@@ -8,7 +8,7 @@
 
 > `const` **NOISE\_DIMENSION**: `object`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:5](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/texture/noiseTexture/simplex/NOISE_DIMENSION.ts#L5)
+Defined in: [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:5](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/resources/texture/noiseTexture/simplex/NOISE_DIMENSION.ts#L5)
 
 **`Experimental`**
 
@@ -16,6 +16,6 @@ Defined in: [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:5](h
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="mode_1d"></a> `MODE_1D` | `1` | `1` | [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:6](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/texture/noiseTexture/simplex/NOISE_DIMENSION.ts#L6) |
-| <a id="mode_2d"></a> `MODE_2D` | `2` | `2` | [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:7](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/texture/noiseTexture/simplex/NOISE_DIMENSION.ts#L7) |
-| <a id="mode_3d"></a> `MODE_3D` | `3` | `3` | [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:8](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/resources/texture/noiseTexture/simplex/NOISE_DIMENSION.ts#L8) |
+| <a id="mode_1d"></a> `MODE_1D` | `1` | `1` | [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:6](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/resources/texture/noiseTexture/simplex/NOISE_DIMENSION.ts#L6) |
+| <a id="mode_2d"></a> `MODE_2D` | `2` | `2` | [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:7](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/resources/texture/noiseTexture/simplex/NOISE_DIMENSION.ts#L7) |
+| <a id="mode_3d"></a> `MODE_3D` | `3` | `3` | [src/resources/texture/noiseTexture/simplex/NOISE\_DIMENSION.ts:8](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/resources/texture/noiseTexture/simplex/NOISE_DIMENSION.ts#L8) |

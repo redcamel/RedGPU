@@ -8,7 +8,7 @@
 
 > **quaternionToRotationMat4**(`q`, `m`): `any`
 
-Defined in: [src/utils/math/quaternionToRotationMat4.ts:21](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/utils/math/quaternionToRotationMat4.ts#L21)
+Defined in: [src/utils/math/quaternionToRotationMat4.ts:21](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/utils/math/quaternionToRotationMat4.ts#L21)
 
 
 Converts a quaternion to a rotation matrix.

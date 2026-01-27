@@ -6,7 +6,7 @@
 
 # Class: RedGPUContextDetector
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:11](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/context/core/RedGPUContextDetector.ts#L11)
+Defined in: [src/context/core/RedGPUContextDetector.ts:11](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/context/core/RedGPUContextDetector.ts#L11)
 
 GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입니다.
 
@@ -20,7 +20,7 @@ Adapter 정보, 제한값(Limits), Fallback 여부, 모바일 환경 여부 등�
 
 > **new RedGPUContextDetector**(`redGPUContext`): `RedGPUContextDetector`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:35](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/context/core/RedGPUContextDetector.ts#L35)
+Defined in: [src/context/core/RedGPUContextDetector.ts:35](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/context/core/RedGPUContextDetector.ts#L35)
 
 RedGPUContextDetector 생성자
 
@@ -43,7 +43,7 @@ RedGPUContextDetector 생성자
 
 > **get** **adapterInfo**(): `GPUAdapterInfo`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:44](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/context/core/RedGPUContextDetector.ts#L44)
+Defined in: [src/context/core/RedGPUContextDetector.ts:44](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/context/core/RedGPUContextDetector.ts#L44)
 
 현재 사용중인 GPUAdapter의 정보를 반환합니다.
 
@@ -60,7 +60,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:44](https://github.com/re
 
 > **get** **groupedLimits**(): `any`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:68](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/context/core/RedGPUContextDetector.ts#L68)
+Defined in: [src/context/core/RedGPUContextDetector.ts:68](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/context/core/RedGPUContextDetector.ts#L68)
 
 그룹화된 한계값 정보를 반환합니다.
 
@@ -77,7 +77,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:68](https://github.com/re
 
 > **get** **isFallbackAdapter**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:60](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/context/core/RedGPUContextDetector.ts#L60)
+Defined in: [src/context/core/RedGPUContextDetector.ts:60](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/context/core/RedGPUContextDetector.ts#L60)
 
 현재 어댑터가 Fallback 어댑터인지 여부를 반환합니다.
 
@@ -94,7 +94,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:60](https://github.com/re
 
 > **get** **isMobile**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:84](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/context/core/RedGPUContextDetector.ts#L84)
+Defined in: [src/context/core/RedGPUContextDetector.ts:84](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/context/core/RedGPUContextDetector.ts#L84)
 
 모바일 디바이스인지 여부를 반환합니다.
 
@@ -111,7 +111,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:84](https://github.com/re
 
 > **get** **limits**(): `GPUSupportedLimits`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:52](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/context/core/RedGPUContextDetector.ts#L52)
+Defined in: [src/context/core/RedGPUContextDetector.ts:52](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/context/core/RedGPUContextDetector.ts#L52)
 
 현재 사용 중인 GPU의 한계값을 반환합니다.
 
@@ -128,7 +128,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:52](https://github.com/re
 
 > **get** **userAgent**(): `string`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:76](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/context/core/RedGPUContextDetector.ts#L76)
+Defined in: [src/context/core/RedGPUContextDetector.ts:76](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/context/core/RedGPUContextDetector.ts#L76)
 
 브라우저의 User-Agent 문자열을 반환합니다.
 

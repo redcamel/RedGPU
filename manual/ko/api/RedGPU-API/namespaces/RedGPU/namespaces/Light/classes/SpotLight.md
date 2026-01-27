@@ -6,7 +6,7 @@
 
 # Class: SpotLight
 
-Defined in: [src/light/lights/SpotLight.ts:25](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L25)
+Defined in: [src/light/lights/SpotLight.ts:25](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L25)
 
 스포트라이트(SpotLight)를 정의하는 클래스입니다.
 
@@ -39,7 +39,7 @@ scene.lightManager.addSpotLight(light);
 
 > **new SpotLight**(`color`, `intensity`): `SpotLight`
 
-Defined in: [src/light/lights/SpotLight.ts:91](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L91)
+Defined in: [src/light/lights/SpotLight.ts:91](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L91)
 
 새로운 SpotLight 인스턴스를 생성합니다.
 
@@ -65,7 +65,7 @@ Defined in: [src/light/lights/SpotLight.ts:91](https://github.com/redcamel/RedGP
 
 > **drawDebugger**: `ADrawDebuggerLight`
 
-Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/core/ABaseLight.ts#L20)
+Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/core/ABaseLight.ts#L20)
 
 광원의 디버깅 시각화를 위한 도우미 객체입니다.
 
@@ -85,7 +85,7 @@ Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/core/ABaseLight.ts#L82)
+Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/core/ABaseLight.ts#L82)
 
 광원의 색상을 반환합니다.
 
@@ -101,7 +101,7 @@ ColorRGB 객체
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/core/ABaseLight.ts#L93)
+Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/core/ABaseLight.ts#L93)
 
 광원의 색상을 설정합니다.
 
@@ -128,7 +128,7 @@ Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU
 
 > **get** **direction**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/SpotLight.ts:267](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L267)
+Defined in: [src/light/lights/SpotLight.ts:267](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L267)
 
 광원의 방향 벡터를 [x, y, z] 형태로 반환합니다.
 
@@ -144,7 +144,7 @@ Defined in: [src/light/lights/SpotLight.ts:267](https://github.com/redcamel/RedG
 
 > **set** **direction**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:278](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L278)
+Defined in: [src/light/lights/SpotLight.ts:278](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L278)
 
 광원의 방향 벡터를 설정합니다.
 
@@ -167,7 +167,7 @@ Defined in: [src/light/lights/SpotLight.ts:278](https://github.com/redcamel/RedG
 
 > **get** **directionX**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:201](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L201)
+Defined in: [src/light/lights/SpotLight.ts:201](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L201)
 
 방향 벡터의 X 성분을 반환합니다.
 
@@ -183,7 +183,7 @@ X 성분 값
 
 > **set** **directionX**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:212](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L212)
+Defined in: [src/light/lights/SpotLight.ts:212](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L212)
 
 방향 벡터의 X 성분을 설정합니다.
 
@@ -206,7 +206,7 @@ Defined in: [src/light/lights/SpotLight.ts:212](https://github.com/redcamel/RedG
 
 > **get** **directionY**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:223](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L223)
+Defined in: [src/light/lights/SpotLight.ts:223](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L223)
 
 방향 벡터의 Y 성분을 반환합니다.
 
@@ -222,7 +222,7 @@ Y 성분 값
 
 > **set** **directionY**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:234](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L234)
+Defined in: [src/light/lights/SpotLight.ts:234](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L234)
 
 방향 벡터의 Y 성분을 설정합니다.
 
@@ -245,7 +245,7 @@ Defined in: [src/light/lights/SpotLight.ts:234](https://github.com/redcamel/RedG
 
 > **get** **directionZ**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:245](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L245)
+Defined in: [src/light/lights/SpotLight.ts:245](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L245)
 
 방향 벡터의 Z 성분을 반환합니다.
 
@@ -261,7 +261,7 @@ Z 성분 값
 
 > **set** **directionZ**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:256](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L256)
+Defined in: [src/light/lights/SpotLight.ts:256](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L256)
 
 방향 벡터의 Z 성분을 설정합니다.
 
@@ -284,7 +284,7 @@ Defined in: [src/light/lights/SpotLight.ts:256](https://github.com/redcamel/RedG
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/core/ABaseLight.ts#L60)
+Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/core/ABaseLight.ts#L60)
 
 디버깅 시각화 기능의 활성화 여부를 반환합니다.
 
@@ -300,7 +300,7 @@ Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/core/ABaseLight.ts#L71)
+Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/core/ABaseLight.ts#L71)
 
 디버깅 시각화 기능을 활성화하거나 비활성화합니다.
 
@@ -327,7 +327,7 @@ Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU
 
 > **get** **innerCutoff**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:291](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L291)
+Defined in: [src/light/lights/SpotLight.ts:291](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L291)
 
 내부 컷오프 각도를 반환합니다.
 
@@ -343,7 +343,7 @@ Defined in: [src/light/lights/SpotLight.ts:291](https://github.com/redcamel/RedG
 
 > **set** **innerCutoff**(`degrees`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:302](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L302)
+Defined in: [src/light/lights/SpotLight.ts:302](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L302)
 
 내부 컷오프 각도를 설정합니다.
 
@@ -366,7 +366,7 @@ Defined in: [src/light/lights/SpotLight.ts:302](https://github.com/redcamel/RedG
 
 > **get** **innerCutoffCos**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:338](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L338)
+Defined in: [src/light/lights/SpotLight.ts:338](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L338)
 
 내부 컷오프 각도의 코사인 값을 반환합니다.
 
@@ -389,7 +389,7 @@ Defined in: [src/light/lights/SpotLight.ts:338](https://github.com/redcamel/RedG
 
 > **get** **intensity**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/core/ABaseLight.ts#L104)
+Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/core/ABaseLight.ts#L104)
 
 광원의 세기를 반환합니다.
 
@@ -405,7 +405,7 @@ Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGP
 
 > **set** **intensity**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/core/ABaseLight.ts#L115)
+Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/core/ABaseLight.ts#L115)
 
 광원의 세기를 설정합니다.
 
@@ -432,7 +432,7 @@ Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGP
 
 > **get** **outerCutoff**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:313](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L313)
+Defined in: [src/light/lights/SpotLight.ts:313](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L313)
 
 외부 컷오프 각도를 반환합니다.
 
@@ -448,7 +448,7 @@ Defined in: [src/light/lights/SpotLight.ts:313](https://github.com/redcamel/RedG
 
 > **set** **outerCutoff**(`degrees`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:324](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L324)
+Defined in: [src/light/lights/SpotLight.ts:324](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L324)
 
 외부 컷오프 각도를 설정합니다.
 
@@ -471,7 +471,7 @@ Defined in: [src/light/lights/SpotLight.ts:324](https://github.com/redcamel/RedG
 
 > **get** **outerCutoffCos**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:352](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L352)
+Defined in: [src/light/lights/SpotLight.ts:352](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L352)
 
 외부 컷오프 각도의 코사인 값을 반환합니다.
 
@@ -494,7 +494,7 @@ Defined in: [src/light/lights/SpotLight.ts:352](https://github.com/redcamel/RedG
 
 > **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/SpotLight.ts:168](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L168)
+Defined in: [src/light/lights/SpotLight.ts:168](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L168)
 
 광원의 위치를 [x, y, z] 형태로 반환합니다.
 
@@ -514,7 +514,7 @@ Defined in: [src/light/lights/SpotLight.ts:168](https://github.com/redcamel/RedG
 
 > **get** **radius**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:179](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L179)
+Defined in: [src/light/lights/SpotLight.ts:179](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L179)
 
 광원의 반경을 반환합니다.
 
@@ -530,7 +530,7 @@ Defined in: [src/light/lights/SpotLight.ts:179](https://github.com/redcamel/RedG
 
 > **set** **radius**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:190](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L190)
+Defined in: [src/light/lights/SpotLight.ts:190](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L190)
 
 광원의 반경을 설정합니다.
 
@@ -553,7 +553,7 @@ Defined in: [src/light/lights/SpotLight.ts:190](https://github.com/redcamel/RedG
 
 > **get** **x**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:102](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L102)
+Defined in: [src/light/lights/SpotLight.ts:102](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L102)
 
 X 좌표를 반환합니다.
 
@@ -569,7 +569,7 @@ X 좌표
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:113](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L113)
+Defined in: [src/light/lights/SpotLight.ts:113](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L113)
 
 X 좌표를 설정합니다.
 
@@ -592,7 +592,7 @@ X 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:124](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L124)
+Defined in: [src/light/lights/SpotLight.ts:124](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L124)
 
 Y 좌표를 반환합니다.
 
@@ -608,7 +608,7 @@ Y 좌표
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:135](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L135)
+Defined in: [src/light/lights/SpotLight.ts:135](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L135)
 
 Y 좌표를 설정합니다.
 
@@ -631,7 +631,7 @@ Y 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/light/lights/SpotLight.ts:146](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L146)
+Defined in: [src/light/lights/SpotLight.ts:146](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L146)
 
 Z 좌표를 반환합니다.
 
@@ -647,7 +647,7 @@ Z 좌표
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:157](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L157)
+Defined in: [src/light/lights/SpotLight.ts:157](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L157)
 
 Z 좌표를 설정합니다.
 
@@ -668,7 +668,7 @@ Z 좌표를 설정합니다.
 
 > **lookAt**(`targetX`, `targetY?`, `targetZ?`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:392](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L392)
+Defined in: [src/light/lights/SpotLight.ts:392](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L392)
 
 특정 타겟 위치를 바라보도록 방향 벡터를 설정합니다.
 
@@ -691,7 +691,7 @@ Defined in: [src/light/lights/SpotLight.ts:392](https://github.com/redcamel/RedG
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/light/lights/SpotLight.ts:369](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/light/lights/SpotLight.ts#L369)
+Defined in: [src/light/lights/SpotLight.ts:369](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/light/lights/SpotLight.ts#L369)
 
 광원의 위치를 설정합니다.
 

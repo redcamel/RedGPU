@@ -6,7 +6,7 @@
 
 # Class: ShadowManager
 
-Defined in: [src/shadow/ShadowManager.ts:4](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/shadow/ShadowManager.ts#L4)
+Defined in: [src/shadow/ShadowManager.ts:4](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/shadow/ShadowManager.ts#L4)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/shadow/ShadowManager.ts:4](https://github.com/redcamel/RedGPU/b
 
 > **new ShadowManager**(): `ShadowManager`
 
-Defined in: [src/shadow/ShadowManager.ts:7](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/shadow/ShadowManager.ts#L7)
+Defined in: [src/shadow/ShadowManager.ts:7](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/shadow/ShadowManager.ts#L7)
 
 #### Returns
 
@@ -28,7 +28,7 @@ Defined in: [src/shadow/ShadowManager.ts:7](https://github.com/redcamel/RedGPU/b
 
 > **get** **directionalShadowManager**(): [`DirectionalShadowManager`](DirectionalShadowManager.md)
 
-Defined in: [src/shadow/ShadowManager.ts:10](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/shadow/ShadowManager.ts#L10)
+Defined in: [src/shadow/ShadowManager.ts:10](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/shadow/ShadowManager.ts#L10)
 
 ##### Returns
 
@@ -40,7 +40,7 @@ Defined in: [src/shadow/ShadowManager.ts:10](https://github.com/redcamel/RedGPU/
 
 > **update**(`redGPUContext`): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:14](https://github.com/redcamel/RedGPU/blob/c7295db2e0ba400cc1c1d95dee8a613dd3fd6ded/src/shadow/ShadowManager.ts#L14)
+Defined in: [src/shadow/ShadowManager.ts:14](https://github.com/redcamel/RedGPU/blob/087135bb59cb0a419d28cd53f7eaeb5c0e6a15bd/src/shadow/ShadowManager.ts#L14)
 
 #### Parameters
 
