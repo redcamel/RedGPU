@@ -29,6 +29,12 @@
             const controllerTest = new RedGPU.Camera.OrbitController(redGPUContext);
             controllerTest.speedDistance = 0.1
             controllerTest.tilt = 0
+            // Lock distance to prevent zooming
+            controllerTest.distance =
+                controllerTest.minDistance =
+                    controllerTest.maxDistance = 0.9;
+
+
             const scene = new RedGPU.Display.Scene();
             const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
             redGPUContext.backgroundColor.a = 0
@@ -62,14 +68,7 @@
         new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
             const mesh = result.resultMesh
             scene.addChild(mesh)
-            if (redGPUContext.detector.isMobile) {
-                view.camera.fitMeshToScreenCenter(mesh, view)
-                view.camera.distance -= 0.2
-                mesh.y += 0.05
-
-            } else {
-                view.camera.fitMeshToScreenCenter(mesh, view)
-            }
+            mesh.y = -0.3
         });
     }
 </script>

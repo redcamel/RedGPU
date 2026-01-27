@@ -134,6 +134,42 @@ declare class OrbitController extends AController {
      */
     set distanceInterpolation(value: number);
     /**
+     * [KO] 최소 줌 거리를 가져옵니다.
+     * [EN] Gets the minimum zoom distance.
+     *
+     * @returns
+     * [KO] 최소 거리
+     * [EN] Minimum distance
+     */
+    get minDistance(): number;
+    /**
+     * [KO] 최소 줌 거리를 설정합니다.
+     * [EN] Sets the minimum zoom distance.
+     *
+     * @param value -
+     * [KO] 최소 거리 (0.1 이상)
+     * [EN] Minimum distance (min 0.1)
+     */
+    set minDistance(value: number);
+    /**
+     * [KO] 최대 줌 거리를 가져옵니다.
+     * [EN] Gets the maximum zoom distance.
+     *
+     * @returns
+     * [KO] 최대 거리
+     * [EN] Maximum distance
+     */
+    get maxDistance(): number;
+    /**
+     * [KO] 최대 줌 거리를 설정합니다.
+     * [EN] Sets the maximum zoom distance.
+     *
+     * @param value -
+     * [KO] 최대 거리 (0.1 이상)
+     * [EN] Maximum distance (min 0.1)
+     */
+    set maxDistance(value: number);
+    /**
      * [KO] 회전 속도를 가져옵니다.
      * [EN] Gets the rotation speed.
      *

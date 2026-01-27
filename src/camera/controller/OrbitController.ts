@@ -39,6 +39,8 @@ class OrbitController extends AController {
 	#distance = 15;
 	#speedDistance = 2;
 	#distanceInterpolation = 0.1;
+    #minDistance = 0.1;
+    #maxDistance = Infinity;
 	// ==================== 회전(팬/틸트) 관련 ====================
 	#pan = 0;
 	#tilt = -35;
@@ -61,10 +63,14 @@ class OrbitController extends AController {
 				},
 				HD_Wheel: (e: WheelEvent) => {
 					this.#distance += e.deltaY / 100 * this.#speedDistance;
+                    if (this.#distance < this.#minDistance) this.#distance = this.#minDistance;
+                    if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
 				},
 				HD_TouchPinch: (deltaScale: number) => {
 					const scaleChange = (deltaScale - 1) * this.#speedDistance;
 					this.#distance -= scaleChange * this.#distance;
+                    if (this.#distance < this.#minDistance) this.#distance = this.#minDistance;
+                    if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
 				},
 			}
 		)
@@ -219,6 +225,56 @@ class OrbitController extends AController {
 		validateNumberRange(value, 0.01, 1);
 		this.#distanceInterpolation = value;
 	}
+
+    /**
+     * [KO] 최소 줌 거리를 가져옵니다.
+     * [EN] Gets the minimum zoom distance.
+     *
+     * @returns
+     * [KO] 최소 거리
+     * [EN] Minimum distance
+     */
+    get minDistance(): number {
+        return this.#minDistance;
+    }
+
+    /**
+     * [KO] 최소 줌 거리를 설정합니다.
+     * [EN] Sets the minimum zoom distance.
+     *
+     * @param value -
+     * [KO] 최소 거리 (0.1 이상)
+     * [EN] Minimum distance (min 0.1)
+     */
+    set minDistance(value: number) {
+        validateNumberRange(value, 0.1);
+        this.#minDistance = value;
+    }
+
+    /**
+     * [KO] 최대 줌 거리를 가져옵니다.
+     * [EN] Gets the maximum zoom distance.
+     *
+     * @returns
+     * [KO] 최대 거리
+     * [EN] Maximum distance
+     */
+    get maxDistance(): number {
+        return this.#maxDistance;
+    }
+
+    /**
+     * [KO] 최대 줌 거리를 설정합니다.
+     * [EN] Sets the maximum zoom distance.
+     *
+     * @param value -
+     * [KO] 최대 거리 (0.1 이상)
+     * [EN] Maximum distance (min 0.1)
+     */
+    set maxDistance(value: number) {
+        validateNumberRange(value, 0.1);
+        this.#maxDistance = value;
+    }
 
 	// ==================== 회전 속도 Getter/Setter ====================
 	/**
@@ -516,6 +572,8 @@ class OrbitController extends AController {
 		}
 		// 거리(줌) 범위 및 보간
 		if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
+        if (this.#distance < this.#minDistance) this.#distance = this.#minDistance;
+        if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
 		const distanceDelta = this.#distance - this.#currentDistance;
 		if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
 			this.#currentDistance += distanceDelta * this.#distanceInterpolation;
