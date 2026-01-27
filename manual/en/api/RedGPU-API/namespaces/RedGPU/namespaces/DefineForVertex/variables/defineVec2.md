@@ -8,7 +8,7 @@
 
 > **defineVec2**: (`classObject`, `keyList`) => `void`
 
-Defined in: [src/defineProperty/DefineForVertex.ts:75](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/defineProperty/DefineForVertex.ts#L75)
+Defined in: [src/defineProperty/DefineForVertex.ts:75](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/defineProperty/DefineForVertex.ts#L75)
 
 ## Parameters
 

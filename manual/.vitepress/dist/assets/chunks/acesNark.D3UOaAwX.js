@@ -1,1 +1,0 @@
-const a="/RedGPU/manual/toneMapping/linear.jpg",n="/RedGPU/manual/toneMapping/khronos.jpg",p="/RedGPU/manual/toneMapping/acesHill.jpg",o="/RedGPU/manual/toneMapping/acesNark.jpg";export{a as _,n as a,p as b,o as c};

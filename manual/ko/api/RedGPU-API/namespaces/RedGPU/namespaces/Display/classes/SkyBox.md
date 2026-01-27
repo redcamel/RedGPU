@@ -6,7 +6,7 @@
 
 # Class: SkyBox
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:56](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L56)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:56](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L56)
 
 3D 씬의 배경으로 사용되는 스카이박스 클래스입니다.
 
@@ -34,7 +34,7 @@ view.skybox = skybox
 
 > **new SkyBox**(`redGPUContext`, `cubeTexture`): `SkyBox`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:141](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L141)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:141](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L141)
 
 새로운 SkyBox 인스턴스를 생성합니다.
 
@@ -61,7 +61,7 @@ redGPUContext가 유효하지 않은 경우 에러 발생
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:66](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L66)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:66](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L66)
 
 GPU 렌더링 정보 객체
 
@@ -72,7 +72,7 @@ GPU 렌더링 정보 객체
 
 > **modelMatrix**: [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:61](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L61)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:61](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L61)
 
 모델 변환 행렬 (4x4 매트릭스)
 
@@ -85,7 +85,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:61](https://github.com/redcame
 
 > **get** **blur**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:193](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L193)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:193](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L193)
 
 스카이박스 블러 정도를 반환합니다.
 
@@ -101,7 +101,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:193](https://github.com/redcam
 
 > **set** **blur**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:207](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L207)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:207](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L207)
 
 스카이박스 블러 정도를 설정합니다.
 
@@ -129,7 +129,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:207](https://github.com/redcam
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L220)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L220)
 
 스카이박스의 불투명도를 반환합니다.
 
@@ -145,7 +145,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcam
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L234)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L234)
 
 스카이박스의 불투명도를 설정합니다.
 
@@ -173,7 +173,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcam
 
 > **get** **skyboxTexture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:246](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L246)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:246](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L246)
 
 현재 스카이박스 텍스처를 반환합니다.
 
@@ -189,7 +189,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:246](https://github.com/redcam
 
 > **set** **skyboxTexture**(`texture`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:260](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L260)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:260](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L260)
 
 스카이박스 텍스처를 설정합니다.
 
@@ -217,7 +217,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:260](https://github.com/redcam
 
 > **get** **transitionDuration**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:160](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L160)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:160](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L160)
 
 전환 지속 시간을 반환합니다.
 
@@ -237,7 +237,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:160](https://github.com/redcam
 
 > **get** **transitionElapsed**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:171](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L171)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:171](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L171)
 
 전환 경과 시간을 반환합니다.
 
@@ -257,7 +257,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:171](https://github.com/redcam
 
 > **get** **transitionProgress**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:182](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L182)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:182](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L182)
 
 전환 진행률을 반환합니다.
 
@@ -277,7 +277,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:182](https://github.com/redcam
 
 > **get** **transitionTexture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:276](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L276)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:276](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L276)
 
 전환 대상 텍스처를 반환합니다.
 
@@ -295,7 +295,7 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:276](https://github.com/redcam
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:323](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L323)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:323](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L323)
 
 스카이박스를 렌더링합니다.
 
@@ -325,7 +325,7 @@ skybox.render(renderViewState);
 
 > **transition**(`transitionTexture`, `duration`, `transitionAlphaTexture`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:299](https://github.com/redcamel/RedGPU/blob/ad7763b72bf927f4e4920daa847a7ad20d9f6f1a/src/display/skyboxs/skyBox/SkyBox.ts#L299)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:299](https://github.com/redcamel/RedGPU/blob/63b6c0b28961b0dbe9fddafb11b9ffeb0ec23759/src/display/skyboxs/skyBox/SkyBox.ts#L299)
 
 다른 텍스처로의 부드러운 전환을 시작합니다.
 
