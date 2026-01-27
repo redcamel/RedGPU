@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769512410570";
+import * as RedGPU from "../../../../dist/index.js?t=1769512737237";
 
 // 1. Create and append a canvas
 const canvas = document.createElement('canvas');
@@ -68,9 +68,9 @@ RedGPU.init(
 );
 
 async function createTest(redGPUContext, scene, material) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769512410570');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769512737237');
 
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769512410570");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769512737237");
     setDebugButtons(RedGPU, redGPUContext);
 
     const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
