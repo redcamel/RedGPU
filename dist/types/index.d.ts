@@ -9,6 +9,7 @@
 import init from "./init";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
 import SystemCode from "./resources/systemCode/SystemCode";
+export * as Bound from "./bound";
 export { init, SystemCode, GLTFLoader };
 export * as Camera from "./camera/";
 export * as RedGPUContext from "./context";

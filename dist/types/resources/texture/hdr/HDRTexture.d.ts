@@ -67,6 +67,7 @@ declare class HDRTexture extends ManagementResourceBase {
         baseMipLevel?: GPUIntegerCoordinate;
         baseArrayLayer?: GPUIntegerCoordinate;
         arrayLayerCount?: GPUIntegerCoordinate;
+        swizzle?: string;
         label?: string;
     };
     /**

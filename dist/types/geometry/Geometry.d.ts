@@ -3,7 +3,7 @@ import GeometryGPURenderInfo from "../primitive/core/GeometryGPURenderInfo";
 import IndexBuffer from "../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../resources/buffer/vertexBuffer/VertexBuffer";
 import ResourceBase from "../resources/core/ResourceBase";
-import AABB from "../utils/math/bound/AABB";
+import AABB from "../bound/AABB";
 /**
  * [KO] 정점 버퍼(VertexBuffer)와 인덱스 버퍼(IndexBuffer)를 관리하며, GPU 렌더링에 필요한 정보를 제공하는 클래스입니다.
  * [EN] A class that manages vertex buffers (VertexBuffer) and index buffers (IndexBuffer) and provides information required for GPU rendering.
@@ -13,7 +13,7 @@ import AABB from "../utils/math/bound/AABB";
  *
  * * ### Example
  * ```typescript
- * const geometry = new RedGPU.Geometry.Geometry(redGPUContext, vertexBuffer, indexBuffer);
+ * const geometry = new RedGPU.Geometry(redGPUContext, vertexBuffer, indexBuffer);
  * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
  * ```
  * @extends ResourceBase

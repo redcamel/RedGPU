@@ -1261,7 +1261,7 @@ class Mesh extends MeshBase {
                         redGPUContext.gpuDevice.queue.writeBuffer(
                             vertexUniformBuffer.gpuBuffer,
                             vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
-                            this.#prevModelMatrix,
+                            this.#prevModelMatrix as BufferSource,
                         )
                     }
                 }
@@ -1515,7 +1515,7 @@ class Mesh extends MeshBase {
                 gpuDevice.queue.writeBuffer(
                     vertexUniformGPUBuffer,
                     vertexUniformInfoMembers.matrixList.startOffset,
-                    this.#uniformDataMatrixList
+                    this.#uniformDataMatrixList as BufferSource
                 )
             }
             if (this.dirtyOpacity) {

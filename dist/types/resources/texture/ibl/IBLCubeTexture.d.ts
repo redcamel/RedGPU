@@ -37,6 +37,7 @@ declare class IBLCubeTexture extends ManagementResourceBase {
         baseMipLevel?: GPUIntegerCoordinate;
         baseArrayLayer?: GPUIntegerCoordinate;
         arrayLayerCount?: GPUIntegerCoordinate;
+        swizzle?: string;
         label?: string;
     };
     /** [KO] 텍스처 포맷 [EN] Texture format */

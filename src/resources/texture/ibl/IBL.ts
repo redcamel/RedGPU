@@ -189,7 +189,7 @@ class IBL {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             label: `irradiance_face_${face}_uniform`
         });
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, faceMatrix);
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, faceMatrix as BufferSource);
         const bindGroup = gpuDevice.createBindGroup({
             layout: renderPipeline.getBindGroupLayout(0),
             entries: [

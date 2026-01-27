@@ -56,7 +56,7 @@ class AniTrack_GLTF {
             0,
             0
         ]);
-        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData);
+        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
         computePassEncoder.setPipeline(this.#computePipeline);
         computePassEncoder.setBindGroup(0, resources.bindGroup);
         const workgroupCount = Math.ceil(targetMesh.geometry.vertexBuffer.vertexCount / 64);
@@ -84,7 +84,7 @@ class AniTrack_GLTF {
         gpuDevice.queue.writeBuffer(
             this.#animationDataListBuffer,
             0,
-            this.aniDataAnimationInfo.dataList
+            this.aniDataAnimationInfo.dataList as BufferSource
         );
     }
 

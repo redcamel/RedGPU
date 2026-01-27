@@ -746,7 +746,7 @@ class View3D extends AView {
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
             }
         )
-        this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData)
+        this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource)
         //
         this.#shadowDepthSampler = new Sampler(this.redGPUContext, {
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
@@ -834,7 +834,7 @@ class View3D extends AView {
                 [pointLightNum, spotLightNum, 0, 0],
                 0,
             )
-            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData);
+            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource);
             this.#passLightClusters.render()
         }
     }
