@@ -92,6 +92,19 @@ export default withMermaid(defineConfig({
     ignoreDeadLinks: true,
     lastUpdated: true,
 
+    // SEO Configuration
+    sitemap: {
+        hostname: 'https://redcamel.github.io/RedGPU/manual/'
+    },
+    head: [
+        ['meta', { name: 'keywords', content: 'WebGPU, RedGPU, 3D Engine, Graphics, Javascript, Typescript' }],
+        ['meta', { name: 'author', content: 'RedCamel' }],
+        ['meta', { property: 'og:type', content: 'website' }],
+        ['meta', { property: 'og:site_name', content: 'RedGPU Documentation' }],
+        ['meta', { property: 'og:title', content: 'RedGPU' }],
+        ['meta', { property: 'og:description', content: 'RedGPU - WebGPU based 3D Graphics Engine' }],
+    ],
+
     // 다국어 로케일 설정 (자동 생성)
     locales: Object.fromEntries(
         languages.map(lang => [

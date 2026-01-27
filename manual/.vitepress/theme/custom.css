@@ -6,6 +6,20 @@
 :root:not(:has(.redgpu-home)) {
     --vp-content-width: 100%;
     --vp-layout-max-width: 100%;
+
+    .VPNav .container{
+        margin:0 !important;
+    }
+    .VPNavBar .wrapper{
+        display:flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .VPNavBar .wrapper .container{
+        display:flex;
+        justify-content: space-between;
+        width: 100%;
+    }
 }
 .VPDoc .content,
 .VPDoc .content-container {
