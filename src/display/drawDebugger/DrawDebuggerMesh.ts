@@ -9,6 +9,7 @@ import AABB from "../../bound/AABB";
 import OBB from "../../bound/OBB";
 import Mesh from "../mesh/Mesh";
 import RenderViewStateData from "../view/core/RenderViewStateData";
+import {mat4} from "gl-matrix";
 
 type DebugMode = 'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB';
 
@@ -189,7 +190,7 @@ class DrawDebuggerMesh {
             cached.halfExtents[0] !== currentOBB.halfExtents[0] ||
             cached.halfExtents[1] !== currentOBB.halfExtents[1] ||
             cached.halfExtents[2] !== currentOBB.halfExtents[2] ||
-            !this.#isMatrixEqual(cached.orientation, currentOBB.orientation)
+            !this.#isMatrixEqual(cached.orientation , currentOBB.orientation)
         );
     }
 
@@ -206,7 +207,7 @@ class DrawDebuggerMesh {
         );
     }
 
-    #isMatrixEqual(a: Float32Array | number[], b: Float32Array | number[]): boolean {
+    #isMatrixEqual(a: Float32Array | number[] | mat4, b: Float32Array | number[]  | mat4): boolean {
         if (a.length !== b.length) return false;
         for (let i = 0; i < a.length; i++) {
             if (Math.abs(a[i] - b[i]) > 0.0001) return false; // 부동소수점 오차 허용

@@ -145,7 +145,7 @@ class IndexBuffer extends ABaseBuffer {
         this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
         this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
         this.#triangleCount = this.#indexCount / 3;
-        gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
+        gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL] as BufferSource);
     }
 }
 

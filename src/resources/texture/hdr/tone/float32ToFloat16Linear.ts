@@ -169,7 +169,7 @@ function createBuffers(gpuDevice: GPUDevice, float32Data: Float32Array, pixelCou
         label: 'float16_read_buffer'
     });
 
-    gpuDevice.queue.writeBuffer(inputBuffer, 0, float32Data);
+    gpuDevice.queue.writeBuffer(inputBuffer, 0, float32Data as BufferSource);
 
     return {inputBuffer, outputBuffer, constantsBuffer, readBuffer};
 }

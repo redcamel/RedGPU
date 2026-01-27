@@ -175,7 +175,7 @@ class VertexBuffer extends ABaseBuffer {
         this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
         this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
         this.#triangleCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride;
-        gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
+        gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL] as BufferSource);
     }
 
     /**
@@ -197,7 +197,7 @@ class VertexBuffer extends ABaseBuffer {
     updateData(data: Array<number> | Float32Array, offset: number = 0) {
         if (data instanceof Array) data = new Float32Array(data);
         const {gpuDevice} = this;
-        gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], offset, data,);
+        gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], offset, data as BufferSource);
     }
 
     /**
@@ -215,7 +215,7 @@ class VertexBuffer extends ABaseBuffer {
      */
     updateAllData(data: Array<number> | Float32Array) {
         const {gpuDevice} = this;
-        gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL]);
+        gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL] as BufferSource);
     }
 
     /**

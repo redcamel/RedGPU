@@ -113,7 +113,7 @@ class FinalRender {
             this.#fragmentBufferData[index][1] = finalColor[1]
             this.#fragmentBufferData[index][2] = finalColor[2]
             this.#fragmentBufferData[index][3] = finalColor[3]
-            gpuDevice.queue.writeBuffer(this.#fragmentBuffer[index], 0, this.#fragmentBufferData[index])
+            gpuDevice.queue.writeBuffer(this.#fragmentBuffer[index], 0, this.#fragmentBufferData[index] as BufferSource)
         }
     }
 
@@ -142,7 +142,7 @@ class FinalRender {
                 vertexUniformBuffer.gpuBuffer,
                 VERTEX_UNIFORM_STRUCT.members.modelMatrix.uniformOffset,
                 // new VERTEX_UNIFORM_STRUCT.members.modelMatrix.View(projectionMatrix),
-                projectionMatrix as Float32Array
+                projectionMatrix as Float32Array as BufferSource
             )
             //
             const needNewBindGroup =

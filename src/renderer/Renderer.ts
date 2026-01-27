@@ -481,7 +481,7 @@ class Renderer {
                     jointData.set(skinInfo.joints[usedJoints[i]].modelMatrix, (i + 1) * 16);
                 }
                 jointData.set(skinInfo.invertNodeGlobalTransform, 0)
-                gpuDevice.queue.writeBuffer(skinInfo.uniformBuffer, 0, jointData)
+                gpuDevice.queue.writeBuffer(skinInfo.uniformBuffer, 0, jointData as BufferSource)
             }
 
             // Compute Pass 설정 및 Dispatch
