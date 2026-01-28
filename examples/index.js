@@ -1,4 +1,4 @@
-import * as RedGPU from "../dist/index.js?t=1769586122100";
+import * as RedGPU from "../dist/index.js?t=1769586528189";
 
 const canvas = document.createElement('canvas');
 canvas.setAttribute('id', 'redGPUCanvas')
