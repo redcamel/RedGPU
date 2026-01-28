@@ -8,8 +8,8 @@ RedUnit.pageLoader('RedGPU', [
 	{title: 'matToEuler', src: './util/matToEuler'},
 	{title: 'quaternionToRotationMat4', src: './util/quaternionToRotationMat4'},
 	{title: 'file', src: './util/file'},
-	{title: 'convertColor', src: './convertColor'},
-	{title: 'colorRgb', src: './colorRgb'},
-	{title: 'colorRgba', src: './colorRgba'},
+	{title: 'convertColor', src: './color/convertColor'},
+	{title: 'colorRgb', src: './color/colorRgb'},
+	{title: 'colorRgba', src: './color/colorRgba'},
 	{title: 'runtimeChecker', src: './runtimeChecker'},
 ])
