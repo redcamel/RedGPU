@@ -8,7 +8,7 @@
 
 > **calculateNormals**(`vertexArray`, `indexArray`): `number`[]
 
-Defined in: [src/utils/math/calculateNormals.ts:24](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/utils/math/calculateNormals.ts#L24)
+Defined in: [src/utils/math/calculateNormals.ts:24](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/utils/math/calculateNormals.ts#L24)
 
 정점 배열과 인덱스 배열을 기반으로 노멀 벡터를 계산합니다.
 

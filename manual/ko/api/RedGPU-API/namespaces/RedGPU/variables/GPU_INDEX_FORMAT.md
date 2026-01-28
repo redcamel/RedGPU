@@ -8,7 +8,7 @@
 
 > `const` **GPU\_INDEX\_FORMAT**: `object`
 
-Defined in: [src/gpuConst/GPU\_INDEX\_FORMAT.ts:10](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/gpuConst/GPU_INDEX_FORMAT.ts#L10)
+Defined in: [src/gpuConst/GPU\_INDEX\_FORMAT.ts:10](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/gpuConst/GPU_INDEX_FORMAT.ts#L10)
 
 인덱스 버퍼에서 사용하는 데이터 포맷을 정의하는 상수군입니다.
 

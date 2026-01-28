@@ -6,7 +6,7 @@
 
 # Class: PackedTexture
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:38](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/resources/texture/packedTexture/PackedTexture.ts#L38)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:38](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/texture/packedTexture/PackedTexture.ts#L38)
 
 여러 텍스처의 채널을 조합해 하나의 텍스처로 패킹하는 유틸리티 클래스입니다.
 
@@ -29,7 +29,7 @@ await packed.packing({
 
 > **new PackedTexture**(`redGPUContext`): `PackedTexture`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:61](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/resources/texture/packedTexture/PackedTexture.ts#L61)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:61](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/texture/packedTexture/PackedTexture.ts#L61)
 
 PackedTexture 인스턴스를 생성합니다.
 
@@ -52,7 +52,7 @@ PackedTexture 인스턴스를 생성합니다.
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:74](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/resources/texture/packedTexture/PackedTexture.ts#L74)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:74](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/texture/packedTexture/PackedTexture.ts#L74)
 
 패킹 결과 GPUTexture 객체
 
@@ -68,7 +68,7 @@ Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:74](https://gi
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:69](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/resources/texture/packedTexture/PackedTexture.ts#L69)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:69](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/texture/packedTexture/PackedTexture.ts#L69)
 
 인스턴스 고유 식별자
 
@@ -82,7 +82,7 @@ Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:69](https://gi
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:130](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/resources/texture/packedTexture/PackedTexture.ts#L130)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:130](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/texture/packedTexture/PackedTexture.ts#L130)
 
 인스턴스를 파괴하고 캐시를 관리합니다.
 
@@ -96,7 +96,7 @@ Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:130](https://g
 
 > **packing**(`textures`, `width`, `height`, `label?`, `componentMapping?`): `Promise`\<`void`\>
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:102](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/resources/texture/packedTexture/PackedTexture.ts#L102)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:102](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/texture/packedTexture/PackedTexture.ts#L102)
 
 여러 텍스처의 채널을 조합해 패킹 텍스처를 생성합니다.
 
@@ -125,7 +125,7 @@ Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:102](https://g
 
 > `static` **getCacheMap**(): `Map`\<`string`, \{ `gpuTexture`: `GPUTexture`; `mappingKey`: `string`; `useNum`: `number`; `uuid`: `string`; \}\>
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:79](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/resources/texture/packedTexture/PackedTexture.ts#L79)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:79](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/texture/packedTexture/PackedTexture.ts#L79)
 
 패킹 텍스처 캐시 맵을 반환합니다.
 

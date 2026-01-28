@@ -8,7 +8,7 @@
 
 > **validateUintRange**(`value`, `min`, `max`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateUintRange.ts:34](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/runtimeChecker/validateFunc/validateUintRange.ts#L34)
+Defined in: [src/runtimeChecker/validateFunc/validateUintRange.ts:34](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/runtimeChecker/validateFunc/validateUintRange.ts#L34)
 
 
 Validates if the given value is an unsigned integer (Uint) within the specified range.

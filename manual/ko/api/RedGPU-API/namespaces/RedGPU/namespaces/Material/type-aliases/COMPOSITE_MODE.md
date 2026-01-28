@@ -8,4 +8,4 @@
 
 > **COMPOSITE\_MODE** = *typeof* [`COMPOSITE_MODE`](../variables/COMPOSITE_MODE.md)\[keyof *typeof* [`COMPOSITE_MODE`](../variables/COMPOSITE_MODE.md)\]
 
-Defined in: [src/material/COMPOSITE\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/material/COMPOSITE_MODE.ts#L6)
+Defined in: [src/material/COMPOSITE\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/COMPOSITE_MODE.ts#L6)

@@ -8,7 +8,7 @@
 
 > **validateRedGPUContext**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
+Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
 
 
 Validates if the given value is a RedGPUContext instance.

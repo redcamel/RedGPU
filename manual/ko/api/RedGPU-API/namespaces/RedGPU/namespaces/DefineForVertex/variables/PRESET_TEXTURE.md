@@ -8,4 +8,4 @@
 
 > **PRESET\_TEXTURE**: `object`
 
-Defined in: [src/defineProperty/DefineForVertex.ts:81](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/defineProperty/DefineForVertex.ts#L81)
+Defined in: [src/defineProperty/DefineForVertex.ts:81](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/defineProperty/DefineForVertex.ts#L81)

@@ -6,7 +6,7 @@
 
 # Class: RedGPUContextDetector
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:24](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextDetector.ts#L24)
+Defined in: [src/context/core/RedGPUContextDetector.ts:24](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/context/core/RedGPUContextDetector.ts#L24)
 
 
 Class that detects and analyzes the GPU adapter and browser environment.
@@ -32,7 +32,7 @@ console.log('GPU Limits:', detector.limits);
 
 > **new RedGPUContextDetector**(`redGPUContext`): `RedGPUContextDetector`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:48](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextDetector.ts#L48)
+Defined in: [src/context/core/RedGPUContextDetector.ts:48](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/context/core/RedGPUContextDetector.ts#L48)
 
 
 RedGPUContextDetector constructor
@@ -55,7 +55,7 @@ RedGPUContextDetector constructor
 
 > **get** **adapterInfo**(): `GPUAdapterInfo`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:57](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextDetector.ts#L57)
+Defined in: [src/context/core/RedGPUContextDetector.ts:57](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/context/core/RedGPUContextDetector.ts#L57)
 
 
 Returns information about the currently used GPUAdapter.
@@ -72,7 +72,7 @@ Returns information about the currently used GPUAdapter.
 
 > **get** **groupedLimits**(): `any`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:81](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextDetector.ts#L81)
+Defined in: [src/context/core/RedGPUContextDetector.ts:81](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/context/core/RedGPUContextDetector.ts#L81)
 
 
 Returns grouped limit information.
@@ -89,7 +89,7 @@ Returns grouped limit information.
 
 > **get** **isFallbackAdapter**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:73](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextDetector.ts#L73)
+Defined in: [src/context/core/RedGPUContextDetector.ts:73](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/context/core/RedGPUContextDetector.ts#L73)
 
 
 Returns whether the current adapter is a fallback adapter.
@@ -106,7 +106,7 @@ Returns whether the current adapter is a fallback adapter.
 
 > **get** **isMobile**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:97](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextDetector.ts#L97)
+Defined in: [src/context/core/RedGPUContextDetector.ts:97](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/context/core/RedGPUContextDetector.ts#L97)
 
 
 Returns whether it is a mobile device.
@@ -123,7 +123,7 @@ Returns whether it is a mobile device.
 
 > **get** **limits**(): `GPUSupportedLimits`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:65](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextDetector.ts#L65)
+Defined in: [src/context/core/RedGPUContextDetector.ts:65](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/context/core/RedGPUContextDetector.ts#L65)
 
 
 Returns the supported limits of the currently used GPU.
@@ -140,7 +140,7 @@ Returns the supported limits of the currently used GPU.
 
 > **get** **userAgent**(): `string`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:89](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextDetector.ts#L89)
+Defined in: [src/context/core/RedGPUContextDetector.ts:89](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/context/core/RedGPUContextDetector.ts#L89)
 
 
 Returns the browser's User-Agent string.

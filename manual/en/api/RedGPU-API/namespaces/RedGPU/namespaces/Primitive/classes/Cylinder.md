@@ -6,7 +6,7 @@
 
 # Class: Cylinder
 
-Defined in: [src/primitive/Cylinder.ts:21](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/Cylinder.ts#L21)
+Defined in: [src/primitive/Cylinder.ts:21](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/Cylinder.ts#L21)
 
 
 Cylinder primitive geometry class.
@@ -31,7 +31,7 @@ const cylinder = new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 2, 32);
 
 > **new Cylinder**(`redGPUContext`, `radiusTop`, `radiusBottom`, `height`, `radialSegments`, `heightSegments`, `openEnded`, `thetaStart`, `thetaLength`): `Cylinder`
 
-Defined in: [src/primitive/Cylinder.ts:191](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/Cylinder.ts#L191)
+Defined in: [src/primitive/Cylinder.ts:191](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/Cylinder.ts#L191)
 
 
 Creates an instance of Cylinder.
@@ -66,7 +66,7 @@ Creates an instance of Cylinder.
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/core/Primitive.ts#L86)
+Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/core/Primitive.ts#L86)
 
 
 Returns the GPU render information.
@@ -80,7 +80,7 @@ Object containing buffer layouts array
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/core/Primitive.ts#L86) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/core/Primitive.ts#L86) |
 
 #### Inherited from
 
@@ -94,7 +94,7 @@ Object containing buffer layouts array
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/core/Primitive.ts#L110)
+Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/core/Primitive.ts#L110)
 
 
 Returns the current index buffer.
@@ -118,7 +118,7 @@ IndexBuffer instance
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/core/Primitive.ts#L98)
+Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/core/Primitive.ts#L98)
 
 
 Returns the current vertex buffer.
@@ -142,7 +142,7 @@ VertexBuffer instance
 
 > **get** **volume**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/core/Primitive.ts#L122)
+Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/core/Primitive.ts#L122)
 
 
 Returns the AABB bounding volume of the geometry.
@@ -166,7 +166,7 @@ AABB instance
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/core/Primitive.ts#L67)
+Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/core/Primitive.ts#L67)
 
 
 Returns the default vertex layout structure (Position, Normal, UV).
@@ -188,7 +188,7 @@ Vertex interleaved struct object
 
 > **\_setData**(`geometry`): `void`
 
-Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/primitive/core/Primitive.ts#L138)
+Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/primitive/core/Primitive.ts#L138)
 
 **`Internal`**
 

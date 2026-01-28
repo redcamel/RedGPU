@@ -8,7 +8,7 @@
 
 > **parseWGSL**(`code`): `any`
 
-Defined in: [src/resources/wgslParser/parseWGSL.ts:111](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/resources/wgslParser/parseWGSL.ts#L111)
+Defined in: [src/resources/wgslParser/parseWGSL.ts:111](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/wgslParser/parseWGSL.ts#L111)
 
 
 Parses WGSL code and returns reflection information.
