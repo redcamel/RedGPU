@@ -16,7 +16,7 @@ export {
     GLTFLoader
 }
 export * as Camera from "./camera/";
-export * as RedGPUContext from "./context";
+export * as Context from "./context";
 export * as Color from "./color";
 export * from "./geometry";
 export * as Util from "./utils";
