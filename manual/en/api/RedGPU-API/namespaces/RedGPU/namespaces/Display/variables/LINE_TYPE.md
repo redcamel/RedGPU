@@ -8,12 +8,12 @@
 
 > `const` **LINE\_TYPE**: `object`
 
-Defined in: [src/display/line/LINE\_TYPE.ts:4](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/line/LINE_TYPE.ts#L4)
+Defined in: [src/display/line/LINE\_TYPE.ts:4](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/line/LINE_TYPE.ts#L4)
 
 ## Type Declaration
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="bezier"></a> `BEZIER` | `"bezier"` | `'bezier'` | [src/display/line/LINE\_TYPE.ts:7](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/line/LINE_TYPE.ts#L7) |
-| <a id="catmull_rom"></a> `CATMULL_ROM` | `"catmullRom"` | `'catmullRom'` | [src/display/line/LINE\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/line/LINE_TYPE.ts#L6) |
-| <a id="linear"></a> `LINEAR` | `"linear"` | `'linear'` | [src/display/line/LINE\_TYPE.ts:5](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/line/LINE_TYPE.ts#L5) |
+| <a id="bezier"></a> `BEZIER` | `"bezier"` | `'bezier'` | [src/display/line/LINE\_TYPE.ts:7](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/line/LINE_TYPE.ts#L7) |
+| <a id="catmull_rom"></a> `CATMULL_ROM` | `"catmullRom"` | `'catmullRom'` | [src/display/line/LINE\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/line/LINE_TYPE.ts#L6) |
+| <a id="linear"></a> `LINEAR` | `"linear"` | `'linear'` | [src/display/line/LINE\_TYPE.ts:5](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/line/LINE_TYPE.ts#L5) |

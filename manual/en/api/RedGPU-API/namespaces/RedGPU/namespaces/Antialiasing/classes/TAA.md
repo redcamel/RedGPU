@@ -6,7 +6,7 @@
 
 # Class: TAA
 
-Defined in: [src/antialiasing/taa/TAA.ts:35](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L35)
+Defined in: [src/antialiasing/taa/TAA.ts:35](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L35)
 
 
 TAA (Temporal Anti-Aliasing) post-processing effect.
@@ -31,7 +31,7 @@ redGPUContext.antialiasingManager.useTAA = true;
 
 > **new TAA**(`redGPUContext`): `TAA`
 
-Defined in: [src/antialiasing/taa/TAA.ts:82](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L82)
+Defined in: [src/antialiasing/taa/TAA.ts:82](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L82)
 
 
 Creates a TAA instance.
@@ -40,7 +40,7 @@ Creates a TAA instance.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../RedGPUContext/classes/RedGPUContext.md) | RedGPU Context |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU Context |
 
 #### Returns
 
@@ -54,7 +54,7 @@ Creates a TAA instance.
 
 > **get** **frameIndex**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L117)
+Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L117)
 
 
 Returns the frame index.
@@ -74,7 +74,7 @@ Current frame index
 
 > **get** **jitterStrength**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:141](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L141)
+Defined in: [src/antialiasing/taa/TAA.ts:141](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L141)
 
 
 Returns the jitter strength.
@@ -90,7 +90,7 @@ Jitter strength
 
 > **set** **jitterStrength**(`value`): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:153](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L153)
+Defined in: [src/antialiasing/taa/TAA.ts:153](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L153)
 
 
 Sets the jitter strength.
@@ -113,7 +113,7 @@ Sets the jitter strength.
 
 > **get** **prevNoneJitterProjectionCameraMatrix**(): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L105)
+Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L105)
 
 
 Returns the non-jittered projection camera matrix of the previous frame.
@@ -133,7 +133,7 @@ Returns the non-jittered projection camera matrix of the previous frame.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L129)
+Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L129)
 
 
 Returns the video memory usage.
@@ -151,7 +151,7 @@ Memory usage (bytes)
 
 > **clear**(): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:229](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L229)
+Defined in: [src/antialiasing/taa/TAA.ts:229](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L229)
 
 
 Clears TAA resources.
@@ -166,7 +166,7 @@ Clears TAA resources.
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): `ASinglePassPostEffectResult`
 
-Defined in: [src/antialiasing/taa/TAA.ts:179](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L179)
+Defined in: [src/antialiasing/taa/TAA.ts:179](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L179)
 
 
 Renders the TAA effect.
@@ -193,7 +193,7 @@ Rendering result (texture and view)
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:257](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/taa/TAA.ts#L257)
+Defined in: [src/antialiasing/taa/TAA.ts:257](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/taa/TAA.ts#L257)
 
 
 Updates a uniform value.

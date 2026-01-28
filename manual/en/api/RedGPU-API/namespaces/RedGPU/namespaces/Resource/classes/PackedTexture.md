@@ -6,7 +6,7 @@
 
 # Class: PackedTexture
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:38](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/texture/packedTexture/PackedTexture.ts#L38)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:38](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/texture/packedTexture/PackedTexture.ts#L38)
 
 
 Utility class that packs channels from multiple textures into a single texture.
@@ -29,7 +29,7 @@ await packed.packing({
 
 > **new PackedTexture**(`redGPUContext`): `PackedTexture`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:61](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/texture/packedTexture/PackedTexture.ts#L61)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:61](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/texture/packedTexture/PackedTexture.ts#L61)
 
 
 Creates a PackedTexture instance.
@@ -38,7 +38,7 @@ Creates a PackedTexture instance.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../RedGPUContext/classes/RedGPUContext.md) | RedGPUContext instance |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 
 #### Returns
 
@@ -52,7 +52,7 @@ Creates a PackedTexture instance.
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:74](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/texture/packedTexture/PackedTexture.ts#L74)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:74](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/texture/packedTexture/PackedTexture.ts#L74)
 
 Packed result GPUTexture object
 
@@ -68,7 +68,7 @@ Packed result GPUTexture object
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:69](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/texture/packedTexture/PackedTexture.ts#L69)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:69](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/texture/packedTexture/PackedTexture.ts#L69)
 
 Instance unique identifier
 
@@ -82,7 +82,7 @@ Instance unique identifier
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:130](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/texture/packedTexture/PackedTexture.ts#L130)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:130](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/texture/packedTexture/PackedTexture.ts#L130)
 
 Destroys the instance and manages the cache.
 
@@ -96,7 +96,7 @@ Destroys the instance and manages the cache.
 
 > **packing**(`textures`, `width`, `height`, `label?`, `componentMapping?`): `Promise`\<`void`\>
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:102](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/texture/packedTexture/PackedTexture.ts#L102)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:102](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/texture/packedTexture/PackedTexture.ts#L102)
 
 
 Creates a packed texture by combining channels from multiple textures.
@@ -125,7 +125,7 @@ Creates a packed texture by combining channels from multiple textures.
 
 > `static` **getCacheMap**(): `Map`\<`string`, \{ `gpuTexture`: `GPUTexture`; `mappingKey`: `string`; `useNum`: `number`; `uuid`: `string`; \}\>
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:79](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/texture/packedTexture/PackedTexture.ts#L79)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:79](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/texture/packedTexture/PackedTexture.ts#L79)
 
 Returns the packed texture cache map.
 

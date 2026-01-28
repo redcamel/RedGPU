@@ -8,13 +8,13 @@
 
 > **createPrimitiveGeometry**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/createPrimitiveGeometry.ts:7](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/primitive/core/createPrimitiveGeometry.ts#L7)
+Defined in: [src/primitive/core/createPrimitiveGeometry.ts:7](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/primitive/core/createPrimitiveGeometry.ts#L7)
 
 ## Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../../../RedGPUContext/classes/RedGPUContext.md) |
+| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) |
 | `interleaveData` | `number`[] |
 | `indexData` | `number`[] |
 | `uniqueKey` | `string` |

@@ -8,7 +8,7 @@
 
 > **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct`): `object`
 
-Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:54](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/postEffect/core/createBasicPostEffectCode.ts#L54)
+Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:54](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/createBasicPostEffectCode.ts#L54)
 
 기본 후처리 이펙트 WGSL 코드를 생성하는 헬퍼 함수입니다.
 
@@ -42,5 +42,5 @@ const shader = createBasicPostEffectCode(effect, '...main code...', 'struct Unif
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:56](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/postEffect/core/createBasicPostEffectCode.ts#L56) |
-| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:57](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/postEffect/core/createBasicPostEffectCode.ts#L57) |
+| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:56](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/createBasicPostEffectCode.ts#L56) |
+| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:57](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/createBasicPostEffectCode.ts#L57) |

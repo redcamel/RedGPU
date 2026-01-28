@@ -6,7 +6,7 @@
 
 # Class: RenderViewStateData
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:36](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L36)
+Defined in: [src/display/view/core/RenderViewStateData.ts:36](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L36)
 
 3D 뷰의 렌더링 상태 데이터를 관리하고 추적하는 클래스입니다.
 
@@ -25,7 +25,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:36](https://github.com
 
 > **new RenderViewStateData**(`view`): `RenderViewStateData`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:107](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L107)
+Defined in: [src/display/view/core/RenderViewStateData.ts:107](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L107)
 
 새로운 RenderViewStateData 인스턴스를 생성합니다.
 
@@ -45,7 +45,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:107](https://github.co
 
 > **animationList**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:87](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L87)
+Defined in: [src/display/view/core/RenderViewStateData.ts:87](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L87)
 
 처리할 애니메이션 목록
 
@@ -55,7 +55,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:87](https://github.com
 
 > **bundleListAlphaLayer**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:77](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L77)
+Defined in: [src/display/view/core/RenderViewStateData.ts:77](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L77)
 
 알파 렌더링 레이어의 객체 배열
 
@@ -65,7 +65,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:77](https://github.com
 
 > **bundleListBasicList**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:89](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L89)
+Defined in: [src/display/view/core/RenderViewStateData.ts:89](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L89)
 
 효율적인 렌더링을 위한 렌더 번들 목록
 
@@ -75,7 +75,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:89](https://github.com
 
 > **bundleListParticleLayer**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:81](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L81)
+Defined in: [src/display/view/core/RenderViewStateData.ts:81](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L81)
 
 파티클 렌더링 레이어의 객체 배열
 
@@ -85,7 +85,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:81](https://github.com
 
 > **bundleListRender2PathLayer**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:83](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L83)
+Defined in: [src/display/view/core/RenderViewStateData.ts:83](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L83)
 
 2D 패스 렌더링 레이어의 객체 배열
 
@@ -95,7 +95,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:83](https://github.com
 
 > **bundleListTransparentLayer**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:79](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L79)
+Defined in: [src/display/view/core/RenderViewStateData.ts:79](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L79)
 
 투명 렌더링 레이어의 객체 배열
 
@@ -105,7 +105,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:79](https://github.com
 
 > **cullingDistanceSquared**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:40](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L40)
+Defined in: [src/display/view/core/RenderViewStateData.ts:40](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L40)
 
 컬링 계산에 사용되는 거리의 제곱 값
 
@@ -115,7 +115,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:40](https://github.com
 
 > **currentRenderPassEncoder**: `GPURenderPassEncoder`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:66](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L66)
+Defined in: [src/display/view/core/RenderViewStateData.ts:66](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L66)
 
 현재 사용 중인 GPU 렌더 패스 인코더
 
@@ -125,7 +125,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:66](https://github.com
 
 > **dirtyVertexUniformFromMaterial**: `object` = `{}`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:75](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L75)
+Defined in: [src/display/view/core/RenderViewStateData.ts:75](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L75)
 
 머티리얼로부터 변경된 버텍스 유니폼의 맵
 
@@ -135,7 +135,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:75](https://github.com
 
 > **distanceCulling**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:42](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L42)
+Defined in: [src/display/view/core/RenderViewStateData.ts:42](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L42)
 
 객체를 컬링하기 위한 거리 임계값
 
@@ -145,7 +145,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:42](https://github.com
 
 > **frustumPlanes**: `number`[][]
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:69](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L69)
+Defined in: [src/display/view/core/RenderViewStateData.ts:69](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L69)
 
 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null
 
@@ -155,7 +155,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:69](https://github.com
 
 > **isScene2DMode**: `boolean` = `false`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:96](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L96)
+Defined in: [src/display/view/core/RenderViewStateData.ts:96](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L96)
 
 씬이 2D 모드인지 여부
 
@@ -165,7 +165,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:96](https://github.com
 
 > **needResetRenderLayer**: `boolean` = `false`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:97](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L97)
+Defined in: [src/display/view/core/RenderViewStateData.ts:97](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L97)
 
 ***
 
@@ -173,7 +173,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:97](https://github.com
 
 > **num3DGroups**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:44](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L44)
+Defined in: [src/display/view/core/RenderViewStateData.ts:44](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L44)
 
 현재 프레임에서 렌더링된 3D 그룹의 수
 
@@ -183,7 +183,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:44](https://github.com
 
 > **num3DObjects**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:46](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L46)
+Defined in: [src/display/view/core/RenderViewStateData.ts:46](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L46)
 
 현재 프레임에서 렌더링된 3D 객체의 수
 
@@ -193,7 +193,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:46](https://github.com
 
 > **numDirtyPipelines**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:50](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L50)
+Defined in: [src/display/view/core/RenderViewStateData.ts:50](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L50)
 
 업데이트가 필요했던 더티 파이프라인의 수
 
@@ -203,7 +203,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:50](https://github.com
 
 > **numDrawCalls**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:48](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L48)
+Defined in: [src/display/view/core/RenderViewStateData.ts:48](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L48)
 
 현재 프레임에서 발행된 드로우 콜의 수
 
@@ -213,7 +213,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:48](https://github.com
 
 > **numInstances**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:52](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L52)
+Defined in: [src/display/view/core/RenderViewStateData.ts:52](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L52)
 
 렌더링된 총 인스턴스 수
 
@@ -223,7 +223,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:52](https://github.com
 
 > **numPoints**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:56](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L56)
+Defined in: [src/display/view/core/RenderViewStateData.ts:56](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L56)
 
 렌더링된 총 포인트 수
 
@@ -233,7 +233,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:56](https://github.com
 
 > **numTriangles**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:54](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L54)
+Defined in: [src/display/view/core/RenderViewStateData.ts:54](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L54)
 
 렌더링된 총 삼각형 수
 
@@ -243,7 +243,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:54](https://github.com
 
 > **prevFragmentUniformBindGroup**: `GPUBindGroup`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:73](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L73)
+Defined in: [src/display/view/core/RenderViewStateData.ts:73](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L73)
 
 최적화를 위해 이전에 사용한 프래그먼트 유니폼 바인드 그룹
 
@@ -253,7 +253,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:73](https://github.com
 
 > **prevTimestamp**: `number` = `0`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:93](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L93)
+Defined in: [src/display/view/core/RenderViewStateData.ts:93](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L93)
 
 ***
 
@@ -261,7 +261,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:93](https://github.com
 
 > **prevVertexGpuBuffer**: `GPUBuffer`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:71](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L71)
+Defined in: [src/display/view/core/RenderViewStateData.ts:71](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L71)
 
 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼
 
@@ -271,7 +271,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:71](https://github.com
 
 > **skinList**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:85](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L85)
+Defined in: [src/display/view/core/RenderViewStateData.ts:85](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L85)
 
 처리할 스킨 메시 목록
 
@@ -281,7 +281,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:85](https://github.com
 
 > **startTime**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:94](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L94)
+Defined in: [src/display/view/core/RenderViewStateData.ts:94](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L94)
 
 ***
 
@@ -289,7 +289,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:94](https://github.com
 
 > **swapBufferIndex**: `number` = `1`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:62](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L62)
+Defined in: [src/display/view/core/RenderViewStateData.ts:62](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L62)
 
 ***
 
@@ -297,7 +297,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:62](https://github.com
 
 > **timestamp**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:92](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L92)
+Defined in: [src/display/view/core/RenderViewStateData.ts:92](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L92)
 
 렌더링 프레임의 현재 타임스탬프
 
@@ -307,7 +307,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:92](https://github.com
 
 > **useDistanceCulling**: `boolean`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:38](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L38)
+Defined in: [src/display/view/core/RenderViewStateData.ts:38](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L38)
 
 이 뷰에 대해 거리 컬링이 활성화되어 있는지 여부
 
@@ -317,7 +317,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:38](https://github.com
 
 > **usedVideoMemory**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:64](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L64)
+Defined in: [src/display/view/core/RenderViewStateData.ts:64](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L64)
 
 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트)
 
@@ -327,7 +327,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:64](https://github.com
 
 > **viewIndex**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:61](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L61)
+Defined in: [src/display/view/core/RenderViewStateData.ts:61](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L61)
 
 ***
 
@@ -335,7 +335,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:61](https://github.com
 
 > **viewportSize**: `ViewportSize`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:60](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L60)
+Defined in: [src/display/view/core/RenderViewStateData.ts:60](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L60)
 
 현재 뷰포트 크기 및 위치 정보
 
@@ -345,7 +345,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:60](https://github.com
 
 > **viewRenderTime**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:58](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L58)
+Defined in: [src/display/view/core/RenderViewStateData.ts:58](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L58)
 
 뷰 렌더링에 소요된 시간 (밀리초)
 
@@ -357,7 +357,7 @@ Defined in: [src/display/view/core/RenderViewStateData.ts:58](https://github.com
 
 > **get** **view**(): [`View3D`](../../../classes/View3D.md)
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:117](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L117)
+Defined in: [src/display/view/core/RenderViewStateData.ts:117](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L117)
 
 연결된 View3D 인스턴스를 가져옵니다.
 
@@ -373,7 +373,7 @@ View3D 인스턴스
 
 > **reset**(`viewRenderPassEncoder`, `time`): `void`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:134](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/display/view/core/RenderViewStateData.ts#L134)
+Defined in: [src/display/view/core/RenderViewStateData.ts:134](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/display/view/core/RenderViewStateData.ts#L134)
 
 새로운 프레임을 위해 렌더 상태 데이터를 초기화합니다.
 

@@ -8,7 +8,7 @@
 
 > **getUniformOffsetByRoundUp**(`previousOffsetAndSize`, `requiredAlignment`): `number`
 
-Defined in: [src/resources/buffer/core/func/getUniformOffsetByRoundUp.ts:12](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/buffer/core/func/getUniformOffsetByRoundUp.ts#L12)
+Defined in: [src/resources/buffer/core/func/getUniformOffsetByRoundUp.ts:12](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/buffer/core/func/getUniformOffsetByRoundUp.ts#L12)
 
 주어진 오프셋과 사이즈를 시작으로 필요한 정렬을 기준으로 오프셋을 반올림합니다.
 <br/>Rounds up the offset based on the given previous offset and size and the required alignment.

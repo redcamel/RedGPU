@@ -6,7 +6,7 @@
 
 # Class: AntialiasingManager
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:22](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L22)
+Defined in: [src/antialiasing/AntialiasingManager.ts:22](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L22)
 
 
 Class that manages anti-aliasing settings.
@@ -29,7 +29,7 @@ const antialiasingManager = redGPUContext.antialiasingManager;
 
 > **new AntialiasingManager**(`redGPUContext`): `AntialiasingManager`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:39](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L39)
+Defined in: [src/antialiasing/AntialiasingManager.ts:39](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L39)
 
 
 AntialiasingManager constructor.
@@ -38,7 +38,7 @@ AntialiasingManager constructor.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../RedGPUContext/classes/RedGPUContext.md) | RedGPUContext instance |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 
 #### Returns
 
@@ -52,7 +52,7 @@ AntialiasingManager constructor.
 
 > **get** **changedMSAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:168](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L168)
+Defined in: [src/antialiasing/AntialiasingManager.ts:168](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L168)
 
 **`Internal`**
 
@@ -70,7 +70,7 @@ Whether MSAA has changed
 
 > **set** **changedMSAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:181](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L181)
+Defined in: [src/antialiasing/AntialiasingManager.ts:181](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L181)
 
 **`Internal`**
 
@@ -95,7 +95,7 @@ Sets whether the MSAA setting has changed.
 
 > **get** **msaaID**(): `string`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:194](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L194)
+Defined in: [src/antialiasing/AntialiasingManager.ts:194](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L194)
 
 **`Internal`**
 
@@ -117,7 +117,7 @@ Unique ID of MSAA
 
 > **get** **useFXAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:136](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L136)
+Defined in: [src/antialiasing/AntialiasingManager.ts:136](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L136)
 
 
 Returns whether FXAA (Fast Approximate Anti-Aliasing) is used.
@@ -138,7 +138,7 @@ Whether FXAA is used
 
 > **set** **useFXAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:153](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L153)
+Defined in: [src/antialiasing/AntialiasingManager.ts:153](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L153)
 
 
 Sets whether to use FXAA (Fast Approximate Anti-Aliasing).
@@ -166,7 +166,7 @@ antialiasingManager.useFXAA = true;
 
 > **get** **useMSAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:98](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L98)
+Defined in: [src/antialiasing/AntialiasingManager.ts:98](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L98)
 
 
 Returns whether MSAA (Multi-Sample Anti-Aliasing) is used.
@@ -187,7 +187,7 @@ Whether MSAA is used
 
 > **set** **useMSAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:115](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L115)
+Defined in: [src/antialiasing/AntialiasingManager.ts:115](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L115)
 
 
 Sets whether to use MSAA (Multi-Sample Anti-Aliasing).
@@ -215,7 +215,7 @@ antialiasingManager.useMSAA = true;
 
 > **get** **useTAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:62](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L62)
+Defined in: [src/antialiasing/AntialiasingManager.ts:62](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L62)
 
 
 Returns whether TAA (Temporal Anti-Aliasing) is used.
@@ -236,7 +236,7 @@ Whether TAA is used
 
 > **set** **useTAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:79](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/antialiasing/AntialiasingManager.ts#L79)
+Defined in: [src/antialiasing/AntialiasingManager.ts:79](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/antialiasing/AntialiasingManager.ts#L79)
 
 
 Sets whether to use TAA (Temporal Anti-Aliasing).

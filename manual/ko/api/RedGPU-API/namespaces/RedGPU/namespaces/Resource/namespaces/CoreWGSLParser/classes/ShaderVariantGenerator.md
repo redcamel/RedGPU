@@ -6,7 +6,7 @@
 
 # Class: ShaderVariantGenerator
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:17](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L17)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:17](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L17)
 
 조건부 블록과 define 문자열을 기반으로 WGSL 셰이더의 다양한 변형(variant) 코드를 생성하는 유틸리티 클래스입니다.
 
@@ -25,7 +25,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:17](https:/
 
 > **new ShaderVariantGenerator**(`defines`, `conditionalBlocks`): `ShaderVariantGenerator`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:32](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L32)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:32](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L32)
 
 ShaderVariantGenerator 인스턴스를 생성합니다. (내부 시스템 전용)
 
@@ -47,7 +47,7 @@ ShaderVariantGenerator 인스턴스를 생성합니다. (내부 시스템 전용
 
 > **getCachedVariants**(): `string`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:64](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L64)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:64](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L64)
 
 현재 캐시된 변형 키 목록을 반환합니다.
 
@@ -62,7 +62,7 @@ Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:64](https:/
 
 > **getVariant**(`variantKey`): `string`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:50](https://github.com/redcamel/RedGPU/blob/a5ea77ed71610f8cfa1c2a662d1aad95bee20f8b/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L50)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:50](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L50)
 
 특정 변형 키에 대한 셰이더 코드를 지연 생성(Lazy generate)합니다.
 
