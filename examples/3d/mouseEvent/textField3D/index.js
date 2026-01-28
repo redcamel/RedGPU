@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769586895088";
+import * as RedGPU from "../../../../dist/index.js?t=1769587130347";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -71,9 +71,9 @@ function getRandomHexValue() {
 }
 
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769586895088');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769587130347');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769586895088");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769587130347");
     setDebugButtons(RedGPU, redGPUContext);
     const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
     const controls = {
