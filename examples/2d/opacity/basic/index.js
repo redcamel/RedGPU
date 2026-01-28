@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769586528189";
+import * as RedGPU from "../../../../dist/index.js?t=1769586895088";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -90,9 +90,9 @@ const createChildTextField2D = (redGPUContext, parent) => {
 };
 
 const renderTestPane = async (redGPUContext, parent, children) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769586528189');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769586895088');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769586528189");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769586895088");
     setDebugButtons(RedGPU, redGPUContext);
     const maxW = redGPUContext.screenRectObject.width;
     const maxH = redGPUContext.screenRectObject.height;
