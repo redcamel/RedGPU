@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769585073767";
+import * as RedGPU from "../../../../dist/index.js?t=1769586122100";
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -36,7 +36,7 @@ const renderTestPane = async (redGPUContext, scene) => {
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769585073767");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769586122100");
     setDebugButtons(RedGPU, redGPUContext);
     const maxAnisotropyValues = [1, 8, 16];
     const spacing = 105;

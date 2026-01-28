@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769585073767";
+import * as RedGPU from "../../../../dist/index.js?t=1769586122100";
 
 // ===== Global Variables =====
 const canvas = document.createElement("canvas");
@@ -132,11 +132,11 @@ const createTextures = (redGPUContext) => {
 
 // ===== UI Rendering =====
 const renderUI = async (redGPUContext, mesh) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769585073767");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769586122100");
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769585073767");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769586122100");
     setDebugButtons(RedGPU, redGPUContext);
 
     const pane = new Pane({title: "Phong Shader Variants"});
