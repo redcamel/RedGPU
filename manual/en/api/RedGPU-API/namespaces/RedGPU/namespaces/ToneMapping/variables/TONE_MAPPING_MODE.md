@@ -8,7 +8,7 @@
 
 > `const` **TONE\_MAPPING\_MODE**: `object`
 
-Defined in: [src/toneMapping/TONE\_MAPPING\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/toneMapping/TONE_MAPPING_MODE.ts#L6)
+Defined in: [src/toneMapping/TONE\_MAPPING\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/toneMapping/TONE_MAPPING_MODE.ts#L6)
 
 
 Constants for available tone mapping modes.
@@ -17,7 +17,7 @@ Constants for available tone mapping modes.
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="aces_filmic_hill"></a> `ACES_FILMIC_HILL` | `"ACESFilmicHill"` | `'ACESFilmicHill'` | ACES Filmic (Hill approximation) tone mapping | [src/toneMapping/TONE\_MAPPING\_MODE.ts:21](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/toneMapping/TONE_MAPPING_MODE.ts#L21) |
-| <a id="aces_filmic_narkowicz"></a> `ACES_FILMIC_NARKOWICZ` | `"ACESFilmicNarkowicz"` | `'ACESFilmicNarkowicz'` | ACES Filmic (Narkowicz approximation) tone mapping | [src/toneMapping/TONE\_MAPPING\_MODE.ts:26](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/toneMapping/TONE_MAPPING_MODE.ts#L26) |
-| <a id="khronos_pbr_neutral"></a> `KHRONOS_PBR_NEUTRAL` | `"khronosPBRNeutral"` | `'khronosPBRNeutral'` | Khronos PBR Neutral tone mapping | [src/toneMapping/TONE\_MAPPING\_MODE.ts:16](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/toneMapping/TONE_MAPPING_MODE.ts#L16) |
-| <a id="linear"></a> `LINEAR` | `"linear"` | `'linear'` | Linear tone mapping | [src/toneMapping/TONE\_MAPPING\_MODE.ts:11](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/toneMapping/TONE_MAPPING_MODE.ts#L11) |
+| <a id="aces_filmic_hill"></a> `ACES_FILMIC_HILL` | `"ACESFilmicHill"` | `'ACESFilmicHill'` | ACES Filmic (Hill approximation) tone mapping | [src/toneMapping/TONE\_MAPPING\_MODE.ts:21](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/toneMapping/TONE_MAPPING_MODE.ts#L21) |
+| <a id="aces_filmic_narkowicz"></a> `ACES_FILMIC_NARKOWICZ` | `"ACESFilmicNarkowicz"` | `'ACESFilmicNarkowicz'` | ACES Filmic (Narkowicz approximation) tone mapping | [src/toneMapping/TONE\_MAPPING\_MODE.ts:26](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/toneMapping/TONE_MAPPING_MODE.ts#L26) |
+| <a id="khronos_pbr_neutral"></a> `KHRONOS_PBR_NEUTRAL` | `"khronosPBRNeutral"` | `'khronosPBRNeutral'` | Khronos PBR Neutral tone mapping | [src/toneMapping/TONE\_MAPPING\_MODE.ts:16](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/toneMapping/TONE_MAPPING_MODE.ts#L16) |
+| <a id="linear"></a> `LINEAR` | `"linear"` | `'linear'` | Linear tone mapping | [src/toneMapping/TONE\_MAPPING\_MODE.ts:11](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/toneMapping/TONE_MAPPING_MODE.ts#L11) |

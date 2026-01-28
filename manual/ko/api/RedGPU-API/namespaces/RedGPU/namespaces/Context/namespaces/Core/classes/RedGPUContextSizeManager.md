@@ -6,7 +6,7 @@
 
 # Class: RedGPUContextSizeManager
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:35](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L35)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:35](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L35)
 
 캔버스 크기 및 렌더링 스케일을 관리하는 클래스입니다.
 
@@ -32,7 +32,7 @@ sizeManager.setSize('100%', '100%');
 
 > **new RedGPUContextSizeManager**(`redGPUContext`, `width`, `height`): `RedGPUContextSizeManager`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:56](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L56)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:56](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L56)
 
 RedGPUContextSizeManager 생성자
 
@@ -57,7 +57,7 @@ RedGPUContextSizeManager 생성자
 
 > **get** **height**(): `string` \| `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:109](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L109)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:109](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L109)
 
 설정된 높이 값을 반환합니다.
 
@@ -70,7 +70,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:109](https://github.co
 
 > **set** **height**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:120](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L120)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:120](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L120)
 
 높이를 설정합니다. (px, % 또는 숫자)
 
@@ -93,7 +93,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:120](https://github.co
 
 > **get** **parentDomRect**(): `DOMRect`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:149](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L149)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:149](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L149)
 
 캔버스의 부모 DOM 요소의 크기 정보를 반환합니다.
 
@@ -110,7 +110,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:149](https://github.co
 
 > **get** **pixelRectArray**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:128](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L128)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:128](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L128)
 
 현재 렌더링될 실제 픽셀 단위 Rect를 배열로 반환합니다. [x, y, w, h]
 
@@ -127,7 +127,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:128](https://github.co
 
 > **get** **pixelRectObject**(): `object`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:136](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L136)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:136](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L136)
 
 현재 렌더링될 실제 픽셀 단위 Rect를 객체로 반환합니다.
 
@@ -138,10 +138,10 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:136](https://github.co
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `height` | `number` | [src/context/core/RedGPUContextSizeManager.ts:141](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L141) |
-| `width` | `number` | [src/context/core/RedGPUContextSizeManager.ts:140](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L140) |
-| `x` | `number` | [src/context/core/RedGPUContextSizeManager.ts:138](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L138) |
-| `y` | `number` | [src/context/core/RedGPUContextSizeManager.ts:139](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L139) |
+| `height` | `number` | [src/context/core/RedGPUContextSizeManager.ts:141](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L141) |
+| `width` | `number` | [src/context/core/RedGPUContextSizeManager.ts:140](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L140) |
+| `x` | `number` | [src/context/core/RedGPUContextSizeManager.ts:138](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L138) |
+| `y` | `number` | [src/context/core/RedGPUContextSizeManager.ts:139](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L139) |
 
 ***
 
@@ -151,7 +151,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:136](https://github.co
 
 > **get** **renderScale**(): `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:68](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L68)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:68](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L68)
 
 렌더링 스케일을 반환합니다.
 
@@ -164,7 +164,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:68](https://github.com
 
 > **set** **renderScale**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:79](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L79)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:79](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L79)
 
 렌더링 스케일을 설정합니다.
 
@@ -187,7 +187,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:79](https://github.com
 
 > **get** **screenRectObject**(): `object`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:153](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L153)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:153](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L153)
 
 ##### Returns
 
@@ -195,10 +195,10 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:153](https://github.co
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `height` | `number` | [src/context/core/RedGPUContextSizeManager.ts:158](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L158) |
-| `width` | `number` | [src/context/core/RedGPUContextSizeManager.ts:157](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L157) |
-| `x` | `number` | [src/context/core/RedGPUContextSizeManager.ts:155](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L155) |
-| `y` | `number` | [src/context/core/RedGPUContextSizeManager.ts:156](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L156) |
+| `height` | `number` | [src/context/core/RedGPUContextSizeManager.ts:158](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L158) |
+| `width` | `number` | [src/context/core/RedGPUContextSizeManager.ts:157](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L157) |
+| `x` | `number` | [src/context/core/RedGPUContextSizeManager.ts:155](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L155) |
+| `y` | `number` | [src/context/core/RedGPUContextSizeManager.ts:156](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L156) |
 
 ***
 
@@ -208,7 +208,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:153](https://github.co
 
 > **get** **width**(): `string` \| `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:90](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L90)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:90](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L90)
 
 설정된 너비 값을 반환합니다.
 
@@ -221,7 +221,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:90](https://github.com
 
 > **set** **width**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:101](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L101)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:101](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L101)
 
 너비를 설정합니다. (px, % 또는 숫자)
 
@@ -242,7 +242,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:101](https://github.co
 
 > **setSize**(`w`, `h`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:259](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L259)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:259](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L259)
 
 요소의 크기를 설정하고 캔버스 스타일을 업데이트합니다.
 
@@ -264,7 +264,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:259](https://github.co
 
 > `static` **calculateSizeFromString**(`rect`, `key`, `value`): `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:236](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L236)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:236](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L236)
 
 문자열 값(px, %)을 픽셀 단위 숫자로 변환합니다.
 
@@ -291,7 +291,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:236](https://github.co
 
 > `static` **getPixelDimension**(`parentRect`, `key`, `value`): `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:219](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L219)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:219](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L219)
 
 부모 Rect를 기준으로 픽셀 크기를 계산하여 반환합니다.
 
@@ -314,7 +314,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:219](https://github.co
 
 > `static` **validatePositionValue**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:190](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L190)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:190](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L190)
 
 입력값이 유효한 위치 값인지 검증합니다. (숫자, px, %)
 
@@ -335,7 +335,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:190](https://github.co
 
 > `static` **validateSizeValue**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:169](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/context/core/RedGPUContextSizeManager.ts#L169)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:169](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/context/core/RedGPUContextSizeManager.ts#L169)
 
 입력값이 유효한 사이즈 값인지 검증합니다. (양수, px, %)
 

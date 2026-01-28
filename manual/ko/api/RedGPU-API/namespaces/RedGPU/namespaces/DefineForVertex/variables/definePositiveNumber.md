@@ -8,7 +8,7 @@
 
 > **definePositiveNumber**: (`classObject`, `keyList`) => `void`
 
-Defined in: [src/defineProperty/DefineForVertex.ts:72](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/defineProperty/DefineForVertex.ts#L72)
+Defined in: [src/defineProperty/DefineForVertex.ts:72](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/defineProperty/DefineForVertex.ts#L72)
 
 ## Parameters
 

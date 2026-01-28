@@ -8,7 +8,7 @@
 
 > **defineSampler**: (`classObject`, `keyList`) => `void`
 
-Defined in: [src/defineProperty/DefineForFragment.ts:104](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/defineProperty/DefineForFragment.ts#L104)
+Defined in: [src/defineProperty/DefineForFragment.ts:104](https://github.com/redcamel/RedGPU/blob/00cd5cecbc002066ec39f118ae442e3c339db347/src/defineProperty/DefineForFragment.ts#L104)
 
 ## Parameters
 
