@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769586528189";
+import * as RedGPU from "../../../../dist/index.js?t=1769587130347";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -100,9 +100,9 @@ const createTorusPrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769586528189");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769587130347");
     setDebugButtons(RedGPU, redGPUContext)
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769586528189");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769587130347");
     const pane = new Pane();
 
     const config = {
