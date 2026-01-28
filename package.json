@@ -47,5 +47,8 @@
   },
   "dependencies": {
     "wgsl_reflect": "1.2.1"
+  },
+  "overrides": {
+    "lodash-es": "^4.17.21"
   }
 }
