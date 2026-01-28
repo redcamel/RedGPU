@@ -1,5 +1,5 @@
-import {hdrImages} from './index.js?t=1769513175662';
-import createSkyBoxHelper from './createSkyBoxHelper.js?t=1769513175662';
+import {hdrImages} from './index.js?t=1769585073767';
+import createSkyBoxHelper from './createSkyBoxHelper.js?t=1769585073767';
 
 const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const folder = pane.addFolder({title: 'Lighting', expanded: true});

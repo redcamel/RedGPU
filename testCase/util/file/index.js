@@ -1,5 +1,5 @@
 import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js';
-import * as RedGPU from "../../dist/index.js";
+import * as RedGPU from "../../../dist/index.js";
 
 const redUnit = new RedUnit('RedGPU - file');
 redUnit.testGroup(

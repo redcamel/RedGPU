@@ -21,8 +21,11 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
  *
  * * ### Example
  * ```typescript
+ * // RedGPU.init 콜백 내부 (Inside RedGPU.init callback)
  * const scene = new RedGPU.Display.Scene();
- * const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+ * const camera = new RedGPU.Camera.RedObitController(redGPUContext);
+ * const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
+ *
  * view.grid = true;
  * redGPUContext.addView(view);
  * ```

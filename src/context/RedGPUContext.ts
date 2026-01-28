@@ -19,6 +19,19 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
  * [KO] 리사이즈, 배경색, 디버그 패널, 안티앨리어싱, 리소스 관리 등 다양한 기능을 제공합니다.
  * [EN] It provides various features such as resizing, background color, debug panel, anti-aliasing, and resource management.
  *
+ * ::: warning
+ * [KO] 이 클래스는 RedGPU.init()에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is created internally by RedGPU.init().<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * * ### Example
+ * ```typescript
+ * RedGPU.init(canvas, (redGPUContext) => {
+ *     console.log('Context created:', redGPUContext);
+ *     redGPUContext.backgroundColor = new RedGPU.Color.ColorRGBA(0, 0, 0, 1);
+ * });
+ * ```
+ *
  * @category Context
  */
 class RedGPUContext extends RedGPUContextViewContainer {

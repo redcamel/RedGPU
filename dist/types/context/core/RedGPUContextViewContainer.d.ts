@@ -5,6 +5,14 @@ import View3D from "../../display/view/View3D";
  *
  * [KO] 뷰의 추가, 제거, 순서 변경 및 조회를 담당합니다.
  * [EN] Handles adding, removing, reordering, and retrieving views.
+ *
+ * * ### Example
+ * ```typescript
+ * // RedGPUContext extends RedGPUContextViewContainer
+ * const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
+ * redGPUContext.addView(view);
+ * ```
+ *
  * @category Context
  */
 declare class RedGPUContextViewContainer {

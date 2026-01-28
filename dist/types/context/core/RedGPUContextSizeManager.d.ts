@@ -11,6 +11,19 @@ type ParentRect = {
  *
  * [KO] 픽셀(px) 또는 백분율(%) 단위로 크기를 설정할 수 있으며, 렌더링 해상도 조절 기능을 제공합니다.
  * [EN] You can set the size in pixels (px) or percentages (%), and it provides rendering resolution adjustment functions.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * * ### Example
+ * ```typescript
+ * const sizeManager = redGPUContext.sizeManager;
+ * sizeManager.renderScale = 0.5; // Reduce resolution to 50%
+ * sizeManager.setSize('100%', '100%');
+ * ```
+ *
  * @category Context
  */
 declare class RedGPUContextSizeManager {
