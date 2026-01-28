@@ -6,7 +6,7 @@
 
 # Class: PickingEvent
 
-Defined in: [src/picking/PickingEvent.ts:19](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L19)
+Defined in: [src/picking/PickingEvent.ts:19](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L19)
 
 
 Class encapsulating information related to mouse events.
@@ -27,7 +27,7 @@ mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
 
 > **new PickingEvent**(`pickingId`, `mouseX`, `mouseY`, `target`, `time`, `type`, `nativeEvent`): `PickingEvent`
 
-Defined in: [src/picking/PickingEvent.ts:125](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L125)
+Defined in: [src/picking/PickingEvent.ts:125](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L125)
 
 
 Creates a PickingEvent instance.
@@ -54,7 +54,7 @@ Creates a PickingEvent instance.
 
 > **altKey**: `boolean` = `false`
 
-Defined in: [src/picking/PickingEvent.ts:85](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L85)
+Defined in: [src/picking/PickingEvent.ts:85](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L85)
 
 
 Whether Alt key is pressed
@@ -71,7 +71,7 @@ false
 
 > **ctrlKey**: `boolean` = `false`
 
-Defined in: [src/picking/PickingEvent.ts:91](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L91)
+Defined in: [src/picking/PickingEvent.ts:91](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L91)
 
 
 Whether Ctrl key is pressed
@@ -88,7 +88,7 @@ false
 
 > **localX**: `number` = `0`
 
-Defined in: [src/picking/PickingEvent.ts:67](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L67)
+Defined in: [src/picking/PickingEvent.ts:67](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L67)
 
 
 Local X coordinate
@@ -105,7 +105,7 @@ Local X coordinate
 
 > **localY**: `number` = `0`
 
-Defined in: [src/picking/PickingEvent.ts:73](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L73)
+Defined in: [src/picking/PickingEvent.ts:73](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L73)
 
 
 Local Y coordinate
@@ -122,7 +122,7 @@ Local Y coordinate
 
 > **localZ**: `number` = `0`
 
-Defined in: [src/picking/PickingEvent.ts:79](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L79)
+Defined in: [src/picking/PickingEvent.ts:79](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L79)
 
 
 Local Z coordinate
@@ -139,7 +139,7 @@ Local Z coordinate
 
 > **mouseX**: `number`
 
-Defined in: [src/picking/PickingEvent.ts:29](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L29)
+Defined in: [src/picking/PickingEvent.ts:29](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L29)
 
 
 Mouse X coordinate
@@ -150,7 +150,7 @@ Mouse X coordinate
 
 > **mouseY**: `number`
 
-Defined in: [src/picking/PickingEvent.ts:34](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L34)
+Defined in: [src/picking/PickingEvent.ts:34](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L34)
 
 
 Mouse Y coordinate
@@ -161,7 +161,7 @@ Mouse Y coordinate
 
 > **movementX**: `number` = `0`
 
-Defined in: [src/picking/PickingEvent.ts:55](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L55)
+Defined in: [src/picking/PickingEvent.ts:55](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L55)
 
 
 Mouse X movement
@@ -178,7 +178,7 @@ Mouse X movement
 
 > **movementY**: `number` = `0`
 
-Defined in: [src/picking/PickingEvent.ts:61](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L61)
+Defined in: [src/picking/PickingEvent.ts:61](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L61)
 
 
 Mouse Y movement
@@ -195,7 +195,7 @@ Mouse Y movement
 
 > **pickingId**: `number`
 
-Defined in: [src/picking/PickingEvent.ts:24](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L24)
+Defined in: [src/picking/PickingEvent.ts:24](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L24)
 
 
 Picking ID
@@ -206,7 +206,7 @@ Picking ID
 
 > **shiftKey**: `boolean` = `false`
 
-Defined in: [src/picking/PickingEvent.ts:97](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L97)
+Defined in: [src/picking/PickingEvent.ts:97](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L97)
 
 
 Whether Shift key is pressed
@@ -223,7 +223,7 @@ false
 
 > **target**: [`Mesh`](../../Display/classes/Mesh.md)
 
-Defined in: [src/picking/PickingEvent.ts:39](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L39)
+Defined in: [src/picking/PickingEvent.ts:39](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L39)
 
 
 Event target mesh
@@ -234,7 +234,7 @@ Event target mesh
 
 > **time**: `number`
 
-Defined in: [src/picking/PickingEvent.ts:44](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L44)
+Defined in: [src/picking/PickingEvent.ts:44](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L44)
 
 
 Event occurrence time
@@ -245,7 +245,7 @@ Event occurrence time
 
 > **type**: `string`
 
-Defined in: [src/picking/PickingEvent.ts:49](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/picking/PickingEvent.ts#L49)
+Defined in: [src/picking/PickingEvent.ts:49](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/picking/PickingEvent.ts#L49)
 
 
 Event type

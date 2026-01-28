@@ -8,7 +8,7 @@
 
 > **init**(`canvas`, `onWebGPUInitialized`, `onFailInitialized?`, `onDestroy?`, `alphaMode?`, `requestAdapterOptions?`): `Promise`\<`void`\>
 
-Defined in: [src/init.ts:49](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/init.ts#L49)
+Defined in: [src/init.ts:49](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/init.ts#L49)
 
 WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
 

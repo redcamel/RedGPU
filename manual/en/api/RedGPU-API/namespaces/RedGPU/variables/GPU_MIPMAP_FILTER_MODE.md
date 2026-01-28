@@ -8,7 +8,7 @@
 
 > `const` **GPU\_MIPMAP\_FILTER\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L10)
 
 
 Constants defining filtering mode options for sampling between mipmap levels.
@@ -20,5 +20,5 @@ Determines how to interpolate between mipmap levels of a texture.
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="linear"></a> `LINEAR` | `"linear"` | `'linear'` | Linearly interpolates between two adjacent mipmap levels. | [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L20) |
-| <a id="nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | Samples from the nearest mipmap level. | [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L15) |
+| <a id="linear"></a> `LINEAR` | `"linear"` | `'linear'` | Linearly interpolates between two adjacent mipmap levels. | [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L20) |
+| <a id="nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | Samples from the nearest mipmap level. | [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L15) |

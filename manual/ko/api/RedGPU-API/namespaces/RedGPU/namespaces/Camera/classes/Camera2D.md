@@ -6,7 +6,7 @@
 
 # Class: Camera2D
 
-Defined in: [src/camera/camera/Camera2D.ts:20](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L20)
+Defined in: [src/camera/camera/Camera2D.ts:20](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L20)
 
 2D 환경에서 객체를 관찰하는 카메라입니다.
 
@@ -28,7 +28,7 @@ camera.setPosition(200, 100);
 
 > **new Camera2D**(): `Camera2D`
 
-Defined in: [src/camera/camera/Camera2D.ts:61](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L61)
+Defined in: [src/camera/camera/Camera2D.ts:61](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L61)
 
 Camera2D 인스턴스를 생성합니다.
 
@@ -45,7 +45,7 @@ Camera2D 인스턴스를 생성합니다.
 
 > **get** **modelMatrix**(): [`mat4`](../../../type-aliases/mat4.md)
 
-Defined in: [src/camera/camera/Camera2D.ts:97](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L97)
+Defined in: [src/camera/camera/Camera2D.ts:97](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L97)
 
 모델 행렬을 반환합니다.
 
@@ -65,7 +65,7 @@ Defined in: [src/camera/camera/Camera2D.ts:97](https://github.com/redcamel/RedGP
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/camera/Camera2D.ts:72](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L72)
+Defined in: [src/camera/camera/Camera2D.ts:72](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L72)
 
 카메라 이름을 반환합니다.
 
@@ -81,7 +81,7 @@ Defined in: [src/camera/camera/Camera2D.ts:72](https://github.com/redcamel/RedGP
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:85](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L85)
+Defined in: [src/camera/camera/Camera2D.ts:85](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L85)
 
 카메라 이름을 설정합니다.
 
@@ -104,7 +104,7 @@ Defined in: [src/camera/camera/Camera2D.ts:85](https://github.com/redcamel/RedGP
 
 > **get** **position**(): \[`number`, `number`\]
 
-Defined in: [src/camera/camera/Camera2D.ts:171](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L171)
+Defined in: [src/camera/camera/Camera2D.ts:171](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L171)
 
 카메라 위치 (x, y)를 반환합니다.
 
@@ -124,7 +124,7 @@ Defined in: [src/camera/camera/Camera2D.ts:171](https://github.com/redcamel/RedG
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:121](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L121)
+Defined in: [src/camera/camera/Camera2D.ts:121](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L121)
 
 X 좌표를 반환합니다.
 
@@ -140,7 +140,7 @@ X 좌표
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:133](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L133)
+Defined in: [src/camera/camera/Camera2D.ts:133](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L133)
 
 X 좌표를 설정합니다.
 
@@ -163,7 +163,7 @@ X 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:146](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L146)
+Defined in: [src/camera/camera/Camera2D.ts:146](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L146)
 
 Y 좌표를 반환합니다.
 
@@ -179,7 +179,7 @@ Y 좌표
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:158](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L158)
+Defined in: [src/camera/camera/Camera2D.ts:158](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L158)
 
 Y 좌표를 설정합니다.
 
@@ -202,7 +202,7 @@ Y 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:109](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L109)
+Defined in: [src/camera/camera/Camera2D.ts:109](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L109)
 
 Z 좌표를 반환합니다. (미사용)
 
@@ -220,7 +220,7 @@ Z 좌표
 
 > **setPosition**(`x`, `y?`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:186](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/camera/camera/Camera2D.ts#L186)
+Defined in: [src/camera/camera/Camera2D.ts:186](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/camera/camera/Camera2D.ts#L186)
 
 카메라의 위치를 설정합니다.
 

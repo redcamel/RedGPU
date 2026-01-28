@@ -6,7 +6,7 @@
 
 # Class: Sharpen
 
-Defined in: [src/postEffect/effects/Sharpen.ts:22](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/effects/Sharpen.ts#L22)
+Defined in: [src/postEffect/effects/Sharpen.ts:22](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/effects/Sharpen.ts#L22)
 
 
 Sharpen post-processing effect.
@@ -31,7 +31,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new Sharpen**(`redGPUContext`): `Sharpen`
 
-Defined in: [src/postEffect/effects/Sharpen.ts:33](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/effects/Sharpen.ts#L33)
+Defined in: [src/postEffect/effects/Sharpen.ts:33](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/effects/Sharpen.ts#L33)
 
 
 Creates a Sharpen instance.
@@ -58,7 +58,7 @@ Creates a Sharpen instance.
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L203)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L203)
 
 
 Returns the output texture view.
@@ -79,7 +79,7 @@ Returns the output texture view.
 
 > **get** **passList**(): [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md)[]
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:57](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/AMultiPassPostEffect.ts#L57)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:57](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/AMultiPassPostEffect.ts#L57)
 
 
 Returns the internal pass list.
@@ -100,7 +100,7 @@ Returns the internal pass list.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L117)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L117)
 
 
 Returns the RedGPU context.
@@ -121,7 +121,7 @@ Returns the RedGPU context.
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L133)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L133)
 
 
 Returns shader information. (Depends on MSAA state)
@@ -142,7 +142,7 @@ Returns shader information. (Depends on MSAA state)
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L125)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L125)
 
 
 Returns storage information.
@@ -163,7 +163,7 @@ Returns storage information.
 
 > **get** **systemUuniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L159)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L159)
 
 
 Returns system uniform information.
@@ -184,7 +184,7 @@ Returns system uniform information.
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L143)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L143)
 
 
 Returns the uniform buffer.
@@ -205,7 +205,7 @@ Returns the uniform buffer.
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L151)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L151)
 
 
 Returns uniform information.
@@ -226,7 +226,7 @@ Returns uniform information.
 
 > **get** **useDepthTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L101)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L101)
 
 
 Returns whether depth texture is used.
@@ -239,7 +239,7 @@ Returns whether depth texture is used.
 
 > **set** **useDepthTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L109)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L109)
 
 
 Sets whether depth texture is used.
@@ -266,7 +266,7 @@ Sets whether depth texture is used.
 
 > **get** **useGBufferNormalTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L77)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L77)
 
 
 Returns whether G-Buffer Normal texture is used.
@@ -279,7 +279,7 @@ Returns whether G-Buffer Normal texture is used.
 
 > **set** **useGBufferNormalTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L85)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L85)
 
 
 Sets whether G-Buffer Normal texture is used.
@@ -306,7 +306,7 @@ Sets whether G-Buffer Normal texture is used.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:48](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/AMultiPassPostEffect.ts#L48)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:48](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/AMultiPassPostEffect.ts#L48)
 
 
 Returns the video memory usage.
@@ -327,7 +327,7 @@ Returns the video memory usage.
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L167)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L167)
 
 
 Workgroup Size X
@@ -340,7 +340,7 @@ Workgroup Size X
 
 > **set** **WORK\_SIZE\_X**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L171)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L171)
 
 ##### Parameters
 
@@ -364,7 +364,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.co
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L179)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L179)
 
 
 Workgroup Size Y
@@ -377,7 +377,7 @@ Workgroup Size Y
 
 > **set** **WORK\_SIZE\_Y**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L183)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L183)
 
 ##### Parameters
 
@@ -401,7 +401,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.co
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L191)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L191)
 
 
 Workgroup Size Z
@@ -414,7 +414,7 @@ Workgroup Size Z
 
 > **set** **WORK\_SIZE\_Z**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L195)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L195)
 
 ##### Parameters
 
@@ -436,7 +436,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.co
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:65](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/AMultiPassPostEffect.ts#L65)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:65](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/AMultiPassPostEffect.ts#L65)
 
 
 Clears all passes.
@@ -455,7 +455,7 @@ Clears all passes.
 
 > **execute**(`view`, `gpuDevice`, `width`, `height`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L289)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L289)
 
 
 Executes the effect.
@@ -483,7 +483,7 @@ Executes the effect.
 
 > **init**(`redGPUContext`, `name`, `computeCodes`, `bindGroupLayout?`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L236)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L236)
 
 
 Initializes the effect.
@@ -513,7 +513,7 @@ Initializes the effect.
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): `ASinglePassPostEffectResult`
 
-Defined in: [src/postEffect/effects/Sharpen.ts:64](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/effects/Sharpen.ts#L64)
+Defined in: [src/postEffect/effects/Sharpen.ts:64](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/effects/Sharpen.ts#L64)
 
 
 Renders the sharpen effect.
@@ -544,7 +544,7 @@ Sharpened texture result
 
 > **update**(`deltaTime`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:352](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L352)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:352](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L352)
 
 
 Updates the effect state.
@@ -569,7 +569,7 @@ Updates the effect state.
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/postEffect/core/ASinglePassPostEffect.ts#L366)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/postEffect/core/ASinglePassPostEffect.ts#L366)
 
 
 Updates a uniform value.

@@ -6,7 +6,7 @@
 
 # Class: ResourceStatusInfo
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:1](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L1)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:1](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L1)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo
 
 > **new ResourceStatusInfo**(): `ResourceStatusInfo`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:5](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:5](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L5)
 
 #### Returns
 
@@ -26,7 +26,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo
 
 > **table**: `Map`\<`string`, `any`\>
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:2](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L2)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:2](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L2)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo
 
 > **videoMemory**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:3](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L3)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:3](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L3)

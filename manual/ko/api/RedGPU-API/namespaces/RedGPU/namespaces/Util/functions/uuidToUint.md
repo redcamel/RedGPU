@@ -8,7 +8,7 @@
 
 > **uuidToUint**(`uuid`): `number`
 
-Defined in: [src/utils/uuid/uuidToUint.ts:18](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/utils/uuid/uuidToUint.ts#L18)
+Defined in: [src/utils/uuid/uuidToUint.ts:18](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/utils/uuid/uuidToUint.ts#L18)
 
 UUID 문자열을 32비트 부호 없는 정수로 변환합니다.
 

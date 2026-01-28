@@ -8,7 +8,7 @@
 
 > `const` **GPU\_PRIMITIVE\_TOPOLOGY**: `object`
 
-Defined in: [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:10](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L10)
+Defined in: [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:10](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L10)
 
 정점 데이터를 기하학적 도형으로 해석하는 방식을 정의하는 상수군입니다.
 

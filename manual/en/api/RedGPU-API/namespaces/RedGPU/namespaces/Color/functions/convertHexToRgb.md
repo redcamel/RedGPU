@@ -8,7 +8,7 @@
 
 > **convertHexToRgb**(`hex`, `returnArrayYn`): `any`
 
-Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/color/convertHexToRgb.ts#L30)
+Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/color/convertHexToRgb.ts#L30)
 
 
 Converts a hexadecimal (Hex) color value to an RGB color.

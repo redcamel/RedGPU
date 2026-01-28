@@ -6,7 +6,7 @@
 
 # Class: VertexInterleaveType
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:13](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L13)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:13](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L13)
 
 
 Class that defines the interleaved format of vertex data.
@@ -34,7 +34,7 @@ const type = RedGPU.Resource.VertexInterleaveType.float32x3;
 
 > **get** `static` **float32**(): `TypeInterleave`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:18](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L18)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:18](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L18)
 
 
 float32 format (1 element, 4 bytes)
@@ -51,7 +51,7 @@ float32 format (1 element, 4 bytes)
 
 > **get** `static` **float32x2**(): `TypeInterleave`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:26](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L26)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:26](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L26)
 
 
 float32x2 format (2 elements, 8 bytes)
@@ -68,7 +68,7 @@ float32x2 format (2 elements, 8 bytes)
 
 > **get** `static` **float32x3**(): `TypeInterleave`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:34](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L34)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:34](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L34)
 
 
 float32x3 format (3 elements, 12 bytes)
@@ -85,7 +85,7 @@ float32x3 format (3 elements, 12 bytes)
 
 > **get** `static` **float32x4**(): `TypeInterleave`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:42](https://github.com/redcamel/RedGPU/blob/3905c89e71c3a0a3e943b9c120a292fc0c103b90/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L42)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:42](https://github.com/redcamel/RedGPU/blob/6bb4d0646784423ce5d3379b392fbd3a57b282b8/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L42)
 
 
 float32x4 format (4 elements, 16 bytes)
