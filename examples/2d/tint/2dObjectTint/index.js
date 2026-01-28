@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769585073767";
+import * as RedGPU from "../../../../dist/index.js?t=1769586122100";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -68,9 +68,9 @@ RedGPU.init(
 );
 
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769585073767');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769586122100');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769585073767");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769586122100");
     setDebugButtons(RedGPU, redGPUContext);
     const firstChild = scene.children[0];
     const defaultTint = firstChild ? firstChild.material.tint : {r: 255, g: 255, b: 255, a: 1};

@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769585073767";
+import * as RedGPU from "../../../../dist/index.js?t=1769586122100";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -57,9 +57,9 @@ RedGPU.init(
 
 // Tint 조작용 Tweakpane 구성
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769585073767");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769586122100");
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769585073767");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769586122100");
     setDebugButtons(RedGPU, redGPUContext);
     // Tint 테스트 추가
     const folder = pane.addFolder({title: "Material Tint Test"});
