@@ -2400,6 +2400,146 @@ Check performance limits on each device.`
             // },
         ]
     },
+    {
+        name: 'Physics',
+        list: [
+            {
+                name: 'Basic Physics',
+                path: 'physics/basic',
+                thumb: 'physics/basic/thumb.png',
+                description: {
+                    ko: `Rapier 물리 엔진을 사용한 기본적인 물리 시뮬레이션 예제입니다.`,
+                    en: `Basic physics simulation example using the Rapier physics engine.`
+                },
+            },
+            {
+                name: 'Shapes & Materials',
+                path: 'physics/shapes',
+                thumb: 'physics/shapes/thumb.png',
+                description: {
+                    ko: `다양한 충돌체 형상(Box, Sphere, Cylinder, Capsule)과 탄성/마찰 설정을 테스트합니다.`,
+                    en: `Tests various collider shapes (Box, Sphere, Cylinder, Capsule) and restitution/friction settings.`
+                },
+            },
+            {
+                name: 'Kinematic Interaction',
+                path: 'physics/kinematic',
+                thumb: 'physics/kinematic/thumb.png',
+                description: {
+                    ko: `코드에 의해 제어되는 키네마틱 객체가 동적 객체들과 상호작용하는 모습을 보여줍니다.`,
+                    en: `Demonstrates how kinematic objects controlled by code interact with dynamic objects.`
+                },
+            },
+            {
+                name: 'Galton Board',
+                path: 'physics/galton',
+                thumb: 'physics/galton/thumb.png',
+                description: {
+                    ko: `대량의 구슬 시뮬레이션을 통해 물리 엔진의 성능과 충돌 안정성을 테스트하는 갈톤 보드 예제입니다.`,
+                    en: `Galton Board example that tests physics engine performance and collision stability through massive ball simulation.`
+                },
+            },
+            {
+                name: 'Collision Events',
+                path: 'physics/collisionEvents',
+                thumb: 'physics/collisionEvents/thumb.png',
+                description: {
+                    ko: `물체 간의 충돌 이벤트를 감지하여 실시간으로 색상을 변경하는 등 물리 연동 로직을 테스트합니다.`,
+                    en: `Tests physics integration logic by detecting collision events between objects and changing colors in real-time.`
+                },
+            },
+            {
+                name: 'Joints & Constraints',
+                path: 'physics/joints',
+                thumb: 'physics/joints/thumb.png',
+                description: {
+                    ko: `물체들을 서로 연결하는 관절(Joint) 기능을 사용하여 체인이나 진자 운동과 같은 복잡한 물리 구조를 구현합니다.`,
+                    en: `Implements complex physical structures like chains or pendulums using joints to connect objects together.`
+                },
+            },
+            {
+                name: 'Raycasting Interaction',
+                path: 'physics/raycast',
+                thumb: 'physics/raycast/thumb.png',
+                description: {
+                    ko: `마우스 클릭 지점에서 광선을 쏘아 물리 객체를 검출하고, 힘을 가해 밀어내는 등의 상호작용을 구현합니다.`,
+                    en: `Casts rays from mouse click positions to detect physics objects and implements interactions like pushing them with force.`
+                },
+            },
+            {
+                name: 'Triggers & Sensors',
+                path: 'physics/triggers',
+                thumb: 'physics/triggers/thumb.png',
+                description: {
+                    ko: `물체와 물리적인 충돌은 발생하지 않으나 영역 진입을 감지하는 센서(Trigger) 기능을 테스트합니다.`,
+                    en: `Tests the sensor (Trigger) function that detects area entry without physical collision.`
+                },
+            },
+            {
+                name: 'Compound Shapes',
+                path: 'physics/compound',
+                thumb: 'physics/compound/thumb.png',
+                description: {
+                    ko: `여러 개의 지오메트리를 결합하여 하나의 복잡한 물리 객체를 만드는 복합 형상 기능을 테스트합니다.`,
+                    en: `Tests the compound shape function that combines multiple geometries to create a single complex physics object.`
+                },
+            },
+            {
+                name: 'Mesh Collider',
+                path: 'physics/meshCollider',
+                thumb: 'physics/meshCollider/thumb.png',
+                description: {
+                    ko: `정교한 지오메트리 데이터를 분석하여 복잡한 모양의 충돌체(Torus 등)를 생성하는 기능을 테스트합니다.`,
+                    en: `Tests the function to create complex-shaped colliders (e.g., Torus) by analyzing sophisticated geometry data.`
+                },
+            },
+            {
+                name: 'Physics Bowling',
+                path: 'physics/bowling',
+                thumb: 'physics/bowling/thumb.png',
+                description: {
+                    ko: `강체, 충돌체, 임펄스, 그리고 CCD(연속 충돌 감지) 기능을 결합한 종합 물리 볼링 예제입니다.`,
+                    en: `A comprehensive physics bowling example combining rigid bodies, colliders, impulses, and CCD (Continuous Collision Detection).`
+                },
+            },
+            {
+                name: 'GLTF Physics',
+                path: 'physics/gltfPhysics',
+                thumb: 'physics/gltfPhysics/thumb.png',
+                description: {
+                    ko: `로드된 GLTF 모델의 복잡한 계층 구조와 메쉬 데이터를 분석하여 자동으로 물리 충돌체를 생성하는 방법을 테스트합니다.`,
+                    en: `Tests how to automatically generate physics colliders by analyzing the complex hierarchy and mesh data of a loaded GLTF model.`
+                },
+            },
+            {
+                name: 'Impulse Explosion',
+                path: 'physics/explosion',
+                thumb: 'physics/explosion/thumb.png',
+                description: {
+                    ko: `클릭 지점을 중심으로 방사형 힘(Radial Force)을 가하여 주변의 수많은 물체를 날려버리는 폭발 효과를 구현합니다.`,
+                    en: `Implements an explosion effect that blows away numerous surrounding objects by applying radial force around the click point.`
+                },
+            },
+            {
+                name: 'Character Controller',
+                path: 'physics/characterController',
+                thumb: 'physics/characterController/thumb.png',
+                description: {
+                    ko: `키네마틱 캐릭터 컨트롤러를 사용하여 장애물 충돌, 경사로 오르기 등 실제 게임 캐릭터와 같은 부드러운 이동을 구현합니다.`,
+                    en: `Implements smooth movement like a real game character using a kinematic character controller, including obstacle collision and slope climbing.`
+                },
+            },
+            {
+                name: 'Revolute Joints & Motors',
+                path: 'physics/revoluteJoint',
+                thumb: 'physics/revoluteJoint/thumb.png',
+                description: {
+                    ko: `특정 축을 기준으로 회전하는 관절(Revolute Joint)과 모터 기능을 사용하여 풍차나 선풍기와 같은 회전 장치를 구현합니다.`,
+                    en: `Implements rotating devices like windmills or fans using revolute joints that rotate around a specific axis and motor functions.`
+                },
+            },
+        ]
+    }
 ]
 Object.freeze(ExampleList);
 export default ExampleList;

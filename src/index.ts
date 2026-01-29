@@ -37,4 +37,5 @@ export * as ToneMapping from "./toneMapping";
 export * as Shadow from "./shadow";
 export * from "./defineProperty"
 export * as Antialiasing from "./antialiasing"
+export * as Physics from "./physics"
 

@@ -1,6 +1,7 @@
 import ColorRGBA from "../../color/ColorRGBA";
 import LightManager from "../../light/LightManager";
 import ShadowManager from "../../shadow/ShadowManager";
+import { IPhysicsEngine } from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../mesh/core/Object3DContainer";
@@ -52,6 +53,11 @@ class Scene extends Object3DContainer {
      * [EN] Shadow manager
      */
     #shadowManager: ShadowManager = new ShadowManager()
+    /**
+     * [KO] 물리 엔진
+     * [EN] Physics engine
+     */
+    #physicsEngine: IPhysicsEngine
 
     /**
      * [KO] Scene 생성자
@@ -80,6 +86,23 @@ class Scene extends Object3DContainer {
      */
     get shadowManager(): ShadowManager {
         return this.#shadowManager;
+    }
+
+    /**
+     * [KO] 씬에 설정된 물리 엔진을 반환합니다.
+     * [EN] Returns the physics engine set for the scene.
+     */
+    get physicsEngine(): IPhysicsEngine {
+        return this.#physicsEngine;
+    }
+
+    /**
+     * [KO] 씬에 물리 엔진을 설정합니다.
+     * [EN] Sets the physics engine for the scene.
+     * @param value - [KO] 물리 엔진 플러그인 [EN] Physics engine plugin
+     */
+    set physicsEngine(value: IPhysicsEngine) {
+        this.#physicsEngine = value;
     }
 
     /**
