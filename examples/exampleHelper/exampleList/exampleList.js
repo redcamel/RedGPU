@@ -2538,6 +2538,24 @@ Check performance limits on each device.`
                     en: `Implements rotating devices like windmills or fans using revolute joints that rotate around a specific axis and motor functions.`
                 },
             },
+            {
+                name: 'Prismatic Joints & Sliders',
+                path: 'physics/prismaticJoint',
+                thumb: 'physics/prismaticJoint/thumb.png',
+                description: {
+                    ko: `직선 방향으로만 왕복 이동이 가능한 프리즈매틱 관절(Prismatic Joint)을 사용하여 승강기나 슬라이더 장치를 구현합니다.`,
+                    en: `Implements elevators or slider devices using prismatic joints that allow reciprocal movement only in a straight line.`
+                },
+            },
+            {
+                name: 'Spring Joints & Elasticity',
+                path: 'physics/springJoint',
+                thumb: 'physics/springJoint/thumb.png',
+                description: {
+                    ko: `물체 사이를 스프링으로 연결하여 탄성 효과를 구현합니다. 서스펜션 시스템이나 트램펄린과 같은 물리 거동을 테스트합니다.`,
+                    en: `Implements elastic effects by connecting objects with springs. Tests physical behaviors like suspension systems or trampolines.`
+                },
+            },
         ]
     }
 ]
