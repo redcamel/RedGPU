@@ -20,20 +20,6 @@ export const PHYSICS_SHAPE = {
 	 * [EN] Capsule-shaped collider
 	 */
 	CAPSULE: 'capsule',
-	/**
-	 * [KO] 원통 형태의 충돌체
-	 * [EN] Cylinder-shaped collider
-	 */
-	CYLINDER: 'cylinder',
-	/**
-	 * [KO] 평면 형태의 충돌체
-	 * [EN] Plane-shaped collider
-	 */
-	PLANE: 'plane',
-	/**
-	 * [KO] 메쉬의 지오메트리를 그대로 사용하는 복잡한 충돌체 (비용 높음)
-	 * [EN] Complex collider using the mesh geometry itself (high cost)
-	 */
 	MESH: 'mesh'
 } as const;
 

@@ -1,136 +1,99 @@
-import Mesh from '../display/mesh/Mesh';
-import { IPhysicsBody } from './IPhysicsBody';
-import { PhysicsShape } from './PhysicsShape';
-import { PhysicsBodyType } from './PhysicsBodyType';
+import Mesh from "../display/mesh/Mesh";
+import { IPhysicsBody } from "./IPhysicsBody";
+import { PhysicsBodyType } from "./PhysicsBodyType";
+import { PhysicsShape } from "./PhysicsShape";
 
-/**
- * [KO] 물리 바디 생성 시 사용하는 초기화 파라미터입니다.
- * [EN] Initialization parameters used when creating a physics body.
- *
- * @category Physics
- */
 export interface BodyParams {
-	/**
-	 * [KO] 바디의 타입 (PHYSICS_BODY_TYPE 참고)
-	 * [EN] Type of the body (See PHYSICS_BODY_TYPE)
-	 *
-	 * [KO] dynamic은 물리 법칙의 영향을 받고, static은 고정되어 있으며, kinematic은 코드로 직접 움직임을 제어합니다.
-	 * [EN] dynamic is affected by physics laws, static is fixed, and kinematic is controlled directly by code.
-	 */
-	type: PhysicsBodyType;
-	/**
-	 * [KO] 충돌체 형상
-	 * [EN] Shape of the collider
-	 */
+	type?: PhysicsBodyType;
 	shape?: PhysicsShape;
-	/**
-	 * [KO] 질량 (기본값: 1)
-	 * [EN] Mass (Default: 1)
-	 */
 	mass?: number;
-	/**
-	 * [KO] 마찰 계수
-	 * [EN] Friction coefficient
-	 */
 	friction?: number;
-	/**
-	 * [KO] 반발 계수 (탄성)
-	 * [EN] Restitution coefficient (bounciness)
-	 */
 	restitution?: number;
-	/**
-	 * [KO] 선형 감쇠 (공기 저항 등, 기본값: 0)
-	 * [EN] Linear damping (e.g. air resistance, Default: 0)
-	 */
 	linearDamping?: number;
-	/**
-	 * [KO] 회전 감쇠 (회전 저항 등, 기본값: 0)
-	 * [EN] Angular damping (e.g. rotation resistance, Default: 0)
-	 */
 	angularDamping?: number;
-	/**
-	 * [KO] 센서 여부 (충돌은 발생하지 않으나 이벤트만 감지)
-	 * [EN] Whether it is a sensor (no physical collision, only event detection)
-	 */
 	isSensor?: boolean;
-	/**
-	 * [KO] 연속 충돌 감지(CCD) 활성화 여부 (고속 물체 권장)
-	 * [EN] Whether to enable Continuous Collision Detection (CCD) (Recommended for fast objects)
-	 */
 	enableCCD?: boolean;
 }
 
 /**
- * [KO] 물리 엔진 플러그인이 구현해야 하는 핵심 인터페이스입니다.
- * [EN] Core interface that physics engine plugins must implement.
- *
- * [KO] RedGPU는 이 인터페이스를 통해 다양한 물리 엔진(예: Rapier)을 동일한 방식으로 사용할 수 있습니다.
- * [EN] RedGPU can use various physics engines (e.g., Rapier) in the same way through this interface.
+ * [KO] 물리 엔진 플러그인이 구현해야 할 인터페이스입니다.
+ * [EN] Interface to be implemented by physics engine plugins.
  *
  * @category Physics
  */
 export interface IPhysicsEngine {
 	/**
-	 * [KO] 물리 엔진의 원본 인스턴스 (Escape Hatch)
-	 * [EN] The native instance of the physics engine (Escape Hatch)
+	 * [KO] 물리 엔진의 원본 월드 인스턴스 (Escape Hatch)
+	 * [EN] The native world instance of the physics engine (Escape Hatch)
 	 */
-	nativeWorld: any;
+	readonly nativeWorld: any;
+	/**
+	 * [KO] 물리 엔진 라이브러리 네임스페이스 (Escape Hatch)
+	 * [EN] The physics engine library namespace (Escape Hatch)
+	 */
+	readonly RAPIER: any;
+	/**
+	 * [KO] 엔진에서 관리 중인 모든 물리 바디 리스트
+	 * [EN] List of all physics bodies managed by the engine
+	 */
+	readonly bodies: IPhysicsBody[];
+
+	/**
+	 * [KO] 물리 엔진에서 충돌이 시작될 때 호출되는 콜백입니다.
+	 * [EN] Callback called when a collision starts in the physics engine.
+	 * @param handle1 - [KO] 첫 번째 충돌체의 핸들 [EN] Handle of the first collider
+	 * @param handle2 - [KO] 두 번째 충돌체의 핸들 [EN] Handle of the second collider
+	 */
+	onCollisionStarted: (handle1: number, handle2: number) => void;
 
 	/**
 	 * [KO] 물리 엔진을 초기화합니다. (WASM 로딩 등)
-	 * [EN] Initializes the physics engine (e.g., loading WASM).
-	 *
-	 * * ### Example
-	 * ```typescript
-	 * await physicsEngine.init();
-	 * ```
-	 *
-	 * @returns
-	 * [KO] 초기화 완료 후 해결되는 Promise
-	 * [EN] A Promise that resolves after initialization is complete
+	 * [EN] Initializes the physics engine. (WASM loading, etc.)
 	 */
 	init(): Promise<void>;
 
 	/**
-	 * [KO] 물리 시뮬레이션을 한 단계 진행시킵니다.
-	 * [EN] Advances the physics simulation by one step.
-	 *
-	 * @param deltaTime -
-	 * [KO] 이전 프레임 이후 경과 시간 (초)
-	 * [EN] Elapsed time since the last frame (seconds)
+	 * [KO] 물리 시뮬레이션을 한 단계 진행합니다.
+	 * [EN] Steps the physics simulation.
+	 * @param deltaTime - [KO] 프레임 간 시간 간격 [EN] Time interval between frames
 	 */
 	step(deltaTime: number): void;
 
 	/**
-	 * [KO] 메쉬를 기반으로 물리 바디를 생성합니다.
-	 * [EN] Creates a physics body based on a mesh.
-	 *
-	 * * ### Example
-	 * ```typescript
-	 * const body = physicsEngine.createBody(mesh, { type: 'dynamic', shape: 'box' });
-	 * ```
-	 *
-	 * @param mesh -
-	 * [KO] 연결할 RedGPU 메쉬 객체
-	 * [EN] RedGPU mesh object to connect
-	 * @param params -
-	 * [KO] 물리 바디 설정 파라미터
-	 * [EN] Physics body configuration parameters
-	 * @returns
-	 * [KO] 생성된 물리 바디 객체
-	 * [EN] The created physics body object
+	 * [KO] 메쉬에 물리 바디를 생성하고 연결합니다.
+	 * [EN] Creates and attaches a physics body to a mesh.
+	 * @param mesh - [KO] 대상 메쉬 [EN] Target mesh
+	 * @param params - [KO] 바디 생성 파라미터 [EN] Body creation parameters
+	 * @returns [KO] 생성된 물리 바디 [EN] Created physics body
 	 */
 	createBody(mesh: Mesh, params: BodyParams): IPhysicsBody;
 
 	/**
-	 * [KO] 물리 바디를 월드에서 제거합니다.
-	 * [EN] Removes a physics body from the world.
-	 *
-	 * @param body -
-	 * [KO] 제거할 물리 바디
-	 * [EN] Physics body to remove
+	 * [KO] 물리 바디를 제거합니다.
+	 * [EN] Removes a physics body.
+	 * @param body - [KO] 제거할 바디 [EN] Body to remove
 	 */
 	removeBody(body: IPhysicsBody): void;
+
+	/**
+	 * [KO] 중력을 설정합니다.
+	 *
+	 * * ### Example
+	 * ```typescript
+	 * physicsEngine.setGravity(0, -9.81, 0);
+	 * ```
+	 *
+	 * @param x -
+	 * [KO] X축 중력
+	 * [EN] Gravity on X axis
+	 * @param y -
+	 * [KO] Y축 중력
+	 * [EN] Gravity on Y axis
+	 * @param z -
+	 * [KO] Z축 중력
+	 * [EN] Gravity on Z axis
+	 */
+	setGravity(x: number, y: number, z: number): void;
 
 	/**
 	 * [KO] 캐릭터 컨트롤러를 생성합니다.

@@ -2556,6 +2556,15 @@ Check performance limits on each device.`
                     en: `Implements elastic effects by connecting objects with springs. Tests physical behaviors like suspension systems or trampolines.`
                 },
             },
+            {
+                name: 'Collision Filtering',
+                path: 'physics/collisionFiltering',
+                thumb: 'physics/collisionFiltering/thumb.png',
+                description: {
+                    ko: `Bitmask 기반의 충돌 그룹 설정을 통해 특정 객체들끼리만 선택적으로 충돌하도록 제어하는 고급 물리 기술을 구현합니다.`,
+                    en: `Implements advanced physics techniques to selectively control collisions between specific objects through Bitmask-based collision group settings.`
+                },
+            },
         ]
     }
 ]

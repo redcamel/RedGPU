@@ -1,63 +1,49 @@
-import * as RAPIER from '@dimforge/rapier3d-compat';
-import { mat4, quat, vec3 } from 'gl-matrix';
+import RAPIER from '@dimforge/rapier3d-compat';
+import { quat, vec3 } from 'gl-matrix';
 import Mesh from '../../../display/mesh/Mesh';
 import { BodyParams, IPhysicsEngine } from '../../../physics/IPhysicsEngine';
-import { PHYSICS_SHAPE, PhysicsShape } from '../../../physics/PhysicsShape';
 import { PHYSICS_BODY_TYPE } from '../../../physics/PhysicsBodyType';
+import { PHYSICS_SHAPE } from '../../../physics/PhysicsShape';
 import { RapierBody } from './RapierBody';
 
 /**
- * [KO] Rapier(WASM)를 사용하는 물리 엔진 플러그인 구현체입니다.
- * [EN] Physics engine plugin implementation using Rapier (WASM).
+ * [KO] Rapier 물리 엔진을 사용하는 RedGPU 물리 플러그인입니다.
+ * [EN] RedGPU physics plugin using the Rapier physics engine.
  *
  * @category Physics
  */
 export class RedRapierPhysics implements IPhysicsEngine {
 	#world: RAPIER.World;
-	#bodies: Map<any, RapierBody> = new Map();
+	#bodies: Map<number, RapierBody> = new Map();
 	#eventQueue: RAPIER.EventQueue;
-	#onCollisionStarted: (handle1: number, handle2: number) => void;
-
-	get RAPIER(): any { return RAPIER; }
-
-	set onCollisionStarted(callback: (handle1: number, handle2: number) => void) {
-		this.#onCollisionStarted = callback;
-	}
-
-	get nativeWorld(): RAPIER.World { return this.#world; }
 
 	/**
-	 * [KO] 현재 관리 중인 모든 물리 바디들의 리스트를 반환합니다.
-	 * [EN] Returns a list of all physics bodies currently being managed.
+	 * [KO] 충돌 시작 콜백
+	 * [EN] Collision started callback
 	 */
-	get bodies(): RapierBody[] {
-		return Array.from(this.#bodies.values());
-	}
+	onCollisionStarted: (handle1: number, handle2: number) => void;
+
+	get nativeWorld(): RAPIER.World { return this.#world; }
+	get RAPIER(): typeof RAPIER { return RAPIER; }
+	get bodies(): RapierBody[] { return Array.from(this.#bodies.values()); }
 
 	async init(): Promise<void> {
 		await RAPIER.init();
-		const gravity = { x: 0.0, y: -9.81, z: 0.0 };
-		this.#world = new RAPIER.World(gravity);
+		this.#world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
 		this.#eventQueue = new RAPIER.EventQueue(true);
 	}
 
 	step(deltaTime: number): void {
-		if (this.#world) {
-			this.#world.timestep = deltaTime;
-			this.#world.step(this.#eventQueue);
+		if (!this.#world) return;
+		this.#world.step(this.#eventQueue);
 
-			if (this.#onCollisionStarted) {
-				this.#eventQueue.drainCollisionEvents((h1, h2, started) => {
-					if (started) this.#onCollisionStarted(h1, h2);
-				});
-			}
+		// 충돌 이벤트 처리
+		this.#eventQueue.drainCollisionEvents((h1, h2, started) => {
+			if (started && this.onCollisionStarted) this.onCollisionStarted(h1, h2);
+		});
 
-			for (const body of this.#bodies.values()) {
-				if (!body.nativeBody.isFixed()) {
-					body.syncToMesh();
-				}
-			}
-		}
+		// 물리 바디 -> 메쉬 동기화
+		this.#bodies.forEach(body => body.syncToMesh());
 	}
 
 	createBody(mesh: Mesh, params: BodyParams): RapierBody {
@@ -65,15 +51,15 @@ export class RedRapierPhysics implements IPhysicsEngine {
 		const rigidBody = this.#world.createRigidBody(rigidBodyDesc);
 
 		const colliders: RAPIER.Collider[] = [];
-		this.#createCollidersRecursively(mesh, rigidBody, params, colliders);
+		// [KO] 메쉬 본체 및 모든 자식 메쉬를 순회하며 콜라이더 생성 (복합 형상 지원)
+		// [EN] Create colliders by traversing the mesh and all its children (Supports compound shapes)
+		this.#createCollidersRecursively(mesh, rigidBody, params, colliders, mesh);
 
-		if (params.linearDamping !== undefined) rigidBody.setLinearDamping(params.linearDamping);
-		if (params.angularDamping !== undefined) rigidBody.setAngularDamping(params.angularDamping);
-		if (params.enableCCD !== undefined) rigidBody.enableCcd(params.enableCCD);
-
-		const body = new RapierBody(mesh, rigidBody, colliders[0] || null);
+		const body = new RapierBody(mesh, rigidBody, colliders[0]);
 		this.#bodies.set(rigidBody.handle, body);
 
+		// 초기 동기화
+		body.syncToMesh();
 		return body;
 	}
 
@@ -82,19 +68,15 @@ export class RedRapierPhysics implements IPhysicsEngine {
 		rigidBody: RAPIER.RigidBody,
 		params: BodyParams,
 		outColliders: RAPIER.Collider[],
-		currentMesh: Mesh = rootMesh,
-		accumRelPos: vec3 = vec3.fromValues(0, 0, 0),
-		accumRelQuat: quat = quat.fromValues(0, 0, 0, 1),
-		accumRelScale: vec3 = vec3.fromValues(1, 1, 1)
+		currentMesh: Mesh,
+		accumRelPos = vec3.create(),
+		accumRelQuat = quat.create(),
+		accumRelScale = vec3.fromValues(1, 1, 1)
 	) {
 		const localPos = vec3.fromValues(currentMesh.x || 0, currentMesh.y || 0, currentMesh.z || 0);
 		const localQuat = quat.create();
 		quat.fromEuler(localQuat, currentMesh.rotationX || 0, currentMesh.rotationY || 0, currentMesh.rotationZ || 0);
-		const localScale = vec3.fromValues(
-			currentMesh.scaleX !== undefined ? currentMesh.scaleX : 1,
-			currentMesh.scaleY !== undefined ? currentMesh.scaleY : 1,
-			currentMesh.scaleZ !== undefined ? currentMesh.scaleZ : 1
-		);
+		const localScale = vec3.fromValues(currentMesh.scaleX || 1, currentMesh.scaleY || 1, currentMesh.scaleZ || 1);
 
 		let currentRelPos = vec3.create();
 		let currentRelQuat = quat.create();
@@ -228,7 +210,6 @@ export class RedRapierPhysics implements IPhysicsEngine {
 		switch (shapeType) {
 			case PHYSICS_SHAPE.SPHERE: desc = RAPIER.ColliderDesc.ball(Math.max(hx, hy, hz)); break;
 			case PHYSICS_SHAPE.CAPSULE: desc = RAPIER.ColliderDesc.capsule(hy, Math.max(hx, hz)); break;
-			case PHYSICS_SHAPE.CYLINDER: desc = RAPIER.ColliderDesc.cylinder(hy, Math.max(hx, hz)); break;
 			case PHYSICS_SHAPE.BOX:
 			default: desc = RAPIER.ColliderDesc.cuboid(hx, hy, hz); break;
 		}
