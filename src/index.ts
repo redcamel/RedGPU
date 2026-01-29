@@ -20,8 +20,7 @@ export * as Context from "./context";
 export * as Color from "./color";
 export * from "./geometry";
 export * as Util from "./utils";
-// export * as glMatrix from "gl-matrix"
-export {mat4, mat3} from "gl-matrix"
+export {mat4, mat3, quat, vec2, vec3, vec4} from "gl-matrix"
 export * as Display from "./display";
 export * as Light from "./light";
 export * as Primitive from "./primitive";

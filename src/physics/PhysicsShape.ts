@@ -20,6 +20,11 @@ export const PHYSICS_SHAPE = {
 	 * [EN] Capsule-shaped collider
 	 */
 	CAPSULE: 'capsule',
+	/**
+	 * [KO] 원기둥 형태의 충돌체
+	 * [EN] Cylinder-shaped collider
+	 */
+	CYLINDER: 'cylinder',
 	MESH: 'mesh'
 } as const;
 

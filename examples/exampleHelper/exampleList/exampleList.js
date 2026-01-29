@@ -2565,6 +2565,60 @@ Check performance limits on each device.`
                     en: `Implements advanced physics techniques to selectively control collisions between specific objects through Bitmask-based collision group settings.`
                 },
             },
+            {
+                name: 'Surface Velocity (Conveyor)',
+                path: 'physics/surfaceVelocity',
+                thumb: 'physics/surfaceVelocity/thumb.png',
+                description: {
+                    ko: `컨베이어 벨트와 같이 표면이 움직이는 물체를 시뮬레이션합니다. 물체가 닿았을 때 특정 방향으로 힘을 가하여 이동시킵니다.`,
+                    en: `Simulates objects with moving surfaces like conveyor belts. Applies force to move objects in a specific direction when they make contact.`
+                },
+            },
+            {
+                name: 'Buoyancy Basics',
+                path: 'physics/buoyancy',
+                thumb: 'physics/buoyancy/thumb.png',
+                description: {
+                    ko: `물속에서 물체가 떠오르는 부력과 유체 저항을 시뮬레이션합니다. 잠긴 깊이에 따라 상향 힘을 조절합니다.`,
+                    en: `Simulates buoyancy and fluid resistance for objects in water. Adjusts upward force based on submerged depth.`
+                },
+            },
+            {
+                name: 'Ragdoll System',
+                path: 'physics/ragdoll',
+                thumb: 'physics/ragdoll/thumb.png',
+                description: {
+                    ko: `인간형 캐릭터의 뼈대를 관절(Joint)로 연결하여, 중력에 의해 자연스럽게 쓰러지는 래그돌 물리 효과를 시뮬레이션합니다.`,
+                    en: `Simulates ragdoll physics where a humanoid skeleton is connected with joints and falls naturally under gravity.`
+                },
+            },
+            {
+                name: 'Advanced Character Controller',
+                path: 'physics/advancedCharacterController',
+                thumb: 'physics/advancedCharacterController/thumb.png',
+                description: {
+                    ko: `관성 이동, 공중 제어, 이중 점프 등 게임적인 조작감이 가미된 고급 캐릭터 컨트롤러를 구현합니다.`,
+                    en: `Implements an advanced character controller with game-like controls such as inertial movement, air control, and double jumping.`
+                },
+            },
+            {
+                name: 'Snapshot & Serialization',
+                path: 'physics/snapshot',
+                thumb: 'physics/snapshot/thumb.png',
+                description: {
+                    ko: `물리 월드 전체 상태를 바이너리 데이터로 저장하고 복구하는 기능을 시연합니다. 시간 되감기나 세이브 시스템 구현에 필수적입니다.`,
+                    en: `Demonstrates saving and restoring the entire physics world state as binary data. Essential for time rewind or save systems.`
+                },
+            },
+            {
+                name: 'Ultimate Stress Test',
+                path: 'physics/stressTest',
+                thumb: 'physics/stressTest/thumb.png',
+                description: {
+                    ko: `수천 개의 물리 객체를 동시에 시뮬레이션하여 엔진의 한계 성능을 테스트합니다. 휴면(Sleep) 모드 활성화를 통한 최적화 효과를 확인합니다.`,
+                    en: `Tests the engine's performance limits by simulating thousands of physics objects simultaneously. Demonstrates optimization through Sleep mode.`
+                },
+            },
         ]
     }
 ]

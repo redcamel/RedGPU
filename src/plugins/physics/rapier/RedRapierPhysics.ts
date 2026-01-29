@@ -209,7 +209,13 @@ export class RedRapierPhysics implements IPhysicsEngine {
 		let desc: RAPIER.ColliderDesc;
 		switch (shapeType) {
 			case PHYSICS_SHAPE.SPHERE: desc = RAPIER.ColliderDesc.ball(Math.max(hx, hy, hz)); break;
-			case PHYSICS_SHAPE.CAPSULE: desc = RAPIER.ColliderDesc.capsule(hy, Math.max(hx, hz)); break;
+			case PHYSICS_SHAPE.CAPSULE: {
+				const radius = Math.max(hx, hz);
+				const halfHeight = Math.max(0, hy - radius);
+				desc = RAPIER.ColliderDesc.capsule(halfHeight, radius);
+				break;
+			}
+			case PHYSICS_SHAPE.CYLINDER: desc = RAPIER.ColliderDesc.cylinder(hy, Math.max(hx, hz)); break;
 			case PHYSICS_SHAPE.BOX:
 			default: desc = RAPIER.ColliderDesc.cuboid(hx, hy, hz); break;
 		}
