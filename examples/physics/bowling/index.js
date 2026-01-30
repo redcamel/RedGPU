@@ -24,14 +24,12 @@ RedGPU.init(
 		physicsEngine.setGravity(0, -9.81, 0);
 		scene.physicsEngine = physicsEngine;
 
-		// 조명 설정
 		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.4;
+		ambientLight.intensity = 0.5;
 		scene.lightManager.ambientLight = ambientLight;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.x = 20; directionalLight.y = 40; directionalLight.z = 20;
-		directionalLight.intensity = 1.5;
+		directionalLight.intensity = 1;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 레인 생성

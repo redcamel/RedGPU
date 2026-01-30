@@ -26,8 +26,7 @@ RedGPU.init(
 		scene.lightManager.ambientLight = ambientLight;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.x = 20; directionalLight.y = 40; directionalLight.z = 20;
-		directionalLight.intensity = 1.2;
+		directionalLight.intensity = 1;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		const createBlock = (x, y, z, sx, sy, sz, color = '#444444') => {

@@ -26,14 +26,12 @@ RedGPU.init(
 		// [KO] 디버깅을 위해 JointData 키 목록 출력
 		console.log('RAPIER.JointData keys:', Object.keys(RAPIER.JointData));
 
-		// 조명 설정
 		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.4;
+		ambientLight.intensity = 0.5;
 		scene.lightManager.ambientLight = ambientLight;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.x = 30; directionalLight.y = 50; directionalLight.z = 20;
-		directionalLight.intensity = 1.5;
+		directionalLight.intensity = 1;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 1. 천장 앵커 포인트
