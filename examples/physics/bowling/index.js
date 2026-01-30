@@ -7,24 +7,24 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
-		// [KO] 카메라 설정: 현실적인 스케일에 맞춰 거리 단축
-		// [EN] Camera setup: Shorten distance for realistic scale
+		// [KO] 카메라 설정: 실제 규격 레인을 한눈에 볼 수 있도록 조정
+		// [EN] Camera setup: Adjusted to see the real specification lane at a glance
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 15;
+		controller.distance = 25;
 		controller.tilt = -25;
 		controller.pan = 0;
-		controller.centerZ = -5;
+		controller.centerZ = -10;
 
 		const scene = new RedGPU.Display.Scene();
 
-		// [KO] 3D 뷰 생성 및 설정
-		// [EN] Create and configure 3D view
+		// [KO] 3D 뷰 설정: 그리드 활성화 (미터 단위 확인용)
+		// [EN] 3D view setup: Enable grid (for verifying meter units)
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
 		redGPUContext.addView(view);
 
-		// [KO] 물리 엔진(Rapier) 초기화: 기본 중력(-9.81) 사용
-		// [EN] Initialize physics engine (Rapier): Using default gravity (-9.81)
+		// [KO] 물리 엔진 초기화: 기본 중력(-9.81) 사용
+		// [EN] Initialize physics engine: Using default gravity (-9.81)
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
@@ -38,46 +38,57 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		// [KO] 레인 생성 (현실적인 볼링 레인 길이 약 18m)
-		// [EN] Create lane (Realistic bowling lane length approx. 18m)
+		// [KO] 바닥 메시 생성
+		const floorMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Ground(redGPUContext, 60, 60),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		floorMesh.material.color.setColorByHEX('#666666');
+		floorMesh.y = -0.1;
+		scene.addChild(floorMesh);
+
+		// [KO] 볼링 레인 생성 (실제 규격: 너비 1.05m, 길이 약 22m)
+		// [EN] Create bowling lane (Real Specs: Width 1.05m, Length approx. 22m)
 		const laneMat = new RedGPU.Material.PhongMaterial(redGPUContext);
-		laneMat.color.setColorByHEX('#444444');
-		laneMat.shininess = 64;
+		laneMat.color.setColorByHEX('#886644');
+		laneMat.shininess = 128;
 
 		const laneMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
-			new RedGPU.Primitive.Ground(redGPUContext, 1.5, 25),
+			new RedGPU.Primitive.Ground(redGPUContext, 1.05, 22),
 			laneMat
 		);
-		laneMesh.z = -8;
+		laneMesh.z = -9; // 파울 라인부터 핀 뒤쪽 공간까지 커버
 		scene.addChild(laneMesh);
 		physicsEngine.createBody(laneMesh, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
 			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
-			friction: 0.05
+			friction: 0.02,
+			restitution: 0.1
 		});
 
 		const activePins = [];
 		const activeBalls = [];
 
-		// [KO] 핀 지오메트리 (높이 약 38cm)
-		// [EN] Pin geometry (height approx. 38cm)
-		const pinGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.06, 0.08, 0.38);
+		// [KO] 실제 핀 규격 (지름 12.1cm, 높이 38.1cm)
+		// [EN] Real pin specs (Diameter 12.1cm, Height 38.1cm)
+		const pinGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.06, 0.06, 0.38);
 		const pinMat = new RedGPU.Material.PhongMaterial(redGPUContext);
 		pinMat.color.setColorByHEX('#ffffff');
 
 		/**
-		 * [KO] 볼링 핀 스폰 함수
-		 * [EN] Function to spawn bowling pins
+		 * [KO] 볼링 핀 스폰 (실제 규격: 파울 라인으로부터 18.288m 지점에 1번 핀 배치)
+		 * [EN] Spawn pins (Real Specs: Place Pin #1 at 18.288m from the foul line)
 		 */
 		const spawnPins = () => {
 			const rows = 4;
-			const spacingX = 0.3;
-			const spacingZ = 0.3;
-			const offsetZ = -15;
+			const spacingX = 0.3048; // 12인치 간격
+			const spacingZ = 0.264;  // 정삼각형 배치를 위한 Z 간격
+			const headPinZ = -18.288; // [KO] 실제 규격 거리 [EN] Real specification distance
 
 			for (let row = 0; row < rows; row++) {
-				const z = offsetZ - row * spacingZ;
+				const z = headPinZ - row * spacingZ;
 				const cols = row + 1;
 				const startX = -(cols - 1) * spacingX / 2;
 
@@ -89,24 +100,22 @@ RedGPU.init(
 						pinMat
 					);
 					pinMesh.x = x;
-					pinMesh.y = 0.2;
+					pinMesh.y = 0.19;
 					pinMesh.z = z;
 					scene.addChild(pinMesh);
+					
 					const body = physicsEngine.createBody(pinMesh, {
 						type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 						shape: RedGPU.Physics.PHYSICS_SHAPE.CYLINDER,
 						mass: 1.5,
-						friction: 0.1
+						friction: 0.1,
+						restitution: 0.5
 					});
 					activePins.push({ mesh: pinMesh, body });
 				}
 			}
 		};
 
-		/**
-		 * [KO] 게임 리셋 함수
-		 * [EN] Game reset function
-		 */
 		const resetGame = () => {
 			activePins.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -124,31 +133,33 @@ RedGPU.init(
 		spawnPins();
 
 		/**
-		 * [KO] 볼링공 투구 함수 (현실적인 공 크기 약 22cm)
-		 * [EN] Function to throw a bowling ball (Realistic ball size approx. 22cm)
+		 * [KO] 볼링공 투구 (실제 규격: 지름 21.8cm, 무게 약 7kg)
+		 * [EN] Throwing bowling ball (Real Specs: Diameter 21.8cm, Weight approx. 7kg)
 		 */
-		const throwBall = (power) => {
+		const throwBall = (power, aim) => {
 			const ballMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
-				new RedGPU.Primitive.Sphere(redGPUContext, 0.11),
+				new RedGPU.Primitive.Sphere(redGPUContext, 0.109), // 반경 10.9cm
 				new RedGPU.Material.PhongMaterial(redGPUContext)
 			);
 			ballMesh.material.color.setColorByHEX('#ff4444');
-			ballMesh.y = 0.11;
-			ballMesh.z = 2;
+			ballMesh.x = aim * 0.3;
+			ballMesh.y = 0.109;
+			ballMesh.z = 1; // 파울 라인 근처에서 투구
 			scene.addChild(ballMesh);
 
 			const ballBody = physicsEngine.createBody(ballMesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
-				mass: 7, // 약 15파운드 질량
+				mass: 7, 
 				restitution: 0.1,
-				friction: 0.5,
+				friction: 0.05,
 				enableCCD: true 
 			});
 
+			const spread = (Math.random() * 0.1) - 0.05;
 			ballBody.applyImpulse({
-				x: (Math.random() * 0.5) - 0.25,
+				x: (aim * 2) + spread,
 				y: 0,
 				z: -power
 			});
@@ -165,10 +176,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- */
 const renderTestPane = async (redGPUContext, throwBall, resetGame) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
@@ -176,13 +183,13 @@ const renderTestPane = async (redGPUContext, throwBall, resetGame) => {
 	const pane = new Pane();
 
 	const params = {
-		power: 150
+		power: 180, // [KO] 늘어난 거리에 맞춰 기본 파워 상향 [EN] Increased default power for the longer distance
+		aim: 0.0
 	};
 
-	pane.addBinding(params, 'power', {
-		min: 50,
-		max: 500
-	});
-	pane.addButton({ title: 'THROW BALL!' }).on('click', () => throwBall(params.power));
+	pane.addBinding(params, 'power', { min: 100, max: 500 });
+	pane.addBinding(params, 'aim', { min: -1.0, max: 1.0 });
+	
+	pane.addButton({ title: 'THROW BALL!' }).on('click', () => throwBall(params.power, params.aim));
 	pane.addButton({ title: 'Reset Game' }).on('click', () => resetGame());
 };
