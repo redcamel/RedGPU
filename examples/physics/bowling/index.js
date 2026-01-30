@@ -16,7 +16,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -35,10 +36,18 @@ RedGPU.init(
 		laneMat.color.setColorByHEX('#666666');
 		laneMat.shininess = 64;
 
-		const laneMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext, 15, 100), laneMat);
+		const laneMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Ground(redGPUContext, 15, 100),
+			laneMat
+		);
 		laneMesh.z = -30;
 		scene.addChild(laneMesh);
-		physicsEngine.createBody(laneMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX, friction: 0.05 });
+		physicsEngine.createBody(laneMesh, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
+			friction: 0.05
+		});
 
 		const activePins = [];
 		const activeBalls = [];
@@ -60,8 +69,14 @@ RedGPU.init(
 
 				for (let col = 0; col < cols; col++) {
 					const x = startX + col * spacingX;
-					const pinMesh = new RedGPU.Display.Mesh(redGPUContext, pinGeo, pinMat);
-					pinMesh.x = x; pinMesh.y = 1.25; pinMesh.z = z;
+					const pinMesh = new RedGPU.Display.Mesh(
+						redGPUContext,
+						pinGeo,
+						pinMat
+					);
+					pinMesh.x = x;
+					pinMesh.y = 1.25;
+					pinMesh.z = z;
 					scene.addChild(pinMesh);
 					const body = physicsEngine.createBody(pinMesh, {
 						type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,

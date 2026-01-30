@@ -14,7 +14,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -31,24 +32,53 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 1. 바닥
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		ground.y = -1; ground.scaleX = 100; ground.scaleY = 2; ground.scaleZ = 100;
+		const ground = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		ground.y = -1;
+		ground.scaleX = 100;
+		ground.scaleY = 2;
+		ground.scaleZ = 100;
 		ground.material.color.setColorByHEX('#444444');
 		scene.addChild(ground);
-		physicsEngine.createBody(ground, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+		physicsEngine.createBody(ground, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
 
 		// 2. 가이드 레일 (정확히 x: -10 위치에 수직으로 배치)
-		const rail = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		rail.x = -10; rail.y = 15; rail.z = 0;
-		rail.scaleX = 2; rail.scaleY = 30; rail.scaleZ = 2;
+		const rail = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		rail.x = -10;
+		rail.y = 15;
+		rail.z = 0;
+		rail.scaleX = 2;
+		rail.scaleY = 30;
+		rail.scaleZ = 2;
 		rail.material.color.setColorByHEX('#666666');
 		scene.addChild(rail);
-		const railBody = physicsEngine.createBody(rail, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+		const railBody = physicsEngine.createBody(rail, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
 
 		// 3. 승강기 플랫폼 (정확히 원점에서 시작)
-		const platform = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		platform.x = 0; platform.y = 5; platform.z = 0;
-		platform.scaleX = 15; platform.scaleY = 1; platform.scaleZ = 15;
+		const platform = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		platform.x = 0;
+		platform.y = 5;
+		platform.z = 0;
+		platform.scaleX = 15;
+		platform.scaleY = 1;
+		platform.scaleZ = 15;
 		platform.material.color.setColorByHEX('#00ccff');
 		scene.addChild(platform);
 
@@ -76,14 +106,22 @@ RedGPU.init(
 		// 4. 낙하 박스
 		const activeBoxes = [];
 		const createBox = () => {
-			const box = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+			const box = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
 			box.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 			box.x = (Math.random() * 10) - 5;
 			box.y = 35;
 			box.z = (Math.random() * 10) - 5;
 			scene.addChild(box);
 
-			const body = physicsEngine.createBody(box, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX, mass: 2 });
+			const body = physicsEngine.createBody(box, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
+				mass: 2
+			});
 			activeBoxes.push({ mesh: box, body });
 			
 			setTimeout(() => {

@@ -13,7 +13,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = false; view.grid = true;
+		view.axis = false;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -27,8 +28,14 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		ground.scaleX = 60; ground.scaleY = 1; ground.scaleZ = 60;
+		const ground = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		ground.scaleX = 60;
+		ground.scaleY = 1;
+		ground.scaleZ = 60;
 		ground.y = -0.5;
 		ground.material.color.setColorByHEX('#222222');
 		scene.addChild(ground);
@@ -39,13 +46,19 @@ RedGPU.init(
 		const boxMat = new RedGPU.Material.PhongMaterial(redGPUContext);
 
 		const createBox = () => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, boxGeo, boxMat);
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				boxGeo,
+				boxMat
+			);
 			mesh.x = (Math.random() * 20) - 10;
 			mesh.y = 20 + (Math.random() * 10);
 			mesh.z = (Math.random() * 20) - 10;
 			mesh.rotationX = Math.random() * 360;
 			mesh.rotationY = Math.random() * 360;
-			mesh.scaleX = mesh.scaleY = mesh.scaleZ = 0.8;
+			mesh.scaleX = 0.8;
+			mesh.scaleY = 0.8;
+			mesh.scaleZ = 0.8;
 			scene.addChild(mesh);
 
 			const body = physicsEngine.createBody(mesh, {

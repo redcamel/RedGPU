@@ -14,7 +14,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -29,16 +30,26 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 바닥 생성
-		const groundMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext, 20, 20), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const groundMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
 
 		const activeDumbbells = [];
 		const createDumbbell = (x, y, z) => {
-			const dumbbellGroup = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Cylinder(redGPUContext, 0.2, 0.2, 4), new RedGPU.Material.PhongMaterial(redGPUContext));
+			const dumbbellGroup = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Cylinder(redGPUContext, 0.2, 0.2, 4),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
 			dumbbellGroup.material.color.setColorByHEX('#aaaaaa');
-			dumbbellGroup.x = x; dumbbellGroup.y = y; dumbbellGroup.z = z;
+			dumbbellGroup.x = x;
+			dumbbellGroup.y = y;
+			dumbbellGroup.z = z;
 			dumbbellGroup.rotationZ = 90;
 			scene.addChild(dumbbellGroup);
 
@@ -46,10 +57,21 @@ RedGPU.init(
 			const weightMat = new RedGPU.Material.PhongMaterial(redGPUContext);
 			weightMat.color.setColorByHEX('#ff4444');
 
-			const leftWeight = new RedGPU.Display.Mesh(redGPUContext, weightGeo, weightMat);
-			leftWeight.y = 2; dumbbellGroup.addChild(leftWeight);
-			const rightWeight = new RedGPU.Display.Mesh(redGPUContext, weightGeo, weightMat);
-			rightWeight.y = -2; dumbbellGroup.addChild(rightWeight);
+			const leftWeight = new RedGPU.Display.Mesh(
+				redGPUContext,
+				weightGeo,
+				weightMat
+			);
+			leftWeight.y = 2;
+			dumbbellGroup.addChild(leftWeight);
+
+			const rightWeight = new RedGPU.Display.Mesh(
+				redGPUContext,
+				weightGeo,
+				weightMat
+			);
+			rightWeight.y = -2;
+			dumbbellGroup.addChild(rightWeight);
 
 			const body = physicsEngine.createBody(dumbbellGroup, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, mass: 5, restitution: 0.5 });
 			activeDumbbells.push({ mesh: dumbbellGroup, body });

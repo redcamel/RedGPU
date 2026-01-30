@@ -15,7 +15,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -35,12 +36,19 @@ RedGPU.init(
 		const chainCollisionFilter = (CHAIN_GROUP << 16) | (~CHAIN_GROUP & 0xFFFF);
 
 		// 1. 고정 앵커
-		const anchorMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const anchorMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		anchorMesh.material.color.setColorByHEX('#ff4444');
 		anchorMesh.y = 15;
 		scene.addChild(anchorMesh);
 
-		const anchorBody = physicsEngine.createBody(anchorMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+		const anchorBody = physicsEngine.createBody(anchorMesh, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
 		anchorBody.nativeCollider.setCollisionGroups(chainCollisionFilter);
 
 		const activeChain = [];
@@ -63,13 +71,21 @@ RedGPU.init(
 			const spacing = 1.2;
 
 			for (let i = 0; i < numLinks; i++) {
-				const linkMesh = new RedGPU.Display.Mesh(redGPUContext, linkGeo, linkMat);
-				linkMesh.y = 15 - (i + 1) * spacing; linkMesh.x = (i + 1) * 0.2; 
+				const linkMesh = new RedGPU.Display.Mesh(
+					redGPUContext,
+					linkGeo,
+					linkMat
+				);
+				linkMesh.y = 15 - (i + 1) * spacing;
+				linkMesh.x = (i + 1) * 0.2; 
 				scene.addChild(linkMesh);
 
 				const currentBody = physicsEngine.createBody(linkMesh, {
-					type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
-					mass: 0.5, linearDamping: 0.5, angularDamping: 0.5
+					type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+					shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
+					mass: 0.5,
+					linearDamping: 0.5,
+					angularDamping: 0.5
 				});
 				currentBody.nativeCollider.setCollisionGroups(chainCollisionFilter);
 
@@ -80,14 +96,22 @@ RedGPU.init(
 				prevBody = currentBody;
 			}
 
-			const bigBallMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext, 2), new RedGPU.Material.PhongMaterial(redGPUContext));
-			bigBallMesh.material.color.setColorByHEX('#4444ff');
-			bigBallMesh.y = 15 - (numLinks + 1) * spacing - 1; bigBallMesh.x = (numLinks + 1) * 0.2;
+			const bigBallMesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Sphere(redGPUContext, 2),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
+			bigBallMesh.material.color.setColorByHEX('#44444ff');
+			bigBallMesh.y = 15 - (numLinks + 1) * spacing - 1;
+			bigBallMesh.x = (numLinks + 1) * 0.2;
 			scene.addChild(bigBallMesh);
 
 			const bigBallBody = physicsEngine.createBody(bigBallMesh, {
-				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
-				mass: 5, linearDamping: 0.2, angularDamping: 0.2
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
+				mass: 5,
+				linearDamping: 0.2,
+				angularDamping: 0.2
 			});
 			bigBallBody.nativeCollider.setCollisionGroups(chainCollisionFilter);
 

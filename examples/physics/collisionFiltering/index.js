@@ -14,7 +14,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -38,9 +39,16 @@ RedGPU.init(
 
 		// 1. 바닥 생성 함수
 		const createFloor = (x, color, membership) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-			mesh.x = x; mesh.y = -1;
-			mesh.scaleX = 15; mesh.scaleY = 2; mesh.scaleZ = 40;
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
+			mesh.x = x;
+			mesh.y = -1;
+			mesh.scaleX = 15;
+			mesh.scaleY = 2;
+			mesh.scaleZ = 40;
 			mesh.material.color.setColorByHEX(color);
 			scene.addChild(mesh);
 			const body = physicsEngine.createBody(mesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
@@ -62,7 +70,11 @@ RedGPU.init(
 		const ballGeo = new RedGPU.Primitive.Sphere(redGPUContext, 1.0);
 
 		const spawnBall = (type) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, ballGeo, new RedGPU.Material.PhongMaterial(redGPUContext));
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				ballGeo,
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
 			mesh.y = 35;
 			// [KO] 모든 구슬이 전체 영역(-25 ~ 25) 내에서 랜덤하게 낙하
 			// [EN] All balls fall randomly within the entire range (-25 to 25)

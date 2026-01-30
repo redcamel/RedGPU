@@ -14,7 +14,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = false; view.grid = false;
+		view.axis = false;
+		view.grid = false;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -29,7 +30,11 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		const waterLevel = 0;
-		const waterMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext, 100, 100), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const waterMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Plane(redGPUContext, 100, 100),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		waterMesh.rotationX = -90;
 		waterMesh.y = waterLevel;
 		waterMesh.material.color.setColorByHEX('#00aaff');
@@ -37,11 +42,21 @@ RedGPU.init(
 		waterMesh.material.transparent = true;
 		scene.addChild(waterMesh);
 
-		const floor = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		floor.y = -20; floor.scaleX = 100; floor.scaleY = 1; floor.scaleZ = 100;
+		const floor = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		floor.y = -20;
+		floor.scaleX = 100;
+		floor.scaleY = 1;
+		floor.scaleZ = 100;
 		floor.material.color.setColorByHEX('#222222');
 		scene.addChild(floor);
-		physicsEngine.createBody(floor, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSIGHT_SHAPE?.BOX || 'box' });
+		physicsEngine.createBody(floor, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSIGHT_SHAPE?.BOX || 'box'
+		});
 
 		const activeObjects = [];
 		const createObject = () => {
@@ -52,7 +67,11 @@ RedGPU.init(
 				isBall ? new RedGPU.Primitive.Sphere(redGPUContext, size / 2) : new RedGPU.Primitive.Box(redGPUContext), 
 				new RedGPU.Material.PhongMaterial(redGPUContext)
 			);
-			if (!isBall) mesh.scaleX = mesh.scaleY = mesh.scaleZ = size;
+			if (!isBall) {
+				mesh.scaleX = size;
+				mesh.scaleY = size;
+				mesh.scaleZ = size;
+			}
 			
 			mesh.x = (Math.random() * 20) - 10;
 			mesh.y = 15 + (Math.random() * 10);

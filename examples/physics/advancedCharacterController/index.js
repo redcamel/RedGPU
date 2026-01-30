@@ -13,7 +13,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = false; view.grid = true;
+		view.axis = false;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -28,12 +29,23 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		const createBlock = (x, y, z, sx, sy, sz, color = '#444444') => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-			mesh.x = x; mesh.y = y; mesh.z = z;
-			mesh.scaleX = sx; mesh.scaleY = sy; mesh.scaleZ = sz;
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
+			mesh.x = x;
+			mesh.y = y;
+			mesh.z = z;
+			mesh.scaleX = sx;
+			mesh.scaleY = sy;
+			mesh.scaleZ = sz;
 			mesh.material.color.setColorByHEX(color);
 			scene.addChild(mesh);
-			physicsEngine.createBody(mesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+			physicsEngine.createBody(mesh, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+			});
 		};
 
 		createBlock(0, -1, 0, 100, 2, 100);
@@ -41,7 +53,11 @@ RedGPU.init(
 			createBlock((Math.random()*80)-40, i*1.5 + 2, (Math.random()*80)-40, 6, 0.5, 6, '#666666');
 		}
 
-		const charMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Cylinder(redGPUContext, 0.6, 0.6, 1.8), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const charMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Cylinder(redGPUContext, 0.6, 0.6, 1.8),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		charMesh.material.color.setColorByHEX('#ff4444');
 		charMesh.y = 5;
 		scene.addChild(charMesh);

@@ -13,7 +13,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = false; view.grid = false;
+		view.axis = false;
+		view.grid = false;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -27,8 +28,14 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		ground.scaleX = 50; ground.scaleY = 1; ground.scaleZ = 50;
+		const ground = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		ground.scaleX = 50;
+		ground.scaleY = 1;
+		ground.scaleZ = 50;
 		ground.y = -0.5;
 		ground.material.color.setColorByHEX('#333333');
 		scene.addChild(ground);
@@ -36,8 +43,14 @@ RedGPU.init(
 
 		const activeObjects = [];
 		const createBox = (x, y, z) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-			mesh.x = x; mesh.y = y; mesh.z = z;
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
+			mesh.x = x;
+			mesh.y = y;
+			mesh.z = z;
 			mesh.rotationX = Math.random() * 360;
 			mesh.rotationY = Math.random() * 360;
 			mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);

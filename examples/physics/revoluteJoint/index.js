@@ -34,34 +34,66 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 1. 바닥
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		ground.y = -1; ground.scaleX = 100; ground.scaleY = 2; ground.scaleZ = 100;
+		const ground = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		ground.y = -1;
+		ground.scaleX = 100;
+		ground.scaleY = 2;
+		ground.scaleZ = 100;
 		ground.material.color.setColorByHEX('#444444');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
 
 		// 2. 풍차 기둥
-		const pillar = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		pillar.y = 10; pillar.scaleX = 2; pillar.scaleY = 20; pillar.scaleZ = 2;
+		const pillar = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		pillar.y = 10;
+		pillar.scaleX = 2;
+		pillar.scaleY = 20;
+		pillar.scaleZ = 2;
 		pillar.material.color.setColorByHEX('#666666');
 		scene.addChild(pillar);
 		const pillarBody = physicsEngine.createBody(pillar, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
 		pillarBody.nativeCollider.setCollisionGroups(windmillFilter);
 
 		// 3. 프로펠러 뭉치
-		const propellerGroup = new RedGPU.Display.Mesh(redGPUContext, null, null);
-		propellerGroup.y = 18; propellerGroup.z = 2.1;
+		const propellerGroup = new RedGPU.Display.Mesh(
+			redGPUContext,
+			null,
+			null
+		);
+		propellerGroup.y = 18;
+		propellerGroup.z = 2.1;
 		scene.addChild(propellerGroup);
 
-		const hub = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Cylinder(redGPUContext, 1.5, 1.5, 2), new RedGPU.Material.PhongMaterial(redGPUContext));
-		hub.rotationX = 90; hub.material.color.setColorByHEX('#ffffff');
+		const hub = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Cylinder(redGPUContext, 1.5, 1.5, 2),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		hub.rotationX = 90;
+		hub.material.color.setColorByHEX('#ffffff');
 		propellerGroup.addChild(hub);
 
 		for (let i = 0; i < 4; i++) {
-			const blade = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-			blade.scaleX = 15; blade.scaleY = 1.0; blade.scaleZ = 0.5;
+			const blade = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
+			blade.scaleX = 15;
+			blade.scaleY = 1.0;
+			blade.scaleZ = 0.5;
 			const angleRad = (i * 90) * (Math.PI / 180);
-			blade.x = Math.cos(angleRad) * 8; blade.y = Math.sin(angleRad) * 8; blade.rotationZ = i * 90;
+			blade.x = Math.cos(angleRad) * 8;
+			blade.y = Math.sin(angleRad) * 8;
+			blade.rotationZ = i * 90;
 			blade.material.color.setColorByHEX('#ffcc00');
 			propellerGroup.addChild(blade);
 		}
@@ -79,8 +111,14 @@ RedGPU.init(
 		const createBall = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX('#ffffff');
-			const ball = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext, 1), material);
-			ball.x = (Math.random() * 24) - 12; ball.y = 35; ball.z = 2.1;
+			const ball = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Sphere(redGPUContext, 1),
+				material
+			);
+			ball.x = (Math.random() * 24) - 12;
+			ball.y = 35;
+			ball.z = 2.1;
 			scene.addChild(ball);
 			const body = physicsEngine.createBody(ball, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE, mass: 1, restitution: 0.5 });
 			body.velocity = { x: 0, y: -15, z: 0 };

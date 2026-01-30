@@ -14,7 +14,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -35,8 +36,14 @@ RedGPU.init(
 		// 1. 천장 앵커 포인트
 		const anchorMeshList = [];
 		const createAnchor = (x, z) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-			mesh.x = x; mesh.y = 25; mesh.z = z;
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
+			mesh.x = x;
+			mesh.y = 25;
+			mesh.z = z;
 			mesh.material.color.setColorByHEX('#ff4444');
 			scene.addChild(mesh);
 			anchorMeshList.push(mesh);
@@ -49,9 +56,15 @@ RedGPU.init(
 		];
 
 		// 2. 탄성 플랫폼
-		const platform = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const platform = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		platform.y = 15;
-		platform.scaleX = 20; platform.scaleY = 1; platform.scaleZ = 20;
+		platform.scaleX = 20;
+		platform.scaleY = 1;
+		platform.scaleZ = 20;
 		platform.material.color.setColorByHEX('#00ccff');
 		scene.addChild(platform);
 
@@ -97,15 +110,25 @@ RedGPU.init(
 		// 5. 낙하 물체 및 리셋
 		const activeObjects = [];
 		const createObject = () => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
 			mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			mesh.x = (Math.random() * 10) - 5; mesh.y = 35; mesh.z = (Math.random() * 10) - 5;
+			mesh.x = (Math.random() * 10) - 5;
+			mesh.y = 35;
+			mesh.z = (Math.random() * 10) - 5;
 			scene.addChild(mesh);
 			const body = physicsEngine.createBody(mesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX, mass: 2 });
 			activeObjects.push({ mesh, body });
 			setTimeout(() => {
 				const idx = activeObjects.findIndex(v => v.body === body);
-				if (idx > -1) { physicsEngine.removeBody(body); scene.removeChild(mesh); }
+				if (idx > -1) {
+					physicsEngine.removeBody(body);
+					scene.removeChild(mesh);
+					activeObjects.splice(idx, 1);
+				}
 			}, 10000);
 		};
 

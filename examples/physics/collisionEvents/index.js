@@ -14,7 +14,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -29,10 +30,18 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 바닥 생성
-		const groundMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext, 15, 15), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const groundMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Ground(redGPUContext, 15, 15),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
-		physicsEngine.createBody(groundMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX, restitution: 0.8 });
+		physicsEngine.createBody(groundMesh, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
+			restitution: 0.8
+		});
 
 		const activeObjects = [];
 		const bodyMap = new Map();
@@ -40,13 +49,21 @@ RedGPU.init(
 		const createBall = (x, y, z) => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX('#ffffff');
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext, 1), material);
-			mesh.x = x; mesh.y = y; mesh.z = z;
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Sphere(redGPUContext, 1),
+				material
+			);
+			mesh.x = x;
+			mesh.y = y;
+			mesh.z = z;
 			scene.addChild(mesh);
 
 			const body = physicsEngine.createBody(mesh, {
-				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
-				mass: 1, restitution: 0.9
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
+				mass: 1,
+				restitution: 0.9
 			});
 			body.nativeCollider.setActiveEvents(1);
 			bodyMap.set(body.nativeCollider.handle, mesh);

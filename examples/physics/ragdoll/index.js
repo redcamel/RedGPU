@@ -13,7 +13,8 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = false; view.grid = false;
+		view.axis = false;
+		view.grid = false;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -29,8 +30,14 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		ground.scaleX = 50; ground.scaleY = 1; ground.scaleZ = 50;
+		const ground = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		ground.scaleX = 50;
+		ground.scaleY = 1;
+		ground.scaleZ = 50;
 		ground.y = -1;
 		ground.material.color.setColorByHEX('#333333');
 		scene.addChild(ground);
@@ -39,9 +46,17 @@ RedGPU.init(
 		const activeRagdolls = [];
 
 		const createLimb = (geometry, x, y, z, sx, sy, sz, color) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext));
-			mesh.x = x; mesh.y = y; mesh.z = z;
-			mesh.scaleX = sx; mesh.scaleY = sy; mesh.scaleZ = sz;
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				geometry,
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
+			mesh.x = x;
+			mesh.y = y;
+			mesh.z = z;
+			mesh.scaleX = sx;
+			mesh.scaleY = sy;
+			mesh.scaleZ = sz;
 			mesh.material.color.setColorByHEX(color);
 			scene.addChild(mesh);
 			const shape = geometry instanceof RedGPU.Primitive.Sphere ? RedGPU.Physics.PHYSICS_SHAPE.SPHERE : RedGPU.Physics.PHYSICS_SHAPE.BOX;

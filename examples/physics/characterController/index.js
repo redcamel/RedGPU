@@ -14,7 +14,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -30,13 +31,24 @@ RedGPU.init(
 
 		// 1. 지형 생성 (경사로와 계단 포함)
 		const createStatic = (geometry, x, y, z, sx, sy, sz, rx = 0, color = '#444444') => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext));
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				geometry,
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
 			mesh.material.color.setColorByHEX(color);
-			mesh.x = x; mesh.y = y; mesh.z = z;
-			mesh.scaleX = sx; mesh.scaleY = sy; mesh.scaleZ = sz;
+			mesh.x = x;
+			mesh.y = y;
+			mesh.z = z;
+			mesh.scaleX = sx;
+			mesh.scaleY = sy;
+			mesh.scaleZ = sz;
 			mesh.rotationX = rx;
 			scene.addChild(mesh);
-			physicsEngine.createBody(mesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+			physicsEngine.createBody(mesh, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+			});
 		};
 
 		createStatic(new RedGPU.Primitive.Box(redGPUContext), 0, -1, 0, 50, 2, 50);
@@ -46,7 +58,11 @@ RedGPU.init(
 		}
 
 		// 2. 캐릭터 생성
-		const charMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 2), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const charMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 2),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		charMesh.material.color.setColorByHEX('#ff4444');
 		charMesh.y = 5;
 		scene.addChild(charMesh);

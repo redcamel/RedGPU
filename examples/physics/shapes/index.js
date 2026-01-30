@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../dist/index.js";
+﻿import * as RedGPU from "../../../dist/index.js";
 import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
@@ -46,7 +46,9 @@ RedGPU.init(
 				new RedGPU.Material.PhongMaterial(redGPUContext)
 			);
 			mesh.material.color.setColorByHEX(color);
-			mesh.x = x; mesh.y = y; mesh.z = z;
+			mesh.x = x;
+			mesh.y = y;
+			mesh.z = z;
 			mesh.scaleX = w; mesh.scaleY = h; mesh.scaleZ = d;
 			mesh.rotationX = rx; mesh.rotationZ = rz;
 			scene.addChild(mesh);
@@ -95,7 +97,9 @@ RedGPU.init(
 				geometry,
 				material
 			);
-			boxMesh.x = x; boxMesh.y = y; boxMesh.z = z;
+			boxMesh.x = x;
+			boxMesh.y = y;
+			boxMesh.z = z;
 			scene.addChild(boxMesh);
 
 			const body = physicsEngine.createBody(boxMesh, {

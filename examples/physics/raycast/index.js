@@ -14,7 +14,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -31,7 +32,11 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 바닥 생성
-		const groundMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext, 30, 30), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const groundMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Ground(redGPUContext, 30, 30),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
 		physicsEngine.createBody(groundMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
@@ -41,8 +46,14 @@ RedGPU.init(
 		const createBox = (i) => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX('#ffffff');
-			const boxMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), material);
-			boxMesh.x = (Math.random() * 10) - 5; boxMesh.y = 2 + (i * 1.5); boxMesh.z = (Math.random() * 10) - 5;
+			const boxMesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				material
+			);
+			boxMesh.x = (Math.random() * 10) - 5;
+			boxMesh.y = 2 + (i * 1.5);
+			boxMesh.z = (Math.random() * 10) - 5;
 			scene.addChild(boxMesh);
 
 			const body = physicsEngine.createBody(boxMesh, {

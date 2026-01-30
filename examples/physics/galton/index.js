@@ -14,7 +14,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = false; view.grid = false;
+		view.axis = false;
+		view.grid = false;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -30,12 +31,23 @@ RedGPU.init(
 
 		// 2. 보드 프레임
 		const createStaticBox = (x, y, z, w, h, d, color = '#444444') => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Box(redGPUContext),
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
 			mesh.material.color.setColorByHEX(color);
-			mesh.x = x; mesh.y = y; mesh.z = z;
-			mesh.scaleX = w; mesh.scaleY = h; mesh.scaleZ = d;
+			mesh.x = x;
+			mesh.y = y;
+			mesh.z = z;
+			mesh.scaleX = w;
+			mesh.scaleY = h;
+			mesh.scaleZ = d;
 			scene.addChild(mesh);
-			physicsEngine.createBody(mesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+			physicsEngine.createBody(mesh, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+			});
 		};
 
 		createStaticBox(0, 0, -1, 30, 40, 1, '#222222'); // 뒷벽
@@ -53,10 +65,20 @@ RedGPU.init(
 			const cols = row + 1;
 			const startX = -(cols - 1) * 2.5 / 2;
 			for (let col = 0; col < cols; col++) {
-				const pinMesh = new RedGPU.Display.Mesh(redGPUContext, pinGeo, pinMat);
-				pinMesh.x = startX + col * 2.5; pinMesh.y = y; pinMesh.z = 0.5; pinMesh.rotationX = 90;
+				const pinMesh = new RedGPU.Display.Mesh(
+					redGPUContext,
+					pinGeo,
+					pinMat
+				);
+				pinMesh.x = startX + col * 2.5;
+				pinMesh.y = y;
+				pinMesh.z = 0.5;
+				pinMesh.rotationX = 90;
 				scene.addChild(pinMesh);
-				physicsEngine.createBody(pinMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.CYLINDER });
+				physicsEngine.createBody(pinMesh, {
+					type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+					shape: RedGPU.Physics.PHYSICS_SHAPE.CYLINDER
+				});
 			}
 		}
 
@@ -66,8 +88,14 @@ RedGPU.init(
 		const createBall = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			const ballMesh = new RedGPU.Display.Mesh(redGPUContext, ballGeo, material);
-			ballMesh.x = (Math.random() * 0.4) - 0.2; ballMesh.y = 18; ballMesh.z = 0.5;
+			const ballMesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				ballGeo,
+				material
+			);
+			ballMesh.x = (Math.random() * 0.4) - 0.2;
+			ballMesh.y = 18;
+			ballMesh.z = 0.5;
 			scene.addChild(ballMesh);
 
 			const body = physicsEngine.createBody(ballMesh, {

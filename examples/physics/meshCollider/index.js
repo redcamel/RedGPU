@@ -15,7 +15,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -31,11 +32,23 @@ RedGPU.init(
 
 		// 1. 다중 지형 생성 함수
 		const createComplexStatic = (geometry, x, y, z, rx, color) => {
-			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext));
+			const mesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				geometry,
+				new RedGPU.Material.PhongMaterial(redGPUContext)
+			);
 			mesh.material.color.setColorByHEX(color);
-			mesh.x = x; mesh.y = y; mesh.z = z; mesh.rotationX = rx;
+			mesh.x = x;
+			mesh.y = y;
+			mesh.z = z;
+			mesh.rotationX = rx;
 			scene.addChild(mesh);
-			physicsEngine.createBody(mesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.MESH, friction: 0.5, restitution: 0.5 });
+			physicsEngine.createBody(mesh, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.MESH,
+				friction: 0.5,
+				restitution: 0.5
+			});
 		};
 
 		createComplexStatic(new RedGPU.Primitive.Torus(redGPUContext, 8, 1.5, 32, 32), 0, 10, 0, 70, '#888888');
@@ -43,21 +56,39 @@ RedGPU.init(
 		createComplexStatic(new RedGPU.Primitive.TorusKnot(redGPUContext, 6, 1.5, 64, 16), 0, -10, 0, 0, '#444444');
 
 		// 2. 바닥 생성
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext, 50, 50), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const ground = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Ground(redGPUContext, 50, 50),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		ground.y = -20;
 		ground.material.color.setColorByHEX('#222222');
 		scene.addChild(ground);
-		physicsEngine.createBody(ground, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+		physicsEngine.createBody(ground, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
 
 		const activeBalls = [];
 		const createBall = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			const ball = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext, 0.6), material);
-			ball.x = (Math.random() * 10) - 5; ball.y = 25; ball.z = (Math.random() * 10) - 5;
+			const ball = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Sphere(redGPUContext, 0.6),
+				material
+			);
+			ball.x = (Math.random() * 10) - 5;
+			ball.y = 25;
+			ball.z = (Math.random() * 10) - 5;
 			scene.addChild(ball);
 
-			const body = physicsEngine.createBody(ball, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE, mass: 1, restitution: 0.6 });
+			const body = physicsEngine.createBody(ball, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
+				mass: 1,
+				restitution: 0.6
+			});
 			const ballInfo = { mesh: ball, body };
 			activeBalls.push(ballInfo);
 

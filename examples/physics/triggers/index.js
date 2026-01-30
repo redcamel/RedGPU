@@ -14,7 +14,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -31,19 +32,37 @@ RedGPU.init(
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 바닥 생성
-		const groundMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext, 20, 20), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const groundMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Ground(redGPUContext, 20, 20),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		groundMesh.material.color.setColorByHEX('#444444');
 		scene.addChild(groundMesh);
-		physicsEngine.createBody(groundMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+		physicsEngine.createBody(groundMesh, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
 
 		// 1. 센서 구역 (Trigger Zone)
-		const triggerMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
+		const triggerMesh = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
 		triggerMesh.material.color.setColorByHEX('#44ff44');
-		triggerMesh.material.opacity = 0.3; triggerMesh.y = 5;
-		triggerMesh.scaleX = 10; triggerMesh.scaleY = 2; triggerMesh.scaleZ = 10;
+		triggerMesh.material.opacity = 0.3;
+		triggerMesh.y = 5;
+		triggerMesh.scaleX = 10;
+		triggerMesh.scaleY = 2;
+		triggerMesh.scaleZ = 10;
 		scene.addChild(triggerMesh);
 
-		const triggerBody = physicsEngine.createBody(triggerMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX, isSensor: true });
+		const triggerBody = physicsEngine.createBody(triggerMesh, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
+			isSensor: true
+		});
 		triggerBody.nativeCollider.setActiveEvents(1);
 
 		// 2. 동적 객체들 및 리셋
@@ -52,11 +71,22 @@ RedGPU.init(
 		const createBall = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX('#ffffff');
-			const ballMesh = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext, 0.5), material);
-			ballMesh.x = (Math.random() * 8) - 4; ballMesh.y = 15; ballMesh.z = (Math.random() * 8) - 4;
+			const ballMesh = new RedGPU.Display.Mesh(
+				redGPUContext,
+				new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
+				material
+			);
+			ballMesh.x = (Math.random() * 8) - 4;
+			ballMesh.y = 15;
+			ballMesh.z = (Math.random() * 8) - 4;
 			scene.addChild(ballMesh);
 
-			const body = physicsEngine.createBody(ballMesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE, mass: 1, restitution: 0.5 });
+			const body = physicsEngine.createBody(ballMesh, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
+				mass: 1,
+				restitution: 0.5
+			});
 			body.nativeCollider.setActiveEvents(1);
 			bodyMap.set(body.nativeCollider.handle, ballMesh);
 			

@@ -15,7 +15,8 @@ RedGPU.init(
 		const scene = new RedGPU.Display.Scene();
 
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		const physicsEngine = new RapierPhysics();
@@ -37,11 +38,21 @@ RedGPU.init(
 		const ballGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.8);
 
 		// 1. 바닥 생성
-		const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext));
-		ground.y = -1; ground.scaleX = 100; ground.scaleY = 2; ground.scaleZ = 100;
+		const ground = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		ground.y = -1;
+		ground.scaleX = 100;
+		ground.scaleY = 2;
+		ground.scaleZ = 100;
 		ground.material.color.setColorByHEX('#444444');
 		scene.addChild(ground);
-		physicsEngine.createBody(ground, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+		physicsEngine.createBody(ground, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
 
 		// 2. GLTF 모델 로드 및 배치
 		const modelURL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
@@ -51,10 +62,16 @@ RedGPU.init(
 					const model = v['resultMesh'];
 					const randomScale = 1.0 + (Math.random() * 3.0);
 					model.scaleX = model.scaleY = model.scaleZ = randomScale;
-					model.x = ix * SPACING; model.y = 5; model.z = iz * SPACING;
+					model.x = ix * SPACING;
+					model.y = 5;
+					model.z = iz * SPACING;
 					scene.addChild(model);
 					view.update();
-					physicsEngine.createBody(model, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.MESH, friction: 0.3 });
+					physicsEngine.createBody(model, {
+						type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+						shape: RedGPU.Physics.PHYSICS_SHAPE.MESH,
+						friction: 0.3
+					});
 				});
 			}
 		}
@@ -64,13 +81,24 @@ RedGPU.init(
 		const createBall = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			const ball = new RedGPU.Display.Mesh(redGPUContext, ballGeo, material);
+			const ball = new RedGPU.Display.Mesh(
+				redGPUContext,
+				ballGeo,
+				material
+			);
 			const gridIdxX = Math.floor(Math.random() * GRID_SIZE) - 1; 
 			const gridIdxZ = Math.floor(Math.random() * GRID_SIZE) - 1; 
-			ball.x = (gridIdxX * SPACING) + (Math.random() * 4 - 2); ball.y = 15; ball.z = (gridIdxZ * SPACING) + (Math.random() * 4 - 2);
+			ball.x = (gridIdxX * SPACING) + (Math.random() * 4 - 2);
+			ball.y = 15;
+			ball.z = (gridIdxZ * SPACING) + (Math.random() * 4 - 2);
 			scene.addChild(ball);
 
-			const body = physicsEngine.createBody(ball, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE, mass: 2, restitution: 0.6 });
+			const body = physicsEngine.createBody(ball, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
+				mass: 2,
+				restitution: 0.6
+			});
 			const ballInfo = { mesh: ball, body };
 			activeBalls.push(ballInfo);
 			setTimeout(() => {
