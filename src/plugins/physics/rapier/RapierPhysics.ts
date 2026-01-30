@@ -223,14 +223,26 @@ export class RapierPhysics implements IPhysicsEngine {
 
 		let desc: RAPIER.ColliderDesc;
 		switch (shapeType) {
-			case PHYSICS_SHAPE.SPHERE: desc = RAPIER.ColliderDesc.ball(Math.max(hx, hy, hz)); break;
+			case PHYSICS_SHAPE.SPHERE: {
+				// [KO] 모든 방향의 스케일 중 가장 큰 값을 반지름으로 사용
+				// [EN] Use the maximum of all scaled dimensions as the radius
+				desc = RAPIER.ColliderDesc.ball(Math.max(hx, hy, hz));
+				break;
+			}
 			case PHYSICS_SHAPE.CAPSULE: {
+				// [KO] 반지름은 X, Z 중 큰 값을 사용하고, 실린더 절반 높이는 전체 높이(hy)에서 반지름을 뺀 값 사용
+				// [EN] Use the max of X and Z for radius, and calculate half-height by subtracting radius from total height (hy)
 				const radius = Math.max(hx, hz);
 				const halfHeight = Math.max(0, hy - radius);
 				desc = RAPIER.ColliderDesc.capsule(halfHeight, radius);
 				break;
 			}
-			case PHYSICS_SHAPE.CYLINDER: desc = RAPIER.ColliderDesc.cylinder(hy, Math.max(hx, hz)); break;
+			case PHYSICS_SHAPE.CYLINDER: {
+				// [KO] 반지름은 X, Z 중 큰 값을 사용하고, 높이는 hy(절반 높이) 사용
+				// [EN] Use the max of X and Z for radius, and hy for half-height
+				desc = RAPIER.ColliderDesc.cylinder(hy, Math.max(hx, hz));
+				break;
+			}
 			case PHYSICS_SHAPE.BOX:
 			default: desc = RAPIER.ColliderDesc.cuboid(hx, hy, hz); break;
 		}

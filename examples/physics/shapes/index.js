@@ -88,9 +88,7 @@ RedGPU.init(
 					shape = RedGPU.Physics.PHYSICS_SHAPE.CYLINDER;
 					break;
 				case 'capsule':
-					// [KO] 현재는 실린더로 캡슐 형상을 대체
-					// [EN] Currently using Cylinder to represent Capsule shape
-					geometry = new RedGPU.Primitive.Cylinder(redGPUContext, 0.5, 0.5, 1.5);
+					geometry = new RedGPU.Primitive.Capsule(redGPUContext, 0.5, 1);
 					shape = RedGPU.Physics.PHYSICS_SHAPE.CAPSULE;
 					break;
 			}
@@ -114,9 +112,6 @@ RedGPU.init(
 				friction
 			});
 			
-			if (type === 'cylinder' || type === 'capsule') {
-				body.rotation = [0, 0, 0.707, 0.707];
-			}
 			activeObjects.push({ mesh: boxMesh, body });
 		};
 

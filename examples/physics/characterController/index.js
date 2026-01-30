@@ -76,15 +76,15 @@ RedGPU.init(
 			);
 		}
 
-		// [KO] 캐릭터 생성 (지름 0.6m, 높이 1.8m 실린더)
-		// [EN] Create character (Cylinder with diameter 0.6m, height 1.8m)
+		// [KO] 캐릭터 생성 (지름 0.6m, 총 높이 1.8m 캡슐)
+		// [EN] Create character (Capsule with diameter 0.6m, total height 1.8m)
 		const charMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
-			new RedGPU.Primitive.Cylinder(redGPUContext, 0.3, 0.3, 1.8),
+			new RedGPU.Primitive.Capsule(redGPUContext, 0.3, 1.2),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
 		charMesh.material.color.setColorByHEX('#ff4444');
-		charMesh.y = 2;
+		charMesh.y = 3;
 		scene.addChild(charMesh);
 
 		const charBody = physicsEngine.createBody(charMesh, {
