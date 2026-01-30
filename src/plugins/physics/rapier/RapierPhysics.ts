@@ -188,6 +188,12 @@ export class RapierPhysics implements IPhysicsEngine {
 		desc.setTranslation(worldPos[0], worldPos[1], worldPos[2]);
 		desc.setRotation({ x: worldQuat[0], y: worldQuat[1], z: worldQuat[2], w: worldQuat[3] });
 
+		// [KO] 추가 물리 속성 설정 (감쇠, CCD 등)
+		// [EN] Set additional physics properties (Damping, CCD, etc.)
+		if (params.linearDamping !== undefined) desc.setLinearDamping(params.linearDamping);
+		if (params.angularDamping !== undefined) desc.setAngularDamping(params.angularDamping);
+		if (params.enableCCD !== undefined) desc.setCcdEnabled(params.enableCCD);
+
 		return desc;
 	}
 
