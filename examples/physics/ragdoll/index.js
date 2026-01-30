@@ -7,8 +7,10 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
+		// [KO] 카메라 설정
+		// [EN] Camera setup
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 20;
+		controller.distance = 15;
 		controller.tilt = -20;
 
 		const scene = new RedGPU.Display.Scene();
@@ -17,6 +19,7 @@ RedGPU.init(
 		view.grid = false;
 		redGPUContext.addView(view);
 
+		// [KO] 물리 엔진 초기화
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
@@ -30,15 +33,17 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
+		// [KO] 바닥 생성 (30m x 30m)
+		// [EN] Create ground (30m x 30m)
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		ground.scaleX = 50;
+		ground.scaleX = 30;
 		ground.scaleY = 1;
-		ground.scaleZ = 50;
-		ground.y = -1;
+		ground.scaleZ = 30;
+		ground.y = -0.5;
 		ground.material.color.setColorByHEX('#333333');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
@@ -48,6 +53,10 @@ RedGPU.init(
 
 		const activeRagdolls = [];
 
+		/**
+		 * [KO] 신체 부위(Limb) 생성 함수
+		 * [EN] Function to create limbs
+		 */
 		const createLimb = (geometry, x, y, z, sx, sy, sz, color) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -73,38 +82,40 @@ RedGPU.init(
 			return { mesh, body };
 		};
 
+		/**
+		 * [KO] 래그돌(Ragdoll) 생성 및 조인트 연결
+		 * [EN] Create Ragdoll and connect joints
+		 */
 		const spawnRagdoll = (offsetX, offsetZ) => {
 			const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-			const baseY = 10;
+			const baseY = 5;
 
-			const head = createLimb(new RedGPU.Primitive.Sphere(redGPUContext, 0.5), offsetX, baseY + 4.5, offsetZ, 1, 1, 1, color);
-			const torso = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX, baseY + 3.2, offsetZ, 1.2, 1.8, 0.6, color);
-			const pelvis = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX, baseY + 2.0, offsetZ, 1.0, 0.6, 0.6, color);
+			const head = createLimb(new RedGPU.Primitive.Sphere(redGPUContext, 0.25), offsetX, baseY + 2.2, offsetZ, 1, 1, 1, color);
+			const torso = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX, baseY + 1.6, offsetZ, 0.6, 0.9, 0.3, color);
+			const pelvis = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX, baseY + 1.0, offsetZ, 0.5, 0.3, 0.3, color);
 
-			// [KO] 조인트 생성 헬퍼
-			// [EN] Joint creation helper
 			const connect = (b1, b2, a1, a2) => {
 				const JD = RAPIER.JointData;
 				const jointData = JD.ball ? JD.ball(a1, a2) : JD.spherical(a1, a2);
 				physicsEngine.nativeWorld.createImpulseJoint(jointData, b1.nativeBody, b2.nativeBody, true);
 			};
 
-			connect(torso.body, head.body, { x: 0, y: 1.0, z: 0 }, { x: 0, y: -0.6, z: 0 });
-			connect(torso.body, pelvis.body, { x: 0, y: -1.0, z: 0 }, { x: 0, y: 0.4, z: 0 });
+			connect(torso.body, head.body, { x: 0, y: 0.5, z: 0 }, { x: 0, y: -0.3, z: 0 });
+			connect(torso.body, pelvis.body, { x: 0, y: -0.5, z: 0 }, { x: 0, y: 0.2, z: 0 });
 
 			const createArm = (side) => {
-				const upper = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 1.2), baseY + 3.5, offsetZ, 0.4, 1.0, 0.4, color);
-				const lower = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 1.2), baseY + 2.3, offsetZ, 0.3, 1.0, 0.3, color);
-				connect(torso.body, upper.body, { x: side * 0.8, y: 0.7, z: 0 }, { x: 0, y: 0.6, z: 0 });
-				connect(upper.body, lower.body, { x: 0, y: -0.6, z: 0 }, { x: 0, y: 0.6, z: 0 });
+				const upper = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 0.6), baseY + 1.7, offsetZ, 0.2, 0.5, 0.2, color);
+				const lower = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 0.6), baseY + 1.1, offsetZ, 0.15, 0.5, 0.15, color);
+				connect(torso.body, upper.body, { x: side * 0.4, y: 0.3, z: 0 }, { x: 0, y: 0.3, z: 0 });
+				connect(upper.body, lower.body, { x: 0, y: -0.3, z: 0 }, { x: 0, y: 0.3, z: 0 });
 				return [upper, lower];
 			};
 
 			const createLeg = (side) => {
-				const upper = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 0.4), baseY + 1.0, offsetZ, 0.4, 1.2, 0.4, color);
-				const lower = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 0.4), baseY - 0.5, offsetZ, 0.3, 1.2, 0.3, color);
-				connect(pelvis.body, upper.body, { x: side * 0.3, y: -0.3, z: 0 }, { x: 0, y: 0.7, z: 0 });
-				connect(upper.body, lower.body, { x: 0, y: -0.7, z: 0 }, { x: 0, y: 0.7, z: 0 });
+				const upper = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 0.2), baseY + 0.5, offsetZ, 0.2, 0.6, 0.2, color);
+				const lower = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 0.2), baseY - 0.2, offsetZ, 0.15, 0.6, 0.15, color);
+				connect(pelvis.body, upper.body, { x: side * 0.15, y: -0.15, z: 0 }, { x: 0, y: 0.35, z: 0 });
+				connect(upper.body, lower.body, { x: 0, y: -0.35, z: 0 }, { x: 0, y: 0.35, z: 0 });
 				return [upper, lower];
 			};
 
@@ -130,7 +141,9 @@ RedGPU.init(
 
 		renderTestPane(redGPUContext, spawnRagdoll, resetScene);
 	},
-	(failReason) => { console.error(failReason); }
+	(failReason) => {
+		console.error(failReason);
+	}
 );
 
 const renderTestPane = async (redGPUContext, spawnRagdoll, resetScene) => {
@@ -138,6 +151,6 @@ const renderTestPane = async (redGPUContext, spawnRagdoll, resetScene) => {
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
-	pane.addButton({ title: 'Spawn Ragdoll' }).on('click', () => spawnRagdoll((Math.random() * 10) - 5, (Math.random() * 10) - 5));
+	pane.addButton({ title: 'Spawn Ragdoll' }).on('click', () => spawnRagdoll((Math.random() * 6) - 3, (Math.random() * 6) - 3));
 	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 };

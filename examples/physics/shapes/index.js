@@ -1,4 +1,4 @@
-﻿import * as RedGPU from "../../../dist/index.js";
+import * as RedGPU from "../../../dist/index.js";
 import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
@@ -7,10 +7,10 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
-		// [KO] 카메라 컨트롤러 설정 (OrbitController)
-		// [EN] Set up camera controller (OrbitController)
+		// [KO] 카메라 컨트롤러 설정
+		// [EN] Set up camera controller
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 35;
+		controller.distance = 25;
 		controller.tilt = -35;
 		controller.pan = 45;
 
@@ -19,7 +19,8 @@ RedGPU.init(
 		// [KO] 3D 뷰 생성 및 설정
 		// [EN] Create and configure 3D view
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true; view.grid = true;
+		view.axis = true;
+		view.grid = true;
 		redGPUContext.addView(view);
 
 		// [KO] 물리 엔진(Rapier) 초기화
@@ -28,8 +29,8 @@ RedGPU.init(
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
 
-		// [KO] 조명 설정: 환경광과 방향광
-		// [EN] Lighting setup: Ambient and Directional lights
+		// [KO] 조명 설정
+		// [EN] Lighting setup
 		const ambientLight = new RedGPU.Light.AmbientLight();
 		ambientLight.intensity = 0.5;
 		scene.lightManager.ambientLight = ambientLight;
@@ -37,8 +38,8 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		// [KO] 정적 물리 객체(바닥, 경사로 등) 생성 함수
-		// [EN] Helper function to create static physics objects (floor, ramp, etc.)
+		// [KO] 정적 환경 구축 (50m 바닥 및 경사로)
+		// [EN] Build static environment (50m floor and ramp)
 		const createStaticBox = (x, y, z, w, h, d, color = '#444444', rx = 0, rz = 0) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -49,8 +50,11 @@ RedGPU.init(
 			mesh.x = x;
 			mesh.y = y;
 			mesh.z = z;
-			mesh.scaleX = w; mesh.scaleY = h; mesh.scaleZ = d;
-			mesh.rotationX = rx; mesh.rotationZ = rz;
+			mesh.scaleX = w;
+			mesh.scaleY = h;
+			mesh.scaleZ = d;
+			mesh.rotationX = rx;
+			mesh.rotationZ = rz;
 			scene.addChild(mesh);
 			physicsEngine.createBody(mesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
@@ -59,17 +63,15 @@ RedGPU.init(
 			});
 		};
 
-		// [KO] 실험실 환경 구축 (바닥 및 경사로)
-		// [EN] Build laboratory environment (floor and ramp)
 		createStaticBox(0, -0.5, 0, 50, 1, 50, '#444444');
 		createStaticBox(-12, 6, 0, 20, 1, 25, '#666666', 0, -25);
 
-		// [KO] 동적 물리 객체 관리 리스트
-		// [EN] List to manage dynamic physics objects
 		const activeObjects = [];
 
-		// [KO] 다양한 형상의 물리 객체 생성 함수
-		// [EN] Helper function to create various shaped physics objects
+		/**
+		 * [KO] 다양한 형상의 물리 객체 생성 함수 (현실적인 1~2m 스케일)
+		 * [EN] Helper function to create various shaped physics objects (realistic 1-2m scale)
+		 */
 		const createPhysicalObject = (type, x, y, z, color, restitution = 0.5, friction = 0.5) => {
 			let geometry, shape;
 			switch (type) {
@@ -78,15 +80,17 @@ RedGPU.init(
 					shape = RedGPU.Physics.PHYSICS_SHAPE.BOX;
 					break;
 				case 'sphere':
-					geometry = new RedGPU.Primitive.Sphere(redGPUContext);
+					geometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
 					shape = RedGPU.Physics.PHYSICS_SHAPE.SPHERE;
 					break;
 				case 'cylinder':
-					geometry = new RedGPU.Primitive.Cylinder(redGPUContext);
+					geometry = new RedGPU.Primitive.Cylinder(redGPUContext, 0.5, 0.5, 1.5);
 					shape = RedGPU.Physics.PHYSICS_SHAPE.CYLINDER;
 					break;
 				case 'capsule':
-					geometry = new RedGPU.Primitive.Cylinder(redGPUContext);
+					// [KO] 현재는 실린더로 캡슐 형상을 대체
+					// [EN] Currently using Cylinder to represent Capsule shape
+					geometry = new RedGPU.Primitive.Cylinder(redGPUContext, 0.5, 0.5, 1.5);
 					shape = RedGPU.Physics.PHYSICS_SHAPE.CAPSULE;
 					break;
 			}
@@ -109,14 +113,15 @@ RedGPU.init(
 				restitution,
 				friction
 			});
-			// [KO] 원기둥과 캡슐은 기본 방향을 조정
-			// [EN] Adjust default orientation for cylinder and capsule
-			if (type === 'cylinder' || type === 'capsule') body.rotation = [0, 0, 0.707, 0.707];
+			
+			if (type === 'cylinder' || type === 'capsule') {
+				body.rotation = [0, 0, 0.707, 0.707];
+			}
 			activeObjects.push({ mesh: boxMesh, body });
 		};
 
-		// [KO] 초기 씬 구성: 여러 형태의 객체들을 랜덤하게 배치
-		// [EN] Initial scene configuration: randomly place various objects
+		// [KO] 초기 씬 구성
+		// [EN] Initial scene configuration
 		const initScene = () => {
 			const colors = ['#ff4444', '#44ff44', '#4444ff', '#ffff44', '#ff44ff', '#44ffff'];
 			const shapes = ['box', 'sphere', 'cylinder', 'capsule'];
@@ -131,8 +136,10 @@ RedGPU.init(
 			}
 		};
 
-		// [KO] 씬 초기화 함수
-		// [EN] Scene reset function
+		/**
+		 * [KO] 씬 초기화 함수
+		 * [EN] Scene reset function
+		 */
 		const resetScene = () => {
 			activeObjects.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -149,39 +156,63 @@ RedGPU.init(
 
 		renderTestPane(redGPUContext, resetScene, createPhysicalObject);
 	},
-	(failReason) => { console.error(failReason); }
+	(failReason) => {
+		console.error(failReason);
+	}
 );
 
 /**
- * [KO] 테스트용 컨트롤 패널을 생성합니다.
- * [EN] Create a control panel for testing.
+ * [KO] 테스트용 컨트롤 패널 생성
+ * [EN] Create a control panel for testing
  */
 const renderTestPane = async (redGPUContext, resetScene, createPhysicalObject) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
-	const params = { type: 'sphere', color: '#ffffff', restitution: 0.6, friction: 0.4 };
+	const params = {
+		type: 'sphere',
+		color: '#ffffff',
+		restitution: 0.6,
+		friction: 0.4
+	};
 
-	// [KO] 개별 객체 생성 폴더
-	// [EN] Folder for individual object spawning
 	const folder = pane.addFolder({ title: 'Spawn Object' });
-	folder.addBinding(params, 'type', { options: { Box: 'box', Sphere: 'sphere', Cylinder: 'cylinder', Capsule: 'capsule' } });
+	folder.addBinding(params, 'type', {
+		options: {
+			Box: 'box',
+			Sphere: 'sphere',
+			Cylinder: 'cylinder',
+			Capsule: 'capsule'
+		}
+	});
 	folder.addBinding(params, 'color');
 	folder.addButton({ title: 'Spawn' }).on('click', () => {
-		createPhysicalObject(params.type, -18 + (Math.random() * 4), 20, (Math.random() * 10) - 5, params.color, params.restitution, params.friction);
+		createPhysicalObject(
+			params.type,
+			-18 + (Math.random() * 4),
+			20,
+			(Math.random() * 10) - 5,
+			params.color,
+			params.restitution,
+			params.friction
+		);
 	});
 
-	// [KO] 랜덤 객체 생성 버튼
-	// [EN] Spawn random object button
 	pane.addButton({ title: 'Spawn Random' }).on('click', () => {
 		const types = ['box', 'sphere', 'cylinder', 'capsule'];
 		const randomType = types[Math.floor(Math.random() * types.length)];
 		const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-		createPhysicalObject(randomType, -18 + (Math.random() * 4), 20, (Math.random() * 10) - 5, randomColor, params.restitution, params.friction);
+		createPhysicalObject(
+			randomType,
+			-18 + (Math.random() * 4),
+			20,
+			(Math.random() * 10) - 5,
+			randomColor,
+			params.restitution,
+			params.friction
+		);
 	});
 
-	// [KO] 씬 초기화 버튼
-	// [EN] Scene reset button
 	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 };

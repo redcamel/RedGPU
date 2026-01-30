@@ -7,8 +7,10 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
+		// [KO] 카메라 컨트롤러 설정
+		// [EN] Set up camera controller
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 30;
+		controller.distance = 25;
 		controller.tilt = -30;
 
 		const scene = new RedGPU.Display.Scene();
@@ -17,6 +19,8 @@ RedGPU.init(
 		view.grid = true;
 		redGPUContext.addView(view);
 
+		// [KO] 물리 엔진 초기화
+		// [EN] Initialize physics engine
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
@@ -28,6 +32,10 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
+		/**
+		 * [KO] 정적 블록 생성 함수
+		 * [EN] Static block creation function
+		 */
 		const createBlock = (x, y, z, sx, sy, sz, color = '#444444') => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -48,14 +56,26 @@ RedGPU.init(
 			});
 		};
 
-		createBlock(0, -1, 0, 100, 2, 100);
-		for(let i=0; i<30; i++) {
-			createBlock((Math.random()*80)-40, i*1.5 + 2, (Math.random()*80)-40, 6, 0.5, 6, '#666666');
+		// [KO] 환경 구축 (50m x 50m 바닥 및 공중 발판들)
+		// [EN] Environment build (50m x 50m ground and floating platforms)
+		createBlock(0, -0.5, 0, 50, 1, 50);
+		for (let i = 0; i < 20; i++) {
+			createBlock(
+				(Math.random() * 40) - 20,
+				i * 1.2 + 1,
+				(Math.random() * 40) - 20,
+				4,
+				0.3,
+				4,
+				'#666666'
+			);
 		}
 
+		// [KO] 캐릭터 생성 (지름 0.6m, 높이 1.8m)
+		// [EN] Create character (diameter 0.6m, height 1.8m)
 		const charMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
-			new RedGPU.Primitive.Cylinder(redGPUContext, 0.6, 0.6, 1.8),
+			new RedGPU.Primitive.Cylinder(redGPUContext, 0.3, 0.3, 1.8),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
 		charMesh.material.color.setColorByHEX('#ff4444');
@@ -72,21 +92,21 @@ RedGPU.init(
 		const keys = { w: false, s: false, a: false, d: false, ' ': false };
 		window.addEventListener('keydown', (e) => { 
 			const k = e.key.toLowerCase();
-			if(keys.hasOwnProperty(k)) keys[k] = true; 
+			if (keys.hasOwnProperty(k)) keys[k] = true; 
 		});
 		window.addEventListener('keyup', (e) => { 
 			const k = e.key.toLowerCase();
-			if(keys.hasOwnProperty(k)) keys[k] = false; 
+			if (keys.hasOwnProperty(k)) keys[k] = false; 
 		});
 
 		let velocity = { x: 0, y: 0, z: 0 };
 		let jumpCount = 0;
-		const maxJumps = 3;
-		const moveSpeed = 0.08;
+		const maxJumps = 2;
+		const moveSpeed = 0.06;
 		const airControl = 0.3;
-		const gravity = -0.01;
-		const jumpForce = 0.3;
-		const friction = 0.6;
+		const gravity = -0.015;
+		const jumpForce = 0.25;
+		const friction = 0.85;
 
 		const render = (time) => {
 			const isGrounded = charController.computedGrounded();
@@ -104,8 +124,8 @@ RedGPU.init(
 			
 			let fX = targetX - camX;
 			let fZ = targetZ - camZ;
-			const fLen = Math.sqrt(fX*fX + fZ*fZ);
-			if(fLen > 0) { fX /= fLen; fZ /= fLen; }
+			const fLen = Math.sqrt(fX * fX + fZ * fZ);
+			if (fLen > 0) { fX /= fLen; fZ /= fLen; }
 
 			const rX = -fZ;
 			const rZ = fX;
@@ -132,6 +152,8 @@ RedGPU.init(
 			velocity.x *= friction;
 			velocity.z *= friction;
 
+			// [KO] 점프 로직 (최대 2단 점프)
+			// [EN] Jump logic (Max double jump)
 			if (keys[' '] && jumpCount < maxJumps) {
 				velocity.y = jumpForce;
 				jumpCount++;
@@ -169,6 +191,12 @@ const renderTestPane = async (redGPUContext, resetFunc) => {
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
-	pane.addBlade({ view: 'text', label: 'Control', value: 'WASD: Move / Space: Double Jump', parse: (v) => v, readonly: true });
+	pane.addBlade({
+		view: 'text',
+		label: 'Control',
+		value: 'WASD: Move / Space: Double Jump',
+		parse: (v) => v,
+		readonly: true
+	});
 	pane.addButton({ title: 'Reset Position' }).on('click', () => resetFunc());
 };

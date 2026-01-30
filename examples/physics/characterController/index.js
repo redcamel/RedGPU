@@ -7,17 +7,23 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
+		// [KO] 카메라 컨트롤러 설정
+		// [EN] Set up camera controller
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 35;
+		controller.distance = 20;
 		controller.tilt = -30;
 
 		const scene = new RedGPU.Display.Scene();
 
+		// [KO] 3D 뷰 생성 및 설정
+		// [EN] Create and configure 3D view
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.axis = true;
 		view.grid = true;
 		redGPUContext.addView(view);
 
+		// [KO] 물리 엔진(Rapier) 초기화
+		// [EN] Initialize physics engine (Rapier)
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
@@ -29,7 +35,8 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		// 1. 지형 생성 (경사로와 계단 포함)
+		// [KO] 지형 생성 함수 (현실적인 미터 단위)
+		// [EN] Helper function to create static terrain (realistic meter scale)
 		const createStatic = (geometry, x, y, z, sx, sy, sz, rx = 0, color = '#444444') => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -51,20 +58,34 @@ RedGPU.init(
 			});
 		};
 
-		createStatic(new RedGPU.Primitive.Box(redGPUContext), 0, -1, 0, 50, 2, 50);
-		createStatic(new RedGPU.Primitive.Box(redGPUContext), -10, 1, 15, 10, 1, 15, -20, '#666666');
-		for(let i=0; i<5; i++) {
-			createStatic(new RedGPU.Primitive.Box(redGPUContext), 10, 1, -10 + (i*5), 2, 2, 2, 0, '#ffaa00');
+		// 바닥 (30m x 30m)
+		createStatic(new RedGPU.Primitive.Box(redGPUContext), 0, -0.5, 0, 30, 1, 30);
+		// 경사로 (폭 5m, 길이 8m)
+		createStatic(new RedGPU.Primitive.Box(redGPUContext), -6, 0.5, 8, 5, 0.5, 8, -20, '#666666');
+		// 계단 (높이 0.2m 간격)
+		for (let i = 0; i < 5; i++) {
+			createStatic(
+				new RedGPU.Primitive.Box(redGPUContext),
+				6,
+				i * 0.2,
+				-5 + (i * 1.5),
+				2,
+				0.4,
+				1.5,
+				0,
+				'#ffaa00'
+			);
 		}
 
-		// 2. 캐릭터 생성
+		// [KO] 캐릭터 생성 (지름 0.6m, 높이 1.8m 실린더)
+		// [EN] Create character (Cylinder with diameter 0.6m, height 1.8m)
 		const charMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
-			new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 2),
+			new RedGPU.Primitive.Cylinder(redGPUContext, 0.3, 0.3, 1.8),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
 		charMesh.material.color.setColorByHEX('#ff4444');
-		charMesh.y = 5;
+		charMesh.y = 2;
 		scene.addChild(charMesh);
 
 		const charBody = physicsEngine.createBody(charMesh, {
@@ -72,27 +93,36 @@ RedGPU.init(
 			shape: RedGPU.Physics.PHYSICS_SHAPE.CAPSULE
 		});
 
+		// [KO] 캐릭터 컨트롤러 생성 (오프셋 0.1m)
+		// [EN] Create character controller (offset 0.1m)
 		const charController = physicsEngine.createCharacterController(0.1);
 
-		// 3. 입력 핸들링
+		// [KO] 입력 핸들링
+		// [EN] Input handling
 		const keys = { w: false, s: false, a: false, d: false };
-		window.addEventListener('keydown', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; });
-		window.addEventListener('keyup', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false; });
+		window.addEventListener('keydown', (e) => {
+			const k = e.key.toLowerCase();
+			if (keys.hasOwnProperty(k)) keys[k] = true;
+		});
+		window.addEventListener('keyup', (e) => {
+			const k = e.key.toLowerCase();
+			if (keys.hasOwnProperty(k)) keys[k] = false;
+		});
 
-		// 4. 이동 및 리셋 로직
 		const movement = { x: 0, y: 0, z: 0 };
-		const speed = 0.2;
-		const gravityConst = -0.1;
+		const speed = 0.15;
+		const gravityConst = -0.05;
 
 		const resetCharacter = () => {
-			charBody.nativeBody.setTranslation({ x: 0, y: 5, z: 0 }, true);
+			charBody.nativeBody.setTranslation({ x: 0, y: 2, z: 0 }, true);
 			movement.x = movement.y = movement.z = 0;
 			Object.keys(keys).forEach(k => keys[k] = false);
 		};
 
 		const renderer = new RedGPU.Renderer();
 		const render = (time) => {
-			// Camera relative movement calculation
+			// [KO] 카메라 방향 기준 이동 계산
+			// [EN] Calculate movement based on camera direction
 			const camX = controller.camera.x;
 			const camZ = controller.camera.z;
 			const targetX = controller.centerX;
@@ -100,8 +130,11 @@ RedGPU.init(
 
 			let fX = targetX - camX;
 			let fZ = targetZ - camZ;
-			const fLen = Math.sqrt(fX*fX + fZ*fZ);
-			if(fLen > 0) { fX /= fLen; fZ /= fLen; }
+			const fLen = Math.sqrt(fX * fX + fZ * fZ);
+			if (fLen > 0) {
+				fX /= fLen;
+				fZ /= fLen;
+			}
 
 			const rX = -fZ;
 			const rZ = fX;
@@ -122,9 +155,12 @@ RedGPU.init(
 			movement.z = (fZ * -inputZ + rZ * inputX) * speed;
 			movement.y += gravityConst;
 
+			// [KO] 컨트롤러를 통한 충돌 감지 및 이동 계산
+			// [EN] Calculate collider movement and move through the controller
 			charController.computeColliderMovement(charBody.nativeCollider, movement);
 			const correctedMovement = charController.computedMovement();
 			const currentPos = charBody.nativeBody.translation();
+			
 			charBody.nativeBody.setNextKinematicTranslation({
 				x: currentPos.x + correctedMovement.x,
 				y: currentPos.y + correctedMovement.y,
@@ -134,13 +170,19 @@ RedGPU.init(
 			const isGrounded = charController.computedGrounded ? charController.computedGrounded() : false;
 			if (isGrounded) movement.y = 0;
 
-			controller.centerX = charMesh.x; controller.centerY = charMesh.y; controller.centerZ = charMesh.z;
+			// [KO] 카메라가 캐릭터를 따라가도록 업데이트
+			// [EN] Update camera to follow the character
+			controller.centerX = charMesh.x;
+			controller.centerY = charMesh.y;
+			controller.centerZ = charMesh.z;
 		};
 		renderer.start(redGPUContext, render);
 
 		renderTestPane(redGPUContext, resetCharacter);
 	},
-	(failReason) => { console.error(failReason); }
+	(failReason) => {
+		console.error(failReason);
+	}
 );
 
 const renderTestPane = async (redGPUContext, resetCharacter) => {
@@ -148,6 +190,12 @@ const renderTestPane = async (redGPUContext, resetCharacter) => {
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
-	pane.addBlade({ view: 'text', label: 'Control', value: 'Use WASD to Move!', parse: (v) => v, readonly: true });
+	pane.addBlade({
+		view: 'text',
+		label: 'Control',
+		value: 'Use WASD to Move!',
+		parse: (v) => v,
+		readonly: true
+	});
 	pane.addButton({ title: 'Reset Character' }).on('click', () => resetCharacter());
 };

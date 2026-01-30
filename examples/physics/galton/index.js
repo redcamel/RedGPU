@@ -7,10 +7,10 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
-		// [KO] 카메라 컨트롤러 설정
-		// [EN] Set up camera controller
+		// [KO] 카메라 컨트롤러 설정: 축소된 보드 크기에 맞춰 거리 조정
+		// [EN] Set up camera controller: Adjust distance for reduced board size
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 45;
+		controller.distance = 25;
 		controller.tilt = -20;
 
 		const scene = new RedGPU.Display.Scene();
@@ -28,6 +28,8 @@ RedGPU.init(
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
 
+		const RAPIER = physicsEngine.RAPIER;
+
 		// [KO] 조명 설정
 		// [EN] Lighting setup
 		const ambientLight = new RedGPU.Light.AmbientLight();
@@ -37,8 +39,10 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		// [KO] 정적 박스 생성 함수 (보드 프레임용)
-		// [EN] Static box creation function (for board frame)
+		/**
+		 * [KO] 정적 박스 생성 함수 (보드 프레임용)
+		 * [EN] Static box creation function (for board frame)
+		 */
 		const createStaticBox = (x, y, z, w, h, d, color = '#444444') => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
@@ -59,32 +63,32 @@ RedGPU.init(
 			});
 		};
 
-		// [KO] 보드 구조물 생성
-		// [EN] Create board structures
-		createStaticBox(0, 0, -1, 30, 40, 1, '#444444'); // [KO] 뒷벽 [EN] Back wall
-		createStaticBox(0, -20, 1, 30, 1, 5, '#666666'); // [KO] 바닥 [EN] Floor
-		createStaticBox(-15, 0, 1, 1, 40, 5, '#666666'); // [KO] 왼쪽벽 [EN] Left wall
-		createStaticBox(15, 0, 1, 1, 40, 5, '#666666'); // [KO] 오른쪽벽 [EN] Right wall
+		// [KO] 보드 구조물 생성 (약 15m x 20m 스케일)
+		// [EN] Create board structures (approx. 15m x 20m scale)
+		createStaticBox(0, 0, -0.5, 15, 20, 1, '#444444'); // 뒷벽
+		createStaticBox(0, -10, 0.5, 15, 1, 2, '#666666'); // 바닥
+		createStaticBox(-7.5, 0, 0.5, 1, 20, 2, '#666666'); // 왼쪽벽
+		createStaticBox(7.5, 0, 0.5, 1, 20, 2, '#666666'); // 오른쪽벽
 
-		// [KO] 핀(Pins) 배치: 삼각형 격자 형태로 배치하여 구슬의 진로를 분산시킴
-		// [EN] Pin placement: Arranged in a triangular grid to disperse marble paths
-		const pinGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.2, 0.2, 2);
+		// [KO] 핀(Pins) 배치: 현실적인 간격(1.2m)으로 조정
+		// [EN] Pin placement: Adjusted to realistic spacing (1.2m)
+		const pinGeo = new RedGPU.Primitive.Cylinder(redGPUContext, 0.1, 0.1, 1);
 		const pinMat = new RedGPU.Material.PhongMaterial(redGPUContext);
 		pinMat.color.setColorByHEX('#888888');
 
 		for (let row = 0; row < 12; row++) {
-			const y = 10 - row * 2.5;
+			const y = 6 - row * 1.25;
 			const cols = row + 1;
-			const startX = -(cols - 1) * 2.5 / 2;
+			const startX = -(cols - 1) * 1.25 / 2;
 			for (let col = 0; col < cols; col++) {
 				const pinMesh = new RedGPU.Display.Mesh(
 					redGPUContext,
 					pinGeo,
 					pinMat
 				);
-				pinMesh.x = startX + col * 2.5;
+				pinMesh.x = startX + col * 1.25;
 				pinMesh.y = y;
-				pinMesh.z = 0.5;
+				pinMesh.z = 0.25;
 				pinMesh.rotationX = 90;
 				scene.addChild(pinMesh);
 				physicsEngine.createBody(pinMesh, {
@@ -94,10 +98,11 @@ RedGPU.init(
 			}
 		}
 
-		// [KO] 구슬 생성 및 관리
-		// [EN] Marble creation and management
+		// [KO] 구슬 생성 및 관리 시스템 (지름 0.5m)
+		// [EN] Marble creation and management system (diameter 0.5m)
 		const activeBalls = [];
-		const ballGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
+		const ballGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.25);
+
 		const createBall = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
@@ -106,9 +111,9 @@ RedGPU.init(
 				ballGeo,
 				material
 			);
-			ballMesh.x = (Math.random() * 0.4) - 0.2;
-			ballMesh.y = 18;
-			ballMesh.z = 0.5;
+			ballMesh.x = (Math.random() * 0.2) - 0.1;
+			ballMesh.y = 9;
+			ballMesh.z = 0.25;
 			scene.addChild(ballMesh);
 
 			const body = physicsEngine.createBody(ballMesh, {
@@ -122,8 +127,6 @@ RedGPU.init(
 			const ballInfo = { mesh: ballMesh, body };
 			activeBalls.push(ballInfo);
 
-			// [KO] 성능을 위해 일정 시간 후 구슬 제거
-			// [EN] Remove marble after a set time for performance
 			setTimeout(() => {
 				const idx = activeBalls.indexOf(ballInfo);
 				if (idx > -1) {
@@ -134,8 +137,6 @@ RedGPU.init(
 			}, 15000);
 		};
 
-		// [KO] 씬 초기화 함수
-		// [EN] Scene reset function
 		const resetScene = () => {
 			activeBalls.forEach(item => {
 				physicsEngine.removeBody(item.body);
@@ -155,10 +156,6 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- */
 const renderTestPane = async (redGPUContext, intervalId, createBall, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
@@ -169,8 +166,6 @@ const renderTestPane = async (redGPUContext, intervalId, createBall, resetScene)
 		pause: false
 	};
 	
-	// [KO] 스폰 속도 조절
-	// [EN] Adjust spawn rate
 	pane.addBinding(params, 'spawnRate', {
 		min: 50,
 		max: 1000
@@ -179,14 +174,10 @@ const renderTestPane = async (redGPUContext, intervalId, createBall, resetScene)
 		if (!params.pause) intervalId = setInterval(createBall, ev.value);
 	});
 
-	// [KO] 일시 정지 설정
-	// [EN] Pause setting
 	pane.addBinding(params, 'pause').on('change', (ev) => {
 		if (ev.value) clearInterval(intervalId);
 		else intervalId = setInterval(createBall, params.spawnRate);
 	});
 
-	// [KO] 씬 초기화 버튼
-	// [EN] Scene reset button
 	pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
 };

@@ -10,7 +10,7 @@ RedGPU.init(
 		// [KO] 카메라 컨트롤러 설정
 		// [EN] Set up camera controller
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 20;
+		controller.distance = 15;
 		controller.tilt = -30;
 
 		const scene = new RedGPU.Display.Scene();
@@ -37,11 +37,11 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		// [KO] 바닥 생성 및 정적 물리 바디 적용
-		// [EN] Create ground and apply static physics body
+		// [KO] 바닥 생성 (10m x 10m) 및 정적 물리 바디 적용
+		// [EN] Create ground (10m x 10m) and apply static physics body
 		const groundMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
-			new RedGPU.Primitive.Ground(redGPUContext, 15, 15),
+			new RedGPU.Primitive.Ground(redGPUContext, 10, 10),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
 		groundMesh.material.color.setColorByHEX('#444444');
@@ -63,7 +63,7 @@ RedGPU.init(
 			material.color.setColorByHEX('#ffffff');
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
-				new RedGPU.Primitive.Sphere(redGPUContext, 1),
+				new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
 				material
 			);
 			mesh.x = x;
@@ -95,22 +95,18 @@ RedGPU.init(
 				scene.removeChild(item.mesh);
 			});
 			activeObjects.length = 0;
-			createBall(0, 10, 0);
+			createBall(0, 5, 0);
 		};
 
 		// [KO] 초기 구슬 생성
 		// [EN] Create initial ball
-		createBall(0, 10, 0);
+		createBall(0, 5, 0);
 
 		/**
 		 * [KO] 충돌 시작 시 호출되는 콜백 함수
 		 * [EN] Callback function called when a collision starts
-		 * @param h1 - [KO] 첫 번째 충돌체 핸들 [EN] First collider handle
-		 * @param h2 - [KO] 두 번째 충돌체 핸들 [EN] Second collider handle
 		 */
 		physicsEngine.onCollisionStarted = (h1, h2) => {
-			// [KO] 엔진의 getBodyByColliderHandle를 사용하여 직접 바디와 메쉬에 접근합니다.
-			// [EN] Directly access the body and mesh using the engine's getBodyByColliderHandle.
 			const body1 = physicsEngine.getBodyByColliderHandle(h1);
 			const body2 = physicsEngine.getBodyByColliderHandle(h2);
 			
@@ -128,15 +124,11 @@ RedGPU.init(
 	}
 );
 
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- * [EN] Create a control panel for testing
- */
 const renderTestPane = async (redGPUContext, createBall, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
-	pane.addButton({ title: 'Spawn Ball' }).on('click', () => createBall((Math.random() * 4) - 2, 15, (Math.random() * 4) - 2));
+	pane.addButton({ title: 'Spawn Ball' }).on('click', () => createBall((Math.random() * 2) - 1, 10, (Math.random() * 2) - 1));
 	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 };

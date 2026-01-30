@@ -7,8 +7,10 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
+		// [KO] 카메라 설정: 수천 개의 객체를 넓게 보기 위한 설정
+		// [EN] Camera setup: Configured to view thousands of objects widely
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 60;
+		controller.distance = 40;
 		controller.tilt = -35;
 
 		const scene = new RedGPU.Display.Scene();
@@ -17,6 +19,7 @@ RedGPU.init(
 		view.grid = true;
 		redGPUContext.addView(view);
 
+		// [KO] 물리 엔진 초기화
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
@@ -28,37 +31,46 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
+		// [KO] 바닥 생성 (40m x 40m)
+		// [EN] Create ground (40m x 40m)
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		ground.scaleX = 60;
+		ground.scaleX = 40;
 		ground.scaleY = 1;
-		ground.scaleZ = 60;
+		ground.scaleZ = 40;
 		ground.y = -0.5;
 		ground.material.color.setColorByHEX('#222222');
 		scene.addChild(ground);
-		physicsEngine.createBody(ground, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+		physicsEngine.createBody(ground, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
 
 		const activeObjects = [];
 		const boxGeo = new RedGPU.Primitive.Box(redGPUContext);
 		const boxMat = new RedGPU.Material.PhongMaterial(redGPUContext);
 
+		/**
+		 * [KO] 0.5m 크기의 작은 박스 생성 함수 (스트레스 테스트용)
+		 * [EN] Function to create small 0.5m boxes (for stress testing)
+		 */
 		const createBox = () => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				boxGeo,
 				boxMat
 			);
-			mesh.x = (Math.random() * 20) - 10;
-			mesh.y = 20 + (Math.random() * 10);
-			mesh.z = (Math.random() * 20) - 10;
+			mesh.x = (Math.random() * 10) - 5;
+			mesh.y = 10 + (Math.random() * 5);
+			mesh.z = (Math.random() * 10) - 5;
 			mesh.rotationX = Math.random() * 360;
 			mesh.rotationY = Math.random() * 360;
-			mesh.scaleX = 0.8;
-			mesh.scaleY = 0.8;
-			mesh.scaleZ = 0.8;
+			mesh.scaleX = 0.5;
+			mesh.scaleY = 0.5;
+			mesh.scaleZ = 0.5;
 			scene.addChild(mesh);
 
 			const body = physicsEngine.createBody(mesh, {
@@ -84,7 +96,9 @@ RedGPU.init(
 
 		renderTestPane(redGPUContext, createBox, resetScene, activeObjects);
 	},
-	(failReason) => { console.error(failReason); }
+	(failReason) => {
+		console.error(failReason);
+	}
 );
 
 const renderTestPane = async (redGPUContext, createBox, resetScene, activeObjects) => {

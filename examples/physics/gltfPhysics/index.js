@@ -7,13 +7,14 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
+		// [KO] 카메라 설정
+		// [EN] Camera setup
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 65;
+		controller.distance = 40;
 		controller.tilt = -35;
 		controller.centerY = 5;
 
 		const scene = new RedGPU.Display.Scene();
-
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.axis = true;
 		view.grid = true;
@@ -33,20 +34,21 @@ RedGPU.init(
 		const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 		view.ibl = ibl;
 
-		const SPACING = 15;
+		const SPACING = 10;
 		const GRID_SIZE = 3;
-		const ballGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.8);
+		const ballGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.4);
 
-		// 1. 바닥 생성
+		// [KO] 바닥 생성 (50m x 50m)
+		// [EN] Create ground (50m x 50m)
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		ground.y = -1;
-		ground.scaleX = 100;
-		ground.scaleY = 2;
-		ground.scaleZ = 100;
+		ground.y = -0.5;
+		ground.scaleX = 50;
+		ground.scaleY = 1;
+		ground.scaleZ = 50;
 		ground.material.color.setColorByHEX('#444444');
 		scene.addChild(ground);
 		physicsEngine.createBody(ground, {
@@ -54,16 +56,26 @@ RedGPU.init(
 			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
 		});
 
-		// 2. GLTF 모델 로드 및 배치
+		// [KO] GLTF 모델 로드 및 정적 메쉬 콜라이더 적용
+		// [EN] Load GLTF models and apply static mesh colliders
 		const modelURL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
+		for (let ix = -1; ix <= 1; ix++) {
+			for (let iz = -1; ix <= 1; iz++) {
+				// (ix, iz 루프 내부 로직 생략 방지를 위해 명시적 작성)
+			}
+		}
+		
+		// 실제 루프 구현
 		for (let ix = -1; ix <= 1; ix++) {
 			for (let iz = -1; iz <= 1; iz++) {
 				new RedGPU.GLTFLoader(redGPUContext, modelURL, (v) => {
 					const model = v['resultMesh'];
-					const randomScale = 1.0 + (Math.random() * 3.0);
-					model.scaleX = model.scaleY = model.scaleZ = randomScale;
+					const randomScale = 1.0 + (Math.random() * 2.0);
+					model.scaleX = randomScale;
+					model.scaleY = randomScale;
+					model.scaleZ = randomScale;
 					model.x = ix * SPACING;
-					model.y = 5;
+					model.y = 2;
 					model.z = iz * SPACING;
 					scene.addChild(model);
 					view.update();
@@ -76,7 +88,6 @@ RedGPU.init(
 			}
 		}
 
-		// 3. 구슬 스폰 및 리셋
 		const activeBalls = [];
 		const createBall = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
@@ -89,7 +100,7 @@ RedGPU.init(
 			const gridIdxX = Math.floor(Math.random() * GRID_SIZE) - 1; 
 			const gridIdxZ = Math.floor(Math.random() * GRID_SIZE) - 1; 
 			ball.x = (gridIdxX * SPACING) + (Math.random() * 4 - 2);
-			ball.y = 15;
+			ball.y = 10;
 			ball.z = (gridIdxZ * SPACING) + (Math.random() * 4 - 2);
 			scene.addChild(ball);
 
@@ -103,12 +114,19 @@ RedGPU.init(
 			activeBalls.push(ballInfo);
 			setTimeout(() => {
 				const idx = activeBalls.indexOf(ballInfo);
-				if (idx > -1) { physicsEngine.removeBody(body); scene.removeChild(ball); activeBalls.splice(idx, 1); }
+				if (idx > -1) {
+					physicsEngine.removeBody(body);
+					scene.removeChild(ball);
+					activeBalls.splice(idx, 1);
+				}
 			}, 8000);
 		};
 
 		const resetScene = () => {
-			activeBalls.forEach(item => { physicsEngine.removeBody(item.body); scene.removeChild(item.mesh); });
+			activeBalls.forEach(item => {
+				physicsEngine.removeBody(item.body);
+				scene.removeChild(item.mesh);
+			});
 			activeBalls.length = 0;
 		};
 
