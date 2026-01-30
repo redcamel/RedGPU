@@ -27,7 +27,6 @@ RedGPU.init(
 		scene.lightManager.ambientLight = ambientLight;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.intensity = 1;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		const beltSystems = [];

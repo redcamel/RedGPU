@@ -27,7 +27,6 @@ RedGPU.init(
 		scene.lightManager.ambientLight = ambientLight;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.intensity = 1;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');

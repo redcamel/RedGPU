@@ -30,7 +30,6 @@ RedGPU.init(
 		scene.lightManager.ambientLight = ambientLight;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.intensity = 1;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 1. 천장 앵커 포인트

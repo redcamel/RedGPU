@@ -35,7 +35,6 @@ RedGPU.init(
         scene.lightManager.ambientLight = ambientLight;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.intensity = 1;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // [KO] 바닥 메시 생성 및 정적 물리 바디 적용

@@ -26,7 +26,6 @@ RedGPU.init(
 		scene.lightManager.ambientLight = ambientLight;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.intensity = 1;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
 		// 2. 보드 프레임
