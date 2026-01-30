@@ -36,29 +36,37 @@ class Capsule extends Primitive {
             const totalVerticalSegments = capSegments * 2 + heightSegments;
             const halfCylinderHeight = cylinderHeight / 2;
 
+            const capArcLength = (Math.PI / 2) * radius;
+            const totalArcLength = capArcLength * 2 + cylinderHeight;
+
             for (let iy = 0; iy <= totalVerticalSegments; iy++) {
                 const verticesRow: number[] = [];
-                const v = iy / totalVerticalSegments;
-
                 let y = 0;
                 let currentRadius = 0;
+                let currentDistance = 0;
 
                 if (iy < capSegments) {
                     // Top Cap
                     const theta = (iy / capSegments) * (Math.PI / 2);
                     y = halfCylinderHeight + radius * Math.cos(theta);
                     currentRadius = radius * Math.sin(theta);
+                    currentDistance = (iy / capSegments) * capArcLength;
                 } else if (iy <= capSegments + heightSegments) {
                     // Cylinder Body
                     const t = (iy - capSegments) / heightSegments;
                     y = halfCylinderHeight - t * cylinderHeight;
                     currentRadius = radius;
+                    currentDistance = capArcLength + t * cylinderHeight;
                 } else {
                     // Bottom Cap
-                    const theta = Math.PI / 2 + ((iy - (capSegments + heightSegments)) / capSegments) * (Math.PI / 2);
+                    const t = (iy - (capSegments + heightSegments)) / capSegments;
+                    const theta = (Math.PI / 2) + t * (Math.PI / 2);
                     y = -halfCylinderHeight + radius * Math.cos(theta);
                     currentRadius = radius * Math.sin(theta);
+                    currentDistance = capArcLength + cylinderHeight + t * capArcLength;
                 }
+
+                const v = currentDistance / totalArcLength;
 
                 for (let ix = 0; ix <= radialSegments; ix++) {
                     const u = ix / radialSegments;
