@@ -1,3 +1,4 @@
+import { vec3 } from "gl-matrix";
 import Mesh from "../display/mesh/Mesh";
 
 /**
@@ -60,6 +61,11 @@ class PickingEvent {
      */
     movementY: number = 0;
     /**
+     * [KO] 월드 공간상의 교차 지점
+     * [EN] Intersection point in world space
+     */
+    point: vec3 = vec3.create();
+    /**
      * [KO] 로컬 X 좌표
      * [EN] Local X coordinate
      * @defaultValue 0
@@ -77,6 +83,11 @@ class PickingEvent {
      * @defaultValue 0
      */
     localZ: number = 0;
+    /**
+     * [KO] 교차된 삼각형의 인덱스
+     * [EN] Index of the intersected triangle
+     */
+    faceIndex: number = -1;
     /**
      * [KO] Alt 키 눌림 여부
      * [EN] Whether Alt key is pressed

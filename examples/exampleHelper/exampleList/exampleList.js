@@ -798,6 +798,15 @@ const ExampleList = [
                             en: `Here's an example of setting up mouse events on a TextField3D.`
                         },
                     },
+                    {
+                        name: 'Raycasting (Precision Picking)',
+                        path: '3d/mouseEvent/raycasting',
+                        thumb: '3d/mouseEvent/raycasting/thumb.png',
+                        description: {
+                            ko: ``,
+                            en: `This example demonstrates high-precision raycasting on complex geometry (TorusKnot).<br/>It calculates the exact intersection point, face index, and local coordinates on the CPU by analyzing vertex buffers.`
+                        },
+                    },
                 ]
             },
             {

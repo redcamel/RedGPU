@@ -5,8 +5,10 @@
  */
 import PickingEvent from "./PickingEvent";
 import PICKING_EVENT_TYPE from "./PICKING_EVENT_TYPE";
+import Raycaster from "./Raycaster";
 
 export {
     PICKING_EVENT_TYPE,
     PickingEvent,
+    Raycaster
 }

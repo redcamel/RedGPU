@@ -5,6 +5,7 @@ import View3D from "../../display/view/View3D";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import PickingEvent from "../PickingEvent";
 import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
+import Raycaster from "../Raycaster";
 
 /**
  * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
@@ -34,6 +35,7 @@ class PickingManager {
     #prevPickingEvent: PickingEvent
     #prevOverTarget: Mesh
     #videoMemorySize: number = 0
+	#raycaster: Raycaster = new Raycaster();
 
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
@@ -289,39 +291,19 @@ class PickingManager {
     }
 
     #fireEvent(type, e: PickingEvent) {
-        if (e.target.events[type]) {
-            // const screenPoint = [
-            // 	this.#mouseX,
-            // 	this.#mouseY,
-            // 	this.#view.pixelRectObject.width,
-            // 	this.#view.pixelRectObject.height,
-            // ];
-            // const worldPoint = screenToWorld(screenPoint, this.#view);
-            // const origin = vec3.fromValues(this.#view.camera.x, this.#view.camera.y, this.#view.camera.z);
-            // // 카메라의 위치를 사용
-            // const direction = vec3.subtract(vec3.create(), vec3.fromValues(worldPoint[0], worldPoint[1], worldPoint[2]), origin);
-            // 방향은 카메라에서 월드 포인트로의 벡터
-            // const rayResult = raycast(
-            // 	vec3.fromValues(worldPoint[0], worldPoint[1], worldPoint[2]),
-            // 	vec3.normalize(vec3.create(), direction),
-            // 	vec3.fromValues(
-            // 		e.target.geometry.bound.minX * e.target.scaleX,
-            // 		e.target.geometry.bound.minY * e.target.scaleY,
-            // 		e.target.geometry.bound.minZ * e.target.scaleZ
-            // 	),
-            // 	vec3.fromValues(
-            // 		e.target.geometry.bound.maxX * e.target.scaleX,
-            // 		e.target.geometry.bound.maxY * e.target.scaleY,
-            // 		e.target.geometry.bound.maxZ * e.target.scaleZ
-            // 	),
-            // 	mat4.invert(mat4.create(), e.target.modelMatrix)
-            // )
-            // if (rayResult) {
-            // 	e.localX = rayResult[0]
-            // 	e.localY = rayResult[1]
-            // 	e.localZ = rayResult[2]
-            // }
-            // console.log('확인',e.type,e.localX,e.localY,e.localZ)
+        if (e.target && e.target.events[type]) {
+			// [KO] 광선 추적을 통한 정밀 교차 정보 산출
+			// [EN] Calculate precise intersection information via raycasting
+			this.#raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view);
+			const intersects = this.#raycaster.intersectObject(e.target);
+			if (intersects.length > 0) {
+				const hit = intersects[0];
+				e.point = hit.point;
+				e.localX = hit.localPoint[0];
+				e.localY = hit.localPoint[1];
+				e.localZ = hit.localPoint[2];
+				e.faceIndex = hit.faceIndex;
+			}
             e.target.events[type](e)
         }
     };

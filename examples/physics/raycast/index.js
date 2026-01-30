@@ -109,28 +109,21 @@ RedGPU.init(
 		 * [KO] 마우스 클릭 시 레이캐스트(Raycast)를 수행하는 이벤트 리스너
 		 * [EN] Event listener that performs raycasting on mouse click
 		 */
+		const raycaster = new RedGPU.Picking.Raycaster();
 		canvas.addEventListener('mousedown', (event) => {
 			const rect = canvas.getBoundingClientRect();
 			const mouseX = event.clientX - rect.left;
 			const mouseY = event.clientY - rect.top;
 
-			// [KO] 1. 클릭한 화면 좌표를 월드 좌표로 변환하여 방향 벡터를 구합니다.
-			// [EN] 1. Convert the clicked screen coordinates to world coordinates to get the direction vector.
-			const worldPoint = RedGPU.Math.screenToWorld(mouseX, mouseY, view);
-			if (!worldPoint) return;
-
-			const rayOrigin = { x: view.rawCamera.x, y: view.rawCamera.y, z: view.rawCamera.z };
-			const rayDir = {
-				x: worldPoint[0] - rayOrigin.x,
-				y: worldPoint[1] - rayOrigin.y,
-				z: worldPoint[2] - rayOrigin.z
-			};
-			const mag = Math.sqrt(rayDir.x * rayDir.x + rayDir.y * rayDir.y + rayDir.z * rayDir.z);
-			const normalizedDir = { x: rayDir.x / mag, y: rayDir.y / mag, z: rayDir.z / mag };
+			// [KO] 1. Raycaster를 사용하여 클릭한 지점의 광선을 생성합니다.
+			// [EN] 1. Use Raycaster to generate a ray at the clicked point.
+			raycaster.setFromCamera(mouseX, mouseY, view);
 
 			// [KO] 2. 물리 엔진의 월드에서 레이를 발사합니다. (최대 거리 1000)
 			// [EN] 2. Cast a ray in the physics engine's world. (Max distance 1000)
-			const ray = new RAPIER.Ray(rayOrigin, normalizedDir);
+			const rayOrigin = { x: raycaster.ray.origin[0], y: raycaster.ray.origin[1], z: raycaster.ray.origin[2] };
+			const rayDir = { x: raycaster.ray.direction[0], y: raycaster.ray.direction[1], z: raycaster.ray.direction[2] };
+			const ray = new RAPIER.Ray(rayOrigin, rayDir);
 			const hit = physicsEngine.nativeWorld.castRay(ray, 1000.0, true);
 
 			if (hit) {
@@ -146,9 +139,9 @@ RedGPU.init(
 						// [KO] 레이의 방향으로 충격량(Impulse)을 가하고 메쉬 색상을 랜덤하게 변경합니다.
 						// [EN] Apply an impulse in the ray's direction and randomly change the mesh color.
 						targetBody.applyImpulse({
-							x: normalizedDir.x * 40,
-							y: (normalizedDir.y * 40) + 15,
-							z: normalizedDir.z * 40
+							x: rayDir.x * 40,
+							y: (rayDir.y * 40) + 15,
+							z: rayDir.z * 40
 						});
 						targetBody.mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
 					}
@@ -176,7 +169,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
+	const { setDebugButtons } = await import("../../../examples/exampleHelper/createExample/panes/index.js");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
 	
