@@ -13,7 +13,7 @@ redUnit.testGroup(
 				0, 0, 1, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(identity));
+			run(RedGPU.Math.matToEuler(identity));
 		}, [0, 0, 0]);
 
 		runner.defineTest('Test 90 degree rotation about Y', function (run) {
@@ -23,7 +23,7 @@ redUnit.testGroup(
 				-1, 0, 0, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(rotationAboutY));
+			run(RedGPU.Math.matToEuler(rotationAboutY));
 		}, [0, -Math.PI / 2, 0]);
 
 		runner.defineTest('Test 90 degree rotation about X', function (run) {
@@ -33,7 +33,7 @@ redUnit.testGroup(
 				0, 1, 0, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(rotationAboutX));
+			run(RedGPU.Math.matToEuler(rotationAboutX));
 		}, [-Math.PI / 2, 0, 0]);
 
 		runner.defineTest('Test 90 degree rotation about Z', function (run) {
@@ -43,7 +43,7 @@ redUnit.testGroup(
 				0, 0, 1, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(rotationAboutZ));
+			run(RedGPU.Math.matToEuler(rotationAboutZ));
 		}, [0, 0, Math.PI / 2]);
 
 	}
@@ -59,7 +59,7 @@ redUnit.testGroup(
 				1, 0, 0, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(rotationAboutY));
+			run(RedGPU.Math.matToEuler(rotationAboutY));
 		}, [0, Math.PI / 2, 0]);
 
 		runner.defineTest('Test -90 degree rotation about X', function (run) {
@@ -69,7 +69,7 @@ redUnit.testGroup(
 				0, -1, 0, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(rotationAboutX));
+			run(RedGPU.Math.matToEuler(rotationAboutX));
 		}, [Math.PI / 2, 0, 0]);
 
 		runner.defineTest('Test -90 degree rotation about Z', function (run) {
@@ -79,7 +79,7 @@ redUnit.testGroup(
 				0, 0, 1, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(rotationAboutZ));
+			run(RedGPU.Math.matToEuler(rotationAboutZ));
 		}, [0, 0, -Math.PI / 2]);
 
 	}
@@ -97,9 +97,9 @@ redUnit.testGroup(
 				0, 0, 0, 1
 			];
 			run([
-					RedGPU.Util.matToEuler(rotationAboutY)[0],
-					+RedGPU.Util.matToEuler(rotationAboutY)[1].toFixed(15),
-					RedGPU.Util.matToEuler(rotationAboutY)[2]
+					RedGPU.Math.matToEuler(rotationAboutY)[0],
+					+RedGPU.Math.matToEuler(rotationAboutY)[1].toFixed(15),
+					RedGPU.Math.matToEuler(rotationAboutY)[2]
 				]
 			);
 		}, [0, -((Math.PI / 4).toFixed(15)), 0]);
@@ -111,7 +111,7 @@ redUnit.testGroup(
 				0, Math.sqrt(2) / 2, Math.sqrt(2) / 2, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(rotationAboutX));
+			run(RedGPU.Math.matToEuler(rotationAboutX));
 		}, [-Math.PI / 4, 0, 0]);
 
 		runner.defineTest('Test 45 degree rotation about Z', function (run) {
@@ -121,7 +121,7 @@ redUnit.testGroup(
 				0, 0, 1, 0,
 				0, 0, 0, 1
 			];
-			run(RedGPU.Util.matToEuler(rotationAboutZ));
+			run(RedGPU.Math.matToEuler(rotationAboutZ));
 		}, [0, 0, -Math.PI / 4]);
 
 	}

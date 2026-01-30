@@ -4,7 +4,7 @@ import * as RedGPU from "../../../dist/index.js";
 const redUnit = new RedUnit('RedGPU - sortTransparentObjects');
 
 redUnit.testGroup(
-	'RedGPU.Util.sortTransparentObjects',
+	'RedGPU.Math.sortTransparentObjects',
 	(runner) => {
 		runner.defineTest('Sort by distance (descending)', (run) => {
 			const cameraPos = { x: 0, y: 0, z: 10 };
@@ -15,7 +15,7 @@ redUnit.testGroup(
 			const objFar = mockMesh(0, 0, 0, 'far');   // distance sq = 100
 
 			const objects = [objNear, objFar, objMid];
-			const sorted = RedGPU.Util.sortTransparentObjects(cameraPos, objects);
+			const sorted = RedGPU.Math.sortTransparentObjects(cameraPos, objects);
 
 			// Descending order (far to near)
 			run(sorted[0].mesh.uuid === 'far' && sorted[1].mesh.uuid === 'mid' && sorted[2].mesh.uuid === 'near');
@@ -26,7 +26,7 @@ redUnit.testGroup(
 			const obj = { mesh: { x: 10, y: 0, z: 0, uuid: 'cache-test' } };
 			
 			const objects = [obj];
-			const sorted = RedGPU.Util.sortTransparentObjects(cameraPos, objects);
+			const sorted = RedGPU.Math.sortTransparentObjects(cameraPos, objects);
 			
 			// Modify original mesh position - if it uses cache, distance won't change in current sort logic if we were to re-sort
 			// But the function is intended for single pass. Caching is per-call.

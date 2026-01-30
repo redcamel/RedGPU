@@ -4,12 +4,12 @@ import * as RedGPU from "../../../dist/index.js";
 const redUnit = new RedUnit('RedGPU - computeViewFrustumPlanes');
 
 redUnit.testGroup(
-	'RedGPU.Util.computeViewFrustumPlanes',
+	'RedGPU.Math.computeViewFrustumPlanes',
 	(runner) => {
 		runner.defineTest('Identity matrices', (run) => {
 			const projectionMTX = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
 			const cameraMTX = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
-			const planes = RedGPU.Util.computeViewFrustumPlanes(projectionMTX, cameraMTX);
+			const planes = RedGPU.Math.computeViewFrustumPlanes(projectionMTX, cameraMTX);
 			
 			// Should return 6 planes
 			run(planes.length === 6);
@@ -18,7 +18,7 @@ redUnit.testGroup(
 		runner.defineTest('Normalization check', (run) => {
 			const projectionMTX = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
 			const cameraMTX = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
-			const planes = RedGPU.Util.computeViewFrustumPlanes(projectionMTX, cameraMTX);
+			const planes = RedGPU.Math.computeViewFrustumPlanes(projectionMTX, cameraMTX);
 			
 			// Norm of (A, B, C) should be 1
 			const allNormalized = planes.every(p => {

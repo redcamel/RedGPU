@@ -4,7 +4,7 @@ import * as RedGPU from "../../../dist/index.js";
 const redUnit = new RedUnit('RedGPU - calculateNormals');
 
 redUnit.testGroup(
-	'RedGPU.Util.calculateNormals',
+	'RedGPU.Math.calculateNormals',
 	(runner) => {
 		runner.defineTest('Flat plane facing +Z', (run) => {
 			const vertices = [
@@ -17,7 +17,7 @@ redUnit.testGroup(
 				0, 2, 1,
 				1, 2, 3
 			];
-			const normals = RedGPU.Util.calculateNormals(vertices, indices);
+			const normals = RedGPU.Math.calculateNormals(vertices, indices);
 			
 			// All normals should be [0, 0, 1] or [0, 0, -1] depending on winding.
 			// cross(v2-v1, v0-v1)
@@ -38,7 +38,7 @@ redUnit.testGroup(
 				1, 1, 0
 			];
 			// No indices provided
-			const normals = RedGPU.Util.calculateNormals(vertices, []);
+			const normals = RedGPU.Math.calculateNormals(vertices, []);
 			run(normals.length === 9);
 		}, true);
 	}
