@@ -23,8 +23,6 @@ RedGPU.init(
 		scene.physicsEngine = physicsEngine;
 
 		const RAPIER = physicsEngine.RAPIER;
-		// [KO] 디버깅을 위해 JointData 키 목록 출력
-		console.log('RAPIER.JointData keys:', Object.keys(RAPIER.JointData));
 
 		const ambientLight = new RedGPU.Light.AmbientLight();
 		ambientLight.intensity = 0.5;
@@ -47,12 +45,17 @@ RedGPU.init(
 			mesh.material.color.setColorByHEX('#ff4444');
 			scene.addChild(mesh);
 			anchorMeshList.push(mesh);
-			return physicsEngine.createBody(mesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+			return physicsEngine.createBody(mesh, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+			});
 		};
 
 		const anchors = [
-			createAnchor(-10, -10), createAnchor(10, -10),
-			createAnchor(10, 10), createAnchor(-10, 10)
+			createAnchor(-10, -10),
+			createAnchor(10, -10),
+			createAnchor(10, 10),
+			createAnchor(-10, 10)
 		];
 
 		// 2. 탄성 플랫폼
@@ -69,34 +72,34 @@ RedGPU.init(
 		scene.addChild(platform);
 
 		const platformBody = physicsEngine.createBody(platform, {
-			type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
-			mass: 15, linearDamping: 0.5, angularDamping: 0.5
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
+			mass: 15,
+			linearDamping: 0.5,
+			angularDamping: 0.5
 		});
 
 		// 3. 스프링 물리 연결
 		const springStiffness = 1000.0;
 		const springDamping = 50.0;
-		const restLength = 10.0;
 
 		anchors.forEach((anchor, i) => {
 			const xSign = (i === 0 || i === 3) ? -1 : 1;
 			const zSign = (i === 0 || i === 1) ? -1 : 1;
 
+			// [KO] 조인트 생성 (ball 또는 spherical 시도)
+			// [EN] Create joint (try ball or spherical)
 			const JD = RAPIER.JointData;
-			let jointData;
+			const anchor1 = { x: 0, y: 0, z: 0 };
+			const anchor2 = { x: 10 * xSign, y: 0, z: 10 * zSign };
+			const jointData = JD.ball ? JD.ball(anchor1, anchor2) : JD.spherical(anchor1, anchor2);
 
-			// [KO] 가능한 명칭들을 순서대로 시도
-			if (typeof JD.spring === 'function') {
-				jointData = JD.spring(restLength, springStiffness, springDamping, { x: 0, y: 0, z: 0 }, { x: 10 * xSign, y: 0, z: 10 * zSign });
-			} else if (typeof JD.distance === 'function') {
-				jointData = JD.distance(restLength, { x: 0, y: 0, z: 0 }, { x: 10 * xSign, y: 0, z: 10 * zSign });
-			} else {
-				// 최후의 수단: ball 관절로 연결만 해둠
-				console.warn('Spring or Distance joint method not found, falling back to ball joint');
-				jointData = JD.ball({ x: 0, y: 0, z: 0 }, { x: 10 * xSign, y: 0, z: 10 * zSign });
-			}
-
-			physicsEngine.nativeWorld.createImpulseJoint(jointData, anchor.nativeBody, platformBody.nativeBody, true);
+			const joint = physicsEngine.nativeWorld.createImpulseJoint(jointData, anchor.nativeBody, platformBody.nativeBody, true);
+			
+			// [KO] 조인트에 탄성(Spring) 특성 부여
+			// [EN] Add spring properties to the joint
+			if (joint.setStiffness) joint.setStiffness(springStiffness);
+			if (joint.setDamping) joint.setDamping(springDamping);
 		});
 
 		// 4. 시각적 스프링 선
@@ -120,15 +123,15 @@ RedGPU.init(
 			mesh.y = 35;
 			mesh.z = (Math.random() * 10) - 5;
 			scene.addChild(mesh);
-			const body = physicsEngine.createBody(mesh, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX, mass: 2 });
+			const body = physicsEngine.createBody(mesh, {
+				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
+				mass: 2
+			});
 			activeObjects.push({ mesh, body });
 			setTimeout(() => {
 				const idx = activeObjects.findIndex(v => v.body === body);
-				if (idx > -1) {
-					physicsEngine.removeBody(body);
-					scene.removeChild(mesh);
-					activeObjects.splice(idx, 1);
-				}
+				if (idx > -1) { physicsEngine.removeBody(body); scene.removeChild(mesh); }
 			}, 10000);
 		};
 
@@ -157,7 +160,9 @@ RedGPU.init(
 
 		renderTestPane(redGPUContext, resetScene);
 	},
-	(failReason) => { console.error(failReason); }
+	(failReason) => {
+		console.error(failReason);
+	}
 );
 
 const renderTestPane = async (redGPUContext, resetScene) => {

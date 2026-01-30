@@ -41,7 +41,10 @@ RedGPU.init(
 		ground.y = -1;
 		ground.material.color.setColorByHEX('#333333');
 		scene.addChild(ground);
-		physicsEngine.createBody(ground, { type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC, shape: RedGPU.Physics.PHYSICS_SHAPE.BOX });
+		physicsEngine.createBody(ground, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
 
 		const activeRagdolls = [];
 
@@ -78,34 +81,30 @@ RedGPU.init(
 			const torso = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX, baseY + 3.2, offsetZ, 1.2, 1.8, 0.6, color);
 			const pelvis = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX, baseY + 2.0, offsetZ, 1.0, 0.6, 0.6, color);
 
-			const createJoint = (b1, b2, a1, a2) => {
+			// [KO] 조인트 생성 헬퍼
+			// [EN] Joint creation helper
+			const connect = (b1, b2, a1, a2) => {
 				const JD = RAPIER.JointData;
-				let params;
-				if (typeof JD.spherical === 'function') params = JD.spherical(a1, a2);
-				else if (typeof JD.ball === 'function') params = JD.ball(a1, a2);
-				else {
-					console.error('Ball/Spherical joint not supported');
-					return;
-				}
-				physicsEngine.nativeWorld.createImpulseJoint(params, b1.nativeBody, b2.nativeBody, true);
+				const jointData = JD.ball ? JD.ball(a1, a2) : JD.spherical(a1, a2);
+				physicsEngine.nativeWorld.createImpulseJoint(jointData, b1.nativeBody, b2.nativeBody, true);
 			};
 
-			createJoint(torso.body, head.body, { x: 0, y: 1.0, z: 0 }, { x: 0, y: -0.6, z: 0 });
-			createJoint(torso.body, pelvis.body, { x: 0, y: -1.0, z: 0 }, { x: 0, y: 0.4, z: 0 });
+			connect(torso.body, head.body, { x: 0, y: 1.0, z: 0 }, { x: 0, y: -0.6, z: 0 });
+			connect(torso.body, pelvis.body, { x: 0, y: -1.0, z: 0 }, { x: 0, y: 0.4, z: 0 });
 
 			const createArm = (side) => {
 				const upper = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 1.2), baseY + 3.5, offsetZ, 0.4, 1.0, 0.4, color);
 				const lower = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 1.2), baseY + 2.3, offsetZ, 0.3, 1.0, 0.3, color);
-				createJoint(torso.body, upper.body, { x: side * 0.8, y: 0.7, z: 0 }, { x: 0, y: 0.6, z: 0 });
-				createJoint(upper.body, lower.body, { x: 0, y: -0.6, z: 0 }, { x: 0, y: 0.6, z: 0 });
+				connect(torso.body, upper.body, { x: side * 0.8, y: 0.7, z: 0 }, { x: 0, y: 0.6, z: 0 });
+				connect(upper.body, lower.body, { x: 0, y: -0.6, z: 0 }, { x: 0, y: 0.6, z: 0 });
 				return [upper, lower];
 			};
 
 			const createLeg = (side) => {
 				const upper = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 0.4), baseY + 1.0, offsetZ, 0.4, 1.2, 0.4, color);
 				const lower = createLimb(new RedGPU.Primitive.Box(redGPUContext), offsetX + (side * 0.4), baseY - 0.5, offsetZ, 0.3, 1.2, 0.3, color);
-				createJoint(pelvis.body, upper.body, { x: side * 0.3, y: -0.3, z: 0 }, { x: 0, y: 0.7, z: 0 });
-				createJoint(upper.body, lower.body, { x: 0, y: -0.7, z: 0 }, { x: 0, y: 0.7, z: 0 });
+				connect(pelvis.body, upper.body, { x: side * 0.3, y: -0.3, z: 0 }, { x: 0, y: 0.7, z: 0 });
+				connect(upper.body, lower.body, { x: 0, y: -0.7, z: 0 }, { x: 0, y: 0.7, z: 0 });
 				return [upper, lower];
 			};
 

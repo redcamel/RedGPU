@@ -7,6 +7,8 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
+		// [KO] 카메라 컨트롤러 설정
+		// [EN] Set up camera controller
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 		controller.distance = 45;
 		controller.tilt = -15;
@@ -14,11 +16,15 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 
+		// [KO] 3D 뷰 생성 및 설정
+		// [EN] Create and configure 3D view
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.axis = true;
 		view.grid = true;
 		redGPUContext.addView(view);
 
+		// [KO] 물리 엔진(Rapier) 초기화 및 설정
+		// [EN] Initialize and configure physics engine (Rapier)
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
@@ -32,10 +38,17 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		const CHAIN_GROUP = 0x0001;
+		/**
+		 * [KO] 충돌 필터 설정
+		 * 사슬 조각들끼리 겹치거나 부딪혀서 발생하는 물리적 불안정함을 방지합니다.
+		 * [EN] Collision filter setup
+		 * Prevents physical instability caused by chain links colliding or overlapping.
+		 */
+		const CHAIN_GROUP = 0x0001; 
 		const chainCollisionFilter = (CHAIN_GROUP << 16) | (~CHAIN_GROUP & 0xFFFF);
 
-		// 1. 고정 앵커
+		// 1. 고정 앵커 (천장에 고정된 지점)
+		// 1. Fixed anchor (point fixed to the ceiling)
 		const anchorMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
@@ -54,21 +67,31 @@ RedGPU.init(
 		const activeChain = [];
 		let bigBallInfo = null;
 
-		const createBallJointData = (a1, a2) => {
+		/**
+		 * [KO] 조인트 생성 헬퍼 (API 호환성 유지)
+		 * [EN] Joint creation helper (Maintaining API compatibility)
+		 */
+		const createJointData = (a1, a2) => {
 			const JD = RAPIER.JointData;
-			if (JD && typeof JD.ball === 'function') return JD.ball(a1, a2);
-			if (JD && typeof JD.spherical === 'function') return JD.spherical(a1, a2);
-			throw new Error('Joint data methods not found in RAPIER');
+			// [KO] Rapier 버전에 따라 ball 또는 spherical 메서드를 사용합니다.
+			// [EN] Use ball or spherical method depending on Rapier version.
+			if (JD.ball) return JD.ball(a1, a2);
+			if (JD.spherical) return JD.spherical(a1, a2);
+			throw new Error('Ball joint creation method not found in RAPIER.JointData');
 		};
 
+		/**
+		 * [KO] 사슬 구조 생성 함수
+		 * [EN] Function to create the chain structure
+		 */
 		const initChain = () => {
-			const linkGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
+			const linkGeo = new RedGPU.Primitive.Sphere(redGPUContext, 0.4);
 			const linkMat = new RedGPU.Material.PhongMaterial(redGPUContext);
 			linkMat.color.setColorByHEX('#888888');
 
 			let prevBody = anchorBody;
-			const numLinks = 10;
-			const spacing = 1.2;
+			const numLinks = 8;
+			const spacing = 1.0;
 
 			for (let i = 0; i < numLinks; i++) {
 				const linkMesh = new RedGPU.Display.Mesh(
@@ -77,53 +100,62 @@ RedGPU.init(
 					linkMat
 				);
 				linkMesh.y = 15 - (i + 1) * spacing;
-				linkMesh.x = (i + 1) * 0.2; 
 				scene.addChild(linkMesh);
 
 				const currentBody = physicsEngine.createBody(linkMesh, {
 					type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 					shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
 					mass: 0.5,
-					linearDamping: 0.5,
+					linearDamping: 0.01,
 					angularDamping: 0.5
 				});
 				currentBody.nativeCollider.setCollisionGroups(chainCollisionFilter);
 
-				const jointData = createBallJointData({ x: 0, y: 0, z: 0 }, { x: 0, y: spacing, z: 0 });
+				const anchor1 = { x: 0, y: -spacing / 2, z: 0 };
+				const anchor2 = { x: 0, y: spacing / 2, z: 0 };
+				const jointData = createJointData(anchor1, anchor2);
 				physicsEngine.nativeWorld.createImpulseJoint(jointData, prevBody.nativeBody, currentBody.nativeBody, true);
 
 				activeChain.push({ mesh: linkMesh, body: currentBody });
 				prevBody = currentBody;
 			}
 
+			// [KO] 사슬 끝에 매달릴 묵직한 공 생성
+			// [EN] Create a heavy ball to hang at the end of the chain
 			const bigBallMesh = new RedGPU.Display.Mesh(
 				redGPUContext,
-				new RedGPU.Primitive.Sphere(redGPUContext, 2),
+				new RedGPU.Primitive.Sphere(redGPUContext, 1.5),
 				new RedGPU.Material.PhongMaterial(redGPUContext)
 			);
-			bigBallMesh.material.color.setColorByHEX('#44444ff');
-			bigBallMesh.y = 15 - (numLinks + 1) * spacing - 1;
-			bigBallMesh.x = (numLinks + 1) * 0.2;
+			bigBallMesh.material.color.setColorByHEX('#4444ff');
+			bigBallMesh.y = 15 - (numLinks + 1) * spacing - 0.5;
 			scene.addChild(bigBallMesh);
 
 			const bigBallBody = physicsEngine.createBody(bigBallMesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 				shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
-				mass: 5,
-				linearDamping: 0.2,
-				angularDamping: 0.2
+				mass: 10.0,
+				linearDamping: 0.01,
+				angularDamping: 0.5
 			});
 			bigBallBody.nativeCollider.setCollisionGroups(chainCollisionFilter);
 
-			const finalJointData = createBallJointData({ x: 0, y: 0, z: 0 }, { x: 0, y: spacing + 1, z: 0 });
+			const finalJointData = createJointData({ x: 0, y: -spacing / 2, z: 0 }, { x: 0, y: 1.0, z: 0 });
 			physicsEngine.nativeWorld.createImpulseJoint(finalJointData, prevBody.nativeBody, bigBallBody.nativeBody, true);
 			bigBallInfo = { mesh: bigBallMesh, body: bigBallBody };
 		};
 
 		const resetScene = () => {
-			activeChain.forEach(item => { physicsEngine.removeBody(item.body); scene.removeChild(item.mesh); });
+			activeChain.forEach(item => {
+				physicsEngine.removeBody(item.body);
+				scene.removeChild(item.mesh);
+			});
 			activeChain.length = 0;
-			if (bigBallInfo) { physicsEngine.removeBody(bigBallInfo.body); scene.removeChild(bigBallInfo.mesh); }
+			if (bigBallInfo) {
+				physicsEngine.removeBody(bigBallInfo.body);
+				scene.removeChild(bigBallInfo.mesh);
+				bigBallInfo = null;
+			}
 			initChain();
 		};
 
@@ -134,7 +166,9 @@ RedGPU.init(
 
 		renderTestPane(redGPUContext, () => bigBallInfo?.body, resetScene);
 	},
-	(failReason) => { console.error(failReason); }
+	(failReason) => {
+		console.error(failReason);
+	}
 );
 
 const renderTestPane = async (redGPUContext, getBigBallBody, resetScene) => {
@@ -142,9 +176,11 @@ const renderTestPane = async (redGPUContext, getBigBallBody, resetScene) => {
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
+	
 	pane.addButton({ title: 'Push Ball!' }).on('click', () => {
 		const body = getBigBallBody();
 		if (body) body.applyImpulse({ x: 150, y: 0, z: (Math.random() * 100) - 50 });
 	});
+
 	pane.addButton({ title: 'Reset Chain' }).on('click', () => resetScene());
 };
