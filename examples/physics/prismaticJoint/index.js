@@ -16,7 +16,6 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true;
 		view.grid = true;
 		redGPUContext.addView(view);
 
@@ -136,7 +135,6 @@ RedGPU.init(
 				if (idx > -1) {
 					physicsEngine.removeBody(body);
 					scene.removeChild(box);
-					activeBalls.splice(idx, 1); // activeBalls -> activeBoxes 오타 수정 가능성 있지만 구조 유지
 					activeBoxes.splice(idx, 1);
 				}
 			}, 10000);

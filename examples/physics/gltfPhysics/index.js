@@ -16,7 +16,6 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true;
 		view.grid = true;
 		redGPUContext.addView(view);
 
@@ -59,13 +58,7 @@ RedGPU.init(
 		// [KO] GLTF 모델 로드 및 정적 메쉬 콜라이더 적용
 		// [EN] Load GLTF models and apply static mesh colliders
 		const modelURL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb';
-		for (let ix = -1; ix <= 1; ix++) {
-			for (let iz = -1; ix <= 1; iz++) {
-				// (ix, iz 루프 내부 로직 생략 방지를 위해 명시적 작성)
-			}
-		}
 		
-		// 실제 루프 구현
 		for (let ix = -1; ix <= 1; ix++) {
 			for (let iz = -1; iz <= 1; iz++) {
 				new RedGPU.GLTFLoader(redGPUContext, modelURL, (v) => {
@@ -136,7 +129,9 @@ RedGPU.init(
 
 		renderTestPane(redGPUContext, resetScene);
 	},
-	(failReason) => { console.error(failReason); }
+	(failReason) => {
+		console.error(failReason);
+	}
 );
 
 const renderTestPane = async (redGPUContext, resetScene) => {

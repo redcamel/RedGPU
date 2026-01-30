@@ -15,7 +15,6 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = false;
 		view.grid = true;
 		redGPUContext.addView(view);
 
@@ -36,7 +35,7 @@ RedGPU.init(
 		 * [KO] 정적 블록 생성 함수
 		 * [EN] Static block creation function
 		 */
-		const createBlock = (x, y, z, sx, sy, sz, color = '#444444') => {
+		const createBlock = (x, y, z, sx, sy, sz, color = '#666666') => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
@@ -67,7 +66,7 @@ RedGPU.init(
 				4,
 				0.3,
 				4,
-				'#666666'
+				'#888888'
 			);
 		}
 

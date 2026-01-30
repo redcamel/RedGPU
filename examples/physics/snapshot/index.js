@@ -15,7 +15,6 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = false;
 		view.grid = false;
 		redGPUContext.addView(view);
 

@@ -18,7 +18,6 @@ RedGPU.init(
 		// [KO] 3D 뷰 생성 및 설정
 		// [EN] Create and configure 3D view
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true;
 		view.grid = true;
 		redGPUContext.addView(view);
 
@@ -130,7 +129,7 @@ RedGPU.init(
 		};
 
 		/**
-		 * [KO] 씬 리셋 함수
+		 * [KO] 씬 초기화 함수
 		 * [EN] Scene reset function
 		 */
 		const resetScene = () => {
@@ -151,6 +150,8 @@ RedGPU.init(
 		 */
 		physicsEngine.onCollisionStarted = (h1, h2) => {
 			const triggerHandle = triggerBody.nativeCollider.handle;
+			// [KO] 충돌한 두 물체 중 하나가 센서(trigger)인지 확인하고, 상대방 물체를 찾습니다.
+			// [EN] Check if one of the colliding objects is the sensor (trigger) and find the other object.
 			const ballHandle = (h1 === triggerHandle) ? h2 : (h2 === triggerHandle ? h1 : null);
 			
 			if (ballHandle !== null) {

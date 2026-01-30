@@ -18,7 +18,6 @@ RedGPU.init(
 		// [KO] 3D 뷰 생성 및 설정
 		// [EN] Create and configure 3D view
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.axis = true;
 		view.grid = true;
 		redGPUContext.addView(view);
 
