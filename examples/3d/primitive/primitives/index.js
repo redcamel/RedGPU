@@ -52,6 +52,7 @@ const createPrimitive = (redGPUContext, scene) => {
         {constructor: RedGPU.Primitive.Box, args: [redGPUContext, 1, 1, 1, 2, 2, 2]},
         {constructor: RedGPU.Primitive.Circle, args: [redGPUContext, 1, 64]},
         {constructor: RedGPU.Primitive.Cylinder, args: [redGPUContext, 0.5, 1, 2, 64, 64]},
+        {constructor: RedGPU.Primitive.Capsule, args: [redGPUContext, 0.5, 1, 32, 1, 12]},
         {constructor: RedGPU.Primitive.Plane, args: [redGPUContext, 2, 2, 10, 10]},
         {constructor: RedGPU.Primitive.Sphere, args: [redGPUContext, 1, 32, 32]},
         {constructor: RedGPU.Primitive.Torus, args: [redGPUContext, 0.7, 0.3, 32, 32]},
