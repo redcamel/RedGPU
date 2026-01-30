@@ -15,6 +15,7 @@ import Primitive from "./core/Primitive";
  * // 반지름 0.5, 실린더 높이 1, 세그먼트들을 설정하여 캡슐 생성
  * const capsule = new RedGPU.Primitive.Capsule(redGPUContext, 0.5, 1, 32, 1, 12);
  * ```
+ * <iframe src="/RedGPU/examples/3d/primitive/capsule/"></iframe>
  * @category Primitive
  */
 class Capsule extends Primitive {
