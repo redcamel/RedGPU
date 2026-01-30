@@ -16,14 +16,14 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 
-		// [KO] 3D 뷰 생성 및 설정
-		// [EN] Create and configure 3D view
+		// [KO] 3D 뷰 생성 및 설정 (그리드 활성화)
+		// [EN] Create and configure 3D view (Grid enabled)
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
 		redGPUContext.addView(view);
 
 		// [KO] 물리 엔진(Rapier) 초기화 및 설정
-		// [EN] Initialize physics engine (Rapier)
+		// [EN] Initialize and configure physics engine (Rapier)
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
@@ -37,6 +37,24 @@ RedGPU.init(
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
+		// [KO] 1. 바닥 생성 (시인성을 위해 #666666 색상 적용)
+		// [EN] 1. Create ground (Applied #666666 color for visibility)
+		const ground = new RedGPU.Display.Mesh(
+			redGPUContext,
+			new RedGPU.Primitive.Box(redGPUContext),
+			new RedGPU.Material.PhongMaterial(redGPUContext)
+		);
+		ground.scaleX = 60;
+		ground.scaleY = 1;
+		ground.scaleZ = 60;
+		ground.y = -0.5;
+		ground.material.color.setColorByHEX('#666666');
+		scene.addChild(ground);
+		physicsEngine.createBody(ground, {
+			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
+			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
+		});
+
 		/**
 		 * [KO] 충돌 필터 설정
 		 * 사슬 조각들끼리 겹치거나 부딪혀서 발생하는 물리적 불안정함을 방지합니다.
@@ -46,8 +64,8 @@ RedGPU.init(
 		const CHAIN_GROUP = 0x0001; 
 		const chainCollisionFilter = (CHAIN_GROUP << 16) | (~CHAIN_GROUP & 0xFFFF);
 
-		// 1. 고정 앵커 (천장에 고정된 지점)
-		// 1. Fixed anchor (point fixed to the ceiling)
+		// 2. 고정 앵커 (천장에 고정된 지점)
+		// 2. Fixed anchor (point fixed to the ceiling)
 		const anchorMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
@@ -67,16 +85,14 @@ RedGPU.init(
 		let bigBallInfo = null;
 
 		/**
-		 * [KO] 조인트 생성 헬퍼 (API 호환성 유지)
-		 * [EN] Joint creation helper (Maintaining API compatibility)
+		 * [KO] 조인트 생성 헬퍼: 명시적으로 spherical 메서드 사용
+		 * [EN] Joint creation helper: Explicitly use the spherical method
 		 */
 		const createJointData = (a1, a2) => {
 			const JD = RAPIER.JointData;
-			// [KO] Rapier 버전에 따라 ball 또는 spherical 메서드를 사용합니다.
-			// [EN] Use ball or spherical method depending on Rapier version.
-			if (JD.ball) return JD.ball(a1, a2);
-			if (JD.spherical) return JD.spherical(a1, a2);
-			throw new Error('Ball joint creation method not found in RAPIER.JointData');
+			// [KO] Rapier의 spherical 조인트를 사용하여 자유로운 회전을 구현합니다.
+			// [EN] Use Rapier's spherical joint to implement free rotation.
+			return JD.spherical(a1, a2);
 		};
 
 		/**
@@ -170,6 +186,9 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 컨트롤 패널 생성
+ */
 const renderTestPane = async (redGPUContext, getBigBallBody, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
@@ -178,7 +197,10 @@ const renderTestPane = async (redGPUContext, getBigBallBody, resetScene) => {
 	
 	pane.addButton({ title: 'Push Ball!' }).on('click', () => {
 		const body = getBigBallBody();
-		if (body) body.applyImpulse({ x: 150, y: 0, z: (Math.random() * 100) - 50 });
+		if (body) {
+			body.nativeBody.wakeUp();
+			body.applyImpulse({ x: 150, y: 0, z: (Math.random() * 100) - 50 });
+		}
 	});
 
 	pane.addButton({ title: 'Reset Chain' }).on('click', () => resetScene());
