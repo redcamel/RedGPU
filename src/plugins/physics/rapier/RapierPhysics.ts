@@ -12,7 +12,7 @@ import { RapierBody } from './RapierBody';
  *
  * @category Physics
  */
-export class RedRapierPhysics implements IPhysicsEngine {
+export class RapierPhysics implements IPhysicsEngine {
 	#world: RAPIER.World;
 	#bodies: Map<number, RapierBody> = new Map();
 	#eventQueue: RAPIER.EventQueue;
@@ -115,8 +115,12 @@ export class RedRapierPhysics implements IPhysicsEngine {
 		this.#bodies.delete(body.nativeBody.handle);
 	}
 
-	setGravity(x: number, y: number, z: number): void {
-		this.#world.gravity = { x, y, z };
+	get gravity(): { x: number, y: number, z: number } {
+		return this.#world.gravity;
+	}
+
+	set gravity(value: { x: number, y: number, z: number }) {
+		this.#world.gravity = value;
 	}
 
 	createCharacterController(offset: number): RAPIER.KinematicCharacterController {

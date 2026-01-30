@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js";
-import { RedRapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -17,9 +17,8 @@ RedGPU.init(
 		view.axis = true; view.grid = true;
 		redGPUContext.addView(view);
 
-		const physicsEngine = new RedRapierPhysics();
+		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
-		physicsEngine.setGravity(0, -9.81, 0);
 		scene.physicsEngine = physicsEngine;
 
 		const RAPIER = physicsEngine.RAPIER;
@@ -73,7 +72,6 @@ RedGPU.init(
 		
 		jointData.limitsEnabled = true;
 		jointData.limits = [0, 25]; // 5에서 시작해서 30까지 이동 가능
-
 		physicsEngine.nativeWorld.createImpulseJoint(jointData, railBody.nativeBody, platformBody.nativeBody, true);
 
 		// 4. 낙하 박스

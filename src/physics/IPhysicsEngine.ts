@@ -76,24 +76,15 @@ export interface IPhysicsEngine {
 	removeBody(body: IPhysicsBody): void;
 
 	/**
-	 * [KO] 중력을 설정합니다.
+	 * [KO] 중력을 설정하거나 가져옵니다.
+	 * [EN] Sets or gets the gravity.
 	 *
 	 * * ### Example
 	 * ```typescript
-	 * physicsEngine.setGravity(0, -9.81, 0);
+	 * physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 	 * ```
-	 *
-	 * @param x -
-	 * [KO] X축 중력
-	 * [EN] Gravity on X axis
-	 * @param y -
-	 * [KO] Y축 중력
-	 * [EN] Gravity on Y axis
-	 * @param z -
-	 * [KO] Z축 중력
-	 * [EN] Gravity on Z axis
 	 */
-	setGravity(x: number, y: number, z: number): void;
+	gravity: { x: number, y: number, z: number };
 
 	/**
 	 * [KO] 캐릭터 컨트롤러를 생성합니다.

@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js";
-import { RedRapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -17,9 +17,8 @@ RedGPU.init(
 		view.axis = true; view.grid = true;
 		redGPUContext.addView(view);
 
-		const physicsEngine = new RedRapierPhysics();
+		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
-		physicsEngine.setGravity(0, -9.81, 0);
 		scene.physicsEngine = physicsEngine;
 
 		const RAPIER = physicsEngine.RAPIER;
@@ -107,13 +106,13 @@ RedGPU.init(
 			activeObjects.push({ mesh, body });
 			setTimeout(() => {
 				const idx = activeObjects.findIndex(v => v.body === body);
-				if (idx > -1) { physicsEngine.removeBody(body); scene.removeChild(mesh); activeObjects.splice(idx, 1); }
+				if (idx > -1) { physicsEngine.removeBody(body); scene.removeChild(mesh); }
 			}, 10000);
 		};
 
 		const resetScene = () => {
-			activeBoxes.forEach(item => { physicsEngine.removeBody(item.body); scene.removeChild(item.mesh); });
-			activeBoxes.length = 0;
+			activeObjects.forEach(item => { physicsEngine.removeBody(item.body); scene.removeChild(item.mesh); });
+			activeObjects.length = 0;
 			platformBody.nativeBody.setTranslation({ x: 0, y: 15, z: 0 }, true);
 			platformBody.nativeBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
 			platformBody.nativeBody.setAngvel({ x: 0, y: 0, z: 0 }, true);

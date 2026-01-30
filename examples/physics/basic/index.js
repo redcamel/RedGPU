@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../dist/index.js";
-import {RedRapierPhysics} from "../../../dist/plugins/physics/rapier/index.js";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -24,9 +24,8 @@ RedGPU.init(
 
         // [KO] 물리 엔진(Rapier) 초기화 및 설정
         // [EN] Initialize and configure physics engine (Rapier)
-        const physicsEngine = new RedRapierPhysics();
+        const physicsEngine = new RapierPhysics();
         await physicsEngine.init();
-        physicsEngine.setGravity(0, -9.81, 0);
         scene.physicsEngine = physicsEngine;
 
         // [KO] 조명 설정: 환경광과 방향광
@@ -41,13 +40,11 @@ RedGPU.init(
 
         // [KO] 바닥 메시 생성 및 정적 물리 바디 적용
         // [EN] Create ground mesh and apply static physics body
-
         const groundMesh = new RedGPU.Display.Mesh(
             redGPUContext,
             new RedGPU.Primitive.Ground(redGPUContext, 10, 10),
             new RedGPU.Material.PhongMaterial(redGPUContext)
         );
-
         groundMesh.material.color.setColorByHEX('#666666');
         scene.addChild(groundMesh);
         physicsEngine.createBody(groundMesh, {
@@ -135,7 +132,7 @@ const renderTestPane = async (redGPUContext, physicsEngine, createBox, resetScen
         min: -30,
         max: 30
     }).on('change', (ev) => {
-        physicsEngine.setGravity(0, ev.value, 0);
+        physicsEngine.gravity = {x: 0, y: ev.value, z: 0};
         updateGravityY(ev.value);
     });
     pane.addButton({title: 'Add Box'}).on('click', () => params.addBox());

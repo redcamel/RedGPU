@@ -8,5 +8,5 @@
  * @packageDocumentation
  */
 
-export * from './RedRapierPhysics';
+export * from './RapierPhysics';
 export * from './RapierBody';
