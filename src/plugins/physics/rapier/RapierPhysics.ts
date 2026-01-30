@@ -27,6 +27,15 @@ export class RapierPhysics implements IPhysicsEngine {
 	get RAPIER(): typeof RAPIER { return RAPIER; }
 	get bodies(): RapierBody[] { return Array.from(this.#bodies.values()); }
 
+	/**
+	 * [KO] 콜라이더 핸들을 통해 RapierBody를 반환합니다.
+	 * [EN] Returns RapierBody through the collider handle.
+	 * @param handle - [KO] 콜라이더 핸들 [EN] Collider handle
+	 */
+	getBodyByColliderHandle(handle: number): RapierBody {
+		return this.#bodies.get(handle);
+	}
+
 	async init(): Promise<void> {
 		await RAPIER.init();
 		this.#world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
@@ -56,7 +65,9 @@ export class RapierPhysics implements IPhysicsEngine {
 		this.#createCollidersRecursively(mesh, rigidBody, params, colliders, mesh);
 
 		const body = new RapierBody(mesh, rigidBody, colliders[0]);
-		this.#bodies.set(rigidBody.handle, body);
+		// [KO] 콜라이더 핸들을 키로 저장 (충돌 이벤트 시 조회를 위함)
+		// [EN] Store using the collider handle as a key (for lookup during collision events)
+		this.#bodies.set(colliders[0].handle, body);
 
 		// 초기 동기화
 		body.syncToMesh();
@@ -112,7 +123,7 @@ export class RapierPhysics implements IPhysicsEngine {
 
 	removeBody(body: RapierBody): void {
 		this.#world.removeRigidBody(body.nativeBody);
-		this.#bodies.delete(body.nativeBody.handle);
+		this.#bodies.delete(body.nativeCollider.handle);
 	}
 
 	get gravity(): { x: number, y: number, z: number } {

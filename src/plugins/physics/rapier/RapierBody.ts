@@ -38,6 +38,14 @@ export class RapierBody implements IPhysicsBody {
 	}
 
 	/**
+	 * [KO] 연결된 RedGPU 메쉬를 반환합니다.
+	 * [EN] Returns the connected RedGPU mesh.
+	 */
+	get mesh(): Mesh {
+		return this.#mesh;
+	}
+
+	/**
 	 * [KO] Rapier의 원본 강체(RigidBody) 객체를 반환합니다.
 	 * [EN] Returns the native Rapier rigid body object.
 	 */

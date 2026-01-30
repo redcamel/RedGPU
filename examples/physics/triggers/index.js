@@ -63,11 +63,13 @@ RedGPU.init(
 			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
 			isSensor: true
 		});
-		triggerBody.nativeCollider.setActiveEvents(1);
+		
+		// [KO] 센서(Trigger)의 충돌 이벤트를 활성화합니다.
+		// [EN] Enable collision events for the sensor (Trigger).
+		triggerBody.nativeCollider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
 
 		// 2. 동적 객체들 및 리셋
 		const activeBalls = [];
-		const bodyMap = new Map();
 		const createBall = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX('#ffffff');
@@ -87,8 +89,10 @@ RedGPU.init(
 				mass: 1,
 				restitution: 0.5
 			});
-			body.nativeCollider.setActiveEvents(1);
-			bodyMap.set(body.nativeCollider.handle, ballMesh);
+
+			// [KO] 구슬의 충돌 이벤트를 활성화합니다.
+			// [EN] Enable collision events for the ball.
+			body.nativeCollider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
 			
 			const ballInfo = { mesh: ballMesh, body };
 			activeBalls.push(ballInfo);
@@ -101,7 +105,6 @@ RedGPU.init(
 		const resetScene = () => {
 			activeBalls.forEach(item => { physicsEngine.removeBody(item.body); scene.removeChild(item.mesh); });
 			activeBalls.length = 0;
-			bodyMap.clear();
 		};
 
 		setInterval(createBall, 1000);
@@ -109,9 +112,12 @@ RedGPU.init(
 		physicsEngine.onCollisionStarted = (h1, h2) => {
 			const triggerHandle = triggerBody.nativeCollider.handle;
 			const ballHandle = (h1 === triggerHandle) ? h2 : (h2 === triggerHandle ? h1 : null);
-			if (ballHandle) {
-				const mesh = bodyMap.get(ballHandle);
-				if (mesh) mesh.material.color.setColorByHEX('#ff44ff');
+			
+			if (ballHandle !== null) {
+				// [KO] 엔진에서 직접 바디를 조회하여 메쉬 색상을 변경합니다. (bodyMap 제거됨)
+				// [EN] Directly lookup the body from the engine to change the mesh color. (bodyMap removed)
+				const ballBody = physicsEngine.getBodyByColliderHandle(ballHandle);
+				if (ballBody?.mesh) ballBody.mesh.material.color.setColorByHEX('#ff44ff');
 			}
 		};
 
