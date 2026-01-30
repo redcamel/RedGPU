@@ -70,27 +70,37 @@ RedGPU.init(
 		});
 
 		const activeObjects = [];
-		// [KO] 동적(Dynamic) 박스 생성 함수
-		// [EN] Dynamic box creation function
-		const createBox = () => {
+		// [KO] 동적(Dynamic) 객체 생성 함수 (박스 또는 구체 랜덤)
+		// [EN] Dynamic object creation function (Random Box or Sphere)
+		const spawnObject = () => {
+			const isBox = Math.random() > 0.5;
+			const geometry = isBox 
+				? new RedGPU.Primitive.Box(redGPUContext) 
+				: new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
+			const physicsShape = isBox 
+				? RedGPU.Physics.PHYSICS_SHAPE.BOX 
+				: RedGPU.Physics.PHYSICS_SHAPE.SPHERE;
+
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			const boxMesh = new RedGPU.Display.Mesh(
+			
+			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
-				new RedGPU.Primitive.Box(redGPUContext),
+				geometry,
 				material
 			);
-			boxMesh.x = Math.random() * 10 - 5;
-			boxMesh.y = 15;
-			boxMesh.z = Math.random() * 10 - 5;
-			scene.addChild(boxMesh);
-			const body = physicsEngine.createBody(boxMesh, {
+			mesh.x = Math.random() * 10 - 5;
+			mesh.y = 15;
+			mesh.z = Math.random() * 10 - 5;
+			scene.addChild(mesh);
+
+			const body = physicsEngine.createBody(mesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
-				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
+				shape: physicsShape,
 				mass: 1,
 				restitution: 0.5
 			});
-			activeObjects.push({mesh: boxMesh, body});
+			activeObjects.push({mesh, body});
 		};
 
 		// [KO] 씬 초기화 함수
@@ -103,7 +113,7 @@ RedGPU.init(
 			activeObjects.length = 0;
 		};
 
-		setInterval(createBox, 500);
+		setInterval(spawnObject, 500);
 
 		const renderer = new RedGPU.Renderer();
 		// [KO] 매 프레임 실행될 렌더링 루프
