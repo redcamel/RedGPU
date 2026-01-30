@@ -23,6 +23,7 @@ export * as Util from "./utils";
 export {mat4, mat3, quat, vec2, vec3, vec4} from "gl-matrix"
 export * as Display from "./display";
 export * as Light from "./light";
+export * as Math from "./math";
 export * as Primitive from "./primitive";
 export * as Material from "./material";
 export * as Resource from "./resources";

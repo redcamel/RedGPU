@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix";
-import View3D from "../../../display/view/View3D";
-import consoleAndThrowError from "../../consoleAndThrowError";
+import View3D from "../../display/view/View3D";
+import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 const resultMTX = mat4.create();
 const resultPosition = {x: 0, y: 0, z: 0, w: 0};

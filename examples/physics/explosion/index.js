@@ -94,7 +94,7 @@ RedGPU.init(
 			const rect = canvas.getBoundingClientRect();
 			// [KO] 클릭한 화면 좌표를 3D 월드 좌표로 변환
 			// [EN] Convert the clicked screen coordinates to 3D world coordinates
-			const worldPoint = RedGPU.Util.screenToWorld(event.clientX - rect.left, event.clientY - rect.top, view);
+			const worldPoint = RedGPU.Math.screenToWorld(event.clientX - rect.left, event.clientY - rect.top, view);
 			if (!worldPoint) return;
 
 			const epicenter = { x: worldPoint[0], y: worldPoint[1], z: worldPoint[2] };

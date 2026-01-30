@@ -8,7 +8,7 @@ import RedGPUContextSizeManager from "../../../context/core/RedGPUContextSizeMan
 import RedGPUContext from "../../../context/RedGPUContext";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import computeViewFrustumPlanes from "../../../utils/math/computeViewFrustumPlanes";
+import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 
 /**
  * [KO] View3D/View2D의 크기와 위치를 관리하는 클래스입니다.

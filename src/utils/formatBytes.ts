@@ -1,4 +1,4 @@
-import consoleAndThrowError from "../consoleAndThrowError";
+import consoleAndThrowError from "./consoleAndThrowError";
 
 /**
  * [KO] 바이트 단위를 사람이 읽기 쉬운 문자열로 변환합니다.

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
-import formatBytes from "../../../utils/math/formatBytes";
+import formatBytes from "../../../utils/formatBytes";
 import {createDebugTitle, makeBooleanDebug, makeColorDebug, updateDebugItemValue} from "../core/debugFunc";
 import DebugRender from "../DebugRender";
 import ADebugItem from "./core/ADebugItem";

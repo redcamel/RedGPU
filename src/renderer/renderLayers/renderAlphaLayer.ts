@@ -1,5 +1,5 @@
 import View3D from "../../display/view/View3D";
-import sortTransparentObjects from "../../utils/math/sortTransparentObjects";
+import sortTransparentObjects from "../../math/sortTransparentObjects";
 
 const renderAlphaLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEncoder) => {
     const {renderViewStateData, rawCamera,} = view

@@ -116,7 +116,7 @@ RedGPU.init(
 
 			// [KO] 1. 클릭한 화면 좌표를 월드 좌표로 변환하여 방향 벡터를 구합니다.
 			// [EN] 1. Convert the clicked screen coordinates to world coordinates to get the direction vector.
-			const worldPoint = RedGPU.Util.screenToWorld(mouseX, mouseY, view);
+			const worldPoint = RedGPU.Math.screenToWorld(mouseX, mouseY, view);
 			if (!worldPoint) return;
 
 			const rayOrigin = { x: view.rawCamera.x, y: view.rawCamera.y, z: view.rawCamera.z };

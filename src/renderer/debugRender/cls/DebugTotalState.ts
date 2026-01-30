@@ -1,4 +1,4 @@
-import formatBytes from "../../../utils/math/formatBytes";
+import formatBytes from "../../../utils/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
 import DebugRender from "../DebugRender";
 import ADebugItem from "./core/ADebugItem";

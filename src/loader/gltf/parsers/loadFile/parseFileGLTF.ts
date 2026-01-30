@@ -2,7 +2,7 @@ import getAbsoluteURL from "../../../../utils/file/getAbsoluteURL";
 import {GLTF} from "../../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
 import parseGLTF from "../parseGLTF";
-import formatBytes from "../../../../utils/math/formatBytes";
+import formatBytes from "../../../../utils/formatBytes";
 import {keepLog} from "../../../../utils";
 
 const cacheMap: Map<string, GLTF> = new Map();

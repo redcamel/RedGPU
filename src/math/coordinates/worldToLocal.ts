@@ -1,5 +1,5 @@
 import {mat4, vec3} from "gl-matrix";
-import validateNumber from "../../../runtimeChecker/validateFunc/validateNumber";
+import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 
 const temp_matrix = mat4.create();
 const temp_vector = vec3.create();

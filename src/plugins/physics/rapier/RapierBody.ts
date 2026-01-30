@@ -2,7 +2,7 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import { mat4, quat, vec3 } from 'gl-matrix';
 import Mesh from '../../../display/mesh/Mesh';
 import { IPhysicsBody } from '../../../physics/IPhysicsBody';
-import mat4ToEuler from '../../../utils/math/mat4ToEuler';
+import mat4ToEuler from '../../../math/mat4ToEuler';
 
 /**
  * [KO] Rapier 물리 엔진을 위한 IPhysicsBody 구현체입니다.
