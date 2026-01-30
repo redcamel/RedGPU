@@ -80,9 +80,34 @@ RedGPU.init(
 
 		const renderer = new RedGPU.Renderer();
 		const render = (time) => {
-			movement.x = 0; movement.z = 0;
-			if (keys.w) movement.z = -speed; if (keys.s) movement.z = speed;
-			if (keys.a) movement.x = -speed; if (keys.d) movement.x = speed;
+			// Camera relative movement calculation
+			const camX = controller.camera.x;
+			const camZ = controller.camera.z;
+			const targetX = controller.centerX;
+			const targetZ = controller.centerZ;
+
+			let fX = targetX - camX;
+			let fZ = targetZ - camZ;
+			const fLen = Math.sqrt(fX*fX + fZ*fZ);
+			if(fLen > 0) { fX /= fLen; fZ /= fLen; }
+
+			const rX = -fZ;
+			const rZ = fX;
+
+			let inputX = 0, inputZ = 0;
+			if (keys.w) inputZ -= 1;
+			if (keys.s) inputZ += 1;
+			if (keys.a) inputX -= 1;
+			if (keys.d) inputX += 1;
+
+			const len = Math.sqrt(inputX * inputX + inputZ * inputZ);
+			if (len > 0) {
+				inputX /= len;
+				inputZ /= len;
+			}
+
+			movement.x = (fX * -inputZ + rX * inputX) * speed;
+			movement.z = (fZ * -inputZ + rZ * inputX) * speed;
 			movement.y += gravityConst;
 
 			charController.computeColliderMovement(charBody.nativeCollider, movement);
