@@ -8,7 +8,7 @@ RedGPU.init(
     (redGPUContext) => {
 		const isMobile = redGPUContext.detector.isMobile;
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = isMobile ? 12 : 7.5;
+        controller.distance = isMobile ? 12 : 8.5;
         controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
@@ -63,7 +63,7 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 			const { width, height } = pixelRectObject;
 			const aspect = width / height;
 			const isMobile = redGPUContext.detector.isMobile;
-			const baseDistance = isMobile ? 8 : 7.5;
+			const baseDistance = isMobile ? 8 : 8.5;
 			controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
 			updateInfoBoxStyle();
 			updateLayout();

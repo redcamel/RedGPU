@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -13,15 +13,65 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
         redGPUContext.addView(view);
 
-        createSampleSprite3D(redGPUContext, scene);
+        // [KO] 정보 표시용 HTML 요소 생성
+        // [EN] Create HTML element for displaying information
+        const infoBox = document.createElement('div');
+        const updateInfoBoxStyle = () => {
+            const isMobile = redGPUContext.detector.isMobile;
+            Object.assign(infoBox.style, {
+                position: 'absolute',
+                bottom: isMobile ? '100px' : '70px',
+                left: '12px',
+                width: isMobile ? 'calc(100% - 64px)' : 'auto',
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#fff',
+                padding: '6px 12px',
+                borderRadius: '12px',
+                fontSize: isMobile ? '12px' : '11px',
+                lineHeight: '1.6',
+                pointerEvents: 'none',
+                textAlign: 'left',
+                whiteSpace: 'pre-wrap',
+                display: 'none',
+                userSelect: 'none',
+                zIndex: '100',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+            });
+        };
+        updateInfoBoxStyle();
+        document.body.appendChild(infoBox);
+
+        const updateInfo = (eventName, e) => {
+            infoBox.style.display = 'block';
+            infoBox.innerHTML = `[Event Info]
+Object: ${e.target.name || 'Sprite3D'}
+Event: ${eventName}
+Distance: ${e.distance ? e.distance.toFixed(4) : 'N/A'}
+World Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]
+Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]
+Face Index: ${e.faceIndex}
+UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
+        };
+
+        const { updateLayout } = createSampleSprite3D(redGPUContext, scene, infoBox, updateInfo);
+
+        redGPUContext.onResize = (screenRectObject, pixelRectObject) => {
+            const { width, height } = pixelRectObject;
+            const aspect = width / height;
+            const isMobile = redGPUContext.detector.isMobile;
+            const baseDistance = isMobile ? 8 : 7.5;
+            controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
+            updateInfoBoxStyle();
+            updateLayout();
+        };
+        redGPUContext.onResize(redGPUContext.sizeManager.screenRectObject, redGPUContext.sizeManager.pixelRectObject);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
 
         renderTestPane(redGPUContext, scene);
     },
@@ -33,22 +83,13 @@ RedGPU.init(
     }
 );
 
-const createSampleSprite3D = async (redGPUContext, scene) => {
+const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
+    const sprites = [];
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
-        const total = array.length;
-        const radius = 2;
-
-        const angle = (index / total) * Math.PI * 2;
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
-
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')));
-        sprite3D.x = x;
-        sprite3D.y = y;
-
         scene.addChild(sprite3D);
         sprite3D.addListener(eventName, (e) => {
-            console.log(`Event: ${eventName}`, e);
+            updateInfo(eventName, e);
             sprite3D.material.useTint = true;
             sprite3D.material.tint.r = Math.floor(Math.random() * 255);
             sprite3D.material.tint.g = Math.floor(Math.random() * 255);
@@ -61,15 +102,30 @@ const createSampleSprite3D = async (redGPUContext, scene) => {
         label.useBillboard = true;
         label.primitiveState.cullMode = 'none';
         sprite3D.addChild(label);
+        sprites.push(sprite3D);
     });
+
+    const updateLayout = () => {
+        const isMobile = redGPUContext.detector.isMobile;
+        const radius = isMobile ? 2.5 : 2;
+        const total = sprites.length;
+        sprites.forEach((sprite, index) => {
+            const angle = (index / total) * Math.PI * 2;
+            sprite.x = Math.cos(angle) * radius;
+            sprite.y = Math.sin(angle) * radius;
+        });
+    };
+
+    updateLayout();
+    return { sprites, updateLayout };
 };
 
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js");
     setDebugButtons(RedGPU, redGPUContext);
-    const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
+    const folder = pane.addFolder({ title: 'Sprite3D', expanded: true });
     const controls = {
         useBillboardPerspective: scene.children[0].useBillboardPerspective,
         useBillboard: scene.children[0].useBillboard,
