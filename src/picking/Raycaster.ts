@@ -216,7 +216,8 @@ export default class Raycaster {
 					localPoint: localIntersectPoint,
 					object: mesh,
 					faceIndex: Math.floor(i0 / 3),
-					uv: hitUV
+					uv: hitUV,
+					ray: this.ray.clone()
 				});
 			}
 		}
@@ -258,4 +259,9 @@ export interface RayIntersectResult {
 	 * [EN] UV coordinates at the intersection point
 	 */
 	uv?: vec2;
+	/**
+	 * [KO] 교차 검사에 사용된 광선 (월드 공간)
+	 * [EN] Ray used for intersection test (world space)
+	 */
+	ray: Ray;
 }

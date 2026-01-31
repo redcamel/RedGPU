@@ -1,6 +1,7 @@
 import { vec3, vec2 } from "gl-matrix";
 import Mesh from "../display/mesh/Mesh";
 import { RayIntersectResult } from "./Raycaster";
+import Ray from "../math/Ray";
 
 /**
  * [KO] 마우스 이벤트 관련 정보를 캡슐화한 클래스입니다.
@@ -101,6 +102,11 @@ class PickingEvent {
      */
     uv: vec2 = vec2.create();
     /**
+     * [KO] 교차 검사에 사용된 광선
+     * [EN] Ray used for intersection test
+     */
+    ray: Ray;
+    /**
      * [KO] 교차된 삼각형의 인덱스
      * [EN] Index of the intersected triangle
      */
@@ -173,6 +179,7 @@ class PickingEvent {
 			this.distance = hit.distance;
 			this.faceIndex = hit.faceIndex;
 			this.uv = hit.uv;
+			this.ray = hit.ray;
 		}
     }
 }

@@ -38,6 +38,15 @@ export default class Ray {
 	}
 
 	/**
+	 * [KO] 현재 Ray 인스턴스를 복제합니다.
+	 * [EN] Clones the current Ray instance.
+	 * @returns [KO] 복제된 Ray 인스턴스 [EN] Cloned Ray instance
+	 */
+	clone(): Ray {
+		return new Ray(this.origin, this.direction);
+	}
+
+	/**
 	 * [KO] 행렬을 사용하여 광선을 변환합니다.
 	 * [EN] Transforms the ray using a matrix.
 	 * @param matrix - [KO] 4x4 변환 행렬 [EN] 4x4 transformation matrix
