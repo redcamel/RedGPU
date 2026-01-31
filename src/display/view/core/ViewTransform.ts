@@ -410,8 +410,8 @@ class ViewTransform {
         const pixelRectObject = sizeManager.pixelRectObject
         const tW = RedGPUContextSizeManager.getPixelDimension(pixelRectObject, 'width', w)
         const tH = RedGPUContextSizeManager.getPixelDimension(pixelRectObject, 'height', h)
-        this.#pixelRectArray[2] = Math.floor(tW * (this.#width.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio));
-        this.#pixelRectArray[3] = Math.floor(tH * (this.#height.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio));
+        this.#pixelRectArray[2] = Math.max(1, Math.floor(tW * (this.#width.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio)));
+        this.#pixelRectArray[3] = Math.max(1, Math.floor(tH * (this.#height.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio)));
         // this.setPosition()
         console.log(`${this.constructor.name}.setSize - input : ${w},${h} | result : ${tW}, ${tH}`);
 		if (this.onResize) this.onResize({

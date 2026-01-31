@@ -302,8 +302,8 @@ class RedGPUContextSizeManager {
      * [EN] Updates pixel Rect information. (Internal use)
      */
     #updatePixelRect(tW: number, tH: number) {
-        this.#pixelRectArray[2] = Math.floor(tW * this.#renderScale * window.devicePixelRatio);
-        this.#pixelRectArray[3] = Math.floor(tH * this.#renderScale * window.devicePixelRatio);
+        this.#pixelRectArray[2] = Math.max(1, Math.floor(tW * this.#renderScale * window.devicePixelRatio));
+        this.#pixelRectArray[3] = Math.max(1, Math.floor(tH * this.#renderScale * window.devicePixelRatio));
     }
 
     /**
@@ -331,8 +331,8 @@ class RedGPUContextSizeManager {
     #changeCanvasStyles(width: number, height: number): void {
         const cvs = this.#htmlCanvas
         const {style} = cvs
-        cvs.width = width * this.#renderScale * window.devicePixelRatio;
-        cvs.height = height * this.#renderScale * window.devicePixelRatio;
+        cvs.width = Math.max(1, width * this.#renderScale * window.devicePixelRatio);
+        cvs.height = Math.max(1, height * this.#renderScale * window.devicePixelRatio);
         style.width = `${width}px`;
         style.height = `${height}px`;
     }
