@@ -10,7 +10,46 @@ RedGPU.init(
         const view = new RedGPU.Display.View2D(redGPUContext, scene);
         redGPUContext.addView(view);
 
-        createSampleTextField2D(redGPUContext, scene);
+        // [KO] 정보 표시용 HTML 요소 생성
+        // [EN] Create HTML element for displaying information
+        const infoBox = document.createElement('div');
+        const updateInfoBoxStyle = () => {
+            const isMobile = redGPUContext.detector.isMobile;
+            Object.assign(infoBox.style, {
+                position: 'absolute',
+                bottom: isMobile ? '100px' : '70px',
+                left: '12px',
+                width: isMobile ? 'calc(100% - 64px)' : 'auto',
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#fff',
+                padding: '6px 12px',
+                borderRadius: '12px',
+                fontSize: isMobile ? '12px' : '11px',
+                lineHeight: '1.6',
+                pointerEvents: 'none',
+                textAlign: 'left',
+                whiteSpace: 'pre-wrap',
+                display: 'none',
+                userSelect: 'none',
+                zIndex: '100',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+            });
+        };
+        updateInfoBoxStyle();
+        document.body.appendChild(infoBox);
+
+        const updateInfo = (eventName, e) => {
+            infoBox.style.display = 'block';
+            infoBox.innerHTML = `[Event Info]
+Object: ${e.target.constructor.name}
+Event: ${eventName}
+Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}]
+UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
+        };
+
+        createSampleTextField2D(redGPUContext, scene, updateInfo);
 
         let centerX = redGPUContext.screenRectObject.width / 2;
         let centerY = redGPUContext.screenRectObject.height / 2;
@@ -23,6 +62,7 @@ RedGPU.init(
             const {width, height} = resizeEvent.screenRectObject;
             centerX = width / 2;
             centerY = height / 2;
+            updateInfoBoxStyle();
         };
 
         const renderer = new RedGPU.Renderer(redGPUContext);
@@ -53,7 +93,7 @@ RedGPU.init(
     }
 );
 
-const createSampleTextField2D = async (redGPUContext, scene) => {
+const createSampleTextField2D = async (redGPUContext, scene, updateInfo) => {
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
         const textField = new RedGPU.Display.TextField2D(redGPUContext);
 
@@ -66,6 +106,7 @@ const createSampleTextField2D = async (redGPUContext, scene) => {
 
         scene.addChild(textField);
         textField.addListener(eventName, (e) => {
+            updateInfo(eventName, e);
             console.log(`Event: ${eventName}`, e);
             e.target.background = getRandomHexValue();
         });
