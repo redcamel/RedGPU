@@ -8,7 +8,7 @@
 
 > **convertRgbToHex**(`r`, `g`, `b`): `string`
 
-Defined in: [src/color/convertRgbToHex.ts:32](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/color/convertRgbToHex.ts#L32)
+Defined in: [src/color/convertRgbToHex.ts:32](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/color/convertRgbToHex.ts#L32)
 
 
 Converts RGB values to a hexadecimal (Hex) color code.

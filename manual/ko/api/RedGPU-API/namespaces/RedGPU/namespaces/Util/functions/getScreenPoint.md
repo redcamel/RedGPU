@@ -8,7 +8,7 @@
 
 > **getScreenPoint**(`view`, `targetMatrix`): \[`number`, `number`\]
 
-Defined in: [src/utils/math/coordinates/getScreenPoint.ts:33](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/utils/math/coordinates/getScreenPoint.ts#L33)
+Defined in: [src/utils/math/coordinates/getScreenPoint.ts:33](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/utils/math/coordinates/getScreenPoint.ts#L33)
 
 3D 모델 행렬을 이용해 화면 상의 2D 픽셀 좌표를 계산합니다.
 

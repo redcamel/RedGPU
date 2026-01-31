@@ -8,7 +8,7 @@
 
 > `const` **GPU\_COMPARE\_FUNCTION**: `object`
 
-Defined in: [src/gpuConst/GPU\_COMPARE\_FUNCTION.ts:10](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/gpuConst/GPU_COMPARE_FUNCTION.ts#L10)
+Defined in: [src/gpuConst/GPU\_COMPARE\_FUNCTION.ts:10](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/gpuConst/GPU_COMPARE_FUNCTION.ts#L10)
 
 비교 연산 시 사용되는 함수 옵션을 정의하는 상수군입니다.
 

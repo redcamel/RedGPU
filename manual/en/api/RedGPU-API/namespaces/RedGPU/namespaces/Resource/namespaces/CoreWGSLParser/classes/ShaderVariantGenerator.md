@@ -6,7 +6,7 @@
 
 # Class: ShaderVariantGenerator
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:17](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L17)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:17](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L17)
 
 
 Utility class that generates various variant codes for WGSL shaders based on conditional blocks and define strings.
@@ -25,7 +25,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ShaderVariantGenerator**(`defines`, `conditionalBlocks`): `ShaderVariantGenerator`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:32](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L32)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:32](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L32)
 
 
 Creates a ShaderVariantGenerator instance. (Internal system only)
@@ -47,7 +47,7 @@ Creates a ShaderVariantGenerator instance. (Internal system only)
 
 > **getCachedVariants**(): `string`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:64](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L64)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:64](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L64)
 
 
 Returns the list of currently cached variant keys.
@@ -62,7 +62,7 @@ Returns the list of currently cached variant keys.
 
 > **getVariant**(`variantKey`): `string`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:50](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L50)
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:50](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L50)
 
 
 Lazy-generates shader code for a specific variant key.

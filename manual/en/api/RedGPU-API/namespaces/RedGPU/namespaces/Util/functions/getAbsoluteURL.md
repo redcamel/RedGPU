@@ -8,7 +8,7 @@
 
 > **getAbsoluteURL**(`base`, `relative`): `string`
 
-Defined in: [src/utils/file/getAbsoluteURL.ts:24](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/utils/file/getAbsoluteURL.ts#L24)
+Defined in: [src/utils/file/getAbsoluteURL.ts:24](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/utils/file/getAbsoluteURL.ts#L24)
 
 
 Converts a relative path to an absolute URL.

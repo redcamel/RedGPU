@@ -8,7 +8,7 @@
 
 > **defineVec4**: (`classObject`, `keyList`) => `void`
 
-Defined in: [src/defineProperty/DefineForFragment.ts:101](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/defineProperty/DefineForFragment.ts#L101)
+Defined in: [src/defineProperty/DefineForFragment.ts:101](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/defineProperty/DefineForFragment.ts#L101)
 
 ## Parameters
 

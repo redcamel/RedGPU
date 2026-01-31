@@ -8,7 +8,7 @@
 
 > `const` **BLEND\_MODE**: `object`
 
-Defined in: [src/material/BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L6)
+Defined in: [src/material/BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L6)
 
 블렌드 모드 상수
 
@@ -17,11 +17,11 @@ Defined in: [src/material/BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/b
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="difference"></a> `DIFFERENCE` | `6` | `6` | [src/material/BLEND\_MODE.ts:13](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L13) |
-| <a id="exclusion"></a> `EXCLUSION` | `7` | `7` | [src/material/BLEND\_MODE.ts:14](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L14) |
-| <a id="lighten"></a> `LIGHTEN` | `2` | `2` | [src/material/BLEND\_MODE.ts:9](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L9) |
-| <a id="linear_dodge"></a> `LINEAR_DODGE` | `4` | `4` | [src/material/BLEND\_MODE.ts:11](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L11) |
-| <a id="multiply"></a> `MULTIPLY` | `1` | `1` | [src/material/BLEND\_MODE.ts:8](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L8) |
-| <a id="normal"></a> `NORMAL` | `0` | `0` | [src/material/BLEND\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L7) |
-| <a id="screen"></a> `SCREEN` | `3` | `3` | [src/material/BLEND\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L10) |
-| <a id="subtract"></a> `SUBTRACT` | `5` | `5` | [src/material/BLEND\_MODE.ts:12](https://github.com/redcamel/RedGPU/blob/721925ec71d511dd28533d65d64c5dbfc2f58dd3/src/material/BLEND_MODE.ts#L12) |
+| <a id="difference"></a> `DIFFERENCE` | `6` | `6` | [src/material/BLEND\_MODE.ts:13](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L13) |
+| <a id="exclusion"></a> `EXCLUSION` | `7` | `7` | [src/material/BLEND\_MODE.ts:14](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L14) |
+| <a id="lighten"></a> `LIGHTEN` | `2` | `2` | [src/material/BLEND\_MODE.ts:9](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L9) |
+| <a id="linear_dodge"></a> `LINEAR_DODGE` | `4` | `4` | [src/material/BLEND\_MODE.ts:11](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L11) |
+| <a id="multiply"></a> `MULTIPLY` | `1` | `1` | [src/material/BLEND\_MODE.ts:8](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L8) |
+| <a id="normal"></a> `NORMAL` | `0` | `0` | [src/material/BLEND\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L7) |
+| <a id="screen"></a> `SCREEN` | `3` | `3` | [src/material/BLEND\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L10) |
+| <a id="subtract"></a> `SUBTRACT` | `5` | `5` | [src/material/BLEND\_MODE.ts:12](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/BLEND_MODE.ts#L12) |
