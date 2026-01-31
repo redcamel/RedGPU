@@ -17,98 +17,25 @@ RedGPU.init(
 		const ambientLight = new RedGPU.Light.AmbientLight();
 		ambientLight.intensity = 0.5;
 		scene.lightManager.ambientLight = ambientLight;
+		scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
-		const directionalLight = new RedGPU.Light.DirectionalLight();
-		directionalLight.direction = [-1, -1, -1];
-		scene.lightManager.addDirectionalLight(directionalLight);
-
-		// [KO] 공통 재질 생성 (반복되는 그리드 텍스처)
-		// [EN] Create common material (repeating grid texture)
+		// [KO] 공통 재질 및 마커 생성
+		// [EN] Create common material and marker
 		const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
-		const sampler = new RedGPU.Resource.Sampler(redGPUContext, {
-			addressModeU: 'repeat',
-			addressModeV: 'repeat'
-		});
-		
 		const createMaterial = () => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 			material.diffuseTexture = texture;
-			material.diffuseTextureSampler = sampler;
 			return material;
 		};
 
-		// [KO] 인터랙션 대상 객체들을 담을 배열
-		// [EN] Array to hold interactable objects
-		const interactableObjects = [];
-
-		// 1. TorusKnot (Left)
-		const torusKnot = new RedGPU.Display.Mesh(
-			redGPUContext,
-			new RedGPU.Primitive.TorusKnot(redGPUContext, 2, 0.6, 128, 32, 2, 3),
-			createMaterial()
-		);
-		torusKnot.setPosition(-6, 0, 0);
-		torusKnot.name = "TorusKnot";
-		scene.addChild(torusKnot);
-		interactableObjects.push(torusKnot);
-
-		// 2. Box (Center)
-		const box = new RedGPU.Display.Mesh(
-			redGPUContext,
-			new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3, 1, 1, 1),
-			createMaterial()
-		);
-		box.name = "Box";
-		scene.addChild(box);
-		interactableObjects.push(box);
-
-		// 3. Sphere (Right)
-		const sphere = new RedGPU.Display.Mesh(
-			redGPUContext,
-			new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32, 0, Math.PI * 2, 0, Math.PI),
-			createMaterial()
-		);
-		sphere.setPosition(6, 0, 0);
-		sphere.name = "Sphere";
-		scene.addChild(sphere);
-		interactableObjects.push(sphere);
-
-		// 4. Cylinder (Back Left)
-		const cylinder = new RedGPU.Display.Mesh(
-			redGPUContext,
-			new RedGPU.Primitive.Cylinder(redGPUContext, 1.5, 1.5, 4, 32, 1, false, 0, Math.PI * 2),
-			createMaterial()
-		);
-		cylinder.setPosition(-4, 0, -5);
-		cylinder.name = "Cylinder";
-		scene.addChild(cylinder);
-		interactableObjects.push(cylinder);
-
-		// 5. Torus (Back Right)
-		const torus = new RedGPU.Display.Mesh(
-			redGPUContext,
-			new RedGPU.Primitive.Torus(redGPUContext, 2, 0.5, 32, 32, 0, Math.PI * 2),
-			createMaterial()
-		);
-		torus.setPosition(4, 0, -5);
-		torus.rotationX = 90;
-		torus.name = "Torus";
-		scene.addChild(torus);
-		interactableObjects.push(torus);
-
-		// [KO] 교차 지점을 표시할 작은 구체
-		// [EN] A small sphere to mark the intersection point
-		const markerMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
 		const marker = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Sphere(redGPUContext, 0.15),
-			markerMaterial
+			new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
 		);
-		marker.visible = false;
-		scene.addChild(marker);
 
-		// [KO] 정보 표시용 HTML 요소 생성
-		// [EN] Create HTML element for displaying information
+		// [KO] 정보 표시용 HTML 요소 및 이벤트 설정
+		// [EN] Set up HTML element for info display and events
 		const infoBox = document.createElement('div');
 		Object.assign(infoBox.style, {
 			position: 'absolute',
@@ -123,69 +50,57 @@ RedGPU.init(
 			fontSize: '11px',
 			lineHeight: '1.6',
 			pointerEvents: 'none',
-			textAlign: 'left',
 			whiteSpace: 'pre-wrap',
 			display: 'none',
-			userSelect: 'none',
-			zIndex: '100',
-			boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+			zIndex: '100'
 		});
 		document.body.appendChild(infoBox);
 
-		const updateInfo = (e) => {
-			infoBox.innerHTML = `[Hit Info]
-Object: ${e.target.name}
-Distance: ${e.distance.toFixed(4)}
-World Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]
-Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]
-Face Index: ${e.faceIndex}
-UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
-		};
-
-		interactableObjects.forEach(mesh => {
+		const setupEvents = (mesh) => {
 			mesh.addListener('over', (e) => {
 				e.target.material.color.setColorByHEX('#00ff00');
-				marker.visible = true;
-				marker.setPosition(e.point[0], e.point[1], e.point[2]);
+				scene.addChild(marker);
 				infoBox.style.display = 'block';
-				updateInfo(e);
 			});
 			mesh.addListener('move', (e) => {
 				marker.setPosition(e.point[0], e.point[1], e.point[2]);
-				updateInfo(e);
+				infoBox.innerHTML = `[Hit Info]\nObject: ${e.target.name}\nDistance: ${e.distance.toFixed(4)}\nWorld Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]\nLocal Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]\nFace Index: ${e.faceIndex}\nUV: [${e.uv[0].toFixed(3)}, ${e.uv[1].toFixed(3)}]`;
 			});
 			mesh.addListener('out', (e) => {
 				e.target.material.color.setColorByHEX('#ffffff');
-				marker.visible = false;
+				scene.removeChild(marker);
 				infoBox.style.display = 'none';
 			});
+		};
+
+		// [KO] 객체 생성 및 이벤트 등록
+		// [EN] Create objects and register events
+		const primitives = [
+			{ name: 'TorusKnot', geom: new RedGPU.Primitive.TorusKnot(redGPUContext, 2, 0.6, 128, 32, 2, 3), pos: [-6, 0, 0] },
+			{ name: 'Box', geom: new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3), pos: [0, 0, 0] },
+			{ name: 'Sphere', geom: new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32), pos: [6, 0, 0] },
+			{ name: 'Cylinder', geom: new RedGPU.Primitive.Cylinder(redGPUContext, 1.5, 1.5, 4, 32), pos: [-4, 0, -5] },
+			{ name: 'Torus', geom: new RedGPU.Primitive.Torus(redGPUContext, 2, 0.5, 32, 32), pos: [4, 0, -5], rot: [90, 0, 0] }
+		];
+
+		primitives.forEach(p => {
+			const mesh = new RedGPU.Display.Mesh(redGPUContext, p.geom, createMaterial());
+			mesh.name = p.name;
+			mesh.setPosition(...p.pos);
+			if (p.rot) [mesh.rotationX, mesh.rotationY, mesh.rotationZ] = p.rot;
+			scene.addChild(mesh);
+			setupEvents(mesh);
 		});
 
-		// [KO] 렌더러 시작
-		// [EN] Start renderer
-		const renderer = new RedGPU.Renderer();
-		renderer.start(redGPUContext);
-
-		// [KO] 테스트용 컨트롤 패널 실행
-		// [EN] Execute test control panel
+		new RedGPU.Renderer().start(redGPUContext);
 		renderTestPane(redGPUContext);
 	},
-	(failReason) => {
-		console.error(failReason);
-	}
+	(failReason) => console.error(failReason)
 );
 
 const renderTestPane = async (redGPUContext) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	
-	pane.addBlade({
-		view: 'text',
-		label: 'Guide',
-		value: 'Hover over objects to see raycasting in action!',
-		parse: (v) => v,
-		readonly: true
-	});
+	setDebugButtons(RedGPU, redGPUContext);
+	new Pane().addBlade({ view: 'text', label: 'Guide', value: 'Hover over objects to see raycasting in action!', parse: (v) => v, readonly: true });
 };
