@@ -66,13 +66,11 @@ export default class Raycaster2D {
 		this.#view = view;
 		const { pixelRectObject } = view;
 		
-		// Convert screen coordinates to NDC (-1 to 1)
 		const ndcX = (screenX * devicePixelRatio / pixelRectObject.width) * 2 - 1;
 		const ndcY = 1 - (screenY * devicePixelRatio / pixelRectObject.height) * 2;
 		
 		vec3.set(this.#ndcPoint, ndcX, ndcY, 0);
 
-		// Update ray origin for compatibility, though not strictly a "ray" in 2D
 		const worldPoint = view.screenToWorld(screenX, screenY);
 		vec3.set(this.ray.origin, worldPoint[0], worldPoint[1], worldPoint[2]);
 		vec3.set(this.ray.direction, 0, 0, -1);
@@ -132,36 +130,27 @@ export default class Raycaster2D {
 
 	#intersectObject(mesh: Mesh, recursive: boolean, intersects: RayIntersectResult[]): void {
 		if (mesh.geometry) {
-			// [KO] 렌더링 시 사용되는 행렬과 동일한 조합 생성
-			// [EN] Create the same matrix combination used during rendering
 			const view = this.#view;
 			const projectionMatrix = view.projectionMatrix;
 			const cameraMatrix = view.rawCamera.modelMatrix;
 			
-			// Combined Matrix = Projection * Camera * Model
 			const combinedMatrix = mat4.multiply(this.#tempMat4, projectionMatrix, cameraMatrix);
 			mat4.multiply(combinedMatrix, combinedMatrix, mesh.modelMatrix);
 			
 			if ((mesh as any).is2DMeshType) {
-				// 2D Mesh (Sprite2D, etc.) scaling factor
 				mat4.scale(combinedMatrix, combinedMatrix, [(mesh as any).width, (mesh as any).height, 1]);
 			}
 
-			// Transform NDC point to local space
 			const invCombinedMatrix = mat4.invert(this.#tempMat4_2, combinedMatrix);
 			if (invCombinedMatrix) {
 				const localPoint = vec3.transformMat4(this.#tempVec3, this.#ndcPoint, invCombinedMatrix);
 
-				// Plane geometry in RedGPU is usually from -0.5 to 0.5
 				if (localPoint[0] >= -0.5 && localPoint[0] <= 0.5 &&
 					localPoint[1] >= -0.5 && localPoint[1] <= 0.5) {
 
-					// Calculate world point from NDC for result
 					const invProjView = mat4.invert(mat4.create(), mat4.multiply(mat4.create(), projectionMatrix, cameraMatrix));
 					const worldPoint = vec3.transformMat4(vec3.create(), this.#ndcPoint, invProjView);
 
-					// [KO] 2개의 삼각형으로 구성된 사각형에서 faceIndex 계산 (기본 Plane 기준)
-					// [EN] Calculate faceIndex for a quad consisting of two triangles (based on standard Plane)
 					const faceIndex = localPoint[0] > localPoint[1] ? 1 : 0;
 
 					intersects.push({

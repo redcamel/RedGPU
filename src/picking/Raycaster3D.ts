@@ -88,8 +88,6 @@ export default class Raycaster3D {
 
 		this.#view = view;
 		const {pixelRectObject} = view;
-		// PickingManager passes logical pixels (divided by devicePixelRatio).
-		// We need to convert them back to device pixels to match pixelRectObject dimensions.
 		const ndcX = ((screenX * devicePixelRatio) / pixelRectObject.width) * 2 - 1;
 		const ndcY = -((screenY * devicePixelRatio) / pixelRectObject.height) * 2 + 1;
 		vec2.set(this.#screenPoint, ndcX, ndcY);
@@ -156,32 +154,24 @@ export default class Raycaster3D {
 			if ((mesh as any).useBillboardPerspective === false) {
 				this.#intersectBillboard(mesh, intersects);
 			} else {
-				// Perspective Billboard (3D)
-				// 1. Calculate Billboard World Matrix
-				// A billboard's world rotation is the same as the camera's world rotation.
-				// The camera's world matrix is the inverse of the view matrix (rawCamera.modelMatrix).
 				const view = this.#view;
 				const invView = mat4.invert(this.#tempMat4_2, view.rawCamera.modelMatrix);
 				const billboardWorldMatrix = this.#tempMat4_3;
 				mat4.copy(billboardWorldMatrix, invView);
 
-				// 2. Set position to mesh's world position
 				billboardWorldMatrix[12] = mesh.modelMatrix[12];
 				billboardWorldMatrix[13] = mesh.modelMatrix[13];
 				billboardWorldMatrix[14] = mesh.modelMatrix[14];
 
-				// 3. Apply mesh's world scale
 				const m = mesh.modelMatrix;
 				const sx = Math.hypot(m[0], m[1], m[2]);
 				const sy = Math.hypot(m[4], m[5], m[6]);
 				const sz = Math.hypot(m[8], m[9], m[10]);
 				mat4.scale(billboardWorldMatrix, billboardWorldMatrix, [sx, sy, sz]);
 
-				// 4. Narrow-phase intersection (disable backface culling for sprites)
 				this.#intersectNarrowPhase(mesh, billboardWorldMatrix, intersects, false);
 			}
 		} else if (mesh.geometry) {
-			// Standard object - Broad-phase: AABB 검사
 			const worldAABB = mesh.boundingAABB;
 			if (this.ray.intersectBox(worldAABB)) {
 				this.#intersectNarrowPhase(mesh, mesh.modelMatrix, intersects, true);

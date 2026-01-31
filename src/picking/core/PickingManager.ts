@@ -188,7 +188,6 @@ class PickingManager {
         const {pixelRectArray} = view;
         const x = this.#mouseX;
         const y = this.#mouseY;
-        // console.log(x,y)
         if (x <= 0 || x >= pixelRectArray[2] || y <= 0 || y >= pixelRectArray[3]) {
             return;
         }
