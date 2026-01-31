@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../dist/index.js?t=1769587130347";
+import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 
 /**
  * 1. 초기화 및 환경 설정
@@ -103,8 +103,8 @@ function loadGLTFModels(redGPUContext, scene) {
  * SSR 설정 컨트롤러 (Tweakpane)
  */
 async function createSSRControls(redGPUContext, targetView) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769587130347');
-    const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1769587130347");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1769835266959");
 
     const pane = new Pane({title: 'SSR 옵션 조절'});
     setDebugButtons(RedGPU, redGPUContext);
