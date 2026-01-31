@@ -1,4 +1,4 @@
-import { mat4, vec3, vec2 } from "gl-matrix";
+import { mat4, vec3, vec2, vec4 } from "gl-matrix";
 import Ray from "../math/Ray";
 import View3D from "../display/view/View3D";
 import Mesh from "../display/mesh/Mesh";
@@ -40,6 +40,13 @@ export default class Raycaster {
 	far: number = Infinity;
 
 	#tempMat4 = mat4.create();
+	#tempMat4_2 = mat4.create();
+	#tempMat4_3 = mat4.create();
+	#tempVec3 = vec3.create();
+	#tempVec3_2 = vec3.create();
+	#tempVec2 = vec2.create();
+	#view: View3D;
+	#screenPoint: vec2 = vec2.create();
 
 	/**
 	 * [KO] Raycaster 인스턴스를 생성합니다.
@@ -78,6 +85,14 @@ export default class Raycaster {
 
 		vec3.copy(this.ray.origin, origin);
 		vec3.copy(this.ray.direction, direction);
+
+		this.#view = view;
+		const {pixelRectObject} = view;
+		// PickingManager passes logical pixels (divided by devicePixelRatio).
+		// We need to convert them back to device pixels to match pixelRectObject dimensions.
+		const ndcX = ((screenX * devicePixelRatio) / pixelRectObject.width) * 2 - 1;
+		const ndcY = -((screenY * devicePixelRatio) / pixelRectObject.height) * 2 + 1;
+		vec2.set(this.#screenPoint, ndcX, ndcY);
 
 		if ('nearClipping' in rawCamera) this.near = rawCamera.nearClipping;
 		if ('farClipping' in rawCamera) this.far = rawCamera.farClipping;
@@ -136,37 +151,40 @@ export default class Raycaster {
 	}
 
 	#intersectObject(mesh: Mesh, recursive: boolean, intersects: RayIntersectResult[]): void {
-		if (mesh.geometry) {
-			// 1. Broad-phase: AABB 검사
+		const isBillboard = (mesh as any).useBillboard;
+		if (isBillboard && this.#view) {
+			if ((mesh as any).useBillboardPerspective === false) {
+				this.#intersectBillboard(mesh, intersects);
+			} else {
+				// Perspective Billboard (3D)
+				// 1. Calculate Billboard World Matrix
+				// A billboard's world rotation is the same as the camera's world rotation.
+				// The camera's world matrix is the inverse of the view matrix (rawCamera.modelMatrix).
+				const view = this.#view;
+				const invView = mat4.invert(this.#tempMat4_2, view.rawCamera.modelMatrix);
+				const billboardWorldMatrix = this.#tempMat4_3;
+				mat4.copy(billboardWorldMatrix, invView);
+
+				// 2. Set position to mesh's world position
+				billboardWorldMatrix[12] = mesh.modelMatrix[12];
+				billboardWorldMatrix[13] = mesh.modelMatrix[13];
+				billboardWorldMatrix[14] = mesh.modelMatrix[14];
+
+				// 3. Apply mesh's world scale
+				const m = mesh.modelMatrix;
+				const sx = Math.hypot(m[0], m[1], m[2]);
+				const sy = Math.hypot(m[4], m[5], m[6]);
+				const sz = Math.hypot(m[8], m[9], m[10]);
+				mat4.scale(billboardWorldMatrix, billboardWorldMatrix, [sx, sy, sz]);
+
+				// 4. Narrow-phase intersection (disable backface culling for sprites)
+				this.#intersectNarrowPhase(mesh, billboardWorldMatrix, intersects, false);
+			}
+		} else if (mesh.geometry) {
+			// Standard object - Broad-phase: AABB 검사
 			const worldAABB = mesh.boundingAABB;
 			if (this.ray.intersectBox(worldAABB)) {
-				// 2. Narrow-phase: 로컬 공간 변환 및 삼각형 정밀 검사
-				const localRay = new Ray();
-				vec3.copy(localRay.origin, this.ray.origin);
-				vec3.copy(localRay.direction, this.ray.direction);
-
-				const invModelMatrix = mat4.invert(this.#tempMat4, mesh.modelMatrix);
-				if (invModelMatrix) {
-					localRay.applyMatrix4(invModelMatrix);
-
-					const geometry = mesh.geometry;
-					const vertexBuffer = geometry.vertexBuffer;
-					const indexBuffer = geometry.indexBuffer;
-					const data = vertexBuffer.data;
-					const stride = vertexBuffer.interleavedStruct.arrayStride / 4;
-
-					if (indexBuffer) {
-						const indices = indexBuffer.data;
-						for (let i = 0; i < indices.length; i += 3) {
-							this.#checkTriangle(localRay, mesh, data, stride, indices[i], indices[i + 1], indices[i + 2], intersects);
-						}
-					} else {
-						const count = vertexBuffer.vertexCount;
-						for (let i = 0; i < count; i += 3) {
-							this.#checkTriangle(localRay, mesh, data, stride, i, i + 1, i + 2, intersects);
-						}
-					}
-				}
+				this.#intersectNarrowPhase(mesh, mesh.modelMatrix, intersects, true);
 			}
 		}
 
@@ -177,23 +195,189 @@ export default class Raycaster {
 		}
 	}
 
+	#intersectNarrowPhase(mesh: Mesh, modelMatrix: mat4, intersects: RayIntersectResult[], backfaceCulling: boolean): void {
+		const localRay = new Ray();
+		vec3.copy(localRay.origin, this.ray.origin);
+		vec3.copy(localRay.direction, this.ray.direction);
+
+		const invModelMatrix = mat4.invert(this.#tempMat4, modelMatrix);
+		if (invModelMatrix) {
+			localRay.applyMatrix4(invModelMatrix);
+
+			const geometry = mesh.geometry;
+			const vertexBuffer = geometry.vertexBuffer;
+			const indexBuffer = geometry.indexBuffer;
+			const data = vertexBuffer.data;
+			const stride = vertexBuffer.interleavedStruct.arrayStride / 4;
+
+			if (indexBuffer) {
+				const indices = indexBuffer.data;
+				for (let i = 0; i < indices.length; i += 3) {
+					this.#checkTriangle(localRay, mesh, modelMatrix, data, stride, indices[i], indices[i + 1], indices[i + 2], intersects, backfaceCulling);
+				}
+			} else {
+				const count = vertexBuffer.vertexCount;
+				for (let i = 0; i < count; i += 3) {
+					this.#checkTriangle(localRay, mesh, modelMatrix, data, stride, i, i + 1, i + 2, intersects, backfaceCulling);
+				}
+			}
+		}
+	}
+
+	#intersectBillboard(mesh: Mesh, intersects: RayIntersectResult[]) {
+		const view = this.#view;
+		const { pixelRectObject } = view;
+		const aspectRatio = pixelRectObject.width / pixelRectObject.height;
+
+		// 1. Calculate offset scale (matches shader's scaleX, scaleY)
+		mat4.multiply(this.#tempMat4, view.projectionMatrix, mesh.modelMatrix);
+		const pmm5 = this.#tempMat4[5];
+		const scaleConstY = Math.max(-1.0, Math.min(1.0, pmm5));
+		const scaleConstX = scaleConstY / aspectRatio;
+
+		const billboardFixedScale = (mesh as any).billboardFixedScale !== undefined ? (mesh as any).billboardFixedScale : 0.1;
+		const offsetXScale = scaleConstX * billboardFixedScale;
+		const offsetYScale = scaleConstY * billboardFixedScale;
+
+		// 2. Calculate Billboard View Matrix (Rotation cleared, Scale applied)
+		const modelViewMatrix = this.#tempMat4_2;
+		mat4.multiply(modelViewMatrix, view.rawCamera.modelMatrix, mesh.modelMatrix);
+
+		const m = mesh.modelMatrix;
+		const sx = Math.hypot(m[0], m[1], m[2]);
+		const sy = Math.hypot(m[4], m[5], m[6]);
+		const sz = Math.hypot(m[8], m[9], m[10]);
+
+		modelViewMatrix[0] = 1; modelViewMatrix[1] = 0; modelViewMatrix[2] = 0;
+		modelViewMatrix[4] = 0; modelViewMatrix[5] = 1; modelViewMatrix[6] = 0;
+		modelViewMatrix[8] = 0; modelViewMatrix[9] = 0; modelViewMatrix[10] = 1;
+		mat4.scale(modelViewMatrix, modelViewMatrix, [sx, sy, sz]);
+
+		// 3. Prepare for intersection check
+		const geometry = mesh.geometry;
+		const vertexBuffer = geometry.vertexBuffer;
+		const indexBuffer = geometry.indexBuffer;
+		const data = vertexBuffer.data;
+		const stride = vertexBuffer.interleavedStruct.arrayStride / 4;
+
+		const mx = this.#screenPoint[0];
+		const my = this.#screenPoint[1];
+
+		const getNDC = (index: number, out: vec2) => {
+			const lx = data[index * stride];
+			const ly = data[index * stride + 1];
+			const lz = data[index * stride + 2];
+
+			const vx = modelViewMatrix[0] * lx + modelViewMatrix[4] * ly + modelViewMatrix[8] * lz + modelViewMatrix[12];
+			const vy = modelViewMatrix[1] * lx + modelViewMatrix[5] * ly + modelViewMatrix[9] * lz + modelViewMatrix[13];
+			const vz = modelViewMatrix[2] * lx + modelViewMatrix[6] * ly + modelViewMatrix[10] * lz + modelViewMatrix[14];
+			const vw = modelViewMatrix[3] * lx + modelViewMatrix[7] * ly + modelViewMatrix[11] * lz + modelViewMatrix[15];
+
+			const cx = view.projectionMatrix[0] * vx + view.projectionMatrix[4] * vy + view.projectionMatrix[8] * vz + view.projectionMatrix[12] * vw;
+			const cy = view.projectionMatrix[1] * vx + view.projectionMatrix[5] * vy + view.projectionMatrix[9] * vz + view.projectionMatrix[13] * vw;
+			const cw = view.projectionMatrix[3] * vx + view.projectionMatrix[7] * vy + view.projectionMatrix[11] * vz + view.projectionMatrix[15] * vw;
+
+			if (cw <= 0) return false;
+			const invW = 1 / cw;
+			out[0] = cx * invW + lx * offsetXScale;
+			out[1] = cy * invW + ly * offsetYScale;
+			return true;
+		};
+
+		const v0 = vec2.create(), v1 = vec2.create(), v2 = vec2.create();
+		const checkTri = (i0: number, i1: number, i2: number) => {
+			if (!getNDC(i0, v0) || !getNDC(i1, v1) || !getNDC(i2, v2)) return;
+
+			const x0 = v0[0], y0 = v0[1], x1 = v1[0], y1 = v1[1], x2 = v2[0], y2 = v2[1];
+			const denom = (y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2);
+			if (Math.abs(denom) < 0.000001) return;
+
+			const wa = ((y1 - y2) * (mx - x2) + (x2 - x1) * (my - y2)) / denom;
+			const wb = ((y2 - y0) * (mx - x2) + (x0 - x2) * (my - y2)) / denom;
+			const wc = 1 - wa - wb;
+
+			if (wa >= 0 && wa <= 1 && wb >= 0 && wb <= 1 && wc >= 0 && wc <= 1) {
+				// Hit! Calculate exact intersection data
+				// 1. Interpolate UV
+				const hitUV = vec2.fromValues(
+					wa * data[i0 * stride + 6] + wb * data[i1 * stride + 6] + wc * data[i2 * stride + 6],
+					wa * data[i0 * stride + 7] + wb * data[i1 * stride + 7] + wc * data[i2 * stride + 7]
+				);
+
+				// 2. Interpolate Local Point
+				const localPoint = vec3.fromValues(
+					wa * data[i0 * stride] + wb * data[i1 * stride] + wc * data[i2 * stride],
+					wa * data[i0 * stride + 1] + wb * data[i1 * stride + 1] + wc * data[i2 * stride + 1],
+					wa * data[i0 * stride + 2] + wb * data[i1 * stride + 2] + wc * data[i2 * stride + 2]
+				);
+
+				// 3. Proper World Point and Distance
+				// The billboard plane in View Space is at constant depth VZ of its center
+				const worldCenter = this.#tempVec3;
+				vec3.set(worldCenter, mesh.modelMatrix[12], mesh.modelMatrix[13], mesh.modelMatrix[14]);
+
+				const viewCenter = this.#tempVec3_2;
+				vec3.transformMat4(viewCenter, worldCenter, view.rawCamera.modelMatrix);
+
+				const viewRayOrigin = vec3.transformMat4(vec3.create(), this.ray.origin, view.rawCamera.modelMatrix);
+
+				// Transform direction (rotation only)
+				const vm = view.rawCamera.modelMatrix;
+				const rd = this.ray.direction;
+				const viewRayDirZ = vm[2] * rd[0] + vm[6] * rd[1] + vm[10] * rd[2];
+
+				// Intersection with plane z = viewCenter[2]
+				// viewRayOrigin[2] + viewRayDirZ * t = viewCenter[2]
+				const t = (viewCenter[2] - viewRayOrigin[2]) / viewRayDirZ;
+
+				const worldIntersectPoint = vec3.scaleAndAdd(vec3.create(), this.ray.origin, this.ray.direction, t);
+
+				if (t >= this.near && t <= this.far) {
+					intersects.push({
+						distance: t,
+						point: worldIntersectPoint,
+						localPoint: localPoint,
+						object: mesh,
+						faceIndex: Math.floor(i0 / 3),
+						uv: hitUV,
+						ray: this.ray.clone()
+					});
+				}
+			}
+		};
+
+		if (indexBuffer) {
+			const indices = indexBuffer.data;
+			for (let i = 0; i < indices.length; i += 3) {
+				checkTri(indices[i], indices[i + 1], indices[i + 2]);
+			}
+		} else {
+			const count = vertexBuffer.vertexCount;
+			for (let i = 0; i < count; i += 3) {
+				checkTri(i, i + 1, i + 2);
+			}
+		}
+	}
+
 	#checkTriangle(
 		localRay: Ray,
 		mesh: Mesh,
+		modelMatrix: mat4,
 		data: Float32Array,
 		stride: number,
 		i0: number, i1: number, i2: number,
-		intersects: RayIntersectResult[]
+		intersects: RayIntersectResult[],
+		backfaceCulling: boolean
 	) {
 		const v0 = vec3.fromValues(data[i0 * stride], data[i0 * stride + 1], data[i0 * stride + 2]);
 		const v1 = vec3.fromValues(data[i1 * stride], data[i1 * stride + 1], data[i1 * stride + 2]);
 		const v2 = vec3.fromValues(data[i2 * stride], data[i2 * stride + 1], data[i2 * stride + 2]);
 
-		const result = localRay.intersectTriangleBarycentric(v0, v1, v2);
+		const result = localRay.intersectTriangleBarycentric(v0, v1, v2, backfaceCulling);
 		if (result) {
 			const { point: localIntersectPoint, u, v } = result;
 			const worldIntersectPoint = vec3.create();
-			vec3.transformMat4(worldIntersectPoint, localIntersectPoint, mesh.modelMatrix);
+			vec3.transformMat4(worldIntersectPoint, localIntersectPoint, modelMatrix);
 
 			const distance = vec3.distance(this.ray.origin, worldIntersectPoint);
 			if (distance >= this.near && distance <= this.far) {
