@@ -25,8 +25,9 @@ RedGPU.init(
         ];
 
         // 라인 업데이트 함수
-        const updateCenterLines = () => {
-            const {width, height} = redGPUContext.screenRectObject;
+        const updateCenterLines = (resizeEvent) => {
+            const screenRect = resizeEvent ? resizeEvent.screenRectObject : redGPUContext.sizeManager.screenRectObject;
+            const {width, height} = screenRect;
             const centerX = width / 2;
             const centerY = height / 2;
 
@@ -42,6 +43,11 @@ RedGPU.init(
         };
 
         updateCenterLines(); // 초기 라인 배치
+
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
         redGPUContext.onResize = updateCenterLines; // 화면 크기 변경 시 갱신
 
         const renderer = new RedGPU.Renderer(redGPUContext);

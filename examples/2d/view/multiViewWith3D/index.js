@@ -34,14 +34,24 @@ RedGPU.init(
         sprite2D.y = viewFor2D.screenRectObject.height / 2;
         sceneFor2D.addChild(sprite2D);
 
-        viewFor2D.onResize = (width, height) => {
+        /**
+         * [KO] 뷰 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the view size changes.
+         */
+        viewFor2D.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
             sprite2D.x = width / 2;
             sprite2D.y = height / 2;
         };
 
-        const onResizeRedGPUContext = () => {
-            viewFor2D.y = redGPUContext.screenRectObject.height - 200;
+        const onResizeRedGPUContext = (resizeEvent) => {
+            const screenRect = resizeEvent ? resizeEvent.screenRectObject : redGPUContext.sizeManager.screenRectObject;
+            viewFor2D.y = screenRect.height - 200;
         };
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
         redGPUContext.onResize = onResizeRedGPUContext;
         onResizeRedGPUContext();
 

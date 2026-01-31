@@ -21,8 +21,8 @@ export interface IRedGPURectObject {
  */
 export interface RedResizeEvent<T = any> {
     target: T;
-    screenRect: IRedGPURectObject;
-    pixelRect: IRedGPURectObject;
+    screenRectObject: IRedGPURectObject;
+    pixelRectObject: IRedGPURectObject;
 }
 
 type ParentRect = {
@@ -314,8 +314,8 @@ class RedGPUContextSizeManager {
         if (this.#redGPUContext.onResize) {
             this.#redGPUContext.onResize({
                 target: this.#redGPUContext,
-                screenRect: this.screenRectObject,
-                pixelRect: this.pixelRectObject
+                screenRectObject: this.screenRectObject,
+                pixelRectObject: this.pixelRectObject
             });
         }
         this.#redGPUContext.viewList.forEach((view: View3D) => {

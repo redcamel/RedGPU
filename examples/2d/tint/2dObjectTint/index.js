@@ -35,8 +35,12 @@ RedGPU.init(
         textField2D.material.tint.setColorByRGBA(255, 128, 0, 1);
         scene.addChild(textField2D);
 
-        redGPUContext.onResize = () => {
-            const {width, height} = redGPUContext.screenRectObject;
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
 
             const gap = 220;
             const totalChildren = scene.children.length;
@@ -49,7 +53,11 @@ RedGPU.init(
                 child.y = startY;
             });
         };
-        redGPUContext.onResize();
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.sizeManager.screenRectObject,
+            pixelRectObject: redGPUContext.sizeManager.pixelRectObject
+        });
 
         renderTestPane(redGPUContext, scene);
 

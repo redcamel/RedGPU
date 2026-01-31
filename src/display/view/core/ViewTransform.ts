@@ -414,13 +414,11 @@ class ViewTransform {
         this.#pixelRectArray[3] = Math.floor(tH * (this.#height.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio));
         // this.setPosition()
         console.log(`${this.constructor.name}.setSize - input : ${w},${h} | result : ${tW}, ${tH}`);
-        if (this.onResize) {
-            this.onResize({
-                target: this,
-                screenRect: this.screenRectObject,
-                pixelRect: this.pixelRectObject
-            });
-        }
+		if (this.onResize) this.onResize({
+			target: this,
+			screenRectObject: this.screenRectObject,
+			pixelRectObject: this.pixelRectObject
+		})
     }
 }
 

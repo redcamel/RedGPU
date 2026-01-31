@@ -53,9 +53,9 @@ RedGPU.init(
          * [EN] resizeEvent.screenRect: Screen size information in CSS pixels (for UI layout)
          */
         view.onResize = (resizeEvent) => {
-            const {screenRect} = resizeEvent;
-            sprite2D.x = screenRect.width / 2;
-            sprite2D.y = screenRect.height / 2;
+            const {width, height} = resizeEvent.screenRectObject;
+            sprite2D.x = width / 2;
+            sprite2D.y = height / 2;
         };
 
         /**

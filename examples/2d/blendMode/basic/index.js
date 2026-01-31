@@ -37,8 +37,12 @@ RedGPU.init(
         shape.y = view.screenRectObject.height / 2;
         scene.addChild(shape);
 
-        redGPUContext.onResize = () => {
-            const {width, height} = redGPUContext.screenRectObject;
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
             base.x = width / 2;
             base.y = 200;
             shape.x = width / 2;
@@ -75,7 +79,11 @@ RedGPU.init(
                 });
             }
         };
-        redGPUContext.onResize();
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.sizeManager.screenRectObject,
+            pixelRectObject: redGPUContext.sizeManager.pixelRectObject
+        });
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = (time) => {

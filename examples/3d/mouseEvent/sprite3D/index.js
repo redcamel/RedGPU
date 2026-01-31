@@ -59,8 +59,12 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 
         const { updateLayout } = createSampleSprite3D(redGPUContext, scene, infoBox, updateInfo);
 
-        redGPUContext.onResize = (screenRectObject, pixelRectObject) => {
-            const { width, height } = pixelRectObject;
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const { width, height } = resizeEvent.pixelRectObject;
             const aspect = width / height;
             const isMobile = redGPUContext.detector.isMobile;
             const baseDistance = isMobile ? 8 : 7.5;
@@ -68,7 +72,11 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
             updateInfoBoxStyle();
             updateLayout();
         };
-        redGPUContext.onResize(redGPUContext.sizeManager.screenRectObject, redGPUContext.sizeManager.pixelRectObject);
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.sizeManager.screenRectObject,
+            pixelRectObject: redGPUContext.sizeManager.pixelRectObject
+        });
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext);
