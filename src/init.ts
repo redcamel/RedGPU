@@ -88,8 +88,16 @@ const init = async (
             //TODO - 확장확인
             requiredFeatures.push("texture-compression-astc");
         }
+        const requiredLimits: Record<string, number> = {};
+        if (adapter.limits.maxBufferSize) {
+            requiredLimits.maxBufferSize = adapter.limits.maxBufferSize;
+        }
+        if (adapter.limits.maxStorageBufferBindingSize) {
+            requiredLimits.maxStorageBufferBindingSize = adapter.limits.maxStorageBufferBindingSize;
+        }
         const gpuDeviceDescriptor: GPUDeviceDescriptor = {
-            requiredFeatures
+            requiredFeatures,
+            requiredLimits
         };
         try {
             const device: GPUDevice = await adapter.requestDevice(gpuDeviceDescriptor)
