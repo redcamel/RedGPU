@@ -107,26 +107,20 @@ RedGPU.init(
 		marker.visible = false;
 		scene.addChild(marker);
 
-		// [KO] Raycaster 인스턴스 생성
-		// [EN] Create a Raycaster instance
-		const raycaster = new RedGPU.Picking.Raycaster();
-
 		// [KO] 정보 표시용 HTML 요소 생성
 		// [EN] Create HTML element for displaying information
 		const infoBox = document.createElement('div');
 		Object.assign(infoBox.style, {
 			position: 'absolute',
-			bottom: '80px',
-			left: '50%',
-			transform: 'translateX(-50%)',
+			bottom: '70px',
+			left: '20px',
 			backgroundColor: 'rgba(0, 0, 0, 0.8)',
 			backdropFilter: 'blur(10px)',
 			border: '1px solid rgba(255, 255, 255, 0.2)',
 			color: '#fff',
-			padding: '15px 25px',
+			padding: '6px 12px',
 			borderRadius: '12px',
-			fontFamily: 'monospace',
-			fontSize: '14px',
+			fontSize: '11px',
 			lineHeight: '1.6',
 			pointerEvents: 'none',
 			textAlign: 'left',
@@ -138,66 +132,33 @@ RedGPU.init(
 		});
 		document.body.appendChild(infoBox);
 
-		let hoveredObject = null;
+		const updateInfo = (e) => {
+			infoBox.innerHTML = `[Hit Info]
+Object: ${e.target.name}
+Distance: ${e.distance.toFixed(4)}
+World Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]
+Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]
+Face Index: ${e.faceIndex}
+UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
+		};
 
-		/**
-		 * [KO] 마우스 이동 이벤트 리스너
-		 * [EN] Mouse move event listener
-		 */
-		canvas.addEventListener('mousemove', (event) => {
-			const rect = canvas.getBoundingClientRect();
-			const mouseX = event.clientX - rect.left;
-			const mouseY = event.clientY - rect.top;
-
-			// [KO] 1. Raycaster 설정
-			// [EN] 1. Set up Raycaster
-			raycaster.setFromCamera(mouseX, mouseY, view);
-
-			// [KO] 2. 모든 객체와 교차 검사 수행
-			// [EN] 2. Perform intersection test with all objects
-			const intersects = raycaster.intersectObjects(interactableObjects);
-
-			if (intersects.length > 0) {
-				const hit = intersects[0];
-				
-				// [KO] 마커 이동 및 활성화
-				// [EN] Move and activate marker
+		interactableObjects.forEach(mesh => {
+			mesh.addListener('over', (e) => {
+				e.target.material.color.setColorByHEX('#00ff00');
 				marker.visible = true;
-				marker.setPosition(hit.point[0], hit.point[1], hit.point[2]);
-				
-				// [KO] 하이라이트 처리
-				// [EN] Highlight processing
-				if (hoveredObject !== hit.object) {
-					// 이전 객체 복원
-					if (hoveredObject) {
-						hoveredObject.material.color.setColorByHEX('#ffffff');
-					}
-					// 새 객체 하이라이트
-					hoveredObject = hit.object;
-					hoveredObject.material.color.setColorByHEX('#00ff00');
-				}
-
-				// [KO] 정보창 업데이트
-				// [EN] Update info box
+				marker.setPosition(e.point[0], e.point[1], e.point[2]);
 				infoBox.style.display = 'block';
-				infoBox.innerHTML = `[Hit Info]
-Object: ${hit.object.name}
-Distance: ${hit.distance.toFixed(4)}
-World Point: [${hit.point[0].toFixed(2)}, ${hit.point[1].toFixed(2)}, ${hit.point[2].toFixed(2)}]
-Local Point: [${hit.localPoint[0].toFixed(2)}, ${hit.localPoint[1].toFixed(2)}, ${hit.localPoint[2].toFixed(2)}]
-Face Index: ${hit.faceIndex}
-UV: [${hit.uv ? hit.uv[0].toFixed(3) : 'N/A'}, ${hit.uv ? hit.uv[1].toFixed(3) : 'N/A'}]`;
-			} else {
-				// [KO] 교차점이 없을 경우
-				// [EN] When there is no intersection
+				updateInfo(e);
+			});
+			mesh.addListener('move', (e) => {
+				marker.setPosition(e.point[0], e.point[1], e.point[2]);
+				updateInfo(e);
+			});
+			mesh.addListener('out', (e) => {
+				e.target.material.color.setColorByHEX('#ffffff');
 				marker.visible = false;
 				infoBox.style.display = 'none';
-
-				if (hoveredObject) {
-					hoveredObject.material.color.setColorByHEX('#ffffff');
-					hoveredObject = null;
-				}
-			}
+			});
 		});
 
 		// [KO] 렌더러 시작

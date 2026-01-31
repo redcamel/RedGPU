@@ -230,7 +230,8 @@ class PickingManager {
         const tMesh = pickingTable[uint32Color];
         const eventType = this.lastMouseClickEvent?.type;
         if (eventType === PICKING_EVENT_TYPE.CLICK) {
-            const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseClickEvent);
+			const hit = this.#getRaycastHit(tMesh);
+            const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseClickEvent, hit);
             this.#fireEvent(eventType, pickingEvent);
         }
     }
@@ -238,7 +239,8 @@ class PickingManager {
         const tMesh = pickingTable[uint32Color];
         const eventType = this.lastMouseEvent?.type;
         if (eventType) {
-            const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseEvent);
+			const hit = this.#getRaycastHit(tMesh);
+            const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseEvent, hit);
             if (this.#prevPickingEvent) {
                 pickingEvent.movementX = mouseX - this.#prevPickingEvent.mouseX;
                 pickingEvent.movementY = mouseY - this.#prevPickingEvent.mouseY;
@@ -279,6 +281,15 @@ class PickingManager {
         document.body.style.cursor = 'default';
     }
 
+	#getRaycastHit(target: Mesh) {
+		if (target) {
+			this.#raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view);
+			const intersects = this.#raycaster.intersectObject(target);
+			return intersects[0];
+		}
+		return null;
+	}
+
     async #getUint32Color(buffer: GPUBuffer) {
         await buffer.mapAsync(GPUMapMode.READ);
         const dataView = new DataView(buffer.getMappedRange());
@@ -292,18 +303,6 @@ class PickingManager {
 
     #fireEvent(type, e: PickingEvent) {
         if (e.target && e.target.events[type]) {
-			// [KO] 광선 추적을 통한 정밀 교차 정보 산출
-			// [EN] Calculate precise intersection information via raycasting
-			this.#raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view);
-			const intersects = this.#raycaster.intersectObject(e.target);
-			if (intersects.length > 0) {
-				const hit = intersects[0];
-				e.point = hit.point;
-				e.localX = hit.localPoint[0];
-				e.localY = hit.localPoint[1];
-				e.localZ = hit.localPoint[2];
-				e.faceIndex = hit.faceIndex;
-			}
             e.target.events[type](e)
         }
     };

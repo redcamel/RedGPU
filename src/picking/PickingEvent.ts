@@ -1,5 +1,6 @@
-import { vec3 } from "gl-matrix";
+import { vec3, vec2 } from "gl-matrix";
 import Mesh from "../display/mesh/Mesh";
+import { RayIntersectResult } from "./Raycaster";
 
 /**
  * [KO] 마우스 이벤트 관련 정보를 캡슐화한 클래스입니다.
@@ -12,6 +13,7 @@ import Mesh from "../display/mesh/Mesh";
  * mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
  *     console.log(e.pickingId, e.target);
  *     console.log(e.localX, e.localY, e.localZ);
+ *     console.log(e.distance, e.uv, e.localPoint);
  * });
  * ```
  *
@@ -66,6 +68,16 @@ class PickingEvent {
      */
     point: vec3 = vec3.create();
     /**
+     * [KO] 카메라와 교차 지점 사이의 거리
+     * [EN] Distance between camera and intersection point
+     */
+    distance: number = 0;
+    /**
+     * [KO] 로컬 공간상의 교차 지점
+     * [EN] Intersection point in local space
+     */
+    localPoint: vec3 = vec3.create();
+    /**
      * [KO] 로컬 X 좌표
      * [EN] Local X coordinate
      * @defaultValue 0
@@ -83,6 +95,11 @@ class PickingEvent {
      * @defaultValue 0
      */
     localZ: number = 0;
+    /**
+     * [KO] 교차 지점의 UV 좌표
+     * [EN] UV coordinates of the intersection point
+     */
+    uv: vec2 = vec2.create();
     /**
      * [KO] 교차된 삼각형의 인덱스
      * [EN] Index of the intersected triangle
@@ -132,8 +149,11 @@ class PickingEvent {
      * @param nativeEvent -
      * [KO] 네이티브 마우스 이벤트
      * [EN] Native mouse event
+     * @param hit -
+     * [KO] 레이캐스팅 교차 결과 (선택적)
+     * [EN] Raycasting intersection result (optional)
      */
-    constructor(pickingId: number, mouseX: number, mouseY: number, target: Mesh, time: number, type: string, nativeEvent: MouseEvent) {
+    constructor(pickingId: number, mouseX: number, mouseY: number, target: Mesh, time: number, type: string, nativeEvent: MouseEvent, hit?: RayIntersectResult) {
         this.pickingId = pickingId;
         this.mouseX = mouseX;
         this.mouseY = mouseY;
@@ -143,6 +163,17 @@ class PickingEvent {
         this.altKey = nativeEvent.altKey;
         this.ctrlKey = nativeEvent.ctrlKey;
         this.shiftKey = nativeEvent.shiftKey;
+
+		if (hit) {
+			this.point = hit.point;
+			this.localPoint = hit.localPoint;
+			this.localX = hit.localPoint[0];
+			this.localY = hit.localPoint[1];
+			this.localZ = hit.localPoint[2];
+			this.distance = hit.distance;
+			this.faceIndex = hit.faceIndex;
+			this.uv = hit.uv;
+		}
     }
 }
 
