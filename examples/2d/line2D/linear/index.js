@@ -26,7 +26,7 @@ RedGPU.init(
 
         // 라인 업데이트 함수
         const updateCenterLines = (resizeEvent) => {
-            const screenRect = resizeEvent ? resizeEvent.screenRectObject : redGPUContext.sizeManager.screenRectObject;
+            const screenRect = resizeEvent ? resizeEvent.screenRectObject : redGPUContext.screenRectObject;
             const {width, height} = screenRect;
             const centerX = width / 2;
             const centerY = height / 2;

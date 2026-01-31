@@ -40,8 +40,8 @@ RedGPU.init(
 
         redGPUContext.onResize({
             target: redGPUContext,
-            screenRectObject: redGPUContext.sizeManager.screenRectObject,
-            pixelRectObject: redGPUContext.sizeManager.pixelRectObject
+            screenRectObject: redGPUContext.screenRectObject,
+            pixelRectObject: redGPUContext.pixelRectObject
         });
 
         renderTestPane(redGPUContext, base);

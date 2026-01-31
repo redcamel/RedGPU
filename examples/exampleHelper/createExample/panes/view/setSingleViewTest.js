@@ -60,7 +60,7 @@ function createTestData(view) {
 const isPercentMode = (view, dimensionKey) => typeof view[dimensionKey] === "number" ? false : view[dimensionKey].includes('%');
 
 function calculateDimensionValue(view, TEST_DATA, dimensionKey, unit, isPercentMode) {
-    const parentDomRect = view.redGPUContext.sizeManager.pixelRectObject;
+    const parentDomRect = view.redGPUContext.pixelRectObject;
     const dimensionValue = TEST_DATA[dimensionKey];
 
     if (unit === '%' && !isPercentMode) {

@@ -45,7 +45,7 @@ RedGPU.init(
         };
 
         const onResizeRedGPUContext = (resizeEvent) => {
-            const screenRect = resizeEvent ? resizeEvent.screenRectObject : redGPUContext.sizeManager.screenRectObject;
+            const screenRect = resizeEvent ? resizeEvent.screenRectObject : redGPUContext.screenRectObject;
             viewFor2D.y = screenRect.height - 200;
         };
         /**

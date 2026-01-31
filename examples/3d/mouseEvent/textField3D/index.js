@@ -74,8 +74,8 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
         };
         redGPUContext.onResize({
             target: redGPUContext,
-            screenRectObject: redGPUContext.sizeManager.screenRectObject,
-            pixelRectObject: redGPUContext.sizeManager.pixelRectObject
+            screenRectObject: redGPUContext.screenRectObject,
+            pixelRectObject: redGPUContext.pixelRectObject
         });
 
         const renderer = new RedGPU.Renderer(redGPUContext);
