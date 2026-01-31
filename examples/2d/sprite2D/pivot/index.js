@@ -15,6 +15,21 @@ RedGPU.init(
         const parentSprite2D = createParentSprite2D(redGPUContext, scene);
         const childSprite2D = createChildSprite2D(redGPUContext, parentSprite2D);
 
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
+            parentSprite2D.x = width / 2;
+            parentSprite2D.y = height / 2;
+        };
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.sizeManager.screenRectObject,
+            pixelRectObject: redGPUContext.sizeManager.pixelRectObject
+        });
+
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = () => {
         };

@@ -353,8 +353,20 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#sizeManager.height = value;
     }
 
-    get screenRectObject() {
+    /**
+     * [KO] 화면 크기 정보(Screen)를 반환합니다. (CSS 픽셀 단위)
+     * [EN] Returns the screen size information. (in CSS pixels)
+     */
+    get screenRectObject(): IRedGPURectObject {
         return this.#sizeManager.screenRectObject
+    }
+
+    /**
+     * [KO] 픽셀 단위 화면 크기 정보(Pixel)를 반환합니다. (물리 픽셀 단위)
+     * [EN] Returns the pixel size information. (in physical pixels)
+     */
+    get pixelRectObject(): IRedGPURectObject {
+        return this.#sizeManager.pixelRectObject
     }
 
     /**
