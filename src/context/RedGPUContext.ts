@@ -5,7 +5,7 @@ import ResourceManager from "../resources/core/resourceManager/ResourceManager";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import RedGPUContextDetector from "./core/RedGPUContextDetector";
-import RedGPUContextSizeManager, {IRedGPURectObject} from "./core/RedGPUContextSizeManager";
+import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 
 /**
@@ -43,10 +43,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
     /**
      * [KO] 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출)
      * [EN] Resize event handler (called when canvas size changes)
-     * @param screenRectObject - [KO] 화면(CSS) 단위 크기 정보 [EN] Size information in screen (CSS) pixels
-     * @param pixelRectObject - [KO] 실제 픽셀 단위 크기 정보 [EN] Size information in actual pixels
+     * @param event - [KO] 리사이즈 이벤트 객체 [EN] Resize event object
      */
-    onResize: ((screenRectObject: IRedGPURectObject, pixelRectObject: IRedGPURectObject) => void) | null = null;
+    onResize: ((event: RedResizeEvent<RedGPUContext>) => void) | null = null;
     /**
      * [KO] 현재 시간(프레임 기준, ms)
      * [EN] Current time (frame based, ms)
@@ -413,11 +412,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
         window?.addEventListener('resize', () => {
             this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
             this.sizeManager.setSize()
-            this.viewList.forEach((view: View3D) => {
-                view.setSize()
-                view.setPosition()
-            })
-			if (this.onResize) this.onResize(this.#sizeManager.screenRectObject, this.#sizeManager.pixelRectObject);
         });
         this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
         const eventList = this.detector.isMobile ?

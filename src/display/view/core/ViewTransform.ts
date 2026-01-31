@@ -4,7 +4,7 @@ import OrthographicCamera from "../../../camera/camera/OrthographicCamera";
 import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import IsometricController from "../../../camera/controller/IsometricController";
 import AController from "../../../camera/core/AController";
-import RedGPUContextSizeManager from "../../../context/core/RedGPUContextSizeManager";
+import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "../../../context/core/RedGPUContextSizeManager";
 import RedGPUContext from "../../../context/RedGPUContext";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
@@ -27,9 +27,9 @@ import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 class ViewTransform {
     /**
      * 뷰 크기 변경 시 호출되는 콜백입니다.
-     * @type {((width: number, height: number) => void) | null}
+     * @type {((event: RedResizeEvent<ViewTransform>) => void) | null}
      */
-    onResize: ((width: number, height: number) => void) | null = null;
+    onResize: ((event: RedResizeEvent<ViewTransform>) => void) | null = null;
     /**
      * 연결된 RedGPUContext 인스턴스(읽기 전용).
      * @private
@@ -415,7 +415,11 @@ class ViewTransform {
         // this.setPosition()
         console.log(`${this.constructor.name}.setSize - input : ${w},${h} | result : ${tW}, ${tH}`);
         if (this.onResize) {
-            this.onResize(this.screenRectObject.width, this.screenRectObject.height);
+            this.onResize({
+                target: this,
+                screenRect: this.screenRectObject,
+                pixelRect: this.pixelRectObject
+            });
         }
     }
 }

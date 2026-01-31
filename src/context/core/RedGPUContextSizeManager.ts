@@ -15,6 +15,16 @@ export interface IRedGPURectObject {
 	height: number;
 }
 
+/**
+ * [KO] 리사이즈 이벤트 객체 인터페이스
+ * [EN] Resize event object interface
+ */
+export interface RedResizeEvent<T = any> {
+    target: T;
+    screenRect: IRedGPURectObject;
+    pixelRect: IRedGPURectObject;
+}
+
 type ParentRect = {
     x: number,
     y: number,
@@ -302,7 +312,11 @@ class RedGPUContextSizeManager {
      */
     #updateViewsSize() {
         if (this.#redGPUContext.onResize) {
-            this.#redGPUContext.onResize(this.screenRectObject, this.pixelRectObject);
+            this.#redGPUContext.onResize({
+                target: this.#redGPUContext,
+                screenRect: this.screenRectObject,
+                pixelRect: this.pixelRectObject
+            });
         }
         this.#redGPUContext.viewList.forEach((view: View3D) => {
             view.setSize()
