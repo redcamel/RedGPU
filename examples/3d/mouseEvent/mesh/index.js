@@ -50,7 +50,7 @@ const createSampleMesh = async (redGPUContext, scene) => {
 
         scene.addChild(mesh);
         mesh.addListener(eventName, (e) => {
-            console.log(`Event: ${eventName}`, e);
+            console.log(`Event: ${eventName}`, e, e.ray);
             let tRotation = Math.random() * 360;
             TweenMax.to(e.target, 0.5, {
                 rotationX: tRotation,
@@ -70,12 +70,8 @@ const createSampleMesh = async (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769587130347');
     const {
-        setRedGPUTest_pane,
         setDebugButtons
     } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769587130347");
     setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    setRedGPUTest_pane(pane, redGPUContext, true);
 };

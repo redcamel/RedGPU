@@ -226,12 +226,25 @@ class PickingManager {
         gpuDevice.queue.submit([readPixelCommandEncoder.finish()]);
         return readPixelBuffer;
     };
+    #createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent) {
+		this.#raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view);
+		let hit;
+		if (tMesh) {
+			const intersects = this.#raycaster.intersectObject(tMesh);
+			hit = intersects[0];
+		}
+		const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent, hit);
+		if (!pickingEvent.ray) {
+			pickingEvent.ray = this.#raycaster.ray.clone();
+		}
+		return pickingEvent;
+    }
+
     #processClickEvent = (uint32Color: number, mouseX: number, mouseY: number, time: number, pickingTable: {}) => {
         const tMesh = pickingTable[uint32Color];
         const eventType = this.lastMouseClickEvent?.type;
         if (eventType === PICKING_EVENT_TYPE.CLICK) {
-			const hit = this.#getRaycastHit(tMesh);
-            const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseClickEvent, hit);
+            const pickingEvent = this.#createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseClickEvent);
             this.#fireEvent(eventType, pickingEvent);
         }
     }
@@ -239,8 +252,7 @@ class PickingManager {
         const tMesh = pickingTable[uint32Color];
         const eventType = this.lastMouseEvent?.type;
         if (eventType) {
-			const hit = this.#getRaycastHit(tMesh);
-            const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseEvent, hit);
+            const pickingEvent = this.#createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseEvent);
             if (this.#prevPickingEvent) {
                 pickingEvent.movementX = mouseX - this.#prevPickingEvent.mouseX;
                 pickingEvent.movementY = mouseY - this.#prevPickingEvent.mouseY;
@@ -280,15 +292,6 @@ class PickingManager {
         this.#prevOverTarget = null;
         document.body.style.cursor = 'default';
     }
-
-	#getRaycastHit(target: Mesh) {
-		if (target) {
-			this.#raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view);
-			const intersects = this.#raycaster.intersectObject(target);
-			return intersects[0];
-		}
-		return null;
-	}
 
     async #getUint32Color(buffer: GPUBuffer) {
         await buffer.mapAsync(GPUMapMode.READ);
