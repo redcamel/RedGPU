@@ -131,7 +131,7 @@ class ViewTransform {
      * @param {PerspectiveCamera | OrthographicCamera | AController | Camera2D} value
      */
     set camera(value: PerspectiveCamera | OrthographicCamera | AController | Camera2D) {
-        if (!(value instanceof PerspectiveCamera || value instanceof Camera2D) && !(value instanceof Camera2D) && !(value instanceof OrthographicCamera) && !(value instanceof AController)) consoleAndThrowError('allow PerspectiveCamera or OrthographicCamera or AController instance')
+        if (!(value instanceof PerspectiveCamera) && !(value instanceof Camera2D) && !(value instanceof OrthographicCamera) && !(value instanceof AController)) consoleAndThrowError('allow PerspectiveCamera or OrthographicCamera or AController instance')
         this.#camera = value;
     }
 
@@ -306,7 +306,6 @@ class ViewTransform {
                     1
                 ]
             );
-            mat4.identity(this.rawCamera.modelMatrix);
         } else {
             const {fieldOfView, nearClipping, farClipping} = this.rawCamera
             mat4.perspective(this.#noneJitterProjectionMatrix, (Math.PI / 180) * fieldOfView, this.aspect, nearClipping, farClipping);

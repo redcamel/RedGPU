@@ -43,9 +43,12 @@ RedGPU.init(
         const updateInfo = (eventName, e) => {
             infoBox.style.display = 'block';
             infoBox.innerHTML = `[Event Info]
-Object: ${e.target.constructor.name}
+Object: ${e.target.name || e.target.constructor.name}
 Event: ${eventName}
-Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}]
+Distance: ${e.distance !== undefined ? e.distance.toFixed(4) : 'N/A'}
+World Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]
+Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]
+Face Index: ${e.faceIndex}
 UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
         };
 
@@ -107,7 +110,6 @@ const createSampleTextField2D = async (redGPUContext, scene, updateInfo) => {
         scene.addChild(textField);
         textField.addListener(eventName, (e) => {
             updateInfo(eventName, e);
-            console.log(`Event: ${eventName}`, e);
             e.target.background = getRandomHexValue();
         });
     });

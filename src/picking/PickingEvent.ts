@@ -1,6 +1,6 @@
 import { vec3, vec2 } from "gl-matrix";
 import Mesh from "../display/mesh/Mesh";
-import { RayIntersectResult } from "./Raycaster";
+import { RayIntersectResult } from "./Raycaster3D";
 import Ray from "../math/Ray";
 
 /**

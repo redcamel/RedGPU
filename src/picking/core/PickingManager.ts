@@ -1,11 +1,11 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import InstancingMesh from "../../display/instancingMesh/InstancingMesh";
 import Mesh from "../../display/mesh/Mesh";
-import View3D from "../../display/view/View3D";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import PickingEvent from "../PickingEvent";
 import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
-import Raycaster from "../Raycaster";
+import Raycaster3D from "../Raycaster3D";
+import Raycaster2D from "../Raycaster2D";
 
 /**
  * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
@@ -28,14 +28,15 @@ class PickingManager {
     #pickingGPUTexture: GPUTexture
     #pickingGPUTextureView: GPUTextureView
     #redGPUContext: RedGPUContext
-    #view: View3D
+    #view: any
     #castingList: (Mesh | InstancingMesh)[] = []
     #mouseX: number = 0
     #mouseY: number = 0
     #prevPickingEvent: PickingEvent
     #prevOverTarget: Mesh
     #videoMemorySize: number = 0
-	#raycaster: Raycaster = new Raycaster();
+	#raycaster3D: Raycaster3D = new Raycaster3D();
+	#raycaster2D: Raycaster2D = new Raycaster2D();
 
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
@@ -132,7 +133,7 @@ class PickingManager {
      * [KO] View3D 인스턴스
      * [EN] View3D instance
      */
-    checkTexture(view: View3D) {
+    checkTexture(view: any) {
         const {redGPUContext} = view
         const {resourceManager} = redGPUContext
         this.#view = view
@@ -158,7 +159,7 @@ class PickingManager {
      * [KO] 시간
      * [EN] Time
      */
-    checkEvents(view: View3D, time: number) {
+    checkEvents(view: any, time: number) {
         if (this.castingList.length) {
             this.#readPixelArrayBuffer(view, time)
             this.resetCastingList()
@@ -182,7 +183,7 @@ class PickingManager {
         });
     }
 
-    #readPixelArrayBuffer = async (view: View3D, time: number, width = 1, height = 1) => {
+    #readPixelArrayBuffer = async (view: any, time: number, width = 1, height = 1) => {
         const {gpuDevice} = view.redGPUContext;
         const {pixelRectArray} = view;
         const x = this.#mouseX;
@@ -227,15 +228,17 @@ class PickingManager {
         return readPixelBuffer;
     };
     #createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent) {
-		this.#raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view);
+		const isView2D = this.#view.rawCamera.constructor.name === 'Camera2D';
+		const raycaster = isView2D ? this.#raycaster2D : this.#raycaster3D;
+		raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view as any);
 		let hit;
 		if (tMesh) {
-			const intersects = this.#raycaster.intersectObject(tMesh);
+			const intersects = raycaster.intersectObject(tMesh);
 			hit = intersects[0];
 		}
 		const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent, hit);
 		if (!pickingEvent.ray) {
-			pickingEvent.ray = this.#raycaster.ray.clone();
+			pickingEvent.ray = raycaster.ray.clone();
 		}
 		return pickingEvent;
     }

@@ -1,4 +1,4 @@
-import { mat4, vec3, vec2, vec4 } from "gl-matrix";
+import { mat4, vec3, vec2 } from "gl-matrix";
 import Ray from "../math/Ray";
 import View3D from "../display/view/View3D";
 import Mesh from "../display/mesh/Mesh";
@@ -12,13 +12,13 @@ import Mesh from "../display/mesh/Mesh";
  *
  * * ### Example
  * ```typescript
- * const raycaster = new RedGPU.Picking.Raycaster();
+ * const raycaster = new RedGPU.Picking.Raycaster3D();
  * raycaster.setFromCamera(mouseX, mouseY, view);
  * const intersects = raycaster.intersectObjects(scene.children);
  * ```
  * @category Picking
  */
-export default class Raycaster {
+export default class Raycaster3D {
 	/**
 	 * [KO] 내부적으로 관리되는 광원 객체
 	 * [EN] Internally managed ray object
@@ -49,8 +49,8 @@ export default class Raycaster {
 	#screenPoint: vec2 = vec2.create();
 
 	/**
-	 * [KO] Raycaster 인스턴스를 생성합니다.
-	 * [EN] Creates a Raycaster instance.
+	 * [KO] Raycaster3D 인스턴스를 생성합니다.
+	 * [EN] Creates a Raycaster3D instance.
 	 */
 	constructor() {
 		this.ray = new Ray();
@@ -94,8 +94,8 @@ export default class Raycaster {
 		const ndcY = -((screenY * devicePixelRatio) / pixelRectObject.height) * 2 + 1;
 		vec2.set(this.#screenPoint, ndcX, ndcY);
 
-		if ('nearClipping' in rawCamera) this.near = rawCamera.nearClipping;
-		if ('farClipping' in rawCamera) this.far = rawCamera.farClipping;
+		if ('nearClipping' in rawCamera) this.near = (rawCamera as any).nearClipping;
+		if ('farClipping' in rawCamera) this.far = (rawCamera as any).farClipping;
 	}
 
 	/**
@@ -190,7 +190,7 @@ export default class Raycaster {
 
 		if (recursive && mesh.children) {
 			for (const child of mesh.children) {
-				this.#intersectObject(child, recursive, intersects);
+				this.#intersectObject(child as Mesh, recursive, intersects);
 			}
 		}
 	}
