@@ -55,8 +55,8 @@ interface Sprite3D {
  * @category Sprite
  */
 class Sprite3D extends Mesh {
-    #width: number = 1
-    #height: number = 1
+    #nativeWidth: number = 1
+    #nativeHeight: number = 1
 
     /**
      * [KO] 새로운 Sprite3D 인스턴스를 생성합니다.
@@ -88,13 +88,23 @@ class Sprite3D extends Mesh {
             if (gpuTexture) {
                 const tW = gpuTexture.width
                 const tH = gpuTexture.height
-                const dpr = window.devicePixelRatio || 1;
-                if (tW !== this.#width || tH !== this.#height || this._renderRatioY !== dpr) {
-                    this.#width = tW
-                    this.#height = tH
-                    // 세로 기준 스케일링 (Height-based) + DPR 반영
-                    this._renderRatioY = dpr
-                    this._renderRatioX = (tW / tH) * dpr
+                if (tW !== this.#nativeWidth || tH !== this.#nativeHeight) {
+                    this.#nativeWidth = tW
+                    this.#nativeHeight = tH
+
+                    const prevX = this._renderRatioX;
+                    const prevY = this._renderRatioY;
+                    const prevPixelSize = this.pixelSize;
+
+                    // 세로 기준 스케일링 (Height-based) 표준화
+                    this._renderRatioY = 1.0
+                    this._renderRatioX = (tW / tH)
+                    // 원본 해상도를 pixelSize 기본값으로 설정
+                    this.pixelSize = tH;
+
+                    if (prevX !== this._renderRatioX || prevY !== this._renderRatioY || prevPixelSize !== this.pixelSize) {
+                        this.dirtyTransform = true
+                    }
                 }
             }
         }

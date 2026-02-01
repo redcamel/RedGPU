@@ -45,7 +45,8 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  * @category TextField
  */
 class TextField3D extends ATextField {
-    #aspectRatio: number = 1;
+    #nativeWidth: number = 1
+    #nativeHeight: number = 1
 
     /**
      * [KO] TextField3D 생성자
@@ -60,21 +61,24 @@ class TextField3D extends ATextField {
     constructor(redGPUContext: RedGPUContext, text?: string) {
         super(redGPUContext, (width: number, height: number) => {
             if (width && height) {
-                const dpr = window.devicePixelRatio || 1;
-                this.#aspectRatio = width / height;
+                if (width !== this.#nativeWidth || height !== this.#nativeHeight) {
+                    this.#nativeWidth = width
+                    this.#nativeHeight = height
 
-                const prevX = this._renderRatioX;
-                const prevY = this._renderRatioY;
+                    const prevX = this._renderRatioX;
+                    const prevY = this._renderRatioY;
+                    const prevPixelSize = this.pixelSize;
 
-                // 세로 기준 스케일링 (Height-based) + DPR 반영
-                this._renderRatioY = dpr;
-                this._renderRatioX = this.#aspectRatio * dpr;
+                    // 세로 기준 스케일링 (Height-based) 표준화
+                    this._renderRatioY = 1.0;
+                    this._renderRatioX = width / height;
 
-                // 픽셀 사이즈 동기화
-                this.pixelSize = height;
+                    // 픽셀 사이즈 동기화
+                    this.pixelSize = height;
 
-                if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
-                    this.dirtyTransform = true;
+                    if (prevX !== this._renderRatioX || prevY !== this._renderRatioY || prevPixelSize !== this.pixelSize) {
+                        this.dirtyTransform = true;
+                    }
                 }
             }
         });
@@ -83,13 +87,6 @@ class TextField3D extends ATextField {
     }
 
     render(renderViewStateData: RenderViewStateData) {
-        const dpr = window.devicePixelRatio || 1;
-        if (this._renderRatioY !== dpr) {
-            // DPR 변경 대응
-            this._renderRatioY = dpr;
-            this._renderRatioX = this.#aspectRatio * dpr;
-            this.dirtyTransform = true;
-        }
         super.render(renderViewStateData);
     }
 
@@ -147,7 +144,7 @@ DefineForVertex.definePositiveNumber(TextField3D, [
 // 버텍스 셰이더에서 사용할 프리셋 정의
 DefineForVertex.defineByPreset(TextField3D, [
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
-    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, true],
+    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
     [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],
 ]);
 Object.freeze(TextField3D);

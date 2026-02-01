@@ -60,12 +60,12 @@ class SpriteSheet3D extends ASpriteSheet {
      * [KO] 렌더링될 텍스처 세그먼트의 실제 너비
      * [EN] Actual width of the texture segment to be rendered
      */
-    #renderTextureWidth: number = 1
+    #nativeWidth: number = 1
     /**
      * [KO] 렌더링될 텍스처 세그먼트의 실제 높이
      * [EN] Actual height of the texture segment to be rendered
      */
-    #renderTextureHeight: number = 1
+    #nativeHeight: number = 1
 
     /**
      * [KO] 새로운 SpriteSheet3D 인스턴스를 생성합니다.
@@ -85,32 +85,34 @@ class SpriteSheet3D extends ASpriteSheet {
                 if (gpuTexture) {
                     const tW = gpuTexture.width / segmentW
                     const tH = gpuTexture.height / segmentH
-                    const dpr = window.devicePixelRatio || 1;
-                    if (tW !== this.#renderTextureWidth || tH !== this.#renderTextureHeight || this._renderRatioY !== dpr) {
-                        this.#renderTextureWidth = tW
-                        this.#renderTextureHeight = tH
-                        // 세로 기준 스케일링 (Height-based) + DPR 반영
-                        this._renderRatioY = dpr
-                        this._renderRatioX = (tW / tH) * dpr
-                        this.dirtyTransform = true
+                    if (tW !== this.#nativeWidth || tH !== this.#nativeHeight) {
+                        this.#nativeWidth = tW
+                        this.#nativeHeight = tH
+
+                        const prevX = this._renderRatioX;
+                        const prevY = this._renderRatioY;
+                        const prevPixelSize = this.pixelSize;
+
+                        // 세로 기준 스케일링 (Height-based) 표준화
+                        this._renderRatioY = 1.0
+                        this._renderRatioX = (tW / tH)
+                        // 원본 세그먼트 해상도를 pixelSize 기본값으로 설정
+                        this.pixelSize = tH;
+
+                        if (prevX !== this._renderRatioX || prevY !== this._renderRatioY || prevPixelSize !== this.pixelSize) {
+                            this.dirtyTransform = true
+                        }
                     }
                 }
             } else {
-                this.#renderTextureWidth = 1
-                this.#renderTextureHeight = 1
+                this.#nativeWidth = 1
+                this.#nativeHeight = 1
             }
         });
         this._geometry = new Plane(redGPUContext);
     }
 
     render(renderViewStateData: RenderViewStateData) {
-        const dpr = window.devicePixelRatio || 1;
-        if (this._renderRatioY !== dpr && this.#renderTextureHeight) {
-            // DPR 변경 대응
-            this._renderRatioY = dpr
-            this._renderRatioX = (this.#renderTextureWidth / this.#renderTextureHeight) * dpr
-            this.dirtyTransform = true
-        }
         super.render(renderViewStateData);
     }
 
