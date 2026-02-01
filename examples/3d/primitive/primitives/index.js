@@ -34,6 +34,17 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 다양한 프리미티브 지오메트리를 생성하여 씬에 배치합니다.
+ * [EN] Creates various primitive geometries and places them in the scene.
+ *
+ * @param redGPUContext -
+ * [KO] RedGPU 컨텍스트
+ * [EN] RedGPU context
+ * @param scene -
+ * [KO] 프리미티브가 추가될 씬
+ * [EN] Scene where primitives will be added
+ */
 const createPrimitive = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -59,37 +70,49 @@ const createPrimitive = (redGPUContext, scene) => {
         {constructor: RedGPU.Primitive.TorusKnot, args: [redGPUContext, 0.5, 0.2, 128, 64, 2, 3]}
     ];
 
+    /**
+     * [KO] 지정된 재질과 위치에 프리미티브 행을 생성합니다.
+     * [EN] Creates a row of primitives at the specified material and position.
+     *
+     * @param material -
+     * [KO] 적용할 머티리얼
+     * [EN] Material to apply
+     * @param yPos -
+     * [KO] Y축 배치 위치
+     * [EN] Y-axis position
+     * @param topology -
+     * [KO] 렌더링 토폴로지 (기본값: TRIANGLE_LIST)
+     * [EN] Rendering topology (default: TRIANGLE_LIST)
+     */
     const createRow = (material, yPos, topology = null) => {
         primitives.forEach((primitive, index) => {
             const geometry = new primitive.constructor(...primitive.args);
             const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
-            if (topology) {
-                mesh.primitiveState.topology = topology;
-            }
+            if (topology) mesh.primitiveState.topology = topology;
 
             mesh.setPosition(centerX - gap * (primitives.length - 1) / 2 + index * gap, yPos, 0);
             scene.addChild(mesh);
 
+            // Primitive Name Label
             if (yPos === startY) {
                 const primitiveName = new RedGPU.Display.TextField3D(redGPUContext);
                 primitiveName.setPosition(centerX - gap * (primitives.length - 1) / 2 + index * gap, startY + 2, 0);
                 primitiveName.text = primitive.constructor.name;
                 primitiveName.color = '#ffffff';
-                primitiveName.fontSize = 32;
+                primitiveName.fontSize = 24;
                 primitiveName.useBillboard = true;
-                primitiveName.useBillboardPerspective = true;
                 scene.addChild(primitiveName);
             }
         });
 
+        // Topology Name Label
         const topologyName = new RedGPU.Display.TextField3D(redGPUContext);
         topologyName.setPosition(centerX - gap * primitives.length / 2 - 1, yPos, 0);
         topologyName.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         topologyName.color = '#ffffff';
-        topologyName.fontSize = 32;
+        topologyName.fontSize = 24;
         topologyName.useBillboard = true;
-        topologyName.useBillboardPerspective = true;
         scene.addChild(topologyName);
     };
 
@@ -98,6 +121,14 @@ const createPrimitive = (redGPUContext, scene) => {
     createRow(pointMaterial, pointY, RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST);
 };
 
+/**
+ * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
+ * [EN] Initializes the Tweakpane GUI for testing.
+ *
+ * @param redGPUContext -
+ * [KO] RedGPU 컨텍스트
+ * [EN] RedGPU context
+ */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

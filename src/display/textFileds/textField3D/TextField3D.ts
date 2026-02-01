@@ -144,7 +144,7 @@ DefineForVertex.definePositiveNumber(TextField3D, [
 // 버텍스 셰이더에서 사용할 프리셋 정의
 DefineForVertex.defineByPreset(TextField3D, [
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
-    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
+    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, true],
     [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],
 ]);
 Object.freeze(TextField3D);
