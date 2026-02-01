@@ -77,8 +77,8 @@ class ATextField extends Mesh {
     #redGPUContext: RedGPUContext
     #currentRequestAnimationFrame: number;
     #needsUpdate: boolean = false; // 업데이트 플래그
-    #renderWidth: number
-    #renderHeight: number
+    #renderWidth: number = 1
+    #renderHeight: number = 1
 
     constructor(redGPUContext: RedGPUContext, imgOnload: Function, mode3dYn: boolean = true) {
         super(redGPUContext);
@@ -126,7 +126,9 @@ class ATextField extends Mesh {
     }
 
     render(renderViewStateData: RenderViewStateData) {
-        this.#textureImgOnload(this.#renderWidth, this.#renderHeight)
+        // if (this.#renderWidth && this.#renderHeight) {
+            this.#textureImgOnload(this.#renderWidth, this.#renderHeight)
+        // }
         this.#updateTexture()
         super.render(renderViewStateData);
     }
@@ -203,25 +205,20 @@ class ATextField extends Mesh {
         this.#textureImg.onload = _ => {
             let tW: number, tH: number;
             const {width, height} = this.#getRenderHtmlSize();
-            const multiple = this.#mode3dYn ? 2 : 2;
-            const textureImgRatio = this.#mode3dYn ? 1 : 2;
+            const dpr = window.devicePixelRatio || 1;
+            const multiple = dpr;
             tW = width * multiple;
             tH = height * multiple;
-            this.#textureImg.width = tW / textureImgRatio;
-            this.#textureImg.height = tH / textureImgRatio;
-            // keepLog("Final Texture Sizes:", {
-            // 	tW2: tW / textureImgRatio,
-            // 	tH2: tH / textureImgRatio,
-            // 	svgWidth: tW,
-            // 	svgHeight: tH,
-            // });
+            this.#textureImg.width = width;
+            this.#textureImg.height = height;
+
             // 렌더링 크기 설정
             this.#textureCvs.width = tW;
             this.#textureCvs.height = tH;
             // 스타일 크기 동기화
             if (!(this.#textureCvs instanceof OffscreenCanvas)) {
-                this.#textureCvs.style.width = `${tW / multiple}px`;
-                this.#textureCvs.style.height = `${tH / multiple}px`;
+                this.#textureCvs.style.width = `${width}px`;
+                this.#textureCvs.style.height = `${height}px`;
             }
             this.#textureCtx.imageSmoothingEnabled = true;
             this.#textureCtx.imageSmoothingQuality = 'high';
@@ -239,13 +236,12 @@ class ATextField extends Mesh {
                     this.material.diffuseTexture.destroy()
                     this.material.diffuseTexture = null
                     if (isObjectURL) {
-                        // keepLog('오브젝트URL삭제',prevSrc?.toString(),typeof prevSrc === 'string',prevSrc?.startsWith('blob:'))
                         URL.revokeObjectURL(prevSrc);
                     }
                 }
                 this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
-                    this.#renderWidth = this.#textureImg.width
-                    this.#renderHeight = this.#textureImg.height
+                    this.#renderWidth = width
+                    this.#renderHeight = height
                 }, null, null, true);
             };
             if (this.#textureCvs instanceof OffscreenCanvas) {

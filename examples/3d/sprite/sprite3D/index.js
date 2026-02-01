@@ -35,53 +35,31 @@ RedGPU.init(
 
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
 
-        sprite3D.scale.set(0.1, 0.1, 0.1);
-
         scene.addChild(sprite3D);
 
-
         const sprite3DH = new RedGPU.Display.Sprite3D(redGPUContext, materialH);
-
         sprite3DH.x = -2.5;
-
-        sprite3DH.scale.set(0.1, 0.1, 0.1);
 
         scene.addChild(sprite3DH);
 
-
         const sprite3DV = new RedGPU.Display.Sprite3D(redGPUContext, materialV);
-
         sprite3DV.x = 2.5;
-
-        sprite3DV.scale.set(0.1, 0.1, 0.1);
 
         scene.addChild(sprite3DV);
 
-
         const spriteCount = 10;
-
         const radius = 6;
 
-
         for (let i = 0; i < spriteCount; i++) {
-
             const angle = (i / spriteCount) * Math.PI * 2;
-
             const x = Math.cos(angle) * radius;
-
             const z = Math.sin(angle) * radius;
-
 
             const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
 
-            sprite3D.scale.set(0.1, 0.1, 0.1);
-
             sprite3D.x = x;
-
             sprite3D.z = z;
-
             scene.addChild(sprite3D);
-
         }
 
         const renderer = new RedGPU.Renderer(redGPUContext);

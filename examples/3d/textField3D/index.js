@@ -58,8 +58,7 @@ const renderTestPane = async (scene, redGPUContext) => {
         setSeparator
     } = await import("../../exampleHelper/createExample/panes/index.js?t=1769835266959");
     setDebugButtons(RedGPU, redGPUContext);
-    const controls = {};
-
+    
     const BASE_STYLES = {
         padding: 0,
         background: 'transparent',
@@ -92,75 +91,104 @@ const renderTestPane = async (scene, redGPUContext) => {
         boxSizing: ['content-box', 'border-box'],
     };
 
-    const updateTestData = () => {
-        const child = scene.children[0];
-
-        controls.useBillboardPerspective = child.useBillboardPerspective;
-        controls.useBillboard = child.useBillboard;
-        controls.scaleX = child.scaleX;
-        controls.scaleY = child.scaleY;
-        controls.scaleZ = child.scaleZ;
-        pane.refresh();
-
-        Object.keys(BASE_STYLES).forEach((key) => {
-            controls[key] = child[key];
-        });
-
-        pane.refresh();
+    const controls = {
+        useBillboard: true,
+        usePixelSize: false,
+        scaleX: 0.1,
+        scaleY: 0.1,
+        scaleZ: 0.1,
+        ...BASE_STYLES
     };
 
-    updateTestData();
-    console.log(controls);
-    updateTestData();
+    const updateTestData = () => {
+        const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
+        if (child) {
+            controls.useBillboard = child.useBillboard;
+            controls.usePixelSize = child.usePixelSize;
+            controls.scaleX = child.scaleX;
+            controls.scaleY = child.scaleY;
+            controls.scaleZ = child.scaleZ;
+
+            Object.keys(BASE_STYLES).forEach((key) => {
+                controls[key] = child[key];
+            });
+            pane.refresh();
+        }
+    };
 
     const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
 
-    TextField3DFolder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
+    const useBillboardBinding = TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboardPerspective = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.useBillboard = evt.value;
         });
-        updateBillboardFixedScaleBinding();
+        updateControlsState();
     });
 
-    TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+    const usePixelSizeBinding = TextField3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboard = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.usePixelSize = evt.value;
         });
-        updateBillboardFixedScaleBinding();
+        updateControlsState();
     });
-
-    const updateBillboardFixedScaleBinding = () => {
-        const hidden = controls.useBillboardPerspective || !controls.useBillboard;
-    };
-    updateBillboardFixedScaleBinding();
 
     setSeparator(pane);
 
     const scaleFolder = pane.addFolder({title: 'TextField3D Scale', expanded: true});
 
-    scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const scaleXBinding = scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.scaleX = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.scaleX = evt.value;
         });
     });
 
-    scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const scaleYBinding = scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.scaleY = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.scaleY = evt.value;
         });
     });
+
+    const updateControlsState = () => {
+        const {useBillboard, usePixelSize} = controls;
+
+        if (!useBillboard) {
+            usePixelSizeBinding.element.style.opacity = 0.25;
+            usePixelSizeBinding.element.style.pointerEvents = 'none';
+
+            scaleXBinding.element.style.opacity = 1;
+            scaleXBinding.element.style.pointerEvents = 'painted';
+            scaleYBinding.element.style.opacity = 1;
+            scaleYBinding.element.style.pointerEvents = 'painted';
+        } else {
+            usePixelSizeBinding.element.style.opacity = 1;
+            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+
+            if (usePixelSize) {
+                // 픽셀 사이즈 모드
+                scaleXBinding.element.style.opacity = 0.25;
+                scaleXBinding.element.style.pointerEvents = 'none';
+                scaleYBinding.element.style.opacity = 0.25;
+                scaleYBinding.element.style.pointerEvents = 'none';
+            } else {
+                scaleXBinding.element.style.opacity = 1;
+                scaleXBinding.element.style.pointerEvents = 'painted';
+                scaleYBinding.element.style.opacity = 1;
+                scaleYBinding.element.style.pointerEvents = 'painted';
+            }
+        }
+    };
 
     const styleFolder = pane.addFolder({title: 'TextField3D Styles', expanded: true});
 
-    styleFolder.addBinding(controls, 'fontSize', {min: 12, max: 50, step: 1}).on('change', (evt) => {
+    styleFolder.addBinding(controls, 'fontSize', {min: 12, max: 128, step: 1}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.fontSize = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.fontSize = evt.value;
         });
     });
 
     styleFolder.addBinding(controls, 'padding', {min: 0, max: 32, step: 1}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.padding = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.padding = evt.value;
         });
     });
 
@@ -172,10 +200,12 @@ const renderTestPane = async (scene, redGPUContext) => {
             }, {}),
         }).on('change', (evt) => {
             scene.children.forEach((child) => {
-                child[key] = evt.value;
+                if (child instanceof RedGPU.Display.TextField3D) child[key] = evt.value;
             });
         });
     });
 
     setSeparator(pane);
+    updateTestData();
+    updateControlsState();
 };

@@ -6,11 +6,9 @@ import Plane from "../../../primitive/Plane";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import {keepLog} from "../../../utils";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 
 interface TextField3D {
-    useSizeAttenuation: boolean;
     useBillboard: boolean;
     usePixelSize: boolean;
     pixelSize: number;
@@ -47,16 +45,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  * @category TextField
  */
 class TextField3D extends ATextField {
-    /**
-     * [KO] 렌더링된 텍스트 텍스처의 너비 (정규화된 값)
-     * [EN] Width of the rendered text texture (normalized value)
-     */
-    #renderTextureWidth: number = 1;
-    /**
-     * [KO] 렌더링된 텍스트 텍스처의 높이 (정규화된 값)
-     * [EN] Height of the rendered text texture (normalized value)
-     */
-    #renderTextureHeight: number = 1;
+    #aspectRatio: number = 1;
 
     /**
      * [KO] TextField3D 생성자
@@ -70,16 +59,23 @@ class TextField3D extends ATextField {
      */
     constructor(redGPUContext: RedGPUContext, text?: string) {
         super(redGPUContext, (width: number, height: number) => {
-            const dpr = window.devicePixelRatio || 1;
-            const prevWidth = this.#renderTextureWidth;
-            const prevHeight = this.#renderTextureHeight;
-            // 세로 기준 스케일링 (Height-based) + DPR 반영
-            this._renderRatioY = dpr
-            this._renderRatioX = (width / height) * dpr
-            this.#renderTextureWidth = this._renderRatioX;
-            this.#renderTextureHeight = this._renderRatioY;
-            if (prevWidth !== this.#renderTextureWidth || prevHeight !== this.#renderTextureHeight) {
-                this.dirtyTransform = true;
+            if (width && height) {
+                const dpr = window.devicePixelRatio || 1;
+                this.#aspectRatio = width / height;
+
+                const prevX = this._renderRatioX;
+                const prevY = this._renderRatioY;
+
+                // 세로 기준 스케일링 (Height-based) + DPR 반영
+                this._renderRatioY = dpr;
+                this._renderRatioX = this.#aspectRatio * dpr;
+
+                // 픽셀 사이즈 동기화
+                this.pixelSize = height;
+
+                if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
+                    this.dirtyTransform = true;
+                }
             }
         });
         this._geometry = new Plane(redGPUContext);
@@ -88,11 +84,11 @@ class TextField3D extends ATextField {
 
     render(renderViewStateData: RenderViewStateData) {
         const dpr = window.devicePixelRatio || 1;
-        if (this._renderRatioY !== dpr && this.#renderTextureHeight) {
+        if (this._renderRatioY !== dpr) {
             // DPR 변경 대응
-            this._renderRatioY = dpr
-            this._renderRatioX = (this.renderTextureWidth / this.renderTextureHeight) * dpr
-            this.dirtyTransform = true
+            this._renderRatioY = dpr;
+            this._renderRatioX = this.#aspectRatio * dpr;
+            this.dirtyTransform = true;
         }
         super.render(renderViewStateData);
     }
@@ -128,22 +124,6 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * 렌더링된 텍스트 텍스처의 너비 (정규화된 값)
-     * @returns {number}
-     */
-    get renderTextureWidth(): number {
-        return this.#renderTextureWidth;
-    }
-
-    /**
-     * 렌더링된 텍스트 텍스처의 높이 (정규화된 값)
-     * @returns {number}
-     */
-    get renderTextureHeight(): number {
-        return this.#renderTextureHeight;
-    }
-
-    /**
      * TextField3D 전용 버텍스 셰이더 모듈을 생성합니다.
      * @returns {GPUShaderModule}
      */
@@ -166,7 +146,6 @@ DefineForVertex.definePositiveNumber(TextField3D, [
 ])
 // 버텍스 셰이더에서 사용할 프리셋 정의
 DefineForVertex.defineByPreset(TextField3D, [
-    [DefineForVertex.PRESET_BOOLEAN.SIZE_ATTENUATION, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
     [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],

@@ -8,6 +8,7 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 7.5;
+        controller.tilt = -15;
         controller.speedDistance = 0.1;
 
         const scene = new RedGPU.Display.Scene();
@@ -141,21 +142,71 @@ const renderTestPane = async (redGPUContext, scene) => {
     const pane = new Pane();
     const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js");
     setDebugButtons(RedGPU, redGPUContext);
-    const TextField3DFolder = pane.addFolder({ title: 'TextField3D', expanded: true });
+    
+    const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
     const controls = {
-        useBillboardPerspective: scene.children[0].useBillboardPerspective,
-        useBillboard: scene.children[0].useBillboard,
+        useBillboard: child.useBillboard,
+        usePixelSize: child.usePixelSize,
+        scaleX: child.scaleX,
+        scaleY: child.scaleY,
     };
 
-    TextField3DFolder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
+    const TextField3DFolder = pane.addFolder({ title: 'TextField3D', expanded: true });
+
+    const useBillboardBinding = TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboardPerspective = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.useBillboard = evt.value;
+        });
+        updateControlsState();
+    });
+
+    const usePixelSizeBinding = TextField3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
+        scene.children.forEach((child) => {
+            if (child instanceof RedGPU.Display.TextField3D) child.usePixelSize = evt.value;
+        });
+        updateControlsState();
+    });
+
+    const scaleXBinding = TextField3DFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            if (child instanceof RedGPU.Display.TextField3D) child.scaleX = evt.value;
         });
     });
 
-    TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+    const scaleYBinding = TextField3DFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboard = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.scaleY = evt.value;
         });
     });
+
+    const updateControlsState = () => {
+        const {useBillboard, usePixelSize} = controls;
+
+        if (!useBillboard) {
+            usePixelSizeBinding.element.style.opacity = 0.25;
+            usePixelSizeBinding.element.style.pointerEvents = 'none';
+
+            scaleXBinding.element.style.opacity = 1;
+            scaleXBinding.element.style.pointerEvents = 'painted';
+            scaleYBinding.element.style.opacity = 1;
+            scaleYBinding.element.style.pointerEvents = 'painted';
+        } else {
+            usePixelSizeBinding.element.style.opacity = 1;
+            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+
+            if (usePixelSize) {
+                scaleXBinding.element.style.opacity = 0.25;
+                scaleXBinding.element.style.pointerEvents = 'none';
+                scaleYBinding.element.style.opacity = 0.25;
+                scaleYBinding.element.style.pointerEvents = 'none';
+            } else {
+                scaleXBinding.element.style.opacity = 1;
+                scaleXBinding.element.style.pointerEvents = 'painted';
+                scaleYBinding.element.style.opacity = 1;
+                scaleYBinding.element.style.pointerEvents = 'painted';
+            }
+        }
+    };
+
+    updateControlsState();
 };

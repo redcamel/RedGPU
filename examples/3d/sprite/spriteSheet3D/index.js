@@ -26,6 +26,7 @@ RedGPU.init(canvas, (redGPUContext) => {
             const z = Math.sin(angle) * radius;
 
             const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
+
             spriteSheet.x = x;
             spriteSheet.z = z;
             scene.addChild(spriteSheet);
@@ -62,9 +63,10 @@ const renderTestPane = async (redGPUContext, scene) => {
     const updateTestData = () => {
         const child = scene.children[0];
 
-        controls.useBillboardPerspective = child.useBillboardPerspective;
+        controls.useSizeAttenuation = child.useSizeAttenuation;
         controls.useBillboard = child.useBillboard;
-        controls.billboardFixedScale = child.billboardFixedScale;
+        controls.usePixelSize = child.usePixelSize;
+        controls.pixelSize = child.pixelSize;
         controls.loop = child.loop;
         controls.frameRate = child.frameRate;
         controls.state = child.state;
@@ -78,8 +80,6 @@ const renderTestPane = async (redGPUContext, scene) => {
         pane.refresh();
     };
 
-    updateTestData();
-
     const spriteSheetInfos = [
         new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24),
         new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/walk.png', 8, 1, 8, 0, true, 24),
@@ -87,37 +87,35 @@ const renderTestPane = async (redGPUContext, scene) => {
         new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/attack.png', 6, 1, 6, 0, true, 24)
     ];
 
+    updateTestData();
+
     const spriteSheet3DFolder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
 
-    spriteSheet3DFolder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
+    const useSizeAttenuationBinding = spriteSheet3DFolder.addBinding(controls, 'useSizeAttenuation').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboardPerspective = evt.value;
+            child.useSizeAttenuation = evt.value;
         });
-        updateBillboardFixedScaleBinding();
     });
 
-    spriteSheet3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+    const useBillboardBinding = spriteSheet3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
             child.useBillboard = evt.value;
         });
-        updateBillboardFixedScaleBinding();
+        updateControlsState();
     });
 
-    const billboardFixedScaleBinding = spriteSheet3DFolder
-        .addBinding(controls, 'billboardFixedScale', {min: 0.1, max: 1})
-        .on('change', (evt) => {
-            scene.children.forEach((child) => {
-                child.billboardFixedScale = evt.value;
-            });
+    const usePixelSizeBinding = spriteSheet3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
+        scene.children.forEach((child) => {
+            child.usePixelSize = evt.value;
         });
+        updateControlsState();
+    });
 
-    const updateBillboardFixedScaleBinding = () => {
-        const hidden = controls.useBillboardPerspective || !controls.useBillboard;
-        billboardFixedScaleBinding.element.style.opacity = hidden ? 0.25 : 1;
-        billboardFixedScaleBinding.element.style.pointerEvents = hidden ? 'none' : 'painted';
-    };
-
-    updateBillboardFixedScaleBinding();
+    const pixelSizeBinding = spriteSheet3DFolder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            child.pixelSize = evt.value;
+        });
+    });
 
     spriteSheet3DFolder.addBinding(controls, 'loop').on('change', (evt) => {
         scene.children.forEach((child) => {
@@ -166,13 +164,13 @@ const renderTestPane = async (redGPUContext, scene) => {
 
     const scaleFolder = pane.addFolder({title: 'SpriteSheet3D Scale', expanded: true});
 
-    scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', () => {
+    const scaleXBinding = scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', () => {
         scene.children.forEach((child) => {
             child.scaleX = controls.scaleX;
         });
     });
 
-    scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', () => {
+    const scaleYBinding = scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', () => {
         scene.children.forEach((child) => {
             child.scaleY = controls.scaleY;
         });
@@ -186,14 +184,71 @@ const renderTestPane = async (redGPUContext, scene) => {
     monitoringFolder.addBinding(controls, 'segmentW', {readonly: true});
     monitoringFolder.addBinding(controls, 'segmentH', {readonly: true});
 
+    const updateControlsState = () => {
+        const {useBillboard, usePixelSize} = controls;
+
+        if (!useBillboard) {
+            // 빌보드가 꺼지면 빌보드 관련 옵션 모두 비활성화
+            useSizeAttenuationBinding.element.style.opacity = 0.25;
+            useSizeAttenuationBinding.element.style.pointerEvents = 'none';
+            usePixelSizeBinding.element.style.opacity = 0.25;
+            usePixelSizeBinding.element.style.pointerEvents = 'none';
+            pixelSizeBinding.element.style.opacity = 0.25;
+            pixelSizeBinding.element.style.pointerEvents = 'none';
+
+            // 스케일은 활성화 (일반 메시 모드)
+            scaleXBinding.element.style.opacity = 1;
+            scaleXBinding.element.style.pointerEvents = 'painted';
+            scaleYBinding.element.style.opacity = 1;
+            scaleYBinding.element.style.pointerEvents = 'painted';
+        } else {
+            // 빌보드 켜짐
+            useSizeAttenuationBinding.element.style.opacity = 1;
+            useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
+            usePixelSizeBinding.element.style.opacity = 1;
+            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+
+            if (usePixelSize) {
+                // 픽셀 사이즈 모드
+                pixelSizeBinding.element.style.opacity = 1;
+                pixelSizeBinding.element.style.pointerEvents = 'painted';
+
+                // 픽셀 모드에서는 원근감/월드스케일 무시됨
+                useSizeAttenuationBinding.element.style.opacity = 0.25;
+                useSizeAttenuationBinding.element.style.pointerEvents = 'none';
+                scaleXBinding.element.style.opacity = 0.25;
+                scaleXBinding.element.style.pointerEvents = 'none';
+                scaleYBinding.element.style.opacity = 0.25;
+                scaleYBinding.element.style.pointerEvents = 'none';
+            } else {
+                // 월드 스케일 모드
+                pixelSizeBinding.element.style.opacity = 0.25;
+                pixelSizeBinding.element.style.pointerEvents = 'none';
+
+                // 원근감/월드스케일 활성화
+                useSizeAttenuationBinding.element.style.opacity = 1;
+                useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
+                scaleXBinding.element.style.opacity = 1;
+                scaleXBinding.element.style.pointerEvents = 'painted';
+                scaleYBinding.element.style.opacity = 1;
+                scaleYBinding.element.style.pointerEvents = 'painted';
+            }
+        }
+    };
+
     const refreshMonitoringControls = () => {
         const child = scene.children[0];
-        controls.currentIndex = child.currentIndex;
-        controls.totalFrame = child.totalFrame;
-        controls.segmentW = child.segmentW;
-        controls.segmentH = child.segmentH;
-        controls.state = child.state;
+        if (child) {
+            controls.currentIndex = child.currentIndex;
+            controls.totalFrame = child.totalFrame;
+            controls.segmentW = child.segmentW;
+            controls.segmentH = child.segmentH;
+            controls.state = child.state;
+        }
         requestAnimationFrame(refreshMonitoringControls);
     };
     requestAnimationFrame(refreshMonitoringControls);
+
+    // 초기 상태 업데이트
+    updateControlsState();
 };

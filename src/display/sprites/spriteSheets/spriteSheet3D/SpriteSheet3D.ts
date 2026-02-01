@@ -8,6 +8,7 @@ import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
+import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
 
 /** SpriteSheet3D 전용 버텍스 셰이더 모듈 이름 */

@@ -96,7 +96,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')));
         scene.addChild(sprite3D);
-        sprite3D.scale.set(0.1, 0.1, 0.1)
+        
         sprite3D.addListener(eventName, (e) => {
             updateInfo(eventName, e);
             sprite3D.material.useTint = true;
@@ -108,7 +108,6 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.text = eventName;
         label.y = -1;
-        label.scale.set(0.1, 0.1, 0.1);
         label.useBillboard = true;
         label.primitiveState.cullMode = 'none';
         sprite3D.addChild(label);
