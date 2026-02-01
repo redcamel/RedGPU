@@ -11,6 +11,8 @@ struct VertexUniforms {
     useBillboard: u32,
     usePixelSize: u32,
     pixelSize: f32,
+    _renderRatioX: f32,
+    _renderRatioY: f32,
     combinedOpacity: f32,
 };
 
@@ -60,6 +62,15 @@ fn main(inputData: InputData) -> OutputData {
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
     let u_pixelSize = vertexUniforms.pixelSize;
+    let u_renderRatioX = vertexUniforms._renderRatioX;
+    let u_renderRatioY = vertexUniforms._renderRatioY;
+
+    var ratioScaleMatrix: mat4x4<f32> = mat4x4<f32>(
+        u_renderRatioX, 0, 0, 0,
+        0, u_renderRatioY, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    );
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -79,11 +90,11 @@ fn main(inputData: InputData) -> OutputData {
         let billboardNormalMatrix = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix);
 
         if (u_useSizeAttenuation == 1) {
-            position = billboardMatrix * input_positionVec4;
-            normalPosition = billboardNormalMatrix * input_vertexNormalVec4;
+            position = billboardMatrix * ratioScaleMatrix * input_positionVec4;
+            normalPosition = billboardNormalMatrix * ratioScaleMatrix * input_vertexNormalVec4;
         } else {
-            position = billboardMatrix * input_positionVec4;
-            normalPosition = billboardNormalMatrix * input_vertexNormalVec4;
+            position = billboardMatrix * ratioScaleMatrix * input_positionVec4;
+            normalPosition = billboardNormalMatrix * ratioScaleMatrix * input_vertexNormalVec4;
         }
 
         output.position = u_projectionMatrix * position;
@@ -94,11 +105,11 @@ fn main(inputData: InputData) -> OutputData {
 
             // 화면 비율 및 스케일 보정
             let aspectRatio = u_resolution.x / u_resolution.y;
-            var scaleX = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) / aspectRatio;
-            var scaleY = clamp((projectionModelMatrix)[1][1], -1.0, 1.0);
+            var scaleX = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) / aspectRatio * u_renderRatioX;
+            var scaleY = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) * u_renderRatioY;
             if(u_usePixelSize == 1) {
-               scaleX = u_pixelSize / u_resolution.x * 2.0;
-               scaleY = u_pixelSize / u_resolution.y * 2.0;
+               scaleX = u_pixelSize / u_resolution.x * 2.0 * u_renderRatioX;
+               scaleY = u_pixelSize / u_resolution.y * 2.0 * u_renderRatioY;
             }
 
             // 위치 조정
@@ -110,8 +121,8 @@ fn main(inputData: InputData) -> OutputData {
     }
     #redgpu_else
     {
-        position = u_cameraMatrix * u_modelMatrix * input_positionVec4;
-        normalPosition = u_cameraMatrix * u_normalModelMatrix * input_vertexNormalVec4;
+        position = u_cameraMatrix * u_modelMatrix * ratioScaleMatrix * input_positionVec4;
+        normalPosition = u_cameraMatrix * u_normalModelMatrix * ratioScaleMatrix * input_vertexNormalVec4;
         output.position = u_projectionMatrix * position;
     }
     #redgpu_endIf
@@ -164,6 +175,15 @@ fn picking(inputData: InputData) -> OutputData {
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
     let u_pixelSize = vertexUniforms.pixelSize;
+    let u_renderRatioX = vertexUniforms._renderRatioX;
+    let u_renderRatioY = vertexUniforms._renderRatioY;
+
+    var ratioScaleMatrix: mat4x4<f32> = mat4x4<f32>(
+        u_renderRatioX, 0, 0, 0,
+        0, u_renderRatioY, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    );
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -179,9 +199,9 @@ fn picking(inputData: InputData) -> OutputData {
         let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix);
 
         if (u_useSizeAttenuation == 1) {
-            position = billboardMatrix * input_positionVec4;
+            position = billboardMatrix * ratioScaleMatrix * input_positionVec4;
         } else {
-            position = billboardMatrix * input_positionVec4;
+            position = billboardMatrix * ratioScaleMatrix * input_positionVec4;
         }
 
         // View3D-Projection Matrix 곱
@@ -193,11 +213,11 @@ fn picking(inputData: InputData) -> OutputData {
 
             // 화면 비율 및 스케일 보정
             let aspectRatio = u_resolution.x / u_resolution.y;
-            var scaleX = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) / aspectRatio;
-            var scaleY = clamp((projectionModelMatrix)[1][1], -1.0, 1.0);
+            var scaleX = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) / aspectRatio * u_renderRatioX;
+            var scaleY = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) * u_renderRatioY;
             if(u_usePixelSize == 1) {
-               scaleX = u_pixelSize / u_resolution.x * 2.0;
-               scaleY = u_pixelSize / u_resolution.y * 2.0;
+               scaleX = u_pixelSize / u_resolution.x * 2.0 * u_renderRatioX;
+               scaleY = u_pixelSize / u_resolution.y * 2.0 * u_renderRatioY;
             }
 
             // 위치 조정
@@ -208,7 +228,7 @@ fn picking(inputData: InputData) -> OutputData {
         }
     } else {
         // 일반적인 변환 계산
-        position = u_cameraMatrix * u_modelMatrix * input_positionVec4;
+        position = u_cameraMatrix * u_modelMatrix * ratioScaleMatrix * input_positionVec4;
         output.position = u_projectionMatrix * position;
     }
 

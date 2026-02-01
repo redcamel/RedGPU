@@ -2,10 +2,12 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import DefineForVertex from "../../../defineProperty/DefineForVertex";
 import Geometry from "../../../geometry/Geometry";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
+import BitmapMaterial from "../../../material/bitmapMaterial/BitmapMaterial";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import Mesh from "../../mesh/Mesh";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/sprite3DVertex.wgsl";
 
 /** Sprite3D 전용 버텍스 셰이더 모듈 이름 */
@@ -27,6 +29,10 @@ interface Sprite3D {
     usePixelSize: boolean;
     /** 고정 크기 값 (px) */
     pixelSize: number;
+    /** X축 렌더링 비율 */
+    _renderRatioX: number;
+    /** Y축 렌더링 비율 */
+    _renderRatioY: number;
 }
 
 /**
@@ -51,6 +57,9 @@ interface Sprite3D {
  * @category Sprite
  */
 class Sprite3D extends Mesh {
+    #width: number = 1
+    #height: number = 1
+
     /**
      * [KO] 새로운 Sprite3D 인스턴스를 생성합니다.
      * [EN] Creates a new Sprite3D instance.
@@ -75,6 +84,28 @@ class Sprite3D extends Mesh {
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE
     }
 
+    render(renderViewStateData: RenderViewStateData) {
+        if (this._material instanceof BitmapMaterial && this._material.diffuseTexture) {
+            const {gpuTexture} = this._material.diffuseTexture;
+            if (gpuTexture) {
+                const tW = gpuTexture.width
+                const tH = gpuTexture.height
+                if (tW !== this.#width || tH !== this.#height) {
+                    this.#width = tW
+                    this.#height = tH
+                    if (this.#height > this.#width) {
+                        this._renderRatioX = 1
+                        this._renderRatioY = this.#height / this.#width
+                    } else {
+                        this._renderRatioX = this.#width / this.#height
+                        this._renderRatioY = 1
+                    }
+                }
+            }
+        }
+        super.render(renderViewStateData);
+    }
+
     /**
      * Sprite3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
      *
@@ -90,6 +121,13 @@ class Sprite3D extends Mesh {
     }
 }
 
+/**
+ * Sprite3D 클래스에 렌더링 비율 속성들을 정의합니다.
+ */
+DefineForVertex.definePositiveNumber(Sprite3D, [
+    ['_renderRatioX', 1],
+    ['_renderRatioY', 1],
+])
 /**
  * Sprite3D 클래스에 빌보드 관련 속성들을 정의합니다.
  */

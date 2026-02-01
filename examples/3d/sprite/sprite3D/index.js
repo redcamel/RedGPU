@@ -16,26 +16,72 @@ RedGPU.init(
 
         const material = new RedGPU.Material.BitmapMaterial(
             redGPUContext,
+
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
         );
 
+        const materialH = new RedGPU.Material.BitmapMaterial(
+            redGPUContext,
+
+            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')
+        );
+
+        const materialV = new RedGPU.Material.BitmapMaterial(
+            redGPUContext,
+
+            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/v_test.jpg')
+        );
+
+
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
+
+        sprite3D.scale.set(0.1, 0.1, 0.1);
 
         scene.addChild(sprite3D);
 
+
+        const sprite3DH = new RedGPU.Display.Sprite3D(redGPUContext, materialH);
+
+        sprite3DH.x = -2.5;
+
+        sprite3DH.scale.set(0.1, 0.1, 0.1);
+
+        scene.addChild(sprite3DH);
+
+
+        const sprite3DV = new RedGPU.Display.Sprite3D(redGPUContext, materialV);
+
+        sprite3DV.x = 2.5;
+
+        sprite3DV.scale.set(0.1, 0.1, 0.1);
+
+        scene.addChild(sprite3DV);
+
+
         const spriteCount = 10;
-        const radius = 5;
+
+        const radius = 6;
+
 
         for (let i = 0; i < spriteCount; i++) {
+
             const angle = (i / spriteCount) * Math.PI * 2;
+
             const x = Math.cos(angle) * radius;
+
             const z = Math.sin(angle) * radius;
+
 
             const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
 
+            sprite3D.scale.set(0.1, 0.1, 0.1);
+
             sprite3D.x = x;
+
             sprite3D.z = z;
+
             scene.addChild(sprite3D);
+
         }
 
         const renderer = new RedGPU.Renderer(redGPUContext);
@@ -90,19 +136,31 @@ const renderTestPane = async (redGPUContext, view, scene) => {
         updateControlsState();
     });
 
-    const pixelSizeBinding = sprite3DFolder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
+    const pixelSizeBinding = sprite3DFolder.addBinding(controls, 'pixelSize', {
+        min: 1,
+        max: 256,
+        step: 1
+    }).on('change', (evt) => {
         scene.children.forEach((child) => {
             child.pixelSize = evt.value;
         });
     });
 
     const scaleFolder = pane.addFolder({title: 'Sprite3D Scale', expanded: true});
-    const scaleXBinding = scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const scaleXBinding = scaleFolder.addBinding(controls, 'scaleX', {
+        min: 0.1,
+        max: 5,
+        step: 0.1
+    }).on('change', (evt) => {
         scene.children.forEach((child) => {
             child.scaleX = controls.scaleX;
         });
     });
-    const scaleYBinding = scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const scaleYBinding = scaleFolder.addBinding(controls, 'scaleY', {
+        min: 0.1,
+        max: 5,
+        step: 0.1
+    }).on('change', (evt) => {
         scene.children.forEach((child) => {
             child.scaleY = controls.scaleY;
         });

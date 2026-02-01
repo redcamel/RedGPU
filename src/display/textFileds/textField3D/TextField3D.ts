@@ -10,7 +10,7 @@ import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/va
 import {keepLog} from "../../../utils";
 
 interface TextField3D {
-    sizeAttenuation: boolean;
+    useSizeAttenuation: boolean;
     useBillboard: boolean;
     usePixelSize: boolean;
     pixelSize: number;

@@ -22,7 +22,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  */
 interface SpriteSheet3D extends ASpriteSheet {
     /** 빌보드 원근감 적용 여부 */
-    sizeAttenuation: boolean;
+    useSizeAttenuation: boolean;
     /** 빌보드 모드 사용 여부 */
     useBillboard: boolean;
     /** 고정 크기 사용 여부 */
