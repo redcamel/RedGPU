@@ -138,20 +138,84 @@ const renderTestPane = async (redGPUContext, scene) => {
     const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js");
     setDebugButtons(RedGPU, redGPUContext);
     const folder = pane.addFolder({ title: 'SpriteSheet3D', expanded: true });
+    
+    const child = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);
     const controls = {
-        useBillboardPerspective: scene.children[0].useBillboardPerspective,
-        useBillboard: scene.children[0].useBillboard,
+        useBillboard: child.useBillboard,
+        usePixelSize: child.usePixelSize,
+        pixelSize: child.pixelSize,
+        scaleX: child.scaleX,
+        scaleY: child.scaleY,
     };
 
-    folder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
+    const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboardPerspective = evt.value;
+            if (child instanceof RedGPU.Display.SpriteSheet3D) child.useBillboard = evt.value;
+        });
+        updateControlsState();
+    });
+
+    const usePixelSizeBinding = folder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
+        scene.children.forEach((child) => {
+            if (child instanceof RedGPU.Display.SpriteSheet3D) child.usePixelSize = evt.value;
+        });
+        updateControlsState();
+    });
+
+    const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            if (child instanceof RedGPU.Display.SpriteSheet3D) child.pixelSize = evt.value;
         });
     });
 
-    folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+    const scaleXBinding = folder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboard = evt.value;
+            if (child instanceof RedGPU.Display.SpriteSheet3D) child.scaleX = evt.value;
         });
     });
+
+    const scaleYBinding = folder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            if (child instanceof RedGPU.Display.SpriteSheet3D) child.scaleY = evt.value;
+        });
+    });
+
+    const updateControlsState = () => {
+        const {useBillboard, usePixelSize} = controls;
+
+        if (!useBillboard) {
+            usePixelSizeBinding.element.style.opacity = 0.25;
+            usePixelSizeBinding.element.style.pointerEvents = 'none';
+            pixelSizeBinding.element.style.opacity = 0.25;
+            pixelSizeBinding.element.style.pointerEvents = 'none';
+
+            scaleXBinding.element.style.opacity = 1;
+            scaleXBinding.element.style.pointerEvents = 'painted';
+            scaleYBinding.element.style.opacity = 1;
+            scaleYBinding.element.style.pointerEvents = 'painted';
+        } else {
+            usePixelSizeBinding.element.style.opacity = 1;
+            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+
+            if (usePixelSize) {
+                pixelSizeBinding.element.style.opacity = 1;
+                pixelSizeBinding.element.style.pointerEvents = 'painted';
+                
+                scaleXBinding.element.style.opacity = 0.25;
+                scaleXBinding.element.style.pointerEvents = 'none';
+                scaleYBinding.element.style.opacity = 0.25;
+                scaleYBinding.element.style.pointerEvents = 'none';
+            } else {
+                pixelSizeBinding.element.style.opacity = 0.25;
+                pixelSizeBinding.element.style.pointerEvents = 'none';
+
+                scaleXBinding.element.style.opacity = 1;
+                scaleXBinding.element.style.pointerEvents = 'painted';
+                scaleYBinding.element.style.opacity = 1;
+                scaleYBinding.element.style.pointerEvents = 'painted';
+            }
+        }
+    };
+
+    updateControlsState();
 };

@@ -135,20 +135,15 @@ const renderTestPane = async (redGPUContext, scene) => {
     const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js");
     setDebugButtons(RedGPU, redGPUContext);
     const folder = pane.addFolder({ title: 'Sprite3D', expanded: true });
+    
+    const child = scene.children[0];
     const controls = {
-        useSizeAttenuation: scene.children[0].useSizeAttenuation,
-        useBillboard: scene.children[0].useBillboard,
-        usePixelSize: scene.children[0].usePixelSize,
-        pixelSize: scene.children[0].pixelSize,
-        scaleX: scene.children[0].scaleX,
-        scaleY: scene.children[0].scaleY,
+        useBillboard: child.useBillboard,
+        usePixelSize: child.usePixelSize,
+        pixelSize: child.pixelSize,
+        scaleX: child.scaleX,
+        scaleY: child.scaleY,
     };
-
-    const useSizeAttenuationBinding = folder.addBinding(controls, 'useSizeAttenuation').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.useSizeAttenuation = evt.value;
-        });
-    });
 
     const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
@@ -186,46 +181,31 @@ const renderTestPane = async (redGPUContext, scene) => {
         const {useBillboard, usePixelSize} = controls;
 
         if (!useBillboard) {
-            // 빌보드가 꺼지면 빌보드 관련 옵션 모두 비활성화
-            useSizeAttenuationBinding.element.style.opacity = 0.25;
-            useSizeAttenuationBinding.element.style.pointerEvents = 'none';
             usePixelSizeBinding.element.style.opacity = 0.25;
             usePixelSizeBinding.element.style.pointerEvents = 'none';
             pixelSizeBinding.element.style.opacity = 0.25;
             pixelSizeBinding.element.style.pointerEvents = 'none';
 
-            // 스케일은 활성화 (일반 메시 모드)
             scaleXBinding.element.style.opacity = 1;
             scaleXBinding.element.style.pointerEvents = 'painted';
             scaleYBinding.element.style.opacity = 1;
             scaleYBinding.element.style.pointerEvents = 'painted';
         } else {
-            // 빌보드 켜짐
-            useSizeAttenuationBinding.element.style.opacity = 1;
-            useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
             usePixelSizeBinding.element.style.opacity = 1;
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
 
             if (usePixelSize) {
-                // 픽셀 사이즈 모드
                 pixelSizeBinding.element.style.opacity = 1;
                 pixelSizeBinding.element.style.pointerEvents = 'painted';
                 
-                // 픽셀 모드에서는 원근감 무시됨
-                useSizeAttenuationBinding.element.style.opacity = 0.25;
-                useSizeAttenuationBinding.element.style.pointerEvents = 'none';
                 scaleXBinding.element.style.opacity = 0.25;
                 scaleXBinding.element.style.pointerEvents = 'none';
                 scaleYBinding.element.style.opacity = 0.25;
                 scaleYBinding.element.style.pointerEvents = 'none';
             } else {
-                // 월드 스케일 모드
                 pixelSizeBinding.element.style.opacity = 0.25;
                 pixelSizeBinding.element.style.pointerEvents = 'none';
 
-                // 원근감 활성화
-                useSizeAttenuationBinding.element.style.opacity = 1;
-                useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
                 scaleXBinding.element.style.opacity = 1;
                 scaleXBinding.element.style.pointerEvents = 'painted';
                 scaleYBinding.element.style.opacity = 1;
