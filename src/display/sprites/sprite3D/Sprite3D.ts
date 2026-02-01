@@ -78,7 +78,7 @@ class Sprite3D extends Mesh {
         super(redGPUContext);
         this._geometry = geometry || new Plane(redGPUContext);
         this._material = material
-        this._material.transparent = true
+        if (this._material) this._material.transparent = true
         this.dirtyPipeline = true
         this.dirtyTransform = true
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE
@@ -93,13 +93,9 @@ class Sprite3D extends Mesh {
                 if (tW !== this.#width || tH !== this.#height) {
                     this.#width = tW
                     this.#height = tH
-                    if (this.#height > this.#width) {
-                        this._renderRatioX = 1
-                        this._renderRatioY = this.#height / this.#width
-                    } else {
-                        this._renderRatioX = this.#width / this.#height
-                        this._renderRatioY = 1
-                    }
+                    // 세로 기준 스케일링 (Height-based)
+                    this._renderRatioY = 1
+                    this._renderRatioX = tW / tH
                 }
             }
         }

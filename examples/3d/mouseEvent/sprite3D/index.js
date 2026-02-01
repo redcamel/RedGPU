@@ -140,7 +140,9 @@ const renderTestPane = async (redGPUContext, scene) => {
         useSizeAttenuation: scene.children[0].useSizeAttenuation,
         useBillboard: scene.children[0].useBillboard,
         usePixelSize: scene.children[0].usePixelSize,
-        pixelSize: scene.children[0].pixelSize
+        pixelSize: scene.children[0].pixelSize,
+        scaleX: scene.children[0].scaleX,
+        scaleY: scene.children[0].scaleY,
     };
 
     const useSizeAttenuationBinding = folder.addBinding(controls, 'useSizeAttenuation').on('change', (evt) => {
@@ -169,6 +171,18 @@ const renderTestPane = async (redGPUContext, scene) => {
         });
     });
 
+    const scaleXBinding = folder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            child.scaleX = controls.scaleX;
+        });
+    });
+    
+    const scaleYBinding = folder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            child.scaleY = controls.scaleY;
+        });
+    });
+
     const updateControlsState = () => {
         const {useBillboard, usePixelSize} = controls;
 
@@ -180,6 +194,12 @@ const renderTestPane = async (redGPUContext, scene) => {
             usePixelSizeBinding.element.style.pointerEvents = 'none';
             pixelSizeBinding.element.style.opacity = 0.25;
             pixelSizeBinding.element.style.pointerEvents = 'none';
+
+            // 스케일은 활성화 (일반 메시 모드)
+            scaleXBinding.element.style.opacity = 1;
+            scaleXBinding.element.style.pointerEvents = 'painted';
+            scaleYBinding.element.style.opacity = 1;
+            scaleYBinding.element.style.pointerEvents = 'painted';
         } else {
             // 빌보드 켜짐
             useSizeAttenuationBinding.element.style.opacity = 1;
@@ -195,6 +215,10 @@ const renderTestPane = async (redGPUContext, scene) => {
                 // 픽셀 모드에서는 원근감 무시됨
                 useSizeAttenuationBinding.element.style.opacity = 0.25;
                 useSizeAttenuationBinding.element.style.pointerEvents = 'none';
+                scaleXBinding.element.style.opacity = 0.25;
+                scaleXBinding.element.style.pointerEvents = 'none';
+                scaleYBinding.element.style.opacity = 0.25;
+                scaleYBinding.element.style.pointerEvents = 'none';
             } else {
                 // 월드 스케일 모드
                 pixelSizeBinding.element.style.opacity = 0.25;
@@ -203,6 +227,10 @@ const renderTestPane = async (redGPUContext, scene) => {
                 // 원근감 활성화
                 useSizeAttenuationBinding.element.style.opacity = 1;
                 useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
+                scaleXBinding.element.style.opacity = 1;
+                scaleXBinding.element.style.pointerEvents = 'painted';
+                scaleYBinding.element.style.opacity = 1;
+                scaleYBinding.element.style.pointerEvents = 'painted';
             }
         }
     };

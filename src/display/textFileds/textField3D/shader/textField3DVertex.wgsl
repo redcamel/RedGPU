@@ -8,7 +8,7 @@ struct VertexUniforms {
     pickingId: u32,
     matrixList:MatrixList,
     normalModelMatrix: mat4x4<f32>,
-    sizeAttenuation: u32,
+    useSizeAttenuation: u32,
     useBillboard: u32,
     usePixelSize: u32,
     pixelSize: f32,
@@ -54,7 +54,7 @@ fn main(inputData: InputData) -> OutputData {
     // Vertex별 Uniform 변수 가져오기
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
-    let u_sizeAttenuation = vertexUniforms.sizeAttenuation;
+    let u_useSizeAttenuation = vertexUniforms.useSizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
     let u_pixelSize = vertexUniforms.pixelSize;
@@ -95,8 +95,11 @@ fn main(inputData: InputData) -> OutputData {
     // 빌보드와 퍼스펙티브 조건 처리
     #redgpu_if useBillboard
     {
+        let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix);
+        let billboardNormalMatrix = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix);
+
         // 퍼스펙티브 스케일 처리
-        if (u_sizeAttenuation != 1) {
+        if (u_useSizeAttenuation != 1) {
             scaleMatrix = mat4x4<f32>(
                 scaleFactor, 0.0, 0.0, 0.0,
                 0.0, scaleFactor, 0.0, 0.0,
@@ -106,15 +109,16 @@ fn main(inputData: InputData) -> OutputData {
         }
 
         // 빌보드 변환 처리
-        position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * ratioScaleMatrix * vec4<f32>(objectPosition, 1.0);
-        normalPosition = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix) * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
+        position = billboardMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
+        normalPosition = billboardNormalMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
         // 투영 변환 적용
         output.position = u_noneJitterProjectionMatrix * position;
 
         // 추가 위치 보정 (퍼스펙티브가 비활성화된 경우)
-        if (u_sizeAttenuation != 1) {
-            var temp = output.position / output.position.w;
+        if (u_usePixelSize == 1 || u_useSizeAttenuation != 1) {
+            var viewPositionCenter = billboardMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            var clipCenter = u_noneJitterProjectionMatrix * viewPositionCenter;
 
             // 화면 비율 및 스케일 보정
             let aspectRatio = u_resolution.x / u_resolution.y;
@@ -127,18 +131,16 @@ fn main(inputData: InputData) -> OutputData {
             }
 
             output.position = vec4<f32>(
-                temp.xy + objectPosition.xy * vec2<f32>(
-                   scaleX,
-                   scaleY
-                ),
-                temp.zw
+                clipCenter.xy + input_position.xy * vec2<f32>(scaleX, scaleY) * clipCenter.w,
+                clipCenter.z,
+                clipCenter.w
             );
         }
     }
     #redgpu_else
     {
         // 일반적인 변환 처리
-        position = u_cameraMatrix * u_modelMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(objectPosition, 1.0);
+        position = u_cameraMatrix * u_modelMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
         normalPosition = u_cameraMatrix * u_normalModelMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
         output.position = u_noneJitterProjectionMatrix * position;
     }
@@ -173,7 +175,7 @@ fn picking(inputData: InputData) -> OutputData {
     // Vertex별 Uniform 변수 가져오기
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
-    let u_sizeAttenuation = vertexUniforms.sizeAttenuation;
+    let u_useSizeAttenuation = vertexUniforms.useSizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
     let u_pixelSize = vertexUniforms.pixelSize;
@@ -211,8 +213,9 @@ fn picking(inputData: InputData) -> OutputData {
 
     // 빌보드와 퍼스펙티브 조건 처리
     if (u_useBillboard == 1) {
+        let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix);
         // 퍼스펙티브 스케일 처리
-        if (u_sizeAttenuation != 1) {
+        if (u_useSizeAttenuation != 1) {
             scaleMatrix = mat4x4<f32>(
                 scaleFactor, 0.0, 0.0, 0.0,
                 0.0, scaleFactor, 0.0, 0.0,
@@ -222,14 +225,15 @@ fn picking(inputData: InputData) -> OutputData {
         }
 
         // 빌보드 변환 처리
-        position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * ratioScaleMatrix * vec4<f32>(objectPosition, 1.0);
+        position = billboardMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
 
         // 투영 변환 적용
         output.position = u_noneJitterProjectionMatrix * position;
 
         // 추가 위치 보정 (퍼스펙티브가 비활성화된 경우)
-        if (u_sizeAttenuation != 1) {
-            var temp = output.position / output.position.w;
+        if (u_usePixelSize == 1 || u_useSizeAttenuation != 1) {
+            var viewPositionCenter = billboardMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            var clipCenter = u_noneJitterProjectionMatrix * viewPositionCenter;
 
             // 화면 비율 및 스케일 보정
             let aspectRatio = u_resolution.x / u_resolution.y;
@@ -242,16 +246,17 @@ fn picking(inputData: InputData) -> OutputData {
             }
 
             output.position = vec4<f32>(
-                temp.xy + objectPosition.xy * vec2<f32>(
+                clipCenter.xy + input_position.xy * vec2<f32>(
                    scaleX,
                    scaleY
-                ),
-                temp.zw
+                ) * clipCenter.w,
+                clipCenter.z,
+                clipCenter.w
             );
         }
     } else {
         // 일반적인 변환 처리
-        position = u_cameraMatrix * u_modelMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(objectPosition, 1.0);
+        position = u_cameraMatrix * u_modelMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
         output.position = u_noneJitterProjectionMatrix * position;
     }
 
