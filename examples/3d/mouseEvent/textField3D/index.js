@@ -147,6 +147,7 @@ const renderTestPane = async (redGPUContext, scene) => {
     const controls = {
         useBillboard: child.useBillboard,
         usePixelSize: child.usePixelSize,
+        fontSize: child.fontSize,
         scaleX: child.scaleX,
         scaleY: child.scaleY,
     };
@@ -167,6 +168,12 @@ const renderTestPane = async (redGPUContext, scene) => {
         updateControlsState();
     });
 
+    const fontSizeBinding = TextField3DFolder.addBinding(controls, 'fontSize', {min: 12, max: 128, step: 1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            if (child instanceof RedGPU.Display.TextField3D) child.fontSize = evt.value;
+        });
+    });
+
     const scaleXBinding = TextField3DFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
         scene.children.forEach((child) => {
             if (child instanceof RedGPU.Display.TextField3D) child.scaleX = evt.value;
@@ -185,6 +192,8 @@ const renderTestPane = async (redGPUContext, scene) => {
         if (!useBillboard) {
             usePixelSizeBinding.element.style.opacity = 0.25;
             usePixelSizeBinding.element.style.pointerEvents = 'none';
+            fontSizeBinding.element.style.opacity = 0.25;
+            fontSizeBinding.element.style.pointerEvents = 'none';
 
             scaleXBinding.element.style.opacity = 1;
             scaleXBinding.element.style.pointerEvents = 'painted';
@@ -195,11 +204,19 @@ const renderTestPane = async (redGPUContext, scene) => {
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
 
             if (usePixelSize) {
+                // 픽셀 사이즈 모드: fontSize 활성화, scale 비활성화
+                fontSizeBinding.element.style.opacity = 1;
+                fontSizeBinding.element.style.pointerEvents = 'painted';
+
                 scaleXBinding.element.style.opacity = 0.25;
                 scaleXBinding.element.style.pointerEvents = 'none';
                 scaleYBinding.element.style.opacity = 0.25;
                 scaleYBinding.element.style.pointerEvents = 'none';
             } else {
+                // 월드 모드: fontSize 비활성화 (사용자 요청), scale 활성화
+                fontSizeBinding.element.style.opacity = 0.25;
+                fontSizeBinding.element.style.pointerEvents = 'none';
+
                 scaleXBinding.element.style.opacity = 1;
                 scaleXBinding.element.style.pointerEvents = 'painted';
                 scaleYBinding.element.style.opacity = 1;
