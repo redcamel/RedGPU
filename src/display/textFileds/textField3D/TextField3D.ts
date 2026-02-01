@@ -6,10 +6,12 @@ import Plane from "../../../primitive/Plane";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
+import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import {keepLog} from "../../../utils";
 
 interface TextField3D {
     useBillboardPerspective: boolean;
-    useBillboard: boolean
+    useBillboard: boolean;
 }
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_3D'
@@ -51,6 +53,16 @@ class TextField3D extends ATextField {
      * [EN] Height of the rendered text texture (normalized value)
      */
     #renderTextureHeight: number = 1;
+    #fixedScaleFactor: number = 10.0;
+
+    get fixedScaleFactor(): number {
+        return this.#fixedScaleFactor;
+    }
+
+    set fixedScaleFactor(value: number) {
+        validatePositiveNumberRange(value,1)
+        this.#fixedScaleFactor = value;
+    }
 
     /**
      * [KO] TextField3D 생성자
@@ -66,8 +78,9 @@ class TextField3D extends ATextField {
         super(redGPUContext, (width: number, height: number) => {
             const prevWidth = this.#renderTextureWidth;
             const prevHeight = this.#renderTextureHeight;
-            this.#renderTextureWidth = width / 1024;
-            this.#renderTextureHeight = height / 1024;
+            const scale =  this.useBillboardPerspective ? this.#fixedScaleFactor :  this.useBillboard ? 1 : this.#fixedScaleFactor
+            this.#renderTextureWidth = width / 1024 * scale;
+            this.#renderTextureHeight = height / 1024 * scale;
             if (prevWidth !== this.#renderTextureWidth || prevHeight !== this.#renderTextureHeight) {
                 this.dirtyTransform = true;
             }

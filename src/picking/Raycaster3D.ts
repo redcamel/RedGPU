@@ -298,19 +298,17 @@ export default class Raycaster3D {
             const sy = Math.hypot(m[4], m[5], m[6]);
             const sz = Math.hypot(m[8], m[9], m[10]);
 
-            // 3. Apply TextField3D specific scale logic
-            const extraScaleX = 10.0;
-            const extraScaleY = 10.0;
-            const extraScaleZ = 1.0;
-            // Apply scales: ModelScale * ExtraScale
-            mat4.scale(billboardWorldMatrix, billboardWorldMatrix, [
-                sx * extraScaleX,
-                sy * extraScaleY,
-                sz * extraScaleZ
-            ]);
+            		// 3. Apply Model Scale (sx, sy, sz) only
 
-            // 4. Narrow Phase
-            this.#intersectNarrowPhase(mesh, billboardWorldMatrix, intersects, false);
+            		// mesh.modelMatrix에는 renderTextureWidth/Height와 기본 스케일(10.0)이 이미 반영되어 있습니다.
+
+            		mat4.scale(billboardWorldMatrix, billboardWorldMatrix, [sx, sy, sz]);
+
+            
+
+            		// 4. Narrow Phase
+
+            		this.#intersectNarrowPhase(mesh, billboardWorldMatrix, intersects, false);
         }
     }
 

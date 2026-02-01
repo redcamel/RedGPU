@@ -71,8 +71,8 @@ fn main(inputData: InputData) -> OutputData {
     let scaleFactor = distance;
 
     var scaleMatrix: mat4x4<f32> = mat4x4<f32>(
-        10.0, 0.0, 0.0, 0.0,
-        0.0, 10.0, 0.0, 0.0,
+        1.0, 0.0, 0.0, 0.0,
+        0.0,  1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
@@ -165,8 +165,8 @@ fn picking(inputData: InputData) -> OutputData {
     let scaleFactor = distance;
 
     var scaleMatrix: mat4x4<f32> = mat4x4<f32>(
-        10.0, 0.0, 0.0, 0.0,
-        0.0, 10.0, 0.0, 0.0,
+        1.0, 0.0, 0.0, 0.0,
+        0.0,  1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0
     );
