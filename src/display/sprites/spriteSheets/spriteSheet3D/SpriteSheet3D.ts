@@ -22,8 +22,6 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  * 3D 스프라이트 시트의 빌보드 및 렌더링 속성을 정의하는 인터페이스
  */
 interface SpriteSheet3D extends ASpriteSheet {
-    /** 빌보드 원근감 적용 여부 */
-    useSizeAttenuation: boolean;
     /** 빌보드 모드 사용 여부 */
     useBillboard: boolean;
     /** 고정 크기 사용 여부 */
@@ -176,7 +174,6 @@ DefineForVertex.definePositiveNumber(SpriteSheet3D, [
  * SpriteSheet3D 클래스에 빌보드 관련 속성들을 정의합니다.
  */
 DefineForVertex.defineByPreset(SpriteSheet3D, [
-    [DefineForVertex.PRESET_BOOLEAN.SIZE_ATTENUATION, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
     [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],

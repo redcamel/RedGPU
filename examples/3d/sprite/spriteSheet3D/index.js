@@ -14,7 +14,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
         const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
         const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
-
         scene.addChild(spriteSheet);
 
         const spriteCount = 10;
@@ -26,7 +25,6 @@ RedGPU.init(canvas, (redGPUContext) => {
             const z = Math.sin(angle) * radius;
 
             const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
-
             spriteSheet.x = x;
             spriteSheet.z = z;
             scene.addChild(spriteSheet);
@@ -63,7 +61,6 @@ const renderTestPane = async (redGPUContext, scene) => {
     const updateTestData = () => {
         const child = scene.children[0];
 
-        controls.useSizeAttenuation = child.useSizeAttenuation;
         controls.useBillboard = child.useBillboard;
         controls.usePixelSize = child.usePixelSize;
         controls.pixelSize = child.pixelSize;
@@ -90,12 +87,6 @@ const renderTestPane = async (redGPUContext, scene) => {
     updateTestData();
 
     const spriteSheet3DFolder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
-
-    const useSizeAttenuationBinding = spriteSheet3DFolder.addBinding(controls, 'useSizeAttenuation').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.useSizeAttenuation = evt.value;
-        });
-    });
 
     const useBillboardBinding = spriteSheet3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
@@ -189,8 +180,6 @@ const renderTestPane = async (redGPUContext, scene) => {
 
         if (!useBillboard) {
             // 빌보드가 꺼지면 빌보드 관련 옵션 모두 비활성화
-            useSizeAttenuationBinding.element.style.opacity = 0.25;
-            useSizeAttenuationBinding.element.style.pointerEvents = 'none';
             usePixelSizeBinding.element.style.opacity = 0.25;
             usePixelSizeBinding.element.style.pointerEvents = 'none';
             pixelSizeBinding.element.style.opacity = 0.25;
@@ -203,8 +192,6 @@ const renderTestPane = async (redGPUContext, scene) => {
             scaleYBinding.element.style.pointerEvents = 'painted';
         } else {
             // 빌보드 켜짐
-            useSizeAttenuationBinding.element.style.opacity = 1;
-            useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
             usePixelSizeBinding.element.style.opacity = 1;
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
 
@@ -213,9 +200,7 @@ const renderTestPane = async (redGPUContext, scene) => {
                 pixelSizeBinding.element.style.opacity = 1;
                 pixelSizeBinding.element.style.pointerEvents = 'painted';
 
-                // 픽셀 모드에서는 원근감/월드스케일 무시됨
-                useSizeAttenuationBinding.element.style.opacity = 0.25;
-                useSizeAttenuationBinding.element.style.pointerEvents = 'none';
+                // 픽셀 모드에서는 월드스케일 무시됨
                 scaleXBinding.element.style.opacity = 0.25;
                 scaleXBinding.element.style.pointerEvents = 'none';
                 scaleYBinding.element.style.opacity = 0.25;
@@ -225,9 +210,7 @@ const renderTestPane = async (redGPUContext, scene) => {
                 pixelSizeBinding.element.style.opacity = 0.25;
                 pixelSizeBinding.element.style.pointerEvents = 'none';
 
-                // 원근감/월드스케일 활성화
-                useSizeAttenuationBinding.element.style.opacity = 1;
-                useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
+                // 월드스케일 활성화
                 scaleXBinding.element.style.opacity = 1;
                 scaleXBinding.element.style.pointerEvents = 'painted';
                 scaleYBinding.element.style.opacity = 1;

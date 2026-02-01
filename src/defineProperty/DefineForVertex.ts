@@ -29,7 +29,6 @@ function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) 
 }
 
 const PRESET_BOOLEAN = {
-    SIZE_ATTENUATION: 'useSizeAttenuation',
     USE_BILLBOARD: 'useBillboard',
     RECEIVE_SHADOW: 'receiveShadow',
     USE_PIXEL_SIZE: 'usePixelSize',
