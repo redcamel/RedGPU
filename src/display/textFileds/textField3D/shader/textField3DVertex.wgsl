@@ -8,8 +8,12 @@ struct VertexUniforms {
     pickingId: u32,
     matrixList:MatrixList,
     normalModelMatrix: mat4x4<f32>,
-    useBillboardPerspective: u32,
+    sizeAttenuation: u32,
     useBillboard: u32,
+    usePixelSize: u32,
+    pixelSize: f32,
+    _renderRatioX: f32,
+    _renderRatioY: f32,
     combinedOpacity: f32,
 };
 
@@ -50,8 +54,19 @@ fn main(inputData: InputData) -> OutputData {
     // Vertex별 Uniform 변수 가져오기
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
-    let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
+    let u_sizeAttenuation = vertexUniforms.sizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
+    let u_usePixelSize = vertexUniforms.usePixelSize;
+    let u_pixelSize = vertexUniforms.pixelSize;
+    let u_renderRatioX = vertexUniforms._renderRatioX;
+    let u_renderRatioY = vertexUniforms._renderRatioY;
+
+    var ratioScaleMatrix: mat4x4<f32> = mat4x4<f32>(
+        u_renderRatioX, 0, 0, 0,
+        0, u_renderRatioY, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    );
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -81,7 +96,7 @@ fn main(inputData: InputData) -> OutputData {
     #redgpu_if useBillboard
     {
         // 퍼스펙티브 스케일 처리
-        if (u_useBillboardPerspective != 1) {
+        if (u_sizeAttenuation != 1) {
             scaleMatrix = mat4x4<f32>(
                 scaleFactor, 0.0, 0.0, 0.0,
                 0.0, scaleFactor, 0.0, 0.0,
@@ -91,19 +106,30 @@ fn main(inputData: InputData) -> OutputData {
         }
 
         // 빌보드 변환 처리
-        position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * vec4<f32>(objectPosition, 1.0);
-        normalPosition = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix) * scaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
+        position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * ratioScaleMatrix * vec4<f32>(objectPosition, 1.0);
+        normalPosition = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix) * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
         // 투영 변환 적용
         output.position = u_noneJitterProjectionMatrix * position;
 
         // 추가 위치 보정 (퍼스펙티브가 비활성화된 경우)
-        if (u_useBillboardPerspective != 1) {
+        if (u_sizeAttenuation != 1) {
             var temp = output.position / output.position.w;
+
+            // 화면 비율 및 스케일 보정
+            let aspectRatio = u_resolution.x / u_resolution.y;
+            var scaleX = (u_noneJitterProjectionMatrix * u_modelMatrix)[0][0] * u_renderRatioX;
+            var scaleY = (u_noneJitterProjectionMatrix * u_modelMatrix)[1][1] * u_renderRatioY;
+
+            if(u_usePixelSize == 1) {
+                scaleX = u_pixelSize / u_resolution.x * 2.0 * u_renderRatioX;
+                scaleY = u_pixelSize / u_resolution.y * 2.0 * u_renderRatioY;
+            }
+
             output.position = vec4<f32>(
                 temp.xy + objectPosition.xy * vec2<f32>(
-                    (u_noneJitterProjectionMatrix * u_modelMatrix)[0][0],
-                    (u_noneJitterProjectionMatrix * u_modelMatrix)[1][1]
+                   scaleX,
+                   scaleY
                 ),
                 temp.zw
             );
@@ -112,8 +138,8 @@ fn main(inputData: InputData) -> OutputData {
     #redgpu_else
     {
         // 일반적인 변환 처리
-        position = u_cameraMatrix * u_modelMatrix * scaleMatrix * vec4<f32>(objectPosition, 1.0);
-        normalPosition = u_cameraMatrix * u_normalModelMatrix * scaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
+        position = u_cameraMatrix * u_modelMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(objectPosition, 1.0);
+        normalPosition = u_cameraMatrix * u_normalModelMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
         output.position = u_noneJitterProjectionMatrix * position;
     }
     #redgpu_endIf
@@ -147,13 +173,25 @@ fn picking(inputData: InputData) -> OutputData {
     // Vertex별 Uniform 변수 가져오기
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
-    let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
+    let u_sizeAttenuation = vertexUniforms.sizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
+    let u_usePixelSize = vertexUniforms.usePixelSize;
+    let u_pixelSize = vertexUniforms.pixelSize;
+    let u_renderRatioX = vertexUniforms._renderRatioX;
+    let u_renderRatioY = vertexUniforms._renderRatioY;
+
+    var ratioScaleMatrix: mat4x4<f32> = mat4x4<f32>(
+        u_renderRatioX, 0, 0, 0,
+        0, u_renderRatioY, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    );
 
     // 입력 데이터
     let input_position = inputData.position;
     let input_positionVec4 = vec4<f32>(input_position, 1.0);
     let input_uv = inputData.uv;
+    let u_resolution = systemUniforms.resolution;
 
     // 처리에 필요한 변수 초기화
     var position: vec4<f32>;
@@ -174,7 +212,7 @@ fn picking(inputData: InputData) -> OutputData {
     // 빌보드와 퍼스펙티브 조건 처리
     if (u_useBillboard == 1) {
         // 퍼스펙티브 스케일 처리
-        if (u_useBillboardPerspective != 1) {
+        if (u_sizeAttenuation != 1) {
             scaleMatrix = mat4x4<f32>(
                 scaleFactor, 0.0, 0.0, 0.0,
                 0.0, scaleFactor, 0.0, 0.0,
@@ -184,25 +222,36 @@ fn picking(inputData: InputData) -> OutputData {
         }
 
         // 빌보드 변환 처리
-        position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * vec4<f32>(objectPosition, 1.0);
+        position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * scaleMatrix * ratioScaleMatrix * vec4<f32>(objectPosition, 1.0);
 
         // 투영 변환 적용
         output.position = u_noneJitterProjectionMatrix * position;
 
         // 추가 위치 보정 (퍼스펙티브가 비활성화된 경우)
-        if (u_useBillboardPerspective != 1) {
+        if (u_sizeAttenuation != 1) {
             var temp = output.position / output.position.w;
+
+            // 화면 비율 및 스케일 보정
+            let aspectRatio = u_resolution.x / u_resolution.y;
+            var scaleX = (u_noneJitterProjectionMatrix * u_modelMatrix)[0][0] * u_renderRatioX;
+            var scaleY = (u_noneJitterProjectionMatrix * u_modelMatrix)[1][1] * u_renderRatioY;
+
+            if(u_usePixelSize == 1) {
+                scaleX = u_pixelSize / u_resolution.x * 2.0 * u_renderRatioX;
+                scaleY = u_pixelSize / u_resolution.y * 2.0 * u_renderRatioY;
+            }
+
             output.position = vec4<f32>(
                 temp.xy + objectPosition.xy * vec2<f32>(
-                    (u_noneJitterProjectionMatrix * u_modelMatrix)[0][0],
-                    (u_noneJitterProjectionMatrix * u_modelMatrix)[1][1]
+                   scaleX,
+                   scaleY
                 ),
                 temp.zw
             );
         }
     } else {
         // 일반적인 변환 처리
-        position = u_cameraMatrix * u_modelMatrix * scaleMatrix * vec4<f32>(objectPosition, 1.0);
+        position = u_cameraMatrix * u_modelMatrix * scaleMatrix * ratioScaleMatrix * vec4<f32>(objectPosition, 1.0);
         output.position = u_noneJitterProjectionMatrix * position;
     }
 

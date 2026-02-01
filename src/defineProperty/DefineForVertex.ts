@@ -29,12 +29,13 @@ function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) 
 }
 
 const PRESET_BOOLEAN = {
-    USE_BILLBOARD_PERSPECTIVE: 'useBillboardPerspective',
+    SIZE_ATTENUATION: 'useSizeAttenuation',
     USE_BILLBOARD: 'useBillboard',
     RECEIVE_SHADOW: 'receiveShadow',
+    USE_PIXEL_SIZE: 'usePixelSize',
 };
 const PRESET_POSITIVE_NUMBER = {
-    BILLBOARD_FIXED_SCALE: 'billboardFixedScale',
+    PIXEL_SIZE: 'pixelSize'
 };
 const PRESET_UINT = {};
 const PRESET_SAMPLER = {};

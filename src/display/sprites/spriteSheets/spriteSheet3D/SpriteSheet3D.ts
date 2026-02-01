@@ -22,9 +22,13 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  */
 interface SpriteSheet3D extends ASpriteSheet {
     /** 빌보드 원근감 적용 여부 */
-    useBillboardPerspective: boolean;
+    sizeAttenuation: boolean;
     /** 빌보드 모드 사용 여부 */
     useBillboard: boolean;
+    /** 고정 크기 사용 여부 */
+    usePixelSize: boolean;
+    /** 고정 크기 값 (px) */
+    pixelSize: number;
     /** X축 렌더링 비율 */
     _renderRatioX: number;
     /** Y축 렌더링 비율 */
@@ -124,7 +128,7 @@ class SpriteSheet3D extends ASpriteSheet {
      * @returns 현재 머티리얼 (BitmapMaterial)
      */
     get material() {
-        return this._material
+        return this._material;
     }
 
     /**
@@ -162,9 +166,10 @@ DefineForVertex.definePositiveNumber(SpriteSheet3D, [
  * SpriteSheet3D 클래스에 빌보드 관련 속성들을 정의합니다.
  */
 DefineForVertex.defineByPreset(SpriteSheet3D, [
-    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD_PERSPECTIVE, true],
+    [DefineForVertex.PRESET_BOOLEAN.SIZE_ATTENUATION, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
-    [DefineForVertex.PRESET_POSITIVE_NUMBER.BILLBOARD_FIXED_SCALE, 0.1, 0.1],
+    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
+    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],
 ])
 /**
  * SpriteSheet3D 클래스를 동결하여 런타임에서의 수정을 방지합니다.

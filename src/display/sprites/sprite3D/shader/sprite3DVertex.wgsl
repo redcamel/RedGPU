@@ -7,9 +7,10 @@ struct MatrixList{
 struct VertexUniforms {
     matrixList:MatrixList,
     pickingId: u32,
-    useBillboardPerspective: u32,
+    useSizeAttenuation: u32,
     useBillboard: u32,
-    billboardFixedScale: f32,
+    usePixelSize: u32,
+    pixelSize: f32,
     combinedOpacity: f32,
 };
 
@@ -55,9 +56,10 @@ fn main(inputData: InputData) -> OutputData {
     // Vertex별 Uniform 변수 가져오기
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
-    let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
+    let u_useSizeAttenuation = vertexUniforms.useSizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
-    let u_billboardFixedScale = vertexUniforms.billboardFixedScale;
+    let u_usePixelSize = vertexUniforms.usePixelSize;
+    let u_pixelSize = vertexUniforms.pixelSize;
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -76,7 +78,7 @@ fn main(inputData: InputData) -> OutputData {
         let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix);
         let billboardNormalMatrix = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix);
 
-        if (u_useBillboardPerspective == 1) {
+        if (u_useSizeAttenuation == 1) {
             position = billboardMatrix * input_positionVec4;
             normalPosition = billboardNormalMatrix * input_vertexNormalVec4;
         } else {
@@ -86,18 +88,22 @@ fn main(inputData: InputData) -> OutputData {
 
         output.position = u_projectionMatrix * position;
 
-        if (u_useBillboardPerspective != 1) {
+        if (u_usePixelSize == 1 || u_useSizeAttenuation != 1) {
             // NDC 좌표로 변환
             var temp = output.position / output.position.w;
 
             // 화면 비율 및 스케일 보정
             let aspectRatio = u_resolution.x / u_resolution.y;
-            let scaleX = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) / aspectRatio;
-            let scaleY = clamp((projectionModelMatrix)[1][1], -1.0, 1.0);
+            var scaleX = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) / aspectRatio;
+            var scaleY = clamp((projectionModelMatrix)[1][1], -1.0, 1.0);
+            if(u_usePixelSize == 1) {
+               scaleX = u_pixelSize / u_resolution.x * 2.0;
+               scaleY = u_pixelSize / u_resolution.y * 2.0;
+            }
 
             // 위치 조정
             output.position = vec4<f32>(
-                temp.xy + input_position.xy * vec2<f32>(scaleX * u_billboardFixedScale, scaleY * u_billboardFixedScale),
+                temp.xy + input_position.xy * vec2<f32>(scaleX, scaleY),
                 temp.zw
             );
         }
@@ -131,9 +137,9 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
     let u_camera = systemUniforms.camera;
     let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
-    let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
+    let u_useSizeAttenuation = vertexUniforms.useSizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
-    let u_billboardFixedScale = vertexUniforms.billboardFixedScale;
+    let u_usePixelSize = vertexUniforms.usePixelSize;
     let input_position = inputData.position;
     let input_positionVec4 = vec4<f32>(input_position, 1.0);
     var position: vec4<f32>;
@@ -154,9 +160,10 @@ fn picking(inputData: InputData) -> OutputData {
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     // 빌보드와 기타 처리 플래그
-    let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
+    let u_useSizeAttenuation = vertexUniforms.useSizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
-    let u_billboardFixedScale = vertexUniforms.billboardFixedScale;
+    let u_usePixelSize = vertexUniforms.usePixelSize;
+    let u_pixelSize = vertexUniforms.pixelSize;
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -171,7 +178,7 @@ fn picking(inputData: InputData) -> OutputData {
         let projectionModelMatrix = u_projectionMatrix * u_modelMatrix;
         let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix);
 
-        if (u_useBillboardPerspective == 1) {
+        if (u_useSizeAttenuation == 1) {
             position = billboardMatrix * input_positionVec4;
         } else {
             position = billboardMatrix * input_positionVec4;
@@ -180,18 +187,22 @@ fn picking(inputData: InputData) -> OutputData {
         // View3D-Projection Matrix 곱
         output.position = u_projectionMatrix * position;
 
-        if (u_useBillboardPerspective != 1) {
+        if (u_usePixelSize == 1 || u_useSizeAttenuation != 1) {
             // NDC 좌표로 변환
             var temp = output.position / output.position.w;
 
             // 화면 비율 및 스케일 보정
             let aspectRatio = u_resolution.x / u_resolution.y;
-            let scaleX = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) / aspectRatio;
-            let scaleY = clamp((projectionModelMatrix)[1][1], -1.0, 1.0);
+            var scaleX = clamp((projectionModelMatrix)[1][1], -1.0, 1.0) / aspectRatio;
+            var scaleY = clamp((projectionModelMatrix)[1][1], -1.0, 1.0);
+            if(u_usePixelSize == 1) {
+               scaleX = u_pixelSize / u_resolution.x * 2.0;
+               scaleY = u_pixelSize / u_resolution.y * 2.0;
+            }
 
             // 위치 조정
             output.position = vec4<f32>(
-                temp.xy + input_position.xy * vec2<f32>(scaleX * u_billboardFixedScale, scaleY * u_billboardFixedScale),
+                temp.xy + input_position.xy * vec2<f32>(scaleX, scaleY),
                 temp.zw
             );
         }

@@ -10,8 +10,12 @@ import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/va
 import {keepLog} from "../../../utils";
 
 interface TextField3D {
-    useBillboardPerspective: boolean;
+    sizeAttenuation: boolean;
     useBillboard: boolean;
+    usePixelSize: boolean;
+    pixelSize: number;
+    _renderRatioX: number;
+    _renderRatioY: number;
 }
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_3D'
@@ -53,16 +57,6 @@ class TextField3D extends ATextField {
      * [EN] Height of the rendered text texture (normalized value)
      */
     #renderTextureHeight: number = 1;
-    #fixedScaleFactor: number = 10.0;
-
-    get fixedScaleFactor(): number {
-        return this.#fixedScaleFactor;
-    }
-
-    set fixedScaleFactor(value: number) {
-        validatePositiveNumberRange(value,1)
-        this.#fixedScaleFactor = value;
-    }
 
     /**
      * [KO] TextField3D 생성자
@@ -76,11 +70,17 @@ class TextField3D extends ATextField {
      */
     constructor(redGPUContext: RedGPUContext, text?: string) {
         super(redGPUContext, (width: number, height: number) => {
+            if (height > width) {
+                this._renderRatioX = 1
+                this._renderRatioY = height / width
+            } else {
+                this._renderRatioX = width / height
+                this._renderRatioY = 1
+            }
             const prevWidth = this.#renderTextureWidth;
             const prevHeight = this.#renderTextureHeight;
-            const scale =  this.useBillboardPerspective ? this.#fixedScaleFactor :  this.useBillboard ? 1 : this.#fixedScaleFactor
-            this.#renderTextureWidth = width / 1024 * scale;
-            this.#renderTextureHeight = height / 1024 * scale;
+            this.#renderTextureWidth = this._renderRatioX;
+            this.#renderTextureHeight = this._renderRatioY;
             if (prevWidth !== this.#renderTextureWidth || prevHeight !== this.#renderTextureHeight) {
                 this.dirtyTransform = true;
             }
@@ -149,10 +149,19 @@ class TextField3D extends ATextField {
     }
 }
 
+/**
+ * TextField3D 클래스에 렌더링 비율 속성들을 정의합니다.
+ */
+DefineForVertex.definePositiveNumber(TextField3D, [
+    ['_renderRatioX', 1],
+    ['_renderRatioY', 1],
+])
 // 버텍스 셰이더에서 사용할 프리셋 정의
 DefineForVertex.defineByPreset(TextField3D, [
-    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD_PERSPECTIVE, true],
-    DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD,
+    [DefineForVertex.PRESET_BOOLEAN.SIZE_ATTENUATION, true],
+    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
+    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
+    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],
 ]);
 Object.freeze(TextField3D);
 export default TextField3D;

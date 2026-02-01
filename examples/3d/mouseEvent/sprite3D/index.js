@@ -96,6 +96,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')));
         scene.addChild(sprite3D);
+        sprite3D.scale.set(0.1, 0.1, 0.1)
         sprite3D.addListener(eventName, (e) => {
             updateInfo(eventName, e);
             sprite3D.material.useTint = true;
@@ -107,6 +108,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.text = eventName;
         label.y = -1;
+        label.scale.set(0.1, 0.1, 0.1);
         label.useBillboard = true;
         label.primitiveState.cullMode = 'none';
         sprite3D.addChild(label);
@@ -135,19 +137,75 @@ const renderTestPane = async (redGPUContext, scene) => {
     setDebugButtons(RedGPU, redGPUContext);
     const folder = pane.addFolder({ title: 'Sprite3D', expanded: true });
     const controls = {
-        useBillboardPerspective: scene.children[0].useBillboardPerspective,
+        useSizeAttenuation: scene.children[0].useSizeAttenuation,
         useBillboard: scene.children[0].useBillboard,
+        usePixelSize: scene.children[0].usePixelSize,
+        pixelSize: scene.children[0].pixelSize
     };
 
-    folder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
+    const useSizeAttenuationBinding = folder.addBinding(controls, 'useSizeAttenuation').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboardPerspective = evt.value;
+            child.useSizeAttenuation = evt.value;
         });
     });
 
-    folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+    const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
             child.useBillboard = evt.value;
         });
+        updateControlsState();
     });
+
+    const usePixelSizeBinding = folder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
+        scene.children.forEach((child) => {
+            child.usePixelSize = evt.value;
+        });
+        updateControlsState();
+    });
+
+    const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            child.pixelSize = evt.value;
+        });
+    });
+
+    const updateControlsState = () => {
+        const {useBillboard, usePixelSize} = controls;
+
+        if (!useBillboard) {
+            // 빌보드가 꺼지면 빌보드 관련 옵션 모두 비활성화
+            useSizeAttenuationBinding.element.style.opacity = 0.25;
+            useSizeAttenuationBinding.element.style.pointerEvents = 'none';
+            usePixelSizeBinding.element.style.opacity = 0.25;
+            usePixelSizeBinding.element.style.pointerEvents = 'none';
+            pixelSizeBinding.element.style.opacity = 0.25;
+            pixelSizeBinding.element.style.pointerEvents = 'none';
+        } else {
+            // 빌보드 켜짐
+            useSizeAttenuationBinding.element.style.opacity = 1;
+            useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
+            usePixelSizeBinding.element.style.opacity = 1;
+            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+
+            if (usePixelSize) {
+                // 픽셀 사이즈 모드
+                pixelSizeBinding.element.style.opacity = 1;
+                pixelSizeBinding.element.style.pointerEvents = 'painted';
+                
+                // 픽셀 모드에서는 원근감 무시됨
+                useSizeAttenuationBinding.element.style.opacity = 0.25;
+                useSizeAttenuationBinding.element.style.pointerEvents = 'none';
+            } else {
+                // 월드 스케일 모드
+                pixelSizeBinding.element.style.opacity = 0.25;
+                pixelSizeBinding.element.style.pointerEvents = 'none';
+
+                // 원근감 활성화
+                useSizeAttenuationBinding.element.style.opacity = 1;
+                useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
+            }
+        }
+    };
+
+    updateControlsState();
 };

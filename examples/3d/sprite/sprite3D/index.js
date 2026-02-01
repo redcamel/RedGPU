@@ -59,9 +59,10 @@ const renderTestPane = async (redGPUContext, view, scene) => {
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     const controls = {
-        useBillboardPerspective: scene.children[0].useBillboardPerspective,
+        useSizeAttenuation: scene.children[0].useSizeAttenuation,
         useBillboard: scene.children[0].useBillboard,
-        billboardFixedScale: scene.children[0].billboardFixedScale,
+        usePixelSize: scene.children[0].usePixelSize,
+        pixelSize: scene.children[0].pixelSize,
         scaleX: scene.children[0].scaleX,
         scaleY: scene.children[0].scaleY,
         scaleZ: scene.children[0].scaleZ,
@@ -69,49 +70,97 @@ const renderTestPane = async (redGPUContext, view, scene) => {
 
     const sprite3DFolder = pane.addFolder({title: 'Sprite3D', expanded: true});
 
-    sprite3DFolder.addBinding(controls, 'useBillboardPerspective').on('change', (evt) => {
+    const useSizeAttenuationBinding = sprite3DFolder.addBinding(controls, 'useSizeAttenuation').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboardPerspective = evt.value;
+            child.useSizeAttenuation = evt.value;
         });
-        updateBillboardFixedScaleBinding();
     });
 
-    sprite3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+    const useBillboardBinding = sprite3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
             child.useBillboard = evt.value;
         });
-        updateBillboardFixedScaleBinding();
+        updateControlsState();
     });
 
-    const updateBillboardFixedScaleBinding = () => {
-        if (!controls.useBillboardPerspective && controls.useBillboard) {
-            billboardFixedScaleBinding.element.style.opacity = 1;
-            billboardFixedScaleBinding.element.style.pointerEvents = 'painted';
-        } else {
-            billboardFixedScaleBinding.element.style.opacity = 0.25;
-            billboardFixedScaleBinding.element.style.pointerEvents = 'none';
-        }
-    };
-
-    const billboardFixedScaleBinding = sprite3DFolder
-        .addBinding(controls, 'billboardFixedScale', {min: 0.1, max: 1})
-        .on('change', (evt) => {
-            scene.children.forEach((child) => {
-                child.billboardFixedScale = evt.value;
-            });
+    const usePixelSizeBinding = sprite3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
+        scene.children.forEach((child) => {
+            child.usePixelSize = evt.value;
         });
+        updateControlsState();
+    });
 
-    updateBillboardFixedScaleBinding();
+    const pixelSizeBinding = sprite3DFolder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            child.pixelSize = evt.value;
+        });
+    });
 
     const scaleFolder = pane.addFolder({title: 'Sprite3D Scale', expanded: true});
-    scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const scaleXBinding = scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
         scene.children.forEach((child) => {
             child.scaleX = controls.scaleX;
         });
     });
-    scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const scaleYBinding = scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
         scene.children.forEach((child) => {
             child.scaleY = controls.scaleY;
         });
     });
+
+    const updateControlsState = () => {
+        const {useBillboard, usePixelSize} = controls;
+
+        if (!useBillboard) {
+            // 빌보드가 꺼지면 빌보드 관련 옵션 모두 비활성화
+            useSizeAttenuationBinding.element.style.opacity = 0.25;
+            useSizeAttenuationBinding.element.style.pointerEvents = 'none';
+            usePixelSizeBinding.element.style.opacity = 0.25;
+            usePixelSizeBinding.element.style.pointerEvents = 'none';
+            pixelSizeBinding.element.style.opacity = 0.25;
+            pixelSizeBinding.element.style.pointerEvents = 'none';
+
+            // 스케일은 활성화 (일반 메시 모드)
+            scaleXBinding.element.style.opacity = 1;
+            scaleXBinding.element.style.pointerEvents = 'painted';
+            scaleYBinding.element.style.opacity = 1;
+            scaleYBinding.element.style.pointerEvents = 'painted';
+        } else {
+            // 빌보드 켜짐
+            useSizeAttenuationBinding.element.style.opacity = 1;
+            useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
+            usePixelSizeBinding.element.style.opacity = 1;
+            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+
+            if (usePixelSize) {
+                // 픽셀 사이즈 모드
+                pixelSizeBinding.element.style.opacity = 1;
+                pixelSizeBinding.element.style.pointerEvents = 'painted';
+
+                // 픽셀 모드에서는 원근감/월드스케일 무시됨
+                useSizeAttenuationBinding.element.style.opacity = 0.25;
+                useSizeAttenuationBinding.element.style.pointerEvents = 'none';
+                scaleXBinding.element.style.opacity = 0.25;
+                scaleXBinding.element.style.pointerEvents = 'none';
+                scaleYBinding.element.style.opacity = 0.25;
+                scaleYBinding.element.style.pointerEvents = 'none';
+            } else {
+                // 월드 스케일 모드
+                pixelSizeBinding.element.style.opacity = 0.25;
+                pixelSizeBinding.element.style.pointerEvents = 'none';
+
+                // 원근감/월드스케일 활성화
+                useSizeAttenuationBinding.element.style.opacity = 1;
+                useSizeAttenuationBinding.element.style.pointerEvents = 'painted';
+                scaleXBinding.element.style.opacity = 1;
+                scaleXBinding.element.style.pointerEvents = 'painted';
+                scaleYBinding.element.style.opacity = 1;
+                scaleYBinding.element.style.pointerEvents = 'painted';
+            }
+        }
+    };
+
+    // 초기 상태 업데이트
+    updateControlsState();
 };
+

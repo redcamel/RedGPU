@@ -7,13 +7,14 @@ struct MatrixList{
 struct VertexUniforms {
     matrixList:MatrixList,
     pickingId: u32,
-    useBillboardPerspective: u32,
+    sizeAttenuation: u32,
     useBillboard: u32,
     segmentW: f32,
     segmentH: f32,
     totalFrame: f32,
     currentIndex: f32,
-    billboardFixedScale: f32,
+    usePixelSize: u32,
+    pixelSize: f32,
     _renderRatioX: f32,
     _renderRatioY: f32,
     combinedOpacity: f32,
@@ -62,9 +63,10 @@ fn main(inputData: InputData) -> OutputData {
     // Vertex별 Uniform 변수 가져오기
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
-    let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
+    let u_sizeAttenuation = vertexUniforms.sizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
-    let u_billboardFixedScale = vertexUniforms.billboardFixedScale;
+    let u_usePixelSize = vertexUniforms.usePixelSize;
+    let u_pixelSize = vertexUniforms.pixelSize;
     let u_renderRatioX = vertexUniforms._renderRatioX;
     let u_renderRatioY = vertexUniforms._renderRatioY;
 
@@ -87,7 +89,7 @@ fn main(inputData: InputData) -> OutputData {
     #redgpu_if useBillboard
     {
         // 기본 position과 normalPosition 계산
-        if (u_useBillboardPerspective == 1) {
+        if (u_sizeAttenuation == 1) {
             position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
             normalPosition = getBillboardMatrix(u_cameraMatrix, u_normalModelMatrix) * ratioScaleMatrix * vec4<f32>(input_vertexNormal, 1.0);
         } else {
@@ -98,18 +100,23 @@ fn main(inputData: InputData) -> OutputData {
         // View3D-Projection Matrix 곱
         output.position = u_projectionMatrix * position;
 
-        if (u_useBillboardPerspective != 1) {
+        if (u_usePixelSize == 1 || u_sizeAttenuation != 1) {
             // NDC 좌표로 변환
             var temp = output.position / output.position.w;
 
             // 화면 비율 및 스케일 보정
             let aspectRatio = u_resolution.x / u_resolution.y;
-            let scaleX = clamp((u_projectionMatrix)[1][1], -1.0, 1.0) / aspectRatio * u_renderRatioX;
-            let scaleY = clamp((u_projectionMatrix)[1][1], -1.0, 1.0) * u_renderRatioY;
+            var scaleX = clamp((u_projectionMatrix)[1][1], -1.0, 1.0) / aspectRatio * u_renderRatioX;
+            var scaleY = clamp((u_projectionMatrix)[1][1], -1.0, 1.0) * u_renderRatioY;
+
+            if(u_usePixelSize == 1) {
+                scaleX = u_pixelSize / u_resolution.x * 2.0 * u_renderRatioX;
+                scaleY = u_pixelSize / u_resolution.y * 2.0 * u_renderRatioY;
+            }
 
             // 위치 조정
             output.position = vec4<f32>(
-                temp.xy + input_position.xy * vec2<f32>(scaleX * u_billboardFixedScale, scaleY * u_billboardFixedScale),
+                temp.xy + input_position.xy * vec2<f32>(scaleX, scaleY),
                 temp.zw
             );
         }
@@ -155,9 +162,10 @@ fn picking(inputData: InputData) -> OutputData {
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
 
     // 빌보드와 기타 처리 플래그
-    let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective;
+    let u_sizeAttenuation = vertexUniforms.sizeAttenuation;
     let u_useBillboard = vertexUniforms.useBillboard;
-    let u_billboardFixedScale = vertexUniforms.billboardFixedScale;
+    let u_usePixelSize = vertexUniforms.usePixelSize;
+    let u_pixelSize = vertexUniforms.pixelSize;
     let u_renderRatioX = vertexUniforms._renderRatioX;
     let u_renderRatioY = vertexUniforms._renderRatioY;
 
@@ -179,7 +187,7 @@ fn picking(inputData: InputData) -> OutputData {
 
     if (u_useBillboard == 1) {
         // 기본 position과 normalPosition 계산
-        if (u_useBillboardPerspective == 1) {
+        if (u_sizeAttenuation == 1) {
             position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
         } else {
             position = getBillboardMatrix(u_cameraMatrix, u_modelMatrix) * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
@@ -188,18 +196,23 @@ fn picking(inputData: InputData) -> OutputData {
         // View3D-Projection Matrix 곱
         output.position = u_projectionMatrix * position;
 
-        if (u_useBillboardPerspective != 1) {
+        if (u_usePixelSize == 1 || u_sizeAttenuation != 1) {
             // NDC 좌표로 변환
             var temp = output.position / output.position.w;
 
             // 화면 비율 및 스케일 보정
             let aspectRatio = u_resolution.x / u_resolution.y;
-            let scaleX = clamp((u_projectionMatrix)[1][1], -1.0, 1.0) / aspectRatio * u_renderRatioX;
-            let scaleY = clamp((u_projectionMatrix)[1][1], -1.0, 1.0) * u_renderRatioY;
+            var scaleX = clamp((u_projectionMatrix)[1][1], -1.0, 1.0) / aspectRatio * u_renderRatioX;
+            var scaleY = clamp((u_projectionMatrix)[1][1], -1.0, 1.0) * u_renderRatioY;
+
+            if(u_usePixelSize == 1) {
+               scaleX = u_pixelSize / u_resolution.x * 2.0 * u_renderRatioX;
+               scaleY = u_pixelSize / u_resolution.y * 2.0 * u_renderRatioY;
+           }
 
             // 위치 조정
             output.position = vec4<f32>(
-                temp.xy + input_position.xy * vec2<f32>(scaleX * u_billboardFixedScale, scaleY * u_billboardFixedScale),
+                temp.xy + input_position.xy * vec2<f32>(scaleX, scaleY),
                 temp.zw
             );
         }

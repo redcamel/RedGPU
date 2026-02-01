@@ -20,14 +20,13 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  */
 interface Sprite3D {
     /** 빌보드 원근감 적용 여부 */
-    useBillboardPerspective: boolean;
+    useSizeAttenuation: boolean;
     /** 빌보드 모드 사용 여부 */
     useBillboard: boolean;
-    /**
-     * 빌보드 고정 크기 배율
-     *
-     * useBillboardPerspective가 false일때만 적용됩니다.*/
-    billboardFixedScale: number;
+    /** 고정 크기 사용 여부 */
+    usePixelSize: boolean;
+    /** 고정 크기 값 (px) */
+    pixelSize: number;
 }
 
 /**
@@ -95,9 +94,10 @@ class Sprite3D extends Mesh {
  * Sprite3D 클래스에 빌보드 관련 속성들을 정의합니다.
  */
 DefineForVertex.defineByPreset(Sprite3D, [
-    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD_PERSPECTIVE, true],
+    [DefineForVertex.PRESET_BOOLEAN.SIZE_ATTENUATION, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
-    [DefineForVertex.PRESET_POSITIVE_NUMBER.BILLBOARD_FIXED_SCALE, 0.1, 0.1],
+    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
+    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],
 ])
 Object.freeze(Sprite3D)
 export default Sprite3D
