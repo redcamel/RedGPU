@@ -90,12 +90,13 @@ class Sprite3D extends Mesh {
             if (gpuTexture) {
                 const tW = gpuTexture.width
                 const tH = gpuTexture.height
-                if (tW !== this.#width || tH !== this.#height) {
+                const dpr = window.devicePixelRatio || 1;
+                if (tW !== this.#width || tH !== this.#height || this._renderRatioY !== dpr) {
                     this.#width = tW
                     this.#height = tH
-                    // 세로 기준 스케일링 (Height-based)
-                    this._renderRatioY = 1
-                    this._renderRatioX = tW / tH
+                    // 세로 기준 스케일링 (Height-based) + DPR 반영
+                    this._renderRatioY = dpr
+                    this._renderRatioX = (tW / tH) * dpr
                 }
             }
         }

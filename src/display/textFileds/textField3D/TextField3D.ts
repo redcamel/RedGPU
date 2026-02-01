@@ -70,15 +70,12 @@ class TextField3D extends ATextField {
      */
     constructor(redGPUContext: RedGPUContext, text?: string) {
         super(redGPUContext, (width: number, height: number) => {
-            if (height > width) {
-                this._renderRatioX = 1
-                this._renderRatioY = height / width
-            } else {
-                this._renderRatioX = width / height
-                this._renderRatioY = 1
-            }
+            const dpr = window.devicePixelRatio || 1;
             const prevWidth = this.#renderTextureWidth;
             const prevHeight = this.#renderTextureHeight;
+            // 세로 기준 스케일링 (Height-based) + DPR 반영
+            this._renderRatioY = dpr
+            this._renderRatioX = (width / height) * dpr
             this.#renderTextureWidth = this._renderRatioX;
             this.#renderTextureHeight = this._renderRatioY;
             if (prevWidth !== this.#renderTextureWidth || prevHeight !== this.#renderTextureHeight) {
@@ -87,6 +84,17 @@ class TextField3D extends ATextField {
         });
         this._geometry = new Plane(redGPUContext);
         if (text) this.text = text;
+    }
+
+    render(renderViewStateData: RenderViewStateData) {
+        const dpr = window.devicePixelRatio || 1;
+        if (this._renderRatioY !== dpr && this.#renderTextureHeight) {
+            // DPR 변경 대응
+            this._renderRatioY = dpr
+            this._renderRatioX = (this.renderTextureWidth / this.renderTextureHeight) * dpr
+            this.dirtyTransform = true
+        }
+        super.render(renderViewStateData);
     }
 
     /**

@@ -83,20 +83,18 @@ class SpriteSheet3D extends ASpriteSheet {
         super(redGPUContext, spriteSheetInfo, (diffuseTexture: BitmapTexture, segmentW: number, segmentH: number) => {
             if (diffuseTexture) {
                 const {gpuTexture} = diffuseTexture;
-                const tW = gpuTexture?.width / segmentW
-                const tH = gpuTexture?.height / segmentH
-                if (tW !== this.#renderTextureWidth || tH !== this.#renderTextureHeight) {
-                    this.#renderTextureWidth = gpuTexture?.width / segmentW
-                    this.#renderTextureHeight = gpuTexture?.height / segmentH
-                    if (this.#renderTextureHeight > this.#renderTextureWidth) {
-                        this._renderRatioX = 1
-                        this._renderRatioY = this.#renderTextureHeight / this.#renderTextureWidth
-                    } else {
-                        this._renderRatioX = this.#renderTextureWidth / this.#renderTextureHeight
-                        this._renderRatioY = 1
+                if (gpuTexture) {
+                    const tW = gpuTexture.width / segmentW
+                    const tH = gpuTexture.height / segmentH
+                    const dpr = window.devicePixelRatio || 1;
+                    if (tW !== this.#renderTextureWidth || tH !== this.#renderTextureHeight || this._renderRatioY !== dpr) {
+                        this.#renderTextureWidth = tW
+                        this.#renderTextureHeight = tH
+                        // 세로 기준 스케일링 (Height-based) + DPR 반영
+                        this._renderRatioY = dpr
+                        this._renderRatioX = (tW / tH) * dpr
+                        this.dirtyTransform = true
                     }
-                    this.dirtyTransform = true
-                    // this.pivotY = -this._renderRatioY * 0.5
                 }
             } else {
                 this.#renderTextureWidth = 1
@@ -104,6 +102,17 @@ class SpriteSheet3D extends ASpriteSheet {
             }
         });
         this._geometry = new Plane(redGPUContext);
+    }
+
+    render(renderViewStateData: RenderViewStateData) {
+        const dpr = window.devicePixelRatio || 1;
+        if (this._renderRatioY !== dpr && this.#renderTextureHeight) {
+            // DPR 변경 대응
+            this._renderRatioY = dpr
+            this._renderRatioX = (this.#renderTextureWidth / this.#renderTextureHeight) * dpr
+            this.dirtyTransform = true
+        }
+        super.render(renderViewStateData);
     }
 
     /**
