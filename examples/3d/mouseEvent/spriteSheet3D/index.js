@@ -8,6 +8,7 @@ RedGPU.init(
     (redGPUContext) => {
         const isMobile = redGPUContext.detector.isMobile;
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = isMobile ? 12 : 9.5;
         controller.tilt = -15;
 
         const scene = new RedGPU.Display.Scene();
@@ -87,16 +88,17 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 );
 
 const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
-    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png');
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     const sprites = [];
     const labels = [];
 
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
-        const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
-        material.useTint = true;
-
         const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
+        
+        // [KO] SpriteSheet3D는 내부에서 자동 생성된 머티리얼을 사용합니다.
+        // [EN] SpriteSheet3D uses an internally auto-generated material.
+        const material = spriteSheet.material;
+        material.useTint = true;
 
         spriteSheet.name = `SpriteSheet3D_${eventName}`;
         spriteSheet.primitiveState.cullMode = 'none';
@@ -105,6 +107,8 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
         scene.addChild(spriteSheet);
         spriteSheet.addListener(eventName, (e) => {
             updateInfo(eventName, e);
+            // [KO] 인스턴스의 실제 머티리얼 틴트를 애니메이션합니다.
+            // [EN] Animate the actual material tint of the instance.
             TweenMax.to(material.tint, 0.5, {
                 r: Math.floor(Math.random() * 255),
                 g: Math.floor(Math.random() * 255),
@@ -127,7 +131,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
     const updateLayout = () => {
         const isMobile = redGPUContext.detector.isMobile;
         const radius = isMobile ? 2.5 : 3;
-        const labelRadius = radius + 1.25; // [KO] 규격 통일 [EN] Unified standards
+        const labelRadius = radius + 1.25;
         const total = sprites.length;
         sprites.forEach((sprite, index) => {
             const angle = (index / total) * Math.PI * 2;
