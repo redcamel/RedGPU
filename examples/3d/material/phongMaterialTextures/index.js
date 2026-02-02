@@ -107,7 +107,8 @@ const createMeshesFromLines = (redGPUContext, scene, lines, spacingX, spacingY, 
             const label = new RedGPU.Display.TextField3D(redGPUContext);
             label.text = `${base.toLowerCase().includes('color') ? `<span style="color:${material[base].hex}">${material[base].hex}</span>` : base} + ${textureType}`;
             label.color = '#ffffff';
-            label.fontSize = 26;
+            // label.fontSize = 26;
+            label.worldSize = 0.9
             label.setPosition(0, -2, 0);
             label.useBillboard = true;
             label.useBillboardPerspective = true;

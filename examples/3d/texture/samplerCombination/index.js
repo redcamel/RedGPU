@@ -97,7 +97,7 @@ const createCategoryGroups = (redGPUContext, scene) => {
         const categoryLabel = new RedGPU.Display.TextField3D(redGPUContext);
         categoryLabel.text = `Category: ${["minFilter", "magFilter", "mipmapFilter"][categoryIndex]}`;
         categoryLabel.color = "#dc631d";
-        categoryLabel.fontSize = 64;
+        categoryLabel.worldSize = 1.5
         categoryLabel.setPosition(currentX, currentY + 7, 0);
         categoryLabel.useBillboard = true;
         categoryLabel.useBillboardPerspective = true;
@@ -142,7 +142,7 @@ const createGroupMeshes = (redGPUContext, scene, group, spacingX, spacingY, subG
         label.text = `min: ${sampler.minFilter} <br/> mag: ${sampler.magFilter} <br/> mipmap: ${sampler.mipmapFilter}`;
         label.color = "#ffffff";
         label.useBillboard = true;
-        label.fontSize = 21;
+        label.worldSize = 2
         label.setPosition(x, y - 2.2, 0);
         scene.addChild(label);
     });
@@ -151,7 +151,7 @@ const createGroupMeshes = (redGPUContext, scene, group, spacingX, spacingY, subG
     const groupLabel = new RedGPU.Display.TextField3D(redGPUContext);
     groupLabel.text = group.name;
     groupLabel.color = "#5fd7ff";
-    groupLabel.fontSize = 42;
+    groupLabel.worldSize = 2
     groupLabel.setPosition(groupX, maxYOffset + groupHeight / 2 + 2.5, 0);
     groupLabel.useBillboard = true;
     groupLabel.useBillboardPerspective = true;

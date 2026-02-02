@@ -69,7 +69,7 @@ const renderTestPane = async (redGPUContext, scene) => {
         textLabel.text = `maxAnisotropy: ${anisotropy}`;
         textLabel.useBillboardPerspective = false;
         textLabel.useBillboard = true;
-        textLabel.fontSize = 26;
+        textLabel.worldSize = 4
         textLabel.depthStencilState.depthCompare = 'always';
         textLabel.setPosition(bottomMesh.x, 0, bottomMesh.z);
         scene.addChild(textLabel);
