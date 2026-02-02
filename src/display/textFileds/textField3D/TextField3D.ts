@@ -65,28 +65,29 @@ class TextField3D extends ATextField {
                 if (width !== this.#nativeWidth || height !== this.#nativeHeight) {
                     this.#nativeWidth = width
                     this.#nativeHeight = height
-                    this.fontSize = this.fontSize
+                    
+                    // [KO] 실제 렌더링된 컨테이너 크기(물리 픽셀)를 유니폼으로 전달
+                    // [EN] Pass the actual rendered container size (physical pixels) to the uniform
+                    if (this.gpuRenderInfo) {
+                        this.redGPUContext.gpuDevice.queue.writeBuffer(
+                            this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
+                            this.gpuRenderInfo.vertexUniformInfo.members.pixelSize.uniformOffset,
+                            new Float32Array([height * window.devicePixelRatio])
+                        )
+                    }
                     this.#updateRatios();
                 }
             }
         });
 
-        // [KO] fontSize 프로퍼티를 래핑하여 변경 시 GPU 유니폼(pixelSize)도 함께 업데이트하도록 설정
-        // [EN] Wrap fontSize property to update GPU uniform (pixelSize) whenever it changes
+        // [KO] fontSize 프로퍼티를 래핑하여 변경 시 부모 클래스의 스타일 업데이트를 트리거함
+        // [EN] Wrap fontSize property to trigger parent class style updates when changed
         const descriptor = Object.getOwnPropertyDescriptor(this, 'fontSize');
         const orgSetter = descriptor.set;
         Object.defineProperty(this, 'fontSize', {
             get: () => this['_fontSize'],
             set: (v: number) => {
                 orgSetter.call(this, v);
-                if (this.gpuRenderInfo) {
-                    const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
-                    this.redGPUContext.gpuDevice.queue.writeBuffer(
-                        vertexUniformBuffer.gpuBuffer,
-                        vertexUniformInfo.members.pixelSize.uniformOffset,
-                        new Float32Array([v * window.devicePixelRatio * 2])
-                    )
-                }
             },
             configurable: true
         });
@@ -130,6 +131,13 @@ class TextField3D extends ATextField {
                 vertexUniformBuffer.gpuBuffer,
                 vertexUniformInfo.members.usePixelSize.uniformOffset,
                 new Uint32Array([value ? 1 : 0])
+            )
+            // [KO] 모드 전환 시 현재 물리 픽셀 크기도 즉시 동기화
+            // [EN] Immediately sync current physical pixel size when switching modes
+            this.redGPUContext.gpuDevice.queue.writeBuffer(
+                vertexUniformBuffer.gpuBuffer,
+                vertexUniformInfo.members.pixelSize.uniformOffset,
+                new Float32Array([this.#nativeHeight * window.devicePixelRatio])
             )
         }
         if (this.#usePixelSize === value) return;
