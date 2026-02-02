@@ -14,7 +14,7 @@ RedGPU.init(canvas, (redGPUContext) => {
         redGPUContext.addView(view);
 
         const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
-        
+
         // [KO] 메인 스프라이트 시트 생성 [EN] Create main sprite sheet
         const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
         spriteSheet.worldSize = 1.0;
@@ -62,11 +62,6 @@ const renderTestPane = async (redGPUContext, scene) => {
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 
-    // [KO] 유효한 스프라이트 시트 정보만 유지 [EN] Maintain only valid sprite sheet infos
-    const spriteSheetInfos = [
-        new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24),
-    ];
-
     const child = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);
     const controls = {
         useBillboard: child.useBillboard,
@@ -83,32 +78,38 @@ const renderTestPane = async (redGPUContext, scene) => {
         segmentH: child.segmentH || 0,
     };
 
+    const updateProperty = (key, value) => {
+        scene.children.forEach((child) => {
+            if (child instanceof RedGPU.Display.SpriteSheet3D) child[key] = value;
+        });
+    }
     const spriteSheet3DFolder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
 
+
     spriteSheet3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.useBillboard = evt.value;
-        });
+        updateProperty('useBillboard', evt.value)
         updateControlsState();
     });
 
     const usePixelSizeBinding = spriteSheet3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.usePixelSize = evt.value;
-        });
+        updateProperty('usePixelSize', evt.value)
         updateControlsState();
     });
 
-    const pixelSizeBinding = spriteSheet3DFolder.addBinding(controls, 'pixelSize', {min: 1, max: 512, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.pixelSize = evt.value;
-        });
+    const pixelSizeBinding = spriteSheet3DFolder.addBinding(controls, 'pixelSize', {
+        min: 1,
+        max: 512,
+        step: 1
+    }).on('change', (evt) => {
+        updateProperty('pixelSize', evt.value)
     });
 
-    const worldSizeBinding = spriteSheet3DFolder.addBinding(controls, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.worldSize = evt.value;
-        });
+    const worldSizeBinding = spriteSheet3DFolder.addBinding(controls, 'worldSize', {
+        min: 0.01,
+        max: 10,
+        step: 0.01
+    }).on('change', (evt) => {
+        updateProperty('worldSize', evt.value)
     });
 
     spriteSheet3DFolder.addBinding(controls, 'loop').on('change', (evt) => {
@@ -121,9 +122,7 @@ const renderTestPane = async (redGPUContext, scene) => {
     });
 
     spriteSheet3DFolder.addBinding(controls, 'frameRate', {min: 0, max: 60, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.frameRate = evt.value;
-        });
+        updateProperty('frameRate', evt.value)
     });
 
     // [KO] 플레이 컨트롤 [EN] Play controls
@@ -190,6 +189,7 @@ const renderTestPane = async (redGPUContext, scene) => {
             controls.segmentW = child.segmentW;
             controls.segmentH = child.segmentH;
             controls.state = child.state;
+            controls.pixelSize = child.pixelSize;
             pane.refresh();
         }
         requestAnimationFrame(refreshMonitoringControls);

@@ -10,6 +10,7 @@ import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
+import {keepLog} from "../../../../utils";
 
 /** SpriteSheet3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
@@ -26,8 +27,6 @@ interface SpriteSheet3D extends ASpriteSheet {
     useBillboard: boolean;
     /** 고정 크기 사용 여부 */
     usePixelSize: boolean;
-    /** 고정 크기 값 (px) */
-    pixelSize: number;
     /** X축 렌더링 비율 */
     _renderRatioX: number;
     /** Y축 렌더링 비율 */
@@ -67,6 +66,7 @@ class SpriteSheet3D extends ASpriteSheet {
      */
     #nativeHeight: number = 1
     #worldSize: number = 1
+    #pixelSize: number = 0
 
     /**
      * [KO] 새로운 SpriteSheet3D 인스턴스를 생성합니다.
@@ -92,12 +92,10 @@ class SpriteSheet3D extends ASpriteSheet {
 
                         const prevPixelSize = this.pixelSize;
                         // 원본 세그먼트 해상도를 pixelSize 기본값으로 설정
-                        this.pixelSize = this.pixelSize || tH;
+                        this.pixelSize = this.#pixelSize ? this.#pixelSize : tH;
                         this.#updateRatios();
-
-                        if (prevPixelSize !== this.pixelSize) {
-                            this.dirtyTransform = true
-                        }
+                        keepLog('오냐 ',this.pixelSize)
+                        this.dirtyTransform = true
                     }
                 }
             } else {
@@ -125,6 +123,24 @@ class SpriteSheet3D extends ASpriteSheet {
         if (this.#worldSize === value) return;
         this.#worldSize = value;
         this.#updateRatios();
+    }
+
+
+    get pixelSize(): number {
+        return this.#pixelSize;
+    }
+
+    set pixelSize(value: number) {
+
+        if(this.gpuRenderInfo){
+            const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
+            this.redGPUContext.gpuDevice.queue.writeBuffer(
+                vertexUniformBuffer.gpuBuffer,
+                vertexUniformInfo.members.pixelSize.uniformOffset,
+                new Float32Array([value])
+            )
+        }
+        this.#pixelSize = value;
     }
 
     #updateRatios() {
@@ -208,7 +224,6 @@ DefineForVertex.definePositiveNumber(SpriteSheet3D, [
 DefineForVertex.defineByPreset(SpriteSheet3D, [
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
-    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 0],
 ])
 /**
  * SpriteSheet3D 클래스를 동결하여 런타임에서의 수정을 방지합니다.
