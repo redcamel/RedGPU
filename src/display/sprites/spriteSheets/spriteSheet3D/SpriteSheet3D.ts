@@ -66,6 +66,7 @@ class SpriteSheet3D extends ASpriteSheet {
      * [EN] Actual height of the texture segment to be rendered
      */
     #nativeHeight: number = 1
+    #worldSize: number = 1
 
     /**
      * [KO] 새로운 SpriteSheet3D 인스턴스를 생성합니다.
@@ -89,17 +90,12 @@ class SpriteSheet3D extends ASpriteSheet {
                         this.#nativeWidth = tW
                         this.#nativeHeight = tH
 
-                        const prevX = this._renderRatioX;
-                        const prevY = this._renderRatioY;
                         const prevPixelSize = this.pixelSize;
-
-                        // 세로 기준 스케일링 (Height-based) 표준화
-                        this._renderRatioY = 1.0
-                        this._renderRatioX = (tW / tH)
                         // 원본 세그먼트 해상도를 pixelSize 기본값으로 설정
                         this.pixelSize = tH;
+                        this.#updateRatios();
 
-                        if (prevX !== this._renderRatioX || prevY !== this._renderRatioY || prevPixelSize !== this.pixelSize) {
+                        if (prevPixelSize !== this.pixelSize) {
                             this.dirtyTransform = true
                         }
                     }
@@ -110,6 +106,40 @@ class SpriteSheet3D extends ASpriteSheet {
             }
         });
         this._geometry = new Plane(redGPUContext);
+    }
+
+    /**
+     * [KO] 월드 공간에서의 세로 크기(높이)를 반환합니다.
+     * [EN] Returns the vertical size (height) in world space.
+     */
+    get worldSize(): number {
+        return this.#worldSize;
+    }
+
+    /**
+     * [KO] 월드 공간에서의 세로 크기(높이)를 설정합니다.
+     * [EN] Sets the vertical size (height) in world space.
+     * @param value - [KO] 월드 크기 (Unit) [EN] World size (Unit)
+     */
+    set worldSize(value: number) {
+        if (this.#worldSize === value) return;
+        this.#worldSize = value;
+        this.#updateRatios();
+    }
+
+    #updateRatios() {
+        if (this.#nativeHeight) {
+            const prevX = this._renderRatioX;
+            const prevY = this._renderRatioY;
+
+            // worldSize가 반영된 최종 렌더링 비율 계산
+            this._renderRatioY = this.#worldSize;
+            this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+
+            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
+                this.dirtyTransform = true;
+            }
+        }
     }
 
     render(renderViewStateData: RenderViewStateData) {

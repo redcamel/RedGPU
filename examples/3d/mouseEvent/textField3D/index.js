@@ -7,7 +7,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 7.5;
+        controller.distance = 6;
         controller.tilt = -15;
         controller.speedDistance = 0.1;
 
@@ -104,6 +104,7 @@ const createSampleTextField3D = (redGPUContext, scene, infoBox, updateInfo) => {
         textField.padding = 10;
         textField.borderRadius = 10;
         textField.primitiveState.cullMode = 'none';
+        textField.worldSize = 1.0;
 
         scene.addChild(textField);
         textField.addListener(eventName, (e) => {
@@ -148,8 +149,7 @@ const renderTestPane = async (redGPUContext, scene) => {
         useBillboard: child.useBillboard,
         usePixelSize: child.usePixelSize,
         fontSize: child.fontSize,
-        scaleX: child.scaleX,
-        scaleY: child.scaleY,
+        worldSize: child.worldSize,
     };
 
     const TextField3DFolder = pane.addFolder({ title: 'TextField3D', expanded: true });
@@ -174,15 +174,9 @@ const renderTestPane = async (redGPUContext, scene) => {
         });
     });
 
-    const scaleXBinding = TextField3DFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const worldSizeBinding = TextField3DFolder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.scaleX = evt.value;
-        });
-    });
-
-    const scaleYBinding = TextField3DFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.scaleY = evt.value;
+            if (child instanceof RedGPU.Display.TextField3D) child.worldSize = evt.value;
         });
     });
 
@@ -194,33 +188,24 @@ const renderTestPane = async (redGPUContext, scene) => {
             usePixelSizeBinding.element.style.pointerEvents = 'none';
             fontSizeBinding.element.style.opacity = 0.25;
             fontSizeBinding.element.style.pointerEvents = 'none';
-
-            scaleXBinding.element.style.opacity = 1;
-            scaleXBinding.element.style.pointerEvents = 'painted';
-            scaleYBinding.element.style.opacity = 1;
-            scaleYBinding.element.style.pointerEvents = 'painted';
+            worldSizeBinding.element.style.opacity = 1;
+            worldSizeBinding.element.style.pointerEvents = 'painted';
         } else {
             usePixelSizeBinding.element.style.opacity = 1;
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
 
             if (usePixelSize) {
-                // 픽셀 사이즈 모드: fontSize 활성화, scale 비활성화
+                // 픽셀 사이즈 모드: fontSize 활성화, worldSize 비활성화
                 fontSizeBinding.element.style.opacity = 1;
                 fontSizeBinding.element.style.pointerEvents = 'painted';
-
-                scaleXBinding.element.style.opacity = 0.25;
-                scaleXBinding.element.style.pointerEvents = 'none';
-                scaleYBinding.element.style.opacity = 0.25;
-                scaleYBinding.element.style.pointerEvents = 'none';
+                worldSizeBinding.element.style.opacity = 0.25;
+                worldSizeBinding.element.style.pointerEvents = 'none';
             } else {
-                // 월드 모드: fontSize 비활성화 (사용자 요청), scale 활성화
+                // 월드 모드: fontSize 비활성화, worldSize 활성화
                 fontSizeBinding.element.style.opacity = 0.25;
                 fontSizeBinding.element.style.pointerEvents = 'none';
-
-                scaleXBinding.element.style.opacity = 1;
-                scaleXBinding.element.style.pointerEvents = 'painted';
-                scaleYBinding.element.style.opacity = 1;
-                scaleYBinding.element.style.pointerEvents = 'painted';
+                worldSizeBinding.element.style.opacity = 1;
+                worldSizeBinding.element.style.pointerEvents = 'painted';
             }
         }
     };

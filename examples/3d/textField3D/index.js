@@ -5,7 +5,7 @@ document.body.appendChild(canvas);
 
 RedGPU.init(canvas, (redGPUContext) => {
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 7.5;
+    controller.distance = 6;
     controller.speedDistance = 0.5;
 
     const scene = new RedGPU.Display.Scene();
@@ -18,6 +18,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
     textField3D.text = textField3D.name.split(' ').join('<br/>');
     textField3D.color = 'red';
+    textField3D.worldSize = 1.0;
     scene.addChild(textField3D);
 
     const spriteCount = 10;
@@ -33,6 +34,7 @@ RedGPU.init(canvas, (redGPUContext) => {
         textField3D.color = 'red';
         textField3D.x = x;
         textField3D.z = z;
+        textField3D.worldSize = 1.0;
         scene.addChild(textField3D);
     }
 
@@ -91,29 +93,12 @@ const renderTestPane = async (scene, redGPUContext) => {
         boxSizing: ['content-box', 'border-box'],
     };
 
+    const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
     const controls = {
-        useBillboard: true,
-        usePixelSize: false,
-        scaleX: 0.1,
-        scaleY: 0.1,
-        scaleZ: 0.1,
+        useBillboard: child.useBillboard,
+        usePixelSize: child.usePixelSize,
+        worldSize: child.worldSize,
         ...BASE_STYLES
-    };
-
-    const updateTestData = () => {
-        const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
-        if (child) {
-            controls.useBillboard = child.useBillboard;
-            controls.usePixelSize = child.usePixelSize;
-            controls.scaleX = child.scaleX;
-            controls.scaleY = child.scaleY;
-            controls.scaleZ = child.scaleZ;
-
-            Object.keys(BASE_STYLES).forEach((key) => {
-                controls[key] = child[key];
-            });
-            pane.refresh();
-        }
     };
 
     const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
@@ -132,21 +117,13 @@ const renderTestPane = async (scene, redGPUContext) => {
         updateControlsState();
     });
 
+    const worldSizeBinding = TextField3DFolder.addBinding(controls, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
+        scene.children.forEach((child) => {
+            if (child instanceof RedGPU.Display.TextField3D) child.worldSize = evt.value;
+        });
+    });
+
     setSeparator(pane);
-
-    const scaleFolder = pane.addFolder({title: 'TextField3D Scale', expanded: true});
-
-    const scaleXBinding = scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.scaleX = evt.value;
-        });
-    });
-
-    const scaleYBinding = scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.scaleY = evt.value;
-        });
-    });
 
     const updateControlsState = () => {
         const {useBillboard, usePixelSize} = controls;
@@ -154,26 +131,19 @@ const renderTestPane = async (scene, redGPUContext) => {
         if (!useBillboard) {
             usePixelSizeBinding.element.style.opacity = 0.25;
             usePixelSizeBinding.element.style.pointerEvents = 'none';
-
-            scaleXBinding.element.style.opacity = 1;
-            scaleXBinding.element.style.pointerEvents = 'painted';
-            scaleYBinding.element.style.opacity = 1;
-            scaleYBinding.element.style.pointerEvents = 'painted';
+            worldSizeBinding.element.style.opacity = 1;
+            worldSizeBinding.element.style.pointerEvents = 'painted';
         } else {
             usePixelSizeBinding.element.style.opacity = 1;
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
 
             if (usePixelSize) {
-                // 픽셀 사이즈 모드
-                scaleXBinding.element.style.opacity = 0.25;
-                scaleXBinding.element.style.pointerEvents = 'none';
-                scaleYBinding.element.style.opacity = 0.25;
-                scaleYBinding.element.style.pointerEvents = 'none';
+                // 픽셀 사이즈 모드: fontSize가 크기를 결정함
+                worldSizeBinding.element.style.opacity = 0.25;
+                worldSizeBinding.element.style.pointerEvents = 'none';
             } else {
-                scaleXBinding.element.style.opacity = 1;
-                scaleXBinding.element.style.pointerEvents = 'painted';
-                scaleYBinding.element.style.opacity = 1;
-                scaleYBinding.element.style.pointerEvents = 'painted';
+                worldSizeBinding.element.style.opacity = 1;
+                worldSizeBinding.element.style.pointerEvents = 'painted';
             }
         }
     };
@@ -206,6 +176,5 @@ const renderTestPane = async (scene, redGPUContext) => {
     });
 
     setSeparator(pane);
-    updateTestData();
     updateControlsState();
 };

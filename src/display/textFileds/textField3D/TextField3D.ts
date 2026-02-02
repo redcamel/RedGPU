@@ -47,6 +47,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 class TextField3D extends ATextField {
     #nativeWidth: number = 1
     #nativeHeight: number = 1
+    #worldSize: number = 1
 
     /**
      * [KO] TextField3D 생성자
@@ -65,18 +66,12 @@ class TextField3D extends ATextField {
                     this.#nativeWidth = width
                     this.#nativeHeight = height
 
-                    const prevX = this._renderRatioX;
-                    const prevY = this._renderRatioY;
                     const prevPixelSize = this.pixelSize;
-
-                    // 세로 기준 스케일링 (Height-based) 표준화
-                    this._renderRatioY = 1.0;
-                    this._renderRatioX = width / height;
-
                     // 픽셀 사이즈 동기화
                     this.pixelSize = height;
+                    this.#updateRatios();
 
-                    if (prevX !== this._renderRatioX || prevY !== this._renderRatioY || prevPixelSize !== this.pixelSize) {
+                    if (prevPixelSize !== this.pixelSize) {
                         this.dirtyTransform = true;
                     }
                 }
@@ -84,6 +79,40 @@ class TextField3D extends ATextField {
         });
         this._geometry = new Plane(redGPUContext);
         if (text) this.text = text;
+    }
+
+    /**
+     * [KO] 월드 공간에서의 세로 크기(높이)를 반환합니다.
+     * [EN] Returns the vertical size (height) in world space.
+     */
+    get worldSize(): number {
+        return this.#worldSize;
+    }
+
+    /**
+     * [KO] 월드 공간에서의 세로 크기(높이)를 설정합니다.
+     * [EN] Sets the vertical size (height) in world space.
+     * @param value - [KO] 월드 크기 (Unit) [EN] World size (Unit)
+     */
+    set worldSize(value: number) {
+        if (this.#worldSize === value) return;
+        this.#worldSize = value;
+        this.#updateRatios();
+    }
+
+    #updateRatios() {
+        if (this.#nativeHeight) {
+            const prevX = this._renderRatioX;
+            const prevY = this._renderRatioY;
+
+            // worldSize가 반영된 최종 렌더링 비율 계산
+            this._renderRatioY = this.#worldSize;
+            this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+
+            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
+                this.dirtyTransform = true;
+            }
+        }
     }
 
     render(renderViewStateData: RenderViewStateData) {
@@ -144,7 +173,7 @@ DefineForVertex.definePositiveNumber(TextField3D, [
 // 버텍스 셰이더에서 사용할 프리셋 정의
 DefineForVertex.defineByPreset(TextField3D, [
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
-    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, true],
+    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
     [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],
 ]);
 Object.freeze(TextField3D);

@@ -7,6 +7,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 10;
         controller.speedDistance = 0.2;
 
         const scene = new RedGPU.Display.Scene();
@@ -30,14 +31,17 @@ RedGPU.init(
         );
 
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
+        sprite3D.worldSize = 1.0;
         scene.addChild(sprite3D);
 
         const sprite3DH = new RedGPU.Display.Sprite3D(redGPUContext, materialH);
         sprite3DH.x = -2.5;
+        sprite3DH.worldSize = 1.0;
         scene.addChild(sprite3DH);
 
         const sprite3DV = new RedGPU.Display.Sprite3D(redGPUContext, materialV);
         sprite3DV.x = 2.5;
+        sprite3DV.worldSize = 1.0;
         scene.addChild(sprite3DV);
 
         const spriteCount = 10;
@@ -49,6 +53,7 @@ RedGPU.init(
             const z = Math.sin(angle) * radius;
 
             const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
+            sprite3D.worldSize = 1.0;
             sprite3D.x = x;
             sprite3D.z = z;
             scene.addChild(sprite3D);
@@ -74,58 +79,47 @@ const renderTestPane = async (redGPUContext, view, scene) => {
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
+    const child = scene.children.find(c => c instanceof RedGPU.Display.Sprite3D);
     const controls = {
-        useBillboard: scene.children[0].useBillboard,
-        usePixelSize: scene.children[0].usePixelSize,
-        pixelSize: scene.children[0].pixelSize,
-        scaleX: scene.children[0].scaleX,
-        scaleY: scene.children[0].scaleY,
-        scaleZ: scene.children[0].scaleZ,
+        useBillboard: child.useBillboard,
+        usePixelSize: child.usePixelSize,
+        pixelSize: child.pixelSize,
+        worldSize: child.worldSize,
     };
 
     const sprite3DFolder = pane.addFolder({title: 'Sprite3D', expanded: true});
 
     const useBillboardBinding = sprite3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboard = evt.value;
+            if (child instanceof RedGPU.Display.Sprite3D) child.useBillboard = evt.value;
         });
         updateControlsState();
     });
 
     const usePixelSizeBinding = sprite3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.usePixelSize = evt.value;
+            if (child instanceof RedGPU.Display.Sprite3D) child.usePixelSize = evt.value;
         });
         updateControlsState();
     });
 
     const pixelSizeBinding = sprite3DFolder.addBinding(controls, 'pixelSize', {
         min: 1,
-        max: 256,
+        max: 512,
         step: 1
     }).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.pixelSize = evt.value;
+            if (child instanceof RedGPU.Display.Sprite3D) child.pixelSize = evt.value;
         });
     });
 
-    const scaleFolder = pane.addFolder({title: 'Sprite3D Scale', expanded: true});
-    const scaleXBinding = scaleFolder.addBinding(controls, 'scaleX', {
-        min: 0.1,
-        max: 5,
-        step: 0.1
+    const worldSizeBinding = sprite3DFolder.addBinding(controls, 'worldSize', {
+        min: 0.01,
+        max: 10,
+        step: 0.01
     }).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.scaleX = controls.scaleX;
-        });
-    });
-    const scaleYBinding = scaleFolder.addBinding(controls, 'scaleY', {
-        min: 0.1,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.scaleY = controls.scaleY;
+            if (child instanceof RedGPU.Display.Sprite3D) child.worldSize = evt.value;
         });
     });
 
@@ -133,46 +127,29 @@ const renderTestPane = async (redGPUContext, view, scene) => {
         const {useBillboard, usePixelSize} = controls;
 
         if (!useBillboard) {
-            // 빌보드가 꺼지면 빌보드 관련 옵션 모두 비활성화
             usePixelSizeBinding.element.style.opacity = 0.25;
             usePixelSizeBinding.element.style.pointerEvents = 'none';
             pixelSizeBinding.element.style.opacity = 0.25;
             pixelSizeBinding.element.style.pointerEvents = 'none';
-
-            // 스케일은 활성화 (일반 메시 모드)
-            scaleXBinding.element.style.opacity = 1;
-            scaleXBinding.element.style.pointerEvents = 'painted';
-            scaleYBinding.element.style.opacity = 1;
-            scaleYBinding.element.style.pointerEvents = 'painted';
+            worldSizeBinding.element.style.opacity = 1;
+            worldSizeBinding.element.style.pointerEvents = 'painted';
         } else {
-            // 빌보드 켜짐
             usePixelSizeBinding.element.style.opacity = 1;
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
 
             if (usePixelSize) {
-                // 픽셀 사이즈 모드
                 pixelSizeBinding.element.style.opacity = 1;
                 pixelSizeBinding.element.style.pointerEvents = 'painted';
-
-                // 픽셀 모드에서는 월드스케일 무시됨
-                scaleXBinding.element.style.opacity = 0.25;
-                scaleXBinding.element.style.pointerEvents = 'none';
-                scaleYBinding.element.style.opacity = 0.25;
-                scaleYBinding.element.style.pointerEvents = 'none';
+                worldSizeBinding.element.style.opacity = 0.25;
+                worldSizeBinding.element.style.pointerEvents = 'none';
             } else {
-                // 월드 스케일 모드
                 pixelSizeBinding.element.style.opacity = 0.25;
                 pixelSizeBinding.element.style.pointerEvents = 'none';
-
-                // 월드스케일 활성화
-                scaleXBinding.element.style.opacity = 1;
-                scaleXBinding.element.style.pointerEvents = 'painted';
-                scaleYBinding.element.style.opacity = 1;
-                scaleYBinding.element.style.pointerEvents = 'painted';
+                worldSizeBinding.element.style.opacity = 1;
+                worldSizeBinding.element.style.pointerEvents = 'painted';
             }
         }
     };
 
-    // 초기 상태 업데이트
     updateControlsState();
 };

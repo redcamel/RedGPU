@@ -7,7 +7,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 7.5;
+        controller.distance = 6;
         controller.tilt = -15;
 
         const scene = new RedGPU.Display.Scene();
@@ -98,6 +98,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
         const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
         spriteSheet.primitiveState.cullMode = 'none';
+        spriteSheet.worldSize = 1.0;
 
         scene.addChild(spriteSheet);
         spriteSheet.addListener(eventName, (e) => {
@@ -113,6 +114,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
         label.y = -1;
         label.useBillboard = true;
         label.primitiveState.cullMode = 'none';
+        label.worldSize = 0.5;
         spriteSheet.addChild(label);
         sprites.push(spriteSheet);
     });
@@ -144,8 +146,7 @@ const renderTestPane = async (redGPUContext, scene) => {
         useBillboard: child.useBillboard,
         usePixelSize: child.usePixelSize,
         pixelSize: child.pixelSize,
-        scaleX: child.scaleX,
-        scaleY: child.scaleY,
+        worldSize: child.worldSize,
     };
 
     const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
@@ -168,15 +169,9 @@ const renderTestPane = async (redGPUContext, scene) => {
         });
     });
 
-    const scaleXBinding = folder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const worldSizeBinding = folder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.scaleX = evt.value;
-        });
-    });
-
-    const scaleYBinding = folder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.scaleY = evt.value;
+            if (child instanceof RedGPU.Display.SpriteSheet3D) child.worldSize = evt.value;
         });
     });
 
@@ -188,11 +183,8 @@ const renderTestPane = async (redGPUContext, scene) => {
             usePixelSizeBinding.element.style.pointerEvents = 'none';
             pixelSizeBinding.element.style.opacity = 0.25;
             pixelSizeBinding.element.style.pointerEvents = 'none';
-
-            scaleXBinding.element.style.opacity = 1;
-            scaleXBinding.element.style.pointerEvents = 'painted';
-            scaleYBinding.element.style.opacity = 1;
-            scaleYBinding.element.style.pointerEvents = 'painted';
+            worldSizeBinding.element.style.opacity = 1;
+            worldSizeBinding.element.style.pointerEvents = 'painted';
         } else {
             usePixelSizeBinding.element.style.opacity = 1;
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
@@ -200,19 +192,13 @@ const renderTestPane = async (redGPUContext, scene) => {
             if (usePixelSize) {
                 pixelSizeBinding.element.style.opacity = 1;
                 pixelSizeBinding.element.style.pointerEvents = 'painted';
-                
-                scaleXBinding.element.style.opacity = 0.25;
-                scaleXBinding.element.style.pointerEvents = 'none';
-                scaleYBinding.element.style.opacity = 0.25;
-                scaleYBinding.element.style.pointerEvents = 'none';
+                worldSizeBinding.element.style.opacity = 0.25;
+                worldSizeBinding.element.style.pointerEvents = 'none';
             } else {
                 pixelSizeBinding.element.style.opacity = 0.25;
                 pixelSizeBinding.element.style.pointerEvents = 'none';
-
-                scaleXBinding.element.style.opacity = 1;
-                scaleXBinding.element.style.pointerEvents = 'painted';
-                scaleYBinding.element.style.opacity = 1;
-                scaleYBinding.element.style.pointerEvents = 'painted';
+                worldSizeBinding.element.style.opacity = 1;
+                worldSizeBinding.element.style.pointerEvents = 'painted';
             }
         }
     };
