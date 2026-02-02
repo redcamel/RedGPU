@@ -181,9 +181,9 @@ class Sprite3D extends Mesh {
                     this.#nativeHeight = tH
                     
                     const prevPixelSize = this.pixelSize;
-                    // [KO] 원본 해상도를 pixelSize(CSS 단위) 기본값으로 동기화
-                    // [EN] Sync physical texture resolution to default pixelSize (CSS unit)
-                    this.pixelSize = this.pixelSize || (tH );
+                    // [KO] 원본 해상도를 pixelSize 기본값으로 동기화
+                    // [EN] Sync physical texture resolution to default pixelSize
+                    this.pixelSize = this.pixelSize || tH;
                     this.#updateRatios();
 
                     if (prevPixelSize !== this.pixelSize) {

@@ -90,9 +90,9 @@ class SpriteSheet3D extends ASpriteSheet {
                         this.#nativeHeight = tH
 
                         const prevPixelSize = this.pixelSize;
-                        // [KO] 원본 세그먼트 해상도를 pixelSize(CSS 단위) 기본값으로 설정
-                        // [EN] Sync physical segment resolution to default pixelSize (CSS unit)
-                        this.pixelSize = this.#pixelSize ? this.#pixelSize : (tH );
+                        // [KO] 원본 세그먼트 해상도를 pixelSize 기본값으로 설정
+                        // [EN] Sync physical segment resolution to default pixelSize
+                        this.pixelSize = this.#pixelSize ? this.#pixelSize : tH;
                         this.#updateRatios();
                         keepLog('오냐 ',this.pixelSize)
                         this.dirtyTransform = true
