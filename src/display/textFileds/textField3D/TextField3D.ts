@@ -112,6 +112,14 @@ class TextField3D extends ATextField {
         return this.#usePixelSize;
     }
 
+    /**
+     * [KO] 실제 렌더링된 픽셀 크기(높이)를 반환합니다.
+     * [EN] Returns the actual rendered pixel size (height).
+     */
+    get pixelSize(): number {
+        return this.#nativeHeight;
+    }
+
     set usePixelSize(value: boolean) {
         if (this.gpuRenderInfo) {
             const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo

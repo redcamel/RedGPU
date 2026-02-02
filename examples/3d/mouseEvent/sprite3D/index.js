@@ -171,7 +171,7 @@ const renderTestPane = async (redGPUContext, scene) => {
         updateControlsState();
     });
 
-    const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
+    const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 0, max: 256, step: 1}).on('change', (evt) => {
         scene.children.forEach((child) => {
             if (child instanceof RedGPU.Display.Sprite3D) child.pixelSize = evt.value;
         });

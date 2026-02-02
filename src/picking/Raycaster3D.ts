@@ -2,6 +2,7 @@ import {mat4, vec3, vec2, vec4} from "gl-matrix";
 import Ray from "../math/Ray";
 import View3D from "../display/view/View3D";
 import Mesh from "../display/mesh/Mesh";
+import {keepLog} from "../utils";
 
 /**
  * [KO] 3D 공간에서 광선(Ray)을 투사하여 객체와의 교차를 검사하는 클래스입니다.
@@ -186,7 +187,8 @@ export default class Raycaster3D {
     #intersectPixelBillboard(mesh: Mesh, intersects: RayIntersectResult[]) {
         const view = this.#view;
         const m = mesh.modelMatrix;
-        const pixelSize = (mesh as any).pixelSize || 64;
+        const pixelSize = (mesh as any).pixelSize  ;
+        keepLog((mesh as any).fontSize)
         const rx = (mesh as any)._renderRatioX || 1;
         const ry = (mesh as any)._renderRatioY || 1;
 
@@ -206,9 +208,10 @@ export default class Raycaster3D {
         const mouseX = this.#screenPoint[0];
         const mouseY = this.#screenPoint[1];
 
-        // 3. NDC 크기 계산 (셰이더 로직 모사)
-        const scaleX = (pixelSize / pixelRectObject.width) * 2.0 * rx;
-        const scaleY = (pixelSize / pixelRectObject.height) * 2.0 * ry;
+        // 3. NDC 크기 계산 (셰이더 로직 모사 - 물리 픽셀 기준)
+        const physicalPixelSize = pixelSize * window.devicePixelRatio;
+        const scaleX = (physicalPixelSize / pixelRectObject.width) * 2.0 * (rx / ry);
+        const scaleY = (physicalPixelSize / pixelRectObject.height) * 2.0;
 
         // 4. 히트 테스트
         if (
