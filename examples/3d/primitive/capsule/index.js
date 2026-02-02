@@ -7,6 +7,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 10;
         controller.tilt = 0;
         controller.speedDistance = 0.3;
 
@@ -14,11 +15,11 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        createCapsulePrimitive(redGPUContext, scene);
+        createPrimitive(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext, () => {
-            // Frame logic
+            // 매 프레임 로직
         });
 
         renderTestPane(redGPUContext);
@@ -31,8 +32,15 @@ RedGPU.init(
     }
 );
 
-const createCapsulePrimitive = (redGPUContext, scene) => {
-    const capsuleMaterials = {
+/**
+ * [KO] Capsule 프리미티브들을 생성하고 정돈된 레이아웃으로 씬에 배치합니다.
+ * [EN] Creates Capsule primitives and places them in the scene with an organized layout.
+ *
+ * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+ * @param scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
+ */
+const createPrimitive = (redGPUContext, scene) => {
+    const materials = {
         solid: new RedGPU.Material.BitmapMaterial(
             redGPUContext,
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
@@ -40,17 +48,6 @@ const createCapsulePrimitive = (redGPUContext, scene) => {
         wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
-
-    const gap = 3;
-    const capsuleProperties = [
-        {material: capsuleMaterials.solid, position: [0, 0, 0]},
-        {
-            material: capsuleMaterials.wireframe,
-            position: [-gap, 0, 0],
-            topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST
-        },
-        {material: capsuleMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
-    ];
 
     const defaultOptions = {
         radius: 0.5,
@@ -60,52 +57,59 @@ const createCapsulePrimitive = (redGPUContext, scene) => {
         capSegments: 12
     };
 
-    capsuleProperties.forEach(({material, position, topology}) => {
-        const capsule = new RedGPU.Display.Mesh(
-            redGPUContext,
-            new RedGPU.Primitive.Capsule(
-                redGPUContext,
-                defaultOptions.radius,
-                defaultOptions.cylinderHeight,
-                defaultOptions.radialSegments,
-                defaultOptions.heightSegments,
-                defaultOptions.capSegments
-            ),
-            material
-        );
+    const capsuleGeometry = new RedGPU.Primitive.Capsule(
+        redGPUContext,
+        defaultOptions.radius,
+        defaultOptions.cylinderHeight,
+        defaultOptions.radialSegments,
+        defaultOptions.heightSegments,
+        defaultOptions.capSegments
+    );
 
-        if (topology) {
-            capsule.primitiveState.topology = topology;
-        }
+    const gap = 3.5; // [KO] 수평 간격 조정 [EN] Adjusted horizontal gap
+    const objects = [
+        {material: materials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+        {material: materials.solid, position: [0, 0, 0]},
+        {material: materials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
+    ];
 
-        capsule.setPosition(...position);
-        scene.addChild(capsule);
+    objects.forEach(({material, position, topology}) => {
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, capsuleGeometry, material);
+        if (topology) mesh.primitiveState.topology = topology;
+        mesh.setPosition(...position);
+        scene.addChild(mesh);
 
+        // Topology Name Label (H=2.0 -> y=1.0+1.0=2.0)
         const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.setPosition(position[0], 2, position[2]);
-        label.text = topology || 'Solid';
+        label.setPosition(position[0], 2.0, position[2]);
+        label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         label.color = '#ffffff';
-        label.fontSize = 26;
-        label.useBillboard = true;
-        label.useBillboardPerspective = true;
+        label.fontSize = 14;
+        label.worldSize = 0.7;
         scene.addChild(label);
     });
 
-    const descriptionLabel = new RedGPU.Display.TextField3D(redGPUContext);
-    descriptionLabel.text = 'Customizable Capsule Primitive';
-    descriptionLabel.color = '#ffffff';
-    descriptionLabel.fontSize = 36;
-    descriptionLabel.setPosition(0, -2.5, 0);
-    descriptionLabel.useBillboard = true;
-    descriptionLabel.useBillboardPerspective = true;
-    scene.addChild(descriptionLabel);
+    // Title Label (H=2.0 -> y=-1.0-1.3=-2.3)
+    const titleText = new RedGPU.Display.TextField3D(redGPUContext);
+    titleText.setPosition(0, -2.3, 0);
+    titleText.text = 'Customizable Capsule Primitive';
+    titleText.color = '#ffffff';
+    titleText.fontSize = 48;
+    titleText.fontWeight = 500;
+    titleText.worldSize = 1.3;
+    scene.addChild(titleText);
 };
 
+/**
+ * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
+ * [EN] Initializes the Tweakpane GUI for testing.
+ */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
-    const pane = new Pane();
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
     setDebugButtons(RedGPU, redGPUContext)
+    const pane = new Pane();
+
     const config = {
         radius: 0.5,
         cylinderHeight: 1.0,
@@ -114,9 +118,8 @@ const renderTestPane = async (redGPUContext) => {
         capSegments: 12
     };
 
-    const updateCapsuleGeometry = () => {
+    const updateGeometry = () => {
         const meshList = redGPUContext.viewList[0].scene.children;
-
         const newGeometry = new RedGPU.Primitive.Capsule(
             redGPUContext,
             config.radius,
@@ -133,17 +136,17 @@ const renderTestPane = async (redGPUContext) => {
         });
     };
 
-    const addBinding = (folder, property, params) => {
-        folder.addBinding(config, property, params).on('change', (v) => {
-            config[property] = v.value;
-            updateCapsuleGeometry();
-        });
-    };
+    const folder = pane.addFolder({title: 'Capsule Properties', expanded: true});
+    const props = ['radius', 'cylinderHeight', 'radialSegments', 'heightSegments', 'capSegments'];
+    const params = [
+        {min: 0.1, max: 2, step: 0.1},
+        {min: 0.1, max: 5, step: 0.1},
+        {min: 3, max: 64, step: 1},
+        {min: 1, max: 32, step: 1},
+        {min: 1, max: 32, step: 1}
+    ];
 
-    const capsuleFolder = pane.addFolder({title: 'Capsule Properties', expanded: true});
-    addBinding(capsuleFolder, 'radius', {min: 0.1, max: 2, step: 0.1});
-    addBinding(capsuleFolder, 'cylinderHeight', {min: 0.1, max: 5, step: 0.1});
-    addBinding(capsuleFolder, 'radialSegments', {min: 3, max: 64, step: 1});
-    addBinding(capsuleFolder, 'heightSegments', {min: 1, max: 32, step: 1});
-    addBinding(capsuleFolder, 'capSegments', {min: 1, max: 32, step: 1});
+    props.forEach((prop, i) => {
+        folder.addBinding(config, prop, params[i]).on('change', updateGeometry);
+    });
 };

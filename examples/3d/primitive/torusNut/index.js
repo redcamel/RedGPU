@@ -7,6 +7,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 10;
         controller.tilt = 0;
         controller.speedDistance = 0.3;
 
@@ -14,7 +15,7 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        createTorusKnotPrimitive(redGPUContext, scene);
+        createPrimitive(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext, () => {
@@ -25,15 +26,21 @@ RedGPU.init(
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
-
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
 
-const createTorusKnotPrimitive = (redGPUContext, scene) => {
-    const torusKnotMaterials = {
+/**
+ * [KO] TorusKnot 프리미티브들을 생성하고 정돈된 레이아웃으로 씬에 배치합니다.
+ * [EN] Creates TorusKnot primitives and places them in the scene with an organized layout.
+ *
+ * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+ * @param scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
+ */
+const createPrimitive = (redGPUContext, scene) => {
+    const materials = {
         solid: new RedGPU.Material.BitmapMaterial(
             redGPUContext,
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
@@ -41,17 +48,6 @@ const createTorusKnotPrimitive = (redGPUContext, scene) => {
         wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
-
-    const gap = 4;
-    const torusKnotProperties = [
-        {material: torusKnotMaterials.solid, position: [0, 0, 0]},
-        {
-            material: torusKnotMaterials.wireframe,
-            position: [-gap, 0, 0],
-            topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST
-        },
-        {material: torusKnotMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
-    ];
 
     const defaultOptions = {
         radius: 1,
@@ -62,48 +58,54 @@ const createTorusKnotPrimitive = (redGPUContext, scene) => {
         q: 3,
     };
 
-    torusKnotProperties.forEach(({material, position, topology}) => {
-        const torusKnot = new RedGPU.Display.Mesh(
-            redGPUContext,
-            new RedGPU.Primitive.TorusKnot(
-                redGPUContext,
-                defaultOptions.radius,
-                defaultOptions.tube,
-                defaultOptions.tubularSegments,
-                defaultOptions.radialSegments,
-                defaultOptions.p,
-                defaultOptions.q
-            ),
-            material
-        );
+    const torusKnotGeometry = new RedGPU.Primitive.TorusKnot(
+        redGPUContext,
+        defaultOptions.radius,
+        defaultOptions.tube,
+        defaultOptions.tubularSegments,
+        defaultOptions.radialSegments,
+        defaultOptions.p,
+        defaultOptions.q
+    );
 
-        if (topology) {
-            torusKnot.primitiveState.topology = topology;
-        }
+    const gap = 4.0; // [KO] 수평 간격 조정 [EN] Adjusted horizontal gap
+    const objects = [
+        {material: materials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
+        {material: materials.solid, position: [0, 0, 0]},
+        {material: materials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
+    ];
 
-        torusKnot.setPosition(...position);
-        scene.addChild(torusKnot);
+    objects.forEach(({material, position, topology}) => {
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, torusKnotGeometry, material);
+        if (topology) mesh.primitiveState.topology = topology;
+        mesh.setPosition(...position);
+        scene.addChild(mesh);
 
+        // Topology Name Label (H=2.8 -> y=1.4+1.0=2.4)
         const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.setPosition(position[0], 2.5, position[2]);
-        label.text = topology || 'Solid';
+        label.setPosition(position[0], 2.4, position[2]);
+        label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         label.color = '#ffffff';
-        label.fontSize = 26;
-        label.useBillboard = true;
-        label.useBillboardPerspective = true;
+        label.fontSize = 14;
+        label.worldSize = 0.7;
         scene.addChild(label);
     });
 
-    const descriptionLabel = new RedGPU.Display.TextField3D(redGPUContext);
-    descriptionLabel.text = 'Customizable TorusKnot Primitive';
-    descriptionLabel.color = '#ffffff';
-    descriptionLabel.fontSize = 36;
-    descriptionLabel.setPosition(0, -3, 0);
-    descriptionLabel.useBillboard = true;
-    descriptionLabel.useBillboardPerspective = true;
-    scene.addChild(descriptionLabel);
+    // Title Label (H=2.8 -> y=-1.4-1.3=-2.7)
+    const titleText = new RedGPU.Display.TextField3D(redGPUContext);
+    titleText.setPosition(0, -2.7, 0);
+    titleText.text = 'Customizable TorusKnot Primitive';
+    titleText.color = '#ffffff';
+    titleText.fontSize = 48;
+    titleText.fontWeight = 500;
+    titleText.worldSize = 1.3;
+    scene.addChild(titleText);
 };
 
+/**
+ * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
+ * [EN] Initializes the Tweakpane GUI for testing.
+ */
 const renderTestPane = async (redGPUContext) => {
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
     setDebugButtons(RedGPU, redGPUContext)
@@ -119,9 +121,8 @@ const renderTestPane = async (redGPUContext) => {
         q: 3,
     };
 
-    const updateTorusKnotGeometry = () => {
-        const meshList = redGPUContext.viewList[0].scene.children.filter(child => !(child instanceof RedGPU.Display.TextField3D));
-
+    const updateGeometry = () => {
+        const meshList = redGPUContext.viewList[0].scene.children;
         const newGeometry = new RedGPU.Primitive.TorusKnot(
             redGPUContext,
             config.radius,
@@ -132,21 +133,18 @@ const renderTestPane = async (redGPUContext) => {
             config.q
         );
 
-        meshList.forEach(mesh => mesh.geometry = newGeometry);
-    };
-
-    const addBinding = (folder, property, params) => {
-        folder.addBinding(config, property, params).on('change', (v) => {
-            config[property] = v.value;
-            updateTorusKnotGeometry();
+        meshList.forEach(mesh => {
+            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
+                mesh.geometry = newGeometry;
+            }
         });
     };
 
-    const torusKnotFolder = pane.addFolder({title: 'TorusKnot Properties', expanded: true});
-    addBinding(torusKnotFolder, 'radius', {min: 0.5, max: 5, step: 0.1});
-    addBinding(torusKnotFolder, 'tube', {min: 0.1, max: 2, step: 0.1});
-    addBinding(torusKnotFolder, 'tubularSegments', {min: 3, max: 128, step: 1});
-    addBinding(torusKnotFolder, 'radialSegments', {min: 3, max: 32, step: 1});
-    addBinding(torusKnotFolder, 'p', {min: 1, max: 10, step: 0.1});
-    addBinding(torusKnotFolder, 'q', {min: 1, max: 10, step: 0.1});
+    const folder = pane.addFolder({title: 'TorusKnot Properties', expanded: true});
+    folder.addBinding(config, 'radius', {min: 0.5, max: 5, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'tube', {min: 0.1, max: 2, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'tubularSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
+    folder.addBinding(config, 'radialSegments', {min: 3, max: 32, step: 1}).on('change', updateGeometry);
+    folder.addBinding(config, 'p', {min: 1, max: 10, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'q', {min: 1, max: 10, step: 0.1}).on('change', updateGeometry);
 };
