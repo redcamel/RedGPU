@@ -6,13 +6,12 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        const isMobile = redGPUContext.detector.isMobile;
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 6;
         controller.tilt = -15;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
         redGPUContext.addView(view);
 
         // [KO] 정보 표시용 HTML 요소 생성
@@ -59,15 +58,11 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 
         const { updateLayout } = createSampleSprite3D(redGPUContext, scene, infoBox, updateInfo);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
         redGPUContext.onResize = (resizeEvent) => {
             const { width, height } = resizeEvent.pixelRectObject;
             const aspect = width / height;
             const isMobile = redGPUContext.detector.isMobile;
-            const baseDistance = isMobile ? 8 : 7.5;
+            const baseDistance = isMobile ? 7.5 : 9.5;
             controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
             updateInfoBoxStyle();
             updateLayout();
@@ -92,41 +87,56 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 );
 
 const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png');
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     const sprites = [];
+    const labels = [];
 
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
+        const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+        material.useTint = true;
+
         const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
+
+        spriteSheet.name = `SpriteSheet3D_${eventName}`;
         spriteSheet.primitiveState.cullMode = 'none';
         spriteSheet.worldSize = 1.0;
 
         scene.addChild(spriteSheet);
         spriteSheet.addListener(eventName, (e) => {
             updateInfo(eventName, e);
-            spriteSheet.material.useTint = true;
-            spriteSheet.material.tint.r = Math.floor(Math.random() * 255);
-            spriteSheet.material.tint.g = Math.floor(Math.random() * 255);
-            spriteSheet.material.tint.b = Math.floor(Math.random() * 255);
+            TweenMax.to(material.tint, 0.5, {
+                r: Math.floor(Math.random() * 255),
+                g: Math.floor(Math.random() * 255),
+                b: Math.floor(Math.random() * 255),
+                roundProps: "r,g,b",
+                ease: Power2.easeOut
+            });
         });
 
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.text = eventName;
-        label.y = -1;
-        label.useBillboard = true;
-        label.primitiveState.cullMode = 'none';
-        label.worldSize = 0.5;
-        spriteSheet.addChild(label);
+        label.fontSize = 14;
+        label.worldSize = 0.7;
+        scene.addChild(label);
+
         sprites.push(spriteSheet);
+        labels.push(label);
     });
 
     const updateLayout = () => {
         const isMobile = redGPUContext.detector.isMobile;
         const radius = isMobile ? 2.5 : 3;
+        const labelRadius = radius + 1.25; // [KO] 규격 통일 [EN] Unified standards
         const total = sprites.length;
         sprites.forEach((sprite, index) => {
             const angle = (index / total) * Math.PI * 2;
             sprite.x = Math.cos(angle) * radius;
             sprite.y = Math.sin(angle) * radius;
+
+            const label = labels[index];
+            label.x = Math.cos(angle) * labelRadius;
+            label.y = Math.sin(angle) * labelRadius;
         });
     };
 

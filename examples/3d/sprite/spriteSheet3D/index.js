@@ -14,10 +14,13 @@ RedGPU.init(canvas, (redGPUContext) => {
         redGPUContext.addView(view);
 
         const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
+        
+        // [KO] 메인 스프라이트 시트 생성 [EN] Create main sprite sheet
         const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
         spriteSheet.worldSize = 1.0;
         scene.addChild(spriteSheet);
 
+        // [KO] 원형 배치 [EN] Circular layout
         const spriteCount = 10;
         const radius = 5;
 
@@ -26,17 +29,15 @@ RedGPU.init(canvas, (redGPUContext) => {
             const x = Math.cos(angle) * radius;
             const z = Math.sin(angle) * radius;
 
-            const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
-            spriteSheet.worldSize = 1.0;
-            spriteSheet.x = x;
-            spriteSheet.z = z;
-            scene.addChild(spriteSheet);
+            const instance = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
+            instance.worldSize = 1.0;
+            instance.x = x;
+            instance.z = z;
+            scene.addChild(instance);
         }
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
 
         renderTestPane(redGPUContext, scene);
     },
@@ -48,6 +49,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     }
 );
 
+/**
+ * [KO] 테스트를 위한 Tweakpane GUI를 설정합니다.
+ * [EN] Sets up the Tweakpane GUI for testing.
+ */
 const renderTestPane = async (redGPUContext, scene) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {
@@ -57,11 +62,9 @@ const renderTestPane = async (redGPUContext, scene) => {
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 
+    // [KO] 유효한 스프라이트 시트 정보만 유지 [EN] Maintain only valid sprite sheet infos
     const spriteSheetInfos = [
         new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24),
-        new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/walk.png', 8, 1, 8, 0, true, 24),
-        new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/jump.png', 8, 1, 8, 0, true, 24),
-        new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/attack.png', 6, 1, 6, 0, true, 24)
     ];
 
     const child = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);
@@ -82,7 +85,7 @@ const renderTestPane = async (redGPUContext, scene) => {
 
     const spriteSheet3DFolder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
 
-    const useBillboardBinding = spriteSheet3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+    spriteSheet3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
             if (child instanceof RedGPU.Display.SpriteSheet3D) child.useBillboard = evt.value;
         });
@@ -123,21 +126,8 @@ const renderTestPane = async (redGPUContext, scene) => {
         });
     });
 
-    const spriteSelectorOptions = spriteSheetInfos.map((_, index) => ({
-        text: `SpriteSheet ${index + 1}`, value: index,
-    }));
-
-    spriteSheet3DFolder.addBinding(controls, 'testSpriteSheetInfo', {
-        options: spriteSelectorOptions,
-    }).on('change', (evt) => {
-        const selectedSpriteSheetInfo = spriteSheetInfos[evt.value];
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.spriteSheetInfo = selectedSpriteSheetInfo;
-        });
-    });
-
+    // [KO] 플레이 컨트롤 [EN] Play controls
     setSeparator(pane);
-
     const playControlsFolder = pane.addFolder({title: 'Play Controls', expanded: true});
 
     playControlsFolder.addButton({title: 'Play'}).on('click', () => {
@@ -158,8 +148,8 @@ const renderTestPane = async (redGPUContext, scene) => {
         });
     });
 
+    // [KO] 모니터링 [EN] Monitoring
     const monitoringFolder = pane.addFolder({title: 'Monitoring', expanded: true});
-
     monitoringFolder.addBinding(controls, 'state', {readonly: true});
     monitoringFolder.addBinding(controls, 'currentIndex', {readonly: true});
     monitoringFolder.addBinding(controls, 'totalFrame', {readonly: true});
@@ -168,7 +158,6 @@ const renderTestPane = async (redGPUContext, scene) => {
 
     const updateControlsState = () => {
         const {useBillboard, usePixelSize} = controls;
-
         if (!useBillboard) {
             usePixelSizeBinding.element.style.opacity = 0.25;
             usePixelSizeBinding.element.style.pointerEvents = 'none';
@@ -179,7 +168,6 @@ const renderTestPane = async (redGPUContext, scene) => {
         } else {
             usePixelSizeBinding.element.style.opacity = 1;
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
-
             if (usePixelSize) {
                 pixelSizeBinding.element.style.opacity = 1;
                 pixelSizeBinding.element.style.pointerEvents = 'painted';

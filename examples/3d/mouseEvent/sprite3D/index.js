@@ -6,8 +6,8 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        const isMobile = redGPUContext.detector.isMobile;
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 7.5;
         controller.tilt = -15;
         controller.speedDistance = 0.1;
 
@@ -59,15 +59,11 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 
         const { updateLayout } = createSampleSprite3D(redGPUContext, scene, infoBox, updateInfo);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
         redGPUContext.onResize = (resizeEvent) => {
             const { width, height } = resizeEvent.pixelRectObject;
             const aspect = width / height;
             const isMobile = redGPUContext.detector.isMobile;
-            const baseDistance = isMobile ? 8 : 7.5;
+            const baseDistance = isMobile ? 7.5 : 9.5;
             controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
             updateInfoBoxStyle();
             updateLayout();
@@ -92,36 +88,53 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 );
 
 const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
     const sprites = [];
+    const labels = [];
+
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
-        const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')));
+        const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+        material.useTint = true;
+
+        const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
+        sprite3D.name = `Sprite3D_${eventName}`;
+        sprite3D.worldSize = 1.0;
         scene.addChild(sprite3D);
         
         sprite3D.addListener(eventName, (e) => {
             updateInfo(eventName, e);
-            sprite3D.material.useTint = true;
-            sprite3D.material.tint.r = Math.floor(Math.random() * 255);
-            sprite3D.material.tint.g = Math.floor(Math.random() * 255);
-            sprite3D.material.tint.b = Math.floor(Math.random() * 255);
+            TweenMax.to(material.tint, 0.5, {
+                r: Math.floor(Math.random() * 255),
+                g: Math.floor(Math.random() * 255),
+                b: Math.floor(Math.random() * 255),
+                roundProps: "r,g,b",
+                ease: Power2.easeOut
+            });
         });
 
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.text = eventName;
-        label.y = -1;
-        label.useBillboard = true;
-        label.primitiveState.cullMode = 'none';
-        sprite3D.addChild(label);
+        label.fontSize = 14;
+        label.worldSize = 0.7;
+        scene.addChild(label);
+
         sprites.push(sprite3D);
+        labels.push(label);
     });
 
     const updateLayout = () => {
         const isMobile = redGPUContext.detector.isMobile;
-        const radius = isMobile ? 2.5 : 2;
+        const radius = isMobile ? 2.5 : 3;
+        const labelRadius = radius + 1.25; // [KO] Mesh 예제 오프셋과 일치 [EN] Synced label offset with Mesh example
         const total = sprites.length;
         sprites.forEach((sprite, index) => {
             const angle = (index / total) * Math.PI * 2;
             sprite.x = Math.cos(angle) * radius;
             sprite.y = Math.sin(angle) * radius;
+
+            const label = labels[index];
+            label.x = Math.cos(angle) * labelRadius;
+            label.y = Math.sin(angle) * labelRadius;
         });
     };
 
@@ -136,44 +149,37 @@ const renderTestPane = async (redGPUContext, scene) => {
     setDebugButtons(RedGPU, redGPUContext);
     const folder = pane.addFolder({ title: 'Sprite3D', expanded: true });
     
-    const child = scene.children[0];
+    const child = scene.children.find(c => c instanceof RedGPU.Display.Sprite3D);
     const controls = {
         useBillboard: child.useBillboard,
         usePixelSize: child.usePixelSize,
         pixelSize: child.pixelSize,
-        scaleX: child.scaleX,
-        scaleY: child.scaleY,
+        worldSize: child.worldSize,
     };
 
     const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.useBillboard = evt.value;
+            if (child instanceof RedGPU.Display.Sprite3D) child.useBillboard = evt.value;
         });
         updateControlsState();
     });
 
     const usePixelSizeBinding = folder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.usePixelSize = evt.value;
+            if (child instanceof RedGPU.Display.Sprite3D) child.usePixelSize = evt.value;
         });
         updateControlsState();
     });
 
     const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.pixelSize = evt.value;
+            if (child instanceof RedGPU.Display.Sprite3D) child.pixelSize = evt.value;
         });
     });
 
-    const scaleXBinding = folder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+    const worldSizeBinding = folder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
         scene.children.forEach((child) => {
-            child.scaleX = controls.scaleX;
-        });
-    });
-    
-    const scaleYBinding = folder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.scaleY = controls.scaleY;
+            if (child instanceof RedGPU.Display.Sprite3D) child.worldSize = evt.value;
         });
     });
 
@@ -185,11 +191,8 @@ const renderTestPane = async (redGPUContext, scene) => {
             usePixelSizeBinding.element.style.pointerEvents = 'none';
             pixelSizeBinding.element.style.opacity = 0.25;
             pixelSizeBinding.element.style.pointerEvents = 'none';
-
-            scaleXBinding.element.style.opacity = 1;
-            scaleXBinding.element.style.pointerEvents = 'painted';
-            scaleYBinding.element.style.opacity = 1;
-            scaleYBinding.element.style.pointerEvents = 'painted';
+            worldSizeBinding.element.style.opacity = 1;
+            worldSizeBinding.element.style.pointerEvents = 'painted';
         } else {
             usePixelSizeBinding.element.style.opacity = 1;
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
@@ -197,19 +200,13 @@ const renderTestPane = async (redGPUContext, scene) => {
             if (usePixelSize) {
                 pixelSizeBinding.element.style.opacity = 1;
                 pixelSizeBinding.element.style.pointerEvents = 'painted';
-                
-                scaleXBinding.element.style.opacity = 0.25;
-                scaleXBinding.element.style.pointerEvents = 'none';
-                scaleYBinding.element.style.opacity = 0.25;
-                scaleYBinding.element.style.pointerEvents = 'none';
+                worldSizeBinding.element.style.opacity = 0.25;
+                worldSizeBinding.element.style.pointerEvents = 'none';
             } else {
                 pixelSizeBinding.element.style.opacity = 0.25;
                 pixelSizeBinding.element.style.pointerEvents = 'none';
-
-                scaleXBinding.element.style.opacity = 1;
-                scaleXBinding.element.style.pointerEvents = 'painted';
-                scaleYBinding.element.style.opacity = 1;
-                scaleYBinding.element.style.pointerEvents = 'painted';
+                worldSizeBinding.element.style.opacity = 1;
+                worldSizeBinding.element.style.pointerEvents = 'painted';
             }
         }
     };

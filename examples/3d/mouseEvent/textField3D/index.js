@@ -6,8 +6,8 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        const isMobile = redGPUContext.detector.isMobile;
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 6;
         controller.tilt = -15;
         controller.speedDistance = 0.1;
 
@@ -58,17 +58,13 @@ Face Index: ${e.faceIndex}
 UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
         };
 
-        const { updateLayout } = createSampleTextField3D(redGPUContext, scene, infoBox, updateInfo);
+        const {updateLayout} = createSampleTextField3D(redGPUContext, scene, infoBox, updateInfo);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
         redGPUContext.onResize = (resizeEvent) => {
-            const { width, height } = resizeEvent.pixelRectObject;
+            const {width, height} = resizeEvent.pixelRectObject;
             const aspect = width / height;
             const isMobile = redGPUContext.detector.isMobile;
-            const baseDistance = isMobile ? 8 : 7.5;
+            const baseDistance = isMobile ? 7.5 : 9.5;
             controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
             updateInfoBoxStyle();
             updateLayout();
@@ -92,15 +88,20 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
     }
 );
 
+/**
+ * [KO] 테스트용 TextField3D 객체들을 생성합니다.
+ * [EN] Creates TextField3D objects for testing.
+ */
 const createSampleTextField3D = (redGPUContext, scene, infoBox, updateInfo) => {
     const textFields = [];
+
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
         const textField = new RedGPU.Display.TextField3D(redGPUContext);
-        textField.useBillboard = true;
-        textField.text = `Hello ${eventName} Event!`;
+        textField.name = `TextField_${eventName}`;
+        textField.text = eventName; // [KO] 텍스트 자체에 이벤트 명 표시 [EN] Set event name directly on text
         textField.background = 'blue';
         textField.color = 'white';
-        textField.fontSize = 16;
+        textField.fontSize = 20; // [KO] 가독성을 위해 크기 약간 확대 [EN] Slightly increased size for readability
         textField.padding = 10;
         textField.borderRadius = 10;
         textField.primitiveState.cullMode = 'none';
@@ -111,6 +112,7 @@ const createSampleTextField3D = (redGPUContext, scene, infoBox, updateInfo) => {
             updateInfo(eventName, e);
             e.target.background = getRandomHexValue();
         });
+
         textFields.push(textField);
     });
 
@@ -126,7 +128,7 @@ const createSampleTextField3D = (redGPUContext, scene, infoBox, updateInfo) => {
     };
 
     updateLayout();
-    return { textFields, updateLayout };
+    return {textFields, updateLayout};
 };
 
 function getRandomHexValue() {
@@ -139,11 +141,11 @@ function getRandomHexValue() {
 }
 
 const renderTestPane = async (redGPUContext, scene) => {
-    const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const pane = new Pane();
-    const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
     setDebugButtons(RedGPU, redGPUContext);
-    
+
     const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
     const controls = {
         useBillboard: child.useBillboard,
@@ -152,7 +154,7 @@ const renderTestPane = async (redGPUContext, scene) => {
         worldSize: child.worldSize,
     };
 
-    const TextField3DFolder = pane.addFolder({ title: 'TextField3D', expanded: true });
+    const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
 
     const useBillboardBinding = TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
         scene.children.forEach((child) => {
@@ -168,13 +170,21 @@ const renderTestPane = async (redGPUContext, scene) => {
         updateControlsState();
     });
 
-    const fontSizeBinding = TextField3DFolder.addBinding(controls, 'fontSize', {min: 12, max: 128, step: 1}).on('change', (evt) => {
+    const fontSizeBinding = TextField3DFolder.addBinding(controls, 'fontSize', {
+        min: 12,
+        max: 128,
+        step: 1
+    }).on('change', (evt) => {
         scene.children.forEach((child) => {
             if (child instanceof RedGPU.Display.TextField3D) child.fontSize = evt.value;
         });
     });
 
-    const worldSizeBinding = TextField3DFolder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
+    const worldSizeBinding = TextField3DFolder.addBinding(controls, 'worldSize', {
+        min: 0.01,
+        max: 5,
+        step: 0.01
+    }).on('change', (evt) => {
         scene.children.forEach((child) => {
             if (child instanceof RedGPU.Display.TextField3D) child.worldSize = evt.value;
         });
@@ -195,13 +205,11 @@ const renderTestPane = async (redGPUContext, scene) => {
             usePixelSizeBinding.element.style.pointerEvents = 'painted';
 
             if (usePixelSize) {
-                // 픽셀 사이즈 모드: fontSize 활성화, worldSize 비활성화
                 fontSizeBinding.element.style.opacity = 1;
                 fontSizeBinding.element.style.pointerEvents = 'painted';
                 worldSizeBinding.element.style.opacity = 0.25;
                 worldSizeBinding.element.style.pointerEvents = 'none';
             } else {
-                // 월드 모드: fontSize 비활성화, worldSize 활성화
                 fontSizeBinding.element.style.opacity = 0.25;
                 fontSizeBinding.element.style.pointerEvents = 'none';
                 worldSizeBinding.element.style.opacity = 1;

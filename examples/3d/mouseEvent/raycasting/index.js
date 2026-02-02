@@ -7,6 +7,8 @@ RedGPU.init(
 	canvas,
 	(redGPUContext) => {
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+		controller.distance = 15;
+		
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
@@ -56,6 +58,10 @@ RedGPU.init(
 		});
 		document.body.appendChild(infoBox);
 
+		/**
+		 * [KO] 메시의 마우스 이벤트를 설정합니다.
+		 * [EN] Sets up mouse events for a mesh.
+		 */
 		const setupEvents = (mesh) => {
 			mesh.addListener('over', (e) => {
 				e.target.material.color.setColorByHEX('#00ff00');
@@ -76,11 +82,11 @@ RedGPU.init(
 		// [KO] 객체 생성 및 이벤트 등록
 		// [EN] Create objects and register events
 		const primitives = [
-			{ name: 'TorusKnot', geom: new RedGPU.Primitive.TorusKnot(redGPUContext, 2, 0.6, 128, 32, 2, 3), pos: [-6, 0, 0] },
-			{ name: 'Box', geom: new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3), pos: [0, 0, 0] },
-			{ name: 'Sphere', geom: new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32), pos: [6, 0, 0] },
-			{ name: 'Cylinder', geom: new RedGPU.Primitive.Cylinder(redGPUContext, 1.5, 1.5, 4, 32), pos: [-4, 0, -5] },
-			{ name: 'Torus', geom: new RedGPU.Primitive.Torus(redGPUContext, 2, 0.5, 32, 32), pos: [4, 0, -5], rot: [90, 0, 0] }
+			{ name: 'TorusKnot', geom: new RedGPU.Primitive.TorusKnot(redGPUContext, 2, 0.6, 128, 32, 2, 3), pos: [-6, 0, 0], h: 2.8 },
+			{ name: 'Box', geom: new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3), pos: [0, 0, 0], h: 3.0 },
+			{ name: 'Sphere', geom: new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32), pos: [6, 0, 0], h: 4.0 },
+			{ name: 'Cylinder', geom: new RedGPU.Primitive.Cylinder(redGPUContext, 1.5, 1.5, 4, 32), pos: [-4, 0, -5], h: 4.0 },
+			{ name: 'Torus', geom: new RedGPU.Primitive.Torus(redGPUContext, 2, 0.5, 32, 32), pos: [4, 0, -5], rot: [90, 0, 0], h: 1.0 }
 		];
 
 		primitives.forEach(p => {
@@ -98,6 +104,10 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
+/**
+ * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
+ * [EN] Initializes the Tweakpane GUI for testing.
+ */
 const renderTestPane = async (redGPUContext) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js");

@@ -8,7 +8,7 @@ RedGPU.init(
     (redGPUContext) => {
 		const isMobile = redGPUContext.detector.isMobile;
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = isMobile ? 12 : 8.5;
+        controller.distance = isMobile ? 12 : 9.5; // [KO] 구도 확보를 위해 거리 약간 확대 [EN] Slightly increased distance for better view
         controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
@@ -59,15 +59,11 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 
         const { updateLayout } = createSampleMesh(redGPUContext, scene, infoBox, updateInfo);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
         redGPUContext.onResize = (resizeEvent) => {
 			const { width, height } = resizeEvent.pixelRectObject;
 			const aspect = width / height;
 			const isMobile = redGPUContext.detector.isMobile;
-			const baseDistance = isMobile ? 8 : 8.5;
+			const baseDistance = isMobile ? 10 : 9.5;
 			controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
 			updateInfoBoxStyle();
 			updateLayout();
@@ -92,42 +88,53 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 );
 
 const createSampleMesh = (redGPUContext, scene, infoBox, updateInfo) => {
-    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'));
-
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
     const geometry = new RedGPU.Primitive.Box(redGPUContext);
 	const meshes = [];
+    const labels = [];
 
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
+        const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+        material.useTint = true;
+        
         const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+        mesh.name = `Mesh_${eventName}`;
         scene.addChild(mesh);
+        
         mesh.addListener(eventName, (e) => {
 			updateInfo(eventName, e);
-            let tRotation = Math.random() * 360;
-            TweenMax.to(e.target, 0.5, {
-                rotationX: tRotation,
-                rotationY: tRotation,
-                rotationZ: tRotation,
-                ease: Back.easeOut
+            TweenMax.to(material.tint, 0.5, {
+                r: Math.floor(Math.random() * 255),
+                g: Math.floor(Math.random() * 255),
+                b: Math.floor(Math.random() * 255),
+                roundProps: "r,g,b",
+                ease: Power2.easeOut
             });
         });
 
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.text = eventName;
-        label.y = -1;
-        label.useBillboard = true;
-        label.primitiveState.cullMode = 'none';
-        mesh.addChild(label);
+        label.fontSize = 14;
+        label.worldSize = 0.7;
+        scene.addChild(label);
+		
 		meshes.push(mesh);
+        labels.push(label);
     });
 
 	const updateLayout = () => {
 		const isMobile = redGPUContext.detector.isMobile;
 		const radius = isMobile ? 2.5 : 3;
+        const labelRadius = radius + 1.5; // [KO] 라벨 간격 1.5배 확대 [EN] Increased label radius by 1.5x
 		const total = meshes.length;
 		meshes.forEach((mesh, index) => {
 			const angle = (index / total) * Math.PI * 2;
 			mesh.x = Math.cos(angle) * radius;
 			mesh.y = Math.sin(angle) * radius;
+            
+            const label = labels[index];
+            label.x = Math.cos(angle) * labelRadius;
+            label.y = Math.sin(angle) * labelRadius;
 		});
 	};
 
