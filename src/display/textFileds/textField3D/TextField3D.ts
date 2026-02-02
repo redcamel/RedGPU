@@ -80,18 +80,6 @@ class TextField3D extends ATextField {
             }
         });
 
-        // [KO] fontSize 프로퍼티를 래핑하여 변경 시 부모 클래스의 스타일 업데이트를 트리거함
-        // [EN] Wrap fontSize property to trigger parent class style updates when changed
-        const descriptor = Object.getOwnPropertyDescriptor(this, 'fontSize');
-        const orgSetter = descriptor.set;
-        Object.defineProperty(this, 'fontSize', {
-            get: () => this['_fontSize'],
-            set: (v: number) => {
-                orgSetter.call(this, v);
-            },
-            configurable: true
-        });
-
         this._geometry = new Plane(redGPUContext);
         this.disableJitter = true;
         if (text) this.text = text;
