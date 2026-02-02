@@ -10,6 +10,7 @@ import RenderViewStateData from "../../view/core/RenderViewStateData";
 
 interface TextField3D {
     useBillboard: boolean;
+    fontSize: number;
     _renderRatioX: number;
     _renderRatioY: number;
 }
@@ -37,7 +38,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  * <iframe src="/RedGPU/examples/3d/textField3D/"></iframe>
  *
  * [KO] 아래는 TextField3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of TextField3D.
+ * [EN] Below is a list of additional sample examples to help understand the structure and and operation of TextField3D.
  * @see [TextField3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/textField3D/)
  *
  * @category TextField
@@ -46,7 +47,6 @@ class TextField3D extends ATextField {
     #nativeWidth: number = 1
     #nativeHeight: number = 1
     #worldSize: number = 1
-    #pixelSize: number = 0
     #usePixelSize: boolean = false
 
     /**
@@ -65,18 +65,32 @@ class TextField3D extends ATextField {
                 if (width !== this.#nativeWidth || height !== this.#nativeHeight) {
                     this.#nativeWidth = width
                     this.#nativeHeight = height
-
-                    const prevPixelSize = this.pixelSize;
-                    // 픽셀 사이즈 동기화
-                    this.pixelSize = this.#pixelSize ? this.#pixelSize : height;
+                    this.fontSize = this.fontSize
                     this.#updateRatios();
-
-                    if (prevPixelSize !== this.pixelSize) {
-                        this.dirtyTransform = true;
-                    }
                 }
             }
         });
+
+        // [KO] fontSize 프로퍼티를 래핑하여 변경 시 GPU 유니폼(pixelSize)도 함께 업데이트하도록 설정
+        // [EN] Wrap fontSize property to update GPU uniform (pixelSize) whenever it changes
+        const descriptor = Object.getOwnPropertyDescriptor(this, 'fontSize');
+        const orgSetter = descriptor.set;
+        Object.defineProperty(this, 'fontSize', {
+            get: () => this['_fontSize'],
+            set: (v: number) => {
+                orgSetter.call(this, v);
+                if (this.gpuRenderInfo) {
+                    const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
+                    this.redGPUContext.gpuDevice.queue.writeBuffer(
+                        vertexUniformBuffer.gpuBuffer,
+                        vertexUniformInfo.members.pixelSize.uniformOffset,
+                        new Float32Array([v])
+                    )
+                }
+            },
+            configurable: true
+        });
+
         this._geometry = new Plane(redGPUContext);
         this.disableJitter = true;
         if (text) this.text = text;
@@ -121,31 +135,6 @@ class TextField3D extends ATextField {
         if (this.#usePixelSize === value) return;
         this.#usePixelSize = value;
         this.#updateRatios();
-    }
-
-    /**
-     * [KO] 고정 크기 값 (px)을 반환합니다.
-     * [EN] Returns the fixed pixel size value (px).
-     */
-    get pixelSize(): number {
-        return this.#pixelSize;
-    }
-
-    /**
-     * [KO] 고정 크기 값 (px)을 설정합니다.
-     * [EN] Sets the fixed pixel size value (px).
-     * @param value - [KO] 픽셀 크기 [EN] Pixel size
-     */
-    set pixelSize(value: number) {
-        if (this.gpuRenderInfo) {
-            const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
-            this.redGPUContext.gpuDevice.queue.writeBuffer(
-                vertexUniformBuffer.gpuBuffer,
-                vertexUniformInfo.members.pixelSize.uniformOffset,
-                new Float32Array([value])
-            )
-        }
-        this.#pixelSize = value;
     }
 
     #updateRatios() {

@@ -284,7 +284,8 @@ class ATextField extends Mesh {
                 tStyle2[key] = processedValue;
                 // 값이 변경된 경우에만 텍스처 업데이트
                 if (oldValue !== value) this.#needsUpdate = true
-            }
+            },
+            configurable: true
         });
         // 초기값 설정 (이때는 업데이트 호출하지 않음)
         this[key] = baseValue;

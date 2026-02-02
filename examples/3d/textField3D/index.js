@@ -1,26 +1,39 @@
+/**
+ * [KO] 3D 공간에서 TextField3D의 사용법과 빌보드, 스타일링 기능을 시연하는 예제입니다.
+ * [EN] An example demonstrating the usage of TextField3D in 3D space, including features like billboard and styling.
+ * @packageDocumentation
+ */
 import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+// [KO] RedGPU 초기화
+// [EN] Initialize RedGPU
 RedGPU.init(canvas, (redGPUContext) => {
+    // [KO] 카메라 컨트롤러 설정
+    // [EN] Camera controller setup
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     controller.distance = 6;
     controller.speedDistance = 0.5;
 
+    // [KO] 씬 및 뷰 설정
+    // [EN] Scene and View setup
     const scene = new RedGPU.Display.Scene();
-    scene.backgroundColor.r = 128;
-    scene.useBackgroundColor = true;
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     view.grid = true;
     redGPUContext.addView(view);
 
+    // [KO] 메인 텍스트 필드 생성
+    // [EN] Create main text field
     const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
     textField3D.text = textField3D.name.split(' ').join('<br/>');
     textField3D.color = 'red';
     textField3D.worldSize = 1.0;
     scene.addChild(textField3D);
 
+    // [KO] 추가 인스턴스들을 원형으로 배치
+    // [EN] Arrange additional instances in a circle
     const spriteCount = 10;
     const radius = 5;
 
@@ -29,21 +42,23 @@ RedGPU.init(canvas, (redGPUContext) => {
         const x = Math.cos(angle) * radius;
         const z = Math.sin(angle) * radius;
 
-        const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
-        textField3D.text = textField3D.name.split(' ').join('<br/>');
-        textField3D.color = 'red';
-        textField3D.x = x;
-        textField3D.z = z;
-        textField3D.worldSize = 1.0;
-        scene.addChild(textField3D);
+        const instance = new RedGPU.Display.TextField3D(redGPUContext);
+        instance.text = instance.name.split(' ').join('<br/>');
+        instance.color = 'red';
+        instance.x = x;
+        instance.z = z;
+        instance.worldSize = 1.0;
+        scene.addChild(instance);
     }
 
+    // [KO] 렌더러 생성 및 시작
+    // [EN] Create and start renderer
     const renderer = new RedGPU.Renderer(redGPUContext);
-    const render = () => {
-    };
-    renderer.start(redGPUContext, render);
+    renderer.start(redGPUContext);
 
-    renderTestPane(scene, redGPUContext);
+    // [KO] 테스트용 GUI 설정
+    // [EN] Setup GUI for testing
+    renderTestPane(redGPUContext, scene);
 }, (failReason) => {
     console.error('Initialization failed:', failReason);
     const errorMessage = document.createElement('div');
@@ -51,34 +66,33 @@ RedGPU.init(canvas, (redGPUContext) => {
     document.body.appendChild(errorMessage);
 });
 
-const renderTestPane = async (scene, redGPUContext) => {
-
+/**
+ * [KO] 테스트를 위한 Tweakpane GUI를 설정합니다.
+ * [EN] Sets up the Tweakpane GUI for testing.
+ *
+ * [KO] TextField3D의 빌보드 모드, 픽셀 사이즈, 각종 스타일 속성(폰트, 색상, 정렬 등)을 실시간으로 제어할 수 있는 UI를 생성합니다.
+ * [EN] Creates a UI to control TextField3D's billboard mode, pixel size, and various style properties (font, color, alignment, etc.) in real-time.
+ *
+ * @param redGPUContext -
+ * [KO] RedGPU 렌더링 컨텍스트
+ * [EN] RedGPU rendering context
+ * @param scene -
+ * [KO] 제어할 텍스트 필드들이 포함된 씬
+ * [EN] Scene containing the text fields to control
+ */
+const renderTestPane = async (redGPUContext, scene) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const pane = new Pane();
-    const {
-        setDebugButtons,
-        setSeparator
-    } = await import("../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons, setSeparator} = await import("../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+
     setDebugButtons(RedGPU, redGPUContext);
-    
-    const BASE_STYLES = {
-        padding: 0,
-        background: 'transparent',
-        color: '#fff',
-        fontFamily: 'Arial',
-        fontSize: 16,
-        fontWeight: 'normal',
-        fontStyle: 'normal',
-        letterSpacing: 0,
-        wordBreak: 'break-all',
-        verticalAlign: 'middle',
-        textAlign: 'center',
-        borderRadius: '10px',
-        lineHeight: 1.4,
-        border: '',
-        boxShadow: 'none',
-        boxSizing: 'border-box',
-        filter: '',
+    const pane = new Pane();
+    const folder = pane.addFolder({title: 'TextField3D', expanded: true});
+
+    const target = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
+    const updateAll = (key, value) => {
+        scene.children.forEach(c => {
+            if (c instanceof RedGPU.Display.TextField3D) c[key] = value;
+        });
     };
 
     const OPTIONS = {
@@ -93,88 +107,59 @@ const renderTestPane = async (scene, redGPUContext) => {
         boxSizing: ['content-box', 'border-box'],
     };
 
-    const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
-    const controls = {
-        useBillboard: child.useBillboard,
-        usePixelSize: child.usePixelSize,
-        worldSize: child.worldSize,
-        ...BASE_STYLES
-    };
-
-    const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
-
-    const useBillboardBinding = TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.useBillboard = evt.value;
-        });
-        updateControlsState();
+    // [KO] 빌보드 및 크기 설정
+    // [EN] Billboard & Size Settings
+    folder.addBinding(target, 'useBillboard').on('change', (evt) => {
+        updateAll('useBillboard', evt.value);
+        updateUI();
+    });
+    const usePixelSize = folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
+        updateAll('usePixelSize', evt.value);
+        updateUI();
+    });
+    const worldSize = folder.addBinding(target, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
+        updateAll('worldSize', evt.value);
     });
 
-    const usePixelSizeBinding = TextField3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.usePixelSize = evt.value;
-        });
-        updateControlsState();
+    setSeparator(folder);
+
+    // [KO] 스타일 설정
+    // [EN] Style Settings
+    const styleFolder = folder.addFolder({title: 'Styles', expanded: true});
+    
+    styleFolder.addBinding(target, 'fontSize', {min: 0, max: 128, step: 1}).on('change', (evt) => {
+        updateAll('fontSize', evt.value);
     });
-
-    const worldSizeBinding = TextField3DFolder.addBinding(controls, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.worldSize = evt.value;
-        });
-    });
-
-    setSeparator(pane);
-
-    const updateControlsState = () => {
-        const {useBillboard, usePixelSize} = controls;
-
-        if (!useBillboard) {
-            usePixelSizeBinding.element.style.opacity = 0.25;
-            usePixelSizeBinding.element.style.pointerEvents = 'none';
-            worldSizeBinding.element.style.opacity = 1;
-            worldSizeBinding.element.style.pointerEvents = 'painted';
-        } else {
-            usePixelSizeBinding.element.style.opacity = 1;
-            usePixelSizeBinding.element.style.pointerEvents = 'painted';
-
-            if (usePixelSize) {
-                // 픽셀 사이즈 모드: fontSize가 크기를 결정함
-                worldSizeBinding.element.style.opacity = 0.25;
-                worldSizeBinding.element.style.pointerEvents = 'none';
-            } else {
-                worldSizeBinding.element.style.opacity = 1;
-                worldSizeBinding.element.style.pointerEvents = 'painted';
-            }
-        }
-    };
-
-    const styleFolder = pane.addFolder({title: 'TextField3D Styles', expanded: true});
-
-    styleFolder.addBinding(controls, 'fontSize', {min: 12, max: 128, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.fontSize = evt.value;
-        });
-    });
-
-    styleFolder.addBinding(controls, 'padding', {min: 0, max: 32, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.padding = evt.value;
-        });
+    styleFolder.addBinding(target, 'padding', {min: 0, max: 32, step: 1}).on('change', (evt) => {
+        updateAll('padding', evt.value);
     });
 
     Object.keys(OPTIONS).forEach((key) => {
-        styleFolder.addBinding(controls, key, {
+        styleFolder.addBinding(target, key, {
             options: OPTIONS[key].reduce((obj, value) => {
                 obj[value] = value;
                 return obj;
             }, {}),
         }).on('change', (evt) => {
-            scene.children.forEach((child) => {
-                if (child instanceof RedGPU.Display.TextField3D) child[key] = evt.value;
-            });
+            updateAll(key, evt.value);
         });
     });
 
-    setSeparator(pane);
-    updateControlsState();
+    // [KO] UI 활성화 상태 업데이트
+    // [EN] Update UI activation state
+    const updateUI = () => {
+        const isBillboard = target.useBillboard;
+        const isPixel = target.usePixelSize;
+
+        usePixelSize.disabled = !isBillboard;
+        worldSize.disabled = isBillboard && isPixel;
+    };
+
+    const refresh = () => {
+        pane.refresh();
+        requestAnimationFrame(refresh);
+    };
+
+    refresh();
+    updateUI();
 };
