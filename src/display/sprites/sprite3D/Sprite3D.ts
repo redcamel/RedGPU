@@ -23,10 +23,6 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 interface Sprite3D {
     /** 빌보드 모드 사용 여부 */
     useBillboard: boolean;
-    /** 고정 크기 사용 여부 */
-    usePixelSize: boolean;
-    /** 고정 크기 값 (px) */
-    pixelSize: number;
     /** X축 렌더링 비율 */
     _renderRatioX: number;
     /** Y축 렌더링 비율 */
@@ -58,6 +54,8 @@ class Sprite3D extends Mesh {
     #nativeWidth: number = 1
     #nativeHeight: number = 1
     #worldSize: number = 1
+    #pixelSize: number = 0
+    #usePixelSize: boolean = false
 
     /**
      * [KO] 새로운 Sprite3D 인스턴스를 생성합니다.
@@ -102,14 +100,69 @@ class Sprite3D extends Mesh {
         this.#updateRatios();
     }
 
+    /**
+     * [KO] 고정 크기 사용 여부를 설정합니다.
+     * [EN] Sets whether to use fixed pixel size.
+     */
+    get usePixelSize(): boolean {
+        return this.#usePixelSize;
+    }
+
+    set usePixelSize(value: boolean) {
+        if (this.gpuRenderInfo) {
+            const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
+            this.redGPUContext.gpuDevice.queue.writeBuffer(
+                vertexUniformBuffer.gpuBuffer,
+                vertexUniformInfo.members.usePixelSize.uniformOffset,
+                new Uint32Array([value ? 1 : 0])
+            )
+        }
+        if (this.#usePixelSize === value) return;
+        this.#usePixelSize = value;
+        this.#updateRatios();
+    }
+
+    /**
+     * [KO] 고정 크기 값 (px)을 반환합니다.
+     * [EN] Returns the fixed pixel size value (px).
+     */
+    get pixelSize(): number {
+        return this.#pixelSize;
+    }
+
+    /**
+     * [KO] 고정 크기 값 (px)을 설정합니다.
+     * [EN] Sets the fixed pixel size value (px).
+     * @param value - [KO] 픽셀 크기 [EN] Pixel size
+     */
+    set pixelSize(value: number) {
+        if (this.gpuRenderInfo) {
+            const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
+            this.redGPUContext.gpuDevice.queue.writeBuffer(
+                vertexUniformBuffer.gpuBuffer,
+                vertexUniformInfo.members.pixelSize.uniformOffset,
+                new Float32Array([value])
+            )
+        }
+        this.#pixelSize = value;
+    }
+
     #updateRatios() {
         if (this.#nativeHeight) {
             const prevX = this._renderRatioX;
             const prevY = this._renderRatioY;
 
-            // worldSize가 반영된 최종 렌더링 비율 계산
-            this._renderRatioY = this.#worldSize;
-            this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+            if (this.usePixelSize) {
+                // [KO] pixelSize 모드일 때는 worldSize를 무시하고 종횡비만 유지
+                // [EN] In pixelSize mode, ignore worldSize and maintain only the aspect ratio
+                this._renderRatioY = 1;
+                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
+            } else {
+                // [KO] worldSize가 반영된 최종 렌더링 비율 계산
+                // [EN] Calculate final rendering ratios reflecting worldSize
+                this._renderRatioY = this.#worldSize;
+                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+            }
 
             if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
                 this.dirtyTransform = true;
@@ -168,8 +221,6 @@ DefineForVertex.definePositiveNumber(Sprite3D, [
  */
 DefineForVertex.defineByPreset(Sprite3D, [
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
-    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
-    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 0],
 ])
 Object.freeze(Sprite3D)
 export default Sprite3D

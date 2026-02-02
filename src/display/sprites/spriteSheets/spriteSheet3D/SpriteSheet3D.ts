@@ -25,8 +25,6 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 interface SpriteSheet3D extends ASpriteSheet {
     /** 빌보드 모드 사용 여부 */
     useBillboard: boolean;
-    /** 고정 크기 사용 여부 */
-    usePixelSize: boolean;
     /** X축 렌더링 비율 */
     _renderRatioX: number;
     /** Y축 렌더링 비율 */
@@ -67,6 +65,7 @@ class SpriteSheet3D extends ASpriteSheet {
     #nativeHeight: number = 1
     #worldSize: number = 1
     #pixelSize: number = 0
+    #usePixelSize: boolean = false
 
     /**
      * [KO] 새로운 SpriteSheet3D 인스턴스를 생성합니다.
@@ -131,16 +130,37 @@ class SpriteSheet3D extends ASpriteSheet {
     }
 
     set pixelSize(value: number) {
-
         if(this.gpuRenderInfo){
             const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
             this.redGPUContext.gpuDevice.queue.writeBuffer(
                 vertexUniformBuffer.gpuBuffer,
                 vertexUniformInfo.members.pixelSize.uniformOffset,
-                new Float32Array([value])
+                new Float32Array([value]) 
             )
         }
         this.#pixelSize = value;
+    }
+
+    /**
+     * [KO] 고정 크기 사용 여부를 설정합니다.
+     * [EN] Sets whether to use fixed pixel size.
+     */
+    get usePixelSize(): boolean {
+        return this.#usePixelSize;
+    }
+
+    set usePixelSize(value: boolean) {
+        if(this.gpuRenderInfo){
+            const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
+            this.redGPUContext.gpuDevice.queue.writeBuffer(
+                vertexUniformBuffer.gpuBuffer,
+                vertexUniformInfo.members.usePixelSize.uniformOffset,
+                new Uint32Array([value ? 1 : 0])
+            )
+        }
+        if (this.#usePixelSize === value) return;
+        this.#usePixelSize = value;
+        this.#updateRatios();
     }
 
     #updateRatios() {
@@ -148,9 +168,17 @@ class SpriteSheet3D extends ASpriteSheet {
             const prevX = this._renderRatioX;
             const prevY = this._renderRatioY;
 
-            // worldSize가 반영된 최종 렌더링 비율 계산
-            this._renderRatioY = this.#worldSize;
-            this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+            if (this.usePixelSize) {
+                // [KO] pixelSize 모드일 때는 worldSize를 무시하고 종횡비만 유지
+                // [EN] In pixelSize mode, ignore worldSize and maintain only the aspect ratio
+                this._renderRatioY = 1;
+                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
+            } else {
+                // [KO] worldSize가 반영된 최종 렌더링 비율 계산
+                // [EN] Calculate final rendering ratios reflecting worldSize
+                this._renderRatioY = this.#worldSize;
+                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+            }
 
             if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
                 this.dirtyTransform = true;
@@ -223,7 +251,6 @@ DefineForVertex.definePositiveNumber(SpriteSheet3D, [
  */
 DefineForVertex.defineByPreset(SpriteSheet3D, [
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
-    [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
 ])
 /**
  * SpriteSheet3D 클래스를 동결하여 런타임에서의 수정을 방지합니다.

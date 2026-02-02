@@ -100,7 +100,9 @@ const renderTestPane = async (redGPUContext, scene) => {
                 if (key === 'play') c.play();
                 else if (key === 'pause') c.pause();
                 else if (key === 'stop') c.stop();
-                else c[key] = value;
+                else {
+                    c[key] = value;
+                }
             }
         });
     };
@@ -115,7 +117,7 @@ const renderTestPane = async (redGPUContext, scene) => {
         updateAll('usePixelSize', evt.value);
         updateUI();
     });
-    const pixelSize = folder.addBinding(target, 'pixelSize', {min: 1, max: 512, step: 1}).on('change', (evt) => {
+    const pixelSize = folder.addBinding(target, 'pixelSize', {min: 0, max: 512, step: 1}).on('change', (evt) => {
         updateAll('pixelSize', evt.value);
     });
     const worldSize = folder.addBinding(target, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
