@@ -4,16 +4,14 @@
 #redgpu_include billboardPicking;
 #redgpu_include billboardShadow;
 
-struct MatrixList {
-    localMatrix: mat4x4<f32>,
+struct MatrixList{
     modelMatrix: mat4x4<f32>,
-    prevModelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
 }
-
 struct VertexUniforms {
-    matrixList: MatrixList,
+    matrixList:MatrixList,
     pickingId: u32,
+    useSizeAttenuation: u32,
     useBillboard: u32,
     segmentW: f32,
     segmentH: f32,
@@ -44,9 +42,9 @@ struct OutputData {
     @location(8) prevClipPos: vec4<f32>,
 
     @location(11) combinedOpacity: f32,
+    //
     @location(12) motionVector: vec3<f32>,
     @location(13) shadowPos: vec3<f32>,
-    @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
@@ -79,9 +77,6 @@ fn main(inputData: InputData) -> OutputData {
     );
     
     output.combinedOpacity = vertexUniforms.combinedOpacity;
-
-    output.currentClipPos = systemUniforms.noneJitterProjectionCameraMatrix * vec4<f32>(billboardResult.vertexPosition, 1.0);
-    output.prevClipPos = systemUniforms.prevNoneJitterProjectionCameraMatrix * vertexUniforms.matrixList.prevModelMatrix * vec4<f32>(inputData.position, 1.0);
 
     return output;
 }
