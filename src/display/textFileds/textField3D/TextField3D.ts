@@ -68,7 +68,7 @@ class TextField3D extends ATextField {
 
                     const prevPixelSize = this.pixelSize;
                     // 픽셀 사이즈 동기화
-                    this.pixelSize = height;
+                    this.pixelSize = this.pixelSize || height;
                     this.#updateRatios();
 
                     if (prevPixelSize !== this.pixelSize) {
@@ -175,7 +175,7 @@ DefineForVertex.definePositiveNumber(TextField3D, [
 DefineForVertex.defineByPreset(TextField3D, [
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
-    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],
+    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 0],
 ]);
 Object.freeze(TextField3D);
 export default TextField3D;

@@ -92,7 +92,7 @@ class SpriteSheet3D extends ASpriteSheet {
 
                         const prevPixelSize = this.pixelSize;
                         // 원본 세그먼트 해상도를 pixelSize 기본값으로 설정
-                        this.pixelSize = tH;
+                        this.pixelSize = this.pixelSize || tH;
                         this.#updateRatios();
 
                         if (prevPixelSize !== this.pixelSize) {
@@ -208,7 +208,7 @@ DefineForVertex.definePositiveNumber(SpriteSheet3D, [
 DefineForVertex.defineByPreset(SpriteSheet3D, [
     [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
     [DefineForVertex.PRESET_BOOLEAN.USE_PIXEL_SIZE, false],
-    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 64],
+    [DefineForVertex.PRESET_POSITIVE_NUMBER.PIXEL_SIZE, 0],
 ])
 /**
  * SpriteSheet3D 클래스를 동결하여 런타임에서의 수정을 방지합니다.

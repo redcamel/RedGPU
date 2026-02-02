@@ -31,17 +31,16 @@ RedGPU.init(
         );
 
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
-        sprite3D.worldSize = 1.0;
         scene.addChild(sprite3D);
+        sprite3D.usePixelSize = true
+        sprite3D.pixelSize = 64
 
         const sprite3DH = new RedGPU.Display.Sprite3D(redGPUContext, materialH);
         sprite3DH.x = -2.5;
-        sprite3DH.worldSize = 1.0;
         scene.addChild(sprite3DH);
 
         const sprite3DV = new RedGPU.Display.Sprite3D(redGPUContext, materialV);
         sprite3DV.x = 2.5;
-        sprite3DV.worldSize = 1.0;
         scene.addChild(sprite3DV);
 
         const spriteCount = 10;
@@ -53,7 +52,6 @@ RedGPU.init(
             const z = Math.sin(angle) * radius;
 
             const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
-            sprite3D.worldSize = 1.0;
             sprite3D.x = x;
             sprite3D.z = z;
             scene.addChild(sprite3D);
@@ -80,76 +78,68 @@ const renderTestPane = async (redGPUContext, view, scene) => {
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     const child = scene.children.find(c => c instanceof RedGPU.Display.Sprite3D);
-    const controls = {
-        useBillboard: child.useBillboard,
-        usePixelSize: child.usePixelSize,
-        pixelSize: child.pixelSize,
-        worldSize: child.worldSize,
-    };
+    console.log(child.position)
 
     const sprite3DFolder = pane.addFolder({title: 'Sprite3D', expanded: true});
 
-    const useBillboardBinding = sprite3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.Sprite3D) child.useBillboard = evt.value;
+    const useBillboardBinding = sprite3DFolder.addBinding(child, 'useBillboard');
+    useBillboardBinding.on('change', (evt) => {
+        scene.children.forEach((c) => {
+            if (c instanceof RedGPU.Display.Sprite3D) c.useBillboard = evt.value;
         });
         updateControlsState();
     });
 
-    const usePixelSizeBinding = sprite3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.Sprite3D) child.usePixelSize = evt.value;
-        });
-        updateControlsState();
-    });
-
-    const pixelSizeBinding = sprite3DFolder.addBinding(controls, 'pixelSize', {
-        min: 1,
-        max: 512,
-        step: 1
-    }).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.Sprite3D) child.pixelSize = evt.value;
-        });
-    });
-
-    const worldSizeBinding = sprite3DFolder.addBinding(controls, 'worldSize', {
+    const worldSizeBinding = sprite3DFolder.addBinding(child, 'worldSize', {
         min: 0.01,
         max: 10,
         step: 0.01
-    }).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.Sprite3D) child.worldSize = evt.value;
+    });
+    worldSizeBinding.on('change', (evt) => {
+        scene.children.forEach((c) => {
+            if (c instanceof RedGPU.Display.Sprite3D) c.worldSize = evt.value;
         });
     });
 
-    const updateControlsState = () => {
-        const {useBillboard, usePixelSize} = controls;
+    const pixelOptionsFolder = sprite3DFolder.addFolder({title: 'Pixel Options', expanded: true});
+    pixelOptionsFolder.addBinding(child, 'usePixelSize');
 
-        if (!useBillboard) {
-            usePixelSizeBinding.element.style.opacity = 0.25;
-            usePixelSizeBinding.element.style.pointerEvents = 'none';
-            pixelSizeBinding.element.style.opacity = 0.25;
-            pixelSizeBinding.element.style.pointerEvents = 'none';
-            worldSizeBinding.element.style.opacity = 1;
-            worldSizeBinding.element.style.pointerEvents = 'painted';
-        } else {
-            usePixelSizeBinding.element.style.opacity = 1;
-            usePixelSizeBinding.element.style.pointerEvents = 'painted';
 
-            if (usePixelSize) {
-                pixelSizeBinding.element.style.opacity = 1;
-                pixelSizeBinding.element.style.pointerEvents = 'painted';
-                worldSizeBinding.element.style.opacity = 0.25;
-                worldSizeBinding.element.style.pointerEvents = 'none';
-            } else {
-                pixelSizeBinding.element.style.opacity = 0.25;
-                pixelSizeBinding.element.style.pointerEvents = 'none';
-                worldSizeBinding.element.style.opacity = 1;
-                worldSizeBinding.element.style.pointerEvents = 'painted';
-            }
-        }
-    };
+    const pixelSizeBinding = pixelOptionsFolder.addBinding(child, 'pixelSize', {
+        min: 1,
+        max: 1024,
+        step: 1
+    });
+    pixelSizeBinding.on('change', (evt) => {
+        scene.children.forEach((c) => {
+            if (c instanceof RedGPU.Display.Sprite3D) c.pixelSize = evt.value;
+        });
+    });
+
+    function updateControlsState() {
+        const {useBillboard, usePixelSize} = child;
+
+        // billboard가 꺼져있으면 pixelSize 관련 모든 컨트롤 비활성화
+        pixelOptionsFolder.disabled = !useBillboard;
+        pixelOptionsFolder.element.style.pointerEvents = useBillboard ? 'auto' : 'none';
+
+        // pixelSize 모드 여부에 따라 슬라이더 활성화 상태 제어
+        const isPixelMode = useBillboard && usePixelSize;
+        pixelSizeBinding.disabled = !isPixelMode;
+        pixelSizeBinding.element.style.pointerEvents = isPixelMode ? 'auto' : 'none';
+
+
+        // worldSize는 pixelSize 모드가 아닐 때만 활성화
+        worldSizeBinding.disabled = isPixelMode;
+        worldSizeBinding.element.style.pointerEvents = isPixelMode ? 'none' : 'auto';
+
+    }
+
+    const check = ()=>{
+        pixelSizeBinding.refresh();
+        requestAnimationFrame(check);
+    }
+    requestAnimationFrame(check);
 
     updateControlsState();
 };
