@@ -78,6 +78,7 @@ class TextField3D extends ATextField {
             }
         });
         this._geometry = new Plane(redGPUContext);
+        this.disableJitter = true;
         if (text) this.text = text;
     }
 
