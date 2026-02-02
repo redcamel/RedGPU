@@ -84,7 +84,7 @@ class TextField3D extends ATextField {
                     this.redGPUContext.gpuDevice.queue.writeBuffer(
                         vertexUniformBuffer.gpuBuffer,
                         vertexUniformInfo.members.pixelSize.uniformOffset,
-                        new Float32Array([v])
+                        new Float32Array([v * window.devicePixelRatio * 2])
                     )
                 }
             },
