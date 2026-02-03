@@ -147,7 +147,9 @@ export class RapierPhysics implements IPhysicsEngine {
 		let desc: RAPIER.RigidBodyDesc;
 		switch (params.type) {
 			case PHYSICS_BODY_TYPE.STATIC: desc = RAPIER.RigidBodyDesc.fixed(); break;
-			case PHYSICS_BODY_TYPE.KINEMATIC: desc = RAPIER.RigidBodyDesc.kinematicPositionBased(); break;
+			case PHYSICS_BODY_TYPE.KINEMATIC:
+			case PHYSICS_BODY_TYPE.KINEMATIC_POSITION: desc = RAPIER.RigidBodyDesc.kinematicPositionBased(); break;
+			case PHYSICS_BODY_TYPE.KINEMATIC_VELOCITY: desc = RAPIER.RigidBodyDesc.kinematicVelocityBased(); break;
 			case PHYSICS_BODY_TYPE.DYNAMIC:
 			default: desc = RAPIER.RigidBodyDesc.dynamic(); break;
 		}

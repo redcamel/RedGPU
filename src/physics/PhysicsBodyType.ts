@@ -16,10 +16,20 @@ export const PHYSICS_BODY_TYPE = {
 	 */
 	STATIC: 'static',
 	/**
-	 * [KO] 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디
-	 * [EN] Kinematic body not affected by physics laws but controlled directly by code
+	 * [KO] 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디 (위치 기반)
+	 * [EN] Kinematic body not affected by physics laws but controlled directly by code (Position based)
 	 */
-	KINEMATIC: 'kinematic'
+	KINEMATIC: 'kinematic',
+	/**
+	 * [KO] 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디 (위치 기반)
+	 * [EN] Kinematic body not affected by physics laws but controlled directly by code (Position based)
+	 */
+	KINEMATIC_POSITION: 'kinematicPosition',
+	/**
+	 * [KO] 물리 법칙의 영향은 받지 않으나 속도로 움직임을 제어하는 바디
+	 * [EN] Kinematic body controlled by velocity
+	 */
+	KINEMATIC_VELOCITY: 'kinematicVelocity'
 } as const;
 
 /**
