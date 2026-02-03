@@ -13,6 +13,16 @@ export interface BodyParams {
 	angularDamping?: number;
 	isSensor?: boolean;
 	enableCCD?: boolean;
+	/**
+	 * [KO] 높이맵 데이터 (shape가 HEIGHTFIELD일 경우 필수)
+	 * [EN] Heightfield data (Required if shape is HEIGHTFIELD)
+	 */
+	heightData?: {
+		nrows: number; // [KO] 세로(Z축) 세그먼트 수 [EN] Number of subdivisions along the Z axis
+		ncols: number; // [KO] 가로(X축) 세그먼트 수 [EN] Number of subdivisions along the X axis
+		heights: Float32Array;
+		scale: { x: number, y: number, z: number };
+	};
 }
 
 /**

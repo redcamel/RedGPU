@@ -2457,8 +2457,17 @@ Check performance limits on each device.`
                         path: 'physics/meshCollider',
                         thumb: 'physics/meshCollider/thumb.png',
                         description: {
-                            ko: `정교한 지오메트리 데이터를 분석하여 복잡한 모양의 충돌체(Torus 등)를 생성하는 기능을 테스트합니다.`, 
-                            en: `Tests the function to create complex-shaped colliders (e.g., Torus) by analyzing sophisticated geometry data.`
+                            ko: `커스텀 기하구조를 물리 충돌체로 변환하는 방법을 테스트합니다.`, 
+                            en: `Tests how to convert custom geometries into physics engine colliders.`
+                        },
+                    },
+                    {
+                        name: 'HeightField',
+                        path: 'physics/heightField',
+                        thumb: 'physics/heightField/thumb.png',
+                        description: {
+                            ko: `높이맵 데이터를 사용하여 지형과 같은 복잡한 표면의 물리 충돌을 구현하는 방법을 테스트합니다.`, 
+                            en: `Tests how to implement physics collisions for complex surfaces like terrain using heightmap data.`
                         },
                     },
                     {

@@ -249,6 +249,19 @@ export class RapierPhysics implements IPhysicsEngine {
 				desc = RAPIER.ColliderDesc.cylinder(hy, Math.max(hx, hz));
 				break;
 			}
+			case PHYSICS_SHAPE.HEIGHTFIELD: {
+				if (!params.heightData) {
+					throw new Error('[RedGPU] heightData is required for PHYSICS_SHAPE.HEIGHTFIELD');
+				}
+				const { nrows, ncols, heights, scale } = params.heightData;
+				desc = RAPIER.ColliderDesc.heightfield(nrows, ncols, heights, new RAPIER.Vector3(scale.x, scale.y, scale.z));
+				// [KO] Rapier heightfield는 기본적으로 최소 코너가 (0,0,0)입니다.
+				// [EN] Rapier heightfield defaults to having its minimum corner at (0,0,0).
+				// [KO] 중앙 정렬을 위해 절반 크기만큼 음수 방향으로 오프셋을 설정합니다.
+				// [EN] Set the translation offset to negative half-size for center alignment.
+				desc.setTranslation(-scale.x / 2, 0, -scale.z / 2);
+				break;
+			}
 			case PHYSICS_SHAPE.BOX:
 			default: desc = RAPIER.ColliderDesc.cuboid(hx, hy, hz); break;
 		}

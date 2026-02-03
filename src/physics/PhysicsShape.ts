@@ -25,6 +25,11 @@ export const PHYSICS_SHAPE = {
 	 * [EN] Cylinder-shaped collider
 	 */
 	CYLINDER: 'cylinder',
+	/**
+	 * [KO] 높이맵 형태의 충돌체
+	 * [EN] Heightfield-shaped collider
+	 */
+	HEIGHTFIELD: 'heightfield',
 	MESH: 'mesh'
 } as const;
 
