@@ -255,10 +255,11 @@ export class RapierPhysics implements IPhysicsEngine {
 				}
 				const { nrows, ncols, heights, scale } = params.heightData;
 				desc = RAPIER.ColliderDesc.heightfield(nrows, ncols, heights, new RAPIER.Vector3(scale.x, scale.y, scale.z));
-				// [KO] Rapier heightfield는 기본적으로 최소 코너가 (0,0,0)입니다.
-				// [EN] Rapier heightfield defaults to having its minimum corner at (0,0,0).
-				// [KO] 중앙 정렬을 위해 절반 크기만큼 음수 방향으로 오프셋을 설정합니다.
-				// [EN] Set the translation offset to negative half-size for center alignment.
+				
+				// [KO] Rapier heightfield는 기본적으로 최소 코너가 (0,0,0)에 위치합니다.
+				// [EN] Rapier heightfield is basically located with the minimum corner at (0,0,0).
+				// [KO] 중앙 정렬을 위해 전체 크기의 절반만큼 음수 방향으로 오프셋을 설정합니다.
+				// [EN] To align the center, set the offset in the negative direction by half the total size.
 				desc.setTranslation(-scale.x / 2, 0, -scale.z / 2);
 				break;
 			}

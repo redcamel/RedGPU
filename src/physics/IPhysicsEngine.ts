@@ -3,24 +3,80 @@ import { IPhysicsBody } from "./IPhysicsBody";
 import { PhysicsBodyType } from "./PhysicsBodyType";
 import { PhysicsShape } from "./PhysicsShape";
 
+/**
+ * [KO] 물리 바디 생성을 위한 파라미터 인터페이스입니다.
+ * [EN] Parameter interface for creating a physics body.
+ */
 export interface BodyParams {
+	/**
+	 * [KO] 물리 바디의 타입 (정적, 동적, 키네마틱)
+	 * [EN] Type of the physics body (Static, Dynamic, Kinematic)
+	 */
 	type?: PhysicsBodyType;
+	/**
+	 * [KO] 충돌체의 형상
+	 * [EN] Shape of the collider
+	 */
 	shape?: PhysicsShape;
+	/**
+	 * [KO] 질량
+	 * [EN] Mass
+	 */
 	mass?: number;
+	/**
+	 * [KO] 마찰 계수
+	 * [EN] Friction coefficient
+	 */
 	friction?: number;
+	/**
+	 * [KO] 탄성 계수
+	 * [EN] Restitution coefficient
+	 */
 	restitution?: number;
+	/**
+	 * [KO] 선형 감쇠
+	 * [EN] Linear damping
+	 */
 	linearDamping?: number;
+	/**
+	 * [KO] 각감쇠
+	 * [EN] Angular damping
+	 */
 	angularDamping?: number;
+	/**
+	 * [KO] 센서 여부 (충돌 반응 없이 이벤트만 발생)
+	 * [EN] Whether it is a sensor (Generates events without collision response)
+	 */
 	isSensor?: boolean;
+	/**
+	 * [KO] 연속 충돌 감지(CCD) 활성화 여부
+	 * [EN] Whether to enable Continuous Collision Detection (CCD)
+	 */
 	enableCCD?: boolean;
 	/**
 	 * [KO] 높이맵 데이터 (shape가 HEIGHTFIELD일 경우 필수)
 	 * [EN] Heightfield data (Required if shape is HEIGHTFIELD)
 	 */
 	heightData?: {
-		nrows: number; // [KO] 세로(Z축) 세그먼트 수 [EN] Number of subdivisions along the Z axis
-		ncols: number; // [KO] 가로(X축) 세그먼트 수 [EN] Number of subdivisions along the X axis
+		/**
+		 * [KO] 세로(Z축) 세그먼트 수
+		 * [EN] Number of subdivisions along the Z axis
+		 */
+		nrows: number;
+		/**
+		 * [KO] 가로(X축) 세그먼트 수
+		 * [EN] Number of subdivisions along the X axis
+		 */
+		ncols: number;
+		/**
+		 * [KO] 높이 데이터 배열
+		 * [EN] Height data array
+		 */
 		heights: Float32Array;
+		/**
+		 * [KO] 충돌체의 전체 스케일
+		 * [EN] Total scale of the collider
+		 */
 		scale: { x: number, y: number, z: number };
 	};
 }

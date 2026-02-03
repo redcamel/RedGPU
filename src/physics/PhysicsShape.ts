@@ -26,10 +26,14 @@ export const PHYSICS_SHAPE = {
 	 */
 	CYLINDER: 'cylinder',
 	/**
-	 * [KO] 높이맵 형태의 충돌체
-	 * [EN] Heightfield-shaped collider
+	 * [KO] 높이맵 형태의 충돌체 (지형 등에 사용)
+	 * [EN] Heightfield-shaped collider (Used for terrain, etc.)
 	 */
 	HEIGHTFIELD: 'heightfield',
+	/**
+	 * [KO] 임의의 메시 형태의 충돌체 (Trimesh)
+	 * [EN] Arbitrary mesh-shaped collider (Trimesh)
+	 */
 	MESH: 'mesh'
 } as const;
 
