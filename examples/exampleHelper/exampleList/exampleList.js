@@ -2561,17 +2561,26 @@ Check performance limits on each device.`
                                                 en: `Tests how to implement elastic connections using spring joints.`
                                             },
                                         },
-                                        {
-                                            name: 'Soft Body',
-                                            path: 'physics/softBody',
-                                            thumb: 'physics/softBody/thumb.png',
-                                            description: {
-                                                ko: `다수의 노드를 스프링으로 연결하여 젤리와 같은 소프트 바디 효과를 구현합니다.`,
-                                                en: `Implements a jelly-like soft body effect by connecting multiple nodes with springs.`
-                                            },
-                                        },
-                                        {
-                                            name: 'Compound Shapes',                        path: 'physics/compound',
+                                                            {
+                                                                name: 'Soft Body',
+                                                                path: 'physics/softBody',
+                                                                thumb: 'physics/softBody/thumb.png',
+                                                                description: {
+                                                                    ko: `다수의 노드를 스프링으로 연결하여 젤리와 같은 소프트 바디 효과를 구현합니다.`,
+                                                                    en: `Implements a jelly-like soft body effect by connecting multiple nodes with springs.`
+                                                                },
+                                                            },
+                                                            {
+                                                                name: 'Raycast Vehicle',
+                                                                path: 'physics/raycastVehicle',
+                                                                thumb: 'physics/raycastVehicle/thumb.png',
+                                                                description: {
+                                                                    ko: `레이캐스트를 사용하여 서스펜션과 주행이 가능한 차량 물리 시뮬레이션을 구현합니다.`,
+                                                                    en: `Implements a vehicle physics simulation with suspension and driving using raycasts.`
+                                                                },
+                                                            },
+                                                            {
+                                                                name: 'Compound Shapes',                        path: 'physics/compound',
                         thumb: 'physics/compound/thumb.png',
                         description: {
                             ko: `여러 개의 지오메트리를 결합하여 하나의 복잡한 물리 객체를 만드는 복합 형상 기능을 테스트합니다.`, 
