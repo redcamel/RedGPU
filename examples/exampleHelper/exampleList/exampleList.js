@@ -2552,18 +2552,26 @@ Check performance limits on each device.`
                             en: `Implements elevators or slider devices using prismatic joints that allow reciprocal movement only in a straight line.`
                         },
                     },
-                    {
-                        name: 'Spring Joints & Elasticity',
-                        path: 'physics/springJoint',
-                        thumb: 'physics/springJoint/thumb.png',
-                        description: {
-                            ko: `물체 사이를 스프링으로 연결하여 탄성 효과를 구현합니다. 서스펜션 시스템이나 트램펄린과 같은 물리 거동을 테스트합니다.`, 
-                            en: `Implements elastic effects by connecting objects with springs. Tests physical behaviors like suspension systems or trampolines.`
-                        },
-                    },
-                    {
-                        name: 'Compound Shapes',
-                        path: 'physics/compound',
+                                        {
+                                            name: 'Spring Joint',
+                                            path: 'physics/springJoint',
+                                            thumb: 'physics/springJoint/thumb.png',
+                                            description: {
+                                                ko: `스프링 조인트를 사용하여 탄성 있는 연결을 구현하는 방법을 테스트합니다.`,
+                                                en: `Tests how to implement elastic connections using spring joints.`
+                                            },
+                                        },
+                                        {
+                                            name: 'Soft Body',
+                                            path: 'physics/softBody',
+                                            thumb: 'physics/softBody/thumb.png',
+                                            description: {
+                                                ko: `다수의 노드를 스프링으로 연결하여 젤리와 같은 소프트 바디 효과를 구현합니다.`,
+                                                en: `Implements a jelly-like soft body effect by connecting multiple nodes with springs.`
+                                            },
+                                        },
+                                        {
+                                            name: 'Compound Shapes',                        path: 'physics/compound',
                         thumb: 'physics/compound/thumb.png',
                         description: {
                             ko: `여러 개의 지오메트리를 결합하여 하나의 복잡한 물리 객체를 만드는 복합 형상 기능을 테스트합니다.`, 
