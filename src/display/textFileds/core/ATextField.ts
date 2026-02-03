@@ -205,7 +205,7 @@ class ATextField extends Mesh {
         this.#textureImg.onload = _ => {
             let tW: number, tH: number;
             const {width, height} = this.#getRenderHtmlSize();
-            const dpr = window.devicePixelRatio || 1;
+            const dpr = window.devicePixelRatio=== 1 ? 2 :window.devicePixelRatio;
             const multiple = dpr;
             tW = width * multiple;
             tH = height * multiple;
