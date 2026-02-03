@@ -274,8 +274,6 @@ class Mesh extends MeshBase {
     #needUpdateMatrixUniform: boolean = true;
     #uniformDataMatrixList: Float32Array;
     #displacementScale: number;
-    #textureOffset: [number, number];
-    #textureScale: [number, number];
     #LODManager: LODManager;
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1;
@@ -1430,27 +1428,23 @@ class Mesh extends MeshBase {
                     const material = currentMaterial as any;
                     const offset = material.textureOffset;
                     const scale = material.textureScale;
-                    dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
 
-                    if (!this.#textureOffset) this.#textureOffset = [0, 0];
-                    if (!this.#textureScale) this.#textureScale = [1, 1];
+                    if(offset) {
 
-                    this.#textureOffset[0] = offset[0];
-                    this.#textureOffset[1] = offset[1];
-                    this.#textureScale[0] = scale[0];
-                    this.#textureScale[1] = scale[1];
+                        dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
+                        tempFloat32_4[0] = offset[0];
+                        tempFloat32_4[1] = offset[1];
+                        tempFloat32_4[2] = scale[0];
+                        tempFloat32_4[3] = scale[1];
 
-                    tempFloat32_4[0] = offset[0];
-                    tempFloat32_4[1] = offset[1];
-                    tempFloat32_4[2] = scale[0];
-                    tempFloat32_4[3] = scale[1];
+                        gpuDevice.queue.writeBuffer(
+                            vertexUniformGPUBuffer,
+                            vertexUniformInfoMembers.uvTransform.uniformOffset,
+                            tempFloat32_4
+                        );
 
-                    gpuDevice.queue.writeBuffer(
-                        vertexUniformGPUBuffer,
-                        vertexUniformInfoMembers.uvTransform.uniformOffset,
-                        tempFloat32_4
-                    );
-                    currentMaterial.dirtyTextureTransform = false
+                        currentMaterial.dirtyTextureTransform = false
+                    }
 
                 }
             }
