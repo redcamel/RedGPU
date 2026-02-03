@@ -3,8 +3,8 @@ import DefineForFragment from "../../defineProperty/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
+import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
@@ -43,34 +43,12 @@ interface BitmapMaterial {
  * <iframe src="/RedGPU/examples/3d/material/bitmapMaterial/"></iframe>
  * @category Material
  */
-class BitmapMaterial extends ABitmapBaseMaterial {
+class BitmapMaterial extends AUVTransformBaseMaterial {
     /**
      * [KO] 파이프라인 dirty 상태 플래그
      * [EN] Pipeline dirty status flag
      */
     dirtyPipeline: boolean = false
-    dirtyTextureTransform: boolean = false
-
-    #textureOffset: [number, number] = [0, 0];
-    #textureScale: [number, number] = [1, 1];
-
-    get textureOffset(): [number, number] {
-        return this.#textureOffset;
-    }
-
-    set textureOffset(value: [number, number]) {
-        this.dirtyTextureTransform = true
-        this.#textureOffset = value;
-    }
-
-    get textureScale(): [number, number] {
-        return this.#textureScale;
-    }
-
-    set textureScale(value: [number, number]) {
-        this.dirtyTextureTransform = true
-        this.#textureScale = value;
-    }
 
     /**
      * [KO] BitmapMaterial 생성자

@@ -4,8 +4,8 @@ import DefineForFragment from "../../defineProperty/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl'
+import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
@@ -143,7 +143,7 @@ interface PhongMaterial {
  *
  * @category Material
  */
-class PhongMaterial extends ABitmapBaseMaterial {
+class PhongMaterial extends AUVTransformBaseMaterial {
     /**
      * [KO] 디스플레이스먼트(변위) 텍스처
      * [EN] Displacement texture
@@ -154,28 +154,6 @@ class PhongMaterial extends ABitmapBaseMaterial {
      * [EN] Displacement scale (default: 1)
      */
     #displacementScale: number = 1
-
-    #textureOffset: [number, number] = [0, 0];
-    #textureScale: [number, number] = [1, 1];
-    dirtyTextureTransform: boolean = false
-
-    get textureOffset(): [number, number] {
-        return this.#textureOffset;
-    }
-
-    set textureOffset(value: [number, number]) {
-        this.dirtyTextureTransform = true
-        this.#textureOffset = value;
-    }
-
-    get textureScale(): [number, number] {
-        return this.#textureScale;
-    }
-
-    set textureScale(value: [number, number]) {
-        this.dirtyTextureTransform = true
-        this.#textureScale = value;
-    }
 
     /**
      * [KO] PhongMaterial 생성자
