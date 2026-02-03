@@ -7,40 +7,43 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
-		// [KO] 카메라 컨트롤러 설정
+		// [KO] 카메라 컨트롤러 설정: 플랫폼의 움직임을 관찰하기 위해 거리와 높이 조정
+		// [EN] Set up camera controller: Adjust distance and height to observe the platform's movement
 		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 30;
-		controller.tilt = -20;
-		controller.centerY = 5;
+		controller.distance = 40;
+		controller.tilt = -25;
+		controller.centerY = 8;
 
 		const scene = new RedGPU.Display.Scene();
 
-		/**
-		 * [KO] 3D 뷰 설정: 그리드 활성화
-		 * RedGPU의 기본 그리드는 한 칸의 가로/세로 길이가 정확히 1유닛(1미터)입니다.
-		 * [EN] 3D view setup: Enable grid
-		 * RedGPU's default grid has a width/height of exactly 1 unit (1 meter) per cell.
-		 */
+		// [KO] 3D 뷰 생성 및 그리드 활성화
+		// [EN] Create 3D view and enable grid
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 		view.grid = true;
 		redGPUContext.addView(view);
 
-		// [KO] 물리 엔진 초기화
+		// [KO] 물리 엔진(Rapier) 초기화 및 씬 연결
+		// [EN] Initialize physics engine (Rapier) and connect to scene
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
 
 		const RAPIER = physicsEngine.RAPIER;
 
+		// [KO] 조명 설정: 씬에 입체감을 주기 위한 환경광과 직사광 추가
+		// [EN] Lighting setup: Add ambient and directional light for depth in the scene
 		const ambientLight = new RedGPU.Light.AmbientLight();
 		ambientLight.intensity = 0.5;
 		scene.lightManager.ambientLight = ambientLight;
 
 		const directionalLight = new RedGPU.Light.DirectionalLight();
+		directionalLight.x = 10;
+		directionalLight.y = 20;
+		directionalLight.z = 10;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		// [KO] 1. 바닥 생성 (시인성을 위해 #666666 색상 적용)
-		// [EN] 1. Create ground (Applied #666666 color for visibility)
+		// [KO] 1. 바닥 생성 및 정적 물리 바디 적용
+		// [EN] 1. Create ground and apply static physics body
 		const ground = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
@@ -50,129 +53,123 @@ RedGPU.init(
 		ground.scaleX = 40;
 		ground.scaleY = 1;
 		ground.scaleZ = 40;
-		ground.material.color.setColorByHEX('#666666');
+		ground.material.color.setColorByHEX('#333333');
 		scene.addChild(ground);
+		
 		physicsEngine.createBody(ground, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
 			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
 		});
 
-		// [KO] 2. 천장 앵커 포인트 생성 (높이 15m)
-		// [EN] 2. Create ceiling anchor points (Height 15m)
+		// [KO] 2. 천장 앵커 포인트 설정 (4개의 고정된 점)
+		// [EN] 2. Set up ceiling anchor points (4 fixed points)
+		const anchorPoints = [
+			{ x: -5, z: -5 },
+			{ x: 5, z: -5 },
+			{ x: 5, z: 5 },
+			{ x: -5, z: 5 }
+		];
+		
 		const anchorMeshList = [];
-		const createAnchor = (x, z) => {
+		const anchorBodies = anchorPoints.map(pt => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
 				new RedGPU.Material.PhongMaterial(redGPUContext)
 			);
-			mesh.x = x;
+			mesh.x = pt.x;
 			mesh.y = 15;
-			mesh.z = z;
-			mesh.scaleX = 0.4;
-			mesh.scaleY = 0.4;
-			mesh.scaleZ = 0.4;
+			mesh.z = pt.z;
+			mesh.scaleX = 0.5;
+			mesh.scaleY = 0.5;
+			mesh.scaleZ = 0.5;
 			mesh.material.color.setColorByHEX('#ff4444');
 			scene.addChild(mesh);
 			anchorMeshList.push(mesh);
+			
 			return physicsEngine.createBody(mesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.STATIC,
 				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX
 			});
-		};
+		});
 
-		const anchors = [
-			createAnchor(-4, -4),
-			createAnchor(4, -4),
-			createAnchor(4, 4),
-			createAnchor(-4, 4)
-		];
-
-		// [KO] 3. 탄성 플랫폼 생성 (Y=2 지점)
-		// [EN] 3. Create elastic platform (at Y=2)
+		// [KO] 3. 동적 플랫폼 생성 (스프링에 의해 매달릴 메쉬)
+		// [EN] 3. Create dynamic platform (Mesh to be suspended by springs)
 		const platform = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Box(redGPUContext),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		platform.y = 2;
-		platform.scaleX = 8;
-		platform.scaleY = 0.2;
-		platform.scaleZ = 8;
-		platform.material.color.setColorByHEX('#00ccff');
+		platform.y = 5;
+		platform.scaleX = 10;
+		platform.scaleY = 0.5;
+		platform.scaleZ = 10;
+		platform.material.color.setColorByHEX('#00aaff');
 		scene.addChild(platform);
 
+		// [KO] 플랫폼에 물리 바디 설정: 현실적인 무게감을 위해 질량과 감쇠 조정
+		// [EN] Set up physics body on the platform: Adjust mass and damping for realistic weight
 		const platformBody = physicsEngine.createBody(platform, {
 			type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
 			shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
-			mass: 10,
-			linearDamping: 0.2,
-			angularDamping: 0.2
+			mass: 30,
+			linearDamping: 0.5,
+			angularDamping: 1.0
 		});
 
-		/**
-		 * [KO] 4. 스프링 조인트 설정 (Spherical Joint + Stiffness)
-		 * 물리적 피봇(Hinge)을 천장(Y=15)에 두어 자연스러운 스윙이 가능하게 합니다.
-		 * spherical 메서드를 직접 사용하여 조인트를 생성합니다.
-		 * [EN] 4. Spring Joint setup (Spherical Joint + Stiffness)
-		 * Place the physical pivot (Hinge) at the ceiling (Y=15) for natural swinging.
-		 * Explicitly use the spherical method to create the joint.
-		 */
-		const springStiffness = 400.0;
-		const springDamping = 10.0;
+		// [KO] 4. 스프링 조인트 연결: 천장 앵커와 플랫폼 모서리 사이의 탄성 연결
+		// [EN] 4. Connect spring joints: Elastic connection between ceiling anchors and platform corners
+		const springStiffness = 1200.0; 
+		const springDamping = 60.0;
+		const restLength = 10.0;
 
-		anchors.forEach((anchor, i) => {
-			const xSign = (i === 0 || i === 3) ? -1 : 1;
-			const zSign = (i === 0 || i === 1) ? -1 : 1;
-
-			const JD = RAPIER.JointData;
-			// [KO] 천장(15m) 기준 오프셋 0 지점과 플랫폼(2m) 기준 위쪽으로 13m 지점을 연결
-			// [EN] Connect the offset 0 point from the ceiling (15m) and the 13m upward point from the platform (2m)
+		anchorBodies.forEach((anchorBody, i) => {
+			const pt = anchorPoints[i];
 			const localAnchor1 = { x: 0, y: 0, z: 0 };
-			const localAnchor2 = { x: 4 * xSign, y: 13, z: 4 * zSign }; 
-			
-			const jointData = JD.spherical(localAnchor1, localAnchor2);
-			const joint = physicsEngine.nativeWorld.createImpulseJoint(jointData, anchor.nativeBody, platformBody.nativeBody, true);
-			
-			if (joint.setStiffness) joint.setStiffness(springStiffness);
-			if (joint.setDamping) joint.setDamping(springDamping);
+			// [KO] 플랫폼의 각 모서리 위치를 로컬 앵커로 설정
+			// [EN] Set each corner position of the platform as a local anchor
+			const jointData = RAPIER.JointData.spring(restLength, springStiffness, springDamping, localAnchor1, { x: pt.x, y: 0, z: pt.z });
+			physicsEngine.nativeWorld.createImpulseJoint(jointData, anchorBody.nativeBody, platformBody.nativeBody, true);
 		});
 
-		// [KO] 5. 시각적 스프링 선 생성
-		const springLines = [];
-		anchorMeshList.forEach(() => {
+		// [KO] 5. 시각적 스프링 선 생성 (Line3D를 사용하여 스프링 시각화)
+		// [EN] 5. Create visual spring lines (Visualize springs using Line3D)
+		const springLines = anchorPoints.map(() => {
 			const line = new RedGPU.Display.Line3D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, '#ffffff');
 			scene.addChild(line);
-			springLines.push(line);
+			return line;
 		});
 
-		// [KO] 6. 낙하 물체 관리
+		// [KO] 6. 떨어지는 장애물 스폰 로직: 크기와 질량이 무작위인 박스와 구체 생성
+		// [EN] 6. Falling obstacle spawn logic: Create boxes and spheres with random size and mass
 		const activeObjects = [];
-		const createObject = () => {
+		const spawnObject = () => {
+			const isBox = Math.random() > 0.5;
+			const size = 0.5 + Math.random() * 1.5;
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
-				new RedGPU.Primitive.Box(redGPUContext),
+				isBox ? new RedGPU.Primitive.Box(redGPUContext) : new RedGPU.Primitive.Sphere(redGPUContext, 0.5),
 				new RedGPU.Material.PhongMaterial(redGPUContext)
 			);
+			mesh.scaleX = mesh.scaleY = mesh.scaleZ = size;
 			mesh.material.color.setColorByHEX(`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`);
-			mesh.x = (Math.random() * 6) - 3;
-			mesh.y = 12;
-			mesh.z = (Math.random() * 6) - 3;
-			mesh.scaleX = 0.6;
-			mesh.scaleY = 0.6;
-			mesh.scaleZ = 0.6;
+			mesh.x = (Math.random() * 8) - 4;
+			mesh.y = 25;
+			mesh.z = (Math.random() * 8) - 4;
 			scene.addChild(mesh);
 			
 			const body = physicsEngine.createBody(mesh, {
 				type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
-				shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,
-				mass: 15 
+				shape: isBox ? RedGPU.Physics.PHYSICS_SHAPE.BOX : RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
+				mass: size * 10
 			});
+			// [KO] 빠른 낙하를 위해 초기 선속도 부여
+			// [EN] Apply initial linear velocity for fast falling
+			body.velocity = { x: 0, y: -20, z: 0 };
 			activeObjects.push({ mesh, body });
 			
-			// 플랫폼 강제 활성화 (졸음 방지)
-			platformBody.nativeBody.wakeUp();
-			
+			// [KO] 10초 후 씬에서 제거하여 자원 관리
+			// [EN] Remove from the scene after 10 seconds for resource management
 			setTimeout(() => {
 				const idx = activeObjects.findIndex(v => v.body === body);
 				if (idx > -1) {
@@ -183,65 +180,55 @@ RedGPU.init(
 			}, 10000);
 		};
 
-		/**
-		 * [KO] 씬 초기화 함수
-		 */
-		const resetScene = () => {
-			activeObjects.forEach(item => {
-				physicsEngine.removeBody(item.body);
-				scene.removeChild(item.mesh);
-			});
-			activeObjects.length = 0;
-			platformBody.nativeBody.setTranslation({ x: 0, y: 2, z: 0 }, true);
-			platformBody.nativeBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
-			platformBody.nativeBody.setAngvel({ x: 0, y: 0, z: 0 }, true);
-			platformBody.nativeBody.wakeUp();
-		};
+		// [KO] 1초 간격으로 물체 생성
+		// [EN] Create objects every 1 second
+		const spawnTimer = setInterval(spawnObject, 1000);
 
-		setInterval(createObject, 1200);
-
-		// [KO] 7. 렌더 루프
-		const render = () => {
+		// [KO] 7. 애니메이션 루프: 플랫폼의 움직임에 맞춰 스프링 선 연결 위치 실시간 갱신
+		// [EN] 7. Animation loop: Real-time update of spring line connection positions according to the platform's movement
+		const updateSpringLines = () => {
 			springLines.forEach((line, i) => {
 				const anchorMesh = anchorMeshList[i];
-				const xSign = (i === 0 || i === 3) ? -1 : 1;
-				const zSign = (i === 0 || i === 1) ? -1 : 1;
+				const pt = anchorPoints[i];
 				
-				// [KO] 플랫폼 모서리의 실시간 월드 좌표 계산
-				const worldPos = platform.localToWorld(4 * xSign, 0, 4 * zSign);
+				// [KO] 플랫폼의 로컬 모서리 좌표를 월드 좌표로 변환하여 선 연결
+				// [EN] Connect lines by converting platform's local corner coordinates to world coordinates
+				const localX = pt.x > 0 ? 0.5 : -0.5;
+				const localZ = pt.z > 0 ? 0.5 : -0.5;
+				const worldPos = platform.localToWorld(localX, 0, localZ);
 
 				line.removeAllPoint();
 				line.addPoint(anchorMesh.x, anchorMesh.y, anchorMesh.z);
 				line.addPoint(worldPos[0], worldPos[1], worldPos[2]);
 			});
 		};
-		const renderer = new RedGPU.Renderer();
-		renderer.start(redGPUContext, render);
 
-		renderTestPane(redGPUContext, platformBody, resetScene);
+		const renderer = new RedGPU.Renderer();
+		renderer.start(redGPUContext, updateSpringLines);
+
+		// [KO] 8. 테스트 UI 구성: 플랫폼 충격 주기 및 오브젝트 제거 기능
+		// [EN] 8. Set up test UI: Platform kick and object clearing functions
+		const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+		const pane = new Pane();
+		
+		const params = {
+			kick: () => {
+				platformBody.nativeBody.wakeUp();
+				platformBody.applyImpulse({ x: 0, y: 200, z: 0 });
+			},
+			reset: () => {
+				activeObjects.forEach(item => {
+					physicsEngine.removeBody(item.body);
+					scene.removeChild(item.mesh);
+				});
+				activeObjects.length = 0;
+			}
+		};
+
+		pane.addButton({ title: 'Kick Platform' }).on('click', params.kick);
+		pane.addButton({ title: 'Clear Objects' }).on('click', params.reset);
 	},
 	(failReason) => {
 		console.error(failReason);
 	}
 );
-
-/**
- * [KO] 테스트용 컨트롤 패널 생성
- */
-const renderTestPane = async (redGPUContext, platformBody, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	
-	pane.addButton({ title: 'KICK PLATFORM!' }).on('click', () => {
-		platformBody.nativeBody.wakeUp();
-		platformBody.applyImpulse({
-			x: (Math.random() * 100) - 50,
-			y: 50,
-			z: (Math.random() * 100) - 50
-		});
-	});
-
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
-};
