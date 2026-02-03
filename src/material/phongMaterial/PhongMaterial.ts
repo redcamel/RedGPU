@@ -118,7 +118,7 @@ interface PhongMaterial {
      * [KO] SSR(스크린 스페이스 리플렉션) 사용 여부
      * [EN] Whether to use SSR (Screen Space Reflection)
      */
-    useSSR: number
+    useSSR: number;
 }
 
 /**
@@ -154,6 +154,28 @@ class PhongMaterial extends ABitmapBaseMaterial {
      * [EN] Displacement scale (default: 1)
      */
     #displacementScale: number = 1
+
+    #textureOffset: [number, number] = [0, 0];
+    #textureScale: [number, number] = [1, 1];
+    dirtyTextureTransform: boolean = false
+
+    get textureOffset(): [number, number] {
+        return this.#textureOffset;
+    }
+
+    set textureOffset(value: [number, number]) {
+        this.dirtyTextureTransform = true
+        this.#textureOffset = value;
+    }
+
+    get textureScale(): [number, number] {
+        return this.#textureScale;
+    }
+
+    set textureScale(value: [number, number]) {
+        this.dirtyTextureTransform = true
+        this.#textureScale = value;
+    }
 
     /**
      * [KO] PhongMaterial 생성자

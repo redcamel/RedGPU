@@ -22,7 +22,7 @@ interface BitmapMaterial {
      * [KO] 비트맵 텍스처 샘플러
      * [EN] Bitmap texture sampler
      */
-    diffuseTextureSampler: Sampler
+    diffuseTextureSampler: Sampler;
 }
 
 /**
@@ -49,6 +49,28 @@ class BitmapMaterial extends ABitmapBaseMaterial {
      * [EN] Pipeline dirty status flag
      */
     dirtyPipeline: boolean = false
+    dirtyTextureTransform: boolean = false
+
+    #textureOffset: [number, number] = [0, 0];
+    #textureScale: [number, number] = [1, 1];
+
+    get textureOffset(): [number, number] {
+        return this.#textureOffset;
+    }
+
+    set textureOffset(value: [number, number]) {
+        this.dirtyTextureTransform = true
+        this.#textureOffset = value;
+    }
+
+    get textureScale(): [number, number] {
+        return this.#textureScale;
+    }
+
+    set textureScale(value: [number, number]) {
+        this.dirtyTextureTransform = true
+        this.#textureScale = value;
+    }
 
     /**
      * [KO] BitmapMaterial 생성자
@@ -81,5 +103,6 @@ DefineForFragment.defineByPreset(BitmapMaterial, [
     DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
     DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
 ])
+
 Object.freeze(BitmapMaterial)
 export default BitmapMaterial

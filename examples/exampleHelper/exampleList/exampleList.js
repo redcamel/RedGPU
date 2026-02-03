@@ -350,6 +350,15 @@ const ExampleList = [
                         },
                     },
                     {
+                        name: 'UV Transform',
+                        path: '3d/material/uvTransform',
+                        thumb: '3d/material/uvTransform/thumb.png',
+                        description: {
+                            ko: `재질의 텍스처 오프셋과 스케일을 조절하여 흐르는 효과나 타일링을 구현하는 방법을 테스트합니다.`,
+                            en: `Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.`
+                        },
+                    },
+                    {
                         name: 'Material Opacity',
                         path: '3d/material/opacity',
                         thumb: '3d/material/opacity/thumb.png',

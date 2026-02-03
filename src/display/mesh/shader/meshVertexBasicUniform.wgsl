@@ -12,4 +12,5 @@ struct VertexUniforms {
     useDisplacementTexture: u32,
     displacementScale: f32,
     disableJitter: u32,
+    uvTransform: vec4<f32>,
 };
