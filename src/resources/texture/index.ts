@@ -6,13 +6,15 @@
 import BitmapTexture from "./BitmapTexture";
 import CubeTexture from "./CubeTexture";
 import HDRTexture from "./hdr/HDRTexture";
-export  * from "./ibl";
+import HDRTextureCube from "./hdr/HDRTextureCube";
 import PackedTexture from "./packedTexture/PackedTexture";
 
 export * from "./noiseTexture";
+export * from "./ibl";
 export {
     BitmapTexture,
     CubeTexture,
     HDRTexture,
+    HDRTextureCube,
     PackedTexture
 }
