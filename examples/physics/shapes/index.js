@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Physics Shapes 예제
+ * [EN] Physics Shapes example
+ *
+ * [KO] 다양한 물리 형상(Box, Sphere, Cylinder, Capsule)을 생성하고 시뮬레이션하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create and simulate various physics shapes (Box, Sphere, Cylinder, Capsule).
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -71,6 +79,13 @@ RedGPU.init(
 		/**
 		 * [KO] 다양한 형상의 물리 객체 생성 함수 (현실적인 1~2m 스케일)
 		 * [EN] Helper function to create various shaped physics objects (realistic 1-2m scale)
+		 * @param {string} type
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} z
+		 * @param {string} color
+		 * @param {number} restitution
+		 * @param {number} friction
 		 */
 		const createPhysicalObject = (type, x, y, z, color, restitution = 0.5, friction = 0.5) => {
 			let geometry, shape;
@@ -159,6 +174,9 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성
  * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} resetScene
+ * @param {function} createPhysicalObject
  */
 const renderTestPane = async (redGPUContext, resetScene, createPhysicalObject) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

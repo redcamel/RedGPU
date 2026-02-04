@@ -3,6 +3,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
+/**
+ * [KO] Buoyancy 예제
+ * [EN] Buoyancy example
+ *
+ * [KO] 부력(Buoyancy) 시뮬레이션 예제입니다. 물체의 잠긴 깊이와 부피에 따라 위쪽 방향으로 힘(Impulse)을 가하고, 수중 저항(Damping)을 적용하여 현실적인 부력 효과를 구현하는 방법을 보여줍니다.
+ * [EN] Buoyancy simulation example. Shows how to implement realistic buoyancy effects by applying upward force (Impulse) based on the submerged depth and volume of an object, along with underwater resistance (Damping).
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -214,6 +222,10 @@ RedGPU.init(
 
 /**
  * [KO] 테스트용 컨트롤 패널 생성
+ * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} createObject
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, createObject, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

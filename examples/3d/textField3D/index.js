@@ -1,6 +1,9 @@
 /**
- * [KO] 3D 공간에서 TextField3D의 사용법과 빌보드, 스타일링 기능을 시연하는 예제입니다.
- * [EN] An example demonstrating the usage of TextField3D in 3D space, including features like billboard and styling.
+ * [KO] TextField3D 예제
+ * [EN] TextField3D example
+ *
+ * [KO] 3D 공간에서 TextField3D의 사용법과 빌보드, 스타일링 기능을 시연합니다.
+ * [EN] Demonstrates the usage of TextField3D in 3D space, including features like billboard and styling.
  * @packageDocumentation
  */
 import * as RedGPU from "../../../dist/index.js?t=1769835266959";

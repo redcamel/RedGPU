@@ -3,6 +3,14 @@ import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] SSAO 예제
+ * [EN] SSAO example
+ *
+ * [KO] Screen Space Ambient Occlusion (SSAO) 효과를 시연합니다.
+ * [EN] Demonstrates the Screen Space Ambient Occlusion (SSAO) effect.
+ */
+
 RedGPU.init(
     canvas,
     (redGPUContext) => {

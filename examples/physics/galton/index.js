@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Galton Board 예제
+ * [EN] Galton Board example
+ *
+ * [KO] 갈톤 보드를 시뮬레이션하여 정규 분포를 형성하는 과정을 보여줍니다.
+ * [EN] Simulates a Galton board to demonstrate the formation of a normal distribution.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -42,6 +50,13 @@ RedGPU.init(
 		/**
 		 * [KO] 정적 박스 생성 함수 (보드 프레임용)
 		 * [EN] Static box creation function (for board frame)
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} z
+		 * @param {number} w
+		 * @param {number} h
+		 * @param {number} d
+		 * @param {string} color
 		 */
 		const createStaticBox = (x, y, z, w, h, d, color = '#444444') => {
 			const mesh = new RedGPU.Display.Mesh(
@@ -124,7 +139,7 @@ RedGPU.init(
 				friction: 0.1,
 				linearDamping: 0.1
 			});
-			const ballInfo = { mesh: ballMesh, body };
+			const ballInfo = { mesh: ball, body };
 			activeBalls.push(ballInfo);
 
 			setTimeout(() => {
@@ -156,6 +171,14 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {number} intervalId
+ * @param {function} createBall
+ * @param {function} resetScene
+ */
 const renderTestPane = async (redGPUContext, intervalId, createBall, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

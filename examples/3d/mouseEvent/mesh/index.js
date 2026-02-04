@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769587130347";
 
+/**
+ * [KO] Mesh Mouse Event 예제
+ * [EN] Mesh Mouse Event example
+ *
+ * [KO] Mesh 객체에 대한 마우스 이벤트 처리를 보여줍니다.
+ * [EN] Demonstrates mouse event handling for Mesh objects.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -87,6 +95,15 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
     }
 );
 
+/**
+ * [KO] 샘플 메시를 생성합니다.
+ * [EN] Creates a sample mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {HTMLElement} infoBox
+ * @param {function} updateInfo
+ * @returns {{meshes: Array<RedGPU.Display.Mesh>, updateLayout: function}}
+ */
 const createSampleMesh = (redGPUContext, scene, infoBox, updateInfo) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
     const geometry = new RedGPU.Primitive.Box(redGPUContext);
@@ -142,6 +159,11 @@ const createSampleMesh = (redGPUContext, scene, infoBox, updateInfo) => {
 	return { meshes, updateLayout };
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
     const {
         setDebugButtons

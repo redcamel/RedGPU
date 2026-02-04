@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Group2D 예제
+ * [EN] Group2D example
+ *
+ * [KO] Group2D를 사용하여 2D 객체들을 그룹화하고 계층 구조를 관리하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to group 2D objects and manage hierarchy using Group2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -44,6 +52,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 루트 그룹을 생성합니다.
+ * [EN] Creates the root group.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Group2D}
+ */
 const createRootGroup = (redGPUContext, scene) => {
     const group = new RedGPU.Display.Group2D();
     group.x = redGPUContext.screenRectObject.width / 2;
@@ -53,6 +68,13 @@ const createRootGroup = (redGPUContext, scene) => {
     return group;
 };
 
+/**
+ * [KO] 부모 Sprite2D를 생성하여 그룹에 추가합니다.
+ * [EN] Creates a parent Sprite2D and adds it to the group.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Group2D} rootGroup
+ * @returns {RedGPU.Display.Sprite2D}
+ */
 const createParentSprite2D = (redGPUContext, rootGroup) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -67,6 +89,13 @@ const createParentSprite2D = (redGPUContext, rootGroup) => {
     return sprite2D;
 };
 
+/**
+ * [KO] 자식 Sprite2D를 생성하여 부모에 추가합니다.
+ * [EN] Creates a child Sprite2D and adds it to the parent.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} parent
+ * @returns {RedGPU.Display.Sprite2D}
+ */
 const createChildSprite2D = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -78,6 +107,14 @@ const createChildSprite2D = (redGPUContext, parent) => {
     return sprite2D;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Group2D} rootGroup
+ * @param {RedGPU.Display.Sprite2D} parent
+ * @param {RedGPU.Display.Sprite2D} child
+ */
 const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const pane = new Pane();

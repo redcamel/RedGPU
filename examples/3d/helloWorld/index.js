@@ -1,8 +1,8 @@
 import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 
 /**
- * [KO] Hello World 예제
- * [EN] Hello World example
+ * [KO] Hello World 3D 예제
+ * [EN] Hello World 3D example
  *
  * [KO] 가장 기본적인 RedGPU 3D 씬 구성 방법을 보여줍니다.
  * [EN] Demonstrates the most basic way to set up a RedGPU 3D scene.

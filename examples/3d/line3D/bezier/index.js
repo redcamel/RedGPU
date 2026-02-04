@@ -1,6 +1,14 @@
 // RedGPU 사용을 위한 모듈 임포트
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Line3D (Bezier) 예제
+ * [EN] Line3D (Bezier) example
+ *
+ * [KO] Line3D를 사용하여 베지어 곡선을 그리는 방법을 보여줍니다.
+ * [EN] Demonstrates how to draw Bezier curves using Line3D.
+ */
+
 /* 1. 캔버스 생성 */
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -45,6 +53,17 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 샘플 Line3D를 생성합니다.
+ * [EN] Creates a sample Line3D.
+ * @param {string} title
+ * @param {RedGPU.Display.View3D} view
+ * @param {number} pointsPerLayer
+ * @param {number} posX
+ * @param {number} posZ
+ * @param {string} baseColor
+ * @param {boolean} [useRainbowColor=false]
+ */
 function createSampleLine3D(title, view, pointsPerLayer, posX, posZ, baseColor, useRainbowColor = false) {
     // 뷰에서 씬(Scene) 및 RedGPU Context를 참조
     const {scene, redGPUContext} = view;

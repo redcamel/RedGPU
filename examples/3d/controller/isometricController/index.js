@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Isometric Controller 예제
+ * [EN] Isometric Controller example
+ *
+ * [KO] 아이소메트릭 뷰(직교 투영)를 제공하는 카메라 컨트롤러의 사용법을 보여줍니다.
+ * [EN] Demonstrates how to use a camera controller that provides an isometric view (orthographic projection).
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -67,6 +75,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Camera.IsometricController} controller
+ * @param {RedGPU.Display.Mesh} targetMesh
+ */
 const renderTestPane = async (redGPUContext, controller, targetMesh) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

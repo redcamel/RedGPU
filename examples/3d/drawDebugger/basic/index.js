@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Draw Debugger 예제
+ * [EN] Draw Debugger example
+ *
+ * [KO] RedGPU의 디버깅 도구를 사용하여 광원, 메시, 경계 상자 등을 시각화하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to use RedGPU's debugging tools to visualize lights, meshes, bounding boxes, and more.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -118,6 +126,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769835266959" );

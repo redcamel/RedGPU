@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] SpriteSheet2D Mouse Event 예제
+ * [EN] SpriteSheet2D Mouse Event example
+ *
+ * [KO] SpriteSheet2D 객체에서 발생하는 마우스 이벤트를 처리하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to handle mouse events on SpriteSheet2D objects.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -96,6 +104,13 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
     }
 );
 
+/**
+ * [KO] 샘플 SpriteSheet2D 객체들을 생성하고 이벤트를 등록합니다.
+ * [EN] Creates sample SpriteSheet2D objects and registers events.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {function} updateInfo
+ */
 const createSampleSprite2D = async (redGPUContext, scene, updateInfo) => {
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
@@ -122,6 +137,11 @@ const createSampleSprite2D = async (redGPUContext, scene, updateInfo) => {
     });
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");

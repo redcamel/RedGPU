@@ -5,6 +5,14 @@ import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
 
+/**
+ * [KO] Old Bloom 예제
+ * [EN] Old Bloom example
+ *
+ * [KO] 구버전 블룸(Bloom) 효과를 시뮬레이션하는 포스트 이펙트 예제입니다.
+ * [EN] Post effect example simulating an old version bloom effect.
+ */
+
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
 RedGPU.init(

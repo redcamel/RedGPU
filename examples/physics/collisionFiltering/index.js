@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Collision Filtering 예제
+ * [EN] Collision Filtering example
+ *
+ * [KO] 충돌 필터링을 사용하여 특정 그룹 간의 충돌만 허용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to use collision filtering to allow collisions only between specific groups.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -120,7 +128,7 @@ RedGPU.init(
 			const bitmask = (membership << 16) | filter;
 			body.nativeCollider.setCollisionGroups(bitmask);
 
-			const ballInfo = { mesh, body };
+			const ballInfo = { mesh: ball, body };
 			activeBalls.push(ballInfo);
 			setTimeout(() => {
 				const idx = activeBalls.indexOf(ballInfo);
@@ -155,6 +163,12 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} resetScene
+ */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

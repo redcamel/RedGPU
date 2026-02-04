@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Character Controller 예제
+ * [EN] Character Controller example
+ *
+ * [KO] 물리 기반 캐릭터 컨트롤러의 기본 기능(이동, 점프, 지형 충돌)을 보여줍니다.
+ * [EN] Demonstrates the basic features of a physics-based character controller (movement, jump, terrain collision).
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -184,6 +192,12 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} resetCharacter
+ */
 const renderTestPane = async (redGPUContext, resetCharacter) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

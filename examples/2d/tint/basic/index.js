@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Tint Basic 예제
+ * [EN] Tint Basic example
+ *
+ * [KO] Sprite2D에 틴트를 적용하는 기본적인 방법을 보여줍니다.
+ * [EN] Demonstrates the basic method of applying tint to a Sprite2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -60,6 +68,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} sprite
+ */
 const renderTestPane = async (redGPUContext, sprite) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const pane = new Pane();

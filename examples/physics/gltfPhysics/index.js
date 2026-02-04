@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] GLTF Physics 예제
+ * [EN] GLTF Physics example
+ *
+ * [KO] GLTF 모델을 로드하고 물리 엔진을 적용하여 충돌 처리를 수행하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to load GLTF models and apply the physics engine to handle collisions.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -134,6 +142,12 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} resetScene
+ */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

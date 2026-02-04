@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] SpriteSheet2D Basic 예제
+ * [EN] SpriteSheet2D Basic example
+ *
+ * [KO] SpriteSheet2D의 기본 사용법과 애니메이션 제어 방법을 보여줍니다.
+ * [EN] Demonstrates the basic usage and animation control of SpriteSheet2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -54,6 +62,12 @@ RedGPU.init(canvas, (redGPUContext) => {
     document.body.appendChild(errorMessage);
 });
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (scene, redGPUContext) => {
     const {
         setDebugButtons,

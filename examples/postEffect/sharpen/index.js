@@ -5,6 +5,14 @@ import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
 
+/**
+ * [KO] Sharpen 예제
+ * [EN] Sharpen example
+ *
+ * [KO] 샤픈(Sharpen) 포스트 이펙트를 시연합니다.
+ * [EN] Demonstrates sharpen post effect.
+ */
+
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
 RedGPU.init(

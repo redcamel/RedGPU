@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js";
 
+/**
+ * [KO] UV Transform 예제
+ * [EN] UV Transform example
+ *
+ * [KO] 텍스처 UV 좌표의 오프셋(이동)과 스케일(크기)을 변환하는 기능을 시연합니다.
+ * [EN] Demonstrates the function of transforming the offset (move) and scale (size) of texture UV coordinates.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

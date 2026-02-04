@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Mesh Bounding Box 예제
+ * [EN] Mesh Bounding Box example
+ *
+ * [KO] 메시의 바운딩 박스(AABB, OBB)를 시각화하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to visualize mesh bounding boxes (AABB, OBB).
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

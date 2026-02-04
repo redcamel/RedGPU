@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] HeightField 예제
+ * [EN] HeightField example
+ *
+ * [KO] 높이 맵 데이터를 사용하여 지형을 생성하고 물리 엔진에 HeightField 콜라이더로 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a terrain using height map data and apply it as a HeightField collider in the physics engine.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -184,6 +192,10 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성 함수
  * [EN] Function to create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RapierPhysics} physicsEngine
+ * @param {function} spawnSpheres
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, physicsEngine, spawnSpheres, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

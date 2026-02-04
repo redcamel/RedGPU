@@ -3,6 +3,14 @@ import {
     loadingProgressInfoHandler
 } from '../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1769835266959'
 
+/**
+ * [KO] High Morph Target Performance 예제
+ * [EN] High Morph Target Performance example
+ *
+ * [KO] 다수의 모프 타겟 애니메이션 객체를 렌더링하여 성능을 테스트합니다.
+ * [EN] Tests performance by rendering a large number of morph target animation objects.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -45,7 +53,13 @@ let num = 0;
 const gridSpacingV = 5; // 격자 간격 (고정)
 const gridSpacingH = 2; // 격자 간격 (고정)
 
-// 격자 위치 계산 함수
+/**
+ * [KO] 격자 위치를 계산합니다.
+ * [EN] Calculates grid position.
+ * @param {number} index
+ * @param {number} totalCount
+ * @returns {{x: number, z: number}}
+ */
 function getGridPosition(index, totalCount) {
     // 전체 개수를 기준으로 격자 크기 계산
     const gridSize = Math.ceil(Math.sqrt(totalCount));
@@ -61,7 +75,11 @@ function getGridPosition(index, totalCount) {
     return {x, z};
 }
 
-// 모든 메시의 위치를 재계산하는 함수
+/**
+ * [KO] 모든 메시의 위치를 재배치합니다.
+ * [EN] Redistributes the positions of all meshes.
+ * @param {RedGPU.Display.Scene} scene
+ */
 function redistributeGrid(scene) {
     const meshes = scene.children.filter(child => child); // 유효한 메시들만
     const totalCount = meshes.length;
@@ -76,6 +94,12 @@ function redistributeGrid(scene) {
 
 let first = true
 
+/**
+ * [KO] GLTF 모델을 로드합니다.
+ * [EN] Loads a GLTF model.
+ * @param {RedGPU.Display.View3D} view
+ * @param {string} url
+ */
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
@@ -95,6 +119,12 @@ function loadGLTF(view, url) {
 }
 
 let pane
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

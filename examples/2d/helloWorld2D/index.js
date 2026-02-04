@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Hello World 2D 예제
+ * [EN] Hello World 2D example
+ *
+ * [KO] RedGPU 2D 씬의 기본적인 구성과 Sprite2D 생성 방법을 보여줍니다.
+ * [EN] Demonstrates the basic setup of a RedGPU 2D scene and how to create a Sprite2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -86,6 +94,11 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {setRedGPUTest_pane} = await import("../../exampleHelper/createExample/panes/index.js?t=1769835266959");

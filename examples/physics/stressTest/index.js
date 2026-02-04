@@ -3,6 +3,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
+/**
+ * [KO] Stress Test 예제
+ * [EN] Stress Test example
+ *
+ * [KO] 수천 개의 물리 객체를 생성하여 물리 엔진의 성능을 테스트합니다.
+ * [EN] Tests the performance of the physics engine by creating thousands of physics objects.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -117,6 +125,11 @@ RedGPU.init(
 
 /**
  * [KO] 테스트용 컨트롤 패널 생성
+ * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} createBall
+ * @param {function} resetScene
+ * @param {Array<object>} activeObjects
  */
 const renderTestPane = async (redGPUContext, createBall, resetScene, activeObjects) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

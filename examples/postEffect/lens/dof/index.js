@@ -4,6 +4,14 @@ import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
 
+/**
+ * [KO] Depth of Field (DOF) 예제
+ * [EN] Depth of Field (DOF) example
+ *
+ * [KO] 피사계 심도(Depth of Field) 효과를 시뮬레이션하는 포스트 이펙트 예제입니다.
+ * [EN] Post effect example demonstrating Depth of Field (DOF) simulation.
+ */
+
 // 2. Initialize RedGPU
 RedGPU.init(
     canvas,

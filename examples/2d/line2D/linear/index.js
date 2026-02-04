@@ -1,6 +1,14 @@
 // RedGPU 사용을 위한 모듈 임포트
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Line2D (Linear) 예제
+ * [EN] Line2D (Linear) example
+ *
+ * [KO] Line2D를 사용하여 직선을 그리는 방법을 보여줍니다.
+ * [EN] Demonstrates how to draw straight lines using Line2D.
+ */
+
 /* 1. 캔버스 생성 */
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);

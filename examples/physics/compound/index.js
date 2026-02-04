@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Compound Shapes 예제
+ * [EN] Compound Shapes example
+ *
+ * [KO] 여러 개의 기본 형상을 결합하여 복합적인 물리 형상을 만드는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create complex physics shapes by combining multiple primitive shapes.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -59,6 +67,9 @@ RedGPU.init(
 		/**
 		 * [KO] 아령 생성 함수: 현실적인 크기(전체 약 1.5m)로 설정
 		 * [EN] Function to create a dumbbell: Set to realistic size (approx. 1.5m total)
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} z
 		 */
 		const createDumbbell = (x, y, z) => {
 			// [KO] 1. 부모 메시(실린더) 생성: 반지름 0.05, 높이 1.0 (현실적인 손잡이 크기)
@@ -157,6 +168,10 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성
  * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} createDumbbell
+ * @param {function} resetScene
+ * @param {Array<object>} activeDumbbells
  */
 const renderTestPane = async (redGPUContext, createDumbbell, resetScene, activeDumbbells) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

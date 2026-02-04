@@ -1,55 +1,37 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
 /**
- * [KO] 캔버스 생성 및 문서 추가
- * [EN] Create canvas and append to document
+ * [KO] Box Primitive 예제
+ * [EN] Box Primitive example
+ *
+ * [KO] Box 프리미티브 생성 및 치수(width, height, depth)와 세그먼트 속성을 실시간으로 제어하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a Box primitive and control its dimensions (width, height, depth) and segment properties in real-time.
  */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-/**
- * [KO] RedGPU 초기화
- * [EN] Initialize RedGPU
- */
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        /**
-         * [KO] 카메라 컨트롤러 설정 (OrbitController)
-         * [EN] Set up camera controller (OrbitController)
-         */
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 10; // [KO] 사용자 설정 거리 유지 [EN] Preserved user-defined distance
+        controller.distance = 10;
         controller.tilt = 0;
         controller.speedDistance = 0.3;
 
-        /**
-         * [KO] 씬 및 뷰 생성
-         * [EN] Create Scene and View
-         */
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        /**
-         * [KO] 프리미티브 생성 및 배치
-         * [EN] Create and place primitives
-         */
         createPrimitive(redGPUContext, scene);
 
-        /**
-         * [KO] 렌더러 시작
-         * [EN] Start Renderer
-         */
         const renderer = new RedGPU.Renderer(redGPUContext);
-        renderer.start(redGPUContext, (time) => {
-            // [KO] 매 프레임 실행될 로직 [EN] Logic to execute every frame
-        });
+        const render = (time) => {
+            // [KO] 매 프레임 실행될 로직
+            // [EN] Logic per frame
+        };
+        renderer.start(redGPUContext, render);
 
-        /**
-         * [KO] 테스트 패널(Tweakpane) 렌더링
-         * [EN] Render test pane (Tweakpane)
-         */
         renderTestPane(redGPUContext);
     },
     (failReason) => {
@@ -61,21 +43,13 @@ RedGPU.init(
 );
 
 /**
- * [KO] Box 프리미티브들을 생성하고 사용자가 설정한 배치대로 씬에 추가합니다.
- * [EN] Creates Box primitives and adds them to the scene following the user's specific layout.
+ * [KO] Box 프리미티브들을 생성하고 정돈된 레이아웃으로 씬에 배치합니다.
+ * [EN] Creates Box primitives and places them in the scene with an organized layout.
  *
- * @param redGPUContext -
- * [KO] RedGPU 컨텍스트
- * [EN] RedGPU context
- * @param scene -
- * [KO] 프리미티브가 추가될 씬
- * [EN] Scene where primitives will be added
+ * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+ * @param {RedGPU.Display.Scene} scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
  */
 const createPrimitive = (redGPUContext, scene) => {
-    /**
-     * [KO] 다양한 렌더링 모드(Solid, Wireframe, Point)를 위한 머티리얼 정의
-     * [EN] Define materials for various rendering modes (Solid, Wireframe, Point)
-     */
     const boxMaterials = {
         solid: new RedGPU.Material.BitmapMaterial(
             redGPUContext,
@@ -85,14 +59,9 @@ const createPrimitive = (redGPUContext, scene) => {
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    /**
-     * [KO] 공통으로 사용할 Box 지오메트리 생성
-     * [EN] Create common Box geometry
-     */
     const boxGeometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1, 2, 2, 2);
 
-    // 배치 설정
-    const gap = 3.5; // [KO] 박스 간 간격 [EN] Spacing between boxes
+    const gap = 3.5;
     const boxes = [
         {material: boxMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
         {material: boxMaterials.solid, position: [0, 0, 0]},
@@ -100,39 +69,31 @@ const createPrimitive = (redGPUContext, scene) => {
     ];
 
     boxes.forEach(({material, position, topology}) => {
-        /**
-         * [KO] 메시 생성 및 씬 추가
-         * [EN] Create mesh and add to scene
-         */
         const box = new RedGPU.Display.Mesh(redGPUContext, boxGeometry, material);
         if (topology) box.primitiveState.topology = topology;
         box.setPosition(...position);
         scene.addChild(box);
 
-        /**
-         * [KO] 상단 속성 라벨 생성 (사용자 설정값 유지)
-         * [EN] Create property label on top (Preserving user values)
-         */
+        // [KO] 토폴로지 이름 라벨 생성
+        // [EN] Create topology name label
         const topologyName = new RedGPU.Display.TextField3D(redGPUContext);
-        topologyName.setPosition(position[0], 1.5, position[2]); // [KO] 사용자 설정 위치 [EN] Preserved position
+        topologyName.setPosition(position[0], 1.5, position[2]);
         topologyName.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         topologyName.color = '#ffffff';
-        topologyName.fontSize = 14; // [KO] 속성 타이틀은 작게 설정 [EN] Property titles are set small
-        topologyName.worldSize = 0.7; // [KO] 사용자 설정 크기 [EN] Preserved worldSize
+        topologyName.fontSize = 14;
+        topologyName.worldSize = 0.7;
         scene.addChild(topologyName);
     });
 
-    /**
-     * [KO] 메인 타이틀 생성 (사용자 설정값 유지)
-     * [EN] Create main title (Preserving user values)
-     */
+    // [KO] 타이틀 라벨 생성
+    // [EN] Create title label
     const titleText = new RedGPU.Display.TextField3D(redGPUContext);
-    titleText.setPosition(0, -1.8, 0); // [KO] 사용자 설정 위치 [EN] Preserved position
+    titleText.setPosition(0, -1.8, 0);
     titleText.text = 'Customizable Box Primitive';
     titleText.color = '#ffffff';
     titleText.fontSize = 48; 
     titleText.fontWeight = 500;
-    titleText.worldSize = 1.3; // [KO] 사용자 설정 크기 [EN] Preserved worldSize
+    titleText.worldSize = 1.3;
     scene.addChild(titleText);
 };
 
@@ -140,9 +101,7 @@ const createPrimitive = (redGPUContext, scene) => {
  * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
  * [EN] Initializes the Tweakpane GUI for testing.
  *
- * @param redGPUContext -
- * [KO] RedGPU 컨텍스트
- * [EN] RedGPU context
+ * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
  */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
@@ -150,10 +109,6 @@ const renderTestPane = async (redGPUContext) => {
     setDebugButtons(RedGPU, redGPUContext)
     const pane = new Pane();
 
-    /**
-     * [KO] 박스 치수 및 세그먼트 설정 객체
-     * [EN] Box dimensions and segments configuration object
-     */
     const config = {
         width: 1,
         height: 1,
@@ -164,8 +119,8 @@ const renderTestPane = async (redGPUContext) => {
     };
 
     /**
-     * [KO] 입력된 설정값에 따라 실시간으로 Box 지오메트리를 업데이트합니다.
-     * [EN] Updates the Box geometry in real-time based on the configured values.
+     * [KO] 설정값 변경 시 Box 지오메트리를 재생성하여 업데이트합니다.
+     * [EN] Recreates and updates the Box geometry when configuration values change.
      */
     const updateBoxGeometry = () => {
         const meshList = redGPUContext.viewList[0].scene.children;
@@ -180,7 +135,6 @@ const renderTestPane = async (redGPUContext) => {
         );
 
         meshList.forEach((mesh) => {
-            // [KO] 라벨 객체를 제외한 박스 메시들의 지오메트리만 교체 [EN] Replace geometry only for box meshes, excluding labels
             if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
                 mesh.geometry = newGeometry;
             }
@@ -189,18 +143,10 @@ const renderTestPane = async (redGPUContext) => {
 
     const boxFolder = pane.addFolder({title: 'Box Dimensions', expanded: true});
     
-    /**
-     * [KO] 치수 설정 바인딩
-     * [EN] Bind dimension settings
-     */
     ['width', 'height', 'depth'].forEach(prop => {
         boxFolder.addBinding(config, prop, {min: 0.1, max: 5, step: 0.1}).on('change', updateBoxGeometry);
     });
 
-    /**
-     * [KO] 세그먼트 설정 바인딩
-     * [EN] Bind segment settings
-     */
     ['segmentX', 'segmentY', 'segmentZ'].forEach(prop => {
         boxFolder.addBinding(config, prop, {min: 1, max: 15, step: 1}).on('change', updateBoxGeometry);
     });

@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Mesh Collider 예제
+ * [EN] Mesh Collider example
+ *
+ * [KO] 메시 콜라이더를 사용하여 복잡한 지형과의 충돌 처리를 보여줍니다.
+ * [EN] Demonstrates collision handling with complex terrain using mesh colliders.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -179,6 +187,8 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성
  * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

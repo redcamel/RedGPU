@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Joints 예제
+ * [EN] Joints example
+ *
+ * [KO] 물리 조인트(Joint)를 사용하여 물체를 연결하고 사슬 구조를 만드는 방법을 보여줍니다.
+ * [EN] Demonstrates how to connect objects using physics joints and create a chain structure.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -87,6 +95,9 @@ RedGPU.init(
 		/**
 		 * [KO] 조인트 생성 헬퍼: 명시적으로 spherical 메서드 사용
 		 * [EN] Joint creation helper: Explicitly use the spherical method
+		 * @param {object} a1
+		 * @param {object} a2
+		 * @returns {object}
 		 */
 		const createJointData = (a1, a2) => {
 			const JD = RAPIER.JointData;
@@ -188,6 +199,10 @@ RedGPU.init(
 
 /**
  * [KO] 테스트용 컨트롤 패널 생성
+ * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} getBigBallBody
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, getBigBallBody, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

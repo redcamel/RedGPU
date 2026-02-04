@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Triggers 예제
+ * [EN] Triggers example
+ *
+ * [KO] 물리 트리거(Trigger)를 사용하여 물체의 진입을 감지하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to detect object entry using a physics trigger.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -175,6 +183,10 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성
  * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.Display.Mesh} triggerMesh
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, scene, triggerMesh, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

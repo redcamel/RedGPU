@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Prismatic Joint 예제
+ * [EN] Prismatic Joint example
+ *
+ * [KO] 프리즈매틱 조인트를 사용하여 직선 운동을 제한하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to use a prismatic joint to constrain linear motion.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -206,6 +214,9 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성
  * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {object} platformBody
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, platformBody, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

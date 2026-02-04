@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] IBL Test 예제
+ * [EN] IBL Test example
+ *
+ * [KO] HDR 이미지를 사용한 이미지 기반 조명(IBL)을 테스트하는 예제입니다.
+ * [EN] Example testing Image Based Lighting (IBL) using HDR images.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -54,6 +62,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] GLTF 모델을 로드합니다.
+ * [EN] Loads a GLTF model.
+ * @param {RedGPU.Display.View3D} view
+ * @param {string} url
+ */
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
 
@@ -105,6 +119,12 @@ function loadGLTF(view, url) {
     );
 }
 
+/**
+ * [KO] IBL을 생성하고 스카이박스를 설정합니다.
+ * [EN] Creates IBL and sets the skybox.
+ * @param {RedGPU.Display.View3D} view
+ * @param {string|string[]} src
+ */
 const createIBL = (view, src) => {
     const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
     const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
@@ -112,6 +132,11 @@ const createIBL = (view, src) => {
     view.skybox = newSkybox;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (targetView) => {
     const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959" );
     const pane = new Pane();

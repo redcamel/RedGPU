@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] TextField2D Basic 예제
+ * [EN] TextField2D Basic example
+ *
+ * [KO] TextField2D의 기본 사용법과 스타일링 옵션을 보여줍니다.
+ * [EN] Demonstrates the basic usage and styling options of TextField2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -57,6 +65,12 @@ RedGPU.init(canvas, (redGPUContext) => {
     document.body.appendChild(errorMessage);
 });
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (scene, redGPUContext) => {
     const {
         setDebugButtons,

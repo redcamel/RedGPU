@@ -4,6 +4,14 @@ import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Instanced Mesh (Sphere) 예제
+ * [EN] Instanced Mesh (Sphere) example
+ *
+ * [KO] 구체 형태의 인스턴싱 메시 생성 및 렌더링 방법을 보여줍니다.
+ * [EN] Demonstrates instanced mesh creation and rendering using spheres.
+ */
+
 // 2. Initialize RedGPU
 RedGPU.init(
     canvas,
@@ -67,6 +75,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트 씬을 생성하고 GUI를 설정합니다.
+ * [EN] Creates the test scene and sets up the GUI.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.Material.PhongMaterial} material
+ */
 async function createTest(redGPUContext, scene, material) {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
 

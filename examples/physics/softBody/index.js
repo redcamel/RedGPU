@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Soft Body 예제
+ * [EN] Soft Body example
+ *
+ * [KO] 스프링 조인트와 메쉬를 사용하여 천(Cloth)과 같은 소프트 바디를 시뮬레이션하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to simulate a soft body like cloth using spring joints and meshes.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -245,6 +253,11 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성 함수
  * [EN] Function to create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} clothMesh
+ * @param {function} spawnObject
+ * @param {function} windBlast
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, clothMesh, spawnObject, windBlast, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

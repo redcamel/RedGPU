@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js";
 
+/**
+ * [KO] Sprite3D Mouse Event 예제
+ * [EN] Sprite3D Mouse Event example
+ *
+ * [KO] Sprite3D 객체에서 발생하는 마우스 이벤트를 처리하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to handle mouse events on Sprite3D objects.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -87,6 +95,15 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
     }
 );
 
+/**
+ * [KO] 샘플 Sprite3D를 생성합니다.
+ * [EN] Creates sample Sprite3D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {HTMLElement} infoBox
+ * @param {function} updateInfo
+ * @returns {{sprites: Array<RedGPU.Display.Sprite3D>, updateLayout: function}}
+ */
 const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
     const sprites = [];
@@ -142,6 +159,12 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
     return { sprites, updateLayout };
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const renderTestPane = async (redGPUContext, scene) => {
     const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const pane = new Pane();

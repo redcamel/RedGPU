@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js";
 
+/**
+ * [KO] Raycasting 예제
+ * [EN] Raycasting example
+ *
+ * [KO] 레이캐스팅을 사용하여 3D 객체와의 상호작용을 감지하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to detect interaction with 3D objects using raycasting.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -107,6 +115,7 @@ RedGPU.init(
 /**
  * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
  * [EN] Initializes the Tweakpane GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

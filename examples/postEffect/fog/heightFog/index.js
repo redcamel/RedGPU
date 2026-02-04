@@ -3,6 +3,14 @@ import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
 
+/**
+ * [KO] Height Fog 예제
+ * [EN] Height Fog example
+ *
+ * [KO] 포스트 이펙트를 사용하여 높이 기반 안개(Height Fog) 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply height-based fog effects using post effects.
+ */
+
 RedGPU.init(
     canvas,
     (redGPUContext) => {
@@ -74,6 +82,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 지형 레벨 씬을 생성합니다.
+ * [EN] Creates a ground-level scene.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 function createGroundLevelScene(redGPUContext, scene) {
     const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 1000, 1000);
     const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
@@ -266,6 +280,15 @@ function createGroundLevelScene(redGPUContext, scene) {
     });
 }
 
+/**
+ * [KO] Height Fog 제어 패널을 생성합니다.
+ * [EN] Creates a control panel for Height Fog.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} view
+ * @param {RedGPU.PostEffect.HeightFog} heightFog
+ * @param {RedGPU.Camera.OrbitController} controller
+ * @param {function} toggleAutoRotate
+ */
 async function createHeightFogControlPanel(redGPUContext, view, heightFog, controller, toggleAutoRotate) {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
 

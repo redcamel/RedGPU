@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Raycast Vehicle 예제
+ * [EN] Raycast Vehicle example
+ *
+ * [KO] 레이캐스트를 이용한 차량 시뮬레이션(서스펜션, 마찰력 등)을 보여줍니다.
+ * [EN] Demonstrates vehicle simulation using raycasting (suspension, friction, etc.).
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -201,6 +209,12 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {object} chassisBody
+ */
 const renderTestPane = async (redGPUContext, chassisBody) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

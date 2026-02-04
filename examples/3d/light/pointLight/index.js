@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Point Light 예제
+ * [EN] Point Light example
+ *
+ * [KO] Point Light의 사용법과 속성 제어 방법을 보여줍니다.
+ * [EN] Demonstrates the usage and property control of Point Light.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -34,6 +42,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] Point Light를 생성합니다.
+ * [EN] Creates a Point Light.
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Light.PointLight}
+ */
 const createPointLight = (scene) => {
     const intensity = 1;
     const light = new RedGPU.Light.PointLight('#fff', intensity);
@@ -47,6 +61,12 @@ const createPointLight = (scene) => {
     return light;
 };
 
+/**
+ * [KO] 샘플 메시들을 생성합니다.
+ * [EN] Creates sample meshes.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createSampleMeshes = (redGPUContext, scene) => {
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(
@@ -71,6 +91,12 @@ const createSampleMeshes = (redGPUContext, scene) => {
     }
 };
 
+/**
+ * [KO] 조명 제어용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for light control.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Light.PointLight} light
+ */
 const renderTestPaneWithLightControl = async (redGPUContext, light) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const pane = new Pane();

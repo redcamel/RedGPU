@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Sprite2D Basic 예제
+ * [EN] Sprite2D Basic example
+ *
+ * [KO] Sprite2D의 기본 사용법과 속성 제어 방법을 보여줍니다.
+ * [EN] Demonstrates the basic usage and property control of Sprite2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -48,6 +56,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} sprite2D
+ */
 const renderTestPane = async (redGPUContext, sprite2D) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

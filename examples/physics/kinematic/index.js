@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Kinematic 예제
+ * [EN] Kinematic example
+ *
+ * [KO] 키네마틱(Kinematic) 물리 바디를 사용하여 사용자가 직접 제어하는 움직이는 장애물을 구현하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to implement a user-controlled moving obstacle using kinematic physics bodies.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -133,6 +141,12 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} resetScene
+ */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js");

@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Skybox With IBL 예제
+ * [EN] Skybox With IBL example
+ *
+ * [KO] IBL(Image Based Lighting)을 사용하여 스카이박스를 생성하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a skybox using IBL (Image Based Lighting).
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -37,12 +45,23 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] IBL을 생성하고 스카이박스를 설정합니다.
+ * [EN] Creates IBL and sets the skybox.
+ * @param {RedGPU.Display.View3D} view
+ * @param {string} src
+ */
 const createIBL = (view, src) => {
     const newIbl = new RedGPU.Resource.IBL(view.redGPUContext, src);
     const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, newIbl.environmentTexture);
     view.skybox = newSkybox;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.Display.View3D} view
+ */
 const renderTestPane = async (view) => {
     const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959" );
     const pane = new Pane();

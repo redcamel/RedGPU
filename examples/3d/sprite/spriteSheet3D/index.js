@@ -1,6 +1,9 @@
 /**
- * [KO] 3D 공간에서 SpriteSheet3D의 사용법과 빌보드, 픽셀 사이즈 모드 등의 기능을 시연하는 예제입니다.
- * [EN] An example demonstrating the usage of SpriteSheet3D in 3D space, including features like billboard and pixel size modes.
+ * [KO] SpriteSheet3D 예제
+ * [EN] SpriteSheet3D example
+ *
+ * [KO] 3D 공간에서 SpriteSheet3D의 사용법과 빌보드, 픽셀 사이즈 모드 등의 기능을 시연합니다.
+ * [EN] Demonstrates the usage of SpriteSheet3D in 3D space, including features like billboard and pixel size modes.
  * @packageDocumentation
  */
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";

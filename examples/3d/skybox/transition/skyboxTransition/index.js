@@ -3,6 +3,14 @@ import * as RedGPU from "../../../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Skybox Transition 예제
+ * [EN] Skybox Transition example
+ *
+ * [KO] 스카이박스 간의 부드러운 전환 효과를 시연합니다.
+ * [EN] Demonstrates smooth transitions between skyboxes.
+ */
+
 // 🎨 여러 텍스처 옵션 정의
 const textureOptions = [
     {
@@ -60,6 +68,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 초기 스카이박스를 생성합니다.
+ * [EN] Creates the initial skybox.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @returns {RedGPU.Display.SkyBox}
+ */
 const createSkybox = (redGPUContext) => {
     // 기본 큐브 텍스처로 시작
     const initialOption = textureOptions[0];
@@ -76,6 +90,12 @@ const createTexture = (redGPUContext, option) => {
     }
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.Display.View3D} targetView
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (targetView, redGPUContext) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959");
     const pane = new Pane();

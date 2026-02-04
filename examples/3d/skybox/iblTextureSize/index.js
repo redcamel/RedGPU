@@ -5,6 +5,14 @@ import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
 
+/**
+ * [KO] IBL Texture Size 예제
+ * [EN] IBL Texture Size example
+ *
+ * [KO] IBL 텍스처 크기에 따른 렌더링 품질 차이를 비교합니다.
+ * [EN] Compares rendering quality based on IBL texture size.
+ */
+
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
 RedGPU.init(
@@ -110,6 +118,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] GLTF 모델을 로드합니다.
+ * [EN] Loads a GLTF model.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {string} url
+ */
 function loadGLTF(redGPUContext, scene, url) {
 
     let mesh
@@ -122,6 +137,12 @@ function loadGLTF(redGPUContext, scene, url) {
     )
 }
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1769835266959');

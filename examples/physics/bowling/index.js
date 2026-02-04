@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Bowling 예제
+ * [EN] Bowling example
+ *
+ * [KO] 물리 엔진을 사용하여 볼링 시뮬레이션을 구현합니다.
+ * [EN] Implements a bowling simulation using the physics engine.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -135,6 +143,8 @@ RedGPU.init(
 		/**
 		 * [KO] 볼링공 투구 (실제 규격: 지름 21.8cm, 무게 약 7kg)
 		 * [EN] Throwing bowling ball (Real Specs: Diameter 21.8cm, Weight approx. 7kg)
+		 * @param {number} power
+		 * @param {number} aim
 		 */
 		const throwBall = (power, aim) => {
 			const ballMesh = new RedGPU.Display.Mesh(
@@ -176,6 +186,13 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} throwBall
+ * @param {function} resetGame
+ */
 const renderTestPane = async (redGPUContext, throwBall, resetGame) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

@@ -3,6 +3,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
+/**
+ * [KO] Explosion 예제
+ * [EN] Explosion example
+ *
+ * [KO] 폭발 효과를 시뮬레이션하여 주변의 물리 객체들에 힘을 가하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to simulate an explosion effect by applying force to surrounding physics objects.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -82,6 +90,12 @@ RedGPU.init(
 	(failReason) => console.error(failReason)
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {Array<object>} activeBoxes
+ */
 const renderTestPane = async (redGPUContext, activeBoxes) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

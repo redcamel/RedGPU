@@ -5,6 +5,14 @@ import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
 
+/**
+ * [KO] Chromatic Aberration 예제
+ * [EN] Chromatic Aberration example
+ *
+ * [KO] 포스트 이펙트를 사용하여 색수차(Chromatic Aberration) 효과를 시연합니다.
+ * [EN] Demonstrates the chromatic aberration post effect.
+ */
+
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
 RedGPU.init(

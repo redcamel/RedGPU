@@ -1,6 +1,14 @@
 import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 
 /**
+ * [KO] SSR 예제
+ * [EN] SSR example
+ *
+ * [KO] Screen Space Reflection (SSR) 효과를 시연합니다.
+ * [EN] Demonstrates the Screen Space Reflection (SSR) effect.
+ */
+
+/**
  * 1. 초기화 및 환경 설정
  */
 const canvas = document.createElement('canvas');

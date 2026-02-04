@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Sprite2D Hierarchy 예제
+ * [EN] Sprite2D Hierarchy example
+ *
+ * [KO] Sprite2D 간의 부모-자식 계층 구조와 변환 상속을 보여줍니다.
+ * [EN] Demonstrates parent-child hierarchy and transformation inheritance between Sprite2D objects.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -46,6 +54,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 부모 Sprite2D를 생성합니다.
+ * [EN] Creates a parent Sprite2D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Sprite2D}
+ */
 const createParentSprite2D = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'));
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -57,6 +72,13 @@ const createParentSprite2D = (redGPUContext, scene) => {
     return sprite2D;
 };
 
+/**
+ * [KO] 자식 Sprite2D를 생성합니다.
+ * [EN] Creates a child Sprite2D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} parent
+ * @returns {RedGPU.Display.Sprite2D}
+ */
 const createChildSprite2D = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -68,6 +90,13 @@ const createChildSprite2D = (redGPUContext, parent) => {
     return sprite2D;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} parent
+ * @param {RedGPU.Display.Sprite2D} child
+ */
 const renderTestPane = async (redGPUContext, parent, child) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const pane = new Pane();

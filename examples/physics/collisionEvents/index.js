@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Collision Events 예제
+ * [EN] Collision Events example
+ *
+ * [KO] 물리 충돌 이벤트 처리 방법을 보여줍니다.
+ * [EN] Demonstrates how to handle physics collision events.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -56,6 +64,9 @@ RedGPU.init(
 		/**
 		 * [KO] 새로운 구슬을 생성하고 충돌 이벤트를 활성화합니다.
 		 * [EN] Create a new ball and enable collision events.
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} z
 		 */
 		const createBall = (x, y, z) => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
@@ -123,6 +134,13 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} createBall
+ * @param {function} resetScene
+ */
 const renderTestPane = async (redGPUContext, createBall, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

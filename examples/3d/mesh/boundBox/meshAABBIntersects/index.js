@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Mesh AABB Intersects 예제
+ * [EN] Mesh AABB Intersects example
+ *
+ * [KO] 두 메시 간의 AABB(Axis-Aligned Bounding Box) 충돌 감지를 보여줍니다.
+ * [EN] Demonstrates AABB (Axis-Aligned Bounding Box) collision detection between two meshes.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 

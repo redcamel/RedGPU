@@ -34,7 +34,7 @@ const BASE_STYLES = {
     background: 'transparent',
     color: '#fff',
     fontFamily: 'Arial',
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: 'normal',
     fontStyle: 'normal',
     letterSpacing: 0,

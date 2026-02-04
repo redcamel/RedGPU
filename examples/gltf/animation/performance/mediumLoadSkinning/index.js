@@ -3,6 +3,14 @@ import {
     loadingProgressInfoHandler
 } from '../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1769835266959'
 
+/**
+ * [KO] Medium Load Skinning 예제
+ * [EN] Medium Load Skinning example
+ *
+ * [KO] 중간 정도 부하를 가진 스키닝 애니메이션 객체를 다수 렌더링하여 성능을 테스트합니다.
+ * [EN] Tests performance by rendering multiple skinning animation objects with medium load.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -49,6 +57,12 @@ RedGPU.init(
 let num = 0
 let first = true
 
+/**
+ * [KO] GLTF 모델을 로드합니다.
+ * [EN] Loads a GLTF model.
+ * @param {RedGPU.Display.View3D} view
+ * @param {string} url
+ */
 function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
@@ -67,6 +81,12 @@ function loadGLTF(view, url) {
 }
 
 let pane
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {setDebugButtons} = await import('../../../../exampleHelper/createExample/panes/index.js?t=1769835266959');

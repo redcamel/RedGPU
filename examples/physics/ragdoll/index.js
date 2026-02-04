@@ -3,6 +3,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
+/**
+ * [KO] Ragdoll 예제
+ * [EN] Ragdoll example
+ *
+ * [KO] 물리 엔진을 사용하여 래그돌(Ragdoll) 시뮬레이션을 구현하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to implement a ragdoll simulation using the physics engine.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -49,6 +57,14 @@ RedGPU.init(
 		/**
 		 * [KO] 신체 부위(Limb) 생성 함수: 메쉬 생성과 물리 바디 등록을 동시에 수행
 		 * [EN] Limb creation function: Creates mesh and registers physics body simultaneously
+		 * @param {RedGPU.Primitive.Primitive3D} geometry
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} z
+		 * @param {number} sx
+		 * @param {number} sy
+		 * @param {number} sz
+		 * @param {string} color
 		 */
 		const createLimb = (geometry, x, y, z, sx, sy, sz, color) => {
 			const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, new RedGPU.Material.PhongMaterial(redGPUContext));
@@ -70,6 +86,8 @@ RedGPU.init(
 		/**
 		 * [KO] 인간형 래그돌 생성 및 구형 조인트(Spherical Joint) 연결 로직
 		 * [EN] Humanoid ragdoll creation and Spherical Joint connection logic
+		 * @param {number} offsetX
+		 * @param {number} offsetZ
 		 */
 		const spawnRagdoll = (offsetX, offsetZ) => {
 			const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
@@ -131,6 +149,10 @@ RedGPU.init(
 
 /**
  * [KO] 테스트용 컨트롤 패널 생성
+ * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} spawnRagdoll
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, spawnRagdoll, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

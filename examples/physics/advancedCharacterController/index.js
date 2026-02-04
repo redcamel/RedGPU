@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Advanced Character Controller 예제
+ * [EN] Advanced Character Controller example
+ *
+ * [KO] 고급 물리 기반 캐릭터 컨트롤러의 기능(이동, 점프, 충돌 처리 등)을 보여줍니다.
+ * [EN] Demonstrates the features of an advanced physics-based character controller (movement, jump, collision handling, etc.).
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -34,6 +42,13 @@ RedGPU.init(
 		/**
 		 * [KO] 정적 블록 생성 함수
 		 * [EN] Static block creation function
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} z
+		 * @param {number} sx
+		 * @param {number} sy
+		 * @param {number} sz
+		 * @param {string} color
 		 */
 		const createBlock = (x, y, z, sx, sy, sz, color = '#666666') => {
 			const mesh = new RedGPU.Display.Mesh(
@@ -185,6 +200,12 @@ RedGPU.init(
 	(failReason) => { console.error(failReason); }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} resetFunc
+ */
 const renderTestPane = async (redGPUContext, resetFunc) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

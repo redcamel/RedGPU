@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Surface Velocity 예제
+ * [EN] Surface Velocity example
+ *
+ * [KO] 표면 속도(Surface Velocity)를 사용하여 컨베이어 벨트를 시뮬레이션하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to simulate conveyor belts using Surface Velocity.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -42,6 +50,12 @@ RedGPU.init(
 		 *
 		 * [KO] 단일 키네마틱 바디와 텍스처 애니메이션을 조합하여 효율적인 컨베이어 벨트를 시뮬레이션합니다.
 		 * [EN] Simulates an efficient conveyor belt by combining a single kinematic body and texture animation.
+		 * @param {number} x
+		 * @param {number} z
+		 * @param {number} length
+		 * @param {number} width
+		 * @param {number} speed
+		 * @param {number} direction
 		 */
 		const createRealConveyor = (x, z, length, width, speed, direction) => {
 			// [KO] 벨트 텍스처 및 재질 설정
@@ -214,6 +228,12 @@ RedGPU.init(
 	}
 );
 
+/**
+ * [KO] 테스트용 컨트롤 패널 생성 함수
+ * [EN] Function to create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {function} resetScene
+ */
 const renderTestPane = async (redGPUContext, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
 	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");

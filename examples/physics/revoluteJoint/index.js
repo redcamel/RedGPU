@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Revolute Joint 예제
+ * [EN] Revolute Joint example
+ *
+ * [KO] 회전 조인트와 모터를 사용하여 풍차를 시뮬레이션하는 예제입니다.
+ * [EN] Example of simulating a windmill using revolute joints and motors.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -203,6 +211,9 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성
  * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {object} joint
+ * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, joint, resetScene) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');

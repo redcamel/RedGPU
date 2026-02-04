@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Multi View with 3D 예제
+ * [EN] Multi View with 3D example
+ *
+ * [KO] 3D 뷰와 2D 뷰를 함께 사용하여 3D 장면 위에 2D UI를 오버레이하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to overlay a 2D UI on top of a 3D scene by using both a 3D view and a 2D view together.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -71,6 +79,11 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959");
     const {

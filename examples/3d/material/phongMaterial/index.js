@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Phong Material 예제
+ * [EN] Phong Material example
+ *
+ * [KO] PhongMaterial의 다양한 속성(색상, 광택, 텍스처 등)을 제어하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to control various properties (color, shininess, texture, etc.) of PhongMaterial.
+ */
+
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 

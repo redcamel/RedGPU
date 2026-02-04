@@ -5,6 +5,14 @@ import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
 
+/**
+ * [KO] Color Temperature & Tint 예제
+ * [EN] Color Temperature & Tint example
+ *
+ * [KO] 포스트 이펙트를 사용하여 화면의 색온도(Color Temperature)와 틴트(Tint)를 조절하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to adjust screen color temperature and tint using post effects.
+ */
+
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
 RedGPU.init(
@@ -93,6 +101,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] GLTF 모델을 로드합니다.
+ * [EN] Loads a GLTF model.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {string} url
+ */
 function loadGLTF(redGPUContext, scene, url) {
 
     let mesh
@@ -105,6 +120,12 @@ function loadGLTF(redGPUContext, scene, url) {
     )
 }
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1769835266959');
@@ -307,7 +328,12 @@ const renderTestPane = async (redGPUContext, targetView) => {
     }
 };
 
-// 색온도에 따른 설명 반환
+/**
+ * [KO] 색온도 값을 기반으로 설명을 반환합니다.
+ * [EN] Returns a description based on the color temperature value.
+ * @param {number} temperature
+ * @returns {string}
+ */
 function getTemperatureDescription(temperature) {
     if (temperature < 2000) return "매우 따뜻함 (촛불)";
     if (temperature < 3000) return "따뜻함 (백열등)";

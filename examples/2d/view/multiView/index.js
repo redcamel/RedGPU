@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Multi View 예제
+ * [EN] Multi View example
+ *
+ * [KO] 하나의 씬을 여러 개의 뷰로 렌더링하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to render a single scene with multiple views.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -71,6 +79,11 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

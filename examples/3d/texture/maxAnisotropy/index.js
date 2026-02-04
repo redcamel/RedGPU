@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Max Anisotropy 예제
+ * [EN] Max Anisotropy example
+ *
+ * [KO] 이방성 필터링(Anisotropic Filtering)의 효과를 시연합니다.
+ * [EN] Demonstrates the effect of Anisotropic Filtering.
+ */
+
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 
@@ -32,6 +40,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI와 씬을 구성합니다.
+ * [EN] Configures the test GUI and scene.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const renderTestPane = async (redGPUContext, scene) => {
     const {
         setSeparator,

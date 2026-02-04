@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js";
 
+/**
+ * [KO] TextField3D Mouse Event 예제
+ * [EN] TextField3D Mouse Event example
+ *
+ * [KO] TextField3D 객체에서 발생하는 마우스 이벤트를 처리하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to handle mouse events on TextField3D objects.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -91,6 +99,11 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 /**
  * [KO] 테스트용 TextField3D 객체들을 생성합니다.
  * [EN] Creates TextField3D objects for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {HTMLElement} infoBox
+ * @param {function} updateInfo
+ * @returns {{textFields: Array<RedGPU.Display.TextField3D>, updateLayout: function}}
  */
 const createSampleTextField3D = (redGPUContext, scene, infoBox, updateInfo) => {
     const textFields = [];
@@ -131,6 +144,11 @@ const createSampleTextField3D = (redGPUContext, scene, infoBox, updateInfo) => {
     return {textFields, updateLayout};
 };
 
+/**
+ * [KO] 무작위 16진수 색상 값을 반환합니다.
+ * [EN] Returns a random hex color value.
+ * @returns {string}
+ */
 function getRandomHexValue() {
     var result = '';
     var characters = '0123456789ABCDEF';
@@ -140,6 +158,12 @@ function getRandomHexValue() {
     return `#${result}`;
 }
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const renderTestPane = async (redGPUContext, scene) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
     const pane = new Pane();

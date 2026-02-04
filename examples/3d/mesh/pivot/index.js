@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Mesh Pivot 예제
+ * [EN] Mesh Pivot example
+ *
+ * [KO] 메시의 피벗 포인트를 변경하여 회전 및 크기 조절의 중심을 변경하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to change the pivot point of a mesh to alter the center of rotation and scaling.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -65,6 +73,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 부모 메시를 생성합니다.
+ * [EN] Creates a parent mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createParentMesh = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -79,6 +94,13 @@ const createParentMesh = (redGPUContext, scene) => {
     return parentMesh;
 };
 
+/**
+ * [KO] 자식 메시를 생성합니다.
+ * [EN] Creates a child mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} parentMesh
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createChildMesh = (redGPUContext, parentMesh) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, "#ff0000");
     const geometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1);
@@ -90,6 +112,13 @@ const createChildMesh = (redGPUContext, parentMesh) => {
     return childMesh;
 };
 
+/**
+ * [KO] 피벗 시각화 메시를 생성합니다.
+ * [EN] Creates a pivot visualization mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} targetMesh
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createPivotMesh = (redGPUContext, targetMesh) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, "#00ff00");
     const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.1, 8, 8);
@@ -100,6 +129,14 @@ const createPivotMesh = (redGPUContext, targetMesh) => {
     return pivotMesh;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} parentMesh
+ * @param {RedGPU.Display.Mesh} childMesh
+ * @param {object} animationConfig
+ */
 const renderTestPane = async (redGPUContext, parentMesh, childMesh, animationConfig) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959");
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");

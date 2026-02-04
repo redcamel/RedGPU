@@ -4,6 +4,14 @@ import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Physics Basic 예제
+ * [EN] Physics Basic example
+ *
+ * [KO] 기본적인 물리 엔진 설정과 객체 상호작용을 보여줍니다.
+ * [EN] Demonstrates basic physics engine setup and object interaction.
+ */
+
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
@@ -58,6 +66,10 @@ RedGPU.init(
 		/**
 		 * [KO] 1m 정육면체 박스 생성 함수
 		 * [EN] Function to create a 1m cubic box
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} z
+		 * @param {string} color
 		 */
 		const createBox = (x, y, z, color) => {
 			const material = new RedGPU.Material.PhongMaterial(redGPUContext);
@@ -126,6 +138,11 @@ RedGPU.init(
 /**
  * [KO] 테스트용 컨트롤 패널 생성
  * [EN] Create a control panel for testing
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RapierPhysics} physicsEngine
+ * @param {function} createBox
+ * @param {function} resetScene
+ * @param {function} updateGravityY
  */
 const renderTestPane = async (redGPUContext, physicsEngine, createBox, resetScene, updateGravityY) => {
 	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
