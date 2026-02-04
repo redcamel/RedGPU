@@ -70,7 +70,7 @@ const loadDescription = async () => {
             title.className = 'item-title'
             document.querySelector('.navigation-bar').appendChild(title);
 
-            let currentLanguage = 'en'; // 기본 언어 설정
+            let currentLanguage = navigator.language.toLowerCase().startsWith('ko') ? 'ko' : 'en'; // 사용자 언어 감지 (Detect user language)
 
             const description = document.createElement('h2');
             description.className = 'item-description';
