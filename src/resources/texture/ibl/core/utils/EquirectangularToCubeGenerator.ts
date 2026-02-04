@@ -3,6 +3,7 @@ import GPU_ADDRESS_MODE from "../../../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../../../gpuConst/GPU_FILTER_MODE";
 import GPU_LOAD_OP from "../../../../../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../../../../../gpuConst/GPU_STORE_OP";
+import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
 import IBLCubeTexture from "../IBLCubeTexture";
@@ -41,16 +42,18 @@ class EquirectangularToCubeGenerator {
 	async generate(sourceTexture: GPUTexture, size: number = 512): Promise<IBLCubeTexture> {
 		const { gpuDevice, resourceManager } = this.#redGPUContext;
 		const format: GPUTextureFormat = 'rgba16float';
+		const mipLevelCount = getMipLevelCount(size, size);
 
-		// 1. 결과용 큐브 텍스처 생성
-		const cubeGPUTexture = resourceManager.createManagedTexture({
+		// 1. 결과용 큐브 텍스처 생성 (밉맵 포함)
+		const textureDesc: GPUTextureDescriptor = {
 			size: [size, size, 6],
 			format: format,
 			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
 			dimension: '2d',
-			mipLevelCount: 1,
+			mipLevelCount: mipLevelCount,
 			label: `EquirectangularToCube_Texture_${createUUID()}`
-		});
+		};
+		const cubeGPUTexture = resourceManager.createManagedTexture(textureDesc);
 
 		// 2. 파이프라인 생성
 		if (!this.#shaderModule) {
@@ -122,6 +125,10 @@ class EquirectangularToCubeGenerator {
 		}
 
 		gpuDevice.queue.submit([commandEncoder.finish()]);
+		
+		// 밉맵 생성
+		resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc);
+		
 		await gpuDevice.queue.onSubmittedWorkDone();
 
 		// 임시 버퍼 정리
@@ -136,6 +143,7 @@ class EquirectangularToCubeGenerator {
 			new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
 			new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
 			new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
+			// WebGPU 큐브맵 렌더링을 위한 면 방향 보정
 			new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
 			new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
 		];

@@ -852,8 +852,6 @@ let attenuation = rangePart * invSquare;
         var R = (reflect(-V, N));
         let NdotV = max(dot(N, V),1e-4);
 
-
-
         #redgpu_if useKHR_materials_anisotropy
         {
             var bentNormal = cross(anisotropicB, V);
@@ -895,24 +893,18 @@ let attenuation = rangePart * invSquare;
         var mipLevel = roughnessParameter * (1.7 - 0.7 * roughnessParameter) * iblMipmapCount;
         var reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, R, mipLevel ).rgb;
 
-        // ---------- ibl 프레넬 항 계산----------
-        let fresnel = pow(1.0 - NdotV, 5.0);
+        // ---------- ibl (BRDF LUT 샘플링) ----------
+        // NdotV와 Roughness를 좌표로 사용하여 미리 계산된 Scale(x)과 Bias(y) 값을 가져옴
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, iblTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
 
-        // 거칠기를 고려한 각 파트별 프레넬 계산
-        var F_IBL_dielectric = F0_dielectric + (max(vec3<f32>(1.0 - roughnessParameter), F0_dielectric) - F0_dielectric) * fresnel;
-        var F_IBL_metal      = F0_metal      + (max(vec3<f32>(1.0 - roughnessParameter), F0_metal)      - F0_metal)      * fresnel;
-        var F_IBL            = F0            + (max(vec3<f32>(1.0 - roughnessParameter), F0)            - F0)            * fresnel;
+        // 거칠기를 고려한 각 파트별 통합 반사율 계산 (Split Sum Approximation)
+        var F_IBL_dielectric = F0_dielectric * envBRDF.x + envBRDF.y;
+        var F_IBL_metal      = F0_metal      * envBRDF.x + envBRDF.y;
+        var F_IBL            = F0            * envBRDF.x + envBRDF.y;
 
-
-        let K = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
-        let G = NdotV / (NdotV * (1.0 - K) + K);
+        // Transmission 등에서 사용하는 Smith 기하 감쇠 근사 (기존 로직 유지)
         let a2 = roughnessParameter * roughnessParameter;
-
         let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
-//        let mipLevel = roughnessParameter * iblMipmapCount;
-
-
-        // ---------- ibl 기본 컬러 ----------
 
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
@@ -932,8 +924,6 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Specular ----------
         var envIBL_SPECULAR:vec3<f32>;
-
-
         envIBL_SPECULAR = reflectedColor * F_IBL * specularParameter ;
         // ---------- ibl Specular BTDF ----------
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
@@ -1002,25 +992,24 @@ let attenuation = rangePart * invSquare;
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
                  // 클리어코트 반사 벡터와 뷰 각도 계산
-                 let clearcoatF0 = 0.04;
                  let clearcoatR = reflect(-V, clearcoatNormal);
                  let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
                  let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
 
-                 let clearcoatF = clearcoatF0 + (vec3<f32>(1.0) - clearcoatF0) * pow(1.0 - clearcoatNdotV, 5.0);
-                 let clearcoatAlpha = clearcoatRoughnessParameter * clearcoatRoughnessParameter;
-                 let clearcoatK = clearcoatAlpha / 2.0;
-                 let clearcoatG = clearcoatNdotV / (clearcoatNdotV * (1.0 - clearcoatK) + clearcoatK);
-                 let clearcoatBRDF = clearcoatF * clearcoatG;
+                 // 클리어코트용 BRDF LUT 샘플링
+                 let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, iblTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
+                 
+                 // 클리어코트는 보통 굴절률 1.5(F0 = 0.04) 고정으로 취급함
+                 let clearcoatF0 = vec3<f32>(0.04);
+                 let clearcoatF = clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y;
 
-                  // Specular IBL
-                let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatBRDF * clearcoatParameter;
+                 // Specular IBL
+                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatF * clearcoatParameter;
 
-                // 최종 합산 (추가 레이어로 더함)
-                indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - clearcoatF ) * indirectLighting;
+                 // 최종 합산 (에너지 보존: 클리어코트가 반사한 만큼 하위 레이어 조명은 감쇠됨)
+                 indirectLighting = clearcoatSpecularIBL + (1.0 - max(clearcoatF.x, max(clearcoatF.y, clearcoatF.z)) * clearcoatParameter) * indirectLighting;
             }
-
         #redgpu_endIf
 
         // 최종 IBL 적용

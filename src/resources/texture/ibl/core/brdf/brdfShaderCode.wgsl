@@ -106,6 +106,8 @@ fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
 
 @fragment
 fn fs_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
-    let integratedBRDF = integrateBRDF(uv.x, 1.0 - uv.y);
+    // [KO] uv.y를 직접 roughness로 사용하여 상단(0.0)에서 하단(1.0)으로 값이 증가하도록 수정
+    // [EN] Use uv.y directly as roughness so that it increases from top (0.0) to bottom (1.0)
+    let integratedBRDF = integrateBRDF(uv.x, uv.y);
     return vec4<f32>(integratedBRDF, 0.0, 1.0);
 }

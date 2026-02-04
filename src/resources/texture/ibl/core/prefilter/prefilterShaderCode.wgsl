@@ -67,7 +67,6 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
     let N = normalize((uniforms.faceMatrix * localPos).xyz);
     
-    // Split Sum Approximation: R = V = N
     let R = N;
     let V = R;
 
@@ -75,6 +74,10 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     var prefilteredColor = vec3<f32>(0.0);
     var totalWeight = 0.0;
     let numSamples = 1024u;
+    
+    let envSize = f32(textureDimensions(environmentTexture).x);
+    // 밉맵 기반 노이즈 억제를 위한 상수
+    let saTexel = 4.0 * PI / (6.0 * envSize * envSize);
 
     for (var i = 0u; i < numSamples; i++) {
         let xi = hammersley(i, numSamples);
@@ -83,7 +86,20 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
 
         let NdotL = max(dot(N, L), 0.0);
         if (NdotL > 0.0) {
-            prefilteredColor += textureSampleLevel(environmentTexture, textureSampler, L, 0.0).rgb * NdotL;
+            // Filtered Importance Sampling 로직
+            let NdotH = max(dot(N, H), 0.001);
+            let VdotH = max(dot(V, H), 0.001);
+            
+            // PDF 계산
+            let D = distribution_ggx(NdotH, roughness);
+            let pdf = (D * NdotH / (4.0 * VdotH)) + 0.0001;
+            
+            // 샘플의 입체각(Solid Angle) 계산
+            let saSample = 1.0 / (f32(numSamples) * pdf + 0.0001);
+            // 밉레벨 결정 (0.5는 바이어스 조절용)
+            let mipLevel = select(0.5 * log2(saSample / saTexel), 0.0, roughness == 0.0);
+
+            prefilteredColor += textureSampleLevel(environmentTexture, textureSampler, L, mipLevel).rgb * NdotL;
             totalWeight += NdotL;
         }
     }
@@ -93,4 +109,12 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     } else {
         return textureSampleLevel(environmentTexture, textureSampler, N, 0.0);
     }
+}
+
+fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
+    let a = roughness * roughness;
+    let a2 = a * a;
+    let NdotH2 = NdotH * NdotH;
+    let denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    return a2 / (PI * denom * denom);
 }
