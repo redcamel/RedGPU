@@ -859,6 +859,19 @@ const ExampleList = [
                     }
                 ]
             },
+            {
+                name: 'IBL Upgrade (Foundation)',
+                list: [
+                    {
+                        name: 'BRDF LUT Test',
+                        path: '3d/ibl/brdfLutTest',
+                        description: {
+                            ko: `새로운 IBL 시스템의 기초인 BRDF LUT 생성을 테스트합니다.`,
+                            en: `Tests BRDF LUT generation, the foundation of the new IBL system.`
+                        },
+                    }
+                ]
+            },
 
         ]
     },

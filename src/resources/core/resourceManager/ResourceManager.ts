@@ -2,10 +2,10 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import {keepLog} from "../../../utils";
 import Sampler from "../../sampler/Sampler";
 import BitmapTexture from "../../texture/BitmapTexture";
+import {BRDFGenerator, IBLCubeTexture} from "../../texture/ibl/core";
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
-import IBLCubeTexture from "../../texture/ibl/IBLCubeTexture";
 import PackedTexture from "../../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../../wgslParser/core/preprocessWGSL";
 import ManagementResourceBase from "../ManagementResourceBase";
@@ -73,6 +73,7 @@ class ResourceManager {
     #emptyCubeTextureView: GPUTextureView
     readonly #mipmapGenerator: MipmapGenerator
     readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
+    readonly #brdfGenerator: BRDFGenerator
     #basicSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
@@ -91,6 +92,7 @@ class ResourceManager {
         this.#gpuDevice = redGPUContext.gpuDevice
         this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
         this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
+        this.#brdfGenerator = new BRDFGenerator(redGPUContext)
         this.#initPresets()
     }
 
@@ -116,6 +118,14 @@ class ResourceManager {
      */
     get basicSampler(): Sampler {
         return this.#basicSampler;
+    }
+
+    /**
+     * [KO] BRDF 생성기를 반환합니다.
+     * [EN] Returns the BRDF generator.
+     */
+    get brdfGenerator(): BRDFGenerator {
+        return this.#brdfGenerator;
     }
 
     /**

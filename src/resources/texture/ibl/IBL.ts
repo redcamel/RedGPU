@@ -7,8 +7,8 @@ import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
-import IBLCubeTexture from "./IBLCubeTexture";
-import irradianceShaderCode from "./irradianceShaderCode.wgsl"
+import {IBLCubeTexture} from "./core";
+import irradianceShaderCode from "./core/irradiance/irradianceShaderCode.wgsl"
 
 /**
  * [KO] Image-Based Lighting (IBL)을 관리하는 클래스입니다.
