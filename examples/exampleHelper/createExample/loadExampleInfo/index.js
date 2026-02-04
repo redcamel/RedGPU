@@ -70,17 +70,84 @@ const loadDescription = async () => {
             title.className = 'item-title'
             document.querySelector('.navigation-bar').appendChild(title);
 
+            let currentLanguage = 'en'; // 기본 언어 설정
+
             const description = document.createElement('h2');
-            const descriptionText = matchedExample.description.en || `${matchedExample.name} | RedGPU Examples`;
-            description.innerHTML = descriptionText.replace(/\n/g, '<br/>');
-            description.className = 'item-description'
-            document.querySelector('.navigation-bar').appendChild(description);
-            setDomTitleAndDescription(
-                `${matchedExample.name} | RedGPU`,
-                descriptionText
-                    .replace(/\n/g, '')
-                    .replace(/\s+/g, ' ')
-            );
+            description.className = 'item-description';
+
+            // 언어 토글 컨테이너 생성 (미리 생성해둠)
+            const toggleContainer = document.createElement('div');
+            toggleContainer.className = 'lang-toggle-container';
+            Object.assign(toggleContainer.style, {
+                position: 'absolute',
+                transform: 'translateY(100%)',
+                bottom: '-6px',
+                display: 'inline-flex',
+                border: '1px solid #666',
+                borderRadius: '4px',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                overflow: 'hidden',
+                pointerEvents: 'auto',
+                fontSize: '10px',
+                height: '18px',
+                verticalAlign: 'middle',
+                width: 'fit-content'
+            });
+
+            const createOption = (lang, label) => {
+                const option = document.createElement('div');
+                option.innerText = label;
+                Object.assign(option.style, {
+                    padding: '0 8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                });
+                option.onclick = (e) => {
+                    e.stopPropagation();
+                    if (currentLanguage !== lang) {
+                        currentLanguage = lang;
+                        updateDescription();
+                    }
+                };
+                return option;
+            };
+
+            const enOption = createOption('en', 'EN');
+            const koOption = createOption('ko', 'KO');
+            toggleContainer.appendChild(enOption);
+            toggleContainer.appendChild(koOption);
+
+            const updateDescription = () => {
+                const descriptionText = matchedExample.description[currentLanguage] || matchedExample.description.en || `${matchedExample.name} | RedGPU Examples`;
+                
+                // 기존 레이아웃 유지를 위해 h2의 내용을 직접 수정
+                description.innerHTML = descriptionText.replace(/\n/g, '<br/>');
+                description.appendChild(toggleContainer); // 텍스트 뒤에 토글 삽입
+
+                // 토글 옵션 스타일 업데이트
+                const updateOptionStyle = (option, lang) => {
+                    Object.assign(option.style, {
+                        color: currentLanguage === lang ? '#000' : '#888',
+                        backgroundColor: currentLanguage === lang ? '#fff' : 'transparent',
+                        fontWeight: currentLanguage === lang ? 'bold' : 'normal'
+                    });
+                };
+                updateOptionStyle(enOption, 'en');
+                updateOptionStyle(koOption, 'ko');
+
+                setDomTitleAndDescription(
+                    `${matchedExample.name} | RedGPU`,
+                    descriptionText.replace(/\n/g, '').replace(/\s+/g, ' ')
+                );
+            };
+
+            updateDescription();
+            const navBar = document.querySelector('.navigation-bar');
+            navBar.appendChild(description);
+
         } else {
             console.warn('No matching createExample found for the normalized path.');
         }
