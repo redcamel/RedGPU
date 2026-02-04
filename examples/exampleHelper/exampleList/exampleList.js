@@ -869,6 +869,14 @@ const ExampleList = [
                             ko: `새로운 IBL 시스템의 기초인 BRDF LUT 생성을 테스트합니다.`,
                             en: `Tests BRDF LUT generation, the foundation of the new IBL system.`
                         },
+                    },
+                    {
+                        name: 'Irradiance Test',
+                        path: '3d/ibl/irradianceTest',
+                        description: {
+                            ko: `분리된 IrradianceGenerator를 사용하여 환경맵으로부터 Irradiance 맵을 생성하고 테스트합니다. 배경 스카이박스에는 생성된 Irradiance 맵이 적용되어 있으며, 중앙의 Sprite3D에는 원본 HDRTexture가 2D 텍스처로 적용되어 있습니다.`,
+                            en: `Generates and tests an Irradiance map from an environment map using the separated IrradianceGenerator. The background skybox uses the generated Irradiance map, while the central Sprite3D uses the original HDRTexture as a 2D texture.`
+                        },
                     }
                 ]
             },

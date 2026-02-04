@@ -1424,7 +1424,7 @@ class Mesh extends MeshBase {
                 this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
             }
             {
-                if (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID] ) {
+                if (vertexUniformInfoMembers.uvTransform && (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID] )) {
                     const material = currentMaterial as any;
                     const offset = material.textureOffset;
                     const scale = material.textureScale;

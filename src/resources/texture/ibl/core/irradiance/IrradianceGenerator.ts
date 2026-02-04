@@ -4,23 +4,22 @@ import GPU_FILTER_MODE from "../../../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import GPU_LOAD_OP from "../../../../../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../../../../../gpuConst/GPU_STORE_OP";
+import createUUID from "../../../../../utils/uuid/createUUID";
+import preprocessWGSL from "../../../../wgslParser/core/preprocessWGSL";
 import Sampler from "../../../../sampler/Sampler";
+import IBLCubeTexture from "../IBLCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl";
 
 /**
  * [KO] Irradiance 맵을 생성하는 클래스입니다.
  * [EN] Class that generates an Irradiance map.
  *
- * [KO] 환경맵으로부터 저주파 조명 정보를 추출하여 난반사(Diffuse) 라이팅에 사용할 Irradiance 맵을 베이킹합니다.
- * [EN] Extracts low-frequency lighting information from the environment map to bake an Irradiance map for diffuse lighting.
- *
  * @category IBL
  */
 class IrradianceGenerator {
 	readonly #redGPUContext: RedGPUContext;
-	#shaderModule: GPUShaderModule;
-	#pipeline: GPURenderPipeline;
 	#sampler: Sampler;
+	#pipelines: Map<string, GPURenderPipeline> = new Map();
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
@@ -35,108 +34,91 @@ class IrradianceGenerator {
 	}
 
 	/**
-	 * [KO] 소스 큐브 텍스처로부터 Irradiance 맵을 생성하여 반환합니다.
-	 * [EN] Generates and returns an Irradiance map from the source cube texture.
-	 *
-	 * @param sourceCubeTexture - [KO] 소스 환경맵 (큐브) [EN] Source environment map (Cube)
-	 * @param size - [KO] 생성될 Irradiance 맵의 크기 (기본값: 32) [EN] Size of the generated Irradiance map (default: 32)
-	 * @returns [KO] 생성된 Irradiance GPUTexture [EN] Generated Irradiance GPUTexture
+	 * [KO] 소스 텍스처로부터 Irradiance 맵을 생성하여 반환합니다.
+	 * [EN] Generates and returns an Irradiance map from the source texture.
 	 */
-	async generate(sourceCubeTexture: GPUTexture, size: number = 32): Promise<GPUTexture> {
+	async generate(sourceTexture: GPUTexture, size: number = 32): Promise<IBLCubeTexture> {
 		const { gpuDevice, resourceManager } = this.#redGPUContext;
+		const is2D = sourceTexture.dimension === '2d';
+		const pipelineKey = is2D ? '2D' : 'CUBE';
 		const format: GPUTextureFormat = 'rgba16float';
 
-		const irradianceTexture = resourceManager.createManagedTexture({
+		// 1. 결과용 큐브 텍스처 생성
+		const irradianceGPUTexture = resourceManager.createManagedTexture({
 			size: [size, size, 6],
 			format: format,
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
 			dimension: '2d',
 			mipLevelCount: 1,
-			label: `Irradiance_Map_Texture`
+			label: `Irradiance_Map_Texture_${createUUID()}`
 		});
 
-		if (!this.#shaderModule) {
-			this.#shaderModule = resourceManager.createGPUShaderModule(
-				'IRRADIANCE_GENERATOR_SHADER_MODULE',
-				{ code: irradianceShaderCode }
-			);
-		}
-
-		if (!this.#pipeline) {
-			this.#pipeline = gpuDevice.createRenderPipeline({
-				label: 'IRRADIANCE_GENERATOR_PIPELINE',
+		// 2. 파이프라인 획득
+		if (!this.#pipelines.has(pipelineKey)) {
+			const preprocessed = preprocessWGSL(irradianceShaderCode);
+			const variantCode = preprocessed.shaderSourceVariant.getVariant(is2D ? 'USE_2D_SOURCE' : 'none');
+			const shaderModule = gpuDevice.createShaderModule({ code: variantCode });
+			
+			const pipeline = gpuDevice.createRenderPipeline({
+				label: `IRRADIANCE_GENERATOR_PIPELINE_${pipelineKey}`,
 				layout: 'auto',
-				vertex: {
-					module: this.#shaderModule,
-					entryPoint: 'vs_main'
-				},
-				fragment: {
-					module: this.#shaderModule,
-					entryPoint: 'fs_main',
-					targets: [{ format }]
-				},
+				vertex: { module: shaderModule, entryPoint: 'vs_main' },
+				fragment: { module: shaderModule, entryPoint: 'fs_main', targets: [{ format }] },
 			});
+			this.#pipelines.set(pipelineKey, pipeline);
 		}
+		const pipeline = this.#pipelines.get(pipelineKey);
 
+		// 3. 6개 면 렌더링
+		const commandEncoder = gpuDevice.createCommandEncoder({ label: 'Irradiance_Generator_Command_Encoder' });
 		const faceMatrices = this.#getCubeMapFaceMatrices();
+		const uniformBuffers: GPUBuffer[] = [];
+
 		for (let face = 0; face < 6; face++) {
-			await this.#renderFace(this.#pipeline, face, faceMatrices[face], sourceCubeTexture, irradianceTexture);
+			const uniformBuffer = gpuDevice.createBuffer({
+				size: 64,
+				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+			});
+			gpuDevice.queue.writeBuffer(uniformBuffer, 0, faceMatrices[face] as BufferSource);
+			uniformBuffers.push(uniformBuffer);
+
+			const bindGroup = gpuDevice.createBindGroup({
+				layout: pipeline.getBindGroupLayout(0),
+				entries: [
+					{ binding: 0, resource: sourceTexture.createView({ dimension: is2D ? '2d' : 'cube' }) },
+					{ binding: 1, resource: this.#sampler.gpuSampler },
+					{ binding: 2, resource: { buffer: uniformBuffer } }
+				]
+			});
+
+			const renderPass = commandEncoder.beginRenderPass({
+				colorAttachments: [{
+					view: irradianceGPUTexture.createView({
+						dimension: '2d',
+						baseMipLevel: 0,
+						mipLevelCount: 1,
+						baseArrayLayer: face,
+						arrayLayerCount: 1
+					}),
+					clearValue: { r: 0, g: 0, b: 0, a: 1 },
+					loadOp: GPU_LOAD_OP.CLEAR,
+					storeOp: GPU_STORE_OP.STORE
+				}]
+			});
+
+			renderPass.setPipeline(pipeline);
+			renderPass.setBindGroup(0, bindGroup);
+			renderPass.draw(6, 1, 0, 0);
+			renderPass.end();
 		}
-
-		return irradianceTexture;
-	}
-
-	async #renderFace(
-		renderPipeline: GPURenderPipeline,
-		face: number,
-		faceMatrix: Float32Array,
-		sourceCubeTexture: GPUTexture,
-		irradianceTexture: GPUTexture
-	): Promise<void> {
-		const { gpuDevice } = this.#redGPUContext;
-		const uniformBuffer = gpuDevice.createBuffer({
-			size: 64,
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-			label: `Irradiance_face_${face}_uniform`
-		});
-		gpuDevice.queue.writeBuffer(uniformBuffer, 0, faceMatrix as BufferSource);
-
-		const bindGroup = gpuDevice.createBindGroup({
-			layout: renderPipeline.getBindGroupLayout(0),
-			entries: [
-				{ binding: 0, resource: sourceCubeTexture.createView({ dimension: 'cube' }) },
-				{ binding: 1, resource: this.#sampler.gpuSampler },
-				{ binding: 2, resource: { buffer: uniformBuffer } }
-			]
-		});
-
-		const commandEncoder = gpuDevice.createCommandEncoder({
-			label: `Irradiance_face_${face}_encoder`
-		});
-
-		const renderPass = commandEncoder.beginRenderPass({
-			colorAttachments: [{
-				view: irradianceTexture.createView({
-					dimension: '2d',
-					baseMipLevel: 0,
-					mipLevelCount: 1,
-					baseArrayLayer: face,
-					arrayLayerCount: 1
-				}),
-				clearValue: { r: 0, g: 0, b: 0, a: 1 },
-				loadOp: GPU_LOAD_OP.CLEAR,
-				storeOp: GPU_STORE_OP.STORE
-			}],
-			label: `Irradiance_face_${face}_renderpass`
-		});
-
-		renderPass.setPipeline(renderPipeline);
-		renderPass.setBindGroup(0, bindGroup);
-		renderPass.draw(6, 1, 0, 0);
-		renderPass.end();
 
 		gpuDevice.queue.submit([commandEncoder.finish()]);
-		uniformBuffer.destroy();
+		await gpuDevice.queue.onSubmittedWorkDone();
+
+		// 임시 버퍼 정리
+		uniformBuffers.forEach(buf => buf.destroy());
+
+		return new IBLCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
 	}
 
 	#getCubeMapFaceMatrices(): Float32Array[] {

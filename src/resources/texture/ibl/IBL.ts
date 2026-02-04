@@ -60,9 +60,7 @@ class IBL {
                     this.#sourceCubeTexture = v.gpuTexture
                     this.#init()
                 },
-                undefined,
-                envCubeSize,
-                true
+                undefined
             );
         } else {
             this.#targetTexture = new CubeTexture(
@@ -119,7 +117,7 @@ class IBL {
             }
             if (!this.#irradianceTexture.gpuTexture) {
                 const irradianceGPUTexture = await irradianceGenerator.generate(this.#sourceCubeTexture);
-                this.#irradianceTexture.gpuTexture = irradianceGPUTexture
+                this.#irradianceTexture.gpuTexture = irradianceGPUTexture.gpuTexture
             }
         }
     }
