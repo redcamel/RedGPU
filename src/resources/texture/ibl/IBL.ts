@@ -1,14 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
-import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
-import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import {keepLog} from "../../../utils";
-import createUUID from "../../../utils/uuid/createUUID";
-import Sampler from "../../sampler/Sampler";
 import CubeTexture from "../CubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
 import {IBLCubeTexture} from "./core";
-import irradianceShaderCode from "./core/irradiance/irradianceShaderCode.wgsl"
 
 /**
  * [KO] Image-Based Lighting (IBL)을 관리하는 클래스입니다.
@@ -30,8 +23,6 @@ class IBL {
     #environmentTexture: IBLCubeTexture;
     #irradianceTexture: IBLCubeTexture;
     #iblTexture: IBLCubeTexture
-    #uuid = createUUID()
-    #format: GPUTextureFormat = 'rgba16float'
     #targetTexture: HDRTexture | CubeTexture
     #envCubeSize: number
     #iblCubeSize: number
@@ -116,7 +107,8 @@ class IBL {
      * [EN] Initializes IBL data and generates maps.
      */
     async #init() {
-        const {downSampleCubeMapGenerator} = this.#redGPUContext.resourceManager
+        const {resourceManager} = this.#redGPUContext
+        const {downSampleCubeMapGenerator, irradianceGenerator} = resourceManager
         if (this.#sourceCubeTexture) {
             if (!this.#iblTexture.gpuTexture) {
                 const iblTexture = await downSampleCubeMapGenerator.downsampleCubemap(this.#sourceCubeTexture, this.#iblCubeSize)
@@ -126,116 +118,13 @@ class IBL {
                 this.#environmentTexture.gpuTexture = this.#sourceCubeTexture
             }
             if (!this.#irradianceTexture.gpuTexture) {
-                const irradianceGPUTexture = await this.#generateIrradianceMap(this.#sourceCubeTexture);
+                const irradianceGPUTexture = await irradianceGenerator.generate(this.#sourceCubeTexture);
                 this.#irradianceTexture.gpuTexture = irradianceGPUTexture
             }
         }
     }
-
-    /**
-     * [KO] Irradiance 맵을 생성합니다.
-     * [EN] Generates an irradiance map.
-     */
-    async #generateIrradianceMap(sourceCubeTexture: GPUTexture): Promise<GPUTexture> {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
-        const irradianceSize = 32;
-        const irradianceMipLevels = 1;
-        const irradianceTexture = resourceManager.createManagedTexture({
-            size: [irradianceSize, irradianceSize, 6],
-            format: this.#format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
-            dimension: '2d',
-            mipLevelCount: irradianceMipLevels,
-            label: `IBL_${this.#uuid}_irradianceTexture`
-        });
-        const irradianceShader = gpuDevice.createShaderModule({
-            code: irradianceShaderCode
-        });
-        const irradiancePipeline = gpuDevice.createRenderPipeline({
-            layout: 'auto',
-            vertex: {
-                module: irradianceShader,
-                entryPoint: 'vs_main'
-            },
-            fragment: {
-                module: irradianceShader,
-                entryPoint: 'fs_main',
-                targets: [{format: this.#format}]
-            },
-        });
-        const sampler = new Sampler(this.#redGPUContext, {
-            magFilter: GPU_FILTER_MODE.LINEAR,
-            minFilter: GPU_FILTER_MODE.LINEAR,
-            mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
-            addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-            addressModeW: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
-        });
-        const faceMatrices = this.#getCubeMapFaceMatrices();
-        for (let face = 0; face < 6; face++) {
-            await this.#renderIrradianceFace(irradiancePipeline, sampler, face, faceMatrices[face], sourceCubeTexture, irradianceTexture);
-        }
-        return irradianceTexture;
-    }
-
-    /**
-     * [KO] Irradiance 맵의 특정 면을 렌더링합니다.
-     * [EN] Renders a specific face of the irradiance map.
-     */
-    async #renderIrradianceFace(renderPipeline: GPURenderPipeline, sampler: Sampler, face: number, faceMatrix: Float32Array, sourceCubeTexture: GPUTexture, irradianceTexture: GPUTexture): Promise<void> {
-        const {gpuDevice} = this.#redGPUContext;
-        const uniformBuffer = gpuDevice.createBuffer({
-            size: 64,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            label: `irradiance_face_${face}_uniform`
-        });
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, faceMatrix as BufferSource);
-        const bindGroup = gpuDevice.createBindGroup({
-            layout: renderPipeline.getBindGroupLayout(0),
-            entries: [
-                {binding: 0, resource: sourceCubeTexture.createView({dimension: 'cube'})},
-                {binding: 1, resource: sampler.gpuSampler},
-                {binding: 2, resource: {buffer: uniformBuffer}}
-            ]
-        });
-        const commandEncoder = gpuDevice.createCommandEncoder({
-            label: `ibl_irradiance_face_${face}_encoder`
-        });
-        const renderPass = commandEncoder.beginRenderPass({
-            colorAttachments: [{
-                view: irradianceTexture.createView({
-                    dimension: '2d',
-                    baseMipLevel: 0,
-                    mipLevelCount: 1,
-                    baseArrayLayer: face,
-                    arrayLayerCount: 1
-                }),
-                clearValue: {r: 0, g: 0, b: 0, a: 1},
-                loadOp: 'clear',
-                storeOp: 'store'
-            }],
-            label: `irradiance_face_${face}_renderpass`
-        });
-        renderPass.setPipeline(renderPipeline);
-        renderPass.setBindGroup(0, bindGroup);
-        renderPass.draw(6, 1, 0, 0);
-        renderPass.end();
-        gpuDevice.queue.submit([commandEncoder.finish()])
-        uniformBuffer.destroy();
-    }
-
-    /** [KO] 큐브맵의 각 면에 대한 변환 행렬을 반환합니다. [EN] Returns the transformation matrices for each face of the cubemap. */
-    #getCubeMapFaceMatrices(): Float32Array[] {
-        return [
-            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
-            new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
-        ];
-    }
 }
+
 
 Object.freeze(IBL)
 export default IBL;

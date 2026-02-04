@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import {keepLog} from "../../../utils";
 import Sampler from "../../sampler/Sampler";
 import BitmapTexture from "../../texture/BitmapTexture";
-import {BRDFGenerator, IBLCubeTexture} from "../../texture/ibl/core";
+import {BRDFGenerator, IBLCubeTexture, IrradianceGenerator} from "../../texture/ibl/core";
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
@@ -74,6 +74,7 @@ class ResourceManager {
     readonly #mipmapGenerator: MipmapGenerator
     readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
     readonly #brdfGenerator: BRDFGenerator
+    readonly #irradianceGenerator: IrradianceGenerator
     #basicSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
@@ -93,6 +94,7 @@ class ResourceManager {
         this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
         this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
         this.#brdfGenerator = new BRDFGenerator(redGPUContext)
+        this.#irradianceGenerator = new IrradianceGenerator(redGPUContext)
         this.#initPresets()
     }
 
@@ -126,6 +128,14 @@ class ResourceManager {
      */
     get brdfGenerator(): BRDFGenerator {
         return this.#brdfGenerator;
+    }
+
+    /**
+     * [KO] Irradiance 생성기를 반환합니다.
+     * [EN] Returns the Irradiance generator.
+     */
+    get irradianceGenerator(): IrradianceGenerator {
+        return this.#irradianceGenerator;
     }
 
     /**
