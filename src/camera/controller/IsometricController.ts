@@ -408,7 +408,7 @@ class IsometricController extends AController {
 	 * [KO] X축 좌표
 	 * [EN] X-axis coordinate
 	 */
-	get x(): number {
+	get targetX(): number {
 		return this.#targetMesh.x;
 	}
 
@@ -420,7 +420,7 @@ class IsometricController extends AController {
 	 * [KO] Y축 좌표
 	 * [EN] Y-axis coordinate
 	 */
-	get y(): number {
+	get targetY(): number {
 		return this.#targetMesh.y;
 	}
 
@@ -432,7 +432,7 @@ class IsometricController extends AController {
 	 * [KO] Z축 좌표
 	 * [EN] Z-axis coordinate
 	 */
-	get z(): number {
+	get targetZ(): number {
 		return this.#targetMesh.z;
 	}
 

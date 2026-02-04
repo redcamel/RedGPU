@@ -245,15 +245,15 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
         title: 'Target Position',
     });
 
-    targetFolder.addBinding(controller, 'x', {
+    targetFolder.addBinding(controller, 'targetX', {
         readonly: true,
     })
 
-    targetFolder.addBinding(controller, 'y', {
+    targetFolder.addBinding(controller, 'targetY', {
         readonly: true,
     })
 
-    targetFolder.addBinding(controller, 'z', {
+    targetFolder.addBinding(controller, 'targetZ', {
         readonly: true,
     })
     const moveFolder = pane.addFolder({

@@ -62,6 +62,8 @@ abstract class AController {
 	#pinchStartDistance: number = 0;
 	#isMultiTouch: boolean = false;
 
+
+
 	/**
 	 * [KO] AController 생성자
 	 * [EN] AController constructor
@@ -136,6 +138,41 @@ abstract class AController {
 		return this.#camera;
 	}
 
+	/**
+	 * [KO] 카메라의 현재 월드 X 좌표를 가져옵니다.
+	 * [EN] Gets the camera's current world X coordinate.
+	 *
+	 * @returns
+	 * [KO] X 좌표
+	 * [EN] X coordinate
+	 */
+	get x(): number {
+		return this.camera.x;
+	}
+
+	/**
+	 * [KO] 카메라의 현재 월드 Y 좌표를 가져옵니다.
+	 * [EN] Gets the camera's current world Y coordinate.
+	 *
+	 * @returns
+	 * [KO] Y 좌표
+	 * [EN] Y coordinate
+	 */
+	get y(): number {
+		return this.camera.y;
+	}
+
+	/**
+	 * [KO] 카메라의 현재 월드 Z 좌표를 가져옵니다.
+	 * [EN] Gets the camera's current world Z coordinate.
+	 *
+	 * @returns
+	 * [KO] Z 좌표
+	 * [EN] Z coordinate
+	 */
+	get z(): number {
+		return this.camera.z;
+	}
 	// ==================== Protected - 파생 클래스 전용 ====================
 	/**
 	 * [KO] 현재 마우스가 호버링 중인 View를 반환합니다.
