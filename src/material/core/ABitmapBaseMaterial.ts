@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import CubeTexture from "../../resources/texture/CubeTexture";
+import HDRTexture from "../../resources/texture/hdr/HDRTexture";
 import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
 import ABaseMaterial from "./ABaseMaterial";
 
@@ -49,13 +50,13 @@ abstract class ABitmapBaseMaterial extends ABaseMaterial {
      * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
      * [EN] Manage texture object changes and DirtyPipeline listeners
      * @param prevTexture -
-     * [KO] 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-     * [EN] Previous texture (BitmapTexture|CubeTexture|ANoiseTexture)
+     * [KO] 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
+     * [EN] Previous texture (BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
      * @param texture -
-     * [KO] 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-     * [EN] New texture (BitmapTexture|CubeTexture|ANoiseTexture)
+     * [KO] 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
+     * [EN] New texture (BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
      */
-    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture) {
+    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture) {
         if (prevTexture) prevTexture.__removeDirtyPipelineListener(this.#updateFragmentState);
         if (texture) texture.__addDirtyPipelineListener(this.#updateFragmentState);
         this.#updateFragmentState()

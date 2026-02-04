@@ -20,12 +20,7 @@ struct VertexOutput {
     return output;
 }
 
-#redgpu_if USE_2D_SOURCE
-    @group(0) @binding(0) var environmentTexture: texture_2d<f32>;
-#redgpu_else
-    @group(0) @binding(0) var environmentTexture: texture_cube<f32>;
-#redgpu_endIf
-
+@group(0) @binding(0) var environmentTexture: texture_cube<f32>;
 @group(0) @binding(1) var environmentSampler: sampler;
 @group(0) @binding(2) var<uniform> faceMatrix: mat4x4<f32>;
 
@@ -45,16 +40,6 @@ fn hammersley(i: u32, n: u32) -> vec2<f32> {
     return vec2<f32>(f32(i) / f32(n), radicalInverse_VdC(i));
 }
 
-// 🌐 큐브맵 방향 벡터를 구면 UV 좌표로 변환하는 함수
-fn directionToSphericalUV(dir: vec3<f32>) -> vec2<f32> {
-    let normalizedDir = normalize(dir);
-    let phi = atan2(normalizedDir.z, normalizedDir.x);
-    let theta = acos(clamp(normalizedDir.y, -1.0, 1.0));
-    let u = (phi + PI) / (2.0 * PI);
-    let v = theta / PI;
-    return vec2<f32>(u, v);
-}
-
 @fragment fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let x = input.texCoord.x * 2.0 - 1.0;
     let y = input.texCoord.y * 2.0 - 1.0;
@@ -69,7 +54,7 @@ fn directionToSphericalUV(dir: vec3<f32>) -> vec2<f32> {
     let bitangent = cross(normal, tangent);
 
     var irradiance = vec3<f32>(0.0);
-    let totalSamples = 512u; // Irradiance는 저주파이므로 샘플 수를 약간 줄여도 충분함
+    let totalSamples = 512u;
 
     for (var i = 0u; i < totalSamples; i++) {
         let xi = hammersley(i, totalSamples);
@@ -80,13 +65,7 @@ fn directionToSphericalUV(dir: vec3<f32>) -> vec2<f32> {
         let sampleVec = vec3<f32>(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
         let worldSample = normalize(tangent * sampleVec.x + bitangent * sampleVec.y + normal * sampleVec.z);
 
-        #redgpu_if USE_2D_SOURCE
-            let uv = directionToSphericalUV(worldSample);
-            let sampleColor = textureSampleLevel(environmentTexture, environmentSampler, uv, 0.0);
-        #redgpu_else
-            let sampleColor = textureSampleLevel(environmentTexture, environmentSampler, worldSample, 0.0);
-        #redgpu_endIf
-
+        let sampleColor = textureSampleLevel(environmentTexture, environmentSampler, worldSample, 0.0);
         irradiance += sampleColor.rgb;
     }
 

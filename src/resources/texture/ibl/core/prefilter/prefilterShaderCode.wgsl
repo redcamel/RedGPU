@@ -9,22 +9,26 @@ struct VertexOutput {
         vec2<f32>(-1.0,  1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0)
     );
 
-    // WebGPU 큐브맵 렌더링을 위한 표준 UV (Top-Left 0,0 기반)
     var texCoord = array<vec2<f32>, 6>(
         vec2<f32>(0.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(0.0, 0.0),
         vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0), vec2<f32>(1.0, 0.0)
     );
-
 
     var output: VertexOutput;
     output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
     output.texCoord = texCoord[vertexIndex];
     return output;
 }
-struct SceneUniforms {
+
+@group(0) @binding(0) var environmentTexture: texture_cube<f32>;
+@group(0) @binding(1) var textureSampler: sampler;
+
+struct PrefilterUniforms {
     faceMatrix: mat4x4<f32>,
     roughness: f32,
 }
+@group(0) @binding(2) var<uniform> uniforms: PrefilterUniforms;
+
 const PI: f32 = 3.14159265359;
 
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
@@ -45,7 +49,7 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     let a = roughness * roughness;
     let phi = 2.0 * PI * xi.x;
     let cosTheta = sqrt((1.0 - xi.y) / (1.0 + (a * a - 1.0) * xi.y));
-    let sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+    let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
 
     let H = vec3<f32>(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 
@@ -55,9 +59,6 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
 
     return normalize(tangent * H.x + bitangent * H.y + N * H.z);
 }
-@group(0) @binding(0) var equirectangularTexture: texture_2d<f32>;
-@group(0) @binding(1) var textureSampler: sampler;
-@group(0) @binding(2) var<uniform> uniforms: SceneUniforms;
 
 @fragment fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let x = input.texCoord.x * 2.0 - 1.0;
@@ -65,18 +66,12 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
 
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
     let N = normalize((uniforms.faceMatrix * localPos).xyz);
+    
+    // Split Sum Approximation: R = V = N
     let R = N;
     let V = R;
 
     let roughness = uniforms.roughness;
-    if (roughness == 0.0) {
-        // 거칠기가 0이면 정반사 (단순 샘플링)
-        let theta = atan2(N.x, N.z);
-        let phi = acos(clamp(N.y, -1.0, 1.0));
-         return textureSampleLevel(equirectangularTexture, textureSampler, vec2<f32>(0.5 - theta / (2.0 * PI), phi / PI), 0.0);
-
-    }
-
     var prefilteredColor = vec3<f32>(0.0);
     var totalWeight = 0.0;
     let numSamples = 1024u;
@@ -88,12 +83,14 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
 
         let NdotL = max(dot(N, L), 0.0);
         if (NdotL > 0.0) {
-            let theta = atan2(L.x, L.z);
-            let phi = acos(clamp(L.y, -1.0, 1.0));
-            prefilteredColor += textureSampleLevel(equirectangularTexture, textureSampler, vec2<f32>(0.5 - theta / (2.0 * PI), phi / PI), 0.0).rgb * NdotL;
+            prefilteredColor += textureSampleLevel(environmentTexture, textureSampler, L, 0.0).rgb * NdotL;
             totalWeight += NdotL;
         }
     }
 
-    return vec4<f32>(prefilteredColor / totalWeight, 1.0);
+    if (totalWeight > 0.0) {
+        return vec4<f32>(prefilteredColor / totalWeight, 1.0);
+    } else {
+        return textureSampleLevel(environmentTexture, textureSampler, N, 0.0);
+    }
 }

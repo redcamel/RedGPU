@@ -17,26 +17,31 @@ RedGPU.init(
             redGPUContext,
             '../../../assets/hdr/pisa.hdr',
             async (v) => {
-                // [KO] 로드된 2D HDR로부터 Irradiance 맵 생성 (IBLCubeTexture 직접 반환)
-                // [EN] Generate Irradiance map from the loaded 2D HDR (returns IBLCubeTexture directly)
-                const irradianceCubeTexture = await redGPUContext.resourceManager.irradianceGenerator.generate(v.gpuTexture);
+                // [KO] 1. 로드된 2D HDR을 큐브맵으로 변환
+                // [EN] 1. Convert the loaded 2D HDR to a cubemap
+                const sourceCubeTexture = await redGPUContext.resourceManager.equirectangularToCubeGenerator.generate(v.gpuTexture);
+
+                // [KO] 2. 변환된 큐브맵으로부터 Irradiance 맵 생성
+                // [EN] 2. Generate Irradiance map from the converted cubemap
+                const irradianceCubeTexture = await redGPUContext.resourceManager.irradianceGenerator.generate(sourceCubeTexture.gpuTexture);
 
                 // [KO] 결과를 시각적으로 확인하기 위해 스카이박스에 적용
                 // [EN] Apply to Skybox to visually verify the result
                 const skybox = new RedGPU.Display.SkyBox(redGPUContext, irradianceCubeTexture);
                 view.skybox = skybox;
-                console.log(hdrTexture.gpuTexture)
 
                 console.log('Irradiance map generated and applied to skybox');
             }
         );
 
+        // [KO] 원본 2D HDR 이미지를 확인하기 위한 Sprite3D 생성
+        // [EN] Create Sprite3D to view the original 2D HDR image
         const previewMesh = new RedGPU.Display.Sprite3D(
             redGPUContext,
             new RedGPU.Material.BitmapMaterial(redGPUContext, hdrTexture)
         );
         previewMesh.usePixelSize = true;
-        previewMesh.pixelSize = 200
+        previewMesh.pixelSize = 300;
         scene.addChild(previewMesh);
 
         const renderer = new RedGPU.Renderer();
@@ -50,8 +55,6 @@ RedGPU.init(
 );
 
 const renderTestPane = async (redGPUContext, scene, hdrTexture) => {
-
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
     setDebugButtons(RedGPU, redGPUContext);
-
 };
