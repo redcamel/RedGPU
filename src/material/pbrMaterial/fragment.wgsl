@@ -123,13 +123,21 @@ struct Uniforms {
 
 //@group(2) @binding(14) var packedKHR_transmission: texture_2d<f32>;
 
+#redgpu_if useKHR_materials_transmission
 @group(2) @binding(14) var packedKHR_diffuse_transmission: texture_2d<f32>;
+#redgpu_endIf
 
+#redgpu_if useKHR_materials_sheen
 @group(2) @binding(15) var packedKHR_sheen: texture_2d<f32>;
+#redgpu_endIf
 
+#redgpu_if useKHR_materials_anisotropy
 @group(2) @binding(16) var KHR_anisotropyTexture: texture_2d<f32>;
+#redgpu_endIf
 
+#redgpu_if useKHR_materials_iridescence
 @group(2) @binding(17) var packedKHR_iridescence: texture_2d<f32>;
+#redgpu_endIf
 
 // Input structure for model data
 struct InputData {

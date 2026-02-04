@@ -89,12 +89,30 @@ const init = async (
             requiredFeatures.push("texture-compression-astc");
         }
         const requiredLimits: Record<string, number> = {};
-        if (adapter.limits.maxBufferSize) {
-            requiredLimits.maxBufferSize = adapter.limits.maxBufferSize;
-        }
-        if (adapter.limits.maxStorageBufferBindingSize) {
-            requiredLimits.maxStorageBufferBindingSize = adapter.limits.maxStorageBufferBindingSize;
-        }
+        const limitKeys = [
+            'maxBufferSize',
+            'maxStorageBufferBindingSize',
+            'maxSampledTexturesPerShaderStage',
+            'maxSamplersPerShaderStage',
+            'maxStorageBuffersPerShaderStage',
+            'maxStorageTexturesPerShaderStage',
+            'maxUniformBuffersPerShaderStage',
+            'maxUniformBufferBindingSize',
+            'maxBindGroups',
+            'maxVertexAttributes',
+            'maxVertexBuffers',
+            'maxInterStageShaderComponents',
+            'maxComputeWorkgroupStorageSize',
+            'maxComputeInvocationsPerWorkgroup',
+            'maxComputeWorkgroupSizeX',
+            'maxComputeWorkgroupSizeY',
+            'maxComputeWorkgroupSizeZ',
+            'maxComputeWorkgroupsPerDimension'
+        ];
+        limitKeys.forEach(key => {
+            if (adapter.limits[key]) requiredLimits[key] = adapter.limits[key];
+        });
+
         const gpuDeviceDescriptor: GPUDeviceDescriptor = {
             requiredFeatures,
             requiredLimits

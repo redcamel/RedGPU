@@ -18,6 +18,7 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        console.log(redGPUContext)
         // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;

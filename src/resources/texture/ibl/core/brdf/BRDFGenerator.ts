@@ -22,18 +22,18 @@ class BRDFGenerator {
         this.#redGPUContext = redGPUContext;
     }
 
-    /**
-     * [KO] BRDF LUT 텍스처를 반환합니다. 생성되지 않은 경우 새로 생성합니다.
-     * [EN] Returns the BRDF LUT texture. Creates a new one if it doesn't exist.
-     */
-    async getBRDFLUTTexture(): Promise<GPUTexture> {
-        if (!this.#brdfLUTTexture) {
-            await this.#generateBRDFLUT();
-        }
-        return this.#brdfLUTTexture;
-    }
+	/**
+	 * [KO] BRDF LUT 텍스처를 반환합니다.
+	 * [EN] Returns the BRDF LUT texture.
+	 */
+	get brdfLUTTexture(): GPUTexture {
+		if (!this.#brdfLUTTexture) {
+			this.#generateBRDFLUT();
+		}
+		return this.#brdfLUTTexture;
+	}
 
-    async #generateBRDFLUT() {
+	async #generateBRDFLUT() {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const size = 512;
         const format: GPUTextureFormat = 'rgba16float';

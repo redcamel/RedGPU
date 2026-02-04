@@ -110,14 +110,16 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
 };
 
 /**
- * [KO] 기본 셰이더 소스를 생성합니다.
- * [EN] Generates the default shader source.
+ * [KO] 기본 셰이더 소스를 생성합니다. (기본적으로 모든 조건부 블록을 제외합니다)
+ * [EN] Generates the default shader source. (Excludes all conditional blocks by default)
  */
 const generateDefaultSource = (defines: string, conditionalBlocks: ConditionalBlock[]): string => {
     let defaultSource = defines;
     for (let i = conditionalBlocks.length - 1; i >= 0; i--) {
         const block = conditionalBlocks[i];
-        defaultSource = defaultSource.replace(block.fullMatch, block.ifBlock);
+        // [KO] 기본 소스에서는 ifBlock 대신 elseBlock을 사용하거나 아예 제거합니다.
+        // [EN] In the default source, use elseBlock instead of ifBlock, or remove it entirely.
+        defaultSource = defaultSource.replace(block.fullMatch, block.elseBlock || '');
     }
     return defaultSource;
 };

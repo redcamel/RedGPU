@@ -675,6 +675,10 @@ class View3D extends AView {
                     resource:
                         resourceManager.getGPUResourceCubeTextureView(ibl_irradianceTexture, ibl_irradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
                 },
+                {
+                    binding: 12,
+                    resource: resourceManager.brdfGenerator.brdfLUTTexture?.createView() || resourceManager.emptyBitmapTextureView
+                },
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);

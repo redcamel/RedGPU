@@ -55,6 +55,7 @@ struct SystemUniform {
 @group(0) @binding(9) var packedTextureSampler: sampler;
 @group(0) @binding(10) var ibl_environmentTexture: texture_cube<f32>;
 @group(0) @binding(11) var ibl_irradianceTexture: texture_cube<f32>;
+@group(0) @binding(12) var ibl_brdfLUTTexture: texture_2d<f32>;
 
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
 const clusterLight_tileCount = vec3<u32>(REDGPU_DEFINE_TILE_COUNT_Xu, REDGPU_DEFINE_TILE_COUNT_Yu, REDGPU_DEFINE_TILE_COUNT_Zu);
