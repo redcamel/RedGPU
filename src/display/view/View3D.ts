@@ -15,7 +15,6 @@ import Sampler from "../../resources/sampler/Sampler";
 import SystemCode from "../../resources/systemCode/SystemCode";
 import CubeTexture from "../../resources/texture/CubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
-import IBLCubeTexture from "../../resources/texture/ibl/IBLCubeTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
 import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
@@ -26,6 +25,7 @@ import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
+import IBLCubeTexture from "../../resources/texture/ibl/core/IBLCubeTexture";
 
 const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
