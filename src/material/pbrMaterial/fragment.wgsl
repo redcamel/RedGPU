@@ -1007,7 +1007,7 @@ let attenuation = rangePart * invSquare;
                  // Specular IBL
                  let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatF * clearcoatParameter;
 
-                 // 최종 합산 (에너지 보존: 클리어코트가 반사한 만큼 하위 레이어 조명은 감쇠됨)
+                 //   최종 합산 (에너지 보존: 클리어코트가 반사한 만큼 하위 레이어 조명은 감쇠됨)
                  indirectLighting = clearcoatSpecularIBL + (1.0 - max(clearcoatF.x, max(clearcoatF.y, clearcoatF.z)) * clearcoatParameter) * indirectLighting;
             }
         #redgpu_endIf
