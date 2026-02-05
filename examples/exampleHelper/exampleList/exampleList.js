@@ -893,72 +893,72 @@ const ExampleList = [
                         name: 'TextureEncodingTest',
                         path: 'gltf/basic/textureEncodingTest',
                         description: {
-                            ko: `텍스처 인코딩 테스트`, 
-                            en: `Texture Encoding Test`
+                            ko: `텍스처가 올바른 전달 함수(Transfer Function)로 샘플링되는지 테스트합니다. Base Color와 Emissive가 sRGB에서 올바르게 디코딩되는지 확인합니다.`, 
+                            en: `Tests that textures are sampled with the correct transfer functions. Verifies base color and emissive textures are decoded from sRGB.`
                         },
                     },
                     {
                         name: 'TextureLinear InterpolationTest',
                         path: 'gltf/basic/textureLinearInterpolationTest',
                         description: {
-                            ko: `텍스처 선형 보간 테스트`, 
-                            en: `Texture Linear Interpolation Test`
+                            ko: `sRGB 디코딩 후 선형 값에 대해 텍스처 선형 보간이 올바르게 수행되는지 테스트합니다.`, 
+                            en: `Tests that linear texture interpolation is correctly performed on linear values (after sRGB decoding).`
                         },
                     },
                     {
                         name: 'VertexColorTest',
                         path: 'gltf/basic/vertexColorTest',
                         description: {
-                            ko: `정점 색상 테스트`, 
-                            en: `Vertex Color Test`
+                            ko: `뷰어가 정점 색상(COLORS_0 속성)을 올바르게 지원하는지 테스트합니다.`, 
+                            en: `Tests proper support for vertex colors (COLORS_0 attribute) in the viewer.`
                         },
                     },
                     {
                         name: 'BoxVertexColors',
                         path: 'gltf/basic/boxVertexColors',
                         description: {
-                            ko: `박스 정점 색상 테스트`, 
-                            en: `Box Vertex Colors Test`
+                            ko: `각 면에 정점 색상이 적용된 간단한 박스 모델입니다.`, 
+                            en: `A simple box model with vertex colors applied to each face.`
                         },
                     },
                     {
                         name: 'OrientationTest',
                         path: 'gltf/basic/orientationTest',
                         description: {
-                            ko: `오리엔테이션(회전) 테스트`, 
-                            en: `Orientation Test`
+                            ko: `노드의 회전 및 방향(Quaternion) 처리가 올바른지 테스트합니다.`, 
+                            en: `Tests the correctness of node rotation and orientation (Quaternion) handling.`
                         },
                     },
                     {
                         name: 'TextureCoordinateTest',
                         path: 'gltf/basic/textureCoordinateTest',
                         description: {
-                            ko: `텍스처 좌표(UV) 테스트`, 
-                            en: `Texture Coordinate Test`
+                            ko: `XYZ 위치(3D 공간 좌표)와 UV 위치(2D 텍스처 좌표) 간의 관계를 보여줍니다.`, 
+                            en: `Demonstrates the relationship between XYZ positions and UV texture coordinates.`
                         },
                     },
                     {
                         name: 'AlphaBlendModeTest',
                         path: 'gltf/basic/alphaBlendModeTest',
                         description: {
-                            ko: `알파 블렌드 모드 테스트`, 
-                            en: `Alpha Blend Mode Test`
+                            ko: `다양한 알파 모드(OPAQUE, BLEND, MASK)가 올바르게 렌더링되는지 테스트합니다.`, 
+                            en: `Tests the various alpha modes (OPAQUE, BLEND, MASK) to verify correct rendering.`
                         },
                     },
                     {
                         name: 'TextureSettingsTest',
                         path: 'gltf/basic/textureSettingsTest',
                         description: {
-                            ko: `텍스처 설정 테스트`, 
-                            en: `Texture Settings Test`
+                            ko: `텍스처 샘플링 설정(Wrap 모드, 필터링)을 테스트합니다.`, 
+                            en: `Tests texture sampling settings (Wrap modes, Filtering).`
                         },
                     },
                     {
                         name: 'MultiUVTest',
                         path: 'gltf/basic/multiUVTest',
                         description: {
-                            ko: `멀티 UV 테스트`, 
-                            en: `Multi-UV Test`
+                            ko: `다중 텍스처 좌표 속성(예: 색상용 TEXCOORD_0, 기타 요소용 TEXCOORD_1)의 사용을 시연합니다.`, 
+                            en: `Demonstrates the usage of multiple texture coordinate attributes (e.g., TEXCOORD_0 for color, TEXCOORD_1 for other elements).`
                         },
                     },
 
@@ -966,48 +966,48 @@ const ExampleList = [
                         name: 'MetalRoughSpheres',
                         path: 'gltf/basic/metalRoughSpheres',
                         description: {
-                            ko: `금속/거칠기 구체 테스트`, 
-                            en: `Metal/Roughness Spheres Test`
+                            ko: `다양한 금속성(Metallic)과 거칠기(Roughness) 값을 가진 구체들을 통해 PBR 렌더링을 테스트합니다.`, 
+                            en: `Tests PBR rendering via spheres with varying Metallic and Roughness values.`
                         },
                     },
                     {
                         name: 'MetalRoughSpheresNoTextures',
                         path: 'gltf/basic/metalRoughSpheresNoTextures',
                         description: {
-                            ko: `텍스처 없는 금속/거칠기 구체 테스트`, 
-                            en: `Metal/Roughness Spheres (No Textures) Test`
+                            ko: `텍스처 없이 재질의 요소(Factor) 값만으로 금속성과 거칠기를 표현하는 테스트입니다.`, 
+                            en: `Tests representing metallic and roughness using only material factor values without textures.`
                         },
                     },
                     {
                         name: 'WaterBottle',
                         path: 'gltf/basic/waterBottle',
                         description: {
-                            ko: `물병 모델 렌더링`, 
-                            en: `Water Bottle Model Rendering`
+                            ko: `Normal, Occlusion, Emissive 맵을 사용하는 기본적인 금속/거칠기(Metal/Roughness) PBR 물병 모델입니다.`, 
+                            en: `A basic Metal/Roughness PBR water bottle model using Normal, Occlusion, and Emissive maps.`
                         },
                     },
                     {
                         name: 'NormalTangentTest',
                         path: 'gltf/basic/normalTangentTest',
                         description: {
-                            ko: `노멀/탄젠트 테스트`, 
-                            en: `Normal/Tangent Test`
+                            ko: `노멀 맵핑과 탄젠트 공간 계산의 정확성을 테스트합니다.`, 
+                            en: `Tests the accuracy of normal mapping and tangent space calculations.`
                         },
                     },
                     {
                         name: 'NormalTangentMirrorTest',
                         path: 'gltf/basic/normalTangentMirrorTest',
                         description: {
-                            ko: `노멀/탄젠트 미러링 테스트`, 
-                            en: `Normal/Tangent Mirror Test`
+                            ko: `미러링된 텍스처 좌표에서의 노멀 맵핑 처리를 테스트합니다.`, 
+                            en: `Tests normal mapping handling with mirrored texture coordinates.`
                         },
                     },
                     {
                         name: 'NegativeScaleTest',
                         path: 'gltf/basic/negativeScaleTest',
                         description: {
-                            ko: `음수 스케일 테스트`, 
-                            en: `Negative Scale Test`
+                            ko: `음수 스케일(반전)이 적용된 노드의 렌더링을 테스트합니다.`, 
+                            en: `Tests rendering of nodes with negative scale (inversion) applied.`
                         },
                     },
 
@@ -1015,16 +1015,16 @@ const ExampleList = [
                         name: 'EnvironmentTest',
                         path: 'gltf/basic/environmentTest',
                         description: {
-                            ko: `환경 맵 테스트`, 
-                            en: `Environment Map Test`
+                            ko: `금속 표면에서의 환경 맵 반사 효과를 테스트합니다.`, 
+                            en: `Tests environment map reflection effects on metallic surfaces.`
                         },
                     },
                     {
                         name: 'Generate normal vector test',
                         path: 'gltf/basic/generateNormalTest',
                         description: {
-                            ko: `노멀 벡터 생성 테스트`, 
-                            en: `Generate Normal Vector Test`
+                            ko: `모델에 노멀 정보가 없을 때 자동으로 노멀 벡터를 생성하는 기능을 테스트합니다.`, 
+                            en: `Tests the automatic generation of normal vectors when the model lacks normal information.`
                         },
                     },
                 ]
@@ -1036,47 +1036,47 @@ const ExampleList = [
                         name: 'CompareBaseColor',
                         path: 'gltf/basic/compareBaseColor',
                         description: {
-                            ko: `기본 색상 비교`, 
-                            en: `Compare Base Color`
+                            ko: `기본 색상(Base Color) 렌더링 결과를 비교합니다.`, 
+                            en: `Compares Base Color rendering results.`
                         },
                     }, {
                         name: 'CompareAlphaCoverage',
                         path: 'gltf/basic/compareAlphaCoverage',
                         description: {
-                            ko: `알파 커버리지 비교`, 
-                            en: `Compare Alpha Coverage`
+                            ko: `알파 커버리지(Alpha Coverage) 렌더링 결과를 비교합니다.`, 
+                            en: `Compares Alpha Coverage rendering results.`
                         },
                     },
                     {
                         name: 'CompareMetallic',
                         path: 'gltf/basic/compareMetallic',
                         description: {
-                            ko: `금속성 비교`, 
-                            en: `Compare Metallic`
+                            ko: `금속성(Metallic) 렌더링 결과를 비교합니다.`, 
+                            en: `Compares Metallic rendering results.`
                         },
                     },
                     {
                         name: 'CompareNormal',
                         path: 'gltf/basic/compareNormal',
                         description: {
-                            ko: `노멀 맵 비교`, 
-                            en: `Compare Normal`
+                            ko: `노멀 맵(Normal Map) 렌더링 결과를 비교합니다.`, 
+                            en: `Compares Normal Map rendering results.`
                         },
                     },
                     {
                         name: 'CompareRoughness',
                         path: 'gltf/basic/compareRoughness',
                         description: {
-                            ko: `거칠기 비교`, 
-                            en: `Compare Roughness`
+                            ko: `거칠기(Roughness) 렌더링 결과를 비교합니다.`, 
+                            en: `Compares Roughness rendering results.`
                         },
                     },
                     {
                         name: 'CompareAmbientOcclusion',
                         path: 'gltf/basic/compareAmbientOcclusion',
                         description: {
-                            ko: `앰비언트 오클루전 비교`, 
-                            en: `Compare Ambient Occlusion`
+                            ko: `앰비언트 오클루전(AO) 렌더링 결과를 비교합니다.`, 
+                            en: `Compares Ambient Occlusion (AO) rendering results.`
                         },
                     },
                 ]
@@ -1088,56 +1088,56 @@ const ExampleList = [
                         name: 'Basic Animations',
                         path: 'gltf/animation/basicAnimations',
                         description: {
-                            ko: `기본 애니메이션`, 
-                            en: `Basic Animations`
+                            ko: `노드의 이동, 회전, 크기 조절 애니메이션을 보여주는 기본 예제입니다.`, 
+                            en: `Basic example showing node translation, rotation, and scaling animations.`
                         },
                     },
                     {
                         name: 'SimpleSkin',
                         path: 'gltf/animation/simpleSkin',
                         description: {
-                            ko: `간단한 스키닝 애니메이션`, 
-                            en: `Simple Skinning Animation`
+                            ko: `가장 기본적인 형태의 스키닝(Skinning) 애니메이션 예제입니다.`, 
+                            en: `The most basic example of skinning animation.`
                         },
                     },
                     {
                         name: 'SimpleMorph',
                         path: 'gltf/animation/simpleMorph',
                         description: {
-                            ko: `간단한 모프 타겟 애니메이션`, 
-                            en: `Simple Morph Target Animation`
+                            ko: `간단한 모프 타겟(Morph Target) 애니메이션 예제입니다.`, 
+                            en: `Simple Morph Target animation example.`
                         },
                     },
                     {
                         name: 'RiggedSimple',
                         path: 'gltf/animation/riggedSimple',
                         description: {
-                            ko: `간단한 리깅 애니메이션`, 
-                            en: `Simple Rigged Animation`
+                            ko: `간단하게 리깅된 원통형 메쉬를 통해 스키닝 동작을 확인합니다.`, 
+                            en: `Verifies skinning behavior via a simply rigged cylindrical mesh.`
                         },
                     },
                     {
                         name: 'RiggedFigure',
                         path: 'gltf/animation/riggedFigure',
                         description: {
-                            ko: `리깅된 캐릭터 애니메이션`, 
-                            en: `Rigged Figure Animation`
+                            ko: `리깅된 인간형 캐릭터 모델의 애니메이션을 테스트합니다.`, 
+                            en: `Tests animation of a rigged humanoid character model.`
                         },
                     },
                     {
                         name: 'InterpolationTest',
                         path: 'gltf/animation/interpolationTest',
                         description: {
-                            ko: `애니메이션 보간 테스트`, 
-                            en: `Animation Interpolation Test`
+                            ko: `애니메이션 보간 모드(Step, Linear, Cubic Spline)의 차이를 보여줍니다.`, 
+                            en: `Demonstrates the differences between animation interpolation modes (Step, Linear, Cubic Spline).`
                         },
                     },
                     {
                         name: 'CesiumMan & MilkTruck',
                         path: 'gltf/animation/cesiumMan',
                         description: {
-                            ko: `CesiumMan 및 MilkTruck 애니메이션`, 
-                            en: `CesiumMan & MilkTruck Animation`
+                            ko: `스키닝된 CesiumMan과 애니메이션이 적용된 우유 트럭 모델입니다.`, 
+                            en: `Skinned CesiumMan and animated Milk Truck models.`
                         },
                     },
 
@@ -1145,24 +1145,24 @@ const ExampleList = [
                         name: 'BrainStem',
                         path: 'gltf/animation/brainStem',
                         description: {
-                            ko: `BrainStem 복합 애니메이션`, 
-                            en: `BrainStem Complex Animation`
+                            ko: `복잡한 계층 구조와 스키닝을 가진 BrainStem 모델 애니메이션입니다.`, 
+                            en: `BrainStem model animation with complex hierarchy and skinning.`
                         },
                     },
                     {
                         name: 'MorphStressTest',
                         path: 'gltf/animation/morphStressTest',
                         description: {
-                            ko: `모프 타겟 스트레스 테스트`, 
-                            en: `Morph Target Stress Test`
+                            ko: `다수의 활성 정점 속성(최대 18개)을 사용하여 모프 타겟 구현을 스트레스 테스트합니다.`, 
+                            en: `Stress-tests morph target implementations with a high number of active vertex attributes (up to 18).`
                         },
                     },
                     {
                         name: 'RecursiveSkeletons',
                         path: 'gltf/animation/recursiveSkeletons',
                         description: {
-                            ko: `재귀적 스켈레톤 애니메이션`, 
-                            en: `Recursive Skeletons Animation`
+                            ko: `복잡한 스키닝 케이스(다른 스킨으로 메쉬 재사용, 단일 스켈레톤에 다중 스킨 바인딩)를 테스트합니다.`, 
+                            en: `Tests complex skinning cases: reusing meshes with different skins and binding multiple skins to a single skeleton.`
                         },
                     },
                     {
@@ -1207,48 +1207,48 @@ Check performance limits on each device.`
                         name: 'corset',
                         path: 'gltf/models/corset',
                         description: {
-                            ko: `코르셋 모델`, 
-                            en: `Corset Model`
+                            ko: `복잡한 형상과 텍스처를 가진 고해상도 코르셋 모델입니다.`, 
+                            en: `High-resolution Corset model with complex geometry and textures.`
                         },
                     },
                     {
                         name: 'Helmets',
                         path: 'gltf/models/helmets',
                         description: {
-                            ko: `헬멧 모델`, 
-                            en: `Helmets Model`
+                            ko: `손상된 헬멧(Damaged Helmet) 등 고품질 PBR 텍스처를 보여주는 모델들입니다.`, 
+                            en: `Models showcasing high-quality PBR textures, such as the Damaged Helmet.`
                         },
                     },
                     {
                         name: 'Sponza',
                         path: 'gltf/models/sponza',
                         description: {
-                            ko: `스폰자(Sponza) 씬`, 
-                            en: `Sponza Scene`
+                            ko: `조명 테스트에 널리 사용되는 건물 내부 모델입니다. 현대적인 PBR 파이프라인을 위해 고해상도 지오메트리로 리메이크되었습니다.`, 
+                            en: `Building interior commonly used for testing lighting. Remade for modern PBR pipelines with high-resolution geometry.`
                         },
                     },
                     {
                         name: 'Tokyo',
                         path: 'gltf/models/tokyo',
                         description: {
-                            ko: `도쿄(Tokyo) 씬`, 
-                            en: `Tokyo Scene`
+                            ko: `수많은 드로우 콜과 대규모 씬 렌더링을 테스트하는 도쿄 도시 모델입니다.`, 
+                            en: `Tokyo city model testing large-scale scene rendering and numerous draw calls.`
                         },
                     },
                     {
                         name: 'texcooredNTest',
                         path: 'gltf/models/texcooredNTest',
                         description: {
-                            ko: `텍스처 좌표 N 테스트`, 
-                            en: `Texture Coordinate N Test`
+                            ko: `다중 텍스처 좌표 채널의 동작을 확인하는 테스트 모델입니다.`, 
+                            en: `Test model verifying the behavior of multiple texture coordinate channels.`
                         },
                     },
                     {
                         name: 'ABeautifulGame',
                         path: 'gltf/models/aBeautifulGame',
                         description: {
-                            ko: `체스 게임 모델`, 
-                            en: `A Beautiful Game Model`
+                            ko: `투과(Transmission)와 볼륨(Volume) 효과를 시연하는 체스 세트입니다.`, 
+                            en: `A chess set demonstrating transmission and volume.`
                         },
                     },
                 ]
@@ -1263,40 +1263,40 @@ Check performance limits on each device.`
                                 name: 'CompareAnisotropy',
                                 path: 'gltf/gltfExtensions/anisotropy/compareAnisotropy',
                                 description: {
-                                    ko: `비등방성 비교`, 
-                                    en: `Compare Anisotropy`
+                                    ko: `비등방성(Anisotropy)이 있는 렌더링과 없는 렌더링을 비교합니다.`, 
+                                    en: `Compares rendering with and without anisotropy.`
                                 },
                             },
                             {
                                 name: 'AnisotropyDiscTest',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyDiscTest',
                                 description: {
-                                    ko: `비등방성 디스크 테스트`, 
-                                    en: `Anisotropy Disc Test`
+                                    ko: `원판 형태의 비등방성 하이라이트 회전을 테스트합니다.`, 
+                                    en: `Tests anisotropic highlight rotation on a disc shape.`
                                 },
                             },
                             {
                                 name: 'AnisotropyRotationTest',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyRotationTest',
                                 description: {
-                                    ko: `비등방성 회전 테스트`, 
-                                    en: `Anisotropy Rotation Test`
+                                    ko: `비등방성 방향 회전에 따른 렌더링 변화를 테스트합니다.`, 
+                                    en: `Tests rendering changes based on anisotropy direction rotation.`
                                 },
                             },
                             {
                                 name: 'AnisotropyStrengthTest',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyStrengthTest',
                                 description: {
-                                    ko: `비등방성 강도 테스트`, 
-                                    en: `Anisotropy Strength Test`
+                                    ko: `비등방성 강도(Strength)에 따른 하이라이트 변화를 테스트합니다.`, 
+                                    en: `Tests highlight changes based on anisotropy strength.`
                                 },
                             },
                             {
                                 name: 'AnisotropyBarnLamp',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyBarnLamp',
                                 description: {
-                                    ko: `비등방성 램프 모델`, 
-                                    en: `Anisotropy Barn Lamp Model`
+                                    ko: `비등방성(Anisotropic) 재질 속성을 보여주는 헛간 램프 모델입니다.`, 
+                                    en: `A barn lamp model showcasing anisotropic material properties.`
                                 },
                             },
                         ]
@@ -1308,56 +1308,56 @@ Check performance limits on each device.`
                                 name: 'CompareIridescence',
                                 path: 'gltf/gltfExtensions/iridescence/compareIridescence',
                                 description: {
-                                    ko: `무지개빛(Iridescence) 비교`, 
-                                    en: `Compare Iridescence`
+                                    ko: `무지개빛(Iridescence) 박막 간섭 효과를 비교합니다.`, 
+                                    en: `Compares Iridescence thin-film interference effects.`
                                 },
                             },
                             {
                                 name: 'IridescenceDielectricSpheres',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceDielectricSpheres',
                                 description: {
-                                    ko: `유전체 구체 무지개빛 테스트`, 
-                                    en: `Iridescence Dielectric Spheres Test`
+                                    ko: `비금속(유전체) 재질에서 KHR_materials_iridescence 확장을 테스트합니다.`, 
+                                    en: `Tests the KHR_materials_iridescence extension on non-metallic (dielectric) materials.`
                                 },
                             },
                             {
                                 name: 'IridescenceMetallicSpheres',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceMetallicSpheres',
                                 description: {
-                                    ko: `금속 구체 무지개빛 테스트`, 
-                                    en: `Iridescence Metallic Spheres Test`
+                                    ko: `금속 구체에 적용된 무지개빛 효과를 테스트합니다.`, 
+                                    en: `Tests iridescence effects applied to metallic spheres.`
                                 },
                             },
                             {
                                 name: 'IridescenceSuzanne',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceSuzanne',
                                 description: {
-                                    ko: `수잔(Suzanne) 모델 무지개빛 테스트`, 
-                                    en: `Iridescence Suzanne Model Test`
+                                    ko: `Suzanne 모델에 적용된 무지개빛 쉐이더 테스트입니다.`, 
+                                    en: `Iridescence shader test applied to the Suzanne model.`
                                 },
                             },
                             {
                                 name: 'IridescenceLamp',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceLamp',
                                 description: {
-                                    ko: `램프 모델 무지개빛 테스트`, 
-                                    en: `Iridescence Lamp Model Test`
+                                    ko: `투과 및 볼륨 효과와 함께 KHR_materials_iridescence를 보여주는 Wayfair 램프 모델입니다.`, 
+                                    en: `A Wayfair lamp model showcasing transmission, volume, and KHR_materials_iridescence.`
                                 },
                             },
                             {
                                 name: 'SunglassesKhronos',
                                 path: 'gltf/gltfExtensions/iridescence/sunglassesKhronos',
                                 description: {
-                                    ko: `선글라스 모델 무지개빛 테스트`, 
-                                    en: `Sunglasses Khronos Model Test`
+                                    ko: `렌즈에 얇은 막 무지개빛 효과가 적용된 선글라스 모델입니다.`, 
+                                    en: `Sunglasses model with thin-film iridescence effects applied to the lenses.`
                                 },
                             },
                             {
                                 name: 'IridescentDishWithOlives',
                                 path: 'gltf/gltfExtensions/iridescence/iridescentDishWithOlives',
                                 description: {
-                                    ko: `접시와 올리브 모델 무지개빛 테스트`, 
-                                    en: `Iridescent Dish With Olives Model Test`
+                                    ko: `투과, 볼륨, IOR 및 스펙큘러 속성을 보여주는 접시 모델입니다.`, 
+                                    en: `A dish demonstrating transmission, volume, IOR, and specular properties.`
                                 },
                             },
                         ]
@@ -1369,32 +1369,32 @@ Check performance limits on each device.`
                                 name: 'CompareClearcoat',
                                 path: 'gltf/gltfExtensions/clearcoat/compareClearcoat',
                                 description: {
-                                    ko: `클리어코트 비교`, 
-                                    en: `Compare Clearcoat`
+                                    ko: `클리어코트(Clearcoat) 재질 렌더링 결과를 비교합니다.`, 
+                                    en: `Compares Clearcoat material rendering results.`
                                 },
                             },
                             {
                                 name: 'ClearCoatTest',
                                 path: 'gltf/gltfExtensions/clearcoat/clearCoatTest',
                                 description: {
-                                    ko: `클리어코트 테스트`, 
-                                    en: `Clearcoat Test`
+                                    ko: `다양한 거칠기와 클리어코트 강도를 테스트합니다.`, 
+                                    en: `Tests various roughness and clearcoat strengths.`
                                 },
                             },
                             {
                                 name: 'ClearcoatWicker',
                                 path: 'gltf/gltfExtensions/clearcoat/clearcoatWicker',
                                 description: {
-                                    ko: `위커(Wicker) 재질 클리어코트`, 
-                                    en: `Clearcoat Wicker Material`
+                                    ko: `직물 표면 위에 코팅된 클리어코트 효과를 보여주는 위커 모델입니다.`, 
+                                    en: `Wicker model showing clearcoat effect coated over a woven surface.`
                                 },
                             },
                             {
                                 name: 'ClearCoatCarPaint',
                                 path: 'gltf/gltfExtensions/clearcoat/clearCoatCarPaint',
                                 description: {
-                                    ko: `자동차 페인트 클리어코트`, 
-                                    en: `Clearcoat Car Paint`
+                                    ko: `자동차 페인트와 같은 다중 레이어 재질 표현을 테스트합니다.`, 
+                                    en: `Tests multi-layer material representation like car paint.`
                                 },
 
                             },
@@ -1408,24 +1408,24 @@ Check performance limits on each device.`
                                 name: 'CompareDispersion',
                                 path: 'gltf/gltfExtensions/dispersion/compareDispersion',
                                 description: {
-                                    ko: `분산(Dispersion) 비교`, 
-                                    en: `Compare Dispersion`
+                                    ko: `빛의 분산(Dispersion) 효과를 비교합니다.`, 
+                                    en: `Compares light dispersion effects.`
                                 },
                             },
                             {
                                 name: 'DispersionTest',
                                 path: 'gltf/gltfExtensions/dispersion/dispersionTest',
                                 description: {
-                                    ko: `분산 테스트`, 
-                                    en: `Dispersion Test`
+                                    ko: `프리즘과 같은 빛의 분산 현상을 테스트합니다.`, 
+                                    en: `Tests light dispersion phenomena like a prism.`
                                 },
                             },
                             {
                                 name: 'DragonDispersion',
                                 path: 'gltf/gltfExtensions/dispersion/dragonDispersion',
                                 description: {
-                                    ko: `용 모델 분산 테스트`, 
-                                    en: `Dragon Model Dispersion Test`
+                                    ko: `용 모델에 적용된 보석 같은 분산 효과를 보여줍니다.`, 
+                                    en: `Shows gem-like dispersion effects applied to a Dragon model.`
                                 },
                             },
                         ]
@@ -1437,16 +1437,16 @@ Check performance limits on each device.`
                                 name: 'CompareEmissiveStrength',
                                 path: 'gltf/gltfExtensions/emissiveStrength/compareEmissiveStrength',
                                 description: {
-                                    ko: `발광 강도 비교`, 
-                                    en: `Compare Emissive Strength`
+                                    ko: `발광(Emissive) 강도 증폭 효과를 비교합니다.`, 
+                                    en: `Compares Emissive Strength amplification effects.`
                                 },
                             },
                             {
                                 name: 'EmissiveStrengthTest',
                                 path: 'gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest',
                                 description: {
-                                    ko: `발광 강도 테스트`, 
-                                    en: `Emissive Strength Test`
+                                    ko: `1.0을 초과하는 고강도 발광 표현을 테스트합니다.`, 
+                                    en: `Tests high-intensity emissive representation exceeding 1.0.`
                                 },
                             },
                         ]
@@ -1458,56 +1458,56 @@ Check performance limits on each device.`
                                 name: 'CompareSheen',
                                 path: 'gltf/gltfExtensions/sheen/compareSheen',
                                 description: {
-                                    ko: `광택(Sheen) 비교`, 
-                                    en: `Compare Sheen`
+                                    ko: `직물 등의 미세한 반사광(Sheen) 효과를 비교합니다.`, 
+                                    en: `Compares Sheen effects seen on fabrics etc.`
                                 },
                             },
                             {
                                 name: 'SheenTestGrid',
                                 path: 'gltf/gltfExtensions/sheen/sheenTestGrid',
                                 description: {
-                                    ko: `광택 테스트 그리드`, 
-                                    en: `Sheen Test Grid`
+                                    ko: `Sheen 색상과 거칠기에 따른 변화를 그리드로 테스트합니다.`, 
+                                    en: `Tests changes based on Sheen color and roughness in a grid.`
                                 },
                             },
                             {
                                 name: 'SheenCloth',
                                 path: 'gltf/gltfExtensions/sheen/sheenCloth',
                                 description: {
-                                    ko: `천 재질 광택`, 
-                                    en: `Sheen Cloth Material`
+                                    ko: `Sheen 효과를 보여주는 직물 예제입니다.`, 
+                                    en: `A fabric example showcasing sheen.`
                                 },
                             },
                             {
                                 name: 'SheenChair',
                                 path: 'gltf/gltfExtensions/sheen/sheenChair',
                                 description: {
-                                    ko: `의자 모델 광택`, 
-                                    en: `Sheen Chair Model`
+                                    ko: `재질 변형(Variant)과 Sheen 효과를 보여주는 의자 모델입니다.`, 
+                                    en: `A chair model demonstrating material variants and sheen.`
                                 },
                             },
                             {
                                 name: 'GlamVelvetSofa',
                                 path: 'gltf/gltfExtensions/sheen/glamVelvetSofa',
                                 description: {
-                                    ko: `벨벳 소파 광택`, 
-                                    en: `Velvet Sofa Sheen`
+                                    ko: `고급 벨벳 소파의 질감을 표현하는 Sheen 모델입니다.`, 
+                                    en: `Sheen model expressing the texture of a luxury velvet sofa.`
                                 },
                             },
                             {
                                 name: 'ChairDamaskPurplegold',
                                 path: 'gltf/gltfExtensions/sheen/chairDamaskPurplegold',
                                 description: {
-                                    ko: `다마스크 의자 광택`, 
-                                    en: `Damask Chair Sheen`
+                                    ko: `다마스크 패턴 의자의 직물 느낌을 표현합니다.`, 
+                                    en: `Expresses the fabric feel of a damask pattern chair.`
                                 },
                             },
                             {
                                 name: 'SheenWoodLeatherSofa',
                                 path: 'gltf/gltfExtensions/sheen/sheenWoodLeatherSofa',
                                 description: {
-                                    ko: `나무/가죽 소파 광택`, 
-                                    en: `Wood/Leather Sofa Sheen`
+                                    ko: `가죽과 나무 재질이 혼합된 소파에서의 Sheen 효과입니다.`, 
+                                    en: `Sheen effect on a sofa combining leather and wood materials.`
                                 },
                             },
 
@@ -1520,24 +1520,24 @@ Check performance limits on each device.`
                                 name: 'CompareSpecular',
                                 path: 'gltf/gltfExtensions/specular/compareSpecular',
                                 description: {
-                                    ko: `스펙큘러 비교`, 
-                                    en: `Compare Specular`
+                                    ko: `스펙큘러(Specular) 반사 강도 및 색상 제어를 비교합니다.`, 
+                                    en: `Compares Specular reflection strength and color control.`
                                 },
                             },
                             {
                                 name: 'SpecularTest',
                                 path: 'gltf/gltfExtensions/specular/specularTest',
                                 description: {
-                                    ko: `스펙큘러 테스트`, 
-                                    en: `Specular Test`
+                                    ko: `유전체 재질의 스펙큘러 하이라이트 조절을 테스트합니다.`, 
+                                    en: `Tests specular highlight adjustments on dielectric materials.`
                                 },
                             },
                             {
                                 name: 'SpecularSilkPouf',
                                 path: 'gltf/gltfExtensions/specular/specularSilkPouf',
                                 description: {
-                                    ko: `실크 푸프 스펙큘러`, 
-                                    en: `Silk Pouf Specular`
+                                    ko: `스펙큘러 속성을 보여주는 실크 푸프 모델입니다.`, 
+                                    en: `A silk pouf model demonstrating specular properties.`
                                 },
                             },
 
@@ -1550,8 +1550,8 @@ Check performance limits on each device.`
                                 name: 'UnlitTest',
                                 path: 'gltf/gltfExtensions/unlit/unlitTest',
                                 description: {
-                                    ko: `Unlit(무광) 재질 테스트`, 
-                                    en: `Unlit Material Test`
+                                    ko: `조명의 영향을 받지 않는 Unlit(무광) 재질을 테스트합니다.`, 
+                                    en: `Tests Unlit materials not affected by lighting.`
                                 },
                             },
                         ]
@@ -1563,16 +1563,16 @@ Check performance limits on each device.`
                                 name: 'TextureTransformTest',
                                 path: 'gltf/gltfExtensions/textureTransform/textureTransformTest',
                                 description: {
-                                    ko: `텍스처 변환 테스트`, 
-                                    en: `Texture Transform Test`
+                                    ko: `KHR_texture_transform 확장의 사용법(스케일, 회전, 이동)을 시연합니다.`, 
+                                    en: `Demonstrates the usage of the KHR_texture_transform extension (scaling, rotation, translation).`
                                 },
                             },
                             {
                                 name: 'TextureTransformMultiTest',
                                 path: 'gltf/gltfExtensions/textureTransform/textureTransformMultiTest',
                                 description: {
-                                    ko: `다중 텍스처 변환 테스트`, 
-                                    en: `Multi Texture Transform Test`
+                                    ko: `여러 텍스처에 서로 다른 변환을 적용하는 테스트입니다.`, 
+                                    en: `Tests applying different transforms to multiple textures.`
                                 },
                             },
                         ]
@@ -1584,16 +1584,16 @@ Check performance limits on each device.`
                                 name: 'DiffuseTransmissionTest',
                                 path: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTest',
                                 description: {
-                                    ko: `확산 투과 테스트`, 
-                                    en: `Diffuse Transmission Test`
+                                    ko: `반투명한 물체의 확산 투과(Diffuse Transmission) 효과를 테스트합니다.`, 
+                                    en: `Tests Diffuse Transmission effects on translucent objects.`
                                 },
                             },
                             {
                                 name: 'DiffuseTransmissionTeacup',
                                 path: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup',
                                 description: {
-                                    ko: `찻잔 확산 투과`, 
-                                    en: `Teacup Diffuse Transmission`
+                                    ko: `얇은 찻잔을 통과하는 빛의 확산을 보여줍니다.`, 
+                                    en: `Shows light diffusion passing through a thin teacup.`
                                 },
                             },
                         ]
@@ -1605,56 +1605,56 @@ Check performance limits on each device.`
                                 name: 'CompareTransmission',
                                 path: 'gltf/gltfExtensions/transmission/compareTransmission',
                                 description: {
-                                    ko: `투과(Transmission) 비교`, 
-                                    en: `Compare Transmission`
+                                    ko: `투명한 물체의 투과(Transmission) 렌더링을 비교합니다.`, 
+                                    en: `Compares Transmission rendering of transparent objects.`
                                 },
                             },
                             {
                                 name: 'TransmissionTest',
                                 path: 'gltf/gltfExtensions/transmission/transmissionTest',
                                 description: {
-                                    ko: `투과 테스트`, 
-                                    en: `Transmission Test`
+                                    ko: `다양한 투과율과 거칠기에 따른 굴절 효과를 테스트합니다.`, 
+                                    en: `Tests refraction effects based on various transmission rates and roughness.`
                                 },
                             },
                             {
                                 name: 'TransmissionRoughnessTest',
                                 path: 'gltf/gltfExtensions/transmission/transmissionRoughnessTest',
                                 description: {
-                                    ko: `투과 거칠기 테스트`, 
-                                    en: `Transmission Roughness Test`
+                                    ko: `거친 표면을 가진 투명 재질의 흐림 효과를 테스트합니다.`, 
+                                    en: `Tests blurring effects on transparent materials with rough surfaces.`
                                 },
                             },
                             {
                                 name: 'StainedGlassLamp',
                                 path: 'gltf/gltfExtensions/transmission/stainedGlassLamp',
                                 description: {
-                                    ko: `스테인드글라스 램프 투과`, 
-                                    en: `Stained Glass Lamp Transmission`
+                                    ko: `스테인드글라스 램프를 통해 색상이 있는 투과광을 보여줍니다.`, 
+                                    en: `Shows colored transmitted light through a stained glass lamp.`
                                 },
                             },
                             {
                                 name: 'ChronographWatch',
                                 path: 'gltf/gltfExtensions/transmission/chronographWatch',
                                 description: {
-                                    ko: `크로노그래프 시계 투과`, 
-                                    en: `Chronograph Watch Transmission`
+                                    ko: `시계 유리의 투명도와 내부 디테일을 보여주는 고품질 모델입니다.`, 
+                                    en: `High-quality model showing watch glass transparency and internal details.`
                                 },
                             },
                             {
                                 name: 'MosquitoInAmber',
                                 path: 'gltf/gltfExtensions/transmission/mosquitoInAmber',
                                 description: {
-                                    ko: `호박 속 모기 투과`, 
-                                    en: `Mosquito In Amber Transmission`
+                                    ko: `호박(Amber) 속에 갇힌 모기를 통해 투과, 굴절률(IOR), 볼륨 속성을 시연합니다.`, 
+                                    en: `A mosquito encased in amber, demonstrating the use of transmission, IOR, and volume properties.`
                                 },
                             },
                             {
                                 name: 'CommercialRefrigerator',
                                 path: 'gltf/gltfExtensions/transmission/commercialRefrigerator',
                                 description: {
-                                    ko: `상업용 냉장고 투과`, 
-                                    en: `Commercial Refrigerator Transmission`
+                                    ko: `유리 문을 가진 상업용 냉장고 모델입니다.`, 
+                                    en: `Commercial refrigerator model with glass doors.`
                                 },
                             },
                         ]
@@ -1666,72 +1666,72 @@ Check performance limits on each device.`
                                 name: 'CompareIor',
                                 path: 'gltf/gltfExtensions/volume/compareIor',
                                 description: {
-                                    ko: `굴절률(IOR) 비교`, 
-                                    en: `Compare IOR`
+                                    ko: `굴절률(IOR)에 따른 빛의 굴절 차이를 비교합니다.`, 
+                                    en: `Compares light refraction differences based on Index of Refraction (IOR).`
                                 },
                             },
                             {
                                 name: 'IORTestGrid',
                                 path: 'gltf/gltfExtensions/volume/IORTestGrid',
                                 description: {
-                                    ko: `굴절률 테스트 그리드`, 
-                                    en: `IOR Test Grid`
+                                    ko: `다양한 IOR 값에 따른 굴절 변화를 그리드로 테스트합니다.`, 
+                                    en: `Tests refraction changes based on various IOR values in a grid.`
                                 },
                             },
                             {
                                 name: 'CompareVolume',
                                 path: 'gltf/gltfExtensions/volume/compareVolume',
                                 description: {
-                                    ko: `볼륨(Volume) 비교`, 
-                                    en: `Compare Volume`
+                                    ko: `볼륨(Volume) 흡수 및 산란 효과를 비교합니다.`, 
+                                    en: `Compares Volume absorption and scattering effects.`
                                 },
                             },
                             {
                                 name: 'TransmissionThinwallTestGrid',
                                 path: 'gltf/gltfExtensions/volume/transmissionThinwallTestGrid',
                                 description: {
-                                    ko: `얇은 벽 투과 테스트`, 
-                                    en: `Thin-wall Transmission Test`
+                                    ko: `얇은 벽(Thin-walled) 옵션 활성화 여부에 따른 투과 차이를 테스트합니다.`, 
+                                    en: `Tests transmission differences based on Thin-walled option activation.`
                                 },
                             },
                             {
                                 name: 'AttenuationTest',
                                 path: 'gltf/gltfExtensions/volume/attenuationTest',
                                 description: {
-                                    ko: `감쇠(Attenuation) 테스트`, 
-                                    en: `Attenuation Test`
+                                    ko: `빛이 매질을 통과할 때의 감쇠(Attenuation) 거리와 색상을 테스트합니다.`, 
+                                    en: `Tests attenuation distance and color as light passes through a medium.`
                                 },
                             },
                             {
                                 name: 'GlassVaseFlowers',
                                 path: 'gltf/gltfExtensions/volume/glassVaseFlowers',
                                 description: {
-                                    ko: `유리 꽃병 볼륨`, 
-                                    en: `Glass Vase Flowers Volume`
+                                    ko: `유리 꽃병과 물의 볼륨 효과를 보여주는 모델입니다.`, 
+                                    en: `Model showing volume effects of a glass vase and water.`
                                 },
                             },
                             {
                                 name: 'GlassBrokenWindow',
                                 path: 'gltf/gltfExtensions/volume/glassBrokenWindow',
                                 description: {
-                                    ko: `깨진 유리창 볼륨`, 
-                                    en: `Glass Broken Window Volume`
+                                    ko: `깨진 유리창의 두께감과 굴절을 표현합니다.`, 
+                                    en: `Expresses the thickness and refraction of a broken window.`
                                 },
                             },
                             {
                                 name: 'GlassHurricaneCandleHolder',
                                 path: 'gltf/gltfExtensions/volume/glassHurricaneCandleHolder',
                                 description: {
-                                    ko: `유리 캔들 홀더 볼륨`, 
-                                    en: `Glass Hurricane Candle Holder Volume`
+                                    ko: `복잡한 유리 형태의 굴절과 반사를 보여주는 캔들 홀더입니다.`, 
+                                    en: `Candle holder showing refraction and reflection of complex glass shapes.`
                                 },
                             },
                             {
                                 name: 'DragonAttenuation',
                                 path: 'gltf/gltfExtensions/volume/dragonAttenuation',
                                 description: {
-                                    ko: `용 모델 감쇠`, 
-                                    en: `Dragon Model Attenuation`
+                                    ko: `KHR_materials_transmission과 KHR_materials_volume을 사용하여 색유리와 같은 객체를 표현합니다.`, 
+                                    en: `Showcases KHR_materials_transmission and KHR_materials_volume, creating an object that resembles colored glass.`
                                 },
                             },
                         ]
