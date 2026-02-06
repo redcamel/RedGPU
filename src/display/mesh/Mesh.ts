@@ -1411,19 +1411,15 @@ class Mesh extends MeshBase {
                 this.#renderBundle = null
 
             }
-        } else {
-            renderViewStateData.num3DGroups++
-        }
-        if (currentGeometry && passFrustumCulling) {
-            const {gpuRenderInfo} = this
-            const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-            const {members: vertexUniformInfoMembers} = vertexUniformInfo
-            const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-            const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
-            if (!this.#uniformDataMatrixList) {
-                this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
-            }
+
             {
+                const {gpuRenderInfo} = this
+                const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+                const {members: vertexUniformInfoMembers} = vertexUniformInfo
+               const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
+                if (!this.#uniformDataMatrixList) {
+                    this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
+                }
                 if (vertexUniformInfoMembers.uvTransform && (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID] )) {
                     const material = currentMaterial as any;
                     const offset = material.textureOffset;
@@ -1448,6 +1444,19 @@ class Mesh extends MeshBase {
 
                 }
             }
+        } else {
+            renderViewStateData.num3DGroups++
+        }
+        if (currentGeometry && passFrustumCulling) {
+            const {gpuRenderInfo} = this
+            const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+            const {members: vertexUniformInfoMembers} = vertexUniformInfo
+            const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+            const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
+            if (!this.#uniformDataMatrixList) {
+                this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
+            }
+
             {
                 if (vertexUniformInfoMembers.displacementScale !== undefined &&
                     this.#displacementScale !== displacementScale
