@@ -131,7 +131,7 @@ struct Uniforms {
 
 //@group(2) @binding(14) var packedKHR_transmission: texture_2d<f32>;
 
-#redgpu_if useKHR_materials_transmission
+#redgpu_if useKHR_materials_diffuse_transmission
 @group(2) @binding(14) var packedKHR_diffuse_transmission: texture_2d<f32>;
 #redgpu_endIf
 

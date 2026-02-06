@@ -114,7 +114,6 @@ const parseWGSL = (code: string) => {
         defaultSource,
         shaderSourceVariant,
         conditionalBlocks: uniqueKeys,
-        conditionalBlockInfos,
         cacheKey
     } = preprocessWGSL(code);
     const cachedReflect = reflectCache.get(cacheKey);

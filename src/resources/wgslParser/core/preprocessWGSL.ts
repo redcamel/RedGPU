@@ -26,7 +26,7 @@ export interface ConditionalBlock {
 }
 
 /** [KO] 전처리된 WGSL 결과 인터페이스 [EN] Preprocessed WGSL result interface */
-interface PreprocessedWGSLResult {
+export interface PreprocessedWGSLResult {
     cacheKey: string;
     defaultSource: string;
     shaderSourceVariant: ShaderVariantGenerator;
