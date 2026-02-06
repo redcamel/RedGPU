@@ -18,6 +18,10 @@ class ShaderVariantGenerator {
     #variantCache = new Map<string, string>();
     #defines: string;
     #conditionalBlocks: ConditionalBlock[];
+    #baseTextures: any[] = [];
+    #baseSamplers: any[] = [];
+    #texturesByUniformName = new Map<string, any[]>();
+    #samplersByUniformName = new Map<string, any[]>();
 
     /**
      * [KO] ShaderVariantGenerator 인스턴스를 생성합니다. (내부 시스템 전용)
@@ -35,6 +39,88 @@ class ShaderVariantGenerator {
     ) {
         this.#defines = defines;
         this.#conditionalBlocks = conditionalBlocks;
+    }
+
+    /**
+     * [KO] 기본 텍스처 및 샘플러 정보를 설정합니다.
+     * [EN] Sets the base texture and sampler information.
+     */
+    setBaseInfo(textures: any[], samplers: any[]) {
+        this.#baseTextures = textures;
+        this.#baseSamplers = samplers;
+    }
+
+    /**
+     * [KO] 특정 유니폼 키에 연결된 텍스처 및 샘플러 정보를 추가합니다.
+     * [EN] Adds texture and sampler information associated with a specific uniform key.
+     */
+    addConditionalInfo(uniformName: string, textures: any[], samplers: any[]) {
+        this.#texturesByUniformName.set(uniformName, textures);
+        this.#samplersByUniformName.set(uniformName, samplers);
+    }
+
+    /**
+     * [KO] 특정 변형 키에 활성화된 텍스처 목록을 반환합니다.
+     * [EN] Returns the list of textures activated for a specific variant key.
+     */
+    getVariantTextures(variantKey: string): any[] {
+        const enabledKeys = variantKey === 'none' ? [] : variantKey.split('+');
+        const result = [...this.#baseTextures];
+        enabledKeys.forEach(key => {
+            const extra = this.#texturesByUniformName.get(key);
+            if (extra) {
+                extra.forEach(t => {
+                    if (!result.find(rt => rt.name === t.name)) result.push(t);
+                });
+            }
+        });
+        return result;
+    }
+
+    /**
+     * [KO] 특정 변형 키에 활성화된 샘플러 목록을 반환합니다.
+     * [EN] Returns the list of samplers activated for a specific variant key.
+     */
+    getVariantSamplers(variantKey: string): any[] {
+        const enabledKeys = variantKey === 'none' ? [] : variantKey.split('+');
+        const result = [...this.#baseSamplers];
+        enabledKeys.forEach(key => {
+            const extra = this.#samplersByUniformName.get(key);
+            if (extra) {
+                extra.forEach(s => {
+                    if (!result.find(rs => rs.name === s.name)) result.push(s);
+                });
+            }
+        });
+        return result;
+    }
+
+    /**
+     * [KO] 모든 가능한 텍스처 목록(합집합)을 반환합니다.
+     * [EN] Returns the list of all possible textures (union).
+     */
+    getUnionTextures(): any[] {
+        const result = [...this.#baseTextures];
+        this.#texturesByUniformName.forEach(textures => {
+            textures.forEach(t => {
+                if (!result.find(rt => rt.name === t.name)) result.push(t);
+            });
+        });
+        return result;
+    }
+
+    /**
+     * [KO] 모든 가능한 샘플러 목록(합집합)을 반환합니다.
+     * [EN] Returns the list of all possible samplers (union).
+     */
+    getUnionSamplers(): any[] {
+        const result = [...this.#baseSamplers];
+        this.#samplersByUniformName.forEach(samplers => {
+            samplers.forEach(s => {
+                if (!result.find(rs => rs.name === s.name)) result.push(s);
+            });
+        });
+        return result;
     }
 
     /**

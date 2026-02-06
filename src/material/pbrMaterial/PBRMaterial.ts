@@ -320,13 +320,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
             2
         )
         this.initGPURenderInfos();
-        this.#packedORMTexture = new PackedTexture(redGPUContext)
-        // this.#packedKHR_clearcoatTexture = new PackedTexture(redGPUContext)
-        // this.#packedKHR_transmission = new PackedTexture(redGPUContext)
-        this.#packedKHR_clearcoatTexture_transmission = new PackedTexture(redGPUContext)
-        this.#packedKHR_diffuse_transmission = new PackedTexture(redGPUContext)
-        this.#packedKHR_sheen = new PackedTexture(redGPUContext)
-        this.#packedKHR_iridescence = new PackedTexture(redGPUContext)
+
+
         this.__packingList = [
             () => {
                 //TODO - 이거 개선해야함... 대상만 갱신되도록
@@ -392,6 +387,12 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup ORM (Occlusion, Roughness, Metallic) texture packing
      */
     async setupPackORMTexture() {
+        if(!(this.occlusionTexture || this.metallicRoughnessTexture)){
+            return
+        }
+        if(!this.#packedORMTexture){
+            this.#packedORMTexture = new PackedTexture(this.redGPUContext)
+        }
         const width = Math.max(
             this.occlusionTexture?.gpuTexture?.width || 1,
             this.metallicRoughnessTexture?.gpuTexture?.width || 1
@@ -417,6 +418,12 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup Clearcoat and Transmission texture packing
      */
     async setupPackedKHR_clearcoatTexture_transmission() {
+        // if(!this.useKHR_materials_clearcoat && !this.useKHR_materials_transmission){
+        //     return
+        // }
+        if(!this.#packedKHR_clearcoatTexture_transmission){
+            this.#packedKHR_clearcoatTexture_transmission = new PackedTexture(this.redGPUContext)
+        }
         // Clearcoat + Transmission을 하나의 텍스처로 패킹
         const clearcoatWidth = Math.max(
             this.KHR_clearcoatTexture?.gpuTexture?.width || 1,
@@ -498,6 +505,12 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup Diffuse Transmission texture packing
      */
     async setupPackedKHR_diffuse_transmission() {
+        if(!(this.KHR_diffuseTransmissionColorTexture || this.KHR_diffuseTransmissionTexture)){
+            return
+        }
+        if(!this.#packedKHR_diffuse_transmission){
+            this.#packedKHR_diffuse_transmission = new PackedTexture(this.redGPUContext)
+        }
         const width = Math.max(
             this.KHR_diffuseTransmissionColorTexture?.gpuTexture?.width || 1,
             this.KHR_diffuseTransmissionTexture?.gpuTexture?.width || 1
@@ -524,6 +537,12 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup Sheen texture packing
      */
     async setupPackedKHR_sheen() {
+        if(!(this.KHR_sheenColorTexture || this.KHR_sheenRoughnessTexture)){
+            return
+        }
+        if(!this.#packedKHR_sheen){
+            this.#packedKHR_sheen = new PackedTexture(this.redGPUContext)
+        }
         const width = Math.max(
             this.KHR_sheenColorTexture?.gpuTexture?.width || 1,
             this.KHR_sheenRoughnessTexture?.gpuTexture?.width || 1
@@ -550,6 +569,12 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup Iridescence texture packing
      */
     async setupPackedKHR_iridescence() {
+        if(!(this.KHR_iridescenceTexture || this.KHR_iridescenceThicknessTexture)){
+            return
+        }
+        if(!this.#packedKHR_iridescence){
+            this.#packedKHR_iridescence = new PackedTexture(this.redGPUContext)
+        }
         const width = Math.max(
             this.KHR_iridescenceTexture?.gpuTexture?.width || 1,
             this.KHR_iridescenceThicknessTexture?.gpuTexture?.width || 1

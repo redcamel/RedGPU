@@ -92,28 +92,36 @@ struct Uniforms {
 // Uniforms Group
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
 
-// Base ColorRGBA Texture
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
+// Base ColorRGBA Texture
+#redgpu_if baseColorTexture
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
+#redgpu_endIf
 
 // Emissive Texture
+#redgpu_if emissiveTexture
 @group(2) @binding(3) var emissiveTextureSampler: sampler;
 @group(2) @binding(4) var emissiveTexture: texture_2d<f32>;
+#redgpu_endIf
 
 // Normal Texture
+#redgpu_if normalTexture
 @group(2) @binding(5) var normalTextureSampler: sampler;
 @group(2) @binding(6) var normalTexture: texture_2d<f32>;
-
+#redgpu_endIf
 
 // occlusionTexture, metallicRoughnessTexture
+#redgpu_if packedORMTexture
 @group(2) @binding(7) var packedORMTexture: texture_2d<f32>;
+#redgpu_endIf
 
 // KHR_specularTexture, KHR_specularColorTexture
+#redgpu_if useKHR_materials_specular
 @group(2) @binding(8) var KHR_specularTextureSampler: sampler;
 @group(2) @binding(9) var KHR_specularTexture: texture_2d<f32>;
 @group(2) @binding(10) var KHR_specularColorTextureSampler: sampler;
 @group(2) @binding(11) var KHR_specularColorTexture: texture_2d<f32>;
-
+#redgpu_endIf
 // KHR_clearcoatTexture, KHR_clearcoatRoughnessTexture
 //@group(2) @binding(12) var packedKHR_clearcoatTexture: texture_2d<f32>;
 
@@ -330,7 +338,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_clearcoatTexture_KHR_texture_transform_rotation,
         uniforms.KHR_clearcoatTexture_KHR_texture_transform_scale
     );
-
+    #redgpu_if useKHR_materials_clearcoat
     let KHR_clearcoatNormalUV = get_transformed_uv(
         input_uv, input_uv1,
         uniforms.KHR_clearcoatNormalTexture_texCoord_index,
@@ -339,6 +347,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_clearcoatNormalTexture_KHR_texture_transform_rotation,
         uniforms.KHR_clearcoatNormalTexture_KHR_texture_transform_scale
     );
+    #redgpu_endIf
 
     let KHR_clearcoatRoughnessUV = get_transformed_uv(
         input_uv, input_uv1,
@@ -547,130 +556,145 @@ fn main(inputData:InputData) -> FragmentOutput {
     var clearcoatParameter = u_KHR_clearcoatFactor;
     var clearcoatRoughnessParameter = u_KHR_clearcoatRoughnessFactor ;
     var clearcoatNormal:vec3<f32> = N;
-    if(clearcoatParameter != 0.0){
-        #redgpu_if useKHR_clearcoatTexture
-            let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
-            clearcoatParameter *= clearcoatSample.r;
-        #redgpu_endIf
-        #redgpu_if useKHR_clearcoatRoughnessTexture
-            let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
-            clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
-        #redgpu_endIf
-        var clearcoatNormalSampler =  textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV);
-        #redgpu_if useKHR_clearcoatNormalTexture
-        {
-            var targetUv = KHR_clearcoatNormalUV;
-            if(backFaceYn){
-                targetUv = 1.0 - targetUv;
+    #redgpu_if useKHR_materials_clearcoat
+    {
+        if(clearcoatParameter != 0.0){
+            #redgpu_if useKHR_clearcoatTexture
+                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
+                clearcoatParameter *= clearcoatSample.r;
+            #redgpu_endIf
+            #redgpu_if useKHR_clearcoatRoughnessTexture
+                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
+                clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
+            #redgpu_endIf
+            var clearcoatNormalSampler =  textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV);
+            #redgpu_if useKHR_clearcoatNormalTexture
+            {
+                var targetUv = KHR_clearcoatNormalUV;
+                if(backFaceYn){
+                    targetUv = 1.0 - targetUv;
+                }
+                clearcoatNormal = clearcoatNormalSampler.rgb;
+                clearcoatNormal = perturb_normal(
+                    N,
+                    input_vertexPosition,
+                    targetUv,
+                    clearcoatNormal,
+                    u_normalScale
+                ) ;
+                if(u_useVertexTangent){
+                    if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
+                }
+                clearcoatNormal = normalize(clearcoatNormal);
             }
-            clearcoatNormal = clearcoatNormalSampler.rgb;
-            clearcoatNormal = perturb_normal(
-                N,
-                input_vertexPosition,
-                targetUv,
-                clearcoatNormal,
-                u_normalScale
-            ) ;
-            if(u_useVertexTangent){
-                if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
-            }
-            clearcoatNormal = normalize(clearcoatNormal);
+            #redgpu_endIf
         }
-        #redgpu_endIf
     }
+    #redgpu_endIf
 
     // ---------- KHR_materials_specular ----------
     var specularParameter = u_KHR_specularFactor;
     var specularColor = u_KHR_specularColorFactor;
-    #redgpu_if KHR_specularColorTexture
-        let specularColorTextureSample = textureSample(
-            KHR_specularColorTexture,
-            KHR_specularColorTextureSampler,
-            KHR_specularColorTextureUV
-        );
-        specularColor *= specularColorTextureSample.rgb;
-    #redgpu_endIf
-    #redgpu_if KHR_specularTexture
-        let specularTextureSample = textureSample(
-            KHR_specularTexture,
-            KHR_specularTextureSampler,
-            KHR_specularTextureUV
-        );
-        specularParameter *= specularTextureSample.a;
+    #redgpu_if useKHR_materials_specular
+        #redgpu_if KHR_specularColorTexture
+            let specularColorTextureSample = textureSample(
+                KHR_specularColorTexture,
+                KHR_specularColorTextureSampler,
+                KHR_specularColorTextureUV
+            );
+            specularColor *= specularColorTextureSample.rgb;
+        #redgpu_endIf
+        #redgpu_if KHR_specularTexture
+            let specularTextureSample = textureSample(
+                KHR_specularTexture,
+                KHR_specularTextureSampler,
+                KHR_specularTextureUV
+            );
+            specularParameter *= specularTextureSample.a;
+        #redgpu_endIf
     #redgpu_endIf
 
     // ---------- KHR_materials_transmission ----------
     var transmissionParameter: f32 = u_KHR_transmissionFactor;
-    #redgpu_if useKHR_transmissionTexture
-      let transmissionSample: vec4<f32> = textureSample(
-          packedKHR_clearcoatTexture_transmission,
-          packedTextureSampler,
-          KHR_transmissionUV
-      );
-      transmissionParameter *= transmissionSample.b;
-    #redgpu_endIf
-
-    // ---------- KHR_materials_volume ----------
     var thicknessParameter: f32 = u_KHR_thicknessFactor;
-    #redgpu_if useKHR_thicknessTexture
-        let thicknessSample: vec4<f32> = textureSample(
-            packedKHR_clearcoatTexture_transmission,
-            packedTextureSampler,
-            KHR_transmissionUV
-        );
-        thicknessParameter *= thicknessSample.a;
+    #redgpu_if useKHR_materials_transmission
+        #redgpu_if useKHR_transmissionTexture
+          let transmissionSample: vec4<f32> = textureSample(
+              packedKHR_clearcoatTexture_transmission,
+              packedTextureSampler,
+              KHR_transmissionUV
+          );
+          transmissionParameter *= transmissionSample.b;
+        #redgpu_endIf
+
+        // ---------- KHR_materials_volume ----------
+
+        #redgpu_if useKHR_thicknessTexture
+            let thicknessSample: vec4<f32> = textureSample(
+                packedKHR_clearcoatTexture_transmission,
+                packedTextureSampler,
+                KHR_transmissionUV
+            );
+            thicknessParameter *= thicknessSample.a;
+        #redgpu_endIf
     #redgpu_endIf
 
     // ---------- KHR_materials_diffuse_transmission ----------
     var diffuseTransmissionColor:vec3<f32> = u_KHR_diffuseTransmissionColorFactor;
     var diffuseTransmissionParameter : f32 = u_KHR_diffuseTransmissionFactor;
-    #redgpu_if useKHR_diffuseTransmissionTexture
-        let diffuseTransmissionTextureSample =  textureSample(
-            packedKHR_diffuse_transmission,
-            packedTextureSampler,
-            KHR_diffuseTransmissionUV
-        );
-        diffuseTransmissionParameter *= diffuseTransmissionTextureSample.a;
-    #redgpu_endIf
-    #redgpu_if useKHR_diffuseTransmissionColorTexture
-        let diffuseTransmissionColorTextureSample =  textureSample(
-            packedKHR_diffuse_transmission,
-            packedTextureSampler,
-            KHR_diffuseTransmissionColorUV
-        );
-        diffuseTransmissionColor *= diffuseTransmissionColorTextureSample.rgb;
+    #redgpu_if useKHR_materials_diffuse_transmission
+        #redgpu_if useKHR_diffuseTransmissionTexture
+            let diffuseTransmissionTextureSample =  textureSample(
+                packedKHR_diffuse_transmission,
+                packedTextureSampler,
+                KHR_diffuseTransmissionUV
+            );
+            diffuseTransmissionParameter *= diffuseTransmissionTextureSample.a;
+        #redgpu_endIf
+        #redgpu_if useKHR_diffuseTransmissionColorTexture
+            let diffuseTransmissionColorTextureSample =  textureSample(
+                packedKHR_diffuse_transmission,
+                packedTextureSampler,
+                KHR_diffuseTransmissionColorUV
+            );
+            diffuseTransmissionColor *= diffuseTransmissionColorTextureSample.rgb;
+        #redgpu_endIf
     #redgpu_endIf
 
     // ---------- KHR_materials_sheen ----------
     var sheenColor = u_KHR_sheenColorFactor;
     var sheenRoughnessParameter = u_KHR_sheenRoughnessFactor;
-    #redgpu_if useKHR_sheenColorTexture
-        let sheenColorSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenColorUV));
-        sheenColor *= sheenColorSample.rgb;
-    #redgpu_endIf
-    #redgpu_if useKHR_sheenRoughnessTexture
-        let sheenRoughnessSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenRoughnessUV));
-        sheenRoughnessParameter *= sheenRoughnessSample.a;
+    #redgpu_if useKHR_materials_sheen
+        #redgpu_if useKHR_sheenColorTexture
+            let sheenColorSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenColorUV));
+            sheenColor *= sheenColorSample.rgb;
+        #redgpu_endIf
+        #redgpu_if useKHR_sheenRoughnessTexture
+            let sheenRoughnessSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenRoughnessUV));
+            sheenRoughnessParameter *= sheenRoughnessSample.a;
+        #redgpu_endIf
     #redgpu_endIf
 
     // ---------- KHR_materials_iridescence ----------
     var iridescenceParameter = u_KHR_iridescenceFactor;
     var iridescenceThickness = u_KHR_iridescenceThicknessMaximum;
-    #redgpu_if useKHR_iridescenceTexture
-        let iridescenceTextureSample: vec4<f32> = textureSample(
-            packedKHR_iridescence,
-            packedTextureSampler,
-            KHR_iridescenceTextureUV
-        );
-        iridescenceParameter *= iridescenceTextureSample.r;
-    #redgpu_endIf
-    #redgpu_if useKHR_iridescenceThicknessTexture
-        let iridescenceThicknessTextureSample: vec4<f32> = textureSample(
-            packedKHR_iridescence,
-            packedTextureSampler,
-            KHR_iridescenceThicknessTextureUV
-        );
-        iridescenceThickness =  mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, iridescenceThicknessTextureSample.g);
+    #redgpu_if useKHR_materials_iridescence
+        #redgpu_if useKHR_iridescenceTexture
+            let iridescenceTextureSample: vec4<f32> = textureSample(
+                packedKHR_iridescence,
+                packedTextureSampler,
+                KHR_iridescenceTextureUV
+            );
+            iridescenceParameter *= iridescenceTextureSample.r;
+        #redgpu_endIf
+        #redgpu_if useKHR_iridescenceThicknessTexture
+            let iridescenceThicknessTextureSample: vec4<f32> = textureSample(
+                packedKHR_iridescence,
+                packedTextureSampler,
+                KHR_iridescenceThicknessTextureUV
+            );
+            iridescenceThickness =  mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, iridescenceThicknessTextureSample.g);
+        #redgpu_endIf
     #redgpu_endIf
 
     // ---------- KHR_materials_anisotropy ----------

@@ -13,6 +13,7 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
+import {keepLog} from "../../utils";
 
 interface ABaseMaterial {
     /**
@@ -119,11 +120,11 @@ abstract class ABaseMaterial extends ResourceBase {
     /**
      * 셰이더 textures 구조 정보
      */
-    readonly #TEXTURE_STRUCT: any
+    #TEXTURE_STRUCT: any
     /**
      * 셰이더 samplers 구조 정보
      */
-    readonly #SAMPLER_STRUCT: any
+    #SAMPLER_STRUCT: any
     /**
      * 머티리얼 모듈명
      */
@@ -132,6 +133,11 @@ abstract class ABaseMaterial extends ResourceBase {
      * 바인드 그룹 레이아웃 객체
      */
     readonly #bindGroupLayout: GPUBindGroupLayout
+    /**
+     * [KO] 바인드 그룹 인덱스
+     * [EN] Bind group index
+     */
+    readonly #targetGroupIndex: number;
     /**
      * [KO] 틴트 블렌드 모드 값
      * [EN] Tint blend mode value
@@ -169,8 +175,12 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#SHADER_INFO = SHADER_INFO
         this.#STORAGE_STRUCT = SHADER_INFO?.storage;
         this.#UNIFORM_STRUCT = SHADER_INFO?.uniforms.uniforms;
-        this.#TEXTURE_STRUCT = SHADER_INFO?.textures;
-        this.#SAMPLER_STRUCT = SHADER_INFO?.samplers;
+        this.#targetGroupIndex = targetGroupIndex;
+        // [KO] 초기 텍스처/샘플러 구조는 전체(Union) 정보를 사용합니다.
+        // [EN] The initial texture/sampler structure uses the union information.
+        this.#TEXTURE_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionTextures();
+        this.#SAMPLER_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionSamplers();
+
         this.#bindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME) || redGPUContext.resourceManager.createBindGroupLayout(
             this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME,
             getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex)
@@ -442,31 +452,42 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Check shader variant (conditional branch) state and update shader module
      */
     #checkVariant() {
-        const {gpuDevice, resourceManager} = this.redGPUContext
+        const {gpuDevice, resourceManager} = this.redGPUContext;
         // 현재 머티리얼 상태에 맞는 바리안트 키 찾기
         const currentVariantKey = this.#findMatchingVariantKey();
-        // 바리안트별 셰이더 모듈 확인/생성
+
+        // 1. 바리안트별 셰이더 모듈 확인/생성
         const variantShaderModuleName = `${this.#FRAGMENT_SHADER_MODULE_NAME}_${currentVariantKey}`;
-        // keepLog('f_variantShaderModuleName',variantShaderModuleName)
         let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
         if (!targetShaderModule) {
-            // 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
             const variantSource = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariant(currentVariantKey);
             if (variantSource) {
-                // keepLog('프레그먼트 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
-                targetShaderModule = resourceManager.createGPUShaderModule(
-                    variantShaderModuleName,
-                    {code: variantSource}
-                );
+                targetShaderModule = resourceManager.createGPUShaderModule(variantShaderModuleName, {code: variantSource});
             } else {
-                console.warn('⚠️ 바리안트 소스를 찾을 수 없음:', currentVariantKey);
-                targetShaderModule = this.gpuRenderInfo.fragmentShaderModule; // 기본값 사용
+                targetShaderModule = this.gpuRenderInfo.fragmentShaderModule;
             }
-        } else {
-            console.log('🚀 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
         }
-        // 셰이더 모듈 업데이트
         this.gpuRenderInfo.fragmentShaderModule = targetShaderModule;
+
+        // 2. 바리안트별 텍스처/샘플러 구조 업데이트
+        this.#TEXTURE_STRUCT = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariantTextures(currentVariantKey);
+        this.#SAMPLER_STRUCT = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariantSamplers(currentVariantKey);
+        keepLog(this.#TEXTURE_STRUCT)
+        // 3. 바리안트별 바인드 그룹 레이아웃 확인/생성
+        const variantLayoutName = `${this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME}_${currentVariantKey}`;
+        let targetLayout = resourceManager.getGPUBindGroupLayout(variantLayoutName);
+        if (!targetLayout) {
+            const tempShaderInfo = {
+                ...this.#SHADER_INFO,
+                textures: this.#TEXTURE_STRUCT,
+                samplers: this.#SAMPLER_STRUCT
+            };
+            targetLayout = resourceManager.createBindGroupLayout(
+                variantLayoutName,
+                getFragmentBindGroupLayoutDescriptorFromShaderInfo(tempShaderInfo, this.#targetGroupIndex)
+            );
+        }
+        this.gpuRenderInfo.fragmentBindGroupLayout = targetLayout;
     }
 
     /**

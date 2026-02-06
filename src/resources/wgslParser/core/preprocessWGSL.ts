@@ -15,7 +15,6 @@ const defineValues = {
     REDGPU_DEFINE_WORKGROUP_SIZE_Z: PassClustersLightHelper.WORKGROUP_SIZE_Z.toString(),
     REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTER: PassClustersLightHelper.MAX_LIGHTS_PER_CLUSTER.toString(),
 } as const;
-const conditionalBlockPattern = /#redgpu_if\s+(\w+)\b([\s\S]*?)(?:#redgpu_else([\s\S]*?))?#redgpu_endIf/g;
 
 /** [KO] 조건부 블록 정보 인터페이스 [EN] Conditional block information interface */
 export interface ConditionalBlock {
@@ -32,6 +31,7 @@ interface PreprocessedWGSLResult {
     defaultSource: string;
     shaderSourceVariant: ShaderVariantGenerator;
     conditionalBlocks: string[];
+    conditionalBlockInfos: ConditionalBlock[];
 }
 
 const preprocessCache = new Map<string, PreprocessedWGSLResult>();
@@ -51,11 +51,20 @@ const generateCodeHash = (code: string): string => {
 };
 
 /**
- * [KO] 인클루드(#redgpu_include)를 처리합니다.
- * [EN] Processes includes (#redgpu_include).
+ * [KO] 인클루드(#redgpu_include)를 처리합니다. (재귀적 포함 지원)
+ * [EN] Processes includes (#redgpu_include). (Supports recursive inclusion)
  */
 const processIncludes = (code: string): string => {
-    return code.replace(includePattern, (match, key) => SystemCode[key] || match);
+    let result = code;
+    let iterations = 0;
+    const MAX_ITERATIONS = 10;
+    while (iterations < MAX_ITERATIONS) {
+        const previousResult = result;
+        result = result.replace(includePattern, (match, key) => SystemCode[key] || match);
+        if (result === previousResult) break;
+        iterations++;
+    }
+    return result;
 };
 
 /**
@@ -69,24 +78,70 @@ const processDefines = (code: string): string => {
 };
 
 /**
- * [KO] 조건부 블록(#redgpu_if)을 찾아 파싱합니다.
- * [EN] Finds and parses conditional blocks (#redgpu_if).
+ * [KO] 조건부 블록(#redgpu_if)을 찾아 파싱합니다. (중첩 지원)
+ * [EN] Finds and parses conditional blocks (#redgpu_if). (Supports nesting)
  */
 const findConditionalBlocks = (code: string): ConditionalBlock[] => {
     const conditionalBlocks: ConditionalBlock[] = [];
+    const tokenRegex = /#redgpu_if\s+(\w+)\b|#redgpu_else|#redgpu_endIf/g;
+
+    const stack: {
+        uniformName: string;
+        startIndex: number;
+        headerLength: number;
+        elseIndex?: number;
+    }[] = [];
+
     let match;
     let blockIndex = 0;
-    conditionalBlockPattern.lastIndex = 0;
-    while ((match = conditionalBlockPattern.exec(code)) !== null) {
-        const [fullMatch, uniformName, ifBlock, elseBlock] = match;
-        conditionalBlocks.push({
-            uniformName,
-            ifBlock: ifBlock.trim(),
-            elseBlock: elseBlock?.trim(),
-            fullMatch,
-            blockIndex: blockIndex++
-        });
+    while ((match = tokenRegex.exec(code)) !== null) {
+        const token = match[0];
+        if (token.startsWith('#redgpu_if')) {
+            stack.push({
+                uniformName: match[1],
+                startIndex: match.index,
+                headerLength: token.length
+            });
+        } else if (token === '#redgpu_else') {
+            const top = stack[stack.length - 1];
+            if (top) {
+                if (top.elseIndex === undefined) {
+                    top.elseIndex = match.index;
+                }
+            } else {
+                throw new Error(`[preprocessWGSL] Mismatched #redgpu_else at index ${match.index}`);
+            }
+        } else if (token === '#redgpu_endIf') {
+            const top = stack.pop();
+            if (top) {
+                const fullMatch = code.substring(top.startIndex, match.index + token.length);
+                let ifBlock: string;
+                let elseBlock: string | undefined;
+
+                if (top.elseIndex !== undefined) {
+                    ifBlock = code.substring(top.startIndex + top.headerLength, top.elseIndex);
+                    elseBlock = code.substring(top.elseIndex + '#redgpu_else'.length, match.index);
+                } else {
+                    ifBlock = code.substring(top.startIndex + top.headerLength, match.index);
+                }
+
+                conditionalBlocks.push({
+                    uniformName: top.uniformName,
+                    ifBlock: ifBlock.trim(),
+                    elseBlock: elseBlock?.trim(),
+                    fullMatch,
+                    blockIndex: blockIndex++
+                });
+            } else {
+                throw new Error(`[preprocessWGSL] Mismatched #redgpu_endIf at index ${match.index}`);
+            }
+        }
     }
+
+    if (stack.length > 0) {
+        throw new Error(`[preprocessWGSL] Unclosed #redgpu_if for: ${stack.map(s => s.uniformName).join(', ')}`);
+    }
+
     return conditionalBlocks;
 };
 
@@ -107,21 +162,6 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
     console.log('발견된 조건부 블록들:', conditionalBlocks.map(b =>
         `${b.uniformName}[${b.blockIndex}]${b.elseBlock ? ' (else 포함)' : ''}`
     ));
-};
-
-/**
- * [KO] 기본 셰이더 소스를 생성합니다. (기본적으로 모든 조건부 블록을 제외합니다)
- * [EN] Generates the default shader source. (Excludes all conditional blocks by default)
- */
-const generateDefaultSource = (defines: string, conditionalBlocks: ConditionalBlock[]): string => {
-    let defaultSource = defines;
-    for (let i = conditionalBlocks.length - 1; i >= 0; i--) {
-        const block = conditionalBlocks[i];
-        // [KO] 기본 소스에서는 ifBlock 대신 elseBlock을 사용하거나 아예 제거합니다.
-        // [EN] In the default source, use elseBlock instead of ifBlock, or remove it entirely.
-        defaultSource = defaultSource.replace(block.fullMatch, block.elseBlock || '');
-    }
-    return defaultSource;
 };
 
 /**
@@ -151,14 +191,19 @@ const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
     const defines = processDefines(withIncludes);
     const conditionalBlocks = findConditionalBlocks(defines);
     logDuplicateKeys(conditionalBlocks);
-    const defaultSource = generateDefaultSource(defines, conditionalBlocks);
+
     const uniqueKeys = [...new Set(conditionalBlocks.map(b => b.uniformName))];
     const shaderSourceVariant = new ShaderVariantGenerator(defines, conditionalBlocks);
+    // [KO] 기본 소스는 모든 조건부 블록이 비활성화된('none') 상태로 생성합니다.
+    // [EN] The default source is generated with all conditional blocks disabled ('none').
+    const defaultSource = shaderSourceVariant.getVariant('none');
+
     const result: PreprocessedWGSLResult = {
         cacheKey,
         defaultSource,
         shaderSourceVariant,
         conditionalBlocks: uniqueKeys,
+        conditionalBlockInfos: conditionalBlocks,
     };
     const totalCombinations = Math.pow(2, uniqueKeys.length);
     preprocessCache.set(cacheKey, result);

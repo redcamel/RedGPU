@@ -110,7 +110,13 @@ const reflectCache = new Map<string, any>();
  */
 const parseWGSL = (code: string) => {
     code = ensureVertexIndexBuiltin(code)
-    const {defaultSource, shaderSourceVariant, conditionalBlocks, cacheKey} = preprocessWGSL(code);
+    const {
+        defaultSource,
+        shaderSourceVariant,
+        conditionalBlocks: uniqueKeys,
+        conditionalBlockInfos,
+        cacheKey
+    } = preprocessWGSL(code);
     const cachedReflect = reflectCache.get(cacheKey);
     let reflectResult;
     if (cachedReflect) {
@@ -128,13 +134,37 @@ const parseWGSL = (code: string) => {
             fragmentEntries: reflect.entry.fragment.map(v => v.name),
             computeEntries: reflect.entry.compute.map(v => v.name),
         };
+
+        // [KO] ShaderVariantGenerator에 기본 정보 설정
+        // [EN] Set base information in ShaderVariantGenerator
+        shaderSourceVariant.setBaseInfo(reflectResult.textures, reflectResult.samplers);
+
+        // [KO] 각 조건부 키별로 추가되는 텍스처/샘플러 수집
+        // [EN] Collect textures/samplers added for each conditional key
+        uniqueKeys.forEach(key => {
+            const variantSource = shaderSourceVariant.getVariant(key);
+            const variantReflect = new WgslReflect(variantSource);
+            const extraTextures = variantReflect.textures.filter(t =>
+                !reflectResult.textures.find(bt => bt.name === t.name)
+            );
+            const extraSamplers = variantReflect.samplers.filter(s =>
+                !reflectResult.samplers.find(bs => bs.name === s.name)
+            );
+            shaderSourceVariant.addConditionalInfo(key, extraTextures, extraSamplers);
+        });
+
+        // [KO] 모든 가능한 텍스처/샘플러의 합집합으로 reflectResult 업데이트 (바인드 그룹 레이아웃용)
+        // [EN] Update reflectResult with the union of all possible textures/samplers (for bind group layout)
+        reflectResult.textures = shaderSourceVariant.getUnionTextures();
+        reflectResult.samplers = shaderSourceVariant.getUnionSamplers();
+
         reflectCache.set(cacheKey, reflectResult);
     }
     return {
         ...reflectResult,
         defaultSource,
         shaderSourceVariant,
-        conditionalBlocks
+        conditionalBlocks: uniqueKeys
     };
 };
 
