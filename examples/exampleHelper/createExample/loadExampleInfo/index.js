@@ -142,9 +142,12 @@ const loadDescription = async () => {
                         const badge = document.createElement('span');
                         badge.innerText = ext;
                         Object.assign(badge.style, {
-                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                            color: '#ccc',
-                            padding: '2px 6px',
+                            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                            color: '#fff',
+                            display:'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '3px 6px',
                             borderRadius: '4px',
                             fontSize: '10px',
                             border: '1px solid rgba(255, 255, 255, 0.2)',
