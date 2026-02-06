@@ -125,6 +125,36 @@ const loadDescription = async () => {
                 
                 // 기존 레이아웃 유지를 위해 h2의 내용을 직접 수정
                 description.innerHTML = descriptionText.replace(/\n/g, '<br/>');
+
+                // Extension List 처리 (Extension List Processing)
+                if (matchedExample.extensionList && matchedExample.extensionList.length > 0) {
+                    const extContainer = document.createElement('div');
+                    extContainer.className = 'extension-list-container';
+                    Object.assign(extContainer.style, {
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
+                        marginBottom: '8px',
+                        marginTop: '12px'
+                    });
+
+                    matchedExample.extensionList.forEach(ext => {
+                        const badge = document.createElement('span');
+                        badge.innerText = ext;
+                        Object.assign(badge.style, {
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            color: '#ccc',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '10px',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            whiteSpace: 'nowrap'
+                        });
+                        extContainer.appendChild(badge);
+                    });
+                    description.appendChild(extContainer);
+                }
+
                 description.appendChild(toggleContainer); // 텍스트 뒤에 토글 삽입
 
                 // 토글 옵션 스타일 업데이트

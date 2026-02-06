@@ -1246,6 +1246,7 @@ Check performance limits on each device.`
                     {
                         name: 'ABeautifulGame',
                         path: 'gltf/models/aBeautifulGame',
+                        extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
                         description: {
                             ko: `투과(Transmission)와 볼륨(Volume) 효과를 시연하는 체스 세트입니다.`, 
                             en: `A chess set demonstrating transmission and volume.`
@@ -1262,6 +1263,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareAnisotropy',
                                 path: 'gltf/gltfExtensions/anisotropy/compareAnisotropy',
+                                extensionList: ['KHR_materials_anisotropy'],
                                 description: {
                                     ko: `비등방성(Anisotropy)이 있는 렌더링과 없는 렌더링을 비교합니다.`, 
                                     en: `Compares rendering with and without anisotropy.`
@@ -1270,6 +1272,7 @@ Check performance limits on each device.`
                             {
                                 name: 'AnisotropyDiscTest',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyDiscTest',
+                                extensionList: ['KHR_materials_anisotropy'],
                                 description: {
                                     ko: `원판 형태의 비등방성 하이라이트 회전을 테스트합니다.`, 
                                     en: `Tests anisotropic highlight rotation on a disc shape.`
@@ -1278,6 +1281,7 @@ Check performance limits on each device.`
                             {
                                 name: 'AnisotropyRotationTest',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyRotationTest',
+                                extensionList: ['KHR_materials_anisotropy'],
                                 description: {
                                     ko: `비등방성 방향 회전에 따른 렌더링 변화를 테스트합니다.`, 
                                     en: `Tests rendering changes based on anisotropy direction rotation.`
@@ -1286,6 +1290,7 @@ Check performance limits on each device.`
                             {
                                 name: 'AnisotropyStrengthTest',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyStrengthTest',
+                                extensionList: ['KHR_materials_anisotropy'],
                                 description: {
                                     ko: `비등방성 강도(Strength)에 따른 하이라이트 변화를 테스트합니다.`, 
                                     en: `Tests highlight changes based on anisotropy strength.`
@@ -1294,6 +1299,7 @@ Check performance limits on each device.`
                             {
                                 name: 'AnisotropyBarnLamp',
                                 path: 'gltf/gltfExtensions/anisotropy/anisotropyBarnLamp',
+                                extensionList: ['KHR_materials_anisotropy'],
                                 description: {
                                     ko: `비등방성(Anisotropic) 재질 속성을 보여주는 헛간 램프 모델입니다.`, 
                                     en: `A barn lamp model showcasing anisotropic material properties.`
@@ -1307,6 +1313,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareIridescence',
                                 path: 'gltf/gltfExtensions/iridescence/compareIridescence',
+                                extensionList: ['KHR_materials_iridescence'],
                                 description: {
                                     ko: `무지개빛(Iridescence) 박막 간섭 효과를 비교합니다.`, 
                                     en: `Compares Iridescence thin-film interference effects.`
@@ -1315,6 +1322,7 @@ Check performance limits on each device.`
                             {
                                 name: 'IridescenceDielectricSpheres',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceDielectricSpheres',
+                                extensionList: ['KHR_materials_iridescence', 'KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
                                     ko: `비금속(유전체) 재질에서 KHR_materials_iridescence 확장을 테스트합니다.`, 
                                     en: `Tests the KHR_materials_iridescence extension on non-metallic (dielectric) materials.`
@@ -1323,6 +1331,7 @@ Check performance limits on each device.`
                             {
                                 name: 'IridescenceMetallicSpheres',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceMetallicSpheres',
+                                extensionList: ['KHR_materials_iridescence'],
                                 description: {
                                     ko: `금속 구체에 적용된 무지개빛 효과를 테스트합니다.`, 
                                     en: `Tests iridescence effects applied to metallic spheres.`
@@ -1331,6 +1340,7 @@ Check performance limits on each device.`
                             {
                                 name: 'IridescenceSuzanne',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceSuzanne',
+                                extensionList: ['KHR_materials_iridescence'],
                                 description: {
                                     ko: `Suzanne 모델에 적용된 무지개빛 쉐이더 테스트입니다.`, 
                                     en: `Iridescence shader test applied to the Suzanne model.`
@@ -1339,6 +1349,7 @@ Check performance limits on each device.`
                             {
                                 name: 'IridescenceLamp',
                                 path: 'gltf/gltfExtensions/iridescence/iridescenceLamp',
+                                extensionList: ['KHR_materials_iridescence', 'KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
                                     ko: `투과 및 볼륨 효과와 함께 KHR_materials_iridescence를 보여주는 Wayfair 램프 모델입니다.`, 
                                     en: `A Wayfair lamp model showcasing transmission, volume, and KHR_materials_iridescence.`
@@ -1347,6 +1358,7 @@ Check performance limits on each device.`
                             {
                                 name: 'SunglassesKhronos',
                                 path: 'gltf/gltfExtensions/iridescence/sunglassesKhronos',
+                                extensionList: ['KHR_materials_iridescence', 'KHR_materials_transmission'],
                                 description: {
                                     ko: `렌즈에 얇은 막 무지개빛 효과가 적용된 선글라스 모델입니다.`, 
                                     en: `Sunglasses model with thin-film iridescence effects applied to the lenses.`
@@ -1355,6 +1367,7 @@ Check performance limits on each device.`
                             {
                                 name: 'IridescentDishWithOlives',
                                 path: 'gltf/gltfExtensions/iridescence/iridescentDishWithOlives',
+                                extensionList: ['KHR_materials_iridescence', 'KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior', 'KHR_materials_specular'],
                                 description: {
                                     ko: `투과, 볼륨, IOR 및 스펙큘러 속성을 보여주는 접시 모델입니다.`, 
                                     en: `A dish demonstrating transmission, volume, IOR, and specular properties.`
@@ -1368,6 +1381,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareClearcoat',
                                 path: 'gltf/gltfExtensions/clearcoat/compareClearcoat',
+                                extensionList: ['KHR_materials_clearcoat'],
                                 description: {
                                     ko: `클리어코트(Clearcoat) 재질 렌더링 결과를 비교합니다.`, 
                                     en: `Compares Clearcoat material rendering results.`
@@ -1376,6 +1390,7 @@ Check performance limits on each device.`
                             {
                                 name: 'ClearCoatTest',
                                 path: 'gltf/gltfExtensions/clearcoat/clearCoatTest',
+                                extensionList: ['KHR_materials_clearcoat'],
                                 description: {
                                     ko: `다양한 거칠기와 클리어코트 강도를 테스트합니다.`, 
                                     en: `Tests various roughness and clearcoat strengths.`
@@ -1384,6 +1399,7 @@ Check performance limits on each device.`
                             {
                                 name: 'ClearcoatWicker',
                                 path: 'gltf/gltfExtensions/clearcoat/clearcoatWicker',
+                                extensionList: ['KHR_materials_clearcoat'],
                                 description: {
                                     ko: `직물 표면 위에 코팅된 클리어코트 효과를 보여주는 위커 모델입니다.`, 
                                     en: `Wicker model showing clearcoat effect coated over a woven surface.`
@@ -1392,6 +1408,7 @@ Check performance limits on each device.`
                             {
                                 name: 'ClearCoatCarPaint',
                                 path: 'gltf/gltfExtensions/clearcoat/clearCoatCarPaint',
+                                extensionList: ['KHR_materials_clearcoat'],
                                 description: {
                                     ko: `자동차 페인트와 같은 다중 레이어 재질 표현을 테스트합니다.`, 
                                     en: `Tests multi-layer material representation like car paint.`
@@ -1407,6 +1424,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareDispersion',
                                 path: 'gltf/gltfExtensions/dispersion/compareDispersion',
+                                extensionList: ['KHR_materials_dispersion', 'KHR_materials_transmission'],
                                 description: {
                                     ko: `빛의 분산(Dispersion) 효과를 비교합니다.`, 
                                     en: `Compares light dispersion effects.`
@@ -1415,6 +1433,7 @@ Check performance limits on each device.`
                             {
                                 name: 'DispersionTest',
                                 path: 'gltf/gltfExtensions/dispersion/dispersionTest',
+                                extensionList: ['KHR_materials_dispersion', 'KHR_materials_transmission'],
                                 description: {
                                     ko: `프리즘과 같은 빛의 분산 현상을 테스트합니다.`, 
                                     en: `Tests light dispersion phenomena like a prism.`
@@ -1423,6 +1442,7 @@ Check performance limits on each device.`
                             {
                                 name: 'DragonDispersion',
                                 path: 'gltf/gltfExtensions/dispersion/dragonDispersion',
+                                extensionList: ['KHR_materials_dispersion', 'KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
                                     ko: `용 모델에 적용된 보석 같은 분산 효과를 보여줍니다.`, 
                                     en: `Shows gem-like dispersion effects applied to a Dragon model.`
@@ -1436,6 +1456,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareEmissiveStrength',
                                 path: 'gltf/gltfExtensions/emissiveStrength/compareEmissiveStrength',
+                                extensionList: ['KHR_materials_emissive_strength'],
                                 description: {
                                     ko: `발광(Emissive) 강도 증폭 효과를 비교합니다.`, 
                                     en: `Compares Emissive Strength amplification effects.`
@@ -1444,6 +1465,7 @@ Check performance limits on each device.`
                             {
                                 name: 'EmissiveStrengthTest',
                                 path: 'gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest',
+                                extensionList: ['KHR_materials_emissive_strength'],
                                 description: {
                                     ko: `1.0을 초과하는 고강도 발광 표현을 테스트합니다.`, 
                                     en: `Tests high-intensity emissive representation exceeding 1.0.`
@@ -1457,6 +1479,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareSheen',
                                 path: 'gltf/gltfExtensions/sheen/compareSheen',
+                                extensionList: ['KHR_materials_sheen'],
                                 description: {
                                     ko: `직물 등의 미세한 반사광(Sheen) 효과를 비교합니다.`, 
                                     en: `Compares Sheen effects seen on fabrics etc.`
@@ -1465,6 +1488,7 @@ Check performance limits on each device.`
                             {
                                 name: 'SheenTestGrid',
                                 path: 'gltf/gltfExtensions/sheen/sheenTestGrid',
+                                extensionList: ['KHR_materials_sheen'],
                                 description: {
                                     ko: `Sheen 색상과 거칠기에 따른 변화를 그리드로 테스트합니다.`, 
                                     en: `Tests changes based on Sheen color and roughness in a grid.`
@@ -1473,6 +1497,7 @@ Check performance limits on each device.`
                             {
                                 name: 'SheenCloth',
                                 path: 'gltf/gltfExtensions/sheen/sheenCloth',
+                                extensionList: ['KHR_materials_sheen'],
                                 description: {
                                     ko: `Sheen 효과를 보여주는 직물 예제입니다.`, 
                                     en: `A fabric example showcasing sheen.`
@@ -1481,6 +1506,7 @@ Check performance limits on each device.`
                             {
                                 name: 'SheenChair',
                                 path: 'gltf/gltfExtensions/sheen/sheenChair',
+                                extensionList: ['KHR_materials_sheen', 'KHR_materials_variants'],
                                 description: {
                                     ko: `재질 변형(Variant)과 Sheen 효과를 보여주는 의자 모델입니다.`, 
                                     en: `A chair model demonstrating material variants and sheen.`
@@ -1489,6 +1515,7 @@ Check performance limits on each device.`
                             {
                                 name: 'GlamVelvetSofa',
                                 path: 'gltf/gltfExtensions/sheen/glamVelvetSofa',
+                                extensionList: ['KHR_materials_sheen', 'KHR_materials_specular', 'KHR_materials_variants'],
                                 description: {
                                     ko: `고급 벨벳 소파의 질감을 표현하는 Sheen 모델입니다.`, 
                                     en: `Sheen model expressing the texture of a luxury velvet sofa.`
@@ -1497,6 +1524,7 @@ Check performance limits on each device.`
                             {
                                 name: 'ChairDamaskPurplegold',
                                 path: 'gltf/gltfExtensions/sheen/chairDamaskPurplegold',
+                                extensionList: ['KHR_materials_sheen'],
                                 description: {
                                     ko: `다마스크 패턴 의자의 직물 느낌을 표현합니다.`, 
                                     en: `Expresses the fabric feel of a damask pattern chair.`
@@ -1505,6 +1533,7 @@ Check performance limits on each device.`
                             {
                                 name: 'SheenWoodLeatherSofa',
                                 path: 'gltf/gltfExtensions/sheen/sheenWoodLeatherSofa',
+                                extensionList: ['KHR_materials_sheen'],
                                 description: {
                                     ko: `가죽과 나무 재질이 혼합된 소파에서의 Sheen 효과입니다.`, 
                                     en: `Sheen effect on a sofa combining leather and wood materials.`
@@ -1519,6 +1548,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareSpecular',
                                 path: 'gltf/gltfExtensions/specular/compareSpecular',
+                                extensionList: ['KHR_materials_specular'],
                                 description: {
                                     ko: `스펙큘러(Specular) 반사 강도 및 색상 제어를 비교합니다.`, 
                                     en: `Compares Specular reflection strength and color control.`
@@ -1527,6 +1557,7 @@ Check performance limits on each device.`
                             {
                                 name: 'SpecularTest',
                                 path: 'gltf/gltfExtensions/specular/specularTest',
+                                extensionList: ['KHR_materials_specular'],
                                 description: {
                                     ko: `유전체 재질의 스펙큘러 하이라이트 조절을 테스트합니다.`, 
                                     en: `Tests specular highlight adjustments on dielectric materials.`
@@ -1535,6 +1566,7 @@ Check performance limits on each device.`
                             {
                                 name: 'SpecularSilkPouf',
                                 path: 'gltf/gltfExtensions/specular/specularSilkPouf',
+                                extensionList: ['KHR_materials_specular'],
                                 description: {
                                     ko: `스펙큘러 속성을 보여주는 실크 푸프 모델입니다.`, 
                                     en: `A silk pouf model demonstrating specular properties.`
@@ -1549,6 +1581,7 @@ Check performance limits on each device.`
                             {
                                 name: 'UnlitTest',
                                 path: 'gltf/gltfExtensions/unlit/unlitTest',
+                                extensionList: ['KHR_materials_unlit'],
                                 description: {
                                     ko: `조명의 영향을 받지 않는 Unlit(무광) 재질을 테스트합니다.`, 
                                     en: `Tests Unlit materials not affected by lighting.`
@@ -1562,6 +1595,7 @@ Check performance limits on each device.`
                             {
                                 name: 'TextureTransformTest',
                                 path: 'gltf/gltfExtensions/textureTransform/textureTransformTest',
+                                extensionList: ['KHR_texture_transform'],
                                 description: {
                                     ko: `KHR_texture_transform 확장의 사용법(스케일, 회전, 이동)을 시연합니다.`, 
                                     en: `Demonstrates the usage of the KHR_texture_transform extension (scaling, rotation, translation).`
@@ -1570,6 +1604,7 @@ Check performance limits on each device.`
                             {
                                 name: 'TextureTransformMultiTest',
                                 path: 'gltf/gltfExtensions/textureTransform/textureTransformMultiTest',
+                                extensionList: ['KHR_texture_transform'],
                                 description: {
                                     ko: `여러 텍스처에 서로 다른 변환을 적용하는 테스트입니다.`, 
                                     en: `Tests applying different transforms to multiple textures.`
@@ -1583,6 +1618,7 @@ Check performance limits on each device.`
                             {
                                 name: 'DiffuseTransmissionTest',
                                 path: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTest',
+                                extensionList: ['KHR_materials_diffuseTransmission'],
                                 description: {
                                     ko: `반투명한 물체의 확산 투과(Diffuse Transmission) 효과를 테스트합니다.`, 
                                     en: `Tests Diffuse Transmission effects on translucent objects.`
@@ -1591,6 +1627,7 @@ Check performance limits on each device.`
                             {
                                 name: 'DiffuseTransmissionTeacup',
                                 path: 'gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup',
+                                extensionList: ['KHR_materials_diffuseTransmission'],
                                 description: {
                                     ko: `얇은 찻잔을 통과하는 빛의 확산을 보여줍니다.`, 
                                     en: `Shows light diffusion passing through a thin teacup.`
@@ -1604,6 +1641,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareTransmission',
                                 path: 'gltf/gltfExtensions/transmission/compareTransmission',
+                                extensionList: ['KHR_materials_transmission'],
                                 description: {
                                     ko: `투명한 물체의 투과(Transmission) 렌더링을 비교합니다.`, 
                                     en: `Compares Transmission rendering of transparent objects.`
@@ -1612,6 +1650,7 @@ Check performance limits on each device.`
                             {
                                 name: 'TransmissionTest',
                                 path: 'gltf/gltfExtensions/transmission/transmissionTest',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_ior'],
                                 description: {
                                     ko: `다양한 투과율과 거칠기에 따른 굴절 효과를 테스트합니다.`, 
                                     en: `Tests refraction effects based on various transmission rates and roughness.`
@@ -1620,6 +1659,7 @@ Check performance limits on each device.`
                             {
                                 name: 'TransmissionRoughnessTest',
                                 path: 'gltf/gltfExtensions/transmission/transmissionRoughnessTest',
+                                extensionList: ['KHR_materials_transmission'],
                                 description: {
                                     ko: `거친 표면을 가진 투명 재질의 흐림 효과를 테스트합니다.`, 
                                     en: `Tests blurring effects on transparent materials with rough surfaces.`
@@ -1628,6 +1668,7 @@ Check performance limits on each device.`
                             {
                                 name: 'StainedGlassLamp',
                                 path: 'gltf/gltfExtensions/transmission/stainedGlassLamp',
+                                extensionList: ['KHR_materials_transmission'],
                                 description: {
                                     ko: `스테인드글라스 램프를 통해 색상이 있는 투과광을 보여줍니다.`, 
                                     en: `Shows colored transmitted light through a stained glass lamp.`
@@ -1636,6 +1677,7 @@ Check performance limits on each device.`
                             {
                                 name: 'ChronographWatch',
                                 path: 'gltf/gltfExtensions/transmission/chronographWatch',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_variants'],
                                 description: {
                                     ko: `시계 유리의 투명도와 내부 디테일을 보여주는 고품질 모델입니다.`, 
                                     en: `High-quality model showing watch glass transparency and internal details.`
@@ -1644,6 +1686,7 @@ Check performance limits on each device.`
                             {
                                 name: 'MosquitoInAmber',
                                 path: 'gltf/gltfExtensions/transmission/mosquitoInAmber',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
                                 description: {
                                     ko: `호박(Amber) 속에 갇힌 모기를 통해 투과, 굴절률(IOR), 볼륨 속성을 시연합니다.`, 
                                     en: `A mosquito encased in amber, demonstrating the use of transmission, IOR, and volume properties.`
@@ -1652,6 +1695,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CommercialRefrigerator',
                                 path: 'gltf/gltfExtensions/transmission/commercialRefrigerator',
+                                extensionList: ['KHR_materials_transmission'],
                                 description: {
                                     ko: `유리 문을 가진 상업용 냉장고 모델입니다.`, 
                                     en: `Commercial refrigerator model with glass doors.`
@@ -1665,6 +1709,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareIor',
                                 path: 'gltf/gltfExtensions/volume/compareIor',
+                                extensionList: ['KHR_materials_ior'],
                                 description: {
                                     ko: `굴절률(IOR)에 따른 빛의 굴절 차이를 비교합니다.`, 
                                     en: `Compares light refraction differences based on Index of Refraction (IOR).`
@@ -1673,6 +1718,7 @@ Check performance limits on each device.`
                             {
                                 name: 'IORTestGrid',
                                 path: 'gltf/gltfExtensions/volume/IORTestGrid',
+                                extensionList: ['KHR_materials_ior'],
                                 description: {
                                     ko: `다양한 IOR 값에 따른 굴절 변화를 그리드로 테스트합니다.`, 
                                     en: `Tests refraction changes based on various IOR values in a grid.`
@@ -1681,6 +1727,7 @@ Check performance limits on each device.`
                             {
                                 name: 'CompareVolume',
                                 path: 'gltf/gltfExtensions/volume/compareVolume',
+                                extensionList: ['KHR_materials_volume'],
                                 description: {
                                     ko: `볼륨(Volume) 흡수 및 산란 효과를 비교합니다.`, 
                                     en: `Compares Volume absorption and scattering effects.`
@@ -1689,6 +1736,7 @@ Check performance limits on each device.`
                             {
                                 name: 'TransmissionThinwallTestGrid',
                                 path: 'gltf/gltfExtensions/volume/transmissionThinwallTestGrid',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
                                     ko: `얇은 벽(Thin-walled) 옵션 활성화 여부에 따른 투과 차이를 테스트합니다.`, 
                                     en: `Tests transmission differences based on Thin-walled option activation.`
@@ -1697,6 +1745,7 @@ Check performance limits on each device.`
                             {
                                 name: 'AttenuationTest',
                                 path: 'gltf/gltfExtensions/volume/attenuationTest',
+                                extensionList: ['KHR_materials_volume'],
                                 description: {
                                     ko: `빛이 매질을 통과할 때의 감쇠(Attenuation) 거리와 색상을 테스트합니다.`, 
                                     en: `Tests attenuation distance and color as light passes through a medium.`
@@ -1705,6 +1754,7 @@ Check performance limits on each device.`
                             {
                                 name: 'GlassVaseFlowers',
                                 path: 'gltf/gltfExtensions/volume/glassVaseFlowers',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
                                 description: {
                                     ko: `유리 꽃병과 물의 볼륨 효과를 보여주는 모델입니다.`, 
                                     en: `Model showing volume effects of a glass vase and water.`
@@ -1713,6 +1763,7 @@ Check performance limits on each device.`
                             {
                                 name: 'GlassBrokenWindow',
                                 path: 'gltf/gltfExtensions/volume/glassBrokenWindow',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
                                 description: {
                                     ko: `깨진 유리창의 두께감과 굴절을 표현합니다.`, 
                                     en: `Expresses the thickness and refraction of a broken window.`
@@ -1721,6 +1772,7 @@ Check performance limits on each device.`
                             {
                                 name: 'GlassHurricaneCandleHolder',
                                 path: 'gltf/gltfExtensions/volume/glassHurricaneCandleHolder',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume', 'KHR_materials_ior'],
                                 description: {
                                     ko: `복잡한 유리 형태의 굴절과 반사를 보여주는 캔들 홀더입니다.`, 
                                     en: `Candle holder showing refraction and reflection of complex glass shapes.`
@@ -1729,6 +1781,7 @@ Check performance limits on each device.`
                             {
                                 name: 'DragonAttenuation',
                                 path: 'gltf/gltfExtensions/volume/dragonAttenuation',
+                                extensionList: ['KHR_materials_transmission', 'KHR_materials_volume'],
                                 description: {
                                     ko: `KHR_materials_transmission과 KHR_materials_volume을 사용하여 색유리와 같은 객체를 표현합니다.`, 
                                     en: `Showcases KHR_materials_transmission and KHR_materials_volume, creating an object that resembles colored glass.`
