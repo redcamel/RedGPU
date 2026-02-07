@@ -1,11 +1,6 @@
 /**
  * [KO] 합성 모드 상수
  * [EN] Composite mode constants
- *
- * ### Example
- * ```typescript
- * console.log(RedGPU.COMPOSITE_MODE.ADDITIVE);
- * ```
  * @category Constant
  */
 export const COMPOSITE_MODE = {

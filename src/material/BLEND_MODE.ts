@@ -1,11 +1,6 @@
 /**
  * [KO] 블렌드 모드 상수
  * [EN] Blend mode constants
- *
- * ### Example
- * ```typescript
- * console.log(RedGPU.BLEND_MODE.NORMAL);
- * ```
  * @category Constant
  */
 export const BLEND_MODE = {

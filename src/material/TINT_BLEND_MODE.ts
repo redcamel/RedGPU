@@ -1,11 +1,6 @@
 /**
  * [KO] 틴트 블렌드 모드 상수
  * [EN] Tint blend mode constants
- *
- * ### Example
- * ```typescript
- * console.log(RedGPU.TINT_BLEND_MODE.MULTIPLY);
- * ```
  * @category Constant
  */
 export const TINT_BLEND_MODE = {

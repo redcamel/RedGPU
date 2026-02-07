@@ -13,16 +13,16 @@ const SHADER_INFO = parseWGSL(fragmentModuleSource)
  * [EN] Common property interface for bitmap texture-based materials
  */
 interface BitmapMaterial {
-    /**
-     * [KO] 머티리얼에 적용할 비트맵 텍스처
-     * [EN] Bitmap texture to apply to the material
-     */
-    diffuseTexture: BitmapTexture
-    /**
-     * [KO] 비트맵 텍스처 샘플러
-     * [EN] Bitmap texture sampler
-     */
-    diffuseTextureSampler: Sampler;
+	/**
+	 * [KO] 머티리얼에 적용할 비트맵 텍스처
+	 * [EN] Bitmap texture to apply to the material
+	 */
+	diffuseTexture: BitmapTexture
+	/**
+	 * [KO] 비트맵 텍스처 샘플러
+	 * [EN] Bitmap texture sampler
+	 */
+	diffuseTextureSampler: Sampler;
 }
 
 /**
@@ -31,8 +31,7 @@ interface BitmapMaterial {
  *
  * [KO] BitmapTexture와 Sampler를 통해 다양한 텍스처 기반 렌더링 효과를 구현할 수 있습니다.
  * [EN] Various texture-based rendering effects can be implemented through BitmapTexture and Sampler.
- *
- * ### Example
+ * * ### Example
  * ```typescript
  * const sourceTexture = new RedGPU.Resource.BitmapTexture(
  *    redGPUContext,
@@ -45,11 +44,11 @@ interface BitmapMaterial {
  * @category Material
  */
 class BitmapMaterial extends AUVTransformBaseMaterial {
-    /**
-     * [KO] 파이프라인 dirty 상태 플래그
-     * [EN] Pipeline dirty status flag
-     */
-    dirtyPipeline: boolean = false
+	/**
+	 * [KO] 파이프라인 dirty 상태 플래그
+	 * [EN] Pipeline dirty status flag
+	 */
+	dirtyPipeline: boolean = false
 
     /**
      * [KO] BitmapMaterial 생성자

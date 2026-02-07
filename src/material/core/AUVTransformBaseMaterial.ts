@@ -17,8 +17,8 @@ import ABitmapBaseMaterial from "./ABitmapBaseMaterial";
  * material.textureOffset = [0.1, 0.1];
  * material.textureScale = [2.0, 2.0];
  * ```
- *
  * <iframe src="/RedGPU/examples/3d/material/uvTransform/" style="width:100%; height:500px;"></iframe>
+ *
  * @category Material
  */
 abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
