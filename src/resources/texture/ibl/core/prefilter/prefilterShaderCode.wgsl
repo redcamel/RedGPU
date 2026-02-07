@@ -52,35 +52,38 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
 
 @compute @workgroup_size(8, 8, 1)
 fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(outTexture);
-    if (global_id.x >= size.x || global_id.y >= size.y || global_id.z >= 6u) {
+    let size_u = textureDimensions(outTexture);
+    let size = vec2<f32>(size_u);
+    
+    if (global_id.x >= size_u.x || global_id.y >= size_u.y || global_id.z >= 6u) {
         return;
     }
 
     let face = global_id.z;
-    // 하프 픽셀 보정 및 정규화된 UV 좌표 (0.0 ~ 1.0)
-    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
-    
-    // UV를 로컬 좌표 (-1.0 ~ 1.0)로 변환
+    let roughness = uniforms.roughness;
+
+    // UV를 로컬 좌표 (-1.0 ~ 1.0)로 변환 (중앙 샘플링 보정)
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
     let x = uv.x * 2.0 - 1.0;
     let y = uv.y * 2.0 - 1.0;
 
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
     let N = normalize((uniforms.faceMatrices[face] * localPos).xyz);
     
+    // Roughness가 0인 경우 (완전 거울) 특수 처리하여 선명도 극대화
+    if (roughness <= 0.0) {
+        textureStore(outTexture, global_id.xy, face, textureSampleLevel(environmentTexture, textureSampler, N, 0.0));
+        return;
+    }
+
     let R = N;
     let V = R;
 
-    let roughness = uniforms.roughness;
     var prefilteredColor = vec3<f32>(0.0);
     var totalWeight = 0.0;
     let numSamples = 1024u;
     
-    // NdotV가 0이 되는 것을 방지
-    let NdotV = max(dot(N, V), 0.001);
-
     let envSize = f32(textureDimensions(environmentTexture).x);
-    // 밉맵 기반 노이즈 억제를 위한 상수
     let saTexel = 4.0 * PI / (6.0 * envSize * envSize);
 
     for (var i = 0u; i < numSamples; i++) {
@@ -90,18 +93,14 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         let NdotL = max(dot(N, L), 0.0);
         if (NdotL > 0.0) {
-            // Filtered Importance Sampling 로직
             let NdotH = max(dot(N, H), 0.001);
             let VdotH = max(dot(V, H), 0.001);
             
-            // PDF 계산
             let D = distribution_ggx(NdotH, roughness);
             let pdf = (D * NdotH / (4.0 * VdotH)) + 0.0001;
             
-            // 샘플의 입체각(Solid Angle) 계산
             let saSample = 1.0 / (f32(numSamples) * pdf + 0.0001);
-            // 밉레벨 결정 (바이어스 축소: 0.5 -> 0.25)
-            let mipLevel = select(max(0.25 * log2(saSample / saTexel), 0.0), 0.0, roughness == 0.0);
+            let mipLevel = max(0.25 * log2(saSample / saTexel), 0.0);
 
             prefilteredColor += textureSampleLevel(environmentTexture, textureSampler, L, mipLevel).rgb * NdotL;
             totalWeight += NdotL;
@@ -109,8 +108,8 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     if (totalWeight > 0.0) {
-        textureStore(outTexture, global_id.xy, global_id.z, vec4<f32>(prefilteredColor / totalWeight, 1.0));
+        textureStore(outTexture, global_id.xy, face, vec4<f32>(prefilteredColor / totalWeight, 1.0));
     } else {
-        textureStore(outTexture, global_id.xy, global_id.z, textureSampleLevel(environmentTexture, textureSampler, N, 0.0));
+        textureStore(outTexture, global_id.xy, face, textureSampleLevel(environmentTexture, textureSampler, N, 0.0));
     }
 }

@@ -25,13 +25,15 @@ fn hammersley(i: u32, n: u32) -> vec2<f32> {
 
 @compute @workgroup_size(8, 8, 1)
 fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(outTexture);
-    if (global_id.x >= size.x || global_id.y >= size.y || global_id.z >= 6u) {
+    let size_u = textureDimensions(outTexture);
+    let size = vec2<f32>(size_u);
+    
+    if (global_id.x >= size_u.x || global_id.y >= size_u.y || global_id.z >= 6u) {
         return;
     }
 
     let face = global_id.z;
-    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
     
     let x = uv.x * 2.0 - 1.0;
     let y = uv.y * 2.0 - 1.0;
@@ -69,7 +71,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let pdf = max(cosTheta, 0.001) / PI;
 
         let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
-        let mipLevel = select(max(0.5 * log2(saSample / saTexel), 0.0), 0.0, saSample <= 0.0);
+        let mipLevel = max(0.5 * log2(saSample / saTexel), 0.0);
 
         let sampleColor = textureSampleLevel(environmentTexture, environmentSampler, worldSample, mipLevel);
 
@@ -79,5 +81,5 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     irradiance = irradiance / totalWeight;
 
-    textureStore(outTexture, global_id.xy, global_id.z, vec4<f32>(irradiance, 1.0));
+    textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
 }

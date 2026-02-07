@@ -51,7 +51,7 @@ RedGPU.init(
         const viewCustom = new RedGPU.Display.View3D(redGPUContext, scene2, controller);
         const ibl_adjustSize = new RedGPU.Resource.IBL(
             redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
-            1024, 32
+            1024, 16
         )
         viewCustom.ibl = ibl_adjustSize;
         viewCustom.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl_adjustSize.environmentTexture);
@@ -146,7 +146,7 @@ function loadGLTF(redGPUContext, scene, url) {
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1769835266959');
-    createPostEffectLabel('Custom IBL Texture Size 32 * 32', redGPUContext.detector.isMobile, 'Basic IBL Texture Size 512 * 512')
+    createPostEffectLabel('Custom IBL Texture Size 16 * 16', redGPUContext.detector.isMobile, 'Basic IBL Texture Size 512 * 512')
     const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769835266959" );
     setDebugButtons(RedGPU, redGPUContext);
 };
