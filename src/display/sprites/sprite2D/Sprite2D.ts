@@ -15,7 +15,7 @@ const BaseSprite2D = mixInMesh2D(Mesh);
  * [KO] Sprite2D는 2D 게임이나 UI 요소를 렌더링하기 위한 클래스입니다. 평면 지오메트리를 기반으로 하며, 너비와 높이를 동적으로 조절할 수 있습니다.
  * [EN] Sprite2D is a class for rendering 2D game or UI elements. Based on plane geometry, its width and height can be adjusted dynamically.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const sprite = new RedGPU.Display.Sprite2D(redGPUContext, material);
  * sprite.setSize(100, 100);
@@ -53,7 +53,7 @@ class Sprite2D extends BaseSprite2D {
      * [KO] RedGPU 렌더링 컨텍스트
      * [EN] RedGPU rendering context
      * @param material -
-     * [KO] 스프라이트에 적용할 머티리얼 (옵션)
+     * [KO] 스프라이트에 적용할 머티리얼 (선택적)
      * [EN] Material to apply to the sprite (optional)
      */
     constructor(redGPUContext: RedGPUContext, material?) {
@@ -62,17 +62,22 @@ class Sprite2D extends BaseSprite2D {
     }
 
     /**
-     * 스프라이트의 너비를 반환합니다.
-     * @returns 현재 너비 값
+     * [KO] 스프라이트의 너비를 반환합니다.
+     * [EN] Returns the width of the sprite.
      */
     get width(): number {
         return this.#width;
     }
 
     /**
-     * 스프라이트의 너비를 설정합니다.
-     * @param value - 설정할 너비 값 (양수)
-     * @throws {Error} 값이 양수가 아닌 경우
+     * [KO] 스프라이트의 너비를 설정합니다.
+     * [EN] Sets the width of the sprite.
+     * @param value -
+     * [KO] 설정할 너비 값 (양수)
+     * [EN] Width value to set (positive)
+     * @throws
+     * [KO] 값이 양수가 아닌 경우 Error 발생
+     * [EN] Throws Error if value is not positive
      */
     set width(value: number) {
         validatePositiveNumberRange(value)
@@ -81,17 +86,22 @@ class Sprite2D extends BaseSprite2D {
     }
 
     /**
-     * 스프라이트의 높이를 반환합니다.
-     * @returns 현재 높이 값
+     * [KO] 스프라이트의 높이를 반환합니다.
+     * [EN] Returns the height of the sprite.
      */
     get height(): number {
         return this.#height;
     }
 
     /**
-     * 스프라이트의 높이를 설정합니다.
-     * @param value - 설정할 높이 값 (양수)
-     * @throws {Error} 값이 양수가 아닌 경우
+     * [KO] 스프라이트의 높이를 설정합니다.
+     * [EN] Sets the height of the sprite.
+     * @param value -
+     * [KO] 설정할 높이 값 (양수)
+     * [EN] Height value to set (positive)
+     * @throws
+     * [KO] 값이 양수가 아닌 경우 Error 발생
+     * [EN] Throws Error if value is not positive
      */
     set height(value: number) {
         validatePositiveNumberRange(value)
@@ -99,27 +109,16 @@ class Sprite2D extends BaseSprite2D {
         this.dirtyTransform = true
     }
 
-    // /**
-    //  * 스프라이트의 머티리얼을 반환합니다.
-    //  * @returns 현재 머티리얼
-    //  */
-    // get material() {
-    // 	return this._material
-    // }
-    //
-    // /**
-    //  * 머티리얼 설정을 시도합니다.
-    //  * @param value - 설정하려는 머티리얼
-    //  * @throws {Error} Sprite2D는 머티리얼을 변경할 수 없습니다
-    //  */
-    // set material(value) {
-    // 	consoleAndThrowError('Sprite2D can not change material')
-    // }
     /**
-     * 스프라이트의 크기를 설정합니다.
+     * [KO] 스프라이트의 크기를 설정합니다.
+     * [EN] Sets the size of the sprite.
      *
-     * @param width - 설정할 너비 값
-     * @param height - 설정할 높이 값 (옵션, 생략 시 너비와 같은 값 사용)
+     * @param width -
+     * [KO] 설정할 너비 값
+     * [EN] Width value to set
+     * @param height -
+     * [KO] 설정할 높이 값 (선택적, 생략 시 너비와 같은 값 사용)
+     * [EN] Height value to set (optional, uses the same value as width if omitted)
      */
     setSize(width: number, height?: number) {
         this.width = width;
