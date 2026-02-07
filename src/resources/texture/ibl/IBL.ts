@@ -22,10 +22,11 @@ class IBL {
 	#sourceCubeTexture: GPUTexture;
 	#environmentTexture: IBLCubeTexture;
 	#irradianceTexture: IBLCubeTexture;
-	#iblTexture: IBLCubeTexture;
+	#prefilterTexture: IBLCubeTexture;
 	#targetTexture: HDRTexture | CubeTexture;
-	#envCubeSize: number;
-	#iblCubeSize: number;
+	#environmentSize: number;
+	#prefilterSize: number;
+	#irradianceSize: number;
 	#isInitializing: boolean = false;
 
 	/**
@@ -33,23 +34,26 @@ class IBL {
 	 * [EN] Creates an IBL instance.
 	 * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
 	 * @param srcInfo - [KO] 환경맵 소스 정보 (HDR URL 또는 6개 이미지 URL 배열) [EN] Environment map source information (HDR URL or array of 6 image URLs)
-	 * @param envCubeSize - [KO] 환경맵 큐브 크기 (기본값: 1024) [EN] Environment map cube size (default: 1024)
-	 * @param iblCubeSize - [KO] IBL 큐브 크기 (기본값: 512) [EN] IBL cube size (default: 512)
+	 * @param environmentSize - [KO] 환경맵 큐브 크기 (기본값: 1024) [EN] Environment map cube size (default: 1024)
+	 * @param prefilterSize - [KO] Prefilter 큐브 크기 (기본값: 512) [EN] Prefilter cube size (default: 512)
+	 * @param irradianceSize - [KO] Irradiance 큐브 크기 (기본값: 64) [EN] Irradiance cube size (default: 64)
 	 */
 	constructor(
 		redGPUContext: RedGPUContext,
 		srcInfo: string | [string, string, string, string, string, string],
-		envCubeSize: number = 1024,
-		iblCubeSize: number = 512
+		environmentSize: number = 1024,
+		prefilterSize: number = 512,
+		irradianceSize: number = 64
 	) {
-		const cacheKeyPart = `${srcInfo}?key=${envCubeSize}_${iblCubeSize}`;
-		this.#iblCubeSize = iblCubeSize;
-		this.#envCubeSize = envCubeSize;
+		const cacheKeyPart = `${srcInfo}?key=${environmentSize}_${prefilterSize}_${irradianceSize}`;
+		this.#prefilterSize = prefilterSize;
+		this.#environmentSize = environmentSize;
+		this.#irradianceSize = irradianceSize;
 		this.#redGPUContext = redGPUContext;
 
 		// 맵들을 담을 IBLCubeTexture 플레이스홀더 생성
 		this.#environmentTexture = new IBLCubeTexture(redGPUContext, `IBL_ENV_${cacheKeyPart}`);
-		this.#iblTexture = new IBLCubeTexture(redGPUContext, `IBL_SPECULAR_${cacheKeyPart}`);
+		this.#prefilterTexture = new IBLCubeTexture(redGPUContext, `IBL_SPECULAR_${cacheKeyPart}`);
 		this.#irradianceTexture = new IBLCubeTexture(redGPUContext, `IBL_IRRADIANCE_${cacheKeyPart}`);
 
 		const onLoad = async (v: HDRTexture | CubeTexture) => {
@@ -78,7 +82,7 @@ class IBL {
 		try {
 			if (v instanceof HDRTexture) {
 				const {equirectangularToCubeGenerator} = this.#redGPUContext.resourceManager;
-				const rawCube = await equirectangularToCubeGenerator.generate(v.gpuTexture, this.#envCubeSize);
+				const rawCube = await equirectangularToCubeGenerator.generate(v.gpuTexture, this.#environmentSize);
 				this.#sourceCubeTexture = rawCube.gpuTexture;
 			} else {
 				this.#sourceCubeTexture = v.gpuTexture;
@@ -90,15 +94,17 @@ class IBL {
 	};
 
 	/** [KO] 환경맵 큐브 크기 [EN] Environment map cube size */
-	get envCubeSize(): number { return this.#envCubeSize; }
-	/** [KO] IBL 큐브 크기 [EN] IBL cube size */
-	get iblCubeSize(): number { return this.#iblCubeSize; }
+	get environmentSize(): number { return this.#environmentSize; }
+	/** [KO] Prefilter 큐브 크기 [EN] Prefilter cube size */
+	get prefilterSize(): number { return this.#prefilterSize; }
+	/** [KO] Irradiance 큐브 크기 [EN] Irradiance cube size */
+	get irradianceSize(): number { return this.#irradianceSize; }
 	/** [KO] Irradiance 텍스처를 반환합니다. [EN] Returns the irradiance texture. */
 	get irradianceTexture(): IBLCubeTexture { return this.#irradianceTexture; }
 	/** [KO] 환경맵 텍스처를 반환합니다. [EN] Returns the environment texture. */
 	get environmentTexture(): IBLCubeTexture { return this.#environmentTexture; }
 	/** [KO] IBL (Specular Prefilter) 텍스처를 반환합니다. [EN] Returns the IBL (Specular Prefilter) texture. */
-	get iblTexture(): IBLCubeTexture { return this.#iblTexture; }
+	get iblTexture(): IBLCubeTexture { return this.#prefilterTexture; }
 
 	/**
 	 * [KO] 소스 큐브맵으로부터 IBL용 맵들을 생성합니다.
@@ -113,12 +119,11 @@ class IBL {
 			this.#environmentTexture.gpuTexture = this.#sourceCubeTexture;
 
 			// 2. Prefilter Map (Specular 반사광용)
-			const prefiltered = await prefilterGenerator.generate(this.#sourceCubeTexture, this.#iblCubeSize);
-			this.#iblTexture.gpuTexture = prefiltered.gpuTexture;
-			// Note: prefiltered 인스턴스 자체는 여기서 관리하지 않으므로 텍스처 소유권만 가져옵니다.
+			const prefiltered = await prefilterGenerator.generate(this.#sourceCubeTexture, this.#prefilterSize);
+			this.#prefilterTexture.gpuTexture = prefiltered.gpuTexture;
 
 			// 3. Irradiance Map (Diffuse 주변광용)
-			const irradiance = await irradianceGenerator.generate(this.#sourceCubeTexture);
+			const irradiance = await irradianceGenerator.generate(this.#sourceCubeTexture, this.#irradianceSize);
 			this.#irradianceTexture.gpuTexture = irradiance.gpuTexture;
 		}
 	}
