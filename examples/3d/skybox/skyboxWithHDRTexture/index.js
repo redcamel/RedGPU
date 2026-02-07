@@ -29,8 +29,8 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        const newTexture = new RedGPU.Resource.HDRTexture(redGPUContext, HDR_ASSETS[0].path);
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, newTexture);
+        const newIbl = new RedGPU.Resource.IBL(redGPUContext, HDR_ASSETS[0].path);
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, newIbl.environmentTexture);
         renderTestPane(view)
 
         const renderer = new RedGPU.Renderer(redGPUContext);
