@@ -86,7 +86,8 @@ const createTexture = (redGPUContext, option) => {
     if (option.type === 'cube') {
         return new RedGPU.Resource.CubeTexture(redGPUContext, option.paths);
     } else {
-        return new RedGPU.Resource.HDRTexture(redGPUContext, option.path);
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, option.path);
+        return ibl.environmentTexture;
     }
 };
 
