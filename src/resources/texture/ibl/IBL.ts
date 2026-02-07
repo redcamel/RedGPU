@@ -26,6 +26,7 @@ class IBL {
 	#targetTexture: HDRTexture | CubeTexture;
 	#envCubeSize: number;
 	#iblCubeSize: number;
+	#isInitializing: boolean = false;
 
 	/**
 	 * [KO] IBL 인스턴스를 생성합니다.
@@ -51,31 +52,42 @@ class IBL {
 		this.#iblTexture = new IBLCubeTexture(redGPUContext, `IBL_SPECULAR_${cacheKeyPart}`);
 		this.#irradianceTexture = new IBLCubeTexture(redGPUContext, `IBL_IRRADIANCE_${cacheKeyPart}`);
 
+		const onLoad = async (v: HDRTexture | CubeTexture) => {
+			v.__addDirtyPipelineListener(this.#onSourceChanged);
+			if (v.gpuTexture) await this.#onSourceChanged();
+		};
+
 		if (typeof srcInfo === 'string') {
 			// 2D HDR 소스 로드 및 큐브 변환
-			this.#targetTexture = new HDRTexture(
-				redGPUContext,
-				srcInfo,
-				async (v: HDRTexture) => {
-					const { equirectangularToCubeGenerator } = this.#redGPUContext.resourceManager;
-					const rawCube = await equirectangularToCubeGenerator.generate(v.gpuTexture, this.#envCubeSize);
-					this.#sourceCubeTexture = rawCube.gpuTexture;
-					await this.#initMaps();
-				}
-			);
+			this.#targetTexture = new HDRTexture(redGPUContext, srcInfo, onLoad);
 		} else {
 			// 6장 이미지 기반 큐브맵 로드
-			this.#targetTexture = new CubeTexture(
-				redGPUContext,
-				srcInfo,
-				true,
-				async (v: CubeTexture) => {
-					this.#sourceCubeTexture = v.gpuTexture;
-					await this.#initMaps();
-				}
-			);
+			this.#targetTexture = new CubeTexture(redGPUContext, srcInfo, true, onLoad);
 		}
 	}
+
+	/**
+	 * [KO] 소스 텍스처 변경 시 호출되는 핸들러입니다.
+	 * [EN] Handler called when the source texture changes.
+	 */
+	#onSourceChanged = async () => {
+		const v = this.#targetTexture;
+		if (!v.gpuTexture || this.#isInitializing) return;
+
+		this.#isInitializing = true;
+		try {
+			if (v instanceof HDRTexture) {
+				const {equirectangularToCubeGenerator} = this.#redGPUContext.resourceManager;
+				const rawCube = await equirectangularToCubeGenerator.generate(v.gpuTexture, this.#envCubeSize);
+				this.#sourceCubeTexture = rawCube.gpuTexture;
+			} else {
+				this.#sourceCubeTexture = v.gpuTexture;
+			}
+			await this.#initMaps();
+		} finally {
+			this.#isInitializing = false;
+		}
+	};
 
 	/** [KO] 환경맵 큐브 크기 [EN] Environment map cube size */
 	get envCubeSize(): number { return this.#envCubeSize; }

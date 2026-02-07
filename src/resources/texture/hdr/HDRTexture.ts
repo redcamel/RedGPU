@@ -129,6 +129,7 @@ class HDRTexture extends ManagementResourceBase {
             this.#height = hdrData.height;
             await this.#createGPUTexture(hdrData);
             this.#onLoad?.(this);
+            this.__fireListenerList();
         } catch (error) {
             console.error('HDR loading error:', error);
             this.#onError?.(error);
