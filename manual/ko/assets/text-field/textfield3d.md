@@ -17,15 +17,27 @@ textField.y = 5; // 공중에 배치
 scene.addChild(textField);
 ```
 
-## 2. 빌보드 (Billboard) 기능
+## 2. 빌보드 (Billboard) 및 크기 제어
 
-3D 텍스트는 카메라의 위치에 따라 측면이나 뒷면이 보일 수 있습니다. 텍스트를 항상 정면으로 보이게 하려면 **Billboard** 기능을 활성화합니다.
+3D 텍스트는 카메라의 위치에 따라 측면이나 뒷면이 보일 수 있습니다. 텍스트를 항상 정면으로 보이게 하려면 **Billboard** 기능을 활성화하며, 필요에 따라 월드 단위 크기나 고정된 픽셀 크기를 설정할 수 있습니다.
+
+### 빌보드 설정
 
 - **`useBillboard`**: 활성화 시 카메라가 회전해도 항상 텍스트가 정면을 향합니다.
-- **`useBillboardPerspective`**: 원근감에 따른 크기 변화를 유지할지 여부를 결정합니다. (기본값: `true`)
+
+### 크기 및 렌더링 모드
+
+| 속성명 | 설명 | 기본값 |
+| :--- | :--- | :--- |
+| **`worldSize`** | 월드 공간에서의 세로 크기 (Unit 단위). 가로 크기는 텍스트 길이에 맞춰 자동 조절됩니다. | `1` |
+| **`usePixelSize`** | 고정 픽셀 크기 모드 사용 여부. `true`일 경우 거리에 관계없이 렌더링된 물리 픽셀 크기로 표시됩니다. | `false` |
 
 ```javascript
-textField.useBillboard = true;
+// 1. 월드 단위 크기 설정 (거리에 따라 작아짐)
+textField.worldSize = 2;
+
+// 2. 고정 픽셀 크기 설정 (거리에 관계없이 가독성 유지)
+textField.usePixelSize = true;
 ```
 
 ## 3. 실습 예제: 3D 텍스트 구성
@@ -45,6 +57,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     text3D.background = "rgba(0, 204, 153, 0.8)";
     text3D.padding = 10;
     text3D.useBillboard = true; // 카메라를 따라 회전
+    text3D.worldSize = 1.2;     // 월드 크기 설정
     
     scene.addChild(text3D);
 
@@ -67,10 +80,10 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ### 라이브 데모
 
-아래 예제에서 설정 조합에 따른 4가지 텍스트 필드의 차이를 확인해 보세요. 마우스로 카메라를 회전시키면 빌보드 효과의 차이가 명확히 드러납니다.
+아래 예제에서 설정 조합에 따른 텍스트 필드의 차이를 확인해 보세요.
 
 <ClientOnly>
-<CodePen title="RedGPU Basics - TextField3D Billboard Comparison" slugHash="textfield3d-billboard">
+<CodePen title="RedGPU Basics - TextField3D Showcase" slugHash="textfield3d-showcase">
 <pre data-lang="html">
 &lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
 </pre>
@@ -93,7 +106,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     );
 
     // 헬멧 및 텍스트 필드 그룹 생성을 위한 헬퍼 함수
-    const createCase = (x, label, color, useBB, useBP) => {
+    const createCase = (x, label, color, useBB, usePS) => {
         // 1. 모델 로딩
         new RedGPU.GLTFLoader(
             redGPUContext,
@@ -109,20 +122,19 @@ RedGPU.init(canvas, (redGPUContext) => {
         const text = new RedGPU.Display.TextField3D(redGPUContext, label);
         text.x = x; text.y = 1.5;
         text.background = color;
-        text.padding = 15; // 패딩 추가
+        text.padding = 15;
         text.useBillboard = useBB;
-        text.useBillboardPerspective = useBP;
+        text.usePixelSize = usePS;
         scene.addChild(text);
     };
 
-    // 4가지 케이스 배치
-    createCase(-4.5, "Billboard: OFF", "rgba(255, 0, 0, 0.8)", false, true);
-    createCase(-1.5, "Billboard: ON", "rgba(0, 204, 153, 0.8)", true, true);
-    createCase(1.5, "Perspective: ON", "rgba(0, 102, 255, 0.8)", true, true);
-    createCase(4.5, "Perspective: OFF", "rgba(255, 102, 0, 0.8)", true, false);
+    // 케이스 배치
+    createCase(-3, "Billboard: OFF", "rgba(255, 0, 0, 0.8)", false, false);
+    createCase(0, "World Size", "rgba(0, 204, 153, 0.8)", true, false);
+    createCase(3, "Pixel Size", "rgba(0, 102, 255, 0.8)", true, true);
 
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 12;
+    controller.distance = 10;
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     view.ibl = ibl;
     view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);

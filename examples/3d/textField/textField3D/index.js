@@ -6,7 +6,7 @@
  * [EN] Demonstrates the usage of TextField3D in 3D space, including features like billboard and styling.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -56,7 +56,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     // [KO] 렌더러 생성 및 시작
     // [EN] Create and start renderer
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext);
 
     // [KO] 테스트용 GUI 설정
@@ -84,8 +84,8 @@ RedGPU.init(canvas, (redGPUContext) => {
  * [EN] Scene containing the text fields to control
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {setDebugButtons, setSeparator} = await import("../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+    const {setDebugButtons, setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js");
 
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();

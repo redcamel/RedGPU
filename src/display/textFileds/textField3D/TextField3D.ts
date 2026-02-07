@@ -35,7 +35,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  * scene.addChild(textField);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/textField3D/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/textField/textField3D/"></iframe>
  *
  * [KO] 아래는 TextField3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and and operation of TextField3D.

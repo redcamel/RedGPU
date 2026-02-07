@@ -603,10 +603,18 @@ const ExampleList = [
                 list: [
                     {
                         name: 'TextField3D',
-                        path: '3d/textField3D',
+                        path: '3d/textField/textField3D',
                         description: {
                             ko: `TextField3D 객체의 사용법을 보여주는 예제입니다.`, 
                             en: `example of a TextField3D object.`
+                        },
+                    },
+                    {
+                        name: 'TextField3D Comparison (World vs Pixel)',
+                        path: '3d/textField/textField3DCompare',
+                        description: {
+                            ko: `TextField3D의 월드 단위 크기(worldSize)와 고정 픽셀 크기(usePixelSize) 설정을 비교 시연하는 예제입니다.`, 
+                            en: `A comparison example demonstrating TextField3D's world unit size (worldSize) and fixed pixel size (usePixelSize) settings.`
                         },
                     },
                 ]

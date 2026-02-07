@@ -17,15 +17,27 @@ textField.y = 5; // Place in the air
 scene.addChild(textField);
 ```
 
-## 2. Billboard Feature
+## 2. Billboard and Size Control
 
-3D text may be seen from the side or back depending on the camera position. To make the text always visible from the front, activate the **Billboard** feature.
+3D text can be seen from the side or back depending on the camera position. To make the text always visible from the front, activate the **Billboard** feature, and you can set the world unit size or fixed pixel size as needed.
+
+### Billboard Setup
 
 - **`useBillboard`**: When activated, the text always faces the front even if the camera rotates.
-- **`useBillboardPerspective`**: Determines whether to maintain size changes due to perspective. (Default: `true`)
+
+### Size and Rendering Mode
+
+| Property Name | Description | Default Value |
+| :--- | :--- | :--- |
+| **`worldSize`** | Vertical size in world space (Unit). Horizontal size is automatically adjusted according to text length. | `1` |
+| **`usePixelSize`** | Whether to use fixed pixel size mode. If `true`, it is displayed at the rendered physical pixel size regardless of distance. | `false` |
 
 ```javascript
-textField.useBillboard = true;
+// 1. Set world unit size (shrinks with distance)
+textField.worldSize = 2;
+
+// 2. Set fixed pixel size (maintains readability regardless of distance)
+textField.usePixelSize = true;
 ```
 
 ## 3. Practical Example: Configuring 3D Text
@@ -45,6 +57,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     text3D.background = "rgba(0, 204, 153, 0.8)";
     text3D.padding = 10;
     text3D.useBillboard = true; // Rotate with camera
+    text3D.worldSize = 1.2;     // Set world size
     
     scene.addChild(text3D);
 
@@ -67,10 +80,10 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ### Live Demo
 
-Check out the differences between the 4 text fields based on setting combinations in the example below. Rotating the camera with the mouse clearly reveals the difference in the billboard effect.
+Check out the differences between text fields based on setting combinations in the example below.
 
 <ClientOnly>
-<CodePen title="RedGPU Basics - TextField3D Billboard Comparison" slugHash="textfield3d-billboard">
+<CodePen title="RedGPU Basics - TextField3D Showcase" slugHash="textfield3d-showcase">
 <pre data-lang="html">
 &lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
 </pre>
@@ -93,7 +106,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     );
 
     // Helper function for creating helmet and text field groups
-    const createCase = (x, label, color, useBB, useBP) => {
+    const createCase = (x, label, color, useBB, usePS) => {
         // 1. Load Model
         new RedGPU.GLTFLoader(
             redGPUContext,
@@ -109,20 +122,19 @@ RedGPU.init(canvas, (redGPUContext) => {
         const text = new RedGPU.Display.TextField3D(redGPUContext, label);
         text.x = x; text.y = 1.5;
         text.background = color;
-        text.padding = 15; // Add padding
+        text.padding = 15;
         text.useBillboard = useBB;
-        text.useBillboardPerspective = useBP;
+        text.usePixelSize = usePS;
         scene.addChild(text);
     };
 
-    // Place 4 cases
-    createCase(-4.5, "Billboard: OFF", "rgba(255, 0, 0, 0.8)", false, true);
-    createCase(-1.5, "Billboard: ON", "rgba(0, 204, 153, 0.8)", true, true);
-    createCase(1.5, "Perspective: ON", "rgba(0, 102, 255, 0.8)", true, true);
-    createCase(4.5, "Perspective: OFF", "rgba(255, 102, 0, 0.8)", true, false);
+    // Place cases
+    createCase(-3, "Billboard: OFF", "rgba(255, 0, 0, 0.8)", false, false);
+    createCase(0, "World Size", "rgba(0, 204, 153, 0.8)", true, false);
+    createCase(3, "Pixel Size", "rgba(0, 102, 255, 0.8)", true, true);
 
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 12;
+    controller.distance = 10;
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     view.ibl = ibl;
     view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
