@@ -17,9 +17,9 @@ const tempMatrix = mat4.create();
  * [KO] 제품 모델링 뷰어나 3D 객체 관찰용으로 주로 사용되며, 중심점을 기준으로 줌, 회전, 팬(Pan) 동작을 통해 대상을 다각도에서 살펴볼 수 있습니다.
  * [EN] Primarily used for product modeling viewers or observing 3D objects, allowing the user to inspect the target from various angles via zoom, rotation, and pan operations around a center point.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+ * const controller = new RedGPU.OrbitController(redGPUContext);
  * controller.centerX = 0;
  * controller.centerY = 0;
  * controller.centerZ = 0;
@@ -27,7 +27,7 @@ const tempMatrix = mat4.create();
  * controller.tilt = -30;
  * controller.pan = 45;
  * ```
- * <iframe src="/RedGPU/examples/3d/controller/orbitController/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/controller/orbitController/" style="width:100%; height:500px;"></iframe>
  * @category Controller
  */
 class OrbitController extends AController {
@@ -54,6 +54,19 @@ class OrbitController extends AController {
 	#currentDistance = 0;
 
 	// ==================== 라이프사이클 ====================
+	/**
+	 * [KO] OrbitController 인스턴스를 생성합니다.
+	 * [EN] Creates an instance of OrbitController.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * const controller = new RedGPU.OrbitController(redGPUContext);
+	 * ```
+	 *
+	 * @param redGPUContext -
+	 * [KO] RedGPUContext 인스턴스
+	 * [EN] RedGPUContext instance
+	 */
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext,
 			{
@@ -431,7 +444,7 @@ class OrbitController extends AController {
 	 * [KO] 메쉬가 화면 중앙에 꽉 차도록 카메라 거리를 자동으로 조절합니다.
 	 * [EN] Automatically adjusts the camera distance so that the mesh fills the screen center.
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * controller.fitMeshToScreenCenter(mesh, view);
 	 * ```

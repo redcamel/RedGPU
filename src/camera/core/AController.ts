@@ -65,8 +65,8 @@ abstract class AController {
 
 
 	/**
-	 * [KO] AController 생성자
-	 * [EN] AController constructor
+	 * [KO] AController 인스턴스를 생성합니다.
+	 * [EN] Creates an instance of AController.
 	 *
 	 * @param redGPUContext -
 	 * [KO] RedGPU 컨텍스트
@@ -307,6 +307,7 @@ abstract class AController {
 	/**
 	 * [KO] 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
 	 * [EN] Checks for keyboard input and sets the active View.
+	 *
 	 * @param view -
 	 * [KO] 현재 View
 	 * [EN] Current View

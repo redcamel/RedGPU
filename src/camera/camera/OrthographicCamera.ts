@@ -10,9 +10,9 @@ import PerspectiveCamera from "./PerspectiveCamera";
  * [KO] 이 투영 모드에서는 객체의 크기가 카메라로부터의 거리에 관계없이 일정하게 유지됩니다. 주로 2D 뷰포트나 설계도면 같은 정투영 뷰를 구현할 때 사용됩니다.
  * [EN] In this projection mode, an object's size stays constant regardless of its distance from the camera. It is primarily used for implementing orthographic views such as 2D viewports or blueprints.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const camera = new RedGPU.Camera.OrthographicCamera();
+ * const camera = new RedGPU.OrthographicCamera();
  * camera.top = 10;
  * camera.bottom = -10;
  * camera.left = -20;
@@ -78,6 +78,11 @@ class OrthographicCamera extends PerspectiveCamera {
 	/**
 	 * [KO] OrthographicCamera 인스턴스를 생성합니다.
 	 * [EN] Creates an instance of OrthographicCamera.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * const camera = new RedGPU.OrthographicCamera();
+	 * ```
 	 */
 	constructor() {
 		super();
@@ -288,6 +293,11 @@ class OrthographicCamera extends PerspectiveCamera {
 	/**
 	 * [KO] 줌을 설정합니다.
 	 * [EN] Sets the zoom level.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * camera.setZoom(2.0);
+	 * ```
 	 *
 	 * @param zoom -
 	 * [KO] 줌 레벨 (0.1 ~ 10)

@@ -15,13 +15,13 @@ const PER_PI = Math.PI / 180;
  * [KO] 거리감 없는 직교 투영을 사용하여 전략 시뮬레이션이나 타일 기반 게임에서 주로 사용되는 고정된 각도의 쿼터뷰(Quarter View)를 구현합니다.
  * [EN] Implements a fixed-angle quarter view, commonly used in strategy simulations or tile-based games, using orthographic projection without perspective distortion.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const controller = new RedGPU.Camera.IsometricController(redGPUContext);
+ * const controller = new RedGPU.IsometricController(redGPUContext);
  * controller.viewHeight = 15;
  * controller.zoom = 1;
  * ```
- * <iframe src="/RedGPU/examples/3d/controller/isometricController/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/controller/isometricController/" style="width:100%; height:500px;"></iframe>
  * @category Controller
  */
 class IsometricController extends AController {
@@ -56,8 +56,13 @@ class IsometricController extends AController {
 
 	// ==================== 라이프사이클 ====================
 	/**
-	 * [KO] IsometricController 생성자
-	 * [EN] IsometricController constructor
+	 * [KO] IsometricController 인스턴스를 생성합니다.
+	 * [EN] Creates an instance of IsometricController.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * const controller = new RedGPU.IsometricController(redGPUContext);
+	 * ```
 	 *
 	 * @param redGPUContext -
 	 * [KO] RedGPUContext 인스턴스
@@ -440,6 +445,11 @@ class IsometricController extends AController {
 	 * [KO] 상향 이동 키를 설정합니다.
 	 * [EN] Sets the move up key.
 	 *
+	 * ### Example
+	 * ```typescript
+	 * controller.setMoveUpKey('w');
+	 * ```
+	 *
 	 * @param value -
 	 * [KO] 설정할 키 이름
 	 * [EN] Key name to set
@@ -451,6 +461,11 @@ class IsometricController extends AController {
 	/**
 	 * [KO] 하향 이동 키를 설정합니다.
 	 * [EN] Sets the move down key.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * controller.setMoveDownKey('s');
+	 * ```
 	 *
 	 * @param value -
 	 * [KO] 설정할 키 이름
@@ -464,6 +479,11 @@ class IsometricController extends AController {
 	 * [KO] 좌측 이동 키를 설정합니다.
 	 * [EN] Sets the move left key.
 	 *
+	 * ### Example
+	 * ```typescript
+	 * controller.setMoveLeftKey('a');
+	 * ```
+	 *
 	 * @param value -
 	 * [KO] 설정할 키 이름
 	 * [EN] Key name to set
@@ -476,6 +496,11 @@ class IsometricController extends AController {
 	 * [KO] 우측 이동 키를 설정합니다.
 	 * [EN] Sets the move right key.
 	 *
+	 * ### Example
+	 * ```typescript
+	 * controller.setMoveRightKey('d');
+	 * ```
+	 *
 	 * @param value -
 	 * [KO] 설정할 키 이름
 	 * [EN] Key name to set
@@ -484,7 +509,6 @@ class IsometricController extends AController {
 		this.#keyNameMapper.moveRight = value;
 	}
 
-	// ==================== 업데이트 및 애니메이션 ====================
 	/**
 	 * [KO] 매 프레임마다 아이소메트릭 카메라를 업데이트합니다.
 	 * [EN] Updates the isometric camera every frame.
