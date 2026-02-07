@@ -10,6 +10,15 @@ import ABitmapBaseMaterial from "./ABitmapBaseMaterial";
  *
  * [KO] 모든 트랜스폼 연산은 버텍스 쉐이더 단계에서 완료되어 렌더링 성능이 최적화됩니다.
  * [EN] All transform calculations are completed at the vertex shader stage to optimize rendering performance.
+ *
+ * ### Example
+ * ```typescript
+ * // AUVTransformBaseMaterial을 상속받은 머티리얼에서 사용 (In material inheriting from AUVTransformBaseMaterial)
+ * material.textureOffset = [0.1, 0.1];
+ * material.textureScale = [2.0, 2.0];
+ * ```
+ * <iframe src="/RedGPU/examples/3d/material/uvTransform/" style="width:100%; height:500px;"></iframe>
+ *
  * @category Material
  */
 abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
@@ -25,6 +34,11 @@ abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
 	/**
 	 * [KO] 텍스처 오프셋 (u, v)
 	 * [EN] Texture offset (u, v)
+	 *
+	 * ### Example
+	 * ```typescript
+	 * material.textureOffset = [0.5, 0.5];
+	 * ```
 	 */
 	get textureOffset(): [number, number] {
 		return this.#textureOffset;
@@ -38,6 +52,11 @@ abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
 	/**
 	 * [KO] 텍스처 스케일 (u, v)
 	 * [EN] Texture scale (u, v)
+	 *
+	 * ### Example
+	 * ```typescript
+	 * material.textureScale = [2.0, 2.0];
+	 * ```
 	 */
 	get textureScale(): [number, number] {
 		return this.#textureScale;
@@ -49,8 +68,9 @@ abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
 	}
 
 	/**
-	 * [KO] AUVTransformBaseMaterial 생성자
-	 * [EN] AUVTransformBaseMaterial constructor
+	 * [KO] AUVTransformBaseMaterial 인스턴스를 생성합니다.
+	 * [EN] Creates an AUVTransformBaseMaterial instance.
+	 *
 	 * @param redGPUContext -
 	 * [KO] RedGPUContext 인스턴스
 	 * [EN] RedGPUContext instance
