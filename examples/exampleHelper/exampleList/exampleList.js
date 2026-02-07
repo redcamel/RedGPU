@@ -573,11 +573,27 @@ const ExampleList = [
                         },
                     },
                     {
+                        name: 'Sprite3D Comparison (World vs Pixel)',
+                        path: '3d/sprite/sprite3DCompare',
+                        description: {
+                            ko: `Sprite3D의 월드 단위 크기(worldSize)와 고정 픽셀 크기(pixelSize) 설정을 비교 시연하는 예제입니다.`, 
+                            en: `A comparison example demonstrating Sprite3D's world unit size (worldSize) and fixed pixel size (pixelSize) settings.`
+                        },
+                    },
+                    {
                         name: 'SpriteSheet3D',
                         path: '3d/sprite/spriteSheet3D',
                         description: {
                             ko: `SpriteSheet3D 객체의 사용법을 보여주는 예제입니다.`, 
                             en: `example of a SpriteSheet3D object.`
+                        },
+                    },
+                    {
+                        name: 'SpriteSheet3D Comparison (World vs Pixel)',
+                        path: '3d/sprite/spriteSheet3DCompare',
+                        description: {
+                            ko: `SpriteSheet3D의 월드 단위 크기(worldSize)와 고정 픽셀 크기(pixelSize) 설정을 비교 시연하는 예제입니다.`, 
+                            en: `A comparison example demonstrating SpriteSheet3D's world unit size (worldSize) and fixed pixel size (pixelSize) settings.`
                         },
                     },
                 ]
