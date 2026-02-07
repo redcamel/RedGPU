@@ -27,7 +27,7 @@ struct SystemUniform {
       camera:Camera,
 	  //
 	  time:f32,
-	  useIblTexture:u32,
+	  usePrefilterTexture:u32,
 	  isView3D:u32,
 	  //
 	  shadowDepthTextureSize:u32,
@@ -48,7 +48,7 @@ struct SystemUniform {
 @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
 @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
 @group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
-@group(0) @binding(3) var iblTextureSampler: sampler;
+@group(0) @binding(3) var prefilterTextureSampler: sampler;
 
 @group(0) @binding(7) var renderPath1ResultTextureSampler: sampler;
 @group(0) @binding(8) var renderPath1ResultTexture: texture_2d<f32>;

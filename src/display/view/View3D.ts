@@ -157,7 +157,7 @@ class View3D extends AView {
      * [KO] 리소스 관리를 위한 이전 프레임의 IBL 텍스처
      * [EN] Previous frame IBL texture for resource management
      */
-    #prevIBL_iblTexture: IBLCubeTexture
+    #prevIBL_prefilterTexture: IBLCubeTexture
     /**
      * [KO] 리소스 관리를 위한 이전 프레임의 IBL 복사열 텍스처
      * [EN] Previous frame IBL irradiance texture for resource management
@@ -347,7 +347,7 @@ class View3D extends AView {
         shadowManager.update(redGPUContext)
         const {directionalShadowManager} = shadowManager
         const ibl = this.ibl
-        const ibl_iblTexture = ibl?.iblTexture?.gpuTexture
+        const ibl_prefilterTexture = ibl?.prefilterTexture?.gpuTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture
         let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
         const index = this.redGPUContext.viewList.indexOf(this)
@@ -358,7 +358,7 @@ class View3D extends AView {
             if (prevInfo) {
                 needResetBindGroup = (
                     prevInfo.ibl !== ibl ||
-                    prevInfo.ibl_iblTexture !== ibl_iblTexture ||
+                    prevInfo.ibl_prefilterTexture !== ibl_prefilterTexture ||
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
                     prevInfo.shadowDepthTextureView !== shadowDepthTextureView
@@ -369,7 +369,7 @@ class View3D extends AView {
             else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
             this.#prevInfoList[key] = {
                 ibl,
-                ibl_iblTexture,
+                ibl_prefilterTexture,
                 ibl_irradianceTexture,
                 renderPath1ResultTextureView,
                 shadowDepthTextureView,
@@ -480,8 +480,8 @@ class View3D extends AView {
                 },
                 //
                 {
-                    key: 'useIblTexture',
-                    value: this.ibl?.iblTexture?.gpuTexture ? 1 : 0,
+                    key: 'usePrefilterTexture',
+                    value: this.ibl?.prefilterTexture?.gpuTexture ? 1 : 0,
                     dataView: this.#uniformDataU32,
                     targetMembers: members
                 },
@@ -608,7 +608,7 @@ class View3D extends AView {
      */
     #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
         this.#updateClusters(true)
-        const ibl_iblTexture = ibl?.iblTexture
+        const ibl_prefilterTexture = ibl?.prefilterTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture
         const {redGPUContext} = this
         const {gpuDevice, resourceManager} = redGPUContext;
@@ -668,7 +668,7 @@ class View3D extends AView {
                 {
                     binding: 10,
                     resource:
-                        resourceManager.getGPUResourceCubeTextureView(ibl_iblTexture, ibl_iblTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                        resourceManager.getGPUResourceCubeTextureView(ibl_prefilterTexture, ibl_prefilterTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
                 },
                 {
                     binding: 11,
@@ -683,7 +683,7 @@ class View3D extends AView {
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
         // IBL 텍스처 리소스 상태 업데이트
-        this.#updateIBLResourceStates(resourceManager, ibl_iblTexture, ibl_irradianceTexture);
+        this.#updateIBLResourceStates(resourceManager, ibl_prefilterTexture, ibl_irradianceTexture);
     }
 
     /**
@@ -691,14 +691,14 @@ class View3D extends AView {
      * 이전 텍스처와 새 텍스처의 사용 횟수를 관리하여 메모리를 효율적으로 관리합니다.
      *
      * @param resourceManager - 리소스 매니저 인스턴스
-     * @param ibl_iblTexture - IBL 텍스처
+     * @param ibl_prefilterTexture - IBL 텍스처
      * @param ibl_irradianceTexture - IBL 복사열 텍스처
      * @private
      */
-    #updateIBLResourceStates(resourceManager: ResourceManager, ibl_iblTexture: any, ibl_irradianceTexture: any) {
+    #updateIBLResourceStates(resourceManager: ResourceManager, ibl_prefilterTexture: any, ibl_irradianceTexture: any) {
         // IBL 텍스처 쌍들을 배열로 정의
         const textureUpdates = [
-            [this.#prevIBL_iblTexture, ibl_iblTexture],
+            [this.#prevIBL_prefilterTexture, ibl_prefilterTexture],
             [this.#prevIBL_irradianceTexture, ibl_irradianceTexture]
         ];
         // 각 텍스처 쌍에 대해 리소스 상태 관리
@@ -711,7 +711,7 @@ class View3D extends AView {
             }
         });
         // 이전 텍스처 참조 업데이트
-        this.#prevIBL_iblTexture = ibl_iblTexture;
+        this.#prevIBL_prefilterTexture = ibl_prefilterTexture;
         this.#prevIBL_irradianceTexture = ibl_irradianceTexture;
     }
 

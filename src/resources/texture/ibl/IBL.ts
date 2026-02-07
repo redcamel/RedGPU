@@ -121,7 +121,7 @@ class IBL {
 	/** [KO] 환경맵 텍스처를 반환합니다. [EN] Returns the environment texture. */
 	get environmentTexture(): IBLCubeTexture { return this.#environmentTexture; }
 	/** [KO] IBL (Specular Prefilter) 텍스처를 반환합니다. [EN] Returns the IBL (Specular Prefilter) texture. */
-	get iblTexture(): IBLCubeTexture { return this.#prefilterTexture; }
+	get prefilterTexture(): IBLCubeTexture { return this.#prefilterTexture; }
 
 	/**
 	 * [KO] 소스 큐브맵으로부터 IBL용 맵들을 생성합니다.

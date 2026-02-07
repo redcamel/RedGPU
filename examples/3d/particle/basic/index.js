@@ -34,7 +34,6 @@ RedGPU.init(
                 "../../../assets/skybox/pz.jpg", // Positive Z
                 "../../../assets/skybox/nz.jpg", // Negative Z
             ])
-        // view.iblTexture = cubeTexture
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
         const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
         const testParticleWrap = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext),

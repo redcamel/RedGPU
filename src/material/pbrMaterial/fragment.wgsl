@@ -200,7 +200,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     let u_shadowDepthTextureSize = systemUniforms.shadowDepthTextureSize;
     let u_bias = systemUniforms.bias;
 
-    let u_useIblTexture = systemUniforms.useIblTexture == 1u;
+    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != .0;
 
@@ -871,7 +871,7 @@ let attenuation = rangePart * invSquare;
     }
 
     // ---------- 간접 조명 계산 - ibl ----------
-    if (u_useIblTexture) {
+    if (u_usePrefilterTexture) {
 
         var R = (reflect(-V, N));
         let NdotV = max(dot(N, V),1e-4);
@@ -915,11 +915,11 @@ let attenuation = rangePart * invSquare;
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
         let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
         var mipLevel = roughnessParameter * iblMipmapCount;
-        var reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, R, mipLevel ).rgb;
+        var reflectedColor = textureSampleLevel( ibl_environmentTexture, prefilterTextureSampler, R, mipLevel ).rgb;
 
         // ---------- ibl (BRDF LUT 샘플링) ----------
         // NdotV와 Roughness를 좌표로 사용하여 미리 계산된 Scale(x)과 Bias(y) 값을 가져옴
-        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, iblTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
 
         // 거칠기를 고려한 각 파트별 통합 반사율 계산 (Split Sum Approximation)
         var F_IBL_dielectric = F0_dielectric * envBRDF.x + envBRDF.y;
@@ -932,14 +932,14 @@ let attenuation = rangePart * invSquare;
 
         // ---------- ibl Diffuse  ----------
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, iblTextureSampler, N,0).rgb;
+        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N,0).rgb;
         var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // ---------- ibl Diffuse Transmission ----------
         #redgpu_if useKHR_materials_diffuse_transmission
         {
             // 후면 산란을 위한 샘플링 방향 (back side)
-            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, -N, mipLevel).rgb;
+            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, -N, mipLevel).rgb;
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
             // 반사와 투과 효과 혼합
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
@@ -1019,10 +1019,10 @@ let attenuation = rangePart * invSquare;
                  let clearcoatR = reflect(-V, clearcoatNormal);
                  let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
-                 let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, iblTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
+                 let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
 
                  // 클리어코트용 BRDF LUT 샘플링
-                 let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, iblTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
+                 let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
                  
                  // 클리어코트는 보통 굴절률 1.5(F0 = 0.04) 고정으로 취급함
                  let clearcoatF0 = vec3<f32>(0.04);
@@ -1107,7 +1107,7 @@ fn calcIBLSheen(
 
     let mipLevel = sheenRoughness * iblMipmapCount;
 
-    let sheenRadiance = textureSampleLevel( ibl_irradianceTexture, iblTextureSampler, R, mipLevel ).rgb;
+    let sheenRadiance = textureSampleLevel( ibl_irradianceTexture, prefilterTextureSampler, R, mipLevel ).rgb;
 
     let sheenDFG = charlieSheenDFG(NdotV, sheenRoughness);
     let envIBL_SHEEN = sheenRadiance * sheenColor * sheenDFG;
