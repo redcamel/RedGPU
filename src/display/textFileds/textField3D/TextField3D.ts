@@ -29,7 +29,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  * [KO] geometry와 material은 고정되어 있으며 외부에서 변경할 수 없습니다.
  * [EN] Geometry and material are fixed and cannot be changed externally.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const textField = new RedGPU.Display.TextField3D(redGPUContext, "Hello RedGPU!");
  * scene.addChild(textField);
@@ -50,8 +50,8 @@ class TextField3D extends ATextField {
     #usePixelSize: boolean = false
 
     /**
-     * [KO] TextField3D 생성자
-     * [EN] TextField3D constructor
+     * [KO] 새로운 TextField3D 인스턴스를 생성합니다.
+     * [EN] Creates a new TextField3D instance.
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
@@ -86,17 +86,19 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * [KO] 월드 공간에서의 세로 크기(높이)를 반환합니다.
-     * [EN] Returns the vertical size (height) in world space.
+     * [KO] 월드 공간에서의 텍스트 세로 크기(Unit 단위)를 반환합니다.
+     * [EN] Returns the vertical size of the text in world space (Unit).
      */
     get worldSize(): number {
         return this.#worldSize;
     }
 
     /**
-     * [KO] 월드 공간에서의 세로 크기(높이)를 설정합니다.
-     * [EN] Sets the vertical size (height) in world space.
-     * @param value - [KO] 월드 크기 (Unit) [EN] World size (Unit)
+     * [KO] 월드 공간에서의 텍스트 세로 크기(Unit 단위)를 설정합니다. 가로 크기는 텍스트 길이에 따라 자동으로 조절됩니다.
+     * [EN] Sets the vertical size of the text in world space (Unit). The horizontal size is automatically adjusted based on the text length.
+     * @param value -
+     * [KO] 설정할 월드 크기
+     * [EN] World size to set
      */
     set worldSize(value: number) {
         if (this.#worldSize === value) return;
@@ -105,21 +107,28 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * [KO] 고정 크기 사용 여부를 설정합니다.
-     * [EN] Sets whether to use fixed pixel size.
+     * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 반환합니다.
+     * [EN] Returns whether to use fixed pixel size mode.
      */
     get usePixelSize(): boolean {
         return this.#usePixelSize;
     }
 
     /**
-     * [KO] 실제 렌더링된 픽셀 크기(높이)를 반환합니다.
-     * [EN] Returns the actual rendered pixel size (height).
+     * [KO] 실제 렌더링된 물리 픽셀 크기(높이)를 반환합니다.
+     * [EN] Returns the actual rendered physical pixel size (height).
      */
     get pixelSize(): number {
         return this.#nativeHeight;
     }
 
+    /**
+     * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 설정합니다. true일 경우 거리에 상관없이 렌더링된 물리 픽셀 크기로 표시됩니다.
+     * [EN] Sets whether to use fixed pixel size mode. If true, it is displayed at the rendered physical pixel size regardless of distance.
+     * @param value -
+     * [KO] 사용 여부
+     * [EN] Whether to use
+     */
     set usePixelSize(value: boolean) {
         if (this.gpuRenderInfo) {
             const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
@@ -141,19 +150,19 @@ class TextField3D extends ATextField {
         this.#updateRatios();
     }
 
+    /**
+     * [KO] 텍스처 해상도와 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
+     * [EN] Updates internal rendering ratios based on texture resolution and settings.
+     */
     #updateRatios() {
         if (this.#nativeHeight) {
             const prevX = this._renderRatioX;
             const prevY = this._renderRatioY;
 
             if (this.usePixelSize) {
-                // [KO] pixelSize 모드일 때는 worldSize를 무시하고 종횡비만 유지
-                // [EN] In pixelSize mode, ignore worldSize and maintain only the aspect ratio
                 this._renderRatioY = 1;
                 this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
             } else {
-                // [KO] worldSize가 반영된 최종 렌더링 비율 계산
-                // [EN] Calculate final rendering ratios reflecting worldSize
                 this._renderRatioY = this.#worldSize;
                 this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
             }
@@ -164,43 +173,67 @@ class TextField3D extends ATextField {
         }
     }
 
+    /**
+     * [KO] 프레임마다 텍스트 필드를 렌더링합니다.
+     * [EN] Renders the text field every frame.
+     * @param renderViewStateData -
+     * [KO] 현재 렌더링 상태 데이터
+     * [EN] Current render view state data
+     */
     render(renderViewStateData: RenderViewStateData) {
         super.render(renderViewStateData);
     }
 
     /**
-     * 텍스트가 출력되는 지오메트리입니다. Plane으로 고정됩니다.
-     * @returns {Geometry | Primitive}
+     * [KO] 텍스트가 출력되는 지오메트리를 반환합니다. Plane으로 고정됩니다.
+     * [EN] Returns the geometry where the text is displayed. Fixed with Plane.
+     * @returns
+     * [KO] 현재 지오메트리
+     * [EN] Current geometry
      */
     get geometry(): Geometry | Primitive {
         return this._geometry;
     }
 
     /**
-     * geometry는 외부에서 변경할 수 없습니다.
+     * [KO] geometry는 외부에서 변경할 수 없습니다.
+     * [EN] geometry cannot be changed externally.
+     * @param value -
+     * [KO] 설정하려는 지오메트리
+     * [EN] Geometry to set
      */
     set geometry(value: Geometry | Primitive) {
         console.error('TextField3D can not change geometry');
     }
 
     /**
-     * 텍스트에 사용되는 머티리얼입니다.
-     * @returns 머티리얼 객체
+     * [KO] 텍스처를 관리하는 내부 머티리얼을 반환합니다.
+     * [EN] Returns the internal material that manages the texture.
+     * @returns
+     * [KO] 머티리얼 객체
+     * [EN] Material object
      */
     get material() {
         return this._material;
     }
 
     /**
-     * material은 외부에서 변경할 수 없습니다.
+     * [KO] material은 외부에서 변경할 수 없습니다.
+     * [EN] material cannot be changed externally.
+     * @param value -
+     * [KO] 설정하려는 머티리얼
+     * [EN] Material to set
      */
     set material(value) {
         console.error('TextField3D can not change material');
     }
 
     /**
-     * TextField3D 전용 버텍스 셰이더 모듈을 생성합니다.
-     * @returns {GPUShaderModule}
+     * [KO] TextField3D 전용 버텍스 셰이더 모듈을 생성합니다.
+     * [EN] Creates a vertex shader module dedicated to TextField3D.
+     * @returns
+     * [KO] 생성된 GPU 셰이더 모듈
+     * [EN] Created GPU shader module
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(

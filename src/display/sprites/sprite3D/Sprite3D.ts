@@ -36,7 +36,7 @@ interface Sprite3D {
  * [KO] Mesh 클래스를 상속받아 빌보드 기능을 제공하는 클래스입니다. 빌보드는 3D 공간에 배치되지만 항상 카메라 방향을 바라보는 평면 객체로, UI 요소, 파티클, 텍스트, 아이콘 등을 3D 씬에 표시할 때 유용합니다.
  * [EN] A class that inherits from Mesh and provides billboard functionality. A billboard is a flat object placed in 3D space but always facing the camera, useful for displaying UI elements, particles, text, icons, etc., in a 3D scene.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const sprite = new RedGPU.Display.Sprite3D(redGPUContext, material);
  * scene.addChild(sprite);
@@ -44,6 +44,7 @@ interface Sprite3D {
  *
  * <iframe src="/RedGPU/examples/3d/sprite/sprite3D/"></iframe>
  *
+ * @see
  * [KO] 아래는 Sprite3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of Sprite3D.
  * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/sprite3D/)
@@ -65,7 +66,7 @@ class Sprite3D extends Mesh {
      * [KO] RedGPU 렌더링 컨텍스트
      * [EN] RedGPU rendering context
      * @param material -
-     * [KO] 스프라이트에 적용할 머티리얼 (옵션)
+     * [KO] 스프라이트에 적용할 머티리얼 (선택적)
      * [EN] Material to apply to the sprite (optional)
      * @param geometry -
      * [KO] 스프라이트의 지오메트리 (기본값: 새로운 Plane 인스턴스)
@@ -82,17 +83,19 @@ class Sprite3D extends Mesh {
     }
 
     /**
-     * [KO] 월드 공간에서의 세로 크기(높이)를 반환합니다.
-     * [EN] Returns the vertical size (height) in world space.
+     * [KO] 월드 공간에서의 스프라이트 세로 크기(Unit 단위)를 반환합니다.
+     * [EN] Returns the vertical size of the sprite in world space (Unit).
      */
     get worldSize(): number {
         return this.#worldSize;
     }
 
     /**
-     * [KO] 월드 공간에서의 세로 크기(높이)를 설정합니다. 
-     * [EN] Sets the vertical size (height) in world space.
-     * @param value - [KO] 월드 크기 (Unit) [EN] World size (Unit)
+     * [KO] 월드 공간에서의 스프라이트 세로 크기(Unit 단위)를 설정합니다. 가로 크기는 텍스처의 비율에 따라 자동으로 조절됩니다.
+     * [EN] Sets the vertical size of the sprite in world space (Unit). The horizontal size is automatically adjusted based on the texture's aspect ratio.
+     * @param value -
+     * [KO] 설정할 월드 크기
+     * [EN] World size to set
      */
     set worldSize(value: number) {
         if (this.#worldSize === value) return;
@@ -101,13 +104,20 @@ class Sprite3D extends Mesh {
     }
 
     /**
-     * [KO] 고정 크기 사용 여부를 설정합니다.
-     * [EN] Sets whether to use fixed pixel size.
+     * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 반환합니다.
+     * [EN] Returns whether to use fixed pixel size mode.
      */
     get usePixelSize(): boolean {
         return this.#usePixelSize;
     }
 
+    /**
+     * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 설정합니다. true일 경우 거리에 상관없이 pixelSize에 설정된 크기로 렌더링됩니다.
+     * [EN] Sets whether to use fixed pixel size mode. If true, it is rendered at the size set in pixelSize regardless of distance.
+     * @param value -
+     * [KO] 사용 여부
+     * [EN] Whether to use
+     */
     set usePixelSize(value: boolean) {
         if (this.gpuRenderInfo) {
             const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
@@ -123,17 +133,19 @@ class Sprite3D extends Mesh {
     }
 
     /**
-     * [KO] 고정 크기 값 (px)을 반환합니다.
-     * [EN] Returns the fixed pixel size value (px).
+     * [KO] 고정 픽셀 크기 값을 반환합니다. (px 단위)
+     * [EN] Returns the fixed pixel size value (in px).
      */
     get pixelSize(): number {
         return this.#pixelSize;
     }
 
     /**
-     * [KO] 고정 크기 값 (px)을 설정합니다.
-     * [EN] Sets the fixed pixel size value (px).
-     * @param value - [KO] 픽셀 크기 [EN] Pixel size
+     * [KO] 고정 픽셀 크기 값을 설정합니다. (px 단위) usePixelSize가 true일 때만 적용됩니다.
+     * [EN] Sets the fixed pixel size value (in px). Only applied when usePixelSize is true.
+     * @param value -
+     * [KO] 설정할 픽셀 크기
+     * [EN] Pixel size to set
      */
     set pixelSize(value: number) {
         if (this.gpuRenderInfo) {
@@ -147,19 +159,19 @@ class Sprite3D extends Mesh {
         this.#pixelSize = value;
     }
 
+    /**
+     * [KO] 텍스처 비율과 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
+     * [EN] Updates internal rendering ratios based on texture ratio and settings.
+     */
     #updateRatios() {
         if (this.#nativeHeight) {
             const prevX = this._renderRatioX;
             const prevY = this._renderRatioY;
 
             if (this.usePixelSize) {
-                // [KO] pixelSize 모드일 때는 worldSize를 무시하고 종횡비만 유지
-                // [EN] In pixelSize mode, ignore worldSize and maintain only the aspect ratio
                 this._renderRatioY = 1;
                 this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
             } else {
-                // [KO] worldSize가 반영된 최종 렌더링 비율 계산
-                // [EN] Calculate final rendering ratios reflecting worldSize
                 this._renderRatioY = this.#worldSize;
                 this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
             }
@@ -170,6 +182,13 @@ class Sprite3D extends Mesh {
         }
     }
 
+    /**
+     * [KO] 프레임마다 스프라이트를 렌더링합니다. 텍스처 로드 완료 시 원본 해상도를 자동으로 동기화합니다.
+     * [EN] Renders the sprite every frame. Automatically syncs physical resolution when texture loading is complete.
+     * @param renderViewStateData -
+     * [KO] 현재 렌더링 상태 데이터
+     * [EN] Current render view state data
+     */
     render(renderViewStateData: RenderViewStateData) {
         if (this._material instanceof BitmapMaterial && this._material.diffuseTexture) {
             const {gpuTexture} = this._material.diffuseTexture;
@@ -181,8 +200,6 @@ class Sprite3D extends Mesh {
                     this.#nativeHeight = tH
                     
                     const prevPixelSize = this.pixelSize;
-                    // [KO] 원본 해상도를 pixelSize 기본값으로 동기화
-                    // [EN] Sync physical texture resolution to default pixelSize
                     this.pixelSize = this.pixelSize || tH;
                     this.#updateRatios();
 
@@ -196,14 +213,15 @@ class Sprite3D extends Mesh {
     }
 
     /**
-     * Sprite3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [KO] Sprite3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [EN] Creates a custom vertex shader module dedicated to Sprite3D.
      *
-     * 이 메서드는 빌보드 기능을 지원하는 전용 버텍스 셰이더를 생성합니다.
-     * 일반 메시와 달리 카메라 방향에 따라 정점 위치를 동적으로 계산하는
-     * 셰이더 로직이 포함되어 있습니다.
+     * [KO] 빌보드 기능을 지원하며 카메라 방향에 따라 정점 위치를 동적으로 계산하는 셰이더를 생성합니다.
+     * [EN] Supports billboard functionality and creates a shader that dynamically calculates vertex positions based on camera direction.
      *
-     * @returns 생성된 버텍스 셰이더 모듈 정보
-     *
+     * @returns
+     * [KO] 생성된 GPU 셰이더 모듈
+     * [EN] Created GPU shader module
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
