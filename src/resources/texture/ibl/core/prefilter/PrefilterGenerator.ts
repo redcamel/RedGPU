@@ -24,6 +24,14 @@ class PrefilterGenerator {
 	#pipeline: GPUComputePipeline;
 	#shaderModule: GPUShaderModule;
 
+    /**
+     * [KO] PrefilterGenerator 인스턴스를 생성합니다.
+     * [EN] Creates a PrefilterGenerator instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
 		this.#sampler = new Sampler(this.#redGPUContext, {
@@ -39,9 +47,20 @@ class PrefilterGenerator {
 	 * [KO] 소스 큐브 텍스처로부터 프리필터링된 큐브맵을 생성하여 반환합니다.
 	 * [EN] Generates and returns a pre-filtered cubemap from the source cube texture.
 	 *
-	 * @param sourceCubeTexture - [KO] 소스 환경맵 (큐브) [EN] Source environment map (Cube)
-	 * @param size - [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512) [EN] Size of one side of the generated cubemap (default: 512)
-	 * @returns [KO] 생성된 Prefilter IBLCubeTexture [EN] Generated Prefilter IBLCubeTexture
+	 * ### Example
+	 * ```typescript
+	 * const prefilteredMap = await redGPUContext.resourceManager.prefilterGenerator.generate(sourceCubeTexture, 512);
+	 * ```
+	 *
+	 * @param sourceCubeTexture -
+	 * [KO] 소스 환경맵 (큐브)
+	 * [EN] Source environment map (Cube)
+	 * @param size -
+	 * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
+	 * [EN] Size of one side of the generated cubemap (default: 512)
+	 * @returns
+	 * [KO] 생성된 Prefilter IBLCubeTexture
+	 * [EN] Generated Prefilter IBLCubeTexture
 	 */
 	async generate(sourceCubeTexture: GPUTexture, size: number = 512): Promise<IBLCubeTexture> {
 		const { gpuDevice, resourceManager } = this.#redGPUContext;

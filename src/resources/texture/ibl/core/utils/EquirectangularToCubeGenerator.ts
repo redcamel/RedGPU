@@ -21,6 +21,14 @@ class EquirectangularToCubeGenerator {
 	#pipeline: GPUComputePipeline;
 	#sampler: Sampler;
 
+    /**
+     * [KO] EquirectangularToCubeGenerator 인스턴스를 생성합니다.
+     * [EN] Creates an EquirectangularToCubeGenerator instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
 		this.#sampler = new Sampler(this.#redGPUContext, {
@@ -35,9 +43,20 @@ class EquirectangularToCubeGenerator {
 	 * [KO] 2D Equirectangular 텍스처를 큐브맵으로 변환하여 반환합니다.
 	 * [EN] Converts a 2D Equirectangular texture to a cubemap and returns it.
 	 *
-	 * @param sourceTexture - [KO] 소스 2D HDR 텍스처 [EN] Source 2D HDR texture
-	 * @param size - [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512) [EN] Size of one side of the generated cubemap (default: 512)
-	 * @returns [KO] 생성된 IBLCubeTexture [EN] Generated IBLCubeTexture
+	 * ### Example
+	 * ```typescript
+	 * const cubeMap = await redGPUContext.resourceManager.equirectangularToCubeGenerator.generate(hdrTexture, 1024);
+	 * ```
+	 *
+	 * @param sourceTexture -
+	 * [KO] 소스 2D HDR 텍스처
+	 * [EN] Source 2D HDR texture
+	 * @param size -
+	 * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
+	 * [EN] Size of one side of the generated cubemap (default: 512)
+	 * @returns
+	 * [KO] 생성된 IBLCubeTexture
+	 * [EN] Generated IBLCubeTexture
 	 */
 	async generate(sourceTexture: GPUTexture, size: number = 512): Promise<IBLCubeTexture> {
 		const { gpuDevice, resourceManager } = this.#redGPUContext;

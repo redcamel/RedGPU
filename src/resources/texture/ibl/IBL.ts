@@ -10,7 +10,7 @@ import {IBLCubeTexture} from "./core";
  * [KO] HDR 또는 큐브맵 이미지를 기반으로 주변광(Diffuse)과 반사광(Specular) 환경을 생성하여 사실적인 PBR 라이팅을 구현합니다.
  * [EN] Enables realistic PBR lighting by generating diffuse and specular environments based on HDR or cubemap images.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const ibl = new RedGPU.Resource.IBL(redGPUContext, 'path/to/environment.hdr');
  * view.ibl = ibl;
@@ -32,11 +32,27 @@ class IBL {
 	/**
 	 * [KO] IBL 인스턴스를 생성합니다.
 	 * [EN] Creates an IBL instance.
-	 * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-	 * @param srcInfo - [KO] 환경맵 소스 정보 (HDR URL 또는 6개 이미지 URL 배열) [EN] Environment map source information (HDR URL or array of 6 image URLs)
-	 * @param environmentSize - [KO] 환경맵 큐브 크기 (기본값: 1024) [EN] Environment map cube size (default: 1024)
-	 * @param prefilterSize - [KO] Prefilter 큐브 크기 (기본값: 512) [EN] Prefilter cube size (default: 512)
-	 * @param irradianceSize - [KO] Irradiance 큐브 크기 (기본값: 64) [EN] Irradiance cube size (default: 64)
+	 *
+	 * ### Example
+	 * ```typescript
+	 * const ibl = new RedGPU.Resource.IBL(redGPUContext, 'path/to/environment.hdr', 1024, 512, 64);
+	 * ```
+	 *
+	 * @param redGPUContext -
+	 * [KO] RedGPUContext 인스턴스
+	 * [EN] RedGPUContext instance
+	 * @param srcInfo -
+	 * [KO] 환경맵 소스 정보 (HDR URL 또는 6개 이미지 URL 배열)
+	 * [EN] Environment map source information (HDR URL or array of 6 image URLs)
+	 * @param environmentSize -
+	 * [KO] 환경맵 큐브 크기 (기본값: 1024)
+	 * [EN] Environment map cube size (default: 1024)
+	 * @param prefilterSize -
+	 * [KO] Prefilter 큐브 크기 (기본값: 512)
+	 * [EN] Prefilter cube size (default: 512)
+	 * @param irradianceSize -
+	 * [KO] Irradiance 큐브 크기 (기본값: 64)
+	 * [EN] Irradiance cube size (default: 64)
 	 */
 	constructor(
 		redGPUContext: RedGPUContext,

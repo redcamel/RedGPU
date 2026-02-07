@@ -18,6 +18,14 @@ class BRDFGenerator {
     #pipeline: GPUComputePipeline;
     #brdfLUTTexture: GPUTexture;
 
+    /**
+     * [KO] BRDFGenerator 인스턴스를 생성합니다.
+     * [EN] Creates a BRDFGenerator instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
     }
@@ -25,6 +33,11 @@ class BRDFGenerator {
 	/**
 	 * [KO] BRDF LUT 텍스처를 반환합니다.
 	 * [EN] Returns the BRDF LUT texture.
+     *
+     * ### Example
+     * ```typescript
+     * const brdfLUT = redGPUContext.resourceManager.brdfGenerator.brdfLUTTexture;
+     * ```
 	 */
 	get brdfLUTTexture(): GPUTexture {
 		if (!this.#brdfLUTTexture) {
@@ -33,6 +46,10 @@ class BRDFGenerator {
 		return this.#brdfLUTTexture;
 	}
 
+    /**
+     * [KO] BRDF LUT를 생성합니다.
+     * [EN] Generates the BRDF LUT.
+     */
 	async #generateBRDFLUT() {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const size = 512;

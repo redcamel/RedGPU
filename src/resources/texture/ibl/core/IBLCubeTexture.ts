@@ -27,6 +27,7 @@ class IBLCubeTexture extends ManagementResourceBase {
     /**
      * [KO] IBLCubeTexture 인스턴스를 생성합니다. (내부 시스템 전용)
      * [EN] Creates an IBLCubeTexture instance. (Internal system only)
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
@@ -58,7 +59,10 @@ class IBLCubeTexture extends ManagementResourceBase {
         }
     }
 
-    /** [KO] 뷰 디스크립터를 반환합니다. [EN] Returns the view descriptor. */
+    /**
+     * [KO] 뷰 디스크립터를 반환합니다.
+     * [EN] Returns the view descriptor.
+     */
     get viewDescriptor() {
         return {
             ...CubeTexture.defaultViewDescriptor,
@@ -66,37 +70,58 @@ class IBLCubeTexture extends ManagementResourceBase {
         }
     }
 
-    /** [KO] 텍스처 포맷 [EN] Texture format */
+    /**
+     * [KO] 텍스처 포맷
+     * [EN] Texture format
+     */
     get format(): GPUTextureFormat {
         return this.#format;
     }
 
-    /** [KO] 비디오 메모리 사용량(byte) [EN] Video memory usage in bytes */
+    /**
+     * [KO] 비디오 메모리 사용량(byte)
+     * [EN] Video memory usage in bytes
+     */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
 
-    /** [KO] GPUTexture 객체 [EN] GPUTexture object */
+    /**
+     * [KO] GPUTexture 객체
+     * [EN] GPUTexture object
+     */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture;
     }
 
-    /** [KO] GPUTexture 객체 설정 [EN] Sets the GPUTexture object */
+    /**
+     * [KO] GPUTexture 객체를 설정합니다.
+     * [EN] Sets the GPUTexture object.
+     */
     set gpuTexture(gpuTexture: GPUTexture) {
         this.#setGpuTexture(gpuTexture)
     }
 
-    /** [KO] 밉맵 레벨 개수 [EN] Number of mipmap levels */
+    /**
+     * [KO] 밉맵 레벨 개수
+     * [EN] Number of mipmap levels
+     */
     get mipLevelCount(): number {
         return this.#mipLevelCount;
     }
 
-    /** [KO] 밉맵 사용 여부 [EN] Whether to use mipmaps */
+    /**
+     * [KO] 밉맵 사용 여부
+     * [EN] Whether to use mipmaps
+     */
     get useMipmap(): boolean {
         return this.#useMipmap;
     }
 
-    /** [KO] 리소스를 파괴합니다. [EN] Destroys the resource. */
+    /**
+     * [KO] 리소스를 파괴합니다.
+     * [EN] Destroys the resource.
+     */
     destroy() {
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
