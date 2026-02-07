@@ -37,7 +37,25 @@ The system supports 6 basic events defined in `RedGPU.Picking.PICKING_EVENT_TYPE
 | **`OUT`** | `'out'` | Occurs when the mouse cursor leaves the object (Hover Out) |
 | **`MOVE`** | `'move'` | Occurs continuously while the mouse pointer moves over the object |
 
-## 3. Practical Example: Interactive Cube
+## 3. Detailed Event Information (PickingEvent)
+
+The object (`e`) passed to the event callback contains various pieces of information at the time of occurrence. This allows for the implementation of precise interaction logic.
+
+| Property Name | Type | Description |
+| :--- | :--- | :--- |
+| **`target`** | `Mesh` | The target object where the event occurred. |
+| **`type`** | `string` | The type of the event that occurred. |
+| **`mouseX`**, **`mouseY`** | `number` | Mouse/touch coordinates within the canvas. |
+| **`movementX`**, **`movementY`** | `number` | Mouse movement amount compared to the previous frame. |
+| **`point`** | `vec3` | Precise intersection point coordinates in world space. |
+| **`localPoint`** | `vec3` | Intersection point coordinates in the object's local space. |
+| **`localX`**, **`localY`**, **`localZ`** | `number` | Individual coordinate values in local space. |
+| **`uv`** | `vec2` | Texture coordinates (UV) at the intersection point. |
+| **`distance`** | `number` | Distance between the camera and the intersection point. |
+| **`faceIndex`** | `number` | Index of the intersected triangle (Polygon). |
+| **`altKey`**, **`ctrlKey`**, **`shiftKey`** | `boolean` | State of modifier keys when the event occurred. |
+
+## 4. Practical Example: Interactive Cube
 
 This is an interactive example where the size changes on mouse over, the color changes upon clicking, and coordinates can be checked during movement.
 
@@ -153,6 +171,28 @@ RedGPU.init(canvas, (redGPUContext) => {
 </pre>
 </CodePen>
 </ClientOnly>
+
+## 5. Live Examples (Interaction by Object)
+
+You can directly check the interaction behavior of various objects provided by RedGPU through the examples below.
+
+### 5.1 Mesh Interaction
+Mouse event handling example for the most basic `Mesh` object.
+<iframe src="/RedGPU/examples/3d/mouseEvent/mesh/"></iframe>
+
+### 5.2 Sprite Interaction
+Example of handling events while maintaining the billboard characteristics of `Sprite3D` and `SpriteSheet3D` objects.
+<iframe src="/RedGPU/examples/3d/mouseEvent/sprite3D/"></iframe>
+<br/>
+<iframe src="/RedGPU/examples/3d/mouseEvent/spriteSheet3D/"></iframe>
+
+### 5.3 Text Field Interaction
+Example of applying styles and events to a `TextField3D` object.
+<iframe src="/RedGPU/examples/3d/mouseEvent/textField3D/"></iframe>
+
+### 5.4 High-Precision Raycasting
+Example of extracting precise intersection points and face information from complex geometry.
+<iframe src="/RedGPU/examples/3d/mouseEvent/raycasting/"></iframe>
 
 ## Key Summary
 

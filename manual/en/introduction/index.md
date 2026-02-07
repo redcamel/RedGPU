@@ -9,6 +9,11 @@ const systemGraph = `
     View -->|Uses| Camera["RedGPU.Camera"]
     Scene -->|Contains| Mesh["RedGPU.Display.Mesh"]
     Mesh -->|Combines| Geo["Geometry"] & Mat["Material"]
+
+    %% Apply Custom Classes
+    class Renderer mermaid-system;
+    class View mermaid-main;
+    class Geo,Mat mermaid-component;
 `
 
 const flowGraph = `

@@ -165,6 +165,22 @@ view.setPosition('10px', '10%');
 *   **`view.pixelRectObject`**: `devicePixelRatio` 가 적용된 실제 **물리 해상도**(Physical Resolution) 입니다. 내부적인 렌더링 계산에 사용됩니다.
 :::
 
+### 3.3 뷰별 크기 변경 감지 (onResize)
+
+`redGPUContext.onResize`가 전체 캔버스의 크기 변화를 감지한다면, 개별 **View3D** 객체의 `onResize` 콜백은 해당 뷰의 크기가 변경될 때마다 호출됩니다. 
+
+뷰의 크기를 퍼센트(`%`) 단위로 설정했을 때 부모인 캔버스 크기가 변하거나, `setSize()`를 통해 직접 크기를 변경할 때 유용하게 사용할 수 있습니다.
+
+```javascript
+// 개별 뷰의 크기 변경 시 호출될 콜백 정의
+view.onResize = (event) => {
+    const { width, height } = event.screenRectObject;
+    console.log(`뷰 영역 변경: ${width}x${height}`);
+    
+    // 해당 뷰 내의 특정 UI 요소를 재배치하거나 카메라 설정을 조정합니다.
+};
+```
+
 ## 4. 디버깅 도구
 
 개발 중 객체의 상대적인 위치와 방향을 직관적으로 파악할 수 있도록 시각화 도구를 제공합니다.
@@ -208,7 +224,7 @@ miniMapView.setSize(miniMapSize, miniMapSize);
 redGPUContext.addView(miniMapView);
 
 // 3. 리사이즈 시 메인 뷰의 표시 크기를 기준으로 미니맵 위치 갱신
-redGPUContext.onResize = () => {
+redGPUContext.onResize = (event) => {
     const { width } = mainView.screenRectObject;
     miniMapView.setPosition(width - miniMapSize - 10, 10);
 };
@@ -252,7 +268,7 @@ RedGPU.init(
         miniMapView.grid = true;
         redGPUContext.addView(miniMapView);
 
-        const updateLayout = () => {
+        const updateLayout = (event) => {
             const { width } = mainView.screenRectObject;
             miniMapView.setPosition(width - miniMapSize - 10, 10);
         };

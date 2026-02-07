@@ -9,13 +9,17 @@ const iblGraph = `
     
     subgraph Outputs ["Generated Resources"]
         IBL --> Irradiance["irradianceTexture (Diffuse)"]
-        IBL --> Specular["iblTexture (Specular)"]
+        IBL --> Specular["prefilterTexture (Specular)"]
         IBL --> Environment["environmentTexture (Background)"]
     end
 
     Irradiance -->|Lighting| PBR["PBR Material"]
     Specular -->|Reflection| PBR
     Environment -->|Background| Skybox["RedGPU.Display.SkyBox"]
+
+    %% Apply Custom Classes
+    class IBL,Skybox mermaid-main;
+    class Irradiance,Specular,Environment,PBR mermaid-component;
 `
 </script>
 
@@ -32,17 +36,21 @@ RedGPU's **Image-Based Lighting** (IBL) system analyzes HDR environment maps or 
 </ClientOnly>
 
 ### 1.1 Irradiance Texture
-Acts as the basic shading and ambient light for objects, giving natural color even where there is no direct light source.
+Acts as the basic shading and ambient light for objects, giving natural color even where there is no direct light source. (**Diffuse Irradiance Map**, accessed via `irradianceTexture` property)
 
-### 1.2 IBL Texture (Specular Texture)
-Responsible for the effect of the surrounding environment being reflected on the object surface. Expresses reflections from surfaces like metal or glass in Physically Based Rendering (PBR) materials.
+### 1.2 Specular Prefilter Texture
+Responsible for the effect of the surrounding environment being reflected on the object surface. Expresses reflections from surfaces like metal or glass in Physically Based Rendering (PBR) materials. (**Specular Prefilter Map**, accessed via `prefilterTexture` property)
+
+::: tip [Automatic Light Resource Application]
+When you assign an `IBL` instance to the `view.ibl` property, the internal **Irradiance Texture** and **Specular Prefilter Texture** are automatically applied to all PBR objects rendered in that view.
+:::
 
 ### 1.3 Environment Texture
-Data that maintains the original image as a high-resolution cubemap, mainly used as a background texture for **SkyBox**.
+Data that maintains the original image as a high-resolution cubemap, mainly used as a background texture for **SkyBox**. (Accessed via `environmentTexture` property)
 
 ## 2. Implementation: Creation and Application
 
-To apply IBL, you must create the resource and then register it in the camera view (**View3D**).
+To apply IBL, you must create the resource and then register it in the **View3D**.
 
 ```javascript
 // 1. Create IBL resource (HDR file recommended)

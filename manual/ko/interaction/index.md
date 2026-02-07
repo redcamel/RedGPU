@@ -37,7 +37,25 @@ mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
 | **`OUT`** | `'out'` | 마우스 커서가 객체 밖으로 벗어날 때 발생 (Hover Out) |
 | **`MOVE`** | `'move'` | 객체 위에서 마우스 포인터가 이동할 때 지속적으로 발생 |
 
-## 3. 실습 예제: 인터렉티브 큐브
+## 3. 상세 이벤트 정보 (PickingEvent)
+
+이벤트 콜백에 전달되는 객체(`e`)는 발생 시점의 다양한 정보를 담고 있습니다. 이를 통해 정밀한 상호작용 로직을 구현할 수 있습니다.
+
+| 속성명 | 타입 | 설명 |
+| :--- | :--- | :--- |
+| **`target`** | `Mesh` | 이벤트가 발생한 대상 객체입니다. |
+| **`type`** | `string` | 발생한 이벤트의 타입입니다. |
+| **`mouseX`**, **`mouseY`** | `number` | 캔버스 내에서의 마우스/터치 좌표입니다. |
+| **`movementX`**, **`movementY`** | `number` | 이전 프레임 대비 마우스 이동량입니다. |
+| **`point`** | `vec3` | 월드 공간상의 정확한 교차 지점 좌표입니다. |
+| **`localPoint`** | `vec3` | 객체의 로컬 공간상의 교차 지점 좌표입니다. |
+| **`localX`**, **`localY`**, **`localZ`** | `number` | 로컬 공간상의 개별 좌표값입니다. |
+| **`uv`** | `vec2` | 교차 지점의 텍스처 좌표(UV)입니다. |
+| **`distance`** | `number` | 카메라와 교차 지점 사이의 거리입니다. |
+| **`faceIndex`** | `number` | 교차된 삼각형(Polygon)의 인덱스입니다. |
+| **`altKey`**, **`ctrlKey`**, **`shiftKey`** | `boolean` | 이벤트 발생 시 조합 키의 눌림 상태입니다. |
+
+## 4. 실습 예제: 인터렉티브 큐브
 
 마우스 오버 시 크기가 변하고, 클릭 시 색상이 바뀌며, 이동 시 좌표를 확인할 수 있는 인터렉티브 예제입니다.
 
@@ -153,6 +171,28 @@ RedGPU.init(canvas, (redGPUContext) => {
 </pre>
 </CodePen>
 </ClientOnly>
+
+## 5. 라이브 예제 (객체별 인터렉션)
+
+RedGPU가 제공하는 다양한 객체들의 인터렉션 동작을 아래 예제들을 통해 직접 확인할 수 있습니다.
+
+### 5.1 일반 메시 인터렉션
+가장 기본적인 `Mesh` 객체의 마우스 이벤트 처리 예제입니다.
+<iframe src="/RedGPU/examples/3d/mouseEvent/mesh/"></iframe>
+
+### 5.2 스프라이트 인터렉션
+`Sprite3D` 및 `SpriteSheet3D` 객체의 빌보드 특성을 유지하며 이벤트를 처리하는 예제입니다.
+<iframe src="/RedGPU/examples/3d/mouseEvent/sprite3D/"></iframe>
+<br/>
+<iframe src="/RedGPU/examples/3d/mouseEvent/spriteSheet3D/"></iframe>
+
+### 5.3 텍스트 필드 인터렉션
+`TextField3D` 객체에 스타일과 이벤트를 적용한 예제입니다.
+<iframe src="/RedGPU/examples/3d/mouseEvent/textField3D/"></iframe>
+
+### 5.4 고정밀 레이캐스팅 (Raycasting)
+복잡한 지오메트리에서 정밀한 충돌 지점과 면(Face) 정보를 추출하는 예제입니다.
+<iframe src="/RedGPU/examples/3d/mouseEvent/raycasting/"></iframe>
 
 ## 핵심 요약
 

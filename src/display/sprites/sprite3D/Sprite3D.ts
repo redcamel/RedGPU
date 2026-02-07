@@ -44,9 +44,14 @@ interface Sprite3D {
  *
  * <iframe src="/RedGPU/examples/3d/sprite/sprite3D/"></iframe>
  *
+ * [KO] 월드 사이즈와 픽셀 사이즈 모드를 비교하는 예제입니다.
+ * [EN] An example comparing World Size and Pixel Size modes.
+ * <iframe src="/RedGPU/examples/3d/sprite/sprite3DCompare/"></iframe>
+ *
  * @see
  * [KO] 아래는 Sprite3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of Sprite3D.
+ * @see [Sprite3D Comparison (World vs Pixel)](/RedGPU/examples/3d/sprite/sprite3DCompare/)
  * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/sprite3D/)
  *
  * @category Sprite

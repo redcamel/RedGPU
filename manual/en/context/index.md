@@ -45,9 +45,6 @@ RedGPU.init(
     (redGPUContext) => {
         // Obtain RedGPUContext instance upon successful initialization.
         console.log('RedGPUContext ready:', redGPUContext);
-
-        // Example: Create scene (context injection required)
-        const scene = new RedGPU.Display.Scene();
     },
     (failReason) => {
         // Handle initialization failure (e.g., WebGPU not supported)
@@ -74,10 +71,17 @@ RedGPU automatically detects changes in the **Layout Size** of the canvas elemen
 
 In this process, you can define an `onResize` callback to execute additional logic at the time of size change.
 
+The `onResize` callback receives an `event` object as an argument, which contains `screenRectObject` (in CSS pixels) and `pixelRectObject` (in physical pixels) information.
+
 ```javascript
 // Define callback to be called when size changes
-redGPUContext.onResize = (width, height) => {
-    console.log(`Canvas size changed: ${width}x${height}`);
+redGPUContext.onResize = (event) => {
+    const { width, height } = event.screenRectObject;
+    console.log(`Canvas size changed (CSS): ${width}x${height}`);
+    
+    const { width: pWidth, height: pHeight } = event.pixelRectObject;
+    console.log(`Canvas actual resolution: ${pWidth}x${pHeight}`);
+    
     // Perform UI repositioning or camera property adjustments.
 };
 ```
