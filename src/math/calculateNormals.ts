@@ -5,9 +5,9 @@
  * [KO] 삼각형 면 단위로 노멀을 구한 뒤 평균화 및 정규화하여 반환합니다.
  * [EN] Calculates face normals, then returns averaged and normalized vertex normals.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const normals = RedGPU.Util.calculateNormals(vertices, indices);
+ * const normals = RedGPU.math.calculateNormals(vertices, indices);
  * ```
  *
  * @param vertexArray -

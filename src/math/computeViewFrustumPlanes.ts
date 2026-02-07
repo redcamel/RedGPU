@@ -8,9 +8,9 @@ const tempMTX = mat4.create();
  * [KO] 각 평면의 방정식을 [A, B, C, D] 형태로 정규화하여 반환합니다.
  * [EN] Returns equations of each plane normalized in [A, B, C, D] format.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const planes = RedGPU.Util.computeViewFrustumPlanes(projectionMTX, cameraMTX);
+ * const planes = RedGPU.math.computeViewFrustumPlanes(projectionMTX, cameraMTX);
  * ```
  *
  * @param projectionMatrix -

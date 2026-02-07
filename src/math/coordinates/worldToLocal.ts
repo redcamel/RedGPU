@@ -7,9 +7,9 @@ const temp_vector = vec3.create();
  * [KO] 월드 좌표를 로컬 좌표로 변환합니다.
  * [EN] Converts world coordinates to local coordinates.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const localPos = RedGPU.Util.worldToLocal(mesh.modelMatrix, 10, 5, 0);
+ * const localPos = RedGPU.math.worldToLocal(mesh.modelMatrix, 10, 5, 0);
  * ```
  *
  * @param targetMatrix -

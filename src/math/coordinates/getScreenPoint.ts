@@ -11,9 +11,9 @@ const resultPosition = {x: 0, y: 0, z: 0, w: 0};
  * [KO] View3D의 카메라 및 프로젝션 정보를 바탕으로 화면 좌표로 변환합니다.
  * [EN] Converts to screen coordinates based on View3D's camera and projection.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const [px, py] = RedGPU.Util.getScreenPoint(view, mesh.modelMatrix);
+ * const [px, py] = RedGPU.math.getScreenPoint(view, mesh.modelMatrix);
  * ```
  *
  * @param view -

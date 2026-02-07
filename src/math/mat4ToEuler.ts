@@ -2,9 +2,9 @@
  * [KO] 4x4 행렬에서 오일러 각도를 추출합니다.
  * [EN] Extracts Euler angles from a 4x4 matrix.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const euler = RedGPU.Util.matToEuler(matrix, [0, 0, 0], 'XYZ');
+ * const euler = RedGPU.math.matToEuler(matrix, [0, 0, 0], 'XYZ');
  * ```
  *
  * @param mat -

@@ -2,9 +2,9 @@
  * [KO] 쿼터니언을 회전 행렬로 변환합니다.
  * [EN] Converts a quaternion to a rotation matrix.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * RedGPU.Util.quaternionToRotationMat4([0, 0, 0, 1], outMatrix);
+ * RedGPU.math.quaternionToRotationMat4([0, 0, 0, 1], outMatrix);
  * ```
  *
  * @param q -

@@ -14,9 +14,9 @@ let resultMTX;
  * [KO] View3D의 카메라 및 프로젝션 정보를 바탕으로 3D 공간의 위치를 계산합니다.
  * [EN] Calculates a position in 3D space based on View3D's camera and projection.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const worldPos = RedGPU.Util.screenToWorld(mouseX, mouseY, view);
+ * const worldPos = RedGPU.math.screenToWorld(mouseX, mouseY, view);
  * ```
  *
  * @param screenX -

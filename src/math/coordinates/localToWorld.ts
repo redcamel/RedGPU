@@ -6,9 +6,9 @@ const temp_matrix0 = mat4.create();
  * [KO] 로컬 좌표를 월드 좌표로 변환합니다.
  * [EN] Converts local coordinates to world coordinates.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const worldPos = RedGPU.Util.localToWorld(mesh.modelMatrix, 0, 1, 0);
+ * const worldPos = RedGPU.math.localToWorld(mesh.modelMatrix, 0, 1, 0);
  * ```
  *
  * @param targetMatrix -

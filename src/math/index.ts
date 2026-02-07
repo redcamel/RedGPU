@@ -1,6 +1,6 @@
 /**
- * [KO] 3D 연산에 필요한 다양한 수학 함수와 기하학적 유틸리티를 제공합니다.
- * [EN] Provides various mathematical functions and geometric utilities required for 3D operations.
+ * [KO] 3D 연산에 필요한 다양한 수학 함수, 기하학적 유틸리티 및 좌표 변환 기능을 제공합니다.
+ * [EN] Provides various mathematical functions, geometric utilities, and coordinate transformation features required for 3D operations.
  * @packageDocumentation
  */
 import calculateNormals from "./calculateNormals";
