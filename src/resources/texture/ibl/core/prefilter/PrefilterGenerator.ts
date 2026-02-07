@@ -21,7 +21,7 @@ import prefilterShaderCode from "./prefilterShaderCode.wgsl";
 class PrefilterGenerator {
 	readonly #redGPUContext: RedGPUContext;
 	#sampler: Sampler;
-	#pipeline: GPURenderPipeline;
+	#pipeline: GPUComputePipeline;
 	#shaderModule: GPUShaderModule;
 
 	constructor(redGPUContext: RedGPUContext) {
@@ -52,7 +52,7 @@ class PrefilterGenerator {
 		const prefilterGPUTexture = resourceManager.createManagedTexture({
 			size: [size, size, 6],
 			format: format,
-			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+			usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
 			dimension: '2d',
 			mipLevelCount: mipLevelCount,
 			label: `Prefilter_Map_Texture_${createUUID()}`
@@ -67,70 +67,60 @@ class PrefilterGenerator {
 		}
 
 		if (!this.#pipeline) {
-			this.#pipeline = gpuDevice.createRenderPipeline({
+			this.#pipeline = gpuDevice.createComputePipeline({
 				label: 'PREFILTER_GENERATOR_PIPELINE',
 				layout: 'auto',
-				vertex: {
+				compute: {
 					module: this.#shaderModule,
-					entryPoint: 'vs_main'
-				},
-				fragment: {
-					module: this.#shaderModule,
-					entryPoint: 'fs_main',
-					targets: [{ format }]
+					entryPoint: 'cs_main'
 				},
 			});
 		}
 
-		// 3. 밉맵 레벨별, 6개 면 렌더링
+		// 3. 밉맵 레벨별 연산 (6개 면 포함)
 		const commandEncoder = gpuDevice.createCommandEncoder({ label: 'Prefilter_Generator_Command_Encoder' });
 		const faceMatrices = this.#getCubeMapFaceMatrices();
 		const uniformBuffers: GPUBuffer[] = [];
 
 		for (let mip = 0; mip < mipLevelCount; mip++) {
+			const mipSize = Math.max(1, size >> mip);
 			const roughness = mip / (mipLevelCount - 1);
 			
-			for (let face = 0; face < 6; face++) {
-				const uniformData = new Float32Array(20); // mat4x4 (16) + float (1) + padding (3)
-				uniformData.set(faceMatrices[face], 0);
-				uniformData[16] = roughness;
+			const uniformData = new Float32Array(16 * 6 + 4); // faceMatrices(16*6) + roughness(1) + padding(3)
+			faceMatrices.forEach((m, i) => uniformData.set(m, i * 16));
+			uniformData[16 * 6] = roughness;
 
-				const uniformBuffer = gpuDevice.createBuffer({
-					size: uniformData.byteLength,
-					usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-				});
-				gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformData);
-				uniformBuffers.push(uniformBuffer);
+			const uniformBuffer = gpuDevice.createBuffer({
+				size: uniformData.byteLength,
+				usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+			});
+			gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformData);
+			uniformBuffers.push(uniformBuffer);
 
-				const bindGroup = gpuDevice.createBindGroup({
-					layout: this.#pipeline.getBindGroupLayout(0),
-					entries: [
-						{ binding: 0, resource: sourceCubeTexture.createView({ dimension: 'cube' }) },
-						{ binding: 1, resource: this.#sampler.gpuSampler },
-						{ binding: 2, resource: { buffer: uniformBuffer } }
-					]
-				});
-
-				const renderPass = commandEncoder.beginRenderPass({
-					colorAttachments: [{
-						view: prefilterGPUTexture.createView({
-							dimension: '2d',
+			const bindGroup = gpuDevice.createBindGroup({
+				layout: this.#pipeline.getBindGroupLayout(0),
+				entries: [
+					{ binding: 0, resource: sourceCubeTexture.createView({ dimension: 'cube' }) },
+					{ binding: 1, resource: this.#sampler.gpuSampler },
+					{ 
+						binding: 2, 
+						resource: prefilterGPUTexture.createView({ 
+							dimension: '2d-array',
 							baseMipLevel: mip,
-							mipLevelCount: 1,
-							baseArrayLayer: face,
-							arrayLayerCount: 1
-						}),
-						clearValue: { r: 0, g: 0, b: 0, a: 1 },
-						loadOp: GPU_LOAD_OP.CLEAR,
-						storeOp: GPU_STORE_OP.STORE
-					}]
-				});
+							mipLevelCount: 1
+						}) 
+					},
+					{ binding: 3, resource: { buffer: uniformBuffer } }
+				]
+			});
 
-				renderPass.setPipeline(this.#pipeline);
-				renderPass.setBindGroup(0, bindGroup);
-				renderPass.draw(6, 1, 0, 0);
-				renderPass.end();
-			}
+			const computePass = commandEncoder.beginComputePass({
+				label: `Prefilter_mip_${mip}_compute_pass`
+			});
+			computePass.setPipeline(this.#pipeline);
+			computePass.setBindGroup(0, bindGroup);
+			computePass.dispatchWorkgroups(Math.ceil(mipSize / 8), Math.ceil(mipSize / 8), 6);
+			computePass.end();
 		}
 
 		gpuDevice.queue.submit([commandEncoder.finish()]);

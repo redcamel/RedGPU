@@ -1,33 +1,15 @@
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) texCoord: vec2<f32>,
-}
-
-@vertex fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
-    var pos = array<vec2<f32>, 6>(
-        vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>(-1.0,  1.0),
-        vec2<f32>(-1.0,  1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0)
-    );
-
-    var texCoord = array<vec2<f32>, 6>(
-        vec2<f32>(0.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(0.0, 0.0),
-        vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0), vec2<f32>(1.0, 0.0)
-    );
-
-    var output: VertexOutput;
-    output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
-    output.texCoord = texCoord[vertexIndex];
-    return output;
-}
+// [KO] Prefilter 생성 컴퓨트 쉐이더
+// [EN] Prefilter generation compute shader
 
 @group(0) @binding(0) var environmentTexture: texture_cube<f32>;
 @group(0) @binding(1) var textureSampler: sampler;
+@group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
 
 struct PrefilterUniforms {
-    faceMatrix: mat4x4<f32>,
+    faceMatrices: array<mat4x4<f32>, 6>,
     roughness: f32,
 }
-@group(0) @binding(2) var<uniform> uniforms: PrefilterUniforms;
+@group(0) @binding(3) var<uniform> uniforms: PrefilterUniforms;
 
 const PI: f32 = 3.14159265359;
 
@@ -45,6 +27,14 @@ fn hammersley(i: u32, n: u32) -> vec2<f32> {
     return vec2<f32>(f32(i) / f32(n), radicalInverse_VdC(i));
 }
 
+fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
+    let a = roughness * roughness;
+    let a2 = a * a;
+    let NdotH2 = NdotH * NdotH;
+    let denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    return a2 / (PI * denom * denom);
+}
+
 fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32> {
     let a = roughness * roughness;
     let phi = 2.0 * PI * xi.x;
@@ -60,12 +50,23 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     return normalize(tangent * H.x + bitangent * H.y + N * H.z);
 }
 
-@fragment fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    let x = input.texCoord.x * 2.0 - 1.0;
-    let y = input.texCoord.y * 2.0 - 1.0;
+@compute @workgroup_size(8, 8, 1)
+fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let size = textureDimensions(outTexture);
+    if (global_id.x >= size.x || global_id.y >= size.y || global_id.z >= 6u) {
+        return;
+    }
+
+    let face = global_id.z;
+    // 하프 픽셀 보정 및 정규화된 UV 좌표 (0.0 ~ 1.0)
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
+    
+    // UV를 로컬 좌표 (-1.0 ~ 1.0)로 변환
+    let x = uv.x * 2.0 - 1.0;
+    let y = uv.y * 2.0 - 1.0;
 
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
-    let N = normalize((uniforms.faceMatrix * localPos).xyz);
+    let N = normalize((uniforms.faceMatrices[face] * localPos).xyz);
     
     let R = N;
     let V = R;
@@ -75,6 +76,9 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     var totalWeight = 0.0;
     let numSamples = 1024u;
     
+    // NdotV가 0이 되는 것을 방지
+    let NdotV = max(dot(N, V), 0.001);
+
     let envSize = f32(textureDimensions(environmentTexture).x);
     // 밉맵 기반 노이즈 억제를 위한 상수
     let saTexel = 4.0 * PI / (6.0 * envSize * envSize);
@@ -96,8 +100,8 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
             
             // 샘플의 입체각(Solid Angle) 계산
             let saSample = 1.0 / (f32(numSamples) * pdf + 0.0001);
-            // 밉레벨 결정 (0.5는 바이어스 조절용)
-            let mipLevel = select(0.5 * log2(saSample / saTexel), 0.0, roughness == 0.0);
+            // 밉레벨 결정 (바이어스 축소: 0.5 -> 0.25)
+            let mipLevel = select(max(0.25 * log2(saSample / saTexel), 0.0), 0.0, roughness == 0.0);
 
             prefilteredColor += textureSampleLevel(environmentTexture, textureSampler, L, mipLevel).rgb * NdotL;
             totalWeight += NdotL;
@@ -105,16 +109,8 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     }
 
     if (totalWeight > 0.0) {
-        return vec4<f32>(prefilteredColor / totalWeight, 1.0);
+        textureStore(outTexture, global_id.xy, global_id.z, vec4<f32>(prefilteredColor / totalWeight, 1.0));
     } else {
-        return textureSampleLevel(environmentTexture, textureSampler, N, 0.0);
+        textureStore(outTexture, global_id.xy, global_id.z, textureSampleLevel(environmentTexture, textureSampler, N, 0.0));
     }
-}
-
-fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
-    let a = roughness * roughness;
-    let a2 = a * a;
-    let NdotH2 = NdotH * NdotH;
-    let denom = (NdotH2 * (a2 - 1.0) + 1.0);
-    return a2 / (PI * denom * denom);
 }

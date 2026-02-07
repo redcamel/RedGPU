@@ -914,7 +914,7 @@ let attenuation = rangePart * invSquare;
         #redgpu_endIf
         // ---------- ibl (roughness에 따른 mipmap 레벨 사용) ----------
         let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-        var mipLevel = roughnessParameter * (1.7 - 0.7 * roughnessParameter) * iblMipmapCount;
+        var mipLevel = roughnessParameter * iblMipmapCount;
         var reflectedColor = textureSampleLevel( ibl_environmentTexture, iblTextureSampler, R, mipLevel ).rgb;
 
         // ---------- ibl (BRDF LUT 샘플링) ----------

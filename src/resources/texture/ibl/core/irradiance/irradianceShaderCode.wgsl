@@ -1,29 +1,10 @@
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) texCoord: vec2<f32>,
-}
-
-@vertex fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
-     var pos = array<vec2<f32>, 6>(
-            vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>(-1.0,  1.0),
-            vec2<f32>(-1.0,  1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0)
-    );
-
-    // WebGPU 큐브맵 렌더링을 위한 표준 UV (Top-Left 0,0 기반)
-    var texCoord = array<vec2<f32>, 6>(
-        vec2<f32>(0.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(0.0, 0.0),
-        vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0), vec2<f32>(1.0, 0.0)
-    );
-
-    var output: VertexOutput;
-    output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
-    output.texCoord = texCoord[vertexIndex];
-    return output;
-}
+// [KO] Irradiance 생성 컴퓨트 쉐이더
+// [EN] Irradiance generation compute shader
 
 @group(0) @binding(0) var environmentTexture: texture_cube<f32>;
 @group(0) @binding(1) var environmentSampler: sampler;
-@group(0) @binding(2) var<uniform> faceMatrix: mat4x4<f32>;
+@group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
+@group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
 const PI = 3.14159265359;
 
@@ -41,12 +22,22 @@ fn radicalInverse_VdC(bits_in: u32) -> f32 {
 fn hammersley(i: u32, n: u32) -> vec2<f32> {
     return vec2<f32>(f32(i) / f32(n), radicalInverse_VdC(i));
 }
-@fragment fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    let x = input.texCoord.x * 2.0 - 1.0;
-    let y = input.texCoord.y * 2.0 - 1.0;
+
+@compute @workgroup_size(8, 8, 1)
+fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let size = textureDimensions(outTexture);
+    if (global_id.x >= size.x || global_id.y >= size.y || global_id.z >= 6u) {
+        return;
+    }
+
+    let face = global_id.z;
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
+    
+    let x = uv.x * 2.0 - 1.0;
+    let y = uv.y * 2.0 - 1.0;
 
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
-    let normal = normalize((faceMatrix * localPos).xyz);
+    let normal = normalize((faceMatrices[face] * localPos).xyz);
 
     // Duff Orthonormal Basis
     let s = select(1.0, -1.0, normal.z < 0.0);
@@ -59,7 +50,7 @@ fn hammersley(i: u32, n: u32) -> vec2<f32> {
     var totalWeight = 0.0;
     let totalSamples = 1024u;
 
-    // 원본 환경맵의 해상도 (예: 1024x1024 가정)를 고려한 밉 선택 상수
+    // 원본 환경맵의 해상도
     let envSize = f32(textureDimensions(environmentTexture).x);
     let saTexel = 4.0 * PI / (6.0 * envSize * envSize); // 텍셀당 입체각
 
@@ -77,20 +68,16 @@ fn hammersley(i: u32, n: u32) -> vec2<f32> {
         // PDF 계산: 코사인 가중치 샘플링의 경우 cosTheta / PI
         let pdf = max(cosTheta, 0.001) / PI;
 
-        // 언리얼 스타일: 샘플의 입체각을 계산하여 적절한 LOD를 선택합니다.
-        // 이를 통해 저해상도 Irradiance 맵에서도 앨리어싱(계단 현상)을 원천 차단합니다.
         let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
-        let mipLevel = select(0.5 * log2(saSample / saTexel), 0.0, saSample <= 0.0);
+        let mipLevel = select(max(0.5 * log2(saSample / saTexel), 0.0), 0.0, saSample <= 0.0);
 
         let sampleColor = textureSampleLevel(environmentTexture, environmentSampler, worldSample, mipLevel);
 
-        // 물리적 정확도를 위해 가중치 누적 (여기서는 코사인 샘플링이므로 단순 누적 후 평균)
         irradiance += sampleColor.rgb;
         totalWeight += 1.0;
     }
 
     irradiance = irradiance / totalWeight;
 
-    // 최종 결과 반환
-    return vec4<f32>(irradiance, 1.0);
+    textureStore(outTexture, global_id.xy, global_id.z, vec4<f32>(irradiance, 1.0));
 }

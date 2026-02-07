@@ -1,28 +1,10 @@
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) texCoord: vec2<f32>,
-}
-
-@vertex fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
-    var pos = array<vec2<f32>, 6>(
-        vec2<f32>(-1.0, -1.0), vec2<f32>( 1.0, -1.0), vec2<f32>(-1.0,  1.0),
-        vec2<f32>(-1.0,  1.0), vec2<f32>( 1.0, -1.0), vec2<f32>( 1.0,  1.0)
-    );
-
-    var texCoord = array<vec2<f32>, 6>(
-        vec2<f32>(0.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(0.0, 0.0),
-        vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0), vec2<f32>(1.0, 0.0)
-    );
-
-    var output: VertexOutput;
-    output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
-    output.texCoord = texCoord[vertexIndex];
-    return output;
-}
+// [KO] Equirectangular(2D) 텍스처를 CubeMap으로 변환하는 컴퓨트 쉐이더
+// [EN] Compute shader that converts an Equirectangular (2D) texture to a CubeMap.
 
 @group(0) @binding(0) var equirectangularTexture: texture_2d<f32>;
 @group(0) @binding(1) var textureSampler: sampler;
-@group(0) @binding(2) var<uniform> faceMatrix: mat4x4<f32>;
+@group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
+@group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
 const PI: f32 = 3.14159265359;
 
@@ -33,13 +15,24 @@ fn directionToSphericalUV(dir: vec3<f32>) -> vec2<f32> {
     return vec2<f32>(0.5 - theta / (2.0 * PI), phi / PI);
 }
 
-@fragment fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-    let x = input.texCoord.x * 2.0 - 1.0;
-    let y = input.texCoord.y * 2.0 - 1.0;
+@compute @workgroup_size(8, 8, 1)
+fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let size = textureDimensions(outTexture);
+    if (global_id.x >= size.x || global_id.y >= size.y || global_id.z >= 6u) {
+        return;
+    }
+
+    let face = global_id.z;
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
+
+    let x = uv.x * 2.0 - 1.0;
+    let y = uv.y * 2.0 - 1.0;
 
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
-    let direction = (faceMatrix * localPos).xyz;
+    let direction = (faceMatrices[face] * localPos).xyz;
     
-    let uv = directionToSphericalUV(direction);
-    return textureSampleLevel(equirectangularTexture, textureSampler, uv, 0.0);
+    let sphericalUV = directionToSphericalUV(direction);
+    let color = textureSampleLevel(equirectangularTexture, textureSampler, sphericalUV, 0.0);
+    textureStore(outTexture, global_id.xy, face, color);
 }
+

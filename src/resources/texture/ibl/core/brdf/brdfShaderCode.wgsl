@@ -1,5 +1,7 @@
-// [KO] BRDF 통합 쉐이더 (DFG LUT 생성용)
-// [EN] BRDF integration shader (for DFG LUT generation)
+// [KO] BRDF 통합 컴퓨트 쉐이더 (DFG LUT 생성용)
+// [EN] BRDF integration compute shader (for DFG LUT generation)
+
+@group(0) @binding(0) var outTexture: texture_storage_2d<rgba16float, write>;
 
 const PI = 3.14159265359;
 
@@ -48,7 +50,8 @@ fn geometrySmith(N: vec3<f32>, V: vec3<f32>, L: vec3<f32>, roughness: f32) -> f3
     return ggx1 * ggx2;
 }
 
-fn integrateBRDF(NdotV: f32, roughness: f32) -> vec2<f32> {
+fn integrateBRDF(in_NdotV: f32, roughness: f32) -> vec2<f32> {
+    let NdotV = max(in_NdotV, 0.001);
     var V: vec3<f32>;
     V.x = sqrt(1.0 - NdotV * NdotV);
     V.y = 0.0;
@@ -71,7 +74,7 @@ fn integrateBRDF(NdotV: f32, roughness: f32) -> vec2<f32> {
 
         if (NdotL > 0.0) {
             let G = geometrySmith(N, V, L, roughness);
-            let G_Vis = (G * VdotH) / (NdotH * NdotV);
+            let G_Vis = (G * VdotH) / (max(NdotH * NdotV, 0.001));
             let Fc = pow(1.0 - VdotH, 5.0);
 
             A = A + (1.0 - Fc) * G_Vis;
@@ -82,32 +85,15 @@ fn integrateBRDF(NdotV: f32, roughness: f32) -> vec2<f32> {
     return vec2<f32>(A, B) / f32(sampleCount);
 }
 
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) uv: vec2<f32>,
-}
+@compute @workgroup_size(16, 16)
+fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let size = textureDimensions(outTexture);
+    if (global_id.x >= size.x || global_id.y >= size.y) {
+        return;
+    }
 
-@vertex
-fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
-    var pos = array<vec2<f32>, 6>(
-        vec2<f32>(-1.0, -1.0), vec2<f32>(1.0, -1.0), vec2<f32>(-1.0, 1.0),
-        vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, -1.0), vec2<f32>(1.0, 1.0)
-    );
-    var uv = array<vec2<f32>, 6>(
-        vec2<f32>(0.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(0.0, 0.0),
-        vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0), vec2<f32>(1.0, 0.0)
-    );
-
-    var output: VertexOutput;
-    output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
-    output.uv = uv[vertexIndex];
-    return output;
-}
-
-@fragment
-fn fs_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
-    // [KO] uv.y를 직접 roughness로 사용하여 상단(0.0)에서 하단(1.0)으로 값이 증가하도록 수정
-    // [EN] Use uv.y directly as roughness so that it increases from top (0.0) to bottom (1.0)
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
     let integratedBRDF = integrateBRDF(uv.x, uv.y);
-    return vec4<f32>(integratedBRDF, 0.0, 1.0);
+    textureStore(outTexture, global_id.xy, vec4<f32>(integratedBRDF, 0.0, 1.0));
 }
+
