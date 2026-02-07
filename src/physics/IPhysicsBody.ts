@@ -23,7 +23,7 @@ export interface IPhysicsBody {
 	 * [KO] 물리 바디의 현재 위치
 	 * [EN] Current position of the physics body
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * body.position = [0, 10, 0];
 	 * ```
@@ -34,7 +34,7 @@ export interface IPhysicsBody {
 	 * [KO] 물리 바디의 현재 회전 (쿼터니언)
 	 * [EN] Current rotation of the physics body (Quaternion)
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * body.rotation = [0, 0, 0, 1];
 	 * ```
@@ -45,7 +45,7 @@ export interface IPhysicsBody {
 	 * [KO] 물리 바디의 현재 선속도
 	 * [EN] Current linear velocity of the physics body
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * const velocity = body.velocity;
 	 * ```
@@ -56,7 +56,7 @@ export interface IPhysicsBody {
 	 * [KO] 물리 바디에 충격량(Impulse)을 적용합니다.
 	 * [EN] Applies an impulse to the physics body.
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * body.applyImpulse([0, 5, 0]);
 	 * ```

@@ -33,7 +33,7 @@ export const PHYSICS_BODY_TYPE = {
 } as const;
 
 /**
- * [KO] PHYSICS_BODY_TYPE의 값들에 대한 유니온 타입입니다.
- * [EN] Union type for the values of PHYSICS_BODY_TYPE.
+ * [KO] `PHYSICS_BODY_TYPE`의 값들에 대한 유니온 타입입니다.
+ * [EN] Union type for the values of `PHYSICS_BODY_TYPE`.
  */
 export type PhysicsBodyType = typeof PHYSICS_BODY_TYPE[keyof typeof PHYSICS_BODY_TYPE];

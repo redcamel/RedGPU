@@ -107,37 +107,55 @@ export interface IPhysicsEngine {
 	/**
 	 * [KO] 물리 엔진에서 충돌이 시작될 때 호출되는 콜백입니다.
 	 * [EN] Callback called when a collision starts in the physics engine.
-	 * @param handle1 - [KO] 첫 번째 충돌체의 핸들 [EN] Handle of the first collider
-	 * @param handle2 - [KO] 두 번째 충돌체의 핸들 [EN] Handle of the second collider
+	 * @param handle1 -
+	 * [KO] 첫 번째 충돌체의 핸들
+	 * [EN] Handle of the first collider
+	 * @param handle2 -
+	 * [KO] 두 번째 충돌체의 핸들
+	 * [EN] Handle of the second collider
 	 */
 	onCollisionStarted: (handle1: number, handle2: number) => void;
 
 	/**
 	 * [KO] 물리 엔진을 초기화합니다. (WASM 로딩 등)
 	 * [EN] Initializes the physics engine. (WASM loading, etc.)
+	 *
+	 * @returns
+	 * [KO] 초기화 완료를 보장하는 Promise
+	 * [EN] Promise that guarantees initialization completion
 	 */
 	init(): Promise<void>;
 
 	/**
 	 * [KO] 물리 시뮬레이션을 한 단계 진행합니다.
 	 * [EN] Steps the physics simulation.
-	 * @param deltaTime - [KO] 프레임 간 시간 간격 [EN] Time interval between frames
+	 * @param deltaTime -
+	 * [KO] 프레임 간 시간 간격
+	 * [EN] Time interval between frames
 	 */
 	step(deltaTime: number): void;
 
 	/**
 	 * [KO] 메쉬에 물리 바디를 생성하고 연결합니다.
 	 * [EN] Creates and attaches a physics body to a mesh.
-	 * @param mesh - [KO] 대상 메쉬 [EN] Target mesh
-	 * @param params - [KO] 바디 생성 파라미터 [EN] Body creation parameters
-	 * @returns [KO] 생성된 물리 바디 [EN] Created physics body
+	 * @param mesh -
+	 * [KO] 대상 메쉬
+	 * [EN] Target mesh
+	 * @param params -
+	 * [KO] 바디 생성 파라미터
+	 * [EN] Body creation parameters
+	 * @returns
+	 * [KO] 생성된 물리 바디
+	 * [EN] Created physics body
 	 */
 	createBody(mesh: Mesh, params: BodyParams): IPhysicsBody;
 
 	/**
 	 * [KO] 물리 바디를 제거합니다.
 	 * [EN] Removes a physics body.
-	 * @param body - [KO] 제거할 바디 [EN] Body to remove
+	 * @param body -
+	 * [KO] 제거할 바디
+	 * [EN] Body to remove
 	 */
 	removeBody(body: IPhysicsBody): void;
 
@@ -145,7 +163,7 @@ export interface IPhysicsEngine {
 	 * [KO] 중력을 설정하거나 가져옵니다.
 	 * [EN] Sets or gets the gravity.
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 	 * ```
@@ -156,8 +174,12 @@ export interface IPhysicsEngine {
 	 * [KO] 캐릭터 컨트롤러를 생성합니다.
 	 * [EN] Creates a character controller.
 	 *
-	 * @param offset - [KO] 지면과의 간격 [EN] Offset from the ground
-	 * @returns [KO] Rapier 캐릭터 컨트롤러 인스턴스 [EN] Rapier character controller instance
+	 * @param offset -
+	 * [KO] 지면과의 간격
+	 * [EN] Offset from the ground
+	 * @returns
+	 * [KO] 캐릭터 컨트롤러 인스턴스
+	 * [EN] Character controller instance
 	 */
 	createCharacterController(offset: number): any;
 }

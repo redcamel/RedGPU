@@ -38,7 +38,7 @@ export const PHYSICS_SHAPE = {
 } as const;
 
 /**
- * [KO] PHYSICS_SHAPE의 값들에 대한 유니온 타입입니다.
- * [EN] Union type for the values of PHYSICS_SHAPE.
+ * [KO] `PHYSICS_SHAPE`의 값들에 대한 유니온 타입입니다.
+ * [EN] Union type for the values of `PHYSICS_SHAPE`.
  */
 export type PhysicsShape = typeof PHYSICS_SHAPE[keyof typeof PHYSICS_SHAPE];
