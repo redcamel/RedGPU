@@ -292,18 +292,8 @@ interface PBRMaterial {
  * [KO] PBR(Physically Based Rendering) 머티리얼 클래스입니다.
  * [EN] PBR (Physically Based Rendering) material class.
  *
- * [KO] ABitmapBaseMaterial을 상속받아 물리 기반 렌더링을 위한 머티리얼을 생성합니다. 
- * [KO] GLTF 2.0 표준 확장(Clearcoat, Sheen, Transmission, Iridescence 등)을 지원하며, 텍스처 패킹을 통해 렌더링 성능을 최적화합니다.
- * [EN] Inherits from ABitmapBaseMaterial to create a material for physically based rendering.
- * [EN] Supports GLTF 2.0 standard extensions (Clearcoat, Sheen, Transmission, Iridescence, etc.) and optimizes rendering performance through texture packing.
- * 
- * ### Example
- * ```typescript
- * const material = new RedGPU.Material.PBRMaterial(redGPUContext);
- * material.baseColorTexture = baseColorTexture;
- * material.metallicFactor = 1.0;
- * material.roughnessFactor = 0.5;
- * ```
+ * [KO] ABitmapBaseMaterial을 상속받아 PBR 렌더링을 위한 머티리얼을 생성합니다.
+ * [EN] Inherits from ABitmapBaseMaterial to create a material for PBR rendering.
  * @category Material
  */
 class PBRMaterial extends ABitmapBaseMaterial {
@@ -316,8 +306,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
     #packedKHR_clearcoatTexture_transmission: PackedTexture
 
     /**
-     * [KO] PBRMaterial 인스턴스를 생성합니다.
-     * [EN] Creates a PBRMaterial instance.
+     * [KO] PBRMaterial 생성자
+     * [EN] PBRMaterial constructor
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
@@ -347,32 +337,32 @@ class PBRMaterial extends ABitmapBaseMaterial {
     }
 
     /**
-     * [KO] Clearcoat 및 Transmission 정보가 통합된 패킹 텍스처를 반환합니다.
-     * [EN] Returns the packed texture integrated with Clearcoat and Transmission information.
+     * [KO] Clearcoat 및 Transmission 패킹 텍스처 반환
+     * [EN] Returns packed texture for Clearcoat and Transmission
      */
     get packedKHR_clearcoatTexture_transmission(): PackedTexture {
         return this.#packedKHR_clearcoatTexture_transmission;
     }
 
     /**
-     * [KO] Iridescence(무지개빛) 정보가 포함된 패킹 텍스처를 반환합니다.
-     * [EN] Returns the packed texture containing Iridescence information.
+     * [KO] Iridescence 패킹 텍스처 반환
+     * [EN] Returns packed texture for Iridescence
      */
     get packedKHR_iridescence(): PackedTexture {
         return this.#packedKHR_iridescence;
     }
 
     /**
-     * [KO] ORM(Occlusion, Roughness, Metallic) 정보가 포함된 패킹 텍스처를 반환합니다.
-     * [EN] Returns the packed texture containing ORM (Occlusion, Roughness, Metallic) information.
+     * [KO] ORM(Occlusion, Roughness, Metallic) 패킹 텍스처 반환
+     * [EN] Returns packed texture for ORM (Occlusion, Roughness, Metallic)
      */
     get packedORMTexture(): PackedTexture {
         return this.#packedORMTexture;
     }
 
     /**
-     * [KO] Sheen(광택) 정보가 포함된 패킹 텍스처를 반환합니다.
-     * [EN] Returns the packed texture containing Sheen information.
+     * [KO] Sheen 패킹 텍스처 반환
+     * [EN] Returns packed texture for Sheen
      */
     get packedKHR_sheen(): PackedTexture {
         return this.#packedKHR_sheen;
@@ -382,8 +372,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
     // 	return this.#packedKHR_transmission;
     // }
     /**
-     * [KO] Diffuse Transmission 정보가 포함된 패킹 텍스처를 반환합니다.
-     * [EN] Returns the packed texture containing Diffuse Transmission information.
+     * [KO] Diffuse Transmission 패킹 텍스처 반환
+     * [EN] Returns packed texture for Diffuse Transmission
      */
     get packedKHR_diffuse_transmission(): PackedTexture {
         return this.#packedKHR_diffuse_transmission;
@@ -393,8 +383,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
     // 	return this.#packedKHR_clearcoatTexture;
     // }
     /**
-     * [KO] ORM(Occlusion, Roughness, Metallic) 텍스처 패킹을 설정합니다.
-     * [EN] Sets up ORM (Occlusion, Roughness, Metallic) texture packing.
+     * [KO] ORM(Occlusion, Roughness, Metallic) 텍스처 패킹 설정
+     * [EN] Setup ORM (Occlusion, Roughness, Metallic) texture packing
      */
     async setupPackORMTexture() {
         if(!(this.occlusionTexture || this.metallicRoughnessTexture)){
@@ -424,8 +414,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
     }
 
     /**
-     * [KO] Clearcoat 및 Transmission 텍스처 패킹을 설정합니다.
-     * [EN] Sets up Clearcoat and Transmission texture packing.
+     * [KO] Clearcoat 및 Transmission 텍스처 패킹 설정
+     * [EN] Setup Clearcoat and Transmission texture packing
      */
     async setupPackedKHR_clearcoatTexture_transmission() {
         // if(!this.useKHR_materials_clearcoat && !this.useKHR_materials_transmission){
@@ -511,8 +501,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
     // 	)
     // }
     /**
-     * [KO] Diffuse Transmission 텍스처 패킹을 설정합니다.
-     * [EN] Sets up Diffuse Transmission texture packing.
+     * [KO] Diffuse Transmission 텍스처 패킹 설정
+     * [EN] Setup Diffuse Transmission texture packing
      */
     async setupPackedKHR_diffuse_transmission() {
         if(!(this.KHR_diffuseTransmissionColorTexture || this.KHR_diffuseTransmissionTexture)){
@@ -543,8 +533,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
     }
 
     /**
-     * [KO] Sheen 텍스처 패킹을 설정합니다.
-     * [EN] Sets up Sheen texture packing.
+     * [KO] Sheen 텍스처 패킹 설정
+     * [EN] Setup Sheen texture packing
      */
     async setupPackedKHR_sheen() {
         if(!(this.KHR_sheenColorTexture || this.KHR_sheenRoughnessTexture)){
@@ -575,8 +565,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
     }
 
     /**
-     * [KO] Iridescence 텍스처 패킹을 설정합니다.
-     * [EN] Sets up Iridescence texture packing.
+     * [KO] Iridescence 텍스처 패킹 설정
+     * [EN] Setup Iridescence texture packing
      */
     async setupPackedKHR_iridescence() {
         if(!(this.KHR_iridescenceTexture || this.KHR_iridescenceThicknessTexture)){

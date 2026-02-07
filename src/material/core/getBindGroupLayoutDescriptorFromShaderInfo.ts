@@ -1,12 +1,3 @@
-/**
- * [KO] 셰이더 정보를 분석하여 GPUBindGroupLayoutEntry 리스트를 포함하는 디스크립터를 생성합니다. (내부 유틸리티)
- * [EN] Analyzes shader information to generate a descriptor containing GPUBindGroupLayoutEntry list. (Internal utility)
- * @param SHADER_INFO - [KO] 분석할 셰이더 정보 [EN] Shader information to analyze
- * @param targetGroupIndex - [KO] 타겟 바인드 그룹 인덱스 [EN] Target bind group index
- * @param visibility - [KO] 셰이더 스테이지 가시성 [EN] Shader stage visibility
- * @param useMSAA - [KO] MSAA 사용 여부 (기본값: true) [EN] Whether to use MSAA (Default: true)
- * @returns [KO] 바인드 그룹 레이아웃 디스크립터 [EN] Bind group layout descriptor
- */
 const getBindGroupLayoutDescriptorFromShaderInfo = (
     SHADER_INFO,
     targetGroupIndex: number,
@@ -93,41 +84,48 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (
         entries
     }
 }
-
 /**
- * [KO] 셰이더 정보로부터 프래그먼트 스테이지용 바인드 그룹 레이아웃 디스크립터를 생성합니다.
- * [EN] Generates a bind group layout descriptor for the fragment stage from shader information.
- * @param SHADER_INFO - [KO] 셰이더 정보 [EN] Shader information
- * @param targetGroupIndex - [KO] 타겟 그룹 인덱스 [EN] Target group index
- * @returns [KO] 바인드 그룹 레이아웃 디스크립터 [EN] Bind group layout descriptor
+ * [KO] 셰이더 정보로부터 프래그먼트 바인드 그룹 레이아웃 디스크립터를 생성합니다.
+ * [EN] Generates a fragment bind group layout descriptor from shader information.
+ * @param SHADER_INFO -
+ * [KO] 셰이더 정보
+ * [EN] Shader information
+ * @param targetGroupIndex -
+ * [KO] 타겟 그룹 인덱스
+ * [EN] Target group index
  */
 const getFragmentBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number) => {
     return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.FRAGMENT)
 }
-
 /**
- * [KO] 셰이더 정보로부터 버텍스 스테이지용 바인드 그룹 레이아웃 디스크립터를 생성합니다.
- * [EN] Generates a bind group layout descriptor for the vertex stage from shader information.
- * @param SHADER_INFO - [KO] 셰이더 정보 [EN] Shader information
- * @param targetGroupIndex - [KO] 타겟 그룹 인덱스 [EN] Target group index
- * @returns [KO] 바인드 그룹 레이아웃 디스크립터 [EN] Bind group layout descriptor
+ * [KO] 셰이더 정보로부터 버텍스 바인드 그룹 레이아웃 디스크립터를 생성합니다.
+ * [EN] Generates a vertex bind group layout descriptor from shader information.
+ * @param SHADER_INFO -
+ * [KO] 셰이더 정보
+ * [EN] Shader information
+ * @param targetGroupIndex -
+ * [KO] 타겟 그룹 인덱스
+ * [EN] Target group index
  */
 const getVertexBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number) => {
     return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.VERTEX)
 }
-
 /**
- * [KO] 셰이더 정보로부터 컴퓨트 스테이지용 바인드 그룹 레이아웃 디스크립터를 생성합니다.
- * [EN] Generates a bind group layout descriptor for the compute stage from shader information.
- * @param SHADER_INFO - [KO] 셰이더 정보 [EN] Shader information
- * @param targetGroupIndex - [KO] 타겟 그룹 인덱스 [EN] Target group index
- * @param useMSAA - [KO] MSAA 사용 여부 [EN] Whether to use MSAA
- * @returns [KO] 바인드 그룹 레이아웃 디스크립터 [EN] Bind group layout descriptor
+ * [KO] 셰이더 정보로부터 컴퓨트 바인드 그룹 레이아웃 디스크립터를 생성합니다.
+ * [EN] Generates a compute bind group layout descriptor from shader information.
+ * @param SHADER_INFO -
+ * [KO] 셰이더 정보
+ * [EN] Shader information
+ * @param targetGroupIndex -
+ * [KO] 타겟 그룹 인덱스
+ * [EN] Target group index
+ * @param useMSAA -
+ * [KO] MSAA 사용 여부
+ * [EN] Whether to use MSAA
  */
 const getComputeBindGroupLayoutDescriptorFromShaderInfo = (SHADER_INFO, targetGroupIndex: number, useMSAA: boolean) => {
     return getBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex, GPUShaderStage.COMPUTE, useMSAA)
 }
-
 export {
     getFragmentBindGroupLayoutDescriptorFromShaderInfo,
     getVertexBindGroupLayoutDescriptorFromShaderInfo,

@@ -7,14 +7,21 @@ import fragmentModuleSource from './fragment.wgsl'
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
+interface ColorMaterial {
+    /**
+     * [KO] 머티리얼의 단색 컬러(ColorRGB)
+     * [EN] Monochromatic color of material (ColorRGB)
+     */
+    color: ColorRGB
+}
+
 /**
  * [KO] 단색(솔리드 컬러) 렌더링을 위한 머티리얼 클래스입니다.
  * [EN] Material class for solid color rendering.
  *
  * [KO] ColorRGB 기반의 색상 지정이 가능하며, GPU 파이프라인에서 단일 색상으로 오브젝트를 렌더링할 때 사용합니다.
  * [EN] It allows color specification based on ColorRGB and is used when rendering objects with a single color in the GPU pipeline.
- *
- * ### Example
+ * * ### Example
  * ```typescript
  * const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
  * ```
@@ -25,20 +32,14 @@ const SHADER_INFO = parseWGSL(fragmentModuleSource)
  */
 class ColorMaterial extends ABaseMaterial {
     /**
-     * [KO] 머티리얼의 단색 컬러(ColorRGB)를 설정하거나 반환합니다.
-     * [EN] Sets or returns the monochromatic color of the material (ColorRGB).
-     */
-    color: ColorRGB
-
-    /**
-     * [KO] ColorMaterial 인스턴스를 생성합니다.
-     * [EN] Creates a ColorMaterial instance.
+     * [KO] ColorMaterial 생성자
+     * [EN] ColorMaterial constructor
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param color -
-     * [KO] 초기 색상 (HEX 문자열 또는 컬러 코드, 기본값: '#fff')
-     * [EN] Initial color (HEX string or color code, default: '#fff')
+     * [KO] HEX 문자열 또는 컬러 코드(기본값: '#fff')
+     * [EN] HEX string or color code (default: '#fff')
      */
     constructor(redGPUContext: RedGPUContext, color: string = '#fff') {
         super(

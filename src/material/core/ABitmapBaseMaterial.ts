@@ -22,8 +22,8 @@ abstract class ABitmapBaseMaterial extends ABaseMaterial {
     __packingList: any[]
 
     /**
-     * [KO] ABitmapBaseMaterial 인스턴스를 생성합니다.
-     * [EN] Creates an ABitmapBaseMaterial instance.
+     * [KO] ABitmapBaseMaterial 생성자
+     * [EN] ABitmapBaseMaterial constructor
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
@@ -47,13 +47,13 @@ abstract class ABitmapBaseMaterial extends ABaseMaterial {
     }
 
     /**
-     * [KO] 텍스처 객체 변경 시 DirtyPipeline 리스너를 관리하고 상태를 업데이트합니다.
-     * [EN] Manages DirtyPipeline listeners and updates state when the texture object changes.
+     * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
+     * [EN] Manage texture object changes and DirtyPipeline listeners
      * @param prevTexture -
-     * [KO] 이전 텍스처 (BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
+     * [KO] 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
      * [EN] Previous texture (BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
      * @param texture -
-     * [KO] 새 텍스처 (BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
+     * [KO] 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
      * [EN] New texture (BitmapTexture|CubeTexture|ANoiseTexture|HDRTexture)
      */
     updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture) {
@@ -63,8 +63,8 @@ abstract class ABitmapBaseMaterial extends ABaseMaterial {
     }
 
     /**
-     * [KO] 샘플러 객체 변경 시 DirtyPipeline 리스너를 관리하고 상태를 업데이트합니다.
-     * [EN] Manages DirtyPipeline listeners and updates state when the sampler object changes.
+     * [KO] 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
+     * [EN] Manage sampler object changes and DirtyPipeline listeners
      * @param prevSampler -
      * [KO] 이전 샘플러
      * [EN] Previous sampler
@@ -79,10 +79,10 @@ abstract class ABitmapBaseMaterial extends ABaseMaterial {
     }
 
     /**
-     * [KO] 파이프라인 갱신 및 프래그먼트 상태/유니폼을 갱신합니다.
-     * [EN] Updates the pipeline and fragment state/uniforms.
-     * [KO] 내부적으로 packingList 콜백을 실행하며, 셰이더 모듈 존재 여부에 따라 적절한 갱신 메서드를 호출합니다.
-     * [EN] Internally executes packingList callbacks and calls the appropriate update method depending on the existence of the shader module.
+     * [KO] 파이프라인 갱신 및 fragmentState/유니폼 갱신
+     * [EN] Update pipeline and fragmentState/uniforms
+     * [KO] 내부적으로 packingList 콜백 실행, fragmentShaderModule 유무에 따라 _updateFragmentState 또는 initGPURenderInfos 호출
+     * [EN] Internally executes packingList callbacks, calls _updateFragmentState or initGPURenderInfos depending on the existence of fragmentShaderModule
      * @private
      */
     #updateFragmentState = () => {

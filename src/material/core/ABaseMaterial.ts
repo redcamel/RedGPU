@@ -15,6 +15,24 @@ import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
 import {keepLog} from "../../utils";
 
+interface ABaseMaterial {
+    /**
+     * [KO] 머티리얼의 불투명도(0~1)
+     * [EN] Material opacity (0~1)
+     */
+    opacity: number;
+    /**
+     * [KO] 머티리얼의 틴트 컬러(RGBA)
+     * [EN] Material tint color (RGBA)
+     */
+    tint: ColorRGBA;
+    /**
+     * [KO] 틴트 컬러 사용 여부
+     * [EN] Whether to use tint color
+     */
+    useTint: boolean;
+}
+
 /**
  * [KO] 다양한 머티리얼의 공통 기반이 되는 추상 클래스입니다.
  * [EN] Abstract class serving as a common base for various materials.
@@ -47,39 +65,73 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Whether the material is transparent
      */
     transparent: boolean = false
-    /** [KO] 컬러 블렌드 상태 객체 [EN] Color blend state object */
+    /**
+     * 컬러 블렌드 상태 객체
+     */
     readonly #blendColorState: BlendState
-    /** [KO] 알파 블렌드 상태 객체 [EN] Alpha blend state object */
+    /**
+     * 알파 블렌드 상태 객체
+     */
     readonly #blendAlphaState: BlendState
-    /** [KO] 컬러 writeMask 상태 [EN] Color writeMask state */
+    /**
+     * 컬러 writeMask 상태
+     */
     #writeMaskState: GPUFlagsConstant = GPUColorWrite.ALL
-    /** [KO] 리소스 매니저 객체 [EN] Resource manager object */
+    /**
+     * 리소스 매니저 객체
+     */
     #resourceManager: ResourceManager
-    /** [KO] 기본 GPU 샘플러 [EN] Basic GPU sampler */
+    /**
+     * 기본 GPU 샘플러
+     */
     readonly #basicGPUSampler: GPUSampler
-    /** [KO] 비트맵 텍스처가 없을 때 사용할 기본 GPUTextureView [EN] Default GPUTextureView when bitmap texture is missing */
+    /**
+     * 비트맵 텍스처가 없을 때 사용할 기본 GPUTextureView
+     */
     readonly #emptyBitmapGPUTextureView: GPUTextureView
-    /** [KO] 큐브 텍스처가 없을 때 사용할 기본 GPUTextureView [EN] Default GPUTextureView when cube texture is missing */
+    /**
+     * 큐브 텍스처가 없을 때 사용할 기본 GPUTextureView
+     */
     readonly #emptyCubeTextureView: GPUTextureView
-    /** [KO] 프래그먼트 셰이더 모듈명 [EN] Fragment shader module name */
+    /**
+     * 프래그먼트 셰이더 모듈명
+     */
     readonly #FRAGMENT_SHADER_MODULE_NAME: string
-    /** [KO] 프래그먼트 바인드 그룹 디스크립터명 [EN] Fragment bind group descriptor name */
+    /**
+     * 프래그먼트 바인드 그룹 디스크립터명
+     */
     readonly #FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME: string
-    /** [KO] 프래그먼트 바인드 그룹 레이아웃명 [EN] Fragment bind group layout name */
+    /**
+     * 프래그먼트 바인드 그룹 레이아웃명
+     */
     readonly #FRAGMENT_BIND_GROUP_LAYOUT_NAME: string
-    /** [KO] 파싱된 WGSL 셰이더 정보 [EN] Parsed WGSL shader info */
+    /**
+     * 파싱된 WGSL 셰이더 정보
+     */
     readonly #SHADER_INFO: any
-    /** [KO] 셰이더 storage 구조 정보 [EN] Shader storage structure info */
+    /**
+     * 셰이더 storage 구조 정보
+     */
     readonly #STORAGE_STRUCT: any
-    /** [KO] 셰이더 uniforms 구조 정보 [EN] Shader uniforms structure info */
+    /**
+     * 셰이더 uniforms 구조 정보
+     */
     readonly #UNIFORM_STRUCT: any
-    /** [KO] 셰이더 textures 구조 정보 [EN] Shader textures structure info */
+    /**
+     * 셰이더 textures 구조 정보
+     */
     #TEXTURE_STRUCT: any
-    /** [KO] 셰이더 samplers 구조 정보 [EN] Shader samplers structure info */
+    /**
+     * 셰이더 samplers 구조 정보
+     */
     #SAMPLER_STRUCT: any
-    /** [KO] 머티리얼 모듈명 [EN] Material module name */
+    /**
+     * 머티리얼 모듈명
+     */
     readonly #MODULE_NAME: string
-    /** [KO] 바인드 그룹 레이아웃 객체 [EN] Bind group layout object */
+    /**
+     * 바인드 그룹 레이아웃 객체
+     */
     readonly #bindGroupLayout: GPUBindGroupLayout
     /**
      * [KO] 바인드 그룹 인덱스
@@ -143,10 +195,6 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#emptyCubeTextureView = this.#resourceManager.emptyCubeTextureView
     }
 
-    /**
-     * [KO] 현재 설정된 틴트 블렌드 모드의 이름을 반환합니다.
-     * [EN] Returns the name of the currently set tint blend mode.
-     */
     get tintBlendMode(): string {
         const entry = Object.entries(TINT_BLEND_MODE).find(([, value]) => value === this.#tintBlendMode);
         if (!entry) {
@@ -155,13 +203,6 @@ abstract class ABaseMaterial extends ResourceBase {
         return entry[0]; // Return the key (e.g., "MULTIPLY")
     }
 
-    /**
-     * [KO] 틴트 블렌드 모드를 설정합니다.
-     * [EN] Sets the tint blend mode.
-     * @param value -
-     * [KO] 틴트 블렌드 모드 값 또는 이름
-     * [EN] Tint blend mode value or name
-     */
     set tintBlendMode(value: TINT_BLEND_MODE | keyof typeof TINT_BLEND_MODE) {
         const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo;
         let valueIdx: number;
@@ -179,27 +220,22 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#tintBlendMode = valueIdx;
     }
 
-    /** [KO] 머티리얼 모듈명 [EN] Material module name */
     get MODULE_NAME(): string {
         return this.#MODULE_NAME;
     }
 
-    /** [KO] 프래그먼트 셰이더 모듈명 [EN] Fragment shader module name */
     get FRAGMENT_SHADER_MODULE_NAME(): string {
         return this.#FRAGMENT_SHADER_MODULE_NAME;
     }
 
-    /** [KO] 프래그먼트 바인드 그룹 디스크립터명 [EN] Fragment bind group descriptor name */
     get FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME(): string {
         return this.#FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME;
     }
 
-    /** [KO] 셰이더 storage 구조 정보 [EN] Shader storage structure information */
     get STORAGE_STRUCT(): any {
         return this.#STORAGE_STRUCT;
     }
 
-    /** [KO] 셰이더 uniforms 구조 정보 [EN] Shader uniforms structure information */
     get UNIFORM_STRUCT(): any {
         return this.#UNIFORM_STRUCT;
     }
@@ -353,9 +389,6 @@ abstract class ABaseMaterial extends ResourceBase {
      * @param entryPoint -
      * [KO] 셰이더 엔트리포인트(기본값: 'main')
      * [EN] Shader entry point (default: 'main')
-     * @returns
-     * [KO] GPU 프래그먼트 상태 객체
-     * [EN] GPU fragment state object
      */
     getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
         return {
@@ -409,9 +442,6 @@ abstract class ABaseMaterial extends ResourceBase {
      * @param sampler -
      * [KO] Sampler 객체
      * [EN] Sampler object
-     * @returns
-     * [KO] GPU 샘플러 인스턴스
-     * [EN] GPU sampler instance
      */
     getGPUResourceSampler(sampler: Sampler) {
         return sampler?.gpuSampler || this.#basicGPUSampler
@@ -463,9 +493,6 @@ abstract class ABaseMaterial extends ResourceBase {
     /**
      * [KO] 현재 머티리얼 상태에 맞는 셰이더 바리안트 키 반환
      * [EN] Returns the shader variant key matching the current material state
-     * @returns
-     * [KO] 바리안트 키 문자열
-     * [EN] Variant key string
      */
     #findMatchingVariantKey(): string {
         const {fragmentShaderVariantConditionalBlocks} = this.gpuRenderInfo;

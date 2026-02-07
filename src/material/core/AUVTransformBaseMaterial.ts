@@ -8,7 +8,7 @@ import ABitmapBaseMaterial from "./ABitmapBaseMaterial";
  * [KO] 이 클래스는 비트맵 기반 머티리얼에서 텍스처의 이동(Offset)과 반복 배율(Scale)을 정밀하게 제어할 수 있는 API를 제공합니다.
  * [EN] This class provides an API for precisely controlling texture translation (Offset) and tiling (Scale) in bitmap-based materials.
  *
- * [KO] 모든 트랜스폼 연산은 버텍스 셰이더 단계에서 완료되어 렌더링 성능이 최적화됩니다.
+ * [KO] 모든 트랜스폼 연산은 버텍스 쉐이더 단계에서 완료되어 렌더링 성능이 최적화됩니다.
  * [EN] All transform calculations are completed at the vertex shader stage to optimize rendering performance.
  *
  * ### Example
@@ -32,8 +32,8 @@ abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
 	#textureScale: [number, number] = [1, 1];
 
 	/**
-	 * [KO] 텍스처 오프셋 (u, v)을 반환합니다.
-	 * [EN] Returns the texture offset (u, v).
+	 * [KO] 텍스처 오프셋 (u, v)
+	 * [EN] Texture offset (u, v)
 	 *
 	 * ### Example
 	 * ```typescript
@@ -44,19 +44,14 @@ abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
 		return this.#textureOffset;
 	}
 
-	/**
-	 * [KO] 텍스처 오프셋 (u, v)을 설정합니다.
-	 * [EN] Sets the texture offset (u, v).
-	 * @param value - [KO] 오프셋 값 [EN] Offset value
-	 */
 	set textureOffset(value: [number, number]) {
 		this.dirtyTextureTransform = true;
 		this.#textureOffset = value;
 	}
 
 	/**
-	 * [KO] 텍스처 스케일 (u, v)을 반환합니다.
-	 * [EN] Returns the texture scale (u, v).
+	 * [KO] 텍스처 스케일 (u, v)
+	 * [EN] Texture scale (u, v)
 	 *
 	 * ### Example
 	 * ```typescript
@@ -67,11 +62,6 @@ abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
 		return this.#textureScale;
 	}
 
-	/**
-	 * [KO] 텍스처 스케일 (u, v)을 설정합니다.
-	 * [EN] Sets the texture scale (u, v).
-	 * @param value - [KO] 스케일 값 [EN] Scale value
-	 */
 	set textureScale(value: [number, number]) {
 		this.dirtyTextureTransform = true;
 		this.#textureScale = value;
@@ -88,7 +78,7 @@ abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
 	 * [KO] 머티리얼 모듈명
 	 * [EN] Material module name
 	 * @param SHADER_INFO -
-	 * [KO] 파싱된 WGSL 셰이더 정보
+	 * [KO] 파싱된 WGSL 쉐이더 정보
 	 * [EN] Parsed WGSL shader info
 	 * @param targetGroupIndex -
 	 * [KO] 바인드 그룹 인덱스

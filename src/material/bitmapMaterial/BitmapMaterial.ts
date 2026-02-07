@@ -9,13 +9,29 @@ import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 /**
+ * [KO] 비트맵 텍스처 기반 머티리얼의 공통 속성 인터페이스
+ * [EN] Common property interface for bitmap texture-based materials
+ */
+interface BitmapMaterial {
+    /**
+     * [KO] 머티리얼에 적용할 비트맵 텍스처
+     * [EN] Bitmap texture to apply to the material
+     */
+    diffuseTexture: BitmapTexture
+    /**
+     * [KO] 비트맵 텍스처 샘플러
+     * [EN] Bitmap texture sampler
+     */
+    diffuseTextureSampler: Sampler;
+}
+
+/**
  * [KO] 비트맵 텍스처 기반의 머티리얼 클래스입니다.
  * [EN] Material class based on bitmap texture.
  *
  * [KO] BitmapTexture와 Sampler를 통해 다양한 텍스처 기반 렌더링 효과를 구현할 수 있습니다.
  * [EN] Various texture-based rendering effects can be implemented through BitmapTexture and Sampler.
- *
- * ### Example
+ * * ### Example
  * ```typescript
  * const sourceTexture = new RedGPU.Resource.BitmapTexture(
  *    redGPUContext,
@@ -29,27 +45,22 @@ const SHADER_INFO = parseWGSL(fragmentModuleSource)
  */
 class BitmapMaterial extends AUVTransformBaseMaterial {
     /**
-     * [KO] 머티리얼에 적용할 비트맵 텍스처를 설정하거나 반환합니다.
-     * [EN] Sets or returns the bitmap texture to apply to the material.
+     * [KO] 파이프라인 dirty 상태 플래그
+     * [EN] Pipeline dirty status flag
      */
-    diffuseTexture: BitmapTexture
-    /**
-     * [KO] 비트맵 텍스처의 샘플러를 설정하거나 반환합니다.
-     * [EN] Sets or returns the sampler for the bitmap texture.
-     */
-    diffuseTextureSampler: Sampler;
+    dirtyPipeline: boolean = false
 
     /**
-     * [KO] BitmapMaterial 인스턴스를 생성합니다.
-     * [EN] Creates a BitmapMaterial instance.
+     * [KO] BitmapMaterial 생성자
+     * [EN] BitmapMaterial constructor
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param diffuseTexture -
-     * [KO] 적용할 초기 비트맵 텍스처 (선택적)
-     * [EN] Initial bitmap texture to apply (optional)
+     * [KO] 적용할 비트맵 텍스처
+     * [EN] Bitmap texture to apply
      * @param name -
-     * [KO] 머티리얼 이름 (선택적)
+     * [KO] 머티리얼 이름(옵션)
      * [EN] Material name (optional)
      */
     constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
