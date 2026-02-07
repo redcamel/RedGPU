@@ -74,7 +74,7 @@ class IBL {
 
 		const onLoad = async (v: HDRTexture | CubeTexture) => {
 			v.__addDirtyPipelineListener(this.#onSourceChanged);
-			if (v.gpuTexture) await this.#onSourceChanged();
+			if (v.gpuTexture) await this.#onSourceChanged(v);
 		};
 
 		if (typeof srcInfo === 'string') {
@@ -89,10 +89,11 @@ class IBL {
 	/**
 	 * [KO] 소스 텍스처 변경 시 호출되는 핸들러입니다.
 	 * [EN] Handler called when the source texture changes.
+     * @param v - [KO] 소스 텍스처 [EN] Source texture
 	 */
-	#onSourceChanged = async () => {
-		const v = this.#targetTexture;
-		if (!v.gpuTexture || this.#isInitializing) return;
+	#onSourceChanged = async (v?: HDRTexture | CubeTexture) => {
+		v = v || this.#targetTexture;
+		if (!v || !v.gpuTexture || this.#isInitializing) return;
 
 		this.#isInitializing = true;
 		try {

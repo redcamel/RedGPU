@@ -127,9 +127,17 @@ function loadGLTF(view, url) {
  */
 const createIBL = (view, src) => {
     const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
-    const newSkybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
     view.ibl = ibl;
-    view.skybox = newSkybox;
+    
+    if (view.skybox) {
+        // [KO] 기존 스카이박스가 있으면 텍스처만 교체 (설정값 유지됨)
+        // [EN] If an existing skybox exists, only replace the texture (settings are preserved)
+        view.skybox.skyboxTexture = ibl.environmentTexture;
+    } else {
+        // [KO] 없으면 새로 생성
+        // [EN] If not, create a new one
+        view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
+    }
 };
 
 /**
@@ -148,6 +156,7 @@ const renderTestPane = async (targetView) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera)
     createSkyBoxHelper(pane, targetView);
+
     const settings = {
         hdrImage: hdrImages[0].path
     };
@@ -159,7 +168,5 @@ const renderTestPane = async (targetView) => {
         }, {})
     }).on("change", (ev) => {
         createIBL(targetView, ev.value);
-        targetView.skybox.blur = TEST_DATA.blur
-        targetView.skybox.opacity = TEST_DATA.opacity
     });
 };

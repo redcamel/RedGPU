@@ -86,7 +86,10 @@ const createTexture = (redGPUContext, option) => {
     if (option.type === 'cube') {
         return new RedGPU.Resource.CubeTexture(redGPUContext, option.paths);
     } else {
-        return new RedGPU.Resource.HDRTexture(redGPUContext, option.path);
+        // [KO] HDR은 IBL을 통해 큐브맵으로 변환된 environmentTexture를 사용해야 함
+        // [EN] HDR must use environmentTexture converted to cubemap via IBL
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, option.path);
+        return ibl.environmentTexture;
     }
 };
 
