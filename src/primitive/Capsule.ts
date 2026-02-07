@@ -10,12 +10,12 @@ import Primitive from "./core/Primitive";
  * [KO] 반지름, 실린더 높이 등을 기반으로 캡슐 형태의 정점 및 인덱스 데이터를 생성하여 관리합니다.
  * [EN] Generates and manages vertex and index data for a capsule based on radius, cylinder height, etc.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // 반지름 0.5, 실린더 높이 1, 세그먼트들을 설정하여 캡슐 생성
- * const capsule = new RedGPU.Primitive.Capsule(redGPUContext, 0.5, 1, 32, 1, 12);
+ * const capsule = new RedGPU.Capsule(redGPUContext, 0.5, 1, 32, 1, 12);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/capsule/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/capsule/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 class Capsule extends Primitive {
@@ -116,6 +116,11 @@ class Capsule extends Primitive {
      * [KO] Capsule 인스턴스를 생성합니다.
      * [EN] Creates an instance of Capsule.
      * 
+     * ### Example
+     * ```typescript
+     * const capsule = new RedGPU.Capsule(redGPUContext, 0.5, 1.0, 32, 1, 12);
+     * ```
+     *
      * @param redGPUContext - 
      * [KO] RedGPUContext 인스턴스 
      * [EN] RedGPUContext instance
