@@ -16,7 +16,7 @@ type SrcInfo = string | { src: string, cacheKey: string }
  * [KO] .hdr 파일을 로드하여 rgba16float 포맷의 2D GPUTexture를 생성합니다. 라이트맵, 투영 텍스처 또는 IBL의 원천 데이터로 사용됩니다.
  * [EN] Loads .hdr files to create a 2D GPUTexture in rgba16float format. Used as source data for lightmaps, projected textures, or IBL.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'path/to/image.hdr');
  * ```
@@ -37,10 +37,25 @@ class HDRTexture extends ManagementResourceBase {
      * [KO] HDRTexture 인스턴스를 생성합니다.
      * [EN] Creates an HDRTexture instance.
      *
-     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param src - [KO] HDR 파일 경로 또는 정보 [EN] HDR file path or information
-     * @param onLoad - [KO] 로드 완료 콜백 [EN] Load complete callback
-     * @param onError - [KO] 에러 콜백 [EN] Error callback
+     * ### Example
+     * ```typescript
+     * const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'assets/hdr/sky.hdr', (v) => {
+     *     console.log('Loaded:', v);
+     * });
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param src -
+     * [KO] HDR 파일 경로 또는 정보
+     * [EN] HDR file path or information
+     * @param onLoad -
+     * [KO] 로드 완료 콜백
+     * [EN] Load complete callback
+     * @param onError -
+     * [KO] 에러 콜백
+     * [EN] Error callback
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -81,7 +96,14 @@ class HDRTexture extends ManagementResourceBase {
     /** [KO] 텍스처 소스 경로 [EN] Texture source path */
     get src(): string { return this.#src; }
 
-    /** [KO] 텍스처 소스 경로 설정 및 로드를 시작합니다. [EN] Sets the texture source path and starts loading. */
+    /**
+     * [KO] 텍스처 소스 경로 설정 및 로드를 시작합니다.
+     * [EN] Sets the texture source path and starts loading.
+     *
+     * @param value -
+     * [KO] 설정할 소스 정보
+     * [EN] Source info to set
+     */
     set src(value: SrcInfo) {
         const newSrc = this.#getParsedSrc(value)
         this.#validateHDRFormat(newSrc);

@@ -16,7 +16,7 @@ type SrcInfo = string | { src: string, cacheKey: string }
  * [KO] Equirectangular 2D HDR 파일을 로드하여 큐브맵으로 변환하고, IBL 및 스카이박스에 최적화된 프리필터링 과정을 수행합니다.
  * [EN] Loads an Equirectangular 2D HDR file, converts it to a cubemap, and performs a pre-filtering process optimized for IBL and Skybox.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const texture = new RedGPU.Resource.HDRTextureCube(redGPUContext, 'path/to/image.hdr');
  * ```
@@ -34,11 +34,28 @@ class HDRTextureCube extends ManagementResourceBase {
 	 * [KO] HDRTextureCube 인스턴스를 생성합니다.
 	 * [EN] Creates an HDRTextureCube instance.
 	 *
-	 * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-	 * @param src - [KO] HDR 파일 경로 또는 정보 [EN] HDR file path or information
-	 * @param onLoad - [KO] 로드 및 변환 완료 콜백 [EN] Load and conversion complete callback
-	 * @param onError - [KO] 에러 콜백 [EN] Error callback
-	 * @param cubeMapSize - [KO] 생성될 큐브맵의 크기 (기본값: 1024) [EN] Size of the generated cubemap (default: 1024)
+	 * ### Example
+	 * ```typescript
+	 * const texture = new RedGPU.Resource.HDRTextureCube(redGPUContext, 'assets/hdr/sky.hdr', (v) => {
+	 *     console.log('Cube map loaded:', v);
+	 * }, null, 1024);
+	 * ```
+	 *
+	 * @param redGPUContext -
+	 * [KO] RedGPUContext 인스턴스
+	 * [EN] RedGPUContext instance
+	 * @param src -
+	 * [KO] HDR 파일 경로 또는 정보
+	 * [EN] HDR file path or information
+	 * @param onLoad -
+	 * [KO] 로드 및 변환 완료 콜백
+	 * [EN] Load and conversion complete callback
+	 * @param onError -
+	 * [KO] 에러 콜백
+	 * [EN] Error callback
+	 * @param cubeMapSize -
+	 * [KO] 생성될 큐브맵의 크기 (기본값: 1024)
+	 * [EN] Size of the generated cubemap (default: 1024)
 	 */
 	constructor(
 		redGPUContext: RedGPUContext,
@@ -69,6 +86,14 @@ class HDRTextureCube extends ManagementResourceBase {
 		}
 	}
 
+    /**
+     * [KO] 내부 리소스를 초기화하고 변환 과정을 시작합니다.
+     * [EN] Initializes internal resources and starts the conversion process.
+     *
+     * @param src -
+     * [KO] 소스 정보
+     * [EN] Source info
+     */
 	async #init(src: SrcInfo) {
 		const { resourceManager } = this.redGPUContext;
 		
@@ -97,12 +122,12 @@ class HDRTextureCube extends ManagementResourceBase {
 		);
 	}
 
-	/** [KO] GPUTexture 객체를 반환합니다. (프리필터링된 결과) [EN] Returns the GPUTexture object (pre-filtered result). */
+	/** [KO] GPUTexture 객체 (프리필터링된 결과) [EN] GPUTexture object (pre-filtered result) */
 	get gpuTexture(): GPUTexture {
 		return this.#cubeTexture?.gpuTexture;
 	}
 
-	/** [KO] 뷰 디스크립터를 반환합니다. [EN] Returns the view descriptor. */
+	/** [KO] 뷰 디스크립터 [EN] View descriptor */
 	get viewDescriptor() {
 		return {
 			...CubeTexture.defaultViewDescriptor,
@@ -110,7 +135,7 @@ class HDRTextureCube extends ManagementResourceBase {
 		};
 	}
 
-	/** [KO] 밉맵 레벨 개수를 반환합니다. [EN] Returns the number of mipmap levels. */
+	/** [KO] 밉맵 레벨 개수 [EN] Number of mipmap levels */
 	get mipLevelCount(): number {
 		return this.#cubeTexture?.mipLevelCount || 1;
 	}
@@ -120,7 +145,7 @@ class HDRTextureCube extends ManagementResourceBase {
 		return this.#cubeTexture?.videoMemorySize || 0;
 	}
 
-	/** [KO] 텍스처 소스 경로를 반환합니다. [EN] Returns the texture source path. */
+	/** [KO] 텍스처 소스 경로 [EN] Texture source path */
 	get src(): string {
 		return this.#src;
 	}
