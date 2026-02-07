@@ -39,6 +39,12 @@ const preprocessCache = new Map<string, PreprocessedWGSLResult>();
 /**
  * [KO] 코드 해시를 생성합니다.
  * [EN] Generates a code hash.
+ * @param code -
+ * [KO] 해시를 생성할 코드 문자열
+ * [EN] Code string to generate hash
+ * @returns
+ * [KO] 생성된 해시 문자열
+ * [EN] Generated hash string
  */
 const generateCodeHash = (code: string): string => {
     let hash = 0;
@@ -53,6 +59,12 @@ const generateCodeHash = (code: string): string => {
 /**
  * [KO] 인클루드(#redgpu_include)를 처리합니다. (재귀적 포함 지원)
  * [EN] Processes includes (#redgpu_include). (Supports recursive inclusion)
+ * @param code -
+ * [KO] 처리할 WGSL 코드
+ * [EN] WGSL code to process
+ * @returns
+ * [KO] 인클루드가 처리된 WGSL 코드
+ * [EN] WGSL code with includes processed
  */
 const processIncludes = (code: string): string => {
     let result = code;
@@ -70,6 +82,12 @@ const processIncludes = (code: string): string => {
 /**
  * [KO] 정의(REDGPU_DEFINE_*)를 처리합니다.
  * [EN] Processes defines (REDGPU_DEFINE_*).
+ * @param code -
+ * [KO] 처리할 WGSL 코드
+ * [EN] WGSL code to process
+ * @returns
+ * [KO] 정의가 처리된 WGSL 코드
+ * [EN] WGSL code with defines processed
  */
 const processDefines = (code: string): string => {
     return code.replace(definePattern, (match) =>
@@ -80,6 +98,12 @@ const processDefines = (code: string): string => {
 /**
  * [KO] 조건부 블록(#redgpu_if)을 찾아 파싱합니다. (중첩 지원)
  * [EN] Finds and parses conditional blocks (#redgpu_if). (Supports nesting)
+ * @param code -
+ * [KO] 파싱할 WGSL 코드
+ * [EN] WGSL code to parse
+ * @returns
+ * [KO] 발견된 조건부 블록 정보 배열
+ * [EN] Array of discovered conditional block information
  */
 const findConditionalBlocks = (code: string): ConditionalBlock[] => {
     const conditionalBlocks: ConditionalBlock[] = [];
@@ -148,6 +172,9 @@ const findConditionalBlocks = (code: string): ConditionalBlock[] => {
 /**
  * [KO] 중복 키 통계 및 로깅을 수행합니다.
  * [EN] Performs duplicate key statistics and logging.
+ * @param conditionalBlocks -
+ * [KO] 조건부 블록 정보 배열
+ * [EN] Array of conditional block information
  */
 const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
     if (!conditionalBlocks.length) return;

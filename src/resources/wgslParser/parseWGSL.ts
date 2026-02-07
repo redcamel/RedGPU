@@ -6,6 +6,18 @@ import WGSLUniformTypes from "./core/WGSLUniformTypes";
 /**
  * [KO] 개별 유니폼 멤버 정보를 생성합니다.
  * [EN] Creates individual uniform member information.
+ * @param curr -
+ * [KO] 현재 멤버 정보
+ * [EN] Current member information
+ * @param start -
+ * [KO] 시작 오프셋
+ * [EN] Start offset
+ * @param typeName -
+ * [KO] 타입 이름
+ * [EN] Type name
+ * @returns
+ * [KO] 가공된 유니폼 멤버 정보
+ * [EN] Processed uniform member information
  */
 const createUniformMember = (curr, start, typeName) => {
     const UniformTypeInfo = WGSLUniformTypes[typeName];
@@ -22,6 +34,18 @@ const createUniformMember = (curr, start, typeName) => {
 /**
  * [KO] 구조체 멤버들을 재귀적으로 처리합니다.
  * [EN] Recursively processes struct members.
+ * @param members -
+ * [KO] 구조체 멤버 배열
+ * [EN] Struct members array
+ * @param start -
+ * [KO] 시작 오프셋 (기본값: 0)
+ * [EN] Start offset (default: 0)
+ * @param end -
+ * [KO] 종료 오프셋 (기본값: 0)
+ * [EN] End offset (default: 0)
+ * @returns
+ * [KO] 처리된 멤버 맵과 오프셋 정보
+ * [EN] Processed members map and offset information
  */
 const processMembers = (members, start = 0, end = 0) => {
     let startOffset = 0;
@@ -58,6 +82,12 @@ const processMembers = (members, start = 0, end = 0) => {
 /**
  * [KO] 유니폼 정보 배열을 처리하여 맵으로 반환합니다.
  * [EN] Processes an array of uniform information and returns it as a map.
+ * @param uniforms -
+ * [KO] 유니폼 배열
+ * [EN] Uniforms array
+ * @returns
+ * [KO] 가공된 유니폼 정보 맵
+ * [EN] Processed uniform information map
  */
 const processUniforms = (uniforms) => {
     return uniforms.reduce((prev, curr) => {
@@ -75,6 +105,12 @@ const processUniforms = (uniforms) => {
 /**
  * [KO] 스토리지 정보 배열을 처리하여 맵으로 반환합니다.
  * [EN] Processes an array of storage information and returns it as a map.
+ * @param storage -
+ * [KO] 스토리지 배열
+ * [EN] Storage array
+ * @returns
+ * [KO] 가공된 스토리지 정보 맵
+ * [EN] Processed storage information map
  */
 const processStorages = (storage) => {
     return storage.reduce((prev, curr) => {
