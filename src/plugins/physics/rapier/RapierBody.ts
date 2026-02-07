@@ -5,8 +5,8 @@ import { IPhysicsBody } from '../../../physics/IPhysicsBody';
 import mat4ToEuler from '../../../math/mat4ToEuler';
 
 /**
- * [KO] Rapier 물리 엔진을 위한 IPhysicsBody 구현체입니다.
- * [EN] IPhysicsBody implementation for the Rapier physics engine.
+ * [KO] Rapier 물리 엔진을 위한 `IPhysicsBody` 구현체입니다.
+ * [EN] `IPhysicsBody` implementation for the Rapier physics engine.
  *
  * [KO] Rapier의 RigidBody와 RedGPU의 Mesh 사이에서 트랜스폼 정보를 동기화하고 제어하는 역할을 합니다.
  * [EN] It synchronizes and controls transform information between Rapier's RigidBody and RedGPU's Mesh.
@@ -19,8 +19,9 @@ export class RapierBody implements IPhysicsBody {
 	#mesh: Mesh;
 
 	/**
-	 * [KO] RapierBody 생성자
-	 * [EN] RapierBody constructor
+	 * [KO] RapierBody 인스턴스를 생성합니다.
+	 * [EN] Creates a RapierBody instance.
+	 *
 	 * @param mesh -
 	 * [KO] 연결할 RedGPU 메쉬
 	 * [EN] RedGPU mesh to connect
@@ -115,6 +116,12 @@ export class RapierBody implements IPhysicsBody {
 	/**
 	 * [KO] 물리 바디에 충격량(Impulse)을 적용합니다.
 	 * [EN] Applies an impulse to the physics body.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * body.applyImpulse([0, 10, 0]);
+	 * ```
+	 *
 	 * @param force -
 	 * [KO] 적용할 힘의 벡터
 	 * [EN] Vector of the force to apply

@@ -7,8 +7,8 @@ import { PHYSICS_SHAPE } from '../../../physics/PhysicsShape';
 import { RapierBody } from './RapierBody';
 
 /**
- * [KO] Rapier 물리 엔진을 사용하는 RedGPU 물리 플러그인입니다.
- * [EN] RedGPU physics plugin using the Rapier physics engine.
+ * [KO] Rapier 물리 엔진을 사용하는 RedGPU 물리 플러그인 구현체입니다.
+ * [EN] RedGPU physics plugin implementation using the Rapier physics engine.
  *
  * @category Physics
  */
@@ -18,30 +18,69 @@ export class RapierPhysics implements IPhysicsEngine {
 	#eventQueue: RAPIER.EventQueue;
 
 	/**
-	 * [KO] 충돌 시작 콜백
-	 * [EN] Collision started callback
+	 * [KO] 물리 엔진에서 충돌이 시작될 때 호출되는 콜백입니다.
+	 * [EN] Callback called when a collision starts in the physics engine.
+	 *
+	 * @param handle1 -
+	 * [KO] 첫 번째 충돌체의 핸들
+	 * [EN] Handle of the first collider
+	 * @param handle2 -
+	 * [KO] 두 번째 충돌체의 핸들
+	 * [EN] Handle of the second collider
 	 */
 	onCollisionStarted: (handle1: number, handle2: number) => void;
 
+	/**
+	 * [KO] 물리 엔진의 원본 월드(World) 객체를 반환합니다.
+	 * [EN] Returns the native World object of the physics engine.
+	 */
 	get nativeWorld(): RAPIER.World { return this.#world; }
+
+	/**
+	 * [KO] Rapier 라이브러리 네임스페이스를 반환합니다.
+	 * [EN] Returns the Rapier library namespace.
+	 */
 	get RAPIER(): typeof RAPIER { return RAPIER; }
+
+	/**
+	 * [KO] 엔진에서 관리 중인 모든 RapierBody 리스트를 반환합니다.
+	 * [EN] Returns a list of all RapierBody instances managed by the engine.
+	 */
 	get bodies(): RapierBody[] { return Array.from(this.#bodies.values()); }
 
 	/**
-	 * [KO] 콜라이더 핸들을 통해 RapierBody를 반환합니다.
-	 * [EN] Returns RapierBody through the collider handle.
-	 * @param handle - [KO] 콜라이더 핸들 [EN] Collider handle
+	 * [KO] 콜라이더 핸들을 통해 관리 중인 RapierBody를 찾아서 반환합니다.
+	 * [EN] Finds and returns the managed RapierBody using its collider handle.
+	 *
+	 * @param handle -
+	 * [KO] 찾을 콜라이더의 고유 핸들
+	 * [EN] Unique handle of the collider to find
+	 * @returns
+	 * [KO] 찾은 RapierBody (없으면 undefined)
+	 * [EN] The found RapierBody (undefined if not found)
 	 */
 	getBodyByColliderHandle(handle: number): RapierBody {
 		return this.#bodies.get(handle);
 	}
 
+	/**
+	 * [KO] Rapier 엔진을 초기화하고 물리 월드를 생성합니다.
+	 * [EN] Initializes the Rapier engine and creates the physics world.
+	 */
 	async init(): Promise<void> {
 		await RAPIER.init();
 		this.#world = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
 		this.#eventQueue = new RAPIER.EventQueue(true);
 	}
 
+	/**
+	 * [KO] 물리 시뮬레이션을 진행하고 메쉬 트랜스폼을 동기화합니다.
+	 * [EN] Advances the physics simulation and synchronizes mesh transforms.
+	 *
+	 * @param deltaTime -
+	 * [KO] 프레임 간 시간 간격 (초 단위)
+	 * [EN] Time interval between frames (in seconds)
+	 */
 	step(deltaTime: number): void {
 		if (!this.#world) return;
 		this.#world.step(this.#eventQueue);
@@ -55,6 +94,20 @@ export class RapierPhysics implements IPhysicsEngine {
 		this.#bodies.forEach(body => body.syncToMesh());
 	}
 
+	/**
+	 * [KO] 특정 메쉬에 물리 바디를 생성하고 엔진에 등록합니다.
+	 * [EN] Creates a physics body for a specific mesh and registers it with the engine.
+	 *
+	 * @param mesh -
+	 * [KO] 대상 RedGPU 메쉬
+	 * [EN] Target RedGPU mesh
+	 * @param params -
+	 * [KO] 바디 생성 설정 파라미터
+	 * [EN] Parameters for body creation
+	 * @returns
+	 * [KO] 생성된 RapierBody 인스턴스
+	 * [EN] Created RapierBody instance
+	 */
 	createBody(mesh: Mesh, params: BodyParams): RapierBody {
 		const rigidBodyDesc = this.#createRigidBodyDesc(params, mesh);
 		const rigidBody = this.#world.createRigidBody(rigidBodyDesc);
@@ -121,11 +174,28 @@ export class RapierPhysics implements IPhysicsEngine {
 		}
 	}
 
+	/**
+	 * [KO] 물리 바디를 엔진에서 제거합니다.
+	 * [EN] Removes a physics body from the engine.
+	 *
+	 * @param body -
+	 * [KO] 제거할 RapierBody 인스턴스
+	 * [EN] RapierBody instance to remove
+	 */
 	removeBody(body: RapierBody): void {
 		this.#world.removeRigidBody(body.nativeBody);
 		this.#bodies.delete(body.nativeCollider.handle);
 	}
 
+	/**
+	 * [KO] 물리 월드의 중력 가속도를 설정하거나 반환합니다.
+	 * [EN] Sets or returns the gravity acceleration of the physics world.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * physics.gravity = { x: 0, y: -9.81, z: 0 };
+	 * ```
+	 */
 	get gravity(): { x: number, y: number, z: number } {
 		return this.#world.gravity;
 	}
@@ -134,6 +204,17 @@ export class RapierPhysics implements IPhysicsEngine {
 		this.#world.gravity = value;
 	}
 
+	/**
+	 * [KO] 캐릭터 컨트롤러를 생성하여 반환합니다.
+	 * [EN] Creates and returns a character controller.
+	 *
+	 * @param offset -
+	 * [KO] 캐릭터와 지면 사이의 간격
+	 * [EN] Offset between the character and the ground
+	 * @returns
+	 * [KO] Rapier 캐릭터 컨트롤러 인스턴스
+	 * [EN] Rapier character controller instance
+	 */
 	createCharacterController(offset: number): RAPIER.KinematicCharacterController {
 		const controller = this.#world.createCharacterController(offset);
 		// [KO] 기본 설정: 경사로 오르기, 계단 오르기 활성화

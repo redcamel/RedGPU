@@ -1,4 +1,4 @@
-import * as RedGPU from "./index"
+import * as RedGPU from "./indexDocPlugin"
 
 export {
     RedGPU
