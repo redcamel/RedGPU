@@ -11,7 +11,7 @@ import {keepLog} from "../utils";
  * [KO] 마우스 좌표와 카메라 정보를 기반으로 광선을 생성하고, 메시의 정밀한 삼각형 단위 충돌 검사를 수행합니다.
  * [EN] Generates a ray based on mouse coordinates and camera information, and performs precise triangle-level collision tests on meshes.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const raycaster = new RedGPU.Picking.Raycaster3D();
  * raycaster.setFromCamera(mouseX, mouseY, view);
@@ -27,15 +27,15 @@ export default class Raycaster3D {
     readonly ray: Ray;
 
     /**
-     * [KO] 교차 검사 시 고려할 최소 거리
-     * [EN] Minimum distance to consider for intersection
+     * [KO] 교차 검사 시 고려할 최소 거리 (카메라로부터)
+     * [EN] Minimum distance to consider for intersection (from camera)
      * @defaultValue 0
      */
     near: number = 0;
 
     /**
-     * [KO] 교차 검사 시 고려할 최대 거리
-     * [EN] Maximum distance to consider for intersection
+     * [KO] 교차 검사 시 고려할 최대 거리 (카메라로부터)
+     * [EN] Maximum distance to consider for intersection (from camera)
      * @defaultValue Infinity
      */
     far: number = Infinity;
@@ -60,7 +60,7 @@ export default class Raycaster3D {
      * [KO] 화면 좌표와 카메라 정보를 기반으로 광선을 설정합니다.
      * [EN] Sets the ray based on screen coordinates and camera information.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * raycaster.setFromCamera(mouseX, mouseY, view);
      * ```
@@ -100,7 +100,7 @@ export default class Raycaster3D {
      * [KO] 단일 객체와의 교차 여부를 검사합니다.
      * [EN] Checks for intersection with a single object.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * const result = raycaster.intersectObject(mesh);
      * ```
@@ -125,7 +125,7 @@ export default class Raycaster3D {
      * [KO] 여러 객체와의 교차 여부를 검사합니다.
      * [EN] Checks for intersections with multiple objects.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * const results = raycaster.intersectObjects(scene.children);
      * ```
@@ -348,18 +348,18 @@ export interface RayIntersectResult {
      */
     distance: number;
     /**
-     * [KO] 월드 공간상의 교차 지점
-     * [EN] Intersection point in world space
+     * [KO] 월드 공간상의 교차 지점 좌표
+     * [EN] Intersection point coordinates in world space
      */
     point: vec3;
     /**
-     * [KO] 로컬 공간상의 교차 지점
-     * [EN] Intersection point in local space
+     * [KO] 객체의 로컬 공간상의 교차 지점 좌표
+     * [EN] Intersection point coordinates in the object's local space
      */
     localPoint: vec3;
     /**
-     * [KO] 교차된 객체
-     * [EN] The intersected object
+     * [KO] 교차된 메시 객체
+     * [EN] The intersected mesh object
      */
     object: Mesh;
     /**
@@ -368,13 +368,13 @@ export interface RayIntersectResult {
      */
     faceIndex?: number;
     /**
-     * [KO] 교차 지점의 UV 좌표
-     * [EN] UV coordinates at the intersection point
+     * [KO] 교차 지점의 UV 좌표 (텍스처 좌표)
+     * [EN] UV coordinates at the intersection point (Texture coordinates)
      */
     uv?: vec2;
     /**
-     * [KO] 교차 검사에 사용된 광선 (월드 공간)
-     * [EN] Ray used for intersection test (world space)
+     * [KO] 교차 검사에 사용된 월드 광선
+     * [EN] World ray used for intersection test
      */
     ray: Ray;
 }

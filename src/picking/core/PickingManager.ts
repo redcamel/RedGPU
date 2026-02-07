@@ -2,7 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import InstancingMesh from "../../display/instancingMesh/InstancingMesh";
 import Mesh from "../../display/mesh/Mesh";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
-import PickingEvent from "../PickingEvent";
+import PickingEvent from "./PickingEvent";
 import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
 import Raycaster3D from "../Raycaster3D";
 import Raycaster2D from "../Raycaster2D";
@@ -13,10 +13,16 @@ import Raycaster2D from "../Raycaster2D";
  *
  * [KO] 마우스 클릭, 이동, 오버 등의 이벤트를 감지하고 처리합니다. GPU 텍스처를 사용하여 픽셀 단위의 객체 선택을 구현합니다.
  * [EN] Detects and processes events such as mouse clicks, moves, and overs. Implements pixel-perfect object selection using GPU textures.
- * * ### Example
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
  * ```typescript
- * // [KO] 내부적으로 View3D에서 사용됩니다.
- * // [EN] Internally used by View3D.
+ * // 올바른 접근 방법 (Correct access)
+ * const pickingManager = view.pickingManager;
  * ```
  * @category Picking
  */

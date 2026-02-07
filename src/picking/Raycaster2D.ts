@@ -11,7 +11,7 @@ import { RayIntersectResult } from "./Raycaster3D";
  * [KO] View2D 환경에 최적화되어 있으며, NDC 좌표를 역추적하여 2D 객체의 정밀한 로컬 좌표 및 UV를 산출합니다.
  * [EN] Optimized for View2D environments, it reverse-tracks NDC coordinates to calculate precise local coordinates and UVs for 2D objects.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const raycaster = new RedGPU.Picking.Raycaster2D();
  * raycaster.setFromCamera(mouseX, mouseY, view);
@@ -21,7 +21,7 @@ import { RayIntersectResult } from "./Raycaster3D";
  */
 export default class Raycaster2D {
 	/**
-	 * [KO] 내부적으로 관리되는 광원 객체
+	 * [KO] 내부적으로 관리되는 광선 객체
 	 * [EN] Internally managed ray object
 	 *
 	 * [KO] 2D에서는 실제 광선 대신 월드 좌표상의 지점을 사용하지만, Raycaster3D와의 호환성을 위해 유지됩니다.
@@ -47,7 +47,7 @@ export default class Raycaster2D {
 	 * [KO] 화면 좌표를 기반으로 피킹 지점을 설정합니다.
 	 * [EN] Sets the picking point based on screen coordinates.
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * raycaster.setFromCamera(mouseX, mouseY, view);
 	 * ```
@@ -80,7 +80,7 @@ export default class Raycaster2D {
 	 * [KO] 단일 객체와의 교차 여부를 검사합니다.
 	 * [EN] Checks for intersection with a single object.
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * const result = raycaster.intersectObject(mesh);
 	 * ```
@@ -105,7 +105,7 @@ export default class Raycaster2D {
 	 * [KO] 여러 객체와의 교차 여부를 검사합니다.
 	 * [EN] Checks for intersections with multiple objects.
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * const results = raycaster.intersectObjects(scene.children);
 	 * ```
