@@ -12,6 +12,12 @@ import ABaseMaterial from "./ABaseMaterial";
  *
  * [KO] 텍스처/샘플러의 변경 감지 및 파이프라인 갱신, 텍스처 리스너 관리 등 텍스처 기반 머티리얼의 핵심 로직을 구현합니다.
  * [EN] It implements core logic for texture-based materials such as detecting texture/sampler changes, updating pipelines, and managing texture listeners.
+ *
+ * ### Example
+ * ```typescript
+ * // 이 클래스는 추상 클래스이며, 텍스처를 사용하는 머티리얼의 기본 기능을 제공합니다.
+ * // This class is an abstract class and provides basic functions for materials that use textures.
+ * ```
  * @category Material
  */
 abstract class ABitmapBaseMaterial extends ABaseMaterial {

@@ -31,7 +31,8 @@ interface BitmapMaterial {
  *
  * [KO] BitmapTexture와 Sampler를 통해 다양한 텍스처 기반 렌더링 효과를 구현할 수 있습니다.
  * [EN] Various texture-based rendering effects can be implemented through BitmapTexture and Sampler.
- * * ### Example
+ *
+ * ### Example
  * ```typescript
  * const sourceTexture = new RedGPU.Resource.BitmapTexture(
  *    redGPUContext,

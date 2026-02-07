@@ -127,7 +127,8 @@ interface PhongMaterial {
  *
  * [KO] 디퓨즈, 스펙큘러, 노멀, AO, 알파, 발광 등 다양한 텍스처와 샘플러, 파라미터를 통해 사실적인 라이팅 효과를 구현할 수 있습니다.
  * [EN] Realistic lighting effects can be implemented through various textures, samplers, and parameters such as diffuse, specular, normal, AO, alpha, and emissive.
- * * ### Example
+ *
+ * ### Example
  * ```typescript
  * const sourceTexture = new RedGPU.Resource.BitmapTexture(
  *    redGPUContext,
@@ -140,7 +141,6 @@ interface PhongMaterial {
  * <iframe src="/RedGPU/examples/3d/material/phongMaterial/"></iframe>
  *
  * @see [PhongMaterial Texture Combination example](/RedGPU/examples/3d/material/phongMaterialTextures/)
- *
  * @category Material
  */
 class PhongMaterial extends AUVTransformBaseMaterial {

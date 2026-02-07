@@ -4,6 +4,12 @@ import ShaderVariantGenerator from "../../resources/wgslParser/core/ShaderVarian
 /**
  * [KO] GPU 프래그먼트 렌더링 작업에 대한 정보를 나타냅니다.
  * [EN] Represents information about a GPU fragment render operation.
+ *
+ * ### Example
+ * ```typescript
+ * // 시스템 내부적으로 머티리얼의 렌더링 정보를 저장하는 데 사용됩니다.
+ * // Used internally by the system to store rendering information for materials.
+ * ```
  * @category Material
  */
 class FragmentGPURenderInfo {

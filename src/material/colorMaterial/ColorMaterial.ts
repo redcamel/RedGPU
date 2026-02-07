@@ -7,6 +7,10 @@ import fragmentModuleSource from './fragment.wgsl'
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
+/**
+ * [KO] 단색 컬러 머티리얼의 속성 인터페이스
+ * [EN] Property interface for color material
+ */
 interface ColorMaterial {
     /**
      * [KO] 머티리얼의 단색 컬러(ColorRGB)
@@ -21,7 +25,8 @@ interface ColorMaterial {
  *
  * [KO] ColorRGB 기반의 색상 지정이 가능하며, GPU 파이프라인에서 단일 색상으로 오브젝트를 렌더링할 때 사용합니다.
  * [EN] It allows color specification based on ColorRGB and is used when rendering objects with a single color in the GPU pipeline.
- * * ### Example
+ *
+ * ### Example
  * ```typescript
  * const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
  * ```
