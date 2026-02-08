@@ -152,23 +152,27 @@ const renderTestPane = async (redGPUContext, controller) => {
     });
 
     controlsFolder.addBinding(controller, 'moveSpeed', {
-        min: 0.1, max: 5, step: 0.1
+        min: 1, max: 1000, step: 1
     });
 
     controlsFolder.addBinding(controller, 'moveSpeedInterpolation', {
-        min: 0.01, max: 0.5, step: 0.01
+        min: 0.0001, max: 1, step: 0.0001
     });
 
     controlsFolder.addBinding(controller, 'rotationSpeed', {
-        min: 0.1, max: 5, step: 0.1
+        min: 1, max: 720, step: 1
     });
 
     controlsFolder.addBinding(controller, 'rotationSpeedInterpolation', {
-        min: 0.01, max: 0.5, step: 0.01
+        min: 0.0001, max: 1, step: 0.0001
+    });
+
+    controlsFolder.addBinding(controller, 'mouseSensitivity', {
+        min: 0.01, max: 1.0, step: 0.01
     });
 
     controlsFolder.addBinding(controller, 'maxAcceleration', {
-        min: 1, max: 10, step: 0.5
+        min: 0.1, max: 10, step: 0.1
     });
 
     const keyBindings = controller.keyNameMapper;
