@@ -156,14 +156,14 @@ async function renderTestPane(redGPUContext, testTarget) {
 	const folderManual = pane.addFolder({ title: 'Manual UV Transform' });
 
 	// Offset
-	folderManual.addBinding(scrollInfo, 'offsetU', { min: -2, max: 2, step: 0.01, label: 'Offset U' }).on('change', (ev) => {
+	folderManual.addBinding(scrollInfo, 'offsetU', { min: -2, max: 2, step: 0.0001, label: 'Offset U' }).on('change', (ev) => {
 		if (!scrollInfo.autoScroll) {
 			const val = [ev.value, scrollInfo.offsetV];
 			phongMaterial.textureOffset = val;
 			bitmapMaterial.textureOffset = val;
 		}
 	});
-	folderManual.addBinding(scrollInfo, 'offsetV', { min: -2, max: 2, step: 0.01, label: 'Offset V' }).on('change', (ev) => {
+	folderManual.addBinding(scrollInfo, 'offsetV', { min: -2, max: 2, step: 0.0001, label: 'Offset V' }).on('change', (ev) => {
 		if (!scrollInfo.autoScroll) {
 			const val = [scrollInfo.offsetU, ev.value];
 			phongMaterial.textureOffset = val;
@@ -172,12 +172,12 @@ async function renderTestPane(redGPUContext, testTarget) {
 	});
 
 	// Scale
-	folderManual.addBinding(scrollInfo, 'scaleU', { min: 0.1, max: 10, step: 0.1, label: 'Scale U' }).on('change', (ev) => {
+	folderManual.addBinding(scrollInfo, 'scaleU', { min: 0.1, max: 10, step: 0.0001, label: 'Scale U' }).on('change', (ev) => {
 		const val = [ev.value, scrollInfo.scaleV];
 		phongMaterial.textureScale = val;
 		bitmapMaterial.textureScale = val;
 	});
-	folderManual.addBinding(scrollInfo, 'scaleV', { min: 0.1, max: 10, step: 0.1, label: 'Scale V' }).on('change', (ev) => {
+	folderManual.addBinding(scrollInfo, 'scaleV', { min: 0.1, max: 10, step: 0.0001, label: 'Scale V' }).on('change', (ev) => {
 		const val = [scrollInfo.scaleU, ev.value];
 		phongMaterial.textureScale = val;
 		bitmapMaterial.textureScale = val;
