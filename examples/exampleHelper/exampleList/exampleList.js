@@ -2273,11 +2273,16 @@ Check performance limits on each device.`
                     },
                     {
                         name: 'KeyboardEvent',
-                        path: '2d/interaction/keyboardEvent',
-                        description: {
-                            ko: `keyboardKeyBuffer를 사용하여 2D 환경에서 객체를 제어하는 방법을 보여줍니다.`, 
-                            en: `Demonstrates how to control an object in a 2D environment using keyboardKeyBuffer.`
-                        },
+                        list: [
+                            {
+                                name: 'Keyboard Interaction',
+                                path: '2d/interaction/keyboardEvent',
+                                description: {
+                                    ko: `keyboardKeyBuffer를 사용하여 2D 환경에서 객체를 제어하는 방법을 보여줍니다.`, 
+                                    en: `Demonstrates how to control an object in a 2D environment using keyboardKeyBuffer.`
+                                },
+                            }
+                        ]
                     },
                 ]
             },
