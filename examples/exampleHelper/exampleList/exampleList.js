@@ -396,14 +396,6 @@ const ExampleList = [
                                 },
                             },
                             {
-                                name: 'Skybox using HDRTexture',
-                                path: '3d/skybox/skyboxWithHDRTexture',
-                                description: {
-                                    ko: `HDR 텍스처를 사용하여 스카이박스를 구성하는 예제입니다.`, 
-                                    en: `An example of constructing a skybox using an HDR texture.`
-                                },
-                            },
-                            {
                                 name: 'Skybox transition',
                                 list: [
                                     {
@@ -430,17 +422,17 @@ const ExampleList = [
                     {
                         name: 'IBL',
                         list: [
-                            // {
-                            //     name: 'Skybox using IBL',
-                            //     path: '3d/skybox/skyboxWithIbl',
-                            //     description: {
-                            //         ko: ``, 
-                            //         en: ``
-                            //     },
-                            // },
+                            {
+                                name: 'Skybox using IBL',
+                                path: '3d/skybox/ibl/skyboxWithIbl',
+                                description: {
+                                    ko: `IBL(Image Based Lighting)을 사용하여 스카이박스를 생성하는 방법을 보여줍니다.`, 
+                                    en: `Demonstrates how to create a skybox using IBL (Image Based Lighting).`
+                                },
+                            },
                             {
                                 name: 'IBL Test',
-                                path: '3d/skybox/iblTest',
+                                path: '3d/skybox/ibl/iblTest',
                                 description: {
                                     ko: `이미지 기반 조명(IBL)을 테스트하는 예제입니다.`, 
                                     en: `An example testing Image-Based Lighting (IBL).`
@@ -448,10 +440,26 @@ const ExampleList = [
                             },
                             {
                                 name: 'Custom IBL Texture Size',
-                                path: '3d/skybox/iblTextureSize',
+                                path: '3d/skybox/ibl/iblTextureSize',
                                 description: {
                                     ko: `IBL 텍스처의 크기를 사용자 정의하는 예제입니다.`, 
                                     en: `An example of customizing the size of the IBL texture.`
+                                },
+                            },
+                            {
+                                name: 'BRDF LUT Test (Dev Only)',
+                                path: '3d/skybox/ibl/brdfLutTest',
+                                description: {
+                                    ko: `새로운 IBL 시스템의 기초인 BRDF LUT 생성을 테스트합니다. (개발 확인용)`,
+                                    en: `Tests BRDF LUT generation, the foundation of the new IBL system. (For development verification)`
+                                },
+                            },
+                            {
+                                name: 'Irradiance Test (Dev Only)',
+                                path: '3d/skybox/ibl/irradianceTest',
+                                description: {
+                                    ko: `분리된 IrradianceGenerator를 사용하여 환경맵으로부터 Irradiance 맵을 생성하고 테스트합니다. (개발 확인용)`,
+                                    en: `Generates and tests an Irradiance map from an environment map using the separated IrradianceGenerator. (For development verification)`
                                 },
                             },
                         ]
@@ -733,7 +741,7 @@ const ExampleList = [
                         list: [
                             {
                                 name: 'Mesh',
-                                path: '3d/mouseEvent/mesh',
+                                path: '3d/interaction/mouseEvent/mesh',
                                 description: {
                                     ko: `Mesh에 마우스 이벤트를 설정하는 예제입니다.`, 
                                     en: `Here's an example of setting up mouse events on a Mesh.`
@@ -741,7 +749,7 @@ const ExampleList = [
                             },
                             {
                                 name: 'Sprite3D',
-                                path: '3d/mouseEvent/sprite3D',
+                                path: '3d/interaction/mouseEvent/sprite3D',
                                 description: {
                                     ko: `Sprite3D에 마우스 이벤트를 설정하는 예제입니다.`, 
                                     en: `Here's an example of setting up mouse events on a Sprite3D.`
@@ -749,7 +757,7 @@ const ExampleList = [
                             },
                             {
                                 name: 'SpriteSheet3D',
-                                path: '3d/mouseEvent/spriteSheet3D',
+                                path: '3d/interaction/mouseEvent/spriteSheet3D',
                                 description: {
                                     ko: `SpriteSheet3D에 마우스 이벤트를 설정하는 예제입니다.`, 
                                     en: `Here's an example of setting up mouse events on a SpriteSheet3D.`
@@ -757,7 +765,7 @@ const ExampleList = [
                             },
                             {
                                 name: 'TextField3D',
-                                path: '3d/mouseEvent/textField3D',
+                                path: '3d/interaction/mouseEvent/textField3D',
                                 description: {
                                     ko: `TextField3D에 마우스 이벤트를 설정하는 예제입니다.`, 
                                     en: `Here's an example of setting up mouse events on a TextField3D.`
@@ -765,7 +773,7 @@ const ExampleList = [
                             },
                             {
                                 name: 'Raycasting (Precision Picking)',
-                                path: '3d/mouseEvent/raycasting',
+                                path: '3d/interaction/mouseEvent/raycasting',
                                 description: {
                                     ko: `이 예제는 복잡한 지오메트리(TorusKnot)에 대한 고정밀 레이캐스팅을 보여줍니다.<br/>버텍스 버퍼를 분석하여 정확한 교차 지점, 면 인덱스 및 로컬 좌표를 CPU에서 계산합니다.`, 
                                     en: `This example demonstrates high-precision raycasting on complex geometry (TorusKnot).<br/>It calculates the exact intersection point, face index, and local coordinates on the CPU by analyzing vertex buffers.`
@@ -775,11 +783,16 @@ const ExampleList = [
                     },
                     {
                         name: 'KeyboardEvent',
-                        path: '3d/interaction/keyboardEvent',
-                        description: {
-                            ko: `keyboardKeyBuffer를 사용하여 매 프레임 키보드 상태를 체크하고 객체를 제어하는 기초적인 방법을 보여줍니다.`, 
-                            en: `Shows basic way to check keyboard state every frame and control an object using keyboardKeyBuffer.`
-                        },
+                        list: [
+                            {
+                                name: 'Keyboard Interaction',
+                                path: '3d/interaction/keyboardEvent',
+                                description: {
+                                    ko: `keyboardKeyBuffer를 사용하여 매 프레임 키보드 상태를 체크하고 객체를 제어하는 기초적인 방법을 보여줍니다.`, 
+                                    en: `Shows basic way to check keyboard state every frame and control an object using keyboardKeyBuffer.`
+                                },
+                            }
+                        ]
                     },
                 ]
             },
@@ -892,27 +905,6 @@ const ExampleList = [
                         description: {
                             ko: `drawIndexedIndirect 기능을 테스트하는 예제입니다.`, 
                             en: `An example testing the drawIndexedIndirect function.`
-                        },
-                    }
-                ]
-            },
-            {
-                name: 'IBL Upgrade (Foundation)',
-                list: [
-                    {
-                        name: 'BRDF LUT Test',
-                        path: '3d/ibl/brdfLutTest',
-                        description: {
-                            ko: `새로운 IBL 시스템의 기초인 BRDF LUT 생성을 테스트합니다.`,
-                            en: `Tests BRDF LUT generation, the foundation of the new IBL system.`
-                        },
-                    },
-                    {
-                        name: 'Irradiance Test',
-                        path: '3d/ibl/irradianceTest',
-                        description: {
-                            ko: `분리된 IrradianceGenerator를 사용하여 환경맵으로부터 Irradiance 맵을 생성하고 테스트합니다. 배경 스카이박스에는 생성된 Irradiance 맵이 적용되어 있으며, 중앙의 Sprite3D에는 원본 HDRTexture가 2D 텍스처로 적용되어 있습니다.`,
-                            en: `Generates and tests an Irradiance map from an environment map using the separated IrradianceGenerator. The background skybox uses the generated Irradiance map, while the central Sprite3D uses the original HDRTexture as a 2D texture.`
                         },
                     }
                 ]
