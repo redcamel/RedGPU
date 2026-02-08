@@ -7,8 +7,8 @@ import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumbe
 import AController from "../core/AController";
 
 const PER_PI = Math.PI / 180;
-const ROTATION_THRESHOLD = 0.01;
-const DISTANCE_THRESHOLD = 0.01;
+const ROTATION_THRESHOLD = 0.0001;
+const DISTANCE_THRESHOLD = 0.0001;
 const tempMatrix = mat4.create();
 
 /**
@@ -87,8 +87,10 @@ class OrbitController extends AController {
                     if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
 				},
 			}
-		)
-		;
+		);
+		this.#currentPan = this.#pan;
+		this.#currentTilt = this.#tilt;
+		this.#currentDistance = this.#distance;
 	}
 
 	// ==================== 센터 좌표 Getter/Setter ====================
@@ -572,7 +574,7 @@ class OrbitController extends AController {
 		// 틸트(Tilt) 보간
 		const tiltDelta = this.#tilt - this.#currentTilt;
 		if (Math.abs(tiltDelta) > ROTATION_THRESHOLD) {
-			this.#currentTilt = this.#tilt + (this.#currentTilt - this.#tilt) * Math.pow(this.#rotationInterpolation, deltaTime);
+			this.#currentTilt += tiltDelta * (1 - Math.pow(this.#rotationInterpolation, deltaTime));
 		} else {
 			this.#currentTilt = this.#tilt;
 		}
@@ -584,7 +586,7 @@ class OrbitController extends AController {
 
 		const distanceDelta = this.#distance - this.#currentDistance;
 		if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
-			this.#currentDistance = this.#distance + (this.#currentDistance - this.#distance) * Math.pow(this.#distanceInterpolation, deltaTime);
+			this.#currentDistance += distanceDelta * (1 - Math.pow(this.#distanceInterpolation, deltaTime));
 		} else {
 			this.#currentDistance = this.#distance;
 		}
