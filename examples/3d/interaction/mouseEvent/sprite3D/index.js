@@ -116,6 +116,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
         sprite3D.name = `Sprite3D_${eventName}`;
         sprite3D.worldSize = 1.0;
+        sprite3D.pixelSize = 64
         scene.addChild(sprite3D);
         
         sprite3D.addListener(eventName, (e) => {

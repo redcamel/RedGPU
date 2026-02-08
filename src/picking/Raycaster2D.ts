@@ -133,32 +133,44 @@ export default class Raycaster2D {
 			const view = this.#view;
 			const projectionMatrix = view.projectionMatrix;
 			const cameraMatrix = view.rawCamera.modelMatrix;
-			
+
 			const combinedMatrix = mat4.multiply(this.#tempMat4, projectionMatrix, cameraMatrix);
 			mat4.multiply(combinedMatrix, combinedMatrix, mesh.modelMatrix);
-			
-			if ((mesh as any).is2DMeshType) {
-				mat4.scale(combinedMatrix, combinedMatrix, [(mesh as any).width, (mesh as any).height, 1]);
-			}
 
 			const invCombinedMatrix = mat4.invert(this.#tempMat4_2, combinedMatrix);
 			if (invCombinedMatrix) {
 				const localPoint = vec3.transformMat4(this.#tempVec3, this.#ndcPoint, invCombinedMatrix);
 
-				if (localPoint[0] >= -0.5 && localPoint[0] <= 0.5 &&
-					localPoint[1] >= -0.5 && localPoint[1] <= 0.5) {
+				let isHit = false;
+				let width = 1;
+				let height = 1;
 
+				if ((mesh as any).is2DMeshType) {
+					width = (mesh as any).width;
+					height = (mesh as any).height;
+					if (localPoint[0] >= -width / 2 && localPoint[0] <= width / 2 &&
+						localPoint[1] >= -height / 2 && localPoint[1] <= height / 2) {
+						isHit = true;
+					}
+				} else {
+					if (localPoint[0] >= -0.5 && localPoint[0] <= 0.5 &&
+						localPoint[1] >= -0.5 && localPoint[1] <= 0.5) {
+						isHit = true;
+					}
+				}
+
+				if (isHit) {
 					const invProjView = mat4.invert(mat4.create(), mat4.multiply(mat4.create(), projectionMatrix, cameraMatrix));
 					const worldPoint = vec3.transformMat4(vec3.create(), this.#ndcPoint, invProjView);
 
-					const faceIndex = localPoint[0] > localPoint[1] ? 1 : 0;
+					const faceIndex = (localPoint[0] / width) > (localPoint[1] / height) ? 1 : 0;
 
 					intersects.push({
 						distance: 0,
 						point: worldPoint,
 						localPoint: vec3.clone(localPoint),
 						object: mesh,
-						uv: vec2.fromValues(localPoint[0] + 0.5, localPoint[1] + 0.5),
+						uv: vec2.fromValues(localPoint[0] / width + 0.5, localPoint[1] / height + 0.5),
 						ray: this.ray.clone(),
 						faceIndex: faceIndex
 					});
