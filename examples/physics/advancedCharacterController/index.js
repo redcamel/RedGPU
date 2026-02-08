@@ -15,16 +15,7 @@ document.body.appendChild(canvas);
 RedGPU.init(
 	canvas,
 	async (redGPUContext) => {
-		// [KO] 카메라 컨트롤러 설정
-		// [EN] Set up camera controller
-		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 25;
-		controller.tilt = -30;
-
 		const scene = new RedGPU.Display.Scene();
-		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.grid = true;
-		redGPUContext.addView(view);
 
 		// [KO] 물리 엔진 초기화
 		// [EN] Initialize physics engine
@@ -50,7 +41,21 @@ RedGPU.init(
 		 * @param {number} sz
 		 * @param {string} color
 		 */
-		const createBlock = (x, y, z, sx, sy, sz, color = '#666666') => {
+		/**
+		 * [KO] 정적 블록 생성 함수
+		 * [EN] Static block creation function
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} z
+		 * @param {number} sx
+		 * @param {number} sy
+		 * @param {number} sz
+		 * @param {string} color
+		 * @param {number} rx
+		 * @param {number} ry
+		 * @param {number} rz
+		 */
+		const createBlock = (x, y, z, sx, sy, sz, color = '#666666', rx = 0, ry = 0, rz = 0) => {
 			const mesh = new RedGPU.Display.Mesh(
 				redGPUContext,
 				new RedGPU.Primitive.Box(redGPUContext),
@@ -62,6 +67,9 @@ RedGPU.init(
 			mesh.scaleX = sx;
 			mesh.scaleY = sy;
 			mesh.scaleZ = sz;
+			mesh.rotationX = rx;
+			mesh.rotationY = ry;
+			mesh.rotationZ = rz;
 			mesh.material.color.setColorByHEX(color);
 			scene.addChild(mesh);
 			physicsEngine.createBody(mesh, {
@@ -70,22 +78,57 @@ RedGPU.init(
 			});
 		};
 
-		// [KO] 환경 구축 (50m x 50m 바닥 및 공중 발판들)
-		// [EN] Environment build (50m x 50m ground and floating platforms)
-		createBlock(0, -0.5, 0, 50, 1, 50);
+		// [KO] 환경 구축 (Dense & Compact Test Course)
+		// [EN] Environment build (Dense & Compact Test Course)
+		createBlock(0, -0.5, 0, 100, 1, 100); // Base Ground
+
+		// [KO] 중앙 밀집 구역 (Center Complex)
+		// 계단 -> 플랫폼 -> 경사로 연결
+		for (let i = 0; i < 12; i++) {
+			createBlock(0, i * 0.18, 5 + i * 0.45, 4, 0.2, 0.6, '#8888aa');
+		}
+		createBlock(0, 12 * 0.18, 12, 6, 0.2, 6, '#8888cc'); // 연결 플랫폼
+		createBlock(0, 12 * 0.18 + 1.4, 20, 6, 0.2, 10, '#8888ee', 20, 0, 0); // 플랫폼에서 이어지는 경사로
+
+		// 나선형 계단을 플랫폼 주변으로 밀착
+		const spiralCenterX = 8;
+		const spiralCenterZ = 10;
 		for (let i = 0; i < 20; i++) {
+			const angle = i * 0.5;
+			const radius = 3;
+			const x = spiralCenterX + Math.cos(angle) * radius;
+			const z = spiralCenterZ + Math.sin(angle) * radius;
+			createBlock(x, i * 0.35, z, 1.5, 0.15, 1.5, '#88aa88', 0, -angle * 180 / Math.PI, 0);
+		}
+
+		// 파쿠르 코스를 중앙 플랫폼 옆으로 배치
+		for (let i = 0; i < 8; i++) {
 			createBlock(
-				(Math.random() * 40) - 20,
-				i * 1.2 + 1,
-				(Math.random() * 40) - 20,
-				4,
-				0.3,
-				4,
-				'#888888'
+				-6 - i * 1.8, 
+				1 + i * 0.4, 
+				8 + (i % 2 === 0 ? 0.8 : -0.8), 
+				1.5, 0.15, 1.5, 
+				`#aa${(90 + i * 20).toString(16)}88`
 			);
 		}
 
-		// [KO] 캐릭터 생성 (지름 0.6m, 총 높이 1.8m 캡슐)
+		// 좁은 길을 플랫폼 상단에 교차
+		createBlock(-12, 12 * 0.18, 12, 10, 0.15, 0.4, '#aaaa88');
+
+		// 입체 구조물을 시작 지점 근처로 당김
+		// 피라미드형 계단
+		for (let i = 0; i < 8; i++) {
+			const size = 12 - i * 1.5;
+			createBlock(-15, i * 0.35, -5, size, 0.4, size, '#777777');
+		}
+
+		// 터널을 중앙 플랫폼 아래에 배치
+		createBlock(0, 0.1, 12, 10, 0.1, 10, '#555555'); // 터널 바닥
+		createBlock(-4, 0, 12, 0.5, 2.5, 10, '#444444'); // 벽 1
+		createBlock(4, 0, 12, 0.5, 2.5, 10, '#444444'); // 벽 2
+		createBlock(0, 2.5, 12, 10, 0.5, 10, '#666666'); // 지붕 (플랫폼 하단)
+
+		// 캐릭터 생성 (지름 0.6m, 총 높이 1.8m 캡슐)
 		// [EN] Create character (Capsule with diameter 0.6m, total height 1.8m)
 		const charMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
@@ -103,16 +146,26 @@ RedGPU.init(
 
 		const charController = physicsEngine.createCharacterController(0.01);
 		
+		// [KO] 카메라 컨트롤러 설정 (OrbitController)
+		// [EN] Set up camera controller (OrbitController)
+		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+		controller.distance = 12;
+		controller.tilt = -15;
+
+		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+		view.grid = true;
+		redGPUContext.addView(view);
+
 		const keyboardBuffer = redGPUContext.keyboardKeyBuffer;
 
 		let velocity = { x: 0, y: 0, z: 0 };
 		let jumpCount = 0;
 		const maxJumps = 2;
-		const moveSpeed = 0.06;
+		const moveSpeed = 0.025;
 		const airControl = 0.3;
-		const gravity = -0.015;
-		const jumpForce = 0.25;
-		const friction = 0.85;
+		const gravity = -0.01;
+		const jumpForce = 0.2;
+		const friction = 0.8;
 
 		const render = (time) => {
 			const isGrounded = charController.computedGrounded();
@@ -125,8 +178,8 @@ RedGPU.init(
 
 			const camX = controller.camera.x;
 			const camZ = controller.camera.z;
-			const targetX = controller.centerX;
-			const targetZ = controller.centerZ;
+			const targetX = charMesh.x;
+			const targetZ = charMesh.z;
 			
 			let fX = targetX - camX;
 			let fZ = targetZ - camZ;
@@ -205,8 +258,15 @@ const renderTestPane = async (redGPUContext, resetFunc) => {
 	const pane = new Pane();
 	pane.addBlade({
 		view: 'text',
-		label: 'Control',
-		value: 'WASD: Move / Space: Double Jump',
+		label: 'Move',
+		value: 'WASD Keys',
+		parse: (v) => v,
+		readonly: true
+	});
+	pane.addBlade({
+		view: 'text',
+		label: 'Jump',
+		value: 'Space (Double Jump)',
 		parse: (v) => v,
 		readonly: true
 	});
