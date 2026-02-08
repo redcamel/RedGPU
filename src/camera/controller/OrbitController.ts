@@ -37,15 +37,15 @@ class OrbitController extends AController {
 	#centerZ = 0;
 	// ==================== 거리(줌) 관련 ====================
 	#distance = 15;
-	#speedDistance = 2;
-	#distanceInterpolation = 0.1;
+	#speedDistance = 1.5;
+	#distanceInterpolation = 0.02;
     #minDistance = 0.1;
     #maxDistance = Infinity;
 	// ==================== 회전(팬/틸트) 관련 ====================
 	#pan = 0;
 	#tilt = -35;
 	#speedRotation = 3;
-	#rotationInterpolation = 0.1;
+	#rotationInterpolation = 0.02;
 	#minTilt = -90;
 	#maxTilt = 90;
 	// ==================== 애니메이션 상태 ====================
@@ -525,8 +525,8 @@ class OrbitController extends AController {
 	 * [EN] Current time (ms)
 	 */
 	update(view: View3D, time: number): void {
-		super.update(view, time, () => {
-			this.#updateAnimation();
+		super.update(view, time, (deltaTime) => {
+			this.#updateAnimation(deltaTime);
 		});
 	}
 
@@ -566,32 +566,47 @@ class OrbitController extends AController {
 	 * [KO] 카메라 애니메이션을 업데이트합니다.
 	 * [EN] Updates camera animation.
 	 *
+	 * @param deltaTime -
+	 * [KO] 초 단위 경과 시간
+	 * [EN] Elapsed time in seconds
 	 * @private
 	 */
-	#updateAnimation(): void {
+	#updateAnimation(deltaTime: number): void {
 		// 틸트 범위 제한
 		if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
 		if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
 		const {camera} = this;
-		// 현재 값을 목표값으로 부드럽게 보간
+
+		// 팬(Pan) 보간 - 지수적 감쇄 적용
 		const panDelta = this.#pan - this.#currentPan;
 		if (Math.abs(panDelta) > ROTATION_THRESHOLD) {
-			this.#currentPan += panDelta * this.#rotationInterpolation;
+			this.#currentPan = this.#pan + (this.#currentPan - this.#pan) * Math.pow(this.#rotationInterpolation, deltaTime);
+		} else {
+			this.#currentPan = this.#pan;
 		}
-		// 틸트 보간
+
+		// 틸트(Tilt) 보간
 		const tiltDelta = this.#tilt - this.#currentTilt;
 		if (Math.abs(tiltDelta) > ROTATION_THRESHOLD) {
-			this.#currentTilt += tiltDelta * this.#rotationInterpolation;
+			this.#currentTilt = this.#tilt + (this.#currentTilt - this.#tilt) * Math.pow(this.#rotationInterpolation, deltaTime);
+		} else {
+			this.#currentTilt = this.#tilt;
 		}
+
 		// 거리(줌) 범위 및 보간
 		if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
-        if (this.#distance < this.#minDistance) this.#distance = this.#minDistance;
-        if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
+		if (this.#distance < this.#minDistance) this.#distance = this.#minDistance;
+		if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
+
 		const distanceDelta = this.#distance - this.#currentDistance;
 		if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
-			this.#currentDistance += distanceDelta * this.#distanceInterpolation;
+			this.#currentDistance = this.#distance + (this.#currentDistance - this.#distance) * Math.pow(this.#distanceInterpolation, deltaTime);
+		} else {
+			this.#currentDistance = this.#distance;
 		}
+
 		if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
+
 		// 카메라 위치 계산
 		mat4.identity(tempMatrix);
 		mat4.translate(tempMatrix, tempMatrix, [this.#centerX, this.#centerY, this.#centerZ]);

@@ -12,153 +12,156 @@ document.body.appendChild(canvas);
  */
 
 RedGPU.init(
-	canvas,
-	(redGPUContext) => {
-		const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-		controller.distance = 15;
+    canvas,
+    (redGPUContext) => {
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 15;
 
-		const scene = new RedGPU.Display.Scene();
-		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.grid = true;
-		redGPUContext.addView(view);
+        const scene = new RedGPU.Display.Scene();
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
+        redGPUContext.addView(view);
 
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
+        const ambientLight = new RedGPU.Light.AmbientLight();
+        ambientLight.intensity = 0.5;
+        scene.lightManager.ambientLight = ambientLight;
 
-		const directionalLight = new RedGPU.Light.DirectionalLight();
-		scene.lightManager.addDirectionalLight(directionalLight);
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
 
-		// [KO] 제어할 박스 메쉬 생성
-		// [EN] Create a box mesh to control
-		const box = new RedGPU.Display.Mesh(
-			redGPUContext,
-			new RedGPU.Primitive.Box(redGPUContext),
-			new RedGPU.Material.PhongMaterial(redGPUContext)
-		);
-		box.material.color.setColorByHEX('#00CC99');
-		scene.addChild(box);
+        // [KO] 제어할 박스 메쉬 생성
+        // [EN] Create a box mesh to control
+        const box = new RedGPU.Display.Mesh(
+            redGPUContext,
+            new RedGPU.Primitive.Box(redGPUContext),
+            new RedGPU.Material.PhongMaterial(redGPUContext)
+        );
+        box.material.color.setColorByHEX('#00CC99');
+        scene.addChild(box);
 
-		const speed = 0.1;
+        const speed = 0.1;
+        let lastTime = 0;
 
-		let lastTime = 0;
-		const render = (time) => {
-			// [KO] 프레임 간 시간 차이 계산 (60fps 기준 비율)
-			// [EN] Calculate time difference between frames (ratio based on 60fps)
-			const deltaTime = lastTime ? Math.min((time - lastTime) / 16.666, 2) : 1;
-			lastTime = time;
+        // [KO] 실시간 키 상태를 표시하기 위한 데이터 객체
+        // [EN] Data object for displaying real-time key states
+        const {keyboardKeyBuffer} = redGPUContext;
+        const activeKeysState = {
+            value: 'None',
+            update: () => {
+                const activeKeys = Object.entries(keyboardKeyBuffer)
+                    .filter(([key, pressed]) => pressed)
+                    .map(([key]) => key === ' ' ? 'Space' : key)
+                    .join(', ');
+                activeKeysState.value = activeKeys || 'None';
+            }
+        };
 
-			const { keyboardKeyBuffer } = redGPUContext;
+        const render = (time) => {
+            const deltaTime = lastTime ? Math.min((time - lastTime) / 16.666, 2) : 1;
+            lastTime = time;
 
-			// [KO] 컨트롤러의 각도를 기반으로 안정적인 이동 방향 계산 (카메라 위치 기반 계산 시의 덜덜거림 방지)
-			// [EN] Calculate stable movement direction based on controller angles (prevents jitter caused by camera position-based calculation)
-			const panRad = (controller.pan) * Math.PI / 180;
-			const fX = -Math.sin(panRad);
-			const fZ = -Math.cos(panRad);
-			const rX = Math.cos(panRad);
-			const rZ = -Math.sin(panRad);
+            // [KO] 카메라 각도에 따른 이동 방향 벡터 계산
+            // [EN] Calculate movement direction vectors based on camera angle
+            const panRad = controller.pan * Math.PI / 180;
+            const forwardX = -Math.sin(panRad);
+            const forwardZ = -Math.cos(panRad);
+            const rightX = Math.cos(panRad);
+            const rightZ = -Math.sin(panRad);
 
-			let moveX = 0;
-			let moveZ = 0;
+            let moveX = 0;
+            let moveZ = 0;
 
-			// [KO] keyboardKeyBuffer를 통한 실시간 키 상태 체크
-			// [EN] Real-time key state check via keyboardKeyBuffer
-			if (keyboardKeyBuffer['w'] || keyboardKeyBuffer['W'] || keyboardKeyBuffer['ArrowUp']) {
-				moveX += fX;
-				moveZ += fZ;
-			}
-			if (keyboardKeyBuffer['s'] || keyboardKeyBuffer['S'] || keyboardKeyBuffer['ArrowDown']) {
-				moveX -= fX;
-				moveZ -= fZ;
-			}
-			if (keyboardKeyBuffer['a'] || keyboardKeyBuffer['A'] || keyboardKeyBuffer['ArrowLeft']) {
-				moveX -= rX;
-				moveZ -= rZ;
-			}
-			if (keyboardKeyBuffer['d'] || keyboardKeyBuffer['D'] || keyboardKeyBuffer['ArrowRight']) {
-				moveX += rX;
-				moveZ += rZ;
-			}
+            // [KO] 입력 처리
+            // [EN] Handle input
+            if (keyboardKeyBuffer['w'] || keyboardKeyBuffer['W'] || keyboardKeyBuffer['ArrowUp']) {
+                moveX += forwardX;
+                moveZ += forwardZ;
+            }
+            if (keyboardKeyBuffer['s'] || keyboardKeyBuffer['S'] || keyboardKeyBuffer['ArrowDown']) {
+                moveX -= forwardX;
+                moveZ -= forwardZ;
+            }
+            if (keyboardKeyBuffer['a'] || keyboardKeyBuffer['A'] || keyboardKeyBuffer['ArrowLeft']) {
+                moveX -= rightX;
+                moveZ -= rightZ;
+            }
+            if (keyboardKeyBuffer['d'] || keyboardKeyBuffer['D'] || keyboardKeyBuffer['ArrowRight']) {
+                moveX += rightX;
+                moveZ += rightZ;
+            }
 
-			// [KO] 이동 방향 정규화 및 속도 적용 (deltaTime 반영)
-			// [EN] Normalize movement direction and apply speed (with deltaTime)
-			const moveLen = Math.sqrt(moveX * moveX + moveZ * moveZ);
-			const currentSpeed = speed * deltaTime;
-			if (moveLen > 0) {
-				box.x += (moveX / moveLen) * currentSpeed;
-				box.z += (moveZ / moveLen) * currentSpeed;
-			}
+            // [KO] 이동 적용 (정규화 및 속도 반영)
+            // [EN] Apply movement (normalization and speed)
+            const moveLen = Math.sqrt(moveX * moveX + moveZ * moveZ);
+            const currentSpeed = speed * deltaTime;
+            if (moveLen > 0) {
+                box.x += (moveX / moveLen) * currentSpeed;
+                box.z += (moveZ / moveLen) * currentSpeed;
+            }
 
-			if (keyboardKeyBuffer[' ']) {
-				box.y += currentSpeed;
-			} else {
-				if (box.y > 0) box.y -= currentSpeed * 0.5;
-				if (box.y < 0) box.y = 0;
-			}
+            // [KO] 상승/하강 (Space)
+            // [EN] Lift/Fall (Space)
+            if (keyboardKeyBuffer[' ']) {
+                box.y += currentSpeed;
+            } else {
+                if (box.y > 0) box.y = Math.max(0, box.y - currentSpeed * 0.5);
+            }
 
-			// [KO] 회전 제어 (Q, E)
-			// [EN] Rotation control (Q, E)
-			const rotationSpeed = 2 * deltaTime;
-			if (keyboardKeyBuffer['q'] || keyboardKeyBuffer['Q']) {
-				box.rotationY += rotationSpeed;
-			}
-			if (keyboardKeyBuffer['e'] || keyboardKeyBuffer['E']) {
-				box.rotationY -= rotationSpeed;
-			}
+            // [KO] 회전 (Q, E)
+            // [EN] Rotation (Q, E)
+            const rotationAmount = 2 * deltaTime;
+            if (keyboardKeyBuffer['q'] || keyboardKeyBuffer['Q']) box.rotationY += rotationAmount;
+            if (keyboardKeyBuffer['e'] || keyboardKeyBuffer['E']) box.rotationY -= rotationAmount;
 
-			// [KO] 카메라가 박스를 따라가도록 업데이트
-			// [EN] Update camera to follow the box
-			controller.centerX = box.x;
-			controller.centerY = box.y;
-			controller.centerZ = box.z;
+            // [KO] 카메라 추적 및 UI 갱신
+            // [EN] Camera tracking and UI update
+            controller.centerX = box.x;
+            controller.centerY = box.y;
+            controller.centerZ = box.z;
 
+            activeKeysState.update();
+        };
 
-		};
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, render);
 
-		const renderer = new RedGPU.Renderer();
-		renderer.start(redGPUContext, render);
-
-		renderTestPane(redGPUContext, redGPUContext.keyboardKeyBuffer);
-	},
-	(failReason) => { console.error(failReason); }
+        renderTestPane(redGPUContext, activeKeysState);
+    },
+    (failReason) => {
+        console.error(failReason);
+    }
 );
 
-const renderTestPane = async (redGPUContext, keyboardKeyBuffer) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	pane.addBlade({
-		view: 'text',
-		label: 'Movement',
-		value: 'WASD / Arrows',
-		parse: (v) => v,
-		readonly: true
-	});
-	pane.addBlade({
-		view: 'text',
-		label: 'Action',
-		value: 'Space: Lift, Q/E: Rotate',
-		parse: (v) => v,
-		readonly: true
-	});
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {Object} activeKeysState
+ */
+const renderTestPane = async (redGPUContext, activeKeysState) => {
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js");
+    setDebugButtons(RedGPU, redGPUContext)
+    const pane = new Pane();
 
-	const activeKeysFolder = pane.addFolder({ title: 'Active Keys' });
-	const activeKeysMonitor = activeKeysFolder.addBlade({
-		view: 'text',
-		label: 'Pressed',
-		value: '',
-		parse: (v) => v,
-		readonly: true
-	});
+    pane.addBlade({
+        view: 'text',
+        label: 'Movement',
+        value: 'WASD / Arrows',
+        parse: (v) => v,
+        readonly: true
+    });
+    pane.addBlade({
+        view: 'text',
+        label: 'Action',
+        value: 'Space: Lift, Q/E: Rotate',
+        parse: (v) => v,
+        readonly: true
+    });
 
-	// [KO] 현재 눌린 키들을 모니터링하여 표시합니다.
-	// [EN] Monitors and displays the currently pressed keys.
-	setInterval(() => {
-		const activeKeys = Object.entries(keyboardKeyBuffer)
-			.filter(([key, pressed]) => pressed)
-			.map(([key]) => key === ' ' ? 'Space' : key)
-			.join(', ');
-		activeKeysMonitor.value = activeKeys || 'None';
-	}, 100);
+    const activeKeysFolder = pane.addFolder({title: 'Active Keys'});
+    activeKeysFolder.addBinding(activeKeysState, 'value', {
+        label: 'Pressed',
+        readonly: true
+    });
 };

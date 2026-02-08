@@ -48,6 +48,7 @@ abstract class AController {
 
 	// ==================== 프레임 관리 ====================
 	#lastUpdateTime = -1;
+	#currentDeltaTime = 0;
 	#currentFrameViews = new Set<View3D>();
 	#keyboardProcessedThisFrame: boolean = false
 
@@ -287,12 +288,13 @@ abstract class AController {
 	 * [KO] 현재 시간 (ms)
 	 * [EN] Current time (ms)
 	 * @param updateAnimation -
-	 * [KO] 애니메이션 업데이트 콜백
-	 * [EN] Animation update callback
+	 * [KO] 애니메이션 업데이트 콜백 (deltaTime 전달)
+	 * [EN] Animation update callback (receives deltaTime)
 	 */
-	update(view: View3D, time: number, updateAnimation: () => void): void {
-		// 새로운 프레임이 시작되면 상태 초기화
+	update(view: View3D, time: number, updateAnimation: (deltaTime: number) => void): void {
+		// 새로운 프레임이 시작되면 상태 초기화 및 deltaTime 계산
 		if (this.#lastUpdateTime !== time) {
+			this.#currentDeltaTime = this.#lastUpdateTime === -1 ? 0 : (time - this.#lastUpdateTime) / 1000;
 			this.#lastUpdateTime = time;
 			this.#currentFrameViews.clear();
 			this.#keyboardProcessedThisFrame = false;
@@ -301,7 +303,7 @@ abstract class AController {
 		if (this.#currentFrameViews.has(view)) return;
 		this.#currentFrameViews.add(view);
 		if (this.#initInfo.useKeyboard && this.keyboardActiveView && this.keyboardActiveView !== view) return;
-		updateAnimation?.();
+		updateAnimation?.(this.#currentDeltaTime);
 	}
 
 	/**
