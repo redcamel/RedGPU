@@ -16,13 +16,6 @@ import mat4ToEuler from '../../math/mat4ToEuler';
  * [EN] This feature is currently in the experimental stage. The API may change in the future.
  * :::
  *
- * * ### Example
- * ```typescript
- * // RapierPhysics를 통해 생성됩니다.
- * // Created via RapierPhysics.
- * const body = physics.createBody(mesh, { type: 'dynamic', shape: 'box' });
- * ```
- *
  * @see [KO] [물리 플러그인 매뉴얼](/RedGPU/manual/ko/plugins/physics)
  * @see [EN] [Physics Plugin Manual](/RedGPU/manual/en/plugins/physics)
  * @experimental

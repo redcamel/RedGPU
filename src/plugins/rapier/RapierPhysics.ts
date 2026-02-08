@@ -18,17 +18,6 @@ import { RapierBody } from './RapierBody';
  * [EN] This feature is currently in the experimental stage. The API may change in the future.
  * :::
  *
- * * ### Example
- * ```typescript
- * const physics = new RedGPU.Plugins.RapierPhysics();
- * await physics.init();
- * 
- * // 매 프레임 업데이트 (Update every frame)
- * renderer.start(redGPUContext, (time, deltaTime) => {
- *     physics.step(deltaTime / 1000);
- * });
- * ```
- *
  * @see [KO] [물리 플러그인 매뉴얼](/RedGPU/manual/ko/plugins/physics)
  * @see [EN] [Physics Plugin Manual](/RedGPU/manual/en/plugins/physics)
  * @experimental
@@ -79,7 +68,7 @@ export class RapierPhysics implements IPhysicsEngine {
 	 *
 	 * * ### Example
 	 * ```typescript
-	 * const body = physics.getBodyByColliderHandle(handle);
+	 * const body = physicsEngine.getBodyByColliderHandle(handle);
 	 * ```
 	 *
 	 * @param handle -
@@ -99,7 +88,7 @@ export class RapierPhysics implements IPhysicsEngine {
 	 *
 	 * * ### Example
 	 * ```typescript
-	 * await physics.init();
+	 * await physicsEngine.init();
 	 * ```
 	 *
 	 * @returns
@@ -118,7 +107,11 @@ export class RapierPhysics implements IPhysicsEngine {
 	 *
 	 * * ### Example
 	 * ```typescript
-	 * physics.step(deltaTime / 1000);
+	 * // [KO] 렌더링 루프에서 물리 시뮬레이션 진행
+	 * // [EN] Step physics simulation in rendering loop
+	 * renderer.start(redGPUContext, (time, deltaTime) => {
+	 *     physicsEngine.step(deltaTime / 1000);
+	 * });
 	 * ```
 	 *
 	 * @param deltaTime -
@@ -144,9 +137,9 @@ export class RapierPhysics implements IPhysicsEngine {
 	 *
 	 * * ### Example
 	 * ```typescript
-	 * const body = physics.createBody(mesh, {
-	 *     type: 'dynamic',
-	 *     shape: 'sphere',
+	 * const body = physicsEngine.createBody(mesh, {
+	 *     type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC,
+	 *     shape: RedGPU.Physics.PHYSICS_SHAPE.SPHERE,
 	 *     mass: 1.0
 	 * });
 	 * ```
@@ -247,7 +240,9 @@ export class RapierPhysics implements IPhysicsEngine {
 	 *
 	 * * ### Example
 	 * ```typescript
-	 * physics.removeBody(body);
+	 * // [KO] 물리 바디 제거
+	 * // [EN] Remove physics body
+	 * physicsEngine.removeBody(body);
 	 * ```
 	 *
 	 * @param body -
@@ -265,7 +260,9 @@ export class RapierPhysics implements IPhysicsEngine {
 	 *
 	 * * ### Example
 	 * ```typescript
-	 * physics.gravity = { x: 0, y: -9.81, z: 0 };
+	 * // [KO] 중력 설정
+	 * // [EN] Set gravity
+	 * physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 	 * ```
 	 */
 	get gravity(): { x: number, y: number, z: number } {
@@ -282,7 +279,7 @@ export class RapierPhysics implements IPhysicsEngine {
 	 *
 	 * * ### Example
 	 * ```typescript
-	 * const controller = physics.createCharacterController(0.1);
+	 * const controller = physicsEngine.createCharacterController(0.1);
 	 * ```
 	 *
 	 * @param offset -
