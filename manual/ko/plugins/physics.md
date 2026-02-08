@@ -5,88 +5,103 @@ order: 1
 
 # 물리 엔진 플러그인 (Rapier)
 
-RedGPU는 고성능 WASM 기반 물리 엔진인 **Rapier**를 플러그인 형태로 지원합니다. 3D 공간에서의 충돌 감지, 중력, 강체(Rigid Body) 시뮬레이션 등을 손쉽게 구현할 수 있습니다.
+RedGPU는 고성능 WASM 기반 물리 엔진인 **Rapier**를 플러그인 형태로 지원합니다. 이 플러그인을 통해 3D 공간에서의 강체(Rigid Body) 시뮬레이션, 정밀한 충돌 감지, 캐릭터 컨트롤러 등을 엔진과 완벽하게 통합하여 사용할 수 있습니다.
+
+::: warning 실험적 기능 (Experimental)
+물리 엔진 플러그인은 현재 **실험적 단계**에 있습니다. 개발 과정에서 API 명세나 동작 방식이 예고 없이 변경될 수 있으니 주의하여 사용하시기 바랍니다.
+:::
 
 ## 1. 초기화 및 설정
 
-물리 엔진을 사용하려면 먼저 `RapierPhysics` 인스턴스를 생성하고 초기화해야 합니다. WASM 파일을 로드하므로 `init()` 메서드는 비동기로 동작합니다.
+물리 엔진은 메인 엔진 번들과 분리되어 있으므로 별도로 임포트해야 합니다. WASM 바이너리를 로드하는 과정이 포함되어 있어 초기화는 비동기로 진행됩니다.
 
 ```javascript
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 import { RapierPhysics } from "https://redcamel.github.io/RedGPU/dist/plugins/physics/rapier/index.js";
 
 // 1. 물리 엔진 인스턴스 생성
 const physicsEngine = new RapierPhysics();
 
-// 2. 물리 엔진 초기화 (WASM 로드)
+// 2. 엔진 초기화 (WASM 로드 및 월드 생성)
 await physicsEngine.init();
 
-// 3. 씬에 물리 엔진 등록
+// 3. 씬(Scene)에 물리 엔진 등록
+// 등록 시 씬 내부의 객체들과 물리 시뮬레이션이 연결될 준비가 완료됩니다.
 scene.physicsEngine = physicsEngine;
 ```
 
-## 2. 물리 바디(Body) 생성
+## 2. 시뮬레이션 자동 통합
 
-메시 객체에 물리적 특성을 부여하려면 `createBody()` 메서드를 사용합니다.
+RedGPU는 씬(Scene)에 등록된 물리 엔진을 렌더링 루프와 동기화하여 **자동으로 업데이트**합니다. 따라서 개발자가 별도의 `step()` 함수를 매 프레임 호출할 필요가 없습니다.
 
 ```javascript
+// 씬에 물리 엔진을 등록하는 것만으로 자동 시뮬레이션이 시작됩니다.
+scene.physicsEngine = physicsEngine;
+```
+
+기본적으로 초당 60회(60FPS)의 고정된 간격으로 물리 연산이 수행되어, 주사율이 다른 모니터 환경에서도 일관된 물리 법칙이 적용됩니다.
+
+## 3. 물리 바디(Body) 생성 및 연결
+
+일반적인 메쉬 객체에 물리적 특성을 부여하려면 `createBody()`를 사용합니다. RedGPU의 물리 시스템은 생성된 바디의 상태(위치, 회전)를 메쉬의 트랜스폼에 자동으로 동기화합니다.
+
+```typescript
 const box = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 scene.addChild(box);
 
-// 메시와 연동되는 물리 바디 생성
-physicsEngine.createBody(box, {
-    type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, // 동적 바디 (중력/힘의 영향 받음)
-    shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,        // 충돌 박스 형태
-    mass: 1,                                        // 질량
-    restitution: 0.5                                // 탄성
+// 메쉬에 동적(Dynamic) 물리 특성 부여
+const body = physicsEngine.createBody(box, {
+    type: RedGPU.Physics.PHYSICS_BODY_TYPE.DYNAMIC, // 물리 법칙의 영향을 받음
+    shape: RedGPU.Physics.PHYSICS_SHAPE.BOX,        // 박스 형태의 충돌체
+    mass: 1.0,                                      // 질량 (kg)
+    restitution: 0.5                                // 탄성 (0 ~ 1)
 });
+
+// 외부에서 힘(충격량) 적용 예시
+body.applyImpulse([0, 10, 0]);
 ```
 
-## 3. 주요 속성 및 타입
+### 복합 콜라이더 (Compound Shapes)
+`createBody` 호출 시 전달된 메쉬에 자식 메쉬들이 포함되어 있다면, RedGPU는 계층 구조를 자동으로 분석하여 모든 자식의 형상을 포함하는 **복합 콜라이더**를 생성합니다.
+
+## 4. 주요 상수 및 설정
 
 ### PHYSICS_BODY_TYPE
-물체의 물리적 동작 방식을 결정합니다.
-
-- **`DYNAMIC`**: 중력과 외부 힘에 반응하며 움직이는 물체 (박스, 캐릭터 등)
-- **`STATIC`**: 움직이지 않는 고정된 물체 (바닥, 벽 등)
-- **`KINEMATIC`**: 코드에 의해서만 움직이며 다른 물체에 힘을 전달하는 물체
+물체가 월드와 상호작용하는 방식을 정의합니다.
+- `DYNAMIC`: 중력과 충돌에 반응하며 자유롭게 움직입니다.
+- `STATIC`: 공간에 고정되어 움직이지 않으며 다른 물체와 충돌만 합니다. (바닥, 벽 등)
+- `KINEMATIC_POSITION`: 물리 법칙은 무시하고 코드로 직접 위치를 제어하며, 다른 물체를 밀어낼 수 있습니다.
 
 ### PHYSICS_SHAPE
-충돌 영역의 형태를 정의합니다.
+기본 제공되는 충돌체 형상입니다.
+- `BOX`, `SPHERE`, `CAPSULE`, `CYLINDER`: 표준 프리미티브 형상.
+- `HEIGHTFIELD`: 지형 데이터를 위한 높이맵 형상.
+- `MESH`: 복잡한 메쉬 데이터 기반의 정밀 콜라이더.
 
-- **`BOX`**, **`SPHERE`**, **`CAPSULE`**, **`CYLINDER`**, **`CONE`**, **`PLANE`** 등
+---
 
-## 4. 라이브 예제
+## 5. 라이브 예제
 
-RedGPU가 제공하는 다양한 물리 엔진 활용 사례들을 확인해 보세요.
+분야별 예제를 통해 물리 엔진의 실제 활용법을 확인해 보세요.
 
-### 4.1 기본 시뮬레이션
-- **[기본 낙하 및 충돌](https://redcamel.github.io/RedGPU/examples/physics/basic/)**: 기본적인 중력과 상자 충돌을 시연합니다.
-- **[다양한 기본 도형](https://redcamel.github.io/RedGPU/examples/physics/shapes/)**: 구, 캡슐, 원기둥 등 여러 형태의 충돌체를 확인합니다.
-- **[키네마틱(Kinematic) 제어](https://redcamel.github.io/RedGPU/examples/physics/kinematic/)**: 코드로 직접 움직임을 제어하는 물리 바디 활용 예제입니다.
+### 5.1 기초 및 형상
+- [기본 시뮬레이션 및 중력 테스트](https://redcamel.github.io/RedGPU/examples/physics/basic/)
+- [다양한 충돌체 형상 (Shapes)](https://redcamel.github.io/RedGPU/examples/physics/shapes/)
+- [지형(Heightfield) 시뮬레이션](https://redcamel.github.io/RedGPU/examples/physics/heightField/)
 
-### 4.2 캐릭터 및 컨트롤러
-- **[캐릭터 컨트롤러](https://redcamel.github.io/RedGPU/examples/physics/characterController/)**: 1인칭/3인칭 시점의 캐릭터 물리 이동 제어.
-- **[고급 캐릭터 컨트롤러](https://redcamel.github.io/RedGPU/examples/physics/advancedCharacterController/)**: 계단 오르기, 경사면 처리 등이 포함된 정교한 컨트롤러.
-- **[래그돌(Ragdoll)](https://redcamel.github.io/RedGPU/examples/physics/ragdoll/)**: 관절로 연결된 인간형 캐릭터의 물리 시뮬레이션.
+### 5.2 컨트롤러 및 상호작용
+- [키네마틱(Kinematic) 캐릭터 제어](https://redcamel.github.io/RedGPU/examples/physics/characterController/)
+- [고급 캐릭터 컨트롤러 (계단/경사로)](https://redcamel.github.io/RedGPU/examples/physics/advancedCharacterController/)
+- [마우스 클릭 및 레이캐스트 상호작용](https://redcamel.github.io/RedGPU/examples/physics/raycast/)
 
-### 4.3 차량 및 탈것
-- **[레이캐스트 차량](https://redcamel.github.io/RedGPU/examples/physics/raycastVehicle/)**: 물리 엔진 기반의 자동차 서스펜션 및 주행 시뮬레이션.
-
-### 4.4 관절 및 제약 조건 (Joints)
-- **[기본 조인트](https://redcamel.github.io/RedGPU/examples/physics/joints/)**: 객체 간의 물리적 연결.
-- **[회전 조인트 (Revolute)](https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/)**: 힌지처럼 특정 축을 기준으로 회전하는 연결.
-- **[스프링 조인트 (Spring)](https://redcamel.github.io/RedGPU/examples/physics/springJoint/)**: 탄성이 있는 연결 효과.
-
-### 4.5 고급 효과 및 최적화
-- **[부력(Buoyancy)](https://redcamel.github.io/RedGPU/examples/physics/buoyancy/)**: 액체 내에서의 부력 효과.
-- **[소프트 바디(Soft Body)](https://redcamel.github.io/RedGPU/examples/physics/softBody/)**: 천이나 젤리처럼 변형 가능한 물체.
-- **[폭발(Explosion)](https://redcamel.github.io/RedGPU/examples/physics/explosion/)**: 충격량 전파를 통한 폭발 연출.
-- **[메시 콜라이더(Mesh Collider)](https://redcamel.github.io/RedGPU/examples/physics/meshCollider/)**: 복잡한 지오메트리 형태 그대로의 충돌 영역 처리.
+### 5.3 조인트 및 고급 물리
+- [기본 조인트 (Joints)](https://redcamel.github.io/RedGPU/examples/physics/joints/)
+- [회전 조인트 (Revolute)](https://redcamel.github.io/RedGPU/examples/physics/revoluteJoint/)
+- [스프링 및 유연한 연결 (Spring)](https://redcamel.github.io/RedGPU/examples/physics/springJoint/)
 
 ---
 
 ## 핵심 요약
-
-- **RapierPhysics**를 통해 WASM 기반의 강력한 물리 연산을 지원합니다.
-- `scene.physicsEngine`에 등록하면 매 프레임 시뮬레이션이 자동으로 업데이트됩니다.
-- 메시 객체에 `createBody`를 호출하여 물리적 특성을 즉시 연결할 수 있습니다.
+1. `RapierPhysics`를 별도로 임포트하고 **비동기 초기화**가 필요합니다.
+2. `scene.physicsEngine` 등록 후 렌더 루프에서 `step(dt)`을 호출해야 시뮬레이션이 동작합니다.
+3. `createBody`는 메쉬의 계층 구조를 자동으로 물리 월드에 반영합니다.

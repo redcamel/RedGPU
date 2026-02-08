@@ -2467,14 +2467,14 @@ Check performance limits on each device.`
                                                                     en: `Implements a jelly-like soft body effect by connecting multiple nodes with springs.`
                                                                 },
                                                             },
-                                                            {
-                                                                name: 'Raycast Vehicle',
-                                                                path: 'physics/raycastVehicle',
-                                                                description: {
-                                                                    ko: `레이캐스트를 사용하여 서스펜션과 주행이 가능한 차량 물리 시뮬레이션을 구현합니다.`, 
-                                                                    en: `Implements a vehicle physics simulation with suspension and driving using raycasts.`
-                                                                },
-                                                            },
+                                                            // {
+                                                            //     name: 'Raycast Vehicle',
+                                                            //     path: 'physics/raycastVehicle',
+                                                            //     description: {
+                                                            //         ko: `레이캐스트를 사용하여 서스펜션과 주행이 가능한 차량 물리 시뮬레이션을 구현합니다.`,
+                                                            //         en: `Implements a vehicle physics simulation with suspension and driving using raycasts.`
+                                                            //     },
+                                                            // },
                                                             {
                                                                 name: 'Compound Shapes',                        path: 'physics/compound',
                         description: {
@@ -2527,14 +2527,14 @@ Check performance limits on each device.`
                             en: `Implements an advanced character controller with game-like controls such as inertial movement, air control, and double jumping.`
                         },
                     },
-                    {
-                        name: 'Snapshot & Serialization',
-                        path: 'physics/snapshot',
-                        description: {
-                            ko: `물리 월드 전체 상태를 바이너리 데이터로 저장하고 복구하는 기능을 시연합니다. 시간 되감기나 세이브 시스템 구현에 필수적입니다.`, 
-                            en: `Demonstrates saving and restoring the entire physics world state as binary data. Essential for time rewind or save systems.`
-                        },
-                    }
+                    // {
+                    //     name: 'Snapshot & Serialization',
+                    //     path: 'physics/snapshot',
+                    //     description: {
+                    //         ko: `물리 월드 전체 상태를 바이너리 데이터로 저장하고 복구하는 기능을 시연합니다. 시간 되감기나 세이브 시스템 구현에 필수적입니다.`,
+                    //         en: `Demonstrates saving and restoring the entire physics world state as binary data. Essential for time rewind or save systems.`
+                    //     },
+                    // }
                 ]
             },
             {
