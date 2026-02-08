@@ -2333,11 +2333,14 @@ Check performance limits on each device.`
     },
     {
         name: 'Physics',
+        experimental: true,
         list: [
             {
                 name: 'Fundamentals',
+                experimental: true,
                 list: [
                     {
+                        experimental: true,
                         name: 'Basic Physics',
                         path: 'physics/basic',
                         description: {
@@ -2346,6 +2349,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Shapes & Materials',
                         path: 'physics/shapes',
                         description: {
@@ -2354,6 +2358,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Kinematic Interaction',
                         path: 'physics/kinematic',
                         description: {
@@ -2362,6 +2367,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Mesh Collider',
                         path: 'physics/meshCollider',
                         description: {
@@ -2370,6 +2376,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'HeightField',
                         path: 'physics/heightField',
                         description: {
@@ -2378,6 +2385,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'GLTF Physics',
                         path: 'physics/gltfPhysics',
                         description: {
@@ -2389,8 +2397,10 @@ Check performance limits on each device.`
             },
             {
                 name: 'Interaction & Events',
+                experimental: true,
                 list: [
                     {
+                        experimental: true,
                         name: 'Raycasting Interaction',
                         path: 'physics/raycast',
                         description: {
@@ -2399,6 +2409,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Collision Events',
                         path: 'physics/collisionEvents',
                         description: {
@@ -2407,6 +2418,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Triggers & Sensors',
                         path: 'physics/triggers',
                         description: {
@@ -2415,6 +2427,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Collision Filtering',
                         path: 'physics/collisionFiltering',
                         description: {
@@ -2426,8 +2439,10 @@ Check performance limits on each device.`
             },
             {
                 name: 'Joints & Constraints',
+                experimental: true,
                 list: [
                     {
+                        experimental: true,
                         name: 'Basic Joints',
                         path: 'physics/joints',
                         description: {
@@ -2436,6 +2451,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Revolute Joints & Motors',
                         path: 'physics/revoluteJoint',
                         description: {
@@ -2444,6 +2460,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Prismatic Joints & Sliders',
                         path: 'physics/prismaticJoint',
                         description: {
@@ -2451,32 +2468,28 @@ Check performance limits on each device.`
                             en: `Implements elevators or slider devices using prismatic joints that allow reciprocal movement only in a straight line.`
                         },
                     },
-                                        {
-                                            name: 'Spring Joint',
-                                            path: 'physics/springJoint',
-                                            description: {
-                                                ko: `스프링 조인트를 사용하여 탄성 있는 연결을 구현하는 방법을 테스트합니다.`, 
-                                                en: `Tests how to implement elastic connections using spring joints.`
-                                            },
-                                        },
-                                                            {
-                                                                name: 'Soft Body',
-                                                                path: 'physics/softBody',
-                                                                description: {
-                                                                    ko: `다수의 노드를 스프링으로 연결하여 젤리와 같은 소프트 바디 효과를 구현합니다.`, 
-                                                                    en: `Implements a jelly-like soft body effect by connecting multiple nodes with springs.`
-                                                                },
-                                                            },
-                                                            // {
-                                                            //     name: 'Raycast Vehicle',
-                                                            //     path: 'physics/raycastVehicle',
-                                                            //     description: {
-                                                            //         ko: `레이캐스트를 사용하여 서스펜션과 주행이 가능한 차량 물리 시뮬레이션을 구현합니다.`,
-                                                            //         en: `Implements a vehicle physics simulation with suspension and driving using raycasts.`
-                                                            //     },
-                                                            // },
-                                                            {
-                                                                name: 'Compound Shapes',                        path: 'physics/compound',
+                    {
+                        experimental: true,
+                        name: 'Spring Joint',
+                        path: 'physics/springJoint',
+                        description: {
+                            ko: `스프링 조인트를 사용하여 탄성 있는 연결을 구현하는 방법을 테스트합니다.`, 
+                            en: `Tests how to implement elastic connections using spring joints.`
+                        },
+                    },
+                    {
+                        experimental: true,
+                        name: 'Soft Body',
+                        path: 'physics/softBody',
+                        description: {
+                            ko: `다수의 노드를 스프링으로 연결하여 젤리와 같은 소프트 바디 효과를 구현합니다.`, 
+                            en: `Implements a jelly-like soft body effect by connecting multiple nodes with springs.`
+                        },
+                    },
+                    {
+                        experimental: true,
+                        name: 'Compound Shapes',
+                        path: 'physics/compound',
                         description: {
                             ko: `여러 개의 지오메트리를 결합하여 하나의 복잡한 물리 객체를 만드는 복합 형상 기능을 테스트합니다.`, 
                             en: `Tests the compound shape function that combines multiple geometries to create a single complex physics object.`
@@ -2486,8 +2499,10 @@ Check performance limits on each device.`
             },
             {
                 name: 'Simulation & Systems',
+                experimental: true,
                 list: [
                     {
+                        experimental: true,
                         name: 'Surface Velocity (Conveyor)',
                         path: 'physics/surfaceVelocity',
                         description: {
@@ -2496,6 +2511,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Buoyancy Basics',
                         path: 'physics/buoyancy',
                         description: {
@@ -2504,6 +2520,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Ragdoll System',
                         path: 'physics/ragdoll',
                         description: {
@@ -2512,6 +2529,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Character Controller',
                         path: 'physics/characterController',
                         description: {
@@ -2520,27 +2538,22 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Advanced Character Controller',
                         path: 'physics/advancedCharacterController',
                         description: {
                             ko: `관성 이동, 공중 제어, 이중 점프 등 게임적인 조작감이 가미된 고급 캐릭터 컨트롤러를 구현합니다.`, 
                             en: `Implements an advanced character controller with game-like controls such as inertial movement, air control, and double jumping.`
                         },
-                    },
-                    // {
-                    //     name: 'Snapshot & Serialization',
-                    //     path: 'physics/snapshot',
-                    //     description: {
-                    //         ko: `물리 월드 전체 상태를 바이너리 데이터로 저장하고 복구하는 기능을 시연합니다. 시간 되감기나 세이브 시스템 구현에 필수적입니다.`,
-                    //         en: `Demonstrates saving and restoring the entire physics world state as binary data. Essential for time rewind or save systems.`
-                    //     },
-                    // }
+                    }
                 ]
             },
             {
                 name: 'Performance & Stress Test',
+                experimental: true,
                 list: [
                     {
+                        experimental: true,
                         name: 'Galton Board',
                         path: 'physics/galton',
                         description: {
@@ -2549,6 +2562,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Physics Bowling',
                         path: 'physics/bowling',
                         description: {
@@ -2557,6 +2571,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Impulse Explosion',
                         path: 'physics/explosion',
                         description: {
@@ -2565,6 +2580,7 @@ Check performance limits on each device.`
                         },
                     },
                     {
+                        experimental: true,
                         name: 'Ultimate Stress Test',
                         path: 'physics/stressTest',
                         description: {

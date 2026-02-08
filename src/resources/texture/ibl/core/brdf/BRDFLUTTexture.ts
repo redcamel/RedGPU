@@ -47,8 +47,8 @@ class BRDFLUTTexture extends ManagementResourceBase {
      * [EN] Video memory usage in bytes
      */
     get videoMemorySize(): number {
-        // 512 * 512 * 8 bytes (rgba16float)
-        return 512 * 512 * 8;
+        // 128 * 128 * 4 bytes (rg16float)
+        return 128 * 128 * 4;
     }
 }
 

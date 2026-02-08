@@ -1,7 +1,5 @@
-// [KO] BRDF 통합 컴퓨트 쉐이더 (DFG LUT 생성용)
-// [EN] BRDF integration compute shader (for DFG LUT generation)
-
-@group(0) @binding(0) var outTexture: texture_storage_2d<rgba16float, write>;
+// [KO] BRDF 통합 쉐이더 (DFG LUT 생성용)
+// [EN] BRDF integration shader (for DFG LUT generation)
 
 const PI = 3.14159265359;
 
@@ -85,15 +83,30 @@ fn integrateBRDF(in_NdotV: f32, roughness: f32) -> vec2<f32> {
     return vec2<f32>(A, B) / f32(sampleCount);
 }
 
-@compute @workgroup_size(16, 16)
-fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(outTexture);
-    if (global_id.x >= size.x || global_id.y >= size.y) {
-        return;
-    }
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) uv: vec2<f32>,
+};
 
-    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
-    let integratedBRDF = integrateBRDF(uv.x, uv.y);
-    textureStore(outTexture, global_id.xy, vec4<f32>(integratedBRDF, 0.0, 1.0));
+@vertex
+fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
+    var pos = array<vec2<f32>, 3>(
+        vec2<f32>(-1.0, -1.0),
+        vec2<f32>(3.0, -1.0),
+        vec2<f32>(-1.0, 3.0)
+    );
+    var output: VertexOutput;
+    output.position = vec4<f32>(pos[vertexIndex], 0.0, 1.0);
+    output.uv = pos[vertexIndex] * 0.5 + 0.5;
+    return output;
 }
 
+@fragment
+fn fs_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
+    // [KO] WebGPU NDC는 하단이 -1, 상단이 1입니다.
+    // [KO] 텍스처의 0행(상단)을 Roughness 0으로 만들기 위해 y축을 뒤집습니다.
+    // [EN] WebGPU NDC is -1 at the bottom and 1 at the top.
+    // [EN] Flip the y-axis to make the 0th row (top) of the texture Roughness 0.
+    let integratedBRDF = integrateBRDF(uv.x, 1.0 - uv.y);
+    return vec4<f32>(integratedBRDF, 0.0, 1.0);
+}
