@@ -103,15 +103,7 @@ RedGPU.init(
 
 		const charController = physicsEngine.createCharacterController(0.01);
 		
-		const keys = { w: false, s: false, a: false, d: false, ' ': false };
-		window.addEventListener('keydown', (e) => { 
-			const k = e.key.toLowerCase();
-			if (keys.hasOwnProperty(k)) keys[k] = true; 
-		});
-		window.addEventListener('keyup', (e) => { 
-			const k = e.key.toLowerCase();
-			if (keys.hasOwnProperty(k)) keys[k] = false; 
-		});
+		const keyboardBuffer = redGPUContext.keyboardKeyBuffer;
 
 		let velocity = { x: 0, y: 0, z: 0 };
 		let jumpCount = 0;
@@ -145,10 +137,10 @@ RedGPU.init(
 			const rZ = fX;
 
 			let inputX = 0, inputZ = 0;
-			if (keys.w) inputZ -= 1;
-			if (keys.s) inputZ += 1;
-			if (keys.a) inputX -= 1;
-			if (keys.d) inputX += 1;
+			if (keyboardBuffer.w || keyboardBuffer.W) inputZ -= 1;
+			if (keyboardBuffer.s || keyboardBuffer.S) inputZ += 1;
+			if (keyboardBuffer.a || keyboardBuffer.A) inputX -= 1;
+			if (keyboardBuffer.d || keyboardBuffer.D) inputX += 1;
 
 			const len = Math.sqrt(inputX * inputX + inputZ * inputZ);
 			if (len > 0) {
@@ -168,10 +160,10 @@ RedGPU.init(
 
 			// [KO] 점프 로직 (최대 2단 점프)
 			// [EN] Jump logic (Max double jump)
-			if (keys[' '] && jumpCount < maxJumps) {
+			if (keyboardBuffer[' '] && jumpCount < maxJumps) {
 				velocity.y = jumpForce;
 				jumpCount++;
-				keys[' '] = false; 
+				keyboardBuffer[' '] = false; 
 			}
 
 			charController.computeColliderMovement(charBody.nativeCollider, velocity);

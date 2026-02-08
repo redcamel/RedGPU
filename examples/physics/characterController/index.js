@@ -104,18 +104,7 @@ RedGPU.init(
 		// [EN] Create character controller (offset 0.1m)
 		const charController = physicsEngine.createCharacterController(0.1);
 
-		// [KO] 입력 핸들링
-		// [EN] Input handling
-		const keys = { w: false, s: false, a: false, d: false };
-		window.addEventListener('keydown', (e) => {
-			const k = e.key.toLowerCase();
-			if (keys.hasOwnProperty(k)) keys[k] = true;
-		});
-		window.addEventListener('keyup', (e) => {
-			const k = e.key.toLowerCase();
-			if (keys.hasOwnProperty(k)) keys[k] = false;
-		});
-
+		const keyboardBuffer = redGPUContext.keyboardKeyBuffer;
 		const movement = { x: 0, y: 0, z: 0 };
 		const speed = 0.15;
 		const gravityConst = -0.05;
@@ -123,7 +112,6 @@ RedGPU.init(
 		const resetCharacter = () => {
 			charBody.nativeBody.setTranslation({ x: 0, y: 2, z: 0 }, true);
 			movement.x = movement.y = movement.z = 0;
-			Object.keys(keys).forEach(k => keys[k] = false);
 		};
 
 		const renderer = new RedGPU.Renderer();
@@ -147,10 +135,10 @@ RedGPU.init(
 			const rZ = fX;
 
 			let inputX = 0, inputZ = 0;
-			if (keys.w) inputZ -= 1;
-			if (keys.s) inputZ += 1;
-			if (keys.a) inputX -= 1;
-			if (keys.d) inputX += 1;
+			if (keyboardBuffer.w || keyboardBuffer.W) inputZ -= 1;
+			if (keyboardBuffer.s || keyboardBuffer.S) inputZ += 1;
+			if (keyboardBuffer.a || keyboardBuffer.A) inputX -= 1;
+			if (keyboardBuffer.d || keyboardBuffer.D) inputX += 1;
 
 			const len = Math.sqrt(inputX * inputX + inputZ * inputZ);
 			if (len > 0) {

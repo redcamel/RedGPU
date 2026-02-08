@@ -95,22 +95,19 @@ RedGPU.init(
 			return { pivot, mesh };
 		});
 
-		const input = { forward: 0, right: 0 };
-		window.addEventListener('keydown', (e) => {
-			if (e.key === 'w' || e.key === 'ArrowUp') input.forward = 1;
-			if (e.key === 's' || e.key === 'ArrowDown') input.forward = -1;
-			if (e.key === 'a' || e.key === 'ArrowLeft') input.right = -1;
-			if (e.key === 'd' || e.key === 'ArrowRight') input.right = 1;
-		});
-		window.addEventListener('keyup', (e) => {
-			if (e.key === 'w' || e.key === 'ArrowUp' || e.key === 's' || e.key === 'ArrowDown') input.forward = 0;
-			if (e.key === 'a' || e.key === 'ArrowLeft' || e.key === 'd' || e.key === 'ArrowRight') input.right = 0;
-		});
+		const keyboardBuffer = redGPUContext.keyboardKeyBuffer;
 
 		let steerAngle = 0;
 		let wheelSpin = 0;
 
 		const updateVehicle = () => {
+			let forward = 0;
+			let right = 0;
+			if (keyboardBuffer.w || keyboardBuffer.W || keyboardBuffer.ArrowUp) forward = 1;
+			if (keyboardBuffer.s || keyboardBuffer.S || keyboardBuffer.ArrowDown) forward = -1;
+			if (keyboardBuffer.a || keyboardBuffer.A || keyboardBuffer.ArrowLeft) right = -1;
+			if (keyboardBuffer.d || keyboardBuffer.D || keyboardBuffer.ArrowRight) right = 1;
+
 			const body = chassisBody.nativeBody;
 			const pos = body.translation();
 			const rot = body.rotation();
@@ -123,7 +120,7 @@ RedGPU.init(
 			RedGPU.Math.vec3.transformQuat(localForward, localForward, q);
 			RedGPU.Math.vec3.transformQuat(localRight, localRight, q);
 
-			steerAngle += (input.right * 30 - steerAngle) * 0.1;
+			steerAngle += (right * 30 - steerAngle) * 0.1;
 			const currentVel = body.linvel();
 			const speed = RedGPU.Math.vec3.dot(RedGPU.Math.vec3.fromValues(currentVel.x, currentVel.y, currentVel.z), localForward);
 			wheelSpin += speed * 2.0;
@@ -171,8 +168,8 @@ RedGPU.init(
 						body.applyImpulseAtPoint({ x: wheelRight[0] * lateralImpulseMag, y: wheelRight[1] * lateralImpulseMag, z: wheelRight[2] * lateralImpulseMag }, worldContactPos, true);
 
 						// [엔진 구동 - 차체 중심 방향으로 힘 분산]
-						if (i >= 2 && input.forward !== 0) {
-							const driveImpulseMag = input.forward * 12000 * (1/60);
+						if (i >= 2 && forward !== 0) {
+							const driveImpulseMag = forward * 12000 * (1/60);
 							// [KO] 접점이 아닌 차체 중심 높이로 힘의 작용점을 올려 앞들림 방지
 							const centerDrivePos = { x: worldContactPos.x, y: pos.y, z: worldContactPos.z };
 							body.applyImpulseAtPoint({ x: localForward[0] * driveImpulseMag, y: localForward[1] * driveImpulseMag, z: localForward[2] * driveImpulseMag }, centerDrivePos, true);
