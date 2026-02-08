@@ -169,10 +169,6 @@ class Renderer {
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
             {
-                // @ts-ignore
-                camera.update?.(view, time)
-            }
-            {
                 const {timestamp, prevTimestamp} = renderViewStateData;
                 const elapsed = timestamp - prevTimestamp;
 
@@ -185,15 +181,17 @@ class Renderer {
                     const {scene} = view
                     if (scene.physicsEngine) {
                         // 물리 시뮬레이션 진행 (초 단위 deltaTime 전달)
-                        scene.physicsEngine.step(fpsInterval);
+                        scene.physicsEngine.step(fpsInterval / 1000);
                     }
                 }
+
+                // @ts-ignore
+                camera.update?.(view, time)
             }
 
             this.#updateJitter(view)
             this.#renderPassViewShadow(view, commandEncoder)
-            // @ts-ignore
-            camera.targetMesh?.render(view.renderViewStateData)
+
             this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
             this.#renderPassViewPickingLayer(view, commandEncoder)
