@@ -2,6 +2,7 @@ import {mat4, vec3} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
+import updateObject3DMatrix from "../../math/updateObject3DMatrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
@@ -560,8 +561,9 @@ class FollowController extends AController {
 	update(view: View3D, time: number): void {
 
 		super.update(view, time, (deltaTime) => {
-			if(view.renderViewStateData.currentRenderPassEncoder) {
-				this.#targetMesh.render(view.renderViewStateData)
+			const {targetMesh} = this
+			if(targetMesh) {
+				updateObject3DMatrix(targetMesh,view)
 			}
 
 			this.#currentDistance = this.#targetDistance + (this.#currentDistance - this.#targetDistance) * Math.pow(this.#distanceInterpolation, deltaTime);
@@ -675,6 +677,11 @@ class FollowController extends AController {
 	 * @private
 	 */
 	#snapToTarget(): void {
+		// [KO] 초기화 시에도 매트릭스를 정확히 계산합니다.
+		// [EN] Calculate the matrix accurately even during initialization.
+		// @ts-ignore
+		updateObject3DMatrix(this.#targetMesh, {pixelRectObject: {height: 1}});
+
 		// 목표값들을 현재값으로 즉시 동기화
 		this.#currentDistance = this.#targetDistance;
 		this.#currentHeight = this.#targetHeight;

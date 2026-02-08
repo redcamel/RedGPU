@@ -3,6 +3,7 @@ import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
 import MESH_TYPE from "../../MESH_TYPE";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
+import updateObject3DMatrix from "../../../math/updateObject3DMatrix";
 
 interface AGroupBase {
 }
@@ -449,46 +450,8 @@ abstract class GroupBase extends Object3DContainer {
         }
         if (this.dirtyTransform) {
             dirtyTransformForChildren = true;
-            {
-                const {pixelRectObject} = view;
-                const parent = this.parent;
-                const tLocalMatrix = this.localMatrix;
-                // 초기화
-                mat4.identity(tLocalMatrix);
-                // Position 설정 (translate)
-                mat4.translate(tLocalMatrix, tLocalMatrix, [
-                    this.#x,
-                    this.#y,
-                    this.#z,
-                ]);
-                // Rotation 설정 (rotate)
-                mat4.rotateX(tLocalMatrix, tLocalMatrix, this.#rotationX * CONVERT_RADIAN); // X축 회전
-                mat4.rotateY(tLocalMatrix, tLocalMatrix, this.#rotationY * CONVERT_RADIAN); // Y축 회전
-                mat4.rotateZ(tLocalMatrix, tLocalMatrix, this.#rotationZ * CONVERT_RADIAN); // Z축 회전
-                // Scale 설정 (scale)
-                let scaleVec = [this.#scaleX, this.#scaleY, this.#scaleZ];
-                // @ts-ignore
-                if (this.renderTextureWidth) {
-                    // @ts-ignore
-                    scaleVec[0] *= this.renderTextureWidth / pixelRectObject.height;
-                    // @ts-ignore
-                    scaleVec[1] *= this.renderTextureHeight / pixelRectObject.height;
-                }
-                // @ts-ignore
-                mat4.scale(tLocalMatrix, tLocalMatrix, scaleVec);
-                // Pivot 처리를 위한 번역 (pivot 적용)
-                if (this.#pivotX || this.#pivotY || this.#pivotZ) {
-                    const pivotTranslation = [-this.#pivotX, -this.#pivotY, -this.#pivotZ];
-                    // @ts-ignore
-                    mat4.translate(tLocalMatrix, tLocalMatrix, pivotTranslation);
-                }
-                // 부모 매트릭스와 합성 (modelMatrix 계산)
-                if (parent?.modelMatrix) {
-                    mat4.multiply(this.modelMatrix, parent.modelMatrix, this.localMatrix);
-                } else {
-                    mat4.copy(this.modelMatrix, this.localMatrix);
-                }
-            }
+            updateObject3DMatrix(this,view)
+
         }
         if (this.dirtyTransform) {
             dirtyTransformForChildren = true

@@ -10,8 +10,10 @@ import matToEuler from "./mat4ToEuler";
 import quaternionToRotationMat4 from "./quaternionToRotationMat4";
 import sortTransparentObjects from "./sortTransparentObjects";
 import Ray from "./Ray";
+import updateObject3DMatrix from "./updateObject3DMatrix";
 export {mat4, mat3, quat, vec2, vec3, vec4} from "gl-matrix"
 export * from "./coordinates";
+
 export {
     calculateNormals,
     calculateTangents,
@@ -19,5 +21,6 @@ export {
     matToEuler,
     quaternionToRotationMat4,
     sortTransparentObjects,
+    updateObject3DMatrix,
     Ray
 }

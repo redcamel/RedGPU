@@ -2,6 +2,7 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
+import updateObject3DMatrix from "../../math/updateObject3DMatrix";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
 
@@ -458,7 +459,7 @@ class OrbitController extends AController {
 	 */
 	fitMeshToScreenCenter(mesh: Mesh, view: View3D): void {
 
-		this.#calcTargetMeshMatrix(mesh, view);
+		updateObject3DMatrix(mesh, view);
 		const bounds = mesh.combinedBoundingAABB;
 
 		// 데이터 유효성 검사 (0,0,0 반환 방지)
@@ -528,38 +529,6 @@ class OrbitController extends AController {
 		super.update(view, time, (deltaTime) => {
 			this.#updateAnimation(deltaTime);
 		});
-	}
-
-	#calcTargetMeshMatrix(mesh: Mesh, view: View3D) {
-		//
-
-		const localMatrix = mat4.create();
-		//
-		mat4.identity(localMatrix)
-		mat4.translate(localMatrix, localMatrix, [mesh.x, mesh.y, mesh.z]);
-		mat4.rotateX(localMatrix, localMatrix, mesh.rotationX * Math.PI / 180);
-		mat4.rotateY(localMatrix, localMatrix, mesh.rotationY * Math.PI / 180);
-		mat4.rotateZ(localMatrix, localMatrix, mesh.rotationZ * Math.PI / 180);
-		mat4.scale(localMatrix, localMatrix, [mesh.scaleX, mesh.scaleY, mesh.scaleZ]);
-		mat4.copy(mesh.localMatrix, localMatrix);
-		//
-		if (mesh.parent) {
-			mat4.multiply(mesh.modelMatrix, mesh.parent?.modelMatrix, localMatrix);
-		} else {
-			mat4.copy(mesh.modelMatrix, localMatrix);
-		}
-
-		//
-		let i = 0;
-		let len = mesh.children.length;
-		for (let i = 0; i < len; i++) {
-			const child = mesh.children[i];
-			if (child instanceof Mesh) {
-				this.#calcTargetMeshMatrix(child, view);
-			}
-
-		}
-
 	}
 
 	/**
