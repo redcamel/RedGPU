@@ -29,7 +29,7 @@ const BaseSprite2D = mixInMesh2D(Mesh);
  * @see [Sprite2D Hierarchy example](/RedGPU/examples/2d/sprite2D/hierarchy/)
  * @see [Sprite2D Pivot example](/RedGPU/examples/2d/sprite2D/pivot/)
  * @see [Sprite2D Child Methods example](/RedGPU/examples/2d/sprite2D/childMethod/)
- * @see [Sprite2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/sprite2D/)
+ * @see [Sprite2D MouseEvent example](/RedGPU/examples/2d/interaction/mouseEvent/sprite2D/)
  *
  * @category Sprite
  */

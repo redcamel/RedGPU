@@ -726,46 +726,59 @@ const ExampleList = [
                 ]
             },
             {
-                name: 'MouseEvent',
+                name: 'Interaction',
                 list: [
                     {
-                        name: 'Mesh',
-                        path: '3d/mouseEvent/mesh',
-                        description: {
-                            ko: `Mesh에 마우스 이벤트를 설정하는 예제입니다.`, 
-                            en: `Here's an example of setting up mouse events on a Mesh.`
-                        },
+                        name: 'MouseEvent',
+                        list: [
+                            {
+                                name: 'Mesh',
+                                path: '3d/mouseEvent/mesh',
+                                description: {
+                                    ko: `Mesh에 마우스 이벤트를 설정하는 예제입니다.`, 
+                                    en: `Here's an example of setting up mouse events on a Mesh.`
+                                },
+                            },
+                            {
+                                name: 'Sprite3D',
+                                path: '3d/mouseEvent/sprite3D',
+                                description: {
+                                    ko: `Sprite3D에 마우스 이벤트를 설정하는 예제입니다.`, 
+                                    en: `Here's an example of setting up mouse events on a Sprite3D.`
+                                },
+                            },
+                            {
+                                name: 'SpriteSheet3D',
+                                path: '3d/mouseEvent/spriteSheet3D',
+                                description: {
+                                    ko: `SpriteSheet3D에 마우스 이벤트를 설정하는 예제입니다.`, 
+                                    en: `Here's an example of setting up mouse events on a SpriteSheet3D.`
+                                },
+                            },
+                            {
+                                name: 'TextField3D',
+                                path: '3d/mouseEvent/textField3D',
+                                description: {
+                                    ko: `TextField3D에 마우스 이벤트를 설정하는 예제입니다.`, 
+                                    en: `Here's an example of setting up mouse events on a TextField3D.`
+                                },
+                            },
+                            {
+                                name: 'Raycasting (Precision Picking)',
+                                path: '3d/mouseEvent/raycasting',
+                                description: {
+                                    ko: `이 예제는 복잡한 지오메트리(TorusKnot)에 대한 고정밀 레이캐스팅을 보여줍니다.<br/>버텍스 버퍼를 분석하여 정확한 교차 지점, 면 인덱스 및 로컬 좌표를 CPU에서 계산합니다.`, 
+                                    en: `This example demonstrates high-precision raycasting on complex geometry (TorusKnot).<br/>It calculates the exact intersection point, face index, and local coordinates on the CPU by analyzing vertex buffers.`
+                                },
+                            },
+                        ]
                     },
                     {
-                        name: 'Sprite3D',
-                        path: '3d/mouseEvent/sprite3D',
+                        name: 'KeyboardEvent',
+                        path: '3d/interaction/keyboardEvent',
                         description: {
-                            ko: `Sprite3D에 마우스 이벤트를 설정하는 예제입니다.`, 
-                            en: `Here's an example of setting up mouse events on a Sprite3D.`
-                        },
-                    },
-                    {
-                        name: 'SpriteSheet3D',
-                        path: '3d/mouseEvent/spriteSheet3D',
-                        description: {
-                            ko: `SpriteSheet3D에 마우스 이벤트를 설정하는 예제입니다.`, 
-                            en: `Here's an example of setting up mouse events on a SpriteSheet3D.`
-                        },
-                    },
-                    {
-                        name: 'TextField3D',
-                        path: '3d/mouseEvent/textField3D',
-                        description: {
-                            ko: `TextField3D에 마우스 이벤트를 설정하는 예제입니다.`, 
-                            en: `Here's an example of setting up mouse events on a TextField3D.`
-                        },
-                    },
-                    {
-                        name: 'Raycasting (Precision Picking)',
-                        path: '3d/mouseEvent/raycasting',
-                        description: {
-                            ko: `이 예제는 복잡한 지오메트리(TorusKnot)에 대한 고정밀 레이캐스팅을 보여줍니다.<br/>버텍스 버퍼를 분석하여 정확한 교차 지점, 면 인덱스 및 로컬 좌표를 CPU에서 계산합니다.`, 
-                            en: `This example demonstrates high-precision raycasting on complex geometry (TorusKnot).<br/>It calculates the exact intersection point, face index, and local coordinates on the CPU by analyzing vertex buffers.`
+                            ko: `keyboardKeyBuffer를 사용하여 매 프레임 키보드 상태를 체크하고 객체를 제어하는 기초적인 방법을 보여줍니다.`, 
+                            en: `Shows basic way to check keyboard state every frame and control an object using keyboardKeyBuffer.`
                         },
                     },
                 ]
@@ -2235,30 +2248,43 @@ Check performance limits on each device.`
                 ]
             },
             {
-                name: '2D MouseEvent',
+                name: 'Interaction',
                 list: [
                     {
-                        name: 'Sprite2D',
-                        path: '2d/mouseEvent/sprite2D',
-                        description: {
-                            ko: `Sprite2D에 대한 마우스 이벤트를 처리하는 예제입니다.`, 
-                            en: `An example handling mouse events on Sprite2D.`
-                        },
+                        name: 'MouseEvent',
+                        list: [
+                            {
+                                name: 'Sprite2D',
+                                path: '2d/interaction/mouseEvent/sprite2D',
+                                description: {
+                                    ko: `Sprite2D에 대한 마우스 이벤트를 처리하는 예제입니다.`, 
+                                    en: `An example handling mouse events on Sprite2D.`
+                                },
+                            },
+                            {
+                                name: 'SpriteSheet2D',
+                                path: '2d/interaction/mouseEvent/spriteSheet2D',
+                                description: {
+                                    ko: `SpriteSheet2D에 대한 마우스 이벤트를 처리하는 예제입니다.`, 
+                                    en: `An example handling mouse events on SpriteSheet2D.`
+                                },
+                            },
+                            {
+                                name: 'TextField2D',
+                                path: '2d/interaction/mouseEvent/textField2D',
+                                description: {
+                                    ko: `TextField2D에 대한 마우스 이벤트를 처리하는 예제입니다.`, 
+                                    en: `An example handling mouse events on TextField2D.`
+                                },
+                            },
+                        ]
                     },
                     {
-                        name: 'SpriteSheet2D',
-                        path: '2d/mouseEvent/spriteSheet2D',
+                        name: 'KeyboardEvent',
+                        path: '2d/interaction/keyboardEvent',
                         description: {
-                            ko: `SpriteSheet2D에 대한 마우스 이벤트를 처리하는 예제입니다.`, 
-                            en: `An example handling mouse events on SpriteSheet2D.`
-                        },
-                    },
-                    {
-                        name: 'TextField2D',
-                        path: '2d/mouseEvent/textField2D',
-                        description: {
-                            ko: `TextField2D에 대한 마우스 이벤트를 처리하는 예제입니다.`, 
-                            en: `An example handling mouse events on TextField2D.`
+                            ko: `keyboardKeyBuffer를 사용하여 2D 환경에서 객체를 제어하는 방법을 보여줍니다.`, 
+                            en: `Demonstrates how to control an object in a 2D environment using keyboardKeyBuffer.`
                         },
                     },
                 ]

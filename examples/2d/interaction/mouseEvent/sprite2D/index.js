@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../../dist/index.js?t=1769835266959";
 
 /**
  * [KO] Sprite2D Mouse Event 예제
@@ -112,7 +112,7 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
  * @param {function} updateInfo
  */
 const createSampleSprite2D = async (redGPUContext, scene, updateInfo) => {
-    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/UV_Grid_Sm.jpg');
 
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
         const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
@@ -146,6 +146,6 @@ const createSampleSprite2D = async (redGPUContext, scene, updateInfo) => {
  */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
     setDebugButtons(RedGPU, redGPUContext);
 };

@@ -1,11 +1,11 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../../dist/index.js?t=1769835266959";
 
 /**
- * [KO] TextField2D Mouse Event 예제
- * [EN] TextField2D Mouse Event example
+ * [KO] SpriteSheet2D Mouse Event 예제
+ * [EN] SpriteSheet2D Mouse Event example
  *
- * [KO] TextField2D 객체에서 발생하는 마우스 이벤트를 처리하는 방법을 보여줍니다.
- * [EN] Demonstrates how to handle mouse events on TextField2D objects.
+ * [KO] SpriteSheet2D 객체에서 발생하는 마우스 이벤트를 처리하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to handle mouse events on SpriteSheet2D objects.
  */
 
 const canvas = document.createElement('canvas');
@@ -60,7 +60,7 @@ Face Index: ${e.faceIndex}
 UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
         };
 
-        createSampleTextField2D(redGPUContext, scene, updateInfo);
+        createSampleSprite2D(redGPUContext, scene, updateInfo);
 
         let centerX = redGPUContext.screenRectObject.width / 2;
         let centerY = redGPUContext.screenRectObject.height / 2;
@@ -81,14 +81,14 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
             const radius = 250;
             const numChildren = view.scene.children.length;
 
-            view.scene.children.forEach((textField2D, index) => {
+            view.scene.children.forEach((spriteSheet2D, index) => {
                 const angle = (index / numChildren) * Math.PI * 2;
                 const endX = centerX + Math.cos(angle) * radius;
                 const endY = centerY + Math.sin(angle) * radius;
 
-                textField2D.setPosition(
-                    textField2D.x + (endX - textField2D.x) * 0.3,
-                    textField2D.y + (endY - textField2D.y) * 0.3
+                spriteSheet2D.setPosition(
+                    spriteSheet2D.x + (endX - spriteSheet2D.x) * 0.3,
+                    spriteSheet2D.y + (endY - spriteSheet2D.y) * 0.3
                 );
             });
         };
@@ -105,44 +105,37 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 );
 
 /**
- * [KO] 샘플 TextField2D 객체들을 생성하고 이벤트를 등록합니다.
- * [EN] Creates sample TextField2D objects and registers events.
+ * [KO] 샘플 SpriteSheet2D 객체들을 생성하고 이벤트를 등록합니다.
+ * [EN] Creates sample SpriteSheet2D objects and registers events.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Scene} scene
  * @param {function} updateInfo
  */
-const createSampleTextField2D = async (redGPUContext, scene, updateInfo) => {
+const createSampleSprite2D = async (redGPUContext, scene, updateInfo) => {
+    const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
-        const textField = new RedGPU.Display.TextField2D(redGPUContext);
-
-        textField.text = `Hello ${eventName} Event!`;
-        textField.background = 'blue';
-        textField.color = 'white';
-        textField.fontSize = 16;
-        textField.padding = 10;
-        textField.borderRadius = 10;
-
-        scene.addChild(textField);
-        textField.addListener(eventName, (e) => {
+        const spriteSheet = new RedGPU.Display.SpriteSheet2D(redGPUContext, spriteSheetInfo);
+        scene.addChild(spriteSheet);
+        spriteSheet.addListener(eventName, (e) => {
             updateInfo(eventName, e);
-            e.target.background = getRandomHexValue();
+            
+            // [KO] 머티리얼의 tint 색상을 무작위로 변경
+            // [EN] Randomly change the tint color of the material
+            spriteSheet.material.useTint = true;
+            spriteSheet.material.tint.r = Math.floor(Math.random() * 255);
+            spriteSheet.material.tint.g = Math.floor(Math.random() * 255);
+            spriteSheet.material.tint.b = Math.floor(Math.random() * 255);
         });
+
+        const label = new RedGPU.Display.TextField2D(redGPUContext);
+        label.text = `Hello ${eventName} Event!`;
+        label.padding = 20;
+        label.borderRadius = 16;
+        label.background = 'rgba(104,54,54,0.4)';
+        label.y = 0;
+        spriteSheet.addChild(label);
     });
 };
-
-/**
- * [KO] 무작위 16진수 색상 값을 반환합니다.
- * [EN] Returns a random hex color value.
- * @returns {string}
- */
-function getRandomHexValue() {
-    let result = '';
-    const characters = '0123456789ABCDEF';
-    for (let i = 0; i < 6; i++) {
-        result += characters[Math.floor(Math.random() * 16)];
-    }
-    return `#${result}`;
-}
 
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
@@ -151,6 +144,6 @@ function getRandomHexValue() {
  */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
     setDebugButtons(RedGPU, redGPUContext);
 };

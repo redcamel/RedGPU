@@ -38,7 +38,7 @@ const BaseSpriteSheet2D = mixInMesh2D(ASpriteSheet);
  *
  * [KO] 아래는 SpriteSheet2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of SpriteSheet2D.
- * @see [SpriteSheet2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/spriteSheet2D/)
+ * @see [SpriteSheet2D MouseEvent example](/RedGPU/examples/2d/interaction/mouseEvent/spriteSheet2D/)
  *
  * @category SpriteSheet
  */
