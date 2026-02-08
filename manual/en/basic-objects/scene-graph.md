@@ -14,20 +14,20 @@ const sceneGraph = `
 
 # Scene Graph
 
-**Scene Graph** refers to the hierarchical structure of objects placed in 3D space. In RedGPU, every **Mesh** can become a parent of another mesh, and the parent's transformation (position, rotation, scale) is inherited intact by the child.
+**Scene Graph** refers to the hierarchical structure of objects placed in 3D space. In RedGPU, every **Mesh** can become a parent of another mesh, and the parent's transformation (position, rotation, scale) is inherited by its children.
 
 ## 1. Mesh Hierarchy
 
-RedGPU's **Mesh** is an object with geometry and material, and at the same time, it acts as a container that can hold other meshes.
+RedGPU's **Mesh** is an object with geometry and material, while simultaneously acting as a container that can hold other meshes.
 
-- **Parent Mesh**: A reference point containing child objects. If the parent moves, the child moves with it while maintaining its relative distance from the parent.
-- **Child Mesh**: An object belonging to a parent. Its `x, y, z` coordinates are calculated as relative coordinates considering the parent's center point as `(0, 0, 0)`.
+- **Parent Mesh**: A reference point containing child objects. If the parent moves, its children move with it, maintaining their relative distance from the parent.
+- **Child Mesh**: An object belonging to a parent. Its `x, y, z` coordinates are calculated as relative coordinates, with the parent's center point treated as `(0, 0, 0)`.
 
 <ClientOnly>
   <MermaidResponsive :definition="sceneGraph" />
 </ClientOnly>
 
-## 2. Forming Hierarchy: addChild
+## 2. Forming a Hierarchy: addChild
 
 You can register a specific mesh as a child of another mesh using the `addChild()` method of **RedGPU.Display.Mesh**.
 
@@ -48,15 +48,15 @@ earth.x = 5;
 
 ## 3. Transformation Inheritance
 
-State changes of the parent mesh affect all children.
+State changes of the parent mesh affect all of its children.
 
-1. **Position**: If the parent moves, the child moves together while attached to the parent.
-2. **Rotation**: If the parent rotates around its axis, the child rotates around the parent's center as if orbiting.
-3. **Scale**: If the parent's size doubles, the child's size and distance from the parent also double.
+1. **Position**: If the parent moves, the child moves with it as if attached to the parent.
+2. **Rotation**: If the parent rotates around its own axis, the child rotates around the parent's center, as if orbiting.
+3. **Scale**: If the parent's size doubles, both the child's size and its distance from the parent also double.
 
-## 4. Practice: Orbit Model using Hierarchy
+## 4. Practice: Orbit Model Using Hierarchy
 
-Let's see how the rotation of the parent mesh affects the child.
+Let's observe how the rotation of a parent mesh affects its children.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -83,8 +83,8 @@ RedGPU.init(canvas, (redGPUContext) => {
         new RedGPU.Primitive.Sphere(redGPUContext, 0.7),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#1890ff')
     );
-    earth.x = 7; // Position 7 units away from Sun (Parent)
-    sun.addChild(earth); // Add Earth to Sun
+    earth.x = 7; // Position 7 units away from the Sun (Parent)
+    sun.addChild(earth); // Add Earth to the Sun
 
     // 3. Create Moon (Child of Earth)
     const moon = new RedGPU.Display.Mesh(
@@ -92,18 +92,18 @@ RedGPU.init(canvas, (redGPUContext) => {
         new RedGPU.Primitive.Sphere(redGPUContext, 0.3),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff')
     );
-    moon.x = 2; // Position 2 units away from Earth (Parent)
-    earth.addChild(moon); // Add Moon to Earth
+    moon.x = 2; // Position 2 units away from the Earth (Parent)
+    earth.addChild(moon); // Add Moon to the Earth
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
     redGPUContext.addView(view);
 
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
-        // Rotating the Sun causes its children Earth and Moon to orbit together.
+        // Rotating the Sun causes its children, Earth and Moon, to orbit together.
         sun.rotationY += 1;
         
-        // Rotating the Earth causes its child Moon to orbit around the Earth.
+        // Rotating the Earth causes its child, the Moon, to orbit around the Earth.
         earth.rotationY += 2;
     });
 });
@@ -169,9 +169,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Key Summary
 
-- Every **Mesh** can be a parent container and include child meshes.
+- Every **Mesh** can act as a parent container and include child meshes.
 - Child coordinates are always **relative coordinates** based on the parent's position.
-- Parent's rotation and scale transformations are physically inherited by the child, making it easy to implement complex linked animations.
+- A parent's rotation and scale transformations are physically inherited by its children, making it easy to implement complex linked animations.
 
 ## Next Steps
 

@@ -5,15 +5,14 @@ order: 1
 
 # TAA (Temporal AA)
 
-**TAA** (Temporal Antialiasing) is a time-based technique that blends previous frames with the current frame to eliminate jagged edges.
-It offers the highest quality among current antialiasing techniques, producing smooth, cinematic images.
+**TAA** (Temporal Antialiasing) is a time-based technique that blends information from previous frames with the current frame to eliminate jagged edges. It provides the highest quality among current antialiasing techniques, producing smooth, cinematic images.
 
 ## 1. How it Works
 
-It accumulates and averages multiple frames rendered while slightly jittering the camera. This allows it to obtain resolution information more precise than a single pixel.
+TAA works by slightly jittering the camera every frame and then accumulating and averaging multiple rendered frames. This process allows the engine to obtain resolution information more precise than a single pixel.
 
-- **Pros**: Provides near-perfect antialiasing quality in static scenes.
-- **Cons**: Ghosting artifacts may occur on fast-moving objects.
+- **Pros**: Provides near-perfect antialiasing quality in static or slow-moving scenes.
+- **Cons**: Ghosting artifacts (trails) may occur on fast-moving objects.
 
 ## 2. Usage
 
@@ -26,7 +25,7 @@ redGPUContext.antialiasingManager.useTAA = true;
 
 ## 3. Live Example: TAA Quality Check
 
-Check how TAA handles edges, textures, and fine patterns in the same scene. (Notice how it perfectly resolves the shimmering in the grid pattern.)
+Observe how TAA handles edges, textures, and fine patterns in the same scene. (Notice how it perfectly resolves the shimmering in the grid pattern and texture details.)
 
 <ClientOnly>
 <CodePen title="RedGPU - TAA Example" slugHash="antialiasing-taa">
@@ -109,9 +108,9 @@ RedGPU.init(canvas, (redGPUContext) => {
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
         if (manager.useTAA) {
-            manager.useTAA = false; // Turn off TAA
+            manager.useTAA = false; // Turn off
         } else {
-            manager.useTAA = true;  // Turn on TAA
+            manager.useTAA = true;  // Turn on
         }
         
         btn.textContent = `TAA: ${manager.useTAA ? 'ON' : 'OFF (None)'}`;
@@ -132,5 +131,5 @@ RedGPU.init(canvas, (redGPUContext) => {
 ## Key Summary
 
 - **Best Quality**: Almost completely eliminates jagged edges.
-- **Auto Selection**: Automatically enabled on high-DPI displays (like Retina).
+- **Auto-Selection**: Automatically enabled on high-DPI displays (like Retina).
 - **High Cost**: Recommended for desktop environments due to per-frame computation and memory overhead.

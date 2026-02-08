@@ -227,14 +227,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 RedGPU가 제공하는 다양한 인터렉션 동작을 아래 예제들을 통해 직접 확인할 수 있습니다.
 
 ### 3.1 마우스 및 터치 예제
-- [일반 메시 인터렉션](/RedGPU/examples/3d/mouseEvent/mesh/)
-- [스프라이트 인터렉션](/RedGPU/examples/3d/mouseEvent/sprite3D/)
-- [텍스트 필드 인터렉션](/RedGPU/examples/3d/mouseEvent/textField3D/)
-- [고정밀 레이캐스팅 (Raycasting)](/RedGPU/examples/3d/mouseEvent/raycasting/)
+- [일반 메시 인터렉션](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/mesh/)
+- [스프라이트 인터렉션](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/sprite3D/)
+- [텍스트 필드 인터렉션](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/textField3D/)
+- [고정밀 레이캐스팅 (Raycasting)](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/raycasting/)
 
 ### 3.2 키보드 인터렉션 예제
-- [캐릭터 컨트롤러 (WASD)](/RedGPU/examples/3d/controller/characterController/)
-- [레이캐스트 차량 시뮬레이션](/RedGPU/examples/3d/physics/raycastVehicle/)
+- [캐릭터 컨트롤러 (WASD)](https://redcamel.github.io/RedGPU/examples/3d/controller/characterController/)
 
 ## 핵심 요약
 

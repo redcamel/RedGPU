@@ -21,15 +21,15 @@ features:
       light: /icon-showcase-light.svg
       dark: /icon-showcase-dark.svg
     title: Real-time Technical Demos
-    details: Explore technical possibilities through diverse graphics examples leveraging the full potential of WebGPU.
+    details: Explore the technical potential of WebGPU through a diverse range of graphics examples.
   - icon:
       light: /icon-api-light.svg
       dark: /icon-api-dark.svg
     title: Structured API
-    details: Provides an interface designed for developer productivity along with comprehensive technical documentation.
+    details: Provides an interface designed for engineer productivity, accompanied by comprehensive technical documentation.
   - icon:
       light: /icon-performance-light.svg
       dark: /icon-performance-light.svg
-    title: Performance Architecture
-    details: Engineered to efficiently utilize WebGPU's parallel processing capabilities, ensuring stable performance in complex environments.
+    title: Performance-Oriented Architecture
+    details: Engineered to efficiently utilize WebGPU's parallel processing capabilities, ensuring stable performance even in complex environments.
 ---

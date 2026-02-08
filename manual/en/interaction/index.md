@@ -5,20 +5,20 @@ order: 8
 
 # Interaction
 
-RedGPU provides an intuitive **Picking** system that handles mouse and touch events for 3D and 2D objects, as well as a **Keyboard Buffer** (`keyboardKeyBuffer`) feature that manages the real-time state of the keyboard. This allows you to easily handle various user inputs, from mouse clicks to complex character controls.
+RedGPU provides an intuitive **Picking** system that handles mouse and touch events for both 3D and 2D objects, as well as a **Keyboard Buffer** (`keyboardKeyBuffer`) feature that manages keyboard states in real-time. This allows you to easily handle various user inputs, from simple mouse clicks to complex character controls.
 
 ## 1. Mouse and Touch Interaction (Picking)
 
-RedGPU's picking system provides the ability to receive and react to user input for most display objects, such as `Mesh`, `Sprite3D`, and `Sprite2D`.
+RedGPU's picking system enables user input reception and reaction for most display objects, such as `Mesh`, `Sprite3D`, and `Sprite2D`.
 
 ### 1.1 Registering Event Listeners
 
-Use the `addListener` method to register events on an object. When an event occurs, the registered callback function is executed, and an event information object (`e`) is passed.
+To register events on an object, use the `addListener` method. When an event occurs, the registered callback function is executed, and an event information object (`e`) is passed to it.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
-// Reference event type constant
+// Reference event type constants
 const { PICKING_EVENT_TYPE } = RedGPU.Picking;
 
 mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
@@ -30,40 +30,40 @@ mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
 
 ### 1.2 Supported Event Types
 
-The system supports 6 basic events defined in `RedGPU.Picking.PICKING_EVENT_TYPE`.
+The system supports the 6 basic events defined in `RedGPU.Picking.PICKING_EVENT_TYPE`.
 
 | Event Constant | String Value | Description |
 | :--- | :--- | :--- |
-| **`CLICK`** | `'click'` | Occurs upon mouse click or touch tap |
-| **`DOWN`** | `'down'` | Occurs upon mouse button press or touch start |
-| **`UP`** | `'up'` | Occurs upon mouse button release or touch end |
-| **`OVER`** | `'over'` | Occurs when the mouse cursor enters over the object (Hover In) |
-| **`OUT`** | `'out'` | Occurs when the mouse cursor leaves the object (Hover Out) |
-| **`MOVE`** | `'move'` | Occurs continuously while the mouse pointer moves over the object |
+| **`CLICK`** | `'click'` | Occurs on a mouse click or touch tap |
+| **`DOWN`** | `'down'` | Occurs when a mouse button is pressed or touch starts |
+| **`UP`** | `'up'` | Occurs when a mouse button is released or touch ends |
+| **`OVER`** | `'over'` | Occurs when the mouse cursor enters the object's area (Hover In) |
+| **`OUT`** | `'out'` | Occurs when the mouse cursor leaves the object's area (Hover Out) |
+| **`MOVE`** | `'move'` | Occurs continuously as the mouse pointer moves over the object |
 
 ### 1.3 Detailed Event Information (PickingEvent)
 
-The object (`e`) passed to the event callback contains various pieces of information at the time of occurrence. This allows for the implementation of precise interaction logic.
+The object (`e`) passed to the event callback contains various pieces of information about the event at the moment it occurred. This allows for the implementation of precise interaction logic.
 
 | Property Name | Type | Description |
 | :--- | :--- | :--- |
 | **`target`** | `Mesh` | The target object where the event occurred. |
 | **`type`** | `string` | The type of the event that occurred. |
-| **`pickingId`** | `number` | Unique ID used for picking. |
-| **`mouseX`**, **`mouseY`** | `number` | Mouse/touch coordinates within the canvas. |
-| **`movementX`**, **`movementY`** | `number` | Mouse movement amount compared to the previous event. |
+| **`pickingId`** | `number` | A unique ID used for picking. |
+| **`mouseX`**, **`mouseY`** | `number` | Mouse or touch coordinates within the canvas. |
+| **`movementX`**, **`movementY`** | `number` | The amount of mouse movement compared to the previous event. |
 | **`point`** | `vec3` | Precise intersection point coordinates in world space. |
 | **`localPoint`** | `vec3` | Intersection point coordinates in the object's local space. |
 | **`localX`**, **`localY`**, **`localZ`** | `number` | Individual coordinate values in local space. |
 | **`uv`** | `vec2` | Texture coordinates (UV) at the intersection point. |
-| **`distance`** | `number` | Distance between the camera and the intersection point. |
-| **`faceIndex`** | `number` | Index of the intersected triangle (Polygon). (-1 if not available) |
-| **`time`** | `number` | Time when the event occurred (ms). |
-| **`altKey`**, **`ctrlKey`**, **`shiftKey`** | `boolean` | State of modifier keys when the event occurred. |
+| **`distance`** | `number` | The distance between the camera and the intersection point. |
+| **`faceIndex`** | `number` | The index of the intersected triangle (polygon). (-1 if not available) |
+| **`time`** | `number` | The time when the event occurred (in ms). |
+| **`altKey`**, **`ctrlKey`**, **`shiftKey`** | `boolean` | The state of modifier keys at the time of the event. |
 
 ### 1.4 Practical Example: Interactive Cube
 
-This is an interactive example where the size changes on mouse over, the color changes upon clicking, and coordinates can be checked during movement.
+This is an interactive example where the size changes on mouse-over, the color changes upon clicking, and coordinates can be checked while moving the mouse.
 
 <ClientOnly>
 <CodePen title="RedGPU - Interaction Example" slugHash="interaction-basic">
@@ -83,13 +83,13 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     const { PICKING_EVENT_TYPE } = RedGPU.Picking;
 
-    // 1. Create basic cube
+    // 1. Create a basic cube
     const geometry = new RedGPU.Primitive.Box(redGPUContext);
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#00CC99');
     const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
     scene.addChild(mesh);
 
-    // 4. Create HTML UI for status display (bottom left)
+    // 4. Create an HTML UI for status display (bottom left)
     const statusOverlay = document.createElement('div');
     Object.assign(statusOverlay.style, {
         position: 'fixed',
@@ -124,55 +124,40 @@ RedGPU.init(canvas, (redGPUContext) => {
     const typeEl = statusOverlay.querySelector('#event-type');
     const updateUI = (e) => {
         typeEl.innerText = `Event: ${e.type.toUpperCase()}`;
-        statusOverlay.querySelector('#canvas-pos').innerText = `${e.mouseX.toFixed(1)}, ${e.mouseY.toFixed(1)}`;
-        
-        // Check if hit information is available
-        const hasHit = e.faceIndex !== -1 || (e.point && (e.point[0] !== 0 || e.point[1] !== 0 || e.point[2] !== 0));
-        
-        if (hasHit) {
-            statusOverlay.querySelector('#world-pos').innerText = `${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}`;
-            statusOverlay.querySelector('#local-pos').innerText = `${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}`;
-            statusOverlay.querySelector('#uv-pos').innerText = `${e.uv[0].toFixed(3)}, ${e.uv[1].toFixed(3)}`;
-            statusOverlay.querySelector('#distance').innerText = e.distance.toFixed(3);
-            statusOverlay.querySelector('#face-index').innerText = e.faceIndex;
-        } else {
-            statusOverlay.querySelector('#world-pos').innerText = '-';
-            statusOverlay.querySelector('#local-pos').innerText = '-';
-            statusOverlay.querySelector('#uv-pos').innerText = '-';
-            statusOverlay.querySelector('#distance').innerText = '-';
-            statusOverlay.querySelector('#face-index').innerText = '-';
-        }
+     
+        statusOverlay.querySelector('#world-pos').innerText = `${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}`;
+        statusOverlay.querySelector('#local-pos').innerText = `${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}`;
+        statusOverlay.querySelector('#uv-pos').innerText = `${e.uv[0].toFixed(3)}, ${e.uv[1].toFixed(3)}`;
+        statusOverlay.querySelector('#distance').innerText = e.distance.toFixed(3);
+        statusOverlay.querySelector('#face-index').innerText = e.faceIndex;
     };
 
     // 3. Register event listeners
     
-    // [CLICK] Random color change and rotation on click
+    // [CLICK] Change to a random color and rotate on click
     mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
         const r = Math.floor(Math.random() * 255);
         const g = Math.floor(Math.random() * 255);
         const b = Math.floor(Math.random() * 255);
         e.target.material.color.setColorByRGB(r, g, b);
         
-        e.target.rotationY += 45;
-        e.target.rotationX += 45;
-        
         updateUI(e);
         typeEl.style.color = '#ffcc00';
     });
 
-    // [DOWN] When mouse button is pressed
+    // [DOWN] When the mouse button is pressed
     mesh.addListener(PICKING_EVENT_TYPE.DOWN, (e) => {
         e.target.scaleX = e.target.scaleY = e.target.scaleZ = 0.9;
         updateUI(e);
         typeEl.style.color = '#ff4444';
     });
 
-    // [MOVE] Display coordinates when moving mouse over the object
+    // [MOVE] Display coordinates when moving the mouse over the object
     mesh.addListener(PICKING_EVENT_TYPE.MOVE, (e) => {
         updateUI(e);
     });
 
-    // [OVER] On mouse over
+    // [OVER] On mouse-over
     mesh.addListener(PICKING_EVENT_TYPE.OVER, (e) => {
         e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.2;
         document.body.style.cursor = 'pointer';
@@ -180,11 +165,11 @@ RedGPU.init(canvas, (redGPUContext) => {
         typeEl.style.color = '#00CC99';
     });
 
-    // [OUT] On mouse out
+    // [OUT] On mouse-out
     mesh.addListener(PICKING_EVENT_TYPE.OUT, (e) => {
         e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.0;
         document.body.style.cursor = 'default';
-        updateUI(e); // Update UI on mouse out (show dashes)
+        updateUI(e); // Update UI on mouse-out (show dashes)
         typeEl.innerText = 'Event: MOUSE_OUT';
         typeEl.style.color = '#ffffff';
     });
@@ -205,15 +190,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 2. Keyboard Interaction (keyboardKeyBuffer)
 
-In addition to object picking, you can check the real-time pressed state of the keyboard through `redGPUContext.keyboardKeyBuffer`. This is very useful for logic that needs to check key states every frame, such as character movement or camera control.
+In addition to object picking, you can check the real-time state of the keyboard via `redGPUContext.keyboardKeyBuffer`. This is very useful for logic that needs to check key states every frame, such as for character movement or camera control.
 
 ### 2.1 Basic Usage
 
-`keyboardKeyBuffer` is an object that has the name of the currently pressed key as the key and the pressed state as the value.
+`keyboardKeyBuffer` is an object that uses the name of the currently pressed key as its key and its pressed state as its value.
 
 ```javascript
 RedGPU.init(canvas, (redGPUContext) => {
-    // Check state within render loop
+    // Check state within the render loop
     const render = (time) => {
         const { keyboardKeyBuffer } = redGPUContext;
 
@@ -232,29 +217,28 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ### 2.2 Key Features
 
-- **Real-time State Management**: Integrated management is provided in `redGPUContext` without the need to directly manage separate `keydown` and `keyup` listeners.
+- **Real-time State Management**: Integrated management is provided within `redGPUContext`, eliminating the need to directly manage separate `keydown` and `keyup` listeners.
 - **Case Sensitivity**: Since it uses the `e.key` value directly, it is case-sensitive. For universal input, it is recommended to check both `'w'` and `'W'`.
 - **Modifier Key Support**: The state of special keys such as `Shift`, `Control`, and `Alt` can be checked in the same way.
 
 ## 3. Live Examples
 
-You can directly check various interaction behaviors provided by RedGPU through the examples below.
+You can directly explore various interaction behaviors provided by RedGPU through the examples below.
 
 ### 3.1 Mouse and Touch Examples
-- [Basic Mesh Interaction](/RedGPU/examples/3d/mouseEvent/mesh/)
-- [Sprite Interaction](/RedGPU/examples/3d/mouseEvent/sprite3D/)
-- [Text Field Interaction](/RedGPU/examples/3d/mouseEvent/textField3D/)
-- [High-Precision Raycasting (Raycasting)](/RedGPU/examples/3d/mouseEvent/raycasting/)
+- [Basic Mesh Interaction](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/mesh/)
+- [Sprite Interaction](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/sprite3D/)
+- [Text Field Interaction](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/textField3D/)
+- [High-Precision Raycasting (Raycasting)](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/raycasting/)
 
 ### 3.2 Keyboard Interaction Examples
-- [Character Controller (WASD)](/RedGPU/examples/3d/controller/characterController/)
-- [Raycast Vehicle Simulation](/RedGPU/examples/3d/physics/raycastVehicle/)
+- [Character Controller (WASD)](https://redcamel.github.io/RedGPU/examples/3d/controller/characterController/)
 
 ## Key Summary
 
-- Independent event processing per object is possible through `addListener`.
-- Precise frame-by-frame keyboard state control is possible through `keyboardKeyBuffer`.
-- A rich user experience (UX) can be provided by using it along with web standard DOM APIs.
+- Independent event processing for each object is possible through `addListener`.
+- Precise, frame-by-frame keyboard state control is possible through `keyboardKeyBuffer`.
+- A rich user experience (UX) can be provided by using these alongside the web-standard DOM API.
 
 ## Next Learning Recommendation
 

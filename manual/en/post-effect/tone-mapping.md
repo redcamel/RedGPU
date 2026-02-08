@@ -9,7 +9,7 @@ Tone mapping is the process of converting the wide range of brightness in HDR im
 
 ## 1. ToneMappingManager
 
-All settings are made through `view.toneMappingManager`. It is automatically included when `View3D` is created, so no separate instance creation is necessary.
+All settings are made through `view.toneMappingManager`. It is automatically included when a `View3D` is created, so no separate instance creation is necessary.
 
 ### Default Settings
 RedGPU adopts **Khronos PBR Neutral**, optimized for physically based rendering, as its default algorithm.
@@ -51,8 +51,8 @@ tm.brightness = 0.02; // Correct shadow brightness
 
 ## Key Summary
 - Tone mapping is managed with separate configuration (`ToneMappingManager`) and execution (`PostEffectManager`).
-- Executed at the **very first stage** of the post-processing pipeline.
-- A core window for controlling exposure and contrast that determines the first impression of the scene.
+- It is executed at the **very first stage** of the post-processing pipeline.
+- It is a core window for controlling exposure and contrast, determining the first impression of the scene.
 
 ## Next Learning Recommendations
 - **[Built-in Effects](./builtin-effects)**

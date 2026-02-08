@@ -7,7 +7,7 @@ order: 11
 
 RedGPU supports a **Plugin System** to extend the core functionality of the engine and facilitate integration with external libraries.
 
-Currently, the following official plugins are provided.
+Currently, the following official plugin is provided.
 
 ## Available Plugins
 
