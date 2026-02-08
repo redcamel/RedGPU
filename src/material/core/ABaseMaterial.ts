@@ -514,7 +514,7 @@ abstract class ABaseMaterial extends ResourceBase {
         // 2. 바리안트별 텍스처/샘플러 구조 업데이트
         this.#TEXTURE_STRUCT = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariantTextures(currentVariantKey);
         this.#SAMPLER_STRUCT = this.gpuRenderInfo.fragmentShaderSourceVariant.getVariantSamplers(currentVariantKey);
-        keepLog(this.#TEXTURE_STRUCT)
+        // keepLog(this.#TEXTURE_STRUCT)
         // 3. 바리안트별 바인드 그룹 레이아웃 확인/생성
         const variantLayoutName = `${this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME}_${currentVariantKey}`;
         let targetLayout = resourceManager.getGPUBindGroupLayout(variantLayoutName);

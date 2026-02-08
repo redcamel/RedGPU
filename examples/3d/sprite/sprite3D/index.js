@@ -122,7 +122,6 @@ const renderTestPane = async (redGPUContext, scene) => {
         scene.children.forEach(c => {
             if (c instanceof RedGPU.Display.Sprite3D) {
 
-                console.log(key,c[key],value)
                 c[key] = value;
             }
         });
