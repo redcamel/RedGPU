@@ -1,1 +1,0 @@
-export * as RapierPhysics from "./rapier/index";

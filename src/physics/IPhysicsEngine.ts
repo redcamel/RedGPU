@@ -85,6 +85,12 @@ export interface BodyParams {
  * [KO] 물리 엔진 플러그인이 구현해야 할 인터페이스입니다.
  * [EN] Interface to be implemented by physics engine plugins.
  *
+ * ::: warning
+ * [KO] 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
+ * [EN] This feature is currently in the experimental stage. The API may change in the future.
+ * :::
+ *
+ * @experimental
  * @category Physics
  */
 export interface IPhysicsEngine {

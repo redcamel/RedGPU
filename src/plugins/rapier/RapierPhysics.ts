@@ -1,16 +1,38 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import { quat, vec3 } from 'gl-matrix';
-import Mesh from '../../../display/mesh/Mesh';
-import { BodyParams, IPhysicsEngine } from '../../../physics/IPhysicsEngine';
-import { PHYSICS_BODY_TYPE } from '../../../physics/PhysicsBodyType';
-import { PHYSICS_SHAPE } from '../../../physics/PhysicsShape';
+import Mesh from '../../display/mesh/Mesh';
+import { BodyParams, IPhysicsEngine } from '../../physics/IPhysicsEngine';
+import { PHYSICS_BODY_TYPE } from '../../physics/PhysicsBodyType';
+import { PHYSICS_SHAPE } from '../../physics/PhysicsShape';
 import { RapierBody } from './RapierBody';
 
 /**
  * [KO] Rapier 물리 엔진을 사용하는 RedGPU 물리 플러그인 구현체입니다.
  * [EN] RedGPU physics plugin implementation using the Rapier physics engine.
  *
- * @category Physics
+ * [KO] 이 클래스는 WASM 기반의 Rapier 엔진을 RedGPU 환경에 통합하며, 고성능 물리 시뮬레이션 월드를 관리합니다. 강체 생성, 충돌 감지, 캐릭터 컨트롤러 및 중력 설정과 같은 핵심 물리 기능을 제공합니다.
+ * [EN] This class integrates the WASM-based Rapier engine into the RedGPU environment and manages a high-performance physics simulation world. It provides core physics features such as rigid body creation, collision detection, character controllers, and gravity settings.
+ *
+ * ::: warning
+ * [KO] 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
+ * [EN] This feature is currently in the experimental stage. The API may change in the future.
+ * :::
+ *
+ * * ### Example
+ * ```typescript
+ * const physics = new RedGPU.Plugins.RapierPhysics();
+ * await physics.init();
+ * 
+ * // 매 프레임 업데이트 (Update every frame)
+ * renderer.start(redGPUContext, (time, deltaTime) => {
+ *     physics.step(deltaTime / 1000);
+ * });
+ * ```
+ *
+ * @see [KO] [물리 플러그인 매뉴얼](/RedGPU/manual/ko/plugins/physics)
+ * @see [EN] [Physics Plugin Manual](/RedGPU/manual/en/plugins/physics)
+ * @experimental
+ * @category RapierPhysics
  */
 export class RapierPhysics implements IPhysicsEngine {
 	#world: RAPIER.World;
@@ -33,24 +55,32 @@ export class RapierPhysics implements IPhysicsEngine {
 	/**
 	 * [KO] 물리 엔진의 원본 월드(World) 객체를 반환합니다.
 	 * [EN] Returns the native World object of the physics engine.
+	 * @readonly
 	 */
 	get nativeWorld(): RAPIER.World { return this.#world; }
 
 	/**
 	 * [KO] Rapier 라이브러리 네임스페이스를 반환합니다.
 	 * [EN] Returns the Rapier library namespace.
+	 * @readonly
 	 */
 	get RAPIER(): typeof RAPIER { return RAPIER; }
 
 	/**
 	 * [KO] 엔진에서 관리 중인 모든 RapierBody 리스트를 반환합니다.
 	 * [EN] Returns a list of all RapierBody instances managed by the engine.
+	 * @readonly
 	 */
 	get bodies(): RapierBody[] { return Array.from(this.#bodies.values()); }
 
 	/**
 	 * [KO] 콜라이더 핸들을 통해 관리 중인 RapierBody를 찾아서 반환합니다.
 	 * [EN] Finds and returns the managed RapierBody using its collider handle.
+	 *
+	 * * ### Example
+	 * ```typescript
+	 * const body = physics.getBodyByColliderHandle(handle);
+	 * ```
 	 *
 	 * @param handle -
 	 * [KO] 찾을 콜라이더의 고유 핸들
@@ -66,6 +96,15 @@ export class RapierPhysics implements IPhysicsEngine {
 	/**
 	 * [KO] Rapier 엔진을 초기화하고 물리 월드를 생성합니다.
 	 * [EN] Initializes the Rapier engine and creates the physics world.
+	 *
+	 * * ### Example
+	 * ```typescript
+	 * await physics.init();
+	 * ```
+	 *
+	 * @returns
+	 * [KO] 초기화 완료를 보장하는 Promise
+	 * [EN] Promise that guarantees initialization completion
 	 */
 	async init(): Promise<void> {
 		await RAPIER.init();
@@ -74,8 +113,13 @@ export class RapierPhysics implements IPhysicsEngine {
 	}
 
 	/**
-	 * [KO] 물리 시뮬레이션을 진행하고 메쉬 트랜스폼을 동기화합니다.
-	 * [EN] Advances the physics simulation and synchronizes mesh transforms.
+	 * [KO] 물리 시뮬레이션을 한 단계 진행하고 메쉬 트랜스폼을 동기화합니다.
+	 * [EN] Steps the physics simulation and synchronizes mesh transforms.
+	 *
+	 * * ### Example
+	 * ```typescript
+	 * physics.step(deltaTime / 1000);
+	 * ```
 	 *
 	 * @param deltaTime -
 	 * [KO] 프레임 간 시간 간격 (초 단위)
@@ -97,6 +141,15 @@ export class RapierPhysics implements IPhysicsEngine {
 	/**
 	 * [KO] 특정 메쉬에 물리 바디를 생성하고 엔진에 등록합니다.
 	 * [EN] Creates a physics body for a specific mesh and registers it with the engine.
+	 *
+	 * * ### Example
+	 * ```typescript
+	 * const body = physics.createBody(mesh, {
+	 *     type: 'dynamic',
+	 *     shape: 'sphere',
+	 *     mass: 1.0
+	 * });
+	 * ```
 	 *
 	 * @param mesh -
 	 * [KO] 대상 RedGPU 메쉬
@@ -127,6 +180,20 @@ export class RapierPhysics implements IPhysicsEngine {
 		return body;
 	}
 
+	/**
+	 * [KO] 콜라이더를 재귀적으로 생성합니다.
+	 * [EN] Recursively creates colliders.
+	 *
+	 * @param rootMesh - [KO] 루트 메쉬 [EN] Root mesh
+	 * @param rigidBody - [KO] 강체 객체 [EN] Rigid body
+	 * @param params - [KO] 바디 설정 [EN] Body parameters
+	 * @param outColliders - [KO] 출력 콜라이더 배열 [EN] Output colliders array
+	 * @param currentMesh - [KO] 현재 메쉬 [EN] Current mesh
+	 * @param accumRelPos - [KO] 누적 상대 위치 [EN] Accumulated relative position
+	 * @param accumRelQuat - [KO] 누적 상대 회전 [EN] Accumulated relative quaternion
+	 * @param accumRelScale - [KO] 누적 상대 스케일 [EN] Accumulated relative scale
+	 * @private
+	 */
 	#createCollidersRecursively(
 		rootMesh: Mesh,
 		rigidBody: RAPIER.RigidBody,
@@ -178,6 +245,11 @@ export class RapierPhysics implements IPhysicsEngine {
 	 * [KO] 물리 바디를 엔진에서 제거합니다.
 	 * [EN] Removes a physics body from the engine.
 	 *
+	 * * ### Example
+	 * ```typescript
+	 * physics.removeBody(body);
+	 * ```
+	 *
 	 * @param body -
 	 * [KO] 제거할 RapierBody 인스턴스
 	 * [EN] RapierBody instance to remove
@@ -191,7 +263,7 @@ export class RapierPhysics implements IPhysicsEngine {
 	 * [KO] 물리 월드의 중력 가속도를 설정하거나 반환합니다.
 	 * [EN] Sets or returns the gravity acceleration of the physics world.
 	 *
-	 * ### Example
+	 * * ### Example
 	 * ```typescript
 	 * physics.gravity = { x: 0, y: -9.81, z: 0 };
 	 * ```
@@ -207,6 +279,11 @@ export class RapierPhysics implements IPhysicsEngine {
 	/**
 	 * [KO] 캐릭터 컨트롤러를 생성하여 반환합니다.
 	 * [EN] Creates and returns a character controller.
+	 *
+	 * * ### Example
+	 * ```typescript
+	 * const controller = physics.createCharacterController(0.1);
+	 * ```
 	 *
 	 * @param offset -
 	 * [KO] 캐릭터와 지면 사이의 간격
@@ -224,6 +301,15 @@ export class RapierPhysics implements IPhysicsEngine {
 		return controller;
 	}
 
+	/**
+	 * [KO] 강체 설정 기술서를 생성합니다.
+	 * [EN] Creates a rigid body description.
+	 *
+	 * @param params - [KO] 바디 파라미터 [EN] Body parameters
+	 * @param mesh - [KO] 메쉬 [EN] Mesh
+	 * @returns [KO] 강체 설정 [EN] Rigid body description
+	 * @private
+	 */
 	#createRigidBodyDesc(params: BodyParams, mesh: Mesh): RAPIER.RigidBodyDesc {
 		let desc: RAPIER.RigidBodyDesc;
 		switch (params.type) {
@@ -280,6 +366,16 @@ export class RapierPhysics implements IPhysicsEngine {
 		return desc;
 	}
 
+	/**
+	 * [KO] 콜라이더 설정 기술서를 생성합니다.
+	 * [EN] Creates a collider description.
+	 *
+	 * @param params - [KO] 바디 파라미터 [EN] Body parameters
+	 * @param mesh - [KO] 메쉬 [EN] Mesh
+	 * @param worldScale - [KO] 월드 스케일 [EN] World scale
+	 * @returns [KO] 콜라이더 설정 [EN] Collider description
+	 * @private
+	 */
 	#createColliderDesc(params: BodyParams, mesh: Mesh, worldScale: vec3): RAPIER.ColliderDesc {
 		const shapeType = params.shape || PHYSICS_SHAPE.BOX;
 

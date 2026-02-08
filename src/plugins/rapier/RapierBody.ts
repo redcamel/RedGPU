@@ -1,17 +1,32 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import { mat4, quat, vec3 } from 'gl-matrix';
-import Mesh from '../../../display/mesh/Mesh';
-import { IPhysicsBody } from '../../../physics/IPhysicsBody';
-import mat4ToEuler from '../../../math/mat4ToEuler';
+import Mesh from '../../display/mesh/Mesh';
+import { IPhysicsBody } from '../../physics/IPhysicsBody';
+import mat4ToEuler from '../../math/mat4ToEuler';
 
 /**
  * [KO] Rapier 물리 엔진을 위한 `IPhysicsBody` 구현체입니다.
  * [EN] `IPhysicsBody` implementation for the Rapier physics engine.
  *
- * [KO] Rapier의 RigidBody와 RedGPU의 Mesh 사이에서 트랜스폼 정보를 동기화하고 제어하는 역할을 합니다.
- * [EN] It synchronizes and controls transform information between Rapier's RigidBody and RedGPU's Mesh.
+ * [KO] Rapier의 RigidBody와 RedGPU의 Mesh 사이에서 트랜스폼 정보를 동기화하고 제어하는 역할을 합니다. 물리 시뮬레이션의 결과가 매 프레임마다 연결된 메쉬의 위치와 회전에 자동으로 반영됩니다.
+ * [EN] It synchronizes and controls transform information between Rapier's RigidBody and RedGPU's Mesh. Simulation results are automatically reflected in the connected mesh's position and rotation every frame.
  *
- * @category Physics
+ * ::: warning
+ * [KO] 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
+ * [EN] This feature is currently in the experimental stage. The API may change in the future.
+ * :::
+ *
+ * * ### Example
+ * ```typescript
+ * // RapierPhysics를 통해 생성됩니다.
+ * // Created via RapierPhysics.
+ * const body = physics.createBody(mesh, { type: 'dynamic', shape: 'box' });
+ * ```
+ *
+ * @see [KO] [물리 플러그인 매뉴얼](/RedGPU/manual/ko/plugins/physics)
+ * @see [EN] [Physics Plugin Manual](/RedGPU/manual/en/plugins/physics)
+ * @experimental
+ * @category RapierPhysics
  */
 export class RapierBody implements IPhysicsBody {
 	#nativeBody: RAPIER.RigidBody;
@@ -41,6 +56,7 @@ export class RapierBody implements IPhysicsBody {
 	/**
 	 * [KO] 연결된 RedGPU 메쉬를 반환합니다.
 	 * [EN] Returns the connected RedGPU mesh.
+	 * @readonly
 	 */
 	get mesh(): Mesh {
 		return this.#mesh;
@@ -49,6 +65,7 @@ export class RapierBody implements IPhysicsBody {
 	/**
 	 * [KO] Rapier의 원본 강체(RigidBody) 객체를 반환합니다.
 	 * [EN] Returns the native Rapier rigid body object.
+	 * @readonly
 	 */
 	get nativeBody(): RAPIER.RigidBody {
 		return this.#nativeBody;
@@ -57,6 +74,7 @@ export class RapierBody implements IPhysicsBody {
 	/**
 	 * [KO] Rapier의 원본 충돌체(Collider) 객체를 반환합니다.
 	 * [EN] Returns the native Rapier collider object.
+	 * @readonly
 	 */
 	get nativeCollider(): RAPIER.Collider {
 		return this.#nativeCollider;
@@ -117,7 +135,7 @@ export class RapierBody implements IPhysicsBody {
 	 * [KO] 물리 바디에 충격량(Impulse)을 적용합니다.
 	 * [EN] Applies an impulse to the physics body.
 	 *
-	 * ### Example
+	 * * ### Example
 	 * ```typescript
 	 * body.applyImpulse([0, 10, 0]);
 	 * ```

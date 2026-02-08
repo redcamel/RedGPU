@@ -8,6 +8,12 @@
  * [KO] 현재는 **Rapier** 물리 엔진이 기본 플러그인으로 지원되고 있습니다.
  * [EN] Currently, the **Rapier** physics engine is supported as the primary plugin.
  *
+ * ::: warning
+ * [KO] 이 패키지의 기능들은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
+ * [EN] The features in this package are currently in the experimental stage. The API may change in the future.
+ * :::
+ *
+ * @experimental
  * @packageDocumentation
  */
 

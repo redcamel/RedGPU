@@ -7,6 +7,12 @@ import { quat, vec3 } from 'gl-matrix';
  * [KO] 이 인터페이스를 통해 물리 시뮬레이션 결과(위치, 회전 등)를 메쉬에 반영하거나, 외부에서 물리 객체를 제어할 수 있습니다.
  * [EN] Through this interface, physics simulation results (position, rotation, etc.) can be reflected in the mesh, or the physics object can be controlled externally.
  *
+ * ::: warning
+ * [KO] 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
+ * [EN] This feature is currently in the experimental stage. The API may change in the future.
+ * :::
+ *
+ * @experimental
  * @category Physics
  */
 export interface IPhysicsBody {

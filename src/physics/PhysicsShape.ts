@@ -2,6 +2,12 @@
  * [KO] 물리 시뮬레이션에서 사용하는 충돌체 형상(Shape)의 종류를 정의합니다.
  * [EN] Defines the types of collider shapes used in physics simulations.
  *
+ * ::: warning
+ * [KO] 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
+ * [EN] This feature is currently in the experimental stage. The API may change in the future.
+ * :::
+ *
+ * @experimental
  * @category Physics
  */
 export const PHYSICS_SHAPE = {
