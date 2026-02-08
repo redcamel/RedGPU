@@ -11,6 +11,19 @@ RedGPU supports the high-performance WASM-based physics engine **Rapier** as a p
 The physics engine plugin is currently in the **experimental stage**. Please be aware that API specifications or behaviors may change without notice during development.
 :::
 
+## 0. Design Intent for Interface/Plugin Separation and Integration
+
+RedGPU's physics system is designed with a strict separation between the common interface (`IPhysicsEngine`) and the actual implementation (Plugin) for seamless integration.
+
+1.  **Bundle Size Optimization**:
+    Physics engines (especially WASM-based ones) occupy significant binary space. Since not all projects require physics, excluding it from the main engine bundle optimizes initial loading speed.
+2.  **Seamless Integration**:
+    One of the most tedious tasks when using a physics engine is 'copying the coordinates of the physics world to 3D meshes every frame.' RedGPU automates this at the engine level, so a single `createBody` call automatically reflects position, rotation, scale, and even **complex child mesh hierarchies** into the physics world.
+3.  **Interchangeability**:
+    User code depends on the established `IPhysicsEngine` interface. This provides the flexibility to switch to other physics engines (e.g., Cannon, Ammo, etc.) in the future with minimal modifications to existing scene configurations or logic code.
+4.  **Asynchronous Initialization Control**:
+    WASM loading is inherently an asynchronous task. By separating it into a plugin, developers can clearly control when the physics engine is ready without interfering with the main engine's initialization flow.
+
 ## 1. Initialization and Setup
 
 The physics engine is separated from the main engine bundle and must be imported separately. Since it involves loading WASM binaries, initialization is performed asynchronously.
@@ -64,19 +77,37 @@ body.applyImpulse([0, 10, 0]);
 ### Compound Colliders
 If the mesh passed when calling `createBody` includes child meshes, RedGPU automatically analyzes the hierarchy and creates a **compound collider** that includes the shapes of all children.
 
-## 4. Key Constants and Settings
+## 4. Full Constants and Settings Specification
 
 ### PHYSICS_BODY_TYPE
-Defines how an object interacts with the world.
+Defines the physical nature of how an object interacts with the world.
 - `DYNAMIC`: Reacts to gravity and collisions, moving freely.
 - `STATIC`: Fixed in space, does not move, and only participates in collisions. (Floors, walls, etc.)
-- `KINEMATIC_POSITION`: Ignores physics laws, its position is controlled directly via code, and it can push other objects.
+- `KINEMATIC`: (Default) Ignores physics laws and controls movement directly via code.
+- `KINEMATIC_POSITION`: Controlled by directly specifying position and rotation, and can push other objects.
+- `KINEMATIC_VELOCITY`: Controls movement by specifying velocity.
 
 ### PHYSICS_SHAPE
-Basic collider shapes provided.
-- `BOX`, `SPHERE`, `CAPSULE`, `CYLINDER`: Standard primitive shapes.
-- `HEIGHTFIELD`: Heightmap shape for terrain data.
-- `MESH`: Precise collider based on complex mesh data.
+The shape of the collider used in the simulation.
+- `BOX`: Rectangular cuboid shape.
+- `SPHERE`: Spherical shape.
+- `CAPSULE`: Capsule shape.
+- `CYLINDER`: Cylindrical shape.
+- `HEIGHTFIELD`: Shape for grid-based heightmap data (terrain).
+- `MESH`: Precise collider using complex mesh geometry as is.
+
+### BodyParams (createBody configuration options)
+All options that can be passed as the second argument when calling `createBody()`.
+- `type`: Body type (`PHYSICS_BODY_TYPE`)
+- `shape`: Collider shape (`PHYSICS_SHAPE`)
+- `mass`: Mass (Default: 1.0)
+- `friction`: Friction coefficient (0.0 ~ 1.0)
+- `restitution`: Restitution coefficient (0.0 ~ 1.0, 1.0 is perfectly elastic collision)
+- `linearDamping`: Damping force such as air resistance for linear movement
+- `angularDamping`: Damping force for rotation
+- `isSensor`: If set to true, only overlap events are generated without physical collision response.
+- `enableCCD`: Enables Continuous Collision Detection. Prevents fast-moving objects from passing through thin walls.
+- `heightData`: Terrain data object required when `shape` is `HEIGHTFIELD`.
 
 ---
 

@@ -49,7 +49,8 @@ RedGPU.init(
         // [KO] 메인 스프라이트 생성 (Pixel Size 모드 시연)
         // [EN] Create main sprite (Demonstrating Pixel Size mode)
         const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
-         scene.addChild(sprite3D);
+        sprite3D.pixelSize = 128
+        scene.addChild(sprite3D);
 
         // [KO] 가로/세로 비율 테스트용 스프라이트 배치
         // [EN] Arrange sprites for aspect ratio testing
@@ -110,13 +111,17 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext, scene) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {setDebugButtons, setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {
+        setDebugButtons,
+        setSeparator
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
 
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
 
-    const target = scene.children.find(c => c instanceof RedGPU.Display.Sprite3D);
+    const target = scene.children[0];
+    console.log(target.pixelSize)
     const updateAll = (key, value) => {
         scene.children.forEach(c => {
             if (c instanceof RedGPU.Display.Sprite3D) c[key] = value;
