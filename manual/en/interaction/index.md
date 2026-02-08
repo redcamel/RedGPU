@@ -226,12 +226,14 @@ RedGPU.init(canvas, (redGPUContext) => {
 You can directly explore various interaction behaviors provided by RedGPU through the examples below.
 
 ### 3.1 Mouse and Touch Examples
-- [Basic Mesh Interaction](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/mesh/)
-- [Sprite Interaction](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/sprite3D/)
-- [Text Field Interaction](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/textField3D/)
-- [High-Precision Raycasting (Raycasting)](https://redcamel.github.io/RedGPU/examples/3d/mouseEvent/raycasting/)
+- [Basic Mesh Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
+- [Sprite Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
+- [Text Field Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
+- [High-Precision Raycasting (Raycasting)](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 
 ### 3.2 Keyboard Interaction Examples
+- [Keyboard Interaction 3D Example](https://redcamel.github.io/RedGPU/examples/3d/interaction/keyboardEvent/)
+- [Keyboard Interaction 2D Example](https://redcamel.github.io/RedGPU/examples/2d/interaction/keyboardEvent/)
 - [Character Controller (WASD)](https://redcamel.github.io/RedGPU/examples/3d/controller/characterController/)
 
 ## Key Summary

@@ -5,8 +5,8 @@ order: 1
 
 # GLTF Loader
 
-While you can create basic shapes with **Primitives**, high-quality assets like detailed characters or buildings need to be created in external 3D tools (Blender, Maya, etc.) and imported.
-RedGPU provides **GLTFLoader**, which supports loading the web 3D standard format **glTF** (GL Transmission Format) 2.0.
+While you can create basic shapes with **Primitives**, high-quality assets such as detailed characters or buildings need to be created in external 3D tools (Blender, Maya, etc.) and then imported.
+RedGPU provides the **GLTFLoader**, which supports loading the web 3D standard format **glTF** (GL Transmission Format) 2.0.
 
 ## 1. Loading a Model
 
@@ -27,11 +27,11 @@ new RedGPU.GLTFLoader(
 
 ### Key Properties (GLTFLoader Instance)
 - **`resultMesh`**: The `RedGPU.Display.Mesh` object containing the loaded model.
-- **`parsingResult`**: Detailed parsing data of the glTF file, including materials, groups, textures, etc.
+- **`parsingResult`**: Detailed parsing data of the glTF file, including materials, groups, textures, and more.
 
 ## 2. Synergy with IBL (Highly Recommended)
 
-Most high-quality models imported from external sources use **PBR (Physically Based Rendering)** materials. Since these materials express textures by reflecting light information from the surrounding environment, you can achieve the most realistic results when using them with **IBL** (Image-Based Lighting) learned earlier.
+Most high-quality models imported from external sources use **PBR (Physically Based Rendering)** materials. Since these materials express textures by reflecting light information from the surrounding environment, you can achieve the most realistic results when using them with **IBL** (Image-Based Lighting), as learned earlier.
 
 If you load a PBR model without IBL, metallic textures may appear black or look very awkward.
 
@@ -46,13 +46,13 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     
-    // 1. Set Camera Distance (Adjust to fit model size)
+    // 1. Set Camera Distance (Adjust to fit the model size)
     controller.distance = 3; 
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 2. Setup IBL and SkyBox (Key for PBR materials)
+    // 2. Set up IBL and a SkyBox (Key for PBR materials)
     const ibl = new RedGPU.Resource.IBL(
         redGPUContext,
         'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -60,7 +60,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     view.ibl = ibl;
     view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-    // 3. Load GLTF Model
+    // 3. Load a GLTF Model
     new RedGPU.GLTFLoader(
         redGPUContext,
         'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
@@ -96,12 +96,12 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 3; // Adjust camera distance
+    controller.distance = 3; // Adjust the camera distance
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // Setup IBL and Skybox
+    // Set up IBL and a Skybox
     const ibl = new RedGPU.Resource.IBL(
         redGPUContext,
         'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -128,6 +128,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-Learn about image-based objects that will enrich the 3D space along with text.
+Learn about image-based objects that will enrich the 3D space alongside text.
 
-- **[Sprite & SpriteSheet](../sprite/index.md)**
+- **[Sprite](../sprite/index.md)**
