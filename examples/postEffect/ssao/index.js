@@ -16,11 +16,11 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
 
-        controller.z = 1.0
-        controller.x = 2
-        controller.y = 2
+
+        controller.y = 1
         controller.tilt = 15
-        controller.pan = 110
+        controller.pan = 90
+        controller.moveSpeed = 20
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
