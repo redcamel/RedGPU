@@ -8,12 +8,11 @@
 
 > **PRESET\_BOOLEAN**: `object`
 
-Defined in: [src/defineProperty/DefineForVertex.ts:77](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/defineProperty/DefineForVertex.ts#L77)
+Defined in: [src/defineProperty/DefineForVertex.ts:75](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/defineProperty/DefineForVertex.ts#L75)
 
 ## Type Declaration
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="receive_shadow"></a> `RECEIVE_SHADOW` | `string` | `'receiveShadow'` | [src/defineProperty/DefineForVertex.ts:34](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/defineProperty/DefineForVertex.ts#L34) |
-| <a id="use_billboard"></a> `USE_BILLBOARD` | `string` | `'useBillboard'` | [src/defineProperty/DefineForVertex.ts:33](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/defineProperty/DefineForVertex.ts#L33) |
-| <a id="use_billboard_perspective"></a> `USE_BILLBOARD_PERSPECTIVE` | `string` | `'useBillboardPerspective'` | [src/defineProperty/DefineForVertex.ts:32](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/defineProperty/DefineForVertex.ts#L32) |
+| <a id="receive_shadow"></a> `RECEIVE_SHADOW` | `string` | `'receiveShadow'` | [src/defineProperty/DefineForVertex.ts:33](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/defineProperty/DefineForVertex.ts#L33) |
+| <a id="use_billboard"></a> `USE_BILLBOARD` | `string` | `'useBillboard'` | [src/defineProperty/DefineForVertex.ts:32](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/defineProperty/DefineForVertex.ts#L32) |

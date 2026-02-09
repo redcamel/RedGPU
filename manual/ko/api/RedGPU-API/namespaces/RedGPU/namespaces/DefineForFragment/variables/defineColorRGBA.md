@@ -8,7 +8,7 @@
 
 > **defineColorRGBA**: (`classObject`, `keyList`) => `void`
 
-Defined in: [src/defineProperty/DefineForFragment.ts:103](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/defineProperty/DefineForFragment.ts#L103)
+Defined in: [src/defineProperty/DefineForFragment.ts:103](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/defineProperty/DefineForFragment.ts#L103)
 
 ## Parameters
 

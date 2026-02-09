@@ -6,7 +6,7 @@
 
 # Class: TAA
 
-Defined in: [src/antialiasing/taa/TAA.ts:35](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L35)
+Defined in: [src/antialiasing/taa/TAA.ts:35](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L35)
 
 TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
 
@@ -31,7 +31,7 @@ redGPUContext.antialiasingManager.useTAA = true;
 
 > **new TAA**(`redGPUContext`): `TAA`
 
-Defined in: [src/antialiasing/taa/TAA.ts:82](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L82)
+Defined in: [src/antialiasing/taa/TAA.ts:82](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L82)
 
 TAA 인스턴스를 생성합니다.
 
@@ -54,7 +54,7 @@ TAA 인스턴스를 생성합니다.
 
 > **get** **frameIndex**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L117)
+Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L117)
 
 프레임 인덱스를 반환합니다.
 
@@ -74,7 +74,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU
 
 > **get** **jitterStrength**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:141](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L141)
+Defined in: [src/antialiasing/taa/TAA.ts:141](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L141)
 
 지터링 강도를 반환합니다.
 
@@ -90,7 +90,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:141](https://github.com/redcamel/RedGPU
 
 > **set** **jitterStrength**(`value`): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:153](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L153)
+Defined in: [src/antialiasing/taa/TAA.ts:153](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L153)
 
 지터링 강도를 설정합니다.
 
@@ -111,16 +111,16 @@ Defined in: [src/antialiasing/taa/TAA.ts:153](https://github.com/redcamel/RedGPU
 
 #### Get Signature
 
-> **get** **prevNoneJitterProjectionCameraMatrix**(): [`mat4`](../../../type-aliases/mat4.md)
+> **get** **prevNoneJitterProjectionCameraMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L105)
+Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L105)
 
 이전 프레임의 지터링 없는 프로젝션 카메라 행렬을 반환합니다.
 
 
 ##### Returns
 
-[`mat4`](../../../type-aliases/mat4.md)
+[`mat4`](../../Math/type-aliases/mat4.md)
 
 4x4 행렬
 
@@ -133,7 +133,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L129)
+Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L129)
 
 비디오 메모리 사용량을 반환합니다.
 
@@ -151,7 +151,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU
 
 > **clear**(): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:229](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L229)
+Defined in: [src/antialiasing/taa/TAA.ts:229](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L229)
 
 TAA 리소스를 초기화합니다.
 
@@ -166,7 +166,7 @@ TAA 리소스를 초기화합니다.
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): `ASinglePassPostEffectResult`
 
-Defined in: [src/antialiasing/taa/TAA.ts:179](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L179)
+Defined in: [src/antialiasing/taa/TAA.ts:179](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L179)
 
 TAA 이펙트를 렌더링합니다.
 
@@ -193,7 +193,7 @@ TAA 이펙트를 렌더링합니다.
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:257](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/antialiasing/taa/TAA.ts#L257)
+Defined in: [src/antialiasing/taa/TAA.ts:257](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/antialiasing/taa/TAA.ts#L257)
 
 유니폼 값을 업데이트합니다.
 

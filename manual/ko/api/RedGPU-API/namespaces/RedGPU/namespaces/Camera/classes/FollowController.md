@@ -6,7 +6,7 @@
 
 # Class: FollowController
 
-Defined in: [src/camera/controller/FollowController.ts:31](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L31)
+Defined in: [src/camera/controller/FollowController.ts:32](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L32)
 
 특정 타겟 메시를 추적하는 카메라 컨트롤러입니다.
 
@@ -14,15 +14,15 @@ Defined in: [src/camera/controller/FollowController.ts:31](https://github.com/re
 3인칭 게임의 캐릭터 카메라처럼 타겟의 뒤를 쫓거나 주변을 회전하며 관찰하는 데 사용됩니다. 타겟의 이동과 회전을 부드럽게 따라가며, 거리와 높이, 각도를 조절하여 다양한 연출이 가능합니다.
 
 
-* ### Example
+### Example
 ```typescript
-const followController = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
+const followController = new RedGPU.FollowController(redGPUContext, targetMesh);
 followController.distance = 15;
 followController.height = 8;
 followController.pan = 45;
 followController.tilt = 30;
 ```
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/controller/followController/"></iframe>
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/controller/followController/" style="width:100%; height:500px;"></iframe>
 
 ## Extends
 
@@ -34,10 +34,15 @@ followController.tilt = 30;
 
 > **new FollowController**(`redGPUContext`, `targetMesh`): `FollowController`
 
-Defined in: [src/camera/controller/FollowController.ts:147](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L147)
+Defined in: [src/camera/controller/FollowController.ts:153](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L153)
 
-FollowController 생성자
+FollowController 인스턴스를 생성합니다.
 
+
+### Example
+```typescript
+const controller = new RedGPU.FollowController(redGPUContext, targetMesh);
+```
 
 #### Parameters
 
@@ -67,7 +72,7 @@ targetMesh가 null이거나 undefined일 경우 에러 발생
 
 > **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:135](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L135)
+Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L138)
 
 이 컨트롤러가 제어하는 카메라를 반환합니다.
 
@@ -91,7 +96,7 @@ Defined in: [src/camera/core/AController.ts:135](https://github.com/redcamel/Red
 
 > **get** **distance**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:170](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L170)
+Defined in: [src/camera/controller/FollowController.ts:176](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L176)
 
 타겟으로부터의 카메라 거리를 가져옵니다.
 
@@ -107,7 +112,7 @@ Defined in: [src/camera/controller/FollowController.ts:170](https://github.com/r
 
 > **set** **distance**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:182](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L182)
+Defined in: [src/camera/controller/FollowController.ts:188](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L188)
 
 타겟으로부터의 카메라 거리를 설정합니다.
 
@@ -130,7 +135,7 @@ Defined in: [src/camera/controller/FollowController.ts:182](https://github.com/r
 
 > **get** **distanceInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:195](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L195)
+Defined in: [src/camera/controller/FollowController.ts:201](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L201)
 
 거리 값의 보간 계수를 가져옵니다.
 
@@ -146,7 +151,7 @@ Defined in: [src/camera/controller/FollowController.ts:195](https://github.com/r
 
 > **set** **distanceInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:207](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L207)
+Defined in: [src/camera/controller/FollowController.ts:213](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L213)
 
 거리 값의 보간 계수를 설정합니다.
 
@@ -169,7 +174,7 @@ Defined in: [src/camera/controller/FollowController.ts:207](https://github.com/r
 
 > **get** **followTargetRotation**(): `boolean`
 
-Defined in: [src/camera/controller/FollowController.ts:395](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L395)
+Defined in: [src/camera/controller/FollowController.ts:401](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L401)
 
 타겟 메시의 회전을 따를지 여부를 가져옵니다.
 
@@ -185,7 +190,7 @@ true일 경우 타겟의 회전을 따름
 
 > **set** **followTargetRotation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:407](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L407)
+Defined in: [src/camera/controller/FollowController.ts:413](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L413)
 
 타겟 메시의 회전을 따를지 여부를 설정합니다.
 
@@ -208,7 +213,7 @@ Defined in: [src/camera/controller/FollowController.ts:407](https://github.com/r
 
 > **get** **height**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:220](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L220)
+Defined in: [src/camera/controller/FollowController.ts:226](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L226)
 
 타겟으로부터의 카메라 높이를 가져옵니다.
 
@@ -224,7 +229,7 @@ Defined in: [src/camera/controller/FollowController.ts:220](https://github.com/r
 
 > **set** **height**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:232](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L232)
+Defined in: [src/camera/controller/FollowController.ts:238](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L238)
 
 타겟으로부터의 카메라 높이를 설정합니다.
 
@@ -247,7 +252,7 @@ Defined in: [src/camera/controller/FollowController.ts:232](https://github.com/r
 
 > **get** **heightInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:245](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L245)
+Defined in: [src/camera/controller/FollowController.ts:251](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L251)
 
 높이 값의 보간 계수를 가져옵니다.
 
@@ -263,7 +268,7 @@ Defined in: [src/camera/controller/FollowController.ts:245](https://github.com/r
 
 > **set** **heightInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:257](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L257)
+Defined in: [src/camera/controller/FollowController.ts:263](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L263)
 
 높이 값의 보간 계수를 설정합니다.
 
@@ -286,7 +291,7 @@ Defined in: [src/camera/controller/FollowController.ts:257](https://github.com/r
 
 > **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:149](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L149)
+Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L187)
 
 **`Internal`**
 
@@ -312,7 +317,7 @@ Defined in: [src/camera/core/AController.ts:149](https://github.com/redcamel/Red
 
 > **get** **interpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:370](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L370)
+Defined in: [src/camera/controller/FollowController.ts:376](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L376)
 
 전체 카메라 위치의 보간 계수를 가져옵니다.
 
@@ -328,7 +333,7 @@ Defined in: [src/camera/controller/FollowController.ts:370](https://github.com/r
 
 > **set** **interpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:382](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L382)
+Defined in: [src/camera/controller/FollowController.ts:388](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L388)
 
 전체 카메라 위치의 보간 계수를 설정합니다.
 
@@ -351,7 +356,7 @@ Defined in: [src/camera/controller/FollowController.ts:382](https://github.com/r
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:195](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L195)
+Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L233)
 
 **`Internal`**
 
@@ -377,7 +382,7 @@ Defined in: [src/camera/core/AController.ts:195](https://github.com/redcamel/Red
 
 > **get** **keyboardActiveView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L162)
+Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L200)
 
 **`Internal`**
 
@@ -395,7 +400,7 @@ Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/Red
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:175](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L175)
+Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L213)
 
 **`Internal`**
 
@@ -424,7 +429,7 @@ Defined in: [src/camera/core/AController.ts:175](https://github.com/redcamel/Red
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:208](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L208)
+Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L246)
 
 **`Internal`**
 
@@ -442,7 +447,7 @@ Defined in: [src/camera/core/AController.ts:208](https://github.com/redcamel/Red
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:221](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L221)
+Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L259)
 
 **`Internal`**
 
@@ -471,7 +476,7 @@ Defined in: [src/camera/core/AController.ts:221](https://github.com/redcamel/Red
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/core/AController.ts:98](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L98)
+Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L101)
 
 컨트롤러의 이름을 반환합니다.
 
@@ -487,7 +492,7 @@ Defined in: [src/camera/core/AController.ts:98](https://github.com/redcamel/RedG
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:111](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L111)
+Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L114)
 
 컨트롤러의 이름을 설정합니다.
 
@@ -514,9 +519,9 @@ Defined in: [src/camera/core/AController.ts:111](https://github.com/redcamel/Red
 
 > **get** **pan**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:270](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L270)
+Defined in: [src/camera/controller/FollowController.ts:276](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L276)
 
-타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져옵니다.
+타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져옵니다. (도 단위)
 
 
 ##### Returns
@@ -530,7 +535,7 @@ Defined in: [src/camera/controller/FollowController.ts:270](https://github.com/r
 
 > **set** **pan**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:282](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L282)
+Defined in: [src/camera/controller/FollowController.ts:288](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L288)
 
 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 설정합니다.
 
@@ -553,7 +558,7 @@ Defined in: [src/camera/controller/FollowController.ts:282](https://github.com/r
 
 > **get** **panInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:295](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L295)
+Defined in: [src/camera/controller/FollowController.ts:301](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L301)
 
 팬 값의 보간 계수를 가져옵니다.
 
@@ -569,7 +574,7 @@ Defined in: [src/camera/controller/FollowController.ts:295](https://github.com/r
 
 > **set** **panInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:307](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L307)
+Defined in: [src/camera/controller/FollowController.ts:313](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L313)
 
 팬 값의 보간 계수를 설정합니다.
 
@@ -592,7 +597,7 @@ Defined in: [src/camera/controller/FollowController.ts:307](https://github.com/r
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/camera/core/AController.ts:123](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L123)
+Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L126)
 
 RedGPU 컨텍스트를 반환합니다.
 
@@ -616,7 +621,7 @@ RedGPU 컨텍스트
 
 > **get** **targetMesh**(): [`Mesh`](../../Display/classes/Mesh.md)
 
-Defined in: [src/camera/controller/FollowController.ts:494](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L494)
+Defined in: [src/camera/controller/FollowController.ts:500](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L500)
 
 따라갈 대상 메시를 가져옵니다.
 
@@ -632,7 +637,7 @@ Defined in: [src/camera/controller/FollowController.ts:494](https://github.com/r
 
 > **set** **targetMesh**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:509](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L509)
+Defined in: [src/camera/controller/FollowController.ts:515](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L515)
 
 따라갈 대상 메시를 설정합니다.
 
@@ -660,7 +665,7 @@ value가 null이거나 undefined일 경우 에러 발생
 
 > **get** **targetOffsetX**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:419](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L419)
+Defined in: [src/camera/controller/FollowController.ts:425](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L425)
 
 타겟으로부터의 카메라 X축 오프셋을 가져옵니다.
 
@@ -676,7 +681,7 @@ X축 오프셋
 
 > **set** **targetOffsetX**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:431](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L431)
+Defined in: [src/camera/controller/FollowController.ts:437](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L437)
 
 타겟으로부터의 카메라 X축 오프셋을 설정합니다.
 
@@ -699,7 +704,7 @@ Defined in: [src/camera/controller/FollowController.ts:431](https://github.com/r
 
 > **get** **targetOffsetY**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:444](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L444)
+Defined in: [src/camera/controller/FollowController.ts:450](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L450)
 
 타겟으로부터의 카메라 Y축 오프셋을 가져옵니다.
 
@@ -715,7 +720,7 @@ Y축 오프셋
 
 > **set** **targetOffsetY**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:456](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L456)
+Defined in: [src/camera/controller/FollowController.ts:462](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L462)
 
 타겟으로부터의 카메라 Y축 오프셋을 설정합니다.
 
@@ -738,7 +743,7 @@ Defined in: [src/camera/controller/FollowController.ts:456](https://github.com/r
 
 > **get** **targetOffsetZ**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:469](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L469)
+Defined in: [src/camera/controller/FollowController.ts:475](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L475)
 
 타겟으로부터의 카메라 Z축 오프셋을 가져옵니다.
 
@@ -754,7 +759,7 @@ Z축 오프셋
 
 > **set** **targetOffsetZ**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:481](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L481)
+Defined in: [src/camera/controller/FollowController.ts:487](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L487)
 
 타겟으로부터의 카메라 Z축 오프셋을 설정합니다.
 
@@ -777,9 +782,9 @@ Defined in: [src/camera/controller/FollowController.ts:481](https://github.com/r
 
 > **get** **tilt**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:320](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L320)
+Defined in: [src/camera/controller/FollowController.ts:326](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L326)
 
-타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져옵니다.
+타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져옵니다. (도 단위)
 
 
 ##### Returns
@@ -793,7 +798,7 @@ Defined in: [src/camera/controller/FollowController.ts:320](https://github.com/r
 
 > **set** **tilt**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:332](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L332)
+Defined in: [src/camera/controller/FollowController.ts:338](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L338)
 
 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 설정합니다.
 
@@ -816,7 +821,7 @@ Defined in: [src/camera/controller/FollowController.ts:332](https://github.com/r
 
 > **get** **tiltInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:345](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L345)
+Defined in: [src/camera/controller/FollowController.ts:351](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L351)
 
 틸트 값의 보간 계수를 가져옵니다.
 
@@ -832,7 +837,7 @@ Defined in: [src/camera/controller/FollowController.ts:345](https://github.com/r
 
 > **set** **tiltInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:357](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L357)
+Defined in: [src/camera/controller/FollowController.ts:363](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L363)
 
 틸트 값의 보간 계수를 설정합니다.
 
@@ -847,13 +852,85 @@ Defined in: [src/camera/controller/FollowController.ts:357](https://github.com/r
 
 `void`
 
+***
+
+### x
+
+#### Get Signature
+
+> **get** **x**(): `number`
+
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L150)
+
+카메라의 현재 월드 X 좌표를 가져옵니다.
+
+
+##### Returns
+
+`number`
+
+X 좌표
+
+
+#### Inherited from
+
+[`AController`](../namespaces/Core/classes/AController.md).[`x`](../namespaces/Core/classes/AController.md#x)
+
+***
+
+### y
+
+#### Get Signature
+
+> **get** **y**(): `number`
+
+Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L162)
+
+카메라의 현재 월드 Y 좌표를 가져옵니다.
+
+
+##### Returns
+
+`number`
+
+Y 좌표
+
+
+#### Inherited from
+
+[`AController`](../namespaces/Core/classes/AController.md).[`y`](../namespaces/Core/classes/AController.md#y)
+
+***
+
+### z
+
+#### Get Signature
+
+> **get** **z**(): `number`
+
+Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L174)
+
+카메라의 현재 월드 Z 좌표를 가져옵니다.
+
+
+##### Returns
+
+`number`
+
+Z 좌표
+
+
+#### Inherited from
+
+[`AController`](../namespaces/Core/classes/AController.md).[`z`](../namespaces/Core/classes/AController.md#z)
+
 ## Methods
 
 ### checkKeyboardInput()
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:283](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L283)
+Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L323)
 
 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
 
@@ -888,7 +965,7 @@ Defined in: [src/camera/core/AController.ts:283](https://github.com/redcamel/Red
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:229](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L229)
+Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L267)
 
 컨트롤러를 제거하고 이벤트 리스너를 해제합니다.
 
@@ -907,7 +984,7 @@ Defined in: [src/camera/core/AController.ts:229](https://github.com/redcamel/Red
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:367](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L367)
+Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L407)
 
 **`Internal`**
 
@@ -937,7 +1014,7 @@ Defined in: [src/camera/core/AController.ts:367](https://github.com/redcamel/Red
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:330](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L330)
+Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L370)
 
 **`Internal`**
 
@@ -960,8 +1037,8 @@ Defined in: [src/camera/core/AController.ts:330](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:350](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L350) |
-| `y` | `number` | [src/camera/core/AController.ts:351](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L351) |
+| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L390) |
+| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L391) |
 
 #### Inherited from
 
@@ -973,10 +1050,15 @@ Defined in: [src/camera/core/AController.ts:330](https://github.com/redcamel/Red
 
 > **setTargetOffset**(`x`, `y`, `z`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:530](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L530)
+Defined in: [src/camera/controller/FollowController.ts:541](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L541)
 
 카메라의 타겟 오프셋을 한 번에 설정합니다.
 
+
+### Example
+```typescript
+controller.setTargetOffset(0, 5, 0);
+```
 
 #### Parameters
 
@@ -996,7 +1078,7 @@ Defined in: [src/camera/controller/FollowController.ts:530](https://github.com/r
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:550](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/FollowController.ts#L550)
+Defined in: [src/camera/controller/FollowController.ts:561](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L561)
 
 매 프레임마다 카메라의 위치와 방향을 업데이트합니다.
 

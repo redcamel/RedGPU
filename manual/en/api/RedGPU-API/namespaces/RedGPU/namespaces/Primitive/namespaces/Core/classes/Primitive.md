@@ -6,7 +6,7 @@
 
 # Class: Primitive
 
-Defined in: [src/primitive/core/Primitive.ts:25](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L25)
+Defined in: [src/primitive/core/Primitive.ts:25](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L25)
 
 
 Base class for all primitive geometries.
@@ -14,9 +14,9 @@ Base class for all primitive geometries.
 
 Manages vertex buffers, index buffers, GPU render layout information, and AABB bounding boxes.
 
-* ### Example
+### Example
 ```typescript
-const primitive = new RedGPU.Primitive.Core.Primitive(redGPUContext);
+const primitive = new RedGPU.Core.Primitive(redGPUContext);
 ```
 
 ## Extended by
@@ -28,6 +28,7 @@ const primitive = new RedGPU.Primitive.Core.Primitive(redGPUContext);
 - [`Circle`](../../../classes/Circle.md)
 - [`Cylinder`](../../../classes/Cylinder.md)
 - [`Box`](../../../classes/Box.md)
+- [`Capsule`](../../../classes/Capsule.md)
 - [`Ground`](../../../classes/Ground.md)
 
 ## Constructors
@@ -36,7 +37,7 @@ const primitive = new RedGPU.Primitive.Core.Primitive(redGPUContext);
 
 > **new Primitive**(`redGPUContext`): `Primitive`
 
-Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L55)
+Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L55)
 
 
 Creates an instance of Primitive.
@@ -59,7 +60,7 @@ Creates an instance of Primitive.
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L86)
+Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L86)
 
 
 Returns the GPU render information.
@@ -73,7 +74,7 @@ Object containing buffer layouts array
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L86) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L86) |
 
 ***
 
@@ -83,7 +84,7 @@ Object containing buffer layouts array
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L110)
+Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L110)
 
 
 Returns the current index buffer.
@@ -103,7 +104,7 @@ IndexBuffer instance
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L98)
+Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L98)
 
 
 Returns the current vertex buffer.
@@ -123,7 +124,7 @@ VertexBuffer instance
 
 > **get** **volume**(): [`AABB`](../../../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L122)
+Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L122)
 
 
 Returns the AABB bounding volume of the geometry.
@@ -143,7 +144,7 @@ AABB instance
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L67)
+Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L67)
 
 
 Returns the default vertex layout structure (Position, Normal, UV).
@@ -161,7 +162,7 @@ Vertex interleaved struct object
 
 > **\_setData**(`geometry`): `void`
 
-Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L138)
+Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L138)
 
 **`Internal`**
 

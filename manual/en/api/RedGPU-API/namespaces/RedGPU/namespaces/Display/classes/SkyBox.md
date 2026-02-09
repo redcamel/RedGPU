@@ -6,19 +6,34 @@
 
 # Class: SkyBox
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:56](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L56)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:71](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L71)
 
 
 Skybox class used as the background for 3D scenes.
 
 
-Renders a 360-degree environment using cube or HDR textures, providing smooth transitions between textures, blur, exposure, and transparency control.
+Renders a 360-degree environment using cube textures, providing smooth transitions between textures, blur, exposure, and transparency control.
 
-* ### Example
+
+Supports both regular 6-image cubemaps (`CubeTexture`) and IBL cubemaps (`IBLCubeTexture`) converted from HDR files.
+
+::: info
+
+To use an HDR (.hdr) file, you must pass the `environmentTexture` converted to a cubemap via `RedGPU.Resource.IBL`.
+:::
+
+### Example
 ```typescript
+// 1. 일반 큐브 텍스처 사용 (Using regular CubeTexture)
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
-view.skybox = skybox
+
+// 2. HDR 파일을 IBL을 통해 사용 (Using HDR file via IBL)
+const ibl = new RedGPU.Resource.IBL(redGPUContext, 'assets/env.hdr');
+const skyboxHDR = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+
+view.skybox = skybox;
 ```
+
 <iframe src="https://redcamel.github.io/RedGPU/examples/3d/skybox/skybox/"></iframe>
 
 ## See
@@ -34,7 +49,7 @@ Below is a list of additional sample examples to help understand the structure a
 
 > **new SkyBox**(`redGPUContext`, `cubeTexture`): `SkyBox`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:141](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L141)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:156](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L156)
 
 
 Creates a new SkyBox instance.
@@ -44,7 +59,7 @@ Creates a new SkyBox instance.
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU rendering context |
-| `cubeTexture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md) | Cube texture or HDR texture to use for the skybox |
+| `cubeTexture` | [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | Cube texture to use for the skybox (Regular or IBL) |
 
 #### Returns
 
@@ -53,7 +68,7 @@ Creates a new SkyBox instance.
 #### Throws
 
 
-Throws error if redGPUContext is invalid
+Throws Error if redGPUContext is invalid
 
 ## Properties
 
@@ -61,7 +76,7 @@ Throws error if redGPUContext is invalid
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:66](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L66)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:81](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L81)
 
 
 GPU rendering information object
@@ -70,9 +85,9 @@ GPU rendering information object
 
 ### modelMatrix
 
-> **modelMatrix**: [`mat4`](../../../type-aliases/mat4.md)
+> **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:61](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L61)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:76](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L76)
 
 
 Model transformation matrix (4x4 matrix)
@@ -85,7 +100,7 @@ Model transformation matrix (4x4 matrix)
 
 > **get** **blur**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:193](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L193)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:196](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L196)
 
 
 Returns the skybox blur amount.
@@ -94,14 +109,11 @@ Returns the skybox blur amount.
 
 `number`
 
-
-Blur value between 0.0 and 1.0
-
 #### Set Signature
 
 > **set** **blur**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:207](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L207)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:210](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L210)
 
 
 Sets the skybox blur amount.
@@ -109,7 +121,7 @@ Sets the skybox blur amount.
 ##### Throws
 
 
-Throws error if value is out of 0.0-1.0 range
+Throws Error if value is out of range
 
 ##### Parameters
 
@@ -129,7 +141,7 @@ Throws error if value is out of 0.0-1.0 range
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L220)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L220)
 
 
 Returns the skybox opacity.
@@ -138,14 +150,11 @@ Returns the skybox opacity.
 
 `number`
 
-
-Opacity value between 0.0 and 1.0
-
 #### Set Signature
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L234)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L234)
 
 
 Sets the skybox opacity.
@@ -153,7 +162,7 @@ Sets the skybox opacity.
 ##### Throws
 
 
-Throws error if value is out of 0.0-1.0 range
+Throws Error if value is out of range
 
 ##### Parameters
 
@@ -171,25 +180,22 @@ Throws error if value is out of 0.0-1.0 range
 
 #### Get Signature
 
-> **get** **skyboxTexture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md)
+> **get** **skyboxTexture**(): [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:246](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L246)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:243](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L243)
 
 
 Returns the current skybox texture.
 
 ##### Returns
 
-[`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md)
-
-
-Current skybox texture
+[`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
 
 #### Set Signature
 
 > **set** **skyboxTexture**(`texture`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:260](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L260)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:257](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L257)
 
 
 Sets the skybox texture.
@@ -197,13 +203,13 @@ Sets the skybox texture.
 ##### Throws
 
 
-Throws error if texture is invalid
+Throws Error if texture is invalid
 
 ##### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `texture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md) | New skybox texture |
+| `texture` | [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | New cube texture (Regular or IBL) |
 
 ##### Returns
 
@@ -217,17 +223,14 @@ Throws error if texture is invalid
 
 > **get** **transitionDuration**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:160](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L160)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:172](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L172)
 
 
-Returns the transition duration.
+Returns the transition duration (in ms).
 
 ##### Returns
 
 `number`
-
-
-Transition duration (ms)
 
 ***
 
@@ -237,17 +240,14 @@ Transition duration (ms)
 
 > **get** **transitionElapsed**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:171](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L171)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:180](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L180)
 
 
-Returns the transition elapsed time.
+Returns the transition elapsed time (in ms).
 
 ##### Returns
 
 `number`
-
-
-Transition elapsed time (ms)
 
 ***
 
@@ -257,17 +257,14 @@ Transition elapsed time (ms)
 
 > **get** **transitionProgress**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:182](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L182)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:188](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L188)
 
 
-Returns the transition progress.
+Returns the progress of the transition currently in progress (0.0 to 1.0).
 
 ##### Returns
 
 `number`
-
-
-Transition progress between 0.0 and 1.0
 
 ***
 
@@ -275,19 +272,16 @@ Transition progress between 0.0 and 1.0
 
 #### Get Signature
 
-> **get** **transitionTexture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md)
+> **get** **transitionTexture**(): [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:276](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L276)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:270](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L270)
 
 
 Returns the transition target texture.
 
 ##### Returns
 
-[`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md)
-
-
-Transition target texture (undefined if not transitioning)
+[`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
 
 ## Methods
 
@@ -295,7 +289,7 @@ Transition target texture (undefined if not transitioning)
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:323](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L323)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:316](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L316)
 
 
 Renders the skybox.
@@ -303,9 +297,8 @@ Renders the skybox.
 
 This method should be called every frame, performing MSAA state check, texture transition updates, and executing actual rendering commands.
 
-* ### Example
+### Example
 ```typescript
-// 렌더링 루프에서
 skybox.render(renderViewState);
 ```
 
@@ -325,12 +318,12 @@ skybox.render(renderViewState);
 
 > **transition**(`transitionTexture`, `duration`, `transitionAlphaTexture`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:299](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/skyboxs/skyBox/SkyBox.ts#L299)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:293](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/skyboxs/skyBox/SkyBox.ts#L293)
 
 
 Starts a smooth transition to another texture.
 
-* ### Example
+### Example
 ```typescript
 // 1초 동안 새 텍스처로 전환
 skybox.transition(newTexture, 1000, noiseTexture);
@@ -340,8 +333,8 @@ skybox.transition(newTexture, 1000, noiseTexture);
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `transitionTexture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md) | `undefined` | Target texture to transition to |
-| `duration` | `number` | `300` | Transition duration (ms, default: 300) |
+| `transitionTexture` | [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | `undefined` | Target cube texture to transition to (Regular or IBL) |
+| `duration` | `number` | `300` | Transition duration (ms, Default: 300) |
 | `transitionAlphaTexture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) | `undefined` | Alpha noise texture to use for the transition effect |
 
 #### Returns

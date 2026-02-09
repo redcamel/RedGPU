@@ -6,11 +6,11 @@
 
 # Core
 
+
+Provides core classes and utilities for primitive generation.
+
 ## Core
 
 - [GeometryGPURenderInfo](classes/GeometryGPURenderInfo.md)
 - [Primitive](classes/Primitive.md)
-
-## Other
-
 - [createPrimitiveGeometry](functions/createPrimitiveGeometry.md)

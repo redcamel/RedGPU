@@ -6,7 +6,7 @@
 
 # Class: PhongMaterial
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:16](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L16)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:16](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L16)
 
 
 Material class supporting various textures/parameters based on Phong lighting.
@@ -31,7 +31,7 @@ material.diffuseTexture = sourceTexture;
 
 ## Extends
 
-- [`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md)
+- [`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md)
 
 ## Constructors
 
@@ -39,7 +39,7 @@ material.diffuseTexture = sourceTexture;
 
 > **new PhongMaterial**(`redGPUContext`, `color`, `name?`): `PhongMaterial`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:171](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L171)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:171](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L171)
 
 
 PhongMaterial constructor
@@ -58,7 +58,7 @@ PhongMaterial constructor
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`constructor`](../namespaces/Core/classes/ABitmapBaseMaterial.md#constructor)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`constructor`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#constructor)
 
 ## Properties
 
@@ -66,14 +66,14 @@ PhongMaterial constructor
 
 > **\_\_packingList**: `any`[]
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABitmapBaseMaterial.ts#L21)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABitmapBaseMaterial.ts#L22)
 
 
 List of callbacks called when updating the pipeline
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`__packingList`](../namespaces/Core/classes/ABitmapBaseMaterial.md#__packinglist)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`__packingList`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#__packinglist)
 
 ***
 
@@ -81,7 +81,7 @@ List of callbacks called when updating the pipeline
 
 > **alphaTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:46](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L46)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:46](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L46)
 
 
 Alpha (transparency) texture
@@ -92,7 +92,7 @@ Alpha (transparency) texture
 
 > **alphaTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L51)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L51)
 
 
 Alpha texture sampler
@@ -103,7 +103,7 @@ Alpha texture sampler
 
 > **aoTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:86](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L86)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:86](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L86)
 
 
 AO (ambient occlusion) texture
@@ -114,7 +114,7 @@ AO (ambient occlusion) texture
 
 > **aoTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:91](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L91)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:91](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L91)
 
 
 AO texture sampler
@@ -125,7 +125,7 @@ AO texture sampler
 
 > **color**: [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L21)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L21)
 
 
 Base color of the material (RGB)
@@ -136,7 +136,7 @@ Base color of the material (RGB)
 
 > **diffuseTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L56)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L56)
 
 
 Diffuse texture
@@ -147,7 +147,7 @@ Diffuse texture
 
 > **diffuseTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L61)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L61)
 
 
 Diffuse texture sampler
@@ -158,14 +158,29 @@ Diffuse texture sampler
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L61)
+Defined in: [src/material/core/ABaseMaterial.ts:62](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L62)
 
 
 Pipeline dirty status flag
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`dirtyPipeline`](../namespaces/Core/classes/ABitmapBaseMaterial.md#dirtypipeline)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`dirtyPipeline`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#dirtypipeline)
+
+***
+
+### dirtyTextureTransform
+
+> **dirtyTextureTransform**: `boolean` = `false`
+
+Defined in: [src/material/core/AUVTransformBaseMaterial.ts:29](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/AUVTransformBaseMaterial.ts#L29)
+
+
+Texture transform change status flag
+
+#### Inherited from
+
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`dirtyTextureTransform`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#dirtytexturetransform)
 
 ***
 
@@ -173,7 +188,7 @@ Pipeline dirty status flag
 
 > **emissiveColor**: [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:26](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L26)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:26](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L26)
 
 
 Emissive color (RGB)
@@ -184,7 +199,7 @@ Emissive color (RGB)
 
 > **emissiveStrength**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:31](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L31)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:31](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L31)
 
 
 Emissive strength
@@ -195,7 +210,7 @@ Emissive strength
 
 > **emissiveTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:76](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L76)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:76](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L76)
 
 
 Emissive texture
@@ -206,7 +221,7 @@ Emissive texture
 
 > **emissiveTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:81](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L81)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:81](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L81)
 
 
 Emissive texture sampler
@@ -217,14 +232,14 @@ Emissive texture sampler
 
 > **gpuRenderInfo**: [`FragmentGPURenderInfo`](../namespaces/Core/classes/FragmentGPURenderInfo.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L56)
+Defined in: [src/material/core/ABaseMaterial.ts:57](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L57)
 
 
 Fragment GPU render info object
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`gpuRenderInfo`](../namespaces/Core/classes/ABitmapBaseMaterial.md#gpurenderinfo)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`gpuRenderInfo`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#gpurenderinfo)
 
 ***
 
@@ -232,7 +247,7 @@ Fragment GPU render info object
 
 > **metallic**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:111](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L111)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:111](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L111)
 
 
 Metallic
@@ -243,7 +258,7 @@ Metallic
 
 > **normalScale**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:106](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L106)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:106](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L106)
 
 
 Normal map scale
@@ -254,7 +269,7 @@ Normal map scale
 
 > **normalTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:96](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L96)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:96](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L96)
 
 
 Normal map texture
@@ -265,7 +280,7 @@ Normal map texture
 
 > **normalTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:101](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L101)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:101](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L101)
 
 
 Normal map texture sampler
@@ -276,14 +291,14 @@ Normal map texture sampler
 
 > **opacity**: `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L22)
+Defined in: [src/material/core/ABaseMaterial.ts:23](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L23)
 
 
 Material opacity (0~1)
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`opacity`](../namespaces/Core/classes/ABitmapBaseMaterial.md#opacity)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`opacity`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#opacity)
 
 ***
 
@@ -291,7 +306,7 @@ Material opacity (0~1)
 
 > **roughness**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:116](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L116)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:116](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L116)
 
 
 Roughness
@@ -302,7 +317,7 @@ Roughness
 
 > **specularColor**: [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:36](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L36)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:36](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L36)
 
 
 Specular color (RGB)
@@ -313,7 +328,7 @@ Specular color (RGB)
 
 > **specularStrength**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:41](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L41)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:41](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L41)
 
 
 Specular strength
@@ -324,7 +339,7 @@ Specular strength
 
 > **specularTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L66)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L66)
 
 
 Specular texture
@@ -335,7 +350,7 @@ Specular texture
 
 > **specularTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:71](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L71)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:71](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L71)
 
 
 Specular texture sampler
@@ -346,14 +361,14 @@ Specular texture sampler
 
 > **tint**: [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L27)
+Defined in: [src/material/core/ABaseMaterial.ts:28](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L28)
 
 
 Material tint color (RGBA)
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`tint`](../namespaces/Core/classes/ABitmapBaseMaterial.md#tint)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`tint`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#tint)
 
 ***
 
@@ -361,14 +376,14 @@ Material tint color (RGBA)
 
 > **transparent**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L66)
+Defined in: [src/material/core/ABaseMaterial.ts:67](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L67)
 
 
 Whether the material is transparent
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`transparent`](../namespaces/Core/classes/ABitmapBaseMaterial.md#transparent)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`transparent`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#transparent)
 
 ***
 
@@ -376,14 +391,14 @@ Whether the material is transparent
 
 > **use2PathRender**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:51](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L51)
+Defined in: [src/material/core/ABaseMaterial.ts:52](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L52)
 
 
 Whether to use 2-pass rendering
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`use2PathRender`](../namespaces/Core/classes/ABitmapBaseMaterial.md#use2pathrender)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`use2PathRender`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#use2pathrender)
 
 ***
 
@@ -391,7 +406,7 @@ Whether to use 2-pass rendering
 
 > **useSSR**: `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:121](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L121)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:121](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L121)
 
 
 Whether to use SSR (Screen Space Reflection)
@@ -402,14 +417,14 @@ Whether to use SSR (Screen Space Reflection)
 
 > **useTint**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L32)
+Defined in: [src/material/core/ABaseMaterial.ts:33](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L33)
 
 
 Whether to use tint color
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`useTint`](../namespaces/Core/classes/ABitmapBaseMaterial.md#usetint)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`useTint`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#usetint)
 
 ## Accessors
 
@@ -419,7 +434,7 @@ Whether to use tint color
 
 > **get** **blendAlphaState**(): [`BlendState`](../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L245)
+Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L289)
 
 
 Returns the material's alpha blend state object
@@ -430,7 +445,7 @@ Returns the material's alpha blend state object
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`blendAlphaState`](../namespaces/Core/classes/ABitmapBaseMaterial.md#blendalphastate)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`blendAlphaState`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#blendalphastate)
 
 ***
 
@@ -440,7 +455,7 @@ Returns the material's alpha blend state object
 
 > **get** **blendColorState**(): [`BlendState`](../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L237)
+Defined in: [src/material/core/ABaseMaterial.ts:281](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L281)
 
 
 Returns the material's color blend state object
@@ -451,7 +466,7 @@ Returns the material's color blend state object
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`blendColorState`](../namespaces/Core/classes/ABitmapBaseMaterial.md#blendcolorstate)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`blendColorState`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#blendcolorstate)
 
 ***
 
@@ -461,7 +476,7 @@ Returns the material's color blend state object
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L57)
 
 
 Returns the cache key.
@@ -474,7 +489,7 @@ Returns the cache key.
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L65)
 
 
 Sets the cache key.
@@ -491,7 +506,7 @@ Sets the cache key.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`cacheKey`](../namespaces/Core/classes/ABitmapBaseMaterial.md#cachekey)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`cacheKey`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#cachekey)
 
 ***
 
@@ -501,23 +516,26 @@ Sets the cache key.
 
 > **get** **displacementScale**(): `number`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:189](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L189)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:192](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L192)
 
 
-Returns displacement scale
+Returns the displacement scale.
 
 ##### Returns
 
 `number`
 
+
+Scale value
+
 #### Set Signature
 
 > **set** **displacementScale**(`value`): `void`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:200](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L200)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:203](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L203)
 
 
-Sets displacement scale
+Sets the displacement scale.
 
 ##### Parameters
 
@@ -537,23 +555,26 @@ Sets displacement scale
 
 > **get** **displacementTexture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:208](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L208)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:214](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L214)
 
 
-Returns displacement texture
+Returns the displacement texture.
 
 ##### Returns
 
 [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
+
+BitmapTexture
+
 #### Set Signature
 
 > **set** **displacementTexture**(`value`): `void`
 
-Defined in: [src/material/phongMaterial/PhongMaterial.ts:219](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/phongMaterial/PhongMaterial.ts#L219)
+Defined in: [src/material/phongMaterial/PhongMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/phongMaterial/PhongMaterial.ts#L225)
 
 
-Sets displacement texture and updates pipeline
+Sets the displacement texture and updates the pipeline.
 
 ##### Parameters
 
@@ -573,7 +594,10 @@ Sets displacement texture and updates pipeline
 
 > **get** **FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L221)
+Defined in: [src/material/core/ABaseMaterial.ts:257](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L257)
+
+
+Returns the fragment bind group descriptor name.
 
 ##### Returns
 
@@ -581,7 +605,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME`](../namespaces/Core/classes/ABitmapBaseMaterial.md#fragment_bind_group_descriptor_name)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#fragment_bind_group_descriptor_name)
 
 ***
 
@@ -591,7 +615,10 @@ Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel
 
 > **get** **FRAGMENT\_SHADER\_MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L217)
+Defined in: [src/material/core/ABaseMaterial.ts:249](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L249)
+
+
+Returns the fragment shader module name.
 
 ##### Returns
 
@@ -599,7 +626,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`FRAGMENT_SHADER_MODULE_NAME`](../namespaces/Core/classes/ABitmapBaseMaterial.md#fragment_shader_module_name)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`FRAGMENT_SHADER_MODULE_NAME`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#fragment_shader_module_name)
 
 ***
 
@@ -609,7 +636,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L106)
 
 
 Returns the associated GPU device.
@@ -620,7 +647,7 @@ Returns the associated GPU device.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`gpuDevice`](../namespaces/Core/classes/ABitmapBaseMaterial.md#gpudevice)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`gpuDevice`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#gpudevice)
 
 ***
 
@@ -630,7 +657,10 @@ Returns the associated GPU device.
 
 > **get** **MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L213)
+Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L241)
+
+
+Returns the material module name.
 
 ##### Returns
 
@@ -638,7 +668,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`MODULE_NAME`](../namespaces/Core/classes/ABitmapBaseMaterial.md#module_name)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`MODULE_NAME`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#module_name)
 
 ***
 
@@ -648,7 +678,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L81)
 
 
 Returns the name of the instance. If no name exists, it is generated using the class name and ID.
@@ -661,7 +691,7 @@ Returns the name of the instance. If no name exists, it is generated using the c
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L90)
 
 
 Sets the name of the instance.
@@ -678,7 +708,7 @@ Sets the name of the instance.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`name`](../namespaces/Core/classes/ABitmapBaseMaterial.md#name)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`name`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#name)
 
 ***
 
@@ -688,7 +718,7 @@ Sets the name of the instance.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L114)
 
 
 Returns the RedGPUContext instance.
@@ -699,7 +729,7 @@ Returns the RedGPUContext instance.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`redGPUContext`](../namespaces/Core/classes/ABitmapBaseMaterial.md#redgpucontext)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`redGPUContext`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#redgpucontext)
 
 ***
 
@@ -709,7 +739,7 @@ Returns the RedGPUContext instance.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L73)
 
 
 Returns the resource manager key.
@@ -720,7 +750,7 @@ Returns the resource manager key.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`resourceManagerKey`](../namespaces/Core/classes/ABitmapBaseMaterial.md#resourcemanagerkey)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`resourceManagerKey`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#resourcemanagerkey)
 
 ***
 
@@ -730,7 +760,10 @@ Returns the resource manager key.
 
 > **get** **STORAGE\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L225)
+Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L265)
+
+
+Returns the shader storage structure information.
 
 ##### Returns
 
@@ -738,7 +771,91 @@ Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`STORAGE_STRUCT`](../namespaces/Core/classes/ABitmapBaseMaterial.md#storage_struct)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`STORAGE_STRUCT`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#storage_struct)
+
+***
+
+### textureOffset
+
+#### Get Signature
+
+> **get** **textureOffset**(): \[`number`, `number`\]
+
+Defined in: [src/material/core/AUVTransformBaseMaterial.ts:43](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/AUVTransformBaseMaterial.ts#L43)
+
+
+Texture offset (u, v)
+
+### Example
+```typescript
+material.textureOffset = [0.5, 0.5];
+```
+
+##### Returns
+
+\[`number`, `number`\]
+
+#### Set Signature
+
+> **set** **textureOffset**(`value`): `void`
+
+Defined in: [src/material/core/AUVTransformBaseMaterial.ts:47](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/AUVTransformBaseMaterial.ts#L47)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | \[`number`, `number`\] |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`textureOffset`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#textureoffset)
+
+***
+
+### textureScale
+
+#### Get Signature
+
+> **get** **textureScale**(): \[`number`, `number`\]
+
+Defined in: [src/material/core/AUVTransformBaseMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/AUVTransformBaseMaterial.ts#L61)
+
+
+Texture scale (u, v)
+
+### Example
+```typescript
+material.textureScale = [2.0, 2.0];
+```
+
+##### Returns
+
+\[`number`, `number`\]
+
+#### Set Signature
+
+> **set** **textureScale**(`value`): `void`
+
+Defined in: [src/material/core/AUVTransformBaseMaterial.ts:65](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/AUVTransformBaseMaterial.ts#L65)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | \[`number`, `number`\] |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`textureScale`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#texturescale)
 
 ***
 
@@ -748,23 +865,32 @@ Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel
 
 > **get** **tintBlendMode**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L188)
+Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L205)
+
+
+Returns the tint blend mode name.
 
 ##### Returns
 
 `string`
 
+
+Tint blend mode name
+
 #### Set Signature
 
 > **set** **tintBlendMode**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L196)
+Defined in: [src/material/core/ABaseMaterial.ts:220](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L220)
+
+
+Sets the tint blend mode.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `"SUBTRACT"` \| `"NORMAL"` \| `"MULTIPLY"` \| `"LIGHTEN"` \| `"SCREEN"` \| `"LINEAR_DODGE"` \| `"DARKEN"` \| `"OVERLAY"` \| `"COLOR_DODGE"` \| `"COLOR_BURN"` \| `"HARD_LIGHT"` \| `"SOFT_LIGHT"` \| `"DIFFERENCE"` \| `"EXCLUSION"` \| `"DIVIDE"` \| `"VIVID_LIGHT"` \| `"LINEAR_BURN"` \| `"PIN_LIGHT"` \| `"SATURATION"` \| `"HUE"` \| `"LUMINOSITY"` \| `"COLOR"` \| `"NEGATION"` \| [`TINT_BLEND_MODE`](../type-aliases/TINT_BLEND_MODE.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `"SUBTRACT"` \| `"NORMAL"` \| `"MULTIPLY"` \| `"LIGHTEN"` \| `"SCREEN"` \| `"LINEAR_DODGE"` \| `"DARKEN"` \| `"OVERLAY"` \| `"COLOR_DODGE"` \| `"COLOR_BURN"` \| `"HARD_LIGHT"` \| `"SOFT_LIGHT"` \| `"DIFFERENCE"` \| `"EXCLUSION"` \| `"DIVIDE"` \| `"VIVID_LIGHT"` \| `"LINEAR_BURN"` \| `"PIN_LIGHT"` \| `"SATURATION"` \| `"HUE"` \| `"LUMINOSITY"` \| `"COLOR"` \| `"NEGATION"` \| [`TINT_BLEND_MODE`](../type-aliases/TINT_BLEND_MODE.md) | Tint blend mode value or key |
 
 ##### Returns
 
@@ -772,7 +898,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`tintBlendMode`](../namespaces/Core/classes/ABitmapBaseMaterial.md#tintblendmode)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`tintBlendMode`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#tintblendmode)
 
 ***
 
@@ -782,7 +908,10 @@ Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel
 
 > **get** **UNIFORM\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L229)
+Defined in: [src/material/core/ABaseMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L273)
+
+
+Returns the shader uniforms structure information.
 
 ##### Returns
 
@@ -790,7 +919,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`UNIFORM_STRUCT`](../namespaces/Core/classes/ABitmapBaseMaterial.md#uniform_struct)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`UNIFORM_STRUCT`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#uniform_struct)
 
 ***
 
@@ -800,7 +929,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L98)
 
 
 Returns the UUID.
@@ -811,7 +940,7 @@ Returns the UUID.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`uuid`](../namespaces/Core/classes/ABitmapBaseMaterial.md#uuid)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`uuid`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#uuid)
 
 ***
 
@@ -821,7 +950,7 @@ Returns the UUID.
 
 > **get** **writeMaskState**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L253)
+Defined in: [src/material/core/ABaseMaterial.ts:297](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L297)
 
 
 Returns the material's writeMask state
@@ -834,7 +963,7 @@ Returns the material's writeMask state
 
 > **set** **writeMaskState**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L264)
+Defined in: [src/material/core/ABaseMaterial.ts:308](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L308)
 
 
 Sets the material's writeMask state
@@ -851,7 +980,7 @@ Sets the material's writeMask state
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`writeMaskState`](../namespaces/Core/classes/ABitmapBaseMaterial.md#writemaskstate)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`writeMaskState`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#writemaskstate)
 
 ## Methods
 
@@ -859,7 +988,7 @@ Sets the material's writeMask state
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L125)
 
 
 Adds a listener function to be called when the pipeline becomes dirty.
@@ -876,7 +1005,7 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`__addDirtyPipelineListener`](../namespaces/Core/classes/ABitmapBaseMaterial.md#__adddirtypipelinelistener)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`__addDirtyPipelineListener`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#__adddirtypipelinelistener)
 
 ***
 
@@ -884,7 +1013,7 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L152)
 
 
 Fires the registered dirty listeners.
@@ -901,7 +1030,7 @@ Fires the registered dirty listeners.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`__fireListenerList`](../namespaces/Core/classes/ABitmapBaseMaterial.md#__firelistenerlist)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`__fireListenerList`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#__firelistenerlist)
 
 ***
 
@@ -909,7 +1038,7 @@ Fires the registered dirty listeners.
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L137)
 
 
 Removes a dirty pipeline listener.
@@ -926,18 +1055,18 @@ Removes a dirty pipeline listener.
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`__removeDirtyPipelineListener`](../namespaces/Core/classes/ABitmapBaseMaterial.md#__removedirtypipelinelistener)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`__removeDirtyPipelineListener`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#__removedirtypipelinelistener)
 
 ***
 
 ### \_updateBaseProperty()
 
-> **\_updateBaseProperty**(): `void`
+> `protected` **\_updateBaseProperty**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L414)
+Defined in: [src/material/core/ABaseMaterial.ts:463](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L463)
 
 
-Reflect basic material properties such as uniform/color/tint to the uniform buffer
+Reflects basic material properties such as uniforms/color/tint to the uniform buffer.
 
 #### Returns
 
@@ -945,18 +1074,18 @@ Reflect basic material properties such as uniform/color/tint to the uniform buff
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`_updateBaseProperty`](../namespaces/Core/classes/ABitmapBaseMaterial.md#_updatebaseproperty)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`_updateBaseProperty`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#_updatebaseproperty)
 
 ***
 
 ### \_updateFragmentState()
 
-> **\_updateFragmentState**(): `void`
+> `protected` **\_updateFragmentState**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L306)
+Defined in: [src/material/core/ABaseMaterial.ts:351](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L351)
 
 
-Update fragment shader bind group/uniform/texture/sampler states
+Updates fragment shader bind group/uniform/texture/sampler states.
 
 #### Returns
 
@@ -964,7 +1093,7 @@ Update fragment shader bind group/uniform/texture/sampler states
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`_updateFragmentState`](../namespaces/Core/classes/ABitmapBaseMaterial.md#_updatefragmentstate)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`_updateFragmentState`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#_updatefragmentstate)
 
 ***
 
@@ -972,10 +1101,10 @@ Update fragment shader bind group/uniform/texture/sampler states
 
 > **getFragmentRenderState**(`entryPoint`): `GPUFragmentState`
 
-Defined in: [src/material/core/ABaseMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L383)
+Defined in: [src/material/core/ABaseMaterial.ts:431](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L431)
 
 
-Returns GPU fragment render state object
+Returns the GPU fragment render state object.
 
 #### Parameters
 
@@ -987,9 +1116,12 @@ Returns GPU fragment render state object
 
 `GPUFragmentState`
 
+
+GPU fragment state
+
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`getFragmentRenderState`](../namespaces/Core/classes/ABitmapBaseMaterial.md#getfragmentrenderstate)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`getFragmentRenderState`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#getfragmentrenderstate)
 
 ***
 
@@ -997,10 +1129,10 @@ Returns GPU fragment render state object
 
 > **getGPUResourceSampler**(`sampler`): `GPUSampler`
 
-Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L436)
+Defined in: [src/material/core/ABaseMaterial.ts:488](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L488)
 
 
-Returns GPU sampler from Sampler object
+Returns the GPU sampler from the Sampler object.
 
 #### Parameters
 
@@ -1012,9 +1144,12 @@ Returns GPU sampler from Sampler object
 
 `GPUSampler`
 
+
+GPUSampler instance
+
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`getGPUResourceSampler`](../namespaces/Core/classes/ABitmapBaseMaterial.md#getgpuresourcesampler)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`getGPUResourceSampler`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#getgpuresourcesampler)
 
 ***
 
@@ -1022,10 +1157,10 @@ Returns GPU sampler from Sampler object
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L272)
+Defined in: [src/material/core/ABaseMaterial.ts:316](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L316)
 
 
-Initialize GPU render pipeline info and uniform buffer
+Initializes GPU render pipeline info and uniform buffer.
 
 #### Returns
 
@@ -1033,7 +1168,7 @@ Initialize GPU render pipeline info and uniform buffer
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`initGPURenderInfos`](../namespaces/Core/classes/ABitmapBaseMaterial.md#initgpurenderinfos)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`initGPURenderInfos`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#initgpurenderinfos)
 
 ***
 
@@ -1041,10 +1176,10 @@ Initialize GPU render pipeline info and uniform buffer
 
 > **updateSampler**(`prevSampler`, `newSampler`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABitmapBaseMaterial.ts#L74)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:75](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABitmapBaseMaterial.ts#L75)
 
 
-Manage sampler object changes and DirtyPipeline listeners
+Manages sampler object changes and DirtyPipeline listeners.
 
 #### Parameters
 
@@ -1059,7 +1194,7 @@ Manage sampler object changes and DirtyPipeline listeners
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`updateSampler`](../namespaces/Core/classes/ABitmapBaseMaterial.md#updatesampler)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`updateSampler`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#updatesampler)
 
 ***
 
@@ -1067,17 +1202,17 @@ Manage sampler object changes and DirtyPipeline listeners
 
 > **updateTexture**(`prevTexture`, `texture`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:58](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABitmapBaseMaterial.ts#L58)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:59](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABitmapBaseMaterial.ts#L59)
 
 
-Manage texture object changes and DirtyPipeline listeners
+Manages texture object changes and DirtyPipeline listeners.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `prevTexture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | Previous texture (BitmapTexture|CubeTexture|ANoiseTexture) |
-| `texture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | New texture (BitmapTexture|CubeTexture|ANoiseTexture) |
+| `prevTexture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md) | Previous texture (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture) |
+| `texture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md) | New texture (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture) |
 
 #### Returns
 
@@ -1085,4 +1220,4 @@ Manage texture object changes and DirtyPipeline listeners
 
 #### Inherited from
 
-[`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`updateTexture`](../namespaces/Core/classes/ABitmapBaseMaterial.md#updatetexture)
+[`AUVTransformBaseMaterial`](../namespaces/Core/classes/AUVTransformBaseMaterial.md).[`updateTexture`](../namespaces/Core/classes/AUVTransformBaseMaterial.md#updatetexture)

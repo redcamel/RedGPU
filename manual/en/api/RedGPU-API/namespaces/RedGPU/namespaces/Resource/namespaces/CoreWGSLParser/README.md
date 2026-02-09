@@ -6,6 +6,9 @@
 
 # CoreWGSLParser
 
+
+Provides core functionalities of the WGSL parser (preprocessing, variant generation, type definitions, etc.).
+
 ## WGSL
 
 - [ShaderVariantGenerator](classes/ShaderVariantGenerator.md)

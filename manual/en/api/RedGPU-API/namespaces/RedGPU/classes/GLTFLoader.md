@@ -6,7 +6,7 @@
 
 # Class: GLTFLoader
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:115](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L115)
+Defined in: [src/loader/gltf/GLTFLoader.ts:115](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L115)
 
 
 Loader that loads and parses 3D model files in GLTF 2.0 format.
@@ -43,7 +43,7 @@ const loader = new RedGPU.GLTFLoader(
 
 > **new GLTFLoader**(`redGPUContext`, `url`, `onLoad`, `onProgress`, `onError`): `GLTFLoader`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:169](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L169)
+Defined in: [src/loader/gltf/GLTFLoader.ts:169](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L169)
 
 
 Creates a GLTFLoader instance and starts file loading.
@@ -68,7 +68,7 @@ Creates a GLTFLoader instance and starts file loading.
 
 > **activeAnimations**: `any`[] = `[]`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:134](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L134)
+Defined in: [src/loader/gltf/GLTFLoader.ts:134](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L134)
 
 
 List of currently playing animation information
@@ -79,7 +79,7 @@ List of currently playing animation information
 
 > **parsingOption**: `any`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:129](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L129)
+Defined in: [src/loader/gltf/GLTFLoader.ts:129](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L129)
 
 **`Internal`**
 
@@ -89,7 +89,7 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:129](https://github.com/redcamel/RedG
 
 > **parsingResult**: `GLTFParsingResult`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:120](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L120)
+Defined in: [src/loader/gltf/GLTFLoader.ts:120](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L120)
 
 
 GLTF parsing result data
@@ -100,7 +100,7 @@ GLTF parsing result data
 
 > **resultMesh**: [`Mesh`](../namespaces/Display/classes/Mesh.md)
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:125](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L125)
+Defined in: [src/loader/gltf/GLTFLoader.ts:125](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L125)
 
 
 Root mesh container containing the parsed result
@@ -113,7 +113,7 @@ Root mesh container containing the parsed result
 
 > **get** **fileName**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:246](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L246)
+Defined in: [src/loader/gltf/GLTFLoader.ts:246](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L246)
 
 
 Returns the file name.
@@ -130,7 +130,7 @@ Returns the file name.
 
 > **get** **filePath**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:221](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L221)
+Defined in: [src/loader/gltf/GLTFLoader.ts:221](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L221)
 
 
 Returns the file path.
@@ -147,7 +147,7 @@ Returns the file path.
 
 > **get** **gltfData**(): `GLTF`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:229](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L229)
+Defined in: [src/loader/gltf/GLTFLoader.ts:229](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L229)
 
 
 Returns the raw GLTF data.
@@ -160,7 +160,7 @@ Returns the raw GLTF data.
 
 > **set** **gltfData**(`value`): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:238](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L238)
+Defined in: [src/loader/gltf/GLTFLoader.ts:238](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L238)
 
 **`Internal`**
 
@@ -185,7 +185,7 @@ Sets the raw GLTF data.
 
 > **get** **loadingProgressInfo**(): `GLTFLoadingProgressInfo`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:205](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L205)
+Defined in: [src/loader/gltf/GLTFLoader.ts:205](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L205)
 
 
 Returns the current loading progress information.
@@ -205,7 +205,7 @@ Loading progress info object
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md)
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:213](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L213)
+Defined in: [src/loader/gltf/GLTFLoader.ts:213](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L213)
 
 
 Returns the RedGPUContext instance.
@@ -222,7 +222,7 @@ Returns the RedGPUContext instance.
 
 > **get** **url**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:254](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L254)
+Defined in: [src/loader/gltf/GLTFLoader.ts:254](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L254)
 
 
 Returns the file URL.
@@ -237,7 +237,7 @@ Returns the file URL.
 
 > **playAnimation**(`parsedSingleClip`): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:293](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L293)
+Defined in: [src/loader/gltf/GLTFLoader.ts:293](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L293)
 
 
 Plays a specific animation clip.
@@ -264,7 +264,7 @@ loader.playAnimation(clip);
 
 > **stopAnimation**(): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:275](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/loader/gltf/GLTFLoader.ts#L275)
+Defined in: [src/loader/gltf/GLTFLoader.ts:275](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/loader/gltf/GLTFLoader.ts#L275)
 
 
 Stops all active animations.

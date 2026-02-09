@@ -6,12 +6,6 @@
 
 # RedGPU
 
-RedGPU는 WebGPU 기반의 차세대 3D 그래픽 엔진입니다.
-
-
-고성능 렌더링 파이프라인, 유연한 카메라 시스템, 다양한 조명 및 재질, 후처리 효과 등을 제공하여 웹 환경에서 강력한 그래픽 애플리케이션을 구축할 수 있도록 돕습니다.
-
-
 ## Constants
 
 - [GPU\_ADDRESS\_MODE](variables/GPU_ADDRESS_MODE.md)
@@ -50,10 +44,11 @@ RedGPU는 WebGPU 기반의 차세대 3D 그래픽 엔진입니다.
 - [DefineForVertex](namespaces/DefineForVertex/README.md)
 - [Display](namespaces/Display/README.md)
 - [Light](namespaces/Light/README.md)
-- [mat3](namespaces/mat3/README.md)
-- [mat4](namespaces/mat4/README.md)
 - [Material](namespaces/Material/README.md)
+- [Math](namespaces/Math/README.md)
+- [Physics](namespaces/Physics/README.md)
 - [Picking](namespaces/Picking/README.md)
+- [Plugin](namespaces/Plugin/README.md)
 - [PostEffect](namespaces/PostEffect/README.md)
 - [Primitive](namespaces/Primitive/README.md)
 - [RenderState](namespaces/RenderState/README.md)
@@ -62,8 +57,6 @@ RedGPU는 WebGPU 기반의 차세대 3D 그래픽 엔진입니다.
 - [Shadow](namespaces/Shadow/README.md)
 - [ToneMapping](namespaces/ToneMapping/README.md)
 - [Util](namespaces/Util/README.md)
-- [mat3](type-aliases/mat3.md)
-- [mat4](type-aliases/mat4.md)
 - [SystemCode](variables/SystemCode.md)
 
 ## Renderer

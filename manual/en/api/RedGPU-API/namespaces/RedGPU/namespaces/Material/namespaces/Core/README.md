@@ -6,10 +6,14 @@
 
 # Core
 
+
+Provides core base classes and utilities for the material system.
+
 ## Material
 
 - [ABaseMaterial](classes/ABaseMaterial.md)
 - [ABitmapBaseMaterial](classes/ABitmapBaseMaterial.md)
+- [AUVTransformBaseMaterial](classes/AUVTransformBaseMaterial.md)
 - [FragmentGPURenderInfo](classes/FragmentGPURenderInfo.md)
 
 ## Other

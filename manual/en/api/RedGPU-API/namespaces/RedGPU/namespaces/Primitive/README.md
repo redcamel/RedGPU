@@ -21,6 +21,7 @@ Easily create standard geometric shapes like Box, Sphere, Plane, and Torus to us
 ## Primitive
 
 - [Box](classes/Box.md)
+- [Capsule](classes/Capsule.md)
 - [Circle](classes/Circle.md)
 - [Cylinder](classes/Cylinder.md)
 - [Ground](classes/Ground.md)

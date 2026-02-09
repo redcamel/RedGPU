@@ -8,17 +8,28 @@
 
 > **createPrimitiveGeometry**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/createPrimitiveGeometry.ts:7](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/createPrimitiveGeometry.ts#L7)
+Defined in: [src/primitive/core/createPrimitiveGeometry.ts:33](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/createPrimitiveGeometry.ts#L33)
+
+
+Creates primitive geometry based on vertex and index data.
+
+### Example
+```typescript
+const geometry = RedGPU.Core.createPrimitiveGeometry(redGPUContext, interleaveData, indexData, "UniqueKey");
+```
 
 ## Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) |
-| `interleaveData` | `number`[] |
-| `indexData` | `number`[] |
-| `uniqueKey` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
+| `interleaveData` | `number`[] | Array of vertex data in interleaved format |
+| `indexData` | `number`[] | Array of index data |
+| `uniqueKey` | `string` | Unique key for caching |
 
 ## Returns
 
 [`Geometry`](../../../../../classes/Geometry.md)
+
+
+Created Geometry instance

@@ -6,7 +6,7 @@
 
 # Class: Circle
 
-Defined in: [src/primitive/Circle.ts:20](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/Circle.ts#L20)
+Defined in: [src/primitive/Circle.ts:20](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/Circle.ts#L20)
 
 Circle(원) 기본 도형 클래스입니다.
 
@@ -14,12 +14,12 @@ Circle(원) 기본 도형 클래스입니다.
 반지름, 세그먼트, 시작 각도 등을 기반으로 2D 원형 데이터를 생성하여 관리합니다.
 
 
-* ### Example
+### Example
 ```typescript
 // 반지름 2, 세그먼트 64짜리 원 생성
-const circle = new RedGPU.Primitive.Circle(redGPUContext, 2, 64);
+const circle = new RedGPU.Circle(redGPUContext, 2, 64);
 ```
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/primitive/circle/"></iframe>
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/primitive/circle/" style="width:100%; height:500px;"></iframe>
 
 ## Extends
 
@@ -31,10 +31,15 @@ const circle = new RedGPU.Primitive.Circle(redGPUContext, 2, 64);
 
 > **new Circle**(`redGPUContext`, `radius`, `segments`, `thetaStart`, `thetaLength`): `Circle`
 
-Defined in: [src/primitive/Circle.ts:85](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/Circle.ts#L85)
+Defined in: [src/primitive/Circle.ts:90](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/Circle.ts#L90)
 
 Circle 인스턴스를 생성합니다.
 
+
+### Example
+```typescript
+const circle = new RedGPU.Circle(redGPUContext, 1, 32, 0, Math.PI * 2);
+```
 
 #### Parameters
 
@@ -62,7 +67,7 @@ Circle 인스턴스를 생성합니다.
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L86)
+Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L86)
 
 GPU 렌더 정보를 반환합니다.
 
@@ -76,7 +81,7 @@ GPU 렌더 정보를 반환합니다.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L86) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L86) |
 
 #### Inherited from
 
@@ -90,7 +95,7 @@ GPU 렌더 정보를 반환합니다.
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L110)
+Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L110)
 
 현재 인덱스 버퍼를 반환합니다.
 
@@ -114,7 +119,7 @@ IndexBuffer 인스턴스
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L98)
+Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L98)
 
 현재 정점 버퍼를 반환합니다.
 
@@ -138,7 +143,7 @@ VertexBuffer 인스턴스
 
 > **get** **volume**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L122)
+Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L122)
 
 지오메트리의 AABB 바운딩 볼륨을 반환합니다.
 
@@ -162,7 +167,7 @@ AABB 인스턴스
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L67)
+Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L67)
 
 기본 정점 레이아웃 구조(Position, Normal, UV)를 반환합니다.
 
@@ -184,7 +189,7 @@ Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/Red
 
 > **\_setData**(`geometry`): `void`
 
-Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/primitive/core/Primitive.ts#L138)
+Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/primitive/core/Primitive.ts#L138)
 
 **`Internal`**
 

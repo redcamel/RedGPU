@@ -6,7 +6,7 @@
 
 # Class: IsometricController
 
-Defined in: [src/camera/controller/IsometricController.ts:27](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L27)
+Defined in: [src/camera/controller/IsometricController.ts:26](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L26)
 
 
 Camera controller providing an isometric view.
@@ -16,11 +16,11 @@ Implements a fixed-angle quarter view, commonly used in strategy simulations or 
 
 * ### Example
 ```typescript
-const controller = new RedGPU.Camera.IsometricController(redGPUContext);
+const controller = new RedGPU.IsometricController(redGPUContext);
 controller.viewHeight = 15;
 controller.zoom = 1;
 ```
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/"></iframe>
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/controller/isometricController/" style="width:100%; height:500px;"></iframe>
 
 ## Extends
 
@@ -32,10 +32,10 @@ controller.zoom = 1;
 
 > **new IsometricController**(`redGPUContext`): `IsometricController`
 
-Defined in: [src/camera/controller/IsometricController.ts:66](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L66)
+Defined in: [src/camera/controller/IsometricController.ts:64](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L64)
 
 
-IsometricController constructor
+Creates an instance of IsometricController.
 
 #### Parameters
 
@@ -59,7 +59,7 @@ IsometricController constructor
 
 > **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:135](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L135)
+Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L138)
 
 
 Returns the camera controlled by this controller.
@@ -83,7 +83,7 @@ Controlled camera (PerspectiveCamera or OrthographicCamera)
 
 > **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:149](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L149)
+Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L187)
 
 **`Internal`**
 
@@ -109,7 +109,7 @@ Hovered View or null
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:195](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L195)
+Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L233)
 
 **`Internal`**
 
@@ -135,7 +135,7 @@ Whether it is the keyboard active controller
 
 > **get** **keyboardActiveView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L162)
+Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L200)
 
 **`Internal`**
 
@@ -153,7 +153,7 @@ Keyboard active View or null
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:175](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L175)
+Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L213)
 
 **`Internal`**
 
@@ -182,7 +182,7 @@ Sets the View with active keyboard input.
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:208](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L208)
+Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L246)
 
 **`Internal`**
 
@@ -200,7 +200,7 @@ Processing status
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:221](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L221)
+Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L259)
 
 **`Internal`**
 
@@ -229,24 +229,20 @@ Sets whether keyboard input has been processed in this frame.
 
 > **get** **keyNameMapper**(): `object`
 
-Defined in: [src/camera/controller/IsometricController.ts:398](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L398)
+Defined in: [src/camera/controller/IsometricController.ts:156](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L156)
 
-
-Gets the current key mapping configuration.
+Key mapping configuration
 
 ##### Returns
 
 `object`
 
-
-Copy of key mapping object
-
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| `moveDown` | `string` | `'s'` | [src/camera/controller/IsometricController.ts:50](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L50) |
-| `moveLeft` | `string` | `'a'` | [src/camera/controller/IsometricController.ts:51](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L51) |
-| `moveRight` | `string` | `'d'` | [src/camera/controller/IsometricController.ts:52](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L52) |
-| `moveUp` | `string` | `'w'` | [src/camera/controller/IsometricController.ts:49](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L49) |
+| `moveDown` | `string` | `'s'` | [src/camera/controller/IsometricController.ts:49](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L49) |
+| `moveLeft` | `string` | `'a'` | [src/camera/controller/IsometricController.ts:50](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L50) |
+| `moveRight` | `string` | `'d'` | [src/camera/controller/IsometricController.ts:51](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L51) |
+| `moveUp` | `string` | `'w'` | [src/camera/controller/IsometricController.ts:48](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L48) |
 
 ***
 
@@ -256,32 +252,25 @@ Copy of key mapping object
 
 > **get** **maxZoom**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:219](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L219)
+Defined in: [src/camera/controller/IsometricController.ts:128](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L128)
 
-
-Gets the maximum zoom level.
+Maximum zoom
 
 ##### Returns
 
 `number`
 
-
-Maximum zoom level
-
 #### Set Signature
 
 > **set** **maxZoom**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:231](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L231)
-
-
-Sets the maximum zoom level.
+Defined in: [src/camera/controller/IsometricController.ts:129](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L129)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Maximum zoom level (min 0.01) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -295,32 +284,25 @@ Sets the maximum zoom level.
 
 > **get** **minZoom**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:193](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L193)
+Defined in: [src/camera/controller/IsometricController.ts:124](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L124)
 
-
-Gets the minimum zoom level.
+Minimum zoom
 
 ##### Returns
 
 `number`
 
-
-Minimum zoom level
-
 #### Set Signature
 
 > **set** **minZoom**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:205](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L205)
-
-
-Sets the minimum zoom level.
+Defined in: [src/camera/controller/IsometricController.ts:125](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L125)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Minimum zoom level (min 0.01) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -334,32 +316,25 @@ Sets the minimum zoom level.
 
 > **get** **mouseMoveSpeed**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:347](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L347)
+Defined in: [src/camera/controller/IsometricController.ts:148](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L148)
 
-
-Gets the mouse movement speed.
+Mouse movement speed
 
 ##### Returns
 
 `number`
 
-
-Mouse movement speed
-
 #### Set Signature
 
 > **set** **mouseMoveSpeed**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:359](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L359)
-
-
-Sets the mouse movement speed.
+Defined in: [src/camera/controller/IsometricController.ts:149](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L149)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Mouse movement speed (min 0.01) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -373,32 +348,25 @@ Sets the mouse movement speed.
 
 > **get** **mouseMoveSpeedInterpolation**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:372](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L372)
+Defined in: [src/camera/controller/IsometricController.ts:152](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L152)
 
-
-Gets the mouse movement interpolation factor.
+Mouse movement interpolation factor
 
 ##### Returns
 
 `number`
 
-
-Mouse movement interpolation factor (0.01 ~ 1)
-
 #### Set Signature
 
 > **set** **mouseMoveSpeedInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:384](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L384)
-
-
-Sets the mouse movement interpolation factor. Lower values for smoother movement.
+Defined in: [src/camera/controller/IsometricController.ts:153](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L153)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Interpolation factor (0.01 ~ 1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -412,32 +380,25 @@ Sets the mouse movement interpolation factor. Lower values for smoother movement
 
 > **get** **moveSpeed**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:297](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L297)
+Defined in: [src/camera/controller/IsometricController.ts:140](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L140)
 
-
-Gets the keyboard movement speed.
+Movement speed
 
 ##### Returns
 
 `number`
 
-
-Movement speed
-
 #### Set Signature
 
 > **set** **moveSpeed**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:309](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L309)
-
-
-Sets the keyboard movement speed.
+Defined in: [src/camera/controller/IsometricController.ts:141](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L141)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Movement speed (min 0.01) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -451,32 +412,25 @@ Sets the keyboard movement speed.
 
 > **get** **moveSpeedInterpolation**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:322](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L322)
+Defined in: [src/camera/controller/IsometricController.ts:144](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L144)
 
-
-Gets the keyboard movement interpolation factor.
+Movement interpolation factor
 
 ##### Returns
 
 `number`
 
-
-Movement interpolation factor (0.01 ~ 1)
-
 #### Set Signature
 
 > **set** **moveSpeedInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:334](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L334)
-
-
-Sets the keyboard movement interpolation factor. Lower values for smoother movement.
+Defined in: [src/camera/controller/IsometricController.ts:145](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L145)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Interpolation factor (0.01 ~ 1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -490,7 +444,7 @@ Sets the keyboard movement interpolation factor. Lower values for smoother movem
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/core/AController.ts:98](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L98)
+Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L101)
 
 
 Returns the name of the controller.
@@ -506,7 +460,7 @@ Controller name
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:111](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L111)
+Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L114)
 
 
 Sets the name of the controller.
@@ -533,7 +487,7 @@ Sets the name of the controller.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/camera/core/AController.ts:123](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L123)
+Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L126)
 
 
 Returns the RedGPU context.
@@ -557,36 +511,77 @@ RedGPU context
 
 > **get** **speedZoom**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:168](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L168)
+Defined in: [src/camera/controller/IsometricController.ts:120](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L120)
 
-
-Gets the zoom speed.
+Zoom speed
 
 ##### Returns
 
 `number`
 
-
-Zoom speed
-
 #### Set Signature
 
 > **set** **speedZoom**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:180](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L180)
-
-
-Sets the zoom speed. Higher values for faster zoom.
+Defined in: [src/camera/controller/IsometricController.ts:121](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L121)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Zoom speed (min 0.01) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
 `void`
+
+***
+
+### targetX
+
+#### Get Signature
+
+> **get** **targetX**(): `number`
+
+Defined in: [src/camera/controller/IsometricController.ts:159](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L159)
+
+Target X position
+
+##### Returns
+
+`number`
+
+***
+
+### targetY
+
+#### Get Signature
+
+> **get** **targetY**(): `number`
+
+Defined in: [src/camera/controller/IsometricController.ts:161](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L161)
+
+Target Y position
+
+##### Returns
+
+`number`
+
+***
+
+### targetZ
+
+#### Get Signature
+
+> **get** **targetZ**(): `number`
+
+Defined in: [src/camera/controller/IsometricController.ts:163](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L163)
+
+Target Z position
+
+##### Returns
+
+`number`
 
 ***
 
@@ -596,32 +591,25 @@ Sets the zoom speed. Higher values for faster zoom.
 
 > **get** **viewHeight**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:246](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L246)
+Defined in: [src/camera/controller/IsometricController.ts:132](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L132)
 
-
-Gets the view height of the orthographic camera.
+View height
 
 ##### Returns
 
 `number`
 
-
-View height
-
 #### Set Signature
 
 > **set** **viewHeight**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:258](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L258)
-
-
-Sets the view height of the orthographic camera.
+Defined in: [src/camera/controller/IsometricController.ts:133](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L133)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | View height (min 0.1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -635,32 +623,25 @@ Sets the view height of the orthographic camera.
 
 > **get** **viewHeightInterpolation**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:271](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L271)
+Defined in: [src/camera/controller/IsometricController.ts:136](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L136)
 
-
-Gets the view height interpolation factor.
+View height interpolation factor
 
 ##### Returns
 
 `number`
 
-
-View height interpolation factor (0.01 ~ 1)
-
 #### Set Signature
 
 > **set** **viewHeightInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:283](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L283)
-
-
-Sets the view height interpolation factor. Lower values for smoother transition.
+Defined in: [src/camera/controller/IsometricController.ts:137](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L137)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Interpolation factor (0.01 ~ 1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -674,17 +655,21 @@ Sets the view height interpolation factor. Lower values for smoother transition.
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:411](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L411)
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L150)
 
 
-Gets the target's X-axis position.
+Gets the camera's current world X coordinate.
 
 ##### Returns
 
 `number`
 
 
-X-axis coordinate
+X coordinate
+
+#### Inherited from
+
+[`AController`](../namespaces/Core/classes/AController.md).[`x`](../namespaces/Core/classes/AController.md#x)
 
 ***
 
@@ -694,17 +679,21 @@ X-axis coordinate
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:423](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L423)
+Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L162)
 
 
-Gets the target's Y-axis position.
+Gets the camera's current world Y coordinate.
 
 ##### Returns
 
 `number`
 
 
-Y-axis coordinate
+Y coordinate
+
+#### Inherited from
+
+[`AController`](../namespaces/Core/classes/AController.md).[`y`](../namespaces/Core/classes/AController.md#y)
 
 ***
 
@@ -714,17 +703,21 @@ Y-axis coordinate
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:435](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L435)
+Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L174)
 
 
-Gets the target's Z-axis position.
+Gets the camera's current world Z coordinate.
 
 ##### Returns
 
 `number`
 
 
-Z-axis coordinate
+Z coordinate
+
+#### Inherited from
+
+[`AController`](../namespaces/Core/classes/AController.md).[`z`](../namespaces/Core/classes/AController.md#z)
 
 ***
 
@@ -734,7 +727,7 @@ Z-axis coordinate
 
 > **get** **zoom**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:117](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L117)
+Defined in: [src/camera/controller/IsometricController.ts:104](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L104)
 
 
 Gets the zoom level.
@@ -743,23 +736,22 @@ Gets the zoom level.
 
 `number`
 
-
-Zoom level (default: 1)
+Zoom level
 
 #### Set Signature
 
 > **set** **zoom**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:129](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L129)
+Defined in: [src/camera/controller/IsometricController.ts:110](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L110)
 
 
-Sets the zoom level. Limited to minZoom ~ maxZoom range.
+Sets the zoom level.
 
 ##### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `number` | Zoom level value |
+| `value` | `number` | Zoom level |
 
 ##### Returns
 
@@ -773,32 +765,25 @@ Sets the zoom level. Limited to minZoom ~ maxZoom range.
 
 > **get** **zoomInterpolation**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:143](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L143)
+Defined in: [src/camera/controller/IsometricController.ts:116](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L116)
 
-
-Gets the zoom interpolation factor.
+Zoom interpolation factor
 
 ##### Returns
 
 `number`
 
-
-Zoom interpolation factor (0.01 ~ 1)
-
 #### Set Signature
 
 > **set** **zoomInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:155](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L155)
-
-
-Sets the zoom interpolation factor. Lower values for smoother zoom.
+Defined in: [src/camera/controller/IsometricController.ts:117](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L117)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Interpolation factor (0.01 ~ 1) |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -810,7 +795,7 @@ Sets the zoom interpolation factor. Lower values for smoother zoom.
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:283](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L283)
+Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L323)
 
 
 Checks for keyboard input and sets the active View.
@@ -845,7 +830,7 @@ True if keyboard input processing is possible, otherwise false
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:229](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L229)
+Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L267)
 
 
 Destroys the controller and removes event listeners.
@@ -864,7 +849,7 @@ Destroys the controller and removes event listeners.
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:367](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L367)
+Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L407)
 
 **`Internal`**
 
@@ -894,7 +879,7 @@ Corresponding View or null
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:330](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L330)
+Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L370)
 
 **`Internal`**
 
@@ -917,8 +902,8 @@ Gets the event coordinates on the canvas.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:350](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L350) |
-| `y` | `number` | [src/camera/core/AController.ts:351](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/core/AController.ts#L351) |
+| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L390) |
+| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L391) |
 
 #### Inherited from
 
@@ -930,16 +915,15 @@ Gets the event coordinates on the canvas.
 
 > **setMoveDownKey**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:459](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L459)
+Defined in: [src/camera/controller/IsometricController.ts:168](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L168)
 
-
-Sets the move down key.
+Sets the move down key
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Key name to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 #### Returns
 
@@ -951,16 +935,15 @@ Sets the move down key.
 
 > **setMoveLeftKey**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:471](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L471)
+Defined in: [src/camera/controller/IsometricController.ts:170](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L170)
 
-
-Sets the move left key.
+Sets the move left key
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Key name to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 #### Returns
 
@@ -972,16 +955,15 @@ Sets the move left key.
 
 > **setMoveRightKey**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:483](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L483)
+Defined in: [src/camera/controller/IsometricController.ts:172](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L172)
 
-
-Sets the move right key.
+Sets the move right key
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Key name to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 #### Returns
 
@@ -993,16 +975,15 @@ Sets the move right key.
 
 > **setMoveUpKey**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:447](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L447)
+Defined in: [src/camera/controller/IsometricController.ts:166](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L166)
 
-
-Sets the move up key.
+Sets the move up key
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Key name to set |
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `string` |
 
 #### Returns
 
@@ -1014,17 +995,17 @@ Sets the move up key.
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:499](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/camera/controller/IsometricController.ts#L499)
+Defined in: [src/camera/controller/IsometricController.ts:180](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/IsometricController.ts#L180)
 
 
-Updates the isometric camera every frame.
+Updates the camera every frame.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | 3D view the camera belongs to |
-| `time` | `number` | Current time (ms) |
+| `view` | [`View3D`](../../Display/classes/View3D.md) | 3D view |
+| `time` | `number` | Current time |
 
 #### Returns
 

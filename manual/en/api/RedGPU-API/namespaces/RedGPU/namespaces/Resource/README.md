@@ -37,6 +37,7 @@ Through each resource and utility, you can easily use various resource managemen
 
 - [Core](namespaces/Core/README.md)
 - [CoreBuffer](namespaces/CoreBuffer/README.md)
+- [CoreIBL](namespaces/CoreIBL/README.md)
 - [CoreNoiseTexture](namespaces/CoreNoiseTexture/README.md)
 - [CoreVertexBuffer](namespaces/CoreVertexBuffer/README.md)
 - [CoreWGSLParser](namespaces/CoreWGSLParser/README.md)

@@ -8,7 +8,7 @@
 
 > `const` **TONE\_MAPPING\_MODE**: `object`
 
-Defined in: [src/toneMapping/TONE\_MAPPING\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/toneMapping/TONE_MAPPING_MODE.ts#L6)
+Defined in: [src/toneMapping/TONE\_MAPPING\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/toneMapping/TONE_MAPPING_MODE.ts#L6)
 
 사용 가능한 톤 매핑 모드 상수 정의입니다.
 

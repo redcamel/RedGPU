@@ -21,6 +21,7 @@ Box, Sphere, Plane, Torus 등 표준 기하 도형들을 손쉽게 생성하고 
 ## Primitive
 
 - [Box](classes/Box.md)
+- [Capsule](classes/Capsule.md)
 - [Circle](classes/Circle.md)
 - [Cylinder](classes/Cylinder.md)
 - [Ground](classes/Ground.md)

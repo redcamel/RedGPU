@@ -6,7 +6,7 @@
 
 # Class: PBRMaterial
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:171](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L171)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:171](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L171)
 
 PBR(Physically Based Rendering) 머티리얼 클래스입니다.
 
@@ -24,7 +24,7 @@ ABitmapBaseMaterial을 상속받아 PBR 렌더링을 위한 머티리얼을 생�
 
 > **new PBRMaterial**(`redGPUContext`): `PBRMaterial`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:315](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L315)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:695](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L695)
 
 PBRMaterial 생성자
 
@@ -49,7 +49,7 @@ PBRMaterial 생성자
 
 > **\_\_packingList**: `any`[]
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABitmapBaseMaterial.ts#L21)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABitmapBaseMaterial.ts#L22)
 
 파이프라인 갱신 시 호출되는 콜백 리스트
 
@@ -64,7 +64,10 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:21](https://github.com/red
 
 > **alphaBlend**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:175](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L175)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:191](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L191)
+
+알파 블렌딩 모드
+
 
 ***
 
@@ -72,7 +75,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:175](https://github.com/red
 
 > **baseColorFactor**: `number`[]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:180](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L180)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:212](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L212)
+
+베이스 컬러 팩터
+
 
 ***
 
@@ -80,7 +86,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:180](https://github.com/red
 
 > **baseColorTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:178](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L178)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:202](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L202)
+
+베이스 컬러 텍스처
+
 
 ***
 
@@ -88,7 +97,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:178](https://github.com/red
 
 > **baseColorTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:181](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L181)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L217)
+
+베이스 컬러 텍스처 UV 인덱스
+
 
 ***
 
@@ -96,7 +108,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:181](https://github.com/red
 
 > **baseColorTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:179](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L179)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:207](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L207)
+
+베이스 컬러 텍스처 샘플러
+
 
 ***
 
@@ -104,7 +119,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:179](https://github.com/red
 
 > **cutOff**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:174](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L174)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:186](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L186)
+
+알파 컷오프 값
+
 
 ***
 
@@ -112,7 +130,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:174](https://github.com/red
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:61](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L61)
+Defined in: [src/material/core/ABaseMaterial.ts:62](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L62)
 
 파이프라인 dirty 상태 플래그
 
@@ -127,7 +145,10 @@ Defined in: [src/material/core/ABaseMaterial.ts:61](https://github.com/redcamel/
 
 > **doubleSided**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:285](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L285)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:661](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L661)
+
+양면 렌더링 여부
+
 
 ***
 
@@ -135,7 +156,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:285](https://github.com/red
 
 > **emissiveFactor**: `number`[]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:269](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L269)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:601](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L601)
+
+발광 팩터
+
 
 ***
 
@@ -143,7 +167,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:269](https://github.com/red
 
 > **emissiveStrength**: `number`[]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:270](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L270)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:606](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L606)
+
+발광 강도
+
 
 ***
 
@@ -151,7 +178,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:270](https://github.com/red
 
 > **emissiveTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:266](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L266)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:586](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L586)
+
+발광 텍스처
+
 
 ***
 
@@ -159,7 +189,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:266](https://github.com/red
 
 > **emissiveTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:268](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L268)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:596](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L596)
+
+발광 텍스처 UV 인덱스
+
 
 ***
 
@@ -167,7 +200,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:268](https://github.com/red
 
 > **emissiveTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:267](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L267)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:591](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L591)
+
+발광 텍스처 샘플러
+
 
 ***
 
@@ -175,7 +211,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:267](https://github.com/red
 
 > **gpuRenderInfo**: [`FragmentGPURenderInfo`](../namespaces/Core/classes/FragmentGPURenderInfo.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L56)
+Defined in: [src/material/core/ABaseMaterial.ts:57](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L57)
 
 프래그먼트 GPU 렌더 정보 객체
 
@@ -190,7 +226,10 @@ Defined in: [src/material/core/ABaseMaterial.ts:56](https://github.com/redcamel/
 
 > **KHR\_anisotropyRotation**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:199](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L199)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:299](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L299)
+
+이방성 회전
+
 
 ***
 
@@ -198,7 +237,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:199](https://github.com/red
 
 > **KHR\_anisotropyStrength**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:198](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L198)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:294](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L294)
+
+이방성 강도
+
 
 ***
 
@@ -206,7 +248,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:198](https://github.com/red
 
 > **KHR\_anisotropyTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:200](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L200)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:304](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L304)
+
+이방성 텍스처
+
 
 ***
 
@@ -214,7 +259,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:200](https://github.com/red
 
 > **KHR\_anisotropyTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:202](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L202)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:314](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L314)
+
+이방성 텍스처 UV 인덱스
+
 
 ***
 
@@ -222,7 +270,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:202](https://github.com/red
 
 > **KHR\_anisotropyTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:201](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L201)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:309](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L309)
+
+이방성 텍스처 샘플러
+
 
 ***
 
@@ -230,7 +281,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:201](https://github.com/red
 
 > **KHR\_attenuationColor**: `number`[]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:224](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L224)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:408](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L408)
+
+감쇠 컬러
+
 
 ***
 
@@ -238,7 +292,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:224](https://github.com/red
 
 > **KHR\_attenuationDistance**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:223](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L223)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:403](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L403)
+
+감쇠 거리
+
 
 ***
 
@@ -246,7 +303,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:223](https://github.com/red
 
 > **KHR\_clearcoatFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:185](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L185)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:233](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L233)
+
+클리어코트 팩터
+
 
 ***
 
@@ -254,7 +314,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:185](https://github.com/red
 
 > **KHR\_clearcoatNormalScale**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:184](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L184)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:228](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L228)
+
+클리어코트 노멀 스케일
+
 
 ***
 
@@ -262,7 +325,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:184](https://github.com/red
 
 > **KHR\_clearcoatNormalTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L188)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:248](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L248)
+
+클리어코트 노멀 텍스처
+
 
 ***
 
@@ -270,7 +336,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:188](https://github.com/red
 
 > **KHR\_clearcoatNormalTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:194](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L194)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:278](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L278)
+
+클리어코트 노멀 텍스처 UV 인덱스
+
 
 ***
 
@@ -278,7 +347,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:194](https://github.com/red
 
 > **KHR\_clearcoatNormalTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:191](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L191)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:263](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L263)
+
+클리어코트 노멀 텍스처 샘플러
+
 
 ***
 
@@ -286,7 +358,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:191](https://github.com/red
 
 > **KHR\_clearcoatRoughnessFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:186](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L186)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:238](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L238)
+
+클리어코트 거칠기 팩터
+
 
 ***
 
@@ -294,7 +369,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:186](https://github.com/red
 
 > **KHR\_clearcoatRoughnessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:189](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L189)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L253)
+
+클리어코트 거칠기 텍스처
+
 
 ***
 
@@ -302,7 +380,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:189](https://github.com/red
 
 > **KHR\_clearcoatRoughnessTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:195](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L195)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:283](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L283)
+
+클리어코트 거칠기 텍스처 UV 인덱스
+
 
 ***
 
@@ -310,7 +391,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:195](https://github.com/red
 
 > **KHR\_clearcoatRoughnessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:192](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L192)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:268](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L268)
+
+클리어코트 거칠기 텍스처 샘플러
+
 
 ***
 
@@ -318,7 +402,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:192](https://github.com/red
 
 > **KHR\_clearcoatTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:187](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L187)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:243](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L243)
+
+클리어코트 텍스처
+
 
 ***
 
@@ -326,7 +413,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:187](https://github.com/red
 
 > **KHR\_clearcoatTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:193](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L193)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L273)
+
+클리어코트 텍스처 UV 인덱스
+
 
 ***
 
@@ -334,7 +424,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:193](https://github.com/red
 
 > **KHR\_clearcoatTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:190](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L190)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:258](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L258)
+
+클리어코트 텍스처 샘플러
+
 
 ***
 
@@ -342,7 +435,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:190](https://github.com/red
 
 > **KHR\_diffuseTransmissionColorFactor**: \[`number`, `number`, `number`\]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L213)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:357](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L357)
+
+확산 투과 컬러 팩터
+
 
 ***
 
@@ -350,7 +446,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:213](https://github.com/red
 
 > **KHR\_diffuseTransmissionColorTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L217)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:377](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L377)
+
+확산 투과 컬러 텍스처
+
 
 ***
 
@@ -358,7 +457,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:217](https://github.com/red
 
 > **KHR\_diffuseTransmissionColorTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:219](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L219)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:387](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L387)
+
+확산 투과 컬러 텍스처 UV 인덱스
+
 
 ***
 
@@ -366,7 +468,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:219](https://github.com/red
 
 > **KHR\_diffuseTransmissionColorTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:218](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L218)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:382](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L382)
+
+확산 투과 컬러 텍스처 샘플러
+
 
 ***
 
@@ -374,7 +479,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:218](https://github.com/red
 
 > **KHR\_diffuseTransmissionFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:212](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L212)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:352](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L352)
+
+확산 투과 팩터
+
 
 ***
 
@@ -382,7 +490,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:212](https://github.com/red
 
 > **KHR\_diffuseTransmissionTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:214](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L214)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:362](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L362)
+
+확산 투과 텍스처
+
 
 ***
 
@@ -390,7 +501,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:214](https://github.com/red
 
 > **KHR\_diffuseTransmissionTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:216](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L216)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:372](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L372)
+
+확산 투과 텍스처 UV 인덱스
+
 
 ***
 
@@ -398,7 +512,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:216](https://github.com/red
 
 > **KHR\_diffuseTransmissionTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:215](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L215)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:367](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L367)
+
+확산 투과 텍스처 샘플러
+
 
 ***
 
@@ -406,7 +523,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:215](https://github.com/red
 
 > **KHR\_dispersion**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:288](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L288)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:668](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L668)
+
+KHR_dispersion 확장 사용 여부
+
 
 ***
 
@@ -414,7 +534,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:288](https://github.com/red
 
 > **KHR\_iridescenceFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:247](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L247)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:507](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L507)
+
+무지개빛 팩터
+
 
 ***
 
@@ -422,7 +545,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:247](https://github.com/red
 
 > **KHR\_iridescenceIor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:248](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L248)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:512](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L512)
+
+무지개빛 IOR
+
 
 ***
 
@@ -430,7 +556,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:248](https://github.com/red
 
 > **KHR\_iridescenceTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:251](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L251)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:527](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L527)
+
+무지개빛 텍스처
+
 
 ***
 
@@ -438,7 +567,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:251](https://github.com/red
 
 > **KHR\_iridescenceTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:252](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L252)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:532](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L532)
+
+무지개빛 텍스처 샘플러
+
 
 ***
 
@@ -446,7 +578,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:252](https://github.com/red
 
 > **KHR\_iridescenceThicknessMaximum**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:250](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L250)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:522](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L522)
+
+무지개빛 최대 두께
+
 
 ***
 
@@ -454,7 +589,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:250](https://github.com/red
 
 > **KHR\_iridescenceThicknessMinimum**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:249](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L249)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:517](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L517)
+
+무지개빛 최소 두께
+
 
 ***
 
@@ -462,7 +600,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:249](https://github.com/red
 
 > **KHR\_iridescenceThicknessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L253)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:537](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L537)
+
+무지개빛 두께 텍스처
+
 
 ***
 
@@ -470,7 +611,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:253](https://github.com/red
 
 > **KHR\_iridescenceThicknessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:254](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L254)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:542](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L542)
+
+무지개빛 두께 텍스처 샘플러
+
 
 ***
 
@@ -478,7 +622,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:254](https://github.com/red
 
 > **KHR\_materials\_ior**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:258](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L258)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:554](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L554)
+
+KHR_materials_ior 확장 IOR 값
+
 
 ***
 
@@ -486,7 +633,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:258](https://github.com/red
 
 > **KHR\_sheenColorFactor**: \[`number`, `number`, `number`\]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:230](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L230)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:434](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L434)
+
+광택 컬러 팩터
+
 
 ***
 
@@ -494,7 +644,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:230](https://github.com/red
 
 > **KHR\_sheenColorTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:232](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L232)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:444](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L444)
+
+광택 컬러 텍스처
+
 
 ***
 
@@ -502,7 +655,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:232](https://github.com/red
 
 > **KHR\_sheenColorTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:233](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L233)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:449](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L449)
+
+광택 컬러 텍스처 샘플러
+
 
 ***
 
@@ -510,7 +666,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:233](https://github.com/red
 
 > **KHR\_sheenRoughnessFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:231](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L231)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:439](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L439)
+
+광택 거칠기 팩터
+
 
 ***
 
@@ -518,7 +677,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:231](https://github.com/red
 
 > **KHR\_sheenRoughnessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:234](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L234)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:454](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L454)
+
+광택 거칠기 텍스처
+
 
 ***
 
@@ -526,7 +688,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:234](https://github.com/red
 
 > **KHR\_sheenRoughnessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:235](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L235)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:459](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L459)
+
+광택 거칠기 텍스처 샘플러
+
 
 ***
 
@@ -534,7 +699,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:235](https://github.com/red
 
 > **KHR\_specularColorFactor**: \[`number`, `number`, `number`\]
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:239](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L239)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:475](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L475)
+
+스펙큘러 컬러 팩터
+
 
 ***
 
@@ -542,7 +710,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:239](https://github.com/red
 
 > **KHR\_specularColorTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:242](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L242)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:490](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L490)
+
+스펙큘러 컬러 텍스처
+
 
 ***
 
@@ -550,7 +721,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:242](https://github.com/red
 
 > **KHR\_specularColorTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:243](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L243)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:495](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L495)
+
+스펙큘러 컬러 텍스처 샘플러
+
 
 ***
 
@@ -558,7 +732,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:243](https://github.com/red
 
 > **KHR\_specularFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:238](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L238)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:470](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L470)
+
+스펙큘러 팩터
+
 
 ***
 
@@ -566,7 +743,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:238](https://github.com/red
 
 > **KHR\_specularTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:240](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L240)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:480](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L480)
+
+스펙큘러 텍스처
+
 
 ***
 
@@ -574,7 +754,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:240](https://github.com/red
 
 > **KHR\_specularTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L241)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:485](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L485)
+
+스펙큘러 텍스처 샘플러
+
 
 ***
 
@@ -582,7 +765,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:241](https://github.com/red
 
 > **KHR\_thicknessFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:222](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L222)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:398](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L398)
+
+두께 팩터
+
 
 ***
 
@@ -590,7 +776,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:222](https://github.com/red
 
 > **KHR\_thicknessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L225)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:413](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L413)
+
+두께 텍스처
+
 
 ***
 
@@ -598,7 +787,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:225](https://github.com/red
 
 > **KHR\_thicknessTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:227](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L227)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:423](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L423)
+
+두께 텍스처 UV 인덱스
+
 
 ***
 
@@ -606,7 +798,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:227](https://github.com/red
 
 > **KHR\_thicknessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:226](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L226)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:418](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L418)
+
+두께 텍스처 샘플러
+
 
 ***
 
@@ -614,7 +809,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:226](https://github.com/red
 
 > **KHR\_transmissionFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:206](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L206)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:326](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L326)
+
+투과 팩터
+
 
 ***
 
@@ -622,7 +820,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:206](https://github.com/red
 
 > **KHR\_transmissionTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:207](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L207)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:331](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L331)
+
+투과 텍스처
+
 
 ***
 
@@ -630,7 +831,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:207](https://github.com/red
 
 > **KHR\_transmissionTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:209](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L209)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:341](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L341)
+
+투과 텍스처 UV 인덱스
+
 
 ***
 
@@ -638,7 +842,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:209](https://github.com/red
 
 > **KHR\_transmissionTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:208](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L208)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:336](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L336)
+
+투과 텍스처 샘플러
+
 
 ***
 
@@ -646,7 +853,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:208](https://github.com/red
 
 > **metallicFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:280](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L280)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:648](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L648)
+
+금속성 팩터
+
 
 ***
 
@@ -654,7 +864,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:280](https://github.com/red
 
 > **metallicRoughnessTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:277](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L277)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:633](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L633)
+
+금속성-거칠기 텍스처
+
 
 ***
 
@@ -662,7 +875,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:277](https://github.com/red
 
 > **metallicRoughnessTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:279](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L279)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:643](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L643)
+
+금속성-거칠기 텍스처 UV 인덱스
+
 
 ***
 
@@ -670,7 +886,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:279](https://github.com/red
 
 > **metallicRoughnessTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:278](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L278)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:638](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L638)
+
+금속성-거칠기 텍스처 샘플러
+
 
 ***
 
@@ -678,7 +897,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:278](https://github.com/red
 
 > **normalScale**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:260](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L260)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:560](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L560)
+
+노멀 스케일
+
 
 ***
 
@@ -686,7 +908,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:260](https://github.com/red
 
 > **normalTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:262](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L262)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:570](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L570)
+
+노멀 텍스처
+
 
 ***
 
@@ -694,7 +919,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:262](https://github.com/red
 
 > **normalTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L264)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:580](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L580)
+
+노멀 텍스처 UV 인덱스
+
 
 ***
 
@@ -702,7 +930,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:264](https://github.com/red
 
 > **normalTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:263](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L263)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:575](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L575)
+
+노멀 텍스처 샘플러
+
 
 ***
 
@@ -710,7 +941,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:263](https://github.com/red
 
 > **occlusionStrength**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:275](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L275)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:627](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L627)
+
+오클루전 강도
+
 
 ***
 
@@ -718,7 +952,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:275](https://github.com/red
 
 > **occlusionTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L272)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:612](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L612)
+
+오클루전 텍스처
+
 
 ***
 
@@ -726,7 +963,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:272](https://github.com/red
 
 > **occlusionTexture\_texCoord\_index**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:274](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L274)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:622](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L622)
+
+오클루전 텍스처 UV 인덱스
+
 
 ***
 
@@ -734,7 +974,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:274](https://github.com/red
 
 > **occlusionTextureSampler**: [`Sampler`](../../Resource/classes/Sampler.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L273)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:617](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L617)
+
+오클루전 텍스처 샘플러
+
 
 ***
 
@@ -742,7 +985,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:273](https://github.com/red
 
 > **opacity**: `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L22)
+Defined in: [src/material/core/ABaseMaterial.ts:23](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L23)
 
 머티리얼의 불투명도(0~1)
 
@@ -757,7 +1000,10 @@ Defined in: [src/material/core/ABaseMaterial.ts:22](https://github.com/redcamel/
 
 > **roughnessFactor**: `number`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:281](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L281)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:653](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L653)
+
+거칠기 팩터
+
 
 ***
 
@@ -765,7 +1011,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:281](https://github.com/red
 
 > **tint**: [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L27)
+Defined in: [src/material/core/ABaseMaterial.ts:28](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L28)
 
 머티리얼의 틴트 컬러(RGBA)
 
@@ -780,7 +1026,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/
 
 > **transparent**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L66)
+Defined in: [src/material/core/ABaseMaterial.ts:67](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L67)
 
 머티리얼 투명도 여부
 
@@ -795,7 +1041,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:66](https://github.com/redcamel/
 
 > **use2PathRender**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:176](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L176)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L196)
 
 2패스 렌더링 사용 여부
 
@@ -810,7 +1056,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:176](https://github.com/red
 
 > **useCutOff**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:173](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L173)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:181](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L181)
+
+알파 컷오프 사용 여부
+
 
 ***
 
@@ -818,7 +1067,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:173](https://github.com/red
 
 > **useKHR\_materials\_anisotropy**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:197](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L197)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:289](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L289)
+
+KHR_materials_anisotropy 확장 사용 여부
+
 
 ***
 
@@ -826,7 +1078,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:197](https://github.com/red
 
 > **useKHR\_materials\_clearcoat**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:183](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L183)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:223](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L223)
+
+KHR_materials_clearcoat 확장 사용 여부
+
 
 ***
 
@@ -834,7 +1089,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:183](https://github.com/red
 
 > **useKHR\_materials\_diffuse\_transmission**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:211](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L211)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:347](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L347)
+
+KHR_materials_diffuse_transmission 확장 사용 여부
+
 
 ***
 
@@ -842,7 +1100,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:211](https://github.com/red
 
 > **useKHR\_materials\_iridescence**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:246](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L246)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:502](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L502)
+
+KHR_materials_iridescence 확장 사용 여부
+
 
 ***
 
@@ -850,7 +1111,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:246](https://github.com/red
 
 > **useKHR\_materials\_sheen**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L229)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:429](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L429)
+
+KHR_materials_sheen 확장 사용 여부
+
 
 ***
 
@@ -858,7 +1122,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:229](https://github.com/red
 
 > **useKHR\_materials\_specular**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L237)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:465](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L465)
+
+KHR_materials_specular 확장 사용 여부
+
 
 ***
 
@@ -866,7 +1133,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:237](https://github.com/red
 
 > **useKHR\_materials\_transmission**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L205)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:321](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L321)
+
+KHR_materials_transmission 확장 사용 여부
+
 
 ***
 
@@ -874,7 +1144,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:205](https://github.com/red
 
 > **useKHR\_materials\_unlit**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:256](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L256)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:548](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L548)
+
+KHR_materials_unlit 확장 사용 여부
+
 
 ***
 
@@ -882,7 +1155,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:256](https://github.com/red
 
 > **useKHR\_materials\_volume**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L221)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:393](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L393)
+
+KHR_materials_volume 확장 사용 여부
+
 
 ***
 
@@ -890,7 +1166,10 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:221](https://github.com/red
 
 > **useNormalTexture**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:261](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L261)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:565](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L565)
+
+노멀 텍스처 사용 여부
+
 
 ***
 
@@ -898,7 +1177,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:261](https://github.com/red
 
 > **useTint**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L32)
+Defined in: [src/material/core/ABaseMaterial.ts:33](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L33)
 
 틴트 컬러 사용 여부
 
@@ -913,7 +1192,10 @@ Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/
 
 > **useVertexColor**: `boolean`
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:172](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L172)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:176](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L176)
+
+버텍스 컬러 사용 여부
+
 
 ## Accessors
 
@@ -923,7 +1205,7 @@ Defined in: [src/material/pbrMaterial/PBRMaterial.ts:172](https://github.com/red
 
 > **get** **blendAlphaState**(): [`BlendState`](../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L245)
+Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L289)
 
 머티리얼의 알파 블렌드 상태 객체 반환
 
@@ -944,7 +1226,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:245](https://github.com/redcamel
 
 > **get** **blendColorState**(): [`BlendState`](../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L237)
+Defined in: [src/material/core/ABaseMaterial.ts:281](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L281)
 
 머티리얼의 컬러 블렌드 상태 객체 반환
 
@@ -965,7 +1247,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:237](https://github.com/redcamel
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L57)
 
 캐시 키를 반환합니다.
 
@@ -978,7 +1260,7 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L65)
 
 캐시 키를 설정합니다.
 
@@ -1005,7 +1287,10 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > **get** **FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L221)
+Defined in: [src/material/core/ABaseMaterial.ts:257](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L257)
+
+프래그먼트 바인드 그룹 디스크립터명을 반환합니다.
+
 
 ##### Returns
 
@@ -1023,7 +1308,10 @@ Defined in: [src/material/core/ABaseMaterial.ts:221](https://github.com/redcamel
 
 > **get** **FRAGMENT\_SHADER\_MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L217)
+Defined in: [src/material/core/ABaseMaterial.ts:249](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L249)
+
+프래그먼트 셰이더 모듈명을 반환합니다.
+
 
 ##### Returns
 
@@ -1041,7 +1329,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:217](https://github.com/redcamel
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L106)
 
 연관된 GPU 디바이스를 반환합니다.
 
@@ -1062,7 +1350,10 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L213)
+Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L241)
+
+머티리얼 모듈명을 반환합니다.
+
 
 ##### Returns
 
@@ -1080,7 +1371,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:213](https://github.com/redcamel
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L81)
 
 인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
 
@@ -1093,7 +1384,7 @@ Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L90)
 
 인스턴스의 이름을 설정합니다.
 
@@ -1120,7 +1411,7 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **packedKHR\_clearcoatTexture\_transmission**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:348](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L348)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:723](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L723)
 
 Clearcoat 및 Transmission 패킹 텍스처 반환
 
@@ -1137,7 +1428,7 @@ Clearcoat 및 Transmission 패킹 텍스처 반환
 
 > **get** **packedKHR\_diffuse\_transmission**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L383)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:758](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L758)
 
 Diffuse Transmission 패킹 텍스처 반환
 
@@ -1154,7 +1445,7 @@ Diffuse Transmission 패킹 텍스처 반환
 
 > **get** **packedKHR\_iridescence**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:356](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L356)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:731](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L731)
 
 Iridescence 패킹 텍스처 반환
 
@@ -1171,7 +1462,7 @@ Iridescence 패킹 텍스처 반환
 
 > **get** **packedKHR\_sheen**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:372](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L372)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:747](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L747)
 
 Sheen 패킹 텍스처 반환
 
@@ -1188,7 +1479,7 @@ Sheen 패킹 텍스처 반환
 
 > **get** **packedORMTexture**(): [`PackedTexture`](../../Resource/classes/PackedTexture.md)
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:364](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L364)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:739](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L739)
 
 ORM(Occlusion, Roughness, Metallic) 패킹 텍스처 반환
 
@@ -1205,7 +1496,7 @@ ORM(Occlusion, Roughness, Metallic) 패킹 텍스처 반환
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L114)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -1226,7 +1517,7 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L73)
 
 리소스 매니저 키를 반환합니다.
 
@@ -1247,7 +1538,10 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 > **get** **STORAGE\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L225)
+Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L265)
+
+셰이더 storage 구조 정보를 반환합니다.
+
 
 ##### Returns
 
@@ -1265,23 +1559,32 @@ Defined in: [src/material/core/ABaseMaterial.ts:225](https://github.com/redcamel
 
 > **get** **tintBlendMode**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:188](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L188)
+Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L205)
+
+틴트 블렌드 모드 이름을 반환합니다.
+
 
 ##### Returns
 
 `string`
 
+틴트 블렌드 모드 이름
+
+
 #### Set Signature
 
 > **set** **tintBlendMode**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L196)
+Defined in: [src/material/core/ABaseMaterial.ts:220](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L220)
+
+틴트 블렌드 모드를 설정합니다.
+
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `"SUBTRACT"` \| `"NORMAL"` \| `"MULTIPLY"` \| `"LIGHTEN"` \| `"SCREEN"` \| `"LINEAR_DODGE"` \| `"DARKEN"` \| `"OVERLAY"` \| `"COLOR_DODGE"` \| `"COLOR_BURN"` \| `"HARD_LIGHT"` \| `"SOFT_LIGHT"` \| `"DIFFERENCE"` \| `"EXCLUSION"` \| `"DIVIDE"` \| `"VIVID_LIGHT"` \| `"LINEAR_BURN"` \| `"PIN_LIGHT"` \| `"SATURATION"` \| `"HUE"` \| `"LUMINOSITY"` \| `"COLOR"` \| `"NEGATION"` \| [`TINT_BLEND_MODE`](../type-aliases/TINT_BLEND_MODE.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `"SUBTRACT"` \| `"NORMAL"` \| `"MULTIPLY"` \| `"LIGHTEN"` \| `"SCREEN"` \| `"LINEAR_DODGE"` \| `"DARKEN"` \| `"OVERLAY"` \| `"COLOR_DODGE"` \| `"COLOR_BURN"` \| `"HARD_LIGHT"` \| `"SOFT_LIGHT"` \| `"DIFFERENCE"` \| `"EXCLUSION"` \| `"DIVIDE"` \| `"VIVID_LIGHT"` \| `"LINEAR_BURN"` \| `"PIN_LIGHT"` \| `"SATURATION"` \| `"HUE"` \| `"LUMINOSITY"` \| `"COLOR"` \| `"NEGATION"` \| [`TINT_BLEND_MODE`](../type-aliases/TINT_BLEND_MODE.md) | 틴트 블렌드 모드 값 또는 키
 
 ##### Returns
 
@@ -1299,7 +1602,10 @@ Defined in: [src/material/core/ABaseMaterial.ts:196](https://github.com/redcamel
 
 > **get** **UNIFORM\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L229)
+Defined in: [src/material/core/ABaseMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L273)
+
+셰이더 uniforms 구조 정보를 반환합니다.
+
 
 ##### Returns
 
@@ -1317,7 +1623,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:229](https://github.com/redcamel
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L98)
 
 고유 식별자(UUID)를 반환합니다.
 
@@ -1338,7 +1644,7 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **get** **writeMaskState**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L253)
+Defined in: [src/material/core/ABaseMaterial.ts:297](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L297)
 
 머티리얼의 writeMask 상태 반환
 
@@ -1351,7 +1657,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:253](https://github.com/redcamel
 
 > **set** **writeMaskState**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L264)
+Defined in: [src/material/core/ABaseMaterial.ts:308](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L308)
 
 머티리얼의 writeMask 상태 설정
 
@@ -1376,7 +1682,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:264](https://github.com/redcamel
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L125)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
 
@@ -1401,7 +1707,7 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L152)
 
 등록된 더티 리스너들을 실행합니다.
 
@@ -1426,7 +1732,7 @@ Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L137)
 
 더티 파이프라인 리스너를 제거합니다.
 
@@ -1449,11 +1755,11 @@ Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel
 
 ### \_updateBaseProperty()
 
-> **\_updateBaseProperty**(): `void`
+> `protected` **\_updateBaseProperty**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L414)
+Defined in: [src/material/core/ABaseMaterial.ts:463](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L463)
 
-머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영
+머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영합니다.
 
 
 #### Returns
@@ -1468,11 +1774,11 @@ Defined in: [src/material/core/ABaseMaterial.ts:414](https://github.com/redcamel
 
 ### \_updateFragmentState()
 
-> **\_updateFragmentState**(): `void`
+> `protected` **\_updateFragmentState**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L306)
+Defined in: [src/material/core/ABaseMaterial.ts:351](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L351)
 
-프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등 상태 갱신
+프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등의 상태를 갱신합니다.
 
 
 #### Returns
@@ -1489,20 +1795,23 @@ Defined in: [src/material/core/ABaseMaterial.ts:306](https://github.com/redcamel
 
 > **getFragmentRenderState**(`entryPoint`): `GPUFragmentState`
 
-Defined in: [src/material/core/ABaseMaterial.ts:383](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L383)
+Defined in: [src/material/core/ABaseMaterial.ts:431](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L431)
 
-GPU 프래그먼트 렌더 상태 객체 반환
+GPU 프래그먼트 렌더 상태 객체를 반환합니다.
 
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `entryPoint` | `string` | `'main'` | 셰이더 엔트리포인트(기본값: 'main')
+| `entryPoint` | `string` | `'main'` | 셰이더 엔트리포인트 (기본값: 'main')
 
 #### Returns
 
 `GPUFragmentState`
+
+GPU 프래그먼트 상태
+
 
 #### Inherited from
 
@@ -1514,9 +1823,9 @@ GPU 프래그먼트 렌더 상태 객체 반환
 
 > **getGPUResourceSampler**(`sampler`): `GPUSampler`
 
-Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L436)
+Defined in: [src/material/core/ABaseMaterial.ts:488](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L488)
 
-샘플러 객체에서 GPU 샘플러 반환
+샘플러 객체에서 GPU 샘플러를 반환합니다.
 
 
 #### Parameters
@@ -1529,6 +1838,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel
 
 `GPUSampler`
 
+GPUSampler 인스턴스
+
+
 #### Inherited from
 
 [`ABitmapBaseMaterial`](../namespaces/Core/classes/ABitmapBaseMaterial.md).[`getGPUResourceSampler`](../namespaces/Core/classes/ABitmapBaseMaterial.md#getgpuresourcesampler)
@@ -1539,9 +1851,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:436](https://github.com/redcamel
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:272](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABaseMaterial.ts#L272)
+Defined in: [src/material/core/ABaseMaterial.ts:316](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABaseMaterial.ts#L316)
 
-GPU 렌더 파이프라인 정보 및 유니폼 버퍼 초기화
+GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
 
 
 #### Returns
@@ -1558,7 +1870,7 @@ GPU 렌더 파이프라인 정보 및 유니폼 버퍼 초기화
 
 > **setupPackedKHR\_clearcoatTexture\_transmission**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:419](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L419)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:800](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L800)
 
 Clearcoat 및 Transmission 텍스처 패킹 설정
 
@@ -1573,7 +1885,7 @@ Clearcoat 및 Transmission 텍스처 패킹 설정
 
 > **setupPackedKHR\_diffuse\_transmission**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:500](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L500)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:887](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L887)
 
 Diffuse Transmission 텍스처 패킹 설정
 
@@ -1588,7 +1900,7 @@ Diffuse Transmission 텍스처 패킹 설정
 
 > **setupPackedKHR\_iridescence**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:552](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L552)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:951](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L951)
 
 Iridescence 텍스처 패킹 설정
 
@@ -1603,7 +1915,7 @@ Iridescence 텍스처 패킹 설정
 
 > **setupPackedKHR\_sheen**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:526](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L526)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:919](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L919)
 
 Sheen 텍스처 패킹 설정
 
@@ -1618,7 +1930,7 @@ Sheen 텍스처 패킹 설정
 
 > **setupPackORMTexture**(): `Promise`\<`void`\>
 
-Defined in: [src/material/pbrMaterial/PBRMaterial.ts:394](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/pbrMaterial/PBRMaterial.ts#L394)
+Defined in: [src/material/pbrMaterial/PBRMaterial.ts:769](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/pbrMaterial/PBRMaterial.ts#L769)
 
 ORM(Occlusion, Roughness, Metallic) 텍스처 패킹 설정
 
@@ -1633,9 +1945,9 @@ ORM(Occlusion, Roughness, Metallic) 텍스처 패킹 설정
 
 > **updateSampler**(`prevSampler`, `newSampler`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABitmapBaseMaterial.ts#L74)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:75](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABitmapBaseMaterial.ts#L75)
 
-샘플러 객체 변경 및 DirtyPipeline 리스너 관리
+샘플러 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
 
 
 #### Parameters
@@ -1659,17 +1971,17 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:74](https://github.com/red
 
 > **updateTexture**(`prevTexture`, `texture`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:58](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/material/core/ABitmapBaseMaterial.ts#L58)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:59](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/material/core/ABitmapBaseMaterial.ts#L59)
 
-텍스처 객체 변경 및 DirtyPipeline 리스너 관리
+텍스처 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
 
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `prevTexture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-| `texture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
+| `prevTexture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md) | 이전 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+| `texture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../Resource/classes/HDRTexture.md) | 새 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
 
 #### Returns
 

@@ -1,0 +1,51 @@
+[**RedGPU API v3.9.1-Alpha**](../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../README.md) / [RedGPU](../../../../README.md) / [Math](../../README.md) / vec4
+
+# vec4
+
+## Functions
+
+- [add](functions/add.md)
+- [ceil](functions/ceil.md)
+- [clone](functions/clone.md)
+- [copy](functions/copy.md)
+- [create](functions/create.md)
+- [cross](functions/cross.md)
+- [dist](functions/dist.md)
+- [distance](functions/distance.md)
+- [div](functions/div.md)
+- [divide](functions/divide.md)
+- [dot](functions/dot.md)
+- [equals](functions/equals.md)
+- [exactEquals](functions/exactEquals.md)
+- [floor](functions/floor.md)
+- [forEach](functions/forEach.md)
+- [fromValues](functions/fromValues.md)
+- [inverse](functions/inverse.md)
+- [len](functions/len.md)
+- [length](functions/length.md)
+- [lerp](functions/lerp.md)
+- [max](functions/max.md)
+- [min](functions/min.md)
+- [mul](functions/mul.md)
+- [multiply](functions/multiply.md)
+- [negate](functions/negate.md)
+- [normalize](functions/normalize.md)
+- [random](functions/random.md)
+- [round](functions/round.md)
+- [scale](functions/scale.md)
+- [scaleAndAdd](functions/scaleAndAdd.md)
+- [set](functions/set.md)
+- [sqrDist](functions/sqrDist.md)
+- [sqrLen](functions/sqrLen.md)
+- [squaredDistance](functions/squaredDistance.md)
+- [squaredLength](functions/squaredLength.md)
+- [str](functions/str.md)
+- [sub](functions/sub.md)
+- [subtract](functions/subtract.md)
+- [transformMat4](functions/transformMat4.md)
+- [transformQuat](functions/transformQuat.md)
+- [zero](functions/zero.md)

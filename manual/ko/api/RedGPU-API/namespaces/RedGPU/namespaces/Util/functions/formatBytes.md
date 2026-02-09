@@ -8,7 +8,7 @@
 
 > **formatBytes**(`bytes`, `decimals`): `string`
 
-Defined in: [src/utils/math/formatBytes.ts:26](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/utils/math/formatBytes.ts#L26)
+Defined in: [src/utils/formatBytes.ts:26](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/utils/formatBytes.ts#L26)
 
 바이트 단위를 사람이 읽기 쉬운 문자열로 변환합니다.
 

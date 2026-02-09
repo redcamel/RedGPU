@@ -6,15 +6,15 @@
 
 # Class: HDRTexture
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:33](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L33)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:25](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L25)
 
-Radiance HDR(.hdr) 파일을 사용하는 텍스처 클래스입니다.
-
-
-GGX 중요도 샘플링을 통해 거칠기별로 프리필터링된 큐브맵을 생성합니다.
+Radiance HDR(.hdr) 파일을 사용하는 2D 텍스처 클래스입니다.
 
 
-* ### Example
+.hdr 파일을 로드하여 rgba16float 포맷의 2D GPUTexture를 생성합니다. 라이트맵, 투영 텍스처 또는 IBL의 원천 데이터로 사용됩니다.
+
+
+### Example
 ```typescript
 const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'path/to/image.hdr');
 ```
@@ -27,23 +27,28 @@ const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'path/to/image.hdr
 
 ### Constructor
 
-> **new HDRTexture**(`redGPUContext`, `src`, `onLoad?`, `onError?`, `cubeMapSize?`, `useMipMap?`): `HDRTexture`
+> **new HDRTexture**(`redGPUContext`, `src`, `onLoad?`, `onError?`): `HDRTexture`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:71](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L71)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:60](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L60)
 
 HDRTexture 인스턴스를 생성합니다.
 
 
+### Example
+```typescript
+const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'assets/hdr/sky.hdr', (v) => {
+    console.log('Loaded:', v);
+});
+```
+
 #### Parameters
 
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext 인스턴스
-| `src` | `SrcInfo` | `undefined` | HDR 파일 경로 또는 정보
-| `onLoad?` | (`textureInstance?`) => `void` | `undefined` | 로드 완료 콜백
-| `onError?` | (`error`) => `void` | `undefined` | 에러 콜백
-| `cubeMapSize?` | `number` | `1024` | 생성될 큐브맵의 한 면 크기
-| `useMipMap?` | `boolean` | `true` | 밉맵 사용 여부 (IBL 사용 시 필수)
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스
+| `src` | `SrcInfo` | HDR 파일 경로 또는 정보
+| `onLoad?` | (`textureInstance?`) => `void` | 로드 완료 콜백
+| `onError?` | (`error`) => `void` | 에러 콜백
 
 #### Returns
 
@@ -61,7 +66,7 @@ HDRTexture 인스턴스를 생성합니다.
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L57)
 
 캐시 키를 반환합니다.
 
@@ -74,7 +79,7 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L65)
 
 캐시 키를 설정합니다.
 
@@ -101,7 +106,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L106)
 
 연관된 GPU 디바이스를 반환합니다.
 
@@ -122,7 +127,7 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:111](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L111)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:95](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L95)
 
 GPUTexture 객체
 
@@ -132,15 +137,15 @@ GPUTexture 객체
 
 ***
 
-### mipLevelCount
+### height
 
 #### Get Signature
 
-> **get** **mipLevelCount**(): `number`
+> **get** **height**(): `number`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:116](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L116)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:91](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L91)
 
-밉맵 레벨 개수
+텍스처 세로 크기
 
 ##### Returns
 
@@ -154,7 +159,7 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:116](https://github.com/red
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L81)
 
 인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
 
@@ -167,7 +172,7 @@ Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L90)
 
 인스턴스의 이름을 설정합니다.
 
@@ -194,7 +199,7 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L114)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -215,7 +220,7 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L73)
 
 리소스 매니저 키를 반환합니다.
 
@@ -236,7 +241,7 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 > **get** **src**(): `string`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:121](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L121)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:97](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L97)
 
 텍스처 소스 경로
 
@@ -248,15 +253,16 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:121](https://github.com/red
 
 > **set** **src**(`value`): `void`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:126](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L126)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:107](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L107)
 
 텍스처 소스 경로 설정 및 로드를 시작합니다.
 
+
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `SrcInfo` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `SrcInfo` | 설정할 소스 정보
 
 ##### Returns
 
@@ -270,7 +276,7 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:126](https://github.com/red
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ManagementResourceBase.ts#L45)
 
 리소스의 관리 상태 정보를 반환합니다.
 
@@ -285,47 +291,13 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com
 
 ***
 
-### useMipmap
-
-#### Get Signature
-
-> **get** **useMipmap**(): `boolean`
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:136](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L136)
-
-밉맵 사용 여부
-
-##### Returns
-
-`boolean`
-
-#### Set Signature
-
-> **set** **useMipmap**(`value`): `void`
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:141](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L141)
-
-밉맵 사용 여부를 설정하고 텍스처를 재생성합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `boolean` |
-
-##### Returns
-
-`void`
-
-***
-
 ### uuid
 
 #### Get Signature
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L98)
 
 고유 식별자(UUID)를 반환합니다.
 
@@ -346,7 +318,7 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:106](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L106)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:93](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L93)
 
 비디오 메모리 사용량(byte)
 
@@ -356,30 +328,19 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:106](https://github.com/red
 
 ***
 
-### viewDescriptor
+### width
 
 #### Get Signature
 
-> **get** **viewDescriptor**(): `object`
+> **get** **width**(): `number`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:151](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L151)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:89](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L89)
 
-뷰 디스크립터를 반환합니다.
+텍스처 가로 크기
 
 ##### Returns
 
-| Name | Type | Description | Defined in |
-| ------ | ------ | ------ | ------ |
-| `arrayLayerCount?` | `number` | How many array layers, starting with [GPUTextureViewDescriptor#baseArrayLayer](CubeTexture.md#viewdescriptorviewdescriptor), are accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1848 |
-| `aspect?` | `GPUTextureAspect` | Which GPUTextureAspect \| aspect(s) of the texture are accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1830 |
-| `baseArrayLayer?` | `number` | The index of the first array layer accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1843 |
-| `baseMipLevel?` | `number` | The first (most detailed) mipmap level accessible to the texture view. | node\_modules/@webgpu/types/dist/index.d.ts:1834 |
-| `dimension?` | `GPUTextureViewDimension` | The dimension to view the texture as. | node\_modules/@webgpu/types/dist/index.d.ts:1817 |
-| `format?` | `GPUTextureFormat` | The format of the texture view. Must be either the GPUTextureDescriptor#format of the texture or one of the GPUTextureDescriptor#viewFormats specified during its creation. | node\_modules/@webgpu/types/dist/index.d.ts:1813 |
-| `label?` | `string` | The initial value of GPUObjectBase#label \| GPUObjectBase.label. | node\_modules/@webgpu/types/dist/index.d.ts:1058 |
-| `mipLevelCount` | `number` | - | [src/resources/texture/hdr/HDRTexture.ts:154](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L154) |
-| `swizzle?` | `string` | A string of length four, with each character mapping to the texture view's red/green/blue/alpha channels, respectively. When accessed by a shader, the red/green/blue/alpha channels are replaced by the value corresponding to the component specified in `swizzle[0]`, `swizzle[1]`, `swizzle[2]`, and `swizzle[3]`, respectively: - `"r"`: Take its value from the red channel of the texture. - `"g"`: Take its value from the green channel of the texture. - `"b"`: Take its value from the blue channel of the texture. - `"a"`: Take its value from the alpha channel of the texture. - `"0"`: Force its value to 0. - `"1"`: Force its value to 1. Requires the GPUFeatureName `"texture-component-swizzle"` feature to be enabled. | node\_modules/@webgpu/types/dist/index.d.ts:1863 |
-| `usage?` | `number` | The allowed GPUTextureUsage \| usage(s) for the texture view. Must be a subset of the GPUTexture#usage flags of the texture. If 0, defaults to the full set of GPUTexture#usage flags of the texture. Note: If the view's [GPUTextureViewDescriptor#format](CubeTexture.md#viewdescriptorviewdescriptor) doesn't support all of the texture's GPUTextureDescriptor#usages, the default will fail, and the view's [GPUTextureViewDescriptor#usage](CubeTexture.md#viewdescriptorviewdescriptor) must be specified explicitly. | node\_modules/@webgpu/types/dist/index.d.ts:1826 |
+`number`
 
 ## Methods
 
@@ -387,7 +348,7 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:151](https://github.com/red
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L125)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
 
@@ -412,7 +373,7 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L152)
 
 등록된 더티 리스너들을 실행합니다.
 
@@ -437,7 +398,7 @@ Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/core/ResourceBase.ts#L137)
 
 더티 파이프라인 리스너를 제거합니다.
 
@@ -462,46 +423,10 @@ Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:176](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L176)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:116](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/hdr/HDRTexture.ts#L116)
 
-텍스처 리소스를 파괴합니다.
+리소스를 파괴합니다.
 
 #### Returns
 
 `void`
-
-***
-
-### getSupportedFormats()
-
-> `static` **getSupportedFormats**(): `string`[]
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:171](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L171)
-
-지원하는 파일 형식 확장자 목록을 반환합니다.
-
-
-#### Returns
-
-`string`[]
-
-***
-
-### isSupportedFormat()
-
-> `static` **isSupportedFormat**(`src`): `boolean`
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:162](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/hdr/HDRTexture.ts#L162)
-
-지정된 경로가 지원하는 HDR 형식인지 확인합니다.
-
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `src` | `string` |
-
-#### Returns
-
-`boolean`

@@ -6,15 +6,15 @@
 
 # Class: IBL
 
-Defined in: [src/resources/texture/ibl/IBL.ts:27](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/ibl/IBL.ts#L27)
+Defined in: [src/resources/texture/ibl/IBL.ts:20](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L20)
 
 
 Class that manages Image-Based Lighting (IBL).
 
 
-Enables more realistic rendering by generating ambient and specular environments based on HDR or cubemap images.
+Enables realistic PBR lighting by generating diffuse and specular environments based on HDR or cubemap images.
 
-* ### Example
+### Example
 ```typescript
 const ibl = new RedGPU.Resource.IBL(redGPUContext, 'path/to/environment.hdr');
 view.ibl = ibl;
@@ -24,12 +24,17 @@ view.ibl = ibl;
 
 ### Constructor
 
-> **new IBL**(`redGPUContext`, `srcInfo`, `envCubeSize`, `iblCubeSize`): `IBL`
+> **new IBL**(`redGPUContext`, `srcInfo`, `environmentSize`, `prefilterSize`, `irradianceSize`): `IBL`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:55](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/ibl/IBL.ts#L55)
+Defined in: [src/resources/texture/ibl/IBL.ts:57](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L57)
 
 
 Creates an IBL instance.
+
+### Example
+```typescript
+const ibl = new RedGPU.Resource.IBL(redGPUContext, 'path/to/environment.hdr', 1024, 512, 64);
+```
 
 #### Parameters
 
@@ -37,8 +42,9 @@ Creates an IBL instance.
 | ------ | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
 | `srcInfo` | `string` \| \[`string`, `string`, `string`, `string`, `string`, `string`\] | `undefined` | Environment map source information (HDR URL or array of 6 image URLs) |
-| `envCubeSize` | `number` | `1024` | Environment map cube size (default: 1024) |
-| `iblCubeSize` | `number` | `512` | IBL cube size (default: 512) |
+| `environmentSize` | `number` | `1024` | Environment map cube size (default: 1024) |
+| `prefilterSize` | `number` | `512` | Prefilter cube size (default: 512) |
+| `irradianceSize` | `number` | `64` | Irradiance cube size (default: 64) |
 
 #### Returns
 
@@ -46,13 +52,13 @@ Creates an IBL instance.
 
 ## Accessors
 
-### envCubeSize
+### environmentSize
 
 #### Get Signature
 
-> **get** **envCubeSize**(): `number`
+> **get** **environmentSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:90](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/ibl/IBL.ts#L90)
+Defined in: [src/resources/texture/ibl/IBL.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L114)
 
 Environment map cube size
 
@@ -66,27 +72,27 @@ Environment map cube size
 
 #### Get Signature
 
-> **get** **environmentTexture**(): `IBLCubeTexture`
+> **get** **environmentTexture**(): [`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)
 
-Defined in: [src/resources/texture/ibl/IBL.ts:105](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/ibl/IBL.ts#L105)
+Defined in: [src/resources/texture/ibl/IBL.ts:122](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L122)
 
 Returns the environment texture.
 
 ##### Returns
 
-`IBLCubeTexture`
+[`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)
 
 ***
 
-### iblCubeSize
+### irradianceSize
 
 #### Get Signature
 
-> **get** **iblCubeSize**(): `number`
+> **get** **irradianceSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:95](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/ibl/IBL.ts#L95)
+Defined in: [src/resources/texture/ibl/IBL.ts:118](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L118)
 
-IBL cube size
+Irradiance cube size
 
 ##### Returns
 
@@ -94,32 +100,48 @@ IBL cube size
 
 ***
 
-### iblTexture
-
-#### Get Signature
-
-> **get** **iblTexture**(): `IBLCubeTexture`
-
-Defined in: [src/resources/texture/ibl/IBL.ts:110](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/ibl/IBL.ts#L110)
-
-Returns the IBL texture.
-
-##### Returns
-
-`IBLCubeTexture`
-
-***
-
 ### irradianceTexture
 
 #### Get Signature
 
-> **get** **irradianceTexture**(): `IBLCubeTexture`
+> **get** **irradianceTexture**(): [`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)
 
-Defined in: [src/resources/texture/ibl/IBL.ts:100](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/texture/ibl/IBL.ts#L100)
+Defined in: [src/resources/texture/ibl/IBL.ts:120](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L120)
 
 Returns the irradiance texture.
 
 ##### Returns
 
-`IBLCubeTexture`
+[`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)
+
+***
+
+### prefilterSize
+
+#### Get Signature
+
+> **get** **prefilterSize**(): `number`
+
+Defined in: [src/resources/texture/ibl/IBL.ts:116](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L116)
+
+Prefilter cube size
+
+##### Returns
+
+`number`
+
+***
+
+### prefilterTexture
+
+#### Get Signature
+
+> **get** **prefilterTexture**(): [`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)
+
+Defined in: [src/resources/texture/ibl/IBL.ts:124](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L124)
+
+Returns the IBL (Specular Prefilter) texture.
+
+##### Returns
+
+[`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)

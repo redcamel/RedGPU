@@ -6,7 +6,7 @@
 
 # Class: VertexInterleavedStructElement
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:5](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L5)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:5](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L5)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructEleme
 
 > **new VertexInterleavedStructElement**(`attributeName`, `attributeStride`, `interleaveType`): `VertexInterleavedStructElement`
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:10](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L10)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:10](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L10)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructEleme
 
 > **attributeName**: `string`
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:6](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L6)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:6](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L6)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructEleme
 
 > **attributeStride**: `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:7](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L7)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:7](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L7)
 
 ***
 
@@ -50,4 +50,4 @@ Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructEleme
 
 > **interleaveType**: `TypeInterleave`
 
-Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:8](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L8)
+Defined in: [src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts:8](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/buffer/vertexBuffer/core/VertexInterleavedStructElement.ts#L8)

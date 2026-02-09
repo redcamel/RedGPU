@@ -12,13 +12,6 @@ RedGPU에서 공통적으로 사용되는 다양한 유틸리티 함수와 클�
 파일 처리, 수학 연산, 텍스처 관리 및 고유 ID 생성 등 핵심 시스템을 지원하는 도구들을 포함합니다.
 
 
-## Coordinates
-
-- [getScreenPoint](functions/getScreenPoint.md)
-- [localToWorld](functions/localToWorld.md)
-- [screenToWorld](functions/screenToWorld.md)
-- [worldToLocal](functions/worldToLocal.md)
-
 ## File
 
 - [getAbsoluteURL](functions/getAbsoluteURL.md)
@@ -32,13 +25,7 @@ RedGPU에서 공통적으로 사용되는 다양한 유틸리티 함수와 클�
 
 ## Math
 
-- [calculateNormals](functions/calculateNormals.md)
-- [calculateTangents](functions/calculateTangents.md)
-- [computeViewFrustumPlanes](functions/computeViewFrustumPlanes.md)
 - [formatBytes](functions/formatBytes.md)
-- [matToEuler](functions/matToEuler.md)
-- [quaternionToRotationMat4](functions/quaternionToRotationMat4.md)
-- [sortTransparentObjects](functions/sortTransparentObjects.md)
 
 ## Texture
 

@@ -6,7 +6,7 @@
 
 # Class: ViewRenderTextureManager
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:19](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L19)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:19](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L19)
 
 View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하는 매니저 클래스입니다.
 
@@ -22,7 +22,7 @@ View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하
 
 > **new ViewRenderTextureManager**(`view`): `ViewRenderTextureManager`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:93](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L93)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:93](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L93)
 
 생성자
 
@@ -44,7 +44,7 @@ Defined in: [src/display/view/core/ViewRenderTextureManager.ts:93](https://githu
 
 > **get** **depthTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:122](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L122)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:122](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L122)
 
 깊이 텍스처를 반환합니다. 필요 시 내부에서 생성합니다.
 
@@ -60,7 +60,7 @@ Defined in: [src/display/view/core/ViewRenderTextureManager.ts:122](https://gith
 
 > **get** **depthTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:130](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L130)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:130](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L130)
 
 깊이 텍스처 뷰를 반환합니다. 필요 시 내부에서 생성합니다.
 
@@ -76,7 +76,7 @@ Defined in: [src/display/view/core/ViewRenderTextureManager.ts:130](https://gith
 
 > **get** **gBufferColorResolveTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:173](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L173)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:173](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L173)
 
 G-Buffer color resolve 텍스처 반환 (MSAA 사용 시 resolve 대상)
 
@@ -92,7 +92,7 @@ G-Buffer color resolve 텍스처 반환 (MSAA 사용 시 resolve 대상)
 
 > **get** **gBufferColorResolveTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:190](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L190)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:190](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L190)
 
 G-Buffer color resolve 텍스처 뷰 반환.
 
@@ -108,7 +108,7 @@ G-Buffer color resolve 텍스처 뷰 반환.
 
 > **get** **gBufferColorTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:165](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L165)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:165](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L165)
 
 G-Buffer color 텍스처 반환 (미리 생성되지 않았으면 undefined)
 
@@ -124,7 +124,7 @@ G-Buffer color 텍스처 반환 (미리 생성되지 않았으면 undefined)
 
 > **get** **gBufferColorTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:181](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L181)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:181](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L181)
 
 G-Buffer color 텍스처 뷰 반환. 내부에서 생성 보장.
 
@@ -140,7 +140,7 @@ G-Buffer color 텍스처 뷰 반환. 내부에서 생성 보장.
 
 > **get** **gBufferMotionVectorResolveTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:239](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L239)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:239](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L239)
 
 G-Buffer 모션 벡터 resolve 텍스처 반환
 
@@ -156,7 +156,7 @@ G-Buffer 모션 벡터 resolve 텍스처 반환
 
 > **get** **gBufferMotionVectorResolveTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:256](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L256)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:256](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L256)
 
 G-Buffer 모션 벡터 resolve 텍스처 뷰 반환.
 
@@ -172,7 +172,7 @@ G-Buffer 모션 벡터 resolve 텍스처 뷰 반환.
 
 > **get** **gBufferMotionVectorTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:231](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L231)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:231](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L231)
 
 G-Buffer 모션 벡터 텍스처 반환
 
@@ -188,7 +188,7 @@ G-Buffer 모션 벡터 텍스처 반환
 
 > **get** **gBufferMotionVectorTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:247](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L247)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:247](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L247)
 
 G-Buffer 모션 벡터 텍스처 뷰 반환. 내부에서 생성 보장.
 
@@ -204,7 +204,7 @@ G-Buffer 모션 벡터 텍스처 뷰 반환. 내부에서 생성 보장.
 
 > **get** **gBufferNormalResolveTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:206](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L206)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:206](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L206)
 
 G-Buffer normal resolve 텍스처 반환
 
@@ -220,7 +220,7 @@ G-Buffer normal resolve 텍스처 반환
 
 > **get** **gBufferNormalResolveTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:223](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L223)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:223](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L223)
 
 G-Buffer normal resolve 텍스처 뷰 반환.
 
@@ -236,7 +236,7 @@ G-Buffer normal resolve 텍스처 뷰 반환.
 
 > **get** **gBufferNormalTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:198](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L198)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:198](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L198)
 
 G-Buffer normal 텍스처 반환
 
@@ -252,7 +252,7 @@ G-Buffer normal 텍스처 반환
 
 > **get** **gBufferNormalTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:214](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L214)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:214](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L214)
 
 G-Buffer normal 텍스처 뷰 반환. 내부에서 생성 보장.
 
@@ -268,7 +268,7 @@ G-Buffer normal 텍스처 뷰 반환. 내부에서 생성 보장.
 
 > **get** **prevDepthTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:135](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L135)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:135](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L135)
 
 ##### Returns
 
@@ -282,7 +282,7 @@ Defined in: [src/display/view/core/ViewRenderTextureManager.ts:135](https://gith
 
 > **get** **renderPath1ResultTexture**(): `GPUTexture`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:152](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L152)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:152](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L152)
 
 렌더 패스1 결과 텍스처를 반환합니다. 필요 시 내부에서 생성합니다.
 
@@ -298,7 +298,7 @@ Defined in: [src/display/view/core/ViewRenderTextureManager.ts:152](https://gith
 
 > **get** **renderPath1ResultTextureDescriptor**(): `GPUTextureDescriptor`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:114](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L114)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L114)
 
 렌더 패스1 결과 텍스처 생성에 사용된 디스크립터를 반환합니다.
 
@@ -314,7 +314,7 @@ Defined in: [src/display/view/core/ViewRenderTextureManager.ts:114](https://gith
 
 > **get** **renderPath1ResultTextureView**(): `GPUTextureView`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:144](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L144)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:144](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L144)
 
 렌더 패스1 결과 텍스처 뷰를 반환합니다.
 
@@ -330,7 +330,7 @@ Defined in: [src/display/view/core/ViewRenderTextureManager.ts:144](https://gith
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/display/view/core/ViewRenderTextureManager.ts:106](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/display/view/core/ViewRenderTextureManager.ts#L106)
+Defined in: [src/display/view/core/ViewRenderTextureManager.ts:106](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/display/view/core/ViewRenderTextureManager.ts#L106)
 
 현재 계산된 비디오 메모리 사용량(바이트)을 반환합니다.
 

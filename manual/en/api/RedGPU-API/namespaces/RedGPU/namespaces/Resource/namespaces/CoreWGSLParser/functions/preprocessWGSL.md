@@ -8,7 +8,7 @@
 
 > **preprocessWGSL**(`code`): `PreprocessedWGSLResult`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:140](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/resources/wgslParser/core/preprocessWGSL.ts#L140)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:209](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/wgslParser/core/preprocessWGSL.ts#L209)
 
 
 Preprocesses WGSL shader code.

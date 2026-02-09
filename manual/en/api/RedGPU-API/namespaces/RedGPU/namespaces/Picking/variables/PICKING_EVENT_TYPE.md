@@ -8,11 +8,12 @@
 
 > `const` **PICKING\_EVENT\_TYPE**: `object`
 
-Defined in: [src/picking/PICKING\_EVENT\_TYPE.ts:13](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/picking/PICKING_EVENT_TYPE.ts#L13)
+Defined in: [src/picking/PICKING\_EVENT\_TYPE.ts:14](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/picking/PICKING_EVENT_TYPE.ts#L14)
 
 
 Object defining picking event types.
-* ### Example
+
+### Example
 ```typescript
 const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
@@ -24,9 +25,9 @@ mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="click"></a> `CLICK` | `"click"` | `'click'` | Mouse click | [src/picking/PICKING\_EVENT\_TYPE.ts:43](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/picking/PICKING_EVENT_TYPE.ts#L43) |
-| <a id="down"></a> `DOWN` | `"down"` | `'down'` | Mouse down | [src/picking/PICKING\_EVENT\_TYPE.ts:23](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/picking/PICKING_EVENT_TYPE.ts#L23) |
-| <a id="move"></a> `MOVE` | `"move"` | `'move'` | Mouse move | [src/picking/PICKING\_EVENT\_TYPE.ts:18](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/picking/PICKING_EVENT_TYPE.ts#L18) |
-| <a id="out"></a> `OUT` | `"out"` | `'out'` | Mouse out | [src/picking/PICKING\_EVENT\_TYPE.ts:38](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/picking/PICKING_EVENT_TYPE.ts#L38) |
-| <a id="over"></a> `OVER` | `"over"` | `'over'` | Mouse over | [src/picking/PICKING\_EVENT\_TYPE.ts:33](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/picking/PICKING_EVENT_TYPE.ts#L33) |
-| <a id="up"></a> `UP` | `"up"` | `'up'` | Mouse up | [src/picking/PICKING\_EVENT\_TYPE.ts:28](https://github.com/redcamel/RedGPU/blob/fe2940f17a5472298f14a33e21121155d25234e5/src/picking/PICKING_EVENT_TYPE.ts#L28) |
+| <a id="click"></a> `CLICK` | `"click"` | `'click'` | Mouse click (When a mouse up occurs on the same object after a mouse down) | [src/picking/PICKING\_EVENT\_TYPE.ts:44](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/picking/PICKING_EVENT_TYPE.ts#L44) |
+| <a id="down"></a> `DOWN` | `"down"` | `'down'` | Mouse down (When a mouse button is pressed) | [src/picking/PICKING\_EVENT\_TYPE.ts:24](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/picking/PICKING_EVENT_TYPE.ts#L24) |
+| <a id="move"></a> `MOVE` | `"move"` | `'move'` | Mouse move (When the mouse moves over the object) | [src/picking/PICKING\_EVENT\_TYPE.ts:19](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/picking/PICKING_EVENT_TYPE.ts#L19) |
+| <a id="out"></a> `OUT` | `"out"` | `'out'` | Mouse out (When the mouse leaves the object area) | [src/picking/PICKING\_EVENT\_TYPE.ts:39](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/picking/PICKING_EVENT_TYPE.ts#L39) |
+| <a id="over"></a> `OVER` | `"over"` | `'over'` | Mouse over (When the mouse enters the object area) | [src/picking/PICKING\_EVENT\_TYPE.ts:34](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/picking/PICKING_EVENT_TYPE.ts#L34) |
+| <a id="up"></a> `UP` | `"up"` | `'up'` | Mouse up (When a mouse button is released) | [src/picking/PICKING\_EVENT\_TYPE.ts:29](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/picking/PICKING_EVENT_TYPE.ts#L29) |
