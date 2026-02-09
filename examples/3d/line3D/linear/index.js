@@ -1,5 +1,5 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js?t=1770635178902";
+import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
 
 /**
  * [KO] Line3D (Linear) 예제
@@ -122,9 +122,9 @@ function rainbowHex(t) {
 }
 
 const renderTestPane = async (redGPUContext, view) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770635178902");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475");
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770635178902");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
     setDebugButtons(RedGPU, redGPUContext);
     // 옵션 초기화
     const debugOptions = {

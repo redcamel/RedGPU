@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770635178902";
+import * as RedGPU from "../../../../../dist/index.js?t=1770637396475";
 
 /**
  * [KO] IBL Test 예제
@@ -146,13 +146,13 @@ const createIBL = (view, src) => {
  * @param {RedGPU.Display.View3D} targetView
  */
 const renderTestPane = async (targetView) => {
-    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770635178902" );
+    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475" );
     const pane = new Pane();
     const {
         createFieldOfView,
         createSkyBoxHelper,
         setDebugButtons
-    } = await import( "../../../../exampleHelper/createExample/panes/index.js?t=1770635178902" );
+    } = await import( "../../../../exampleHelper/createExample/panes/index.js?t=1770637396475" );
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera)
     createSkyBoxHelper(pane, targetView);

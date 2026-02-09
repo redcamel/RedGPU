@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770635178902";
+import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
 
 /**
  * [KO] Circle Primitive 예제
@@ -104,8 +104,8 @@ const createPrimitive = (redGPUContext, scene) => {
  * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
  */
 const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770635178902');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770635178902");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
     setDebugButtons(RedGPU, redGPUContext)
     const pane = new Pane();
 
