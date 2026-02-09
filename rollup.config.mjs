@@ -52,7 +52,7 @@ export default [
 		]
 	},
 	{
-		input: './src/plugins/physics/rapier/index.ts',
+		input: './src/plugins/rapier/index.ts',
 		output: {
 			file: './dist/plugins/physics/rapier/index.js',
 			format: "es",
