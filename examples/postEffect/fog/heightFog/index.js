@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770635178902";
+import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
 
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
@@ -290,10 +290,10 @@ function createGroundLevelScene(redGPUContext, scene) {
  * @param {function} toggleAutoRotate
  */
 async function createHeightFogControlPanel(redGPUContext, view, heightFog, controller, toggleAutoRotate) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770635178902');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
 
     const pane = new Pane({title: 'Height Fog Demo', expanded: true});
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770635178902");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
     setDebugButtons(RedGPU, redGPUContext);
     const PARAMS = {
         enabled: true,

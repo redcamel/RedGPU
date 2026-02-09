@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770635178902";
+import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
 
 /**
  * [KO] Sprite2D Child Method 예제
@@ -79,12 +79,12 @@ const createInitialObjects = (redGPUContext, scene) => {
  * @param {RedGPU.Display.Scene} scene
  */
 const createPaneUI = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770635178902');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
     const pane = new Pane();
     const {
         setDebugButtons,
         setRedGPUTest_pane
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770635178902");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
     setDebugButtons(RedGPU, redGPUContext);
     pane.addButton({title: 'Add Child'}).on('click', () => {
         addChildObject(redGPUContext, scene);
