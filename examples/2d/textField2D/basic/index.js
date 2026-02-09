@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] TextField2D Basic 예제
+ * [EN] TextField2D Basic example
+ *
+ * [KO] TextField2D의 기본 사용법과 스타일링 옵션을 보여줍니다.
+ * [EN] Demonstrates the basic usage and styling options of TextField2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -16,20 +24,33 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     const spriteCount = 10;
     const radius = 200;
-    const centerX = redGPUContext.screenRectObject.width / 2;
-    const centerY = redGPUContext.screenRectObject.height / 2;
 
     for (let i = 0; i < spriteCount; i++) {
-        const angle = (i / spriteCount) * Math.PI * 2;
-        const x = centerX + Math.cos(angle) * radius;
-        const y = centerY + Math.sin(angle) * radius;
-
         const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
         textField2D.text = textField2D.name.split(' ').join('<br/>');
-        textField2D.x = Math.floor(x);
-        textField2D.y = Math.floor(y);
         scene.addChild(textField2D);
     }
+
+    /**
+     * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+     * [EN] Event handler called when the screen size changes.
+     */
+    redGPUContext.onResize = (resizeEvent) => {
+        const {width, height} = resizeEvent.screenRectObject;
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        scene.children.forEach((child, i) => {
+            const angle = (i / spriteCount) * Math.PI * 2;
+            child.x = Math.floor(centerX + Math.cos(angle) * radius);
+            child.y = Math.floor(centerY + Math.sin(angle) * radius);
+        });
+    };
+    redGPUContext.onResize({
+        target: redGPUContext,
+        screenRectObject: redGPUContext.screenRectObject,
+        pixelRectObject: redGPUContext.pixelRectObject
+    });
 
     const renderer = new RedGPU.Renderer(redGPUContext);
     const render = () => {
@@ -44,6 +65,12 @@ RedGPU.init(canvas, (redGPUContext) => {
     document.body.appendChild(errorMessage);
 });
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (scene, redGPUContext) => {
     const {
         setDebugButtons,

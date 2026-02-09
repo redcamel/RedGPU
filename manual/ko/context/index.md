@@ -49,9 +49,6 @@ RedGPU.init(
     (redGPUContext) => {
         // 초기화 성공 시 redGPUContext 인스턴스를 획득합니다.
         console.log('RedGPUContext 준비 완료:', redGPUContext);
-
-        // 예: 씬 생성 (context 주입 필요)
-        const scene = new RedGPU.Display.Scene();
     },
     (failReason) => {
         // 초기화 실패 시 (WebGPU 미지원 등) 처리
@@ -76,12 +73,19 @@ RedGPU.init(
 
 RedGPU는 캔버스 요소의 **표시 크기**(Layout Size) 변화를 실시간으로 감지합니다. 브라우저 창의 크기가 바뀌거나 CSS 레이아웃에 의해 캔버스가 차지하는 영역이 변경되면, 엔진은 이에 맞춰 렌더링 해상도를 자동으로 재설정합니다.
 
-이 과정에서 `onResize` 콜백을 정의하면, 크기 변경 시점에 맞춘 추가적인 로직을 실행할 수 있습니다.
+이 과정에서 `onResize` 콜백을 정의하면, 크기 변경 시점에 맞춘 추가적인 로직을 실행할 수 있습니다. 
+
+`onResize` 콜백은 `event` 객체를 인자로 받으며, 이 객체에는 `screenRectObject`(CSS 픽셀 단위)와 `pixelRectObject`(물리 픽셀 단위) 정보가 포함되어 있습니다.
 
 ```javascript
 // 크기 변경 시 호출될 콜백 정의
-redGPUContext.onResize = (width, height) => {
-    console.log(`캔버스 크기 변경: ${width}x${height}`);
+redGPUContext.onResize = (event) => {
+    const { width, height } = event.screenRectObject;
+    console.log(`캔버스 크기 변경 (CSS): ${width}x${height}`);
+    
+    const { width: pWidth, height: pHeight } = event.pixelRectObject;
+    console.log(`캔버스 실제 해상도: ${pWidth}x${pHeight}`);
+    
     // UI 재배치나 카메라 속성 조정 등을 수행합니다.
 };
 ```

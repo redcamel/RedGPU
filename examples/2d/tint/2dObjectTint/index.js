@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] 2D Object Tint 예제
+ * [EN] 2D Object Tint example
+ *
+ * [KO] 다양한 2D 객체(Sprite2D, SpriteSheet2D, TextField2D)에 틴트 색상을 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply tint colors to various 2D objects (Sprite2D, SpriteSheet2D, TextField2D).
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -35,8 +43,12 @@ RedGPU.init(
         textField2D.material.tint.setColorByRGBA(255, 128, 0, 1);
         scene.addChild(textField2D);
 
-        redGPUContext.onResize = () => {
-            const {width, height} = redGPUContext.screenRectObject;
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
 
             const gap = 220;
             const totalChildren = scene.children.length;
@@ -49,7 +61,11 @@ RedGPU.init(
                 child.y = startY;
             });
         };
-        redGPUContext.onResize();
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.screenRectObject,
+            pixelRectObject: redGPUContext.pixelRectObject
+        });
 
         renderTestPane(redGPUContext, scene);
 
@@ -67,6 +83,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const renderTestPane = async (redGPUContext, scene) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const pane = new Pane();

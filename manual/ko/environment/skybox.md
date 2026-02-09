@@ -5,24 +5,22 @@ order: 1
 <script setup>
 const skyboxGraph = `
     HDRSource["HDR Source (.hdr)"] -->|new| IBL["RedGPU.Resource.IBL"]
-    HDRSource -->|new| HDRTex["RedGPU.Resource.HDRTexture"]
     Images["6 Images"] -->|new| CubeTex["RedGPU.Resource.CubeTexture"]
 
     IBL -->|.environmentTexture| Skybox["RedGPU.Display.SkyBox"]
-    HDRTex --> Skybox
     CubeTex --> Skybox
 
     Skybox -->|view.skybox| View3D["RedGPU.Display.View3D"]
 
     %% 커스텀 클래스 적용
     class View3D,Skybox mermaid-main;
-    class IBL,HDRTex,CubeTex mermaid-component;
+    class IBL,CubeTex mermaid-component;
 `
 </script>
 
 # Skybox
 
-Skybox는 3D 공간의 무한한 배경을 표현하는 기술입니다. **SkyBox** 객체를 생성하여 카메라 뷰(**View3D**)의 `skybox` 속성에 할당하면 렌더링됩니다.
+Skybox는 3D 공간의 무한한 배경을 표현하는 기술입니다. **SkyBox** 객체를 생성하여 **View3D**의 `skybox` 속성에 할당하면 렌더링됩니다.
 
 ## 1. 기본 사용법
 
@@ -38,7 +36,7 @@ view.skybox = skybox;
 
 ## 2. 텍스처 생성 방법
 
-SkyBox에 적용할 텍스처를 생성하는 방법은 크게 세 가지로 나뉩니다. 가장 권장되는 방식인 **IBL** 부터 고전적인 **큐브맵** 순으로 살펴봅니다.
+SkyBox에 적용할 텍스처를 생성하는 방법은 크게 두 가지로 나뉩니다. 가장 권장되는 방식인 **IBL** 부터 고전적인 **큐브맵** 순으로 살펴봅니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="skyboxGraph" />
@@ -51,6 +49,10 @@ SkyBox에 적용할 텍스처를 생성하는 방법은 크게 세 가지로 나
 - **장점**: 배경과 완벽하게 일치하는 물리 기반 조명(Diffuse/Specular) 데이터를 함께 얻을 수 있습니다.
 - **활용**: 가장 사실적인 렌더링 결과를 얻기 위해 주로 사용되는 현대적인 방식입니다.
 
+::: info [HDR 파일 사용 가이드]
+RedGPU에서 한 장의 HDR(.hdr) 파노라마 이미지를 스카이박스로 사용하려면 반드시 `IBL`을 거쳐야 합니다. 스카이박스는 큐브 형태의 데이터를 요구하며, `IBL`이 2D 파노라마를 큐브맵으로 자동 변환해 줍니다.
+:::
+
 ```javascript
 // IBL 생성 (조명 데이터 + 배경 텍스처 생성됨)
 const ibl = new RedGPU.Resource.IBL(
@@ -62,22 +64,7 @@ const ibl = new RedGPU.Resource.IBL(
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 ```
 
-### 2.2 단일 HDR 이미지 (HDRTexture)
-
-한 장의 HDR 파노라마 이미지를 로드하여 `HDRTexture`를 생성하고 이를 Skybox에 직접 적용하는 방식입니다.
-
-- **장점**: 단 한 장의 이미지로 고품질의 배경을 구성할 수 있습니다.
-- **특징**: 단순히 배경으로만 사용되며, 씬 전체의 조명(IBL) 데이터까지 자동으로 계산하지는 않습니다.
-
-```javascript
-const hdrTexture = new RedGPU.Resource.HDRTexture(
-    redGPUContext, 
-    '/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
-);
-const skybox = new RedGPU.Display.SkyBox(redGPUContext, hdrTexture);
-```
-
-### 2.3 6장의 이미지 (CubeTexture)
+### 2.2 6장의 이미지 (CubeTexture)
 
 상, 하, 좌, 우, 앞, 뒤 6장의 일반 이미지(JPG, PNG 등)를 결합하여 `CubeTexture`를 생성하는 고전적인 방식입니다. 이미지 배열은 반드시 **px, nx, py, ny, pz, nz** 순서로 전달해야 합니다.
 
@@ -96,12 +83,12 @@ const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 
 ## 3. 구현 방식 비교
 
-| 구분 | IBL 활용 (권장) | HDRTexture | CubeTexture |
-| :--- | :--- | :--- | :--- |
-| **소스** | 1장의 HDR 이미지 | 1장의 HDR 이미지 | 6장의 이미지 |
-| **타입** | `CubeTexture` (변환됨) | `HDRTexture` | `CubeTexture` |
-| **조명 데이터** | O (자동 생성) | X | X |
-| **주요 용도** | 배경 + 물리 기반 조명 | 고품질 배경 | 단순 배경 |
+| 구분 | IBL 활용 (권장) | CubeTexture |
+| :--- | :--- | :--- |
+| **소스** | 1장의 HDR 이미지 | 6장의 이미지 |
+| **타입** | `IBLCubeTexture` | `CubeTexture` |
+| **조명 데이터** | O (자동 생성) | X |
+| **주요 용도** | 배경 + 물리 기반 조명 | 단순 배경 |
 
 ## 4. 라이브 데모
 

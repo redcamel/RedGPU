@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Indirect Draw 예제
+ * [EN] Indirect Draw example
+ *
+ * [KO] GPU 기반의 Indirect Draw 기능을 사용하여 렌더링 성능을 최적화하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to optimize rendering performance using GPU-based Indirect Draw.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -48,12 +56,26 @@ RedGPU.init(
         document.body.appendChild(errorDiv);
     }
 );
+
+/**
+ * [KO] 샘플 SpriteSheet3D를 생성합니다.
+ * [EN] Creates a sample SpriteSheet3D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createSampleSpriteSheet3D = (redGPUContext, scene) => {
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
     spriteSheet.z = -5
     scene.addChild(spriteSheet);
 }
+
+/**
+ * [KO] 샘플 Sprite3D를 생성합니다.
+ * [EN] Creates a sample Sprite3D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createSampleSprite3D = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -64,6 +86,14 @@ const createSampleSprite3D = (redGPUContext, scene) => {
     sprite3D.z = -3
     scene.addChild(sprite3D);
 }
+
+/**
+ * [KO] 샘플 파티클을 생성합니다.
+ * [EN] Creates a sample particle.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createSampleParticle = (redGPUContext, scene) => {
     const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../assets/particle/particle2.png');
     const testParticleWrap = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext),
@@ -76,6 +106,13 @@ const createSampleParticle = (redGPUContext, scene) => {
     testParticle.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
     return testParticleWrap
 }
+
+/**
+ * [KO] 샘플 텍스트를 생성합니다.
+ * [EN] Creates sample text.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createSampleText = (redGPUContext, scene) => {
     const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
     textField3D.text = textField3D.name.split(' ').join('<br/>');
@@ -84,6 +121,14 @@ const createSampleText = (redGPUContext, scene) => {
     textField3D.z = -2
     scene.addChild(textField3D);
 }
+
+/**
+ * [KO] 샘플 메시를 생성합니다.
+ * [EN] Creates a sample mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createSampleMesh = (redGPUContext, scene) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
@@ -93,6 +138,14 @@ const createSampleMesh = (redGPUContext, scene) => {
 
     return mesh;
 };
+
+/**
+ * [KO] 두 번째 샘플 메시를 생성합니다.
+ * [EN] Creates a second sample mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createSampleMesh2 = (redGPUContext, scene) => {
     const material = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
     const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
@@ -104,6 +157,14 @@ const createSampleMesh2 = (redGPUContext, scene) => {
     return mesh;
 };
 
+/**
+ * [KO] GLTF 모델들을 그리드 형태로 로드합니다.
+ * [EN] Loads GLTF models in a grid layout.
+ * @param {RedGPU.Display.View3D} view
+ * @param {string[]} urls
+ * @param {number} [gridSize=3]
+ * @param {number} [spacing=3]
+ */
 function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
     const {redGPUContext, scene} = view;
 
@@ -133,6 +194,12 @@ function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
     });
 }
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

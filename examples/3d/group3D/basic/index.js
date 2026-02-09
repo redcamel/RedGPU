@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Group3D Basic 예제
+ * [EN] Group3D Basic example
+ *
+ * [KO] Group3D를 사용하여 3D 객체들을 그룹화하고 계층 구조를 관리하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to group 3D objects and manage hierarchy using Group3D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -33,6 +41,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 루트 그룹을 생성합니다.
+ * [EN] Creates the root group.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Group3D}
+ */
 const createRootGroup = (redGPUContext, scene) => {
     const group = new RedGPU.Display.Group3D();
     group.x = 0;
@@ -43,6 +58,13 @@ const createRootGroup = (redGPUContext, scene) => {
     return group;
 };
 
+/**
+ * [KO] 부모 메시를 생성하여 그룹에 추가합니다.
+ * [EN] Creates a parent mesh and adds it to the group.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Group3D} rootGroup
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createParentMesh = (redGPUContext, rootGroup) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -58,6 +80,13 @@ const createParentMesh = (redGPUContext, rootGroup) => {
     return mesh;
 };
 
+/**
+ * [KO] 자식 메시를 생성하여 부모에 추가합니다.
+ * [EN] Creates a child mesh and adds it to the parent.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} parent
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createChildMesh = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.5);
@@ -70,6 +99,14 @@ const createChildMesh = (redGPUContext, parent) => {
     return mesh;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Group3D} rootGroup
+ * @param {RedGPU.Display.Mesh} parent
+ * @param {RedGPU.Display.Mesh} child
+ */
 const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const pane = new Pane();

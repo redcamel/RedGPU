@@ -2,12 +2,13 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
+import updateObject3DMatrix from "../../math/updateObject3DMatrix";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
 
 const PER_PI = Math.PI / 180;
-const ROTATION_THRESHOLD = 0.01;
-const DISTANCE_THRESHOLD = 0.01;
+const ROTATION_THRESHOLD = 0.0001;
+const DISTANCE_THRESHOLD = 0.0001;
 const tempMatrix = mat4.create();
 
 /**
@@ -17,9 +18,9 @@ const tempMatrix = mat4.create();
  * [KO] 제품 모델링 뷰어나 3D 객체 관찰용으로 주로 사용되며, 중심점을 기준으로 줌, 회전, 팬(Pan) 동작을 통해 대상을 다각도에서 살펴볼 수 있습니다.
  * [EN] Primarily used for product modeling viewers or observing 3D objects, allowing the user to inspect the target from various angles via zoom, rotation, and pan operations around a center point.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+ * const controller = new RedGPU.OrbitController(redGPUContext);
  * controller.centerX = 0;
  * controller.centerY = 0;
  * controller.centerZ = 0;
@@ -27,7 +28,7 @@ const tempMatrix = mat4.create();
  * controller.tilt = -30;
  * controller.pan = 45;
  * ```
- * <iframe src="/RedGPU/examples/3d/controller/orbitController/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/controller/orbitController/" style="width:100%; height:500px;"></iframe>
  * @category Controller
  */
 class OrbitController extends AController {
@@ -37,15 +38,15 @@ class OrbitController extends AController {
 	#centerZ = 0;
 	// ==================== 거리(줌) 관련 ====================
 	#distance = 15;
-	#speedDistance = 2;
-	#distanceInterpolation = 0.1;
+	#speedDistance = 1.5;
+	#distanceInterpolation = 0.02;
     #minDistance = 0.1;
     #maxDistance = Infinity;
 	// ==================== 회전(팬/틸트) 관련 ====================
 	#pan = 0;
 	#tilt = -35;
 	#speedRotation = 3;
-	#rotationInterpolation = 0.1;
+	#rotationInterpolation = 0.02;
 	#minTilt = -90;
 	#maxTilt = 90;
 	// ==================== 애니메이션 상태 ====================
@@ -54,6 +55,19 @@ class OrbitController extends AController {
 	#currentDistance = 0;
 
 	// ==================== 라이프사이클 ====================
+	/**
+	 * [KO] OrbitController 인스턴스를 생성합니다.
+	 * [EN] Creates an instance of OrbitController.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * const controller = new RedGPU.OrbitController(redGPUContext);
+	 * ```
+	 *
+	 * @param redGPUContext -
+	 * [KO] RedGPUContext 인스턴스
+	 * [EN] RedGPUContext instance
+	 */
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext,
 			{
@@ -73,8 +87,10 @@ class OrbitController extends AController {
                     if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
 				},
 			}
-		)
-		;
+		);
+		this.#currentPan = this.#pan;
+		this.#currentTilt = this.#tilt;
+		this.#currentDistance = this.#distance;
 	}
 
 	// ==================== 센터 좌표 Getter/Setter ====================
@@ -427,11 +443,23 @@ class OrbitController extends AController {
 		this.#maxTilt = value;
 	}
 
+	#calcTargetMeshMatrix(mesh: Mesh, view: View3D){
+
+		updateObject3DMatrix(mesh, view);
+		let len = mesh.children.length;
+		for (let i = 0; i < len; i++) {
+			const child = mesh.children[i];
+			if (child instanceof Mesh) {
+				this.#calcTargetMeshMatrix(child, view);
+			}
+
+		}
+	}
 	/**
 	 * [KO] 메쉬가 화면 중앙에 꽉 차도록 카메라 거리를 자동으로 조절합니다.
 	 * [EN] Automatically adjusts the camera distance so that the mesh fills the screen center.
 	 *
-	 * * ### Example
+	 * ### Example
 	 * ```typescript
 	 * controller.fitMeshToScreenCenter(mesh, view);
 	 * ```
@@ -445,7 +473,7 @@ class OrbitController extends AController {
 	 */
 	fitMeshToScreenCenter(mesh: Mesh, view: View3D): void {
 
-		this.#calcTargetMeshMatrix(mesh, view);
+		this.#calcTargetMeshMatrix(mesh,view)
 		const bounds = mesh.combinedBoundingAABB;
 
 		// 데이터 유효성 검사 (0,0,0 반환 방지)
@@ -512,73 +540,59 @@ class OrbitController extends AController {
 	 * [EN] Current time (ms)
 	 */
 	update(view: View3D, time: number): void {
-		super.update(view, time, () => {
-			this.#updateAnimation();
+		super.update(view, time, (deltaTime) => {
+			this.#updateAnimation(deltaTime);
 		});
-	}
-
-	#calcTargetMeshMatrix(mesh: Mesh, view: View3D) {
-		//
-
-		const localMatrix = mat4.create();
-		//
-		mat4.identity(localMatrix)
-		mat4.translate(localMatrix, localMatrix, [mesh.x, mesh.y, mesh.z]);
-		mat4.rotateX(localMatrix, localMatrix, mesh.rotationX * Math.PI / 180);
-		mat4.rotateY(localMatrix, localMatrix, mesh.rotationY * Math.PI / 180);
-		mat4.rotateZ(localMatrix, localMatrix, mesh.rotationZ * Math.PI / 180);
-		mat4.scale(localMatrix, localMatrix, [mesh.scaleX, mesh.scaleY, mesh.scaleZ]);
-		mat4.copy(mesh.localMatrix, localMatrix);
-		//
-		if (mesh.parent) {
-			mat4.multiply(mesh.modelMatrix, mesh.parent?.modelMatrix, localMatrix);
-		} else {
-			mat4.copy(mesh.modelMatrix, localMatrix);
-		}
-
-		//
-		let i = 0;
-		let len = mesh.children.length;
-		for (let i = 0; i < len; i++) {
-			const child = mesh.children[i];
-			if (child instanceof Mesh) {
-				this.#calcTargetMeshMatrix(child, view);
-			}
-
-		}
-
 	}
 
 	/**
 	 * [KO] 카메라 애니메이션을 업데이트합니다.
 	 * [EN] Updates camera animation.
 	 *
+	 * @param deltaTime -
+	 * [KO] 초 단위 경과 시간
+	 * [EN] Elapsed time in seconds
 	 * @private
 	 */
-	#updateAnimation(): void {
+	#updateAnimation(deltaTime: number): void {
 		// 틸트 범위 제한
 		if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
 		if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
 		const {camera} = this;
-		// 현재 값을 목표값으로 부드럽게 보간
-		const panDelta = this.#pan - this.#currentPan;
+
+		// 팬(Pan) 보간 - 지수적 감쇄 및 최단 경로(Shortest Path) 적용
+		let panDelta = (this.#pan - this.#currentPan) % 360;
+		if (panDelta > 180) panDelta -= 360;
+		if (panDelta < -180) panDelta += 360;
+
 		if (Math.abs(panDelta) > ROTATION_THRESHOLD) {
-			this.#currentPan += panDelta * this.#rotationInterpolation;
+			this.#currentPan += panDelta * (1 - Math.pow(this.#rotationInterpolation, deltaTime));
+		} else {
+			this.#currentPan = this.#pan;
 		}
-		// 틸트 보간
+
+		// 틸트(Tilt) 보간
 		const tiltDelta = this.#tilt - this.#currentTilt;
 		if (Math.abs(tiltDelta) > ROTATION_THRESHOLD) {
-			this.#currentTilt += tiltDelta * this.#rotationInterpolation;
+			this.#currentTilt += tiltDelta * (1 - Math.pow(this.#rotationInterpolation, deltaTime));
+		} else {
+			this.#currentTilt = this.#tilt;
 		}
+
 		// 거리(줌) 범위 및 보간
 		if (this.#distance < camera.nearClipping) this.#distance = camera.nearClipping;
-        if (this.#distance < this.#minDistance) this.#distance = this.#minDistance;
-        if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
+		if (this.#distance < this.#minDistance) this.#distance = this.#minDistance;
+		if (this.#distance > this.#maxDistance) this.#distance = this.#maxDistance;
+
 		const distanceDelta = this.#distance - this.#currentDistance;
 		if (Math.abs(distanceDelta) > DISTANCE_THRESHOLD) {
-			this.#currentDistance += distanceDelta * this.#distanceInterpolation;
+			this.#currentDistance += distanceDelta * (1 - Math.pow(this.#distanceInterpolation, deltaTime));
+		} else {
+			this.#currentDistance = this.#distance;
 		}
+
 		if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
+
 		// 카메라 위치 계산
 		mat4.identity(tempMatrix);
 		mat4.translate(tempMatrix, tempMatrix, [this.#centerX, this.#centerY, this.#centerZ]);

@@ -5,17 +5,17 @@ order: 3
 
 # Instancing Mesh LOD
 
-This section covers how to apply LOD to **Instancing Mesh**, which renders massive amounts of objects.
-LOD for `InstancingMesh` calculates the distance for each instance in parallel inside the **GPU Shader**, so there is almost no CPU overhead even when applying LOD to tens of thousands of objects.
+This section covers how to apply LOD to **Instancing Mesh**, which is used for rendering massive amounts of objects.
+LOD for `InstancingMesh` calculates the distance for each instance in parallel within the **GPU Shader**. This means there is virtually no CPU overhead, even when applying LOD to tens of thousands of objects.
 
 ## 1. How it Works
 
-When LOD is registered to an `InstancingMesh`, **Sub Draw Calls** equal to the number of LODs may be created internally.
-However, through rendering pipeline optimization, the GPU determines the camera distance of each instance and references the appropriate geometry buffer for drawing.
+When LOD is registered to an `InstancingMesh`, **Sub-Draw Calls** equal to the number of LOD levels may be created internally.
+However, through rendering pipeline optimization, the GPU determines the camera distance for each instance and references the appropriate geometry buffer for rendering.
 
 ## 2. Usage
 
-Use `LODManager.addLOD` just like a regular `Mesh`.
+Use `LODManager.addLOD` just as you would for a regular `Mesh`.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -29,16 +29,16 @@ const instancedMesh = new RedGPU.Display.InstancingMesh(
 );
 
 // 2. Add LOD Levels
-// The GPU calculates the distance for each instance and applies the geometry below.
-instancedMesh.LODManager.addLOD(20, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8));
-instancedMesh.LODManager.addLOD(40, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));
+// The GPU calculates the distance for each instance and applies the geometry accordingly.
+instancedMesh.LODManager.addLOD(30, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8));
+instancedMesh.LODManager.addLOD(60, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));
 
 scene.addChild(instancedMesh);
 ```
 
-## 3. Live Example: 2,000 LOD Cubes
+## 3. Live Example: 2,000 LOD Objects
 
-Observe how 2,000 objects change shape depending on their distance from the camera. If you zoom in/out, distant objects are displayed as **Boxes**, and close objects as **Spheres**.
+Observe how 2,000 objects change their shape depending on their distance from the camera. If you zoom in or out, distant objects appear as **Boxes**, while close objects appear as **Spheres**.
 
 <ClientOnly>
 <CodePen title="RedGPU - Instancing LOD Example" slugHash="lod-instancing">
@@ -66,7 +66,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Create InstancingMesh
-    // Base(0~30): Sphere High (32x32)
+    // Base detail (distance 0~30): Sphere High (32x32)
     const maxCount = 2000;
     const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32);
     
@@ -84,13 +84,13 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.addChild(mesh);
 
     // 2. Add LOD Levels
-    // 30 or more: Sphere Low (8x8)
+    // Level 1 (distance 30 or more): Sphere Low (8x8)
     mesh.LODManager.addLOD(30, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8));
     
-    // 60 or more: Box
+    // Level 2 (distance 60 or more): Box
     mesh.LODManager.addLOD(60, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));
 
-    // 3. Random placement of instances
+    // 3. Randomly place instances
     const range = 100;
     for (let i = 0; i < maxCount; i++) {
         const instance = mesh.instanceChildren[i];
@@ -110,10 +110,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 5. Render
+    // 5. Render Loop
     const renderer = new RedGPU.Renderer(redGPUContext);
     renderer.start(redGPUContext, () => {
-        // Full rotation
+        // Full scene rotation
         mesh.rotationY += 0.002;
     });
 });
@@ -123,5 +123,5 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Key Summary
 
-- **GPU Acceleration**: Since the GPU determines the distance without CPU calculation, there is almost no performance degradation even with massive amounts of objects.
-- **Memory Saving**: Using low-resolution models for distant objects dramatically reduces vertex processing costs.
+- **GPU Acceleration**: Since the GPU determines distances without CPU calculation, there is almost no performance degradation even with a massive number of objects.
+- **Memory Optimization**: Using low-resolution models for distant objects dramatically reduces vertex processing costs.

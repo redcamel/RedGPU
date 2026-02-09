@@ -4,8 +4,8 @@ import DefineForFragment from "../../defineProperty/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl'
+import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
@@ -118,7 +118,7 @@ interface PhongMaterial {
      * [KO] SSR(스크린 스페이스 리플렉션) 사용 여부
      * [EN] Whether to use SSR (Screen Space Reflection)
      */
-    useSSR: number
+    useSSR: number;
 }
 
 /**
@@ -143,85 +143,91 @@ interface PhongMaterial {
  *
  * @category Material
  */
-class PhongMaterial extends ABitmapBaseMaterial {
-    /**
-     * [KO] 디스플레이스먼트(변위) 텍스처
-     * [EN] Displacement texture
-     */
-    #displacementTexture: BitmapTexture
-    /**
-     * [KO] 디스플레이스먼트(변위) 스케일(기본값: 1)
-     * [EN] Displacement scale (default: 1)
-     */
-    #displacementScale: number = 1
+class PhongMaterial extends AUVTransformBaseMaterial {
+	/**
+	 * [KO] 디스플레이스먼트(변위) 텍스처
+	 * [EN] Displacement texture
+	 */
+	#displacementTexture: BitmapTexture
+	/**
+	 * [KO] 디스플레이스먼트(변위) 스케일 (기본값: 1)
+	 * [EN] Displacement scale (default: 1)
+	 */
+	#displacementScale: number = 1
 
-    /**
-     * [KO] PhongMaterial 생성자
-     * [EN] PhongMaterial constructor
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param color -
-     * [KO] 기본 색상(HEX 문자열, 기본값: '#fff')
-     * [EN] Base color (HEX string, default: '#fff')
-     * @param name -
-     * [KO] 머티리얼 이름(옵션)
-     * [EN] Material name (optional)
-     */
-    constructor(redGPUContext: RedGPUContext, color: string = '#fff', name?: string) {
-        super(
-            redGPUContext,
-            'PHONG_MATERIAL',
-            SHADER_INFO,
-            2
-        )
-        if (name) this.name = name
-        this.initGPURenderInfos()
-        this.color.setColorByHEX(color)
-        this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
-        this.specularColor.setColorByHEX(this.specularColor.hex)
-    }
+	/**
+	 * [KO] PhongMaterial 생성자
+	 * [EN] PhongMaterial constructor
+	 * @param redGPUContext -
+	 * [KO] RedGPUContext 인스턴스
+	 * [EN] RedGPUContext instance
+	 * @param color -
+	 * [KO] 기본 색상 (HEX 문자열, 기본값: '#fff')
+	 * [EN] Base color (HEX string, default: '#fff')
+	 * @param name -
+	 * [KO] 머티리얼 이름 (옵션)
+	 * [EN] Material name (optional)
+	 */
+	constructor(redGPUContext: RedGPUContext, color: string = '#fff', name?: string) {
+		super(
+			redGPUContext,
+			'PHONG_MATERIAL',
+			SHADER_INFO,
+			2
+		)
+		if (name) this.name = name
+		this.initGPURenderInfos()
+		this.color.setColorByHEX(color)
+		this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
+		this.specularColor.setColorByHEX(this.specularColor.hex)
+	}
 
-    /**
-     * [KO] 디스플레이스먼트(변위) 스케일 반환
-     * [EN] Returns displacement scale
-     */
-    get displacementScale(): number {
-        return this.#displacementScale;
-    }
+	/**
+	 * [KO] 디스플레이스먼트(변위) 스케일을 반환합니다.
+	 * [EN] Returns the displacement scale.
+	 * @returns
+	 * [KO] 스케일 값
+	 * [EN] Scale value
+	 */
+	get displacementScale(): number {
+		return this.#displacementScale;
+	}
 
-    /**
-     * [KO] 디스플레이스먼트(변위) 스케일 설정
-     * [EN] Sets displacement scale
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
-    set displacementScale(value: number) {
-        this.#displacementScale = value;
-    }
+	/**
+	 * [KO] 디스플레이스먼트(변위) 스케일을 설정합니다.
+	 * [EN] Sets the displacement scale.
+	 * @param value -
+	 * [KO] 스케일 값
+	 * [EN] Scale value
+	 */
+	set displacementScale(value: number) {
+		this.#displacementScale = value;
+	}
 
-    /**
-     * [KO] 디스플레이스먼트(변위) 텍스처 반환
-     * [EN] Returns displacement texture
-     */
-    get displacementTexture(): BitmapTexture {
-        return this.#displacementTexture;
-    }
+	/**
+	 * [KO] 디스플레이스먼트(변위) 텍스처를 반환합니다.
+	 * [EN] Returns the displacement texture.
+	 * @returns
+	 * [KO] BitmapTexture
+	 * [EN] BitmapTexture
+	 */
+	get displacementTexture(): BitmapTexture {
+		return this.#displacementTexture;
+	}
 
-    /**
-     * [KO] 디스플레이스먼트(변위) 텍스처 설정 및 파이프라인 갱신
-     * [EN] Sets displacement texture and updates pipeline
-     * @param value -
-     * [KO] BitmapTexture
-     * [EN] BitmapTexture
-     */
-    set displacementTexture(value: BitmapTexture) {
-        const prevTexture: BitmapTexture = this.#displacementTexture
-        this.#displacementTexture = value;
-        this.updateTexture(prevTexture, value)
-        this.dirtyPipeline = true
-    }
+	/**
+	 * [KO] 디스플레이스먼트(변위) 텍스처를 설정하고 파이프라인을 갱신합니다.
+	 * [EN] Sets the displacement texture and updates the pipeline.
+	 * @param value -
+	 * [KO] BitmapTexture
+	 * [EN] BitmapTexture
+	 */
+	set displacementTexture(value: BitmapTexture) {
+		const prevTexture: BitmapTexture = this.#displacementTexture
+		this.#displacementTexture = value;
+		this.updateTexture(prevTexture, value)
+		this.dirtyPipeline = true
+	}
 }
 
 DefineForFragment.defineByPreset(PhongMaterial, [

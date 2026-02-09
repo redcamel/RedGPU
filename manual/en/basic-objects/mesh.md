@@ -12,7 +12,7 @@ const meshGraph = `
 
 # Mesh
 
-**Mesh** is the most basic object unit visually represented in RedGPU's 3D space. **Geometry**, corresponding to the skeleton, and **Material**, corresponding to the skin, are combined to form a complete object.
+**Mesh** is the most basic object unit visually represented in RedGPU's 3D space. **Geometry**, which acts as the skeleton, and **Material**, which acts as the skin, are combined to form a complete object.
 
 ## 1. Components of a Mesh
 
@@ -29,7 +29,7 @@ A **Mesh** cannot exist independently and must combine the following two element
 
 **Geometry** is a collection of numerous **Vertex** data points in 3D space.
 
-RedGPU provides basic shapes called **Primitives** to allow quick **space configuration or visualization testing** before loading external model files. Using these allows you to design 3D structures immediately without complex data calculations.
+RedGPU provides basic shapes called **Primitives** to allow for quick **space configuration or visualization testing** before loading external model files. Using these allows you to design 3D structures immediately without complex data calculations.
 
 | Type | Description |
 | :--- | :--- |
@@ -41,7 +41,7 @@ RedGPU provides basic shapes called **Primitives** to allow quick **space config
 
 ## 3. Defining the Surface: Material
 
-**Material** is a property that determines how an object's surface looks. It can define not only simple colors but also textures, reflectance, transparency, etc.
+**Material** is a property that determines how an object's surface looks. It can define not only simple colors but also textures, reflectance, transparency, and more.
 
 | Type | Features | Main Usage |
 | :--- | :--- | :--- |
@@ -62,7 +62,7 @@ blueAlphaMat.alpha = 0.5;
 ```
 
 ::: info [Various Materials]
-Use **BitmapMaterial** to apply images, **PhongMaterial** to express light and shadow, etc. These are covered in detail in the following chapters.
+Use **BitmapMaterial** to apply images, **PhongMaterial** to express light and shadow, and so on. These are covered in detail in the following chapters.
 :::
 
 ## 4. Controlling the Mesh (Transformation)
@@ -71,7 +71,7 @@ The created **Mesh** object has properties that can be freely transformed within
 
 - **Position** (`x`, `y`, `z`): Specifies the position in space.
 - **Rotation** (`rotationX`, `rotationY`, `rotationZ`): Adjusts the rotation value of the object. (Unit: Degree)
-- **Scale** (`scaleX`, `scaleY`, `scaleZ`): Adjusts the size of the object by a multiple.
+- **Scale** (`scaleX`, `scaleY`, `scaleZ`): Adjusts the size of the object by a multiplier.
 
 ::: tip [Pivot Guide]
 All movement, rotation, and scaling operations are based on the object's **Pivot** point. For primitives, the geometric center of each shape becomes the reference point.
@@ -192,8 +192,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Key Summary
 
-- **Mesh** is the basic unit of a 3D object combining **Geometry** and **Material**.
-- **Primitive** is standard shape data for visualization testing and structural design.
+- **Mesh** is the basic unit of a 3D object, combining **Geometry** and **Material**.
+- **Primitive** refers to standard shape data for visualization testing and structural design.
 - **ColorMaterial** is lightweight and suitable for checking colors without lighting.
 - All transformations are based on the object's **Pivot** point.
 

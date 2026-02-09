@@ -36,8 +36,8 @@ const setRedGPUTest_pane = (pane, redGPUContext, openYn = false) => {
             `pixelRectArray : ${redGPUContext.sizeManager.pixelRectArray}`,
             `pixelRectObject : ${[
                 '{',
-                ` x : ${redGPUContext.sizeManager.pixelRectObject.x}, y : ${redGPUContext.sizeManager.pixelRectObject.y},`,
-                ` width : ${redGPUContext.sizeManager.pixelRectObject.width}, height : ${redGPUContext.sizeManager.pixelRectObject.height}`,
+                ` x : ${redGPUContext.pixelRectObject.x}, y : ${redGPUContext.pixelRectObject.y},`,
+                ` width : ${redGPUContext.pixelRectObject.width}, height : ${redGPUContext.pixelRectObject.height}`,
                 '}',
             ].join('\n')}`,
             `parentDomRect : ${[

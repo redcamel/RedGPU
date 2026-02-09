@@ -5,7 +5,7 @@ order: 2
 
 # General Effects
 
-Manages various standard effects provided by RedGPU, such as radial blur and grayscale.
+RedGPU provides various standard effects, such as radial blur and grayscale, managed through the `PostEffectManager`.
 
 ::: tip [Learning Guide]
 Technically, tone mapping is executed at the very first stage of the overall post-processing, but in this chapter, we first cover **General Effects** where visual changes can be experienced most intuitively.
@@ -23,7 +23,7 @@ view.postEffectManager.addEffect(radialBlur);
 ## 2. Key Effect Examples
 
 ### 2.1 Radial Blur
-Creates a sense of speed or concentration effects that spread outward from a center point.
+Creates a sense of speed or concentration effects that radiate outward from a center point.
 
 <ClientOnly>
 <CodePen title="RedGPU PostEffect - RadialBlur" slugHash="posteffect-radialblur">
@@ -121,26 +121,26 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 3. Full Support List
 
-Full list of all general effects provided by RedGPU. All effects are located under the `RedGPU.PostEffect` namespace.
+Here is the complete list of all general effects provided by RedGPU. All effects are located under the `RedGPU.PostEffect` namespace.
 
 | Category | Class Name | Description |
 | :--- | :--- | :--- |
-| **Blur** | `Blur`, `GaussianBlur` | Gaussian blur (Most common blur effect) |
-| | `BlurX`, `BlurY` | Unidirectional (horizontal/vertical) blur |
+| **Blur** | `Blur`, `GaussianBlur` | Gaussian blur (the most common blur effect) |
+| | `BlurX`, `BlurY` | Unidirectional (horizontal or vertical) blur |
 | | `DirectionalBlur` | Blur effect in a specified angle direction |
 | | `RadialBlur` | Blur effect spreading outward from the center in a circle |
 | | `ZoomBlur` | Blur effect expanding outward from the center |
 | **Adjustments** | `BrightnessContrast` | Brightness and contrast adjustment |
 | | `HueSaturation` | Hue and saturation adjustment |
-| | `ColorBalance` | Color balance (midtones, shadows, highlights) adjustment |
+| | `ColorBalance` | Color balance adjustment (midtones, shadows, highlights) |
 | | `ColorTemperatureTint` | Color temperature and tint adjustment |
-| | `Vibrance` | Vibrance (adjust mainly unsaturated parts) |
-| | `Grayscale` | Converts image to black and white |
+| | `Vibrance` | Vibrance adjustment (affects mainly unsaturated parts) |
+| | `Grayscale` | Converts the image to black and white |
 | | `Invert` | Color inversion |
 | | `Threshold` | Binarization based on a threshold |
 | **Lens** | `OldBloom` | Classic light bleeding effect |
-| | `DOF` | Depth of field (blur areas out of focus) |
-| | `Vignetting` | Effect of darkening the outer edges of the screen |
+| | `DOF` | Depth of Field (blurs areas out of focus) |
+| | `Vignetting` | Darkens the outer edges of the screen |
 | | `ChromaticAberration` | Recreates lens chromatic aberration |
 | | `LensDistortion` | Lens distortion effect |
 | **Atmospheric** | `Fog` | Distance-based fog effect |
@@ -150,14 +150,14 @@ Full list of all general effects provided by RedGPU. All effects are located und
 | | `Convolution` | Kernel-based filter (supports Sharpen, Edge, Emboss, etc.) |
 
 ::: info [Check Live]
-All the effects above can be checked in real-time demos in the **PostEffect** category of the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/#postEffect).
+All the effects listed above can be checked in real-time demos in the **PostEffect** category of the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/#postEffect).
 :::
 
 ## Key Summary
 - You can layer effects in any order using `addEffect()`.
-- All effect objects require `redGPUContext` upon creation.
+- All effect objects require a `redGPUContext` upon creation.
 - Actual rendering is performed immediately after the tone mapping stage.
 
 ## Next Learning Recommendations
-- **[Tone Mapping](./tone-mapping)**
-- **[Built-in Effects](./builtin-effects)**
+- **[Tone Mapping](./tone-mapping.md)**
+- **[Built-in Effects](./builtin-effects.md)**

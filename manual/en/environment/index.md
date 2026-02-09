@@ -5,7 +5,7 @@ order: 6
 
 # Environment
 
-Now that shadows have been applied and a sense of three-dimensionality has been formed, it's time to add infinite backgrounds and photorealistic light information. RedGPU provides Skybox and IBL (Image-Based Lighting) features to maximize the realism of 3D scenes.
+Now that shadows have been applied and a sense of three-dimensionality has been formed, it's time to add infinite backgrounds and photorealistic light information. RedGPU provides Skybox and IBL (Image-Based Lighting) features, along with Tone Mapping to fine-tune the final color, to maximize the realism of 3D scenes.
 
 ## Main Learning Topics
 

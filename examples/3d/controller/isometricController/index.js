@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Isometric Controller 예제
+ * [EN] Isometric Controller example
+ *
+ * [KO] 아이소메트릭 뷰(직교 투영)를 제공하는 카메라 컨트롤러의 사용법을 보여줍니다.
+ * [EN] Demonstrates how to use a camera controller that provides an isometric view (orthographic projection).
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -67,6 +75,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Camera.IsometricController} controller
+ * @param {RedGPU.Display.Mesh} targetMesh
+ */
 const renderTestPane = async (redGPUContext, controller, targetMesh) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {
@@ -105,7 +120,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 
         // 컨트롤러 동기화 유틸리티
         const syncControllers = (source, target) => {
-            [].forEach(prop => target[prop] = source[prop]);
+            ['zoom', 'viewHeight'].forEach(prop => target[prop] = source[prop]);
         };
 
         // 테스트 모드 핸들러 맵
@@ -149,28 +164,28 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 
     // 카메라 설정 폴더
     const cameraFolder = pane.addFolder({
-        title: 'Camera Settings',
+        title: 'Movement Settings',
     });
     cameraFolder.addBinding(controller, 'moveSpeed', {
-        min: 0.01,
-        max: 2,
-        step: 0.01
+        min: 1,
+        max: 200,
+        step: 1
     });
 
     cameraFolder.addBinding(controller, 'moveSpeedInterpolation', {
-        min: 0.01,
+        min: 0.0001,
         max: 1,
-        step: 0.01
+        step: 0.0001
     });
     cameraFolder.addBinding(controller, 'mouseMoveSpeed', {
-        min: 0.01,
-        max: 1,
-        step: 0.01
+        min: 0.1,
+        max: 10,
+        step: 0.1
     });
     cameraFolder.addBinding(controller, 'mouseMoveSpeedInterpolation', {
-        min: 0.01,
+        min: 0.0001,
         max: 1,
-        step: 0.01
+        step: 0.0001
     });
 
     // 줌 설정 폴더
@@ -179,20 +194,20 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
     });
 
     zoomFolder.addBinding(controller, 'zoom', {
-        min: controller.minZoom,
-        max: controller.maxZoom,
+        min: 0.1,
+        max: 10,
         step: 0.1,
     });
 
     zoomFolder.addBinding(controller, 'zoomInterpolation', {
-        min: 0.01,
+        min: 0.0001,
         max: 1,
-        step: 0.01,
+        step: 0.0001,
     });
 
     zoomFolder.addBinding(controller, 'speedZoom', {
         min: 0.01,
-        max: 0.5,
+        max: 1.0,
         step: 0.01,
     });
 
@@ -204,7 +219,7 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
 
     zoomFolder.addBinding(controller, 'maxZoom', {
         min: 1,
-        max: 10,
+        max: 20,
         step: 0.1,
     });
 
@@ -214,15 +229,15 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
     });
 
     viewFolder.addBinding(controller, 'viewHeight', {
-        min: 5,
-        max: 100,
+        min: 1,
+        max: 500,
         step: 1,
     });
 
     viewFolder.addBinding(controller, 'viewHeightInterpolation', {
-        min: 0.01,
+        min: 0.0001,
         max: 1,
-        step: 0.01,
+        step: 0.0001,
     });
 
     // 타겟 위치 폴더
@@ -230,15 +245,15 @@ const renderTestPane = async (redGPUContext, controller, targetMesh) => {
         title: 'Target Position',
     });
 
-    targetFolder.addBinding(controller, 'x', {
+    targetFolder.addBinding(controller, 'targetX', {
         readonly: true,
     })
 
-    targetFolder.addBinding(controller, 'y', {
+    targetFolder.addBinding(controller, 'targetY', {
         readonly: true,
     })
 
-    targetFolder.addBinding(controller, 'z', {
+    targetFolder.addBinding(controller, 'targetZ', {
         readonly: true,
     })
     const moveFolder = pane.addFolder({

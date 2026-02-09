@@ -32,7 +32,7 @@ const updateMeshDirtyPipeline = (
     const {vertexUniformInfo} = mesh.gpuRenderInfo
     const {members} = vertexUniformInfo
     for (const k in members) {
-        if (k !== 'pickingId') mesh[k] = mesh[k]
+        if (k !== 'pickingId' && k !== 'pixelSize') mesh[k] = mesh[k]
     }
     if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
         mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)

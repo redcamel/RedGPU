@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Voronoi Noise (Basic) 예제
+ * [EN] Voronoi Noise (Basic) example
+ *
+ * [KO] 보로노이 노이즈 텍스처를 생성하고 다양한 패턴과 파라미터를 조절하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a Voronoi noise texture and adjust various patterns and parameters.
+ */
+
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 
@@ -49,6 +57,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Resource.VoronoiTexture} targetNoiseTexture
+ * @param {object} testData
+ */
 const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

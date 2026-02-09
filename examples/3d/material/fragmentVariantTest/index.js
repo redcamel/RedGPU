@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Fragment Variant Test 예제
+ * [EN] Fragment Variant Test example
+ *
+ * [KO] 셰이더 베리언트 생성 및 관리 기능을 테스트합니다.
+ * [EN] Tests shader variant generation and management features.
+ */
+
 // ===== Global Variables =====
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);

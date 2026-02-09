@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Sprite2D Basic 예제
+ * [EN] Sprite2D Basic example
+ *
+ * [KO] Sprite2D의 기본 사용법과 속성 제어 방법을 보여줍니다.
+ * [EN] Demonstrates the basic usage and property control of Sprite2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -15,9 +23,22 @@ RedGPU.init(
 
         const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
         sprite2D.setSize(100, 100);
-        sprite2D.x = view.screenRectObject.width / 2;
-        sprite2D.y = view.screenRectObject.height / 2;
         scene.addChild(sprite2D);
+
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
+            sprite2D.x = width / 2;
+            sprite2D.y = height / 2;
+        };
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.screenRectObject,
+            pixelRectObject: redGPUContext.pixelRectObject
+        });
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = (time) => {
@@ -35,6 +56,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} sprite2D
+ */
 const renderTestPane = async (redGPUContext, sprite2D) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

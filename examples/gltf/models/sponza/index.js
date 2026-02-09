@@ -13,7 +13,10 @@ RedGPU.init(
         // Setup camera or controller
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
 
+        controller.moveSpeed = 20
         controller.tilt = 15
+        controller.y = 1
+        controller.pan = 90
 
         // Create scene and view
         const scene = new RedGPU.Display.Scene();
@@ -66,4 +69,3 @@ const renderTestPane = async (redGPUContext, targetView) => {
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);
 };
-

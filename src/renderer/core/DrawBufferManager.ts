@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
-import formatBytes from "../../utils/math/formatBytes";
+import formatBytes from "../../utils/formatBytes";
 
 /**
  * WebGPU 드로우 커맨드를 효율적으로 관리하는 매니저 클래스

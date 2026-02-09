@@ -4,11 +4,11 @@ import OrthographicCamera from "../../../camera/camera/OrthographicCamera";
 import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import IsometricController from "../../../camera/controller/IsometricController";
 import AController from "../../../camera/core/AController";
-import RedGPUContextSizeManager from "../../../context/core/RedGPUContextSizeManager";
+import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "../../../context/core/RedGPUContextSizeManager";
 import RedGPUContext from "../../../context/RedGPUContext";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import computeViewFrustumPlanes from "../../../utils/math/computeViewFrustumPlanes";
+import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 
 /**
  * [KO] View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
@@ -27,9 +27,9 @@ import computeViewFrustumPlanes from "../../../utils/math/computeViewFrustumPlan
 class ViewTransform {
     /**
      * 뷰 크기 변경 시 호출되는 콜백입니다.
-     * @type {((width: number, height: number) => void) | null}
+     * @type {((event: RedResizeEvent<ViewTransform>) => void) | null}
      */
-    onResize: ((width: number, height: number) => void) | null = null;
+    onResize: ((event: RedResizeEvent<ViewTransform>) => void) | null = null;
     /**
      * 연결된 RedGPUContext 인스턴스(읽기 전용).
      * @private
@@ -131,7 +131,7 @@ class ViewTransform {
      * @param {PerspectiveCamera | OrthographicCamera | AController | Camera2D} value
      */
     set camera(value: PerspectiveCamera | OrthographicCamera | AController | Camera2D) {
-        if (!(value instanceof PerspectiveCamera || value instanceof Camera2D) && !(value instanceof Camera2D) && !(value instanceof OrthographicCamera) && !(value instanceof AController)) consoleAndThrowError('allow PerspectiveCamera or OrthographicCamera or AController instance')
+        if (!(value instanceof PerspectiveCamera) && !(value instanceof Camera2D) && !(value instanceof OrthographicCamera) && !(value instanceof AController)) consoleAndThrowError('allow PerspectiveCamera or OrthographicCamera or AController instance')
         this.#camera = value;
     }
 
@@ -306,7 +306,6 @@ class ViewTransform {
                     1
                 ]
             );
-            mat4.identity(this.rawCamera.modelMatrix);
         } else {
             const {fieldOfView, nearClipping, farClipping} = this.rawCamera
             mat4.perspective(this.#noneJitterProjectionMatrix, (Math.PI / 180) * fieldOfView, this.aspect, nearClipping, farClipping);
@@ -391,7 +390,6 @@ class ViewTransform {
         const tY = RedGPUContextSizeManager.getPixelDimension(pixelRectObject, 'height', y)
         this.#pixelRectArray[0] = Math.floor(tX * (this.#x.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio));
         this.#pixelRectArray[1] = Math.floor(tY * (this.#y.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio));
-        console.log(`${this.constructor.name}.setPosition - input : ${x},${y} | result : ${tX}, ${tY}`);
     }
 
     /**
@@ -410,13 +408,13 @@ class ViewTransform {
         const pixelRectObject = sizeManager.pixelRectObject
         const tW = RedGPUContextSizeManager.getPixelDimension(pixelRectObject, 'width', w)
         const tH = RedGPUContextSizeManager.getPixelDimension(pixelRectObject, 'height', h)
-        this.#pixelRectArray[2] = Math.floor(tW * (this.#width.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio));
-        this.#pixelRectArray[3] = Math.floor(tH * (this.#height.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio));
-        // this.setPosition()
-        console.log(`${this.constructor.name}.setSize - input : ${w},${h} | result : ${tW}, ${tH}`);
-        if (this.onResize) {
-            this.onResize(this.screenRectObject.width, this.screenRectObject.height);
-        }
+        this.#pixelRectArray[2] = Math.max(1, Math.floor(tW * (this.#width.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio)));
+        this.#pixelRectArray[3] = Math.max(1, Math.floor(tH * (this.#height.toString().includes('%') ? 1 : sizeManager.renderScale * window.devicePixelRatio)));
+		if (this.onResize) this.onResize({
+			target: this,
+			screenRectObject: this.screenRectObject,
+			pixelRectObject: this.pixelRectObject
+		})
     }
 }
 

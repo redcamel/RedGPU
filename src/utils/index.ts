@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 import copyGPUBuffer from "./copyGPUBuffer";
+import formatBytes from "./formatBytes";
 
 /**
  * [KO] 빌드 시 제거되지 않는 콘솔 로그 함수입니다.
@@ -21,10 +22,10 @@ import copyGPUBuffer from "./copyGPUBuffer";
 const keepLog = console.log.bind(console);
 
 export * from "./file";
-export * from "./math";
 export * from "./texture";
 export * from "./uuid";
 export {
     keepLog,
     copyGPUBuffer,
+    formatBytes
 }

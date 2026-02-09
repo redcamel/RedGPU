@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Sampler Combination 예제
+ * [EN] Sampler Combination example
+ *
+ * [KO] 텍스처 샘플러의 다양한 필터 조합(Min, Mag, Mipmap)을 테스트하고 비교합니다.
+ * [EN] Tests and compares various filter combinations (Min, Mag, Mipmap) of the texture sampler.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -36,6 +44,12 @@ RedGPU.init(
         console.error("Initialization failed:", failReason);
     }
 );
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext,) => {
     const {
         setSeparator,
@@ -43,6 +57,15 @@ const renderTestPane = async (redGPUContext,) => {
     } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
     setDebugButtons(RedGPU, redGPUContext);
 }
+
+/**
+ * [KO] 샘플러 조합을 생성합니다.
+ * [EN] Generates sampler combinations.
+ * @param {Array<object>} settings
+ * @param {string} fixedCategory
+ * @param {string} fixedValue
+ * @returns {Array<object>}
+ */
 const generateSamplerCombinations = (settings, fixedCategory, fixedValue) => {
     const combinations = [];
     const recursiveGenerator = (current, depth) => {
@@ -61,6 +84,13 @@ const generateSamplerCombinations = (settings, fixedCategory, fixedValue) => {
     return combinations;
 };
 
+/**
+ * [KO] 그룹화된 조합을 생성합니다.
+ * [EN] Generates grouped combinations.
+ * @param {Array<object>} settings
+ * @param {string} category
+ * @returns {Array<{name: string, combinations: Array<object>}>}
+ */
 const generateGroupedCombinations = (settings, category) => {
     const targetSetting = settings.find((setting) => setting.name === category);
     return targetSetting.values.map((value) => ({
@@ -69,6 +99,12 @@ const generateGroupedCombinations = (settings, category) => {
     }));
 };
 
+/**
+ * [KO] 카테고리 그룹들을 생성합니다.
+ * [EN] Creates category groups.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createCategoryGroups = (redGPUContext, scene) => {
     const settings = [
         {name: "minFilter", values: ["nearest", "linear"]},
@@ -97,7 +133,7 @@ const createCategoryGroups = (redGPUContext, scene) => {
         const categoryLabel = new RedGPU.Display.TextField3D(redGPUContext);
         categoryLabel.text = `Category: ${["minFilter", "magFilter", "mipmapFilter"][categoryIndex]}`;
         categoryLabel.color = "#dc631d";
-        categoryLabel.fontSize = 64;
+        categoryLabel.worldSize = 1.5
         categoryLabel.setPosition(currentX, currentY + 7, 0);
         categoryLabel.useBillboard = true;
         categoryLabel.useBillboardPerspective = true;
@@ -122,6 +158,18 @@ const createCategoryGroups = (redGPUContext, scene) => {
     });
 };
 
+/**
+ * [KO] 그룹 메시들을 생성합니다.
+ * [EN] Creates group meshes.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {object} group
+ * @param {number} spacingX
+ * @param {number} spacingY
+ * @param {number} subGroupSpacingY
+ * @param {number} groupX
+ * @param {number} groupY
+ */
 const createGroupMeshes = (redGPUContext, scene, group, spacingX, spacingY, subGroupSpacingY, groupX, groupY) => {
     let maxYOffset = 0, minYOffset = 0;
 
@@ -142,7 +190,7 @@ const createGroupMeshes = (redGPUContext, scene, group, spacingX, spacingY, subG
         label.text = `min: ${sampler.minFilter} <br/> mag: ${sampler.magFilter} <br/> mipmap: ${sampler.mipmapFilter}`;
         label.color = "#ffffff";
         label.useBillboard = true;
-        label.fontSize = 21;
+        label.worldSize = 2
         label.setPosition(x, y - 2.2, 0);
         scene.addChild(label);
     });
@@ -151,7 +199,7 @@ const createGroupMeshes = (redGPUContext, scene, group, spacingX, spacingY, subG
     const groupLabel = new RedGPU.Display.TextField3D(redGPUContext);
     groupLabel.text = group.name;
     groupLabel.color = "#5fd7ff";
-    groupLabel.fontSize = 42;
+    groupLabel.worldSize = 2
     groupLabel.setPosition(groupX, maxYOffset + groupHeight / 2 + 2.5, 0);
     groupLabel.useBillboard = true;
     groupLabel.useBillboardPerspective = true;
@@ -160,6 +208,13 @@ const createGroupMeshes = (redGPUContext, scene, group, spacingX, spacingY, subG
     groupY -= subGroupSpacingY;
 };
 
+/**
+ * [KO] 샘플러 설정이 적용된 머티리얼을 생성합니다.
+ * [EN] Creates a material with sampler settings applied.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {object} sampler
+ * @returns {RedGPU.Material.BitmapMaterial}
+ */
 const createMaterialWithSampler = (redGPUContext, sampler) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/UV_Grid_Sm.jpg");
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext);

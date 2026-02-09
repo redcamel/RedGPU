@@ -10,6 +10,7 @@
  */
 export * as Core from './core'
 import Box from "./Box";
+import Capsule from "./Capsule";
 import Circle from "./Circle";
 import Cylinder from "./Cylinder";
 import Ground from "./Ground";
@@ -27,5 +28,6 @@ export {
     Circle,
     Cylinder,
     Box,
+    Capsule,
     Ground
 }

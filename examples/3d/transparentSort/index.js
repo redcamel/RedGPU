@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Transparent Sort 예제
+ * [EN] Transparent Sort example
+ *
+ * [KO] 투명한 객체들의 정렬(Sorting) 처리를 시연합니다.
+ * [EN] Demonstrates the sorting of transparent objects.
+ */
+
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 
@@ -46,6 +54,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 스카이박스를 생성합니다.
+ * [EN] Creates a skybox.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @returns {RedGPU.Display.SkyBox}
+ */
 const createSkybox = (redGPUContext) => {
     const skyboxImagePaths = [
         "../../assets/skybox/px.jpg",
@@ -61,6 +75,12 @@ const createSkybox = (redGPUContext) => {
     return skybox;
 };
 
+/**
+ * [KO] 무작위 메시들을 씬에 추가합니다.
+ * [EN] Adds random meshes to the scene.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const addRandomMeshes = (redGPUContext, scene) => {
     const geometries = [
         new RedGPU.Primitive.Sphere(redGPUContext, 2, 16, 16),
@@ -94,11 +114,21 @@ const addRandomMeshes = (redGPUContext, scene) => {
     renderTestPane(redGPUContext);
 };
 
+/**
+ * [KO] 무작위 16진수 색상 값을 반환합니다.
+ * [EN] Returns a random hex color value.
+ * @returns {string}
+ */
 const getRandomHexValue = () => {
     const randomColor = Math.floor(Math.random() * 0xffffff);
     return `#${randomColor.toString(16).padStart(6, "0")}`;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import(
         "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959"

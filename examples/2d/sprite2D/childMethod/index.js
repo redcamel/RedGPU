@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Sprite2D Child Method 예제
+ * [EN] Sprite2D Child Method example
+ *
+ * [KO] Sprite2D의 자식 객체 관리 기능(추가, 검색, 이동, 삭제)을 보여줍니다.
+ * [EN] Demonstrates child object management features (add, get, move, remove) of Sprite2D.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -13,13 +21,23 @@ RedGPU.init(
 
         createInitialObjects(redGPUContext, scene);
 
+        let centerX = redGPUContext.screenRectObject.width / 2;
+        let centerY = redGPUContext.screenRectObject.height / 2;
+
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
+            centerX = width / 2;
+            centerY = height / 2;
+        };
+
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = () => {
             const radius = 250;
             const numChildren = view.scene.children.length;
-
-            const centerX = view.screenRectObject.width / 2;
-            const centerY = view.screenRectObject.height / 2;
 
             view.scene.children.forEach((sprite2D, index) => {
                 const angle = (index / numChildren) * Math.PI * 2;
@@ -42,12 +60,24 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 초기 객체를 생성합니다.
+ * [EN] Creates initial objects.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createInitialObjects = (redGPUContext, scene) => {
     for (let i = 0; i < 6; i++) {
         addChildObject(redGPUContext, scene, '#ffffff');
     }
 };
 
+/**
+ * [KO] 테스트용 UI 패널을 생성합니다.
+ * [EN] Creates a UI panel for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createPaneUI = async (redGPUContext, scene) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const pane = new Pane();
@@ -135,10 +165,22 @@ const createPaneUI = async (redGPUContext, scene) => {
     });
 };
 
+/**
+ * [KO] 무작위 16진수 색상 값을 반환합니다.
+ * [EN] Returns a random hex color value.
+ * @returns {string}
+ */
 const getRandomHexColor = () => {
     return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
 };
 
+/**
+ * [KO] 자식 객체를 생성하여 추가합니다.
+ * [EN] Creates and adds a child object.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {string} [color]
+ */
 const addChildObject = (redGPUContext, scene, color = getRandomHexColor()) => {
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, new RedGPU.Material.ColorMaterial(redGPUContext, color));
     sprite2D.width = 25;

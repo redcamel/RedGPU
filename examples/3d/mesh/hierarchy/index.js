@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Mesh Hierarchy 예제
+ * [EN] Mesh Hierarchy example
+ *
+ * [KO] 메시 간의 부모-자식 계층 구조와 변환 상속을 보여줍니다.
+ * [EN] Demonstrates parent-child hierarchy and transformation inheritance between meshes.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -35,6 +43,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 부모 메시를 생성합니다.
+ * [EN] Creates a parent mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createParentMesh = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -49,6 +64,13 @@ const createParentMesh = (redGPUContext, scene) => {
     return parentMesh;
 };
 
+/**
+ * [KO] 자식 메시를 생성합니다.
+ * [EN] Creates a child mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} parentMesh
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createChildMesh = (redGPUContext, parentMesh) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const geometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1);
@@ -60,6 +82,13 @@ const createChildMesh = (redGPUContext, parentMesh) => {
     return childMesh;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} parentMesh
+ * @param {RedGPU.Display.Mesh} childMesh
+ */
 const renderTestPane = async (redGPUContext, parentMesh, childMesh) => {
 
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');

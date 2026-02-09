@@ -5,23 +5,23 @@ order: 3
 
 # Shadow System
 
-In 3D space, shadows are a key element determining an object's three-dimensionality and spatial relationships. RedGPU provides a physically based shadow system, allowing you to express realistic shadows with simple settings.
+In 3D space, shadows are a key element in determining an object's three-dimensionality and its spatial relationship with other objects. RedGPU provides a physically based shadow system, allowing you to express realistic shadows with simple configuration.
 
 ## 1. 3 Elements of Shadow Generation
 
-For shadows to appear on the screen, the following three elements must be configured organically:
+For shadows to appear on the screen, the following three elements must be configured properly:
 
-1.  **Light**: The light that will create the shadow. Currently, **DirectionalLight** supports shadow generation.
+1.  **Light**: The light source that will create the shadow. Currently, **DirectionalLight** supports shadow generation.
 2.  **Caster**: The object that **creates** the shadow. (e.g., character, building) -> `mesh.castShadow = true`
 3.  **Receiver**: The object that **receives** the shadow. (e.g., floor, wall) -> `mesh.receiveShadow = true`
 
-::: warning [Performance Attention]
-Shadow calculations consume a lot of GPU resources. Therefore, instead of applying it to all objects, it is better for performance optimization to selectively apply it to visually important objects and floors.
+::: warning [Performance Note]
+Shadow calculations consume significant GPU resources. Therefore, rather than applying them to all objects, it is better for performance optimization to selectively apply them to visually important objects and surfaces.
 :::
 
 ## 2. Object Configuration (Cast & Receive)
 
-Every **Mesh** object in RedGPU has independent properties determining whether to create and receive shadows.
+Every **Mesh** object in RedGPU has independent properties that determine whether it creates or receives shadows.
 
 ```javascript
 // 1. Object creating the shadow (Caster)
@@ -39,7 +39,7 @@ The **Scene** owns a **ShadowManager** internally, allowing you to manage shadow
 
 ```javascript
 // Set shadow map resolution (Default: 1024)
-// Larger values lead to sharper shadow edges but increase performance cost.
+// Larger values lead to sharper shadow edges but increase the performance cost.
 scene.shadowManager.directionalShadowManager.shadowDepthTextureSize = 2048;
 ```
 
@@ -152,12 +152,12 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Key Summary
 
--   **castShadow**: Set an object to create a shadow.
--   **receiveShadow**: Set a shadow to be cast on the object surface.
--   **Quality Control**: You can adjust the balance between performance and sharpness through `ShadowManager`.
+-   **castShadow**: Set an object to cast a shadow.
+-   **receiveShadow**: Set a shadow to be cast on an object's surface.
+-   **Quality Control**: You can adjust the balance between performance and sharpness through the `ShadowManager`.
 
 ## Next Steps
 
-Learn how to add infinite backgrounds and photorealistic environment light to spaces where three-dimensionality has been brought to life with added shadows.
+Learn how to add infinite backgrounds and photorealistic environment light to spaces where three-dimensionality has been brought to life with shadows.
 
 - **[Environment](../environment/index.md)**

@@ -5,7 +5,7 @@ import ResourceManager from "../resources/core/resourceManager/ResourceManager";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
 import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import RedGPUContextDetector from "./core/RedGPUContextDetector";
-import RedGPUContextSizeManager from "./core/RedGPUContextSizeManager";
+import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 
 /**
@@ -43,8 +43,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
     /**
      * [KO] 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출)
      * [EN] Resize event handler (called when canvas size changes)
+     * @param event - [KO] 리사이즈 이벤트 객체 [EN] Resize event object
      */
-    onResize: ((width: number, height: number) => void) | null = null;
+    onResize: ((event: RedResizeEvent<RedGPUContext>) => void) | null = null;
     /**
      * [KO] 현재 시간(프레임 기준, ms)
      * [EN] Current time (frame based, ms)
@@ -352,8 +353,20 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#sizeManager.height = value;
     }
 
-    get screenRectObject() {
+    /**
+     * [KO] 화면 크기 정보(Screen)를 반환합니다. (CSS 픽셀 단위)
+     * [EN] Returns the screen size information. (in CSS pixels)
+     */
+    get screenRectObject(): IRedGPURectObject {
         return this.#sizeManager.screenRectObject
+    }
+
+    /**
+     * [KO] 픽셀 단위 화면 크기 정보(Pixel)를 반환합니다. (물리 픽셀 단위)
+     * [EN] Returns the pixel size information. (in physical pixels)
+     */
+    get pixelRectObject(): IRedGPURectObject {
+        return this.#sizeManager.pixelRectObject
     }
 
     /**
@@ -411,12 +424,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
         window?.addEventListener('resize', () => {
             this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
             this.sizeManager.setSize()
-            this.viewList.forEach((view: View3D) => {
-                view.setSize()
-                view.setPosition()
-
-            })
-
         });
         this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
         const eventList = this.detector.isMobile ?

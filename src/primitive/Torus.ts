@@ -9,12 +9,12 @@ import Primitive from "./core/Primitive";
  * [KO] 반지름, 두께, 세그먼트 등을 기반으로 3D 도넛 형태의 데이터를 생성하여 관리합니다.
  * [EN] Generates and manages 3D torus data based on radius, thickness, segments, etc.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // 반지름 2, 두께 0.5짜리 토러스 생성
- * const torus = new RedGPU.Primitive.Torus(redGPUContext, 2, 0.5);
+ * const torus = new RedGPU.Torus(redGPUContext, 2, 0.5);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/torus/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/torus/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 class Torus extends Primitive {
@@ -76,6 +76,11 @@ class Torus extends Primitive {
      * [KO] Torus 인스턴스를 생성합니다.
      * [EN] Creates an instance of Torus.
      * 
+     * ### Example
+     * ```typescript
+     * const torus = new RedGPU.Torus(redGPUContext, 1, 0.5, 16, 16, 0, Math.PI * 2);
+     * ```
+     *
      * @param redGPUContext - 
      * [KO] RedGPUContext 인스턴스 
      * [EN] RedGPUContext instance

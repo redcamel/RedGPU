@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Spot Light 예제
+ * [EN] Spot Light example
+ *
+ * [KO] Spot Light의 사용법과 속성 제어 방법을 보여줍니다.
+ * [EN] Demonstrates the usage and property control of Spot Light.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -34,6 +42,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 스카이박스를 생성합니다.
+ * [EN] Creates a skybox.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @returns {RedGPU.Display.SkyBox}
+ */
 const createSkybox = (redGPUContext) => {
     const skyboxImagePaths = [
         "../../../assets/skybox/px.jpg",
@@ -49,6 +63,12 @@ const createSkybox = (redGPUContext) => {
     return skybox;
 };
 
+/**
+ * [KO] Spot Light를 생성합니다.
+ * [EN] Creates a Spot Light.
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Light.SpotLight}
+ */
 const createSpotLight = (scene) => {
     const intensity = 2;
     const light = new RedGPU.Light.SpotLight('#fff', intensity);
@@ -62,6 +82,12 @@ const createSpotLight = (scene) => {
     return light;
 };
 
+/**
+ * [KO] 샘플 메시들을 생성합니다.
+ * [EN] Creates sample meshes.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createSampleMeshes = (redGPUContext, scene) => {
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(
@@ -95,6 +121,12 @@ const createSampleMeshes = (redGPUContext, scene) => {
     }
 };
 
+/**
+ * [KO] 조명 제어용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for light control.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Light.SpotLight} light
+ */
 const renderTestPaneWithLightControl = async (redGPUContext, light) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const pane = new Pane();

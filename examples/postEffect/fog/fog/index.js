@@ -3,6 +3,14 @@ import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
 
+/**
+ * [KO] Fog 예제
+ * [EN] Fog example
+ *
+ * [KO] 포스트 이펙트를 사용하여 화면에 안개(Fog) 효과를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply fog effects to the screen using post effects.
+ */
+
 RedGPU.init(
     canvas,
     (redGPUContext) => {
@@ -50,6 +58,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트 씬을 생성합니다.
+ * [EN] Creates a test scene.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 function createTestScene(redGPUContext, scene) {
     new RedGPU.GLTFLoader(
         redGPUContext,
@@ -125,6 +139,13 @@ function createTestScene(redGPUContext, scene) {
     scene.addChild(groundMesh);
 }
 
+/**
+ * [KO] 테스트용 GUI를 생성합니다.
+ * [EN] Creates a test GUI.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} view
+ * @param {RedGPU.PostEffect.Fog} fogEffect
+ */
 async function createControlPanel(redGPUContext, view, fogEffect) {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
 

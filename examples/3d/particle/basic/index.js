@@ -6,6 +6,14 @@ import {setSeparator} from "../../../exampleHelper/createExample/panes/index.js?
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+/**
+ * [KO] Particle Basic 예제
+ * [EN] Particle Basic example
+ *
+ * [KO] 기본적인 파티클 이미터를 생성하고 속성을 제어하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a basic particle emitter and control its properties.
+ */
+
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
 RedGPU.init(
@@ -26,7 +34,6 @@ RedGPU.init(
                 "../../../assets/skybox/pz.jpg", // Positive Z
                 "../../../assets/skybox/nz.jpg", // Negative Z
             ])
-        // view.iblTexture = cubeTexture
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
         const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
         const testParticleWrap = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext),
@@ -62,6 +69,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.ParticleEmitter} testParticle
+ */
 const renderTestPane = async (redGPUContext, testParticle) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");

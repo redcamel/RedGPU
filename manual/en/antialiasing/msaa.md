@@ -5,13 +5,13 @@ order: 2
 
 # MSAA (Multisample AA)
 
-**MSAA**(Multisample Antialiasing) is the standard antialiasing method supported at the hardware (GPU) level. It smoothes the edges of geometry by sampling multiple times.
+**MSAA** (Multisample Antialiasing) is the most standard antialiasing method supported at the hardware (GPU) level. It smoothes geometry edges by sampling boundary areas multiple times.
 
 ## 1. Features & Pros
 
-- **Standard Quality**: A proven method that cleans up object edges very well.
-- **Performance Balance**: Lighter than Super Sampling (SSAA) but uses more memory than Post-Processing (FXAA).
-- **Cons**: Only smoothes geometry edges; does not fix aliasing within textures or shaders.
+- **Standard Quality**: A proven method that cleans up object outlines very well.
+- **Performance Balance**: Lighter than Super Sampling (SSAA) but consumes more memory than Post-Processing (FXAA).
+- **Cons**: Only smoothes geometry edges; it does not resolve aliasing within textures or shader artifacts.
 
 ## 2. Usage
 
@@ -22,9 +22,9 @@ Enabled via `antialiasingManager.useMSAA`. Enabling this automatically disables 
 redGPUContext.antialiasingManager.useMSAA = true;
 ```
 
-## 3. Live Example: MSAA Quality Check
+## 3. Live Example: MSAA Application
 
-Toggle MSAA and compare the changes in geometry edges and highlights.
+Toggle MSAA on and off to compare the changes in geometry outlines and highlights.
 
 <ClientOnly>
 <CodePen title="RedGPU - MSAA Example" slugHash="antialiasing-msaa">
@@ -129,6 +129,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Key Summary
 
-- **Hardware Support**: Uses built-in GPU features.
-- **Edge Specialized**: Excellent for smoothing object outlines.
+- **Hardware Support**: Utilizes built-in GPU features.
+- **Edge-Specialized**: Excellent for smoothing object outlines.
 - **Default**: Enabled by default in standard display environments.

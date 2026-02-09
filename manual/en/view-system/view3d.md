@@ -152,6 +152,22 @@ Two coordinate objects are provided for High-DPI (Retina) display support:
 *   **`view.pixelRectObject`**: The actual **Physical Resolution** with `devicePixelRatio` applied. Used for internal rendering calculations.
 :::
 
+### 3.3 Detection of Per-View Size Changes (onResize)
+
+While `redGPUContext.onResize` detects size changes of the entire canvas, the `onResize` callback of an individual **View3D** object is called whenever the size of that specific view changes.
+
+This is particularly useful when the view's size is set in percentages (`%`) and the parent canvas size changes, or when you explicitly change the size using `setSize()`.
+
+```javascript
+// Define callback to be called when an individual view's size changes
+view.onResize = (event) => {
+    const { width, height } = event.screenRectObject;
+    console.log(`View area changed: ${width}x${height}`);
+    
+    // Reposition specific UI elements within that view or adjust camera settings.
+};
+```
+
 ## 4. Debugging Tools
 
 RedGPU provides visualization tools to help intuitively understand the relative position and direction of objects during development.
@@ -195,7 +211,7 @@ miniMapView.setSize(miniMapSize, miniMapSize);
 redGPUContext.addView(miniMapView);
 
 // 3. Update minimap position based on main view's layout size upon resizing
-redGPUContext.onResize = () => {
+redGPUContext.onResize = (event) => {
     const { width } = mainView.screenRectObject;
     miniMapView.setPosition(width - miniMapSize - 10, 10);
 };
@@ -239,7 +255,7 @@ RedGPU.init(
         miniMapView.grid = true;
         redGPUContext.addView(miniMapView);
 
-        const updateLayout = () => {
+        const updateLayout = (event) => {
             const { width } = mainView.screenRectObject;
             miniMapView.setPosition(width - miniMapSize - 10, 10);
         };

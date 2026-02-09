@@ -1,5 +1,13 @@
 import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
 
+/**
+ * [KO] Orbit Controller 예제
+ * [EN] Orbit Controller example
+ *
+ * [KO] OrbitController를 사용하여 타겟을 중심으로 궤도를 도는 카메라 컨트롤을 시연합니다.
+ * [EN] Demonstrates camera control orbiting around a target using OrbitController.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -54,6 +62,13 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Camera.OrbitController} controller
+ */
 const renderTestPane = async (redGPUContext, controller) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
     const {

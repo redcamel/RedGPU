@@ -29,12 +29,10 @@ function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) 
 }
 
 const PRESET_BOOLEAN = {
-    USE_BILLBOARD_PERSPECTIVE: 'useBillboardPerspective',
     USE_BILLBOARD: 'useBillboard',
     RECEIVE_SHADOW: 'receiveShadow',
 };
 const PRESET_POSITIVE_NUMBER = {
-    BILLBOARD_FIXED_SCALE: 'billboardFixedScale',
 };
 const PRESET_UINT = {};
 const PRESET_SAMPLER = {};

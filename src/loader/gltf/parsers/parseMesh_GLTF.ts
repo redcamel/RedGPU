@@ -9,7 +9,7 @@ import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import calculateNormals from "../../../utils/math/calculateNormals";
+import calculateNormals from "../../../math/calculateNormals";
 import createUUID from "../../../utils/uuid/createUUID";
 import AccessorInfo_GLTF from "../cls/AccessorInfo_GLTF";
 import MorphInfo_GLTF from "../cls/MorphInfo_GLTF";

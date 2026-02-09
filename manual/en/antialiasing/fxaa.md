@@ -5,13 +5,13 @@ order: 3
 
 # FXAA (Fast Approximate AA)
 
-**FXAA** is a **Post-Processing** antialiasing technique that analyzes the rendered image to find edges and blur them.
+**FXAA** is a **post-processing** (Post-Processing) antialiasing technique that analyzes the rendered image to find edges and smooth them.
 
 ## 1. Features & Pros
 
-- **Super Fast**: Very low computational cost, suitable for mobile devices.
+- **Ultra-Fast**: Very low computational cost, making it ideal for mobile devices and low-end hardware.
 - **Memory Efficient**: Does not require additional buffers like MSAA.
-- **Cons**: The entire screen may become slightly blurry, reducing texture sharpness.
+- **Cons**: The entire screen may appear slightly blurry, which can reduce texture sharpness.
 
 ## 2. Usage
 
@@ -24,7 +24,7 @@ redGPUContext.antialiasingManager.useFXAA = true;
 
 ## 3. Live Example: FXAA Quality Check
 
-Check how FXAA handles edges, textures, and highlights. (Edges are smoothed, but texture details may be slightly blurred.)
+Observe how FXAA handles not only geometry edges but also shimmering in textures and highlights.
 
 <ClientOnly>
 <CodePen title="RedGPU - FXAA Example" slugHash="antialiasing-fxaa">
@@ -113,14 +113,16 @@ RedGPU.init(canvas, (redGPUContext) => {
         }
         
         btn.textContent = `FXAA: ${manager.useFXAA ? 'ON' : 'OFF (None)'}`;
-        btn.style.background = manager.useFXAA ? '#00CC99' : '#ccc';
+        btn.style.background = manager.useFXAA ? '#00CC99' : '#555';
     };
     document.body.appendChild(btn);
 
     const renderer = new RedGPU.Renderer(redGPUContext);
     renderer.start(redGPUContext, () => {
-        sphere.rotationY += 0.01;
-        box.rotationY += 0.01;
+        // Slowly rotate to observe texture blurring
+        scene.children.forEach(mesh => {
+            if(mesh instanceof RedGPU.Display.Mesh) mesh.rotationY += 0.01;
+        })
     });
 });
 </pre>
