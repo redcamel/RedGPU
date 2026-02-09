@@ -6,7 +6,7 @@
 
 # Class: LightManager
 
-Defined in: [src/light/LightManager.ts:30](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L30)
+Defined in: [src/light/LightManager.ts:30](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L30)
 
 씬(Scene) 내의 모든 조명을 통합 관리하는 클래스입니다.
 
@@ -42,7 +42,7 @@ lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 > **get** **ambientLight**(): [`AmbientLight`](AmbientLight.md)
 
-Defined in: [src/light/LightManager.ts:180](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L180)
+Defined in: [src/light/LightManager.ts:180](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L180)
 
 현재 설정된 환경광(AmbientLight)을 반환합니다.
 
@@ -58,7 +58,7 @@ AmbientLight 인스턴스 또는 null
 
 > **set** **ambientLight**(`value`): `void`
 
-Defined in: [src/light/LightManager.ts:195](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L195)
+Defined in: [src/light/LightManager.ts:195](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L195)
 
 환경광(AmbientLight)을 설정합니다.
 
@@ -86,7 +86,7 @@ AmbientLight 인스턴스가 아닌 값을 전달하면 오류를 던집니다.
 
 > **get** **directionalLightCount**(): `number`
 
-Defined in: [src/light/LightManager.ts:156](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L156)
+Defined in: [src/light/LightManager.ts:156](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L156)
 
 등록된 방향성 조명의 개수를 반환합니다.
 
@@ -106,7 +106,7 @@ Defined in: [src/light/LightManager.ts:156](https://github.com/redcamel/RedGPU/b
 
 > **get** **directionalLights**(): [`DirectionalLight`](DirectionalLight.md)[]
 
-Defined in: [src/light/LightManager.ts:168](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L168)
+Defined in: [src/light/LightManager.ts:168](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L168)
 
 등록된 방향성 조명 배열을 반환합니다.
 
@@ -126,7 +126,7 @@ Defined in: [src/light/LightManager.ts:168](https://github.com/redcamel/RedGPU/b
 
 > **get** **limitClusterLightCount**(): `number`
 
-Defined in: [src/light/LightManager.ts:108](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L108)
+Defined in: [src/light/LightManager.ts:108](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L108)
 
 클러스터 조명(Point + Spot)의 최대 허용 개수를 반환합니다.
 
@@ -146,7 +146,7 @@ Defined in: [src/light/LightManager.ts:108](https://github.com/redcamel/RedGPU/b
 
 > **get** **limitDirectionalLightCount**(): `number`
 
-Defined in: [src/light/LightManager.ts:144](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L144)
+Defined in: [src/light/LightManager.ts:144](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L144)
 
 방향성 조명의 최대 허용 개수를 반환합니다.
 
@@ -166,7 +166,7 @@ Defined in: [src/light/LightManager.ts:144](https://github.com/redcamel/RedGPU/b
 
 > **get** **pointLightCount**(): `number`
 
-Defined in: [src/light/LightManager.ts:132](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L132)
+Defined in: [src/light/LightManager.ts:132](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L132)
 
 등록된 포인트 조명의 개수를 반환합니다.
 
@@ -186,7 +186,7 @@ Defined in: [src/light/LightManager.ts:132](https://github.com/redcamel/RedGPU/b
 
 > **get** **pointLights**(): [`PointLight`](PointLight.md)[]
 
-Defined in: [src/light/LightManager.ts:120](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L120)
+Defined in: [src/light/LightManager.ts:120](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L120)
 
 등록된 포인트 조명 배열을 반환합니다.
 
@@ -206,7 +206,7 @@ Defined in: [src/light/LightManager.ts:120](https://github.com/redcamel/RedGPU/b
 
 > **get** **spotLightCount**(): `number`
 
-Defined in: [src/light/LightManager.ts:96](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L96)
+Defined in: [src/light/LightManager.ts:96](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L96)
 
 등록된 스포트 조명의 개수를 반환합니다.
 
@@ -226,7 +226,7 @@ Defined in: [src/light/LightManager.ts:96](https://github.com/redcamel/RedGPU/bl
 
 > **get** **spotLights**(): [`SpotLight`](SpotLight.md)[]
 
-Defined in: [src/light/LightManager.ts:84](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L84)
+Defined in: [src/light/LightManager.ts:84](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L84)
 
 등록된 스포트 조명 배열을 반환합니다.
 
@@ -244,7 +244,7 @@ Defined in: [src/light/LightManager.ts:84](https://github.com/redcamel/RedGPU/bl
 
 > **addDirectionalLight**(`value`): `void`
 
-Defined in: [src/light/LightManager.ts:266](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L266)
+Defined in: [src/light/LightManager.ts:266](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L266)
 
 DirectionalLight를 추가합니다.
 
@@ -275,7 +275,7 @@ scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 > **addPointLight**(`value`): `void`
 
-Defined in: [src/light/LightManager.ts:241](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L241)
+Defined in: [src/light/LightManager.ts:241](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L241)
 
 PointLight를 추가합니다.
 
@@ -306,7 +306,7 @@ SpotLight와 합친 개수가 클러스터 제한을 초과하면 오류를 던�
 
 > **addSpotLight**(`value`): `void`
 
-Defined in: [src/light/LightManager.ts:216](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L216)
+Defined in: [src/light/LightManager.ts:216](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L216)
 
 SpotLight를 추가합니다.
 
@@ -337,7 +337,7 @@ PointLight와 합친 개수가 클러스터 제한을 초과하면 오류를 던
 
 > **removeAllDirectionalLight**(): `void`
 
-Defined in: [src/light/LightManager.ts:334](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L334)
+Defined in: [src/light/LightManager.ts:334](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L334)
 
 모든 DirectionalLight를 제거합니다.
 
@@ -352,7 +352,7 @@ Defined in: [src/light/LightManager.ts:334](https://github.com/redcamel/RedGPU/b
 
 > **removeAllLight**(): `void`
 
-Defined in: [src/light/LightManager.ts:345](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L345)
+Defined in: [src/light/LightManager.ts:345](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L345)
 
 장면의 모든 조명을 제거합니다.
 
@@ -370,7 +370,7 @@ Defined in: [src/light/LightManager.ts:345](https://github.com/redcamel/RedGPU/b
 
 > **removeAllPointLight**(): `void`
 
-Defined in: [src/light/LightManager.ts:326](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L326)
+Defined in: [src/light/LightManager.ts:326](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L326)
 
 모든 PointLight를 제거합니다.
 
@@ -385,7 +385,7 @@ Defined in: [src/light/LightManager.ts:326](https://github.com/redcamel/RedGPU/b
 
 > **removeAllSpotLight**(): `void`
 
-Defined in: [src/light/LightManager.ts:318](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L318)
+Defined in: [src/light/LightManager.ts:318](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L318)
 
 모든 SpotLight를 제거합니다.
 
@@ -400,7 +400,7 @@ Defined in: [src/light/LightManager.ts:318](https://github.com/redcamel/RedGPU/b
 
 > **removeDirectionalLight**(`value`): `void`
 
-Defined in: [src/light/LightManager.ts:309](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L309)
+Defined in: [src/light/LightManager.ts:309](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L309)
 
 특정 DirectionalLight를 제거합니다.
 
@@ -421,7 +421,7 @@ Defined in: [src/light/LightManager.ts:309](https://github.com/redcamel/RedGPU/b
 
 > **removePointLight**(`value`): `void`
 
-Defined in: [src/light/LightManager.ts:296](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L296)
+Defined in: [src/light/LightManager.ts:296](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L296)
 
 특정 PointLight를 제거합니다.
 
@@ -442,7 +442,7 @@ Defined in: [src/light/LightManager.ts:296](https://github.com/redcamel/RedGPU/b
 
 > **removeSpotLight**(`value`): `void`
 
-Defined in: [src/light/LightManager.ts:283](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/light/LightManager.ts#L283)
+Defined in: [src/light/LightManager.ts:283](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/light/LightManager.ts#L283)
 
 특정 SpotLight를 제거합니다.
 

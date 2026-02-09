@@ -8,7 +8,7 @@
 
 > `const` **GPU\_CULL\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_CULL\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/gpuConst/GPU_CULL_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_CULL\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_CULL_MODE.ts#L10)
 
 
 Constants defining which faces to cull during rendering.
@@ -20,6 +20,6 @@ Determines whether to exclude front or back faces from rendering relative to the
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="back"></a> `BACK` | `"back"` | `'back'` | Culls back faces, rendering only front faces. (Standard setting) | [src/gpuConst/GPU\_CULL\_MODE.ts:25](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/gpuConst/GPU_CULL_MODE.ts#L25) |
-| <a id="front"></a> `FRONT` | `"front"` | `'front'` | Culls front faces, rendering only back faces. | [src/gpuConst/GPU\_CULL\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/gpuConst/GPU_CULL_MODE.ts#L20) |
-| <a id="none"></a> `NONE` | `"none"` | `'none'` | Does not perform any culling. | [src/gpuConst/GPU\_CULL\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/gpuConst/GPU_CULL_MODE.ts#L15) |
+| <a id="back"></a> `BACK` | `"back"` | `'back'` | Culls back faces, rendering only front faces. (Standard setting) | [src/gpuConst/GPU\_CULL\_MODE.ts:25](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_CULL_MODE.ts#L25) |
+| <a id="front"></a> `FRONT` | `"front"` | `'front'` | Culls front faces, rendering only back faces. | [src/gpuConst/GPU\_CULL\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_CULL_MODE.ts#L20) |
+| <a id="none"></a> `NONE` | `"none"` | `'none'` | Does not perform any culling. | [src/gpuConst/GPU\_CULL\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_CULL_MODE.ts#L15) |

@@ -6,7 +6,7 @@
 
 # Class: SkyBox
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:71](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L71)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:71](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L71)
 
 
 Skybox class used as the background for 3D scenes.
@@ -49,7 +49,7 @@ Below is a list of additional sample examples to help understand the structure a
 
 > **new SkyBox**(`redGPUContext`, `cubeTexture`): `SkyBox`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:156](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L156)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:156](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L156)
 
 
 Creates a new SkyBox instance.
@@ -76,7 +76,7 @@ Throws Error if redGPUContext is invalid
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:81](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L81)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:81](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L81)
 
 
 GPU rendering information object
@@ -87,7 +87,7 @@ GPU rendering information object
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:76](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L76)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:76](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L76)
 
 
 Model transformation matrix (4x4 matrix)
@@ -100,7 +100,7 @@ Model transformation matrix (4x4 matrix)
 
 > **get** **blur**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:196](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L196)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:196](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L196)
 
 
 Returns the skybox blur amount.
@@ -113,7 +113,7 @@ Returns the skybox blur amount.
 
 > **set** **blur**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:210](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L210)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:210](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L210)
 
 
 Sets the skybox blur amount.
@@ -141,7 +141,7 @@ Throws Error if value is out of range
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L220)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L220)
 
 
 Returns the skybox opacity.
@@ -154,7 +154,7 @@ Returns the skybox opacity.
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L234)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L234)
 
 
 Sets the skybox opacity.
@@ -182,7 +182,7 @@ Throws Error if value is out of range
 
 > **get** **skyboxTexture**(): [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:243](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L243)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:243](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L243)
 
 
 Returns the current skybox texture.
@@ -195,7 +195,7 @@ Returns the current skybox texture.
 
 > **set** **skyboxTexture**(`texture`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:257](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L257)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:257](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L257)
 
 
 Sets the skybox texture.
@@ -223,7 +223,7 @@ Throws Error if texture is invalid
 
 > **get** **transitionDuration**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:172](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L172)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:172](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L172)
 
 
 Returns the transition duration (in ms).
@@ -240,7 +240,7 @@ Returns the transition duration (in ms).
 
 > **get** **transitionElapsed**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:180](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L180)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:180](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L180)
 
 
 Returns the transition elapsed time (in ms).
@@ -257,7 +257,7 @@ Returns the transition elapsed time (in ms).
 
 > **get** **transitionProgress**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:188](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L188)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:188](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L188)
 
 
 Returns the progress of the transition currently in progress (0.0 to 1.0).
@@ -274,7 +274,7 @@ Returns the progress of the transition currently in progress (0.0 to 1.0).
 
 > **get** **transitionTexture**(): [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:270](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L270)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:270](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L270)
 
 
 Returns the transition target texture.
@@ -289,7 +289,7 @@ Returns the transition target texture.
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:316](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L316)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:316](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L316)
 
 
 Renders the skybox.
@@ -318,7 +318,7 @@ skybox.render(renderViewState);
 
 > **transition**(`transitionTexture`, `duration`, `transitionAlphaTexture`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:293](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/skyboxs/skyBox/SkyBox.ts#L293)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:293](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/skyboxs/skyBox/SkyBox.ts#L293)
 
 
 Starts a smooth transition to another texture.

@@ -6,7 +6,7 @@
 
 # Class: BRDFGenerator
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:13](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L13)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:13](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L13)
 
 BRDF LUT(Look-Up Table)를 생성하는 클래스입니다.
 
@@ -20,7 +20,7 @@ Split Sum Approximation 기법을 위해 2D BRDF 통합 텍스처를 사전 베�
 
 > **new BRDFGenerator**(`redGPUContext`): `BRDFGenerator`
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:27](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L27)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:27](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L27)
 
 BRDFGenerator 인스턴스를 생성합니다.
 
@@ -43,7 +43,7 @@ BRDFGenerator 인스턴스를 생성합니다.
 
 > **get** **brdfLUTTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:40](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L40)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:40](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L40)
 
 BRDF LUT 텍스처를 반환합니다.
 

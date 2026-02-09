@@ -8,10 +8,10 @@
 
 > **PRESET\_CUBE\_TEXTURE**: `object`
 
-Defined in: [src/defineProperty/DefineForFragment.ts:113](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/defineProperty/DefineForFragment.ts#L113)
+Defined in: [src/defineProperty/DefineForFragment.ts:113](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/defineProperty/DefineForFragment.ts#L113)
 
 ## Type Declaration
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="environment_texture"></a> `ENVIRONMENT_TEXTURE` | `string` | `'environmentTexture'` | [src/defineProperty/DefineForFragment.ts:48](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/defineProperty/DefineForFragment.ts#L48) |
+| <a id="environment_texture"></a> `ENVIRONMENT_TEXTURE` | `string` | `'environmentTexture'` | [src/defineProperty/DefineForFragment.ts:48](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/defineProperty/DefineForFragment.ts#L48) |

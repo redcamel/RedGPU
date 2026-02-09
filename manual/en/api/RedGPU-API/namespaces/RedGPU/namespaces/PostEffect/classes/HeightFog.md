@@ -6,7 +6,7 @@
 
 # Class: HeightFog
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:31](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L31)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:31](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L31)
 
 
 Height Fog post-processing effect.
@@ -37,7 +37,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new HeightFog**(`redGPUContext`): `HeightFog`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:86](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L86)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:86](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L86)
 
 
 Creates a HeightFog instance.
@@ -62,7 +62,7 @@ Creates a HeightFog instance.
 
 > `static` **EXPONENTIAL**: `number` = `0`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:36](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L36)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:36](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L36)
 
 
 Exponential fog type
@@ -73,7 +73,7 @@ Exponential fog type
 
 > `static` **EXPONENTIAL\_SQUARED**: `number` = `1`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:41](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L41)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:41](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L41)
 
 
 Exponential Squared fog type
@@ -86,7 +86,7 @@ Exponential Squared fog type
 
 > **get** **baseHeight**(): `number`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:153](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L153)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:153](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L153)
 
 
 Returns the fog base height.
@@ -99,7 +99,7 @@ Returns the fog base height.
 
 > **set** **baseHeight**(`value`): `void`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:161](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L161)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:161](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L161)
 
 
 Sets the fog base height.
@@ -122,7 +122,7 @@ Sets the fog base height.
 
 > **get** **density**(): `number`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:127](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L127)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:127](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L127)
 
 
 Returns the fog density.
@@ -135,7 +135,7 @@ Returns the fog density.
 
 > **set** **density**(`value`): `void`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:135](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L135)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:135](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L135)
 
 
 Sets the fog density. (0 ~ 5)
@@ -158,7 +158,7 @@ Sets the fog density. (0 ~ 5)
 
 > **get** **falloff**(): `number`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:200](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L200)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:200](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L200)
 
 
 Returns the height falloff.
@@ -171,7 +171,7 @@ Returns the height falloff.
 
 > **set** **falloff**(`value`): `void`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:208](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L208)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:208](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L208)
 
 
 Sets the height falloff. (0.001 ~ 2)
@@ -194,7 +194,7 @@ Sets the height falloff. (0.001 ~ 2)
 
 > **get** **fogColor**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:145](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L145)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:145](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L145)
 
 
 Returns the fog color.
@@ -211,7 +211,7 @@ Returns the fog color.
 
 > **get** **fogType**(): `number`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:109](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L109)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:109](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L109)
 
 
 Returns the fog type.
@@ -224,7 +224,7 @@ Returns the fog type.
 
 > **set** **fogType**(`value`): `void`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:117](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L117)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:117](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L117)
 
 
 Sets the fog type. (0 or 1)
@@ -247,7 +247,7 @@ Sets the fog type. (0 or 1)
 
 > **get** **maxHeight**(): `number`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:173](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L173)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:173](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L173)
 
 
 Returns the fog max height. (baseHeight + thickness)
@@ -264,7 +264,7 @@ Returns the fog max height. (baseHeight + thickness)
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L203)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L203)
 
 
 Returns the output texture view.
@@ -285,7 +285,7 @@ Returns the output texture view.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L117)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L117)
 
 
 Returns the RedGPU context.
@@ -306,7 +306,7 @@ Returns the RedGPU context.
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L133)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L133)
 
 
 Returns shader information. (Depends on MSAA state)
@@ -327,7 +327,7 @@ Returns shader information. (Depends on MSAA state)
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L125)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L125)
 
 
 Returns storage information.
@@ -348,7 +348,7 @@ Returns storage information.
 
 > **get** **systemUuniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L159)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L159)
 
 
 Returns system uniform information.
@@ -369,7 +369,7 @@ Returns system uniform information.
 
 > **get** **thickness**(): `number`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:181](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L181)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:181](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L181)
 
 
 Returns the fog layer thickness.
@@ -382,7 +382,7 @@ Returns the fog layer thickness.
 
 > **set** **thickness**(`value`): `void`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:189](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L189)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:189](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L189)
 
 
 Sets the fog layer thickness. (Minimum 0.1)
@@ -405,7 +405,7 @@ Sets the fog layer thickness. (Minimum 0.1)
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L143)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L143)
 
 
 Returns the uniform buffer.
@@ -426,7 +426,7 @@ Returns the uniform buffer.
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L151)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L151)
 
 
 Returns uniform information.
@@ -447,7 +447,7 @@ Returns uniform information.
 
 > **get** **useDepthTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L101)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L101)
 
 
 Returns whether depth texture is used.
@@ -460,7 +460,7 @@ Returns whether depth texture is used.
 
 > **set** **useDepthTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L109)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L109)
 
 
 Sets whether depth texture is used.
@@ -487,7 +487,7 @@ Sets whether depth texture is used.
 
 > **get** **useGBufferNormalTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L77)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L77)
 
 
 Returns whether G-Buffer Normal texture is used.
@@ -500,7 +500,7 @@ Returns whether G-Buffer Normal texture is used.
 
 > **set** **useGBufferNormalTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L85)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L85)
 
 
 Sets whether G-Buffer Normal texture is used.
@@ -527,7 +527,7 @@ Sets whether G-Buffer Normal texture is used.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L93)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L93)
 
 
 Returns the video memory usage.
@@ -548,7 +548,7 @@ Returns the video memory usage.
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L167)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L167)
 
 
 Workgroup Size X
@@ -561,7 +561,7 @@ Workgroup Size X
 
 > **set** **WORK\_SIZE\_X**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L171)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L171)
 
 ##### Parameters
 
@@ -585,7 +585,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.co
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L179)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L179)
 
 
 Workgroup Size Y
@@ -598,7 +598,7 @@ Workgroup Size Y
 
 > **set** **WORK\_SIZE\_Y**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L183)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L183)
 
 ##### Parameters
 
@@ -622,7 +622,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.co
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L191)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L191)
 
 
 Workgroup Size Z
@@ -635,7 +635,7 @@ Workgroup Size Z
 
 > **set** **WORK\_SIZE\_Z**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L195)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L195)
 
 ##### Parameters
 
@@ -657,7 +657,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.co
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L211)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L211)
 
 
 Clears the effect.
@@ -676,7 +676,7 @@ Clears the effect.
 
 > **execute**(`view`, `gpuDevice`, `width`, `height`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L289)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L289)
 
 
 Executes the effect.
@@ -704,7 +704,7 @@ Executes the effect.
 
 > **init**(`redGPUContext`, `name`, `computeCodes`, `bindGroupLayout?`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L236)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L236)
 
 
 Initializes the effect.
@@ -734,7 +734,7 @@ Initializes the effect.
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): `ASinglePassPostEffectResult`
 
-Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:234](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/effects/fog/heightFog/HeightFog.ts#L234)
+Defined in: [src/postEffect/effects/fog/heightFog/HeightFog.ts:234](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/effects/fog/heightFog/HeightFog.ts#L234)
 
 
 Renders the fog effect.
@@ -765,7 +765,7 @@ Rendering result
 
 > **update**(`deltaTime`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:352](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L352)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:352](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L352)
 
 
 Updates the effect state.
@@ -790,7 +790,7 @@ Updates the effect state.
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/postEffect/core/ASinglePassPostEffect.ts#L366)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/postEffect/core/ASinglePassPostEffect.ts#L366)
 
 
 Updates a uniform value.

@@ -6,7 +6,7 @@
 
 # Class: Sampler
 
-Defined in: [src/resources/sampler/Sampler.ts:33](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L33)
+Defined in: [src/resources/sampler/Sampler.ts:33](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L33)
 
 GPU 텍스처 샘플러를 관리하는 클래스입니다.
 
@@ -35,7 +35,7 @@ GPU 텍스처 샘플러를 관리하는 클래스입니다.
 
 > **new Sampler**(`redGPUContext`, `options?`): `Sampler`
 
-Defined in: [src/resources/sampler/Sampler.ts:78](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L78)
+Defined in: [src/resources/sampler/Sampler.ts:78](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L78)
 
 Sampler 인스턴스를 생성합니다.
 
@@ -73,7 +73,7 @@ const sampler = new RedGPU.Resource.Sampler(redGPUContext, {
 
 > **get** **addressModeU**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:84](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L84)
+Defined in: [src/resources/sampler/Sampler.ts:84](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L84)
 
 U축 어드레스 모드
 
@@ -85,7 +85,7 @@ U축 어드레스 모드
 
 > **set** **addressModeU**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:89](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L89)
+Defined in: [src/resources/sampler/Sampler.ts:89](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L89)
 
 U축 어드레스 모드 설정
 
@@ -107,7 +107,7 @@ U축 어드레스 모드 설정
 
 > **get** **addressModeV**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:94](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L94)
+Defined in: [src/resources/sampler/Sampler.ts:94](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L94)
 
 V축 어드레스 모드
 
@@ -119,7 +119,7 @@ V축 어드레스 모드
 
 > **set** **addressModeV**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:99](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L99)
+Defined in: [src/resources/sampler/Sampler.ts:99](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L99)
 
 V축 어드레스 모드 설정
 
@@ -141,7 +141,7 @@ V축 어드레스 모드 설정
 
 > **get** **addressModeW**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:104](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L104)
+Defined in: [src/resources/sampler/Sampler.ts:104](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L104)
 
 W축 어드레스 모드
 
@@ -153,7 +153,7 @@ W축 어드레스 모드
 
 > **set** **addressModeW**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:109](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L109)
+Defined in: [src/resources/sampler/Sampler.ts:109](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L109)
 
 W축 어드레스 모드 설정
 
@@ -175,7 +175,7 @@ W축 어드레스 모드 설정
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L57)
 
 캐시 키를 반환합니다.
 
@@ -188,7 +188,7 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L65)
 
 캐시 키를 설정합니다.
 
@@ -215,7 +215,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L106)
 
 연관된 GPU 디바이스를 반환합니다.
 
@@ -236,7 +236,7 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **gpuSampler**(): `GPUSampler`
 
-Defined in: [src/resources/sampler/Sampler.ts:136](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L136)
+Defined in: [src/resources/sampler/Sampler.ts:136](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L136)
 
 GPU 샘플러 객체를 반환합니다.
 
@@ -253,7 +253,7 @@ GPU 샘플러 객체를 반환합니다.
 
 > **get** **isAnisotropyValid**(): `boolean`
 
-Defined in: [src/resources/sampler/Sampler.ts:206](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L206)
+Defined in: [src/resources/sampler/Sampler.ts:206](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L206)
 
 애니소트로피 설정이 유효한지 확인합니다. (모든 필터가 'linear'여야 함)
 
@@ -270,7 +270,7 @@ Defined in: [src/resources/sampler/Sampler.ts:206](https://github.com/redcamel/R
 
 > **get** **magFilter**(): `GPUFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:144](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L144)
+Defined in: [src/resources/sampler/Sampler.ts:144](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L144)
 
 확대 필터 모드를 반환합니다.
 
@@ -283,7 +283,7 @@ Defined in: [src/resources/sampler/Sampler.ts:144](https://github.com/redcamel/R
 
 > **set** **magFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:155](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L155)
+Defined in: [src/resources/sampler/Sampler.ts:155](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L155)
 
 확대 필터 모드를 설정합니다.
 
@@ -306,7 +306,7 @@ Defined in: [src/resources/sampler/Sampler.ts:155](https://github.com/redcamel/R
 
 > **get** **maxAnisotropy**(): `number`
 
-Defined in: [src/resources/sampler/Sampler.ts:182](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L182)
+Defined in: [src/resources/sampler/Sampler.ts:182](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L182)
 
 최대 애니소트로피 값을 반환합니다.
 
@@ -319,7 +319,7 @@ Defined in: [src/resources/sampler/Sampler.ts:182](https://github.com/redcamel/R
 
 > **set** **maxAnisotropy**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:196](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L196)
+Defined in: [src/resources/sampler/Sampler.ts:196](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L196)
 
 최대 애니소트로피 값을 설정합니다. (1~16 사이)
 
@@ -347,7 +347,7 @@ Defined in: [src/resources/sampler/Sampler.ts:196](https://github.com/redcamel/R
 
 > **get** **minFilter**(): `GPUFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:163](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L163)
+Defined in: [src/resources/sampler/Sampler.ts:163](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L163)
 
 축소 필터 모드를 반환합니다.
 
@@ -360,7 +360,7 @@ Defined in: [src/resources/sampler/Sampler.ts:163](https://github.com/redcamel/R
 
 > **set** **minFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:174](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L174)
+Defined in: [src/resources/sampler/Sampler.ts:174](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L174)
 
 축소 필터 모드를 설정합니다.
 
@@ -383,7 +383,7 @@ Defined in: [src/resources/sampler/Sampler.ts:174](https://github.com/redcamel/R
 
 > **get** **mipmapFilter**(): `GPUMipmapFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:117](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L117)
+Defined in: [src/resources/sampler/Sampler.ts:117](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L117)
 
 밉맵 필터 모드를 반환합니다.
 
@@ -396,7 +396,7 @@ Defined in: [src/resources/sampler/Sampler.ts:117](https://github.com/redcamel/R
 
 > **set** **mipmapFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:128](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/sampler/Sampler.ts#L128)
+Defined in: [src/resources/sampler/Sampler.ts:128](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/sampler/Sampler.ts#L128)
 
 밉맵 필터 모드를 설정합니다.
 
@@ -419,7 +419,7 @@ Defined in: [src/resources/sampler/Sampler.ts:128](https://github.com/redcamel/R
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L81)
 
 인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
 
@@ -432,7 +432,7 @@ Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L90)
 
 인스턴스의 이름을 설정합니다.
 
@@ -459,7 +459,7 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L114)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -480,7 +480,7 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L73)
 
 리소스 매니저 키를 반환합니다.
 
@@ -501,7 +501,7 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L98)
 
 고유 식별자(UUID)를 반환합니다.
 
@@ -520,7 +520,7 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L125)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
 
@@ -545,7 +545,7 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L152)
 
 등록된 더티 리스너들을 실행합니다.
 
@@ -570,7 +570,7 @@ Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/resources/core/ResourceBase.ts#L137)
 
 더티 파이프라인 리스너를 제거합니다.
 

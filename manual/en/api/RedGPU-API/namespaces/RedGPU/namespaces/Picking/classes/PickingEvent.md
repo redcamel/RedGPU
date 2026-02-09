@@ -6,7 +6,7 @@
 
 # Class: PickingEvent
 
-Defined in: [src/picking/core/PickingEvent.ts:24](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L24)
+Defined in: [src/picking/core/PickingEvent.ts:24](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L24)
 
 
 Class encapsulating information related to mouse events.
@@ -29,7 +29,7 @@ mesh.addListener(RedGPU.Picking.PICKING_EVENT_TYPE.CLICK, (e) => {
 
 > **new PickingEvent**(`pickingId`, `mouseX`, `mouseY`, `target`, `time`, `type`, `nativeEvent`, `hit?`): `PickingEvent`
 
-Defined in: [src/picking/core/PickingEvent.ts:163](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L163)
+Defined in: [src/picking/core/PickingEvent.ts:163](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L163)
 
 
 Creates a PickingEvent instance.
@@ -57,7 +57,7 @@ Creates a PickingEvent instance.
 
 > **altKey**: `boolean` = `false`
 
-Defined in: [src/picking/core/PickingEvent.ts:120](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L120)
+Defined in: [src/picking/core/PickingEvent.ts:120](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L120)
 
 
 Whether the Alt key is pressed
@@ -74,7 +74,7 @@ false
 
 > **ctrlKey**: `boolean` = `false`
 
-Defined in: [src/picking/core/PickingEvent.ts:126](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L126)
+Defined in: [src/picking/core/PickingEvent.ts:126](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L126)
 
 
 Whether the Ctrl key is pressed
@@ -91,7 +91,7 @@ false
 
 > **distance**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:76](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L76)
+Defined in: [src/picking/core/PickingEvent.ts:76](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L76)
 
 
 Distance between the camera and the intersection point
@@ -102,7 +102,7 @@ Distance between the camera and the intersection point
 
 > **faceIndex**: `number` = `-1`
 
-Defined in: [src/picking/core/PickingEvent.ts:114](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L114)
+Defined in: [src/picking/core/PickingEvent.ts:114](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L114)
 
 
 Index of the intersected triangle (For 3D)
@@ -113,7 +113,7 @@ Index of the intersected triangle (For 3D)
 
 > **localPoint**: [`vec3`](../../Math/type-aliases/vec3.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:81](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L81)
+Defined in: [src/picking/core/PickingEvent.ts:81](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L81)
 
 
 Intersection point coordinates in the object's local space
@@ -124,7 +124,7 @@ Intersection point coordinates in the object's local space
 
 > **localX**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:87](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L87)
+Defined in: [src/picking/core/PickingEvent.ts:87](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L87)
 
 
 Local X coordinate
@@ -141,7 +141,7 @@ Local X coordinate
 
 > **localY**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:93](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L93)
+Defined in: [src/picking/core/PickingEvent.ts:93](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L93)
 
 
 Local Y coordinate
@@ -158,7 +158,7 @@ Local Y coordinate
 
 > **localZ**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:99](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L99)
+Defined in: [src/picking/core/PickingEvent.ts:99](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L99)
 
 
 Local Z coordinate
@@ -175,7 +175,7 @@ Local Z coordinate
 
 > **mouseX**: `number`
 
-Defined in: [src/picking/core/PickingEvent.ts:34](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L34)
+Defined in: [src/picking/core/PickingEvent.ts:34](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L34)
 
 
 Mouse X coordinate (Canvas relative)
@@ -186,7 +186,7 @@ Mouse X coordinate (Canvas relative)
 
 > **mouseY**: `number`
 
-Defined in: [src/picking/core/PickingEvent.ts:39](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L39)
+Defined in: [src/picking/core/PickingEvent.ts:39](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L39)
 
 
 Mouse Y coordinate (Canvas relative)
@@ -197,7 +197,7 @@ Mouse Y coordinate (Canvas relative)
 
 > **movementX**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:60](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L60)
+Defined in: [src/picking/core/PickingEvent.ts:60](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L60)
 
 
 Mouse X movement compared to the previous event
@@ -214,7 +214,7 @@ Mouse X movement compared to the previous event
 
 > **movementY**: `number` = `0`
 
-Defined in: [src/picking/core/PickingEvent.ts:66](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L66)
+Defined in: [src/picking/core/PickingEvent.ts:66](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L66)
 
 
 Mouse Y movement compared to the previous event
@@ -231,7 +231,7 @@ Mouse Y movement compared to the previous event
 
 > **pickingId**: `number`
 
-Defined in: [src/picking/core/PickingEvent.ts:29](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L29)
+Defined in: [src/picking/core/PickingEvent.ts:29](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L29)
 
 
 Picking ID (Unique value used for color-based picking)
@@ -242,7 +242,7 @@ Picking ID (Unique value used for color-based picking)
 
 > **point**: [`vec3`](../../Math/type-aliases/vec3.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:71](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L71)
+Defined in: [src/picking/core/PickingEvent.ts:71](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L71)
 
 
 Intersection point coordinates in world space
@@ -253,7 +253,7 @@ Intersection point coordinates in world space
 
 > **ray**: [`Ray`](../../Math/classes/Ray.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:109](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L109)
+Defined in: [src/picking/core/PickingEvent.ts:109](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L109)
 
 
 World ray used for intersection test
@@ -264,7 +264,7 @@ World ray used for intersection test
 
 > **shiftKey**: `boolean` = `false`
 
-Defined in: [src/picking/core/PickingEvent.ts:132](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L132)
+Defined in: [src/picking/core/PickingEvent.ts:132](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L132)
 
 
 Whether the Shift key is pressed
@@ -281,7 +281,7 @@ false
 
 > **target**: [`Mesh`](../../Display/classes/Mesh.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:44](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L44)
+Defined in: [src/picking/core/PickingEvent.ts:44](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L44)
 
 
 The target mesh where the event occurred
@@ -292,7 +292,7 @@ The target mesh where the event occurred
 
 > **time**: `number`
 
-Defined in: [src/picking/core/PickingEvent.ts:49](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L49)
+Defined in: [src/picking/core/PickingEvent.ts:49](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L49)
 
 
 Event occurrence time
@@ -303,7 +303,7 @@ Event occurrence time
 
 > **type**: `string`
 
-Defined in: [src/picking/core/PickingEvent.ts:54](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L54)
+Defined in: [src/picking/core/PickingEvent.ts:54](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L54)
 
 
 Event type (See PICKING_EVENT_TYPE)
@@ -314,7 +314,7 @@ Event type (See PICKING_EVENT_TYPE)
 
 > **uv**: [`vec2`](../../Math/type-aliases/vec2.md)
 
-Defined in: [src/picking/core/PickingEvent.ts:104](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/picking/core/PickingEvent.ts#L104)
+Defined in: [src/picking/core/PickingEvent.ts:104](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/core/PickingEvent.ts#L104)
 
 
 UV coordinates at the intersection point (Texture coordinates)
