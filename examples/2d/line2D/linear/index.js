@@ -1,5 +1,5 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js?t=1770634235177";
+import * as RedGPU from "../../../../dist/index.js?t=1770635178902";
 
 /**
  * [KO] Line2D (Linear) 예제
@@ -130,7 +130,7 @@ function getRainbowColor(t) {
 
 /* 6. 디버그 UI 패널 */
 async function setupDebugPanel(redGPUContext, groups, updateLinesCallback, getPointsPerLine, setPointsPerLine) {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770635178902");
     const pane = new Pane();
 
     const debugOptions = {

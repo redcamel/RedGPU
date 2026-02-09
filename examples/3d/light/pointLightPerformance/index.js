@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770634235177";
+import * as RedGPU from "../../../../dist/index.js?t=1770635178902";
 
 /**
  * [KO] Point Light Performance 예제
@@ -50,7 +50,7 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770634235177");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770635178902");
     setDebugButtons(RedGPU, redGPUContext);
 };
 
