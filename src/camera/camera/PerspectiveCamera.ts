@@ -86,7 +86,7 @@ class PerspectiveCamera {
 	 * [KO] 근평면(near)
 	 * [EN] Near clipping plane
 	 */
-	#nearClipping: number = 0.1;
+	#nearClipping: number = 0.01;
 
 	/**
 	 * [KO] 원평면(far)
