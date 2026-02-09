@@ -48,11 +48,14 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # docs 폴더와 구형 sitemap.xml 삭제 반영 (존재할 경우에만)
-          git rm -rf --ignore-unmatch docs/ sitemap.xml
+          # docs 폴더 삭제 반영 (존재할 경우에만)
+          git rm -rf --ignore-unmatch docs/ sitemap/
           
-          # 빌드 결과물 및 사이트맵 폴더 추가
-          git add dist/ manual/ sitemap/ examples/ -f
+          # 빌드 결과물 및 사이트맵 파일 추가
+          git add dist/ manual/ examples/ sitemap.xml sitemap-examples.xml -f
+          
+          # sitemap 폴더가 있을 경우 추가 (없을 수도 있음)
+          git add sitemap/ -f || true
           
           # 변경사항이 있는 경우에만 커밋 (무한 루프 방지를 위해 [skip ci] 포함)
           git diff --staged --quiet || git commit -m "chore: auto-build dist and docs with cache bursting [skip ci]"

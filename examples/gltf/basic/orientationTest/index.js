@@ -1,7 +1,7 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770634235177";
+import * as RedGPU from "../../../../dist/index.js?t=1770635178902";
 import {
     loadingProgressInfoHandler
-} from '../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770634235177'
+} from '../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770635178902'
 
 /**
  * [KO] Orientation Test 예제
@@ -76,11 +76,11 @@ const loadGLTF = async (view, url) => {
  * @param {RedGPU.Display.View3D} targetView
  */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770635178902');
     const {
         createIblHelper,
         setDebugButtons
-    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1770634235177');
+    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1770635178902');
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);

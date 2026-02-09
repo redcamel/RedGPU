@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../dist/index.js?t=1770634235177";
+import * as RedGPU from "../../../dist/index.js?t=1770635178902";
 
 /**
  * [KO] SSR 예제
@@ -111,8 +111,8 @@ function loadGLTFModels(redGPUContext, scene) {
  * SSR 설정 컨트롤러 (Tweakpane)
  */
 async function createSSRControls(redGPUContext, targetView) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177');
-    const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1770634235177");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770635178902');
+    const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1770635178902");
 
     const pane = new Pane({title: 'SSR 옵션 조절'});
     setDebugButtons(RedGPU, redGPUContext);
