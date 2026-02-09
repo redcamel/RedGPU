@@ -8,7 +8,7 @@
 
 > **validateNumber**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateNumber.ts:26](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/runtimeChecker/validateFunc/validateNumber.ts#L26)
+Defined in: [src/runtimeChecker/validateFunc/validateNumber.ts:26](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/runtimeChecker/validateFunc/validateNumber.ts#L26)
 
 주어진 값이 숫자(Number) 타입인지 검증합니다.
 

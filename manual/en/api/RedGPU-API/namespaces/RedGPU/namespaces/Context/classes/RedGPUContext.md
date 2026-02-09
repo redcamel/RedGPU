@@ -6,7 +6,7 @@
 
 # Class: RedGPUContext
 
-Defined in: [src/context/RedGPUContext.ts:37](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L37)
+Defined in: [src/context/RedGPUContext.ts:37](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L37)
 
 
 The RedGPUContext class is the top-level context object provided after WebGPU initialization.
@@ -41,7 +41,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 > **new RedGPUContext**(`htmlCanvas`, `gpuAdapter`, `gpuDevice`, `gpuContext`, `alphaMode`): `RedGPUContext`
 
-Defined in: [src/context/RedGPUContext.ts:141](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L141)
+Defined in: [src/context/RedGPUContext.ts:141](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L141)
 
 
 RedGPUContext constructor
@@ -70,7 +70,7 @@ RedGPUContext constructor
 
 > **currentRequestAnimationFrame**: `number`
 
-Defined in: [src/context/RedGPUContext.ts:42](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L42)
+Defined in: [src/context/RedGPUContext.ts:42](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L42)
 
 
 Current requestAnimationFrame ID (for frame loop management)
@@ -81,7 +81,7 @@ Current requestAnimationFrame ID (for frame loop management)
 
 > **currentTime**: `number`
 
-Defined in: [src/context/RedGPUContext.ts:53](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L53)
+Defined in: [src/context/RedGPUContext.ts:53](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L53)
 
 
 Current time (frame based, ms)
@@ -92,7 +92,7 @@ Current time (frame based, ms)
 
 > **onResize**: (`event`) => `void` = `null`
 
-Defined in: [src/context/RedGPUContext.ts:48](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L48)
+Defined in: [src/context/RedGPUContext.ts:48](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L48)
 
 
 Resize event handler (called when canvas size changes)
@@ -115,7 +115,7 @@ Resize event handler (called when canvas size changes)
 
 > **get** **alphaMode**(): `GPUCanvasAlphaMode`
 
-Defined in: [src/context/RedGPUContext.ts:243](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L243)
+Defined in: [src/context/RedGPUContext.ts:243](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L243)
 
 
 Returns the alpha mode of the canvas.
@@ -128,7 +128,7 @@ Returns the alpha mode of the canvas.
 
 > **set** **alphaMode**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:254](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L254)
+Defined in: [src/context/RedGPUContext.ts:254](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L254)
 
 
 Sets the alpha mode of the canvas.
@@ -151,7 +151,7 @@ Sets the alpha mode of the canvas.
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/context/RedGPUContext.ts:169](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L169)
+Defined in: [src/context/RedGPUContext.ts:169](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L169)
 
 
 Returns the antialiasing manager.
@@ -168,7 +168,7 @@ Returns the antialiasing manager.
 
 > **get** **backgroundColor**(): [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/context/RedGPUContext.ts:196](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L196)
+Defined in: [src/context/RedGPUContext.ts:196](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L196)
 
 
 Returns the background color.
@@ -181,7 +181,7 @@ Returns the background color.
 
 > **set** **backgroundColor**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:210](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L210)
+Defined in: [src/context/RedGPUContext.ts:210](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L210)
 
 
 Sets the background color.
@@ -209,7 +209,7 @@ Throws error if value is not an instance of ColorRGBA
 
 > **get** **boundingClientRect**(): `DOMRect`
 
-Defined in: [src/context/RedGPUContext.ts:161](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L161)
+Defined in: [src/context/RedGPUContext.ts:161](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L161)
 
 ##### Returns
 
@@ -223,7 +223,7 @@ Defined in: [src/context/RedGPUContext.ts:161](https://github.com/redcamel/RedGP
 
 > **get** **configurationDescription**(): `GPUCanvasConfiguration`
 
-Defined in: [src/context/RedGPUContext.ts:227](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L227)
+Defined in: [src/context/RedGPUContext.ts:227](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L227)
 
 
 Returns the GPU canvas configuration information.
@@ -240,7 +240,7 @@ Returns the GPU canvas configuration information.
 
 > **get** **detector**(): [`RedGPUContextDetector`](../namespaces/Core/classes/RedGPUContextDetector.md)
 
-Defined in: [src/context/RedGPUContext.ts:219](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L219)
+Defined in: [src/context/RedGPUContext.ts:219](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L219)
 
 
 Returns the RedGPUContextDetector instance.
@@ -257,7 +257,7 @@ Returns the RedGPUContextDetector instance.
 
 > **get** **gpuAdapter**(): `GPUAdapter`
 
-Defined in: [src/context/RedGPUContext.ts:235](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L235)
+Defined in: [src/context/RedGPUContext.ts:235](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L235)
 
 
 Returns the GPU adapter.
@@ -274,7 +274,7 @@ Returns the GPU adapter.
 
 > **get** **gpuContext**(): `GPUCanvasContext`
 
-Defined in: [src/context/RedGPUContext.ts:263](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L263)
+Defined in: [src/context/RedGPUContext.ts:263](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L263)
 
 
 Returns the GPU canvas context.
@@ -291,7 +291,7 @@ Returns the GPU canvas context.
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/context/RedGPUContext.ts:271](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L271)
+Defined in: [src/context/RedGPUContext.ts:271](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L271)
 
 
 Returns the GPU device.
@@ -308,7 +308,7 @@ Returns the GPU device.
 
 > **get** **height**(): `string` \| `number`
 
-Defined in: [src/context/RedGPUContext.ts:341](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L341)
+Defined in: [src/context/RedGPUContext.ts:341](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L341)
 
 
 Returns the height.
@@ -321,7 +321,7 @@ Returns the height.
 
 > **set** **height**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:352](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L352)
+Defined in: [src/context/RedGPUContext.ts:352](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L352)
 
 
 Sets the height.
@@ -344,7 +344,7 @@ Sets the height.
 
 > **get** **htmlCanvas**(): `HTMLCanvasElement`
 
-Defined in: [src/context/RedGPUContext.ts:279](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L279)
+Defined in: [src/context/RedGPUContext.ts:279](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L279)
 
 
 Returns the HTML canvas element.
@@ -361,7 +361,7 @@ Returns the HTML canvas element.
 
 > **get** **keyboardKeyBuffer**(): `object`
 
-Defined in: [src/context/RedGPUContext.ts:287](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L287)
+Defined in: [src/context/RedGPUContext.ts:287](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L287)
 
 
 Returns the keyboard input buffer.
@@ -374,7 +374,7 @@ Returns the keyboard input buffer.
 
 > **set** **keyboardKeyBuffer**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:298](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L298)
+Defined in: [src/context/RedGPUContext.ts:298](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L298)
 
 
 Sets the keyboard input buffer.
@@ -397,7 +397,7 @@ Sets the keyboard input buffer.
 
 > **get** **numViews**(): `number`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:47](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L47)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:47](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L47)
 
 
 Returns the number of View3D objects owned.
@@ -418,7 +418,7 @@ Returns the number of View3D objects owned.
 
 > **get** **pixelRectObject**(): `IRedGPURectObject`
 
-Defined in: [src/context/RedGPUContext.ts:368](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L368)
+Defined in: [src/context/RedGPUContext.ts:368](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L368)
 
 
 Returns the pixel size information. (in physical pixels)
@@ -435,7 +435,7 @@ Returns the pixel size information. (in physical pixels)
 
 > **get** **renderScale**(): `number`
 
-Defined in: [src/context/RedGPUContext.ts:376](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L376)
+Defined in: [src/context/RedGPUContext.ts:376](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L376)
 
 
 Returns the render scale.
@@ -448,7 +448,7 @@ Returns the render scale.
 
 > **set** **renderScale**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:387](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L387)
+Defined in: [src/context/RedGPUContext.ts:387](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L387)
 
 
 Sets the render scale.
@@ -471,7 +471,7 @@ Sets the render scale.
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/context/RedGPUContext.ts:306](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L306)
+Defined in: [src/context/RedGPUContext.ts:306](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L306)
 
 
 Returns the resource manager.
@@ -488,7 +488,7 @@ Returns the resource manager.
 
 > **get** **screenRectObject**(): `IRedGPURectObject`
 
-Defined in: [src/context/RedGPUContext.ts:360](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L360)
+Defined in: [src/context/RedGPUContext.ts:360](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L360)
 
 
 Returns the screen size information. (in CSS pixels)
@@ -505,7 +505,7 @@ Returns the screen size information. (in CSS pixels)
 
 > **get** **sizeManager**(): [`RedGPUContextSizeManager`](../namespaces/Core/classes/RedGPUContextSizeManager.md)
 
-Defined in: [src/context/RedGPUContext.ts:314](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L314)
+Defined in: [src/context/RedGPUContext.ts:314](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L314)
 
 
 Returns the RedGPUContextSizeManager instance.
@@ -522,7 +522,7 @@ Returns the RedGPUContextSizeManager instance.
 
 > **get** **useDebugPanel**(): `boolean`
 
-Defined in: [src/context/RedGPUContext.ts:177](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L177)
+Defined in: [src/context/RedGPUContext.ts:177](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L177)
 
 
 Returns whether the debug panel is used.
@@ -535,7 +535,7 @@ Returns whether the debug panel is used.
 
 > **set** **useDebugPanel**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:188](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L188)
+Defined in: [src/context/RedGPUContext.ts:188](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L188)
 
 
 Sets whether to use the debug panel.
@@ -558,7 +558,7 @@ Sets whether to use the debug panel.
 
 > **get** **viewList**(): [`View3D`](../../Display/classes/View3D.md)[]
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:39](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L39)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:39](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L39)
 
 
 Returns the list of View3D objects owned by this instance.
@@ -579,7 +579,7 @@ Returns the list of View3D objects owned by this instance.
 
 > **get** **width**(): `string` \| `number`
 
-Defined in: [src/context/RedGPUContext.ts:322](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L322)
+Defined in: [src/context/RedGPUContext.ts:322](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L322)
 
 
 Returns the width.
@@ -592,7 +592,7 @@ Returns the width.
 
 > **set** **width**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:333](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L333)
+Defined in: [src/context/RedGPUContext.ts:333](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L333)
 
 
 Sets the width.
@@ -613,7 +613,7 @@ Sets the width.
 
 > **addView**(`view`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:72](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L72)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:72](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L72)
 
 
 Adds a view to the view list.
@@ -638,7 +638,7 @@ Adds a view to the view list.
 
 > **addViewAt**(`view`, `index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:87](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L87)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:87](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L87)
 
 
 Adds a view at the specified index in the view list.
@@ -664,7 +664,7 @@ Adds a view at the specified index in the view list.
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:61](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L61)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:61](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L61)
 
 
 Checks if the given child View3D is contained in the current container.
@@ -692,7 +692,7 @@ Containment status
 
 > **destroy**(): `void`
 
-Defined in: [src/context/RedGPUContext.ts:399](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L399)
+Defined in: [src/context/RedGPUContext.ts:399](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L399)
 
 
 Destroys the GPU device and releases resources.
@@ -707,7 +707,7 @@ Destroys the GPU device and releases resources.
 
 > **getViewAt**(`index`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:103](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L103)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:103](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L103)
 
 
 Retrieves the view at the specified index.
@@ -732,7 +732,7 @@ Retrieves the view at the specified index.
 
 > **getViewIndex**(`view`): `number`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:115](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L115)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:115](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L115)
 
 
 Returns the index of the specified view.
@@ -757,7 +757,7 @@ Returns the index of the specified view.
 
 > **removeAllViews**(): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:225](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L225)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:225](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L225)
 
 
 Removes all views from the view list.
@@ -776,7 +776,7 @@ Removes all views from the view list.
 
 > **removeView**(`view`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:197](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L197)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:197](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L197)
 
 
 Removes the specified view from the view list.
@@ -801,7 +801,7 @@ Removes the specified view from the view list.
 
 > **removeViewAt**(`index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:211](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L211)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:211](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L211)
 
 
 Removes the view at the specified index from the view list.
@@ -826,7 +826,7 @@ Removes the view at the specified index from the view list.
 
 > **setSize**(`w`, `h`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:413](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/RedGPUContext.ts#L413)
+Defined in: [src/context/RedGPUContext.ts:413](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/RedGPUContext.ts#L413)
 
 
 Sets the size of the context.
@@ -848,7 +848,7 @@ Sets the size of the context.
 
 > **setViewIndex**(`view`, `index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:133](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L133)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:133](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L133)
 
 
 Moves the specified view to a specific index in the view list.
@@ -879,7 +879,7 @@ Throws error if view is not registered or index is out of bounds
 
 > **swapViews**(`view1`, `view2`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:160](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L160)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:160](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L160)
 
 
 Swaps the positions of two views in the view list.
@@ -910,7 +910,7 @@ Throws error if view is not a child of this context
 
 > **swapViewsAt**(`index1`, `index2`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:179](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/context/core/RedGPUContextViewContainer.ts#L179)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:179](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/context/core/RedGPUContextViewContainer.ts#L179)
 
 
 Swaps the positions of two views at the specified indices.

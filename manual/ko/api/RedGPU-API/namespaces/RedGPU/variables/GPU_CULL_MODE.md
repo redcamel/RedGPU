@@ -8,7 +8,7 @@
 
 > `const` **GPU\_CULL\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_CULL\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/gpuConst/GPU_CULL_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_CULL\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/gpuConst/GPU_CULL_MODE.ts#L10)
 
 렌더링 시 제외할 면(컬링)을 정의하는 상수군입니다.
 

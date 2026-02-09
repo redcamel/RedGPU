@@ -6,7 +6,7 @@
 
 # Class: FollowController
 
-Defined in: [src/camera/controller/FollowController.ts:32](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L32)
+Defined in: [src/camera/controller/FollowController.ts:32](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L32)
 
 
 Camera controller that tracks a specific target mesh.
@@ -34,7 +34,7 @@ followController.tilt = 30;
 
 > **new FollowController**(`redGPUContext`, `targetMesh`): `FollowController`
 
-Defined in: [src/camera/controller/FollowController.ts:153](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L153)
+Defined in: [src/camera/controller/FollowController.ts:153](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L153)
 
 
 Creates an instance of FollowController.
@@ -72,7 +72,7 @@ Throws Error if targetMesh is null or undefined
 
 > **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L138)
+Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L138)
 
 
 Returns the camera controlled by this controller.
@@ -96,7 +96,7 @@ Controlled camera (PerspectiveCamera or OrthographicCamera)
 
 > **get** **distance**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:176](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L176)
+Defined in: [src/camera/controller/FollowController.ts:176](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L176)
 
 
 Gets the camera distance from the target.
@@ -112,7 +112,7 @@ Target distance (min 0.1)
 
 > **set** **distance**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:188](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L188)
+Defined in: [src/camera/controller/FollowController.ts:188](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L188)
 
 
 Sets the camera distance from the target.
@@ -135,7 +135,7 @@ Sets the camera distance from the target.
 
 > **get** **distanceInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:201](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L201)
+Defined in: [src/camera/controller/FollowController.ts:201](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L201)
 
 
 Gets the interpolation factor for the distance value.
@@ -151,7 +151,7 @@ Distance interpolation factor (0.01 ~ 1)
 
 > **set** **distanceInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:213](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L213)
+Defined in: [src/camera/controller/FollowController.ts:213](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L213)
 
 
 Sets the interpolation factor for the distance value.
@@ -174,7 +174,7 @@ Sets the interpolation factor for the distance value.
 
 > **get** **followTargetRotation**(): `boolean`
 
-Defined in: [src/camera/controller/FollowController.ts:401](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L401)
+Defined in: [src/camera/controller/FollowController.ts:401](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L401)
 
 
 Gets whether to follow the target mesh's rotation.
@@ -190,7 +190,7 @@ If true, follows the target's rotation
 
 > **set** **followTargetRotation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:413](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L413)
+Defined in: [src/camera/controller/FollowController.ts:413](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L413)
 
 
 Sets whether to follow the target mesh's rotation.
@@ -213,7 +213,7 @@ Sets whether to follow the target mesh's rotation.
 
 > **get** **height**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:226](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L226)
+Defined in: [src/camera/controller/FollowController.ts:226](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L226)
 
 
 Gets the camera height from the target.
@@ -229,7 +229,7 @@ Target height
 
 > **set** **height**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:238](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L238)
+Defined in: [src/camera/controller/FollowController.ts:238](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L238)
 
 
 Sets the camera height from the target.
@@ -252,7 +252,7 @@ Sets the camera height from the target.
 
 > **get** **heightInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:251](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L251)
+Defined in: [src/camera/controller/FollowController.ts:251](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L251)
 
 
 Gets the interpolation factor for the height value.
@@ -268,7 +268,7 @@ Height interpolation factor (0.01 ~ 1)
 
 > **set** **heightInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:263](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L263)
+Defined in: [src/camera/controller/FollowController.ts:263](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L263)
 
 
 Sets the interpolation factor for the height value.
@@ -291,7 +291,7 @@ Sets the interpolation factor for the height value.
 
 > **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L187)
+Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L187)
 
 **`Internal`**
 
@@ -317,7 +317,7 @@ Hovered View or null
 
 > **get** **interpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:376](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L376)
+Defined in: [src/camera/controller/FollowController.ts:376](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L376)
 
 
 Gets the interpolation factor for the overall camera position.
@@ -333,7 +333,7 @@ Interpolation factor (0.01 ~ 1)
 
 > **set** **interpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:388](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L388)
+Defined in: [src/camera/controller/FollowController.ts:388](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L388)
 
 
 Sets the interpolation factor for the overall camera position.
@@ -356,7 +356,7 @@ Sets the interpolation factor for the overall camera position.
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L233)
+Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L233)
 
 **`Internal`**
 
@@ -382,7 +382,7 @@ Whether it is the keyboard active controller
 
 > **get** **keyboardActiveView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L200)
+Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L200)
 
 **`Internal`**
 
@@ -400,7 +400,7 @@ Keyboard active View or null
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L213)
+Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L213)
 
 **`Internal`**
 
@@ -429,7 +429,7 @@ Sets the View with active keyboard input.
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L246)
+Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L246)
 
 **`Internal`**
 
@@ -447,7 +447,7 @@ Processing status
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L259)
+Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L259)
 
 **`Internal`**
 
@@ -476,7 +476,7 @@ Sets whether keyboard input has been processed in this frame.
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L101)
+Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L101)
 
 
 Returns the name of the controller.
@@ -492,7 +492,7 @@ Controller name
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L114)
+Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L114)
 
 
 Sets the name of the controller.
@@ -519,7 +519,7 @@ Sets the name of the controller.
 
 > **get** **pan**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:276](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L276)
+Defined in: [src/camera/controller/FollowController.ts:276](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L276)
 
 
 Gets the camera's horizontal rotation (pan) angle around the target (in degrees).
@@ -535,7 +535,7 @@ Pan angle (in degrees)
 
 > **set** **pan**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:288](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L288)
+Defined in: [src/camera/controller/FollowController.ts:288](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L288)
 
 
 Sets the camera's horizontal rotation (pan) angle around the target.
@@ -558,7 +558,7 @@ Sets the camera's horizontal rotation (pan) angle around the target.
 
 > **get** **panInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:301](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L301)
+Defined in: [src/camera/controller/FollowController.ts:301](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L301)
 
 
 Gets the interpolation factor for the pan value.
@@ -574,7 +574,7 @@ Pan interpolation factor (0.01 ~ 1)
 
 > **set** **panInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:313](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L313)
+Defined in: [src/camera/controller/FollowController.ts:313](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L313)
 
 
 Sets the interpolation factor for the pan value.
@@ -597,7 +597,7 @@ Sets the interpolation factor for the pan value.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L126)
+Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L126)
 
 
 Returns the RedGPU context.
@@ -621,7 +621,7 @@ RedGPU context
 
 > **get** **targetMesh**(): [`Mesh`](../../Display/classes/Mesh.md)
 
-Defined in: [src/camera/controller/FollowController.ts:500](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L500)
+Defined in: [src/camera/controller/FollowController.ts:500](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L500)
 
 
 Gets the target mesh to follow.
@@ -637,7 +637,7 @@ Current target mesh
 
 > **set** **targetMesh**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:515](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L515)
+Defined in: [src/camera/controller/FollowController.ts:515](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L515)
 
 
 Sets the target mesh to follow.
@@ -665,7 +665,7 @@ Throws Error if value is null or undefined
 
 > **get** **targetOffsetX**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:425](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L425)
+Defined in: [src/camera/controller/FollowController.ts:425](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L425)
 
 
 Gets the camera's X-axis offset from the target.
@@ -681,7 +681,7 @@ X-axis offset
 
 > **set** **targetOffsetX**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:437](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L437)
+Defined in: [src/camera/controller/FollowController.ts:437](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L437)
 
 
 Sets the camera's X-axis offset from the target.
@@ -704,7 +704,7 @@ Sets the camera's X-axis offset from the target.
 
 > **get** **targetOffsetY**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:450](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L450)
+Defined in: [src/camera/controller/FollowController.ts:450](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L450)
 
 
 Gets the camera's Y-axis offset from the target.
@@ -720,7 +720,7 @@ Y-axis offset
 
 > **set** **targetOffsetY**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:462](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L462)
+Defined in: [src/camera/controller/FollowController.ts:462](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L462)
 
 
 Sets the camera's Y-axis offset from the target.
@@ -743,7 +743,7 @@ Sets the camera's Y-axis offset from the target.
 
 > **get** **targetOffsetZ**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:475](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L475)
+Defined in: [src/camera/controller/FollowController.ts:475](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L475)
 
 
 Gets the camera's Z-axis offset from the target.
@@ -759,7 +759,7 @@ Z-axis offset
 
 > **set** **targetOffsetZ**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:487](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L487)
+Defined in: [src/camera/controller/FollowController.ts:487](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L487)
 
 
 Sets the camera's Z-axis offset from the target.
@@ -782,7 +782,7 @@ Sets the camera's Z-axis offset from the target.
 
 > **get** **tilt**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:326](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L326)
+Defined in: [src/camera/controller/FollowController.ts:326](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L326)
 
 
 Gets the camera's vertical rotation (tilt) angle around the target (in degrees).
@@ -798,7 +798,7 @@ Tilt angle (in degrees, -89 ~ 89)
 
 > **set** **tilt**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:338](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L338)
+Defined in: [src/camera/controller/FollowController.ts:338](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L338)
 
 
 Sets the camera's vertical rotation (tilt) angle around the target.
@@ -821,7 +821,7 @@ Sets the camera's vertical rotation (tilt) angle around the target.
 
 > **get** **tiltInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FollowController.ts:351](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L351)
+Defined in: [src/camera/controller/FollowController.ts:351](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L351)
 
 
 Gets the interpolation factor for the tilt value.
@@ -837,7 +837,7 @@ Tilt interpolation factor (0.01 ~ 1)
 
 > **set** **tiltInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:363](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L363)
+Defined in: [src/camera/controller/FollowController.ts:363](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L363)
 
 
 Sets the interpolation factor for the tilt value.
@@ -860,7 +860,7 @@ Sets the interpolation factor for the tilt value.
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L150)
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L150)
 
 
 Gets the camera's current world X coordinate.
@@ -884,7 +884,7 @@ X coordinate
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L162)
+Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L162)
 
 
 Gets the camera's current world Y coordinate.
@@ -908,7 +908,7 @@ Y coordinate
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L174)
+Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L174)
 
 
 Gets the camera's current world Z coordinate.
@@ -930,7 +930,7 @@ Z coordinate
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L323)
+Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L323)
 
 
 Checks for keyboard input and sets the active View.
@@ -965,7 +965,7 @@ True if keyboard input processing is possible, otherwise false
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L267)
+Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L267)
 
 
 Destroys the controller and removes event listeners.
@@ -984,7 +984,7 @@ Destroys the controller and removes event listeners.
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L407)
+Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L407)
 
 **`Internal`**
 
@@ -1014,7 +1014,7 @@ Corresponding View or null
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L370)
+Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L370)
 
 **`Internal`**
 
@@ -1037,8 +1037,8 @@ Gets the event coordinates on the canvas.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L390) |
-| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L391) |
+| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L390) |
+| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L391) |
 
 #### Inherited from
 
@@ -1050,7 +1050,7 @@ Gets the event coordinates on the canvas.
 
 > **setTargetOffset**(`x`, `y`, `z`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:541](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L541)
+Defined in: [src/camera/controller/FollowController.ts:541](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L541)
 
 
 Sets the camera's target offset at once.
@@ -1078,7 +1078,7 @@ controller.setTargetOffset(0, 5, 0);
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/camera/controller/FollowController.ts:561](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/FollowController.ts#L561)
+Defined in: [src/camera/controller/FollowController.ts:561](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FollowController.ts#L561)
 
 
 Updates the camera's position and orientation every frame.

@@ -6,7 +6,7 @@
 
 # Class: PrefilterGenerator
 
-Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:21](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L21)
+Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:21](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L21)
 
 Prefilter 맵을 생성하는 클래스입니다.
 
@@ -20,7 +20,7 @@ Prefilter 맵을 생성하는 클래스입니다.
 
 > **new PrefilterGenerator**(`redGPUContext`): `PrefilterGenerator`
 
-Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:35](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L35)
+Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:35](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L35)
 
 PrefilterGenerator 인스턴스를 생성합니다.
 
@@ -41,7 +41,7 @@ PrefilterGenerator 인스턴스를 생성합니다.
 
 > **generate**(`sourceCubeTexture`, `size`): `Promise`\<[`IBLCubeTexture`](IBLCubeTexture.md)\>
 
-Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:65](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L65)
+Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:65](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L65)
 
 소스 큐브 텍스처로부터 프리필터링된 큐브맵을 생성하여 반환합니다.
 

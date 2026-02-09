@@ -6,7 +6,7 @@
 
 # Class: PrefilterGenerator
 
-Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:21](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L21)
+Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:21](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L21)
 
 
 Class that generates a Prefilter map.
@@ -20,7 +20,7 @@ Extracts filtered reflection information for each roughness level from a cubemap
 
 > **new PrefilterGenerator**(`redGPUContext`): `PrefilterGenerator`
 
-Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:35](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L35)
+Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:35](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L35)
 
 
 Creates a PrefilterGenerator instance.
@@ -41,7 +41,7 @@ Creates a PrefilterGenerator instance.
 
 > **generate**(`sourceCubeTexture`, `size`): `Promise`\<[`IBLCubeTexture`](IBLCubeTexture.md)\>
 
-Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:65](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L65)
+Defined in: [src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts:65](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/prefilter/PrefilterGenerator.ts#L65)
 
 
 Generates and returns a pre-filtered cubemap from the source cube texture.

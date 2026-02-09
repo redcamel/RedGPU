@@ -6,7 +6,7 @@
 
 # Class: RapierBody
 
-Defined in: [src/plugins/rapier/RapierBody.ts:24](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L24)
+Defined in: [src/plugins/rapier/RapierBody.ts:24](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L24)
 
 **`Experimental`**
 
@@ -36,7 +36,7 @@ Rapier의 RigidBody와 RedGPU의 Mesh 사이에서 트랜스폼 정보를 동기
 
 > **new RapierBody**(`mesh`, `body`, `collider`): `RapierBody`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:43](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L43)
+Defined in: [src/plugins/rapier/RapierBody.ts:43](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L43)
 
 **`Experimental`**
 
@@ -63,7 +63,7 @@ RapierBody 인스턴스를 생성합니다.
 
 > **get** **mesh**(): [`Mesh`](../../../../Display/classes/Mesh.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:54](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L54)
+Defined in: [src/plugins/rapier/RapierBody.ts:54](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L54)
 
 **`Experimental`**
 
@@ -82,7 +82,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:54](https://github.com/redcamel/Re
 
 > **get** **nativeBody**(): `RigidBody`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:63](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L63)
+Defined in: [src/plugins/rapier/RapierBody.ts:63](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L63)
 
 **`Experimental`**
 
@@ -105,7 +105,7 @@ Rapier의 원본 강체(RigidBody) 객체를 반환합니다.
 
 > **get** **nativeCollider**(): `Collider`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:72](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L72)
+Defined in: [src/plugins/rapier/RapierBody.ts:72](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L72)
 
 **`Experimental`**
 
@@ -124,7 +124,7 @@ Rapier의 원본 충돌체(Collider) 객체를 반환합니다.
 
 > **get** **position**(): [`vec3`](../../../../Math/type-aliases/vec3.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:80](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L80)
+Defined in: [src/plugins/rapier/RapierBody.ts:80](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L80)
 
 **`Experimental`**
 
@@ -139,7 +139,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:80](https://github.com/redcamel/Re
 
 > **set** **position**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:85](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L85)
+Defined in: [src/plugins/rapier/RapierBody.ts:85](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L85)
 
 **`Experimental`**
 
@@ -173,7 +173,7 @@ body.position = [0, 10, 0];
 
 > **get** **rotation**(): [`quat`](../../../../Math/type-aliases/quat.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:97](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L97)
+Defined in: [src/plugins/rapier/RapierBody.ts:97](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L97)
 
 **`Experimental`**
 
@@ -188,7 +188,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:97](https://github.com/redcamel/Re
 
 > **set** **rotation**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:102](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L102)
+Defined in: [src/plugins/rapier/RapierBody.ts:102](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L102)
 
 **`Experimental`**
 
@@ -222,7 +222,7 @@ body.rotation = [0, 0, 0, 1];
 
 > **get** **velocity**(): [`vec3`](../../../../Math/type-aliases/vec3.md)
 
-Defined in: [src/plugins/rapier/RapierBody.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L114)
+Defined in: [src/plugins/rapier/RapierBody.ts:114](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L114)
 
 **`Experimental`**
 
@@ -237,7 +237,7 @@ Defined in: [src/plugins/rapier/RapierBody.ts:114](https://github.com/redcamel/R
 
 > **set** **velocity**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:119](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L119)
+Defined in: [src/plugins/rapier/RapierBody.ts:119](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L119)
 
 **`Experimental`**
 
@@ -269,7 +269,7 @@ const velocity = body.velocity;
 
 > **applyImpulse**(`force`): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:140](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L140)
+Defined in: [src/plugins/rapier/RapierBody.ts:140](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L140)
 
 **`Experimental`**
 
@@ -301,7 +301,7 @@ body.applyImpulse([0, 10, 0]);
 
 > **syncToMesh**(): `void`
 
-Defined in: [src/plugins/rapier/RapierBody.ts:152](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/plugins/rapier/RapierBody.ts#L152)
+Defined in: [src/plugins/rapier/RapierBody.ts:152](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/plugins/rapier/RapierBody.ts#L152)
 
 **`Experimental`**
 

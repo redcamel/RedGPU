@@ -6,7 +6,7 @@
 
 # Class: OrbitController
 
-Defined in: [src/camera/controller/OrbitController.ts:34](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L34)
+Defined in: [src/camera/controller/OrbitController.ts:34](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L34)
 
 특정 지점을 중심으로 회전하는 궤도형 카메라 컨트롤러입니다.
 
@@ -36,7 +36,7 @@ controller.pan = 45;
 
 > **new OrbitController**(`redGPUContext`): `OrbitController`
 
-Defined in: [src/camera/controller/OrbitController.ts:71](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L71)
+Defined in: [src/camera/controller/OrbitController.ts:71](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L71)
 
 OrbitController 인스턴스를 생성합니다.
 
@@ -68,7 +68,7 @@ const controller = new RedGPU.OrbitController(redGPUContext);
 
 > **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L138)
+Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L138)
 
 이 컨트롤러가 제어하는 카메라를 반환합니다.
 
@@ -92,7 +92,7 @@ Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/Red
 
 > **get** **centerX**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:105](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L105)
+Defined in: [src/camera/controller/OrbitController.ts:105](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L105)
 
 회전 중심의 X축 좌표를 가져옵니다.
 
@@ -108,7 +108,7 @@ Defined in: [src/camera/controller/OrbitController.ts:105](https://github.com/re
 
 > **set** **centerX**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:117](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L117)
+Defined in: [src/camera/controller/OrbitController.ts:117](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L117)
 
 회전 중심의 X축 좌표를 설정합니다.
 
@@ -131,7 +131,7 @@ Defined in: [src/camera/controller/OrbitController.ts:117](https://github.com/re
 
 > **get** **centerY**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:129](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L129)
+Defined in: [src/camera/controller/OrbitController.ts:129](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L129)
 
 회전 중심의 Y축 좌표를 가져옵니다.
 
@@ -147,7 +147,7 @@ Defined in: [src/camera/controller/OrbitController.ts:129](https://github.com/re
 
 > **set** **centerY**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:141](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L141)
+Defined in: [src/camera/controller/OrbitController.ts:141](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L141)
 
 회전 중심의 Y축 좌표를 설정합니다.
 
@@ -170,7 +170,7 @@ Defined in: [src/camera/controller/OrbitController.ts:141](https://github.com/re
 
 > **get** **centerZ**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:153](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L153)
+Defined in: [src/camera/controller/OrbitController.ts:153](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L153)
 
 회전 중심의 Z축 좌표를 가져옵니다.
 
@@ -186,7 +186,7 @@ Defined in: [src/camera/controller/OrbitController.ts:153](https://github.com/re
 
 > **set** **centerZ**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:165](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L165)
+Defined in: [src/camera/controller/OrbitController.ts:165](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L165)
 
 회전 중심의 Z축 좌표를 설정합니다.
 
@@ -209,7 +209,7 @@ Defined in: [src/camera/controller/OrbitController.ts:165](https://github.com/re
 
 > **get** **distance**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:178](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L178)
+Defined in: [src/camera/controller/OrbitController.ts:178](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L178)
 
 중심점으로부터 카메라까지의 거리를 가져옵니다.
 
@@ -225,7 +225,7 @@ Defined in: [src/camera/controller/OrbitController.ts:178](https://github.com/re
 
 > **set** **distance**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:190](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L190)
+Defined in: [src/camera/controller/OrbitController.ts:190](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L190)
 
 중심점으로부터 카메라까지의 거리를 설정합니다.
 
@@ -248,7 +248,7 @@ Defined in: [src/camera/controller/OrbitController.ts:190](https://github.com/re
 
 > **get** **distanceInterpolation**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:228](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L228)
+Defined in: [src/camera/controller/OrbitController.ts:228](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L228)
 
 거리 보간 계수를 가져옵니다.
 
@@ -264,7 +264,7 @@ Defined in: [src/camera/controller/OrbitController.ts:228](https://github.com/re
 
 > **set** **distanceInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:240](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L240)
+Defined in: [src/camera/controller/OrbitController.ts:240](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L240)
 
 거리 보간 계수를 설정합니다. 낮을수록 부드러운 줌 이동
 
@@ -287,7 +287,7 @@ Defined in: [src/camera/controller/OrbitController.ts:240](https://github.com/re
 
 > **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L187)
+Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L187)
 
 **`Internal`**
 
@@ -313,7 +313,7 @@ Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/Red
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L233)
+Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L233)
 
 **`Internal`**
 
@@ -339,7 +339,7 @@ Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/Red
 
 > **get** **keyboardActiveView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L200)
+Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L200)
 
 **`Internal`**
 
@@ -357,7 +357,7 @@ Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/Red
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L213)
+Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L213)
 
 **`Internal`**
 
@@ -386,7 +386,7 @@ Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/Red
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L246)
+Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L246)
 
 **`Internal`**
 
@@ -404,7 +404,7 @@ Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/Red
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L259)
+Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L259)
 
 **`Internal`**
 
@@ -433,7 +433,7 @@ Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/Red
 
 > **get** **maxDistance**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:278](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L278)
+Defined in: [src/camera/controller/OrbitController.ts:278](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L278)
 
 최대 줌 거리를 가져옵니다.
 
@@ -449,7 +449,7 @@ Defined in: [src/camera/controller/OrbitController.ts:278](https://github.com/re
 
 > **set** **maxDistance**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:290](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L290)
+Defined in: [src/camera/controller/OrbitController.ts:290](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L290)
 
 최대 줌 거리를 설정합니다.
 
@@ -472,7 +472,7 @@ Defined in: [src/camera/controller/OrbitController.ts:290](https://github.com/re
 
 > **get** **maxTilt**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:429](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L429)
+Defined in: [src/camera/controller/OrbitController.ts:429](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L429)
 
 최대 틸트 각도를 가져옵니다.
 
@@ -488,7 +488,7 @@ Defined in: [src/camera/controller/OrbitController.ts:429](https://github.com/re
 
 > **set** **maxTilt**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:441](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L441)
+Defined in: [src/camera/controller/OrbitController.ts:441](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L441)
 
 최대 틸트 각도를 설정합니다.
 
@@ -511,7 +511,7 @@ Defined in: [src/camera/controller/OrbitController.ts:441](https://github.com/re
 
 > **get** **minDistance**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:253](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L253)
+Defined in: [src/camera/controller/OrbitController.ts:253](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L253)
 
 최소 줌 거리를 가져옵니다.
 
@@ -527,7 +527,7 @@ Defined in: [src/camera/controller/OrbitController.ts:253](https://github.com/re
 
 > **set** **minDistance**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:265](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L265)
+Defined in: [src/camera/controller/OrbitController.ts:265](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L265)
 
 최소 줌 거리를 설정합니다.
 
@@ -550,7 +550,7 @@ Defined in: [src/camera/controller/OrbitController.ts:265](https://github.com/re
 
 > **get** **minTilt**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:404](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L404)
+Defined in: [src/camera/controller/OrbitController.ts:404](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L404)
 
 최소 틸트 각도를 가져옵니다.
 
@@ -566,7 +566,7 @@ Defined in: [src/camera/controller/OrbitController.ts:404](https://github.com/re
 
 > **set** **minTilt**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:416](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L416)
+Defined in: [src/camera/controller/OrbitController.ts:416](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L416)
 
 최소 틸트 각도를 설정합니다.
 
@@ -589,7 +589,7 @@ Defined in: [src/camera/controller/OrbitController.ts:416](https://github.com/re
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L101)
+Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L101)
 
 컨트롤러의 이름을 반환합니다.
 
@@ -605,7 +605,7 @@ Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/Red
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L114)
+Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L114)
 
 컨트롤러의 이름을 설정합니다.
 
@@ -632,7 +632,7 @@ Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/Red
 
 > **get** **pan**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:355](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L355)
+Defined in: [src/camera/controller/OrbitController.ts:355](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L355)
 
 카메라의 팬(가로 회전) 각도를 가져옵니다. (단위: 도)
 
@@ -648,7 +648,7 @@ Defined in: [src/camera/controller/OrbitController.ts:355](https://github.com/re
 
 > **set** **pan**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:367](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L367)
+Defined in: [src/camera/controller/OrbitController.ts:367](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L367)
 
 카메라의 팬(가로 회전) 각도를 설정합니다. (단위: 도)
 
@@ -671,7 +671,7 @@ Defined in: [src/camera/controller/OrbitController.ts:367](https://github.com/re
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L126)
+Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L126)
 
 RedGPU 컨텍스트를 반환합니다.
 
@@ -695,7 +695,7 @@ RedGPU 컨텍스트
 
 > **get** **rotationInterpolation**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:329](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L329)
+Defined in: [src/camera/controller/OrbitController.ts:329](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L329)
 
 회전 보간 계수를 가져옵니다.
 
@@ -711,7 +711,7 @@ Defined in: [src/camera/controller/OrbitController.ts:329](https://github.com/re
 
 > **set** **rotationInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:341](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L341)
+Defined in: [src/camera/controller/OrbitController.ts:341](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L341)
 
 회전 보간 계수를 설정합니다. 낮을수록 부드러운 회전
 
@@ -734,7 +734,7 @@ Defined in: [src/camera/controller/OrbitController.ts:341](https://github.com/re
 
 > **get** **speedDistance**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:203](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L203)
+Defined in: [src/camera/controller/OrbitController.ts:203](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L203)
 
 거리 조절 속도를 가져옵니다.
 
@@ -750,7 +750,7 @@ Defined in: [src/camera/controller/OrbitController.ts:203](https://github.com/re
 
 > **set** **speedDistance**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:215](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L215)
+Defined in: [src/camera/controller/OrbitController.ts:215](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L215)
 
 거리 조절 속도를 설정합니다. 높을수록 빠른 줌 속도
 
@@ -773,7 +773,7 @@ Defined in: [src/camera/controller/OrbitController.ts:215](https://github.com/re
 
 > **get** **speedRotation**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:304](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L304)
+Defined in: [src/camera/controller/OrbitController.ts:304](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L304)
 
 회전 속도를 가져옵니다.
 
@@ -789,7 +789,7 @@ Defined in: [src/camera/controller/OrbitController.ts:304](https://github.com/re
 
 > **set** **speedRotation**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:316](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L316)
+Defined in: [src/camera/controller/OrbitController.ts:316](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L316)
 
 회전 속도를 설정합니다. 높을수록 빠른 회전 속도
 
@@ -812,7 +812,7 @@ Defined in: [src/camera/controller/OrbitController.ts:316](https://github.com/re
 
 > **get** **tilt**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:379](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L379)
+Defined in: [src/camera/controller/OrbitController.ts:379](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L379)
 
 카메라의 틸트(세로 회전) 각도를 가져옵니다. (단위: 도, 범위: -90 ~ 90)
 
@@ -828,7 +828,7 @@ Defined in: [src/camera/controller/OrbitController.ts:379](https://github.com/re
 
 > **set** **tilt**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:391](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L391)
+Defined in: [src/camera/controller/OrbitController.ts:391](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L391)
 
 카메라의 틸트(세로 회전) 각도를 설정합니다. (단위: 도)
 
@@ -851,7 +851,7 @@ Defined in: [src/camera/controller/OrbitController.ts:391](https://github.com/re
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L150)
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L150)
 
 카메라의 현재 월드 X 좌표를 가져옵니다.
 
@@ -875,7 +875,7 @@ X 좌표
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L162)
+Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L162)
 
 카메라의 현재 월드 Y 좌표를 가져옵니다.
 
@@ -899,7 +899,7 @@ Y 좌표
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L174)
+Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L174)
 
 카메라의 현재 월드 Z 좌표를 가져옵니다.
 
@@ -921,7 +921,7 @@ Z 좌표
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L323)
+Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L323)
 
 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
 
@@ -956,7 +956,7 @@ Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/Red
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L267)
+Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L267)
 
 컨트롤러를 제거하고 이벤트 리스너를 해제합니다.
 
@@ -975,7 +975,7 @@ Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/Red
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L407)
+Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L407)
 
 **`Internal`**
 
@@ -1005,7 +1005,7 @@ Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/Red
 
 > **fitMeshToScreenCenter**(`mesh`, `view`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:474](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L474)
+Defined in: [src/camera/controller/OrbitController.ts:474](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L474)
 
 메쉬가 화면 중앙에 꽉 차도록 카메라 거리를 자동으로 조절합니다.
 
@@ -1032,7 +1032,7 @@ controller.fitMeshToScreenCenter(mesh, view);
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L370)
+Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L370)
 
 **`Internal`**
 
@@ -1055,8 +1055,8 @@ Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L390) |
-| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/core/AController.ts#L391) |
+| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L390) |
+| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L391) |
 
 #### Inherited from
 
@@ -1068,7 +1068,7 @@ Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/Red
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:542](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/camera/controller/OrbitController.ts#L542)
+Defined in: [src/camera/controller/OrbitController.ts:542](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/OrbitController.ts#L542)
 
 매 프레임마다 오빗 카메라를 업데이트합니다.
 

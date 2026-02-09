@@ -6,7 +6,7 @@
 
 # Class: IBL
 
-Defined in: [src/resources/texture/ibl/IBL.ts:20](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L20)
+Defined in: [src/resources/texture/ibl/IBL.ts:20](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/IBL.ts#L20)
 
 
 Class that manages Image-Based Lighting (IBL).
@@ -26,7 +26,7 @@ view.ibl = ibl;
 
 > **new IBL**(`redGPUContext`, `srcInfo`, `environmentSize`, `prefilterSize`, `irradianceSize`): `IBL`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:57](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L57)
+Defined in: [src/resources/texture/ibl/IBL.ts:57](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/IBL.ts#L57)
 
 
 Creates an IBL instance.
@@ -58,7 +58,7 @@ const ibl = new RedGPU.Resource.IBL(redGPUContext, 'path/to/environment.hdr', 10
 
 > **get** **environmentSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:114](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L114)
+Defined in: [src/resources/texture/ibl/IBL.ts:114](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/IBL.ts#L114)
 
 Environment map cube size
 
@@ -74,7 +74,7 @@ Environment map cube size
 
 > **get** **environmentTexture**(): [`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)
 
-Defined in: [src/resources/texture/ibl/IBL.ts:122](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L122)
+Defined in: [src/resources/texture/ibl/IBL.ts:122](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/IBL.ts#L122)
 
 Returns the environment texture.
 
@@ -90,7 +90,7 @@ Returns the environment texture.
 
 > **get** **irradianceSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:118](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L118)
+Defined in: [src/resources/texture/ibl/IBL.ts:118](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/IBL.ts#L118)
 
 Irradiance cube size
 
@@ -106,7 +106,7 @@ Irradiance cube size
 
 > **get** **irradianceTexture**(): [`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)
 
-Defined in: [src/resources/texture/ibl/IBL.ts:120](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L120)
+Defined in: [src/resources/texture/ibl/IBL.ts:120](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/IBL.ts#L120)
 
 Returns the irradiance texture.
 
@@ -122,7 +122,7 @@ Returns the irradiance texture.
 
 > **get** **prefilterSize**(): `number`
 
-Defined in: [src/resources/texture/ibl/IBL.ts:116](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L116)
+Defined in: [src/resources/texture/ibl/IBL.ts:116](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/IBL.ts#L116)
 
 Prefilter cube size
 
@@ -138,7 +138,7 @@ Prefilter cube size
 
 > **get** **prefilterTexture**(): [`IBLCubeTexture`](../namespaces/CoreIBL/classes/IBLCubeTexture.md)
 
-Defined in: [src/resources/texture/ibl/IBL.ts:124](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/resources/texture/ibl/IBL.ts#L124)
+Defined in: [src/resources/texture/ibl/IBL.ts:124](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/IBL.ts#L124)
 
 Returns the IBL (Specular Prefilter) texture.
 

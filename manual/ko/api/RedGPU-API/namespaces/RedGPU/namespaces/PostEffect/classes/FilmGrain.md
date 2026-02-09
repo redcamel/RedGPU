@@ -6,7 +6,7 @@
 
 # Class: FilmGrain
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:55](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L55)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:55](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L55)
 
 필름 그레인(Film Grain) 후처리 이펙트입니다.
 
@@ -35,7 +35,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new FilmGrain**(`redGPUContext`): `FilmGrain`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:117](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L117)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:117](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L117)
 
 FilmGrain 인스턴스를 생성합니다.
 
@@ -60,7 +60,7 @@ FilmGrain 인스턴스를 생성합니다.
 
 > `static` **HEAVY**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:70](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L70)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:70](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L70)
 
 강한 그레인 프리셋
 
@@ -91,7 +91,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:70](https://github.co
 
 > `static` **MEDIUM**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:65](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L65)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:65](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L65)
 
 중간 강도 프리셋
 
@@ -122,7 +122,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:65](https://github.co
 
 > `static` **SUBTLE**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:60](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L60)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:60](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L60)
 
 미세한 그레인 프리셋
 
@@ -153,7 +153,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:60](https://github.co
 
 > `static` **VINTAGE**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:75](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L75)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:75](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L75)
 
 빈티지 프리셋
 
@@ -186,7 +186,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:75](https://github.co
 
 > **get** **coloredGrain**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:183](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L183)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:183](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L183)
 
 컬러 그레인 비율을 반환합니다.
 
@@ -199,7 +199,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:183](https://github.c
 
 > **set** **coloredGrain**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:191](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L191)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:191](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L191)
 
 컬러 그레인 비율을 설정합니다. (0 ~ 1)
 
@@ -222,7 +222,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:191](https://github.c
 
 > **get** **filmGrainIntensity**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:132](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L132)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:132](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L132)
 
 그레인 강도를 반환합니다.
 
@@ -235,7 +235,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:132](https://github.c
 
 > **set** **filmGrainIntensity**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:140](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L140)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:140](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L140)
 
 그레인 강도를 설정합니다. (0 ~ 1)
 
@@ -258,7 +258,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:140](https://github.c
 
 > **get** **filmGrainResponse**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:149](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L149)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:149](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L149)
 
 밝기 반응도를 반환합니다.
 
@@ -271,7 +271,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:149](https://github.c
 
 > **set** **filmGrainResponse**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:157](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L157)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:157](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L157)
 
 밝기 반응도를 설정합니다. (0 ~ 2)
 
@@ -294,7 +294,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:157](https://github.c
 
 > **get** **filmGrainScale**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:166](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L166)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:166](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L166)
 
 그레인 스케일을 반환합니다.
 
@@ -307,7 +307,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:166](https://github.c
 
 > **set** **filmGrainScale**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:174](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L174)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:174](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L174)
 
 그레인 스케일을 설정합니다. (0.1 ~ 20)
 
@@ -330,7 +330,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:174](https://github.c
 
 > **get** **grainSaturation**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:200](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L200)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:200](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L200)
 
 그레인 채도를 반환합니다.
 
@@ -343,7 +343,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:200](https://github.c
 
 > **set** **grainSaturation**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:208](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L208)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:208](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L208)
 
 그레인 채도를 설정합니다. (0 ~ 2)
 
@@ -366,7 +366,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:208](https://github.c
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L203)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L203)
 
 출력 텍스처 뷰를 반환합니다.
 
@@ -387,7 +387,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.co
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L117)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L117)
 
 RedGPU 컨텍스트를 반환합니다.
 
@@ -408,7 +408,7 @@ RedGPU 컨텍스트를 반환합니다.
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L133)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L133)
 
 셰이더 정보를 반환합니다. (MSAA 상태에 따라 다름)
 
@@ -429,7 +429,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.co
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L125)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L125)
 
 스토리지 정보를 반환합니다.
 
@@ -450,7 +450,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.co
 
 > **get** **systemUuniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L159)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L159)
 
 시스템 유니폼 정보를 반환합니다.
 
@@ -471,7 +471,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.co
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L143)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L143)
 
 유니폼 버퍼를 반환합니다.
 
@@ -492,7 +492,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.co
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L151)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L151)
 
 유니폼 정보를 반환합니다.
 
@@ -513,7 +513,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.co
 
 > **get** **useDepthTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L101)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L101)
 
 깊이 텍스처 사용 여부를 반환합니다.
 
@@ -526,7 +526,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.co
 
 > **set** **useDepthTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L109)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L109)
 
 깊이 텍스처 사용 여부를 설정합니다.
 
@@ -553,7 +553,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.co
 
 > **get** **useGBufferNormalTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L77)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L77)
 
 G-Buffer Normal 텍스처 사용 여부를 반환합니다.
 
@@ -566,7 +566,7 @@ G-Buffer Normal 텍스처 사용 여부를 반환합니다.
 
 > **set** **useGBufferNormalTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L85)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L85)
 
 G-Buffer Normal 텍스처 사용 여부를 설정합니다.
 
@@ -593,7 +593,7 @@ G-Buffer Normal 텍스처 사용 여부를 설정합니다.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L93)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L93)
 
 비디오 메모리 사용량을 반환합니다.
 
@@ -614,7 +614,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L167)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L167)
 
 Workgroup Size X
 
@@ -627,7 +627,7 @@ Workgroup Size X
 
 > **set** **WORK\_SIZE\_X**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L171)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L171)
 
 ##### Parameters
 
@@ -651,7 +651,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.co
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L179)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L179)
 
 Workgroup Size Y
 
@@ -664,7 +664,7 @@ Workgroup Size Y
 
 > **set** **WORK\_SIZE\_Y**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L183)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L183)
 
 ##### Parameters
 
@@ -688,7 +688,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.co
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L191)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L191)
 
 Workgroup Size Z
 
@@ -701,7 +701,7 @@ Workgroup Size Z
 
 > **set** **WORK\_SIZE\_Z**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L195)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L195)
 
 ##### Parameters
 
@@ -723,7 +723,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.co
 
 > **applyPreset**(`preset`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:221](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L221)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:221](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L221)
 
 프리셋을 적용합니다.
 
@@ -744,7 +744,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:221](https://github.c
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L211)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L211)
 
 이펙트를 초기화(해제)합니다.
 
@@ -763,7 +763,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.co
 
 > **execute**(`view`, `gpuDevice`, `width`, `height`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L289)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L289)
 
 이펙트를 실행합니다.
 
@@ -791,7 +791,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.co
 
 > **init**(`redGPUContext`, `name`, `computeCodes`, `bindGroupLayout?`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L236)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L236)
 
 이펙트를 초기화합니다.
 
@@ -821,7 +821,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.co
 
 > **render**(`view`, `width`, `height`, ...`sourceTextureInfo`): `ASinglePassPostEffectResult`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L322)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L322)
 
 이펙트를 렌더링합니다.
 
@@ -852,7 +852,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.co
 
 > **update**(`deltaTime`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:238](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/effects/filmGrain/FilmGrain.ts#L238)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:238](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/effects/filmGrain/FilmGrain.ts#L238)
 
 시간을 업데이트합니다. (애니메이션용)
 
@@ -877,7 +877,7 @@ Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:238](https://github.c
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/postEffect/core/ASinglePassPostEffect.ts#L366)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/postEffect/core/ASinglePassPostEffect.ts#L366)
 
 유니폼 값을 업데이트합니다.
 

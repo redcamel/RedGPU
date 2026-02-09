@@ -8,7 +8,7 @@
 
 > **updateObject3DMatrix**(`targetMesh`, `view`): `void`
 
-Defined in: [src/math/updateObject3DMatrix.ts:28](https://github.com/redcamel/RedGPU/blob/53d960064b98622dd416b4a8f7a962ba471077f1/src/math/updateObject3DMatrix.ts#L28)
+Defined in: [src/math/updateObject3DMatrix.ts:28](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/math/updateObject3DMatrix.ts#L28)
 
 Object3D(Mesh, AGroupBase)의 로컬 행렬과 모델 행렬을 업데이트합니다.
 
