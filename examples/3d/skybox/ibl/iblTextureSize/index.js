@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770625511985";
+import * as RedGPU from "../../../../../dist/index.js?t=1770634235177";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -144,9 +144,9 @@ function loadGLTF(redGPUContext, scene, url) {
  * @param {RedGPU.Display.View3D} targetView
  */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
-    const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770625511985');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177');
+    const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770634235177');
     createPostEffectLabel('Custom IBL Texture Size 16 * 16', redGPUContext.detector.isMobile, 'Basic IBL Texture Size 512 * 512')
-    const {setDebugButtons} = await import( "../../../../exampleHelper/createExample/panes/index.js?t=1770625511985" );
+    const {setDebugButtons} = await import( "../../../../exampleHelper/createExample/panes/index.js?t=1770634235177" );
     setDebugButtons(RedGPU, redGPUContext);
 };

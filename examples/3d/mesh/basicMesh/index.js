@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+import * as RedGPU from "../../../../dist/index.js?t=1770634235177";
 
 /**
  * [KO] Basic Mesh 예제
@@ -69,8 +69,8 @@ const createSampleMesh = (redGPUContext, scene) => {
  */
 const renderTestPane = async (redGPUContext, mesh) => {
 
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177');
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770634235177");
     setDebugButtons(RedGPU, redGPUContext)
     const pane = new Pane();
 
