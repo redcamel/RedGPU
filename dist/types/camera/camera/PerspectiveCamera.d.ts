@@ -6,9 +6,9 @@ import { mat4 } from "gl-matrix";
  * [KO] 인간의 눈이나 카메라 렌즈와 유사하게 거리에 따라 물체의 크기가 달라지는 원근감을 제공합니다. 3D 환경에서 깊이감 있는 씬을 렌더링할 때 기본적으로 사용됩니다.
  * [EN] Provides perspective where object sizes vary based on distance, similar to the human eye or a camera lens. It is used by default for rendering depth-filled scenes in a 3D environment.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const camera = new RedGPU.Camera.PerspectiveCamera();
+ * const camera = new RedGPU.PerspectiveCamera();
  * camera.x = 10;
  * camera.y = 5;
  * camera.z = 20;
@@ -22,6 +22,11 @@ declare class PerspectiveCamera {
     /**
      * [KO] PerspectiveCamera 인스턴스를 생성합니다.
      * [EN] Creates an instance of PerspectiveCamera.
+     *
+     * ### Example
+     * ```typescript
+     * const camera = new RedGPU.PerspectiveCamera();
+     * ```
      */
     constructor();
     /**
@@ -226,6 +231,12 @@ declare class PerspectiveCamera {
      * [KO] 카메라 위치를 설정합니다.
      * [EN] Sets the camera position.
      *
+     * ### Example
+     * ```typescript
+     * camera.setPosition(10, 5, 20);
+     * camera.setPosition([10, 5, 20]);
+     * ```
+     *
      * @param x -
      * [KO] X 좌표 또는 [x, y, z] 배열
      * [EN] X coordinate or [x, y, z] array
@@ -240,6 +251,11 @@ declare class PerspectiveCamera {
     /**
      * [KO] 카메라가 특정 좌표를 바라보도록 회전시킵니다.
      * [EN] Rotates the camera to look at a specific coordinate.
+     *
+     * ### Example
+     * ```typescript
+     * camera.lookAt(0, 0, 0);
+     * ```
      *
      * @param x -
      * [KO] 바라볼 대상의 X 좌표

@@ -3,12 +3,11 @@ import Geometry from "../../../../geometry/Geometry";
 import Primitive from "../../../../primitive/core/Primitive";
 import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
+import RenderViewStateData from "../../../view/core/RenderViewStateData";
 /**
  * 3D 스프라이트 시트의 빌보드 및 렌더링 속성을 정의하는 인터페이스
  */
 interface SpriteSheet3D extends ASpriteSheet {
-    /** 빌보드 원근감 적용 여부 */
-    useBillboardPerspective: boolean;
     /** 빌보드 모드 사용 여부 */
     useBillboard: boolean;
     /** X축 렌더링 비율 */
@@ -23,7 +22,7 @@ interface SpriteSheet3D extends ASpriteSheet {
  * [KO] 3D 공간에서 빌보드 효과를 가진 스프라이트 시트 애니메이션을 제공합니다. 캐릭터나 파티클과 같은 2D 스프라이트를 3D 공간에 배치하면서도 항상 카메라를 향하도록 하여 자연스러운 시각 효과를 만듭니다. 텍스처의 종횡비에 따라 자동으로 렌더링 비율이 조정됩니다.
  * [EN] Provides sprite sheet animation with billboard effects in 3D space. Creates natural visual effects by placing 2D sprites like characters or particles in 3D space while always facing the camera. Rendering ratios are automatically adjusted according to the texture's aspect ratio.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const info = new RedGPU.Display.SpriteSheetInfo(redGPUContext, 'sheet.png', 5, 3, 15, 0);
  * const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, info);
@@ -32,8 +31,14 @@ interface SpriteSheet3D extends ASpriteSheet {
  *
  * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
  *
+ * [KO] 월드 사이즈와 픽셀 사이즈 모드를 비교하는 예제입니다.
+ * [EN] An example comparing World Size and Pixel Size modes.
+ * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3DCompare/"></iframe>
+ *
+ * @see
  * [KO] 아래는 SpriteSheet3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of SpriteSheet3D.
+ * @see [SpriteSheet3D Comparison (World vs Pixel)](/RedGPU/examples/3d/sprite/spriteSheet3DCompare/)
  * @see [SpriteSheet3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/spriteSheet3D/)
  * @category SpriteSheet
  */
@@ -52,36 +57,100 @@ declare class SpriteSheet3D extends ASpriteSheet {
      */
     constructor(redGPUContext: RedGPUContext, spriteSheetInfo: SpriteSheetInfo);
     /**
-     * 지오메트리를 반환합니다.
-     * @returns 현재 지오메트리 (고정된 Plane)
+     * [KO] 월드 공간에서의 스프라이트 세로 크기(Unit 단위)를 반환합니다.
+     * [EN] Returns the vertical size of the sprite in world space (Unit).
+     */
+    get worldSize(): number;
+    /**
+     * [KO] 월드 공간에서의 스프라이트 세로 크기(Unit 단위)를 설정합니다. 가로 크기는 세그먼트 비율에 따라 자동으로 조절됩니다.
+     * [EN] Sets the vertical size of the sprite in world space (Unit). The horizontal size is automatically adjusted based on the segment's aspect ratio.
+     * @param value -
+     * [KO] 설정할 월드 크기
+     * [EN] World size to set
+     */
+    set worldSize(value: number);
+    /**
+     * [KO] 고정 픽셀 크기 값을 반환합니다. (px 단위)
+     * [EN] Returns the fixed pixel size value (in px).
+     */
+    get pixelSize(): number;
+    /**
+     * [KO] 고정 픽셀 크기 값을 설정합니다. (px 단위) usePixelSize가 true일 때만 적용됩니다.
+     * [EN] Sets the fixed pixel size value (in px). Only applied when usePixelSize is true.
+     * @param value -
+     * [KO] 설정할 픽셀 크기
+     * [EN] Pixel size to set
+     */
+    set pixelSize(value: number);
+    /**
+     * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 반환합니다.
+     * [EN] Returns whether to use fixed pixel size mode.
+     */
+    get usePixelSize(): boolean;
+    /**
+     * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 설정합니다. true일 경우 거리에 상관없이 pixelSize에 설정된 크기로 렌더링됩니다.
+     * [EN] Sets whether to use fixed pixel size mode. If true, it is rendered at the size set in pixelSize regardless of distance.
+     * @param value -
+     * [KO] 사용 여부
+     * [EN] Whether to use
+     */
+    set usePixelSize(value: boolean);
+    /**
+     * [KO] 프레임마다 스프라이트 시트를 렌더링합니다.
+     * [EN] Renders the sprite sheet every frame.
+     * @param renderViewStateData -
+     * [KO] 현재 렌더링 상태 데이터
+     * [EN] Current render view state data
+     */
+    render(renderViewStateData: RenderViewStateData): void;
+    /**
+     * [KO] 지오메트리를 반환합니다. SpriteSheet3D는 Plane으로 고정되어 있습니다.
+     * [EN] Returns the geometry. SpriteSheet3D is fixed with Plane.
+     * @returns
+     * [KO] 현재 지오메트리
+     * [EN] Current geometry
      */
     get geometry(): Geometry | Primitive;
     /**
-     * SpriteSheet3D는 지오메트리를 변경할 수 없습니다
-     * @param value - 설정하려는 지오메트리
-     * @throws {Error} SpriteSheet3D는 지오메트리를 변경할 수 없습니다
+     * [KO] SpriteSheet3D는 지오메트리를 변경할 수 없습니다.
+     * [EN] SpriteSheet3D cannot change geometry.
+     * @param value -
+     * [KO] 설정하려는 지오메트리
+     * [EN] Geometry to set
+     * @throws
+     * [KO] 지오메트리 변경 시도 시 에러 발생
+     * [EN] Throws error when attempting to change geometry
      */
     set geometry(value: Geometry | Primitive);
     /**
-     * 머티리얼을 반환합니다.
-     * @returns 현재 머티리얼 (BitmapMaterial)
+     * [KO] 머티리얼을 반환합니다.
+     * [EN] Returns the material.
+     * @returns
+     * [KO] 현재 머티리얼
+     * [EN] Current material
      */
     get material(): any;
     /**
-     * SpriteSheet3D는 머티리얼을 변경할 수 없습니다
-     * @param value - 설정하려는 머티리얼
-     * @throws {Error} SpriteSheet3D는 머티리얼을 변경할 수 없습니다
+     * [KO] SpriteSheet3D는 머티리얼을 변경할 수 없습니다.
+     * [EN] SpriteSheet3D cannot change material.
+     * @param value -
+     * [KO] 설정하려는 머티리얼
+     * [EN] Material to set
+     * @throws
+     * [KO] 머티리얼 변경 시도 시 에러 발생
+     * [EN] Throws error when attempting to change material
      */
     set material(value: any);
     /**
-     * SpriteSheet3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [KO] SpriteSheet3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [EN] Creates a custom vertex shader module dedicated to SpriteSheet3D.
      *
-     * 3D 공간에서의 빌보드 효과와 스프라이트 시트 렌더링에 최적화된
-     * 버텍스 셰이더를 생성합니다. 카메라 방향에 따른 동적 정점 계산과
-     * UV 좌표 프레임 인덱싱 로직이 포함되어 있습니다.
+     * [KO] 3D 공간에서의 빌보드 효과와 스프라이트 시트 렌더링에 최적화된 셰이더를 생성합니다.
+     * [EN] Creates a shader optimized for billboard effects and sprite sheet rendering in 3D space.
      *
-     * @returns 생성된 버텍스 셰이더 모듈 정보
-     * @protected
+     * @returns
+     * [KO] 생성된 GPU 셰이더 모듈
+     * [EN] Created GPU shader module
      */
     createCustomMeshVertexShaderModule: () => GPUShaderModule;
 }

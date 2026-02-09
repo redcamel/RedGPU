@@ -1,9 +1,17 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
+
+/**
+ * [KO] Particle Performance 예제
+ * [EN] Particle Performance example
+ *
+ * [KO] 다수의 파티클 이미터를 사용하여 성능을 테스트하는 예제입니다.
+ * [EN] Example testing performance using multiple particle emitters.
+ */
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
@@ -36,7 +44,6 @@ RedGPU.init(
                 "../../../assets/skybox/pz.jpg", // Positive Z
                 "../../../assets/skybox/nz.jpg", // Negative Z
             ])
-        // view.iblTexture = cubeTexture
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
         const texture_particle1 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle.png');
         const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
@@ -89,8 +96,13 @@ RedGPU.init(
     }
 );
 
-const renderTestPane = async (redGPUContext, mesh) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
+const renderTestPane = async (redGPUContext) => {
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
 
 };

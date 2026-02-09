@@ -5,7 +5,7 @@ import ResourceStateStorageBuffer
 import ResourceStateUniformBuffer
     from "../../../resources/core/resourceManager/resourceState/ResourceStateUniformBuffer";
 import ResourceStateVertexBuffer from "../../../resources/core/resourceManager/resourceState/ResourceStateVertexBuffer";
-import formatBytes from "../../../utils/math/formatBytes";
+import formatBytes from "../../../utils/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
 import DebugRender from "../DebugRender";
 

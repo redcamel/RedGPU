@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Max Anisotropy 예제
+ * [EN] Max Anisotropy example
+ *
+ * [KO] 이방성 필터링(Anisotropic Filtering)의 효과를 시연합니다.
+ * [EN] Demonstrates the effect of Anisotropic Filtering.
+ */
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -32,11 +40,17 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI와 씬을 구성합니다.
+ * [EN] Configures the test GUI and scene.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const renderTestPane = async (redGPUContext, scene) => {
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const maxAnisotropyValues = [1, 8, 16];
     const spacing = 105;
@@ -69,7 +83,7 @@ const renderTestPane = async (redGPUContext, scene) => {
         textLabel.text = `maxAnisotropy: ${anisotropy}`;
         textLabel.useBillboardPerspective = false;
         textLabel.useBillboard = true;
-        textLabel.fontSize = 26;
+        textLabel.worldSize = 4
         textLabel.depthStencilState.depthCompare = 'always';
         textLabel.setPosition(bottomMesh.x, 0, bottomMesh.z);
         scene.addChild(textLabel);

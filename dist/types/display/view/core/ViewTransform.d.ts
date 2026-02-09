@@ -3,6 +3,7 @@ import Camera2D from "../../../camera/camera/Camera2D";
 import OrthographicCamera from "../../../camera/camera/OrthographicCamera";
 import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import AController from "../../../camera/core/AController";
+import { RedResizeEvent } from "../../../context/core/RedGPUContextSizeManager";
 import RedGPUContext from "../../../context/RedGPUContext";
 /**
  * [KO] View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
@@ -22,9 +23,9 @@ declare class ViewTransform {
     #private;
     /**
      * 뷰 크기 변경 시 호출되는 콜백입니다.
-     * @type {((width: number, height: number) => void) | null}
+     * @type {((event: RedResizeEvent<ViewTransform>) => void) | null}
      */
-    onResize: ((width: number, height: number) => void) | null;
+    onResize: ((event: RedResizeEvent<ViewTransform>) => void) | null;
     /**
      * ViewTransform 생성자.
      * @param {RedGPUContext} redGPUContext - 유효한 RedGPUContext 인스턴스

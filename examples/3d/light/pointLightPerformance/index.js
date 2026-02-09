@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Point Light Performance 예제
+ * [EN] Point Light Performance example
+ *
+ * [KO] 다수의 Point Light를 렌더링하여 성능을 테스트하는 예제입니다.
+ * [EN] Example testing performance by rendering multiple Point Lights.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -35,10 +43,24 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
 };
+
+/**
+ * [KO] 다수의 Point Light를 생성합니다.
+ * [EN] Creates multiple Point Lights.
+ * @param {RedGPU.Display.Scene} scene
+ * @param {number} count
+ * @returns {{lights: Array<RedGPU.Light.PointLight>, initialPositions: Array<{x: number, y: number, z: number}>}}
+ */
 const createPointLights = (scene, count) => {
     const lights = [];
     const initialPositions = [];
@@ -65,6 +87,13 @@ const createPointLights = (scene, count) => {
     return {lights, initialPositions};
 };
 
+/**
+ * [KO] 구체 메시들을 생성합니다.
+ * [EN] Creates sphere meshes.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {number} count
+ */
 const createSphereMeshes = (redGPUContext, scene, count) => {
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(
@@ -100,6 +129,12 @@ const createSphereMeshes = (redGPUContext, scene, count) => {
     }
 };
 
+/**
+ * [KO] 라이트들을 애니메이션합니다.
+ * [EN] Animates the lights.
+ * @param {Array<RedGPU.Light.PointLight>} lights
+ * @param {Array<{x: number, y: number, z: number}>} initialPositions
+ */
 const animateLights = (lights, initialPositions) => {
     const time = performance.now() * 0.001;
 

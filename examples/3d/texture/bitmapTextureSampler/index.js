@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Bitmap Texture Sampler 예제
+ * [EN] Bitmap Texture Sampler example
+ *
+ * [KO] 비트맵 텍스처 샘플러의 다양한 옵션(필터링, 래핑, 이방성 필터링 등)을 테스트하는 예제입니다.
+ * [EN] Example testing various options of bitmap texture sampler (filtering, wrapping, anisotropic filtering, etc.).
+ */
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -35,6 +43,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 단일 메시를 추가합니다.
+ * [EN] Adds a single mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const addSingleMesh = (redGPUContext, scene) => {
     const geometry = new RedGPU.Primitive.Box(redGPUContext, 5, 5, 5, 16, 16, 16, 2);
     const diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/UV_Grid_Sm.jpg");
@@ -48,12 +63,18 @@ const addSingleMesh = (redGPUContext, scene) => {
     return mesh;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} mesh
+ */
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 

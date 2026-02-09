@@ -2,10 +2,16 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import {keepLog} from "../../../utils";
 import Sampler from "../../sampler/Sampler";
 import BitmapTexture from "../../texture/BitmapTexture";
+import {
+    BRDFGenerator,
+    EquirectangularToCubeGenerator,
+    IBLCubeTexture,
+    IrradianceGenerator,
+    PrefilterGenerator
+} from "../../texture/ibl/core";
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
-import IBLCubeTexture from "../../texture/ibl/IBLCubeTexture";
 import PackedTexture from "../../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../../wgslParser/core/preprocessWGSL";
 import ManagementResourceBase from "../ManagementResourceBase";
@@ -73,6 +79,10 @@ class ResourceManager {
     #emptyCubeTextureView: GPUTextureView
     readonly #mipmapGenerator: MipmapGenerator
     readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
+    readonly #brdfGenerator: BRDFGenerator
+    readonly #irradianceGenerator: IrradianceGenerator
+    readonly #prefilterGenerator: PrefilterGenerator
+    readonly #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
     #basicSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
@@ -91,6 +101,10 @@ class ResourceManager {
         this.#gpuDevice = redGPUContext.gpuDevice
         this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
         this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
+        this.#brdfGenerator = new BRDFGenerator(redGPUContext)
+        this.#irradianceGenerator = new IrradianceGenerator(redGPUContext)
+        this.#prefilterGenerator = new PrefilterGenerator(redGPUContext)
+        this.#equirectangularToCubeGenerator = new EquirectangularToCubeGenerator(redGPUContext)
         this.#initPresets()
     }
 
@@ -116,6 +130,38 @@ class ResourceManager {
      */
     get basicSampler(): Sampler {
         return this.#basicSampler;
+    }
+
+    /**
+     * [KO] BRDF 생성기를 반환합니다.
+     * [EN] Returns the BRDF generator.
+     */
+    get brdfGenerator(): BRDFGenerator {
+        return this.#brdfGenerator;
+    }
+
+    /**
+     * [KO] Irradiance 생성기를 반환합니다.
+     * [EN] Returns the Irradiance generator.
+     */
+    get irradianceGenerator(): IrradianceGenerator {
+        return this.#irradianceGenerator;
+    }
+
+    /**
+     * [KO] Prefilter 생성기를 반환합니다.
+     * [EN] Returns the Prefilter generator.
+     */
+    get prefilterGenerator(): PrefilterGenerator {
+        return this.#prefilterGenerator;
+    }
+
+    /**
+     * [KO] Equirectangular(2D)를 CubeMap으로 변환하는 생성기를 반환합니다.
+     * [EN] Returns the generator that converts Equirectangular (2D) to CubeMap.
+     */
+    get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator {
+        return this.#equirectangularToCubeGenerator;
     }
 
     /**
@@ -595,6 +641,7 @@ class ResourceManager {
                         {binding: 9, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
                         {binding: 10, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
                         {binding: 11, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
+                        {binding: 12, visibility: GPUShaderStage.FRAGMENT, texture: {}},
                     ],
                 }
             )

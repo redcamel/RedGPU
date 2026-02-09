@@ -1,5 +1,13 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Line2D (Linear) 예제
+ * [EN] Line2D (Linear) example
+ *
+ * [KO] Line2D를 사용하여 직선을 그리는 방법을 보여줍니다.
+ * [EN] Demonstrates how to draw straight lines using Line2D.
+ */
 
 /* 1. 캔버스 생성 */
 const canvas = document.createElement("canvas");
@@ -25,8 +33,9 @@ RedGPU.init(
         ];
 
         // 라인 업데이트 함수
-        const updateCenterLines = () => {
-            const {width, height} = redGPUContext.screenRectObject;
+        const updateCenterLines = (resizeEvent) => {
+            const screenRect = resizeEvent ? resizeEvent.screenRectObject : redGPUContext.screenRectObject;
+            const {width, height} = screenRect;
             const centerX = width / 2;
             const centerY = height / 2;
 
@@ -42,6 +51,11 @@ RedGPU.init(
         };
 
         updateCenterLines(); // 초기 라인 배치
+
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
         redGPUContext.onResize = updateCenterLines; // 화면 크기 변경 시 갱신
 
         const renderer = new RedGPU.Renderer(redGPUContext);
@@ -116,7 +130,7 @@ function getRainbowColor(t) {
 
 /* 6. 디버그 UI 패널 */
 async function setupDebugPanel(redGPUContext, groups, updateLinesCallback, getPointsPerLine, setPointsPerLine) {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985");
     const pane = new Pane();
 
     const debugOptions = {

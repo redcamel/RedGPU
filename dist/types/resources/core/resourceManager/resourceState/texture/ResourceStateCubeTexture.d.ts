@@ -1,5 +1,5 @@
 import CubeTexture from "../../../../texture/CubeTexture";
-import IBLCubeTexture from "../../../../texture/ibl/IBLCubeTexture";
+import IBLCubeTexture from "../../../../texture/ibl/core/IBLCubeTexture";
 declare class ResourceStateCubeTexture {
     texture: CubeTexture | IBLCubeTexture;
     srcList: string[];

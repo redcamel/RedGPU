@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Free Controller 예제
+ * [EN] Free Controller example
+ *
+ * [KO] 자유로운 이동과 회전이 가능한 FreeController의 사용법을 보여줍니다.
+ * [EN] Demonstrates how to use FreeController for free movement and rotation.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -51,9 +59,16 @@ RedGPU.init(canvas, (redGPUContext) => {
     errorMessage.innerHTML = failReason;
     document.body.appendChild(errorMessage);
 });
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Camera.FreeController} controller
+ */
 const renderTestPane = async (redGPUContext, controller) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
 
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
@@ -137,23 +152,27 @@ const renderTestPane = async (redGPUContext, controller) => {
     });
 
     controlsFolder.addBinding(controller, 'moveSpeed', {
-        min: 0.1, max: 5, step: 0.1
+        min: 1, max: 1000, step: 1
     });
 
     controlsFolder.addBinding(controller, 'moveSpeedInterpolation', {
-        min: 0.01, max: 0.5, step: 0.01
+        min: 0.0001, max: 1, step: 0.0001
     });
 
     controlsFolder.addBinding(controller, 'rotationSpeed', {
-        min: 0.1, max: 5, step: 0.1
+        min: 1, max: 720, step: 1
     });
 
     controlsFolder.addBinding(controller, 'rotationSpeedInterpolation', {
-        min: 0.01, max: 0.5, step: 0.01
+        min: 0.0001, max: 1, step: 0.0001
+    });
+
+    controlsFolder.addBinding(controller, 'mouseSensitivity', {
+        min: 0.01, max: 1.0, step: 0.01
     });
 
     controlsFolder.addBinding(controller, 'maxAcceleration', {
-        min: 1, max: 10, step: 0.5
+        min: 0.1, max: 10, step: 0.1
     });
 
     const keyBindings = controller.keyNameMapper;

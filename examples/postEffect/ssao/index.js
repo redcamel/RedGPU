@@ -1,18 +1,26 @@
-import * as RedGPU from "../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../dist/index.js?t=1770625511985";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
+
+/**
+ * [KO] SSAO 예제
+ * [EN] SSAO example
+ *
+ * [KO] Screen Space Ambient Occlusion (SSAO) 효과를 시연합니다.
+ * [EN] Demonstrates the Screen Space Ambient Occlusion (SSAO) effect.
+ */
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
 
-        controller.z = 1.0
-        controller.x = 2
-        controller.y = 2
+
+        controller.y = 1
         controller.tilt = 15
-        controller.pan = 110
+        controller.pan = 90
+        controller.moveSpeed = 20
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -49,11 +57,11 @@ function loadGLTF(view, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         createIblHelper,
         setDebugButtons
-    } = await import('../../exampleHelper/createExample/panes/index.js?t=1769835266959');
+    } = await import('../../exampleHelper/createExample/panes/index.js?t=1770625511985');
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);

@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import CubeTexture from "../../resources/texture/CubeTexture";
+import HDRTexture from "../../resources/texture/hdr/HDRTexture";
 import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
 import ABaseMaterial from "./ABaseMaterial";
 /**
@@ -37,19 +38,19 @@ declare abstract class ABitmapBaseMaterial extends ABaseMaterial {
      */
     constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
     /**
-     * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
-     * [EN] Manage texture object changes and DirtyPipeline listeners
+     * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
+     * [EN] Manages texture object changes and DirtyPipeline listeners.
      * @param prevTexture -
-     * [KO] 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-     * [EN] Previous texture (BitmapTexture|CubeTexture|ANoiseTexture)
+     * [KO] 이전 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+     * [EN] Previous texture (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
      * @param texture -
-     * [KO] 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-     * [EN] New texture (BitmapTexture|CubeTexture|ANoiseTexture)
+     * [KO] 새 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+     * [EN] New texture (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
      */
-    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture): void;
+    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture): void;
     /**
-     * [KO] 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
-     * [EN] Manage sampler object changes and DirtyPipeline listeners
+     * [KO] 샘플러 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
+     * [EN] Manages sampler object changes and DirtyPipeline listeners.
      * @param prevSampler -
      * [KO] 이전 샘플러
      * [EN] Previous sampler

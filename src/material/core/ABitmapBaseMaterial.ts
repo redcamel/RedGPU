@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import CubeTexture from "../../resources/texture/CubeTexture";
+import HDRTexture from "../../resources/texture/hdr/HDRTexture";
 import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
 import ABaseMaterial from "./ABaseMaterial";
 
@@ -14,68 +15,68 @@ import ABaseMaterial from "./ABaseMaterial";
  * @category Material
  */
 abstract class ABitmapBaseMaterial extends ABaseMaterial {
-    /**
-     * [KO] 파이프라인 갱신 시 호출되는 콜백 리스트
-     * [EN] List of callbacks called when updating the pipeline
-     */
-    __packingList: any[]
+	/**
+	 * [KO] 파이프라인 갱신 시 호출되는 콜백 리스트
+	 * [EN] List of callbacks called when updating the pipeline
+	 */
+	__packingList: any[]
 
-    /**
-     * [KO] ABitmapBaseMaterial 생성자
-     * [EN] ABitmapBaseMaterial constructor
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param moduleName -
-     * [KO] 머티리얼 모듈명
-     * [EN] Material module name
-     * @param SHADER_INFO -
-     * [KO] 파싱된 WGSL 셰이더 정보
-     * [EN] Parsed WGSL shader info
-     * @param targetGroupIndex -
-     * [KO] 바인드 그룹 인덱스
-     * [EN] Bind group index
-     */
-    constructor(
-        redGPUContext: RedGPUContext,
-        moduleName: string,
-        SHADER_INFO: any,
-        targetGroupIndex: number
-    ) {
-        super(redGPUContext, moduleName, SHADER_INFO, targetGroupIndex)
-    }
+	/**
+	 * [KO] ABitmapBaseMaterial 생성자
+	 * [EN] ABitmapBaseMaterial constructor
+	 * @param redGPUContext -
+	 * [KO] RedGPUContext 인스턴스
+	 * [EN] RedGPUContext instance
+	 * @param moduleName -
+	 * [KO] 머티리얼 모듈명
+	 * [EN] Material module name
+	 * @param SHADER_INFO -
+	 * [KO] 파싱된 WGSL 셰이더 정보
+	 * [EN] Parsed WGSL shader info
+	 * @param targetGroupIndex -
+	 * [KO] 바인드 그룹 인덱스
+	 * [EN] Bind group index
+	 */
+	constructor(
+		redGPUContext: RedGPUContext,
+		moduleName: string,
+		SHADER_INFO: any,
+		targetGroupIndex: number
+	) {
+		super(redGPUContext, moduleName, SHADER_INFO, targetGroupIndex)
+	}
 
-    /**
-     * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너 관리
-     * [EN] Manage texture object changes and DirtyPipeline listeners
-     * @param prevTexture -
-     * [KO] 이전 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-     * [EN] Previous texture (BitmapTexture|CubeTexture|ANoiseTexture)
-     * @param texture -
-     * [KO] 새 텍스처(BitmapTexture|CubeTexture|ANoiseTexture)
-     * [EN] New texture (BitmapTexture|CubeTexture|ANoiseTexture)
-     */
-    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture) {
-        if (prevTexture) prevTexture.__removeDirtyPipelineListener(this.#updateFragmentState);
-        if (texture) texture.__addDirtyPipelineListener(this.#updateFragmentState);
-        this.#updateFragmentState()
-    }
+	/**
+	 * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
+	 * [EN] Manages texture object changes and DirtyPipeline listeners.
+	 * @param prevTexture -
+	 * [KO] 이전 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+	 * [EN] Previous texture (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+	 * @param texture -
+	 * [KO] 새 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+	 * [EN] New texture (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+	 */
+	updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture) {
+		if (prevTexture) prevTexture.__removeDirtyPipelineListener(this.#updateFragmentState);
+		if (texture) texture.__addDirtyPipelineListener(this.#updateFragmentState);
+		this.#updateFragmentState()
+	}
 
-    /**
-     * [KO] 샘플러 객체 변경 및 DirtyPipeline 리스너 관리
-     * [EN] Manage sampler object changes and DirtyPipeline listeners
-     * @param prevSampler -
-     * [KO] 이전 샘플러
-     * [EN] Previous sampler
-     * @param newSampler -
-     * [KO] 새 샘플러
-     * [EN] New sampler
-     */
-    updateSampler(prevSampler: Sampler, newSampler: Sampler) {
-        if (prevSampler) prevSampler.__removeDirtyPipelineListener(this.#updateFragmentState);
-        if (newSampler) newSampler.__addDirtyPipelineListener(this.#updateFragmentState);
-        this.#updateFragmentState()
-    }
+	/**
+	 * [KO] 샘플러 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
+	 * [EN] Manages sampler object changes and DirtyPipeline listeners.
+	 * @param prevSampler -
+	 * [KO] 이전 샘플러
+	 * [EN] Previous sampler
+	 * @param newSampler -
+	 * [KO] 새 샘플러
+	 * [EN] New sampler
+	 */
+	updateSampler(prevSampler: Sampler, newSampler: Sampler) {
+		if (prevSampler) prevSampler.__removeDirtyPipelineListener(this.#updateFragmentState);
+		if (newSampler) newSampler.__addDirtyPipelineListener(this.#updateFragmentState);
+		this.#updateFragmentState()
+	}
 
     /**
      * [KO] 파이프라인 갱신 및 fragmentState/유니폼 갱신

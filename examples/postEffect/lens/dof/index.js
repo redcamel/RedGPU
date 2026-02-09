@@ -1,8 +1,16 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
 
 // 1. Create and append a canvas
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
+
+/**
+ * [KO] Depth of Field (DOF) 예제
+ * [EN] Depth of Field (DOF) example
+ *
+ * [KO] 피사계 심도(Depth of Field) 효과를 시뮬레이션하는 포스트 이펙트 예제입니다.
+ * [EN] Post effect example demonstrating Depth of Field (DOF) simulation.
+ */
 
 // 2. Initialize RedGPU
 RedGPU.init(
@@ -199,11 +207,11 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1769835266959');
+    const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770625511985');
     createPostEffectLabel('DOF', redGPUContext.detector.isMobile)
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const pane = new Pane();
     const effect = targetView.postEffectManager.getEffectAt(0)
 

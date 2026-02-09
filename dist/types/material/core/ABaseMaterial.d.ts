@@ -72,12 +72,46 @@ declare abstract class ABaseMaterial extends ResourceBase {
      * [EN] Bind group index
      */
     constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
+    /**
+     * [KO] 틴트 블렌드 모드 이름을 반환합니다.
+     * [EN] Returns the tint blend mode name.
+     * @returns
+     * [KO] 틴트 블렌드 모드 이름
+     * [EN] Tint blend mode name
+     */
     get tintBlendMode(): string;
+    /**
+     * [KO] 틴트 블렌드 모드를 설정합니다.
+     * [EN] Sets the tint blend mode.
+     * @param value -
+     * [KO] 틴트 블렌드 모드 값 또는 키
+     * [EN] Tint blend mode value or key
+     */
     set tintBlendMode(value: TINT_BLEND_MODE | keyof typeof TINT_BLEND_MODE);
+    /**
+     * [KO] 머티리얼 모듈명을 반환합니다.
+     * [EN] Returns the material module name.
+     */
     get MODULE_NAME(): string;
+    /**
+     * [KO] 프래그먼트 셰이더 모듈명을 반환합니다.
+     * [EN] Returns the fragment shader module name.
+     */
     get FRAGMENT_SHADER_MODULE_NAME(): string;
+    /**
+     * [KO] 프래그먼트 바인드 그룹 디스크립터명을 반환합니다.
+     * [EN] Returns the fragment bind group descriptor name.
+     */
     get FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME(): string;
+    /**
+     * [KO] 셰이더 storage 구조 정보를 반환합니다.
+     * [EN] Returns the shader storage structure information.
+     */
     get STORAGE_STRUCT(): any;
+    /**
+     * [KO] 셰이더 uniforms 구조 정보를 반환합니다.
+     * [EN] Returns the shader uniforms structure information.
+     */
     get UNIFORM_STRUCT(): any;
     /**
      * [KO] 머티리얼의 컬러 블렌드 상태 객체 반환
@@ -103,34 +137,42 @@ declare abstract class ABaseMaterial extends ResourceBase {
      */
     set writeMaskState(value: GPUFlagsConstant);
     /**
-     * [KO] GPU 렌더 파이프라인 정보 및 유니폼 버퍼 초기화
-     * [EN] Initialize GPU render pipeline info and uniform buffer
+     * [KO] GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
+     * [EN] Initializes GPU render pipeline info and uniform buffer.
      */
     initGPURenderInfos(): void;
     /**
-     * [KO] 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등 상태 갱신
-     * [EN] Update fragment shader bind group/uniform/texture/sampler states
+     * [KO] 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등의 상태를 갱신합니다.
+     * [EN] Updates fragment shader bind group/uniform/texture/sampler states.
+     * @protected
      */
     _updateFragmentState(): void;
     /**
-     * [KO] GPU 프래그먼트 렌더 상태 객체 반환
-     * [EN] Returns GPU fragment render state object
+     * [KO] GPU 프래그먼트 렌더 상태 객체를 반환합니다.
+     * [EN] Returns the GPU fragment render state object.
      * @param entryPoint -
-     * [KO] 셰이더 엔트리포인트(기본값: 'main')
+     * [KO] 셰이더 엔트리포인트 (기본값: 'main')
      * [EN] Shader entry point (default: 'main')
+     * @returns
+     * [KO] GPU 프래그먼트 상태
+     * [EN] GPU fragment state
      */
     getFragmentRenderState(entryPoint?: string): GPUFragmentState;
     /**
-     * [KO] 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영
-     * [EN] Reflect basic material properties such as uniform/color/tint to the uniform buffer
+     * [KO] 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영합니다.
+     * [EN] Reflects basic material properties such as uniforms/color/tint to the uniform buffer.
+     * @protected
      */
     _updateBaseProperty(): void;
     /**
-     * [KO] 샘플러 객체에서 GPU 샘플러 반환
-     * [EN] Returns GPU sampler from Sampler object
+     * [KO] 샘플러 객체에서 GPU 샘플러를 반환합니다.
+     * [EN] Returns the GPU sampler from the Sampler object.
      * @param sampler -
      * [KO] Sampler 객체
      * [EN] Sampler object
+     * @returns
+     * [KO] GPUSampler 인스턴스
+     * [EN] GPUSampler instance
      */
     getGPUResourceSampler(sampler: Sampler): GPUSampler;
 }

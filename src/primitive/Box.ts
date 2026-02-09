@@ -9,11 +9,11 @@ import Primitive from "./core/Primitive";
  * [KO] 6면체 박스의 정점 및 인덱스 데이터를 생성하여 관리하며, Mesh의 geometry로 사용됩니다.
  * [EN] Generates and manages vertex and index data for a hexahedral box, used as geometry for a Mesh.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const boxGeometry = new RedGPU.Primitive.Box(redGPUContext);
+ * const boxGeometry = new RedGPU.Box(redGPUContext);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/box/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/box/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 class Box extends Primitive {
@@ -92,6 +92,11 @@ class Box extends Primitive {
      * [KO] Box 인스턴스를 생성합니다.
      * [EN] Creates an instance of Box.
      * 
+     * ### Example
+     * ```typescript
+     * const box = new RedGPU.Box(redGPUContext, 1, 1, 1, 1, 1, 1, 1);
+     * ```
+     *
      * @param redGPUContext - 
      * [KO] RedGPUContext 인스턴스 
      * [EN] RedGPUContext instance

@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] GLTF Directional Shadow 예제
+ * [EN] GLTF Directional Shadow example
+ *
+ * [KO] GLTF 모델에 Directional Light 그림자를 적용하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to apply Directional Light shadows to GLTF models.
+ */
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -43,6 +51,15 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] GLTF 모델을 로드합니다.
+ * [EN] Loads a GLTF model.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {string} url
+ * @param {number} xPosition
+ * @param {number} yPosition
+ */
 function loadGLTF(redGPUContext, scene, url, xPosition, yPosition) {
     let mesh;
     new RedGPU.GLTFLoader(
@@ -58,6 +75,12 @@ function loadGLTF(redGPUContext, scene, url, xPosition, yPosition) {
     );
 }
 
+/**
+ * [KO] 바닥을 추가합니다.
+ * [EN] Adds a ground.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const addGround = (redGPUContext, scene) => {
     const ground = new RedGPU.Display.Mesh(
         redGPUContext,
@@ -69,11 +92,17 @@ const addGround = (redGPUContext, scene) => {
     scene.addChild(ground);
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
-    const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js?t=1769835266959');
+    const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js?t=1770625511985');
 
     const pane = new Pane();
     const {shadowManager} = targetView.scene;

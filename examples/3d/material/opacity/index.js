@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Opacity 3D Material 예제
+ * [EN] Opacity 3D Material example
+ *
+ * [KO] 3D 객체의 투명도(opacity)를 조절하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to control the opacity of 3D objects.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -31,6 +39,17 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 자식 Sprite3D를 생성합니다.
+ * [EN] Creates a child Sprite3D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} parent
+ * @param {string} labelPrefix
+ * @param {number} x
+ * @param {number} y
+ * @param {string|null} textureUrl
+ * @returns {RedGPU.Display.Sprite3D}
+ */
 const createChildSprite3D = (redGPUContext, parent, labelPrefix, x = 0, y = 0, textureUrl = null) => {
     let material;
     if (textureUrl) {
@@ -52,6 +71,15 @@ const createChildSprite3D = (redGPUContext, parent, labelPrefix, x = 0, y = 0, t
     return sprite3D;
 };
 
+/**
+ * [KO] 자식 SpriteSheet3D를 생성합니다.
+ * [EN] Creates a child SpriteSheet3D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} parent
+ * @param {number} x
+ * @param {number} y
+ * @returns {RedGPU.Display.SpriteSheet3D}
+ */
 const createChildSpriteSheet3D = (redGPUContext, parent, x = 0, y = 0) => {
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     const sprite3D = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
@@ -67,6 +95,15 @@ const createChildSpriteSheet3D = (redGPUContext, parent, x = 0, y = 0) => {
     return sprite3D;
 };
 
+/**
+ * [KO] 자식 TextField3D를 생성합니다.
+ * [EN] Creates a child TextField3D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} parent
+ * @param {number} x
+ * @param {number} y
+ * @returns {RedGPU.Display.TextField3D}
+ */
 const createChildTextField3D = (redGPUContext, parent, x = 0, y = 0) => {
     const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
     textField3D.x = x;
@@ -78,12 +115,19 @@ const createChildTextField3D = (redGPUContext, parent, x = 0, y = 0) => {
     return textField3D;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite3D} parent
+ * @param {Array<RedGPU.Display.DisplayObject3D>} children
+ */
 const renderTestPane = async (redGPUContext, parent, children) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 

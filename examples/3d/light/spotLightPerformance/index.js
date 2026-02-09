@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Spot Light Performance 예제
+ * [EN] Spot Light Performance example
+ *
+ * [KO] 다수의 Spot Light를 렌더링하여 성능을 테스트하는 예제입니다.
+ * [EN] Example testing performance by rendering multiple Spot Lights.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -41,10 +49,23 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
 };
+
+/**
+ * [KO] 스카이박스를 생성합니다.
+ * [EN] Creates a skybox.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @returns {RedGPU.Display.SkyBox}
+ */
 const createSkybox = (redGPUContext) => {
     const skyboxImagePaths = [
         "../../../assets/skybox/px.jpg",
@@ -60,6 +81,12 @@ const createSkybox = (redGPUContext) => {
     return skybox;
 };
 
+/**
+ * [KO] 다수의 Spot Light를 생성합니다.
+ * [EN] Creates multiple Spot Lights.
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {Array<{light: RedGPU.Light.SpotLight, originalPos: object, rotationSpeed: number, orbitRadius: number}>}
+ */
 const createSpotLight = (scene) => {
     const intensity = 2;
     const gridSize = 32;
@@ -101,6 +128,12 @@ const createSpotLight = (scene) => {
     return lights;
 };
 
+/**
+ * [KO] 샘플 메시들을 생성합니다.
+ * [EN] Creates sample meshes.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createSampleMeshes = (redGPUContext, scene) => {
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(

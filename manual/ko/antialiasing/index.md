@@ -51,4 +51,4 @@ console.log(`TAA: ${manager.useTAA}, MSAA: ${manager.useMSAA}, FXAA: ${manager.u
 
 ---
 
-[다음 단계: TAA 배우기](./taa.md)
+[다음 단계: 플러그인 시스템 배우기](../plugins/index.md)

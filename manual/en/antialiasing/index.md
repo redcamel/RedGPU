@@ -51,4 +51,4 @@ We recommend learning in order of quality.
 
 ---
 
-[Next Step: Learn TAA](./taa.md)
+[Next Step: Learn Plugin System](../plugins/index.md)

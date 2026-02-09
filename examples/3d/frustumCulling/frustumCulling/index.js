@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Frustum Culling 예제
+ * [EN] Frustum Culling example
+ *
+ * [KO] 프러스텀 컬링 기능을 시연합니다.
+ * [EN] Demonstrates the frustum culling feature.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -32,6 +40,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 메시들을 생성합니다.
+ * [EN] Creates test meshes.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {Array<RedGPU.Display.Mesh>}
+ */
 const createTestMeshes = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -64,10 +79,17 @@ const createTestMeshes = (redGPUContext, scene) => {
     return meshes;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {Array<RedGPU.Display.Mesh>} meshes
+ * @param {RedGPU.Display.View3D} view
+ */
 const renderTestPane = async (redGPUContext, meshes, view) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const pane = new Pane();
-    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1769835266959" );
+    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1770625511985" );
     setDebugButtons(RedGPU, redGPUContext);
     const config = {
         cameraDistance: view.camera.distance,

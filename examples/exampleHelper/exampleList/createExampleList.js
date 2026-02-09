@@ -1,4 +1,4 @@
-import ExampleList from './exampleList.js?t=1769835266959';
+import ExampleList from './exampleList.js?t=1770625511985';
 
 // 상태 관리 - sessionStorage에 저장/복원할 항목들
 const STATE_KEY = 'redgpu_examples_state';
@@ -95,76 +95,8 @@ const createThumbnail = (item, link) => {
 
     });
 
-    // 썸네일이 있는 경우
-    if (item.thumb) {
-        if (Array.isArray(item.thumb)) {
-            // 그리드 레이아웃 처리 (여러 이미지)
-            createGridThumbnails(item, thumbContainer);
-        } else {
-            // 단일 이미지 처리
-            createSingleThumbnail(item, thumbContainer);
-        }
-    } else {
-        // 썸네일이 없는 경우 타이틀만 표시
-        createTitleOnly(item, thumbContainer);
-    }
-
+    createSingleThumbnail(item, thumbContainer);
     link.appendChild(thumbContainer);
-};
-
-// 그리드 썸네일 생성 함수
-const createGridThumbnails = (item, container) => {
-    const gridContainer = document.createElement('div');
-    Object.assign(gridContainer.style, {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: 'repeat(2, 1fr)',
-        gap: '3px',
-        width: '100%',
-        height: '100%',
-        boxSizing: 'border-box'
-    });
-
-    // 최대 4개 이미지 처리
-    const maxImages = Math.min(item.thumb.length, 4);
-    for (let i = 0; i < maxImages; i++) {
-        const thumbWrap = document.createElement('div');
-        Object.assign(thumbWrap.style, {
-            overflow: 'hidden',
-            width: '100%',
-            height: '100%',
-            position: 'relative'
-        });
-
-        const thumb = document.createElement('img');
-        thumb.src = item.thumb[i];
-        thumb.alt = `${item.name} thumbnail`;
-        thumb.loading = 'lazy';
-
-        Object.assign(thumb.style, {
-            position: 'absolute',
-            top: '0',
-            left: '0',
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain'
-        });
-
-        thumbWrap.appendChild(thumb);
-        gridContainer.appendChild(thumbWrap);
-    }
-
-    // 빈 셀 추가
-    for (let i = maxImages; i < 4; i++) {
-        const emptyCell = document.createElement('div');
-        Object.assign(emptyCell.style, {
-            background: '#1e1e1e',
-            borderRadius: '4px'
-        });
-        gridContainer.appendChild(emptyCell);
-    }
-
-    container.appendChild(gridContainer);
 };
 
 // 단일 썸네일 생성 함수
@@ -180,7 +112,9 @@ const createSingleThumbnail = (item, container) => {
     });
 
     const thumb = document.createElement('img');
-    thumb.src = item.thumb;
+    const cleanPath = item.path.replace(/\/+$/, "");
+    thumb.src = `${cleanPath}/thumb.png`;
+    console.log( thumb.src)
 
     Object.assign(thumb.style, {
         // position: 'absolute',
@@ -194,26 +128,6 @@ const createSingleThumbnail = (item, container) => {
     container.appendChild(thumbWrap);
 };
 
-// 타이틀 전용 컨테이너 생성 함수
-const createTitleOnly = (item, container) => {
-    const noThumbContainer = document.createElement('div');
-    Object.assign(noThumbContainer.style, {
-        width: '100%',
-        height: 'calc(100% - 41px)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '10px',
-        boxSizing: 'border-box',
-        color: '#ffffff',
-        textAlign: 'center',
-        fontWeight: 'bold',
-        fontSize: '16px'
-    });
-
-    noThumbContainer.textContent = item.name || 'No thumbnail';
-    container.appendChild(noThumbContainer);
-};
 const stripTags = (str) => str.replace(/<\/?[^>]+(>|$)/g, "");
 
 // 아이템 렌더링 함수

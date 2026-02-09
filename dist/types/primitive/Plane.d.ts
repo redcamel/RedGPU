@@ -7,12 +7,12 @@ import Primitive from "./core/Primitive";
  * [KO] XY 평면에 배치된 평면 데이터를 생성하여 관리합니다.
  * [EN] Generates and manages planar data placed on the XY plane.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // 5x5 크기의 평면 생성
- * const plane = new RedGPU.Primitive.Plane(redGPUContext, 5, 5);
+ * const plane = new RedGPU.Plane(redGPUContext, 5, 5);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/plane/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/plane/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 declare class Plane extends Primitive {
@@ -20,6 +20,11 @@ declare class Plane extends Primitive {
     /**
      * [KO] Plane 인스턴스를 생성합니다.
      * [EN] Creates an instance of Plane.
+     *
+     * ### Example
+     * ```typescript
+     * const plane = new RedGPU.Plane(redGPUContext, 1, 1, 1, 1, 1, false);
+     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스

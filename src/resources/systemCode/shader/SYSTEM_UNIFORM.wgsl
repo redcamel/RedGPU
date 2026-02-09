@@ -27,7 +27,7 @@ struct SystemUniform {
       camera:Camera,
 	  //
 	  time:f32,
-	  useIblTexture:u32,
+	  usePrefilterTexture:u32,
 	  isView3D:u32,
 	  //
 	  shadowDepthTextureSize:u32,
@@ -48,13 +48,14 @@ struct SystemUniform {
 @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
 @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
 @group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
-@group(0) @binding(3) var iblTextureSampler: sampler;
+@group(0) @binding(3) var prefilterTextureSampler: sampler;
 
 @group(0) @binding(7) var renderPath1ResultTextureSampler: sampler;
 @group(0) @binding(8) var renderPath1ResultTexture: texture_2d<f32>;
 @group(0) @binding(9) var packedTextureSampler: sampler;
 @group(0) @binding(10) var ibl_environmentTexture: texture_cube<f32>;
 @group(0) @binding(11) var ibl_irradianceTexture: texture_cube<f32>;
+@group(0) @binding(12) var ibl_brdfLUTTexture: texture_2d<f32>;
 
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
 const clusterLight_tileCount = vec3<u32>(REDGPU_DEFINE_TILE_COUNT_Xu, REDGPU_DEFINE_TILE_COUNT_Yu, REDGPU_DEFINE_TILE_COUNT_Zu);

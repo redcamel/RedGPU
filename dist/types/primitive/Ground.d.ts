@@ -7,12 +7,12 @@ import Primitive from "./core/Primitive";
  * [KO] XZ 평면에 배치된 평면 데이터를 생성하여 관리합니다. 주로 바닥이나 지형의 기반으로 사용됩니다.
  * [EN] Generates and manages planar data placed on the XZ plane. Primarily used as a base for floors or terrain.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // 10x10 크기의 그라운드 생성
- * const ground = new RedGPU.Primitive.Ground(redGPUContext, 10, 10);
+ * const ground = new RedGPU.Ground(redGPUContext, 10, 10);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/ground/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/ground/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 declare class Ground extends Primitive {
@@ -20,6 +20,11 @@ declare class Ground extends Primitive {
     /**
      * [KO] Ground 인스턴스를 생성합니다.
      * [EN] Creates an instance of Ground.
+     *
+     * ### Example
+     * ```typescript
+     * const ground = new RedGPU.Ground(redGPUContext, 10, 10, 1, 1, 1, false);
+     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스

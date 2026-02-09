@@ -9,22 +9,27 @@ import AController from "../core/AController";
  * [KO] 3인칭 게임의 캐릭터 카메라처럼 타겟의 뒤를 쫓거나 주변을 회전하며 관찰하는 데 사용됩니다. 타겟의 이동과 회전을 부드럽게 따라가며, 거리와 높이, 각도를 조절하여 다양한 연출이 가능합니다.
  * [EN] Used to follow behind or rotate around a target, like a character camera in a 3rd person game. It smoothly tracks the target's movement and rotation, allowing for various cinematic effects by adjusting distance, height, and angles.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const followController = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
+ * const followController = new RedGPU.FollowController(redGPUContext, targetMesh);
  * followController.distance = 15;
  * followController.height = 8;
  * followController.pan = 45;
  * followController.tilt = 30;
  * ```
- * <iframe src="/RedGPU/examples/3d/controller/followController/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/controller/followController/" style="width:100%; height:500px;"></iframe>
  * @category Controller
  */
 declare class FollowController extends AController {
     #private;
     /**
-     * [KO] FollowController 생성자
-     * [EN] FollowController constructor
+     * [KO] FollowController 인스턴스를 생성합니다.
+     * [EN] Creates an instance of FollowController.
+     *
+     * ### Example
+     * ```typescript
+     * const controller = new RedGPU.FollowController(redGPUContext, targetMesh);
+     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
@@ -110,8 +115,8 @@ declare class FollowController extends AController {
      */
     set heightInterpolation(value: number);
     /**
-     * [KO] 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져옵니다.
-     * [EN] Gets the camera's horizontal rotation (pan) angle around the target.
+     * [KO] 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져옵니다. (도 단위)
+     * [EN] Gets the camera's horizontal rotation (pan) angle around the target (in degrees).
      *
      * @returns
      * [KO] 팬 각도 (도 단위)
@@ -146,8 +151,8 @@ declare class FollowController extends AController {
      */
     set panInterpolation(value: number);
     /**
-     * [KO] 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져옵니다.
-     * [EN] Gets the camera's vertical rotation (tilt) angle around the target.
+     * [KO] 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져옵니다. (도 단위)
+     * [EN] Gets the camera's vertical rotation (tilt) angle around the target (in degrees).
      *
      * @returns
      * [KO] 틸트 각도 (도 단위, -89 ~ 89)
@@ -295,6 +300,11 @@ declare class FollowController extends AController {
     /**
      * [KO] 카메라의 타겟 오프셋을 한 번에 설정합니다.
      * [EN] Sets the camera's target offset at once.
+     *
+     * ### Example
+     * ```typescript
+     * controller.setTargetOffset(0, 5, 0);
+     * ```
      *
      * @param x -
      * [KO] X축 오프셋

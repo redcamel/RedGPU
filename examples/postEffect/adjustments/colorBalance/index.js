@@ -1,9 +1,17 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
 document.querySelector('#example-container').appendChild(canvas);
+
+/**
+ * [KO] Color Balance 예제
+ * [EN] Color Balance example
+ *
+ * [KO] 포스트 이펙트를 사용하여 화면의 색상 균형(Shadow, Midtone, Highlight)을 조절하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to adjust the screen's color balance (Shadow, Midtone, Highlight) using post effects.
+ */
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
@@ -92,6 +100,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] GLTF 모델을 로드합니다.
+ * [EN] Loads a GLTF model.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {string} url
+ */
 function loadGLTF(redGPUContext, scene, url) {
 
     let mesh
@@ -104,11 +119,17 @@ function loadGLTF(redGPUContext, scene, url) {
     )
 }
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
+    const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770625511985');
     createPostEffectLabel('ColorBalance', redGPUContext.detector.isMobile)
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 

@@ -48,6 +48,7 @@ abstract class AController {
 
 	// ==================== 프레임 관리 ====================
 	#lastUpdateTime = -1;
+	#currentDeltaTime = 0;
 	#currentFrameViews = new Set<View3D>();
 	#keyboardProcessedThisFrame: boolean = false
 
@@ -62,9 +63,11 @@ abstract class AController {
 	#pinchStartDistance: number = 0;
 	#isMultiTouch: boolean = false;
 
+
+
 	/**
-	 * [KO] AController 생성자
-	 * [EN] AController constructor
+	 * [KO] AController 인스턴스를 생성합니다.
+	 * [EN] Creates an instance of AController.
 	 *
 	 * @param redGPUContext -
 	 * [KO] RedGPU 컨텍스트
@@ -136,6 +139,41 @@ abstract class AController {
 		return this.#camera;
 	}
 
+	/**
+	 * [KO] 카메라의 현재 월드 X 좌표를 가져옵니다.
+	 * [EN] Gets the camera's current world X coordinate.
+	 *
+	 * @returns
+	 * [KO] X 좌표
+	 * [EN] X coordinate
+	 */
+	get x(): number {
+		return this.camera.x;
+	}
+
+	/**
+	 * [KO] 카메라의 현재 월드 Y 좌표를 가져옵니다.
+	 * [EN] Gets the camera's current world Y coordinate.
+	 *
+	 * @returns
+	 * [KO] Y 좌표
+	 * [EN] Y coordinate
+	 */
+	get y(): number {
+		return this.camera.y;
+	}
+
+	/**
+	 * [KO] 카메라의 현재 월드 Z 좌표를 가져옵니다.
+	 * [EN] Gets the camera's current world Z coordinate.
+	 *
+	 * @returns
+	 * [KO] Z 좌표
+	 * [EN] Z coordinate
+	 */
+	get z(): number {
+		return this.camera.z;
+	}
 	// ==================== Protected - 파생 클래스 전용 ====================
 	/**
 	 * [KO] 현재 마우스가 호버링 중인 View를 반환합니다.
@@ -250,12 +288,13 @@ abstract class AController {
 	 * [KO] 현재 시간 (ms)
 	 * [EN] Current time (ms)
 	 * @param updateAnimation -
-	 * [KO] 애니메이션 업데이트 콜백
-	 * [EN] Animation update callback
+	 * [KO] 애니메이션 업데이트 콜백 (deltaTime 전달)
+	 * [EN] Animation update callback (receives deltaTime)
 	 */
-	update(view: View3D, time: number, updateAnimation: () => void): void {
-		// 새로운 프레임이 시작되면 상태 초기화
+	update(view: View3D, time: number, updateAnimation: (deltaTime: number) => void): void {
+		// 새로운 프레임이 시작되면 상태 초기화 및 deltaTime 계산
 		if (this.#lastUpdateTime !== time) {
+			this.#currentDeltaTime = this.#lastUpdateTime === -1 ? 0 : (time - this.#lastUpdateTime) / 1000;
 			this.#lastUpdateTime = time;
 			this.#currentFrameViews.clear();
 			this.#keyboardProcessedThisFrame = false;
@@ -264,12 +303,13 @@ abstract class AController {
 		if (this.#currentFrameViews.has(view)) return;
 		this.#currentFrameViews.add(view);
 		if (this.#initInfo.useKeyboard && this.keyboardActiveView && this.keyboardActiveView !== view) return;
-		updateAnimation?.();
+		updateAnimation?.(this.#currentDeltaTime);
 	}
 
 	/**
 	 * [KO] 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
 	 * [EN] Checks for keyboard input and sets the active View.
+	 *
 	 * @param view -
 	 * [KO] 현재 View
 	 * [EN] Current View

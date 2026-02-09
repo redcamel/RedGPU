@@ -33,23 +33,57 @@ scene.addChild(sprite);
 
 스프라이트의 빌보드 동작과 시각적 표현을 제어하는 주요 속성들입니다.
 
+### 빌보드 설정
+
 | 속성명 | 설명 | 기본값 |
 | :--- | :--- | :--- |
 | **`useBillboard`** | 카메라를 항상 향하게 할지 여부 | `true` |
-| **`useBillboardPerspective`** | 카메라와의 거리에 따른 원근감(크기 변화) 적용 여부 | `true` |
+
+### 크기 및 렌더링 모드
+
+`Sprite3D`는 월드 단위 크기 또는 고정된 픽셀 크기로 렌더링할 수 있는 옵션을 제공합니다.
+
+| 속성명 | 설명 | 기본값 |
+| :--- | :--- | :--- |
+| **`worldSize`** | 월드 공간에서의 세로 크기 (Unit 단위). 가로 크기는 비율에 맞춰 자동 조절됩니다. | `1` |
+| **`usePixelSize`** | 고정 픽셀 크기 모드 사용 여부. `true`일 경우 거리에 관계없이 일정한 픽셀 크기로 렌더링됩니다. | `false` |
+| **`pixelSize`** | 고정 픽셀 크기 값 (`px` 단위). `usePixelSize`가 `true`일 때만 적용됩니다. | `0` |
 
 ```javascript
-// 멀어져도 크기가 일정하게 유지되는 아이콘 스타일 설정
-sprite.useBillboard = true;
-sprite.useBillboardPerspective = false; 
+// 1. 월드 단위 크기 설정 (거리에 따라 작아짐)
+sprite.worldSize = 2;
+
+// 2. 고정 픽셀 크기 설정 (아이콘 등 UI 스타일, 거리에 관계없이 크기 일정)
+sprite.usePixelSize = true;
+sprite.pixelSize = 64; 
 ```
 
-## 4. 실습 예제: 빌보드 유형별 비교
+### 3.3 월드 사이즈와 픽셀 사이즈의 관계
 
-3D 공간에 세 가지 서로 다른 설정의 스프라이트를 배치하여 빌보드 옵션에 따른 시각적 차이를 확인해 봅니다.
+`Sprite3D`에서 크기와 선명도를 결정하는 핵심 요소들의 관계를 이해하면 상황에 맞는 최적의 연출이 가능합니다.
+
+#### 3.3.1 소스 해상도 (Texture Resolution)
+- **역할**: 원본 이미지의 크기가 스프라이트의 **최대 선명도**를 결정합니다.
+- **특징**: `usePixelSize` 모드를 사용할 때, `pixelSize`를 원본 해상도보다 크게 설정하면 이미지가 흐려질 수 있습니다.
+
+#### 3.3.2 월드 사이즈 (`worldSize`)
+- **역할**: 3D 월드 공간 내에서의 **물리적 세로 높이**(Unit 단위)를 결정합니다.
+- **동작**: `usePixelSize`가 `false`일 때 작동하며, 일반적인 3D 오브젝트처럼 거리에 따른 원근감이 적용됩니다.
+
+#### 3.3.3 고정 픽셀 모드 (`usePixelSize` & `pixelSize`)
+- **역할**: 3D 공간에 위치하지만, 화면에는 **지정한 픽셀 크기** 그대로 표시합니다.
+- **특징**: 이 모드가 활성화되면 `worldSize`는 무시됩니다. 기본적으로 텍스처가 로드될 때의 **원본 높이(Height)**가 `pixelSize`에 자동으로 할당됩니다. 아이콘이나 마커처럼 거리에 상관없이 일정한 크기와 가독성을 유지해야 할 때 사용합니다.
+
+::: tip [픽셀 크기 조절]
+`usePixelSize`가 활성화된 상태에서 스프라이트가 너무 크거나 작게 보인다면, `worldSize`가 아닌 `pixelSize` 속성을 직접 변경하여 조절하십시오.
+:::
+
+## 4. 실습 예제: 렌더링 모드별 비교
+
+3D 공간에 서로 다른 설정의 스프라이트를 배치하여 시각적 차이를 확인해 봅니다.
 
 <ClientOnly>
-<CodePen title="RedGPU - Sprite3D Billboard Showcase" slugHash="sprite3d-showcase">
+<CodePen title="RedGPU - Sprite3D Showcase" slugHash="sprite3d-showcase">
 <pre data-lang="html">
 &lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
 </pre>
@@ -69,24 +103,20 @@ RedGPU.init(canvas, (redGPUContext) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'https://redcamel.github.io/RedGPU/examples/assets/texture/crate.png');
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
 
-    // 1. 기본 빌보드 (Perspective ON)
+    // 1. 기본 월드 사이즈 (World Size)
     const sprite1 = new RedGPU.Display.Sprite3D(redGPUContext, material);
     sprite1.x = -3; sprite1.y = 1;
+    sprite1.worldSize = 1.5;
     scene.addChild(sprite1);
 
-    // 2. 빌보드 비활성화 (공간에 고정된 평면)
+    // 2. 고정 픽셀 사이즈 (Pixel Size) - 멀어져도 크기가 변하지 않음
     const sprite2 = new RedGPU.Display.Sprite3D(redGPUContext, material);
-    sprite2.x = 0; sprite2.y = 1;
-    sprite2.useBillboard = false;
+    sprite2.x = 3; sprite2.y = 1;
+    sprite2.usePixelSize = true;
+    sprite2.pixelSize = 100;
     scene.addChild(sprite2);
 
-    // 3. 고정 크기 빌보드 (Perspective OFF)
-    const sprite3 = new RedGPU.Display.Sprite3D(redGPUContext, material);
-    sprite3.x = 3; sprite3.y = 1;
-    sprite3.useBillboardPerspective = false;
-    scene.addChild(sprite3);
-
-    // 4. 옵션 설명 라벨 (TextField3D)
+    // 3. 옵션 설명 라벨 (TextField3D)
     const createLabel = (text, x, y) => {
         const label = new RedGPU.Display.TextField3D(redGPUContext, text);
         label.x = x; label.y = y;
@@ -94,13 +124,12 @@ RedGPU.init(canvas, (redGPUContext) => {
         label.fontSize = 16;
         label.background = '#ff3333';
         label.padding = 8;
-        label.useBillboard = true; // 라벨은 항상 정면 보기
+        label.useBillboard = true;
         scene.addChild(label);
     };
 
-    createLabel('Billboard ON', -3, 2.2);
-    createLabel('Billboard OFF', 0, 2.2);
-    createLabel('Perspective OFF', 3, 2.2);
+    createLabel('World Size', -3, 2.5);
+    createLabel('Pixel Size', 3, 2.5);
 
     // 3D 뷰 설정
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
@@ -109,8 +138,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     view.grid = true;
     redGPUContext.addView(view);
 
-    // 렌더링 시작
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext);
 });
 </pre>
@@ -122,7 +150,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 ## 핵심 요약
 
 - **Sprite3D** 는 3D 좌표계를 가지면서도 카메라를 정면으로 바라보는 **Billboard** 기능을 제공합니다.
-- `useBillboardPerspective` 속성을 통해 거리에 관계없이 일정한 크기로 표현되는 UI 스타일 요소를 구현할 수 있습니다.
+- `usePixelSize` 속성을 통해 거리에 관계없이 일정한 크기로 표현되는 UI 스타일 요소를 구현할 수 있습니다.
 - 텍스처의 해상도와 비율에 따라 지오메트리 크기가 자동 조정되어 편리하게 사용할 수 있습니다.
 
 ---

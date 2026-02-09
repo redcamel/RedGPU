@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Basic Mesh 예제
+ * [EN] Basic Mesh example
+ *
+ * [KO] 기본적인 3D 메시 생성 및 속성(위치, 크기, 회전) 제어 방법을 보여줍니다.
+ * [EN] Demonstrates basic 3D mesh creation and property control (position, scale, rotation).
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -33,6 +41,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 샘플 메시를 생성합니다.
+ * [EN] Creates a sample mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createSampleMesh = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -46,10 +61,16 @@ const createSampleMesh = (redGPUContext, scene) => {
     return mesh;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} mesh
+ */
 const renderTestPane = async (redGPUContext, mesh) => {
 
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext)
     const pane = new Pane();
 

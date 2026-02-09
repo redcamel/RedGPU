@@ -1,10 +1,11 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import InstancingMesh from "../../display/instancingMesh/InstancingMesh";
 import Mesh from "../../display/mesh/Mesh";
-import View3D from "../../display/view/View3D";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
-import PickingEvent from "../PickingEvent";
+import PickingEvent from "./PickingEvent";
 import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
+import Raycaster3D from "../Raycaster3D";
+import Raycaster2D from "../Raycaster2D";
 
 /**
  * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
@@ -12,10 +13,16 @@ import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
  *
  * [KO] 마우스 클릭, 이동, 오버 등의 이벤트를 감지하고 처리합니다. GPU 텍스처를 사용하여 픽셀 단위의 객체 선택을 구현합니다.
  * [EN] Detects and processes events such as mouse clicks, moves, and overs. Implements pixel-perfect object selection using GPU textures.
- * * ### Example
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
  * ```typescript
- * // [KO] 내부적으로 View3D에서 사용됩니다.
- * // [EN] Internally used by View3D.
+ * // 올바른 접근 방법 (Correct access)
+ * const pickingManager = view.pickingManager;
  * ```
  * @category Picking
  */
@@ -27,13 +34,15 @@ class PickingManager {
     #pickingGPUTexture: GPUTexture
     #pickingGPUTextureView: GPUTextureView
     #redGPUContext: RedGPUContext
-    #view: View3D
+    #view: any
     #castingList: (Mesh | InstancingMesh)[] = []
     #mouseX: number = 0
     #mouseY: number = 0
     #prevPickingEvent: PickingEvent
     #prevOverTarget: Mesh
     #videoMemorySize: number = 0
+	#raycaster3D: Raycaster3D = new Raycaster3D();
+	#raycaster2D: Raycaster2D = new Raycaster2D();
 
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
@@ -130,7 +139,7 @@ class PickingManager {
      * [KO] View3D 인스턴스
      * [EN] View3D instance
      */
-    checkTexture(view: View3D) {
+    checkTexture(view: any) {
         const {redGPUContext} = view
         const {resourceManager} = redGPUContext
         this.#view = view
@@ -156,7 +165,7 @@ class PickingManager {
      * [KO] 시간
      * [EN] Time
      */
-    checkEvents(view: View3D, time: number) {
+    checkEvents(view: any, time: number) {
         if (this.castingList.length) {
             this.#readPixelArrayBuffer(view, time)
             this.resetCastingList()
@@ -180,12 +189,11 @@ class PickingManager {
         });
     }
 
-    #readPixelArrayBuffer = async (view: View3D, time: number, width = 1, height = 1) => {
+    #readPixelArrayBuffer = async (view: any, time: number, width = 1, height = 1) => {
         const {gpuDevice} = view.redGPUContext;
         const {pixelRectArray} = view;
         const x = this.#mouseX;
         const y = this.#mouseY;
-        // console.log(x,y)
         if (x <= 0 || x >= pixelRectArray[2] || y <= 0 || y >= pixelRectArray[3]) {
             return;
         }
@@ -224,11 +232,27 @@ class PickingManager {
         gpuDevice.queue.submit([readPixelCommandEncoder.finish()]);
         return readPixelBuffer;
     };
+    #createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent) {
+		const isView2D = this.#view.rawCamera.constructor.name === 'Camera2D';
+		const raycaster = isView2D ? this.#raycaster2D : this.#raycaster3D;
+		raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view as any);
+		let hit;
+		if (tMesh) {
+			const intersects = raycaster.intersectObject(tMesh);
+			hit = intersects[0];
+		}
+		const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent, hit);
+		if (!pickingEvent.ray) {
+			pickingEvent.ray = raycaster.ray.clone();
+		}
+		return pickingEvent;
+    }
+
     #processClickEvent = (uint32Color: number, mouseX: number, mouseY: number, time: number, pickingTable: {}) => {
         const tMesh = pickingTable[uint32Color];
         const eventType = this.lastMouseClickEvent?.type;
         if (eventType === PICKING_EVENT_TYPE.CLICK) {
-            const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseClickEvent);
+            const pickingEvent = this.#createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseClickEvent);
             this.#fireEvent(eventType, pickingEvent);
         }
     }
@@ -236,7 +260,7 @@ class PickingManager {
         const tMesh = pickingTable[uint32Color];
         const eventType = this.lastMouseEvent?.type;
         if (eventType) {
-            const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseEvent);
+            const pickingEvent = this.#createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, this.lastMouseEvent);
             if (this.#prevPickingEvent) {
                 pickingEvent.movementX = mouseX - this.#prevPickingEvent.mouseX;
                 pickingEvent.movementY = mouseY - this.#prevPickingEvent.mouseY;
@@ -289,39 +313,7 @@ class PickingManager {
     }
 
     #fireEvent(type, e: PickingEvent) {
-        if (e.target.events[type]) {
-            // const screenPoint = [
-            // 	this.#mouseX,
-            // 	this.#mouseY,
-            // 	this.#view.pixelRectObject.width,
-            // 	this.#view.pixelRectObject.height,
-            // ];
-            // const worldPoint = screenToWorld(screenPoint, this.#view);
-            // const origin = vec3.fromValues(this.#view.camera.x, this.#view.camera.y, this.#view.camera.z);
-            // // 카메라의 위치를 사용
-            // const direction = vec3.subtract(vec3.create(), vec3.fromValues(worldPoint[0], worldPoint[1], worldPoint[2]), origin);
-            // 방향은 카메라에서 월드 포인트로의 벡터
-            // const rayResult = raycast(
-            // 	vec3.fromValues(worldPoint[0], worldPoint[1], worldPoint[2]),
-            // 	vec3.normalize(vec3.create(), direction),
-            // 	vec3.fromValues(
-            // 		e.target.geometry.bound.minX * e.target.scaleX,
-            // 		e.target.geometry.bound.minY * e.target.scaleY,
-            // 		e.target.geometry.bound.minZ * e.target.scaleZ
-            // 	),
-            // 	vec3.fromValues(
-            // 		e.target.geometry.bound.maxX * e.target.scaleX,
-            // 		e.target.geometry.bound.maxY * e.target.scaleY,
-            // 		e.target.geometry.bound.maxZ * e.target.scaleZ
-            // 	),
-            // 	mat4.invert(mat4.create(), e.target.modelMatrix)
-            // )
-            // if (rayResult) {
-            // 	e.localX = rayResult[0]
-            // 	e.localY = rayResult[1]
-            // 	e.localZ = rayResult[2]
-            // }
-            // console.log('확인',e.type,e.localX,e.localY,e.localZ)
+        if (e.target && e.target.events[type]) {
             e.target.events[type](e)
         }
     };

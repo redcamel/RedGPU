@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] SSR 예제
+ * [EN] SSR example
+ *
+ * [KO] Screen Space Reflection (SSR) 효과를 시연합니다.
+ * [EN] Demonstrates the Screen Space Reflection (SSR) effect.
+ */
 
 /**
  * 1. 초기화 및 환경 설정
@@ -103,8 +111,8 @@ function loadGLTFModels(redGPUContext, scene) {
  * SSR 설정 컨트롤러 (Tweakpane)
  */
 async function createSSRControls(redGPUContext, targetView) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
+    const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1770625511985");
 
     const pane = new Pane({title: 'SSR 옵션 조절'});
     setDebugButtons(RedGPU, redGPUContext);

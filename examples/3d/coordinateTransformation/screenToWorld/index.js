@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Screen To World 예제
+ * [EN] Screen To World example
+ *
+ * [KO] 2D 화면 좌표(마우스 좌표 등)를 3D 월드 좌표로 변환하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to transform 2D screen coordinates (like mouse coordinates) into 3D world coordinates.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -34,11 +42,25 @@ RedGPU.init(
         document.body.innerHTML = `<div style="color: red; padding: 20px;">오류: ${failReason}</div>`;
     }
 );
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
 };
 
+/**
+ * [KO] 간단한 데모 씬을 설정합니다.
+ * [EN] Sets up a simple demo scene.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.Display.View3D} view
+ * @returns {object} Demo object
+ */
 function setupSimpleDemo(redGPUContext, scene, view) {
     // 🎯 단일 타겟 메시 (구체)
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
@@ -72,6 +94,14 @@ function setupSimpleDemo(redGPUContext, scene, view) {
     };
 }
 
+/**
+ * [KO] 마우스 이벤트를 설정하여 3D 위치를 업데이트합니다.
+ * [EN] Sets up mouse events to update 3D position.
+ * @param {HTMLCanvasElement} canvas
+ * @param {RedGPU.Display.View3D} view
+ * @param {RedGPU.Display.Mesh} targetMesh
+ * @param {object} mouseData
+ */
 function setupMouseEvents(canvas, view, targetMesh, mouseData) {
     canvas.addEventListener('mousemove', (event) => {
         const rect = canvas.getBoundingClientRect();

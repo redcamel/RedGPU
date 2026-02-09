@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Multi View 예제
+ * [EN] Multi View example
+ *
+ * [KO] 하나의 씬을 여러 개의 뷰로 렌더링하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to render a single scene with multiple views.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -34,12 +42,22 @@ RedGPU.init(
         sprite2D_2.y = view2.screenRectObject.height / 2;
         scene2.addChild(sprite2D_2);
 
-        view.onResize = (width, height) => {
+        /**
+         * [KO] 뷰 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the view size changes.
+         */
+        view.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
             sprite2D.x = width / 2;
             sprite2D.y = height / 2;
         };
 
-        view2.onResize = (width, height) => {
+        /**
+         * [KO] 뷰 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the view size changes.
+         */
+        view2.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
             sprite2D_2.x = width / 2;
             sprite2D_2.y = height / 2;
         };
@@ -61,13 +79,18 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setDebugButtons,
         setRedGPUTest_pane,
         setViewListTest
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     setRedGPUTest_pane(pane, redGPUContext, false);

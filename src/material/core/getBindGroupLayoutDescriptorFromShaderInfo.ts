@@ -1,8 +1,27 @@
+/**
+ * [KO] 셰이더 정보로부터 바인드 그룹 레이아웃 디스크립터를 생성합니다.
+ * [EN] Generates a bind group layout descriptor from shader information.
+ * @param SHADER_INFO -
+ * [KO] 셰이더 정보
+ * [EN] Shader information
+ * @param targetGroupIndex -
+ * [KO] 타겟 그룹 인덱스
+ * [EN] Target group index
+ * @param visibility -
+ * [KO] GPU 셰이더 스테이지 가시성
+ * [EN] GPU shader stage visibility
+ * @param useMSAA -
+ * [KO] MSAA 사용 여부 (기본값: true)
+ * [EN] Whether to use MSAA (default: true)
+ * @returns
+ * [KO] 바인드 그룹 레이아웃 디스크립터
+ * [EN] Bind group layout descriptor
+ */
 const getBindGroupLayoutDescriptorFromShaderInfo = (
-    SHADER_INFO,
-    targetGroupIndex: number,
-    visibility: GPUFlagsConstant,
-    useMSAA: boolean = true
+	SHADER_INFO,
+	targetGroupIndex: number,
+	visibility: GPUFlagsConstant,
+	useMSAA: boolean = true
 ) => {
     const {textures, samplers, uniforms, storage} = SHADER_INFO
     const entries: GPUBindGroupLayoutEntry[] = []

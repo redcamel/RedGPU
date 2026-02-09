@@ -1,8 +1,8 @@
 import {mat4, vec3} from "gl-matrix";
 import Mesh from "../../../display/mesh/Mesh";
 import GPU_FRONT_FACE from "../../../gpuConst/GPU_FRONT_FACE";
-import mat4ToEuler from "../../../utils/math/mat4ToEuler";
-import quaternionToRotationMat4 from "../../../utils/math/quaternionToRotationMat4";
+import mat4ToEuler from "../../../math/mat4ToEuler";
+import quaternionToRotationMat4 from "../../../math/quaternionToRotationMat4";
 import {Node} from "../GLTF";
 
 const RAD_TO_DEG = 180 / Math.PI;

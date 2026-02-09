@@ -6,12 +6,12 @@ order: 2
 # Mesh LOD
 
 This section covers how to apply LOD to general **Mesh** objects.
-LOD for a `Mesh` works by calculating the distance from the camera on the CPU every frame and swapping to the **Geometry** that meets the condition.
+LOD for a `Mesh` works by calculating the distance from the camera on the CPU every frame and swapping to the **Geometry** that meets the specified distance condition.
 
 ## 1. How it Works
 
-The `LODManager` inside the `Mesh` iterates through the registered LOD levels and finds the level with the largest distance value that is less than or equal to the current camera distance.
-When a suitable level is found, the rendering target is swapped to the geometry registered in that level.
+The `LODManager` within the `Mesh` iterates through the registered LOD levels and finds the level with the largest distance value that is less than or equal to the current camera distance.
+When a suitable level is found, the rendering target is swapped to the geometry registered at that level.
 
 ## 2. Usage
 
@@ -39,7 +39,7 @@ scene.addChild(mesh);
 
 ## 3. Live Example
 
-Observe how the sphere shape becomes simpler and eventually turns into a box as the distance increases.
+Observe how the sphere shape becomes simpler and eventually turns into a box as the distance from the camera increases.
 
 <ClientOnly>
 <CodePen title="RedGPU - Mesh LOD Example" slugHash="lod-mesh-basic">
@@ -109,9 +109,9 @@ RedGPU.init(canvas, (redGPUContext) => {
     const render = () => {
         // Calculate distance and update UI (for visual confirmation)
         const dist = Math.sqrt(
-            Math.pow(view.rawCamera.x - mesh.x, 2) +
-            Math.pow(view.rawCamera.y - mesh.y, 2) +
-            Math.pow(view.rawCamera.z - mesh.z, 2)
+            Math.pow(view.camera.x - mesh.x, 2) +
+            Math.pow(view.camera.y - mesh.y, 2) +
+            Math.pow(view.camera.z - mesh.z, 2)
         );
         
         let currentLevel = "High (Sphere 32)";

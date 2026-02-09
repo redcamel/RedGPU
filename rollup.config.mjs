@@ -12,7 +12,6 @@ export default [
 		output: {
 			file: './dist/index.js',
 			format: "es",
-
 		},
 		plugins: [
 			stringWgsl(),
@@ -52,6 +51,28 @@ export default [
 			removeSpacesAndTabs()
 		]
 	},
+	{
+		input: './src/plugins/rapier/index.ts',
+		output: {
+			file: './dist/plugins/physics/rapier/index.js',
+			format: "es",
+		},
+		plugins: [
+			stringWgsl(),
+			nodeResolve(),
+			json(),
+			typescript({
+				tsconfig: 'tsconfig.json',
+				declaration: false,
+				declarationDir: null
+			}),
+			terser({
+				format: { comments: false },
+				mangle: { keep_classnames: true, keep_fnames: true },
+			}),
+			removeSpacesAndTabs()
+		]
+	}
 ]
 
 function removeSpacesAndTabs() {

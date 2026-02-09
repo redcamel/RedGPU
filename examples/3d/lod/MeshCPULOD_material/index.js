@@ -1,7 +1,15 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
+
+/**
+ * [KO] Mesh CPU LOD (Material) 예제
+ * [EN] Mesh CPU LOD (Material) example
+ *
+ * [KO] CPU 기반 LOD와 머티리얼 변경을 함께 적용한 메시 렌더링을 시연합니다.
+ * [EN] Demonstrates mesh rendering with CPU-based LOD and material switching.
+ */
 
 RedGPU.init(
     canvas,
@@ -39,9 +47,15 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트 씬을 생성하고 GUI를 설정합니다.
+ * [EN] Creates the test scene and sets up the GUI.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 async function createTest(redGPUContext, scene) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
 
     const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Suzanne/glTF/Suzanne.gltf';
 

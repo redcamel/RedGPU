@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Tint Basic 예제
+ * [EN] Tint Basic example
+ *
+ * [KO] Sprite2D에 틴트를 적용하는 기본적인 방법을 보여줍니다.
+ * [EN] Demonstrates the basic method of applying tint to a Sprite2D.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -28,13 +36,21 @@ RedGPU.init(
         subChild.setPosition(150, 150);
         base.addChild(subChild);
 
-        redGPUContext.onResize = () => {
-            const {width, height} = redGPUContext.screenRectObject;
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
             base.x = width / 2;
             base.y = height / 2;
         };
 
-        redGPUContext.onResize();
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.screenRectObject,
+            pixelRectObject: redGPUContext.pixelRectObject
+        });
 
         renderTestPane(redGPUContext, base);
 
@@ -52,10 +68,16 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} sprite
+ */
 const renderTestPane = async (redGPUContext, sprite) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const folder = pane.addFolder({title: 'Material Tint Test'});
     const targetTint = sprite.material.tint;

@@ -26,8 +26,8 @@ export type controllerInit = {
 declare abstract class AController {
     #private;
     /**
-     * [KO] AController 생성자
-     * [EN] AController constructor
+     * [KO] AController 인스턴스를 생성합니다.
+     * [EN] Creates an instance of AController.
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
@@ -73,6 +73,33 @@ declare abstract class AController {
      * [EN] Controlled camera (PerspectiveCamera or OrthographicCamera)
      */
     get camera(): PerspectiveCamera | OrthographicCamera;
+    /**
+     * [KO] 카메라의 현재 월드 X 좌표를 가져옵니다.
+     * [EN] Gets the camera's current world X coordinate.
+     *
+     * @returns
+     * [KO] X 좌표
+     * [EN] X coordinate
+     */
+    get x(): number;
+    /**
+     * [KO] 카메라의 현재 월드 Y 좌표를 가져옵니다.
+     * [EN] Gets the camera's current world Y coordinate.
+     *
+     * @returns
+     * [KO] Y 좌표
+     * [EN] Y coordinate
+     */
+    get y(): number;
+    /**
+     * [KO] 카메라의 현재 월드 Z 좌표를 가져옵니다.
+     * [EN] Gets the camera's current world Z coordinate.
+     *
+     * @returns
+     * [KO] Z 좌표
+     * [EN] Z coordinate
+     */
+    get z(): number;
     /**
      * [KO] 현재 마우스가 호버링 중인 View를 반환합니다.
      * [EN] Returns the View currently being hovered by the mouse.
@@ -149,13 +176,14 @@ declare abstract class AController {
      * [KO] 현재 시간 (ms)
      * [EN] Current time (ms)
      * @param updateAnimation -
-     * [KO] 애니메이션 업데이트 콜백
-     * [EN] Animation update callback
+     * [KO] 애니메이션 업데이트 콜백 (deltaTime 전달)
+     * [EN] Animation update callback (receives deltaTime)
      */
-    update(view: View3D, time: number, updateAnimation: () => void): void;
+    update(view: View3D, time: number, updateAnimation: (deltaTime: number) => void): void;
     /**
      * [KO] 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
      * [EN] Checks for keyboard input and sets the active View.
+     *
      * @param view -
      * [KO] 현재 View
      * [EN] Current View

@@ -2,6 +2,7 @@ import {mat4, vec3} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
+import updateObject3DMatrix from "../../math/updateObject3DMatrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
@@ -17,15 +18,15 @@ const tempVec3 = vec3.create();
  * [KO] 3인칭 게임의 캐릭터 카메라처럼 타겟의 뒤를 쫓거나 주변을 회전하며 관찰하는 데 사용됩니다. 타겟의 이동과 회전을 부드럽게 따라가며, 거리와 높이, 각도를 조절하여 다양한 연출이 가능합니다.
  * [EN] Used to follow behind or rotate around a target, like a character camera in a 3rd person game. It smoothly tracks the target's movement and rotation, allowing for various cinematic effects by adjusting distance, height, and angles.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const followController = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
+ * const followController = new RedGPU.FollowController(redGPUContext, targetMesh);
  * followController.distance = 15;
  * followController.height = 8;
  * followController.pan = 45;
  * followController.tilt = 30;
  * ```
- * <iframe src="/RedGPU/examples/3d/controller/followController/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/controller/followController/" style="width:100%; height:500px;"></iframe>
  * @category Controller
  */
 class FollowController extends AController {
@@ -43,7 +44,7 @@ class FollowController extends AController {
 	 * [KO] 거리 보간 계수 (0.01 ~ 1)
 	 * [EN] Distance interpolation factor (0.01 ~ 1)
 	 */
-	#distanceInterpolation: number = 0.1;
+	#distanceInterpolation: number = 0.02;
 
 	/**
 	 * [KO] 현재 높이값
@@ -59,13 +60,13 @@ class FollowController extends AController {
 	 * [KO] 높이 보간 계수 (0.01 ~ 1)
 	 * [EN] Height interpolation factor (0.01 ~ 1)
 	 */
-	#heightInterpolation: number = 0.1;
+	#heightInterpolation: number = 0.02;
 
 	/**
 	 * [KO] 전체 보간 계수 (0.01 ~ 1)
 	 * [EN] Overall interpolation factor (0.01 ~ 1)
 	 */
-	#interpolation: number = 1;
+	#interpolation: number = 0.02;
 
 	/**
 	 * [KO] 현재 팬(가로 회전) 각도 (도 단위)
@@ -81,7 +82,7 @@ class FollowController extends AController {
 	 * [KO] 팬 보간 계수 (0.01 ~ 1)
 	 * [EN] Pan interpolation factor (0.01 ~ 1)
 	 */
-	#panInterpolation: number = 0.1;
+	#panInterpolation: number = 0.02;
 
 	/**
 	 * [KO] 현재 틸트(세로 회전) 각도 (도 단위)
@@ -97,7 +98,7 @@ class FollowController extends AController {
 	 * [KO] 틸트 보간 계수 (0.01 ~ 1)
 	 * [EN] Tilt interpolation factor (0.01 ~ 1)
 	 */
-	#tiltInterpolation: number = 0.1;
+	#tiltInterpolation: number = 0.02;
 
 	/**
 	 * [KO] 타겟 메시의 회전을 따를지 여부
@@ -131,8 +132,13 @@ class FollowController extends AController {
 	#currentPos = vec3.create();
 
 	/**
-	 * [KO] FollowController 생성자
-	 * [EN] FollowController constructor
+	 * [KO] FollowController 인스턴스를 생성합니다.
+	 * [EN] Creates an instance of FollowController.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * const controller = new RedGPU.FollowController(redGPUContext, targetMesh);
+	 * ```
 	 *
 	 * @param redGPUContext -
 	 * [KO] RedGPU 컨텍스트
@@ -154,9 +160,9 @@ class FollowController extends AController {
 				this.#targetDistance -= scaleChange * this.#targetDistance;
 			},
 		});
-		this.#targetMesh = targetMesh;
+		this.targetMesh = targetMesh;
 		this.#targetMesh.setIgnoreFrustumCullingRecursively(true);
-		vec3.copy(this.#currentPos, this.#calculateCameraPosition());
+
 	}
 
 	/**
@@ -260,8 +266,8 @@ class FollowController extends AController {
 	}
 
 	/**
-	 * [KO] 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져옵니다.
-	 * [EN] Gets the camera's horizontal rotation (pan) angle around the target.
+	 * [KO] 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져옵니다. (도 단위)
+	 * [EN] Gets the camera's horizontal rotation (pan) angle around the target (in degrees).
 	 *
 	 * @returns
 	 * [KO] 팬 각도 (도 단위)
@@ -310,8 +316,8 @@ class FollowController extends AController {
 	}
 
 	/**
-	 * [KO] 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져옵니다.
-	 * [EN] Gets the camera's vertical rotation (tilt) angle around the target.
+	 * [KO] 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져옵니다. (도 단위)
+	 * [EN] Gets the camera's vertical rotation (tilt) angle around the target (in degrees).
 	 *
 	 * @returns
 	 * [KO] 틸트 각도 (도 단위, -89 ~ 89)
@@ -510,12 +516,17 @@ class FollowController extends AController {
 		if (!value) throw new Error('FollowController: targetMesh cannot be null or undefined');
 		this.#targetMesh = value;
 		this.#targetMesh.setIgnoreFrustumCullingRecursively(true);
-		vec3.copy(this.#currentPos, this.#calculateCameraPosition());
+		this.#snapToTarget();
 	}
 
 	/**
 	 * [KO] 카메라의 타겟 오프셋을 한 번에 설정합니다.
 	 * [EN] Sets the camera's target offset at once.
+	 *
+	 * ### Example
+	 * ```typescript
+	 * controller.setTargetOffset(0, 5, 0);
+	 * ```
 	 *
 	 * @param x -
 	 * [KO] X축 오프셋
@@ -549,12 +560,30 @@ class FollowController extends AController {
 	 */
 	update(view: View3D, time: number): void {
 
-		super.update(view, time, () => {
-			this.#currentDistance += (this.#targetDistance - this.#currentDistance) * this.#distanceInterpolation;
-			this.#currentHeight += (this.#targetHeight - this.#currentHeight) * this.#heightInterpolation;
-			this.#currentPan += (this.#targetPan - this.#currentPan) * this.#panInterpolation;
-			this.#currentTilt += (this.#targetTilt - this.#currentTilt) * this.#tiltInterpolation;
-			vec3.lerp(this.#currentPos, this.#currentPos, this.#calculateCameraPosition(), this.#interpolation);
+		super.update(view, time, (deltaTime) => {
+			const {targetMesh} = this
+			if(targetMesh) {
+				updateObject3DMatrix(targetMesh,view)
+			}
+
+			this.#currentDistance = this.#targetDistance + (this.#currentDistance - this.#targetDistance) * Math.pow(this.#distanceInterpolation, deltaTime);
+			this.#currentHeight = this.#targetHeight + (this.#currentHeight - this.#targetHeight) * Math.pow(this.#heightInterpolation, deltaTime);
+
+			// 팬(Pan) 보간 - 지수적 감쇄 및 최단 경로(Shortest Path) 적용
+			let panDelta = (this.#targetPan - this.#currentPan) % 360;
+			if (panDelta > 180) panDelta -= 360;
+			if (panDelta < -180) panDelta += 360;
+			this.#currentPan += panDelta * (1 - Math.pow(this.#panInterpolation, deltaTime));
+
+			this.#currentTilt = this.#targetTilt + (this.#currentTilt - this.#targetTilt) * Math.pow(this.#tiltInterpolation, deltaTime);
+
+			const targetPos = this.#calculateCameraPosition();
+			const posSmoothing = Math.pow(this.#interpolation, deltaTime);
+			
+			this.#currentPos[0] = targetPos[0] + (this.#currentPos[0] - targetPos[0]) * posSmoothing;
+			this.#currentPos[1] = targetPos[1] + (this.#currentPos[1] - targetPos[1]) * posSmoothing;
+			this.#currentPos[2] = targetPos[2] + (this.#currentPos[2] - targetPos[2]) * posSmoothing;
+
 			this.camera.setPosition(this.#currentPos[0], this.#currentPos[1], this.#currentPos[2]);
 
 			const lookAt = this.#calculateLookAtTarget();
@@ -640,6 +669,32 @@ class FollowController extends AController {
 			targetWorldY + tempVec3[1],
 			targetWorldZ + tempVec3[2]
 		);
+	}
+
+	/**
+	 * [KO] 보간 없이 즉시 타겟 위치로 카메라 상태를 동기화합니다.
+	 * [EN] Immediately synchronizes the camera state to the target position without interpolation.
+	 * @private
+	 */
+	#snapToTarget(): void {
+		// [KO] 초기화 시에도 매트릭스를 정확히 계산합니다.
+		// [EN] Calculate the matrix accurately even during initialization.
+		// @ts-ignore
+		updateObject3DMatrix(this.#targetMesh, {pixelRectObject: {height: 1}});
+
+		// 목표값들을 현재값으로 즉시 동기화
+		this.#currentDistance = this.#targetDistance;
+		this.#currentHeight = this.#targetHeight;
+		this.#currentPan = this.#targetPan;
+		this.#currentTilt = this.#targetTilt;
+
+		// 계산된 위치를 현재 위치로 즉시 설정
+		const initialPos = this.#calculateCameraPosition();
+		vec3.copy(this.#currentPos, initialPos);
+
+		this.camera.setPosition(this.#currentPos[0], this.#currentPos[1], this.#currentPos[2]);
+		const lookAt = this.#calculateLookAtTarget();
+		this.camera.lookAt(lookAt[0], lookAt[1], lookAt[2]);
 	}
 
 }

@@ -1,4 +1,4 @@
-import formatBytes from "../../../utils/math/formatBytes";
+import formatBytes from "../../../utils/formatBytes";
 
 /**
  * ArrayBuffer 로딩 성공 시 호출되는 콜백 함수 타입

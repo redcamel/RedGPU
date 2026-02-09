@@ -1,8 +1,16 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
 
 // 1. Create and append a canvas
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
+
+/**
+ * [KO] Instance Mesh GPU LOD 예제
+ * [EN] Instance Mesh GPU LOD example
+ *
+ * [KO] GPU 기반 LOD(Level of Detail)를 적용한 인스턴싱 메시를 시연합니다.
+ * [EN] Demonstrates instanced mesh with GPU-based LOD (Level of Detail).
+ */
 
 // 2. Initialize RedGPU
 RedGPU.init(
@@ -67,10 +75,17 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트 씬을 생성하고 GUI를 설정합니다.
+ * [EN] Creates the test scene and sets up the GUI.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.Material.PhongMaterial} material
+ */
 async function createTest(redGPUContext, scene, material) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
 
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
 
     const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();

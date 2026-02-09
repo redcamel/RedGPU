@@ -7,12 +7,12 @@ import Primitive from "./core/Primitive";
  * [KO] 상하 반지름, 높이 등을 기반으로 원기둥 형태의 정점 및 인덱스 데이터를 생성하여 관리합니다.
  * [EN] Generates and manages vertex and index data for a cylinder based on radius, height, etc.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // 반지름 1, 높이 2, 세그먼트 32짜리 실린더 생성
- * const cylinder = new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 2, 32);
+ * const cylinder = new RedGPU.Cylinder(redGPUContext, 1, 1, 2, 32);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/cylinder/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/cylinder/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 declare class Cylinder extends Primitive {
@@ -20,6 +20,11 @@ declare class Cylinder extends Primitive {
     /**
      * [KO] Cylinder 인스턴스를 생성합니다.
      * [EN] Creates an instance of Cylinder.
+     *
+     * ### Example
+     * ```typescript
+     * const cylinder = new RedGPU.Cylinder(redGPUContext, 1, 1, 2, 32);
+     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스

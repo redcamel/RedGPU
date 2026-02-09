@@ -7,12 +7,12 @@ import Primitive from "./core/Primitive";
  * [KO] 반지름, 세그먼트, 시작 각도 등을 기반으로 2D 원형 데이터를 생성하여 관리합니다.
  * [EN] Generates and manages 2D circular data based on radius, segments, start angle, etc.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // 반지름 2, 세그먼트 64짜리 원 생성
- * const circle = new RedGPU.Primitive.Circle(redGPUContext, 2, 64);
+ * const circle = new RedGPU.Circle(redGPUContext, 2, 64);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/circle/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/circle/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 declare class Circle extends Primitive {
@@ -20,6 +20,11 @@ declare class Circle extends Primitive {
     /**
      * [KO] Circle 인스턴스를 생성합니다.
      * [EN] Creates an instance of Circle.
+     *
+     * ### Example
+     * ```typescript
+     * const circle = new RedGPU.Circle(redGPUContext, 1, 32, 0, Math.PI * 2);
+     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스

@@ -1,0 +1,71 @@
+import RedGPUContext from "../../context/RedGPUContext";
+import ABitmapBaseMaterial from "./ABitmapBaseMaterial";
+/**
+ * [KO] 텍스처 UV 트랜스폼(Offset, Scale) 기능을 제공하는 추상 머티리얼 클래스입니다.
+ * [EN] Abstract material class providing texture UV transform (Offset, Scale) functionality.
+ *
+ * [KO] 이 클래스는 비트맵 기반 머티리얼에서 텍스처의 이동(Offset)과 반복 배율(Scale)을 정밀하게 제어할 수 있는 API를 제공합니다.
+ * [EN] This class provides an API for precisely controlling texture translation (Offset) and tiling (Scale) in bitmap-based materials.
+ *
+ * [KO] 모든 트랜스폼 연산은 버텍스 쉐이더 단계에서 완료되어 렌더링 성능이 최적화됩니다.
+ * [EN] All transform calculations are completed at the vertex shader stage to optimize rendering performance.
+ *
+ * ### Example
+ * ```typescript
+ * // AUVTransformBaseMaterial을 상속받은 머티리얼에서 사용 (In material inheriting from AUVTransformBaseMaterial)
+ * material.textureOffset = [0.1, 0.1];
+ * material.textureScale = [2.0, 2.0];
+ * ```
+ * <iframe src="/RedGPU/examples/3d/material/uvTransform/" style="width:100%; height:500px;"></iframe>
+ *
+ * @category Material
+ */
+declare abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
+    #private;
+    /**
+     * [KO] 텍스처 트랜스폼 변경 여부 플래그
+     * [EN] Texture transform change status flag
+     */
+    dirtyTextureTransform: boolean;
+    /**
+     * [KO] 텍스처 오프셋 (u, v)
+     * [EN] Texture offset (u, v)
+     *
+     * ### Example
+     * ```typescript
+     * material.textureOffset = [0.5, 0.5];
+     * ```
+     */
+    get textureOffset(): [number, number];
+    set textureOffset(value: [number, number]);
+    /**
+     * [KO] 텍스처 스케일 (u, v)
+     * [EN] Texture scale (u, v)
+     *
+     * ### Example
+     * ```typescript
+     * material.textureScale = [2.0, 2.0];
+     * ```
+     */
+    get textureScale(): [number, number];
+    set textureScale(value: [number, number]);
+    /**
+     * [KO] AUVTransformBaseMaterial 인스턴스를 생성합니다.
+     * [EN] Creates an AUVTransformBaseMaterial instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param moduleName -
+     * [KO] 머티리얼 모듈명
+     * [EN] Material module name
+     * @param SHADER_INFO -
+     * [KO] 파싱된 WGSL 쉐이더 정보
+     * [EN] Parsed WGSL shader info
+     * @param targetGroupIndex -
+     * [KO] 바인드 그룹 인덱스
+     * [EN] Bind group index
+     */
+    constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
+}
+export default AUVTransformBaseMaterial;

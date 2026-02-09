@@ -7,12 +7,12 @@ import Primitive from "./core/Primitive";
  * [KO] 반지름, 튜브 두께, 매듭 파라미터 등을 기반으로 3D 매듭형 도넛 데이터를 생성하여 관리합니다.
  * [EN] Generates and manages 3D torus knot data based on radius, tube thickness, knot parameters, etc.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // p=2, q=3 매듭 토러스 생성
- * const torusKnot = new RedGPU.Primitive.TorusKnot(redGPUContext, 1, 0.4, 128, 16, 2, 3);
+ * const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 128, 16, 2, 3);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/torusNut/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/torusNut/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 declare class TorusKnot extends Primitive {
@@ -20,6 +20,11 @@ declare class TorusKnot extends Primitive {
     /**
      * [KO] TorusKnot 인스턴스를 생성합니다.
      * [EN] Creates an instance of TorusKnot.
+     *
+     * ### Example
+     * ```typescript
+     * const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 64, 8, 2, 3);
+     * ```
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스

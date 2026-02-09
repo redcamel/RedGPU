@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Directional Shadow 예제
+ * [EN] Directional Shadow example
+ *
+ * [KO] Directional Light에 의한 그림자 생성 및 설정을 보여줍니다.
+ * [EN] Demonstrates shadow generation and configuration by Directional Light.
+ */
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -46,6 +54,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 스카이박스를 생성합니다.
+ * [EN] Creates a skybox.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @returns {RedGPU.Display.SkyBox}
+ */
 const createSkybox = (redGPUContext) => {
     const skyboxImagePaths = [
         "../../../assets/skybox/px.jpg",
@@ -61,6 +75,12 @@ const createSkybox = (redGPUContext) => {
     return skybox;
 };
 
+/**
+ * [KO] 무작위 메시들을 씬에 추가합니다.
+ * [EN] Adds random meshes to the scene.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const addRandomMeshes = (redGPUContext, scene) => {
     const geometries = [
         new RedGPU.Primitive.Sphere(redGPUContext, 2, 16, 16),
@@ -98,14 +118,25 @@ const addRandomMeshes = (redGPUContext, scene) => {
     renderTestPane(redGPUContext, scene);
 };
 
+/**
+ * [KO] 무작위 16진수 색상 값을 반환합니다.
+ * [EN] Returns a random hex color value.
+ * @returns {string}
+ */
 const getRandomHexValue = () => {
     const randomColor = Math.floor(Math.random() * 0xffffff);
     return `#${randomColor.toString(16).padStart(6, "0")}`;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     const {shadowManager} = scene;

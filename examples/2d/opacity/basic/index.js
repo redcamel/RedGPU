@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Opacity 예제
+ * [EN] Opacity example
+ *
+ * [KO] 2D 객체의 투명도(opacity)를 조절하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to control the opacity of 2D objects.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -17,6 +25,21 @@ RedGPU.init(
         const childTextField2D = createChildTextField2D(redGPUContext, parentSprite2D);
         const childSpriteSheet2D = createChildSpriteSheet2D(redGPUContext, parentSprite2D);
 
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
+            parentSprite2D.x = width / 2;
+            parentSprite2D.y = height / 2;
+        };
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.screenRectObject,
+            pixelRectObject: redGPUContext.pixelRectObject
+        });
+
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = () => {
         };
@@ -32,6 +55,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 부모 Sprite2D를 생성합니다.
+ * [EN] Creates a parent Sprite2D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Sprite2D}
+ */
 const createParentSprite2D = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'));
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -49,6 +79,13 @@ const createParentSprite2D = (redGPUContext, scene) => {
     return sprite2D;
 };
 
+/**
+ * [KO] 자식 Sprite2D를 생성합니다.
+ * [EN] Creates a child Sprite2D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} parent
+ * @returns {RedGPU.Display.Sprite2D}
+ */
 const createChildSprite2D = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
@@ -65,6 +102,13 @@ const createChildSprite2D = (redGPUContext, parent) => {
     return sprite2D;
 };
 
+/**
+ * [KO] 자식 SpriteSheet2D를 생성합니다.
+ * [EN] Creates a child SpriteSheet2D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} parent
+ * @returns {RedGPU.Display.SpriteSheet2D}
+ */
 const createChildSpriteSheet2D = (redGPUContext, parent) => {
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     const sprite2D = new RedGPU.Display.SpriteSheet2D(redGPUContext, spriteSheetInfo);
@@ -80,6 +124,13 @@ const createChildSpriteSheet2D = (redGPUContext, parent) => {
     return sprite2D;
 };
 
+/**
+ * [KO] 자식 TextField2D를 생성합니다.
+ * [EN] Creates a child TextField2D.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} parent
+ * @returns {RedGPU.Display.TextField2D}
+ */
 const createChildTextField2D = (redGPUContext, parent) => {
     const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
     textField2D.x = 0;
@@ -89,10 +140,17 @@ const createChildTextField2D = (redGPUContext, parent) => {
     return textField2D;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} parent
+ * @param {Array<RedGPU.Display.DisplayObject2D>} children
+ */
 const renderTestPane = async (redGPUContext, parent, children) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const maxW = redGPUContext.screenRectObject.width;
     const maxH = redGPUContext.screenRectObject.height;

@@ -36,14 +36,38 @@ const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, sheetInfo);
 scene.addChild(spriteSheet);
 ```
 
-## 3. Animation Control
+## 3. Key Property Control
 
-You can control the playback state of the animation in real-time through the `SpriteSheet3D` instance.
+Key properties controlling the playback state and the size of the sprite.
+
+### Animation Control
 
 - **`play()`**: Starts the animation.
 - **`stop()`**: Pauses the animation at the current frame.
 - **`gotoAndPlay(frameIndex)`**: Moves to the specified frame and plays immediately.
 - **`gotoAndStop(frameIndex)`**: Moves to the specified frame and stops.
+
+### Size and Rendering Mode
+
+`SpriteSheet3D` provides the same size setting options as `Sprite3D`.
+
+| Property Name | Description | Default Value |
+| :--- | :--- | :--- |
+| **`worldSize`** | Vertical size in world space (Unit). | `1` |
+| **`usePixelSize`** | Whether to use fixed pixel size mode. | `false` |
+| **`pixelSize`** | Fixed pixel size value (in `px`). | `0` |
+
+```javascript
+// Display character animation at a fixed pixel size
+spriteSheet.usePixelSize = true;
+spriteSheet.pixelSize = 128;
+```
+
+### 3.3 Size Setting Policy
+
+`SpriteSheet3D` shares the same size setting mechanism as `Sprite3D`. It supports physical size setting in 3D space through `worldSize` and absolute pixel size setting on the screen through `usePixelSize`.
+
+For detailed differences between modes and operating principles, please refer to the **[Size Relationship section of the Sprite3D manual](./sprite.md#_3-3-relationship-between-world-size-and-pixel-size)**.
 
 ## 4. Practical Example: Walking Character Animation
 
@@ -73,24 +97,20 @@ RedGPU.init(canvas, (redGPUContext) => {
         5, 3, 15, 0, true, 24
     );
 
-    // 2. Basic Billboard (Perspective ON)
+    // 2. World Size Sprite Sheet
     const spriteSheet1 = new RedGPU.Display.SpriteSheet3D(redGPUContext, sheetInfo);
     spriteSheet1.x = -3; spriteSheet1.y = 1;
+    spriteSheet1.worldSize = 2;
     scene.addChild(spriteSheet1);
 
-    // 3. Disable Billboard (Plane fixed in space)
+    // 3. Fixed Pixel Size Sprite Sheet
     const spriteSheet2 = new RedGPU.Display.SpriteSheet3D(redGPUContext, sheetInfo);
-    spriteSheet2.x = 0; spriteSheet2.y = 1;
-    spriteSheet2.useBillboard = false;
+    spriteSheet2.x = 3; spriteSheet2.y = 1;
+    spriteSheet2.usePixelSize = true;
+    spriteSheet2.pixelSize = 150;
     scene.addChild(spriteSheet2);
 
-    // 4. Fixed Size Billboard (Perspective OFF)
-    const spriteSheet3 = new RedGPU.Display.SpriteSheet3D(redGPUContext, sheetInfo);
-    spriteSheet3.x = 3; spriteSheet3.y = 1;
-    spriteSheet3.useBillboardPerspective = false;
-    scene.addChild(spriteSheet3);
-
-    // 5. Option Description Label (TextField3D)
+    // 4. Option Description Label (TextField3D)
     const createLabel = (text, x, y) => {
         const label = new RedGPU.Display.TextField3D(redGPUContext, text);
         label.x = x; label.y = y;
@@ -98,13 +118,12 @@ RedGPU.init(canvas, (redGPUContext) => {
         label.fontSize = 16;
         label.background = '#ff3333';
         label.padding = 8;
-        label.useBillboard = true; // Labels always face front
+        label.useBillboard = true;
         scene.addChild(label);
     };
 
-    createLabel('Billboard ON', -3, 2.2);
-    createLabel('Billboard OFF', 0, 2.2);
-    createLabel('Perspective OFF', 3, 2.2);
+    createLabel('World Size', -3, 2.5);
+    createLabel('Pixel Size', 3, 2.5);
 
     // 3D View Setup
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
@@ -114,7 +133,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // Start Rendering
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext);
 });
 </pre>

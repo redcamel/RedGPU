@@ -8,11 +8,12 @@ export interface ConditionalBlock {
     blockIndex: number;
 }
 /** [KO] 전처리된 WGSL 결과 인터페이스 [EN] Preprocessed WGSL result interface */
-interface PreprocessedWGSLResult {
+export interface PreprocessedWGSLResult {
     cacheKey: string;
     defaultSource: string;
     shaderSourceVariant: ShaderVariantGenerator;
     conditionalBlocks: string[];
+    conditionalBlockInfos: ConditionalBlock[];
 }
 /**
  * [KO] WGSL 셰이더 코드를 전처리합니다.

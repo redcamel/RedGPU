@@ -1,5 +1,5 @@
-import {hdrImages} from './index.js?t=1769835266959';
-import createSkyBoxHelper from './createSkyBoxHelper.js?t=1769835266959';
+import {hdrImages} from './index.js?t=1770625511985';
+import createSkyBoxHelper from './createSkyBoxHelper.js?t=1770625511985';
 
 const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const folder = pane.addFolder({title: 'Lighting', expanded: true});
@@ -81,9 +81,17 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         }
 
         const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath);
-        const skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
         view.ibl = ibl;
-        view.skybox = skybox;
+
+        if (view.skybox) {
+            // [KO] 기존 스카이박스가 있으면 텍스처만 교체 (설정값 유지됨)
+            // [EN] If an existing skybox exists, only replace the texture (settings are preserved)
+            view.skybox.skyboxTexture = ibl.environmentTexture;
+        } else {
+            // [KO] 없으면 새로 생성
+            // [EN] If not, create a new one
+            view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
+        }
     };
 
     const handleLightToggle = (enabled) => {

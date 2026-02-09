@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Follow Controller 예제
+ * [EN] Follow Controller example
+ *
+ * [KO] 특정 대상을 따라다니는 카메라 컨트롤러(FollowController)의 사용법을 보여줍니다.
+ * [EN] Demonstrates how to use a camera controller (FollowController) that follows a specific target.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -99,11 +107,18 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Camera.FollowController} controller
+ */
 const renderTestPane = async (redGPUContext, controller) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
 
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
@@ -216,11 +231,11 @@ const renderTestPane = async (redGPUContext, controller) => {
     presetFolder.addButton({
         title: 'Reset All Delays',
     }).on('click', () => {
-        controller.interpolation = 1;
-        controller.distanceInterpolation = 0.1;
-        controller.heightInterpolation = 0.1;
-        controller.panInterpolation = 0.1;
-        controller.tiltInterpolation = 0.1;
+        controller.interpolation = 0.02;
+        controller.distanceInterpolation = 0.02;
+        controller.heightInterpolation = 0.02;
+        controller.panInterpolation = 0.02;
+        controller.tiltInterpolation = 0.02;
         pane.refresh();
     });
 

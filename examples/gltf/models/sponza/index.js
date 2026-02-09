@@ -1,7 +1,7 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
 import {
     loadingProgressInfoHandler
-} from '../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1769835266959'
+} from '../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770625511985'
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -13,7 +13,10 @@ RedGPU.init(
         // Setup camera or controller
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
 
+        controller.moveSpeed = 20
         controller.tilt = 15
+        controller.y = 1
+        controller.pan = 90
 
         // Create scene and view
         const scene = new RedGPU.Display.Scene();
@@ -57,13 +60,12 @@ const loadGLTF = async (view, url) => {
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         createIblHelper,
         setDebugButtons
-    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1769835266959');
+    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1770625511985');
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);
 };
-

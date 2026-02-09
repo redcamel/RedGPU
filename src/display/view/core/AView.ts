@@ -5,7 +5,7 @@ import PickingManager from "../../../picking/core/PickingManager";
 import FXAA from "../../../antialiasing/fxaa/FXAA";
 import TAA from "../../../antialiasing/taa/TAA";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import screenToWorld from "../../../utils/math/coordinates/screenToWorld";
+import screenToWorld from "../../../math/coordinates/screenToWorld";
 import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import DrawDebuggerAxis from "../../drawDebugger/DrawDebuggerAxis";
 import DrawDebuggerGrid from "../../drawDebugger/grid/DrawDebuggerGrid";

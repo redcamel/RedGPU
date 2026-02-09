@@ -11,9 +11,9 @@ import AABB from "../../bound/AABB";
  * [KO] 정점 버퍼, 인덱스 버퍼, GPU 렌더 레이아웃 정보 및 AABB 바운딩 박스를 관리합니다.
  * [EN] Manages vertex buffers, index buffers, GPU render layout information, and AABB bounding boxes.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const primitive = new RedGPU.Primitive.Core.Primitive(redGPUContext);
+ * const primitive = new RedGPU.Core.Primitive(redGPUContext);
  * ```
  * @category Core
  */

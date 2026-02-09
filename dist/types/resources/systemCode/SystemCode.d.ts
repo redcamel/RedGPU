@@ -8,6 +8,9 @@ declare const SystemCode: Readonly<{
     FragmentOutput: "string";
     picking: "string";
     drawPicking: "string";
+    billboardPicking: "string";
+    billboardShadow: "string";
+    calcBillboard: "string";
     calcDisplacements: "string";
     getBillboardMatrix: "string";
     extractScaleAndTranslation: "string";

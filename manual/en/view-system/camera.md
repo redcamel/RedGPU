@@ -5,17 +5,16 @@ order: 4
 
 # Camera
 
-If **Scene** is the 'stage' where all objects are placed, **Camera** is the 'observer's eye' looking at that stage.
-It is a core object that manages the **Projection Matrix** and **View Matrix** for converting **World Coordinate** system to **Screen Coordinate** system.
+If **Scene** is the 'stage' where all objects are placed, **Camera** is the 'observer's eye' looking at that stage. It is a core object that manages the **Projection Matrix** and **View Matrix** for converting from the **World Coordinate** system to the **Screen Coordinate** system.
 
-RedGPU supports two standard projection methods depending on the usage.
+RedGPU supports two standard projection methods depending on the use case.
 
 ## 1. PerspectiveCamera
 
-**PerspectiveCamera** uses the **Perspective Projection** method. Similar to the human eye or a real camera lens, objects far away appear smaller and closer objects appear larger, providing a sense of space with depth.
+**PerspectiveCamera** uses the **Perspective Projection** method. Similar to the human eye or a real camera lens, objects that are far away appear smaller and closer objects appear larger, providing a sense of space with depth.
 
 ```javascript
-// Create instance (Context injection required)
+// Create an instance (Context injection required)
 const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
 
 // 1. Field of View setup (Default: 60 degrees)
@@ -23,7 +22,7 @@ const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
 camera.fieldOfView = 45; 
 
 // 2. Clipping Planes setup
-// Only objects between near ~ far are drawn on the screen.
+// Only objects between near and far are rendered on the screen.
 camera.nearClipping = 0.1; 
 camera.farClipping = 1000; 
 
@@ -38,7 +37,7 @@ camera.z = -15;
 To move the camera's position and then make it look directly at a specific point, use the `lookAt()` method. This method automatically recalculates the **View Matrix** to look at the target point.
 
 ```javascript
-// Set camera to look at the world origin (0, 0, 0)
+// Set the camera to look at the world origin (0, 0, 0)
 camera.lookAt(0, 0, 0);
 
 // When tracking a moving object (call every frame)
@@ -61,7 +60,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
     camera.y = 8; // Look down from a slightly high position
     
-    // fieldOfView setup
+    // Field of View setup
     camera.fieldOfView = 45;
     camera.lookAt(0, 0, 0);
 
@@ -80,7 +79,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     view.grid = true;
     redGPUContext.addView(view);
 
-    // 3. Animation: change camera position in real-time
+    // 3. Animation: Change camera position in real-time
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, (time) => {
         const angle = time / 1000;
@@ -126,7 +125,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
     camera.y = 8;
     
-    // fieldOfView setup
+    // Field of View setup
     camera.fieldOfView = 45;
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
@@ -149,6 +148,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-Instead of manually calculating camera positions in code, learn how to intuitively control it using mouse and touch.
+Instead of manually calculating camera positions in code, learn how to control it intuitively using a mouse or touch.
 
 - **[Camera Controller](./controller.md)**

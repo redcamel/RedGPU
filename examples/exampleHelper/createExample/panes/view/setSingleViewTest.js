@@ -1,4 +1,4 @@
-import setSingleSceneTest from "../scene/setSingleSceneTest.js?t=1769835266959";
+import setSingleSceneTest from "../scene/setSingleSceneTest.js?t=1770625511985";
 
 const PERCENT_MAX = 200;
 const PIXEL_MAX = 2048;
@@ -60,7 +60,7 @@ function createTestData(view) {
 const isPercentMode = (view, dimensionKey) => typeof view[dimensionKey] === "number" ? false : view[dimensionKey].includes('%');
 
 function calculateDimensionValue(view, TEST_DATA, dimensionKey, unit, isPercentMode) {
-    const parentDomRect = view.redGPUContext.sizeManager.pixelRectObject;
+    const parentDomRect = view.redGPUContext.pixelRectObject;
     const dimensionValue = TEST_DATA[dimensionKey];
 
     if (unit === '%' && !isPercentMode) {

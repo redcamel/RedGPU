@@ -17,24 +17,28 @@ const lightGraph = `
         LightMgr -->|Manages| DirLight
         LightMgr -->|Manages| PointLight
         LightMgr -->|Manages| SpotLight
+        
+        %% Apply custom classes
+        class Scene mermaid-main;
+        class LightMgr mermaid-system;
 `
 </script>
 
 # Light
 
-If **Texture** is like applying a drawing to an object's surface, **Light** is the 'vitality' that gives three-dimensionality and depth to that object.
-All lights in RedGPU are managed integratedly through the **LightManager**, allowing dramatic direction by combining various light sources.
+While **Texture** is like applying an illustration to an object's surface, **Light** is the 'vitality' that gives that object three-dimensionality and depth.
+All lights in RedGPU are managed centrally through the **LightManager**, allowing for dramatic direction by combining various light sources.
 
 ## 1. LightManager
 
-Creating a light alone does not affect the screen. It must be registered in the `lightManager` of the **Scene** for the engine to include it in calculations.
+Creating a light alone does not affect the screen. It must be registered in the `lightManager` of the **Scene** for the engine to include it in its calculations.
 
 <ClientOnly>
   <MermaidResponsive :definition="lightGraph" />
 </ClientOnly>
 
 ::: tip [Default Lighting State]
-If no light is set, the scene will be in total darkness. However, adding **AmbientLight** at a very low intensity allows you to check at least the outline of shadow areas where direct light does not reach.
+If no light is set, the scene will be in total darkness. However, adding **AmbientLight** at a very low intensity allows you to at least see the outline of shadow areas where direct light does not reach.
 :::
 
 ```javascript
@@ -47,7 +51,7 @@ scene.lightManager.addPointLight(pointLight);
 
 ## 2. Main Types of Lighting
 
-RedGPU provides four types of light sources with different physical characteristics. It's important to understand the characteristics of each light and combine them appropriately.
+RedGPU provides four types of light sources with different physical characteristics. It is important to understand the characteristics of each light and combine them appropriately.
 
 | Type | Features | Main Usage | Analogy |
 | :--- | :--- | :--- | :--- |
@@ -57,23 +61,23 @@ RedGPU provides four types of light sources with different physical characterist
 | **SpotLight** | Concentrated cone-shaped light | Highlight lighting, theatrical stage effects | Flashlight |
 
 ### 2.1 AmbientLight
-Light that shines uniformly from all directions.
-- **Features**: Has no position or direction, and no shadows are created. Used for correction to slightly brighten dark areas where light does not reach.
+Light that shines uniformly from all directions onto objects.
+- **Features**: Has no position or direction, and creates no shadows. It is used for correction to slightly brighten dark areas where light does not reach.
 
 ### 2.2 DirectionalLight
-Light that shines in parallel in a specific direction from an infinitely far distance like the sun.
-- **Features**: Direction is constant regardless of position, and it is the most representative light source that can create shadows.
+Light that shines in parallel from an infinitely distant source in a specific direction, like the sun.
+- **Features**: Direction is constant regardless of position, and it is the most representative light source capable of creating shadows.
 
 ### 2.3 PointLight
-Light that spreads in all directions from a point in space.
-- **Features**: **Attenuation** occurs where brightness decreases in proportion to the square of the distance. The `radius` property determines the range the light reaches.
+Light that radiates in all directions from a point in space.
+- **Features**: **Attenuation** occurs, where brightness decreases in proportion to the square of the distance. The `radius` property determines the range the light reaches.
 
 ### 2.4 SpotLight
 A light source that shines a cone-shaped light in a specific direction from a specific point.
-- **Features**: Creates concentrated lighting effects by adjusting the light `angle` and outer softness (`exponent`).
+- **Features**: Creates concentrated lighting effects by adjusting the light's `angle` and outer softness (`exponent`).
 
-::: warning [Material Attention]
-**ColorMaterial** is not affected by light and outputs only a single color. To see lighting effects, you must use a glossy/textured material such as **PhongMaterial** or **PBRMaterial**.
+::: warning [Material Note]
+**ColorMaterial** is not affected by light and outputs only a single color. To see lighting effects, you must use a glossy or textured material such as **PhongMaterial** or **PBRMaterial**.
 :::
 
 ## 3. Practice: Diverse Lighting Configuration
@@ -142,7 +146,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ### Live Demo
 
-Observe the changes in light on the surface of objects as the light source position moves.
+Observe the changes in light on the surface of objects as the position of the light source moves.
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Multi Lights" slugHash="multi-lights-demo">
@@ -210,9 +214,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Key Summary
 
-- Manage all light sources by registering and controlling them via **LightManager**.
+- Manage all light sources by registering and controlling them via the **LightManager**.
 - To see lighting effects, you must use glossy materials such as **PhongMaterial** or **PBRMaterial**.
-- **DirectionalLight** is suitable for global lighting, while **PointLight** / **SpotLight** are suitable for highlight lighting.
+- **DirectionalLight** is suitable for global lighting, while **PointLight** and **SpotLight** are better for highlight lighting.
 
 ## Next Learning Recommendation
 

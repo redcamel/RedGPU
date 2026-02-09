@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
-import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
+import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 /**
  * [KO] 비트맵 텍스처 기반 머티리얼의 공통 속성 인터페이스
  * [EN] Common property interface for bitmap texture-based materials
@@ -36,7 +36,7 @@ interface BitmapMaterial {
  * <iframe src="/RedGPU/examples/3d/material/bitmapMaterial/"></iframe>
  * @category Material
  */
-declare class BitmapMaterial extends ABitmapBaseMaterial {
+declare class BitmapMaterial extends AUVTransformBaseMaterial {
     /**
      * [KO] 파이프라인 dirty 상태 플래그
      * [EN] Pipeline dirty status flag

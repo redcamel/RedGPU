@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Bitmap Material 예제
+ * [EN] Bitmap Material example
+ *
+ * [KO] BitmapMaterial의 사용법과 텍스처 변경 기능을 보여줍니다.
+ * [EN] Demonstrates the usage of BitmapMaterial and texture changing functionality.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -33,6 +41,13 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 샘플 메시를 생성합니다.
+ * [EN] Creates a sample mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createSampleMesh = (redGPUContext, scene) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
@@ -45,12 +60,18 @@ const createSampleMesh = (redGPUContext, scene) => {
     return mesh;
 };
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} mesh
+ */
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 

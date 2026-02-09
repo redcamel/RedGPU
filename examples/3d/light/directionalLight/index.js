@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Directional Light 예제
+ * [EN] Directional Light example
+ *
+ * [KO] Directional Light의 사용법과 속성 제어 방법을 보여줍니다.
+ * [EN] Demonstrates the usage and property control of Directional Light.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -33,6 +41,12 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] Directional Light를 생성합니다.
+ * [EN] Creates a Directional Light.
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Light.DirectionalLight}
+ */
 const createDirectionalLight = (scene) => {
     const direction = [-1, -1, -1];
     const light = new RedGPU.Light.DirectionalLight(direction, '#fff');
@@ -41,6 +55,13 @@ const createDirectionalLight = (scene) => {
     return light;
 };
 
+/**
+ * [KO] 샘플 메시를 생성합니다.
+ * [EN] Creates a sample mesh.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {RedGPU.Display.Mesh}
+ */
 const createSampleMesh = (redGPUContext, scene) => {
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
@@ -52,10 +73,17 @@ const createSampleMesh = (redGPUContext, scene) => {
     return mesh;
 };
 
+/**
+ * [KO] 조명 제어용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for light control.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} mesh
+ * @param {RedGPU.Light.DirectionalLight} light
+ */
 const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const lightConfig = {
         directionX: light.direction[0],

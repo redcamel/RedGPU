@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Tint Basic (3D) 예제
+ * [EN] Tint Basic (3D) example
+ *
+ * [KO] 3D 메시 및 머티리얼에 틴트(Tint)를 적용하는 기본적인 방법을 보여줍니다.
+ * [EN] Demonstrates the basic method of applying tint to 3D meshes and materials.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -55,11 +63,16 @@ RedGPU.init(
     }
 );
 
-// Tint 조작용 Tweakpane 구성
+/**
+ * [KO] 틴트 조작용 Tweakpane GUI를 구성합니다.
+ * [EN] Configures the Tweakpane GUI for tint manipulation.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Mesh} mesh
+ */
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985");
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     // Tint 테스트 추가
     const folder = pane.addFolder({title: "Material Tint Test"});

@@ -97,7 +97,7 @@ fn main(inputData: InputData) -> OutputData {
     output.position = u_projectionCameraMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
-    output.uv = input_uv;
+    output.uv = input_uv * vertexUniforms.uvTransform.zw + vertexUniforms.uvTransform.xy;
 
     output.combinedOpacity = vertexUniforms.combinedOpacity;
 

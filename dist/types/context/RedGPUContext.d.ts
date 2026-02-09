@@ -2,7 +2,7 @@ import ColorRGBA from "../color/ColorRGBA";
 import ResourceManager from "../resources/core/resourceManager/ResourceManager";
 import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import RedGPUContextDetector from "./core/RedGPUContextDetector";
-import RedGPUContextSizeManager from "./core/RedGPUContextSizeManager";
+import RedGPUContextSizeManager, { IRedGPURectObject, RedResizeEvent } from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -40,8 +40,9 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
     /**
      * [KO] 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출)
      * [EN] Resize event handler (called when canvas size changes)
+     * @param event - [KO] 리사이즈 이벤트 객체 [EN] Resize event object
      */
-    onResize: ((width: number, height: number) => void) | null;
+    onResize: ((event: RedResizeEvent<RedGPUContext>) => void) | null;
     /**
      * [KO] 현재 시간(프레임 기준, ms)
      * [EN] Current time (frame based, ms)
@@ -198,12 +199,16 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Height value (number or string)
      */
     set height(value: number | string);
-    get screenRectObject(): {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
+    /**
+     * [KO] 화면 크기 정보(Screen)를 반환합니다. (CSS 픽셀 단위)
+     * [EN] Returns the screen size information. (in CSS pixels)
+     */
+    get screenRectObject(): IRedGPURectObject;
+    /**
+     * [KO] 픽셀 단위 화면 크기 정보(Pixel)를 반환합니다. (물리 픽셀 단위)
+     * [EN] Returns the pixel size information. (in physical pixels)
+     */
+    get pixelRectObject(): IRedGPURectObject;
     /**
      * [KO] 렌더 스케일을 반환합니다.
      * [EN] Returns the render scale.

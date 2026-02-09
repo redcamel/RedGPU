@@ -177,15 +177,21 @@ class Renderer {
                     // 경과 시간에서 오차를 보정하며 마지막 프레임 시간 업데이트
                     renderViewStateData.prevTimestamp = timestamp - (elapsed % fpsInterval);
 
-                    // @ts-ignore
-                    camera.update?.(view, time)
+
+                    const {scene} = view
+                    if (scene.physicsEngine) {
+                        // 물리 시뮬레이션 진행 (초 단위 deltaTime 전달)
+                        scene.physicsEngine.step(fpsInterval / 1000);
+                    }
                 }
+
+                // @ts-ignore
+                camera.update?.(view, time)
             }
 
             this.#updateJitter(view)
             this.#renderPassViewShadow(view, commandEncoder)
-            // @ts-ignore
-            camera.targetMesh?.render(view.renderViewStateData)
+
             this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
             this.#renderPassViewPickingLayer(view, commandEncoder)

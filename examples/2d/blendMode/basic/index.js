@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Blend Mode 예제
+ * [EN] Blend Mode example
+ *
+ * [KO] 2D 객체에 대한 다양한 블렌딩 모드를 시연합니다.
+ * [EN] Demonstrates various blend modes for 2D objects.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -37,8 +45,12 @@ RedGPU.init(
         shape.y = view.screenRectObject.height / 2;
         scene.addChild(shape);
 
-        redGPUContext.onResize = () => {
-            const {width, height} = redGPUContext.screenRectObject;
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
             base.x = width / 2;
             base.y = 200;
             shape.x = width / 2;
@@ -75,7 +87,11 @@ RedGPU.init(
                 });
             }
         };
-        redGPUContext.onResize();
+        redGPUContext.onResize({
+            target: redGPUContext,
+            screenRectObject: redGPUContext.screenRectObject,
+            pixelRectObject: redGPUContext.pixelRectObject
+        });
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = (time) => {
@@ -93,6 +109,15 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 블렌드 모드 결과 그룹을 생성합니다.
+ * [EN] Creates a group of blend mode results.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.Resource.BitmapTexture} texture_blendTest_base
+ * @param {RedGPU.Resource.BitmapTexture} texture_blendTest_shape
+ * @returns {RedGPU.Display.Group3D}
+ */
 function createResults(redGPUContext, scene, texture_blendTest_base, texture_blendTest_shape) {
 
     const rootGroup = new RedGPU.Display.Group3D();
@@ -128,6 +153,15 @@ function createResults(redGPUContext, scene, texture_blendTest_base, texture_ble
 
 }
 
+/**
+ * [KO] 원본 뷰를 생성합니다.
+ * [EN] Creates the source view.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.Resource.BitmapTexture} texture_blendTest_base
+ * @param {RedGPU.Resource.BitmapTexture} texture_blendTest_shape
+ * @returns {{base_origin: RedGPU.Display.Sprite2D, shape_origin: RedGPU.Display.Sprite2D}}
+ */
 function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_blendTest_shape) {
     const material_base_origin = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
@@ -166,12 +200,19 @@ function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_
     };
 }
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Sprite2D} base
+ * @param {RedGPU.Display.Sprite2D} shape
+ */
 const renderTestPane = async (redGPUContext, base, shape) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setRedGPUTest_pane,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     setRedGPUTest_pane(pane, redGPUContext, false);

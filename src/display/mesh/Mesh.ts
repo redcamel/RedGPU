@@ -16,7 +16,7 @@ import calculateMeshAABB from "../../bound/math/calculateMeshAABB";
 import calculateMeshCombinedAABB from "../../bound/math/calculateMeshCombinedAABB";
 import calculateMeshOBB from "../../bound/math/calculateMeshOBB";
 import OBB from "../../bound/OBB";
-import mat4ToEuler from "../../utils/math/mat4ToEuler";
+import mat4ToEuler from "../../math/mat4ToEuler";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
@@ -37,6 +37,7 @@ const CONVERT_RADIAN = Math.PI / 180;
 const CPI = 3.141592653589793, CPI2 = 6.283185307179586, C225 = 0.225, C127 = 1.27323954, C045 = 0.405284735,
     C157 = 1.5707963267948966;
 const tempFloat32_1 = new Float32Array(1);
+const tempFloat32_4 = new Float32Array(4);
 const up = new Float32Array([0, 1, 0]);
 
 interface Mesh {
@@ -80,31 +81,31 @@ interface LODGPURenderInfo {
  * @category Mesh
  */
 class Mesh extends MeshBase {
-	/**
-	 * [KO] 메시의 디스플레이스먼트 텍스처
-	 * [EN] Displacement texture of the mesh
-	 */
-	displacementTexture: BitmapTexture;
-	/**
-	 * [KO] 그림자 캐스팅 여부
-	 * [EN] Whether to cast shadows
-	 */
-	castShadow: boolean = false;
-	/**
-	 * [KO] LOD 정보 변경 필요 여부
-	 * [EN] Whether LOD info needs update
-	 */
-	dirtyLOD: boolean = false;
-	/**
-	 * [KO] 프러스텀 컬링 통과 여부
-	 * [EN] Whether it passed frustum culling
-	 */
-	passFrustumCulling: boolean = true;
-	/**
-	 * [KO] 커스텀 버텍스 셰이더 모듈 생성 함수
-	 * [EN] Function to create custom vertex shader module
-	 */
-	createCustomMeshVertexShaderModule?: () => GPUShaderModule;
+    /**
+     * [KO] 메시의 디스플레이스먼트 텍스처
+     * [EN] Displacement texture of the mesh
+     */
+    displacementTexture: BitmapTexture;
+    /**
+     * [KO] 그림자 캐스팅 여부
+     * [EN] Whether to cast shadows
+     */
+    castShadow: boolean = false;
+    /**
+     * [KO] LOD 정보 변경 필요 여부
+     * [EN] Whether LOD info needs update
+     */
+    dirtyLOD: boolean = false;
+    /**
+     * [KO] 프러스텀 컬링 통과 여부
+     * [EN] Whether it passed frustum culling
+     */
+    passFrustumCulling: boolean = true;
+    /**
+     * [KO] 커스텀 버텍스 셰이더 모듈 생성 함수
+     * [EN] Function to create custom vertex shader module
+     */
+    createCustomMeshVertexShaderModule?: () => GPUShaderModule;
     /**
      * [KO] 인스턴스 고유 ID
      * [EN] Instance unique ID
@@ -215,817 +216,817 @@ class Mesh extends MeshBase {
      * [EN] Whether to ignore frustum culling
      */
     #ignoreFrustumCulling: boolean = false
-	/**
-	 * [KO] 메시 투명도
-	 * [EN] Mesh opacity
-	 */
-	#opacity: number = 1;
-	/**
-	 * [KO] 디버그 메시 객체
-	 * [EN] Debug mesh object
-	 */
-	#drawDebugger: DrawDebuggerMesh;
-	/**
-	 * [KO] 디버그 활성화 여부
-	 * [EN] Whether to enable debugging
-	 */
-	#enableDebugger: boolean = false;
-	/**
-	 * [KO] 캐싱된 AABB
-	 * [EN] Cached AABB
-	 */
-	#cachedBoundingAABB: AABB;
-	/**
-	 * [KO] 캐싱된 OBB
-	 * [EN] Cached OBB
-	 */
-	#cachedBoundingOBB: OBB;
-	/**
-	 * [KO] 이전 프레임의 모델 행렬
-	 * [EN] Model matrix of the previous frame
-	 */
-	#prevModelMatrix: Float32Array;
-	/**
-	 * [KO] 렌더 번들 인코더
-	 * [EN] Render bundle encoder
-	 */
-	#bundleEncoder: GPURenderBundleEncoder;
-	/**
-	 * [KO] 렌더 번들
-	 * [EN] Render bundle
-	 */
-	#renderBundle: GPURenderBundle;
-	#renderBundle_LODList: GPURenderBundle[] = [];
-	/**
-	 * [KO] 이전 시스템 바인드 그룹
-	 * [EN] Previous system bind group
-	 */
-	#prevSystemBindGroupList: GPUBindGroup[] = [];
-	/**
-	 * [KO] 이전 프래그먼트 바인드 그룹
-	 * [EN] Previous fragment bind group
-	 */
-	#prevFragmentBindGroup: GPUBindGroup;
-	#drawCommandSlot: DrawCommandSlot | null = null;
-	#drawCommandSlot_LODList: DrawCommandSlot[] = [];
-	#drawBufferManager: DrawBufferManager | null = null;
-	#needUpdateNormalMatrixUniform: boolean = true;
-	#needUpdateMatrixUniform: boolean = true;
-	#uniformDataMatrixList: Float32Array;
-	#displacementScale: number;
-	#LODManager: LODManager;
-	#lodGPURenderInfoList: LODGPURenderInfo[] = [];
-	#currentLODIndex: number = -1;
+    /**
+     * [KO] 메시 투명도
+     * [EN] Mesh opacity
+     */
+    #opacity: number = 1;
+    /**
+     * [KO] 디버그 메시 객체
+     * [EN] Debug mesh object
+     */
+    #drawDebugger: DrawDebuggerMesh;
+    /**
+     * [KO] 디버그 활성화 여부
+     * [EN] Whether to enable debugging
+     */
+    #enableDebugger: boolean = false;
+    /**
+     * [KO] 캐싱된 AABB
+     * [EN] Cached AABB
+     */
+    #cachedBoundingAABB: AABB;
+    /**
+     * [KO] 캐싱된 OBB
+     * [EN] Cached OBB
+     */
+    #cachedBoundingOBB: OBB;
+    /**
+     * [KO] 이전 프레임의 모델 행렬
+     * [EN] Model matrix of the previous frame
+     */
+    #prevModelMatrix: Float32Array;
+    /**
+     * [KO] 렌더 번들 인코더
+     * [EN] Render bundle encoder
+     */
+    #bundleEncoder: GPURenderBundleEncoder;
+    /**
+     * [KO] 렌더 번들
+     * [EN] Render bundle
+     */
+    #renderBundle: GPURenderBundle;
+    #renderBundle_LODList: GPURenderBundle[] = [];
+    /**
+     * [KO] 이전 시스템 바인드 그룹
+     * [EN] Previous system bind group
+     */
+    #prevSystemBindGroupList: GPUBindGroup[] = [];
+    /**
+     * [KO] 이전 프래그먼트 바인드 그룹
+     * [EN] Previous fragment bind group
+     */
+    #prevFragmentBindGroup: GPUBindGroup;
+    #drawCommandSlot: DrawCommandSlot | null = null;
+    #drawCommandSlot_LODList: DrawCommandSlot[] = [];
+    #drawBufferManager: DrawBufferManager | null = null;
+    #needUpdateNormalMatrixUniform: boolean = true;
+    #needUpdateMatrixUniform: boolean = true;
+    #uniformDataMatrixList: Float32Array;
+    #displacementScale: number;
+    #LODManager: LODManager;
+    #lodGPURenderInfoList: LODGPURenderInfo[] = [];
+    #currentLODIndex: number = -1;
 
-	/**
-	 * [KO] Mesh 인스턴스를 생성합니다.
-	 * [EN] Creates an instance of Mesh.
-	 * @param redGPUContext -
-	 * [KO] RedGPUContext 인스턴스
-	 * [EN] RedGPUContext instance
-	 * @param geometry -
-	 * [KO] geometry 또는 primitive 객체(선택)
-	 * [EN] geometry or primitive object (optional)
-	 * @param material -
-	 * [KO] 머티리얼(선택)
-	 * [EN] Material (optional)
-	 * @param name -
-	 * [KO] 메시 이름(선택)
-	 * [EN] Mesh name (optional)
-	 */
-	constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
-		super(redGPUContext);
-		if (name) this.name = name;
-		this._geometry = geometry;
-		this._material = material;
-		this.#pickingId = uuidToUint(this.uuid);
-		this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext);
-		this.#checkDrawCommandSlot();
-		this.#LODManager = new LODManager(this, () => {
-			this.dirtyLOD = true;
-		});
-	}
+    /**
+     * [KO] Mesh 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Mesh.
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param geometry -
+     * [KO] geometry 또는 primitive 객체(선택)
+     * [EN] geometry or primitive object (optional)
+     * @param material -
+     * [KO] 머티리얼(선택)
+     * [EN] Material (optional)
+     * @param name -
+     * [KO] 메시 이름(선택)
+     * [EN] Mesh name (optional)
+     */
+    constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?, name?: string) {
+        super(redGPUContext);
+        if (name) this.name = name;
+        this._geometry = geometry;
+        this._material = material;
+        this.#pickingId = uuidToUint(this.uuid);
+        this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext);
+        this.#checkDrawCommandSlot();
+        this.#LODManager = new LODManager(this, () => {
+            this.dirtyLOD = true;
+        });
+    }
 
-	/**
-	 * [KO] LOD(Level of Detail) 매니저를 반환합니다.
-	 * [EN] Returns the LOD (Level of Detail) manager.
-	 * @returns
-	 * [KO] LODManager 인스턴스
-	 * [EN] LODManager instance
-	 */
-	get LODManager(): LODManager {
-		return this.#LODManager;
-	}
+    /**
+     * [KO] LOD(Level of Detail) 매니저를 반환합니다.
+     * [EN] Returns the LOD (Level of Detail) manager.
+     * @returns
+     * [KO] LODManager 인스턴스
+     * [EN] LODManager instance
+     */
+    get LODManager(): LODManager {
+        return this.#LODManager;
+    }
 
-	/**
-	 * [KO] 디버거 활성화 여부를 반환합니다.
-	 * [EN] Returns whether the debugger is enabled.
-	 */
-	get enableDebugger(): boolean {
-		return this.#enableDebugger;
-	}
+    /**
+     * [KO] 디버거 활성화 여부를 반환합니다.
+     * [EN] Returns whether the debugger is enabled.
+     */
+    get enableDebugger(): boolean {
+        return this.#enableDebugger;
+    }
 
-	/**
-	 * [KO] 디버거 활성화 여부를 설정합니다.
-	 * [EN] Sets whether the debugger is enabled.
-	 * @param value -
-	 * [KO] 활성화 여부
-	 * [EN] Whether to enable
-	 */
-	set enableDebugger(value: boolean) {
-		this.#enableDebugger = value;
-		if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this);
-	}
+    /**
+     * [KO] 디버거 활성화 여부를 설정합니다.
+     * [EN] Sets whether the debugger is enabled.
+     * @param value -
+     * [KO] 활성화 여부
+     * [EN] Whether to enable
+     */
+    set enableDebugger(value: boolean) {
+        this.#enableDebugger = value;
+        if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this);
+    }
 
-	/**
-	 * [KO] 디버그 메시 객체를 반환합니다.
-	 * [EN] Returns the debug mesh object.
-	 */
-	get drawDebugger(): DrawDebuggerMesh {
-		return this.#drawDebugger;
-	}
+    /**
+     * [KO] 디버그 메시 객체를 반환합니다.
+     * [EN] Returns the debug mesh object.
+     */
+    get drawDebugger(): DrawDebuggerMesh {
+        return this.#drawDebugger;
+    }
 
-	_material;
-	/**
-	 * [KO] 머티리얼을 반환합니다.
-	 * [EN] Returns the material.
-	 */
-	get material() {
-		return this._material;
-	}
+    _material;
+    /**
+     * [KO] 머티리얼을 반환합니다.
+     * [EN] Returns the material.
+     */
+    get material() {
+        return this._material;
+    }
 
-	/**
-	 * [KO] 머티리얼을 설정합니다.
-	 * [EN] Sets the material.
-	 * @param value -
-	 * [KO] 설정할 머티리얼
-	 * [EN] Material to set
-	 */
-	set material(value) {
-		this._material = value;
-		this.dirtyPipeline = true;
-		// blendMode 키가 있는 경우 블렌드 모드 재적용
-		if ("blendMode" in this) {
-			this.blendMode = this.blendMode;
-		}
-	}
+    /**
+     * [KO] 머티리얼을 설정합니다.
+     * [EN] Sets the material.
+     * @param value -
+     * [KO] 설정할 머티리얼
+     * [EN] Material to set
+     */
+    set material(value) {
+        this._material = value;
+        this.dirtyPipeline = true;
+        // blendMode 키가 있는 경우 블렌드 모드 재적용
+        if ("blendMode" in this) {
+            this.blendMode = this.blendMode;
+        }
+    }
 
-	_geometry: Geometry | Primitive;
-	/**
-	 * [KO] 지오메트리를 반환합니다.
-	 * [EN] Returns the geometry.
-	 */
-	get geometry(): Geometry | Primitive {
-		return this._geometry;
-	}
+    _geometry: Geometry | Primitive;
+    /**
+     * [KO] 지오메트리를 반환합니다.
+     * [EN] Returns the geometry.
+     */
+    get geometry(): Geometry | Primitive {
+        return this._geometry;
+    }
 
-	/**
-	 * [KO] 지오메트리를 설정합니다.
-	 * [EN] Sets the geometry.
-	 * @param value -
-	 * [KO] 설정할 지오메트리
-	 * [EN] Geometry to set
-	 */
-	set geometry(value: Geometry | Primitive) {
-		this._geometry = value;
-		this.dirtyPipeline = true;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] 지오메트리를 설정합니다.
+     * [EN] Sets the geometry.
+     * @param value -
+     * [KO] 설정할 지오메트리
+     * [EN] Geometry to set
+     */
+    set geometry(value: Geometry | Primitive) {
+        this._geometry = value;
+        this.dirtyPipeline = true;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 메시의 투명도를 반환합니다. (0~1)
-	 * [EN] Returns the opacity of the mesh. (0~1)
-	 */
-	get opacity(): number {
-		return this.#opacity;
-	}
+    /**
+     * [KO] 메시의 투명도를 반환합니다. (0~1)
+     * [EN] Returns the opacity of the mesh. (0~1)
+     */
+    get opacity(): number {
+        return this.#opacity;
+    }
 
-	/**
-	 * [KO] 메시의 투명도를 설정합니다. (0~1)
-	 * [EN] Sets the opacity of the mesh. (0~1)
-	 * @param value -
-	 * [KO] 투명도 값
-	 * [EN] Opacity value
-	 */
-	set opacity(value: number) {
-		validatePositiveNumberRange(value, 0, 1);
-		this.#opacity = value;
-		this.dirtyOpacity = true;
-	}
+    /**
+     * [KO] 메시의 투명도를 설정합니다. (0~1)
+     * [EN] Sets the opacity of the mesh. (0~1)
+     * @param value -
+     * [KO] 투명도 값
+     * [EN] Opacity value
+     */
+    set opacity(value: number) {
+        validatePositiveNumberRange(value, 0, 1);
+        this.#opacity = value;
+        this.dirtyOpacity = true;
+    }
 
-	/**
-	 * [KO] 프러스텀 컬링 무시 여부를 반환합니다.
-	 * [EN] Returns whether to ignore frustum culling.
-	 */
-	get ignoreFrustumCulling(): boolean {
-		return this.#ignoreFrustumCulling;
-	}
+    /**
+     * [KO] 프러스텀 컬링 무시 여부를 반환합니다.
+     * [EN] Returns whether to ignore frustum culling.
+     */
+    get ignoreFrustumCulling(): boolean {
+        return this.#ignoreFrustumCulling;
+    }
 
-	/**
-	 * [KO] 프러스텀 컬링 무시 여부를 설정합니다.
-	 * [EN] Sets whether to ignore frustum culling.
-	 * @param value -
-	 * [KO] 무시 여부
-	 * [EN] Whether to ignore
-	 */
-	set ignoreFrustumCulling(value: boolean) {
-		this.#ignoreFrustumCulling = value;
-	}
+    /**
+     * [KO] 프러스텀 컬링 무시 여부를 설정합니다.
+     * [EN] Sets whether to ignore frustum culling.
+     * @param value -
+     * [KO] 무시 여부
+     * [EN] Whether to ignore
+     */
+    set ignoreFrustumCulling(value: boolean) {
+        this.#ignoreFrustumCulling = value;
+    }
 
-	/**
-	 * [KO] 피킹 ID를 반환합니다.
-	 * [EN] Returns the picking ID.
-	 */
-	get pickingId(): number {
-		return this.#pickingId;
-	}
+    /**
+     * [KO] 피킹 ID를 반환합니다.
+     * [EN] Returns the picking ID.
+     */
+    get pickingId(): number {
+        return this.#pickingId;
+    }
 
-	/**
-	 * [KO] 등록된 이벤트들을 반환합니다.
-	 * [EN] Returns the registered events.
-	 */
-	get events(): any {
-		return this.#events;
-	}
+    /**
+     * [KO] 등록된 이벤트들을 반환합니다.
+     * [EN] Returns the registered events.
+     */
+    get events(): any {
+        return this.#events;
+    }
 
-	/**
-	 * [KO] 메시의 이름을 반환합니다.
-	 * [EN] Returns the name of the mesh.
-	 */
-	get name(): string {
-		if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-		return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-	}
+    /**
+     * [KO] 메시의 이름을 반환합니다.
+     * [EN] Returns the name of the mesh.
+     */
+    get name(): string {
+        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
+        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
+    }
 
-	/**
-	 * [KO] 메시의 이름을 설정합니다.
-	 * [EN] Sets the name of the mesh.
-	 * @param value -
-	 * [KO] 메시 이름
-	 * [EN] Mesh name
-	 */
-	set name(value: string) {
-		this.#name = value;
-	}
+    /**
+     * [KO] 메시의 이름을 설정합니다.
+     * [EN] Sets the name of the mesh.
+     * @param value -
+     * [KO] 메시 이름
+     * [EN] Mesh name
+     */
+    set name(value: string) {
+        this.#name = value;
+    }
 
-	/**
-	 * [KO] 버텍스 상태 버퍼 레이아웃을 반환합니다.
-	 * [EN] Returns the vertex state buffer layouts.
-	 */
-	get vertexStateBuffers(): GPUVertexBufferLayout[] {
-		return this._geometry.gpuRenderInfo.buffers;
-	}
+    /**
+     * [KO] 버텍스 상태 버퍼 레이아웃을 반환합니다.
+     * [EN] Returns the vertex state buffer layouts.
+     */
+    get vertexStateBuffers(): GPUVertexBufferLayout[] {
+        return this._geometry.gpuRenderInfo.buffers;
+    }
 
-	/**
-	 * [KO] 설정된 부모 객체를 반환합니다.
-	 * [EN] Returns the set parent object.
-	 */
-	get parent(): Object3DContainer {
-		return this.#parent;
-	}
+    /**
+     * [KO] 설정된 부모 객체를 반환합니다.
+     * [EN] Returns the set parent object.
+     */
+    get parent(): Object3DContainer {
+        return this.#parent;
+    }
 
-	/**
-	 * [KO] 부모 객체를 설정합니다.
-	 * [EN] Sets the parent object.
-	 * @param value -
-	 * [KO] 부모 컨테이너
-	 * [EN] Parent container
-	 */
-	set parent(value: Object3DContainer) {
-		this.#parent = value;
-	}
+    /**
+     * [KO] 부모 객체를 설정합니다.
+     * [EN] Sets the parent object.
+     * @param value -
+     * [KO] 부모 컨테이너
+     * [EN] Parent container
+     */
+    set parent(value: Object3DContainer) {
+        this.#parent = value;
+    }
 
-	/**
-	 * [KO] 피벗 X 좌표를 반환합니다.
-	 * [EN] Returns the pivot X coordinate.
-	 */
-	get pivotX(): number {
-		return this.#pivotX;
-	}
+    /**
+     * [KO] 피벗 X 좌표를 반환합니다.
+     * [EN] Returns the pivot X coordinate.
+     */
+    get pivotX(): number {
+        return this.#pivotX;
+    }
 
-	/**
-	 * [KO] 피벗 X 좌표를 설정합니다.
-	 * [EN] Sets the pivot X coordinate.
-	 * @param value -
-	 * [KO] X 좌표
-	 * [EN] X coordinate
-	 */
-	set pivotX(value: number) {
-		this.#pivotX = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] 피벗 X 좌표를 설정합니다.
+     * [EN] Sets the pivot X coordinate.
+     * @param value -
+     * [KO] X 좌표
+     * [EN] X coordinate
+     */
+    set pivotX(value: number) {
+        this.#pivotX = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 피벗 Y 좌표를 반환합니다.
-	 * [EN] Returns the pivot Y coordinate.
-	 */
-	get pivotY(): number {
-		return this.#pivotY;
-	}
+    /**
+     * [KO] 피벗 Y 좌표를 반환합니다.
+     * [EN] Returns the pivot Y coordinate.
+     */
+    get pivotY(): number {
+        return this.#pivotY;
+    }
 
-	/**
-	 * [KO] 피벗 Y 좌표를 설정합니다.
-	 * [EN] Sets the pivot Y coordinate.
-	 * @param value -
-	 * [KO] Y 좌표
-	 * [EN] Y coordinate
-	 */
-	set pivotY(value: number) {
-		this.#pivotY = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] 피벗 Y 좌표를 설정합니다.
+     * [EN] Sets the pivot Y coordinate.
+     * @param value -
+     * [KO] Y 좌표
+     * [EN] Y coordinate
+     */
+    set pivotY(value: number) {
+        this.#pivotY = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 피벗 Z 좌표를 반환합니다.
-	 * [EN] Returns the pivot Z coordinate.
-	 */
-	get pivotZ(): number {
-		return this.#pivotZ;
-	}
+    /**
+     * [KO] 피벗 Z 좌표를 반환합니다.
+     * [EN] Returns the pivot Z coordinate.
+     */
+    get pivotZ(): number {
+        return this.#pivotZ;
+    }
 
-	/**
-	 * [KO] 피벗 Z 좌표를 설정합니다.
-	 * [EN] Sets the pivot Z coordinate.
-	 * @param value -
-	 * [KO] Z 좌표
-	 * [EN] Z coordinate
-	 */
-	set pivotZ(value: number) {
-		this.#pivotZ = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] 피벗 Z 좌표를 설정합니다.
+     * [EN] Sets the pivot Z coordinate.
+     * @param value -
+     * [KO] Z 좌표
+     * [EN] Z coordinate
+     */
+    set pivotZ(value: number) {
+        this.#pivotZ = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] X 위치 좌표를 반환합니다.
-	 * [EN] Returns the X position coordinate.
-	 */
-	get x(): number {
-		return this.#x;
-	}
+    /**
+     * [KO] X 위치 좌표를 반환합니다.
+     * [EN] Returns the X position coordinate.
+     */
+    get x(): number {
+        return this.#x;
+    }
 
-	/**
-	 * [KO] X 위치 좌표를 설정합니다.
-	 * [EN] Sets the X position coordinate.
-	 * @param value -
-	 * [KO] X 좌표
-	 * [EN] X coordinate
-	 */
-	set x(value: number) {
-		this.#x = this.#positionArray[0] = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] X 위치 좌표를 설정합니다.
+     * [EN] Sets the X position coordinate.
+     * @param value -
+     * [KO] X 좌표
+     * [EN] X coordinate
+     */
+    set x(value: number) {
+        this.#x = this.#positionArray[0] = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] Y 위치 좌표를 반환합니다.
-	 * [EN] Returns the Y position coordinate.
-	 */
-	get y(): number {
-		return this.#y;
-	}
+    /**
+     * [KO] Y 위치 좌표를 반환합니다.
+     * [EN] Returns the Y position coordinate.
+     */
+    get y(): number {
+        return this.#y;
+    }
 
-	/**
-	 * [KO] Y 위치 좌표를 설정합니다.
-	 * [EN] Sets the Y position coordinate.
-	 * @param value -
-	 * [KO] Y 좌표
-	 * [EN] Y coordinate
-	 */
-	set y(value: number) {
-		this.#y = this.#positionArray[1] = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] Y 위치 좌표를 설정합니다.
+     * [EN] Sets the Y position coordinate.
+     * @param value -
+     * [KO] Y 좌표
+     * [EN] Y coordinate
+     */
+    set y(value: number) {
+        this.#y = this.#positionArray[1] = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] Z 위치 좌표를 반환합니다.
-	 * [EN] Returns the Z position coordinate.
-	 */
-	get z(): number {
-		return this.#z;
-	}
+    /**
+     * [KO] Z 위치 좌표를 반환합니다.
+     * [EN] Returns the Z position coordinate.
+     */
+    get z(): number {
+        return this.#z;
+    }
 
-	/**
-	 * [KO] Z 위치 좌표를 설정합니다.
-	 * [EN] Sets the Z position coordinate.
-	 * @param value -
-	 * [KO] Z 좌표
-	 * [EN] Z coordinate
-	 */
-	set z(value: number) {
-		this.#z = this.#positionArray[2] = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] Z 위치 좌표를 설정합니다.
+     * [EN] Sets the Z position coordinate.
+     * @param value -
+     * [KO] Z 좌표
+     * [EN] Z coordinate
+     */
+    set z(value: number) {
+        this.#z = this.#positionArray[2] = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 현재 위치를 반환합니다. [x, y, z]
-	 * [EN] Returns the current position. [x, y, z]
-	 * @returns
-	 * [KO] 위치 배열
-	 * [EN] Position array
-	 */
-	get position(): Float32Array {
-		return this.#positionArray;
-	}
+    /**
+     * [KO] 현재 위치를 반환합니다. [x, y, z]
+     * [EN] Returns the current position. [x, y, z]
+     * @returns
+     * [KO] 위치 배열
+     * [EN] Position array
+     */
+    get position(): Float32Array {
+        return this.#positionArray;
+    }
 
-	/**
-	 * [KO] X축 스케일을 반환합니다.
-	 * [EN] Returns the X-axis scale.
-	 */
-	get scaleX(): number {
-		return this.#scaleX;
-	}
+    /**
+     * [KO] X축 스케일을 반환합니다.
+     * [EN] Returns the X-axis scale.
+     */
+    get scaleX(): number {
+        return this.#scaleX;
+    }
 
-	/**
-	 * [KO] X축 스케일을 설정합니다.
-	 * [EN] Sets the X-axis scale.
-	 * @param value -
-	 * [KO] 스케일 값
-	 * [EN] Scale value
-	 */
-	set scaleX(value: number) {
-		this.#scaleX = this.#scaleArray[0] = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] X축 스케일을 설정합니다.
+     * [EN] Sets the X-axis scale.
+     * @param value -
+     * [KO] 스케일 값
+     * [EN] Scale value
+     */
+    set scaleX(value: number) {
+        this.#scaleX = this.#scaleArray[0] = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] Y축 스케일을 반환합니다.
-	 * [EN] Returns the Y-axis scale.
-	 */
-	get scaleY(): number {
-		return this.#scaleY;
-	}
+    /**
+     * [KO] Y축 스케일을 반환합니다.
+     * [EN] Returns the Y-axis scale.
+     */
+    get scaleY(): number {
+        return this.#scaleY;
+    }
 
-	/**
-	 * [KO] Y축 스케일을 설정합니다.
-	 * [EN] Sets the Y-axis scale.
-	 * @param value -
-	 * [KO] 스케일 값
-	 * [EN] Scale value
-	 */
-	set scaleY(value: number) {
-		this.#scaleY = this.#scaleArray[1] = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] Y축 스케일을 설정합니다.
+     * [EN] Sets the Y-axis scale.
+     * @param value -
+     * [KO] 스케일 값
+     * [EN] Scale value
+     */
+    set scaleY(value: number) {
+        this.#scaleY = this.#scaleArray[1] = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] Z축 스케일을 반환합니다.
-	 * [EN] Returns the Z-axis scale.
-	 */
-	get scaleZ(): number {
-		return this.#scaleZ;
-	}
+    /**
+     * [KO] Z축 스케일을 반환합니다.
+     * [EN] Returns the Z-axis scale.
+     */
+    get scaleZ(): number {
+        return this.#scaleZ;
+    }
 
-	/**
-	 * [KO] Z축 스케일을 설정합니다.
-	 * [EN] Sets the Z-axis scale.
-	 * @param value -
-	 * [KO] 스케일 값
-	 * [EN] Scale value
-	 */
-	set scaleZ(value: number) {
-		this.#scaleZ = this.#scaleArray[2] = value;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] Z축 스케일을 설정합니다.
+     * [EN] Sets the Z-axis scale.
+     * @param value -
+     * [KO] 스케일 값
+     * [EN] Scale value
+     */
+    set scaleZ(value: number) {
+        this.#scaleZ = this.#scaleArray[2] = value;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 현재 스케일을 반환합니다. [x, y, z]
-	 * [EN] Returns the current scale. [x, y, z]
-	 */
-	get scale(): Float32Array {
-		return this.#scaleArray;
-	}
+    /**
+     * [KO] 현재 스케일을 반환합니다. [x, y, z]
+     * [EN] Returns the current scale. [x, y, z]
+     */
+    get scale(): Float32Array {
+        return this.#scaleArray;
+    }
 
-	/**
-	 * [KO] X축 회전값을 반환합니다. (도)
-	 * [EN] Returns the X-axis rotation value. (degrees)
-	 */
-	get rotationX(): number {
-		return this.#rotationX;
-	}
+    /**
+     * [KO] X축 회전값을 반환합니다. (도)
+     * [EN] Returns the X-axis rotation value. (degrees)
+     */
+    get rotationX(): number {
+        return this.#rotationX;
+    }
 
-	/**
-	 * [KO] X축 회전값을 설정합니다. (도)
-	 * [EN] Sets the X-axis rotation value. (degrees)
-	 * @param value -
-	 * [KO] 회전값
-	 * [EN] Rotation value
-	 */
-	set rotationX(value: number) {
-		this.#rotationX = this.#rotationArray[0] = value % 360;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] X축 회전값을 설정합니다. (도)
+     * [EN] Sets the X-axis rotation value. (degrees)
+     * @param value -
+     * [KO] 회전값
+     * [EN] Rotation value
+     */
+    set rotationX(value: number) {
+        this.#rotationX = this.#rotationArray[0] = value % 360;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] Y축 회전값을 반환합니다. (도)
-	 * [EN] Returns the Y-axis rotation value. (degrees)
-	 */
-	get rotationY(): number {
-		return this.#rotationY;
-	}
+    /**
+     * [KO] Y축 회전값을 반환합니다. (도)
+     * [EN] Returns the Y-axis rotation value. (degrees)
+     */
+    get rotationY(): number {
+        return this.#rotationY;
+    }
 
-	/**
-	 * [KO] Y축 회전값을 설정합니다. (도)
-	 * [EN] Sets the Y-axis rotation value. (degrees)
-	 * @param value -
-	 * [KO] 회전값
-	 * [EN] Rotation value
-	 */
-	set rotationY(value: number) {
-		this.#rotationY = this.#rotationArray[1] = value % 360;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] Y축 회전값을 설정합니다. (도)
+     * [EN] Sets the Y-axis rotation value. (degrees)
+     * @param value -
+     * [KO] 회전값
+     * [EN] Rotation value
+     */
+    set rotationY(value: number) {
+        this.#rotationY = this.#rotationArray[1] = value % 360;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] Z축 회전값을 반환합니다. (도)
-	 * [EN] Returns the Z-axis rotation value. (degrees)
-	 */
-	get rotationZ(): number {
-		return this.#rotationZ;
-	}
+    /**
+     * [KO] Z축 회전값을 반환합니다. (도)
+     * [EN] Returns the Z-axis rotation value. (degrees)
+     */
+    get rotationZ(): number {
+        return this.#rotationZ;
+    }
 
-	/**
-	 * [KO] Z축 회전값을 설정합니다. (도)
-	 * [EN] Sets the Z-axis rotation value. (degrees)
-	 * @param value -
-	 * [KO] 회전값
-	 * [EN] Rotation value
-	 */
-	set rotationZ(value: number) {
-		this.#rotationZ = this.#rotationArray[2] = value % 360;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] Z축 회전값을 설정합니다. (도)
+     * [EN] Sets the Z-axis rotation value. (degrees)
+     * @param value -
+     * [KO] 회전값
+     * [EN] Rotation value
+     */
+    set rotationZ(value: number) {
+        this.#rotationZ = this.#rotationArray[2] = value % 360;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 현재 회전값을 반환합니다. [x, y, z] (도)
-	 * [EN] Returns the current rotation values. [x, y, z] (degrees)
-	 */
-	get rotation(): Float32Array {
-		return this.#rotationArray;
-	}
+    /**
+     * [KO] 현재 회전값을 반환합니다. [x, y, z] (도)
+     * [EN] Returns the current rotation values. [x, y, z] (degrees)
+     */
+    get rotation(): Float32Array {
+        return this.#rotationArray;
+    }
 
-	/**
-	 * [KO] OBB(Oriented Bounding Box) 정보를 반환합니다.
-	 * [EN] Returns the OBB (Oriented Bounding Box) information.
-	 */
-	get boundingOBB(): OBB {
-		if (!this.#cachedBoundingOBB || this.dirtyTransform) {
-			this.#cachedBoundingOBB = null;
-			this.#cachedBoundingAABB = null;
-			this.#cachedBoundingOBB = calculateMeshOBB(this);
-		}
-		return this.#cachedBoundingOBB;
-	}
+    /**
+     * [KO] OBB(Oriented Bounding Box) 정보를 반환합니다.
+     * [EN] Returns the OBB (Oriented Bounding Box) information.
+     */
+    get boundingOBB(): OBB {
+        if (!this.#cachedBoundingOBB || this.dirtyTransform) {
+            this.#cachedBoundingOBB = null;
+            this.#cachedBoundingAABB = null;
+            this.#cachedBoundingOBB = calculateMeshOBB(this);
+        }
+        return this.#cachedBoundingOBB;
+    }
 
-	/**
-	 * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
-	 * [EN] Returns the AABB (Axis-Aligned Bounding Box) information.
-	 */
-	get boundingAABB(): AABB {
-		if (!this.#cachedBoundingAABB || this.dirtyTransform) {
-			this.#cachedBoundingOBB = null;
-			this.#cachedBoundingAABB = null;
-			this.#cachedBoundingAABB = calculateMeshAABB(this);
-		}
-		return this.#cachedBoundingAABB;
-	}
+    /**
+     * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
+     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information.
+     */
+    get boundingAABB(): AABB {
+        if (!this.#cachedBoundingAABB || this.dirtyTransform) {
+            this.#cachedBoundingOBB = null;
+            this.#cachedBoundingAABB = null;
+            this.#cachedBoundingAABB = calculateMeshAABB(this);
+        }
+        return this.#cachedBoundingAABB;
+    }
 
-	/**
-	 * [KO] 자식 객체들을 포함한 통합 AABB 정보를 반환합니다.
-	 * [EN] Returns the combined AABB information including child objects.
-	 */
-	get combinedBoundingAABB(): AABB {
-		return calculateMeshCombinedAABB(this);
-	}
+    /**
+     * [KO] 자식 객체들을 포함한 통합 AABB 정보를 반환합니다.
+     * [EN] Returns the combined AABB information including child objects.
+     */
+    get combinedBoundingAABB(): AABB {
+        return calculateMeshCombinedAABB(this);
+    }
 
-	/**
-	 * [KO] 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
-	 * [EN] Sets the debugger visibility for all objects in the hierarchy.
-	 * @param enableDebugger -
-	 * [KO] 활성화 여부 (기본값: false)
-	 * [EN] Whether to enable (default: false)
-	 */
-	setEnableDebuggerRecursively(enableDebugger: boolean = false) {
-		if ('enableDebugger' in this) {
-			this.enableDebugger = enableDebugger;
-		}
-		if (this.children) {
-			this.children.forEach(child => {
-				child.setEnableDebuggerRecursively(enableDebugger);
-			});
-		}
-	}
+    /**
+     * [KO] 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
+     * [EN] Sets the debugger visibility for all objects in the hierarchy.
+     * @param enableDebugger -
+     * [KO] 활성화 여부 (기본값: false)
+     * [EN] Whether to enable (default: false)
+     */
+    setEnableDebuggerRecursively(enableDebugger: boolean = false) {
+        if ('enableDebugger' in this) {
+            this.enableDebugger = enableDebugger;
+        }
+        if (this.children) {
+            this.children.forEach(child => {
+                child.setEnableDebuggerRecursively(enableDebugger);
+            });
+        }
+    }
 
-	/**
-	 * [KO] 하위 계층의 모든 객체에 그림자 캐스팅 여부를 설정합니다.
-	 * [EN] Sets shadow casting for all objects in the hierarchy.
-	 * @param value -
-	 * [KO] 캐스팅 여부 (기본값: false)
-	 * [EN] Whether to cast (default: false)
-	 */
-	setCastShadowRecursively(value: boolean = false) {
-		if ('castShadow' in this) {
-			this.castShadow = value;
-		}
-		if (this.children) {
-			this.children.forEach(child => {
-				child.setCastShadowRecursively(value);
-			});
-		}
-	}
+    /**
+     * [KO] 하위 계층의 모든 객체에 그림자 캐스팅 여부를 설정합니다.
+     * [EN] Sets shadow casting for all objects in the hierarchy.
+     * @param value -
+     * [KO] 캐스팅 여부 (기본값: false)
+     * [EN] Whether to cast (default: false)
+     */
+    setCastShadowRecursively(value: boolean = false) {
+        if ('castShadow' in this) {
+            this.castShadow = value;
+        }
+        if (this.children) {
+            this.children.forEach(child => {
+                child.setCastShadowRecursively(value);
+            });
+        }
+    }
 
-	/**
-	 * [KO] 하위 계층의 모든 객체에 그림자 수신 여부를 설정합니다.
-	 * [EN] Sets shadow receiving for all objects in the hierarchy.
-	 * @param value -
-	 * [KO] 수신 여부 (기본값: false)
-	 * [EN] Whether to receive (default: false)
-	 */
-	setReceiveShadowRecursively(value: boolean = false) {
-		if ('receiveShadow' in this) {
-			this.receiveShadow = value;
-		}
-		if (this.children) {
-			this.children.forEach(child => {
-				child.setReceiveShadowRecursively(value);
-			});
-		}
-	}
+    /**
+     * [KO] 하위 계층의 모든 객체에 그림자 수신 여부를 설정합니다.
+     * [EN] Sets shadow receiving for all objects in the hierarchy.
+     * @param value -
+     * [KO] 수신 여부 (기본값: false)
+     * [EN] Whether to receive (default: false)
+     */
+    setReceiveShadowRecursively(value: boolean = false) {
+        if ('receiveShadow' in this) {
+            this.receiveShadow = value;
+        }
+        if (this.children) {
+            this.children.forEach(child => {
+                child.setReceiveShadowRecursively(value);
+            });
+        }
+    }
 
-	/**
-	 * [KO] 하위 계층의 모든 객체에 프러스텀 컬링 무시 여부를 설정합니다.
-	 * [EN] Sets whether to ignore frustum culling for all objects in the hierarchy.
-	 * @param value -
-	 * [KO] 무시 여부 (기본값: false)
-	 * [EN] Whether to ignore (default: false)
-	 */
-	setIgnoreFrustumCullingRecursively(value: boolean = false) {
-		if ('ignoreFrustumCulling' in this) {
-			this.ignoreFrustumCulling = value;
-		}
-		if (this.children) {
-			this.children.forEach(child => {
-				child.setIgnoreFrustumCullingRecursively(value);
-			});
-		}
-	}
+    /**
+     * [KO] 하위 계층의 모든 객체에 프러스텀 컬링 무시 여부를 설정합니다.
+     * [EN] Sets whether to ignore frustum culling for all objects in the hierarchy.
+     * @param value -
+     * [KO] 무시 여부 (기본값: false)
+     * [EN] Whether to ignore (default: false)
+     */
+    setIgnoreFrustumCullingRecursively(value: boolean = false) {
+        if ('ignoreFrustumCulling' in this) {
+            this.ignoreFrustumCulling = value;
+        }
+        if (this.children) {
+            this.children.forEach(child => {
+                child.setIgnoreFrustumCullingRecursively(value);
+            });
+        }
+    }
 
-	/**
-	 * [KO] 부모 계층을 고려한 통합 투명도를 계산하여 반환합니다.
-	 * [EN] Calculates and returns the combined opacity considering the parent hierarchy.
-	 * @returns
-	 * [KO] 통합 투명도 값
-	 * [EN] Combined opacity value
-	 */
-	getCombinedOpacity(): number {
-		if (this['is2DMeshType']) {
-			const parent = this.parent as { getCombinedOpacity?: () => number } | undefined;
-			return this.#opacity * (parent?.getCombinedOpacity ? parent.getCombinedOpacity() : 1);
-		}
-		return 1;
-	}
+    /**
+     * [KO] 부모 계층을 고려한 통합 투명도를 계산하여 반환합니다.
+     * [EN] Calculates and returns the combined opacity considering the parent hierarchy.
+     * @returns
+     * [KO] 통합 투명도 값
+     * [EN] Combined opacity value
+     */
+    getCombinedOpacity(): number {
+        if (this['is2DMeshType']) {
+            const parent = this.parent as { getCombinedOpacity?: () => number } | undefined;
+            return this.#opacity * (parent?.getCombinedOpacity ? parent.getCombinedOpacity() : 1);
+        }
+        return 1;
+    }
 
-	/**
-	 * [KO] 이벤트 리스너를 추가합니다.
-	 * [EN] Adds an event listener.
-	 * @param eventName -
-	 * [KO] 이벤트 이름
-	 * [EN] Event name
-	 * @param callback -
-	 * [KO] 콜백 함수
-	 * [EN] Callback function
-	 */
-	addListener(eventName: string, callback: Function) {
-		this.#events[eventName] = callback;
-		this.#eventsNum = Object.keys(this.#events).length;
-	}
+    /**
+     * [KO] 이벤트 리스너를 추가합니다.
+     * [EN] Adds an event listener.
+     * @param eventName -
+     * [KO] 이벤트 이름
+     * [EN] Event name
+     * @param callback -
+     * [KO] 콜백 함수
+     * [EN] Callback function
+     */
+    addListener(eventName: string, callback: Function) {
+        this.#events[eventName] = callback;
+        this.#eventsNum = Object.keys(this.#events).length;
+    }
 
-	/**
-	 * [KO] 메시가 특정 좌표를 바라보도록 회전시킵니다.
-	 * [EN] Rotates the mesh to look at a specific coordinate.
-	 * @param targetX -
-	 * [KO] 대상 X 좌표 또는 [x, y, z] 배열
-	 * [EN] Target X coordinate or [x, y, z] array
-	 * @param targetY -
-	 * [KO] 대상 Y 좌표 (targetX가 배열인 경우 무시됨)
-	 * [EN] Target Y coordinate (ignored if targetX is an array)
-	 * @param targetZ -
-	 * [KO] 대상 Z 좌표 (targetX가 배열인 경우 무시됨)
-	 * [EN] Target Z coordinate (ignored if targetX is an array)
-	 */
-	lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-		var tPosition = [];
-		var tRotation = [];
-		tPosition[0] = targetX;
-		tPosition[1] = targetY;
-		tPosition[2] = targetZ;
-		//out, eye, center, up
-		mat4.identity(this.localMatrix);
-		mat4.targetTo(this.localMatrix, [this.#x, this.#y, this.#z], tPosition, up);
-		tRotation = mat4ToEuler(this.localMatrix, []);
-		this.rotationX = tRotation[0] * 180 / Math.PI;
-		this.rotationY = tRotation[1] * 180 / Math.PI;
-		this.rotationZ = tRotation[2] * 180 / Math.PI;
-	}
+    /**
+     * [KO] 메시가 특정 좌표를 바라보도록 회전시킵니다.
+     * [EN] Rotates the mesh to look at a specific coordinate.
+     * @param targetX -
+     * [KO] 대상 X 좌표 또는 [x, y, z] 배열
+     * [EN] Target X coordinate or [x, y, z] array
+     * @param targetY -
+     * [KO] 대상 Y 좌표 (targetX가 배열인 경우 무시됨)
+     * [EN] Target Y coordinate (ignored if targetX is an array)
+     * @param targetZ -
+     * [KO] 대상 Z 좌표 (targetX가 배열인 경우 무시됨)
+     * [EN] Target Z coordinate (ignored if targetX is an array)
+     */
+    lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
+        var tPosition = [];
+        var tRotation = [];
+        tPosition[0] = targetX;
+        tPosition[1] = targetY;
+        tPosition[2] = targetZ;
+        //out, eye, center, up
+        mat4.identity(this.localMatrix);
+        mat4.targetTo(this.localMatrix, [this.#x, this.#y, this.#z], tPosition, up);
+        tRotation = mat4ToEuler(this.localMatrix, []);
+        this.rotationX = tRotation[0] * 180 / Math.PI;
+        this.rotationY = tRotation[1] * 180 / Math.PI;
+        this.rotationZ = tRotation[2] * 180 / Math.PI;
+    }
 
-	/**
-	 * [KO] 스케일을 설정합니다.
-	 * [EN] Sets the scale.
-	 * @param x -
-	 * [KO] X축 스케일
-	 * [EN] X-axis scale
-	 * @param y -
-	 * [KO] Y축 스케일 (생략 시 x와 동일)
-	 * [EN] Y-axis scale (if omitted, same as x)
-	 * @param z -
-	 * [KO] Z축 스케일 (생략 시 x와 동일)
-	 * [EN] Z-axis scale (if omitted, same as x)
-	 */
-	setScale(x: number, y?: number, z?: number) {
-		y = y ?? x;
-		z = z ?? x;
-		const scaleArray = this.#scaleArray;
-		this.#scaleX = scaleArray[0] = x;
-		this.#scaleY = scaleArray[1] = y;
-		this.#scaleZ = scaleArray[2] = z;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] 스케일을 설정합니다.
+     * [EN] Sets the scale.
+     * @param x -
+     * [KO] X축 스케일
+     * [EN] X-axis scale
+     * @param y -
+     * [KO] Y축 스케일 (생략 시 x와 동일)
+     * [EN] Y-axis scale (if omitted, same as x)
+     * @param z -
+     * [KO] Z축 스케일 (생략 시 x와 동일)
+     * [EN] Z-axis scale (if omitted, same as x)
+     */
+    setScale(x: number, y?: number, z?: number) {
+        y = y ?? x;
+        z = z ?? x;
+        const scaleArray = this.#scaleArray;
+        this.#scaleX = scaleArray[0] = x;
+        this.#scaleY = scaleArray[1] = y;
+        this.#scaleZ = scaleArray[2] = z;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 위치를 설정합니다.
-	 * [EN] Sets the position.
-	 * @param x -
-	 * [KO] X 좌표
-	 * [EN] X coordinate
-	 * @param y -
-	 * [KO] Y 좌표 (생략 시 x와 동일)
-	 * [EN] Y coordinate (if omitted, same as x)
-	 * @param z -
-	 * [KO] Z 좌표 (생략 시 x와 동일)
-	 * [EN] Z coordinate (if omitted, same as x)
-	 */
-	setPosition(x: number, y?: number, z?: number) {
-		y = y ?? x;
-		z = z ?? x;
-		const positionArray = this.#positionArray;
-		this.#x = positionArray[0] = x;
-		this.#y = positionArray[1] = y;
-		this.#z = positionArray[2] = z;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] 위치를 설정합니다.
+     * [EN] Sets the position.
+     * @param x -
+     * [KO] X 좌표
+     * [EN] X coordinate
+     * @param y -
+     * [KO] Y 좌표 (생략 시 x와 동일)
+     * [EN] Y coordinate (if omitted, same as x)
+     * @param z -
+     * [KO] Z 좌표 (생략 시 x와 동일)
+     * [EN] Z coordinate (if omitted, same as x)
+     */
+    setPosition(x: number, y?: number, z?: number) {
+        y = y ?? x;
+        z = z ?? x;
+        const positionArray = this.#positionArray;
+        this.#x = positionArray[0] = x;
+        this.#y = positionArray[1] = y;
+        this.#z = positionArray[2] = z;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 회전값을 설정합니다. (도)
-	 * [EN] Sets the rotation values. (degrees)
-	 * @param rotationX -
-	 * [KO] X축 회전
-	 * [EN] X-axis rotation
-	 * @param rotationY -
-	 * [KO] Y축 회전 (생략 시 rotationX와 동일)
-	 * [EN] Y-axis rotation (if omitted, same as rotationX)
-	 * @param rotationZ -
-	 * [KO] Z축 회전 (생략 시 rotationX와 동일)
-	 * [EN] Z-axis rotation (if omitted, same as rotationX)
-	 */
-	setRotation(rotationX: number, rotationY?: number, rotationZ?: number) {
-		rotationY = rotationY ?? rotationX;
-		rotationZ = rotationZ ?? rotationX;
-		const rotationArray = this.#rotationArray;
-		this.#rotationX = rotationArray[0] = rotationX;
-		this.#rotationY = rotationArray[1] = rotationY;
-		this.#rotationZ = rotationArray[2] = rotationZ;
-		this.dirtyTransform = true;
-	}
+    /**
+     * [KO] 회전값을 설정합니다. (도)
+     * [EN] Sets the rotation values. (degrees)
+     * @param rotationX -
+     * [KO] X축 회전
+     * [EN] X-axis rotation
+     * @param rotationY -
+     * [KO] Y축 회전 (생략 시 rotationX와 동일)
+     * [EN] Y-axis rotation (if omitted, same as rotationX)
+     * @param rotationZ -
+     * [KO] Z축 회전 (생략 시 rotationX와 동일)
+     * [EN] Z-axis rotation (if omitted, same as rotationX)
+     */
+    setRotation(rotationX: number, rotationY?: number, rotationZ?: number) {
+        rotationY = rotationY ?? rotationX;
+        rotationZ = rotationZ ?? rotationX;
+        const rotationArray = this.#rotationArray;
+        this.#rotationX = rotationArray[0] = rotationX;
+        this.#rotationY = rotationArray[1] = rotationY;
+        this.#rotationZ = rotationArray[2] = rotationZ;
+        this.dirtyTransform = true;
+    }
 
-	/**
-	 * [KO] 메시를 복제합니다.
-	 * [EN] Clones the mesh.
-	 * @experimental
-	 * @returns
-	 * [KO] 복제된 Mesh 인스턴스
-	 * [EN] Cloned Mesh instance
-	 */
-	clone() {
-		const cloneMesh = new Mesh(this.redGPUContext, this._geometry, this._material);
-		cloneMesh.setPosition(this.#x, this.#y, this.#z);
-		cloneMesh.setRotation(this.#rotationX, this.#rotationY, this.#rotationZ);
-		cloneMesh.setScale(this.#scaleX, this.#scaleY, this.#scaleZ);
-		// cloneMesh.geometry = this._geometry
-		// cloneMesh.material = this._material
-		//TODO 추가로 먼가 더해야할것 같으디..
-		let i = this.children.length;
-		while (i--) {
-			cloneMesh.addChild(this.children[i].clone());
-		}
-		return cloneMesh;
-	}
+    /**
+     * [KO] 메시를 복제합니다.
+     * [EN] Clones the mesh.
+     * @experimental
+     * @returns
+     * [KO] 복제된 Mesh 인스턴스
+     * [EN] Cloned Mesh instance
+     */
+    clone() {
+        const cloneMesh = new Mesh(this.redGPUContext, this._geometry, this._material);
+        cloneMesh.setPosition(this.#x, this.#y, this.#z);
+        cloneMesh.setRotation(this.#rotationX, this.#rotationY, this.#rotationZ);
+        cloneMesh.setScale(this.#scaleX, this.#scaleY, this.#scaleZ);
+        // cloneMesh.geometry = this._geometry
+        // cloneMesh.material = this._material
+        //TODO 추가로 먼가 더해야할것 같으디..
+        let i = this.children.length;
+        while (i--) {
+            cloneMesh.addChild(this.children[i].clone());
+        }
+        return cloneMesh;
+    }
 
-	/**
-	 * [KO] 메시를 렌더링합니다.
-	 * [EN] Renders the mesh.
-	 * @param renderViewStateData -
-	 * [KO] 렌더 상태 데이터
-	 * [EN] Render view state data
-	 */
-	render(renderViewStateData: RenderViewStateData) {
+    /**
+     * [KO] 메시를 렌더링합니다.
+     * [EN] Renders the mesh.
+     * @param renderViewStateData -
+     * [KO] 렌더 상태 데이터
+     * [EN] Render view state data
+     */
+    render(renderViewStateData: RenderViewStateData) {
         const {redGPUContext,} = this
         const {
             view,
@@ -1410,6 +1411,39 @@ class Mesh extends MeshBase {
                 this.#renderBundle = null
 
             }
+
+            {
+                const {gpuRenderInfo} = this
+                const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+                const {members: vertexUniformInfoMembers} = vertexUniformInfo
+               const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
+                if (!this.#uniformDataMatrixList) {
+                    this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
+                }
+                if (vertexUniformInfoMembers.uvTransform && (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID] )) {
+                    const material = currentMaterial as any;
+                    const offset = material.textureOffset;
+                    const scale = material.textureScale;
+
+                    if(offset) {
+
+                        dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
+                        tempFloat32_4[0] = offset[0];
+                        tempFloat32_4[1] = offset[1];
+                        tempFloat32_4[2] = scale[0];
+                        tempFloat32_4[3] = scale[1];
+
+                        gpuDevice.queue.writeBuffer(
+                            vertexUniformGPUBuffer,
+                            vertexUniformInfoMembers.uvTransform.uniformOffset,
+                            tempFloat32_4
+                        );
+
+                        currentMaterial.dirtyTextureTransform = false
+                    }
+
+                }
+            }
         } else {
             renderViewStateData.num3DGroups++
         }
@@ -1422,6 +1456,7 @@ class Mesh extends MeshBase {
             if (!this.#uniformDataMatrixList) {
                 this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
             }
+
             {
                 if (vertexUniformInfoMembers.displacementScale !== undefined &&
                     this.#displacementScale !== displacementScale

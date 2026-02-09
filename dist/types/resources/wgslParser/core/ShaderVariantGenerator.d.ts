@@ -27,6 +27,69 @@ declare class ShaderVariantGenerator {
      */
     constructor(defines: string, conditionalBlocks: ConditionalBlock[]);
     /**
+     * [KO] 기본 텍스처 및 샘플러 정보를 설정합니다.
+     * [EN] Sets the base texture and sampler information.
+     * @param textures -
+     * [KO] 기본 텍스처 배열
+     * [EN] Base textures array
+     * @param samplers -
+     * [KO] 기본 샘플러 배열
+     * [EN] Base samplers array
+     */
+    setBaseInfo(textures: any[], samplers: any[]): void;
+    /**
+     * [KO] 특정 유니폼 키에 연결된 텍스처 및 샘플러 정보를 추가합니다.
+     * [EN] Adds texture and sampler information associated with a specific uniform key.
+     * @param uniformName -
+     * [KO] 유니폼 이름
+     * [EN] Uniform name
+     * @param textures -
+     * [KO] 해당 조건에서 활성화될 텍스처 배열
+     * [EN] Textures array to be activated in this condition
+     * @param samplers -
+     * [KO] 해당 조건에서 활성화될 샘플러 배열
+     * [EN] Samplers array to be activated in this condition
+     */
+    addConditionalInfo(uniformName: string, textures: any[], samplers: any[]): void;
+    /**
+     * [KO] 특정 변형 키에 활성화된 텍스처 목록을 반환합니다.
+     * [EN] Returns the list of textures activated for a specific variant key.
+     * @param variantKey -
+     * [KO] 변형 키
+     * [EN] Variant key
+     * @returns
+     * [KO] 활성화된 텍스처 배열
+     * [EN] Activated textures array
+     */
+    getVariantTextures(variantKey: string): any[];
+    /**
+     * [KO] 특정 변형 키에 활성화된 샘플러 목록을 반환합니다.
+     * [EN] Returns the list of samplers activated for a specific variant key.
+     * @param variantKey -
+     * [KO] 변형 키
+     * [EN] Variant key
+     * @returns
+     * [KO] 활성화된 샘플러 배열
+     * [EN] Activated samplers array
+     */
+    getVariantSamplers(variantKey: string): any[];
+    /**
+     * [KO] 모든 가능한 텍스처 목록(합집합)을 반환합니다.
+     * [EN] Returns the list of all possible textures (union).
+     * @returns
+     * [KO] 모든 텍스처 배열
+     * [EN] All textures array
+     */
+    getUnionTextures(): any[];
+    /**
+     * [KO] 모든 가능한 샘플러 목록(합집합)을 반환합니다.
+     * [EN] Returns the list of all possible samplers (union).
+     * @returns
+     * [KO] 모든 샘플러 배열
+     * [EN] All samplers array
+     */
+    getUnionSamplers(): any[];
+    /**
      * [KO] 특정 변형 키에 대한 셰이더 코드를 지연 생성(Lazy generate)합니다.
      * [EN] Lazy-generates shader code for a specific variant key.
      * @param variantKey -
@@ -40,6 +103,9 @@ declare class ShaderVariantGenerator {
     /**
      * [KO] 현재 캐시된 변형 키 목록을 반환합니다.
      * [EN] Returns the list of currently cached variant keys.
+     * @returns
+     * [KO] 캐시된 변형 키 배열
+     * [EN] Cached variant keys array
      */
     getCachedVariants(): string[];
 }

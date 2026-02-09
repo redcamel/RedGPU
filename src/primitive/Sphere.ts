@@ -10,12 +10,12 @@ import Primitive from "./core/Primitive";
  * [KO] 반지름, 세그먼트 등을 기반으로 3D 구 형태의 데이터를 생성하여 관리합니다.
  * [EN] Generates and manages 3D spherical data based on radius, segments, etc.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // 반지름 1, 32x16 세그먼트 구 생성
- * const sphere = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 16);
+ * const sphere = new RedGPU.Sphere(redGPUContext, 1, 32, 16);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/sphere/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/sphere/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 class Sphere extends Primitive {
@@ -83,6 +83,11 @@ class Sphere extends Primitive {
      * [KO] Sphere 인스턴스를 생성합니다.
      * [EN] Creates an instance of Sphere.
      * 
+     * ### Example
+     * ```typescript
+     * const sphere = new RedGPU.Sphere(redGPUContext, 1, 32, 16);
+     * ```
+     *
      * @param redGPUContext - 
      * [KO] RedGPUContext 인스턴스 
      * [EN] RedGPUContext instance

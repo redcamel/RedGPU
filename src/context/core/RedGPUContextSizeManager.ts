@@ -4,6 +4,27 @@ import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/valid
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import RedGPUContext from "../RedGPUContext";
 
+/**
+ * [KO] 사각형 영역 정보를 나타내는 인터페이스입니다.
+ * [EN] Interface representing rectangular area information.
+ */
+export interface IRedGPURectObject {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+
+/**
+ * [KO] 리사이즈 이벤트 객체 인터페이스
+ * [EN] Resize event object interface
+ */
+export interface RedResizeEvent<T = any> {
+    target: T;
+    screenRectObject: IRedGPURectObject;
+    pixelRectObject: IRedGPURectObject;
+}
+
 type ParentRect = {
     x: number,
     y: number,
@@ -133,7 +154,7 @@ class RedGPUContextSizeManager {
      * [KO] 현재 렌더링될 실제 픽셀 단위 Rect를 객체로 반환합니다.
      * [EN] Returns the actual pixel rect to be rendered as an object.
      */
-    get pixelRectObject() {
+    get pixelRectObject(): IRedGPURectObject {
         return {
             x: this.#pixelRectArray[0],
             y: this.#pixelRectArray[1],
@@ -150,7 +171,7 @@ class RedGPUContextSizeManager {
         return (this.#htmlCanvas.parentNode || document.body)['getBoundingClientRect']()
     }
 
-    get screenRectObject() {
+    get screenRectObject(): IRedGPURectObject {
         return {
             x: this.#pixelRectArray[0] / devicePixelRatio,
             y: this.#pixelRectArray[1] / devicePixelRatio,
@@ -281,8 +302,8 @@ class RedGPUContextSizeManager {
      * [EN] Updates pixel Rect information. (Internal use)
      */
     #updatePixelRect(tW: number, tH: number) {
-        this.#pixelRectArray[2] = Math.floor(tW * this.#renderScale * window.devicePixelRatio);
-        this.#pixelRectArray[3] = Math.floor(tH * this.#renderScale * window.devicePixelRatio);
+        this.#pixelRectArray[2] = Math.max(1, Math.floor(tW * this.#renderScale * window.devicePixelRatio));
+        this.#pixelRectArray[3] = Math.max(1, Math.floor(tH * this.#renderScale * window.devicePixelRatio));
     }
 
     /**
@@ -291,7 +312,11 @@ class RedGPUContextSizeManager {
      */
     #updateViewsSize() {
         if (this.#redGPUContext.onResize) {
-            this.#redGPUContext.onResize(this.screenRectObject.width, this.screenRectObject.height);
+            this.#redGPUContext.onResize({
+                target: this.#redGPUContext,
+                screenRectObject: this.screenRectObject,
+                pixelRectObject: this.pixelRectObject
+            });
         }
         this.#redGPUContext.viewList.forEach((view: View3D) => {
             view.setSize()
@@ -306,8 +331,8 @@ class RedGPUContextSizeManager {
     #changeCanvasStyles(width: number, height: number): void {
         const cvs = this.#htmlCanvas
         const {style} = cvs
-        cvs.width = width * this.#renderScale * window.devicePixelRatio;
-        cvs.height = height * this.#renderScale * window.devicePixelRatio;
+        cvs.width = Math.max(1, width * this.#renderScale * window.devicePixelRatio);
+        cvs.height = Math.max(1, height * this.#renderScale * window.devicePixelRatio);
         style.width = `${width}px`;
         style.height = `${height}px`;
     }

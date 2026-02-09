@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] Simplex Noise (Displacement) 예제
+ * [EN] Simplex Noise (Displacement) example
+ *
+ * [KO] 심플렉스 노이즈를 사용하여 디스플레이스먼트 맵 효과를 구현하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to implement displacement mapping effects using Simplex noise.
+ */
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -69,12 +77,19 @@ RedGPU.init(
     }
 );
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Resource.SimplexTexture} targetNoiseTexture
+ * @param {object} testData
+ */
 const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 

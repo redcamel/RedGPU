@@ -1,4 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+
+/**
+ * [KO] World To Local 예제
+ * [EN] World To Local example
+ *
+ * [KO] 월드 좌표계와 로컬 좌표계 간의 변환을 시연합니다.
+ * [EN] Demonstrates transformation between world coordinate system and local coordinate system.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -41,11 +49,24 @@ RedGPU.init(
         document.body.innerHTML = `<div>오류: ${failReason}</div>`;
     }
 );
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
 };
 
+/**
+ * [KO] 테스트용 메시들을 생성합니다.
+ * [EN] Creates test meshes.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @returns {object} Created meshes
+ */
 function createTestMeshes(redGPUContext, scene) {
     // 텍스처 머티리얼
     const textureMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);

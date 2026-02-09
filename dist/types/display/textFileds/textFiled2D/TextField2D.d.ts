@@ -27,7 +27,7 @@ declare const BaseTextField2D: {
  * [KO] geometry와 material은 고정되어 있으며 외부에서 변경할 수 없습니다.
  * [EN] Geometry and material are fixed and cannot be changed externally.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const textField = new RedGPU.Display.TextField2D(redGPUContext);
  * textField.text = "Hello 2D Text!";
@@ -38,59 +38,84 @@ declare const BaseTextField2D: {
  *
  * [KO] 아래는 TextField2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of TextField2D.
- * @see [TextField2D MouseEvent example](/RedGPU/examples/2d/mouseEvent/textField2D/)
+ * @see [TextField2D MouseEvent example](/RedGPU/examples/2d/interaction/mouseEvent/textField2D/)
  *
  * @category TextField
  */
 declare class TextField2D extends BaseTextField2D {
     #private;
     /**
-     * [KO] TextField2D 생성자
-     * [EN] TextField2D constructor
+     * [KO] TextField2D 인스턴스를 생성합니다.
+     * [EN] Creates a TextField2D instance.
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param useSmoothing -
-     * [KO] 텍스처 필터링에 smoothing 적용 여부
-     * [EN] Whether to apply smoothing to texture filtering
+     * [KO] 텍스처 필터링에 smoothing 적용 여부 (기본값: true)
+     * [EN] Whether to apply smoothing to texture filtering (default: true)
      */
     constructor(redGPUContext: RedGPUContext, useSmoothing?: boolean);
     /**
-     * 텍스처 필터링에 smoothing을 사용할지 여부를 반환합니다.
+     * [KO] 텍스처 필터링에 smoothing을 사용할지 여부를 반환합니다.
+     * [EN] Returns whether to use smoothing for texture filtering.
      */
     get useSmoothing(): boolean;
     /**
-     * 텍스처 필터링에 smoothing을 설정합니다.
-     * true일 경우 LINEAR 필터를 사용하고, false일 경우 NEAREST 필터를 사용합니다.
+     * [KO] 텍스처 필터링에 smoothing을 설정합니다. true일 경우 LINEAR 필터를 사용하고, false일 경우 NEAREST 필터를 사용합니다.
+     * [EN] Sets smoothing for texture filtering. If true, uses LINEAR filter; if false, uses NEAREST filter.
+     * @param value -
+     * [KO] 사용 여부
+     * [EN] Whether to use
      */
     set useSmoothing(value: boolean);
     /**
-     * 텍스트 렌더링 결과의 너비를 반환합니다.
+     * [KO] 텍스트 렌더링 결과의 너비를 반환합니다.
+     * [EN] Returns the width of the text rendering result.
      */
     get width(): number;
     /**
-     * 텍스트 렌더링 결과의 높이를 반환합니다.
+     * [KO] 텍스트 렌더링 결과의 높이를 반환합니다.
+     * [EN] Returns the height of the text rendering result.
      */
     get height(): number;
     /**
-     * 텍스트가 출력되는 지오메트리입니다. Plane으로 고정됩니다.
+     * [KO] 텍스트가 출력되는 지오메트리를 반환합니다. Plane으로 고정됩니다.
+     * [EN] Returns the geometry where the text is displayed. Fixed with Plane.
+     * @returns
+     * [KO] 현재 지오메트리
+     * [EN] Current geometry
      */
     get geometry(): Geometry | Primitive;
     /**
-     * geometry는 외부에서 변경할 수 없습니다.
+     * [KO] TextField2D는 지오메트리를 변경할 수 없습니다.
+     * [EN] TextField2D cannot change geometry.
+     * @param value -
+     * [KO] 설정하려는 지오메트리
+     * [EN] Geometry to set
      */
     set geometry(value: Geometry | Primitive);
     /**
-     * 텍스트에 사용되는 머티리얼입니다.
+     * [KO] 텍스트에 사용되는 머티리얼을 반환합니다.
+     * [EN] Returns the material used for the text.
+     * @returns
+     * [KO] 현재 머티리얼
+     * [EN] Current material
      */
     get material(): any;
     /**
-     * material은 외부에서 변경할 수 없습니다.
+     * [KO] TextField2D는 머티리얼을 변경할 수 없습니다.
+     * [EN] TextField2D cannot change material.
+     * @param value -
+     * [KO] 설정하려는 머티리얼
+     * [EN] Material to set
      */
     set material(value: any);
     /**
-     * TextField2D 전용 버텍스 셰이더 모듈을 생성합니다.
-     * @returns {GPUShaderModule}
+     * [KO] TextField2D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [EN] Creates a vertex shader module dedicated to TextField2D.
+     * @returns
+     * [KO] 생성된 GPU 셰이더 모듈
+     * [EN] Created GPU shader module
      */
     createCustomMeshVertexShaderModule: () => GPUShaderModule;
 }

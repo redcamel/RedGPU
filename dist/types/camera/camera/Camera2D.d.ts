@@ -6,9 +6,9 @@ import { mat4 } from "gl-matrix";
  * [KO] 평면적인 2D 좌표계를 기반으로 위치를 제어하며, UI나 2D 게임 요소의 렌더링에 주로 사용됩니다.
  * [EN] Controls position based on a flat 2D coordinate system, primarily used for rendering UI or 2D game elements.
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * const camera = new RedGPU.Camera.Camera2D();
+ * const camera = new RedGPU.Camera2D();
  * camera.x = 100;
  * camera.y = 50;
  * camera.setPosition(200, 100);
@@ -20,6 +20,11 @@ declare class Camera2D {
     /**
      * [KO] Camera2D 인스턴스를 생성합니다.
      * [EN] Creates an instance of Camera2D.
+     *
+     * ### Example
+     * ```typescript
+     * const camera = new RedGPU.Camera2D();
+     * ```
      */
     constructor();
     /**
@@ -106,6 +111,12 @@ declare class Camera2D {
     /**
      * [KO] 카메라의 위치를 설정합니다.
      * [EN] Sets the camera position.
+     *
+     * ### Example
+     * ```typescript
+     * camera.setPosition(100, 200);
+     * camera.setPosition([100, 200, 0]);
+     * ```
      *
      * @param x -
      * [KO] X 좌표 또는 [x, y, z] 배열

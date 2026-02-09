@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Sampler from "../../sampler/Sampler";
 import BitmapTexture from "../../texture/BitmapTexture";
+import { BRDFGenerator, EquirectangularToCubeGenerator, IBLCubeTexture, IrradianceGenerator, PrefilterGenerator } from "../../texture/ibl/core";
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
-import IBLCubeTexture from "../../texture/ibl/IBLCubeTexture";
 import PackedTexture from "../../texture/packedTexture/PackedTexture";
 import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
@@ -61,6 +61,26 @@ declare class ResourceManager {
      * [EN] Returns the basic sampler.
      */
     get basicSampler(): Sampler;
+    /**
+     * [KO] BRDF 생성기를 반환합니다.
+     * [EN] Returns the BRDF generator.
+     */
+    get brdfGenerator(): BRDFGenerator;
+    /**
+     * [KO] Irradiance 생성기를 반환합니다.
+     * [EN] Returns the Irradiance generator.
+     */
+    get irradianceGenerator(): IrradianceGenerator;
+    /**
+     * [KO] Prefilter 생성기를 반환합니다.
+     * [EN] Returns the Prefilter generator.
+     */
+    get prefilterGenerator(): PrefilterGenerator;
+    /**
+     * [KO] Equirectangular(2D)를 CubeMap으로 변환하는 생성기를 반환합니다.
+     * [EN] Returns the generator that converts Equirectangular (2D) to CubeMap.
+     */
+    get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator;
     /**
      * [KO] 밉맵 생성기를 반환합니다.
      * [EN] Returns the mipmap generator.

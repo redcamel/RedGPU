@@ -1,7 +1,15 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
 import {
     loadingProgressInfoHandler
-} from '../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1769835266959'
+} from '../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770625511985'
+
+/**
+ * [KO] Texture Encoding Test 예제
+ * [EN] Texture Encoding Test example
+ *
+ * [KO] Texture Encoding Test GLTF 모델을 로드하고 렌더링합니다.
+ * [EN] Loads and renders the Texture Encoding Test GLTF model.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -10,6 +18,7 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        console.log(redGPUContext)
         // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
@@ -41,6 +50,12 @@ RedGPU.init(
 );
 
 
+/**
+ * [KO] GLTF 모델을 로드합니다.
+ * [EN] Loads a GLTF model.
+ * @param {RedGPU.Display.View3D} view
+ * @param {string} url
+ */
 const loadGLTF = async (view, url) => {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(
@@ -55,14 +70,19 @@ const loadGLTF = async (view, url) => {
     );
 }
 
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} targetView
+ */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         createIblHelper,
         setDebugButtons
-    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1769835266959');
+    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1770625511985');
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);
 };
-

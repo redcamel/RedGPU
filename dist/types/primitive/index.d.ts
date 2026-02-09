@@ -10,6 +10,7 @@
  */
 export * as Core from './core';
 import Box from "./Box";
+import Capsule from "./Capsule";
 import Circle from "./Circle";
 import Cylinder from "./Cylinder";
 import Ground from "./Ground";
@@ -17,4 +18,4 @@ import Plane from "./Plane";
 import Sphere from "./Sphere";
 import Torus from "./Torus";
 import TorusKnot from "./TorusKnot";
-export { Plane, Sphere, Torus, TorusKnot, Circle, Cylinder, Box, Ground };
+export { Plane, Sphere, Torus, TorusKnot, Circle, Cylinder, Box, Capsule, Ground };

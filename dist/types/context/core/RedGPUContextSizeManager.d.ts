@@ -1,4 +1,23 @@
 import RedGPUContext from "../RedGPUContext";
+/**
+ * [KO] 사각형 영역 정보를 나타내는 인터페이스입니다.
+ * [EN] Interface representing rectangular area information.
+ */
+export interface IRedGPURectObject {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+/**
+ * [KO] 리사이즈 이벤트 객체 인터페이스
+ * [EN] Resize event object interface
+ */
+export interface RedResizeEvent<T = any> {
+    target: T;
+    screenRectObject: IRedGPURectObject;
+    pixelRectObject: IRedGPURectObject;
+}
 type ParentRect = {
     x: number;
     y: number;
@@ -90,23 +109,13 @@ declare class RedGPUContextSizeManager {
      * [KO] 현재 렌더링될 실제 픽셀 단위 Rect를 객체로 반환합니다.
      * [EN] Returns the actual pixel rect to be rendered as an object.
      */
-    get pixelRectObject(): {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
+    get pixelRectObject(): IRedGPURectObject;
     /**
      * [KO] 캔버스의 부모 DOM 요소의 크기 정보를 반환합니다.
      * [EN] Returns the dimension information of the canvas's parent DOM element.
      */
     get parentDomRect(): DOMRect;
-    get screenRectObject(): {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
+    get screenRectObject(): IRedGPURectObject;
     /**
      * [KO] 입력값이 유효한 사이즈 값인지 검증합니다. (양수, px, %)
      * [EN] Validates if the input value is a valid size value. (positive number, px, %)

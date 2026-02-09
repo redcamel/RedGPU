@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 import copyGPUBuffer from "./copyGPUBuffer";
+import formatBytes from "./formatBytes";
 /**
  * [KO] 빌드 시 제거되지 않는 콘솔 로그 함수입니다.
  * [EN] Console log function that is not removed during build.
@@ -19,7 +20,6 @@ import copyGPUBuffer from "./copyGPUBuffer";
  */
 declare const keepLog: any;
 export * from "./file";
-export * from "./math";
 export * from "./texture";
 export * from "./uuid";
-export { keepLog, copyGPUBuffer, };
+export { keepLog, copyGPUBuffer, formatBytes };
