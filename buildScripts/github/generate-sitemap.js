@@ -76,11 +76,8 @@ for (const category of categories) {
 // XML 닫기
 examplesSitemapXML += `</urlset>`;
 
-// sitemap 디렉토리 생성
+// 사이트맵 저장 경로 (프로젝트 루트)
 const sitemapDir = path.join(__dirname, '../../');
-if (!fs.existsSync(sitemapDir)) {
-    fs.mkdirSync(sitemapDir);
-}
 
 // Examples 사이트맵 파일 저장
 fs.writeFileSync(path.join(sitemapDir, 'sitemap-examples.xml'), examplesSitemapXML);
