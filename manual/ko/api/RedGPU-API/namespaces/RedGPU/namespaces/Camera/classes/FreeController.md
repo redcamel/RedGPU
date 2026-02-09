@@ -6,7 +6,7 @@
 
 # Class: FreeController
 
-Defined in: [src/camera/controller/FreeController.ts:46](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L46)
+Defined in: [src/camera/controller/FreeController.ts:46](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L46)
 
 자유롭게 이동 가능한 1인칭 시점의 카메라 컨트롤러입니다.
 
@@ -32,7 +32,7 @@ controller.tilt = 10;
 
 > **new FreeController**(`redGPUContext`): `FreeController`
 
-Defined in: [src/camera/controller/FreeController.ts:88](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L88)
+Defined in: [src/camera/controller/FreeController.ts:88](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L88)
 
 FreeController 인스턴스를 생성합니다.
 
@@ -59,7 +59,7 @@ FreeController 인스턴스를 생성합니다.
 
 > **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L138)
+Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L138)
 
 이 컨트롤러가 제어하는 카메라를 반환합니다.
 
@@ -83,7 +83,7 @@ Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/Red
 
 > **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L187)
+Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L187)
 
 **`Internal`**
 
@@ -109,7 +109,7 @@ Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/Red
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L233)
+Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L233)
 
 **`Internal`**
 
@@ -135,7 +135,7 @@ Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/Red
 
 > **get** **keyboardActiveView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L200)
+Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L200)
 
 **`Internal`**
 
@@ -153,7 +153,7 @@ Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/Red
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L213)
+Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L213)
 
 **`Internal`**
 
@@ -182,7 +182,7 @@ Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/Red
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L246)
+Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L246)
 
 **`Internal`**
 
@@ -200,7 +200,7 @@ Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/Red
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L259)
+Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L259)
 
 **`Internal`**
 
@@ -229,7 +229,7 @@ Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/Red
 
 > **get** **keyNameMapper**(): `KeyNameMapper`
 
-Defined in: [src/camera/controller/FreeController.ts:150](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L150)
+Defined in: [src/camera/controller/FreeController.ts:150](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L150)
 
 키 매핑 설정 객체
 
@@ -245,7 +245,7 @@ Defined in: [src/camera/controller/FreeController.ts:150](https://github.com/red
 
 > **get** **maxAcceleration**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:146](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L146)
+Defined in: [src/camera/controller/FreeController.ts:146](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L146)
 
 최대 가속도 배율
 
@@ -257,7 +257,7 @@ Defined in: [src/camera/controller/FreeController.ts:146](https://github.com/red
 
 > **set** **maxAcceleration**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:147](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L147)
+Defined in: [src/camera/controller/FreeController.ts:147](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L147)
 
 ##### Parameters
 
@@ -277,7 +277,7 @@ Defined in: [src/camera/controller/FreeController.ts:147](https://github.com/red
 
 > **get** **mouseSensitivity**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:125](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L125)
+Defined in: [src/camera/controller/FreeController.ts:125](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L125)
 
 마우스 감도
 
@@ -289,7 +289,7 @@ Defined in: [src/camera/controller/FreeController.ts:125](https://github.com/red
 
 > **set** **mouseSensitivity**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:126](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L126)
+Defined in: [src/camera/controller/FreeController.ts:126](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L126)
 
 ##### Parameters
 
@@ -309,7 +309,7 @@ Defined in: [src/camera/controller/FreeController.ts:126](https://github.com/red
 
 > **get** **moveSpeed**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:130](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L130)
+Defined in: [src/camera/controller/FreeController.ts:130](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L130)
 
 이동 속도
 
@@ -321,7 +321,7 @@ Defined in: [src/camera/controller/FreeController.ts:130](https://github.com/red
 
 > **set** **moveSpeed**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:131](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L131)
+Defined in: [src/camera/controller/FreeController.ts:131](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L131)
 
 ##### Parameters
 
@@ -341,7 +341,7 @@ Defined in: [src/camera/controller/FreeController.ts:131](https://github.com/red
 
 > **get** **moveSpeedInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:134](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L134)
+Defined in: [src/camera/controller/FreeController.ts:134](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L134)
 
 이동 보간 계수
 
@@ -353,7 +353,7 @@ Defined in: [src/camera/controller/FreeController.ts:134](https://github.com/red
 
 > **set** **moveSpeedInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:135](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L135)
+Defined in: [src/camera/controller/FreeController.ts:135](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L135)
 
 ##### Parameters
 
@@ -373,7 +373,7 @@ Defined in: [src/camera/controller/FreeController.ts:135](https://github.com/red
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L101)
+Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L101)
 
 컨트롤러의 이름을 반환합니다.
 
@@ -389,7 +389,7 @@ Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/Red
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L114)
+Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L114)
 
 컨트롤러의 이름을 설정합니다.
 
@@ -416,7 +416,7 @@ Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/Red
 
 > **get** **pan**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:117](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L117)
+Defined in: [src/camera/controller/FreeController.ts:117](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L117)
 
 좌우 회전 각도 (도)
 
@@ -428,7 +428,7 @@ Defined in: [src/camera/controller/FreeController.ts:117](https://github.com/red
 
 > **set** **pan**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:118](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L118)
+Defined in: [src/camera/controller/FreeController.ts:118](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L118)
 
 ##### Parameters
 
@@ -448,7 +448,7 @@ Defined in: [src/camera/controller/FreeController.ts:118](https://github.com/red
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L126)
+Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L126)
 
 RedGPU 컨텍스트를 반환합니다.
 
@@ -472,7 +472,7 @@ RedGPU 컨텍스트
 
 > **get** **rotationSpeed**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:138](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L138)
+Defined in: [src/camera/controller/FreeController.ts:138](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L138)
 
 회전 속도
 
@@ -484,7 +484,7 @@ Defined in: [src/camera/controller/FreeController.ts:138](https://github.com/red
 
 > **set** **rotationSpeed**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:139](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L139)
+Defined in: [src/camera/controller/FreeController.ts:139](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L139)
 
 ##### Parameters
 
@@ -504,7 +504,7 @@ Defined in: [src/camera/controller/FreeController.ts:139](https://github.com/red
 
 > **get** **rotationSpeedInterpolation**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:142](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L142)
+Defined in: [src/camera/controller/FreeController.ts:142](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L142)
 
 회전 보간 계수
 
@@ -516,7 +516,7 @@ Defined in: [src/camera/controller/FreeController.ts:142](https://github.com/red
 
 > **set** **rotationSpeedInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:143](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L143)
+Defined in: [src/camera/controller/FreeController.ts:143](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L143)
 
 ##### Parameters
 
@@ -536,7 +536,7 @@ Defined in: [src/camera/controller/FreeController.ts:143](https://github.com/red
 
 > **get** **tilt**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:121](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L121)
+Defined in: [src/camera/controller/FreeController.ts:121](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L121)
 
 상하 회전 각도 (도)
 
@@ -548,7 +548,7 @@ Defined in: [src/camera/controller/FreeController.ts:121](https://github.com/red
 
 > **set** **tilt**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:122](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L122)
+Defined in: [src/camera/controller/FreeController.ts:122](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L122)
 
 ##### Parameters
 
@@ -568,7 +568,7 @@ Defined in: [src/camera/controller/FreeController.ts:122](https://github.com/red
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:103](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L103)
+Defined in: [src/camera/controller/FreeController.ts:103](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L103)
 
 X축 위치
 
@@ -580,7 +580,7 @@ X축 위치
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:104](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L104)
+Defined in: [src/camera/controller/FreeController.ts:104](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L104)
 
 카메라의 현재 월드 X 좌표를 가져옵니다.
 
@@ -610,7 +610,7 @@ X 좌표
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:107](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L107)
+Defined in: [src/camera/controller/FreeController.ts:107](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L107)
 
 Y축 위치
 
@@ -622,7 +622,7 @@ Y축 위치
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:108](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L108)
+Defined in: [src/camera/controller/FreeController.ts:108](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L108)
 
 카메라의 현재 월드 Y 좌표를 가져옵니다.
 
@@ -652,7 +652,7 @@ Y 좌표
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/controller/FreeController.ts:111](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L111)
+Defined in: [src/camera/controller/FreeController.ts:111](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L111)
 
 Z축 위치
 
@@ -664,7 +664,7 @@ Z축 위치
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:112](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L112)
+Defined in: [src/camera/controller/FreeController.ts:112](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L112)
 
 카메라의 현재 월드 Z 좌표를 가져옵니다.
 
@@ -692,7 +692,7 @@ Z 좌표
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L323)
+Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L323)
 
 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
 
@@ -727,7 +727,7 @@ Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/Red
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L267)
+Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L267)
 
 컨트롤러를 제거하고 이벤트 리스너를 해제합니다.
 
@@ -746,7 +746,7 @@ Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/Red
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L407)
+Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L407)
 
 **`Internal`**
 
@@ -776,7 +776,7 @@ Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/Red
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L370)
+Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L370)
 
 **`Internal`**
 
@@ -799,8 +799,8 @@ Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L390) |
-| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/core/AController.ts#L391) |
+| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L390) |
+| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/core/AController.ts#L391) |
 
 #### Inherited from
 
@@ -812,7 +812,7 @@ Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/Red
 
 > **setMoveBackKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:156](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L156)
+Defined in: [src/camera/controller/FreeController.ts:156](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L156)
 
 후진 키 설정
 
@@ -832,7 +832,7 @@ Defined in: [src/camera/controller/FreeController.ts:156](https://github.com/red
 
 > **setMoveDownKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:164](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L164)
+Defined in: [src/camera/controller/FreeController.ts:164](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L164)
 
 하향 이동 키 설정
 
@@ -852,7 +852,7 @@ Defined in: [src/camera/controller/FreeController.ts:164](https://github.com/red
 
 > **setMoveForwardKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:154](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L154)
+Defined in: [src/camera/controller/FreeController.ts:154](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L154)
 
 전진 키 설정
 
@@ -872,7 +872,7 @@ Defined in: [src/camera/controller/FreeController.ts:154](https://github.com/red
 
 > **setMoveLeftKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:158](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L158)
+Defined in: [src/camera/controller/FreeController.ts:158](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L158)
 
 좌측 이동 키 설정
 
@@ -892,7 +892,7 @@ Defined in: [src/camera/controller/FreeController.ts:158](https://github.com/red
 
 > **setMoveRightKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:160](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L160)
+Defined in: [src/camera/controller/FreeController.ts:160](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L160)
 
 우측 이동 키 설정
 
@@ -912,7 +912,7 @@ Defined in: [src/camera/controller/FreeController.ts:160](https://github.com/red
 
 > **setMoveUpKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:162](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L162)
+Defined in: [src/camera/controller/FreeController.ts:162](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L162)
 
 상향 이동 키 설정
 
@@ -932,7 +932,7 @@ Defined in: [src/camera/controller/FreeController.ts:162](https://github.com/red
 
 > **setTurnDownKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:172](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L172)
+Defined in: [src/camera/controller/FreeController.ts:172](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L172)
 
 하향 회전 키 설정
 
@@ -952,7 +952,7 @@ Defined in: [src/camera/controller/FreeController.ts:172](https://github.com/red
 
 > **setTurnLeftKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:166](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L166)
+Defined in: [src/camera/controller/FreeController.ts:166](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L166)
 
 좌회전 키 설정
 
@@ -972,7 +972,7 @@ Defined in: [src/camera/controller/FreeController.ts:166](https://github.com/red
 
 > **setTurnRightKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:168](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L168)
+Defined in: [src/camera/controller/FreeController.ts:168](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L168)
 
 우회전 키 설정
 
@@ -992,7 +992,7 @@ Defined in: [src/camera/controller/FreeController.ts:168](https://github.com/red
 
 > **setTurnUpKey**(`value`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:170](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L170)
+Defined in: [src/camera/controller/FreeController.ts:170](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L170)
 
 상향 회전 키 설정
 
@@ -1012,7 +1012,7 @@ Defined in: [src/camera/controller/FreeController.ts:170](https://github.com/red
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/camera/controller/FreeController.ts:181](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/camera/controller/FreeController.ts#L181)
+Defined in: [src/camera/controller/FreeController.ts:181](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/camera/controller/FreeController.ts#L181)
 
 매 프레임 컨트롤러를 업데이트합니다.
 

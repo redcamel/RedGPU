@@ -8,7 +8,7 @@
 
 > **imageBitmapToGPUTexture**(`gpuDevice`, `imageBitmaps`, `textureDescriptor`, `usePremultiplyAlpha`): `GPUTexture`
 
-Defined in: [src/utils/texture/imageBitmapToGPUTexture.ts:27](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/utils/texture/imageBitmapToGPUTexture.ts#L27)
+Defined in: [src/utils/texture/imageBitmapToGPUTexture.ts:27](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/utils/texture/imageBitmapToGPUTexture.ts#L27)
 
 
 Creates a GPUTexture from an array of ImageBitmaps.

@@ -8,7 +8,7 @@
 
 > **getFileName**(`url`, `withExtension`): `string`
 
-Defined in: [src/utils/file/getFileName.ts:22](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/utils/file/getFileName.ts#L22)
+Defined in: [src/utils/file/getFileName.ts:22](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/utils/file/getFileName.ts#L22)
 
 주어진 URL에서 파일 이름을 추출합니다.
 

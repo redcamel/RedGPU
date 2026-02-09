@@ -8,7 +8,7 @@
 
 > **mergerNoiseUniformDefault**(`basicOption`, `addOption`): `any`
 
-Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:4](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L4)
+Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:4](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L4)
 
 ## Parameters
 

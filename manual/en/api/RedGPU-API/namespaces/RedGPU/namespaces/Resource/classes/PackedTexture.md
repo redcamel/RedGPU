@@ -6,7 +6,7 @@
 
 # Class: PackedTexture
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:38](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/packedTexture/PackedTexture.ts#L38)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:38](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/packedTexture/PackedTexture.ts#L38)
 
 
 Utility class that packs channels from multiple textures into a single texture.
@@ -29,7 +29,7 @@ await packed.packing({
 
 > **new PackedTexture**(`redGPUContext`): `PackedTexture`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:61](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/packedTexture/PackedTexture.ts#L61)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:61](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/packedTexture/PackedTexture.ts#L61)
 
 
 Creates a PackedTexture instance.
@@ -52,7 +52,7 @@ Creates a PackedTexture instance.
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:74](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/packedTexture/PackedTexture.ts#L74)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:74](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/packedTexture/PackedTexture.ts#L74)
 
 Packed result GPUTexture object
 
@@ -68,7 +68,7 @@ Packed result GPUTexture object
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:69](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/packedTexture/PackedTexture.ts#L69)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:69](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/packedTexture/PackedTexture.ts#L69)
 
 Instance unique identifier
 
@@ -82,7 +82,7 @@ Instance unique identifier
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:130](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/packedTexture/PackedTexture.ts#L130)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:130](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/packedTexture/PackedTexture.ts#L130)
 
 Destroys the instance and manages the cache.
 
@@ -96,7 +96,7 @@ Destroys the instance and manages the cache.
 
 > **packing**(`textures`, `width`, `height`, `label?`, `componentMapping?`): `Promise`\<`void`\>
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:102](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/packedTexture/PackedTexture.ts#L102)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:102](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/packedTexture/PackedTexture.ts#L102)
 
 
 Creates a packed texture by combining channels from multiple textures.
@@ -125,7 +125,7 @@ Creates a packed texture by combining channels from multiple textures.
 
 > `static` **getCacheMap**(): `Map`\<`string`, \{ `gpuTexture`: `GPUTexture`; `mappingKey`: `string`; `useNum`: `number`; `uuid`: `string`; \}\>
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:79](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/packedTexture/PackedTexture.ts#L79)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:79](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/packedTexture/PackedTexture.ts#L79)
 
 Returns the packed texture cache map.
 

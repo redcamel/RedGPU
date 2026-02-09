@@ -6,7 +6,7 @@
 
 # Class: TextFieldMaterial
 
-Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:11](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L11)
+Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:11](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L11)
 
 텍스트 필드 렌더링에 사용되는 머티리얼 클래스입니다.
 
@@ -27,7 +27,7 @@ Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:
 
 > **new TextFieldMaterial**(`redGPUContext`, `diffuseTexture?`, `name?`): `TextFieldMaterial`
 
-Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:40](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L40)
+Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:40](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L40)
 
 `TextFieldMaterial` 인스턴스를 생성합니다.
 
@@ -53,7 +53,7 @@ Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:
 
 > **\_\_packingList**: `any`[]
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABitmapBaseMaterial.ts#L22)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABitmapBaseMaterial.ts#L22)
 
 파이프라인 갱신 시 호출되는 콜백 리스트
 
@@ -68,7 +68,7 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:22](https://github.com/red
 
 > **diffuseTexture**: [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:12](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L12)
+Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:12](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L12)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:
 
 > **diffuseTextureSampler**: [`Sampler`](../../../../Resource/classes/Sampler.md)
 
-Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:13](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L13)
+Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:13](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L13)
 
 ***
 
@@ -84,7 +84,7 @@ Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:31](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L31)
+Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:31](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts#L31)
 
 파이프라인 재생성 여부를 나타냅니다.
 머티리얼 설정이 변경되었을 때 true로 설정되어야 합니다.
@@ -99,7 +99,7 @@ Defined in: [src/display/textFileds/core/textFieldMaterial/TextFieldMaterial.ts:
 
 > **gpuRenderInfo**: [`FragmentGPURenderInfo`](../../../../Material/namespaces/Core/classes/FragmentGPURenderInfo.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:57](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L57)
+Defined in: [src/material/core/ABaseMaterial.ts:57](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L57)
 
 프래그먼트 GPU 렌더 정보 객체
 
@@ -114,7 +114,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:57](https://github.com/redcamel/
 
 > **opacity**: `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:23](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L23)
+Defined in: [src/material/core/ABaseMaterial.ts:23](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L23)
 
 머티리얼의 불투명도(0~1)
 
@@ -129,7 +129,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:23](https://github.com/redcamel/
 
 > **tint**: [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:28](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L28)
+Defined in: [src/material/core/ABaseMaterial.ts:28](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L28)
 
 머티리얼의 틴트 컬러(RGBA)
 
@@ -144,7 +144,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:28](https://github.com/redcamel/
 
 > **transparent**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:67](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L67)
+Defined in: [src/material/core/ABaseMaterial.ts:67](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L67)
 
 머티리얼 투명도 여부
 
@@ -159,7 +159,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:67](https://github.com/redcamel/
 
 > **use2PathRender**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:52](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L52)
+Defined in: [src/material/core/ABaseMaterial.ts:52](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L52)
 
 2패스 렌더링 사용 여부
 
@@ -174,7 +174,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:52](https://github.com/redcamel/
 
 > **useTint**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:33](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L33)
+Defined in: [src/material/core/ABaseMaterial.ts:33](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L33)
 
 틴트 컬러 사용 여부
 
@@ -191,7 +191,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:33](https://github.com/redcamel/
 
 > **get** **blendAlphaState**(): [`BlendState`](../../../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L289)
+Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L289)
 
 머티리얼의 알파 블렌드 상태 객체 반환
 
@@ -212,7 +212,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel
 
 > **get** **blendColorState**(): [`BlendState`](../../../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:281](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L281)
+Defined in: [src/material/core/ABaseMaterial.ts:281](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L281)
 
 머티리얼의 컬러 블렌드 상태 객체 반환
 
@@ -233,7 +233,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:281](https://github.com/redcamel
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L57)
 
 캐시 키를 반환합니다.
 
@@ -246,7 +246,7 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L65)
 
 캐시 키를 설정합니다.
 
@@ -273,7 +273,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > **get** **FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:257](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L257)
+Defined in: [src/material/core/ABaseMaterial.ts:257](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L257)
 
 프래그먼트 바인드 그룹 디스크립터명을 반환합니다.
 
@@ -294,7 +294,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:257](https://github.com/redcamel
 
 > **get** **FRAGMENT\_SHADER\_MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:249](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L249)
+Defined in: [src/material/core/ABaseMaterial.ts:249](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L249)
 
 프래그먼트 셰이더 모듈명을 반환합니다.
 
@@ -315,7 +315,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:249](https://github.com/redcamel
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L106)
 
 연관된 GPU 디바이스를 반환합니다.
 
@@ -336,7 +336,7 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L241)
+Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L241)
 
 머티리얼 모듈명을 반환합니다.
 
@@ -357,7 +357,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L81)
 
 인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
 
@@ -370,7 +370,7 @@ Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L90)
 
 인스턴스의 이름을 설정합니다.
 
@@ -397,7 +397,7 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L114)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -418,7 +418,7 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L73)
 
 리소스 매니저 키를 반환합니다.
 
@@ -439,7 +439,7 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 > **get** **STORAGE\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L265)
+Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L265)
 
 셰이더 storage 구조 정보를 반환합니다.
 
@@ -460,7 +460,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel
 
 > **get** **tintBlendMode**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L205)
+Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L205)
 
 틴트 블렌드 모드 이름을 반환합니다.
 
@@ -476,7 +476,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel
 
 > **set** **tintBlendMode**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:220](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L220)
+Defined in: [src/material/core/ABaseMaterial.ts:220](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L220)
 
 틴트 블렌드 모드를 설정합니다.
 
@@ -503,7 +503,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:220](https://github.com/redcamel
 
 > **get** **UNIFORM\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L273)
+Defined in: [src/material/core/ABaseMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L273)
 
 셰이더 uniforms 구조 정보를 반환합니다.
 
@@ -524,7 +524,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:273](https://github.com/redcamel
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L98)
 
 고유 식별자(UUID)를 반환합니다.
 
@@ -545,7 +545,7 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **get** **writeMaskState**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:297](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L297)
+Defined in: [src/material/core/ABaseMaterial.ts:297](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L297)
 
 머티리얼의 writeMask 상태 반환
 
@@ -558,7 +558,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:297](https://github.com/redcamel
 
 > **set** **writeMaskState**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:308](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L308)
+Defined in: [src/material/core/ABaseMaterial.ts:308](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L308)
 
 머티리얼의 writeMask 상태 설정
 
@@ -583,7 +583,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:308](https://github.com/redcamel
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L125)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
 
@@ -608,7 +608,7 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L152)
 
 등록된 더티 리스너들을 실행합니다.
 
@@ -633,7 +633,7 @@ Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L137)
 
 더티 파이프라인 리스너를 제거합니다.
 
@@ -658,7 +658,7 @@ Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel
 
 > `protected` **\_updateBaseProperty**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:463](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L463)
+Defined in: [src/material/core/ABaseMaterial.ts:463](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L463)
 
 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영합니다.
 
@@ -677,7 +677,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:463](https://github.com/redcamel
 
 > `protected` **\_updateFragmentState**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:351](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L351)
+Defined in: [src/material/core/ABaseMaterial.ts:351](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L351)
 
 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등의 상태를 갱신합니다.
 
@@ -696,7 +696,7 @@ Defined in: [src/material/core/ABaseMaterial.ts:351](https://github.com/redcamel
 
 > **getFragmentRenderState**(`entryPoint`): `GPUFragmentState`
 
-Defined in: [src/material/core/ABaseMaterial.ts:431](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L431)
+Defined in: [src/material/core/ABaseMaterial.ts:431](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L431)
 
 GPU 프래그먼트 렌더 상태 객체를 반환합니다.
 
@@ -724,7 +724,7 @@ GPU 프래그먼트 상태
 
 > **getGPUResourceSampler**(`sampler`): `GPUSampler`
 
-Defined in: [src/material/core/ABaseMaterial.ts:488](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L488)
+Defined in: [src/material/core/ABaseMaterial.ts:488](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L488)
 
 샘플러 객체에서 GPU 샘플러를 반환합니다.
 
@@ -752,7 +752,7 @@ GPUSampler 인스턴스
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:316](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABaseMaterial.ts#L316)
+Defined in: [src/material/core/ABaseMaterial.ts:316](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABaseMaterial.ts#L316)
 
 GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
 
@@ -771,7 +771,7 @@ GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
 
 > **updateSampler**(`prevSampler`, `newSampler`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:75](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABitmapBaseMaterial.ts#L75)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:75](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABitmapBaseMaterial.ts#L75)
 
 샘플러 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
 
@@ -797,7 +797,7 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:75](https://github.com/red
 
 > **updateTexture**(`prevTexture`, `texture`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:59](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/ABitmapBaseMaterial.ts#L59)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:59](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/ABitmapBaseMaterial.ts#L59)
 
 텍스처 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
 

@@ -8,4 +8,4 @@
 
 > **LINE\_TYPE** = *typeof* [`LINE_TYPE`](../variables/LINE_TYPE.md)\[keyof *typeof* [`LINE_TYPE`](../variables/LINE_TYPE.md)\]
 
-Defined in: [src/display/line/LINE\_TYPE.ts:4](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/display/line/LINE_TYPE.ts#L4)
+Defined in: [src/display/line/LINE\_TYPE.ts:4](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/display/line/LINE_TYPE.ts#L4)

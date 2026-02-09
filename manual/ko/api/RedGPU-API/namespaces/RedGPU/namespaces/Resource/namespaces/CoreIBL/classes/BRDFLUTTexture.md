@@ -6,7 +6,7 @@
 
 # Class: BRDFLUTTexture
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:12](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts#L12)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:12](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts#L12)
 
 BRDF LUT(Look-Up Table) 전용 텍스처 클래스입니다.
 
@@ -21,7 +21,7 @@ BRDF LUT(Look-Up Table) 전용 텍스처 클래스입니다.
 
 > **new BRDFLUTTexture**(`redGPUContext`): `BRDFLUTTexture`
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:23](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts#L23)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:23](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts#L23)
 
 BRDFLUTTexture 인스턴스를 생성합니다.
 
@@ -48,7 +48,7 @@ BRDFLUTTexture 인스턴스를 생성합니다.
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L57)
 
 캐시 키를 반환합니다.
 
@@ -61,7 +61,7 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L65)
 
 캐시 키를 설정합니다.
 
@@ -88,7 +88,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L106)
 
 연관된 GPU 디바이스를 반환합니다.
 
@@ -109,7 +109,7 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:41](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts#L41)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:41](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts#L41)
 
 GPUTexture 객체를 반환합니다.
 
@@ -126,7 +126,7 @@ GPUTexture 객체를 반환합니다.
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L81)
 
 인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
 
@@ -139,7 +139,7 @@ Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L90)
 
 인스턴스의 이름을 설정합니다.
 
@@ -166,7 +166,7 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L114)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -187,7 +187,7 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L73)
 
 리소스 매니저 키를 반환합니다.
 
@@ -208,7 +208,7 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../../Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ManagementResourceBase.ts#L45)
 
 리소스의 관리 상태 정보를 반환합니다.
 
@@ -229,7 +229,7 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L98)
 
 고유 식별자(UUID)를 반환합니다.
 
@@ -250,7 +250,7 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:49](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts#L49)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:49](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts#L49)
 
 비디오 메모리 사용량(byte)
 
@@ -265,7 +265,7 @@ Defined in: [src/resources/texture/ibl/core/brdf/BRDFLUTTexture.ts:49](https://g
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L125)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
 
@@ -290,7 +290,7 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 > **\_\_fireListenerList**(`resetList`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L152)
 
 등록된 더티 리스너들을 실행합니다.
 
@@ -315,7 +315,7 @@ Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/core/ResourceBase.ts#L137)
 
 더티 파이프라인 리스너를 제거합니다.
 

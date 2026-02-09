@@ -8,7 +8,7 @@
 
 > **matToEuler**(`mat`, `dest`, `order?`): `any`
 
-Defined in: [src/math/mat4ToEuler.ts:24](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/math/mat4ToEuler.ts#L24)
+Defined in: [src/math/mat4ToEuler.ts:24](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/math/mat4ToEuler.ts#L24)
 
 4x4 행렬에서 오일러 각도를 추출합니다.
 

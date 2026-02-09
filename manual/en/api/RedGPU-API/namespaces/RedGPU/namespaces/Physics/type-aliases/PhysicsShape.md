@@ -8,7 +8,7 @@
 
 > **PhysicsShape** = *typeof* [`PHYSICS_SHAPE`](../variables/PHYSICS_SHAPE.md)\[keyof *typeof* [`PHYSICS_SHAPE`](../variables/PHYSICS_SHAPE.md)\]
 
-Defined in: [src/physics/PhysicsShape.ts:50](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/physics/PhysicsShape.ts#L50)
+Defined in: [src/physics/PhysicsShape.ts:50](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/physics/PhysicsShape.ts#L50)
 
 **`Experimental`**
 

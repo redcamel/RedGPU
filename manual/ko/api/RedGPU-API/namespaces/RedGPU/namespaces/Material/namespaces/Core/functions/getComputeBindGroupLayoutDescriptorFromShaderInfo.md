@@ -8,7 +8,7 @@
 
 > **getComputeBindGroupLayoutDescriptorFromShaderInfo**(`SHADER_INFO`, `targetGroupIndex`, `useMSAA`): `object`
 
-Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:145](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L145)
+Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:145](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L145)
 
 셰이더 정보로부터 컴퓨트 바인드 그룹 레이아웃 디스크립터를 생성합니다.
 
@@ -27,4 +27,4 @@ Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:145
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:103](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L103) |
+| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:103](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L103) |

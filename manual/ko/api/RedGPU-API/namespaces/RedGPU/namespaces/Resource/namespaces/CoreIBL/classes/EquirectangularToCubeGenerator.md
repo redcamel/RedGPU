@@ -6,7 +6,7 @@
 
 # Class: EquirectangularToCubeGenerator
 
-Defined in: [src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts:18](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts#L18)
+Defined in: [src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts:18](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts#L18)
 
 Equirectangular(2D) 텍스처를 CubeMap으로 변환하는 클래스입니다.
 
@@ -17,7 +17,7 @@ Equirectangular(2D) 텍스처를 CubeMap으로 변환하는 클래스입니다.
 
 > **new EquirectangularToCubeGenerator**(`redGPUContext`): `EquirectangularToCubeGenerator`
 
-Defined in: [src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts:32](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts#L32)
+Defined in: [src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts:32](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts#L32)
 
 EquirectangularToCubeGenerator 인스턴스를 생성합니다.
 
@@ -38,7 +38,7 @@ EquirectangularToCubeGenerator 인스턴스를 생성합니다.
 
 > **generate**(`sourceTexture`, `size`): `Promise`\<[`IBLCubeTexture`](IBLCubeTexture.md)\>
 
-Defined in: [src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts:61](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts#L61)
+Defined in: [src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts:61](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/resources/texture/ibl/core/utils/EquirectangularToCubeGenerator.ts#L61)
 
 2D Equirectangular 텍스처를 큐브맵으로 변환하여 반환합니다.
 

@@ -8,7 +8,7 @@
 
 > **validateUintRange**(`value`, `min`, `max`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateUintRange.ts:34](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/runtimeChecker/validateFunc/validateUintRange.ts#L34)
+Defined in: [src/runtimeChecker/validateFunc/validateUintRange.ts:34](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/runtimeChecker/validateFunc/validateUintRange.ts#L34)
 
 주어진 값이 부호 없는 정수(Uint) 범위 내에 있는지 검증합니다.
 

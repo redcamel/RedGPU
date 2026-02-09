@@ -8,7 +8,7 @@
 
 > `const` **GPU\_FRONT\_FACE**: `object`
 
-Defined in: [src/gpuConst/GPU\_FRONT\_FACE.ts:10](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/gpuConst/GPU_FRONT_FACE.ts#L10)
+Defined in: [src/gpuConst/GPU\_FRONT\_FACE.ts:10](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/gpuConst/GPU_FRONT_FACE.ts#L10)
 
 앞면(Front Face)을 판단하는 정점의 순서를 정의하는 상수군입니다.
 

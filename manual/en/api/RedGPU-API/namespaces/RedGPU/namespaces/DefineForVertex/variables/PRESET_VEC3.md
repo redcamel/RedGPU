@@ -8,4 +8,4 @@
 
 > **PRESET\_VEC3**: `object`
 
-Defined in: [src/defineProperty/DefineForVertex.ts:82](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/defineProperty/DefineForVertex.ts#L82)
+Defined in: [src/defineProperty/DefineForVertex.ts:82](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/defineProperty/DefineForVertex.ts#L82)

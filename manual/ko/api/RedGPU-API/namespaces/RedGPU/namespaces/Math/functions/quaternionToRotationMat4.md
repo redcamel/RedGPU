@@ -8,7 +8,7 @@
 
 > **quaternionToRotationMat4**(`q`, `m`): `any`
 
-Defined in: [src/math/quaternionToRotationMat4.ts:21](https://github.com/redcamel/RedGPU/blob/b6431aa69ee7246cf56c0e787d030ba82af82fd0/src/math/quaternionToRotationMat4.ts#L21)
+Defined in: [src/math/quaternionToRotationMat4.ts:21](https://github.com/redcamel/RedGPU/blob/9bfdef0c694e55fcb123b3a85e1533dc988b5344/src/math/quaternionToRotationMat4.ts#L21)
 
 쿼터니언을 회전 행렬로 변환합니다.
 
