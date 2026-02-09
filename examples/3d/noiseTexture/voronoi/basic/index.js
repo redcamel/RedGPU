@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../../dist/index.js?t=1770625511985";
 
 /**
  * [KO] Voronoi Noise (Basic) 예제
@@ -65,11 +65,11 @@ RedGPU.init(
  * @param {object} testData
  */
 const renderTestPane = async (redGPUContext, targetNoiseTexture, testData) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 

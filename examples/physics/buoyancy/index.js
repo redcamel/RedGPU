@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import * as RedGPU from "../../../dist/index.js?t=1770625511985";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770625511985";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -228,8 +228,8 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, createObject, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js");
+	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
+	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770625511985");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
 	

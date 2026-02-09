@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js?t=1770625511985";
 
 /**
  * [KO] SpriteSheet3D Mouse Event 예제
@@ -172,9 +172,9 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
  * @param {RedGPU.Display.Scene} scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+    const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const pane = new Pane();
-    const { setDebugButtons } = await import("../../../../exampleHelper/createExample/panes/index.js");
+    const { setDebugButtons } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const folder = pane.addFolder({ title: 'SpriteSheet3D', expanded: true });
     

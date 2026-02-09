@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../dist/index.js?t=1770625511985";
 
 /**
  * [KO] Indirect Draw 예제
@@ -201,11 +201,11 @@ function loadGLTFGrid(view, urls, gridSize = 3, spacing = 3) {
  * @param {RedGPU.Display.View3D} targetView
  */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         createIblHelper,
         setDebugButtons
-    } = await import('../../exampleHelper/createExample/panes/index.js?t=1769835266959');
+    } = await import('../../exampleHelper/createExample/panes/index.js?t=1770625511985');
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);

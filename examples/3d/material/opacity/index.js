@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1769835266959";
+import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
 
 /**
  * [KO] Opacity 3D Material 예제
@@ -123,11 +123,11 @@ const createChildTextField3D = (redGPUContext, parent, x = 0, y = 0) => {
  * @param {Array<RedGPU.Display.DisplayObject3D>} children
  */
 const renderTestPane = async (redGPUContext, parent, children) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1769835266959');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1769835266959");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 
