@@ -6,7 +6,7 @@
  * [EN] Demonstrates the difference between World Size (worldSize) and fixed Pixel Size (usePixelSize) modes for TextField3D.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+import * as RedGPU from "../../../../dist/index.js?t=1770634235177";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -56,8 +56,8 @@ RedGPU.init(
 );
 
 const renderTestPane = async (redGPUContext, textWorld, textPixel) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
-	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
+	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177');
+	const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770634235177");
 
 	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();

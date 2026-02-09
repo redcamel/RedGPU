@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1770625511985";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770625511985";
+import * as RedGPU from "../../../dist/index.js?t=1770634235177";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770634235177";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -97,8 +97,8 @@ RedGPU.init(
  * @param {Array<object>} activeBoxes
  */
 const renderTestPane = async (redGPUContext, activeBoxes) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770625511985");
+	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177');
+	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770634235177");
 	setDebugButtons(RedGPU, redGPUContext);
 	const pane = new Pane();
 	pane.addBlade({ view: 'text', label: 'Interaction', value: 'Click to EXPLODE & SPAWN!', parse: (v) => v, readonly: true });

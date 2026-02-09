@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+import * as RedGPU from "../../../../dist/index.js?t=1770634235177";
 
 /**
  * [KO] Sprite2D Pivot 예제
@@ -102,12 +102,12 @@ const createChildSprite2D = (redGPUContext, parent) => {
  * @param {RedGPU.Display.Sprite2D} child
  */
 const renderTestPane = async (redGPUContext, parent, child) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177');
     const pane = new Pane();
     const {
         setDebugButtons,
         setRedGPUTest_pane
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770634235177");
     setDebugButtons(RedGPU, redGPUContext);
     const maxW = redGPUContext.screenRectObject.width;
     const maxH = redGPUContext.screenRectObject.height;

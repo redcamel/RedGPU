@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+import * as RedGPU from "../../../../dist/index.js?t=1770634235177";
 
 /**
  * [KO] Fragment Variant Test 예제
@@ -140,11 +140,11 @@ const createTextures = (redGPUContext) => {
 
 // ===== UI Rendering =====
 const renderUI = async (redGPUContext, mesh) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177");
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770634235177");
     setDebugButtons(RedGPU, redGPUContext);
 
     const pane = new Pane({title: "Phong Shader Variants"});

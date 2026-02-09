@@ -1,7 +1,7 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770625511985";
+import * as RedGPU from "../../../../../dist/index.js?t=1770634235177";
 import {
     loadingProgressInfoHandler
-} from '../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770625511985'
+} from '../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770634235177'
 
 /**
  * [KO] Anisotropy Barn Lamp 예제
@@ -77,11 +77,11 @@ const loadGLTF = async (view, url) => {
  * @param {RedGPU.Display.View3D} targetView
  */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770625511985');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770634235177');
     const {
         createIblHelper,
         setDebugButtons
-    } = await import('../../../../exampleHelper/createExample/panes/index.js?t=1770625511985');
+    } = await import('../../../../exampleHelper/createExample/panes/index.js?t=1770634235177');
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);

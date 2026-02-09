@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770625511985";
+import * as RedGPU from "../../../../dist/index.js?t=1770634235177";
 
 /**
  * [KO] Primitives 예제
@@ -146,7 +146,7 @@ const createPrimitive = (redGPUContext, scene) => {
 const renderTestPane = async (redGPUContext) => {
    const {
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770634235177");
     setDebugButtons(RedGPU, redGPUContext)
 
 };

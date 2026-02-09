@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770625511985";
+import * as RedGPU from "../../../../../dist/index.js?t=1770634235177";
 
 /**
  * [KO] Mesh AABB Intersects 예제
@@ -48,7 +48,7 @@ RedGPU.init(
  * [EN] Sets up Tweakpane buttons for testing.
  */
 const renderTestPane = async (redGPUContext, view) => {
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770625511985");
+    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770634235177");
     setDebugButtons(RedGPU, redGPUContext);
 };
 
