@@ -77,14 +77,14 @@ for (const category of categories) {
 examplesSitemapXML += `</urlset>`;
 
 // sitemap 디렉토리 생성
-const sitemapDir = path.join(__dirname, '../../sitemap');
+const sitemapDir = path.join(__dirname, '../../');
 if (!fs.existsSync(sitemapDir)) {
     fs.mkdirSync(sitemapDir);
 }
 
 // Examples 사이트맵 파일 저장
 fs.writeFileSync(path.join(sitemapDir, 'sitemap-examples.xml'), examplesSitemapXML);
-console.log(`Examples 사이트맵이 생성되었습니다: sitemap/sitemap-examples.xml (총 ${urlCount}개 URL)`);
+console.log(`Examples 사이트맵이 생성되었습니다: sitemap-examples.xml (총 ${urlCount}개 URL)`);
 
 
 // 2. Root Sitemap Index 생성 (sitemap/sitemap.xml)
@@ -92,7 +92,7 @@ console.log(`Examples 사이트맵이 생성되었습니다: sitemap/sitemap-exa
 const sitemapIndexXML = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://redcamel.github.io/RedGPU/sitemap/sitemap-examples.xml</loc>
+    <loc>https://redcamel.github.io/RedGPU/sitemap-examples.xml</loc>
     <lastmod>${today}</lastmod>
   </sitemap>
   <sitemap>
@@ -103,4 +103,4 @@ const sitemapIndexXML = `<?xml version="1.0" encoding="UTF-8"?>
 
 // Root 사이트맵 인덱스 파일 저장
 fs.writeFileSync(path.join(sitemapDir, 'sitemap.xml'), sitemapIndexXML);
-console.log(`루트 사이트맵 인덱스가 생성되었습니다: sitemap/sitemap.xml`);
+console.log(`루트 사이트맵 인덱스가 생성되었습니다: sitemap.xml`);
