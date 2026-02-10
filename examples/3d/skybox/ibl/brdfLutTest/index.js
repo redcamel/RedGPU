@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../../dist/index.js?t=1770698056099";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);

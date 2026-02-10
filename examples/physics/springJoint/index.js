@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1770637396475";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770637396475";
+import * as RedGPU from "../../../dist/index.js?t=1770698056099";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770698056099";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -208,7 +208,7 @@ RedGPU.init(
 
 		// [KO] 8. 테스트 UI 구성: 플랫폼 충격 주기 및 오브젝트 제거 기능
 		// [EN] 8. Set up test UI: Platform kick and object clearing functions
-		const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+		const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
 		const pane = new Pane();
 		
 		const params = {

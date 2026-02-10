@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Distance Culling 예제
@@ -94,9 +94,9 @@ const createTestMeshes = (redGPUContext, scene) => {
  * @param {RedGPU.Display.View3D} view
  */
 const renderTestPane = async (redGPUContext, meshes, view) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
     const pane = new Pane();
-    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1770637396475" );
+    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1770698056099" );
     setDebugButtons(RedGPU, redGPUContext);
     const config = {
         cameraDistance: view.camera.distance,

@@ -1,4 +1,4 @@
-import {setSingleViewTest} from "../index.js?t=1770637396475";
+import {setSingleViewTest} from "../index.js?t=1770698056099";
 
 const setViewListTest = (pane, viewList, shouldExpand = false, camera2DYn = false) => {
     const title = viewList.length === 1 ? viewList[0].name : 'ViewList';

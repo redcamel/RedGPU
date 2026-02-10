@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Hello World 3D 예제
@@ -47,11 +47,11 @@ RedGPU.init(
  * @param {RedGPU.Display.View3D} view
  */
 const renderTestPane = async (redGPUContext, view) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
     const {
         setRedGPUTest_pane,
         setDebugButtons
-    } = await import("../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    } = await import("../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext)
     const pane = new Pane();
     setRedGPUTest_pane(pane, redGPUContext, true);

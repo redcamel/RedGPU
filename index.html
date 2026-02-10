@@ -316,7 +316,7 @@
 
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(calc(50% - 1rem), 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
@@ -449,47 +449,17 @@
             display: block;
         }
 
-        .fullscreen-btn {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 10;
-            backdrop-filter: blur(5px);
-            opacity: 0;
-            transform: translateY(10px);
-        }
 
-        .video-card:hover .fullscreen-btn {
-            opacity: 1;
-            transform: translateY(0);
-        }
 
-        .fullscreen-btn:hover {
-            background: rgba(255, 0, 110, 0.8);
-            transform: scale(1.1);
-        }
-
-        .fullscreen-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: white;
-        }
 
         @media (max-width: 768px) {
             .content {
                 padding: 0 2rem;
             }
-
+            .feature-grid {
+                grid-template-columns: 2fr;
+                gap: 1rem;
+            }
             .release-badges {
                 flex-direction: column;
                 align-items: center;
@@ -687,19 +657,6 @@
             t0.src = './examples/exampleHelper/indexSample.html';
             iframes.appendChild(t0);
 
-            const video = document.querySelector('.video-card video');
-            const fullscreenBtn = document.querySelector('.fullscreen-btn');
-            if (video && fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', () => {
-                    if (!document.fullscreenElement) {
-                        video.requestFullscreen().catch(err => {
-                            console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                        });
-                    } else {
-                        document.exitFullscreen();
-                    }
-                });
-            }
         };
     </script>
 </head>
@@ -782,15 +739,17 @@
     <section class="section">
         <h2 class="section-title">Visual Showcase</h2>
         <div class="video-card">
-            <video autoplay loop muted playsinline>
+            <video autoplay loop muted playsinline controls>
                 <source src="https://github.com/user-attachments/assets/3115b699-9b3e-45f2-9e3b-682db04bcc03" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <button class="fullscreen-btn" aria-label="Toggle Fullscreen">
-                <svg viewBox="0 0 24 24">
-                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                </svg>
-            </button>
+        </div>
+        <br/>
+        <div class="video-card">
+            <video autoplay loop muted playsinline controls>
+                <source src="https://github.com/user-attachments/assets/2bb100e7-fb48-43c8-8144-963cec280de9" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </section>
 

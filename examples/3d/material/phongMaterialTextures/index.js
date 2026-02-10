@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Phong Material Textures 예제
@@ -71,7 +71,7 @@ const renderTestPane = async (redGPUContext) => {
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext);
 }
 

@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
 
 // 1. Create and append a canvas
 const canvas = document.createElement('canvas');
@@ -83,9 +83,9 @@ RedGPU.init(
  * @param {RedGPU.Material.PhongMaterial} material
  */
 async function createTest(redGPUContext, scene, material) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
 
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext);
 
     const maxNum = redGPUContext.detector.isMobile ? 1000 : 5000;

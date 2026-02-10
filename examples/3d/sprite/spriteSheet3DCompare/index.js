@@ -6,7 +6,7 @@
  * [EN] Demonstrates the difference between World Size (worldSize) and fixed Pixel Size (pixelSize) modes.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -89,8 +89,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 
 const renderTestPane = async (redGPUContext, worldSprite, pixelSprite) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
 
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
