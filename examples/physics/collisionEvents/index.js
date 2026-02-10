@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1770698056099";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770698056099";
+import * as RedGPU from "../../../dist/index.js?t=1770699661827";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770699661827";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -142,8 +142,8 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, createBall, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770698056099");
+	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770699661827');
+	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770699661827");
 	setDebugButtons(RedGPU, redGPUContext)
 	const pane = new Pane();
 	pane.addButton({ title: 'Spawn Ball' }).on('click', () => createBall((Math.random() * 2) - 1, 10, (Math.random() * 2) - 1));

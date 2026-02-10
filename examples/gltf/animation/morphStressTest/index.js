@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
+import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
 
 /**
  * [KO] Morph Stress Test 예제
@@ -61,11 +61,11 @@ function loadGLTF(view, url) {
  * @param {RedGPU.Display.View3D} targetView
  */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770699661827');
     const {
         createIblHelper,
         setDebugButtons
-    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1770698056099');
+    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1770699661827');
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     createIblHelper(pane, targetView, RedGPU);

@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
+import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
 
 /**
  * [KO] Max Anisotropy 예제
@@ -50,7 +50,7 @@ const renderTestPane = async (redGPUContext, scene) => {
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770699661827");
     setDebugButtons(RedGPU, redGPUContext);
     const maxAnisotropyValues = [1, 8, 16];
     const spacing = 105;

@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
+import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
 
 /**
  * [KO] Point Light 예제
@@ -98,9 +98,9 @@ const createSampleMeshes = (redGPUContext, scene) => {
  * @param {RedGPU.Light.PointLight} light
  */
 const renderTestPaneWithLightControl = async (redGPUContext, light) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770699661827');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770699661827");
     setDebugButtons(RedGPU, redGPUContext);
     const lightConfig = {
         x: light.position[0],

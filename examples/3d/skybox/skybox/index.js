@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
+import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
 
 /**
  * [KO] Skybox 예제
@@ -65,13 +65,13 @@ const createSkybox = (redGPUContext) => {
  * @param {RedGPU.Display.View3D} targetView
  */
 const renderTestPane = async (targetView) => {
-    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099" );
+    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770699661827" );
     const pane = new Pane();
     const {
         createFieldOfView,
         createSkyBoxHelper,
         setDebugButtons
-    } = await import( "../../../exampleHelper/createExample/panes/index.js?t=1770698056099" );
+    } = await import( "../../../exampleHelper/createExample/panes/index.js?t=1770699661827" );
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera)
     createSkyBoxHelper(pane, targetView)
