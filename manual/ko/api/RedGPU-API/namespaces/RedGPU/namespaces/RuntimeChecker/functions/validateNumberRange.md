@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: validateNumberRange()
 
-> **validateNumberRange**(`value`, `minRange`, `maxRange`): `boolean`
+> **validateNumberRange**(`value`, `minRange?`, `maxRange?`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/runtimeChecker/validateFunc/validateNumberRange.ts#L32)
+Defined in: [src/runtimeChecker/validateFunc/validateNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/runtimeChecker/validateFunc/validateNumberRange.ts#L32)
 
 주어진 값이 지정된 범위 내의 숫자인지 검증합니다.
 

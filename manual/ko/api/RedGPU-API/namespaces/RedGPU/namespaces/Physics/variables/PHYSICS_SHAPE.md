@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **PHYSICS\_SHAPE**: `object`
 
-Defined in: [src/physics/PhysicsShape.ts:13](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/PhysicsShape.ts#L13)
+Defined in: [src/physics/PhysicsShape.ts:13](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/PhysicsShape.ts#L13)
 
 **`Experimental`**
 
@@ -24,9 +24,9 @@ Defined in: [src/physics/PhysicsShape.ts:13](https://github.com/redcamel/RedGPU/
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="box"></a> `BOX` | `"box"` | `'box'` | 박스 형태의 충돌체
-| <a id="capsule"></a> `CAPSULE` | `"capsule"` | `'capsule'` | 캡슐 형태의 충돌체
-| <a id="cylinder"></a> `CYLINDER` | `"cylinder"` | `'cylinder'` | 원기둥 형태의 충돌체
-| <a id="heightfield"></a> `HEIGHTFIELD` | `"heightfield"` | `'heightfield'` | 높이맵 형태의 충돌체 (지형 등에 사용)
-| <a id="mesh"></a> `MESH` | `"mesh"` | `'mesh'` | 임의의 메시 형태의 충돌체 (Trimesh)
-| <a id="sphere"></a> `SPHERE` | `"sphere"` | `'sphere'` | 구 형태의 충돌체
+| <a id="property-box"></a> `BOX` | `"box"` | `'box'` | 박스 형태의 충돌체
+| <a id="property-capsule"></a> `CAPSULE` | `"capsule"` | `'capsule'` | 캡슐 형태의 충돌체
+| <a id="property-cylinder"></a> `CYLINDER` | `"cylinder"` | `'cylinder'` | 원기둥 형태의 충돌체
+| <a id="property-heightfield"></a> `HEIGHTFIELD` | `"heightfield"` | `'heightfield'` | 높이맵 형태의 충돌체 (지형 등에 사용)
+| <a id="property-mesh"></a> `MESH` | `"mesh"` | `'mesh'` | 임의의 메시 형태의 충돌체 (Trimesh)
+| <a id="property-sphere"></a> `SPHERE` | `"sphere"` | `'sphere'` | 구 형태의 충돌체

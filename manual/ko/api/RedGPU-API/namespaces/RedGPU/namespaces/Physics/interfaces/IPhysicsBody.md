@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: IPhysicsBody
 
-Defined in: [src/physics/IPhysicsBody.ts:18](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/IPhysicsBody.ts#L18)
+Defined in: [src/physics/IPhysicsBody.ts:18](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/IPhysicsBody.ts#L18)
 
 **`Experimental`**
 
@@ -27,7 +27,7 @@ Defined in: [src/physics/IPhysicsBody.ts:18](https://github.com/redcamel/RedGPU/
 
 > **nativeBody**: `any`
 
-Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/IPhysicsBody.ts#L26)
+Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/IPhysicsBody.ts#L26)
 
 **`Experimental`**
 
@@ -43,7 +43,7 @@ Defined in: [src/physics/IPhysicsBody.ts:26](https://github.com/redcamel/RedGPU/
 
 > **position**: [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:37](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/IPhysicsBody.ts#L37)
+Defined in: [src/physics/IPhysicsBody.ts:37](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/IPhysicsBody.ts#L37)
 
 **`Experimental`**
 
@@ -61,7 +61,7 @@ body.position = [0, 10, 0];
 
 > **rotation**: [`quat`](../../Math/type-aliases/quat.md) \| \{ `w`: `number`; `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:48](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/IPhysicsBody.ts#L48)
+Defined in: [src/physics/IPhysicsBody.ts:48](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/IPhysicsBody.ts#L48)
 
 **`Experimental`**
 
@@ -79,7 +79,7 @@ body.rotation = [0, 0, 0, 1];
 
 > **velocity**: [`vec3`](../../Math/type-aliases/vec3.md) \| \{ `x`: `number`; `y`: `number`; `z`: `number`; \}
 
-Defined in: [src/physics/IPhysicsBody.ts:59](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/IPhysicsBody.ts#L59)
+Defined in: [src/physics/IPhysicsBody.ts:59](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/IPhysicsBody.ts#L59)
 
 **`Experimental`**
 
@@ -97,7 +97,7 @@ const velocity = body.velocity;
 
 > **applyImpulse**(`force`): `void`
 
-Defined in: [src/physics/IPhysicsBody.ts:74](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/IPhysicsBody.ts#L74)
+Defined in: [src/physics/IPhysicsBody.ts:74](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/IPhysicsBody.ts#L74)
 
 **`Experimental`**
 
@@ -125,7 +125,7 @@ body.applyImpulse([0, 5, 0]);
 
 > **syncToMesh**(): `void`
 
-Defined in: [src/physics/IPhysicsBody.ts:83](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/IPhysicsBody.ts#L83)
+Defined in: [src/physics/IPhysicsBody.ts:83](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/IPhysicsBody.ts#L83)
 
 **`Experimental`**
 

@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **defineVec2**: (`classObject`, `keyList`) => `void`
 
-Defined in: [src/defineProperty/DefineForFragment.ts:99](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/defineProperty/DefineForFragment.ts#L99)
+Defined in: [src/defineProperty/DefineForFragment.ts:99](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L99)
 
 ## Parameters
 

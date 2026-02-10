@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **GPU\_FILTER\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_FILTER_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/gpuConst/GPU_FILTER_MODE.ts#L10)
 
 텍스처 샘플링 시의 필터링 모드 옵션을 정의하는 상수군입니다.
 
@@ -20,5 +20,5 @@ Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:10](https://github.com/redcamel/R
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="linear"></a> `LINEAR` | `"linear"` | `'linear'` | 주변 텍셀 값들을 선형 보간하여 사용합니다.
-| <a id="nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | 가장 가까운 텍셀의 값을 사용합니다.
+| <a id="property-linear"></a> `LINEAR` | `"linear"` | `'linear'` | 주변 텍셀 값들을 선형 보간하여 사용합니다.
+| <a id="property-nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | 가장 가까운 텍셀의 값을 사용합니다.

@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: OrbitController
 
-Defined in: [src/camera/controller/OrbitController.ts:34](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L34)
+Defined in: [src/camera/controller/OrbitController.ts:34](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L34)
 
 
 Orbital camera controller that rotates around a specific point.
@@ -36,7 +36,7 @@ controller.pan = 45;
 
 > **new OrbitController**(`redGPUContext`): `OrbitController`
 
-Defined in: [src/camera/controller/OrbitController.ts:71](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L71)
+Defined in: [src/camera/controller/OrbitController.ts:71](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L71)
 
 
 Creates an instance of OrbitController.
@@ -68,7 +68,7 @@ const controller = new RedGPU.OrbitController(redGPUContext);
 
 > **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L138)
+Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L138)
 
 
 Returns the camera controlled by this controller.
@@ -92,7 +92,7 @@ Controlled camera (PerspectiveCamera or OrthographicCamera)
 
 > **get** **centerX**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:105](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L105)
+Defined in: [src/camera/controller/OrbitController.ts:105](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L105)
 
 
 Gets the X-axis coordinate of the rotation center.
@@ -108,7 +108,7 @@ Center point X-axis coordinate
 
 > **set** **centerX**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:117](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L117)
+Defined in: [src/camera/controller/OrbitController.ts:117](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L117)
 
 
 Sets the X-axis coordinate of the rotation center.
@@ -131,7 +131,7 @@ Sets the X-axis coordinate of the rotation center.
 
 > **get** **centerY**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:129](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L129)
+Defined in: [src/camera/controller/OrbitController.ts:129](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L129)
 
 
 Gets the Y-axis coordinate of the rotation center.
@@ -147,7 +147,7 @@ Center point Y-axis coordinate
 
 > **set** **centerY**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:141](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L141)
+Defined in: [src/camera/controller/OrbitController.ts:141](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L141)
 
 
 Sets the Y-axis coordinate of the rotation center.
@@ -170,7 +170,7 @@ Sets the Y-axis coordinate of the rotation center.
 
 > **get** **centerZ**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:153](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L153)
+Defined in: [src/camera/controller/OrbitController.ts:153](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L153)
 
 
 Gets the Z-axis coordinate of the rotation center.
@@ -186,7 +186,7 @@ Center point Z-axis coordinate
 
 > **set** **centerZ**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:165](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L165)
+Defined in: [src/camera/controller/OrbitController.ts:165](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L165)
 
 
 Sets the Z-axis coordinate of the rotation center.
@@ -209,7 +209,7 @@ Sets the Z-axis coordinate of the rotation center.
 
 > **get** **distance**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:178](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L178)
+Defined in: [src/camera/controller/OrbitController.ts:178](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L178)
 
 
 Gets the distance from the center point to the camera.
@@ -225,7 +225,7 @@ Distance value
 
 > **set** **distance**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:190](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L190)
+Defined in: [src/camera/controller/OrbitController.ts:190](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L190)
 
 
 Sets the distance from the center point to the camera.
@@ -248,7 +248,7 @@ Sets the distance from the center point to the camera.
 
 > **get** **distanceInterpolation**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:228](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L228)
+Defined in: [src/camera/controller/OrbitController.ts:228](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L228)
 
 
 Gets the distance interpolation factor.
@@ -264,7 +264,7 @@ Distance interpolation factor (0.01 ~ 1)
 
 > **set** **distanceInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:240](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L240)
+Defined in: [src/camera/controller/OrbitController.ts:240](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L240)
 
 
 Sets the distance interpolation factor. Lower values for smoother zoom movement.
@@ -287,7 +287,7 @@ Sets the distance interpolation factor. Lower values for smoother zoom movement.
 
 > **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L187)
+Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L187)
 
 **`Internal`**
 
@@ -313,7 +313,7 @@ Hovered View or null
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L233)
+Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L233)
 
 **`Internal`**
 
@@ -339,7 +339,7 @@ Whether it is the keyboard active controller
 
 > **get** **keyboardActiveView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L200)
+Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L200)
 
 **`Internal`**
 
@@ -357,7 +357,7 @@ Keyboard active View or null
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L213)
+Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L213)
 
 **`Internal`**
 
@@ -386,7 +386,7 @@ Sets the View with active keyboard input.
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L246)
+Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L246)
 
 **`Internal`**
 
@@ -404,7 +404,7 @@ Processing status
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L259)
+Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L259)
 
 **`Internal`**
 
@@ -433,7 +433,7 @@ Sets whether keyboard input has been processed in this frame.
 
 > **get** **maxDistance**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:278](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L278)
+Defined in: [src/camera/controller/OrbitController.ts:278](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L278)
 
 
 Gets the maximum zoom distance.
@@ -449,7 +449,7 @@ Maximum distance
 
 > **set** **maxDistance**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:290](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L290)
+Defined in: [src/camera/controller/OrbitController.ts:290](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L290)
 
 
 Sets the maximum zoom distance.
@@ -472,7 +472,7 @@ Sets the maximum zoom distance.
 
 > **get** **maxTilt**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:429](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L429)
+Defined in: [src/camera/controller/OrbitController.ts:429](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L429)
 
 
 Gets the maximum tilt angle.
@@ -488,7 +488,7 @@ Maximum tilt angle
 
 > **set** **maxTilt**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:441](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L441)
+Defined in: [src/camera/controller/OrbitController.ts:441](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L441)
 
 
 Sets the maximum tilt angle.
@@ -511,7 +511,7 @@ Sets the maximum tilt angle.
 
 > **get** **minDistance**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:253](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L253)
+Defined in: [src/camera/controller/OrbitController.ts:253](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L253)
 
 
 Gets the minimum zoom distance.
@@ -527,7 +527,7 @@ Minimum distance
 
 > **set** **minDistance**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:265](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L265)
+Defined in: [src/camera/controller/OrbitController.ts:265](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L265)
 
 
 Sets the minimum zoom distance.
@@ -550,7 +550,7 @@ Sets the minimum zoom distance.
 
 > **get** **minTilt**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:404](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L404)
+Defined in: [src/camera/controller/OrbitController.ts:404](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L404)
 
 
 Gets the minimum tilt angle.
@@ -566,7 +566,7 @@ Minimum tilt angle
 
 > **set** **minTilt**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:416](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L416)
+Defined in: [src/camera/controller/OrbitController.ts:416](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L416)
 
 
 Sets the minimum tilt angle.
@@ -589,7 +589,7 @@ Sets the minimum tilt angle.
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L101)
+Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L101)
 
 
 Returns the name of the controller.
@@ -605,7 +605,7 @@ Controller name
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L114)
+Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L114)
 
 
 Sets the name of the controller.
@@ -632,7 +632,7 @@ Sets the name of the controller.
 
 > **get** **pan**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:355](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L355)
+Defined in: [src/camera/controller/OrbitController.ts:355](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L355)
 
 
 Gets the camera's pan (horizontal rotation) angle. (Unit: degrees)
@@ -648,7 +648,7 @@ Pan angle value
 
 > **set** **pan**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:367](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L367)
+Defined in: [src/camera/controller/OrbitController.ts:367](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L367)
 
 
 Sets the camera's pan (horizontal rotation) angle. (Unit: degrees)
@@ -671,7 +671,7 @@ Sets the camera's pan (horizontal rotation) angle. (Unit: degrees)
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L126)
+Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L126)
 
 
 Returns the RedGPU context.
@@ -695,7 +695,7 @@ RedGPU context
 
 > **get** **rotationInterpolation**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:329](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L329)
+Defined in: [src/camera/controller/OrbitController.ts:329](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L329)
 
 
 Gets the rotation interpolation factor.
@@ -711,7 +711,7 @@ Rotation interpolation factor (0.01 ~ 1)
 
 > **set** **rotationInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:341](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L341)
+Defined in: [src/camera/controller/OrbitController.ts:341](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L341)
 
 
 Sets the rotation interpolation factor. Lower values for smoother rotation.
@@ -734,7 +734,7 @@ Sets the rotation interpolation factor. Lower values for smoother rotation.
 
 > **get** **speedDistance**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:203](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L203)
+Defined in: [src/camera/controller/OrbitController.ts:203](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L203)
 
 
 Gets the distance adjustment speed.
@@ -750,7 +750,7 @@ Distance change speed
 
 > **set** **speedDistance**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:215](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L215)
+Defined in: [src/camera/controller/OrbitController.ts:215](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L215)
 
 
 Sets the distance adjustment speed. Higher values for faster zoom speed.
@@ -773,7 +773,7 @@ Sets the distance adjustment speed. Higher values for faster zoom speed.
 
 > **get** **speedRotation**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:304](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L304)
+Defined in: [src/camera/controller/OrbitController.ts:304](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L304)
 
 
 Gets the rotation speed.
@@ -789,7 +789,7 @@ Rotation speed value
 
 > **set** **speedRotation**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:316](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L316)
+Defined in: [src/camera/controller/OrbitController.ts:316](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L316)
 
 
 Sets the rotation speed. Higher values for faster rotation speed.
@@ -812,7 +812,7 @@ Sets the rotation speed. Higher values for faster rotation speed.
 
 > **get** **tilt**(): `number`
 
-Defined in: [src/camera/controller/OrbitController.ts:379](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L379)
+Defined in: [src/camera/controller/OrbitController.ts:379](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L379)
 
 
 Gets the camera's tilt (vertical rotation) angle. (Unit: degrees, Range: -90 ~ 90)
@@ -828,7 +828,7 @@ Tilt angle value
 
 > **set** **tilt**(`value`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:391](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L391)
+Defined in: [src/camera/controller/OrbitController.ts:391](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L391)
 
 
 Sets the camera's tilt (vertical rotation) angle. (Unit: degrees)
@@ -851,7 +851,7 @@ Sets the camera's tilt (vertical rotation) angle. (Unit: degrees)
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L150)
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L150)
 
 
 Gets the camera's current world X coordinate.
@@ -875,7 +875,7 @@ X coordinate
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L162)
+Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L162)
 
 
 Gets the camera's current world Y coordinate.
@@ -899,7 +899,7 @@ Y coordinate
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L174)
+Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L174)
 
 
 Gets the camera's current world Z coordinate.
@@ -921,7 +921,7 @@ Z coordinate
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L323)
+Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L323)
 
 
 Checks for keyboard input and sets the active View.
@@ -956,7 +956,7 @@ True if keyboard input processing is possible, otherwise false
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L267)
+Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L267)
 
 
 Destroys the controller and removes event listeners.
@@ -975,7 +975,7 @@ Destroys the controller and removes event listeners.
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L407)
+Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L407)
 
 **`Internal`**
 
@@ -1005,7 +1005,7 @@ Corresponding View or null
 
 > **fitMeshToScreenCenter**(`mesh`, `view`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:474](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L474)
+Defined in: [src/camera/controller/OrbitController.ts:474](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L474)
 
 
 Automatically adjusts the camera distance so that the mesh fills the screen center.
@@ -1032,7 +1032,7 @@ controller.fitMeshToScreenCenter(mesh, view);
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L370)
+Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L370)
 
 **`Internal`**
 
@@ -1055,8 +1055,8 @@ Gets the event coordinates on the canvas.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L390) |
-| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/core/AController.ts#L391) |
+| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L390) |
+| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L391) |
 
 #### Inherited from
 
@@ -1068,7 +1068,7 @@ Gets the event coordinates on the canvas.
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/camera/controller/OrbitController.ts:542](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/controller/OrbitController.ts#L542)
+Defined in: [src/camera/controller/OrbitController.ts:542](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/OrbitController.ts#L542)
 
 
 Updates the orbit camera every frame.

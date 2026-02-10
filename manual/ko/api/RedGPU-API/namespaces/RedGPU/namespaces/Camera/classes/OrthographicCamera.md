@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: OrthographicCamera
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:23](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L23)
+Defined in: [src/camera/camera/OrthographicCamera.ts:23](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L23)
 
 직교 투영을 사용하는 카메라입니다.
 
@@ -33,7 +33,7 @@ camera.right = 20;
 
 > **new OrthographicCamera**(): `OrthographicCamera`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:87](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L87)
+Defined in: [src/camera/camera/OrthographicCamera.ts:87](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L87)
 
 OrthographicCamera 인스턴스를 생성합니다.
 
@@ -59,7 +59,7 @@ const camera = new RedGPU.OrthographicCamera();
 
 > **get** **bottom**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:126](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L126)
+Defined in: [src/camera/camera/OrthographicCamera.ts:126](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L126)
 
 투영 하단 값을 반환합니다.
 
@@ -75,7 +75,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:126](https://github.com/red
 
 > **set** **bottom**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:138](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L138)
+Defined in: [src/camera/camera/OrthographicCamera.ts:138](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L138)
 
 투영 하단 값을 설정합니다.
 
@@ -98,7 +98,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:138](https://github.com/red
 
 > **get** **farClipping**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:245](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L245)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:245](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L245)
 
 원평면(far) 거리를 반환합니다.
 
@@ -114,7 +114,7 @@ Defined in: [src/camera/camera/PerspectiveCamera.ts:245](https://github.com/redc
 
 > **set** **farClipping**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:257](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L257)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:257](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L257)
 
 원평면(far) 거리를 설정합니다.
 
@@ -141,7 +141,7 @@ Defined in: [src/camera/camera/PerspectiveCamera.ts:257](https://github.com/redc
 
 > **get** **fieldOfView**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:195](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L195)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:195](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L195)
 
 시야각(FOV)을 반환합니다. (도)
 
@@ -157,7 +157,7 @@ Defined in: [src/camera/camera/PerspectiveCamera.ts:195](https://github.com/redc
 
 > **set** **fieldOfView**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:207](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L207)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:207](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L207)
 
 시야각(FOV)을 설정합니다. (도)
 
@@ -184,7 +184,7 @@ Defined in: [src/camera/camera/PerspectiveCamera.ts:207](https://github.com/redc
 
 > **get** **left**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:151](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L151)
+Defined in: [src/camera/camera/OrthographicCamera.ts:151](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L151)
 
 투영 좌측 값을 반환합니다.
 
@@ -200,7 +200,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:151](https://github.com/red
 
 > **set** **left**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:163](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L163)
+Defined in: [src/camera/camera/OrthographicCamera.ts:163](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L163)
 
 투영 좌측 값을 설정합니다.
 
@@ -223,7 +223,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:163](https://github.com/red
 
 > **get** **maxZoom**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:251](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L251)
+Defined in: [src/camera/camera/OrthographicCamera.ts:251](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L251)
 
 최대 줌 레벨을 반환합니다.
 
@@ -239,7 +239,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:251](https://github.com/red
 
 > **set** **maxZoom**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:263](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L263)
+Defined in: [src/camera/camera/OrthographicCamera.ts:263](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L263)
 
 최대 줌 레벨을 설정합니다.
 
@@ -262,7 +262,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:263](https://github.com/red
 
 > **get** **minZoom**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:226](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L226)
+Defined in: [src/camera/camera/OrthographicCamera.ts:226](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L226)
 
 최소 줌 레벨을 반환합니다.
 
@@ -278,7 +278,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:226](https://github.com/red
 
 > **set** **minZoom**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:238](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L238)
+Defined in: [src/camera/camera/OrthographicCamera.ts:238](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L238)
 
 최소 줌 레벨을 설정합니다.
 
@@ -301,7 +301,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:238](https://github.com/red
 
 > **get** **modelMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:295](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L295)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:295](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L295)
 
 모델 행렬을 반환합니다.
 
@@ -325,7 +325,7 @@ Defined in: [src/camera/camera/PerspectiveCamera.ts:295](https://github.com/redc
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:276](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L276)
+Defined in: [src/camera/camera/OrthographicCamera.ts:276](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L276)
 
 카메라 이름을 반환합니다.
 
@@ -341,7 +341,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:276](https://github.com/red
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:289](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L289)
+Defined in: [src/camera/camera/OrthographicCamera.ts:289](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L289)
 
 카메라 이름을 설정합니다.
 
@@ -368,7 +368,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:289](https://github.com/red
 
 > **get** **nearClipping**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:220](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L220)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:220](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L220)
 
 근평면(near) 거리를 반환합니다.
 
@@ -384,7 +384,7 @@ Defined in: [src/camera/camera/PerspectiveCamera.ts:220](https://github.com/redc
 
 > **set** **nearClipping**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:232](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L232)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:232](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L232)
 
 근평면(near) 거리를 설정합니다.
 
@@ -411,7 +411,7 @@ Defined in: [src/camera/camera/PerspectiveCamera.ts:232](https://github.com/redc
 
 > **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:382](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L382)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:382](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L382)
 
 카메라 위치 (x, y, z)를 반환합니다.
 
@@ -435,7 +435,7 @@ Defined in: [src/camera/camera/PerspectiveCamera.ts:382](https://github.com/redc
 
 > **get** **right**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:176](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L176)
+Defined in: [src/camera/camera/OrthographicCamera.ts:176](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L176)
 
 투영 우측 값을 반환합니다.
 
@@ -451,7 +451,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:176](https://github.com/red
 
 > **set** **right**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:188](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L188)
+Defined in: [src/camera/camera/OrthographicCamera.ts:188](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L188)
 
 투영 우측 값을 설정합니다.
 
@@ -474,7 +474,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:188](https://github.com/red
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:123](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L123)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:123](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L123)
 
 X축 회전값을 반환합니다. (라디안)
 
@@ -490,7 +490,7 @@ X축 회전값
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:135](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L135)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:135](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L135)
 
 X축 회전값을 설정합니다. (라디안)
 
@@ -517,7 +517,7 @@ X축 회전값을 설정합니다. (라디안)
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:147](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L147)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:147](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L147)
 
 Y축 회전값을 반환합니다. (라디안)
 
@@ -533,7 +533,7 @@ Y축 회전값
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:159](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L159)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:159](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L159)
 
 Y축 회전값을 설정합니다. (라디안)
 
@@ -560,7 +560,7 @@ Y축 회전값을 설정합니다. (라디안)
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:171](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L171)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:171](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L171)
 
 Z축 회전값을 반환합니다. (라디안)
 
@@ -576,7 +576,7 @@ Z축 회전값
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:183](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L183)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:183](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L183)
 
 Z축 회전값을 설정합니다. (라디안)
 
@@ -603,7 +603,7 @@ Z축 회전값을 설정합니다. (라디안)
 
 > **get** **top**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:101](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L101)
+Defined in: [src/camera/camera/OrthographicCamera.ts:101](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L101)
 
 투영 상단 값을 반환합니다.
 
@@ -619,7 +619,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:101](https://github.com/red
 
 > **set** **top**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:113](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L113)
+Defined in: [src/camera/camera/OrthographicCamera.ts:113](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L113)
 
 투영 상단 값을 설정합니다.
 
@@ -642,7 +642,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:113](https://github.com/red
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:307](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L307)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:307](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L307)
 
 X 좌표를 반환합니다.
 
@@ -658,7 +658,7 @@ X 좌표
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:319](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L319)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:319](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L319)
 
 X 좌표를 설정합니다.
 
@@ -685,7 +685,7 @@ X 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:332](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L332)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:332](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L332)
 
 Y 좌표를 반환합니다.
 
@@ -701,7 +701,7 @@ Y 좌표
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:344](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L344)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:344](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L344)
 
 Y 좌표를 설정합니다.
 
@@ -728,7 +728,7 @@ Y 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:357](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L357)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:357](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L357)
 
 Z 좌표를 반환합니다.
 
@@ -744,7 +744,7 @@ Z 좌표
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:369](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L369)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:369](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L369)
 
 Z 좌표를 설정합니다.
 
@@ -771,7 +771,7 @@ Z 좌표를 설정합니다.
 
 > **get** **zoom**(): `number`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:201](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L201)
+Defined in: [src/camera/camera/OrthographicCamera.ts:201](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L201)
 
 줌 레벨을 반환합니다.
 
@@ -787,7 +787,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:201](https://github.com/red
 
 > **set** **zoom**(`value`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:213](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L213)
+Defined in: [src/camera/camera/OrthographicCamera.ts:213](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L213)
 
 줌 레벨을 설정합니다.
 
@@ -808,7 +808,7 @@ Defined in: [src/camera/camera/OrthographicCamera.ts:213](https://github.com/red
 
 > **lookAt**(`x`, `y`, `z`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:436](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L436)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:436](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L436)
 
 카메라가 특정 좌표를 바라보도록 회전시킵니다.
 
@@ -840,7 +840,7 @@ camera.lookAt(0, 0, 0);
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:406](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/PerspectiveCamera.ts#L406)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:406](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L406)
 
 카메라 위치를 설정합니다.
 
@@ -873,7 +873,7 @@ camera.setPosition([10, 5, 20]);
 
 > **setZoom**(`zoom`): `void`
 
-Defined in: [src/camera/camera/OrthographicCamera.ts:306](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/camera/camera/OrthographicCamera.ts#L306)
+Defined in: [src/camera/camera/OrthographicCamera.ts:306](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/OrthographicCamera.ts#L306)
 
 줌을 설정합니다.
 

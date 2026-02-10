@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: createMeshVertexUniformBuffers()
 
-> **createMeshVertexUniformBuffers**(`mesh`, `skin`): `void`
+> **createMeshVertexUniformBuffers**(`mesh`, `skin?`): `void`
 
-Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:13](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L13)
+Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:13](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L13)
 
 createMeshVertexUniformBuffers
 
@@ -16,8 +16,8 @@ createMeshVertexUniformBuffers
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `mesh` | [`Mesh`](../../../classes/Mesh.md) | `undefined` |  |
-| `skin` | `boolean` | `false` |  |
+| `mesh` | [`Mesh`](../../../classes/Mesh.md) | `undefined` | - |
+| `skin` | `boolean` | `false` | - |
 
 ## Returns
 

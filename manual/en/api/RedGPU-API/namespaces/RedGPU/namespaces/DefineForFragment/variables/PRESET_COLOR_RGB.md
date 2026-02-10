@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,12 +8,12 @@
 
 > **PRESET\_COLOR\_RGB**: `object`
 
-Defined in: [src/defineProperty/DefineForFragment.ts:117](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/defineProperty/DefineForFragment.ts#L117)
+Defined in: [src/defineProperty/DefineForFragment.ts:117](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L117)
 
 ## Type Declaration
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="color"></a> `COLOR` | `string` | `'color'` | [src/defineProperty/DefineForFragment.ts:62](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/defineProperty/DefineForFragment.ts#L62) |
-| <a id="emissive_color"></a> `EMISSIVE_COLOR` | `string` | `'emissiveColor'` | [src/defineProperty/DefineForFragment.ts:63](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/defineProperty/DefineForFragment.ts#L63) |
-| <a id="specular_color"></a> `SPECULAR_COLOR` | `string` | `'specularColor'` | [src/defineProperty/DefineForFragment.ts:64](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/defineProperty/DefineForFragment.ts#L64) |
+| <a id="property-color"></a> `COLOR` | `string` | `'color'` | [src/defineProperty/DefineForFragment.ts:62](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L62) |
+| <a id="property-emissive_color"></a> `EMISSIVE_COLOR` | `string` | `'emissiveColor'` | [src/defineProperty/DefineForFragment.ts:63](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L63) |
+| <a id="property-specular_color"></a> `SPECULAR_COLOR` | `string` | `'specularColor'` | [src/defineProperty/DefineForFragment.ts:64](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L64) |

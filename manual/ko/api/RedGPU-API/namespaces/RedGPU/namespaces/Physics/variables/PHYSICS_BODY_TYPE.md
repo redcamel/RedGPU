@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **PHYSICS\_BODY\_TYPE**: `object`
 
-Defined in: [src/physics/PhysicsBodyType.ts:13](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/physics/PhysicsBodyType.ts#L13)
+Defined in: [src/physics/PhysicsBodyType.ts:13](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/physics/PhysicsBodyType.ts#L13)
 
 **`Experimental`**
 
@@ -24,8 +24,8 @@ Defined in: [src/physics/PhysicsBodyType.ts:13](https://github.com/redcamel/RedG
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="dynamic"></a> `DYNAMIC` | `"dynamic"` | `'dynamic'` | 물리 법칙(중력, 충돌 등)의 영향을 받는 동적 바디
-| <a id="kinematic"></a> `KINEMATIC` | `"kinematic"` | `'kinematic'` | 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디 (위치 기반)
-| <a id="kinematic_position"></a> `KINEMATIC_POSITION` | `"kinematicPosition"` | `'kinematicPosition'` | 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디 (위치 기반)
-| <a id="kinematic_velocity"></a> `KINEMATIC_VELOCITY` | `"kinematicVelocity"` | `'kinematicVelocity'` | 물리 법칙의 영향은 받지 않으나 속도로 움직임을 제어하는 바디
-| <a id="static"></a> `STATIC` | `"static"` | `'static'` | 움직이지 않고 고정된 정적 바디
+| <a id="property-dynamic"></a> `DYNAMIC` | `"dynamic"` | `'dynamic'` | 물리 법칙(중력, 충돌 등)의 영향을 받는 동적 바디
+| <a id="property-kinematic"></a> `KINEMATIC` | `"kinematic"` | `'kinematic'` | 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디 (위치 기반)
+| <a id="property-kinematic_position"></a> `KINEMATIC_POSITION` | `"kinematicPosition"` | `'kinematicPosition'` | 물리 법칙의 영향은 받지 않으나 코드로 직접 움직임을 제어하는 바디 (위치 기반)
+| <a id="property-kinematic_velocity"></a> `KINEMATIC_VELOCITY` | `"kinematicVelocity"` | `'kinematicVelocity'` | 물리 법칙의 영향은 받지 않으나 속도로 움직임을 제어하는 바디
+| <a id="property-static"></a> `STATIC` | `"static"` | `'static'` | 움직이지 않고 고정된 정적 바디

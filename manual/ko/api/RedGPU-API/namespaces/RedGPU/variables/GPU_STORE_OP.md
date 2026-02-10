@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **GPU\_STORE\_OP**: `object`
 
-Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_STORE_OP.ts#L10)
+Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/gpuConst/GPU_STORE_OP.ts#L10)
 
 렌더 패스 종료 시 어태치먼트의 내용을 저장하는 방식을 정의하는 상수군입니다.
 
@@ -20,5 +20,5 @@ Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedG
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="discard"></a> `DISCARD` | `"discard"` | `'discard'` | 렌더링된 결과물을 저장하지 않고 버립니다.
-| <a id="store"></a> `STORE` | `"store"` | `'store'` | 렌더링된 결과물을 어태치먼트에 저장합니다.
+| <a id="property-discard"></a> `DISCARD` | `"discard"` | `'discard'` | 렌더링된 결과물을 저장하지 않고 버립니다.
+| <a id="property-store"></a> `STORE` | `"store"` | `'store'` | 렌더링된 결과물을 어태치먼트에 저장합니다.

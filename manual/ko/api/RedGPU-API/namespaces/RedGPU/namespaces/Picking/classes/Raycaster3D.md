@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: Raycaster3D
 
-Defined in: [src/picking/Raycaster3D.ts:22](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/Raycaster3D.ts#L22)
+Defined in: [src/picking/Raycaster3D.ts:22](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/picking/Raycaster3D.ts#L22)
 
 3D 공간에서 광선(Ray)을 투사하여 객체와의 교차를 검사하는 클래스입니다.
 
@@ -27,7 +27,7 @@ const intersects = raycaster.intersectObjects(scene.children);
 
 > **new Raycaster3D**(): `Raycaster3D`
 
-Defined in: [src/picking/Raycaster3D.ts:55](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/Raycaster3D.ts#L55)
+Defined in: [src/picking/Raycaster3D.ts:55](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/picking/Raycaster3D.ts#L55)
 
 Raycaster3D 인스턴스를 생성합니다.
 
@@ -42,7 +42,7 @@ Raycaster3D 인스턴스를 생성합니다.
 
 > **far**: `number` = `Infinity`
 
-Defined in: [src/picking/Raycaster3D.ts:41](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/Raycaster3D.ts#L41)
+Defined in: [src/picking/Raycaster3D.ts:41](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/picking/Raycaster3D.ts#L41)
 
 교차 검사 시 고려할 최대 거리 (카메라로부터)
 
@@ -59,7 +59,7 @@ Infinity
 
 > **near**: `number` = `0`
 
-Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/Raycaster3D.ts#L34)
+Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/picking/Raycaster3D.ts#L34)
 
 교차 검사 시 고려할 최소 거리 (카메라로부터)
 
@@ -76,7 +76,7 @@ Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/b
 
 > `readonly` **ray**: [`Ray`](../../Math/classes/Ray.md)
 
-Defined in: [src/picking/Raycaster3D.ts:27](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/Raycaster3D.ts#L27)
+Defined in: [src/picking/Raycaster3D.ts:27](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/picking/Raycaster3D.ts#L27)
 
 내부적으로 관리되는 광원 객체
 
@@ -85,9 +85,9 @@ Defined in: [src/picking/Raycaster3D.ts:27](https://github.com/redcamel/RedGPU/b
 
 ### intersectObject()
 
-> **intersectObject**(`mesh`, `recursive`): `RayIntersectResult`[]
+> **intersectObject**(`mesh`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster3D.ts:118](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/Raycaster3D.ts#L118)
+Defined in: [src/picking/Raycaster3D.ts:118](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/picking/Raycaster3D.ts#L118)
 
 단일 객체와의 교차 여부를 검사합니다.
 
@@ -115,9 +115,9 @@ const result = raycaster.intersectObject(mesh);
 
 ### intersectObjects()
 
-> **intersectObjects**(`meshes`, `recursive`): `RayIntersectResult`[]
+> **intersectObjects**(`meshes`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster3D.ts:143](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/Raycaster3D.ts#L143)
+Defined in: [src/picking/Raycaster3D.ts:143](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/picking/Raycaster3D.ts#L143)
 
 여러 객체와의 교차 여부를 검사합니다.
 
@@ -147,7 +147,7 @@ const results = raycaster.intersectObjects(scene.children);
 
 > **setFromCamera**(`screenX`, `screenY`, `view`): `void`
 
-Defined in: [src/picking/Raycaster3D.ts:78](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/picking/Raycaster3D.ts#L78)
+Defined in: [src/picking/Raycaster3D.ts:78](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/picking/Raycaster3D.ts#L78)
 
 화면 좌표와 카메라 정보를 기반으로 광선을 설정합니다.
 

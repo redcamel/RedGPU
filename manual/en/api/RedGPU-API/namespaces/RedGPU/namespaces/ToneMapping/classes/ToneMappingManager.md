@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ToneMappingManager
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:31](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L31)
+Defined in: [src/toneMapping/ToneMappingManager.ts:31](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L31)
 
 
 Class that integrates and manages tone mapping, exposure, contrast, and brightness.
@@ -30,7 +30,7 @@ toneMappingManager.exposure = 1.2;
 
 > **new ToneMappingManager**(`view`): `ToneMappingManager`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:46](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L46)
+Defined in: [src/toneMapping/ToneMappingManager.ts:46](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L46)
 
 
 Creates a ToneMappingManager instance. (Internal system only)
@@ -53,7 +53,7 @@ Creates a ToneMappingManager instance. (Internal system only)
 
 > **get** **brightness**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:97](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L97)
+Defined in: [src/toneMapping/ToneMappingManager.ts:97](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L97)
 
 Returns the brightness.
 
@@ -65,7 +65,7 @@ Returns the brightness.
 
 > **set** **brightness**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:102](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L102)
+Defined in: [src/toneMapping/ToneMappingManager.ts:102](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L102)
 
 Sets the brightness. (-1.0 to 1.0, Default: 0.0)
 
@@ -87,7 +87,7 @@ Sets the brightness. (-1.0 to 1.0, Default: 0.0)
 
 > **get** **contrast**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:85](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L85)
+Defined in: [src/toneMapping/ToneMappingManager.ts:85](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L85)
 
 Returns the contrast.
 
@@ -99,7 +99,7 @@ Returns the contrast.
 
 > **set** **contrast**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:90](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L90)
+Defined in: [src/toneMapping/ToneMappingManager.ts:90](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L90)
 
 Sets the contrast. (0.0 to 2.0, Default: 1.0)
 
@@ -121,7 +121,7 @@ Sets the contrast. (0.0 to 2.0, Default: 1.0)
 
 > **get** **exposure**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:73](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L73)
+Defined in: [src/toneMapping/ToneMappingManager.ts:73](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L73)
 
 Returns the exposure value.
 
@@ -133,7 +133,7 @@ Returns the exposure value.
 
 > **set** **exposure**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:78](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L78)
+Defined in: [src/toneMapping/ToneMappingManager.ts:78](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L78)
 
 Sets the exposure value. (Default: 1.0)
 
@@ -155,7 +155,7 @@ Sets the exposure value. (Default: 1.0)
 
 > **get** **mode**(): [`TONE_MAPPING_MODE`](../type-aliases/TONE_MAPPING_MODE.md)
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L58)
+Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L58)
 
 Returns the currently applied tone mapping mode.
 
@@ -167,7 +167,7 @@ Returns the currently applied tone mapping mode.
 
 > **set** **mode**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:63](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L63)
+Defined in: [src/toneMapping/ToneMappingManager.ts:63](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L63)
 
 Sets the tone mapping mode.
 
@@ -189,7 +189,7 @@ Sets the tone mapping mode.
 
 > **get** **toneMapping**(): `AToneMappingEffect`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:52](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L52)
+Defined in: [src/toneMapping/ToneMappingManager.ts:52](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L52)
 
 Returns the currently active tone mapping effect instance.
 
@@ -203,7 +203,7 @@ Returns the currently active tone mapping effect instance.
 
 > **render**(`width`, `height`, `currentTextureView`): `ASinglePassPostEffectResult`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:116](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/toneMapping/ToneMappingManager.ts#L116)
+Defined in: [src/toneMapping/ToneMappingManager.ts:116](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/toneMapping/ToneMappingManager.ts#L116)
 
 
 Renders tone mapping.

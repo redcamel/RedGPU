@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **GPU\_BLEND\_OPERATION**: `object`
 
-Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:10](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_BLEND_OPERATION.ts#L10)
+Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:10](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/gpuConst/GPU_BLEND_OPERATION.ts#L10)
 
 블렌딩 시 사용되는 수학적 연산 옵션을 정의하는 상수군입니다.
 
@@ -20,8 +20,8 @@ Defined in: [src/gpuConst/GPU\_BLEND\_OPERATION.ts:10](https://github.com/redcam
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="add"></a> `ADD` | `"add"` | `"add"` | 소스와 대상 결과를 더합니다.
-| <a id="max"></a> `MAX` | `"max"` | `"max"` | 두 결과 중 큰 값을 선택합니다.
-| <a id="min"></a> `MIN` | `"min"` | `"min"` | 두 결과 중 작은 값을 선택합니다.
-| <a id="reverse_subtract"></a> `REVERSE_SUBTRACT` | `"reverse-subtract"` | `"reverse-subtract"` | 소스 결과에서 대상 결과를 뺍니다.
-| <a id="subtract"></a> `SUBTRACT` | `"subtract"` | `"subtract"` | 대상 결과에서 소스 결과를 뺍니다.
+| <a id="property-add"></a> `ADD` | `"add"` | `"add"` | 소스와 대상 결과를 더합니다.
+| <a id="property-max"></a> `MAX` | `"max"` | `"max"` | 두 결과 중 큰 값을 선택합니다.
+| <a id="property-min"></a> `MIN` | `"min"` | `"min"` | 두 결과 중 작은 값을 선택합니다.
+| <a id="property-reverse_subtract"></a> `REVERSE_SUBTRACT` | `"reverse-subtract"` | `"reverse-subtract"` | 소스 결과에서 대상 결과를 뺍니다.
+| <a id="property-subtract"></a> `SUBTRACT` | `"subtract"` | `"subtract"` | 대상 결과에서 소스 결과를 뺍니다.

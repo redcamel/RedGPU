@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **GPU\_MIPMAP\_FILTER\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L10)
 
 밉맵 레벨 간 샘플링 시의 필터링 모드 옵션을 정의하는 상수군입니다.
 
@@ -20,5 +20,5 @@ Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:10](https://github.com/re
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="linear"></a> `LINEAR` | `"linear"` | `'linear'` | 인접한 두 밉맵 레벨 사이를 선형 보간합니다.
-| <a id="nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | 가장 가까운 밉맵 레벨에서 샘플링합니다.
+| <a id="property-linear"></a> `LINEAR` | `"linear"` | `'linear'` | 인접한 두 밉맵 레벨 사이를 선형 보간합니다.
+| <a id="property-nearest"></a> `NEAREST` | `"nearest"` | `'nearest'` | 가장 가까운 밉맵 레벨에서 샘플링합니다.

@@ -1,4 +1,4 @@
-[**RedGPU API v3.9.1-Alpha**](../../../../README.md)
+[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **GPU\_ADDRESS\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_ADDRESS\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/679a4dd32b59905529e39631a371e5e3eb5fce15/src/gpuConst/GPU_ADDRESS_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_ADDRESS\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/gpuConst/GPU_ADDRESS_MODE.ts#L10)
 
 텍스처 샘플링 및 래핑을 위한 주소 모드 옵션을 정의하는 상수군입니다.
 
@@ -20,6 +20,6 @@ Defined in: [src/gpuConst/GPU\_ADDRESS\_MODE.ts:10](https://github.com/redcamel/
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="clamp_to_edge"></a> `CLAMP_TO_EDGE` | `"clamp-to-edge"` | `'clamp-to-edge'` | 텍스처 좌표를 [0, 1] 범위 내로 클램핑합니다.
-| <a id="mirrored_repeat"></a> `MIRRORED_REPEAT` | `"mirror-repeat"` | `'mirror-repeat'` | 텍스처를 미러링하며 타일 형태로 반복합니다.
-| <a id="repeat"></a> `REPEAT` | `"repeat"` | `'repeat'` | 텍스처를 타일 형태로 반복합니다.
+| <a id="property-clamp_to_edge"></a> `CLAMP_TO_EDGE` | `"clamp-to-edge"` | `'clamp-to-edge'` | 텍스처 좌표를 [0, 1] 범위 내로 클램핑합니다.
+| <a id="property-mirrored_repeat"></a> `MIRRORED_REPEAT` | `"mirror-repeat"` | `'mirror-repeat'` | 텍스처를 미러링하며 타일 형태로 반복합니다.
+| <a id="property-repeat"></a> `REPEAT` | `"repeat"` | `'repeat'` | 텍스처를 타일 형태로 반복합니다.
