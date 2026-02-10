@@ -560,10 +560,8 @@ class OrbitController extends AController {
 		if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
 		const {camera} = this;
 
-		// 팬(Pan) 보간 - 지수적 감쇄 및 최단 경로(Shortest Path) 적용
-		let panDelta = (this.#pan - this.#currentPan) % 360;
-		if (panDelta > 180) panDelta -= 360;
-		if (panDelta < -180) panDelta += 360;
+		// 팬(Pan) 보간 - 지수적 감쇄
+		const panDelta = this.#pan - this.#currentPan;
 
 		if (Math.abs(panDelta) > ROTATION_THRESHOLD) {
 			this.#currentPan += panDelta * (1 - Math.pow(this.#rotationInterpolation, deltaTime));

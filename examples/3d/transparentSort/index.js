@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../dist/index.js?t=1770698056099";
+import * as RedGPU from "../../../dist/index.js?t=1770713934910";
 
 /**
  * [KO] Transparent Sort 예제
@@ -131,9 +131,9 @@ const getRandomHexValue = () => {
  */
 const renderTestPane = async (redGPUContext) => {
     const {Pane} = await import(
-        "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099"
+        "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910"
         );
-    const {setDebugButtons} = await import( "../../exampleHelper/createExample/panes/index.js?t=1770698056099" );
+    const {setDebugButtons} = await import( "../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     const params = {

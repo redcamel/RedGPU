@@ -6,7 +6,7 @@
  * [EN] Demonstrates the usage of SpriteSheet3D in 3D space, including features like billboard and pixel size modes.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
+import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -86,11 +86,11 @@ RedGPU.init(canvas, (redGPUContext) => {
  * [EN] Scene containing the sprites to control
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const {
         setDebugButtons,
         setSeparator
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
 
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
