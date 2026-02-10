@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
+import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Mesh Pivot 예제
@@ -138,8 +138,8 @@ const createPivotMesh = (redGPUContext, targetMesh) => {
  * @param {object} animationConfig
  */
 const renderTestPane = async (redGPUContext, parentMesh, childMesh, animationConfig) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext)
     const pane = new Pane();
 

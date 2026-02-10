@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
+import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Tint Basic (3D) 예제
@@ -70,9 +70,9 @@ RedGPU.init(
  * @param {RedGPU.Display.Mesh} mesh
  */
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099");
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext);
     // Tint 테스트 추가
     const folder = pane.addFolder({title: "Material Tint Test"});

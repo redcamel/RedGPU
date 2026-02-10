@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770697269592";
+import * as RedGPU from "../../../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Mesh Bounding Box 예제
@@ -62,7 +62,7 @@ RedGPU.init(
  * [EN] Sets up test pane buttons.
  */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
+    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext);
 };
 

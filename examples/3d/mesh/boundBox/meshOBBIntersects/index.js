@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770697269592";
+import * as RedGPU from "../../../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Mesh OBB Intersects 예제
@@ -48,7 +48,7 @@ RedGPU.init(
  * [EN] Initializes the test button pane.
  */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
+    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext);
 };
 

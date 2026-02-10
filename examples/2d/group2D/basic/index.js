@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
+import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Group2D 예제
@@ -116,9 +116,9 @@ const createChildSprite2D = (redGPUContext, parent) => {
  * @param {RedGPU.Display.Sprite2D} child
  */
 const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770698056099');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext);
     const maxW = redGPUContext.screenRectObject.width;
     const maxH = redGPUContext.screenRectObject.height;

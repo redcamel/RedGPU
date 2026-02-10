@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
+import * as RedGPU from "../../../../dist/index.js?t=1770698056099";
 
 /**
  * [KO] Mesh LookAt 예제
@@ -59,7 +59,7 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770698056099");
     setDebugButtons(RedGPU, redGPUContext);
 };
 
