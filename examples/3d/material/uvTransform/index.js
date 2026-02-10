@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
 
 /**
  * [KO] UV Transform 예제
@@ -136,8 +136,8 @@ RedGPU.init(
  * [EN] Create UI panel function for test manipulation
  */
 async function renderTestPane(redGPUContext, testTarget) {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
-	const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592');
+	const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
 
 	setDebugButtons(RedGPU, redGPUContext);
 

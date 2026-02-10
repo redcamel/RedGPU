@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
 
 /**
  * [KO] Single View 예제
@@ -70,11 +70,11 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592');
     const {
         setViewListTest,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
     setDebugButtons(RedGPU, redGPUContext)
     const pane = new Pane();
     setViewListTest(pane, redGPUContext.viewList, true);

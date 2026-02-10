@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
 
 /**
  * [KO] 2D Object Tint 예제
@@ -90,9 +90,9 @@ RedGPU.init(
  * @param {RedGPU.Display.Scene} scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
     setDebugButtons(RedGPU, redGPUContext);
     const firstChild = scene.children[0];
     const defaultTint = firstChild ? firstChild.material.tint : {r: 255, g: 255, b: 255, a: 1};

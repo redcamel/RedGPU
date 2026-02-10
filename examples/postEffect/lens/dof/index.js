@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
 
 // 1. Create and append a canvas
 const canvas = document.createElement('canvas');
@@ -207,11 +207,11 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770637396475');
+    const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770697269592');
     createPostEffectLabel('DOF', redGPUContext.detector.isMobile)
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
     setDebugButtons(RedGPU, redGPUContext);
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592');
     const pane = new Pane();
     const effect = targetView.postEffectManager.getEffectAt(0)
 

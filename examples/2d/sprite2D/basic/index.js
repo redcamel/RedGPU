@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../dist/index.js?t=1770697269592";
 
 /**
  * [KO] Sprite2D Basic 예제
@@ -63,11 +63,11 @@ RedGPU.init(
  * @param {RedGPU.Display.Sprite2D} sprite2D
  */
 const renderTestPane = async (redGPUContext, sprite2D) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592');
     const {
         setDebugButtons,
         setRedGPUTest_pane
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     setRedGPUTest_pane(pane, redGPUContext, false);

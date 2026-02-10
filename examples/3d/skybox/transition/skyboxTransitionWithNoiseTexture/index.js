@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770637396475";
+import * as RedGPU from "../../../../../dist/index.js?t=1770697269592";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -100,13 +100,13 @@ const createTexture = (redGPUContext, option) => {
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (targetView, redGPUContext) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770637396475");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770697269592");
     const pane = new Pane();
     const {
         createFieldOfView,
         setSeparator,
         createSkyBoxHelper
-    } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770637396475");
+    } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770697269592");
 
     createFieldOfView(pane, targetView.camera);
     createSkyBoxHelper(pane, targetView);
