@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
+import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 /**
  * [KO] Bitmap Material 예제
@@ -67,11 +67,11 @@ const createSampleMesh = (redGPUContext, scene) => {
  * @param {RedGPU.Display.Mesh} mesh
  */
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770699661827');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const {
         setSeparator,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770699661827");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
 

@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
+import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 /**
  * [KO] World To Local 예제
@@ -56,7 +56,7 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770699661827");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext);
 };
 

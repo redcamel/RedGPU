@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
+import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 /**
  * [KO] Directional Light 예제
@@ -81,9 +81,9 @@ const createSampleMesh = (redGPUContext, scene) => {
  * @param {RedGPU.Light.DirectionalLight} light
  */
 const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770699661827');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770699661827");
+    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext);
     const lightConfig = {
         directionX: light.direction[0],

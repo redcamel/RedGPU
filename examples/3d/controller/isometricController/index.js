@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
+import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 /**
  * [KO] Isometric Controller 예제
@@ -83,10 +83,10 @@ RedGPU.init(
  * @param {RedGPU.Display.Mesh} targetMesh
  */
 const renderTestPane = async (redGPUContext, controller, targetMesh) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770699661827');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const {
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770699661827");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
 
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();

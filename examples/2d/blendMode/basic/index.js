@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770699661827";
+import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 /**
  * [KO] Blend Mode 예제
@@ -208,11 +208,11 @@ function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_
  * @param {RedGPU.Display.Sprite2D} shape
  */
 const renderTestPane = async (redGPUContext, base, shape) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770699661827');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const {
         setRedGPUTest_pane,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770699661827");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     setRedGPUTest_pane(pane, redGPUContext, false);
