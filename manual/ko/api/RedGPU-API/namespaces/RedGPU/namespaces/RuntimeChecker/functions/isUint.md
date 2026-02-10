@@ -8,7 +8,7 @@
 
 > **isUint**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/isFunc/isUint.ts:21](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/runtimeChecker/isFunc/isUint.ts#L21)
+Defined in: [src/runtimeChecker/isFunc/isUint.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/runtimeChecker/isFunc/isUint.ts#L21)
 
 주어진 값이 부호 없는 정수(Unsigned Integer)인지 검사합니다.
 

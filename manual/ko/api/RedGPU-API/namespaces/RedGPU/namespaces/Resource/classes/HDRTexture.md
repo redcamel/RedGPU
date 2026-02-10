@@ -6,7 +6,7 @@
 
 # Class: HDRTexture
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:25](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L25)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:25](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L25)
 
 Radiance HDR(.hdr) 파일을 사용하는 2D 텍스처 클래스입니다.
 
@@ -29,7 +29,7 @@ const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'path/to/image.hdr
 
 > **new HDRTexture**(`redGPUContext`, `src`, `onLoad?`, `onError?`): `HDRTexture`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:60](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L60)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:60](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L60)
 
 HDRTexture 인스턴스를 생성합니다.
 
@@ -66,7 +66,7 @@ const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'assets/hdr/sky.hd
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L57)
 
 캐시 키를 반환합니다.
 
@@ -79,7 +79,7 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L65)
 
 캐시 키를 설정합니다.
 
@@ -106,7 +106,7 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L106)
 
 연관된 GPU 디바이스를 반환합니다.
 
@@ -127,7 +127,7 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:95](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L95)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:95](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L95)
 
 GPUTexture 객체
 
@@ -143,7 +143,7 @@ GPUTexture 객체
 
 > **get** **height**(): `number`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:91](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L91)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:91](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L91)
 
 텍스처 세로 크기
 
@@ -159,7 +159,7 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:91](https://github.com/redc
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L81)
 
 인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
 
@@ -172,7 +172,7 @@ Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L90)
 
 인스턴스의 이름을 설정합니다.
 
@@ -199,7 +199,7 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L114)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -220,7 +220,7 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L73)
 
 리소스 매니저 키를 반환합니다.
 
@@ -241,7 +241,7 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 > **get** **src**(): `string`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:97](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L97)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:97](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L97)
 
 텍스처 소스 경로
 
@@ -253,7 +253,7 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:97](https://github.com/redc
 
 > **set** **src**(`value`): `void`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:107](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L107)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:107](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L107)
 
 텍스처 소스 경로 설정 및 로드를 시작합니다.
 
@@ -276,7 +276,7 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:107](https://github.com/red
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ManagementResourceBase.ts#L45)
 
 리소스의 관리 상태 정보를 반환합니다.
 
@@ -297,7 +297,7 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L98)
 
 고유 식별자(UUID)를 반환합니다.
 
@@ -318,7 +318,7 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:93](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L93)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L93)
 
 비디오 메모리 사용량(byte)
 
@@ -334,7 +334,7 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:93](https://github.com/redc
 
 > **get** **width**(): `number`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:89](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L89)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:89](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L89)
 
 텍스처 가로 크기
 
@@ -348,7 +348,7 @@ Defined in: [src/resources/texture/hdr/HDRTexture.ts:89](https://github.com/redc
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L125)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
 
@@ -373,7 +373,7 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 > **\_\_fireListenerList**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L152)
+Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L152)
 
 등록된 더티 리스너들을 실행합니다.
 
@@ -398,7 +398,7 @@ Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L137)
 
 더티 파이프라인 리스너를 제거합니다.
 
@@ -423,7 +423,7 @@ Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:116](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/hdr/HDRTexture.ts#L116)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:116](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L116)
 
 리소스를 파괴합니다.
 

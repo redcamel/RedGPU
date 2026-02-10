@@ -6,7 +6,7 @@
 
 # Class: IsometricController
 
-Defined in: [src/camera/controller/IsometricController.ts:26](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L26)
+Defined in: [src/camera/controller/IsometricController.ts:26](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L26)
 
 등각 투영(Isometric) 시점을 제공하는 카메라 컨트롤러입니다.
 
@@ -32,7 +32,7 @@ controller.zoom = 1;
 
 > **new IsometricController**(`redGPUContext`): `IsometricController`
 
-Defined in: [src/camera/controller/IsometricController.ts:64](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L64)
+Defined in: [src/camera/controller/IsometricController.ts:64](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L64)
 
 IsometricController 인스턴스를 생성합니다.
 
@@ -59,7 +59,7 @@ IsometricController 인스턴스를 생성합니다.
 
 > **get** **camera**(): [`PerspectiveCamera`](PerspectiveCamera.md) \| [`OrthographicCamera`](OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L138)
+Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L138)
 
 이 컨트롤러가 제어하는 카메라를 반환합니다.
 
@@ -83,7 +83,7 @@ Defined in: [src/camera/core/AController.ts:138](https://github.com/redcamel/Red
 
 > **get** **hoveredView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L187)
+Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L187)
 
 **`Internal`**
 
@@ -109,7 +109,7 @@ Defined in: [src/camera/core/AController.ts:187](https://github.com/redcamel/Red
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L233)
+Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L233)
 
 **`Internal`**
 
@@ -135,7 +135,7 @@ Defined in: [src/camera/core/AController.ts:233](https://github.com/redcamel/Red
 
 > **get** **keyboardActiveView**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L200)
+Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L200)
 
 **`Internal`**
 
@@ -153,7 +153,7 @@ Defined in: [src/camera/core/AController.ts:200](https://github.com/redcamel/Red
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L213)
+Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L213)
 
 **`Internal`**
 
@@ -182,7 +182,7 @@ Defined in: [src/camera/core/AController.ts:213](https://github.com/redcamel/Red
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L246)
+Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L246)
 
 **`Internal`**
 
@@ -200,7 +200,7 @@ Defined in: [src/camera/core/AController.ts:246](https://github.com/redcamel/Red
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L259)
+Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L259)
 
 **`Internal`**
 
@@ -229,7 +229,7 @@ Defined in: [src/camera/core/AController.ts:259](https://github.com/redcamel/Red
 
 > **get** **keyNameMapper**(): `object`
 
-Defined in: [src/camera/controller/IsometricController.ts:156](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L156)
+Defined in: [src/camera/controller/IsometricController.ts:156](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L156)
 
 키 매핑 설정
 
@@ -239,10 +239,10 @@ Defined in: [src/camera/controller/IsometricController.ts:156](https://github.co
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| `moveDown` | `string` | `'s'` | [src/camera/controller/IsometricController.ts:49](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L49) |
-| `moveLeft` | `string` | `'a'` | [src/camera/controller/IsometricController.ts:50](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L50) |
-| `moveRight` | `string` | `'d'` | [src/camera/controller/IsometricController.ts:51](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L51) |
-| `moveUp` | `string` | `'w'` | [src/camera/controller/IsometricController.ts:48](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L48) |
+| `moveDown` | `string` | `'s'` | [src/camera/controller/IsometricController.ts:49](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L49) |
+| `moveLeft` | `string` | `'a'` | [src/camera/controller/IsometricController.ts:50](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L50) |
+| `moveRight` | `string` | `'d'` | [src/camera/controller/IsometricController.ts:51](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L51) |
+| `moveUp` | `string` | `'w'` | [src/camera/controller/IsometricController.ts:48](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L48) |
 
 ***
 
@@ -252,7 +252,7 @@ Defined in: [src/camera/controller/IsometricController.ts:156](https://github.co
 
 > **get** **maxZoom**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:128](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L128)
+Defined in: [src/camera/controller/IsometricController.ts:128](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L128)
 
 최대 줌
 
@@ -264,7 +264,7 @@ Defined in: [src/camera/controller/IsometricController.ts:128](https://github.co
 
 > **set** **maxZoom**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:129](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L129)
+Defined in: [src/camera/controller/IsometricController.ts:129](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L129)
 
 ##### Parameters
 
@@ -284,7 +284,7 @@ Defined in: [src/camera/controller/IsometricController.ts:129](https://github.co
 
 > **get** **minZoom**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:124](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L124)
+Defined in: [src/camera/controller/IsometricController.ts:124](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L124)
 
 최소 줌
 
@@ -296,7 +296,7 @@ Defined in: [src/camera/controller/IsometricController.ts:124](https://github.co
 
 > **set** **minZoom**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:125](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L125)
+Defined in: [src/camera/controller/IsometricController.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L125)
 
 ##### Parameters
 
@@ -316,7 +316,7 @@ Defined in: [src/camera/controller/IsometricController.ts:125](https://github.co
 
 > **get** **mouseMoveSpeed**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:148](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L148)
+Defined in: [src/camera/controller/IsometricController.ts:148](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L148)
 
 마우스 이동 속도
 
@@ -328,7 +328,7 @@ Defined in: [src/camera/controller/IsometricController.ts:148](https://github.co
 
 > **set** **mouseMoveSpeed**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:149](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L149)
+Defined in: [src/camera/controller/IsometricController.ts:149](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L149)
 
 ##### Parameters
 
@@ -348,7 +348,7 @@ Defined in: [src/camera/controller/IsometricController.ts:149](https://github.co
 
 > **get** **mouseMoveSpeedInterpolation**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:152](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L152)
+Defined in: [src/camera/controller/IsometricController.ts:152](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L152)
 
 마우스 이동 보간 계수
 
@@ -360,7 +360,7 @@ Defined in: [src/camera/controller/IsometricController.ts:152](https://github.co
 
 > **set** **mouseMoveSpeedInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:153](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L153)
+Defined in: [src/camera/controller/IsometricController.ts:153](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L153)
 
 ##### Parameters
 
@@ -380,7 +380,7 @@ Defined in: [src/camera/controller/IsometricController.ts:153](https://github.co
 
 > **get** **moveSpeed**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:140](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L140)
+Defined in: [src/camera/controller/IsometricController.ts:140](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L140)
 
 이동 속도
 
@@ -392,7 +392,7 @@ Defined in: [src/camera/controller/IsometricController.ts:140](https://github.co
 
 > **set** **moveSpeed**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:141](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L141)
+Defined in: [src/camera/controller/IsometricController.ts:141](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L141)
 
 ##### Parameters
 
@@ -412,7 +412,7 @@ Defined in: [src/camera/controller/IsometricController.ts:141](https://github.co
 
 > **get** **moveSpeedInterpolation**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:144](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L144)
+Defined in: [src/camera/controller/IsometricController.ts:144](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L144)
 
 이동 보간 계수
 
@@ -424,7 +424,7 @@ Defined in: [src/camera/controller/IsometricController.ts:144](https://github.co
 
 > **set** **moveSpeedInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:145](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L145)
+Defined in: [src/camera/controller/IsometricController.ts:145](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L145)
 
 ##### Parameters
 
@@ -444,7 +444,7 @@ Defined in: [src/camera/controller/IsometricController.ts:145](https://github.co
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L101)
+Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L101)
 
 컨트롤러의 이름을 반환합니다.
 
@@ -460,7 +460,7 @@ Defined in: [src/camera/core/AController.ts:101](https://github.com/redcamel/Red
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L114)
+Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L114)
 
 컨트롤러의 이름을 설정합니다.
 
@@ -487,7 +487,7 @@ Defined in: [src/camera/core/AController.ts:114](https://github.com/redcamel/Red
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L126)
+Defined in: [src/camera/core/AController.ts:126](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L126)
 
 RedGPU 컨텍스트를 반환합니다.
 
@@ -511,7 +511,7 @@ RedGPU 컨텍스트
 
 > **get** **speedZoom**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:120](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L120)
+Defined in: [src/camera/controller/IsometricController.ts:120](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L120)
 
 줌 속도
 
@@ -523,7 +523,7 @@ Defined in: [src/camera/controller/IsometricController.ts:120](https://github.co
 
 > **set** **speedZoom**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:121](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L121)
+Defined in: [src/camera/controller/IsometricController.ts:121](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L121)
 
 ##### Parameters
 
@@ -543,7 +543,7 @@ Defined in: [src/camera/controller/IsometricController.ts:121](https://github.co
 
 > **get** **targetX**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:159](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L159)
+Defined in: [src/camera/controller/IsometricController.ts:159](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L159)
 
 타겟 X 위치
 
@@ -559,7 +559,7 @@ Defined in: [src/camera/controller/IsometricController.ts:159](https://github.co
 
 > **get** **targetY**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:161](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L161)
+Defined in: [src/camera/controller/IsometricController.ts:161](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L161)
 
 타겟 Y 위치
 
@@ -575,7 +575,7 @@ Defined in: [src/camera/controller/IsometricController.ts:161](https://github.co
 
 > **get** **targetZ**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:163](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L163)
+Defined in: [src/camera/controller/IsometricController.ts:163](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L163)
 
 타겟 Z 위치
 
@@ -591,7 +591,7 @@ Defined in: [src/camera/controller/IsometricController.ts:163](https://github.co
 
 > **get** **viewHeight**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:132](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L132)
+Defined in: [src/camera/controller/IsometricController.ts:132](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L132)
 
 뷰 높이
 
@@ -603,7 +603,7 @@ Defined in: [src/camera/controller/IsometricController.ts:132](https://github.co
 
 > **set** **viewHeight**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:133](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L133)
+Defined in: [src/camera/controller/IsometricController.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L133)
 
 ##### Parameters
 
@@ -623,7 +623,7 @@ Defined in: [src/camera/controller/IsometricController.ts:133](https://github.co
 
 > **get** **viewHeightInterpolation**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:136](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L136)
+Defined in: [src/camera/controller/IsometricController.ts:136](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L136)
 
 뷰 높이 보간 계수
 
@@ -635,7 +635,7 @@ Defined in: [src/camera/controller/IsometricController.ts:136](https://github.co
 
 > **set** **viewHeightInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:137](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L137)
+Defined in: [src/camera/controller/IsometricController.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L137)
 
 ##### Parameters
 
@@ -655,7 +655,7 @@ Defined in: [src/camera/controller/IsometricController.ts:137](https://github.co
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L150)
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L150)
 
 카메라의 현재 월드 X 좌표를 가져옵니다.
 
@@ -679,7 +679,7 @@ X 좌표
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L162)
+Defined in: [src/camera/core/AController.ts:162](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L162)
 
 카메라의 현재 월드 Y 좌표를 가져옵니다.
 
@@ -703,7 +703,7 @@ Y 좌표
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L174)
+Defined in: [src/camera/core/AController.ts:174](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L174)
 
 카메라의 현재 월드 Z 좌표를 가져옵니다.
 
@@ -727,7 +727,7 @@ Z 좌표
 
 > **get** **zoom**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:104](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L104)
+Defined in: [src/camera/controller/IsometricController.ts:104](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L104)
 
 줌 레벨을 가져옵니다.
 
@@ -742,7 +742,7 @@ Defined in: [src/camera/controller/IsometricController.ts:104](https://github.co
 
 > **set** **zoom**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:110](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L110)
+Defined in: [src/camera/controller/IsometricController.ts:110](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L110)
 
 줌 레벨을 설정합니다.
 
@@ -765,7 +765,7 @@ Defined in: [src/camera/controller/IsometricController.ts:110](https://github.co
 
 > **get** **zoomInterpolation**(): `number`
 
-Defined in: [src/camera/controller/IsometricController.ts:116](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L116)
+Defined in: [src/camera/controller/IsometricController.ts:116](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L116)
 
 줌 보간 계수
 
@@ -777,7 +777,7 @@ Defined in: [src/camera/controller/IsometricController.ts:116](https://github.co
 
 > **set** **zoomInterpolation**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:117](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L117)
+Defined in: [src/camera/controller/IsometricController.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L117)
 
 ##### Parameters
 
@@ -795,7 +795,7 @@ Defined in: [src/camera/controller/IsometricController.ts:117](https://github.co
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L323)
+Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L323)
 
 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
 
@@ -830,7 +830,7 @@ Defined in: [src/camera/core/AController.ts:323](https://github.com/redcamel/Red
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L267)
+Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L267)
 
 컨트롤러를 제거하고 이벤트 리스너를 해제합니다.
 
@@ -849,7 +849,7 @@ Defined in: [src/camera/core/AController.ts:267](https://github.com/redcamel/Red
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L407)
+Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L407)
 
 **`Internal`**
 
@@ -879,7 +879,7 @@ Defined in: [src/camera/core/AController.ts:407](https://github.com/redcamel/Red
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L370)
+Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L370)
 
 **`Internal`**
 
@@ -902,8 +902,8 @@ Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L390) |
-| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/core/AController.ts#L391) |
+| `x` | `number` | [src/camera/core/AController.ts:390](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L390) |
+| `y` | `number` | [src/camera/core/AController.ts:391](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/core/AController.ts#L391) |
 
 #### Inherited from
 
@@ -915,7 +915,7 @@ Defined in: [src/camera/core/AController.ts:370](https://github.com/redcamel/Red
 
 > **setMoveDownKey**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:168](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L168)
+Defined in: [src/camera/controller/IsometricController.ts:168](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L168)
 
 하향 이동 키 설정
 
@@ -935,7 +935,7 @@ Defined in: [src/camera/controller/IsometricController.ts:168](https://github.co
 
 > **setMoveLeftKey**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:170](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L170)
+Defined in: [src/camera/controller/IsometricController.ts:170](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L170)
 
 좌측 이동 키 설정
 
@@ -955,7 +955,7 @@ Defined in: [src/camera/controller/IsometricController.ts:170](https://github.co
 
 > **setMoveRightKey**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:172](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L172)
+Defined in: [src/camera/controller/IsometricController.ts:172](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L172)
 
 우측 이동 키 설정
 
@@ -975,7 +975,7 @@ Defined in: [src/camera/controller/IsometricController.ts:172](https://github.co
 
 > **setMoveUpKey**(`value`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:166](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L166)
+Defined in: [src/camera/controller/IsometricController.ts:166](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L166)
 
 상향 이동 키 설정
 
@@ -995,7 +995,7 @@ Defined in: [src/camera/controller/IsometricController.ts:166](https://github.co
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/camera/controller/IsometricController.ts:180](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/controller/IsometricController.ts#L180)
+Defined in: [src/camera/controller/IsometricController.ts:180](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/controller/IsometricController.ts#L180)
 
 매 프레임마다 카메라를 업데이트합니다.
 

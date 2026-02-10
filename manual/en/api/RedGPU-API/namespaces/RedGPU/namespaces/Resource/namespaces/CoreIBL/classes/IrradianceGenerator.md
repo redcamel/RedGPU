@@ -6,7 +6,7 @@
 
 # Class: IrradianceGenerator
 
-Defined in: [src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts:21](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts#L21)
+Defined in: [src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts#L21)
 
 
 Class that generates an Irradiance map.
@@ -20,7 +20,7 @@ Extracts low-frequency lighting information from a cubemap to bake an Irradiance
 
 > **new IrradianceGenerator**(`redGPUContext`): `IrradianceGenerator`
 
-Defined in: [src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts:35](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts#L35)
+Defined in: [src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts:35](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts#L35)
 
 
 Creates an IrradianceGenerator instance.
@@ -41,7 +41,7 @@ Creates an IrradianceGenerator instance.
 
 > **generate**(`sourceCubeTexture`, `size?`): `Promise`\<[`IBLCubeTexture`](IBLCubeTexture.md)\>
 
-Defined in: [src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts:66](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts#L66)
+Defined in: [src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts:66](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/ibl/core/irradiance/IrradianceGenerator.ts#L66)
 
 
 Generates and returns an Irradiance map from the source cube texture.

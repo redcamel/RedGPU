@@ -8,7 +8,7 @@
 
 > **parseWGSL**(`code`): `any`
 
-Defined in: [src/resources/wgslParser/parseWGSL.ts:147](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/wgslParser/parseWGSL.ts#L147)
+Defined in: [src/resources/wgslParser/parseWGSL.ts:147](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/parseWGSL.ts#L147)
 
 WGSL 코드를 파싱하고 리플렉션 정보를 반환합니다.
 

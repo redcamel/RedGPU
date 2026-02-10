@@ -8,7 +8,7 @@
 
 > **sortTransparentObjects**(`cameraPos`, `objects`): `GPURenderBundle`[]
 
-Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/math/sortTransparentObjects.ts#L21)
+Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/sortTransparentObjects.ts#L21)
 
 
 Sorts transparent objects by distance from camera (descending).

@@ -6,7 +6,7 @@
 
 # Class: PerspectiveCamera
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:24](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L24)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L24)
 
 
 Camera that uses perspective projection.
@@ -34,7 +34,7 @@ camera.lookAt(0, 0, 0);
 
 > **new PerspectiveCamera**(): `PerspectiveCamera`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:112](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L112)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:112](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L112)
 
 
 Creates an instance of PerspectiveCamera.
@@ -56,7 +56,7 @@ const camera = new RedGPU.PerspectiveCamera();
 
 > **get** **farClipping**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:245](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L245)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:245](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L245)
 
 
 Returns the far clipping distance.
@@ -72,7 +72,7 @@ Far clipping distance
 
 > **set** **farClipping**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:257](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L257)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:257](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L257)
 
 
 Sets the far clipping distance.
@@ -95,7 +95,7 @@ Sets the far clipping distance.
 
 > **get** **fieldOfView**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:195](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L195)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:195](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L195)
 
 
 Returns the field of view. (degrees)
@@ -111,7 +111,7 @@ Field of view
 
 > **set** **fieldOfView**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:207](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L207)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:207](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L207)
 
 
 Sets the field of view. (degrees)
@@ -134,7 +134,7 @@ Sets the field of view. (degrees)
 
 > **get** **modelMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:295](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L295)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:295](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L295)
 
 
 Returns the model matrix.
@@ -154,7 +154,7 @@ Model matrix
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:270](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L270)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:270](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L270)
 
 
 Returns the camera name.
@@ -170,7 +170,7 @@ Camera name
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:283](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L283)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:283](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L283)
 
 
 Sets the camera name.
@@ -193,7 +193,7 @@ Sets the camera name.
 
 > **get** **nearClipping**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:220](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L220)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:220](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L220)
 
 
 Returns the near clipping distance.
@@ -209,7 +209,7 @@ Near clipping distance
 
 > **set** **nearClipping**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:232](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L232)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:232](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L232)
 
 
 Sets the near clipping distance.
@@ -232,7 +232,7 @@ Sets the near clipping distance.
 
 > **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:382](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L382)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:382](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L382)
 
 
 Returns the camera position (x, y, z).
@@ -252,7 +252,7 @@ Returns the camera position (x, y, z).
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:123](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L123)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:123](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L123)
 
 
 Returns the X rotation value. (radians)
@@ -268,7 +268,7 @@ X rotation value
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:135](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L135)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:135](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L135)
 
 
 Sets the X rotation value. (radians)
@@ -291,7 +291,7 @@ Sets the X rotation value. (radians)
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:147](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L147)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:147](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L147)
 
 
 Returns the Y rotation value. (radians)
@@ -307,7 +307,7 @@ Y rotation value
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:159](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L159)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:159](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L159)
 
 
 Sets the Y rotation value. (radians)
@@ -330,7 +330,7 @@ Sets the Y rotation value. (radians)
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:171](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L171)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:171](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L171)
 
 
 Returns the Z rotation value. (radians)
@@ -346,7 +346,7 @@ Z rotation value
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:183](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L183)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:183](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L183)
 
 
 Sets the Z rotation value. (radians)
@@ -369,7 +369,7 @@ Sets the Z rotation value. (radians)
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:307](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L307)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:307](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L307)
 
 
 Returns the X coordinate.
@@ -385,7 +385,7 @@ X coordinate
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:319](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L319)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:319](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L319)
 
 
 Sets the X coordinate.
@@ -408,7 +408,7 @@ Sets the X coordinate.
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:332](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L332)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:332](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L332)
 
 
 Returns the Y coordinate.
@@ -424,7 +424,7 @@ Y coordinate
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:344](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L344)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:344](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L344)
 
 
 Sets the Y coordinate.
@@ -447,7 +447,7 @@ Sets the Y coordinate.
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:357](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L357)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:357](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L357)
 
 
 Returns the Z coordinate.
@@ -463,7 +463,7 @@ Z coordinate
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:369](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L369)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:369](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L369)
 
 
 Sets the Z coordinate.
@@ -484,7 +484,7 @@ Sets the Z coordinate.
 
 > **lookAt**(`x`, `y`, `z`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:436](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L436)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:436](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L436)
 
 
 Rotates the camera to look at a specific coordinate.
@@ -512,7 +512,7 @@ camera.lookAt(0, 0, 0);
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/camera/camera/PerspectiveCamera.ts:406](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/PerspectiveCamera.ts#L406)
+Defined in: [src/camera/camera/PerspectiveCamera.ts:406](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/PerspectiveCamera.ts#L406)
 
 
 Sets the camera position.

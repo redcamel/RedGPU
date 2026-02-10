@@ -8,7 +8,7 @@
 
 > **ensureVertexIndexBuiltin**(`shaderSource`): `string`
 
-Defined in: [src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts:16](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts#L16)
+Defined in: [src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts:16](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts#L16)
 
 
 Checks if the `vertex_index` builtin argument is included in the WGSL shader code, and automatically injects it if not.

@@ -8,15 +8,15 @@
 
 > **PRESET\_POSITIVE\_NUMBER**: `object`
 
-Defined in: [src/defineProperty/DefineForFragment.ts:109](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L109)
+Defined in: [src/defineProperty/DefineForFragment.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/defineProperty/DefineForFragment.ts#L109)
 
 ## Type Declaration
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="property-ao_strength"></a> `AO_STRENGTH` | `string` | `'aoStrength'` | [src/defineProperty/DefineForFragment.ts:30](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L30) |
-| <a id="property-emissive_strength"></a> `EMISSIVE_STRENGTH` | `string` | `'emissiveStrength'` | [src/defineProperty/DefineForFragment.ts:32](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L32) |
-| <a id="property-normal_scale"></a> `NORMAL_SCALE` | `string` | `'normalScale'` | [src/defineProperty/DefineForFragment.ts:35](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L35) |
-| <a id="property-opacity"></a> `OPACITY` | `string` | `'opacity'` | [src/defineProperty/DefineForFragment.ts:33](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L33) |
-| <a id="property-shininess"></a> `SHININESS` | `string` | `'shininess'` | [src/defineProperty/DefineForFragment.ts:34](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L34) |
-| <a id="property-specular_strength"></a> `SPECULAR_STRENGTH` | `string` | `'specularStrength'` | [src/defineProperty/DefineForFragment.ts:31](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForFragment.ts#L31) |
+| <a id="property-ao_strength"></a> `AO_STRENGTH` | `string` | `'aoStrength'` | [src/defineProperty/DefineForFragment.ts:30](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/defineProperty/DefineForFragment.ts#L30) |
+| <a id="property-emissive_strength"></a> `EMISSIVE_STRENGTH` | `string` | `'emissiveStrength'` | [src/defineProperty/DefineForFragment.ts:32](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/defineProperty/DefineForFragment.ts#L32) |
+| <a id="property-normal_scale"></a> `NORMAL_SCALE` | `string` | `'normalScale'` | [src/defineProperty/DefineForFragment.ts:35](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/defineProperty/DefineForFragment.ts#L35) |
+| <a id="property-opacity"></a> `OPACITY` | `string` | `'opacity'` | [src/defineProperty/DefineForFragment.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/defineProperty/DefineForFragment.ts#L33) |
+| <a id="property-shininess"></a> `SHININESS` | `string` | `'shininess'` | [src/defineProperty/DefineForFragment.ts:34](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/defineProperty/DefineForFragment.ts#L34) |
+| <a id="property-specular_strength"></a> `SPECULAR_STRENGTH` | `string` | `'specularStrength'` | [src/defineProperty/DefineForFragment.ts:31](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/defineProperty/DefineForFragment.ts#L31) |

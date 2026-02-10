@@ -8,4 +8,4 @@
 
 > `const` **SystemCode**: `Readonly`\<\{ `billboardPicking`: `"string"`; `billboardShadow`: `"string"`; `calcBillboard`: `"string"`; `calcDirectionalShadowVisibility`: `"string"`; `calcDisplacements`: `"string"`; `calcPrePathBackground`: `"string"`; `calcTintBlendMode`: `"string"`; `calculateMotionVector`: `"string"`; `drawDirectionalShadowDepth`: `"string"`; `drawPicking`: `"string"`; `extractScaleAndTranslation`: `"string"`; `FragmentOutput`: `"string"`; `getBillboardMatrix`: `"string"`; `meshVertexBasicUniform`: `"string"`; `normalFunctions`: `"string"`; `picking`: `"string"`; `SYSTEM_UNIFORM`: `"string"`; \}\>
 
-Defined in: [src/resources/systemCode/SystemCode.ts:5](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/systemCode/SystemCode.ts#L5)
+Defined in: [src/resources/systemCode/SystemCode.ts:5](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/systemCode/SystemCode.ts#L5)

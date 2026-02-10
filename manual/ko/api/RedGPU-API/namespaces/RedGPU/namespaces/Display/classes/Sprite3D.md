@@ -6,7 +6,7 @@
 
 # Class: Sprite3D
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:23](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L23)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:23](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L23)
 
 3D 공간에서 항상 카메라를 향하는 2D 스프라이트 객체입니다.
 
@@ -43,7 +43,7 @@ scene.addChild(sprite);
 
 > **new Sprite3D**(`redGPUContext`, `material?`, `geometry?`): `Sprite3D`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:80](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L80)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:80](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L80)
 
 새로운 Sprite3D 인스턴스를 생성합니다.
 
@@ -70,7 +70,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:80](https://github.com/red
 
 > **\_geometry**: [`Geometry`](../../../classes/Geometry.md) \| [`Primitive`](../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/display/mesh/Mesh.ts:374](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L374)
+Defined in: [src/display/mesh/Mesh.ts:374](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L374)
 
 #### Inherited from
 
@@ -82,7 +82,7 @@ Defined in: [src/display/mesh/Mesh.ts:374](https://github.com/redcamel/RedGPU/bl
 
 > **\_material**: `any`
 
-Defined in: [src/display/mesh/Mesh.ts:349](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L349)
+Defined in: [src/display/mesh/Mesh.ts:349](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L349)
 
 #### Inherited from
 
@@ -94,7 +94,7 @@ Defined in: [src/display/mesh/Mesh.ts:349](https://github.com/redcamel/RedGPU/bl
 
 > **\_renderRatioX**: `number`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:27](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L27)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L27)
 
 X축 렌더링 비율
 
@@ -104,7 +104,7 @@ X축 렌더링 비율
 
 > **\_renderRatioY**: `number`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:29](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L29)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:29](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L29)
 
 Y축 렌더링 비율
 
@@ -114,7 +114,7 @@ Y축 렌더링 비율
 
 > **animationInfo**: `object`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:33](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L33)
+Defined in: [src/display/mesh/core/MeshBase.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L33)
 
 #### animationsList
 
@@ -146,7 +146,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:33](https://github.com/redcamel/R
 
 > **castShadow**: `boolean` = `false`
 
-Defined in: [src/display/mesh/Mesh.ts:93](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L93)
+Defined in: [src/display/mesh/Mesh.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L93)
 
 그림자 캐스팅 여부
 
@@ -161,7 +161,7 @@ Defined in: [src/display/mesh/Mesh.ts:93](https://github.com/redcamel/RedGPU/blo
 
 > **dirtyLOD**: `boolean` = `false`
 
-Defined in: [src/display/mesh/Mesh.ts:98](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L98)
+Defined in: [src/display/mesh/Mesh.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L98)
 
 LOD 정보 변경 필요 여부
 
@@ -176,7 +176,7 @@ LOD 정보 변경 필요 여부
 
 > **dirtyOpacity**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L49)
+Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L49)
 
 #### Inherited from
 
@@ -188,7 +188,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/R
 
 > **dirtyPipeline**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L47)
+Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L47)
 
 #### Inherited from
 
@@ -200,7 +200,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/R
 
 > **dirtyTransform**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L48)
+Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L48)
 
 #### Inherited from
 
@@ -212,7 +212,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/R
 
 > **disableJitter**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L45)
+Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L45)
 
 #### Inherited from
 
@@ -224,7 +224,7 @@ Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blo
 
 > **displacementTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/display/mesh/Mesh.ts:88](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L88)
+Defined in: [src/display/mesh/Mesh.ts:88](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L88)
 
 메시의 디스플레이스먼트 텍스처
 
@@ -239,7 +239,7 @@ Defined in: [src/display/mesh/Mesh.ts:88](https://github.com/redcamel/RedGPU/blo
 
 > **gltfLoaderInfo**: [`GLTFLoader`](../../../classes/GLTFLoader.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L46)
+Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L46)
 
 #### Inherited from
 
@@ -251,7 +251,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/R
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L32)
+Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L32)
 
 #### Inherited from
 
@@ -263,7 +263,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/R
 
 > **localMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L51)
+Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L51)
 
 #### Inherited from
 
@@ -275,7 +275,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/R
 
 > **meshType**: `string`
 
-Defined in: [src/display/mesh/Mesh.ts:46](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L46)
+Defined in: [src/display/mesh/Mesh.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L46)
 
 #### Inherited from
 
@@ -287,7 +287,7 @@ Defined in: [src/display/mesh/Mesh.ts:46](https://github.com/redcamel/RedGPU/blo
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L50)
+Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L50)
 
 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
 
@@ -301,7 +301,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/R
 
 > **normalModelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:52](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L52)
+Defined in: [src/display/mesh/core/MeshBase.ts:52](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L52)
 
 #### Inherited from
 
@@ -313,7 +313,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:52](https://github.com/redcamel/R
 
 > **passFrustumCulling**: `boolean` = `true`
 
-Defined in: [src/display/mesh/Mesh.ts:103](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L103)
+Defined in: [src/display/mesh/Mesh.ts:103](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L103)
 
 프러스텀 컬링 통과 여부
 
@@ -328,7 +328,7 @@ Defined in: [src/display/mesh/Mesh.ts:103](https://github.com/redcamel/RedGPU/bl
 
 > **receiveShadow**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L44)
+Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L44)
 
 #### Inherited from
 
@@ -340,7 +340,7 @@ Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > **useBillboard**: `boolean`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:25](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L25)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:25](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L25)
 
 빌보드 모드 사용 여부
 
@@ -350,7 +350,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:25](https://github.com/red
 
 > **useDisplacementTexture**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:47](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L47)
+Defined in: [src/display/mesh/Mesh.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L47)
 
 #### Inherited from
 
@@ -364,7 +364,7 @@ Defined in: [src/display/mesh/Mesh.ts:47](https://github.com/redcamel/RedGPU/blo
 
 > **get** **boundingAABB**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:783](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L783)
+Defined in: [src/display/mesh/Mesh.ts:783](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L783)
 
 AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
 
@@ -385,7 +385,7 @@ AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
 
 > **get** **boundingOBB**(): [`OBB`](../../Bound/classes/OBB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:770](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L770)
+Defined in: [src/display/mesh/Mesh.ts:770](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L770)
 
 OBB(Oriented Bounding Box) 정보를 반환합니다.
 
@@ -406,7 +406,7 @@ OBB(Oriented Bounding Box) 정보를 반환합니다.
 
 > **get** **children**(): [`Mesh`](Mesh.md)[]
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:42](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L42)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:42](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L42)
 
 현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
 
@@ -428,7 +428,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:42](https://github.com/r
 
 > **get** **combinedBoundingAABB**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:796](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L796)
+Defined in: [src/display/mesh/Mesh.ts:796](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L796)
 
 자식 객체들을 포함한 통합 AABB 정보를 반환합니다.
 
@@ -449,7 +449,7 @@ Defined in: [src/display/mesh/Mesh.ts:796](https://github.com/redcamel/RedGPU/bl
 
 > **get** **currentShaderModuleName**(): `string`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L79)
+Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L79)
 
 ##### Returns
 
@@ -459,7 +459,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/R
 
 > **set** **currentShaderModuleName**(`value`): `void`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:83](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L83)
+Defined in: [src/display/mesh/core/MeshBase.ts:83](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L83)
 
 ##### Parameters
 
@@ -483,7 +483,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:83](https://github.com/redcamel/R
 
 > **get** **depthStencilState**(): [`DepthStencilState`](../../RenderState/classes/DepthStencilState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:92](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L92)
+Defined in: [src/display/mesh/core/MeshBase.ts:92](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L92)
 
 ##### Returns
 
@@ -501,7 +501,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:92](https://github.com/redcamel/R
 
 > **get** **drawDebugger**(): `DrawDebuggerMesh`
 
-Defined in: [src/display/mesh/Mesh.ts:345](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L345)
+Defined in: [src/display/mesh/Mesh.ts:345](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L345)
 
 디버그 메시 객체를 반환합니다.
 
@@ -522,7 +522,7 @@ Defined in: [src/display/mesh/Mesh.ts:345](https://github.com/redcamel/RedGPU/bl
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:325](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L325)
+Defined in: [src/display/mesh/Mesh.ts:325](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L325)
 
 디버거 활성화 여부를 반환합니다.
 
@@ -535,7 +535,7 @@ Defined in: [src/display/mesh/Mesh.ts:325](https://github.com/redcamel/RedGPU/bl
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L336)
+Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L336)
 
 디버거 활성화 여부를 설정합니다.
 
@@ -562,7 +562,7 @@ Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/bl
 
 > **get** **events**(): `any`
 
-Defined in: [src/display/mesh/Mesh.ts:448](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L448)
+Defined in: [src/display/mesh/Mesh.ts:448](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L448)
 
 등록된 이벤트들을 반환합니다.
 
@@ -583,7 +583,7 @@ Defined in: [src/display/mesh/Mesh.ts:448](https://github.com/redcamel/RedGPU/bl
 
 > **get** **geometry**(): [`Geometry`](../../../classes/Geometry.md) \| [`Primitive`](../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/display/mesh/Mesh.ts:379](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L379)
+Defined in: [src/display/mesh/Mesh.ts:379](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L379)
 
 지오메트리를 반환합니다.
 
@@ -596,7 +596,7 @@ Defined in: [src/display/mesh/Mesh.ts:379](https://github.com/redcamel/RedGPU/bl
 
 > **set** **geometry**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:390](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L390)
+Defined in: [src/display/mesh/Mesh.ts:390](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L390)
 
 지오메트리를 설정합니다.
 
@@ -623,7 +623,7 @@ Defined in: [src/display/mesh/Mesh.ts:390](https://github.com/redcamel/RedGPU/bl
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:100](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L100)
+Defined in: [src/display/mesh/core/MeshBase.ts:100](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L100)
 
 Retrieves the GPU device associated with the current instance.
 
@@ -645,7 +645,7 @@ The GPU device.
 
 > **get** **ignoreFrustumCulling**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:421](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L421)
+Defined in: [src/display/mesh/Mesh.ts:421](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L421)
 
 프러스텀 컬링 무시 여부를 반환합니다.
 
@@ -658,7 +658,7 @@ Defined in: [src/display/mesh/Mesh.ts:421](https://github.com/redcamel/RedGPU/bl
 
 > **set** **ignoreFrustumCulling**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:432](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L432)
+Defined in: [src/display/mesh/Mesh.ts:432](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L432)
 
 프러스텀 컬링 무시 여부를 설정합니다.
 
@@ -685,7 +685,7 @@ Defined in: [src/display/mesh/Mesh.ts:432](https://github.com/redcamel/RedGPU/bl
 
 > **get** **LODManager**(): [`LODManager`](../namespaces/CoreMesh/classes/LODManager.md)
 
-Defined in: [src/display/mesh/Mesh.ts:317](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L317)
+Defined in: [src/display/mesh/Mesh.ts:317](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L317)
 
 LOD(Level of Detail) 매니저를 반환합니다.
 
@@ -709,7 +709,7 @@ LODManager 인스턴스
 
 > **get** **material**(): `any`
 
-Defined in: [src/display/mesh/Mesh.ts:354](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L354)
+Defined in: [src/display/mesh/Mesh.ts:354](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L354)
 
 머티리얼을 반환합니다.
 
@@ -722,7 +722,7 @@ Defined in: [src/display/mesh/Mesh.ts:354](https://github.com/redcamel/RedGPU/bl
 
 > **set** **material**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:365](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L365)
+Defined in: [src/display/mesh/Mesh.ts:365](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L365)
 
 머티리얼을 설정합니다.
 
@@ -749,7 +749,7 @@ Defined in: [src/display/mesh/Mesh.ts:365](https://github.com/redcamel/RedGPU/bl
 
 > **get** **name**(): `string`
 
-Defined in: [src/display/mesh/Mesh.ts:456](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L456)
+Defined in: [src/display/mesh/Mesh.ts:456](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L456)
 
 메시의 이름을 반환합니다.
 
@@ -762,7 +762,7 @@ Defined in: [src/display/mesh/Mesh.ts:456](https://github.com/redcamel/RedGPU/bl
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:468](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L468)
+Defined in: [src/display/mesh/Mesh.ts:468](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L468)
 
 메시의 이름을 설정합니다.
 
@@ -789,7 +789,7 @@ Defined in: [src/display/mesh/Mesh.ts:468](https://github.com/redcamel/RedGPU/bl
 
 > **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:50](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L50)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:50](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L50)
 
 자식 객체의 개수를 반환합니다.
 
@@ -811,7 +811,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:50](https://github.com/r
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:400](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L400)
+Defined in: [src/display/mesh/Mesh.ts:400](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L400)
 
 메시의 투명도를 반환합니다. (0~1)
 
@@ -824,7 +824,7 @@ Defined in: [src/display/mesh/Mesh.ts:400](https://github.com/redcamel/RedGPU/bl
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:411](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L411)
+Defined in: [src/display/mesh/Mesh.ts:411](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L411)
 
 메시의 투명도를 설정합니다. (0~1)
 
@@ -851,7 +851,7 @@ Defined in: [src/display/mesh/Mesh.ts:411](https://github.com/redcamel/RedGPU/bl
 
 > **get** **parent**(): [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md)
 
-Defined in: [src/display/mesh/Mesh.ts:484](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L484)
+Defined in: [src/display/mesh/Mesh.ts:484](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L484)
 
 설정된 부모 객체를 반환합니다.
 
@@ -864,7 +864,7 @@ Defined in: [src/display/mesh/Mesh.ts:484](https://github.com/redcamel/RedGPU/bl
 
 > **set** **parent**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:495](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L495)
+Defined in: [src/display/mesh/Mesh.ts:495](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L495)
 
 부모 객체를 설정합니다.
 
@@ -891,7 +891,7 @@ Defined in: [src/display/mesh/Mesh.ts:495](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pickingId**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:440](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L440)
+Defined in: [src/display/mesh/Mesh.ts:440](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L440)
 
 피킹 ID를 반환합니다.
 
@@ -912,7 +912,7 @@ Defined in: [src/display/mesh/Mesh.ts:440](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:503](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L503)
+Defined in: [src/display/mesh/Mesh.ts:503](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L503)
 
 피벗 X 좌표를 반환합니다.
 
@@ -925,7 +925,7 @@ Defined in: [src/display/mesh/Mesh.ts:503](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:514](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L514)
+Defined in: [src/display/mesh/Mesh.ts:514](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L514)
 
 피벗 X 좌표를 설정합니다.
 
@@ -952,7 +952,7 @@ Defined in: [src/display/mesh/Mesh.ts:514](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L523)
+Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L523)
 
 피벗 Y 좌표를 반환합니다.
 
@@ -965,7 +965,7 @@ Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:534](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L534)
+Defined in: [src/display/mesh/Mesh.ts:534](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L534)
 
 피벗 Y 좌표를 설정합니다.
 
@@ -992,7 +992,7 @@ Defined in: [src/display/mesh/Mesh.ts:534](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:543](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L543)
+Defined in: [src/display/mesh/Mesh.ts:543](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L543)
 
 피벗 Z 좌표를 반환합니다.
 
@@ -1005,7 +1005,7 @@ Defined in: [src/display/mesh/Mesh.ts:543](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:554](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L554)
+Defined in: [src/display/mesh/Mesh.ts:554](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L554)
 
 피벗 Z 좌표를 설정합니다.
 
@@ -1032,7 +1032,7 @@ Defined in: [src/display/mesh/Mesh.ts:554](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pixelSize**(): `number`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:144](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L144)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:144](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L144)
 
 고정 픽셀 크기 값을 반환합니다. (px 단위)
 
@@ -1045,7 +1045,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:144](https://github.com/re
 
 > **set** **pixelSize**(`value`): `void`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:155](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L155)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:155](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L155)
 
 고정 픽셀 크기 값을 설정합니다. (px 단위) usePixelSize가 true일 때만 적용됩니다.
 
@@ -1068,7 +1068,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:155](https://github.com/re
 
 > **get** **position**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:626](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L626)
+Defined in: [src/display/mesh/Mesh.ts:626](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L626)
 
 현재 위치를 반환합니다. [x, y, z]
 
@@ -1092,7 +1092,7 @@ Defined in: [src/display/mesh/Mesh.ts:626](https://github.com/redcamel/RedGPU/bl
 
 > **get** **primitiveState**(): [`PrimitiveState`](../../RenderState/classes/PrimitiveState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L88)
+Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L88)
 
 ##### Returns
 
@@ -1110,7 +1110,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/R
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L109)
+Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L109)
 
 Retrieves the RedGPUContext instance.
 
@@ -1132,7 +1132,7 @@ The RedGPUContext instance.
 
 > **get** **rotation**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:762](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L762)
+Defined in: [src/display/mesh/Mesh.ts:762](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L762)
 
 현재 회전값을 반환합니다. [x, y, z] (도)
 
@@ -1153,7 +1153,7 @@ Defined in: [src/display/mesh/Mesh.ts:762](https://github.com/redcamel/RedGPU/bl
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:702](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L702)
+Defined in: [src/display/mesh/Mesh.ts:702](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L702)
 
 X축 회전값을 반환합니다. (도)
 
@@ -1166,7 +1166,7 @@ X축 회전값을 반환합니다. (도)
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:713](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L713)
+Defined in: [src/display/mesh/Mesh.ts:713](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L713)
 
 X축 회전값을 설정합니다. (도)
 
@@ -1193,7 +1193,7 @@ X축 회전값을 설정합니다. (도)
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:722](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L722)
+Defined in: [src/display/mesh/Mesh.ts:722](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L722)
 
 Y축 회전값을 반환합니다. (도)
 
@@ -1206,7 +1206,7 @@ Y축 회전값을 반환합니다. (도)
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:733](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L733)
+Defined in: [src/display/mesh/Mesh.ts:733](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L733)
 
 Y축 회전값을 설정합니다. (도)
 
@@ -1233,7 +1233,7 @@ Y축 회전값을 설정합니다. (도)
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:742](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L742)
+Defined in: [src/display/mesh/Mesh.ts:742](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L742)
 
 Z축 회전값을 반환합니다. (도)
 
@@ -1246,7 +1246,7 @@ Z축 회전값을 반환합니다. (도)
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:753](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L753)
+Defined in: [src/display/mesh/Mesh.ts:753](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L753)
 
 Z축 회전값을 설정합니다. (도)
 
@@ -1273,7 +1273,7 @@ Z축 회전값을 설정합니다. (도)
 
 > **get** **scale**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:694](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L694)
+Defined in: [src/display/mesh/Mesh.ts:694](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L694)
 
 현재 스케일을 반환합니다. [x, y, z]
 
@@ -1294,7 +1294,7 @@ Defined in: [src/display/mesh/Mesh.ts:694](https://github.com/redcamel/RedGPU/bl
 
 > **get** **scaleX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:634](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L634)
+Defined in: [src/display/mesh/Mesh.ts:634](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L634)
 
 X축 스케일을 반환합니다.
 
@@ -1307,7 +1307,7 @@ X축 스케일을 반환합니다.
 
 > **set** **scaleX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:645](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L645)
+Defined in: [src/display/mesh/Mesh.ts:645](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L645)
 
 X축 스케일을 설정합니다.
 
@@ -1334,7 +1334,7 @@ X축 스케일을 설정합니다.
 
 > **get** **scaleY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:654](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L654)
+Defined in: [src/display/mesh/Mesh.ts:654](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L654)
 
 Y축 스케일을 반환합니다.
 
@@ -1347,7 +1347,7 @@ Y축 스케일을 반환합니다.
 
 > **set** **scaleY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:665](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L665)
+Defined in: [src/display/mesh/Mesh.ts:665](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L665)
 
 Y축 스케일을 설정합니다.
 
@@ -1374,7 +1374,7 @@ Y축 스케일을 설정합니다.
 
 > **get** **scaleZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:674](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L674)
+Defined in: [src/display/mesh/Mesh.ts:674](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L674)
 
 Z축 스케일을 반환합니다.
 
@@ -1387,7 +1387,7 @@ Z축 스케일을 반환합니다.
 
 > **set** **scaleZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:685](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L685)
+Defined in: [src/display/mesh/Mesh.ts:685](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L685)
 
 Z축 스케일을 설정합니다.
 
@@ -1414,7 +1414,7 @@ Z축 스케일을 설정합니다.
 
 > **get** **usePixelSize**(): `boolean`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:115](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L115)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:115](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L115)
 
 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 반환합니다.
 
@@ -1427,7 +1427,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:115](https://github.com/re
 
 > **set** **usePixelSize**(`value`): `void`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:126](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L126)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:126](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L126)
 
 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 설정합니다. true일 경우 거리에 상관없이 pixelSize에 설정된 크기로 렌더링됩니다.
 
@@ -1450,7 +1450,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:126](https://github.com/re
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:75](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L75)
+Defined in: [src/display/mesh/core/MeshBase.ts:75](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L75)
 
 Retrieves the UUID of the object.
 
@@ -1472,7 +1472,7 @@ The UUID of the object.
 
 > **get** **vertexStateBuffers**(): `GPUVertexBufferLayout`[]
 
-Defined in: [src/display/mesh/Mesh.ts:476](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L476)
+Defined in: [src/display/mesh/Mesh.ts:476](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L476)
 
 버텍스 상태 버퍼 레이아웃을 반환합니다.
 
@@ -1493,7 +1493,7 @@ Defined in: [src/display/mesh/Mesh.ts:476](https://github.com/redcamel/RedGPU/bl
 
 > **get** **worldSize**(): `number`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:94](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L94)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:94](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L94)
 
 월드 공간에서의 스프라이트 세로 크기(Unit 단위)를 반환합니다.
 
@@ -1506,7 +1506,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:94](https://github.com/red
 
 > **set** **worldSize**(`value`): `void`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:105](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L105)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:105](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L105)
 
 월드 공간에서의 스프라이트 세로 크기(Unit 단위)를 설정합니다. 가로 크기는 텍스처의 비율에 따라 자동으로 조절됩니다.
 
@@ -1529,7 +1529,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:105](https://github.com/re
 
 > **get** **x**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:563](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L563)
+Defined in: [src/display/mesh/Mesh.ts:563](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L563)
 
 X 위치 좌표를 반환합니다.
 
@@ -1542,7 +1542,7 @@ X 위치 좌표를 반환합니다.
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:574](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L574)
+Defined in: [src/display/mesh/Mesh.ts:574](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L574)
 
 X 위치 좌표를 설정합니다.
 
@@ -1569,7 +1569,7 @@ X 위치 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:583](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L583)
+Defined in: [src/display/mesh/Mesh.ts:583](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L583)
 
 Y 위치 좌표를 반환합니다.
 
@@ -1582,7 +1582,7 @@ Y 위치 좌표를 반환합니다.
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:594](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L594)
+Defined in: [src/display/mesh/Mesh.ts:594](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L594)
 
 Y 위치 좌표를 설정합니다.
 
@@ -1609,7 +1609,7 @@ Y 위치 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:603](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L603)
+Defined in: [src/display/mesh/Mesh.ts:603](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L603)
 
 Z 위치 좌표를 반환합니다.
 
@@ -1622,7 +1622,7 @@ Z 위치 좌표를 반환합니다.
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:614](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L614)
+Defined in: [src/display/mesh/Mesh.ts:614](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L614)
 
 Z 위치 좌표를 설정합니다.
 
@@ -1647,7 +1647,7 @@ Z 위치 좌표를 설정합니다.
 
 > **\_\_fireListenerList**(`resetList?`): `void`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:130](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L130)
+Defined in: [src/display/mesh/core/MeshBase.ts:130](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L130)
 
 Fires the dirty listeners list.
 
@@ -1671,7 +1671,7 @@ Fires the dirty listeners list.
 
 > **addChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:69](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L69)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:69](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L69)
 
 자식 Mesh를 컨테이너에 추가합니다.
 
@@ -1697,7 +1697,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:69](https://github.com/r
 
 > **addChildAt**(`child`, `index`): `Sprite3D`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:87](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L87)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:87](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L87)
 
 자식 Mesh를 특정 인덱스에 추가합니다.
 
@@ -1724,7 +1724,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:87](https://github.com/r
 
 > **addListener**(`eventName`, `callback`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:897](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L897)
+Defined in: [src/display/mesh/Mesh.ts:897](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L897)
 
 이벤트 리스너를 추가합니다.
 
@@ -1750,7 +1750,7 @@ Defined in: [src/display/mesh/Mesh.ts:897](https://github.com/redcamel/RedGPU/bl
 
 > **clone**(): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/Mesh.ts:1007](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L1007)
+Defined in: [src/display/mesh/Mesh.ts:1007](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1007)
 
 **`Experimental`**
 
@@ -1774,7 +1774,7 @@ Defined in: [src/display/mesh/Mesh.ts:1007](https://github.com/redcamel/RedGPU/b
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:59](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L59)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:59](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L59)
 
 특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
 
@@ -1800,7 +1800,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:59](https://github.com/r
 
 > **createCustomMeshVertexShaderModule**(): `GPUShaderModule`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:231](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L231)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:231](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L231)
 
 Sprite3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
 
@@ -1821,7 +1821,7 @@ Sprite3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
 
 > **createMeshVertexShaderModuleBASIC**(`VERTEX_SHADER_MODULE_NAME`, `SHADER_INFO`, `UNIFORM_STRUCT_BASIC`, `vertexModuleSource`): `GPUShaderModule`
 
-Defined in: [src/display/mesh/Mesh.ts:1711](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L1711)
+Defined in: [src/display/mesh/Mesh.ts:1711](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1711)
 
 #### Parameters
 
@@ -1846,7 +1846,7 @@ Defined in: [src/display/mesh/Mesh.ts:1711](https://github.com/redcamel/RedGPU/b
 
 > **getChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:109](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L109)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L109)
 
 지정된 인덱스의 자식 Mesh를 반환합니다.
 
@@ -1872,7 +1872,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:109](https://github.com/
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:123](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L123)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:123](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L123)
 
 특정 자식 객체의 인덱스를 반환합니다.
 
@@ -1898,7 +1898,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:123](https://github.com/
 
 > **getCombinedOpacity**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:879](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L879)
+Defined in: [src/display/mesh/Mesh.ts:879](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L879)
 
 부모 계층을 고려한 통합 투명도를 계산하여 반환합니다.
 
@@ -1920,7 +1920,7 @@ Defined in: [src/display/mesh/Mesh.ts:879](https://github.com/redcamel/RedGPU/bl
 
 > **getScreenPoint**(`view`): \[`number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L121)
+Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L121)
 
 #### Parameters
 
@@ -1942,7 +1942,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:1697](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L1697)
+Defined in: [src/display/mesh/Mesh.ts:1697](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1697)
 
 #### Returns
 
@@ -1958,7 +1958,7 @@ Defined in: [src/display/mesh/Mesh.ts:1697](https://github.com/redcamel/RedGPU/b
 
 > **localToWorld**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:117](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L117)
+Defined in: [src/display/mesh/core/MeshBase.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L117)
 
 #### Parameters
 
@@ -1982,7 +1982,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:117](https://github.com/redcamel/
 
 > **lookAt**(`targetX`, `targetY?`, `targetZ?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:915](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L915)
+Defined in: [src/display/mesh/Mesh.ts:915](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L915)
 
 메시가 특정 좌표를 바라보도록 회전시킵니다.
 
@@ -2009,7 +2009,7 @@ Defined in: [src/display/mesh/Mesh.ts:915](https://github.com/redcamel/RedGPU/bl
 
 > **removeAllChildren**(): `Sprite3D`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:232](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L232)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:232](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L232)
 
 모든 자식 객체를 제거합니다.
 
@@ -2029,7 +2029,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:232](https://github.com/
 
 > **removeChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:201](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L201)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:201](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L201)
 
 특정 자식 객체를 제거합니다.
 
@@ -2055,7 +2055,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:201](https://github.com/
 
 > **removeChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:217](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L217)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:217](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L217)
 
 지정된 인덱스의 자식 객체를 제거합니다.
 
@@ -2081,7 +2081,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:217](https://github.com/
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:197](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/sprites/sprite3D/Sprite3D.ts#L197)
+Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:197](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/sprite3D/Sprite3D.ts#L197)
 
 프레임마다 스프라이트를 렌더링합니다. 텍스처 로드 완료 시 원본 해상도를 자동으로 동기화합니다.
 
@@ -2106,7 +2106,7 @@ Defined in: [src/display/sprites/sprite3D/Sprite3D.ts:197](https://github.com/re
 
 > **setCastShadowRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:825](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L825)
+Defined in: [src/display/mesh/Mesh.ts:825](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L825)
 
 하위 계층의 모든 객체에 그림자 캐스팅 여부를 설정합니다.
 
@@ -2131,7 +2131,7 @@ Defined in: [src/display/mesh/Mesh.ts:825](https://github.com/redcamel/RedGPU/bl
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:138](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L138)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L138)
 
 자식 객체의 위치를 변경합니다.
 
@@ -2156,7 +2156,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:138](https://github.com/
 
 > **setEnableDebuggerRecursively**(`enableDebugger?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:807](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L807)
+Defined in: [src/display/mesh/Mesh.ts:807](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L807)
 
 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
 
@@ -2181,7 +2181,7 @@ Defined in: [src/display/mesh/Mesh.ts:807](https://github.com/redcamel/RedGPU/bl
 
 > **setIgnoreFrustumCullingRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:861](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L861)
+Defined in: [src/display/mesh/Mesh.ts:861](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L861)
 
 하위 계층의 모든 객체에 프러스텀 컬링 무시 여부를 설정합니다.
 
@@ -2206,7 +2206,7 @@ Defined in: [src/display/mesh/Mesh.ts:861](https://github.com/redcamel/RedGPU/bl
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:966](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L966)
+Defined in: [src/display/mesh/Mesh.ts:966](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L966)
 
 위치를 설정합니다.
 
@@ -2233,7 +2233,7 @@ Defined in: [src/display/mesh/Mesh.ts:966](https://github.com/redcamel/RedGPU/bl
 
 > **setReceiveShadowRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:843](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L843)
+Defined in: [src/display/mesh/Mesh.ts:843](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L843)
 
 하위 계층의 모든 객체에 그림자 수신 여부를 설정합니다.
 
@@ -2258,7 +2258,7 @@ Defined in: [src/display/mesh/Mesh.ts:843](https://github.com/redcamel/RedGPU/bl
 
 > **setRotation**(`rotationX`, `rotationY?`, `rotationZ?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:989](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L989)
+Defined in: [src/display/mesh/Mesh.ts:989](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L989)
 
 회전값을 설정합니다. (도)
 
@@ -2285,7 +2285,7 @@ Defined in: [src/display/mesh/Mesh.ts:989](https://github.com/redcamel/RedGPU/bl
 
 > **setScale**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:943](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/Mesh.ts#L943)
+Defined in: [src/display/mesh/Mesh.ts:943](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L943)
 
 스케일을 설정합니다.
 
@@ -2312,7 +2312,7 @@ Defined in: [src/display/mesh/Mesh.ts:943](https://github.com/redcamel/RedGPU/bl
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:161](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L161)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:161](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L161)
 
 두 자식 객체의 위치를 서로 바꿉니다.
 
@@ -2337,7 +2337,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:161](https://github.com/
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:181](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/Object3DContainer.ts#L181)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:181](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L181)
 
 두 인덱스의 자식 객체 위치를 서로 바꿉니다.
 
@@ -2362,7 +2362,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:181](https://github.com/
 
 > **worldToLocal**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:113](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/MeshBase.ts#L113)
+Defined in: [src/display/mesh/core/MeshBase.ts:113](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L113)
 
 #### Parameters
 

@@ -8,7 +8,7 @@
 
 > `const` **keepLog**: `any`
 
-Defined in: [src/utils/index.ts:22](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/utils/index.ts#L22)
+Defined in: [src/utils/index.ts:22](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/index.ts#L22)
 
 빌드 시 제거되지 않는 콘솔 로그 함수입니다.
 

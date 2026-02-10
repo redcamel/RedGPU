@@ -8,7 +8,7 @@
 
 > **mixInMesh2D**\<`TBase`\>(`Base`): \{(...`args`): `resultClass`; `prototype`: `resultClass`\<`any`\>; \} & `TBase`
 
-Defined in: [src/display/mesh/core/mixInMesh2D.ts:18](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/display/mesh/core/mixInMesh2D.ts#L18)
+Defined in: [src/display/mesh/core/mixInMesh2D.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/mixInMesh2D.ts#L18)
 
 ## Type Parameters
 

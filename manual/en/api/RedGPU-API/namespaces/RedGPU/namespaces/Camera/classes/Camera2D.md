@@ -6,7 +6,7 @@
 
 # Class: Camera2D
 
-Defined in: [src/camera/camera/Camera2D.ts:20](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L20)
+Defined in: [src/camera/camera/Camera2D.ts:20](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L20)
 
 
 Camera for observing objects in a 2D environment.
@@ -28,7 +28,7 @@ camera.setPosition(200, 100);
 
 > **new Camera2D**(): `Camera2D`
 
-Defined in: [src/camera/camera/Camera2D.ts:66](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L66)
+Defined in: [src/camera/camera/Camera2D.ts:66](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L66)
 
 
 Creates an instance of Camera2D.
@@ -50,7 +50,7 @@ const camera = new RedGPU.Camera2D();
 
 > **get** **modelMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/camera/camera/Camera2D.ts:102](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L102)
+Defined in: [src/camera/camera/Camera2D.ts:102](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L102)
 
 
 Returns the model matrix.
@@ -70,7 +70,7 @@ Model matrix
 
 > **get** **name**(): `string`
 
-Defined in: [src/camera/camera/Camera2D.ts:77](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L77)
+Defined in: [src/camera/camera/Camera2D.ts:77](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L77)
 
 
 Returns the camera name.
@@ -86,7 +86,7 @@ Camera name
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:90](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L90)
+Defined in: [src/camera/camera/Camera2D.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L90)
 
 
 Sets the camera name.
@@ -109,7 +109,7 @@ Sets the camera name.
 
 > **get** **position**(): \[`number`, `number`\]
 
-Defined in: [src/camera/camera/Camera2D.ts:176](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L176)
+Defined in: [src/camera/camera/Camera2D.ts:176](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L176)
 
 
 Returns the camera position (x, y).
@@ -129,7 +129,7 @@ Returns the camera position (x, y).
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:126](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L126)
+Defined in: [src/camera/camera/Camera2D.ts:126](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L126)
 
 
 Returns the X coordinate.
@@ -145,7 +145,7 @@ X coordinate
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:138](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L138)
+Defined in: [src/camera/camera/Camera2D.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L138)
 
 
 Sets the X coordinate.
@@ -168,7 +168,7 @@ Sets the X coordinate.
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:151](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L151)
+Defined in: [src/camera/camera/Camera2D.ts:151](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L151)
 
 
 Returns the Y coordinate.
@@ -184,7 +184,7 @@ Y coordinate
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:163](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L163)
+Defined in: [src/camera/camera/Camera2D.ts:163](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L163)
 
 
 Sets the Y coordinate.
@@ -207,7 +207,7 @@ Sets the Y coordinate.
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:114](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L114)
+Defined in: [src/camera/camera/Camera2D.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L114)
 
 
 Returns the Z coordinate. (Unused)
@@ -225,7 +225,7 @@ Z coordinate
 
 > **setPosition**(`x`, `y?`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:197](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/camera/camera/Camera2D.ts#L197)
+Defined in: [src/camera/camera/Camera2D.ts:197](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/camera/camera/Camera2D.ts#L197)
 
 
 Sets the camera position.

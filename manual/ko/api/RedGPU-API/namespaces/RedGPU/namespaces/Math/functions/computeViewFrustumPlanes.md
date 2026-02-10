@@ -8,7 +8,7 @@
 
 > **computeViewFrustumPlanes**(`projectionMatrix`, `cameraMatrix`): `number`[][]
 
-Defined in: [src/math/computeViewFrustumPlanes.ts:27](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/math/computeViewFrustumPlanes.ts#L27)
+Defined in: [src/math/computeViewFrustumPlanes.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/computeViewFrustumPlanes.ts#L27)
 
 프로젝션 및 카메라 행렬로부터 6개의 뷰 프러스텀 평면을 계산합니다.
 

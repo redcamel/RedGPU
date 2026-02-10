@@ -8,7 +8,7 @@
 
 > **createPrimitiveGeometry**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/createPrimitiveGeometry.ts:33](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/primitive/core/createPrimitiveGeometry.ts#L33)
+Defined in: [src/primitive/core/createPrimitiveGeometry.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/createPrimitiveGeometry.ts#L33)
 
 
 Creates primitive geometry based on vertex and index data.

@@ -6,7 +6,7 @@
 
 # Class: FilmGrain
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:55](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L55)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:55](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L55)
 
 
 Film Grain post-processing effect.
@@ -35,7 +35,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new FilmGrain**(`redGPUContext`): `FilmGrain`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:117](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L117)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L117)
 
 
 Creates a FilmGrain instance.
@@ -60,7 +60,7 @@ Creates a FilmGrain instance.
 
 > `static` **HEAVY**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:70](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L70)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:70](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L70)
 
 
 Heavy grain preset
@@ -91,7 +91,7 @@ Heavy grain preset
 
 > `static` **MEDIUM**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:65](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L65)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:65](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L65)
 
 
 Medium intensity preset
@@ -122,7 +122,7 @@ Medium intensity preset
 
 > `static` **SUBTLE**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:60](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L60)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:60](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L60)
 
 
 Subtle grain preset
@@ -153,7 +153,7 @@ Subtle grain preset
 
 > `static` **VINTAGE**: `object`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:75](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L75)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:75](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L75)
 
 
 Vintage preset
@@ -186,7 +186,7 @@ Vintage preset
 
 > **get** **coloredGrain**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:183](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L183)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:183](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L183)
 
 
 Returns the colored grain ratio.
@@ -199,7 +199,7 @@ Returns the colored grain ratio.
 
 > **set** **coloredGrain**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:191](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L191)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:191](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L191)
 
 
 Sets the colored grain ratio. (0 ~ 1)
@@ -222,7 +222,7 @@ Sets the colored grain ratio. (0 ~ 1)
 
 > **get** **filmGrainIntensity**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:132](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L132)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:132](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L132)
 
 
 Returns the grain intensity.
@@ -235,7 +235,7 @@ Returns the grain intensity.
 
 > **set** **filmGrainIntensity**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:140](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L140)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:140](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L140)
 
 
 Sets the grain intensity. (0 ~ 1)
@@ -258,7 +258,7 @@ Sets the grain intensity. (0 ~ 1)
 
 > **get** **filmGrainResponse**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:149](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L149)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:149](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L149)
 
 
 Returns the brightness response.
@@ -271,7 +271,7 @@ Returns the brightness response.
 
 > **set** **filmGrainResponse**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:157](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L157)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:157](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L157)
 
 
 Sets the brightness response. (0 ~ 2)
@@ -294,7 +294,7 @@ Sets the brightness response. (0 ~ 2)
 
 > **get** **filmGrainScale**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:166](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L166)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:166](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L166)
 
 
 Returns the grain scale.
@@ -307,7 +307,7 @@ Returns the grain scale.
 
 > **set** **filmGrainScale**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:174](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L174)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:174](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L174)
 
 
 Sets the grain scale. (0.1 ~ 20)
@@ -330,7 +330,7 @@ Sets the grain scale. (0.1 ~ 20)
 
 > **get** **grainSaturation**(): `number`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:200](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L200)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:200](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L200)
 
 
 Returns the grain saturation.
@@ -343,7 +343,7 @@ Returns the grain saturation.
 
 > **set** **grainSaturation**(`value`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:208](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L208)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:208](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L208)
 
 
 Sets the grain saturation. (0 ~ 2)
@@ -366,7 +366,7 @@ Sets the grain saturation. (0 ~ 2)
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L203)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L203)
 
 
 Returns the output texture view.
@@ -387,7 +387,7 @@ Returns the output texture view.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L117)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L117)
 
 
 Returns the RedGPU context.
@@ -408,7 +408,7 @@ Returns the RedGPU context.
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L133)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L133)
 
 
 Returns shader information. (Depends on MSAA state)
@@ -429,7 +429,7 @@ Returns shader information. (Depends on MSAA state)
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L125)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L125)
 
 
 Returns storage information.
@@ -450,7 +450,7 @@ Returns storage information.
 
 > **get** **systemUuniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L159)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L159)
 
 
 Returns system uniform information.
@@ -471,7 +471,7 @@ Returns system uniform information.
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L143)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L143)
 
 
 Returns the uniform buffer.
@@ -492,7 +492,7 @@ Returns the uniform buffer.
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L151)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L151)
 
 
 Returns uniform information.
@@ -513,7 +513,7 @@ Returns uniform information.
 
 > **get** **useDepthTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L101)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L101)
 
 
 Returns whether depth texture is used.
@@ -526,7 +526,7 @@ Returns whether depth texture is used.
 
 > **set** **useDepthTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L109)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L109)
 
 
 Sets whether depth texture is used.
@@ -553,7 +553,7 @@ Sets whether depth texture is used.
 
 > **get** **useGBufferNormalTexture**(): `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L77)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L77)
 
 
 Returns whether G-Buffer Normal texture is used.
@@ -566,7 +566,7 @@ Returns whether G-Buffer Normal texture is used.
 
 > **set** **useGBufferNormalTexture**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L85)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L85)
 
 
 Sets whether G-Buffer Normal texture is used.
@@ -593,7 +593,7 @@ Sets whether G-Buffer Normal texture is used.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L93)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L93)
 
 
 Returns the video memory usage.
@@ -614,7 +614,7 @@ Returns the video memory usage.
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L167)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L167)
 
 
 Workgroup Size X
@@ -627,7 +627,7 @@ Workgroup Size X
 
 > **set** **WORK\_SIZE\_X**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L171)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L171)
 
 ##### Parameters
 
@@ -651,7 +651,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.co
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L179)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L179)
 
 
 Workgroup Size Y
@@ -664,7 +664,7 @@ Workgroup Size Y
 
 > **set** **WORK\_SIZE\_Y**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L183)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L183)
 
 ##### Parameters
 
@@ -688,7 +688,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.co
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L191)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L191)
 
 
 Workgroup Size Z
@@ -701,7 +701,7 @@ Workgroup Size Z
 
 > **set** **WORK\_SIZE\_Z**(`value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L195)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L195)
 
 ##### Parameters
 
@@ -723,7 +723,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.co
 
 > **applyPreset**(`preset`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:221](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L221)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:221](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L221)
 
 
 Applies a preset.
@@ -744,7 +744,7 @@ Applies a preset.
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L211)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L211)
 
 
 Clears the effect.
@@ -763,7 +763,7 @@ Clears the effect.
 
 > **execute**(`view`, `gpuDevice`, `width`, `height`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L289)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L289)
 
 
 Executes the effect.
@@ -791,7 +791,7 @@ Executes the effect.
 
 > **init**(`redGPUContext`, `name`, `computeCodes`, `bindGroupLayout?`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L236)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L236)
 
 
 Initializes the effect.
@@ -821,7 +821,7 @@ Initializes the effect.
 
 > **render**(`view`, `width`, `height`, ...`sourceTextureInfo`): `ASinglePassPostEffectResult`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L322)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L322)
 
 
 Renders the effect.
@@ -852,7 +852,7 @@ Rendering result (texture and view)
 
 > **update**(`deltaTime`): `void`
 
-Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:238](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/effects/filmGrain/FilmGrain.ts#L238)
+Defined in: [src/postEffect/effects/filmGrain/FilmGrain.ts:238](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/filmGrain/FilmGrain.ts#L238)
 
 
 Updates the time. (For animation)
@@ -877,7 +877,7 @@ Updates the time. (For animation)
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/postEffect/core/ASinglePassPostEffect.ts#L366)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L366)
 
 
 Updates a uniform value.

@@ -8,7 +8,7 @@
 
 > **calculateMeshAABB**(`mesh`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshAABB.ts:27](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/bound/math/calculateMeshAABB.ts#L27)
+Defined in: [src/bound/math/calculateMeshAABB.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/bound/math/calculateMeshAABB.ts#L27)
 
 메시의 로컬 AABB를 월드 공간 AABB로 변환하여 계산합니다.
 

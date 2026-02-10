@@ -6,7 +6,7 @@
 
 # Class: PointLight
 
-Defined in: [src/light/lights/PointLight.ts:24](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L24)
+Defined in: [src/light/lights/PointLight.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L24)
 
 점광원(PointLight)을 정의하는 클래스입니다.
 
@@ -38,7 +38,7 @@ scene.lightManager.addPointLight(light);
 
 > **new PointLight**(`color?`, `intensity?`): `PointLight`
 
-Defined in: [src/light/lights/PointLight.ts:60](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L60)
+Defined in: [src/light/lights/PointLight.ts:60](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L60)
 
 새로운 PointLight 인스턴스를 생성합니다.
 
@@ -64,7 +64,7 @@ Defined in: [src/light/lights/PointLight.ts:60](https://github.com/redcamel/RedG
 
 > **drawDebugger**: `ADrawDebuggerLight`
 
-Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/core/ABaseLight.ts#L20)
+Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L20)
 
 광원의 디버깅 시각화를 위한 도우미 객체입니다.
 
@@ -84,7 +84,7 @@ Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/core/ABaseLight.ts#L82)
+Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L82)
 
 광원의 색상을 반환합니다.
 
@@ -100,7 +100,7 @@ ColorRGB 객체
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/core/ABaseLight.ts#L93)
+Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L93)
 
 광원의 색상을 설정합니다.
 
@@ -127,7 +127,7 @@ Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/core/ABaseLight.ts#L60)
+Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L60)
 
 디버깅 시각화 기능의 활성화 여부를 반환합니다.
 
@@ -143,7 +143,7 @@ Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/core/ABaseLight.ts#L71)
+Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L71)
 
 디버깅 시각화 기능을 활성화하거나 비활성화합니다.
 
@@ -170,7 +170,7 @@ Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU
 
 > **get** **intensity**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/core/ABaseLight.ts#L104)
+Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L104)
 
 광원의 세기를 반환합니다.
 
@@ -186,7 +186,7 @@ Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGP
 
 > **set** **intensity**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/core/ABaseLight.ts#L115)
+Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L115)
 
 광원의 세기를 설정합니다.
 
@@ -213,7 +213,7 @@ Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGP
 
 > **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/PointLight.ts:137](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L137)
+Defined in: [src/light/lights/PointLight.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L137)
 
 광원의 위치를 [x, y, z] 형태로 반환합니다.
 
@@ -233,7 +233,7 @@ Defined in: [src/light/lights/PointLight.ts:137](https://github.com/redcamel/Red
 
 > **get** **radius**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:148](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L148)
+Defined in: [src/light/lights/PointLight.ts:148](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L148)
 
 광원의 반경을 반환합니다.
 
@@ -249,7 +249,7 @@ Defined in: [src/light/lights/PointLight.ts:148](https://github.com/redcamel/Red
 
 > **set** **radius**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:159](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L159)
+Defined in: [src/light/lights/PointLight.ts:159](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L159)
 
 광원의 반경을 설정합니다.
 
@@ -272,7 +272,7 @@ Defined in: [src/light/lights/PointLight.ts:159](https://github.com/redcamel/Red
 
 > **get** **x**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:71](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L71)
+Defined in: [src/light/lights/PointLight.ts:71](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L71)
 
 X 좌표를 반환합니다.
 
@@ -288,7 +288,7 @@ X 좌표
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:82](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L82)
+Defined in: [src/light/lights/PointLight.ts:82](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L82)
 
 X 좌표를 설정합니다.
 
@@ -311,7 +311,7 @@ X 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:93](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L93)
+Defined in: [src/light/lights/PointLight.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L93)
 
 Y 좌표를 반환합니다.
 
@@ -327,7 +327,7 @@ Y 좌표
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:104](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L104)
+Defined in: [src/light/lights/PointLight.ts:104](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L104)
 
 Y 좌표를 설정합니다.
 
@@ -350,7 +350,7 @@ Y 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/light/lights/PointLight.ts:115](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L115)
+Defined in: [src/light/lights/PointLight.ts:115](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L115)
 
 Z 좌표를 반환합니다.
 
@@ -366,7 +366,7 @@ Z 좌표
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:126](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L126)
+Defined in: [src/light/lights/PointLight.ts:126](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L126)
 
 Z 좌표를 설정합니다.
 
@@ -387,7 +387,7 @@ Z 좌표를 설정합니다.
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/light/lights/PointLight.ts:176](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/light/lights/PointLight.ts#L176)
+Defined in: [src/light/lights/PointLight.ts:176](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/PointLight.ts#L176)
 
 광원의 위치를 설정합니다.
 

@@ -6,7 +6,7 @@
 
 # Class: BRDFGenerator
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:13](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L13)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:13](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L13)
 
 
 Class that generates BRDF LUT (Look-Up Table).
@@ -20,7 +20,7 @@ Pre-bakes a 2D BRDF integration texture for the Split Sum Approximation techniqu
 
 > **new BRDFGenerator**(`redGPUContext`): `BRDFGenerator`
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:27](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L27)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L27)
 
 
 Creates a BRDFGenerator instance.
@@ -43,7 +43,7 @@ Creates a BRDFGenerator instance.
 
 > **get** **brdfLUTTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:40](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L40)
+Defined in: [src/resources/texture/ibl/core/brdf/BRDFGenerator.ts:40](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/ibl/core/brdf/BRDFGenerator.ts#L40)
 
 
 Returns the BRDF LUT texture.

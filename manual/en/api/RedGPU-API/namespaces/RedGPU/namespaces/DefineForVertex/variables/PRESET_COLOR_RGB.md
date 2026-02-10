@@ -8,4 +8,4 @@
 
 > **PRESET\_COLOR\_RGB**: `object`
 
-Defined in: [src/defineProperty/DefineForVertex.ts:84](https://github.com/redcamel/RedGPU/blob/b3274202eaabee728fa50abc8b146faf4bbca5f8/src/defineProperty/DefineForVertex.ts#L84)
+Defined in: [src/defineProperty/DefineForVertex.ts:84](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/defineProperty/DefineForVertex.ts#L84)
