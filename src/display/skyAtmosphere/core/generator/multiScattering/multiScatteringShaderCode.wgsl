@@ -9,6 +9,13 @@ struct AtmosphereParameters {
     mieScattering: f32,
     mieExtinction: f32,
     rayleighScattering: vec3<f32>,
+    mieAnisotropy: f32,
+    rayleighScaleHeight: f32,
+    mieScaleHeight: f32,
+    cameraHeight: f32,
+    dummy1: f32,
+    ozoneAbsorption: vec3<f32>,
+    dummy2: f32,
 };
 @group(0) @binding(3) var<uniform> params: AtmosphereParameters;
 
@@ -23,7 +30,6 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
 }
 
 fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    // [KO] 바뀐 Transmittance 매핑에 맞춰 샘플링 (Ground=1)
     let uv = vec2<f32>((cos_theta + 1.0) * 0.5, 1.0 - (h / params.atmosphereHeight));
     return textureSampleLevel(transmittanceTexture, tSampler, uv, 0.0).rgb;
 }
@@ -35,8 +41,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
     let cos_sun_theta = uv.x * 2.0 - 1.0;
-    
-    // [KO] uv.y 매핑 수정
     let h = (1.0 - uv.y) * params.atmosphereHeight;
     
     var multi_scat_as_vector = vec3<f32>(0.0);
@@ -55,7 +59,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         
         if (t_max > 0.0) {
             let transmittance = get_transmittance(h, ray_cos_theta);
-            let height_factor = exp(-h / 8.0);
+            let height_factor = exp(-h / params.rayleighScaleHeight);
             multi_scat_as_vector += (1.0 - transmittance) * height_factor;
         }
     }

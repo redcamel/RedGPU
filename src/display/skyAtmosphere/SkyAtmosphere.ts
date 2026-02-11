@@ -59,15 +59,22 @@ class SkyAtmosphere {
 	#mieExtinction: number = 0.00444;
 	#rayleighScattering: [number, number, number] = [0.0058, 0.0135, 0.0331];
 	
-	// Step 4 파라미터
+	// Advanced Parameters
+	#rayleighScaleHeight: number = 8.0;
+	#mieScaleHeight: number = 1.2;
 	#mieAnisotropy: number = 0.8;
+	#ozoneAbsorption: [number, number, number] = [0.00065, 0.00188, 0.00008];
+	
 	#sunSize: number = 0.5;
+	#sunIntensity: number = 100.0;
+	#exposure: number = 1.0;
 	
 	#sunElevation: number = 45;
 	#sunAzimuth: number = 0;
 	
 	#dirtyLUT: boolean = true;
 	#dirtySkyView: boolean = true;
+	#prevCameraHeight: number = -1;
 
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
@@ -108,8 +115,21 @@ class SkyAtmosphere {
 		this.#dirtyLUT = true;
 	}
 
+	get rayleighScaleHeight(): number { return this.#rayleighScaleHeight; }
+	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#rayleighScaleHeight = v; this.#dirtyLUT = true; }
+
+	get mieScaleHeight(): number { return this.#mieScaleHeight; }
+	set mieScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#mieScaleHeight = v; this.#dirtyLUT = true; }
+
 	get mieAnisotropy(): number { return this.#mieAnisotropy; }
 	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#mieAnisotropy = v; this.#dirtySkyView = true; }
+
+	get ozoneAbsorption(): [number, number, number] { return this.#ozoneAbsorption; }
+	set ozoneAbsorption(v: [number, number, number]) {
+		v.forEach(val => validatePositiveNumberRange(val, 0, 1.0));
+		this.#ozoneAbsorption = v;
+		this.#dirtyLUT = true;
+	}
 
 	get sunSize(): number { return this.#sunSize; }
 	set sunSize(v: number) {
@@ -118,19 +138,17 @@ class SkyAtmosphere {
 		this.#material.sunSize = v;
 	}
 
+	get sunIntensity(): number { return this.#sunIntensity; }
+	set sunIntensity(v: number) { validatePositiveNumberRange(v, 0, 10000); this.#sunIntensity = v; }
+
+	get exposure(): number { return this.#exposure; }
+	set exposure(v: number) { validatePositiveNumberRange(v, 0, 100); this.#exposure = v; }
+
 	get sunElevation(): number { return this.#sunElevation; }
-	set sunElevation(v: number) {
-		validateNumberRange(v, -90, 90);
-		this.#sunElevation = v;
-		this.#updateSunDirection();
-	}
+	set sunElevation(v: number) { validateNumberRange(v, -90, 90); this.#sunElevation = v; this.#updateSunDirection(); }
 
 	get sunAzimuth(): number { return this.#sunAzimuth; }
-	set sunAzimuth(v: number) {
-		validateNumberRange(v, -360, 360);
-		this.#sunAzimuth = v;
-		this.#updateSunDirection();
-	}
+	set sunAzimuth(v: number) { validateNumberRange(v, -360, 360); this.#sunAzimuth = v; this.#updateSunDirection(); }
 
 	get sunDirection(): Float32Array { return this.#sunDirection; }
 
@@ -157,7 +175,11 @@ class SkyAtmosphere {
 			mieExtinction: this.#mieExtinction,
 			rayleighScattering: this.#rayleighScattering,
 			sunDirection: this.#sunDirection,
-			mieAnisotropy: this.#mieAnisotropy
+			mieAnisotropy: this.#mieAnisotropy,
+			rayleighScaleHeight: this.#rayleighScaleHeight,
+			mieScaleHeight: this.#mieScaleHeight,
+			cameraHeight: 0.2, // 임시 고정
+			ozoneAbsorption: this.#ozoneAbsorption
 		};
 
 		if (this.#dirtyLUT) {
@@ -185,7 +207,6 @@ class SkyAtmosphere {
 		mat4.translate(this.modelMatrix, this.modelMatrix, cameraPos);
 		mat4.scale(this.modelMatrix, this.modelMatrix, [5000, 5000, 5000]);
 
-		// 정점 유니폼 업데이트 (modelMatrix)
 		this.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
 
 		if (this.#dirtyPipeline || this.#material.dirtyPipeline || this.#prevSystemUniform_Vertex_UniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
