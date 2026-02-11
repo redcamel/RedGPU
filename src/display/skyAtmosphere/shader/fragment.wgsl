@@ -31,22 +31,31 @@ fn main(outData: OutData) -> FragmentOutput {
     // 현재 카메라 높이 (일단 해수면 근처 0.2km로 가정)
     let h = 0.2;
     
-    // LUT 샘플링 좌표 계산
+    // 1. 시야각에 따른 투과율 (대기의 두께감 표현)
     let uv = vec2<f32>((cos_theta + 1.0) * 0.5, h / atmosphereHeight);
     let transmittance = textureSample(transmittanceTexture, transmittanceTextureSampler, uv).rgb;
     
-    // 태양 방향과의 각도 계산
-    let sun_cos_theta = dot(view_dir, normalize(uniforms.sunDirection));
+    // 2. 태양 방향과의 각도 및 태양 투과율 (노을 색감의 핵심)
+    let sun_dir = normalize(uniforms.sunDirection);
+    let sun_cos_theta = dot(sun_dir, up);
+    let sun_uv = vec2<f32>(sun_cos_theta * 0.5 + 0.5, h / atmosphereHeight);
+    let sun_transmittance = textureSample(transmittanceTexture, transmittanceTextureSampler, sun_uv).rgb;
     
-    // 투과율을 기반으로 색상 결정
-    var color = 1.0 - transmittance;
+    // 3. 태양 디스크와 주변 산란 광량 계산
+    let view_sun_cos_theta = dot(view_dir, sun_dir);
+    let sun_disk = smoothstep(0.998, 1.0, view_sun_cos_theta);
     
-    // 단순 태양 디스크 표현
-    let sun_disk = smoothstep(0.99, 1.0, sun_cos_theta);
+    // 4. 하늘 바탕색 결정 (태양 투과율을 곱해 노을빛 적용)
+    // 낮에는 푸른색, 노을시엔 태양 투과율에 따라 붉은색으로 전이
+    let base_sky_color = mix(vec3<f32>(0.3, 0.5, 0.9), vec3<f32>(0.1, 0.2, 0.4), clamp(cos_theta, 0.0, 1.0));
+    let sky_color = base_sky_color * sun_transmittance * 3.0; // 에너지를 보정하여 밝게 유지
     
-    // 하늘색 혼합 (태양 위치에 따라 색상 변화)
-    let sky_color = mix(vec3<f32>(0.3, 0.5, 0.9), vec3<f32>(0.1, 0.2, 0.4), clamp(cos_theta, 0.0, 1.0));
-    color = color * sky_color * 2.0 + sun_disk * transmittance * 5.0;
+    // 5. 최종 합성
+    // (1.0 - transmittance)는 대기 농도를 의미함
+    var color = (1.0 - transmittance) * sky_color;
+    
+    // 태양 디스크 추가 (태양 투과율이 적용된 색상)
+    color = color + sun_disk * sun_transmittance * 10.0;
 
     output.color = vec4<f32>(color, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);

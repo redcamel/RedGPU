@@ -164,31 +164,39 @@ class SkyAtmosphere {
 
 	/** [KO] 미(Mie) 산란 계수를 반환합니다. [EN] Returns the Mie scattering coefficient. */
 	get mieScattering(): number { return this.#mieScattering; }
-	/**
-	 * [KO] 미(Mie) 산란 계수를 설정합니다. 이 값이 높을수록 태양 주변 광륜이 커지고 대기가 뿌옇게 보입니다.
-	 * [EN] Sets the Mie scattering coefficient. Higher values result in larger sun halos and a hazier atmosphere.
-	 */
-	set mieScattering(v: number) { validatePositiveNumberRange(v, 0); this.#mieScattering = v; this.#dirtyLUT = true; }
-
-	/** [KO] 미(Mie) 소멸 계수를 반환합니다. [EN] Returns the Mie extinction coefficient. */
-	get mieExtinction(): number { return this.#mieExtinction; }
-	/**
-	 * [KO] 미(Mie) 소멸 계수를 설정합니다. 값이 높을수록 시야가 탁해지고 대기가 불투명해집니다.
-	 * [EN] Sets the Mie extinction coefficient. Higher values make the view murkier and the atmosphere more opaque.
-	 */
-	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0); this.#mieExtinction = v; this.#dirtyLUT = true; }
-
-	/** [KO] 레일리(Rayleigh) 산란 계수를 반환합니다. [EN] Returns the Rayleigh scattering coefficient. */
-	get rayleighScattering(): [number, number, number] { return this.#rayleighScattering; }
-	/**
-	 * [KO] 레일리(Rayleigh) 산란 계수를 설정합니다. 하늘의 기본 색상과 노을의 붉은 색감에 영향을 미칩니다.
-	 * [EN] Sets the Rayleigh scattering coefficient. Affects the primary sky color and sunset hues.
-	 */
-	set rayleighScattering(v: [number, number, number]) {
-		v.forEach(val => validatePositiveNumberRange(val, 0));
-		this.#rayleighScattering = v;
-		this.#dirtyLUT = true;
-	}
+		/**
+		 * [KO] 미(Mie) 산란 계수를 설정합니다. 이 값이 높을수록 태양 주변 광륜이 커지고 대기가 뿌옇게 보입니다.
+		 * [EN] Sets the Mie scattering coefficient. Higher values result in larger sun halos and a hazier atmosphere.
+		 */
+		set mieScattering(v: number) {
+			validatePositiveNumberRange(v, 0, 1.0);
+			this.#mieScattering = v;
+			this.#dirtyLUT = true;
+		}
+	
+		/** [KO] 미(Mie) 소멸 계수를 반환합니다. [EN] Returns the Mie extinction coefficient. */
+		get mieExtinction(): number { return this.#mieExtinction; }
+		/**
+		 * [KO] 미(Mie) 소멸 계수를 설정합니다. 값이 높을수록 시야가 탁해지고 대기가 불투명해집니다.
+		 * [EN] Sets the Mie extinction coefficient. Higher values make the view murkier and the atmosphere more opaque.
+		 */
+		set mieExtinction(v: number) {
+			validatePositiveNumberRange(v, 0, 1.0);
+			this.#mieExtinction = v;
+			this.#dirtyLUT = true;
+		}
+	
+		/** [KO] 레일리(Rayleigh) 산란 계수를 반환합니다. [EN] Returns the Rayleigh scattering coefficient. */
+		get rayleighScattering(): [number, number, number] { return this.#rayleighScattering; }
+		/**
+		 * [KO] 레일리(Rayleigh) 산란 계수를 설정합니다. 하늘의 기본 색상과 노을의 붉은 색감에 영향을 미칩니다.
+		 * [EN] Sets the Rayleigh scattering coefficient. Affects the primary sky color and sunset hues.
+		 */
+		set rayleighScattering(v: [number, number, number]) {
+			v.forEach(val => validatePositiveNumberRange(val, 0, 1.0));
+			this.#rayleighScattering = v;
+			this.#dirtyLUT = true;
+		}
 
 	/**
 	 * [KO] 태양의 고도(Elevation, -90~90도)를 반환합니다.
