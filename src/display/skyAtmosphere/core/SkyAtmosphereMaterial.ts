@@ -5,13 +5,19 @@ import Sampler from "../../../resources/sampler/Sampler";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
 import TransmittanceLUTTexture from "./generator/TransmittanceLUTTexture";
+import MultiScatteringLUTTexture from "./generator/MultiScatteringLUTTexture";
+import SkyViewLUTTexture from "./generator/SkyViewLUTTexture";
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 interface SkyAtmosphereMaterial {
 	/** [KO] 투과율 LUT 텍스처 [EN] Transmittance LUT texture */
 	transmittanceTexture: TransmittanceLUTTexture;
-	/** [KO] 투과율 텍스처 샘플러 [EN] Transmittance texture sampler */
+	/** [KO] 다중 산란 LUT 텍스처 [EN] Multi-scattering LUT texture */
+	multiScatteringTexture: MultiScatteringLUTTexture;
+	/** [KO] 스카이 뷰 LUT 텍스처 [EN] Sky-View LUT texture */
+	skyViewTexture: SkyViewLUTTexture;
+	/** [KO] LUT 텍스처 샘플러 [EN] LUT texture sampler */
 	transmittanceTextureSampler: Sampler;
 	/** [KO] 태양 방향 [EN] Sun direction */
 	sunDirection: Float32Array;
@@ -20,13 +26,6 @@ interface SkyAtmosphereMaterial {
 /**
  * [KO] SkyAtmosphere 렌더링에 사용되는 전용 머티리얼 클래스입니다.
  * [EN] Material class exclusively used for SkyAtmosphere rendering.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템 내부적으로 사용되는 머티리얼 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is a material class used internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- *
- * @category SkyAtmosphere
  */
 class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 	/**
@@ -36,12 +35,9 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 	dirtyPipeline: boolean = false
 
 	/**
-	 * [KO] SkyAtmosphereMaterial 인스턴스를 생성합니다. (내부 시스템 전용)
-	 * [EN] Creates a SkyAtmosphereMaterial instance. (Internal system only)
+	 * [KO] SkyAtmosphereMaterial 인스턴스를 생성합니다.
 	 *
-	 * @param redGPUContext -
-	 * [KO] RedGPUContext 인스턴스
-	 * [EN] RedGPUContext instance
+	 * @param redGPUContext - RedGPUContext 인스턴스
 	 */
 	constructor(redGPUContext: RedGPUContext) {
 		super(
@@ -66,6 +62,8 @@ DefineForFragment.defineVec3(SkyAtmosphereMaterial, [
 ])
 DefineForFragment.defineTexture(SkyAtmosphereMaterial, [
 	'transmittanceTexture',
+	'multiScatteringTexture',
+	'skyViewTexture',
 ])
 DefineForFragment.defineSampler(SkyAtmosphereMaterial, [
 	'transmittanceTextureSampler',

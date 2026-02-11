@@ -53,7 +53,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
     let cos_theta = uv.x * 2.0 - 1.0;
-    let h = uv.y * params.atmosphereHeight;
+    
+    // [KO] uv.y = 1 이 지면(h=0), uv.y = 0 이 대기 끝(h=60)이 되도록 수정
+    // [EN] Map uv.y = 1 to Ground (h=0), uv.y = 0 to Atmosphere Boundary (h=60)
+    let h = (1.0 - uv.y) * params.atmosphereHeight;
     
     let optical_depth = get_optical_depth(h, cos_theta);
     let transmittance = exp(-optical_depth);
