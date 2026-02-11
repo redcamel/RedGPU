@@ -36,13 +36,17 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKY_ATMOSPHERE'
  * [KO] 이 클래스는 거대 구체 지오메트리를 사용하여 카메라를 추적하며, 레일리(Rayleigh) 및 미(Mie) 산란 연산을 통해 사실적인 하늘, 노을, 대기 효과를 렌더링합니다.
  * [EN] This class uses large sphere geometry to track the camera and renders realistic sky, sunset, and atmospheric effects through Rayleigh and Mie scattering calculations.
  *
+ * [KO] 태양의 위치는 업계 표준인 고도(Elevation)와 방위각(Azimuth) 체계를 사용하여 제어하며, 이를 통해 시간대별 대기 변화를 직관적으로 연출할 수 있습니다.
+ * [EN] The sun's position is controlled using the industry-standard Elevation and Azimuth system, allowing for intuitive art direction of atmospheric changes over time.
+ *
  * ### Example
  * ```typescript
  * const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
  *
- * // 파라미터 조절 (Adjust parameters)
- * skyAtmosphere.atmosphereHeight = 60;
- * skyAtmosphere.sunDirection = new Float32Array([1, 0.2, 0]);
+ * // 태양 위치 설정 (일몰 연출: 고도 5도)
+ * // Sun orientation (Sunset: elevation 5 degrees)
+ * skyAtmosphere.sunElevation = 5;
+ * skyAtmosphere.sunAzimuth = 180;
  *
  * view.skyAtmosphere = skyAtmosphere;
  * ```
@@ -101,8 +105,8 @@ class SkyAtmosphere {
 	 */
 	#transmittanceGenerator: TransmittanceGenerator
 	/**
-	 * [KO] 태양 방향 벡터
-	 * [EN] Sun direction vector
+	 * [KO] 계산된 태양 방향 벡터 (정규화됨)
+	 * [EN] Calculated sun direction vector (normalized)
 	 */
 	#sunDirection: Float32Array = new Float32Array([0, 1, 0])
 	/**
@@ -111,18 +115,17 @@ class SkyAtmosphere {
 	 */
 	#prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
 
-	/** [KO] 지구 반지름 (km) [EN] Earth radius (km) */
+	// Physics Parameters
 	#earthRadius: number = 6360.0;
-	/** [KO] 대기층 두께 (km) [EN] Atmosphere thickness (km) */
 	#atmosphereHeight: number = 60.0;
-	/** [KO] 미(Mie) 산란 계수 [EN] Mie scattering coefficient */
 	#mieScattering: number = 0.00399;
-	/** [KO] 미(Mie) 소멸 계수 [EN] Mie extinction coefficient */
 	#mieExtinction: number = 0.00444;
-	/** [KO] 레일리(Rayleigh) 산란 계수 [EN] Rayleigh scattering coefficient */
 	#rayleighScattering: [number, number, number] = [0.0058, 0.0135, 0.0331];
-	/** [KO] LUT 갱신 필요 여부 [EN] Whether LUT needs updating */
 	#dirtyLUT: boolean = true;
+
+	// Sun Orientation (Industry standard coordinates)
+	#sunElevation: number = 45;
+	#sunAzimuth: number = 0;
 
 	/**
 	 * [KO] SkyAtmosphere 인스턴스를 생성합니다.
@@ -145,70 +148,41 @@ class SkyAtmosphere {
 		// LUT Generator 초기화
 		this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext)
 		this.#material.transmittanceTexture = this.#transmittanceGenerator.lutTexture
+		
+		this.#updateSunDirection();
 	}
 
-	/** [KO] 지구 반지름을 반환합니다. [EN] Returns the earth radius. */
+	/** [KO] 지구 반지름(km)을 반환합니다. [EN] Returns the earth radius(km). */
 	get earthRadius(): number { return this.#earthRadius; }
-	/** [KO] 지구 반지름을 설정합니다. [EN] Sets the earth radius. */
-	set earthRadius(v: number) {
-		validatePositiveNumberRange(v, 1);
-		this.#earthRadius = v;
-		this.#dirtyLUT = true;
-	}
+	/** [KO] 지구 반지름(km)을 설정합니다. [EN] Sets the earth radius(km). */
+	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#earthRadius = v; this.#dirtyLUT = true; }
 
-	/** [KO] 대기층 두께를 반환합니다. [EN] Returns the atmosphere height. */
+	/** [KO] 대기층 두께(km)를 반환합니다. [EN] Returns the atmosphere height(km). */
 	get atmosphereHeight(): number { return this.#atmosphereHeight; }
-	/** [KO] 대기층 두께를 설정합니다. [EN] Sets the atmosphere height. */
-	set atmosphereHeight(v: number) {
-		validatePositiveNumberRange(v, 1);
-		this.#atmosphereHeight = v;
-		this.#dirtyLUT = true;
-	}
+	/** [KO] 대기층 두께(km)를 설정합니다. [EN] Sets the atmosphere height(km). */
+	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#atmosphereHeight = v; this.#dirtyLUT = true; }
 
 	/** [KO] 미(Mie) 산란 계수를 반환합니다. [EN] Returns the Mie scattering coefficient. */
 	get mieScattering(): number { return this.#mieScattering; }
 	/**
-	 * [KO] 미(Mie) 산란 계수를 설정합니다.
-	 * [EN] Sets the Mie scattering coefficient.
-	 *
-	 * [KO] 이 값이 높을수록 태양 주변의 광륜(Halo)이 커지고 대기가 뿌옇게(Haze) 보입니다.
-	 * [EN] Higher values result in a larger halo around the sun and a hazier atmosphere.
-	 *
-	 * @param v - [KO] 산란 계수 [EN] Scattering coefficient
+	 * [KO] 미(Mie) 산란 계수를 설정합니다. 이 값이 높을수록 태양 주변 광륜이 커지고 대기가 뿌옇게 보입니다.
+	 * [EN] Sets the Mie scattering coefficient. Higher values result in larger sun halos and a hazier atmosphere.
 	 */
-	set mieScattering(v: number) {
-		validatePositiveNumberRange(v, 0);
-		this.#mieScattering = v;
-		this.#dirtyLUT = true;
-	}
+	set mieScattering(v: number) { validatePositiveNumberRange(v, 0); this.#mieScattering = v; this.#dirtyLUT = true; }
 
 	/** [KO] 미(Mie) 소멸 계수를 반환합니다. [EN] Returns the Mie extinction coefficient. */
 	get mieExtinction(): number { return this.#mieExtinction; }
 	/**
-	 * [KO] 미(Mie) 소멸 계수를 설정합니다.
-	 * [EN] Sets the Mie extinction coefficient.
-	 *
-	 * [KO] 대기 중 먼지나 수증기에 의한 빛의 흡수 및 산란 소멸 정도를 결정하며, 값이 높을수록 시야가 탁해지고 불투명해집니다.
-	 * [EN] Determines the degree of light absorption and scattering extinction by dust or water vapor; higher values make the view murkier and more opaque.
-	 *
-	 * @param v - [KO] 소멸 계수 [EN] Extinction coefficient
+	 * [KO] 미(Mie) 소멸 계수를 설정합니다. 값이 높을수록 시야가 탁해지고 대기가 불투명해집니다.
+	 * [EN] Sets the Mie extinction coefficient. Higher values make the view murkier and the atmosphere more opaque.
 	 */
-	set mieExtinction(v: number) {
-		validatePositiveNumberRange(v, 0);
-		this.#mieExtinction = v;
-		this.#dirtyLUT = true;
-	}
+	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0); this.#mieExtinction = v; this.#dirtyLUT = true; }
 
 	/** [KO] 레일리(Rayleigh) 산란 계수를 반환합니다. [EN] Returns the Rayleigh scattering coefficient. */
 	get rayleighScattering(): [number, number, number] { return this.#rayleighScattering; }
 	/**
-	 * [KO] 레일리(Rayleigh) 산란 계수를 설정합니다.
-	 * [EN] Sets the Rayleigh scattering coefficient.
-	 *
-	 * [KO] 대기 분자에 의한 산란을 결정하며, 하늘의 기본 색상(파란색)과 노을의 붉은 색감에 직접적인 영향을 미칩니다.
-	 * [EN] Determines scattering by atmospheric molecules, directly affecting the primary sky color (blue) and the reddish tones of sunsets.
-	 *
-	 * @param v - [KO] [R, G, B] 산란 계수 [EN] [R, G, B] Scattering coefficients
+	 * [KO] 레일리(Rayleigh) 산란 계수를 설정합니다. 하늘의 기본 색상과 노을의 붉은 색감에 영향을 미칩니다.
+	 * [EN] Sets the Rayleigh scattering coefficient. Affects the primary sky color and sunset hues.
 	 */
 	set rayleighScattering(v: [number, number, number]) {
 		v.forEach(val => validatePositiveNumberRange(val, 0));
@@ -217,41 +191,61 @@ class SkyAtmosphere {
 	}
 
 	/**
-	 * [KO] 태양 방향을 반환합니다.
-	 * [EN] Returns the sun direction.
-	 *
-	 * @returns
-	 * [KO] 태양 방향 벡터
-	 * [EN] Sun direction vector
+	 * [KO] 태양의 고도(Elevation, -90~90도)를 반환합니다.
+	 * [EN] Returns the sun elevation (Elevation, -90 to 90 degrees).
 	 */
-	get sunDirection(): Float32Array {
-		return this.#sunDirection;
+	get sunElevation(): number { return this.#sunElevation; }
+	/**
+	 * [KO] 태양의 고도(Elevation, -90~90도)를 설정합니다. 0도는 지평선, 90도는 정오를 의미합니다.
+	 * [EN] Sets the sun elevation (Elevation, -90 to 90 degrees). 0 means horizon, 90 means zenith.
+	 */
+	set sunElevation(v: number) {
+		validateNumberRange(v, -90, 90);
+		this.#sunElevation = v;
+		this.#updateSunDirection();
 	}
 
 	/**
-	 * [KO] 태양 방향을 설정합니다.
-	 * [EN] Sets the sun direction.
-	 *
-	 * @param value -
-	 * [KO] 태양 방향 벡터
-	 * [EN] Sun direction vector
+	 * [KO] 태양의 방위각(Azimuth, -360~360도)을 반환합니다.
+	 * [EN] Returns the sun azimuth (Azimuth, -360 to 360 degrees).
 	 */
-	set sunDirection(value: Float32Array) {
-		value.forEach(val => validateNumberRange(val, -1, 1));
-		this.#sunDirection = value;
-		this.#material.sunDirection = value;
+	get sunAzimuth(): number { return this.#sunAzimuth; }
+	/**
+	 * [KO] 태양의 방위각(Azimuth, -360~360도)을 설정합니다.
+	 * [EN] Sets the sun azimuth (Azimuth, -360 to 360 degrees).
+	 */
+	set sunAzimuth(v: number) {
+		validateNumberRange(v, -360, 360);
+		this.#sunAzimuth = v;
+		this.#updateSunDirection();
+	}
+
+	/**
+	 * [KO] 계산된 태양 방향 벡터를 반환합니다. (정규화됨)
+	 * [EN] Returns the calculated sun direction vector. (Normalized)
+	 */
+	get sunDirection(): Float32Array { return this.#sunDirection; }
+
+	/**
+	 * 고도와 방위각을 기반으로 구면 좌표계 연산을 통해 방향 벡터를 갱신합니다.
+	 * @private
+	 */
+	#updateSunDirection(): void {
+		const phi = (90 - this.#sunElevation) * (Math.PI / 180);
+		const theta = (this.#sunAzimuth) * (Math.PI / 180);
+
+		this.#sunDirection[0] = Math.sin(phi) * Math.cos(theta);
+		this.#sunDirection[1] = Math.cos(phi);
+		this.#sunDirection[2] = Math.sin(phi) * Math.sin(theta);
+		
+		this.#material.sunDirection = this.#sunDirection;
 	}
 
 	/**
 	 * [KO] SkyAtmosphere를 렌더링합니다.
 	 * [EN] Renders the SkyAtmosphere.
 	 *
-	 * [KO] 매 프레임 호출되어 카메라를 추적하고, 필요한 경우 LUT를 갱신하며 GPU 렌더링 명령을 실행합니다.
-	 * [EN] Called every frame to track the camera, update the LUT if necessary, and execute GPU rendering commands.
-	 *
-	 * @param renderViewStateData -
-	 * [KO] 렌더링 상태 및 디버그 정보
-	 * [EN] Rendering state and debug info
+	 * @param renderViewStateData - 렌더링 상태 정보
 	 */
 	render(renderViewStateData: RenderViewStateData): void {
 		const {currentRenderPassEncoder, view} = renderViewStateData
@@ -259,7 +253,6 @@ class SkyAtmosphere {
 		const {triangleCount, indexCount, format} = indexBuffer
 		const {gpuDevice, antialiasingManager} = this.#redGPUContext
 
-		// LUT 갱신 체크
 		if (this.#dirtyLUT) {
 			this.#transmittanceGenerator.render({
 				earthRadius: this.#earthRadius,
@@ -272,15 +265,12 @@ class SkyAtmosphere {
 		}
 
 		this.#updateMSAAStatus();
-
 		if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
 
-		// 카메라 위치에 맞춰 구체 이동 (카메라 팔로잉)
 		const {camera} = view;
 		const cameraPos = (camera as any).position || [0, 0, 0];
 		mat4.identity(this.modelMatrix);
 		mat4.translate(this.modelMatrix, this.modelMatrix, cameraPos);
-		// 매우 크게 확장
 		mat4.scale(this.modelMatrix, this.modelMatrix, [5000, 5000, 5000]);
 
 		this.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
@@ -296,18 +286,14 @@ class SkyAtmosphere {
 				...view.basicRenderBundleEncoderDescriptor,
 				label: 'skyAtmosphere'
 			})
-			const {gpuRenderInfo} = this
-			const {vertexUniformBindGroup, pipeline} = gpuRenderInfo
-			bundleEncoder.setPipeline(pipeline)
+			bundleEncoder.setPipeline(this.gpuRenderInfo.pipeline)
 			bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
 			bundleEncoder.setVertexBuffer(0, this.#geometry.vertexBuffer.gpuBuffer)
-			bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
+			bundleEncoder.setBindGroup(1, this.gpuRenderInfo.vertexUniformBindGroup);
 			bundleEncoder.setBindGroup(2, this.#material.gpuRenderInfo.fragmentUniformBindGroup)
 			bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, format)
 			bundleEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
-			this.#renderBundle = bundleEncoder.finish({
-				label: 'renderBundle skyAtmosphere',
-			})
+			this.#renderBundle = bundleEncoder.finish({ label: 'renderBundle skyAtmosphere' })
 		}
 
 		currentRenderPassEncoder.executeBundles([this.#renderBundle])
@@ -318,86 +304,55 @@ class SkyAtmosphere {
 		renderViewStateData.numPoints += indexCount
 	}
 
-	/**
-	 * MSAA (Multi-Sample Anti-Aliasing) 상태 변경을 확인하고 파이프라인을 갱신합니다.
-	 * @private
-	 */
 	#updateMSAAStatus(): void {
 		const {changedMSAA} = this.#redGPUContext.antialiasingManager
-		if (changedMSAA) {
-			this.#dirtyPipeline = true
-		}
+		if (changedMSAA) this.#dirtyPipeline = true
 	}
 
-	/**
-	 * GPU 렌더링 정보를 초기화합니다.
-	 * @private
-	 * @param redGPUContext - RedGPU 렌더링 컨텍스트
-	 */
 	#initGPURenderInfos(redGPUContext: RedGPUContext): void {
 		const {resourceManager} = this.#redGPUContext
-		const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKY_ATMOSPHERE_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
+		const vertex_BindGroupLayout = resourceManager.getGPUBindGroupLayout('SKY_ATMOSPHERE_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
 			'SKY_ATMOSPHERE_VERTEX_BIND_GROUP_LAYOUT',
 			getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
 		)
 
 		const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
-		const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKY_ATMOSPHERE_VERTEX_UNIFORM_BUFFER', 'SKY_ATMOSPHERE_VERTEX_UNIFORM_BUFFER')
-
+		const vertexUniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKY_ATMOSPHERE_VERTEX_UNIFORM_BUFFER', 'SKY_ATMOSPHERE_VERTEX_UNIFORM_BUFFER')
+		
 		const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {
 			layout: vertex_BindGroupLayout,
 			label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
 			entries: [{
 				binding: 0,
-				resource: {
-					buffer: vertexUniformBuffer.gpuBuffer,
-					offset: 0,
-					size: vertexUniformBuffer.size
-				},
+				resource: { buffer: vertexUniformBuffer.gpuBuffer, offset: 0, size: vertexUniformBuffer.size },
 			}]
 		}
-		const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
+		const vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
 		this.gpuRenderInfo = new VertexGPURenderInfo(
-			null,
-			SHADER_INFO.shaderSourceVariant,
-			SHADER_INFO.conditionalBlocks,
-			UNIFORM_STRUCT,
-			vertex_BindGroupLayout,
-			vertexUniformBuffer,
-			vertexUniformBindGroup,
-			this.#updatePipeline(),
+			null, SHADER_INFO.shaderSourceVariant, SHADER_INFO.conditionalBlocks, UNIFORM_STRUCT,
+			vertex_BindGroupLayout, vertexUniformBuffer, vertexUniformBindGroup, this.#updatePipeline(),
 		)
 	}
 
-	/**
-	 * 렌더링 파이프라인을 업데이트합니다.
-	 * @private
-	 * @returns 새로 생성된 GPU 렌더 파이프라인
-	 */
 	#updatePipeline(): GPURenderPipeline {
 		const {resourceManager, gpuDevice, antialiasingManager} = this.#redGPUContext
-		const vModuleDescriptor: GPUShaderModuleDescriptor = {code: vertexModuleSource}
-		const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
-			VERTEX_SHADER_MODULE_NAME,
-			vModuleDescriptor
-		)
+		const vertexShaderModule = resourceManager.createGPUShaderModule(VERTEX_SHADER_MODULE_NAME, {code: vertexModuleSource})
 		const vertexState: GPUVertexState = {
 			module: vertexShaderModule,
 			entryPoint: 'main',
 			buffers: this.#geometry.gpuRenderInfo.buffers
 		}
 
-		const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKY_ATMOSPHERE_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
+		const vertex_BindGroupLayout = resourceManager.getGPUBindGroupLayout('SKY_ATMOSPHERE_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
 			'SKY_ATMOSPHERE_VERTEX_BIND_GROUP_LAYOUT',
 			getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
 		)
-		const bindGroupLayouts: GPUBindGroupLayout[] = [
+		const bindGroupLayouts = [
 			resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
 			vertex_BindGroupLayout,
 			this.#material.gpuRenderInfo.fragmentBindGroupLayout
 		]
-		const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts: bindGroupLayouts}
-		const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout('SKY_ATMOSPHERE_PIPELINE_LAYOUT', pipelineLayoutDescriptor);
+		const pipelineLayout = resourceManager.createGPUPipelineLayout('SKY_ATMOSPHERE_PIPELINE_LAYOUT', {bindGroupLayouts});
 		const pipelineDescriptor: GPURenderPipelineDescriptor = {
 			label: PIPELINE_DESCRIPTOR_LABEL,
 			layout: pipelineLayout,
@@ -405,9 +360,7 @@ class SkyAtmosphere {
 			fragment: this.#material.gpuRenderInfo.fragmentState,
 			primitive: this.#primitiveState.state,
 			depthStencil: this.#depthStencilState.state,
-			multisample: {
-				count: antialiasingManager.useMSAA ? 4 : 1,
-			},
+			multisample: { count: antialiasingManager.useMSAA ? 4 : 1 },
 		}
 		return gpuDevice.createRenderPipeline(pipelineDescriptor)
 	}

@@ -17,9 +17,8 @@ export default function createSkyAtmosphereHelper(pane, targetView) {
 
 	const params = {
 		visible: true,
-		sunX: skyAtmosphere.sunDirection[0],
-		sunY: skyAtmosphere.sunDirection[1],
-		sunZ: skyAtmosphere.sunDirection[2],
+		sunElevation: skyAtmosphere.sunElevation,
+		sunAzimuth: skyAtmosphere.sunAzimuth,
 		earthRadius: skyAtmosphere.earthRadius,
 		atmosphereHeight: skyAtmosphere.atmosphereHeight,
 		mieScattering: skyAtmosphere.mieScattering,
@@ -39,15 +38,14 @@ export default function createSkyAtmosphereHelper(pane, targetView) {
 		}
 	});
 
-	// Sun Direction Controls (Individual Sliders)
-	const sunFolder = folder.addFolder({ title: 'Sun Direction', expanded: true });
-	const updateSun = () => {
-		skyAtmosphere.sunDirection = new Float32Array([params.sunX, params.sunY, params.sunZ]);
-	};
-
-	sunFolder.addBinding(params, 'sunX', { min: -1, max: 1, step: 0.01, label: 'Sun X' }).on('change', updateSun);
-	sunFolder.addBinding(params, 'sunY', { min: -1, max: 1, step: 0.01, label: 'Sun Y' }).on('change', updateSun);
-	sunFolder.addBinding(params, 'sunZ', { min: -1, max: 1, step: 0.01, label: 'Sun Z' }).on('change', updateSun);
+	// Sun Orientation (Elevation & Azimuth)
+	const sunFolder = folder.addFolder({ title: 'Sun Orientation', expanded: true });
+	sunFolder.addBinding(params, 'sunElevation', { min: -90, max: 90, step: 0.1, label: 'Elevation (고도)' }).on('change', (ev) => {
+		skyAtmosphere.sunElevation = ev.value;
+	});
+	sunFolder.addBinding(params, 'sunAzimuth', { min: -360, max: 360, step: 0.1, label: 'Azimuth (방위각)' }).on('change', (ev) => {
+		skyAtmosphere.sunAzimuth = ev.value;
+	});
 
 	// Physics Parameters
 	const physicsFolder = folder.addFolder({ title: 'Atmosphere Physics', expanded: false });
@@ -70,7 +68,7 @@ export default function createSkyAtmosphereHelper(pane, targetView) {
 		skyAtmosphere.rayleighScattering = [ev.value.r, ev.value.g, ev.value.b];
 	});
 
-	// LUT Preview (Placeholder)
+	// LUT Preview Placeholder
 	const debugFolder = folder.addFolder({ title: 'Debug (LUT Preview)', expanded: false });
 	const canvas = document.createElement('canvas');
 	canvas.style.width = '100%';
