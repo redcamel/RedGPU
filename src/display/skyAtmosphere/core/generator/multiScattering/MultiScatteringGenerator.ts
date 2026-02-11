@@ -30,11 +30,14 @@ class MultiScatteringGenerator {
 	#init(): void {
 		const {gpuDevice} = this.#redGPUContext;
 		this.#lutTexture = new MultiScatteringLUTTexture(this.#redGPUContext, this.width, this.height);
-		this.#uniformData = new Float32Array(16);
+
+		// [KO] 16개 슬롯(64 bytes)으로 고정하여 표준 정렬 준수
+		this.#uniformData = new Float32Array(16); 
 		this.#uniformBuffer = gpuDevice.createBuffer({
 			size: 64,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 		});
+
 		const shaderModule = gpuDevice.createShaderModule({ code: multiScatteringShaderCode });
 		this.#pipeline = gpuDevice.createComputePipeline({
 			layout: 'auto',
@@ -42,24 +45,38 @@ class MultiScatteringGenerator {
 		});
 	}
 
-	render(transmittanceTexture: TransmittanceLUTTexture, params: any): void {
+	render(transmittanceTexture: TransmittanceLUTTexture, params: {
+		earthRadius: number,
+		atmosphereHeight: number,
+		mieScattering: number,
+		mieExtinction: number,
+		rayleighScaleHeight: number,
+		mieScaleHeight: number,
+		rayleighScattering: [number, number, number],
+		ozoneAbsorption: [number, number, number]
+	}): void {
 		const {gpuDevice} = this.#redGPUContext;
+		
+		// 1. 스칼라 값 주입 (Index 0-5)
 		this.#uniformData[0] = params.earthRadius;
 		this.#uniformData[1] = params.atmosphereHeight;
 		this.#uniformData[2] = params.mieScattering;
 		this.#uniformData[3] = params.mieExtinction;
-		this.#uniformData[4] = params.rayleighScattering[0];
-		this.#uniformData[5] = params.rayleighScattering[1];
-		this.#uniformData[6] = params.rayleighScattering[2];
-		this.#uniformData[7] = params.mieAnisotropy;
-		this.#uniformData[8] = params.rayleighScaleHeight;
-		this.#uniformData[9] = params.mieScaleHeight;
-		this.#uniformData[10] = params.cameraHeight;
+		this.#uniformData[4] = params.rayleighScaleHeight;
+		this.#uniformData[5] = params.mieScaleHeight;
+		
+		// 2. Rayleigh Scattering (Offset 32 = Index 8)
+		this.#uniformData[8] = params.rayleighScattering[0];
+		this.#uniformData[9] = params.rayleighScattering[1];
+		this.#uniformData[10] = params.rayleighScattering[2];
+		
+		// 3. Ozone Absorption (Offset 48 = Index 12)
 		this.#uniformData[12] = params.ozoneAbsorption[0];
 		this.#uniformData[13] = params.ozoneAbsorption[1];
 		this.#uniformData[14] = params.ozoneAbsorption[2];
-
+		
 		gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
+
 		this.#bindGroup = gpuDevice.createBindGroup({
 			layout: this.#pipeline.getBindGroupLayout(0),
 			entries: [
@@ -69,6 +86,7 @@ class MultiScatteringGenerator {
 				{ binding: 3, resource: { buffer: this.#uniformBuffer } }
 			]
 		});
+
 		const commandEncoder = gpuDevice.createCommandEncoder();
 		const passEncoder = commandEncoder.beginComputePass();
 		passEncoder.setPipeline(this.#pipeline);

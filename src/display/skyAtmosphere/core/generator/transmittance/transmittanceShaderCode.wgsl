@@ -1,15 +1,23 @@
 // [KO] 투과율(Transmittance) LUT 생성을 위한 Compute Shader (최종 최적화)
 @group(0) @binding(0) var transmittanceTexture: texture_storage_2d<rgba16float, write>;
 
-// [KO] 투과율 계산에 꼭 필요한 소멸(Extinction) 관련 파라미터만 포함
+// [KO] 키워드 없이 순서만으로 정렬을 맞춘 구조체
 struct TransmittanceParameters {
     earthRadius: f32,
     atmosphereHeight: f32,
     mieExtinction: f32,
     rayleighScaleHeight: f32,
+    
     mieScaleHeight: f32,
+    dummy1: f32,
+    dummy2: f32,
+    dummy3: f32,
+
     rayleighScattering: vec3<f32>,
+    dummy4: f32,
+
     ozoneAbsorption: vec3<f32>,
+    dummy5: f32,
 };
 @group(0) @binding(1) var<uniform> params: TransmittanceParameters;
 
@@ -28,7 +36,6 @@ fn get_optical_depth(h: f32, cos_theta: f32) -> vec3<f32> {
     let sin_theta = sqrt(max(0.0, 1.0 - cos_theta * cos_theta));
     let ray_dir = vec3<f32>(sin_theta, cos_theta, 0.0);
     
-    // Planet shadowing
     let t_earth = get_ray_sphere_intersection(ray_origin, ray_dir, params.earthRadius);
     if (t_earth > 0.0) { return vec3<f32>(1e20); }
     
@@ -43,7 +50,7 @@ fn get_optical_depth(h: f32, cos_theta: f32) -> vec3<f32> {
     
     for (var i = 0; i < steps; i = i + 1) {
         let t = (f32(i) + 0.5) * step_size;
-        let p = ray_origin + ray_dir * t; // [KO] 올바른 좌표 계산
+        let p = ray_origin + ray_dir * t;
         let height = length(p) - params.earthRadius;
         
         opt_r += exp(-max(0.0, height) / params.rayleighScaleHeight) * step_size;
