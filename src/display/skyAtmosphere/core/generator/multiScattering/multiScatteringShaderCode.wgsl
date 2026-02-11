@@ -1,27 +1,23 @@
-// [KO] 다중 산란(Multi-Scattering) LUT 생성을 위한 Compute Shader (최종 최적화)
+// [KO] 다중 산란(Multi-Scattering) LUT 생성을 위한 Compute Shader
 @group(0) @binding(0) var multiScatTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(2) var tSampler: sampler;
 
-// [KO] 다중 산란 연산에 꼭 필요한 파라미터만 포함 (48 bytes)
-struct MultiScatteringParameters {
+struct AtmosphereParameters {
     earthRadius: f32,
     atmosphereHeight: f32,
     mieScattering: f32,
     mieExtinction: f32,
-
+    rayleighScattering: vec3<f32>,
+    mieAnisotropy: f32,
     rayleighScaleHeight: f32,
     mieScaleHeight: f32,
+    cameraHeight: f32,
     dummy1: f32,
-    dummy2: f32,
-
-    rayleighScattering: vec3<f32>,
-    dummy3: f32,
-
     ozoneAbsorption: vec3<f32>,
-    dummy4: f32,
+    dummy2: f32,
 };
-@group(0) @binding(3) var<uniform> params: MultiScatteringParameters;
+@group(0) @binding(3) var<uniform> params: AtmosphereParameters;
 
 const PI: f32 = 3.14159265359;
 
@@ -30,8 +26,7 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
     let c = dot(ray_origin, ray_origin) - sphere_radius * sphere_radius;
     let delta = b * b - c;
     if (delta < 0.0) { return -1.0; }
-    let t = -b + sqrt(delta);
-    return select(-1.0, t, t > 0.0);
+    return -b + sqrt(delta);
 }
 
 fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
@@ -50,7 +45,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     
     var multi_scat_as_vector = vec3<f32>(0.0);
     let sample_count = 64;
-    
     for (var i = 0; i < sample_count; i = i + 1) {
         let step = f32(i) + 0.5;
         let theta = acos(1.0 - 2.0 * step / f32(sample_count));
@@ -59,12 +53,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let ray_dir = vec3<f32>(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
         let ray_cos_theta = ray_dir.y;
         
+        let atmosphereRadius = params.earthRadius + params.atmosphereHeight;
         let ray_origin = vec3<f32>(0.0, h + params.earthRadius, 0.0);
-        let t_max = get_ray_sphere_intersection(ray_origin, ray_dir, params.earthRadius + params.atmosphereHeight);
+        let t_max = get_ray_sphere_intersection(ray_origin, ray_dir, atmosphereRadius);
         
         if (t_max > 0.0) {
             let transmittance = get_transmittance(h, ray_cos_theta);
-            // 대기 밀도 하강 속도(Scale Height)를 반영한 에너지 누적
             let height_factor = exp(-h / params.rayleighScaleHeight);
             multi_scat_as_vector += (1.0 - transmittance) * height_factor;
         }

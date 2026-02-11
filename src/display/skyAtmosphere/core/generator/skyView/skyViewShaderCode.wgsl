@@ -116,7 +116,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let multi_scat_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - (max(0.0, cur_h) / params.atmosphereHeight));
             let multi_scat_contrib = textureSampleLevel(multiScatTexture, tSampler, multi_scat_uv, 0.0).rgb;
             let total_density = params.rayleighScattering * rho_r + params.mieScattering * rho_m;
-            let multi_scat = multi_scat_contrib * total_density;
+
+            // 다중 산란은 태양 투과율의 제곱근으로 부드럽게 감쇠
+            // 완전히 차단하면 너무 어두워지므로, 간접광으로 일부 기여
+            let shadow_factor = sqrt(max(sun_trans.r, max(sun_trans.g, sun_trans.b)));
+            let multi_scat = multi_scat_contrib * total_density * mix(0.1, 1.0, shadow_factor);
 
             // 총 산란
             let step_scat = single_scat + multi_scat;
