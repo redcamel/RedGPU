@@ -21,6 +21,8 @@ interface SkyAtmosphereMaterial {
 	transmittanceTextureSampler: Sampler;
 	/** [KO] 태양 방향 [EN] Sun direction */
 	sunDirection: Float32Array;
+	/** [KO] 태양 크기 [EN] Sun size */
+	sunSize: number;
 }
 
 /**
@@ -35,7 +37,7 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 	dirtyPipeline: boolean = false
 
 	/**
-	 * [KO] SkyAtmosphereMaterial 인스턴스를 생성합니다.
+	 * [KO] SkyAtmosphereMaterial 인스턴스를 생성합니다. (내부 시스템 전용)
 	 *
 	 * @param redGPUContext - RedGPUContext 인스턴스
 	 */
@@ -48,6 +50,7 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 		)
 		this.initGPURenderInfos()
 		this.sunDirection = new Float32Array([0, 1, 0])
+		this.sunSize = 0.5;
 		this.transmittanceTextureSampler = new Sampler(this.redGPUContext, {
 			magFilter: 'linear',
 			minFilter: 'linear',
@@ -59,6 +62,9 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 
 DefineForFragment.defineVec3(SkyAtmosphereMaterial, [
 	['sunDirection', [0, 1, 0]],
+])
+DefineForFragment.definePositiveNumber(SkyAtmosphereMaterial, [
+	['sunSize', 0.5],
 ])
 DefineForFragment.defineTexture(SkyAtmosphereMaterial, [
 	'transmittanceTexture',

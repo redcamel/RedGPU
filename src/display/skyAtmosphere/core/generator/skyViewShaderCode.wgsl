@@ -11,6 +11,7 @@ struct AtmosphereParameters {
     mieExtinction: f32,
     rayleighScattering: vec3<f32>,
     sunDirection: vec3<f32>,
+    mieAnisotropy: f32,
 };
 @group(0) @binding(4) var<uniform> params: AtmosphereParameters;
 
@@ -34,8 +35,9 @@ fn phase_rayleigh(cos_theta: f32) -> f32 {
     return 3.0 / (16.0 * PI) * (1.0 + cos_theta * cos_theta);
 }
 
+// [KO] Mie Phase Function (Henyey-Greenstein) - params.mieAnisotropy 적용
 fn phase_mie(cos_theta: f32) -> f32 {
-    let g = 0.8;
+    let g = params.mieAnisotropy;
     let g2 = g * g;
     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(1.0 + g2 - 2.0 * g * cos_theta, 1.5));
 }
@@ -90,7 +92,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             
             let multi_scat = textureSampleLevel(multiScatTexture, tSampler, vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - (max(0.0, current_h) / params.atmosphereHeight)), 0.0).rgb;
             
-            // [KO] 임의의 보정값 없이 순수 산란 합산
             let step_scat = (scat_rayleigh + scat_mie) * sun_transmittance;
             let total_scat = step_scat + multi_scat * (scat_rayleigh + scat_mie);
             
@@ -101,6 +102,5 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
     
-    // [KO] 지면 Ambient 제거
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, 1.0));
 }

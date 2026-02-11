@@ -59,6 +59,10 @@ class SkyAtmosphere {
 	#mieExtinction: number = 0.00444;
 	#rayleighScattering: [number, number, number] = [0.0058, 0.0135, 0.0331];
 	
+	// Step 4 파라미터
+	#mieAnisotropy: number = 0.8;
+	#sunSize: number = 0.5;
+	
 	#sunElevation: number = 45;
 	#sunAzimuth: number = 0;
 	
@@ -104,6 +108,16 @@ class SkyAtmosphere {
 		this.#dirtyLUT = true;
 	}
 
+	get mieAnisotropy(): number { return this.#mieAnisotropy; }
+	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#mieAnisotropy = v; this.#dirtySkyView = true; }
+
+	get sunSize(): number { return this.#sunSize; }
+	set sunSize(v: number) {
+		validatePositiveNumberRange(v, 0.01, 10.0);
+		this.#sunSize = v;
+		this.#material.sunSize = v;
+	}
+
 	get sunElevation(): number { return this.#sunElevation; }
 	set sunElevation(v: number) {
 		validateNumberRange(v, -90, 90);
@@ -142,14 +156,15 @@ class SkyAtmosphere {
 			mieScattering: this.#mieScattering,
 			mieExtinction: this.#mieExtinction,
 			rayleighScattering: this.#rayleighScattering,
-			sunDirection: this.#sunDirection
+			sunDirection: this.#sunDirection,
+			mieAnisotropy: this.#mieAnisotropy
 		};
 
 		if (this.#dirtyLUT) {
 			this.#transmittanceGenerator.render(physicsParams);
 			this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture, physicsParams);
 			this.#dirtyLUT = false;
-			this.#dirtySkyView = true; // LUT이 바뀌면 SkyView도 다시 구워야 함
+			this.#dirtySkyView = true;
 		}
 
 		if (this.#dirtySkyView) {
@@ -170,6 +185,7 @@ class SkyAtmosphere {
 		mat4.translate(this.modelMatrix, this.modelMatrix, cameraPos);
 		mat4.scale(this.modelMatrix, this.modelMatrix, [5000, 5000, 5000]);
 
+		// 정점 유니폼 업데이트 (modelMatrix)
 		this.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
 
 		if (this.#dirtyPipeline || this.#material.dirtyPipeline || this.#prevSystemUniform_Vertex_UniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {

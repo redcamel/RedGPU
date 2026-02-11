@@ -19,10 +19,12 @@ export default function createSkyAtmosphereHelper(pane, targetView) {
 		visible: true,
 		sunElevation: skyAtmosphere.sunElevation,
 		sunAzimuth: skyAtmosphere.sunAzimuth,
+		sunSize: skyAtmosphere.sunSize,
 		earthRadius: skyAtmosphere.earthRadius,
 		atmosphereHeight: skyAtmosphere.atmosphereHeight,
 		mieScattering: skyAtmosphere.mieScattering,
 		mieExtinction: skyAtmosphere.mieExtinction,
+		mieAnisotropy: skyAtmosphere.mieAnisotropy,
 		rayleighR: skyAtmosphere.rayleighScattering[0],
 		rayleighG: skyAtmosphere.rayleighScattering[1],
 		rayleighB: skyAtmosphere.rayleighScattering[2]
@@ -44,6 +46,9 @@ export default function createSkyAtmosphereHelper(pane, targetView) {
 	sunFolder.addBinding(params, 'sunAzimuth', { min: -360, max: 360, step: 0.001, label: 'Azimuth (방위각)' }).on('change', (ev) => {
 		skyAtmosphere.sunAzimuth = ev.value;
 	});
+	sunFolder.addBinding(params, 'sunSize', { min: 0.1, max: 5.0, step: 0.01, label: 'Sun Size (태양 크기)' }).on('change', (ev) => {
+		skyAtmosphere.sunSize = ev.value;
+	});
 
 	// Physics Parameters
 	const physicsFolder = folder.addFolder({ title: 'Atmosphere Physics', expanded: true });
@@ -62,6 +67,9 @@ export default function createSkyAtmosphereHelper(pane, targetView) {
 	mieFolder.addBinding(params, 'mieExtinction', { min: 0, max: 0.1, step: 0.0001, label: 'Mie Extinction' }).on('change', (ev) => {
 		skyAtmosphere.mieExtinction = ev.value;
 	});
+	mieFolder.addBinding(params, 'mieAnisotropy', { min: 0, max: 0.999, step: 0.001, label: 'Mie Anisotropy (이방성)' }).on('change', (ev) => {
+		skyAtmosphere.mieAnisotropy = ev.value;
+	});
 
 	const rayleighFolder = physicsFolder.addFolder({ title: 'Rayleigh (하늘색/노을색)', expanded: true });
 	const updateRayleigh = () => {
@@ -71,4 +79,12 @@ export default function createSkyAtmosphereHelper(pane, targetView) {
 	rayleighFolder.addBinding(params, 'rayleighG', { min: 0, max: 0.1, step: 0.0001, label: 'Rayleigh G' }).on('change', updateRayleigh);
 	rayleighFolder.addBinding(params, 'rayleighB', { min: 0, max: 0.1, step: 0.0001, label: 'Rayleigh B' }).on('change', updateRayleigh);
 
+	// LUT Preview Placeholder
+	const debugFolder = folder.addFolder({ title: 'Debug (LUT Preview)', expanded: false });
+	const canvas = document.createElement('canvas');
+	canvas.style.width = '100%';
+	canvas.style.height = '64px';
+	canvas.style.marginTop = '8px';
+	canvas.style.border = '1px solid #555';
+	debugFolder.controller.view.containerElement.appendChild(canvas);
 }
