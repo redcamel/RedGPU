@@ -1,25 +1,30 @@
-// [KO] Sky-View LUT 생성을 위한 Compute Shader
+// [KO] Sky-View LUT 생성을 위한 Compute Shader (최종 최적화)
 @group(0) @binding(0) var skyViewTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(3) var tSampler: sampler;
 
-struct AtmosphereParameters {
+struct SkyViewParameters {
     earthRadius: f32,
     atmosphereHeight: f32,
     mieScattering: f32,
     mieExtinction: f32,
-    rayleighScattering: vec3<f32>,
-    mieAnisotropy: f32,
+
     rayleighScaleHeight: f32,
     mieScaleHeight: f32,
+    mieAnisotropy: f32,
     cameraHeight: f32,
+
+    rayleighScattering: vec3<f32>,
     dummy1: f32,
+
     ozoneAbsorption: vec3<f32>,
     dummy2: f32,
+
     sunDirection: vec3<f32>,
+    dummy3: f32,
 };
-@group(0) @binding(4) var<uniform> params: AtmosphereParameters;
+@group(0) @binding(4) var<uniform> params: SkyViewParameters;
 
 const PI: f32 = 3.14159265359;
 
@@ -55,7 +60,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
     let azimuth = (uv.x - 0.5) * 2.0 * PI;
     
-    // [KO] 비선형 매핑 적용 (지평선 부근 정밀도)
+    // [KO] 비선형 고도 매핑 (지평선 부근 해상도 집중)
     let v = uv.y;
     var elevation: f32;
     if (v < 0.5) {
@@ -85,9 +90,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let t = (f32(i) + 0.5) * step_size;
             let p = ray_origin + view_dir * t;
             let cur_h = length(p) - params.earthRadius;
-            let cos_sun = dot(normalize(p), params.sunDirection);
+            let up_at_p = normalize(p);
             
+            let cos_sun = dot(up_at_p, params.sunDirection);
             let sun_trans = get_transmittance(max(0.0, cur_h), cos_sun);
+            
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
             
@@ -97,11 +104,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             
             let multi_scat = textureSampleLevel(multiScatTexture, tSampler, vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - (max(0.0, cur_h) / params.atmosphereHeight)), 0.0).rgb;
             
-            let step_scat = (scat_r + scat_m) * sun_trans + multi_scat * (scat_r + scat_m);
-            let total_extinction = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * max(0.0, 1.0 - abs(cur_h - 25.0) / 15.0);
+            let step_scat = (scat_r + scat_m) * sun_trans + multi_scat * (params.rayleighScattering * rho_r + params.mieScattering * rho_m);
+            let step_extinction = params.rayleighScattering * rho_r + (params.mieExtinction * rho_m) + (params.ozoneAbsorption * max(0.0, 1.0 - abs(cur_h - 25.0) / 15.0));
             
             luminance += transmittance_to_camera * step_scat * step_size;
-            transmittance_to_camera *= exp(-total_extinction * step_size);
+            transmittance_to_camera *= exp(-step_extinction * step_size);
         }
     }
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, 1.0));
