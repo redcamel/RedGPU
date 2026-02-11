@@ -55,8 +55,8 @@ class SkyAtmosphere {
 	// Physics Parameters
 	#earthRadius: number = 6360.0;
 	#atmosphereHeight: number = 60.0;
-	#mieScattering: number = 0.00399;
-	#mieExtinction: number = 0.00444;
+	#mieScattering: number = 0.021; // 지평선 노을을 위해 5배 증가
+	#mieExtinction: number = 0.021;
 	#rayleighScattering: [number, number, number] = [0.0058, 0.0135, 0.0331];
 	
 	// Advanced Parameters
@@ -66,7 +66,7 @@ class SkyAtmosphere {
 	#ozoneAbsorption: [number, number, number] = [0.00065, 0.00188, 0.00008];
 	
 	#sunSize: number = 0.5;
-	#sunIntensity: number = 100.0;
+	#sunIntensity: number = 22.0;
 	#exposure: number = 1.0;
 	
 	#sunElevation: number = 45;
@@ -92,15 +92,31 @@ class SkyAtmosphere {
 		this.#material.transmittanceTexture = this.#transmittanceGenerator.lutTexture
 		this.#material.multiScatteringTexture = this.#multiScatteringGenerator.lutTexture
 		this.#material.skyViewTexture = this.#skyViewGenerator.lutTexture
-		
+
+		this.#material.atmosphereHeight = this.#atmosphereHeight;
+		this.#material.exposure = 20.0;
+		this.#material.sunIntensity = 22.0;
+		this.#material.cameraHeight = 0.2;
+		this.#material.earthRadius = this.#earthRadius;
+
 		this.#updateSunDirection();
 	}
 
 	get earthRadius(): number { return this.#earthRadius; }
-	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#earthRadius = v; this.#dirtyLUT = true; }
+	set earthRadius(v: number) {
+		validatePositiveNumberRange(v, 1);
+		this.#earthRadius = v;
+		this.#material.earthRadius = v;
+		this.#dirtyLUT = true;
+	}
 
 	get atmosphereHeight(): number { return this.#atmosphereHeight; }
-	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#atmosphereHeight = v; this.#dirtyLUT = true; }
+	set atmosphereHeight(v: number) {
+		validatePositiveNumberRange(v, 1);
+		this.#atmosphereHeight = v;
+		this.#material.atmosphereHeight = v;
+		this.#dirtyLUT = true;
+	}
 
 	get mieScattering(): number { return this.#mieScattering; }
 	set mieScattering(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#mieScattering = v; this.#dirtyLUT = true; }
@@ -139,10 +155,18 @@ class SkyAtmosphere {
 	}
 
 	get sunIntensity(): number { return this.#sunIntensity; }
-	set sunIntensity(v: number) { validatePositiveNumberRange(v, 0, 10000); this.#sunIntensity = v; }
+	set sunIntensity(v: number) {
+		validatePositiveNumberRange(v, 0, 10000);
+		this.#sunIntensity = v;
+		this.#material.sunIntensity = v;
+	}
 
 	get exposure(): number { return this.#exposure; }
-	set exposure(v: number) { validatePositiveNumberRange(v, 0, 100); this.#exposure = v; }
+	set exposure(v: number) {
+		validatePositiveNumberRange(v, 0, 100);
+		this.#exposure = v;
+		this.#material.exposure = v;
+	}
 
 	get sunElevation(): number { return this.#sunElevation; }
 	set sunElevation(v: number) { validateNumberRange(v, -90, 90); this.#sunElevation = v; this.#updateSunDirection(); }

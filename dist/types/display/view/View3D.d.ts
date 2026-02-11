@@ -8,6 +8,7 @@ import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import IBL from "../../resources/texture/ibl/IBL";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
+import SkyAtmosphere from "../skyAtmosphere/SkyAtmosphere";
 import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
@@ -126,6 +127,19 @@ declare class View3D extends AView {
      * [EN] SkyBox instance to set
      */
     set skybox(value: SkyBox);
+    /**
+     * [KO] SkyAtmosphere를 반환합니다.
+     * [EN] Returns the SkyAtmosphere.
+     */
+    get skyAtmosphere(): SkyAtmosphere;
+    /**
+     * [KO] SkyAtmosphere를 설정합니다.
+     * [EN] Sets the SkyAtmosphere.
+     * @param value -
+     * [KO] 설정할 SkyAtmosphere 인스턴스
+     * [EN] SkyAtmosphere instance to set
+     */
+    set skyAtmosphere(value: SkyAtmosphere);
     get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor;
     get noneJitterProjectionCameraMatrix(): mat4;
     /**

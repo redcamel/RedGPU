@@ -23,6 +23,16 @@ interface SkyAtmosphereMaterial {
 	sunDirection: Float32Array;
 	/** [KO] 태양 크기 [EN] Sun size */
 	sunSize: number;
+	/** [KO] 대기 높이 [EN] Atmosphere height */
+	atmosphereHeight: number;
+	/** [KO] 노출 [EN] Exposure */
+	exposure: number;
+	/** [KO] 태양 강도 [EN] Sun intensity */
+	sunIntensity: number;
+	/** [KO] 카메라 높이 [EN] Camera height */
+	cameraHeight: number;
+	/** [KO] 지구 반경 [EN] Earth radius */
+	earthRadius: number;
 }
 
 /**
@@ -51,6 +61,11 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 		this.initGPURenderInfos()
 		this.sunDirection = new Float32Array([0, 1, 0])
 		this.sunSize = 0.5;
+		this.atmosphereHeight = 60.0;
+		this.exposure = 20.0;
+		this.sunIntensity = 22.0; // 물리적 태양 복사조도 (W/m²·sr 기준)
+		this.cameraHeight = 0.2;
+		this.earthRadius = 6360.0;
 		this.transmittanceTextureSampler = new Sampler(this.redGPUContext, {
 			magFilter: 'linear',
 			minFilter: 'linear',
@@ -65,6 +80,11 @@ DefineForFragment.defineVec3(SkyAtmosphereMaterial, [
 ])
 DefineForFragment.definePositiveNumber(SkyAtmosphereMaterial, [
 	['sunSize', 0.5],
+	['atmosphereHeight', 60.0],
+	['exposure', 20.0],
+	['sunIntensity', 22.0],
+	['cameraHeight', 0.2],
+	['earthRadius', 6360.0],
 ])
 DefineForFragment.defineTexture(SkyAtmosphereMaterial, [
 	'transmittanceTexture',

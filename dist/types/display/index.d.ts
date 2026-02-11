@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 import Scene from "./scene/Scene";
+export * from "./skyAtmosphere";
 export * from "./skyboxs/skyBox";
 export * from './mesh';
 export * from "./view";

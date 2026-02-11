@@ -77,7 +77,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     var luminance = vec3<f32>(0.0);
     var transmittance_to_camera = vec3<f32>(1.0);
-    
+
     if (dist_limit > 0.0) {
         let steps = 40;
         let step_size = dist_limit / f32(steps);
@@ -85,21 +85,46 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let t = (f32(i) + 0.5) * step_size;
             let p = ray_origin + view_dir * t;
             let cur_h = length(p) - params.earthRadius;
-            let cos_sun = dot(normalize(p), params.sunDirection);
-            
-            let sun_trans = get_transmittance(max(0.0, cur_h), cos_sun);
+            let p_norm = normalize(p);
+            let cos_sun = dot(p_norm, params.sunDirection);
+
+            // 태양 방향으로의 투과율 (직접 산란)
+            // 태양이 지평선 아래면 행성 그림자 처리
+            var sun_trans = get_transmittance(max(0.0, cur_h), cos_sun);
+
+            // 행성 그림자: 샘플 포인트에서 태양 방향으로 레이를 쏴서 행성과 충돌 체크
+            let shadow_ray_origin = p;
+            let shadow_t = get_ray_sphere_intersection(shadow_ray_origin, params.sunDirection, params.earthRadius);
+            if (shadow_t > 0.0) {
+                sun_trans = vec3<f32>(0.0); // 행성 그림자 영역
+            }
+
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
-            
+
+            // Phase Function은 view_dir와 sun_dir 사이의 각도 사용
             let view_sun_cos = dot(view_dir, params.sunDirection);
-            let scat_r = params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos);
-            let scat_m = params.mieScattering * rho_m * phase_mie(view_sun_cos);
-            
-            let multi_scat = textureSampleLevel(multiScatTexture, tSampler, vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - (max(0.0, cur_h) / params.atmosphereHeight)), 0.0).rgb;
-            
-            let step_scat = (scat_r + scat_m) * sun_trans + multi_scat * (scat_r + scat_m);
-            let total_extinction = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * max(0.0, 1.0 - abs(cur_h - 25.0) / 15.0);
-            
+            let phase_r = phase_rayleigh(view_sun_cos);
+            let phase_m = phase_mie(view_sun_cos);
+
+            // 단일 산란 (Single Scattering)
+            let scat_r = params.rayleighScattering * rho_r * phase_r;
+            let scat_m = params.mieScattering * rho_m * phase_m;
+            let single_scat = (scat_r + scat_m) * sun_trans;
+
+            // 다중 산란 (Multi-Scattering) - Phase Function 없이 등방성
+            let multi_scat_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - (max(0.0, cur_h) / params.atmosphereHeight));
+            let multi_scat_contrib = textureSampleLevel(multiScatTexture, tSampler, multi_scat_uv, 0.0).rgb;
+            let total_density = params.rayleighScattering * rho_r + params.mieScattering * rho_m;
+            let multi_scat = multi_scat_contrib * total_density;
+
+            // 총 산란
+            let step_scat = single_scat + multi_scat;
+
+            // 총 소멸 (Extinction)
+            let ozone_density = max(0.0, 1.0 - abs(cur_h - 25.0) / 15.0);
+            let total_extinction = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * ozone_density;
+
             luminance += transmittance_to_camera * step_scat * step_size;
             transmittance_to_camera *= exp(-total_extinction * step_size);
         }
