@@ -4,6 +4,7 @@ import createFieldOfView from "./createFieldOfView.js?t=1770713934910";
 import createGridTest from "./createGridTest.js?t=1770713934910";
 import createIblHelper from "./createIblHelper.js?t=1770713934910";
 import createSkyBoxHelper from "./createSkyBoxHelper.js?t=1770713934910";
+import createSkyAtmosphereHelper from "./createSkyAtmosphereHelper.js?t=1770713934910";
 import setSceneListTest from "./scene/setSceneListTest.js?t=1770713934910";
 import setSingleSceneTest from "./scene/setSingleSceneTest.js?t=1770713934910";
 import setAntialiasing_pane from "./setAntialiasing_pane.js?t=1770713934910";
@@ -235,6 +236,7 @@ export {
     setAntialiasing_pane,
     createIblHelper,
     createSkyBoxHelper,
+    createSkyAtmosphereHelper,
     hdrImages,
     setDebugButtons,
 }

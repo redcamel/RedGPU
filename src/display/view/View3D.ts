@@ -21,6 +21,7 @@ import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight
 import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
+import SkyAtmosphere from "../skyAtmosphere/SkyAtmosphere";
 import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
@@ -78,6 +79,11 @@ class View3D extends AView {
      * [EN] Skybox object for environment rendering
      */
     #skybox: SkyBox
+    /**
+     * [KO] 대기 산란 효과를 위한 SkyAtmosphere 객체
+     * [EN] SkyAtmosphere object for atmospheric scattering effects
+     */
+    #skyAtmosphere: SkyAtmosphere
     /**
      * [KO] IBL(이미지 기반 조명) 설정
      * [EN] IBL (Image-Based Lighting) settings
@@ -309,6 +315,25 @@ class View3D extends AView {
             this.#manageIBLResourceState(resourceManager, prevTexture.cacheKey, false);
         }
         this.#skybox = value;
+    }
+
+    /**
+     * [KO] SkyAtmosphere를 반환합니다.
+     * [EN] Returns the SkyAtmosphere.
+     */
+    get skyAtmosphere(): SkyAtmosphere {
+        return this.#skyAtmosphere;
+    }
+
+    /**
+     * [KO] SkyAtmosphere를 설정합니다.
+     * [EN] Sets the SkyAtmosphere.
+     * @param value -
+     * [KO] 설정할 SkyAtmosphere 인스턴스
+     * [EN] SkyAtmosphere instance to set
+     */
+    set skyAtmosphere(value: SkyAtmosphere) {
+        this.#skyAtmosphere = value;
     }
 
     get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor {
