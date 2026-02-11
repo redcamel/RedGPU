@@ -10,6 +10,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
+        controller.tilt = 0
         view.axis = true;
         redGPUContext.addView(view);
         

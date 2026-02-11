@@ -46,7 +46,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
     
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
-    
     let azimuth = (uv.x - 0.5) * 2.0 * PI;
     let elevation = (0.5 - uv.y) * PI; 
     
@@ -63,8 +62,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, atmosphereRadius);
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, params.earthRadius);
     
-    // [KO] 적분 거리를 지면 또는 대기 끝 중 가까운 곳으로 설정
-    // [EN] Set integration distance to either ground or atmosphere boundary, whichever is closer
     var dist_limit = t_max;
     if (t_earth > 0.0) { dist_limit = min(t_max, t_earth); }
 
@@ -93,6 +90,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             
             let multi_scat = textureSampleLevel(multiScatTexture, tSampler, vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - (max(0.0, current_h) / params.atmosphereHeight)), 0.0).rgb;
             
+            // [KO] 임의의 보정값 없이 순수 산란 합산
             let step_scat = (scat_rayleigh + scat_mie) * sun_transmittance;
             let total_scat = step_scat + multi_scat * (scat_rayleigh + scat_mie);
             
@@ -103,11 +101,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
     
-    // [KO] 지면 방향일 경우 아주 미세한 지면 반사광(Ambient) 추가 (완전 암흑 방지)
-    // [EN] Add subtle ambient light for nadir direction to prevent total darkness
-    if (t_earth > 0.0 && t_earth < t_max) {
-        luminance += vec3<f32>(0.01, 0.01, 0.01) * transmittance_to_camera;
-    }
-    
+    // [KO] 지면 Ambient 제거
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, 1.0));
 }
