@@ -1,40 +1,33 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import Sampler from "../../../../resources/sampler/Sampler";
-import MultiScatteringLUTTexture from "./MultiScatteringLUTTexture";
-import multiScatteringShaderCode from "./multiScatteringShaderCode.wgsl";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import transmittanceShaderCode from "./transmittanceShaderCode.wgsl";
 import TransmittanceLUTTexture from "./TransmittanceLUTTexture";
 
 /**
- * [KO] Multi-Scattering LUT를 생성하는 클래스입니다.
- * [EN] Class that generates the Multi-Scattering LUT.
+ * [KO] Transmittance LUT를 생성하는 클래스입니다.
+ * [EN] Class that generates the Transmittance LUT.
  */
-class MultiScatteringGenerator {
+class TransmittanceGenerator {
 	#redGPUContext: RedGPUContext;
-	#lutTexture: MultiScatteringLUTTexture;
+	#lutTexture: TransmittanceLUTTexture;
 	#pipeline: GPUComputePipeline;
 	#bindGroup: GPUBindGroup;
 	#uniformBuffer: GPUBuffer;
 	#uniformData: Float32Array;
-	#sampler: Sampler;
 
-	readonly width: number = 32;
-	readonly height: number = 32;
+	readonly width: number = 256;
+	readonly height: number = 64;
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
-		this.#sampler = new Sampler(this.#redGPUContext, {
-			magFilter: 'linear',
-			minFilter: 'linear'
-		});
 		this.#init();
 	}
 
-	get lutTexture(): MultiScatteringLUTTexture { return this.#lutTexture; }
+	get lutTexture(): TransmittanceLUTTexture { return this.#lutTexture; }
 
 	#init(): void {
 		const {gpuDevice} = this.#redGPUContext;
 
-		this.#lutTexture = new MultiScatteringLUTTexture(this.#redGPUContext, this.width, this.height);
+		this.#lutTexture = new TransmittanceLUTTexture(this.#redGPUContext, this.width, this.height);
 
 		this.#uniformData = new Float32Array(8);
 		this.#uniformBuffer = gpuDevice.createBuffer({
@@ -43,7 +36,7 @@ class MultiScatteringGenerator {
 		});
 
 		const shaderModule = gpuDevice.createShaderModule({
-			code: multiScatteringShaderCode
+			code: transmittanceShaderCode
 		});
 
 		this.#pipeline = gpuDevice.createComputePipeline({
@@ -53,14 +46,23 @@ class MultiScatteringGenerator {
 				entryPoint: 'main'
 			}
 		});
+
+		this.#bindGroup = gpuDevice.createBindGroup({
+			layout: this.#pipeline.getBindGroupLayout(0),
+			entries: [
+				{
+					binding: 0,
+					resource: this.#lutTexture.gpuTextureView
+				},
+				{
+					binding: 1,
+					resource: { buffer: this.#uniformBuffer }
+				}
+			]
+		});
 	}
 
-	/**
-	 * [KO] LUT를 렌더링(계산)합니다.
-	 * @param transmittanceTexture - 투과율 LUT 텍스처
-	 * @param params - 대기 파라미터
-	 */
-	render(transmittanceTexture: TransmittanceLUTTexture, params: {
+	render(params: {
 		earthRadius: number,
 		atmosphereHeight: number,
 		mieScattering: number,
@@ -79,23 +81,11 @@ class MultiScatteringGenerator {
 
 		gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
 
-		// 바인드 그룹은 소스 텍스처가 바뀔 수 있으므로 매번 생성하거나 캐싱 전략 필요
-		// 여기서는 간단히 매번 생성 (32x32이므로 오버헤드 미미)
-		this.#bindGroup = gpuDevice.createBindGroup({
-			layout: this.#pipeline.getBindGroupLayout(0),
-			entries: [
-				{ binding: 0, resource: this.#lutTexture.gpuTextureView },
-				{ binding: 1, resource: transmittanceTexture.gpuTextureView },
-				{ binding: 2, resource: this.#sampler.gpuSampler },
-				{ binding: 3, resource: { buffer: this.#uniformBuffer } }
-			]
-		});
-
 		const commandEncoder = gpuDevice.createCommandEncoder();
 		const passEncoder = commandEncoder.beginComputePass();
 		passEncoder.setPipeline(this.#pipeline);
 		passEncoder.setBindGroup(0, this.#bindGroup);
-		passEncoder.dispatchWorkgroups(this.width, this.height);
+		passEncoder.dispatchWorkgroups(Math.ceil(this.width / 16), Math.ceil(this.height / 16));
 		passEncoder.end();
 		gpuDevice.queue.submit([commandEncoder.finish()]);
 
@@ -103,4 +93,4 @@ class MultiScatteringGenerator {
 	}
 }
 
-export default MultiScatteringGenerator;
+export default TransmittanceGenerator;

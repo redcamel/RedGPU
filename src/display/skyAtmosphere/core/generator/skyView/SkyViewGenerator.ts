@@ -1,9 +1,9 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import Sampler from "../../../../resources/sampler/Sampler";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import Sampler from "../../../../../resources/sampler/Sampler";
 import SkyViewLUTTexture from "./SkyViewLUTTexture";
 import skyViewShaderCode from "./skyViewShaderCode.wgsl";
-import TransmittanceLUTTexture from "./TransmittanceLUTTexture";
-import MultiScatteringLUTTexture from "./MultiScatteringLUTTexture";
+import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
+import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTTexture";
 
 /**
  * [KO] Sky-View LUT를 생성하는 클래스입니다.
@@ -35,10 +35,6 @@ class SkyViewGenerator {
 
 		this.#lutTexture = new SkyViewLUTTexture(this.#redGPUContext, this.width, this.height);
 
-		// AtmosphereParameters 레이아웃 구조 (64 bytes)
-		// 0: earthRadius, 4: atmosphereHeight, 8: mieScattering, 12: mieExtinction
-		// 16, 20, 24: rayleighScattering (28: padding)
-		// 32, 36, 40: sunDirection (44: mieAnisotropy)
 		this.#uniformData = new Float32Array(16); 
 		this.#uniformBuffer = gpuDevice.createBuffer({
 			size: 64,
@@ -75,14 +71,13 @@ class SkyViewGenerator {
 		this.#uniformData[4] = params.rayleighScattering[0];
 		this.#uniformData[5] = params.rayleighScattering[1];
 		this.#uniformData[6] = params.rayleighScattering[2];
+		this.#uniformData[7] = params.mieAnisotropy;
 		
 		this.#uniformData[8] = params.sunDirection[0];
 		this.#uniformData[9] = params.sunDirection[1];
 		this.#uniformData[10] = params.sunDirection[2];
 		
-		// [KO] mieAnisotropy 위치 수정 (Offset 44 = Index 11)
-		// [EN] Fix mieAnisotropy position (Offset 44 = Index 11)
-		this.#uniformData[11] = params.mieAnisotropy;
+		this.#uniformData[11] = params.mieAnisotropy; // Fix logic if needed
 
 		gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
 

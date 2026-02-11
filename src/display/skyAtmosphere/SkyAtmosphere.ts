@@ -15,9 +15,9 @@ import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumbe
 import VertexGPURenderInfo from "../mesh/core/VertexGPURenderInfo";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import SkyAtmosphereMaterial from "./core/SkyAtmosphereMaterial";
-import TransmittanceGenerator from "./core/generator/TransmittanceGenerator";
-import MultiScatteringGenerator from "./core/generator/MultiScatteringGenerator";
-import SkyViewGenerator from "./core/generator/SkyViewGenerator";
+import TransmittanceGenerator from "./core/generator/transmittance/TransmittanceGenerator";
+import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
+import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import vertexModuleSource from './shader/vertex.wgsl';
 
 /** 파싱된 WGSL 셰이더 정보 */

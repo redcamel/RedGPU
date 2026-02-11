@@ -1,5 +1,5 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import ManagementResourceBase from "../../../../resources/core/ManagementResourceBase";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import ManagementResourceBase from "../../../../../resources/core/ManagementResourceBase";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 
@@ -15,12 +15,6 @@ class MultiScatteringLUTTexture extends ManagementResourceBase {
 	#width: number;
 	#height: number;
 
-	/**
-	 * [KO] MultiScatteringLUTTexture 인스턴스를 생성합니다.
-	 * @param redGPUContext - RedGPUContext 인스턴스
-	 * @param width - 텍스처 너비 (기본 32)
-	 * @param height - 텍스처 높이 (기본 32)
-	 */
 	constructor(redGPUContext: RedGPUContext, width: number = 32, height: number = 32) {
 		super(redGPUContext, MANAGED_STATE_KEY);
 		this.#width = width;
@@ -28,9 +22,6 @@ class MultiScatteringLUTTexture extends ManagementResourceBase {
 		this.#init();
 	}
 
-	/**
-	 * [KO] 텍스처를 초기화합니다.
-	 */
 	#init(): void {
 		const {gpuDevice} = this.redGPUContext;
 		this.#gpuTexture = gpuDevice.createTexture({
@@ -46,16 +37,10 @@ class MultiScatteringLUTTexture extends ManagementResourceBase {
 	get gpuTexture(): GPUTexture { return this.#gpuTexture; }
 	get gpuTextureView(): GPUTextureView { return this.#gpuTextureView; }
 
-	/**
-	 * [KO] 비디오 메모리 사용량(byte)을 반환합니다.
-	 */
 	get videoMemorySize(): number {
 		return this.#width * this.#height * 8;
 	}
 
-	/**
-	 * [KO] 데이터 변경 시 리스너들에게 알립니다.
-	 */
 	notifyUpdate(): void {
 		this.__fireListenerList();
 	}

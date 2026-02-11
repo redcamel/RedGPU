@@ -4,9 +4,9 @@ import ABitmapBaseMaterial from "../../../material/core/ABitmapBaseMaterial";
 import Sampler from "../../../resources/sampler/Sampler";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
-import TransmittanceLUTTexture from "./generator/TransmittanceLUTTexture";
-import MultiScatteringLUTTexture from "./generator/MultiScatteringLUTTexture";
-import SkyViewLUTTexture from "./generator/SkyViewLUTTexture";
+import TransmittanceLUTTexture from "./generator/transmittance/TransmittanceLUTTexture";
+import MultiScatteringLUTTexture from "./generator/multiScattering/MultiScatteringLUTTexture";
+import SkyViewLUTTexture from "./generator/skyView/SkyViewLUTTexture";
 
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
