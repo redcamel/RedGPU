@@ -53,7 +53,7 @@ class SkyAtmosphere {
 
 	#rayleighScaleHeight: number = 8.0;
 	#mieScaleHeight: number = 1.2;
-	#mieAnisotropy: number = 0.8;
+	#mieAnisotropy: number = 0.9;
 	#ozoneAbsorption: [number, number, number] = [0.00065, 0.00188, 0.00008];
 	#ozoneLayerCenter: number = 25.0;
 	#ozoneLayerWidth: number = 15.0;

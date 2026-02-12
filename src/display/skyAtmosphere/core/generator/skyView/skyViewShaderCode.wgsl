@@ -79,22 +79,29 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var transmittance_to_camera = vec3<f32>(1.0);
 
     if (dist_limit > 0.0) {
-        let steps = 32;
+        let steps = 128;
         let step_size = dist_limit / f32(steps);
 
         for (var i = 0; i < steps; i = i + 1) {
             let t = (f32(i) + 0.5) * step_size;
             let p = ray_origin + view_dir * t;
-            let cur_h = length(p) - r;
+            let p_len = length(p);
+            let up = p / p_len;
+            let cur_h = p_len - r;
 
-            let cos_sun = params.p4.y;
+            // [물리 보정] 해당 지점에서의 로컬 태양 고도 계산
+            let cos_sun = dot(up, params.p4.xyz); 
             let current_horizon_cos = -sqrt(max(0.0, cur_h * (2.0 * r + cur_h))) / (r + cur_h);
             let light_fade = smoothstep(current_horizon_cos - 0.1, current_horizon_cos + 0.1, cos_sun);
 
             let sun_trans = get_transmittance(cur_h, cos_sun) * light_fade;
 
+            // [수정] 이진 그림자 대신 부드러운 그림자 마스크 사용
             var shadow_mask = 1.0;
-            if (get_ray_sphere_intersection(p, params.p4.xyz, r) > 0.0) { shadow_mask = 0.0; }
+            let t_earth_shadow = get_ray_sphere_intersection(p, params.p4.xyz, r);
+            if (t_earth_shadow > 0.0) { 
+                shadow_mask = smoothstep(-0.05, 0.02, cos_sun); // 지평선 근처에서 부드럽게 감쇄
+            }
             shadow_mask = min(shadow_mask, light_fade);
 
             let rho_r = exp(-max(0.0, cur_h) / params.p2.x);
@@ -118,9 +125,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
 
-    if (elevation < horizon_elevation) {
-        luminance *= smoothstep(horizon_elevation - 0.05, horizon_elevation, elevation);
-    }
+    // [수정] 지평선 하단 강제 페이드 제거 (Aerial Perspective를 위해)
+    // if (elevation < horizon_elevation) {
+    //    luminance *= smoothstep(horizon_elevation - 0.05, horizon_elevation, elevation);
+    // }
 
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, 1.0));
 }

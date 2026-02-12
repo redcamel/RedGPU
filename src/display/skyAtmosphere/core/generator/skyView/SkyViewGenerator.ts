@@ -13,8 +13,8 @@ class SkyViewGenerator {
 	#uniformData: Float32Array;
 	#sampler: Sampler;
 
-	readonly width: number = 200;
-	readonly height: number = 200;
+	readonly width: number = 512;
+	readonly height: number = 512;
 
 	earthRadius: number = 6360.0;
 	atmosphereHeight: number = 60.0;
