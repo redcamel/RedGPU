@@ -19,6 +19,7 @@ import TransmittanceGenerator from "./core/generator/transmittance/Transmittance
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import vertexModuleSource from './shader/vertex.wgsl';
+import {PerspectiveCamera} from "../../camera";
 
 const SHADER_INFO = parseWGSL(vertexModuleSource)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
@@ -91,13 +92,22 @@ class SkyAtmosphere {
 		this.#material.exposure = 20.0;
 		this.#material.sunIntensity = 22.0;
 		this.#material.cameraHeight = 0.2;
-		this.#material.earthRadius = this.#earthRadius;
+
+		// [수정] Material의 earthRadius는 이제 vec4이므로, earthRadiusVal setter를 사용해야 합니다.
+		this.#material.earthRadiusVal = this.#earthRadius;
 
 		this.#updateSunDirection();
 	}
 
+	// [수정] earthRadius Setter 수정
 	get earthRadius(): number { return this.#earthRadius; }
-	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#earthRadius = v; this.#material.earthRadius = v; this.#dirtyLUT = true; }
+	set earthRadius(v: number) {
+		validatePositiveNumberRange(v, 1);
+		this.#earthRadius = v;
+		this.#material.earthRadiusVal = v; // 여기 수정됨
+		this.#dirtyLUT = true;
+	}
+
 	get atmosphereHeight(): number { return this.#atmosphereHeight; }
 	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#atmosphereHeight = v; this.#material.atmosphereHeight = v; this.#dirtyLUT = true; }
 	get mieScattering(): number { return this.#mieScattering; }
@@ -148,6 +158,21 @@ class SkyAtmosphere {
 		const {triangleCount, indexCount, format} = indexBuffer
 		const {gpuDevice} = this.#redGPUContext
 
+		// [추가] 카메라 높이 동기화 로직
+		const rawCamera = view.rawCamera as PerspectiveCamera;
+		const cameraPos = [rawCamera.x,rawCamera.y,rawCamera.z];
+
+		// 월드 좌표계(단위:미터 가정)를 km로 변환 (1 unit = 1 meter)
+		// 최소 높이 10m(0.01km)로 제한하여 지하로 들어가는 것 방지
+		const currentHeightKm = Math.max(0.01, cameraPos[1] / 1000.0);
+
+		// 높이가 변했으면 SkyView LUT를 다시 그려야 함
+		if (Math.abs(this.#material.cameraHeight - currentHeightKm) > 0.001) {
+			this.#material.cameraHeight = currentHeightKm;
+			this.#dirtySkyView = true;
+		}
+
+		// Physics Param 업데이트 (카메라 높이 반영)
 		const physicsParams = {
 			earthRadius: this.#earthRadius,
 			atmosphereHeight: this.#atmosphereHeight,
@@ -158,7 +183,7 @@ class SkyAtmosphere {
 			mieAnisotropy: this.#mieAnisotropy,
 			rayleighScaleHeight: this.#rayleighScaleHeight,
 			mieScaleHeight: this.#mieScaleHeight,
-			cameraHeight: this.#material.cameraHeight,
+			cameraHeight: this.#material.cameraHeight, // 업데이트된 높이 사용
 			ozoneAbsorption: this.#ozoneAbsorption,
 			ozoneLayerCenter: this.#ozoneLayerCenter,
 			ozoneLayerWidth: this.#ozoneLayerWidth,
@@ -184,8 +209,6 @@ class SkyAtmosphere {
 		this.#updateMSAAStatus();
 		if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
 
-		const {camera} = view;
-		const cameraPos = (camera as any).position || [0, 0, 0];
 		mat4.identity(this.modelMatrix);
 		mat4.translate(this.modelMatrix, this.modelMatrix, cameraPos);
 		mat4.scale(this.modelMatrix, this.modelMatrix, [5000, 5000, 5000]);
