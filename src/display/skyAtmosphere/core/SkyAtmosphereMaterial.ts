@@ -23,6 +23,8 @@ interface SkyAtmosphereMaterial {
 	sunIntensity: number;
 	cameraHeight: number;
 	earthRadius: number;
+	heightFogDensity: number;
+	heightFogFalloff: number;
 }
 
 class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
@@ -40,6 +42,8 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 		this.sunIntensity = 22.0;
 		this.cameraHeight = 0.2;
 		this.earthRadius = 6360.0;
+		this.heightFogDensity = 0.0; // 기본값은 0 (사용 안 함)
+		this.heightFogFalloff = 0.1;
 
 		this.transmittanceTextureSampler = new Sampler(this.redGPUContext, {
 			magFilter: 'linear',
@@ -58,7 +62,9 @@ DefineForFragment.definePositiveNumber(SkyAtmosphereMaterial, [
 	'exposure',
 	'sunIntensity',
 	'cameraHeight',
-	'earthRadius'
+	'earthRadius',
+	'heightFogDensity',
+	'heightFogFalloff'
 ]);
 
 DefineForFragment.defineTexture(SkyAtmosphereMaterial, [

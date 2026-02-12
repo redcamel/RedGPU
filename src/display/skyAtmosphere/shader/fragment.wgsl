@@ -19,6 +19,8 @@ struct Uniforms {
     sunIntensity: f32,
     cameraHeight: f32,
     earthRadius: f32,
+    heightFogDensity: f32,
+    heightFogFalloff: f32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
@@ -41,6 +43,23 @@ fn get_transmittance_uv(h: f32, cos_theta: f32, atm_h: f32) -> vec2<f32> {
     return vec2<f32>(u, v);
 }
 
+// [추가] 지수적 높이 안개 투과율 계산 (Exponential Height Fog)
+fn get_height_fog_transmittance(cam_h: f32, ray_dir_y: f32, dist: f32, density: f32, falloff: f32) -> f32 {
+    if (density <= 0.0) { return 1.0; }
+    let h = max(0.0, cam_h);
+    let k = falloff;
+    let d = dist;
+    let y = ray_dir_y;
+    
+    var exponent: f32;
+    if (abs(y) < 0.0001) {
+        exponent = density * exp(-k * h) * d;
+    } else {
+        exponent = (density * exp(-k * h)) / (k * y) * (1.0 - exp(-k * y * d));
+    }
+    return exp(-max(0.0, exponent));
+}
+
 @fragment
 fn main(outData: OutData) -> FragmentOutput {
     var output: FragmentOutput;
@@ -51,12 +70,12 @@ fn main(outData: OutData) -> FragmentOutput {
     let exposure = uniforms.exposure;
     let sunIntensity = uniforms.sunIntensity;
     let camH = uniforms.cameraHeight;
-    let earthR = uniforms.earthRadius;
+    let earthRadius = uniforms.earthRadius;
 
     let viewDir = normalize(outData.vertexPosition.xyz);
 
     // [곡률 반영] 카메라 높이에 따른 기하학적 지평선 각도 계산
-    let r = earthR;
+    let r = earthRadius;
     let h_c = max(0.0001, camH);
     let horizon_sin = -sqrt(max(0.0, h_c * (2.0 * r + h_c))) / (r + h_c);
     let horizon_elevation = asin(clamp(horizon_sin, -1.0, 1.0));
@@ -94,27 +113,33 @@ fn main(outData: OutData) -> FragmentOutput {
     let sunDiskLuminance = sunRadiance * sunTransmittance * sunDiskMask;
 
     // [개선] Henyey-Greenstein 페이즈 함수를 이용한 물리적 태양 후광 (Mie Halo)
-    // LUT의 해상도 한계를 극복하기 위해 프래그먼트 셰이더에서 직접 계산하여 부드러운 Glow 구현
-    let p_mie = henyey_greenstein_phase(view_sun_cos, 0.99); // 태양 주변의 강한 전방 산란
-    let sunHalo = sunIntensity * sunTransmittance * p_mie * 0.01;
+    // 두 개의 로브를 혼합하여 중심은 강하고 주변은 부드러운 Glow 구현
+    let p_mie_glow = henyey_greenstein_phase(view_sun_cos, 0.75);
+    let p_mie_halo = henyey_greenstein_phase(view_sun_cos, 0.99);
+    let sunHalo = sunIntensity * sunTransmittance * (p_mie_glow * 0.02 + p_mie_halo * 0.005);
 
     // 3. 지평선 및 대기 안개(Haze) 계산
-    let sun_haze_factor = smoothstep(0.0, 0.2, sunDir.y);
-    let haze_amount = mix(0.02, 0.001, sun_haze_factor) + clamp(0.005 / max(0.001, camH), 0.0, 0.02);
-    let horizon_fade = smoothstep(horizon_elevation - haze_amount, horizon_elevation + haze_amount * 0.5, elevation);
+    // [개선] 지평선 부근의 안개를 더 두껍고 부드럽게 처리
+    let sun_haze_factor = smoothstep(-0.2, 0.5, sunDir.y); 
+    let haze_amount = mix(0.04, 0.005, sun_haze_factor) + clamp(0.02 / max(0.001, camH), 0.0, 0.1);
+    let horizon_fade = smoothstep(horizon_elevation - haze_amount, horizon_elevation + haze_amount, elevation);
 
     // 4. 지표면 영역 계산
     var groundPart = vec3<f32>(0.0);
     let albedo = vec3<f32>(0.15);
     
+    // 지면과의 충돌 거리 (안개 계산용)
+    var hitDist: f32 = 1e6; // 지면과 충돌하지 않을 경우 매우 먼 거리 가정
+
     if (elevation < horizon_elevation + haze_amount) {
-        let camPos = vec3<f32>(0.0, r + h_c, 0.0);
+        let camPos = vec3<f32>(0.0, earthRadius + h_c, 0.0);
         let b = dot(camPos, viewDir);
-        let c = dot(camPos, camPos) - r * r;
+        let c = dot(camPos, camPos) - earthRadius * earthRadius;
         let delta = b * b - c;
 
         if (delta >= 0.0) {
             let t = -b - sqrt(delta);
+            hitDist = t;
             let hitPos = camPos + viewDir * t;
             let groundNormal = normalize(hitPos);
             let localCosSun = dot(groundNormal, sunDir);
@@ -141,12 +166,26 @@ fn main(outData: OutData) -> FragmentOutput {
     }
 
     // 5. 최종 합성
-    // [개선] 스카이뷰 LUT에서 가져온 산란광에 태양 디스크와 직접 계산한 후광을 더함
-    var finalHDR = (skyLuminance * sunIntensity) + sunHalo + mix(groundPart, sunDiskLuminance, horizon_fade);
-
-    // [보정] 지평선 아래에서 후광이 너무 밝게 튀는 현상 방지
+    // [개선] 후광(Halo)은 지표면에 의해 가려져야 하므로 지평선 페이드를 먼저 계산하여 적용
     let halo_ground_fade = smoothstep(horizon_elevation - 0.1, horizon_elevation + 0.05, elevation);
-    finalHDR = mix(finalHDR - sunHalo, finalHDR, max(0.15, halo_ground_fade));
+    let effectiveHalo = sunHalo * max(0.15, halo_ground_fade);
+
+    // 기본 구성: 대기 산란광 + 유효 후광 + (지면 또는 태양디스크 선택)
+    var finalHDR = (skyLuminance * sunIntensity) + effectiveHalo + mix(groundPart, sunDiskLuminance, horizon_fade);
+
+    // [추가] 지평선 안개 강화 (Horizon Haze Boost - 지면/하늘 공통 적용)
+    let horizon_haze_mask = exp(-abs(elevation - horizon_elevation) * 40.0);
+    let haze_color = skyLuminance * sunIntensity * 0.4 * (1.0 - sun_haze_factor * 0.5);
+    finalHDR += haze_color * horizon_haze_mask;
+
+    // [개선] 통합 높이 안개 적용 (Exponential Height Fog - 지면/하늘 공통 적용)
+    // 시선 방향이 하늘인 경우 대기권 두께(atmH)를 기준으로 안개를 계산하여 저고도 안개층 투과 표현
+    let fogCalcDist = select(atmH / max(0.01, abs(viewDir.y)), hitDist, hitDist < 1e5);
+    let fogT = get_height_fog_transmittance(camH, viewDir.y, fogCalcDist, uniforms.heightFogDensity, uniforms.heightFogFalloff);
+    
+    // 안개 색상은 지평선 부근의 산란광을 기준으로 산출 (자연스러운 블렌딩)
+    let fogColor = skyLuminance * sunIntensity; 
+    finalHDR = mix(fogColor, finalHDR, fogT);
 
     output.color = vec4<f32>(finalHDR * exposure, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);

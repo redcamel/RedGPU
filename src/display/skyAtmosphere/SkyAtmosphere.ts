@@ -63,6 +63,9 @@ class SkyAtmosphere {
 	#sunIntensity: number = 22.0;
 	#exposure: number = 1.0;
 
+	#heightFogDensity: number = 0.0;
+	#heightFogFalloff: number = 0.1;
+
 	#sunElevation: number = 45;
 	#sunAzimuth: number = 0;
 
@@ -109,6 +112,22 @@ class SkyAtmosphere {
 		this.sunSize = this.#sunSize;
 		this.sunIntensity = this.#sunIntensity;
 		this.exposure = this.#exposure;
+		this.heightFogDensity = this.#heightFogDensity;
+		this.heightFogFalloff = this.#heightFogFalloff;
+	}
+
+	get heightFogDensity(): number { return this.#heightFogDensity; }
+	set heightFogDensity(v: number) {
+		validatePositiveNumberRange(v, 0, 10);
+		this.#heightFogDensity = v;
+		this.#material.heightFogDensity = v;
+	}
+
+	get heightFogFalloff(): number { return this.#heightFogFalloff; }
+	set heightFogFalloff(v: number) {
+		validatePositiveNumberRange(v, 0.001, 10);
+		this.#heightFogFalloff = v;
+		this.#material.heightFogFalloff = v;
 	}
 
 	get earthRadius(): number { return this.#earthRadius; }

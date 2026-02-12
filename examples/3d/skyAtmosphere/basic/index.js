@@ -78,6 +78,10 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_atm.addBinding(skyAtmosphere, 'atmosphereHeight', { min: 1, max: 200, label: 'Atmosphere Height (km)' });
     f_atm.addBinding(skyAtmosphere, 'multiScatteringAmbient', { min: 0, max: 1, label: 'Multi-Scat Ambient' });
 
+    const f_fog = pane.addFolder({ title: 'Height Fog (Artistic)', expanded: false });
+    f_fog.addBinding(skyAtmosphere, 'heightFogDensity', { min: 0, max: 2, label: 'Density' });
+    f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', { min: 0.001, max: 1, label: 'Falloff' });
+
     const f_rayleigh = pane.addFolder({ title: 'Rayleigh Scattering', expanded: false });
     // Rayleigh 산란은 배열이므로 프록시 객체를 통해 제어
     const rayleighProxy = {
