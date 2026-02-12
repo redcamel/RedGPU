@@ -2,25 +2,36 @@
 
 @group(0) @binding(0) var transmittanceTexture: texture_storage_2d<rgba16float, write>;
 
-struct TransmittanceParametersPacked {
-    p0: vec4<f32>, // (earthRadius, atmosphereHeight, mieExtinction, rayleighScaleHeight)
-    p1: vec4<f32>, // (mieScaleHeight, ozoneLayerCenter, ozoneLayerWidth, reserved)
-    p2: vec4<f32>, // (rayleighScattering.rgb, reserved)
-    p3: vec4<f32>, // (ozoneAbsorption.rgb, reserved)
+struct TransmittanceParameters {
+    earthRadius: f32,
+    atmosphereHeight: f32,
+    mieExtinction: f32,
+    rayleighScaleHeight: f32,
+
+    mieScaleHeight: f32,
+    ozoneLayerCenter: f32,
+    ozoneLayerWidth: f32,
+    padding0: f32,
+
+    rayleighScattering: vec3<f32>,
+    padding1: f32,
+
+    ozoneAbsorption: vec3<f32>,
+    padding2: f32,
 };
-@group(0) @binding(1) var<uniform> params: TransmittanceParametersPacked;
+@group(0) @binding(1) var<uniform> params: TransmittanceParameters;
 
-fn earth_radius() -> f32 { return params.p0.x; }
-fn atmosphere_height() -> f32 { return params.p0.y; }
-fn mie_extinction() -> f32 { return params.p0.z; }
-fn rayleigh_scale_height() -> f32 { return params.p0.w; }
+fn earth_radius() -> f32 { return params.earthRadius; }
+fn atmosphere_height() -> f32 { return params.atmosphereHeight; }
+fn mie_extinction() -> f32 { return params.mieExtinction; }
+fn rayleigh_scale_height() -> f32 { return params.rayleighScaleHeight; }
 
-fn mie_scale_height() -> f32 { return params.p1.x; }
-fn ozone_layer_center() -> f32 { return params.p1.y; }
-fn ozone_layer_width() -> f32 { return params.p1.z; }
+fn mie_scale_height() -> f32 { return params.mieScaleHeight; }
+fn ozone_layer_center() -> f32 { return params.ozoneLayerCenter; }
+fn ozone_layer_width() -> f32 { return params.ozoneLayerWidth; }
 
-fn rayleigh_scattering() -> vec3<f32> { return params.p2.xyz; }
-fn ozone_absorption() -> vec3<f32> { return params.p3.xyz; }
+fn rayleigh_scattering() -> vec3<f32> { return params.rayleighScattering; }
+fn ozone_absorption() -> vec3<f32> { return params.ozoneAbsorption; }
 
 // [튜닝] exp(-tau) 언더플로우로 LUT가 까맣게 붙는 걸 완화(시각화/안정화용)
 const MAX_TAU: f32 = 50.0;

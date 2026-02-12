@@ -1,14 +1,18 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import transmittanceShaderCode from "./transmittanceShaderCode.wgsl";
 import TransmittanceLUTTexture from "./TransmittanceLUTTexture";
+import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+
+const SHADER_INFO = parseWGSL(transmittanceShaderCode);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 class TransmittanceGenerator {
 	#redGPUContext: RedGPUContext;
 	#lutTexture: TransmittanceLUTTexture;
 	#pipeline: GPUComputePipeline;
 	#bindGroup: GPUBindGroup;
-	#uniformBuffer: GPUBuffer;
-	#uniformData: Float32Array;
+	#uniformBuffer: UniformBuffer;
 
 	readonly width: number = 256;
 	readonly height: number = 64;
@@ -34,12 +38,8 @@ class TransmittanceGenerator {
 		const {gpuDevice} = this.#redGPUContext;
 		this.#lutTexture = new TransmittanceLUTTexture(this.#redGPUContext, this.width, this.height);
 
-		// 4개의 vec4 = 16 floats
-		this.#uniformData = new Float32Array(16);
-		this.#uniformBuffer = gpuDevice.createBuffer({
-			size: 64,
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-		});
+		const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
+		this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'TRANS_GEN_UNIFORM_BUFFER');
 
 		const shaderModule = gpuDevice.createShaderModule({ code: transmittanceShaderCode });
 		this.#pipeline = gpuDevice.createComputePipeline({
@@ -51,7 +51,7 @@ class TransmittanceGenerator {
 			layout: this.#pipeline.getBindGroupLayout(0),
 			entries: [
 				{ binding: 0, resource: this.#lutTexture.gpuTextureView },
-				{ binding: 1, resource: { buffer: this.#uniformBuffer } }
+				{ binding: 1, resource: { buffer: this.#uniformBuffer.gpuBuffer } }
 			]
 		});
 	}
@@ -59,28 +59,11 @@ class TransmittanceGenerator {
 	render(): void {
 		const {gpuDevice} = this.#redGPUContext;
 
-		// p0: (earthRadius, atmHeight, mieExtinction, rayScaleH)
-		this.#uniformData[0] = this.earthRadius;
-		this.#uniformData[1] = this.atmosphereHeight;
-		this.#uniformData[2] = this.mieExtinction;
-		this.#uniformData[3] = this.rayleighScaleHeight;
-
-		// p1: (mieScaleH, ozoneCenter, ozoneWidth, padding)
-		this.#uniformData[4] = this.mieScaleHeight;
-		this.#uniformData[5] = this.ozoneLayerCenter;
-		this.#uniformData[6] = this.ozoneLayerWidth;
-
-		// p2: (rayleighScat.rgb, padding)
-		this.#uniformData[8] = this.rayleighScattering[0];
-		this.#uniformData[9] = this.rayleighScattering[1];
-		this.#uniformData[10] = this.rayleighScattering[2];
-
-		// p3: (ozoneAbs.rgb, padding)
-		this.#uniformData[12] = this.ozoneAbsorption[0];
-		this.#uniformData[13] = this.ozoneAbsorption[1];
-		this.#uniformData[14] = this.ozoneAbsorption[2];
-
-		gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
+		const {members} = UNIFORM_STRUCT;
+		for (const [key, member] of Object.entries(members)) {
+			const value = (this as any)[key];
+			if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
+		}
 
 		const commandEncoder = gpuDevice.createCommandEncoder();
 		const passEncoder = commandEncoder.beginComputePass();

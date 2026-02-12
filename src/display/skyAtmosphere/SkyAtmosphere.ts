@@ -57,7 +57,7 @@ class SkyAtmosphere {
 	#ozoneAbsorption: [number, number, number] = [0.00065, 0.00188, 0.00008];
 	#ozoneLayerCenter: number = 25.0;
 	#ozoneLayerWidth: number = 15.0;
-	#multiScatAmbient: number = 0.05;
+	#multiScatteringAmbient: number = 0.05;
 
 	#sunSize: number = 0.5;
 	#sunIntensity: number = 22.0;
@@ -105,7 +105,7 @@ class SkyAtmosphere {
 		this.ozoneAbsorption = this.#ozoneAbsorption;
 		this.ozoneLayerCenter = this.#ozoneLayerCenter;
 		this.ozoneLayerWidth = this.#ozoneLayerWidth;
-		this.multiScatAmbient = this.#multiScatAmbient;
+		this.multiScatteringAmbient = this.#multiScatteringAmbient;
 		this.sunSize = this.#sunSize;
 		this.sunIntensity = this.#sunIntensity;
 		this.exposure = this.#exposure;
@@ -115,7 +115,7 @@ class SkyAtmosphere {
 	set earthRadius(v: number) {
 		validatePositiveNumberRange(v, 1);
 		this.#earthRadius = v;
-		this.#material.earthRadiusVal = v;
+		this.#material.earthRadius = v;
 		this.#transmittanceGenerator.earthRadius = v;
 		this.#multiScatteringGenerator.earthRadius = v;
 		this.#skyViewGenerator.earthRadius = v;
@@ -221,11 +221,11 @@ class SkyAtmosphere {
 		this.#dirtyLUT = true;
 	}
 
-	get multiScatAmbient(): number { return this.#multiScatAmbient; }
-	set multiScatAmbient(v: number) {
+	get multiScatteringAmbient(): number { return this.#multiScatteringAmbient; }
+	set multiScatteringAmbient(v: number) {
 		validatePositiveNumberRange(v, 0, 1.0);
-		this.#multiScatAmbient = v;
-		this.#skyViewGenerator.multiScatAmbient = v;
+		this.#multiScatteringAmbient = v;
+		this.#skyViewGenerator.multiScatteringAmbient = v;
 		this.#dirtySkyView = true;
 	}
 

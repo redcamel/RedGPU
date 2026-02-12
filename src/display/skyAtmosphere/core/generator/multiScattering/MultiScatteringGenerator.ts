@@ -3,13 +3,17 @@ import Sampler from "../../../../../resources/sampler/Sampler";
 import MultiScatteringLUTTexture from "./MultiScatteringLUTTexture";
 import multiScatteringShaderCode from "./multiScatteringShaderCode.wgsl";
 import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
+import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+
+const SHADER_INFO = parseWGSL(multiScatteringShaderCode);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 class MultiScatteringGenerator {
     #redGPUContext: RedGPUContext;
     #lutTexture: MultiScatteringLUTTexture;
     #pipeline: GPUComputePipeline;
-    #uniformBuffer: GPUBuffer;
-    #uniformData: Float32Array;
+    #uniformBuffer: UniformBuffer;
     #sampler: Sampler;
 
     readonly width: number = 256;
@@ -36,12 +40,8 @@ class MultiScatteringGenerator {
         const {gpuDevice} = this.#redGPUContext;
         this.#lutTexture = new MultiScatteringLUTTexture(this.#redGPUContext, this.width, this.height);
 
-        // 3개의 vec4
-        this.#uniformData = new Float32Array(12);
-        this.#uniformBuffer = gpuDevice.createBuffer({
-            size: this.#uniformData.byteLength,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
+        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
+        this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'MULTI_SCAT_GEN_UNIFORM_BUFFER');
 
         const shaderModule = gpuDevice.createShaderModule({code: multiScatteringShaderCode});
         this.#pipeline = gpuDevice.createComputePipeline({
@@ -53,23 +53,11 @@ class MultiScatteringGenerator {
     render(transmittanceTexture: TransmittanceLUTTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
-        // p0: (earthRadius, atmHeight, mieScat, mieExt)
-        this.#uniformData[0] = this.earthRadius;
-        this.#uniformData[1] = this.atmosphereHeight;
-        this.#uniformData[2] = this.mieScattering;
-        this.#uniformData[3] = this.mieExtinction;
-
-        // p1: (rayScat.rgb, mieAnisotropy)
-        this.#uniformData[4] = this.rayleighScattering[0];
-        this.#uniformData[5] = this.rayleighScattering[1];
-        this.#uniformData[6] = this.rayleighScattering[2];
-        this.#uniformData[7] = this.mieAnisotropy;
-
-        // p2: (rayScaleH, mieScaleH, padding, padding)
-        this.#uniformData[8] = this.rayleighScaleHeight;
-        this.#uniformData[9] = this.mieScaleHeight;
-
-        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
+        const {members} = UNIFORM_STRUCT;
+        for (const [key, member] of Object.entries(members)) {
+            const value = (this as any)[key];
+            if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
+        }
         
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#pipeline.getBindGroupLayout(0),
@@ -77,7 +65,7 @@ class MultiScatteringGenerator {
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
                 {binding: 1, resource: transmittanceTexture.gpuTextureView},
                 {binding: 2, resource: this.#sampler.gpuSampler},
-                {binding: 3, resource: {buffer: this.#uniformBuffer}}
+                {binding: 3, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
             ]
         });
 

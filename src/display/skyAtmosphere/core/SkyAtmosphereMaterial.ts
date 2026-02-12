@@ -16,62 +16,30 @@ interface SkyAtmosphereMaterial {
 	skyViewTexture: SkyViewLUTTexture;
 	transmittanceTextureSampler: Sampler;
 
-	// Uniform vec4 Blocks
-	sunData: Float32Array;          // [dir.x, dir.y, dir.z, size]
-	atmosphereParams: Float32Array; // [height, exposure, intensity, camHeight]
-	earthParams: Float32Array;      // [radius, 0, 0, 0]
+	sunDirection: Float32Array;
+	sunSize: number;
+	atmosphereHeight: number;
+	exposure: number;
+	sunIntensity: number;
+	cameraHeight: number;
+	earthRadius: number;
 }
 
 class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 	dirtyPipeline: boolean = false
-
-	// 기존 인터페이스 호환용 Getter/Setter
-	get sunDirection(): Float32Array { return this.sunData.subarray(0, 3); }
-	set sunDirection(v: Float32Array | number[]) {
-		this.sunData[0] = v[0]; this.sunData[1] = v[1]; this.sunData[2] = v[2];
-		this.sunData = this.sunData; // 업데이트 트리거
-	}
-	get sunSize(): number { return this.sunData[3]; }
-	set sunSize(v: number) { 
-		this.sunData[3] = v; 
-		this.sunData = this.sunData; // 업데이트 트리거
-	}
-
-	get atmosphereHeight(): number { return this.atmosphereParams[0]; }
-	set atmosphereHeight(v: number) { 
-		this.atmosphereParams[0] = v; 
-		this.atmosphereParams = this.atmosphereParams; 
-	}
-	get exposure(): number { return this.atmosphereParams[1]; }
-	set exposure(v: number) { 
-		this.atmosphereParams[1] = v; 
-		this.atmosphereParams = this.atmosphereParams;
-	}
-	get sunIntensity(): number { return this.atmosphereParams[2]; }
-	set sunIntensity(v: number) { 
-		this.atmosphereParams[2] = v; 
-		this.atmosphereParams = this.atmosphereParams;
-	}
-	get cameraHeight(): number { return this.atmosphereParams[3]; }
-	set cameraHeight(v: number) { 
-		this.atmosphereParams[3] = v; 
-		this.atmosphereParams = this.atmosphereParams;
-	}
-
-	get earthRadiusVal(): number { return this.earthParams[0]; }
-	set earthRadiusVal(v: number) { 
-		this.earthParams[0] = v; 
-		this.earthParams = this.earthParams;
-	}
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext, 'SKY_ATMOSPHERE_MATERIAL', SHADER_INFO, 2);
 		this.initGPURenderInfos();
 
 		// 초기화 (UE 표준값 기반)
-		this.sunData = new Float32Array([0, 1, 0, 0.5]);
-		this.atmosphereParams = new Float32Array([60.0, 1.0, 22.0, 0.2]);
-		this.earthParams = new Float32Array([6360.0, 0, 0, 0]);
+		this.sunDirection = new Float32Array([0, 1, 0]);
+		this.sunSize = 0.5;
+		this.atmosphereHeight = 60.0;
+		this.exposure = 1.0;
+		this.sunIntensity = 22.0;
+		this.cameraHeight = 0.2;
+		this.earthRadius = 6360.0;
 
 		this.transmittanceTextureSampler = new Sampler(this.redGPUContext, {
 			magFilter: 'linear',
@@ -82,11 +50,15 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 	}
 }
 
-// 16바이트 정렬 정의
-DefineForFragment.defineVec4(SkyAtmosphereMaterial, [
-	'sunData',
-	'atmosphereParams',
-	'earthParams'
+// 개별 속성 정의 (셰이더 구조체 순서와 일치해야 함)
+DefineForFragment.defineVec3(SkyAtmosphereMaterial, ['sunDirection']);
+DefineForFragment.definePositiveNumber(SkyAtmosphereMaterial, [
+	'sunSize',
+	'atmosphereHeight',
+	'exposure',
+	'sunIntensity',
+	'cameraHeight',
+	'earthRadius'
 ]);
 
 DefineForFragment.defineTexture(SkyAtmosphereMaterial, [

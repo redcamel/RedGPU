@@ -12,9 +12,13 @@ struct FragmentOutput {
 };
 
 struct Uniforms {
-    sunData: vec4<f32>,          // xyz: sunDirection, w: sunSize
-    atmosphereParams: vec4<f32>, // x: atmHeight, y: exposure, z: sunIntensity, w: cameraHeight
-    earthParams: vec4<f32>,      // x: earthRadius, yzw: padding
+    sunDirection: vec3<f32>,
+    sunSize: f32,
+    atmosphereHeight: f32,
+    exposure: f32,
+    sunIntensity: f32,
+    cameraHeight: f32,
+    earthRadius: f32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
@@ -41,13 +45,13 @@ fn get_transmittance_uv(h: f32, cos_theta: f32, atm_h: f32) -> vec2<f32> {
 fn main(outData: OutData) -> FragmentOutput {
     var output: FragmentOutput;
 
-    let sunDir = normalize(uniforms.sunData.xyz);
-    let sunSize = uniforms.sunData.w;
-    let atmH = uniforms.atmosphereParams.x;
-    let exposure = uniforms.atmosphereParams.y;
-    let sunIntensity = uniforms.atmosphereParams.z;
-    let camH = uniforms.atmosphereParams.w;
-    let earthR = uniforms.earthParams.x;
+    let sunDir = normalize(uniforms.sunDirection);
+    let sunSize = uniforms.sunSize;
+    let atmH = uniforms.atmosphereHeight;
+    let exposure = uniforms.exposure;
+    let sunIntensity = uniforms.sunIntensity;
+    let camH = uniforms.cameraHeight;
+    let earthR = uniforms.earthRadius;
 
     let viewDir = normalize(outData.vertexPosition.xyz);
 

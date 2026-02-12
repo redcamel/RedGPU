@@ -4,13 +4,17 @@ import SkyViewLUTTexture from "./SkyViewLUTTexture";
 import skyViewShaderCode from "./skyViewShaderCode.wgsl";
 import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
 import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTTexture";
+import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+
+const SHADER_INFO = parseWGSL(skyViewShaderCode);
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 class SkyViewGenerator {
 	#redGPUContext: RedGPUContext;
 	#lutTexture: SkyViewLUTTexture;
 	#pipeline: GPUComputePipeline;
-	#uniformBuffer: GPUBuffer;
-	#uniformData: Float32Array;
+	#uniformBuffer: UniformBuffer;
 	#sampler: Sampler;
 
 	readonly width: number = 512;
@@ -25,7 +29,7 @@ class SkyViewGenerator {
 	rayleighScaleHeight: number = 8.0;
 	mieScaleHeight: number = 1.2;
 	cameraHeight: number = 0.2;
-	multiScatAmbient: number = 0.05;
+	multiScatteringAmbient: number = 0.05;
 	ozoneAbsorption: [number, number, number] = [0.00065, 0.00188, 0.00008];
 	ozoneLayerCenter: number = 25.0;
 	ozoneLayerWidth: number = 15.0;
@@ -43,12 +47,8 @@ class SkyViewGenerator {
 		const {gpuDevice} = this.#redGPUContext;
 		this.#lutTexture = new SkyViewLUTTexture(this.#redGPUContext, this.width, this.height);
 
-		// 5개의 vec4
-		this.#uniformData = new Float32Array(20);
-		this.#uniformBuffer = gpuDevice.createBuffer({
-			size: this.#uniformData.byteLength,
-			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-		});
+		const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
+		this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'SKY_VIEW_GEN_UNIFORM_BUFFER');
 
 		const shaderModule = gpuDevice.createShaderModule({ code: skyViewShaderCode });
 		this.#pipeline = gpuDevice.createComputePipeline({
@@ -60,37 +60,11 @@ class SkyViewGenerator {
 	render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture): void {
 		const {gpuDevice} = this.#redGPUContext;
 
-		// p0: (earthRadius, atmHeight, mieScat, mieExt)
-		this.#uniformData[0] = this.earthRadius;
-		this.#uniformData[1] = this.atmosphereHeight;
-		this.#uniformData[2] = this.mieScattering;
-		this.#uniformData[3] = this.mieExtinction;
-
-		// p1: (rayScat.rgb, mieAnisotropy)
-		this.#uniformData[4] = this.rayleighScattering[0];
-		this.#uniformData[5] = this.rayleighScattering[1];
-		this.#uniformData[6] = this.rayleighScattering[2];
-		this.#uniformData[7] = this.mieAnisotropy;
-
-		// p2: (rayScaleH, mieScaleH, cameraH, multiScatAmbient)
-		this.#uniformData[8] = this.rayleighScaleHeight;
-		this.#uniformData[9] = this.mieScaleHeight;
-		this.#uniformData[10] = this.cameraHeight;
-		this.#uniformData[11] = this.multiScatAmbient;
-
-		// p3: (ozoneAbs.rgb, ozoneCenter)
-		this.#uniformData[12] = this.ozoneAbsorption[0];
-		this.#uniformData[13] = this.ozoneAbsorption[1];
-		this.#uniformData[14] = this.ozoneAbsorption[2];
-		this.#uniformData[15] = this.ozoneLayerCenter;
-
-		// p4: (sunDir.rgb, ozoneWidth)
-		this.#uniformData[16] = this.sunDirection[0];
-		this.#uniformData[17] = this.sunDirection[1];
-		this.#uniformData[18] = this.sunDirection[2];
-		this.#uniformData[19] = this.ozoneLayerWidth;
-
-		gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
+		const {members} = UNIFORM_STRUCT;
+		for (const [key, member] of Object.entries(members)) {
+			const value = (this as any)[key];
+			if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
+		}
 
 		const bindGroup = gpuDevice.createBindGroup({
 			layout: this.#pipeline.getBindGroupLayout(0),
@@ -99,7 +73,7 @@ class SkyViewGenerator {
 				{ binding: 1, resource: transmittance.gpuTextureView },
 				{ binding: 2, resource: multiScat.gpuTextureView },
 				{ binding: 3, resource: this.#sampler.gpuSampler },
-				{ binding: 4, resource: { buffer: this.#uniformBuffer } }
+				{ binding: 4, resource: { buffer: this.#uniformBuffer.gpuBuffer } }
 			]
 		});
 
