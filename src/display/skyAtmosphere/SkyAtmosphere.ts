@@ -89,11 +89,12 @@ class SkyAtmosphere {
 		this.#material.skyViewTexture = this.#skyViewGenerator.lutTexture
 
 		this.#material.atmosphereHeight = this.#atmosphereHeight;
-		this.#material.exposure = 20.0;
-		this.#material.sunIntensity = 22.0;
+		this.#material.exposure = this.#exposure;
+		this.#material.sunIntensity = this.#sunIntensity;
+		this.#material.sunSize = this.#sunSize;
 		this.#material.cameraHeight = 0.2;
 
-		// [수정] Material의 earthRadius는 이제 vec4이므로, earthRadiusVal setter를 사용해야 합니다.
+		// Material의 earthRadius는 이제 vec4이므로, earthRadiusVal setter를 사용해야 합니다.
 		this.#material.earthRadiusVal = this.#earthRadius;
 
 		this.#updateSunDirection();
@@ -104,7 +105,7 @@ class SkyAtmosphere {
 	set earthRadius(v: number) {
 		validatePositiveNumberRange(v, 1);
 		this.#earthRadius = v;
-		this.#material.earthRadiusVal = v; // 여기 수정됨
+		this.#material.earthRadiusVal = v;
 		this.#dirtyLUT = true;
 	}
 
@@ -125,9 +126,9 @@ class SkyAtmosphere {
 	get ozoneAbsorption(): [number, number, number] { return this.#ozoneAbsorption; }
 	set ozoneAbsorption(v: [number, number, number]) { v.forEach(val => validatePositiveNumberRange(val, 0, 1.0)); this.#ozoneAbsorption = v; this.#dirtyLUT = true; }
 	get ozoneLayerCenter(): number { return this.#ozoneLayerCenter; }
-	set ozoneLayerCenter(v: number) { validatePositiveNumberRange(v, 0, 100); this.#ozoneLayerCenter = v; this.#dirtySkyView = true; }
+	set ozoneLayerCenter(v: number) { validatePositiveNumberRange(v, 0, 100); this.#ozoneLayerCenter = v; this.#dirtyLUT = true; }
 	get ozoneLayerWidth(): number { return this.#ozoneLayerWidth; }
-	set ozoneLayerWidth(v: number) { validatePositiveNumberRange(v, 1, 50); this.#ozoneLayerWidth = v; this.#dirtySkyView = true; }
+	set ozoneLayerWidth(v: number) { validatePositiveNumberRange(v, 1, 50); this.#ozoneLayerWidth = v; this.#dirtyLUT = true; }
 	get multiScatAmbient(): number { return this.#multiScatAmbient; }
 	set multiScatAmbient(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#multiScatAmbient = v; this.#dirtySkyView = true; }
 	get sunSize(): number { return this.#sunSize; }
