@@ -12,8 +12,8 @@ class MultiScatteringGenerator {
     #uniformData: Float32Array;
     #sampler: Sampler;
 
-    readonly width: number = 32;
-    readonly height: number = 32;
+    readonly width: number = 256;
+    readonly height: number = 256;
 
     earthRadius: number = 6360.0;
     atmosphereHeight: number = 60.0;

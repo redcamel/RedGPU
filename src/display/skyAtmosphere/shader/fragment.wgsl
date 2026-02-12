@@ -25,6 +25,12 @@ struct Uniforms {
 
 const PI: f32 = 3.14159265359;
 
+// Henyey-Greenstein phase function (for Mie scattering)
+fn henyey_greenstein_phase(cos_theta: f32, g: f32) -> f32 {
+    let g2 = g * g;
+    return (1.0 - g2) / (4.0 * PI * pow(max(0.0001, 1.0 + g2 - 2.0 * g * cos_theta), 1.5));
+}
+
 fn get_transmittance_uv(h: f32, cos_theta: f32, atm_h: f32) -> vec2<f32> {
     let v = sqrt(clamp(h / atm_h, 0.0, 1.0));
     let u = clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0);
@@ -65,12 +71,12 @@ fn main(outData: OutData) -> FragmentOutput {
     }
     let skyU = azimuth / (2.0 * PI) + 0.5;
 
-    // [개선] LUT에서 산란광(rgb)과 투과율(a)을 읽음
+    // LUT에서 산란광(rgb)과 투과율(a)을 읽음
     let skySample = textureSample(skyViewTexture, tSampler, vec2<f32>(skyU, skyV));
     let skyLuminance = skySample.rgb;
     let lutTransmittance = skySample.a;
 
-    // 2. 태양 디스크 직접광 (지면 마스킹 포함)
+    // 2. 태양 및 후광(Halo) 계산
     let view_sun_cos = dot(viewDir, sunDir);
     let sun_angular_radius = sunSize * (PI / 180.0);
     let cosSunRadius = cos(sun_angular_radius);
@@ -78,27 +84,30 @@ fn main(outData: OutData) -> FragmentOutput {
     let viewTransUV = get_transmittance_uv(camH, viewDir.y, atmH);
     let sunTransmittance = textureSampleLevel(transmittanceTexture, tSampler, viewTransUV, 0.0).rgb;
 
+    // 태양 디스크 (Direct Sun Disk)
     let sunRadiance = sunIntensity / max(1e-7, 2.0 * PI * (1.0 - cosSunRadius));
     let sunDiskMask = smoothstep(cosSunRadius - 0.001, cosSunRadius + 0.001, view_sun_cos);
-    let sunGroundMask = smoothstep(horizon_elevation - 0.001, horizon_elevation + 0.001, elevation);
-    let sunDiskLuminance = sunRadiance * sunTransmittance * sunDiskMask * sunGroundMask;
+    let sunDiskLuminance = sunRadiance * sunTransmittance * sunDiskMask;
 
-    // 3. 최종 합성
-    var finalHDR: vec3<f32>;
+    // [개선] Henyey-Greenstein 페이즈 함수를 이용한 물리적 태양 후광 (Mie Halo)
+    // LUT의 해상도 한계를 극복하기 위해 프래그먼트 셰이더에서 직접 계산하여 부드러운 Glow 구현
+    let p_mie = henyey_greenstein_phase(view_sun_cos, 0.99); // 태양 주변의 강한 전방 산란
+    let sunHalo = sunIntensity * sunTransmittance * p_mie * 0.01;
+
+    // 3. 지평선 및 대기 안개(Haze) 계산
+    let sun_haze_factor = smoothstep(0.0, 0.2, sunDir.y);
+    let haze_amount = mix(0.02, 0.001, sun_haze_factor) + clamp(0.005 / max(0.001, camH), 0.0, 0.02);
+    let horizon_fade = smoothstep(horizon_elevation - haze_amount, horizon_elevation + haze_amount * 0.5, elevation);
+
+    // 4. 지표면 영역 계산
+    var groundPart = vec3<f32>(0.0);
     let albedo = vec3<f32>(0.15);
-
-    if (elevation >= horizon_elevation) {
-        // [하늘 영역]
-        finalHDR = (skyLuminance * sunIntensity) + sunDiskLuminance;
-    } else {
-        // [지표면 영역]
+    
+    if (elevation < horizon_elevation + haze_amount) {
         let camPos = vec3<f32>(0.0, r + h_c, 0.0);
         let b = dot(camPos, viewDir);
         let c = dot(camPos, camPos) - r * r;
         let delta = b * b - c;
-
-        var groundRawColor = vec3<f32>(0.0);
-        var aerialTransmittance = vec3<f32>(lutTransmittance);
 
         if (delta >= 0.0) {
             let t = -b - sqrt(delta);
@@ -120,29 +129,20 @@ fn main(outData: OutData) -> FragmentOutput {
             let NdotH = max(0.0, dot(groundNormal, H));
             let specular = pow(NdotH, 512.0) * 4.0;
 
-            groundRawColor = albedo * (sunIntensity * gTrans * NdotL * gLightFade + ambLight * sunIntensity * 0.1)
-                           + (sunIntensity * gTrans * specular * gLightFade);
+            let groundRawColor = albedo * (sunIntensity * gTrans * NdotL * gLightFade + ambLight * sunIntensity * 0.1)
+                               + (sunIntensity * gTrans * specular * gLightFade);
+            
+            groundPart = groundRawColor * lutTransmittance;
         }
-
-        finalHDR = (groundRawColor * aerialTransmittance) + (skyLuminance * sunIntensity);
     }
 
-    // [개선] 지평선 부근 부드러운 블렌딩 (Atmospheric Haze)
-    let sun_haze_factor = smoothstep(0.0, 0.2, sunDir.y);
-    let haze_amount = mix(0.02, 0.001, sun_haze_factor) + clamp(0.005 / max(0.001, camH), 0.0, 0.02);
-    let horizon_fade = smoothstep(horizon_elevation - haze_amount, horizon_elevation + haze_amount * 0.5, elevation);
+    // 5. 최종 합성
+    // [개선] 스카이뷰 LUT에서 가져온 산란광에 태양 디스크와 직접 계산한 후광을 더함
+    var finalHDR = (skyLuminance * sunIntensity) + sunHalo + mix(groundPart, sunDiskLuminance, horizon_fade);
 
-    // 하늘 파트와 지면 파트를 다시 한번 mix하여 경계 제거
-    let skyPart = (skyLuminance * sunIntensity) + sunDiskLuminance;
-    finalHDR = mix(finalHDR, skyPart, horizon_fade);
-
-    // [추가] 절차적 미 산란 후광 (Procedural Mie Halo)
-    let g = 0.985;
-    let g2 = g * g;
-    let miePhase = (1.0 - g2) / (4.0 * PI * pow(max(0.01, 1.0 + g2 - 2.0 * g * view_sun_cos), 1.5));
-    let haloColor = sunIntensity * sunTransmittance * miePhase * 0.05;
-    let halo_ground_fade = smoothstep(horizon_elevation - 0.2, horizon_elevation + 0.1, elevation);
-    finalHDR += haloColor * max(0.15, halo_ground_fade);
+    // [보정] 지평선 아래에서 후광이 너무 밝게 튀는 현상 방지
+    let halo_ground_fade = smoothstep(horizon_elevation - 0.1, horizon_elevation + 0.05, elevation);
+    finalHDR = mix(finalHDR - sunHalo, finalHDR, max(0.15, halo_ground_fade));
 
     output.color = vec4<f32>(finalHDR * exposure, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);

@@ -106,6 +106,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             let rho_r = exp(-max(0.0, cur_h) / params.p2.x);
             let rho_m = exp(-max(0.0, cur_h) / params.p2.y);
+            
+            // [추가] 오존 밀도 프로파일 (Tent Function)
+            let o_width = max(1e-3, params.p4.w);
+            let rho_o = max(0.0, 1.0 - abs(cur_h - params.p3.w) / o_width);
 
             let view_sun_cos = dot(view_dir, params.p4.xyz);
             let step_scat = (params.p1.xyz * rho_r * phase_rayleigh(view_sun_cos) + 
@@ -116,7 +120,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let total_density = params.p1.xyz * rho_r + params.p0.z * rho_m;
             let scat_ms = multi_scat_energy * total_density * params.p2.w;
 
-            let extinction = params.p1.xyz * rho_r + params.p0.w * rho_m;
+            // [보정] 소멸 계수(Extinction)에 오존 흡수 성분 추가하여 천정의 푸른색 강화
+            let extinction = params.p1.xyz * rho_r + params.p0.w * rho_m + params.p3.xyz * rho_o;
 
             luminance += transmittance_to_camera * (step_scat + scat_ms) * step_size;
             transmittance_to_camera *= exp(-extinction * step_size);
