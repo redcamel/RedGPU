@@ -29,21 +29,40 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 	get sunDirection(): Float32Array { return this.sunData.subarray(0, 3); }
 	set sunDirection(v: Float32Array | number[]) {
 		this.sunData[0] = v[0]; this.sunData[1] = v[1]; this.sunData[2] = v[2];
+		this.sunData = this.sunData; // 업데이트 트리거
 	}
 	get sunSize(): number { return this.sunData[3]; }
-	set sunSize(v: number) { this.sunData[3] = v; }
+	set sunSize(v: number) { 
+		this.sunData[3] = v; 
+		this.sunData = this.sunData; // 업데이트 트리거
+	}
 
 	get atmosphereHeight(): number { return this.atmosphereParams[0]; }
-	set atmosphereHeight(v: number) { this.atmosphereParams[0] = v; }
+	set atmosphereHeight(v: number) { 
+		this.atmosphereParams[0] = v; 
+		this.atmosphereParams = this.atmosphereParams; 
+	}
 	get exposure(): number { return this.atmosphereParams[1]; }
-	set exposure(v: number) { this.atmosphereParams[1] = v; }
+	set exposure(v: number) { 
+		this.atmosphereParams[1] = v; 
+		this.atmosphereParams = this.atmosphereParams;
+	}
 	get sunIntensity(): number { return this.atmosphereParams[2]; }
-	set sunIntensity(v: number) { this.atmosphereParams[2] = v; }
+	set sunIntensity(v: number) { 
+		this.atmosphereParams[2] = v; 
+		this.atmosphereParams = this.atmosphereParams;
+	}
 	get cameraHeight(): number { return this.atmosphereParams[3]; }
-	set cameraHeight(v: number) { this.atmosphereParams[3] = v; }
+	set cameraHeight(v: number) { 
+		this.atmosphereParams[3] = v; 
+		this.atmosphereParams = this.atmosphereParams;
+	}
 
 	get earthRadiusVal(): number { return this.earthParams[0]; }
-	set earthRadiusVal(v: number) { this.earthParams[0] = v; }
+	set earthRadiusVal(v: number) { 
+		this.earthParams[0] = v; 
+		this.earthParams = this.earthParams;
+	}
 
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext, 'SKY_ATMOSPHERE_MATERIAL', SHADER_INFO, 2);

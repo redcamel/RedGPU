@@ -34,7 +34,7 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
 }
 
 fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    // [표준] Transmittance LUT 매핑 (v=sqrt(h/H), u=cos*0.5+0.5)
+    // [표준] v=sqrt(h/H), u=cos*0.5+0.5
     let v = sqrt(clamp(h / params.atmosphereHeight, 0.0, 1.0));
     let u = clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0);
     return textureSampleLevel(transmittanceTexture, tSampler, vec2<f32>(u, v), 0.0).rgb;
@@ -58,14 +58,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
     let azimuth = (uv.x - 0.5) * 2.0 * PI;
 
-    // [표준] UE 비선형 Elevation 매핑 (v=0:천정/Up, v=0.5:지평선, v=1:천저/Down)
+    // [표준] UE 비선형 Elevation 매핑 (v=0:Zenith, v=0.5:Horizon, v=1:Nadir)
     let v_coord = uv.y;
     var elevation: f32;
     if (v_coord <= 0.5) {
-        let coord = 1.0 - v_coord * 2.0; // v=0 -> 1.0, v=0.5 -> 0.0
+        let coord = 1.0 - v_coord * 2.0; 
         elevation = (coord * coord) * (PI * 0.5);
     } else {
-        let coord = (v_coord - 0.5) * 2.0; // v=0.5 -> 0.0, v=1 -> 1.0
+        let coord = (v_coord - 0.5) * 2.0; 
         elevation = -(coord * coord) * (PI * 0.5);
     }
 
@@ -92,44 +92,43 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let cur_h = length(p) - r;
 
             let cos_sun = params.sunDirection.y;
-            let horizon_cosine = -sqrt(max(0.0, cur_h * (2.0 * r + cur_h))) / (r + cur_h);
+            let h_c = max(0.0, cur_h);
+            let horizon_cosine = -sqrt(h_c * (2.0 * r + h_c)) / (r + h_c);
             let light_fade = smoothstep(horizon_cosine - 0.1, horizon_cosine + 0.1, cos_sun);
 
-            let sun_trans = get_transmittance(max(0.0, cur_h), cos_sun) * light_fade;
+            let sun_trans = get_transmittance(h_c, cos_sun) * light_fade;
 
             var shadow_mask = 1.0;
             if (get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
             shadow_mask = min(shadow_mask, light_fade);
 
-            let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
-            let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
+            let rho_r = exp(-h_c / params.rayleighScaleHeight);
+            let rho_m = exp(-h_c / params.mieScaleHeight);
 
             let view_sun_cos = dot(view_dir, params.sunDirection);
-            let phase_r = phase_rayleigh(view_sun_cos);
-            let phase_m = phase_mie(view_sun_cos);
+            let step_scat = (params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos) + 
+                             params.mieScattering * rho_m * phase_mie(view_sun_cos)) * sun_trans * shadow_mask;
 
-            let scat_r = params.rayleighScattering * rho_r * phase_r;
-            let scat_m = params.mieScattering * rho_m * phase_m;
-            let single_scat = (scat_r + scat_m) * sun_trans * shadow_mask;
-
-            // Multi Scattering
-            let multi_scat_uv = vec2<f32>(
-                clamp(cos_sun * 0.5 + 0.5, 0.0, 1.0),
-                sqrt(clamp(cur_h / params.atmosphereHeight, 0.0, 1.0))
-            );
+            // Multi Scattering (Ambient)
+            let multi_scat_uv = vec2<f32>(clamp(cos_sun * 0.5 + 0.5, 0.0, 1.0), sqrt(clamp(h_c / params.atmosphereHeight, 0.0, 1.0)));
             let multi_scat_energy = textureSampleLevel(multiScatTexture, tSampler, multi_scat_uv, 0.0).rgb;
             let total_density = params.rayleighScattering * rho_r + params.mieScattering * rho_m;
-            let multi_scat = multi_scat_energy * total_density * params.multiScatAmbient;
+            let scat_ms = multi_scat_energy * total_density * params.multiScatAmbient;
 
-            let step_scat = single_scat + multi_scat;
-            let ozone_density = max(0.0, 1.0 - abs(cur_h - params.ozoneLayerCenter) / params.ozoneLayerWidth);
+            // Extinction
+            let ozone_density = max(0.0, 1.0 - abs(h_c - params.ozoneLayerCenter) / params.ozoneLayerWidth);
             let extinction = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * ozone_density;
 
-            luminance += transmittance_to_camera * step_scat * step_size;
+            luminance += transmittance_to_camera * (step_scat + scat_ms) * step_size;
             transmittance_to_camera *= exp(-extinction * step_size);
 
             if (all(transmittance_to_camera < vec3<f32>(0.001))) { break; }
         }
+    }
+
+    // 지평선 아래는 대기 산란광을 급격히 어둡게 처리하여 지표면 색상에 방해되지 않게 함
+    if (view_dir.y < 0.0) {
+        luminance *= smoothstep(-0.1, -0.0, view_dir.y);
     }
 
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, 1.0));
