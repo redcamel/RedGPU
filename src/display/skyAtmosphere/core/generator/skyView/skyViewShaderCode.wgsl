@@ -125,10 +125,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
 
-    // [수정] 지평선 하단 강제 페이드 제거 (Aerial Perspective를 위해)
+    // [수정] 지평선 하단 감쇄를 완전히 제거 (지면 위 Aerial Perspective 보존)
     // if (elevation < horizon_elevation) {
-    //    luminance *= smoothstep(horizon_elevation - 0.05, horizon_elevation, elevation);
+    //    luminance *= smoothstep(horizon_elevation - 0.005, horizon_elevation, elevation);
     // }
 
-    textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, 1.0));
+    // 카메라에서 dist_limit(지면 혹은 대기끝)까지의 투과율을 alpha에 저장
+    let avg_transmittance = (transmittance_to_camera.r + transmittance_to_camera.g + transmittance_to_camera.b) / 3.0;
+    textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, avg_transmittance));
 }
