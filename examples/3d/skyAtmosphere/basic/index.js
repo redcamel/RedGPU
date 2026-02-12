@@ -67,20 +67,20 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     });
 
     const f_sun = pane.addFolder({ title: 'Sun & Exposure' });
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, label: 'Sun Elevation' });
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, label: 'Sun Azimuth' });
-    f_sun.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100, label: 'Sun Intensity' });
-    f_sun.addBinding(skyAtmosphere, 'sunSize', { min: 0.01, max: 10, label: 'Sun Size' });
-    f_sun.addBinding(skyAtmosphere, 'exposure', { min: 0, max: 10, label: 'Exposure' });
+    f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, step: 0.001, label: 'Sun Elevation' });
+    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, step: 0.001, label: 'Sun Azimuth' });
+    f_sun.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100, step: 0.001, label: 'Sun Intensity' });
+    f_sun.addBinding(skyAtmosphere, 'sunSize', { min: 0.01, max: 10, step: 0.001, label: 'Sun Size' });
+    f_sun.addBinding(skyAtmosphere, 'exposure', { min: 0, max: 10, step: 0.001, label: 'Exposure' });
 
     const f_atm = pane.addFolder({ title: 'Atmosphere Physics' });
-    f_atm.addBinding(skyAtmosphere, 'earthRadius', { min: 100, max: 10000, label: 'Earth Radius (km)' });
-    f_atm.addBinding(skyAtmosphere, 'atmosphereHeight', { min: 1, max: 200, label: 'Atmosphere Height (km)' });
-    f_atm.addBinding(skyAtmosphere, 'multiScatteringAmbient', { min: 0, max: 1, label: 'Multi-Scat Ambient' });
+    f_atm.addBinding(skyAtmosphere, 'earthRadius', { min: 100, max: 10000, step: 1, label: 'Earth Radius (km)' });
+    f_atm.addBinding(skyAtmosphere, 'atmosphereHeight', { min: 1, max: 200, step: 0.1, label: 'Atmosphere Height (km)' });
+    f_atm.addBinding(skyAtmosphere, 'multiScatteringAmbient', { min: 0, max: 1, step: 0.001, label: 'Multi-Scat Ambient' });
 
     const f_fog = pane.addFolder({ title: 'Height Fog (Artistic)', expanded: false });
-    f_fog.addBinding(skyAtmosphere, 'heightFogDensity', { min: 0, max: 2, label: 'Density' });
-    f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', { min: 0.001, max: 1, label: 'Falloff' });
+    f_fog.addBinding(skyAtmosphere, 'heightFogDensity', { min: 0, max: 2, step: 0.0001, label: 'Density' });
+    f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', { min: 0.001, max: 1, step: 0.0001, label: 'Falloff' });
 
     const f_rayleigh = pane.addFolder({ title: 'Rayleigh Scattering', expanded: false });
     // Rayleigh 산란은 배열이므로 프록시 객체를 통해 제어
@@ -92,16 +92,16 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
         get b() { return skyAtmosphere.rayleighScattering[2]; },
         set b(v) { skyAtmosphere.rayleighScattering = [skyAtmosphere.rayleighScattering[0], skyAtmosphere.rayleighScattering[1], v]; }
     };
-    f_rayleigh.addBinding(rayleighProxy, 'r', { min: 0, max: 0.1, label: 'Scattering R' });
-    f_rayleigh.addBinding(rayleighProxy, 'g', { min: 0, max: 0.1, label: 'Scattering G' });
-    f_rayleigh.addBinding(rayleighProxy, 'b', { min: 0, max: 0.1, label: 'Scattering B' });
-    f_rayleigh.addBinding(skyAtmosphere, 'rayleighScaleHeight', { min: 0.1, max: 50, label: 'Scale Height' });
+    f_rayleigh.addBinding(rayleighProxy, 'r', { min: 0, max: 0.1, step: 0.0001, label: 'Scattering R' });
+    f_rayleigh.addBinding(rayleighProxy, 'g', { min: 0, max: 0.1, step: 0.0001, label: 'Scattering G' });
+    f_rayleigh.addBinding(rayleighProxy, 'b', { min: 0, max: 0.1, step: 0.0001, label: 'Scattering B' });
+    f_rayleigh.addBinding(skyAtmosphere, 'rayleighScaleHeight', { min: 0.1, max: 50, step: 0.01, label: 'Scale Height' });
 
     const f_mie = pane.addFolder({ title: 'Mie Scattering', expanded: false });
-    f_mie.addBinding(skyAtmosphere, 'mieScattering', { min: 0, max: 0.1, label: 'Scattering' });
-    f_mie.addBinding(skyAtmosphere, 'mieExtinction', { min: 0, max: 0.1, label: 'Extinction' });
-    f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', { min: 0, max: 0.999, label: 'Anisotropy (g)' });
-    f_mie.addBinding(skyAtmosphere, 'mieScaleHeight', { min: 0.1, max: 20, label: 'Scale Height' });
+    f_mie.addBinding(skyAtmosphere, 'mieScattering', { min: 0, max: 0.1, step: 0.0001, label: 'Scattering' });
+    f_mie.addBinding(skyAtmosphere, 'mieExtinction', { min: 0, max: 0.1, step: 0.0001, label: 'Extinction' });
+    f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', { min: 0, max: 0.999, step: 0.001, label: 'Anisotropy (g)' });
+    f_mie.addBinding(skyAtmosphere, 'mieScaleHeight', { min: 0.1, max: 20, step: 0.01, label: 'Scale Height' });
 
     const f_ozone = pane.addFolder({ title: 'Ozone Layer', expanded: false });
     // Ozone 흡수 계수 프록시
@@ -113,9 +113,9 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
         get b() { return skyAtmosphere.ozoneAbsorption[2]; },
         set b(v) { skyAtmosphere.ozoneAbsorption = [skyAtmosphere.ozoneAbsorption[0], skyAtmosphere.ozoneAbsorption[1], v]; }
     };
-    f_ozone.addBinding(ozoneProxy, 'r', { min: 0, max: 0.01, label: 'Absorption R' });
-    f_ozone.addBinding(ozoneProxy, 'g', { min: 0, max: 0.01, label: 'Absorption G' });
-    f_ozone.addBinding(ozoneProxy, 'b', { min: 0, max: 0.01, label: 'Absorption B' });
-    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerCenter', { min: 0, max: 100, label: 'Layer Center (km)' });
-    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerWidth', { min: 1, max: 50, label: 'Layer Width (km)' });
+    f_ozone.addBinding(ozoneProxy, 'r', { min: 0, max: 0.01, step: 0.00001, label: 'Absorption R' });
+    f_ozone.addBinding(ozoneProxy, 'g', { min: 0, max: 0.01, step: 0.00001, label: 'Absorption G' });
+    f_ozone.addBinding(ozoneProxy, 'b', { min: 0, max: 0.01, step: 0.00001, label: 'Absorption B' });
+    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerCenter', { min: 0, max: 100, step: 0.1, label: 'Layer Center (km)' });
+    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerWidth', { min: 1, max: 50, step: 0.1, label: 'Layer Width (km)' });
 };
