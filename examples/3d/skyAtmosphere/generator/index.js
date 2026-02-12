@@ -17,10 +17,10 @@ RedGPU.init(
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-
+        controller.tilt = 0
         controller.distance = 20;
-        view.grid = true;
-        view.axis = true;
+        // view.grid = true;
+        // view.axis = true;
         redGPUContext.addView(view);
 
         // SkyAtmosphere 생성

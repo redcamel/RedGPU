@@ -44,12 +44,10 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
 }
 
 fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    // MultiScattering에서 사용한 매핑과 동일하게 유지
-    let uv = vec2<f32>(
-        clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0),
-        clamp(h / params.atmosphereHeight, 0.0, 1.0)
-    );
-    return textureSampleLevel(transmittanceTexture, tSampler, uv, 0.0).rgb;
+    // [수정] Transmittance LUT 생성 로직과 정확히 일치하는 역함수 매핑
+    let v = sqrt(clamp(h / params.atmosphereHeight, 0.0, 1.0));
+    let u = clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0);
+    return textureSampleLevel(transmittanceTexture, tSampler, vec2<f32>(u, v), 0.0).rgb;
 }
 
 fn phase_rayleigh(cos_theta: f32) -> f32 {
@@ -104,13 +102,19 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let cur_h = length(p) - params.earthRadius;
 
             // 태양 방향 투과율 (Shadow 포함)
-            // MultiScattering에서 그림자를 이미 처리했으므로, 여기선 기하학적 그림자만 체크하면 됨
-            let sun_trans = get_transmittance(max(0.0, cur_h), params.sunDirection.y);
+            // [수정] 지평선 기준 부드러운 감쇠 (MultiScattering과 동일 로직 적용)
+            let cos_sun = params.sunDirection.y;
+            let r = params.earthRadius;
+            let h_c = max(0.0, cur_h);
+            let horizon_cosine = -sqrt(h_c * (2.0 * r + h_c)) / (r + h_c);
+            let light_fade = smoothstep(horizon_cosine - 0.1, horizon_cosine + 0.1, cos_sun);
 
-            // 행성 자체 그림자 체크 (밤하늘 구현)
-            let shadow_t = get_ray_sphere_intersection(p, params.sunDirection, params.earthRadius);
+            let sun_trans = get_transmittance(h_c, cos_sun) * light_fade;
+
+            // 행성 자체 그림자 체크 (밤하늘 구현 - Hard Shadow 보완)
             var shadow_mask = 1.0;
-            if (shadow_t > 0.0) { shadow_mask = 0.0; }
+            if (get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
+            shadow_mask = min(shadow_mask, light_fade);
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);

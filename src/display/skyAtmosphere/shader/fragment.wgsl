@@ -70,12 +70,13 @@ fn main(outData: OutData) -> FragmentOutput {
     let sun_cos_radius = cos(sun_angular_radius);
 
     // 투과율 텍스처 샘플링을 위한 UV 계산
-    let sun_zenith_cos = dot(sunDirection, up);
+    let sun_zenith_cos = sunDirection.y;
 
-    // Transmittance UV 계산 (Y축 뒤집지 않음)
+    // [수정] Transmittance LUT 매핑 동기화 (UE 표준: [-1, 1] 선형 + 비선형 높이)
+    let safe_h = clamp(cameraHeight / atmosphereHeight, 0.0, 1.0);
     let sun_uv = vec2<f32>(
-        (sun_zenith_cos + 1.0) * 0.5,
-        clamp(cameraHeight / atmosphereHeight, 0.0, 1.0)
+        clamp(sun_zenith_cos * 0.5 + 0.5, 0.0, 1.0),
+        sqrt(safe_h)
     );
     let sun_transmittance = textureSample(transmittanceTexture, transmittanceTextureSampler, sun_uv).rgb;
 
@@ -86,26 +87,55 @@ fn main(outData: OutData) -> FragmentOutput {
     // 태양 가장자리 부드럽게 (Anti-aliasing)
     let sun_disk_mask = smoothstep(sun_cos_radius - 0.0002, sun_cos_radius + 0.0002, view_sun_cos);
 
-    // 지평선 아래 태양 제거
+    // [수정] 지평선 아래 태양 제거 및 부드러운 전이
+    let sun_visibility = smoothstep(-0.02, 0.02, sun_zenith_cos);
     let view_above_horizon = smoothstep(-0.01, 0.01, view_dir.y);
 
-    let sun_disk_luminance = sun_radiance * sun_transmittance * sun_disk_mask * view_above_horizon;
+    let sun_disk_luminance = sun_radiance * sun_transmittance * sun_disk_mask * view_above_horizon * sun_visibility;
 
     // [4] 가짜 지표면 (Fake Ground) 렌더링
-    // 지평선 아래가 검게 나오는 현상을 방지하기 위해 지구 표면 색상을 합성합니다.
     var ground_color = vec3<f32>(0.0);
     if (view_dir.y < -0.01) {
-        // 1. 지구 표면 색상 (Albedo): 약간 푸르스름한 회색
-        let earth_albedo = vec3<f32>(0.05, 0.05, 0.1);
+        // 1. 지구 표면 색상 (Albedo): 조금 더 밝은 회색
+        let earth_albedo = vec3<f32>(0.15, 0.15, 0.15);
 
-        // 2. 지표면 법선(Normal): 구체라고 가정하고 중심에서 뻗어나가는 방향
-        let ground_normal = normalize(outData.vertexPosition.xyz);
+        // 2. 물리적 지표면 법선 계산 (구형 지구 중심 기준)
+        let r = uniforms.earthRadius.x;
+        // 카메라 위치는 (0, r+h, 0)
+        let cam_pos = vec3<f32>(0.0, r + cameraHeight, 0.0);
+        
+        // Ray-Sphere Intersection (지표면 r과 교차)
+        let b = dot(cam_pos, view_dir);
+        let c = dot(cam_pos, cam_pos) - r * r;
+        let delta = b * b - c;
+        // delta는 항상 양수여야 함 (내부에서 아래를 보므로)
+        let t = -b - sqrt(max(0.0, delta));
+        
+        let hit_pos = cam_pos + view_dir * t;
+        let ground_normal = normalize(hit_pos); // 구 중심(0,0,0) 기준 법선
 
-        // 3. 지표면 조명 계산 (Lambertian)
+        // 3. 지표면 조명 계산 (Lambertian + Physical Ambient)
+        // 직사광
         let NdotL = max(0.0, dot(ground_normal, sunDirection));
-
-        // 4. 최종 지표면 색상 = 알베도 * 태양광 * 강도 (반사율 감안하여 조절)
-        ground_color = earth_albedo * (sunIntensity * NdotL * 0.1);
+        
+        // 지표면(h=0)에서의 투과율 계산 (v = sqrt(0/H) = 0)
+        let ground_sun_uv = vec2<f32>(
+            clamp(sunDirection.y * 0.5 + 0.5, 0.0, 1.0),
+            0.0 
+        );
+        let ground_transmittance = textureSampleLevel(transmittanceTexture, transmittanceTextureSampler, ground_sun_uv, 0.0).rgb;
+        let direct_light = sunIntensity * ground_transmittance * NdotL;
+        
+        // 간접광 (Ambient from MultiScattering LUT)
+        // 지표면(h=0)에서의 평균 산란광 (v = 0)
+        let ambient_uv = vec2<f32>(
+             clamp(sunDirection.y * 0.5 + 0.5, 0.0, 1.0),
+             0.0
+        );
+        let ambient_light = textureSampleLevel(multiScatteringTexture, transmittanceTextureSampler, ambient_uv, 0.0).rgb * sunIntensity * 0.5;
+        
+        // 4. 최종 지표면 색상
+        ground_color = earth_albedo * (direct_light + ambient_light);
     }
 
     // [5] 최종 합성 (HDR)

@@ -84,25 +84,43 @@ fn get_optical_depth(h: f32, cos_theta: f32) -> vec3<f32> {
 }
 
 @compute @workgroup_size(16, 16)
+
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+
     let size = textureDimensions(transmittanceTexture);
+
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
+
+
 
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
 
-    // [개선] 지표 근처(아래쪽)에 해상도를 더 주기 위해 비선형 높이 매핑 사용
-    // uv.y=1(아래) => h=0, uv.y=0(위) => h=H 는 유지
-    let y = 1.0 - uv.y;
-    let h = (y * y) * atmosphere_height();
 
-    // [개선] μ는 0..1이지만 너무 0에 붙으면 τ가 급증하므로 MIN_MU~1로 리맵
-    let cos_theta = mix(MIN_MU, 1.0, uv.x);
+
+    // [수정] UE 표준 매핑: uv.y=0(아래) -> h=0, uv.y=1(위) -> h=H
+
+    // 지표면 정밀도를 위해 제곱 매핑 사용
+
+    let h = (uv.y * uv.y) * atmosphere_height();
+
+
+
+    // [수정] UE 표준 매핑: uv.x [0..1] -> cos_theta [-1..1]
+
+    let cos_theta = uv.x * 2.0 - 1.0;
+
+
 
     let tau3 = get_optical_depth(h, cos_theta);
 
-    // [개선] exp 언더플로우 방지(시각화/안정화용)
-    let tau_clamped = min(tau3, vec3<f32>(MAX_TAU));
-    let T = exp(-tau_clamped);
+
+
+    // [개선] exp 언더플로우 방지 및 투과율 계산
+
+    let T = exp(-min(tau3, vec3<f32>(MAX_TAU)));
+
+
 
     textureStore(transmittanceTexture, global_id.xy, vec4<f32>(T, 1.0));
+
 }

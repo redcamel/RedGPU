@@ -31,11 +31,13 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
 }
 
 fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    let uv = vec2<f32>(
-        clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0),
-        clamp(h / params.atmosphereHeight, 0.0, 1.0)
-    );
-    return textureSampleLevel(transmittanceTexture, tSampler, uv, 0.0).rgb;
+    // [수정] Transmittance LUT 생성 로직과 정확히 일치하는 역함수 매핑
+    // Height: h = v^2 * H  =>  v = sqrt(h/H)
+    let v = sqrt(clamp(h / params.atmosphereHeight, 0.0, 1.0));
+    // Angle: cos = u * 2 - 1  =>  u = (cos + 1) / 2
+    let u = clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0);
+
+    return textureSampleLevel(transmittanceTexture, tSampler, vec2<f32>(u, v), 0.0).rgb;
 }
 
 @compute @workgroup_size(8, 8)
