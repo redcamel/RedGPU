@@ -11,46 +11,47 @@ import SkyViewLUTTexture from "./generator/skyView/SkyViewLUTTexture";
 const SHADER_INFO = parseWGSL(fragmentModuleSource)
 
 interface SkyAtmosphereMaterial {
-	/** [KO] 투과율 LUT 텍스처 [EN] Transmittance LUT texture */
 	transmittanceTexture: TransmittanceLUTTexture;
-	/** [KO] 다중 산란 LUT 텍스처 [EN] Multi-scattering LUT texture */
 	multiScatteringTexture: MultiScatteringLUTTexture;
-	/** [KO] 스카이 뷰 LUT 텍스처 [EN] Sky-View LUT texture */
 	skyViewTexture: SkyViewLUTTexture;
-	/** [KO] LUT 텍스처 샘플러 [EN] LUT texture sampler */
 	transmittanceTextureSampler: Sampler;
-	/** [KO] 태양 방향 [EN] Sun direction */
-	sunDirection: Float32Array;
-	/** [KO] 태양 크기 [EN] Sun size */
-	sunSize: number;
-	/** [KO] 대기 높이 [EN] Atmosphere height */
-	atmosphereHeight: number;
-	/** [KO] 노출 [EN] Exposure */
-	exposure: number;
-	/** [KO] 태양 강도 [EN] Sun intensity */
-	sunIntensity: number;
-	/** [KO] 카메라 높이 [EN] Camera height */
-	cameraHeight: number;
-	/** [KO] 지구 반경 [EN] Earth radius */
-	earthRadius: number;
+
+	// [수정] 데이터 정렬 밀림 방지를 위해 vec4 단위로 관리
+	// xyz: sunDirection, w: sunSize
+	sunData: Float32Array;
+	// x: atmHeight, y: exposure, z: sunIntensity, w: cameraHeight
+	atmosphereParams: Float32Array;
+	// x: earthRadius, yzw: padding
+	earthRadius: Float32Array;
 }
 
-/**
- * [KO] SkyAtmosphere 렌더링에 사용되는 전용 머티리얼 클래스입니다.
- * [EN] Material class exclusively used for SkyAtmosphere rendering.
- */
 class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
-	/**
-	 * [KO] 파이프라인 dirty 상태 플래그
-	 * [EN] Pipeline dirty status flag
-	 */
 	dirtyPipeline: boolean = false
 
-	/**
-	 * [KO] SkyAtmosphereMaterial 인스턴스를 생성합니다. (내부 시스템 전용)
-	 *
-	 * @param redGPUContext - RedGPUContext 인스턴스
-	 */
+	// 사용 편의를 위한 Getter/Setter (기존 코드 호환성 유지)
+	get sunDirection(): Float32Array { return this.sunData.subarray(0, 3); }
+	set sunDirection(v: Float32Array | number[]) {
+		this.sunData[0] = v[0]; this.sunData[1] = v[1]; this.sunData[2] = v[2];
+	}
+
+	get sunSize(): number { return this.sunData[3]; }
+	set sunSize(v: number) { this.sunData[3] = v; }
+
+	get atmosphereHeight(): number { return this.atmosphereParams[0]; }
+	set atmosphereHeight(v: number) { this.atmosphereParams[0] = v; }
+
+	get exposure(): number { return this.atmosphereParams[1]; }
+	set exposure(v: number) { this.atmosphereParams[1] = v; }
+
+	get sunIntensity(): number { return this.atmosphereParams[2]; }
+	set sunIntensity(v: number) { this.atmosphereParams[2] = v; }
+
+	get cameraHeight(): number { return this.atmosphereParams[3]; }
+	set cameraHeight(v: number) { this.atmosphereParams[3] = v; }
+
+	get earthRadiusVal(): number { return this.earthRadius[0]; }
+	set earthRadiusVal(v: number) { this.earthRadius[0] = v; }
+
 	constructor(redGPUContext: RedGPUContext) {
 		super(
 			redGPUContext,
@@ -59,13 +60,12 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 			2
 		)
 		this.initGPURenderInfos()
-		this.sunDirection = new Float32Array([0, 1, 0])
-		this.sunSize = 0.5;
-		this.atmosphereHeight = 60.0;
-		this.exposure = 20.0;
-		this.sunIntensity = 22.0; // 물리적 태양 복사조도 (W/m²·sr 기준)
-		this.cameraHeight = 0.2;
-		this.earthRadius = 6360.0;
+
+		// [초기화] vec4 패킹에 맞춰 기본값 설정
+		this.sunData = new Float32Array([0, 1, 0, 0.5])
+		this.atmosphereParams = new Float32Array([60.0, 20.0, 22.0, 0.2])
+		this.earthRadius = new Float32Array([6360.0, 0, 0, 0])
+
 		this.transmittanceTextureSampler = new Sampler(this.redGPUContext, {
 			magFilter: 'linear',
 			minFilter: 'linear',
@@ -75,17 +75,13 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 	}
 }
 
-DefineForFragment.defineVec3(SkyAtmosphereMaterial, [
-	['sunDirection', [0, 1, 0]],
+// [중요] defineVec4를 사용하여 16바이트 정렬을 강제합니다.
+DefineForFragment.defineVec4(SkyAtmosphereMaterial, [
+	'sunData',
+	'atmosphereParams',
+	'earthRadius'
 ])
-DefineForFragment.definePositiveNumber(SkyAtmosphereMaterial, [
-	['sunSize', 0.5],
-	['atmosphereHeight', 60.0],
-	['exposure', 20.0],
-	['sunIntensity', 22.0],
-	['cameraHeight', 0.2],
-	['earthRadius', 6360.0],
-])
+
 DefineForFragment.defineTexture(SkyAtmosphereMaterial, [
 	'transmittanceTexture',
 	'multiScatteringTexture',

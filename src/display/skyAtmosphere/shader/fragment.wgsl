@@ -1,22 +1,24 @@
 #redgpu_include SYSTEM_UNIFORM;
+
 struct OutData {
   @builtin(position) position : vec4<f32>,
   @location(0) vertexPosition: vec4<f32>,
 };
+
 struct FragmentOutput {
     @location(0) color: vec4<f32>,
     @location(1) normal: vec4<f32>,
     @location(2) motionVector: vec4<f32>,
 };
+
+// [수정] Uniform Buffer 정렬 문제를 해결하기 위해 vec4로 패킹
+// TS(SkyAtmosphereMaterial.ts)와 1:1로 대응됩니다.
 struct Uniforms {
-    sunDirection: vec3<f32>,
-    sunSize: f32,
-    atmosphereHeight: f32,
-    exposure: f32,
-    sunIntensity: f32,
-    cameraHeight: f32,
-    earthRadius: f32,
+    sunData: vec4<f32>,          // xyz: sunDirection, w: sunSize
+    atmosphereParams: vec4<f32>, // x: atmHeight, y: exposure, z: sunIntensity, w: cameraHeight
+    earthRadius: vec4<f32>,      // x: earthRadius, yzw: padding
 };
+
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(2) @binding(2) var multiScatteringTexture: texture_2d<f32>;
@@ -28,76 +30,91 @@ const PI: f32 = 3.14159265359;
 @fragment
 fn main(outData: OutData) -> FragmentOutput {
     var output: FragmentOutput;
-    
+
+    // [1] 데이터 언패킹 (Unpacking)
+    let sunDirection = normalize(uniforms.sunData.xyz);
+    let sunSize = uniforms.sunData.w;
+
+    let atmosphereHeight = uniforms.atmosphereParams.x;
+    let exposure = uniforms.atmosphereParams.y;
+    let sunIntensity = uniforms.atmosphereParams.z;
+    let cameraHeight = uniforms.atmosphereParams.w;
+    // earthRadius는 패딩으로 인해 x값만 사용
+
     let view_dir = normalize(outData.vertexPosition.xyz);
-    let sun_dir = normalize(uniforms.sunDirection);
     let up = vec3<f32>(0.0, 1.0, 0.0);
-    
-    // 비선형 샘플링 좌표 (Sky-View LUT 매핑과 동기화)
+
+    // [2] Sky-View LUT 샘플링
+    // atan2(z, x)는 Azimuth 0도를 +X축으로 정의합니다.
     let azimuth = atan2(view_dir.z, view_dir.x);
     let elevation = asin(clamp(view_dir.y, -1.0, 1.0));
 
-    // skyViewShaderCode.wgsl과 동일한 역매핑 적용
+    // SkyViewGenerator와 동일한 비선형 매핑 좌표 계산
     var v: f32;
     if (elevation >= 0.0) {
-        // 위쪽(0° ~ 90°) -> v = 0.0 ~ 0.5
         let coord = sqrt(elevation / (PI * 0.5));
         v = 0.5 * (1.0 - coord);
     } else {
-        // 아래쪽(-90° ~ 0°) -> v = 0.5 ~ 1.0
         let coord = sqrt(-elevation / (PI * 0.5));
         v = 0.5 * (1.0 + coord);
     }
     let sky_uv = vec2<f32>((azimuth / (2.0 * PI)) + 0.5, v);
 
-    // 1. 대기 산란 휘도 (Sky-View LUT)
-    // 지평선 아래 방향도 포함 (대기를 통한 간접광)
+    // 하늘 산란광 (Sky Luminance) 샘플링
+    // 지평선 아래(y < 0) 영역에서는 SkyView LUT가 보통 어둡거나 검게 나옵니다.
     let sky_luminance = textureSample(skyViewTexture, transmittanceTextureSampler, clamp(sky_uv, vec2<f32>(0.0), vec2<f32>(1.0))).rgb;
 
-    // 2. 태양 디스크 직접광 (대기권 밖에서 들어오는 태양 자체)
-    let view_sun_cos = dot(view_dir, sun_dir);
-
-    // 태양 각반경 체크
-    let sun_angular_radius = uniforms.sunSize * (PI / 180.0);
+    // [3] 태양 디스크 직접광 (Sun Disk)
+    let view_sun_cos = dot(view_dir, sunDirection);
+    let sun_angular_radius = sunSize * (PI / 180.0);
     let sun_cos_radius = cos(sun_angular_radius);
 
-    // 태양 디스크 영역: 대기를 통과한 태양 직접광 계산
-    let sun_zenith_cos = dot(sun_dir, up);
-    let sun_uv = vec2<f32>((sun_zenith_cos + 1.0) * 0.5, 1.0 - (uniforms.cameraHeight / uniforms.atmosphereHeight));
+    // 투과율 텍스처 샘플링을 위한 UV 계산
+    let sun_zenith_cos = dot(sunDirection, up);
+
+    // Transmittance UV 계산 (Y축 뒤집지 않음)
+    let sun_uv = vec2<f32>(
+        (sun_zenith_cos + 1.0) * 0.5,
+        clamp(cameraHeight / atmosphereHeight, 0.0, 1.0)
+    );
     let sun_transmittance = textureSample(transmittanceTexture, transmittanceTextureSampler, sun_uv).rgb;
 
-    // 태양 입체각(solid angle) 계산: Ω = 2π(1 - cos(θ))
+    // 태양 Radiance 계산
     let sun_solid_angle = 2.0 * PI * (1.0 - cos(sun_angular_radius));
+    let sun_radiance = sunIntensity / sun_solid_angle;
 
-    // 태양 복사 휘도 (Radiance): 지구 대기권 밖에서의 태양 강도
-    // 물리적 단위: W/(m²·sr)
-    let sun_radiance = uniforms.sunIntensity / sun_solid_angle;
+    // 태양 가장자리 부드럽게 (Anti-aliasing)
+    let sun_disk_mask = smoothstep(sun_cos_radius - 0.0002, sun_cos_radius + 0.0002, view_sun_cos);
 
-    // 태양 디스크 마스크 (smoothstep으로 부드러운 경계)
-    let sun_disk_mask = smoothstep(sun_cos_radius - 0.001, sun_cos_radius, view_sun_cos);
+    // 지평선 아래 태양 제거
+    let view_above_horizon = smoothstep(-0.01, 0.01, view_dir.y);
 
-    // 지평선 클리핑: view_dir이 지평선 아래를 보면 태양 안 보임
-    let view_above_horizon = step(0.0, view_dir.y);
+    let sun_disk_luminance = sun_radiance * sun_transmittance * sun_disk_mask * view_above_horizon;
 
-    // 태양이 지평선과 교차할 때 처리
-    // 태양 중심의 elevation angle (라디안)
-    let sun_elevation_angle = asin(clamp(sun_dir.y, -1.0, 1.0));
+    // [4] 가짜 지표면 (Fake Ground) 렌더링
+    // 지평선 아래가 검게 나오는 현상을 방지하기 위해 지구 표면 색상을 합성합니다.
+    var ground_color = vec3<f32>(0.0);
+    if (view_dir.y < -0.01) {
+        // 1. 지구 표면 색상 (Albedo): 약간 푸르스름한 회색
+        let earth_albedo = vec3<f32>(0.05, 0.05, 0.1);
 
-    // 태양의 하단 가장자리가 지평선보다 위에 있으면 보임
-    // 태양이 완전히 지평선 아래로 내려가면 안 보임
-    let sun_bottom_elevation = sun_elevation_angle - sun_angular_radius;
-    let sun_top_elevation = sun_elevation_angle + sun_angular_radius;
+        // 2. 지표면 법선(Normal): 구체라고 가정하고 중심에서 뻗어나가는 방향
+        let ground_normal = normalize(outData.vertexPosition.xyz);
 
-    // 부드러운 전환: 태양 하단이 지평선 근처일 때
-    let horizon_fade = smoothstep(-sun_angular_radius * 0.1, sun_angular_radius * 0.1, sun_bottom_elevation);
+        // 3. 지표면 조명 계산 (Lambertian)
+        let NdotL = max(0.0, dot(ground_normal, sunDirection));
 
-    let sun_disk_luminance = sun_radiance * sun_transmittance * sun_disk_mask * view_above_horizon * horizon_fade;
+        // 4. 최종 지표면 색상 = 알베도 * 태양광 * 강도 (반사율 감안하여 조절)
+        ground_color = earth_albedo * (sunIntensity * NdotL * 0.1);
+    }
 
-    // 3. 최종 합성: 산란광 + 태양 직접광
-    let final_luminance = sky_luminance + sun_disk_luminance;
+    // [5] 최종 합성 (HDR)
+    // Sky + Sun + Ground
+    // view_dir.y가 음수일 때 sky_luminance는 거의 0에 가까우므로 ground_color가 주가 됩니다.
+    let final_hdr = sky_luminance + sun_disk_luminance + ground_color;
 
-    // 4. 노출 적용 (모든 광원에 동일하게)
-    var final_color = final_luminance * uniforms.exposure;
+    // [6] 노출 적용 (톤맵핑 제거됨, Linear Output)
+    let final_color = final_hdr * exposure;
 
     output.color = vec4<f32>(final_color, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
