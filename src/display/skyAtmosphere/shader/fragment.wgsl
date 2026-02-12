@@ -45,15 +45,25 @@ fn main(outData: OutData) -> FragmentOutput {
 
     let viewDir = normalize(outData.vertexPosition.xyz);
 
+    // [곡률 반영] 카메라 높이에 따른 기하학적 지평선 각도 계산
+    let r = earthR;
+    let h_c = max(0.0001, camH);
+    let horizon_sin = -sqrt(max(0.0, h_c * (2.0 * r + h_c))) / (r + h_c);
+    let horizon_elevation = asin(clamp(horizon_sin, -1.0, 1.0));
+
     // 1. Sky-View LUT 샘플링
     let azimuth = atan2(viewDir.z, viewDir.x);
     let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
     
     var skyV: f32;
-    if (elevation >= 0.0) {
-        skyV = 0.5 * (1.0 - sqrt(elevation / (PI * 0.5)));
+    if (elevation >= horizon_elevation) {
+        // 지평선 위
+        let v_range = (PI * 0.5) - horizon_elevation;
+        skyV = 0.5 * (1.0 - sqrt(max(0.0, (elevation - horizon_elevation) / v_range)));
     } else {
-        skyV = 0.5 * (1.0 + sqrt(-elevation / (PI * 0.5)));
+        // 지평선 아래
+        let v_range = horizon_elevation + (PI * 0.5);
+        skyV = 0.5 * (1.0 + sqrt(max(0.0, (horizon_elevation - elevation) / v_range)));
     }
     let skyU = azimuth / (2.0 * PI) + 0.5;
     let skyLuminance = textureSample(skyViewTexture, tSampler, vec2<f32>(skyU, skyV)).rgb;
@@ -66,11 +76,14 @@ fn main(outData: OutData) -> FragmentOutput {
     let sunTransmittance = textureSample(transmittanceTexture, tSampler, sunUV).rgb;
     let sunRadiance = sunIntensity / max(1e-7, 2.0 * PI * (1.0 - cosSunRadius));
     let sunDiskMask = smoothstep(cosSunRadius - 0.0001, cosSunRadius + 0.0001, view_sun_cos);
-    let sunDiskLuminance = sunRadiance * sunTransmittance * sunDiskMask * smoothstep(-0.01, 0.01, viewDir.y);
+    
+    // 태양 가시성 (지평선에 가려짐 반영)
+    let sun_above_horizon = smoothstep(horizon_elevation - 0.01, horizon_elevation + 0.01, elevation);
+    let sunDiskLuminance = sunRadiance * sunTransmittance * sunDiskMask * sun_above_horizon;
 
     // 3. 물리적 지표면 렌더링
     var groundColor = vec3<f32>(0.0);
-    if (viewDir.y < 0.0) {
+    if (elevation < horizon_elevation) {
         let albedo = vec3<f32>(0.12); 
         let camPos = vec3<f32>(0.0, earthR + camH, 0.0);
         let b = dot(camPos, viewDir);
@@ -94,13 +107,11 @@ fn main(outData: OutData) -> FragmentOutput {
     }
 
     // 4. 최종 합성
-    // 지평선 아래는 skyLuminance(대기 산란광)를 groundColor(지면 색상)로 완전히 대체
     var finalHDR: vec3<f32>;
-    if (viewDir.y >= 0.0) {
+    if (elevation >= horizon_elevation) {
         finalHDR = (skyLuminance * sunIntensity) + sunDiskLuminance;
     } else {
-        // 지평선 아래에서 대기 산란광은 지면 앞에 아주 살짝만 묻어나도록 처리 (보통 제거)
-        finalHDR = groundColor; 
+        finalHDR = groundColor;
     }
     
     output.color = vec4<f32>(finalHDR * exposure, 1.0);

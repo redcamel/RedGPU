@@ -4,18 +4,9 @@
 @group(0) @binding(2) var tSampler: sampler;
 
 struct AtmosphereParameters {
-    earthRadius: f32,
-    atmosphereHeight: f32,
-    mieScattering: f32,
-    mieExtinction: f32,
-    rayleighScattering: vec3<f32>,
-    dummy1: f32,
-    mieAnisotropy: f32,
-    rayleighScaleHeight: f32,
-    mieScaleHeight: f32,
-    cameraHeight: f32,
-    ozoneAbsorption: vec3<f32>,
-    dummy2: f32,
+    p0: vec4<f32>, // earthRadius, atmosphereHeight, mieScat, mieExt
+    p1: vec4<f32>, // rayleighScat.rgb, mieAnisotropy
+    p2: vec4<f32>, // rayScaleH, mieScaleH, padding, padding
 };
 @group(0) @binding(3) var<uniform> params: AtmosphereParameters;
 
@@ -31,8 +22,7 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
 }
 
 fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    // [표준] Transmittance LUT 생성 로직과 정확히 일치하는 역함수 매핑
-    let v = sqrt(clamp(h / params.atmosphereHeight, 0.0, 1.0));
+    let v = sqrt(clamp(h / params.p0.y, 0.0, 1.0));
     let u = clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0);
     return textureSampleLevel(transmittanceTexture, tSampler, vec2<f32>(u, v), 0.0).rgb;
 }
@@ -44,20 +34,19 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
 
-    // [표준] v=0 -> h=0, v=1 -> h=H (제곱 매핑)
-    let h = (uv.y * uv.y) * params.atmosphereHeight;
+    // X축: 태양 각도, Y축: 고도
     let cos_sun_theta = uv.x * 2.0 - 1.0;
+    let h = (uv.y * uv.y) * params.p0.y;
 
-    let ray_origin = vec3<f32>(0.0, h + params.earthRadius, 0.0);
+    let r = params.p0.x;
+    let ray_origin = vec3<f32>(0.0, h + r, 0.0);
     let sun_dir = vec3<f32>(sqrt(max(0.0, 1.0 - cos_sun_theta * cos_sun_theta)), cos_sun_theta, 0.0);
 
     var lum_total = vec3<f32>(0.0);
     var fms = vec3<f32>(0.0);
 
     let sample_count = 64;
-    
-    // 지평선 소프트 쉐도우
-    let r = params.earthRadius;
+
     let horizon_cosine = -sqrt(h * (2.0 * r + h)) / (r + h);
     let light_fade = smoothstep(horizon_cosine - 0.1, horizon_cosine + 0.1, cos_sun_theta);
     var sun_transmittance = get_transmittance(h, cos_sun_theta) * light_fade;
@@ -69,8 +58,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         let ray_dir = vec3<f32>(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
 
-        let t_max = get_ray_sphere_intersection(ray_origin, ray_dir, params.earthRadius + params.atmosphereHeight);
-        let t_earth = get_ray_sphere_intersection(ray_origin, ray_dir, params.earthRadius);
+        let t_max = get_ray_sphere_intersection(ray_origin, ray_dir, r + params.p0.y);
+        let t_earth = get_ray_sphere_intersection(ray_origin, ray_dir, r);
 
         if (t_max > 0.0 && t_earth < 0.0) {
             let ray_transmittance = get_transmittance(h, ray_dir.y);
