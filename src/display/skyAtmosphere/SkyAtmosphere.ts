@@ -157,6 +157,7 @@ class SkyAtmosphere {
 	set mieScattering(v: number) {
 		validatePositiveNumberRange(v, 0, 1.0);
 		this.#mieScattering = v;
+		this.#material.mieScattering = v;
 		this.#multiScatteringGenerator.mieScattering = v;
 		this.#skyViewGenerator.mieScattering = v;
 		this.#dirtyLUT = true;
