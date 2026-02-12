@@ -30,9 +30,9 @@ class SkyViewGenerator {
 	#init(): void {
 		const {gpuDevice} = this.#redGPUContext;
 		this.#lutTexture = new SkyViewLUTTexture(this.#redGPUContext, this.width, this.height);
-		this.#uniformData = new Float32Array(20); 
+		this.#uniformData = new Float32Array(24); // 증가: 20 -> 24
 		this.#uniformBuffer = gpuDevice.createBuffer({
-			size: 80,
+			size: 96, // 증가: 80 -> 96 (24 * 4 bytes)
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
 		});
 		const shaderModule = gpuDevice.createShaderModule({ code: skyViewShaderCode });
@@ -55,12 +55,15 @@ class SkyViewGenerator {
 		this.#uniformData[8] = params.rayleighScaleHeight;
 		this.#uniformData[9] = params.mieScaleHeight;
 		this.#uniformData[10] = params.cameraHeight;
+		this.#uniformData[11] = params.multiScatAmbient || 0.05; // 새로운 파라미터
 		this.#uniformData[12] = params.ozoneAbsorption[0];
 		this.#uniformData[13] = params.ozoneAbsorption[1];
 		this.#uniformData[14] = params.ozoneAbsorption[2];
+		this.#uniformData[15] = params.ozoneLayerCenter || 25.0; // 새로운 파라미터
 		this.#uniformData[16] = params.sunDirection[0];
 		this.#uniformData[17] = params.sunDirection[1];
 		this.#uniformData[18] = params.sunDirection[2];
+		this.#uniformData[19] = params.ozoneLayerWidth || 15.0; // 새로운 파라미터
 
 		gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
 		const bindGroup = gpuDevice.createBindGroup({

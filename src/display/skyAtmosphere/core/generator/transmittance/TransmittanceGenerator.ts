@@ -27,8 +27,8 @@ class TransmittanceGenerator {
 		const {gpuDevice} = this.#redGPUContext;
 		this.#lutTexture = new TransmittanceLUTTexture(this.#redGPUContext, this.width, this.height);
 
-		// [KO] 16개 슬롯(64 bytes)으로 고정하여 표준 정렬 준수
-		this.#uniformData = new Float32Array(16); 
+		// 4 * vec4<f32> = 16 floats = 64 bytes
+		this.#uniformData = new Float32Array(16);
 		this.#uniformBuffer = gpuDevice.createBuffer({
 			size: 64,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
@@ -49,34 +49,42 @@ class TransmittanceGenerator {
 		});
 	}
 
-	render(params: {
-		earthRadius: number,
-		atmosphereHeight: number,
-		mieExtinction: number,
-		rayleighScaleHeight: number,
-		mieScaleHeight: number,
-		rayleighScattering: [number, number, number],
-		ozoneAbsorption: [number, number, number]
-	}): void {
+	render(params: any): void {
 		const {gpuDevice} = this.#redGPUContext;
-		
-		// 1. 스칼라 값 주입 (Index 0-4)
-		this.#uniformData[0] = params.earthRadius;
-		this.#uniformData[1] = params.atmosphereHeight;
-		this.#uniformData[2] = params.mieExtinction;
-		this.#uniformData[3] = params.rayleighScaleHeight;
-		this.#uniformData[4] = params.mieScaleHeight;
-		
-		// 2. Rayleigh Scattering (Offset 32 = Index 8)
-		this.#uniformData[8] = params.rayleighScattering[0];
-		this.#uniformData[9] = params.rayleighScattering[1];
-		this.#uniformData[10] = params.rayleighScattering[2];
-		
-		// 3. Ozone Absorption (Offset 48 = Index 12)
-		this.#uniformData[12] = params.ozoneAbsorption[0];
-		this.#uniformData[13] = params.ozoneAbsorption[1];
-		this.#uniformData[14] = params.ozoneAbsorption[2];
-		
+
+		this.#uniformData.fill(0);
+
+		// p0: (earthRadius, atmosphereHeight, mieExtinction, rayleighScaleHeight)
+		this.#uniformData[0] = Number(params.earthRadius);
+		this.#uniformData[1] = Number(params.atmosphereHeight);
+		this.#uniformData[2] = Number(params.mieExtinction);
+		this.#uniformData[3] = Number(params.rayleighScaleHeight);
+
+		// p1: (mieScaleHeight, ozoneLayerCenter, ozoneLayerWidth, reserved)
+		this.#uniformData[4] = Number(params.mieScaleHeight);
+		this.#uniformData[5] = Number(params.ozoneLayerCenter ?? 25.0);
+		this.#uniformData[6] = Number(params.ozoneLayerWidth ?? 15.0);
+		this.#uniformData[7] = 0;
+
+		// p2: (rayleighScattering.rgb, reserved)
+		this.#uniformData[8] = Number(params.rayleighScattering?.[0]);
+		this.#uniformData[9] = Number(params.rayleighScattering?.[1]);
+		this.#uniformData[10] = Number(params.rayleighScattering?.[2]);
+		this.#uniformData[11] = 0;
+
+		// p3: (ozoneAbsorption.rgb, reserved)
+		this.#uniformData[12] = Number(params.ozoneAbsorption?.[0]);
+		this.#uniformData[13] = Number(params.ozoneAbsorption?.[1]);
+		this.#uniformData[14] = Number(params.ozoneAbsorption?.[2]);
+		this.#uniformData[15] = 0;
+
+		for (let i = 0; i < this.#uniformData.length; i++) {
+			const v = this.#uniformData[i];
+			if (!Number.isFinite(v)) {
+				throw new Error(`TransmittanceGenerator uniformData[${i}] is not finite: ${String(v)}`);
+			}
+		}
+
 		gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as BufferSource);
 
 		const commandEncoder = gpuDevice.createCommandEncoder();

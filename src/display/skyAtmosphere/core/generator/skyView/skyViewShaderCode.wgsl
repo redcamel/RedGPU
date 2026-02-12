@@ -14,10 +14,11 @@ struct AtmosphereParameters {
     rayleighScaleHeight: f32,
     mieScaleHeight: f32,
     cameraHeight: f32,
-    dummy1: f32,
+    multiScatAmbient: f32,  // 다중 산란 최소 간접광 비율
     ozoneAbsorption: vec3<f32>,
-    dummy2: f32,
+    ozoneLayerCenter: f32,  // 오존층 중심 고도 (km)
     sunDirection: vec3<f32>,
+    ozoneLayerWidth: f32,   // 오존층 두께 (km)
 };
 @group(0) @binding(4) var<uniform> params: AtmosphereParameters;
 
@@ -73,7 +74,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, params.earthRadius + params.atmosphereHeight);
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, params.earthRadius);
     var dist_limit = t_max;
-    if (t_earth > 0.0) { dist_limit = min(t_max, t_earth); }
+    // 지평선 부근에서 수치 오차 방지: 매우 작은 t_earth 무시
+    if (t_earth > 0.1) { dist_limit = min(t_max, t_earth); }
 
     var luminance = vec3<f32>(0.0);
     var transmittance_to_camera = vec3<f32>(1.0);
@@ -93,10 +95,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             var sun_trans = get_transmittance(max(0.0, cur_h), cos_sun);
 
             // 행성 그림자: 샘플 포인트에서 태양 방향으로 레이를 쏴서 행성과 충돌 체크
-            let shadow_ray_origin = p;
-            let shadow_t = get_ray_sphere_intersection(shadow_ray_origin, params.sunDirection, params.earthRadius);
-            if (shadow_t > 0.0) {
-                sun_trans = vec3<f32>(0.0); // 행성 그림자 영역
+            // 수치 오차 방지: 높이가 매우 낮은 경우만 그림자 체크
+            if (cur_h < 10.0) {
+                let shadow_ray_origin = p;
+                let shadow_t = get_ray_sphere_intersection(shadow_ray_origin, params.sunDirection, params.earthRadius);
+                // 명확한 교차만 그림자로 처리 (수치 오차 제거)
+                if (shadow_t > 0.01) {
+                    sun_trans = vec3<f32>(0.0); // 행성 그림자 영역
+                }
             }
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
@@ -120,13 +126,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             // 다중 산란은 태양 투과율의 제곱근으로 부드럽게 감쇠
             // 완전히 차단하면 너무 어두워지므로, 간접광으로 일부 기여
             let shadow_factor = sqrt(max(sun_trans.r, max(sun_trans.g, sun_trans.b)));
-            let multi_scat = multi_scat_contrib * total_density * mix(0.1, 1.0, shadow_factor);
+            let multi_scat = multi_scat_contrib * total_density * mix(params.multiScatAmbient, 1.0, shadow_factor);
 
             // 총 산란
             let step_scat = single_scat + multi_scat;
 
             // 총 소멸 (Extinction)
-            let ozone_density = max(0.0, 1.0 - abs(cur_h - 25.0) / 15.0);
+            let ozone_density = max(0.0, 1.0 - abs(cur_h - params.ozoneLayerCenter) / params.ozoneLayerWidth);
             let total_extinction = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * ozone_density;
 
             luminance += transmittance_to_camera * step_scat * step_size;

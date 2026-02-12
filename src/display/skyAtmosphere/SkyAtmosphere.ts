@@ -20,20 +20,12 @@ import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScat
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import vertexModuleSource from './shader/vertex.wgsl';
 
-/** 파싱된 WGSL 셰이더 정보 */
 const SHADER_INFO = parseWGSL(vertexModuleSource)
-/** 버텍스 유니폼 구조체 정보 */
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
-/** 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SKY_ATMOSPHERE'
-/** 버텍스 바인드 그룹 디스크립터 이름 */
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_SKY_ATMOSPHERE'
-/** 파이프라인 디스크립터 레이블 */
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKY_ATMOSPHERE'
 
-/**
- * [KO] 물리 기반 대기 산란(Atmospheric Scattering)을 구현하는 클래스입니다.
- */
 class SkyAtmosphere {
 	modelMatrix: mat4 = mat4.create()
 	gpuRenderInfo: VertexGPURenderInfo
@@ -44,7 +36,7 @@ class SkyAtmosphere {
 	#redGPUContext: RedGPUContext
 	#primitiveState: PrimitiveState
 	#depthStencilState: DepthStencilState
-	
+
 	#transmittanceGenerator: TransmittanceGenerator
 	#multiScatteringGenerator: MultiScatteringGenerator
 	#skyViewGenerator: SkyViewGenerator
@@ -52,29 +44,29 @@ class SkyAtmosphere {
 	#sunDirection: Float32Array = new Float32Array([0, 1, 0])
 	#prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
 
-	// Physics Parameters
 	#earthRadius: number = 6360.0;
 	#atmosphereHeight: number = 60.0;
-	#mieScattering: number = 0.021; // 지평선 노을을 위해 5배 증가
+	#mieScattering: number = 0.021;
 	#mieExtinction: number = 0.021;
 	#rayleighScattering: [number, number, number] = [0.0058, 0.0135, 0.0331];
-	
-	// Advanced Parameters
+
 	#rayleighScaleHeight: number = 8.0;
 	#mieScaleHeight: number = 1.2;
 	#mieAnisotropy: number = 0.8;
 	#ozoneAbsorption: [number, number, number] = [0.00065, 0.00188, 0.00008];
-	
+	#ozoneLayerCenter: number = 25.0;
+	#ozoneLayerWidth: number = 15.0;
+	#multiScatAmbient: number = 0.05;
+
 	#sunSize: number = 0.5;
 	#sunIntensity: number = 22.0;
 	#exposure: number = 1.0;
-	
+
 	#sunElevation: number = 45;
 	#sunAzimuth: number = 0;
-	
+
 	#dirtyLUT: boolean = true;
 	#dirtySkyView: boolean = true;
-	#prevCameraHeight: number = -1;
 
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
@@ -84,11 +76,13 @@ class SkyAtmosphere {
 		this.#primitiveState = new PrimitiveState(this)
 		this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
 		this.#depthStencilState = new DepthStencilState(this)
+		this.#depthStencilState.depthCompare = 'less-equal'
+		this.#depthStencilState.depthWriteEnabled = false
 
 		this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext)
 		this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext)
 		this.#skyViewGenerator = new SkyViewGenerator(redGPUContext)
-		
+
 		this.#material.transmittanceTexture = this.#transmittanceGenerator.lutTexture
 		this.#material.multiScatteringTexture = this.#multiScatteringGenerator.lutTexture
 		this.#material.skyViewTexture = this.#skyViewGenerator.lutTexture
@@ -103,77 +97,39 @@ class SkyAtmosphere {
 	}
 
 	get earthRadius(): number { return this.#earthRadius; }
-	set earthRadius(v: number) {
-		validatePositiveNumberRange(v, 1);
-		this.#earthRadius = v;
-		this.#material.earthRadius = v;
-		this.#dirtyLUT = true;
-	}
-
+	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#earthRadius = v; this.#material.earthRadius = v; this.#dirtyLUT = true; }
 	get atmosphereHeight(): number { return this.#atmosphereHeight; }
-	set atmosphereHeight(v: number) {
-		validatePositiveNumberRange(v, 1);
-		this.#atmosphereHeight = v;
-		this.#material.atmosphereHeight = v;
-		this.#dirtyLUT = true;
-	}
-
+	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#atmosphereHeight = v; this.#material.atmosphereHeight = v; this.#dirtyLUT = true; }
 	get mieScattering(): number { return this.#mieScattering; }
 	set mieScattering(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#mieScattering = v; this.#dirtyLUT = true; }
-
 	get mieExtinction(): number { return this.#mieExtinction; }
 	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#mieExtinction = v; this.#dirtyLUT = true; }
-
 	get rayleighScattering(): [number, number, number] { return this.#rayleighScattering; }
-	set rayleighScattering(v: [number, number, number]) {
-		v.forEach(val => validatePositiveNumberRange(val, 0, 1.0));
-		this.#rayleighScattering = v;
-		this.#dirtyLUT = true;
-	}
-
+	set rayleighScattering(v: [number, number, number]) { v.forEach(val => validatePositiveNumberRange(val, 0, 1.0)); this.#rayleighScattering = v; this.#dirtyLUT = true; }
 	get rayleighScaleHeight(): number { return this.#rayleighScaleHeight; }
 	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#rayleighScaleHeight = v; this.#dirtyLUT = true; }
-
 	get mieScaleHeight(): number { return this.#mieScaleHeight; }
 	set mieScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#mieScaleHeight = v; this.#dirtyLUT = true; }
-
 	get mieAnisotropy(): number { return this.#mieAnisotropy; }
 	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#mieAnisotropy = v; this.#dirtySkyView = true; }
-
 	get ozoneAbsorption(): [number, number, number] { return this.#ozoneAbsorption; }
-	set ozoneAbsorption(v: [number, number, number]) {
-		v.forEach(val => validatePositiveNumberRange(val, 0, 1.0));
-		this.#ozoneAbsorption = v;
-		this.#dirtyLUT = true;
-	}
-
+	set ozoneAbsorption(v: [number, number, number]) { v.forEach(val => validatePositiveNumberRange(val, 0, 1.0)); this.#ozoneAbsorption = v; this.#dirtyLUT = true; }
+	get ozoneLayerCenter(): number { return this.#ozoneLayerCenter; }
+	set ozoneLayerCenter(v: number) { validatePositiveNumberRange(v, 0, 100); this.#ozoneLayerCenter = v; this.#dirtySkyView = true; }
+	get ozoneLayerWidth(): number { return this.#ozoneLayerWidth; }
+	set ozoneLayerWidth(v: number) { validatePositiveNumberRange(v, 1, 50); this.#ozoneLayerWidth = v; this.#dirtySkyView = true; }
+	get multiScatAmbient(): number { return this.#multiScatAmbient; }
+	set multiScatAmbient(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#multiScatAmbient = v; this.#dirtySkyView = true; }
 	get sunSize(): number { return this.#sunSize; }
-	set sunSize(v: number) {
-		validatePositiveNumberRange(v, 0.01, 10.0);
-		this.#sunSize = v;
-		this.#material.sunSize = v;
-	}
-
+	set sunSize(v: number) { validatePositiveNumberRange(v, 0.01, 10.0); this.#sunSize = v; this.#material.sunSize = v; }
 	get sunIntensity(): number { return this.#sunIntensity; }
-	set sunIntensity(v: number) {
-		validatePositiveNumberRange(v, 0, 10000);
-		this.#sunIntensity = v;
-		this.#material.sunIntensity = v;
-	}
-
+	set sunIntensity(v: number) { validatePositiveNumberRange(v, 0, 10000); this.#sunIntensity = v; this.#material.sunIntensity = v; }
 	get exposure(): number { return this.#exposure; }
-	set exposure(v: number) {
-		validatePositiveNumberRange(v, 0, 100);
-		this.#exposure = v;
-		this.#material.exposure = v;
-	}
-
+	set exposure(v: number) { validatePositiveNumberRange(v, 0, 100); this.#exposure = v; this.#material.exposure = v; }
 	get sunElevation(): number { return this.#sunElevation; }
 	set sunElevation(v: number) { validateNumberRange(v, -90, 90); this.#sunElevation = v; this.#updateSunDirection(); }
-
 	get sunAzimuth(): number { return this.#sunAzimuth; }
 	set sunAzimuth(v: number) { validateNumberRange(v, -360, 360); this.#sunAzimuth = v; this.#updateSunDirection(); }
-
 	get sunDirection(): Float32Array { return this.#sunDirection; }
 
 	#updateSunDirection(): void {
@@ -190,7 +146,7 @@ class SkyAtmosphere {
 		const {currentRenderPassEncoder, view} = renderViewStateData
 		const {indexBuffer} = this.#geometry
 		const {triangleCount, indexCount, format} = indexBuffer
-		const {gpuDevice, antialiasingManager} = this.#redGPUContext
+		const {gpuDevice} = this.#redGPUContext
 
 		const physicsParams = {
 			earthRadius: this.#earthRadius,
@@ -202,8 +158,11 @@ class SkyAtmosphere {
 			mieAnisotropy: this.#mieAnisotropy,
 			rayleighScaleHeight: this.#rayleighScaleHeight,
 			mieScaleHeight: this.#mieScaleHeight,
-			cameraHeight: 0.2, // 임시 고정
-			ozoneAbsorption: this.#ozoneAbsorption
+			cameraHeight: this.#material.cameraHeight,
+			ozoneAbsorption: this.#ozoneAbsorption,
+			ozoneLayerCenter: this.#ozoneLayerCenter,
+			ozoneLayerWidth: this.#ozoneLayerWidth,
+			multiScatAmbient: this.#multiScatAmbient
 		};
 
 		if (this.#dirtyLUT) {
@@ -276,7 +235,7 @@ class SkyAtmosphere {
 
 		const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
 		const vertexUniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKY_ATMOSPHERE_VERTEX_UNIFORM_BUFFER', 'SKY_ATMOSPHERE_VERTEX_UNIFORM_BUFFER')
-		
+
 		const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {
 			layout: vertex_BindGroupLayout,
 			label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
@@ -322,6 +281,10 @@ class SkyAtmosphere {
 		}
 		return gpuDevice.createRenderPipeline(pipelineDescriptor)
 	}
+
+	get transmittanceTexture() { return this.#transmittanceGenerator.lutTexture; }
+	get multiScatteringTexture() { return this.#multiScatteringGenerator.lutTexture; }
+	get skyViewTexture() { return this.#skyViewGenerator.lutTexture; }
 }
 
 Object.freeze(SkyAtmosphere)

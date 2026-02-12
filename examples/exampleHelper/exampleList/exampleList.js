@@ -484,6 +484,27 @@ const ExampleList = [
                                 },
                             },
                         ]
+                    },
+                    {
+                        name: 'SkyAtmosphere',
+                        list: [
+                            {
+                                name: 'SkyAtmosphere Basic',
+                                path: '3d/skyAtmosphere/basic',
+                                description: {
+                                    ko: `물리 기반 대기 산란(Atmospheric Scattering)을 시뮬레이션하는 SkyAtmosphere의 기본 사용법을 보여줍니다.`,
+                                    en: `Shows the basic usage of SkyAtmosphere, which simulates physics-based atmospheric scattering.`
+                                },
+                            },
+                            {
+                                name: 'SkyAtmosphere Generator (LUT)',
+                                path: '3d/skyAtmosphere/generator',
+                                description: {
+                                    ko: `SkyAtmosphere 시스템 내부에서 실시간으로 생성되는 LUT(Look-Up Table) 텍스처들을 Sprite3D를 통해 시각화합니다.`,
+                                    en: `Visualizes LUT (Look-Up Table) textures generated in real-time within the SkyAtmosphere system using Sprite3D.`
+                                },
+                            }
+                        ]
                     }
 
                 ]

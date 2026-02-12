@@ -49,8 +49,9 @@ fn main(outData: OutData) -> FragmentOutput {
         v = 0.5 * (1.0 + coord);
     }
     let sky_uv = vec2<f32>((azimuth / (2.0 * PI)) + 0.5, v);
-    
+
     // 1. 대기 산란 휘도 (Sky-View LUT)
+    // 지평선 아래 방향도 포함 (대기를 통한 간접광)
     let sky_luminance = textureSample(skyViewTexture, transmittanceTextureSampler, clamp(sky_uv, vec2<f32>(0.0), vec2<f32>(1.0))).rgb;
 
     // 2. 태양 디스크 직접광 (대기권 밖에서 들어오는 태양 자체)
@@ -75,8 +76,22 @@ fn main(outData: OutData) -> FragmentOutput {
     // 태양 디스크 마스크 (smoothstep으로 부드러운 경계)
     let sun_disk_mask = smoothstep(sun_cos_radius - 0.001, sun_cos_radius, view_sun_cos);
 
-    // 대기 투과율 적용
-    let sun_disk_luminance = sun_radiance * sun_transmittance * sun_disk_mask;
+    // 지평선 클리핑: view_dir이 지평선 아래를 보면 태양 안 보임
+    let view_above_horizon = step(0.0, view_dir.y);
+
+    // 태양이 지평선과 교차할 때 처리
+    // 태양 중심의 elevation angle (라디안)
+    let sun_elevation_angle = asin(clamp(sun_dir.y, -1.0, 1.0));
+
+    // 태양의 하단 가장자리가 지평선보다 위에 있으면 보임
+    // 태양이 완전히 지평선 아래로 내려가면 안 보임
+    let sun_bottom_elevation = sun_elevation_angle - sun_angular_radius;
+    let sun_top_elevation = sun_elevation_angle + sun_angular_radius;
+
+    // 부드러운 전환: 태양 하단이 지평선 근처일 때
+    let horizon_fade = smoothstep(-sun_angular_radius * 0.1, sun_angular_radius * 0.1, sun_bottom_elevation);
+
+    let sun_disk_luminance = sun_radiance * sun_transmittance * sun_disk_mask * view_above_horizon * horizon_fade;
 
     // 3. 최종 합성: 산란광 + 태양 직접광
     let final_luminance = sky_luminance + sun_disk_luminance;

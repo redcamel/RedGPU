@@ -17,6 +17,8 @@ fn main(inputData:InputData) -> OutData {
     var outData : OutData;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     outData.position = u_projectionCameraMatrix * vertexUniforms.modelMatrix * vec4<f32>(inputData.position, 1.0);
+    // 하늘은 항상 가장 뒤에 렌더링되도록 depth를 최대값으로 설정
+    outData.position.z = outData.position.w;
     outData.vertexPosition = vec4<f32>(inputData.position, 1.0);
     return outData;
 }
