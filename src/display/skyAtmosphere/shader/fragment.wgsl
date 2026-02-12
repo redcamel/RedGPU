@@ -118,19 +118,18 @@ fn main(outData: OutData) -> FragmentOutput {
     let p_mie_halo = henyey_greenstein_phase(view_sun_cos, 0.99);
     let sunHalo = sunIntensity * sunTransmittance * (p_mie_glow * 0.02 + p_mie_halo * 0.005);
 
-    // 3. 지평선 안개 및 전이 설정 (Geometric Knife-edge 제거용)
-    let sun_haze_factor = smoothstep(-0.2, 0.5, sunDir.y); 
-    let haze_amount = mix(0.6, 0.2, sun_haze_factor); // 전이 범위를 대폭 확장
+    // 3. 지평선 전이 및 안티앨리어싱 설정 (물리적 경계면 보호)
     let distFromHorizon = elevation - horizon_elevation;
     let absDistFromHorizon = abs(distFromHorizon);
+    let horizonAA = smoothstep(-0.002, 0.002, distFromHorizon);
 
     // 4. 지표면 영역 계산
     var groundPart = vec3<f32>(0.0);
     let albedo = vec3<f32>(0.15);
     var hitDist: f32 = 1e6;
 
-    // 지평선 부근 계산 영역 확장 (전이 영역 포함)
-    if (distFromHorizon < haze_amount) {
+    // 지평선 아래일 경우에만 물리적 지면 계산
+    if (distFromHorizon < 0.01) {
         let camPos = vec3<f32>(0.0, earthRadius + h_c, 0.0);
         let b = dot(camPos, viewDir);
         let c = dot(camPos, camPos) - earthRadius * earthRadius;
@@ -160,37 +159,27 @@ fn main(outData: OutData) -> FragmentOutput {
             let groundRawColor = albedo * (sunIntensity * gTrans * NdotL * gLightFade + ambLight * sunIntensity * 0.1)
                                + (sunIntensity * gTrans * specular * gLightFade);
             
-            // [개선] 지면 소멸 로직: 지평선에 도달하기 훨씬 전부터 대기색과 완전 통합
-            let groundFade = smoothstep(0.0, haze_amount, -distFromHorizon);
-            groundPart = (groundRawColor * lutTransmittance) * groundFade;
+            // 지면 반사광은 대기 투과율에 의해서만 감쇄됨 (물리적 Aerial Perspective)
+            groundPart = groundRawColor * lutTransmittance;
         }
     }
 
-    // 5. 최종 합성 (Seamless Volumetric Horizon)
-    // [개선] 지평선 샘플링 데이터 고정 및 안정화
-    let horizonSample = textureSampleLevel(skyViewTexture, tSampler, vec2<f32>(skyU, 0.5), 0.0);
-    let stableHorizonColor = horizonSample.rgb * sunIntensity;
+    // 5. 물리 기반 최종 합성 (Physically-based Composition)
+    let atmosphereColor = skyLuminance * sunIntensity;
     
-    // 지평선 부근 대기색 평탄화 (샘플링 불연속성 제거)
-    let atmosphereColor = mix(stableHorizonColor, skyLuminance * sunIntensity, smoothstep(0.0, haze_amount * 2.0, absDistFromHorizon));
-    
-    // 태양 및 후광 처리 (지평선 차폐를 극도로 부드럽게)
-    let sunFade = smoothstep(-0.02, 0.08, distFromHorizon);
-    let effectiveSun = sunDiskLuminance * sunFade;
-    let effectiveHalo = sunHalo * smoothstep(-0.5, 0.5, distFromHorizon);
+    // 태양 및 후광 처리 (지면 차폐 적용)
+    let groundMask = horizonAA;
+    let effectiveSun = sunDiskLuminance * groundMask;
+    let effectiveHalo = sunHalo * max(0.1, groundMask);
 
-    // 통합 베이스 합성
-    var finalHDR = atmosphereColor + effectiveSun + effectiveHalo + groundPart;
+    // [합성] 대기 산란광 + (지면 반사광 OR 태양 직접광)
+    // 지평선 AA를 통해 기하학적 경계면에서의 샘플링 튀는 현상만 보정
+    var finalHDR = atmosphereColor + effectiveHalo;
+    finalHDR = mix(finalHDR + groundPart, finalHDR + effectiveSun, horizonAA);
 
-    // [추가] 지평선 안개 산란광 증폭 (Volumetric Bloom Curtain - 경계면 완전 매립)
-    let horizon_haze_mask = exp(-absDistFromHorizon * (8.0 / haze_amount));
-    let haze_boost_color = stableHorizonColor * 4.0 * (1.0 - sun_haze_factor * 0.5);
-    finalHDR += haze_boost_color * horizon_haze_mask;
-
-    // 6. 통합 높이 안개 적용 (Distance Discontinuity Fix)
+    // 6. 통합 높이 안개 적용 (지수적 감쇄 모델)
     let horizonDist = sqrt(h_c * (2.0 * earthRadius + h_c));
     let fogCalcDist = select(horizonDist, hitDist, hitDist < 1e5);
-    
     let fogT = get_height_fog_transmittance(camH, viewDir.y, fogCalcDist, uniforms.heightFogDensity, uniforms.heightFogFalloff);
     finalHDR = mix(atmosphereColor, finalHDR, fogT);
 
