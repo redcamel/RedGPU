@@ -10,12 +10,17 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
-        controller.tilt = 0
+        // 초기 카메라 위치 조정 (지평선을 바라보도록)
+        controller.tilt = -10;
+        controller.distance = 100;
+        
         view.axis = true;
         redGPUContext.addView(view);
         
-        // SkyAtmosphere 생성 및 설정
+        // SkyAtmosphere 생성 및 물리적 초기값 설정
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        skyAtmosphere.sunElevation = 5; // 노을 시점
+        skyAtmosphere.exposure = 1.5; 
         view.skyAtmosphere = skyAtmosphere;
 
         const renderer = new RedGPU.Renderer(redGPUContext);

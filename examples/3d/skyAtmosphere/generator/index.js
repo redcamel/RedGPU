@@ -49,16 +49,19 @@ RedGPU.init(
             return sprite;
         };
 
-        // 3종의 LUT 텍스처 시각화 (위/아래 배치)
-        // 위쪽: Multi-Scattering LUT (1:1), Sky-View LUT (1:1)
-        const multiScattering = createLUTSprite(skyAtmosphere.multiScatteringTexture, 'Multi-Scattering LUT', -3, 8);
-        const skyView =  createLUTSprite(skyAtmosphere.skyViewTexture, 'Sky-View LUT', 3, 8);
+        // 3종의 LUT 텍스처 시각화 (좌우 배치)
+        // 수평 배치로 변경하여 V축(수직) 변화를 더 명확히 확인
+        const skyView = createLUTSprite(skyAtmosphere.skyViewTexture, 'Sky-View LUT (Zenith:Top)', -6, 6);
+        const multiScattering = createLUTSprite(skyAtmosphere.multiScatteringTexture, 'Multi-Scat LUT', 0, 6);
+        const transmittance = createLUTSprite(skyAtmosphere.transmittanceTexture, 'Transmittance LUT', 6, 6);
         
-        // 아래쪽: Transmittance LUT (4:1 비율로 자동 확장됨)
-        const transmittance = createLUTSprite(skyAtmosphere.transmittanceTexture, 'Transmittance LUT', 0, 3);
-
+        // 지평선을 천천히 회전시켜 LUT 변화 관찰
+        let time = 0;
         const renderer = new RedGPU.Renderer(redGPUContext);
-        renderer.start(redGPUContext,);
+        renderer.start(redGPUContext, () => {
+            time += 0.01;
+            skyAtmosphere.sunElevation = Math.sin(time) * 30;
+        });
 
         renderTestPane(view);
     },

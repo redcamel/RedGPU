@@ -31,12 +31,9 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
 }
 
 fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    // [수정] Transmittance LUT 생성 로직과 정확히 일치하는 역함수 매핑
-    // Height: h = v^2 * H  =>  v = sqrt(h/H)
+    // [표준] Transmittance LUT 생성 로직과 정확히 일치하는 역함수 매핑
     let v = sqrt(clamp(h / params.atmosphereHeight, 0.0, 1.0));
-    // Angle: cos = u * 2 - 1  =>  u = (cos + 1) / 2
     let u = clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0);
-
     return textureSampleLevel(transmittanceTexture, tSampler, vec2<f32>(u, v), 0.0).rgb;
 }
 
@@ -47,36 +44,23 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
 
-    // X축: 태양 각도, Y축: 고도
+    // [표준] v=0 -> h=0, v=1 -> h=H (제곱 매핑)
+    let h = (uv.y * uv.y) * params.atmosphereHeight;
     let cos_sun_theta = uv.x * 2.0 - 1.0;
-    let h = uv.y * params.atmosphereHeight;
 
     let ray_origin = vec3<f32>(0.0, h + params.earthRadius, 0.0);
-
-    // 태양 방향 벡터
     let sun_dir = vec3<f32>(sqrt(max(0.0, 1.0 - cos_sun_theta * cos_sun_theta)), cos_sun_theta, 0.0);
 
     var lum_total = vec3<f32>(0.0);
     var fms = vec3<f32>(0.0);
 
     let sample_count = 64;
-
-    // [Soft Shadow Fix]
-    // 기존의 칼같은 shadow_check 대신, 지평선 각도를 기준으로 부드럽게 어둡게 만듭니다.
-
-    var sun_transmittance = get_transmittance(h, cos_sun_theta);
-
-    // 현재 높이 h에서의 지평선 코사인 값 계산 (기하학적 한계선)
-    // cos_hor = -sqrt(h * (2R + h)) / (R + h)
+    
+    // 지평선 소프트 쉐도우
     let r = params.earthRadius;
     let horizon_cosine = -sqrt(h * (2.0 * r + h)) / (r + h);
-
-    // 지평선 근처에서 빛을 부드럽게 감쇠 (smoothstep 사용)
-    // 0.15 범위는 '노을/박명'이 지속되는 구간의 길이를 조절합니다.
-    let light_fade = smoothstep(horizon_cosine - 0.15, horizon_cosine + 0.15, cos_sun_theta);
-
-    // 투과율에 감쇠 적용
-    sun_transmittance = sun_transmittance * light_fade;
+    let light_fade = smoothstep(horizon_cosine - 0.1, horizon_cosine + 0.1, cos_sun_theta);
+    var sun_transmittance = get_transmittance(h, cos_sun_theta) * light_fade;
 
     for (var i = 0; i < sample_count; i = i + 1) {
         let step = f32(i) + 0.5;
@@ -90,22 +74,16 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         if (t_max > 0.0 && t_earth < 0.0) {
             let ray_transmittance = get_transmittance(h, ray_dir.y);
-
-            // Phase Function
             let nu = dot(ray_dir, sun_dir);
             let phase = 3.0 / (16.0 * PI) * (1.0 + nu * nu);
-
             let scattering = 1.0 - ray_transmittance;
 
-            // 적분 누적
             lum_total += scattering * sun_transmittance * phase;
             fms += scattering * (1.0 / f32(sample_count));
         }
     }
 
     let final_energy = lum_total / f32(sample_count) * 4.0 * PI;
-
-    // 지난번 에러(min 타입 불일치)도 여기서 함께 수정되어 있습니다.
     let output = final_energy / (1.0 - min(fms, vec3<f32>(0.999)));
 
     textureStore(multiScatTexture, global_id.xy, vec4<f32>(output, 1.0));

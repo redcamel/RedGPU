@@ -211,7 +211,7 @@ class SkyAtmosphere {
 
 		mat4.identity(this.modelMatrix);
 		mat4.translate(this.modelMatrix, this.modelMatrix, cameraPos);
-		mat4.scale(this.modelMatrix, this.modelMatrix, [5000, 5000, 5000]);
+		mat4.scale(this.modelMatrix, this.modelMatrix, [1000000, 1000000, 1000000]);
 
 		this.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
 
