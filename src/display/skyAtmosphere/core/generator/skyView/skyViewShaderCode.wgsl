@@ -4,21 +4,31 @@
 @group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(3) var tSampler: sampler;
 
+// [수정] 16바이트 정렬을 고려한 패킹 구조체
 struct AtmosphereParameters {
+    // Chunk 1
     earthRadius: f32,
     atmosphereHeight: f32,
     mieScattering: f32,
     mieExtinction: f32,
+
+    // Chunk 2 (vec3 + f32 패킹)
     rayleighScattering: vec3<f32>,
     mieAnisotropy: f32,
+
+    // Chunk 3
     rayleighScaleHeight: f32,
     mieScaleHeight: f32,
     cameraHeight: f32,
-    multiScatAmbient: f32,  // 다중 산란 최소 간접광 비율
+    multiScatAmbient: f32,
+
+    // Chunk 4 (vec3 + f32 패킹)
     ozoneAbsorption: vec3<f32>,
-    ozoneLayerCenter: f32,  // 오존층 중심 고도 (km)
+    ozoneLayerCenter: f32,
+
+    // Chunk 5 (vec3 + f32 패킹)
     sunDirection: vec3<f32>,
-    ozoneLayerWidth: f32,   // 오존층 두께 (km)
+    ozoneLayerWidth: f32,
 };
 @group(0) @binding(4) var<uniform> params: AtmosphereParameters;
 
@@ -34,7 +44,11 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
 }
 
 fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    let uv = vec2<f32>((cos_theta + 1.0) * 0.5, 1.0 - (h / params.atmosphereHeight));
+    // MultiScattering에서 사용한 매핑과 동일하게 유지
+    let uv = vec2<f32>(
+        clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0),
+        clamp(h / params.atmosphereHeight, 0.0, 1.0)
+    );
     return textureSampleLevel(transmittanceTexture, tSampler, uv, 0.0).rgb;
 }
 
@@ -52,11 +66,11 @@ fn phase_mie(cos_theta: f32) -> f32 {
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let size = textureDimensions(skyViewTexture);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
-    
+
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
     let azimuth = (uv.x - 0.5) * 2.0 * PI;
-    
-    // [KO] 비선형 매핑 적용 (지평선 부근 정밀도)
+
+    // 비선형 고도 매핑 (지평선 부근 해상도 확보)
     let v = uv.y;
     var elevation: f32;
     if (v < 0.5) {
@@ -66,78 +80,78 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let coord = (v - 0.5) * 2.0;
         elevation = -(coord * coord) * (PI * 0.5);
     }
-    
+
+    // 카메라 기준 View Vector 계산
     let view_dir = vec3<f32>(cos(elevation) * cos(azimuth), sin(elevation), cos(elevation) * sin(azimuth));
-    let h = params.cameraHeight; 
-    let ray_origin = vec3<f32>(0.0, h + params.earthRadius, 0.0);
-    
+    let ray_origin = vec3<f32>(0.0, params.cameraHeight + params.earthRadius, 0.0);
+
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, params.earthRadius + params.atmosphereHeight);
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, params.earthRadius);
+
     var dist_limit = t_max;
-    // 지평선 부근에서 수치 오차 방지: 매우 작은 t_earth 무시
-    if (t_earth > 0.1) { dist_limit = min(t_max, t_earth); }
+    if (t_earth > 0.0) { dist_limit = min(t_max, t_earth); }
 
     var luminance = vec3<f32>(0.0);
     var transmittance_to_camera = vec3<f32>(1.0);
 
     if (dist_limit > 0.0) {
-        let steps = 40;
+        let steps = 32; // 성능/품질 타협
         let step_size = dist_limit / f32(steps);
+
         for (var i = 0; i < steps; i = i + 1) {
             let t = (f32(i) + 0.5) * step_size;
             let p = ray_origin + view_dir * t;
             let cur_h = length(p) - params.earthRadius;
-            let p_norm = normalize(p);
-            let cos_sun = dot(p_norm, params.sunDirection);
 
-            // 태양 방향으로의 투과율 (직접 산란)
-            // 태양이 지평선 아래면 행성 그림자 처리
-            var sun_trans = get_transmittance(max(0.0, cur_h), cos_sun);
+            // 태양 방향 투과율 (Shadow 포함)
+            // MultiScattering에서 그림자를 이미 처리했으므로, 여기선 기하학적 그림자만 체크하면 됨
+            let sun_trans = get_transmittance(max(0.0, cur_h), params.sunDirection.y);
 
-            // 행성 그림자: 샘플 포인트에서 태양 방향으로 레이를 쏴서 행성과 충돌 체크
-            // 수치 오차 방지: 높이가 매우 낮은 경우만 그림자 체크
-            if (cur_h < 10.0) {
-                let shadow_ray_origin = p;
-                let shadow_t = get_ray_sphere_intersection(shadow_ray_origin, params.sunDirection, params.earthRadius);
-                // 명확한 교차만 그림자로 처리 (수치 오차 제거)
-                if (shadow_t > 0.01) {
-                    sun_trans = vec3<f32>(0.0); // 행성 그림자 영역
-                }
-            }
+            // 행성 자체 그림자 체크 (밤하늘 구현)
+            let shadow_t = get_ray_sphere_intersection(p, params.sunDirection, params.earthRadius);
+            var shadow_mask = 1.0;
+            if (shadow_t > 0.0) { shadow_mask = 0.0; }
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
 
-            // Phase Function은 view_dir와 sun_dir 사이의 각도 사용
             let view_sun_cos = dot(view_dir, params.sunDirection);
             let phase_r = phase_rayleigh(view_sun_cos);
             let phase_m = phase_mie(view_sun_cos);
 
-            // 단일 산란 (Single Scattering)
+            // [1] Single Scattering (직사광)
             let scat_r = params.rayleighScattering * rho_r * phase_r;
             let scat_m = params.mieScattering * rho_m * phase_m;
-            let single_scat = (scat_r + scat_m) * sun_trans;
+            let single_scat = (scat_r + scat_m) * sun_trans * shadow_mask;
 
-            // 다중 산란 (Multi-Scattering) - Phase Function 없이 등방성
-            let multi_scat_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - (max(0.0, cur_h) / params.atmosphereHeight));
-            let multi_scat_contrib = textureSampleLevel(multiScatTexture, tSampler, multi_scat_uv, 0.0).rgb;
+            // [2] Multi Scattering (간접광)
+            // Multi-Scattering LUT 샘플링: X축(태양각도), Y축(고도)
+            let multi_scat_uv = vec2<f32>(
+                params.sunDirection.y * 0.5 + 0.5,
+                clamp(cur_h / params.atmosphereHeight, 0.0, 1.0)
+            );
+            let multi_scat_energy = textureSampleLevel(multiScatTexture, tSampler, multi_scat_uv, 0.0).rgb;
+
             let total_density = params.rayleighScattering * rho_r + params.mieScattering * rho_m;
+            // 그림자 속에서도 산란광(Ambient)은 존재해야 하므로 shadow_mask 대신 Ambient factor 사용
+            let multi_scat = multi_scat_energy * total_density * params.multiScatAmbient;
 
-            // 다중 산란은 태양 투과율의 제곱근으로 부드럽게 감쇠
-            // 완전히 차단하면 너무 어두워지므로, 간접광으로 일부 기여
-            let shadow_factor = sqrt(max(sun_trans.r, max(sun_trans.g, sun_trans.b)));
-            let multi_scat = multi_scat_contrib * total_density * mix(params.multiScatAmbient, 1.0, shadow_factor);
-
-            // 총 산란
+            // 최종 합산
             let step_scat = single_scat + multi_scat;
 
-            // 총 소멸 (Extinction)
+            // 소멸(Extinction) 계산
             let ozone_density = max(0.0, 1.0 - abs(cur_h - params.ozoneLayerCenter) / params.ozoneLayerWidth);
-            let total_extinction = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * ozone_density;
+            let extinction = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * ozone_density;
 
             luminance += transmittance_to_camera * step_scat * step_size;
-            transmittance_to_camera *= exp(-total_extinction * step_size);
+            transmittance_to_camera *= exp(-extinction * step_size);
+
+            // 투과율이 거의 0이면 조기 종료 (성능 최적화)
+            if (transmittance_to_camera.x < 0.001 && transmittance_to_camera.y < 0.001 && transmittance_to_camera.z < 0.001) {
+                break;
+            }
         }
     }
+
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, 1.0));
 }
