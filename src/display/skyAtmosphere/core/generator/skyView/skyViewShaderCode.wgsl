@@ -42,12 +42,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, r + params.atmosphereHeight);
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, r);
 
-    // [수정] 지면 충돌 시 거리를 확실하게 제한하여 지구 내부 적분 방지
+    // [핵심] 적분 거리를 지면 혹은 대기 끝으로 제한
     var dist_limit = t_max;
-    var is_ground_hit = false;
     if (t_earth > 0.0) {
-        dist_limit = t_earth;
-        is_ground_hit = true;
+        if (t_max < 0.0) {
+            dist_limit = t_earth;
+        } else {
+            dist_limit = min(t_max, t_earth);
+        }
     }
 
     var luminance = vec3<f32>(0.0);
@@ -102,21 +104,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
 
-    // [수정] 지면에 닿았을 경우의 Aerial Perspective 처리
-    if (is_ground_hit) {
-        let hit_p = ray_origin + view_dir * t_earth;
-        let ground_n = normalize(hit_p);
-        let cos_s = max(0.0, dot(ground_n, params.sunDirection));
-        
-        // 지면 지점에서의 태양 투과율 샘플링
-        let sun_t = get_transmittance(length(hit_p) - r, cos_s);
-        // 기본 지면 반사광 계산 (Albedo 적용)
-        let ground_reflectance = params.groundAlbedo * (sun_t * cos_s + params.multiScatteringAmbient * 0.1);
-        
-        // 최종 휘도 = (지면 반사광 * 카메라까지의 투과율) + 카메라에서 지면까지의 누적 산란광
-        luminance += ground_reflectance * transmittance_to_camera;
-    }
-
+    // [수정] LUT는 오직 대기 산란 정보(Atmosphere only)만 포함하도록 지면 반사광 합산 제거
     let avg_transmittance = (transmittance_to_camera.r + transmittance_to_camera.g + transmittance_to_camera.b) / 3.0;
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, avg_transmittance));
 }

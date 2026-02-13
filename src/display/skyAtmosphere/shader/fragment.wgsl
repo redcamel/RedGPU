@@ -83,96 +83,107 @@ fn main(outData: OutData) -> FragmentOutput {
     let sun_haze_factor = smoothstep(-0.2, 0.5, sunDir.y);
     let haze_amount = mix(0.3, 0.1, sun_haze_factor); 
 
+
     // 4. 지표면 영역 계산
     var groundPart = vec3<f32>(0.0);
-    let albedo = uniforms.groundAlbedo;
+
+    // [중요 Check] JS에서 groundAlbedo를 1.0으로 보내면 안 됩니다.
+    // 보통 아스팔트/흙은 0.1 ~ 0.3 정도입니다. 물리적으로는 PI로 나누어야 합니다.
+    let albedo = uniforms.groundAlbedo / PI;
     var hitDist: f32 = 1e6;
 
-    // 지평선 지점(v=0.5)의 색상을 샘플링하여 안개 및 합성의 기준점으로 사용
-    let horizonColor = textureSampleLevel(skyViewTexture, tSampler, vec2<f32>(skyU, 0.5), 0.0).rgb * sunIntensity;
-
-    // [개선] 조건문 단순화 및 예외 처리
+    // 충돌 판별 및 바닥 색상 계산
     {
         let camPos = vec3<f32>(0.0, earthRadius + h_c, 0.0);
         let b = dot(camPos, viewDir);
         let c = dot(camPos, camPos) - earthRadius * earthRadius;
         let delta = b * b - c;
 
-        var fogFactor = 1.0; 
         var finalGroundColor = vec3<f32>(0.0);
 
         if (delta >= 0.0) {
-            // [충돌 성공] 실제 바닥 계산
+            // [충돌 성공]
             let t = -b - sqrt(delta);
             hitDist = t;
             let hitPos = camPos + viewDir * t;
             let groundNormal = normalize(hitPos);
-            let localCosSun = dot(groundNormal, sunDir);
-            let NdotL = max(0.0, localCosSun);
 
+            // 태양과 지면의 각도
+            let localCosSun = dot(groundNormal, sunDir);
+            let NdotL = max(0.0, localCosSun); // 직사광(Direct Light)은 음수가 될 수 없음
+
+            // 지면으로 떨어지는 투과율 계산
             let gTransUV = get_transmittance_uv(0.0, localCosSun, atmH);
             let gTrans = textureSampleLevel(transmittanceTexture, tSampler, gTransUV, 0.0).rgb;
+
+            // 직사광 부드러운 감쇠 (Shadow Terminator)
             let gLightFade = smoothstep(-0.02, 0.02, localCosSun);
 
+            // [핵심 수정 1] 야간 Ambient 차단 (Ambient Fade)
+            // 태양이 지평선 아래(-0.1)로 내려가면 환경광도 꺼져야 합니다.
+            // 이게 없으면 밤에도 MultiScattering 텍스처가 바닥을 밝게 비춰 색이 탁해집니다.
+            let ambientFade = smoothstep(-0.4, 0.1, sunDir.y);
+
+            // Multi-Scattering(환경광) 샘플링
             let ambUV = vec2<f32>(clamp(localCosSun * 0.5 + 0.5, 0.0, 1.0), 0.0);
             let ambLight = textureSampleLevel(multiScatteringTexture, tSampler, ambUV, 0.0).rgb;
 
+            // Specular 계산
             let V = -viewDir;
             let L = sunDir;
             let H = normalize(V + L);
             let NdotH = max(0.0, dot(groundNormal, H));
             let specular = pow(NdotH, uniforms.groundShininess) * uniforms.groundSpecular;
 
-            // [수정 3] 바닥 주변광(Ambient) 강화
-            let groundRawColor = albedo * (sunIntensity * gTrans * NdotL * gLightFade + ambLight * sunIntensity * uniforms.groundAmbient)
-                               + (sunIntensity * gTrans * specular * gLightFade);
-            
-            // 물리적 Aerial Perspective (지면 반사광 + 대기 산란광 통합)
-            let groundWithAP = (groundRawColor * lutTransmittance) + (skyLuminance * sunIntensity);
-            
-            // 거리 기반 안개 계산
-            let groundFogDensity = uniforms.heightFogDensity * 0.5 + 0.005; 
-            fogFactor = 1.0 - exp(-max(0.0, hitDist) * groundFogDensity);
-            finalGroundColor = groundWithAP;
+            // [핵심 수정 2] 바닥 최종 색상 조합
+            // ambientFade를 곱해주어 밤에 바닥이 검게 되도록 함
+            let diffuseLight = sunIntensity * gTrans * NdotL * gLightFade;
+            let ambientLight = ambLight * sunIntensity * uniforms.groundAmbient * ambientFade;
+            let specularLight = sunIntensity * gTrans * specular * gLightFade;
+
+            let groundRawColor = albedo * (diffuseLight + ambientLight) + specularLight;
+
+            // 대기 효과 적용 (Aerial Perspective)
+            // skyLuminance * sunIntensity는 이미 물리적으로 정확한 값이므로 그대로 더함
+            finalGroundColor = (groundRawColor * lutTransmittance) + (skyLuminance * sunIntensity);
+
         } else {
-            // [충돌 실패] 지평선 아래인데 충돌 실패 시 무한히 먼 바닥 처리 (검은 구멍 방지)
-            fogFactor = 1.0;
+            // 바닥 충돌 없음 (하늘)
             finalGroundColor = vec3<f32>(0.0);
         }
-        
-        // 최종 바닥 색상 합성
-        groundPart = mix(finalGroundColor, horizonColor, fogFactor);
+
+        groundPart = finalGroundColor;
     }
 
-    // 5. 최종 합성 (Physically-based Composition)
-    // 하늘 기본색 (태양 제외)
+    // 5. 최종 합성
     let atmosphereColor = skyLuminance * sunIntensity;
-    
-    // 지평선 마스크 (0: 지면, 1: 하늘)
-    // [개선] 라인 현상 방지를 위해 AA 구간을 더 부드럽게 확장함
-    let horizonMask = smoothstep(-0.004, 0.004, distFromHorizon);
 
-    // [핵심] 하늘과 땅을 마스크로 확실하게 교체
+    // 지평선 AA 처리
+    let horizonMask = smoothstep(-0.002, 0.002, distFromHorizon);
+
+    // 하늘과 바닥 합성
     var finalHDR = mix(groundPart, atmosphereColor, horizonMask);
 
-    // 태양 및 후광 처리 (지면 차폐 적용)
+    // 태양/후광 추가
     let effectiveSun = sunDiskLuminance * horizonMask;
     let effectiveHalo = sunHalo * max(0.1, horizonMask);
     finalHDR += effectiveSun + effectiveHalo;
 
-    // [개선] 지평선 안개 강화 보정
-    // 단순히 더하는 양을 대폭 줄이고(1.2 -> 0.3), 범위를 넓혀 부드럽게 만듦
-    let horizon_haze_mask = exp(-absDistFromHorizon * (8.0 / haze_amount));
-    let haze_boost_color = atmosphereColor * uniforms.horizonHaze * (1.0 - sun_haze_factor * 0.5);
-    finalHDR += haze_boost_color * horizon_haze_mask;
+    // 지평선 안개 보정 (선택적)
+    let horizon_haze_mask = exp(-absDistFromHorizon * (10.0 / haze_amount));
+    let haze_boost = atmosphereColor * uniforms.horizonHaze * 0.5;
+    finalHDR += haze_boost * horizon_haze_mask;
 
-    // 6. 통합 높이 안개 적용 (전체적인 공간 깊이감 부여)
+    // 6. Height Fog (거리 안개)
     let horizonDist = sqrt(h_c * (2.0 * earthRadius + h_c));
     let fogCalcDist = select(horizonDist, hitDist, hitDist < 1e5);
     let fogT = get_height_fog_transmittance(camH, viewDir.y, fogCalcDist, uniforms.heightFogDensity, uniforms.heightFogFalloff);
     finalHDR = mix(atmosphereColor, finalHDR, fogT);
 
-    output.color = vec4<f32>(finalHDR * exposure, 1.0);
+    // [최종 출력] 톤맵핑 없음 (시스템에서 처리)
+    // exposure만 적용하여 Linear HDR 상태로 내보냄
+    // 만약 바닥이 여전히 하얗다면 uniforms.groundAlbedo를 줄이거나 exposure를 낮춰야 함
+    output.color = vec4<f32>(finalHDR * exposure * 0.2, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
     output.motionVector = vec4<f32>(0.0, 0.0, 0.0, 1.0);
     return output;
