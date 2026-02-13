@@ -1,4 +1,4 @@
-// [KO] 다중 산란(Multi-Scattering) 에너지 보정 LUT 생성을 위한 Compute Shader
+// [KO] UE5 표준 Multi-Scattering LUT 생성
 
 @group(0) @binding(0) var multiScatTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
@@ -12,7 +12,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
     let cos_sun_theta = uv.x * 2.0 - 1.0;
-    let h = (uv.y * uv.y) * params.atmosphereHeight;
+    let h = uv.y * params.atmosphereHeight;
 
     let r = params.earthRadius;
     let ray_origin = vec3<f32>(0.0, h + r, 0.0);
@@ -30,13 +30,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         let t_max = get_ray_sphere_intersection(ray_origin, ray_dir, r + params.atmosphereHeight);
         let t_earth = get_ray_sphere_intersection(ray_origin, ray_dir, r);
-
-        var dist_limit = t_max;
-        var hit_ground = false;
-        if (t_earth > 0.0) {
-            dist_limit = t_earth;
-            hit_ground = true;
-        }
+        let dist_limit = select(t_max, t_earth, t_earth > 0.0);
 
         if (dist_limit > 0.0) {
             let steps = 20;
@@ -57,26 +51,21 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 let scat_total = params.rayleighScattering * rho_r + params.mieScattering * rho_m;
                 let ext_total = params.rayleighScattering * rho_r + params.mieExtinction * rho_m;
 
-                let phase = 1.0 / (4.0 * PI);
-                L1 += T_path * sun_t * scat_total * phase * step_size;
+                L1 += T_path * sun_t * scat_total * (1.0 / (4.0 * PI)) * step_size;
                 f1 += T_path * scat_total * step_size;
                 T_path *= exp(-ext_total * step_size);
             }
 
-            if (hit_ground) {
-                let hit_p = ray_origin + ray_dir * dist_limit;
-                let ground_n = normalize(hit_p);
-                let cos_s = max(0.0, dot(ground_n, sun_dir));
-                let sun_t = get_transmittance(transmittanceTexture, tSampler, 0.0, cos_s, params.atmosphereHeight);
-                L1 += T_path * sun_t * cos_s * params.groundAlbedo / PI;
+            if (t_earth > 0.0) {
+                let hit_p = ray_origin + ray_dir * t_earth;
+                let cos_s = max(0.0, dot(normalize(hit_p), sun_dir));
+                L1 += T_path * get_transmittance(transmittanceTexture, tSampler, 0.0, cos_s, params.atmosphereHeight) * cos_s * params.groundAlbedo / PI;
             }
-
             lum_total += L1;
             fms_total += f1 / f32(sample_count);
         }
     }
 
-    let L2 = lum_total / f32(sample_count);
-    let output = L2 / (1.0 - min(fms_total, vec3<f32>(0.999)));
+    let output = (lum_total / f32(sample_count)) / (1.0 - min(fms_total, vec3<f32>(0.999)));
     textureStore(multiScatTexture, global_id.xy, vec4<f32>(output, 1.0));
 }
