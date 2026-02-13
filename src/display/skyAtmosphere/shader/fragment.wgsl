@@ -148,8 +148,7 @@ fn main(outData: OutData) -> FragmentOutput {
 
             // [언리얼 스타일] 3D LUT 기반 Aerial Perspective (공중 투시)
             // 3D LUT에서 해당 방향과 거리에 맞는 산란광과 투과율을 가져옵니다.
-            let azimuth = atan2(viewDir.z, viewDir.x);
-            let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
+            // azimuth와 elevation은 상단에서 계산된 값을 재사용합니다.
             
             let u = azimuth / (2.0 * PI) + 0.5;
             let v = elevation / PI + 0.5;
@@ -171,37 +170,37 @@ fn main(outData: OutData) -> FragmentOutput {
     }
 
     // 5. 최종 합성
-    // (atmosphereColor는 상단에서 이미 정의됨)
-
-    // [개선] 지평선 AA 및 전이 처리 (더 부드러운 범위 설정)
-    // 기존 0.002에서 0.008로 확장하여 경계를 더 부드럽게 만듦
-    let horizonMask = smoothstep(-0.008, 0.008, distFromHorizon);
-
-    // 하늘과 바닥 합성
-    var finalHDR = mix(groundPart, atmosphereColor, horizonMask);
+    // [언리얼 스타일] 지평선 합성 개편
+    // 인위적인 smoothstep 마스크를 제거하고 물리적 교차 결과에 기반합니다.
+    
+    var finalHDR: vec3<f32>;
+    
+    // 행성 충돌 여부에 따른 완벽한 분리 합성
+    // hitDist가 유효하면 지면(Aerial Perspective 적용), 아니면 하늘(Sky-View LUT)
+    if (hitDist > 0.0 && hitDist < 1e6) {
+        finalHDR = groundPart;
+    } else {
+        finalHDR = atmosphereColor;
+    }
 
     // 태양/후광 추가
-    let effectiveSun = sunDiskLuminance * horizonMask;
-    let effectiveHalo = sunHalo * max(0.2, horizonMask); // 후광은 지평선 아래로도 약간 번지도록 설정
-    finalHDR += effectiveSun + effectiveHalo;
+    // 지평선 아래로도 후광이 자연스럽게 번지도록 마스크 없이 합산
+    finalHDR += sunDiskLuminance + sunHalo;
 
-    // [개선] 지평선 안개 및 연무 보정 (Horizon Haze)
-    // 지평선 부근의 산란광을 강화하여 경계를 시각적으로 부드럽게 만듦
-    let haze_range = mix(0.1, 0.2, 1.0 - sun_haze_factor); // 태양이 낮을수록 연무 범위 확대
-    let horizon_haze_mask = exp(-absDistFromHorizon * (5.0 / (haze_amount + 0.01)));
-    let haze_boost = atmosphereColor * uniforms.horizonHaze * 0.8;
-    finalHDR += haze_boost * horizon_haze_mask;
+    // [언리얼 스타일] 지평선 연무(Horizon Haze)
+    // 물리적 대기 적분 외에 시각적 깊이감을 위한 추가 연무 레이어
+    let horizon_haze_mask = exp(-abs(distFromHorizon) * (5.0 / (haze_amount + 0.01)));
+    finalHDR += atmosphereColor * uniforms.horizonHaze * horizon_haze_mask;
 
     // 6. Height Fog (거리 안개)
+    // 지평선 부근의 안개 처리를 통해 경계를 한 번 더 부드럽게 융합
     let horizonDist = sqrt(h_c * (2.0 * earthRadius + h_c));
-    let fogCalcDist = select(horizonDist, hitDist, hitDist < 1e5);
+    let fogCalcDist = select(horizonDist, hitDist, hitDist < 1e6);
     let fogT = get_height_fog_transmittance(camH, viewDir.y, fogCalcDist, uniforms.heightFogDensity, uniforms.heightFogFalloff);
     
-    // 안개 적용 시에도 지평선 부근은 대기색과 더 자연스럽게 섞이도록 처리
     finalHDR = mix(atmosphereColor, finalHDR, fogT);
 
     // [최종 출력] 톤맵핑 없음 (시스템에서 처리)
-    // 최종 보정된 Linear HDR 상태로 내보냄
     output.color = vec4<f32>(finalHDR * exposure * 0.2, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
     output.motionVector = vec4<f32>(0.0, 0.0, 0.0, 1.0);

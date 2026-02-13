@@ -37,21 +37,21 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, r + params.atmosphereHeight);
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, r);
 
-    // [핵심] 적분 거리를 지면 혹은 대기 끝으로 제한
+    // [핵심] 적분 거리 결정
+    // 언리얼은 SkyView LUT 생성 시 지면에 부딪히는 광선도 대기 끝까지 적분하거나, 
+    // 지면에서의 기여분을 정확히 분리합니다. 
+    // 여기서는 '하늘' 데이터만 담기 위해 지면 충돌 시 적분을 중단하되, 
+    // 지평선 부근의 전이를 위해 t_earth를 정교하게 처리합니다.
     var dist_limit = t_max;
     if (t_earth > 0.0) {
-        if (t_max < 0.0) {
-            dist_limit = t_earth;
-        } else {
-            dist_limit = min(t_max, t_earth);
-        }
+        dist_limit = t_earth;
     }
 
     var luminance = vec3<f32>(0.0);
     var transmittance_to_camera = vec3<f32>(1.0);
 
     if (dist_limit > 0.0) {
-        let steps = 128;
+        let steps = 64; // 효율과 품질의 균형
         let step_size = dist_limit / f32(steps);
 
         for (var i = 0; i < steps; i = i + 1) {
@@ -62,18 +62,20 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let cur_h = p_len - r;
 
             let cos_sun = dot(up, params.sunDirection); 
-            let current_horizon_cos = -sqrt(max(0.0, cur_h * (2.0 * r + cur_h))) / (r + cur_h);
-            let light_fade = smoothstep(current_horizon_cos - 0.1, current_horizon_cos + 0.1, cos_sun);
-
-            let sun_trans = get_transmittance(transmittanceTexture, tSampler, cur_h, cos_sun, params.atmosphereHeight) * light_fade;
-
+            
+            // [언리얼 스타일] 행성 그림자 (Earth Shadow)
+            // 지면에 의해 가려지는 태양광을 부드럽게 계산
             var shadow_mask = 1.0;
             let t_earth_shadow = get_ray_sphere_intersection(p, params.sunDirection, r);
             if (t_earth_shadow > 0.0) { 
-                shadow_mask = smoothstep(-0.05, 0.02, cos_sun);
+                shadow_mask = 0.0; 
+            } else {
+                // 지평선 부근에서의 산란광 감쇠 (Shadow Terminator)
+                let current_horizon_cos = -sqrt(max(0.0, cur_h * (2.0 * r + cur_h))) / (r + cur_h);
+                shadow_mask = smoothstep(current_horizon_cos - 0.01, current_horizon_cos + 0.01, cos_sun);
             }
-            shadow_mask = min(shadow_mask, light_fade);
 
+            let sun_trans = get_transmittance(transmittanceTexture, tSampler, cur_h, cos_sun, params.atmosphereHeight);
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
             
@@ -84,11 +86,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let step_scat = (params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos) + 
                              params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy)) * sun_trans * shadow_mask;
 
+            // 다중 산란 (Multi-Scattering)
             let multi_scat_uv = vec2<f32>(clamp(cos_sun * 0.5 + 0.5, 0.0, 1.0), sqrt(clamp(max(0.0, cur_h) / params.atmosphereHeight, 0.0, 1.0)));
             let multi_scat_energy = textureSampleLevel(multiScatTexture, tSampler, multi_scat_uv, 0.0).rgb;
-            
             let total_scat = params.rayleighScattering * rho_r + params.mieScattering * rho_m;
-            let scat_ms = multi_scat_energy * total_scat;
+            let scat_ms = multi_scat_energy * total_scat * shadow_mask;
 
             let extinction = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * rho_o;
 
@@ -99,7 +101,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
 
-    // [수정] LUT는 오직 대기 산란 정보(Atmosphere only)만 포함하도록 지면 반사광 합산 제거
+    // [중요] 텍스처 저장 시 알파 채널에 투과율 저장
     let avg_transmittance = (transmittance_to_camera.r + transmittance_to_camera.g + transmittance_to_camera.b) / 3.0;
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, avg_transmittance));
 }
