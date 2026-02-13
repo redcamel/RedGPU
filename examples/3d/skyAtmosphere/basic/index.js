@@ -41,7 +41,7 @@ RedGPU.init(
         const ground = new RedGPU.Display.Mesh(redGPUContext, groundGeo, groundMat);
         ground.y = 0; 
         ground.primitiveState.cullMode = 'none'; 
-        scene.addChild(ground);
+        // scene.addChild(ground);
 
         // 4. 태양 방향을 따라 테스트 메쉬 효율적 배치
         const sphereGeo = new RedGPU.Primitive.Sphere(redGPUContext, 10, 32, 32);
