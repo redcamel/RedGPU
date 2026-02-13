@@ -2,12 +2,13 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import SkyViewLUTTexture from "./SkyViewLUTTexture";
 import skyViewShaderCode from "./skyViewShaderCode.wgsl";
+import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
 import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
-const SHADER_INFO = parseWGSL(skyViewShaderCode);
+const SHADER_INFO = parseWGSL(skyAtmosphereFn + skyViewShaderCode);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 class SkyViewGenerator {
@@ -19,21 +20,6 @@ class SkyViewGenerator {
 
 	readonly width: number = 512;
 	readonly height: number = 512;
-
-	earthRadius: number = 6360.0;
-	atmosphereHeight: number = 60.0;
-	mieScattering: number = 0.021;
-	mieExtinction: number = 0.021;
-	rayleighScattering: [number, number, number] = [0.0058, 0.0135, 0.0331];
-	mieAnisotropy: number = 0.8;
-	rayleighScaleHeight: number = 8.0;
-	mieScaleHeight: number = 1.2;
-	cameraHeight: number = 0.2;
-	multiScatteringAmbient: number = 0.05;
-	ozoneAbsorption: [number, number, number] = [0.00065, 0.00188, 0.00008];
-	ozoneLayerCenter: number = 25.0;
-	ozoneLayerWidth: number = 15.0;
-	sunDirection: [number, number, number] = [0, 1, 0];
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
@@ -50,19 +36,19 @@ class SkyViewGenerator {
 		const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
 		this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'SKY_VIEW_GEN_UNIFORM_BUFFER');
 
-		const shaderModule = gpuDevice.createShaderModule({ code: skyViewShaderCode });
+		const shaderModule = gpuDevice.createShaderModule({ code: SHADER_INFO.defaultSource });
 		this.#pipeline = gpuDevice.createComputePipeline({
 			layout: 'auto',
 			compute: { module: shaderModule, entryPoint: 'main' }
 		});
 	}
 
-	render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture): void {
+	render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture, params: any): void {
 		const {gpuDevice} = this.#redGPUContext;
 
 		const {members} = UNIFORM_STRUCT;
 		for (const [key, member] of Object.entries(members)) {
-			const value = (this as any)[key];
+			const value = params[key];
 			if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
 		}
 

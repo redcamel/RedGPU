@@ -11,55 +11,11 @@ struct FragmentOutput {
     @location(2) motionVector: vec4<f32>,
 };
 
-struct Uniforms {
-    sunDirection: vec3<f32>,
-    sunSize: f32,
-    atmosphereHeight: f32,
-    exposure: f32,
-    sunIntensity: f32,
-    cameraHeight: f32,
-    earthRadius: f32,
-    heightFogDensity: f32,
-    heightFogFalloff: f32,
-    mieScattering: f32,
-};
-
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
+@group(2) @binding(0) var<uniform> uniforms: AtmosphereParameters;
 @group(2) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(2) @binding(2) var multiScatteringTexture: texture_2d<f32>;
 @group(2) @binding(3) var skyViewTexture: texture_2d<f32>;
 @group(2) @binding(4) var tSampler: sampler;
-
-const PI: f32 = 3.14159265359;
-
-// Henyey-Greenstein phase function (for Mie scattering)
-fn henyey_greenstein_phase(cos_theta: f32, g: f32) -> f32 {
-    let g2 = g * g;
-    return (1.0 - g2) / (4.0 * PI * pow(max(0.0001, 1.0 + g2 - 2.0 * g * cos_theta), 1.5));
-}
-
-fn get_transmittance_uv(h: f32, cos_theta: f32, atm_h: f32) -> vec2<f32> {
-    let v = sqrt(clamp(h / atm_h, 0.0, 1.0));
-    let u = clamp(cos_theta * 0.5 + 0.5, 0.0, 1.0);
-    return vec2<f32>(u, v);
-}
-
-// [추가] 지수적 높이 안개 투과율 계산 (Exponential Height Fog)
-fn get_height_fog_transmittance(cam_h: f32, ray_dir_y: f32, dist: f32, density: f32, falloff: f32) -> f32 {
-    if (density <= 0.0) { return 1.0; }
-    let h = max(0.0, cam_h);
-    let k = falloff;
-    let d = dist;
-    let y = ray_dir_y;
-    
-    var exponent: f32;
-    if (abs(y) < 0.0001) {
-        exponent = density * exp(-k * h) * d;
-    } else {
-        exponent = (density * exp(-k * h)) / (k * y) * (1.0 - exp(-k * y * d));
-    }
-    return exp(-max(0.0, exponent));
-}
 
 @fragment
 fn main(outData: OutData) -> FragmentOutput {
@@ -98,7 +54,7 @@ fn main(outData: OutData) -> FragmentOutput {
     let skyU = azimuth / (2.0 * PI) + 0.5;
 
     // LUT에서 산란광(rgb)과 투과율(a)을 읽음
-    let skySample = textureSample(skyViewTexture, tSampler, vec2<f32>(skyU, skyV));
+    let skySample = textureSampleLevel(skyViewTexture, tSampler, vec2<f32>(skyU, skyV), 0.0);
     let skyLuminance = skySample.rgb;
     let lutTransmittance = skySample.a;
 
@@ -119,8 +75,8 @@ fn main(outData: OutData) -> FragmentOutput {
 
     // [해결 3] 과도한 블룸 제어 (Mie Scattering 계수 연동)
     let haloStrength = uniforms.mieScattering * 1.2; 
-    let p_mie_glow = henyey_greenstein_phase(view_sun_cos, 0.75);
-    let p_mie_halo = henyey_greenstein_phase(view_sun_cos, 0.99);
+    let p_mie_glow = phase_mie(view_sun_cos, uniforms.mieGlow);
+    let p_mie_halo = phase_mie(view_sun_cos, uniforms.mieHalo);
     let sunHalo = sunIntensity * sunTrans * (p_mie_glow * haloStrength + p_mie_halo * (haloStrength * 0.2));
 
     // 3. 지평선 전이 설정
@@ -129,7 +85,7 @@ fn main(outData: OutData) -> FragmentOutput {
 
     // 4. 지표면 영역 계산
     var groundPart = vec3<f32>(0.0);
-    let albedo = vec3<f32>(0.15);
+    let albedo = uniforms.groundAlbedo;
     var hitDist: f32 = 1e6;
 
     // 지평선 지점(v=0.5)의 색상을 샘플링하여 안개 및 합성의 기준점으로 사용
@@ -165,10 +121,10 @@ fn main(outData: OutData) -> FragmentOutput {
             let L = sunDir;
             let H = normalize(V + L);
             let NdotH = max(0.0, dot(groundNormal, H));
-            let specular = pow(NdotH, 512.0) * 4.0;
+            let specular = pow(NdotH, uniforms.groundShininess) * uniforms.groundSpecular;
 
-            // [수정 3] 바닥 주변광(Ambient) 강화 (0.1 -> 0.4)
-            let groundRawColor = albedo * (sunIntensity * gTrans * NdotL * gLightFade + ambLight * sunIntensity * 0.4)
+            // [수정 3] 바닥 주변광(Ambient) 강화
+            let groundRawColor = albedo * (sunIntensity * gTrans * NdotL * gLightFade + ambLight * sunIntensity * uniforms.groundAmbient)
                                + (sunIntensity * gTrans * specular * gLightFade);
             
             // 물리적 Aerial Perspective (지면 반사광 + 대기 산란광 통합)
@@ -193,25 +149,21 @@ fn main(outData: OutData) -> FragmentOutput {
     let atmosphereColor = skyLuminance * sunIntensity;
     
     // 지평선 마스크 (0: 지면, 1: 하늘)
-    // 전문가 피드백: AA 구간을 아주 좁게 잡아 선명하게 처리하되, 안개로 부드럽게 만듦
-    let horizonMask = smoothstep(-0.001, 0.001, distFromHorizon);
+    // [개선] 라인 현상 방지를 위해 AA 구간을 더 부드럽게 확장함
+    let horizonMask = smoothstep(-0.004, 0.004, distFromHorizon);
 
-    // [핵심] 하늘과 땅을 마스크로 확실하게 교체 (더하기 아님!)
-    // groundPart는 이미 Aerial Perspective와 지평선 안개가 적용된 상태
+    // [핵심] 하늘과 땅을 마스크로 확실하게 교체
     var finalHDR = mix(groundPart, atmosphereColor, horizonMask);
 
     // 태양 및 후광 처리 (지면 차폐 적용)
-    // 태양은 지면에 완벽히 가려져야 하므로 horizonMask 사용
     let effectiveSun = sunDiskLuminance * horizonMask;
-    // 후광(Halo)은 지면 앞으로도 살짝 넘어올 수 있도록 처리 (Volumetric Glow)
     let effectiveHalo = sunHalo * max(0.1, horizonMask);
-
-    // 태양과 후광 합산 (교체된 베이스 위에 추가)
     finalHDR += effectiveSun + effectiveHalo;
 
-    // [추가] 지평선 안개 강화 (경계선 완전 소멸용 최종 보정)
-    let horizon_haze_mask = exp(-absDistFromHorizon * (15.0 / haze_amount));
-    let haze_boost_color = atmosphereColor * 1.2 * (1.0 - sun_haze_factor * 0.5);
+    // [개선] 지평선 안개 강화 보정
+    // 단순히 더하는 양을 대폭 줄이고(1.2 -> 0.3), 범위를 넓혀 부드럽게 만듦
+    let horizon_haze_mask = exp(-absDistFromHorizon * (8.0 / haze_amount));
+    let haze_boost_color = atmosphereColor * uniforms.horizonHaze * (1.0 - sun_haze_factor * 0.5);
     finalHDR += haze_boost_color * horizon_haze_mask;
 
     // 6. 통합 높이 안개 적용 (전체적인 공간 깊이감 부여)

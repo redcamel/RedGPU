@@ -2,11 +2,12 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import MultiScatteringLUTTexture from "./MultiScatteringLUTTexture";
 import multiScatteringShaderCode from "./multiScatteringShaderCode.wgsl";
+import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
-const SHADER_INFO = parseWGSL(multiScatteringShaderCode);
+const SHADER_INFO = parseWGSL(skyAtmosphereFn + multiScatteringShaderCode);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 class MultiScatteringGenerator {
@@ -18,15 +19,6 @@ class MultiScatteringGenerator {
 
     readonly width: number = 256;
     readonly height: number = 256;
-
-    earthRadius: number = 6360.0;
-    atmosphereHeight: number = 60.0;
-    mieScattering: number = 0.021;
-    mieExtinction: number = 0.021;
-    rayleighScattering: [number, number, number] = [0.0058, 0.0135, 0.0331];
-    mieAnisotropy: number = 0.8;
-    rayleighScaleHeight: number = 8.0;
-    mieScaleHeight: number = 1.2;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -43,19 +35,19 @@ class MultiScatteringGenerator {
         const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
         this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'MULTI_SCAT_GEN_UNIFORM_BUFFER');
 
-        const shaderModule = gpuDevice.createShaderModule({code: multiScatteringShaderCode});
+        const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({
             layout: 'auto',
             compute: {module: shaderModule, entryPoint: 'main'}
         });
     }
 
-    render(transmittanceTexture: TransmittanceLUTTexture): void {
+    render(transmittanceTexture: TransmittanceLUTTexture, params: any): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const {members} = UNIFORM_STRUCT;
         for (const [key, member] of Object.entries(members)) {
-            const value = (this as any)[key];
+            const value = params[key];
             if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
         }
         

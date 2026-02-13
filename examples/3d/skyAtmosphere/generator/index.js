@@ -61,4 +61,21 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     const f_phys = pane.addFolder({ title: 'Atmosphere Physics' });
     f_phys.addBinding(skyAtmosphere, 'earthRadius', { min: 100, max: 10000, label: 'Earth Radius (km)' });
     f_phys.addBinding(skyAtmosphere, 'atmosphereHeight', { min: 1, max: 200, label: 'Atmosphere Height (km)' });
+
+    const f_artistic = pane.addFolder({ title: 'Artistic Controls' });
+    f_artistic.addBinding(skyAtmosphere, 'horizonHaze', { min: 0, max: 2, label: 'Horizon Haze' });
+    f_artistic.addBinding(skyAtmosphere, 'groundAmbient', { min: 0, max: 2, label: 'Ground Ambient' });
+    const albedoProxy = {
+        get color() {
+            return {
+                r: skyAtmosphere.groundAlbedo[0],
+                g: skyAtmosphere.groundAlbedo[1],
+                b: skyAtmosphere.groundAlbedo[2]
+            };
+        },
+        set color(v) {
+            skyAtmosphere.groundAlbedo = [v.r, v.g, v.b];
+        }
+    };
+    f_artistic.addBinding(albedoProxy, 'color', { label: 'Ground Albedo', color: { type: 'float' } });
 };

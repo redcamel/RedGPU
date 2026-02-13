@@ -42,35 +42,43 @@ class SkyAtmosphere {
 	#multiScatteringGenerator: MultiScatteringGenerator
 	#skyViewGenerator: SkyViewGenerator
 
-	#sunDirection: Float32Array = new Float32Array([0, 1, 0])
-	#prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
-
-	#earthRadius: number = 6360.0;
-	#atmosphereHeight: number = 60.0;
-	#mieScattering: number = 0.021;
-	#mieExtinction: number = 0.021;
-	#rayleighScattering: [number, number, number] = [0.0058, 0.0135, 0.0331];
-
-	#rayleighScaleHeight: number = 8.0;
-	#mieScaleHeight: number = 1.2;
-	#mieAnisotropy: number = 0.9;
-	#ozoneAbsorption: [number, number, number] = [0.00065, 0.00188, 0.00008];
-	#ozoneLayerCenter: number = 25.0;
-	#ozoneLayerWidth: number = 15.0;
-	#multiScatteringAmbient: number = 0.05;
-
-	#sunSize: number = 0.5;
-	#sunIntensity: number = 22.0;
-	#exposure: number = 1.0;
-
-	#heightFogDensity: number = 0.0;
-	#heightFogFalloff: number = 0.1;
+	// [통합] 모든 대기 산란 파라미터를 하나의 객체로 관리
+	#params = {
+		earthRadius: 6360.0,
+		atmosphereHeight: 60.0,
+		mieScattering: 0.021,
+		mieExtinction: 0.021,
+		rayleighScattering: [0.0058, 0.0135, 0.0331],
+		rayleighScaleHeight: 8.0,
+		mieScaleHeight: 1.2,
+		mieAnisotropy: 0.9,
+		ozoneAbsorption: [0.00065, 0.00188, 0.00008],
+		ozoneLayerCenter: 25.0,
+		ozoneLayerWidth: 15.0,
+		multiScatteringAmbient: 0.05,
+		sunSize: 0.5,
+		sunIntensity: 22.0,
+		exposure: 1.0,
+		heightFogDensity: 0.0,
+		heightFogFalloff: 0.1,
+		horizonHaze: 0.3,
+		groundAmbient: 0.4,
+		groundAlbedo: [0.15, 0.15, 0.15],
+		mieGlow: 0.75,
+		mieHalo: 0.99,
+		groundShininess: 512.0,
+		groundSpecular: 4.0,
+		sunDirection: new Float32Array([0, 1, 0]),
+		cameraHeight: 0.2,
+		padding: 0
+	};
 
 	#sunElevation: number = 45;
 	#sunAzimuth: number = 0;
 
 	#dirtyLUT: boolean = true;
 	#dirtySkyView: boolean = true;
+	#prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup;
 
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
@@ -96,187 +104,13 @@ class SkyAtmosphere {
 	}
 
 	#syncInitialParams(): void {
-		// 모든 자식 인스턴스의 파라미터를 현재 필드값으로 초기화
-		this.earthRadius = this.#earthRadius;
-		this.atmosphereHeight = this.#atmosphereHeight;
-		this.mieScattering = this.#mieScattering;
-		this.mieExtinction = this.#mieExtinction;
-		this.rayleighScattering = this.#rayleighScattering;
-		this.rayleighScaleHeight = this.#rayleighScaleHeight;
-		this.mieScaleHeight = this.#mieScaleHeight;
-		this.mieAnisotropy = this.#mieAnisotropy;
-		this.ozoneAbsorption = this.#ozoneAbsorption;
-		this.ozoneLayerCenter = this.#ozoneLayerCenter;
-		this.ozoneLayerWidth = this.#ozoneLayerWidth;
-		this.multiScatteringAmbient = this.#multiScatteringAmbient;
-		this.sunSize = this.#sunSize;
-		this.sunIntensity = this.#sunIntensity;
-		this.exposure = this.#exposure;
-		this.heightFogDensity = this.#heightFogDensity;
-		this.heightFogFalloff = this.#heightFogFalloff;
+		// 모든 자식 인스턴스의 파라미터를 현재 #params 값으로 초기화
+		Object.keys(this.#params).forEach(key => {
+			if (key !== 'sunDirection' && key !== 'cameraHeight' && key !== 'padding') {
+				(this as any)[key] = (this.#params as any)[key];
+			}
+		});
 	}
-
-	get heightFogDensity(): number { return this.#heightFogDensity; }
-	set heightFogDensity(v: number) {
-		validatePositiveNumberRange(v, 0, 10);
-		this.#heightFogDensity = v;
-		this.#material.heightFogDensity = v;
-	}
-
-	get heightFogFalloff(): number { return this.#heightFogFalloff; }
-	set heightFogFalloff(v: number) {
-		validatePositiveNumberRange(v, 0.001, 10);
-		this.#heightFogFalloff = v;
-		this.#material.heightFogFalloff = v;
-	}
-
-	get earthRadius(): number { return this.#earthRadius; }
-	set earthRadius(v: number) {
-		validatePositiveNumberRange(v, 1);
-		this.#earthRadius = v;
-		this.#material.earthRadius = v;
-		this.#transmittanceGenerator.earthRadius = v;
-		this.#multiScatteringGenerator.earthRadius = v;
-		this.#skyViewGenerator.earthRadius = v;
-		this.#dirtyLUT = true;
-		this.#dirtySkyView = true;
-	}
-
-	get atmosphereHeight(): number { return this.#atmosphereHeight; }
-	set atmosphereHeight(v: number) {
-		validatePositiveNumberRange(v, 1);
-		this.#atmosphereHeight = v;
-		this.#material.atmosphereHeight = v;
-		this.#transmittanceGenerator.atmosphereHeight = v;
-		this.#multiScatteringGenerator.atmosphereHeight = v;
-		this.#skyViewGenerator.atmosphereHeight = v;
-		this.#dirtyLUT = true;
-	}
-
-	get mieScattering(): number { return this.#mieScattering; }
-	set mieScattering(v: number) {
-		validatePositiveNumberRange(v, 0, 1.0);
-		this.#mieScattering = v;
-		this.#material.mieScattering = v;
-		this.#multiScatteringGenerator.mieScattering = v;
-		this.#skyViewGenerator.mieScattering = v;
-		this.#dirtyLUT = true;
-	}
-
-	get mieExtinction(): number { return this.#mieExtinction; }
-	set mieExtinction(v: number) {
-		validatePositiveNumberRange(v, 0, 1.0);
-		this.#mieExtinction = v;
-		this.#transmittanceGenerator.mieExtinction = v;
-		this.#multiScatteringGenerator.mieExtinction = v;
-		this.#skyViewGenerator.mieExtinction = v;
-		this.#dirtyLUT = true;
-	}
-
-	get rayleighScattering(): [number, number, number] { return this.#rayleighScattering; }
-	set rayleighScattering(v: [number, number, number]) {
-		v.forEach(val => validatePositiveNumberRange(val, 0, 1.0));
-		this.#rayleighScattering = v;
-		const vCopy = [...v] as [number, number, number];
-		this.#transmittanceGenerator.rayleighScattering = vCopy;
-		this.#multiScatteringGenerator.rayleighScattering = vCopy;
-		this.#skyViewGenerator.rayleighScattering = vCopy;
-		this.#dirtyLUT = true;
-	}
-
-	get rayleighScaleHeight(): number { return this.#rayleighScaleHeight; }
-	set rayleighScaleHeight(v: number) {
-		validatePositiveNumberRange(v, 0.1, 100);
-		this.#rayleighScaleHeight = v;
-		this.#transmittanceGenerator.rayleighScaleHeight = v;
-		this.#multiScatteringGenerator.rayleighScaleHeight = v;
-		this.#skyViewGenerator.rayleighScaleHeight = v;
-		this.#dirtyLUT = true;
-	}
-
-	get mieScaleHeight(): number { return this.#mieScaleHeight; }
-	set mieScaleHeight(v: number) {
-		validatePositiveNumberRange(v, 0.1, 100);
-		this.#mieScaleHeight = v;
-		this.#transmittanceGenerator.mieScaleHeight = v;
-		this.#multiScatteringGenerator.mieScaleHeight = v;
-		this.#skyViewGenerator.mieScaleHeight = v;
-		this.#dirtyLUT = true;
-	}
-
-	get mieAnisotropy(): number { return this.#mieAnisotropy; }
-	set mieAnisotropy(v: number) {
-		validateNumberRange(v, 0, 0.999);
-		this.#mieAnisotropy = v;
-		this.#multiScatteringGenerator.mieAnisotropy = v;
-		this.#skyViewGenerator.mieAnisotropy = v;
-		this.#dirtyLUT = true;
-	}
-
-	get ozoneAbsorption(): [number, number, number] { return this.#ozoneAbsorption; }
-	set ozoneAbsorption(v: [number, number, number]) {
-		v.forEach(val => validatePositiveNumberRange(val, 0, 1.0));
-		this.#ozoneAbsorption = v;
-		const vCopy = [...v] as [number, number, number];
-		this.#transmittanceGenerator.ozoneAbsorption = vCopy;
-		this.#skyViewGenerator.ozoneAbsorption = vCopy;
-		this.#dirtyLUT = true;
-	}
-
-	get ozoneLayerCenter(): number { return this.#ozoneLayerCenter; }
-	set ozoneLayerCenter(v: number) {
-		validatePositiveNumberRange(v, 0, 100);
-		this.#ozoneLayerCenter = v;
-		this.#transmittanceGenerator.ozoneLayerCenter = v;
-		this.#skyViewGenerator.ozoneLayerCenter = v;
-		this.#dirtyLUT = true;
-	}
-
-	get ozoneLayerWidth(): number { return this.#ozoneLayerWidth; }
-	set ozoneLayerWidth(v: number) {
-		validatePositiveNumberRange(v, 1, 50);
-		this.#ozoneLayerWidth = v;
-		this.#transmittanceGenerator.ozoneLayerWidth = v;
-		this.#skyViewGenerator.ozoneLayerWidth = v;
-		this.#dirtyLUT = true;
-	}
-
-	get multiScatteringAmbient(): number { return this.#multiScatteringAmbient; }
-	set multiScatteringAmbient(v: number) {
-		validatePositiveNumberRange(v, 0, 1.0);
-		this.#multiScatteringAmbient = v;
-		this.#skyViewGenerator.multiScatteringAmbient = v;
-		this.#dirtySkyView = true;
-	}
-
-	get sunSize(): number { return this.#sunSize; }
-	set sunSize(v: number) { 
-		validatePositiveNumberRange(v, 0.01, 10.0); 
-		this.#sunSize = v; 
-		this.#material.sunSize = v; 
-	}
-
-	get sunIntensity(): number { return this.#sunIntensity; }
-	set sunIntensity(v: number) { 
-		validatePositiveNumberRange(v, 0, 10000); 
-		this.#sunIntensity = v; 
-		this.#material.sunIntensity = v; 
-	}
-
-	get exposure(): number { return this.#exposure; }
-	set exposure(v: number) { 
-		validatePositiveNumberRange(v, 0, 100); 
-		this.#exposure = v; 
-		this.#material.exposure = v; 
-	}
-
-	get sunElevation(): number { return this.#sunElevation; }
-	set sunElevation(v: number) { validateNumberRange(v, -90, 90); this.#sunElevation = v; this.#updateSunDirection(); }
-
-	get sunAzimuth(): number { return this.#sunAzimuth; }
-	set sunAzimuth(v: number) { validateNumberRange(v, -360, 360); this.#sunAzimuth = v; this.#updateSunDirection(); }
-
-	get sunDirection(): Float32Array { return this.#sunDirection; }
 
 	#updateSunDirection(): void {
 		const phi = (90 - this.#sunElevation) * (Math.PI / 180);
@@ -285,14 +119,91 @@ class SkyAtmosphere {
 		const dy = Math.cos(phi);
 		const dz = Math.sin(phi) * Math.sin(theta);
 		
-		this.#sunDirection[0] = dx;
-		this.#sunDirection[1] = dy;
-		this.#sunDirection[2] = dz;
+		this.#params.sunDirection[0] = dx;
+		this.#params.sunDirection[1] = dy;
+		this.#params.sunDirection[2] = dz;
 		
-		this.#material.sunDirection = this.#sunDirection;
-		this.#skyViewGenerator.sunDirection = [dx, dy, dz];
+		this.#material.sunDirection = this.#params.sunDirection;
 		this.#dirtySkyView = true;
 	}
+
+	// Getter / Setter 보일러플레이트 축소 (공통 패턴)
+	get sunElevation(): number { return this.#sunElevation; }
+	set sunElevation(v: number) { validateNumberRange(v, -90, 90); this.#sunElevation = v; this.#updateSunDirection(); }
+	get sunAzimuth(): number { return this.#sunAzimuth; }
+	set sunAzimuth(v: number) { validateNumberRange(v, -360, 360); this.#sunAzimuth = v; this.#updateSunDirection(); }
+
+	get earthRadius(): number { return this.#params.earthRadius; }
+	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#params.earthRadius = v; this.#material.earthRadius = v; this.#dirtyLUT = true; }
+	
+	get atmosphereHeight(): number { return this.#params.atmosphereHeight; }
+	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#params.atmosphereHeight = v; this.#material.atmosphereHeight = v; this.#dirtyLUT = true; }
+
+	get mieScattering(): number { return this.#params.mieScattering; }
+	set mieScattering(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieScattering = v; this.#material.mieScattering = v; this.#dirtyLUT = true; }
+
+	get mieExtinction(): number { return this.#params.mieExtinction; }
+	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieExtinction = v; this.#dirtyLUT = true; }
+
+	get rayleighScattering(): [number, number, number] { return this.#params.rayleighScattering as [number, number, number]; }
+	set rayleighScattering(v: [number, number, number]) { this.#params.rayleighScattering = [...v]; this.#material.rayleighScattering = new Float32Array(v); this.#dirtyLUT = true; }
+
+	get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
+	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.rayleighScaleHeight = v; this.#dirtyLUT = true; }
+
+	get mieScaleHeight(): number { return this.#params.mieScaleHeight; }
+	set mieScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.mieScaleHeight = v; this.#dirtyLUT = true; }
+
+	get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
+	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieAnisotropy = v; this.#dirtyLUT = true; }
+
+	get ozoneAbsorption(): [number, number, number] { return this.#params.ozoneAbsorption as [number, number, number]; }
+	set ozoneAbsorption(v: [number, number, number]) { this.#params.ozoneAbsorption = [...v]; this.#dirtyLUT = true; }
+
+	get ozoneLayerCenter(): number { return this.#params.ozoneLayerCenter; }
+	set ozoneLayerCenter(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.ozoneLayerCenter = v; this.#dirtyLUT = true; }
+
+	get ozoneLayerWidth(): number { return this.#params.ozoneLayerWidth; }
+	set ozoneLayerWidth(v: number) { validatePositiveNumberRange(v, 1, 50); this.#params.ozoneLayerWidth = v; this.#dirtyLUT = true; }
+
+	get multiScatteringAmbient(): number { return this.#params.multiScatteringAmbient; }
+	set multiScatteringAmbient(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.multiScatteringAmbient = v; this.#dirtySkyView = true; }
+
+	get sunSize(): number { return this.#params.sunSize; }
+	set sunSize(v: number) { validatePositiveNumberRange(v, 0.01, 10.0); this.#params.sunSize = v; this.#material.sunSize = v; }
+
+	get sunIntensity(): number { return this.#params.sunIntensity; }
+	set sunIntensity(v: number) { validatePositiveNumberRange(v, 0, 10000); this.#params.sunIntensity = v; this.#material.sunIntensity = v; }
+
+	get exposure(): number { return this.#params.exposure; }
+	set exposure(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.exposure = v; this.#material.exposure = v; }
+
+	get heightFogDensity(): number { return this.#params.heightFogDensity; }
+	set heightFogDensity(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.heightFogDensity = v; this.#material.heightFogDensity = v; }
+
+	get heightFogFalloff(): number { return this.#params.heightFogFalloff; }
+	set heightFogFalloff(v: number) { validatePositiveNumberRange(v, 0.001, 10); this.#params.heightFogFalloff = v; this.#material.heightFogFalloff = v; }
+
+	get horizonHaze(): number { return this.#params.horizonHaze; }
+	set horizonHaze(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.horizonHaze = v; this.#material.horizonHaze = v; }
+
+	get groundAmbient(): number { return this.#params.groundAmbient; }
+	set groundAmbient(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.groundAmbient = v; this.#material.groundAmbient = v; }
+
+	get groundAlbedo(): [number, number, number] { return this.#params.groundAlbedo as [number, number, number]; }
+	set groundAlbedo(v: [number, number, number]) { this.#params.groundAlbedo = [...v]; this.#material.groundAlbedo = new Float32Array(v); this.#dirtySkyView = true; }
+
+	get mieGlow(): number { return this.#params.mieGlow; }
+	set mieGlow(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieGlow = v; this.#material.mieGlow = v; }
+
+	get mieHalo(): number { return this.#params.mieHalo; }
+	set mieHalo(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieHalo = v; this.#material.mieHalo = v; }
+
+	get groundShininess(): number { return this.#params.groundShininess; }
+	set groundShininess(v: number) { validatePositiveNumberRange(v, 1, 2048); this.#params.groundShininess = v; this.#material.groundShininess = v; }
+
+	get groundSpecular(): number { return this.#params.groundSpecular; }
+	set groundSpecular(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.groundSpecular = v; this.#material.groundSpecular = v; }
 
 	render(renderViewStateData: RenderViewStateData): void {
 		const {currentRenderPassEncoder, view} = renderViewStateData
@@ -304,16 +215,15 @@ class SkyAtmosphere {
 		const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
 		const currentHeightKm = Math.max(0.001, cameraPos[1] / 1000.0);
 
-		// 카메라 높이가 변하면 스카이뷰 제너레이터 속성도 갱신
-		if (Math.abs(this.#material.cameraHeight - currentHeightKm) > 0.001) {
+		if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.001) {
+			this.#params.cameraHeight = currentHeightKm;
 			this.#material.cameraHeight = currentHeightKm;
-			this.#skyViewGenerator.cameraHeight = currentHeightKm;
 			this.#dirtySkyView = true;
 		}
 
 		if (this.#dirtyLUT) {
-			this.#transmittanceGenerator.render();
-			this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
+			this.#transmittanceGenerator.render(this.#params);
+			this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture, this.#params);
 			this.#dirtyLUT = false;
 			this.#dirtySkyView = true;
 		}
@@ -321,7 +231,8 @@ class SkyAtmosphere {
 		if (this.#dirtySkyView) {
 			this.#skyViewGenerator.render(
 				this.#transmittanceGenerator.lutTexture,
-				this.#multiScatteringGenerator.lutTexture
+				this.#multiScatteringGenerator.lutTexture,
+				this.#params
 			);
 			this.#dirtySkyView = false;
 		}

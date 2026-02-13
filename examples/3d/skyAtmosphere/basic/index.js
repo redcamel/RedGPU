@@ -24,8 +24,7 @@ RedGPU.init(
         view.skyAtmosphere = skyAtmosphere;
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        renderer.start(redGPUContext, () => {
-        });
+        renderer.start(redGPUContext);
 
         renderTestPane(view, skyAtmosphere);
     },
@@ -36,7 +35,7 @@ RedGPU.init(
 
 const renderTestPane = async (targetView, skyAtmosphere) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane();
+    const pane = new Pane({ title: 'Sky Atmosphere Controls' });
     const {
         createFieldOfView,
         setDebugButtons
@@ -45,77 +44,78 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera);
 
-    // [전용 테스트 패널] SkyAtmosphere 물리 파라미터 제어
+    // 1. Presets
     const f_presets = pane.addFolder({ title: 'Presets' });
-    f_presets.addButton({ title: 'Noon (정오)' }).on('click', () => {
-        skyAtmosphere.sunElevation = 90;
-        skyAtmosphere.sunAzimuth = 0;
-        skyAtmosphere.exposure = 1.0;
+    const applyPreset = (el, az, exp) => {
+        skyAtmosphere.sunElevation = el;
+        skyAtmosphere.sunAzimuth = az;
+        skyAtmosphere.exposure = exp;
         pane.refresh();
-    });
-    f_presets.addButton({ title: 'Sunset (노을)' }).on('click', () => {
-        skyAtmosphere.sunElevation = 2;
-        skyAtmosphere.sunAzimuth = 0;
-        skyAtmosphere.exposure = 1.5;
-        pane.refresh();
-    });
-    f_presets.addButton({ title: 'Dawn (새벽)' }).on('click', () => {
-        skyAtmosphere.sunElevation = -2;
-        skyAtmosphere.sunAzimuth = 0;
-        skyAtmosphere.exposure = 2.0;
-        pane.refresh();
-    });
+    };
+    f_presets.addButton({ title: 'Noon (정오)' }).on('click', () => applyPreset(90, 0, 1.0));
+    f_presets.addButton({ title: 'Sunset (노을)' }).on('click', () => applyPreset(2, 0, 1.5));
+    f_presets.addButton({ title: 'Twilight (황혼)' }).on('click', () => applyPreset(-5, 0, 2.5));
+    f_presets.addButton({ title: 'Midnight (심야)' }).on('click', () => applyPreset(-20, 0, 0.5));
 
-    const f_sun = pane.addFolder({ title: 'Sun & Exposure' });
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, step: 0.001, label: 'Sun Elevation' });
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, step: 0.001, label: 'Sun Azimuth' });
-    f_sun.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100, step: 0.001, label: 'Sun Intensity' });
-    f_sun.addBinding(skyAtmosphere, 'sunSize', { min: 0.01, max: 10, step: 0.001, label: 'Sun Size' });
-    f_sun.addBinding(skyAtmosphere, 'exposure', { min: 0, max: 10, step: 0.001, label: 'Exposure' });
+    // 2. Sun & Exposure
+    const f_sun = pane.addFolder({ title: 'Sun & Light' });
+    f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, step: 0.1 });
+    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, step: 0.1 });
+    f_sun.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100 });
+    f_sun.addBinding(skyAtmosphere, 'sunSize', { min: 0.01, max: 5 });
+    f_sun.addBinding(skyAtmosphere, 'exposure', { min: 0, max: 10 });
 
-    const f_atm = pane.addFolder({ title: 'Atmosphere Physics' });
-    f_atm.addBinding(skyAtmosphere, 'earthRadius', { min: 100, max: 10000, step: 1, label: 'Earth Radius (km)' });
-    f_atm.addBinding(skyAtmosphere, 'atmosphereHeight', { min: 1, max: 200, step: 0.1, label: 'Atmosphere Height (km)' });
-    f_atm.addBinding(skyAtmosphere, 'multiScatteringAmbient', { min: 0, max: 1, step: 0.001, label: 'Multi-Scat Ambient' });
-
-    const f_fog = pane.addFolder({ title: 'Height Fog (Artistic)', expanded: false });
-    f_fog.addBinding(skyAtmosphere, 'heightFogDensity', { min: 0, max: 2, step: 0.0001, label: 'Density' });
-    f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', { min: 0.001, max: 1, step: 0.0001, label: 'Falloff' });
-
-    const f_rayleigh = pane.addFolder({ title: 'Rayleigh Scattering', expanded: false });
-    // Rayleigh 산란은 배열이므로 프록시 객체를 통해 제어
+    // 3. Atmosphere Physics
+    const f_phys = pane.addFolder({ title: 'Atmosphere Physics', expanded: false });
+    f_phys.addBinding(skyAtmosphere, 'earthRadius', { min: 100, max: 10000, label: 'Earth Radius (km)' });
+    f_phys.addBinding(skyAtmosphere, 'atmosphereHeight', { min: 1, max: 200, label: 'Atmo Height (km)' });
+    
+    // Rayleigh
+    const f_rayleigh = f_phys.addFolder({ title: 'Rayleigh' });
     const rayleighProxy = {
-        get r() { return skyAtmosphere.rayleighScattering[0]; },
-        set r(v) { skyAtmosphere.rayleighScattering = [v, skyAtmosphere.rayleighScattering[1], skyAtmosphere.rayleighScattering[2]]; },
-        get g() { return skyAtmosphere.rayleighScattering[1]; },
-        set g(v) { skyAtmosphere.rayleighScattering = [skyAtmosphere.rayleighScattering[0], v, skyAtmosphere.rayleighScattering[2]]; },
-        get b() { return skyAtmosphere.rayleighScattering[2]; },
-        set b(v) { skyAtmosphere.rayleighScattering = [skyAtmosphere.rayleighScattering[0], skyAtmosphere.rayleighScattering[1], v]; }
+        get color() { return { r: skyAtmosphere.rayleighScattering[0], g: skyAtmosphere.rayleighScattering[1], b: skyAtmosphere.rayleighScattering[2] }; },
+        set color(v) { skyAtmosphere.rayleighScattering = [v.r, v.g, v.b]; }
     };
-    f_rayleigh.addBinding(rayleighProxy, 'r', { min: 0, max: 0.1, step: 0.0001, label: 'Scattering R' });
-    f_rayleigh.addBinding(rayleighProxy, 'g', { min: 0, max: 0.1, step: 0.0001, label: 'Scattering G' });
-    f_rayleigh.addBinding(rayleighProxy, 'b', { min: 0, max: 0.1, step: 0.0001, label: 'Scattering B' });
-    f_rayleigh.addBinding(skyAtmosphere, 'rayleighScaleHeight', { min: 0.1, max: 50, step: 0.01, label: 'Scale Height' });
+    f_rayleigh.addBinding(rayleighProxy, 'color', { label: 'Scattering', color: { type: 'float' } });
+    f_rayleigh.addBinding(skyAtmosphere, 'rayleighScaleHeight', { min: 0.1, max: 50 });
 
-    const f_mie = pane.addFolder({ title: 'Mie Scattering', expanded: false });
-    f_mie.addBinding(skyAtmosphere, 'mieScattering', { min: 0, max: 0.1, step: 0.0001, label: 'Scattering' });
-    f_mie.addBinding(skyAtmosphere, 'mieExtinction', { min: 0, max: 0.1, step: 0.0001, label: 'Extinction' });
-    f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', { min: 0, max: 0.999, step: 0.001, label: 'Anisotropy (g)' });
-    f_mie.addBinding(skyAtmosphere, 'mieScaleHeight', { min: 0.1, max: 20, step: 0.01, label: 'Scale Height' });
+    // Mie
+    const f_mie = f_phys.addFolder({ title: 'Mie' });
+    f_mie.addBinding(skyAtmosphere, 'mieScattering', { min: 0, max: 0.1 });
+    f_mie.addBinding(skyAtmosphere, 'mieExtinction', { min: 0, max: 0.1 });
+    f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', { min: 0, max: 0.999, label: 'Anisotropy (g)' });
+    f_mie.addBinding(skyAtmosphere, 'mieScaleHeight', { min: 0.1, max: 20 });
 
-    const f_ozone = pane.addFolder({ title: 'Ozone Layer', expanded: false });
-    // Ozone 흡수 계수 프록시
+    // Ozone
+    const f_ozone = f_phys.addFolder({ title: 'Ozone Layer' });
     const ozoneProxy = {
-        get r() { return skyAtmosphere.ozoneAbsorption[0]; },
-        set r(v) { skyAtmosphere.ozoneAbsorption = [v, skyAtmosphere.ozoneAbsorption[1], skyAtmosphere.ozoneAbsorption[2]]; },
-        get g() { return skyAtmosphere.ozoneAbsorption[1]; },
-        set g(v) { skyAtmosphere.ozoneAbsorption = [skyAtmosphere.ozoneAbsorption[0], v, skyAtmosphere.ozoneAbsorption[2]]; },
-        get b() { return skyAtmosphere.ozoneAbsorption[2]; },
-        set b(v) { skyAtmosphere.ozoneAbsorption = [skyAtmosphere.ozoneAbsorption[0], skyAtmosphere.ozoneAbsorption[1], v]; }
+        get color() { return { r: skyAtmosphere.ozoneAbsorption[0], g: skyAtmosphere.ozoneAbsorption[1], b: skyAtmosphere.ozoneAbsorption[2] }; },
+        set color(v) { skyAtmosphere.ozoneAbsorption = [v.r, v.g, v.b]; }
     };
-    f_ozone.addBinding(ozoneProxy, 'r', { min: 0, max: 0.01, step: 0.00001, label: 'Absorption R' });
-    f_ozone.addBinding(ozoneProxy, 'g', { min: 0, max: 0.01, step: 0.00001, label: 'Absorption G' });
-    f_ozone.addBinding(ozoneProxy, 'b', { min: 0, max: 0.01, step: 0.00001, label: 'Absorption B' });
-    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerCenter', { min: 0, max: 100, step: 0.1, label: 'Layer Center (km)' });
-    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerWidth', { min: 1, max: 50, step: 0.1, label: 'Layer Width (km)' });
+    f_ozone.addBinding(ozoneProxy, 'color', { label: 'Absorption', color: { type: 'float' } });
+    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerCenter', { min: 0, max: 100 });
+    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerWidth', { min: 1, max: 50 });
+
+    // 4. Artistic Controls (The most important for visual)
+    const f_art = pane.addFolder({ title: 'Artistic Controls (Visual Tuning)', expanded: true });
+    f_art.addBinding(skyAtmosphere, 'horizonHaze', { min: 0, max: 5 });
+    f_art.addBinding(skyAtmosphere, 'multiScatteringAmbient', { min: 0, max: 1, label: 'GI Strength' });
+    
+    const f_ground = f_art.addFolder({ title: 'Ground & Aerial Perspective' });
+    const albedoProxy = {
+        get color() { return { r: skyAtmosphere.groundAlbedo[0], g: skyAtmosphere.groundAlbedo[1], b: skyAtmosphere.groundAlbedo[2] }; },
+        set color(v) { skyAtmosphere.groundAlbedo = [v.r, v.g, v.b]; }
+    };
+    f_ground.addBinding(albedoProxy, 'color', { label: 'Ground Color', color: { type: 'float' } });
+    f_ground.addBinding(skyAtmosphere, 'groundAmbient', { min: 0, max: 2 });
+    f_ground.addBinding(skyAtmosphere, 'groundShininess', { min: 1, max: 2048 });
+    f_ground.addBinding(skyAtmosphere, 'groundSpecular', { min: 0, max: 20 });
+
+    const f_halo = f_art.addFolder({ title: 'Sun Halo (Bloom)' });
+    f_halo.addBinding(skyAtmosphere, 'mieGlow', { min: 0, max: 0.999, label: 'Outer Halo' });
+    f_halo.addBinding(skyAtmosphere, 'mieHalo', { min: 0, max: 0.999, label: 'Inner Halo' });
+
+    const f_fog = f_art.addFolder({ title: 'Height Fog' });
+    f_fog.addBinding(skyAtmosphere, 'heightFogDensity', { min: 0, max: 2, step: 0.0001 });
+    f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', { min: 0.001, max: 1, step: 0.0001 });
 };
