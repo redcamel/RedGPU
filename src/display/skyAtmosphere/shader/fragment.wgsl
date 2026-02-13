@@ -16,6 +16,7 @@ struct FragmentOutput {
 @group(2) @binding(2) var multiScatteringTexture: texture_2d<f32>;
 @group(2) @binding(3) var skyViewTexture: texture_2d<f32>;
 @group(2) @binding(4) var cameraVolumeTexture: texture_3d<f32>;
+// TODO: MSAA 대응 시 texture_depth_2d_multisampled 및 textureLoad sample_index 처리 필요
 @group(2) @binding(5) var sceneDepthTexture: texture_depth_2d;
 @group(2) @binding(6) var tSampler: sampler;
 

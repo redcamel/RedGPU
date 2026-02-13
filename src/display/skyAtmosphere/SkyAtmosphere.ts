@@ -402,6 +402,7 @@ class SkyAtmosphere {
 		this.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
 
 		// [최적화] sceneDepthTexture는 뷰 리사이즈 시에만 변경되므로 체크 후 업데이트 (파이프라인 재생성 방지)
+		// TODO: MSAA 사용 시 multisampled depth texture 대응 필요
 		const currentDepthView = view.viewRenderTextureManager.depthTextureView;
 		if (this.#material.sceneDepthTexture !== currentDepthView) {
 			this.#material.sceneDepthTexture = currentDepthView;
