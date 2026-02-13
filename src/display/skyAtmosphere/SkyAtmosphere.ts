@@ -27,8 +27,31 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SKY_ATMOSPHERE'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_SKY_ATMOSPHERE'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKY_ATMOSPHERE'
 
+/**
+ * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 시스템 클래스입니다.
+ * [EN] Physics-based Atmospheric Scattering system class.
+ *
+ * [KO] 이 클래스는 투과율(Transmittance), 다중 산란(Multi-Scattering), Sky-View LUT를 실시간으로 생성하여 사실적인 하늘과 대기 효과를 렌더링합니다.
+ * [EN] This class renders realistic sky and atmospheric effects by generating Transmittance, Multi-Scattering, and Sky-View LUTs in real-time.
+ *
+ * ### Example
+ * ```typescript
+ * const skyAtmosphere = new RedGPU.SkyAtmosphere(redGPUContext);
+ * scene.skyAtmosphere = skyAtmosphere;
+ * ```
+ *
+ * @category Display
+ */
 class SkyAtmosphere {
+	/**
+	 * [KO] 모델 행렬
+	 * [EN] Model matrix
+	 */
 	modelMatrix: mat4 = mat4.create()
+	/**
+	 * [KO] GPU 렌더링 정보
+	 * [EN] GPU render information
+	 */
 	gpuRenderInfo: VertexGPURenderInfo
 	#dirtyPipeline: boolean = true
 	#renderBundle: GPURenderBundle
@@ -80,6 +103,14 @@ class SkyAtmosphere {
 	#dirtySkyView: boolean = true;
 	#prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup;
 
+	/**
+	 * [KO] SkyAtmosphere 인스턴스를 생성합니다.
+	 * [EN] Creates a SkyAtmosphere instance.
+	 *
+	 * @param redGPUContext -
+	 * [KO] RedGPU 컨텍스트
+	 * [EN] RedGPU context
+	 */
 	constructor(redGPUContext: RedGPUContext) {
 		validateRedGPUContext(redGPUContext)
 		this.#redGPUContext = redGPUContext
@@ -118,93 +149,205 @@ class SkyAtmosphere {
 		const dx = Math.sin(phi) * Math.cos(theta);
 		const dy = Math.cos(phi);
 		const dz = Math.sin(phi) * Math.sin(theta);
-		
+
 		this.#params.sunDirection[0] = dx;
 		this.#params.sunDirection[1] = dy;
 		this.#params.sunDirection[2] = dz;
-		
+
 		this.#material.sunDirection = this.#params.sunDirection;
 		this.#dirtySkyView = true;
 	}
 
-	// Getter / Setter 보일러플레이트 축소 (공통 패턴)
+	/**
+	 * [KO] 태양의 고도 (도 단위, -90 ~ 90)
+	 * [EN] Sun elevation (in degrees, -90 ~ 90)
+	 */
 	get sunElevation(): number { return this.#sunElevation; }
 	set sunElevation(v: number) { validateNumberRange(v, -90, 90); this.#sunElevation = v; this.#updateSunDirection(); }
+
+	/**
+	 * [KO] 태양의 방위각 (도 단위, -360 ~ 360)
+	 * [EN] Sun azimuth (in degrees, -360 ~ 360)
+	 */
 	get sunAzimuth(): number { return this.#sunAzimuth; }
 	set sunAzimuth(v: number) { validateNumberRange(v, -360, 360); this.#sunAzimuth = v; this.#updateSunDirection(); }
 
+	/**
+	 * [KO] 지구의 반지름 (km)
+	 * [EN] Earth radius (km)
+	 */
 	get earthRadius(): number { return this.#params.earthRadius; }
 	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#params.earthRadius = v; this.#material.earthRadius = v; this.#dirtyLUT = true; }
-	
+
+	/**
+	 * [KO] 대기의 높이 (km)
+	 * [EN] Atmosphere height (km)
+	 */
 	get atmosphereHeight(): number { return this.#params.atmosphereHeight; }
 	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#params.atmosphereHeight = v; this.#material.atmosphereHeight = v; this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 미(Mie) 산란 계수
+	 * [EN] Mie scattering coefficient
+	 */
 	get mieScattering(): number { return this.#params.mieScattering; }
 	set mieScattering(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieScattering = v; this.#material.mieScattering = v; this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 미(Mie) 소멸 계수
+	 * [EN] Mie extinction coefficient
+	 */
 	get mieExtinction(): number { return this.#params.mieExtinction; }
-	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieExtinction = v; this.#dirtyLUT = true; }
+	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieExtinction = v; this.#material.mieExtinction = v; this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 레일리(Rayleigh) 산란 계수 (RGB)
+	 * [EN] Rayleigh scattering coefficient (RGB)
+	 */
 	get rayleighScattering(): [number, number, number] { return this.#params.rayleighScattering as [number, number, number]; }
 	set rayleighScattering(v: [number, number, number]) { this.#params.rayleighScattering = [...v]; this.#material.rayleighScattering = new Float32Array(v); this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 레일리(Rayleigh) 스케일 높이 (km)
+	 * [EN] Rayleigh scale height (km)
+	 */
 	get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
-	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.rayleighScaleHeight = v; this.#dirtyLUT = true; }
+	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.rayleighScaleHeight = v; this.#material.rayleighScaleHeight = v; this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 미(Mie) 스케일 높이 (km)
+	 * [EN] Mie scale height (km)
+	 */
 	get mieScaleHeight(): number { return this.#params.mieScaleHeight; }
-	set mieScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.mieScaleHeight = v; this.#dirtyLUT = true; }
+	set mieScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.mieScaleHeight = v; this.#material.mieScaleHeight = v; this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 미(Mie) 비등방성 계수 (0 ~ 0.999)
+	 * [EN] Mie anisotropy coefficient (0 ~ 0.999)
+	 */
 	get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
-	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieAnisotropy = v; this.#dirtyLUT = true; }
+	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieAnisotropy = v; this.#material.mieAnisotropy = v; this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 오존 흡수 계수 (RGB)
+	 * [EN] Ozone absorption coefficient (RGB)
+	 */
 	get ozoneAbsorption(): [number, number, number] { return this.#params.ozoneAbsorption as [number, number, number]; }
-	set ozoneAbsorption(v: [number, number, number]) { this.#params.ozoneAbsorption = [...v]; this.#dirtyLUT = true; }
+	set ozoneAbsorption(v: [number, number, number]) { this.#params.ozoneAbsorption = [...v]; this.#material.ozoneAbsorption = new Float32Array(v); this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 오존층 중심 고도 (km)
+	 * [EN] Ozone layer center altitude (km)
+	 */
 	get ozoneLayerCenter(): number { return this.#params.ozoneLayerCenter; }
-	set ozoneLayerCenter(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.ozoneLayerCenter = v; this.#dirtyLUT = true; }
+	set ozoneLayerCenter(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.ozoneLayerCenter = v; this.#material.ozoneLayerCenter = v; this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 오존층 두께 (km)
+	 * [EN] Ozone layer width (km)
+	 */
 	get ozoneLayerWidth(): number { return this.#params.ozoneLayerWidth; }
-	set ozoneLayerWidth(v: number) { validatePositiveNumberRange(v, 1, 50); this.#params.ozoneLayerWidth = v; this.#dirtyLUT = true; }
+	set ozoneLayerWidth(v: number) { validatePositiveNumberRange(v, 1, 50); this.#params.ozoneLayerWidth = v; this.#material.ozoneLayerWidth = v; this.#dirtyLUT = true; }
 
+	/**
+	 * [KO] 다중 산란 환경광 계수
+	 * [EN] Multi-scattering ambient coefficient
+	 */
 	get multiScatteringAmbient(): number { return this.#params.multiScatteringAmbient; }
-	set multiScatteringAmbient(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.multiScatteringAmbient = v; this.#dirtySkyView = true; }
+	set multiScatteringAmbient(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.multiScatteringAmbient = v; this.#material.multiScatteringAmbient = v; this.#dirtySkyView = true; }
 
+	/**
+	 * [KO] 태양의 시직경 (도 단위)
+	 * [EN] Sun angular size (in degrees)
+	 */
 	get sunSize(): number { return this.#params.sunSize; }
 	set sunSize(v: number) { validatePositiveNumberRange(v, 0.01, 10.0); this.#params.sunSize = v; this.#material.sunSize = v; }
 
+	/**
+	 * [KO] 태양의 강도
+	 * [EN] Sun intensity
+	 */
 	get sunIntensity(): number { return this.#params.sunIntensity; }
 	set sunIntensity(v: number) { validatePositiveNumberRange(v, 0, 10000); this.#params.sunIntensity = v; this.#material.sunIntensity = v; }
 
+	/**
+	 * [KO] 노출값
+	 * [EN] Exposure value
+	 */
 	get exposure(): number { return this.#params.exposure; }
 	set exposure(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.exposure = v; this.#material.exposure = v; }
 
+	/**
+	 * [KO] 높이 안개 밀도
+	 * [EN] Height fog density
+	 */
 	get heightFogDensity(): number { return this.#params.heightFogDensity; }
 	set heightFogDensity(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.heightFogDensity = v; this.#material.heightFogDensity = v; }
 
+	/**
+	 * [KO] 높이 안개 감쇠 계수
+	 * [EN] Height fog falloff coefficient
+	 */
 	get heightFogFalloff(): number { return this.#params.heightFogFalloff; }
 	set heightFogFalloff(v: number) { validatePositiveNumberRange(v, 0.001, 10); this.#params.heightFogFalloff = v; this.#material.heightFogFalloff = v; }
 
+	/**
+	 * [KO] 지평선 연무 강도
+	 * [EN] Horizon haze intensity
+	 */
 	get horizonHaze(): number { return this.#params.horizonHaze; }
 	set horizonHaze(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.horizonHaze = v; this.#material.horizonHaze = v; }
 
+	/**
+	 * [KO] 지면 환경광 강도
+	 * [EN] Ground ambient intensity
+	 */
 	get groundAmbient(): number { return this.#params.groundAmbient; }
 	set groundAmbient(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.groundAmbient = v; this.#material.groundAmbient = v; }
 
+	/**
+	 * [KO] 지면 알베도 (RGB)
+	 * [EN] Ground albedo (RGB)
+	 */
 	get groundAlbedo(): [number, number, number] { return this.#params.groundAlbedo as [number, number, number]; }
 	set groundAlbedo(v: [number, number, number]) { this.#params.groundAlbedo = [...v]; this.#material.groundAlbedo = new Float32Array(v); this.#dirtySkyView = true; }
 
+	/**
+	 * [KO] 미(Mie) 글로우 계수
+	 * [EN] Mie glow coefficient
+	 */
 	get mieGlow(): number { return this.#params.mieGlow; }
 	set mieGlow(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieGlow = v; this.#material.mieGlow = v; }
 
+	/**
+	 * [KO] 미(Mie) 헤일로 계수
+	 * [EN] Mie halo coefficient
+	 */
 	get mieHalo(): number { return this.#params.mieHalo; }
 	set mieHalo(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieHalo = v; this.#material.mieHalo = v; }
 
+	/**
+	 * [KO] 지면 광택도
+	 * [EN] Ground shininess
+	 */
 	get groundShininess(): number { return this.#params.groundShininess; }
 	set groundShininess(v: number) { validatePositiveNumberRange(v, 1, 2048); this.#params.groundShininess = v; this.#material.groundShininess = v; }
 
+	/**
+	 * [KO] 지면 스펙큘러 강도
+	 * [EN] Ground specular intensity
+	 */
 	get groundSpecular(): number { return this.#params.groundSpecular; }
 	set groundSpecular(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.groundSpecular = v; this.#material.groundSpecular = v; }
 
+	/**
+	 * [KO] 대기를 렌더링합니다.
+	 * [EN] Renders the atmosphere.
+	 *
+	 * @param renderViewStateData -
+	 * [KO] 렌더 뷰 상태 데이터
+	 * [EN] Render view state data
+	 */
 	render(renderViewStateData: RenderViewStateData): void {
 		const {currentRenderPassEncoder, view} = renderViewStateData
 		const {indexBuffer} = this.#geometry
