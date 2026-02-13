@@ -1,7 +1,9 @@
+#redgpu_include SYSTEM_UNIFORM;
 #redgpu_include drawPicking;
 #redgpu_include calcTintBlendMode;
 #redgpu_include FragmentOutput;
 #redgpu_include calculateMotionVector;
+
 struct Uniforms {
     color:vec3<f32>,
     //
@@ -14,6 +16,7 @@ struct Uniforms {
 struct InputData {
   // Built-in attributes
   @builtin(position) position : vec4<f32>,
+  @location(0) vertexPosition: vec3<f32>,
 
   @location(7) currentClipPos: vec4<f32>,
   @location(8) prevClipPos: vec4<f32>,
@@ -31,6 +34,28 @@ fn main(inputData: InputData) -> FragmentOutput {
     #redgpu_if useTint
         finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
+
+    // [Atmosphere] 시스템 플래그가 활성화된 경우 Aerial Perspective 합성
+    if (systemUniforms.useSkyAtmosphere == 1u) {
+        let viewVec = inputData.vertexPosition - systemUniforms.camera.cameraPosition;
+        let viewDir = normalize(viewVec);
+        let distKm = length(viewVec) / 1000.0;
+
+        let PI = 3.14159265;
+        let u = atan2(viewDir.z, viewDir.x) / (2.0 * PI) + 0.5;
+        let v = asin(clamp(viewDir.y, -1.0, 1.0)) / PI + 0.5;
+        let w = sqrt(clamp(distKm / 100.0, 0.0, 1.0));
+
+        let apSample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(u, v, w), 0.0);
+        
+        // [수정] 태양 강도와 노출을 적용하여 하늘 밝기와 동기화
+        let atmosphereColor = apSample.rgb * systemUniforms.skyAtmosphereSunIntensity;
+        let atmosphereTransmittance = apSample.a;
+        
+        finalColor = vec4<f32>((finalColor.rgb * atmosphereTransmittance) + atmosphereColor, finalColor.a);
+        finalColor = vec4<f32>(finalColor.rgb * systemUniforms.skyAtmosphereExposure, finalColor.a);
+    }
+
     if (finalColor.a == 0.0) {
         discard;
     }

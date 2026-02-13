@@ -501,6 +501,8 @@ class SkyAtmosphere {
 	get transmittanceTexture() { return this.#transmittanceGenerator.lutTexture; }
 	get multiScatteringTexture() { return this.#multiScatteringGenerator.lutTexture; }
 	get skyViewTexture() { return this.#skyViewGenerator.lutTexture; }
+	get cameraVolumeTexture() { return this.#cameraVolumeGenerator.lutTexture; }
+	get skyAtmosphereSampler() { return this.#material.transmittanceTextureSampler; }
 }
 
 Object.freeze(SkyAtmosphere)

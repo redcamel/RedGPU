@@ -249,9 +249,9 @@ class Renderer {
         renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
         viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
         if (skybox) skybox.render(renderViewStateData)
-        if (skyAtmosphere) skyAtmosphere.render(renderViewStateData)
         if (axis) axis.render(renderViewStateData)
         renderBasicLayer(view, viewRenderPassEncoder)
+        if (skyAtmosphere) skyAtmosphere.render(renderViewStateData)
         if (grid) grid.render(renderViewStateData)
         renderAlphaLayer(view, viewRenderPassEncoder)
         viewRenderPassEncoder.end()

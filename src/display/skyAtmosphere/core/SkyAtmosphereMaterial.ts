@@ -280,20 +280,10 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 				binding: 3,
 				resource: resourceManager.getGPUResourceBitmapTextureView(this.skyViewTexture?.gpuTexture) || resourceManager.emptyBitmapTextureView
 			},
-			// Binding 4: Camera Volume LUT (3D)
-			{
-				binding: 4,
-				resource: this.cameraVolumeTexture ? this.cameraVolumeTexture.gpuTextureView : resourceManager.emptyTexture3DView
-			},
 			// Binding 5: Scene Depth (Depth 2D)
 			{
 				binding: 5,
 				resource: this.sceneDepthTexture || resourceManager.emptyDepthTextureView
-			},
-			// Binding 6: Sampler
-			{
-				binding: 6,
-				resource: this.getGPUResourceSampler(this.transmittanceTextureSampler)
 			}
 		];
 
@@ -364,14 +354,6 @@ Object.defineProperty(SkyAtmosphereMaterial.prototype, 'sceneDepthTexture', {
 		if (this.gpuRenderInfo?.fragmentShaderModule) this._updateFragmentState();
 	}
 });
-
-DefineForFragment.defineTexture3D(SkyAtmosphereMaterial, [
-	'cameraVolumeTexture',
-]);
-
-DefineForFragment.defineSampler(SkyAtmosphereMaterial, [
-	'transmittanceTextureSampler',
-]);
 
 Object.freeze(SkyAtmosphereMaterial);
 export default SkyAtmosphereMaterial;

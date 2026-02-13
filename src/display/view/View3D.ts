@@ -522,6 +522,24 @@ class View3D extends AView {
                     dataView: this.#uniformDataU32,
                     targetMembers: members
                 },
+                {
+                    key: 'useSkyAtmosphere',
+                    value: this.skyAtmosphere ? 1 : 0,
+                    dataView: this.#uniformDataU32,
+                    targetMembers: members
+                },
+                {
+                    key: 'skyAtmosphereSunIntensity',
+                    value: this.skyAtmosphere ? this.skyAtmosphere.sunIntensity : 0,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
+                {
+                    key: 'skyAtmosphereExposure',
+                    value: this.skyAtmosphere ? this.skyAtmosphere.exposure : 1,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: members
+                },
                 // shadow
                 {
                     key: 'shadowDepthTextureSize',
@@ -703,6 +721,14 @@ class View3D extends AView {
                 {
                     binding: 12,
                     resource: resourceManager.brdfGenerator.brdfLUTTexture?.createView() || resourceManager.emptyBitmapTextureView
+                },
+                {
+                    binding: 13,
+                    resource: this.skyAtmosphere ? this.skyAtmosphere.cameraVolumeTexture.gpuTextureView : resourceManager.emptyTexture3DView
+                },
+                {
+                    binding: 14,
+                    resource: this.skyAtmosphere ? this.skyAtmosphere.skyAtmosphereSampler.gpuSampler : this.#basicSampler
                 },
             ]
         }
