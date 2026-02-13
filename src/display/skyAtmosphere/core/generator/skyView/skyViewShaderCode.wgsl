@@ -16,15 +16,21 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let r = params.earthRadius;
     let h_c = max(0.0001, params.cameraHeight);
-    let horizon_angle = acos(-sqrt(max(0.0, h_c * (2.0 * r + h_c))) / (r + h_c)) - (PI * 0.5);
+    
+    // 지평선 각도 계산
+    let horizon_cos = -sqrt(max(0.0, h_c * (2.0 * r + h_c))) / (r + h_c);
+    let horizon_elevation = asin(clamp(horizon_cos, -1.0, 1.0));
 
+    // [UE5 표준 역매핑]
     var view_elevation: f32;
     if (uv.y < 0.5) {
-        let ratio = uv.y * 2.0;
-        view_elevation = ratio * (horizon_angle + (PI * 0.5)) - (PI * 0.5);
+        // [Sky Part] v = 0.5 * (1 - sqrt(ratio)) -> ratio = (1 - 2v)^2
+        let ratio = (1.0 - 2.0 * uv.y) * (1.0 - 2.0 * uv.y);
+        view_elevation = horizon_elevation + ratio * ((PI * 0.5) - horizon_elevation);
     } else {
-        let ratio = (uv.y - 0.5) * 2.0;
-        view_elevation = (ratio * ratio) * ((PI * 0.5) - horizon_angle) + horizon_angle;
+        // [Ground Part] v = 0.5 * (1 + sqrt(ratio)) -> ratio = (2v - 1)^2
+        let ratio = (2.0 * uv.y - 1.0) * (2.0 * uv.y - 1.0);
+        view_elevation = horizon_elevation - ratio * (horizon_elevation + (PI * 0.5));
     }
 
     let view_dir = vec3<f32>(cos(view_elevation) * cos(azimuth), sin(view_elevation), cos(view_elevation) * sin(azimuth));
@@ -44,8 +50,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         for (var i = 0; i < steps; i = i + 1) {
             let t = (f32(i) + 0.5) * step_size;
             let p = ray_origin + view_dir * t;
-            let up = p / length(p);
-            let cur_h = length(p) - r;
+            let p_len = length(p);
+            let up = p / p_len;
+            let cur_h = p_len - r;
 
             let cos_sun = dot(up, params.sunDirection);
             let sun_trans = get_transmittance(transmittanceTexture, tSampler, cur_h, cos_sun, params.atmosphereHeight);
@@ -62,6 +69,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let scat = (params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos) + 
                         params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy)) * sun_trans * shadow_mask;
 
+            // 다중 산란 기여 (Energy Compensation)
             let ms_uv = vec2<f32>(cos_sun * 0.5 + 0.5, cur_h / params.atmosphereHeight);
             let ms_energy = textureSampleLevel(multiScatTexture, tSampler, ms_uv, 0.0).rgb;
             let ms_scat = ms_energy * (params.rayleighScattering * rho_r + params.mieScattering * rho_m) * shadow_mask;

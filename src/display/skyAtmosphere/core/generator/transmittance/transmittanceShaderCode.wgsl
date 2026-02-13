@@ -39,7 +39,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
     let cos_theta = uv.x * 2.0 - 1.0;
-    let h = uv.y * params.atmosphereHeight;
+    
+    // [역매핑 보정] V = 1.0 - (h / H_atm) -> h = (1.0 - V) * H_atm
+    let h = (1.0 - uv.y) * params.atmosphereHeight;
 
     let T = exp(-min(get_optical_depth(h, cos_theta), vec3<f32>(MAX_TAU)));
     textureStore(transmittanceTexture, global_id.xy, vec4<f32>(T, 1.0));

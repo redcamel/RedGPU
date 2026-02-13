@@ -1,7 +1,7 @@
 const PI: f32 = 3.14159265359;
 const MAX_TAU: f32 = 50.0;
 
-// [KO] 대기 산란 시스템 통합 파라미터 구조체
+// [KO] 대기 산란 시스템 통합 파라미터 구조체 (16바이트 정렬 완료)
 struct AtmosphereParameters {
     rayleighScattering: vec3<f32>,
     mieAnisotropy: f32,
@@ -47,11 +47,12 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
     return -1.0;
 }
 
-// [KO] UE5 표준 Transmittance LUT UV 매핑
+// [KO] UE5 표준 Transmittance LUT UV 매핑 (u: zenith, v: height)
+// WebGPU: V=0.0 (Top) -> Atmosphere Top, V=1.0 (Bottom) -> Ground
 fn get_transmittance_uv(h: f32, cos_theta: f32, atmosphere_height: f32) -> vec2<f32> {
     let H = clamp(h / atmosphere_height, 0.0, 1.0);
     let mu = cos_theta * 0.5 + 0.5;
-    return vec2<f32>(mu, H);
+    return vec2<f32>(mu, 1.0 - H); // V축 반전: 0(Top)=Atmo, 1(Bottom)=Ground
 }
 
 // [KO] 투과율 샘플링
@@ -60,7 +61,7 @@ fn get_transmittance(t_tex: texture_2d<f32>, t_sam: sampler, h: f32, cos_theta: 
     return textureSampleLevel(t_tex, t_sam, uv, 0.0).rgb;
 }
 
-// [KO] UE5 표준 Sky-View LUT UV 매핑 (지평선 왜곡 포함)
+// [KO] UE5 표준 Sky-View LUT UV 매핑 (v=0.5: Horizon, v=0: Top, v=1: Bottom)
 fn get_sky_view_uv(view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atmosphere_height: f32) -> vec2<f32> {
     let azimuth = atan2(view_dir.z, view_dir.x);
     let u = (azimuth / (2.0 * PI)) + 0.5;
@@ -73,11 +74,15 @@ fn get_sky_view_uv(view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atm
 
     var v: f32;
     if (view_elevation >= horizon_elevation) {
+        // [Sky Part] Horizon -> Top (0.5 -> 0.0)
         let v_range = (PI * 0.5) - horizon_elevation;
-        v = 0.5 * (1.0 - sqrt(max(0.0, (view_elevation - horizon_elevation) / v_range)));
+        let ratio = (view_elevation - horizon_elevation) / v_range;
+        v = 0.5 * (1.0 - sqrt(max(0.0, ratio)));
     } else {
+        // [Ground Part] Horizon -> Bottom (0.5 -> 1.0)
         let v_range = horizon_elevation + (PI * 0.5);
-        v = 0.5 * (1.0 + sqrt(max(0.0, (horizon_elevation - view_elevation) / v_range)));
+        let ratio = (horizon_elevation - view_elevation) / v_range;
+        v = 0.5 * (1.0 + sqrt(max(0.0, ratio)));
     }
     return vec2<f32>(u, clamp(v, 0.0, 1.0));
 }
@@ -92,7 +97,7 @@ fn phase_mie(cos_theta: f32, g: f32) -> f32 {
     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(0.001, 1.0 + g2 - 2.0 * g * cos_theta), 1.5));
 }
 
-// [KO] 높이 안개
+// [KO] 높이 안개 투과율
 fn get_height_fog_transmittance(cam_h: f32, ray_dir_y: f32, dist: f32, density: f32, falloff: f32) -> f32 {
     if (density <= 0.0) { return 1.0; }
     let h = max(0.0, cam_h);

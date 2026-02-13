@@ -321,26 +321,32 @@ DefineForFragment.definePositiveNumber(SkyAtmosphereMaterial, ['groundAmbient'])
 DefineForFragment.defineVec3(SkyAtmosphereMaterial, ['sunDirection']);
 DefineForFragment.definePositiveNumber(SkyAtmosphereMaterial, ['sunSize']);
 
-// Scalars
+// Scalars & Padding (Order must match skyAtmosphereFn.wgsl)
 DefineForFragment.definePositiveNumber(SkyAtmosphereMaterial, [
 	'earthRadius',
 	'atmosphereHeight',
 	'mieScattering',
 	'mieExtinction',
+
 	'rayleighScaleHeight',
 	'mieScaleHeight',
 	'cameraHeight',
 	'multiScatteringAmbient',
+
 	'exposure',
 	'sunIntensity',
 	'heightFogDensity',
 	'heightFogFalloff',
+
 	'horizonHaze',
 	'mieGlow',
 	'mieHalo',
 	'groundShininess',
+
 	'groundSpecular',
-	'ozoneLayerWidth'
+	'ozoneLayerWidth',
+	'padding0',
+	'padding1'
 ]);
 
 DefineForFragment.defineTexture(SkyAtmosphereMaterial, [

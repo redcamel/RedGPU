@@ -39,6 +39,12 @@ RedGPU.init(
         createLUTSprite(skyAtmosphere.skyViewTexture, 'Sky-View LUT (Zenith:Top)', -6, 6);
         createLUTSprite(skyAtmosphere.multiScatteringTexture, 'Multi-Scat LUT', 0, 6);
         createLUTSprite(skyAtmosphere.transmittanceTexture, 'Transmittance LUT', 6, 6);
+
+        const infoLabel = new RedGPU.Display.TextField3D(redGPUContext, '3D Camera Volume LUT (Aerial Perspective) is active in background');
+        infoLabel.x = 0; infoLabel.y = 1;
+        infoLabel.worldSize = 0.6;
+        infoLabel.color = '#555';
+        scene.addChild(infoLabel);
         
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext);

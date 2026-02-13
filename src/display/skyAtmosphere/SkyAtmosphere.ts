@@ -95,7 +95,8 @@ class SkyAtmosphere {
 		groundSpecular: 4.0,
 		sunDirection: new Float32Array([0, 1, 0]),
 		cameraHeight: 0.2,
-		padding: 0
+		padding0: 0,
+		padding1: 0
 	};
 
 	#sunElevation: number = 45;
@@ -141,7 +142,7 @@ class SkyAtmosphere {
 	#syncInitialParams(): void {
 		// 모든 자식 인스턴스의 파라미터를 현재 #params 값으로 초기화
 		Object.keys(this.#params).forEach(key => {
-			if (key !== 'sunDirection' && key !== 'cameraHeight' && key !== 'padding') {
+			if (key !== 'sunDirection' && key !== 'cameraHeight' && !key.startsWith('padding')) {
 				(this as any)[key] = (this.#params as any)[key];
 			}
 		});
@@ -362,7 +363,8 @@ class SkyAtmosphere {
 		const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
 		const currentHeightKm = Math.max(0.001, cameraPos[1] / 1000.0);
 
-		if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.001) {
+		// [최적화] 카메라 고도 변화 임계값을 10m(0.01km)로 상향하여 불필요한 갱신 방지
+		if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.01) {
 			this.#params.cameraHeight = currentHeightKm;
 			this.#material.cameraHeight = currentHeightKm;
 			this.#dirtySkyView = true;
@@ -381,16 +383,14 @@ class SkyAtmosphere {
 				this.#multiScatteringGenerator.lutTexture,
 				this.#params
 			);
+			// [최적화] 3D LUT는 회전과 무관하므로 고도/태양 변화 시에만 갱신
+			this.#cameraVolumeGenerator.render(
+				this.#transmittanceGenerator.lutTexture,
+				this.#multiScatteringGenerator.lutTexture,
+				this.#params
+			);
 			this.#dirtySkyView = false;
 		}
-
-		// [추가] Camera Volume (Aerial Perspective) 3D LUT 업데이트
-		// 매 프레임 카메라 위치와 파라미터에 따라 업데이트
-		this.#cameraVolumeGenerator.render(
-			this.#transmittanceGenerator.lutTexture,
-			this.#multiScatteringGenerator.lutTexture,
-			this.#params
-		);
 
 		this.#updateMSAAStatus();
 		if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
@@ -401,8 +401,13 @@ class SkyAtmosphere {
 
 		this.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
 
+		// [최적화] sceneDepthTexture는 뷰 리사이즈 시에만 변경되므로 체크 후 업데이트 (파이프라인 재생성 방지)
+		const currentDepthView = view.viewRenderTextureManager.depthTextureView;
+		if (this.#material.sceneDepthTexture !== currentDepthView) {
+			this.#material.sceneDepthTexture = currentDepthView;
+		}
+
 		if (this.#dirtyPipeline || this.#material.dirtyPipeline || this.#prevSystemUniform_Vertex_UniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
-			this.#material.sceneDepthTexture = view.viewRenderTextureManager.depthTextureView
 			this.gpuRenderInfo.pipeline = this.#updatePipeline()
 			this.#dirtyPipeline = false
 			renderViewStateData.numDirtyPipelines++
