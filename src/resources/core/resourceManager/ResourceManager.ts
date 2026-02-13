@@ -78,6 +78,7 @@ class ResourceManager {
     #emptyBitmapTextureView: GPUTextureView
     #emptyCubeTextureView: GPUTextureView
     #emptyTexture3DView: GPUTextureView
+    #emptyDepthTextureView: GPUTextureView
     readonly #mipmapGenerator: MipmapGenerator
     readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
     readonly #brdfGenerator: BRDFGenerator
@@ -211,6 +212,14 @@ class ResourceManager {
      */
     get emptyTexture3DView(): GPUTextureView {
         return this.#emptyTexture3DView;
+    }
+
+    /**
+     * [KO] 빈 깊이 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty depth texture view.
+     */
+    get emptyDepthTextureView(): GPUTextureView {
+        return this.#emptyDepthTextureView;
     }
 
     /**
@@ -628,6 +637,14 @@ class ResourceManager {
                 label: emptyTexture3D.label,
                 dimension: '3d'
             });
+
+            const emptyDepthTexture = gpuDevice.createTexture({
+                size: {width: 1, height: 1, depthOrArrayLayers: 1},
+                format: 'depth24plus',
+                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+                label: 'EMPTY_DEPTH_TEXTURE',
+            });
+            this.#emptyDepthTextureView = emptyDepthTexture.createView({label: emptyDepthTexture.label});
 
             this.#basicSampler = new Sampler(this.redGPUContext)
         }

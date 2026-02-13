@@ -34,6 +34,11 @@ interface SkyAtmosphereMaterial {
 	 */
 	cameraVolumeTexture: CameraVolumeLUTTexture;
 	/**
+	 * [KO] 씬 깊이(Scene Depth) 텍스처
+	 * [EN] Scene Depth texture
+	 */
+	sceneDepthTexture: GPUTextureView;
+	/**
 	 * [KO] 투과율 텍스처 샘플러
 	 * [EN] Transmittance texture sampler
 	 */
@@ -241,6 +246,66 @@ class SkyAtmosphereMaterial extends ABitmapBaseMaterial {
 			addressModeV: 'clamp-to-edge'
 		});
 	}
+
+	/**
+	 * [KO] 프래그먼트 바인드 그룹을 명시적인 인덱스로 구성합니다.
+	 * [EN] Configures the fragment bind group with explicit indices.
+	 * @protected
+	 */
+	override _updateFragmentState() {
+		const {gpuDevice, resourceManager} = this.redGPUContext;
+
+		const entries: GPUBindGroupEntry[] = [
+			// Binding 0: Uniform Buffer
+			{
+				binding: 0,
+				resource: {
+					buffer: this.gpuRenderInfo.fragmentUniformBuffer.gpuBuffer,
+					offset: 0,
+					size: this.gpuRenderInfo.fragmentUniformBuffer.size
+				}
+			},
+			// Binding 1: Transmittance LUT (2D)
+			{
+				binding: 1,
+				resource: resourceManager.getGPUResourceBitmapTextureView(this.transmittanceTexture?.gpuTexture) || resourceManager.emptyBitmapTextureView
+			},
+			// Binding 2: Multi-Scattering LUT (2D)
+			{
+				binding: 2,
+				resource: resourceManager.getGPUResourceBitmapTextureView(this.multiScatteringTexture?.gpuTexture) || resourceManager.emptyBitmapTextureView
+			},
+			// Binding 3: Sky-View LUT (2D)
+			{
+				binding: 3,
+				resource: resourceManager.getGPUResourceBitmapTextureView(this.skyViewTexture?.gpuTexture) || resourceManager.emptyBitmapTextureView
+			},
+			// Binding 4: Camera Volume LUT (3D)
+			{
+				binding: 4,
+				resource: this.cameraVolumeTexture ? this.cameraVolumeTexture.gpuTextureView : resourceManager.emptyTexture3DView
+			},
+			// Binding 5: Scene Depth (Depth 2D)
+			{
+				binding: 5,
+				resource: this.sceneDepthTexture || resourceManager.emptyDepthTextureView
+			},
+			// Binding 6: Sampler
+			{
+				binding: 6,
+				resource: this.getGPUResourceSampler(this.transmittanceTextureSampler)
+			}
+		];
+
+		const bindGroupDescriptor: GPUBindGroupDescriptor = {
+			layout: this.gpuRenderInfo.fragmentBindGroupLayout,
+			label: this.FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,
+			entries
+		};
+
+		this.gpuRenderInfo.fragmentState = this.getFragmentRenderState();
+		this.gpuRenderInfo.fragmentUniformBindGroup = gpuDevice.createBindGroup(bindGroupDescriptor);
+	}
 }
 
 // 개별 속성 정의 (셰이더 구조체 AtmosphereParameters 순서와 정확히 일치해야 함)
@@ -283,6 +348,16 @@ DefineForFragment.defineTexture(SkyAtmosphereMaterial, [
 	'multiScatteringTexture',
 	'skyViewTexture',
 ]);
+
+// [수정] sceneDepthTexture는 raw GPUTextureView이므로 리스너 로직이 없는 수동 정의 사용
+Object.defineProperty(SkyAtmosphereMaterial.prototype, 'sceneDepthTexture', {
+	get: function () { return this._sceneDepthTexture; },
+	set: function (v) {
+		this._sceneDepthTexture = v;
+		this.dirtyPipeline = true;
+		if (this.gpuRenderInfo?.fragmentShaderModule) this._updateFragmentState();
+	}
+});
 
 DefineForFragment.defineTexture3D(SkyAtmosphereMaterial, [
 	'cameraVolumeTexture',

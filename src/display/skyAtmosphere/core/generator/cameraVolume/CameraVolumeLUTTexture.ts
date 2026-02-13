@@ -16,7 +16,7 @@ class CameraVolumeLUTTexture extends ManagementResourceBase {
 	#height: number;
 	#depth: number;
 
-	constructor(redGPUContext: RedGPUContext, width: number = 32, height: number = 32, depth: number = 16) {
+	constructor(redGPUContext: RedGPUContext, width: number = 64, height: number = 64, depth: number = 32) {
 		super(redGPUContext, MANAGED_STATE_KEY);
 		this.#width = width;
 		this.#height = height;

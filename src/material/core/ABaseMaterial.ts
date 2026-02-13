@@ -369,7 +369,6 @@ abstract class ABaseMaterial extends ResourceBase {
 			console.log(this, name, this[name])
 			let resource
 			if (textureType === 'texture_cube') resource = resourceManager.getGPUResourceCubeTextureView(this[name])
-			else if (textureType === 'texture_3d') resource = this[name] ? resourceManager.getGPUResourceBitmapTextureView(this[name], {dimension: '3d'}) : resourceManager.emptyTexture3DView
 			else if (this[name] instanceof PackedTexture) {
 				resource = resourceManager.getGPUResourceBitmapTextureView(this[name])
 			} else {

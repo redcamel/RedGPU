@@ -18,9 +18,9 @@ class CameraVolumeGenerator {
 	#uniformBuffer: UniformBuffer;
 	#sampler: Sampler;
 
-	readonly width: number = 32;
-	readonly height: number = 32;
-	readonly depth: number = 16;
+	readonly width: number = 64;
+	readonly height: number = 64;
+	readonly depth: number = 32;
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;

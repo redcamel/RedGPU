@@ -112,6 +112,11 @@ declare class ResourceManager {
      */
     get emptyTexture3DView(): GPUTextureView;
     /**
+     * [KO] 빈 깊이 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty depth texture view.
+     */
+    get emptyDepthTextureView(): GPUTextureView;
+    /**
      * [KO] 비트맵 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed bitmap texture state.
      */

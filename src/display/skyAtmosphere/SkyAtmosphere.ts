@@ -402,6 +402,7 @@ class SkyAtmosphere {
 		this.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
 
 		if (this.#dirtyPipeline || this.#material.dirtyPipeline || this.#prevSystemUniform_Vertex_UniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+			this.#material.sceneDepthTexture = view.viewRenderTextureManager.depthTextureView
 			this.gpuRenderInfo.pipeline = this.#updatePipeline()
 			this.#dirtyPipeline = false
 			renderViewStateData.numDirtyPipelines++

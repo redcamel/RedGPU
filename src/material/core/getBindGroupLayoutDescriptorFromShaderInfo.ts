@@ -68,7 +68,7 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (
                     texture: textureType === "texture_depth_2d" || textureType === "texture_depth_multisampled_2d" ? {
                         viewDimension: '2d',
                         sampleType: 'depth',
-                        multisampled: useMSAA
+                        multisampled: textureType === "texture_depth_multisampled_2d"
                     } : textureType === "texture_cube" ? {
                         viewDimension: 'cube'
                     } : textureType === "texture_3d" ? {

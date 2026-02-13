@@ -17,8 +17,8 @@ class MultiScatteringGenerator {
     #uniformBuffer: UniformBuffer;
     #sampler: Sampler;
 
-    readonly width: number = 256;
-    readonly height: number = 256;
+    readonly width: number = 32;
+    readonly height: number = 32;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;

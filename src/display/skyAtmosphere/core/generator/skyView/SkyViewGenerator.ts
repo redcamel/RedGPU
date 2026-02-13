@@ -18,8 +18,8 @@ class SkyViewGenerator {
 	#uniformBuffer: UniformBuffer;
 	#sampler: Sampler;
 
-	readonly width: number = 512;
-	readonly height: number = 512;
+	readonly width: number = 200;
+	readonly height: number = 200;
 
 	constructor(redGPUContext: RedGPUContext) {
 		this.#redGPUContext = redGPUContext;
