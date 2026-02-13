@@ -18,6 +18,7 @@ import SkyAtmosphereMaterial from "./core/SkyAtmosphereMaterial";
 import TransmittanceGenerator from "./core/generator/transmittance/TransmittanceGenerator";
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
+import CameraVolumeGenerator from "./core/generator/cameraVolume/CameraVolumeGenerator";
 import vertexModuleSource from './shader/vertex.wgsl';
 import {PerspectiveCamera} from "../../camera";
 
@@ -64,6 +65,7 @@ class SkyAtmosphere {
 	#transmittanceGenerator: TransmittanceGenerator
 	#multiScatteringGenerator: MultiScatteringGenerator
 	#skyViewGenerator: SkyViewGenerator
+	#cameraVolumeGenerator: CameraVolumeGenerator
 
 	// [통합] 모든 대기 산란 파라미터를 하나의 객체로 관리
 	#params = {
@@ -125,10 +127,12 @@ class SkyAtmosphere {
 		this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext)
 		this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext)
 		this.#skyViewGenerator = new SkyViewGenerator(redGPUContext)
+		this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext)
 
 		this.#material.transmittanceTexture = this.#transmittanceGenerator.lutTexture
 		this.#material.multiScatteringTexture = this.#multiScatteringGenerator.lutTexture
 		this.#material.skyViewTexture = this.#skyViewGenerator.lutTexture
+		this.#material.cameraVolumeTexture = this.#cameraVolumeGenerator.lutTexture
 
 		this.#syncInitialParams();
 		this.#updateSunDirection();
@@ -379,6 +383,14 @@ class SkyAtmosphere {
 			);
 			this.#dirtySkyView = false;
 		}
+
+		// [추가] Camera Volume (Aerial Perspective) 3D LUT 업데이트
+		// 매 프레임 카메라 위치와 파라미터에 따라 업데이트
+		this.#cameraVolumeGenerator.render(
+			this.#transmittanceGenerator.lutTexture,
+			this.#multiScatteringGenerator.lutTexture,
+			this.#params
+		);
 
 		this.#updateMSAAStatus();
 		if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)

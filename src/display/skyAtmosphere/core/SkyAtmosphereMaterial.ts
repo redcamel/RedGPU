@@ -8,6 +8,7 @@ import skyAtmosphereFn from "./skyAtmosphereFn.wgsl"
 import TransmittanceLUTTexture from "./generator/transmittance/TransmittanceLUTTexture";
 import MultiScatteringLUTTexture from "./generator/multiScattering/MultiScatteringLUTTexture";
 import SkyViewLUTTexture from "./generator/skyView/SkyViewLUTTexture";
+import CameraVolumeLUTTexture from "./generator/cameraVolume/CameraVolumeLUTTexture";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + fragmentModuleSource)
 
@@ -27,6 +28,11 @@ interface SkyAtmosphereMaterial {
 	 * [EN] Sky-View LUT texture
 	 */
 	skyViewTexture: SkyViewLUTTexture;
+	/**
+	 * [KO] 3D 공중 투시(Aerial Perspective) LUT 텍스처
+	 * [EN] 3D Aerial Perspective LUT texture
+	 */
+	cameraVolumeTexture: CameraVolumeLUTTexture;
 	/**
 	 * [KO] 투과율 텍스처 샘플러
 	 * [EN] Transmittance texture sampler
@@ -276,6 +282,10 @@ DefineForFragment.defineTexture(SkyAtmosphereMaterial, [
 	'transmittanceTexture',
 	'multiScatteringTexture',
 	'skyViewTexture',
+]);
+
+DefineForFragment.defineTexture3D(SkyAtmosphereMaterial, [
+	'cameraVolumeTexture',
 ]);
 
 DefineForFragment.defineSampler(SkyAtmosphereMaterial, [

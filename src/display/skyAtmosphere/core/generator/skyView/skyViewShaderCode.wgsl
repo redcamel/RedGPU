@@ -6,11 +6,6 @@
 @group(0) @binding(3) var tSampler: sampler;
 @group(0) @binding(4) var<uniform> params: AtmosphereParameters;
 
-fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    let uv = get_transmittance_uv(h, cos_theta, params.atmosphereHeight);
-    return textureSampleLevel(transmittanceTexture, tSampler, uv, 0.0).rgb;
-}
-
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let size = textureDimensions(skyViewTexture);
@@ -70,7 +65,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let current_horizon_cos = -sqrt(max(0.0, cur_h * (2.0 * r + cur_h))) / (r + cur_h);
             let light_fade = smoothstep(current_horizon_cos - 0.1, current_horizon_cos + 0.1, cos_sun);
 
-            let sun_trans = get_transmittance(cur_h, cos_sun) * light_fade;
+            let sun_trans = get_transmittance(transmittanceTexture, tSampler, cur_h, cos_sun, params.atmosphereHeight) * light_fade;
 
             var shadow_mask = 1.0;
             let t_earth_shadow = get_ray_sphere_intersection(p, params.sunDirection, r);

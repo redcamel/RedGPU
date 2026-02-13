@@ -23,6 +23,7 @@ declare const DefineForFragment: {
     defineColorRGBA: (classObject: Object, keyList: Array<any>) => void;
     defineSampler: (classObject: Object, keyList: Array<any>) => void;
     defineTexture: (classObject: Object, keyList: Array<any>) => void;
+    defineTexture3D: (classObject: Object, keyList: Array<any>) => void;
     defineCubeTexture: (classObject: Object, keyList: Array<any>) => void;
     PRESET_BOOLEAN: {};
     PRESET_POSITIVE_NUMBER: {

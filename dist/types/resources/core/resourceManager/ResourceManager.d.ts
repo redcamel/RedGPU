@@ -107,6 +107,11 @@ declare class ResourceManager {
      */
     get emptyCubeTextureView(): GPUTextureView;
     /**
+     * [KO] 빈 3D 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty 3D texture view.
+     */
+    get emptyTexture3DView(): GPUTextureView;
+    /**
      * [KO] 비트맵 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed bitmap texture state.
      */

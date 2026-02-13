@@ -15,7 +15,8 @@ struct FragmentOutput {
 @group(2) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(2) @binding(2) var multiScatteringTexture: texture_2d<f32>;
 @group(2) @binding(3) var skyViewTexture: texture_2d<f32>;
-@group(2) @binding(4) var tSampler: sampler;
+@group(2) @binding(4) var cameraVolumeTexture: texture_3d<f32>;
+@group(2) @binding(5) var tSampler: sampler;
 
 @fragment
 fn main(outData: OutData) -> FragmentOutput {
@@ -58,14 +59,16 @@ fn main(outData: OutData) -> FragmentOutput {
     let skyLuminance = skySample.rgb;
     let lutTransmittance = skySample.a;
 
-    // 2. 태양 및 후광(Halo) 계산
+    // 2. 최종 대기광 계산 (지면 계산에서 활용하기 위해 상단으로 이동)
+    let atmosphereColor = skyLuminance * sunIntensity;
+
+    // 3. 태양 및 후광(Halo) 계산
     let view_sun_cos = dot(viewDir, sunDir);
     let sun_angular_radius = sunSize * (PI / 180.0);
     let cosSunRadius = cos(sun_angular_radius);
 
     // [해결 2] 태양 디스크 붉은색 보정 (Transmittance At Sun Direction 적용)
-    let sunTransUV = get_transmittance_uv(camH, sunDir.y, atmH);
-    let sunTrans = textureSampleLevel(transmittanceTexture, tSampler, sunTransUV, 0.0).rgb;
+    let sunTrans = get_transmittance(transmittanceTexture, tSampler, camH, sunDir.y, atmH);
 
     // 태양 디스크 (Direct Sun Disk)
     let sunRadiance = sunIntensity / max(1e-7, 2.0 * PI * (1.0 - cosSunRadius));
@@ -143,9 +146,21 @@ fn main(outData: OutData) -> FragmentOutput {
 
             let groundRawColor = albedo * (diffuseLight + ambientLight) + specularLight;
 
-            // 대기 효과 적용 (Aerial Perspective)
-            // skyLuminance * sunIntensity는 이미 물리적으로 정확한 값이므로 그대로 더함
-            finalGroundColor = (groundRawColor * lutTransmittance) + (skyLuminance * sunIntensity);
+            // [언리얼 스타일] 3D LUT 기반 Aerial Perspective (공중 투시)
+            // 3D LUT에서 해당 방향과 거리에 맞는 산란광과 투과율을 가져옵니다.
+            let azimuth = atan2(viewDir.z, viewDir.x);
+            let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
+            
+            let u = azimuth / (2.0 * PI) + 0.5;
+            let v = elevation / PI + 0.5;
+            let max_dist = 100.0;
+            let w = sqrt(clamp(hitDist / max_dist, 0.0, 1.0)); // Generator의 w 매핑과 일치해야 함
+
+            let apSample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(u, v, w), 0.0);
+            let aerialScattering = apSample.rgb;
+            let aerialTransmittance = apSample.a;
+
+            finalGroundColor = (groundRawColor * aerialTransmittance) + (aerialScattering * sunIntensity);
 
         } else {
             // 바닥 충돌 없음 (하늘)
@@ -156,33 +171,37 @@ fn main(outData: OutData) -> FragmentOutput {
     }
 
     // 5. 최종 합성
-    let atmosphereColor = skyLuminance * sunIntensity;
+    // (atmosphereColor는 상단에서 이미 정의됨)
 
-    // 지평선 AA 처리
-    let horizonMask = smoothstep(-0.002, 0.002, distFromHorizon);
+    // [개선] 지평선 AA 및 전이 처리 (더 부드러운 범위 설정)
+    // 기존 0.002에서 0.008로 확장하여 경계를 더 부드럽게 만듦
+    let horizonMask = smoothstep(-0.008, 0.008, distFromHorizon);
 
     // 하늘과 바닥 합성
     var finalHDR = mix(groundPart, atmosphereColor, horizonMask);
 
     // 태양/후광 추가
     let effectiveSun = sunDiskLuminance * horizonMask;
-    let effectiveHalo = sunHalo * max(0.1, horizonMask);
+    let effectiveHalo = sunHalo * max(0.2, horizonMask); // 후광은 지평선 아래로도 약간 번지도록 설정
     finalHDR += effectiveSun + effectiveHalo;
 
-    // 지평선 안개 보정 (선택적)
-    let horizon_haze_mask = exp(-absDistFromHorizon * (10.0 / haze_amount));
-    let haze_boost = atmosphereColor * uniforms.horizonHaze * 0.5;
+    // [개선] 지평선 안개 및 연무 보정 (Horizon Haze)
+    // 지평선 부근의 산란광을 강화하여 경계를 시각적으로 부드럽게 만듦
+    let haze_range = mix(0.1, 0.2, 1.0 - sun_haze_factor); // 태양이 낮을수록 연무 범위 확대
+    let horizon_haze_mask = exp(-absDistFromHorizon * (5.0 / (haze_amount + 0.01)));
+    let haze_boost = atmosphereColor * uniforms.horizonHaze * 0.8;
     finalHDR += haze_boost * horizon_haze_mask;
 
     // 6. Height Fog (거리 안개)
     let horizonDist = sqrt(h_c * (2.0 * earthRadius + h_c));
     let fogCalcDist = select(horizonDist, hitDist, hitDist < 1e5);
     let fogT = get_height_fog_transmittance(camH, viewDir.y, fogCalcDist, uniforms.heightFogDensity, uniforms.heightFogFalloff);
+    
+    // 안개 적용 시에도 지평선 부근은 대기색과 더 자연스럽게 섞이도록 처리
     finalHDR = mix(atmosphereColor, finalHDR, fogT);
 
     // [최종 출력] 톤맵핑 없음 (시스템에서 처리)
-    // exposure만 적용하여 Linear HDR 상태로 내보냄
-    // 만약 바닥이 여전히 하얗다면 uniforms.groundAlbedo를 줄이거나 exposure를 낮춰야 함
+    // 최종 보정된 Linear HDR 상태로 내보냄
     output.color = vec4<f32>(finalHDR * exposure * 0.2, 1.0);
     output.normal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
     output.motionVector = vec4<f32>(0.0, 0.0, 0.0, 1.0);

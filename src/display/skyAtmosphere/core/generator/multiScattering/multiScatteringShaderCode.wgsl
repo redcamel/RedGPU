@@ -5,11 +5,6 @@
 @group(0) @binding(2) var tSampler: sampler;
 @group(0) @binding(3) var<uniform> params: AtmosphereParameters;
 
-fn get_transmittance(h: f32, cos_theta: f32) -> vec3<f32> {
-    let uv = get_transmittance_uv(h, cos_theta, params.atmosphereHeight);
-    return textureSampleLevel(transmittanceTexture, tSampler, uv, 0.0).rgb;
-}
-
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let size = textureDimensions(multiScatTexture);
@@ -55,7 +50,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 let cur_p = ray_origin + ray_dir * t;
                 let cur_h = length(cur_p) - r;
                 let cos_s = dot(normalize(cur_p), sun_dir);
-                let sun_t = get_transmittance(cur_h, cos_s);
+                let sun_t = get_transmittance(transmittanceTexture, tSampler, cur_h, cos_s, params.atmosphereHeight);
                 
                 let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
                 let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
@@ -72,7 +67,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 let hit_p = ray_origin + ray_dir * dist_limit;
                 let ground_n = normalize(hit_p);
                 let cos_s = max(0.0, dot(ground_n, sun_dir));
-                let sun_t = get_transmittance(0.0, cos_s);
+                let sun_t = get_transmittance(transmittanceTexture, tSampler, 0.0, cos_s, params.atmosphereHeight);
                 L1 += T_path * sun_t * cos_s * params.groundAlbedo / PI;
             }
 

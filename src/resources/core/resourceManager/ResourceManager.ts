@@ -77,6 +77,7 @@ class ResourceManager {
     #cachedBufferState: any = {}
     #emptyBitmapTextureView: GPUTextureView
     #emptyCubeTextureView: GPUTextureView
+    #emptyTexture3DView: GPUTextureView
     readonly #mipmapGenerator: MipmapGenerator
     readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
     readonly #brdfGenerator: BRDFGenerator
@@ -202,6 +203,14 @@ class ResourceManager {
      */
     get emptyCubeTextureView(): GPUTextureView {
         return this.#emptyCubeTextureView;
+    }
+
+    /**
+     * [KO] 빈 3D 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty 3D texture view.
+     */
+    get emptyTexture3DView(): GPUTextureView {
+        return this.#emptyTexture3DView;
     }
 
     /**
@@ -607,6 +616,19 @@ class ResourceManager {
                     {width: 1, height: 1, depthOrArrayLayers: 1}
                 );
             }
+
+            const emptyTexture3D = gpuDevice.createTexture({
+                size: {width: 1, height: 1, depthOrArrayLayers: 1},
+                dimension: '3d',
+                format: 'rgba8unorm',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                label: 'EMPTY_TEXTURE_3D',
+            });
+            this.#emptyTexture3DView = emptyTexture3D.createView({
+                label: emptyTexture3D.label,
+                dimension: '3d'
+            });
+
             this.#basicSampler = new Sampler(this.redGPUContext)
         }
         {

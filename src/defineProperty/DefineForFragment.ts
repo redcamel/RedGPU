@@ -6,6 +6,7 @@ import defineCubeTexture from "./funcs/defineCubeTexture";
 import definePositiveNumberRange from "./funcs/definePositiveNumberRange";
 import defineSampler from "./funcs/defineSampler";
 import defineTexture from "./funcs/defineTexture";
+import defineTexture3D from "./funcs/defineTexture3D";
 import defineUintRange from "./funcs/defineUintRange";
 import defineVector from "./funcs/defineVector";
 
@@ -89,6 +90,7 @@ const DefineForFragment = {
             defineColorRGB: [defineColorRGB, PRESET_COLOR_RGB],
             defineSampler: [defineSampler, PRESET_SAMPLER],
             defineTexture: [defineTexture, PRESET_TEXTURE],
+            defineTexture3D: [defineTexture3D, {}],
             defineCubeTexture: [defineCubeTexture, PRESET_CUBE_TEXTURE],
         }
     ),
@@ -103,6 +105,7 @@ const DefineForFragment = {
     defineColorRGBA: defineProperties(defineColorRGBA),
     defineSampler: defineProperties(defineSampler),
     defineTexture: defineProperties(defineTexture),
+    defineTexture3D: defineProperties(defineTexture3D),
     defineCubeTexture: defineProperties(defineCubeTexture),
     //
     PRESET_BOOLEAN,

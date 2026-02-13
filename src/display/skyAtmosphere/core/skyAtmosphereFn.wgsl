@@ -65,6 +65,12 @@ fn get_transmittance_uv(h: f32, cos_theta: f32, atmosphere_height: f32) -> vec2<
     return vec2<f32>(u, v);
 }
 
+// [KO] 투과율 LUT에서 고도와 각도에 따른 투과율 값을 샘플링
+fn get_transmittance(t_tex: texture_2d<f32>, t_sam: sampler, h: f32, cos_theta: f32, atmosphere_height: f32) -> vec3<f32> {
+    let uv = get_transmittance_uv(h, cos_theta, atmosphere_height);
+    return textureSampleLevel(t_tex, t_sam, uv, 0.0).rgb;
+}
+
 // [KO] 레일리 산란(Rayleigh Scattering) 페이즈 함수
 fn phase_rayleigh(cos_theta: f32) -> f32 {
     return 3.0 / (16.0 * PI) * (1.0 + cos_theta * cos_theta);
