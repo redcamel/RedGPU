@@ -18,6 +18,27 @@ struct FragmentOutput {
 @group(2) @binding(4) var cameraVolumeTexture: texture_3d<f32>;
 @group(2) @binding(5) var tSampler: sampler;
 
+// [추가] 절차적 지형 노이즈 함수
+fn hash33(p: vec3<f32>) -> vec3<f32> {
+    var p3 = fract(p * vec3<f32>(0.1031, 0.1030, 0.0973));
+    p3 += dot(p3, p3.yxz + 33.33);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+}
+
+fn get_ground_noise(p: vec3<f32>) -> f32 {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(mix(dot(hash33(i + vec3<f32>(0.0, 0.0, 0.0)), f - vec3<f32>(0.0, 0.0, 0.0)),
+                       dot(hash33(i + vec3<f32>(1.0, 0.0, 0.0)), f - vec3<f32>(1.0, 0.0, 0.0)), u.x),
+                   mix(dot(hash33(i + vec3<f32>(0.0, 1.0, 0.0)), f - vec3<f32>(0.0, 1.0, 0.0)),
+                       dot(hash33(i + vec3<f32>(1.0, 1.0, 0.0)), f - vec3<f32>(1.0, 1.0, 0.0)), u.x), u.y),
+               mix(mix(dot(hash33(i + vec3<f32>(0.0, 0.0, 1.0)), f - vec3<f32>(0.0, 0.0, 1.0)),
+                       dot(hash33(i + vec3<f32>(1.0, 0.0, 1.0)), f - vec3<f32>(1.0, 0.0, 1.0)), u.x),
+                   mix(dot(hash33(i + vec3<f32>(0.0, 1.0, 1.0)), f - vec3<f32>(0.0, 1.0, 1.0)),
+                       dot(hash33(i + vec3<f32>(1.0, 1.0, 1.0)), f - vec3<f32>(1.0, 1.0, 1.0)), u.x), u.y), u.z);
+}
+
 @fragment
 fn main(outData: OutData) -> FragmentOutput {
     var output: FragmentOutput;
@@ -89,10 +110,6 @@ fn main(outData: OutData) -> FragmentOutput {
 
     // 4. 지표면 영역 계산
     var groundPart = vec3<f32>(0.0);
-
-    // [중요 Check] JS에서 groundAlbedo를 1.0으로 보내면 안 됩니다.
-    // 보통 아스팔트/흙은 0.1 ~ 0.3 정도입니다. 물리적으로는 PI로 나누어야 합니다.
-    let albedo = uniforms.groundAlbedo / PI;
     var hitDist: f32 = 1e6;
 
     // 충돌 판별 및 바닥 색상 계산
@@ -109,22 +126,29 @@ fn main(outData: OutData) -> FragmentOutput {
             let t = -b - sqrt(delta);
             hitDist = t;
             let hitPos = camPos + viewDir * t;
-            let groundNormal = normalize(hitPos);
+            var groundNormal = normalize(hitPos);
+
+            // [개선] 절차적 지형 디테일 추가
+            // hitPos를 이용해 미세한 노이즈와 색상 변화 생성 (멀리서도 보이도록 큰 스케일과 작은 스케일 혼합)
+            let noiseVal = get_ground_noise(hitPos * 0.1) * 0.5 + get_ground_noise(hitPos * 2.0) * 0.25;
+            let detailAlbedo = mix(uniforms.groundAlbedo * 0.7, uniforms.groundAlbedo * 1.3, noiseVal);
+            let albedo = detailAlbedo / PI;
+
+            // 법선 변조 (거친 표면감 부여)
+            let nNoise = hash33(hitPos * 100.0) * 0.02;
+            groundNormal = normalize(groundNormal + nNoise);
 
             // 태양과 지면의 각도
             let localCosSun = dot(groundNormal, sunDir);
-            let NdotL = max(0.0, localCosSun); // 직사광(Direct Light)은 음수가 될 수 없음
+            let NdotL = max(0.0, localCosSun); 
 
             // 지면으로 떨어지는 투과율 계산
-            let gTransUV = get_transmittance_uv(0.0, localCosSun, atmH);
-            let gTrans = textureSampleLevel(transmittanceTexture, tSampler, gTransUV, 0.0).rgb;
+            let gTrans = get_transmittance(transmittanceTexture, tSampler, 0.0, localCosSun, atmH);
 
             // 직사광 부드러운 감쇠 (Shadow Terminator)
-            let gLightFade = smoothstep(-0.02, 0.02, localCosSun);
+            let gLightFade = smoothstep(-0.05, 0.05, localCosSun);
 
             // [핵심 수정 1] 야간 Ambient 차단 (Ambient Fade)
-            // 태양이 지평선 아래(-0.1)로 내려가면 환경광도 꺼져야 합니다.
-            // 이게 없으면 밤에도 MultiScattering 텍스처가 바닥을 밝게 비춰 색이 탁해집니다.
             let ambientFade = smoothstep(-0.4, 0.1, sunDir.y);
 
             // Multi-Scattering(환경광) 샘플링
@@ -139,7 +163,6 @@ fn main(outData: OutData) -> FragmentOutput {
             let specular = pow(NdotH, uniforms.groundShininess) * uniforms.groundSpecular;
 
             // [핵심 수정 2] 바닥 최종 색상 조합
-            // ambientFade를 곱해주어 밤에 바닥이 검게 되도록 함
             let diffuseLight = sunIntensity * gTrans * NdotL * gLightFade;
             let ambientLight = ambLight * sunIntensity * uniforms.groundAmbient * ambientFade;
             let specularLight = sunIntensity * gTrans * specular * gLightFade;
@@ -147,13 +170,11 @@ fn main(outData: OutData) -> FragmentOutput {
             let groundRawColor = albedo * (diffuseLight + ambientLight) + specularLight;
 
             // [언리얼 스타일] 3D LUT 기반 Aerial Perspective (공중 투시)
-            // 3D LUT에서 해당 방향과 거리에 맞는 산란광과 투과율을 가져옵니다.
             // azimuth와 elevation은 상단에서 계산된 값을 재사용합니다.
-            
             let u = azimuth / (2.0 * PI) + 0.5;
             let v = elevation / PI + 0.5;
             let max_dist = 100.0;
-            let w = sqrt(clamp(hitDist / max_dist, 0.0, 1.0)); // Generator의 w 매핑과 일치해야 함
+            let w = sqrt(clamp(hitDist / max_dist, 0.0, 1.0));
 
             let apSample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(u, v, w), 0.0);
             let aerialScattering = apSample.rgb;
@@ -171,33 +192,34 @@ fn main(outData: OutData) -> FragmentOutput {
 
     // 5. 최종 합성
     // [언리얼 스타일] 지평선 합성 개편
-    // 인위적인 smoothstep 마스크를 제거하고 물리적 교차 결과에 기반합니다.
-    
     var finalHDR: vec3<f32>;
     
-    // 행성 충돌 여부에 따른 완벽한 분리 합성
-    // hitDist가 유효하면 지면(Aerial Perspective 적용), 아니면 하늘(Sky-View LUT)
+    // 행성 충돌 여부에 따른 분리 합성
     if (hitDist > 0.0 && hitDist < 1e6) {
+        // [지면 영역]
+        // 3D LUT 기반 Aerial Perspective를 통해 물리적인 지면 색상 결정
+        // (aerialScattering에 이미 후광과 연무가 포함되어 있음)
         finalHDR = groundPart;
     } else {
+        // [하늘 영역]
         finalHDR = atmosphereColor;
+        
+        // 하늘 영역에만 직접적인 태양 디스크와 후광 보정 추가 (2D LUT 보완)
+        // Sky-View LUT의 해상도 한계를 보완하기 위해 셰이더에서 직접 합산
+        finalHDR += sunDiskLuminance + sunHalo * 0.1; 
     }
 
-    // 태양/후광 추가
-    // 지평선 아래로도 후광이 자연스럽게 번지도록 마스크 없이 합산
-    finalHDR += sunDiskLuminance + sunHalo;
-
-    // [언리얼 스타일] 지평선 연무(Horizon Haze)
-    // 물리적 대기 적분 외에 시각적 깊이감을 위한 추가 연무 레이어
-    let horizon_haze_mask = exp(-abs(distFromHorizon) * (5.0 / (haze_amount + 0.01)));
-    finalHDR += atmosphereColor * uniforms.horizonHaze * horizon_haze_mask;
+    // [시각적 보정] 지평선 연무 (필요한 경우에만 매우 미세하게)
+    // 물리적 적분 외에 예술적 허용치로 지평선을 아주 살짝 풀어줌
+    let horizon_haze_mask = exp(-abs(distFromHorizon) * (15.0 / (haze_amount + 0.01)));
+    finalHDR += atmosphereColor * uniforms.horizonHaze * horizon_haze_mask * 0.2;
 
     // 6. Height Fog (거리 안개)
-    // 지평선 부근의 안개 처리를 통해 경계를 한 번 더 부드럽게 융합
     let horizonDist = sqrt(h_c * (2.0 * earthRadius + h_c));
     let fogCalcDist = select(horizonDist, hitDist, hitDist < 1e6);
     let fogT = get_height_fog_transmittance(camH, viewDir.y, fogCalcDist, uniforms.heightFogDensity, uniforms.heightFogFalloff);
     
+    // 안개 적용
     finalHDR = mix(atmosphereColor, finalHDR, fogT);
 
     // [최종 출력] 톤맵핑 없음 (시스템에서 처리)
