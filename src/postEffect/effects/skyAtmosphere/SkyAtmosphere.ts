@@ -26,7 +26,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	#cameraVolumeGenerator: CameraVolumeGenerator;
 	#sampler: Sampler;
 
-	// [원복] 기존 display/SkyAtmosphere.ts와 동일한 파라미터 구조 및 타입 유지
 	#params = {
 		earthRadius: 6360.0,
 		atmosphereHeight: 60.0,
@@ -79,7 +78,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext);
 		this.#skyViewGenerator = new SkyViewGenerator(redGPUContext);
 		this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext);
-		this.#sampler = new Sampler(redGPUContext, { magFilter: 'linear', minFilter: 'linear' });
+		// 샘플러 설정 명시 (원본과 동일하게 clamp-to-edge 적용)
+		this.#sampler = new Sampler(redGPUContext, { 
+			magFilter: 'linear', 
+			minFilter: 'linear',
+			addressModeU: 'clamp-to-edge',
+			addressModeV: 'clamp-to-edge'
+		});
 
 		const uniformData = new ArrayBuffer(160);
 		this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, 'SKY_ATMOSPHERE_PE_UNIFORM_BUFFER');
@@ -174,7 +179,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	}
 
 	#syncAllUniforms(): void {
-		// [원복] WGSL 구조체 AtmosphereParameters의 정확한 정렬 순서대로 수동 기록
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 0, View: Float32Array }, this.#params.rayleighScattering);
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 12, View: Float32Array }, [this.#params.mieAnisotropy]);
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 16, View: Float32Array }, this.#params.ozoneAbsorption);
@@ -265,50 +269,109 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		return { texture: this.#outputTexture, textureView: this.#outputTextureView };
 	}
 
+	/** [KO] 태양 고도 [EN] Sun elevation */
 	get sunElevation(): number { return this.#sunElevation; }
 	set sunElevation(v: number) { validateNumberRange(v, -90, 90); this.#sunElevation = v; this.#updateSunDirection(); }
 
+	/** [KO] 태양 방위각 [EN] Sun azimuth */
 	get sunAzimuth(): number { return this.#sunAzimuth; }
 	set sunAzimuth(v: number) { validateNumberRange(v, -360, 360); this.#sunAzimuth = v; this.#updateSunDirection(); }
 
+	/** [KO] 노출 [EN] Exposure */
 	get exposure(): number { return this.#params.exposure; }
 	set exposure(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.exposure = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 96, View: Float32Array }, [v]); }
 
+	/** [KO] 태양 강도 [EN] Sun intensity */
 	get sunIntensity(): number { return this.#params.sunIntensity; }
 	set sunIntensity(v: number) { validatePositiveNumberRange(v, 0, 10000); this.#params.sunIntensity = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 100, View: Float32Array }, [v]); }
 
+	/** [KO] 지구 반지름 [EN] Earth radius */
 	get earthRadius(): number { return this.#params.earthRadius; }
 	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#params.earthRadius = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 64, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
+	/** [KO] 대기 높이 [EN] Atmosphere height */
 	get atmosphereHeight(): number { return this.#params.atmosphereHeight; }
 	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#params.atmosphereHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 68, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
+	/** [KO] 미 산란 계수 [EN] Mie scattering coefficient */
 	get mieScattering(): number { return this.#params.mieScattering; }
 	set mieScattering(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieScattering = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 72, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
+	/** [KO] 미 소멸 계수 [EN] Mie extinction coefficient */
 	get mieExtinction(): number { return this.#params.mieExtinction; }
 	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieExtinction = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 76, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
+	/** [KO] 레일리 산란 계수 [EN] Rayleigh scattering coefficient */
 	get rayleighScattering(): [number, number, number] { return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]]; }
 	set rayleighScattering(v: [number, number, number]) { this.#params.rayleighScattering = [...v]; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 0, View: Float32Array }, this.#params.rayleighScattering); this.#dirtyLUT = true; }
 
+	/** [KO] 레일리 스케일 높이 [EN] Rayleigh scale height */
 	get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
 	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.rayleighScaleHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 80, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
+	/** [KO] 미 스케일 높이 [EN] Mie scale height */
 	get mieScaleHeight(): number { return this.#params.mieScaleHeight; }
 	set mieScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.mieScaleHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 84, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
+	/** [KO] 미 비등방성 [EN] Mie anisotropy */
 	get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
 	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieAnisotropy = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 12, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
+	/** [KO] 지평선 연무 [EN] Horizon haze */
 	get horizonHaze(): number { return this.#params.horizonHaze; }
 	set horizonHaze(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.horizonHaze = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 112, View: Float32Array }, [v]); }
 
+	/** [KO] 지면 알베도 [EN] Ground albedo */
 	get groundAlbedo(): [number, number, number] { return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]]; }
-	set groundAlbedo(v: [number, number, number]) { this.#params.groundAlbedo = [...v]; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 32, View: Float32Array }, this.#params.groundAlbedo); this.#dirtySkyView = true; }
+	set groundAlbedo(v: [number, number, number]) { this.#params.groundAlbedo = [...v]; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 32, View: Float32Array }, this.#params.groundAlbedo); this.#dirtyLUT = true; }
 
+	/** [KO] 지면 환경광 [EN] Ground ambient */
 	get groundAmbient(): number { return this.#params.groundAmbient; }
 	set groundAmbient(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.groundAmbient = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 44, View: Float32Array }, [v]); }
+
+	/** [KO] 오존 흡수 계수 [EN] Ozone absorption coefficient */
+	get ozoneAbsorption(): [number, number, number] { return [this.#params.ozoneAbsorption[0], this.#params.ozoneAbsorption[1], this.#params.ozoneAbsorption[2]]; }
+	set ozoneAbsorption(v: [number, number, number]) { this.#params.ozoneAbsorption = [...v]; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 16, View: Float32Array }, this.#params.ozoneAbsorption); this.#dirtyLUT = true; }
+
+	/** [KO] 오존층 중심 [EN] Ozone layer center */
+	get ozoneLayerCenter(): number { return this.#params.ozoneLayerCenter; }
+	set ozoneLayerCenter(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.ozoneLayerCenter = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 28, View: Float32Array }, [v]); this.#dirtyLUT = true; }
+
+	/** [KO] 오존층 두께 [EN] Ozone layer width */
+	get ozoneLayerWidth(): number { return this.#params.ozoneLayerWidth; }
+	set ozoneLayerWidth(v: number) { validatePositiveNumberRange(v, 1, 50); this.#params.ozoneLayerWidth = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 132, View: Float32Array }, [v]); this.#dirtyLUT = true; }
+
+	/** [KO] 다중 산란 환경광 [EN] Multi-scattering ambient */
+	get multiScatteringAmbient(): number { return this.#params.multiScatteringAmbient; }
+	set multiScatteringAmbient(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.multiScatteringAmbient = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 92, View: Float32Array }, [v]); this.#dirtySkyView = true; }
+
+	/** [KO] 높이 안개 밀도 [EN] Height fog density */
+	get heightFogDensity(): number { return this.#params.heightFogDensity; }
+	set heightFogDensity(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.heightFogDensity = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 104, View: Float32Array }, [v]); }
+
+	/** [KO] 높이 안개 감쇄 [EN] Height fog falloff */
+	get heightFogFalloff(): number { return this.#params.heightFogFalloff; }
+	set heightFogFalloff(v: number) { validatePositiveNumberRange(v, 0.001, 10); this.#params.heightFogFalloff = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 108, View: Float32Array }, [v]); }
+
+	/** [KO] 태양 시직경 [EN] Sun size */
+	get sunSize(): number { return this.#params.sunSize; }
+	set sunSize(v: number) { validatePositiveNumberRange(v, 0.01, 10.0); this.#params.sunSize = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 60, View: Float32Array }, [v]); }
+
+	/** [KO] 미 글로우 [EN] Mie glow */
+	get mieGlow(): number { return this.#params.mieGlow; }
+	set mieGlow(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieGlow = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 116, View: Float32Array }, [v]); }
+
+	/** [KO] 미 헤일로 [EN] Mie halo */
+	get mieHalo(): number { return this.#params.mieHalo; }
+	set mieHalo(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieHalo = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 120, View: Float32Array }, [v]); }
+
+	/** [KO] 지면 광택도 [EN] Ground shininess */
+	get groundShininess(): number { return this.#params.groundShininess; }
+	set groundShininess(v: number) { validatePositiveNumberRange(v, 1, 2048); this.#params.groundShininess = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 124, View: Float32Array }, [v]); }
+
+	/** [KO] 지면 스펙큘러 [EN] Ground specular */
+	get groundSpecular(): number { return this.#params.groundSpecular; }
+	set groundSpecular(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.groundSpecular = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 128, View: Float32Array }, [v]); }
 
 	get transmittanceTexture() { return this.#transmittanceGenerator.lutTexture; }
 	get multiScatteringTexture() { return this.#multiScatteringGenerator.lutTexture; }
