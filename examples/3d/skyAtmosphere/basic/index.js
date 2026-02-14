@@ -10,21 +10,20 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
-        // 1. SkyAtmosphere 초기화 (태양 위치 설정)
-        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        // 1. SkyAtmosphere 초기화 (PostEffect 방식)
+        const skyAtmosphere = new RedGPU.PostEffect.SkyAtmosphere(redGPUContext);
         skyAtmosphere.sunElevation = 5; 
         skyAtmosphere.sunAzimuth = 0;   
         skyAtmosphere.exposure = 1.5;
         skyAtmosphere.horizonHaze = 0.8;
-        view.skyAtmosphere = skyAtmosphere;
-
-        // 2. 카메라 설정: 태양을 정면으로 바라보도록 배치
-        view.camera.farClipping = 2000000;
         
-        // SkyAtmosphere의 sunAzimuth 0도는 +X 방향입니다.
-        // OrbitController에서 +X를 바라보려면 pan을 -90도로 설정해야 합니다.
+        // 포스트 이펙트 매니저에 추가
+        view.postEffectManager.addEffect(skyAtmosphere);
+
+        // 2. 카메라 설정
+        view.camera.farClipping = 2000000;
         controller.pan = -90 + skyAtmosphere.sunAzimuth;
-        controller.tilt = -skyAtmosphere.sunElevation; // 태양 고도와 맞춤
+        controller.tilt = -skyAtmosphere.sunElevation;
         controller.distance = 400;
         
         // 이동 제한
@@ -35,32 +34,13 @@ RedGPU.init(
         
         redGPUContext.addView(view);
 
-        // 3. 거대한 지면 (빨간색)
-        const groundGeo = new RedGPU.Primitive.Ground(redGPUContext, 100000, 100000);
-        const groundMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
-        const ground = new RedGPU.Display.Mesh(redGPUContext, groundGeo, groundMat);
-        ground.y = 0; 
-        ground.primitiveState.cullMode = 'none'; 
-        // scene.addChild(ground);
-
-        // 4. 태양 방향을 따라 테스트 메쉬 효율적 배치
+        // 3. 테스트 환경 구성 (다양한 거리의 구체들)
         const sphereGeo = new RedGPU.Primitive.Sphere(redGPUContext, 10, 32, 32);
         const sphereMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff');
 
-        // 태양 방향 벡터 계산
-        const phi = (90 - skyAtmosphere.sunElevation) * (Math.PI / 180);
-        const theta = (skyAtmosphere.sunAzimuth) * (Math.PI / 180);
-        const sunDir = [
-            Math.sin(phi) * Math.cos(theta),
-            Math.cos(phi),
-            Math.sin(phi) * Math.sin(theta)
-        ];
-
         for (let i = 0; i < 30; i++) {
-            const dist = 500 * Math.pow(1.4, i); // 거리 조절
+            const dist = 500 * Math.pow(1.4, i);
             const mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeo, sphereMat);
-            
-            // 황금각(Golden Angle)을 활용한 나선형 배치 (서로 겹치지 않고 골고루 분포)
             const angle = i * 137.5 * (Math.PI / 180); 
             
             mesh.x = Math.cos(angle) * dist;
@@ -93,7 +73,7 @@ RedGPU.init(
 
 const renderTestPane = async (targetView, skyAtmosphere) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane({ title: 'SkyAtmosphere Professional Verifier', expanded: true });
+    const pane = new Pane({ title: 'SkyAtmosphere Post-Effect Verifier', expanded: true });
     
     const {
         createFieldOfView,
@@ -103,29 +83,38 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera);
 
+    // 대기 산란 On/Off 제어
     const state = { enabled: true };
     pane.addBinding(state, 'enabled', { label: 'Enable Atmosphere' }).on('change', (v) => {
-        targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
+        if (v.value) {
+            targetView.postEffectManager.addEffect(skyAtmosphere);
+        } else {
+            // 해당 이펙트만 제거
+            const list = targetView.postEffectManager.effectList;
+            const idx = list.indexOf(skyAtmosphere);
+            if (idx > -1) list.splice(idx, 1);
+        }
     });
 
     const f_sun = pane.addFolder({ title: '1. Sun & Exposure' });
     f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, step: 0.01, label: 'Elevation' });
     f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, step: 0.01, label: 'Azimuth' });
     f_sun.addBinding(skyAtmosphere, 'exposure', { min: 0, max: 10, step: 0.01, label: 'Exposure' });
+    f_sun.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100, step: 0.1, label: 'Sun Intensity' });
 
-    const f_art = pane.addFolder({ title: '2. Fog & Haze' });
+    const f_art = pane.addFolder({ title: '2. Artistic Controls' });
     f_art.addBinding(skyAtmosphere, 'horizonHaze', { min: 0, max: 5, step: 0.01, label: 'Horizon Haze' });
-    f_art.addBinding(skyAtmosphere, 'heightFogDensity', { min: 0, max: 1, step: 0.0001, label: 'Fog Density' });
-
+    f_art.addBinding(skyAtmosphere, 'groundAmbient', { min: 0, max: 10, step: 0.01, label: 'Ground Ambient' });
+    
     const f_presets = pane.addFolder({ title: '3. Cinematic Presets' });
-    const apply = (el, az, exp, haze) => {
+    const apply = (el, az, exp, intensity) => {
         skyAtmosphere.sunElevation = el;
         skyAtmosphere.sunAzimuth = az;
         skyAtmosphere.exposure = exp;
-        skyAtmosphere.horizonHaze = haze;
+        skyAtmosphere.sunIntensity = intensity;
         pane.refresh();
     };
-    f_presets.addButton({ title: 'High Noon' }).on('click', () => apply(90, 0, 1.0, 0.1));
-    f_presets.addButton({ title: 'Golden Sunset' }).on('click', () => apply(3.5, 0, 1.8, 1.2));
-    f_presets.addButton({ title: 'Eerie Twilight' }).on('click', () => apply(-4, 0, 4.0, 2.0));
+    f_presets.addButton({ title: 'High Noon' }).on('click', () => apply(90, 0, 1.0, 22.0));
+    f_presets.addButton({ title: 'Golden Sunset' }).on('click', () => apply(3.5, 0, 1.8, 22.0));
+    f_presets.addButton({ title: 'Eerie Twilight' }).on('click', () => apply(-4, 0, 4.0, 10.0));
 };
