@@ -26,33 +26,34 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	#cameraVolumeGenerator: CameraVolumeGenerator;
 	#sampler: Sampler;
 
+	// [원복] 기존 display/SkyAtmosphere.ts와 동일한 파라미터 구조 및 타입 유지
 	#params = {
-		rayleighScattering: new Float32Array([0.0058, 0.0135, 0.0331]),
-		mieAnisotropy: 0.9,
-		ozoneAbsorption: new Float32Array([0.00065, 0.0188, 0.00008]),
-		ozoneLayerCenter: 25.0,
-		groundAlbedo: new Float32Array([0.15, 0.15, 0.15]),
-		groundAmbient: 0.4,
-		sunDirection: new Float32Array([0, 1, 0]),
-		sunSize: 0.5,
 		earthRadius: 6360.0,
 		atmosphereHeight: 60.0,
 		mieScattering: 0.021,
 		mieExtinction: 0.021,
+		rayleighScattering: [0.0058, 0.0135, 0.0331],
 		rayleighScaleHeight: 8.0,
 		mieScaleHeight: 1.2,
-		cameraHeight: 0.2,
+		mieAnisotropy: 0.9,
+		ozoneAbsorption: [0.00065, 0.0188, 0.00008],
+		ozoneLayerCenter: 25.0,
+		ozoneLayerWidth: 15.0,
 		multiScatteringAmbient: 0.05,
-		exposure: 1.0,
+		sunSize: 0.5,
 		sunIntensity: 22.0,
+		exposure: 1.0,
 		heightFogDensity: 0.0,
 		heightFogFalloff: 0.1,
 		horizonHaze: 0.3,
+		groundAmbient: 0.4,
+		groundAlbedo: [0.15, 0.15, 0.15],
 		mieGlow: 0.75,
 		mieHalo: 0.99,
 		groundShininess: 512.0,
 		groundSpecular: 4.0,
-		ozoneLayerWidth: 15.0,
+		sunDirection: new Float32Array([0, 1, 0]),
+		cameraHeight: 0.2,
 		padding0: 0,
 		padding1: 0
 	};
@@ -62,7 +63,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	#dirtyLUT: boolean = true;
 	#dirtySkyView: boolean = true;
 
-	// 수동 관리 멤버
 	#uniformBuffer: UniformBuffer;
 	#pipeline: GPUComputePipeline;
 	#bindGroupLayout0: GPUBindGroupLayout;
@@ -81,34 +81,31 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext);
 		this.#sampler = new Sampler(redGPUContext, { magFilter: 'linear', minFilter: 'linear' });
 
-		// 1. 유니폼 버퍼 생성
 		const uniformData = new ArrayBuffer(160);
 		this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, 'SKY_ATMOSPHERE_PE_UNIFORM_BUFFER');
 
-		// 2. 바인드 그룹 레이아웃 수동 정의 (일반 Texture로 변경하여 샘플링 가능하게 함)
 		this.#bindGroupLayout0 = gpuDevice.createBindGroupLayout({
 			label: 'SKY_ATMOSPHERE_PE_BGL_0',
 			entries: [
-				{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} }, // source
-				{ binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'depth' } }, // depth
-				{ binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {} }, // transmittance (Normal Texture)
-				{ binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {} }, // multiScat (Normal Texture)
-				{ binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {} }, // skyView (Normal Texture)
-				{ binding: 5, visibility: GPUShaderStage.COMPUTE, texture: { viewDimension: '3d' } }, // cameraVolume (Normal Texture 3D)
-				{ binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {} } // sampler
+				{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} },
+				{ binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'depth' } },
+				{ binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {} },
+				{ binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {} },
+				{ binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {} },
+				{ binding: 5, visibility: GPUShaderStage.COMPUTE, texture: { viewDimension: '3d' } },
+				{ binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {} }
 			]
 		});
 
 		this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
 			label: 'SKY_ATMOSPHERE_PE_BGL_1',
 			entries: [
-				{ binding: 0, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'write-only' } }, // output
-				{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }, // system uniform
-				{ binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } } // uniforms
+				{ binding: 0, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'write-only' } },
+				{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
+				{ binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }
 			]
 		});
 
-		// 3. 파이프라인 생성 (정합성을 위해 원본 바인딩 스타일 유지)
 		const shaderCode = [
 			skyAtmosphereFn,
 			'@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
@@ -129,6 +126,25 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 			'    return systemUniforms.camera.farClipping * systemUniforms.camera.nearClipping / fma(depthSample, systemUniforms.camera.nearClipping - systemUniforms.camera.farClipping, systemUniforms.camera.farClipping);',
 			'}',
 			'fn fetchDepth(pos: vec2<u32>) -> f32 { return textureLoad(depthTexture, pos, 0); }',
+			'',
+			'fn hash33_pe(p: vec3<f32>) -> vec3<f32> {',
+			'    var p3 = fract(p * vec3<f32>(0.1031, 0.1030, 0.0973));',
+			'    p3 += dot(p3, p3.yxz + 33.33);',
+			'    return fract((p3.xxy + p3.yzz) * p3.zyx);',
+			'}',
+			'fn get_ground_noise_pe(p: vec3<f32>) -> f32 {',
+			'    let i = floor(p);',
+			'    let f = fract(p);',
+			'    let u = f * f * (3.0 - 2.0 * f);',
+			'    return mix(mix(mix(dot(hash33_pe(i + vec3<f32>(0.0, 0.0, 0.0)), f - vec3<f32>(0.0, 0.0, 0.0)),',
+			'                       dot(hash33_pe(i + vec3<f32>(1.0, 0.0, 0.0)), f - vec3<f32>(1.0, 0.0, 0.0)), u.x),',
+			'                   mix(dot(hash33_pe(i + vec3<f32>(0.0, 1.0, 0.0)), f - vec3<f32>(0.0, 1.0, 0.0)),',
+			'                       dot(hash33_pe(i + vec3<f32>(1.0, 1.0, 0.0)), f - vec3<f32>(1.0, 1.0, 0.0)), u.x), u.y),',
+			'               mix(mix(dot(hash33_pe(i + vec3<f32>(0.0, 0.0, 1.0)), f - vec3<f32>(0.0, 0.0, 1.0)),',
+			'                       dot(hash33_pe(i + vec3<f32>(1.0, 0.0, 1.0)), f - vec3<f32>(1.0, 0.0, 1.0)), u.x),',
+			'                   mix(dot(hash33_pe(i + vec3<f32>(0.0, 1.0, 1.0)), f - vec3<f32>(0.0, 1.0, 1.0)),',
+			'                       dot(hash33_pe(i + vec3<f32>(1.0, 1.0, 1.0)), f - vec3<f32>(1.0, 1.0, 1.0)), u.x), u.y), u.z);',
+			'}',
 			'',
 			'@compute @workgroup_size(16, 16)',
 			'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
@@ -158,14 +174,16 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	}
 
 	#syncAllUniforms(): void {
-		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 0, View: Float32Array }, Array.from(this.#params.rayleighScattering));
+		// [원복] WGSL 구조체 AtmosphereParameters의 정확한 정렬 순서대로 수동 기록
+		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 0, View: Float32Array }, this.#params.rayleighScattering);
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 12, View: Float32Array }, [this.#params.mieAnisotropy]);
-		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 16, View: Float32Array }, Array.from(this.#params.ozoneAbsorption));
+		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 16, View: Float32Array }, this.#params.ozoneAbsorption);
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 28, View: Float32Array }, [this.#params.ozoneLayerCenter]);
-		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 32, View: Float32Array }, Array.from(this.#params.groundAlbedo));
+		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 32, View: Float32Array }, this.#params.groundAlbedo);
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 44, View: Float32Array }, [this.#params.groundAmbient]);
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 48, View: Float32Array }, Array.from(this.#params.sunDirection));
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 60, View: Float32Array }, [this.#params.sunSize]);
+		
 		this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 64, View: Float32Array }, [
 			this.#params.earthRadius, this.#params.atmosphereHeight, this.#params.mieScattering, this.#params.mieExtinction,
 			this.#params.rayleighScaleHeight, this.#params.mieScaleHeight, this.#params.cameraHeight, this.#params.multiScatteringAmbient,
@@ -272,7 +290,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieExtinction = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 76, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
 	get rayleighScattering(): [number, number, number] { return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]]; }
-	set rayleighScattering(v: [number, number, number]) { this.#params.rayleighScattering.set(v); this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 0, View: Float32Array }, Array.from(this.#params.rayleighScattering)); this.#dirtyLUT = true; }
+	set rayleighScattering(v: [number, number, number]) { this.#params.rayleighScattering = [...v]; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 0, View: Float32Array }, this.#params.rayleighScattering); this.#dirtyLUT = true; }
 
 	get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
 	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.rayleighScaleHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 80, View: Float32Array }, [v]); this.#dirtyLUT = true; }
@@ -287,7 +305,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	set horizonHaze(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.horizonHaze = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 112, View: Float32Array }, [v]); }
 
 	get groundAlbedo(): [number, number, number] { return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]]; }
-	set groundAlbedo(v: [number, number, number]) { this.#params.groundAlbedo.set(v); this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 32, View: Float32Array }, Array.from(this.#params.groundAlbedo)); this.#dirtySkyView = true; }
+	set groundAlbedo(v: [number, number, number]) { this.#params.groundAlbedo = [...v]; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 32, View: Float32Array }, this.#params.groundAlbedo); this.#dirtySkyView = true; }
 
 	get groundAmbient(): number { return this.#params.groundAmbient; }
 	set groundAmbient(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.groundAmbient = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 44, View: Float32Array }, [v]); }
