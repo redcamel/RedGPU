@@ -44,7 +44,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		exposure: 1.0,
 		heightFogDensity: 0.0,
 		heightFogFalloff: 0.1,
-		horizonHaze: 0.3,
+		horizonHaze: 0.0,
 		groundAmbient: 0.4,
 		groundAlbedo: [0.1, 0.1, 0.1],
 		mieGlow: 0.75,
@@ -78,11 +78,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext);
 		this.#skyViewGenerator = new SkyViewGenerator(redGPUContext);
 		this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext);
-		// 샘플러 설정 명시 (원본과 동일하게 clamp-to-edge 적용)
+		// 샘플러 설정: 수평각(U)은 repeat, 수직각(V)은 clamp 적용
 		this.#sampler = new Sampler(redGPUContext, { 
 			magFilter: 'linear', 
 			minFilter: 'linear',
-			addressModeU: 'clamp-to-edge',
+			addressModeU: 'repeat',
 			addressModeV: 'clamp-to-edge'
 		});
 

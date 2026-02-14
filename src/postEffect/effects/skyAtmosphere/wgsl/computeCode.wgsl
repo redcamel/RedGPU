@@ -42,9 +42,9 @@ let ap_dist = clamp(depthKm, 0.0, max_ap_dist);
 let azimuth = atan2(viewDir.z, viewDir.x);
 let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
 
-// [KO] UV를 미세하게 안쪽으로 클램핑하여 텍스처 경계면의 샘플링 노이즈를 방지합니다.
-// [EN] Inset UVs slightly to prevent sampling noise at texture boundaries.
-let ap_u = clamp((azimuth / (2.0 * PI)) + 0.5, 0.001, 0.999);
+// [KO] ap_u(Azimuth)는 repeat 샘플러를 사용하여 360도 경계에서 부드럽게 이어지도록 합니다.
+// [EN] ap_u (Azimuth) uses a repeat sampler to smoothly wrap around the 360-degree boundary.
+let ap_u = (azimuth / (2.0 * PI)) + 0.5;
 let ap_v = clamp((elevation / PI) + 0.5, 0.001, 0.999);
 let ap_w = clamp(sqrt(ap_dist / max_ap_dist), 0.0, 0.999);
 let ap_sample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(ap_u, ap_v, ap_w), 0.0);
@@ -84,13 +84,8 @@ if (t_earth > 0.0) {
     atmosphereBackground += sun_mask * sun_trans * (uniforms.sunIntensity * 100.0);
 }
 
-// 공통 지평선 연무 (Haze) 추가
-let distFromHorizon = asin(clamp(viewDir.y, -1.0, 1.0)) - (asin(clamp(-sqrt(max(0.0, camH * (2.0 * r + camH))) / (r + camH), -1.0, 1.0)));
-let haze_amount = mix(0.3, 0.1, smoothstep(-0.2, 0.5, sunDir.y));
-let horizon_haze_mask = exp(-abs(distFromHorizon) * (15.0 / (haze_amount + 0.01)));
-let skyUVForHaze = get_sky_view_uv(viewDir, camH, r, atmH);
-let skySampleForHaze = textureSampleLevel(skyViewTexture, tSampler, skyUVForHaze, 0.0);
-atmosphereBackground += (skySampleForHaze.rgb * uniforms.sunIntensity) * uniforms.horizonHaze * horizon_haze_mask * 0.2;
+// [KO] 지평선 연무(Haze)는 Sky-View LUT와 Aerial Perspective LUT에 이미 물리적으로 통합되어 있습니다.
+// [EN] Horizon Haze is already physically integrated into Sky-View and Aerial Perspective LUTs.
 
 // 4. 최종 합성 및 단일 노출 적용
 // [KO] sceneAlpha가 1.0인 불투명 영역은 atmosphereBackground가 섞이지 않습니다.
