@@ -10,12 +10,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let size = textureDimensions(multiScatTexture);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
-    let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
+    // [KO] 텍셀 중심 매핑
+    // [EN] Pixel center mapping
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
     let cos_sun_theta = uv.x * 2.0 - 1.0;
     
-    // [역매핑 보정] V = 1.0 - sqrt(h / H_atm) -> h = (1.0 - V)^2 * H_atm
-    let ratio = (1.0 - uv.y) * (1.0 - uv.y);
-    let h = ratio * params.atmosphereHeight;
+    // [KO] V = 1.0 - (h / H_atm) -> h = (1.0 - V) * H_atm (Transmittance와 일관성 유지)
+    // [EN] V = 1.0 - (h / H_atm) -> h = (1.0 - V) * H_atm (Keep consistency with Transmittance)
+    let h = clamp((1.0 - uv.y) * params.atmosphereHeight, 0.0, params.atmosphereHeight);
 
     let r = params.earthRadius;
     let ray_origin = vec3<f32>(0.0, h + r, 0.0);
@@ -27,7 +29,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let sample_count = 64;
     for (var i = 0; i < sample_count; i = i + 1) {
         let step = f32(i) + 0.5;
-        let theta = acos(1.0 - 2.0 * step / f32(sample_count));
+        let theta = acos(clamp(1.0 - 2.0 * step / f32(sample_count), -1.0, 1.0));
         let phi = (sqrt(5.0) + 1.0) * PI * step;
         let ray_dir = vec3<f32>(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
 
@@ -51,8 +53,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 
                 let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
                 let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
-                let scat_total = params.rayleighScattering * rho_r + params.mieScattering * rho_m;
-                let ext_total = params.rayleighScattering * rho_r + params.mieExtinction * rho_m;
+                
+                let scat_total = params.rayleighScattering * rho_r + vec3<f32>(params.mieScattering * rho_m);
+                let ext_total = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m);
 
                 L1 += T_path * sun_t * scat_total * (1.0 / (4.0 * PI)) * step_size;
                 f1 += T_path * scat_total * step_size;

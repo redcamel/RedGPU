@@ -42,8 +42,11 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
     let s = sqrt(delta);
     let t0 = -b - s;
     let t1 = -b + s;
-    if (t0 > -1e-6) { return max(0.0, t0); }
-    if (t1 > -1e-6) { return max(0.0, t1); }
+    
+    // [KO] epsilon을 1e-4로 조정하여 정밀도 문제로 인한 자기 교차 방지
+    // [EN] Adjust epsilon to 1e-4 to prevent self-intersection due to precision issues
+    if (t0 > 1e-4) { return t0; }
+    if (t1 > 1e-4) { return t1; }
     return -1.0;
 }
 

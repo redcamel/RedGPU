@@ -11,7 +11,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let size = textureDimensions(skyViewTexture);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
-    let uv = vec2<f32>(global_id.xy) / vec2<f32>(size - 1u);
+    // [KO] 텍셀 중심 매핑
+    // [EN] Pixel center mapping
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
     let azimuth = (uv.x - 0.5) * 2.0 * PI;
 
     let r = params.earthRadius;
@@ -63,18 +65,23 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
-            let rho_o = max(0.0, 1.0 - abs(cur_h - params.ozoneLayerCenter) / max(1e-3, params.ozoneLayerWidth));
+            
+            // [KO] 오존층: 가우시안 분포 모델 적용
+            // [EN] Ozone layer: Apply Gaussian distribution model
+            let ozone_dist = abs(cur_h - params.ozoneLayerCenter);
+            let rho_o = exp(-max(0.0, ozone_dist * ozone_dist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
 
             let view_sun_cos = dot(view_dir, params.sunDirection);
             let scat = (params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos) + 
-                        params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy)) * sun_trans * shadow_mask;
+                        vec3<f32>(params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy))) * sun_trans * shadow_mask;
 
-            // 다중 산란 기여 (Energy Compensation)
-            let ms_uv = vec2<f32>(cos_sun * 0.5 + 0.5, cur_h / params.atmosphereHeight);
+            // [KO] 다중 산란 기여 (V 매핑을 1.0 - H로 수정하여 생성기와 일치시킴)
+            // [EN] Multi-scattering contribution (Updated V mapping to 1.0 - H to match generator)
+            let ms_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
             let ms_energy = textureSampleLevel(multiScatTexture, tSampler, ms_uv, 0.0).rgb;
-            let ms_scat = ms_energy * (params.rayleighScattering * rho_r + params.mieScattering * rho_m) * shadow_mask;
+            let ms_scat = ms_energy * (params.rayleighScattering * rho_r + vec3<f32>(params.mieScattering * rho_m)) * shadow_mask;
 
-            let ext = params.rayleighScattering * rho_r + params.mieExtinction * rho_m + params.ozoneAbsorption * rho_o;
+            let ext = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m) + params.ozoneAbsorption * rho_o;
 
             luminance += transmittance * (scat + ms_scat) * step_size;
             transmittance *= exp(-ext * step_size);

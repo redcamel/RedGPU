@@ -35,7 +35,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		rayleighScaleHeight: 8.0,
 		mieScaleHeight: 1.2,
 		mieAnisotropy: 0.9,
-		ozoneAbsorption: [0.00065, 0.0188, 0.00008],
+		ozoneAbsorption: [0.00065, 0.00188, 0.00008],
 		ozoneLayerCenter: 25.0,
 		ozoneLayerWidth: 15.0,
 		multiScatteringAmbient: 0.05,
