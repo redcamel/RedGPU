@@ -5,23 +5,25 @@ if (id.x >= size.x || id.y >= size.y) { return; }
 let uv = (vec2<f32>(id) + 0.5) / vec2<f32>(size);
 let sceneColor = textureLoad(sourceTexture, id, 0).rgb;
 
-// 1. 시선 방향(viewDir) 재구성 (회전만 적용하여 왜곡 및 흔들림 방지)
+// 1. 시선 방향(viewDir) 재구성
+// NDC -> View Space -> World Space (Rotation Only)
 let ndc = vec2<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0);
-let clipPos = vec4<f32>(ndc, 1.0, 1.0); 
 
-// 카메라 공간의 방향 계산
-var viewSpacePos = systemUniforms.inverseProjectionMatrix * clipPos;
+// 카메라 공간의 방향 계산 (Far plane 사용)
+var viewSpacePos = systemUniforms.inverseProjectionMatrix * vec4<f32>(ndc, 1.0, 1.0);
 let viewSpaceDir = normalize(viewSpacePos.xyz / viewSpacePos.w);
 
-// 월드 공간으로 변환 (카메라의 회전만 적용)
-// cameraMatrix의 상위 3x3 행렬을 사용하여 위치(Translation) 영향을 제거
-let worldDir = mat3x3<f32>(
-    systemUniforms.camera.cameraMatrix[0].xyz,
-    systemUniforms.camera.cameraMatrix[1].xyz,
-    systemUniforms.camera.cameraMatrix[2].xyz
-) * viewSpaceDir;
+// 카메라의 월드 행렬(inverseCameraMatrix)에서 순수 회전만 추출하여 적용
+// 위치(Translation) 값이 섞여 들어가는 것을 방지하여 지평선 회전 현상 해결
+let worldRotation = mat3x3<f32>(
+    systemUniforms.camera.inverseCameraMatrix[0].xyz,
+    systemUniforms.camera.inverseCameraMatrix[1].xyz,
+    systemUniforms.camera.inverseCameraMatrix[2].xyz
+);
+let viewDir = normalize(worldRotation * viewSpaceDir);
 
-let viewDir = normalize(worldDir);
+// 카메라 정방향(Forward) 추출 (동일한 방식으로 회전만 적용)
+let camForward = normalize(worldRotation * vec3<f32>(0.0, 0.0, -1.0));
 
 let sunDir = normalize(uniforms.sunDirection);
 let camH = max(0.0001, uniforms.cameraHeight);
@@ -31,21 +33,20 @@ let atmH = uniforms.atmosphereHeight;
 // 2. 깊이 정보를 통한 거리 계산
 let rawDepth = fetchDepth(id);
 let viewZ = linearDepth(rawDepth);
-let camForward = -normalize(systemUniforms.camera.cameraMatrix[2].xyz);
 let cosThetaView = max(0.01, dot(viewDir, camForward));
 let sceneDistKm = (viewZ / cosThetaView) / 1000.0;
 
-// 3. 가상 행성 충돌 검사
-let camPos = vec3<f32>(0.0, r + camH, 0.0);
-let t_earth = get_ray_sphere_intersection(camPos, viewDir, r);
-
-// 최종 충돌 거리 결정 (메시 영역 보호 포함)
+// 3. 메시 영역 보호
 if (rawDepth < 1.0) {
     textureStore(outputTexture, id, vec4<f32>(sceneColor, 1.0));
     return;
 }
 
-// 4. 합성 로직
+// 4. 가상 행성 충돌 검사
+let camPos = vec3<f32>(0.0, r + camH, 0.0);
+let t_earth = get_ray_sphere_intersection(camPos, viewDir, r);
+
+// 5. 합성 로직
 var finalHDR: vec3<f32>;
 let haze_amount = mix(0.3, 0.1, smoothstep(-0.2, 0.5, sunDir.y));
 
