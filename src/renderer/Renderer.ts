@@ -239,7 +239,7 @@ class Renderer {
     }
 
     #renderPassViewBasicLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
-        const {renderViewStateData, skybox, skyAtmosphere, grid, axis} = view
+        const {renderViewStateData, skybox, grid, axis} = view
         const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
         {
             const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
@@ -251,7 +251,6 @@ class Renderer {
         if (skybox) skybox.render(renderViewStateData)
         if (axis) axis.render(renderViewStateData)
         renderBasicLayer(view, viewRenderPassEncoder)
-        if (skyAtmosphere) skyAtmosphere.render(renderViewStateData)
         if (grid) grid.render(renderViewStateData)
         renderAlphaLayer(view, viewRenderPassEncoder)
         viewRenderPassEncoder.end()

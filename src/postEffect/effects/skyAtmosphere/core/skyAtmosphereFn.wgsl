@@ -61,14 +61,6 @@ fn get_transmittance(t_tex: texture_2d<f32>, t_sam: sampler, h: f32, cos_theta: 
     return textureSampleLevel(t_tex, t_sam, uv, 0.0).rgb;
 }
 
-// [KO] Storage Texture 전용 투과율 페치 (PostEffect용)
-fn get_transmittance_storage(t_tex: texture_storage_2d<rgba16float, read>, h: f32, cos_theta: f32, atmosphere_height: f32) -> vec3<f32> {
-    let uv = get_transmittance_uv(h, cos_theta, atmosphere_height);
-    let size = vec2<f32>(textureDimensions(t_tex));
-    let texCoord = vec2<i32>(uv * (size - 1.0));
-    return textureLoad(t_tex, texCoord).rgb;
-}
-
 // [KO] UE5 표준 Sky-View LUT UV 매핑 (v=0.5: Horizon, v=0: Top, v=1: Bottom)
 fn get_sky_view_uv(view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atmosphere_height: f32) -> vec2<f32> {
     let azimuth = atan2(view_dir.z, view_dir.x);
@@ -93,21 +85,6 @@ fn get_sky_view_uv(view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atm
         v = 0.5 * (1.0 + sqrt(max(0.0, ratio)));
     }
     return vec2<f32>(u, clamp(v, 0.0, 1.0));
-}
-
-// [KO] Storage Texture 전용 Sky-View 페치
-fn get_sky_view_storage(t_tex: texture_storage_2d<rgba16float, read>, view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atmosphere_height: f32) -> vec4<f32> {
-    let uv = get_sky_view_uv(view_dir, view_height, earth_radius, atmosphere_height);
-    let size = vec2<f32>(textureDimensions(t_tex));
-    let texCoord = vec2<i32>(uv * (size - 1.0));
-    return textureLoad(t_tex, texCoord);
-}
-
-// [KO] Storage Texture 전용 Camera Volume (3D) 페치
-fn get_camera_volume_storage(t_tex: texture_storage_3d<rgba16float, read>, u: f32, v: f32, w: f32) -> vec4<f32> {
-    let size = vec3<f32>(textureDimensions(t_tex));
-    let texCoord = vec3<i32>(vec3<f32>(u, v, w) * (size - 1.0));
-    return textureLoad(t_tex, texCoord);
 }
 
 // [KO] 페이즈 함수

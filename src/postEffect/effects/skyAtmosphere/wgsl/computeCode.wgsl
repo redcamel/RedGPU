@@ -7,7 +7,7 @@ let sceneColor = textureLoad(sourceTexture, id, 0).rgb;
 
 // 1. 역행렬을 이용한 월드 공간 시선 방향(viewDir) 재구성
 let ndc = vec2<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0);
-let clipPos = vec4<f32>(ndc, 0.0, 1.0); // 0.0 is near in WebGPU
+let clipPos = vec4<f32>(ndc, 0.0, 1.0); 
 var viewDirPos = systemUniforms.inverseProjectionCameraMatrix * clipPos;
 viewDirPos /= viewDirPos.w;
 let viewDir = normalize(viewDirPos.xyz - systemUniforms.camera.cameraPosition);
@@ -32,13 +32,14 @@ let t_earth = get_ray_sphere_intersection(camPos, viewDir, r);
 var hitDistKm = select(1e6, t_earth, t_earth > 0.0);
 if (rawDepth < 1.0) { hitDistKm = min(hitDistKm, sceneDistKm); }
 
-// 4. Sky-View 및 Aerial Perspective 샘플링
+// 4. Sky-View 및 Aerial Perspective 샘플링 (원본 함수 사용)
 var atmosphereColor: vec3<f32>;
 var atmosphereTransmittance: f32;
 
 if (rawDepth >= 1.0 && t_earth <= 0.0) {
-    // [하늘 영역]
-    let skySample = get_sky_view_storage(skyViewTexture, viewDir, camH, r, atmH);
+    // [하늘 영역] - 원본 함수 및 선형 보간 샘플링 적용
+    let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
+    let skySample = textureSampleLevel(skyViewTexture, tSampler, skyUV, 0.0);
     atmosphereColor = skySample.rgb;
     atmosphereTransmittance = skySample.a;
 } else {
@@ -49,12 +50,12 @@ if (rawDepth >= 1.0 && t_earth <= 0.0) {
     let v = (elevation / PI) + 0.5;
     let w = sqrt(clamp(hitDistKm / 100.0, 0.0, 1.0));
     
-    let apSample = get_camera_volume_storage(cameraVolumeTexture, u, v, w);
+    let apSample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(u, v, w), 0.0);
     atmosphereColor = apSample.rgb;
     atmosphereTransmittance = apSample.a;
 }
 
-// 5. 지면 및 메시 합성
+// 5. 지면 및 메시 합성 (원본 로직과 동일하게 HDR 계산)
 var finalHDR: vec3<f32>;
 let haze_amount = mix(0.3, 0.1, smoothstep(-0.2, 0.5, sunDir.y));
 
@@ -63,9 +64,9 @@ if (rawDepth >= 1.0 && t_earth > 0.0) {
     let hitPos = camPos + viewDir * t_earth;
     let up = normalize(hitPos);
     let cos_sun = dot(up, sunDir);
-    let gTrans = get_transmittance_storage(transmittanceTexture, 0.0, cos_sun, atmH);
+    // 원본 get_transmittance 사용
+    let gTrans = get_transmittance(transmittanceTexture, tSampler, 0.0, cos_sun, atmH);
     
-    // 단순 알베도 (노이즈 제외하여 복잡성 감소, 필요시 추가)
     let albedo = uniforms.groundAlbedo / PI;
     let diffuse = albedo * gTrans * max(0.0, cos_sun) * uniforms.sunIntensity;
     finalHDR = (diffuse * atmosphereTransmittance) + (atmosphereColor * uniforms.sunIntensity);
@@ -80,14 +81,13 @@ if (rawDepth >= 1.0 && t_earth > 0.0) {
     let view_sun_cos = dot(viewDir, sunDir);
     let sun_rad = uniforms.sunSize * (PI / 180.0);
     let sun_mask = smoothstep(cos(sun_rad) - 0.001, cos(sun_rad), view_sun_cos);
-    let sun_trans = get_transmittance_storage(transmittanceTexture, camH, sunDir.y, atmH);
+    let sun_trans = get_transmittance(transmittanceTexture, tSampler, camH, sunDir.y, atmH);
     finalHDR += sun_mask * sun_trans * (uniforms.sunIntensity * 100.0);
 }
 
 // 공통 지평선 연무 (Haze)
 let distFromHorizon = asin(clamp(viewDir.y, -1.0, 1.0)) - (asin(clamp(-sqrt(max(0.0, camH * (2.0 * r + camH))) / (r + camH), -1.0, 1.0)));
 let horizon_haze_mask = exp(-abs(distFromHorizon) * (15.0 / (haze_amount + 0.01)));
-let skySampleForHaze = get_sky_view_storage(skyViewTexture, viewDir, camH, r, atmH);
-finalHDR += (skySampleForHaze.rgb * uniforms.sunIntensity) * uniforms.horizonHaze * horizon_haze_mask * 0.2;
+finalHDR += (atmosphereColor * uniforms.sunIntensity) * uniforms.horizonHaze * horizon_haze_mask * 0.2;
 
 textureStore(outputTexture, id, vec4<f32>(finalHDR * uniforms.exposure, 1.0));

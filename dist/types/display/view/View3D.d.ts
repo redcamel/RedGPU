@@ -8,7 +8,7 @@ import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import IBL from "../../resources/texture/ibl/IBL";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
-import SkyAtmosphere from "../skyAtmosphere/SkyAtmosphere";
+import SkyAtmosphere from "../../postEffect/effects/skyAtmosphere/SkyAtmosphere";
 import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";

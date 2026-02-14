@@ -13,7 +13,6 @@ import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../../../resources/sampler/Sampler";
-import SystemCode from "../../../resources/systemCode/SystemCode";
 import POST_EFFECT_SYSTEM_UNIFORM from '../../core/postEffectSystemUniform.wgsl';
 
 /**
@@ -80,48 +79,48 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext);
 		this.#skyViewGenerator = new SkyViewGenerator(redGPUContext);
 		this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext);
-		this.#sampler = new Sampler(redGPUContext);
+		this.#sampler = new Sampler(redGPUContext, { magFilter: 'linear', minFilter: 'linear' });
 
 		// 1. 유니폼 버퍼 생성
-		const uniformData = new ArrayBuffer(160); // AtmosphereParameters size
+		const uniformData = new ArrayBuffer(160);
 		this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, 'SKY_ATMOSPHERE_PE_UNIFORM_BUFFER');
 
-		// 2. 바인드 그룹 레이아웃 수동 정의
+		// 2. 바인드 그룹 레이아웃 수동 정의 (일반 Texture로 변경하여 샘플링 가능하게 함)
 		this.#bindGroupLayout0 = gpuDevice.createBindGroupLayout({
 			label: 'SKY_ATMOSPHERE_PE_BGL_0',
 			entries: [
-				{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} },
-				{ binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'depth' } },
-				{ binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'read-only' } },
-				{ binding: 3, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'read-only' } },
-				{ binding: 4, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'read-only' } },
-				{ binding: 5, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'read-only', viewDimension: '3d' } },
-				{ binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {} }
+				{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} }, // source
+				{ binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'depth' } }, // depth
+				{ binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {} }, // transmittance (Normal Texture)
+				{ binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {} }, // multiScat (Normal Texture)
+				{ binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {} }, // skyView (Normal Texture)
+				{ binding: 5, visibility: GPUShaderStage.COMPUTE, texture: { viewDimension: '3d' } }, // cameraVolume (Normal Texture 3D)
+				{ binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {} } // sampler
 			]
 		});
 
 		this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
 			label: 'SKY_ATMOSPHERE_PE_BGL_1',
 			entries: [
-				{ binding: 0, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'write-only' } },
-				{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
-				{ binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }
+				{ binding: 0, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'write-only' } }, // output
+				{ binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }, // system uniform
+				{ binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } } // uniforms
 			]
 		});
 
-		// 3. 파이프라인 생성 (문자열 결합 최적화)
+		// 3. 파이프라인 생성 (정합성을 위해 원본 바인딩 스타일 유지)
 		const shaderCode = [
 			skyAtmosphereFn,
 			'@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
 			'@group(0) @binding(1) var depthTexture : texture_depth_2d;',
-			'@group(0) @binding(2) var transmittanceTexture : texture_storage_2d<rgba16float, read>;',
-			'@group(0) @binding(3) var multiScatteringTexture : texture_storage_2d<rgba16float, read>;',
-			'@group(0) @binding(4) var skyViewTexture : texture_storage_2d<rgba16float, read>;',
-			'@group(0) @binding(5) var cameraVolumeTexture : texture_storage_3d<rgba16float, read>;',
+			'@group(0) @binding(2) var transmittanceTexture : texture_2d<f32>;',
+			'@group(0) @binding(3) var multiScatteringTexture : texture_2d<f32>;',
+			'@group(0) @binding(4) var skyViewTexture : texture_2d<f32>;',
+			'@group(0) @binding(5) var cameraVolumeTexture : texture_3d<f32>;',
 			'@group(0) @binding(6) var tSampler : sampler;',
 			'',
 			'@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
-			POST_EFFECT_SYSTEM_UNIFORM, // 직접 삽입
+			POST_EFFECT_SYSTEM_UNIFORM,
 			'@group(1) @binding(2) var<uniform> uniforms: Uniforms;',
 			'',
 			uniformStructCode,
@@ -260,88 +259,44 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	get sunIntensity(): number { return this.#params.sunIntensity; }
 	set sunIntensity(v: number) { validatePositiveNumberRange(v, 0, 10000); this.#params.sunIntensity = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 100, View: Float32Array }, [v]); }
 
-	/**
-	 * [KO] 지구의 반지름 (km)
-	 * [EN] Earth radius (km)
-	 */
 	get earthRadius(): number { return this.#params.earthRadius; }
 	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#params.earthRadius = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 64, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/**
-	 * [KO] 대기의 높이 (km)
-	 * [EN] Atmosphere height (km)
-	 */
 	get atmosphereHeight(): number { return this.#params.atmosphereHeight; }
 	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#params.atmosphereHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 68, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/**
-	 * [KO] 미(Mie) 산란 계수
-	 * [EN] Mie scattering coefficient
-	 */
 	get mieScattering(): number { return this.#params.mieScattering; }
 	set mieScattering(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieScattering = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 72, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/**
-	 * [KO] 미(Mie) 소멸 계수
-	 * [EN] Mie extinction coefficient
-	 */
 	get mieExtinction(): number { return this.#params.mieExtinction; }
 	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieExtinction = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 76, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/**
-	 * [KO] 레일리(Rayleigh) 산란 계수 (RGB)
-	 * [EN] Rayleigh scattering coefficient (RGB)
-	 */
 	get rayleighScattering(): [number, number, number] { return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]]; }
 	set rayleighScattering(v: [number, number, number]) { this.#params.rayleighScattering.set(v); this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 0, View: Float32Array }, Array.from(this.#params.rayleighScattering)); this.#dirtyLUT = true; }
 
-	/**
-	 * [KO] 레일리(Rayleigh) 스케일 높이 (km)
-	 * [EN] Rayleigh scale height (km)
-	 */
 	get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
 	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.rayleighScaleHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 80, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/**
-	 * [KO] 미(Mie) 스케일 높이 (km)
-	 * [EN] Mie scale height (km)
-	 */
 	get mieScaleHeight(): number { return this.#params.mieScaleHeight; }
 	set mieScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.mieScaleHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 84, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/**
-	 * [KO] 미(Mie) 비등방성 계수 (0 ~ 0.999)
-	 * [EN] Mie anisotropy coefficient (0 ~ 0.999)
-	 */
 	get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
 	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieAnisotropy = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 12, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/**
-	 * [KO] 지평선 연무 강도
-	 * [EN] Horizon haze intensity
-	 */
 	get horizonHaze(): number { return this.#params.horizonHaze; }
 	set horizonHaze(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.horizonHaze = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 112, View: Float32Array }, [v]); }
 
-	/**
-	 * [KO] 지면 알베도 (RGB)
-	 * [EN] Ground albedo (RGB)
-	 */
 	get groundAlbedo(): [number, number, number] { return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]]; }
 	set groundAlbedo(v: [number, number, number]) { this.#params.groundAlbedo.set(v); this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 32, View: Float32Array }, Array.from(this.#params.groundAlbedo)); this.#dirtySkyView = true; }
 
-	/**
-	 * [KO] 지면 환경광 강도
-	 * [EN] Ground ambient intensity
-	 */
 	get groundAmbient(): number { return this.#params.groundAmbient; }
 	set groundAmbient(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.groundAmbient = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 44, View: Float32Array }, [v]); }
 
-	// LUT 텍스처 접근자 (RedGPU 리소스 인스턴스 반환)
 	get transmittanceTexture() { return this.#transmittanceGenerator.lutTexture; }
 	get multiScatteringTexture() { return this.#multiScatteringGenerator.lutTexture; }
 	get skyViewTexture() { return this.#skyViewGenerator.lutTexture; }
 	get cameraVolumeTexture() { return this.#cameraVolumeGenerator.lutTexture; }
+	get skyAtmosphereSampler() { return this.#sampler; }
 }
 
 Object.freeze(SkyAtmosphere);
