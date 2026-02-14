@@ -342,13 +342,17 @@ class PostEffectManager {
             texture: this.#storageTexture,
             textureView: this.#sourceTextureView,
         };
-        {
-            currentTextureView = toneMappingManager.render(
+
+        // SkyAtmosphere 전용 처리 (톤 매핑 전 HDR 공간에서 실행)
+        if (this.#view.skyAtmosphere) {
+            currentTextureView = this.#view.skyAtmosphere.render(
+                this.#view,
                 width,
                 height,
                 currentTextureView
             );
         }
+
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(
                 this.#view,
@@ -357,6 +361,14 @@ class PostEffectManager {
                 currentTextureView,
             );
         });
+
+        {
+            currentTextureView = toneMappingManager.render(
+                width,
+                height,
+                currentTextureView
+            );
+        }
 
         if (useFXAA) {
             currentTextureView = fxaa.render(

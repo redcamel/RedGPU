@@ -10,15 +10,15 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
-        // 1. SkyAtmosphere 초기화 (PostEffect 방식)
+        // 1. SkyAtmosphere 초기화
         const skyAtmosphere = new RedGPU.PostEffect.SkyAtmosphere(redGPUContext);
         skyAtmosphere.sunElevation = 5; 
         skyAtmosphere.sunAzimuth = 0;   
         skyAtmosphere.exposure = 1.5;
         skyAtmosphere.horizonHaze = 0.8;
         
-        // 포스트 이펙트 매니저에 추가
-        view.postEffectManager.addEffect(skyAtmosphere);
+        // View 속성에 직접 설정
+        view.skyAtmosphere = skyAtmosphere;
 
         // 2. 카메라 설정
         view.camera.farClipping = 2000000;
@@ -34,7 +34,7 @@ RedGPU.init(
         
         redGPUContext.addView(view);
 
-        // 3. 테스트 환경 구성 (다양한 거리의 구체들)
+        // 3. 테스트 환경 구성
         const sphereGeo = new RedGPU.Primitive.Sphere(redGPUContext, 10, 32, 32);
         const sphereMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff');
 
@@ -83,17 +83,9 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera);
 
-    // 대기 산란 On/Off 제어
     const state = { enabled: true };
     pane.addBinding(state, 'enabled', { label: 'Enable Atmosphere' }).on('change', (v) => {
-        if (v.value) {
-            targetView.postEffectManager.addEffect(skyAtmosphere);
-        } else {
-            // 해당 이펙트만 제거
-            const list = targetView.postEffectManager.effectList;
-            const idx = list.indexOf(skyAtmosphere);
-            if (idx > -1) list.splice(idx, 1);
-        }
+        targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
     });
 
     const f_sun = pane.addFolder({ title: '1. Sun & Exposure' });

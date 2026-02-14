@@ -17,9 +17,9 @@ RedGPU.init(
         controller.distance = 20;
         redGPUContext.addView(view);
 
-        // 1. SkyAtmosphere 초기화 (PostEffect 방식)
+        // 1. SkyAtmosphere 초기화 (View 속성 방식)
         const skyAtmosphere = new RedGPU.PostEffect.SkyAtmosphere(redGPUContext);
-        view.postEffectManager.addEffect(skyAtmosphere);
+        view.skyAtmosphere = skyAtmosphere;
 
         // 2. LUT 스프라이트 생성 함수
         const createLUTSprite = (texture, name, x, y) => {
