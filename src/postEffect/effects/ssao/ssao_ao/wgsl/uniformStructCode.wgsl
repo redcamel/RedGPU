@@ -1,4 +1,5 @@
 #redgpu_include math.getInterleavedGradientNoise
+#redgpu_include depth.linearizeDepth
 
 struct Uniforms {
     radius: f32,
@@ -18,10 +19,15 @@ fn getTextureSize() -> vec2<f32> {
 fn reconstructViewPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
     let texSize = getTextureSize();
     let uv = (vec2<f32>(screenCoord) + 0.5) / texSize;
-    let ndc = vec3<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0, depth);
+    
+    // [KO] NDC 좌표 구성 (depth 0 ~ 1 범위 기준)
+    let ndc = vec3<f32>(
+        uv.x * 2.0 - 1.0, 
+        (1.0 - uv.y) * 2.0 - 1.0, 
+        depth
+    );
 
-    let clipPos = vec4<f32>(ndc, 1.0);
-    let viewPos4 = systemUniforms.inverseProjectionMatrix * clipPos;
+    let viewPos4 = systemUniforms.inverseProjectionMatrix * vec4<f32>(ndc, 1.0);
     return viewPos4.xyz / viewPos4.w;
 }
 

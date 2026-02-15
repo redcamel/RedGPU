@@ -1,4 +1,5 @@
 #redgpu_include math.getInterleavedGradientNoise
+#redgpu_include depth.linearizeDepth
 
 struct Uniforms {
      maxSteps: u32,
@@ -20,20 +21,21 @@ struct Uniforms {
      let invTexDims = 1.0 / vec2<f32>(texDims);
      let uv = (vec2<f32>(screenCoord) + 0.5) * invTexDims;
 
+     // [KO] 표준 linearizeDepth를 사용하여 뷰 공간의 선형 Z 값 복구
+     let linearZ = linearizeDepth(depth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
+     
+     // [KO] NDC 좌표 재구성 (표준 0 ~ 1 깊이 범위 기준)
      let ndc = vec3<f32>(
          uv.x * 2.0 - 1.0,
-         -(uv.y * 2.0 - 1.0),
-         depth * 2.0 - 1.0
+         (1.0 - uv.y) * 2.0 - 1.0, // WGSL 스크린 좌표계 보정 (Y-Down to Y-Up)
+         depth
      );
 
-     let clipPos = vec4<f32>(ndc, 1.0);
-     let viewPos4 = systemUniforms.inverseProjectionMatrix * clipPos;
-
-     if (abs(viewPos4.w) < 1e-6) {
-         return vec3<f32>(0.0);
-     }
-
+     // [KO] 역투영 행렬을 통한 뷰 공간 복원
+     let viewPos4 = systemUniforms.inverseProjectionMatrix * vec4<f32>(ndc, 1.0);
      let viewPos = viewPos4.xyz / viewPos4.w;
+     
+     // [KO] 역카메라 행렬을 통한 월드 공간 복원
      let worldPos4 = systemUniforms.camera.inverseCameraMatrix * vec4<f32>(viewPos, 1.0);
      return worldPos4.xyz;
  }
