@@ -15,5 +15,3 @@ struct SystemUniform {
 };
 
 @group(1) @binding(1) var<uniform> systemUniforms: SystemUniform;
-
-#redgpu_include depth.linearizeDepth

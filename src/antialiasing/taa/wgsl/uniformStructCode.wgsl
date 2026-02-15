@@ -1,6 +1,7 @@
 #redgpu_include color.get_luminance
 #redgpu_include color.rgb_to_ycocg
 #redgpu_include color.ycocg_to_rgb
+#redgpu_include depth.linearizeDepth
 
 // ===== 1. 구조체 및 유틸리티 (Alpha 지원 확장) =====
 struct Uniforms {
