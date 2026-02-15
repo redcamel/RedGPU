@@ -1,3 +1,5 @@
+#redgpu_include color.get_luminance
+
 // ===== 1. 구조체 및 유틸리티 (Alpha 지원 확장) =====
 struct Uniforms {
     frameIndex: f32,
@@ -13,6 +15,8 @@ struct NeighborhoodStats {
     minAlpha: f32,    
     maxAlpha: f32,    
     meanAlpha: f32,   
+    meanLuminance: f32,
+    stdDevLuminance: f32,
 };
 
 struct SampledColor {
@@ -64,6 +68,8 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
     let screenSize = vec2<f32>(screenSizeU);
     var m1 = vec3<f32>(0.0);
     var m2 = vec3<f32>(0.0);
+    var m1L = 0.0;
+    var m2L = 0.0;
     var m1A = 0.0;
     var minC = vec3<f32>(1e5);
     var maxC = vec3<f32>(-1e5);
@@ -74,11 +80,15 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
         for (var x: i32 = -1; x <= 1; x++) {
             let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
             let colorRGBA = textureLoad(sourceTexture, sampleCoord, 0);
-            let colorYCoCg = rgb_to_ycocg(colorRGBA.rgb);
+            let colorRGB = colorRGBA.rgb;
+            let colorYCoCg = rgb_to_ycocg(colorRGB);
+            let lum = get_luminance(colorRGB);
             let alpha = colorRGBA.a;
 
             m1 += colorYCoCg;
             m2 += colorYCoCg * colorYCoCg;
+            m1L += lum;
+            m2L += lum * lum;
             m1A += alpha;
             minC = min(minC, colorYCoCg);
             maxC = max(maxC, colorYCoCg);
@@ -91,6 +101,8 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
     var stats: NeighborhoodStats;
     stats.mean = m1 / sampleCount;
     stats.stdDev = sqrt(max((m2 / sampleCount) - (stats.mean * stats.mean), vec3<f32>(0.0)));
+    stats.meanLuminance = m1L / sampleCount;
+    stats.stdDevLuminance = sqrt(max((m2L / sampleCount) - (stats.meanLuminance * stats.meanLuminance), 0.0));
     stats.minColor = minC;
     stats.maxColor = maxC;
     stats.minAlpha = minA;
@@ -100,9 +112,10 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
     return stats;
 }
 
-fn get_color_discrepancy_weight(stats: NeighborhoodStats, histYCoCg: vec3<f32>) -> f32 {
-    let diff = abs(stats.mean.x - histYCoCg.x);
-    let threshold = max(stats.stdDev.x * 0.45, 0.01);
+fn get_color_discrepancy_weight(stats: NeighborhoodStats, histRGB: vec3<f32>) -> f32 {
+    let histLuminance = get_luminance(histRGB);
+    let diff = abs(stats.meanLuminance - histLuminance);
+    let threshold = max(stats.stdDevLuminance * 0.45, 0.01);
     return smoothstep(threshold, threshold * 2.0, diff);
 }
 

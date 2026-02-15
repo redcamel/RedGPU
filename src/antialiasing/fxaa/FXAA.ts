@@ -33,15 +33,15 @@ class FXAA extends ASinglePassPostEffect {
     /**
      * [KO] 엣지 임계값 (0.0 ~ 0.5)
      * [EN] Edge threshold (0.0 ~ 0.5)
-     * @defaultValue 0.166
+     * @defaultValue 0.125
      */
-    #edgeThreshold: number = 0.166
+    #edgeThreshold: number = 0.125
     /**
      * [KO] 최소 엣지 임계값 (0.0 ~ 0.1)
      * [EN] Minimum edge threshold (0.0 ~ 0.1)
-     * @defaultValue 0.0833
+     * @defaultValue 0.0625
      */
-    #edgeThresholdMin: number = 0.0833
+    #edgeThresholdMin: number = 0.0625
 
     /**
      * [KO] FXAA 인스턴스를 생성합니다.

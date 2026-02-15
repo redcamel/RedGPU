@@ -57,7 +57,7 @@
         let clippedAlpha = clamp(historyData.alpha, stats.minAlpha, stats.maxAlpha);
 
         let clippedHistoryRGB = ycocg_to_rgb(clippedYCoCg);
-        let lumaWeight = get_color_discrepancy_weight(stats, clippedYCoCg);
+        let lumaWeight = get_color_discrepancy_weight(stats, clippedHistoryRGB);
 
         var blendFactor = mix(0.08, 0.4, motionSoft);
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
