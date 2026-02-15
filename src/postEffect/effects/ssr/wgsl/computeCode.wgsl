@@ -38,7 +38,7 @@ let normal = normalize(worldNormal);
 let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
 
 let reflectionDir = calculateWorldReflectionRay(worldPos, normal, cameraWorldPos);
-let reflection = performWorldRayMarching(worldPos, reflectionDir);
+let reflection = performWorldRayMarching(worldPos, reflectionDir, screenCoord);
 
 // 반사 결과 처리
 if (reflection.a > 0.001) {

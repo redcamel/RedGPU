@@ -1,3 +1,5 @@
+#redgpu_include math.getInterleavedGradientNoise
+
 struct Uniforms {
      maxSteps: u32,
      maxDistance: f32,
@@ -62,7 +64,7 @@ struct Uniforms {
      return reflect(-viewDir, worldNormal);
  }
 
-fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<f32> {
+fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCoord: vec2<i32>) -> vec4<f32> {
     let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
     let cameraDistance = length(startWorldPos - cameraWorldPos);
 
@@ -78,7 +80,11 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<
     let maxRefinementLevels = 4u;
     let invMaxSteps = 1.0 / f32(adaptiveMaxSteps);
 
-    var currentWorldPos = startWorldPos + rayDir * 0.01;
+    // [KO] IGN을 활용한 레이 마칭 지터링 적용 (계단 현상 완화)
+    // [EN] Apply ray marching jittering using IGN (Reduces banding)
+    let jitter = getInterleavedGradientNoise(vec2<f32>(screenCoord));
+    var currentWorldPos = startWorldPos + rayDir * (adaptiveStepSize * jitter);
+    
     var currentStepSize = adaptiveStepSize;
     var refinementLevel = 0u;
 
@@ -96,14 +102,14 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<
             break;
         }
 
-        let screenCoord = vec2<i32>(currentScreenUV * texSizeF);
-        let sampledDepth = textureLoad(depthTexture, screenCoord, 0);
+        let coord = vec2<i32>(currentScreenUV * texSizeF);
+        let sampledDepth = textureLoad(depthTexture, coord, 0);
 
         if (sampledDepth >= 0.999) {
             continue;
         }
 
-        let sampledWorldPos = reconstructWorldPosition(screenCoord, sampledDepth);
+        let sampledWorldPos = reconstructWorldPosition(coord, sampledDepth);
         let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
@@ -118,7 +124,7 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>) -> vec4<
                 continue;
             }
 
-            let reflectionColor = textureLoad(sourceTexture, screenCoord);
+            let reflectionColor = textureLoad(sourceTexture, coord);
             let travelDistance = sqrt(travelDistanceSq);
             let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
             let edgeFade = calculateEdgeFade(currentScreenUV);
