@@ -6,7 +6,7 @@
 @group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
-const PI: f32 = 3.14159265359;
+#redgpu_include math.PI
 
 fn directionToSphericalUV(dir: vec3<f32>) -> vec2<f32> {
     let normalizedDir = normalize(dir);

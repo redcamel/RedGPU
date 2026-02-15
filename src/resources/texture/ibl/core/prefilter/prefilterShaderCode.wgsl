@@ -11,7 +11,7 @@ struct PrefilterUniforms {
 }
 @group(0) @binding(3) var<uniform> uniforms: PrefilterUniforms;
 
-const PI: f32 = 3.14159265359;
+#redgpu_include math.PI
 
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
     var bits = bits_in;

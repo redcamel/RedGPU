@@ -44,7 +44,7 @@ struct SimParams {
 @group(0) @binding(4) var<storage, read_write> infoScale: array<Info>;
 @group(0) @binding(5) var<storage, read_write> infoAlpha: array<Info>;
 
-const PI:f32 = 3.141592653589793;
+#redgpu_include math.PI
 const HPI:f32 = PI * 0.5;
 const PI2:f32 = PI * 2.0;
 

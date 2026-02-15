@@ -6,7 +6,7 @@
 @group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
-const PI = 3.14159265359;
+#redgpu_include math.PI
 
 // Hammersley 시퀀스를 위한 비트 반전 함수 (표준 IBL 기법)
 fn radicalInverse_VdC(bits_in: u32) -> f32 {

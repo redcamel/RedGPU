@@ -1,5 +1,4 @@
 #redgpu_include math.getHash3D_vec3
-#redgpu_include depth.linearizeDepth
 
 struct Uniforms {
 	rayleighScattering: vec3<f32>,

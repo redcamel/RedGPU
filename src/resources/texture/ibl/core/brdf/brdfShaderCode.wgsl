@@ -1,7 +1,7 @@
 // [KO] BRDF 통합 쉐이더 (DFG LUT 생성용)
 // [EN] BRDF integration shader (for DFG LUT generation)
 
-const PI = 3.14159265359;
+#redgpu_include math.PI
 
 fn radicalInverse_VdC(bits: u32) -> f32 {
     var b = bits;

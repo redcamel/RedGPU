@@ -6,6 +6,7 @@
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
 #redgpu_include calculateMotionVector;
+#redgpu_include math.PI
 
 struct Uniforms {
     useVertexColor: u32,
@@ -1223,7 +1224,7 @@ fn calcLight(
             let invR = 1 / sheenRoughnessAlpha;
             let cos2h = NdotH * NdotH;
             let sin2h = 1 - cos2h;
-            let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / (2 * pi);
+            let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / (2 * PI);
             let sheen_visibility =  1.0 / ((1.0 + lambda_sheen(NdotV, sheenRoughnessAlpha) + lambda_sheen(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV * NdotL));
             let LdotN = max(dot(L, N), 0.04);
             let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
@@ -1272,7 +1273,9 @@ fn calcLight(
     let lightContribution = directLighting * dLight * lightDirection;
     return lightContribution;
 }
-const pi: f32 = 3.14159265359;
+// [KO] PI는 이제 math.PI 인클루드를 통해 공급됩니다.
+// [EN] PI is now supplied via math.PI include.
+
 fn BRDF_specularAnisotropicGGX( f0: vec3<f32>, f90: vec3<f32>, alphaRoughness: f32, VdotH: f32, NdotL: f32, NdotV: f32, NdotH: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, TdotH: f32, BdotH: f32, anisotropy: f32 ) -> vec3<f32> {
     var at = mix(alphaRoughness, 1.0, anisotropy * anisotropy);
     var ab = alphaRoughness;
@@ -1289,7 +1292,7 @@ fn D_GGX_anisotropic( NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32 ) -> 
 //     return 0.0;
 //    }
     let w2: f32 = a2 / denominator;
-    return a2 * w2 * w2 / pi;
+    return a2 * w2 * w2 / PI;
 }
 fn V_GGX_anisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, at: f32, ab: f32 ) -> f32 {
    let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
@@ -1322,7 +1325,7 @@ fn iridescent_fresnel(outside_ior: f32, iridescence_ior: f32, base_f0: vec3<f32>
     let effective_thickness = max(iridescence_thickness, 10.0);
     let ior_scale = max(1.0, 1.5 - 0.5 * (safe_iridescence_ior / 1.5));
     let optical_thickness = 2.0 * effective_thickness * safe_iridescence_ior * cos_theta2 * ior_scale;
-    let phase = (2.0 * 3.14159265359 * optical_thickness) / wavelengths;
+    let phase = (2.0 * PI * optical_thickness) / wavelengths;
 
     // 삼각함수 (한 번만)
     let cos_phase = cos(phase);
@@ -1504,16 +1507,16 @@ fn diffuse_brdf_disney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albed
     let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
     let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
 
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor / pi;
+    return albedo * NdotL * lightScatter * viewScatter * energyFactor / PI;
 }
 
 fn diffuse_brdf(NdotL:f32, albedo: vec3<f32>) -> vec3<f32> {
-    return albedo * NdotL / pi;
+    return albedo * NdotL / PI;
 }
 fn diffuse_btdf(N: vec3<f32>, L: vec3<f32>, Albedo: vec3<f32>) -> vec3<f32> {
     // 뒷면으로 들어오는 광선만 처리 (-dot(N,L)를 사용하여 음수만 양수로 변환하여 사용)
     let cos_theta = max(-dot(N, L), 0.0);
-    return Albedo * cos_theta / pi;
+    return Albedo * cos_theta / PI;
 }
 
 fn specular_brdf(

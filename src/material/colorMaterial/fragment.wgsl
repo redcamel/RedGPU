@@ -3,6 +3,7 @@
 #redgpu_include calcTintBlendMode;
 #redgpu_include FragmentOutput;
 #redgpu_include calculateMotionVector;
+#redgpu_include math.PI
 
 struct Uniforms {
     color:vec3<f32>,
@@ -41,7 +42,7 @@ fn main(inputData: InputData) -> FragmentOutput {
         let viewDir = normalize(viewVec);
         let distKm = length(viewVec) / 1000.0;
 
-        let PI = 3.14159265;
+        // [KO] PI는 이제 math.PI 인클루드를 통해 공급됩니다.
         let u = atan2(viewDir.z, viewDir.x) / (2.0 * PI) + 0.5;
         let v = asin(clamp(viewDir.y, -1.0, 1.0)) / PI + 0.5;
         let w = sqrt(clamp(distKm / 100.0, 0.0, 1.0));

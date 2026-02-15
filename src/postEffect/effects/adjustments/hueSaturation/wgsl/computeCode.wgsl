@@ -7,7 +7,7 @@ var color:vec4<f32> = textureLoad( sourceTexture, index, );
 
 let hue_value : f32 = uniforms.hue / 180.0;
 let saturation_value : f32 = uniforms.saturation / 100.0;
-let angle : f32 = hue_value * 3.1415926535897932384626433832795;
+let angle : f32 = hue_value * PI;
 let s : f32 = sin(angle);
 let c : f32 = cos(angle);
 var weights : vec3<f32> = (vec3<f32>(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;

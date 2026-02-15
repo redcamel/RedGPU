@@ -1,4 +1,4 @@
-const PI: f32 = 3.14159265359;
+#redgpu_include math.PI
 const MAX_TAU: f32 = 50.0;
 
 // [KO] 대기 산란 시스템 통합 파라미터 구조체 (16바이트 정렬 완료)
