@@ -42,6 +42,16 @@ export namespace MathLibrary {
     export const getBitHash1D_vec4 = getBitHash1D_vec4_wgsl;
     export const getBitHash2D_vec2 = getBitHash2D_vec2_wgsl;
     export const getBitHash3D_vec3 = getBitHash3D_vec3_wgsl;
+
+    // [KO] 수학 상수 (인라인 정의)
+    // [EN] Math Constants (In-line definition)
+    export const PI = 'const PI: f32 = 3.141592653589793;';
+    export const PI2 = 'const PI2: f32 = 6.283185307179586;';
+    export const HPI = 'const HPI: f32 = 1.5707963267948966;';
+    export const INV_PI = 'const INV_PI: f32 = 0.31830988618379067;';
+    export const DEG_TO_RAD = 'const DEG_TO_RAD: f32 = 0.017453292519943295;';
+    export const RAD_TO_DEG = 'const RAD_TO_DEG: f32 = 57.29577951308232;';
+    export const EPSILON = 'const EPSILON: f32 = 1e-6;';
 }
 
 /**
