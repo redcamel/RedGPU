@@ -2,6 +2,7 @@
 // [EN] BRDF integration shader (for DFG LUT generation)
 
 #redgpu_include math.PI
+#redgpu_include math.PI2
 
 fn radicalInverse_VdC(bits: u32) -> f32 {
     var b = bits;
@@ -19,7 +20,7 @@ fn hammersley(i: u32, N: u32) -> vec2<f32> {
 
 fn importanceSampleGGX(Xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32> {
     let a = roughness * roughness;
-    let phi = 2.0 * PI * Xi.x;
+    let phi = PI2 * Xi.x;
     let cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a * a - 1.0) * Xi.y));
     let sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 

@@ -7,6 +7,7 @@
 @group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
 #redgpu_include math.PI
+#redgpu_include math.PI2
 
 // Hammersley 시퀀스를 위한 비트 반전 함수 (표준 IBL 기법)
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
@@ -60,7 +61,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let xi = hammersley(i, totalSamples);
 
         // Cosine-weighted hemisphere sampling
-        let phi = 2.0 * PI * xi.x;
+        let phi = PI2 * xi.x;
         let cosTheta = sqrt(1.0 - xi.y);
         let sinTheta = sqrt(xi.y);
 

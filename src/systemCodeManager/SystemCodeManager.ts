@@ -88,10 +88,8 @@ export namespace SystemCodeManager {
 
     /** [KO] 수학 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for mathematics. */
     export import math = MathLibrary;
-
     /** [KO] 색상 변환 및 처리 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for color conversion and processing. */
     export import color = ColorLibrary;
-
     /** [KO] 깊이(Depth) 및 좌표 복구 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for depth and position reconstruction. */
     export import depth = DepthLibrary;
 

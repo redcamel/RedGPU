@@ -12,6 +12,7 @@ struct PrefilterUniforms {
 @group(0) @binding(3) var<uniform> uniforms: PrefilterUniforms;
 
 #redgpu_include math.PI
+#redgpu_include math.PI2
 
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
     var bits = bits_in;
@@ -37,7 +38,7 @@ fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
 
 fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32> {
     let a = roughness * roughness;
-    let phi = 2.0 * PI * xi.x;
+    let phi = PI2 * xi.x;
     let cosTheta = sqrt((1.0 - xi.y) / (1.0 + (a * a - 1.0) * xi.y));
     let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
 

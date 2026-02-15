@@ -45,8 +45,8 @@ struct SimParams {
 @group(0) @binding(5) var<storage, read_write> infoAlpha: array<Info>;
 
 #redgpu_include math.PI
-const HPI:f32 = PI * 0.5;
-const PI2:f32 = PI * 2.0;
+#redgpu_include math.HPI
+#redgpu_include math.PI2
 
 fn calEasing(n: f32, easingType: f32) -> f32 {
     var m: f32 = n;

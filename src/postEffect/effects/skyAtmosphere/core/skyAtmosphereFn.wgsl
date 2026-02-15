@@ -1,4 +1,5 @@
 #redgpu_include math.PI
+#redgpu_include math.PI2
 const MAX_TAU: f32 = 50.0;
 
 // [KO] 대기 산란 시스템 통합 파라미터 구조체 (16바이트 정렬 완료)
@@ -67,7 +68,7 @@ fn get_transmittance(t_tex: texture_2d<f32>, t_sam: sampler, h: f32, cos_theta: 
 // [KO] UE5 표준 Sky-View LUT UV 매핑 (v=0.5: Horizon, v=0: Top, v=1: Bottom)
 fn get_sky_view_uv(view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atmosphere_height: f32) -> vec2<f32> {
     let azimuth = atan2(view_dir.z, view_dir.x);
-    let u = (azimuth / (2.0 * PI)) + 0.5;
+    let u = (azimuth / PI2) + 0.5;
 
     let r = earth_radius;
     let h = max(0.0, view_height);
