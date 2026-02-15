@@ -1,9 +1,8 @@
 import PassClustersLightHelper from "../../../light/clusterLight/PassClustersLightHelper";
-import SystemCode from "../../systemCode/SystemCode";
+import SystemCodeManager from "../../../systemCodeManager/SystemCodeManager";
 import ShaderVariantGenerator from "./ShaderVariantGenerator";
 
-const shaderCodeKeys = Object.keys(SystemCode).join('|');
-const includePattern = new RegExp(`#redgpu_include (${shaderCodeKeys})`, 'g');
+const includePattern = /#redgpu_include\s+([\w.]+)/g;
 const definePattern = /REDGPU_DEFINE_(?:TILE_COUNT_[XYZ]|TOTAL_TILES|WORKGROUP_SIZE_[XYZ]|MAX_LIGHTS_PER_CLUSTER)/g;
 const defineValues = {
     REDGPU_DEFINE_TILE_COUNT_X: PassClustersLightHelper.TILE_COUNT_X.toString(),
@@ -57,8 +56,8 @@ const generateCodeHash = (code: string): string => {
 };
 
 /**
- * [KO] 인클루드(#redgpu_include)를 처리합니다. (재귀적 포함 지원)
- * [EN] Processes includes (#redgpu_include). (Supports recursive inclusion)
+ * [KO] 인클루드(#redgpu_include)를 처리합니다. (재귀적 포함 및 점 표기법 경로 지원)
+ * [EN] Processes includes (#redgpu_include). (Supports recursive inclusion and dot-notation paths)
  * @param code -
  * [KO] 처리할 WGSL 코드
  * [EN] WGSL code to process
@@ -70,9 +69,29 @@ const processIncludes = (code: string): string => {
     let result = code;
     let iterations = 0;
     const MAX_ITERATIONS = 10;
+
+    /**
+     * [KO] 점 표기법 경로를 해석하여 SystemCodeManager에서 WGSL 문자열을 찾습니다.
+     * [EN] Resolves dot-notation paths to find WGSL strings in SystemCodeManager.
+     */
+    const resolvePath = (path: string): string | null => {
+        const parts = path.split('.');
+        let current: any = SystemCodeManager;
+        for (const part of parts) {
+            if (current && typeof current === 'object' && part in current) {
+                current = current[part];
+            } else {
+                return null;
+            }
+        }
+        // [KO] 최종 결과가 문자열일 때만 유효한 청크로 간주합니다.
+        // [EN] Only consider it a valid chunk if the final result is a string.
+        return typeof current === 'string' ? current : null;
+    };
+
     while (iterations < MAX_ITERATIONS) {
         const previousResult = result;
-        result = result.replace(includePattern, (match, key) => SystemCode[key] || match);
+        result = result.replace(includePattern, (match, path) => resolvePath(path) || match);
         if (result === previousResult) break;
         iterations++;
     }

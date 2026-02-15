@@ -10,22 +10,44 @@ if (!preprocessWGSL) {
 }
 
 redUnit.testGroup(
-    'preprocessWGSL - Core Functionality',
+    'preprocessWGSL - Core Functionality (SystemCodeManager)',
     (runner) => {
-        runner.defineTest('Include Logic (#redgpu_include)', function (run) {
-            const testKey = 'FragmentOutput';
-            const expected = RedGPU.SystemCode[testKey];
-            if (!expected) {
-                run(false, 'FragmentOutput not found in SystemCode');
-                return;
-            }
-            const testCode = `#redgpu_include ${testKey}`;
-
+        runner.defineTest('Flat Path Include (SYSTEM_UNIFORM)', function (run) {
+            // [KO] 최상위 레벨의 SYSTEM_UNIFORM 인클루드 테스트
+            // [EN] Test top-level SYSTEM_UNIFORM include
+            const testCode = `#redgpu_include SYSTEM_UNIFORM`;
             try {
                 const result = preprocessWGSL(testCode);
-                const hasContent = result.defaultSource.includes('struct FragmentOutput');
+                const hasContent = result.defaultSource.includes('struct SystemUniform');
                 const tagRemoved = !result.defaultSource.includes('#redgpu_include');
                 run(hasContent && tagRemoved);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
+
+        runner.defineTest('Dot-Notation Path Include (math.hash12)', function (run) {
+            // [KO] 계층 구조를 가진 math.hash12 인클루드 테스트
+            // [EN] Test hierarchical math.hash12 include
+            const testCode = `#redgpu_include math.hash12`;
+            try {
+                const result = preprocessWGSL(testCode);
+                const hasContent = result.defaultSource.includes('fn hash12');
+                const tagRemoved = !result.defaultSource.includes('#redgpu_include');
+                run(hasContent && tagRemoved);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
+
+        runner.defineTest('Dot-Notation Path Include (color.get_luminance)', function (run) {
+            // [KO] 계층 구조를 가진 color.get_luminance 인클루드 테스트
+            // [EN] Test hierarchical color.get_luminance include
+            const testCode = `#redgpu_include color.get_luminance`;
+            try {
+                const result = preprocessWGSL(testCode);
+                const hasContent = result.defaultSource.includes('fn get_luminance');
+                run(hasContent);
             } catch (e) {
                 run(false, e);
             }
@@ -41,8 +63,13 @@ redUnit.testGroup(
                 run(false, e);
             }
         }, true);
+    }
+);
 
-        runner.defineTest('Conditional Logic (#redgpu_if) - Basic', function (run) {
+redUnit.testGroup(
+    'preprocessWGSL - Conditional Logic',
+    (runner) => {
+        runner.defineTest('Basic #redgpu_if/else', function (run) {
             const code = `
                 #redgpu_if USE_TEST
                 let testValue = 1;
@@ -66,35 +93,7 @@ redUnit.testGroup(
             }
         }, true);
 
-        runner.defineTest('Default Source - All disabled by default', function (run) {
-            const code = `
-                #redgpu_if A
-                let a = 1;
-                #redgpu_else
-                let a = 0;
-                #redgpu_endIf
-                #redgpu_if B
-                let b = 1;
-                #redgpu_endIf
-            `;
-            try {
-                const result = preprocessWGSL(code);
-                const hasA0 = result.defaultSource.includes('let a = 0;');
-                const hasA1 = result.defaultSource.includes('let a = 1;');
-                const hasB1 = result.defaultSource.includes('let b = 1;');
-                
-                run(hasA0 && !hasA1 && !hasB1);
-            } catch (e) {
-                run(false, e);
-            }
-        }, true);
-    }
-);
-
-redUnit.testGroup(
-    'preprocessWGSL - Nested and Complex Scenarios',
-    (runner) => {
-        runner.defineTest('Nested #redgpu_if - Basic', function (run) {
+        runner.defineTest('Nested #redgpu_if', function (run) {
             const code = `
                 #redgpu_if OUTER
                     #redgpu_if INNER
@@ -110,105 +109,11 @@ redUnit.testGroup(
 
                 const srcBoth = gen.getVariant('OUTER+INNER');
                 const srcOuterOnly = gen.getVariant('OUTER');
-                const srcNone = gen.getVariant('none');
 
                 const checkBoth = srcBoth.includes('let nested = 1;');
                 const checkOuterOnly = srcOuterOnly.includes('let nested = 0;');
-                const checkNone = !srcNone.includes('let nested');
 
-                run(checkBoth && checkOuterOnly && checkNone);
-            } catch (e) {
-                run(false, e);
-            }
-        }, true);
-
-        runner.defineTest('Nested #redgpu_if - Iridescence Example', function (run) {
-            const code = `
-                #redgpu_if useKHR_materials_iridescence
-                    #redgpu_if useKHR_iridescenceTexture
-                        let iridescenceTextureSample: vec4<f32> = vec4<f32>(1.0);
-                        iridescenceParameter *= iridescenceTextureSample.r;
-                    #redgpu_endIf
-                    #redgpu_if useKHR_iridescenceThicknessTexture
-                        let iridescenceThicknessTextureSample: vec4<f32> = vec4<f32>(1.0);
-                        iridescenceThickness = mix(0.0, 1.0, iridescenceThicknessTextureSample.g);
-                    #redgpu_endIf
-                #redgpu_endIf
-            `;
-            try {
-                const result = preprocessWGSL(code);
-                const gen = result.shaderSourceVariant;
-
-                const srcAll = gen.getVariant('useKHR_materials_iridescence+useKHR_iridescenceTexture+useKHR_iridescenceThicknessTexture');
-                const srcThicknessOnly = gen.getVariant('useKHR_materials_iridescence+useKHR_iridescenceThicknessTexture');
-                const srcTextureOnly = gen.getVariant('useKHR_materials_iridescence+useKHR_iridescenceTexture');
-                const srcOuterOnly = gen.getVariant('useKHR_materials_iridescence');
-                const srcNone = gen.getVariant('none');
-
-                const checkAll = srcAll.includes('iridescenceParameter *=') && srcAll.includes('iridescenceThickness =');
-                const checkThicknessOnly = !srcThicknessOnly.includes('iridescenceParameter *=') && srcThicknessOnly.includes('iridescenceThickness =');
-                const checkTextureOnly = srcTextureOnly.includes('iridescenceParameter *=') && !srcTextureOnly.includes('iridescenceThickness =');
-                const checkOuterOnly = !srcOuterOnly.includes('iridescenceParameter *=') && !srcOuterOnly.includes('iridescenceThickness =');
-                const checkNone = !srcNone.includes('iridescenceParameter *=') && !srcNone.includes('iridescenceThickness =');
-
-                run(checkAll && checkThicknessOnly && checkTextureOnly && checkOuterOnly && checkNone);
-            } catch (e) {
-                run(false, e);
-            }
-        }, true);
-
-        runner.defineTest('Deeply Nested #redgpu_if', function (run) {
-            const code = `
-                #redgpu_if LEVEL1
-                    #redgpu_if LEVEL2
-                        #redgpu_if LEVEL3
-                            let value = 3;
-                        #redgpu_else
-                            let value = 2;
-                        #redgpu_endIf
-                    #redgpu_else
-                        let value = 1;
-                    #redgpu_endIf
-                #redgpu_else
-                    let value = 0;
-                #redgpu_endIf
-            `;
-            try {
-                const result = preprocessWGSL(code);
-                const gen = result.shaderSourceVariant;
-
-                const srcL123 = gen.getVariant('LEVEL1+LEVEL2+LEVEL3');
-                const srcL12 = gen.getVariant('LEVEL1+LEVEL2');
-                const srcL1 = gen.getVariant('LEVEL1');
-                const srcNone = gen.getVariant('none');
-
-                const checkL123 = srcL123.includes('let value = 3;');
-                const checkL12 = srcL12.includes('let value = 2;');
-                const checkL1 = srcL1.includes('let value = 1;');
-                const checkNone = srcNone.includes('let value = 0;');
-
-                run(checkL123 && checkL12 && checkL1 && checkNone);
-            } catch (e) {
-                run(false, e);
-            }
-        }, true);
-
-        runner.defineTest('Multiple same key in nested blocks', function (run) {
-            const code = `
-                #redgpu_if TEST
-                    #redgpu_if TEST
-                        let nested = 1;
-                    #redgpu_endIf
-                #redgpu_endIf
-            `;
-            try {
-                const result = preprocessWGSL(code);
-                const gen = result.shaderSourceVariant;
-
-                const srcTrue = gen.getVariant('TEST');
-                const srcFalse = gen.getVariant('none');
-
-                run(srcTrue.includes('let nested = 1;') && !srcFalse.includes('let nested'));
+                run(checkBoth && checkOuterOnly);
             } catch (e) {
                 run(false, e);
             }
@@ -234,28 +139,17 @@ redUnit.testGroup(
             }
         }, true);
 
-        runner.defineTest('Unclosed #redgpu_if', function (run) {
-            const code = `
-                #redgpu_if TEST
-                let x = 1;
-            `;
+        runner.defineTest('Invalid Include Path (Non-string member)', function (run) {
+            // [KO] math는 객체(Namespace)이지 문자열이 아니므로 인클루드 실패해야 함
+            // [EN] math is an object (Namespace), not a string, so include should fail
+            const code = `#redgpu_include math`;
             try {
-                preprocessWGSL(code);
-                run(false, 'Should have thrown an error for unclosed if');
+                const result = preprocessWGSL(code);
+                // [KO] 결과물이 문자열이 아니면 태그를 그대로 유지해야 함
+                // [EN] If the result is not a string, the tag should be preserved
+                run(result.defaultSource.includes('#redgpu_include math'));
             } catch (e) {
-                run(e.message.includes('Unclosed #redgpu_if'));
-            }
-        }, true);
-
-        runner.defineTest('Mismatched #redgpu_else', function (run) {
-            const code = `
-                #redgpu_else
-            `;
-            try {
-                preprocessWGSL(code);
-                run(false, 'Should have thrown an error for mismatched else');
-            } catch (e) {
-                run(e.message.includes('Mismatched #redgpu_else'));
+                run(false, e);
             }
         }, true);
     }

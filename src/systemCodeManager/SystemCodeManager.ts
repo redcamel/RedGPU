@@ -4,6 +4,8 @@ import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
+import SystemVertexCode from '../resources/systemCode/shader/vertex';
+import SystemFragmentCode from '../resources/systemCode/shader/fragment';
 
 /**
  * [KO] 수학 관련 셰이더 함수 라이브러리
@@ -92,11 +94,13 @@ export namespace DepthLibrary {
 }
 
 /**
- * [KO] 시스템 셰이더 코드 및 공통 라이브러리 관리자
- * [EN] System shader code and common library manager
+ * [KO] 엔진 시스템에서 전역적으로 사용되는 셰이더 코드 및 공통 라이브러리를 통합 관리하는 레지스트리입니다.
+ * [EN] A registry that integrates and manages shader code and common libraries used globally in the engine.
  * 
- * [KO] 네임스페이스 구조를 통해 셰이더 자산의 계층 관계를 문서상에 명확히 시각화하며, 각 함수의 실제 WGSL 소스 코드를 포함합니다.
- * [EN] Clearly visualizes the hierarchical relationship of shader assets in the documentation through a namespace structure, and includes the actual WGSL source code for each function.
+ * [KO] 모든 자산은 `SystemCodeManager.category.function` 형태의 계층적 구조를 통해 접근할 수 있으며, 
+ * RedGPU 셰이더 전처리기를 통해 `#redgpu_include` 매크로로 참조 가능합니다.
+ * [EN] All assets can be accessed through a hierarchical structure in the form of `SystemCodeManager.category.function`,
+ * and can be referenced via the `#redgpu_include` macro through the RedGPU shader preprocessor.
  * 
  * @category Shader
  */
@@ -236,6 +240,31 @@ export namespace SystemCodeManager {
 
     /** [KO] 깊이 관련 라이브러리 [EN] Depth related library */
     export import depth = DepthLibrary;
+
+    /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
+    export const vertex = SystemVertexCode;
+    /** [KO] 시스템 Fragment 관련 레거시 코드 [EN] System Fragment related legacy code */
+    export const fragment = SystemFragmentCode;
+
+    // [KO] 레거시 직접 참조 지원 (예: #redgpu_include FragmentOutput)
+    // [EN] Support legacy direct references (e.g., #redgpu_include FragmentOutput)
+    export const FragmentOutput = SystemFragmentCode.FragmentOutput;
+    export const calcTintBlendMode = SystemFragmentCode.calcTintBlendMode;
+    export const calcDirectionalShadowVisibility = SystemFragmentCode.calcDirectionalShadowVisibility;
+    export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;
+    export const normalFunctions = SystemFragmentCode.normalFunctions;
+    export const calcPrePathBackground = SystemFragmentCode.calcPrePathBackground;
+    export const calculateMotionVector = SystemFragmentCode.calculateMotionVector;
+    export const picking = SystemFragmentCode.picking;
+    export const drawPicking = SystemFragmentCode.drawPicking;
+
+    export const billboardPicking = SystemVertexCode.billboardPicking;
+    export const billboardShadow = SystemVertexCode.billboardShadow;
+    export const calcBillboard = SystemVertexCode.calcBillboard;
+    export const calcDisplacements = SystemVertexCode.calcDisplacements;
+    export const getBillboardMatrix = SystemVertexCode.getBillboardMatrix;
+    export const extractScaleAndTranslation = SystemVertexCode.extractScaleAndTranslation;
+    export const meshVertexBasicUniform = SystemVertexCode.meshVertexBasicUniform;
 }
 
 export default SystemCodeManager;

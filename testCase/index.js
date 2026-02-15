@@ -12,6 +12,7 @@ RedUnit.pageLoader('RedGPU', [
 	{title: 'colorRgb', src: './color/colorRgb'},
 	{title: 'colorRgba', src: './color/colorRgba'},
 	{title: 'runtimeChecker', src: './runtimeChecker'},
+	{title: 'preprocessWGSL', src: './resources/wgslParser/preprocessWGSL'},
 	{title: 'uuid', src: './util/uuid'},
 	{title: 'absoluteURL', src: './util/absoluteURL'},
 	{title: 'sortTransparentObjects', src: './util/sortTransparentObjects'},
