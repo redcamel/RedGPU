@@ -11,6 +11,23 @@ import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/Unif
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
+/**
+ * [KO] 거리별 공중 투시(Aerial Perspective)를 위한 3D LUT 생성을 담당하는 클래스입니다.
+ * [EN] Class responsible for generating 3D LUT for Aerial Perspective by distance.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * // SkyAtmosphere 내부에서 자동으로 관리됩니다.
+ * const cameraVolumeTexture = skyAtmosphere.cameraVolumeTexture;
+ * ```
+ *
+ * @category PostEffect
+ */
 class CameraVolumeGenerator {
 	#redGPUContext: RedGPUContext;
 	#lutTexture: CameraVolumeLUTTexture;
@@ -18,8 +35,11 @@ class CameraVolumeGenerator {
 	#uniformBuffer: UniformBuffer;
 	#sampler: Sampler;
 
+	/** [KO] 텍스처 가로 크기 [EN] Texture width */
 	readonly width: number = 64;
+	/** [KO] 텍스처 세로 크기 [EN] Texture height */
 	readonly height: number = 64;
+	/** [KO] 텍스처 깊이 크기 [EN] Texture depth */
 	readonly depth: number = 32;
 
 	constructor(redGPUContext: RedGPUContext) {
@@ -28,6 +48,7 @@ class CameraVolumeGenerator {
 		this.#init();
 	}
 
+	/** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
 	get lutTexture(): CameraVolumeLUTTexture { return this.#lutTexture; }
 
 	#init(): void {
@@ -44,6 +65,14 @@ class CameraVolumeGenerator {
 		});
 	}
 
+	/**
+	 * [KO] 카메라 볼륨 LUT를 렌더링합니다.
+	 * [EN] Renders the Camera Volume LUT.
+	 *
+	 * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
+	 * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
+	 * @param params - [KO] 대기 파라미터 [EN] Atmosphere parameters
+	 */
 	render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture, params: any): void {
 		const {gpuDevice} = this.#redGPUContext;
 

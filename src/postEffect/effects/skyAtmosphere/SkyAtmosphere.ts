@@ -18,6 +18,17 @@ import POST_EFFECT_SYSTEM_UNIFORM from '../../core/postEffectSystemUniform.wgsl'
 /**
  * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 포스트 이펙트 클래스입니다.
  * [EN] Physics-based Atmospheric Scattering post-effect class.
+ *
+ * [KO] Rayleigh 산란, Mie 산란 및 오존 흡수를 시뮬레이션하여 사실적인 하늘과 공중 투시 효과를 제공합니다.
+ * [EN] Provides realistic sky and aerial perspective effects by simulating Rayleigh scattering, Mie scattering, and ozone absorption.
+ *
+ * ### Example
+ * ```typescript
+ * const skyAtmosphere = new RedGPU.PostEffect.SkyAtmosphere(redGPUContext);
+ * view.skyAtmosphere = skyAtmosphere;
+ * ```
+ *
+ * @category PostEffect
  */
 class SkyAtmosphere extends ASinglePassPostEffect {
 	#transmittanceGenerator: TransmittanceGenerator;
@@ -70,6 +81,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	#outputTextureView: GPUTextureView;
 	#prevDimensions: { width: number, height: number };
 
+	/**
+	 * [KO] SkyAtmosphere 인스턴스를 생성합니다.
+	 * [EN] Creates a SkyAtmosphere instance.
+	 *
+	 * @param redGPUContext -
+	 * [KO] RedGPU 컨텍스트
+	 * [EN] RedGPU context
+	 */
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
 		const {gpuDevice, resourceManager} = redGPUContext;
@@ -78,7 +97,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext);
 		this.#skyViewGenerator = new SkyViewGenerator(redGPUContext);
 		this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext);
-		// 샘플러 설정: 수평각(U)은 repeat, 수직각(V)은 clamp 적용
+
 		this.#sampler = new Sampler(redGPUContext, { 
 			magFilter: 'linear', 
 			minFilter: 'linear',
@@ -204,6 +223,26 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		]);
 	}
 
+	/**
+	 * [KO] 씬을 렌더링하고 대기 효과를 합성합니다.
+	 * [EN] Renders the scene and composites atmospheric effects.
+	 *
+	 * @param view -
+	 * [KO] 렌더링할 3D 뷰
+	 * [EN] 3D view to render
+	 * @param width -
+	 * [KO] 출력 너비
+	 * [EN] Output width
+	 * @param height -
+	 * [KO] 출력 높이
+	 * [EN] Output height
+	 * @param sourceTextureInfo -
+	 * [KO] 소스 텍스처 정보
+	 * [EN] Source texture information
+	 * @returns
+	 * [KO] 후처리 결과
+	 * [EN] Post-effect result
+	 */
 	render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
 		const {gpuDevice, resourceManager} = this.redGPUContext;
 		const {rawCamera} = view;
@@ -276,15 +315,15 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		return { texture: this.#outputTexture, textureView: this.#outputTextureView };
 	}
 
-	/** [KO] 태양 고도 [EN] Sun elevation */
+	/** [KO] 태양 고도 (도) [EN] Sun elevation (degrees) */
 	get sunElevation(): number { return this.#sunElevation; }
 	set sunElevation(v: number) { validateNumberRange(v, -90, 90); this.#sunElevation = v; this.#updateSunDirection(); }
 
-	/** [KO] 태양 방위각 [EN] Sun azimuth */
+	/** [KO] 태양 방위각 (도) [EN] Sun azimuth (degrees) */
 	get sunAzimuth(): number { return this.#sunAzimuth; }
 	set sunAzimuth(v: number) { validateNumberRange(v, -360, 360); this.#sunAzimuth = v; this.#updateSunDirection(); }
 
-	/** [KO] 노출 [EN] Exposure */
+	/** [KO] 노출 (Exposure) [EN] Exposure */
 	get exposure(): number { return this.#params.exposure; }
 	set exposure(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.exposure = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 96, View: Float32Array }, [v]); }
 
@@ -292,39 +331,39 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	get sunIntensity(): number { return this.#params.sunIntensity; }
 	set sunIntensity(v: number) { validatePositiveNumberRange(v, 0, 10000); this.#params.sunIntensity = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 100, View: Float32Array }, [v]); }
 
-	/** [KO] 지구 반지름 [EN] Earth radius */
+	/** [KO] 지구 반지름 (km) [EN] Earth radius (km) */
 	get earthRadius(): number { return this.#params.earthRadius; }
 	set earthRadius(v: number) { validatePositiveNumberRange(v, 1); this.#params.earthRadius = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 64, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 대기 높이 [EN] Atmosphere height */
+	/** [KO] 대기층 높이 (km) [EN] Atmosphere height (km) */
 	get atmosphereHeight(): number { return this.#params.atmosphereHeight; }
 	set atmosphereHeight(v: number) { validatePositiveNumberRange(v, 1); this.#params.atmosphereHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 68, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 미 산란 계수 [EN] Mie scattering coefficient */
+	/** [KO] 미(Mie) 산란 계수 [EN] Mie scattering coefficient */
 	get mieScattering(): number { return this.#params.mieScattering; }
 	set mieScattering(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieScattering = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 72, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 미 소멸 계수 [EN] Mie extinction coefficient */
+	/** [KO] 미(Mie) 소멸 계수 [EN] Mie extinction coefficient */
 	get mieExtinction(): number { return this.#params.mieExtinction; }
 	set mieExtinction(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.mieExtinction = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 76, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 레일리 산란 계수 [EN] Rayleigh scattering coefficient */
+	/** [KO] 레일리(Rayleigh) 산란 계수 [EN] Rayleigh scattering coefficient */
 	get rayleighScattering(): [number, number, number] { return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]]; }
 	set rayleighScattering(v: [number, number, number]) { this.#params.rayleighScattering = [...v]; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 0, View: Float32Array }, this.#params.rayleighScattering); this.#dirtyLUT = true; }
 
-	/** [KO] 레일리 스케일 높이 [EN] Rayleigh scale height */
+	/** [KO] 레일리(Rayleigh) 스케일 높이 (km) [EN] Rayleigh scale height (km) */
 	get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
 	set rayleighScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.rayleighScaleHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 80, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 미 스케일 높이 [EN] Mie scale height */
+	/** [KO] 미(Mie) 스케일 높이 (km) [EN] Mie scale height (km) */
 	get mieScaleHeight(): number { return this.#params.mieScaleHeight; }
 	set mieScaleHeight(v: number) { validatePositiveNumberRange(v, 0.1, 100); this.#params.mieScaleHeight = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 84, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 미 비등방성 [EN] Mie anisotropy */
+	/** [KO] 미(Mie) 비등방성 (g) [EN] Mie anisotropy (g) */
 	get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
 	set mieAnisotropy(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieAnisotropy = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 12, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 지평선 연무 [EN] Horizon haze */
+	/** [KO] 지평선 연무 (Haze) [EN] Horizon haze */
 	get horizonHaze(): number { return this.#params.horizonHaze; }
 	set horizonHaze(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.horizonHaze = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 112, View: Float32Array }, [v]); }
 
@@ -340,15 +379,15 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	get ozoneAbsorption(): [number, number, number] { return [this.#params.ozoneAbsorption[0], this.#params.ozoneAbsorption[1], this.#params.ozoneAbsorption[2]]; }
 	set ozoneAbsorption(v: [number, number, number]) { this.#params.ozoneAbsorption = [...v]; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 16, View: Float32Array }, this.#params.ozoneAbsorption); this.#dirtyLUT = true; }
 
-	/** [KO] 오존층 중심 [EN] Ozone layer center */
+	/** [KO] 오존층 중심 고도 (km) [EN] Ozone layer center altitude (km) */
 	get ozoneLayerCenter(): number { return this.#params.ozoneLayerCenter; }
 	set ozoneLayerCenter(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.ozoneLayerCenter = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 28, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 오존층 두께 [EN] Ozone layer width */
+	/** [KO] 오존층 두께 (km) [EN] Ozone layer width (km) */
 	get ozoneLayerWidth(): number { return this.#params.ozoneLayerWidth; }
 	set ozoneLayerWidth(v: number) { validatePositiveNumberRange(v, 1, 50); this.#params.ozoneLayerWidth = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 132, View: Float32Array }, [v]); this.#dirtyLUT = true; }
 
-	/** [KO] 다중 산란 환경광 [EN] Multi-scattering ambient */
+	/** [KO] 다중 산란 환경광 기여도 [EN] Multi-scattering ambient contribution */
 	get multiScatteringAmbient(): number { return this.#params.multiScatteringAmbient; }
 	set multiScatteringAmbient(v: number) { validatePositiveNumberRange(v, 0, 1.0); this.#params.multiScatteringAmbient = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 92, View: Float32Array }, [v]); this.#dirtySkyView = true; }
 
@@ -356,7 +395,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	get heightFogDensity(): number { return this.#params.heightFogDensity; }
 	set heightFogDensity(v: number) { validatePositiveNumberRange(v, 0, 10); this.#params.heightFogDensity = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 104, View: Float32Array }, [v]); }
 
-	/** [KO] 높이 안개 감쇄 [EN] Height fog falloff */
+	/** [KO] 높이 안개 감쇄 계수 [EN] Height fog falloff coefficient */
 	get heightFogFalloff(): number { return this.#params.heightFogFalloff; }
 	set heightFogFalloff(v: number) { validatePositiveNumberRange(v, 0.001, 10); this.#params.heightFogFalloff = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 108, View: Float32Array }, [v]); }
 
@@ -364,11 +403,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	get sunSize(): number { return this.#params.sunSize; }
 	set sunSize(v: number) { validatePositiveNumberRange(v, 0.01, 10.0); this.#params.sunSize = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 60, View: Float32Array }, [v]); }
 
-	/** [KO] 미 글로우 [EN] Mie glow */
+	/** [KO] 미(Mie) 글로우 강도 [EN] Mie glow intensity */
 	get mieGlow(): number { return this.#params.mieGlow; }
 	set mieGlow(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieGlow = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 116, View: Float32Array }, [v]); }
 
-	/** [KO] 미 헤일로 [EN] Mie halo */
+	/** [KO] 미(Mie) 헤일로 강도 [EN] Mie halo intensity */
 	get mieHalo(): number { return this.#params.mieHalo; }
 	set mieHalo(v: number) { validateNumberRange(v, 0, 0.999); this.#params.mieHalo = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 120, View: Float32Array }, [v]); }
 
@@ -376,14 +415,19 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	get groundShininess(): number { return this.#params.groundShininess; }
 	set groundShininess(v: number) { validatePositiveNumberRange(v, 1, 2048); this.#params.groundShininess = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 124, View: Float32Array }, [v]); }
 
-	/** [KO] 지면 스펙큘러 [EN] Ground specular */
+	/** [KO] 지면 스펙큘러 강도 [EN] Ground specular intensity */
 	get groundSpecular(): number { return this.#params.groundSpecular; }
 	set groundSpecular(v: number) { validatePositiveNumberRange(v, 0, 100); this.#params.groundSpecular = v; this.#uniformBuffer.writeOnlyBuffer({ uniformOffset: 128, View: Float32Array }, [v]); }
 
+	/** [KO] 투과율 LUT 텍스처를 반환합니다. [EN] Returns the Transmittance LUT texture. */
 	get transmittanceTexture() { return this.#transmittanceGenerator.lutTexture; }
+	/** [KO] 다중 산란 LUT 텍스처를 반환합니다. [EN] Returns the Multi-Scattering LUT texture. */
 	get multiScatteringTexture() { return this.#multiScatteringGenerator.lutTexture; }
+	/** [KO] 스카이 뷰 LUT 텍스처를 반환합니다. [EN] Returns the Sky-View LUT texture. */
 	get skyViewTexture() { return this.#skyViewGenerator.lutTexture; }
+	/** [KO] 카메라 볼륨(AP) LUT 텍스처를 반환합니다. [EN] Returns the Camera Volume (AP) LUT texture. */
 	get cameraVolumeTexture() { return this.#cameraVolumeGenerator.lutTexture; }
+	/** [KO] 대기 산란 전용 샘플러를 반환합니다. [EN] Returns the dedicated atmosphere sampler. */
 	get skyAtmosphereSampler() { return this.#sampler; }
 }
 

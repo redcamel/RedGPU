@@ -38,12 +38,12 @@ RedGPU.init(
         // 3. 테스트 환경 구성
         const sphereGeo = new RedGPU.Primitive.Sphere(redGPUContext, 10, 32, 32);
         const sphereMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff');
-
+        sphereMat.color.setColorByHEX('#ff0000')
         const FIXED_SCALE = 10;
 
         const GRID_X = 4;
 
-        const GRID_Z = 250;
+        const GRID_Z = 100;
 
         const STEP_X = 2000; // [KO] 층간 간격 확대 (2km) [EN] Increase layer spacing
 
@@ -81,8 +81,6 @@ RedGPU.init(
 
                 mesh.scaleX = mesh.scaleY = mesh.scaleZ = FIXED_SCALE;
 
-
-                mesh.ignoreFrustumCulling = true;
 
                 scene.addChild(mesh);
 

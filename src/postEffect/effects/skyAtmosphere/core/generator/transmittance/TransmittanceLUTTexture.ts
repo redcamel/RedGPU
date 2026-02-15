@@ -24,15 +24,9 @@ class TransmittanceLUTTexture extends ManagementResourceBase {
 	 * [KO] TransmittanceLUTTexture 인스턴스를 생성합니다.
 	 * [EN] Creates a TransmittanceLUTTexture instance.
 	 *
-	 * @param redGPUContext -
-	 * [KO] RedGPU 컨텍스트
-	 * [EN] RedGPU context
-	 * @param width -
-	 * [KO] 텍스처 가로 크
-	 * [EN] Texture width
-	 * @param height -
-	 * [KO] 텍스처 세로 크기
-	 * [EN] Texture height
+	 * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+	 * @param width - [KO] 텍스처 가로 크기 [EN] Texture width
+	 * @param height - [KO] 텍스처 세로 크기 [EN] Texture height
 	 */
 	constructor(redGPUContext: RedGPUContext, width: number, height: number) {
 		super(redGPUContext, MANAGED_STATE_KEY);
@@ -53,13 +47,17 @@ class TransmittanceLUTTexture extends ManagementResourceBase {
 		this.__fireListenerList();
 	}
 
+	/** [KO] 내부 GPUTexture 객체를 반환합니다. [EN] Returns the internal GPUTexture object. */
 	get gpuTexture(): GPUTexture { return this.#gpuTexture; }
+	/** [KO] 내부 GPUTextureView 객체를 반환합니다. [EN] Returns the internal GPUTextureView object. */
 	get gpuTextureView(): GPUTextureView { return this.#gpuTextureView; }
 
+	/** [KO] 비디오 메모리 사용량을 바이트 단위로 반환합니다. [EN] Returns video memory usage in bytes. */
 	get videoMemorySize(): number {
 		return this.#width * this.#height * 8;
 	}
 
+	/** [KO] 텍스처 업데이트가 완료되었음을 알립니다. [EN] Notifies that the texture update is complete. */
 	notifyUpdate(): void {
 		this.__fireListenerList();
 	}

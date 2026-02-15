@@ -10,6 +10,17 @@ import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/Unif
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + multiScatteringShaderCode);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
+/**
+ * [KO] 다중 산란(Multi-Scattering) 에너지 보정을 위한 LUT 생성을 담당하는 클래스입니다.
+ * [EN] Class responsible for generating LUT for Multi-Scattering energy compensation.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category PostEffect
+ */
 class MultiScatteringGenerator {
     #redGPUContext: RedGPUContext;
     #lutTexture: MultiScatteringLUTTexture;
@@ -17,7 +28,9 @@ class MultiScatteringGenerator {
     #uniformBuffer: UniformBuffer;
     #sampler: Sampler;
 
+    /** [KO] 텍스처 가로 크기 [EN] Texture width */
     readonly width: number = 32;
+    /** [KO] 텍스처 세로 크기 [EN] Texture height */
     readonly height: number = 32;
 
     constructor(redGPUContext: RedGPUContext) {
@@ -26,6 +39,7 @@ class MultiScatteringGenerator {
         this.#init();
     }
 
+    /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
     get lutTexture(): MultiScatteringLUTTexture { return this.#lutTexture; }
 
     #init(): void {
@@ -42,6 +56,13 @@ class MultiScatteringGenerator {
         });
     }
 
+    /**
+     * [KO] 다중 산란 LUT를 렌더링합니다.
+     * [EN] Renders the Multi-Scattering LUT.
+     *
+     * @param transmittanceTexture - [KO] 투과율 LUT 텍스처 [EN] Transmittance LUT texture
+     * @param params - [KO] 대기 파라미터 [EN] Atmosphere parameters
+     */
     render(transmittanceTexture: TransmittanceLUTTexture, params: any): void {
         const {gpuDevice} = this.#redGPUContext;
 

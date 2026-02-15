@@ -92,7 +92,7 @@ class PerspectiveCamera {
 	 * [KO] 원평면(far)
 	 * [EN] Far clipping plane
 	 */
-	#farClipping: number = 10000;
+	#farClipping: number = 100000;
 
 	/**
 	 * [KO] 카메라 이름

@@ -11,6 +11,17 @@ import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/Unif
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + skyViewShaderCode);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
+/**
+ * [KO] 카메라 시점에서의 전방위 하늘색 데이터를 담는 Sky-View LUT 생성을 담당하는 클래스입니다.
+ * [EN] Class responsible for generating Sky-View LUT containing all-around sky color data from the camera perspective.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category PostEffect
+ */
 class SkyViewGenerator {
 	#redGPUContext: RedGPUContext;
 	#lutTexture: SkyViewLUTTexture;
@@ -18,7 +29,9 @@ class SkyViewGenerator {
 	#uniformBuffer: UniformBuffer;
 	#sampler: Sampler;
 
+	/** [KO] 텍스처 가로 크기 [EN] Texture width */
 	readonly width: number = 200;
+	/** [KO] 텍스처 세로 크기 [EN] Texture height */
 	readonly height: number = 200;
 
 	constructor(redGPUContext: RedGPUContext) {
@@ -27,6 +40,7 @@ class SkyViewGenerator {
 		this.#init();
 	}
 
+	/** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
 	get lutTexture(): SkyViewLUTTexture { return this.#lutTexture; }
 
 	#init(): void {
@@ -43,6 +57,14 @@ class SkyViewGenerator {
 		});
 	}
 
+	/**
+	 * [KO] 스카이 뷰 LUT를 렌더링합니다.
+	 * [EN] Renders the Sky-View LUT.
+	 *
+	 * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
+	 * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
+	 * @param params - [KO] 대기 파라미터 [EN] Atmosphere parameters
+	 */
 	render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture, params: any): void {
 		const {gpuDevice} = this.#redGPUContext;
 

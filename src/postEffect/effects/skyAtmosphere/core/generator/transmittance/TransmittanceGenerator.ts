@@ -8,6 +8,17 @@ import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/Unif
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
+/**
+ * [KO] 대기 투과율(Transmittance) LUT 생성을 담당하는 클래스입니다.
+ * [EN] Class responsible for generating Atmospheric Transmittance LUT.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category PostEffect
+ */
 class TransmittanceGenerator {
 	#redGPUContext: RedGPUContext;
 	#lutTexture: TransmittanceLUTTexture;
@@ -15,7 +26,9 @@ class TransmittanceGenerator {
 	#bindGroup: GPUBindGroup;
 	#uniformBuffer: UniformBuffer;
 
+	/** [KO] 텍스처 가로 크기 [EN] Texture width */
 	readonly width: number = 256;
+	/** [KO] 텍스처 세로 크기 [EN] Texture height */
 	readonly height: number = 64;
 
 	constructor(redGPUContext: RedGPUContext) {
@@ -23,6 +36,7 @@ class TransmittanceGenerator {
 		this.#init();
 	}
 
+	/** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
 	get lutTexture(): TransmittanceLUTTexture { return this.#lutTexture; }
 
 	#init(): void {
@@ -47,6 +61,12 @@ class TransmittanceGenerator {
 		});
 	}
 
+	/**
+	 * [KO] 투과율 LUT를 렌더링합니다.
+	 * [EN] Renders the Transmittance LUT.
+	 *
+	 * @param params - [KO] 대기 파라미터 [EN] Atmosphere parameters
+	 */
 	render(params: any): void {
 		const {gpuDevice} = this.#redGPUContext;
 
