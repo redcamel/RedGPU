@@ -38,8 +38,12 @@ fn ycocg_to_rgb(ycocg: vec3<f32>) -> vec3<f32> {
 }
 
 fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
-    let depthDiff = abs(currDepth - prevDepth);
-    return 1.0 - clamp((depthDiff - 0.01) / 0.02, 0.0, 1.0);
+    let currLinear = linearDepth(currDepth);
+    let prevLinear = linearDepth(prevDepth);
+    let depthDiff = abs(currLinear - prevLinear);
+    // [KO] 선형 거리 차이에 따른 신뢰도 계산 (0.1m 차이부터 감쇄 시작, 0.5m 이상이면 신뢰도 0)
+    // [EN] Depth confidence based on linear distance (Decay starts at 0.1m, 0 confidence if > 0.5m)
+    return 1.0 - clamp((depthDiff - 0.1) / 0.4, 0.0, 1.0);
 }
 
 fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {

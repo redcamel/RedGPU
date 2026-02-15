@@ -15,3 +15,10 @@ struct SystemUniform {
 };
 
 @group(1) @binding(1) var<uniform> systemUniforms: SystemUniform;
+
+fn linearDepth(depthSample : f32) -> f32 {
+    let n = systemUniforms.camera.nearClipping;
+    let f = systemUniforms.camera.farClipping;
+    let d = clamp(depthSample, 0.0, 1.0);
+    return (n * f) / max(1e-6, f - d * (f - n));
+}
