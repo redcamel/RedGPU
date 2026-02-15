@@ -6,6 +6,7 @@
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
 #redgpu_include calculateMotionVector;
+
 struct Uniforms {
     useVertexColor: u32,
     useCutOff: u32,
@@ -1054,8 +1055,6 @@ let attenuation = rangePart * invSquare;
     #redgpu_endIf
     finalColor += vec4<f32>( emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0);
 
-    // ---------- srgb로 변환해주어야함 ----------
-//    finalColor = linear_to_srgb(finalColor);
 
     // ---------- 컷오프 판단 ----------
     #redgpu_if useCutOff
@@ -1613,15 +1612,3 @@ fn get_transformed_uv(
     return result_uv;
 }
 
-fn linear_to_srgb(linearColor: vec4<f32>) -> vec4<f32> {
- let cutoff = vec4<f32>(0.0031308);
- let higher = vec4<f32>(1.055) * pow(linearColor, vec4<f32>(1.0/2.4)) - vec4<f32>(0.055);
- let lower = linearColor * vec4<f32>(12.92);
-
- return vec4<f32>(
-   mix(higher.r, lower.r, step(linearColor.r, cutoff.r)),
-   mix(higher.g, lower.g, step(linearColor.g, cutoff.g)),
-   mix(higher.b, lower.b, step(linearColor.b, cutoff.b)),
-   linearColor.a // 알파는 보통 그대로 둡니다
- );
-}

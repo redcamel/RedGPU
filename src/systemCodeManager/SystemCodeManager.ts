@@ -13,6 +13,10 @@ import getBitHash2D_vec2_wgsl from './shader/math/getBitHash2D_vec2.wgsl';
 import getBitHash3D_vec3_wgsl from './shader/math/getBitHash3D_vec3.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
+import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
+import linear_to_srgb_vec4_wgsl from './shader/color/linear_to_srgb_vec4.wgsl';
+import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
+import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
@@ -47,6 +51,10 @@ export namespace MathLibrary {
 export namespace ColorLibrary {
     export const rgb_to_ycocg = rgb_to_ycocg_wgsl;
     export const ycocg_to_rgb = ycocg_to_rgb_wgsl;
+    export const linear_to_srgb_vec3 = linear_to_srgb_vec3_wgsl;
+    export const linear_to_srgb_vec4 = linear_to_srgb_vec4_wgsl;
+    export const srgb_to_linear_vec3 = srgb_to_linear_vec3_wgsl;
+    export const srgb_to_linear_vec4 = srgb_to_linear_vec4_wgsl;
     export const get_luminance = get_luminance_wgsl;
 }
 

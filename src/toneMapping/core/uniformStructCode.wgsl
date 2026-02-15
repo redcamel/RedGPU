@@ -1,3 +1,5 @@
+#redgpu_include color.linear_to_srgb_vec3
+
 struct Uniforms {
     exposure: f32,
     contrast: f32,
@@ -5,27 +7,6 @@ struct Uniforms {
     _pad: f32,
 };
 
-/// 선형 RGB → sRGB 감마 보정
-fn linearToSRGB(linearColor: vec3<f32>) -> vec3<f32> {
-    // sRGB 표준 변환 공식
-    let a = 0.055;
-    let cutoff = 0.0031308;
-    let gamma = 2.4;
-
-    var srgb: vec3<f32>;
-
-    // 각 채널별로 처리
-    for (var i = 0; i < 3; i++) {
-        let c = linearColor[i];
-        if (c <= cutoff) {
-            srgb[i] = 12.92 * c;
-        } else {
-            srgb[i] = (1.0 + a) * pow(c, 1.0 / gamma) - a;
-        }
-    }
-
-    return srgb;
-}
 fn linearToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
     let exposed = color * exposure;
     return exposed;
@@ -90,7 +71,7 @@ fn acesFilmicHillToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
 fn getFinalSRGB(toneMappedColor:vec3<f32>, contrast: f32, brightness: f32) -> vec3<f32> {
     let contrastRGB = applyContrast(toneMappedColor, uniforms.contrast);
     let finalLinearRGB = applyBrightness(contrastRGB, uniforms.brightness);
-    let finalSRGB = clamp(linearToSRGB(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
+    let finalSRGB = clamp(linear_to_srgb_vec3(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
     return finalSRGB;
 }
 /// 명암 조절
