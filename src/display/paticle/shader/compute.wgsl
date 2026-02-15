@@ -1,3 +1,5 @@
+#redgpu_include math.getHash1D
+
 // 파티클 구조체 선언
 struct Info {
     startValue: f32,
@@ -190,12 +192,9 @@ fn calEasing(n: f32, easingType: f32) -> f32 {
     }
     return m;
 }
-fn rand(n: f32) -> f32 {
-    return fract(sin(n) * 43758.5453123);
-}
 fn randomRange(min:f32, max:f32, v:f32)->f32
 {
-    var newValue:f32 = rand(v);
+    var newValue:f32 = getHash1D(v);
     return (newValue * (max-min)) + min;
 }
 fn compute_value(tInfo: Info, lifeRatio: f32) -> f32 {
