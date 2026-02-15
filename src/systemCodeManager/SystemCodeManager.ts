@@ -1,5 +1,10 @@
-import hash12_wgsl from './shader/math/hash12.wgsl';
-import hash33_wgsl from './shader/math/hash33.wgsl';
+import getHash1D_wgsl from './shader/math/getHash1D.wgsl';
+import getHash1D_vec2_wgsl from './shader/math/getHash1D_vec2.wgsl';
+import getHash1D_vec3_wgsl from './shader/math/getHash1D_vec3.wgsl';
+import getHash1D_vec4_wgsl from './shader/math/getHash1D_vec4.wgsl';
+import getHash2D_vec2_wgsl from './shader/math/getHash2D_vec2.wgsl';
+import getHash3D_vec3_wgsl from './shader/math/getHash3D_vec3.wgsl';
+import getInterleavedGradientNoise_wgsl from './shader/math/getInterleavedGradientNoise.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
@@ -13,32 +18,125 @@ import SystemFragmentCode from '../resources/systemCode/shader/fragment';
  */
 export namespace MathLibrary {
     /**
-     * [KO] 2D 입력 좌표를 기반으로 1D 해시 값을 생성합니다.
-     * [EN] Generates a 1D hash value based on 2D input coordinates.
+     * [KO] 단일 시드값을 기반으로 1D 난수(0.0 ~ 1.0)를 생성합니다. (비트 연산 기반 고정밀)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) based on a single seed value. (High-precision Bitwise)
      *
      * ```wgsl
-     * fn hash12(p: vec2<f32>) -> f32 {
-     *     var p3 = fract(vec3<f32>(p.xyx) * 0.1031);
-     *     p3 += dot(p3, p3.yzx + 33.33);
-     *     return fract((p3.x + p3.y) * p3.z);
+     * fn getHash1D(seed: f32) -> f32 {
+     *     var x = bitcast<u32>(seed);
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     return f32(x) / 4294967296.0;
      * }
      * ```
      */
-    export const hash12 = hash12_wgsl;
-
+    export const getHash1D = getHash1D_wgsl;
     /**
-     * [KO] 3D 입력 벡터를 기반으로 3D 해시 벡터를 생성합니다.
-     * [EN] Generates a 3D hash vector based on a 3D input vector.
+     * [KO] 2D 좌표를 기반으로 1D 난수(0.0 ~ 1.0)를 생성합니다. (비트 연산 및 정수 변환 기반)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) based on 2D coordinates. (Bitwise and Integer conversion)
      *
      * ```wgsl
-     * fn hash33(p: vec3<f32>) -> vec3<f32> {
-     *     var p3 = fract(p * vec3<f32>(0.1031, 0.1030, 0.0973));
-     *     p3 += dot(p3, p3.yxz + 33.33);
-     *     return fract((p3.xxy + p3.yzz) * p3.zyx);
+     * fn getHash1D_vec2(coord: vec2<f32>) -> f32 {
+     *     // [KO] 명시적 정수 변환으로 좌표 계의 안정성 확보
+     *     // [EN] Explicit integer conversion for coordinate system stability
+     *     let q = vec2<u32>(abs(coord));
+     *     var x = q.x ^ q.y;
+     *     
+     *     // [KO] 고품질 비트 믹서 (PCG 스타일)
+     *     // [EN] High-quality bit mixer (PCG style)
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     return f32(x) / 4294967296.0;
      * }
      * ```
      */
-    export const hash33 = hash33_wgsl;
+    export const getHash1D_vec2 = getHash1D_vec2_wgsl;
+    /**
+     * [KO] 3D 입력(예: 위치 + 시간)을 기반으로 1D 난수(0.0 ~ 1.0)를 생성합니다. (비트 연산 기반)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) based on 3D input (e.g., position + time). (Bitwise)
+     *
+     * ```wgsl
+     * fn getHash1D_vec3(v: vec3<f32>) -> f32 {
+     *     var q = bitcast<vec3<u32>>(abs(v));
+     *     var x = q.x ^ q.y ^ q.z;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     return f32(x) / 4294967296.0;
+     * }
+     * ```
+     */
+    export const getHash1D_vec3 = getHash1D_vec3_wgsl;
+    /**
+     * [KO] 4D 입력(예: 위치 + 시간)을 기반으로 1D 난수(0.0 ~ 1.0)를 생성합니다. (비트 연산 기반)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) based on 4D input (e.g., position + time). (Bitwise)
+     *
+     * ```wgsl
+     * fn getHash1D_vec4(v: vec4<f32>) -> f32 {
+     *     var q = bitcast<vec4<u32>>(v);
+     *     var x = q.x ^ q.y ^ q.z ^ q.w;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     return f32(x) / 4294967296.0;
+     * }
+     * ```
+     */
+    export const getHash1D_vec4 = getHash1D_vec4_wgsl;
+    /**
+     * [KO] 2D 좌표를 기반으로 2D 난수 벡터를 생성합니다. (비트 연산 및 정수 변환 기반)
+     * [EN] Generates a 2D random vector based on 2D coordinates. (Bitwise and Integer conversion)
+     *
+     * ```wgsl
+     * fn getHash2D_vec2(coord: vec2<f32>) -> vec2<f32> {
+     *     var q = vec2<u32>(abs(coord));
+     *     q = q * vec2<u32>(1597334677u, 3812015801u);
+     *     let n = (q.x ^ q.y) * 1597334677u;
+     *     q = vec2<u32>(n ^ (n >> 16u), n ^ (n << 16u));
+     *     return vec2<f32>(q) / 4294967296.0;
+     * }
+     * ```
+     */
+    export const getHash2D_vec2 = getHash2D_vec2_wgsl;
+    /**
+     * [KO] 3D 위치를 기반으로 3D 난수 벡터를 생성합니다. (비트 연산 및 정수 변환 기반)
+     * [EN] Generates a 3D random vector based on a 3D position. (Bitwise and Integer conversion)
+     *
+     * ```wgsl
+     * fn getHash3D_vec3(position: vec3<f32>) -> vec3<f32> {
+     *     var q = vec3<u32>(abs(position));
+     *     var x = q.x ^ q.y ^ q.z;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     
+     *     // [KO] 각 채널에 대해 서로 다른 오프셋을 주어 벡터 구성
+     *     // [EN] Give different offsets for each channel to compose vector
+     *     let r = f32(x) / 4294967296.0;
+     *     x = (x * 1103515245u + 12345u);
+     *     let g = f32(x) / 4294967296.0;
+     *     x = (x * 1103515245u + 12345u);
+     *     let b = f32(x) / 4294967296.0;
+     *     
+     *     return vec3<f32>(r, g, b);
+     * }
+     * ```
+     */
+    export const getHash3D_vec3 = getHash3D_vec3_wgsl;
+    /**
+     * [KO] Jorge Jimenez의 Interleaved Gradient Noise를 생성합니다. (디더링 및 샘플 회전용 초고속 노이즈)
+     * [EN] Generates Interleaved Gradient Noise by Jorge Jimenez. (Ultra-fast noise for dithering and sample rotation)
+     *
+     * ```wgsl
+     * fn getInterleavedGradientNoise(screenCoord: vec2<f32>) -> f32 {
+     *     let magic = vec3<f32>(0.06711056, 0.00583715, 52.9829189);
+     *     return fract(magic.z * fract(dot(screenCoord, magic.xy)));
+     * }
+     * ```
+     */
+    export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
 }
 
 /**
@@ -60,7 +158,6 @@ export namespace ColorLibrary {
      * ```
      */
     export const rgb_to_ycocg = rgb_to_ycocg_wgsl;
-
     /**
      * [KO] RGB 색상의 휘도(Luminance)를 계산합니다. (Rec. 709)
      * [EN] Calculates the luminance of an RGB color. (Rec. 709)
@@ -232,13 +329,13 @@ export namespace SystemCodeManager {
      */
     export const SYSTEM_UNIFORM = SYSTEM_UNIFORM_wgsl;
 
-    /** [KO] 수학 관련 라이브러리 [EN] Math related library */
+    /** [KO] 수학 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for mathematics. */
     export import math = MathLibrary;
 
-    /** [KO] 색상 관련 라이브러리 [EN] Color related library */
+    /** [KO] 색상 변환 및 처리 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for color conversion and processing. */
     export import color = ColorLibrary;
 
-    /** [KO] 깊이 관련 라이브러리 [EN] Depth related library */
+    /** [KO] 깊이(Depth) 및 좌표 복구 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for depth and position reconstruction. */
     export import depth = DepthLibrary;
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
@@ -246,8 +343,7 @@ export namespace SystemCodeManager {
     /** [KO] 시스템 Fragment 관련 레거시 코드 [EN] System Fragment related legacy code */
     export const fragment = SystemFragmentCode;
 
-    // [KO] 레거시 직접 참조 지원 (예: #redgpu_include FragmentOutput)
-    // [EN] Support legacy direct references (e.g., #redgpu_include FragmentOutput)
+    // [KO] 레거시 직접 참조 지원
     export const FragmentOutput = SystemFragmentCode.FragmentOutput;
     export const calcTintBlendMode = SystemFragmentCode.calcTintBlendMode;
     export const calcDirectionalShadowVisibility = SystemFragmentCode.calcDirectionalShadowVisibility;
