@@ -1,5 +1,5 @@
-// [KO] 2D 좌표를 기반으로 2D 난수 벡터를 생성합니다. (비트 연산 및 정수 변환 기반)
-// [EN] Generates a 2D random vector based on 2D coordinates. (Bitwise and Integer conversion)
+// [KO] 2D 좌표를 정수로 변환하여 2D 난수 벡터를 생성합니다. (안정적 그리드 기반)
+// [EN] Generates a 2D random vector by converting 2D coordinates to integers. (Stable Grid-based)
 fn getHash2D_vec2(coord: vec2<f32>) -> vec2<f32> {
     var q = vec2<u32>(abs(coord));
     q = q * vec2<u32>(1597334677u, 3812015801u);

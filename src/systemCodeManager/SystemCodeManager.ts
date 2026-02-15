@@ -5,6 +5,12 @@ import getHash1D_vec4_wgsl from './shader/math/getHash1D_vec4.wgsl';
 import getHash2D_vec2_wgsl from './shader/math/getHash2D_vec2.wgsl';
 import getHash3D_vec3_wgsl from './shader/math/getHash3D_vec3.wgsl';
 import getInterleavedGradientNoise_wgsl from './shader/math/getInterleavedGradientNoise.wgsl';
+import getBitHash1D_wgsl from './shader/math/getBitHash1D.wgsl';
+import getBitHash1D_vec2_wgsl from './shader/math/getBitHash1D_vec2.wgsl';
+import getBitHash1D_vec3_wgsl from './shader/math/getBitHash1D_vec3.wgsl';
+import getBitHash1D_vec4_wgsl from './shader/math/getBitHash1D_vec4.wgsl';
+import getBitHash2D_vec2_wgsl from './shader/math/getBitHash2D_vec2.wgsl';
+import getBitHash3D_vec3_wgsl from './shader/math/getBitHash3D_vec3.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
@@ -17,13 +23,14 @@ import SystemFragmentCode from '../resources/systemCode/shader/fragment';
  * [EN] Math related shader function library
  */
 export namespace MathLibrary {
+    // [KO] Grid 기반 안정적 해시 시리즈
     /**
-     * [KO] 단일 시드값을 기반으로 1D 난수(0.0 ~ 1.0)를 생성합니다. (비트 연산 기반 고정밀)
-     * [EN] Generates a 1D random number (0.0 ~ 1.0) based on a single seed value. (High-precision Bitwise)
+     * [KO] 단일 시드값을 정수로 변환하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (안정적 그리드 기반)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) by converting a single seed value to an integer. (Stable Grid-based)
      *
      * ```wgsl
      * fn getHash1D(seed: f32) -> f32 {
-     *     var x = bitcast<u32>(seed);
+     *     var x = u32(abs(seed)); // [KO] 명시적 정수 변환 [EN] Explicit integer conversion
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
      *     x = (x >> 16u) ^ x;
@@ -33,18 +40,13 @@ export namespace MathLibrary {
      */
     export const getHash1D = getHash1D_wgsl;
     /**
-     * [KO] 2D 좌표를 기반으로 1D 난수(0.0 ~ 1.0)를 생성합니다. (비트 연산 및 정수 변환 기반)
-     * [EN] Generates a 1D random number (0.0 ~ 1.0) based on 2D coordinates. (Bitwise and Integer conversion)
+     * [KO] 2D 좌표를 정수로 변환하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (안정적 그리드 기반)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) by converting 2D coordinates to integers. (Stable Grid-based)
      *
      * ```wgsl
      * fn getHash1D_vec2(coord: vec2<f32>) -> f32 {
-     *     // [KO] 명시적 정수 변환으로 좌표 계의 안정성 확보
-     *     // [EN] Explicit integer conversion for coordinate system stability
      *     let q = vec2<u32>(abs(coord));
      *     var x = q.x ^ q.y;
-     *     
-     *     // [KO] 고품질 비트 믹서 (PCG 스타일)
-     *     // [EN] High-quality bit mixer (PCG style)
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
      *     x = (x >> 16u) ^ x;
@@ -54,12 +56,12 @@ export namespace MathLibrary {
      */
     export const getHash1D_vec2 = getHash1D_vec2_wgsl;
     /**
-     * [KO] 3D 입력(예: 위치 + 시간)을 기반으로 1D 난수(0.0 ~ 1.0)를 생성합니다. (비트 연산 기반)
-     * [EN] Generates a 1D random number (0.0 ~ 1.0) based on 3D input (e.g., position + time). (Bitwise)
+     * [KO] 3D 벡터를 정수로 변환하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (안정적 그리드 기반)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) by converting a 3D vector to integers. (Stable Grid-based)
      *
      * ```wgsl
      * fn getHash1D_vec3(v: vec3<f32>) -> f32 {
-     *     var q = bitcast<vec3<u32>>(abs(v));
+     *     let q = vec3<u32>(abs(v));
      *     var x = q.x ^ q.y ^ q.z;
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
@@ -70,12 +72,12 @@ export namespace MathLibrary {
      */
     export const getHash1D_vec3 = getHash1D_vec3_wgsl;
     /**
-     * [KO] 4D 입력(예: 위치 + 시간)을 기반으로 1D 난수(0.0 ~ 1.0)를 생성합니다. (비트 연산 기반)
-     * [EN] Generates a 1D random number (0.0 ~ 1.0) based on 4D input (e.g., position + time). (Bitwise)
+     * [KO] 4D 벡터를 정수로 변환하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (안정적 그리드 기반)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) by converting a 4D vector to integers. (Stable Grid-based)
      *
      * ```wgsl
      * fn getHash1D_vec4(v: vec4<f32>) -> f32 {
-     *     var q = bitcast<vec4<u32>>(v);
+     *     let q = vec4<u32>(abs(v));
      *     var x = q.x ^ q.y ^ q.z ^ q.w;
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
@@ -86,8 +88,8 @@ export namespace MathLibrary {
      */
     export const getHash1D_vec4 = getHash1D_vec4_wgsl;
     /**
-     * [KO] 2D 좌표를 기반으로 2D 난수 벡터를 생성합니다. (비트 연산 및 정수 변환 기반)
-     * [EN] Generates a 2D random vector based on 2D coordinates. (Bitwise and Integer conversion)
+     * [KO] 2D 좌표를 정수로 변환하여 2D 난수 벡터를 생성합니다. (안정적 그리드 기반)
+     * [EN] Generates a 2D random vector by converting 2D coordinates to integers. (Stable Grid-based)
      *
      * ```wgsl
      * fn getHash2D_vec2(coord: vec2<f32>) -> vec2<f32> {
@@ -101,8 +103,8 @@ export namespace MathLibrary {
      */
     export const getHash2D_vec2 = getHash2D_vec2_wgsl;
     /**
-     * [KO] 3D 위치를 기반으로 3D 난수 벡터를 생성합니다. (비트 연산 및 정수 변환 기반)
-     * [EN] Generates a 3D random vector based on a 3D position. (Bitwise and Integer conversion)
+     * [KO] 3D 위치를 정수로 변환하여 3D 난수 벡터를 생성합니다. (안정적 그리드 기반)
+     * [EN] Generates a 3D random vector by converting a 3D position to integers. (Stable Grid-based)
      *
      * ```wgsl
      * fn getHash3D_vec3(position: vec3<f32>) -> vec3<f32> {
@@ -112,8 +114,6 @@ export namespace MathLibrary {
      *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
      *     x = (x >> 16u) ^ x;
      *     
-     *     // [KO] 각 채널에 대해 서로 다른 오프셋을 주어 벡터 구성
-     *     // [EN] Give different offsets for each channel to compose vector
      *     let r = f32(x) / 4294967296.0;
      *     x = (x * 1103515245u + 12345u);
      *     let g = f32(x) / 4294967296.0;
@@ -125,6 +125,8 @@ export namespace MathLibrary {
      * ```
      */
     export const getHash3D_vec3 = getHash3D_vec3_wgsl;
+    
+    // [KO] 초고속 노이즈
     /**
      * [KO] Jorge Jimenez의 Interleaved Gradient Noise를 생성합니다. (디더링 및 샘플 회전용 초고속 노이즈)
      * [EN] Generates Interleaved Gradient Noise by Jorge Jimenez. (Ultra-fast noise for dithering and sample rotation)
@@ -137,6 +139,109 @@ export namespace MathLibrary {
      * ```
      */
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
+
+    // [KO] Bitcast 기반 초정밀 해시 시리즈
+    /**
+     * [KO] 단일 시드값의 비트 구조를 보존하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (초정밀)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) by preserving the bit structure of a single seed value. (Ultra-precise)
+     *
+     * ```wgsl
+     * fn getBitHash1D(seed: f32) -> f32 {
+     *     var x = bitcast<u32>(seed);
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     return f32(x) / 4294967296.0;
+     * }
+     * ```
+     */
+    export const getBitHash1D = getBitHash1D_wgsl;
+    /**
+     * [KO] 2D 벡터의 비트 구조를 보존하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (초정밀)
+     * [EN] Generates a 1D random number (0.0 ~ 1.0) by preserving the bit structure of a 2D vector. (Ultra-precise)
+     *
+     * ```wgsl
+     * fn getBitHash1D_vec2(coord: vec2<f32>) -> f32 {
+     *     let q = bitcast<vec2<u32>>(coord);
+     *     var x = q.x ^ q.y;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     return f32(x) / 4294967296.0;
+     * }
+     * ```
+     */
+    export const getBitHash1D_vec2 = getBitHash1D_vec2_wgsl;
+    /**
+     * [KO] 3D 벡터의 비트 구조를 보존하여 1D 난수를 생성합니다. (초정밀)
+     * [EN] Generates a 1D random number by preserving the bit structure of a 3D vector. (Ultra-precise)
+     *
+     * ```wgsl
+     * fn getBitHash1D_vec3(v: vec3<f32>) -> f32 {
+     *     var q = bitcast<vec3<u32>>(v);
+     *     var x = q.x ^ q.y ^ q.z;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     return f32(x) / 4294967296.0;
+     * }
+     * ```
+     */
+    export const getBitHash1D_vec3 = getBitHash1D_vec3_wgsl;
+    /**
+     * [KO] 4D 벡터의 비트 구조를 보존하여 1D 난수를 생성합니다. (초정밀)
+     * [EN] Generates a 1D random number by preserving the bit structure of a 4D vector. (Ultra-precise)
+     *
+     * ```wgsl
+     * fn getBitHash1D_vec4(v: vec4<f32>) -> f32 {
+     *     var q = bitcast<vec4<u32>>(v);
+     *     var x = q.x ^ q.y ^ q.z ^ q.w;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     return f32(x) / 4294967296.0;
+     * }
+     * ```
+     */
+    export const getBitHash1D_vec4 = getBitHash1D_vec4_wgsl;
+    /**
+     * [KO] 2D 벡터의 비트 구조를 보존하여 2D 난수 벡터를 생성합니다. (초정밀)
+     * [EN] Generates a 2D random vector by preserving the bit structure of a 2D vector. (Ultra-precise)
+     *
+     * ```wgsl
+     * fn getBitHash2D_vec2(coord: vec2<f32>) -> vec2<f32> {
+     *     var q = bitcast<vec2<u32>>(coord);
+     *     q = q * vec2<u32>(1597334677u, 3812015801u);
+     *     let n = (q.x ^ q.y) * 1597334677u;
+     *     q = vec2<u32>(n ^ (n >> 16u), n ^ (n << 16u));
+     *     return vec2<f32>(q) / 4294967296.0;
+     * }
+     * ```
+     */
+    export const getBitHash2D_vec2 = getBitHash2D_vec2_wgsl;
+    /**
+     * [KO] 3D 벡터의 비트 구조를 보존하여 3D 난수 벡터를 생성합니다. (초정밀)
+     * [EN] Generates a 3D random vector by preserving the bit structure of a 3D vector. (Ultra-precise)
+     *
+     * ```wgsl
+     * fn getBitHash3D_vec3(position: vec3<f32>) -> vec3<f32> {
+     *     var q = bitcast<vec3<u32>>(position);
+     *     var x = q.x ^ q.y ^ q.z;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
+     *     x = (x >> 16u) ^ x;
+     *     
+     *     let r = f32(x) / 4294967296.0;
+     *     x = (x * 1103515245u + 12345u);
+     *     let g = f32(x) / 4294967296.0;
+     *     x = (x * 1103515245u + 12345u);
+     *     let b = f32(x) / 4294967296.0;
+     *     
+     *     return vec3<f32>(r, g, b);
+     * }
+     * ```
+     */
+    export const getBitHash3D_vec3 = getBitHash3D_vec3_wgsl;
 }
 
 /**
@@ -193,11 +298,6 @@ export namespace DepthLibrary {
 /**
  * [KO] 엔진 시스템에서 전역적으로 사용되는 셰이더 코드 및 공통 라이브러리를 통합 관리하는 레지스트리입니다.
  * [EN] A registry that integrates and manages shader code and common libraries used globally in the engine.
- * 
- * [KO] 모든 자산은 `SystemCodeManager.category.function` 형태의 계층적 구조를 통해 접근할 수 있으며, 
- * RedGPU 셰이더 전처리기를 통해 `#redgpu_include` 매크로로 참조 가능합니다.
- * [EN] All assets can be accessed through a hierarchical structure in the form of `SystemCodeManager.category.function`,
- * and can be referenced via the `#redgpu_include` macro through the RedGPU shader preprocessor.
  * 
  * @category Shader
  */

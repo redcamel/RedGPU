@@ -1,7 +1,7 @@
-// [KO] 3D 위치를 정수로 변환하여 3D 난수 벡터를 생성합니다. (안정적 그리드 기반)
-// [EN] Generates a 3D random vector by converting a 3D position to integers. (Stable Grid-based)
-fn getHash3D_vec3(position: vec3<f32>) -> vec3<f32> {
-    var q = vec3<u32>(abs(position));
+// [KO] 3D 벡터의 비트 구조를 보존하여 3D 난수 벡터를 생성합니다. (초정밀)
+// [EN] Generates a 3D random vector by preserving the bit structure of a 3D vector. (Ultra-precise)
+fn getBitHash3D_vec3(position: vec3<f32>) -> vec3<f32> {
+    var q = bitcast<vec3<u32>>(position);
     var x = q.x ^ q.y ^ q.z;
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
