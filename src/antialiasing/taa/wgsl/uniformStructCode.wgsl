@@ -1,5 +1,6 @@
 #redgpu_include color.get_luminance
-#redgpu_include depth.linearizeDepth
+#redgpu_include color.rgb_to_ycocg
+#redgpu_include color.ycocg_to_rgb
 
 // ===== 1. 구조체 및 유틸리티 (Alpha 지원 확장) =====
 struct Uniforms {
@@ -25,22 +26,6 @@ struct SampledColor {
     ycocg: vec3<f32>,
     alpha: f32,       
 };
-
-// RGB -> YCoCg 변환
-fn rgb_to_ycocg(rgb: vec3<f32>) -> vec3<f32> {
-    let y  = dot(rgb, vec3<f32>(0.25, 0.5, 0.25));
-    let co = dot(rgb, vec3<f32>(0.5, 0.0, -0.5));
-    let cg = dot(rgb, vec3<f32>(-0.25, 0.5, -0.25));
-    return vec3<f32>(y, co, cg);
-}
-
-// YCoCg -> RGB 변환
-fn ycocg_to_rgb(ycocg: vec3<f32>) -> vec3<f32> {
-    let y  = ycocg.x;
-    let co = ycocg.y;
-    let cg = ycocg.z;
-    return vec3<f32>(y + co - cg, y + cg, y - co - cg);
-}
 
 fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let currLinear = linearizeDepth(currDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
