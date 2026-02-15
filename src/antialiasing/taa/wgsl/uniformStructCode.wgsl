@@ -140,8 +140,11 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
         let sampleRGBA = textureSampleLevel(tex, smp, coords[i], 0.0);
         let sampleRGB = max(sampleRGBA.rgb, vec3<f32>(0.0));
         let sampleYCoCg = rgb_to_ycocg(sampleRGB);
+        let sampleLum = get_luminance(sampleRGB);
 
-        let w = weights[i] * (1.0 / (1.0 + sampleYCoCg.x));
+        // [KO] 엔진 표준 휘도(Rec. 709)를 기반으로 안티 플리커 가중치 계산
+        // [EN] Calculate anti-flicker weight based on engine standard luminance (Rec. 709)
+        let w = weights[i] * (1.0 / (1.0 + sampleLum));
 
         sumRGB += sampleRGB * w;
         sumYCoCg += sampleYCoCg * w;
