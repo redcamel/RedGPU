@@ -83,7 +83,10 @@ struct ClusterLight_Clusters {
 };
 
 fn linearDepth(depthSample : f32) -> f32 {
-    return systemUniforms.camera.farClipping*systemUniforms.camera.nearClipping / fma(depthSample, systemUniforms.camera.nearClipping-systemUniforms.camera.farClipping, systemUniforms.camera.farClipping);
+    let n = systemUniforms.camera.nearClipping;
+    let f = systemUniforms.camera.farClipping;
+    let d = clamp(depthSample, 0.0, 1.0);
+    return (n * f) / max(1e-6, f - d * (f - n));
 }
 fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
     let tile = getClusterLightTile(fragCoord);
