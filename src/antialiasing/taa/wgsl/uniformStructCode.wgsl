@@ -1,4 +1,5 @@
 #redgpu_include color.get_luminance
+#redgpu_include depth.linearizeDepth
 
 // ===== 1. 구조체 및 유틸리티 (Alpha 지원 확장) =====
 struct Uniforms {
@@ -42,8 +43,8 @@ fn ycocg_to_rgb(ycocg: vec3<f32>) -> vec3<f32> {
 }
 
 fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
-    let currLinear = linearDepth(currDepth);
-    let prevLinear = linearDepth(prevDepth);
+    let currLinear = linearizeDepth(currDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
+    let prevLinear = linearizeDepth(prevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
     let depthDiff = abs(currLinear - prevLinear);
     // [KO] 선형 거리 차이에 따른 신뢰도 계산 (0.1m 차이부터 감쇄 시작, 0.5m 이상이면 신뢰도 0)
     // [EN] Depth confidence based on linear distance (Decay starts at 0.1m, 0 confidence if > 0.5m)
