@@ -64,6 +64,8 @@ struct SystemUniform {
 @group(0) @binding(13) var cameraVolumeTexture: texture_3d<f32>;
 @group(0) @binding(14) var tSampler: sampler;
 
+#redgpu_include depth.linearizeDepth
+
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
 const clusterLight_tileCount = vec3<u32>(REDGPU_DEFINE_TILE_COUNT_Xu, REDGPU_DEFINE_TILE_COUNT_Yu, REDGPU_DEFINE_TILE_COUNT_Zu);
 
@@ -84,12 +86,6 @@ struct ClusterLight_Clusters {
     cubeList : array<ClusterLight_ClusterCube, REDGPU_DEFINE_TOTAL_TILES>
 };
 
-fn linearDepth(depthSample : f32) -> f32 {
-    let n = systemUniforms.camera.nearClipping;
-    let f = systemUniforms.camera.farClipping;
-    let d = clamp(depthSample, 0.0, 1.0);
-    return (n * f) / max(1e-6, f - d * (f - n));
-}
 fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
     let tile = getClusterLightTile(fragCoord);
     return tile.x +
@@ -98,9 +94,11 @@ fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
 
 }
 fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
-    let sliceScale = f32(clusterLight_tileCount.z) / log2(systemUniforms.camera.farClipping / systemUniforms.camera.nearClipping);
-    let sliceBias = -(f32(clusterLight_tileCount.z) * log2(systemUniforms.camera.nearClipping) / log2(systemUniforms.camera.farClipping / systemUniforms.camera.nearClipping));
-    let zTile = u32(max(log2(linearDepth(fragCoord.z)) * sliceScale + sliceBias, 0.0));
+    let near = systemUniforms.camera.nearClipping;
+    let far = systemUniforms.camera.farClipping;
+    let sliceScale = f32(clusterLight_tileCount.z) / log2(far / near);
+    let sliceBias = -(f32(clusterLight_tileCount.z) * log2(near) / log2(far / near));
+    let zTile = u32(max(log2(linearizeDepth(fragCoord.z, near, far)) * sliceScale + sliceBias, 0.0));
     return vec3<u32>(u32(fragCoord.x / (systemUniforms.resolution.x / f32(clusterLight_tileCount.x))),
                      u32(fragCoord.y / (systemUniforms.resolution.y / f32(clusterLight_tileCount.y))),
                      zTile);
