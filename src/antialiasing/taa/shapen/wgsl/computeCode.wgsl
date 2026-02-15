@@ -11,12 +11,11 @@ let rightRGBA  = textureLoad(sourceTexture, min(index + vec2<u32>(1u, 0u), dimen
 let upRGBA     = textureLoad(sourceTexture, index - vec2<u32>(0u, select(0u, 1u, index.y > 0u)));
 let downRGBA   = textureLoad(sourceTexture, min(index + vec2<u32>(0u, 1u), dimensions - 1u));
 
-let lumaWeight = vec3<f32>(0.299, 0.587, 0.114);
-let lCenter = dot(centerRGBA.rgb, lumaWeight);
-let lLeft   = dot(leftRGBA.rgb, lumaWeight);
-let lRight  = dot(rightRGBA.rgb, lumaWeight);
-let lUp     = dot(upRGBA.rgb, lumaWeight);
-let lDown   = dot(downRGBA.rgb, lumaWeight);
+let lCenter = get_luminance(centerRGBA.rgb);
+let lLeft   = get_luminance(leftRGBA.rgb);
+let lRight  = get_luminance(rightRGBA.rgb);
+let lUp     = get_luminance(upRGBA.rgb);
+let lDown   = get_luminance(downRGBA.rgb);
 
 let minL = min(lCenter, min(min(lLeft, lRight), min(lUp, lDown)));
 let maxL = max(lCenter, max(max(lLeft, lRight), max(lUp, lDown)));

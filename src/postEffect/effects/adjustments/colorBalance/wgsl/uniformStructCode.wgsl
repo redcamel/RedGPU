@@ -1,3 +1,5 @@
+#redgpu_include color.get_luminance
+
 struct Uniforms {
     shadowCyanRed:f32,
     shadowMagentaGreen:f32,

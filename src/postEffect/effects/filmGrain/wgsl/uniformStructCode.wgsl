@@ -1,3 +1,5 @@
+#redgpu_include color.get_luminance
+
 struct Uniforms {
     filmGrainIntensity: f32,
     filmGrainResponse: f32,

@@ -40,10 +40,10 @@ let colorGrain = vec3<f32>(noiseR, noiseG, noiseB);
 
 var grainColor = mix(vec3<f32>(monoGrain), colorGrain, coloredGrain_value);
 
-let grainLuminance = dot(grainColor, vec3<f32>(0.299, 0.587, 0.114));
+let grainLuminance = get_luminance(grainColor);
 grainColor = mix(vec3<f32>(grainLuminance), grainColor, grainSaturation_value);
 
-let luminance = dot(originalColor.rgb, vec3<f32>(0.299, 0.587, 0.114));
+let luminance = get_luminance(originalColor.rgb);
 let luminanceWeight = pow(max(luminance, 0.01), filmGrainResponse_value);
 
 let grainIntensity = filmGrainIntensity_value * luminanceWeight;
