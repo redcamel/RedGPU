@@ -1,3 +1,5 @@
+#redgpu_include math.getInterleavedGradientNoise
+
 struct Uniforms {
     radius: f32,
     intensity: f32,
@@ -30,7 +32,9 @@ fn reconstructViewNormal(gBufferNormalData: vec4<f32>) -> vec3<f32> {
 }
 
 fn getNoiseVec(p: vec2<f32>) -> vec3<f32> {
-    let noise = fract(52.9829189 * fract(dot(p, vec2<f32>(0.06711056, 0.00583715))));
+    // [KO] 표준 math.getInterleavedGradientNoise를 사용하여 회전 노이즈를 생성합니다.
+    // [EN] Generate rotation noise using standard math.getInterleavedGradientNoise.
+    let noise = getInterleavedGradientNoise(p);
     let angle = noise * 6.28318530718;
     return vec3<f32>(cos(angle), sin(angle), 0.0);
 }
