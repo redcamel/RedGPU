@@ -6,7 +6,7 @@ let dimensionsVec = vec2<f32>(dimW, dimH);
 let amount = uniforms.amount / min(dimW, dimH);
 
 const loopSize = 30.0;
-let offset = random(global_id, 0.0);
+let offset = getHash1D_vec2(vec2<f32>(global_id.xy));
 
 let center = vec2<f32>(dimW * 0.5 + uniforms.centerX, dimH * 0.5 + uniforms.centerY);
 let global_id_vec = vec2<f32>(f32(global_id.x), f32(global_id.y));

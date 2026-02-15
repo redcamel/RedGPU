@@ -4,7 +4,7 @@ let dimW = f32(dimensions.x);
 let size_value: f32 = uniforms.size;
 var sum: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
 
-var offset = random(global_id, 0.0);
+var offset = getHash1D_vec2(vec2<f32>(global_id.xy));
 var total = 0.0;
 let loopSize = 10.0;
 

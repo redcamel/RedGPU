@@ -9,7 +9,7 @@ let normalizedDir = select(vec2<f32>(0.0), direction / dirLength, dirLength > 0.
 let dir = normalizedDir * uniforms.amount;
 
 const loopSize = 30.0;
-let offset = random(global_id, 0.0);
+let offset = getHash1D_vec2(vec2<f32>(global_id.xy));
 
 let global_id_vec = vec2<f32>(f32(global_id.x), f32(global_id.y));
 
