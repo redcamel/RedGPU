@@ -27,7 +27,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let ray_origin = vec3<f32>(0.0, h_c + r, 0.0);
 
     // 적분 시작
-    var luminance = vec3<f32>(0.0);
+    var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
 
     let steps = 32;
@@ -74,12 +74,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             // [KO] 전체 소멸 계수 (에너지 소실)
             let extinction = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m) + params.ozoneAbsorption * rho_o + vec3<f32>(params.heightFogDensity * rho_f);
 
-            luminance += transmittance * (step_scat + scat_ms) * step_size;
+            radiance += transmittance * (step_scat + scat_ms) * step_size;
             transmittance *= exp(-extinction * step_size);
         }
     }
 
     // 결과 저장 (RGB: 산란광, A: 평균 투과율)
     let avg_trans = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
-    textureStore(cameraVolumeTexture, global_id, vec4<f32>(luminance, avg_trans));
+    textureStore(cameraVolumeTexture, global_id, vec4<f32>(radiance, avg_trans));
 }

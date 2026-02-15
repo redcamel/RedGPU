@@ -42,7 +42,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, r);
     let dist_limit = select(t_max, t_earth, t_earth > 0.0);
 
-    var luminance = vec3<f32>(0.0);
+    var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
 
     if (dist_limit > 0.0) {
@@ -84,11 +84,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             let ext = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m) + params.ozoneAbsorption * rho_o + vec3<f32>(params.heightFogDensity * rho_f);
 
-            luminance += transmittance * (scat + ms_scat) * step_size;
+            radiance += transmittance * (scat + ms_scat) * step_size;
             transmittance *= exp(-ext * step_size);
             if (all(transmittance < vec3<f32>(0.001))) { break; }
         }
     }
 
-    textureStore(skyViewTexture, global_id.xy, vec4<f32>(luminance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
+    textureStore(skyViewTexture, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
 }
