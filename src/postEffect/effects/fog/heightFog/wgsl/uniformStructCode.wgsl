@@ -18,27 +18,18 @@ fn isFiniteVec3(v: vec3<f32>) -> bool {
 }
 
 fn reconstructWorldPositionUltraPrecise(screenCoord: vec2<f32>, depth: f32) -> vec3<f32> {
-    let ndcX = fma(screenCoord.x, 2.0, -1.0);
-    let ndcY = fma(-screenCoord.y, 2.0, 1.0);
+    // [KO] WebGPU 표준 NDC 재구성 (Y-Up, Depth 0-1)
+    // [EN] Reconstruct standard WebGPU NDC (Y-Up, Depth 0-1)
+    let ndc = vec3<f32>(
+        screenCoord.x * 2.0 - 1.0,
+        (1.0 - screenCoord.y) * 2.0 - 1.0,
+        depth
+    );
 
-    let safeDepth = clamp(depth, 1e-7, 1.0 - 1e-7);
-    let ndc = vec3<f32>(ndcX, ndcY, safeDepth);
+    let worldPos4 = systemUniforms.inverseProjectionCameraMatrix * vec4<f32>(ndc, 1.0);
+    let worldPos = worldPos4.xyz / worldPos4.w;
 
-    let clipPos = vec4<f32>(ndc, 1.0);
-    let worldPos4 = systemUniforms.inverseProjectionCameraMatrix * clipPos;
-
-    let epsilon = 1e-6;
-    let w = select(worldPos4.w, epsilon, abs(worldPos4.w) < epsilon);
-    let worldPos = worldPos4.xyz / w;
-
-    let maxCoord = 1e6;
-    let stabilizedX = clamp(worldPos.x, -maxCoord, maxCoord);
-    let stabilizedY = clamp(worldPos.y, -maxCoord, maxCoord);
-    let stabilizedZ = clamp(worldPos.z, -maxCoord, maxCoord);
-
-    let finalPos = vec3<f32>(stabilizedX, stabilizedY, stabilizedZ);
-
-    return select(vec3<f32>(0.0, 0.0, 0.0), finalPos, isFiniteVec3(finalPos));
+    return select(vec3<f32>(0.0), worldPos, isFiniteVec3(worldPos));
 }
 
 fn calculateHeightFogFactor(screenCoord: vec2<f32>, depth: f32) -> f32 {
@@ -150,45 +141,16 @@ fn calculateAbsoluteHeightFogMaxPrecision(worldHeight: f32) -> f32 {
 }
 
 fn getRayDirectionMaxPrecision(screenCoord: vec2<f32>) -> vec3<f32> {
-    let centeredX = fma(screenCoord.x, 1.0, -0.5);
-    let centeredY = fma(screenCoord.y, 1.0, -0.5);
+    // [KO] WebGPU 표준 NDC 재구성 (Y-Up, Depth 1.0 기준)
+    let ndc = vec3<f32>(
+        screenCoord.x * 2.0 - 1.0,
+        (1.0 - screenCoord.y) * 2.0 - 1.0,
+        1.0
+    );
 
-    let ndcX = centeredX * 2.0;
-    let ndcY = -(centeredY * 2.0);
-    let ndc = vec3<f32>(ndcX, ndcY, 1.0);
+    let worldPos4 = systemUniforms.inverseProjectionCameraMatrix * vec4<f32>(ndc, 1.0);
+    let worldPos = worldPos4.xyz / worldPos4.w;
 
-    let clipPos = vec4<f32>(ndc, 1.0);
-    let worldPos4 = systemUniforms.inverseProjectionCameraMatrix * clipPos;
-
-    let epsilon = 1e-6;
-    let w = select(worldPos4.w, epsilon, abs(worldPos4.w) < epsilon);
-    let worldPos = worldPos4.xyz / w;
-
-    let cameraPos = systemUniforms.camera.cameraPosition;
-    let rayDir = worldPos - cameraPos;
-
-    let rayLength = length(rayDir);
-    let minLength = 1e-6;
-
-    if (rayLength < minLength) {
-        return vec3<f32>(0.0, 0.0, 1.0);
-    }
-
-    let normalizedRay = rayDir / rayLength;
-
-    let safeRayX = clamp(normalizedRay.x, -0.999, 0.999);
-    let safeRayY = clamp(normalizedRay.y, -0.999, 0.999);
-    let safeRayZ = clamp(normalizedRay.z, -0.999, 0.999);
-
-    let safeRay = vec3<f32>(safeRayX, safeRayY, safeRayZ);
-
-    let finalRayLength = length(safeRay);
-    let isValidRay = finalRayLength > 1e-6 && isFiniteValue(finalRayLength);
-
-    if (isValidRay) {
-        let finalRay = safeRay / finalRayLength;
-        return select(vec3<f32>(0.0, 0.0, 1.0), finalRay, isFiniteVec3(finalRay));
-    }
-
-    return vec3<f32>(0.0, 0.0, 1.0);
+    let rayDir = normalize(worldPos - systemUniforms.camera.cameraPosition);
+    return select(vec3<f32>(0.0, 0.0, 1.0), rayDir, isFiniteVec3(rayDir));
 }
