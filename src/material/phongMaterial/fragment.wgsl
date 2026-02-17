@@ -1,7 +1,8 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcTintBlendMode;
 #redgpu_include calcDirectionalShadowVisibility;
-#redgpu_include normalFunctions;
+#redgpu_include math.getTBNFromCotangent
+#redgpu_include math.getNormalFromNormalMap
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
 #redgpu_include calculateMotionVector;
@@ -112,7 +113,8 @@ fn main(inputData:InputData) -> FragmentOutput {
     var N = normalize(inputData.vertexNormal) ;
     #redgpu_if normalTexture
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
-        N = perturb_normal( N, inputData.vertexPosition, inputData.uv, normalSamplerColor, u_normalScale ) ;
+        let tbn = getTBNFromCotangent(N, inputData.vertexPosition, inputData.uv);
+        N = getNormalFromNormalMap(normalSamplerColor, tbn, -u_normalScale);
     #redgpu_endIf
     //
     var finalColor:vec4<f32>;

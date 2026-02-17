@@ -21,6 +21,8 @@ import getRayDirection_wgsl from './shader/math/getRayDirection.wgsl';
 import getReflectionVectorFromViewDirection_wgsl from './shader/math/getReflectionVectorFromViewDirection.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/getTBNFromVertexTangent.wgsl';
 import getTBN_wgsl from './shader/math/getTBN.wgsl';
+import getTBNFromCotangent_wgsl from './shader/math/getTBNFromCotangent.wgsl';
+import getNormalFromNormalMap_wgsl from './shader/math/getNormalFromNormalMap.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
 import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
@@ -65,6 +67,8 @@ export namespace MathLibrary {
     export const getReflectionVectorFromViewDirection = getReflectionVectorFromViewDirection_wgsl;
     export const getTBNFromVertexTangent = getTBNFromVertexTangent_wgsl;
     export const getTBN = getTBN_wgsl;
+    export const getTBNFromCotangent = getTBNFromCotangent_wgsl;
+    export const getNormalFromNormalMap = getNormalFromNormalMap_wgsl;
 
     // 수학 상수
     export const PI = 'const PI: f32 = 3.141592653589793;';
@@ -125,7 +129,6 @@ export namespace SystemCodeManager {
     export const calcTintBlendMode = SystemFragmentCode.calcTintBlendMode;
     export const calcDirectionalShadowVisibility = SystemFragmentCode.calcDirectionalShadowVisibility;
     export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;
-    export const normalFunctions = SystemFragmentCode.normalFunctions;
     export const calcPrePathBackground = SystemFragmentCode.calcPrePathBackground;
     export const calculateMotionVector = SystemFragmentCode.calculateMotionVector;
     export const picking = SystemFragmentCode.picking;

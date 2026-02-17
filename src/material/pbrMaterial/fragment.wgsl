@@ -1,7 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcDirectionalShadowVisibility;
 #redgpu_include calcTintBlendMode;
-#redgpu_include normalFunctions;
 #redgpu_include drawPicking;
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
@@ -13,6 +12,8 @@
 #redgpu_include math.getReflectionVectorFromViewDirection
 #redgpu_include math.getTBNFromVertexTangent
 #redgpu_include math.getTBN
+#redgpu_include math.getTBNFromCotangent
+#redgpu_include math.getNormalFromNormalMap
 
 struct Uniforms {
     useVertexColor: u32,
@@ -481,13 +482,12 @@ fn main(inputData:InputData) -> FragmentOutput {
     {
         var targetUv = select(normalUV, 1.0 - normalUV, backFaceYn);
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
-        N = perturb_normal(
-            N,
-            input_vertexPosition,
-            targetUv,
+        let tbn = getTBNFromCotangent(N, input_vertexPosition, targetUv);
+        N = getNormalFromNormalMap(
             vec3<f32>(normalSamplerColor.r, 1.0 - normalSamplerColor.g, normalSamplerColor.b),
-            u_normalScale
-        ) ;
+            tbn,
+            -u_normalScale
+        );
         N = select(N, select(N, -N, backFaceYn), u_useVertexTangent);
     }
     #redgpu_else
@@ -583,13 +583,12 @@ fn main(inputData:InputData) -> FragmentOutput {
                     targetUv = 1.0 - targetUv;
                 }
                 clearcoatNormal = clearcoatNormalSampler.rgb;
-                clearcoatNormal = perturb_normal(
-                    N,
-                    input_vertexPosition,
-                    targetUv,
+                let clearcoatTBN = getTBNFromCotangent(N, input_vertexPosition, targetUv);
+                clearcoatNormal = getNormalFromNormalMap(
                     clearcoatNormal,
-                    u_normalScale
-                ) ;
+                    clearcoatTBN,
+                    -u_normalScale
+                );
                 if(u_useVertexTangent){
                     if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
                 }
@@ -746,8 +745,9 @@ fn main(inputData:InputData) -> FragmentOutput {
        anisotropicDirection = rotationMtx * anisotropicDirection;
 
        // 3. 최종 이방성 탄젠트/바이탄젠트 계산 (TBN 공간으로 투영)
-       anisotropicT = normalize(T * anisotropicDirection.x + B * anisotropicDirection.y);
-       anisotropicB = normalize(cross(N, anisotropicT));
+       let anisotropicTBN = getTBN(N, T * anisotropicDirection.x + B * anisotropicDirection.y);
+       anisotropicT = anisotropicTBN[0];
+       anisotropicB = anisotropicTBN[1];
     }
     #redgpu_endIf
 
