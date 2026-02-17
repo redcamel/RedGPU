@@ -587,7 +587,7 @@ fn main(inputData:InputData) -> FragmentOutput {
                 clearcoatNormal = getNormalFromNormalMap(
                     clearcoatNormal,
                     clearcoatTBN,
-                    -u_normalScale
+                    u_normalScale
                 );
                 if(u_useVertexTangent){
                     if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }

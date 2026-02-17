@@ -1,19 +1,22 @@
 /**
- * [KO] 노멀 맵의 RGB 데이터와 TBN 행렬을 결합하여 최종 법선 벡터를 계산합니다.
- * [EN] Combines normal map RGB data with a TBN matrix to calculate the final normal vector.
+ * [KO] 노멀 맵 데이터를 탄젠트 공간의 법선 벡터로 변환하고 TBN 행렬을 적용합니다.
+ * [EN] Converts normal map data to a tangent space normal vector and applies the TBN matrix.
  *
- * @param normalMapColor - [KO] 노멀 맵에서 샘플링된 RGB 데이터 [0, 1] [EN] RGB data sampled from normal map [0, 1]
+ * @param normalMapColor - [KO] 노멀 맵에서 샘플링된 데이터 (RG 또는 RGB) [EN] Sampled data from normal map (RG or RGB)
  * @param tbn - [KO] 3x3 TBN 행렬 [EN] 3x3 TBN matrix
- * @param normalScale - [KO] 노멀 강도 조절 계수 [EN] Normal scale adjustment factor
- * @returns [KO] 정규화된 최종 법선 벡터 [EN] Final normalized normal vector
+ * @param normalScale - [KO] 노멀 강도 [EN] Normal scale
+ * @returns [KO] 월드/뷰 공간의 정규화된 법선 벡터 [EN] Normalized normal vector in world/view space
  */
 fn getNormalFromNormalMap(normalMapColor: vec3<f32>, tbn: mat3x3<f32>, normalScale: f32) -> vec3<f32> {
-    // 1. RGB [0, 1] -> 탄젠트 공간 노멀 [-1, 1] 변환
-    var tangentNormal = normalMapColor * 2.0 - 1.0;
-    
-    // 2. Normal Scale 적용 (XY 성분만 스케일링)
-    tangentNormal = vec3<f32>(tangentNormal.xy * normalScale, tangentNormal.z);
-    
-    // 3. TBN 행렬을 통한 공간 변환 및 정규화
-    return normalize(tbn * tangentNormal);
+    // 1. Unpack XY: [0, 1] -> [-1, 1]
+    var n: vec2<f32> = normalMapColor.xy * 2.0 - 1.0;
+
+    // 2. Apply Scale
+    n *= normalScale;
+
+    // 3. Z-Reconstruction: z = sqrt(1.0 - x^2 - y^2)
+    let z: f32 = sqrt(max(0.0, 1.0 - dot(n, n)));
+
+    // 4. Transform to World/View Space and Normalize
+    return normalize(tbn * vec3<f32>(n, z));
 }
