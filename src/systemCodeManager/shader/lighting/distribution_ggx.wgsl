@@ -1,4 +1,5 @@
 #redgpu_include math.PI
+#redgpu_include math.EPSILON
 
 /**
  * [KO] GGX(Trowbridge-Reitz) 법선 분포 함수(NDF)를 계산합니다.
@@ -17,6 +18,6 @@ fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
     let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
     let denom_squared = denom * denom;
 
-    return nom / max(1e-6, denom_squared * PI);
+    return nom / max(EPSILON, denom_squared * PI);
 }
 

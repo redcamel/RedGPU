@@ -1,6 +1,7 @@
 #redgpu_include lighting.distribution_ggx
 #redgpu_include lighting.geometry_smith
 #redgpu_include lighting.fresnel_schlick
+#redgpu_include math.EPSILON
 
 /**
  * [KO] Cook-Torrance 모델을 사용하여 물리 기반 스펙큘러 BRDF를 계산합니다.
@@ -35,10 +36,10 @@ fn specular_brdf(
     let F = fresnel_schlick(LdotH, F0);
 
     // 4. Cook-Torrance BRDF 합산
-    // [KO] 분모를 max(NdotV, 1e-4) * max(NdotL, 1e-4)로 처리하여 하이라이트 정밀도 극대화
-    // [EN] Maximizes highlight precision by using max(NdotV, 1e-4) * max(NdotL, 1e-4) in the denominator.
+    // [KO] 분모를 시스템 표준 EPSILON을 사용하여 방어함으로써 수치적 안정성과 정밀도 확보
+    // [EN] Ensures numerical stability and precision by protecting the denominator using the system standard EPSILON.
     let numerator = D * G * F;
-    let denominator = 4.0 * max(NdotV, 1e-4) * max(NdotL, 1e-4);
+    let denominator = 4.0 * max(NdotV, EPSILON) * max(NdotL, EPSILON);
 
     return numerator / denominator;
 }

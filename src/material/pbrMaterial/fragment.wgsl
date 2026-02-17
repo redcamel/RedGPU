@@ -21,6 +21,10 @@
 #redgpu_include lighting.distribution_ggx
 #redgpu_include lighting.geometry_smith
 #redgpu_include lighting.specular_brdf
+#redgpu_include lighting.specular_btdf
+#redgpu_include lighting.diffuse_btdf
+#redgpu_include lighting.fresnel_mix
+#redgpu_include lighting.fresnel_coat
 
 struct Uniforms {
     useVertexColor: u32,
@@ -1320,111 +1324,6 @@ fn V_GGX_anisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32
    let v = 0.5 / (GGXV + GGXL);
    return clamp(v, 0.0, 1.0);
 }
-fn specular_btdf(
-    NdotV: f32,
-    NdotL: f32,
-    NdotH: f32,
-    VdotH: f32,
-    LdotH: f32,
-    roughness: f32,
-    F0: vec3<f32>,
-    ior: f32
-) -> vec3<f32> {
-    let eta: f32 = 1.0 / ior;
-
-    // GGX 분포 함수를 기존 roughness로 계산합니다.
-    // 여기서는 외부에서 받은 NdotH와 roughness 값을 사용해 D 계산
-    let D_rough: f32 = distribution_ggx(NdotH, roughness * roughness);
-
-    // ior가 1.0이면 미세 효과가 없으므로 D = 1.0이 되어야 합니다.
-    // 보간 인자 t를 통해 두 값을 혼합합니다.
-    let t: f32 = clamp((ior - 1.0) * 100.0, 0.0, 1.0);
-    let D: f32 = mix(1.0, D_rough, t);
-
-    // 기하학적 감쇠 계산
-    let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * NdotL) / VdotH));
-
-    // 프레넬 항 계산 (이미 F0가 외부에서 제공됨)
-    let F: vec3<f32> = fresnel_schlick(VdotH, F0);
-
-    let denom: f32 = (eta * VdotH + LdotH) * (eta * VdotH + LdotH);
-
-    // BTDF 공식 적용
-    let btdf: vec3<f32> =
-        (vec3<f32>(1.0) - F) *   // 투과되는 빛 (반사되지 않는 부분)
-        abs(VdotH * LdotH) *     // 미세면 가시성
-        (eta * eta) *           // 굴절률의 제곱
-        D *                     // 미세면 분포
-        G /                     // 기하학적 감쇠
-        (NdotV * denom + 0.001); // 분모항 (작은 값 추가로 나누기 오류 방지)
-
-    return btdf;
-}
-
-fn lambda_sheen_calc_l(x: f32, alpha_g: f32) -> f32 {
-    let one_minus_alpha_sq = (1.0 - alpha_g) * (1.0 - alpha_g);
-
-    let a = mix(21.5473, 25.3245, one_minus_alpha_sq);
-    let b = mix(3.82987, 3.32435, one_minus_alpha_sq);
-    let c = mix(0.19823, 0.16801, one_minus_alpha_sq);
-    let d = mix(-1.97760, -1.27393, one_minus_alpha_sq);
-    let e = mix(-4.32054, -4.85967, one_minus_alpha_sq);
-
-    return a / (1.0 + b * pow(x, c)) + d * x + e;
-}
-fn lambda_sheen(cos_theta: f32, alpha_g: f32) -> f32 {
-    if (abs(cos_theta) < 0.5) {
-        return exp(lambda_sheen_calc_l(cos_theta, alpha_g));
-    } else {
-        return exp(2.0 * lambda_sheen_calc_l(0.5, alpha_g) - lambda_sheen_calc_l(1.0 - cos_theta, alpha_g));
-    }
-}
-
-fn fresnel_coat(NdotV:f32, ior: f32, weight: f32, base: vec3<f32>, layer: vec3<f32>) -> vec3<f32> {
-    let f0: f32 = pow((1.0 - ior) / (1.0 + ior), 2.0);
-    let fr: f32 = f0 + (1.0 - f0) * pow(1.0 - abs(NdotV), 5.0);
-    return mix(base, layer, weight * fr);
-}
-fn fresnel_mix(
-    F0: vec3<f32>,
-    weight: f32,
-    base: vec3<f32>,
-    layer: vec3<f32>,
-    VdotH: f32
-) -> vec3<f32> {
-    var f0 = F0;
-    f0 = min(f0, vec3<f32>(1.0));
-    let fr = f0 + (1.0 - f0) * pow(1.0 - abs(VdotH), 5.0);
-    return (1 - weight * max(max(fr.x, fr.y), fr.z)) * base + weight * fr * layer;
-}
-fn fresnel_mix_ibl(
-    F0: vec3<f32>,
-    weight: f32,
-    base: vec3<f32>,
-    layer: vec3<f32>,
-    NdotV: f32
-) -> vec3<f32> {
-    var f0 = F0;
-    f0 = min(f0, vec3<f32>(1.0));
-    // Schlick의 프레넬 근사법 - 물리적으로 정확한 방식
-    let fr = f0 + (1.0 - f0) * pow(1.0 - max(NdotV, 0.0), 5.0);
-
-    // 물리적으로 올바른 블렌딩 방식: 에너지 보존 원칙을 준수
-    return base * (1.0 - fr * weight) + layer * fr * weight;
-}
-fn diffuse_brdf(NdotL:f32, albedo:vec3<f32>) -> vec3<f32> {
-
-    return albedo * NdotL * INV_PI;
-
-}
-
-
-fn diffuse_btdf(N: vec3<f32>, L: vec3<f32>, Albedo: vec3<f32>) -> vec3<f32> {
-    // 뒷면으로 들어오는 광선만 처리 (-dot(N,L)를 사용하여 음수만 양수로 변환하여 사용)
-    let cos_theta = max(-dot(N, L), 0.0);
-    return Albedo * cos_theta * INV_PI;
-}
-
 fn get_transformed_uv(
     input_uv: vec2<f32>,
     input_uv1: vec2<f32>,

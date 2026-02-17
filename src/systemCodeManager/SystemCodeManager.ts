@@ -38,6 +38,10 @@ import iridescent_fresnel_wgsl from './shader/lighting/iridescent_fresnel.wgsl';
 import distribution_ggx_wgsl from './shader/lighting/distribution_ggx.wgsl';
 import geometry_smith_wgsl from './shader/lighting/geometry_smith.wgsl';
 import specular_brdf_wgsl from './shader/lighting/specular_brdf.wgsl';
+import specular_btdf_wgsl from './shader/lighting/specular_btdf.wgsl';
+import diffuse_btdf_wgsl from './shader/lighting/diffuse_btdf.wgsl';
+import fresnel_mix_wgsl from './shader/lighting/fresnel_mix.wgsl';
+import fresnel_coat_wgsl from './shader/lighting/fresnel_coat.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -134,6 +138,10 @@ export namespace LightingLibrary {
     export const distribution_ggx = distribution_ggx_wgsl;
     export const geometry_smith = geometry_smith_wgsl;
     export const specular_brdf = specular_brdf_wgsl;
+    export const specular_btdf = specular_btdf_wgsl;
+    export const diffuse_btdf = diffuse_btdf_wgsl;
+    export const fresnel_mix = fresnel_mix_wgsl;
+    export const fresnel_coat = fresnel_coat_wgsl;
 }
 
 /**
