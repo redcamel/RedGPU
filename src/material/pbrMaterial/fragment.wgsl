@@ -14,6 +14,7 @@
 #redgpu_include math.tnb.getTBN
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
+#redgpu_include lighting.diffuse_brdf_disney
 
 struct Uniforms {
     useVertexColor: u32,
@@ -1508,21 +1509,6 @@ fn fresnel_mix_ibl(
     // 물리적으로 올바른 블렌딩 방식: 에너지 보존 원칙을 준수
     return base * (1.0 - fr * weight) + layer * fr * weight;
 }
-// Disney-style diffuse BRDF (언리얼과 유사)
-fn diffuse_brdf_disney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
-    if (NdotL <= 0.0) { return vec3<f32>(0.0); }
-
-    // Disney diffuse term
-    let energyBias = mix(0.0, 0.5, roughness);
-    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
-    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
-    let f0 = 1.0;
-    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
-    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
-
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
-}
-
 fn diffuse_brdf(NdotL:f32, albedo:vec3<f32>) -> vec3<f32> {
 
     return albedo * NdotL * INV_PI;

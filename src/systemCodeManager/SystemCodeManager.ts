@@ -31,6 +31,7 @@ import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
 import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
+import diffuse_brdf_disney_wgsl from './shader/lighting/diffuse_brdf_disney.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -116,6 +117,14 @@ export namespace DepthLibrary {
 }
 
 /**
+ * [KO] 조명 및 BRDF 관련 셰이더 함수 라이브러리
+ * [EN] Lighting and BRDF related shader function library
+ */
+export namespace LightingLibrary {
+    export const diffuse_brdf_disney = diffuse_brdf_disney_wgsl;
+}
+
+/**
  * [KO] 엔진 시스템에서 전역적으로 사용되는 셰이더 코드 및 공통 라이브러리를 통합 관리하는 레지스트리입니다.
  * [EN] A registry that integrates and manages shader code and common libraries used globally in the engine.
  * 
@@ -131,6 +140,8 @@ export namespace SystemCodeManager {
     export import color = ColorLibrary;
     /** [KO] 깊이(Depth) 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for depth. */
     export import depth = DepthLibrary;
+    /** [KO] 조명 및 BRDF 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for lighting and BRDF. */
+    export import lighting = LightingLibrary;
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
     export const vertex = SystemVertexCode;
