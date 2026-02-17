@@ -13,6 +13,7 @@ struct PrefilterUniforms {
 
 #redgpu_include math.PI
 #redgpu_include math.PI2
+#redgpu_include math.getTBN
 
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
     var bits = bits_in;
@@ -42,13 +43,14 @@ fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     let cosTheta = sqrt((1.0 - xi.y) / (1.0 + (a * a - 1.0) * xi.y));
     let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
 
-    let H = vec3<f32>(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+    let H_local = vec3<f32>(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 
+    // [KO] 공통 라이브러리 math.getTBN을 사용하여 일관된 기저 생성
+    // [EN] Create consistent basis using common library math.getTBN
     let up = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(N.z) < 0.999);
-    let tangent = normalize(cross(up, N));
-    let bitangent = cross(N, tangent);
+    let tbn = getTBN(N, up);
 
-    return normalize(tangent * H.x + bitangent * H.y + N * H.z);
+    return normalize(tbn * H_local);
 }
 
 @compute @workgroup_size(8, 8, 1)

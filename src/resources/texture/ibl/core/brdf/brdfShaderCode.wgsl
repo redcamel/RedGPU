@@ -3,6 +3,7 @@
 
 #redgpu_include math.PI
 #redgpu_include math.PI2
+#redgpu_include math.getTBN
 
 fn radicalInverse_VdC(bits: u32) -> f32 {
     var b = bits;
@@ -24,13 +25,12 @@ fn importanceSampleGGX(Xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32>
     let cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a * a - 1.0) * Xi.y));
     let sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
-    let H = vec3<f32>(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+    let H_local = vec3<f32>(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 
     let up = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(N.z) < 0.999);
-    let tangent = normalize(cross(up, N));
-    let bitangent = cross(N, tangent);
+    let tbn = getTBN(N, up);
 
-    return normalize(tangent * H.x + bitangent * H.y + N * H.z);
+    return normalize(tbn * H_local);
 }
 
 fn geometrySchlickGGX(NdotV: f32, roughness: f32) -> f32 {

@@ -9,6 +9,7 @@
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
+#redgpu_include math.getTBN
 
 // Hammersley 시퀀스를 위한 비트 반전 함수 (표준 IBL 기법)
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
@@ -43,12 +44,10 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
     let normal = normalize((faceMatrices[face] * localPos).xyz);
 
-    // Duff Orthonormal Basis
-    let s = select(1.0, -1.0, normal.z < 0.0);
-    let a = -1.0 / (s + normal.z);
-    let b = normal.x * normal.y * a;
-    let tangent = vec3<f32>(1.0 + s * normal.x * normal.x * a, s * b, -s * normal.x);
-    let bitangent = vec3<f32>(b, s + normal.y * normal.y * a, -normal.y);
+    // [KO] 공통 라이브러리 math.getTBN을 사용하여 일관된 기저 생성
+    // [EN] Create consistent basis using common library math.getTBN
+    let up = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(normal.z) < 0.999);
+    let tbn = getTBN(normal, up);
 
     var irradiance = vec3<f32>(0.0);
     var totalWeight = 0.0;
@@ -67,7 +66,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let sinTheta = sqrt(xi.y);
 
         let sampleVec = vec3<f32>(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
-        let worldSample = normalize(tangent * sampleVec.x + bitangent * sampleVec.y + normal * sampleVec.z);
+        let worldSample = normalize(tbn * sampleVec);
 
         // PDF 계산: 코사인 가중치 샘플링의 경우 cosTheta / PI
         let pdf = max(cosTheta, 0.001) * INV_PI;
