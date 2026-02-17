@@ -1,4 +1,4 @@
-#redgpu_include math.getWorldNormalFromGNormalBuffer
+#redgpu_include math.reconstruct.getWorldNormalFromGNormalBuffer
 
 /**
  * [KO] G-Buffer 데이터와 카메라 행렬을 사용하여 뷰 공간 법선 벡터를 복구합니다.

@@ -1,4 +1,4 @@
-#redgpu_include math.getReflectionVectorFromViewDirection
+#redgpu_include math.direction.getReflectionVectorFromViewDirection
 
 fn calcPrePathBackground(
     u_useKHR_materials_volume:bool, thicknessParameter:f32, u_KHR_dispersion:f32, u_KHR_attenuationDistance:f32, u_KHR_attenuationColor:vec3<f32>,

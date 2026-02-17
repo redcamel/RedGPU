@@ -9,7 +9,7 @@
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
 #redgpu_include math.direction.getViewDirection
-#redgpu_include math.getReflectionVectorFromViewDirection
+#redgpu_include math.direction.getReflectionVectorFromViewDirection
 #redgpu_include math.tnb.getTBNFromVertexTangent
 #redgpu_include math.tnb.getTBN
 #redgpu_include math.tnb.getTBNFromCotangent

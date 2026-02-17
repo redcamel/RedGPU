@@ -1,4 +1,4 @@
-#redgpu_include math.getNDCFromDepth
+#redgpu_include math.reconstruct.getNDCFromDepth
 
 /**
  * [KO] 깊이 정보를 바탕으로 뷰(카메라) 공간의 좌표를 복구합니다.

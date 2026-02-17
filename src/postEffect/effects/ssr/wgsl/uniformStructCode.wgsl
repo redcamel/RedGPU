@@ -1,10 +1,10 @@
 #redgpu_include math.getInterleavedGradientNoise
 #redgpu_include depth.linearizeDepth
 #redgpu_include math.EPSILON
-#redgpu_include math.getViewPositionFromDepth
-#redgpu_include math.getWorldNormalFromGNormalBuffer
+#redgpu_include math.reconstruct.getViewPositionFromDepth
+#redgpu_include math.reconstruct.getWorldNormalFromGNormalBuffer
 #redgpu_include math.direction.getViewDirection
-#redgpu_include math.getReflectionVectorFromViewDirection
+#redgpu_include math.direction.getReflectionVectorFromViewDirection
 
 struct Uniforms {
      maxSteps: u32,

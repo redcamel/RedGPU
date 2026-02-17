@@ -11,14 +11,14 @@ import getBitHash1D_vec3_wgsl from './shader/math/hash/getBitHash1D_vec3.wgsl';
 import getBitHash1D_vec4_wgsl from './shader/math/hash/getBitHash1D_vec4.wgsl';
 import getBitHash2D_vec2_wgsl from './shader/math/hash/getBitHash2D_vec2.wgsl';
 import getBitHash3D_vec3_wgsl from './shader/math/hash/getBitHash3D_vec3.wgsl';
-import getNDCFromDepth_wgsl from './shader/math/getNDCFromDepth.wgsl';
-import getWorldPositionFromDepth_wgsl from './shader/math/getWorldPositionFromDepth.wgsl';
-import getViewPositionFromDepth_wgsl from './shader/math/getViewPositionFromDepth.wgsl';
-import getWorldNormalFromGNormalBuffer_wgsl from './shader/math/getWorldNormalFromGNormalBuffer.wgsl';
-import getViewNormalFromGNormalBuffer_wgsl from './shader/math/getViewNormalFromGNormalBuffer.wgsl';
+import getNDCFromDepth_wgsl from './shader/math/reconstruct/getNDCFromDepth.wgsl';
+import getWorldPositionFromDepth_wgsl from './shader/math/reconstruct/getWorldPositionFromDepth.wgsl';
+import getViewPositionFromDepth_wgsl from './shader/math/reconstruct/getViewPositionFromDepth.wgsl';
+import getWorldNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getWorldNormalFromGNormalBuffer.wgsl';
+import getViewNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getViewNormalFromGNormalBuffer.wgsl';
 import getViewDirection_wgsl from './shader/math/direction/getViewDirection.wgsl';
 import getRayDirection_wgsl from './shader/math/direction/getRayDirection.wgsl';
-import getReflectionVectorFromViewDirection_wgsl from './shader/math/getReflectionVectorFromViewDirection.wgsl';
+import getReflectionVectorFromViewDirection_wgsl from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
@@ -59,20 +59,21 @@ export namespace MathLibrary {
 
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
 
-    // 공간 및 벡터 복구
-    export const getNDCFromDepth = getNDCFromDepth_wgsl;
-    export const getWorldPositionFromDepth = getWorldPositionFromDepth_wgsl;
-    export const getViewPositionFromDepth = getViewPositionFromDepth_wgsl;
-    export const getWorldNormalFromGNormalBuffer = getWorldNormalFromGNormalBuffer_wgsl;
-    export const getViewNormalFromGNormalBuffer = getViewNormalFromGNormalBuffer_wgsl;
-
     /** [KO] 방향(Direction) 관련 셰이더 함수 [EN] Direction related shader functions */
     export namespace direction {
         export const getViewDirection = getViewDirection_wgsl;
         export const getRayDirection = getRayDirection_wgsl;
+        export const getReflectionVectorFromViewDirection = getReflectionVectorFromViewDirection_wgsl;
     }
 
-    export const getReflectionVectorFromViewDirection = getReflectionVectorFromViewDirection_wgsl;
+    /** [KO] 공간 및 벡터 복구(Reconstruction) 관련 셰이더 함수 [EN] Space and vector reconstruction related shader functions */
+    export namespace reconstruct {
+        export const getNDCFromDepth = getNDCFromDepth_wgsl;
+        export const getWorldPositionFromDepth = getWorldPositionFromDepth_wgsl;
+        export const getViewPositionFromDepth = getViewPositionFromDepth_wgsl;
+        export const getWorldNormalFromGNormalBuffer = getWorldNormalFromGNormalBuffer_wgsl;
+        export const getViewNormalFromGNormalBuffer = getViewNormalFromGNormalBuffer_wgsl;
+    }
 
     /** [KO] TNB(Tangent, Normal, Bitangent) 관련 셰이더 함수 [EN] TNB related shader functions */
     export namespace tnb {
