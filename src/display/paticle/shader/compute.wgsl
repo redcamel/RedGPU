@@ -47,6 +47,7 @@ struct SimParams {
 #redgpu_include math.PI
 #redgpu_include math.HPI
 #redgpu_include math.PI2
+#redgpu_include math.DEG_TO_RAD
 
 fn calEasing(n: f32, easingType: f32) -> f32 {
     var m: f32 = n;
@@ -165,7 +166,7 @@ fn calEasing(n: f32, easingType: f32) -> f32 {
         case 25: {
             if (m == 0.0) { m = 0.0; }
             else if (m == 1.0) { m = 1.0; }
-            else { m -= 1.0; m = -1.0 * pow(2.0, 10.0 * m) * sin((m - 0.075) * (PI2) / 0.3); }
+            else { m -= 1.0; m = -1.0 * pow(2.0, 10.0 * m) * sin((m - 0.075) * PI2 / 0.3); }
         }
         // ElasticIn
         case 26: {
@@ -267,11 +268,11 @@ fn main(
     particles[index].valueScale = compute_value(targetInfo, lifeRatio);
     // rotation
     targetInfo = infoRotation[index].infoX;
-    particles[index].valueRotation.x =  compute_value(targetInfo, lifeRatio) * PI / 180.0;
+    particles[index].valueRotation.x =  compute_value(targetInfo, lifeRatio) * DEG_TO_RAD;
     targetInfo = infoRotation[index].infoY;
-    particles[index].valueRotation.y =  compute_value(targetInfo, lifeRatio) * PI / 180.0;
+    particles[index].valueRotation.y =  compute_value(targetInfo, lifeRatio) * DEG_TO_RAD;
     targetInfo = infoRotation[index].infoZ;
-    particles[index].valueRotation.z =  compute_value(targetInfo, lifeRatio) * PI / 180.0;
+    particles[index].valueRotation.z =  compute_value(targetInfo, lifeRatio) * DEG_TO_RAD;
 
 
 }

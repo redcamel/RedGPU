@@ -18,6 +18,7 @@ class DOFUnified extends ASinglePassPostEffect {
         super(redGPUContext);
         const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = this;
         const computeCode = `
+            #redgpu_include math.PI2
             struct Uniforms {
                 nearBlurSize: f32,
                 farBlurSize: f32,
@@ -102,7 +103,7 @@ class DOFUnified extends ASinglePassPostEffect {
                 let maxRadius = min(blurRadius, maxBlurSize);
                 /* Near blur에 더 많은 샘플 적용 */
                 let samples = select(8, 16, isNear); /* near=16, far=8 */
-                let angleStep = 6.28318530718 / f32(samples);
+                let angleStep = PI2 / f32(samples);
                 
                 let originalSample = textureLoad(sourceTexture, center);
                 let originalColor = originalSample.rgb;
@@ -156,7 +157,7 @@ class DOFUnified extends ASinglePassPostEffect {
                 if (isNear && maxRadius > 2.0) {
                     let additionalSamples = 8;
                     let innerRadius = maxRadius * 0.3;
-                    let innerAngleStep = 6.28318530718 / f32(additionalSamples);
+                    let innerAngleStep = PI2 / f32(additionalSamples);
                     
                     for (var i = 0; i < additionalSamples; i = i + 1) {
                         let angle = f32(i) * innerAngleStep + 0.5; /* 약간의 오프셋 */

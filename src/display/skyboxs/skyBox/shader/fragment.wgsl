@@ -1,5 +1,7 @@
 #redgpu_include FragmentOutput
 #redgpu_include color.get_luminance
+#redgpu_include math.PI
+#redgpu_include math.PI2
 struct Uniforms {
     opacity: f32,
     blur: f32,
@@ -22,8 +24,8 @@ fn sphericalToUV(dir: vec3<f32>) -> vec2<f32> {
     let phi = atan2(normalizedDir.z, normalizedDir.x);
     let theta = acos(clamp(normalizedDir.y, -1.0, 1.0));
 
-    let u = (phi + 3.14159265359) / (2.0 * 3.14159265359);
-    let v = theta / 3.14159265359;
+    let u = (phi + PI) / PI2;
+    let v = theta / PI;
 
     return vec2<f32>(u, v);
 }
