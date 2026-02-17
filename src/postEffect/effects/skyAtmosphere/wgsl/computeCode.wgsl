@@ -82,7 +82,7 @@ if (t_earth > 0.0) {
     
     // 태양 디스크 합성
     let view_sun_cos = dot(viewDir, sunDir);
-    let sun_rad = uniforms.sunSize * (PI / 180.0);
+    let sun_rad = uniforms.sunSize * DEG_TO_RAD;
     let sun_mask = smoothstep(cos(sun_rad) - 0.001, cos(sun_rad), view_sun_cos);
     let sun_trans = get_transmittance(transmittanceTexture, tSampler, camH, sunDir.y, atmH);
     atmosphereBackground += sun_mask * sun_trans * (uniforms.sunIntensity * 100.0);

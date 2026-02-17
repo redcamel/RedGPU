@@ -23,7 +23,7 @@
         return;
     }
     // 2. 뷰 공간(View Space) 데이터 복원
-    let viewPos      = reconstructViewPosition(screenCoord, depth);
+    let viewPos      = reconstructViewPositionFromDepth((vec2<f32>(screenCoord) + 0.5) / vec2<f32>(texSize), depth, systemUniforms.inverseProjectionMatrix);
     let viewNormal   = reconstructViewNormal(textureLoad(gBufferNormalTexture, screenCoord, 0));
     let distToCamera = -viewPos.z;
 
@@ -71,7 +71,7 @@
 
         if (realDepth < 0.001) { continue; }
 
-        let realViewPos = reconstructViewPosition(sampleCoord, realDepth);
+        let realViewPos = reconstructViewPositionFromDepth(sampleUV, realDepth, systemUniforms.inverseProjectionMatrix);
 
         // 자가 차폐 방지를 위한 적응형 바이어스 계산
         let adaptiveBias = uniforms.bias * (1.0 + distToCamera * uniforms.biasDistanceScale);

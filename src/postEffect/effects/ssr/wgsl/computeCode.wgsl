@@ -25,7 +25,8 @@ if (precomputedReflectionStrength < 0.05) {
     return;
 }
 
-let worldPos = reconstructWorldPosition(screenCoord, depth);
+let uv = (vec2<f32>(screenCoord) + 0.5) / vec2<f32>(texDims);
+let worldPos = reconstructWorldPosition(uv, depth);
 let worldNormal = reconstructWorldNormal(gBufferNormalData);
 
 // 노멀 유효성 체크

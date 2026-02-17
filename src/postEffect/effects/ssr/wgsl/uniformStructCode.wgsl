@@ -1,6 +1,7 @@
 #redgpu_include math.getInterleavedGradientNoise
 #redgpu_include depth.linearizeDepth
 #redgpu_include math.EPSILON
+#redgpu_include depth.reconstructViewPositionFromDepth
 
 struct Uniforms {
      maxSteps: u32,
@@ -17,26 +18,10 @@ struct Uniforms {
      return textureDimensions(depthTexture);
  }
 
- fn reconstructWorldPosition(screenCoord: vec2<i32>, depth: f32) -> vec3<f32> {
-     let texDims = getTextureDimensions();
-     let invTexDims = 1.0 / vec2<f32>(texDims);
-     let uv = (vec2<f32>(screenCoord) + 0.5) * invTexDims;
-
-     // [KO] 표준 linearizeDepth를 사용하여 뷰 공간의 선형 Z 값 복구
-     let linearZ = linearizeDepth(depth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
-     
-     // [KO] NDC 좌표 재구성 (표준 0 ~ 1 깊이 범위 기준)
-     let ndc = vec3<f32>(
-         uv.x * 2.0 - 1.0,
-         (1.0 - uv.y) * 2.0 - 1.0, // WGSL 스크린 좌표계 보정 (Y-Down to Y-Up)
-         depth
-     );
-
-     // [KO] 역투영 행렬을 통한 뷰 공간 복원
-     let viewPos4 = systemUniforms.inverseProjectionMatrix * vec4<f32>(ndc, 1.0);
-     let viewPos = viewPos4.xyz / viewPos4.w;
-     
-     // [KO] 역카메라 행렬을 통한 월드 공간 복원
+ fn reconstructWorldPosition(uv: vec2<f32>, depth: f32) -> vec3<f32> {
+     // 1. View 공간 복원 (표준 함수 사용)
+     let viewPos = reconstructViewPositionFromDepth(uv, depth, systemUniforms.inverseProjectionMatrix);
+     // 2. World 공간 변환 (카메라 역행렬 사용)
      let worldPos4 = systemUniforms.camera.inverseCameraMatrix * vec4<f32>(viewPos, 1.0);
      return worldPos4.xyz;
  }
@@ -112,7 +97,7 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCo
             continue;
         }
 
-        let sampledWorldPos = reconstructWorldPosition(coord, sampledDepth);
+        let sampledWorldPos = reconstructWorldPosition(currentScreenUV, sampledDepth);
         let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;

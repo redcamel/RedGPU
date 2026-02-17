@@ -2,6 +2,7 @@
 #redgpu_include math.PI2
 #redgpu_include math.HPI
 #redgpu_include math.INV_PI
+#redgpu_include math.DEG_TO_RAD
 const MAX_TAU: f32 = 50.0;
 
 // [KO] 대기 산란 시스템 통합 파라미터 구조체 (16바이트 정렬 완료)

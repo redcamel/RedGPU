@@ -1,4 +1,5 @@
 #redgpu_include math.EPSILON
+#redgpu_include depth.reconstructWorldPositionFromDepth
 struct Uniforms {
     fogType: u32,
     density: f32,
@@ -19,17 +20,7 @@ fn isFiniteVec3(v: vec3<f32>) -> bool {
 }
 
 fn reconstructWorldPositionUltraPrecise(screenCoord: vec2<f32>, depth: f32) -> vec3<f32> {
-    // [KO] WebGPU 표준 NDC 재구성 (Y-Up, Depth 0-1)
-    // [EN] Reconstruct standard WebGPU NDC (Y-Up, Depth 0-1)
-    let ndc = vec3<f32>(
-        screenCoord.x * 2.0 - 1.0,
-        (1.0 - screenCoord.y) * 2.0 - 1.0,
-        depth
-    );
-
-    let worldPos4 = systemUniforms.inverseProjectionCameraMatrix * vec4<f32>(ndc, 1.0);
-    let worldPos = worldPos4.xyz / worldPos4.w;
-
+    let worldPos = reconstructWorldPositionFromDepth(screenCoord, depth, systemUniforms.inverseProjectionCameraMatrix);
     return select(vec3<f32>(0.0), worldPos, isFiniteVec3(worldPos));
 }
 
@@ -142,16 +133,7 @@ fn calculateAbsoluteHeightFogMaxPrecision(worldHeight: f32) -> f32 {
 }
 
 fn getRayDirectionMaxPrecision(screenCoord: vec2<f32>) -> vec3<f32> {
-    // [KO] WebGPU 표준 NDC 재구성 (Y-Up, Depth 1.0 기준)
-    let ndc = vec3<f32>(
-        screenCoord.x * 2.0 - 1.0,
-        (1.0 - screenCoord.y) * 2.0 - 1.0,
-        1.0
-    );
-
-    let worldPos4 = systemUniforms.inverseProjectionCameraMatrix * vec4<f32>(ndc, 1.0);
-    let worldPos = worldPos4.xyz / worldPos4.w;
-
+    let worldPos = reconstructWorldPositionFromDepth(screenCoord, 1.0, systemUniforms.inverseProjectionCameraMatrix);
     let rayDir = normalize(worldPos - systemUniforms.camera.cameraPosition);
     return select(vec3<f32>(0.0, 0.0, 1.0), rayDir, isFiniteVec3(rayDir));
 }

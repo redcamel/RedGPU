@@ -19,6 +19,9 @@ import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
 import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
+import getNDCFromDepth_wgsl from './shader/depth/getNDCFromDepth.wgsl';
+import reconstructWorldPositionFromDepth_wgsl from './shader/depth/reconstructWorldPositionFromDepth.wgsl';
+import reconstructViewPositionFromDepth_wgsl from './shader/depth/reconstructViewPositionFromDepth.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -74,6 +77,9 @@ export namespace ColorLibrary {
  */
 export namespace DepthLibrary {
     export const linearizeDepth = linearizeDepth_wgsl;
+    export const getNDCFromDepth = getNDCFromDepth_wgsl;
+    export const reconstructWorldPositionFromDepth = reconstructWorldPositionFromDepth_wgsl;
+    export const reconstructViewPositionFromDepth = reconstructViewPositionFromDepth_wgsl;
 }
 
 /**
