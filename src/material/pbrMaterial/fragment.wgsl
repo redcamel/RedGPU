@@ -18,6 +18,9 @@
 #redgpu_include lighting.fresnel_schlick
 #redgpu_include lighting.conductor_fresnel
 #redgpu_include lighting.iridescent_fresnel
+#redgpu_include lighting.distribution_ggx
+#redgpu_include lighting.geometry_smith
+#redgpu_include lighting.specular_brdf
 
 struct Uniforms {
     useVertexColor: u32,
@@ -1420,55 +1423,6 @@ fn diffuse_btdf(N: vec3<f32>, L: vec3<f32>, Albedo: vec3<f32>) -> vec3<f32> {
     // 뒷면으로 들어오는 광선만 처리 (-dot(N,L)를 사용하여 음수만 양수로 변환하여 사용)
     let cos_theta = max(-dot(N, L), 0.0);
     return Albedo * cos_theta * INV_PI;
-}
-
-fn specular_brdf(
-    F0: vec3<f32>,
-    roughness: f32,
-    NdotH: f32,
-    NdotV: f32,
-    NdotL: f32,
-    LdotH: f32
-) -> vec3<f32> {
-
-    // Distribution (D)
-    let D = distribution_ggx(NdotH, roughness);
-
-    // Geometric Shadowing (G)
-    let G = geometry_smith(NdotV, NdotL, roughness);
-
-    // Fresnel (F)
-    let F = fresnel_schlick(LdotH, F0);
-
-    // Cook-Torrance BRDF
-    let numerator = D * G * F;
-    let denominator = 4.0 * NdotV * NdotL + 0.04; // 0으로 나누기 방지
-//    let energyCompensation = 1.0 + roughness * (1.0 / NdotV - 1.0);
-    return (numerator / denominator) ;
-}
-
-// 표준 GGX Normal Distribution Function
-fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
-    let alpha = roughness * roughness;
-    let alpha2 = alpha * alpha;
-    let NdotH2 = NdotH * NdotH;
-
-    let nom = alpha2;
-    let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
-    let denom_squared = denom * denom;
-
-    return nom / (denom_squared * PI);
-}
-
-// Smith's method for Geometric Shadowing with GGX
-fn geometry_smith(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
-    let alpha = roughness * roughness;
-    let k = alpha / 2.0;  // 직접 조명에 적합한 k 값
-
-    let ggx1 = NdotV / (NdotV * (1.0 - k) + k);
-    let ggx2 = NdotL / (NdotL * (1.0 - k) + k);
-
-    return ggx1 * ggx2;
 }
 
 fn get_transformed_uv(

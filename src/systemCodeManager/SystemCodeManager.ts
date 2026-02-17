@@ -35,6 +35,9 @@ import diffuse_brdf_disney_wgsl from './shader/lighting/diffuse_brdf_disney.wgsl
 import fresnel_schlick_wgsl from './shader/lighting/fresnel_schlick.wgsl';
 import conductor_fresnel_wgsl from './shader/lighting/conductor_fresnel.wgsl';
 import iridescent_fresnel_wgsl from './shader/lighting/iridescent_fresnel.wgsl';
+import distribution_ggx_wgsl from './shader/lighting/distribution_ggx.wgsl';
+import geometry_smith_wgsl from './shader/lighting/geometry_smith.wgsl';
+import specular_brdf_wgsl from './shader/lighting/specular_brdf.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -128,6 +131,9 @@ export namespace LightingLibrary {
     export const fresnel_schlick = fresnel_schlick_wgsl;
     export const conductor_fresnel = conductor_fresnel_wgsl;
     export const iridescent_fresnel = iridescent_fresnel_wgsl;
+    export const distribution_ggx = distribution_ggx_wgsl;
+    export const geometry_smith = geometry_smith_wgsl;
+    export const specular_brdf = specular_brdf_wgsl;
 }
 
 /**
