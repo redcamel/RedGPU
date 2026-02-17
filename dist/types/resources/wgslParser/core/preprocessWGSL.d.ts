@@ -25,10 +25,13 @@ export interface PreprocessedWGSLResult {
  * @param code -
  * [KO] 전처리할 WGSL 소스 코드
  * [EN] WGSL source code to preprocess
+ * @param sourceName -
+ * [KO] 셰이더 소스 식별 이름 (경고 출력용)
+ * [EN] Shader source identifier name (for warnings)
  * @returns
  * [KO] 전처리 결과 객체 (캐시 키, 기본 소스, 변형 생성기 등 포함)
  * [EN] Preprocessing result object (including cache key, default source, and variant generator)
  * @category WGSL
  */
-declare const preprocessWGSL: (code: string) => PreprocessedWGSLResult;
+declare const preprocessWGSL: (code: string, sourceName?: string) => PreprocessedWGSLResult;
 export default preprocessWGSL;

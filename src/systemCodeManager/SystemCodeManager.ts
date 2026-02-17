@@ -16,6 +16,7 @@ import getWorldPositionFromDepth_wgsl from './shader/math/getWorldPositionFromDe
 import getViewPositionFromDepth_wgsl from './shader/math/getViewPositionFromDepth.wgsl';
 import getWorldNormalFromGNormalBuffer_wgsl from './shader/math/getWorldNormalFromGNormalBuffer.wgsl';
 import getViewNormalFromGNormalBuffer_wgsl from './shader/math/getViewNormalFromGNormalBuffer.wgsl';
+import getViewDirection_wgsl from './shader/math/getViewDirection.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
 import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
@@ -55,6 +56,7 @@ export namespace MathLibrary {
     export const getViewPositionFromDepth = getViewPositionFromDepth_wgsl;
     export const getWorldNormalFromGNormalBuffer = getWorldNormalFromGNormalBuffer_wgsl;
     export const getViewNormalFromGNormalBuffer = getViewNormalFromGNormalBuffer_wgsl;
+    export const getViewDirection = getViewDirection_wgsl;
 
     // 수학 상수
     export const PI = 'const PI: f32 = 3.141592653589793;';

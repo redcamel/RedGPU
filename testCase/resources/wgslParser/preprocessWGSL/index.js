@@ -53,6 +53,19 @@ redUnit.testGroup(
             }
         }, true);
 
+        runner.defineTest('Dot-Notation Path Include (math.getNDCFromDepth)', function (run) {
+            // [KO] 계층 구조를 가진 math.getNDCFromDepth 인클루드 테스트
+            // [EN] Test hierarchical math.getNDCFromDepth include
+            const testCode = `#redgpu_include math.getNDCFromDepth`;
+            try {
+                const result = preprocessWGSL(testCode);
+                const hasContent = result.defaultSource.includes('fn getNDCFromDepth');
+                run(hasContent);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
+
         runner.defineTest('Define Logic (REDGPU_DEFINE_*)', function (run) {
             const code = `let x = REDGPU_DEFINE_TILE_COUNT_X;`;
             try {

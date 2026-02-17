@@ -3,6 +3,7 @@
 #redgpu_include math.EPSILON
 #redgpu_include math.getViewPositionFromDepth
 #redgpu_include math.getWorldNormalFromGNormalBuffer
+#redgpu_include math.getViewDirection
 
 struct Uniforms {
      maxSteps: u32,
@@ -45,7 +46,7 @@ struct Uniforms {
  }
 
  fn calculateWorldReflectionRay(worldPos: vec3<f32>, worldNormal: vec3<f32>, cameraWorldPos: vec3<f32>) -> vec3<f32> {
-     let viewDir = normalize(cameraWorldPos - worldPos);
+     let viewDir = getViewDirection(worldPos, cameraWorldPos);
      return reflect(-viewDir, worldNormal);
  }
 

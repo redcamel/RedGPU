@@ -9,6 +9,7 @@
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
+#redgpu_include math.getViewDirection
 
 struct Uniforms {
     useVertexColor: u32,
@@ -493,7 +494,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     #redgpu_endIf
     /////////////////////////////////////////////////////////////////////////////////
     // view direction vector
-    let V: vec3<f32> = normalize(u_cameraPosition - input_vertexPosition);
+    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let NdotV = max(dot(N, V), 0.04);
     let VdotN = max(dot(V, N), 0.0);
     /////////////////////////////////////////////////////////////////////////////////

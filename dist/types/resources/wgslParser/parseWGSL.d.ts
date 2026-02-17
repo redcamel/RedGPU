@@ -8,10 +8,13 @@
  * @param code -
  * [KO] 파싱할 WGSL 셰이더 코드 문자열
  * [EN] WGSL shader code string to parse
+ * @param sourceName -
+ * [KO] 셰이더 소스 식별 이름 (경고 출력용)
+ * [EN] Shader source identifier name (for warnings)
  * @returns
  * [KO] 리플렉션 정보 및 전처리된 소스 코드를 포함하는 객체
  * [EN] An object containing reflection information and preprocessed source code
  * @category WGSL
  */
-declare const parseWGSL: (code: string) => any;
+declare const parseWGSL: (code: string, sourceName?: string) => any;
 export default parseWGSL;
