@@ -1,8 +1,9 @@
-#redgpu_include SYSTEM_UNIFORM;
-#redgpu_include calcTintBlendMode;
-#redgpu_include drawPicking;
-#redgpu_include FragmentOutput;
-#redgpu_include calculateMotionVector;
+#redgpu_include SYSTEM_UNIFORM
+#redgpu_include calcTintBlendMode
+#redgpu_include drawPicking
+#redgpu_include FragmentOutput
+#redgpu_include calculateMotionVector
+
 struct Uniforms {
     opacity: f32,
     useTint:u32,

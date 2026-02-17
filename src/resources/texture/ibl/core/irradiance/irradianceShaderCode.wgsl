@@ -8,6 +8,7 @@
 
 #redgpu_include math.PI
 #redgpu_include math.PI2
+#redgpu_include math.INV_PI
 
 // Hammersley 시퀀스를 위한 비트 반전 함수 (표준 IBL 기법)
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
@@ -69,7 +70,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let worldSample = normalize(tangent * sampleVec.x + bitangent * sampleVec.y + normal * sampleVec.z);
 
         // PDF 계산: 코사인 가중치 샘플링의 경우 cosTheta / PI
-        let pdf = max(cosTheta, 0.001) / PI;
+        let pdf = max(cosTheta, 0.001) * INV_PI;
 
         let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
         let mipLevel = max(0.5 * log2(saSample / saTexel), 0.0);

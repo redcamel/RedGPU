@@ -19,10 +19,10 @@ const createMeshVertexShaderModulePBRSkin = (
     if (currentShaderModuleName === label) return resourceManager.getGPUShaderModule(label,)
     else {
         vModuleDescriptor.code = code.replaceAll('#JOINT_NUM', jointNum)
-        gpuRenderInfo.vertexUniformInfo = parseWGSL(vModuleDescriptor.code).uniforms.vertexUniforms
+        gpuRenderInfo.vertexUniformInfo = parseWGSL(vModuleDescriptor.code, 'MESH_VERTEX_PBR_SKIN').uniforms.vertexUniforms
         if (mesh.animationInfo.skinInfo) {
             createMeshVertexUniformBuffers(mesh, true)
-            mesh.animationInfo.skinInfo.vertexStorageInfo = parseWGSL(vModuleDescriptor.code).storage.vertexStorages
+            mesh.animationInfo.skinInfo.vertexStorageInfo = parseWGSL(vModuleDescriptor.code, 'MESH_VERTEX_PBR_SKIN').storage.vertexStorages
             // const newData = new ArrayBuffer(mesh.animationInfo.skinInfo.vertexStorageInfo.arrayBufferByteLength)
 
             mesh.animationInfo.skinInfo.vertexStorageBuffer = gpuDevice.createBuffer({

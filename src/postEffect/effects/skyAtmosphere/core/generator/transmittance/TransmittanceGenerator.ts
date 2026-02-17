@@ -5,7 +5,7 @@ import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode);
+const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'TRANSMITTANCE_GENERATOR');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**

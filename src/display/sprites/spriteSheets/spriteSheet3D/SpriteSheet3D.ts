@@ -15,7 +15,7 @@ import {keepLog} from "../../../../utils";
 /** SpriteSheet3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
 /** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL(vertexModuleSource);
+const SHADER_INFO = parseWGSL(vertexModuleSource, 'SPRITE_SHEET_3D_VERTEX');
 /** 버텍스 유니폼 구조체 정보 */
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 

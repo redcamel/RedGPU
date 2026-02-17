@@ -1,4 +1,5 @@
 // [KO] UE5 표준 Multi-Scattering LUT 생성
+#redgpu_include math.INV_PI
 
 @group(0) @binding(0) var multiScatTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
@@ -57,7 +58,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 let scat_total = params.rayleighScattering * rho_r + vec3<f32>(params.mieScattering * rho_m);
                 let ext_total = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m);
 
-                L1 += T_path * sun_t * scat_total * (1.0 / (4.0 * PI)) * step_size;
+                L1 += T_path * sun_t * scat_total * (0.25 * INV_PI) * step_size;
                 f1 += T_path * scat_total * step_size;
                 T_path *= exp(-ext_total * step_size);
             }
@@ -65,7 +66,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             if (t_earth > 0.0) {
                 let hit_p = ray_origin + ray_dir * t_earth;
                 let cos_s = max(0.0, dot(normalize(hit_p), sun_dir));
-                L1 += T_path * get_transmittance(transmittanceTexture, tSampler, 0.0, cos_s, params.atmosphereHeight) * cos_s * params.groundAlbedo / PI;
+                L1 += T_path * get_transmittance(transmittanceTexture, tSampler, 0.0, cos_s, params.atmosphereHeight) * cos_s * params.groundAlbedo * INV_PI;
             }
             lum_total += L1;
             fms_total += f1 / f32(sample_count);

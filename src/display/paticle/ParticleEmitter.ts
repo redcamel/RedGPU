@@ -12,7 +12,7 @@ import computeModuleSource from "./shader/compute.wgsl";
 import vertexModuleSource from "./shader/particleVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_PARTICLE_EMITTER'
-const SHADER_INFO = parseWGSL(vertexModuleSource);
+const SHADER_INFO = parseWGSL(vertexModuleSource, 'PARTICLE_EMITTER_VERTEX');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 interface ParticleEmitter {

@@ -301,8 +301,8 @@ class TAA {
             `${name}_NonMSAA`,
             {code: computeCodes.nonMsaa}
         )
-        this.#SHADER_INFO_MSAA = parseWGSL(computeCodes.msaa)
-        this.#SHADER_INFO_NON_MSAA = parseWGSL(computeCodes.nonMsaa)
+        this.#SHADER_INFO_MSAA = parseWGSL(computeCodes.msaa, 'TAA_MSAA')
+        this.#SHADER_INFO_NON_MSAA = parseWGSL(computeCodes.nonMsaa, 'TAA_NON_MSAA')
         const STORAGE_STRUCT = this.#SHADER_INFO_MSAA.storage;
         const UNIFORM_STRUCT = this.#SHADER_INFO_MSAA.uniforms;
         this.#storageInfo = STORAGE_STRUCT

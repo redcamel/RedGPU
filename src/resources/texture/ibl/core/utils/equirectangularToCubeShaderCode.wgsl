@@ -7,12 +7,14 @@
 @group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
 #redgpu_include math.PI
+#redgpu_include math.PI2
+#redgpu_include math.INV_PI
 
 fn directionToSphericalUV(dir: vec3<f32>) -> vec2<f32> {
     let normalizedDir = normalize(dir);
     let theta = atan2(normalizedDir.x, normalizedDir.z);
     let phi = acos(clamp(normalizedDir.y, -1.0, 1.0));
-    return vec2<f32>(0.5 - theta / (2.0 * PI), phi / PI);
+    return vec2<f32>(0.5 - theta / PI2, phi * INV_PI);
 }
 
 @compute @workgroup_size(8, 8, 1)

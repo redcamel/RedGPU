@@ -6,7 +6,7 @@ import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 
-const SHADER_INFO = parseWGSL(fragmentModuleSource)
+const SHADER_INFO = parseWGSL(fragmentModuleSource, 'TEXTFIELD_MATERIAL')
 
 interface TextFieldMaterial {
     diffuseTexture: BitmapTexture

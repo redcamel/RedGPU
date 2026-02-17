@@ -9,7 +9,7 @@ import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANois
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
 
-const SHADER_INFO = parseWGSL(fragmentModuleSource)
+const SHADER_INFO = parseWGSL(fragmentModuleSource, 'SKYBOX_MATERIAL')
 
 interface SkyBoxMaterial {
     /** [KO] 현재 스카이박스 큐브 텍스처 (일반 또는 IBL) [EN] Current skybox cube texture (Regular or IBL) */

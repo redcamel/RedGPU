@@ -21,7 +21,7 @@ import SkyBoxMaterial from "./core/SkyBoxMaterial";
 import vertexModuleSource from './shader/vertex.wgsl';
 
 /** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL(vertexModuleSource)
+const SHADER_INFO = parseWGSL(vertexModuleSource, 'SKYBOX_VERTEX')
 /** 버텍스 유니폼 구조체 정보 */
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 /** 버텍스 셰이더 모듈 이름 */

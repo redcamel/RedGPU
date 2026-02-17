@@ -8,7 +8,7 @@ import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTText
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode);
+const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_VOLUME_GENERATOR');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**

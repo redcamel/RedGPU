@@ -28,7 +28,7 @@ import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import IBLCubeTexture from "../../resources/texture/ibl/core/IBLCubeTexture";
 
-const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM)
+const SHADER_INFO = parseWGSL(SystemCode.SYSTEM_UNIFORM, 'VIEW3D_SYSTEM_UNIFORM')
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 let temp = mat4.create()
 let temp2 = mat4.create()

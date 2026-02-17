@@ -8,6 +8,7 @@
 #redgpu_include calculateMotionVector;
 #redgpu_include math.PI
 #redgpu_include math.PI2
+#redgpu_include math.INV_PI
 
 struct Uniforms {
     useVertexColor: u32,
@@ -1293,7 +1294,7 @@ fn D_GGX_anisotropic( NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32 ) -> 
 //     return 0.0;
 //    }
     let w2: f32 = a2 / denominator;
-    return a2 * w2 * w2 / PI;
+    return a2 * w2 * w2 * INV_PI;
 }
 fn V_GGX_anisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, at: f32, ab: f32 ) -> f32 {
    let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
@@ -1508,16 +1509,20 @@ fn diffuse_brdf_disney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albed
     let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
     let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
 
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor / PI;
+    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
 }
 
-fn diffuse_brdf(NdotL:f32, albedo: vec3<f32>) -> vec3<f32> {
-    return albedo * NdotL / PI;
+fn diffuse_brdf(NdotL:f32, albedo:vec3<f32>) -> vec3<f32> {
+
+    return albedo * NdotL * INV_PI;
+
 }
+
+
 fn diffuse_btdf(N: vec3<f32>, L: vec3<f32>, Albedo: vec3<f32>) -> vec3<f32> {
     // 뒷면으로 들어오는 광선만 처리 (-dot(N,L)를 사용하여 음수만 양수로 변환하여 사용)
     let cos_theta = max(-dot(N, L), 0.0);
-    return Albedo * cos_theta / PI;
+    return Albedo * cos_theta * INV_PI;
 }
 
 fn specular_brdf(

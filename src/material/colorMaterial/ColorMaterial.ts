@@ -5,7 +5,7 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABaseMaterial from "../core/ABaseMaterial";
 import fragmentModuleSource from './fragment.wgsl'
 
-const SHADER_INFO = parseWGSL(fragmentModuleSource)
+const SHADER_INFO = parseWGSL(fragmentModuleSource, 'COLOR_MATERIAL')
 
 interface ColorMaterial {
     /**

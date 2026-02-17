@@ -61,20 +61,32 @@ const generateCodeHash = (code: string): string => {
  * @param code -
  * [KO] 처리할 WGSL 코드
  * [EN] WGSL code to process
+ * @param sourceName -
+ * [KO] 셰이더 소스 식별 이름 (경고 출력용)
+ * [EN] Shader source identifier name (for warnings)
  * @returns
  * [KO] 인클루드가 처리된 WGSL 코드
  * [EN] WGSL code with includes processed
  */
-const processIncludes = (code: string): string => {
+const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): string => {
     let result = code;
     let iterations = 0;
     const MAX_ITERATIONS = 10;
+    const includedPaths = new Set<string>();
 
     /**
      * [KO] 점 표기법 경로를 해석하여 SystemCodeManager에서 WGSL 문자열을 찾습니다.
      * [EN] Resolves dot-notation paths to find WGSL strings in SystemCodeManager.
      */
-    const resolvePath = (path: string): string | null => {
+    const resolvePath = (path: string, offset: number, currentSource: string): string | null => {
+        if (includedPaths.has(path)) {
+            // [KO] 현재까지의 코드에서 라인 번호 계산
+            // [EN] Calculate line number from current offset
+            const lineNumber = currentSource.substring(0, offset).split('\n').length;
+            console.warn(`[preprocessWGSL] Duplicate include detected in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. This redundant include will be ignored.`);
+            return '';
+        }
+        
         const parts = path.split('.');
         let current: any = SystemCodeManager;
         for (const part of parts) {
@@ -84,14 +96,20 @@ const processIncludes = (code: string): string => {
                 return null;
             }
         }
-        // [KO] 최종 결과가 문자열일 때만 유효한 청크로 간주합니다.
-        // [EN] Only consider it a valid chunk if the final result is a string.
-        return typeof current === 'string' ? current : null;
+        
+        if (typeof current === 'string') {
+            includedPaths.add(path);
+            return current;
+        }
+        return null;
     };
 
     while (iterations < MAX_ITERATIONS) {
         const previousResult = result;
-        result = result.replace(includePattern, (match, path) => resolvePath(path) || match);
+        result = result.replace(includePattern, (match, path, offset) => {
+            const resolved = resolvePath(path, offset, result);
+            return resolved !== null ? resolved : match;
+        });
         if (result === previousResult) break;
         iterations++;
     }
@@ -220,20 +238,23 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
  * @param code -
  * [KO] 전처리할 WGSL 소스 코드
  * [EN] WGSL source code to preprocess
+ * @param sourceName -
+ * [KO] 셰이더 소스 식별 이름 (경고 출력용)
+ * [EN] Shader source identifier name (for warnings)
  * @returns
  * [KO] 전처리 결과 객체 (캐시 키, 기본 소스, 변형 생성기 등 포함)
  * [EN] Preprocessing result object (including cache key, default source, and variant generator)
  * @category WGSL
  */
-const preprocessWGSL = (code: string): PreprocessedWGSLResult => {
-    const cacheKey = generateCodeHash(code);
+const preprocessWGSL = (code: string, sourceName?: string): PreprocessedWGSLResult => {
+    const cacheKey = generateCodeHash(code + (sourceName || ''));
     const cachedResult = preprocessCache.get(cacheKey);
     if (cachedResult) {
-        console.log('🚀 캐시에서 WGSL 로드:', cacheKey);
+        // console.log('🚀 캐시에서 WGSL 로드:', cacheKey);
         return cachedResult;
     }
-    console.log('🔄 WGSL 파싱 시작:', cacheKey);
-    const withIncludes = processIncludes(code);
+    // console.log('🔄 WGSL 파싱 시작:', cacheKey);
+    const withIncludes = processIncludes(code, sourceName);
     const defines = processDefines(withIncludes);
     const conditionalBlocks = findConditionalBlocks(defines);
     logDuplicateKeys(conditionalBlocks);

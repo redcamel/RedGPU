@@ -10,25 +10,25 @@ const SHADER_INFO_PBR = parseWGSL([
     vertexSourcePbrInput,
     vertexSourcePbrOutput,
     vertexSourcePbr,
-].join("\n"));
+].join("\n"), 'MESH_PBR');
 
 const SHADER_INFO_BASIC = parseWGSL([
     vertexSourceInput,
     vertexSourceOutput,
     vertexSource
-].join("\n"));
+].join("\n"), 'MESH_BASIC');
 
 const SHADER_INFO_ONLY_FRAGMENT_PBR = parseWGSL([
     vertexSourceInput,
     vertexSourcePbrOutput,
     vertexSource,
-].join("\n"));
+].join("\n"), 'MESH_ONLY_FRAGMENT_PBR');
 
 const SHADER_INFO_ONLY_VERTEX_PBR = parseWGSL([
     vertexSourcePbrInput,
     vertexSourceOutput,
     vertexSource,
-].join("\n"));
+].join("\n"), 'MESH_ONLY_VERTEX_PBR');
 const MESH_SHADER_INFO = {
     SHADER_INFO_PBR,
     SHADER_INFO_BASIC,

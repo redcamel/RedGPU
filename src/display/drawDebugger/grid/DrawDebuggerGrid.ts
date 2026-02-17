@@ -19,7 +19,7 @@ import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import shaderSource from './shader.wgsl'
 
-const SHADER_INFO = parseWGSL(shaderSource);
+const SHADER_INFO = parseWGSL(shaderSource, 'DRAW_DEBUGGER_GRID');
 const FRAGMENT_UNIFORM_STRUCT = SHADER_INFO.uniforms.gridArgs;
 console.log(SHADER_INFO)
 const SHADER_MODULE_NAME = 'VERTEX_MODULE_GRID'

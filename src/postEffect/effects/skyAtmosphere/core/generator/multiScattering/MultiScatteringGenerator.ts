@@ -7,7 +7,7 @@ import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + multiScatteringShaderCode);
+const SHADER_INFO = parseWGSL(skyAtmosphereFn + multiScatteringShaderCode, 'MULTI_SCATTERING_GENERATOR');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**

@@ -21,7 +21,7 @@ import LINE_TYPE from "./LINE_TYPE";
 import vertexModuleSource from "./shader/lineVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_3D'
-const SHADER_INFO = parseWGSL(vertexModuleSource);
+const SHADER_INFO = parseWGSL(vertexModuleSource, 'LINE3D_VERTEX');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 /**

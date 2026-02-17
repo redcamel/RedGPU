@@ -5,6 +5,7 @@
 #redgpu_include calculateMotionVector
 #redgpu_include math.PI
 #redgpu_include math.PI2
+#redgpu_include math.INV_PI
 
 struct Uniforms {
     color:vec3<f32>,
@@ -44,7 +45,7 @@ fn main(inputData: InputData) -> FragmentOutput {
         let distKm = length(viewVec) / 1000.0;
 
         let u = atan2(viewDir.z, viewDir.x) / PI2 + 0.5;
-        let v = asin(clamp(viewDir.y, -1.0, 1.0)) / PI + 0.5;
+        let v = asin(clamp(viewDir.y, -1.0, 1.0)) * INV_PI + 0.5;
         let w = sqrt(clamp(distKm / 100.0, 0.0, 1.0));
 
         let apSample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(u, v, w), 0.0);

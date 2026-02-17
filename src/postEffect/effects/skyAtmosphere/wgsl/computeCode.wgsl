@@ -48,8 +48,8 @@ let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
 
 // [KO] ap_u(Azimuth)는 repeat 샘플러를 사용하여 360도 경계에서 부드럽게 이어지도록 합니다.
 // [EN] ap_u (Azimuth) uses a repeat sampler to smoothly wrap around the 360-degree boundary.
-let ap_u = (azimuth / (2.0 * PI)) + 0.5;
-let ap_v = clamp((elevation / PI) + 0.5, 0.001, 0.999);
+let ap_u = (azimuth / PI2) + 0.5;
+let ap_v = clamp((elevation * INV_PI) + 0.5, 0.001, 0.999);
 let ap_w = clamp(sqrt(ap_dist / max_ap_dist), 0.0, 0.999);
 let ap_sample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(ap_u, ap_v, ap_w), 0.0);
 
@@ -69,7 +69,7 @@ if (t_earth > 0.0) {
     let up = normalize(hitPos);
     let cos_sun = dot(up, sunDir);
     let gTrans = get_transmittance(transmittanceTexture, tSampler, 0.0, cos_sun, atmH);
-    let albedo = uniforms.groundAlbedo / PI;
+    let albedo = uniforms.groundAlbedo * INV_PI;
     let diffuse = albedo * gTrans * max(0.0, cos_sun) * uniforms.sunIntensity;
     let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
     let skySample = textureSampleLevel(skyViewTexture, tSampler, skyUV, 0.0);

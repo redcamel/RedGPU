@@ -8,7 +8,7 @@ import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTText
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + skyViewShaderCode);
+const SHADER_INFO = parseWGSL(skyAtmosphereFn + skyViewShaderCode, 'SKY_VIEW_GENERATOR');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**

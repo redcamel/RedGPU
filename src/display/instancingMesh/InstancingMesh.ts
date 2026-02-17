@@ -151,7 +151,7 @@ class InstancingMesh extends Mesh {
     set instanceCount(count: number) {
         validateUintRange(count);
         this.#instanceCount = Math.min(count, this.#maxInstanceCount);
-        this.gpuRenderInfo.vertexUniformInfo = parseWGSL(this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
+        this.gpuRenderInfo.vertexUniformInfo = parseWGSL(this.#getVertexModuleSource(this.geometry, this.material), 'INSTANCING_MESH_VERTEX').storage.instanceUniforms;
         this.#rebuildInstanceUniformBuffer();
         if (this.#instanceChildren.length > this.#instanceCount) {
             this.#instanceChildren.length = this.#instanceCount;

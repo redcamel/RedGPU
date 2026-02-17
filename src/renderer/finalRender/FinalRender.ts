@@ -15,8 +15,8 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import vertexModuleSource from './vertex.wgsl'
 
-const VERTEX_SHADER_INFO = parseWGSL(vertexModuleSource)
-const FRAGMENT_SHADER_INFO = parseWGSL(fragmentModuleSource)
+const VERTEX_SHADER_INFO = parseWGSL(vertexModuleSource, 'FINAL_RENDER_VERTEX')
+const FRAGMENT_SHADER_INFO = parseWGSL(fragmentModuleSource, 'FINAL_RENDER_FRAGMENT')
 const VERTEX_UNIFORM_STRUCT = VERTEX_SHADER_INFO.uniforms.vertexUniforms
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_FINAL_RENDER'
 const FRAGMENT_SHADER_MODULE_NAME = 'FRAGMENT_MODULE_FINAL_RENDER'

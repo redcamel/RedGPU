@@ -3,7 +3,7 @@ import ABaseMaterial from "../../../material/core/ABaseMaterial";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from '../shader/fragment.wgsl'
 
-const SHADER_INFO = parseWGSL(fragmentModuleSource)
+const SHADER_INFO = parseWGSL(fragmentModuleSource, 'LINE_MATERIAL')
 
 class LineMaterial extends ABaseMaterial {
     constructor(redGPUContext: RedGPUContext, name?: string) {

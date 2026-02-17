@@ -162,7 +162,7 @@ const parseExtensionShaderCode = (source: string) => {
     // console.log('resultStr', resultStr)
     return resultStr
 }
-const SHADER_INFO = parseWGSL(parseExtensionShaderCode(fragmentModuleSource))
+const SHADER_INFO = parseWGSL(parseExtensionShaderCode(fragmentModuleSource), 'PBR_MATERIAL')
 
 /**
  * [KO] PBRMaterial 속성 인터페이스

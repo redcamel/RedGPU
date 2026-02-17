@@ -14,7 +14,7 @@ import vertexModuleSource from "./shader/spriteSheet2DVertex.wgsl";
 /** SpriteSheet2D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_2D'
 /** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL(vertexModuleSource);
+const SHADER_INFO = parseWGSL(vertexModuleSource, 'SPRITE_SHEET_2D_VERTEX');
 /** 버텍스 유니폼 구조체 정보 */
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 /** 2D 메시 기능이 믹스인된 베이스 스프라이트 시트 클래스 */
