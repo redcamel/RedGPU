@@ -1,3 +1,4 @@
+#redgpu_include math.EPSILON
 struct Uniforms {
     fogType: u32,
     density: f32,
@@ -59,7 +60,7 @@ fn getSkyboxHeightMaxPrecision(rayDirection: vec3<f32>) -> f32 {
     let downThreshold = -0.015;
     let transitionRange = upThreshold - downThreshold;
 
-    let safeTransitionRange = max(transitionRange, 1e-6);
+    let safeTransitionRange = max(transitionRange, EPSILON);
 
     if (rayY > upThreshold) {
         return u_maxHeight + 25.0;

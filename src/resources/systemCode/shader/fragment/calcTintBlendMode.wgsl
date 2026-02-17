@@ -1,9 +1,10 @@
+#redgpu_include math.EPSILON
 // 함수 정의 순서 수정: 유틸리티 함수들을 먼저 정의
 fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
     let maxVal: f32 = max(max(rgb.r, rgb.g), rgb.b);
     let minVal: f32 = min(min(rgb.r, rgb.g), rgb.b);
     let delta: f32 = maxVal - minVal;
-    let eps = 1e-6;
+    let eps = EPSILON;
 
     let lightness: f32 = (maxVal + minVal) * 0.5;
 
@@ -105,7 +106,7 @@ fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
 // 메인 함수: 이제 위의 함수들을 안전하게 사용 가능
 fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
     var tintedColor: vec3<f32>;
-    let eps = 1e-6; // 0으로 나누기 방지용 작은 값
+    let eps = EPSILON; // 0으로 나누기 방지용 작은 값
 
     switch (tintBlendMode) {
         case 0u: { // NORMAL

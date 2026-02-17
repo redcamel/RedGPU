@@ -1,5 +1,6 @@
 #redgpu_include math.getInterleavedGradientNoise
 #redgpu_include depth.linearizeDepth
+#redgpu_include math.EPSILON
 
 struct Uniforms {
      maxSteps: u32,
@@ -47,7 +48,7 @@ struct Uniforms {
  fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
      let clipPos4 = systemUniforms.projectionCameraMatrix * vec4<f32>(worldPos, 1.0);
 
-     if (abs(clipPos4.w) < 1e-6) {
+     if (abs(clipPos4.w) < EPSILON) {
          return vec2<f32>(-1.0);
      }
 

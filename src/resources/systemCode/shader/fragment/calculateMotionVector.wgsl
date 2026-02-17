@@ -1,11 +1,12 @@
+#redgpu_include math.EPSILON
 fn calculateMotionVector(
     currentClipPos: vec4<f32>,
     prevClipPos: vec4<f32>,
 ) -> vec2<f32> {
     // 1. Perspective Divide (NDC로 변환)
     // 0으로 나누기 방지를 위해 매우 작은 값(epsilon) 사용
-    let currentNDC = currentClipPos.xy / max(currentClipPos.w, 1e-6);
-    let prevNDC = prevClipPos.xy / max(prevClipPos.w, 1e-6);
+    let currentNDC = currentClipPos.xy / max(currentClipPos.w, EPSILON);
+    let prevNDC = prevClipPos.xy / max(prevClipPos.w, EPSILON);
 
     // 2. 모션 벡터 계산 (NDC 공간: -1 ~ 1 범위)
     // 현재 위치에서 이전 위치를 뺍니다.
