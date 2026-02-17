@@ -7,6 +7,7 @@
 #redgpu_include FragmentOutput
 #redgpu_include calculateMotionVector;
 #redgpu_include math.PI
+#redgpu_include math.PI2
 
 struct Uniforms {
     useVertexColor: u32,
@@ -1224,7 +1225,7 @@ fn calcLight(
             let invR = 1 / sheenRoughnessAlpha;
             let cos2h = NdotH * NdotH;
             let sin2h = 1 - cos2h;
-            let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / (2 * PI);
+            let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / PI2;
             let sheen_visibility =  1.0 / ((1.0 + lambda_sheen(NdotV, sheenRoughnessAlpha) + lambda_sheen(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV * NdotL));
             let LdotN = max(dot(L, N), 0.04);
             let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
@@ -1325,7 +1326,7 @@ fn iridescent_fresnel(outside_ior: f32, iridescence_ior: f32, base_f0: vec3<f32>
     let effective_thickness = max(iridescence_thickness, 10.0);
     let ior_scale = max(1.0, 1.5 - 0.5 * (safe_iridescence_ior / 1.5));
     let optical_thickness = 2.0 * effective_thickness * safe_iridescence_ior * cos_theta2 * ior_scale;
-    let phase = (2.0 * PI * optical_thickness) / wavelengths;
+    let phase = (PI2 * optical_thickness) / wavelengths;
 
     // 삼각함수 (한 번만)
     let cos_phase = cos(phase);
@@ -1554,7 +1555,7 @@ fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
     let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
     let denom_squared = denom * denom;
 
-    return nom / (denom_squared * 3.14159265359);
+    return nom / (denom_squared * PI);
 }
 
 // Smith's method for Geometric Shadowing with GGX
