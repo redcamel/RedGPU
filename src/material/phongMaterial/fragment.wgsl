@@ -65,6 +65,10 @@ struct InputData {
 @group(2) @binding(12) var normalTexture: texture_2d<f32>;
 
 
+#redgpu_include math.PI
+#redgpu_include math.EPSILON
+#redgpu_include math.getViewDirection
+
 @fragment
 fn main(inputData:InputData) -> FragmentOutput {
     var output: FragmentOutput;
@@ -96,7 +100,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     let u_specularStrength = uniforms.specularStrength;
     let u_shininess = uniforms.shininess;
     let u_opacity = uniforms.opacity;
-    let E = normalize(u_cameraPosition - inputData.vertexPosition);
+    let E = getViewDirection(inputData.vertexPosition, u_cameraPosition);
 
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != .0;

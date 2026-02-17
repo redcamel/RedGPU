@@ -1,5 +1,6 @@
 #redgpu_include math.EPSILON
 #redgpu_include math.getWorldPositionFromDepth
+#redgpu_include math.getRayDirection
 struct Uniforms {
     fogType: u32,
     density: f32,
@@ -134,6 +135,6 @@ fn calculateAbsoluteHeightFogMaxPrecision(worldHeight: f32) -> f32 {
 
 fn getRayDirectionMaxPrecision(screenCoord: vec2<f32>) -> vec3<f32> {
     let worldPos = getWorldPositionFromDepth(screenCoord, 1.0, systemUniforms.inverseProjectionCameraMatrix);
-    let rayDir = normalize(worldPos - systemUniforms.camera.cameraPosition);
+    let rayDir = getRayDirection(worldPos, systemUniforms.camera.cameraPosition);
     return select(vec3<f32>(0.0, 0.0, 1.0), rayDir, isFiniteVec3(rayDir));
 }
