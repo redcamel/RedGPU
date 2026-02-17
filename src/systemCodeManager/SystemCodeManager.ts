@@ -1,16 +1,16 @@
-import getHash1D_wgsl from './shader/math/getHash1D.wgsl';
-import getHash1D_vec2_wgsl from './shader/math/getHash1D_vec2.wgsl';
-import getHash1D_vec3_wgsl from './shader/math/getHash1D_vec3.wgsl';
-import getHash1D_vec4_wgsl from './shader/math/getHash1D_vec4.wgsl';
-import getHash2D_vec2_wgsl from './shader/math/getHash2D_vec2.wgsl';
-import getHash3D_vec3_wgsl from './shader/math/getHash3D_vec3.wgsl';
+import getHash1D_wgsl from './shader/math/hash/getHash1D.wgsl';
+import getHash1D_vec2_wgsl from './shader/math/hash/getHash1D_vec2.wgsl';
+import getHash1D_vec3_wgsl from './shader/math/hash/getHash1D_vec3.wgsl';
+import getHash1D_vec4_wgsl from './shader/math/hash/getHash1D_vec4.wgsl';
+import getHash2D_vec2_wgsl from './shader/math/hash/getHash2D_vec2.wgsl';
+import getHash3D_vec3_wgsl from './shader/math/hash/getHash3D_vec3.wgsl';
 import getInterleavedGradientNoise_wgsl from './shader/math/getInterleavedGradientNoise.wgsl';
-import getBitHash1D_wgsl from './shader/math/getBitHash1D.wgsl';
-import getBitHash1D_vec2_wgsl from './shader/math/getBitHash1D_vec2.wgsl';
-import getBitHash1D_vec3_wgsl from './shader/math/getBitHash1D_vec3.wgsl';
-import getBitHash1D_vec4_wgsl from './shader/math/getBitHash1D_vec4.wgsl';
-import getBitHash2D_vec2_wgsl from './shader/math/getBitHash2D_vec2.wgsl';
-import getBitHash3D_vec3_wgsl from './shader/math/getBitHash3D_vec3.wgsl';
+import getBitHash1D_wgsl from './shader/math/hash/getBitHash1D.wgsl';
+import getBitHash1D_vec2_wgsl from './shader/math/hash/getBitHash1D_vec2.wgsl';
+import getBitHash1D_vec3_wgsl from './shader/math/hash/getBitHash1D_vec3.wgsl';
+import getBitHash1D_vec4_wgsl from './shader/math/hash/getBitHash1D_vec4.wgsl';
+import getBitHash2D_vec2_wgsl from './shader/math/hash/getBitHash2D_vec2.wgsl';
+import getBitHash3D_vec3_wgsl from './shader/math/hash/getBitHash3D_vec3.wgsl';
 import getNDCFromDepth_wgsl from './shader/math/getNDCFromDepth.wgsl';
 import getWorldPositionFromDepth_wgsl from './shader/math/getWorldPositionFromDepth.wgsl';
 import getViewPositionFromDepth_wgsl from './shader/math/getViewPositionFromDepth.wgsl';
@@ -40,21 +40,24 @@ import SystemFragmentCode from '../resources/systemCode/shader/fragment';
  * [EN] Math related shader function library
  */
 export namespace MathLibrary {
-    // 해시 및 노이즈
-    export const getHash1D = getHash1D_wgsl;
-    export const getHash1D_vec2 = getHash1D_vec2_wgsl;
-    export const getHash1D_vec3 = getHash1D_vec3_wgsl;
-    export const getHash1D_vec4 = getHash1D_vec4_wgsl;
-    export const getHash2D_vec2 = getHash2D_vec2_wgsl;
-    export const getHash3D_vec3 = getHash3D_vec3_wgsl;
-    export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
+    /** [KO] 해시(Hash) 관련 셰이더 함수 [EN] Hash related shader functions */
+    export namespace hash {
+        export const getHash1D = getHash1D_wgsl;
+        export const getHash1D_vec2 = getHash1D_vec2_wgsl;
+        export const getHash1D_vec3 = getHash1D_vec3_wgsl;
+        export const getHash1D_vec4 = getHash1D_vec4_wgsl;
+        export const getHash2D_vec2 = getHash2D_vec2_wgsl;
+        export const getHash3D_vec3 = getHash3D_vec3_wgsl;
 
-    export const getBitHash1D = getBitHash1D_wgsl;
-    export const getBitHash1D_vec2 = getBitHash1D_vec2_wgsl;
-    export const getBitHash1D_vec3 = getBitHash1D_vec3_wgsl;
-    export const getBitHash1D_vec4 = getBitHash1D_vec4_wgsl;
-    export const getBitHash2D_vec2 = getBitHash2D_vec2_wgsl;
-    export const getBitHash3D_vec3 = getBitHash3D_vec3_wgsl;
+        export const getBitHash1D = getBitHash1D_wgsl;
+        export const getBitHash1D_vec2 = getBitHash1D_vec2_wgsl;
+        export const getBitHash1D_vec3 = getBitHash1D_vec3_wgsl;
+        export const getBitHash1D_vec4 = getBitHash1D_vec4_wgsl;
+        export const getBitHash2D_vec2 = getBitHash2D_vec2_wgsl;
+        export const getBitHash3D_vec3 = getBitHash3D_vec3_wgsl;
+    }
+
+    export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
 
     // 공간 및 벡터 복구
     export const getNDCFromDepth = getNDCFromDepth_wgsl;
