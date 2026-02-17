@@ -26,13 +26,13 @@ redUnit.testGroup(
             }
         }, true);
 
-        runner.defineTest('Dot-Notation Path Include (math.hash12)', function (run) {
-            // [KO] 계층 구조를 가진 math.hash12 인클루드 테스트
-            // [EN] Test hierarchical math.hash12 include
-            const testCode = `#redgpu_include math.hash12`;
+        runner.defineTest('Dot-Notation Path Include (math.getHash1D)', function (run) {
+            // [KO] 계층 구조를 가진 math.getHash1D 인클루드 테스트
+            // [EN] Test hierarchical math.getHash1D include
+            const testCode = `#redgpu_include math.getHash1D`;
             try {
                 const result = preprocessWGSL(testCode);
-                const hasContent = result.defaultSource.includes('fn hash12');
+                const hasContent = result.defaultSource.includes('fn getHash1D');
                 const tagRemoved = !result.defaultSource.includes('#redgpu_include');
                 run(hasContent && tagRemoved);
             } catch (e) {
@@ -58,6 +58,26 @@ redUnit.testGroup(
             try {
                 const result = preprocessWGSL(code);
                 const pass = !result.defaultSource.includes('REDGPU_DEFINE_TILE_COUNT_X') && result.defaultSource.includes('let x = ');
+                run(pass);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
+
+        runner.defineTest('Duplicate Include Prevention (Include Once)', function (run) {
+            // [KO] 동일한 모듈을 두 번 인클루드했을 때 한 번만 처리되는지 테스트
+            // [EN] Test if duplicate includes are handled correctly (only once)
+            const testCode = `#redgpu_include math.PI\n#redgpu_include math.PI`;
+            try {
+                // [KO] 식별 이름을 함께 전달하여 테스트
+                const result = preprocessWGSL(testCode, 'TEST_DUPLICATE_INCLUDE');
+                
+                // [KO] PI 정의 패턴을 찾습니다. (공백 무시)
+                const piPattern = /const\s+PI\s*:\s*f32\s*=\s*3\.141592653589793\s*;/g;
+                const matches = result.defaultSource.match(piPattern);
+                
+                // [KO] 매칭된 결과가 정확히 1개여야 함
+                const pass = matches && matches.length === 1;
                 run(pass);
             } catch (e) {
                 run(false, e);
@@ -139,17 +159,26 @@ redUnit.testGroup(
             }
         }, true);
 
-        runner.defineTest('Invalid Include Path (Non-string member)', function (run) {
-            // [KO] math는 객체(Namespace)이지 문자열이 아니므로 인클루드 실패해야 함
-            // [EN] math is an object (Namespace), not a string, so include should fail
+        runner.defineTest('Invalid Include Path (Non-existent member)', function (run) {
+            // [KO] 존재하지 않는 경로 인클루드 시 에러 발생 테스트
+            const code = `#redgpu_include non.existent.path`;
+            try {
+                preprocessWGSL(code, 'TEST_INVALID_PATH');
+                run(false, 'Should have thrown an error for non-existent path');
+            } catch (e) {
+                run(e.message.includes('Path not found'));
+            }
+        }, true);
+
+        runner.defineTest('Invalid Include Target (Non-string member)', function (run) {
+            // [KO] math는 객체(Namespace)이지 문자열이 아니므로 인클루드 에러 발생해야 함
+            // [EN] math is an object (Namespace), not a string, so include should throw an error
             const code = `#redgpu_include math`;
             try {
-                const result = preprocessWGSL(code);
-                // [KO] 결과물이 문자열이 아니면 태그를 그대로 유지해야 함
-                // [EN] If the result is not a string, the tag should be preserved
-                run(result.defaultSource.includes('#redgpu_include math'));
+                preprocessWGSL(code, 'TEST_INVALID_TARGET');
+                run(false, 'Should have thrown an error for non-string target');
             } catch (e) {
-                run(false, e);
+                run(e.message.includes('Target is not a WGSL string'));
             }
         }, true);
     }

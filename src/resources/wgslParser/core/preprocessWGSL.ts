@@ -93,15 +93,18 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): s
             if (current && typeof current === 'object' && part in current) {
                 current = current[part];
             } else {
-                return null;
+                const lineNumber = currentSource.substring(0, offset).split('\n').length;
+                throw new Error(`[preprocessWGSL] Invalid include path in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Path not found in SystemCodeManager.`);
             }
         }
         
         if (typeof current === 'string') {
             includedPaths.add(path);
             return current;
+        } else {
+            const lineNumber = currentSource.substring(0, offset).split('\n').length;
+            throw new Error(`[preprocessWGSL] Invalid include target in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Target is not a WGSL string.`);
         }
-        return null;
     };
 
     while (iterations < MAX_ITERATIONS) {
