@@ -478,6 +478,10 @@ fn main(inputData:InputData) -> FragmentOutput {
     }
     #redgpu_endIf
 
+    // [KO] 클리어코트 등을 위해 변형 전 기하 법선을 보존합니다.
+    // [EN] Preserves the geometric normal before perturbation for clearcoat, etc.
+    let geometricNormal = N;
+
     #redgpu_if normalTexture
     {
         var targetUv = select(normalUV, 1.0 - normalUV, backFaceYn);
@@ -583,11 +587,13 @@ fn main(inputData:InputData) -> FragmentOutput {
                     targetUv = 1.0 - targetUv;
                 }
                 clearcoatNormal = clearcoatNormalSampler.rgb;
-                let clearcoatTBN = getTBNFromCotangent(N, input_vertexPosition, targetUv);
+                // [KO] 클리어코트 TBN은 변형된 N이 아닌 기하 법선(geometricNormal)을 기준으로 구축해야 합니다.
+                // [EN] Clearcoat TBN should be constructed based on the geometricNormal, not the perturbed N.
+                let clearcoatTBN = getTBNFromCotangent(geometricNormal, input_vertexPosition, targetUv);
                 clearcoatNormal = getNormalFromNormalMap(
                     vec3<f32>(clearcoatNormal.r, 1.0 - clearcoatNormal.g, clearcoatNormal.b),
                     clearcoatTBN,
-                    -u_normalScale
+                    -u_KHR_clearcoatNormalScale
                 );
                 if(u_useVertexTangent){
                     if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
