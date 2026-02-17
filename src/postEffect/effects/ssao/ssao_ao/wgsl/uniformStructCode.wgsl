@@ -1,7 +1,8 @@
 #redgpu_include math.getInterleavedGradientNoise
 #redgpu_include math.PI2
 #redgpu_include depth.linearizeDepth
-#redgpu_include depth.reconstructViewPositionFromDepth
+#redgpu_include reconstruct.reconstructViewPositionFromDepth
+#redgpu_include reconstruct.reconstructViewNormalFromGNormalBuffer
 
 struct Uniforms {
     radius: f32,
@@ -14,23 +15,17 @@ struct Uniforms {
     useBlur: f32,
 }
 
- fn getTextureSize() -> vec2<f32> {
+  fn getTextureSize() -> vec2<f32> {
 
-    return vec2<f32>(textureDimensions(sourceTexture));
+     return vec2<f32>(textureDimensions(sourceTexture));
 
-}
+ }
 
+ 
 
+ fn getNoiseVec(p: vec2<f32>) -> vec3<f32> {
 
-fn reconstructViewNormal(gBufferNormalData: vec4<f32>) -> vec3<f32> {
-
-
-    let worldNormal = normalize(gBufferNormalData.rgb * 2.0 - 1.0);
-    let viewNormal = (systemUniforms.camera.cameraMatrix * vec4<f32>(worldNormal, 0.0)).xyz;
-    return normalize(viewNormal);
-}
-
-fn getNoiseVec(p: vec2<f32>) -> vec3<f32> {
+ 
     // [KO] 표준 math.getInterleavedGradientNoise를 사용하여 회전 노이즈를 생성합니다.
     // [EN] Generate rotation noise using standard math.getInterleavedGradientNoise.
     let noise = getInterleavedGradientNoise(p);

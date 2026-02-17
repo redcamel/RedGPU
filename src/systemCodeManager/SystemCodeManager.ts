@@ -19,9 +19,11 @@ import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
 import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
-import getNDCFromDepth_wgsl from './shader/depth/getNDCFromDepth.wgsl';
-import reconstructWorldPositionFromDepth_wgsl from './shader/depth/reconstructWorldPositionFromDepth.wgsl';
-import reconstructViewPositionFromDepth_wgsl from './shader/depth/reconstructViewPositionFromDepth.wgsl';
+import getNDCFromDepth_wgsl from './shader/reconstruct/getNDCFromDepth.wgsl';
+import reconstructWorldPositionFromDepth_wgsl from './shader/reconstruct/reconstructWorldPositionFromDepth.wgsl';
+import reconstructViewPositionFromDepth_wgsl from './shader/reconstruct/reconstructViewPositionFromDepth.wgsl';
+import reconstructWorldNormalFromGNormalBuffer_wgsl from './shader/reconstruct/reconstructWorldNormalFromGNormalBuffer.wgsl';
+import reconstructViewNormalFromGNormalBuffer_wgsl from './shader/reconstruct/reconstructViewNormalFromGNormalBuffer.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -77,9 +79,18 @@ export namespace ColorLibrary {
  */
 export namespace DepthLibrary {
     export const linearizeDepth = linearizeDepth_wgsl;
+}
+
+/**
+ * [KO] 좌표 및 벡터 복구 관련 셰이더 함수 라이브러리
+ * [EN] Shader function library for coordinate and vector reconstruction
+ */
+export namespace ReconstructLibrary {
     export const getNDCFromDepth = getNDCFromDepth_wgsl;
     export const reconstructWorldPositionFromDepth = reconstructWorldPositionFromDepth_wgsl;
     export const reconstructViewPositionFromDepth = reconstructViewPositionFromDepth_wgsl;
+    export const reconstructWorldNormalFromGNormalBuffer = reconstructWorldNormalFromGNormalBuffer_wgsl;
+    export const reconstructViewNormalFromGNormalBuffer = reconstructViewNormalFromGNormalBuffer_wgsl;
 }
 
 /**
@@ -96,8 +107,10 @@ export namespace SystemCodeManager {
     export import math = MathLibrary;
     /** [KO] 색상 변환 및 처리 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for color conversion and processing. */
     export import color = ColorLibrary;
-    /** [KO] 깊이(Depth) 및 좌표 복구 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for depth and position reconstruction. */
+    /** [KO] 깊이(Depth) 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for depth. */
     export import depth = DepthLibrary;
+    /** [KO] 좌표 및 벡터 복구 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for coordinate and vector reconstruction. */
+    export import reconstruct = ReconstructLibrary;
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
     export const vertex = SystemVertexCode;

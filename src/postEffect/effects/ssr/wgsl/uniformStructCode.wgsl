@@ -1,7 +1,8 @@
 #redgpu_include math.getInterleavedGradientNoise
 #redgpu_include depth.linearizeDepth
 #redgpu_include math.EPSILON
-#redgpu_include depth.reconstructViewPositionFromDepth
+#redgpu_include reconstruct.reconstructViewPositionFromDepth
+#redgpu_include reconstruct.reconstructWorldNormalFromGNormalBuffer
 
 struct Uniforms {
      maxSteps: u32,
@@ -24,10 +25,6 @@ struct Uniforms {
      // 2. World 공간 변환 (카메라 역행렬 사용)
      let worldPos4 = systemUniforms.camera.inverseCameraMatrix * vec4<f32>(viewPos, 1.0);
      return worldPos4.xyz;
- }
-
- fn reconstructWorldNormal(gBufferNormalData: vec4<f32>) -> vec3<f32> {
-     return normalize(gBufferNormalData.rgb * 2.0 - 1.0);
  }
 
  fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {

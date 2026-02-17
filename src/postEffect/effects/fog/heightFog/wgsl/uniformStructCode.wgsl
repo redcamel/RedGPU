@@ -1,5 +1,5 @@
 #redgpu_include math.EPSILON
-#redgpu_include depth.reconstructWorldPositionFromDepth
+#redgpu_include reconstruct.reconstructWorldPositionFromDepth
 struct Uniforms {
     fogType: u32,
     density: f32,

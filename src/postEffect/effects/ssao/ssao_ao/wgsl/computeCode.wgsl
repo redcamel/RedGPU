@@ -24,7 +24,7 @@
     }
     // 2. 뷰 공간(View Space) 데이터 복원
     let viewPos      = reconstructViewPositionFromDepth((vec2<f32>(screenCoord) + 0.5) / vec2<f32>(texSize), depth, systemUniforms.inverseProjectionMatrix);
-    let viewNormal   = reconstructViewNormal(textureLoad(gBufferNormalTexture, screenCoord, 0));
+    let viewNormal   = reconstructViewNormalFromGNormalBuffer(normalData.rgb, systemUniforms.camera.cameraMatrix);
     let distToCamera = -viewPos.z;
 
 
