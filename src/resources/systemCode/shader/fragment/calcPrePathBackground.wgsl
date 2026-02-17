@@ -40,9 +40,10 @@ fn calcPrePathBackground(
         let validG = dot(refractedVecG, refractedVecG) > 0.0;
         let validB = dot(refractedVecB, refractedVecB) > 0.0;
 
-        let finalRefractR = select(getReflectionVectorFromViewDirection(V, N), refractedVecR, validR);
-        let finalRefractG = select(getReflectionVectorFromViewDirection(V, N), refractedVecG, validG);
-        let finalRefractB = select(getReflectionVectorFromViewDirection(V, N), refractedVecB, validB);
+        let R = getReflectionVectorFromViewDirection(V, N);
+        let finalRefractR = select(R, refractedVecR, validR);
+        let finalRefractG = select(R, refractedVecG, validG);
+        let finalRefractB = select(R, refractedVecB, validB);
 
         // 안전한 thickness 범위 제한
         let safeThickness = clamp(thicknessParameter, 0.0, 100.0);
@@ -89,7 +90,8 @@ fn calcPrePathBackground(
 
         // 전반사 체크
         let valid = dot(refractedVec, refractedVec) > 0.0;
-        let finalRefract = select(getReflectionVectorFromViewDirection(V, N), refractedVec, valid);
+        let R = getReflectionVectorFromViewDirection(V, N);
+        let finalRefract = select(R, refractedVec, valid);
 
         // 안전한 thickness 범위 제한
         let safeThickness = clamp(thicknessParameter, 0.0, 100.0);
