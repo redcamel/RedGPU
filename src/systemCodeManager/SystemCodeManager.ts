@@ -18,6 +18,7 @@ import getWorldNormalFromGNormalBuffer_wgsl from './shader/math/getWorldNormalFr
 import getViewNormalFromGNormalBuffer_wgsl from './shader/math/getViewNormalFromGNormalBuffer.wgsl';
 import getViewDirection_wgsl from './shader/math/getViewDirection.wgsl';
 import getRayDirection_wgsl from './shader/math/getRayDirection.wgsl';
+import getReflectionVectorFromViewDirection_wgsl from './shader/math/getReflectionVectorFromViewDirection.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
 import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
@@ -59,6 +60,7 @@ export namespace MathLibrary {
     export const getViewNormalFromGNormalBuffer = getViewNormalFromGNormalBuffer_wgsl;
     export const getViewDirection = getViewDirection_wgsl;
     export const getRayDirection = getRayDirection_wgsl;
+    export const getReflectionVectorFromViewDirection = getReflectionVectorFromViewDirection_wgsl;
 
     // 수학 상수
     export const PI = 'const PI: f32 = 3.141592653589793;';

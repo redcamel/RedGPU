@@ -10,6 +10,7 @@
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
 #redgpu_include math.getViewDirection
+#redgpu_include math.getReflectionVectorFromViewDirection
 
 struct Uniforms {
     useVertexColor: u32,
@@ -878,7 +879,7 @@ let attenuation = rangePart * invSquare;
     // ---------- 간접 조명 계산 - ibl ----------
     if (u_usePrefilterTexture) {
 
-        var R = (reflect(-V, N));
+        var R = getReflectionVectorFromViewDirection(V, N);
         let NdotV = max(dot(N, V),1e-4);
 
         #redgpu_if useKHR_materials_anisotropy
@@ -889,7 +890,7 @@ let attenuation = rangePart * invSquare;
             let tempSquared = temp * temp;
             var a = tempSquared * tempSquared;
             bentNormal = normalize(mix(bentNormal, N, a));
-            var reflectVec = reflect(-V, bentNormal);
+            var reflectVec = getReflectionVectorFromViewDirection(V, bentNormal);
             reflectVec = normalize(mix(reflectVec, bentNormal, roughnessParameter * roughnessParameter));
 
             let roughnessT = roughnessParameter * (1.0 + anisotropy);
@@ -1021,7 +1022,7 @@ let attenuation = rangePart * invSquare;
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
                  // 클리어코트 반사 벡터와 뷰 각도 계산
-                 let clearcoatR = reflect(-V, clearcoatNormal);
+                 let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
                  let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
                  let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
@@ -1106,7 +1107,7 @@ fn calcIBLSheen(
     iblMipmapCount: f32,
 ) -> SheenResult {
     let NdotV = clamp(dot(N, V), 0.0001, 1.0);
-    let R = reflect(-V, N);
+    let R = getReflectionVectorFromViewDirection(V, N);
 
     let mipLevel = sheenRoughness * iblMipmapCount;
 
