@@ -1,8 +1,8 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcTintBlendMode;
 #redgpu_include calcDirectionalShadowVisibility;
-#redgpu_include math.getTBNFromCotangent
-#redgpu_include math.getNormalFromNormalMap
+#redgpu_include math.tnb.getTBNFromCotangent
+#redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
 #redgpu_include calculateMotionVector;

@@ -3,7 +3,7 @@
 
 #redgpu_include math.PI
 #redgpu_include math.PI2
-#redgpu_include math.getTBN
+#redgpu_include math.tnb.getTBN
 
 fn radicalInverse_VdC(bits: u32) -> f32 {
     var b = bits;

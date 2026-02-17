@@ -13,7 +13,7 @@ struct PrefilterUniforms {
 
 #redgpu_include math.PI
 #redgpu_include math.PI2
-#redgpu_include math.getTBN
+#redgpu_include math.tnb.getTBN
 
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
     var bits = bits_in;

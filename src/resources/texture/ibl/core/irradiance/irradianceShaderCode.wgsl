@@ -9,7 +9,7 @@
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
-#redgpu_include math.getTBN
+#redgpu_include math.tnb.getTBN
 
 // Hammersley 시퀀스를 위한 비트 반전 함수 (표준 IBL 기법)
 fn radicalInverse_VdC(bits_in: u32) -> f32 {

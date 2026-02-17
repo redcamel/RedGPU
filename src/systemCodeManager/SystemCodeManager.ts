@@ -19,10 +19,10 @@ import getViewNormalFromGNormalBuffer_wgsl from './shader/math/getViewNormalFrom
 import getViewDirection_wgsl from './shader/math/getViewDirection.wgsl';
 import getRayDirection_wgsl from './shader/math/getRayDirection.wgsl';
 import getReflectionVectorFromViewDirection_wgsl from './shader/math/getReflectionVectorFromViewDirection.wgsl';
-import getTBNFromVertexTangent_wgsl from './shader/math/getTBNFromVertexTangent.wgsl';
-import getTBN_wgsl from './shader/math/getTBN.wgsl';
-import getTBNFromCotangent_wgsl from './shader/math/getTBNFromCotangent.wgsl';
-import getNormalFromNormalMap_wgsl from './shader/math/getNormalFromNormalMap.wgsl';
+import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
+import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
+import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
+import getNormalFromNormalMap_wgsl from './shader/math/tnb/getNormalFromNormalMap.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
 import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
@@ -65,10 +65,14 @@ export namespace MathLibrary {
     export const getViewDirection = getViewDirection_wgsl;
     export const getRayDirection = getRayDirection_wgsl;
     export const getReflectionVectorFromViewDirection = getReflectionVectorFromViewDirection_wgsl;
-    export const getTBNFromVertexTangent = getTBNFromVertexTangent_wgsl;
-    export const getTBN = getTBN_wgsl;
-    export const getTBNFromCotangent = getTBNFromCotangent_wgsl;
-    export const getNormalFromNormalMap = getNormalFromNormalMap_wgsl;
+
+    /** [KO] TNB(Tangent, Normal, Bitangent) 관련 셰이더 함수 [EN] TNB related shader functions */
+    export namespace tnb {
+        export const getTBNFromVertexTangent = getTBNFromVertexTangent_wgsl;
+        export const getTBN = getTBN_wgsl;
+        export const getTBNFromCotangent = getTBNFromCotangent_wgsl;
+        export const getNormalFromNormalMap = getNormalFromNormalMap_wgsl;
+    }
 
     // 수학 상수
     export const PI = 'const PI: f32 = 3.141592653589793;';
