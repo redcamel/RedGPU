@@ -11,6 +11,11 @@ import getBitHash1D_vec3_wgsl from './shader/math/getBitHash1D_vec3.wgsl';
 import getBitHash1D_vec4_wgsl from './shader/math/getBitHash1D_vec4.wgsl';
 import getBitHash2D_vec2_wgsl from './shader/math/getBitHash2D_vec2.wgsl';
 import getBitHash3D_vec3_wgsl from './shader/math/getBitHash3D_vec3.wgsl';
+import getNDCFromDepth_wgsl from './shader/math/getNDCFromDepth.wgsl';
+import getWorldPositionFromDepth_wgsl from './shader/math/getWorldPositionFromDepth.wgsl';
+import getViewPositionFromDepth_wgsl from './shader/math/getViewPositionFromDepth.wgsl';
+import getWorldNormalFromGNormalBuffer_wgsl from './shader/math/getWorldNormalFromGNormalBuffer.wgsl';
+import getViewNormalFromGNormalBuffer_wgsl from './shader/math/getViewNormalFromGNormalBuffer.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
 import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
@@ -19,11 +24,6 @@ import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
 import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
-import getNDCFromDepth_wgsl from './shader/reconstruct/getNDCFromDepth.wgsl';
-import reconstructWorldPositionFromDepth_wgsl from './shader/reconstruct/reconstructWorldPositionFromDepth.wgsl';
-import reconstructViewPositionFromDepth_wgsl from './shader/reconstruct/reconstructViewPositionFromDepth.wgsl';
-import reconstructWorldNormalFromGNormalBuffer_wgsl from './shader/reconstruct/reconstructWorldNormalFromGNormalBuffer.wgsl';
-import reconstructViewNormalFromGNormalBuffer_wgsl from './shader/reconstruct/reconstructViewNormalFromGNormalBuffer.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -33,6 +33,7 @@ import SystemFragmentCode from '../resources/systemCode/shader/fragment';
  * [EN] Math related shader function library
  */
 export namespace MathLibrary {
+    // 해시 및 노이즈
     export const getHash1D = getHash1D_wgsl;
     export const getHash1D_vec2 = getHash1D_vec2_wgsl;
     export const getHash1D_vec3 = getHash1D_vec3_wgsl;
@@ -48,8 +49,14 @@ export namespace MathLibrary {
     export const getBitHash2D_vec2 = getBitHash2D_vec2_wgsl;
     export const getBitHash3D_vec3 = getBitHash3D_vec3_wgsl;
 
-    // [KO] 수학 상수 (인라인 정의)
-    // [EN] Math Constants (In-line definition)
+    // 공간 및 벡터 복구
+    export const getNDCFromDepth = getNDCFromDepth_wgsl;
+    export const getWorldPositionFromDepth = getWorldPositionFromDepth_wgsl;
+    export const getViewPositionFromDepth = getViewPositionFromDepth_wgsl;
+    export const getWorldNormalFromGNormalBuffer = getWorldNormalFromGNormalBuffer_wgsl;
+    export const getViewNormalFromGNormalBuffer = getViewNormalFromGNormalBuffer_wgsl;
+
+    // 수학 상수
     export const PI = 'const PI: f32 = 3.141592653589793;';
     export const PI2 = 'const PI2: f32 = 6.283185307179586;';
     export const HPI = 'const HPI: f32 = 1.5707963267948966;';
@@ -82,18 +89,6 @@ export namespace DepthLibrary {
 }
 
 /**
- * [KO] 좌표 및 벡터 복구 관련 셰이더 함수 라이브러리
- * [EN] Shader function library for coordinate and vector reconstruction
- */
-export namespace ReconstructLibrary {
-    export const getNDCFromDepth = getNDCFromDepth_wgsl;
-    export const reconstructWorldPositionFromDepth = reconstructWorldPositionFromDepth_wgsl;
-    export const reconstructViewPositionFromDepth = reconstructViewPositionFromDepth_wgsl;
-    export const reconstructWorldNormalFromGNormalBuffer = reconstructWorldNormalFromGNormalBuffer_wgsl;
-    export const reconstructViewNormalFromGNormalBuffer = reconstructViewNormalFromGNormalBuffer_wgsl;
-}
-
-/**
  * [KO] 엔진 시스템에서 전역적으로 사용되는 셰이더 코드 및 공통 라이브러리를 통합 관리하는 레지스트리입니다.
  * [EN] A registry that integrates and manages shader code and common libraries used globally in the engine.
  * 
@@ -103,14 +98,12 @@ export namespace SystemCodeManager {
     /** [KO] 전역 시스템 유니폼 정의 [EN] Global system uniform definitions */
     export const SYSTEM_UNIFORM = SYSTEM_UNIFORM_wgsl;
 
-    /** [KO] 수학 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for mathematics. */
+    /** [KO] 수학 및 공간 변환 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for mathematics and space transformations. */
     export import math = MathLibrary;
     /** [KO] 색상 변환 및 처리 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for color conversion and processing. */
     export import color = ColorLibrary;
     /** [KO] 깊이(Depth) 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for depth. */
     export import depth = DepthLibrary;
-    /** [KO] 좌표 및 벡터 복구 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for coordinate and vector reconstruction. */
-    export import reconstruct = ReconstructLibrary;
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
     export const vertex = SystemVertexCode;

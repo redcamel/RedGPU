@@ -1,4 +1,4 @@
-#redgpu_include reconstruct.getNDCFromDepth
+#redgpu_include math.getNDCFromDepth
 
 /**
  * [KO] 깊이 정보를 바탕으로 뷰(카메라) 공간의 좌표를 복구합니다.
@@ -9,7 +9,7 @@
  * @param inverseProjectionMatrix - [KO] 역투영 행렬 [EN] Inverse Projection matrix
  * @returns [KO] 복구된 뷰 공간 좌표 [EN] Reconstructed view space position
  */
-fn reconstructViewPositionFromDepth(
+fn getViewPositionFromDepth(
     uv: vec2<f32>,
     depth: f32,
     inverseProjectionMatrix: mat4x4<f32>

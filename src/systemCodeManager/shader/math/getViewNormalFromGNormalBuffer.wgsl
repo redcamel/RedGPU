@@ -1,4 +1,4 @@
-#redgpu_include reconstruct.reconstructWorldNormalFromGNormalBuffer
+#redgpu_include math.getWorldNormalFromGNormalBuffer
 
 /**
  * [KO] G-Buffer 데이터와 카메라 행렬을 사용하여 뷰 공간 법선 벡터를 복구합니다.
@@ -8,7 +8,7 @@
  * @param cameraMatrix - [KO] 카메라 행렬 (View Matrix) [EN] Camera matrix (View Matrix)
  * @returns [KO] 복구된 뷰 공간 법선 벡터 [EN] Reconstructed view space normal vector
  */
-fn reconstructViewNormalFromGNormalBuffer(gBufferNormal: vec3<f32>, cameraMatrix: mat4x4<f32>) -> vec3<f32> {
-    let worldNormal = reconstructWorldNormalFromGNormalBuffer(gBufferNormal);
+fn getViewNormalFromGNormalBuffer(gBufferNormal: vec3<f32>, cameraMatrix: mat4x4<f32>) -> vec3<f32> {
+    let worldNormal = getWorldNormalFromGNormalBuffer(gBufferNormal);
     return normalize((cameraMatrix * vec4<f32>(worldNormal, 0.0)).xyz);
 }

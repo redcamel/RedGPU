@@ -1,4 +1,4 @@
-#redgpu_include reconstruct.getNDCFromDepth
+#redgpu_include math.getNDCFromDepth
 
 /**
  * [KO] 깊이 정보를 바탕으로 월드 공간의 좌표를 복구합니다.
@@ -9,7 +9,7 @@
  * @param inverseProjectionCameraMatrix - [KO] 역투영카메라 행렬 [EN] Inverse Projection-Camera matrix
  * @returns [KO] 복구된 월드 공간 좌표 [EN] Reconstructed world space position
  */
-fn reconstructWorldPositionFromDepth(
+fn getWorldPositionFromDepth(
     uv: vec2<f32>,
     depth: f32,
     inverseProjectionCameraMatrix: mat4x4<f32>

@@ -1,8 +1,8 @@
 #redgpu_include math.getInterleavedGradientNoise
 #redgpu_include math.PI2
 #redgpu_include depth.linearizeDepth
-#redgpu_include reconstruct.reconstructViewPositionFromDepth
-#redgpu_include reconstruct.reconstructViewNormalFromGNormalBuffer
+#redgpu_include math.getViewPositionFromDepth
+#redgpu_include math.getViewNormalFromGNormalBuffer
 
 struct Uniforms {
     radius: f32,
