@@ -1,5 +1,6 @@
 #redgpu_include math.PI
 #redgpu_include math.PI2
+#redgpu_include math.HPI
 const MAX_TAU: f32 = 50.0;
 
 // [KO] 대기 산란 시스템 통합 파라미터 구조체 (16바이트 정렬 완료)
@@ -79,12 +80,12 @@ fn get_sky_view_uv(view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atm
     var v: f32;
     if (view_elevation >= horizon_elevation) {
         // [Sky Part] Horizon -> Top (0.5 -> 0.0)
-        let v_range = (PI * 0.5) - horizon_elevation;
+        let v_range = HPI - horizon_elevation;
         let ratio = (view_elevation - horizon_elevation) / v_range;
         v = 0.5 * (1.0 - sqrt(max(0.0, ratio)));
     } else {
         // [Ground Part] Horizon -> Bottom (0.5 -> 1.0)
-        let v_range = horizon_elevation + (PI * 0.5);
+        let v_range = horizon_elevation + HPI;
         let ratio = (horizon_elevation - view_elevation) / v_range;
         v = 0.5 * (1.0 + sqrt(max(0.0, ratio)));
     }

@@ -14,7 +14,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [KO] 텍셀 중심 매핑
     // [EN] Pixel center mapping
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
-    let azimuth = (uv.x - 0.5) * 2.0 * PI;
+    let azimuth = (uv.x - 0.5) * PI2;
 
     let r = params.earthRadius;
     let h_c = max(0.0001, params.cameraHeight);
@@ -28,11 +28,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (uv.y < 0.5) {
         // [Sky Part] v = 0.5 * (1 - sqrt(ratio)) -> ratio = (1 - 2v)^2
         let ratio = (1.0 - 2.0 * uv.y) * (1.0 - 2.0 * uv.y);
-        view_elevation = horizon_elevation + ratio * ((PI * 0.5) - horizon_elevation);
+        view_elevation = horizon_elevation + ratio * (HPI - horizon_elevation);
     } else {
         // [Ground Part] v = 0.5 * (1 + sqrt(ratio)) -> ratio = (2v - 1)^2
         let ratio = (2.0 * uv.y - 1.0) * (2.0 * uv.y - 1.0);
-        view_elevation = horizon_elevation - ratio * (horizon_elevation + (PI * 0.5));
+        view_elevation = horizon_elevation - ratio * (horizon_elevation + HPI);
     }
 
     let view_dir = vec3<f32>(cos(view_elevation) * cos(azimuth), sin(view_elevation), cos(view_elevation) * sin(azimuth));
