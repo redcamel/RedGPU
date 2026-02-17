@@ -1,5 +1,5 @@
 #redgpu_include color.get_luminance
-#redgpu_include math.getHash1D_vec3
+#redgpu_include math.hash.getHash1D_vec3
 #redgpu_include math.getInterleavedGradientNoise
 
 struct Uniforms {

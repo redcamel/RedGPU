@@ -1,4 +1,4 @@
-#redgpu_include math.getHash1D
+#redgpu_include math.hash.getHash1D
 
 // 파티클 구조체 선언
 struct Info {

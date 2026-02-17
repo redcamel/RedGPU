@@ -1,4 +1,4 @@
-#redgpu_include math.getHash1D_vec2
+#redgpu_include math.hash.getHash1D_vec2
 
 struct Uniforms {
     amount: f32,
