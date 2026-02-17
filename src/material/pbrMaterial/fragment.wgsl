@@ -11,6 +11,8 @@
 #redgpu_include math.INV_PI
 #redgpu_include math.getViewDirection
 #redgpu_include math.getReflectionVectorFromViewDirection
+#redgpu_include math.getTBNFromVertexTangent
+#redgpu_include math.getTBN
 
 struct Uniforms {
     useVertexColor: u32,
@@ -713,15 +715,16 @@ fn main(inputData:InputData) -> FragmentOutput {
        var B: vec3<f32>;
 
        // 1. 기본 TBN 기저 구축
+       var tbn: mat3x3<f32>;
        if (u_useVertexTangent && length(input_vertexTangent.xyz) > 0.0) {
-           T = normalize(input_vertexTangent.xyz);
-           B = normalize(cross(N, T) * input_vertexTangent.w);
+           tbn = getTBNFromVertexTangent(N, input_vertexTangent);
        } else {
-           // 탄젠트가 없는 경우 Normal을 기준으로 임의의 수직 벡터 생성
-           T = normalize(select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 1.0, 0.0), abs(N.x) > 0.9));
-           T = normalize(T - N * dot(T, N));
-           B = normalize(cross(N, T));
+           // 탄젠트가 없는 경우 Normal을 기준으로 임의의 축 벡터로부터 직교 기저 생성
+           let anyT = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 1.0, 0.0), abs(N.x) > 0.9);
+           tbn = getTBN(N, anyT);
        }
+       T = tbn[0];
+       B = tbn[1];
 
        var anisotropicDirection: vec2<f32> = vec2<f32>(1.0, 0.0);
        if(u_useKHR_anisotropyTexture){

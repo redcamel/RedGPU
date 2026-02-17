@@ -35,9 +35,7 @@
 
     // 4. TBN 매트릭스 생성 (노멀 기반의 로컬 좌표계 구성)
     let noiseVec  = getNoiseVec(vec2<f32>(screenCoord));
-    let tangent   = normalize(noiseVec - viewNormal * dot(noiseVec, viewNormal));
-    let bitangent = cross(viewNormal, tangent);
-    let tbn       = mat3x3<f32>(tangent, bitangent, viewNormal);
+    let tbn       = getTBN(viewNormal, noiseVec);
 
     // 5. 샘플 커널 정의 (8개 샘플 포인트)
     let samples = array<vec3<f32>, 8>(
@@ -71,7 +69,7 @@
 
         if (realDepth < 0.001) { continue; }
 
-        let realViewPos = reconstructViewPositionFromDepth(sampleUV, realDepth, systemUniforms.inverseProjectionMatrix);
+        let realViewPos = getViewPositionFromDepth(sampleUV, realDepth, systemUniforms.inverseProjectionMatrix);
 
         // 자가 차폐 방지를 위한 적응형 바이어스 계산
         let adaptiveBias = uniforms.bias * (1.0 + distToCamera * uniforms.biasDistanceScale);

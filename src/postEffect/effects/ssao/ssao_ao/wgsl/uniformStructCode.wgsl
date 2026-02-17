@@ -3,6 +3,7 @@
 #redgpu_include depth.linearizeDepth
 #redgpu_include math.getViewPositionFromDepth
 #redgpu_include math.getViewNormalFromGNormalBuffer
+#redgpu_include math.getTBN
 
 struct Uniforms {
     radius: f32,
