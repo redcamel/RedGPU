@@ -15,6 +15,9 @@
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include lighting.diffuse_brdf_disney
+#redgpu_include lighting.fresnel_schlick
+#redgpu_include lighting.conductor_fresnel
+#redgpu_include lighting.iridescent_fresnel
 
 struct Uniforms {
     useVertexColor: u32,
@@ -1314,105 +1317,6 @@ fn V_GGX_anisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32
    let v = 0.5 / (GGXV + GGXL);
    return clamp(v, 0.0, 1.0);
 }
-fn iridescent_fresnel(outside_ior: f32, iridescence_ior: f32, base_f0: vec3<f32>,
-                      iridescence_thickness: f32, iridescence_factor: f32, cos_theta1: f32) -> vec3<f32> {
-    // 조기 반환
-    if (iridescence_thickness <= 0.0 || iridescence_factor <= 0.0) {
-        return base_f0;
-    }
-
-    let cos_theta1_abs = abs(cos_theta1);
-    let safe_iridescence_ior = max(iridescence_ior, 1.01);
-
-    // 스넬의 법칙
-    let sin_theta1 = sqrt(max(0.0, 1.0 - cos_theta1_abs * cos_theta1_abs));
-    let sin_theta2 = (outside_ior / safe_iridescence_ior) * sin_theta1;
-
-    if (sin_theta2 >= 1.0) {
-        return base_f0 + iridescence_factor * (vec3<f32>(1.0) - base_f0);
-    }
-
-    let cos_theta2 = sqrt(max(0.0, 1.0 - sin_theta2 * sin_theta2));
-
-    // 상수들 사전 계산
-    let wavelengths = vec3<f32>(650.0, 510.0, 475.0);
-    let effective_thickness = max(iridescence_thickness, 10.0);
-    let ior_scale = max(1.0, 1.5 - 0.5 * (safe_iridescence_ior / 1.5));
-    let optical_thickness = 2.0 * effective_thickness * safe_iridescence_ior * cos_theta2 * ior_scale;
-    let phase = (PI2 * optical_thickness) / wavelengths;
-
-    // 삼각함수 (한 번만)
-    let cos_phase = cos(phase);
-    let sin_phase = sin(phase);
-
-    // 공통 계산값들
-    let outside_cos1 = outside_ior * cos_theta1_abs;
-    let iridescence_cos2 = safe_iridescence_ior * cos_theta2;
-    let iridescence_cos1 = safe_iridescence_ior * cos_theta1_abs;
-    let outside_cos2 = outside_ior * cos_theta2;
-
-    // 프레넬 계수 (스칼라)
-    let r12_s = (outside_cos1 - iridescence_cos2) / (outside_cos1 + iridescence_cos2);
-    let r12_p = (iridescence_cos1 - outside_cos2) / (iridescence_cos1 + outside_cos2);
-
-    // 기본 F0에서 굴절률 추출 (벡터화)
-    let sqrt_f0 = sqrt(clamp(base_f0, vec3<f32>(0.01), vec3<f32>(0.99)));
-    let safe_n3 = max((1.0 + sqrt_f0) / (1.0 - sqrt_f0), vec3<f32>(1.2));
-
-    // r23 계산 (벡터화)
-    let iridescence_cos2_vec = vec3<f32>(iridescence_cos2);
-    let cos_theta1_abs_vec = vec3<f32>(cos_theta1_abs);
-    let iridescence_cos1_vec = vec3<f32>(iridescence_cos1);
-    let cos_theta2_vec = vec3<f32>(cos_theta2);
-
-    let r23_s = (iridescence_cos2_vec - safe_n3 * cos_theta1_abs_vec) /
-                (iridescence_cos2_vec + safe_n3 * cos_theta1_abs_vec);
-    let r23_p = (safe_n3 * cos_theta2_vec - iridescence_cos1_vec) /
-                (safe_n3 * cos_theta2_vec + iridescence_cos1_vec);
-
-    // 복소수 계산을 위한 공통 값들
-    let r12_s_vec = vec3<f32>(r12_s);
-    let r12_p_vec = vec3<f32>(r12_p);
-
-    // S-편광 복소수 계산
-    let num_s_real = r12_s_vec + r23_s * cos_phase;
-    let num_s_imag = r23_s * sin_phase;
-    let den_s_real = vec3<f32>(1.0) + r12_s_vec * r23_s * cos_phase;
-    let den_s_imag = r12_s_vec * r23_s * sin_phase;
-
-    // P-편광 복소수 계산
-    let num_p_real = r12_p_vec + r23_p * cos_phase;
-    let num_p_imag = r23_p * sin_phase;
-    let den_p_real = vec3<f32>(1.0) + r12_p_vec * r23_p * cos_phase;
-    let den_p_imag = r12_p_vec * r23_p * sin_phase;
-
-    // 복소수 나눗셈 인라인 계산 (S-편광)
-    let den_s_squared = den_s_real * den_s_real + den_s_imag * den_s_imag + vec3<f32>(0.001);
-    let rs_real = (num_s_real * den_s_real + num_s_imag * den_s_imag) / den_s_squared;
-    let rs_imag = (num_s_imag * den_s_real - num_s_real * den_s_imag) / den_s_squared;
-    let Rs = rs_real * rs_real + rs_imag * rs_imag;
-
-    // 복소수 나눗셈 인라인 계산 (P-편광)
-    let den_p_squared = den_p_real * den_p_real + den_p_imag * den_p_imag + vec3<f32>(0.001);
-    let rp_real = (num_p_real * den_p_real + num_p_imag * den_p_imag) / den_p_squared;
-    let rp_imag = (num_p_imag * den_p_real - num_p_real * den_p_imag) / den_p_squared;
-    let Rp = rp_real * rp_real + rp_imag * rp_imag;
-
-    // 전체 반사율
-    let reflectance = 0.5 * (Rs + Rp);
-
-    // IOR 영향 최적화
-    let ior_influence = smoothstep(1.0, 2.0, safe_iridescence_ior);
-    let enhanced_reflectance = mix(
-        pow(reflectance, vec3<f32>(0.8)) * 1.2,
-        reflectance,
-        ior_influence
-    );
-
-    // 최종 결과
-    let clamped_reflectance = clamp(enhanced_reflectance, vec3<f32>(0.0), vec3<f32>(1.0));
-    return mix(base_f0, clamped_reflectance, iridescence_factor);
-}
 fn specular_btdf(
     NdotV: f32,
     NdotL: f32,
@@ -1477,10 +1381,6 @@ fn fresnel_coat(NdotV:f32, ior: f32, weight: f32, base: vec3<f32>, layer: vec3<f
     let f0: f32 = pow((1.0 - ior) / (1.0 + ior), 2.0);
     let fr: f32 = f0 + (1.0 - f0) * pow(1.0 - abs(NdotV), 5.0);
     return mix(base, layer, weight * fr);
-}
-fn conductor_fresnel(F0: vec3<f32>, bsdf: vec3<f32>, VdotH: f32) -> vec3<f32> {
-    let fresnel = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - abs(VdotH), 5.0);
-    return bsdf * fresnel;
 }
 fn fresnel_mix(
     F0: vec3<f32>,
@@ -1569,11 +1469,6 @@ fn geometry_smith(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     let ggx2 = NdotL / (NdotL * (1.0 - k) + k);
 
     return ggx1 * ggx2;
-}
-
-// Schlick's approximation for Fresnel
-fn fresnel_schlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
-    return F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 fn get_transformed_uv(

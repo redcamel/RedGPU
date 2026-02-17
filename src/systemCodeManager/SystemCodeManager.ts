@@ -32,6 +32,9 @@ import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
 import diffuse_brdf_disney_wgsl from './shader/lighting/diffuse_brdf_disney.wgsl';
+import fresnel_schlick_wgsl from './shader/lighting/fresnel_schlick.wgsl';
+import conductor_fresnel_wgsl from './shader/lighting/conductor_fresnel.wgsl';
+import iridescent_fresnel_wgsl from './shader/lighting/iridescent_fresnel.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -122,6 +125,9 @@ export namespace DepthLibrary {
  */
 export namespace LightingLibrary {
     export const diffuse_brdf_disney = diffuse_brdf_disney_wgsl;
+    export const fresnel_schlick = fresnel_schlick_wgsl;
+    export const conductor_fresnel = conductor_fresnel_wgsl;
+    export const iridescent_fresnel = iridescent_fresnel_wgsl;
 }
 
 /**
