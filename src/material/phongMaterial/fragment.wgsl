@@ -68,7 +68,7 @@ struct InputData {
 
 #redgpu_include math.PI
 #redgpu_include math.EPSILON
-#redgpu_include math.getViewDirection
+#redgpu_include math.direction.getViewDirection
 
 @fragment
 fn main(inputData:InputData) -> FragmentOutput {

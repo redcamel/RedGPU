@@ -1,6 +1,6 @@
 #redgpu_include math.EPSILON
 #redgpu_include math.getWorldPositionFromDepth
-#redgpu_include math.getRayDirection
+#redgpu_include math.direction.getRayDirection
 struct Uniforms {
     fogType: u32,
     density: f32,

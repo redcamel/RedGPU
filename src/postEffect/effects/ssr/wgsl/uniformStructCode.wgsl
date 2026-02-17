@@ -3,7 +3,7 @@
 #redgpu_include math.EPSILON
 #redgpu_include math.getViewPositionFromDepth
 #redgpu_include math.getWorldNormalFromGNormalBuffer
-#redgpu_include math.getViewDirection
+#redgpu_include math.direction.getViewDirection
 #redgpu_include math.getReflectionVectorFromViewDirection
 
 struct Uniforms {
