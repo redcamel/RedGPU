@@ -585,9 +585,9 @@ fn main(inputData:InputData) -> FragmentOutput {
                 clearcoatNormal = clearcoatNormalSampler.rgb;
                 let clearcoatTBN = getTBNFromCotangent(N, input_vertexPosition, targetUv);
                 clearcoatNormal = getNormalFromNormalMap(
-                    clearcoatNormal,
+                    vec3<f32>(clearcoatNormal.r, 1.0 - clearcoatNormal.g, clearcoatNormal.b),
                     clearcoatTBN,
-                    u_normalScale
+                    -u_normalScale
                 );
                 if(u_useVertexTangent){
                     if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; }
