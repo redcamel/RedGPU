@@ -604,7 +604,7 @@ fn main(inputData:InputData) -> FragmentOutput {
                 // [EN] Clearcoat TBN should be constructed based on the geometricNormal, not the perturbed N.
                 let clearcoatTBN = getTBNFromCotangent(geometricNormal, input_vertexPosition, targetUv);
                 clearcoatNormal = getNormalFromNormalMap(
-                    vec3<f32>(clearcoatNormal.r, 1.0 - clearcoatNormal.g, clearcoatNormal.b),
+                    vec3<f32>(clearcoatNormalSampler.r, 1.0 - clearcoatNormalSampler.g, clearcoatNormalSampler.b),
                     clearcoatTBN,
                     -u_KHR_clearcoatNormalScale
                 );
