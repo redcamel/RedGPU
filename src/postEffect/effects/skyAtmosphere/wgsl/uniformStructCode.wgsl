@@ -36,12 +36,6 @@ struct Uniforms {
 	padding1: f32
 };
 
-fn fetchDepth(pos: vec2<u32>) -> f32 {
-    let dSize = textureDimensions(depthTexture);
-    let clampedPos = min(pos, dSize - 1u);
-    return textureLoad(depthTexture, clampedPos, 0);
-}
-
 /**
  * [KO] 지면 노이즈를 생성합니다. (표준 getHash3D_vec3 사용)
  * [EN] Generates ground noise. (Using standard getHash3D_vec3)

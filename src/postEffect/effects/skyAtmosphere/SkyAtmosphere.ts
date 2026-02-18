@@ -74,8 +74,12 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	#dirtySkyView: boolean = true;
 
 	#uniformBuffer: UniformBuffer;
-	#pipeline: GPUComputePipeline;
-	#bindGroupLayout0: GPUBindGroupLayout;
+	#computeShaderMSAA: GPUShaderModule;
+	#computeShaderNonMSAA: GPUShaderModule;
+	#cachedBindGroupLayouts: Map<string, GPUBindGroupLayout> = new Map();
+	#cachedComputePipelines: Map<string, GPUComputePipeline> = new Map();
+	#currentMSAAState: boolean | null = null;
+
 	#bindGroupLayout1: GPUBindGroupLayout;
 	#outputTexture: GPUTexture;
 	#outputTextureView: GPUTextureView;
@@ -91,7 +95,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 	 */
 	constructor(redGPUContext: RedGPUContext) {
 		super(redGPUContext);
-		const {gpuDevice, resourceManager} = redGPUContext;
+		const {gpuDevice} = redGPUContext;
 
 		this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext);
 		this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext);
@@ -108,19 +112,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 		const uniformData = new ArrayBuffer(160);
 		this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, 'SKY_ATMOSPHERE_PE_UNIFORM_BUFFER');
 
-		this.#bindGroupLayout0 = gpuDevice.createBindGroupLayout({
-			label: 'SKY_ATMOSPHERE_PE_BGL_0',
-			entries: [
-				{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} },
-				{ binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'depth' } },
-				{ binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {} },
-				{ binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {} },
-				{ binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {} },
-				{ binding: 5, visibility: GPUShaderStage.COMPUTE, texture: { viewDimension: '3d' } },
-				{ binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {} }
-			]
-		});
-
 		this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
 			label: 'SKY_ATMOSPHERE_PE_BGL_1',
 			entries: [
@@ -130,37 +121,93 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 			]
 		});
 
-		const shaderCode = [
-			skyAtmosphereFn,
-			'@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
-			'@group(0) @binding(1) var depthTexture : texture_depth_2d;',
-			'@group(0) @binding(2) var transmittanceTexture : texture_2d<f32>;',
-			'@group(0) @binding(3) var multiScatteringTexture : texture_2d<f32>;',
-			'@group(0) @binding(4) var skyViewTexture : texture_2d<f32>;',
-			'@group(0) @binding(5) var cameraVolumeTexture : texture_3d<f32>;',
-			'@group(0) @binding(6) var tSampler : sampler;',
-			'',
-			'@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
-			POST_EFFECT_SYSTEM_UNIFORM,
-			'@group(1) @binding(2) var<uniform> uniforms: Uniforms;',
-			'',
-			uniformStructCode,
-			'',
-			'@compute @workgroup_size(16, 16)',
-			'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
-			computeCode,
-			'}'
-		].join('\n');
-
-		const shaderModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_PE_SHADER', { code: shaderCode });
-		this.#pipeline = gpuDevice.createComputePipeline({
-			label: 'SKY_ATMOSPHERE_PE_PIPELINE',
-			layout: gpuDevice.createPipelineLayout({ bindGroupLayouts: [this.#bindGroupLayout0, this.#bindGroupLayout1] }),
-			compute: { module: shaderModule, entryPoint: 'main' }
-		});
-
+		this.#initShaders();
 		this.#updateSunDirection();
 		this.#syncAllUniforms();
+	}
+
+	#initShaders(): void {
+		const {resourceManager} = this.redGPUContext;
+		const createCode = (useMSAA: boolean) => {
+			const depthTextureDeclaration = useMSAA 
+				? '@group(0) @binding(1) var depthTexture : texture_depth_multisampled_2d;' 
+				: '@group(0) @binding(1) var depthTexture : texture_depth_2d;';
+			
+			const fetchDepthFunction = `
+				fn fetchDepth(pos: vec2<u32>) -> f32 {
+					let dSize = textureDimensions(depthTexture);
+					let clampedPos = min(pos, dSize - 1u);
+					${useMSAA 
+						? 'return textureLoad(depthTexture, clampedPos, 0);' 
+						: 'return textureLoad(depthTexture, clampedPos, 0);'}
+				}
+			`;
+
+			return [
+				skyAtmosphereFn,
+				'@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
+				depthTextureDeclaration,
+				'@group(0) @binding(2) var transmittanceTexture : texture_2d<f32>;',
+				'@group(0) @binding(3) var multiScatteringTexture : texture_2d<f32>;',
+				'@group(0) @binding(4) var skyViewTexture : texture_2d<f32>;',
+				'@group(0) @binding(5) var cameraVolumeTexture : texture_3d<f32>;',
+				'@group(0) @binding(6) var tSampler : sampler;',
+				'',
+				'@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
+				POST_EFFECT_SYSTEM_UNIFORM,
+				'@group(1) @binding(2) var<uniform> uniforms: Uniforms;',
+				'',
+				uniformStructCode,
+				fetchDepthFunction,
+				'',
+				'@compute @workgroup_size(16, 16)',
+				'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
+				computeCode,
+				'}'
+			].join('\n');
+		};
+
+		this.#computeShaderMSAA = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_PE_MSAA', { code: createCode(true) });
+		this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_PE_NON_MSAA', { code: createCode(false) });
+	}
+
+	#getBindGroupLayout0(useMSAA: boolean): GPUBindGroupLayout {
+		const key = `BGL0_MSAA_${useMSAA}`;
+		if (this.#cachedBindGroupLayouts.has(key)) return this.#cachedBindGroupLayouts.get(key);
+
+		const bgl = this.redGPUContext.gpuDevice.createBindGroupLayout({
+			label: `SKY_ATMOSPHERE_PE_${key}`,
+			entries: [
+				{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} },
+				{ binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'depth', multisampled: useMSAA } },
+				{ binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {} },
+				{ binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {} },
+				{ binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {} },
+				{ binding: 5, visibility: GPUShaderStage.COMPUTE, texture: { viewDimension: '3d' } },
+				{ binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {} }
+			]
+		});
+		this.#cachedBindGroupLayouts.set(key, bgl);
+		return bgl;
+	}
+
+	#getPipeline(useMSAA: boolean): GPUComputePipeline {
+		const key = `PIPELINE_MSAA_${useMSAA}`;
+		if (this.#cachedComputePipelines.has(key)) return this.#cachedComputePipelines.get(key);
+
+		const {gpuDevice} = this.redGPUContext;
+		const pipeline = gpuDevice.createComputePipeline({
+			label: `SKY_ATMOSPHERE_PE_${key}`,
+			layout: gpuDevice.createPipelineLayout({ 
+				bindGroupLayouts: [this.#getBindGroupLayout0(useMSAA), this.#bindGroupLayout1] 
+			}),
+			compute: { 
+				module: useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA, 
+				entryPoint: 'main' 
+			}
+		});
+		this.#cachedComputePipelines.set(key, pipeline);
+		return pipeline;
 	}
 
 	#updateSunDirection(): void {
@@ -251,10 +298,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
 		const commandEncoder = gpuDevice.createCommandEncoder({ label: 'SkyAtmosphere_PE_Pass' });
 		const passEncoder = commandEncoder.beginComputePass();
-		passEncoder.setPipeline(this.#pipeline);
+		
+		const {useMSAA} = this.redGPUContext.antialiasingManager;
+		const pipeline = this.#getPipeline(useMSAA);
+		passEncoder.setPipeline(pipeline);
 
 		const bindGroup0 = gpuDevice.createBindGroup({
-			layout: this.#bindGroupLayout0,
+			layout: this.#getBindGroupLayout0(useMSAA),
 			entries: [
 				{ binding: 0, resource: sourceTextureInfo.textureView },
 				{ binding: 1, resource: view.viewRenderTextureManager.depthTextureView },
