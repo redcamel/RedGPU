@@ -34,7 +34,7 @@ struct OutputData {
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowPos: vec3<f32>,
+    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };

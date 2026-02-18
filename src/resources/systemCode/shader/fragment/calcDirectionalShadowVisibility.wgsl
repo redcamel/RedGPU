@@ -3,17 +3,17 @@ fn calcDirectionalShadowVisibility(
    directionalShadowMapSampler: sampler_comparison,
    shadowDepthTextureSize: u32,
    bias: f32,
-   shadowPos: vec3<f32>
+   shadowCoord: vec3<f32>
 ) -> f32 {
     let oneOverShadowDepthTextureSize = 1.0 / f32(shadowDepthTextureSize);
-    let shadowDepth = clamp(shadowPos.z, 0.0, 1.0);
+    let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
 
     var visibility: f32 = 0.0;
 
     for (var y = -1; y <= 1; y++) {
         for (var x = -1; x <= 1; x++) {
             let offset = vec2f(vec2(x, y)) * oneOverShadowDepthTextureSize;
-            let tUV = shadowPos.xy + offset;
+            let tUV = shadowCoord.xy + offset;
 
             let sampleVisibility = textureSampleCompare(
                 directionalShadowMap,

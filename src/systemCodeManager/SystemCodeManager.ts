@@ -19,6 +19,7 @@ import getViewNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getVi
 import getViewDirection_wgsl from './shader/math/direction/getViewDirection.wgsl';
 import getRayDirection_wgsl from './shader/math/direction/getRayDirection.wgsl';
 import getReflectionVectorFromViewDirection_wgsl from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
+import getShadowCoord_wgsl from './shader/math/getShadowCoord.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
@@ -69,6 +70,7 @@ export namespace MathLibrary {
     }
 
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
+    export const getShadowCoord = getShadowCoord_wgsl;
 
     /** [KO] 방향(Direction) 관련 셰이더 함수 [EN] Direction related shader functions */
     export namespace direction {

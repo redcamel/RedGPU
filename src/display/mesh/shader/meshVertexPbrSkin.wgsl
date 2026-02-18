@@ -1,4 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include math.getShadowCoord;
 
 #redgpu_include meshVertexBasicUniform;
 const maxDistance: f32 = 1000.0;
@@ -37,7 +38,7 @@ struct OutputDataSkin {
 
     //
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowPos: vec3<f32>,
+    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
@@ -115,8 +116,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     // Shadow calculation
     #redgpu_if receiveShadow
     {
-        let posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-        output.shadowPos = vec3(posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z);
+        output.shadowCoord = getShadowCoord(position.xyz, u_directionalLightProjectionViewMatrix);
         output.receiveShadow = vertexUniforms.receiveShadow;
     }
     #redgpu_endIf

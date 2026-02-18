@@ -1,4 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include math.getShadowCoord;
 #redgpu_include drawDirectionalShadowDepth;
 #redgpu_include picking;
 #redgpu_include calcDisplacements;
@@ -104,8 +105,7 @@ fn main(inputData: InputData) -> OutputData {
     // Shadow calculation
     #redgpu_if receiveShadow
     {
-        let posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-        output.shadowPos = vec3(posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z);
+        output.shadowCoord = getShadowCoord(position.xyz, u_directionalLightProjectionViewMatrix);
         output.receiveShadow = vertexUniforms.receiveShadow;
     }
     #redgpu_endIf
