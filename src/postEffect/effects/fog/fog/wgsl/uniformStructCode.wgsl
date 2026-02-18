@@ -1,4 +1,4 @@
-#redgpu_include depth.linearizeDepth
+#redgpu_include depth.getLinearizeDepth
 
 struct Uniforms {
     fogType: u32,

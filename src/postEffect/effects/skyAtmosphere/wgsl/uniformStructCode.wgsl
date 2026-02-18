@@ -1,5 +1,5 @@
 #redgpu_include math.hash.getHash3D_vec3
-#redgpu_include depth.linearizeDepth
+#redgpu_include depth.getLinearizeDepth
 struct Uniforms {
 	rayleighScattering: vec3<f32>,
 	mieAnisotropy: f32,

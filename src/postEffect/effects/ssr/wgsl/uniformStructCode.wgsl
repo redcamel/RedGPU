@@ -1,5 +1,5 @@
 #redgpu_include math.getInterleavedGradientNoise
-#redgpu_include depth.linearizeDepth
+#redgpu_include depth.getLinearizeDepth
 #redgpu_include math.EPSILON
 #redgpu_include math.reconstruct.getViewPositionFromDepth
 #redgpu_include math.reconstruct.getWorldNormalFromGNormalBuffer

@@ -64,7 +64,7 @@ struct SystemUniform {
 @group(0) @binding(13) var cameraVolumeTexture: texture_3d<f32>;
 @group(0) @binding(14) var tSampler: sampler;
 
-#redgpu_include depth.linearizeDepth
+#redgpu_include depth.getLinearizeDepth
 
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
 const clusterLight_tileCount = vec3<u32>(REDGPU_DEFINE_TILE_COUNT_Xu, REDGPU_DEFINE_TILE_COUNT_Yu, REDGPU_DEFINE_TILE_COUNT_Zu);
@@ -98,7 +98,7 @@ fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
     let far = systemUniforms.camera.farClipping;
     let sliceScale = f32(clusterLight_tileCount.z) / log2(far / near);
     let sliceBias = -(f32(clusterLight_tileCount.z) * log2(near) / log2(far / near));
-    let zTile = u32(max(log2(linearizeDepth(fragCoord.z, near, far)) * sliceScale + sliceBias, 0.0));
+    let zTile = u32(max(log2(getLinearizeDepth(fragCoord.z, near, far)) * sliceScale + sliceBias, 0.0));
     return vec3<u32>(u32(fragCoord.x / (systemUniforms.resolution.x / f32(clusterLight_tileCount.x))),
                      u32(fragCoord.y / (systemUniforms.resolution.y / f32(clusterLight_tileCount.y))),
                      zTile);

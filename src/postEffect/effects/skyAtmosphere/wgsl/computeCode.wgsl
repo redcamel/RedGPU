@@ -33,7 +33,7 @@ let atmH = uniforms.atmosphereHeight;
 
 // 3. 공중 투시(Aerial Perspective) 적용
 let rawDepth = fetchDepth(id);
-let depthKm = linearizeDepth(
+let depthKm = getLinearizeDepth(
     rawDepth, 
     systemUniforms.camera.nearClipping, 
     systemUniforms.camera.farClipping

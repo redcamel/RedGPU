@@ -1,6 +1,6 @@
 #redgpu_include math.getInterleavedGradientNoise
 #redgpu_include math.PI2
-#redgpu_include depth.linearizeDepth
+#redgpu_include depth.getLinearizeDepth
 #redgpu_include math.reconstruct.getViewPositionFromDepth
 #redgpu_include math.reconstruct.getViewNormalFromGNormalBuffer
 #redgpu_include math.tnb.getTBN

@@ -1,3 +1,5 @@
+#redgpu_include depth.getLinearizeDepth
+
 struct Uniforms {
     focusDistance: f32,
     aperture: f32,
@@ -5,12 +7,6 @@ struct Uniforms {
     nearPlane: f32,
     farPlane: f32,
 };
-
-fn linearizeDepth(depth: f32) -> f32 {
-    let z = depth * 2.0 - 1.0;
-    return (2.0 * uniforms.nearPlane * uniforms.farPlane) /
-           (uniforms.farPlane + uniforms.nearPlane - z * (uniforms.farPlane - uniforms.nearPlane));
-}
 
 /* CoC 값을 0~1 범위로 인코딩 */
 fn encodeCoC(coc: f32) -> f32 {

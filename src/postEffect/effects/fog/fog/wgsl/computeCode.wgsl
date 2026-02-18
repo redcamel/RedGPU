@@ -5,7 +5,7 @@ var sceneColor = textureLoad(sourceTexture, coord);
 let depth = textureLoad(depthTexture, coord, 0);
 
 // 1. 표준 깊이 복구
-let linDepth = linearizeDepth(depth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
+let linDepth = getLinearizeDepth(depth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
 
 // 2. 포그 계수 계산 (Inline)
 let u_density = uniforms.density;

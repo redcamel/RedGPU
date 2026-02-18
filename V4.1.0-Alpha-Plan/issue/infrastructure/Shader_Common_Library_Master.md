@@ -49,9 +49,11 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | **Tint Blend Mode** | `color.getTintBlendMode` | ✅ 완료 | **[블렌딩 표준]** 23종의 포토샵 규격 블렌딩 모드 지원. `calc...` 명칭 현대화 및 `color/` 이동 완료. |
 
 #### 📂 상세 적용 이력 (Color)
+- `src/systemCodeManager/shader/color/getLuminance.wgsl`: 표준 함수 구현 및 CamelCase 적용 완료.
 - `src/systemCodeManager/shader/color/getTintBlendMode.wgsl`: 23종 블렌딩 모드 통합 구현.
+- **[휘도 계산 적용]**: `fxaa`, `taa`, `vibrance`, `filmGrain`, `threshold`, `colorBalance`, `skyBox` 등 엔진 전역 적용 완료.
 - **[틴트 블렌드 적용]**: `phongMaterial`, `bitmapMaterial`, `colorMaterial` 등 모든 재질 셰이더 적용 완료.
-- `fxaa.wgsl`, `vibrance/fragment.wgsl`, `taa/computeCode.wgsl`, `oldBloom/fragment.wgsl`, `toneMapping/fragment.wgsl`, `pbrMaterial/fragment.wgsl`, `colorMaterial/fragment.wgsl` 전역 적용 완료.
+- `toneMapping/fragment.wgsl`, `pbrMaterial/fragment.wgsl`, `colorMaterial/fragment.wgsl` 내 `linearToSrgb` 계열 적용 완료.
 
 ---
 
@@ -67,7 +69,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 
 #### 📂 상세 적용 이력 (Math)
 - `pbrMaterial`, `phongMaterial`, `filmGrain`, `skyAtmosphere`, `zoomBlur`, `ssao_ao`, `particle/compute.wgsl` 적용 완료.
-- `systemCodeManager/shader/depth/linearizeDepth.wgsl`: `math.EPSILON` 재귀 인클루드 적용.
+- `src/systemCodeManager/shader/depth/getLinearizeDepth.wgsl`: `math.EPSILON` 재귀 인클루드 적용.
 
 ---
 
@@ -88,13 +90,16 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 ### 4. Space Reconstruction & Depth (깊이 및 공간 복구)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **Linear Depth** | `depth.linearizeDepth` | ✅ 완료 | **[공간 분석]** WebGPU의 비선형 Depth(0~1)를 선형 거리로 변환. SSAO, SSR, Fog 계산의 정밀도 핵심. |
+| **Linear Depth** | `depth.getLinearizeDepth` | ✅ 완료 | **[공간 분석]** WebGPU의 비선형 Depth(0~1)를 선형 거리로 변환. `linearizeDepth` 명칭 현대화 완료. |
 | **Get NDC** | `math.reconstruct.getNDCFromDepth` | ✅ 완료 | **[좌표 변환]** 스크린 UV와 Depth를 조합하여 NDC 좌표 복구. 후처리 공간 변환의 기초 데이터. |
 | **Position Rec.** | `math.reconstruct.getXXXPosition...` | ✅ 완료 | **[역투영 표준]** NDC -> World/View 공간 복구. 픽셀 미분 없이 깊이값만으로 정확한 3D 위치 추적. |
 | **Normal Rec.** | `math.reconstruct.getXXXNormal...` | ✅ 완료 | **[G-Buffer 복구]** GNormalBuffer RGB 데이터를 정규화된 월드/뷰 법선 벡터로 변환. |
 
 #### 📂 상세 적용 이력 (Depth & Reconstruction)
-- `SYSTEM_UNIFORM.wgsl`, `ssr/uniformStructCode.wgsl`, `ssao_ao/computeCode.wgsl`, `heightFog/uniformStructCode.wgsl`, `equirectangularToCubeShaderCode.wgsl` 적용 완료.
+- `src/systemCodeManager/shader/depth/getLinearizeDepth.wgsl`: 표준 함수 구현 및 `getXXXX` 명칭 통일 완료.
+- `SYSTEM_UNIFORM.wgsl`, `ssr`, `ssao`, `fog`, `skyAtmosphere`, `taa` 등 엔진 전역 적용 완료.
+- `src/postEffect/effects/lens/dof/`: 파편화된 내부 `linearizeDepth` 정의를 제거하고 표준 라이브러리로 통합 완료.
+- `equirectangularToCubeShaderCode.wgsl`: `math.reconstruct.getNDCFromDepth` 적용 완료.
 
 ---
 
@@ -165,7 +170,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 
 ## ⚠️ 안정성 및 유지보수 가이드
 - **Include Once**: 동일 경로(`#redgpu_include`)의 중복 치환을 방지하기 위해 전처리기 규격을 반드시 준수하십시오.
-- **Naming Standard**: `math.getXXXX`(수학/공간), `lighting.getXXXX`(조명), `color.getXXXX`(색상) 등 **get 접두사**와 **CamelCase** 네임스페이스를 엄격히 준수합니다.
+- **Naming Standard**: `math.getXXXX`(수학/공간), `lighting.getXXXX`(조명), `color.getXXXX`(색상), `depth.getXXXX`(깊이) 등 **get 접두사**와 **CamelCase** 네임스페이스를 엄격히 준수합니다.
 - **Verification**: 모듈화 단계마다 기존 결과물(NormalTangentTest 등)과 시각적 차이가 없는지 엄격히 검증해야 합니다.
 
 ---

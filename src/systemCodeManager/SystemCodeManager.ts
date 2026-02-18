@@ -34,7 +34,7 @@ import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
 import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import getLuminance_wgsl from './shader/color/getLuminance.wgsl';
 import getTintBlendMode_wgsl from './shader/color/getTintBlendMode.wgsl';
-import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
+import getLinearizeDepth_wgsl from './shader/depth/getLinearizeDepth.wgsl';
 import diffuseBRDFDisney_wgsl from './shader/lighting/getDiffuseBRDFDisney.wgsl';
 import fresnelSchlick_wgsl from './shader/lighting/getFresnelSchlick.wgsl';
 import conductorFresnel_wgsl from './shader/lighting/getConductorFresnel.wgsl';
@@ -131,7 +131,7 @@ export namespace ColorLibrary {
  * [EN] Depth related shader function library
  */
 export namespace DepthLibrary {
-    export const linearizeDepth = linearizeDepth_wgsl;
+    export const getLinearizeDepth = getLinearizeDepth_wgsl;
 }
 
 /**
