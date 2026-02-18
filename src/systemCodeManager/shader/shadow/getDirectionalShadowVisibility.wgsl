@@ -15,8 +15,8 @@
  * [KO] 그림자 바이어스
  * [EN] Shadow bias
  * @param shadowCoord -
- * [KO] [0, 1] 범위로 변환된 그림자 좌표 (math.getShadowCoord 결과값)
- * [EN] Shadow coordinates transformed to [0, 1] range (result of math.getShadowCoord)
+ * [KO] [0, 1] 범위로 변환된 그림자 좌표 (shadow.getShadowCoord 결과값)
+ * [EN] Shadow coordinates transformed to [0, 1] range (result of shadow.getShadowCoord)
  * @returns
  * [KO] 가시성 계수 (0.0 ~ 1.0)
  * [EN] Visibility factor (0.0 ~ 1.0)

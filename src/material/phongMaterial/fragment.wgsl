@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include color.getTintBlendMode;
-#redgpu_include math.getDirectionalShadowVisibility;
+#redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include drawPicking;
