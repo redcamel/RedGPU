@@ -20,6 +20,7 @@ import ABaseLight from "../core/ABaseLight";
  * [KO] 아래는 SpotLight 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and behavior of SpotLight.
  * @see [SpotLight Cluster Performance example](/RedGPU/examples/3d/light/spotLightPerformance/)
+ * @see [SpotLight with glTF example](/RedGPU/examples/3d/light/spotLightWithGltf/)
  * @category Light
  */
 class SpotLight extends ABaseLight {

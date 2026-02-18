@@ -15,7 +15,7 @@
  * [KO] 계산된 감쇄 계수 (0.0 ~ 1.0)
  * [EN] Calculated attenuation factor (0.0 to 1.0)
  */
-fn getLightAttenuation(distance: f32, radius: f32) -> f32 {
+fn getLightDistanceAttenuation(distance: f32, radius: f32) -> f32 {
     let d2 = distance * distance;
     let r2 = radius * radius;
     
@@ -28,7 +28,5 @@ fn getLightAttenuation(distance: f32, radius: f32) -> f32 {
     
     // [KO] 정규화된 역제곱 법칙 적용 (Radius^2 / d^2)
     // [EN] Apply normalized inverse square law (Radius^2 / d^2)
-    // [KO] 반경이 커져도 중심부의 밝기가 급격히 떨어지지 않도록 보정합니다.
-    // [EN] Compensates so that the center brightness doesn't drop sharply as the radius increases.
     return (windowing * windowing) * r2 / max(d2, 0.0001);
 }

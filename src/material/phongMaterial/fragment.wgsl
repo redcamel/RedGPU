@@ -6,7 +6,8 @@
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
 #redgpu_include math.getMotionVector;
-#redgpu_include lighting.getLightAttenuation;
+#redgpu_include lighting.getLightDistanceAttenuation;
+#redgpu_include lighting.getLightAngleAttenuation;
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -194,7 +195,7 @@ fn main(inputData:InputData) -> FragmentOutput {
          }
 
          let L = normalize(lightDir);
-         let attenuation = getLightAttenuation(lightDistance, u_clusterLightRadius);
+         let attenuation = getLightDistanceAttenuation(lightDistance, u_clusterLightRadius);
 
          var finalAttenuation = attenuation;
 
@@ -205,26 +206,16 @@ fn main(inputData:InputData) -> FragmentOutput {
                  clusterLightList.lights[i].directionY,
                  clusterLightList.lights[i].directionZ
              ));
-             let u_clusterLightInnerAngle = clusterLightList.lights[i].innerCutoff;
-             let u_clusterLightOuterCutoff = clusterLightList.lights[i].outerCutoff;
-
+             
              // 라이트에서 버텍스로의 방향
-             let lightToVertex = normalize(-lightDir);
-             let cosTheta = dot(lightToVertex, u_clusterLightDirection);
-
-             let cosOuter = cos(radians(u_clusterLightOuterCutoff));
-             let cosInner = cos(radians(u_clusterLightInnerAngle));
-
-             // 스폿라이트 외곽 범위를 벗어나면 스킵
-             if (cosTheta < cosOuter) {
-                 continue;
-             }
-
-             // 스폿라이트 강도 계산 (부드러운 페이드)
-             let epsilon = cosInner - cosOuter;
-             let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
-
-             finalAttenuation *= spotIntensity;
+             let lightToVertex = normalize(-L);
+             
+             finalAttenuation *= getLightAngleAttenuation(
+                 lightToVertex, 
+                 u_clusterLightDirection, 
+                 clusterLightList.lights[i].innerCutoff, 
+                 clusterLightList.lights[i].outerCutoff
+             );
          }
 
          let R = reflect(-L, N);

@@ -111,8 +111,8 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | **Shadow Coord** | `shadow.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 완료. |
 | **Shadow Depth Pos**| `shadow.getShadowClipPosition`| ✅ 완료 | **[그림자 투영]** Shadow Pass 전용. World -> LightClipSpace 변환 및 투영 절차 규격화. |
 | **Shadow Visibility**| `shadow.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 명칭 현대화 및 전용 라이브러리 이동 완료. |
-| **Standard PCF** | `shadow.getShadowPCF` | **Medium** | **[필터링]** 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드 분리 예정. |
-| **Shadow Bias** | `shadow.applyShadowBias` | **Medium** | **[아티팩트 제거]** Slope-scaled bias 등 법선 기반 가변 바이어스 구축 예정. |
+| **Standard PCF** | `shadow.getShadowPCF` | **High** | **[필터링]** 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드 분리 예정. |
+| **Shadow Bias** | `shadow.applyShadowBias` | **High** | **[아티팩트 제거]** Slope-scaled bias 등 법선 기반 가변 바이어스 구축 예정. |
 
 #### 📂 상세 적용 이력 (Basis & Shadow)
 - `src/systemCodeManager/shader/shadow/getShadowCoord.wgsl`: 표준 함수 구현 완료.
@@ -158,15 +158,16 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | :--- | :--- | :---: | :--- |
 | **Motion Vector** | `math.getMotionVector` | ✅ 완료 | **[시간적 안정성]** 프레임 간 Clip Space 좌표 기반 모션 계산. TAA 및 Motion Blur 필수 데이터. |
 | **Back Refraction** | `calcPrePathBackground` | ✅ 완료 | **[투과 처리]** Transmission 재질용 백그라운드 굴절 샘플링. 굴절률과 거칠기 보정 포함. |
-| **Distance Falloff** | `lighting.getLightAttenuation` | ✅ 완료 | **[에너지 감쇄]** glTF 2.0 / Frostbite / Unreal 표준 감쇄. $Radius^2$ 정규화 포함. Phong/PBR 통합 적용. |
-| **Spotlight Cone** | `math.getSpotlightFactor` | **Medium** | **[원뿔 감쇄]** 스폿라이트 내부/외부 원뿔 감쇄 로직 통합 및 부드러운 페이드 처리 예정. |
+| **Distance Falloff** | `lighting.getLightDistanceAttenuation` | ✅ 완료 | **[에너지 감쇄]** glTF 2.0 / Frostbite / Unreal 표준 감쇄. $Radius^2$ 정규화 포함. Phong/PBR 통합 적용. |
+| **Spotlight Cone** | `lighting.getLightAngleAttenuation` | ✅ 완료 | **[원뿔 감쇄]** 스폿라이트 내부/외부 원뿔 각도 기반의 부드러운 페이드 처리. |
 
 #### 📂 상세 적용 이력 (System)
-- `src/systemCodeManager/shader/lighting/getLightAttenuation.wgsl`: 표준 함수 구현 완료.
+- `src/systemCodeManager/shader/lighting/getLightDistanceAttenuation.wgsl`: 표준 함수 구현 완료.
     - **[기술 사양]**: $(1 - (d/r)^4)^2$ 윈도잉 함수를 적용하여 물리적 역제곱 법칙($1/d^2$)과 부드러운 끝부분 감쇄를 결합.
     - **[정규화]**: $Radius^2$ 스케일을 곱하여 반경 변화에 따른 아티스틱한 광량 보전 지원.
-- **[감쇄 로직 통합]**: `pbrMaterial`, `phongMaterial` 내 하드코딩된 감쇄 연산을 `lighting.getLightAttenuation`으로 전량 교체.
-- **[구조 일치화]**: `phongMaterial`에서 발생하던 스펙큘러 중복 감쇄($1/d^4$) 오류 수정 및 두 재질 간 조명 계산 구조 통일.
+- `src/systemCodeManager/shader/lighting/getLightAngleAttenuation.wgsl`: 스폿라이트 각도 감쇄 구현 완료.
+    - **[기술 사양]**: 내부/외부 원뿔 각도 사이의 부드러운 보간 처리. glTF 2.0 및 Unreal 방식 준수.
+- **[감쇄 로직 통합]**: `pbrMaterial`, `phongMaterial` 내 하드코딩된 모든 조명 감쇄 연산을 `lighting.getLightXXXXAttenuation`으로 전량 교체 및 구조 일원화.
 - **[검증 예제]**: `examples/3d/light/pointLightWithGltf/` (DamagedHelmet 그리드 배치를 통한 PBR 상호작용 검증).
 - `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준 함수 구현 및 이동 완료.
 - **[모션 벡터 적용]**: `pbr`, `phong`, `bitmap`, `color`, `line`, `grid` 등 모든 렌더링 프래그먼트 셰이더 적용 완료.

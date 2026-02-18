@@ -684,6 +684,14 @@ const ExampleList = [
                         },
                     },
                     {
+                        name: 'SpotLight with glTF',
+                        path: '3d/light/spotLightWithGltf',
+                        description: {
+                            ko: `현대적인 원뿔 감쇄(Angle Attenuation) 수식이 적용된 Spot Light와 glTF PBR 모델의 상호작용 예제입니다.`, 
+                            en: `An example of interaction between Spot Light with modern angle attenuation formula and glTF PBR model.`
+                        },
+                    },
+                    {
                         name: 'PointLight Performance(cluster)',
                         path: '3d/light/pointLightPerformance',
                         description: {

@@ -5,7 +5,8 @@
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
 #redgpu_include math.getMotionVector;
-#redgpu_include lighting.getLightAttenuation;
+#redgpu_include lighting.getLightDistanceAttenuation;
+#redgpu_include lighting.getLightAngleAttenuation;
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
@@ -838,7 +839,7 @@ fn main(inputData:InputData) -> FragmentOutput {
          }
 
          let L = normalize(lightDir);
-         let attenuation = getLightAttenuation(lightDistance, u_clusterLightRadius);
+         let attenuation = getLightDistanceAttenuation(lightDistance, u_clusterLightRadius);
 
          var finalAttenuation = attenuation;
 
@@ -849,26 +850,16 @@ fn main(inputData:InputData) -> FragmentOutput {
                  targetLight.directionY,
                  targetLight.directionZ
              ));
-             let u_clusterLightInnerAngle = targetLight.innerCutoff;
-             let u_clusterLightOuterCutoff = targetLight.outerCutoff;
 
              // 라이트에서 버텍스로의 방향
              let lightToVertex = normalize(-L);
-             let cosTheta = dot(lightToVertex, u_clusterLightDirection);
-
-             let cosOuter = cos(radians(u_clusterLightOuterCutoff));
-             let cosInner = cos(radians(u_clusterLightInnerAngle));
-
-             // 스폿라이트 외곽 범위를 벗어나면 스킵
-             if (cosTheta < cosOuter) {
-                 continue;
-             }
-
-             // 스폿라이트 강도 계산 (부드러운 페이드)
-             let epsilon = cosInner - cosOuter;
-             let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
-
-             finalAttenuation *= spotIntensity;
+             
+             finalAttenuation *= getLightAngleAttenuation(
+                 lightToVertex, 
+                 u_clusterLightDirection, 
+                 targetLight.innerCutoff, 
+                 targetLight.outerCutoff
+             );
          }
 
          // calcLight 함수 호출
@@ -1179,7 +1170,8 @@ fn calcLight(
 ) -> vec3<f32>{
     let dLight = lightColor * lightIntensity ;
 
-    let NdotL = max(dot(N, L), 0.04);
+    let dotNL = dot(N, L);
+    let NdotL = max(dotNL, 0.04);
     let NdotV = max(dot(N, V), 0.04);
     let H = normalize(L + V);
     let LdotH = max(dot(L, H), 0.0);
@@ -1281,10 +1273,10 @@ fn calcLight(
 
     var lightDirection: f32;
     #redgpu_if useKHR_materials_diffuse_transmission
-        lightDirection = mix(abs(dot(N, L)), 1.0, diffuseTransmissionParameter);
+        lightDirection = mix(abs(dotNL), 1.0, diffuseTransmissionParameter);
     #redgpu_else
         // 투과가 없는 경우, 기존처럼 양수 값만 허용
-        lightDirection = NdotL;
+        lightDirection = max(dotNL, 0.0);
     #redgpu_endIf
 
     let lightContribution = directLighting * dLight * lightDirection;
