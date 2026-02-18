@@ -1,5 +1,9 @@
 #redgpu_include math.EPSILON
-// 함수 정의 순서 수정: 유틸리티 함수들을 먼저 정의
+
+/**
+ * [KO] RGB 색상을 HSL 색상 공간으로 변환합니다.
+ * [EN] Converts RGB color to HSL color space.
+ */
 fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
     let maxVal: f32 = max(max(rgb.r, rgb.g), rgb.b);
     let minVal: f32 = min(min(rgb.r, rgb.g), rgb.b);
@@ -38,6 +42,10 @@ fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
     return vec3<f32>(hue, saturation, lightness);
 }
 
+/**
+ * [KO] HSL 색상을 RGB 색상 공간으로 변환합니다.
+ * [EN] Converts HSL color to RGB color space.
+ */
 fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
     let h = hsl.x; // Hue: 0.0 ~ 1.0
     let s = hsl.y; // Saturation: 0.0 ~ 1.0
@@ -58,7 +66,7 @@ fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
 
     let p = 2.0 * l - q;
 
-    // R, G, B 계산 (hueToRgb 로직을 본문에 직접 작성)
+    // R, G, B 계산
     var r: f32;
     var g: f32;
     var b: f32;
@@ -103,14 +111,29 @@ fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
     return vec3<f32>(r, g, b);
 }
 
-// 메인 함수: 이제 위의 함수들을 안전하게 사용 가능
-fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
+/**
+ * [KO] 베이스 색상에 틴트(Tint) 색상을 지정된 블렌딩 모드로 합성합니다.
+ * [EN] Blends the base color with a tint color using the specified blending mode.
+ *
+ * @param baseColor -
+ * [KO] 원본 색상 (RGBA)
+ * [EN] Base color (RGBA)
+ * @param tintBlendMode -
+ * [KO] 블렌딩 모드 인덱스 (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION)
+ * [EN] Blending mode index (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION)
+ * @param tint -
+ * [KO] 합성할 틴트 색상 (RGBA)
+ * [EN] Tint color to blend (RGBA)
+ * @returns
+ * [KO] 합성된 최종 색상 (RGBA)
+ * [EN] Final blended color (RGBA)
+ */
+fn get_tint_blend_mode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
     var tintedColor: vec3<f32>;
     let eps = EPSILON; // 0으로 나누기 방지용 작은 값
 
     switch (tintBlendMode) {
         case 0u: { // NORMAL
-            // 다른 모드와 일관성 유지
             tintedColor = mix(baseColor.rgb, tint.rgb, tint.a);
         }
         case 1u: { // MULTIPLY
@@ -139,11 +162,9 @@ fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) 
             );
         }
         case 8u: { // COLOR_DODGE
-            // 0으로 나누기 방지
             tintedColor = clamp(baseColor.rgb / (1.0 - tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 9u: { // COLOR_BURN
-            // 0으로 나누기 방지
             tintedColor = 1.0 - clamp((1.0 - baseColor.rgb) / (tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 10u: { // HARD_LIGHT
@@ -167,11 +188,9 @@ fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) 
             tintedColor = baseColor.rgb + tint.rgb - 2.0 * baseColor.rgb * tint.rgb;
         }
         case 14u: { // DIVIDE
-            // 0으로 나누기 방지
             tintedColor = clamp(baseColor.rgb / (tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 15u: { // VIVID_LIGHT
-            // 0으로 나누기 방지
             tintedColor = mix(
                 clamp(baseColor.rgb / (1.0 - (tint.rgb - vec3<f32>(0.5)) * 2.0 + eps), vec3<f32>(0.0), vec3<f32>(1.0)),
                 1.0 - clamp((1.0 - baseColor.rgb) / (tint.rgb * 2.0 + eps), vec3<f32>(0.0), vec3<f32>(1.0)),
@@ -216,6 +235,5 @@ fn calcTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) 
         }
     }
 
-    // 모든 모드에서 일관된 알파 처리
     return vec4<f32>(tintedColor, baseColor.a * tint.a);
 }

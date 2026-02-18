@@ -1,9 +1,6 @@
 declare const SystemCode: Readonly<{
-    calcTintBlendMode: "string";
-    calcDirectionalShadowVisibility: "string";
     drawDirectionalShadowDepth: "string";
     calcPrePathBackground: "string";
-    calculateMotionVector: "string";
     FragmentOutput: "string";
     picking: "string";
     drawPicking: "string";
@@ -12,7 +9,6 @@ declare const SystemCode: Readonly<{
     calcBillboard: "string";
     calcDisplacements: "string";
     getBillboardMatrix: "string";
-    extractScaleAndTranslation: "string";
     meshVertexBasicUniform: "string";
     SYSTEM_UNIFORM: "string";
 }>;

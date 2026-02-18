@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM
-#redgpu_include calcTintBlendMode
+#redgpu_include color.getTintBlendMode
 #redgpu_include drawPicking
 #redgpu_include FragmentOutput
 #redgpu_include math.getMotionVector
@@ -44,7 +44,7 @@ fn main(inputData: InputData) -> FragmentOutput {
   finalColor = vec4<f32>(finalColor.rgb * alpha2D, finalColor.a * uniforms.opacity * inputData.combinedOpacity);
 
   #redgpu_if useTint
-      finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+      finalColor = get_tint_blend_mode(finalColor, uniforms.tintBlendMode, uniforms.tint);
   #redgpu_endIf
 
   // alpha 값이 0일 경우 discard

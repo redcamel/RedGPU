@@ -33,6 +33,7 @@ import linear_to_srgb_vec4_wgsl from './shader/color/linear_to_srgb_vec4.wgsl';
 import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
 import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
+import getTintBlendMode_wgsl from './shader/color/getTintBlendMode.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
 import diffuse_brdf_disney_wgsl from './shader/lighting/diffuse_brdf_disney.wgsl';
 import fresnel_schlick_wgsl from './shader/lighting/fresnel_schlick.wgsl';
@@ -122,6 +123,7 @@ export namespace ColorLibrary {
     export const srgb_to_linear_vec3 = srgb_to_linear_vec3_wgsl;
     export const srgb_to_linear_vec4 = srgb_to_linear_vec4_wgsl;
     export const get_luminance = get_luminance_wgsl;
+    export const getTintBlendMode = getTintBlendMode_wgsl;
 }
 
 /**
@@ -176,7 +178,7 @@ export namespace SystemCodeManager {
 
     // [KO] 레거시 직접 참조 지원 (전처리기 호환성)
     export const FragmentOutput = SystemFragmentCode.FragmentOutput;
-    export const calcTintBlendMode = SystemFragmentCode.calcTintBlendMode;
+    export const calcTintBlendMode = getTintBlendMode_wgsl;
     export const calcDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
     export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;
     export const calcPrePathBackground = SystemFragmentCode.calcPrePathBackground;

@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM
 #redgpu_include drawPicking
-#redgpu_include calcTintBlendMode
+#redgpu_include color.getTintBlendMode
 #redgpu_include FragmentOutput
 #redgpu_include math.getMotionVector
 #redgpu_include math.PI
@@ -35,7 +35,7 @@ fn main(inputData: InputData) -> FragmentOutput {
     var output: FragmentOutput;
     var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
     #redgpu_if useTint
-        finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        finalColor = get_tint_blend_mode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
 
     // [Atmosphere] 시스템 플래그가 활성화된 경우 Aerial Perspective 합성

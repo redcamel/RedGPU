@@ -42,12 +42,15 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 ### 1. Color Space & Conversion (색상 변환 및 처리)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **Rec. 709 Luminance** | `color.get_luminance` | ✅ 완료 | **[VFX 표준]** 인지적 밝기 분석용. HDTV 표준 가중치(0.2126, 0.7152, 0.0722) 적용. |
-| **YCoCg Transform** | `color.rgb_to_ycocg/ycocg` | ✅ 완료 | **[AA 표준]** TAA의 이력 압축 및 Bloom의 휘도 추출용. RGB 대비 색상 채널 분리가 우수함. |
-| **sRGB Transform** | `color.linear_to_srgb_v3/4` | ✅ 완료 | **[출력 표준]** Gamma 2.2 보정 수행. 최종 Canvas 출력을 위한 필수 전처리. |
-| **Linear Transform** | `color.srgb_to_linear_v3/4` | ✅ 완료 | **[입력 보정]** 비-linear 텍스처나 입력값을 물리 기반 조명 연산 공간으로 변환. |
+| **Rec. 709 Luminance** | `color.getLuminance` | ✅ 완료 | **[VFX 표준]** 인지적 밝기 분석용. HDTV 표준 가중치(0.2126, 0.7152, 0.0722) 적용. |
+| **YCoCg Transform** | `color.rgbToYCoCg/YCoCgToRgb` | ✅ 완료 | **[AA 표준]** TAA의 이력 압축 및 Bloom의 휘도 추출용. RGB 대비 색상 채널 분리가 우수함. |
+| **sRGB Transform** | `color.linearToSrgbV3/4` | ✅ 완료 | **[출력 표준]** Gamma 2.2 보정 수행. 최종 Canvas 출력을 위한 필수 전처리. |
+| **Linear Transform** | `color.srgbToLinearV3/4` | ✅ 완료 | **[입력 보정]** 비-linear 텍스처나 입력값을 물리 기반 조명 연산 공간으로 변환. |
+| **Tint Blend Mode** | `color.getTintBlendMode` | ✅ 완료 | **[블렌딩 표준]** 23종의 포토샵 규격 블렌딩 모드 지원. `calc...` 명칭 현대화 및 `color/` 이동 완료. |
 
 #### 📂 상세 적용 이력 (Color)
+- `src/systemCodeManager/shader/color/getTintBlendMode.wgsl`: 23종 블렌딩 모드 통합 구현.
+- **[틴트 블렌드 적용]**: `phongMaterial`, `bitmapMaterial`, `colorMaterial` 등 모든 재질 셰이더 적용 완료.
 - `fxaa.wgsl`, `vibrance/fragment.wgsl`, `taa/computeCode.wgsl`, `oldBloom/fragment.wgsl`, `toneMapping/fragment.wgsl`, `pbrMaterial/fragment.wgsl`, `colorMaterial/fragment.wgsl` 전역 적용 완료.
 
 ---
@@ -55,12 +58,12 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 ### 2. Mathematics & Randomization (수학적 상수 및 해시)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **Common Constants** | `math.PI/PI2/INV_PI/...` | ✅ 완료 | **[수치 일관성]** 7종 핵심 상수 전역 통합. 파일별 미세한 렌더링 오차 원천 차단. |
+| **Common Constants** | `math.PI/PI2/INV_PI/...` | ✅ 완료 | **[수치 일관성]** 7종 핵심 상수 전역 통합. 파일별 미세한 렌더링 오차 차단. |
 | **Stable Hash (Grid)** | `math.hash.getHashXX` | ✅ 완료 | **[절차적 생성]** 정수 변환 기반의 안정적인 해시. GPU 아키텍처와 무관한 동일 격자 패턴 보장. |
 | **Bitcast Hash (Bit)** | `math.hash.getBitHashXX` | ✅ 완료 | **[고정밀 난수]** IEEE 754 비트 레벨 조작 해시. 극소량의 변화에도 민감한 난수가 필요한 노이즈용. |
-| **Dither Noise** | `math.getInterleavedGradientNoise` | ✅ 완료 | **[성능 특화]** Jorge Jimenez 알고리즘. SSAO, SSR의 샘플링 노이즈 제거용 초고속 디더링. |
+| **Dither Noise** | `math.getInterleavedGradientNoise` | ✅ 완료 | **[성능 특화]** Jorge Jimenez 알고리즘. SSAO, SSR의 샘플링 노이즈 제거를 위한 초고속 디더링. |
 | **Safe Math** | `math.safeDivision` | **Medium** | **[안정성]** 0 나누기 방지 유틸리티. 분모가 0에 근접할 때 EPSILON으로 보정하여 NaN 에러 방어. |
-| **UV Transform** | `math.transform_uv` | **Low** | **[좌표 표준화]** Offset, Scale, Rotation 통합 변환. Scale -> Rotate -> Offset 엔진 표준 순서 강제. |
+| **UV Transform** | `math.transformUv` | **Low** | **[좌표 표준화]** Offset, Scale, Rotation 통합 변환. Scale -> Rotate -> Offset 엔진 표준 순서 강제. |
 
 #### 📂 상세 적용 이력 (Math)
 - `pbrMaterial`, `phongMaterial`, `filmGrain`, `skyAtmosphere`, `zoomBlur`, `ssao_ao`, `particle/compute.wgsl` 적용 완료.
@@ -71,7 +74,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 ### 3. Vector & Directional Analysis (방향 및 시선 분석)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **View Direction** | `math.direction.getViewDirection` | ✅ 완료 | **[시선 벡터]** 카메라와 픽셀 위치를 기반으로 한 정규화된 시선 벡터 계산. PBR/Phong 조명 필수 요소. |
+| **View Direction** | `math.direction.getViewDirection` | ✅ 완료 | **[시선 벡터]** 카메라와 픽셀 위치를 기반으로 한 시선 벡터 계산. PBR/Phong 조명 필수 요소. |
 | **Ray Direction** | `math.direction.getRayDirection` | ✅ 완료 | **[광선 추적]** 카메라 기준 픽셀 투사 벡터 계산. HeightFog 등 볼륨 환경 효과에 사용. |
 | **Reflection Vec** | `math.direction.getReflectionVector...`| ✅ 완료 | **[반사 벡터]** 시선 및 법선 기반의 환경 맵 샘플링용 반사 벡터 계산. |
 
@@ -99,12 +102,12 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
 | **TBN Basis** | `math.tnb.getTBNXXX` | ✅ 완료 | **[기저 표준]** Gram-Schmidt 및 Cotangent 기반 탄젠트 공간 구축. glTF 표준 및 미러링 대응 규격. |
-| **Normal Decode** | `math.tnb.getNormalFromNormalMap` | ✅ 완료 | **[맵핑 표준]** Z-Reconstruction 포함 법선 복구. 텍스처 압축 손실을 수학적으로 보정하여 품질 향상. |
-| **Shadow Coord** | `math.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 (`shadowPos` -> `shadowCoord`). |
-| **Shadow Visibility**| `math.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. `calc...` 명칭 현대화 및 수학 라이브러리(`math/`) 이동 완료. |
+| **Normal Decode** | `math.tnb.getNormalFromNormalMap` | ✅ 완료 | **[맵핑 표준]** Z-Reconstruction 포함 법선 복구. 품질 향상 핵심. |
+| **Shadow Coord** | `math.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 완료. |
+| **Shadow Visibility**| `math.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 명칭 현대화 및 수학 라이브러리 이동 완료. |
 | **Shadow Depth Pos**| `math.getShadowClipPosition`| **Medium** | **[그림자 투영]** Depth Pass용 World -> LightClipSpace 변환 규격화 및 셰이더 레벨 Depth Bias 기반 마련. |
-| **Standard PCF** | `math.getShadowPCF` | **Medium** | **[필터링]** 고정된 3x3 PCF를 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드로 모듈화 예정. |
-| **Shadow Bias** | `math.applyShadowBias` | **Medium** | **[아티팩트 제거]** Slope-scaled bias 등 법선 방향을 고려한 가변 바이어스 계산 라이브러리화 예정. |
+| **Standard PCF** | `math.getShadowPCF` | **Medium** | **[필터링]** 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드 분리 예정. |
+| **Shadow Bias** | `math.applyShadowBias` | **Medium** | **[아티팩트 제거]** Slope-scaled bias 등 법선 기반 가변 바이어스 구축 예정. |
 
 #### 📂 상세 적용 이력 (Basis & Shadow)
 - `src/systemCodeManager/shader/math/getShadowCoord.wgsl`: 표준 함수 구현 및 내부 명칭 통일 완료.
@@ -120,17 +123,17 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 ### 6. Lighting & Material BRDF/BTDF (물리 기반 조명)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **Disney Diffuse** | `lighting.diffuse_brdf_disney` | ✅ 완료 | **[확산광 모델]** 거칠기 고려 레트로-리플렉션 모델. 물리적 사실감 극대화 및 에너지 보존 적용. |
-| **PBR Specular** | `lighting.specular_brdf` | ✅ 완료 | **[반사광 모델]** Cook-Torrance (GGX 분포 + Smith 기하 차폐). 고정밀 반사 연산. |
-| **BTDF Utils** | `lighting.specular_btdf / diffuse` | ✅ 완료 | **[투과 모델]** Transmission 확장을 위한 굴절(Refraction) 및 확산 투과 계산식 모듈화. |
-| **Fresnel Utils** | `lighting.fresnel_xxx` | ✅ 완료 | **[프레넬 표준]** Schlick 근사, Conductor(금속), Iridescent(박막 간섭) 등 재질별 특성 분리. |
-| **Fresnel Mix/Coat**| `lighting.fresnel_mix / coat` | ✅ 완료 | **[레이어 결합]** 에너지 보존 법칙 기반 다중 레이어(Clearcoat 등) 합성 및 빛 감쇄 계산. |
-| **Anisotropy Spec** | `lighting.anisotropy_ggx` | **High** | **[이방성]** 이방성 GGX 분포 및 가시성 함수 통합 예정. PBR 확장 필수 로직. |
-| **Sheen Model** | `lighting.sheen_charlie` | **High** | **[패브릭 조명]** Charlie Sheen 모델 기반 조명 라이브러리화 예정. |
+| **Disney Diffuse** | `lighting.diffuseBrdfDisney` | ✅ 완료 | **[확산광 모델]** 거칠기 고려 레트로-리플렉션 모델. 물리적 사실감 극대화 및 에너지 보존 적용. |
+| **PBR Specular** | `lighting.specularBrdf` | ✅ 완료 | **[반사광 모델]** Cook-Torrance (GGX 분포 + Smith 기하 차폐). 고정밀 반사 연산. |
+| **BTDF Utils** | `lighting.specularBtdf / diffuseBtdf` | ✅ 완료 | **[투과 모델]** Transmission 확장을 위한 굴절(Refraction) 및 확산 투과 계산식 모듈화. |
+| **Fresnel Utils** | `lighting.fresnelXxx` | ✅ 완료 | **[프레넬 표준]** Schlick, Conductor, Iridescent 등 재질별 특성 분리. |
+| **Fresnel Mix/Coat**| `lighting.fresnelMix / coat` | ✅ 완료 | **[레이어 결합]** 에너지 보존 법칙 기반 다중 레이어(Clearcoat 등) 합성 및 빛 감쇄 계산. |
+| **Anisotropy Spec** | `lighting.anisotropyGgx` | **High** | **[이방성]** 이방성 GGX 분포 및 가시성 함수 통합 예정. PBR 확장 필수 로직. |
+| **Sheen Model** | `lighting.sheenCharlie` | **High** | **[패브릭 조명]** Charlie Sheen 모델 기반 조명 라이브러리화 예정. |
 
 #### 📂 상세 적용 이력 (Lighting)
-- `src/material/pbrMaterial/fragment.wgsl`: 하드코딩된 조명 및 프레넬 수식 전량(`lighting.xxx`) 교체 완료.
-- `src/systemCodeManager/shader/lighting/specular_brdf.wgsl`: 하이라이트 선명도 최적화(`max(..., 1e-4)`) 적용 완료.
+- `src/material/pbrMaterial/fragment.wgsl`: 하드코딩된 조명 및 프레넬 수식 전량 교체 완료.
+- `src/systemCodeManager/shader/lighting/specularBrdf.wgsl`: 하이라이트 선명도 최적화(`max(..., 1e-4)`) 적용 완료.
 
 ---
 
@@ -139,7 +142,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | :--- | :--- | :---: | :--- |
 | **Height Fog** | `math.getHeightFogFactor` | **High** | **[환경 감쇄]** 고도 기반 안개 수식의 수치 안정화 및 모듈화 예정. 거리/고도 복합 감쇄 지원. |
 | **Linear/Exp Fog** | `math.getFogFactor` | **Medium** | **[기본 안개]** 일반적인 선형/지수 안개 공식 라이브러리화 예정. |
-| **Scatter Utils** | `math.scattering_xxx` | **Medium** | **[대기 산란]** Rayleigh 및 Mie 산란 기본 수식 모듈화 예정. 대기 효과 최적화 핵심. |
+| **Scatter Utils** | `math.scatteringXxx` | **Medium** | **[대기 산란]** Rayleigh 및 Mie 산란 기본 수식 모듈화 예정. 대기 효과 최적화 핵심. |
 
 ---
 

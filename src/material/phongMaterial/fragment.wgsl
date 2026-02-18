@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include calcTintBlendMode;
+#redgpu_include color.getTintBlendMode;
 #redgpu_include math.getDirectionalShadowVisibility;
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
@@ -265,7 +265,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     //
     finalColor = vec4<f32>(mixColor + emissiveColor, resultAlpha);
     #redgpu_if useTint
-        finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        finalColor = get_tint_blend_mode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
     // alpha 값이 0일 경우 discard
     if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {

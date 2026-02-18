@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include math.getDirectionalShadowVisibility;
-#redgpu_include calcTintBlendMode;
+#redgpu_include color.getTintBlendMode;
 #redgpu_include drawPicking;
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
