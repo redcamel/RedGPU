@@ -108,16 +108,16 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | :--- | :--- | :---: | :--- |
 | **TBN Basis** | `math.tnb.getTBNXXX` | ✅ 완료 | **[기저 표준]** Gram-Schmidt 및 Cotangent 기반 탄젠트 공간 구축. glTF 표준 및 미러링 대응 규격. |
 | **Normal Decode** | `math.tnb.getNormalFromNormalMap` | ✅ 완료 | **[맵핑 표준]** Z-Reconstruction 포함 법선 복구. 품질 향상 핵심. |
-| **Shadow Coord** | `math.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 완료. |
-| **Shadow Depth Pos**| `math.getShadowClipPosition`| ✅ 완료 | **[그림자 투영]** Shadow Pass 전용. World -> LightClipSpace 변환 및 투영 절차 규격화. |
-| **Shadow Visibility**| `math.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 명칭 현대화 및 수학 라이브러리 이동 완료. |
-| **Standard PCF** | `math.getShadowPCF` | **Medium** | **[필터링]** 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드 분리 예정. |
-| **Shadow Bias** | `math.applyShadowBias` | **Medium** | **[아티팩트 제거]** Slope-scaled bias 등 법선 기반 가변 바이어스 구축 예정. |
+| **Shadow Coord** | `shadow.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 완료. |
+| **Shadow Depth Pos**| `shadow.getShadowClipPosition`| ✅ 완료 | **[그림자 투영]** Shadow Pass 전용. World -> LightClipSpace 변환 및 투영 절차 규격화. |
+| **Shadow Visibility**| `shadow.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 명칭 현대화 및 전용 라이브러리 이동 완료. |
+| **Standard PCF** | `shadow.getShadowPCF` | **Medium** | **[필터링]** 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드 분리 예정. |
+| **Shadow Bias** | `shadow.applyShadowBias` | **Medium** | **[아티팩트 제거]** Slope-scaled bias 등 법선 기반 가변 바이어스 구축 예정. |
 
 #### 📂 상세 적용 이력 (Basis & Shadow)
-- `src/systemCodeManager/shader/math/getShadowCoord.wgsl`: 표준 함수 구현 완료.
-- `src/systemCodeManager/shader/math/getShadowClipPosition.wgsl`: Depth Pass용 표준 함수 구현 완료.
-- `src/systemCodeManager/shader/math/getDirectionalShadowVisibility.wgsl`: 현대화 및 이동 완료.
+- `src/systemCodeManager/shader/shadow/getShadowCoord.wgsl`: 표준 함수 구현 완료.
+- `src/systemCodeManager/shader/shadow/getShadowClipPosition.wgsl`: Depth Pass용 표준 함수 구현 완료.
+- `src/systemCodeManager/shader/shadow/getDirectionalShadowVisibility.wgsl`: 현대화 및 이동 완료.
 - **[버텍스 셰이더 적용]**: `meshVertex`, `meshVertexPbr`, `meshVertexPbrSkin`, `particleVertex`, `spriteSheet2D/3D`, `textField2D/3D` 적용 완료.
 - **[그림자 패스 통합]**: `meshVertexPbrSkin`, `core/drawDirectionalShadowDepth`, `instanceMeshVertex_shadow` 내 투영 로직 통합 완료.
 - **[필드명 통일]**: `meshVertex_output`, `meshVertexPbr_output`, `instanceMeshVertex_output` 등 모든 출력 구조체 `shadowCoord` 통일 완료.
