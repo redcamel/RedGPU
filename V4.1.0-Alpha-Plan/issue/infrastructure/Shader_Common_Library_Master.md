@@ -36,7 +36,10 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
     - **Native (Y-Down)**: 별도의 반전 없이 그대로 사용합니다.
 - **Normal Scale 표준화**: 
     - 가공된 Y-Down 기반 노멀 데이터를 월드 공간의 비탄젠트(Up) 방향과 일치시키기 위해 시스템적으로 **`-u_normalScale`**을 적용합니다 (NormalTangentTest 통과 규격).
-- **레이어 독립성**: 클리어코트 등 추가 레이어 계산 시 반드시 **변형 전 기하 법선(Geometric Normal)**을 TBN 기저의 기준으로 사용해야 합니다.
+    - **중요**: 노멀 맵이 없는 경우에도 버텍스 노멀에 `-u_normalScale`을 동일하게 적용하여 `NdotV` 등 각도 기반 계산의 일관성을 유지해야 합니다.
+- **Iridescence (무지개빛) 표준**:
+    - `lighting.getIridescentFresnel`은 Airy's 공식을 기반으로 한 순수 물리 모델을 따릅니다.
+    - 임의의 시각적 보정(smoothstep, pow 등)을 배제하여 glTF 2.0 물리 표준과의 호환성을 보장합니다.
 
 ### 2.5 전역 좌표계 일관성 보정 (Global Coordinate Consistency)
 `src/systemCodeManager/` 내의 모든 라이브러리는 다음의 보정 원칙을 공유하여 수학적 충돌을 방지합니다.
