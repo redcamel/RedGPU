@@ -37,9 +37,7 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
 
     // 상수들 사전 계산
     let wavelengths = vec3<f32>(650.0, 510.0, 475.0);
-    let effectiveThickness = max(iridescenceThickness, 10.0);
-    let iorScale = max(1.0, 1.5 - 0.5 * (safeIridescenceIOR / 1.5));
-    let opticalThickness = 2.0 * effectiveThickness * safeIridescenceIOR * cosTheta2 * iorScale;
+    let opticalThickness = 2.0 * iridescenceThickness * safeIridescenceIOR * cosTheta2;
     let phase = (PI2 * opticalThickness) / wavelengths;
 
     // 삼각함수 (한 번만)
@@ -88,13 +86,13 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
     let denPImag = r12_pVec * r23_p * sinPhase;
 
     // 복소수 나눗셈 인라인 계산 (S-편광)
-    let denSSquared = numSReal * numSReal + numSImag * numSImag + vec3<f32>(0.001); // 변수명 오타 수정 포함
+    let denSSquared = denSReal * denSReal + denSImag * denSImag;
     let rsReal = (numSReal * denSReal + numSImag * denSImag) / denSSquared;
     let rsImag = (numSImag * denSReal - numSReal * denSImag) / denSSquared;
     let Rs = rsReal * rsReal + rsImag * rsImag;
 
     // 복소수 나눗셈 인라인 계산 (P-편광)
-    let denPSquared = denPReal * denPReal + denPImag * denPImag + vec3<f32>(0.001);
+    let denPSquared = denPReal * denPReal + denPImag * denPImag;
     let rpReal = (numPReal * denPReal + numPImag * denPImag) / denPSquared;
     let rpImag = (numPImag * denPReal - numPReal * denPImag) / denPSquared;
     let Rp = rpReal * rpReal + rpImag * rpImag;
@@ -102,15 +100,7 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
     // 전체 반사율
     let reflectance = 0.5 * (Rs + Rp);
 
-    // IOR 영향 최적화
-    let iorInfluence = smoothstep(1.0, 2.0, safeIridescenceIOR);
-    let enhancedReflectance = mix(
-        pow(reflectance, vec3<f32>(0.8)) * 1.2,
-        reflectance,
-        iorInfluence
-    );
-
     // 최종 결과
-    let clampedReflectance = clamp(enhancedReflectance, vec3<f32>(0.0), vec3<f32>(1.0));
+    let clampedReflectance = clamp(reflectance, vec3<f32>(0.0), vec3<f32>(1.0));
     return mix(baseF0, clampedReflectance, iridescenceFactor);
 }
