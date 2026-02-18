@@ -98,7 +98,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 #### 📂 상세 적용 이력 (Depth & Reconstruction)
 - `src/systemCodeManager/shader/depth/getLinearizeDepth.wgsl`: 표준 함수 구현 및 `getXXXX` 명칭 통일 완료.
 - `SYSTEM_UNIFORM.wgsl`, `ssr`, `ssao`, `fog`, `skyAtmosphere`, `taa` 등 엔진 전역 적용 완료.
-- `src/postEffect/effects/lens/dof/`: 파편화된 내부 `linearizeDepth` 정의를 제거하고 표준 라이브러리로 통합 완료.
+- `src/postEffect/effects/lens/dof/`: 파편화된 내부 `linearizeDepth` 정의를 제거하고 표준 라이브러리로 통합 완료. **[설계 준수]** 함수 정의가 포함된 인클루드는 반드시 `uniformStructCode.wgsl` (전역 스코프)에 배치함.
 - `equirectangularToCubeShaderCode.wgsl`: `math.reconstruct.getNDCFromDepth` 적용 완료.
 
 ---
@@ -109,18 +109,19 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | **TBN Basis** | `math.tnb.getTBNXXX` | ✅ 완료 | **[기저 표준]** Gram-Schmidt 및 Cotangent 기반 탄젠트 공간 구축. glTF 표준 및 미러링 대응 규격. |
 | **Normal Decode** | `math.tnb.getNormalFromNormalMap` | ✅ 완료 | **[맵핑 표준]** Z-Reconstruction 포함 법선 복구. 품질 향상 핵심. |
 | **Shadow Coord** | `math.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 완료. |
+| **Shadow Depth Pos**| `math.getShadowClipPosition`| ✅ 완료 | **[그림자 투영]** Shadow Pass 전용. World -> LightClipSpace 변환 및 투영 절차 규격화. |
 | **Shadow Visibility**| `math.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 명칭 현대화 및 수학 라이브러리 이동 완료. |
-| **Shadow Depth Pos**| `math.getShadowClipPosition`| **Medium** | **[그림자 투영]** Depth Pass용 World -> LightClipSpace 변환 규격화 및 셰이더 레벨 Depth Bias 기반 마련. |
 | **Standard PCF** | `math.getShadowPCF` | **Medium** | **[필터링]** 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드 분리 예정. |
 | **Shadow Bias** | `math.applyShadowBias` | **Medium** | **[아티팩트 제거]** Slope-scaled bias 등 법선 기반 가변 바이어스 구축 예정. |
 
 #### 📂 상세 적용 이력 (Basis & Shadow)
-- `src/systemCodeManager/shader/math/getShadowCoord.wgsl`: 표준 함수 구현 및 내부 명칭 통일 완료.
+- `src/systemCodeManager/shader/math/getShadowCoord.wgsl`: 표준 함수 구현 완료.
+- `src/systemCodeManager/shader/math/getShadowClipPosition.wgsl`: Depth Pass용 표준 함수 구현 완료.
 - `src/systemCodeManager/shader/math/getDirectionalShadowVisibility.wgsl`: 현대화 및 이동 완료.
 - **[버텍스 셰이더 적용]**: `meshVertex`, `meshVertexPbr`, `meshVertexPbrSkin`, `particleVertex`, `spriteSheet2D/3D`, `textField2D/3D` 적용 완료.
+- **[그림자 패스 통합]**: `meshVertexPbrSkin`, `core/drawDirectionalShadowDepth`, `instanceMeshVertex_shadow` 내 투영 로직 통합 완료.
 - **[필드명 통일]**: `meshVertex_output`, `meshVertexPbr_output`, `instanceMeshVertex_output` 등 모든 출력 구조체 `shadowCoord` 통일 완료.
 - **[프래그먼트 적용]**: `pbrMaterial`, `phongMaterial`, `bitmapMaterial`, `textFieldMaterial` 내 `InputData` 필드명 및 호출부 통일 완료.
-- `src/material/pbrMaterial/fragment.wgsl`: `math.tnb` 관련 함수 전역 적용 완료.
 - `src/resources/texture/ibl/core/`: `prefilter`, `brdf`, `irradiance` 내 `math.tnb.getTBN` 통합 완료.
 
 ---
@@ -169,11 +170,12 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 ---
 
 ## ⚠️ 안정성 및 유지보수 가이드
-- **Include Once**: 동일 경로(`#redgpu_include`)의 중복 치환을 방지하기 위해 전처리기 규격을 반드시 준수하십시오.
-- **Naming Standard**: `math.getXXXX`(수학/공간), `lighting.getXXXX`(조명), `color.getXXXX`(색상), `depth.getXXXX`(깊이) 등 **get 접두사**와 **CamelCase** 네임스페이스를 엄격히 준수합니다.
-- **Verification**: 모듈화 단계마다 기존 결과물(NormalTangentTest 등)과 시각적 차이가 없는지 엄격히 검증해야 합니다.
+- **Include Scope (Critical)**: `SinglePassPostEffect` 계열에서 함수 정의가 포함된 `#redgpu_include`를 사용할 경우, 반드시 `uniformStructCode.wgsl` (전역 스코프)에 배치해야 합니다. `computeCode.wgsl` (함수 내부 스코프)에 배치 시 문법 에러가 발생합니다.
+- **Include Once**: 동일 경로 중복 치환 방지를 위해 전처리기 규격을 엄수하십시오.
+- **Naming Standard**: `math.getXXXX`, `lighting.getXXXX`, `color.getXXXX`, `depth.getXXXX` 등 명칭 규칙을 엄격히 준수합니다.
+- **Verification**: 모듈화 단계마다 기존 결과물과의 시각적 차이를 엄격히 검증해야 합니다.
 
 ---
 **최종 업데이트:** 2026-02-18
-**상태:** getXXXX 명명 규칙 및 전 카테고리 통합 마스터 명세 수립 완료
+**상태:** 그림자 인프라(Coord/Position/Visibility) 완전 표준화 완료
 **프로젝트:** RedGPU
