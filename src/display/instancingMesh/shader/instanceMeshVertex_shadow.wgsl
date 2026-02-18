@@ -1,5 +1,5 @@
 
-#redgpu_include math.getShadowClipPosition
+#redgpu_include shadow.getShadowClipPosition
 
 struct OutputShadowData {
     @builtin(position) position: vec4<f32>,

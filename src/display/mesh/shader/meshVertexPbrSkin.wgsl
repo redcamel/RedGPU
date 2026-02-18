@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include math.getShadowCoord;
-#redgpu_include math.getShadowClipPosition;
+#redgpu_include shadow.getShadowCoord;
+#redgpu_include shadow.getShadowClipPosition;
 
 #redgpu_include meshVertexBasicUniform;
 const maxDistance: f32 = 1000.0;

@@ -19,9 +19,9 @@ import getViewNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getVi
 import getViewDirection_wgsl from './shader/math/direction/getViewDirection.wgsl';
 import getRayDirection_wgsl from './shader/math/direction/getRayDirection.wgsl';
 import getReflectionVectorFromViewDirection_wgsl from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
-import getShadowCoord_wgsl from './shader/math/getShadowCoord.wgsl';
-import getShadowClipPosition_wgsl from './shader/math/getShadowClipPosition.wgsl';
-import getDirectionalShadowVisibility_wgsl from './shader/math/getDirectionalShadowVisibility.wgsl';
+import getShadowCoord_wgsl from './shader/shadow/getShadowCoord.wgsl';
+import getShadowClipPosition_wgsl from './shader/shadow/getShadowClipPosition.wgsl';
+import getDirectionalShadowVisibility_wgsl from './shader/shadow/getDirectionalShadowVisibility.wgsl';
 import getMotionVector_wgsl from './shader/math/getMotionVector.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
@@ -74,9 +74,6 @@ export namespace MathLibrary {
     }
 
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
-    export const getShadowCoord = getShadowCoord_wgsl;
-    export const getShadowClipPosition = getShadowClipPosition_wgsl;
-    export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
     export const getMotionVector = getMotionVector_wgsl;
 
     /** [KO] 방향(Direction) 관련 셰이더 함수 [EN] Direction related shader functions */
@@ -111,6 +108,16 @@ export namespace MathLibrary {
     export const DEG_TO_RAD = 'const DEG_TO_RAD: f32 = 0.017453292519943295;';
     export const RAD_TO_DEG = 'const RAD_TO_DEG: f32 = 57.29577951308232;';
     export const EPSILON = 'const EPSILON: f32 = 1e-6;';
+}
+
+/**
+ * [KO] 그림자 관련 셰이더 함수 라이브러리
+ * [EN] Shadow related shader function library
+ */
+export namespace ShadowLibrary {
+    export const getShadowCoord = getShadowCoord_wgsl;
+    export const getShadowClipPosition = getShadowClipPosition_wgsl;
+    export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
 }
 
 /**
@@ -166,6 +173,8 @@ export namespace SystemCodeManager {
 
     /** [KO] 수학 및 공간 변환 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for mathematics and space transformations. */
     export import math = MathLibrary;
+    /** [KO] 그림자 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for shadow. */
+    export import shadow = ShadowLibrary;
     /** [KO] 색상 변환 및 처리 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for color conversion and processing. */
     export import color = ColorLibrary;
     /** [KO] 깊이(Depth) 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for depth. */

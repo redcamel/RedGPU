@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include math.getDirectionalShadowVisibility;
+#redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include color.getTintBlendMode;
 #redgpu_include drawPicking;
 #redgpu_include calcPrePathBackground
