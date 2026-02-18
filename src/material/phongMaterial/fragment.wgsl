@@ -6,7 +6,7 @@
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
 #redgpu_include math.getMotionVector;
-#redgpu_include math.getLightAttenuation;
+#redgpu_include lighting.getLightAttenuation;
 struct Uniforms {
     color: vec3<f32>,
     //

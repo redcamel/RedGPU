@@ -5,7 +5,7 @@ import getHash1D_vec4_wgsl from './shader/math/hash/getHash1D_vec4.wgsl';
 import getHash2D_vec2_wgsl from './shader/math/hash/getHash2D_vec2.wgsl';
 import getHash3D_vec3_wgsl from './shader/math/hash/getHash3D_vec3.wgsl';
 import getInterleavedGradientNoise_wgsl from './shader/math/getInterleavedGradientNoise.wgsl';
-import getLightAttenuation_wgsl from './shader/math/getLightAttenuation.wgsl';
+import getLightAttenuation_wgsl from './shader/lighting/getLightAttenuation.wgsl';
 import getBitHash1D_wgsl from './shader/math/hash/getBitHash1D.wgsl';
 import getBitHash1D_vec2_wgsl from './shader/math/hash/getBitHash1D_vec2.wgsl';
 import getBitHash1D_vec3_wgsl from './shader/math/hash/getBitHash1D_vec3.wgsl';
@@ -76,7 +76,6 @@ export namespace MathLibrary {
 
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
     export const getMotionVector = getMotionVector_wgsl;
-    export const getLightAttenuation = getLightAttenuation_wgsl;
 
     /** [KO] 방향(Direction) 관련 셰이더 함수 [EN] Direction related shader functions */
     export namespace direction {
@@ -150,6 +149,7 @@ export namespace DepthLibrary {
  * [EN] Lighting and BRDF related shader function library
  */
 export namespace LightingLibrary {
+    export const getLightAttenuation = getLightAttenuation_wgsl;
     export const getDiffuseBRDFDisney = diffuseBRDFDisney_wgsl;
     export const getFresnelSchlick = fresnelSchlick_wgsl;
     export const getConductorFresnel = conductorFresnel_wgsl;

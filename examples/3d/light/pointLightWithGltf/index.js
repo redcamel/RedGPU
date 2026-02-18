@@ -26,6 +26,14 @@ RedGPU.init(
         view.grid = true;
         redGPUContext.addView(view);
 
+        // IBL 설정
+        const iblUrl = '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr';
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, iblUrl);
+        view.ibl = ibl;
+        
+        // 스카이박스 추가
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+
         // 광원 생성 (Point Light)
         const light = createPointLight(scene);
 
@@ -57,7 +65,7 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext);
 
-        renderTestPane(redGPUContext, light);
+        renderTestPane(redGPUContext, view, light);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -69,7 +77,7 @@ RedGPU.init(
  * [EN] Creates a Point Light.
  */
 const createPointLight = (scene) => {
-    const light = new RedGPU.Light.PointLight('#fff', 2);
+    const light = new RedGPU.Light.PointLight('#ff0000', 1);
     light.x = 0;
     light.y = 2;
     light.z = 0;
@@ -82,12 +90,37 @@ const createPointLight = (scene) => {
 /**
  * [KO] 제어 패널을 구성합니다.
  */
-const renderTestPane = async (redGPUContext, light) => {
+const renderTestPane = async (redGPUContext, view, light) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+    const {
+        setDebugButtons,
+        hdrImages
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext);
+    
+    // IBL 및 Lighting 폴더 구성
+    const lightingFolder = pane.addFolder({title: 'Lighting Settings', expanded: true});
+    
+    // IBL 설정
+    const iblConfig = {
+        showSkybox: true
+    };
 
+    lightingFolder.addBinding(iblConfig, 'showSkybox', {
+        label: 'Show Skybox'
+    }).on('change', (ev) => {
+        if (ev.value) {
+            if (!view.skybox && view.ibl) {
+                view.skybox = new RedGPU.Display.SkyBox(redGPUContext, view.ibl.environmentTexture);
+            }
+        } else {
+            view.skybox = null;
+        }
+    });
+
+    // Point Light 설정
+    const lightFolder = pane.addFolder({title: 'Point Light', expanded: true});
     const lightConfig = {
         x: light.x,
         y: light.y,
@@ -97,7 +130,6 @@ const renderTestPane = async (redGPUContext, light) => {
         color: {r: light.color.r, g: light.color.g, b: light.color.b},
     };
 
-    const lightFolder = pane.addFolder({title: 'Point Light', expanded: true});
     lightFolder.addBinding(lightConfig, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
         light.x = evt.value;
     });

@@ -5,7 +5,7 @@
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
 #redgpu_include math.getMotionVector;
-#redgpu_include math.getLightAttenuation;
+#redgpu_include lighting.getLightAttenuation;
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
