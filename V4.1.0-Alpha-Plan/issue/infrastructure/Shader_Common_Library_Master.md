@@ -158,10 +158,16 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | :--- | :--- | :---: | :--- |
 | **Motion Vector** | `math.getMotionVector` | ✅ 완료 | **[시간적 안정성]** 프레임 간 Clip Space 좌표 기반 모션 계산. TAA 및 Motion Blur 필수 데이터. |
 | **Back Refraction** | `calcPrePathBackground` | ✅ 완료 | **[투과 처리]** Transmission 재질용 백그라운드 굴절 샘플링. 굴절률과 거칠기 보정 포함. |
-| **Distance Falloff** | `math.getLightAttenuation` | **High** | **[에너지 감쇄]** Inverse Square 기반 물리적 광원 감쇄 표준화 예정. Phong/PBR 통합 적용. |
+| **Distance Falloff** | `math.getLightAttenuation` | ✅ 완료 | **[에너지 감쇄]** glTF 2.0 / Frostbite / Unreal 표준 감쇄. $Radius^2$ 정규화 포함. Phong/PBR 통합 적용. |
 | **Spotlight Cone** | `math.getSpotlightFactor` | **Medium** | **[원뿔 감쇄]** 스폿라이트 내부/외부 원뿔 감쇄 로직 통합 및 부드러운 페이드 처리 예정. |
 
 #### 📂 상세 적용 이력 (System)
+- `src/systemCodeManager/shader/math/getLightAttenuation.wgsl`: 표준 함수 구현 완료.
+    - **[기술 사양]**: $(1 - (d/r)^4)^2$ 윈도잉 함수를 적용하여 물리적 역제곱 법칙($1/d^2$)과 부드러운 끝부분 감쇄를 결합.
+    - **[정규화]**: $Radius^2$ 스케일을 곱하여 반경 변화에 따른 아티스틱한 광량 보전 지원.
+- **[감쇄 로직 통합]**: `pbrMaterial`, `phongMaterial` 내 하드코딩된 감쇄 연산을 `math.getLightAttenuation`으로 전량 교체.
+- **[구조 일치화]**: `phongMaterial`에서 발생하던 스펙큘러 중복 감쇄($1/d^4$) 오류 수정 및 두 재질 간 조명 계산 구조 통일.
+- **[검증 예제]**: `examples/3d/light/pointLightWithGltf/` (DamagedHelmet 그리드 배치를 통한 PBR 상호작용 검증).
 - `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준 함수 구현 및 이동 완료.
 - **[모션 벡터 적용]**: `pbr`, `phong`, `bitmap`, `color`, `line`, `grid` 등 모든 렌더링 프래그먼트 셰이더 적용 완료.
 - **`calcPrePathBackground`**: `pbrMaterial` 내 KHR_materials_transmission 구현부 적용 완료.

@@ -6,6 +6,7 @@
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
 #redgpu_include math.getMotionVector;
+#redgpu_include math.getLightAttenuation;
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -193,15 +194,7 @@ fn main(inputData:InputData) -> FragmentOutput {
          }
 
          let L = normalize(lightDir);
-//         let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
-//         let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
-
-        let dist2 = max(dot(lightDir, lightDir), 0.0001);
-        let d = sqrt(dist2);
-        let rangePart = pow(clamp(1.0 - d / u_clusterLightRadius, 0.0, 1.0), 2.0);
-        // 반경 정규화로 중심부 과도한 밝기 방지 (radius^2 스케일)
-        let invSquare = (u_clusterLightRadius * u_clusterLightRadius) / dist2;
-        let attenuation = rangePart * invSquare;
+         let attenuation = getLightAttenuation(lightDistance, u_clusterLightRadius);
 
          var finalAttenuation = attenuation;
 
@@ -238,11 +231,8 @@ fn main(inputData:InputData) -> FragmentOutput {
          let diffuse = diffuseColor * max(dot(N, L), 0.0);
          let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue;
 
-         let diffuseAttenuation = finalAttenuation;
-         let specularAttenuation = finalAttenuation * finalAttenuation;
-
-         let ld = u_clusterLightColor * diffuse * diffuseAttenuation * u_clusterLightIntensity;
-         let ls = u_specularColor * u_specularStrength * specular * specularAttenuation * u_clusterLightIntensity;
+         let ld = u_clusterLightColor * diffuse * finalAttenuation * u_clusterLightIntensity;
+         let ls = u_specularColor * u_specularStrength * specular * finalAttenuation * u_clusterLightIntensity;
 
          mixColor += ld + ls;
     }

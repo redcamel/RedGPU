@@ -668,6 +668,14 @@ const ExampleList = [
                         },
                     },
                     {
+                        name: 'PointLight with glTF',
+                        path: '3d/light/pointLightWithGltf',
+                        description: {
+                            ko: `현대적인 감쇄(Attenuation) 수식이 적용된 Point Light와 glTF PBR 모델의 상호작용 예제입니다.`, 
+                            en: `An example of interaction between Point Light with modern attenuation formula and glTF PBR model.`
+                        },
+                    },
+                    {
                         name: 'SpotLight',
                         path: '3d/light/spotLight',
                         description: {

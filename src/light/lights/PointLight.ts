@@ -19,6 +19,7 @@ import ABaseLight from "../core/ABaseLight";
  * [KO] 아래는 PointLight 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and behavior of PointLight.
  * @see [PointLight Cluster Performance example](/RedGPU/examples/3d/light/pointLightPerformance/)
+ * @see [PointLight with glTF example](/RedGPU/examples/3d/light/pointLightWithGltf/)
  * @category Light
  */
 class PointLight extends ABaseLight {

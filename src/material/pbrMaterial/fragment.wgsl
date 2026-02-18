@@ -5,6 +5,7 @@
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
 #redgpu_include math.getMotionVector;
+#redgpu_include math.getLightAttenuation;
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
@@ -828,71 +829,63 @@ fn main(inputData:InputData) -> FragmentOutput {
             let u_clusterLightRadius = targetLight.radius;
             let u_isSpotLight = targetLight.isSpotLight;
 
-            let lightDistance = length(u_clusterLightPosition - input_vertexPosition);
+         let lightDir = u_clusterLightPosition - input_vertexPosition;
+         let lightDistance = length(lightDir);
 
+         // 거리 범위 체크
+         if (lightDistance > u_clusterLightRadius) {
+             continue;
+         }
 
-            if (lightDistance > u_clusterLightRadius) {
-                continue;
-            }
+         let L = normalize(lightDir);
+         let attenuation = getLightAttenuation(lightDistance, u_clusterLightRadius);
 
-            let lightDir = normalize(u_clusterLightPosition - input_vertexPosition);
-//            let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
-//            let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
-let Lvec = u_clusterLightPosition - input_vertexPosition;
-let dist2 = max(dot(Lvec, Lvec), 0.0001);
-let d = sqrt(dist2);
-let rangePart = pow(clamp(1.0 - d / u_clusterLightRadius, 0.0, 1.0), 2.0);
-// 반경 정규화로 중심부 과도한 밝기 방지 (radius^2 스케일)
-let invSquare = (u_clusterLightRadius * u_clusterLightRadius) / dist2;
-let attenuation = rangePart * invSquare;
+         var finalAttenuation = attenuation;
 
+         // 스폿라이트 처리
+         if (u_isSpotLight > 0.0) {
+             let u_clusterLightDirection = normalize(vec3<f32>(
+                 targetLight.directionX,
+                 targetLight.directionY,
+                 targetLight.directionZ
+             ));
+             let u_clusterLightInnerAngle = targetLight.innerCutoff;
+             let u_clusterLightOuterCutoff = targetLight.outerCutoff;
 
-            var finalAttenuation = attenuation;
+             // 라이트에서 버텍스로의 방향
+             let lightToVertex = normalize(-L);
+             let cosTheta = dot(lightToVertex, u_clusterLightDirection);
 
-            // 스폿라이트 처리
-            if (u_isSpotLight > 0.0) {
-                let u_clusterLightDirection = normalize(vec3<f32>(
-                    targetLight.directionX,
-                    targetLight.directionY,
-                    targetLight.directionZ
-                ));
-                let u_clusterLightInnerAngle = targetLight.innerCutoff;
-                let u_clusterLightOuterCutoff = targetLight.outerCutoff;
+             let cosOuter = cos(radians(u_clusterLightOuterCutoff));
+             let cosInner = cos(radians(u_clusterLightInnerAngle));
 
-                // 라이트에서 버텍스로의 방향
-                let lightToVertex = normalize(-lightDir);
-                let cosTheta = dot(lightToVertex, u_clusterLightDirection);
+             // 스폿라이트 외곽 범위를 벗어나면 스킵
+             if (cosTheta < cosOuter) {
+                 continue;
+             }
 
-                let cosOuter = cos(radians(u_clusterLightOuterCutoff));
-                let cosInner = cos(radians(u_clusterLightInnerAngle));
+             // 스폿라이트 강도 계산 (부드러운 페이드)
+             let epsilon = cosInner - cosOuter;
+             let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
 
-                // 스폿라이트 외곽 범위를 벗어나면 스킵
-                if (cosTheta < cosOuter) {
-                    continue;
-                }
+             finalAttenuation *= spotIntensity;
+         }
 
-                // 스폿라이트 강도 계산 (부드러운 페이드)
-                let epsilon = cosInner - cosOuter;
-                let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
-
-                finalAttenuation *= spotIntensity;
-            }
-
-            // calcLight 함수 호출
-            totalDirectLighting += calcLight(
-                targetLight.color, targetLight.intensity * finalAttenuation,
-                N, V, lightDir,
-                VdotN,
-                roughnessParameter, metallicParameter, albedo,
-                F0, ior,
-                prePathBackground,
-                specularColor, specularParameter,
-                u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
-                transmissionParameter,
-                sheenColor, sheenRoughnessParameter,
-                anisotropy, anisotropicT, anisotropicB,
-                clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
-            );
+         // calcLight 함수 호출
+         totalDirectLighting += calcLight(
+             targetLight.color, targetLight.intensity * finalAttenuation,
+             N, V, L,
+             VdotN,
+             roughnessParameter, metallicParameter, albedo,
+             F0, ior,
+             prePathBackground,
+             specularColor, specularParameter,
+             u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
+             transmissionParameter,
+             sheenColor, sheenRoughnessParameter,
+             anisotropy, anisotropicT, anisotropicB,
+             clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
+         );
         }
     }
 
