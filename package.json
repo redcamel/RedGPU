@@ -47,7 +47,6 @@
     "vitepress-sidebar": "^1.33.1"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "wgsl_reflect": "^1.2.3"
   },
   "overrides": {

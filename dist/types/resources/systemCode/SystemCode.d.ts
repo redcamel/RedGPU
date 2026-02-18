@@ -2,7 +2,6 @@ declare const SystemCode: Readonly<{
     calcTintBlendMode: "string";
     calcDirectionalShadowVisibility: "string";
     drawDirectionalShadowDepth: "string";
-    normalFunctions: "string";
     calcPrePathBackground: "string";
     calculateMotionVector: "string";
     FragmentOutput: "string";
