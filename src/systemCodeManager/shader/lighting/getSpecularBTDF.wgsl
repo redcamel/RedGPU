@@ -1,5 +1,5 @@
-#redgpu_include lighting.distribution_ggx
-#redgpu_include lighting.fresnel_schlick
+#redgpu_include lighting.getDistributionGGX
+#redgpu_include lighting.getFresnelSchlick
 #redgpu_include math.EPSILON
 
 /**
@@ -19,7 +19,7 @@
  * @param ior - [KO] 굴절률 [EN] Index of refraction
  * @returns [KO] 계산된 스펙큘러 BTDF 값 [EN] Calculated specular BTDF value
  */
-fn specular_btdf(
+fn getSpecularBTDF(
     NdotV: f32,
     NdotL: f32,
     NdotH: f32,
@@ -32,7 +32,7 @@ fn specular_btdf(
     let eta: f32 = 1.0 / ior;
 
     // 1. D (Distribution) 계산
-    let D_rough: f32 = distribution_ggx(NdotH, roughness);
+    let D_rough: f32 = getDistributionGGX(NdotH, roughness);
     let t: f32 = clamp((ior - 1.0) * 100.0, 0.0, 1.0);
     let D: f32 = mix(1.0, D_rough, t);
 
@@ -40,7 +40,7 @@ fn specular_btdf(
     let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * NdotL) / VdotH));
 
     // 3. F (Fresnel) 계산
-    let F: vec3<f32> = fresnel_schlick(VdotH, F0);
+    let F: vec3<f32> = getFresnelSchlick(VdotH, F0);
 
     let denom = (eta * VdotH + LdotH) * (eta * VdotH + LdotH);
 

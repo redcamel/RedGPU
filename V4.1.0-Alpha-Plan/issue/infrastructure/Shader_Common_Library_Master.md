@@ -60,7 +60,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | :--- | :--- | :---: | :--- |
 | **Common Constants** | `math.PI/PI2/INV_PI/...` | ✅ 완료 | **[수치 일관성]** 7종 핵심 상수 전역 통합. 파일별 미세한 렌더링 오차 차단. |
 | **Stable Hash (Grid)** | `math.hash.getHashXX` | ✅ 완료 | **[절차적 생성]** 정수 변환 기반의 안정적인 해시. GPU 아키텍처와 무관한 동일 격자 패턴 보장. |
-| **Bitcast Hash (Bit)** | `math.hash.getBitHashXX` | ✅ 완료 | **[고정밀 난수]** IEEE 754 비트 레벨 조작 해시. 극소량의 변화에도 민감한 난수가 필요한 노이즈용. |
+| **Bitcast Hash (Bit)** | `math.hash.getBitHashXX` | ✅ 완료 | **[고정밀 난수]** IEEE 754 비트 레벨 조작 해시. 극소량의 변화에도 민감한 난수가 필요한 고품질 노이즈용. |
 | **Dither Noise** | `math.getInterleavedGradientNoise` | ✅ 완료 | **[성능 특화]** Jorge Jimenez 알고리즘. SSAO, SSR의 샘플링 노이즈 제거를 위한 초고속 디더링. |
 | **Safe Math** | `math.safeDivision` | **Medium** | **[안정성]** 0 나누기 방지 유틸리티. 분모가 0에 근접할 때 EPSILON으로 보정하여 NaN 에러 방어. |
 | **UV Transform** | `math.transformUv` | **Low** | **[좌표 표준화]** Offset, Scale, Rotation 통합 변환. Scale -> Rotate -> Offset 엔진 표준 순서 강제. |
@@ -89,7 +89,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
 | **Linear Depth** | `depth.linearizeDepth` | ✅ 완료 | **[공간 분석]** WebGPU의 비선형 Depth(0~1)를 선형 거리로 변환. SSAO, SSR, Fog 계산의 정밀도 핵심. |
-| **Get NDC** | `math.reconstruct.getNDCFromDepth` | ✅ 완료 | **[좌표 변환]** 스크린 UV와 Depth를 조합하여 NDC 공간 좌표 복구. 후처리 공간 변환의 기초 데이터. |
+| **Get NDC** | `math.reconstruct.getNDCFromDepth` | ✅ 완료 | **[좌표 변환]** 스크린 UV와 Depth를 조합하여 NDC 좌표 복구. 후처리 공간 변환의 기초 데이터. |
 | **Position Rec.** | `math.reconstruct.getXXXPosition...` | ✅ 완료 | **[역투영 표준]** NDC -> World/View 공간 복구. 픽셀 미분 없이 깊이값만으로 정확한 3D 위치 추적. |
 | **Normal Rec.** | `math.reconstruct.getXXXNormal...` | ✅ 완료 | **[G-Buffer 복구]** GNormalBuffer RGB 데이터를 정규화된 월드/뷰 법선 벡터로 변환. |
 
@@ -123,17 +123,18 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 ### 6. Lighting & Material BRDF/BTDF (물리 기반 조명)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **Disney Diffuse** | `lighting.diffuseBrdfDisney` | ✅ 완료 | **[확산광 모델]** 거칠기 고려 레트로-리플렉션 모델. 물리적 사실감 극대화 및 에너지 보존 적용. |
-| **PBR Specular** | `lighting.specularBrdf` | ✅ 완료 | **[반사광 모델]** Cook-Torrance (GGX 분포 + Smith 기하 차폐). 고정밀 반사 연산. |
-| **BTDF Utils** | `lighting.specularBtdf / diffuseBtdf` | ✅ 완료 | **[투과 모델]** Transmission 확장을 위한 굴절(Refraction) 및 확산 투과 계산식 모듈화. |
-| **Fresnel Utils** | `lighting.fresnelXxx` | ✅ 완료 | **[프레넬 표준]** Schlick, Conductor, Iridescent 등 재질별 특성 분리. |
-| **Fresnel Mix/Coat**| `lighting.fresnelMix / coat` | ✅ 완료 | **[레이어 결합]** 에너지 보존 법칙 기반 다중 레이어(Clearcoat 등) 합성 및 빛 감쇄 계산. |
-| **Anisotropy Spec** | `lighting.anisotropyGgx` | **High** | **[이방성]** 이방성 GGX 분포 및 가시성 함수 통합 예정. PBR 확장 필수 로직. |
-| **Sheen Model** | `lighting.sheenCharlie` | **High** | **[패브릭 조명]** Charlie Sheen 모델 기반 조명 라이브러리화 예정. |
+| **Disney Diffuse** | `lighting.getDiffuseBRDFDisney` | ✅ 완료 | **[확산광 모델]** 거칠기 고려 레트로-리플렉션 모델. 물리적 사실감 극대화 및 에너지 보존 적용. |
+| **PBR Specular** | `lighting.getSpecularBRDF` | ✅ 완료 | **[반사광 모델]** Cook-Torrance (GGX 분포 + Smith 기하 차폐). 고정밀 반사 연산. |
+| **BTDF Utils** | `lighting.getSpecularBTDF / getDiffuseBTDF` | ✅ 완료 | **[투과 모델]** Transmission 확장을 위한 굴절 및 확산 투과 계산식 모듈화. |
+| **Fresnel Utils** | `lighting.getFresnelXxx / getConductorFresnel / getIridescentFresnel` | ✅ 완료 | **[프레넬 표준]** Schlick, Conductor, Iridescent 등 재질별 특성 분리. |
+| **Fresnel Mix/Coat**| `lighting.getFresnelMix / getFresnelCoat` | ✅ 완료 | **[레이어 결합]** 에너지 보존 법칙 기반 다중 레이어 합성 및 빛 감쇄 계산. |
+| **Anisotropy Spec** | `lighting.getAnisotropyGGX` | **High** | **[이방성]** 이방성 GGX 분포 및 가시성 함수 통합 예정. PBR 확장 필수 로직. |
+| **Sheen Model** | `lighting.getSheenCharlie` | **High** | **[패브릭 조명]** Charlie Sheen 모델 기반 조명 라이브러리화 예정. |
 
 #### 📂 상세 적용 이력 (Lighting)
+- `src/systemCodeManager/shader/lighting/`: `getDiffuseBRDFDisney`, `getSpecularBRDF`, `getSpecularBTDF`, `getDistributionGGX`, `getConductorFresnel`, `getIridescentFresnel` 등 정규화된 명칭 적용 완료.
 - `src/material/pbrMaterial/fragment.wgsl`: 하드코딩된 조명 및 프레넬 수식 전량 교체 완료.
-- `src/systemCodeManager/shader/lighting/specularBrdf.wgsl`: 하이라이트 선명도 최적화(`max(..., 1e-4)`) 적용 완료.
+- `src/systemCodeManager/shader/lighting/getSpecularBRDF.wgsl`: 하이라이트 선명도 최적화(`max(..., 1e-4)`) 적용 완료.
 
 ---
 
@@ -142,7 +143,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | :--- | :--- | :---: | :--- |
 | **Height Fog** | `math.getHeightFogFactor` | **High** | **[환경 감쇄]** 고도 기반 안개 수식의 수치 안정화 및 모듈화 예정. 거리/고도 복합 감쇄 지원. |
 | **Linear/Exp Fog** | `math.getFogFactor` | **Medium** | **[기본 안개]** 일반적인 선형/지수 안개 공식 라이브러리화 예정. |
-| **Scatter Utils** | `math.scatteringXxx` | **Medium** | **[대기 산란]** Rayleigh 및 Mie 산란 기본 수식 모듈화 예정. 대기 효과 최적화 핵심. |
+| **Scatter Utils** | `math.getScatteringXxx` | **Medium** | **[대기 산란]** Rayleigh 및 Mie 산란 기본 수식 모듈화 예정. 대기 효과 최적화 핵심. |
 
 ---
 
@@ -164,10 +165,10 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 
 ## ⚠️ 안정성 및 유지보수 가이드
 - **Include Once**: 동일 경로(`#redgpu_include`)의 중복 치환을 방지하기 위해 전처리기 규격을 반드시 준수하십시오.
-- **Naming Standard**: `math.xxx`(수학/공간), `lighting.xxx`(조명), `color.xxx`(색상), `depth.xxx`(깊이) 네임스페이스를 엄격히 준수합니다.
+- **Naming Standard**: `math.getXXXX`(수학/공간), `lighting.getXXXX`(조명), `color.getXXXX`(색상) 등 **get 접두사**와 **CamelCase** 네임스페이스를 엄격히 준수합니다.
 - **Verification**: 모듈화 단계마다 기존 결과물(NormalTangentTest 등)과 시각적 차이가 없는지 엄격히 검증해야 합니다.
 
 ---
 **최종 업데이트:** 2026-02-18
-**상태:** 좌표계 정의 및 전 카테고리 통합 마스터 명세 수립 완료
+**상태:** getXXXX 명명 규칙 및 전 카테고리 통합 마스터 명세 수립 완료
 **프로젝트:** RedGPU

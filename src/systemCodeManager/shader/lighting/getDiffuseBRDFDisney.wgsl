@@ -15,7 +15,7 @@
  * @param albedo - [KO] 표면 반사율(색상) [EN] Surface albedo (color)
  * @returns [KO] 계산된 확산광 BRDF 값 [EN] Calculated diffuse BRDF value
  */
-fn diffuse_brdf_disney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
 
     // Disney diffuse term

@@ -9,15 +9,14 @@
  * @param roughness - [KO] 표면 거칠기 [0, 1] [EN] Surface roughness [0, 1]
  * @returns [KO] 미세면의 정렬 밀도 [EN] Microfacet alignment density
  */
-fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
+fn getDistributionGGX(NdotH: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let alpha2 = alpha * alpha;
     let NdotH2 = NdotH * NdotH;
 
     let nom = alpha2;
     let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
-    let denom_squared = denom * denom;
+    let denomSquared = denom * denom;
 
-    return nom / max(EPSILON, denom_squared * PI);
+    return nom / max(EPSILON, denomSquared * PI);
 }
-

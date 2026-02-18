@@ -12,8 +12,8 @@
  * @param albedo - [KO] 표면 반사율(색상) [EN] Surface albedo (color)
  * @returns [KO] 계산된 확산 투과 값 [EN] Calculated diffuse transmission value
  */
-fn diffuse_btdf(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
+fn getDiffuseBTDF(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
     // 뒷면으로 들어오는 광선만 처리 (-dot(N,L)를 사용하여 음수만 양수로 변환하여 사용)
-    let cos_theta = max(-dot(N, L), 0.0);
-    return albedo * cos_theta * INV_PI;
+    let cosTheta = max(-dot(N, L), 0.0);
+    return albedo * cosTheta * INV_PI;
 }

@@ -1,6 +1,6 @@
-#redgpu_include lighting.distribution_ggx
-#redgpu_include lighting.geometry_smith
-#redgpu_include lighting.fresnel_schlick
+#redgpu_include lighting.getDistributionGGX
+#redgpu_include lighting.getGeometrySmith
+#redgpu_include lighting.getFresnelSchlick
 #redgpu_include math.EPSILON
 
 /**
@@ -18,7 +18,7 @@
  * @param LdotH - [KO] 광원 방향과 하프 벡터의 내적 (프레넬용) [EN] Dot product of light and half vector (for Fresnel)
  * @returns [KO] 계산된 스펙큘러 BRDF 값 [EN] Calculated specular BRDF value
  */
-fn specular_brdf(
+fn getSpecularBRDF(
     F0: vec3<f32>,
     roughness: f32,
     NdotH: f32,
@@ -27,13 +27,13 @@ fn specular_brdf(
     LdotH: f32
 ) -> vec3<f32> {
     // 1. Distribution (D)
-    let D = distribution_ggx(NdotH, roughness);
+    let D = getDistributionGGX(NdotH, roughness);
 
     // 2. Geometric Shadowing (G)
-    let G = geometry_smith(NdotV, NdotL, roughness);
+    let G = getGeometrySmith(NdotV, NdotL, roughness);
 
     // 3. Fresnel (F)
-    let F = fresnel_schlick(LdotH, F0);
+    let F = getFresnelSchlick(LdotH, F0);
 
     // 4. Cook-Torrance BRDF 합산
     // [KO] 분모를 시스템 표준 EPSILON을 사용하여 방어함으로써 수치적 안정성과 정밀도 확보

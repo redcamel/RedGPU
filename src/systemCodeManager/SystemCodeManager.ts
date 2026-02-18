@@ -35,17 +35,17 @@ import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
 import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
 import getTintBlendMode_wgsl from './shader/color/getTintBlendMode.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
-import diffuse_brdf_disney_wgsl from './shader/lighting/diffuse_brdf_disney.wgsl';
-import fresnel_schlick_wgsl from './shader/lighting/fresnel_schlick.wgsl';
-import conductor_fresnel_wgsl from './shader/lighting/conductor_fresnel.wgsl';
-import iridescent_fresnel_wgsl from './shader/lighting/iridescent_fresnel.wgsl';
-import distribution_ggx_wgsl from './shader/lighting/distribution_ggx.wgsl';
-import geometry_smith_wgsl from './shader/lighting/geometry_smith.wgsl';
-import specular_brdf_wgsl from './shader/lighting/specular_brdf.wgsl';
-import specular_btdf_wgsl from './shader/lighting/specular_btdf.wgsl';
-import diffuse_btdf_wgsl from './shader/lighting/diffuse_btdf.wgsl';
-import fresnel_mix_wgsl from './shader/lighting/fresnel_mix.wgsl';
-import fresnel_coat_wgsl from './shader/lighting/fresnel_coat.wgsl';
+import diffuseBRDFDisney_wgsl from './shader/lighting/getDiffuseBRDFDisney.wgsl';
+import fresnelSchlick_wgsl from './shader/lighting/getFresnelSchlick.wgsl';
+import conductorFresnel_wgsl from './shader/lighting/getConductorFresnel.wgsl';
+import iridescentFresnel_wgsl from './shader/lighting/getIridescentFresnel.wgsl';
+import distributionGGX_wgsl from './shader/lighting/getDistributionGGX.wgsl';
+import geometrySmith_wgsl from './shader/lighting/getGeometrySmith.wgsl';
+import specularBRDF_wgsl from './shader/lighting/getSpecularBRDF.wgsl';
+import specularBTDF_wgsl from './shader/lighting/getSpecularBTDF.wgsl';
+import diffuseBTDF_wgsl from './shader/lighting/getDiffuseBTDF.wgsl';
+import fresnelMix_wgsl from './shader/lighting/getFresnelMix.wgsl';
+import fresnelCoat_wgsl from './shader/lighting/getFresnelCoat.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -139,17 +139,17 @@ export namespace DepthLibrary {
  * [EN] Lighting and BRDF related shader function library
  */
 export namespace LightingLibrary {
-    export const diffuse_brdf_disney = diffuse_brdf_disney_wgsl;
-    export const fresnel_schlick = fresnel_schlick_wgsl;
-    export const conductor_fresnel = conductor_fresnel_wgsl;
-    export const iridescent_fresnel = iridescent_fresnel_wgsl;
-    export const distribution_ggx = distribution_ggx_wgsl;
-    export const geometry_smith = geometry_smith_wgsl;
-    export const specular_brdf = specular_brdf_wgsl;
-    export const specular_btdf = specular_btdf_wgsl;
-    export const diffuse_btdf = diffuse_btdf_wgsl;
-    export const fresnel_mix = fresnel_mix_wgsl;
-    export const fresnel_coat = fresnel_coat_wgsl;
+    export const getDiffuseBRDFDisney = diffuseBRDFDisney_wgsl;
+    export const getFresnelSchlick = fresnelSchlick_wgsl;
+    export const getConductorFresnel = conductorFresnel_wgsl;
+    export const getIridescentFresnel = iridescentFresnel_wgsl;
+    export const getDistributionGGX = distributionGGX_wgsl;
+    export const getGeometrySmith = geometrySmith_wgsl;
+    export const getSpecularBRDF = specularBRDF_wgsl;
+    export const getSpecularBTDF = specularBTDF_wgsl;
+    export const getDiffuseBTDF = diffuseBTDF_wgsl;
+    export const getFresnelMix = fresnelMix_wgsl;
+    export const getFresnelCoat = fresnelCoat_wgsl;
 }
 
 /**

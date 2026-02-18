@@ -7,7 +7,7 @@
  * @param roughness - [KO] 표면 거칠기 [0, 1] [EN] Surface roughness [0, 1]
  * @returns [KO] 기하 감쇠 계수 [EN] Geometric attenuation factor
  */
-fn geometry_smith(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
+fn getGeometrySmith(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let k = alpha / 2.0; // 직접 조명(Direct Lighting)에 적합한 k 값
 

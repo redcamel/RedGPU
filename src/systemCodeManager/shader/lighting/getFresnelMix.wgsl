@@ -9,7 +9,7 @@
  * @param VdotH - [KO] 시선 방향과 하프 벡터의 내적 [EN] Dot product of view direction and half vector
  * @returns [KO] 혼합된 최종 색상 [EN] Final mixed color
  */
-fn fresnel_mix(
+fn getFresnelMix(
     F0: vec3<f32>,
     weight: f32,
     base: vec3<f32>,

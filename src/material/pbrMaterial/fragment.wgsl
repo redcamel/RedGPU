@@ -14,17 +14,17 @@
 #redgpu_include math.tnb.getTBN
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
-#redgpu_include lighting.diffuse_brdf_disney
-#redgpu_include lighting.fresnel_schlick
-#redgpu_include lighting.conductor_fresnel
-#redgpu_include lighting.iridescent_fresnel
-#redgpu_include lighting.distribution_ggx
-#redgpu_include lighting.geometry_smith
-#redgpu_include lighting.specular_brdf
-#redgpu_include lighting.specular_btdf
-#redgpu_include lighting.diffuse_btdf
-#redgpu_include lighting.fresnel_mix
-#redgpu_include lighting.fresnel_coat
+#redgpu_include lighting.getDiffuseBRDFDisney
+#redgpu_include lighting.getFresnelSchlick
+#redgpu_include lighting.getConductorFresnel
+#redgpu_include lighting.getIridescentFresnel
+#redgpu_include lighting.getDistributionGGX
+#redgpu_include lighting.getGeometrySmith
+#redgpu_include lighting.getSpecularBRDF
+#redgpu_include lighting.getSpecularBTDF
+#redgpu_include lighting.getDiffuseBTDF
+#redgpu_include lighting.getFresnelMix
+#redgpu_include lighting.getFresnelCoat
 
 struct Uniforms {
     useVertexColor: u32,
@@ -790,8 +790,8 @@ fn main(inputData:InputData) -> FragmentOutput {
 
     #redgpu_if useKHR_materials_iridescence
         if (iridescenceParameter > 0.0) {
-            F0_dielectric = iridescent_fresnel(1.0, u_KHR_iridescenceIor, F0_dielectric, iridescenceThickness, iridescenceParameter, NdotV);
-            F0_metal = iridescent_fresnel(1.0, u_KHR_iridescenceIor, baseColor.rgb, iridescenceThickness, iridescenceParameter, NdotV);
+            F0_dielectric = getIridescentFresnel(1.0, u_KHR_iridescenceIor, F0_dielectric, iridescenceThickness, iridescenceParameter, NdotV);
+            F0_metal = getIridescentFresnel(1.0, u_KHR_iridescenceIor, baseColor.rgb, iridescenceThickness, iridescenceParameter, NdotV);
         }
     #redgpu_endIf
     let F0 = mix(F0_dielectric, F0_metal, metallicParameter); // 기본 반사율
@@ -1194,9 +1194,9 @@ fn calcLight(
     let VdotH = max(dot(V, H), 0.0);
 
 
-    var DIFFUSE_BRDF:vec3<f32> = diffuse_brdf_disney(NdotL, NdotV, LdotH, roughnessParameter, albedo);
+    var DIFFUSE_BRDF:vec3<f32> = getDiffuseBRDFDisney(NdotL, NdotV, LdotH, roughnessParameter, albedo);
     #redgpu_if useKHR_materials_diffuse_transmission
-        DIFFUSE_BRDF = mix(DIFFUSE_BRDF, diffuse_btdf(N, L, diffuseTransmissionColor), diffuseTransmissionParameter);
+        DIFFUSE_BRDF = mix(DIFFUSE_BRDF, getDiffuseBTDF(N, L, diffuseTransmissionColor), diffuseTransmissionParameter);
     #redgpu_endIf
 
     var SPECULAR_BRDF:vec3<f32>;
@@ -1218,19 +1218,19 @@ fn calcLight(
             ) ;
         #redgpu_endIf
     }else{
-        SPECULAR_BRDF = specular_brdf( albedo, roughnessParameter, NdotH, NdotV, NdotL, LdotH);
+        SPECULAR_BRDF = getSpecularBRDF( albedo, roughnessParameter, NdotH, NdotV, NdotL, LdotH);
     }
 
-    let METAL_BRDF = conductor_fresnel( albedo, SPECULAR_BRDF, VdotH);;
+    let METAL_BRDF = getConductorFresnel( albedo, SPECULAR_BRDF, VdotH);;
 
     var SPECULAR_BTDF =  vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
         if(transmissionParameter > 0.0){
-            SPECULAR_BTDF = specular_btdf( NdotV, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
+            SPECULAR_BTDF = getSpecularBTDF( NdotV, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
         }
     #redgpu_endIf
 
-    let DIELECTRIC_BRDF = fresnel_mix(
+    let DIELECTRIC_BRDF = getFresnelMix(
         F0 ,
         specularParameter,
         mix(DIFFUSE_BRDF , SPECULAR_BTDF , transmissionParameter),
@@ -1281,8 +1281,8 @@ fn calcLight(
             let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.04);
             let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
             let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
-            let CLEARCOAT_BRDF = specular_brdf( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
-            directLighting = fresnel_coat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
+            let CLEARCOAT_BRDF = getSpecularBRDF( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
+            directLighting = getFresnelCoat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
         }
     #redgpu_endIf
 
@@ -1303,12 +1303,12 @@ fn calcLight(
 fn BRDF_specularAnisotropicGGX( f0: vec3<f32>, f90: vec3<f32>, alphaRoughness: f32, VdotH: f32, NdotL: f32, NdotV: f32, NdotH: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, TdotH: f32, BdotH: f32, anisotropy: f32 ) -> vec3<f32> {
     var at = mix(alphaRoughness, 1.0, anisotropy * anisotropy);
     var ab = alphaRoughness;
-    var F:vec3<f32> = fresnel_schlick(VdotH,f0);
-    var V:f32 = V_GGX_anisotropic(NdotL, NdotV, BdotV, TdotV, TdotL, BdotL, at, ab);
-    var D:f32 = D_GGX_anisotropic(NdotH, TdotH, BdotH, at, ab);
+    var F:vec3<f32> = getFresnelSchlick(VdotH,f0);
+    var V:f32 = vGGXAnisotropic(NdotL, NdotV, BdotV, TdotV, TdotL, BdotL, at, ab);
+    var D:f32 = dGGXAnisotropic(NdotH, TdotH, BdotH, at, ab);
     return F * (V * D);
 }
-fn D_GGX_anisotropic( NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32 ) -> f32 {
+fn dGGXAnisotropic( NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32 ) -> f32 {
     let a2: f32 = at * ab;
     let f: vec3<f32> = vec3<f32>(ab * TdotH, at * BdotH, a2 * NdotH);
     let denominator: f32 = dot(f, f);
@@ -1318,7 +1318,7 @@ fn D_GGX_anisotropic( NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32 ) -> 
     let w2: f32 = a2 / denominator;
     return a2 * w2 * w2 * INV_PI;
 }
-fn V_GGX_anisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, at: f32, ab: f32 ) -> f32 {
+fn vGGXAnisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, at: f32, ab: f32 ) -> f32 {
    let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
    let GGXL = NdotV * length(vec3<f32>(at * TdotL, ab * BdotL, NdotL));
    let v = 0.5 / (GGXV + GGXL);
