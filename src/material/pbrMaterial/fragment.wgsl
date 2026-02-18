@@ -1170,8 +1170,8 @@ fn calcLight(
 ) -> vec3<f32>{
     let dLight = lightColor * lightIntensity ;
 
-    let dotNL = dot(N, L);
-    let NdotL = max(dotNL, 0.04);
+    let NdotL_origin = dot(N, L);
+    let NdotL = max(NdotL_origin, 0.04);
     let NdotV = max(dot(N, V), 0.04);
     let H = normalize(L + V);
     let LdotH = max(dot(L, H), 0.0);
@@ -1273,10 +1273,10 @@ fn calcLight(
 
     var lightDirection: f32;
     #redgpu_if useKHR_materials_diffuse_transmission
-        lightDirection = mix(abs(dotNL), 1.0, diffuseTransmissionParameter);
+        lightDirection = mix(abs(NdotL_origin), 1.0, diffuseTransmissionParameter);
     #redgpu_else
         // 투과가 없는 경우, 기존처럼 양수 값만 허용
-        lightDirection = max(dotNL, 0.0);
+        lightDirection = max(NdotL_origin, 0.0);
     #redgpu_endIf
 
     let lightContribution = directLighting * dLight * lightDirection;

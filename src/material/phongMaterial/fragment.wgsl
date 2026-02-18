@@ -133,7 +133,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     #redgpu_if specularTexture
         specularSamplerValue = textureSample(specularTexture,specularTextureSampler, inputData.uv).r ;
     #redgpu_endIf
-    var mixColor:vec3<f32>;
+    var mixColor:vec3<f32> = vec3<f32>(0.0);
 
     // 암비안트 라이트 처리 추가
     let ambientContribution = u_ambientLightColor * u_ambientLightIntensity;
@@ -161,8 +161,9 @@ fn main(inputData:InputData) -> FragmentOutput {
 
         let L = normalize(u_directionalLightDirection);
         let R = reflect(L, N);
-        let lambertTerm = max(dot(N, -L), 0.0);
-        let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue;
+        let NdotL = dot(N, -L);
+        let lambertTerm = max(NdotL, 0.0);
+        let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue * step(0.0, NdotL);
 
         // 디렉셔널 라이트 기여도 (쉐도우 적용)
         let lightContribution = u_directionalLightColor * u_directionalLightIntensity * visibility;
@@ -219,8 +220,9 @@ fn main(inputData:InputData) -> FragmentOutput {
          }
 
          let R = reflect(-L, N);
-         let diffuse = diffuseColor * max(dot(N, L), 0.0);
-         let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue;
+         let NdotL = dot(N, L);
+         let diffuse = diffuseColor * max(NdotL, 0.0);
+         let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue * step(0.0, NdotL);
 
          let ld = u_clusterLightColor * diffuse * finalAttenuation * u_clusterLightIntensity;
          let ls = u_specularColor * u_specularStrength * specular * finalAttenuation * u_clusterLightIntensity;
