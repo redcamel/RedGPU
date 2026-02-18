@@ -21,6 +21,7 @@ import getRayDirection_wgsl from './shader/math/direction/getRayDirection.wgsl';
 import getReflectionVectorFromViewDirection_wgsl from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
 import getShadowCoord_wgsl from './shader/math/getShadowCoord.wgsl';
 import getDirectionalShadowVisibility_wgsl from './shader/math/getDirectionalShadowVisibility.wgsl';
+import getMotionVector_wgsl from './shader/math/getMotionVector.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
@@ -73,6 +74,7 @@ export namespace MathLibrary {
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
     export const getShadowCoord = getShadowCoord_wgsl;
     export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
+    export const getMotionVector = getMotionVector_wgsl;
 
     /** [KO] 방향(Direction) 관련 셰이더 함수 [EN] Direction related shader functions */
     export namespace direction {
@@ -178,7 +180,7 @@ export namespace SystemCodeManager {
     export const calcDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
     export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;
     export const calcPrePathBackground = SystemFragmentCode.calcPrePathBackground;
-    export const calculateMotionVector = SystemFragmentCode.calculateMotionVector;
+    export const calculateMotionVector = getMotionVector_wgsl;
     export const picking = SystemFragmentCode.picking;
     export const drawPicking = SystemFragmentCode.drawPicking;
 
@@ -187,7 +189,6 @@ export namespace SystemCodeManager {
     export const calcBillboard = SystemVertexCode.calcBillboard;
     export const calcDisplacements = SystemVertexCode.calcDisplacements;
     export const getBillboardMatrix = SystemVertexCode.getBillboardMatrix;
-    export const extractScaleAndTranslation = SystemVertexCode.extractScaleAndTranslation;
     export const meshVertexBasicUniform = SystemVertexCode.meshVertexBasicUniform;
 }
 

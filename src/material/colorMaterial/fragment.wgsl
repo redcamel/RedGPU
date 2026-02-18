@@ -2,7 +2,7 @@
 #redgpu_include drawPicking
 #redgpu_include calcTintBlendMode
 #redgpu_include FragmentOutput
-#redgpu_include calculateMotionVector
+#redgpu_include math.getMotionVector
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
@@ -62,7 +62,7 @@ fn main(inputData: InputData) -> FragmentOutput {
         discard;
     }
     output.color = finalColor;
-    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
+    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
     return output;
 }
 

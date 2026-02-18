@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include FragmentOutput;
-#redgpu_include calculateMotionVector;
+#redgpu_include math.getMotionVector;
 
 // --- 데이터 구조 정의 ---
 struct VertexIn {
@@ -81,7 +81,7 @@ fn fragmentMain(inputData: VertexOut) -> FragmentOutput {
 //    output.color = vec4<f32>(finalColor, baseAlpha);
 
     // 4. 모션 벡터 계산 및 저장
-    let motion = calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos);
+    let motion = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
     output.gBufferMotionVector = vec4<f32>(motion, 0.0, 1.0);
 
     return output;

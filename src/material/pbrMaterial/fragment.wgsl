@@ -4,7 +4,7 @@
 #redgpu_include drawPicking;
 #redgpu_include calcPrePathBackground
 #redgpu_include FragmentOutput
-#redgpu_include calculateMotionVector;
+#redgpu_include math.getMotionVector;
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
@@ -1099,7 +1099,7 @@ let attenuation = rangePart * invSquare;
         let baseReflectionStrength = smoothnessCurved * baseReflection;
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
-    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
+    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
 
 //  // 디버깅: 모션벡터 증폭하여 확인
 //   let amplifiedMotion = inputData.motionVector * 50.0;  // 50배 증폭

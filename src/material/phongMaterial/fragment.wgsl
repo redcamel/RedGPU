@@ -5,7 +5,7 @@
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include drawPicking;
 #redgpu_include FragmentOutput;
-#redgpu_include calculateMotionVector;
+#redgpu_include math.getMotionVector;
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -286,6 +286,6 @@ fn main(inputData:InputData) -> FragmentOutput {
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
 
-    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
+    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
     return output;
 }
