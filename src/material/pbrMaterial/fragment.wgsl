@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include calcDirectionalShadowVisibility;
+#redgpu_include math.getDirectionalShadowVisibility;
 #redgpu_include calcTintBlendMode;
 #redgpu_include drawPicking;
 #redgpu_include calcPrePathBackground
@@ -518,7 +518,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     /////////////////////////////////////////////////////////////////////////////////
 
     var visibility:f32 = 1.0;
-    visibility = calcDirectionalShadowVisibility(
+    visibility = getDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
                 u_shadowDepthTextureSize,

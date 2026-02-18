@@ -20,6 +20,7 @@ import getViewDirection_wgsl from './shader/math/direction/getViewDirection.wgsl
 import getRayDirection_wgsl from './shader/math/direction/getRayDirection.wgsl';
 import getReflectionVectorFromViewDirection_wgsl from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
 import getShadowCoord_wgsl from './shader/math/getShadowCoord.wgsl';
+import getDirectionalShadowVisibility_wgsl from './shader/math/getDirectionalShadowVisibility.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
@@ -71,6 +72,7 @@ export namespace MathLibrary {
 
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
     export const getShadowCoord = getShadowCoord_wgsl;
+    export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
 
     /** [KO] 방향(Direction) 관련 셰이더 함수 [EN] Direction related shader functions */
     export namespace direction {
@@ -173,7 +175,7 @@ export namespace SystemCodeManager {
     // [KO] 레거시 직접 참조 지원 (전처리기 호환성)
     export const FragmentOutput = SystemFragmentCode.FragmentOutput;
     export const calcTintBlendMode = SystemFragmentCode.calcTintBlendMode;
-    export const calcDirectionalShadowVisibility = SystemFragmentCode.calcDirectionalShadowVisibility;
+    export const calcDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
     export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;
     export const calcPrePathBackground = SystemFragmentCode.calcPrePathBackground;
     export const calculateMotionVector = SystemFragmentCode.calculateMotionVector;

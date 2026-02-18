@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcTintBlendMode;
-#redgpu_include calcDirectionalShadowVisibility;
+#redgpu_include math.getDirectionalShadowVisibility;
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include drawPicking;
@@ -139,7 +139,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     mixColor += ambientDiffuse;
 
     var visibility:f32 = 1.0;
-     visibility = calcDirectionalShadowVisibility(
+     visibility = getDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
                 u_shadowDepthTextureSize,
