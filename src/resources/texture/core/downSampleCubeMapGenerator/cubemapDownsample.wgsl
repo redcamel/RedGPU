@@ -55,7 +55,7 @@ fn clampCubemapUV(uv: vec2<f32>) -> vec2<f32> {
     return clamp(uv, vec2<f32>(0.0), vec2<f32>(1.0));
 }
 
-#redgpu_include color.get_luminance
+#redgpu_include color.getLuminance
 #redgpu_include math.PI
 
 @compute @workgroup_size(8, 8, 1)
@@ -168,7 +168,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // 색상 보정 (높은 밉맵 레벨에서 채도 조정)
     if (targetMipLevel > 0.0) {
-        let luminance = get_luminance(color.rgb);
+        let luminance = getLuminance(color.rgb);
         let saturation = 0.9 + 0.1 / (1.0 + targetMipLevel * 0.1);
         color = vec4<f32>(mix(vec3<f32>(luminance), color.rgb, saturation), color.a);
     }

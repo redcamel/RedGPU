@@ -32,7 +32,7 @@ import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
 import linear_to_srgb_vec4_wgsl from './shader/color/linear_to_srgb_vec4.wgsl';
 import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
 import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
-import get_luminance_wgsl from './shader/color/get_luminance.wgsl';
+import getLuminance_wgsl from './shader/color/getLuminance.wgsl';
 import getTintBlendMode_wgsl from './shader/color/getTintBlendMode.wgsl';
 import linearizeDepth_wgsl from './shader/depth/linearizeDepth.wgsl';
 import diffuseBRDFDisney_wgsl from './shader/lighting/getDiffuseBRDFDisney.wgsl';
@@ -122,7 +122,7 @@ export namespace ColorLibrary {
     export const linear_to_srgb_vec4 = linear_to_srgb_vec4_wgsl;
     export const srgb_to_linear_vec3 = srgb_to_linear_vec3_wgsl;
     export const srgb_to_linear_vec4 = srgb_to_linear_vec4_wgsl;
-    export const get_luminance = get_luminance_wgsl;
+    export const getLuminance = getLuminance_wgsl;
     export const getTintBlendMode = getTintBlendMode_wgsl;
 }
 

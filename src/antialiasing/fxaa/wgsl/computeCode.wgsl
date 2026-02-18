@@ -5,17 +5,17 @@ let i_index = vec2<i32>(index);
 // 1. 현재 픽셀 및 주변 4방향 루마(Luma) 및 알파 샘플링
 let colorM4 = textureLoad(sourceTexture, index);
 let colorM = colorM4.rgb;
-let lumaM = get_luminance(colorM);
+let lumaM = getLuminance(colorM);
 
 let colorN4 = fetchColor4(i_index + vec2<i32>(0, -1), dims);
 let colorS4 = fetchColor4(i_index + vec2<i32>(0, 1), dims);
 let colorW4 = fetchColor4(i_index + vec2<i32>(-1, 0), dims);
 let colorE4 = fetchColor4(i_index + vec2<i32>(1, 0), dims);
 
-let lumaN = get_luminance(colorN4.rgb);
-let lumaS = get_luminance(colorS4.rgb);
-let lumaW = get_luminance(colorW4.rgb);
-let lumaE = get_luminance(colorE4.rgb);
+let lumaN = getLuminance(colorN4.rgb);
+let lumaS = getLuminance(colorS4.rgb);
+let lumaW = getLuminance(colorW4.rgb);
+let lumaE = getLuminance(colorE4.rgb);
 
 // 2. 로컬 대비(Contrast) 분석을 통한 조기 종료 결정
 let lumaMin = min(lumaM, min(min(lumaN, lumaS), min(lumaW, lumaE)));
@@ -28,10 +28,10 @@ if (range < max(uniforms.edgeThresholdMin, lumaMax * uniforms.edgeThreshold)) {
 }
 
 // 3. 대각선 루마 샘플링 (3x3 영역 완성)
-let lumaNW = get_luminance(fetchColor4(i_index + vec2<i32>(-1, -1), dims).rgb);
-let lumaNE = get_luminance(fetchColor4(i_index + vec2<i32>(1, -1), dims).rgb);
-let lumaSW = get_luminance(fetchColor4(i_index + vec2<i32>(-1, 1), dims).rgb);
-let lumaSE = get_luminance(fetchColor4(i_index + vec2<i32>(1, 1), dims).rgb);
+let lumaNW = getLuminance(fetchColor4(i_index + vec2<i32>(-1, -1), dims).rgb);
+let lumaNE = getLuminance(fetchColor4(i_index + vec2<i32>(1, -1), dims).rgb);
+let lumaSW = getLuminance(fetchColor4(i_index + vec2<i32>(-1, 1), dims).rgb);
+let lumaSE = getLuminance(fetchColor4(i_index + vec2<i32>(1, 1), dims).rgb);
 
 // 4. 엣지 방향 판단 (수직 vs 수평)
 let edgeVer = abs(lumaNW + lumaSW - 2.0 * lumaW) + abs(lumaN + lumaS - 2.0 * lumaM) * 2.0 + abs(lumaNE + lumaSE - 2.0 * lumaE);
@@ -65,11 +65,11 @@ var doneP = false;
 var doneN = false;
 for (var i = 0; i < 10; i++) {
     if (!doneP) {
-        if (abs(get_luminance(fetchColor4(posP, dims).rgb) - lumaLocalAverage) >= gradientScaled) { doneP = true; }
+        if (abs(getLuminance(fetchColor4(posP, dims).rgb) - lumaLocalAverage) >= gradientScaled) { doneP = true; }
         else { posP += searchStep; }
     }
     if (!doneN) {
-        if (abs(get_luminance(fetchColor4(posN, dims).rgb) - lumaLocalAverage) >= gradientScaled) { doneN = true; }
+        if (abs(getLuminance(fetchColor4(posN, dims).rgb) - lumaLocalAverage) >= gradientScaled) { doneN = true; }
         else { posN -= searchStep; }
     }
     if (doneP && doneN) { break; }

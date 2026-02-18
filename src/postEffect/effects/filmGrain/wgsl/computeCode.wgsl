@@ -22,11 +22,11 @@ let grainCoord = floor(vec2<f32>(global_id.xy) / baseScale);
 var grain = getFilmicGrain(grainCoord, time_value, coloredGrain_value);
 
 // 3. 입자 채도 제어
-let grainLum = get_luminance(grain);
+let grainLum = getLuminance(grain);
 grain = mix(vec3<f32>(grainLum), grain, grainSaturation_value);
 
 // 4. 휘도 마스킹
-let sceneLuminance = get_luminance(originalColor.rgb);
+let sceneLuminance = getLuminance(originalColor.rgb);
 let responseMask = pow(1.0 - sceneLuminance, filmGrainResponse_value);
 let finalMask = responseMask * smoothstep(0.0, 0.1, sceneLuminance);
 

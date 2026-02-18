@@ -1,4 +1,4 @@
-#redgpu_include color.get_luminance
+#redgpu_include color.getLuminance
 #redgpu_include color.rgb_to_ycocg
 #redgpu_include color.ycocg_to_rgb
 #redgpu_include depth.linearizeDepth
@@ -69,7 +69,7 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
             let colorRGBA = textureLoad(sourceTexture, sampleCoord, 0);
             let colorRGB = colorRGBA.rgb;
             let colorYCoCg = rgb_to_ycocg(colorRGB);
-            let lum = get_luminance(colorRGB);
+            let lum = getLuminance(colorRGB);
             let alpha = colorRGBA.a;
 
             m1 += colorYCoCg;
@@ -100,7 +100,7 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
 }
 
 fn get_color_discrepancy_weight(stats: NeighborhoodStats, histRGB: vec3<f32>) -> f32 {
-    let histLuminance = get_luminance(histRGB);
+    let histLuminance = getLuminance(histRGB);
     let diff = abs(stats.meanLuminance - histLuminance);
     let threshold = max(stats.stdDevLuminance * 0.45, 0.01);
     return smoothstep(threshold, threshold * 2.0, diff);
@@ -141,7 +141,7 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
         let sampleRGBA = textureSampleLevel(tex, smp, coords[i], 0.0);
         let sampleRGB = max(sampleRGBA.rgb, vec3<f32>(0.0));
         let sampleYCoCg = rgb_to_ycocg(sampleRGB);
-        let sampleLum = get_luminance(sampleRGB);
+        let sampleLum = getLuminance(sampleRGB);
 
         // [KO] 엔진 표준 휘도(Rec. 709)를 기반으로 안티 플리커 가중치 계산
         // [EN] Calculate anti-flicker weight based on engine standard luminance (Rec. 709)

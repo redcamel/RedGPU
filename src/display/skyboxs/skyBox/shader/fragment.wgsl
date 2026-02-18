@@ -1,5 +1,5 @@
 #redgpu_include FragmentOutput
-#redgpu_include color.get_luminance
+#redgpu_include color.getLuminance
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
@@ -49,7 +49,7 @@ fn main(inputData: InputData) -> FragmentOutput {
             let uv = sphericalToUV(normalize(cubemapVec));
             // transitionAlphaTexture 샘플링
             let transitionAlphaSample = textureSampleLevel(transitionAlphaTexture, skyboxTextureSampler, uv, 0.0);
-            let transitionAlphaValue = get_luminance(transitionAlphaSample.rgb);
+            let transitionAlphaValue = getLuminance(transitionAlphaSample.rgb);
             // 노이즈 기반 트랜지션 마스크 생성
             let threshold = u_transitionProgress;
             let noiseInfluence = 0.3;

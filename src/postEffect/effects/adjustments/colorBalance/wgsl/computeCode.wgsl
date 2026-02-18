@@ -5,7 +5,7 @@ let dimH = f32(dimensions.y);
 let uv = 	vec2<f32>(f32(index.x)/dimW,f32(index.y)/dimH);
 var color:vec4<f32> = textureLoad( sourceTexture, index, );
 
-let original_luminance = get_luminance(color.rgb);
+let original_luminance = getLuminance(color.rgb);
 
 let shadow_weight = 1.0 - smoothstep(0.0, 0.5, original_luminance);
 let highlight_weight = smoothstep(0.5, 1.0, original_luminance);
@@ -27,7 +27,7 @@ color.r += cyan_red * 0.01;
 color.g += magenta_green * 0.01;
 color.b += yellow_blue * 0.01;
 
-let adjusted_luminance = get_luminance(color.rgb);
+let adjusted_luminance = getLuminance(color.rgb);
 if (uniforms.preserveLuminosity == 1 && adjusted_luminance > 0.0) {
     let ratio = original_luminance / adjusted_luminance;
     color = color * ratio;

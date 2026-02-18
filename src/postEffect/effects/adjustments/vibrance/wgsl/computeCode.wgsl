@@ -6,7 +6,7 @@ let uv = vec2<f32>(f32(index.x)/dimW, f32(index.y)/dimH);
 var color: vec4<f32> = textureLoad(sourceTexture, index);
 
 let originalColor = color;
-let luminance = get_luminance(color.rgb);
+let luminance = getLuminance(color.rgb);
 
 if (uniforms.saturation != 0.0) {
     let saturationFactor = 1.0 + uniforms.saturation * 0.01;

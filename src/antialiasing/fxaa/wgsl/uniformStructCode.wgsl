@@ -5,7 +5,7 @@ struct Uniforms {
   padding: f32
 };
 
-#redgpu_include color.get_luminance
+#redgpu_include color.getLuminance
 
 fn fetchColor4(pos: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     let p = vec2<u32>(clamp(vec2<u32>(pos), vec2<u32>(0), dims - 1));
