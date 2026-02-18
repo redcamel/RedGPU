@@ -26,14 +26,28 @@ RedGPU는 WebGPU의 네이티브 사양을 준수하면서도 상호운용성을
 - **Z 범위 (Depth)**: **0.0(Near) ~ 1.0(Far)** (WebGPU 표준 준수)
 
 ### 2.4 노멀 매핑 및 glTF 호환성 표준 (Normal Mapping & glTF Compatibility)
-RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 glTF(Y-Up) 에셋을 완벽하게 렌더링하기 위한 검증된 표준 사양입니다.
+RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 자산의 출처(glTF vs Native)에 관계없이 일관된 법선 방향을 보장하기 위한 표준 사양입니다.
 
-- **Z-Reconstruction (법선 복구)**: $Z = \sqrt{max(0.0, 1.0 - (X^2 + Y^2))}$ 공식을 사용하여 단위 벡터 정밀도를 보장하며, 텍스처 압축 아티팩트를 제거합니다.
-- **TBN 기저 시스템**: $N \times T = B$ 순환 순서를 준수하는 오른손 법칙 기저를 사용하여 Orthonormal Basis를 구축합니다.
-- **glTF 보정 가이드 (Calibration)**: 
-    - **Green 채널(Y) 반전**: glTF의 Y-Up 노멀을 RedGPU의 V-Down 환경에 맞추기 위해 `1.0 - Green` 처리가 필수입니다.
-    - **X-축 방향성 보정**: 시스템 특성상 `normalScale`에 마이너스를 적용하여 X축 방향성을 보정합니다 (NormalTangentTest 통과 규격).
-    - **레이어 독립성**: 클리어코트 등 추가 레이어 계산 시 반드시 **변형 전 기하 법선(Geometric Normal)**을 TBN 기저의 기준으로 사용해야 합니다.
+- **Z-Reconstruction (법선 복구)**: $Z = \sqrt{max(0.0, 1.0 - (X^2 + Y^2))}$ 공식을 사용하여 단위 벡터 정밀도를 보장합니다.
+- **TBN 기저 시스템**: $N \times T = B$ 순환 순서를 준수하는 오른손 법칙 기저를 사용합니다. `getTBNFromCotangent`에서 생성된 비탄젠트($B$)는 월드 공간의 위(+Y)를 향합니다.
+- **명시적 데이터 가공 (Explicit Processing)**: 
+    - 유연성을 위해 `getNormalFromNormalMap`은 순수 수학 함수로 유지하며, 채널 가공은 재질에서 명시적으로 수행합니다.
+    - **glTF (Y-Up)**: 엔진의 V-Down 환경과 맞추기 위해 재질에서 `1.0 - Green` 처리를 수행합니다.
+    - **Native (Y-Down)**: 별도의 반전 없이 그대로 사용합니다.
+- **Normal Scale 표준화**: 
+    - 가공된 Y-Down 기반 노멀 데이터를 월드 공간의 비탄젠트(Up) 방향과 일치시키기 위해 시스템적으로 **`-u_normalScale`**을 적용합니다 (NormalTangentTest 통과 규격).
+- **레이어 독립성**: 클리어코트 등 추가 레이어 계산 시 반드시 **변형 전 기하 법선(Geometric Normal)**을 TBN 기저의 기준으로 사용해야 합니다.
+
+### 2.5 전역 좌표계 일관성 보정 (Global Coordinate Consistency)
+`src/systemCodeManager/` 내의 모든 라이브러리는 다음의 보정 원칙을 공유하여 수학적 충돌을 방지합니다.
+
+- **NDC & Screen Alignment**: 
+    - WebGPU의 스크린 Y-Down 특성을 NDC Y-Up으로 보정하기 위해 `getNDCFromDepth`에서 `(1.0 - uv.y)`를 적용합니다.
+    - `getMotionVector` 역시 동일한 원리로 Y축을 반전시켜 UV 공간의 모션과 일치시킵니다.
+- **Shadow Mapping Alignment**:
+    - `getShadowCoord`에서 `y * -0.5 + 0.5` 처리를 통해 월드 Up(+Y)이 그림자 맵의 상단(V=0)에 매핑되도록 V-Down 시스템과 동기화합니다.
+- **View & Ray Analysis**:
+    - `getViewDirection`(Pixel $\to$ Cam)과 `getRayDirection`(Cam $\to$ Pixel)을 명확히 분리하여, 반사 벡터(`getReflectionVector...`) 계산 시 물리적 정확도를 보장합니다.
 
 ---
 
@@ -106,11 +120,11 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 ### 5. Surface Basis & Shadow Mapping (그림자 및 기저)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **TBN Basis** | `math.tnb.getTBNXXX` | ✅ 완료 | **[기저 표준]** Gram-Schmidt 및 Cotangent 기반 탄젠트 공간 구축. glTF 표준 및 미러링 대응 규격. |
-| **Normal Decode** | `math.tnb.getNormalFromNormalMap` | ✅ 완료 | **[맵핑 표준]** Z-Reconstruction 포함 법선 복구. 품질 향상 핵심. |
+| **TBN Basis** | `math.tnb.getTBNXXX` | ✅ 완료 | **[기저 표준]** Gram-Schmidt 및 Cotangent 기반 탄젠트 공간 구축. WebGPU 스크린 Y-Down 특성 반영. |
+| **Normal Decode** | `math.tnb.getNormalFromNormalMap` | ✅ 완료 | **[순수 함수]** Unpack, Z-Recon, Transform만 수행하는 수학 유틸리티. 가공은 재질에서 담당. |
 | **Shadow Coord** | `shadow.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 완료. |
 | **Shadow Depth Pos**| `shadow.getShadowClipPosition`| ✅ 완료 | **[그림자 투영]** Shadow Pass 전용. World -> LightClipSpace 변환 및 투영 절차 규격화. |
-| **Shadow Visibility**| `shadow.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 명칭 현대화 및 전용 라이브러리(`shadow/`) 이동 완료. |
+| **Shadow Visibility**| `shadow.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 거리에 따른 최소 가시성 보정(레거시) 유지. |
 | **Standard PCF** | `shadow.getShadowPCF` | **High** | **[필터링]** 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드 분리 예정. |
 | **Shadow Bias** | `shadow.applyShadowBias` | **High** | **[아티팩트 제거]** Slope-scaled bias 등 법선 기반 가변 바이어스 구축 예정. |
 
