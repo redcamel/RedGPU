@@ -77,7 +77,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 ### 2. Mathematics & Randomization (수학적 상수 및 해시)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **Common Constants** | `math.PI/PI2/INV_PI/...` | ✅ 완료 | **[수치 일관성]** 7종 핵심 상수 전역 통합. 파일별 미세한 렌더링 오차 차단. |
+| **Common Constants** | `math.PI/PI2/INV_PI/INV_PI2/SQRT2/E/FLT_MAX/...` | ✅ 완료 | **[수치 일관성]** 14종 핵심 상수 전역 통합. 정밀도 향상 및 나눗셈 연산 최적화. |
 | **Stable Hash (Grid)** | `math.hash.getHashXX` | ✅ 완료 | **[절차적 생성]** 정수 변환 기반의 안정적인 해시. GPU 아키텍처와 무관한 동일 격자 패턴 보장. |
 | **Bitcast Hash (Bit)** | `math.hash.getBitHashXX` | ✅ 완료 | **[고정밀 난수]** IEEE 754 비트 레벨 조작 해시. 극소량의 변화에도 민감한 난수가 필요한 고품질 노이즈용. |
 | **Dither Noise** | `math.getInterleavedGradientNoise` | ✅ 완료 | **[성능 특화]** Jorge Jimenez 알고리즘. SSAO, SSR의 샘플링 노이즈 제거를 위한 초고속 디더링. |
@@ -117,6 +117,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 - `SYSTEM_UNIFORM.wgsl`, `ssr`, `ssao`, `fog`, `skyAtmosphere`, `taa` 등 엔진 전역 적용 완료.
 - `src/postEffect/effects/lens/dof/`: 파편화된 내부 `linearizeDepth` 정의를 제거하고 표준 라이브러리로 통합 완료. **[설계 준수]** 함수 정의가 포함된 인클루드는 반드시 `uniformStructCode.wgsl` (전역 스코프)에 배치함.
 - `equirectangularToCubeShaderCode.wgsl`: `math.reconstruct.getNDCFromDepth` 적용 완료.
+- **[MSAA 대응]**: 컴퓨트 셰이더 기반 포스트 이펙트(`skyAtmosphere`, `taa`)에서 MSAA 뎁스 샘플링 로직 표준화 완료.
 
 ---
 
@@ -181,6 +182,16 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 - `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준 함수 구현 및 이동 완료.
 - **[모션 벡터 적용]**: 모든 렌더링 프래그먼트 셰이더 적용 완료.
 - **`calcPrePathBackground`**: `pbrMaterial` 내 KHR_materials_transmission 구현부 적용 완료.
+
+---
+
+### 2.6 포스트 이펙트 MSAA 대응 표준 (Post-Effect MSAA Standard)
+컴퓨트 셰이더 기반 포스트 이펙트에서 MSAA 뎁스 텍스처를 처리할 때의 표준 가이드라인입니다.
+
+- **상태 동기화**: `view.sampleCount` 대신 `antialiasingManager.useMSAA`를 기준으로 바리안트를 결정하여 시스템 전체의 안티앨리어싱 상태와 동기화합니다.
+- **셰이더 바리안트**: 템플릿 리터럴을 활용하여 `texture_depth_multisampled_2d`와 `texture_depth_2d`를 조건부 선언합니다.
+- **데이터 로드**: `fetchDepth`와 같은 헬퍼 함수를 통해 `textureLoad(depthTexture, pos, 0)` 등 샘플 인덱스 처리를 캡슐화합니다.
+- **리소스 캐싱**: `useMSAA` 상태별로 `BindGroupLayout` 및 `Pipeline`을 캐싱하여 런타임 상태 변화에 따른 오버헤드를 최소화합니다.
 
 ---
 
