@@ -110,19 +110,15 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | **Normal Decode** | `math.tnb.getNormalFromNormalMap` | ✅ 완료 | **[맵핑 표준]** Z-Reconstruction 포함 법선 복구. 품질 향상 핵심. |
 | **Shadow Coord** | `shadow.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 완료. |
 | **Shadow Depth Pos**| `shadow.getShadowClipPosition`| ✅ 완료 | **[그림자 투영]** Shadow Pass 전용. World -> LightClipSpace 변환 및 투영 절차 규격화. |
-| **Shadow Visibility**| `shadow.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 명칭 현대화 및 전용 라이브러리 이동 완료. |
+| **Shadow Visibility**| `shadow.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 명칭 현대화 및 전용 라이브러리(`shadow/`) 이동 완료. |
 | **Standard PCF** | `shadow.getShadowPCF` | **High** | **[필터링]** 가변 크기(5x5, 7x7) 및 하드웨어 비교 샘플링 모드 분리 예정. |
 | **Shadow Bias** | `shadow.applyShadowBias` | **High** | **[아티팩트 제거]** Slope-scaled bias 등 법선 기반 가변 바이어스 구축 예정. |
 
 #### 📂 상세 적용 이력 (Basis & Shadow)
-- `src/systemCodeManager/shader/shadow/getShadowCoord.wgsl`: 표준 함수 구현 완료.
-- `src/systemCodeManager/shader/shadow/getShadowClipPosition.wgsl`: Depth Pass용 표준 함수 구현 완료.
-- `src/systemCodeManager/shader/shadow/getDirectionalShadowVisibility.wgsl`: 현대화 및 이동 완료.
-- **[버텍스 셰이더 적용]**: `meshVertex`, `meshVertexPbr`, `meshVertexPbrSkin`, `particleVertex`, `spriteSheet2D/3D`, `textField2D/3D` 적용 완료.
+- `src/systemCodeManager/shader/shadow/`: 그림자 관련 파일 전량 전용 폴더로 집결 및 `shadow.` 네임스페이스 확정.
+- **[버텍스 셰이더 적용]**: `meshVertex`, `meshVertexPbr`, `meshVertexPbrSkin`, `particleVertex`, `spriteSheet2D/3D`, `textField2D/3D` 내 `#redgpu_include shadow.XXXX` 적용 완료.
 - **[그림자 패스 통합]**: `meshVertexPbrSkin`, `core/drawDirectionalShadowDepth`, `instanceMeshVertex_shadow` 내 투영 로직 통합 완료.
-- **[필드명 통일]**: `meshVertex_output`, `meshVertexPbr_output`, `instanceMeshVertex_output` 등 모든 출력 구조체 `shadowCoord` 통일 완료.
 - **[프래그먼트 적용]**: `pbrMaterial`, `phongMaterial`, `bitmapMaterial`, `textFieldMaterial` 내 `InputData` 필드명 및 호출부 통일 완료.
-- `src/resources/texture/ibl/core/`: `prefilter`, `brdf`, `irradiance` 내 `math.tnb.getTBN` 통합 완료.
 
 ---
 
@@ -131,16 +127,19 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | :--- | :--- | :---: | :--- |
 | **Disney Diffuse** | `lighting.getDiffuseBRDFDisney` | ✅ 완료 | **[확산광 모델]** 거칠기 고려 레트로-리플렉션 모델. 물리적 사실감 극대화 및 에너지 보존 적용. |
 | **PBR Specular** | `lighting.getSpecularBRDF` | ✅ 완료 | **[반사광 모델]** Cook-Torrance (GGX 분포 + Smith 기하 차폐). 고정밀 반사 연산. |
+| **Light Distance** | `lighting.getLightDistanceAttenuation` | ✅ 완료 | **[에너지 감쇄]** glTF 2.0 표준 윈도잉 및 $Radius^2$ 정규화 적용. 물리적 정확도와 편의성 결합. |
+| **Light Angle** | `lighting.getLightAngleAttenuation` | ✅ 완료 | **[원뿔 감쇄]** 스폿라이트 내부/외부 원뿔 각도 기반의 부드러운 페이드 처리. |
 | **BTDF Utils** | `lighting.getSpecularBTDF / getDiffuseBTDF` | ✅ 완료 | **[투과 모델]** Transmission 확장을 위한 굴절 및 확산 투과 계산식 모듈화. |
 | **Fresnel Utils** | `lighting.getFresnelXxx / getConductorFresnel / getIridescentFresnel` | ✅ 완료 | **[프레넬 표준]** Schlick, Conductor, Iridescent 등 재질별 특성 분리. |
-| **Fresnel Mix/Coat**| `lighting.getFresnelMix / getFresnelCoat` | ✅ 완료 | **[레이어 결합]** 에너지 보존 법칙 기반 다중 레이어 합성 및 빛 감쇄 계산. |
 | **Anisotropy Spec** | `lighting.getAnisotropyGGX` | **High** | **[이방성]** 이방성 GGX 분포 및 가시성 함수 통합 예정. PBR 확장 필수 로직. |
 | **Sheen Model** | `lighting.getSheenCharlie` | **High** | **[패브릭 조명]** Charlie Sheen 모델 기반 조명 라이브러리화 예정. |
 
 #### 📂 상세 적용 이력 (Lighting)
-- `src/systemCodeManager/shader/lighting/`: `getDiffuseBRDFDisney`, `getSpecularBRDF`, `getSpecularBTDF`, `getDistributionGGX`, `getConductorFresnel`, `getIridescentFresnel` 등 정규화된 명칭 적용 완료.
-- `src/material/pbrMaterial/fragment.wgsl`: 하드코딩된 조명 및 프레넬 수식 전량 교체 완료.
-- `src/systemCodeManager/shader/lighting/getSpecularBRDF.wgsl`: 하이라이트 선명도 최적화(`max(..., 1e-4)`) 적용 완료.
+- `src/systemCodeManager/shader/lighting/getLightDistanceAttenuation.wgsl`: 표준 감쇄 함수 구현 및 $Radius^2$ 보정 적용 완료.
+- `src/systemCodeManager/shader/lighting/getLightAngleAttenuation.wgsl`: 스폿라이트 각도 감쇄 구현 완료.
+- **[재질 통합]**: `pbrMaterial`, `phongMaterial` 내 조명 루프 구조 일치화 및 `NdotL` 네이밍 컨벤션 정규화.
+- **[오류 수정]**: `phongMaterial` 스펙큘러 중복 감쇄($1/d^4$) 및 조명 누수 현상 해결.
+- **[검증 예제]**: `examples/3d/light/pointLightWithGltf/`, `examples/3d/light/spotLightWithGltf/` 생성 완료.
 
 ---
 
@@ -158,31 +157,21 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 gl
 | :--- | :--- | :---: | :--- |
 | **Motion Vector** | `math.getMotionVector` | ✅ 완료 | **[시간적 안정성]** 프레임 간 Clip Space 좌표 기반 모션 계산. TAA 및 Motion Blur 필수 데이터. |
 | **Back Refraction** | `calcPrePathBackground` | ✅ 완료 | **[투과 처리]** Transmission 재질용 백그라운드 굴절 샘플링. 굴절률과 거칠기 보정 포함. |
-| **Distance Falloff** | `lighting.getLightDistanceAttenuation` | ✅ 완료 | **[에너지 감쇄]** glTF 2.0 / Frostbite / Unreal 표준 감쇄. $Radius^2$ 정규화 포함. Phong/PBR 통합 적용. |
-| **Spotlight Cone** | `lighting.getLightAngleAttenuation` | ✅ 완료 | **[원뿔 감쇄]** 스폿라이트 내부/외부 원뿔 각도 기반의 부드러운 페이드 처리. |
 
 #### 📂 상세 적용 이력 (System)
-- `src/systemCodeManager/shader/lighting/getLightDistanceAttenuation.wgsl`: 표준 함수 구현 완료.
-    - **[기술 사양]**: $(1 - (d/r)^4)^2$ 윈도잉 함수를 적용하여 물리적 역제곱 법칙($1/d^2$)과 부드러운 끝부분 감쇄를 결합.
-    - **[정규화]**: $Radius^2$ 스케일을 곱하여 반경 변화에 따른 아티스틱한 광량 보전 지원.
-- `src/systemCodeManager/shader/lighting/getLightAngleAttenuation.wgsl`: 스폿라이트 각도 감쇄 구현 완료.
-    - **[기술 사양]**: 내부/외부 원뿔 각도 사이의 부드러운 보간 처리. glTF 2.0 및 Unreal 방식 준수.
-- **[감쇄 로직 통합]**: `pbrMaterial`, `phongMaterial` 내 하드코딩된 모든 조명 감쇄 연산을 `lighting.getLightXXXXAttenuation`으로 전량 교체 및 구조 일원화.
-- **[검증 예제]**: `examples/3d/light/pointLightWithGltf/` (DamagedHelmet 그리드 배치를 통한 PBR 상호작용 검증).
 - `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준 함수 구현 및 이동 완료.
-- **[모션 벡터 적용]**: `pbr`, `phong`, `bitmap`, `color`, `line`, `grid` 등 모든 렌더링 프래그먼트 셰이더 적용 완료.
+- **[모션 벡터 적용]**: 모든 렌더링 프래그먼트 셰이더 적용 완료.
 - **`calcPrePathBackground`**: `pbrMaterial` 내 KHR_materials_transmission 구현부 적용 완료.
-- **[레거시 정리]**: 사용되지 않는 `extractScaleAndTranslation.wgsl` 삭제 및 `SystemCodeManager` 내 참조 제거 완료 (코드 경량화).
 
 ---
 
 ## ⚠️ 안정성 및 유지보수 가이드
 - **Include Scope (Critical)**: `SinglePassPostEffect` 계열에서 함수 정의가 포함된 `#redgpu_include`를 사용할 경우, 반드시 `uniformStructCode.wgsl` (전역 스코프)에 배치해야 합니다. `computeCode.wgsl` (함수 내부 스코프)에 배치 시 문법 에러가 발생합니다.
 - **Include Once**: 동일 경로 중복 치환 방지를 위해 전처리기 규격을 엄수하십시오.
-- **Naming Standard**: `math.getXXXX`, `lighting.getXXXX`, `color.getXXXX`, `depth.getXXXX` 등 명칭 규칙을 엄격히 준수합니다.
+- **Naming Standard**: `math.getXXXX`, `lighting.getXXXX`, `color.getXXXX`, `depth.getXXXX`, `shadow.getXXXX` 등 명칭 규칙을 엄격히 준수합니다.
 - **Verification**: 모듈화 단계마다 기존 결과물과의 시각적 차이를 엄격히 검증해야 합니다.
 
 ---
 **최종 업데이트:** 2026-02-18
-**상태:** 그림자 인프라(Coord/Position/Visibility) 완전 표준화 완료
+**상태:** 조명(Distance/Angle) 및 그림자 인프라 표준화 완료
 **프로젝트:** RedGPU
