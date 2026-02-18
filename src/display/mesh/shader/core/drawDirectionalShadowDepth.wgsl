@@ -1,3 +1,5 @@
+#redgpu_include math.getShadowClipPosition
+
 struct OutputShadowData {
     @builtin(position) position: vec4<f32>,
 };
@@ -43,7 +45,7 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
     #redgpu_endIf
 
     // 최종 위치 계산 (그림자 맵 좌표계로 변환)
-    output.position = u_directionalLightProjectionViewMatrix * position;
+    output.position = getShadowClipPosition(position.xyz, u_directionalLightProjectionViewMatrix);
 
     return output;
 }

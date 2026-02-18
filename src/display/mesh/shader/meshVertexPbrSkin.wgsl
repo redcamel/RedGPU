@@ -1,5 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include math.getShadowCoord;
+#redgpu_include math.getShadowClipPosition;
 
 #redgpu_include meshVertexBasicUniform;
 const maxDistance: f32 = 1000.0;
@@ -159,7 +160,7 @@ let skinMat = vertexStorages[inputData.idx];
 
     // Position calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(input_position, 1.0);
-    output.position = u_directionalLightProjectionViewMatrix * position;
+    output.position = getShadowClipPosition(position.xyz, u_directionalLightProjectionViewMatrix);
 
     return output;
 }

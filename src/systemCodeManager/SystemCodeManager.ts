@@ -20,6 +20,7 @@ import getViewDirection_wgsl from './shader/math/direction/getViewDirection.wgsl
 import getRayDirection_wgsl from './shader/math/direction/getRayDirection.wgsl';
 import getReflectionVectorFromViewDirection_wgsl from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
 import getShadowCoord_wgsl from './shader/math/getShadowCoord.wgsl';
+import getShadowClipPosition_wgsl from './shader/math/getShadowClipPosition.wgsl';
 import getDirectionalShadowVisibility_wgsl from './shader/math/getDirectionalShadowVisibility.wgsl';
 import getMotionVector_wgsl from './shader/math/getMotionVector.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
@@ -74,6 +75,7 @@ export namespace MathLibrary {
 
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
     export const getShadowCoord = getShadowCoord_wgsl;
+    export const getShadowClipPosition = getShadowClipPosition_wgsl;
     export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
     export const getMotionVector = getMotionVector_wgsl;
 

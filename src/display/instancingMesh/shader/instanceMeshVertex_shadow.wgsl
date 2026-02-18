@@ -1,4 +1,6 @@
 
+#redgpu_include math.getShadowClipPosition
+
 struct OutputShadowData {
     @builtin(position) position: vec4<f32>,
 };
@@ -35,6 +37,6 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
 
-    output.position = u_directionalLightProjectionViewMatrix * position;
+    output.position = getShadowClipPosition(position.xyz, u_directionalLightProjectionViewMatrix);
     return output;
 }
