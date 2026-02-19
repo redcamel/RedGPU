@@ -16,7 +16,9 @@
 #redgpu_include math.tnb.getTBN
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap;
-#redgpu_include KHR.texture_transform.getKHRTextureTransformUV;
+#redgpu_include KHR.KHR_texture_transform.getKHRTextureTransformUV;
+#redgpu_include KHR.KHR_materials_sheen.getSheenIBL;
+#redgpu_include KHR.KHR_materials_sheen.getSheenLambda;
 #redgpu_include lighting.getDiffuseBRDFDisney;
 #redgpu_include lighting.getFresnelSchlick
 #redgpu_include lighting.getConductorFresnel
@@ -1000,20 +1002,22 @@ fn main(inputData:InputData) -> FragmentOutput {
         let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR  ;
 
         // ---------- ibl Sheen 계산 ----------
-        var envIBL_SHEEN = vec3<f32>(0.0);
-        var sheen_albedo_scaling: f32 = 1.0;
+        var sheenIBLContribution = vec3<f32>(0.0);
+        var sheenAlbedoScaling: f32 = 1.0;
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
         #redgpu_if useKHR_materials_sheen
-            let sheenResult = calcIBLSheen(
+            let sheenResult = getSheenIBL(
                 N,
                 V,
                 sheenColor,
                 maxSheenColor,
                 sheenRoughnessParameter,
-                iblMipmapCount
+                iblMipmapCount,
+                ibl_irradianceTexture,
+                prefilterTextureSampler
             );
-            envIBL_SHEEN = sheenResult.envIBL_SHEEN;
-            sheen_albedo_scaling = sheenResult.sheen_albedo_scaling;
+            sheenIBLContribution = sheenResult.sheenIBLContribution;
+            sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         #redgpu_endIf
 
         // ---------- ibl Metal 계산 ----------
@@ -1022,7 +1026,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         // ---------- ibl 기본 혼합 ----------
         let metallicPart = envIBL_METAL * metallicParameter ; // 금속 파트 계산
         let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ; // 유전체 파트 계산
-        var indirectLighting = (metallicPart + dielectricPart) * sheen_albedo_scaling + envIBL_SHEEN; // sheen 파트 포함
+        var indirectLighting = (metallicPart + dielectricPart) * sheenAlbedoScaling + sheenIBLContribution; // sheen 파트 포함
         // ---------- ibl clearcoat 계산 ----------
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
@@ -1098,60 +1102,6 @@ fn main(inputData:InputData) -> FragmentOutput {
 };
 // ---------- KHR_materials_anisotropy ----------
 
-// ---------- KHR_materials_sheen ----------
-struct SheenResult {
-    envIBL_SHEEN: vec3<f32>,
-    sheen_albedo_scaling: f32
-}
-fn calcIBLSheen(
-    N: vec3<f32>,
-    V: vec3<f32>,
-    sheenColor: vec3<f32>,
-    maxSheenColor: f32,
-    sheenRoughness: f32,
-    iblMipmapCount: f32,
-) -> SheenResult {
-    let NdotV = clamp(dot(N, V), 0.0001, 1.0);
-    let R = getReflectionVectorFromViewDirection(V, N);
-
-    let mipLevel = sheenRoughness * iblMipmapCount;
-
-    let sheenRadiance = textureSampleLevel( ibl_irradianceTexture, prefilterTextureSampler, R, mipLevel ).rgb;
-
-    let sheenDFG = charlieSheenDFG(NdotV, sheenRoughness);
-    let envIBL_SHEEN = sheenRadiance * sheenColor * sheenDFG;
-
-    let E = charlieSheenE(NdotV, sheenRoughness);
-    let sheen_albedo_scaling = 1.0 - maxSheenColor * E;
-
-    return SheenResult(envIBL_SHEEN, sheen_albedo_scaling);
-}
-
-fn charlieSheenDFG(NdotV: f32, roughness: f32) -> f32 {
-    if (roughness < 0.01) {
-        return 0.0;
-    }
-
-    let r = clamp(roughness, 0.01, 1.0);
-    let grazingFactor = 1.0 - NdotV;
-    let roughnessExp = 1.0 / max(r, 0.1);
-    let distribution = pow(grazingFactor, roughnessExp);
-    let intensity = pow(roughnessExp, 0.5);
-
-    return distribution * intensity * 0.5;
-}
-
-fn charlieSheenE(NdotV: f32, roughness: f32) -> f32 {
-    if (roughness < 0.01) {
-        return 0.0;
-    }
-
-    let r = clamp(roughness, 0.01, 1.0);
-    let grazingFactor = 1.0 - NdotV;
-    let roughnessExp = 1.0 / max(r, 0.1);
-
-    return pow(grazingFactor, roughnessExp) * pow(r, 0.5);
-}
 // ---------------------------------------------
 
 fn calcLight(
@@ -1235,7 +1185,7 @@ fn calcLight(
             let cos2h = NdotH * NdotH;
             let sin2h = 1 - cos2h;
             let sheenDistribution = (2 + invR) * pow(sin2h, invR * 0.5) / PI2;
-            let sheen_visibility =  1.0 / ((1.0 + lambda_sheen(NdotV, sheenRoughnessAlpha) + lambda_sheen(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV * NdotL));
+            let sheen_visibility =  1.0 / ((1.0 + getSheenLambda(NdotV, sheenRoughnessAlpha) + getSheenLambda(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV * NdotL));
             let LdotN = max(dot(L, N), 0.04);
             let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
             let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
