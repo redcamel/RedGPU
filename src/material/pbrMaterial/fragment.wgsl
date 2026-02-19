@@ -15,8 +15,9 @@
 #redgpu_include math.tnb.getTBNFromVertexTangent
 #redgpu_include math.tnb.getTBN
 #redgpu_include math.tnb.getTBNFromCotangent
-#redgpu_include math.tnb.getNormalFromNormalMap
-#redgpu_include lighting.getDiffuseBRDFDisney
+#redgpu_include math.tnb.getNormalFromNormalMap;
+#redgpu_include getKHRTextureTransformUV;
+#redgpu_include lighting.getDiffuseBRDFDisney;
 #redgpu_include lighting.getFresnelSchlick
 #redgpu_include lighting.getConductorFresnel
 #redgpu_include lighting.getIridescentFresnel
@@ -306,7 +307,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     // 모든 텍스처 타입에 대한 UV 좌표를 초기화
 
     // 기본 PBR 텍스처 UV 좌표
-    let diffuseUV = get_transformed_uv(
+    let diffuseUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.baseColorTexture_texCoord_index,
         uniforms.use_baseColorTexture_KHR_texture_transform,
@@ -315,7 +316,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.baseColorTexture_KHR_texture_transform_scale
     );
 
-    let emissiveUV = get_transformed_uv(
+    let emissiveUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.emissiveTexture_texCoord_index,
         uniforms.use_emissiveTexture_KHR_texture_transform,
@@ -324,7 +325,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.emissiveTexture_KHR_texture_transform_scale
     );
 
-    let occlusionUV = get_transformed_uv(
+    let occlusionUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.occlusionTexture_texCoord_index,
         uniforms.use_occlusionTexture_KHR_texture_transform,
@@ -333,7 +334,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.occlusionTexture_KHR_texture_transform_scale
     );
 
-    let metallicRoughnessUV = get_transformed_uv(
+    let metallicRoughnessUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.metallicRoughnessTexture_texCoord_index,
         uniforms.use_metallicRoughnessTexture_KHR_texture_transform,
@@ -342,7 +343,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.metallicRoughnessTexture_KHR_texture_transform_scale
     );
 
-    let normalUV = get_transformed_uv(
+    let normalUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.normalTexture_texCoord_index,
         uniforms.use_normalTexture_KHR_texture_transform,
@@ -352,7 +353,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     );
 
     // 클리어코트 텍스처 UV 좌표
-    let KHR_clearcoatUV = get_transformed_uv(
+    let KHR_clearcoatUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_clearcoatTexture_texCoord_index,
         uniforms.use_KHR_clearcoatTexture_KHR_texture_transform,
@@ -361,7 +362,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_clearcoatTexture_KHR_texture_transform_scale
     );
     #redgpu_if useKHR_materials_clearcoat
-    let KHR_clearcoatNormalUV = get_transformed_uv(
+    let KHR_clearcoatNormalUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_clearcoatNormalTexture_texCoord_index,
         uniforms.use_KHR_clearcoatNormalTexture_KHR_texture_transform,
@@ -371,7 +372,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     );
     #redgpu_endIf
 
-    let KHR_clearcoatRoughnessUV = get_transformed_uv(
+    let KHR_clearcoatRoughnessUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_clearcoatRoughnessTexture_texCoord_index,
         uniforms.use_KHR_clearcoatRoughnessTexture_KHR_texture_transform,
@@ -381,7 +382,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     );
 
     // 광택 텍스처 UV 좌표
-    let KHR_sheenColorUV = get_transformed_uv(
+    let KHR_sheenColorUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_sheenColorTexture_texCoord_index,
         uniforms.use_KHR_sheenColorTexture_KHR_texture_transform,
@@ -390,7 +391,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_sheenColorTexture_KHR_texture_transform_scale
     );
 
-    let KHR_sheenRoughnessUV = get_transformed_uv(
+    let KHR_sheenRoughnessUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_sheenRoughnessTexture_texCoord_index,
         uniforms.use_KHR_sheenRoughnessTexture_KHR_texture_transform,
@@ -400,7 +401,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     );
 
     // 스페큘러 텍스처 UV 좌표
-    let KHR_specularTextureUV = get_transformed_uv(
+    let KHR_specularTextureUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_specularTexture_texCoord_index,
         uniforms.use_KHR_specularTexture_KHR_texture_transform,
@@ -409,7 +410,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_specularTexture_KHR_texture_transform_scale
     );
 
-    let KHR_specularColorTextureUV = get_transformed_uv(
+    let KHR_specularColorTextureUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_specularColorTexture_texCoord_index,
         uniforms.use_KHR_specularColorTexture_KHR_texture_transform,
@@ -419,7 +420,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     );
 
     // 무지개빛 텍스처 UV 좌표
-    let KHR_iridescenceTextureUV = get_transformed_uv(
+    let KHR_iridescenceTextureUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_iridescenceTexture_texCoord_index,
         uniforms.use_KHR_iridescenceTexture_KHR_texture_transform,
@@ -428,7 +429,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_iridescenceTexture_KHR_texture_transform_scale
     );
 
-    let KHR_iridescenceThicknessTextureUV = get_transformed_uv(
+    let KHR_iridescenceThicknessTextureUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_iridescenceThicknessTexture_texCoord_index,
         uniforms.use_KHR_iridescenceThicknessTexture_KHR_texture_transform,
@@ -438,7 +439,7 @@ fn main(inputData:InputData) -> FragmentOutput {
     );
 
     // 투과 텍스처 UV 좌표
-    let KHR_transmissionUV = get_transformed_uv(
+    let KHR_transmissionUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_transmissionTexture_texCoord_index,
         uniforms.use_KHR_transmissionTexture_KHR_texture_transform,
@@ -447,7 +448,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_transmissionTexture_KHR_texture_transform_scale
     );
 
-    let KHR_diffuseTransmissionUV = get_transformed_uv(
+    let KHR_diffuseTransmissionUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_diffuseTransmissionTexture_texCoord_index,
         uniforms.use_KHR_diffuseTransmissionTexture_KHR_texture_transform,
@@ -456,7 +457,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_scale
     );
 
-    let KHR_diffuseTransmissionColorUV = get_transformed_uv(
+    let KHR_diffuseTransmissionColorUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_diffuseTransmissionColorTexture_texCoord_index,
         uniforms.use_KHR_diffuseTransmissionColorTexture_KHR_texture_transform,
@@ -465,7 +466,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_scale
     );
 
-    let KHR_anisotropyUV = get_transformed_uv(
+    let KHR_anisotropyUV = getKHRTextureTransformUV(
         input_uv, input_uv1,
         uniforms.KHR_anisotropyTexture_texCoord_index,
         uniforms.use_KHR_anisotropyTexture_KHR_texture_transform,
@@ -1309,45 +1310,3 @@ fn vGGXAnisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, 
    let v = 0.5 / (GGXV + GGXL);
    return clamp(v, 0.0, 1.0);
 }
-fn get_transformed_uv(
-    input_uv: vec2<f32>,
-    input_uv1: vec2<f32>,
-    texCoord_index: u32,
-    use_transform: u32,
-    transform_offset: vec2<f32>,
-    transform_rotation: f32,
-    transform_scale: vec2<f32>
-) -> vec2<f32> {
-    // UV 좌표 선택
-    var result_uv = select(input_uv, input_uv1, texCoord_index == 1);
-
-    // 변환 적용 (필요한 경우)
-    if (use_transform == 1) {
-        // 행렬 직접 생성 및 적용
-        let translation = mat3x3<f32>(
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            transform_offset.x, transform_offset.y, 1.0
-        );
-
-        let cos_rot = cos(transform_rotation);
-        let sin_rot = sin(transform_rotation);
-        let rotation_matrix = mat3x3<f32>(
-            cos_rot, -sin_rot, 0.0,
-            sin_rot, cos_rot, 0.0,
-            0.0, 0.0, 1.0
-        );
-
-        let scale_matrix = mat3x3<f32>(
-            transform_scale.x, 0.0, 0.0,
-            0.0, transform_scale.y, 0.0,
-            0.0, 0.0, 1.0
-        );
-
-        let result_matrix = translation * rotation_matrix * scale_matrix;
-        result_uv = (result_matrix * vec3<f32>(result_uv, 1.0)).xy;
-    }
-
-    return result_uv;
-}
-

@@ -29,6 +29,7 @@ import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTang
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
 import getNormalFromNormalMap_wgsl from './shader/math/tnb/getNormalFromNormalMap.wgsl';
+import getKHRTextureTransformUV_wgsl from './shader/getKHRTextureTransformUV.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
 import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
@@ -203,6 +204,7 @@ export namespace SystemCodeManager {
     export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;
     export const calcPrePathBackground = getTransmissionRefraction_wgsl;
     export const calculateMotionVector = getMotionVector_wgsl;
+    export const getKHRTextureTransformUV = getKHRTextureTransformUV_wgsl;
     export const picking = SystemFragmentCode.picking;
     export const drawPicking = SystemFragmentCode.drawPicking;
 
