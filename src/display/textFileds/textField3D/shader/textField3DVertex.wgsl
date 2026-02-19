@@ -2,7 +2,7 @@
 #redgpu_include getBillboardMatrix;
 #redgpu_include calcBillboard;
 #redgpu_include entryPoint.billboard.entryPointPickingVertex;
-#redgpu_include entryPoint.billboard.entryPointShadowVertex;
+#redgpu_include entryPoint.empty.entryPointShadowVertex;
 
 struct MatrixList{
     modelMatrix: mat4x4<f32>,

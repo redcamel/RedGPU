@@ -63,7 +63,6 @@ import meshEntryPointPickingVertex_wgsl from './shader/entryPoint/mesh/entryPoin
 import meshEntryPointPickingFragment_wgsl from './shader/entryPoint/mesh/entryPointPickingFragment.wgsl';
 import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPointShadowVertex.wgsl';
 import billboardEntryPointPickingVertex_wgsl from './shader/entryPoint/billboard/entryPointPickingVertex.wgsl';
-import billboardEntryPointShadowVertex_wgsl from './shader/entryPoint/billboard/entryPointShadowVertex.wgsl';
 import emptyEntryPointPickingVertex_wgsl from './shader/entryPoint/empty/entryPointPickingVertex.wgsl';
 import emptyEntryPointShadowVertex_wgsl from './shader/entryPoint/empty/entryPointShadowVertex.wgsl';
 import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
@@ -224,7 +223,6 @@ export namespace EntryPointLibrary {
     /** [KO] 빌보드 관련 엔트리 포인트 [EN] Billboard related entry points */
     export namespace billboard {
         export const entryPointPickingVertex = billboardEntryPointPickingVertex_wgsl;
-        export const entryPointShadowVertex = billboardEntryPointShadowVertex_wgsl;
     }
     /** [KO] 빈 엔트리 포인트 (미지원 객체용) [EN] Empty entry points (for unsupported objects) */
     export namespace empty {
@@ -285,7 +283,7 @@ export namespace SystemCodeManager {
     export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
 
     export const billboardPicking = billboardEntryPointPickingVertex_wgsl;
-    export const billboardShadow = billboardEntryPointShadowVertex_wgsl;
+    export const billboardShadow = emptyEntryPointShadowVertex_wgsl;
     export const calcBillboard = SystemVertexCode.calcBillboard;
     export const calcDisplacements = SystemVertexCode.calcDisplacements;
     export const getBillboardMatrix = SystemVertexCode.getBillboardMatrix;
