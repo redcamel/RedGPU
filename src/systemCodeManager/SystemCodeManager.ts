@@ -55,6 +55,9 @@ import getSheenCharlieDFG_wgsl from './shader/KHR/KHR_materials_sheen/getSheenCh
 import getSheenCharlieE_wgsl from './shader/KHR/KHR_materials_sheen/getSheenCharlieE.wgsl';
 import getSheenLambda_wgsl from './shader/KHR/KHR_materials_sheen/getSheenLambda.wgsl';
 import getSheenIBL_wgsl from './shader/KHR/KHR_materials_sheen/getSheenIBL.wgsl';
+import getAnisotropicNDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicNDF.wgsl';
+import getAnisotropicVisibility_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicVisibility.wgsl';
+import getAnisotropicSpecularBRDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicSpecularBRDF.wgsl';
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
@@ -136,6 +139,12 @@ export namespace KHRLibrary {
         export const getSheenCharlieE = getSheenCharlieE_wgsl;
         export const getSheenLambda = getSheenLambda_wgsl;
         export const getSheenIBL = getSheenIBL_wgsl;
+    }
+    /** [KO] KHR_materials_anisotropy [EN] KHR_materials_anisotropy */
+    export namespace KHR_materials_anisotropy {
+        export const getAnisotropicNDF = getAnisotropicNDF_wgsl;
+        export const getAnisotropicVisibility = getAnisotropicVisibility_wgsl;
+        export const getAnisotropicSpecularBRDF = getAnisotropicSpecularBRDF_wgsl;
     }
 }
 

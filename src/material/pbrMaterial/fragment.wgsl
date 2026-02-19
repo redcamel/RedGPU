@@ -19,6 +19,7 @@
 #redgpu_include KHR.KHR_texture_transform.getKHRTextureTransformUV;
 #redgpu_include KHR.KHR_materials_sheen.getSheenIBL;
 #redgpu_include KHR.KHR_materials_sheen.getSheenLambda;
+#redgpu_include KHR.KHR_materials_anisotropy.getAnisotropicSpecularBRDF;
 #redgpu_include lighting.getDiffuseBRDFDisney;
 #redgpu_include lighting.getFresnelSchlick
 #redgpu_include lighting.getConductorFresnel
@@ -1145,9 +1146,8 @@ fn calcLight(
             var TdotH = dot(anisotropicT, H);
             var BdotH = dot(anisotropicB, H);
             var BdotV = dot(anisotropicB, V);
-            SPECULAR_BRDF =  BRDF_specularAnisotropicGGX(
+            SPECULAR_BRDF =  getAnisotropicSpecularBRDF(
                 albedo,
-                vec3<f32>(1.0),
                 roughnessParameter * roughnessParameter,
                 VdotH, NdotL, NdotV, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH,
                 anisotropy
@@ -1232,31 +1232,4 @@ fn calcLight(
 
     let lightContribution = directLighting * dLight * lightDirection;
     return lightContribution;
-}
-// [KO] PI는 이제 math.PI 인클루드를 통해 공급됩니다.
-// [EN] PI is now supplied via math.PI include.
-
-fn BRDF_specularAnisotropicGGX( f0: vec3<f32>, f90: vec3<f32>, alphaRoughness: f32, VdotH: f32, NdotL: f32, NdotV: f32, NdotH: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, TdotH: f32, BdotH: f32, anisotropy: f32 ) -> vec3<f32> {
-    var at = mix(alphaRoughness, 1.0, anisotropy * anisotropy);
-    var ab = alphaRoughness;
-    var F:vec3<f32> = getFresnelSchlick(VdotH,f0);
-    var V:f32 = vGGXAnisotropic(NdotL, NdotV, BdotV, TdotV, TdotL, BdotL, at, ab);
-    var D:f32 = dGGXAnisotropic(NdotH, TdotH, BdotH, at, ab);
-    return F * (V * D);
-}
-fn dGGXAnisotropic( NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32 ) -> f32 {
-    let a2: f32 = at * ab;
-    let f: vec3<f32> = vec3<f32>(ab * TdotH, at * BdotH, a2 * NdotH);
-    let denominator: f32 = dot(f, f);
-//    if (denominator < 0.0001) {
-//     return 0.0;
-//    }
-    let w2: f32 = a2 / denominator;
-    return a2 * w2 * w2 * INV_PI;
-}
-fn vGGXAnisotropic( NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, at: f32, ab: f32 ) -> f32 {
-   let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
-   let GGXL = NdotV * length(vec3<f32>(at * TdotL, ab * BdotL, NdotL));
-   let v = 0.5 / (GGXV + GGXL);
-   return clamp(v, 0.0, 1.0);
 }
