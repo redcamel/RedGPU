@@ -1,6 +1,6 @@
 #redgpu_include color.getLuminance
-#redgpu_include color.rgb_to_ycocg
-#redgpu_include color.ycocg_to_rgb
+#redgpu_include color.rgbToYCoCg
+#redgpu_include color.YCoCgToRgb
 
 struct Uniforms {
     bloomStrength: f32,

@@ -29,12 +29,12 @@ import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTang
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
 import getNormalFromNormalMap_wgsl from './shader/math/tnb/getNormalFromNormalMap.wgsl';
-import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
-import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
-import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
-import linear_to_srgb_vec4_wgsl from './shader/color/linear_to_srgb_vec4.wgsl';
-import srgb_to_linear_vec3_wgsl from './shader/color/srgb_to_linear_vec3.wgsl';
-import srgb_to_linear_vec4_wgsl from './shader/color/srgb_to_linear_vec4.wgsl';
+import rgbToYCoCg_wgsl from './shader/color/rgbToYCoCg.wgsl';
+import YCoCgToRgb_wgsl from './shader/color/YCoCgToRgb.wgsl';
+import linearToSrgbVec3_wgsl from './shader/color/linearToSrgbVec3.wgsl';
+import linearToSrgbVec4_wgsl from './shader/color/linearToSrgbVec4.wgsl';
+import srgbToLinearVec3_wgsl from './shader/color/srgbToLinearVec3.wgsl';
+import srgbToLinearVec4_wgsl from './shader/color/srgbToLinearVec4.wgsl';
 import getLuminance_wgsl from './shader/color/getLuminance.wgsl';
 import getTintBlendMode_wgsl from './shader/color/getTintBlendMode.wgsl';
 import getLinearizeDepth_wgsl from './shader/depth/getLinearizeDepth.wgsl';
@@ -163,12 +163,12 @@ export namespace ShadowLibrary {
  * [EN] Color related shader function library
  */
 export namespace ColorLibrary {
-    export const rgb_to_ycocg = rgb_to_ycocg_wgsl;
-    export const ycocg_to_rgb = ycocg_to_rgb_wgsl;
-    export const linear_to_srgb_vec3 = linear_to_srgb_vec3_wgsl;
-    export const linear_to_srgb_vec4 = linear_to_srgb_vec4_wgsl;
-    export const srgb_to_linear_vec3 = srgb_to_linear_vec3_wgsl;
-    export const srgb_to_linear_vec4 = srgb_to_linear_vec4_wgsl;
+    export const rgbToYCoCg = rgbToYCoCg_wgsl;
+    export const YCoCgToRgb = YCoCgToRgb_wgsl;
+    export const linearToSrgbVec3 = linearToSrgbVec3_wgsl;
+    export const linearToSrgbVec4 = linearToSrgbVec4_wgsl;
+    export const srgbToLinearVec3 = srgbToLinearVec3_wgsl;
+    export const srgbToLinearVec4 = srgbToLinearVec4_wgsl;
     export const getLuminance = getLuminance_wgsl;
     export const getTintBlendMode = getTintBlendMode_wgsl;
 }

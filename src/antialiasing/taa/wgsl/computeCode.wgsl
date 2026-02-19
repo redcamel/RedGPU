@@ -14,7 +14,7 @@
     let currentRGBA = textureSampleLevel(sourceTexture, taaTextureSampler, currentUV, 0.0);
     let currentRGB = currentRGBA.rgb;
     let currentAlpha = currentRGBA.a;
-    let currentYCoCg = rgb_to_ycocg(currentRGB);
+    let currentYCoCg = rgbToYCoCg(currentRGB);
     let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
 
     var closestDepth = 1.0;
@@ -56,7 +56,7 @@
         let clippedYCoCg = clip_history_ycocg(historyData.ycocg, stats, motionSoft);
         let clippedAlpha = clamp(historyData.alpha, stats.minAlpha, stats.maxAlpha);
 
-        let clippedHistoryRGB = ycocg_to_rgb(clippedYCoCg);
+        let clippedHistoryRGB = YCoCgToRgb(clippedYCoCg);
         let lumaWeight = get_color_discrepancy_weight(stats, clippedHistoryRGB);
 
         var blendFactor = mix(0.08, 0.4, motionSoft);

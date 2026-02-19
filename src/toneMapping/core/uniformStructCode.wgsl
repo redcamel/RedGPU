@@ -1,4 +1,4 @@
-#redgpu_include color.linear_to_srgb_vec3
+#redgpu_include color.linearToSrgbVec3
 
 struct Uniforms {
     exposure: f32,
@@ -71,7 +71,7 @@ fn acesFilmicHillToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
 fn getFinalSRGB(toneMappedColor:vec3<f32>, contrast: f32, brightness: f32) -> vec3<f32> {
     let contrastRGB = applyContrast(toneMappedColor, uniforms.contrast);
     let finalLinearRGB = applyBrightness(contrastRGB, uniforms.brightness);
-    let finalSRGB = clamp(linear_to_srgb_vec3(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
+    let finalSRGB = clamp(linearToSrgbVec3(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
     return finalSRGB;
 }
 /// 명암 조절

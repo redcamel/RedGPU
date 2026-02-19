@@ -1,6 +1,6 @@
 #redgpu_include color.getLuminance
-#redgpu_include color.rgb_to_ycocg
-#redgpu_include color.ycocg_to_rgb
+#redgpu_include color.rgbToYCoCg
+#redgpu_include color.YCoCgToRgb
 #redgpu_include depth.getLinearizeDepth
 
 // ===== 1. 구조체 및 유틸리티 (Alpha 지원 확장) =====
@@ -68,7 +68,7 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
             let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
             let colorRGBA = textureLoad(sourceTexture, sampleCoord, 0);
             let colorRGB = colorRGBA.rgb;
-            let colorYCoCg = rgb_to_ycocg(colorRGB);
+            let colorYCoCg = rgbToYCoCg(colorRGB);
             let lum = getLuminance(colorRGB);
             let alpha = colorRGBA.a;
 
@@ -140,7 +140,7 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
     for(var i = 0; i < 5; i++) {
         let sampleRGBA = textureSampleLevel(tex, smp, coords[i], 0.0);
         let sampleRGB = max(sampleRGBA.rgb, vec3<f32>(0.0));
-        let sampleYCoCg = rgb_to_ycocg(sampleRGB);
+        let sampleYCoCg = rgbToYCoCg(sampleRGB);
         let sampleLum = getLuminance(sampleRGB);
 
         // [KO] 엔진 표준 휘도(Rec. 709)를 기반으로 안티 플리커 가중치 계산

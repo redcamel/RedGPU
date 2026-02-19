@@ -128,7 +128,7 @@ fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
  * [KO] 합성된 최종 색상 (RGBA)
  * [EN] Final blended color (RGBA)
  */
-fn get_tint_blend_mode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
+fn getTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
     var tintedColor: vec3<f32>;
 
     switch (tintBlendMode) {
