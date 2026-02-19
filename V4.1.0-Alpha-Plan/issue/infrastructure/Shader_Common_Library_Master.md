@@ -446,6 +446,13 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
       <td><b>[수학 유틸리티]</b> Scalar 및 Vec3에 대한 NaN/Inf 체크 헬퍼 함수 통합.</td>
     </tr>
     <tr>
+      <td><b>Billboard Matrix</b></td>
+      <td><code>math.billboard.getBillboardMatrix</code></td>
+      <td align="center">Vertex</td>
+      <td align="center">✅ 완료</td>
+      <td><b>[통합 빌보드]</b> 표준(Scale 추출) 및 고속(대각 성분) 모드 통합. 언리얼 엔진 스타일의 단일화된 로직.</td>
+    </tr>
+    <tr>
       <td><b>Picking System</b></td>
       <td><code>entryPoint.mesh.entryPointPickingVertex / fragment</code><br/><code>entryPoint.billboard.entryPointPickingVertex</code><br/><code>entryPoint.empty.entryPointPickingVertex</code></td>
       <td align="center">Common</td>
@@ -477,6 +484,9 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 </table>
 
 #### 📂 상세 적용 이력 (System)
+- `src/systemCodeManager/shader/math/billboard/getBillboardMatrix.wgsl`: 표준(Standard) 및 빠른(Fast) 스케일 옵션을 포함하는 통합 빌보드 행렬 계산 함수 구현 완료.
+- **[빌보드 통합]**: `getBillboardMatrixNoScaleRatio`를 폐지하고 `getBillboardMatrix(..., mode)` 형태의 단일 API로 통합하여 유지보수성 향상.
+- **[셰이더 적용]**: `calcBillboard`, `particleVertex`, `sprite3DVertex`, `textField3DVertex` 등 엔진 전역 빌보드 셰이더 적용 완료.
 - `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준 함수 구현 및 이동 완료.
 - **[엔트리 포인트 통합]**: 모든 시스템 엔트리 포인트 셰이더를 `src/systemCodeManager/shader/entryPoint/` 하위로 집결시키고, 객체 타입별(`mesh/`, `billboard/`, `empty/`)로 구조화하여 관리 효율성 확보 완료.
 - **[빌보드 시스템 통합]**: 빌보드 전용 피킹 및 그림자 셰이더를 `SystemCodeManager`를 통해 일원화하여 관리 완료.
