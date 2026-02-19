@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include FragmentOutput;
+#redgpu_include systemStruct.FragmentOutput;
 #redgpu_include math.getMotionVector;
 
 // --- 데이터 구조 정의 ---

@@ -3,7 +3,7 @@
 #redgpu_include color.getTintBlendMode;
 #redgpu_include entryPointPickingFragment;
 #redgpu_include lighting.getTransmissionRefraction;
-#redgpu_include FragmentOutput;
+#redgpu_include systemStruct.FragmentOutput;
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;

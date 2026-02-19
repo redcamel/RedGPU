@@ -62,6 +62,9 @@ import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRef
 import meshEntryPointPickingVertex_wgsl from './shader/picking/mesh/entryPointPickingVertex.wgsl';
 import meshEntryPointPickingFragment_wgsl from './shader/picking/mesh/entryPointPickingFragment.wgsl';
 import billboardEntryPointPickingVertex_wgsl from './shader/picking/billboard/entryPointPickingVertex.wgsl';
+import emptyEntryPointPickingVertex_wgsl from './shader/picking/empty/entryPointPickingVertex.wgsl';
+import FragmentOutput_wgsl from './shader/struct/FragmentOutput.wgsl';
+import OutputShadowData_wgsl from './shader/struct/OutputShadowData.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -219,6 +222,19 @@ export namespace EntryPointLibrary {
     export namespace billboard {
         export const entryPointPickingVertex = billboardEntryPointPickingVertex_wgsl;
     }
+    /** [KO] 빈 피킹 엔트리 포인트 (미지원 객체용) [EN] Empty picking entry points (for unsupported objects) */
+    export namespace empty {
+        export const entryPointPickingVertex = emptyEntryPointPickingVertex_wgsl;
+    }
+}
+
+/**
+ * [KO] 시스템 공통 구조체 라이브러리
+ * [EN] System common structure library
+ */
+export namespace SystemStructLibrary {
+    export const FragmentOutput = FragmentOutput_wgsl;
+    export const OutputShadowData = OutputShadowData_wgsl;
 }
 
 /**
@@ -243,6 +259,8 @@ export namespace SystemCodeManager {
     export import lighting = LightingLibrary;
     /** [KO] 엔트리 포인트 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for entry points. */
     export import entryPoint = EntryPointLibrary;
+    /** [KO] 시스템 공통 구조체 라이브러리입니다. [EN] Common shader structure library for system. */
+    export import systemStruct = SystemStructLibrary;
     /** [KO] glTF KHR 확장 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for glTF KHR extensions. */
     export import KHR = KHRLibrary;
 
@@ -252,7 +270,8 @@ export namespace SystemCodeManager {
     export const fragment = SystemFragmentCode;
 
     // [KO] 레거시 직접 참조 지원 (전처리기 호환성)
-    export const FragmentOutput = SystemFragmentCode.FragmentOutput;
+    export const FragmentOutput = FragmentOutput_wgsl;
+    export const OutputShadowData = OutputShadowData_wgsl;
     export const calcTintBlendMode = getTintBlendMode_wgsl;
     export const calcDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
     export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;

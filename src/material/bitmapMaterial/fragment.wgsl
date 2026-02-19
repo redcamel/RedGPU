@@ -1,7 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM
 #redgpu_include color.getTintBlendMode
 #redgpu_include entryPointPickingFragment
-#redgpu_include FragmentOutput
+#redgpu_include systemStruct.FragmentOutput
 #redgpu_include math.getMotionVector
 
 struct Uniforms {

@@ -1,10 +1,9 @@
 
 #redgpu_include shadow.getShadowClipPosition
+#redgpu_include systemStruct.OutputShadowData;
 
-struct OutputShadowData {
-    @builtin(position) position: vec4<f32>,
-};
 @vertex
+
 fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;
 

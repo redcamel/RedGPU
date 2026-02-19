@@ -184,6 +184,4 @@ fn main( inputData:InputData) -> OutputData {
   output.combinedOpacity = inputData.alpha;
   return output;
 }
-struct OutputShadowData {
-    @builtin(position) position : vec4<f32>,
-};
+#redgpu_include systemStruct.OutputShadowData;

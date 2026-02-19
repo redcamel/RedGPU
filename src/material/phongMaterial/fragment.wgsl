@@ -4,7 +4,7 @@
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include entryPointPickingFragment;
-#redgpu_include FragmentOutput;
+#redgpu_include systemStruct.FragmentOutput;
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;

@@ -1,7 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcTintBlendMode;
 #redgpu_include entryPointPickingFragment;
-#redgpu_include FragmentOutput;
+#redgpu_include systemStruct.FragmentOutput;
 
 struct Uniforms {
   useDiffuseTexture: u32,

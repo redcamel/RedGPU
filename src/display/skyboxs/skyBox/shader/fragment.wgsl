@@ -1,4 +1,4 @@
-#redgpu_include FragmentOutput
+#redgpu_include systemStruct.FragmentOutput
 #redgpu_include color.getLuminance
 #redgpu_include math.PI
 #redgpu_include math.PI2
