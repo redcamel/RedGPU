@@ -2,8 +2,8 @@
 #redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include color.getTintBlendMode;
 #redgpu_include drawPicking;
-#redgpu_include calcPrePathBackground
-#redgpu_include FragmentOutput
+#redgpu_include system.getTransmissionRefraction;
+#redgpu_include FragmentOutput;
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;
@@ -771,9 +771,9 @@ fn main(inputData:InputData) -> FragmentOutput {
     #redgpu_endIf
 
     // ---------- 2패스일경우 배경 샘플링 ----------
-    var prePathBackground = vec3<f32>(0.0);
+    var transmissionRefraction = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
-        prePathBackground = calcPrePathBackground(
+        transmissionRefraction = getTransmissionRefraction(
             u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor,
             ior, roughnessParameter, albedo,
             systemUniforms.projectionCameraMatrix, input_vertexPosition, input_ndcPosition,
@@ -807,7 +807,7 @@ fn main(inputData:InputData) -> FragmentOutput {
             VdotN,
             roughnessParameter, metallicParameter, albedo,
             F0, ior,
-            prePathBackground,
+            transmissionRefraction,
             specularColor, specularParameter,
             u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
             transmissionParameter,
@@ -869,7 +869,7 @@ fn main(inputData:InputData) -> FragmentOutput {
              VdotN,
              roughnessParameter, metallicParameter, albedo,
              F0, ior,
-             prePathBackground,
+             transmissionRefraction,
              specularColor, specularParameter,
              u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
              transmissionParameter,
@@ -971,7 +971,7 @@ fn main(inputData:InputData) -> FragmentOutput {
                 let NdotT = abs(dot(N, normalize(refractedDir)));
                 let F_transmission = vec3<f32>(1.0) - mix(F_IBL_dielectric,F_IBL_metal,metallicParameter);
 
-                var attenuatedBackground = prePathBackground;
+                var attenuatedBackground = transmissionRefraction;
                  if (u_useKHR_materials_volume) {
                      let localNodeScale = inputData.localNodeScale_volumeScale[0];
                      let volumeScale = inputData.localNodeScale_volumeScale[1];
@@ -1160,7 +1160,7 @@ fn calcLight(
     roughnessParameter:f32, metallicParameter:f32, albedo:vec3<f32>,
     F0:vec3<f32>, ior:f32,
 
-    prePathBackground:vec3<f32>,
+    transmissionRefraction:vec3<f32>,
     specularColor:vec3<f32>, specularParameter:f32,
     u_useKHR_materials_diffuse_transmission:bool, diffuseTransmissionParameter:f32, diffuseTransmissionColor:vec3<f32>,
     transmissionParameter:f32,
@@ -1257,7 +1257,7 @@ fn calcLight(
         if(transmissionParameter > 0.0) {
             // 투과 가중치에 따라 배경색 혼합
             let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
-            directLighting = mix(directLighting, prePathBackground , transmissionWeight);
+            directLighting = mix(directLighting, transmissionRefraction , transmissionWeight);
         }
     #redgpu_endIf
 

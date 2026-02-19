@@ -49,6 +49,8 @@ import specularBTDF_wgsl from './shader/lighting/getSpecularBTDF.wgsl';
 import diffuseBTDF_wgsl from './shader/lighting/getDiffuseBTDF.wgsl';
 import fresnelMix_wgsl from './shader/lighting/getFresnelMix.wgsl';
 import fresnelCoat_wgsl from './shader/lighting/getFresnelCoat.wgsl';
+import getIsFinite_wgsl from './shader/math/getIsFinite.wgsl';
+import getTransmissionRefraction_wgsl from './shader/system/getTransmissionRefraction.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -77,6 +79,7 @@ export namespace MathLibrary {
 
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;
     export const getMotionVector = getMotionVector_wgsl;
+    export const getIsFinite = getIsFinite_wgsl;
 
     /** [KO] 방향(Direction) 관련 셰이더 함수 [EN] Direction related shader functions */
     export namespace direction {
@@ -110,6 +113,15 @@ export namespace MathLibrary {
     export const DEG_TO_RAD = 'const DEG_TO_RAD: f32 = 0.017453292519943295;';
     export const RAD_TO_DEG = 'const RAD_TO_DEG: f32 = 57.29577951308232;';
     export const EPSILON = 'const EPSILON: f32 = 1e-6;';
+    export const FLT_MAX = 'const FLT_MAX: f32 = 3.402823466e+38;';
+}
+
+/**
+ * [KO] 엔진 시스템 기반 인프라 및 유틸리티 셰이더 함수 라이브러리 (Category 8)
+ * [EN] Engine system infrastructure and utility shader function library (Category 8)
+ */
+export namespace SystemLibrary {
+    export const getTransmissionRefraction = getTransmissionRefraction_wgsl;
 }
 
 /**
@@ -185,6 +197,8 @@ export namespace SystemCodeManager {
     export import depth = DepthLibrary;
     /** [KO] 조명 및 BRDF 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for lighting and BRDF. */
     export import lighting = LightingLibrary;
+    /** [KO] 엔진 시스템 인프라 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for engine system infrastructure. */
+    export import system = SystemLibrary;
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
     export const vertex = SystemVertexCode;
@@ -196,7 +210,7 @@ export namespace SystemCodeManager {
     export const calcTintBlendMode = getTintBlendMode_wgsl;
     export const calcDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
     export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;
-    export const calcPrePathBackground = SystemFragmentCode.calcPrePathBackground;
+    export const calcPrePathBackground = getTransmissionRefraction_wgsl;
     export const calculateMotionVector = getMotionVector_wgsl;
     export const picking = SystemFragmentCode.picking;
     export const drawPicking = SystemFragmentCode.drawPicking;

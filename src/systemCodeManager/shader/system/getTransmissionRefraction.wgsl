@@ -1,13 +1,38 @@
 #redgpu_include math.direction.getReflectionVectorFromViewDirection
+#redgpu_include math.getIsFinite
 
-fn calcPrePathBackground(
+/**
+ * [KO] 굴절 및 투과 효과를 위해 배경(RenderPath1) 데이터를 샘플링하여 최종 투과 굴절 색상을 계산합니다.
+ * [EN] Samples background (RenderPath1) data to calculate the final transmission refraction color.
+ *
+ * [KO] 이 함수는 KHR_materials_transmission 및 volume 확장을 지원하며, 분산(Dispersion) 및 두께에 따른 굴절 왜곡을 시뮬레이션합니다.
+ * [EN] This function supports KHR_materials_transmission and volume extensions, simulating refractive distortion based on dispersion and thickness.
+ *
+ * @param u_useKHR_materials_volume - [KO] 볼륨 효과 사용 여부 [EN] Whether to use volume effects
+ * @param thicknessParameter - [KO] 투과 두께 [EN] Transmission thickness
+ * @param u_KHR_dispersion - [KO] 분산 계수 [EN] Dispersion coefficient
+ * @param u_KHR_attenuationDistance - [KO] 감쇄 거리 [EN] Attenuation distance
+ * @param u_KHR_attenuationColor - [KO] 감쇄 색상 [EN] Attenuation color
+ * @param ior - [KO] 굴절률 [EN] Index of Refraction
+ * @param roughnessParameter - [KO] 거칠기 계수 [EN] Roughness parameter
+ * @param albedo - [KO] 알베도 색상 [EN] Albedo color
+ * @param projectionCameraMatrix - [KO] 투영-카메라 행렬 [EN] Projection-Camera matrix
+ * @param input_vertexPosition - [KO] 월드 공간의 버텍스 위치 [EN] Vertex position in world space
+ * @param input_ndcPosition - [KO] NDC 공간의 위치 (미사용) [EN] Position in NDC space (Unused)
+ * @param V - [KO] 시선 방향 벡터 [EN] View direction vector
+ * @param N - [KO] 법선 벡터 [EN] Normal vector
+ * @param renderPath1ResultTexture - [KO] 배경 텍스처 [EN] Background texture
+ * @param renderPath1ResultTextureSampler - [KO] 배경 샘플러 [EN] Background sampler
+ * @returns [KO] 계산된 최종 투과 굴절 색상 [EN] Calculated final transmission refraction color
+ */
+fn getTransmissionRefraction(
     u_useKHR_materials_volume:bool, thicknessParameter:f32, u_KHR_dispersion:f32, u_KHR_attenuationDistance:f32, u_KHR_attenuationColor:vec3<f32>,
     ior:f32, roughnessParameter:f32, albedo:vec3<f32>,
     projectionCameraMatrix:mat4x4<f32>, input_vertexPosition:vec3<f32>, input_ndcPosition:vec3<f32>,
     V:vec3<f32>, N:vec3<f32>,
     renderPath1ResultTexture:texture_2d<f32>, renderPath1ResultTextureSampler:sampler
 ) -> vec3<f32> {
-    var prePathBackground = vec3<f32>(0.0);
+    var transmissionRefraction = vec3<f32>(0.0);
 
     // Mip Level 안전 범위 설정
     let maxMipLevel = f32(textureNumLevels(renderPath1ResultTexture) - 1);
@@ -78,9 +103,9 @@ fn calcPrePathBackground(
         let sampledB = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV_B, transmissionMipLevel).b;
 
         // NaN/Inf 방지
-        prePathBackground.r = select(0.0, sampledR, isFiniteScalar(sampledR));
-        prePathBackground.g = select(0.0, sampledG, isFiniteScalar(sampledG));
-        prePathBackground.b = select(0.0, sampledB, isFiniteScalar(sampledB));
+        transmissionRefraction.r = select(0.0, sampledR, getIsFiniteScalar(sampledR));
+        transmissionRefraction.g = select(0.0, sampledG, getIsFiniteScalar(sampledG));
+        transmissionRefraction.b = select(0.0, sampledB, getIsFiniteScalar(sampledB));
 
     } else {
         // IOR 값 안전 범위 제한
@@ -109,29 +134,15 @@ fn calcPrePathBackground(
         let sampled = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalUV, transmissionMipLevel).rgb;
 
         // NaN/Inf 방지
-        prePathBackground = select(vec3<f32>(0.0), sampled, all(isFiniteVec3(sampled)));
+        transmissionRefraction = select(vec3<f32>(0.0), sampled, all(getIsFiniteVec3(sampled)));
     }
 
     // 투과 색상에 알베도 적용 (안전한 범위로 제한)
     let safeAlbedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
-    prePathBackground *= safeAlbedo;
+    transmissionRefraction *= safeAlbedo;
 
     // 최종 결과 안전성 체크
-    prePathBackground = select(vec3<f32>(0.0), prePathBackground, all(isFiniteVec3(prePathBackground)));
+    transmissionRefraction = select(vec3<f32>(0.0), transmissionRefraction, all(getIsFiniteVec3(transmissionRefraction)));
 
-    return prePathBackground;
-}
-
-// isFinite 헬퍼 함수 (NaN과 Inf 체크)
-fn isFiniteScalar(x: f32) -> bool {
-    // NaN은 자기 자신과 같지 않고, Inf는 매우 큰 값
-    return x == x && abs(x) < 1e30;
-}
-
-fn isFiniteVec3(v: vec3<f32>) -> vec3<bool> {
-    return vec3<bool>(
-        v.x == v.x && abs(v.x) < 1e30,
-        v.y == v.y && abs(v.y) < 1e30,
-        v.z == v.z && abs(v.z) < 1e30
-    );
+    return transmissionRefraction;
 }
