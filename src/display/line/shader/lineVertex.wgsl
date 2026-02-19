@@ -60,3 +60,4 @@ fn main(inputData: InputData) -> OutputData {
 }
 
 #redgpu_include entryPoint.empty.entryPointPickingVertex;
+#redgpu_include entryPoint.empty.entryPointShadowVertex;

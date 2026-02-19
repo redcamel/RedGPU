@@ -468,10 +468,10 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
     </tr>
     <tr>
       <td><b>Shadow Output</b></td>
-      <td><code>entryPoint.mesh.entryPointShadowVertex</code><br/><code>entryPoint.billboard.entryPointShadowVertex</code></td>
+      <td><code>entryPoint.mesh.entryPointShadowVertex</code><br/><code>entryPoint.billboard.entryPointShadowVertex</code><br/><code>entryPoint.empty.entryPointShadowVertex</code></td>
       <td align="center">Vert Only</td>
       <td align="center">✅ 완료</td>
-      <td><b>[그림자 표준]</b> 섀도우 맵 렌더링을 위한 정점 셰이더 출력 구조체 통합 완료.</td>
+      <td><b>[그림자 표준]</b> 섀도우 맵 렌더링을 위한 정점 셰이더 출력 구조체 및 타입별 엔트리 포인트 통합 완료.</td>
     </tr>
   </tbody>
 </table>

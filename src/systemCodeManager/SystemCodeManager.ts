@@ -65,6 +65,7 @@ import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPoint
 import billboardEntryPointPickingVertex_wgsl from './shader/entryPoint/billboard/entryPointPickingVertex.wgsl';
 import billboardEntryPointShadowVertex_wgsl from './shader/entryPoint/billboard/entryPointShadowVertex.wgsl';
 import emptyEntryPointPickingVertex_wgsl from './shader/entryPoint/empty/entryPointPickingVertex.wgsl';
+import emptyEntryPointShadowVertex_wgsl from './shader/entryPoint/empty/entryPointShadowVertex.wgsl';
 import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
@@ -228,6 +229,7 @@ export namespace EntryPointLibrary {
     /** [KO] 빈 엔트리 포인트 (미지원 객체용) [EN] Empty entry points (for unsupported objects) */
     export namespace empty {
         export const entryPointPickingVertex = emptyEntryPointPickingVertex_wgsl;
+        export const entryPointShadowVertex = emptyEntryPointShadowVertex_wgsl;
     }
 }
 
