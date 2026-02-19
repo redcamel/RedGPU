@@ -170,7 +170,7 @@ fn main( inputData:InputData) -> OutputData {
         var rotateMTX2 = rotationMTX( vec3(0,0, inputData.rotation.z) ) ;
         temp = translateTX * rotateMTX2;
         position = rotateMTX2 * vec4<f32>(inputData.a_position  , 1);
-        output.position =  u_projectionMatrix *  getBillboardMatrixNoScaleRatio( u_cameraMatrix,  temp ) * scaleMTX * position;
+        output.position =  u_projectionMatrix *  getBillboardMatrix( u_cameraMatrix,  temp, 0u ) * scaleMTX * position;
     }else{
         var rotateMTX = rotationMTX( inputData.rotation ) ;
         temp = translateTX * rotateMTX * scaleMTX;

@@ -1,5 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include getBillboardMatrix;
 struct MatrixList{
     modelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,

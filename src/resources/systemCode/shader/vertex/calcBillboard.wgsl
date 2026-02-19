@@ -34,7 +34,7 @@ fn calcBillboard(
     var viewNormal: vec4<f32>;
 
     if (useBillboard == 1u) {
-        let billboardMatrix = getBillboardMatrix(cameraMatrix, modelMatrix);
+        let billboardMatrix = getBillboardMatrix(cameraMatrix, modelMatrix, 1u);
         
         if (usePixelSize == 1u) {
             // [Pixel Size 모드] - 피벗 기반 확장 및 W-보정 적용
