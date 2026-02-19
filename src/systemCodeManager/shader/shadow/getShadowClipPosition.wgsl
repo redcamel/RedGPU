@@ -1,4 +1,5 @@
 /**
+ * [Stage: Vertex Only]
  * [KO] 월드 좌표를 빛의 관점에서의 클립 공간(Clip Space) 좌표로 변환합니다. (Shadow Pass 전용)
  * [EN] Converts world coordinates to clip space coordinates from the light's perspective. (For Shadow Pass)
  *

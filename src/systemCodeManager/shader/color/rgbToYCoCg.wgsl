@@ -1,4 +1,5 @@
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] RGB 색상을 YCoCg 색 공간으로 변환합니다. (TAA 및 압축 효율 최적화)
  * [EN] Converts RGB color to YCoCg color space. (Optimized for TAA and compression efficiency)
  */

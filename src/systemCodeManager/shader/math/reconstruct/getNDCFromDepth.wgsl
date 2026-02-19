@@ -1,4 +1,5 @@
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 스크린 UV와 깊이 값을 WebGPU 표준 NDC(Normalized Device Coordinates) 좌표로 변환합니다.
  * [EN] Converts screen UV and depth values to standard WebGPU NDC (Normalized Device Coordinates).
  *

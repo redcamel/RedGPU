@@ -1,4 +1,5 @@
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] RGB 색상의 휘도(Luminance)를 계산합니다. (Rec. 709 표준 가중치 적용)
  * [EN] Calculates the luminance of an RGB color. (Applying Rec. 709 standard weights)
  *

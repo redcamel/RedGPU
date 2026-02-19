@@ -1,4 +1,5 @@
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 단일 스칼라 값이 유한(Finite)한지 체크합니다. (NaN과 Inf 체크)
  * [EN] Checks if a single scalar value is finite. (Checks for NaN and Inf)
  *
@@ -11,6 +12,7 @@ fn getIsFiniteScalar(x: f32) -> bool {
 }
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] vec3 벡터의 모든 채널이 유한(Finite)한지 체크합니다.
  * [EN] Checks if all channels of a vec3 vector are finite.
  *

@@ -4,6 +4,7 @@
 #redgpu_include math.EPSILON
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] Cook-Torrance 모델을 사용하여 물리 기반 스펙큘러 BRDF를 계산합니다.
  * [EN] Calculates Physically-Based Specular BRDF using the Cook-Torrance model.
  *

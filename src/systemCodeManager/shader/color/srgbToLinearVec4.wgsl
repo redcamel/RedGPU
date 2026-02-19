@@ -1,6 +1,7 @@
 #redgpu_include color.srgbToLinearVec3
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] sRGB 색 공간의 vec4 색상을 Linear 색 공간으로 변환합니다. (Alpha 보존)
  * [EN] Converts vec4 color from sRGB color space to Linear color space. (Preserves Alpha)
  */

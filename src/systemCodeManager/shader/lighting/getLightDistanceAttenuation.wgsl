@@ -1,6 +1,7 @@
 #redgpu_include math.EPSILON
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 거리 제곱에 반비례하는 물리적 광원 감쇄 계수를 계산합니다.
  * [EN] Calculates the physical light attenuation factor inversely proportional to the square of the distance.
  *

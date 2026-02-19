@@ -1,4 +1,5 @@
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 월드 좌표를 빛의 클립 공간 좌표(UV + Depth)로 변환합니다.
  * [EN] Converts world coordinates to light's clip space coordinates (UV + Depth).
  *

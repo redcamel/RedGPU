@@ -8,6 +8,7 @@ struct SheenIBLResult {
 }
 
 /**
+ * [Stage: Fragment, Compute]
  * [KO] Charlie 모델 기반의 Sheen IBL 기여도를 통합 계산합니다.
  * [EN] Integrally calculates Sheen IBL contribution based on the Charlie model.
  *

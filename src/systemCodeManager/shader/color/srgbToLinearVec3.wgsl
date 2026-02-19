@@ -1,4 +1,5 @@
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] sRGB 색 공간의 vec3 색상을 Linear 색 공간으로 변환합니다.
  * [EN] Converts vec3 color from sRGB color space to Linear color space.
  */

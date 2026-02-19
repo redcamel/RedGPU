@@ -1,4 +1,5 @@
 /**
+ * [Stage: Fragment Only (or Compute with textureSampleCompare)]
  * [KO] 방향성 광원의 그림자 가시성(Visibility)을 계산합니다.
  * [EN] Calculates the shadow visibility for a directional light.
  *

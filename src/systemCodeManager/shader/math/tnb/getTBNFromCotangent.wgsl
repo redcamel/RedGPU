@@ -1,4 +1,5 @@
 /**
+ * [Stage: Fragment Only]
  * [KO] 픽셀의 미분(Derivatives)을 사용하여 탄젠트와 비탄젠트를 동적으로 계산하고 TBN 행렬을 구축합니다.
  * [EN] Dynamically calculates tangent and bitangent using pixel derivatives and constructs a TBN matrix.
  *

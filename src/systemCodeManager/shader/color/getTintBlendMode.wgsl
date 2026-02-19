@@ -1,6 +1,7 @@
 #redgpu_include math.EPSILON
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] RGB 색상을 HSL 색상 공간으로 변환합니다.
  * [EN] Converts RGB color to HSL color space.
  */
@@ -8,7 +9,6 @@ fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
     let maxVal: f32 = max(max(rgb.r, rgb.g), rgb.b);
     let minVal: f32 = min(min(rgb.r, rgb.g), rgb.b);
     let delta: f32 = maxVal - minVal;
-    let EPSILON = EPSILON;
 
     let lightness: f32 = (maxVal + minVal) * 0.5;
 
@@ -43,6 +43,7 @@ fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
 }
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] HSL 색상을 RGB 색상 공간으로 변환합니다.
  * [EN] Converts HSL color to RGB color space.
  */
@@ -112,6 +113,7 @@ fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
 }
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 베이스 색상에 틴트(Tint) 색상을 지정된 블렌딩 모드로 합성합니다.
  * [EN] Blends the base color with a tint color using the specified blending mode.
  *

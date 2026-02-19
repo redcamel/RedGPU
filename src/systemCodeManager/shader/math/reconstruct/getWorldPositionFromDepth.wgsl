@@ -1,6 +1,7 @@
 #redgpu_include math.reconstruct.getNDCFromDepth
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 깊이 정보를 바탕으로 월드 공간의 좌표를 복구합니다.
  * [EN] Reconstructs world space position from depth information.
  *

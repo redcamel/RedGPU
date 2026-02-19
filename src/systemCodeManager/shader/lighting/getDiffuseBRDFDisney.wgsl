@@ -2,6 +2,7 @@
 #redgpu_include math.INV_PI
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] Disney Diffuse BRDF 모델을 사용하여 확산광을 계산합니다.
  * [EN] Calculates diffuse lighting using the Disney Diffuse BRDF model.
  *

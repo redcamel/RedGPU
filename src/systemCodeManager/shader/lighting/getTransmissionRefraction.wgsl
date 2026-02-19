@@ -3,6 +3,7 @@
 #redgpu_include math.EPSILON
 
 /**
+ * [Stage: Fragment, Compute]
  * [KO] 굴절 및 투과 효과를 위해 배경(RenderPath1) 데이터를 샘플링하여 최종 투과 굴절 색상을 계산합니다.
  * [EN] Samples background (RenderPath1) data to calculate the final transmission refraction color.
  *

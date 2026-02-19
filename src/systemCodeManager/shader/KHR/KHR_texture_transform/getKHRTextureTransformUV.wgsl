@@ -1,4 +1,5 @@
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] KHR_texture_transform 확장을 기반으로 UV 좌표를 변환합니다.
  * [EN] Transforms UV coordinates based on the KHR_texture_transform extension.
  *

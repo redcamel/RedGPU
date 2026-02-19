@@ -3,6 +3,7 @@
 #redgpu_include KHR.KHR_materials_anisotropy.getAnisotropicVisibility
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 이방성(Anisotropic) GGX 모델을 사용하여 물리 기반 스펙큘러 BRDF를 계산합니다.
  * [EN] Calculates Physically-Based Specular BRDF using the Anisotropic GGX model.
  *

@@ -1,6 +1,7 @@
 #redgpu_include math.EPSILON
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 비선형 깊이(Depth) 값을 선형 거리로 복구합니다. (Stable Version)
  * [EN] Recovers non-linear depth values into linear distances. (Stable Version)
  *
@@ -13,4 +14,3 @@ fn getLinearizeDepth(depthSample : f32, near : f32, far : f32) -> f32 {
     let d = clamp(depthSample, 0.0, 1.0);
     return (near * far) / max(EPSILON, far - d * (far - near));
 }
-

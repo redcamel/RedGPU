@@ -1,6 +1,7 @@
 #redgpu_include math.reconstruct.getWorldNormalFromGNormalBuffer
 
 /**
+ * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] G-Buffer 데이터와 카메라 행렬을 사용하여 뷰 공간 법선 벡터를 복구합니다.
  * [EN] Reconstructs view space normal vector from G-Buffer data and camera matrix.
  *
