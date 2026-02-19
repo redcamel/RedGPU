@@ -55,10 +55,10 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - WebGPU 스크린 좌표계 보정(`1.0 - uv.y`)이 굴절 UV 계산에 올바르게 반영됨을 검증.
 
 ### 8. 텍스처 변환 표준 (Texture Transform Standard)
-*   **대상**: `getKHRTextureTransformUV`
+*   **대상**: `KHR.KHR_texture_transform.getKHRTextureTransformUV`
 *   **결과**: ✅ 완료.
     - `KHR_texture_transform` 확장 규격에 따른 TRS(Translation, Rotation, Scale) 행렬 합성 방식 준수.
-    - 파편화된 `get_transformed_uv` 로직을 시스템 최상위 공통 라이브러리로 통합.
+    - 파편화된 `get_transformed_uv` 로직을 `KHR` 전용 공통 라이브러리로 통합.
     - 멀티 UV(UV0, UV1) 대응을 위한 `texCoord_index` 처리 및 `u32` 기반의 안정적인 선택 로직 검증.
 
 ### 9. 수치적 안정성 및 0 나누기 방어 (Numerical Stability)
@@ -68,8 +68,15 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - `getIridescentFresnel`, `getTransmissionRefraction`, `getAnisotropicVisibility` 등 모든 나눗셈 연산의 분모에 `max(..., EPSILON)` 방어 로직 적용 확인.
     - IOR 최소 임계값(`1.0 + EPSILON`) 설정을 통해 굴절 벡터 계산 시의 수치적 발산 방지 검증.
 
+### 10. glTF 확장 규격 표준화 (KHR Extensions)
+*   **대상**: `MaterialsSheen`, `MaterialsAnisotropy`
+*   **결과**: ✅ 완료.
+    - `KHR_materials_sheen`: Charlie 모델 기반 DFG, E, Lambda, IBL 기능 분리 및 라이브러리화 완료.
+    - `KHR_materials_anisotropy`: 이방성 NDF, 가시성, Specular BRDF 라이브러리화 및 `pbrMaterial` 통합 완료.
+    - 모든 확장 규격 함수를 `KHR.KHR_xxxx` 네임스페이스와 전용 폴더 구조로 계층화하여 관리.
+
 ---
 
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
-- **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화 완료.
+- **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화, 명명 규칙(CamelCase) 정규화 완료.
