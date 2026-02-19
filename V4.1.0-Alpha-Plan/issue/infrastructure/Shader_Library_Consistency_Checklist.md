@@ -54,8 +54,15 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - RGB 분산(Dispersion) 처리 시 채널별 IOR 안전 범위(min 1.0001) 적용 확인.
     - WebGPU 스크린 좌표계 보정(`1.0 - uv.y`)이 굴절 UV 계산에 올바르게 반영됨을 검증.
 
+### 8. 텍스처 변환 표준 (Texture Transform Standard)
+*   **대상**: `getKHRTextureTransformUV`
+*   **결과**: ✅ 완료.
+    - `KHR_texture_transform` 확장 규격에 따른 TRS(Translation, Rotation, Scale) 행렬 합성 방식 준수.
+    - 파편화된 `get_transformed_uv` 로직을 시스템 최상위 공통 라이브러리로 통합.
+    - 멀티 UV(UV0, UV1) 대응을 위한 `texCoord_index` 처리 및 `u32` 기반의 안정적인 선택 로직 검증.
+
 ---
 
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
-- **2026-02-19**: 전 항목 점검 완료 및 `lighting.getTransmissionRefraction` 통합 완료.
+- **2026-02-19**: 전 항목 점검 완료 및 `getKHRTextureTransformUV` 통합 완료.
