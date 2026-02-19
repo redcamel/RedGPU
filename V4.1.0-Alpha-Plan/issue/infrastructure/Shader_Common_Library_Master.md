@@ -57,17 +57,52 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 ## 📝 기능 카테고리별 통합 현황 및 로드맵
 
 ### 1. Color Space & Conversion (색상 변환 및 처리)
-| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
-| :--- | :--- | :---: | :--- |
-| **Rec. 709 Luminance** | `color.getLuminance` | ✅ 완료 | **[VFX 표준]** 인지적 밝기 분석용. HDTV 표준 가중치(0.2126, 0.7152, 0.0722) 적용. |
-| **YCoCg Transform** | `color.rgbToYCoCg / YCoCgToRgb` | ✅ 완료 | **[AA 표준]** TAA의 이력 압축 및 Bloom의 휘도 추출용. RGB 대비 색상 채널 분리가 우수함. |
-| **sRGB Transform** | `color.linearToSrgbVec3 / 4` | ✅ 완료 | **[출력 표준]** Gamma 2.2 보정 수행. 최종 Canvas 출력을 위한 필수 전처리. |
-| **Linear Transform** | `color.srgbToLinearVec3 / 4` | ✅ 완료 | **[입력 보정]** 비-linear 텍스처나 입력값을 물리 기반 조명 연산 공간으로 변환. |
-| **Tint Blend Mode** | `color.getTintBlendMode` | ✅ 완료 | **[블렌딩 표준]** 23종의 포토샵 규격 블렌딩 모드 지원. `getTintBlendMode`로 명칭 정규화 완료. |
+<table style="width: 100%;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">대상 기능</th>
+      <th style="width: 30%;">명칭 (Include Path)</th>
+      <th style="width: 10%;">상태</th>
+      <th style="width: 40%;">적용 범위 및 기술 비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Rec. 709 Luminance</b></td>
+      <td><code>color.getLuminance</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[VFX 표준]</b> 인지적 밝기 분석용. HDTV 표준 가중치 적용.</td>
+    </tr>
+    <tr>
+      <td><b>YCoCg Transform</b></td>
+      <td><code>color.rgbToYCoCg / YCoCgToRgb</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[AA 표준]</b> TAA 및 Bloom용. RGB 대비 색상 채널 분리 우수.</td>
+    </tr>
+    <tr>
+      <td><b>sRGB Transform</b></td>
+      <td><code>color.linearToSrgbVec3 / 4</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[출력 표준]</b> Gamma 2.2 보정. <code>linearToSrgbVec3/4</code> 명칭 정규화 완료.</td>
+    </tr>
+    <tr>
+      <td><b>Linear Transform</b></td>
+      <td><code>color.srgbToLinearVec3 / 4</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[입력 보정]</b> 비-linear 입력을 물리 기반 조명 공간으로 변환.</td>
+    </tr>
+    <tr>
+      <td><b>Tint Blend Mode</b></td>
+      <td><code>color.getTintBlendMode</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[블렌딩 표준]</b> 23종 포토샵 규격 블렌딩. <code>getTintBlendMode</code> 정규화 완료.</td>
+    </tr>
+  </tbody>
+</table>
 
 #### 📂 상세 적용 이력 (Color)
-- `src/systemCodeManager/shader/color/getLuminance.wgsl`: 표준 함수 구현 및 CamelCase 적용 완료.
-- `src/systemCodeManager/shader/color/getTintBlendMode.wgsl`: 23종 블렌딩 모드 통합 구현. `get_tint_blend_mode`에서 리네임 완료.
+- `src/systemCodeManager/shader/color/`: 모든 함수 CamelCase 및 명시적 타입 접미사(`Vec3/4`) 적용 완료.
+- `src/systemCodeManager/shader/color/getTintBlendMode.wgsl`: 23종 블렌딩 모드 통합 구현 및 리네임 완료.
 - **[휘도 계산 적용]**: `fxaa`, `taa`, `vibrance`, `filmGrain`, `threshold`, `colorBalance`, `skyBox` 등 엔진 전역 적용 완료.
 - **[틴트 블렌드 적용]**: `phongMaterial`, `bitmapMaterial`, `colorMaterial` 등 모든 재질 셰이더 적용 완료.
 - `toneMapping/fragment.wgsl`, `pbrMaterial/fragment.wgsl`, `colorMaterial/fragment.wgsl` 내 `linearToSrgbVec3/4` 계열 적용 완료.
@@ -75,95 +110,348 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 ---
 
 ### 2. Mathematics & Randomization (수학적 상수 및 해시)
-| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
-| :--- | :--- | :---: | :--- |
-| **Common Constants** | `math.PI/PI2/INV_PI/INV_PI2/SQRT2/E/FLT_MAX/...` | ✅ 완료 | **[수치 일관성]** 14종 핵심 상수 전역 통합. 정밀도 향상 및 나눗셈 연산 최적화. |
-| **Stable Hash (Grid)** | `math.hash.getHashXX` | ✅ 완료 | **[절차적 생성]** 정수 변환 기반의 안정적인 해시. GPU 아키텍처와 무관한 동일 격자 패턴 보장. |
-| **Bitcast Hash (Bit)** | `math.hash.getBitHashXX` | ✅ 완료 | **[고정밀 난수]** IEEE 754 비트 레벨 조작 해시. 극소량의 변화에도 민감한 난수가 필요한 고품질 노이즈용. |
-| **Dither Noise** | `math.getInterleavedGradientNoise` | ✅ 완료 | **[성능 특화]** Jorge Jimenez 알고리즘. SSAO, SSR의 샘플링 노이즈 제거를 위한 초고속 디더링. |
-| **Safe Math** | `math.safeDivision` | ✅ 완료 | **[안정성]** 0 나누기 방지 표준화. 모든 나눗셈 분모에 `math.EPSILON` 방어 로직 적용 및 매직 넘버 제거. |
+<table style="width: 100%;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">대상 기능</th>
+      <th style="width: 30%;">명칭 (Include Path)</th>
+      <th style="width: 10%;">상태</th>
+      <th style="width: 40%;">적용 범위 및 기술 비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Common Constants</b></td>
+      <td><code>math.PI / EPSILON / FLT_MAX / ...</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[수치 일관성]</b> 14종 핵심 상수 전역 통합.</td>
+    </tr>
+    <tr>
+      <td><b>Stable Hash (Grid)</b></td>
+      <td><code>math.hash.getHashXX</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[절차적 생성]</b> 정수 변환 기반의 안정적인 격자 해시.</td>
+    </tr>
+    <tr>
+      <td><b>Bitcast Hash (Bit)</b></td>
+      <td><code>math.hash.getBitHashXX</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[고정밀 난수]</b> IEEE 754 비트 레벨 조작 해시.</td>
+    </tr>
+    <tr>
+      <td><b>Dither Noise</b></td>
+      <td><code>math.getInterleavedGradientNoise</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[성능 특화]</b> Jorge Jimenez 알고리즘. SSAO, SSR용.</td>
+    </tr>
+    <tr>
+      <td><b>Safe Math</b></td>
+      <td><code>math.safe.safeDiv</code></td>
+      <td align="center">Medium</td>
+      <td><b>[Priority 3]</b> 0 나누기 방지 패턴의 함수 추상화.</td>
+    </tr>
+    <tr>
+      <td><b>Safe Normalize</b></td>
+      <td><code>math.safe.safeNormalize</code></td>
+      <td align="center">Medium</td>
+      <td><b>[Priority 3]</b> 제로 벡터 정규화 NaN 방어 유틸리티.</td>
+    </tr>
+  </tbody>
+</table>
 
 #### 📂 상세 적용 이력 (Math)
 - `pbrMaterial`, `phongMaterial`, `filmGrain`, `skyAtmosphere`, `zoomBlur`, `ssao_ao`, `particle/compute.wgsl` 적용 완료.
 - `src/systemCodeManager/shader/depth/getLinearizeDepth.wgsl`: `math.EPSILON` 재귀 인클루드 적용.
-- **[수치 안정성 강화]**: `lighting`, `color`, `KHR` 라이브러리 내 파편화된 매직 넘버(`0.0001`, `0.001` 등)를 `math.EPSILON`으로 통일 및 분모 방어 로직 전역 적용 완료.
+- **[수치 안정성 강화]**: `lighting`, `color`, `KHR` 라이브러리 내 파편화된 매직 넘버를 `math.EPSILON`으로 통일 및 분모 방어 로직 전역 적용 완료.
 
 ---
 
 ### 3. Vector & Directional Analysis (방향 및 시선 분석)
-| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
-| :--- | :--- | :---: | :--- |
-| **View Direction** | `math.direction.getViewDirection` | ✅ 완료 | **[시선 벡터]** 카메라와 픽셀 위치를 기반으로 한 시선 벡터 계산. PBR/Phong 조명 필수 요소. |
-| **Ray Direction** | `math.direction.getRayDirection` | ✅ 완료 | **[광선 추적]** 카메라 기준 픽셀 투사 벡터 계산. HeightFog 등 볼륨 환경 효과에 사용. |
-| **Reflection Vec** | `math.direction.getReflectionVector...`| ✅ 완료 | **[반사 벡터]** 시선 및 법선 기반의 환경 맵 샘플링용 반사 벡터 계산. |
+<table style="width: 100%;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">대상 기능</th>
+      <th style="width: 30%;">명칭 (Include Path)</th>
+      <th style="width: 10%;">상태</th>
+      <th style="width: 40%;">적용 범위 및 기술 비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>View Direction</b></td>
+      <td><code>math.direction.getViewDirection</code></td>
+      <td align="center">✅ 완료</td>
+      <td>카메라와 픽셀 위치 기반 시선 벡터 계산.</td>
+    </tr>
+    <tr>
+      <td><b>Ray Direction</b></td>
+      <td><code>math.direction.getRayDirection</code></td>
+      <td align="center">✅ 완료</td>
+      <td>카메라 기준 픽셀 투사 벡터 계산. 볼륨 효과용.</td>
+    </tr>
+    <tr>
+      <td><b>Reflection Vec</b></td>
+      <td><code>math.direction.getReflectionVector...</code></td>
+      <td align="center">✅ 완료</td>
+      <td>시선 및 법선 기반의 환경 맵 샘플링용 반사 벡터.</td>
+    </tr>
+  </tbody>
+</table>
+
+#### 📂 상세 적용 이력 (Vector)
+- `pbrMaterial/fragment.wgsl`: `getViewDirection`, `getReflectionVectorFromViewDirection` 적용 완료.
+- `phongMaterial/fragment.wgsl`: `getViewDirection` 적용 완료.
+- `src/postEffect/effects/fog/heightFog/wgsl/uniformStructCode.wgsl`: `getRayDirection` 적용 완료.
 
 ---
 
 ### 4. Space Reconstruction & Depth (깊이 및 공간 복구)
-| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
-| :--- | :--- | :---: | :--- |
-| **Linear Depth** | `depth.getLinearizeDepth` | ✅ 완료 | **[공간 분석]** WebGPU의 비선형 Depth(0~1)를 선형 거리로 변환. `linearizeDepth` 명칭 현대화 완료. |
-| **Get NDC** | `math.reconstruct.getNDCFromDepth` | ✅ 완료 | **[좌표 변환]** 스크린 UV와 Depth를 조합하여 NDC 좌표 복구. 후처리 공간 변환의 기초 데이터. |
-| **Position Rec.** | `math.reconstruct.getXXXPosition...` | ✅ 완료 | **[역투영 표준]** NDC -> World/View 공간 복구. 픽셀 미분 없이 깊이값만으로 정확한 3D 위치 추적. |
-| **Normal Rec.** | `math.reconstruct.getXXXNormal...` | ✅ 완료 | **[G-Buffer 복구]** GNormalBuffer RGB 데이터를 정규화된 월드/뷰 법선 벡터로 변환. |
+<table style="width: 100%;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">대상 기능</th>
+      <th style="width: 30%;">명칭 (Include Path)</th>
+      <th style="width: 10%;">상태</th>
+      <th style="width: 40%;">적용 범위 및 기술 비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Linear Depth</b></td>
+      <td><code>depth.getLinearizeDepth</code></td>
+      <td align="center">✅ 완료</td>
+      <td>WebGPU의 비선형 Depth를 선형 거리로 변환.</td>
+    </tr>
+    <tr>
+      <td><b>Get NDC</b></td>
+      <td><code>math.reconstruct.getNDCFromDepth</code></td>
+      <td align="center">✅ 완료</td>
+      <td>스크린 UV와 Depth를 조합하여 NDC 좌표 복구.</td>
+    </tr>
+    <tr>
+      <td><b>Position Rec.</b></td>
+      <td><code>math.reconstruct.getXXXPosition...</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[역투영 표준]</b> NDC -> World/View 공간 복구.</td>
+    </tr>
+    <tr>
+      <td><b>Normal Rec.</b></td>
+      <td><code>math.reconstruct.getXXXNormal...</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[G-Buffer 복구]</b> GNormalBuffer 데이터를 법선으로 변환.</td>
+    </tr>
+  </tbody>
+</table>
+
+#### 📂 상세 적용 이력 (Depth & Reconstruction)
+- `src/systemCodeManager/shader/depth/getLinearizeDepth.wgsl`: 표준 함수 구현 완료.
+- `SYSTEM_UNIFORM.wgsl`, `ssr`, `ssao`, `fog`, `skyAtmosphere`, `taa` 등 엔진 전역 적용 완료.
+- **[MSAA 대응]**: 컴퓨트 셰이더 기반 포스트 이펙트에서 MSAA 뎁스 샘플링 로직 표준화 완료.
 
 ---
 
 ### 5. Surface Basis & Shadow Mapping (그림자 및 기저)
-| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
-| :--- | :--- | :---: | :--- |
-| **TBN Basis** | `math.tnb.getTBNXXX` | ✅ 완료 | **[기저 표준]** Gram-Schmidt 및 Cotangent 기반 탄젠트 공간 구축. WebGPU 스크린 Y-Down 특성 반영. |
-| **Normal Decode** | `math.tnb.getNormalFromNormalMap` | ✅ 완료 | **[순수 함수]** Unpack, Z-Recon, Transform만 수행하는 수학 유틸리티. 가공은 재질에서 담당. |
-| **Shadow Coord** | `shadow.getShadowCoord` | ✅ 완료 | **[그림자 변환]** 월드 좌표를 샘플링용 [0, 1] 범위로 변환. 엔진 전역 명칭 통일 완료. |
-| **Shadow Depth Pos**| `shadow.getShadowClipPosition`| ✅ 완료 | **[그림자 투영]** Shadow Pass 전용. World -> LightClipSpace 변환 및 투영 절차 규격화. |
-| **Shadow Visibility**| `shadow.getDirectionalShadowVisibility`| ✅ 완료 | **[가시성 표준]** 3x3 PCF 포함. 거리에 따른 최소 가시성 보정(레거시) 유지. |
+<table style="width: 100%;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">대상 기능</th>
+      <th style="width: 30%;">명칭 (Include Path)</th>
+      <th style="width: 10%;">상태</th>
+      <th style="width: 40%;">적용 범위 및 기술 비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>TBN Basis</b></td>
+      <td><code>math.tnb.getTBNXXX</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[기저 표준]</b> Gram-Schmidt 및 Cotangent 기반 탄젠트 공간 구축.</td>
+    </tr>
+    <tr>
+      <td><b>Normal Decoding</b></td>
+      <td><code>math.tnb.get...</code></td>
+      <td align="center">High</td>
+      <td><b>[Priority 2]</b> 모든 재질의 노멀 매핑 로직을 <code>math.tnb</code>로 단일화.</td>
+    </tr>
+    <tr>
+      <td><b>Shadow Coord</b></td>
+      <td><code>shadow.getShadowCoord</code></td>
+      <td align="center">✅ 완료</td>
+      <td>월드 좌표를 샘플링용 [0, 1] 범위로 변환.</td>
+    </tr>
+    <tr>
+      <td><b>Shadow Depth</b></td>
+      <td><code>shadow.draw...</code></td>
+      <td align="center">High</td>
+      <td><b>[Priority 1]</b> <code>drawDirectionalShadowDepth</code> 이주 및 통합.</td>
+    </tr>
+    <tr>
+      <td><b>Shadow Visibility</b></td>
+      <td><code>shadow.getDirectionalShadowVisibility</code></td>
+      <td align="center">✅ 완료</td>
+      <td><b>[가시성 표준]</b> 3x3 PCF 필터링 포함.</td>
+    </tr>
+  </tbody>
+</table>
+
+#### 📂 상세 적용 이력 (Basis & Shadow)
+- `src/systemCodeManager/shader/shadow/`: 그림자 관련 파일 전량 전용 폴더로 집결.
+- **[버텍스 셰이더 적용]**: 모든 메시 버텍스 셰이더 내 `#redgpu_include shadow.XXXX` 적용 완료.
+- **[프래그먼트 적용]**: `pbrMaterial`, `phongMaterial`, `bitmapMaterial` 내 호출부 통일 완료.
 
 ---
 
-### 6. Lighting & Material BRDF/BTDF (물리 기반 조명)
-| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
-| :--- | :--- | :---: | :--- |
-| **Disney Diffuse** | `lighting.getDiffuseBRDFDisney` | ✅ 완료 | **[확산광 모델]** 거칠기 고려 레트로-리플렉션 모델. 물리적 사실감 극대화 및 에너지 보존 적용. |
-| **PBR Specular** | `lighting.getSpecularBRDF` | ✅ 완료 | **[반사광 모델]** Cook-Torrance (GGX 분포 + Smith 기하 차폐). 고정밀 반사 연산. |
-| **Light Distance** | `lighting.getLightDistanceAttenuation` | ✅ 완료 | **[에너지 감쇄]** glTF 2.0 표준 윈도잉 및 $Radius^2$ 정규화 적용. 물리적 정확도와 편의성 결합. |
-| **Light Angle** | `lighting.getLightAngleAttenuation` | ✅ 완료 | **[원뿔 감쇄]** 스폿라이트 내부/외부 원뿔 각도 기반의 부드러운 페이드 처리. |
-| **BTDF Utils** | `lighting.getSpecularBTDF / getDiffuseBTDF` | ✅ 완료 | **[투과 모델]** Transmission 확장을 위한 굴절 및 확산 투과 계산식 모듈화. |
-| **Fresnel Utils** | `lighting.getFresnelXxx / getConductorFresnel / getIridescentFresnel` | ✅ 완료 | **[프레넬 표준]** Schlick, Conductor, Iridescent 등 재질별 특성 분리. |
-| **Transmission** | `lighting.getTransmissionRefraction` | ✅ 완료 | **[투과 굴절]** 배경 굴절 샘플링 및 분산(Dispersion) 처리. (범용 광학 함수) |
+### 6. Lighting & Material BRDF (물리 기반 조명)
+<table style="width: 100%;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">대상 기능</th>
+      <th style="width: 30%;">명칭 (Include Path)</th>
+      <th style="width: 10%;">상태</th>
+      <th style="width: 40%;">적용 범위 및 기술 비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Disney Diffuse</b></td>
+      <td><code>lighting.getDiffuseBRDFDisney</code></td>
+      <td align="center">✅ 완료</td>
+      <td>거칠기 고려 역반사 모델. 에너지 보존 적용.</td>
+    </tr>
+    <tr>
+      <td><b>PBR Specular</b></td>
+      <td><code>lighting.getSpecularBRDF</code></td>
+      <td align="center">✅ 완료</td>
+      <td>Cook-Torrance (GGX 분포 + Smith 기하 차폐).</td>
+    </tr>
+    <tr>
+      <td><b>Light Atten.</b></td>
+      <td><code>lighting.get...Attenuation</code></td>
+      <td align="center">✅ 완료</td>
+      <td>거리 및 각도 감쇄. glTF 2.0 표준 윈도잉 적용.</td>
+    </tr>
+    <tr>
+      <td><b>Transmission</b></td>
+      <td><code>lighting.getTransmissionRefraction</code></td>
+      <td align="center">✅ 완료</td>
+      <td>범용 배경 굴절 샘플링 및 분산(Dispersion) 처리.</td>
+    </tr>
+    <tr>
+      <td><b>Lighting Loop</b></td>
+      <td><code>lighting.get...Contribution</code></td>
+      <td align="center">Medium</td>
+      <td><b>[Priority 2]</b> 재질별 조명 합산 루프 구조 및 변수명 표준화.</td>
+    </tr>
+  </tbody>
+</table>
 
 #### 📂 상세 적용 이력 (Lighting)
-- `src/systemCodeManager/shader/lighting/getTransmissionRefraction.wgsl`: `KHR_materials_transmission` 기반 배경 굴절 로직 통합 완료.
-- `src/systemCodeManager/shader/lighting/getLightDistanceAttenuation.wgsl`: 표준 감쇄 함수 구현 및 $Radius^2$ 보정 적용 완료.
-- `src/systemCodeManager/shader/lighting/getLightAngleAttenuation.wgsl`: 스폿라이트 각도 감쇄 구현 완료. 매직 넘버 제거 완료.
+- `src/systemCodeManager/shader/lighting/`: 감쇄 함수 및 투과 굴절 로직 통합 완료.
+- **[재질 통합]**: `pbrMaterial`, `phongMaterial` 내 조명 루프 구조 일치화 진행 중.
+- **[오류 수정]**: 조명 누수 현상 해결 및 매직 넘버 제거 완료.
 
 ---
 
 ### 8. System Infrastructure & Utility (엔진 시스템 함수)
-| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
-| :--- | :--- | :---: | :--- |
-| **Motion Vector** | `math.getMotionVector` | ✅ 완료 | **[시간적 안정성]** 프레임 간 Clip Space 좌표 기반 모션 계산. TAA 및 Motion Blur 필수 데이터. |
-| **IsFinite Helper** | `math.getIsFinite` | ✅ 완료 | **[수학 유틸리티]** Scalar 및 Vec3에 대한 NaN/Inf 체크 헬퍼 함수 통합. |
+<table style="width: 100%;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">대상 기능</th>
+      <th style="width: 30%;">명칭 (Include Path)</th>
+      <th style="width: 10%;">상태</th>
+      <th style="width: 40%;">적용 범위 및 기술 비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Motion Vector</b></td>
+      <td><code>math.getMotionVector</code></td>
+      <td align="center">✅ 완료</td>
+      <td>프레임 간 모션 계산. TAA 및 Motion Blur 필수 데이터.</td>
+    </tr>
+    <tr>
+      <td><b>IsFinite Helper</b></td>
+      <td><code>math.getIsFinite</code></td>
+      <td align="center">✅ 완료</td>
+      <td>Scalar 및 Vec3에 대한 NaN/Inf 체크 헬퍼 통합.</td>
+    </tr>
+    <tr>
+      <td><b>Picking System</b></td>
+      <td><code>picking.get...</code></td>
+      <td align="center">High</td>
+      <td><b>[Priority 1]</b> 레거시 <code>picking.wgsl</code> 코드의 이주 및 표준화.</td>
+    </tr>
+    <tr>
+      <td><b>System Output</b></td>
+      <td><code>system.FragmentOutput</code></td>
+      <td align="center">High</td>
+      <td><b>[Priority 1]</b> <code>FragmentOutput</code> 구조체 정의 이주.</td>
+    </tr>
+  </tbody>
+</table>
+
+#### 📂 상세 적용 이력 (System)
+- `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준화 완료.
+- **`lighting.getTransmissionRefraction`**: `math.getIsFinite`를 통한 안정성 강화 완료.
 
 ---
 
-### 9. glTF KHR Extensions (KHR 표준 확장)
-| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
-| :--- | :--- | :---: | :--- |
-| **Texture Transform** | `KHR.KHR_texture_transform.getKHRTextureTransformUV` | ✅ 완료 | **[좌표 표준화]** `KHR_texture_transform` 규격 기반 TRS 행렬 합성. |
-| **Sheen Charlie** | `KHR.KHR_materials_sheen.getSheenIBL` | ✅ 완료 | **[천 재질]** `KHR_materials_sheen` 규격 기반 Charlie 모델 통합 연산. |
-| **Anisotropy Spec** | `KHR.KHR_materials_anisotropy.getAnisotropicSpecularBRDF` | ✅ 완료 | **[이방성]** `KHR_materials_anisotropy` 규격 기반 GGX 분포 및 가시성 통합. |
+### 9. glTF KHR Extensions (glTF 표준 확장)
+<table style="width: 100%;">
+  <thead>
+    <tr>
+      <th style="width: 20%;">대상 기능</th>
+      <th style="width: 30%;">명칭 (Include Path)</th>
+      <th style="width: 10%;">상태</th>
+      <th style="width: 40%;">적용 범위 및 기술 비고</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Texture Transform</b></td>
+      <td><code>KHR.KHR_texture_transform.get...</code></td>
+      <td align="center">✅ 완료</td>
+      <td><code>KHR_texture_transform</code> 규격 기반 TRS 변환.</td>
+    </tr>
+    <tr>
+      <td><b>Sheen Charlie</b></td>
+      <td><code>KHR.KHR_materials_sheen.get...</code></td>
+      <td align="center">✅ 완료</td>
+      <td>Charlie 모델 기반 DFG, E, Lambda, IBL 통합.</td>
+    </tr>
+    <tr>
+      <td><b>Anisotropy Spec</b></td>
+      <td><code>KHR.KHR_materials_anisotropy.get...</code></td>
+      <td align="center">✅ 완료</td>
+      <td>이방성 GGX 분포 및 가시성 통합.</td>
+    </tr>
+    <tr>
+      <td><b>Clearcoat</b></td>
+      <td><code>KHR.KHR_materials_clearcoat</code></td>
+      <td align="center">High</td>
+      <td><b>[Priority 4]</b> 클리어코트 레이어 및 노멀 연산 분리 예정.</td>
+    </tr>
+  </tbody>
+</table>
 
 #### 📂 상세 적용 이력 (KHR)
-- `src/systemCodeManager/shader/KHR/KHR_texture_transform/getKHRTextureTransformUV.wgsl`: glTF 표준 확장 통합 및 `pbrMaterial` 적용 완료.
-- `src/systemCodeManager/shader/KHR/KHR_materials_sheen/`: Charlie 모델 기반 DFG, E, Lambda, IBL 기능 분리 및 통합 완료.
-- `src/systemCodeManager/shader/KHR/KHR_materials_anisotropy/`: 이방성 NDF, 가시성, Specular BRDF 라이브러리화 및 `pbrMaterial` 적용 완료.
+- `src/systemCodeManager/shader/KHR/`: 확장 규격별 전용 폴더 구조 및 네임스페이스 계층화 완료.
+- **[Anisotropy/Sheen]**: `pbrMaterial` 내 하드코딩된 로직을 라이브러리로 완전 이주 및 동기화 완료.
+
+---
+
+### 2.6 포스트 이펙트 MSAA 대응 표준 (Post-Effect MSAA Standard)
+컴퓨트 셰이더 기반 포스트 이펙트에서 MSAA 뎁스 텍스처를 처리할 때의 표준 가이드라인입니다.
+
+- **상태 동기화**: `antialiasingManager.useMSAA`를 기준으로 시스템 안티앨리어싱 상태와 동기화합니다.
+- **셰이더 바리안트**: 템플릿 리터럴을 활용하여 뎁스 텍스처 타입을 조건부 선언합니다.
+- **데이터 로드**: `fetchDepth` 헬퍼 함수를 통해 샘플 인덱스 처리를 캡슐화합니다.
 
 ---
 
 ## ⚠️ 안정성 및 유지보수 가이드
-- **Include Scope (Critical)**: `SinglePassPostEffect` 계열에서 함수 정의가 포함된 `#redgpu_include`를 사용할 경우, 반드시 `uniformStructCode.wgsl` (전역 스코프)에 배치해야 합니다. `computeCode.wgsl` (함수 내부 스코프)에 배치 시 문법 에러가 발생합니다.
-- **Include Once**: 동일 경로 중복 치환 방지를 위해 전처리기 규격을 엄수하십시오.
-- **Naming Standard**: `math.getXXXX`, `lighting.getXXXX`, `color.getXXXX`, `depth.getXXXX`, `shadow.getXXXX`, `KHR.KHR_xxxx.getXXXX` 등 명칭 규칙을 엄격히 준수합니다.
+- **Include Scope (Critical)**: 함수 정의가 포함된 인클루드는 반드시 `uniformStructCode.wgsl` (전역 스코프)에 배치해야 합니다.
+- **Naming Standard**: `math.getXXXX`, `lighting.getXXXX`, `KHR.KHR_xxxx.getXXXX` 등 명칭 규칙을 엄격히 준수합니다.
 - **Verification**: 모듈화 단계마다 기존 결과물과의 시각적 차이를 엄격히 검증해야 합니다.
 
 ---
