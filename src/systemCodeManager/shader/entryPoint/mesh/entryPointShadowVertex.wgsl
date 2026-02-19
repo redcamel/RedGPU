@@ -2,7 +2,7 @@
 #redgpu_include systemStruct.OutputShadowData;
 
 @vertex
-fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
+fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;
 
     // 시스템 Uniform 변수 가져오기

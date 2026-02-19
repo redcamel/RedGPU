@@ -3,9 +3,9 @@
 #redgpu_include systemStruct.OutputShadowData;
 
 @vertex
-
-fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
+fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;
+
 
     let input_instanceIdx: u32 = visibilityBuffer[inputData.instanceIdx];
 

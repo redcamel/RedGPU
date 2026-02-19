@@ -21,7 +21,7 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
             const {vertexUniformBindGroup} = gpuRenderInfo
             if (!gpuRenderInfo[pipelineKey]) {
                 if (pipelineKey === 'shadowPipeline') {
-                    gpuRenderInfo.shadowPipeline = target.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('drawDirectionalShadowDepth') ? createBasePipeline(target, target.gpuRenderInfo.vertexShaderModule, target.gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.SHADOW) : null
+                    gpuRenderInfo.shadowPipeline = target.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('entryPointShadowVertex') ? createBasePipeline(target, target.gpuRenderInfo.vertexShaderModule, target.gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.SHADOW) : null
                 } else if (pipelineKey === 'pickingPipeline') {
                     gpuRenderInfo.pickingPipeline = target.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('entryPointPickingVertex') ? createBasePipeline(target, target.gpuRenderInfo.vertexShaderModule, target.gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.PICKING) : null
                 }

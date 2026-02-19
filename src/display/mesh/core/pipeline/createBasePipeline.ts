@@ -18,7 +18,7 @@ const createBasePipeline = (
     // module = mesh.gpuRenderInfo.vertexShaderModule
     switch (pipelineType) {
         case PIPELINE_TYPE.SHADOW :
-            entryPoint = 'drawDirectionalShadowDepth'
+            entryPoint = 'entryPointShadowVertex'
             pipelineLabel = `${module.label}_shadow_pipeline`
             break
         case PIPELINE_TYPE.PICKING :

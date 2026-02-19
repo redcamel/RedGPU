@@ -314,10 +314,10 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
     </tr>
     <tr>
       <td><b>Shadow Depth</b></td>
-      <td><code>shadow.draw...</code></td>
+      <td><code>entryPoint.shadow.mesh.entryPointShadowVertex</code><br/><code>entryPoint.shadow.billboard.entryPointShadowVertex</code></td>
       <td align="center">Vert Only</td>
-      <td align="center">High</td>
-      <td><b>[Priority 1]</b> <code>drawDirectionalShadowDepth</code>를 표준 라이브러리로 이주 예정.</td>
+      <td align="center">✅ 완료</td>
+      <td><b>[그림자 엔트리]</b> Mesh/Billboard 전용 섀도우 맵 렌더링 엔트리 포인트 통합 완료.</td>
     </tr>
     <tr>
       <td><b>Shadow Sync</b></td>
@@ -339,7 +339,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 #### 📂 상세 적용 이력 (Basis & Shadow)
 - `src/systemCodeManager/shader/shadow/`: 그림자 관련 파일 전량 전용 폴더로 집결 및 `shadow.` 네임스페이스 확정.
 - **[버텍스 셰이더 적용]**: `meshVertex`, `meshVertexPbr`, `meshVertexPbrSkin`, `particleVertex`, `spriteSheet2D/3D`, `textField2D/3D` 내 `#redgpu_include shadow.XXXX` 적용 완료.
-- **[그림자 패스 통합]**: `meshVertexPbrSkin`, `core/drawDirectionalShadowDepth`, `instanceMeshVertex_shadow` 내 투영 로직 통합 완료.
+- **[그림자 패스 통합]**: `meshVertexPbrSkin`, `entryPointShadowVertex`, `instanceMeshVertex_shadow` 내 투영 로직 통합 및 엔트리 포인트 명칭 정규화 완료.
 - **[프래그먼트 적용]**: `pbrMaterial`, `phongMaterial`, `bitmapMaterial`, `textFieldMaterial` 내 `InputData` 필드명 및 호출부 통일 완료.
 
 ---
@@ -447,14 +447,14 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
     </tr>
     <tr>
       <td><b>Picking System</b></td>
-      <td><code>entryPoint.mesh.entryPointPickingVertex / entryPointPickingFragment</code><br/><code>entryPoint.billboard.entryPointPickingVertex</code><br/><code>entryPoint.empty.entryPointPickingVertex</code></td>
+      <td><code>entryPoint.picking.mesh.entryPointPickingVertex / fragment</code><br/><code>entryPoint.picking.billboard.entryPointPickingVertex</code><br/><code>entryPoint.picking.empty.entryPointPickingVertex</code></td>
       <td align="center">Common</td>
       <td align="center">✅ 완료</td>
       <td><b>[피킹 표준]</b> Mesh/Billboard/Empty 전용 피킹 통합. 기하 변환 로직 차이로 인해 의도적으로 분리 관리.</td>
     </tr>
     <tr>
       <td><b>Billboard System</b></td>
-      <td><code>entryPoint.billboard.entryPointPickingVertex / billboardShadow / ...</code></td>
+      <td><code>entryPoint.picking.billboard.entryPointPickingVertex / entryPoint.shadow.billboard...</code></td>
       <td align="center">Vertex</td>
       <td align="center">✅ 완료</td>
       <td><b>[빌보드 표준]</b> 카메라 정면을 향하는 기저 변환 및 빌보드용 피킹/그림자 셰이더 통합 완료.</td>
@@ -478,11 +478,11 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 
 #### 📂 상세 적용 이력 (System)
 - `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준 함수 구현 및 이동 완료.
-- **[피킹 시스템 통합]**: 분산되어 있던 피킹 셰이더를 `src/systemCodeManager/shader/picking/` 하위의 `mesh/`, `billboard/`, `empty/` 폴더로 구조화하여 통합 완료.
+- **[엔트리 포인트 통합]**: 모든 시스템 엔트리 포인트 셰이더를 `src/systemCodeManager/shader/entryPoint/` 하위로 집결시키고, 객체 타입별(`mesh/`, `billboard/`, `empty/`)로 구조화하여 관리 효율성 확보 완료.
 - **[빌보드 시스템 통합]**: 빌보드 전용 피킹 및 그림자 셰이더를 `SystemCodeManager`를 통해 일원화하여 관리 완료.
 - **[네임스페이스 구축]**: `SystemCodeManager.entryPoint`, `SystemCodeManager.systemStruct` 네임스페이스를 신설하여 시스템 코드를 구조화함.
-- **[구조체 표준화]**: `FragmentOutput` 및 `OutputShadowData`를 `systemStruct`로 통합하여 엔진 전역 인터페이스 일관성 확보 완료.
-- **[레거시 정리]**: `SystemVertexCode` 및 `SystemFragmentCode`에서 중복된 구조체 및 엔트리 포인트를 제거하고 `SystemCodeManager` 상위 레벨로 일원화.
+- **[구조체 표준화]**: `FragmentOutput` 및 `OutputShadowData`를 `systemStruct`로 통합하고, 관련 파일을 `src/systemCodeManager/shader/systemStruct/`로 구조화하여 일관성 확보 완료.
+- **[레거시 정리]**: `SystemVertexCode` 및 `SystemFragmentCode`에서 중복된 구조체 및 엔트리 포인트를 제거하고 `SystemCodeManager`로 일원화.
 - **[모션 벡터 적용]**: 모든 렌더링 프래그먼트 셰이더 적용 완료.
 - **`lighting.getTransmissionRefraction`**: `pbrMaterial` 내 KHR_materials_transmission 구현부 적용 완료. `math.getIsFinite`를 통한 안정성 강화.
 

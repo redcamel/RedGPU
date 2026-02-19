@@ -59,4 +59,4 @@ fn main(inputData: InputData) -> OutputData {
     return output;
 }
 
-#redgpu_include entryPoint.empty.entryPointPickingVertex;
+#redgpu_include entryPoint.picking.empty.entryPointPickingVertex;

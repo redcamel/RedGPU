@@ -59,10 +59,12 @@ import getAnisotropicNDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAni
 import getAnisotropicVisibility_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicVisibility.wgsl';
 import getAnisotropicSpecularBRDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicSpecularBRDF.wgsl';
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
-import meshEntryPointPickingVertex_wgsl from './shader/picking/mesh/entryPointPickingVertex.wgsl';
-import meshEntryPointPickingFragment_wgsl from './shader/picking/mesh/entryPointPickingFragment.wgsl';
-import billboardEntryPointPickingVertex_wgsl from './shader/picking/billboard/entryPointPickingVertex.wgsl';
-import emptyEntryPointPickingVertex_wgsl from './shader/picking/empty/entryPointPickingVertex.wgsl';
+import meshEntryPointPickingVertex_wgsl from './shader/entryPoint/mesh/entryPointPickingVertex.wgsl';
+import meshEntryPointPickingFragment_wgsl from './shader/entryPoint/mesh/entryPointPickingFragment.wgsl';
+import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPointShadowVertex.wgsl';
+import billboardEntryPointPickingVertex_wgsl from './shader/entryPoint/billboard/entryPointPickingVertex.wgsl';
+import billboardEntryPointShadowVertex_wgsl from './shader/entryPoint/billboard/entryPointShadowVertex.wgsl';
+import emptyEntryPointPickingVertex_wgsl from './shader/entryPoint/empty/entryPointPickingVertex.wgsl';
 import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
@@ -213,18 +215,32 @@ export namespace LightingLibrary {
  * [EN] Entry point related shader function library
  */
 export namespace EntryPointLibrary {
-    /** [KO] 메시 피킹 관련 엔트리 포인트 [EN] Mesh picking related entry points */
-    export namespace mesh {
-        export const entryPointPickingVertex = meshEntryPointPickingVertex_wgsl;
-        export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
+    /** [KO] 피킹 관련 엔트리 포인트 [EN] Picking related entry points */
+    export namespace picking {
+        /** [KO] 메시 피킹 [EN] Mesh picking */
+        export namespace mesh {
+            export const entryPointPickingVertex = meshEntryPointPickingVertex_wgsl;
+            export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
+        }
+        /** [KO] 빌보드 피킹 [EN] Billboard picking */
+        export namespace billboard {
+            export const entryPointPickingVertex = billboardEntryPointPickingVertex_wgsl;
+        }
+        /** [KO] 빈 피킹 (미지원 객체용) [EN] Empty picking (for unsupported objects) */
+        export namespace empty {
+            export const entryPointPickingVertex = emptyEntryPointPickingVertex_wgsl;
+        }
     }
-    /** [KO] 빌보드 피킹 관련 엔트리 포인트 [EN] Billboard picking related entry points */
-    export namespace billboard {
-        export const entryPointPickingVertex = billboardEntryPointPickingVertex_wgsl;
-    }
-    /** [KO] 빈 피킹 엔트리 포인트 (미지원 객체용) [EN] Empty picking entry points (for unsupported objects) */
-    export namespace empty {
-        export const entryPointPickingVertex = emptyEntryPointPickingVertex_wgsl;
+    /** [KO] 그림자 관련 엔트리 포인트 [EN] Shadow related entry points */
+    export namespace shadow {
+        /** [KO] 메시 그림자 [EN] Mesh shadow */
+        export namespace mesh {
+            export const entryPointShadowVertex = meshEntryPointShadowVertex_wgsl;
+        }
+        /** [KO] 빌보드 그림자 [EN] Billboard shadow */
+        export namespace billboard {
+            export const entryPointShadowVertex = billboardEntryPointShadowVertex_wgsl;
+        }
     }
 }
 
@@ -274,7 +290,7 @@ export namespace SystemCodeManager {
     export const OutputShadowData = OutputShadowData_wgsl;
     export const calcTintBlendMode = getTintBlendMode_wgsl;
     export const calcDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
-    export const drawDirectionalShadowDepth = SystemFragmentCode.drawDirectionalShadowDepth;
+    export const drawDirectionalShadowDepth = meshEntryPointShadowVertex_wgsl;
     export const calcPrePathBackground = getTransmissionRefraction_wgsl;
     export const calculateMotionVector = getMotionVector_wgsl;
     export const getKHRTextureTransformUV = getKHRTextureTransformUV_wgsl;
@@ -282,7 +298,7 @@ export namespace SystemCodeManager {
     export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
 
     export const billboardPicking = billboardEntryPointPickingVertex_wgsl;
-    export const billboardShadow = SystemVertexCode.billboardShadow;
+    export const billboardShadow = billboardEntryPointShadowVertex_wgsl;
     export const calcBillboard = SystemVertexCode.calcBillboard;
     export const calcDisplacements = SystemVertexCode.calcDisplacements;
     export const getBillboardMatrix = SystemVertexCode.getBillboardMatrix;

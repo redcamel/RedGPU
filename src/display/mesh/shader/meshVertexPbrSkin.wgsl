@@ -143,7 +143,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 }
 
 @vertex
-fn drawDirectionalShadowDepth(inputData: InputDataSkin) -> OutputShadowData {
+fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
 
     // System uniforms
