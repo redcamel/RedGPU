@@ -46,8 +46,16 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - **Vertex Normal Scale**: 노멀 맵이 없을 때에도 `-u_normalScale`을 적용하여 `NdotV` 및 `Iridescence` 각도 왜곡을 방지하도록 `pbr/phong` 재질 동기화 완료.
     - **Iridescence Logic**: 비물리적/수학적 오류(분모 제곱 누락, 임의 보정 등)를 제거하고 표준 물리 공식으로 복구 완료.
 
+### 7. 물리 기반 투과 및 굴절 표준 (Transmission & Refraction)
+*   **대상**: `lighting.getTransmissionRefraction`
+*   **결과**: ✅ 완료.
+    - `KHR_materials_transmission` 및 `volume` 확장 표준 규격 준수 확인.
+    - `math.getIsFinite`를 도입하여 NaN/Inf에 의한 픽셀 오염 방지 로직 통합.
+    - RGB 분산(Dispersion) 처리 시 채널별 IOR 안전 범위(min 1.0001) 적용 확인.
+    - WebGPU 스크린 좌표계 보정(`1.0 - uv.y`)이 굴절 UV 계산에 올바르게 반영됨을 검증.
+
 ---
 
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
-- **2026-02-19**: 전 항목 점검 완료 및 라이브러리/재질 동기화 완료.
+- **2026-02-19**: 전 항목 점검 완료 및 `lighting.getTransmissionRefraction` 통합 완료.
