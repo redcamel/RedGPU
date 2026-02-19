@@ -82,7 +82,6 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 | **Bitcast Hash (Bit)** | `math.hash.getBitHashXX` | ✅ 완료 | **[고정밀 난수]** IEEE 754 비트 레벨 조작 해시. 극소량의 변화에도 민감한 난수가 필요한 고품질 노이즈용. |
 | **Dither Noise** | `math.getInterleavedGradientNoise` | ✅ 완료 | **[성능 특화]** Jorge Jimenez 알고리즘. SSAO, SSR의 샘플링 노이즈 제거를 위한 초고속 디더링. |
 | **Safe Math** | `math.safeDivision` | **Medium** | **[안정성]** 0 나누기 방지 유틸리티. 분모가 0에 근접할 때 EPSILON으로 보정하여 NaN 에러 방어. |
-| **UV Transform** | `getKHRTextureTransformUV` | ✅ 완료 | **[좌표 표준화]** KHR_texture_transform 기반 Offset, Scale, Rotation 통합 변환. |
 
 #### 📂 상세 적용 이력 (Math)
 - `pbrMaterial`, `phongMaterial`, `filmGrain`, `skyAtmosphere`, `zoomBlur`, `ssao_ao`, `particle/compute.wgsl` 적용 완료.
@@ -152,7 +151,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 | **Direct Light** | `lighting.getLightDirectContribution` | **High** | **[직접광 통합]** 모든 재질의 최종 조명 에너지 합산 인터페이스 단일화. 엔진 차원의 조명 누수 방어. |
 | **BTDF Utils** | `lighting.getSpecularBTDF / getDiffuseBTDF` | ✅ 완료 | **[투과 모델]** Transmission 확장을 위한 굴절 및 확산 투과 계산식 모듈화. |
 | **Fresnel Utils** | `lighting.getFresnelXxx / getConductorFresnel / getIridescentFresnel` | ✅ 완료 | **[프레넬 표준]** Schlick, Conductor, Iridescent 등 재질별 특성 분리. |
-| **Transmission** | `lighting.getTransmissionRefraction` | ✅ 완료 | **[투과 굴절]** KHR_materials_transmission 기반 배경 굴절 샘플링. |
+| **Transmission** | `lighting.getTransmissionRefraction` | ✅ 완료 | **[투과 굴절]** 배경 굴절 샘플링 및 분산(Dispersion) 처리. (범용 광학 함수) |
 | **Anisotropy Spec** | `lighting.getAnisotropyGGX` | **High** | **[이방성]** 이방성 GGX 분포 및 가시성 함수 통합 예정. PBR 확장 필수 로직. |
 | **Sheen Model** | `lighting.getSheenCharlie` | **High** | **[패브릭 조명]** Charlie Sheen 모델 기반 조명 라이브러리화 예정. |
 
@@ -194,6 +193,13 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 - **셰이더 바리안트**: 템플릿 리터럴을 활용하여 `texture_depth_multisampled_2d`와 `texture_depth_2d`를 조건부 선언합니다.
 - **데이터 로드**: `fetchDepth`와 같은 헬퍼 함수를 통해 `textureLoad(depthTexture, pos, 0)` 등 샘플 인덱스 처리를 캡슐화합니다.
 - **리소스 캐싱**: `useMSAA` 상태별로 `BindGroupLayout` 및 `Pipeline`을 캐싱하여 런타임 상태 변화에 따른 오버헤드를 최소화합니다.
+
+---
+
+### 9. glTF KHR Extensions (KHR 표준 확장)
+| 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
+| :--- | :--- | :---: | :--- |
+| **Texture Transform** | `KHR.getKHRTextureTransformUV` | ✅ 완료 | **[좌표 표준화]** `KHR_texture_transform` 규격 기반 TRS 행렬 합성. |
 
 ---
 

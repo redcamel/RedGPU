@@ -29,7 +29,6 @@ import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTang
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
 import getNormalFromNormalMap_wgsl from './shader/math/tnb/getNormalFromNormalMap.wgsl';
-import getKHRTextureTransformUV_wgsl from './shader/getKHRTextureTransformUV.wgsl';
 import rgb_to_ycocg_wgsl from './shader/color/rgb_to_ycocg.wgsl';
 import ycocg_to_rgb_wgsl from './shader/color/ycocg_to_rgb.wgsl';
 import linear_to_srgb_vec3_wgsl from './shader/color/linear_to_srgb_vec3.wgsl';
@@ -51,6 +50,7 @@ import diffuseBTDF_wgsl from './shader/lighting/getDiffuseBTDF.wgsl';
 import fresnelMix_wgsl from './shader/lighting/getFresnelMix.wgsl';
 import fresnelCoat_wgsl from './shader/lighting/getFresnelCoat.wgsl';
 import getIsFinite_wgsl from './shader/math/getIsFinite.wgsl';
+import getKHRTextureTransformUV_wgsl from './shader/KHR/getKHRTextureTransformUV.wgsl';
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
@@ -115,6 +115,15 @@ export namespace MathLibrary {
     export const RAD_TO_DEG = 'const RAD_TO_DEG: f32 = 57.29577951308232;';
     export const EPSILON = 'const EPSILON: f32 = 1e-6;';
     export const FLT_MAX = 'const FLT_MAX: f32 = 3.402823466e+38;';
+}
+
+/**
+ * [KO] glTF KHR 확장 관련 셰이더 함수 라이브러리
+ * [EN] Shader function library for glTF KHR extensions
+ */
+export namespace KHRLibrary {
+    /** [KO] KHR_texture_transform [EN] KHR_texture_transform */
+    export const getKHRTextureTransformUV = getKHRTextureTransformUV_wgsl;
 }
 
 /**
@@ -191,6 +200,8 @@ export namespace SystemCodeManager {
     export import depth = DepthLibrary;
     /** [KO] 조명 및 BRDF 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for lighting and BRDF. */
     export import lighting = LightingLibrary;
+    /** [KO] glTF KHR 확장 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for glTF KHR extensions. */
+    export import KHR = KHRLibrary;
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
     export const vertex = SystemVertexCode;

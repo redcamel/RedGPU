@@ -16,7 +16,7 @@
 #redgpu_include math.tnb.getTBN
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap;
-#redgpu_include getKHRTextureTransformUV;
+#redgpu_include KHR.getKHRTextureTransformUV;
 #redgpu_include lighting.getDiffuseBRDFDisney;
 #redgpu_include lighting.getFresnelSchlick
 #redgpu_include lighting.getConductorFresnel
