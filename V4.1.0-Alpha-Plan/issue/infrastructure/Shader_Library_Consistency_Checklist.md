@@ -65,4 +65,4 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
-- **2026-02-19**: 전 항목 점검 완료 및 `getKHRTextureTransformUV` 통합 완료.
+- **2026-02-19**: 전 항목 점검 완료 및 `lighting.getTransmissionRefraction`, `KHR.KHR_texture_transform.getKHRTextureTransformUV` 통합 완료.

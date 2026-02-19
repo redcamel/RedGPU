@@ -86,7 +86,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 #### 📂 상세 적용 이력 (Math)
 - `pbrMaterial`, `phongMaterial`, `filmGrain`, `skyAtmosphere`, `zoomBlur`, `ssao_ao`, `particle/compute.wgsl` 적용 완료.
 - `src/systemCodeManager/shader/depth/getLinearizeDepth.wgsl`: `math.EPSILON` 재귀 인클루드 적용.
-- `src/systemCodeManager/shader/KHR/texture_transform/getKHRTextureTransformUV.wgsl`: glTF 표준 확장 통합 및 `pbrMaterial` 적용 완료. (KHR 전용 확장 라이브러리)
+- `src/systemCodeManager/shader/KHR/KHR_texture_transform/getKHRTextureTransformUV.wgsl`: glTF 표준 확장 통합 및 `pbrMaterial` 적용 완료. (KHR 전용 확장 라이브러리)
 
 ---
 
@@ -153,7 +153,6 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 | **Fresnel Utils** | `lighting.getFresnelXxx / getConductorFresnel / getIridescentFresnel` | ✅ 완료 | **[프레넬 표준]** Schlick, Conductor, Iridescent 등 재질별 특성 분리. |
 | **Transmission** | `lighting.getTransmissionRefraction` | ✅ 완료 | **[투과 굴절]** 배경 굴절 샘플링 및 분산(Dispersion) 처리. (범용 광학 함수) |
 | **Anisotropy Spec** | `lighting.getAnisotropyGGX` | **High** | **[이방성]** 이방성 GGX 분포 및 가시성 함수 통합 예정. PBR 확장 필수 로직. |
-| **Sheen Model** | `lighting.getSheenCharlie` | **High** | **[패브릭 조명]** Charlie Sheen 모델 기반 조명 라이브러리화 예정. |
 
 #### 📂 상세 적용 이력 (Lighting)
 - `src/systemCodeManager/shader/lighting/getLightDistanceAttenuation.wgsl`: 표준 감쇄 함수 구현 및 $Radius^2$ 보정 적용 완료.
@@ -199,7 +198,8 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 ### 9. glTF KHR Extensions (KHR 표준 확장)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **Texture Transform** | `KHR.texture_transform.getKHRTextureTransformUV` | ✅ 완료 | **[좌표 표준화]** `KHR_texture_transform` 규격 기반 TRS 행렬 합성. |
+| **Texture Transform** | `KHR.KHR_texture_transform.getKHRTextureTransformUV` | ✅ 완료 | **[좌표 표준화]** `KHR_texture_transform` 규격 기반 TRS 행렬 합성. |
+| **Sheen Charlie** | `KHR.KHR_materials_sheen.getSheenIBL` | ✅ 완료 | **[천 재질]** `KHR_materials_sheen` 규격 기반 Charlie 모델 통합 연산. |
 
 ---
 
