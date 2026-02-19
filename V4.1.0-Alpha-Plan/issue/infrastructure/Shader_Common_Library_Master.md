@@ -81,12 +81,13 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 | **Stable Hash (Grid)** | `math.hash.getHashXX` | ✅ 완료 | **[절차적 생성]** 정수 변환 기반의 안정적인 해시. GPU 아키텍처와 무관한 동일 격자 패턴 보장. |
 | **Bitcast Hash (Bit)** | `math.hash.getBitHashXX` | ✅ 완료 | **[고정밀 난수]** IEEE 754 비트 레벨 조작 해시. 극소량의 변화에도 민감한 난수가 필요한 고품질 노이즈용. |
 | **Dither Noise** | `math.getInterleavedGradientNoise` | ✅ 완료 | **[성능 특화]** Jorge Jimenez 알고리즘. SSAO, SSR의 샘플링 노이즈 제거를 위한 초고속 디더링. |
-| **Safe Math** | `math.safeDivision` | **Medium** | **[안정성]** 0 나누기 방지 유틸리티. 분모가 0에 근접할 때 EPSILON으로 보정하여 NaN 에러 방어. |
+| **Safe Math** | `math.safeDivision` | ✅ 완료 | **[안정성]** 0 나누기 방지 표준화. 모든 나눗셈 분모에 `math.EPSILON` 방어 로직 적용 및 매직 넘버 제거. |
 
 #### 📂 상세 적용 이력 (Math)
 - `pbrMaterial`, `phongMaterial`, `filmGrain`, `skyAtmosphere`, `zoomBlur`, `ssao_ao`, `particle/compute.wgsl` 적용 완료.
 - `src/systemCodeManager/shader/depth/getLinearizeDepth.wgsl`: `math.EPSILON` 재귀 인클루드 적용.
 - `src/systemCodeManager/shader/KHR/KHR_texture_transform/getKHRTextureTransformUV.wgsl`: glTF 표준 확장 통합 및 `pbrMaterial` 적용 완료. (KHR 전용 확장 라이브러리)
+- **[수치 안정성 강화]**: `lighting`, `color`, `KHR` 라이브러리 내 파편화된 매직 넘버(`0.0001`, `0.001` 등)를 `math.EPSILON`으로 통일 및 분모 방어 로직 전역 적용 완료.
 
 ---
 
