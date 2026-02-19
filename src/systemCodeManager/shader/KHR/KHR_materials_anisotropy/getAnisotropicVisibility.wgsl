@@ -1,3 +1,5 @@
+#redgpu_include math.EPSILON
+
 /**
  * [KO] 이방성 GGX 스펙큘러 BRDF를 위한 가시성(Visibility) 항을 계산합니다.
  * [EN] Calculates the Visibility term for Anisotropic GGX specular BRDF.
@@ -18,6 +20,6 @@ fn getAnisotropicVisibility(
 ) -> f32 {
    let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
    let GGXL = NdotV * length(vec3<f32>(at * TdotL, ab * BdotL, NdotL));
-   let v = 0.5 / (GGXV + GGXL);
+   let v = 0.5 / max(GGXV + GGXL, EPSILON);
    return clamp(v, 0.0, 1.0);
 }

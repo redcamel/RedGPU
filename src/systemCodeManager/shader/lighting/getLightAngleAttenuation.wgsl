@@ -1,3 +1,5 @@
+#redgpu_include math.EPSILON
+
 /**
  * [KO] 스폿라이트의 각도(원뿔)에 따른 감쇄 계수를 계산합니다.
  * [EN] Calculates the attenuation factor according to the angle (cone) of the spotlight.
@@ -33,12 +35,12 @@ fn getLightAngleAttenuation(
     
     // [KO] 스폿라이트 감쇄 수식 (glTF 2.0 표준)
     // [EN] Spotlight attenuation formula (glTF 2.0 standard)
-    // scale = 1.0 / max(0.001, cosInner - cosOuter)
+    // scale = 1.0 / max(EPSILON, cosInner - cosOuter)
     // offset = -cosOuter * scale
     // factor = clamp(cosTheta * scale + offset, 0.0, 1.0)
     // result = factor * factor (더 부드러운 감쇄를 위해 제곱 적용)
     
-    let epsilon = max(0.001, cosInner - cosOuter);
+    let epsilon = max(EPSILON, cosInner - cosOuter);
     let factor = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
     return factor * factor;
 }

@@ -1,3 +1,5 @@
+#redgpu_include math.EPSILON
+
 /**
  * [KO] 거리 제곱에 반비례하는 물리적 광원 감쇄 계수를 계산합니다.
  * [EN] Calculates the physical light attenuation factor inversely proportional to the square of the distance.
@@ -28,5 +30,5 @@ fn getLightDistanceAttenuation(distance: f32, radius: f32) -> f32 {
     
     // [KO] 정규화된 역제곱 법칙 적용 (Radius^2 / d^2)
     // [EN] Apply normalized inverse square law (Radius^2 / d^2)
-    return (windowing * windowing) * r2 / max(d2, 0.0001);
+    return (windowing * windowing) * r2 / max(d2, EPSILON);
 }

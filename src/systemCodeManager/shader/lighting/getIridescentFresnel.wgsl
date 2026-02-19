@@ -1,4 +1,5 @@
 #redgpu_include math.PI2
+#redgpu_include math.EPSILON
 
 /**
  * [KO] 박막 간섭(Thin-film interference) 효과를 시뮬레이션하는 고정밀 무지개빛 프레넬을 계산합니다.
@@ -51,12 +52,12 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
     let outsideCos2 = outsideIOR * cosTheta2;
 
     // 프레넬 계수 (스칼라)
-    let r12_s = (outsideCos1 - iridescenceCos2) / (outsideCos1 + iridescenceCos2);
-    let r12_p = (iridescenceCos1 - outsideCos2) / (iridescenceCos1 + outsideCos2);
+    let r12_s = (outsideCos1 - iridescenceCos2) / max(outsideCos1 + iridescenceCos2, EPSILON);
+    let r12_p = (iridescenceCos1 - outsideCos2) / max(iridescenceCos1 + outsideCos2, EPSILON);
 
     // 기본 F0에서 굴절률 추출 (벡터화)
     let sqrtF0 = sqrt(clamp(baseF0, vec3<f32>(0.01), vec3<f32>(0.99)));
-    let safeN3 = max((1.0 + sqrtF0) / (1.0 - sqrtF0), vec3<f32>(1.2));
+    let safeN3 = max((1.0 + sqrtF0) / max(1.0 - sqrtF0, vec3<f32>(EPSILON)), vec3<f32>(1.2));
 
     // r23 계산 (벡터화)
     let iridescenceCos2Vec = vec3<f32>(iridescenceCos2);
@@ -65,9 +66,9 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
     let cosTheta2Vec = vec3<f32>(cosTheta2);
 
     let r23_s = (iridescenceCos2Vec - safeN3 * cosTheta1AbsVec) /
-                (iridescenceCos2Vec + safeN3 * cosTheta1AbsVec);
+                max(iridescenceCos2Vec + safeN3 * cosTheta1AbsVec, vec3<f32>(EPSILON));
     let r23_p = (safeN3 * cosTheta2Vec - iridescenceCos1Vec) /
-                (safeN3 * cosTheta2Vec + iridescenceCos1Vec);
+                max(safeN3 * cosTheta2Vec + iridescenceCos1Vec, vec3<f32>(EPSILON));
 
     // 복소수 계산을 위한 공통 값들
     let r12_sVec = vec3<f32>(r12_s);
@@ -87,14 +88,14 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
 
     // 복소수 나눗셈 인라인 계산 (S-편광)
     let denSSquared = denSReal * denSReal + denSImag * denSImag;
-    let rsReal = (numSReal * denSReal + numSImag * denSImag) / denSSquared;
-    let rsImag = (numSImag * denSReal - numSReal * denSImag) / denSSquared;
+    let rsReal = (numSReal * denSReal + numSImag * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
+    let rsImag = (numSImag * denSReal - numSReal * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
     let Rs = rsReal * rsReal + rsImag * rsImag;
 
     // 복소수 나눗셈 인라인 계산 (P-편광)
     let denPSquared = denPReal * denPReal + denPImag * denPImag;
-    let rpReal = (numPReal * denPReal + numPImag * denPImag) / denPSquared;
-    let rpImag = (numPImag * denPReal - numPReal * denPImag) / denPSquared;
+    let rpReal = (numPReal * denPReal + numPImag * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
+    let rpImag = (numPImag * denPReal - numPReal * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
     let Rp = rpReal * rpReal + rpImag * rpImag;
 
     // 전체 반사율
