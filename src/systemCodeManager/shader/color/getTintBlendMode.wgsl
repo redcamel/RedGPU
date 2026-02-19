@@ -8,30 +8,30 @@ fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
     let maxVal: f32 = max(max(rgb.r, rgb.g), rgb.b);
     let minVal: f32 = min(min(rgb.r, rgb.g), rgb.b);
     let delta: f32 = maxVal - minVal;
-    let eps = EPSILON;
+    let EPSILON = EPSILON;
 
     let lightness: f32 = (maxVal + minVal) * 0.5;
 
-    if (delta < eps) {
+    if (delta < EPSILON) {
         return vec3<f32>(0.0, 0.0, lightness);
     }
 
     // Saturation 계산
     var saturation: f32;
     if (lightness < 0.5) {
-        saturation = delta / (maxVal + minVal + eps);
+        saturation = delta / (maxVal + minVal + EPSILON);
     } else {
-        saturation = delta / (2.0 - maxVal - minVal + eps);
+        saturation = delta / (2.0 - maxVal - minVal + EPSILON);
     }
 
     // Hue 계산 (부동소수점 비교 개선)
     var hue: f32 = 0.0;
-    if (abs(rgb.r - maxVal) < eps) {
+    if (abs(rgb.r - maxVal) < EPSILON) {
         hue = (rgb.g - rgb.b) / delta;
         if (rgb.g < rgb.b) {
             hue += 6.0;
         }
-    } else if (abs(rgb.g - maxVal) < eps) {
+    } else if (abs(rgb.g - maxVal) < EPSILON) {
         hue = (rgb.b - rgb.r) / delta + 2.0;
     } else {
         hue = (rgb.r - rgb.g) / delta + 4.0;
@@ -130,7 +130,6 @@ fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
  */
 fn get_tint_blend_mode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
     var tintedColor: vec3<f32>;
-    let eps = EPSILON; // 0으로 나누기 방지용 작은 값
 
     switch (tintBlendMode) {
         case 0u: { // NORMAL
@@ -162,10 +161,10 @@ fn get_tint_blend_mode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>
             );
         }
         case 8u: { // COLOR_DODGE
-            tintedColor = clamp(baseColor.rgb / (1.0 - tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
+            tintedColor = clamp(baseColor.rgb / (1.0 - tint.rgb + EPSILON), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 9u: { // COLOR_BURN
-            tintedColor = 1.0 - clamp((1.0 - baseColor.rgb) / (tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
+            tintedColor = 1.0 - clamp((1.0 - baseColor.rgb) / (tint.rgb + EPSILON), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 10u: { // HARD_LIGHT
             tintedColor = mix(
@@ -188,12 +187,12 @@ fn get_tint_blend_mode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>
             tintedColor = baseColor.rgb + tint.rgb - 2.0 * baseColor.rgb * tint.rgb;
         }
         case 14u: { // DIVIDE
-            tintedColor = clamp(baseColor.rgb / (tint.rgb + eps), vec3<f32>(0.0), vec3<f32>(1.0));
+            tintedColor = clamp(baseColor.rgb / (tint.rgb + EPSILON), vec3<f32>(0.0), vec3<f32>(1.0));
         }
         case 15u: { // VIVID_LIGHT
             tintedColor = mix(
-                clamp(baseColor.rgb / (1.0 - (tint.rgb - vec3<f32>(0.5)) * 2.0 + eps), vec3<f32>(0.0), vec3<f32>(1.0)),
-                1.0 - clamp((1.0 - baseColor.rgb) / (tint.rgb * 2.0 + eps), vec3<f32>(0.0), vec3<f32>(1.0)),
+                clamp(baseColor.rgb / (1.0 - (tint.rgb - vec3<f32>(0.5)) * 2.0 + EPSILON), vec3<f32>(0.0), vec3<f32>(1.0)),
+                1.0 - clamp((1.0 - baseColor.rgb) / (tint.rgb * 2.0 + EPSILON), vec3<f32>(0.0), vec3<f32>(1.0)),
                 step(vec3<f32>(0.5), tint.rgb)
             );
         }

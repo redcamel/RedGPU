@@ -1,3 +1,5 @@
+#redgpu_include math.EPSILON
+
 /**
  * [KO] Charlie Sheen 모델의 DFG(Distribution, Fresnel, Geometry) 통합 항을 계산합니다.
  * [EN] Calculates the integrated DFG term for the Charlie Sheen model.
@@ -13,7 +15,7 @@ fn getSheenCharlieDFG(NdotV: f32, roughness: f32) -> f32 {
 
     let r = clamp(roughness, 0.01, 1.0);
     let grazingFactor = 1.0 - NdotV;
-    let roughnessExp = 1.0 / max(r, 0.1);
+    let roughnessExp = 1.0 / max(r, EPSILON);
     let distribution = pow(grazingFactor, roughnessExp);
     let intensity = pow(roughnessExp, 0.5);
 

@@ -1,5 +1,6 @@
 #redgpu_include math.direction.getReflectionVectorFromViewDirection
 #redgpu_include math.getIsFinite
+#redgpu_include math.EPSILON
 
 /**
  * [KO] 굴절 및 투과 효과를 위해 배경(RenderPath1) 데이터를 샘플링하여 최종 투과 굴절 색상을 계산합니다.
@@ -51,9 +52,9 @@ fn getTransmissionRefraction(
         }
 
         // IOR 값 안전 범위 제한 (1.0 이상)
-        iorR = max(iorR, 1.0001);
-        iorG = max(iorG, 1.0001);
-        iorB = max(iorB, 1.0001);
+        iorR = max(iorR, 1.0 + EPSILON);
+        iorG = max(iorG, 1.0 + EPSILON);
+        iorB = max(iorB, 1.0 + EPSILON);
 
         // 굴절 벡터 계산
         let refractedVecR: vec3<f32> = refract(-V, N, 1.0 / iorR);
@@ -84,9 +85,9 @@ fn getTransmissionRefraction(
         let clipPosB: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPosB, 1.0);
 
         // 0으로 나누기 방지
-        let wR = max(abs(clipPosR.w), 0.0001);
-        let wG = max(abs(clipPosG.w), 0.0001);
-        let wB = max(abs(clipPosB.w), 0.0001);
+        let wR = max(abs(clipPosR.w), EPSILON);
+        let wG = max(abs(clipPosG.w), EPSILON);
+        let wB = max(abs(clipPosB.w), EPSILON);
 
         let ndcR: vec2<f32> = clipPosR.xy / wR * 0.5 + 0.5;
         let ndcG: vec2<f32> = clipPosG.xy / wG * 0.5 + 0.5;
@@ -109,7 +110,7 @@ fn getTransmissionRefraction(
 
     } else {
         // IOR 값 안전 범위 제한
-        let safeIor = max(ior, 1.0001);
+        let safeIor = max(ior, 1.0 + EPSILON);
 
         let refractedVec: vec3<f32> = refract(-V, N, 1.0 / safeIor);
 
@@ -125,7 +126,7 @@ fn getTransmissionRefraction(
         let clipPos: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPos, 1.0);
 
         // 0으로 나누기 방지
-        let w = max(abs(clipPos.w), 0.0001);
+        let w = max(abs(clipPos.w), EPSILON);
         let ndc: vec2<f32> = clipPos.xy / w * 0.5 + 0.5;
 
         // UV 범위 제한
