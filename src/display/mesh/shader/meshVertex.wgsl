@@ -1,7 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getShadowCoord;
 #redgpu_include drawDirectionalShadowDepth;
-#redgpu_include picking;
+#redgpu_include entryPointPickingVertex;
 #redgpu_include calcDisplacements;
 
 #redgpu_include meshVertexBasicUniform;

@@ -59,6 +59,8 @@ import getAnisotropicNDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAni
 import getAnisotropicVisibility_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicVisibility.wgsl';
 import getAnisotropicSpecularBRDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicSpecularBRDF.wgsl';
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
+import entryPointPickingVertex_wgsl from './shader/picking/entryPointPickingVertex.wgsl';
+import entryPointPickingFragment_wgsl from './shader/picking/entryPointPickingFragment.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -203,6 +205,15 @@ export namespace LightingLibrary {
 }
 
 /**
+ * [KO] 엔트리 포인트 관련 셰이더 함수 라이브러리
+ * [EN] Entry point related shader function library
+ */
+export namespace EntryPointLibrary {
+    export const entryPointPickingVertex = entryPointPickingVertex_wgsl;
+    export const entryPointPickingFragment = entryPointPickingFragment_wgsl;
+}
+
+/**
  * [KO] 엔진 시스템에서 전역적으로 사용되는 셰이더 코드 및 공통 라이브러리를 통합 관리하는 레지스트리입니다.
  * [EN] A registry that integrates and manages shader code and common libraries used globally in the engine.
  * 
@@ -222,6 +233,8 @@ export namespace SystemCodeManager {
     export import depth = DepthLibrary;
     /** [KO] 조명 및 BRDF 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for lighting and BRDF. */
     export import lighting = LightingLibrary;
+    /** [KO] 엔트리 포인트 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for entry points. */
+    export import entryPoint = EntryPointLibrary;
     /** [KO] glTF KHR 확장 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for glTF KHR extensions. */
     export import KHR = KHRLibrary;
 
@@ -238,8 +251,8 @@ export namespace SystemCodeManager {
     export const calcPrePathBackground = getTransmissionRefraction_wgsl;
     export const calculateMotionVector = getMotionVector_wgsl;
     export const getKHRTextureTransformUV = getKHRTextureTransformUV_wgsl;
-    export const picking = SystemFragmentCode.picking;
-    export const drawPicking = SystemFragmentCode.drawPicking;
+    export const entryPointPickingVertex = entryPointPickingVertex_wgsl;
+    export const entryPointPickingFragment = entryPointPickingFragment_wgsl;
 
     export const billboardPicking = SystemVertexCode.billboardPicking;
     export const billboardShadow = SystemVertexCode.billboardShadow;

@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcTintBlendMode;
-#redgpu_include drawPicking;
+#redgpu_include entryPointPickingFragment;
 #redgpu_include FragmentOutput;
 
 struct Uniforms {

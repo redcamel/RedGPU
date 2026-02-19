@@ -9,4 +9,3 @@ const SystemCode = Object.freeze({
 })
 Object.freeze(SystemCode)
 export default SystemCode
-
