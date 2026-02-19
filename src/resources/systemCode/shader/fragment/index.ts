@@ -1,6 +1,6 @@
 import drawDirectionalShadowDepth from '../../../../display/mesh/shader/core/drawDirectionalShadowDepth.wgsl'
-import picking from '../../../../display/mesh/shader/core/picking.wgsl'
-import drawPicking from './drawPicking.wgsl'
+import picking from '../../../../display/mesh/shader/core/entryPointPickingVertex.wgsl'
+import entryPointPickingFragment from './entryPointPickingFragment.wgsl'
 import FragmentOutput from './fragmentOutput.wgsl'
 
 const SystemFragmentCode = Object.freeze({
@@ -8,7 +8,7 @@ const SystemFragmentCode = Object.freeze({
     FragmentOutput,
     //
     picking,
-    drawPicking,
+    drawPicking: entryPointPickingFragment,
 })
 Object.freeze(SystemFragmentCode)
 export default SystemFragmentCode

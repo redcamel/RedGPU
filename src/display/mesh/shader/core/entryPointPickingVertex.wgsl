@@ -1,5 +1,5 @@
 @vertex
-fn picking(inputData: InputData) -> OutputData {
+fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     var output: OutputData;
     let input_position = inputData.position;
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
