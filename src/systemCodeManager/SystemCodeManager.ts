@@ -50,7 +50,7 @@ import diffuseBTDF_wgsl from './shader/lighting/getDiffuseBTDF.wgsl';
 import fresnelMix_wgsl from './shader/lighting/getFresnelMix.wgsl';
 import fresnelCoat_wgsl from './shader/lighting/getFresnelCoat.wgsl';
 import getIsFinite_wgsl from './shader/math/getIsFinite.wgsl';
-import getKHRTextureTransformUV_wgsl from './shader/KHR/getKHRTextureTransformUV.wgsl';
+import getKHRTextureTransformUV_wgsl from './shader/KHR/texture_transform/getKHRTextureTransformUV.wgsl';
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
@@ -123,7 +123,9 @@ export namespace MathLibrary {
  */
 export namespace KHRLibrary {
     /** [KO] KHR_texture_transform [EN] KHR_texture_transform */
-    export const getKHRTextureTransformUV = getKHRTextureTransformUV_wgsl;
+    export namespace texture_transform {
+        export const getKHRTextureTransformUV = getKHRTextureTransformUV_wgsl;
+    }
 }
 
 /**

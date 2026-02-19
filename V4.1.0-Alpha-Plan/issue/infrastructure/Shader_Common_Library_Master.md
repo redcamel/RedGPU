@@ -86,7 +86,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 #### 📂 상세 적용 이력 (Math)
 - `pbrMaterial`, `phongMaterial`, `filmGrain`, `skyAtmosphere`, `zoomBlur`, `ssao_ao`, `particle/compute.wgsl` 적용 완료.
 - `src/systemCodeManager/shader/depth/getLinearizeDepth.wgsl`: `math.EPSILON` 재귀 인클루드 적용.
-- `src/systemCodeManager/shader/getKHRTextureTransformUV.wgsl`: glTF 표준 확장 통합 및 `pbrMaterial` 적용 완료. (System 최상위 유틸리티)
+- `src/systemCodeManager/shader/KHR/texture_transform/getKHRTextureTransformUV.wgsl`: glTF 표준 확장 통합 및 `pbrMaterial` 적용 완료. (KHR 전용 확장 라이브러리)
 
 ---
 
@@ -199,7 +199,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 ### 9. glTF KHR Extensions (KHR 표준 확장)
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
-| **Texture Transform** | `KHR.getKHRTextureTransformUV` | ✅ 완료 | **[좌표 표준화]** `KHR_texture_transform` 규격 기반 TRS 행렬 합성. |
+| **Texture Transform** | `KHR.texture_transform.getKHRTextureTransformUV` | ✅ 완료 | **[좌표 표준화]** `KHR_texture_transform` 규격 기반 TRS 행렬 합성. |
 
 ---
 
