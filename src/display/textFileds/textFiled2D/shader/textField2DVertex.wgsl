@@ -73,7 +73,7 @@ fn main(inputData: InputData) -> OutputData {
 }
 
 @vertex
-fn picking(inputData: InputData) -> OutputData {
+fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     var output: OutputData;
 
     // 시스템 Uniform 변수 가져오기

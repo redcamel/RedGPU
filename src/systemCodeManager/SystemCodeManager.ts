@@ -59,8 +59,9 @@ import getAnisotropicNDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAni
 import getAnisotropicVisibility_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicVisibility.wgsl';
 import getAnisotropicSpecularBRDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicSpecularBRDF.wgsl';
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
-import entryPointPickingVertex_wgsl from './shader/picking/entryPointPickingVertex.wgsl';
-import entryPointPickingFragment_wgsl from './shader/picking/entryPointPickingFragment.wgsl';
+import meshEntryPointPickingVertex_wgsl from './shader/picking/mesh/entryPointPickingVertex.wgsl';
+import meshEntryPointPickingFragment_wgsl from './shader/picking/mesh/entryPointPickingFragment.wgsl';
+import billboardEntryPointPickingVertex_wgsl from './shader/picking/billboard/entryPointPickingVertex.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -209,8 +210,15 @@ export namespace LightingLibrary {
  * [EN] Entry point related shader function library
  */
 export namespace EntryPointLibrary {
-    export const entryPointPickingVertex = entryPointPickingVertex_wgsl;
-    export const entryPointPickingFragment = entryPointPickingFragment_wgsl;
+    /** [KO] 메시 피킹 관련 엔트리 포인트 [EN] Mesh picking related entry points */
+    export namespace mesh {
+        export const entryPointPickingVertex = meshEntryPointPickingVertex_wgsl;
+        export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
+    }
+    /** [KO] 빌보드 피킹 관련 엔트리 포인트 [EN] Billboard picking related entry points */
+    export namespace billboard {
+        export const entryPointPickingVertex = billboardEntryPointPickingVertex_wgsl;
+    }
 }
 
 /**
@@ -251,10 +259,10 @@ export namespace SystemCodeManager {
     export const calcPrePathBackground = getTransmissionRefraction_wgsl;
     export const calculateMotionVector = getMotionVector_wgsl;
     export const getKHRTextureTransformUV = getKHRTextureTransformUV_wgsl;
-    export const entryPointPickingVertex = entryPointPickingVertex_wgsl;
-    export const entryPointPickingFragment = entryPointPickingFragment_wgsl;
+    export const entryPointPickingVertex = meshEntryPointPickingVertex_wgsl;
+    export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
 
-    export const billboardPicking = SystemVertexCode.billboardPicking;
+    export const billboardPicking = billboardEntryPointPickingVertex_wgsl;
     export const billboardShadow = SystemVertexCode.billboardShadow;
     export const calcBillboard = SystemVertexCode.calcBillboard;
     export const calcDisplacements = SystemVertexCode.calcDisplacements;

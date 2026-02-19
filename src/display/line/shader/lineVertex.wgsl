@@ -62,7 +62,7 @@ fn main(inputData: InputData) -> OutputData {
 }
 
 @vertex
-fn picking(inputData: InputData) -> OutputData {
+fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     //TODO 일단 두께지원을 안하니 나중에 개선
     var output: OutputData;
     return output;

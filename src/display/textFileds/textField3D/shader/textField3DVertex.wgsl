@@ -1,7 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include getBillboardMatrix;
 #redgpu_include calcBillboard;
-#redgpu_include billboardPicking;
+#redgpu_include vertex.entryPointPickingVertex;
 #redgpu_include billboardShadow;
 
 struct MatrixList{

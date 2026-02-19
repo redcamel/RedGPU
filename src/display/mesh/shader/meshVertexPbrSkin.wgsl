@@ -166,7 +166,7 @@ let skinMat = vertexStorages[inputData.idx];
 }
 
 @vertex
-fn picking(inputData: InputDataSkin) -> OutputDataSkin {
+fn entryPointPickingVertex(inputData: InputDataSkin) -> OutputDataSkin {
     var output: OutputDataSkin;
 
     // System uniforms
