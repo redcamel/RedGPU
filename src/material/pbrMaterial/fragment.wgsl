@@ -2,7 +2,7 @@
 #redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include color.getTintBlendMode;
 #redgpu_include drawPicking;
-#redgpu_include system.getTransmissionRefraction;
+#redgpu_include lighting.getTransmissionRefraction;
 #redgpu_include FragmentOutput;
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;

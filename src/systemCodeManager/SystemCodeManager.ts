@@ -50,7 +50,7 @@ import diffuseBTDF_wgsl from './shader/lighting/getDiffuseBTDF.wgsl';
 import fresnelMix_wgsl from './shader/lighting/getFresnelMix.wgsl';
 import fresnelCoat_wgsl from './shader/lighting/getFresnelCoat.wgsl';
 import getIsFinite_wgsl from './shader/math/getIsFinite.wgsl';
-import getTransmissionRefraction_wgsl from './shader/system/getTransmissionRefraction.wgsl';
+import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
@@ -117,14 +117,6 @@ export namespace MathLibrary {
 }
 
 /**
- * [KO] 엔진 시스템 기반 인프라 및 유틸리티 셰이더 함수 라이브러리 (Category 8)
- * [EN] Engine system infrastructure and utility shader function library (Category 8)
- */
-export namespace SystemLibrary {
-    export const getTransmissionRefraction = getTransmissionRefraction_wgsl;
-}
-
-/**
  * [KO] 그림자 관련 셰이더 함수 라이브러리
  * [EN] Shadow related shader function library
  */
@@ -175,6 +167,7 @@ export namespace LightingLibrary {
     export const getDiffuseBTDF = diffuseBTDF_wgsl;
     export const getFresnelMix = fresnelMix_wgsl;
     export const getFresnelCoat = fresnelCoat_wgsl;
+    export const getTransmissionRefraction = getTransmissionRefraction_wgsl;
 }
 
 /**
@@ -197,8 +190,6 @@ export namespace SystemCodeManager {
     export import depth = DepthLibrary;
     /** [KO] 조명 및 BRDF 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for lighting and BRDF. */
     export import lighting = LightingLibrary;
-    /** [KO] 엔진 시스템 인프라 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for engine system infrastructure. */
-    export import system = SystemLibrary;
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
     export const vertex = SystemVertexCode;

@@ -151,6 +151,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 | **Direct Light** | `lighting.getLightDirectContribution` | **High** | **[직접광 통합]** 모든 재질의 최종 조명 에너지 합산 인터페이스 단일화. 엔진 차원의 조명 누수 방어. |
 | **BTDF Utils** | `lighting.getSpecularBTDF / getDiffuseBTDF` | ✅ 완료 | **[투과 모델]** Transmission 확장을 위한 굴절 및 확산 투과 계산식 모듈화. |
 | **Fresnel Utils** | `lighting.getFresnelXxx / getConductorFresnel / getIridescentFresnel` | ✅ 완료 | **[프레넬 표준]** Schlick, Conductor, Iridescent 등 재질별 특성 분리. |
+| **Transmission** | `lighting.getTransmissionRefraction` | ✅ 완료 | **[투과 굴절]** KHR_materials_transmission 기반 배경 굴절 샘플링. |
 | **Anisotropy Spec** | `lighting.getAnisotropyGGX` | **High** | **[이방성]** 이방성 GGX 분포 및 가시성 함수 통합 예정. PBR 확장 필수 로직. |
 | **Sheen Model** | `lighting.getSheenCharlie` | **High** | **[패브릭 조명]** Charlie Sheen 모델 기반 조명 라이브러리화 예정. |
 
@@ -176,12 +177,12 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 | 대상 기능 | 명칭 (Include Path) | 상태 | 적용 범위 및 기술 비고 |
 | :--- | :--- | :---: | :--- |
 | **Motion Vector** | `math.getMotionVector` | ✅ 완료 | **[시간적 안정성]** 프레임 간 Clip Space 좌표 기반 모션 계산. TAA 및 Motion Blur 필수 데이터. |
-| **Back Refraction** | `calcPrePathBackground` | ✅ 완료 | **[투과 처리]** Transmission 재질용 백그라운드 굴절 샘플링. 굴절률과 거칠기 보정 포함. |
+| **IsFinite Helper** | `math.getIsFinite` | ✅ 완료 | **[수학 유틸리티]** Scalar 및 Vec3에 대한 NaN/Inf 체크 헬퍼 함수 통합. |
 
 #### 📂 상세 적용 이력 (System)
 - `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준 함수 구현 및 이동 완료.
 - **[모션 벡터 적용]**: 모든 렌더링 프래그먼트 셰이더 적용 완료.
-- **`calcPrePathBackground`**: `pbrMaterial` 내 KHR_materials_transmission 구현부 적용 완료.
+- **`lighting.getTransmissionRefraction`**: `pbrMaterial` 내 KHR_materials_transmission 구현부 적용 완료. `math.getIsFinite`를 통한 안정성 강화.
 
 ---
 
