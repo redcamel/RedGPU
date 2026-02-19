@@ -482,7 +482,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
 - **[빌보드 시스템 통합]**: 빌보드 전용 피킹 및 그림자 셰이더를 `SystemCodeManager`를 통해 일원화하여 관리 완료.
 - **[네임스페이스 구축]**: `SystemCodeManager.entryPoint`, `SystemCodeManager.systemStruct` 네임스페이스를 신설하여 시스템 코드를 구조화함.
 - **[구조체 표준화]**: `FragmentOutput` 및 `OutputShadowData`를 `systemStruct`로 통합하고, 관련 파일을 `src/systemCodeManager/shader/systemStruct/`로 구조화하여 일관성 확보 완료.
-- **[레거시 정리]**: `SystemVertexCode` 및 `SystemFragmentCode`에서 중복된 구조체 및 엔트리 포인트를 제거하고 `SystemCodeManager`로 일원화.
+- **[레거시 정리]**: `SystemFragmentCode`를 폐지하고 `SystemVertexCode` 내 중복된 구조체 및 엔트리 포인트를 `SystemCodeManager`로 일원화하여 관리 효율성 확보 완료.
 - **[모션 벡터 적용]**: 모든 렌더링 프래그먼트 셰이더 적용 완료.
 - **`lighting.getTransmissionRefraction`**: `pbrMaterial` 내 KHR_materials_transmission 구현부 적용 완료. `math.getIsFinite`를 통한 안정성 강화.
 

@@ -69,7 +69,6 @@ import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
-import SystemFragmentCode from '../resources/systemCode/shader/fragment';
 
 /**
  * [KO] 수학 관련 셰이더 함수 라이브러리
@@ -270,8 +269,6 @@ export namespace SystemCodeManager {
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
     export const vertex = SystemVertexCode;
-    /** [KO] 시스템 Fragment 관련 레거시 코드 [EN] System Fragment related legacy code */
-    export const fragment = SystemFragmentCode;
 
     // [KO] 레거시 직접 참조 지원 (전처리기 호환성)
     export const FragmentOutput = FragmentOutput_wgsl;
