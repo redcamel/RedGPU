@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include getBillboardMatrix;
-#redgpu_include calcBillboard;
+#redgpu_include getBillboardResult;
 #redgpu_include entryPoint.billboard.entryPointPickingVertex;
 #redgpu_include entryPoint.empty.entryPointShadowVertex;
 
@@ -52,7 +52,7 @@ struct OutputData {
 fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
 
-    let billboardResult = calcBillboard(
+    let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
         vertexUniforms.matrixList.modelMatrix,

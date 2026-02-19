@@ -26,6 +26,7 @@ import getShadowClipPosition_wgsl from './shader/shadow/getShadowClipPosition.wg
 import getDirectionalShadowVisibility_wgsl from './shader/shadow/getDirectionalShadowVisibility.wgsl';
 import getMotionVector_wgsl from './shader/math/getMotionVector.wgsl';
 import getBillboardMatrix_wgsl from './shader/math/billboard/getBillboardMatrix.wgsl';
+import getBillboardResult_wgsl from './shader/math/billboard/getBillboardResult.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
@@ -100,6 +101,7 @@ export namespace MathLibrary {
     /** [KO] 빌보드(Billboard) 관련 셰이더 함수 [EN] Billboard related shader functions */
     export namespace billboard {
         export const getBillboardMatrix = getBillboardMatrix_wgsl;
+        export const getBillboardResult = getBillboardResult_wgsl;
     }
 
     /** [KO] 방향(Direction) 관련 셰이더 함수 [EN] Direction related shader functions */
@@ -290,9 +292,10 @@ export namespace SystemCodeManager {
 
     export const billboardPicking = billboardEntryPointPickingVertex_wgsl;
     export const billboardShadow = emptyEntryPointShadowVertex_wgsl;
-    export const calcBillboard = SystemVertexCode.calcBillboard;
+    export const getBillboardResult = getBillboardResult_wgsl;
+    export const calcBillboard = getBillboardResult_wgsl;
     export const calcDisplacements = SystemVertexCode.calcDisplacements;
-    export const getBillboardMatrix = SystemVertexCode.getBillboardMatrix;
+    export const getBillboardMatrix = getBillboardMatrix_wgsl;
     export const meshVertexBasicUniform = SystemVertexCode.meshVertexBasicUniform;
 }
 

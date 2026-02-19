@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include getBillboardMatrix;
-#redgpu_include calcBillboard;
+#redgpu_include getBillboardResult;
 #redgpu_include entryPoint.billboard.entryPointPickingVertex;
 #redgpu_include entryPoint.empty.entryPointShadowVertex;
 
@@ -45,7 +45,7 @@ fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
 
     // TextField3D는 선명도를 위해 noneJitterProjectionMatrix 사용
-    let billboardResult = calcBillboard(
+    let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
         vertexUniforms.matrixList.modelMatrix,

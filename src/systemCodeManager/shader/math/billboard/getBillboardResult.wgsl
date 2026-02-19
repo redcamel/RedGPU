@@ -5,10 +5,10 @@ struct BillboardResult {
 }
 
 /**
- * [KO] 빌보드 및 픽셀 크기 모드를 지원하는 공통 정점 변환 함수입니다.
- * [EN] Common vertex transformation function supporting billboard and pixel size modes.
+ * [KO] 빌보드 및 픽셀 크기 모드를 지원하는 공통 정점 변환 결과 데이터를 리턴합니다.
+ * [EN] Returns common vertex transformation result data supporting billboard and pixel size modes.
  */
-fn calcBillboard(
+fn getBillboardResult(
     input_position: vec3<f32>,
     input_normal: vec3<f32>,
     modelMatrix: mat4x4<f32>,

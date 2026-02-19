@@ -25,7 +25,7 @@ fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     );
 
     if (u_useBillboard == 1) {
-        let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix);
+        let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix, 1u);
         
         if (u_usePixelSize == 1) {
             let viewPositionCenter = billboardMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
