@@ -1,4 +1,4 @@
-#redgpu_include entryPoint.picking.mesh.entryPointPickingFragment;
+#redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.FragmentOutput;
 #redgpu_include math.getMotionVector;
 struct Uniforms {

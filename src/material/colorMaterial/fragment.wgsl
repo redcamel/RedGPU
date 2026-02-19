@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM
-#redgpu_include entryPoint.picking.mesh.entryPointPickingFragment
+#redgpu_include entryPoint.mesh.entryPointPickingFragment
 #redgpu_include color.getTintBlendMode
 #redgpu_include systemStruct.FragmentOutput
 #redgpu_include math.getMotionVector

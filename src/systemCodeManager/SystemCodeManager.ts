@@ -215,32 +215,20 @@ export namespace LightingLibrary {
  * [EN] Entry point related shader function library
  */
 export namespace EntryPointLibrary {
-    /** [KO] 피킹 관련 엔트리 포인트 [EN] Picking related entry points */
-    export namespace picking {
-        /** [KO] 메시 피킹 [EN] Mesh picking */
-        export namespace mesh {
-            export const entryPointPickingVertex = meshEntryPointPickingVertex_wgsl;
-            export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
-        }
-        /** [KO] 빌보드 피킹 [EN] Billboard picking */
-        export namespace billboard {
-            export const entryPointPickingVertex = billboardEntryPointPickingVertex_wgsl;
-        }
-        /** [KO] 빈 피킹 (미지원 객체용) [EN] Empty picking (for unsupported objects) */
-        export namespace empty {
-            export const entryPointPickingVertex = emptyEntryPointPickingVertex_wgsl;
-        }
+    /** [KO] 메시 관련 엔트리 포인트 [EN] Mesh related entry points */
+    export namespace mesh {
+        export const entryPointPickingVertex = meshEntryPointPickingVertex_wgsl;
+        export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
+        export const entryPointShadowVertex = meshEntryPointShadowVertex_wgsl;
     }
-    /** [KO] 그림자 관련 엔트리 포인트 [EN] Shadow related entry points */
-    export namespace shadow {
-        /** [KO] 메시 그림자 [EN] Mesh shadow */
-        export namespace mesh {
-            export const entryPointShadowVertex = meshEntryPointShadowVertex_wgsl;
-        }
-        /** [KO] 빌보드 그림자 [EN] Billboard shadow */
-        export namespace billboard {
-            export const entryPointShadowVertex = billboardEntryPointShadowVertex_wgsl;
-        }
+    /** [KO] 빌보드 관련 엔트리 포인트 [EN] Billboard related entry points */
+    export namespace billboard {
+        export const entryPointPickingVertex = billboardEntryPointPickingVertex_wgsl;
+        export const entryPointShadowVertex = billboardEntryPointShadowVertex_wgsl;
+    }
+    /** [KO] 빈 엔트리 포인트 (미지원 객체용) [EN] Empty entry points (for unsupported objects) */
+    export namespace empty {
+        export const entryPointPickingVertex = emptyEntryPointPickingVertex_wgsl;
     }
 }
 

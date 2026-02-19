@@ -447,14 +447,14 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
     </tr>
     <tr>
       <td><b>Picking System</b></td>
-      <td><code>entryPoint.picking.mesh.entryPointPickingVertex / fragment</code><br/><code>entryPoint.picking.billboard.entryPointPickingVertex</code><br/><code>entryPoint.picking.empty.entryPointPickingVertex</code></td>
+      <td><code>entryPoint.mesh.entryPointPickingVertex / fragment</code><br/><code>entryPoint.billboard.entryPointPickingVertex</code><br/><code>entryPoint.empty.entryPointPickingVertex</code></td>
       <td align="center">Common</td>
       <td align="center">✅ 완료</td>
       <td><b>[피킹 표준]</b> Mesh/Billboard/Empty 전용 피킹 통합. 기하 변환 로직 차이로 인해 의도적으로 분리 관리.</td>
     </tr>
     <tr>
       <td><b>Billboard System</b></td>
-      <td><code>entryPoint.picking.billboard.entryPointPickingVertex / entryPoint.shadow.billboard...</code></td>
+      <td><code>entryPoint.billboard.entryPointPickingVertex / entryPointShadowVertex</code></td>
       <td align="center">Vertex</td>
       <td align="center">✅ 완료</td>
       <td><b>[빌보드 표준]</b> 카메라 정면을 향하는 기저 변환 및 빌보드용 피킹/그림자 셰이더 통합 완료.</td>
@@ -468,7 +468,7 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
     </tr>
     <tr>
       <td><b>Shadow Output</b></td>
-      <td><code>systemStruct.OutputShadowData</code></td>
+      <td><code>entryPoint.mesh.entryPointShadowVertex</code><br/><code>entryPoint.billboard.entryPointShadowVertex</code></td>
       <td align="center">Vert Only</td>
       <td align="center">✅ 완료</td>
       <td><b>[그림자 표준]</b> 섀도우 맵 렌더링을 위한 정점 셰이더 출력 구조체 통합 완료.</td>

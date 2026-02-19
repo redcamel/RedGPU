@@ -3,7 +3,7 @@
 #redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
-#redgpu_include entryPoint.picking.mesh.entryPointPickingFragment;
+#redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.FragmentOutput;
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;

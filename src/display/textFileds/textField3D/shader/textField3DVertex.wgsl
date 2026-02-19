@@ -1,8 +1,8 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include getBillboardMatrix;
 #redgpu_include calcBillboard;
-#redgpu_include entryPoint.picking.billboard.entryPointPickingVertex;
-#redgpu_include entryPoint.shadow.billboard.entryPointShadowVertex;
+#redgpu_include entryPoint.billboard.entryPointPickingVertex;
+#redgpu_include entryPoint.billboard.entryPointShadowVertex;
 
 struct MatrixList{
     modelMatrix: mat4x4<f32>,

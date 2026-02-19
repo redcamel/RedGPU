@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include calcTintBlendMode;
-#redgpu_include entryPoint.picking.mesh.entryPointPickingFragment;
+#redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.FragmentOutput;
 
 struct Uniforms {
