@@ -447,33 +447,42 @@ RedGPU의 V-Down(Top-Left) 환경과 고유한 TBN 기저 시스템 하에서 �
     </tr>
     <tr>
       <td><b>Picking System</b></td>
-      <td><code>entryPoint.mesh.entryPointPickingVertex / entryPointPickingFragment</code><br/><code>entryPoint.billboard.entryPointPickingVertex</code></td>
+      <td><code>entryPoint.mesh.entryPointPickingVertex / entryPointPickingFragment</code><br/><code>entryPoint.billboard.entryPointPickingVertex</code><br/><code>entryPoint.empty.entryPointPickingVertex</code></td>
       <td align="center">Common</td>
       <td align="center">✅ 완료</td>
-      <td><b>[피킹 표준]</b> Mesh 및 Billboard 전용 피킹 엔트리 포인트 통합 및 계층형 네임스페이스 구축 완료.</td>
+      <td><b>[피킹 표준]</b> Mesh/Billboard/Empty 전용 피킹 통합. 기하 변환 로직 차이로 인해 의도적으로 분리 관리.</td>
     </tr>
     <tr>
       <td><b>Billboard System</b></td>
-      <td><code>vertex.entryPointPickingVertex / billboardShadow / ...</code></td>
+      <td><code>entryPoint.billboard.entryPointPickingVertex / billboardShadow / ...</code></td>
       <td align="center">Vertex</td>
       <td align="center">✅ 완료</td>
       <td><b>[빌보드 표준]</b> 카메라 정면을 향하는 기저 변환 및 빌보드용 피킹/그림자 셰이더 통합 완료.</td>
     </tr>
     <tr>
       <td><b>System Output</b></td>
-      <td><code>fragment.FragmentOutput</code></td>
-      <td align="center">High</td>
-      <td align="center">High</td>
-      <td><b>[Priority 1]</b> <code>FragmentOutput</code> 구조체 정의 이주 및 표준화 예정.</td>
+      <td><code>systemStruct.FragmentOutput</code></td>
+      <td align="center">Frag Only</td>
+      <td align="center">✅ 완료</td>
+      <td><b>[출력 표준]</b> G-Buffer 구성을 포함한 최종 프래그먼트 출력 구조체 통합 완료.</td>
+    </tr>
+    <tr>
+      <td><b>Shadow Output</b></td>
+      <td><code>systemStruct.OutputShadowData</code></td>
+      <td align="center">Vert Only</td>
+      <td align="center">✅ 완료</td>
+      <td><b>[그림자 표준]</b> 섀도우 맵 렌더링을 위한 정점 셰이더 출력 구조체 통합 완료.</td>
     </tr>
   </tbody>
 </table>
 
 #### 📂 상세 적용 이력 (System)
 - `src/systemCodeManager/shader/math/getMotionVector.wgsl`: 표준 함수 구현 및 이동 완료.
-- **[피킹 시스템 통합]**: `src/resources/systemCode` 및 `src/display/mesh/shader/core`에 분산되어 있던 피킹 셰이더를 `src/systemCodeManager/shader/picking/`으로 통합하고, `entryPointPickingVertex.wgsl`, `entryPointPickingFragment.wgsl`로 명칭 정규화 완료.
+- **[피킹 시스템 통합]**: 분산되어 있던 피킹 셰이더를 `src/systemCodeManager/shader/picking/` 하위의 `mesh/`, `billboard/`, `empty/` 폴더로 구조화하여 통합 완료.
 - **[빌보드 시스템 통합]**: 빌보드 전용 피킹 및 그림자 셰이더를 `SystemCodeManager`를 통해 일원화하여 관리 완료.
-- **[네임스페이스 구축]**: `SystemCodeManager.entryPoint` 네임스페이스를 신설하여 시스템 엔트리 포인트 코드를 구조화함.
+- **[네임스페이스 구축]**: `SystemCodeManager.entryPoint`, `SystemCodeManager.systemStruct` 네임스페이스를 신설하여 시스템 코드를 구조화함.
+- **[구조체 표준화]**: `FragmentOutput` 및 `OutputShadowData`를 `systemStruct`로 통합하여 엔진 전역 인터페이스 일관성 확보 완료.
+- **[레거시 정리]**: `SystemVertexCode` 및 `SystemFragmentCode`에서 중복된 구조체 및 엔트리 포인트를 제거하고 `SystemCodeManager` 상위 레벨로 일원화.
 - **[모션 벡터 적용]**: 모든 렌더링 프래그먼트 셰이더 적용 완료.
 - **`lighting.getTransmissionRefraction`**: `pbrMaterial` 내 KHR_materials_transmission 구현부 적용 완료. `math.getIsFinite`를 통한 안정성 강화.
 

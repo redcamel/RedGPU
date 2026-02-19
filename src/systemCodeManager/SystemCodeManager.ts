@@ -63,8 +63,8 @@ import meshEntryPointPickingVertex_wgsl from './shader/picking/mesh/entryPointPi
 import meshEntryPointPickingFragment_wgsl from './shader/picking/mesh/entryPointPickingFragment.wgsl';
 import billboardEntryPointPickingVertex_wgsl from './shader/picking/billboard/entryPointPickingVertex.wgsl';
 import emptyEntryPointPickingVertex_wgsl from './shader/picking/empty/entryPointPickingVertex.wgsl';
-import FragmentOutput_wgsl from './shader/struct/FragmentOutput.wgsl';
-import OutputShadowData_wgsl from './shader/struct/OutputShadowData.wgsl';
+import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
+import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
 import SystemVertexCode from '../resources/systemCode/shader/vertex';
 import SystemFragmentCode from '../resources/systemCode/shader/fragment';
