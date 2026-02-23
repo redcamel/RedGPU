@@ -158,6 +158,72 @@ class SystemUniformUpdater {
     }
 
     /**
+     * [KO] 투영 관련 행렬 정보를 유니폼 데이터에 업데이트합니다.
+     * [EN] Updates projection-related matrix information to uniform data.
+     * 
+     * @param projectionInfo -
+     * [KO] 투영 행렬 정보 객체
+     * [EN] Projection matrix information object
+     * @param projectionMembers -
+     * [KO] WGSL 투영 구조체 멤버 정보
+     * [EN] WGSL projection structure member information
+     * @param uniformDataF32 -
+     * [KO] 대상 Float32Array 버퍼
+     * [EN] Target Float32Array buffer
+     * @param uniformDataU32 -
+     * [KO] 대상 Uint32Array 버퍼
+     * [EN] Target Uint32Array buffer
+     */
+    static updateProjection(
+        projectionInfo: {
+            projectionMatrix: mat4,
+            projectionViewMatrix: mat4,
+            noneJitterProjectionMatrix: mat4,
+            noneJitterProjectionViewMatrix: mat4,
+            inverseProjectionMatrix: mat4,
+            inverseProjectionViewMatrix?: mat4,
+            prevNoneJitterProjectionViewMatrix: mat4,
+        },
+        projectionMembers: any,
+        uniformDataF32: Float32Array,
+        uniformDataU32: Uint32Array
+    ) {
+        updateSystemUniformData(
+            projectionMembers, uniformDataF32, uniformDataU32,
+            [
+                {
+                    key: 'projectionMatrix',
+                    value: projectionInfo.projectionMatrix,
+                },
+                {
+                    key: 'projectionViewMatrix',
+                    value: projectionInfo.projectionViewMatrix,
+                },
+                {
+                    key: 'noneJitterProjectionMatrix',
+                    value: projectionInfo.noneJitterProjectionMatrix,
+                },
+                {
+                    key: 'noneJitterProjectionViewMatrix',
+                    value: projectionInfo.noneJitterProjectionViewMatrix,
+                },
+                {
+                    key: 'inverseProjectionMatrix',
+                    value: projectionInfo.inverseProjectionMatrix,
+                },
+                {
+                    key: 'inverseProjectionViewMatrix',
+                    value: projectionInfo.inverseProjectionViewMatrix || mat4.create(),
+                },
+                {
+                    key: 'prevNoneJitterProjectionViewMatrix',
+                    value: projectionInfo.prevNoneJitterProjectionViewMatrix,
+                }
+            ]
+        )
+    }
+
+    /**
      * [KO] 직사광(DirectionalLight) 배열 정보를 유니폼 데이터에 업데이트합니다.
      * [EN] Updates DirectionalLight array information to uniform data.
      * 

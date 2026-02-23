@@ -108,4 +108,4 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
 - **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화, 명명 규칙(CamelCase) 정규화 완료.
-- **2026-02-23**: 디스플레이스먼트 라이브러리 리팩토링 및 좌표계 보정 로직 반영. 모든 레거시 인덱스 파일(`SystemCode`, `SystemVertexCode`) 삭제 및 `SystemCodeManager` 기반 전면 일원화. 엔진 전반의 TypeScript 직접 임포트 정규화 및 시스템 유니폼 파일 구조 정규화 작업 완료.
+- **2026-02-23**: 디스플레이스먼트 라이브러리 리팩토링 및 좌표계 보정 로직 반영. 모든 레거시 인덱스 파일(`SystemCode`, `SystemVertexCode`) 삭제 및 `SystemCodeManager` 기반 전면 일원화. 엔진 전반의 TypeScript 직접 임포트 정규화 및 시스템 유니폼 파일 구조 정규화 작업 완료. 조명 구조체(`DirectionalLight`, `AmbientLight`) 파일 분리 및 `SystemUniformUpdater`를 통한 업데이트 로직 모듈화 완료.

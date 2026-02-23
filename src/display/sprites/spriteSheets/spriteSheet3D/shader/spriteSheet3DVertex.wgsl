@@ -57,7 +57,7 @@ fn main(inputData: InputData) -> OutputData {
         inputData.vertexNormal,
         vertexUniforms.matrixList.modelMatrix,
         systemUniforms.camera.viewMatrix,
-        systemUniforms.projectionMatrix,
+        systemUniforms.projection.projectionMatrix,
         systemUniforms.resolution,
         vertexUniforms.useBillboard,
         vertexUniforms.usePixelSize,
@@ -70,7 +70,7 @@ fn main(inputData: InputData) -> OutputData {
     output.vertexPosition = billboardResult.vertexPosition;
     output.vertexNormal = billboardResult.vertexNormal;
     
-    // UV 좌표 계산 (스프라이트 시트 전용)
+    // UV 좌표 계산 (?�프?�이???�트 ?�용)
     output.uv = vec2<f32>(
         inputData.uv.x / vertexUniforms.segmentW + ((vertexUniforms.currentIndex % vertexUniforms.segmentW) / vertexUniforms.segmentW),
         inputData.uv.y / vertexUniforms.segmentH - (floor(vertexUniforms.currentIndex / vertexUniforms.segmentH) / vertexUniforms.segmentH)

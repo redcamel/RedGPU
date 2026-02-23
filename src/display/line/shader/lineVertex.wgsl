@@ -32,9 +32,9 @@ struct OutputData {
 @vertex
 fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
-    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
-    let u_noneJitterProjectionViewMatrix = systemUniforms.noneJitterProjectionViewMatrix;
-    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.prevNoneJitterProjectionViewMatrix;
+    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
+    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
+    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
 
     let u_matrixList = vertexUniforms.matrixList;
     let u_modelMatrix = u_matrixList.modelMatrix;
@@ -61,3 +61,4 @@ fn main(inputData: InputData) -> OutputData {
 
 #redgpu_include entryPoint.empty.entryPointPickingVertex;
 #redgpu_include entryPoint.empty.entryPointShadowVertex;
+

@@ -22,10 +22,10 @@ fn main(inputData: InputData) -> OutputData {
     let input_vertexNormal = inputData.vertexNormal;
 
     // System uniforms
-    let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
-    let u_noneJitterProjectionViewMatrix = systemUniforms.noneJitterProjectionViewMatrix;
-    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.prevNoneJitterProjectionViewMatrix;
+    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
+    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
+    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
@@ -95,3 +95,4 @@ fn main(inputData: InputData) -> OutputData {
 
     return output;
 }
+

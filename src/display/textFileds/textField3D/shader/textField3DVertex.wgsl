@@ -44,13 +44,13 @@ struct OutputData {
 fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
 
-    // TextField3D는 선명도를 위해 noneJitterProjectionMatrix 사용
+    // TextField3D???�명?��? ?�해 noneJitterProjectionMatrix ?�용
     let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
         vertexUniforms.matrixList.modelMatrix,
         systemUniforms.camera.viewMatrix,
-        systemUniforms.noneJitterProjectionMatrix,
+        systemUniforms.projection.noneJitterProjectionMatrix,
         systemUniforms.resolution,
         vertexUniforms.useBillboard,
         vertexUniforms.usePixelSize,

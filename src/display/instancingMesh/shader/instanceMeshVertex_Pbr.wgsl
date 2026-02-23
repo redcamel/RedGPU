@@ -11,9 +11,9 @@ fn main(inputData: InputData) -> OutputData {
     let u_useDisplacementTexture = instanceUniforms.useDisplacementTexture == 1u;
     let u_displacementScale = instanceUniforms.displacementScale;
 
-    // 시스템 유니폼
-    let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
+    // ?�스???�니??
+    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -24,7 +24,7 @@ fn main(inputData: InputData) -> OutputData {
 
     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
 
-    // 월드 좌표 변환
+    // ?�드 좌표 변??
     let worldPosition = position.xyz;
 
     // Displacement 처리
@@ -43,11 +43,11 @@ fn main(inputData: InputData) -> OutputData {
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
 
-    // 최종 클립 좌표 계산
+    // 최종 ?�립 좌표 계산
     output.position = u_projectionViewMatrix * u_instanceGroupModelMatrix * position;
     output.vertexPosition = position.xyz;
 
-    // 노말 변환
+    // ?�말 변??
     var normalPosition: vec3<f32> = (u_instanceGroupModelMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0)).xyz;
     output.vertexNormal = normalPosition;
 
@@ -61,3 +61,4 @@ fn main(inputData: InputData) -> OutputData {
 
     return output;
 }
+

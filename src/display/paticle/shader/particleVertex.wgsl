@@ -132,8 +132,8 @@ fn main( inputData:InputData) -> OutputData {
   var output : OutputData;
 
   //
-  let u_projectionMatrix = systemUniforms.projectionMatrix;
-  let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
+  let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+  let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
   let u_resolution = systemUniforms.resolution;
   let u_camera = systemUniforms.camera;
   let u_viewMatrix = u_camera.viewMatrix;
@@ -185,3 +185,4 @@ fn main( inputData:InputData) -> OutputData {
   return output;
 }
 #redgpu_include systemStruct.OutputShadowData;
+

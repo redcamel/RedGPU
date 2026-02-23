@@ -52,7 +52,7 @@ fn main(inputData: InputData) -> OutputData {
         inputData.vertexNormal,
         vertexUniforms.matrixList.modelMatrix,
         systemUniforms.camera.viewMatrix,
-        systemUniforms.projectionMatrix,
+        systemUniforms.projection.projectionMatrix,
         systemUniforms.resolution,
         vertexUniforms.useBillboard,
         vertexUniforms.usePixelSize,
@@ -68,3 +68,4 @@ fn main(inputData: InputData) -> OutputData {
     output.combinedOpacity = vertexUniforms.combinedOpacity;
     return output;
 }
+

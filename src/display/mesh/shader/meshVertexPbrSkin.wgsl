@@ -56,10 +56,10 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     let input_vertexNormal = inputData.vertexNormal;
 
     // System uniforms
-    let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
-    let u_noneJitterProjectionViewMatrix = systemUniforms.noneJitterProjectionViewMatrix;
-    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.prevNoneJitterProjectionViewMatrix;
+    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
+    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
+    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
@@ -85,18 +85,18 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 
     // Position and normal calculation
 
-    // 스킨된 position
+    // ?�킨??position
     let skinnedPosition = (skinMat * vec4<f32>(inputData.position, 1.0));
 
     // 최종 position
     let position = u_modelMatrix * skinnedPosition;
 
-    // 스킨된 normal
+    // ?�킨??normal
     let skinnedNormal = (skinMat * vec4<f32>(input_vertexNormal, 0.0)).xyz;
     let transformedNormal = normalize((u_normalModelMatrix * vec4<f32>(skinnedNormal, 0.0)).xyz);
     output.vertexNormal = transformedNormal;
 
-    // tangent도 동일하게 처리
+    // tangent???�일?�게 처리
     let skinnedTangent = (skinMat * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(skinnedTangent, 0.0)).xyz;
     output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
@@ -168,8 +168,8 @@ fn entryPointPickingVertex(inputData: InputDataSkin) -> OutputDataSkin {
     var output: OutputDataSkin;
 
     // System uniforms
-    let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
+    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
@@ -183,3 +183,4 @@ let skinMat = vertexStorages[inputData.idx];
 
     return output;
 }
+

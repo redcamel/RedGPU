@@ -433,32 +433,21 @@ class View3D extends AView {
             SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members.skyAtmosphere.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateDirectionalLights(lightManager.directionalLights, members.directionalLights.memberList, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateAmbientLight(lightManager.ambientLight, members.ambientLight.members, this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateProjection(
+                {
+                    projectionMatrix,
+                    projectionViewMatrix: mat4.multiply(temp, projectionMatrix, viewMatrix),
+                    noneJitterProjectionMatrix,
+                    noneJitterProjectionViewMatrix: this.#noneJitterProjectionViewMatrix,
+                    inverseProjectionMatrix,
+                    prevNoneJitterProjectionViewMatrix: redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix,
+                },
+                members.projection.members,
+                this.#uniformDataF32,
+                this.#uniformDataU32
+            )
 
             updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-                {
-                    key: 'projectionMatrix',
-                    value: projectionMatrix,
-                },
-                {
-                    key: 'projectionViewMatrix',
-                    value: mat4.multiply(temp, projectionMatrix, viewMatrix),
-                },
-                {
-                    key: 'noneJitterProjectionMatrix',
-                    value: noneJitterProjectionMatrix,
-                },
-                {
-                    key: 'noneJitterProjectionViewMatrix',
-                    value: this.#noneJitterProjectionViewMatrix,
-                },
-                {
-                    key: 'inverseProjectionMatrix',
-                    value: inverseProjectionMatrix,
-                },
-                {
-                    key: 'prevNoneJitterProjectionViewMatrix',
-                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix,
-                },
                 {
                     key: 'resolution',
                     value: [this.pixelRectObject.width, this.pixelRectObject.height],

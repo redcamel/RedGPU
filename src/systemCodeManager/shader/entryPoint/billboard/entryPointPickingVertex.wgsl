@@ -4,9 +4,9 @@ fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     let u_resolution = systemUniforms.resolution;
     
     #redgpu_if disableJitter
-        let u_projectionMatrix = systemUniforms.noneJitterProjectionMatrix;
+        let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
     #redgpu_else
-        let u_projectionMatrix = systemUniforms.projectionMatrix;
+        let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     #redgpu_endIf
     
     let u_viewMatrix = systemUniforms.camera.viewMatrix;

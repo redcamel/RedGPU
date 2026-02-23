@@ -461,26 +461,19 @@ class PostEffectManager {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
             SystemUniformUpdater.updateCamera(rawCamera, cameraMembers, this.#uniformDataF32, this.#uniformDataU32)
-            updateSystemUniformData(
-                members, this.#uniformDataF32, this.#uniformDataU32,
-                [
-                    {
-                        key: 'projectionMatrix',
-                        value: projectionMatrix,
-                    },
-                    {
-                        key: 'inverseProjectionMatrix',
-                        value: inverseProjectionMatrix,
-                    },
-                    {
-                        key: 'projectionViewMatrix',
-                        value: projectionViewMatrix,
-                    },
-                    {
-                        key: 'inverseProjectionViewMatrix',
-                        value: mat4.invert(temp2, projectionViewMatrix),
-                    },
-                ]
+            SystemUniformUpdater.updateProjection(
+                {
+                    projectionMatrix,
+                    projectionViewMatrix,
+                    noneJitterProjectionMatrix: projectionMatrix,
+                    noneJitterProjectionViewMatrix: projectionViewMatrix,
+                    inverseProjectionMatrix,
+                    inverseProjectionViewMatrix: mat4.invert(temp2, projectionViewMatrix),
+                    prevNoneJitterProjectionViewMatrix: projectionViewMatrix
+                },
+                members.projection.members,
+                this.#uniformDataF32,
+                this.#uniformDataU32
             )
         }
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);

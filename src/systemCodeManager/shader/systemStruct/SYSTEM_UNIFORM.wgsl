@@ -4,16 +4,12 @@
 #redgpu_include systemStruct.AmbientLight
 
 #redgpu_include systemStruct.Camera
+#redgpu_include systemStruct.Projection
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
 
 struct SystemUniform {
-	  projectionMatrix:mat4x4<f32>,
-	  projectionViewMatrix:mat4x4<f32>,
-	  noneJitterProjectionMatrix:mat4x4<f32>,
-	  noneJitterProjectionViewMatrix:mat4x4<f32>,
-	  inverseProjectionMatrix:mat4x4<f32>,
-	  prevNoneJitterProjectionViewMatrix:mat4x4<f32>,
+	  projection: Projection,
 	  resolution:vec2<f32>,
       //
       camera:Camera,

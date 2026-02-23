@@ -56,13 +56,29 @@
 
 ---
 
+## 📝 조명 구조체 사양 (Light Struct Specification - Final)
+시스템 유니폼에 포함되는 조명 데이터 구조입니다.
+
+### 2.4 DirectionalLight 구조체
+| 순서 | 필드명 | 타입 | 설명 |
+| :-- | :--- | :--- | :--- |
+| 1 | **direction** | `vec3<f32>` | 광원의 방향 벡터 |
+| 2 | **color** | `vec3<f32>` | 광원의 색상 (Linear) |
+| 3 | **intensity** | `f32` | 광원의 강도 |
+
+### 2.5 AmbientLight 구조체
+| 순서 | 필드명 | 타입 | 설명 |
+| :-- | :--- | :--- | :--- |
+| 1 | **color** | `vec3<f32>` | 환경광 색상 (Linear) |
+| 2 | **intensity** | `f32` | 환경광 강도 |
+
+---
+
 ## 💻 WGSL 정의 (Final WGSL)
-`struct Camera`, `struct Shadow`, `struct SkyAtmosphere`는 별도의 파일로 분리되어 관리되며, `SYSTEM_UNIFORM.wgsl`에서 인클루드하여 사용합니다.
+모든 시스템 구조체는 별도의 파일로 분리되어 관리되며, `SYSTEM_UNIFORM.wgsl`에서 인클루드하여 사용합니다.
 
 ### 2.1 Camera 구조체
 - **파일 위치**: `src/systemCodeManager/shader/systemStruct/Camera.wgsl`
-- **시스템 등록**: `SystemCodeManager.ts` 내 `SystemStructLibrary`에 등록되어 `#redgpu_include systemStruct.Camera` 형태로 사용 가능합니다.
-
 ```wgsl
 struct Camera {
     viewMatrix: mat4x4<f32>,
@@ -76,7 +92,6 @@ struct Camera {
 
 ### 2.2 Shadow 구조체
 - **파일 위치**: `src/systemCodeManager/shader/systemStruct/Shadow.wgsl`
-
 ```wgsl
 struct Shadow {
     directionalShadowDepthTextureSize: u32,
@@ -87,7 +102,6 @@ struct Shadow {
 
 ### 2.3 SkyAtmosphere 구조체
 - **파일 위치**: `src/systemCodeManager/shader/systemStruct/SkyAtmosphere.wgsl`
-
 ```wgsl
 struct SkyAtmosphere {
     useSkyAtmosphere: u32,
@@ -97,8 +111,29 @@ struct SkyAtmosphere {
 };
 ```
 
+### 2.4 DirectionalLight 구조체
+- **파일 위치**: `src/systemCodeManager/shader/systemStruct/DirectionalLight.wgsl`
+```wgsl
+struct DirectionalLight {
+    direction: vec3<f32>,
+    color: vec3<f32>,
+    intensity: f32,
+};
+```
+
+### 2.5 AmbientLight 구조체
+- **파일 위치**: `src/systemCodeManager/shader/systemStruct/AmbientLight.wgsl`
+```wgsl
+struct AmbientLight {
+    color: vec3<f32>,
+    intensity: f32
+};
+```
+
 ```wgsl
 // SYSTEM_UNIFORM.wgsl
+#redgpu_include systemStruct.DirectionalLight
+#redgpu_include systemStruct.AmbientLight
 #redgpu_include systemStruct.Camera
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
@@ -108,6 +143,8 @@ struct SystemUniform {
     camera: Camera,
     skyAtmosphere: SkyAtmosphere,
     shadow: Shadow,
+    directionalLights: array<DirectionalLight, 3>,
+    ambientLight: AmbientLight,
     // ...
 };
 ```
@@ -117,21 +154,21 @@ struct SystemUniform {
 ## 🛠 중앙 집중식 업데이트 (Centralized Update Logic)
 
 ### SystemUniformUpdater 도입
-중복된 유니폼 업데이트 로직을 제거하고 유지보수성을 높이기 위해 `SystemUniformUpdater` 클래스를 도입했습니다.
-
 - **위치**: `src/renderer/SystemUniformUpdater.ts`
 - **역할**: 각 시스템 객체와 유니폼 버퍼의 오프셋 정보를 받아 표준화된 방식으로 데이터를 기록합니다.
 - **주요 메서드**: 
-  - `static updateCamera(camera, cameraMembers, uniformDataF32)`
-  - `static updateShadow(shadowManager, shadowMembers, uniformData)`
-  - `static updateSkyAtmosphere(skyAtmosphere, skyAtmosphereMembers, uniformData)`
+  - `static updateCamera(camera, cameraMembers, uniformDataF32, uniformDataU32)`
+  - `static updateShadow(shadowManager, shadowMembers, uniformDataF32, uniformDataU32)`
+  - `static updateSkyAtmosphere(skyAtmosphere, skyAtmosphereMembers, uniformDataF32, uniformDataU32)`
+  - `static updateDirectionalLights(directionalLights, directionalLightsMembers, uniformDataF32, uniformDataU32)`
+  - `static updateAmbientLight(ambientLight, ambientLightMembers, uniformDataF32, uniformDataU32)`
 
 ---
 
 ## 🛠 전환 계획 (Migration Plan) - 완료
 1. **TypeScript 데이터 모델 업데이트 (완료)**: `View3D.ts`, `PostEffectManager.ts` 필드 정규화 및 오프셋 동기화.
-2. **시스템 셰이더 업데이트 (완료)**: `src/systemCodeManager/shader/systemStruct/` 내 구조체 동기화 및 별도 파일 분리.
-3. **중앙 집중식 업데이터 도입 (완료)**: `SystemUniformUpdater`를 통한 업데이트 로직 단일화.
+2. **시스템 셰이더 업데이트 (완료)**: `src/systemCodeManager/shader/systemStruct/` 내 구조체 동기화 및 모든 필드 별도 파일 분리.
+3. **중앙 집중식 업데이터 도입 (완료)**: `SystemUniformUpdater`를 통한 업데이트 로직 단일화 및 모듈화.
 4. **검증 및 정규화 (완료)**: 모든 연산의 명칭 일관성 확보 및 셰이더 참조 수정.
 
 ---
@@ -142,9 +179,10 @@ struct SystemUniform {
 - [x] **단독 명칭 교체**: 코드베이스 전반(`src/`)에서 `cameraMatrix` $\rightarrow$ `viewMatrix` 교체 완료.
 - [x] **복합 행렬 명칭 교체**: `projectionCameraMatrix` $\rightarrow$ `projectionViewMatrix` 교체 완료.
 - [x] **그림자 및 대기 산란 정규화**: `Shadow`, `SkyAtmosphere` 구조체 도입 및 필드명 구체화 완료.
+- [x] **조명 구조체 정규화 및 분리**: `DirectionalLight`, `AmbientLight` 구조체 파일 분리 및 인클루드 체계 구축 완료.
 - [x] **역행렬 명칭 교체**: `inverseCameraMatrix` $\rightarrow$ `inverseViewMatrix` 일괄 교체 완료.
-- [x] **시스템 구조체 반영 및 분리**: `Camera.wgsl`, `Shadow.wgsl`, `SkyAtmosphere.wgsl` 신설 및 공유 구조 개선 완료.
-- [x] **중앙 집중식 로직 도입**: `SystemUniformUpdater`를 통해 업데이트 로직 단일화 완료.
+- [x] **시스템 구조체 반영 및 분리**: `Camera`, `Shadow`, `SkyAtmosphere`, `DirectionalLight`, `AmbientLight` 등 모든 시스템 구조체 파일 분리 완료.
+- [x] **중앙 집중식 로직 도입**: `SystemUniformUpdater`를 통해 모든 시스템 유니폼 업데이트 로직 단일화 완료.
 - [x] **출력 구조체 명칭 변경**: `FragmentOutput` $\rightarrow$ `OutputFragment` 일관성 확보 완료.
 
 ### 진행 예정/검토 필요 (Pending/Todo)

@@ -1,9 +1,7 @@
 #redgpu_include systemStruct.Camera
+#redgpu_include systemStruct.Projection
 struct SystemUniform {
-    projectionMatrix:mat4x4<f32>,
-    inverseProjectionMatrix:mat4x4<f32>,
-    projectionViewMatrix:mat4x4<f32>,
-    inverseProjectionViewMatrix:mat4x4<f32>,
+    projection: Projection,
     camera:Camera,
 };
 

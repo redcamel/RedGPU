@@ -72,6 +72,7 @@ import emptyEntryPointShadowVertex_wgsl from './shader/entryPoint/empty/entryPoi
 import OutputFragment_wgsl from './shader/systemStruct/OutputFragment.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
 import Camera_wgsl from './shader/systemStruct/Camera.wgsl';
+import Projection_wgsl from './shader/systemStruct/Projection.wgsl';
 import DirectionalLight_wgsl from './shader/systemStruct/DirectionalLight.wgsl';
 import AmbientLight_wgsl from './shader/systemStruct/AmbientLight.wgsl';
 import Shadow_wgsl from './shader/systemStruct/Shadow.wgsl';
@@ -264,6 +265,7 @@ export namespace SystemStructLibrary {
     export const OutputFragment = OutputFragment_wgsl;
     export const OutputShadowData = OutputShadowData_wgsl;
     export const Camera = Camera_wgsl;
+    export const Projection = Projection_wgsl;
     export const DirectionalLight = DirectionalLight_wgsl;
     export const AmbientLight = AmbientLight_wgsl;
     export const Shadow = Shadow_wgsl;
