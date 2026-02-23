@@ -13,7 +13,6 @@ struct SystemUniform {
 	  resolution:vec2<f32>,
       //
       camera:Camera,
-	  //
 	  time:f32,
 	  usePrefilterTexture:u32,
 	  isView3D:u32,

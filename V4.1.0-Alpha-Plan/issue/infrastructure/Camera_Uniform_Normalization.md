@@ -22,6 +22,7 @@
 ## 📝 구조체 사양 (Struct Specification - Final)
 데이터 정렬(16바이트)과 연산 효율성을 고려하여 최종 확정된 구조입니다.
 
+### 2.1 Camera 구조체
 | 순서 | 필드명 | 타입 | 설명 |
 | :-- | :--- | :--- | :--- |
 | 1 | **viewMatrix** | `mat4x4<f32>` | World to View 변환 행렬 |
@@ -30,6 +31,19 @@
 | 4 | **nearClipping** | `f32` | 근거리 클리핑 평면 거리 |
 | 5 | **farClipping** | `f32` | 원거리 클리핑 평면 거리 |
 | 6 | **fieldOfView** | `f32` | 시야각 (Radian) |
+
+### 2.2 Projection 구조체
+모든 투영 관련 행렬을 하나의 논리적 단위로 통합했습니다.
+
+| 순서 | 필드명 | 타입 | 설명 |
+| :-- | :--- | :--- | :--- |
+| 1 | **projectionMatrix** | `mat4x4<f32>` | View to Clip 변환 행렬 |
+| 2 | **projectionViewMatrix** | `mat4x4<f32>` | World to Clip 변환 행렬 ($P \times V$) |
+| 3 | **noneJitterProjectionMatrix** | `mat4x4<f32>` | TAA 지터가 제거된 투영 행렬 |
+| 4 | **noneJitterProjectionViewMatrix** | `mat4x4<f32>` | TAA 지터가 제거된 월드-클립 변환 행렬 |
+| 5 | **inverseProjectionMatrix** | `mat4x4<f32>` | Clip to View 변환 행렬 (공간 복구용) |
+| 6 | **inverseProjectionViewMatrix** | `mat4x4<f32>` | Clip to World 변환 행렬 |
+| 7 | **prevNoneJitterProjectionViewMatrix** | `mat4x4<f32>` | 이전 프레임의 지터 없는 월드-클립 변환 행렬 |
 
 ---
 
@@ -111,41 +125,56 @@ struct SkyAtmosphere {
 };
 ```
 
-### 2.4 DirectionalLight 구조체
-- **파일 위치**: `src/systemCodeManager/shader/systemStruct/DirectionalLight.wgsl`
+### 2.4 Projection 구조체
+- **파일 위치**: `src/systemCodeManager/shader/systemStruct/Projection.wgsl`
 ```wgsl
-struct DirectionalLight {
-    direction: vec3<f32>,
-    color: vec3<f32>,
-    intensity: f32,
+struct Projection {
+    projectionMatrix: mat4x4<f32>,
+    projectionViewMatrix: mat4x4<f32>,
+    noneJitterProjectionMatrix: mat4x4<f32>,
+    noneJitterProjectionViewMatrix: mat4x4<f32>,
+    inverseProjectionMatrix: mat4x4<f32>,
+    inverseProjectionViewMatrix: mat4x4<f32>,
+    prevNoneJitterProjectionViewMatrix: mat4x4<f32>
 };
 ```
 
-### 2.5 AmbientLight 구조체
-- **파일 위치**: `src/systemCodeManager/shader/systemStruct/AmbientLight.wgsl`
-```wgsl
-struct AmbientLight {
-    color: vec3<f32>,
-    intensity: f32
-};
-```
+### 2.5 조명 구조체 (Light Structs)
+- **파일 위치**: `src/systemCodeManager/shader/systemStruct/DirectionalLight.wgsl` 및 `AmbientLight.wgsl`
 
 ```wgsl
 // SYSTEM_UNIFORM.wgsl
 #redgpu_include systemStruct.DirectionalLight
 #redgpu_include systemStruct.AmbientLight
 #redgpu_include systemStruct.Camera
+#redgpu_include systemStruct.Projection
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
 
 struct SystemUniform {
-    // ...
-    camera: Camera,
-    skyAtmosphere: SkyAtmosphere,
-    shadow: Shadow,
-    directionalLights: array<DirectionalLight, 3>,
-    ambientLight: AmbientLight,
-    // ...
+	  projection: Projection,
+	  resolution:vec2<f32>,
+      camera:Camera,
+	  time:f32,
+	  usePrefilterTexture:u32,
+	  isView3D:u32,
+	  skyAtmosphere:SkyAtmosphere,
+	  shadow:Shadow,
+      directionalLightCount:u32,
+      directionalLightProjectionViewMatrix:mat4x4<f32>,
+      directionalLightProjectionMatrix:mat4x4<f32>,
+      directionalLightViewMatrix:mat4x4<f32>,
+      directionalLights:array<DirectionalLight,3>,
+	  ambientLight:AmbientLight,
+};
+
+// POST_EFFECT_SYSTEM_UNIFORM.wgsl
+#redgpu_include systemStruct.Camera
+#redgpu_include systemStruct.Projection
+
+struct SystemUniform {
+    projection: Projection,
+    camera:Camera,
 };
 ```
 

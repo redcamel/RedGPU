@@ -429,6 +429,7 @@ class View3D extends AView {
             const {members} = structInfo;
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
             const projectionViewMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
+            this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
             SystemUniformUpdater.updateCamera(rawCamera, members.camera.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateShadow(shadowManager, members.shadow.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members.skyAtmosphere.members, this.#uniformDataF32, this.#uniformDataU32)
@@ -441,6 +442,7 @@ class View3D extends AView {
                     noneJitterProjectionMatrix,
                     noneJitterProjectionViewMatrix: this.#noneJitterProjectionViewMatrix,
                     inverseProjectionMatrix,
+                    inverseProjectionViewMatrix: mat4.invert(temp3, projectionViewMatrix),
                     prevNoneJitterProjectionViewMatrix: redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix,
                 },
                 members.projection.members,
