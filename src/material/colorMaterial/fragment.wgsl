@@ -49,7 +49,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let v = asin(clamp(viewDir.y, -1.0, 1.0)) * INV_PI + 0.5;
         let w = sqrt(clamp(distKm / 100.0, 0.0, 1.0));
 
-        let apSample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(u, v, w), 0.0);
+        let apSample = textureSampleLevel(cameraVolumeTexture, atmosphereSampler, vec3<f32>(u, v, w), 0.0);
         
         // [수정] 태양 강도와 노출을 적용하여 하늘 밝기와 동기화
         let atmosphereColor = apSample.rgb * u_skyAtmosphere.skyAtmosphereSunIntensity;

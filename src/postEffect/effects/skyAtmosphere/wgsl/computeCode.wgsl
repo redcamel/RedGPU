@@ -51,7 +51,7 @@ let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
 let ap_u = (azimuth / PI2) + 0.5;
 let ap_v = clamp((elevation * INV_PI) + 0.5, 0.001, 0.999);
 let ap_w = clamp(sqrt(ap_dist / max_ap_dist), 0.0, 0.999);
-let ap_sample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(ap_u, ap_v, ap_w), 0.0);
+let ap_sample = textureSampleLevel(cameraVolumeTexture, atmosphereSampler, vec3<f32>(ap_u, ap_v, ap_w), 0.0);
 
 // 불투명 객체(depth < 0.999999)에 대기 효과 적용
 if (rawDepth < 0.999999) {
@@ -68,23 +68,23 @@ if (t_earth > 0.0) {
     let hitPos = camPos + viewDir * t_earth;
     let up = normalize(hitPos);
     let cos_sun = dot(up, sunDir);
-    let gTrans = get_transmittance(transmittanceTexture, tSampler, 0.0, cos_sun, atmH);
+    let gTrans = get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_sun, atmH);
     let albedo = uniforms.groundAlbedo * INV_PI;
     let diffuse = albedo * gTrans * max(0.0, cos_sun) * uniforms.sunIntensity;
     let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
-    let skySample = textureSampleLevel(skyViewTexture, tSampler, skyUV, 0.0);
+    let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
     atmosphereBackground = (diffuse * skySample.a) + (skySample.rgb * uniforms.sunIntensity);
 } else {
     // 순수 하늘 영역
     let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
-    let skySample = textureSampleLevel(skyViewTexture, tSampler, skyUV, 0.0);
+    let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
     atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
     
     // 태양 디스크 합성
     let view_sun_cos = dot(viewDir, sunDir);
     let sun_rad = uniforms.sunSize * DEG_TO_RAD;
     let sun_mask = smoothstep(cos(sun_rad) - 0.001, cos(sun_rad), view_sun_cos);
-    let sun_trans = get_transmittance(transmittanceTexture, tSampler, camH, sunDir.y, atmH);
+    let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
     atmosphereBackground += sun_mask * sun_trans * (uniforms.sunIntensity * 100.0);
 }
 

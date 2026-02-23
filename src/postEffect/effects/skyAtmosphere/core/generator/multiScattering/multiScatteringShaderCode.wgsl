@@ -3,7 +3,7 @@
 
 @group(0) @binding(0) var multiScatTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
-@group(0) @binding(2) var tSampler: sampler;
+@group(0) @binding(2) var atmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: AtmosphereParameters;
 
 @compute @workgroup_size(8, 8)
@@ -50,7 +50,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 let cur_p = ray_origin + ray_dir * t;
                 let cur_h = length(cur_p) - r;
                 let cos_s = dot(normalize(cur_p), sun_dir);
-                let sun_t = get_transmittance(transmittanceTexture, tSampler, cur_h, cos_s, params.atmosphereHeight);
+                let sun_t = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_s, params.atmosphereHeight);
                 
                 let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
                 let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
@@ -66,7 +66,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             if (t_earth > 0.0) {
                 let hit_p = ray_origin + ray_dir * t_earth;
                 let cos_s = max(0.0, dot(normalize(hit_p), sun_dir));
-                L1 += T_path * get_transmittance(transmittanceTexture, tSampler, 0.0, cos_s, params.atmosphereHeight) * cos_s * params.groundAlbedo * INV_PI;
+                L1 += T_path * get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_s, params.atmosphereHeight) * cos_s * params.groundAlbedo * INV_PI;
             }
             lum_total += L1;
             fms_total += f1 / f32(sample_count);

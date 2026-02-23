@@ -3,7 +3,7 @@
 @group(0) @binding(0) var cameraVolumeTexture: texture_storage_3d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
-@group(0) @binding(3) var tSampler: sampler;
+@group(0) @binding(3) var atmosphereSampler: sampler;
 @group(0) @binding(4) var<uniform> params: AtmosphereParameters;
 
 @compute @workgroup_size(4, 4, 4)
@@ -45,7 +45,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             let up = p / p_len;
             let cos_sun = dot(up, params.sunDirection);
-            let sun_trans = get_transmittance(transmittanceTexture, tSampler, cur_h, cos_sun, params.atmosphereHeight);
+            let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
@@ -67,7 +67,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             // [KO] 다중 산란 기여분 (에너지 보존 고려)
             let multi_scat_uv = vec2<f32>(clamp(cos_sun * 0.5 + 0.5, 0.0, 1.0), 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
-            let multi_scat_energy = textureSampleLevel(multiScatTexture, tSampler, multi_scat_uv, 0.0).rgb;
+            let multi_scat_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, multi_scat_uv, 0.0).rgb;
             let total_scat_coeff = params.rayleighScattering * rho_r + vec3<f32>((params.mieScattering * rho_m) + (params.heightFogDensity * rho_f));
             let scat_ms = multi_scat_energy * total_scat_coeff;
 

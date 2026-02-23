@@ -3,7 +3,7 @@
 @group(0) @binding(0) var skyViewTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
-@group(0) @binding(3) var tSampler: sampler;
+@group(0) @binding(3) var atmosphereSampler: sampler;
 @group(0) @binding(4) var<uniform> params: AtmosphereParameters;
 
 @compute @workgroup_size(16, 16)
@@ -57,7 +57,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let cur_h = p_len - r;
 
             let cos_sun = dot(up, params.sunDirection);
-            let sun_trans = get_transmittance(transmittanceTexture, tSampler, cur_h, cos_sun, params.atmosphereHeight);
+            let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
 
             // 행성 그림자
             var shadow_mask = 1.0;
@@ -79,7 +79,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             // [KO] 다중 산란 기여 (V 매핑을 1.0 - H로 수정하여 생성기와 일치시킴)
             // [EN] Multi-scattering contribution (Updated V mapping to 1.0 - H to match generator)
             let ms_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
-            let ms_energy = textureSampleLevel(multiScatTexture, tSampler, ms_uv, 0.0).rgb;
+            let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, ms_uv, 0.0).rgb;
             let ms_scat = ms_energy * (params.rayleighScattering * rho_r + vec3<f32>((params.mieScattering + params.heightFogDensity) * rho_m)) * shadow_mask;
 
             let ext = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m) + params.ozoneAbsorption * rho_o + vec3<f32>(params.heightFogDensity * rho_f);

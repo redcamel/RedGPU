@@ -151,7 +151,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 				'@group(0) @binding(3) var multiScatteringTexture : texture_2d<f32>;',
 				'@group(0) @binding(4) var skyViewTexture : texture_2d<f32>;',
 				'@group(0) @binding(5) var cameraVolumeTexture : texture_3d<f32>;',
-				'@group(0) @binding(6) var tSampler : sampler;',
+				'@group(0) @binding(6) var atmosphereSampler : sampler;',
 				'',
 				'@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
 				SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM,

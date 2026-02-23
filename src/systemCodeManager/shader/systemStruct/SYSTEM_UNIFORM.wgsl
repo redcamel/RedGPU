@@ -55,7 +55,7 @@ struct SystemUniform {
 @group(0) @binding(11) var ibl_irradianceTexture: texture_cube<f32>;
 @group(0) @binding(12) var ibl_brdfLUTTexture: texture_2d<f32>;
 @group(0) @binding(13) var cameraVolumeTexture: texture_3d<f32>;
-@group(0) @binding(14) var tSampler: sampler;
+@group(0) @binding(14) var atmosphereSampler: sampler;
 
 #redgpu_include depth.getLinearizeDepth
 
