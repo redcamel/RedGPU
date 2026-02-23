@@ -84,15 +84,15 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - **시스템 통합**: `SystemCodeManager.displacement` 네임스페이스를 통해 라이브러리화 완료.
 
 ### 12. 시스템 셰이더 중복 제거 및 일원화 (System Shader Redundancy Cleanup)
-*   **대상**: `src/resources/systemCode/shader/vertex/index.ts` (SystemVertexCode)
+*   **대상**: `src/resources/systemCode/SystemCode.ts`, `src/resources/systemCode/shader/vertex/index.ts` (SystemVertexCode)
 *   **결과**: ✅ 완료.
-    - `SystemVertexCode` (index.ts) 파일을 **완전히 폐지 및 삭제**.
-    - 잔존하던 빌보드, 디스플레이스먼트, 메시 유니폼(`meshVertexBasicUniform`) 등의 모든 매핑을 `SystemCodeManager`로 전면 이주.
-    - 모든 시스템 및 공통 라이브러리 접근을 `SystemCodeManager`로 단일화하여 셰이더 인프라 아키텍처를 극도로 단순화함.
+    - **레거시 인덱스 파일 완전 삭제**: `SystemCode.ts` 및 `SystemVertexCode` (index.ts)를 폐지하여 셰이더 관리 포인트를 `SystemCodeManager`로 일원화.
+    - **내부 의존성 정리**: `View3D.ts`, `src/index.ts` 등 엔진 핵심부에서 사용하던 레거시 참조를 `SystemCodeManager`로 전환 완료.
+    - **아키텍처 정규화**: 모든 시스템 및 공통 라이브러리 접근을 단일 레지스트리로 통합하여 셰이더 인프라의 투명성과 유지보수성을 극대화함.
 
 ---
 
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
 - **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화, 명명 규칙(CamelCase) 정규화 완료.
-- **2026-02-23**: 디스플레이스먼트 라이브러리 리팩토링 및 좌표계 보정 로직 반영. `SystemVertexCode` (index.ts) 파일 완전 폐지 및 `SystemCodeManager`로의 전면 일원화 작업 완료.
+- **2026-02-23**: 디스플레이스먼트 라이브러리 리팩토링 및 좌표계 보정 로직 반영. 모든 레거시 인덱스 파일(`SystemCode`, `SystemVertexCode`) 삭제 및 `SystemCodeManager` 기반 전면 일원화 작업 완료.

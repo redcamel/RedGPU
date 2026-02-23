@@ -8,10 +8,9 @@
  */
 import init from "./init";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
-import SystemCode from "./resources/systemCode/SystemCode";
 import SystemCodeManager from "./systemCodeManager/SystemCodeManager";
 export * as Bound from "./bound";
-export { init, SystemCode, SystemCodeManager, GLTFLoader };
+export { init, SystemCodeManager, GLTFLoader };
 export * as Camera from "./camera/";
 export * as Context from "./context";
 export * as Color from "./color";
