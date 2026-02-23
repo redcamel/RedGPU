@@ -28,6 +28,7 @@ import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import IBLCubeTexture from "../../resources/texture/ibl/core/IBLCubeTexture";
 import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
+import updateSystemUniformData from "../../renderer/updateSystemUniformData";
 
 const SHADER_INFO = parseWGSL(SystemCodeManager.SYSTEM_UNIFORM, 'VIEW3D_SYSTEM_UNIFORM')
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -409,13 +410,6 @@ class View3D extends AView {
         this.#updateSystemUniform();
     }
 
-    #updateSystemUniformData(valueLust: { key, value, dataView, targetMembers }[]) {
-        valueLust.forEach(({key, value, dataView, targetMembers}) => {
-            const info = targetMembers[key]
-            dataView.set(typeof value === 'number' ? [value] : value, info.uniformOffset / info.View.BYTES_PER_ELEMENT)
-        })
-    }
-
     #updateSystemUniform() {
         // 시스템 유니폼 업데이트
         const {
@@ -435,96 +429,68 @@ class View3D extends AView {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
-            SystemUniformUpdater.updateCamera(rawCamera,cameraMembers,this.#uniformDataF32)
-            SystemUniformUpdater.updateShadow(shadowManager, members.shadow.members, this.#uniformDataF32)
-            SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members.skyAtmosphere.members, this.#uniformDataF32)
+            SystemUniformUpdater.updateCamera(rawCamera,cameraMembers,this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateShadow(shadowManager, members.shadow.members, this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members.skyAtmosphere.members, this.#uniformDataF32, this.#uniformDataU32)
 
-            this.#updateSystemUniformData([
+            updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
                 {
                     key: 'projectionMatrix',
                     value: projectionMatrix,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'projectionViewMatrix',
                     value: mat4.multiply(temp, projectionMatrix, viewMatrix),
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'noneJitterProjectionMatrix',
                     value: noneJitterProjectionMatrix,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'noneJitterProjectionViewMatrix',
                     value: this.#noneJitterProjectionViewMatrix,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'inverseProjectionMatrix',
                     value: inverseProjectionMatrix,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'prevNoneJitterProjectionViewMatrix',
                     value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'resolution',
                     value: [this.pixelRectObject.width, this.pixelRectObject.height],
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 //
                 {
                     key: 'usePrefilterTexture',
                     value: this.ibl?.prefilterTexture?.gpuTexture ? 1 : 0,
-                    dataView: this.#uniformDataU32,
-                    targetMembers: members
                 },
                 {
                     key: 'time',
                     value: this.renderViewStateData.timestamp || 0,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'isView3D',
                     value: this.constructor === View3D ? 1 : 0,
-                    dataView: this.#uniformDataU32,
-                    targetMembers: members
                 },
                 // directionalLight
                 {
                     key: 'directionalLightCount',
                     value: lightManager.directionalLightCount,
-                    dataView: this.#uniformDataU32,
-                    targetMembers: members
                 },
                 {
                     key: 'directionalLightProjectionViewMatrix',
                     value: lightManager.getDirectionalLightProjectionViewMatrix(this),
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'directionalLightProjectionMatrix',
                     value: lightManager.getDirectionalLightProjectionMatrix(this),
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
                 {
                     key: 'directionalLightViewMatrix',
                     value: lightManager.getDirectionalLightViewMatrix(this),
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
                 },
             ]);
 
@@ -537,25 +503,20 @@ class View3D extends AView {
                     light.drawDebugger.render(this.renderViewStateData)
                 }
                 const targetMembers = directionalLights.memberList[index]
-                this.#updateSystemUniformData(
+                updateSystemUniformData(
+                    targetMembers, this.#uniformDataF32, this.#uniformDataU32,
                     [
                         {
                             key: 'direction',
                             value: light.direction,
-                            dataView: this.#uniformDataF32,
-                            targetMembers
                         },
                         {
                             key: 'color',
                             value: light.color.rgbNormalLinear,
-                            dataView: this.#uniformDataF32,
-                            targetMembers
                         },
                         {
                             key: 'intensity',
                             value: light.intensity,
-                            dataView: this.#uniformDataF32,
-                            targetMembers
                         }
                     ]
                 )
@@ -566,19 +527,16 @@ class View3D extends AView {
             const {ambientLight} = members
             const targetMembers = ambientLight.members;
             if (light) {
-                this.#updateSystemUniformData(
+                updateSystemUniformData(
+                    targetMembers, this.#uniformDataF32, this.#uniformDataU32,
                     [
                         {
                             key: 'color',
                             value: light.color.rgbNormalLinear,
-                            dataView: this.#uniformDataF32,
-                            targetMembers
                         },
                         {
                             key: 'intensity',
                             value: light.intensity,
-                            dataView: this.#uniformDataF32,
-                            targetMembers
                         },
                     ]
                 )

@@ -13,6 +13,7 @@ import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
 import SystemUniformUpdater from "../renderer/SystemUniformUpdater";
+import updateSystemUniformData from "../renderer/updateSystemUniformData";
 
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -448,13 +449,6 @@ class PostEffectManager {
         }
     }
 
-    #updateSystemUniformData(valueLust: { key, value, dataView, targetMembers }[]) {
-        valueLust.forEach(({key, value, dataView, targetMembers}) => {
-            const info = targetMembers[key]
-            dataView.set(typeof value === 'number' ? [value] : value, info.uniformOffset / info.View.BYTES_PER_ELEMENT)
-        })
-    }
-
     #updateSystemUniforms() {
         const {inverseProjectionMatrix, projectionMatrix, rawCamera, redGPUContext, scene} = this.#view
         const {gpuDevice} = redGPUContext
@@ -466,32 +460,25 @@ class PostEffectManager {
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
-            SystemUniformUpdater.updateCamera(rawCamera,cameraMembers,this.#uniformDataF32)
-            this.#updateSystemUniformData(
+            SystemUniformUpdater.updateCamera(rawCamera, cameraMembers, this.#uniformDataF32, this.#uniformDataU32)
+            updateSystemUniformData(
+                members, this.#uniformDataF32, this.#uniformDataU32,
                 [
                     {
                         key: 'projectionMatrix',
                         value: projectionMatrix,
-                        dataView: this.#uniformDataF32,
-                        targetMembers: members
                     },
                     {
                         key: 'inverseProjectionMatrix',
                         value: inverseProjectionMatrix,
-                        dataView: this.#uniformDataF32,
-                        targetMembers: members
                     },
                     {
                         key: 'projectionViewMatrix',
                         value: projectionViewMatrix,
-                        dataView: this.#uniformDataF32,
-                        targetMembers: members
                     },
                     {
                         key: 'inverseProjectionViewMatrix',
                         value: mat4.invert(temp2, projectionViewMatrix),
-                        dataView: this.#uniformDataF32,
-                        targetMembers: members
                     },
                 ]
             )

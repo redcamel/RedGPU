@@ -2,26 +2,21 @@ import {mat4} from "gl-matrix";
 import Camera2D from "../camera/camera/Camera2D";
 import PerspectiveCamera from "../camera/camera/PerspectiveCamera";
 import OrthographicCamera from "../camera/camera/OrthographicCamera";
+import updateSystemUniformData from "./updateSystemUniformData";
 
 let temp3 = mat4.create()
 
-const updateSystemUniformData = (targetMembers,dataView,valueLust: { key, value}[]) => {
-    valueLust.forEach(({key, value}) => {
-        const info = targetMembers[key]
-        dataView.set(typeof value === 'number' ? [value] : value, info.uniformOffset / info.View.BYTES_PER_ELEMENT)
-    })
-}
-
 class SystemUniformUpdater {
     static updateCamera(
-        camera: PerspectiveCamera | Camera2D | OrthographicCamera ,
-        cameraMembers:any, //TODO 타입을 정해야하나...
-        uniformDataF32: Float32Array
+        camera: PerspectiveCamera | Camera2D | OrthographicCamera,
+        cameraMembers: any, //TODO 타입을 정해야하나...
+        uniformDataF32: Float32Array,
+        uniformDataU32: Uint32Array
     ) {
         const {viewMatrix, position} = camera
         const camera2DYn = camera instanceof Camera2D;
         updateSystemUniformData(
-            cameraMembers,uniformDataF32,
+            cameraMembers, uniformDataF32, uniformDataU32,
             [
                 {
                     key: 'viewMatrix',
@@ -55,10 +50,11 @@ class SystemUniformUpdater {
     static updateShadow(
         shadowManager: any,
         shadowMembers: any,
-        uniformData: any
+        uniformDataF32: Float32Array,
+        uniformDataU32: Uint32Array
     ) {
         updateSystemUniformData(
-            shadowMembers, uniformData,
+            shadowMembers, uniformDataF32, uniformDataU32,
             [
                 {
                     key: 'directionalShadowDepthTextureSize',
@@ -75,10 +71,11 @@ class SystemUniformUpdater {
     static updateSkyAtmosphere(
         skyAtmosphere: any, // TODO: SkyAtmosphere 타입 정의 필요
         skyAtmosphereMembers: any,
-        uniformData: any
+        uniformDataF32: Float32Array,
+        uniformDataU32: Uint32Array
     ) {
         updateSystemUniformData(
-            skyAtmosphereMembers, uniformData,
+            skyAtmosphereMembers, uniformDataF32, uniformDataU32,
             [
                 {
                     key: 'useSkyAtmosphere',
