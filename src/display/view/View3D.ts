@@ -486,6 +486,12 @@ class View3D extends AView {
                     targetMembers: cameraMembers
                 },
                 {
+                    key: 'inverseViewMatrix',
+                    value: mat4.invert(temp3, viewMatrix),
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
                     key: 'cameraPosition',
                     value: cameraPosition,
                     dataView: this.#uniformDataF32,
@@ -500,6 +506,13 @@ class View3D extends AView {
                 {
                     key: 'farClipping',
                     value: camera2DYn ? 0 : rawCamera.farClipping,
+                    dataView: this.#uniformDataF32,
+                    targetMembers: cameraMembers
+                },
+                {
+                    key: 'fieldOfView',
+                    //@ts-ignore
+                    value: rawCamera.fieldOfView * Math.PI / 180,
                     dataView: this.#uniformDataF32,
                     targetMembers: cameraMembers
                 },
