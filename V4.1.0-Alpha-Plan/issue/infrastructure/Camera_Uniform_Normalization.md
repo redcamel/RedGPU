@@ -33,7 +33,7 @@
 | 6 | **fieldOfView** | `f32` | 시야각 (Radian) |
 
 ### 2.2 Projection 구조체
-모든 투영 관련 행렬을 하나의 논리적 단위로 통합했습니다.
+모든 투영 관련 행렬을 하나의 논리적 단위로 통합했습니다. `View3D`와 `PostEffectManager`는 이 구조체를 100% 동일한 로직으로 공유합니다.
 
 | 순서 | 필드명 | 타입 | 설명 |
 | :-- | :--- | :--- | :--- |
@@ -42,7 +42,7 @@
 | 3 | **noneJitterProjectionMatrix** | `mat4x4<f32>` | TAA 지터가 제거된 투영 행렬 |
 | 4 | **noneJitterProjectionViewMatrix** | `mat4x4<f32>` | TAA 지터가 제거된 월드-클립 변환 행렬 |
 | 5 | **inverseProjectionMatrix** | `mat4x4<f32>` | Clip to View 변환 행렬 (공간 복구용) |
-| 6 | **inverseProjectionViewMatrix** | `mat4x4<f32>` | Clip to World 변환 행렬 |
+| 6 | **inverseProjectionViewMatrix** | `mat4x4<f32>` | Clip to World 변환 행렬 ($(P \times V)^{-1}$) |
 | 7 | **prevNoneJitterProjectionViewMatrix** | `mat4x4<f32>` | 이전 프레임의 지터 없는 월드-클립 변환 행렬 |
 
 ---
@@ -212,6 +212,7 @@ struct SystemUniform {
 - [x] **역행렬 명칭 교체**: `inverseCameraMatrix` $\rightarrow$ `inverseViewMatrix` 일괄 교체 완료.
 - [x] **시스템 구조체 반영 및 분리**: `Camera`, `Shadow`, `SkyAtmosphere`, `DirectionalLight`, `AmbientLight` 등 모든 시스템 구조체 파일 분리 완료.
 - [x] **중앙 집중식 로직 도입**: `SystemUniformUpdater`를 통해 모든 시스템 유니폼 업데이트 로직 단일화 완료.
+- [x] **데이터 정합성 확보**: `View3D`와 `PostEffectManager` 간의 투영/카메라 업데이트 로직 100% 동기화 완료.
 - [x] **출력 구조체 명칭 변경**: `FragmentOutput` $\rightarrow$ `OutputFragment` 일관성 확보 완료.
 
 ### 진행 예정/검토 필요 (Pending/Todo)
