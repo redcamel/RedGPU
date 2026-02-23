@@ -69,7 +69,7 @@ class TAA {
     #prevMSAA: Boolean
     #prevMSAAID: string
     #prevJitterOffset: [number, number] = [0, 0]
-    #prevNoneJitterProjectionCameraMatrix: mat4 = mat4.create();
+    #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
 
     /**
      * [KO] TAA 인스턴스를 생성합니다.
@@ -102,8 +102,8 @@ class TAA {
      * [KO] 4x4 행렬
      * [EN] 4x4 matrix
      */
-    get prevNoneJitterProjectionCameraMatrix(): mat4 {
-        return this.#prevNoneJitterProjectionCameraMatrix;
+    get prevNoneJitterProjectionViewMatrix(): mat4 {
+        return this.#prevNoneJitterProjectionViewMatrix;
     }
 
     /**
@@ -187,7 +187,7 @@ class TAA {
             this.updateUniform('frameIndex', this.#frameIndex);
             this.updateUniform('currJitterOffset', view.jitterOffset);
             this.updateUniform('prevJitterOffset', this.#prevJitterOffset);
-            mat4.copy(this.#prevNoneJitterProjectionCameraMatrix, view.noneJitterProjectionCameraMatrix)
+            mat4.copy(this.#prevNoneJitterProjectionViewMatrix, view.noneJitterProjectionViewMatrix)
 
             this.#prevJitterOffset = [...view.jitterOffset]
         }

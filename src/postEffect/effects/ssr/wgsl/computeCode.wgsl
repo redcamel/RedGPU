@@ -36,7 +36,7 @@ if (length(worldNormal) < 0.01) {
 }
 
 let normal = normalize(worldNormal);
-let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
+let cameraWorldPos = systemUniforms.camera.inverseViewMatrix[3].xyz;
 
 let reflectionDir = calculateWorldReflectionRay(worldPos, normal, cameraWorldPos);
 let reflection = performWorldRayMarching(worldPos, reflectionDir, screenCoord);

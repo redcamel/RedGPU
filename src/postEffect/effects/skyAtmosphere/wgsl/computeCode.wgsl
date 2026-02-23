@@ -18,9 +18,9 @@ let viewSpaceDir = vec3<f32>(
 );
 
 let worldRotation = mat3x3<f32>(
-    systemUniforms.camera.inverseCameraMatrix[0].xyz,
-    systemUniforms.camera.inverseCameraMatrix[1].xyz,
-    systemUniforms.camera.inverseCameraMatrix[2].xyz
+    systemUniforms.camera.inverseViewMatrix[0].xyz,
+    systemUniforms.camera.inverseViewMatrix[1].xyz,
+    systemUniforms.camera.inverseViewMatrix[2].xyz
 );
 // [KO] 정규화는 모든 변환이 끝난 후 한 번만 수행하여 수치적 안정성을 높입니다.
 // [EN] Normalize once after all transforms to improve numerical stability.

@@ -1,6 +1,6 @@
 struct Camera {
     viewMatrix:mat4x4<f32>,
-    inverseCameraMatrix:mat4x4<f32>,
+    inverseViewMatrix:mat4x4<f32>,
     cameraPosition:vec3<f32>,
     nearClipping:f32,
     farClipping:f32,
@@ -10,7 +10,7 @@ struct SystemUniform {
     projectionMatrix:mat4x4<f32>,
     inverseProjectionMatrix:mat4x4<f32>,
     projectionViewMatrix:mat4x4<f32>,
-    inverseProjectionCameraMatrix:mat4x4<f32>,
+    inverseProjectionViewMatrix:mat4x4<f32>,
     camera:Camera,
 };
 

@@ -21,7 +21,7 @@ fn isFiniteVec3(v: vec3<f32>) -> bool {
 }
 
 fn reconstructWorldPositionUltraPrecise(screenCoord: vec2<f32>, depth: f32) -> vec3<f32> {
-    let worldPos = getWorldPositionFromDepth(screenCoord, depth, systemUniforms.inverseProjectionCameraMatrix);
+    let worldPos = getWorldPositionFromDepth(screenCoord, depth, systemUniforms.inverseProjectionViewMatrix);
     return select(vec3<f32>(0.0), worldPos, isFiniteVec3(worldPos));
 }
 
@@ -134,7 +134,7 @@ fn calculateAbsoluteHeightFogMaxPrecision(worldHeight: f32) -> f32 {
 }
 
 fn getRayDirectionMaxPrecision(screenCoord: vec2<f32>) -> vec3<f32> {
-    let worldPos = getWorldPositionFromDepth(screenCoord, 1.0, systemUniforms.inverseProjectionCameraMatrix);
+    let worldPos = getWorldPositionFromDepth(screenCoord, 1.0, systemUniforms.inverseProjectionViewMatrix);
     let rayDir = getRayDirection(worldPos, systemUniforms.camera.cameraPosition);
     return select(vec3<f32>(0.0, 0.0, 1.0), rayDir, isFiniteVec3(rayDir));
 }

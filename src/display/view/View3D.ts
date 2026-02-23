@@ -172,7 +172,7 @@ class View3D extends AView {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
-    #noneJitterProjectionCameraMatrix: mat4 = mat4.create()
+    #noneJitterProjectionViewMatrix: mat4 = mat4.create()
 
     /**
      * [KO] View3D 인스턴스를 생성합니다.
@@ -346,8 +346,8 @@ class View3D extends AView {
         }
     }
 
-    get noneJitterProjectionCameraMatrix(): mat4 {
-        return this.#noneJitterProjectionCameraMatrix;
+    get noneJitterProjectionViewMatrix(): mat4 {
+        return this.#noneJitterProjectionViewMatrix;
     }
 
     /**
@@ -433,7 +433,7 @@ class View3D extends AView {
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
-            this.#noneJitterProjectionCameraMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
+            this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
 
             this.#updateSystemUniformData([
                 {
@@ -455,8 +455,8 @@ class View3D extends AView {
                     targetMembers: members
                 },
                 {
-                    key: 'noneJitterProjectionCameraMatrix',
-                    value: this.#noneJitterProjectionCameraMatrix,
+                    key: 'noneJitterProjectionViewMatrix',
+                    value: this.#noneJitterProjectionViewMatrix,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
@@ -467,8 +467,8 @@ class View3D extends AView {
                     targetMembers: members
                 },
                 {
-                    key: 'prevNoneJitterProjectionCameraMatrix',
-                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionCameraMatrix : this.#noneJitterProjectionCameraMatrix,
+                    key: 'prevNoneJitterProjectionViewMatrix',
+                    value: redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },

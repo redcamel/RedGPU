@@ -58,8 +58,8 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
     // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
-    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
-    let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
+    let u_noneJitterProjectionViewMatrix = systemUniforms.noneJitterProjectionViewMatrix;
+    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.prevNoneJitterProjectionViewMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
@@ -122,8 +122,8 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 
     // Motion vector calculation
     {
-        output.currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-        output.prevClipPos = u_prevNoneJitterProjectionCameraMatrix * u_prevModelMatrix  * (prevSkinMat * input_position_vec4);
+        output.currentClipPos = u_noneJitterProjectionViewMatrix * position;
+        output.prevClipPos = u_prevNoneJitterProjectionViewMatrix * u_prevModelMatrix  * (prevSkinMat * input_position_vec4);
     }
 
     // Scale calculations

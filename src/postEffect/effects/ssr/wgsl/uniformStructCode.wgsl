@@ -25,7 +25,7 @@ struct Uniforms {
      // 1. View 공간 복원 (표준 함수 사용)
      let viewPos = getViewPositionFromDepth(uv, depth, systemUniforms.inverseProjectionMatrix);
      // 2. World 공간 변환 (카메라 역행렬 사용)
-     let worldPos4 = systemUniforms.camera.inverseCameraMatrix * vec4<f32>(viewPos, 1.0);
+     let worldPos4 = systemUniforms.camera.inverseViewMatrix * vec4<f32>(viewPos, 1.0);
      return worldPos4.xyz;
  }
 
@@ -52,7 +52,7 @@ struct Uniforms {
  }
 
 fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCoord: vec2<i32>) -> vec4<f32> {
-    let cameraWorldPos = systemUniforms.camera.inverseCameraMatrix[3].xyz;
+    let cameraWorldPos = systemUniforms.camera.inverseViewMatrix[3].xyz;
     let cameraDistance = length(startWorldPos - cameraWorldPos);
 
     let distanceScale = 1.0 + cameraDistance * 0.1;

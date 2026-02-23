@@ -34,8 +34,8 @@ fn vertexMain(inputData: VertexIn) -> VertexOut {
     var output: VertexOut;
 
     let modelPos = inputData.position;
-    let viewProj = systemUniforms.noneJitterProjectionCameraMatrix;
-    let prevViewProj = systemUniforms.prevNoneJitterProjectionCameraMatrix;
+    let viewProj = systemUniforms.noneJitterProjectionViewMatrix;
+    let prevViewProj = systemUniforms.prevNoneJitterProjectionViewMatrix;
 
     // 기본 위치 계산
     output.position = viewProj * modelPos;

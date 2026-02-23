@@ -91,15 +91,17 @@ struct Camera {
 ## 📊 진행 현황 (Progress Status)
 
 ### 완료 항목 (Completed)
-- [x] **단독 명칭 교체**: 코드베이스 전반(`src/`)에서 `cameraMatrix` 변수/필드명을 `viewMatrix`로 교체 완료.
-- [x] **시스템 구조체 반영**: `SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl` 내 필드명 업데이트.
-- [x] **핵심 매니저 업데이트**: `View3D.ts`, `PostEffectManager.ts` 등 주요 클래스의 참조 로직 수정.
+- [x] **단독 명칭 교체**: 코드베이스 전반(`src/`)에서 `cameraMatrix` $\rightarrow$ `viewMatrix` 교체 완료.
+- [x] **복합 행렬 명칭 교체**: `projectionCameraMatrix` $\rightarrow$ `projectionViewMatrix` 교체 완료.
+- [x] **Jitter 관련 명칭 교체**: `noneJitterProjectionViewMatrix`, `prevNoneJitterProjectionViewMatrix` 교체 완료.
+- [x] **역행렬 명칭 교체**: `inverseCameraMatrix`, `inverseProjectionCameraMatrix` 등을 `inverseViewMatrix`, `inverseProjectionViewMatrix`로 교체 완료.
+- [x] **시스템 구조체 반영**: `SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl` 내 필드명 업데이트 완료.
+- [x] **핵심 매니저 업데이트**: `View3D.ts`, `PostEffectManager.ts` 등 주요 클래스의 참조 로직 수정 완료.
 
 ### 진행 예정/검토 필요 (Pending/Todo)
-- [ ] **복합 행렬 명칭 정규화**: `projectionCameraMatrix`, `noneJitterProjectionCameraMatrix` 등을 `projectionViewMatrix` 계열로 변경 검토.
-- [ ] **역행렬 명칭 교체**: 여전히 `inverseCameraMatrix`로 명명된 부분을 `inverseViewMatrix`로 일괄 교체 필요.
+- [ ] **런타임 검증**: 실제 렌더링 시 TAA, SSR 등에서 정규화된 유니폼 값이 정상적으로 연산되는지 추가 확인.
 
 ---
 **최종 업데이트:** 2026-02-23
-**상태:** 진행 중 (In Progress)
+**상태:** 완료 (Completed)
 **작성자:** Gemini CLI
