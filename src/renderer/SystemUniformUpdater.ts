@@ -71,6 +71,30 @@ class SystemUniformUpdater {
             ]
         )
     }
+
+    static updateSkyAtmosphere(
+        skyAtmosphere: any, // TODO: SkyAtmosphere 타입 정의 필요
+        skyAtmosphereMembers: any,
+        uniformData: any
+    ) {
+        updateSystemUniformData(
+            skyAtmosphereMembers, uniformData,
+            [
+                {
+                    key: 'useSkyAtmosphere',
+                    value: skyAtmosphere ? 1 : 0,
+                },
+                {
+                    key: 'skyAtmosphereSunIntensity',
+                    value: skyAtmosphere ? skyAtmosphere.sunIntensity : 0,
+                },
+                {
+                    key: 'skyAtmosphereExposure',
+                    value: skyAtmosphere ? skyAtmosphere.exposure : 1,
+                }
+            ]
+        )
+    }
 }
 
 Object.freeze(SystemUniformUpdater)

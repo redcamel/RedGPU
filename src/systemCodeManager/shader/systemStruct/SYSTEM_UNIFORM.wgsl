@@ -12,6 +12,7 @@ struct AmbientLight {
 
 #redgpu_include systemStruct.Camera
 #redgpu_include systemStruct.Shadow
+#redgpu_include systemStruct.SkyAtmosphere
 
 struct SystemUniform {
 	  projectionMatrix:mat4x4<f32>,
@@ -27,9 +28,7 @@ struct SystemUniform {
 	  time:f32,
 	  usePrefilterTexture:u32,
 	  isView3D:u32,
-	  useSkyAtmosphere:u32,
-	  skyAtmosphereSunIntensity:f32,
-	  skyAtmosphereExposure:f32,
+	  skyAtmosphere:SkyAtmosphere,
 	  //
 	  shadow:Shadow,
 

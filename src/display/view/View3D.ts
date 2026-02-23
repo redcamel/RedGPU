@@ -437,6 +437,7 @@ class View3D extends AView {
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
             SystemUniformUpdater.updateCamera(rawCamera,cameraMembers,this.#uniformDataF32)
             SystemUniformUpdater.updateShadow(shadowManager, members.shadow.members, this.#uniformDataF32)
+            SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members.skyAtmosphere.members, this.#uniformDataF32)
 
             this.#updateSystemUniformData([
                 {
@@ -498,24 +499,6 @@ class View3D extends AView {
                     key: 'isView3D',
                     value: this.constructor === View3D ? 1 : 0,
                     dataView: this.#uniformDataU32,
-                    targetMembers: members
-                },
-                {
-                    key: 'useSkyAtmosphere',
-                    value: this.skyAtmosphere ? 1 : 0,
-                    dataView: this.#uniformDataU32,
-                    targetMembers: members
-                },
-                {
-                    key: 'skyAtmosphereSunIntensity',
-                    value: this.skyAtmosphere ? this.skyAtmosphere.sunIntensity : 0,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
-                },
-                {
-                    key: 'skyAtmosphereExposure',
-                    value: this.skyAtmosphere ? this.skyAtmosphere.exposure : 1,
-                    dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
                 // directionalLight

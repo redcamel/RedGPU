@@ -39,7 +39,8 @@ fn main(inputData: InputData) -> OutputFragment {
     #redgpu_endIf
 
     // [Atmosphere] 시스템 플래그가 활성화된 경우 Aerial Perspective 합성
-    if (systemUniforms.useSkyAtmosphere == 1u) {
+    let u_skyAtmosphere = systemUniforms.skyAtmosphere;
+    if (u_skyAtmosphere.useSkyAtmosphere == 1u) {
         let viewVec = inputData.vertexPosition - systemUniforms.camera.cameraPosition;
         let viewDir = normalize(viewVec);
         let distKm = length(viewVec) / 1000.0;
@@ -51,11 +52,11 @@ fn main(inputData: InputData) -> OutputFragment {
         let apSample = textureSampleLevel(cameraVolumeTexture, tSampler, vec3<f32>(u, v, w), 0.0);
         
         // [수정] 태양 강도와 노출을 적용하여 하늘 밝기와 동기화
-        let atmosphereColor = apSample.rgb * systemUniforms.skyAtmosphereSunIntensity;
+        let atmosphereColor = apSample.rgb * u_skyAtmosphere.skyAtmosphereSunIntensity;
         let atmosphereTransmittance = apSample.a;
         
         finalColor = vec4<f32>((finalColor.rgb * atmosphereTransmittance) + atmosphereColor, finalColor.a);
-        finalColor = vec4<f32>(finalColor.rgb * systemUniforms.skyAtmosphereExposure, finalColor.a);
+        finalColor = vec4<f32>(finalColor.rgb * u_skyAtmosphere.skyAtmosphereExposure, finalColor.a);
     }
 
     if (finalColor.a == 0.0) {
