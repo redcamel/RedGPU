@@ -27,6 +27,8 @@ import getDirectionalShadowVisibility_wgsl from './shader/shadow/getDirectionalS
 import getMotionVector_wgsl from './shader/math/getMotionVector.wgsl';
 import getBillboardMatrix_wgsl from './shader/math/billboard/getBillboardMatrix.wgsl';
 import getBillboardResult_wgsl from './shader/math/billboard/getBillboardResult.wgsl';
+import getDisplacementPosition_wgsl from './shader/displacement/getDisplacementPosition.wgsl';
+import getDisplacementNormal_wgsl from './shader/displacement/getDisplacementNormal.wgsl';
 import getTBNFromVertexTangent_wgsl from './shader/math/tnb/getTBNFromVertexTangent.wgsl';
 import getTBN_wgsl from './shader/math/tnb/getTBN.wgsl';
 import getTBNFromCotangent_wgsl from './shader/math/tnb/getTBNFromCotangent.wgsl';
@@ -164,6 +166,15 @@ export namespace KHRLibrary {
 }
 
 /**
+ * [KO] 디스플레이스먼트(Displacement) 관련 셰이더 함수 라이브러리
+ * [EN] Displacement related shader function library
+ */
+export namespace DisplacementLibrary {
+    export const getDisplacementPosition = getDisplacementPosition_wgsl;
+    export const getDisplacementNormal = getDisplacementNormal_wgsl;
+}
+
+/**
  * [KO] 그림자 관련 셰이더 함수 라이브러리
  * [EN] Shadow related shader function library
  */
@@ -274,6 +285,8 @@ export namespace SystemCodeManager {
     export import systemStruct = SystemStructLibrary;
     /** [KO] glTF KHR 확장 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for glTF KHR extensions. */
     export import KHR = KHRLibrary;
+    /** [KO] 디스플레이스먼트(Displacement) 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for displacement. */
+    export import displacement = DisplacementLibrary;
 
     /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
     export const vertex = SystemVertexCode;
@@ -294,7 +307,8 @@ export namespace SystemCodeManager {
     export const billboardShadow = emptyEntryPointShadowVertex_wgsl;
     export const getBillboardResult = getBillboardResult_wgsl;
     export const calcBillboard = getBillboardResult_wgsl;
-    export const calcDisplacements = SystemVertexCode.calcDisplacements;
+    export const calcDisplacementPosition = getDisplacementPosition_wgsl;
+    export const calcDisplacementNormal = getDisplacementNormal_wgsl;
     export const getBillboardMatrix = getBillboardMatrix_wgsl;
     export const meshVertexBasicUniform = SystemVertexCode.meshVertexBasicUniform;
 }

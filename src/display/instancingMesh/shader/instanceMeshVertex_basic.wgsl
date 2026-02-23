@@ -31,7 +31,7 @@ fn main(inputData: InputData) -> OutputData {
     if (u_useDisplacementTexture) {
         let distance = distance(position.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
-        let displacedPosition = calcDisplacementPosition(
+        let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
             displacementTexture,

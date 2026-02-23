@@ -1,5 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include calcDisplacements;
+#redgpu_include displacement.getDisplacementPosition;
+#redgpu_include displacement.getDisplacementNormal;
 
 struct InstanceUniforms {
     useDisplacementTexture: u32,

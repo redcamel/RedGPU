@@ -24,7 +24,7 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     if (u_useDisplacementTexture) {
         let distance = distance(position.xyz, u_directionalLightProjectionViewMatrix[3].xyz);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
-        let displacedPosition = calcDisplacementPosition(
+        let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
             displacementTexture,

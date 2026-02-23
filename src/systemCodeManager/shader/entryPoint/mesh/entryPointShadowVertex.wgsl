@@ -28,7 +28,7 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     {
         let distance = distance(position.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
-        let displacedPosition = calcDisplacementPosition(
+        let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
             displacementTexture,

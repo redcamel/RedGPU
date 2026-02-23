@@ -2,7 +2,8 @@
 #redgpu_include shadow.getShadowCoord;
 #redgpu_include entryPoint.mesh.entryPointShadowVertex;
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
-#redgpu_include calcDisplacements;
+#redgpu_include displacement.getDisplacementPosition;
+#redgpu_include displacement.getDisplacementNormal;
 
 #redgpu_include meshVertexBasicUniform;
 
@@ -67,7 +68,7 @@ fn main(inputData: InputData) -> OutputData {
         let distance = distance(tempPosition.xyz, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
 
-        let displacedPosition = calcDisplacementPosition(
+        let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
             displacementTexture,
@@ -80,7 +81,7 @@ fn main(inputData: InputData) -> OutputData {
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
 
         let worldUV = input_uv;
-        let displacedNormal = calcDisplacementNormal(
+        let displacedNormal = getDisplacementNormal(
             normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz),
             displacementTexture,
             displacementTextureSampler,
