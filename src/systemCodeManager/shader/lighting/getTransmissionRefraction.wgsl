@@ -18,7 +18,7 @@
  * @param ior - [KO] 굴절률 [EN] Index of Refraction
  * @param roughnessParameter - [KO] 거칠기 계수 [EN] Roughness parameter
  * @param albedo - [KO] 알베도 색상 [EN] Albedo color
- * @param projectionCameraMatrix - [KO] 투영-카메라 행렬 [EN] Projection-Camera matrix
+ * @param projectionViewMatrix - [KO] 투영-카메라 행렬 [EN] Projection-Camera matrix
  * @param input_vertexPosition - [KO] 월드 공간의 버텍스 위치 [EN] Vertex position in world space
  * @param input_ndcPosition - [KO] NDC 공간의 위치 (미사용) [EN] Position in NDC space (Unused)
  * @param V - [KO] 시선 방향 벡터 [EN] View direction vector
@@ -30,7 +30,7 @@
 fn getTransmissionRefraction(
     u_useKHR_materials_volume:bool, thicknessParameter:f32, u_KHR_dispersion:f32, u_KHR_attenuationDistance:f32, u_KHR_attenuationColor:vec3<f32>,
     ior:f32, roughnessParameter:f32, albedo:vec3<f32>,
-    projectionCameraMatrix:mat4x4<f32>, input_vertexPosition:vec3<f32>, input_ndcPosition:vec3<f32>,
+    projectionViewMatrix:mat4x4<f32>, input_vertexPosition:vec3<f32>, input_ndcPosition:vec3<f32>,
     V:vec3<f32>, N:vec3<f32>,
     renderPath1ResultTexture:texture_2d<f32>, renderPath1ResultTextureSampler:sampler
 ) -> vec3<f32> {
@@ -81,9 +81,9 @@ fn getTransmissionRefraction(
         let worldPosB: vec3<f32> = input_vertexPosition + finalRefractB * safeThickness;
 
         // 월드→뷰→프로젝션 변환 적용하여 최종 UV 좌표 계산
-        let clipPosR: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPosR, 1.0);
-        let clipPosG: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPosG, 1.0);
-        let clipPosB: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPosB, 1.0);
+        let clipPosR: vec4<f32> = projectionViewMatrix * vec4<f32>(worldPosR, 1.0);
+        let clipPosG: vec4<f32> = projectionViewMatrix * vec4<f32>(worldPosG, 1.0);
+        let clipPosB: vec4<f32> = projectionViewMatrix * vec4<f32>(worldPosB, 1.0);
 
         // 0으로 나누기 방지
         let wR = max(abs(clipPosR.w), EPSILON);
@@ -124,7 +124,7 @@ fn getTransmissionRefraction(
         let safeThickness = clamp(thicknessParameter, 0.0, 100.0);
 
         let worldPos: vec3<f32> = input_vertexPosition + finalRefract * safeThickness;
-        let clipPos: vec4<f32> = projectionCameraMatrix * vec4<f32>(worldPos, 1.0);
+        let clipPos: vec4<f32> = projectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
         // 0으로 나누기 방지
         let w = max(abs(clipPos.w), EPSILON);

@@ -57,7 +57,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 
     // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
@@ -103,7 +103,7 @@ fn main(inputData: InputDataSkin) -> OutputDataSkin {
 
 
     // Basic output assignments
-    output.position = u_projectionCameraMatrix * position;
+    output.position = u_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
@@ -169,7 +169,7 @@ fn entryPointPickingVertex(inputData: InputDataSkin) -> OutputDataSkin {
 
     // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
@@ -178,7 +178,7 @@ fn entryPointPickingVertex(inputData: InputDataSkin) -> OutputDataSkin {
 let skinMat = vertexStorages[inputData.idx];
     // Position calculation
     let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
-    output.position = u_projectionCameraMatrix * position;
+    output.position = u_projectionViewMatrix * position;
     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
 
     return output;

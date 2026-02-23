@@ -462,7 +462,7 @@ class PostEffectManager {
         const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
         const camera2DYn = rawCamera instanceof Camera2D;
         // console.log(structInfo);
-        const projectionCameraMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
+        const projectionViewMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
@@ -481,14 +481,14 @@ class PostEffectManager {
                         targetMembers: members
                     },
                     {
-                        key: 'projectionCameraMatrix',
-                        value: projectionCameraMatrix,
+                        key: 'projectionViewMatrix',
+                        value: projectionViewMatrix,
                         dataView: this.#uniformDataF32,
                         targetMembers: members
                     },
                     {
                         key: 'inverseProjectionCameraMatrix',
-                        value: mat4.invert(temp2, projectionCameraMatrix),
+                        value: mat4.invert(temp2, projectionViewMatrix),
                         dataView: this.#uniformDataF32,
                         targetMembers: members
                     },

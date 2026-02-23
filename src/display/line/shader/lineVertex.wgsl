@@ -32,7 +32,7 @@ struct OutputData {
 @vertex
 fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
 
@@ -46,7 +46,7 @@ fn main(inputData: InputData) -> OutputData {
 
     var position: vec4<f32>;
     position = u_modelMatrix * input_position_vec4;
-    output.position = u_projectionCameraMatrix * position;
+    output.position = u_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexColor = input_vertexColor;
 

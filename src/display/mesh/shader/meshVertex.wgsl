@@ -30,7 +30,7 @@ fn main(inputData: InputData) -> OutputData {
     }
     #redgpu_endIf
 
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
@@ -96,7 +96,7 @@ fn main(inputData: InputData) -> OutputData {
     #redgpu_endIf
 
     // Basic output assignments
-    output.position = u_projectionCameraMatrix * position;
+    output.position = u_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = input_uv * vertexUniforms.uvTransform.zw + vertexUniforms.uvTransform.xy;

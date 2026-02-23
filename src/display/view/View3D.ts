@@ -443,7 +443,7 @@ class View3D extends AView {
                     targetMembers: members
                 },
                 {
-                    key: 'projectionCameraMatrix',
+                    key: 'projectionViewMatrix',
                     value: mat4.multiply(temp, projectionMatrix, viewMatrix),
                     dataView: this.#uniformDataF32,
                     targetMembers: members

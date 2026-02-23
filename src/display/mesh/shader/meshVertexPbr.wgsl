@@ -23,7 +23,7 @@ fn main(inputData: InputData) -> OutputData {
 
     // System uniforms
     let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
     let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
     let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
@@ -52,7 +52,7 @@ fn main(inputData: InputData) -> OutputData {
     normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0);
 
     // Basic output assignments
-    output.position = u_projectionCameraMatrix * position;
+    output.position = u_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalize(normalPosition.xyz);
     output.uv = inputData.uv;

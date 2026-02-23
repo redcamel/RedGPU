@@ -780,7 +780,7 @@ fn main(inputData:InputData) -> FragmentOutput {
         transmissionRefraction = getTransmissionRefraction(
             u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor,
             ior, roughnessParameter, albedo,
-            systemUniforms.projectionCameraMatrix, input_vertexPosition, input_ndcPosition,
+            systemUniforms.projectionViewMatrix, input_vertexPosition, input_ndcPosition,
             V, N,
             renderPath1ResultTexture, renderPath1ResultTextureSampler
         );

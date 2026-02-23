@@ -13,7 +13,7 @@ fn main(inputData: InputData) -> OutputData {
 
     // 시스템 유니폼
     let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
+    let u_projectionViewMatrix = systemUniforms.projectionViewMatrix;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -44,7 +44,7 @@ fn main(inputData: InputData) -> OutputData {
     }
 
     // 최종 클립 좌표 계산
-    output.position = u_projectionCameraMatrix * u_instanceGroupModelMatrix * position;
+    output.position = u_projectionViewMatrix * u_instanceGroupModelMatrix * position;
     output.vertexPosition = position.xyz;
 
     // 노말 변환

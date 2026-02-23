@@ -30,7 +30,7 @@ struct Uniforms {
  }
 
  fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
-     let clipPos4 = systemUniforms.projectionCameraMatrix * vec4<f32>(worldPos, 1.0);
+     let clipPos4 = systemUniforms.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
      if (abs(clipPos4.w) < EPSILON) {
          return vec2<f32>(-1.0);

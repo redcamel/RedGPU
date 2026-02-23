@@ -19,7 +19,7 @@ struct Camera {
 
 struct SystemUniform {
 	  projectionMatrix:mat4x4<f32>,
-	  projectionCameraMatrix:mat4x4<f32>,
+	  projectionViewMatrix:mat4x4<f32>,
 	  noneJitterProjectionMatrix:mat4x4<f32>,
 	  noneJitterProjectionCameraMatrix:mat4x4<f32>,
 	  inverseProjectionMatrix:mat4x4<f32>,
