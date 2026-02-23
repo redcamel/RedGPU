@@ -75,8 +75,17 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - `KHR_materials_anisotropy`: 이방성 NDF, 가시성, Specular BRDF 라이브러리화 및 `pbrMaterial` 통합 완료.
     - 모든 확장 규격 함수를 `KHR.KHR_xxxx` 네임스페이스와 전용 폴더 구조로 계층화하여 관리.
 
+### 11. 디스플레이스먼트 매핑 일관성 (Displacement Mapping)
+*   **대상**: `displacement.getDisplacementPosition`, `displacement.getDisplacementNormal`
+*   **결과**: ✅ 완료.
+    - **파일 분리**: `calcDisplacements.wgsl`을 기능별 개별 파일로 분리하고 전용 폴더(`shader/displacement/`)로 이동.
+    - **명칭 표준화**: `get` 접두어 기반 CamelCase 명칭 규칙 적용 완료.
+    - **좌표계 최적화**: WebGPU의 V-Down 환경에 맞춰 `ddy` 부호(down - up)를 교정하고, 월드 공간 TBN 기반 섭동 로직을 통해 회전 시의 법선 왜곡 문제 해결.
+    - **시스템 통합**: `SystemCodeManager.displacement` 네임스페이스를 통해 라이브러리화 완료.
+
 ---
 
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
 - **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화, 명명 규칙(CamelCase) 정규화 완료.
+- **2026-02-23**: 디스플레이스먼트 매핑 라이브러리 리팩토링 및 좌표계 보정 로직 반영 완료.
