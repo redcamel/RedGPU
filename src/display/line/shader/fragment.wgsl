@@ -1,5 +1,5 @@
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
-#redgpu_include systemStruct.FragmentOutput;
+#redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
 struct Uniforms {
   	opacity:f32
@@ -17,8 +17,8 @@ struct InputData {
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @fragment
-fn main(inputData:InputData) -> FragmentOutput {
-    var output:FragmentOutput;
+fn main(inputData:InputData) -> OutputFragment {
+    var output:OutputFragment;
     output.color = inputData.vertexColor;
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
 

@@ -1,7 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM
 #redgpu_include entryPoint.mesh.entryPointPickingFragment
 #redgpu_include color.getTintBlendMode
-#redgpu_include systemStruct.FragmentOutput
+#redgpu_include systemStruct.OutputFragment
 #redgpu_include math.getMotionVector
 #redgpu_include math.PI
 #redgpu_include math.PI2
@@ -31,8 +31,8 @@ struct InputData {
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @fragment
-fn main(inputData: InputData) -> FragmentOutput {
-    var output: FragmentOutput;
+fn main(inputData: InputData) -> OutputFragment {
+    var output: OutputFragment;
     var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
     #redgpu_if useTint
         finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);

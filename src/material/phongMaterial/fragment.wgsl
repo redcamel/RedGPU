@@ -4,7 +4,7 @@
 #redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
-#redgpu_include systemStruct.FragmentOutput;
+#redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;
@@ -73,8 +73,8 @@ struct InputData {
 #redgpu_include math.direction.getViewDirection
 
 @fragment
-fn main(inputData:InputData) -> FragmentOutput {
-    var output: FragmentOutput;
+fn main(inputData:InputData) -> OutputFragment {
+    var output: OutputFragment;
     // AmbientLight
     let u_ambientLight = systemUniforms.ambientLight;
     let u_ambientLightColor = u_ambientLight.color;

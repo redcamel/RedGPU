@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include systemStruct.FragmentOutput;
+#redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
 
 // --- 데이터 구조 정의 ---
@@ -51,8 +51,8 @@ fn vertexMain(inputData: VertexIn) -> VertexOut {
 
 // --- 프래그먼트 셰이더 ---
 @fragment
-fn fragmentMain(inputData: VertexOut) -> FragmentOutput {
-    var output: FragmentOutput;
+fn fragmentMain(inputData: VertexOut) -> OutputFragment {
+    var output: OutputFragment;
 
     // 1. 거리 기반 투명도(Fade) 계산
     let distanceToCamera = length(inputData.worldPos - systemUniforms.camera.cameraPosition);

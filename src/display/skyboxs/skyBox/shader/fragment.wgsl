@@ -1,4 +1,4 @@
-#redgpu_include systemStruct.FragmentOutput
+#redgpu_include systemStruct.OutputFragment
 #redgpu_include color.getLuminance
 #redgpu_include math.PI
 #redgpu_include math.PI2
@@ -33,7 +33,7 @@ fn sphericalToUV(dir: vec3<f32>) -> vec2<f32> {
 
 
 @fragment
-fn main(inputData: InputData) -> FragmentOutput {
+fn main(inputData: InputData) -> OutputFragment {
     var cubemapVec = (inputData.vertexPosition.xyz);
     let mipmapCount: f32 = f32(textureNumLevels(skyboxTexture) - 1);
     let blurCurve = uniforms.blur * uniforms.blur; // 제곱 곡선
@@ -69,7 +69,7 @@ fn main(inputData: InputData) -> FragmentOutput {
     if (outColor.a == 0.0) {
         discard;
     }
-    var output: FragmentOutput;
+    var output: OutputFragment;
     output.color = outColor;
 
     return output;

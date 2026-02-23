@@ -69,7 +69,7 @@ import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPoint
 import billboardEntryPointPickingVertex_wgsl from './shader/entryPoint/billboard/entryPointPickingVertex.wgsl';
 import emptyEntryPointPickingVertex_wgsl from './shader/entryPoint/empty/entryPointPickingVertex.wgsl';
 import emptyEntryPointShadowVertex_wgsl from './shader/entryPoint/empty/entryPointShadowVertex.wgsl';
-import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
+import OutputFragment_wgsl from './shader/systemStruct/OutputFragment.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
 import Camera_wgsl from './shader/systemStruct/Camera.wgsl';
 import Shadow_wgsl from './shader/systemStruct/Shadow.wgsl';
@@ -258,7 +258,7 @@ export namespace EntryPointLibrary {
  * [EN] System common structure library
  */
 export namespace SystemStructLibrary {
-    export const FragmentOutput = FragmentOutput_wgsl;
+    export const OutputFragment = OutputFragment_wgsl;
     export const OutputShadowData = OutputShadowData_wgsl;
     export const Camera = Camera_wgsl;
     export const Shadow = Shadow_wgsl;
@@ -297,7 +297,7 @@ export namespace SystemCodeManager {
     export import displacement = DisplacementLibrary;
 
     // [KO] 레거시 직접 참조 지원 (전처리기 호환성)
-    export const FragmentOutput = FragmentOutput_wgsl;
+    export const OutputFragment = OutputFragment_wgsl;
     export const OutputShadowData = OutputShadowData_wgsl;
     export const calcTintBlendMode = getTintBlendMode_wgsl;
     export const calcDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;

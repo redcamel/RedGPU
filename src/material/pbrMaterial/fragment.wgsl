@@ -3,7 +3,7 @@
 #redgpu_include color.getTintBlendMode;
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include lighting.getTransmissionRefraction;
-#redgpu_include systemStruct.FragmentOutput;
+#redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;
@@ -204,8 +204,8 @@ struct InputData {
 
 
 @fragment
-fn main(inputData:InputData) -> FragmentOutput {
-    var output: FragmentOutput;
+fn main(inputData:InputData) -> OutputFragment {
+    var output: OutputFragment;
     // 데이터 변수를 뽑아서 저장
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;
