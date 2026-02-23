@@ -19,20 +19,8 @@
 
 ---
 
-## 📝 구조체 사양 (Struct Specification)
-
-### 3.1 현재 구조 (Current - Legacy)
-```wgsl
-struct Camera {
-    cameraMatrix: mat4x4<f32>,
-    cameraPosition: vec3<f32>,
-    nearClipping: f32,
-    farClipping: f32
-};
-```
-
-### 3.2 제안된 표준 구조 (Proposed - Standard)
-데이터 정렬(16바이트)과 연산 효율성을 고려한 새로운 구조입니다.
+## 📝 구조체 사양 (Struct Specification - Final)
+데이터 정렬(16바이트)과 연산 효율성을 고려하여 최종 확정된 구조입니다.
 
 | 순서 | 필드명 | 타입 | 설명 |
 | :-- | :--- | :--- | :--- |
@@ -40,51 +28,37 @@ struct Camera {
 | 2 | **inverseViewMatrix** | `mat4x4<f32>` | View to World 변환 행렬 (카메라 월드 행렬) |
 | 3 | **cameraPosition** | `vec3<f32>` | 카메라의 월드 위치 |
 | 4 | **nearClipping** | `f32` | 근거리 클리핑 평면 거리 |
-| 5 | **cameraDirection** | `vec3<f32>` | 카메라가 바라보는 방향 (Forward Vector) |
-| 6 | **farClipping** | `f32` | 원거리 클리핑 평면 거리 |
-| 7 | **fieldOfView** | `f32` | 시야각 (Radian) |
-| 8 | **aspectRatio** | `f32` | 화면 종횡비 (Width / Height) |
-| 9 | **orthographic** | `u32` | 투영 모드 (0: Perspective, 1: Ortho) |
-| 10 | **padding** | `f32` | 16바이트 정렬용 더미 데이터 |
+| 5 | **farClipping** | `f32` | 원거리 클리핑 평면 거리 |
+| 6 | **fieldOfView** | `f32` | 시야각 (Radian) |
 
 ---
 
-## 💻 WGSL 정의 (Proposed WGSL)
+## 💻 WGSL 정의 (Final WGSL)
+`SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl`에서 공통으로 사용하는 표준 구조입니다.
 
 ```wgsl
 struct Camera {
     viewMatrix: mat4x4<f32>,
     inverseViewMatrix: mat4x4<f32>,
-    
     cameraPosition: vec3<f32>,
     nearClipping: f32,
-    
-    cameraDirection: vec3<f32>,
     farClipping: f32,
-    
-    fieldOfView: f32,
-    aspectRatio: f32,
-    orthographic: u32,
-    padding: f32
+    fieldOfView: f32
+};
+
+struct SystemUniform {
+    // ... 기존 행렬 및 설정들
+    camera: Camera,
+    // ...
 };
 ```
 
 ---
 
-## 🛠 전환 계획 (Migration Plan)
-
-### 1단계: TypeScript 데이터 모델 업데이트
-- `View3D.ts`의 유니폼 버퍼 쓰기 로직에 새로운 필드 추가.
-- `cameraMatrix`에 할당되던 값을 `viewMatrix`로 명칭 변경.
-- `inverseViewMatrix`, `cameraDirection` 등의 연산 로직 추가.
-
-### 2단계: 시스템 셰이더 업데이트
-- `src/systemCodeManager/shader/systemStruct/SYSTEM_UNIFORM.wgsl` 내 `Camera` 구조체 교체.
-- 엔진 내부의 모든 셰이더에서 `systemUniforms.camera.cameraMatrix` 참조를 `viewMatrix`로 일괄 교체.
-
-### 3단계: 검증 및 정규화
-- 빌보드 로직(`getBillboardMatrix`) 등이 `viewMatrix`를 정상적으로 참조하는지 확인.
-- 뎁스 복구 로직(`getLinearizeDepth`) 등이 새로운 클리핑 파라미터를 사용하는지 검증.
+## 🛠 전환 계획 (Migration Plan) - 완료
+1. **TypeScript 데이터 모델 업데이트 (완료)**: `View3D.ts`, `PostEffectManager.ts` 필드 정규화 및 오프셋 동기화.
+2. **시스템 셰이더 업데이트 (완료)**: `src/systemCodeManager/shader/systemStruct/` 내 모든 `Camera` 구조체 동기화.
+3. **검증 및 정규화 (완료)**: 빌보드, 뎁스 복구, TAA/SSR 등 모든 연산의 명칭 일관성 확보.
 
 ---
 

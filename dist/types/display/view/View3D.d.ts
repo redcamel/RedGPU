@@ -141,7 +141,7 @@ declare class View3D extends AView {
      */
     set skyAtmosphere(value: SkyAtmosphere);
     get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor;
-    get noneJitterProjectionCameraMatrix(): mat4;
+    get noneJitterProjectionViewMatrix(): mat4;
     /**
      * [KO] 뷰를 업데이트하고 렌더링 준비를 수행합니다.
      * [EN] Updates the view and prepares for rendering.

@@ -1,2 +1,3 @@
 import Renderer from "./Renderer";
-export { Renderer, };
+import SystemUniformUpdater from "./SystemUniformUpdater";
+export { Renderer, SystemUniformUpdater };

@@ -163,7 +163,7 @@ declare class PerspectiveCamera {
      * [KO] 모델 행렬
      * [EN] Model matrix
      */
-    get modelMatrix(): mat4;
+    get viewMatrix(): mat4;
     /**
      * [KO] X 좌표를 반환합니다.
      * [EN] Returns the X coordinate.

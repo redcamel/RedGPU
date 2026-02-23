@@ -12,6 +12,7 @@ import SystemCodeManager from "../systemCodeManager/SystemCodeManager";
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
+import SystemUniformUpdater from "../renderer/SystemUniformUpdater";
 
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -460,12 +461,12 @@ class PostEffectManager {
         const {viewMatrix, position: cameraPosition} = rawCamera
         const structInfo = this.#postEffectSystemUniformBufferStructInfo
         const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
-        const camera2DYn = rawCamera instanceof Camera2D;
         // console.log(structInfo);
         const projectionViewMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
+            SystemUniformUpdater.updateCamera(rawCamera,cameraMembers,this.#uniformDataF32)
             this.#updateSystemUniformData(
                 [
                     {
@@ -491,44 +492,6 @@ class PostEffectManager {
                         value: mat4.invert(temp2, projectionViewMatrix),
                         dataView: this.#uniformDataF32,
                         targetMembers: members
-                    },
-                    // 카메라 시스템 유니폼 업데이트
-                    {
-                        key: 'viewMatrix',
-                        value: viewMatrix,
-                        dataView: this.#uniformDataF32,
-                        targetMembers: cameraMembers
-                    },
-                    {
-                        key: 'inverseViewMatrix',
-                        value: mat4.invert(temp2, viewMatrix),
-                        dataView: this.#uniformDataF32,
-                        targetMembers: cameraMembers
-                    },
-                    {
-                        key: 'cameraPosition',
-                        value: cameraPosition,
-                        dataView: this.#uniformDataF32,
-                        targetMembers: cameraMembers
-                    },
-                    {
-                        key: 'nearClipping',
-                        value: camera2DYn ? 0 : rawCamera.nearClipping,
-                        dataView: this.#uniformDataF32,
-                        targetMembers: cameraMembers
-                    },
-                    {
-                        key: 'farClipping',
-                        value: camera2DYn ? 0 : rawCamera.farClipping,
-                        dataView: this.#uniformDataF32,
-                        targetMembers: cameraMembers
-                    },
-                    {
-                        key: 'fieldOfView',
-                        //@ts-ignore
-                        value: rawCamera.fieldOfView * Math.PI / 180,
-                        dataView: this.#uniformDataF32,
-                        targetMembers: cameraMembers
                     },
                 ]
             )

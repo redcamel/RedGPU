@@ -1,8 +1,2 @@
-declare const SystemFragmentCode: Readonly<{
-    drawDirectionalShadowDepth: "string";
-    calcPrePathBackground: "string";
-    FragmentOutput: "string";
-    picking: "string";
-    drawPicking: "string";
-}>;
+declare const SystemFragmentCode: Readonly<{}>;
 export default SystemFragmentCode;

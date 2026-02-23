@@ -53,7 +53,7 @@ declare class Camera2D {
      * [KO] 모델 행렬
      * [EN] Model matrix
      */
-    get modelMatrix(): mat4;
+    get viewMatrix(): mat4;
     /**
      * [KO] Z 좌표를 반환합니다. (미사용)
      * [EN] Returns the Z coordinate. (Unused)

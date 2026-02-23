@@ -27,6 +27,7 @@ import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import IBLCubeTexture from "../../resources/texture/ibl/core/IBLCubeTexture";
+import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 
 const SHADER_INFO = parseWGSL(SystemCodeManager.SYSTEM_UNIFORM, 'VIEW3D_SYSTEM_UNIFORM')
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -173,6 +174,7 @@ class View3D extends AView {
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
     #noneJitterProjectionViewMatrix: mat4 = mat4.create()
+
 
     /**
      * [KO] View3D 인스턴스를 생성합니다.
@@ -428,13 +430,12 @@ class View3D extends AView {
         const { viewMatrix, position: cameraPosition} = rawCamera
         const structInfo = this.systemUniform_Vertex_StructInfo;
         const {gpuBuffer} = systemUniform_Vertex_UniformBuffer;
-        const camera2DYn = rawCamera instanceof Camera2D;
         const {members} = structInfo
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
-
+            SystemUniformUpdater.updateCamera(rawCamera,cameraMembers,this.#uniformDataF32)
             this.#updateSystemUniformData([
                 {
                     key: 'projectionMatrix',
@@ -477,44 +478,6 @@ class View3D extends AView {
                     value: [this.pixelRectObject.width, this.pixelRectObject.height],
                     dataView: this.#uniformDataF32,
                     targetMembers: members
-                },
-                // 카메라 시스템 유니폼 업데이트
-                {
-                    key: 'viewMatrix',
-                    value: viewMatrix,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: cameraMembers
-                },
-                {
-                    key: 'inverseViewMatrix',
-                    value: mat4.invert(temp3, viewMatrix),
-                    dataView: this.#uniformDataF32,
-                    targetMembers: cameraMembers
-                },
-                {
-                    key: 'cameraPosition',
-                    value: cameraPosition,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: cameraMembers
-                },
-                {
-                    key: 'nearClipping',
-                    value: camera2DYn ? 0 : rawCamera.nearClipping,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: cameraMembers
-                },
-                {
-                    key: 'farClipping',
-                    value: camera2DYn ? 0 : rawCamera.farClipping,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: cameraMembers
-                },
-                {
-                    key: 'fieldOfView',
-                    //@ts-ignore
-                    value: rawCamera.fieldOfView * Math.PI / 180,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: cameraMembers
                 },
                 //
                 {

@@ -41,7 +41,7 @@ declare class TAA {
      * [KO] 4x4 행렬
      * [EN] 4x4 matrix
      */
-    get prevNoneJitterProjectionCameraMatrix(): mat4;
+    get prevNoneJitterProjectionViewMatrix(): mat4;
     /**
      * [KO] 프레임 인덱스를 반환합니다.
      * [EN] Returns the frame index.
