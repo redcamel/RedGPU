@@ -7,7 +7,7 @@
  *
  * @param uv - [KO] 스크린 UV (0~1) [EN] Screen UV (0~1)
  * @param depth - [KO] 깊이 값 (0~1) [EN] Depth value (0~1)
- * @param inverseProjectionCameraMatrix - [KO] 역투영카메라 행렬 [EN] Inverse Projection-Camera matrix
+ * @param inverseProjectionCameraMatrix - [KO] 역투영카메라 행렬 [EN] Inverse Projection-View matrix
  * @returns [KO] 복구된 월드 공간 좌표 [EN] Reconstructed world space position
  */
 fn getWorldPositionFromDepth(

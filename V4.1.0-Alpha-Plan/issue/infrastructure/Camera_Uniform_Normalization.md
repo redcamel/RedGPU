@@ -87,6 +87,19 @@ struct Camera {
 - 뎁스 복구 로직(`getLinearizeDepth`) 등이 새로운 클리핑 파라미터를 사용하는지 검증.
 
 ---
-**작성일:** 2026-02-23
-**상태:** 논의 중 (Draft)
+
+## 📊 진행 현황 (Progress Status)
+
+### 완료 항목 (Completed)
+- [x] **단독 명칭 교체**: 코드베이스 전반(`src/`)에서 `cameraMatrix` 변수/필드명을 `viewMatrix`로 교체 완료.
+- [x] **시스템 구조체 반영**: `SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl` 내 필드명 업데이트.
+- [x] **핵심 매니저 업데이트**: `View3D.ts`, `PostEffectManager.ts` 등 주요 클래스의 참조 로직 수정.
+
+### 진행 예정/검토 필요 (Pending/Todo)
+- [ ] **복합 행렬 명칭 정규화**: `projectionCameraMatrix`, `noneJitterProjectionCameraMatrix` 등을 `projectionViewMatrix` 계열로 변경 검토.
+- [ ] **역행렬 명칭 교체**: 여전히 `inverseCameraMatrix`로 명명된 부분을 `inverseViewMatrix`로 일괄 교체 필요.
+
+---
+**최종 업데이트:** 2026-02-23
+**상태:** 진행 중 (In Progress)
 **작성자:** Gemini CLI

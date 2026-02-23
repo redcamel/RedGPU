@@ -18,7 +18,7 @@
  * @param ior - [KO] 굴절률 [EN] Index of Refraction
  * @param roughnessParameter - [KO] 거칠기 계수 [EN] Roughness parameter
  * @param albedo - [KO] 알베도 색상 [EN] Albedo color
- * @param projectionViewMatrix - [KO] 투영-카메라 행렬 [EN] Projection-Camera matrix
+ * @param projectionViewMatrix - [KO] 투영-카메라 행렬 [EN] Projection-View matrix
  * @param input_vertexPosition - [KO] 월드 공간의 버텍스 위치 [EN] Vertex position in world space
  * @param input_ndcPosition - [KO] NDC 공간의 위치 (미사용) [EN] Position in NDC space (Unused)
  * @param V - [KO] 시선 방향 벡터 [EN] View direction vector
