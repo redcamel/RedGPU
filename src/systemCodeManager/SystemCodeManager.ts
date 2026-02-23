@@ -71,6 +71,7 @@ import emptyEntryPointPickingVertex_wgsl from './shader/entryPoint/empty/entryPo
 import emptyEntryPointShadowVertex_wgsl from './shader/entryPoint/empty/entryPointShadowVertex.wgsl';
 import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
+import Camera_wgsl from './shader/systemStruct/Camera.wgsl';
 import meshVertexBasicUniform_wgsl from '../display/mesh/core/shader/meshVertexBasicUniform.wgsl';
 import POST_EFFECT_SYSTEM_UNIFORM_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM.wgsl';
 import SYSTEM_UNIFORM_wgsl from './shader/systemStruct/SYSTEM_UNIFORM.wgsl';
@@ -258,6 +259,7 @@ export namespace EntryPointLibrary {
 export namespace SystemStructLibrary {
     export const FragmentOutput = FragmentOutput_wgsl;
     export const OutputShadowData = OutputShadowData_wgsl;
+    export const Camera = Camera_wgsl;
     export const meshVertexBasicUniform = meshVertexBasicUniform_wgsl;
 }
 

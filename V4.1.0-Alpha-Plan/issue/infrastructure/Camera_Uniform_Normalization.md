@@ -34,9 +34,12 @@
 ---
 
 ## 💻 WGSL 정의 (Final WGSL)
-`SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl`에서 공통으로 사용하는 표준 구조입니다.
+`struct Camera`는 별도의 파일로 분리되어 관리되며, `SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl`에서 인클루드하여 사용합니다.
+
+- **파일 위치**: `src/systemCodeManager/shader/systemStruct/Camera.wgsl`
 
 ```wgsl
+// Camera.wgsl
 struct Camera {
     viewMatrix: mat4x4<f32>,
     inverseViewMatrix: mat4x4<f32>,
@@ -45,9 +48,14 @@ struct Camera {
     farClipping: f32,
     fieldOfView: f32
 };
+```
+
+```wgsl
+// SYSTEM_UNIFORM.wgsl / POST_EFFECT_SYSTEM_UNIFORM.wgsl
+#redgpu_include systemStruct.Camera
 
 struct SystemUniform {
-    // ... 기존 행렬 및 설정들
+    // ...
     camera: Camera,
     // ...
 };
@@ -55,10 +63,22 @@ struct SystemUniform {
 
 ---
 
+## 🛠 중앙 집중식 업데이트 (Centralized Update Logic)
+
+### SystemUniformUpdater 도입
+중복된 유니폼 업데이트 로직을 제거하고 유지보수성을 높이기 위해 `SystemUniformUpdater` 클래스를 도입했습니다.
+
+- **위치**: `src/renderer/SystemUniformUpdater.ts`
+- **역할**: `Camera` 객체와 유니폼 버퍼의 오프셋 정보를 받아 표준화된 순서로 데이터를 기록합니다.
+- **주요 메서드**: `static updateCamera(camera, cameraMembers, uniformDataF32)`
+
+---
+
 ## 🛠 전환 계획 (Migration Plan) - 완료
 1. **TypeScript 데이터 모델 업데이트 (완료)**: `View3D.ts`, `PostEffectManager.ts` 필드 정규화 및 오프셋 동기화.
-2. **시스템 셰이더 업데이트 (완료)**: `src/systemCodeManager/shader/systemStruct/` 내 모든 `Camera` 구조체 동기화.
-3. **검증 및 정규화 (완료)**: 빌보드, 뎁스 복구, TAA/SSR 등 모든 연산의 명칭 일관성 확보.
+2. **시스템 셰이더 업데이트 (완료)**: `src/systemCodeManager/shader/systemStruct/` 내 모든 `Camera` 구조체 동기화 및 `Camera.wgsl`로 분리.
+3. **중앙 집중식 업데이터 도입 (완료)**: `SystemUniformUpdater`를 통한 업데이트 로직 단일화.
+4. **검증 및 정규화 (완료)**: 빌보드, 뎁스 복구, TAA/SSR 등 모든 연산의 명칭 일관성 확보.
 
 ---
 
@@ -69,7 +89,8 @@ struct SystemUniform {
 - [x] **복합 행렬 명칭 교체**: `projectionCameraMatrix` $\rightarrow$ `projectionViewMatrix` 교체 완료.
 - [x] **Jitter 관련 명칭 교체**: `noneJitterProjectionViewMatrix`, `prevNoneJitterProjectionViewMatrix` 교체 완료.
 - [x] **역행렬 명칭 교체**: `inverseCameraMatrix`, `inverseProjectionCameraMatrix` 등을 `inverseViewMatrix`, `inverseProjectionViewMatrix`로 교체 완료.
-- [x] **시스템 구조체 반영**: `SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl` 내 필드명 업데이트 완료.
+- [x] **시스템 구조체 반영 및 분리**: `Camera.wgsl`을 신설하고 `SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl`에서 공유하도록 개선 완료.
+- [x] **중앙 집중식 로직 도입**: `SystemUniformUpdater`를 통해 `View3D`, `PostEffectManager` 업데이트 로직 단일화 완료.
 - [x] **핵심 매니저 업데이트**: `View3D.ts`, `PostEffectManager.ts` 등 주요 클래스의 참조 로직 수정 완료.
 
 ### 진행 예정/검토 필요 (Pending/Todo)
