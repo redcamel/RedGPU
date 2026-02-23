@@ -9,7 +9,7 @@ fn pointLight_testSphereAABB(light:u32,  tile:u32) -> bool {
    // 라이트의 반지름과 위치를 획득하고, 위치는 World Space에서 View3D Space로 변환합니다.
    let radius:f32 = targetLight.radius;
    let position:vec3<f32> = targetLight.position;
-   let center:vec3<f32> = (systemUniforms.camera.cameraMatrix *  vec4<f32>(position, 1.0)).xyz;
+   let center:vec3<f32> = (systemUniforms.camera.viewMatrix *  vec4<f32>(position, 1.0)).xyz;
 
    // AABB와 라이트 사이의 제곱 거리를 계산합니다.
    let squaredDistance:f32 = pointLight_sqDistPointAABB(center, tile, targetTile.minAABB.xyz, targetTile.maxAABB.xyz);
@@ -42,7 +42,7 @@ fn spotLight_testSphereAABB(light: u32, tile: u32) -> bool {
 
     let radius: f32 = targetLight.radius;
     let position: vec3<f32> = targetLight.position;
-    let center: vec3<f32> = (systemUniforms.camera.cameraMatrix * vec4<f32>(position, 1.0)).xyz;
+    let center: vec3<f32> = (systemUniforms.camera.viewMatrix * vec4<f32>(position, 1.0)).xyz;
 
     // 포인트라이트와 똑같은 거리 계산
     let squaredDistance: f32 = pointLight_sqDistPointAABB(center, tile, targetTile.minAABB.xyz, targetTile.maxAABB.xyz);

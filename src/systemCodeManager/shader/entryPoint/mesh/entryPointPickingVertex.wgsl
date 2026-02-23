@@ -6,7 +6,7 @@ fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
     output.position = u_projectionCameraMatrix * position;
     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);

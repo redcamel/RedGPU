@@ -35,7 +35,7 @@ fn main(inputData: InputData) -> OutputData {
     let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex uniforms

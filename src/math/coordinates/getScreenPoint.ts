@@ -34,7 +34,7 @@ const getScreenPoint = (view: View3D, targetMatrix: mat4): [number, number] => {
     if (!(view?.constructor?.name === 'View3D')) consoleAndThrowError('allow only View3D instance')
     mat4.identity(resultMTX);
     const {noneJitterProjectionMatrix, rawCamera, pixelRectArray} = view;
-    mat4.multiply(resultMTX, noneJitterProjectionMatrix, rawCamera.modelMatrix);
+    mat4.multiply(resultMTX, noneJitterProjectionMatrix, rawCamera.viewMatrix);
     mat4.multiply(resultMTX, resultMTX, targetMatrix);
     resultPosition.z = resultMTX[14];
     resultPosition.w = resultMTX[15];

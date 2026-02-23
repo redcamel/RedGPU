@@ -132,9 +132,9 @@ export default class Raycaster2D {
 		if (mesh.geometry) {
 			const view = this.#view;
 			const projectionMatrix = view.projectionMatrix;
-			const cameraMatrix = view.rawCamera.modelMatrix;
+			const viewMatrix = view.rawCamera.viewMatrix;
 
-			const combinedMatrix = mat4.multiply(this.#tempMat4, projectionMatrix, cameraMatrix);
+			const combinedMatrix = mat4.multiply(this.#tempMat4, projectionMatrix, viewMatrix);
 			mat4.multiply(combinedMatrix, combinedMatrix, mesh.modelMatrix);
 
 			const invCombinedMatrix = mat4.invert(this.#tempMat4_2, combinedMatrix);
@@ -160,7 +160,7 @@ export default class Raycaster2D {
 				}
 
 				if (isHit) {
-					const invProjView = mat4.invert(mat4.create(), mat4.multiply(mat4.create(), projectionMatrix, cameraMatrix));
+					const invProjView = mat4.invert(mat4.create(), mat4.multiply(mat4.create(), projectionMatrix, viewMatrix));
 					const worldPoint = vec3.transformMat4(vec3.create(), this.#ndcPoint, invProjView);
 
 					const faceIndex = (localPoint[0] / width) > (localPoint[1] / height) ? 1 : 0;

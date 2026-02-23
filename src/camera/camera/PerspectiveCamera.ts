@@ -38,7 +38,7 @@ class PerspectiveCamera {
 	 * [KO] 모델 행렬(mat4)
 	 * [EN] Model matrix (mat4)
 	 */
-	#modelMatrix: mat4 = mat4.create();
+	#viewMatrix: mat4 = mat4.create();
 
 	/**
 	 * [KO] X 좌표
@@ -292,8 +292,8 @@ class PerspectiveCamera {
 	 * [KO] 모델 행렬
 	 * [EN] Model matrix
 	 */
-	get modelMatrix(): mat4 {
-		return this.#modelMatrix;
+	get viewMatrix(): mat4 {
+		return this.#viewMatrix;
 	}
 
 	/**
@@ -318,7 +318,7 @@ class PerspectiveCamera {
 	 */
 	set x(value: number) {
 		this.#x = value;
-		this.#modelMatrix[12] = value;
+		this.#viewMatrix[12] = value;
 	}
 
 	/**
@@ -343,7 +343,7 @@ class PerspectiveCamera {
 	 */
 	set y(value: number) {
 		this.#y = value;
-		this.#modelMatrix[13] = value;
+		this.#viewMatrix[13] = value;
 	}
 
 	/**
@@ -368,7 +368,7 @@ class PerspectiveCamera {
 	 */
 	set z(value: number) {
 		this.#z = value;
-		this.#modelMatrix[14] = value;
+		this.#viewMatrix[14] = value;
 	}
 
 	/**
@@ -411,7 +411,7 @@ class PerspectiveCamera {
 			this.#y = y;
 			this.#z = z;
 		}
-		[this.#modelMatrix[12], this.#modelMatrix[13], this.#modelMatrix[14]] = [this.#x, this.#y, this.#z];
+		[this.#viewMatrix[12], this.#viewMatrix[13], this.#viewMatrix[14]] = [this.#x, this.#y, this.#z];
 	}
 
 	/**
@@ -461,7 +461,7 @@ class PerspectiveCamera {
 			up[1] = 0;
 		}
 
-		mat4.lookAt(this.#modelMatrix, eye, target, up);
+		mat4.lookAt(this.#viewMatrix, eye, target, up);
 	}
 }
 

@@ -18,7 +18,7 @@ fn main(inputData:InputData) -> OutData {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     outData.position = u_projectionCameraMatrix * vertexUniforms.modelMatrix * vec4<f32>(inputData.position, 1.0);
     outData.vertexPosition = vec4<f32>(inputData.position, 1.0);
     return outData;

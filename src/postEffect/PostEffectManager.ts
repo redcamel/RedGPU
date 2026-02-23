@@ -457,12 +457,12 @@ class PostEffectManager {
     #updateSystemUniforms() {
         const {inverseProjectionMatrix, projectionMatrix, rawCamera, redGPUContext, scene} = this.#view
         const {gpuDevice} = redGPUContext
-        const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
+        const {viewMatrix, position: cameraPosition} = rawCamera
         const structInfo = this.#postEffectSystemUniformBufferStructInfo
         const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
         const camera2DYn = rawCamera instanceof Camera2D;
         // console.log(structInfo);
-        const projectionCameraMatrix = mat4.multiply(temp, projectionMatrix, cameraMatrix);
+        const projectionCameraMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
@@ -494,14 +494,14 @@ class PostEffectManager {
                     },
                     // 카메라 시스템 유니폼 업데이트
                     {
-                        key: 'cameraMatrix',
-                        value: cameraMatrix,
+                        key: 'viewMatrix',
+                        value: viewMatrix,
                         dataView: this.#uniformDataF32,
                         targetMembers: cameraMembers
                     },
                     {
                         key: 'inverseCameraMatrix',
-                        value: mat4.invert(temp2, cameraMatrix),
+                        value: mat4.invert(temp2, viewMatrix),
                         dataView: this.#uniformDataF32,
                         targetMembers: cameraMembers
                     },

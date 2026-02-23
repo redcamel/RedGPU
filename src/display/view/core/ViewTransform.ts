@@ -251,9 +251,9 @@ class ViewTransform {
      */
     get frustumPlanes() {
         if (this.#camera instanceof AController) {
-            return computeViewFrustumPlanes(this.projectionMatrix, this.#camera.camera.modelMatrix)
+            return computeViewFrustumPlanes(this.projectionMatrix, this.#camera.camera.viewMatrix)
         } else {
-            return computeViewFrustumPlanes(this.projectionMatrix, this.#camera.modelMatrix)
+            return computeViewFrustumPlanes(this.projectionMatrix, this.#camera.viewMatrix)
         }
     }
 

@@ -196,7 +196,7 @@ export default class Raycaster3D {
 
         // 1. Pivot NDC 계산
         const centerWorld = vec3.fromValues(m[12], m[13], m[14]);
-        const centerView = vec3.transformMat4(this.#tempVec3, centerWorld, rawCamera.modelMatrix);
+        const centerView = vec3.transformMat4(this.#tempVec3, centerWorld, rawCamera.viewMatrix);
         const centerClip = vec4.transformMat4(this.#tempMat4, vec4.fromValues(centerView[0], centerView[1], centerView[2], 1.0), projectionMatrix);
 
         if (centerClip[3] <= 0) return;
@@ -243,7 +243,7 @@ export default class Raycaster3D {
         const ry = (mesh as any)._renderRatioY || 1;
 
         // 1. 빌보드 월드 행렬 생성
-        const invView = mat4.invert(this.#tempMat4_2, view.rawCamera.modelMatrix);
+        const invView = mat4.invert(this.#tempMat4_2, view.rawCamera.viewMatrix);
         const billboardWorldMatrix = this.#tempMat4_3;
         mat4.copy(billboardWorldMatrix, invView);
 

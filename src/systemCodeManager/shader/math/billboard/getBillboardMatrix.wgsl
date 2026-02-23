@@ -1,13 +1,13 @@
 /**
  * [KO] 빌보드 행렬을 계산합니다.
  * [EN] Calculates the billboard matrix.
- * @param cameraMatrix - [KO] 카메라 행렬 [EN] Camera matrix
+ * @param viewMatrix - [KO] 카메라 행렬 [EN] Camera matrix
  * @param modelMatrix - [KO] 모델 행렬 [EN] Model matrix
  * @param useStandardScale - [KO] 1u: 표준 (정확한 스케일 추출), 0u: 빠른 스케일 (대각 성분 사용)
  *                           [EN] 1u: Standard (accurate scale extraction), 0u: Fast scale (uses diagonal elements)
  */
-fn getBillboardMatrix(cameraMatrix: mat4x4<f32>, modelMatrix: mat4x4<f32>, useStandardScale: u32) -> mat4x4<f32> {
-    var resultMatrix = cameraMatrix * modelMatrix;
+fn getBillboardMatrix(viewMatrix: mat4x4<f32>, modelMatrix: mat4x4<f32>, useStandardScale: u32) -> mat4x4<f32> {
+    var resultMatrix = viewMatrix * modelMatrix;
     
     if (useStandardScale == 1u) {
         // [표준 모드] 회전이 포함된 행렬에서도 정확한 스케일 추출 (length 연산 포함)

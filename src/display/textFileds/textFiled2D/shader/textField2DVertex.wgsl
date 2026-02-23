@@ -37,7 +37,7 @@ fn main(inputData: InputData) -> OutputData {
     // 시스템 Uniform 변수 가져오기
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
@@ -54,8 +54,8 @@ fn main(inputData: InputData) -> OutputData {
     var normalPosition: vec4<f32>;
 
     // 일반적인 변환 계산
-    position = u_cameraMatrix * u_modelMatrix * vec4<f32>(input_position, 1.0);
-    normalPosition = u_cameraMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
+    position = u_viewMatrix * u_modelMatrix * vec4<f32>(input_position, 1.0);
+    normalPosition = u_viewMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
     // 투영 변환 적용
     output.position = u_projectionMatrix * position;
@@ -76,7 +76,7 @@ fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     // 시스템 Uniform 변수 가져오기
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
@@ -93,8 +93,8 @@ fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     var normalPosition: vec4<f32>;
 
     // 일반적인 변환 계산
-    position = u_cameraMatrix * u_modelMatrix * vec4<f32>(input_position, 1.0);
-    normalPosition = u_cameraMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
+    position = u_viewMatrix * u_modelMatrix * vec4<f32>(input_position, 1.0);
+    normalPosition = u_viewMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
 
     // 투영 변환 적용
     output.position = u_projectionMatrix * position;

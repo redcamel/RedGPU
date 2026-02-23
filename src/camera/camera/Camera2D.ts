@@ -28,7 +28,7 @@ class Camera2D {
 	 * [KO] 모델 행렬
 	 * [EN] Model matrix
 	 */
-	#modelMatrix: mat4 = mat4.create();
+	#viewMatrix: mat4 = mat4.create();
 
 	/**
 	 * [KO] X 좌표
@@ -99,8 +99,8 @@ class Camera2D {
 	 * [KO] 모델 행렬
 	 * [EN] Model matrix
 	 */
-	get modelMatrix(): mat4 {
-		return this.#modelMatrix;
+	get viewMatrix(): mat4 {
+		return this.#viewMatrix;
 	}
 
 	/**
@@ -137,7 +137,7 @@ class Camera2D {
 	 */
 	set x(value: number) {
 		this.#x = value;
-		this.#modelMatrix[12] = value;
+		this.#viewMatrix[12] = value;
 	}
 
 	/**
@@ -162,7 +162,7 @@ class Camera2D {
 	 */
 	set y(value: number) {
 		this.#y = value;
-		this.#modelMatrix[13] = value;
+		this.#viewMatrix[13] = value;
 	}
 
 	/**
@@ -201,7 +201,7 @@ class Camera2D {
 			this.#x = x;
 			this.#y = y;
 		}
-		[this.#modelMatrix[12], this.#modelMatrix[13], this.#modelMatrix[14]] = [this.#x, this.#y, 0];
+		[this.#viewMatrix[12], this.#viewMatrix[13], this.#viewMatrix[14]] = [this.#x, this.#y, 0];
 	}
 }
 

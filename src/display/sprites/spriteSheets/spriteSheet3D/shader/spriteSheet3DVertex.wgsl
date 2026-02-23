@@ -56,7 +56,7 @@ fn main(inputData: InputData) -> OutputData {
         inputData.position,
         inputData.vertexNormal,
         vertexUniforms.matrixList.modelMatrix,
-        systemUniforms.camera.cameraMatrix,
+        systemUniforms.camera.viewMatrix,
         systemUniforms.projectionMatrix,
         systemUniforms.resolution,
         vertexUniforms.useBillboard,

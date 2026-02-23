@@ -15,7 +15,7 @@ fn main(inputData: InputData) -> OutputData {
     let u_projectionMatrix = systemUniforms.projectionMatrix;
     let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
     let input_position = inputData.position;

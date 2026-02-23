@@ -9,7 +9,7 @@ fn entryPointPickingVertex(inputData: InputData) -> OutputData {
         let u_projectionMatrix = systemUniforms.projectionMatrix;
     #redgpu_endIf
     
-    let u_cameraMatrix = systemUniforms.camera.cameraMatrix;
+    let u_viewMatrix = systemUniforms.camera.viewMatrix;
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
@@ -25,7 +25,7 @@ fn entryPointPickingVertex(inputData: InputData) -> OutputData {
     );
 
     if (u_useBillboard == 1) {
-        let billboardMatrix = getBillboardMatrix(u_cameraMatrix, u_modelMatrix, 1u);
+        let billboardMatrix = getBillboardMatrix(u_viewMatrix, u_modelMatrix, 1u);
         
         if (u_usePixelSize == 1) {
             let viewPositionCenter = billboardMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -41,7 +41,7 @@ fn entryPointPickingVertex(inputData: InputData) -> OutputData {
             output.position = u_projectionMatrix * billboardMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
         }
     } else {
-        output.position = u_projectionMatrix * u_cameraMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
+        output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
     }
 
     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);

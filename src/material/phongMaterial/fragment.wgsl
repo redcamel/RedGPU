@@ -89,7 +89,7 @@ fn main(inputData:InputData) -> FragmentOutput {
 
     // Camera
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
 

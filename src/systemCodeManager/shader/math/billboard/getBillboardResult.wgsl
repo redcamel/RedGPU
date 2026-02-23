@@ -12,7 +12,7 @@ fn getBillboardResult(
     input_position: vec3<f32>,
     input_normal: vec3<f32>,
     modelMatrix: mat4x4<f32>,
-    cameraMatrix: mat4x4<f32>,
+    viewMatrix: mat4x4<f32>,
     projectionMatrix: mat4x4<f32>,
     resolution: vec2<f32>,
     useBillboard: u32,
@@ -34,7 +34,7 @@ fn getBillboardResult(
     var viewNormal: vec4<f32>;
 
     if (useBillboard == 1u) {
-        let billboardMatrix = getBillboardMatrix(cameraMatrix, modelMatrix, 1u);
+        let billboardMatrix = getBillboardMatrix(viewMatrix, modelMatrix, 1u);
         
         if (usePixelSize == 1u) {
             // [Pixel Size 모드] - 피벗 기반 확장 및 W-보정 적용
@@ -58,8 +58,8 @@ fn getBillboardResult(
         }
     } else {
         // [일반 모드] - 빌보드 없는 평면 변환
-        viewPos = cameraMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
-        viewNormal = cameraMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_normal, 0.0);
+        viewPos = viewMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
+        viewNormal = viewMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_normal, 0.0);
         result.position = projectionMatrix * viewPos;
     }
 

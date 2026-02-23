@@ -425,7 +425,7 @@ class View3D extends AView {
         const {redGPUContext, systemUniform_Vertex_UniformBuffer} = this
         const {gpuDevice} = redGPUContext
         const {lightManager, shadowManager} = this.scene
-        const {modelMatrix: cameraMatrix, position: cameraPosition} = rawCamera
+        const { viewMatrix, position: cameraPosition} = rawCamera
         const structInfo = this.systemUniform_Vertex_StructInfo;
         const {gpuBuffer} = systemUniform_Vertex_UniformBuffer;
         const camera2DYn = rawCamera instanceof Camera2D;
@@ -433,7 +433,7 @@ class View3D extends AView {
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
-            this.#noneJitterProjectionCameraMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, cameraMatrix)
+            this.#noneJitterProjectionCameraMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
 
             this.#updateSystemUniformData([
                 {
@@ -444,7 +444,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'projectionCameraMatrix',
-                    value: mat4.multiply(temp, projectionMatrix, cameraMatrix),
+                    value: mat4.multiply(temp, projectionMatrix, viewMatrix),
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },
@@ -480,8 +480,8 @@ class View3D extends AView {
                 },
                 // 카메라 시스템 유니폼 업데이트
                 {
-                    key: 'cameraMatrix',
-                    value: cameraMatrix,
+                    key: 'viewMatrix',
+                    value: viewMatrix,
                     dataView: this.#uniformDataF32,
                     targetMembers: cameraMembers
                 },
