@@ -1,10 +1,10 @@
 import RAPIER from '@dimforge/rapier3d-compat';
-import { quat, vec3 } from 'gl-matrix';
+import {quat, vec3} from 'gl-matrix';
 import Mesh from '../../display/mesh/Mesh';
-import { BodyParams, IPhysicsEngine } from '../../physics/IPhysicsEngine';
-import { PHYSICS_BODY_TYPE } from '../../physics/PhysicsBodyType';
-import { PHYSICS_SHAPE } from '../../physics/PhysicsShape';
-import { RapierBody } from './RapierBody';
+import {BodyParams, IPhysicsEngine} from '../../physics/IPhysicsEngine';
+import {PHYSICS_BODY_TYPE} from '../../physics/PhysicsBodyType';
+import {PHYSICS_SHAPE} from '../../physics/PhysicsShape';
+import {RapierBody} from './RapierBody';
 
 /**
  * [KO] Rapier 물리 엔진을 사용하는 RedGPU 물리 플러그인 구현체입니다.

@@ -1,7 +1,7 @@
 import ColorRGBA from "../../color/ColorRGBA";
 import LightManager from "../../light/LightManager";
 import ShadowManager from "../../shadow/ShadowManager";
-import { IPhysicsEngine } from "../../physics/IPhysicsEngine";
+import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../mesh/core/Object3DContainer";

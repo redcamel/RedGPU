@@ -2,8 +2,6 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import GPU_LOAD_OP from "../../../../../gpuConst/GPU_LOAD_OP";
-import GPU_STORE_OP from "../../../../../gpuConst/GPU_STORE_OP";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
 import IBLCubeTexture from "../IBLCubeTexture";

@@ -1,7 +1,6 @@
 import {mat4} from "gl-matrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
-import {keepLog} from "../../utils";
 
 /**
  * [KO] 원근 투영을 사용하는 카메라입니다.

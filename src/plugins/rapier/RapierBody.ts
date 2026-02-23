@@ -1,7 +1,7 @@
 import RAPIER from '@dimforge/rapier3d-compat';
-import { mat4, quat, vec3 } from 'gl-matrix';
+import {mat4, quat, vec3} from 'gl-matrix';
 import Mesh from '../../display/mesh/Mesh';
-import { IPhysicsBody } from '../../physics/IPhysicsBody';
+import {IPhysicsBody} from '../../physics/IPhysicsBody';
 import mat4ToEuler from '../../math/mat4ToEuler';
 
 /**

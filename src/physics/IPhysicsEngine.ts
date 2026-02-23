@@ -1,7 +1,7 @@
 import Mesh from "../display/mesh/Mesh";
-import { IPhysicsBody } from "./IPhysicsBody";
-import { PhysicsBodyType } from "./PhysicsBodyType";
-import { PhysicsShape } from "./PhysicsShape";
+import {IPhysicsBody} from "./IPhysicsBody";
+import {PhysicsBodyType} from "./PhysicsBodyType";
+import {PhysicsShape} from "./PhysicsShape";
 
 /**
  * [KO] 물리 바디 생성을 위한 파라미터 인터페이스입니다.

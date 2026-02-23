@@ -1,8 +1,8 @@
-import { mat4, vec3, vec2 } from "gl-matrix";
+import {mat4, vec2, vec3} from "gl-matrix";
 import View2D from "../display/view/View2D";
 import Mesh from "../display/mesh/Mesh";
 import Ray from "../math/Ray";
-import { RayIntersectResult } from "./Raycaster3D";
+import {RayIntersectResult} from "./Raycaster3D";
 
 /**
  * [KO] 2D 공간에서 객체와의 교차를 검사하는 클래스입니다.

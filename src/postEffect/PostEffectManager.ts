@@ -1,5 +1,4 @@
 import {mat4} from "gl-matrix";
-import Camera2D from "../camera/camera/Camera2D";
 import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
@@ -13,7 +12,6 @@ import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
 import SystemUniformUpdater from "../renderer/SystemUniformUpdater";
-import updateSystemUniformData from "../renderer/updateSystemUniformData";
 
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.

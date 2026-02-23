@@ -1,4 +1,4 @@
-import { quat, vec3 } from 'gl-matrix';
+import {quat, vec3} from 'gl-matrix';
 
 /**
  * [KO] 물리 엔진의 강체(Rigid Body)와 RedGPU 메쉬를 연결하는 인터페이스입니다.

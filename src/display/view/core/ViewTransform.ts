@@ -4,7 +4,7 @@ import OrthographicCamera from "../../../camera/camera/OrthographicCamera";
 import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import IsometricController from "../../../camera/controller/IsometricController";
 import AController from "../../../camera/core/AController";
-import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "../../../context/core/RedGPUContextSizeManager";
+import RedGPUContextSizeManager, {RedResizeEvent} from "../../../context/core/RedGPUContextSizeManager";
 import RedGPUContext from "../../../context/RedGPUContext";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";

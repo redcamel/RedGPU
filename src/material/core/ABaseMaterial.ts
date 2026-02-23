@@ -13,7 +13,6 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
-import {keepLog} from "../../utils";
 
 interface ABaseMaterial {
     /**

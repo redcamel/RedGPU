@@ -20,7 +20,8 @@ import getWorldNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getW
 import getViewNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getViewNormalFromGNormalBuffer.wgsl';
 import getViewDirection_wgsl from './shader/math/direction/getViewDirection.wgsl';
 import getRayDirection_wgsl from './shader/math/direction/getRayDirection.wgsl';
-import getReflectionVectorFromViewDirection_wgsl from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
+import getReflectionVectorFromViewDirection_wgsl
+    from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
 import getShadowCoord_wgsl from './shader/shadow/getShadowCoord.wgsl';
 import getShadowClipPosition_wgsl from './shader/shadow/getShadowClipPosition.wgsl';
 import getDirectionalShadowVisibility_wgsl from './shader/shadow/getDirectionalShadowVisibility.wgsl';

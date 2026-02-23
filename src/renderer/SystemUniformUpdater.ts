@@ -5,8 +5,6 @@ import OrthographicCamera from "../camera/camera/OrthographicCamera";
 import updateSystemUniformData from "./updateSystemUniformData";
 import DirectionalLight from "../light/lights/DirectionalLight";
 import AmbientLight from "../light/lights/AmbientLight";
-import RedGPUContext from "../context/RedGPUContext";
-import RenderViewStateData from "../display/view/core/RenderViewStateData";
 
 let temp3 = mat4.create()
 
