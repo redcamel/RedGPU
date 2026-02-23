@@ -21,10 +21,9 @@ struct SystemUniform {
 	  time:f32,
 	  usePrefilterTexture:u32,
 	  isView3D:u32,
-	  skyAtmosphere:SkyAtmosphere,
 	  //
+	  skyAtmosphere:SkyAtmosphere,
 	  shadow:Shadow,
-
       //
       directionalLightCount:u32,
       directionalLightProjectionViewMatrix:mat4x4<f32>,
