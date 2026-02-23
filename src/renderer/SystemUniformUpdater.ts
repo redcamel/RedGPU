@@ -3,6 +3,10 @@ import Camera2D from "../camera/camera/Camera2D";
 import PerspectiveCamera from "../camera/camera/PerspectiveCamera";
 import OrthographicCamera from "../camera/camera/OrthographicCamera";
 import updateSystemUniformData from "./updateSystemUniformData";
+import DirectionalLight from "../light/lights/DirectionalLight";
+import AmbientLight from "../light/lights/AmbientLight";
+import RedGPUContext from "../context/RedGPUContext";
+import RenderViewStateData from "../display/view/core/RenderViewStateData";
 
 let temp3 = mat4.create()
 
@@ -92,7 +96,58 @@ class SystemUniformUpdater {
             ]
         )
     }
-}
+
+        static updateDirectionalLights(
+            directionalLights: DirectionalLight[],
+            directionalLightsMemberList: any,
+            uniformDataF32: Float32Array,
+            uniformDataU32: Uint32Array,
+        ) {
+            directionalLights.forEach((light: DirectionalLight, index: number) => {
+                const targetMembers = directionalLightsMemberList[index]
+                updateSystemUniformData(
+                    targetMembers, uniformDataF32, uniformDataU32,
+                    [
+                        {
+                            key: 'direction',
+                            value: light.direction,
+                        },
+                        {
+                            key: 'color',
+                            value: light.color.rgbNormalLinear,
+                        },
+                        {
+                            key: 'intensity',
+                            value: light.intensity,
+                        }
+                    ]
+                )
+            })
+        }
+    
+        static updateAmbientLight(
+            ambientLight: AmbientLight,
+            ambientLightMembers: any,
+            uniformDataF32: Float32Array,
+            uniformDataU32: Uint32Array
+        ) {
+            if (ambientLight) {
+                updateSystemUniformData(
+                    ambientLightMembers, uniformDataF32, uniformDataU32,
+                    [
+                        {
+                            key: 'color',
+                            value: ambientLight.color.rgbNormalLinear,
+                        },
+                        {
+                            key: 'intensity',
+                            value: ambientLight.intensity,
+                        },
+                    ]
+                )
+            }
+        }
+    }
 
 Object.freeze(SystemUniformUpdater)
 export default SystemUniformUpdater

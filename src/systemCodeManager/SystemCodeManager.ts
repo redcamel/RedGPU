@@ -72,6 +72,8 @@ import emptyEntryPointShadowVertex_wgsl from './shader/entryPoint/empty/entryPoi
 import OutputFragment_wgsl from './shader/systemStruct/OutputFragment.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
 import Camera_wgsl from './shader/systemStruct/Camera.wgsl';
+import DirectionalLight_wgsl from './shader/systemStruct/DirectionalLight.wgsl';
+import AmbientLight_wgsl from './shader/systemStruct/AmbientLight.wgsl';
 import Shadow_wgsl from './shader/systemStruct/Shadow.wgsl';
 import SkyAtmosphere_wgsl from './shader/systemStruct/SkyAtmosphere.wgsl';
 import meshVertexBasicUniform_wgsl from '../display/mesh/core/shader/meshVertexBasicUniform.wgsl';
@@ -262,6 +264,8 @@ export namespace SystemStructLibrary {
     export const OutputFragment = OutputFragment_wgsl;
     export const OutputShadowData = OutputShadowData_wgsl;
     export const Camera = Camera_wgsl;
+    export const DirectionalLight = DirectionalLight_wgsl;
+    export const AmbientLight = AmbientLight_wgsl;
     export const Shadow = Shadow_wgsl;
     export const SkyAtmosphere = SkyAtmosphere_wgsl;
     export const meshVertexBasicUniform = meshVertexBasicUniform_wgsl;

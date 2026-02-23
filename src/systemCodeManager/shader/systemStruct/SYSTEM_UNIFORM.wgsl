@@ -1,14 +1,7 @@
 // [KO] 엔진의 표준 시스템 유니폼 및 전역 바인딩 구조체 정의입니다.
 // [EN] Definitions of the engine's standard system uniforms and global binding structures.
-struct DirectionalLight {
-	  direction:vec3<f32>,
-	  color:vec3<f32>,
-	  intensity:f32,
-};
-struct AmbientLight {
-	  color:vec3<f32>,
-	  intensity:f32
-};
+#redgpu_include systemStruct.DirectionalLight
+#redgpu_include systemStruct.AmbientLight
 
 #redgpu_include systemStruct.Camera
 #redgpu_include systemStruct.Shadow

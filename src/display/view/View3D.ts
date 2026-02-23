@@ -49,7 +49,7 @@ let temp3 = mat4.create()
  * const scene = new RedGPU.Display.Scene();
  * const camera = new RedGPU.Camera.RedObitController(redGPUContext);
  * const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
- * 
+ *
  * view.grid = true;
  * redGPUContext.addView(view);
  * ```
@@ -421,17 +421,18 @@ class View3D extends AView {
         const {redGPUContext, systemUniform_Vertex_UniformBuffer} = this
         const {gpuDevice} = redGPUContext
         const {lightManager, shadowManager} = this.scene
-        const { viewMatrix, position: cameraPosition} = rawCamera
+        const {viewMatrix, position: cameraPosition} = rawCamera
         const structInfo = this.systemUniform_Vertex_StructInfo;
         const {gpuBuffer} = systemUniform_Vertex_UniformBuffer;
         const {members} = structInfo
         {
             const {members} = structInfo;
-            const cameraMembers = members.camera.members;
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
-            SystemUniformUpdater.updateCamera(rawCamera,cameraMembers,this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateCamera(rawCamera, members.camera.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateShadow(shadowManager, members.shadow.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members.skyAtmosphere.members, this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateDirectionalLights(lightManager.directionalLights, members.directionalLights.memberList, this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateAmbientLight(lightManager.ambientLight, members.ambientLight.members, this.#uniformDataF32, this.#uniformDataU32)
 
             updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
                 {
@@ -496,51 +497,13 @@ class View3D extends AView {
 
         }
         {
-            lightManager.directionalLights.forEach((light: DirectionalLight, index) => {
-                const {directionalLights} = members
+
+            lightManager.directionalLights.forEach((light: DirectionalLight) => {
                 if (light.enableDebugger) {
                     if (!light.drawDebugger) light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light)
                     light.drawDebugger.render(this.renderViewStateData)
                 }
-                const targetMembers = directionalLights.memberList[index]
-                updateSystemUniformData(
-                    targetMembers, this.#uniformDataF32, this.#uniformDataU32,
-                    [
-                        {
-                            key: 'direction',
-                            value: light.direction,
-                        },
-                        {
-                            key: 'color',
-                            value: light.color.rgbNormalLinear,
-                        },
-                        {
-                            key: 'intensity',
-                            value: light.intensity,
-                        }
-                    ]
-                )
             })
-        }
-        {
-            const light = lightManager.ambientLight
-            const {ambientLight} = members
-            const targetMembers = ambientLight.members;
-            if (light) {
-                updateSystemUniformData(
-                    targetMembers, this.#uniformDataF32, this.#uniformDataU32,
-                    [
-                        {
-                            key: 'color',
-                            value: light.color.rgbNormalLinear,
-                        },
-                        {
-                            key: 'intensity',
-                            value: light.intensity,
-                        },
-                    ]
-                )
-            }
         }
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
     }
