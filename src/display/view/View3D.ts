@@ -436,6 +436,8 @@ class View3D extends AView {
             const cameraMembers = members.camera.members;
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
             SystemUniformUpdater.updateCamera(rawCamera,cameraMembers,this.#uniformDataF32)
+            SystemUniformUpdater.updateShadow(shadowManager, members.shadow.members, this.#uniformDataF32)
+
             this.#updateSystemUniformData([
                 {
                     key: 'projectionMatrix',
@@ -513,19 +515,6 @@ class View3D extends AView {
                 {
                     key: 'skyAtmosphereExposure',
                     value: this.skyAtmosphere ? this.skyAtmosphere.exposure : 1,
-                    dataView: this.#uniformDataF32,
-                    targetMembers: members
-                },
-                // shadow
-                {
-                    key: 'shadowDepthTextureSize',
-                    value: shadowManager.directionalShadowManager.shadowDepthTextureSize,
-                    dataView: this.#uniformDataU32,
-                    targetMembers: members
-                },
-                {
-                    key: 'bias',
-                    value: shadowManager.directionalShadowManager.bias,
                     dataView: this.#uniformDataF32,
                     targetMembers: members
                 },

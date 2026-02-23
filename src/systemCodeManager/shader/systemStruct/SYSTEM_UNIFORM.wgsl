@@ -11,6 +11,7 @@ struct AmbientLight {
 };
 
 #redgpu_include systemStruct.Camera
+#redgpu_include systemStruct.Shadow
 
 struct SystemUniform {
 	  projectionMatrix:mat4x4<f32>,
@@ -30,9 +31,7 @@ struct SystemUniform {
 	  skyAtmosphereSunIntensity:f32,
 	  skyAtmosphereExposure:f32,
 	  //
-	  shadowDepthTextureSize:u32,
-	  bias:f32,
-
+	  shadow:Shadow,
 
       //
       directionalLightCount:u32,

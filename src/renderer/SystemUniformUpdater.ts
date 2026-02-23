@@ -51,6 +51,26 @@ class SystemUniformUpdater {
             ]
         )
     }
+
+    static updateShadow(
+        shadowManager: any,
+        shadowMembers: any,
+        uniformData: any
+    ) {
+        updateSystemUniformData(
+            shadowMembers, uniformData,
+            [
+                {
+                    key: 'directionalShadowDepthTextureSize',
+                    value: shadowManager.directionalShadowManager.shadowDepthTextureSize,
+                },
+                {
+                    key: 'directionalShadowBias',
+                    value: shadowManager.directionalShadowManager.bias,
+                }
+            ]
+        )
+    }
 }
 
 Object.freeze(SystemUniformUpdater)

@@ -83,8 +83,8 @@ fn main(inputData:InputData) -> FragmentOutput {
     // DirectionalLight
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
-    let u_shadowDepthTextureSize = systemUniforms.shadowDepthTextureSize;
-    let u_bias = systemUniforms.bias;
+    let u_directionalShadowDepthTextureSize = systemUniforms.shadow.directionalShadowDepthTextureSize;
+    let u_directionalShadowBias = systemUniforms.shadow.directionalShadowBias;
 
 
     // Camera
@@ -144,8 +144,8 @@ fn main(inputData:InputData) -> FragmentOutput {
      visibility = getDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
-                u_shadowDepthTextureSize,
-                u_bias,
+                u_directionalShadowDepthTextureSize,
+                u_directionalShadowBias,
                 inputData.shadowCoord,
 
             );
