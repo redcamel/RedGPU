@@ -37,6 +37,7 @@
 `struct Camera`는 별도의 파일로 분리되어 관리되며, `SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl`에서 인클루드하여 사용합니다.
 
 - **파일 위치**: `src/systemCodeManager/shader/systemStruct/Camera.wgsl`
+- **시스템 등록**: `SystemCodeManager.ts` 내 `SystemStructLibrary`에 등록되어 `#redgpu_include systemStruct.Camera` 형태로 사용 가능합니다.
 
 ```wgsl
 // Camera.wgsl
