@@ -450,13 +450,21 @@ class PostEffectManager {
     }
 
     #updateSystemUniforms() {
-        const {inverseProjectionMatrix, projectionMatrix, rawCamera, redGPUContext, scene} = this.#view
+        const {
+            inverseProjectionMatrix,
+            projectionMatrix,
+            noneJitterProjectionMatrix,
+            rawCamera,
+            redGPUContext,
+            taa
+        } = this.#view
         const {gpuDevice} = redGPUContext
-        const {viewMatrix, position: cameraPosition} = rawCamera
+        const {viewMatrix} = rawCamera
         const structInfo = this.#postEffectSystemUniformBufferStructInfo
         const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
-        // console.log(structInfo);
+
         const projectionViewMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
+        const noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix);
         {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
@@ -465,11 +473,11 @@ class PostEffectManager {
                 {
                     projectionMatrix,
                     projectionViewMatrix,
-                    noneJitterProjectionMatrix: projectionMatrix,
-                    noneJitterProjectionViewMatrix: projectionViewMatrix,
+                    noneJitterProjectionMatrix,
+                    noneJitterProjectionViewMatrix,
                     inverseProjectionMatrix,
-                    inverseProjectionViewMatrix: mat4.invert(temp2, projectionViewMatrix),
-                    prevNoneJitterProjectionViewMatrix: projectionViewMatrix
+                    inverseProjectionViewMatrix: mat4.invert(temp3, projectionViewMatrix),
+                    prevNoneJitterProjectionViewMatrix: redGPUContext.antialiasingManager.useTAA ? taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix
                 },
                 members.projection.members,
                 this.#uniformDataF32,
@@ -477,7 +485,6 @@ class PostEffectManager {
             )
         }
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
-        // console.log('structInfo',view.scene.directionalLights)
     }
 
     #init() {
@@ -636,5 +643,6 @@ class PostEffectManager {
 
 let temp = mat4.create()
 let temp2 = mat4.create()
+let temp3 = mat4.create()
 Object.freeze(PostEffectManager)
 export default PostEffectManager
