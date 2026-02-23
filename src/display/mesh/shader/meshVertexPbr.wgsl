@@ -2,7 +2,6 @@
 #redgpu_include shadow.getShadowCoord;
 #redgpu_include entryPoint.mesh.entryPointShadowVertex;
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
-
 #redgpu_include meshVertexBasicUniform;
 
 const maxDistance: f32 = 1000.0;

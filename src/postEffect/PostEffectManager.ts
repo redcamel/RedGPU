@@ -8,7 +8,7 @@ import parseWGSL from "../resources/wgslParser/parseWGSL";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
-import postEffectSystemUniformCode from "./core/postEffectSystemUniform.wgsl"
+import SystemCodeManager from "../systemCodeManager/SystemCodeManager";
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
@@ -546,7 +546,7 @@ class PostEffectManager {
         });
         this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
         this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
-        const SHADER_INFO = parseWGSL(postEffectSystemUniformCode, 'POST_EFFECT_SYSTEM_UNIFORM')
+        const SHADER_INFO = parseWGSL(SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM, 'POST_EFFECT_SYSTEM_UNIFORM')
         const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
         const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
         this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;

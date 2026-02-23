@@ -13,7 +13,7 @@ import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../../../resources/sampler/Sampler";
-import POST_EFFECT_SYSTEM_UNIFORM from '../../core/postEffectSystemUniform.wgsl';
+import SystemCodeManager from "../../../systemCodeManager/SystemCodeManager";
 
 /**
  * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 포스트 이펙트 클래스입니다.
@@ -154,7 +154,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 				'@group(0) @binding(6) var tSampler : sampler;',
 				'',
 				'@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
-				POST_EFFECT_SYSTEM_UNIFORM,
+				SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM,
 				'@group(1) @binding(2) var<uniform> uniforms: Uniforms;',
 				'',
 				uniformStructCode,
