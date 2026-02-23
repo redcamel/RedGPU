@@ -33,8 +33,6 @@
 
 ---
 
----
-
 ## 📝 그림자 구조체 사양 (Shadow Struct Specification - Final)
 방향성 광원의 그림자 데이터를 그룹화하여 최종 확정된 구조입니다.
 
@@ -46,15 +44,26 @@
 
 ---
 
+## 📝 대기 산란 구조체 사양 (SkyAtmosphere Struct Specification - Final)
+대기 산란 관련 데이터를 그룹화하여 최종 확정된 구조입니다.
+
+| 순서 | 필드명 | 타입 | 설명 |
+| :-- | :--- | :--- | :--- |
+| 1 | **useSkyAtmosphere** | `u32` | 대기 산란 사용 여부 (0: 비활성, 1: 활성) |
+| 2 | **skyAtmosphereSunIntensity** | `f32` | 태양 광 강도 |
+| 3 | **skyAtmosphereExposure** | `f32` | 대기 노출값 |
+| 4 | **padding** | `f32` | 16바이트 정렬용 패딩 |
+
+---
+
 ## 💻 WGSL 정의 (Final WGSL)
-`struct Camera`와 `struct Shadow`는 별도의 파일로 분리되어 관리되며, `SYSTEM_UNIFORM.wgsl` 및 `POST_EFFECT_SYSTEM_UNIFORM.wgsl`에서 인클루드하여 사용합니다.
+`struct Camera`, `struct Shadow`, `struct SkyAtmosphere`는 별도의 파일로 분리되어 관리되며, `SYSTEM_UNIFORM.wgsl`에서 인클루드하여 사용합니다.
 
 ### 2.1 Camera 구조체
 - **파일 위치**: `src/systemCodeManager/shader/systemStruct/Camera.wgsl`
 - **시스템 등록**: `SystemCodeManager.ts` 내 `SystemStructLibrary`에 등록되어 `#redgpu_include systemStruct.Camera` 형태로 사용 가능합니다.
 
 ```wgsl
-// Camera.wgsl
 struct Camera {
     viewMatrix: mat4x4<f32>,
     inverseViewMatrix: mat4x4<f32>,
@@ -67,10 +76,8 @@ struct Camera {
 
 ### 2.2 Shadow 구조체
 - **파일 위치**: `src/systemCodeManager/shader/systemStruct/Shadow.wgsl`
-- **시스템 등록**: `#redgpu_include systemStruct.Shadow` 형태로 사용 가능합니다.
 
 ```wgsl
-// Shadow.wgsl
 struct Shadow {
     directionalShadowDepthTextureSize: u32,
     directionalShadowBias: f32,
@@ -78,14 +85,28 @@ struct Shadow {
 };
 ```
 
+### 2.3 SkyAtmosphere 구조체
+- **파일 위치**: `src/systemCodeManager/shader/systemStruct/SkyAtmosphere.wgsl`
+
+```wgsl
+struct SkyAtmosphere {
+    useSkyAtmosphere: u32,
+    skyAtmosphereSunIntensity: f32,
+    skyAtmosphereExposure: f32,
+    padding: f32
+};
+```
+
 ```wgsl
 // SYSTEM_UNIFORM.wgsl
 #redgpu_include systemStruct.Camera
 #redgpu_include systemStruct.Shadow
+#redgpu_include systemStruct.SkyAtmosphere
 
 struct SystemUniform {
     // ...
     camera: Camera,
+    skyAtmosphere: SkyAtmosphere,
     shadow: Shadow,
     // ...
 };
@@ -99,18 +120,19 @@ struct SystemUniform {
 중복된 유니폼 업데이트 로직을 제거하고 유지보수성을 높이기 위해 `SystemUniformUpdater` 클래스를 도입했습니다.
 
 - **위치**: `src/renderer/SystemUniformUpdater.ts`
-- **역할**: `Camera`, `Shadow` 객체와 유니폼 버퍼의 오프셋 정보를 받아 표준화된 방식으로 데이터를 기록합니다.
+- **역할**: 각 시스템 객체와 유니폼 버퍼의 오프셋 정보를 받아 표준화된 방식으로 데이터를 기록합니다.
 - **주요 메서드**: 
   - `static updateCamera(camera, cameraMembers, uniformDataF32)`
   - `static updateShadow(shadowManager, shadowMembers, uniformData)`
+  - `static updateSkyAtmosphere(skyAtmosphere, skyAtmosphereMembers, uniformData)`
 
 ---
 
 ## 🛠 전환 계획 (Migration Plan) - 완료
 1. **TypeScript 데이터 모델 업데이트 (완료)**: `View3D.ts`, `PostEffectManager.ts` 필드 정규화 및 오프셋 동기화.
-2. **시스템 셰이더 업데이트 (완료)**: `src/systemCodeManager/shader/systemStruct/` 내 구조체 동기화 및 별도 파일(`Camera.wgsl`, `Shadow.wgsl`)로 분리.
+2. **시스템 셰이더 업데이트 (완료)**: `src/systemCodeManager/shader/systemStruct/` 내 구조체 동기화 및 별도 파일 분리.
 3. **중앙 집중식 업데이터 도입 (완료)**: `SystemUniformUpdater`를 통한 업데이트 로직 단일화.
-4. **검증 및 정규화 (완료)**: 빌보드, 뎁스 복구, TAA/SSR, 그림자 가시성 등 모든 연산의 명칭 일관성 확보.
+4. **검증 및 정규화 (완료)**: 모든 연산의 명칭 일관성 확보 및 셰이더 참조 수정.
 
 ---
 
@@ -119,12 +141,11 @@ struct SystemUniform {
 ### 완료 항목 (Completed)
 - [x] **단독 명칭 교체**: 코드베이스 전반(`src/`)에서 `cameraMatrix` $\rightarrow$ `viewMatrix` 교체 완료.
 - [x] **복합 행렬 명칭 교체**: `projectionCameraMatrix` $\rightarrow$ `projectionViewMatrix` 교체 완료.
-- [x] **그림자 명칭 정규화**: `bias` $\rightarrow$ `directionalShadowBias` 및 관련 필드 명칭 구체화 완료.
-- [x] **Jitter 관련 명칭 교체**: `noneJitterProjectionViewMatrix`, `prevNoneJitterProjectionViewMatrix` 교체 완료.
-- [x] **역행렬 명칭 교체**: `inverseCameraMatrix`, `inverseProjectionCameraMatrix` 등을 `inverseViewMatrix`, `inverseProjectionViewMatrix`로 교체 완료.
-- [x] **시스템 구조체 반영 및 분리**: `Camera.wgsl`, `Shadow.wgsl`을 신설하고 `SYSTEM_UNIFORM.wgsl` 등에서 공유하도록 개선 완료.
-- [x] **중앙 집중식 로직 도입**: `SystemUniformUpdater`를 통해 `View3D`, `PostEffectManager` 업데이트 로직 단일화 완료.
-- [x] **핵심 매니저 업데이트**: `View3D.ts`, `PostEffectManager.ts` 등 주요 클래스의 참조 로직 수정 완료.
+- [x] **그림자 및 대기 산란 정규화**: `Shadow`, `SkyAtmosphere` 구조체 도입 및 필드명 구체화 완료.
+- [x] **역행렬 명칭 교체**: `inverseCameraMatrix` $\rightarrow$ `inverseViewMatrix` 일괄 교체 완료.
+- [x] **시스템 구조체 반영 및 분리**: `Camera.wgsl`, `Shadow.wgsl`, `SkyAtmosphere.wgsl` 신설 및 공유 구조 개선 완료.
+- [x] **중앙 집중식 로직 도입**: `SystemUniformUpdater`를 통해 업데이트 로직 단일화 완료.
+- [x] **출력 구조체 명칭 변경**: `FragmentOutput` $\rightarrow$ `OutputFragment` 일관성 확보 완료.
 
 ### 진행 예정/검토 필요 (Pending/Todo)
 - [ ] **런타임 검증**: 실제 렌더링 시 TAA, SSR 등에서 정규화된 유니폼 값이 정상적으로 연산되는지 추가 확인.
