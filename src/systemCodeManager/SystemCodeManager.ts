@@ -72,8 +72,8 @@ import emptyEntryPointShadowVertex_wgsl from './shader/entryPoint/empty/entryPoi
 import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
 import meshVertexBasicUniform_wgsl from '../display/mesh/core/shader/meshVertexBasicUniform.wgsl';
-import postEffectSystemUniform_wgsl from '../postEffect/core/postEffectSystemUniform.wgsl';
-import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
+import POST_EFFECT_SYSTEM_UNIFORM_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM.wgsl';
+import SYSTEM_UNIFORM_wgsl from './shader/systemStruct/SYSTEM_UNIFORM.wgsl';
 
 /**
  * [KO] 수학 관련 셰이더 함수 라이브러리
@@ -271,7 +271,7 @@ export namespace SystemCodeManager {
     /** [KO] 전역 시스템 유니폼 정의 [EN] Global system uniform definitions */
     export const SYSTEM_UNIFORM = SYSTEM_UNIFORM_wgsl;
     /** [KO] 포스트 이펙트 전역 시스템 유니폼 정의 [EN] Post effect global system uniform definitions */
-    export const POST_EFFECT_SYSTEM_UNIFORM = postEffectSystemUniform_wgsl;
+    export const POST_EFFECT_SYSTEM_UNIFORM = POST_EFFECT_SYSTEM_UNIFORM_wgsl;
 
     /** [KO] 수학 및 공간 변환 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for mathematics and space transformations. */
     export import math = MathLibrary;
