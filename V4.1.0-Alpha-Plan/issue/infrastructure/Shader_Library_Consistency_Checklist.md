@@ -105,6 +105,25 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 
 ---
 
+## 🚀 향후 파편화 제거 대상 (Normalization Roadmap)
+
+시스템 인프라 정규화의 다음 단계로, 아래 두 항목을 최우선 순위로 관리합니다.
+
+### 1. 정점 셰이더 입출력 구조체 명칭 정규화 (Vertex I/O Normalization)
+*   **현황**: 파일별로 `VertexOutput`, `VertexOut`, `OutData`, `OutputData` 등 출력 구조체 명칭이 혼용되어 유지보수 시 혼선 발생.
+*   **목표**:
+    *   모든 정점 셰이더의 입력 구조체는 **`InputData`**로 통일.
+    *   모든 정점 셰이더의 출력 구조체는 **`VertexOutput`**으로 통일 (프래그먼트의 `InputData`와 매칭).
+    *   구조체 내 필드 순서를 데이터 레이아웃 최적화 규칙에 맞춰 표준화.
+
+### 2. 샘플러 프리셋 관리 및 직접 생성 금지 (Sampler Preset Standardization)
+*   **현황**: `View3D.ts`, `PostEffect` 및 개별 텍스처 로직에서 `new Sampler()`를 통해 개별적으로 샘플러를 생성하여 중복 리소스 발생 및 관리의 어려움 존재.
+*   **목표**:
+    *   `ResourceManager`에 정의된 **`PRESET_Sampler_XXXX`** 형태의 정적 프리셋만 사용하도록 코드베이스 전체 강제.
+    *   컴포넌트 수준에서의 임의 샘플러 생성을 제거하여 GPU 샘플러 슬롯 낭비 방지 및 일관된 필터링 품질 확보.
+
+---
+
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
 - **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화, 명명 규칙(CamelCase) 정규화 완료.

@@ -1,4 +1,4 @@
-import { vec3, vec2 } from "gl-matrix";
+import { vec2, vec3 } from "gl-matrix";
 import Ray from "../math/Ray";
 import View3D from "../display/view/View3D";
 import Mesh from "../display/mesh/Mesh";
