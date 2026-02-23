@@ -71,8 +71,8 @@ import emptyEntryPointPickingVertex_wgsl from './shader/entryPoint/empty/entryPo
 import emptyEntryPointShadowVertex_wgsl from './shader/entryPoint/empty/entryPointShadowVertex.wgsl';
 import FragmentOutput_wgsl from './shader/systemStruct/FragmentOutput.wgsl';
 import OutputShadowData_wgsl from './shader/systemStruct/OutputShadowData.wgsl';
+import meshVertexBasicUniform_wgsl from '../display/mesh/core/shader/meshVertexBasicUniform.wgsl';
 import SYSTEM_UNIFORM_wgsl from '../resources/systemCode/shader/SYSTEM_UNIFORM.wgsl';
-import SystemVertexCode from '../resources/systemCode/shader/vertex';
 
 /**
  * [KO] 수학 관련 셰이더 함수 라이브러리
@@ -257,6 +257,7 @@ export namespace EntryPointLibrary {
 export namespace SystemStructLibrary {
     export const FragmentOutput = FragmentOutput_wgsl;
     export const OutputShadowData = OutputShadowData_wgsl;
+    export const meshVertexBasicUniform = meshVertexBasicUniform_wgsl;
 }
 
 /**
@@ -288,9 +289,6 @@ export namespace SystemCodeManager {
     /** [KO] 디스플레이스먼트(Displacement) 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for displacement. */
     export import displacement = DisplacementLibrary;
 
-    /** [KO] 시스템 Vertex 관련 레거시 코드 [EN] System Vertex related legacy code */
-    export const vertex = SystemVertexCode;
-
     // [KO] 레거시 직접 참조 지원 (전처리기 호환성)
     export const FragmentOutput = FragmentOutput_wgsl;
     export const OutputShadowData = OutputShadowData_wgsl;
@@ -310,7 +308,7 @@ export namespace SystemCodeManager {
     export const calcDisplacementPosition = getDisplacementPosition_wgsl;
     export const calcDisplacementNormal = getDisplacementNormal_wgsl;
     export const getBillboardMatrix = getBillboardMatrix_wgsl;
-    export const meshVertexBasicUniform = SystemVertexCode.meshVertexBasicUniform;
+    export const meshVertexBasicUniform = meshVertexBasicUniform_wgsl;
 }
 
 export default SystemCodeManager;

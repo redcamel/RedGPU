@@ -83,9 +83,16 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - **좌표계 최적화**: WebGPU의 V-Down 환경에 맞춰 `ddy` 부호(down - up)를 교정하고, 월드 공간 TBN 기반 섭동 로직을 통해 회전 시의 법선 왜곡 문제 해결.
     - **시스템 통합**: `SystemCodeManager.displacement` 네임스페이스를 통해 라이브러리화 완료.
 
+### 12. 시스템 셰이더 중복 제거 및 일원화 (System Shader Redundancy Cleanup)
+*   **대상**: `src/resources/systemCode/shader/vertex/index.ts` (SystemVertexCode)
+*   **결과**: ✅ 완료.
+    - `SystemVertexCode` (index.ts) 파일을 **완전히 폐지 및 삭제**.
+    - 잔존하던 빌보드, 디스플레이스먼트, 메시 유니폼(`meshVertexBasicUniform`) 등의 모든 매핑을 `SystemCodeManager`로 전면 이주.
+    - 모든 시스템 및 공통 라이브러리 접근을 `SystemCodeManager`로 단일화하여 셰이더 인프라 아키텍처를 극도로 단순화함.
+
 ---
 
 ## 📅 업데이트 히스토리
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
 - **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화, 명명 규칙(CamelCase) 정규화 완료.
-- **2026-02-23**: 디스플레이스먼트 매핑 라이브러리 리팩토링 및 좌표계 보정 로직 반영 완료.
+- **2026-02-23**: 디스플레이스먼트 라이브러리 리팩토링 및 좌표계 보정 로직 반영. `SystemVertexCode` (index.ts) 파일 완전 폐지 및 `SystemCodeManager`로의 전면 일원화 작업 완료.

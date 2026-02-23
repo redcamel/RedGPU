@@ -8,13 +8,11 @@
  */
 import init from "./init";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
-import SystemCode from "./resources/systemCode/SystemCode";
 import SystemCodeManager from "./systemCodeManager/SystemCodeManager";
 
 export * as Bound from "./bound";
 export {
     init,
-    SystemCode,
     SystemCodeManager,
     GLTFLoader
 }
