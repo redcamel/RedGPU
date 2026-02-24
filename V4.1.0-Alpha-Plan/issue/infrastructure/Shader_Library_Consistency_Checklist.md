@@ -125,17 +125,24 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - **호환성 확보**: 시스템 엔트리 포인트(`mesh`, `billboard`, `empty` 등)와 디스플레이 객체 간의 타입 불일치를 해결하여 공통 라이브러리 활용도 극대화.
 
 ### 18. 공중 투시 시스템 통합 (Aerial Perspective Integration)
-*   **대상**: `lighting.getAerialPerspective`
+*   **대상**: `skyAtmosphere.getAerialPerspective`
 *   **결과**: ✅ 완료.
-    - **모듈화**: `ColorMaterial` 내에 파편화되어 있던 공중 투시 로직을 시스템 공통 라이브러리(`lighting`)로 이주 완료.
+    - **모듈화**: `ColorMaterial` 내에 파편화되어 있던 공중 투시 로직을 시스템 공통 라이브러리(`skyAtmosphere`)로 이주 완료.
     - **범용성**: `getAerialPerspective(color, worldPos)` 인터페이스를 통해 모든 재질에서 단 한 줄로 대기 산란 효과를 적용할 수 있도록 구현.
     - **물리적 정합성**: `SkyAtmosphere` 시스템의 태양 강도, 노출, LUT 데이터를 활용하여 하늘 배경과 오브젝트 간의 물리적 밝기 동기화 확인.
 
-### 19. 레거시 별칭 제거 및 네임스페이스 단일화 (Legacy Alias Cleanup)
+### 19. 대기 태양광 조명 연동 (Atmosphere Sun Light Integration)
+*   **대상**: `skyAtmosphere.getAtmosphereSunLight`
+*   **결과**: ✅ 완료.
+    - **데이터 공유**: `SkyAtmosphere` 시스템의 태양 위치(Surface-to-Light 벡터)를 모든 머티리얼이 접근 가능한 `systemUniforms`에 공유.
+    - **조명 통합**: `PhongMaterial`, `PBRMaterial`의 조명 루프에 대기 태양광(Sun Light) 계산 로직을 통합하여, 하늘의 태양 위치와 물체의 음영이 실시간으로 연동되도록 구현.
+    - **표준 준수**: 언리얼 엔진 등 상용 엔진에서 사용하는 `SunDirection` 명칭과 `Surface-to-Light` 벡터 데이터 성격을 일관되게 적용.
+
+### 20. 레거시 별칭 제거 및 네임스페이스 단일화 (Legacy Alias Cleanup)
 *   **대상**: `SystemCodeManager.ts` 및 전역 `.wgsl` 인클루드
 *   **결과**: ✅ 완료.
     - **별칭 삭제**: `calcTintBlendMode`, `getBillboardMatrix` 등 `SystemCodeManager` 하단에 존재하던 중복 별칭들을 전량 제거.
-    - **경로 정규화**: 모든 셰이더 코드(`textField`, `sprite`, `particle`, `mesh`) 내의 `#redgpu_include` 경로를 `math.billboard`, `systemStruct` 등 표준 네임스페이스 기반으로 전수 교체 완료.
+    - **경로 정규화**: 모든 셰이더 코드(`textField`, `sprite`, `particle`, `mesh`) 내의 `#redgpu_include` 경로를 `math.billboard`, `systemStruct`, `skyAtmosphere` 등 표준 네임스페이스 기반으로 전수 교체 완료.
     - **유지보수성**: 코드베이스 내의 셰이더 참조 경로를 일원화하여 향후 라이브러리 변경 시 영향 범위를 최소화함.
 
 ---
