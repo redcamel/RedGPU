@@ -2,11 +2,11 @@ import {mat4, vec3} from "gl-matrix";
 import Camera2D from "../camera/camera/Camera2D";
 import View3D from "../display/view/View3D";
 import consoleAndThrowError from "../utils/consoleAndThrowError";
-import PassClustersLightHelper from "./clusterLight/PassClustersLightHelper";
 import AmbientLight from "./lights/AmbientLight";
 import DirectionalLight from "./lights/DirectionalLight";
 import PointLight from "./lights/PointLight";
 import SpotLight from "./lights/SpotLight";
+import PassClustersLightHelper from "./clusterLight/core/PassClustersLightHelper";
 
 /**
  * [KO] 씬(Scene) 내의 모든 조명을 통합 관리하는 클래스입니다.

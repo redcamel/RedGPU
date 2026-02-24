@@ -1,4 +1,4 @@
-import PassClustersLightHelper from "../../../light/clusterLight/PassClustersLightHelper";
+import PassClustersLightHelper from "../../../light/clusterLight/core/PassClustersLightHelper";
 import SystemCodeManager from "../../../systemCodeManager/SystemCodeManager";
 import ShaderVariantGenerator from "./ShaderVariantGenerator";
 
