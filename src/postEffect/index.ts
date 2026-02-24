@@ -26,7 +26,6 @@ import Convolution from "./effects/convolution/Convolution";
 import FilmGrain from "./effects/filmGrain/FilmGrain";
 import Fog from "./effects/fog/fog/Fog";
 import HeightFog from "./effects/fog/heightFog/HeightFog";
-import SkyAtmosphere from "./effects/skyAtmosphere/SkyAtmosphere";
 import ChromaticAberration from "./effects/lens/chromaticAberration/ChromaticAberration";
 import DOF from "./effects/lens/dof/DOF";
 import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
@@ -64,7 +63,6 @@ export {
     // Environmental Effects
     Fog,
     HeightFog,
-    SkyAtmosphere,
     // Visual Effects
     FilmGrain,
     OldBloom,

@@ -1,8 +1,8 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import View3D from "../../../display/view/View3D";
-import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
+import RedGPUContext from "../../context/RedGPUContext";
+import View3D from "../../display/view/View3D";
+import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
+import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../postEffect/core/ASinglePassPostEffect";
 import TransmittanceGenerator from "./core/generator/transmittance/TransmittanceGenerator";
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
@@ -10,24 +10,24 @@ import CameraVolumeGenerator from "./core/generator/cameraVolume/CameraVolumeGen
 import skyAtmosphereFn from "./core/skyAtmosphereFn.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
-import Sampler from "../../../resources/sampler/Sampler";
-import SystemCodeManager from "../../../systemCodeManager/SystemCodeManager";
+import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
+import Sampler from "../../resources/sampler/Sampler";
+import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
 
 /**
- * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 포스트 이펙트 클래스입니다.
- * [EN] Physics-based Atmospheric Scattering post-effect class.
+ * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 클래스입니다.
+ * [EN] Physics-based Atmospheric Scattering class.
  *
  * [KO] Rayleigh 산란, Mie 산란 및 오존 흡수를 시뮬레이션하여 사실적인 하늘과 공중 투시 효과를 제공합니다.
  * [EN] Provides realistic sky and aerial perspective effects by simulating Rayleigh scattering, Mie scattering, and ozone absorption.
  *
  * ### Example
  * ```typescript
- * const skyAtmosphere = new RedGPU.PostEffect.SkyAtmosphere(redGPUContext);
+ * const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
  * view.skyAtmosphere = skyAtmosphere;
  * ```
  *
- * @category PostEffect
+ * @category Display
  */
 class SkyAtmosphere extends ASinglePassPostEffect {
     #transmittanceGenerator: TransmittanceGenerator;

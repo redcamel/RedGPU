@@ -18,7 +18,7 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         // 1. SkyAtmosphere 초기화 (View 속성 방식)
-        const skyAtmosphere = new RedGPU.PostEffect.SkyAtmosphere(redGPUContext);
+        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 
         // 2. LUT 스프라이트 생성 함수

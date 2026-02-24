@@ -1,12 +1,12 @@
-import RedGPUContext from "../../../../../../context/RedGPUContext";
-import Sampler from "../../../../../../resources/sampler/Sampler";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import Sampler from "../../../../../resources/sampler/Sampler";
 import CameraVolumeLUTTexture from "./CameraVolumeLUTTexture";
 import cameraVolumeShaderCode from "./cameraVolumeShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
 import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTTexture";
-import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
-import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_VOLUME_GENERATOR');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;

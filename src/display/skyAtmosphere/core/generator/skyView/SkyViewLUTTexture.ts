@@ -1,5 +1,5 @@
-import RedGPUContext from "../../../../../../context/RedGPUContext";
-import ManagementResourceBase from "../../../../../../resources/core/ManagementResourceBase";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import ManagementResourceBase from "../../../../../resources/core/ManagementResourceBase";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 

@@ -16,7 +16,7 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
-import SkyAtmosphere from "../../postEffect/effects/skyAtmosphere/SkyAtmosphere";
+import SkyAtmosphere from "../skyAtmosphere/SkyAtmosphere";
 import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";

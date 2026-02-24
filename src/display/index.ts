@@ -8,6 +8,7 @@
  * @packageDocumentation
  */
 import Scene from "./scene/Scene";
+import SkyAtmosphere from "./skyAtmosphere/SkyAtmosphere";
 
 export * from "./skyboxs/skyBox";
 export * from './mesh'
@@ -20,4 +21,5 @@ export * from "./textFileds";
 export * from "./instancingMesh";
 export {
     Scene,
+    SkyAtmosphere
 }

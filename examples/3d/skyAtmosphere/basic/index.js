@@ -11,7 +11,7 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
         // 1. SkyAtmosphere 초기화
-        const skyAtmosphere = new RedGPU.PostEffect.SkyAtmosphere(redGPUContext);
+        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         skyAtmosphere.sunElevation = 5;
         skyAtmosphere.sunAzimuth = 0;
         skyAtmosphere.exposure = 1.5;

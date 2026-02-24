@@ -13,7 +13,7 @@
 ### 2.1 하이엔드 대기 시스템 (Atmospherics)
 | 과제 명칭 | 우선순위 | 난이도 | 부하 정도 | 상세 내용 |
 | :--- | :---: | :---: | :---: | :--- |
-| **[SkyAtmosphere](issue/atmosphere/SkyAtmosphere_Master_Specification.md)** | 🔴 최고 | 🟠 높음 | 🟡 보통 | Rayleigh/Mie 산란 기반 실시간 스카이 및 노을 시스템 구현 (view.skyAtmosphere 슬롯 신설, **MSAA 대응 포함**) |
+| **[SkyAtmosphere](issue/atmosphere/SkyAtmosphere_Master_Specification.md)** | 🔴 최고 | 🟠 높음 | 🟡 보통 | Rayleigh/Mie 산란 기반 실시간 스카이 및 노을 시스템 구현 (Display 모듈로 통합, view.skyAtmosphere 슬롯 신설, MSAA 대응 포함) |
 
 ### 2.2 디테일 인프라 (Detail Foundation)
 | 과제 명칭 | 우선순위 | 난이도 | 부하 정도 | 상세 내용 |
