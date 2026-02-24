@@ -16,7 +16,7 @@ struct InputData {
     @location(1) vertexColor: vec4<f32>,
 };
 
-struct OutputData {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexColor: vec4<f32>,
@@ -28,8 +28,8 @@ struct OutputData {
 };
 
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
     let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
     let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;

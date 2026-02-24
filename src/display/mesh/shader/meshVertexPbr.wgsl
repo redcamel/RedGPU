@@ -13,8 +13,8 @@ const maxMipLevel: f32 = 10.0;
 
 
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     // Input data
     let input_position = inputData.position;

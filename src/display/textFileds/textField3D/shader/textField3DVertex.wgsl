@@ -46,7 +46,7 @@ struct InputData {
  * [KO] 버텍스 출력 데이터 구조체입니다.
  * [EN] Vertex output data structure.
  */
-struct OutputData {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -61,8 +61,8 @@ struct OutputData {
  * [EN] Main vertex shader entry point for TextField3D.
  */
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     // [KO] TextField3D의 선명도를 위해 지터링이 제거된 투영 행렬(noneJitterProjectionMatrix)을 사용합니다.
     // [EN] Uses a jitter-free projection matrix (noneJitterProjectionMatrix) for the clarity of TextField3D.

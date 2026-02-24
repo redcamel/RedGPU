@@ -1,6 +1,6 @@
 @vertex
-fn entryPointPickingVertex(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
     let input_position = inputData.position;
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;

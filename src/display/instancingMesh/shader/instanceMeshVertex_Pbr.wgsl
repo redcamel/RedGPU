@@ -1,6 +1,6 @@
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     let input_instanceIdx: u32 = visibilityBuffer[inputData.instanceIdx];
 

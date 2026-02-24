@@ -1,5 +1,5 @@
 @vertex
-fn entryPointPickingVertex(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
     return output;
 }

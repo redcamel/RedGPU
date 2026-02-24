@@ -27,7 +27,7 @@ struct InputData {
     @location(2) uv: vec2<f32>,
 };
 
-struct OutputData {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -35,6 +35,7 @@ struct OutputData {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
@@ -43,9 +44,10 @@ struct OutputData {
 };
 
 
+
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     let billboardResult = getBillboardResult(
         inputData.position,

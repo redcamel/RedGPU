@@ -30,7 +30,7 @@ struct InputDataSkin {
  * [KO] 스키닝이 적용된 메시의 버텍스 출력 구조체입니다.
  * [EN] Vertex output structure for skinned meshes.
  */
-struct OutputDataSkin {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -58,8 +58,8 @@ struct OutputDataSkin {
  * [EN] Main vertex shader entry point for skinned meshes.
  */
 @vertex
-fn main(inputData: InputDataSkin) -> OutputDataSkin {
-    var output: OutputDataSkin;
+fn main(inputData: InputDataSkin) -> VertexOutput {
+    var output: VertexOutput;
 
     // [KO] 입력 데이터 처리
     // [EN] Process input data
@@ -182,8 +182,8 @@ fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
  * [EN] Vertex shader for skinned mesh picking.
  */
 @vertex
-fn entryPointPickingVertex(inputData: InputDataSkin) -> OutputDataSkin {
-    var output: OutputDataSkin;
+fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
+    var output: VertexOutput;
 
     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;

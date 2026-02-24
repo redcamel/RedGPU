@@ -1,6 +1,6 @@
 @vertex
-fn entryPointPickingVertex(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
     let u_resolution = systemUniforms.resolution;
     
     #redgpu_if disableJitter

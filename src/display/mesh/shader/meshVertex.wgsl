@@ -16,8 +16,8 @@ const maxMipLevel: f32 = 10.0;
 
 
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     // System uniforms
     #redgpu_if disableJitter

@@ -6,7 +6,7 @@
  * [KO] 그리드 디버거를 위한 셰이더 구조체 정의입니다.
  * [EN] Shader structure definitions for the grid debugger.
  */
-struct VertexIn {
+struct InputData {
     @location(0) position: vec4<f32>,
     @location(1) color: vec4<f32>,
 }
@@ -15,7 +15,7 @@ struct VertexIn {
  * [KO] 버텍스 셰이더 출력 및 프래그먼트 셰이더 입력 구조체입니다.
  * [EN] Vertex shader output and fragment shader input structure.
  */
-struct VertexOut {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) color: vec4<f32>,
     @location(1) worldPos: vec3<f32>,
@@ -47,8 +47,8 @@ const AXIS_ALPHA: f32 = 0.8;
  * [EN] Grid vertex shader entry point.
  */
 @vertex
-fn vertexMain(inputData: VertexIn) -> VertexOut {
-    var output: VertexOut;
+fn vertexMain(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     let modelPos = inputData.position;
     let viewProj = systemUniforms.projection.noneJitterProjectionViewMatrix;
@@ -73,7 +73,7 @@ fn vertexMain(inputData: VertexIn) -> VertexOut {
  * [EN] Grid fragment shader entry point.
  */
 @fragment
-fn fragmentMain(inputData: VertexOut) -> OutputFragment {
+fn fragmentMain(inputData: VertexOutput) -> OutputFragment {
     var output: OutputFragment;
 
     // [KO] 1. 거리 기반 페이드(Fade) 효과 계산 (가독성 향상)

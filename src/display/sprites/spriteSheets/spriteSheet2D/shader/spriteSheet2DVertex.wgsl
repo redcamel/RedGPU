@@ -39,7 +39,7 @@ struct InputData {
  * [KO] 버텍스 출력 데이터 구조체입니다.
  * [EN] Vertex output data structure.
  */
-struct OutputData {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -59,8 +59,8 @@ struct OutputData {
  * [EN] Main vertex shader entry point for SpriteSheet 2D.
  */
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     // [KO] 시스템 유니폼 변수 가져오기
     // [EN] Get system uniform variables
@@ -110,8 +110,8 @@ fn main(inputData: InputData) -> OutputData {
  * [EN] Vertex shader for SpriteSheet 2D picking.
  */
 @vertex
-fn entryPointPickingVertex(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_viewMatrix = systemUniforms.camera.viewMatrix;

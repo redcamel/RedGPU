@@ -4,7 +4,7 @@ struct InputData {
     @location(1) vertexNormal : vec3<f32>,
     @location(2) uv : vec2<f32>,
 };
-struct OutData {
+struct VertexOutput {
   @builtin(position) position : vec4<f32>,
   @location(0) vertexPosition: vec4<f32>,
 };
@@ -13,14 +13,14 @@ struct VertexUniforms {
 };
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 @vertex
-fn main(inputData:InputData) -> OutData {
-    var outData : OutData;
+fn main(inputData:InputData) -> VertexOutput {
+    var output : VertexOutput;
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
     let u_camera = systemUniforms.camera;
     let u_viewMatrix = u_camera.viewMatrix;
-    outData.position = u_projectionViewMatrix * vertexUniforms.modelMatrix * vec4<f32>(inputData.position, 1.0);
-    outData.vertexPosition = vec4<f32>(inputData.position, 1.0);
-    return outData;
+    output.position = u_projectionViewMatrix * vertexUniforms.modelMatrix * vec4<f32>(inputData.position, 1.0);
+    output.vertexPosition = vec4<f32>(inputData.position, 1.0);
+    return output;
 }
 

@@ -49,7 +49,7 @@ struct InputData {
  * [KO] 버텍스 출력 데이터 구조체입니다.
  * [EN] Vertex output data structure.
  */
-struct OutputData {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -69,8 +69,8 @@ struct OutputData {
  * [EN] Main vertex shader entry point for SpriteSheet 3D.
  */
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     // [KO] 빌보드 및 사이즈 보정 계산 결과 획득
     // [EN] Get billboard and size attenuation calculation results
