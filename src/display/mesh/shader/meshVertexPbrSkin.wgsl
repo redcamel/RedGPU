@@ -2,7 +2,7 @@
 #redgpu_include shadow.getShadowCoord;
 #redgpu_include shadow.getShadowClipPosition;
 
-#redgpu_include meshVertexBasicUniform;
+#redgpu_include systemStruct.meshVertexBasicUniform;
 const maxDistance: f32 = 1000.0;
 const maxMipLevel: f32 = 10.0;
 

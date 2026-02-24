@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include getBillboardMatrix;
-#redgpu_include getBillboardResult;
+#redgpu_include math.billboard.getBillboardMatrix;
+#redgpu_include math.billboard.getBillboardResult;
 #redgpu_include entryPoint.billboard.entryPointPickingVertex;
 #redgpu_include entryPoint.empty.entryPointShadowVertex;
 

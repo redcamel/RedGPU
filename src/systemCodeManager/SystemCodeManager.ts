@@ -64,6 +64,7 @@ import getAnisotropicNDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAni
 import getAnisotropicVisibility_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicVisibility.wgsl';
 import getAnisotropicSpecularBRDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicSpecularBRDF.wgsl';
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
+import getAerialPerspective_wgsl from './shader/lighting/getAerialPerspective.wgsl';
 import meshEntryPointPickingVertex_wgsl from './shader/entryPoint/mesh/entryPointPickingVertex.wgsl';
 import meshEntryPointPickingFragment_wgsl from './shader/entryPoint/mesh/entryPointPickingFragment.wgsl';
 import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPointShadowVertex.wgsl';
@@ -235,6 +236,7 @@ export namespace LightingLibrary {
     export const getFresnelMix = fresnelMix_wgsl;
     export const getFresnelCoat = fresnelCoat_wgsl;
     export const getTransmissionRefraction = getTransmissionRefraction_wgsl;
+    export const getAerialPerspective = getAerialPerspective_wgsl;
 }
 
 /**
@@ -306,27 +308,6 @@ export namespace SystemCodeManager {
     export import KHR = KHRLibrary;
     /** [KO] 디스플레이스먼트(Displacement) 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for displacement. */
     export import displacement = DisplacementLibrary;
-
-    // [KO] 레거시 직접 참조 지원 (전처리기 호환성)
-    export const OutputFragment = OutputFragment_wgsl;
-    export const OutputShadowData = OutputShadowData_wgsl;
-    export const calcTintBlendMode = getTintBlendMode_wgsl;
-    export const calcDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
-    export const drawDirectionalShadowDepth = meshEntryPointShadowVertex_wgsl;
-    export const calcPrePathBackground = getTransmissionRefraction_wgsl;
-    export const calculateMotionVector = getMotionVector_wgsl;
-    export const getKHRTextureTransformUV = getKHRTextureTransformUV_wgsl;
-    export const entryPointPickingVertex = meshEntryPointPickingVertex_wgsl;
-    export const entryPointPickingFragment = meshEntryPointPickingFragment_wgsl;
-
-    export const billboardPicking = billboardEntryPointPickingVertex_wgsl;
-    export const billboardShadow = emptyEntryPointShadowVertex_wgsl;
-    export const getBillboardResult = getBillboardResult_wgsl;
-    export const calcBillboard = getBillboardResult_wgsl;
-    export const calcDisplacementPosition = getDisplacementPosition_wgsl;
-    export const calcDisplacementNormal = getDisplacementNormal_wgsl;
-    export const getBillboardMatrix = getBillboardMatrix_wgsl;
-    export const meshVertexBasicUniform = meshVertexBasicUniform_wgsl;
 }
 
 export default SystemCodeManager;

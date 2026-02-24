@@ -1,4 +1,4 @@
-#redgpu_include OutputShadowData;
+#redgpu_include systemStruct.OutputShadowData;
 
 @vertex
 fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
