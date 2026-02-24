@@ -68,14 +68,6 @@ struct ClusterLightGrid {
     cells : array<ClusterLightCell , REDGPU_DEFINE_TOTAL_TILES>,
     indices : array<u32, clusterLight_indicesLength>
 };
-struct ClusterLight_ClusterCube {
-    minAABB : vec4<f32>,
-    maxAABB : vec4<f32>
-  };
-struct ClusterLight_Clusters {
-    cubeList : array<ClusterLight_ClusterCube, REDGPU_DEFINE_TOTAL_TILES>
-};
-
 fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
     let tile = getClusterLightTile(fragCoord);
     return tile.x +
@@ -93,7 +85,6 @@ fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
                      u32(fragCoord.y / (systemUniforms.resolution.y / f32(clusterLight_tileCount.y))),
                      zTile);
 }
-
 struct ClusterLight {
     position : vec3<f32>, radius : f32,
     color : vec3<f32>,    intensity : f32,

@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 
-@group(1) @binding(0) var<storage, read_write> clusterLight_Clusters : ClusterLight_Clusters;
+@group(1) @binding(0) var<storage, read_write> clusterBoundsGrid : ClusterBoundsGrid;
 
 /**
  * [KO] 선과 Z 평면의 교점을 계산합니다.
@@ -87,6 +87,6 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     let minAABB = min(min(minPointNear, minPointFar), min(maxPointNear, maxPointFar));
     let maxAABB = max(max(minPointNear, minPointFar), max(maxPointNear, maxPointFar));
 
-    clusterLight_Clusters.cubeList[tileIndex].minAABB = vec4<f32>(minAABB, 0.0);
-    clusterLight_Clusters.cubeList[tileIndex].maxAABB = vec4<f32>(maxAABB, 0.0);
+    clusterBoundsGrid.cubeList[tileIndex].minAABB = vec4<f32>(minAABB, 0.0);
+    clusterBoundsGrid.cubeList[tileIndex].maxAABB = vec4<f32>(maxAABB, 0.0);
 }

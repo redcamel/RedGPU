@@ -1,10 +1,11 @@
 #redgpu_include SYSTEM_UNIFORM;
-@group(1) @binding(0) var<storage> clusterLight_Clusters : ClusterLight_Clusters;
+
+@group(1) @binding(0) var<storage> clusterBoundsGrid : ClusterBoundsGrid;
 
 fn pointLight_testSphereAABB(light:u32,  tile:u32) -> bool {
    // 라이트와 타일의 정보를 한 번만 획득합니다.
    let targetLight = clusterLightList.lights[light];
-   let targetTile = clusterLight_Clusters.cubeList[tile];
+   let targetTile = clusterBoundsGrid.cubeList[tile];
 
    // 라이트의 반지름과 위치를 획득하고, 위치는 World Space에서 View3D Space로 변환합니다.
    let radius:f32 = targetLight.radius;
@@ -38,7 +39,7 @@ fn pointLight_sqDistPointAABB(targetPoint:vec3<f32>, tile:u32, minAABB:vec3<f32>
 // 스폿라이트용 구체-AABB 거리 체크 (포인트라이트와 동일)
 fn spotLight_testSphereAABB(light: u32, tile: u32) -> bool {
     let targetLight = clusterLightList.lights[light];
-    let targetTile = clusterLight_Clusters.cubeList[tile];
+    let targetTile = clusterBoundsGrid.cubeList[tile];
 
     let radius: f32 = targetLight.radius;
     let position: vec3<f32> = targetLight.position;
