@@ -4,14 +4,14 @@ fn main(inputData: InputData) -> OutputData {
 
     let input_instanceIdx: u32 = visibilityBuffer[inputData.instanceIdx];
 
-
     let u_modelMatrix = instanceUniforms.instanceModelMatrixs[input_instanceIdx];
     let u_normalModelMatrix = instanceUniforms.instanceNormalModelMatrix[input_instanceIdx];
     let u_instanceGroupModelMatrix = instanceUniforms.instanceGroupModelMatrix;
     let u_useDisplacementTexture = instanceUniforms.useDisplacementTexture == 1u;
     let u_displacementScale = instanceUniforms.displacementScale;
 
-    // ?�스???�니??
+    // [KO] 시스템 유니폼 접근
+    // [EN] Access system uniforms
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
     let u_camera = systemUniforms.camera;
@@ -24,7 +24,8 @@ fn main(inputData: InputData) -> OutputData {
 
     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
 
-    // ?�드 좌표 변??
+    // [KO] 월드 좌표 변환
+    // [EN] World coordinate transformation
     let worldPosition = position.xyz;
 
     // Displacement 처리
@@ -43,11 +44,13 @@ fn main(inputData: InputData) -> OutputData {
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
 
-    // 최종 ?�립 좌표 계산
+    // [KO] 최종 클립 좌표 계산
+    // [EN] Calculate final clip coordinates
     output.position = u_projectionViewMatrix * u_instanceGroupModelMatrix * position;
     output.vertexPosition = position.xyz;
 
-    // ?�말 변??
+    // [KO] 노말 변환
+    // [EN] Normal transformation
     var normalPosition: vec3<f32> = (u_instanceGroupModelMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0)).xyz;
     output.vertexNormal = normalPosition;
 
@@ -56,4 +59,3 @@ fn main(inputData: InputData) -> OutputData {
 
     return output;
 }
-
