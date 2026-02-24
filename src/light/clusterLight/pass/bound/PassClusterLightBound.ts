@@ -1,11 +1,11 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import View3D from "../../display/view/View3D";
-import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import ClusterCellBoundsSource from "./ClusterBoundsGrid.wgsl";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import View3D from "../../../../display/view/View3D";
+import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
+import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
+import validateRedGPUContext from "../../../../runtimeChecker/validateFunc/validateRedGPUContext";
+import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";
-import PassClustersLightHelper from "./PassClustersLightHelper";
+import PassClustersLightHelper from "../../core/PassClustersLightHelper";
 
 /**
  * [KO] 클러스터 조명의 경계를 계산하는 컴퓨트 패스 클래스입니다.

@@ -4,9 +4,11 @@ import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
-import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBound";
-import PassClustersLight from "../../light/clusterLight/PassClustersLight";
-import PassClustersLightHelper from "../../light/clusterLight/PassClustersLightHelper";
+import {
+    PassClusterLightBound,
+    PassClustersLight,
+    PassClustersLightHelper
+} from "../../light/clusterLight";
 import DirectionalLight from "../../light/lights/DirectionalLight";
 import PostEffectManager from "../../postEffect/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";

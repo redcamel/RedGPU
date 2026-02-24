@@ -3,9 +3,9 @@
  * [EN] Module for cluster-based lighting processing.
  * @packageDocumentation
  */
-import PassClusterLightBound from "./PassClusterLightBound";
-import PassClustersLight from "./PassClustersLight";
-import PassClustersLightHelper from "./PassClustersLightHelper";
+import PassClusterLightBound from "./pass/bound/PassClusterLightBound";
+import PassClustersLight from "./pass/light/PassClustersLight";
+import PassClustersLightHelper from "./core/PassClustersLightHelper";
 
 export {
     PassClustersLightHelper,

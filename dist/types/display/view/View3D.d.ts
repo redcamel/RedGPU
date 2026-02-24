@@ -2,7 +2,7 @@ import { mat4 } from "gl-matrix";
 import Camera2D from "../../camera/camera/Camera2D";
 import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
-import PassClusterLightBound from "../../light/clusterLight/PassClusterLightBound";
+import { PassClusterLightBound } from "../../light/clusterLight";
 import PostEffectManager from "../../postEffect/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import IBL from "../../resources/texture/ibl/IBL";
