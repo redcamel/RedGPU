@@ -2,6 +2,7 @@
 #redgpu_include color.rgbToYCoCg
 #redgpu_include color.YCoCgToRgb
 #redgpu_include depth.getLinearizeDepth
+#redgpu_include math.EPSILON
 
 // ===== 1. 구조체 및 유틸리티 (Alpha 지원 확장) =====
 struct Uniforms {
@@ -154,7 +155,7 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
     }
 
     var result: SampledColor;
-    let invSumW = 1.0 / max(sumW, 0.0001);
+    let invSumW = 1.0 / max(sumW, EPSILON);
     result.rgb = sumRGB * invSumW;
     result.ycocg = sumYCoCg * invSumW;
     result.alpha = sumAlpha * invSumW;

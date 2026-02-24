@@ -10,6 +10,7 @@
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
+#redgpu_include math.EPSILON
 #redgpu_include math.direction.getViewDirection
 #redgpu_include math.direction.getReflectionVectorFromViewDirection
 #redgpu_include math.tnb.getTBNFromVertexTangent
@@ -351,7 +352,7 @@ fn main(inputData:InputData) -> OutputFragment {
         roughnessParameter = metallicRoughnessSample.g * roughnessParameter;
     #redgpu_endIf
     roughnessParameter = max(roughnessParameter, 0.045);
-    if (abs(ior - 1.0) < 0.0001) { roughnessParameter = 0.0; }
+    if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
 
     // [KO] 클리어코트 처리 [EN] Clearcoat processing
     var clearcoatParameter = u_KHR_clearcoatFactor;
@@ -639,10 +640,10 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_if useKHR_materials_transmission
             var refractedDir: vec3<f32>;
             let eta = 1.0 / ior;
-            if (abs(ior - 1.0) < 0.0001) { refractedDir = V; }
+            if (abs(ior - 1.0) < EPSILON) { refractedDir = V; }
             else { refractedDir = refract(-V, -N, eta); }
 
-            if(length(refractedDir) > 0.0001) {
+            if(length(refractedDir) > EPSILON) {
                 let NdotT = abs(dot(N, normalize(refractedDir)));
                 let F_transmission = vec3<f32>(1.0) - mix(F_IBL_dielectric,F_IBL_metal,metallicParameter);
 
@@ -651,8 +652,8 @@ fn main(inputData:InputData) -> OutputFragment {
                      let localNodeScale = inputData.localNodeScale_volumeScale[0];
                      let volumeScale = inputData.localNodeScale_volumeScale[1];
                      let scaledThickness = thicknessParameter * localNodeScale ;
-                     let safeAttenuationColor = clamp(u_KHR_attenuationColor, vec3<f32>(0.0001), vec3<f32>(1.0));
-                     let safeAttenuationDistance = max(u_KHR_attenuationDistance, 0.0001);
+                     let safeAttenuationColor = clamp(u_KHR_attenuationColor, vec3<f32>(EPSILON), vec3<f32>(1.0));
+                     let safeAttenuationDistance = max(u_KHR_attenuationDistance, EPSILON);
                      let attenuationCoefficient = -log(safeAttenuationColor) / safeAttenuationDistance;
                      let cosTheta = max(NdotT, 0.001);
                      let pathLength = scaledThickness / cosTheta;

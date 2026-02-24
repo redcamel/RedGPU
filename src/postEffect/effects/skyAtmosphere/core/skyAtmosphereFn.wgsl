@@ -3,6 +3,7 @@
 #redgpu_include math.HPI
 #redgpu_include math.INV_PI
 #redgpu_include math.DEG_TO_RAD
+#redgpu_include math.EPSILON
 const MAX_TAU: f32 = 50.0;
 
 // [KO] 대기 산란 시스템 통합 파라미터 구조체 (16바이트 정렬 완료)
@@ -47,10 +48,10 @@ fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere
     let t0 = -b - s;
     let t1 = -b + s;
     
-    // [KO] epsilon을 1e-4로 조정하여 정밀도 문제로 인한 자기 교차 방지
-    // [EN] Adjust epsilon to 1e-4 to prevent self-intersection due to precision issues
-    if (t0 > 1e-4) { return t0; }
-    if (t1 > 1e-4) { return t1; }
+    // [KO] epsilon을 EPSILON로 조정하여 정밀도 문제로 인한 자기 교차 방지
+    // [EN] Adjust epsilon to EPSILON to prevent self-intersection due to precision issues
+    if (t0 > EPSILON) { return t0; }
+    if (t1 > EPSILON) { return t1; }
     return -1.0;
 }
 
@@ -101,7 +102,7 @@ fn phase_rayleigh(cos_theta: f32) -> f32 {
 
 fn phase_mie(cos_theta: f32, g: f32) -> f32 {
     let g2 = g * g;
-    return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(0.001, 1.0 + g2 - 2.0 * g * cos_theta), 1.5));
+    return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cos_theta), 1.5));
 }
 
 // [KO] 높이 안개 투과율
@@ -111,7 +112,7 @@ fn get_height_fog_transmittance(cam_h: f32, ray_dir_y: f32, dist: f32, density: 
     let k = falloff;
     let y = ray_dir_y;
     var exponent: f32;
-    if (abs(y) < 0.0001) {
+    if (abs(y) < EPSILON) {
         exponent = density * exp(-k * h) * dist;
     } else {
         exponent = (density * exp(-k * h)) / (k * y) * (1.0 - exp(-k * y * dist));

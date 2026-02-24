@@ -1,3 +1,4 @@
+#redgpu_include math.EPSILON
 #redgpu_include math.direction.getReflectionVectorFromViewDirection
 #redgpu_include KHR.KHR_materials_sheen.getSheenCharlieDFG
 #redgpu_include KHR.KHR_materials_sheen.getSheenCharlieE
@@ -32,7 +33,7 @@ fn getSheenIBL(
     irradianceTexture: texture_cube<f32>,
     textureSampler: sampler
 ) -> SheenIBLResult {
-    let NdotV = clamp(dot(N, V), 0.0001, 1.0);
+    let NdotV = clamp(dot(N, V), EPSILON, 1.0);
     let R = getReflectionVectorFromViewDirection(V, N);
 
     let mipLevel = sheenRoughness * iblMipmapCount;

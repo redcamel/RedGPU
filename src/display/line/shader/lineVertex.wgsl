@@ -27,8 +27,6 @@ struct OutputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-#redgpu_include systemStruct.OutputShadowData;
-
 @vertex
 fn main(inputData: InputData) -> OutputData {
     var output: OutputData;
