@@ -7,7 +7,7 @@ let filmGrainResponse_value: f32 = uniforms.filmGrainResponse;
 let filmGrainScale_value: f32 = uniforms.filmGrainScale;
 let coloredGrain_value: f32 = uniforms.coloredGrain;
 let grainSaturation_value: f32 = uniforms.grainSaturation;
-let time_value: f32 = uniforms.time;
+let frameIndex_value: u32 = systemUniforms.time.frameIndex;
 
 if (filmGrainIntensity_value <= 0.0) {
     textureStore(outputTexture, index, originalColor);
@@ -19,7 +19,7 @@ let baseScale = max(filmGrainScale_value, 0.1);
 let grainCoord = floor(vec2<f32>(global_id.xy) / baseScale);
 
 // 2. 시네마틱 입자 생성 ( -1.0 ~ 1.0 범위)
-var grain = getFilmicGrain(grainCoord, time_value, coloredGrain_value);
+var grain = getFilmicGrain(grainCoord, frameIndex_value, coloredGrain_value);
 
 // 3. 입자 채도 제어
 let grainLum = getLuminance(grain);

@@ -32,7 +32,6 @@ class FilmGrain extends ASinglePassPostEffect {
     #filmGrainScale: number = VINTAGE.filmGrainScale;
     #coloredGrain: number = VINTAGE.coloredGrain;
     #grainSaturation: number = VINTAGE.grainSaturation;
-    #time: number = 0.0;
     #devicePixelRatio: number = 1.0;
 
     constructor(redGPUContext: RedGPUContext) {
@@ -70,19 +69,12 @@ class FilmGrain extends ASinglePassPostEffect {
         this.#updateUniforms();
     }
 
-    update(deltaTime: number): void {
-        this.#time += deltaTime;
-        if (this.#time > 1000.0) this.#time -= 1000.0;
-        this.updateUniform('time', this.#time);
-    }
-
     #updateUniforms(): void {
         this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
         this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
         this.updateUniform('filmGrainScale', this.#filmGrainScale);
         this.updateUniform('coloredGrain', this.#coloredGrain);
         this.updateUniform('grainSaturation', this.#grainSaturation);
-        this.updateUniform('time', this.#time);
         this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
     }
 }
