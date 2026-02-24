@@ -92,12 +92,12 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         }
     }
 
-    var offset = atomicAdd(&clusterLightGroup.offset, clusterLightCount);
+    var offset = atomicAdd(&clusterLightGrid.offset, clusterLightCount);
 
     for(var i = 0u; i < clusterLightCount; i = i + 1u) {
-        clusterLightGroup.indices[offset + i] = clusterLightIndices[i];
+        clusterLightGrid.indices[offset + i] = clusterLightIndices[i];
     }
 
-    clusterLightGroup.lights[tileIndex].offset = offset;
-    clusterLightGroup.lights[tileIndex].count = clusterLightCount;
+    clusterLightGrid.cells[tileIndex].offset = offset;
+    clusterLightGrid.cells[tileIndex].count = clusterLightCount;
 }

@@ -176,11 +176,11 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // PointLight
     let clusterIndex = getClusterLightClusterIndex(inputData.position);
-    let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
-    let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
+    let lightOffset  = clusterLightGrid.cells[clusterIndex].offset;
+    let lightCount:u32   = clusterLightGrid.cells[clusterIndex].count;
 
     for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-         let i = clusterLightGroup.indices[lightOffset + lightIndex];
+         let i = clusterLightGrid.indices[lightOffset + lightIndex];
          let u_clusterLightPosition = clusterLightList.lights[i].position;
          let u_clusterLightColor = clusterLightList.lights[i].color;
          let u_clusterLightIntensity = clusterLightList.lights[i].intensity;

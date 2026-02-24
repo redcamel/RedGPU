@@ -531,11 +531,11 @@ fn main(inputData:InputData) -> OutputFragment {
     // [KO] 직접 조명 계산 - Point/Spot Lights (Clustered) [EN] Direct lighting calculation - Point/Spot Lights (Clustered)
     {
         let clusterIndex = getClusterLightClusterIndex(inputData.position);
-        let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
-        let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
+        let lightOffset  = clusterLightGrid.cells[clusterIndex].offset;
+        let lightCount:u32   = clusterLightGrid.cells[clusterIndex].count;
 
         for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-            let i = clusterLightGroup.indices[lightOffset + lightIndex];
+            let i = clusterLightGrid.indices[lightOffset + lightIndex];
             let targetLight = clusterLightList.lights[i];
             let u_clusterLightPosition = targetLight.position;
             let u_clusterLightRadius = targetLight.radius;

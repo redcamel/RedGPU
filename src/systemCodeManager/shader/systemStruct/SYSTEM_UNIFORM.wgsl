@@ -50,13 +50,22 @@ struct SystemUniform {
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
 const clusterLight_tileCount = vec3<u32>(REDGPU_DEFINE_TILE_COUNT_Xu, REDGPU_DEFINE_TILE_COUNT_Yu, REDGPU_DEFINE_TILE_COUNT_Zu);
 
-struct ClusterLights  {
+/**
+ * [KO] 클러스터 조명 격자의 한 칸(박스) 정보를 나타내는 구조체입니다.
+ * [EN] Structure representing a single cell (box) in the cluster light grid.
+ */
+struct ClusterLightCell {
     offset : u32,
     count : u32
 };
-struct ClusterLightsGroup {
+
+/**
+ * [KO] 클러스터 조명 데이터를 통합 관리하는 격자(Grid) 구조체입니다.
+ * [EN] Grid structure that integrally manages cluster light data.
+ */
+struct ClusterLightGrid {
     offset : atomic<u32>,
-    lights : array<ClusterLights , REDGPU_DEFINE_TOTAL_TILES>,
+    cells : array<ClusterLightCell , REDGPU_DEFINE_TOTAL_TILES>,
     indices : array<u32, clusterLight_indicesLength>
 };
 struct ClusterLight_ClusterCube {
@@ -96,4 +105,4 @@ struct ClusterLightList {
     lights : array<ClusterLight>
 };
 @group(0) @binding(5) var<storage> clusterLightList : ClusterLightList;
-@group(0) @binding(6) var<storage, read_write> clusterLightGroup : ClusterLightsGroup;
+@group(0) @binding(6) var<storage, read_write> clusterLightGrid : ClusterLightGrid;
