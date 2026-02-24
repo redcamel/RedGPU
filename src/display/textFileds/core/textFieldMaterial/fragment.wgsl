@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include calcTintBlendMode;
-#redgpu_include entryPoint.mesh.entryPoint pickingFragment;
+#redgpu_include color.getTintBlendMode;
+#redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.OutputFragment;
 
 /**
@@ -49,7 +49,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // [KO] 틴트 색상 및 블렌딩 모드 적용 [EN] Apply tint color and blend mode
     #redgpu_if useTint
-        finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
 
     // [KO] 알파 값이 0인 픽셀은 렌더링에서 제외 [EN] Discard pixels with zero alpha
