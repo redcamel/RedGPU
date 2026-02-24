@@ -3,7 +3,7 @@ import View3D from "../../display/view/View3D";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
-import ClusterCellBoundsSource from "./ClusterCellBounds.wgsl";
+import ClusterCellBoundsSource from "./ClusterBoundsGrid.wgsl";
 import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";
 import PassClustersLightHelper from "./PassClustersLightHelper";
 

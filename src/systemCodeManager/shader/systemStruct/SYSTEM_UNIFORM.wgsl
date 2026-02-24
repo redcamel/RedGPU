@@ -68,6 +68,19 @@ struct ClusterLightGrid {
     cells : array<ClusterLightCell , REDGPU_DEFINE_TOTAL_TILES>,
     indices : array<u32, clusterLight_indicesLength>
 };
+struct ClusterLight {
+    position : vec3<f32>, radius : f32,
+    color : vec3<f32>,    intensity : f32,
+    isSpotLight:f32,    directionX:f32,    directionY:f32,    directionZ:f32,
+    outerCutoff:f32,    innerCutoff:f32,
+};
+struct ClusterLightList {
+    count:vec4<f32>,
+    lights : array<ClusterLight>
+};
+@group(0) @binding(5) var<storage> clusterLightList : ClusterLightList;
+@group(0) @binding(6) var<storage, read_write> clusterLightGrid : ClusterLightGrid;
+
 fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
     let tile = getClusterLightTile(fragCoord);
     return tile.x +
@@ -85,15 +98,3 @@ fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
                      u32(fragCoord.y / (systemUniforms.resolution.y / f32(clusterLight_tileCount.y))),
                      zTile);
 }
-struct ClusterLight {
-    position : vec3<f32>, radius : f32,
-    color : vec3<f32>,    intensity : f32,
-    isSpotLight:f32,    directionX:f32,    directionY:f32,    directionZ:f32,
-    outerCutoff:f32,    innerCutoff:f32,
-};
-struct ClusterLightList {
-    count:vec4<f32>,
-    lights : array<ClusterLight>
-};
-@group(0) @binding(5) var<storage> clusterLightList : ClusterLightList;
-@group(0) @binding(6) var<storage, read_write> clusterLightGrid : ClusterLightGrid;
