@@ -25,7 +25,7 @@ RedGPU.init(
         view.rawCamera.farClipping = 2000000;
         controller.pan = -90; // [KO] 태양 방향으로 카메라 회전 [EN] Pan camera to sun direction
         controller.tilt = -10;
-        controller.distance = 2000;
+        controller.distance = 1500;
 
         // 이동 제한
         controller.minTilt = -88;
@@ -37,8 +37,8 @@ RedGPU.init(
 
         // 3. 테스트 환경 구성
         const sphereGeo = new RedGPU.Primitive.Sphere(redGPUContext, 10, 32, 32);
-        const sphereMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff');
-        sphereMat.color.setColorByHEX('#ff0000')
+        const sphereColorMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
+        const spherePhongMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
         const FIXED_SCALE = 10;
 
         const GRID_X = 4;
@@ -54,35 +54,48 @@ RedGPU.init(
 
             for (let j = 0; j < GRID_Z; j++) {
 
-                const mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeo, sphereMat);
+                let mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeo, sphereColorMat);
 
 
-                mesh.x = j * STEP_Z;
-
-                mesh.z = (i - (GRID_X - 1) / 2) * STEP_X;
-
-
-                // [KO] 현실적인 대기권 내 고도 설정
-
-                // [EN] Realistic atmospheric altitudes
 
                 let heightValue = 0;
 
-                if (i === 0) heightValue = 100;   // 해수면 (0.1km)
+                if (i === 0) {
+                    // 해수면 (0.1km)
+                    mesh.material = sphereColorMat;
+                    heightValue = 100;
+                    mesh.x = j * STEP_Z;
+                    mesh.z = (i - (GRID_X - 1) / 2) * STEP_X;
+                    mesh.y = heightValue;
+                    mesh.scaleX = mesh.scaleY = mesh.scaleZ = FIXED_SCALE;
+                    scene.addChild(mesh);
 
-                else if (i === 1) heightValue = 500;  // 저고도 (2km)
+                } else if (i === 1) {
+                    heightValue = 500;
+                    const url  = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb'
+                    new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
+                            mesh = result.resultMesh;
+                            mesh.x = j * STEP_Z;
+                            mesh.z = (i - (GRID_X - 1) / 2) * STEP_X;
+                            mesh.y = heightValue;
+                            mesh.scaleX = mesh.scaleY = mesh.scaleZ = 150;
+                            scene.addChild(mesh);
+                        }
+                    );
+                } else if (i === 2) {
+                    mesh.material = spherePhongMat;
 
-                else if (i === 2) heightValue = 1000;  // 중고도 (5km)
+                    mesh.x = j * STEP_Z;
+                    mesh.z = (i - (GRID_X - 1) / 2) * STEP_X;
+                    mesh.y = heightValue;
+                    mesh.scaleX = mesh.scaleY = mesh.scaleZ = FIXED_SCALE;
+                    scene.addChild(mesh);
+                    heightValue = 1000;
+
+                }
 
                 else if (i === 3) heightValue = 2000; // 고고도 (10km)
 
-
-                mesh.y = heightValue;
-
-                mesh.scaleX = mesh.scaleY = mesh.scaleZ = FIXED_SCALE;
-
-
-                scene.addChild(mesh);
 
             }
 

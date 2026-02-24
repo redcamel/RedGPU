@@ -5,7 +5,7 @@
 #redgpu_include color.getTintBlendMode
 #redgpu_include systemStruct.OutputFragment
 #redgpu_include math.getMotionVector
-#redgpu_include lighting.getAerialPerspective
+#redgpu_include skyAtmosphere.getAerialPerspective
 
 struct Uniforms {
     color:vec3<f32>,

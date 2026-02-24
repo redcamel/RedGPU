@@ -151,6 +151,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#updateSunDirection();
     }
 
+    /** [KO] 태양 방향 벡터 [EN] Sun direction vector */
+    get sunDirection(): Float32Array {
+        return this.#params.sunDirection;
+    }
+
     /** [KO] 노출 (Exposure) [EN] Exposure */
     get exposure(): number {
         return this.#params.exposure;

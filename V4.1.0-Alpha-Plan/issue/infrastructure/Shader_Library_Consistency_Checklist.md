@@ -124,6 +124,20 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - **출력 구조체**: 모든 정점 셰이더의 출력을 `VertexOutput`으로 통일.
     - **호환성 확보**: 시스템 엔트리 포인트(`mesh`, `billboard`, `empty` 등)와 디스플레이 객체 간의 타입 불일치를 해결하여 공통 라이브러리 활용도 극대화.
 
+### 18. 공중 투시 시스템 통합 (Aerial Perspective Integration)
+*   **대상**: `lighting.getAerialPerspective`
+*   **결과**: ✅ 완료.
+    - **모듈화**: `ColorMaterial` 내에 파편화되어 있던 공중 투시 로직을 시스템 공통 라이브러리(`lighting`)로 이주 완료.
+    - **범용성**: `getAerialPerspective(color, worldPos)` 인터페이스를 통해 모든 재질에서 단 한 줄로 대기 산란 효과를 적용할 수 있도록 구현.
+    - **물리적 정합성**: `SkyAtmosphere` 시스템의 태양 강도, 노출, LUT 데이터를 활용하여 하늘 배경과 오브젝트 간의 물리적 밝기 동기화 확인.
+
+### 19. 레거시 별칭 제거 및 네임스페이스 단일화 (Legacy Alias Cleanup)
+*   **대상**: `SystemCodeManager.ts` 및 전역 `.wgsl` 인클루드
+*   **결과**: ✅ 완료.
+    - **별칭 삭제**: `calcTintBlendMode`, `getBillboardMatrix` 등 `SystemCodeManager` 하단에 존재하던 중복 별칭들을 전량 제거.
+    - **경로 정규화**: 모든 셰이더 코드(`textField`, `sprite`, `particle`, `mesh`) 내의 `#redgpu_include` 경로를 `math.billboard`, `systemStruct` 등 표준 네임스페이스 기반으로 전수 교체 완료.
+    - **유지보수성**: 코드베이스 내의 셰이더 참조 경로를 일원화하여 향후 라이브러리 변경 시 영향 범위를 최소화함.
+
 ---
 
 ## 🚀 향후 파편화 제거 대상 (Normalization Roadmap)
@@ -149,4 +163,4 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
 - **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화, 명명 규칙(CamelCase) 정규화 완료.
 - **2026-02-23**: 디스플레이스먼트 라이브러리 리팩토링 및 좌표계 보정 로직 반영. 모든 레거시 인덱스 파일(`SystemCode`, `SystemVertexCode`) 삭제 및 `SystemCodeManager` 기반 전면 일원화. 엔진 전반의 TypeScript 직접 임포트 정규화 및 시스템 유니폼 파일 구조 정규화 작업 완료. 조명 구조체(`DirectionalLight`, `AmbientLight`), 투영 행렬 구조체(`Projection`), 시간 구조체(`Time`) 파일 분리 및 모듈화 완료. `SYSTEM_UNIFORM` 및 `POST_EFFECT_SYSTEM_UNIFORM` 내 구조체 통합과 `SystemUniformUpdater`를 통한 업데이트 로직 단일화 완료. 특히 `RenderViewStateData`로 시간 계산 로직을 중앙화하여 렌더링 경로 간 데이터 정합성 확보. 쉐이더 코드 내 투영 행렬 접근 경로(`projection.XXXX`) 일괄 갱신 완료.
-- **2026-02-24**: 클러스터 라이팅 시스템 대규모 리팩토링 완료. `ClusterLightManager` 도입을 통한 `View3D` 비대함 해결 및 캡슐화 강화. `ClusterLightCell`, `ClusterLightGrid`, `ClusterCellBounds`, `ClusterBoundsGrid`로 명칭 체계 정규화 및 모듈화된 폴더 구조(`core`, `pass/bound`, `pass/light`) 확립. 해상도 기반 Dirty Checking 최적화 및 WGSL 인코딩 손상 파일 전수 복구 완료. 셰이더 수학 상수 통합 및 정점 셰이더 I/O 명칭 정규화(`InputData`/`VertexOutput`)를 통해 엔진 전역의 인터페이스 일관성 확보.
+- **2026-02-24**: 클러스터 라이팅 시스템 대규모 리팩토링 완료. `ClusterLightManager` 도입을 통한 `View3D` 비대함 해결 및 캡슐화 강화. `ClusterLightCell`, `ClusterLightGrid`, `ClusterCellBounds`, `ClusterBoundsGrid`로 명칭 체계 정규화 및 모듈화된 폴더 구조(`core`, `pass/bound`, `pass/light`) 확립. 해상도 기반 Dirty Checking 최적화 및 WGSL 인코딩 손상 파일 전수 복구 완료. 셰이더 수학 상수 통합 및 정점 셰이더 I/O 명칭 정규화(`InputData`/`VertexOutput`)를 통해 엔진 전역의 인터페이스 일관성 확보. 공중 투시(Aerial Perspective) 모듈화 및 `SystemCodeManager` 내 레거시 별칭 제거를 통한 네임스페이스 기반 경로 단일화 완료.

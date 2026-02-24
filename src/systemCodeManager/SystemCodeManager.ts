@@ -64,7 +64,8 @@ import getAnisotropicNDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAni
 import getAnisotropicVisibility_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicVisibility.wgsl';
 import getAnisotropicSpecularBRDF_wgsl from './shader/KHR/KHR_materials_anisotropy/getAnisotropicSpecularBRDF.wgsl';
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
-import getAerialPerspective_wgsl from './shader/lighting/getAerialPerspective.wgsl';
+import getAerialPerspective_wgsl from './shader/lighting/skyAtmosphere/getAerialPerspective.wgsl';
+import getAtmosphereSunLight_wgsl from './shader/lighting/skyAtmosphere/getAtmosphereSunLight.wgsl';
 import meshEntryPointPickingVertex_wgsl from './shader/entryPoint/mesh/entryPointPickingVertex.wgsl';
 import meshEntryPointPickingFragment_wgsl from './shader/entryPoint/mesh/entryPointPickingFragment.wgsl';
 import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPointShadowVertex.wgsl';
@@ -236,7 +237,15 @@ export namespace LightingLibrary {
     export const getFresnelMix = fresnelMix_wgsl;
     export const getFresnelCoat = fresnelCoat_wgsl;
     export const getTransmissionRefraction = getTransmissionRefraction_wgsl;
+}
+
+/**
+ * [KO] 대기 산란(SkyAtmosphere) 관련 셰이더 함수 라이브러리
+ * [EN] SkyAtmosphere related shader function library
+ */
+export namespace SkyAtmosphereLibrary {
     export const getAerialPerspective = getAerialPerspective_wgsl;
+    export const getAtmosphereSunLight = getAtmosphereSunLight_wgsl;
 }
 
 /**
@@ -300,6 +309,8 @@ export namespace SystemCodeManager {
     export import depth = DepthLibrary;
     /** [KO] 조명 및 BRDF 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for lighting and BRDF. */
     export import lighting = LightingLibrary;
+    /** [KO] 대기 산란 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for SkyAtmosphere. */
+    export import skyAtmosphere = SkyAtmosphereLibrary;
     /** [KO] 엔트리 포인트 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for entry points. */
     export import entryPoint = EntryPointLibrary;
     /** [KO] 시스템 공통 구조체 라이브러리입니다. [EN] Common shader structure library for system. */

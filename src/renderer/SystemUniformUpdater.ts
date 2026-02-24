@@ -151,6 +151,10 @@ class SystemUniformUpdater {
                 {
                     key: 'skyAtmosphereExposure',
                     value: skyAtmosphere ? skyAtmosphere.exposure : 1,
+                },
+                {
+                    key: 'skyAtmosphereSunDirection',
+                    value: skyAtmosphere ? skyAtmosphere.sunDirection : new Float32Array([0, 0, 0]),
                 }
             ]
         )

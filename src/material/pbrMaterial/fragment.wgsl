@@ -32,6 +32,8 @@
 #redgpu_include lighting.getDiffuseBTDF
 #redgpu_include lighting.getFresnelMix
 #redgpu_include lighting.getFresnelCoat
+#redgpu_include skyAtmosphere.getAerialPerspective
+#redgpu_include skyAtmosphere.getAtmosphereSunLight
 
 /**
  * [KO] PBR 재질을 위한 유니폼 구조체입니다. 다양한 KHR 확장을 지원합니다.
@@ -529,6 +531,12 @@ fn main(inputData:InputData) -> OutputFragment {
         totalDirectLighting += calcLight(u_directionalLights[i].color, u_directionalLights[i].intensity * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
     }
 
+    // [Atmosphere Sun Light]
+    let atmoSun = getAtmosphereSunLight();
+    if (atmoSun.visible == 1u) {
+        totalDirectLighting += calcLight(atmoSun.color, atmoSun.intensity, N, V, atmoSun.direction, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+    }
+
     // [KO] 직접 조명 계산 - Point/Spot Lights (Clustered) [EN] Direct lighting calculation - Point/Spot Lights (Clustered)
     {
         let clusterIndex = getClusterLightClusterIndex(inputData.position);
@@ -721,6 +729,9 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useCutOff
         if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
+
+    // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
+    finalColor = getAerialPerspective(finalColor, input_vertexPosition);
 
     output.color = finalColor;
 

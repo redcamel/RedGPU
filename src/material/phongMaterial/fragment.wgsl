@@ -8,6 +8,8 @@
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;
+#redgpu_include skyAtmosphere.getAerialPerspective
+#redgpu_include skyAtmosphere.getAtmosphereSunLight
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -174,6 +176,17 @@ fn main(inputData:InputData) -> OutputFragment {
 
     }
 
+    // [Atmosphere Sun Light]
+    let atmoSun = getAtmosphereSunLight();
+    if (atmoSun.visible == 1u) {
+        let L = atmoSun.direction;
+        let R = reflect(-L, N);
+        let lambertTerm = max(dot(N, L), 0.0);
+        let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue * step(0.0, lambertTerm);
+        let lightContribution = atmoSun.color * atmoSun.intensity;
+        mixColor += (diffuseColor * lightContribution * lambertTerm) + (u_specularColor * u_specularStrength * lightContribution * specular);
+    }
+
     // PointLight
     let clusterIndex = getClusterLightClusterIndex(inputData.position);
     let lightOffset  = clusterLightGrid.cells[clusterIndex].offset;
@@ -254,6 +267,8 @@ fn main(inputData:InputData) -> OutputFragment {
     if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;
     }
+    // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
+    finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
     output.color = finalColor;
 
     {
