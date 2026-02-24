@@ -6,4 +6,5 @@
 import PassClusterLightBound from "./pass/bound/PassClusterLightBound";
 import PassClustersLight from "./pass/light/PassClustersLight";
 import PassClustersLightHelper from "./core/PassClustersLightHelper";
-export { PassClustersLightHelper, PassClusterLightBound, PassClustersLight };
+import ClusterLightManager from "./ClusterLightManager";
+export { PassClustersLightHelper, PassClusterLightBound, PassClustersLight, ClusterLightManager };

@@ -4,11 +4,6 @@ import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_COMPARE_FUNCTION from "../../gpuConst/GPU_COMPARE_FUNCTION";
-import {
-    PassClusterLightBound,
-    PassClustersLight,
-    PassClustersLightHelper
-} from "../../light/clusterLight";
 import DirectionalLight from "../../light/lights/DirectionalLight";
 import PostEffectManager from "../../postEffect/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -19,8 +14,6 @@ import CubeTexture from "../../resources/texture/CubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
-import DrawDebuggerPointLight from "../drawDebugger/light/DrawDebuggerPointLight";
-import DrawDebuggerSpotLight from "../drawDebugger/light/DrawDebuggerSpotLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
 import SkyAtmosphere from "../../postEffect/effects/skyAtmosphere/SkyAtmosphere";
@@ -31,6 +24,7 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import IBLCubeTexture from "../../resources/texture/ibl/core/IBLCubeTexture";
 import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/updateSystemUniformData";
+import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
 
 const SHADER_INFO = parseWGSL(SystemCodeManager.SYSTEM_UNIFORM, 'VIEW3D_SYSTEM_UNIFORM')
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -133,36 +127,9 @@ class View3D extends AView {
      * [EN] Compressed GPU sampler for tiled texture sampling
      */
     #basicPackedSampler: GPUSampler
-    /**
-     * [KO] 클러스터 라이트 데이터를 저장하는 GPU 버퍼
-     * [EN] GPU buffer for storing cluster light data
-     */
-    #clusterLightsBuffer: GPUBuffer
-    /**
-     * [KO] 클러스터 라이트 데이터를 담은 Float32Array
-     * [EN] Float32Array containing cluster light data
-     */
-    #clusterLightsBufferData: Float32Array
-    /**
-     * [KO] 클러스터 라이트 처리 패스
-     * [EN] Cluster light processing pass
-     */
-    #passLightClusters: PassClustersLight
-    /**
-     * [KO] 클러스터 라이트 경계 계산 패스
-     * [EN] Cluster light boundary calculation pass
-     */
-    #passLightClustersBound: PassClusterLightBound
-    /**
-     * [KO] 더티 체킹용 이전 프레임 너비
-     * [EN] Previous frame width for dirty checking
-     */
-    #prevWidth: number = undefined
-    /**
-     * [KO] 더티 체킹용 이전 프레임 높이
-     * [EN] Previous frame height for dirty checking
-     */
-    #prevHeight: number = undefined
+
+
+
     /**
      * [KO] 리소스 관리를 위한 이전 프레임의 IBL 텍스처
      * [EN] Previous frame IBL texture for resource management
@@ -177,7 +144,12 @@ class View3D extends AView {
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
     #noneJitterProjectionViewMatrix: mat4 = mat4.create()
+    #clusterLightManager: ClusterLightManager
 
+
+    get clusterLightManager(): ClusterLightManager {
+        return this.#clusterLightManager;
+    }
 
     /**
      * [KO] View3D 인스턴스를 생성합니다.
@@ -205,6 +177,7 @@ class View3D extends AView {
         this.#renderViewStateData = new RenderViewStateData(this)
         this.#postEffectManager = new PostEffectManager(this)
         this.#toneMappingManager = new ToneMappingManager(this)
+        this.#clusterLightManager = new ClusterLightManager(this)
         // keepLog(this.systemUniform_Vertex_StructInfo)
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)
@@ -243,13 +216,7 @@ class View3D extends AView {
         return this.#systemUniform_Vertex_UniformBuffer;
     }
 
-    /**
-     * [KO] 클러스터 라이트 경계 패스를 반환합니다.
-     * [EN] Returns the cluster light boundary pass.
-     */
-    get passLightClustersBound(): PassClusterLightBound {
-        return this.#passLightClustersBound;
-    }
+
 
     /**
      * [KO] IBL(이미지 기반 조명) 설정을 반환합니다.
@@ -392,7 +359,7 @@ class View3D extends AView {
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
                     prevInfo.shadowDepthTextureView !== shadowDepthTextureView
-                    || !this.#passLightClusters
+                    || !this.#clusterLightManager.passClustersLight
                 )
             }
             if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView)
@@ -407,7 +374,7 @@ class View3D extends AView {
             }
             // keepLog(this.#prevInfoList)
         }
-        this.#updateClusters(calcPointLightCluster);
+        this.#clusterLightManager.updateClusterLights(calcPointLightCluster);
 
         this.#updateSystemUniform();
     }
@@ -515,7 +482,7 @@ class View3D extends AView {
      * @private
      */
     #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
-        this.#updateClusters(true)
+        this.#clusterLightManager.updateClusterLights(true)
         const ibl_prefilterTexture = ibl?.prefilterTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture
         const {redGPUContext} = this
@@ -547,17 +514,17 @@ class View3D extends AView {
                 {
                     binding: 5,
                     resource: {
-                        buffer: this.#clusterLightsBuffer,
+                        buffer: this.#clusterLightManager.clusterLightsBuffer,
                         offset: 0,
-                        size: this.#clusterLightsBuffer.size
+                        size: this.#clusterLightManager.clusterLightsBuffer.size
                     }
                 },
                 {
                     binding: 6,
                     resource: {
-                        buffer: this.#passLightClusters.clusterLightsBuffer,
+                        buffer: this.#clusterLightManager.passClustersLight.clusterLightsBuffer,
                         offset: 0,
-                        size: this.#passLightClusters.clusterLightsBuffer.size
+                        size: this.#clusterLightManager.passClustersLight.clusterLightsBuffer.size
                     }
                 },
                 {
@@ -661,16 +628,7 @@ class View3D extends AView {
             'SYSTEM_UNIFORM_BUFFER_VERTEX',
             'SYSTEM_UNIFORM_BUFFER_VERTEX',
         );
-        //
-        this.#clusterLightsBufferData = new Float32Array((16 * PassClustersLightHelper.MAX_CLUSTER_LIGHTS) + 4)
-        this.#clusterLightsBuffer = this.redGPUContext.resourceManager.createGPUBuffer(`VIEW_CLUSTER_LIGHTS_BUFFER`,
-            {
-                size: this.#clusterLightsBufferData.byteLength,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
-            }
-        )
-        this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource)
-        //
+       //
         this.#shadowDepthSampler = new Sampler(this.redGPUContext, {
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
             addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
@@ -684,83 +642,7 @@ class View3D extends AView {
         }).gpuSampler
     }
 
-    /**
-     * 클러스터 라이트를 업데이트합니다.
-     * 포인트 라이트와 스팟 라이트 데이터를 계산하고 GPU 버퍼에 업로드합니다.
-     *
-     * @param calcClusterLight - 클러스터 라이트 계산 여부 (기본값: false)
-     * @private
-     */
-    #updateClusters(calcClusterLight: boolean = false) {
-        if (!calcClusterLight) return
-        const {redGPUContext, scene, renderViewStateData} = this
-        // const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== this.pixelRectArray[2] || this.#prevHeight !== this.pixelRectArray[3]
-        const dirtyPixelSize = true;
-        if (!this.#passLightClustersBound) {
-            this.#passLightClustersBound = new PassClusterLightBound(redGPUContext, this)
-        }
-        if (this.#passLightClusters && dirtyPixelSize) {
-            // console.log('passLightClustersBound 재계산')
-            this.#passLightClustersBound.render()
-            this.#prevWidth = this.pixelRectArray[2]
-            this.#prevHeight = this.pixelRectArray[3]
-        }
-        if (!this.#passLightClusters) {
-            this.#passLightClusters = new PassClustersLight(redGPUContext, this)
-        }
-        if (scene) {
-            const {pointLights, spotLights} = scene.lightManager
-            const pointLightNum = pointLights.length
-            const spotLightNum = spotLights.length
-            if (pointLightNum) {
-                let i = pointLightNum
-                // console.log('실행이되긴하하나2')
-                while (i--) {
-                    const tLight = pointLights[i]
-                    const stride = 16
-                    const offset = 4 + stride * i
-                    this.#clusterLightsBufferData.set(
-                        [
-                            ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormalLinear, tLight.intensity, 0
-                        ],
-                        offset,
-                    )
-                    if (tLight.enableDebugger) {
-                        if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerPointLight(redGPUContext, tLight)
-                        tLight.drawDebugger.render(renderViewStateData)
-                    }
-                }
-            }
-            if (spotLightNum) {
-                const stride = 16
-                const prevOffset = pointLightNum * stride
-                let i = spotLightNum
-                // console.log('실행이되긴하하나2')
-                while (i--) {
-                    const tLight = spotLights[i]
-                    const offset = 4 + stride * i + prevOffset;
-                    this.#clusterLightsBufferData.set(
-                        [
-                            ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormalLinear, tLight.intensity, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
-                        ],
-                        offset,
-                    )
-                    if (tLight.enableDebugger) {
-                        if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerSpotLight(redGPUContext, tLight)
-                        tLight.drawDebugger.render(renderViewStateData)
-                    }
-                }
-            }
-            this.#clusterLightsBufferData.set(
-                [pointLightNum, spotLightNum, 0, 0],
-                0,
-            )
-            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource);
-            this.#passLightClusters.render()
-        }
-    }
+
 }
 
 Object.freeze(View3D)

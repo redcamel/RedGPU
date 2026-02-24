@@ -99,7 +99,7 @@ class PassClustersLight {
                 {
                     binding: 0,
                     resource: {
-                        buffer: this.#view.passLightClustersBound.clusterBoundBuffer
+                        buffer: this.#view.clusterLightManager.passClusterLightBound.clusterBoundBuffer
                     }
                 }
             ]
