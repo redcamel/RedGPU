@@ -45,6 +45,16 @@
 | 6 | **inverseProjectionViewMatrix** | `mat4x4<f32>` | Clip to World 변환 행렬 ($(P \times V)^{-1}$) |
 | 7 | **prevNoneJitterProjectionViewMatrix** | `mat4x4<f32>` | 이전 프레임의 지터 없는 월드-클립 변환 행렬 |
 
+### 2.3 Time 구조체
+동적 애니메이션 및 시간적 효과를 위한 데이터 그룹입니다. 셰이더 내 중복 연산을 줄이고 시간적 안정성을 확보하기 위해 아래 4가지 필드를 표준으로 정의합니다.
+
+| 순서 | 필드명 | 타입 | 설명 | 기술적 근거 (Rationale) |
+| :-- | :--- | :--- | :--- | :--- |
+| 1 | **time** | `f32` | 누적 절대 시간 (Sec) | 텍스처 애니메이션, 파동 등 시각 효과의 기초 데이터 |
+| 2 | **deltaTime** | `f32` | 프레임 간 경과 시간 (Sec) | 프레임 독립적인 물리 연산(파티클 등) 및 속도 기반 효과 |
+| 3 | **frameIndex** | `u32` | 누적 프레임 카운트 | TAA 지터 시퀀스 제어, 블루 노이즈 패턴 변경 등 Temporal 효과 필수 |
+| 4 | **sinTime** | `f32` | `sin(time)` 미리 계산값 | 수천 개의 객체가 개별적으로 `sin()`을 연산하는 비용 절감 (성능 최적화) |
+
 ---
 
 ## 📝 그림자 구조체 사양 (Shadow Struct Specification - Final)
@@ -139,7 +149,18 @@ struct Projection {
 };
 ```
 
-### 2.5 조명 구조체 (Light Structs)
+### 2.5 Time 구조체
+- **파일 위치**: `src/systemCodeManager/shader/systemStruct/Time.wgsl` (신설 예정)
+```wgsl
+struct Time {
+    time: f32,
+    deltaTime: f32,
+    frameIndex: u32,
+    sinTime: f32
+};
+```
+
+### 2.6 조명 구조체 (Light Structs)
 - **파일 위치**: `src/systemCodeManager/shader/systemStruct/DirectionalLight.wgsl` 및 `AmbientLight.wgsl`
 
 ```wgsl
@@ -148,25 +169,22 @@ struct Projection {
 #redgpu_include systemStruct.AmbientLight
 #redgpu_include systemStruct.Camera
 #redgpu_include systemStruct.Projection
+#redgpu_include systemStruct.Time
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
 
 struct SystemUniform {
 	  projection: Projection,
+	  time: Time,
 	  resolution:vec2<f32>,
       camera:Camera,
-	  time:f32,
 	  usePrefilterTexture:u32,
 	  isView3D:u32,
 	  skyAtmosphere:SkyAtmosphere,
 	  shadow:Shadow,
-      directionalLightCount:u32,
-      directionalLightProjectionViewMatrix:mat4x4<f32>,
-      directionalLightProjectionMatrix:mat4x4<f32>,
-      directionalLightViewMatrix:mat4x4<f32>,
-      directionalLights:array<DirectionalLight,3>,
-	  ambientLight:AmbientLight,
+      // ... (Lights)
 };
+```
 
 // POST_EFFECT_SYSTEM_UNIFORM.wgsl
 #redgpu_include systemStruct.Camera

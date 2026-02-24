@@ -435,6 +435,12 @@ class View3D extends AView {
             SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members.skyAtmosphere.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateDirectionalLights(lightManager.directionalLights, members.directionalLights.memberList, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateAmbientLight(lightManager.ambientLight, members.ambientLight.members, this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateTime(
+                this.renderViewStateData,
+                members.time.members,
+                this.#uniformDataF32,
+                this.#uniformDataU32
+            )
             SystemUniformUpdater.updateProjection(
                 {
                     projectionMatrix,
@@ -459,10 +465,6 @@ class View3D extends AView {
                 {
                     key: 'usePrefilterTexture',
                     value: this.ibl?.prefilterTexture?.gpuTexture ? 1 : 0,
-                },
-                {
-                    key: 'time',
-                    value: this.renderViewStateData.timestamp || 0,
                 },
                 {
                     key: 'isView3D',

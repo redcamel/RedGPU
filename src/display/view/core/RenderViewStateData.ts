@@ -34,68 +34,83 @@ interface ViewportSize {
  * @category Core
  */
 class RenderViewStateData {
-    /** 이 뷰에 대해 거리 컬링이 활성화되어 있는지 여부 */
+    /** [KO] 이 뷰에 대해 거리 컬링이 활성화되어 있는지 여부 [EN] Whether distance culling is enabled for this view */
     useDistanceCulling: boolean;
-    /** 컬링 계산에 사용되는 거리의 제곱 값 */
+    /** [KO] 컬링 계산에 사용되는 거리의 제곱 값 [EN] Squared distance value used for culling calculations */
     cullingDistanceSquared: number;
-    /** 객체를 컬링하기 위한 거리 임계값 */
+    /** [KO] 객체를 컬링하기 위한 거리 임계값 [EN] Distance threshold for culling objects */
     distanceCulling: number;
-    /** 현재 프레임에서 렌더링된 3D 그룹의 수 */
+
+    /** [KO] 현재 프레임에서 렌더링된 3D 그룹의 수 [EN] Number of 3D groups rendered in the current frame */
     num3DGroups: number;
-    /** 현재 프레임에서 렌더링된 3D 객체의 수 */
+    /** [KO] 현재 프레임에서 렌더링된 3D 객체의 수 [EN] Number of 3D objects rendered in the current frame */
     num3DObjects: number;
-    /** 현재 프레임에서 발행된 드로우 콜의 수 */
+    /** [KO] 현재 프레임에서 발행된 드로우 콜의 수 [EN] Number of draw calls issued in the current frame */
     numDrawCalls: number;
-    /** 업데이트가 필요했던 더티 파이프라인의 수 */
+    /** [KO] 업데이트가 필요했던 더티 파이프라인의 수 [EN] Number of dirty pipelines that needed updating */
     numDirtyPipelines: number;
-    /** 렌더링된 총 인스턴스 수 */
+    /** [KO] 렌더링된 총 인스턴스 수 [EN] Total number of instances rendered */
     numInstances: number;
-    /** 렌더링된 총 삼각형 수 */
+    /** [KO] 렌더링된 총 삼각형 수 [EN] Total number of triangles rendered */
     numTriangles: number;
-    /** 렌더링된 총 포인트 수 */
+    /** [KO] 렌더링된 총 포인트 수 [EN] Total number of points rendered */
     numPoints: number;
-    /** 뷰 렌더링에 소요된 시간 (밀리초) */
+
+    // Time related
+    /** [KO] 렌더링 시작을 표시하는 성능 타임스탬프 (ms) [EN] Performance timestamp marking the start of rendering (ms) */
+    startTime: number;
+    /** [KO] 렌더링 프레임의 현재 타임스탬프 (ms) [EN] Current timestamp of the rendering frame (ms) */
+    timestamp: number;
+    /** [KO] 이전 프레임의 타임스탬프 (ms) [EN] Timestamp of the previous frame (ms) */
+    prevTimestamp: number = 0;
+    /** [KO] 뷰 렌더링에 소요된 시간 (밀리초) [EN] Time taken for view rendering (ms) */
     viewRenderTime: number;
-    /** 현재 뷰포트 크기 및 위치 정보 */
+    /** [KO] 현재 프레임 인덱스 (누적 렌더링 횟수) [EN] Current frame index (accumulated rendering count) */
+    frameIndex: number = 0;
+    /** [KO] 현재 프레임의 절대 시간 (초) [EN] Absolute time of the current frame (seconds) */
+    time: number = 0;
+    /** [KO] 프레임 간 경과 시간 (초) [EN] Elapsed time between frames (seconds) */
+    deltaTime: number = 0;
+    /** [KO] sin(time)의 계산된 값 [EN] Calculated value of sin(time) */
+    sinTime: number = 0;
+
+    /** [KO] 현재 뷰포트 크기 및 위치 정보 [EN] Current viewport size and position information */
     viewportSize: ViewportSize;
     viewIndex: number;
     swapBufferIndex: number = 1;
-    /** 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) */
+    /** [KO] 렌더 텍스처가 사용하는 비디오 메모리 양 (바이트) [EN] Amount of video memory used by render textures (bytes) */
     usedVideoMemory: number;
-    /** 현재 사용 중인 GPU 렌더 패스 인코더 */
+    /** [KO] 현재 사용 중인 GPU 렌더 패스 인코더 [EN] Current GPU render pass encoder in use */
     currentRenderPassEncoder: GPURenderPassEncoder;
 
-    /** 컬링을 위한 프러스텀 평면 배열, 프러스텀 컬링이 비활성화된 경우 null */
+    /** [KO] 컬링을 위한 프러스텀 평면 배열 [EN] Frustum planes array for culling */
     frustumPlanes: number[][];
-    /** 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 */
+    /** [KO] 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 [EN] Previously used vertex GPU buffer for optimization */
     prevVertexGpuBuffer: GPUBuffer;
-    /** 최적화를 위해 이전에 사용한 프래그먼트 유니폼 바인드 그룹 */
+    /** [KO] 최적화를 위해 이전에 사용한 프래그먼트 유니폼 바인드 그룹 [EN] Previously used fragment uniform bind group for optimization */
     prevFragmentUniformBindGroup: GPUBindGroup;
-    /** 머티리얼로부터 변경된 버텍스 유니폼의 맵 */
+    /** [KO] 머티리얼로부터 변경된 버텍스 유니폼의 맵 [EN] Map of vertex uniforms changed from materials */
     dirtyVertexUniformFromMaterial = {};
-    /** 알파 렌더링 레이어의 객체 배열 */
+
+    /** [KO] 알파 렌더링 레이어의 객체 배열 [EN] Array of objects in the alpha rendering layer */
     bundleListAlphaLayer = [];
-    /** 투명 렌더링 레이어의 객체 배열 */
+    /** [KO] 투명 렌더링 레이어의 객체 배열 [EN] Array of objects in the transparent rendering layer */
     bundleListTransparentLayer = [];
-    /** 파티클 렌더링 레이어의 객체 배열 */
+    /** [KO] 파티클 렌더링 레이어의 객체 배열 [EN] Array of objects in the particle rendering layer */
     bundleListParticleLayer = [];
-    /** 2D 패스 렌더링 레이어의 객체 배열 */
+    /** [KO] 2D 패스 렌더링 레이어의 객체 배열 [EN] Array of objects in the 2D pass rendering layer */
     bundleListRender2PathLayer = [];
-    /** 처리할 스킨 메시 목록 */
+    /** [KO] 처리할 스킨 메시 목록 [EN] List of skin meshes to process */
     skinList = [];
-    /** 처리할 애니메이션 목록 */
+    /** [KO] 처리할 애니메이션 목록 [EN] List of animations to process */
     animationList = [];
-    /** 효율적인 렌더링을 위한 렌더 번들 목록 */
+    /** [KO] 효율적인 렌더링을 위한 렌더 번들 목록 [EN] List of render bundles for efficient rendering */
     bundleListBasicList = [];
-    /** 렌더링 시작을 표시하는 성능 타임스탬프 */
-    /** 렌더링 프레임의 현재 타임스탬프 */
-    timestamp: number;
-    prevTimestamp: number = 0;
-    startTime: number;
-    /** 씬이 2D 모드인지 여부 */
+
+    /** [KO] 씬이 2D 모드인지 여부 [EN] Whether the scene is in 2D mode */
     isScene2DMode: boolean = false;
     needResetRenderLayer: boolean = false;
-    /** 연결된 View3D 인스턴스 (private) */
+    /** [KO] 연결된 View3D 인스턴스 (private) [EN] Connected View3D instance (private) */
     readonly #view: View3D;
     #prev_msaaID
 
@@ -163,6 +178,10 @@ class RenderViewStateData {
         this.numTriangles = 0;
         this.numPoints = 0;
         this.viewRenderTime = 0;
+        this.frameIndex++;
+        this.time = time / 1000;
+        this.deltaTime = (time - this.prevTimestamp) / 1000;
+        this.sinTime = Math.sin(this.time);
         this.currentRenderPassEncoder = viewRenderPassEncoder;
         this.timestamp = time;
         this.prevVertexGpuBuffer = null;

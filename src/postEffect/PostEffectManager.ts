@@ -467,6 +467,12 @@ class PostEffectManager {
             const {members} = structInfo;
             const cameraMembers = members.camera.members;
             SystemUniformUpdater.updateCamera(rawCamera, cameraMembers, this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateTime(
+                this.#view.renderViewStateData,
+                members.time.members,
+                this.#uniformDataF32,
+                this.#uniformDataU32
+            )
             SystemUniformUpdater.updateProjection(
                 {
                     projectionMatrix,

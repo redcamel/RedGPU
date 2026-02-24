@@ -5,15 +5,16 @@
 
 #redgpu_include systemStruct.Camera
 #redgpu_include systemStruct.Projection
+#redgpu_include systemStruct.Time
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
 
 struct SystemUniform {
 	  projection: Projection,
+	  time: Time,
 	  resolution:vec2<f32>,
       //
       camera:Camera,
-	  time:f32,
 	  usePrefilterTexture:u32,
 	  isView3D:u32,
 	  //

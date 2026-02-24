@@ -5,6 +5,7 @@ import OrthographicCamera from "../camera/camera/OrthographicCamera";
 import updateSystemUniformData from "./updateSystemUniformData";
 import DirectionalLight from "../light/lights/DirectionalLight";
 import AmbientLight from "../light/lights/AmbientLight";
+import RenderViewStateData from "../display/view/core/RenderViewStateData";
 
 let temp3 = mat4.create()
 
@@ -150,6 +151,57 @@ class SystemUniformUpdater {
                 {
                     key: 'skyAtmosphereExposure',
                     value: skyAtmosphere ? skyAtmosphere.exposure : 1,
+                }
+            ]
+        )
+    }
+
+    /**
+     * [KO] 시간 관련 정보를 유니폼 데이터에 업데이트합니다.
+     * [EN] Updates time-related information to uniform data.
+     * 
+     * @param timeInfo -
+     * [KO] 시간 정보 객체
+     * [EN] Time information object
+     * @param timeMembers -
+     * [KO] WGSL 시간 구조체 멤버 정보
+     * [EN] WGSL time structure member information
+     * @param uniformDataF32 -
+     * [KO] 대상 Float32Array 버퍼
+     * [EN] Target Float32Array buffer
+     * @param uniformDataU32 -
+     * [KO] 대상 Uint32Array 버퍼
+     * [EN] Target Uint32Array buffer
+     */
+    static updateTime(
+        timeInfo: {
+            time: number,
+            deltaTime: number,
+            frameIndex: number,
+            sinTime: number,
+        } | RenderViewStateData,
+        timeMembers: any,
+        uniformDataF32: Float32Array,
+        uniformDataU32: Uint32Array
+    ) {
+        updateSystemUniformData(
+            timeMembers, uniformDataF32, uniformDataU32,
+            [
+                {
+                    key: 'time',
+                    value: timeInfo.time,
+                },
+                {
+                    key: 'deltaTime',
+                    value: timeInfo.deltaTime,
+                },
+                {
+                    key: 'frameIndex',
+                    value: timeInfo.frameIndex,
+                },
+                {
+                    key: 'sinTime',
+                    value: timeInfo.sinTime,
                 }
             ]
         )
