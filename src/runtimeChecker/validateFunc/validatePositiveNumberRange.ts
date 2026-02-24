@@ -12,20 +12,20 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
  * RedGPU.RuntimeChecker.validatePositiveNumberRange(10, 0, 100);
  * ```
  *
- * @param value - 
- * [KO] 검증할 숫자 값 
+ * @param value -
+ * [KO] 검증할 숫자 값
  * [EN] Value to validate
- * @param minRange - 
- * [KO] 허용되는 최소값 (0 이상, 기본값: 0) 
+ * @param minRange -
+ * [KO] 허용되는 최소값 (0 이상, 기본값: 0)
  * [EN] Minimum allowed value (>= 0, default: 0)
- * @param maxRange - 
- * [KO] 허용되는 최대값 (기본값: Number.MAX_VALUE) 
+ * @param maxRange -
+ * [KO] 허용되는 최대값 (기본값: Number.MAX_VALUE)
  * [EN] Maximum allowed value (default: Number.MAX_VALUE)
- * @returns 
- * [KO] 범위 내의 양수이면 true 
+ * @returns
+ * [KO] 범위 내의 양수이면 true
  * [EN] True if the value is a positive number within range
- * @throws 
- * [KO] 입력값이 숫자가 아니거나, 0 미만이거나, 범위를 벗어날 경우 Error 발생 
+ * @throws
+ * [KO] 입력값이 숫자가 아니거나, 0 미만이거나, 범위를 벗어날 경우 Error 발생
  * [EN] Throws Error if inputs are not numbers, negative, or the value is out of range
  * @category Validation
  */

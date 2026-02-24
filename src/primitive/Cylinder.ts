@@ -159,38 +159,38 @@ class Cylinder extends Primitive {
     /**
      * [KO] Cylinder 인스턴스를 생성합니다.
      * [EN] Creates an instance of Cylinder.
-     * 
+     *
      * ### Example
      * ```typescript
      * const cylinder = new RedGPU.Cylinder(redGPUContext, 1, 1, 2, 32);
      * ```
      *
-     * @param redGPUContext - 
-     * [KO] RedGPUContext 인스턴스 
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
-     * @param radiusTop - 
-     * [KO] 윗면 반지름 (기본값 1) 
+     * @param radiusTop -
+     * [KO] 윗면 반지름 (기본값 1)
      * [EN] Top radius (default 1)
-     * @param radiusBottom - 
-     * [KO] 아랫면 반지름 (기본값 1) 
+     * @param radiusBottom -
+     * [KO] 아랫면 반지름 (기본값 1)
      * [EN] Bottom radius (default 1)
-     * @param height - 
-     * [KO] 높이 (기본값 1) 
+     * @param height -
+     * [KO] 높이 (기본값 1)
      * [EN] Height (default 1)
-     * @param radialSegments - 
-     * [KO] 둘레 세그먼트 수 (기본값 8) 
+     * @param radialSegments -
+     * [KO] 둘레 세그먼트 수 (기본값 8)
      * [EN] Radial segments (default 8)
-     * @param heightSegments - 
-     * [KO] 높이 세그먼트 수 (기본값 8) 
+     * @param heightSegments -
+     * [KO] 높이 세그먼트 수 (기본값 8)
      * [EN] Height segments (default 8)
-     * @param openEnded - 
-     * [KO] 캡 사용 안함 여부 (기본값 false) 
+     * @param openEnded -
+     * [KO] 캡 사용 안함 여부 (기본값 false)
      * [EN] Whether the ends are open (default false)
-     * @param thetaStart - 
-     * [KO] 시작 각도 (라디안, 기본값 0) 
+     * @param thetaStart -
+     * [KO] 시작 각도 (라디안, 기본값 0)
      * [EN] Starting angle (radians, default 0)
-     * @param thetaLength - 
-     * [KO] 원호 각도 (라디안, 기본값 2*PI) 
+     * @param thetaLength -
+     * [KO] 원호 각도 (라디안, 기본값 2*PI)
      * [EN] Arc angle (radians, default 2*PI)
      */
     constructor(redGPUContext: RedGPUContext,

@@ -59,6 +59,5 @@ declare class FilmGrain extends ASinglePassPostEffect {
     get grainSaturation(): number;
     set grainSaturation(v: number);
     applyPreset(preset: typeof SUBTLE): void;
-    update(deltaTime: number): void;
 }
 export default FilmGrain;

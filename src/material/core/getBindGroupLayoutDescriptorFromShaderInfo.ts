@@ -18,10 +18,10 @@
  * [EN] Bind group layout descriptor
  */
 const getBindGroupLayoutDescriptorFromShaderInfo = (
-	SHADER_INFO,
-	targetGroupIndex: number,
-	visibility: GPUFlagsConstant,
-	useMSAA: boolean = true
+    SHADER_INFO,
+    targetGroupIndex: number,
+    visibility: GPUFlagsConstant,
+    useMSAA: boolean = true
 ) => {
     const {textures, samplers, uniforms, storage} = SHADER_INFO
     const entries: GPUBindGroupLayoutEntry[] = []

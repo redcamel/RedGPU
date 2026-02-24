@@ -4,6 +4,6 @@ declare function defineUintRange(propertyKey: string, initValue?: number, forFra
     value?: any;
     writable?: boolean;
     get: () => any;
-    set: (v: any) => void;
+    set: (newValue: number) => void;
 };
 export default defineUintRange;

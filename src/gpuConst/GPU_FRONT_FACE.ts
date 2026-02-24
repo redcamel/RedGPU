@@ -4,20 +4,20 @@
  *
  * [KO] 정점이 배치된 순서에 따라 어느 쪽이 앞면인지 결정합니다.
  * [EN] Determines which side is the front face based on the order in which vertices are arranged.
- * 
+ *
  * @category Constants
  */
 const GPU_FRONT_FACE = {
-	/**
-	 * [KO] 시계 방향(Clockwise)으로 배치된 면을 앞면으로 간주합니다.
-	 * [EN] Considers faces with clockwise winding as the front face.
-	 */
-	CW: 'cw',
-	/**
-	 * [KO] 반시계 방향(Counter-Clockwise)으로 배치된 면을 앞면으로 간주합니다.
-	 * [EN] Considers faces with counter-clockwise winding as the front face.
-	 */
-	CCW: 'ccw'
+    /**
+     * [KO] 시계 방향(Clockwise)으로 배치된 면을 앞면으로 간주합니다.
+     * [EN] Considers faces with clockwise winding as the front face.
+     */
+    CW: 'cw',
+    /**
+     * [KO] 반시계 방향(Counter-Clockwise)으로 배치된 면을 앞면으로 간주합니다.
+     * [EN] Considers faces with counter-clockwise winding as the front face.
+     */
+    CCW: 'ccw'
 } as const;
 Object.freeze(GPU_FRONT_FACE);
 export default GPU_FRONT_FACE;

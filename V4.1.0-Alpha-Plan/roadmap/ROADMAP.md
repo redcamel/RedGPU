@@ -95,5 +95,5 @@
 *   **[상세 로드맵 및 구현 수준 분석 바로가기: POST_PROCESSING_ROADMAP.md](./POST_PROCESSING_ROADMAP.md)**
 
 ---
-**최종 업데이트:** 2026년 2월 10일
+**최종 업데이트:** 2026년 2월 24일
 **대상 버전:** RedGPU V4.1.0 ~ V5.0.0

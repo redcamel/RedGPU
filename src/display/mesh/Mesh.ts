@@ -1419,16 +1419,16 @@ class Mesh extends MeshBase {
                 const {gpuRenderInfo} = this
                 const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
                 const {members: vertexUniformInfoMembers} = vertexUniformInfo
-               const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
+                const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
                 if (!this.#uniformDataMatrixList) {
                     this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
                 }
-                if (vertexUniformInfoMembers.uvTransform && (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID] )) {
+                if (vertexUniformInfoMembers.uvTransform && (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID])) {
                     const material = currentMaterial as any;
                     const offset = material.textureOffset;
                     const scale = material.textureScale;
 
-                    if(offset) {
+                    if (offset) {
 
                         dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
                         tempFloat32_4[0] = offset[0];

@@ -86,7 +86,7 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): s
             console.warn(`[preprocessWGSL] Duplicate include detected in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. This redundant include will be ignored.`);
             return '';
         }
-        
+
         const parts = path.split('.');
         let current: any = SystemCodeManager;
         for (const part of parts) {
@@ -97,7 +97,7 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): s
                 throw new Error(`[preprocessWGSL] Invalid include path in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Path not found in SystemCodeManager.`);
             }
         }
-        
+
         if (typeof current === 'string') {
             includedPaths.add(path);
             return current;

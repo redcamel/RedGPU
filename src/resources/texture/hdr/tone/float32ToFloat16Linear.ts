@@ -5,25 +5,25 @@ import RedGPUContext from "../../../../context/RedGPUContext";
  * [EN] Interface for Float16 conversion options.
  */
 export interface Float16ConversionOptions {
-	/**
-	 * [KO] 이미지 너비
-	 * [EN] Image width
-	 */
+    /**
+     * [KO] 이미지 너비
+     * [EN] Image width
+     */
     width: number;
-	/**
-	 * [KO] 이미지 높이
-	 * [EN] Image height
-	 */
+    /**
+     * [KO] 이미지 높이
+     * [EN] Image height
+     */
     height: number;
-	/**
-	 * [KO] 컴퓨트 워크그룹 크기 (기본값: [8, 8])
-	 * [EN] Compute workgroup size (default: [8, 8])
-	 */
+    /**
+     * [KO] 컴퓨트 워크그룹 크기 (기본값: [8, 8])
+     * [EN] Compute workgroup size (default: [8, 8])
+     */
     workgroupSize?: [number, number];
-	/**
-	 * [KO] 최대 밝기 제한값 (기본값: 1000.0)
-	 * [EN] Maximum brightness limit value (default: 1000.0)
-	 */
+    /**
+     * [KO] 최대 밝기 제한값 (기본값: 1000.0)
+     * [EN] Maximum brightness limit value (default: 1000.0)
+     */
     maxValue?: number;
 }
 
@@ -32,20 +32,20 @@ export interface Float16ConversionOptions {
  * [EN] Interface for Float16 conversion results.
  */
 export interface Float16ConversionResult {
-	/**
-	 * [KO] 변환된 `Uint16Array` 데이터
-	 * [EN] Converted `Uint16Array` data
-	 */
+    /**
+     * [KO] 변환된 `Uint16Array` 데이터
+     * [EN] Converted `Uint16Array` data
+     */
     data: Uint16Array;
-	/**
-	 * [KO] 처리된 총 픽셀 수
-	 * [EN] Total number of processed pixels
-	 */
+    /**
+     * [KO] 처리된 총 픽셀 수
+     * [EN] Total number of processed pixels
+     */
     processedPixels: number;
-	/**
-	 * [KO] 실행 시간 (ms)
-	 * [EN] Execution time in milliseconds
-	 */
+    /**
+     * [KO] 실행 시간 (ms)
+     * [EN] Execution time in milliseconds
+     */
     executionTime: number;
 }
 

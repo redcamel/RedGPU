@@ -10,11 +10,11 @@
  * const isValid = RedGPU.RuntimeChecker.isHexColor('#FF0000');
  * ```
  *
- * @param hex - 
- * [KO] 검사할 문자열 
+ * @param hex -
+ * [KO] 검사할 문자열
  * [EN] String to check
- * @returns 
- * [KO] 유효한 Hex 색상이면 true, 아니면 false 
+ * @returns
+ * [KO] 유효한 Hex 색상이면 true, 아니면 false
  * [EN] True if it is a valid hex color, otherwise false
  * @category Checker
  */

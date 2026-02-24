@@ -70,7 +70,7 @@ class TextField3D extends ATextField {
                 if (width !== this.#nativeWidth || height !== this.#nativeHeight) {
                     this.#nativeWidth = width
                     this.#nativeHeight = height
-                    
+
                     // [KO] 실제 렌더링된 컨테이너 크기(물리 픽셀)를 유니폼으로 전달
                     // [EN] Pass the actual rendered container size (physical pixels) to the uniform
                     if (this.gpuRenderInfo) {
@@ -120,14 +120,6 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * [KO] 실제 렌더링된 물리 픽셀 크기(높이)를 반환합니다.
-     * [EN] Returns the actual rendered physical pixel size (height).
-     */
-    get pixelSize(): number {
-        return this.#nativeHeight;
-    }
-
-    /**
      * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 설정합니다. true일 경우 거리에 상관없이 렌더링된 물리 픽셀 크기로 표시됩니다.
      * [EN] Sets whether to use fixed pixel size mode. If true, it is displayed at the rendered physical pixel size regardless of distance.
      * @param value -
@@ -156,37 +148,11 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * [KO] 텍스처 해상도와 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
-     * [EN] Updates internal rendering ratios based on texture resolution and settings.
+     * [KO] 실제 렌더링된 물리 픽셀 크기(높이)를 반환합니다.
+     * [EN] Returns the actual rendered physical pixel size (height).
      */
-    #updateRatios() {
-        if (this.#nativeHeight) {
-            const prevX = this._renderRatioX;
-            const prevY = this._renderRatioY;
-
-            if (this.usePixelSize) {
-                this._renderRatioY = 1;
-                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
-            } else {
-                this._renderRatioY = this.#worldSize;
-                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
-            }
-
-            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
-                this.dirtyTransform = true;
-            }
-        }
-    }
-
-    /**
-     * [KO] 프레임마다 텍스트 필드를 렌더링합니다.
-     * [EN] Renders the text field every frame.
-     * @param renderViewStateData -
-     * [KO] 현재 렌더링 상태 데이터
-     * [EN] Current render view state data
-     */
-    render(renderViewStateData: RenderViewStateData) {
-        super.render(renderViewStateData);
+    get pixelSize(): number {
+        return this.#nativeHeight;
     }
 
     /**
@@ -234,6 +200,17 @@ class TextField3D extends ATextField {
     }
 
     /**
+     * [KO] 프레임마다 텍스트 필드를 렌더링합니다.
+     * [EN] Renders the text field every frame.
+     * @param renderViewStateData -
+     * [KO] 현재 렌더링 상태 데이터
+     * [EN] Current render view state data
+     */
+    render(renderViewStateData: RenderViewStateData) {
+        super.render(renderViewStateData);
+    }
+
+    /**
      * [KO] TextField3D 전용 버텍스 셰이더 모듈을 생성합니다.
      * [EN] Creates a vertex shader module dedicated to TextField3D.
      * @returns
@@ -247,6 +224,29 @@ class TextField3D extends ATextField {
             UNIFORM_STRUCT,
             vertexModuleSource
         );
+    }
+
+    /**
+     * [KO] 텍스처 해상도와 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
+     * [EN] Updates internal rendering ratios based on texture resolution and settings.
+     */
+    #updateRatios() {
+        if (this.#nativeHeight) {
+            const prevX = this._renderRatioX;
+            const prevY = this._renderRatioY;
+
+            if (this.usePixelSize) {
+                this._renderRatioY = 1;
+                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
+            } else {
+                this._renderRatioY = this.#worldSize;
+                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+            }
+
+            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
+                this.dirtyTransform = true;
+            }
+        }
     }
 }
 

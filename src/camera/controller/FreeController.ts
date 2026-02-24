@@ -100,76 +100,175 @@ class FreeController extends AController {
 
     // ==================== 위치(Position) Getter/Setter ====================
     /** [KO] X축 위치 [EN] X-axis position */
-    get x(): number { return this.#targetMesh.x; }
-    set x(value: number) { validateNumber(value); this.#targetMesh.x = value; this.#desirePosition[0] = value; }
+    get x(): number {
+        return this.#targetMesh.x;
+    }
+
+    set x(value: number) {
+        validateNumber(value);
+        this.#targetMesh.x = value;
+        this.#desirePosition[0] = value;
+    }
 
     /** [KO] Y축 위치 [EN] Y-axis position */
-    get y(): number { return this.#targetMesh.y; }
-    set y(value: number) { validateNumber(value); this.#targetMesh.y = value; this.#desirePosition[1] = value; }
+    get y(): number {
+        return this.#targetMesh.y;
+    }
+
+    set y(value: number) {
+        validateNumber(value);
+        this.#targetMesh.y = value;
+        this.#desirePosition[1] = value;
+    }
 
     /** [KO] Z축 위치 [EN] Z-axis position */
-    get z(): number { return this.#targetMesh.z; }
-    set z(value: number) { validateNumber(value); this.#targetMesh.z = value; this.#desirePosition[2] = value; }
+    get z(): number {
+        return this.#targetMesh.z;
+    }
+
+    set z(value: number) {
+        validateNumber(value);
+        this.#targetMesh.z = value;
+        this.#desirePosition[2] = value;
+    }
 
 
     // ==================== 회전(Rotation) Getter/Setter ====================
     /** [KO] 좌우 회전 각도 (도) [EN] Horizontal rotation angle (Pan) in degrees */
-    get pan(): number { return this.#pan; }
-    set pan(value: number) { validateNumber(value); this.#pan = value; }
+    get pan(): number {
+        return this.#pan;
+    }
+
+    set pan(value: number) {
+        validateNumber(value);
+        this.#pan = value;
+    }
 
     /** [KO] 상하 회전 각도 (도) [EN] Vertical rotation angle (Tilt) in degrees */
-    get tilt(): number { return this.#tilt; }
-    set tilt(value: number) { validateNumber(value); this.#tilt = Math.max(-89.9, Math.min(89.9, value)); }
+    get tilt(): number {
+        return this.#tilt;
+    }
+
+    set tilt(value: number) {
+        validateNumber(value);
+        this.#tilt = Math.max(-89.9, Math.min(89.9, value));
+    }
 
     /** [KO] 마우스 감도 [EN] Mouse rotation sensitivity */
-    get mouseSensitivity(): number { return this.#mouseSensitivity; }
-    set mouseSensitivity(value: number) { validateNumberRange(value, 0.01); this.#mouseSensitivity = value; }
+    get mouseSensitivity(): number {
+        return this.#mouseSensitivity;
+    }
+
+    set mouseSensitivity(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#mouseSensitivity = value;
+    }
 
     // ==================== 이동 속도 및 보간 설정 ====================
     /** [KO] 이동 속도 [EN] Movement speed */
-    get moveSpeed(): number { return this.#moveSpeed; }
-    set moveSpeed(value: number) { validateNumberRange(value, 0.01); this.#moveSpeed = value; }
+    get moveSpeed(): number {
+        return this.#moveSpeed;
+    }
+
+    set moveSpeed(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#moveSpeed = value;
+    }
 
     /** [KO] 이동 보간 계수 [EN] Movement interpolation factor */
-    get moveSpeedInterpolation(): number { return this.#moveDelayInterpolation; }
-    set moveSpeedInterpolation(value: number) { validateNumberRange(value, 0.0001, 1); this.#moveDelayInterpolation = value; }
+    get moveSpeedInterpolation(): number {
+        return this.#moveDelayInterpolation;
+    }
+
+    set moveSpeedInterpolation(value: number) {
+        validateNumberRange(value, 0.0001, 1);
+        this.#moveDelayInterpolation = value;
+    }
 
     /** [KO] 회전 속도 [EN] Rotation speed */
-    get rotationSpeed(): number { return this.#rotationSpeed; }
-    set rotationSpeed(value: number) { validateNumberRange(value, 0.01); this.#rotationSpeed = value; }
+    get rotationSpeed(): number {
+        return this.#rotationSpeed;
+    }
+
+    set rotationSpeed(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#rotationSpeed = value;
+    }
 
     /** [KO] 회전 보간 계수 [EN] Rotation interpolation factor */
-    get rotationSpeedInterpolation(): number { return this.#rotationInterpolation; }
-    set rotationSpeedInterpolation(value: number) { validateNumberRange(value, 0.0001, 1); this.#rotationInterpolation = value; }
+    get rotationSpeedInterpolation(): number {
+        return this.#rotationInterpolation;
+    }
+
+    set rotationSpeedInterpolation(value: number) {
+        validateNumberRange(value, 0.0001, 1);
+        this.#rotationInterpolation = value;
+    }
 
     /** [KO] 최대 가속도 배율 [EN] Maximum acceleration scale */
-    get maxAcceleration(): number { return this.#maxAcceleration; }
-    set maxAcceleration(value: number) { this.#maxAcceleration = value; }
+    get maxAcceleration(): number {
+        return this.#maxAcceleration;
+    }
+
+    set maxAcceleration(value: number) {
+        this.#maxAcceleration = value;
+    }
 
     /** [KO] 키 매핑 설정 객체 [EN] Key mapping configuration object */
-    get keyNameMapper(): KeyNameMapper { return {...this.#keyNameMapper}; }
+    get keyNameMapper(): KeyNameMapper {
+        return {...this.#keyNameMapper};
+    }
 
     // ==================== 키 매핑 설정 메서드 ====================
     /** [KO] 전진 키 설정 [EN] Sets the move forward key */
-    setMoveForwardKey(value: string) { this.#keyNameMapper.moveForward = value; }
+    setMoveForwardKey(value: string) {
+        this.#keyNameMapper.moveForward = value;
+    }
+
     /** [KO] 후진 키 설정 [EN] Sets the move backward key */
-    setMoveBackKey(value: string) { this.#keyNameMapper.moveBack = value; }
+    setMoveBackKey(value: string) {
+        this.#keyNameMapper.moveBack = value;
+    }
+
     /** [KO] 좌측 이동 키 설정 [EN] Sets the move left key */
-    setMoveLeftKey(value: string) { this.#keyNameMapper.moveLeft = value; }
+    setMoveLeftKey(value: string) {
+        this.#keyNameMapper.moveLeft = value;
+    }
+
     /** [KO] 우측 이동 키 설정 [EN] Sets the move right key */
-    setMoveRightKey(value: string) { this.#keyNameMapper.moveRight = value; }
+    setMoveRightKey(value: string) {
+        this.#keyNameMapper.moveRight = value;
+    }
+
     /** [KO] 상향 이동 키 설정 [EN] Sets the move up key */
-    setMoveUpKey(value: string) { this.#keyNameMapper.moveUp = value; }
+    setMoveUpKey(value: string) {
+        this.#keyNameMapper.moveUp = value;
+    }
+
     /** [KO] 하향 이동 키 설정 [EN] Sets the move down key */
-    setMoveDownKey(value: string) { this.#keyNameMapper.moveDown = value; }
+    setMoveDownKey(value: string) {
+        this.#keyNameMapper.moveDown = value;
+    }
+
     /** [KO] 좌회전 키 설정 [EN] Sets the turn left key */
-    setTurnLeftKey(value: string) { this.#keyNameMapper.turnLeft = value; }
+    setTurnLeftKey(value: string) {
+        this.#keyNameMapper.turnLeft = value;
+    }
+
     /** [KO] 우회전 키 설정 [EN] Sets the turn right key */
-    setTurnRightKey(value: string) { this.#keyNameMapper.turnRight = value; }
+    setTurnRightKey(value: string) {
+        this.#keyNameMapper.turnRight = value;
+    }
+
     /** [KO] 상향 회전 키 설정 [EN] Sets the turn up key */
-    setTurnUpKey(value: string) { this.#keyNameMapper.turnUp = value; }
+    setTurnUpKey(value: string) {
+        this.#keyNameMapper.turnUp = value;
+    }
+
     /** [KO] 하향 회전 키 설정 [EN] Sets the turn down key */
-    setTurnDownKey(value: string) { this.#keyNameMapper.turnDown = value; }
+    setTurnDownKey(value: string) {
+        this.#keyNameMapper.turnDown = value;
+    }
 
     /**
      * [KO] 매 프레임 컨트롤러를 업데이트합니다.
@@ -248,17 +347,47 @@ class FreeController extends AController {
 
         const tempAccelerationValue = this.#currentAcceleration * tSpeed;
 
-        if (keyboardKeyBuffer[tKeyNameMapper.turnLeft]) { rotate = true; pan = tSpeedRotation; }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnRight]) { rotate = true; pan = -tSpeedRotation; }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnUp]) { rotate = true; tilt = tSpeedRotation; }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnDown]) { rotate = true; tilt = -tSpeedRotation; }
+        if (keyboardKeyBuffer[tKeyNameMapper.turnLeft]) {
+            rotate = true;
+            pan = tSpeedRotation;
+        }
+        if (keyboardKeyBuffer[tKeyNameMapper.turnRight]) {
+            rotate = true;
+            pan = -tSpeedRotation;
+        }
+        if (keyboardKeyBuffer[tKeyNameMapper.turnUp]) {
+            rotate = true;
+            tilt = tSpeedRotation;
+        }
+        if (keyboardKeyBuffer[tKeyNameMapper.turnDown]) {
+            rotate = true;
+            tilt = -tSpeedRotation;
+        }
 
-        if (keyboardKeyBuffer[tKeyNameMapper.moveForward]) { move = true; this.#displacementVec3[2] = -tempAccelerationValue; }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveBack]) { move = true; this.#displacementVec3[2] = tempAccelerationValue; }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveLeft]) { move = true; this.#displacementVec3[0] = -tempAccelerationValue; }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveRight]) { move = true; this.#displacementVec3[0] = tempAccelerationValue; }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveUp]) { move = true; this.#displacementVec3[1] = tempAccelerationValue; }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveDown]) { move = true; this.#displacementVec3[1] = -tempAccelerationValue; }
+        if (keyboardKeyBuffer[tKeyNameMapper.moveForward]) {
+            move = true;
+            this.#displacementVec3[2] = -tempAccelerationValue;
+        }
+        if (keyboardKeyBuffer[tKeyNameMapper.moveBack]) {
+            move = true;
+            this.#displacementVec3[2] = tempAccelerationValue;
+        }
+        if (keyboardKeyBuffer[tKeyNameMapper.moveLeft]) {
+            move = true;
+            this.#displacementVec3[0] = -tempAccelerationValue;
+        }
+        if (keyboardKeyBuffer[tKeyNameMapper.moveRight]) {
+            move = true;
+            this.#displacementVec3[0] = tempAccelerationValue;
+        }
+        if (keyboardKeyBuffer[tKeyNameMapper.moveUp]) {
+            move = true;
+            this.#displacementVec3[1] = tempAccelerationValue;
+        }
+        if (keyboardKeyBuffer[tKeyNameMapper.moveDown]) {
+            move = true;
+            this.#displacementVec3[1] = -tempAccelerationValue;
+        }
 
         const accelerationDelta = 3 * deltaTime;
         if (rotate || move) {

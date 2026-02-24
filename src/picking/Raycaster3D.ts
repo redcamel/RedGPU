@@ -187,7 +187,7 @@ export default class Raycaster3D {
     #intersectPixelBillboard(mesh: Mesh, intersects: RayIntersectResult[]) {
         const view = this.#view;
         const m = mesh.modelMatrix;
-        const pixelSize = (mesh as any).pixelSize  ;
+        const pixelSize = (mesh as any).pixelSize;
         keepLog((mesh as any).fontSize)
         const rx = (mesh as any)._renderRatioX || 1;
         const ry = (mesh as any)._renderRatioY || 1;

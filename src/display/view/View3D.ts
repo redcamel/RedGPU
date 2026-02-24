@@ -129,7 +129,6 @@ class View3D extends AView {
     #basicPackedSampler: GPUSampler
 
 
-
     /**
      * [KO] 리소스 관리를 위한 이전 프레임의 IBL 텍스처
      * [EN] Previous frame IBL texture for resource management
@@ -145,11 +144,6 @@ class View3D extends AView {
     #uniformDataU32: Uint32Array
     #noneJitterProjectionViewMatrix: mat4 = mat4.create()
     #clusterLightManager: ClusterLightManager
-
-
-    get clusterLightManager(): ClusterLightManager {
-        return this.#clusterLightManager;
-    }
 
     /**
      * [KO] View3D 인스턴스를 생성합니다.
@@ -184,6 +178,10 @@ class View3D extends AView {
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
     }
 
+    get clusterLightManager(): ClusterLightManager {
+        return this.#clusterLightManager;
+    }
+
     /**
      * [KO] 뷰 렌더 텍스처 매니저를 반환합니다.
      * [EN] Returns the ViewRenderTextureManager instance.
@@ -215,7 +213,6 @@ class View3D extends AView {
     get systemUniform_Vertex_UniformBuffer(): UniformBuffer {
         return this.#systemUniform_Vertex_UniformBuffer;
     }
-
 
 
     /**
@@ -628,7 +625,7 @@ class View3D extends AView {
             'SYSTEM_UNIFORM_BUFFER_VERTEX',
             'SYSTEM_UNIFORM_BUFFER_VERTEX',
         );
-       //
+        //
         this.#shadowDepthSampler = new Sampler(this.redGPUContext, {
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
             addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,

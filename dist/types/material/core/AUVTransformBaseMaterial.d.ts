@@ -28,6 +28,24 @@ declare abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
      */
     dirtyTextureTransform: boolean;
     /**
+     * [KO] AUVTransformBaseMaterial 인스턴스를 생성합니다.
+     * [EN] Creates an AUVTransformBaseMaterial instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param moduleName -
+     * [KO] 머티리얼 모듈명
+     * [EN] Material module name
+     * @param SHADER_INFO -
+     * [KO] 파싱된 WGSL 쉐이더 정보
+     * [EN] Parsed WGSL shader info
+     * @param targetGroupIndex -
+     * [KO] 바인드 그룹 인덱스
+     * [EN] Bind group index
+     */
+    constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
+    /**
      * [KO] 텍스처 오프셋 (u, v)
      * [EN] Texture offset (u, v)
      *
@@ -49,23 +67,5 @@ declare abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
      */
     get textureScale(): [number, number];
     set textureScale(value: [number, number]);
-    /**
-     * [KO] AUVTransformBaseMaterial 인스턴스를 생성합니다.
-     * [EN] Creates an AUVTransformBaseMaterial instance.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param moduleName -
-     * [KO] 머티리얼 모듈명
-     * [EN] Material module name
-     * @param SHADER_INFO -
-     * [KO] 파싱된 WGSL 쉐이더 정보
-     * [EN] Parsed WGSL shader info
-     * @param targetGroupIndex -
-     * [KO] 바인드 그룹 인덱스
-     * [EN] Bind group index
-     */
-    constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
 }
 export default AUVTransformBaseMaterial;

@@ -10,11 +10,11 @@
  * const isValid = RedGPU.RuntimeChecker.isUint(10);
  * ```
  *
- * @param value - 
- * [KO] 검사할 숫자 값 
+ * @param value -
+ * [KO] 검사할 숫자 값
  * [EN] Value to check
- * @returns 
- * [KO] 부호 없는 정수이면 true, 아니면 false 
+ * @returns
+ * [KO] 부호 없는 정수이면 true, 아니면 false
  * [EN] True if it is an unsigned integer, otherwise false
  * @category Checker
  */

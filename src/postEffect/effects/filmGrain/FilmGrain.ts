@@ -8,10 +8,34 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * [KO] 필름 그레인 프리셋 정의 (업계 표준 수치 기반)
  * [EN] Film Grain preset definitions (Based on industry standard values)
  */
-const SUBTLE = { filmGrainIntensity: 0.008, filmGrainResponse: 1.5, filmGrainScale: 1.2, coloredGrain: 0.05, grainSaturation: 0.1 };
-const MEDIUM = { filmGrainIntensity: 0.015, filmGrainResponse: 1.2, filmGrainScale: 1.8, coloredGrain: 0.15, grainSaturation: 0.3 };
-const HEAVY = { filmGrainIntensity: 0.03, filmGrainResponse: 1.0, filmGrainScale: 2.5, coloredGrain: 0.25, grainSaturation: 0.5 };
-const VINTAGE = { filmGrainIntensity: 0.06, filmGrainResponse: 0.7, filmGrainScale: 4.0, coloredGrain: 0.6, grainSaturation: 0.8 };
+const SUBTLE = {
+    filmGrainIntensity: 0.008,
+    filmGrainResponse: 1.5,
+    filmGrainScale: 1.2,
+    coloredGrain: 0.05,
+    grainSaturation: 0.1
+};
+const MEDIUM = {
+    filmGrainIntensity: 0.015,
+    filmGrainResponse: 1.2,
+    filmGrainScale: 1.8,
+    coloredGrain: 0.15,
+    grainSaturation: 0.3
+};
+const HEAVY = {
+    filmGrainIntensity: 0.03,
+    filmGrainResponse: 1.0,
+    filmGrainScale: 2.5,
+    coloredGrain: 0.25,
+    grainSaturation: 0.5
+};
+const VINTAGE = {
+    filmGrainIntensity: 0.06,
+    filmGrainResponse: 0.7,
+    filmGrainScale: 4.0,
+    coloredGrain: 0.6,
+    grainSaturation: 0.8
+};
 
 /**
  * [KO] 현대적인 시네마틱 필름 그레인(Film Grain) 후처리 이펙트입니다.
@@ -45,20 +69,50 @@ class FilmGrain extends ASinglePassPostEffect {
         this.#updateUniforms();
     }
 
-    get filmGrainIntensity(): number { return this.#filmGrainIntensity; }
-    set filmGrainIntensity(v: number) { this.#filmGrainIntensity = v; this.updateUniform('filmGrainIntensity', v); }
+    get filmGrainIntensity(): number {
+        return this.#filmGrainIntensity;
+    }
 
-    get filmGrainResponse(): number { return this.#filmGrainResponse; }
-    set filmGrainResponse(v: number) { this.#filmGrainResponse = v; this.updateUniform('filmGrainResponse', v); }
+    set filmGrainIntensity(v: number) {
+        this.#filmGrainIntensity = v;
+        this.updateUniform('filmGrainIntensity', v);
+    }
 
-    get filmGrainScale(): number { return this.#filmGrainScale; }
-    set filmGrainScale(v: number) { this.#filmGrainScale = v; this.updateUniform('filmGrainScale', v); }
+    get filmGrainResponse(): number {
+        return this.#filmGrainResponse;
+    }
 
-    get coloredGrain(): number { return this.#coloredGrain; }
-    set coloredGrain(v: number) { this.#coloredGrain = v; this.updateUniform('coloredGrain', v); }
+    set filmGrainResponse(v: number) {
+        this.#filmGrainResponse = v;
+        this.updateUniform('filmGrainResponse', v);
+    }
 
-    get grainSaturation(): number { return this.#grainSaturation; }
-    set grainSaturation(v: number) { this.#grainSaturation = v; this.updateUniform('grainSaturation', v); }
+    get filmGrainScale(): number {
+        return this.#filmGrainScale;
+    }
+
+    set filmGrainScale(v: number) {
+        this.#filmGrainScale = v;
+        this.updateUniform('filmGrainScale', v);
+    }
+
+    get coloredGrain(): number {
+        return this.#coloredGrain;
+    }
+
+    set coloredGrain(v: number) {
+        this.#coloredGrain = v;
+        this.updateUniform('coloredGrain', v);
+    }
+
+    get grainSaturation(): number {
+        return this.#grainSaturation;
+    }
+
+    set grainSaturation(v: number) {
+        this.#grainSaturation = v;
+        this.updateUniform('grainSaturation', v);
+    }
 
     applyPreset(preset: typeof SUBTLE): void {
         this.#filmGrainIntensity = preset.filmGrainIntensity;

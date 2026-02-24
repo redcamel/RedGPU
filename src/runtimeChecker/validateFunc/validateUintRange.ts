@@ -14,20 +14,20 @@ const MAX_UINT = 4503599627370496
  * RedGPU.RuntimeChecker.validateUintRange(10, 0, 100);
  * ```
  *
- * @param value - 
- * [KO] 검증할 숫자 값 
+ * @param value -
+ * [KO] 검증할 숫자 값
  * [EN] Value to validate
- * @param min - 
- * [KO] 허용되는 최소 Uint 값 (기본값: 0) 
+ * @param min -
+ * [KO] 허용되는 최소 Uint 값 (기본값: 0)
  * [EN] Minimum allowed Uint value (default: 0)
- * @param max - 
- * [KO] 허용되는 최대 Uint 값 (기본값: 4503599627370496) 
+ * @param max -
+ * [KO] 허용되는 최대 Uint 값 (기본값: 4503599627370496)
  * [EN] Maximum allowed Uint value (default: 4503599627370496)
- * @returns 
- * [KO] 범위 내의 Uint이면 true 
+ * @returns
+ * [KO] 범위 내의 Uint이면 true
  * [EN] True if the value is a Uint within range
- * @throws 
- * [KO] 값 또는 범위가 Uint가 아니거나, 범위를 벗어날 경우 Error 발생 
+ * @throws
+ * [KO] 값 또는 범위가 Uint가 아니거나, 범위를 벗어날 경우 Error 발생
  * [EN] Throws Error if values/range are not Uint or out of range
  * @category Validation
  */

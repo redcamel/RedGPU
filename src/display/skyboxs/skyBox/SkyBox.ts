@@ -50,11 +50,11 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  * ```typescript
  * // 1. 일반 큐브 텍스처 사용 (Using regular CubeTexture)
  * const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
- * 
+ *
  * // 2. HDR 파일을 IBL을 통해 사용 (Using HDR file via IBL)
  * const ibl = new RedGPU.Resource.IBL(redGPUContext, 'assets/env.hdr');
  * const skyboxHDR = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
- * 
+ *
  * view.skybox = skybox;
  * ```
  *

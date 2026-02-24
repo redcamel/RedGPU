@@ -41,8 +41,8 @@ class PickingManager {
     #prevPickingEvent: PickingEvent
     #prevOverTarget: Mesh
     #videoMemorySize: number = 0
-	#raycaster3D: Raycaster3D = new Raycaster3D();
-	#raycaster2D: Raycaster2D = new Raycaster2D();
+    #raycaster3D: Raycaster3D = new Raycaster3D();
+    #raycaster2D: Raycaster2D = new Raycaster2D();
 
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
@@ -232,20 +232,21 @@ class PickingManager {
         gpuDevice.queue.submit([readPixelCommandEncoder.finish()]);
         return readPixelBuffer;
     };
+
     #createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent) {
-		const isView2D = this.#view.rawCamera.constructor.name === 'Camera2D';
-		const raycaster = isView2D ? this.#raycaster2D : this.#raycaster3D;
-		raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view as any);
-		let hit;
-		if (tMesh) {
-			const intersects = raycaster.intersectObject(tMesh);
-			hit = intersects[0];
-		}
-		const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent, hit);
-		if (!pickingEvent.ray) {
-			pickingEvent.ray = raycaster.ray.clone();
-		}
-		return pickingEvent;
+        const isView2D = this.#view.rawCamera.constructor.name === 'Camera2D';
+        const raycaster = isView2D ? this.#raycaster2D : this.#raycaster3D;
+        raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view as any);
+        let hit;
+        if (tMesh) {
+            const intersects = raycaster.intersectObject(tMesh);
+            hit = intersects[0];
+        }
+        const pickingEvent = new PickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent, hit);
+        if (!pickingEvent.ray) {
+            pickingEvent.ray = raycaster.ray.clone();
+        }
+        return pickingEvent;
     }
 
     #processClickEvent = (uint32Color: number, mouseX: number, mouseY: number, time: number, pickingTable: {}) => {

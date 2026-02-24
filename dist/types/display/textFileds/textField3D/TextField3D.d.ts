@@ -70,11 +70,6 @@ declare class TextField3D extends ATextField {
      */
     get usePixelSize(): boolean;
     /**
-     * [KO] 실제 렌더링된 물리 픽셀 크기(높이)를 반환합니다.
-     * [EN] Returns the actual rendered physical pixel size (height).
-     */
-    get pixelSize(): number;
-    /**
      * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 설정합니다. true일 경우 거리에 상관없이 렌더링된 물리 픽셀 크기로 표시됩니다.
      * [EN] Sets whether to use fixed pixel size mode. If true, it is displayed at the rendered physical pixel size regardless of distance.
      * @param value -
@@ -83,13 +78,10 @@ declare class TextField3D extends ATextField {
      */
     set usePixelSize(value: boolean);
     /**
-     * [KO] 프레임마다 텍스트 필드를 렌더링합니다.
-     * [EN] Renders the text field every frame.
-     * @param renderViewStateData -
-     * [KO] 현재 렌더링 상태 데이터
-     * [EN] Current render view state data
+     * [KO] 실제 렌더링된 물리 픽셀 크기(높이)를 반환합니다.
+     * [EN] Returns the actual rendered physical pixel size (height).
      */
-    render(renderViewStateData: RenderViewStateData): void;
+    get pixelSize(): number;
     /**
      * [KO] 텍스트가 출력되는 지오메트리를 반환합니다. Plane으로 고정됩니다.
      * [EN] Returns the geometry where the text is displayed. Fixed with Plane.
@@ -122,6 +114,14 @@ declare class TextField3D extends ATextField {
      * [EN] Material to set
      */
     set material(value: any);
+    /**
+     * [KO] 프레임마다 텍스트 필드를 렌더링합니다.
+     * [EN] Renders the text field every frame.
+     * @param renderViewStateData -
+     * [KO] 현재 렌더링 상태 데이터
+     * [EN] Current render view state data
+     */
+    render(renderViewStateData: RenderViewStateData): void;
     /**
      * [KO] TextField3D 전용 버텍스 셰이더 모듈을 생성합니다.
      * [EN] Creates a vertex shader module dedicated to TextField3D.

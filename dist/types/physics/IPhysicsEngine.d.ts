@@ -123,6 +123,20 @@ export interface IPhysicsEngine {
      */
     onCollisionStarted: (handle1: number, handle2: number) => void;
     /**
+     * [KO] 중력을 설정하거나 가져옵니다.
+     * [EN] Sets or gets the gravity.
+     *
+     * ### Example
+     * ```typescript
+     * physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
+     * ```
+     */
+    gravity: {
+        x: number;
+        y: number;
+        z: number;
+    };
+    /**
      * [KO] 물리 엔진을 초기화합니다. (WASM 로딩 등)
      * [EN] Initializes the physics engine. (WASM loading, etc.)
      *
@@ -161,20 +175,6 @@ export interface IPhysicsEngine {
      * [EN] Body to remove
      */
     removeBody(body: IPhysicsBody): void;
-    /**
-     * [KO] 중력을 설정하거나 가져옵니다.
-     * [EN] Sets or gets the gravity.
-     *
-     * ### Example
-     * ```typescript
-     * physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
-     * ```
-     */
-    gravity: {
-        x: number;
-        y: number;
-        z: number;
-    };
     /**
      * [KO] 캐릭터 컨트롤러를 생성합니다.
      * [EN] Creates a character controller.

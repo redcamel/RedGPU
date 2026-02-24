@@ -1,4 +1,3 @@
-
 /**
  * [KO] 시스템 유니폼 데이터를 업데이트합니다.
  * [EN] Updates system uniform data.

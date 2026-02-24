@@ -12,7 +12,7 @@ import OldBloomBlend from "./oldBloomBlend/OldBloomBlend";
  *
  * [KO] 임계값, 가우시안 블러, 블렌드 단계를 거쳐 밝은 영역에 부드러운 빛 번짐 효과를 만듭니다.
  * [EN] Creates a soft glow effect in bright areas through threshold, Gaussian blur, and blend steps.
- * 
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
@@ -51,7 +51,7 @@ class OldBloom extends AMultiPassPostEffect {
         this.#effect_threshold = this.passList[0] as Threshold;
         this.#effect_gaussianBlur = this.passList[1] as GaussianBlur;
         this.#effect_oldBloomBlend = this.passList[2] as OldBloomBlend;
-        
+
         // 초기값 동기화
         this.#effect_threshold.threshold = this.#threshold;
         this.#effect_gaussianBlur.size = this.#gaussianBlurSize;
@@ -59,25 +59,37 @@ class OldBloom extends AMultiPassPostEffect {
         this.#effect_oldBloomBlend.bloomStrength = this.#bloomStrength;
     }
 
-    get threshold(): number { return this.#threshold; }
+    get threshold(): number {
+        return this.#threshold;
+    }
+
     set threshold(value: number) {
         this.#threshold = value;
         this.#effect_threshold.threshold = value;
     }
 
-    get gaussianBlurSize(): number { return this.#gaussianBlurSize; }
+    get gaussianBlurSize(): number {
+        return this.#gaussianBlurSize;
+    }
+
     set gaussianBlurSize(value: number) {
         this.#gaussianBlurSize = value;
         this.#effect_gaussianBlur.size = value;
     }
 
-    get exposure(): number { return this.#exposure; }
+    get exposure(): number {
+        return this.#exposure;
+    }
+
     set exposure(value: number) {
         this.#exposure = value;
         this.#effect_oldBloomBlend.exposure = value;
     }
 
-    get bloomStrength(): number { return this.#bloomStrength; }
+    get bloomStrength(): number {
+        return this.#bloomStrength;
+    }
+
     set bloomStrength(value: number) {
         this.#bloomStrength = value;
         this.#effect_oldBloomBlend.bloomStrength = value;

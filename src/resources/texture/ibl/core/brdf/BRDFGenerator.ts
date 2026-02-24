@@ -28,27 +28,27 @@ class BRDFGenerator {
         this.#redGPUContext = redGPUContext;
     }
 
-	/**
-	 * [KO] BRDF LUT 텍스처를 반환합니다.
-	 * [EN] Returns the BRDF LUT texture.
+    /**
+     * [KO] BRDF LUT 텍스처를 반환합니다.
+     * [EN] Returns the BRDF LUT texture.
      *
      * ### Example
      * ```typescript
      * const brdfLUT = redGPUContext.resourceManager.brdfGenerator.brdfLUTTexture;
      * ```
-	 */
-	get brdfLUTTexture(): GPUTexture {
-		if (!this.#brdfLUTTexture) {
-			this.#generateBRDFLUT();
-		}
-		return this.#brdfLUTTexture;
-	}
+     */
+    get brdfLUTTexture(): GPUTexture {
+        if (!this.#brdfLUTTexture) {
+            this.#generateBRDFLUT();
+        }
+        return this.#brdfLUTTexture;
+    }
 
     /**
      * [KO] BRDF LUT를 생성합니다.
      * [EN] Generates the BRDF LUT.
      */
-	async #generateBRDFLUT() {
+    async #generateBRDFLUT() {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const size = 128;
         const format: GPUTextureFormat = 'rg16float';
@@ -79,7 +79,7 @@ class BRDFGenerator {
                 fragment: {
                     module: this.#brdfShaderModule,
                     entryPoint: 'fs_main',
-                    targets: [{ format }]
+                    targets: [{format}]
                 },
                 primitive: {
                     topology: 'triangle-list',
@@ -97,7 +97,7 @@ class BRDFGenerator {
                 {
                     view: this.#brdfLUTTexture.createView(),
                     loadOp: 'clear',
-                    clearValue: { r: 0, g: 0, b: 0, a: 1 },
+                    clearValue: {r: 0, g: 0, b: 0, a: 1},
                     storeOp: 'store'
                 }
             ]

@@ -5,20 +5,20 @@ import {keepLog} from "../../../utils";
  * [EN] Interface representing HDR texture data.
  */
 export interface HDRData {
-	/**
-	 * [KO] 부동 소수점 픽셀 데이터 (RGBA 순서)
-	 * [EN] Floating-point pixel data (RGBA order)
-	 */
+    /**
+     * [KO] 부동 소수점 픽셀 데이터 (RGBA 순서)
+     * [EN] Floating-point pixel data (RGBA order)
+     */
     data: Float32Array;
-	/**
-	 * [KO] 이미지 너비
-	 * [EN] Image width
-	 */
+    /**
+     * [KO] 이미지 너비
+     * [EN] Image width
+     */
     width: number;
-	/**
-	 * [KO] 이미지 높이
-	 * [EN] Image height
-	 */
+    /**
+     * [KO] 이미지 높이
+     * [EN] Image height
+     */
     height: number;
 }
 
@@ -27,20 +27,20 @@ export interface HDRData {
  * [EN] Interface representing file validation results.
  */
 export interface FileValidation {
-	/**
-	 * [KO] 유효 여부
-	 * [EN] Whether the file is valid
-	 */
+    /**
+     * [KO] 유효 여부
+     * [EN] Whether the file is valid
+     */
     isValid: boolean;
-	/**
-	 * [KO] 파일 포맷 정보
-	 * [EN] File format information
-	 */
+    /**
+     * [KO] 파일 포맷 정보
+     * [EN] File format information
+     */
     format: string;
-	/**
-	 * [KO] 에러 메시지 (선택적)
-	 * [EN] Error message (optional)
-	 */
+    /**
+     * [KO] 에러 메시지 (선택적)
+     * [EN] Error message (optional)
+     */
     error?: string;
 }
 
@@ -61,29 +61,29 @@ export interface FileValidation {
 class HDRLoader {
     #enableDebugLogs: boolean = true;
 
-	/**
-	 * [KO] HDRLoader 인스턴스를 생성합니다.
-	 * [EN] Creates an HDRLoader instance.
-	 * @param enableDebugLogs -
-	 * [KO] 디버그 로그 활성화 여부 (기본값: true)
-	 * [EN] Whether to enable debug logs (default: true)
-	 */
+    /**
+     * [KO] HDRLoader 인스턴스를 생성합니다.
+     * [EN] Creates an HDRLoader instance.
+     * @param enableDebugLogs -
+     * [KO] 디버그 로그 활성화 여부 (기본값: true)
+     * [EN] Whether to enable debug logs (default: true)
+     */
     constructor(enableDebugLogs: boolean = true) {
         this.#enableDebugLogs = enableDebugLogs;
     }
 
-	/**
-	 * [KO] 디버그 로그 활성화 여부를 반환합니다.
-	 * [EN] Returns whether debug logs are enabled.
-	 */
+    /**
+     * [KO] 디버그 로그 활성화 여부를 반환합니다.
+     * [EN] Returns whether debug logs are enabled.
+     */
     get enableDebugLogs(): boolean {
         return this.#enableDebugLogs;
     }
 
-	/**
-	 * [KO] 디버그 로그 활성화 여부를 설정합니다.
-	 * [EN] Sets whether to enable debug logs.
-	 */
+    /**
+     * [KO] 디버그 로그 활성화 여부를 설정합니다.
+     * [EN] Sets whether to enable debug logs.
+     */
     set enableDebugLogs(value: boolean) {
         this.#enableDebugLogs = value;
     }
@@ -91,21 +91,21 @@ class HDRLoader {
     /**
      * [KO] HDR 파일을 로드하고 데이터를 반환합니다.
      * [EN] Loads an HDR file and returns the data.
-	 *
-	 * ### Example
-	 * ```typescript
-	 * const hdrData = await loader.loadHDRFile('assets/sky.hdr');
-	 * ```
-	 *
-	 * @param src -
-	 * [KO] HDR 파일 경로
-	 * [EN] HDR file path
-	 * @returns
-	 * [KO] 파싱된 HDR 데이터 (픽셀, 크기 정보 포함)
-	 * [EN] Parsed HDR data (including pixel and size information)
-	 * @throws
-	 * [KO] HTTP 로드 실패 또는 잘못된 포맷일 경우 Error 발생
-	 * [EN] Throws Error on HTTP failure or invalid format
+     *
+     * ### Example
+     * ```typescript
+     * const hdrData = await loader.loadHDRFile('assets/sky.hdr');
+     * ```
+     *
+     * @param src -
+     * [KO] HDR 파일 경로
+     * [EN] HDR file path
+     * @returns
+     * [KO] 파싱된 HDR 데이터 (픽셀, 크기 정보 포함)
+     * [EN] Parsed HDR data (including pixel and size information)
+     * @throws
+     * [KO] HTTP 로드 실패 또는 잘못된 포맷일 경우 Error 발생
+     * [EN] Throws Error on HTTP failure or invalid format
      */
     async loadHDRFile(src: string): Promise<HDRData> {
         if (this.#enableDebugLogs) {

@@ -96,14 +96,6 @@ declare class SpriteSheet3D extends ASpriteSheet {
      */
     set usePixelSize(value: boolean);
     /**
-     * [KO] 프레임마다 스프라이트 시트를 렌더링합니다.
-     * [EN] Renders the sprite sheet every frame.
-     * @param renderViewStateData -
-     * [KO] 현재 렌더링 상태 데이터
-     * [EN] Current render view state data
-     */
-    render(renderViewStateData: RenderViewStateData): void;
-    /**
      * [KO] 지오메트리를 반환합니다. SpriteSheet3D는 Plane으로 고정되어 있습니다.
      * [EN] Returns the geometry. SpriteSheet3D is fixed with Plane.
      * @returns
@@ -141,6 +133,14 @@ declare class SpriteSheet3D extends ASpriteSheet {
      * [EN] Throws error when attempting to change material
      */
     set material(value: any);
+    /**
+     * [KO] 프레임마다 스프라이트 시트를 렌더링합니다.
+     * [EN] Renders the sprite sheet every frame.
+     * @param renderViewStateData -
+     * [KO] 현재 렌더링 상태 데이터
+     * [EN] Current render view state data
+     */
+    render(renderViewStateData: RenderViewStateData): void;
     /**
      * [KO] SpriteSheet3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
      * [EN] Creates a custom vertex shader module dedicated to SpriteSheet3D.

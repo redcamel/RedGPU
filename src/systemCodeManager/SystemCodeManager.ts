@@ -279,7 +279,7 @@ export namespace SystemStructLibrary {
 /**
  * [KO] 엔진 시스템에서 전역적으로 사용되는 셰이더 코드 및 공통 라이브러리를 통합 관리하는 레지스트리입니다.
  * [EN] A registry that integrates and manages shader code and common libraries used globally in the engine.
- * 
+ *
  * @category Shader
  */
 export namespace SystemCodeManager {

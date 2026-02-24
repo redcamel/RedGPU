@@ -12,14 +12,14 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
  * RedGPU.RuntimeChecker.validateRedGPUContext(redGPUContext);
  * ```
  *
- * @param value - 
- * [KO] 검증할 객체 
+ * @param value -
+ * [KO] 검증할 객체
  * [EN] Value to validate
- * @returns 
- * [KO] RedGPUContext 인스턴스이면 true 
+ * @returns
+ * [KO] RedGPUContext 인스턴스이면 true
  * [EN] True if the value is a RedGPUContext instance
- * @throws 
- * [KO] RedGPUContext 인스턴스가 아닐 경우 Error 발생 
+ * @throws
+ * [KO] RedGPUContext 인스턴스가 아닐 경우 Error 발생
  * [EN] Throws Error if the value is not a RedGPUContext instance
  * @category Validation
  */

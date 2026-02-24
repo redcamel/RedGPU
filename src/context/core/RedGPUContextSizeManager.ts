@@ -9,10 +9,10 @@ import RedGPUContext from "../RedGPUContext";
  * [EN] Interface representing rectangular area information.
  */
 export interface IRedGPURectObject {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 }
 
 /**

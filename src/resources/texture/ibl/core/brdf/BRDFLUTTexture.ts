@@ -26,15 +26,6 @@ class BRDFLUTTexture extends ManagementResourceBase {
     }
 
     /**
-     * [KO] 텍스처를 초기화합니다.
-     * [EN] Initializes the texture.
-     */
-    #init() {
-        this.#gpuTexture = this.redGPUContext.resourceManager.brdfGenerator.brdfLUTTexture;
-        this.__fireListenerList();
-    }
-
-    /**
      * [KO] GPUTexture 객체를 반환합니다.
      * [EN] Returns the GPUTexture object.
      */
@@ -49,6 +40,15 @@ class BRDFLUTTexture extends ManagementResourceBase {
     get videoMemorySize(): number {
         // 128 * 128 * 4 bytes (rg16float)
         return 128 * 128 * 4;
+    }
+
+    /**
+     * [KO] 텍스처를 초기화합니다.
+     * [EN] Initializes the texture.
+     */
+    #init() {
+        this.#gpuTexture = this.redGPUContext.resourceManager.brdfGenerator.brdfLUTTexture;
+        this.__fireListenerList();
     }
 }
 

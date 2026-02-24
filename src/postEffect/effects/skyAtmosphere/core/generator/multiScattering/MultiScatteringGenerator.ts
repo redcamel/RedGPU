@@ -22,16 +22,15 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
  * @category PostEffect
  */
 class MultiScatteringGenerator {
+    /** [KO] 텍스처 가로 크기 [EN] Texture width */
+    readonly width: number = 32;
+    /** [KO] 텍스처 세로 크기 [EN] Texture height */
+    readonly height: number = 32;
     #redGPUContext: RedGPUContext;
     #lutTexture: MultiScatteringLUTTexture;
     #pipeline: GPUComputePipeline;
     #uniformBuffer: UniformBuffer;
     #sampler: Sampler;
-
-    /** [KO] 텍스처 가로 크기 [EN] Texture width */
-    readonly width: number = 32;
-    /** [KO] 텍스처 세로 크기 [EN] Texture height */
-    readonly height: number = 32;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -40,20 +39,8 @@ class MultiScatteringGenerator {
     }
 
     /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
-    get lutTexture(): MultiScatteringLUTTexture { return this.#lutTexture; }
-
-    #init(): void {
-        const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new MultiScatteringLUTTexture(this.#redGPUContext, this.width, this.height);
-
-        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
-        this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'MULTI_SCAT_GEN_UNIFORM_BUFFER');
-
-        const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
-        this.#pipeline = gpuDevice.createComputePipeline({
-            layout: 'auto',
-            compute: {module: shaderModule, entryPoint: 'main'}
-        });
+    get lutTexture(): MultiScatteringLUTTexture {
+        return this.#lutTexture;
     }
 
     /**
@@ -71,7 +58,7 @@ class MultiScatteringGenerator {
             const value = params[key];
             if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
         }
-        
+
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#pipeline.getBindGroupLayout(0),
             entries: [
@@ -90,6 +77,20 @@ class MultiScatteringGenerator {
         passEncoder.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
         this.#lutTexture.notifyUpdate();
+    }
+
+    #init(): void {
+        const {gpuDevice} = this.#redGPUContext;
+        this.#lutTexture = new MultiScatteringLUTTexture(this.#redGPUContext, this.width, this.height);
+
+        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
+        this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'MULTI_SCAT_GEN_UNIFORM_BUFFER');
+
+        const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
+        this.#pipeline = gpuDevice.createComputePipeline({
+            layout: 'auto',
+            compute: {module: shaderModule, entryPoint: 'main'}
+        });
     }
 }
 

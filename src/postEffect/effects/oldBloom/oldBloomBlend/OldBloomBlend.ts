@@ -20,7 +20,7 @@ class OldBloomBlend extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        
+
         const shaderSource = {
             msaa: `
                 @group(0) @binding(0) var sourceTexture0 : texture_storage_2d<rgba16float, read>;
@@ -55,13 +55,19 @@ class OldBloomBlend extends ASinglePassPostEffect {
         this.bloomStrength = this.#bloomStrength;
     }
 
-    get bloomStrength(): number { return this.#bloomStrength; }
+    get bloomStrength(): number {
+        return this.#bloomStrength;
+    }
+
     set bloomStrength(value: number) {
         this.#bloomStrength = value;
         this.updateUniform('bloomStrength', value);
     }
 
-    get exposure(): number { return this.#exposure; }
+    get exposure(): number {
+        return this.#exposure;
+    }
+
     set exposure(value: number) {
         this.#exposure = value;
         this.updateUniform('exposure', value);

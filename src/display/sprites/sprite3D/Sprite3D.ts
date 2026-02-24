@@ -165,29 +165,6 @@ class Sprite3D extends Mesh {
     }
 
     /**
-     * [KO] 텍스처 비율과 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
-     * [EN] Updates internal rendering ratios based on texture ratio and settings.
-     */
-    #updateRatios() {
-        if (this.#nativeHeight) {
-            const prevX = this._renderRatioX;
-            const prevY = this._renderRatioY;
-
-            if (this.usePixelSize) {
-                this._renderRatioY = 1;
-                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
-            } else {
-                this._renderRatioY = this.#worldSize;
-                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
-            }
-
-            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
-                this.dirtyTransform = true;
-            }
-        }
-    }
-
-    /**
      * [KO] 프레임마다 스프라이트를 렌더링합니다. 텍스처 로드 완료 시 원본 해상도를 자동으로 동기화합니다.
      * [EN] Renders the sprite every frame. Automatically syncs physical resolution when texture loading is complete.
      * @param renderViewStateData -
@@ -203,7 +180,7 @@ class Sprite3D extends Mesh {
                 if (tW !== this.#nativeWidth || tH !== this.#nativeHeight) {
                     this.#nativeWidth = tW
                     this.#nativeHeight = tH
-                    
+
                     const prevPixelSize = this.pixelSize;
                     this.pixelSize = this.pixelSize || tH;
                     this.#updateRatios();
@@ -230,6 +207,29 @@ class Sprite3D extends Mesh {
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
+    }
+
+    /**
+     * [KO] 텍스처 비율과 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
+     * [EN] Updates internal rendering ratios based on texture ratio and settings.
+     */
+    #updateRatios() {
+        if (this.#nativeHeight) {
+            const prevX = this._renderRatioX;
+            const prevY = this._renderRatioY;
+
+            if (this.usePixelSize) {
+                this._renderRatioY = 1;
+                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
+            } else {
+                this._renderRatioY = this.#worldSize;
+                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+            }
+
+            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
+                this.dirtyTransform = true;
+            }
+        }
     }
 }
 

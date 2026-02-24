@@ -32,8 +32,7 @@ const PRESET_BOOLEAN = {
     USE_BILLBOARD: 'useBillboard',
     RECEIVE_SHADOW: 'receiveShadow',
 };
-const PRESET_POSITIVE_NUMBER = {
-};
+const PRESET_POSITIVE_NUMBER = {};
 const PRESET_UINT = {};
 const PRESET_SAMPLER = {};
 const PRESET_CUBE_TEXTURE = {};

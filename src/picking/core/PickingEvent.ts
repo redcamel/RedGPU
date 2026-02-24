@@ -171,17 +171,17 @@ class PickingEvent {
         this.ctrlKey = nativeEvent.ctrlKey;
         this.shiftKey = nativeEvent.shiftKey;
 
-		if (hit) {
-			this.point = hit.point;
-			this.localPoint = hit.localPoint;
-			this.localX = hit.localPoint[0];
-			this.localY = hit.localPoint[1];
-			this.localZ = hit.localPoint[2];
-			this.distance = hit.distance;
-			this.faceIndex = hit.faceIndex;
-			this.uv = hit.uv;
-			this.ray = hit.ray;
-		}
+        if (hit) {
+            this.point = hit.point;
+            this.localPoint = hit.localPoint;
+            this.localX = hit.localPoint[0];
+            this.localY = hit.localPoint[1];
+            this.localZ = hit.localPoint[2];
+            this.distance = hit.distance;
+            this.faceIndex = hit.faceIndex;
+            this.uv = hit.uv;
+            this.ray = hit.ray;
+        }
     }
 }
 

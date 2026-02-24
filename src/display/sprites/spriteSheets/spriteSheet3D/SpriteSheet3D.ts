@@ -100,7 +100,7 @@ class SpriteSheet3D extends ASpriteSheet {
                         // [EN] Sync physical segment resolution to default pixelSize
                         this.pixelSize = this.#pixelSize ? this.#pixelSize : tH;
                         this.#updateRatios();
-                        keepLog('오냐 ',this.pixelSize)
+                        keepLog('오냐 ', this.pixelSize)
                         this.dirtyTransform = true
                     }
                 }
@@ -149,12 +149,12 @@ class SpriteSheet3D extends ASpriteSheet {
      * [EN] Pixel size to set
      */
     set pixelSize(value: number) {
-        if(this.gpuRenderInfo){
+        if (this.gpuRenderInfo) {
             const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
             this.redGPUContext.gpuDevice.queue.writeBuffer(
                 vertexUniformBuffer.gpuBuffer,
                 vertexUniformInfo.members.pixelSize.uniformOffset,
-                new Float32Array([value * window.devicePixelRatio]) 
+                new Float32Array([value * window.devicePixelRatio])
             )
         }
         this.#pixelSize = value;
@@ -176,7 +176,7 @@ class SpriteSheet3D extends ASpriteSheet {
      * [EN] Whether to use
      */
     set usePixelSize(value: boolean) {
-        if(this.gpuRenderInfo){
+        if (this.gpuRenderInfo) {
             const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
             this.redGPUContext.gpuDevice.queue.writeBuffer(
                 vertexUniformBuffer.gpuBuffer,
@@ -187,40 +187,6 @@ class SpriteSheet3D extends ASpriteSheet {
         if (this.#usePixelSize === value) return;
         this.#usePixelSize = value;
         this.#updateRatios();
-    }
-
-    /**
-     * [KO] 세그먼트 비율과 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
-     * [EN] Updates internal rendering ratios based on segment ratio and settings.
-     */
-    #updateRatios() {
-        if (this.#nativeHeight) {
-            const prevX = this._renderRatioX;
-            const prevY = this._renderRatioY;
-
-            if (this.usePixelSize) {
-                this._renderRatioY = 1;
-                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
-            } else {
-                this._renderRatioY = this.#worldSize;
-                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
-            }
-
-            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
-                this.dirtyTransform = true;
-            }
-        }
-    }
-
-    /**
-     * [KO] 프레임마다 스프라이트 시트를 렌더링합니다.
-     * [EN] Renders the sprite sheet every frame.
-     * @param renderViewStateData -
-     * [KO] 현재 렌더링 상태 데이터
-     * [EN] Current render view state data
-     */
-    render(renderViewStateData: RenderViewStateData) {
-        super.render(renderViewStateData);
     }
 
     /**
@@ -274,6 +240,17 @@ class SpriteSheet3D extends ASpriteSheet {
     }
 
     /**
+     * [KO] 프레임마다 스프라이트 시트를 렌더링합니다.
+     * [EN] Renders the sprite sheet every frame.
+     * @param renderViewStateData -
+     * [KO] 현재 렌더링 상태 데이터
+     * [EN] Current render view state data
+     */
+    render(renderViewStateData: RenderViewStateData) {
+        super.render(renderViewStateData);
+    }
+
+    /**
      * [KO] SpriteSheet3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
      * [EN] Creates a custom vertex shader module dedicated to SpriteSheet3D.
      *
@@ -286,6 +263,29 @@ class SpriteSheet3D extends ASpriteSheet {
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
+    }
+
+    /**
+     * [KO] 세그먼트 비율과 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
+     * [EN] Updates internal rendering ratios based on segment ratio and settings.
+     */
+    #updateRatios() {
+        if (this.#nativeHeight) {
+            const prevX = this._renderRatioX;
+            const prevY = this._renderRatioY;
+
+            if (this.usePixelSize) {
+                this._renderRatioY = 1;
+                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
+            } else {
+                this._renderRatioY = this.#worldSize;
+                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+            }
+
+            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
+                this.dirtyTransform = true;
+            }
+        }
     }
 }
 

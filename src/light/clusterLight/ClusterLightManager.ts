@@ -40,26 +40,6 @@ class ClusterLightManager {
      * [EN] Float32Array containing cluster light data
      */
     #clusterLightsBufferData: Float32Array
-    /**
-     * [KO] 클러스터 라이트 경계 패스를 반환합니다.
-     * [EN] Returns the cluster light boundary pass.
-     */
-    get passClusterLightBound(): PassClusterLightBound {
-        return this.#passClusterLightBound;
-    }
-
-    get passClustersLight(): PassClustersLight {
-        return this.#passClustersLight;
-    }
-
-
-    get clusterLightsBuffer(): GPUBuffer {
-        return this.#clusterLightsBuffer;
-    }
-
-    get clusterLightsBufferData(): Float32Array {
-        return this.#clusterLightsBufferData;
-    }
 
     constructor(view: View3D) {
         this.#view = view
@@ -75,6 +55,27 @@ class ClusterLightManager {
         this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource)
 
     }
+
+    /**
+     * [KO] 클러스터 라이트 경계 패스를 반환합니다.
+     * [EN] Returns the cluster light boundary pass.
+     */
+    get passClusterLightBound(): PassClusterLightBound {
+        return this.#passClusterLightBound;
+    }
+
+    get passClustersLight(): PassClustersLight {
+        return this.#passClustersLight;
+    }
+
+    get clusterLightsBuffer(): GPUBuffer {
+        return this.#clusterLightsBuffer;
+    }
+
+    get clusterLightsBufferData(): Float32Array {
+        return this.#clusterLightsBufferData;
+    }
+
     /**
      * 클러스터 라이트를 업데이트합니다.
      * 포인트 라이트와 스팟 라이트 데이터를 계산하고 GPU 버퍼에 업로드합니다.
@@ -84,7 +85,7 @@ class ClusterLightManager {
      */
     updateClusterLights(calcClusterLight: boolean = false) {
         if (!calcClusterLight) return
-        const {redGPUContext, scene, renderViewStateData,pixelRectArray} = this.#view
+        const {redGPUContext, scene, renderViewStateData, pixelRectArray} = this.#view
         const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== pixelRectArray[2] || this.#prevHeight !== pixelRectArray[3]
         // const dirtyPixelSize = true;
         if (!this.#passClusterLightBound) {

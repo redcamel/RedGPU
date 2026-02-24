@@ -4,35 +4,35 @@
  *
  * [KO] 정점들이 어떤 규칙으로 연결되어 그려질지 결정합니다.
  * [EN] Determines the rules by which vertices are connected and drawn.
- * 
+ *
  * @category Constants
  */
 const GPU_PRIMITIVE_TOPOLOGY = {
-	/**
-	 * [KO] 각 정점을 독립적인 점으로 렌더링합니다.
-	 * [EN] Renders each vertex as an independent point.
-	 */
-	POINT_LIST: 'point-list',
-	/**
-	 * [KO] 두 정점을 연결하여 독립적인 선분을 만듭니다.
-	 * [EN] Connects two vertices to form an independent line segment.
-	 */
-	LINE_LIST: 'line-list',
-	/**
-	 * [KO] 연속된 정점들을 하나의 선으로 연결합니다.
-	 * [EN] Connects consecutive vertices into a single continuous line.
-	 */
-	LINE_STRIP: 'line-strip',
-	/**
-	 * [KO] 세 정점을 연결하여 독립적인 삼각형을 만듭니다.
-	 * [EN] Connects three vertices to form an independent triangle.
-	 */
-	TRIANGLE_LIST: 'triangle-list',
-	/**
-	 * [KO] 연속된 정점들을 연결하여 삼각형 띠를 만듭니다.
-	 * [EN] Connects consecutive vertices to form a triangle strip.
-	 */
-	TRIANGLE_STRIP: 'triangle-strip',
+    /**
+     * [KO] 각 정점을 독립적인 점으로 렌더링합니다.
+     * [EN] Renders each vertex as an independent point.
+     */
+    POINT_LIST: 'point-list',
+    /**
+     * [KO] 두 정점을 연결하여 독립적인 선분을 만듭니다.
+     * [EN] Connects two vertices to form an independent line segment.
+     */
+    LINE_LIST: 'line-list',
+    /**
+     * [KO] 연속된 정점들을 하나의 선으로 연결합니다.
+     * [EN] Connects consecutive vertices into a single continuous line.
+     */
+    LINE_STRIP: 'line-strip',
+    /**
+     * [KO] 세 정점을 연결하여 독립적인 삼각형을 만듭니다.
+     * [EN] Connects three vertices to form an independent triangle.
+     */
+    TRIANGLE_LIST: 'triangle-list',
+    /**
+     * [KO] 연속된 정점들을 연결하여 삼각형 띠를 만듭니다.
+     * [EN] Connects consecutive vertices to form a triangle strip.
+     */
+    TRIANGLE_STRIP: 'triangle-strip',
 } as const;
 Object.freeze(GPU_PRIMITIVE_TOPOLOGY);
 export default GPU_PRIMITIVE_TOPOLOGY;

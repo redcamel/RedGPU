@@ -101,7 +101,10 @@ class IsometricController extends AController {
      * [EN] Gets the zoom level.
      * @returns [KO] 줌 레벨 [EN] Zoom level
      */
-    get zoom(): number { return this.#targetZoom; }
+    get zoom(): number {
+        return this.#targetZoom;
+    }
+
     /**
      * [KO] 줌 레벨을 설정합니다.
      * [EN] Sets the zoom level.
@@ -113,63 +116,146 @@ class IsometricController extends AController {
     }
 
     /** [KO] 줌 보간 계수 [EN] Zoom interpolation factor */
-    get zoomInterpolation(): number { return this.#zoomInterpolation; }
-    set zoomInterpolation(value: number) { validateNumberRange(value, 0.0001, 1); this.#zoomInterpolation = value; }
+    get zoomInterpolation(): number {
+        return this.#zoomInterpolation;
+    }
+
+    set zoomInterpolation(value: number) {
+        validateNumberRange(value, 0.0001, 1);
+        this.#zoomInterpolation = value;
+    }
 
     /** [KO] 줌 속도 [EN] Zoom speed */
-    get speedZoom(): number { return this.#speedZoom; }
-    set speedZoom(value: number) { validateNumberRange(value, 0.01); this.#speedZoom = value; }
+    get speedZoom(): number {
+        return this.#speedZoom;
+    }
+
+    set speedZoom(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#speedZoom = value;
+    }
 
     /** [KO] 최소 줌 [EN] Minimum zoom */
-    get minZoom(): number { return this.#minZoom; }
-    set minZoom(value: number) { validateNumberRange(value, 0.01); this.#minZoom = value; this.zoom = this.#targetZoom; }
+    get minZoom(): number {
+        return this.#minZoom;
+    }
+
+    set minZoom(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#minZoom = value;
+        this.zoom = this.#targetZoom;
+    }
 
     /** [KO] 최대 줌 [EN] Maximum zoom */
-    get maxZoom(): number { return this.#maxZoom; }
-    set maxZoom(value: number) { validateNumberRange(value, 0.01); this.#maxZoom = value; this.zoom = this.#targetZoom; }
+    get maxZoom(): number {
+        return this.#maxZoom;
+    }
+
+    set maxZoom(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#maxZoom = value;
+        this.zoom = this.#targetZoom;
+    }
 
     /** [KO] 뷰 높이 [EN] View height */
-    get viewHeight(): number { return this.#targetViewHeight; }
-    set viewHeight(value: number) { validateNumberRange(value, 0.1); this.#targetViewHeight = value; }
+    get viewHeight(): number {
+        return this.#targetViewHeight;
+    }
+
+    set viewHeight(value: number) {
+        validateNumberRange(value, 0.1);
+        this.#targetViewHeight = value;
+    }
 
     /** [KO] 뷰 높이 보간 계수 [EN] View height interpolation factor */
-    get viewHeightInterpolation(): number { return this.#viewHeightInterpolation; }
-    set viewHeightInterpolation(value: number) { validateNumberRange(value, 0.0001, 1); this.#viewHeightInterpolation = value; }
+    get viewHeightInterpolation(): number {
+        return this.#viewHeightInterpolation;
+    }
+
+    set viewHeightInterpolation(value: number) {
+        validateNumberRange(value, 0.0001, 1);
+        this.#viewHeightInterpolation = value;
+    }
 
     /** [KO] 이동 속도 [EN] Movement speed */
-    get moveSpeed(): number { return this.#moveSpeed; }
-    set moveSpeed(value: number) { validateNumberRange(value, 0.01); this.#moveSpeed = value; }
+    get moveSpeed(): number {
+        return this.#moveSpeed;
+    }
+
+    set moveSpeed(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#moveSpeed = value;
+    }
 
     /** [KO] 이동 보간 계수 [EN] Movement interpolation factor */
-    get moveSpeedInterpolation(): number { return this.#moveSpeedInterpolation; }
-    set moveSpeedInterpolation(value: number) { validateNumberRange(value, 0.0001, 1); this.#moveSpeedInterpolation = value; }
+    get moveSpeedInterpolation(): number {
+        return this.#moveSpeedInterpolation;
+    }
+
+    set moveSpeedInterpolation(value: number) {
+        validateNumberRange(value, 0.0001, 1);
+        this.#moveSpeedInterpolation = value;
+    }
 
     /** [KO] 마우스 이동 속도 [EN] Mouse movement speed */
-    get mouseMoveSpeed(): number { return this.#mouseMoveSpeed; }
-    set mouseMoveSpeed(value: number) { validateNumberRange(value, 0.01); this.#mouseMoveSpeed = value; }
+    get mouseMoveSpeed(): number {
+        return this.#mouseMoveSpeed;
+    }
+
+    set mouseMoveSpeed(value: number) {
+        validateNumberRange(value, 0.01);
+        this.#mouseMoveSpeed = value;
+    }
 
     /** [KO] 마우스 이동 보간 계수 [EN] Mouse movement interpolation factor */
-    get mouseMoveSpeedInterpolation(): number { return this.#mouseMoveSpeedInterpolation; }
-    set mouseMoveSpeedInterpolation(value: number) { validateNumberRange(value, 0.0001, 1); this.#mouseMoveSpeedInterpolation = value; }
+    get mouseMoveSpeedInterpolation(): number {
+        return this.#mouseMoveSpeedInterpolation;
+    }
+
+    set mouseMoveSpeedInterpolation(value: number) {
+        validateNumberRange(value, 0.0001, 1);
+        this.#mouseMoveSpeedInterpolation = value;
+    }
 
     /** [KO] 키 매핑 설정 [EN] Key mapping configuration */
-    get keyNameMapper() { return {...this.#keyNameMapper}; }
+    get keyNameMapper() {
+        return {...this.#keyNameMapper};
+    }
 
     /** [KO] 타겟 X 위치 [EN] Target X position */
-    get targetX(): number { return this.#targetMesh.x; }
+    get targetX(): number {
+        return this.#targetMesh.x;
+    }
+
     /** [KO] 타겟 Y 위치 [EN] Target Y position */
-    get targetY(): number { return this.#targetMesh.y; }
+    get targetY(): number {
+        return this.#targetMesh.y;
+    }
+
     /** [KO] 타겟 Z 위치 [EN] Target Z position */
-    get targetZ(): number { return this.#targetMesh.z; }
+    get targetZ(): number {
+        return this.#targetMesh.z;
+    }
 
     /** [KO] 상향 이동 키 설정 [EN] Sets the move up key */
-    setMoveUpKey(value: string) { this.#keyNameMapper.moveUp = value; }
+    setMoveUpKey(value: string) {
+        this.#keyNameMapper.moveUp = value;
+    }
+
     /** [KO] 하향 이동 키 설정 [EN] Sets the move down key */
-    setMoveDownKey(value: string) { this.#keyNameMapper.moveDown = value; }
+    setMoveDownKey(value: string) {
+        this.#keyNameMapper.moveDown = value;
+    }
+
     /** [KO] 좌측 이동 키 설정 [EN] Sets the move left key */
-    setMoveLeftKey(value: string) { this.#keyNameMapper.moveLeft = value; }
+    setMoveLeftKey(value: string) {
+        this.#keyNameMapper.moveLeft = value;
+    }
+
     /** [KO] 우측 이동 키 설정 [EN] Sets the move right key */
-    setMoveRightKey(value: string) { this.#keyNameMapper.moveRight = value; }
+    setMoveRightKey(value: string) {
+        this.#keyNameMapper.moveRight = value;
+    }
 
     /**
      * [KO] 매 프레임마다 카메라를 업데이트합니다.
@@ -192,39 +278,39 @@ class IsometricController extends AController {
      */
     #updateAnimation(view: View3D, deltaTime: number): void {
         this.#handleKeyboardInput(view, deltaTime);
-        
+
         // 지수적 감쇄 보간
         this.#currentZoom = this.#targetZoom + (this.#currentZoom - this.#targetZoom) * Math.pow(this.#zoomInterpolation, deltaTime);
         this.#currentViewHeight = this.#targetViewHeight + (this.#currentViewHeight - this.#targetViewHeight) * Math.pow(this.#viewHeightInterpolation, deltaTime);
-        
+
         if (!this.#targetMesh) return;
 
         const posSmoothing = Math.pow(this.#moveSpeedInterpolation, deltaTime);
         this.#targetMesh.x = this.#targetX + (this.#targetMesh.x - this.#targetX) * posSmoothing;
         this.#targetMesh.z = this.#targetZ + (this.#targetMesh.z - this.#targetZ) * posSmoothing;
-        
+
         const targetPos = this.#targetMesh.position;
         const angleRad = this.#cameraAngle * PER_PI;
-        
+
         const {width, height} = view.pixelRectObject;
         const aspectRatio = width / height;
         const effectiveHeight = this.#currentViewHeight / this.#currentZoom;
         const effectiveWidth = effectiveHeight * aspectRatio;
-        
+
         const scaleFactor = this.#currentViewHeight / 15;
         const baseDistance = 15;
         const baseHeight = 12;
-        
+
         const cameraDistance = (baseDistance * scaleFactor) / this.#currentZoom;
         const cameraHeight = (baseHeight * scaleFactor) / this.#currentZoom;
-        
+
         const cameraX = targetPos[0] + Math.cos(angleRad) * cameraDistance;
         const cameraY = targetPos[1] + cameraHeight;
         const cameraZ = targetPos[2] + Math.sin(angleRad) * cameraDistance;
-        
+
         this.camera.setPosition(cameraX, cameraY, cameraZ);
         this.camera.lookAt(targetPos[0], targetPos[1], targetPos[2]);
-        
+
         const orthoCamera = this.camera as OrthographicCamera;
         orthoCamera.left = -effectiveWidth / 2;
         orthoCamera.right = effectiveWidth / 2;
@@ -240,24 +326,24 @@ class IsometricController extends AController {
     #handleKeyboardInput(view: View3D, deltaTime: number): boolean {
         if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
         if (!this.#targetMesh) return false;
-        
+
         const {keyboardKeyBuffer} = view.redGPUContext;
         const tKeyNameMapper = this.#keyNameMapper;
         const speed = this.#moveSpeed * deltaTime;
-        
+
         let inputUp = 0, inputDown = 0, inputLeft = 0, inputRight = 0;
         if (keyboardKeyBuffer[tKeyNameMapper.moveUp]) inputUp = speed;
         if (keyboardKeyBuffer[tKeyNameMapper.moveDown]) inputDown = speed;
         if (keyboardKeyBuffer[tKeyNameMapper.moveLeft]) inputLeft = speed;
         if (keyboardKeyBuffer[tKeyNameMapper.moveRight]) inputRight = speed;
-        
+
         const angleRad = this.#cameraAngle * PER_PI;
         const cos = Math.cos(angleRad);
         const sin = Math.sin(angleRad);
-        
+
         const worldDeltaX = (inputDown - inputUp) * cos + (inputRight - inputLeft) * cos;
         const worldDeltaZ = (inputDown - inputUp) * sin + (inputRight - inputLeft) * (-sin);
-        
+
         this.#targetX += worldDeltaX;
         this.#targetZ += worldDeltaZ;
         return true;

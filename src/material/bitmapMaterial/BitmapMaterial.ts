@@ -13,16 +13,16 @@ const SHADER_INFO = parseWGSL(fragmentModuleSource, 'BITMAP_MATERIAL')
  * [EN] Common property interface for bitmap texture-based materials
  */
 interface BitmapMaterial {
-	/**
-	 * [KO] 머티리얼에 적용할 비트맵 텍스처
-	 * [EN] Bitmap texture to apply to the material
-	 */
-	diffuseTexture: BitmapTexture
-	/**
-	 * [KO] 비트맵 텍스처 샘플러
-	 * [EN] Bitmap texture sampler
-	 */
-	diffuseTextureSampler: Sampler;
+    /**
+     * [KO] 머티리얼에 적용할 비트맵 텍스처
+     * [EN] Bitmap texture to apply to the material
+     */
+    diffuseTexture: BitmapTexture
+    /**
+     * [KO] 비트맵 텍스처 샘플러
+     * [EN] Bitmap texture sampler
+     */
+    diffuseTextureSampler: Sampler;
 }
 
 /**
@@ -44,11 +44,11 @@ interface BitmapMaterial {
  * @category Material
  */
 class BitmapMaterial extends AUVTransformBaseMaterial {
-	/**
-	 * [KO] 파이프라인 dirty 상태 플래그
-	 * [EN] Pipeline dirty status flag
-	 */
-	dirtyPipeline: boolean = false
+    /**
+     * [KO] 파이프라인 dirty 상태 플래그
+     * [EN] Pipeline dirty status flag
+     */
+    dirtyPipeline: boolean = false
 
     /**
      * [KO] BitmapMaterial 생성자

@@ -39,7 +39,6 @@ import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
  */
 declare class View3D extends AView {
     #private;
-    get clusterLightManager(): ClusterLightManager;
     /**
      * [KO] View3D 인스턴스를 생성합니다.
      * [EN] Creates a View3D instance.
@@ -60,6 +59,7 @@ declare class View3D extends AView {
      * [EN] Optional name identifier for the view
      */
     constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string);
+    get clusterLightManager(): ClusterLightManager;
     /**
      * [KO] 뷰 렌더 텍스처 매니저를 반환합니다.
      * [EN] Returns the ViewRenderTextureManager instance.

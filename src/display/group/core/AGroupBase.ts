@@ -450,7 +450,7 @@ abstract class GroupBase extends Object3DContainer {
         }
         if (this.dirtyTransform) {
             dirtyTransformForChildren = true;
-            updateObject3DMatrix(this,view)
+            updateObject3DMatrix(this, view)
 
         }
         if (this.dirtyTransform) {

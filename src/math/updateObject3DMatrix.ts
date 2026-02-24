@@ -25,7 +25,7 @@ const CONVERT_RADIAN = Math.PI / 180;
  * [EN] The View3D instance currently being rendered (used for size calculations, etc.)
  * @category Math
  */
-const updateObject3DMatrix = (targetMesh:Mesh|AGroupBase,view:View3D)=>{
+const updateObject3DMatrix = (targetMesh: Mesh | AGroupBase, view: View3D) => {
 
     const {pixelRectObject} = view;
     const parent = targetMesh.parent;

@@ -91,35 +91,35 @@ class Box extends Primitive {
     /**
      * [KO] Box 인스턴스를 생성합니다.
      * [EN] Creates an instance of Box.
-     * 
+     *
      * ### Example
      * ```typescript
      * const box = new RedGPU.Box(redGPUContext, 1, 1, 1, 1, 1, 1, 1);
      * ```
      *
-     * @param redGPUContext - 
-     * [KO] RedGPUContext 인스턴스 
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
-     * @param width - 
-     * [KO] 박스 너비 (기본값 1) 
+     * @param width -
+     * [KO] 박스 너비 (기본값 1)
      * [EN] Box width (default 1)
-     * @param height - 
-     * [KO] 박스 높이 (기본값 1) 
+     * @param height -
+     * [KO] 박스 높이 (기본값 1)
      * [EN] Box height (default 1)
-     * @param depth - 
-     * [KO] 박스 깊이 (기본값 1) 
+     * @param depth -
+     * [KO] 박스 깊이 (기본값 1)
      * [EN] Box depth (default 1)
-     * @param wSegments - 
-     * [KO] 가로(X축) 세그먼트 수 (기본값 1) 
+     * @param wSegments -
+     * [KO] 가로(X축) 세그먼트 수 (기본값 1)
      * [EN] Width (X-axis) segments (default 1)
-     * @param hSegments - 
-     * [KO] 세로(Y축) 세그먼트 수 (기본값 1) 
+     * @param hSegments -
+     * [KO] 세로(Y축) 세그먼트 수 (기본값 1)
      * [EN] Height (Y-axis) segments (default 1)
-     * @param dSegments - 
-     * [KO] 깊이(Z축) 세그먼트 수 (기본값 1) 
+     * @param dSegments -
+     * [KO] 깊이(Z축) 세그먼트 수 (기본값 1)
      * [EN] Depth (Z-axis) segments (default 1)
-     * @param uvSize - 
-     * [KO] UV 스케일 (기본값 1) 
+     * @param uvSize -
+     * [KO] UV 스케일 (기본값 1)
      * [EN] UV scale (default 1)
      */
     constructor(
