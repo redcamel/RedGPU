@@ -6,5 +6,5 @@ struct SkyAtmosphere {
     skyAtmosphereSunDirection: vec3<f32>,
     skyAtmosphereEarthRadius: f32,
     skyAtmosphereAtmosphereHeight: f32,
-    padding: vec3<f32>
+    padding: f32
 };

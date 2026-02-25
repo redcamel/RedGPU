@@ -7,6 +7,7 @@ import TransmittanceGenerator from "./core/generator/transmittance/Transmittance
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import CameraVolumeGenerator from "./core/generator/cameraVolume/CameraVolumeGenerator";
+import AtmosphereIrradianceGenerator from "./core/generator/irradiance/AtmosphereIrradianceGenerator";
 import skyAtmosphereFn from "./core/skyAtmosphereFn.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -34,6 +35,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #multiScatteringGenerator: MultiScatteringGenerator;
     #skyViewGenerator: SkyViewGenerator;
     #cameraVolumeGenerator: CameraVolumeGenerator;
+    #irradianceGenerator: AtmosphereIrradianceGenerator;
     #sampler: Sampler;
 
     #params = {
@@ -100,6 +102,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext);
         this.#skyViewGenerator = new SkyViewGenerator(redGPUContext);
         this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext);
+        this.#irradianceGenerator = new AtmosphereIrradianceGenerator(redGPUContext);
 
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: 'linear',
@@ -455,6 +458,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         return this.#cameraVolumeGenerator.lutTexture;
     }
 
+    /** [KO] 대기 조도(Irradiance) LUT 텍스처를 반환합니다. [EN] Returns the Atmospheric Irradiance LUT texture. */
+    get atmosphereIrradianceTexture() {
+        return this.#irradianceGenerator.lutTexture;
+    }
+
     /** [KO] 대기 산란 전용 샘플러를 반환합니다. [EN] Returns the dedicated atmosphere sampler. */
     get skyAtmosphereSampler() {
         return this.#sampler;
@@ -502,6 +510,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         if (this.#dirtySkyView) {
             this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#params);
             this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#params);
+            this.#irradianceGenerator.render(this.#skyViewGenerator.lutTexture, this.#params);
             this.#dirtySkyView = false;
         }
 
@@ -649,6 +658,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             uniformOffset: 48,
             View: Float32Array
         }, Array.from(this.#params.sunDirection));
+
         this.#dirtySkyView = true;
     }
 

@@ -42,10 +42,15 @@ RedGPU.init(
         const transmittance = skyAtmosphere.transmittanceTexture;
         const multiScat = skyAtmosphere.multiScatteringTexture;
         const skyView = skyAtmosphere.skyViewTexture;
+        const irradiance = skyAtmosphere.atmosphereIrradianceTexture;
 
         if (transmittance) createLUTSprite(transmittance, 'Transmittance LUT', -6, 6);
         if (multiScat) createLUTSprite(multiScat, 'Multi-Scat LUT', 0, 6);
         if (skyView) createLUTSprite(skyView, 'Sky-View LUT (Zenith:Top)', 6, 6);
+        if (irradiance) {
+            const s = createLUTSprite(irradiance, 'Atmosphere Irradiance LUT', 0, 0);
+            s.scaleY = 0.5; // [KO] 1D LUT 시각화 보정 [EN] Adjust 1D LUT visualization
+        }
 
         const infoLabel = new RedGPU.Display.TextField3D(redGPUContext, '3D Camera Volume LUT (Aerial Perspective) is active in background');
         infoLabel.x = 0; infoLabel.y = 1;

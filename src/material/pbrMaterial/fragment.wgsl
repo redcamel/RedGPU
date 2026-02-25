@@ -616,8 +616,8 @@ fn main(inputData:InputData) -> OutputFragment {
             iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb;
         }
 
-        // [KO] 대기 산란 필터링 적용 (IBL 동기화)
-        // [EN] Apply Atmospheric Scattering Filtering (IBL Synchronization)
+        // [KO] 대기 산란 필터링 및 조도 합성 (IBL 동기화)
+        // [EN] Atmospheric Scattering Filtering and Irradiance Synthesis (IBL Synchronization)
         if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
             let u_atmo = systemUniforms.skyAtmosphere;
             let camH = u_atmo.skyAtmosphereCameraHeight;
@@ -632,12 +632,13 @@ fn main(inputData:InputData) -> OutputFragment {
             let specSkyScat = textureSampleLevel(skyViewTexture, atmosphereSampler, specSkyUV, 0.0).rgb * sunInt;
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
 
-            // [KO] Diffuse 필터링: (HDR 조도 * 투과율) + 실시간 하늘 산란광
-            // [EN] Diffuse Filtering: (HDR Irradiance * Transmittance) + Real-time Sky Scattering
+            // [KO] Diffuse 필터링: (HDR 조도 * 투과율) + 실시간 대기 조도(Irradiance)
+            // [EN] Diffuse Filtering: (HDR Irradiance * Transmittance) + Real-time Atmosphere Irradiance
             let diffTrans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            let diffSkyUV = get_sky_view_uv(N, camH, earthR, atmH);
-            let diffSkyScat = textureSampleLevel(skyViewTexture, atmosphereSampler, diffSkyUV, 0.0).rgb * sunInt;
-            iblDiffuseColor = (iblDiffuseColor * diffTrans) + diffSkyScat;
+            // [KO] 법선 방향의 수직각을 [0, 1] 범위로 매핑하여 조도 LUT 샘플링
+            let u_irradiance = clamp((N.y * 0.5) + 0.5, 0.001, 0.999);
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceTexture, atmosphereSampler, vec2<f32>(u_irradiance, 0.5), 0.0).rgb * sunInt;
+            iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
         // [KO] ibl (BRDF LUT 샘플링) [EN] ibl BRDF LUT sampling

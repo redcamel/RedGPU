@@ -174,7 +174,16 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 *   **결과**: ✅ 완료.
     - **전역 바인딩 확장**: `skyViewTexture`를 시스템 유니폼 그룹(Group 0, Binding 16)에 추가하여 모든 재질에서 실시간 하늘 데이터를 참조할 수 있도록 인프라 확장.
     - **물리적 필터링**: PBR 셰이더 내에서 IBL(Diffuse/Specular) 샘플링 시, 반사/법선 방향의 대기 투과율(`Transmittance`)과 산란광(`Sky-View`)을 합성하는 물리적 필터 적용.
-    - **시각적 정합성**: 정적인 HDR 텍스처를 사용하더라도 대기 상태(노을 등)에 따라 반사광의 색상과 밝기가 실시간으로 변조되어 환경과 완벽히 동기화됨.
+    - **대기 주변광 폴백(Fallback)**: IBL 텍스처가 없는 경우, `SkyAtmosphere` 시스템에서 계산된 실시간 주변광(`skyAtmosphereAmbientColor`)을 기초값으로 사용하여 물체가 대기색을 머금도록 보완.
+    - **시각적 정합성**: 정적인 HDR 텍스처 사용 여부와 관계없이 대기 상태(노을 등)에 따라 반사광의 색상과 밝기가 실시간으로 변조되어 환경과 완벽히 동기화됨.
+
+### 25. 실시간 대기 조도 LUT 생성 (Atmosphere Irradiance LUT)
+*   **대상**: `AtmosphereIrradianceGenerator` 및 `PBRMaterial`
+*   **결과**: ✅ 완료.
+    - **제너레이터 신설**: `Sky-View LUT`를 입력으로 받아 하늘 반구의 총 에너지를 물리적으로 적분하는 `AtmosphereIrradianceGenerator` 구현.
+    - **데이터 구조**: 표면 법선의 Zenith 각도에 따른 1D 조도 데이터를 생성하여 메모리 및 연산 효율성 극대화.
+    - **PBR 연동**: IBL 텍스처가 없는 경우, 이 실시간 조도 LUT를 샘플링하여 주변광(Diffuse)의 기초 소스로 사용하도록 셰이더 폴백 로직 강화.
+    - **완전한 독립성**: 이제 수동으로 HDR 파일을 설정하지 않아도, 대기 시스템만으로 물체의 앞면과 뒷면, 그림자 영역까지 대기색에 물드는 하이엔드 조명 효과 완성.
 
 ---
 

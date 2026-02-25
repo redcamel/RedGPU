@@ -31,6 +31,7 @@ SkyAtmosphere는 월드 공간 내의 물리적 공기 밀도(Atmospheric Densit
 | **Transmittance** | 256x64 | 고도 및 각도별 투과율 데이터 | 비선형 (Zenith angle vs Altitude) |
 | **Multi-Scattering** | 32x32 | 다중 산란 에너지 보정 | 선형 (1.0 - H) 기반 에너지 보존 |
 | **Sky-View** | 200x200 | 전방위 대기색 시각화 텍스처 | 위경도 매핑 및 지평선 왜곡 보정 |
+| **Irradiance** | 32x1 | 반구 조명(Ambient) 적분 데이터 | 법선 Zenith 기반 Lambert 적분 |
 | **Camera Volume** | 64x64x32 | Aerial Perspective (공중 투시) | $z^2$ 비선형 매핑 (최대 100km) |
 
 ---
