@@ -52,6 +52,7 @@ import geometrySmith_wgsl from './shader/lighting/getGeometrySmith.wgsl';
 import specularBRDF_wgsl from './shader/lighting/getSpecularBRDF.wgsl';
 import specularBTDF_wgsl from './shader/lighting/getSpecularBTDF.wgsl';
 import diffuseBTDF_wgsl from './shader/lighting/getDiffuseBTDF.wgsl';
+import getPhongLight_wgsl from './shader/lighting/getPhongLight.wgsl';
 import fresnelMix_wgsl from './shader/lighting/getFresnelMix.wgsl';
 import fresnelCoat_wgsl from './shader/lighting/getFresnelCoat.wgsl';
 import getIsFinite_wgsl from './shader/math/getIsFinite.wgsl';
@@ -237,6 +238,7 @@ export namespace LightingLibrary {
     export const getFresnelMix = fresnelMix_wgsl;
     export const getFresnelCoat = fresnelCoat_wgsl;
     export const getTransmissionRefraction = getTransmissionRefraction_wgsl;
+    export const getPhongLight = getPhongLight_wgsl;
 }
 
 /**

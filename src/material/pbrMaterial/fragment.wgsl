@@ -532,8 +532,8 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [Atmosphere Sun Light]
-    let atmoSun = getAtmosphereSunLight();
-    if (atmoSun.visible == 1u) {
+    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+        let atmoSun = getAtmosphereSunLight();
         totalDirectLighting += calcLight(atmoSun.color, atmoSun.intensity, N, V, atmoSun.direction, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
     }
 

@@ -145,6 +145,13 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - **경로 정규화**: 모든 셰이더 코드(`textField`, `sprite`, `particle`, `mesh`) 내의 `#redgpu_include` 경로를 `math.billboard`, `systemStruct`, `skyAtmosphere` 등 표준 네임스페이스 기반으로 전수 교체 완료.
     - **유지보수성**: 코드베이스 내의 셰이더 참조 경로를 일원화하여 향후 라이브러리 변경 시 영향 범위를 최소화함.
 
+### 21. Phong 조명 계산 통합 (Phong Lighting Unification)
+*   **대상**: `lighting.getPhongLight`
+*   **결과**: ✅ 완료.
+    - **공식 표준화**: Lambert Diffuse 및 Phong Specular 계산식을 시스템 라이브러리로 추출하여 물리적 일관성 확보.
+    - **코드 중복 제거**: `PhongMaterial` 내의 Directional, SkyAtmosphere Sun, Point/Spot Light 계산 루프를 하나의 공통 함수로 통합 완료.
+    - **안정성**: 입사광 반사 로직(`reflect(-L, N)`)을 내장하여 호출부의 방향성 계산 오류 가능성 제거.
+
 ---
 
 ## 🚀 향후 파편화 제거 대상 (Normalization Roadmap)

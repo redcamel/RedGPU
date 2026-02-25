@@ -8,6 +8,7 @@
 #redgpu_include math.getMotionVector;
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;
+#redgpu_include lighting.getPhongLight;
 #redgpu_include skyAtmosphere.getAerialPerspective
 #redgpu_include skyAtmosphere.getAtmosphereSunLight
 struct Uniforms {
@@ -105,7 +106,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_specularStrength = uniforms.specularStrength;
     let u_shininess = uniforms.shininess;
     let u_opacity = uniforms.opacity;
-    let E = getViewDirection(inputData.vertexPosition, u_cameraPosition);
+    let V = getViewDirection(inputData.vertexPosition, u_cameraPosition);
 
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != .0;
@@ -161,30 +162,21 @@ fn main(inputData:InputData) -> OutputFragment {
         let u_directionalLightColor = u_directionalLights[i].color;
         let u_directionalLightIntensity = u_directionalLights[i].intensity;
 
-        let L = normalize(u_directionalLightDirection);
-        let R = reflect(L, N);
-        let NdotL = dot(N, -L);
-        let lambertTerm = max(NdotL, 0.0);
-        let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue * step(0.0, NdotL);
-
-        // 디렉셔널 라이트 기여도 (쉐도우 적용)
-        let lightContribution = u_directionalLightColor * u_directionalLightIntensity * visibility;
-        let ld = diffuseColor * lightContribution * lambertTerm;
-        let ls = u_specularColor * u_specularStrength * lightContribution * specular;
-
-        mixColor += ld + ls;
-
+         mixColor += getPhongLight(
+            u_directionalLightColor, u_directionalLightIntensity * visibility, -normalize(u_directionalLightDirection),
+            N, V, u_shininess, specularSamplerValue,
+            diffuseColor, u_specularColor, u_specularStrength
+        );
     }
 
     // [Atmosphere Sun Light]
-    let atmoSun = getAtmosphereSunLight();
-    if (atmoSun.visible == 1u) {
-        let L = atmoSun.direction;
-        let R = reflect(-L, N);
-        let lambertTerm = max(dot(N, L), 0.0);
-        let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue * step(0.0, lambertTerm);
-        let lightContribution = atmoSun.color * atmoSun.intensity;
-        mixColor += (diffuseColor * lightContribution * lambertTerm) + (u_specularColor * u_specularStrength * lightContribution * specular);
+    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+        let atmoSun = getAtmosphereSunLight();
+        mixColor += getPhongLight(
+            atmoSun.color, atmoSun.intensity, atmoSun.direction,
+            N, V, u_shininess, specularSamplerValue,
+            diffuseColor, u_specularColor, u_specularStrength
+        );
     }
 
     // PointLight
@@ -232,15 +224,13 @@ fn main(inputData:InputData) -> OutputFragment {
              );
          }
 
-         let R = reflect(-L, N);
-         let NdotL = dot(N, L);
-         let diffuse = diffuseColor * max(NdotL, 0.0);
-         let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue * step(0.0, NdotL);
-
-         let ld = u_clusterLightColor * diffuse * finalAttenuation * u_clusterLightIntensity;
-         let ls = u_specularColor * u_specularStrength * specular * finalAttenuation * u_clusterLightIntensity;
-
-         mixColor += ld + ls;
+         // [KO] getPhongLight를 사용하여 포인트/스폿 라이트 계산
+         // [EN] Calculate point/spot light using getPhongLight
+         mixColor += getPhongLight(
+             u_clusterLightColor, u_clusterLightIntensity * finalAttenuation, L,
+             N, V, u_shininess, specularSamplerValue,
+             diffuseColor, u_specularColor, u_specularStrength
+         );
     }
 
 
