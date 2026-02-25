@@ -44,9 +44,9 @@ RedGPU.init(
         const TEXT_Y = 300; // [KO] 텍스트 필드 높이 [EN] Text field height
 
         const GRID_X = 7;
-        const GRID_Z = 100;
+        const GRID_Z = 50;
         const STEP_X = 1000;
-        const STEP_Z = 1000;
+        const STEP_Z = 2000;
 
         const particleTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle.png');
         const testTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
@@ -94,7 +94,7 @@ RedGPU.init(
 
                 } else if (i === 3) {
                     // [KO] 중앙 배치 및 높이 조절된 텍스트 필드 [EN] Centered and height-adjusted text field
-                    const textField = new RedGPU.Display.TextField3D(redGPUContext, `Distance: ${j}km`);
+                    const textField = new RedGPU.Display.TextField3D(redGPUContext, `Distance: ${j * 2}km`);
                     textField.x = j * STEP_Z;
                     textField.z = 0; // [KO] 중앙 배치 [EN] Center placement
                     textField.y = TEXT_Y; // [KO] 조금 높게 [EN] Slightly higher
@@ -125,17 +125,17 @@ RedGPU.init(
                     emitter.x = j * STEP_Z;
                     emitter.z = STEP_X * 3;
                     emitter.y = FIXED_Y;
-                    emitter.particleNum = 100;
-                    emitter.minEndX = -100;
-                    emitter.maxEndX = 100;
-                    emitter.minEndY = -100;
-                    emitter.maxEndY = 100;
-                    emitter.minEndZ = -100;
-                    emitter.maxEndZ = 100;
+                    emitter.particleNum = 200;
+                    emitter.minEndX = -200;
+                    emitter.maxEndX = 200;
+                    emitter.minEndY = -200;
+                    emitter.maxEndY = 200;
+                    emitter.minEndZ = -200;
+                    emitter.maxEndZ = 200;
                     emitter.minStartScale = 0;
                     emitter.maxStartScale = 0;
-                    emitter.minEndScale = 200;
-                    emitter.maxEndScale = 300;
+                    emitter.minEndScale = 300;
+                    emitter.maxEndScale = 500;
                     emitter.minEndAlpha = 0;
                     emitter.maxEndAlpha = 0;
                     scene.addChild(emitter);
