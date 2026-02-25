@@ -336,11 +336,11 @@ class View3D extends AView {
      * [EN] Render pass 1 result texture view (optional)
      */
     update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
-        const {scene, redGPUContext} = this
+        const {scene, redGPUContext,ibl,skyAtmosphere} = this
         const {shadowManager} = scene
         shadowManager.update(redGPUContext)
         const {directionalShadowManager} = shadowManager
-        const ibl = this.ibl
+
         const ibl_prefilterTexture = ibl?.prefilterTexture?.gpuTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture
         let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
@@ -352,6 +352,7 @@ class View3D extends AView {
             if (prevInfo) {
                 needResetBindGroup = (
                     prevInfo.ibl !== ibl ||
+                    prevInfo.skyAtmosphere !== skyAtmosphere ||
                     prevInfo.ibl_prefilterTexture !== ibl_prefilterTexture ||
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
@@ -363,6 +364,7 @@ class View3D extends AView {
             else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
             this.#prevInfoList[key] = {
                 ibl,
+                skyAtmosphere,
                 ibl_prefilterTexture,
                 ibl_irradianceTexture,
                 renderPath1ResultTextureView,
