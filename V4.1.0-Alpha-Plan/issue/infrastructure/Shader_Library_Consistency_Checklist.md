@@ -134,8 +134,9 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 ### 19. 대기 태양광 조명 연동 (Atmosphere Sun Light Integration)
 *   **대상**: `skyAtmosphere.getAtmosphereSunLight`
 *   **결과**: ✅ 완료.
-    - **데이터 공유**: `SkyAtmosphere` 시스템의 태양 위치(Surface-to-Light 벡터)를 모든 머티리얼이 접근 가능한 `systemUniforms`에 공유.
+    - **데이터 공유**: `SkyAtmosphere` 시스템의 태양 위치(Surface-to-Light 벡터), 카메라 고도, 대기 파라미터를 모든 머티리얼이 접근 가능한 `systemUniforms`에 공유.
     - **조명 통합**: `PhongMaterial`, `PBRMaterial`의 조명 루프에 대기 태양광(Sun Light) 계산 로직을 통합하여, 하늘의 태양 위치와 물체의 음영이 실시간으로 연동되도록 구현.
+    - **물리적 색상**: 투과율 LUT 샘플링을 통해 태양 고도에 따른 실시간 색상 변화(노을 효과 등)를 물리적으로 재현.
     - **표준 준수**: 언리얼 엔진 등 상용 엔진에서 사용하는 `SunDirection` 명칭과 `Surface-to-Light` 벡터 데이터 성격을 일관되게 적용.
 
 ### 20. 레거시 별칭 제거 및 네임스페이스 단일화 (Legacy Alias Cleanup)

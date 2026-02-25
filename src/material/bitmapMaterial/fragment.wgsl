@@ -3,6 +3,7 @@
 #redgpu_include entryPoint.mesh.entryPointPickingFragment
 #redgpu_include systemStruct.OutputFragment
 #redgpu_include math.getMotionVector
+#redgpu_include skyAtmosphere.getAerialPerspective
 
 struct Uniforms {
     opacity: f32,
@@ -50,6 +51,10 @@ fn main(inputData: InputData) -> OutputFragment {
   if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;
   }
+
+  // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
+  finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
+
   output.color = finalColor;
   output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
   return output;

@@ -2,6 +2,7 @@
 #redgpu_include color.getTintBlendMode;
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.OutputFragment;
+#redgpu_include skyAtmosphere.getAerialPerspective;
 
 /**
  * [KO] 텍스트 필드 재질을 위한 유니폼 구조체입니다.
@@ -56,6 +57,9 @@ fn main(inputData: InputData) -> OutputFragment {
     if (finalColor.a == 0.0) {
       discard;
     }
+
+    // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
+    finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
 
     output.color = finalColor;
     output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );

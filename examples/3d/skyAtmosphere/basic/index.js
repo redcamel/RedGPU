@@ -40,65 +40,85 @@ RedGPU.init(
         const sphereColorMat = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
         const spherePhongMat = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
         const FIXED_SCALE = 10;
+        const FIXED_Y = 100;
+        const TEXT_Y = 300; // [KO] 텍스트 필드 높이 [EN] Text field height
 
-        const GRID_X = 4;
-
+        const GRID_X = 6;
         const GRID_Z = 100;
-
-        const STEP_X = 2000; // [KO] 층간 간격 확대 (2km) [EN] Increase layer spacing
-
+        const STEP_X = 1000;
         const STEP_Z = 1000;
 
+        const testTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+        const spriteMat = new RedGPU.Material.BitmapMaterial(redGPUContext, testTexture);
+        const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(
+            redGPUContext,
+            '../../../assets/spriteSheet/spriteSheet.png',
+            5, 3, 15, 0
+        );
 
         for (let i = 0; i < GRID_X; i++) {
-
             for (let j = 0; j < GRID_Z; j++) {
-
                 let mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeo, sphereColorMat);
-
-
-
-                let heightValue = 0;
+                mesh.x = j * STEP_Z;
 
                 if (i === 0) {
-                    // 해수면 (0.1km)
+                    // [KO] 컬러 메쉬 [EN] Color Mesh
                     mesh.material = sphereColorMat;
-                    heightValue = 100;
-                    mesh.x = j * STEP_Z;
-                    mesh.z = (i - (GRID_X - 1) / 2) * STEP_X;
-                    mesh.y = heightValue;
+                    mesh.z = -STEP_X;
+                    mesh.y = FIXED_Y;
                     mesh.scaleX = mesh.scaleY = mesh.scaleZ = FIXED_SCALE;
                     scene.addChild(mesh);
 
                 } else if (i === 1) {
-                    heightValue = 500;
-                    const url  = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb'
+                    // [KO] glTF 모델 [EN] glTF Model
+                    mesh.z = STEP_X;
+                    mesh.y = FIXED_Y;
+                    const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb'
                     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-                            mesh = result.resultMesh;
-                            mesh.x = j * STEP_Z;
-                            mesh.z = (i - (GRID_X - 1) / 2) * STEP_X;
-                            mesh.y = heightValue;
-                            mesh.scaleX = mesh.scaleY = mesh.scaleZ = 150;
-                            scene.addChild(mesh);
+                            let helmet = result.resultMesh;
+                            helmet.x = mesh.x;
+                            helmet.z = mesh.z;
+                            helmet.y = mesh.y;
+                            helmet.scaleX = helmet.scaleY = helmet.scaleZ = 150;
+                            scene.addChild(helmet);
                         }
                     );
                 } else if (i === 2) {
+                    // [KO] 퐁 메쉬 [EN] Phong Mesh
                     mesh.material = spherePhongMat;
-
-                    mesh.x = j * STEP_Z;
-                    mesh.z = (i - (GRID_X - 1) / 2) * STEP_X;
-                    mesh.y = heightValue;
+                    mesh.z = STEP_X * 2;
+                    mesh.y = FIXED_Y;
                     mesh.scaleX = mesh.scaleY = mesh.scaleZ = FIXED_SCALE;
                     scene.addChild(mesh);
-                    heightValue = 1000;
 
+                } else if (i === 3) {
+                    // [KO] 중앙 배치 및 높이 조절된 텍스트 필드 [EN] Centered and height-adjusted text field
+                    const textField = new RedGPU.Display.TextField3D(redGPUContext, `Distance: ${j}km`);
+                    textField.x = j * STEP_Z;
+                    textField.z = 0; // [KO] 중앙 배치 [EN] Center placement
+                    textField.y = TEXT_Y; // [KO] 조금 높게 [EN] Slightly higher
+                    textField.worldSize = 100;
+                    textField.color = '#000';
+                    textField.fontSize = 60;
+                    scene.addChild(textField);
+                } else if (i === 4) {
+                    // [KO] Sprite3D 테스트 [EN] Sprite3D test
+                    const sprite = new RedGPU.Display.Sprite3D(redGPUContext, spriteMat);
+                    sprite.x = j * STEP_Z;
+                    sprite.z = -STEP_X * 2;
+                    sprite.y = FIXED_Y;
+                    sprite.worldSize = 300;
+                    scene.addChild(sprite);
+                } else if (i === 5) {
+                    // [KO] SpriteSheet3D 테스트 [EN] SpriteSheet3D test
+                    const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
+                    spriteSheet.x = j * STEP_Z;
+                    spriteSheet.z = -STEP_X * 3;
+                    spriteSheet.y = FIXED_Y;
+                    spriteSheet.worldSize = 300;
+                    scene.addChild(spriteSheet);
                 }
-
-                else if (i === 3) heightValue = 2000; // 고고도 (10km)
-
-
             }
-
         }
 
 
