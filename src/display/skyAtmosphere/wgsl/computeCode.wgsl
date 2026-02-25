@@ -78,12 +78,16 @@ if (t_earth > 0.0) {
     let hitPos = camPos + viewDir * t_earth;
     let up = normalize(hitPos);
     let cos_sun = dot(up, sunDir);
-    let gTrans = get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_sun, atmH);
+    let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_sun, atmH);
+    
     let albedo = uniforms.groundAlbedo * INV_PI;
-    let diffuse = albedo * gTrans * max(0.0, cos_sun) * uniforms.sunIntensity;
     let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
     let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
-    atmosphereBackground = (diffuse * skySample.a) + (skySample.rgb * uniforms.sunIntensity);
+    
+    // [KO] 지면 조명: (직사광 + 산란광) * 알베도
+    // [EN] Ground lighting: (Direct + Scattered) * Albedo
+    let groundColor = (sun_trans * max(0.0, cos_sun) + skySample.rgb) * uniforms.sunIntensity * albedo;
+    atmosphereBackground = groundColor;
 } else {
     // [KO] 순수 하늘 영역 [EN] Pure sky area
     let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
@@ -106,4 +110,5 @@ if (t_earth > 0.0) {
 // [KO] sceneAlpha가 1.0인 불투명 영역에는 atmosphereBackground가 투영되지 않습니다.
 // [EN] Opaque areas (sceneAlpha = 1.0) do not mix with atmosphereBackground.
 let finalColor = mix(atmosphereBackground, sceneColor, sceneAlpha);
+
 textureStore(outputTexture, id, vec4<f32>(finalColor * uniforms.exposure, 1.0));

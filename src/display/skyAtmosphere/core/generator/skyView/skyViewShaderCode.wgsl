@@ -81,7 +81,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, ms_uv, 0.0).rgb;
             let ms_scat = ms_energy * (params.rayleighScattering * rho_r + vec3<f32>((params.mieScattering + params.heightFogDensity) * rho_m)) * shadow_mask;
 
-            let extinction = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m) + params.ozoneAbsorption * rho_o + vec3<f32>(params.heightFogDensity * rho_f);
+            let extinction = get_total_extinction(cur_h, params) + vec3<f32>(params.heightFogDensity * rho_f);
 
             radiance += transmittance * (scat + ms_scat) * step_size;
             transmittance *= exp(-extinction * step_size);

@@ -40,8 +40,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let p_len = length(p);
             let cur_h = p_len - r;
 
-            // 지표면 아래인 경우 중단
-            if (cur_h < 0.0) { break; }
+            // [KO] 지표면 아래인 경우 중단 (미세 오프셋으로 수평선 부근 안정성 확보)
+            if (cur_h < -0.001) { break; }
 
             let up = p / p_len;
             let cos_sun = dot(up, params.sunDirection);
@@ -72,7 +72,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let scat_ms = multi_scat_energy * total_scat_coeff;
 
             // [KO] 전체 소멸 계수 (에너지 소실)
-            let extinction = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m) + params.ozoneAbsorption * rho_o + vec3<f32>(params.heightFogDensity * rho_f);
+            let extinction = get_total_extinction(cur_h, params) + vec3<f32>(params.heightFogDensity * rho_f);
 
             radiance += transmittance * (step_scat + scat_ms) * step_size;
             transmittance *= exp(-extinction * step_size);

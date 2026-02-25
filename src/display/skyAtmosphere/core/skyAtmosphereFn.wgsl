@@ -95,6 +95,23 @@ fn get_sky_view_uv(view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atm
     return vec2<f32>(u, clamp(v, 0.0, 1.0));
 }
 
+// [KO] 오존 농도 분포 (Gaussian-like distribution)
+fn get_ozone_density(h: f32, center: f32, width: f32) -> f32 {
+    let x = (h - center) / width;
+    return max(0.0, 1.0 - abs(x));
+}
+
+// [KO] 전체 소멸 계수 계산 (Extinction)
+fn get_total_extinction(h: f32, params: AtmosphereParameters) -> vec3<f32> {
+    let rho_r = exp(-max(0.0, h) / params.rayleighScaleHeight);
+    let rho_m = exp(-max(0.0, h) / params.mieScaleHeight);
+    let rho_o = get_ozone_density(h, params.ozoneLayerCenter, params.ozoneLayerWidth);
+    
+    return params.rayleighScattering * rho_r + 
+           vec3<f32>(params.mieExtinction * rho_m) + 
+           params.ozoneAbsorption * rho_o;
+}
+
 // [KO] 페이즈 함수
 fn phase_rayleigh(cos_theta: f32) -> f32 {
     return 3.0 / (16.0 * PI) * (1.0 + cos_theta * cos_theta);
