@@ -17,8 +17,8 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 class AtmosphereIrradianceGenerator {
     /** [KO] 텍스처 가로 크기 (Zenith resolution) [EN] Texture width (Zenith resolution) */
     readonly width: number = 32;
-    /** [KO] 텍스처 세로 크기 [EN] Texture height */
-    readonly height: number = 1;
+    /** [KO] 텍스처 세로 크기 (Relative Azimuth resolution) [EN] Texture height (Relative Azimuth resolution) */
+    readonly height: number = 32;
     #redGPUContext: RedGPUContext;
     #lutTexture: AtmosphereIrradianceLUTTexture;
     #pipeline: GPUComputePipeline;
@@ -65,7 +65,7 @@ class AtmosphereIrradianceGenerator {
         const passEncoder = commandEncoder.beginComputePass();
         passEncoder.setPipeline(this.#pipeline);
         passEncoder.setBindGroup(0, bindGroup);
-        passEncoder.dispatchWorkgroups(1, 1, 1); // 32 threads in one workgroup
+        passEncoder.dispatchWorkgroups(Math.ceil(this.width / 8), Math.ceil(this.height / 8), 1);
         passEncoder.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
         this.#lutTexture.notifyUpdate();

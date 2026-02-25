@@ -48,8 +48,8 @@ RedGPU.init(
         if (multiScat) createLUTSprite(multiScat, 'Multi-Scat LUT', 0, 6);
         if (skyView) createLUTSprite(skyView, 'Sky-View LUT (Zenith:Top)', 6, 6);
         if (irradiance) {
-            const s = createLUTSprite(irradiance, 'Atmosphere Irradiance LUT', 0, 0);
-            s.scaleY = 0.5; // [KO] 1D LUT 시각화 보정 [EN] Adjust 1D LUT visualization
+            const s = createLUTSprite(irradiance, 'Atmosphere Irradiance LUT (2D)', 0, 0);
+            s.scaleY = 1.0; // 2D LUT 시각화 비율 복구
         }
 
         const infoLabel = new RedGPU.Display.TextField3D(redGPUContext, '3D Camera Volume LUT (Aerial Perspective) is active in background');

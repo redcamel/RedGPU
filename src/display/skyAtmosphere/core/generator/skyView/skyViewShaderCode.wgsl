@@ -76,17 +76,30 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                         vec3<f32>(params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy)) +
                         vec3<f32>(params.heightFogDensity * rho_f)) * sun_trans * shadow_mask;
 
-            // [KO] 다중 산란 기여 (V 매핑을 1.0 - H로 수정하여 생성기와 일치시킴)
-            // [EN] Multi-scattering contribution (Updated V mapping to 1.0 - H to match generator)
+            // [KO] 다중 산란 기여
             let ms_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
             let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, ms_uv, 0.0).rgb;
             let ms_scat = ms_energy * (params.rayleighScattering * rho_r + vec3<f32>((params.mieScattering + params.heightFogDensity) * rho_m)) * shadow_mask;
 
-            let ext = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m) + params.ozoneAbsorption * rho_o + vec3<f32>(params.heightFogDensity * rho_f);
+            let extinction = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m) + params.ozoneAbsorption * rho_o + vec3<f32>(params.heightFogDensity * rho_f);
 
             radiance += transmittance * (scat + ms_scat) * step_size;
-            transmittance *= exp(-ext * step_size);
+            transmittance *= exp(-extinction * step_size);
             if (all(transmittance < vec3<f32>(0.001))) { break; }
+        }
+
+        // [KO] 지면과 충돌한 경우 지면 반사광 추가
+        if (t_earth > 0.0) {
+            let hitPos = ray_origin + view_dir * t_earth;
+            let up = normalize(hitPos);
+            let cos_sun = dot(up, params.sunDirection);
+            let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_sun, params.atmosphereHeight);
+            
+            let albedo = params.groundAlbedo * INV_PI;
+            let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cos_sun * 0.5 + 0.5, 0.0), 0.0).rgb;
+            
+            let ground_radiance = (sun_trans * max(0.0, cos_sun) + ms_energy) * albedo;
+            radiance += transmittance * ground_radiance;
         }
     }
 

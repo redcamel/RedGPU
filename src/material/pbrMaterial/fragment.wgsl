@@ -635,9 +635,16 @@ fn main(inputData:InputData) -> OutputFragment {
             // [KO] Diffuse 필터링: (HDR 조도 * 투과율) + 실시간 대기 조도(Irradiance)
             // [EN] Diffuse Filtering: (HDR Irradiance * Transmittance) + Real-time Atmosphere Irradiance
             let diffTrans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            // [KO] 법선 방향의 수직각을 [0, 1] 범위로 매핑하여 조도 LUT 샘플링
-            let u_irradiance = clamp((N.y * 0.5) + 0.5, 0.001, 0.999);
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceTexture, atmosphereSampler, vec2<f32>(u_irradiance, 0.5), 0.0).rgb * sunInt;
+            
+            // [KO] 2D 조도 LUT 샘플링 (X: Elevation, Y: Relative Azimuth to Sun)
+            let u_el = clamp((asin(clamp(N.y, -1.0, 1.0)) * INV_PI) + 0.5, 0.001, 0.999);
+            
+            let sun_azimuth = atan2(u_atmo.skyAtmosphereSunDirection.z, u_atmo.skyAtmosphereSunDirection.x);
+            let pixel_azimuth = atan2(N.z, N.x);
+            let rel_azimuth = pixel_azimuth - sun_azimuth;
+            let v_az = clamp((rel_azimuth / PI2) + 0.5, 0.001, 0.999);
+            
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceTexture, atmosphereSampler, vec2<f32>(u_el, v_az), 0.0).rgb * sunInt;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
