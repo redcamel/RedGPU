@@ -156,6 +156,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         return this.#params.sunDirection;
     }
 
+    /** [KO] 카메라 고도 (km) [EN] Camera height (km) */
+    get cameraHeight(): number {
+        return this.#params.cameraHeight;
+    }
+
     /** [KO] 노출 (Exposure) [EN] Exposure */
     get exposure(): number {
         return this.#params.exposure;

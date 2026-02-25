@@ -153,8 +153,20 @@ class SystemUniformUpdater {
                     value: skyAtmosphere ? skyAtmosphere.exposure : 1,
                 },
                 {
+                    key: 'skyAtmosphereCameraHeight',
+                    value: skyAtmosphere ? skyAtmosphere.cameraHeight : 0.001,
+                },
+                {
                     key: 'skyAtmosphereSunDirection',
                     value: skyAtmosphere ? skyAtmosphere.sunDirection : new Float32Array([0, 0, 0]),
+                },
+                {
+                    key: 'skyAtmosphereEarthRadius',
+                    value: skyAtmosphere ? skyAtmosphere.earthRadius : 6360.0,
+                },
+                {
+                    key: 'skyAtmosphereAtmosphereHeight',
+                    value: skyAtmosphere ? skyAtmosphere.atmosphereHeight : 60.0,
                 }
             ]
         )

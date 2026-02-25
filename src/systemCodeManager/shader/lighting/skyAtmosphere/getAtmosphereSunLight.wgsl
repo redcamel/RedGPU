@@ -1,3 +1,5 @@
+#redgpu_include skyAtmosphere.skyAtmosphereFn
+
 /**
  * [KO] SkyAtmosphere 시스템의 태양 정보를 담는 구조체입니다.
  * [EN] Structure containing sun information from the SkyAtmosphere system.
@@ -5,7 +7,7 @@
 struct AtmosphereSunLight {
     direction: vec3<f32>, // [KO] 태양을 향하는 방향 (Surface-to-Light) [EN] Direction toward the sun
     intensity: f32,       // [KO] 태양 광도 [EN] Sun light intensity
-    color: vec3<f32>,     // [KO] 태양 광색 [EN] Sun light color
+    color: vec3<f32>,     // [KO] 태양 광색 (대기 투과율이 적용된 물리적 색상) [EN] Sun light color (physical color with atmospheric transmittance applied)
     padding: f32          // [KO] 16바이트 정렬을 위한 패딩 [EN] Padding for 16-byte alignment
 };
 
@@ -19,9 +21,19 @@ fn getAtmosphereSunLight() -> AtmosphereSunLight {
     var sun: AtmosphereSunLight;
     let u_skyAtmosphere = systemUniforms.skyAtmosphere;
     
-    sun.direction = normalize(u_skyAtmosphere.skyAtmosphereSunDirection);
+    let sunDir = normalize(u_skyAtmosphere.skyAtmosphereSunDirection);
+    sun.direction = sunDir;
     sun.intensity = u_skyAtmosphere.skyAtmosphereSunIntensity;
-    sun.color = vec3<f32>(1.0, 1.0, 1.0); // [KO] 추후 대기 투과율에 따른 색상 연동 예정 [EN] Will be linked to color by transmittance later
+    
+    // [KO] 현재 고도와 태양 각도를 기반으로 대기 투과율(Transmittance)을 샘플링하여 실제 태양색 결정
+    // [EN] Sample Atmospheric Transmittance based on current height and sun angle to determine actual sun color
+    sun.color = get_transmittance(
+        transmittanceTexture, 
+        atmosphereSampler, 
+        u_skyAtmosphere.skyAtmosphereCameraHeight, 
+        sunDir.y, 
+        u_skyAtmosphere.skyAtmosphereAtmosphereHeight
+    );
     
     return sun;
 }
