@@ -48,6 +48,7 @@ SkyAtmosphere는 월드 공간 내의 물리적 공기 밀도(Atmospheric Densit
 최종 픽셀 색상은 다음의 수식을 통해 결정됩니다.
 $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 * **배경 (Background)**: Sky-View LUT에서 직접 시각화된 데이터를 추출합니다.
+* **스카이박스 (Skybox)**: 스카이박스가 활성화된 경우, 대기 투과율(Transmittance)을 적용하여 배경 산란광과 물리적으로 합성합니다.
 * **불투명 객체 (Opaque Objects)**: Camera Volume 3D LUT를 참조하여 투과율 및 산란광을 합성합니다.
 
 ---
@@ -60,6 +61,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 2. **360° Azimuth Wrap-around**: 수평각 샘플링 시 `repeat` 모드를 적용하고 셰이더 내 클램핑을 제거하여 경계의 불연속성을 해결하였습니다.
 3. **Numerical Bias in Culling**: 부동 소수점 오차에 의한 객체 소실 방지를 위해 CPU 컬링 로직에 1.0 유닛(1m)의 안전 마진을 적용하였습니다.
 4. **Stable Linear Depth**: 개선된 선형 깊이 복구 공식(`(n * f) / max(1e-6, f - d * (f - n))`)을 통해 정밀도를 유지합니다.
+5. **Physical Sun Color Calculation**: 하드코딩된 태양색 대신 투과율 LUT를 샘플링하여 태양 고도와 카메라 위치에 따른 실시간 물리적 태양광 색상을 산출합니다.
 
 ---
 
@@ -72,6 +74,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 | **연산 방식** | Raster/Compute Hybrid | Pure Compute Shader | RedGPU 연산 단일화 |
 | **좌표계 최적화** | Z-Up | Y-Up | RedGPU 표준 좌표계 최적화 |
 | **안개 통합** | 컴포넌트 기반 합성 | 산란 적분 내 직접 통합 | 물리적 정합성 동일 수준 |
+| **조명 연동** | 일방향 (Sky -> Light) | 양방향 (Light <-> Atmosphere) | 시스템 유니폼을 통한 전역 연동 |
 
 ---
 
@@ -90,9 +93,11 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 * **Physically Integrated Fog**: Mie 산란 적분 내에 높이 안개 통합 연산을 적용하였습니다.
 * **Gaussian Ozone Distribution**: 오존 밀도 시뮬레이션에 가우시안 곡선 모델을 도입하였습니다.
 * **360° Seamless Sampling**: 3D LUT 샘플러 설정을 최적화하여 경계 불연속성 문제를 해결하였습니다.
+* **Skybox Composition**: 스카이박스 텍스처를 대기 투과율과 합성하는 전용 패스를 구현하였습니다.
 
 ### 7.2 엔진 코어 공통 변경 사항
-* **System Uniform Expansion**: `SystemUniform` 구조체 및 바인딩 그룹(Group 0)에 `cameraVolumeTexture`(3D Texture)와 `skyAtmosphereSampler`를 전역으로 추가하여, 모든 셰이더 단계에서 대기 데이터에 접근할 수 있도록 인프라를 확장하였습니다.
+* **System Uniform Expansion**: `SystemUniform` 구조체 및 바인딩 그룹(Group 0)에 `cameraVolumeTexture`(3D Texture), `transmittanceTexture`(2D Texture), `skyAtmosphereSampler`를 전역으로 추가하여, 모든 셰이더 단계에서 대기 데이터에 접근할 수 있도록 인프라를 확장하였습니다.
+* **Physical Sun Lighting**: 대기 시스템의 태양 방향과 강도, 투과 색상을 시스템 유니폼으로 공유하여 `PhongMaterial`, `PBRMaterial` 등 모든 조명 연산에 통합하였습니다.
 * **Resource Management Upgrade**: `ResourceManager`에 `emptyTexture3DView` 및 `emptyDepthTextureView` 관리 기능을 추가하여, 3D 텍스처 미사용 시의 안정성을 확보하고 바인딩 오류를 방지하였습니다.
 * **Material System Enhancement**: `getBindGroupLayoutDescriptorFromShaderInfo` 함수를 개선하여 `texture_3d` 바인딩 레이아웃 생성을 지원, 재질 시스템 전반에서 3D 볼륨 텍스처를 활용할 수 있도록 하였습니다.
 * **Numerical Bias in Culling**: `Mesh.ts`의 절두체 컬링 로직에 Numerical Bias를 도입하였습니다.
@@ -100,6 +105,6 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 * **Default Camera Clipping Updated**: 대규모 스케일 렌더링에 대응하기 위해 기본 Near/Far Clipping 수치를 상향 조정하였습니다.
 
 ---
-**최종 업데이트:** 2026-02-14
+**최종 업데이트:** 2026-02-24
 **상태:** Master Specification Established
 **프로젝트:** RedGPU

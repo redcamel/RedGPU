@@ -43,11 +43,12 @@ RedGPU.init(
         const FIXED_Y = 100;
         const TEXT_Y = 300; // [KO] 텍스트 필드 높이 [EN] Text field height
 
-        const GRID_X = 6;
+        const GRID_X = 7;
         const GRID_Z = 100;
         const STEP_X = 1000;
         const STEP_Z = 1000;
 
+        const particleTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle.png');
         const testTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
         const spriteMat = new RedGPU.Material.BitmapMaterial(redGPUContext, testTexture);
         const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(
@@ -117,6 +118,27 @@ RedGPU.init(
                     spriteSheet.y = FIXED_Y;
                     spriteSheet.worldSize = 300;
                     scene.addChild(spriteSheet);
+                } else if (i === 6) {
+                    // [KO] ParticleEmitter 테스트 [EN] ParticleEmitter test
+                    const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
+                    emitter.material.diffuseTexture = particleTexture;
+                    emitter.x = j * STEP_Z;
+                    emitter.z = STEP_X * 3;
+                    emitter.y = FIXED_Y;
+                    emitter.particleNum = 100;
+                    emitter.minEndX = -100;
+                    emitter.maxEndX = 100;
+                    emitter.minEndY = -100;
+                    emitter.maxEndY = 100;
+                    emitter.minEndZ = -100;
+                    emitter.maxEndZ = 100;
+                    emitter.minStartScale = 0;
+                    emitter.maxStartScale = 0;
+                    emitter.minEndScale = 200;
+                    emitter.maxEndScale = 300;
+                    emitter.minEndAlpha = 0;
+                    emitter.maxEndAlpha = 0;
+                    scene.addChild(emitter);
                 }
             }
         }
