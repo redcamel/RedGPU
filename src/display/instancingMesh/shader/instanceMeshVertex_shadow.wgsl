@@ -11,6 +11,7 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
 
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let u_modelMatrix = instanceUniforms.instanceModelMatrixs[input_instanceIdx];
+    let u_instanceGroupModelMatrix = instanceUniforms.instanceGroupModelMatrix;
     let u_useDisplacementTexture = instanceUniforms.useDisplacementTexture == 1u;
     let u_displacementScale = instanceUniforms.displacementScale;
 
@@ -22,7 +23,8 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
 
     // Displacement 처리
     if (u_useDisplacementTexture) {
-        let distance = distance(position.xyz, u_directionalLightProjectionViewMatrix[3].xyz);
+        let worldPos = (u_instanceGroupModelMatrix * position).xyz;
+        let distance = distance(worldPos, u_directionalLightProjectionViewMatrix[3].xyz);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
         let displacedPosition = getDisplacementPosition(
             input_position,
@@ -36,6 +38,6 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
 
-    output.position = getShadowClipPosition(position.xyz, u_directionalLightProjectionViewMatrix);
+    output.position = getShadowClipPosition((u_instanceGroupModelMatrix * position).xyz, u_directionalLightProjectionViewMatrix);
     return output;
 }

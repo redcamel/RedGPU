@@ -186,8 +186,8 @@ class InstancingMesh extends Mesh {
     }
 
     static getLimitSize(): number {
-        const headSize = (16 + 1 + 1 + 2) * 4;
-        const perInstanceSize = (16 + 16 + 1) * 4;
+        const headSize = (16 + 16 + 1 + 1 + 2) * 4; // mat4x2 + u32 + f32 + padding(vec2) = 144 bytes
+        const perInstanceSize = (16 + 16 + 1) * 4; // mat4x2 + f32(opacity) = 132 bytes
         const maxStorageBufferBindingSize = Math.floor(Math.min(268435456, 134217728));
         const limitNum = Math.floor((maxStorageBufferBindingSize - headSize) / perInstanceSize);
         return limitNum;
@@ -255,7 +255,7 @@ class InstancingMesh extends Mesh {
         mat4.scale(this.localMatrix, this.localMatrix, [this.scaleX, this.scaleY, this.scaleZ]);
         const parent = this.parent;
         if (parent?.modelMatrix) {
-            mat4.multiply(this.modelMatrix, this.localMatrix, parent.modelMatrix);
+            mat4.multiply(this.modelMatrix, parent.modelMatrix, this.localMatrix);
         } else {
             this.modelMatrix = mat4.clone(this.localMatrix);
         }
@@ -370,10 +370,26 @@ class InstancingMesh extends Mesh {
                 this.modelMatrix,
                 members.instanceGroupModelMatrix.uniformOffset / 4,
             );
+            
+            // [KO] 그룹 노말 행렬 계산 및 업로드
+            // [EN] Calculate and upload group normal matrix
+            const groupNormalMatrix = mat4.create();
+            mat4.invert(groupNormalMatrix, this.modelMatrix);
+            mat4.transpose(groupNormalMatrix, groupNormalMatrix);
+            vertexUniformBuffer.dataViewF32.set(
+                groupNormalMatrix,
+                members.instanceGroupNormalModelMatrix.uniformOffset / 4,
+            );
+
             gpuDevice.queue.writeBuffer(
                 vertexUniformBuffer.gpuBuffer,
                 members.instanceGroupModelMatrix.uniformOffset,
                 new members.instanceGroupModelMatrix.View(this.modelMatrix),
+            );
+            gpuDevice.queue.writeBuffer(
+                vertexUniformBuffer.gpuBuffer,
+                members.instanceGroupNormalModelMatrix.uniformOffset,
+                new members.instanceGroupNormalModelMatrix.View(groupNormalMatrix),
             );
         }
         if (this.dirtyInstanceMeshObject3D || this.dirtyInstanceNum) {
@@ -676,8 +692,6 @@ class InstancingMesh extends Mesh {
         const prevBuffer = this.gpuRenderInfo.vertexUniformBuffer;
         if (prevBuffer?.gpuBuffer) {
             newBuffer.dataViewF32.set(prevBuffer.dataViewF32, 0);
-            newBuffer.dataViewU32.set([prevBuffer.dataViewU32[0]], 0);
-            newBuffer.dataViewU32.set([prevBuffer.dataViewU32[1]], 4);
             prevBuffer.destroy();
         }
         this.gpuRenderInfo.vertexUniformBuffer = newBuffer;

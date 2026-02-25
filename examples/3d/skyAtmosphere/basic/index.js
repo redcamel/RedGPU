@@ -26,6 +26,7 @@ RedGPU.init(
         controller.pan = -90; // [KO] 태양 방향으로 카메라 회전 [EN] Pan camera to sun direction
         controller.tilt = -10;
         controller.distance = 1500;
+        controller.speedDistance = 100;
 
         // 이동 제한
         controller.minTilt = -88;
@@ -43,7 +44,7 @@ RedGPU.init(
         const FIXED_Y = 100;
         const TEXT_Y = 300; // [KO] 텍스트 필드 높이 [EN] Text field height
 
-        const GRID_X = 7;
+        const GRID_X = 8;
         const GRID_Z = 50;
         const STEP_X = 1000;
         const STEP_Z = 2000;
@@ -57,6 +58,13 @@ RedGPU.init(
             5, 3, 15, 0
         );
 
+        // [KO] InstancingMesh를 루프 밖에서 한 번만 생성하여 효율적으로 사용
+        // [EN] Create InstancingMesh only once outside the loop for efficiency
+        const instanceMesh = new RedGPU.Display.InstancingMesh(redGPUContext, 250, 250, sphereGeo, spherePhongMat);
+        instanceMesh.z = 0; // [KO] 중앙 배치 [EN] Center placement
+        instanceMesh.y = FIXED_Y;
+        scene.addChild(instanceMesh);
+
         for (let i = 0; i < GRID_X; i++) {
             for (let j = 0; j < GRID_Z; j++) {
                 let mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeo, sphereColorMat);
@@ -65,14 +73,14 @@ RedGPU.init(
                 if (i === 0) {
                     // [KO] 컬러 메쉬 [EN] Color Mesh
                     mesh.material = sphereColorMat;
-                    mesh.z = -STEP_X;
+                    mesh.z = -STEP_X * 3;
                     mesh.y = FIXED_Y;
                     mesh.scaleX = mesh.scaleY = mesh.scaleZ = FIXED_SCALE;
                     scene.addChild(mesh);
 
                 } else if (i === 1) {
                     // [KO] glTF 모델 [EN] glTF Model
-                    mesh.z = STEP_X;
+                    mesh.z = -STEP_X * 2;
                     mesh.y = FIXED_Y;
                     const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb'
                     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
@@ -87,43 +95,54 @@ RedGPU.init(
                 } else if (i === 2) {
                     // [KO] 퐁 메쉬 [EN] Phong Mesh
                     mesh.material = spherePhongMat;
-                    mesh.z = STEP_X * 2;
+                    mesh.z = -STEP_X;
                     mesh.y = FIXED_Y;
                     mesh.scaleX = mesh.scaleY = mesh.scaleZ = FIXED_SCALE;
                     scene.addChild(mesh);
 
                 } else if (i === 3) {
-                    // [KO] 중앙 배치 및 높이 조절된 텍스트 필드 [EN] Centered and height-adjusted text field
+                    // [KO] 인스턴싱 데이터 할당 (중앙 배치, 각 거리당 5개씩) [EN] Assign instancing data (Centered, 5 per distance)
+                    for (let k = 0; k < 5; k++) {
+                        const child = instanceMesh.instanceChildren[j * 5 + k];
+                        child.x = j * STEP_Z;
+                        child.y = 0;
+                        child.z = (k - 2) * 100; // [KO] 중앙을 기준으로 100 유닛 간격 배치 [EN] 100 units apart from the center
+                        child.scaleX = child.scaleY = child.scaleZ = 5;
+                    }
+
+                } else if (i === 4) {
+                    // [KO] 텍스트 필드 테스트 [EN] Text field test
                     const textField = new RedGPU.Display.TextField3D(redGPUContext, `Distance: ${j * 2}km`);
                     textField.x = j * STEP_Z;
-                    textField.z = 0; // [KO] 중앙 배치 [EN] Center placement
-                    textField.y = TEXT_Y; // [KO] 조금 높게 [EN] Slightly higher
+                    textField.z = STEP_X; 
+                    textField.y = TEXT_Y;
                     textField.worldSize = 100;
                     textField.color = '#000';
                     textField.fontSize = 60;
                     scene.addChild(textField);
-                } else if (i === 4) {
+
+                } else if (i === 5) {
                     // [KO] Sprite3D 테스트 [EN] Sprite3D test
                     const sprite = new RedGPU.Display.Sprite3D(redGPUContext, spriteMat);
                     sprite.x = j * STEP_Z;
-                    sprite.z = -STEP_X * 2;
+                    sprite.z = STEP_X * 2;
                     sprite.y = FIXED_Y;
                     sprite.worldSize = 300;
                     scene.addChild(sprite);
-                } else if (i === 5) {
+                } else if (i === 6) {
                     // [KO] SpriteSheet3D 테스트 [EN] SpriteSheet3D test
                     const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
                     spriteSheet.x = j * STEP_Z;
-                    spriteSheet.z = -STEP_X * 3;
+                    spriteSheet.z = STEP_X * 3;
                     spriteSheet.y = FIXED_Y;
                     spriteSheet.worldSize = 300;
                     scene.addChild(spriteSheet);
-                } else if (i === 6) {
+                } else if (i === 7) {
                     // [KO] ParticleEmitter 테스트 [EN] ParticleEmitter test
                     const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
                     emitter.material.diffuseTexture = particleTexture;
                     emitter.x = j * STEP_Z;
-                    emitter.z = STEP_X * 3;
+                    emitter.z = STEP_X * 4;
                     emitter.y = FIXED_Y;
                     emitter.particleNum = 200;
                     emitter.minEndX = -200;

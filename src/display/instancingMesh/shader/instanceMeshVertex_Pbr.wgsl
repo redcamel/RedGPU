@@ -30,7 +30,8 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // Displacement 처리
     if (u_useDisplacementTexture) {
-        let distance = distance(position.xyz, u_cameraPosition);
+        let worldPosForDisplacement = (u_instanceGroupModelMatrix * position).xyz;
+        let distance = distance(worldPosForDisplacement, u_cameraPosition);
         let mipLevel = (distance / maxDistance) * maxMipLevel;
         let displacedPosition = getDisplacementPosition(
             input_position,
@@ -46,20 +47,22 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // [KO] 최종 클립 좌표 계산
     // [EN] Calculate final clip coordinates
-    output.position = u_projectionViewMatrix * u_instanceGroupModelMatrix * position;
-    output.vertexPosition = position.xyz;
+    let worldPositionVec4 = u_instanceGroupModelMatrix * position;
+    output.position = u_projectionViewMatrix * worldPositionVec4;
+    output.vertexPosition = worldPositionVec4.xyz;
 
     // [KO] 노말 변환
     // [EN] Normal transformation
-    var normalPosition: vec3<f32> = (u_instanceGroupModelMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0)).xyz;
-    output.vertexNormal = normalPosition;
+    let u_instanceGroupNormalModelMatrix = instanceUniforms.instanceGroupNormalModelMatrix;
+    var normalPosition: vec3<f32> = (u_instanceGroupNormalModelMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz;
+    output.vertexNormal = normalize(normalPosition);
 
     output.instanceOpacity = instanceUniforms.instanceOpacity[input_instanceIdx];
 
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.vertexTangent = u_normalModelMatrix * inputData.vertexTangent;
+    output.vertexTangent = vec4<f32>((u_instanceGroupNormalModelMatrix * u_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz, inputData.vertexTangent.w);
 
     return output;
 }
