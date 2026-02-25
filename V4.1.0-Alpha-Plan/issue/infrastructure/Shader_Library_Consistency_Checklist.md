@@ -129,6 +129,7 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 *   **결과**: ✅ 완료.
     - **모듈화**: `ColorMaterial` 내에 파편화되어 있던 공중 투시 로직을 시스템 공통 라이브러리(`skyAtmosphere`)로 이주 완료.
     - **범용성**: `getAerialPerspective(color, worldPos)` 인터페이스를 통해 모든 재질에서 단 한 줄로 대기 산란 효과를 적용할 수 있도록 구현.
+    - **호출부 최적화**: 함수 내부의 조건문을 제거하고 호출 측(머티리얼)에서 `useSkyAtmosphere` 활성 여부를 체크하도록 구조를 변경하여 런타임 성능 최적화.
     - **물리적 정합성**: `SkyAtmosphere` 시스템의 태양 강도, 노출, LUT 데이터를 활용하여 하늘 배경과 오브젝트 간의 물리적 밝기 동기화 확인.
 
 ### 19. 대기 태양광 조명 연동 (Atmosphere Sun Light Integration)
@@ -153,20 +154,28 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - **코드 중복 제거**: `PhongMaterial` 내의 Directional, SkyAtmosphere Sun, Point/Spot Light 계산 루프를 하나의 공통 함수로 통합 완료.
     - **안정성**: 입사광 반사 로직(`reflect(-L, N)`)을 내장하여 호출부의 방향성 계산 오류 가능성 제거.
 
+### 22. 인스턴싱 메쉬 시스템 정규화 (InstancingMesh Normalization)
+*   **대상**: `src/display/instancingMesh/` 전역 및 셰이더
+*   **결과**: ✅ 완료.
+    - **데이터 정렬 최적화**: `InstanceUniforms` 구조체를 16바이트 단위로 재정렬하고 명시적 패딩(`vec2<f32>`)을 추가하여 버퍼 오프셋 오염 방지.
+    - **그룹 노말 행렬 도입**: `instanceGroupNormalModelMatrix`를 추가하여 인스턴스 그룹 전체의 변환이 법선(Normal)에 정확히 반영되도록 수정.
+    - **월드 좌표 계산 교정**: 버텍스 셰이더에서 그룹 변환 행렬을 누락하던 문제를 수정하여 공중 투시(`getAerialPerspective`) 및 그림자가 올바른 위치에서 연산되도록 보장.
+    - **셰이더 동기화**: 컬링 컴퓨트 셰이더(`instanceCullingCompute.wgsl`)와 렌더링 셰이더 간의 데이터 구조를 100% 일치시켜 파이프라인 무결성 확보.
+
+### 23. 머티리얼별 대기 효과 개별 제어 (Per-Material Atmosphere Control)
+*   **대상**: `ABaseMaterial` 및 모든 프래그먼트 셰이더
+*   **결과**: ✅ 완료.
+    - **속성 추가**: `ABaseMaterial`에 `useAtmosphere` 속성을 추가하고 기본값을 `true`로 설정.
+    - **유니폼 동기화**: 모든 재질의 `Uniforms` 구조체에 `useAtmosphere: u32` 필드를 추가하여 런타임 제어 기반 마련.
+    - **런타임 최적화**: 셰이더 내에서 `systemUniforms.useSkyAtmosphere`와 `uniforms.useAtmosphere`를 동시에 체크하도록 수정하여, 시스템이 켜져 있어도 특정 객체만 대기 효과를 제외할 수 있는 유연성 확보.
+
 ---
 
 ## 🚀 향후 파편화 제거 대상 (Normalization Roadmap)
 
-시스템 인프라 정규화의 다음 단계로, 아래 두 항목을 최우선 순위로 관리합니다.
+시스템 인프라 정규화의 다음 단계로, 아래 항목을 최우선 순위로 관리합니다.
 
-### 1. 정점 셰이더 입출력 구조체 명칭 정규화 (Vertex I/O Normalization)
-*   **현황**: 파일별로 `VertexOutput`, `VertexOut`, `OutData`, `OutputData` 등 출력 구조체 명칭이 혼용되어 유지보수 시 혼선 발생.
-*   **목표**:
-    *   모든 정점 셰이더의 입력 구조체는 **`InputData`**로 통일.
-    *   모든 정점 셰이더의 출력 구조체는 **`VertexOutput`**으로 통일 (프래그먼트의 `InputData`와 매칭).
-    *   구조체 내 필드 순서를 데이터 레이아웃 최적화 규칙에 맞춰 표준화.
-
-### 2. 샘플러 프리셋 관리 및 직접 생성 금지 (Sampler Preset Standardization)
+### 1. 샘플러 프리셋 관리 및 직접 생성 금지 (Sampler Preset Standardization)
 *   **현황**: `View3D.ts`, `PostEffect` 및 개별 텍스처 로직에서 `new Sampler()`를 통해 개별적으로 샘플러를 생성하여 중복 리소스 발생 및 관리의 어려움 존재.
 *   **목표**:
     *   `ResourceManager`에 정의된 **`PRESET_Sampler_XXXX`** 형태의 정적 프리셋만 사용하도록 코드베이스 전체 강제.
@@ -178,4 +187,5 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 - **2026-02-18**: 문서 최초 생성. 주요 파편화 지점 5개 항목 리스트업.
 - **2026-02-19**: 전 항목 점검 완료 및 KHR 라이브러리 통합, 전역 수치 안정성(EPSILON) 강화, 명명 규칙(CamelCase) 정규화 완료.
 - **2026-02-23**: 디스플레이스먼트 라이브러리 리팩토링 및 좌표계 보정 로직 반영. 모든 레거시 인덱스 파일(`SystemCode`, `SystemVertexCode`) 삭제 및 `SystemCodeManager` 기반 전면 일원화. 엔진 전반의 TypeScript 직접 임포트 정규화 및 시스템 유니폼 파일 구조 정규화 작업 완료. 조명 구조체(`DirectionalLight`, `AmbientLight`), 투영 행렬 구조체(`Projection`), 시간 구조체(`Time`) 파일 분리 및 모듈화 완료. `SYSTEM_UNIFORM` 및 `POST_EFFECT_SYSTEM_UNIFORM` 내 구조체 통합과 `SystemUniformUpdater`를 통한 업데이트 로직 단일화 완료. 특히 `RenderViewStateData`로 시간 계산 로직을 중앙화하여 렌더링 경로 간 데이터 정합성 확보. 쉐이더 코드 내 투영 행렬 접근 경로(`projection.XXXX`) 일괄 갱신 완료.
-- **2026-02-24**: 클러스터 라이팅 시스템 대규모 리팩토링 완료. `ClusterLightManager` 도입을 통한 `View3D` 비대함 해결 및 캡슐화 강화. `ClusterLightCell`, `ClusterLightGrid`, `ClusterCellBounds`, `ClusterBoundsGrid`로 명칭 체계 정규화 및 모듈화된 폴더 구조(`core`, `pass/bound`, `pass/light`) 확립. 해상도 기반 Dirty Checking 최적화 및 WGSL 인코딩 손상 파일 전수 복구 완료. 셰이더 수학 상수 통합 및 정점 셰이더 I/O 명칭 정규화(`InputData`/`VertexOutput`)를 통해 엔진 전역의 인터페이스 일관성 확보. 공중 투시(Aerial Perspective) 모듈화 및 `SystemCodeManager` 내 레거시 별칭 제거를 통한 네임스페이스 기반 경로 단일화 완료.
+- **2026-02-24**: 클러스터 라이팅 시스템 대규모 리팩토링 완료. `ClusterLightManager` 도입을 통한 `View3D` 비대함 해결 및 캡슐화 강화. `ClusterLightCell`, `ClusterLightGrid`, `ClusterCellBounds`, `ClusterBoundsGrid`로 명칭 체계 정규화 및 모듈화된 폴더 구조(`core`, `pass/bound`, `pass/light`) 확립. 해상도 기반 Dirty Checking 최적화 및 WGSL 인코딩 손상 파일 전수 복구 완료. 셰이더 수학 상수 통합 및 정점 셰이더 I/O 명칭 정규화(`InputData`/`VertexOutput`)를 통해 엔진 전역의 인터페이스 일관성 확보. 공중 투시(Aerial Perspective) 모듈화 및 `SystemCodeManager` 내 레거시 별칭 제거를 통한 네임스페이스 기반 경로 단일화 완료. `InstancingMesh` 시스템의 데이터 정렬 최적화 및 그룹 노말 행렬 도입을 통한 물리적 정합성 강화 완료. `getAerialPerspective` 호출부 최적화 및 머티리얼별 `useAtmosphere` 개별 제어 기능 구현 완료.
+ `getAerialPerspective` 호출부 최적화를 통해 대기 시스템 비활성 시의 성능 오버헤드 제거 완료.

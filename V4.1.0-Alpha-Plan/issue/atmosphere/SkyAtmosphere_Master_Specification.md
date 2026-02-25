@@ -62,6 +62,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 3. **Numerical Bias in Culling**: 부동 소수점 오차에 의한 객체 소실 방지를 위해 CPU 컬링 로직에 1.0 유닛(1m)의 안전 마진을 적용하였습니다.
 4. **Stable Linear Depth**: 개선된 선형 깊이 복구 공식(`(n * f) / max(1e-6, f - d * (f - n))`)을 통해 정밀도를 유지합니다.
 5. **Physical Sun Color Calculation**: 하드코딩된 태양색 대신 투과율 LUT를 샘플링하여 태양 고도와 카메라 위치에 따른 실시간 물리적 태양광 색상을 산출합니다.
+6. **Caller-Side Activation Check**: `getAerialPerspective` 함수 내부의 조건문을 제거하고 호출부(Material)에서 `useSkyAtmosphere` 여부를 판단하도록 최적화하여 비활성 시의 오버헤드를 최소화하였습니다.
 
 ---
 
@@ -100,6 +101,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 * **Physical Sun Lighting**: 대기 시스템의 태양 방향과 강도, 투과 색상을 시스템 유니폼으로 공유하여 `PhongMaterial`, `PBRMaterial` 등 모든 조명 연산에 통합하였습니다.
 * **Resource Management Upgrade**: `ResourceManager`에 `emptyTexture3DView` 및 `emptyDepthTextureView` 관리 기능을 추가하여, 3D 텍스처 미사용 시의 안정성을 확보하고 바인딩 오류를 방지하였습니다.
 * **Material System Enhancement**: `getBindGroupLayoutDescriptorFromShaderInfo` 함수를 개선하여 `texture_3d` 바인딩 레이아웃 생성을 지원, 재질 시스템 전반에서 3D 볼륨 텍스처를 활용할 수 있도록 하였습니다.
+* **InstancingMesh World Correction**: 인스턴싱 셰이더의 월드 좌표 계산 로직에 그룹 행렬을 통합하여, 대량의 객체들이 개별 위치에서 정확한 공중 투시(Aerial Perspective) 효과를 받도록 보장하였습니다.
 * **Numerical Bias in Culling**: `Mesh.ts`의 절두체 컬링 로직에 Numerical Bias를 도입하였습니다.
 * **Enhanced Linear Depth Reconstruction**: 안정화된 선형 깊이 복구 공식을 엔진 전역에 적용하였습니다.
 * **Default Camera Clipping Updated**: 대규모 스케일 렌더링에 대응하기 위해 기본 Near/Far Clipping 수치를 상향 조정하였습니다.

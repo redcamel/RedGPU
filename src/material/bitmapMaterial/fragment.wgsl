@@ -10,6 +10,7 @@ struct Uniforms {
     useTint:u32,
     tint:vec4<f32>,
     tintBlendMode:u32,
+    useAtmosphere:u32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
@@ -53,7 +54,7 @@ fn main(inputData: InputData) -> OutputFragment {
   }
 
   // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
-  if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+  if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
       finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
   }
 

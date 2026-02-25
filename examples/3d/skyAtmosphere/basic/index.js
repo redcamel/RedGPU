@@ -30,7 +30,7 @@ RedGPU.init(
 
         // 이동 제한
         controller.minTilt = -88;
-        controller.maxTilt = 88;
+        controller.maxTilt = 0;
         controller.minDistance = 10;
         controller.maxDistance = 1000000;
 
@@ -44,7 +44,7 @@ RedGPU.init(
         const FIXED_Y = 100;
         const TEXT_Y = 300; // [KO] 텍스트 필드 높이 [EN] Text field height
 
-        const GRID_X = 8;
+        const GRID_X = 9;
         const GRID_Z = 50;
         const STEP_X = 1000;
         const STEP_Z = 2000;
@@ -158,6 +158,15 @@ RedGPU.init(
                     emitter.minEndAlpha = 0;
                     emitter.maxEndAlpha = 0;
                     scene.addChild(emitter);
+                } else if (i === 8) {
+                    // [KO] Line3D 테스트 [EN] Line3D test
+                    const line = new RedGPU.Display.Line3D(redGPUContext, RedGPU.Display.LINE_TYPE.LINEAR, '#00ff00');
+                    line.addPoint(0, -100, 0);
+                    line.addPoint(0, 100, 0);
+                    line.x = j * STEP_Z;
+                    line.z = STEP_X * 5;
+                    line.y = FIXED_Y;
+                    scene.addChild(line);
                 }
             }
         }
