@@ -1,7 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM
 #redgpu_include entryPoint.mesh.entryPointPickingFragment
-#redgpu_include SYSTEM_UNIFORM
-#redgpu_include entryPoint.mesh.entryPointPickingFragment
 #redgpu_include color.getTintBlendMode
 #redgpu_include systemStruct.OutputFragment
 #redgpu_include math.getMotionVector
@@ -39,7 +37,9 @@ fn main(inputData: InputData) -> OutputFragment {
     #redgpu_endIf
 
     // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
-    finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
+    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+        finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
+    }
 
     if (finalColor.a == 0.0) {
         discard;

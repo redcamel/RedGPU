@@ -731,7 +731,9 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
-    finalColor = getAerialPerspective(finalColor, input_vertexPosition);
+    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+        finalColor = getAerialPerspective(finalColor, input_vertexPosition);
+    }
 
     output.color = finalColor;
 

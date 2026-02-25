@@ -258,7 +258,9 @@ fn main(inputData:InputData) -> OutputFragment {
       discard;
     }
     // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
-    finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
+    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+        finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
+    }
     output.color = finalColor;
 
     {
