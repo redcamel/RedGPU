@@ -399,7 +399,6 @@ class SkyBox {
         const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKYBOX_VERTEX_UNIFORM_BUFFER', 'SKYBOX_VERTEX_UNIFORM_BUFFER')
         // modelMatrix
         mat4.identity(this.modelMatrix);
-        mat4.scale(this.modelMatrix, this.modelMatrix, [10000, 10000, 10000]); 	//TODO 카메라 farClip 받도록 수정
         vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
         // GPUBindGroupDescriptor
         const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {

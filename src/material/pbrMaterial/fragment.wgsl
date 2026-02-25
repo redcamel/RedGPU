@@ -573,7 +573,7 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [KO] 간접 조명 계산 - IBL [EN] Indirect lighting calculation - IBL
-    if (u_usePrefilterTexture) {
+    if (u_usePrefilterTexture || systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
         var R = getReflectionVectorFromViewDirection(V, N);
         let NdotV = max(dot(N, V),1e-4);
 
@@ -606,11 +606,41 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_endIf
 
         // [KO] ibl (roughness에 따른 mipmap 레벨 적용) [EN] ibl (apply mipmap level based on roughness)
-        let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
-        var mipLevel = roughnessParameter * iblMipmapCount;
-        var reflectedColor = textureSampleLevel( ibl_environmentTexture, prefilterTextureSampler, R, mipLevel ).rgb;
+        var reflectedColor = vec3<f32>(0.0);
+        var iblDiffuseColor = vec3<f32>(0.0);
+        
+        if (u_usePrefilterTexture) {
+            let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
+            var mipLevel = roughnessParameter * iblMipmapCount;
+            reflectedColor = textureSampleLevel( ibl_environmentTexture, prefilterTextureSampler, R, mipLevel ).rgb;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb;
+        }
 
-        // [KO] ibl (BRDF LUT 샘플링) [EN] ibl (BRDF LUT sampling)
+        // [KO] 대기 산란 필터링 적용 (IBL 동기화)
+        // [EN] Apply Atmospheric Scattering Filtering (IBL Synchronization)
+        if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let camH = u_atmo.skyAtmosphereCameraHeight;
+            let atmH = u_atmo.skyAtmosphereAtmosphereHeight;
+            let earthR = u_atmo.skyAtmosphereEarthRadius;
+            let sunInt = u_atmo.skyAtmosphereSunIntensity;
+
+            // [KO] Specular 필터링: (HDR 반사 * 투과율) + 실시간 하늘 산란광
+            // [EN] Specular Filtering: (HDR Reflection * Transmittance) + Real-time Sky Scattering
+            let specTrans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
+            let specSkyUV = get_sky_view_uv(R, camH, earthR, atmH);
+            let specSkyScat = textureSampleLevel(skyViewTexture, atmosphereSampler, specSkyUV, 0.0).rgb * sunInt;
+            reflectedColor = (reflectedColor * specTrans) + specSkyScat;
+
+            // [KO] Diffuse 필터링: (HDR 조도 * 투과율) + 실시간 하늘 산란광
+            // [EN] Diffuse Filtering: (HDR Irradiance * Transmittance) + Real-time Sky Scattering
+            let diffTrans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
+            let diffSkyUV = get_sky_view_uv(N, camH, earthR, atmH);
+            let diffSkyScat = textureSampleLevel(skyViewTexture, atmosphereSampler, diffSkyUV, 0.0).rgb * sunInt;
+            iblDiffuseColor = (iblDiffuseColor * diffTrans) + diffSkyScat;
+        }
+
+        // [KO] ibl (BRDF LUT 샘플링) [EN] ibl BRDF LUT sampling
         // [KO] NdotV와 Roughness를 좌표로 사용하여 미리 계산된 Scale(x)와 Bias(y) 값을 가져옵니다.
         // [EN] Uses NdotV and Roughness as coordinates to fetch pre-calculated Scale(x) and Bias(y) values.
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
@@ -626,14 +656,28 @@ fn main(inputData:InputData) -> OutputFragment {
 
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
         let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-        let iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N,0).rgb;
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor* (vec3<f32>(1.0) - F_IBL_dielectric);
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // [KO] ibl 확산 투과 (Diffuse Transmission) [EN] ibl Diffuse Transmission
         #redgpu_if useKHR_materials_diffuse_transmission
         {
             // [KO] 뒷면 반사광을 위한 샘플링 방향 [EN] Sampling direction for back side reflection
-            var backScatteringColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, -N, mipLevel).rgb;
+            var backScatteringColor = vec3<f32>(0.0);
+            if (u_usePrefilterTexture) {
+                let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
+                var mipLevel = roughnessParameter * iblMipmapCount;
+                backScatteringColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, -N, mipLevel).rgb;
+            }
+            
+            // [KO] 대기 필터링 적용 (Back side)
+            if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
+                let u_atmo = systemUniforms.skyAtmosphere;
+                let backTrans = get_transmittance(transmittanceTexture, atmosphereSampler, u_atmo.skyAtmosphereCameraHeight, -N.y, u_atmo.skyAtmosphereAtmosphereHeight);
+                let backSkyUV = get_sky_view_uv(-N, u_atmo.skyAtmosphereCameraHeight, u_atmo.skyAtmosphereEarthRadius, u_atmo.skyAtmosphereAtmosphereHeight);
+                let backSkyScat = textureSampleLevel(skyViewTexture, atmosphereSampler, backSkyUV, 0.0).rgb * u_atmo.skyAtmosphereSunIntensity;
+                backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
+            }
+
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
             // [KO] 반사광 및 투과 효과 혼합 [EN] Mix reflection and transmission effects
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);

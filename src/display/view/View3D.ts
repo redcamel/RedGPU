@@ -563,6 +563,10 @@ class View3D extends AView {
                     binding: 15,
                     resource: this.skyAtmosphere ? this.skyAtmosphere.transmittanceTexture.gpuTextureView : resourceManager.emptyBitmapTextureView
                 },
+                {
+                    binding: 16,
+                    resource: this.skyAtmosphere ? this.skyAtmosphere.skyViewTexture.gpuTextureView : resourceManager.emptyBitmapTextureView
+                },
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);

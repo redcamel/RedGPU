@@ -497,6 +497,14 @@ const ExampleList = [
                                 },
                             },
                             {
+                                name: 'SkyAtmosphere with glTF',
+                                path: '3d/skyAtmosphere/gltf',
+                                description: {
+                                    ko: `SkyAtmosphere 시스템과 대량의 glTF 모델(PBR) 간의 물리적 조명 동기화 및 공중 투시 효과를 보여줍니다.`,
+                                    en: `Shows physical lighting synchronization and aerial perspective effects between the SkyAtmosphere system and a large number of glTF models (PBR).`
+                                },
+                            },
+                            {
                                 name: 'SkyAtmosphere Generator (LUT)',
                                 path: '3d/skyAtmosphere/generator',
                                 description: {

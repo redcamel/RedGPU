@@ -1,8 +1,11 @@
+#redgpu_include SYSTEM_UNIFORM
 #redgpu_include systemStruct.OutputFragment
 #redgpu_include color.getLuminance
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.INV_PI
+#redgpu_include skyAtmosphere.skyAtmosphereFn
+
 struct Uniforms {
     opacity: f32,
     blur: f32,
@@ -35,6 +38,7 @@ fn sphericalToUV(dir: vec3<f32>) -> vec2<f32> {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var cubemapVec = (inputData.vertexPosition.xyz);
+    let viewDir = normalize(cubemapVec);
     let mipmapCount: f32 = f32(textureNumLevels(skyboxTexture) - 1);
     let blurCurve = uniforms.blur * uniforms.blur; // 제곱 곡선
     let skyboxColor = textureSampleLevel(skyboxTexture, skyboxTextureSampler, cubemapVec, mipmapCount * blurCurve);
@@ -46,7 +50,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
         #redgpu_if transitionAlphaTexture
             // 큐브맵 벡터를 2D UV 좌표로 변환
-            let uv = sphericalToUV(normalize(cubemapVec));
+            let uv = sphericalToUV(viewDir);
             // transitionAlphaTexture 샘플링
             let transitionAlphaSample = textureSampleLevel(transitionAlphaTexture, skyboxTextureSampler, uv, 0.0);
             let transitionAlphaValue = getLuminance(transitionAlphaSample.rgb);
@@ -65,12 +69,33 @@ fn main(inputData: InputData) -> OutputFragment {
         #redgpu_endIf
     }
 
-    var outColor = vec4<f32>(sampleColor.rgb, sampleColor.a * uniforms.opacity);
+    var finalAlpha = sampleColor.a * uniforms.opacity;
+
+    // [KO] 대기가 활성화된 경우 투과율을 알파에 반영 (우주는 대기 너머에 있음)
+    // [EN] If atmosphere is enabled, reflect transmittance in alpha (Space is beyond the atmosphere)
+    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+        let u_atmo = systemUniforms.skyAtmosphere;
+        let transmittance = get_transmittance(
+            transmittanceTexture, 
+            atmosphereSampler, 
+            u_atmo.skyAtmosphereCameraHeight, 
+            viewDir.y, 
+            u_atmo.skyAtmosphereAtmosphereHeight
+        );
+        // RGB 투과율의 평균을 사용하여 배경의 가시성 결정
+        let T = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
+        finalAlpha *= T;
+    }
+
+    var outColor = vec4<f32>(sampleColor.rgb, finalAlpha);
     if (outColor.a == 0.0) {
         discard;
     }
+    
     var output: OutputFragment;
     output.color = outColor;
+    output.gBufferNormal = vec4<f32>(0.0);
+    output.gBufferMotionVector = vec4<f32>(0.0);
 
     return output;
 }

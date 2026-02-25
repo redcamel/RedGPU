@@ -169,6 +169,13 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
     - **유니폼 동기화**: 모든 재질의 `Uniforms` 구조체에 `useAtmosphere: u32` 필드를 추가하여 런타임 제어 기반 마련.
     - **런타임 최적화**: 셰이더 내에서 `systemUniforms.useSkyAtmosphere`와 `uniforms.useAtmosphere`를 동시에 체크하도록 수정하여, 시스템이 켜져 있어도 특정 객체만 대기 효과를 제외할 수 있는 유연성 확보.
 
+### 24. IBL 대기 산란 동기화 (IBL Atmospheric Synchronization)
+*   **대상**: `PBRMaterial` 및 `SYSTEM_UNIFORM`
+*   **결과**: ✅ 완료.
+    - **전역 바인딩 확장**: `skyViewTexture`를 시스템 유니폼 그룹(Group 0, Binding 16)에 추가하여 모든 재질에서 실시간 하늘 데이터를 참조할 수 있도록 인프라 확장.
+    - **물리적 필터링**: PBR 셰이더 내에서 IBL(Diffuse/Specular) 샘플링 시, 반사/법선 방향의 대기 투과율(`Transmittance`)과 산란광(`Sky-View`)을 합성하는 물리적 필터 적용.
+    - **시각적 정합성**: 정적인 HDR 텍스처를 사용하더라도 대기 상태(노을 등)에 따라 반사광의 색상과 밝기가 실시간으로 변조되어 환경과 완벽히 동기화됨.
+
 ---
 
 ## 🚀 향후 파편화 제거 대상 (Normalization Roadmap)

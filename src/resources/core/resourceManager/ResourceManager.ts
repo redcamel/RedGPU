@@ -684,6 +684,7 @@ class ResourceManager {
                         {binding: 13, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "3d"}},
                         {binding: 14, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
                         {binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+                        {binding: 16, visibility: GPUShaderStage.FRAGMENT, texture: {}},
                     ],
                 }
             )
