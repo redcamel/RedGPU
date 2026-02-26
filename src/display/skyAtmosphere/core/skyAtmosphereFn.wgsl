@@ -8,7 +8,7 @@
 const MAX_TAU: f32 = 50.0;
 
 // [KO] 레이-구체 교차점 계산
-fn get_ray_sphere_intersection(ray_origin: vec3<u32>, ray_dir: vec3<f32>, sphere_radius: f32) -> f32 {
+fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere_radius: f32) -> f32 {
     let b = dot(ray_origin, ray_dir);
     let c = dot(ray_origin, ray_origin) - sphere_radius * sphere_radius;
     let delta = b * b - c;
