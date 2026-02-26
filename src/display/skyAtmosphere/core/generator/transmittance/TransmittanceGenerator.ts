@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import transmittanceShaderCode from "./transmittanceShaderCode.wgsl";
-import TransmittanceLUTTexture from "./TransmittanceLUTTexture";
+import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -25,7 +25,7 @@ class TransmittanceGenerator {
     /** [KO] 텍스처 세로 크기 [EN] Texture height */
     readonly height: number = 64;
     #redGPUContext: RedGPUContext;
-    #lutTexture: TransmittanceLUTTexture;
+    #lutTexture: SkyAtmosphereLUTTexture;
     #pipeline: GPUComputePipeline;
     #bindGroup: GPUBindGroup;
     #sharedUniformBuffer: UniformBuffer;
@@ -37,7 +37,7 @@ class TransmittanceGenerator {
     }
 
     /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
-    get lutTexture(): TransmittanceLUTTexture {
+    get lutTexture(): SkyAtmosphereLUTTexture {
         return this.#lutTexture;
     }
 
@@ -60,7 +60,7 @@ class TransmittanceGenerator {
 
     #init(): void {
         const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new TransmittanceLUTTexture(this.#redGPUContext, this.width, this.height);
+        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'TransmittanceLUTTexture', this.width, this.height);
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

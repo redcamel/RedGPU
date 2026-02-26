@@ -1,9 +1,8 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
-import AtmosphereIrradianceLUTTexture from "./AtmosphereIrradianceLUTTexture";
+import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
 import atmosphereIrradianceShaderCode from "./atmosphereIrradianceShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
-import SkyViewLUTTexture from "../skyView/SkyViewLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
@@ -20,7 +19,7 @@ class AtmosphereIrradianceGenerator {
     /** [KO] 텍스처 세로 크기 (Relative Azimuth resolution) [EN] Texture height (Relative Azimuth resolution) */
     readonly height: number = 32;
     #redGPUContext: RedGPUContext;
-    #lutTexture: AtmosphereIrradianceLUTTexture;
+    #lutTexture: SkyAtmosphereLUTTexture;
     #pipeline: GPUComputePipeline;
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
@@ -32,7 +31,7 @@ class AtmosphereIrradianceGenerator {
         this.#init();
     }
 
-    get lutTexture(): AtmosphereIrradianceLUTTexture {
+    get lutTexture(): SkyAtmosphereLUTTexture {
         return this.#lutTexture;
     }
 
@@ -42,7 +41,7 @@ class AtmosphereIrradianceGenerator {
      *
      * @param skyView - [KO] 스카이 뷰 LUT [EN] Sky-View LUT
      */
-    render(skyView: SkyViewLUTTexture): void {
+    render(skyView: SkyAtmosphereLUTTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
@@ -67,7 +66,7 @@ class AtmosphereIrradianceGenerator {
 
     #init(): void {
         const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new AtmosphereIrradianceLUTTexture(this.#redGPUContext, this.width, this.height);
+        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'AtmosphereIrradianceLUTTexture', this.width, this.height);
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

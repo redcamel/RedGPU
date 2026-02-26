@@ -1,10 +1,8 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
-import CameraVolumeLUTTexture from "./CameraVolumeLUTTexture";
+import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
 import cameraVolumeShaderCode from "./cameraVolumeShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
-import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
-import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
@@ -36,7 +34,7 @@ class CameraVolumeGenerator {
     /** [KO] 텍스처 깊이 크기 [EN] Texture depth */
     readonly depth: number = 32;
     #redGPUContext: RedGPUContext;
-    #lutTexture: CameraVolumeLUTTexture;
+    #lutTexture: SkyAtmosphereLUTTexture;
     #pipeline: GPUComputePipeline;
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
@@ -49,7 +47,7 @@ class CameraVolumeGenerator {
     }
 
     /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
-    get lutTexture(): CameraVolumeLUTTexture {
+    get lutTexture(): SkyAtmosphereLUTTexture {
         return this.#lutTexture;
     }
 
@@ -60,7 +58,7 @@ class CameraVolumeGenerator {
      * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
      * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
      */
-    render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture): void {
+    render(transmittance: SkyAtmosphereLUTTexture, multiScat: SkyAtmosphereLUTTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
@@ -90,7 +88,7 @@ class CameraVolumeGenerator {
 
     #init(): void {
         const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new CameraVolumeLUTTexture(this.#redGPUContext, this.width, this.height, this.depth);
+        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'CameraVolumeLUTTexture', this.width, this.height, this.depth);
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

@@ -1,9 +1,8 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
-import MultiScatteringLUTTexture from "./MultiScatteringLUTTexture";
+import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
 import multiScatteringShaderCode from "./multiScatteringShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
-import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
@@ -27,7 +26,7 @@ class MultiScatteringGenerator {
     /** [KO] 텍스처 세로 크기 [EN] Texture height */
     readonly height: number = 32;
     #redGPUContext: RedGPUContext;
-    #lutTexture: MultiScatteringLUTTexture;
+    #lutTexture: SkyAtmosphereLUTTexture;
     #pipeline: GPUComputePipeline;
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
@@ -40,7 +39,7 @@ class MultiScatteringGenerator {
     }
 
     /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
-    get lutTexture(): MultiScatteringLUTTexture {
+    get lutTexture(): SkyAtmosphereLUTTexture {
         return this.#lutTexture;
     }
 
@@ -50,7 +49,7 @@ class MultiScatteringGenerator {
      *
      * @param transmittanceTexture - [KO] 투과율 LUT 텍스처 [EN] Transmittance LUT texture
      */
-    render(transmittanceTexture: TransmittanceLUTTexture): void {
+    render(transmittanceTexture: SkyAtmosphereLUTTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
@@ -75,7 +74,7 @@ class MultiScatteringGenerator {
 
     #init(): void {
         const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new MultiScatteringLUTTexture(this.#redGPUContext, this.width, this.height);
+        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'MultiScatteringLUTTexture', this.width, this.height);
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

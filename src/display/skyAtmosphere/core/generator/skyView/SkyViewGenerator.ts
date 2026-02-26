@@ -1,10 +1,8 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
-import SkyViewLUTTexture from "./SkyViewLUTTexture";
+import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
 import skyViewShaderCode from "./skyViewShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
-import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
-import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
@@ -28,7 +26,7 @@ class SkyViewGenerator {
     /** [KO] 텍스처 세로 크기 [EN] Texture height */
     readonly height: number = 200;
     #redGPUContext: RedGPUContext;
-    #lutTexture: SkyViewLUTTexture;
+    #lutTexture: SkyAtmosphereLUTTexture;
     #pipeline: GPUComputePipeline;
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
@@ -41,7 +39,7 @@ class SkyViewGenerator {
     }
 
     /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
-    get lutTexture(): SkyViewLUTTexture {
+    get lutTexture(): SkyAtmosphereLUTTexture {
         return this.#lutTexture;
     }
 
@@ -52,7 +50,7 @@ class SkyViewGenerator {
      * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
      * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
      */
-    render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture): void {
+    render(transmittance: SkyAtmosphereLUTTexture, multiScat: SkyAtmosphereLUTTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
@@ -78,7 +76,7 @@ class SkyViewGenerator {
 
     #init(): void {
         const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new SkyViewLUTTexture(this.#redGPUContext, this.width, this.height);
+        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'SkyViewLUTTexture', this.width, this.height);
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({
