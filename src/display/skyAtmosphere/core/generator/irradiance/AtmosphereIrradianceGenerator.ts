@@ -1,13 +1,13 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
-import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import atmosphereIrradianceShaderCode from "./atmosphereIrradianceShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + atmosphereIrradianceShaderCode, 'ATMOSPHERE_IRRADIANCE_GENERATOR');
-
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**
  * [KO] Sky-View LUT를 기반으로 실시간 조도(Irradiance) LUT를 생성하는 클래스입니다.
@@ -19,7 +19,7 @@ class AtmosphereIrradianceGenerator {
     /** [KO] 텍스처 세로 크기 (Relative Azimuth resolution) [EN] Texture height (Relative Azimuth resolution) */
     readonly height: number = 32;
     #redGPUContext: RedGPUContext;
-    #lutTexture: SkyAtmosphereLUTTexture;
+    #lutTexture: DirectTexture;
     #pipeline: GPUComputePipeline;
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
@@ -31,7 +31,7 @@ class AtmosphereIrradianceGenerator {
         this.#init();
     }
 
-    get lutTexture(): SkyAtmosphereLUTTexture {
+    get lutTexture(): DirectTexture {
         return this.#lutTexture;
     }
 
@@ -41,7 +41,7 @@ class AtmosphereIrradianceGenerator {
      *
      * @param skyView - [KO] 스카이 뷰 LUT [EN] Sky-View LUT
      */
-    render(skyView: SkyAtmosphereLUTTexture): void {
+    render(skyView: DirectTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
@@ -65,8 +65,17 @@ class AtmosphereIrradianceGenerator {
     }
 
     #init(): void {
-        const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'AtmosphereIrradianceLUTTexture', this.width, this.height);
+        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        
+        const gpuTexture = resourceManager.createManagedTexture({
+            label: 'AtmosphereIrradianceLUTTexture',
+            size: [this.width, this.height, 1],
+            dimension: '2d',
+            format: 'rgba16float',
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+        });
+
+        this.#lutTexture = new DirectTexture(this.#redGPUContext, 'AtmosphereIrradianceLUTTexture', gpuTexture);
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

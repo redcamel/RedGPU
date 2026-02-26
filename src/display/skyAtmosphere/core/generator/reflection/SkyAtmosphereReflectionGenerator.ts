@@ -2,10 +2,10 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import reflectionShaderCode from "./skyAtmosphereReflectionShaderCode.wgsl";
-import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR');
@@ -53,7 +53,7 @@ class SkyAtmosphereReflectionGenerator {
      * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
      * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
      */
-    async render(transmittance: SkyAtmosphereLUTTexture, multiScat: SkyAtmosphereLUTTexture): Promise<void> {
+    async render(transmittance: DirectTexture, multiScat: DirectTexture): Promise<void> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
 
         // 1. 소스 큐브맵 렌더링 (6개 면)

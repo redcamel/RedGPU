@@ -1,13 +1,13 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
-import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import multiScatteringShaderCode from "./multiScatteringShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + multiScatteringShaderCode, 'MULTI_SCATTERING_GENERATOR');
-
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**
  * [KO] 다중 산란(Multi-Scattering) 에너지 보정을 위한 LUT 생성을 담당하는 클래스입니다.
@@ -26,7 +26,7 @@ class MultiScatteringGenerator {
     /** [KO] 텍스처 세로 크기 [EN] Texture height */
     readonly height: number = 32;
     #redGPUContext: RedGPUContext;
-    #lutTexture: SkyAtmosphereLUTTexture;
+    #lutTexture: DirectTexture;
     #pipeline: GPUComputePipeline;
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
@@ -39,7 +39,7 @@ class MultiScatteringGenerator {
     }
 
     /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
-    get lutTexture(): SkyAtmosphereLUTTexture {
+    get lutTexture(): DirectTexture {
         return this.#lutTexture;
     }
 
@@ -49,7 +49,7 @@ class MultiScatteringGenerator {
      *
      * @param transmittanceTexture - [KO] 투과율 LUT 텍스처 [EN] Transmittance LUT texture
      */
-    render(transmittanceTexture: SkyAtmosphereLUTTexture): void {
+    render(transmittanceTexture: DirectTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
@@ -73,8 +73,17 @@ class MultiScatteringGenerator {
     }
 
     #init(): void {
-        const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'MultiScatteringLUTTexture', this.width, this.height);
+        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        
+        const gpuTexture = resourceManager.createManagedTexture({
+            label: 'MultiScatteringLUTTexture',
+            size: [this.width, this.height, 1],
+            dimension: '2d',
+            format: 'rgba16float',
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+        });
+
+        this.#lutTexture = new DirectTexture(this.#redGPUContext, 'MultiScatteringLUTTexture', gpuTexture);
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

@@ -3,6 +3,7 @@ import {keepLog} from "../../../utils";
 import Sampler from "../../sampler/Sampler";
 import BitmapTexture from "../../texture/BitmapTexture";
 import DirectCubeTexture from "../../texture/DirectCubeTexture";
+import DirectTexture from "../../texture/DirectTexture";
 import {
     BRDFGenerator,
     EquirectangularToCubeGenerator,
@@ -349,8 +350,8 @@ class ResourceManager {
      * [KO] 비트맵 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
      * [EN] Retrieves or creates a view for a bitmap texture from cache.
      * @param texture -
-     * [KO] 대상 텍스처 (BitmapTexture, PackedTexture 또는 GPUTexture)
-     * [EN] Target texture (BitmapTexture, PackedTexture, or GPUTexture)
+     * [KO] 대상 텍스처 (BitmapTexture, PackedTexture, DirectTexture 또는 GPUTexture)
+     * [EN] Target texture (BitmapTexture, PackedTexture, DirectTexture, or GPUTexture)
      * @param viewDescriptor -
      * [KO] 뷰 디스크립터 (선택)
      * [EN] View descriptor (optional)
@@ -359,7 +360,7 @@ class ResourceManager {
      * [EN] GPUTextureView
      */
     getGPUResourceBitmapTextureView(
-        texture: BitmapTexture | PackedTexture | GPUTexture,
+        texture: any,
         viewDescriptor?: GPUTextureViewDescriptor
     ): GPUTextureView | null {
         const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture;
@@ -403,7 +404,7 @@ class ResourceManager {
      * [EN] GPUTextureView
      */
     getGPUResourceCubeTextureView(
-        cubeTexture: CubeTexture | GPUTexture | DirectCubeTexture,
+        cubeTexture: any,
         viewDescriptor?: GPUTextureViewDescriptor
     ): GPUTextureView | null {
         const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture;
@@ -415,8 +416,7 @@ class ResourceManager {
             textureViewMap = new Map();
             this.#cubeTextureViewCache.set(targetGPUTexture, textureViewMap);
         }
-        if (!(cubeTexture instanceof GPUTexture) && !viewDescriptor) viewDescriptor = cubeTexture.viewDescriptor;
-        const effectiveDescriptor = viewDescriptor || CubeTexture.defaultViewDescriptor;
+        const effectiveDescriptor: GPUTextureViewDescriptor = viewDescriptor || (cubeTexture instanceof GPUTexture ? CubeTexture.defaultViewDescriptor : cubeTexture.viewDescriptor);
         const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
         let cachedView = textureViewMap.get(cacheKey);
         if (!cachedView) {

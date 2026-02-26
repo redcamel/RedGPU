@@ -1,13 +1,14 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
-import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
+import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
 import cameraVolumeShaderCode from "./cameraVolumeShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_VOLUME_GENERATOR');
-
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**
  * [KO] 거리별 공중 투시(Aerial Perspective)를 위한 3D LUT 생성을 담당하는 클래스입니다.
@@ -34,7 +35,7 @@ class CameraVolumeGenerator {
     /** [KO] 텍스처 깊이 크기 [EN] Texture depth */
     readonly depth: number = 32;
     #redGPUContext: RedGPUContext;
-    #lutTexture: SkyAtmosphereLUTTexture;
+    #lutTexture: DirectCubeTexture;
     #pipeline: GPUComputePipeline;
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
@@ -47,7 +48,7 @@ class CameraVolumeGenerator {
     }
 
     /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
-    get lutTexture(): SkyAtmosphereLUTTexture {
+    get lutTexture(): DirectCubeTexture {
         return this.#lutTexture;
     }
 
@@ -58,13 +59,13 @@ class CameraVolumeGenerator {
      * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
      * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
      */
-    render(transmittance: SkyAtmosphereLUTTexture, multiScat: SkyAtmosphereLUTTexture): void {
+    render(transmittance: DirectTexture, multiScat: DirectTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#pipeline.getBindGroupLayout(0),
             entries: [
-                {binding: 0, resource: this.#lutTexture.gpuTextureView},
+                {binding: 0, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})},
                 {binding: 1, resource: transmittance.gpuTextureView},
                 {binding: 2, resource: multiScat.gpuTextureView},
                 {binding: 3, resource: this.#sampler.gpuSampler},
@@ -87,11 +88,22 @@ class CameraVolumeGenerator {
     }
 
     #init(): void {
-        const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'CameraVolumeLUTTexture', this.width, this.height, this.depth);
+        const {resourceManager} = this.#redGPUContext;
+        
+        // 3D GPUTexture 생성
+        const gpuTexture = resourceManager.createManagedTexture({
+            label: 'CameraVolumeLUTTexture',
+            size: [this.width, this.height, this.depth],
+            dimension: '3d',
+            format: 'rgba16float',
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING
+        });
 
-        const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
-        this.#pipeline = gpuDevice.createComputePipeline({
+        // DirectCubeTexture (3D/Cube 범용 컨테이너)로 래핑
+        this.#lutTexture = new DirectCubeTexture(this.#redGPUContext, 'CameraVolumeLUTTexture', gpuTexture);
+
+        const shaderModule = this.#redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
+        this.#pipeline = this.#redGPUContext.gpuDevice.createComputePipeline({
             layout: 'auto',
             compute: {module: shaderModule, entryPoint: 'main'}
         });

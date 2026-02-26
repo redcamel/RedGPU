@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import transmittanceShaderCode from "./transmittanceShaderCode.wgsl";
-import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -25,7 +25,7 @@ class TransmittanceGenerator {
     /** [KO] 텍스처 세로 크기 [EN] Texture height */
     readonly height: number = 64;
     #redGPUContext: RedGPUContext;
-    #lutTexture: SkyAtmosphereLUTTexture;
+    #lutTexture: DirectTexture;
     #pipeline: GPUComputePipeline;
     #bindGroup: GPUBindGroup;
     #sharedUniformBuffer: UniformBuffer;
@@ -37,7 +37,7 @@ class TransmittanceGenerator {
     }
 
     /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
-    get lutTexture(): SkyAtmosphereLUTTexture {
+    get lutTexture(): DirectTexture {
         return this.#lutTexture;
     }
 
@@ -59,8 +59,17 @@ class TransmittanceGenerator {
     }
 
     #init(): void {
-        const {gpuDevice} = this.#redGPUContext;
-        this.#lutTexture = new SkyAtmosphereLUTTexture(this.#redGPUContext, 'TransmittanceLUTTexture', this.width, this.height);
+        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        
+        const gpuTexture = resourceManager.createManagedTexture({
+            label: 'TransmittanceLUTTexture',
+            size: [this.width, this.height, 1],
+            dimension: '2d',
+            format: 'rgba16float',
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+        });
+
+        this.#lutTexture = new DirectTexture(this.#redGPUContext, 'TransmittanceLUTTexture', gpuTexture);
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

@@ -16,7 +16,8 @@ import Sampler from "../../resources/sampler/Sampler";
 import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import SkyAtmosphereLUTTexture from "./core/generator/SkyAtmosphereLUTTexture";
+import DirectTexture from "../../resources/texture/DirectTexture";
+import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'SKY_ATMOSPHERE_CORE');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
@@ -451,32 +452,32 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /** [KO] 투과율 LUT 텍스처를 반환합니다. [EN] Returns the Transmittance LUT texture. */
-    get transmittanceTexture(): SkyAtmosphereLUTTexture {
+    get transmittanceTexture(): DirectTexture {
         return this.#transmittanceGenerator.lutTexture;
     }
 
     /** [KO] 다중 산란 LUT 텍스처를 반환합니다. [EN] Returns the Multi-Scattering LUT texture. */
-    get multiScatteringTexture(): SkyAtmosphereLUTTexture {
+    get multiScatteringTexture(): DirectTexture {
         return this.#multiScatteringGenerator.lutTexture;
     }
 
     /** [KO] 스카이 뷰 LUT 텍스처를 반환합니다. [EN] Returns the Sky-View LUT texture. */
-    get skyViewTexture(): SkyAtmosphereLUTTexture {
+    get skyViewTexture(): DirectTexture {
         return this.#skyViewGenerator.lutTexture;
     }
 
     /** [KO] 카메라 볼륨(AP) LUT 텍스처를 반환합니다. [EN] Returns the Camera Volume (AP) LUT texture. */
-    get cameraVolumeTexture(): SkyAtmosphereLUTTexture {
+    get cameraVolumeTexture(): DirectCubeTexture {
         return this.#cameraVolumeGenerator.lutTexture;
     }
 
     /** [KO] 대기 조도(Irradiance) LUT 텍스처를 반환합니다. [EN] Returns the Atmospheric Irradiance LUT texture. */
-    get atmosphereIrradianceTexture(): SkyAtmosphereLUTTexture {
+    get atmosphereIrradianceTexture(): DirectTexture {
         return this.#irradianceGenerator.lutTexture;
     }
 
     /** [KO] 프리필터링된 대기 반사 큐브맵을 반환합니다. [EN] Returns the pre-filtered atmospheric reflection cubemap. */
-    get skyAtmosphereReflectionTexture() {
+    get skyAtmosphereReflectionTexture(): DirectCubeTexture {
         return this.#reflectionGenerator.prefilteredTexture;
     }
 
@@ -564,7 +565,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 {binding: 2, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
                 {binding: 3, resource: this.#multiScatteringGenerator.lutTexture.gpuTextureView},
                 {binding: 4, resource: this.skyViewTexture.gpuTextureView},
-                {binding: 5, resource: this.#cameraVolumeGenerator.lutTexture.gpuTextureView},
+                {binding: 5, resource: this.#cameraVolumeGenerator.lutTexture.gpuTexture.createView({dimension: '3d'})},
                 {binding: 6, resource: this.#sampler.gpuSampler}
             ]
         });
