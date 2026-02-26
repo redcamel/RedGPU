@@ -352,15 +352,6 @@ class PostEffectManager {
                 currentTextureView
             );
         }
-
-        {
-            currentTextureView = toneMappingManager.render(
-                width,
-                height,
-                currentTextureView
-            );
-        }
-
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(
                 this.#view,
@@ -369,6 +360,15 @@ class PostEffectManager {
                 currentTextureView,
             );
         });
+        {
+            currentTextureView = toneMappingManager.render(
+                width,
+                height,
+                currentTextureView
+            );
+        }
+
+
 
         if (useFXAA) {
             currentTextureView = fxaa.render(
