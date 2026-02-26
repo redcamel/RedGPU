@@ -21,18 +21,18 @@ fn getAtmosphereSunLight() -> AtmosphereSunLight {
     var sun: AtmosphereSunLight;
     let u_skyAtmosphere = systemUniforms.skyAtmosphere;
     
-    let sunDir = normalize(u_skyAtmosphere.skyAtmosphereSunDirection);
+    let sunDir = normalize(u_skyAtmosphere.sunDirection);
     sun.direction = sunDir;
-    sun.intensity = u_skyAtmosphere.skyAtmosphereSunIntensity;
+    sun.intensity = u_skyAtmosphere.sunIntensity;
     
     // [KO] 현재 고도와 태양 각도를 기반으로 대기 투과율(Transmittance)을 샘플링하여 실제 태양색 결정
     // [EN] Sample Atmospheric Transmittance based on current height and sun angle to determine actual sun color
     sun.color = get_transmittance(
         transmittanceTexture, 
         atmosphereSampler, 
-        u_skyAtmosphere.skyAtmosphereCameraHeight, 
+        u_skyAtmosphere.cameraHeight, 
         sunDir.y, 
-        u_skyAtmosphere.skyAtmosphereAtmosphereHeight
+        u_skyAtmosphere.atmosphereHeight
     );
     
     return sun;

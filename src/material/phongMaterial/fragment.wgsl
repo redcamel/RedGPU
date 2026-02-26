@@ -9,7 +9,6 @@
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;
 #redgpu_include lighting.getPhongLight;
-#redgpu_include skyAtmosphere.getAerialPerspective
 #redgpu_include skyAtmosphere.getAtmosphereSunLight
 struct Uniforms {
     color: vec3<f32>,
@@ -171,7 +170,7 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [Atmosphere Sun Light]
-    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+    if (systemUniforms.useSkyAtmosphere == 1u) {
         let atmoSun = getAtmosphereSunLight();
         mixColor += getPhongLight(
             atmoSun.color, atmoSun.intensity, atmoSun.direction,

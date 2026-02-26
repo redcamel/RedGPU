@@ -11,8 +11,6 @@ import AtmosphereIrradianceGenerator from "./core/generator/irradiance/Atmospher
 import SkyAtmosphereReflectionGenerator from "./core/generator/reflection/SkyAtmosphereReflectionGenerator";
 import skyAtmosphereFn from "./core/skyAtmosphereFn.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
-import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../../resources/sampler/Sampler";
 import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
 
@@ -76,7 +74,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
 
-    #uniformBuffer: UniformBuffer;
     #computeShaderMSAA: GPUShaderModule;
     #computeShaderNonMSAA: GPUShaderModule;
     #cachedBindGroupLayouts: Map<string, GPUBindGroupLayout> = new Map();
@@ -114,9 +111,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             addressModeV: 'clamp-to-edge'
         });
 
-        const uniformData = new ArrayBuffer(160);
-        this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, 'SKY_ATMOSPHERE_PE_UNIFORM_BUFFER');
-
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
             label: 'SKY_ATMOSPHERE_PE_BGL_1',
             entries: [
@@ -125,14 +119,12 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                     visibility: GPUShaderStage.COMPUTE,
                     storageTexture: {format: 'rgba16float', access: 'write-only'}
                 },
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
             ]
         });
 
         this.#initShaders();
         this.#updateSunDirection();
-        this.#syncAllUniforms();
     }
 
     /** [KO] 태양 고도 (도) [EN] Sun elevation (degrees) */
@@ -162,6 +154,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         return this.#params.sunDirection;
     }
 
+    /** [KO] 대기 파라미터 객체 [EN] Atmosphere parameters object */
+    get params() {
+        return this.#params;
+    }
+
     /** [KO] 카메라 고도 (km) [EN] Camera height (km) */
     get cameraHeight(): number {
         return this.#params.cameraHeight;
@@ -175,7 +172,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set exposure(v: number) {
         validatePositiveNumberRange(v, 0, 100);
         this.#params.exposure = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 96, View: Float32Array}, [v]);
     }
 
     /** [KO] 태양 강도 [EN] Sun intensity */
@@ -186,7 +182,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set sunIntensity(v: number) {
         validatePositiveNumberRange(v, 0, 10000);
         this.#params.sunIntensity = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 100, View: Float32Array}, [v]);
     }
 
     /** [KO] 지구 반지름 (km) [EN] Earth radius (km) */
@@ -197,7 +192,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set earthRadius(v: number) {
         validatePositiveNumberRange(v, 1);
         this.#params.earthRadius = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 64, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -209,7 +203,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set atmosphereHeight(v: number) {
         validatePositiveNumberRange(v, 1);
         this.#params.atmosphereHeight = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 68, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -221,7 +214,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieScattering(v: number) {
         validatePositiveNumberRange(v, 0, 1.0);
         this.#params.mieScattering = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 72, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -233,7 +225,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieExtinction(v: number) {
         validatePositiveNumberRange(v, 0, 1.0);
         this.#params.mieExtinction = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 76, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -244,7 +235,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     set rayleighScattering(v: [number, number, number]) {
         this.#params.rayleighScattering = [...v];
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 0, View: Float32Array}, this.#params.rayleighScattering);
         this.#dirtyLUT = true;
     }
 
@@ -256,7 +246,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set rayleighScaleHeight(v: number) {
         validatePositiveNumberRange(v, 0.1, 100);
         this.#params.rayleighScaleHeight = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 80, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -268,7 +257,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieScaleHeight(v: number) {
         validatePositiveNumberRange(v, 0.1, 100);
         this.#params.mieScaleHeight = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 84, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -280,7 +268,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieAnisotropy(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieAnisotropy = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 12, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -292,7 +279,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set horizonHaze(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.horizonHaze = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 112, View: Float32Array}, [v]);
     }
 
     /** [KO] 지면 알베도 [EN] Ground albedo */
@@ -302,7 +288,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     set groundAlbedo(v: [number, number, number]) {
         this.#params.groundAlbedo = [...v];
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 32, View: Float32Array}, this.#params.groundAlbedo);
         this.#dirtyLUT = true;
     }
 
@@ -314,7 +299,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set groundAmbient(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.groundAmbient = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 44, View: Float32Array}, [v]);
     }
 
     /** [KO] 오존 흡수 계수 [EN] Ozone absorption coefficient */
@@ -324,7 +308,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     set ozoneAbsorption(v: [number, number, number]) {
         this.#params.ozoneAbsorption = [...v];
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 16, View: Float32Array}, this.#params.ozoneAbsorption);
         this.#dirtyLUT = true;
     }
 
@@ -336,7 +319,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set ozoneLayerCenter(v: number) {
         validatePositiveNumberRange(v, 0, 100);
         this.#params.ozoneLayerCenter = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 28, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -348,7 +330,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set ozoneLayerWidth(v: number) {
         validatePositiveNumberRange(v, 1, 50);
         this.#params.ozoneLayerWidth = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 132, View: Float32Array}, [v]);
         this.#dirtyLUT = true;
     }
 
@@ -360,7 +341,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set multiScatteringAmbient(v: number) {
         validatePositiveNumberRange(v, 0, 1.0);
         this.#params.multiScatteringAmbient = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 92, View: Float32Array}, [v]);
         this.#dirtySkyView = true;
     }
 
@@ -372,7 +352,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set heightFogDensity(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.heightFogDensity = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 104, View: Float32Array}, [v]);
     }
 
     /** [KO] 높이 안개 감쇄 계수 [EN] Height fog falloff coefficient */
@@ -383,7 +362,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set heightFogFalloff(v: number) {
         validatePositiveNumberRange(v, 0.001, 10);
         this.#params.heightFogFalloff = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 108, View: Float32Array}, [v]);
     }
 
     /** [KO] 태양 시직경 [EN] Sun size */
@@ -394,7 +372,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set sunSize(v: number) {
         validatePositiveNumberRange(v, 0.01, 10.0);
         this.#params.sunSize = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 60, View: Float32Array}, [v]);
     }
 
     /** [KO] 미(Mie) 글로우 강도 [EN] Mie glow intensity */
@@ -405,7 +382,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieGlow(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieGlow = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 116, View: Float32Array}, [v]);
     }
 
     /** [KO] 미(Mie) 헤일로 강도 [EN] Mie halo intensity */
@@ -416,7 +392,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieHalo(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieHalo = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 120, View: Float32Array}, [v]);
     }
 
     /** [KO] 지면 광택도 [EN] Ground shininess */
@@ -427,7 +402,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set groundShininess(v: number) {
         validatePositiveNumberRange(v, 1, 2048);
         this.#params.groundShininess = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 124, View: Float32Array}, [v]);
     }
 
     /** [KO] 지면 스펙큘러 강도 [EN] Ground specular intensity */
@@ -438,7 +412,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set groundSpecular(v: number) {
         validatePositiveNumberRange(v, 0, 100);
         this.#params.groundSpecular = v;
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 128, View: Float32Array}, [v]);
     }
 
     /** [KO] 투과율 LUT 텍스처를 반환합니다. [EN] Returns the Transmittance LUT texture. */
@@ -504,7 +477,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
         if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.01) {
             this.#params.cameraHeight = currentHeightKm;
-            this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 88, View: Float32Array}, [currentHeightKm]);
             this.#dirtySkyView = true;
         }
 
@@ -549,7 +521,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 {binding: 1, resource: view.viewRenderTextureManager.depthTextureView},
                 {binding: 2, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
                 {binding: 3, resource: this.#multiScatteringGenerator.lutTexture.gpuTextureView},
-                {binding: 4, resource: this.#skyViewGenerator.lutTexture.gpuTextureView},
+                {binding: 4, resource: this.skyViewTexture.gpuTextureView},
                 {binding: 5, resource: this.#cameraVolumeGenerator.lutTexture.gpuTextureView},
                 {binding: 6, resource: this.#sampler.gpuSampler}
             ]
@@ -559,8 +531,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             layout: this.#bindGroupLayout1,
             entries: [
                 {binding: 0, resource: this.#outputTextureView},
-                {binding: 1, resource: {buffer: view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer}},
-                {binding: 2, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+                {binding: 1, resource: {buffer: view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer}}
             ]
         });
 
@@ -591,6 +562,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 			`;
 
             return [
+                '#redgpu_include depth.getLinearizeDepth',
                 skyAtmosphereFn,
                 '@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
                 depthTextureDeclaration,
@@ -602,13 +574,15 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 '',
                 '@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM,
-                '@group(1) @binding(2) var<uniform> uniforms: Uniforms;',
                 '',
-                uniformStructCode,
                 fetchDepthFunction,
                 '',
                 '@compute @workgroup_size(16, 16)',
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
+                '    let uniforms = systemUniforms.skyAtmosphere;',
+                '    let camH = uniforms.cameraHeight;',
+                '    let r = uniforms.earthRadius;',
+                '    let atmH = uniforms.atmosphereHeight;',
                 computeCode,
                 '}'
             ].join('\n');
@@ -663,34 +637,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#params.sunDirection[0] = Math.sin(phi) * Math.cos(theta);
         this.#params.sunDirection[1] = Math.cos(phi);
         this.#params.sunDirection[2] = Math.sin(phi) * Math.sin(theta);
-        this.#uniformBuffer.writeOnlyBuffer({
-            uniformOffset: 48,
-            View: Float32Array
-        }, Array.from(this.#params.sunDirection));
 
         this.#dirtySkyView = true;
-    }
-
-    #syncAllUniforms(): void {
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 0, View: Float32Array}, this.#params.rayleighScattering);
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 12, View: Float32Array}, [this.#params.mieAnisotropy]);
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 16, View: Float32Array}, this.#params.ozoneAbsorption);
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 28, View: Float32Array}, [this.#params.ozoneLayerCenter]);
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 32, View: Float32Array}, this.#params.groundAlbedo);
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 44, View: Float32Array}, [this.#params.groundAmbient]);
-        this.#uniformBuffer.writeOnlyBuffer({
-            uniformOffset: 48,
-            View: Float32Array
-        }, Array.from(this.#params.sunDirection));
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 60, View: Float32Array}, [this.#params.sunSize]);
-
-        this.#uniformBuffer.writeOnlyBuffer({uniformOffset: 64, View: Float32Array}, [
-            this.#params.earthRadius, this.#params.atmosphereHeight, this.#params.mieScattering, this.#params.mieExtinction,
-            this.#params.rayleighScaleHeight, this.#params.mieScaleHeight, this.#params.cameraHeight, this.#params.multiScatteringAmbient,
-            this.#params.exposure, this.#params.sunIntensity, this.#params.heightFogDensity, this.#params.heightFogFalloff,
-            this.#params.horizonHaze, this.#params.mieGlow, this.#params.mieHalo, this.#params.groundShininess,
-            this.#params.groundSpecular, this.#params.ozoneLayerWidth
-        ]);
     }
 }
 

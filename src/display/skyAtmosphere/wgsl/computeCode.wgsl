@@ -33,9 +33,6 @@ let worldRotation = mat3x3<f32>(
 let viewDir = normalize(worldRotation * viewSpaceDir);
 
 let sunDir = normalize(uniforms.sunDirection);
-let camH = max(0.0001, uniforms.cameraHeight);
-let r = uniforms.earthRadius;
-let atmH = uniforms.atmosphereHeight;
 
 // [KO] 2. 공중 원근법(Aerial Perspective) 적용
 // [EN] 2. Apply Aerial Perspective
@@ -99,7 +96,10 @@ if (t_earth > 0.0) {
     let sun_rad = uniforms.sunSize * DEG_TO_RAD;
     let sun_mask = smoothstep(cos(sun_rad) - 0.001, cos(sun_rad), view_sun_cos);
     let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
-    atmosphereBackground += sun_mask * sun_trans * (uniforms.sunIntensity * 100.0);
+    
+    // [KO] 태양 디스크 합성: 물리적으로 올바른 강도 적용
+    // [EN] Sun disk synthesis: apply physically correct intensity
+    atmosphereBackground += sun_mask * sun_trans * uniforms.sunIntensity;
 }
 
 // [KO] 지평선 안개(Haze)는 Sky-View LUT와 Aerial Perspective LUT에 이미 물리적으로 통합되어 있습니다.

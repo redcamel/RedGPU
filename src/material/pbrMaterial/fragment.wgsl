@@ -32,7 +32,6 @@
 #redgpu_include lighting.getDiffuseBTDF
 #redgpu_include lighting.getFresnelMix
 #redgpu_include lighting.getFresnelCoat
-#redgpu_include skyAtmosphere.getAerialPerspective
 #redgpu_include skyAtmosphere.getAtmosphereSunLight
 
 /**
@@ -533,7 +532,7 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [Atmosphere Sun Light]
-    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+    if (systemUniforms.useSkyAtmosphere == 1u) {
         let atmoSun = getAtmosphereSunLight();
         totalDirectLighting += calcLight(atmoSun.color, atmoSun.intensity, N, V, atmoSun.direction, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
     }
@@ -573,7 +572,7 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [KO] 간접 조명 계산 - IBL [EN] Indirect lighting calculation - IBL
-    if (u_usePrefilterTexture || systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+    if (u_usePrefilterTexture || systemUniforms.useSkyAtmosphere == 1u) {
         var R = getReflectionVectorFromViewDirection(V, N);
         let NdotV = max(dot(N, V),1e-4);
 
@@ -618,12 +617,12 @@ fn main(inputData:InputData) -> OutputFragment {
 
         // [KO] 대기 산란 필터링 및 조도 합성 (IBL 동기화)
         // [EN] Atmospheric Scattering Filtering and Irradiance Synthesis (IBL Synchronization)
-        if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
+        if (systemUniforms.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
             let u_atmo = systemUniforms.skyAtmosphere;
-            let camH = u_atmo.skyAtmosphereCameraHeight;
-            let atmH = u_atmo.skyAtmosphereAtmosphereHeight;
-            let earthR = u_atmo.skyAtmosphereEarthRadius;
-            let sunInt = u_atmo.skyAtmosphereSunIntensity;
+            let camH = u_atmo.cameraHeight;
+            let atmH = u_atmo.atmosphereHeight;
+            let earthR = u_atmo.earthRadius;
+            let sunInt = u_atmo.sunIntensity;
 
             // [KO] Specular 필터링: (HDR 반사 * 투과율) + 실시간 하늘 산란광
             // [EN] Specular Filtering: (HDR Reflection * Transmittance) + Real-time Sky Scattering
@@ -644,7 +643,7 @@ fn main(inputData:InputData) -> OutputFragment {
             // [KO] 2D 조도 LUT 샘플링 (X: Elevation, Y: Relative Azimuth to Sun)
             let u_el = clamp((asin(clamp(N.y, -1.0, 1.0)) * INV_PI) + 0.5, 0.001, 0.999);
             
-            let sun_azimuth = atan2(u_atmo.skyAtmosphereSunDirection.z, u_atmo.skyAtmosphereSunDirection.x);
+            let sun_azimuth = atan2(u_atmo.sunDirection.z, u_atmo.sunDirection.x);
             let pixel_azimuth = atan2(N.z, N.x);
             let rel_azimuth = pixel_azimuth - sun_azimuth;
             let v_az = clamp((rel_azimuth / PI2) + 0.5, 0.001, 0.999);
@@ -683,11 +682,13 @@ fn main(inputData:InputData) -> OutputFragment {
             }
             
             // [KO] 대기 필터링 적용 (Back side)
-            if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
+            if (systemUniforms.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
-                let backTrans = get_transmittance(transmittanceTexture, atmosphereSampler, u_atmo.skyAtmosphereCameraHeight, -N.y, u_atmo.skyAtmosphereAtmosphereHeight);
-                let backSkyUV = get_sky_view_uv(-N, u_atmo.skyAtmosphereCameraHeight, u_atmo.skyAtmosphereEarthRadius, u_atmo.skyAtmosphereAtmosphereHeight);
-                let backSkyScat = textureSampleLevel(skyViewTexture, atmosphereSampler, backSkyUV, 0.0).rgb * u_atmo.skyAtmosphereSunIntensity;
+                let backTrans = get_transmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
+                
+                // [KO] 큐브맵 기반 샘플링으로 교체 (skyViewTexture 의존성 제거)
+                // [EN] Replace with cubemap-based sampling (remove dependency on skyViewTexture)
+                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * u_atmo.sunIntensity;
                 backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
             }
 

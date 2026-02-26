@@ -487,6 +487,12 @@ class PostEffectManager {
                 this.#uniformDataF32,
                 this.#uniformDataU32
             )
+            SystemUniformUpdater.updateSkyAtmosphere(
+                this.#view.skyAtmosphere,
+                members,
+                this.#uniformDataF32,
+                this.#uniformDataU32
+            )
         }
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
     }

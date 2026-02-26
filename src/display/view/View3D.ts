@@ -400,7 +400,7 @@ class View3D extends AView {
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
             SystemUniformUpdater.updateCamera(rawCamera, members.camera.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateShadow(shadowManager, members.shadow.members, this.#uniformDataF32, this.#uniformDataU32)
-            SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members.skyAtmosphere.members, this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateDirectionalLights(lightManager.directionalLights, members.directionalLights.memberList, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateAmbientLight(lightManager.ambientLight, members.ambientLight.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateTime(
@@ -554,20 +554,12 @@ class View3D extends AView {
                     resource: resourceManager.brdfGenerator.brdfLUTTexture?.createView() || resourceManager.emptyBitmapTextureView
                 },
                 {
-                    binding: 13,
-                    resource: this.skyAtmosphere ? this.skyAtmosphere.cameraVolumeTexture.gpuTextureView : resourceManager.emptyTexture3DView
-                },
-                {
                     binding: 14,
                     resource: this.skyAtmosphere ? this.skyAtmosphere.skyAtmosphereSampler.gpuSampler : this.#basicSampler
                 },
                 {
                     binding: 15,
                     resource: this.skyAtmosphere ? this.skyAtmosphere.transmittanceTexture.gpuTextureView : resourceManager.emptyBitmapTextureView
-                },
-                {
-                    binding: 16,
-                    resource: this.skyAtmosphere ? this.skyAtmosphere.skyViewTexture.gpuTextureView : resourceManager.emptyBitmapTextureView
                 },
                 {
                     binding: 17,

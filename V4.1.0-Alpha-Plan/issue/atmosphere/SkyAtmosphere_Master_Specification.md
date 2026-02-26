@@ -31,7 +31,8 @@ SkyAtmosphere는 월드 공간 내의 물리적 공기 밀도(Atmospheric Densit
 | **Transmittance** | 256x64 | 고도 및 각도별 투과율 데이터 | 비선형 (Zenith angle vs Altitude) |
 | **Multi-Scattering** | 32x32 | 다중 산란 에너지 보정 | 선형 (1.0 - H) 기반 에너지 보존 |
 | **Sky-View** | 200x200 | 전방위 대기색 시각화 텍스처 | 위경도 매핑 및 지평선 왜곡 보정 |
-| **Irradiance** | 32x1 | 반구 조명(Ambient) 적분 데이터 | 법선 Zenith 기반 Lambert 적분 |
+| **Irradiance** | 32x32 | 반구 조명(Ambient) 적분 데이터 | 법선 Zenith 기반 Lambert 적분 |
+| **Sky-View Reflection** | 128x128 (Cube) | 프리필터링된 반사광 데이터 | 6개면 개별 적분 및 Prefilter (GGX) |
 | **Camera Volume** | 64x64x32 | Aerial Perspective (공중 투시) | $z^2$ 비선형 매핑 (최대 100km) |
 
 ---
@@ -40,9 +41,11 @@ SkyAtmosphere는 월드 공간 내의 물리적 공기 밀도(Atmospheric Densit
 
 ### 3.1 컴퓨트 셰이더 기반 파이프라인 (Compute Shader Based Pipeline)
 `ASinglePassPostEffect`를 상속받는 Pure Compute Shader 방식으로 구현되었습니다.
-* **구현 방식**: 기하 구조(Sphere Mesh) 의존성을 제거하고 픽셀 단위 Compute Pass로 전환하였습니다.
+* **통합 적용 방식 (Single Pass Application)**: 공중 투시(Aerial Perspective) 효과는 개별 재질(Material) 셰이더가 아닌, **포스트 프로세스 패스에서 화면 전체에 일괄 적용**됩니다.
+* **물리적 정합성**: 재질에서의 중복 적용(Double Fogging)을 원천 차단하여 정오의 과도한 산란광 문제를 해결하고 성능을 최적화하였습니다.
+* **동적 반사광 시스템**: `SkyAtmosphereReflectionGenerator`를 도입하여 실시간 대기색이 반영된 프리필터링된 큐브맵을 생성합니다.
 * **리소스 바인딩**:
-    * **Group 0**: Source Color, Depth, LUTs (4종), Sampler를 바인딩합니다.
+    * **Group 0**: Source Color, Depth, LUTs (5종), Samplers를 바인딩합니다.
     * **Group 1**: Output Storage Texture, System Uniforms, Atmosphere Parameters를 바인딩합니다.
 
 ### 3.2 합성 로직 (Composition Logic)
@@ -63,7 +66,8 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 3. **Numerical Bias in Culling**: 부동 소수점 오차에 의한 객체 소실 방지를 위해 CPU 컬링 로직에 1.0 유닛(1m)의 안전 마진을 적용하였습니다.
 4. **Stable Linear Depth**: 개선된 선형 깊이 복구 공식(`(n * f) / max(1e-6, f - d * (f - n))`)을 통해 정밀도를 유지합니다.
 5. **Physical Sun Color Calculation**: 하드코딩된 태양색 대신 투과율 LUT를 샘플링하여 태양 고도와 카메라 위치에 따른 실시간 물리적 태양광 색상을 산출합니다.
-6. **Caller-Side Activation Check**: `getAerialPerspective` 함수 내부의 조건문을 제거하고 호출부(Material)에서 `useSkyAtmosphere` 여부를 판단하도록 최적화하여 비활성 시의 오버헤드를 최소화하였습니다.
+6. **Post-Process Only Integration**: 모든 재질(Material)에서의 `getAerialPerspective` 호출을 전면 제거하고 포스트 프로세스로 통합하였습니다. 이를 통해 뎁스 불연속성 문제와 물리적 중복 계산($T^2$)을 완벽히 해결하였습니다.
+7. **Physical Consistency in Fog Scattering**: Sky-View LUT와 Camera Volume LUT 간의 산란 로직을 통일하였습니다. 특히 높이 안개(Height Fog) 계산 시 Mie 페이즈 함수(g=0.7)를 양측에 동일하게 적용하고 밀도 감쇄 계수($\rho_f$)를 정확히 분리 적용하여 배경 하늘과 물체 위 안색의 일관성을 확보하였습니다.
 
 ---
 
@@ -82,9 +86,11 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 
 ## 6. 향후 과제 (Future Roadmap)
 
-1. **Dynamic IBL Integration**: Sky-View 데이터를 활용하여 실시간 환경 반사광을 업데이트할 예정입니다.
-2. **Volumetric Cloud Interaction**: 대기 밀도 데이터를 활용하여 구름 시스템과의 광학적 상호작용을 구현할 계획입니다.
-3. **Terrain Shadowing**: 지형 고도 데이터를 반영하여 대기 볼륨 내 그림자(God Rays) 생성을 추진합니다.
+1. **Dynamic IBL & Reflection Synchronization (완료)**: 
+   * `AtmosphereIrradianceGenerator` 및 `SkyAtmosphereReflectionGenerator`를 통해 주변광 및 반사광의 실시간 동기화가 구현되었습니다.
+   * PBR 재질에서 거칠기(Roughness)에 따른 부드러운 대기 반사광을 지원합니다.
+2. **Volumetric Cloud Interaction**: 대기 밀도 데이터를 활용하여 구름 시스템과의 광학적 상호작용(Shadowing, In-scattering)을 구현할 계획입니다.
+3. **Terrain Shadowing (God Rays)**: 지형 고도(Height Map) 데이터를 반영하여 대기 볼륨 내에 물리적인 그림자(Volumetric Shadows) 및 빛줄기(God Rays) 생성을 추진합니다.
 
 ---
 
@@ -95,10 +101,11 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 * **Physically Integrated Fog**: Mie 산란 적분 내에 높이 안개 통합 연산을 적용하였습니다.
 * **Gaussian Ozone Distribution**: 오존 밀도 시뮬레이션에 가우시안 곡선 모델을 도입하였습니다.
 * **360° Seamless Sampling**: 3D LUT 샘플러 설정을 최적화하여 경계 불연속성 문제를 해결하였습니다.
+* **Dynamic Reflection System**: `SkyAtmosphereReflectionGenerator`를 도입하여 거칠기(Roughness) 대응이 가능한 프리필터링된 대기 반사 큐브맵을 실시간으로 생성합니다.
 * **Skybox Composition**: 스카이박스 텍스처를 대기 투과율과 합성하는 전용 패스를 구현하였습니다.
 
 ### 7.2 엔진 코어 공통 변경 사항
-* **System Uniform Expansion**: `SystemUniform` 구조체 및 바인딩 그룹(Group 0)에 `cameraVolumeTexture`(3D Texture), `transmittanceTexture`(2D Texture), `skyAtmosphereSampler`를 전역으로 추가하여, 모든 셰이더 단계에서 대기 데이터에 접근할 수 있도록 인프라를 확장하였습니다.
+* **System Uniform Expansion**: `SystemUniform` 구조체 및 바인딩 그룹(Group 0)에 `cameraVolumeTexture`(3D Texture), `transmittanceTexture`(2D Texture), `skyAtmosphere_prefilteredTexture`(Cube Texture), `skyAtmosphereSampler`를 전역으로 추가하여, 모든 셰이더 단계에서 대기 데이터에 접근할 수 있도록 인프라를 확장하였습니다.
 * **Physical Sun Lighting**: 대기 시스템의 태양 방향과 강도, 투과 색상을 시스템 유니폼으로 공유하여 `PhongMaterial`, `PBRMaterial` 등 모든 조명 연산에 통합하였습니다.
 * **Resource Management Upgrade**: `ResourceManager`에 `emptyTexture3DView` 및 `emptyDepthTextureView` 관리 기능을 추가하여, 3D 텍스처 미사용 시의 안정성을 확보하고 바인딩 오류를 방지하였습니다.
 * **Material System Enhancement**: `getBindGroupLayoutDescriptorFromShaderInfo` 함수를 개선하여 `texture_3d` 바인딩 레이아웃 생성을 지원, 재질 시스템 전반에서 3D 볼륨 텍스처를 활용할 수 있도록 하였습니다.
@@ -108,6 +115,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 * **Default Camera Clipping Updated**: 대규모 스케일 렌더링에 대응하기 위해 기본 Near/Far Clipping 수치를 상향 조정하였습니다.
 
 ---
-**최종 업데이트:** 2026-02-24
-**상태:** Master Specification Established
+**최종 업데이트:** 2026-02-26
+**상태:** Verified & Completed (Shader Analysis & Physical Consistency Fix Applied)
 **프로젝트:** RedGPU
+---

@@ -73,14 +73,14 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // [KO] 대기가 활성화된 경우 투과율을 알파에 반영 (우주는 대기 너머에 있음)
     // [EN] If atmosphere is enabled, reflect transmittance in alpha (Space is beyond the atmosphere)
-    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u) {
+    if (systemUniforms.useSkyAtmosphere == 1u) {
         let u_atmo = systemUniforms.skyAtmosphere;
         let transmittance = get_transmittance(
             transmittanceTexture, 
             atmosphereSampler, 
-            u_atmo.skyAtmosphereCameraHeight, 
+            u_atmo.cameraHeight, 
             viewDir.y, 
-            u_atmo.skyAtmosphereAtmosphereHeight
+            u_atmo.atmosphereHeight
         );
         // RGB 투과율의 평균을 사용하여 배경의 가시성 결정
         let T = (transmittance.r + transmittance.g + transmittance.b) / 3.0;

@@ -133,41 +133,51 @@ class SystemUniformUpdater {
      */
     static updateSkyAtmosphere(
         skyAtmosphere: any, // TODO: SkyAtmosphere 타입 정의 필요
-        skyAtmosphereMembers: any,
+        systemMembers: any,
         uniformDataF32: Float32Array,
         uniformDataU32: Uint32Array
     ) {
+        const params = skyAtmosphere?.params;
+        const skyAtmosphereMembers = systemMembers.skyAtmosphere.members;
+        
+        // 1. 전역 플래그 업데이트
+        updateSystemUniformData(
+            systemMembers, uniformDataF32, uniformDataU32,
+            [{key: 'useSkyAtmosphere', value: skyAtmosphere ? 1 : 0}]
+        );
+
+        // 2. 물리 구조체 업데이트
         updateSystemUniformData(
             skyAtmosphereMembers, uniformDataF32, uniformDataU32,
             [
-                {
-                    key: 'useSkyAtmosphere',
-                    value: skyAtmosphere ? 1 : 0,
-                },
-                {
-                    key: 'skyAtmosphereSunIntensity',
-                    value: skyAtmosphere ? skyAtmosphere.sunIntensity : 0,
-                },
-                {
-                    key: 'skyAtmosphereExposure',
-                    value: skyAtmosphere ? skyAtmosphere.exposure : 1,
-                },
-                {
-                    key: 'skyAtmosphereCameraHeight',
-                    value: skyAtmosphere ? skyAtmosphere.cameraHeight : 0.001,
-                },
-                {
-                    key: 'skyAtmosphereSunDirection',
-                    value: skyAtmosphere ? skyAtmosphere.sunDirection : new Float32Array([0, 0, 0]),
-                },
-                {
-                    key: 'skyAtmosphereEarthRadius',
-                    value: skyAtmosphere ? skyAtmosphere.earthRadius : 6360.0,
-                },
-                {
-                    key: 'skyAtmosphereAtmosphereHeight',
-                    value: skyAtmosphere ? skyAtmosphere.atmosphereHeight : 60.0,
-                }
+                {key: 'rayleighScattering', value: params?.rayleighScattering || [0, 0, 0]},
+                {key: 'mieAnisotropy', value: params?.mieAnisotropy || 0},
+                {key: 'ozoneAbsorption', value: params?.ozoneAbsorption || [0, 0, 0]},
+                {key: 'ozoneLayerCenter', value: params?.ozoneLayerCenter || 0},
+                {key: 'groundAlbedo', value: params?.groundAlbedo || [0, 0, 0]},
+                {key: 'groundAmbient', value: params?.groundAmbient || 0},
+                {key: 'sunDirection', value: params?.sunDirection || [0, 0, 0]},
+                {key: 'sunSize', value: params?.sunSize || 0},
+                {key: 'earthRadius', value: params?.earthRadius || 0},
+                {key: 'atmosphereHeight', value: params?.atmosphereHeight || 0},
+                {key: 'mieScattering', value: params?.mieScattering || 0},
+                {key: 'mieExtinction', value: params?.mieExtinction || 0},
+                {key: 'rayleighScaleHeight', value: params?.rayleighScaleHeight || 0},
+                {key: 'mieScaleHeight', value: params?.mieScaleHeight || 0},
+                {key: 'cameraHeight', value: params?.cameraHeight || 0},
+                {key: 'multiScatteringAmbient', value: params?.multiScatteringAmbient || 0},
+                {key: 'exposure', value: params?.exposure || 0},
+                {key: 'sunIntensity', value: params?.sunIntensity || 0},
+                {key: 'heightFogDensity', value: params?.heightFogDensity || 0},
+                {key: 'heightFogFalloff', value: params?.heightFogFalloff || 0},
+                {key: 'horizonHaze', value: params?.horizonHaze || 0},
+                {key: 'mieGlow', value: params?.mieGlow || 0},
+                {key: 'mieHalo', value: params?.mieHalo || 0},
+                {key: 'groundShininess', value: params?.groundShininess || 0},
+                {key: 'groundSpecular', value: params?.groundSpecular || 0},
+                {key: 'ozoneLayerWidth', value: params?.ozoneLayerWidth || 0},
+                {key: 'padding0', value: 0},
+                {key: 'padding1', value: 0},
             ]
         )
     }

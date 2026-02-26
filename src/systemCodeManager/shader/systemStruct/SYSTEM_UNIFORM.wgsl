@@ -17,6 +17,7 @@ struct SystemUniform {
       camera:Camera,
 	  usePrefilterTexture:u32,
 	  isView3D:u32,
+	  useSkyAtmosphere:u32,
 	  //
 	  skyAtmosphere:SkyAtmosphere,
 	  shadow:Shadow,
@@ -42,10 +43,10 @@ struct SystemUniform {
 @group(0) @binding(10) var ibl_environmentTexture: texture_cube<f32>;
 @group(0) @binding(11) var ibl_irradianceTexture: texture_cube<f32>;
 @group(0) @binding(12) var ibl_brdfLUTTexture: texture_2d<f32>;
-@group(0) @binding(13) var cameraVolumeTexture: texture_3d<f32>;
+
 @group(0) @binding(14) var atmosphereSampler: sampler;
 @group(0) @binding(15) var transmittanceTexture: texture_2d<f32>;
-@group(0) @binding(16) var skyViewTexture: texture_2d<f32>;
+
 @group(0) @binding(17) var atmosphereIrradianceTexture: texture_2d<f32>;
 @group(0) @binding(18) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
 
