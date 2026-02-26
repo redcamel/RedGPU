@@ -22,11 +22,12 @@ class AtmosphereIrradianceGenerator {
     #redGPUContext: RedGPUContext;
     #lutTexture: AtmosphereIrradianceLUTTexture;
     #pipeline: GPUComputePipeline;
-    #uniformBuffer: UniformBuffer;
+    #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
 
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer) {
         this.#redGPUContext = redGPUContext;
+        this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#sampler = new Sampler(this.#redGPUContext, {magFilter: 'linear', minFilter: 'linear'});
         this.#init();
     }
@@ -40,16 +41,9 @@ class AtmosphereIrradianceGenerator {
      * [EN] Renders the irradiance LUT.
      *
      * @param skyView - [KO] 스카이 뷰 LUT [EN] Sky-View LUT
-     * @param params - [KO] 대기 파라미터 [EN] Atmosphere parameters
      */
-    render(skyView: SkyViewLUTTexture, params: any): void {
+    render(skyView: SkyViewLUTTexture): void {
         const {gpuDevice} = this.#redGPUContext;
-
-        const {members} = UNIFORM_STRUCT;
-        for (const [key, member] of Object.entries(members)) {
-            const value = params[key];
-            if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
-        }
 
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#pipeline.getBindGroupLayout(0),
@@ -57,7 +51,7 @@ class AtmosphereIrradianceGenerator {
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
                 {binding: 1, resource: skyView.gpuTextureView},
                 {binding: 2, resource: this.#sampler.gpuSampler},
-                {binding: 3, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+                {binding: 3, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}}
             ]
         });
 
@@ -74,9 +68,6 @@ class AtmosphereIrradianceGenerator {
     #init(): void {
         const {gpuDevice} = this.#redGPUContext;
         this.#lutTexture = new AtmosphereIrradianceLUTTexture(this.#redGPUContext, this.width, this.height);
-
-        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
-        this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'ATMOSPHERE_IRRADIANCE_GEN_UNIFORM_BUFFER');
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

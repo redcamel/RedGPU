@@ -38,11 +38,12 @@ class CameraVolumeGenerator {
     #redGPUContext: RedGPUContext;
     #lutTexture: CameraVolumeLUTTexture;
     #pipeline: GPUComputePipeline;
-    #uniformBuffer: UniformBuffer;
+    #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
 
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer) {
         this.#redGPUContext = redGPUContext;
+        this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#sampler = new Sampler(this.#redGPUContext, {magFilter: 'linear', minFilter: 'linear'});
         this.#init();
     }
@@ -58,16 +59,9 @@ class CameraVolumeGenerator {
      *
      * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
      * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
-     * @param params - [KO] 대기 파라미터 [EN] Atmosphere parameters
      */
-    render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture, params: any): void {
+    render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture): void {
         const {gpuDevice} = this.#redGPUContext;
-
-        const {members} = UNIFORM_STRUCT;
-        for (const [key, member] of Object.entries(members)) {
-            const value = params[key];
-            if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
-        }
 
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#pipeline.getBindGroupLayout(0),
@@ -76,7 +70,7 @@ class CameraVolumeGenerator {
                 {binding: 1, resource: transmittance.gpuTextureView},
                 {binding: 2, resource: multiScat.gpuTextureView},
                 {binding: 3, resource: this.#sampler.gpuSampler},
-                {binding: 4, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+                {binding: 4, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}}
             ]
         });
 
@@ -97,9 +91,6 @@ class CameraVolumeGenerator {
     #init(): void {
         const {gpuDevice} = this.#redGPUContext;
         this.#lutTexture = new CameraVolumeLUTTexture(this.#redGPUContext, this.width, this.height, this.depth);
-
-        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
-        this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'CAMERA_VOLUME_GEN_UNIFORM_BUFFER');
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({

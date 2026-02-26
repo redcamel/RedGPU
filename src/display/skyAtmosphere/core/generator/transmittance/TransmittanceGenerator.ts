@@ -28,10 +28,11 @@ class TransmittanceGenerator {
     #lutTexture: TransmittanceLUTTexture;
     #pipeline: GPUComputePipeline;
     #bindGroup: GPUBindGroup;
-    #uniformBuffer: UniformBuffer;
+    #sharedUniformBuffer: UniformBuffer;
 
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer) {
         this.#redGPUContext = redGPUContext;
+        this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#init();
     }
 
@@ -43,17 +44,9 @@ class TransmittanceGenerator {
     /**
      * [KO] 투과율 LUT를 렌더링합니다.
      * [EN] Renders the Transmittance LUT.
-     *
-     * @param params - [KO] 대기 파라미터 [EN] Atmosphere parameters
      */
-    render(params: any): void {
+    render(): void {
         const {gpuDevice} = this.#redGPUContext;
-
-        const {members} = UNIFORM_STRUCT;
-        for (const [key, member] of Object.entries(members)) {
-            const value = params[key];
-            if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
-        }
 
         const commandEncoder = gpuDevice.createCommandEncoder();
         const passEncoder = commandEncoder.beginComputePass();
@@ -69,9 +62,6 @@ class TransmittanceGenerator {
         const {gpuDevice} = this.#redGPUContext;
         this.#lutTexture = new TransmittanceLUTTexture(this.#redGPUContext, this.width, this.height);
 
-        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength);
-        this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, vertexUniformData, 'TRANS_GEN_UNIFORM_BUFFER');
-
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({
             layout: 'auto',
@@ -82,7 +72,7 @@ class TransmittanceGenerator {
             layout: this.#pipeline.getBindGroupLayout(0),
             entries: [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+                {binding: 1, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}}
             ]
         });
     }

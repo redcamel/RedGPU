@@ -31,12 +31,13 @@ class SkyAtmosphereReflectionGenerator {
     #sourceCubeTextureView: GPUTextureView;
     #prefilteredTexture: IBLCubeTexture;
     #pipeline: GPUComputePipeline;
-    #uniformBuffer: UniformBuffer;
+    #sharedUniformBuffer: UniformBuffer;
     #faceMatrixBuffer: UniformBuffer;
     #sampler: Sampler;
 
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer) {
         this.#redGPUContext = redGPUContext;
+        this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#sampler = new Sampler(this.#redGPUContext, {magFilter: 'linear', minFilter: 'linear'});
         this.#init();
     }
@@ -52,19 +53,11 @@ class SkyAtmosphereReflectionGenerator {
      *
      * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
      * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
-     * @param params - [KO] 대기 파라미터 [EN] Atmosphere parameters
      */
-    async render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture, params: any): Promise<void> {
+    async render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture): Promise<void> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
 
-        // 1. 유니폼 업데이트
-        const {members} = UNIFORM_STRUCT;
-        for (const [key, member] of Object.entries(members)) {
-            const value = params[key];
-            if (value !== undefined) this.#uniformBuffer.writeOnlyBuffer(member, value);
-        }
-
-        // 2. 소스 큐브맵 렌더링 (6개 면)
+        // 1. 소스 큐브맵 렌더링 (6개 면)
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#pipeline.getBindGroupLayout(0),
             entries: [
@@ -72,7 +65,7 @@ class SkyAtmosphereReflectionGenerator {
                 {binding: 1, resource: transmittance.gpuTextureView},
                 {binding: 2, resource: multiScat.gpuTextureView},
                 {binding: 3, resource: this.#sampler.gpuSampler},
-                {binding: 4, resource: {buffer: this.#uniformBuffer.gpuBuffer}},
+                {binding: 4, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}},
                 {binding: 5, resource: {buffer: this.#faceMatrixBuffer.gpuBuffer}}
             ]
         });
@@ -85,7 +78,7 @@ class SkyAtmosphereReflectionGenerator {
         passEncoder.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
 
-        // 3. 프리필터링 수행 (기존 텍스처에 덮어쓰기)
+        // 2. 프리필터링 수행 (기존 텍스처에 덮어쓰기)
         // [KO] 고정된 텍스처를 재사용함으로써 BindGroup 재생성 비용과 GC 부하를 제거합니다.
         // [EN] Eliminate BindGroup regeneration cost and GC overhead by reusing a fixed texture.
         await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.size, this.#prefilteredTexture);
@@ -106,9 +99,6 @@ class SkyAtmosphereReflectionGenerator {
         // 2. 프리필터 결과용 텍스처 미리 생성
         this.#prefilteredTexture = new IBLCubeTexture(this.#redGPUContext, `SKY_ATMOSPHERE_REFL_FIXED_${createUUID()}`);
 
-        // 3. 유니폼 버퍼 초기화
-        this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength), 'SKY_REFL_GEN_UNIFORM_BUFFER');
-        
         const faceMatrices = this.#getCubeMapFaceMatrices();
         const faceMatrixData = new Float32Array(16 * 6);
         faceMatrices.forEach((m, i) => faceMatrixData.set(m, i * 16));

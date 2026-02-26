@@ -10,9 +10,15 @@ import CameraVolumeGenerator from "./core/generator/cameraVolume/CameraVolumeGen
 import AtmosphereIrradianceGenerator from "./core/generator/irradiance/AtmosphereIrradianceGenerator";
 import SkyAtmosphereReflectionGenerator from "./core/generator/reflection/SkyAtmosphereReflectionGenerator";
 import skyAtmosphereFn from "./core/skyAtmosphereFn.wgsl";
+import transmittanceShaderCode from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 import Sampler from "../../resources/sampler/Sampler";
 import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
+import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
+import parseWGSL from "../../resources/wgslParser/parseWGSL";
+
+const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'SKY_ATMOSPHERE_CORE');
+const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**
  * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 클래스입니다.
@@ -37,6 +43,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #irradianceGenerator: AtmosphereIrradianceGenerator;
     #reflectionGenerator: SkyAtmosphereReflectionGenerator;
     #sampler: Sampler;
+    #sharedUniformBuffer: UniformBuffer;
 
     #params = {
         earthRadius: 6360.0,
@@ -73,6 +80,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #sunAzimuth: number = 0;
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
+    #dirtyUniformBuffer: boolean = true;
 
     #computeShaderMSAA: GPUShaderModule;
     #computeShaderNonMSAA: GPUShaderModule;
@@ -97,12 +105,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         super(redGPUContext);
         const {gpuDevice} = redGPUContext;
 
-        this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext);
-        this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext);
-        this.#skyViewGenerator = new SkyViewGenerator(redGPUContext);
-        this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext);
-        this.#irradianceGenerator = new AtmosphereIrradianceGenerator(redGPUContext);
-        this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext);
+        this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength), 'SKY_ATMOSPHERE_SHARED_UNIFORM_BUFFER');
+
+        this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext, this.#sharedUniformBuffer);
+        this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext, this.#sharedUniformBuffer);
+        this.#skyViewGenerator = new SkyViewGenerator(redGPUContext, this.#sharedUniformBuffer);
+        this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext, this.#sharedUniformBuffer);
+        this.#irradianceGenerator = new AtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer);
+        this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, this.#sharedUniformBuffer);
 
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: 'linear',
@@ -136,6 +146,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validateNumberRange(v, -90, 90);
         this.#sunElevation = v;
         this.#updateSunDirection();
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 태양 방위각 (도) [EN] Sun azimuth (degrees) */
@@ -147,6 +158,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validateNumberRange(v, -360, 360);
         this.#sunAzimuth = v;
         this.#updateSunDirection();
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 태양 방향 벡터 [EN] Sun direction vector */
@@ -172,6 +184,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set exposure(v: number) {
         validatePositiveNumberRange(v, 0, 100);
         this.#params.exposure = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 태양 강도 [EN] Sun intensity */
@@ -182,6 +195,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set sunIntensity(v: number) {
         validatePositiveNumberRange(v, 0, 10000);
         this.#params.sunIntensity = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 지구 반지름 (km) [EN] Earth radius (km) */
@@ -193,6 +207,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 1);
         this.#params.earthRadius = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 대기층 높이 (km) [EN] Atmosphere height (km) */
@@ -204,6 +219,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 1);
         this.#params.atmosphereHeight = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 미(Mie) 산란 계수 [EN] Mie scattering coefficient */
@@ -215,6 +231,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 0, 1.0);
         this.#params.mieScattering = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 미(Mie) 소멸 계수 [EN] Mie extinction coefficient */
@@ -226,6 +243,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 0, 1.0);
         this.#params.mieExtinction = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 레일리(Rayleigh) 산란 계수 [EN] Rayleigh scattering coefficient */
@@ -236,6 +254,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set rayleighScattering(v: [number, number, number]) {
         this.#params.rayleighScattering = [...v];
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 레일리(Rayleigh) 스케일 높이 (km) [EN] Rayleigh scale height (km) */
@@ -247,6 +266,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 0.1, 100);
         this.#params.rayleighScaleHeight = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 미(Mie) 스케일 높이 (km) [EN] Mie scale height (km) */
@@ -258,6 +278,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 0.1, 100);
         this.#params.mieScaleHeight = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 미(Mie) 비등방성 (g) [EN] Mie anisotropy (g) */
@@ -269,6 +290,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieAnisotropy = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 지평선 연무 (Haze) [EN] Horizon haze */
@@ -279,6 +301,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set horizonHaze(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.horizonHaze = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 지면 알베도 [EN] Ground albedo */
@@ -289,6 +312,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set groundAlbedo(v: [number, number, number]) {
         this.#params.groundAlbedo = [...v];
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 지면 환경광 [EN] Ground ambient */
@@ -299,6 +323,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set groundAmbient(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.groundAmbient = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 오존 흡수 계수 [EN] Ozone absorption coefficient */
@@ -309,6 +334,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set ozoneAbsorption(v: [number, number, number]) {
         this.#params.ozoneAbsorption = [...v];
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 오존층 중심 고도 (km) [EN] Ozone layer center altitude (km) */
@@ -320,6 +346,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 0, 100);
         this.#params.ozoneLayerCenter = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 오존층 두께 (km) [EN] Ozone layer width (km) */
@@ -331,6 +358,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 1, 50);
         this.#params.ozoneLayerWidth = v;
         this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 다중 산란 환경광 기여도 [EN] Multi-scattering ambient contribution */
@@ -342,6 +370,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 0, 1.0);
         this.#params.multiScatteringAmbient = v;
         this.#dirtySkyView = true;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 높이 안개 밀도 [EN] Height fog density */
@@ -352,6 +381,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set heightFogDensity(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.heightFogDensity = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 높이 안개 감쇄 계수 [EN] Height fog falloff coefficient */
@@ -362,6 +392,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set heightFogFalloff(v: number) {
         validatePositiveNumberRange(v, 0.001, 10);
         this.#params.heightFogFalloff = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 태양 시직경 [EN] Sun size */
@@ -372,6 +403,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set sunSize(v: number) {
         validatePositiveNumberRange(v, 0.01, 10.0);
         this.#params.sunSize = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 미(Mie) 글로우 강도 [EN] Mie glow intensity */
@@ -382,6 +414,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieGlow(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieGlow = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 미(Mie) 헤일로 강도 [EN] Mie halo intensity */
@@ -392,6 +425,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieHalo(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieHalo = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 지면 광택도 [EN] Ground shininess */
@@ -402,6 +436,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set groundShininess(v: number) {
         validatePositiveNumberRange(v, 1, 2048);
         this.#params.groundShininess = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 지면 스펙큘러 강도 [EN] Ground specular intensity */
@@ -412,6 +447,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set groundSpecular(v: number) {
         validatePositiveNumberRange(v, 0, 100);
         this.#params.groundSpecular = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 투과율 LUT 텍스처를 반환합니다. [EN] Returns the Transmittance LUT texture. */
@@ -478,20 +514,26 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.01) {
             this.#params.cameraHeight = currentHeightKm;
             this.#dirtySkyView = true;
+            this.#dirtyUniformBuffer = true;
+        }
+
+        if (this.#dirtyUniformBuffer) {
+            this.#updateSharedUniformBuffer();
+            this.#dirtyUniformBuffer = false;
         }
 
         if (this.#dirtyLUT) {
-            this.#transmittanceGenerator.render(this.#params);
-            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture, this.#params);
+            this.#transmittanceGenerator.render();
+            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
             this.#dirtyLUT = false;
             this.#dirtySkyView = true;
         }
 
         if (this.#dirtySkyView) {
-            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#params);
-            this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#params);
-            this.#irradianceGenerator.render(this.#skyViewGenerator.lutTexture, this.#params);
-            this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#params);
+            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#irradianceGenerator.render(this.#skyViewGenerator.lutTexture);
+            this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#dirtySkyView = false;
         }
 
@@ -542,6 +584,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         gpuDevice.queue.submit([commandEncoder.finish()]);
 
         return {texture: this.#outputTexture, textureView: this.#outputTextureView};
+    }
+
+    #updateSharedUniformBuffer(): void {
+        const {members} = UNIFORM_STRUCT;
+        for (const [key, member] of Object.entries(members)) {
+            const value = this.#params[key];
+            if (value !== undefined) this.#sharedUniformBuffer.writeOnlyBuffer(member, value);
+        }
     }
 
     #initShaders(): void {
