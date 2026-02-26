@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import IBLCubeTexture from "../IBLCubeTexture";
+import DirectCubeTexture from "../../../DirectCubeTexture";
 /**
  * [KO] Prefilter 맵을 생성하는 클래스입니다.
  * [EN] Class that generates a Prefilter map.
@@ -39,9 +39,9 @@ declare class PrefilterGenerator {
      * [KO] 결과물을 저장할 대상 텍스처 (선택)
      * [EN] Target texture to store the result (optional)
      * @returns
-     * [KO] 생성된 또는 업데이트된 Prefilter IBLCubeTexture
-     * [EN] Generated or updated Prefilter IBLCubeTexture
+     * [KO] 생성된 또는 업데이트된 Prefilter DirectCubeTexture
+     * [EN] Generated or updated Prefilter DirectCubeTexture
      */
-    generate(sourceCubeTexture: GPUTexture, size?: number, destinationTexture?: GPUTexture | IBLCubeTexture): Promise<IBLCubeTexture>;
+    generate(sourceCubeTexture: GPUTexture, size?: number, destinationTexture?: GPUTexture | DirectCubeTexture): Promise<DirectCubeTexture>;
 }
 export default PrefilterGenerator;

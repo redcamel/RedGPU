@@ -4,7 +4,7 @@ import GPU_FILTER_MODE from "../../../../../gpuConst/GPU_FILTER_MODE";
 import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
-import IBLCubeTexture from "../IBLCubeTexture";
+import DirectCubeTexture from "../../../DirectCubeTexture";
 import prefilterShaderCode from "./prefilterShaderCode.wgsl";
 
 /**
@@ -60,10 +60,10 @@ class PrefilterGenerator {
      * [KO] 결과물을 저장할 대상 텍스처 (선택)
      * [EN] Target texture to store the result (optional)
      * @returns
-     * [KO] 생성된 또는 업데이트된 Prefilter IBLCubeTexture
-     * [EN] Generated or updated Prefilter IBLCubeTexture
+     * [KO] 생성된 또는 업데이트된 Prefilter DirectCubeTexture
+     * [EN] Generated or updated Prefilter DirectCubeTexture
      */
-    async generate(sourceCubeTexture: GPUTexture, size: number = 512, destinationTexture?: GPUTexture | IBLCubeTexture): Promise<IBLCubeTexture> {
+    async generate(sourceCubeTexture: GPUTexture, size: number = 512, destinationTexture?: GPUTexture | DirectCubeTexture): Promise<DirectCubeTexture> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
@@ -73,7 +73,7 @@ class PrefilterGenerator {
         if (destinationTexture) {
             prefilterGPUTexture = destinationTexture instanceof GPUTexture ? destinationTexture : destinationTexture.gpuTexture;
             if (!prefilterGPUTexture) {
-                // IBLCubeTexture는 있으나 내부 GPUTexture가 없는 경우 새로 생성하여 할당
+                // DirectCubeTexture는 있으나 내부 GPUTexture가 없는 경우 새로 생성하여 할당
                 prefilterGPUTexture = resourceManager.createManagedTexture({
                     size: [size, size, 6],
                     format: format,
@@ -82,7 +82,7 @@ class PrefilterGenerator {
                     mipLevelCount: mipLevelCount,
                     label: `Prefilter_Map_Texture_${createUUID()}`
                 });
-                if (destinationTexture instanceof IBLCubeTexture) destinationTexture.gpuTexture = prefilterGPUTexture;
+                if (destinationTexture instanceof DirectCubeTexture) destinationTexture.gpuTexture = prefilterGPUTexture;
             }
         } else {
             prefilterGPUTexture = resourceManager.createManagedTexture({
@@ -166,10 +166,10 @@ class PrefilterGenerator {
         // 임시 버퍼 정리
         uniformBuffers.forEach(buf => buf.destroy());
 
-        if (destinationTexture instanceof IBLCubeTexture) {
+        if (destinationTexture instanceof DirectCubeTexture) {
             return destinationTexture;
         }
-        return new IBLCubeTexture(this.#redGPUContext, `Prefilter_Map_${createUUID()}`, prefilterGPUTexture);
+        return new DirectCubeTexture(this.#redGPUContext, `Prefilter_Map_${createUUID()}`, prefilterGPUTexture);
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {

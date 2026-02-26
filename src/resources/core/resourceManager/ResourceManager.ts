@@ -2,10 +2,10 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import {keepLog} from "../../../utils";
 import Sampler from "../../sampler/Sampler";
 import BitmapTexture from "../../texture/BitmapTexture";
+import DirectCubeTexture from "../../texture/DirectCubeTexture";
 import {
     BRDFGenerator,
     EquirectangularToCubeGenerator,
-    IBLCubeTexture,
     IrradianceGenerator,
     PrefilterGenerator
 } from "../../texture/ibl/core";
@@ -393,8 +393,8 @@ class ResourceManager {
      * [KO] 큐브 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
      * [EN] Retrieves or creates a view for a cube texture from cache.
      * @param cubeTexture -
-     * [KO] 대상 큐브 텍스처 (CubeTexture, IBLCubeTexture 또는 GPUTexture)
-     * [EN] Target cube texture (CubeTexture, IBLCubeTexture, or GPUTexture)
+     * [KO] 대상 큐브 텍스처 (CubeTexture, DirectCubeTexture 또는 GPUTexture)
+     * [EN] Target cube texture (CubeTexture, DirectCubeTexture, or GPUTexture)
      * @param viewDescriptor -
      * [KO] 뷰 디스크립터 (선택)
      * [EN] View descriptor (optional)
@@ -403,7 +403,7 @@ class ResourceManager {
      * [EN] GPUTextureView
      */
     getGPUResourceCubeTextureView(
-        cubeTexture: CubeTexture | GPUTexture | IBLCubeTexture,
+        cubeTexture: CubeTexture | GPUTexture | DirectCubeTexture,
         viewDescriptor?: GPUTextureViewDescriptor
     ): GPUTextureView | null {
         const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture;
@@ -770,7 +770,7 @@ class ResourceManager {
     }
 }
 
-Object.freeze(BitmapTexture)
+Object.freeze(ResourceManager)
 export default ResourceManager
 
 class ImmutableKeyMap extends Map {

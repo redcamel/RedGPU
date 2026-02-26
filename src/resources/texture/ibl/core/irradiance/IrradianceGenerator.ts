@@ -4,7 +4,7 @@ import GPU_FILTER_MODE from "../../../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
-import IBLCubeTexture from "../IBLCubeTexture";
+import DirectCubeTexture from "../../../DirectCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl";
 
 /**
@@ -58,10 +58,10 @@ class IrradianceGenerator {
      * [KO] 생성될 Irradiance 맵의 크기 (기본값: 32)
      * [EN] Size of the generated Irradiance map (default: 32)
      * @returns
-     * [KO] 생성된 Irradiance IBLCubeTexture
-     * [EN] Generated Irradiance IBLCubeTexture
+     * [KO] 생성된 Irradiance DirectCubeTexture
+     * [EN] Generated Irradiance DirectCubeTexture
      */
-    async generate(sourceCubeTexture: GPUTexture, size: number = 32): Promise<IBLCubeTexture> {
+    async generate(sourceCubeTexture: GPUTexture, size: number = 32): Promise<DirectCubeTexture> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
 
@@ -132,7 +132,7 @@ class IrradianceGenerator {
         // 임시 버퍼 정리
         uniformBuffer.destroy();
 
-        return new IBLCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
+        return new DirectCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {

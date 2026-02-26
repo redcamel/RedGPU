@@ -4,7 +4,7 @@ import GPU_FILTER_MODE from "../../../../../gpuConst/GPU_FILTER_MODE";
 import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
-import IBLCubeTexture from "../IBLCubeTexture";
+import DirectCubeTexture from "../../../DirectCubeTexture";
 import equirectangularToCubeShaderCode from "./equirectangularToCubeShaderCode.wgsl";
 
 /**
@@ -53,10 +53,10 @@ class EquirectangularToCubeGenerator {
      * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
      * [EN] Size of one side of the generated cubemap (default: 512)
      * @returns
-     * [KO] 생성된 IBLCubeTexture
-     * [EN] Generated IBLCubeTexture
+     * [KO] 생성된 DirectCubeTexture
+     * [EN] Generated DirectCubeTexture
      */
-    async generate(sourceTexture: GPUTexture, size: number = 512): Promise<IBLCubeTexture> {
+    async generate(sourceTexture: GPUTexture, size: number = 512): Promise<DirectCubeTexture> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
@@ -139,7 +139,7 @@ class EquirectangularToCubeGenerator {
         // 임시 버퍼 정리
         uniformBuffer.destroy();
 
-        return new IBLCubeTexture(this.#redGPUContext, `CubeMap_From_Equirect_${createUUID()}`, cubeGPUTexture);
+        return new DirectCubeTexture(this.#redGPUContext, `CubeMap_From_Equirect_${createUUID()}`, cubeGPUTexture);
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {

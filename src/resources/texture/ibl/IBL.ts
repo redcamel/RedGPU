@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import CubeTexture from "../CubeTexture";
+import DirectCubeTexture from "../DirectCubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
-import {IBLCubeTexture} from "./core";
 
 /**
  * [KO] Image-Based Lighting (IBL)을 관리하는 클래스입니다.
@@ -20,9 +20,9 @@ import {IBLCubeTexture} from "./core";
 class IBL {
     #redGPUContext: RedGPUContext;
     #sourceCubeTexture: GPUTexture;
-    #environmentTexture: IBLCubeTexture;
-    #irradianceTexture: IBLCubeTexture;
-    #prefilterTexture: IBLCubeTexture;
+    #environmentTexture: DirectCubeTexture;
+    #irradianceTexture: DirectCubeTexture;
+    #prefilterTexture: DirectCubeTexture;
     #targetTexture: HDRTexture | CubeTexture;
     #environmentSize: number;
     #prefilterSize: number;
@@ -67,10 +67,10 @@ class IBL {
         this.#irradianceSize = irradianceSize;
         this.#redGPUContext = redGPUContext;
 
-        // 맵들을 담을 IBLCubeTexture 플레이스홀더 생성
-        this.#environmentTexture = new IBLCubeTexture(redGPUContext, `IBL_ENV_${cacheKeyPart}`);
-        this.#prefilterTexture = new IBLCubeTexture(redGPUContext, `IBL_SPECULAR_${cacheKeyPart}`);
-        this.#irradianceTexture = new IBLCubeTexture(redGPUContext, `IBL_IRRADIANCE_${cacheKeyPart}`);
+        // 맵들을 담을 DirectCubeTexture 플레이스홀더 생성
+        this.#environmentTexture = new DirectCubeTexture(redGPUContext, `IBL_ENV_${cacheKeyPart}`);
+        this.#prefilterTexture = new DirectCubeTexture(redGPUContext, `IBL_SPECULAR_${cacheKeyPart}`);
+        this.#irradianceTexture = new DirectCubeTexture(redGPUContext, `IBL_IRRADIANCE_${cacheKeyPart}`);
 
         const onLoad = async (v: HDRTexture | CubeTexture) => {
             v.__addDirtyPipelineListener(this.#onSourceChanged);
@@ -102,17 +102,17 @@ class IBL {
     }
 
     /** [KO] Irradiance 텍스처를 반환합니다. [EN] Returns the irradiance texture. */
-    get irradianceTexture(): IBLCubeTexture {
+    get irradianceTexture(): DirectCubeTexture {
         return this.#irradianceTexture;
     }
 
     /** [KO] 환경맵 텍스처를 반환합니다. [EN] Returns the environment texture. */
-    get environmentTexture(): IBLCubeTexture {
+    get environmentTexture(): DirectCubeTexture {
         return this.#environmentTexture;
     }
 
     /** [KO] IBL (Specular Prefilter) 텍스처를 반환합니다. [EN] Returns the IBL (Specular Prefilter) texture. */
-    get prefilterTexture(): IBLCubeTexture {
+    get prefilterTexture(): DirectCubeTexture {
         return this.#prefilterTexture;
     }
 

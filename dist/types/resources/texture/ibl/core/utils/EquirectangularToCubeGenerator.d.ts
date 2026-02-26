@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import IBLCubeTexture from "../IBLCubeTexture";
+import DirectCubeTexture from "../../../DirectCubeTexture";
 /**
  * [KO] Equirectangular(2D) 텍스처를 CubeMap으로 변환하는 클래스입니다.
  * [EN] Class that converts an Equirectangular (2D) texture to a CubeMap.
@@ -33,9 +33,9 @@ declare class EquirectangularToCubeGenerator {
      * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
      * [EN] Size of one side of the generated cubemap (default: 512)
      * @returns
-     * [KO] 생성된 IBLCubeTexture
-     * [EN] Generated IBLCubeTexture
+     * [KO] 생성된 DirectCubeTexture
+     * [EN] Generated DirectCubeTexture
      */
-    generate(sourceTexture: GPUTexture, size?: number): Promise<IBLCubeTexture>;
+    generate(sourceTexture: GPUTexture, size?: number): Promise<DirectCubeTexture>;
 }
 export default EquirectangularToCubeGenerator;

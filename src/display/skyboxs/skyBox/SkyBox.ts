@@ -9,7 +9,7 @@ import PrimitiveState from "../../../renderState/PrimitiveState";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 import CubeTexture from "../../../resources/texture/CubeTexture";
-import {IBLCubeTexture} from "../../../resources/texture/ibl/core";
+import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
@@ -38,8 +38,8 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  * [KO] 큐브 텍스처를 사용하여 360도 환경을 렌더링하며, 텍스처 간 부드러운 전환 효과와 블러, 노출, 투명도 조절 기능을 제공합니다.
  * [EN] Renders a 360-degree environment using cube textures, providing smooth transitions between textures, blur, exposure, and transparency control.
  *
- * [KO] 일반적인 6장 이미지 큐브맵(`CubeTexture`)과 HDR 파일로부터 변환된 IBL 큐브맵(`IBLCubeTexture`)을 모두 지원합니다.
- * [EN] Supports both regular 6-image cubemaps (`CubeTexture`) and IBL cubemaps (`IBLCubeTexture`) converted from HDR files.
+ * [KO] 일반적인 6장 이미지 큐브맵(`CubeTexture`)과 직접 주입 방식의 큐브맵(`DirectCubeTexture`)을 모두 지원합니다.
+ * [EN] Supports both regular 6-image cubemaps (`CubeTexture`) and direct-injected cubemaps (`DirectCubeTexture`).
  *
  * ::: info
  * [KO] HDR(.hdr) 파일을 사용하려는 경우, `RedGPU.Resource.IBL`을 통해 큐브맵으로 변환된 `environmentTexture`를 전달해야 합니다.
@@ -111,15 +111,15 @@ class SkyBox {
      */
     #depthStencilState: DepthStencilState
     /**
-     * [KO] 현재 스카이박스 텍스처 (일반 또는 IBL)
-     * [EN] Current skybox texture (Regular or IBL)
+     * [KO] 현재 스카이박스 텍스처 (일반 또는 직접 주입)
+     * [EN] Current skybox texture (Regular or Direct)
      */
-    #skyboxTexture: CubeTexture | IBLCubeTexture
+    #skyboxTexture: CubeTexture | DirectCubeTexture
     /**
-     * [KO] 전환 대상 텍스처 (일반 또는 IBL)
-     * [EN] Transition target texture (Regular or IBL)
+     * [KO] 전환 대상 텍스처 (일반 또는 직접 주입)
+     * [EN] Transition target texture (Regular or Direct)
      */
-    #transitionTexture: CubeTexture | IBLCubeTexture
+    #transitionTexture: CubeTexture | DirectCubeTexture
     /**
      * [KO] 전환 시작 시간 (밀리초)
      * [EN] Transition start time (ms)
@@ -145,15 +145,15 @@ class SkyBox {
      * [KO] RedGPU 렌더링 컨텍스트
      * [EN] RedGPU rendering context
      * @param cubeTexture -
-     * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 IBL)
-     * [EN] Cube texture to use for the skybox (Regular or IBL)
+     * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 직접 주입)
+     * [EN] Cube texture to use for the skybox (Regular or Direct)
      *
      * @throws
      * [KO] redGPUContext가 유효하지 않은 경우 Error 발생
      * [EN] Throws Error if redGPUContext is invalid
      *
      */
-    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | IBLCubeTexture) {
+    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | DirectCubeTexture) {
         validateRedGPUContext(redGPUContext)
         this.#redGPUContext = redGPUContext
         this.#geometry = new Box(redGPUContext)
@@ -208,7 +208,7 @@ class SkyBox {
      * [EN] Throws Error if value is out of range
      */
     set blur(value: number) {
-        validatePositiveNumberRange(1, 0, 1)
+        validatePositiveNumberRange(value, 0, 1)
         this.#material.blur = value;
     }
 
@@ -232,7 +232,7 @@ class SkyBox {
      * [EN] Throws Error if value is out of range
      */
     set opacity(value: number) {
-        validatePositiveNumberRange(1, 0, 1)
+        validatePositiveNumberRange(value, 0, 1)
         this.#material.opacity = value;
     }
 
@@ -240,7 +240,7 @@ class SkyBox {
      * [KO] 현재 스카이박스 텍스처를 반환합니다.
      * [EN] Returns the current skybox texture.
      */
-    get skyboxTexture(): CubeTexture | IBLCubeTexture {
+    get skyboxTexture(): CubeTexture | DirectCubeTexture {
         return this.#skyboxTexture
     }
 
@@ -248,15 +248,15 @@ class SkyBox {
      * [KO] 스카이박스 텍스처를 설정합니다.
      * [EN] Sets the skybox texture.
      * @param texture -
-     * [KO] 새로운 큐브 텍스처 (일반 또는 IBL)
-     * [EN] New cube texture (Regular or IBL)
+     * [KO] 새로운 큐브 텍스처 (일반 또는 직접 주입)
+     * [EN] New cube texture (Regular or Direct)
      * @throws
      * [KO] 텍스처가 유효하지 않은 경우 Error 발생
      * [EN] Throws Error if texture is invalid
      */
-    set skyboxTexture(texture: CubeTexture | IBLCubeTexture) {
+    set skyboxTexture(texture: CubeTexture | DirectCubeTexture) {
         if (!texture) {
-            consoleAndThrowError('SkyBox requires a valid CubeTexture | IBLCubeTexture')
+            consoleAndThrowError('SkyBox requires a valid CubeTexture | DirectCubeTexture')
         } else {
             this.#skyboxTexture = texture
             this.#material.skyboxTexture = texture
@@ -267,7 +267,7 @@ class SkyBox {
      * [KO] 전환 대상 텍스처를 반환합니다.
      * [EN] Returns the transition target texture.
      */
-    get transitionTexture(): CubeTexture | IBLCubeTexture {
+    get transitionTexture(): CubeTexture | DirectCubeTexture {
         return this.#transitionTexture
     }
 
@@ -281,8 +281,8 @@ class SkyBox {
      * skybox.transition(newTexture, 1000, noiseTexture);
      * ```
      * @param transitionTexture -
-     * [KO] 전환할 대상 큐브 텍스처 (일반 또는 IBL)
-     * [EN] Target cube texture to transition to (Regular or IBL)
+     * [KO] 전환할 대상 큐브 텍스처 (일반 또는 직접 주입)
+     * [EN] Target cube texture to transition to (Regular or Direct)
      * @param duration -
      * [KO] 전환 지속 시간 (밀리초, 기본값: 300)
      * [EN] Transition duration (ms, Default: 300)
@@ -290,7 +290,7 @@ class SkyBox {
      * [KO] 전환 효과에 사용할 알파 노이즈 텍스처
      * [EN] Alpha noise texture to use for the transition effect
      */
-    transition(transitionTexture: CubeTexture | IBLCubeTexture, duration: number = 300, transitionAlphaTexture: ANoiseTexture) {
+    transition(transitionTexture: CubeTexture | DirectCubeTexture, duration: number = 300, transitionAlphaTexture: ANoiseTexture) {
         this.#transitionTexture = transitionTexture
         this.#material.transitionTexture = transitionTexture
         this.#transitionDuration = duration
@@ -318,7 +318,6 @@ class SkyBox {
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
-        const {useMSAA, changedMSAA} = antialiasingManager
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
         // keepLog(this.#dirtyPipeline , this.#material.dirtyPipeline)

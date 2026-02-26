@@ -1,7 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Sampler from "../../sampler/Sampler";
 import BitmapTexture from "../../texture/BitmapTexture";
-import { BRDFGenerator, EquirectangularToCubeGenerator, IBLCubeTexture, IrradianceGenerator, PrefilterGenerator } from "../../texture/ibl/core";
+import DirectCubeTexture from "../../texture/DirectCubeTexture";
+import { BRDFGenerator, EquirectangularToCubeGenerator, IrradianceGenerator, PrefilterGenerator } from "../../texture/ibl/core";
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
@@ -204,8 +205,8 @@ declare class ResourceManager {
      * [KO] 큐브 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
      * [EN] Retrieves or creates a view for a cube texture from cache.
      * @param cubeTexture -
-     * [KO] 대상 큐브 텍스처 (CubeTexture, IBLCubeTexture 또는 GPUTexture)
-     * [EN] Target cube texture (CubeTexture, IBLCubeTexture, or GPUTexture)
+     * [KO] 대상 큐브 텍스처 (CubeTexture, DirectCubeTexture 또는 GPUTexture)
+     * [EN] Target cube texture (CubeTexture, DirectCubeTexture, or GPUTexture)
      * @param viewDescriptor -
      * [KO] 뷰 디스크립터 (선택)
      * [EN] View descriptor (optional)
@@ -213,7 +214,7 @@ declare class ResourceManager {
      * [KO] GPUTextureView
      * [EN] GPUTextureView
      */
-    getGPUResourceCubeTextureView(cubeTexture: CubeTexture | GPUTexture | IBLCubeTexture, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null;
+    getGPUResourceCubeTextureView(cubeTexture: CubeTexture | GPUTexture | DirectCubeTexture, viewDescriptor?: GPUTextureViewDescriptor): GPUTextureView | null;
     /**
      * [KO] GPUShaderModule을 생성하고 캐싱합니다.
      * [EN] Creates and caches a GPUShaderModule.

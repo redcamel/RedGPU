@@ -1,7 +1,7 @@
 import { mat4 } from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import CubeTexture from "../../../resources/texture/CubeTexture";
-import { IBLCubeTexture } from "../../../resources/texture/ibl/core";
+import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import VertexGPURenderInfo from "../../mesh/core/VertexGPURenderInfo";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
@@ -12,8 +12,8 @@ import RenderViewStateData from "../../view/core/RenderViewStateData";
  * [KO] 큐브 텍스처를 사용하여 360도 환경을 렌더링하며, 텍스처 간 부드러운 전환 효과와 블러, 노출, 투명도 조절 기능을 제공합니다.
  * [EN] Renders a 360-degree environment using cube textures, providing smooth transitions between textures, blur, exposure, and transparency control.
  *
- * [KO] 일반적인 6장 이미지 큐브맵(`CubeTexture`)과 HDR 파일로부터 변환된 IBL 큐브맵(`IBLCubeTexture`)을 모두 지원합니다.
- * [EN] Supports both regular 6-image cubemaps (`CubeTexture`) and IBL cubemaps (`IBLCubeTexture`) converted from HDR files.
+ * [KO] 일반적인 6장 이미지 큐브맵(`CubeTexture`)과 직접 주입 방식의 큐브맵(`DirectCubeTexture`)을 모두 지원합니다.
+ * [EN] Supports both regular 6-image cubemaps (`CubeTexture`) and direct-injected cubemaps (`DirectCubeTexture`).
  *
  * ::: info
  * [KO] HDR(.hdr) 파일을 사용하려는 경우, `RedGPU.Resource.IBL`을 통해 큐브맵으로 변환된 `environmentTexture`를 전달해야 합니다.
@@ -62,15 +62,15 @@ declare class SkyBox {
      * [KO] RedGPU 렌더링 컨텍스트
      * [EN] RedGPU rendering context
      * @param cubeTexture -
-     * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 IBL)
-     * [EN] Cube texture to use for the skybox (Regular or IBL)
+     * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 직접 주입)
+     * [EN] Cube texture to use for the skybox (Regular or Direct)
      *
      * @throws
      * [KO] redGPUContext가 유효하지 않은 경우 Error 발생
      * [EN] Throws Error if redGPUContext is invalid
      *
      */
-    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | IBLCubeTexture);
+    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | DirectCubeTexture);
     /**
      * [KO] 전환 지속 시간을 반환합니다. (ms)
      * [EN] Returns the transition duration (in ms).
@@ -122,23 +122,23 @@ declare class SkyBox {
      * [KO] 현재 스카이박스 텍스처를 반환합니다.
      * [EN] Returns the current skybox texture.
      */
-    get skyboxTexture(): CubeTexture | IBLCubeTexture;
+    get skyboxTexture(): CubeTexture | DirectCubeTexture;
     /**
      * [KO] 스카이박스 텍스처를 설정합니다.
      * [EN] Sets the skybox texture.
      * @param texture -
-     * [KO] 새로운 큐브 텍스처 (일반 또는 IBL)
-     * [EN] New cube texture (Regular or IBL)
+     * [KO] 새로운 큐브 텍스처 (일반 또는 직접 주입)
+     * [EN] New cube texture (Regular or Direct)
      * @throws
      * [KO] 텍스처가 유효하지 않은 경우 Error 발생
      * [EN] Throws Error if texture is invalid
      */
-    set skyboxTexture(texture: CubeTexture | IBLCubeTexture);
+    set skyboxTexture(texture: CubeTexture | DirectCubeTexture);
     /**
      * [KO] 전환 대상 텍스처를 반환합니다.
      * [EN] Returns the transition target texture.
      */
-    get transitionTexture(): CubeTexture | IBLCubeTexture;
+    get transitionTexture(): CubeTexture | DirectCubeTexture;
     /**
      * [KO] 다른 텍스처로의 부드러운 전환을 시작합니다.
      * [EN] Starts a smooth transition to another texture.
@@ -149,8 +149,8 @@ declare class SkyBox {
      * skybox.transition(newTexture, 1000, noiseTexture);
      * ```
      * @param transitionTexture -
-     * [KO] 전환할 대상 큐브 텍스처 (일반 또는 IBL)
-     * [EN] Target cube texture to transition to (Regular or IBL)
+     * [KO] 전환할 대상 큐브 텍스처 (일반 또는 직접 주입)
+     * [EN] Target cube texture to transition to (Regular or Direct)
      * @param duration -
      * [KO] 전환 지속 시간 (밀리초, 기본값: 300)
      * [EN] Transition duration (ms, Default: 300)
@@ -158,7 +158,7 @@ declare class SkyBox {
      * [KO] 전환 효과에 사용할 알파 노이즈 텍스처
      * [EN] Alpha noise texture to use for the transition effect
      */
-    transition(transitionTexture: CubeTexture | IBLCubeTexture, duration: number, transitionAlphaTexture: ANoiseTexture): void;
+    transition(transitionTexture: CubeTexture | DirectCubeTexture, duration: number, transitionAlphaTexture: ANoiseTexture): void;
     /**
      * [KO] 스카이박스를 렌더링합니다.
      * [EN] Renders the skybox.

@@ -5,7 +5,7 @@ import reflectionShaderCode from "./skyAtmosphereReflectionShaderCode.wgsl";
 import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
-import IBLCubeTexture from "../../../../../resources/texture/ibl/core/IBLCubeTexture";
+import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR');
@@ -28,7 +28,7 @@ class SkyAtmosphereReflectionGenerator {
     #redGPUContext: RedGPUContext;
     #sourceCubeTexture: GPUTexture;
     #sourceCubeTextureView: GPUTextureView;
-    #prefilteredTexture: IBLCubeTexture;
+    #prefilteredTexture: DirectCubeTexture;
     #pipeline: GPUComputePipeline;
     #sharedUniformBuffer: UniformBuffer;
     #faceMatrixBuffer: UniformBuffer;
@@ -42,7 +42,7 @@ class SkyAtmosphereReflectionGenerator {
     }
 
     /** [KO] 프리필터링된 반사 큐브맵을 반환합니다. [EN] Returns the pre-filtered reflection cubemap. */
-    get prefilteredTexture(): IBLCubeTexture {
+    get prefilteredTexture(): DirectCubeTexture {
         return this.#prefilteredTexture;
     }
 
@@ -96,7 +96,7 @@ class SkyAtmosphereReflectionGenerator {
         this.#sourceCubeTextureView = this.#sourceCubeTexture.createView({dimension: '2d-array'});
 
         // 2. 프리필터 결과용 텍스처 미리 생성
-        this.#prefilteredTexture = new IBLCubeTexture(this.#redGPUContext, `SKY_ATMOSPHERE_REFL_FIXED_${createUUID()}`);
+        this.#prefilteredTexture = new DirectCubeTexture(this.#redGPUContext, `SKY_ATMOSPHERE_REFL_FIXED_${createUUID()}`);
 
         const faceMatrices = this.#getCubeMapFaceMatrices();
         const faceMatrixData = new Float32Array(16 * 6);

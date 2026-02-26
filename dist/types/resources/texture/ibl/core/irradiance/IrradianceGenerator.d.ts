@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import IBLCubeTexture from "../IBLCubeTexture";
+import DirectCubeTexture from "../../../DirectCubeTexture";
 /**
  * [KO] Irradiance 맵을 생성하는 클래스입니다.
  * [EN] Class that generates an Irradiance map.
@@ -36,9 +36,9 @@ declare class IrradianceGenerator {
      * [KO] 생성될 Irradiance 맵의 크기 (기본값: 32)
      * [EN] Size of the generated Irradiance map (default: 32)
      * @returns
-     * [KO] 생성된 Irradiance IBLCubeTexture
-     * [EN] Generated Irradiance IBLCubeTexture
+     * [KO] 생성된 Irradiance DirectCubeTexture
+     * [EN] Generated Irradiance DirectCubeTexture
      */
-    generate(sourceCubeTexture: GPUTexture, size?: number): Promise<IBLCubeTexture>;
+    generate(sourceCubeTexture: GPUTexture, size?: number): Promise<DirectCubeTexture>;
 }
 export default IrradianceGenerator;

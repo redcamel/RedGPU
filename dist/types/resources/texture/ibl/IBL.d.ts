@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import { IBLCubeTexture } from "./core";
+import DirectCubeTexture from "../DirectCubeTexture";
 /**
  * [KO] Image-Based Lighting (IBL)을 관리하는 클래스입니다.
  * [EN] Class that manages Image-Based Lighting (IBL).
@@ -49,10 +49,10 @@ declare class IBL {
     /** [KO] Irradiance 큐브 크기 [EN] Irradiance cube size */
     get irradianceSize(): number;
     /** [KO] Irradiance 텍스처를 반환합니다. [EN] Returns the irradiance texture. */
-    get irradianceTexture(): IBLCubeTexture;
+    get irradianceTexture(): DirectCubeTexture;
     /** [KO] 환경맵 텍스처를 반환합니다. [EN] Returns the environment texture. */
-    get environmentTexture(): IBLCubeTexture;
+    get environmentTexture(): DirectCubeTexture;
     /** [KO] IBL (Specular Prefilter) 텍스처를 반환합니다. [EN] Returns the IBL (Specular Prefilter) texture. */
-    get prefilterTexture(): IBLCubeTexture;
+    get prefilterTexture(): DirectCubeTexture;
 }
 export default IBL;

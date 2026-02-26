@@ -1,23 +1,21 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import calculateTextureByteSize from "../../../../utils/texture/calculateTextureByteSize";
-import ManagementResourceBase from "../../../core/ManagementResourceBase";
-import ResourceStateCubeTexture from "../../../core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
-import CubeTexture from "../../CubeTexture";
+import RedGPUContext from "../../context/RedGPUContext";
+import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
+import ManagementResourceBase from "../core/ManagementResourceBase";
+import ResourceStateCubeTexture from "../core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
+import CubeTexture from "./CubeTexture";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
 
 /**
- * [KO] IBL에서 내부적으로 사용하는 큐브 텍스처 클래스입니다.
- * [EN] Cube texture class used internally in IBL.
+ * [KO] 파일 로드 없이 GPUTexture를 직접 주입받아 관리하는 큐브 텍스처 클래스입니다.
+ * [EN] Cube texture class that directly injects and manages GPUTexture without loading files.
  *
- * ::: warning
- * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
- * :::
+ * [KO] 주로 IBL용 필터링 결과물이나 실시간 대기 반사광 등, 시스템 내부에서 생성된 텍스처를 래핑하는 용도로 사용됩니다.
+ * [EN] Primarily used to wrap textures generated within the system, such as IBL filtering results or real-time atmospheric reflections.
  *
- * @category IBL
+ * @category Texture
  */
-class IBLCubeTexture extends ManagementResourceBase {
+class DirectCubeTexture extends ManagementResourceBase {
     #gpuTexture: GPUTexture
     #mipLevelCount: number
     #useMipmap: boolean = true
@@ -25,8 +23,8 @@ class IBLCubeTexture extends ManagementResourceBase {
     #format: GPUTextureFormat
 
     /**
-     * [KO] IBLCubeTexture 인스턴스를 생성합니다. (내부 시스템 전용)
-     * [EN] Creates an IBLCubeTexture instance. (Internal system only)
+     * [KO] DirectCubeTexture 인스턴스를 생성합니다.
+     * [EN] Creates a DirectCubeTexture instance.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -49,7 +47,7 @@ class IBLCubeTexture extends ManagementResourceBase {
         if (cacheKey) {
             let target: ResourceStateCubeTexture = table.get(cacheKey)
             if (target) {
-                return target.texture as IBLCubeTexture
+                return target.texture as DirectCubeTexture
             } else {
                 if (gpuTexture) {
                     this.#setGpuTexture(gpuTexture)
@@ -165,5 +163,5 @@ class IBLCubeTexture extends ManagementResourceBase {
     }
 }
 
-Object.freeze(IBLCubeTexture)
-export default IBLCubeTexture
+Object.freeze(DirectCubeTexture)
+export default DirectCubeTexture

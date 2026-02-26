@@ -4,7 +4,7 @@ import ABitmapBaseMaterial from "../../../../material/core/ABitmapBaseMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import CubeTexture from "../../../../resources/texture/CubeTexture";
-import {IBLCubeTexture} from "../../../../resources/texture/ibl/core";
+import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
@@ -12,10 +12,10 @@ import fragmentModuleSource from "../shader/fragment.wgsl"
 const SHADER_INFO = parseWGSL(fragmentModuleSource, 'SKYBOX_MATERIAL')
 
 interface SkyBoxMaterial {
-    /** [KO] 현재 스카이박스 큐브 텍스처 (일반 또는 IBL) [EN] Current skybox cube texture (Regular or IBL) */
-    skyboxTexture: CubeTexture | IBLCubeTexture;
-    /** [KO] 전환 대상 큐브 텍스처 (일반 또는 IBL) [EN] Target cube texture for transition (Regular or IBL) */
-    transitionTexture: CubeTexture | IBLCubeTexture;
+    /** [KO] 현재 스카이박스 큐브 텍스처 (일반 또는 직접 주입) [EN] Current skybox cube texture (Regular or Direct) */
+    skyboxTexture: CubeTexture | DirectCubeTexture;
+    /** [KO] 전환 대상 큐브 텍스처 (일반 또는 직접 주입) [EN] Target cube texture for transition (Regular or Direct) */
+    transitionTexture: CubeTexture | DirectCubeTexture;
     /** [KO] 전환 효과용 알파 노이즈 텍스처 [EN] Alpha noise texture for transition effect */
     transitionAlphaTexture: ANoiseTexture | BitmapTexture;
     /** [KO] 스카이박스 텍스처 샘플러 [EN] Skybox texture sampler */
@@ -53,10 +53,10 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param cubeTexture -
-     * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 IBL)
-     * [EN] Cube texture to use for the skybox (Regular or IBL)
+     * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 직접 주입)
+     * [EN] Cube texture to use for the skybox (Regular or Direct)
      */
-    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | IBLCubeTexture) {
+    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | DirectCubeTexture) {
         super(
             redGPUContext,
             'SKYBOX_MATERIAL',

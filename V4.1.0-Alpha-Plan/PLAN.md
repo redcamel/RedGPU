@@ -53,6 +53,7 @@
 | **레거시 정리 및 최적화** | ✅ 완료 | `getAerialPerspective` 제거, 바인딩 인덱스 재정렬, 재질 유니폼 최적화 완료 |
 | **SkyAtmosphere 유니폼 최적화** | ✅ 완료 | `SkyAtmosphere`와 각 제너레이터 간의 단일 공용 버퍼 도입 및 동기화 최적화 완료 |
 | **LUT 텍스처 리소스 통합** | ✅ 완료 | 5종의 개별 LUT 클래스를 `SkyAtmosphereLUTTexture`로 단일화하여 코드 중복 제거 |
+| **[Direct-Injected 큐브 텍스처 관리 표준화](issue/infrastructure/Refactor_IBLCubeTexture_to_DirectCubeTexture.md)** | ✅ 완료 | `IBLCubeTexture`를 범용 클래스로 분리 및 IBL 모듈 의존성 제거 |
 | **리소스 업데이트 API 정규화** | ✅ 완료 | `__fireListenerList`를 `notifyUpdate`로 리네임하여 엔진 전역 API 직관성 확보 |
 | **Import 전수 점검** | ⏳ 대기 | 전체 프로젝트 참조 무결성 확인 및 최적화 |
 

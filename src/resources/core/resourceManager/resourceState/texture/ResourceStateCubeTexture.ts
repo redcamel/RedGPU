@@ -1,14 +1,14 @@
 import CubeTexture from "../../../../texture/CubeTexture";
-import IBLCubeTexture from "../../../../texture/ibl/core/IBLCubeTexture";
+import DirectCubeTexture from "../../../../texture/DirectCubeTexture";
 
 class ResourceStateCubeTexture {
-    texture: CubeTexture | IBLCubeTexture
+    texture: CubeTexture | DirectCubeTexture
     srcList: string[]
     cacheKey: string
     useNum: number = 0
     uuid: string | number
 
-    constructor(cubeTexture: CubeTexture | IBLCubeTexture) {
+    constructor(cubeTexture: CubeTexture | DirectCubeTexture) {
         this.texture = cubeTexture
         this.srcList = cubeTexture instanceof CubeTexture ? cubeTexture.srcList : undefined
         this.cacheKey = cubeTexture.cacheKey

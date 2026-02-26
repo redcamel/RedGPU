@@ -11,6 +11,7 @@ import ResourceManager from "../../resources/core/resourceManager/ResourceManage
 import Sampler from "../../resources/sampler/Sampler";
 import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
 import CubeTexture from "../../resources/texture/CubeTexture";
+import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
@@ -21,7 +22,6 @@ import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
-import IBLCubeTexture from "../../resources/texture/ibl/core/IBLCubeTexture";
 import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
@@ -130,15 +130,15 @@ class View3D extends AView {
 
 
     /**
-     * [KO] 리소스 관리를 위한 이전 프레임의 IBL 텍스처
-     * [EN] Previous frame IBL texture for resource management
+     * [KO] 리소스 관리를 위한 이전 프레임의 직접 주입형 큐브 텍스처
+     * [EN] Previous frame direct cube texture for resource management
      */
-    #prevIBL_prefilterTexture: IBLCubeTexture
+    #prevIBL_prefilterTexture: DirectCubeTexture
     /**
-     * [KO] 리소스 관리를 위한 이전 프레임의 IBL 복사열 텍스처
-     * [EN] Previous frame IBL irradiance texture for resource management
+     * [KO] 리소스 관리를 위한 이전 프레임의 직접 주입형 큐브 복사열 텍스처
+     * [EN] Previous frame direct irradiance cube texture for resource management
      */
-    #prevIBL_irradianceTexture: IBLCubeTexture
+    #prevIBL_irradianceTexture: DirectCubeTexture
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
