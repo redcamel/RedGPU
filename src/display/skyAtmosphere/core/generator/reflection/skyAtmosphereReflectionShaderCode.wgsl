@@ -1,41 +1,26 @@
-// [KO] UE5 표준 Sky-View LUT 생성
-
-@group(0) @binding(0) var skyViewTexture: texture_storage_2d<rgba16float, write>;
+@group(0) @binding(0) var outputTexture: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(3) var atmosphereSampler: sampler;
 @group(0) @binding(4) var<uniform> params: AtmosphereParameters;
+@group(0) @binding(5) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
-@compute @workgroup_size(16, 16)
+@compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(skyViewTexture);
+    let size = textureDimensions(outputTexture).xy;
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
-    // [KO] 텍셀 중심 매핑
-    // [EN] Pixel center mapping
+    let face = global_id.z;
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
-    let azimuth = (uv.x - 0.5) * PI2;
-
+    let clipPos = vec4<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0, 1.0, 1.0);
+    
+    // [KO] 큐브맵 페이스 행렬을 이용해 월드 공간 방향 계산
+    // [EN] Calculate world space direction using cubemap face matrix
+    let worldPos = faceMatrices[face] * clipPos;
+    let view_dir = normalize(worldPos.xyz);
+    
     let r = params.earthRadius;
     let h_c = max(0.0001, params.cameraHeight);
-    
-    // 지평선 각도 계산
-    let horizon_cos = -sqrt(max(0.0, h_c * (2.0 * r + h_c))) / (r + h_c);
-    let horizon_elevation = asin(clamp(horizon_cos, -1.0, 1.0));
-
-    // [UE5 표준 역매핑]
-    var view_elevation: f32;
-    if (uv.y < 0.5) {
-        // [Sky Part] v = 0.5 * (1 - sqrt(ratio)) -> ratio = (1 - 2v)^2
-        let ratio = (1.0 - 2.0 * uv.y) * (1.0 - 2.0 * uv.y);
-        view_elevation = horizon_elevation + ratio * (HPI - horizon_elevation);
-    } else {
-        // [Ground Part] v = 0.5 * (1 + sqrt(ratio)) -> ratio = (2v - 1)^2
-        let ratio = (2.0 * uv.y - 1.0) * (2.0 * uv.y - 1.0);
-        view_elevation = horizon_elevation - ratio * (horizon_elevation + HPI);
-    }
-
-    let view_dir = vec3<f32>(cos(view_elevation) * cos(azimuth), sin(view_elevation), cos(view_elevation) * sin(azimuth));
     let ray_origin = vec3<f32>(0.0, h_c + r, 0.0);
 
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, r + params.atmosphereHeight);
@@ -46,7 +31,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var transmittance = vec3<f32>(1.0);
 
     if (dist_limit > 0.0) {
-        let steps = 64;
+        // [KO] 품질을 위해 32단계 적분 (SkyView보다 작게 설정하여 성능 확보)
+        // [EN] 32-step integration for quality (set smaller than SkyView for performance)
+        let steps = 32;
         let step_size = dist_limit / f32(steps);
 
         for (var i = 0; i < steps; i = i + 1) {
@@ -59,33 +46,26 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let cos_sun = dot(up, params.sunDirection);
             let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
 
-            // 행성 그림자
+            // [KO] 행성 그림자 [EN] Planet shadow
             var shadow_mask = 1.0;
             if (get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
-            
-            // [KO] 오존층 및 높이 안개 기여분
-            let ozone_dist = abs(cur_h - params.ozoneLayerCenter);
-            let rho_o = exp(-max(0.0, ozone_dist * ozone_dist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
             let rho_f = exp(-max(0.0, cur_h) * params.heightFogFalloff);
 
             let view_sun_cos = dot(view_dir, params.sunDirection);
             
-            // [KO] 물리적으로 올바른 산란광 계산 (안개용 페이즈 함수 0.7 추가)
-            // [EN] Physically correct scattering calculation (add phase function 0.7 for fog)
+            // [KO] 산란광 계산 (물리적 정합성 교정 완료된 로직 적용)
             let scat_r = params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos);
             let scat_m = vec3<f32>(params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy));
             let scat_f = vec3<f32>(params.heightFogDensity * rho_f * phase_mie(view_sun_cos, 0.7)); 
             
             let scat = (scat_r + scat_m + scat_f) * sun_trans * shadow_mask;
 
-            // [KO] 다중 산란 기여 (안개 밀도 rho_f를 정확히 반영)
-            // [EN] Multi-scattering contribution (correctly reflecting fog density rho_f)
+            // [KO] 다중 산란 기여분
             let ms_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
             let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, ms_uv, 0.0).rgb;
-            
             let total_scat_coeff = params.rayleighScattering * rho_r + vec3<f32>(params.mieScattering * rho_m + params.heightFogDensity * rho_f);
             let ms_scat = ms_energy * total_scat_coeff * shadow_mask;
 
@@ -96,7 +76,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             if (all(transmittance < vec3<f32>(0.001))) { break; }
         }
 
-        // [KO] 지면과 충돌한 경우 지면 반사광 추가
+        // [KO] 지면 반사광 추가
         if (t_earth > 0.0) {
             let hitPos = ray_origin + view_dir * t_earth;
             let up = normalize(hitPos);
@@ -111,5 +91,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
 
-    textureStore(skyViewTexture, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
+    // [KO] 최종 광도 저장 (태양 강도는 재질에서 샘플링 시 곱함)
+    // [EN] Store final radiance (sun intensity is multiplied when sampling in the material)
+    textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }

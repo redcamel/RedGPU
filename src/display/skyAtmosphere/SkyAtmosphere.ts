@@ -8,6 +8,7 @@ import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScat
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import CameraVolumeGenerator from "./core/generator/cameraVolume/CameraVolumeGenerator";
 import AtmosphereIrradianceGenerator from "./core/generator/irradiance/AtmosphereIrradianceGenerator";
+import SkyAtmosphereReflectionGenerator from "./core/generator/reflection/SkyAtmosphereReflectionGenerator";
 import skyAtmosphereFn from "./core/skyAtmosphereFn.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
@@ -36,6 +37,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #skyViewGenerator: SkyViewGenerator;
     #cameraVolumeGenerator: CameraVolumeGenerator;
     #irradianceGenerator: AtmosphereIrradianceGenerator;
+    #reflectionGenerator: SkyAtmosphereReflectionGenerator;
     #sampler: Sampler;
 
     #params = {
@@ -103,6 +105,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#skyViewGenerator = new SkyViewGenerator(redGPUContext);
         this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext);
         this.#irradianceGenerator = new AtmosphereIrradianceGenerator(redGPUContext);
+        this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext);
 
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: 'linear',
@@ -463,6 +466,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         return this.#irradianceGenerator.lutTexture;
     }
 
+    /** [KO] 프리필터링된 대기 반사 큐브맵을 반환합니다. [EN] Returns the pre-filtered atmospheric reflection cubemap. */
+    get skyAtmosphereReflectionTexture() {
+        return this.#reflectionGenerator.prefilteredTexture;
+    }
+
     /** [KO] 대기 산란 전용 샘플러를 반환합니다. [EN] Returns the dedicated atmosphere sampler. */
     get skyAtmosphereSampler() {
         return this.#sampler;
@@ -511,6 +519,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#params);
             this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#params);
             this.#irradianceGenerator.render(this.#skyViewGenerator.lutTexture, this.#params);
+            this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#params);
             this.#dirtySkyView = false;
         }
 

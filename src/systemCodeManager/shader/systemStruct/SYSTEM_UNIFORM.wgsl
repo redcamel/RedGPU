@@ -47,6 +47,7 @@ struct SystemUniform {
 @group(0) @binding(15) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(16) var skyViewTexture: texture_2d<f32>;
 @group(0) @binding(17) var atmosphereIrradianceTexture: texture_2d<f32>;
+@group(0) @binding(18) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
 
 #redgpu_include depth.getLinearizeDepth
 

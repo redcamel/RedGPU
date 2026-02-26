@@ -686,6 +686,7 @@ class ResourceManager {
                         {binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {}},
                         {binding: 16, visibility: GPUShaderStage.FRAGMENT, texture: {}},
                         {binding: 17, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+                        {binding: 18, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
                     ],
                 }
             )
