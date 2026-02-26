@@ -19,7 +19,7 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import SkyAtmosphereLUTTexture from "./core/generator/SkyAtmosphereLUTTexture";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'SKY_ATMOSPHERE_CORE');
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
+
 
 /**
  * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 클래스입니다.

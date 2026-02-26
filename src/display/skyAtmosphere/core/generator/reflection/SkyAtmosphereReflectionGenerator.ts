@@ -9,7 +9,7 @@ import IBLCubeTexture from "../../../../../resources/texture/ibl/core/IBLCubeTex
 import createUUID from "../../../../../utils/uuid/createUUID";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR');
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
+
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사 큐브맵을 생성하는 클래스입니다.

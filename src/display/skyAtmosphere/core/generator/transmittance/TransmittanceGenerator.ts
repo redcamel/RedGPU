@@ -6,7 +6,7 @@ import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'TRANSMITTANCE_GENERATOR');
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
+
 
 /**
  * [KO] 대기 투과율(Transmittance) LUT 생성을 담당하는 클래스입니다.
