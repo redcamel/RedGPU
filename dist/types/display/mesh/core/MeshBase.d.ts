@@ -65,10 +65,10 @@ declare class MeshBase extends Object3DContainer {
     localToWorld(x: number, y: number, z: number): [number, number, number];
     getScreenPoint(view: View3D): [number, number];
     /**
-     * Fires the dirty listeners list.
+     * Notifies registered listeners that the mesh has been updated.
      *
      * @param {boolean} [resetList=false] - Indicates whether to reset the dirty listeners list after firing.
      */
-    __fireListenerList(resetList?: boolean): void;
+    notifyUpdate(resetList?: boolean): void;
 }
 export default MeshBase;

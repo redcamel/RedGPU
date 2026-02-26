@@ -53,11 +53,6 @@ class SkyAtmosphereLUTTexture extends ManagementResourceBase {
         return this.#width * this.#height * this.#depth * 8; // RGBA16F = 8 bytes per pixel
     }
 
-    /** [KO] 텍스처 업데이트가 완료되었음을 알립니다. [EN] Notifies that the texture update is complete. */
-    notifyUpdate(): void {
-        this.__fireListenerList();
-    }
-
     #init(label: string): void {
         const {gpuDevice} = this.redGPUContext;
         const dimension: GPUTextureDimension = this.#depth > 1 ? '3d' : '2d';
@@ -75,7 +70,7 @@ class SkyAtmosphereLUTTexture extends ManagementResourceBase {
             dimension: dimension
         });
         
-        this.__fireListenerList();
+        this.notifyUpdate();
     }
 }
 

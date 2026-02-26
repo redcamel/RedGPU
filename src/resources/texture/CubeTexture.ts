@@ -154,7 +154,7 @@ class CubeTexture extends ManagementResourceBase {
     destroy() {
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
-        this.__fireListenerList(true)
+        this.notifyUpdate(true)
         this.#unregisterResource()
         this.#srcList = null
         this.cacheKey = null
@@ -189,7 +189,7 @@ class CubeTexture extends ManagementResourceBase {
         this.cacheKey = cacheKey || `direct_${this.uuid}`;
         this.#videoMemorySize = calculateTextureByteSize(gpuTexture);
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
-        this.__fireListenerList();
+        this.notifyUpdate();
     }
 
     /**
@@ -221,7 +221,7 @@ class CubeTexture extends ManagementResourceBase {
     #setGpuTexture(value: GPUTexture) {
         this.#gpuTexture = value;
         if (!value) this.#imgBitmaps = null
-        this.__fireListenerList();
+        this.notifyUpdate();
     }
 
     /**

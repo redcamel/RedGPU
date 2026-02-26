@@ -125,7 +125,7 @@ class IBLCubeTexture extends ManagementResourceBase {
     destroy() {
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
-        this.__fireListenerList(true)
+        this.notifyUpdate(true)
         this.#unregisterResource()
         this.cacheKey = null
         if (temp) temp.destroy()
@@ -145,7 +145,7 @@ class IBLCubeTexture extends ManagementResourceBase {
             this.#videoMemorySize = calculateTextureByteSize(value)
         }
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
-        this.__fireListenerList();
+        this.notifyUpdate();
     }
 
     /**

@@ -156,7 +156,7 @@ class BitmapTexture extends ManagementResourceBase {
     destroy() {
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
-        this.__fireListenerList(true)
+        this.notifyUpdate(true)
         this.#unregisterResource()
         this.cacheKey = null
         this.#src = null
@@ -193,7 +193,7 @@ class BitmapTexture extends ManagementResourceBase {
     #setGpuTexture(value: GPUTexture) {
         this.#gpuTexture = value;
         if (!value) this.#imgBitmap = null
-        this.__fireListenerList();
+        this.notifyUpdate();
     }
 
     /**

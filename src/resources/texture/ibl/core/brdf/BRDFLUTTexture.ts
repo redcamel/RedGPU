@@ -48,7 +48,7 @@ class BRDFLUTTexture extends ManagementResourceBase {
      */
     #init() {
         this.#gpuTexture = this.redGPUContext.resourceManager.brdfGenerator.brdfLUTTexture;
-        this.__fireListenerList();
+        this.notifyUpdate();
     }
 }
 

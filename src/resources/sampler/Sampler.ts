@@ -214,7 +214,7 @@ class Sampler extends ResourceBase {
      * [EN] Calls listeners when the GPU sampler changes.
      */
     #onGpuSamplerChanged() {
-        this.__fireListenerList()
+        this.notifyUpdate()
     }
 
     /**

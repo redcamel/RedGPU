@@ -72,20 +72,20 @@ declare class ResourceBase {
      */
     __addDirtyPipelineListener(listener: () => void): void;
     /**
-     * [KO] 더티 파이프라인 리스너를 제거합니다.
-     * [EN] Removes a dirty pipeline listener.
+     * [KO] 리소스 업데이트 리스너를 제거합니다.
+     * [EN] Removes a resource update listener.
      * @param listener -
      * [KO] 제거할 리스너 함수
      * [EN] Listener function to be removed
      */
     __removeDirtyPipelineListener(listener: () => void): void;
     /**
-     * [KO] 등록된 더티 리스너들을 실행합니다.
-     * [EN] Fires the registered dirty listeners.
+     * [KO] 리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
+     * [EN] Notifies registered listeners that the resource has been updated.
      * @param resetList -
      * [KO] 실행 후 리스너 목록 초기화 여부 (기본값: false)
      * [EN] Whether to reset the listener list after firing (default: false)
      */
-    __fireListenerList(resetList?: boolean): void;
+    notifyUpdate(resetList?: boolean): void;
 }
 export default ResourceBase;

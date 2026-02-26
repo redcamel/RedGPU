@@ -123,11 +123,11 @@ class MeshBase extends Object3DContainer {
     }
 
     /**
-     * Fires the dirty listeners list.
+     * Notifies registered listeners that the mesh has been updated.
      *
      * @param {boolean} [resetList=false] - Indicates whether to reset the dirty listeners list after firing.
      */
-    __fireListenerList(resetList: boolean = false) {
+    notifyUpdate(resetList: boolean = false) {
         // console.log('this.#dirtyListeners', this, this.#dirtyListeners)
         for (const listener of this.#dirtyListeners) listener(this);
         if (resetList) this.#dirtyListeners.length = 0

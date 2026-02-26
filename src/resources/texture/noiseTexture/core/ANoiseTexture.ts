@@ -182,7 +182,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
     /** [KO] 리소스를 파괴합니다. [EN] Destroys the resource. */
     destroy() {
         const temp = this.#gpuTexture
-        this.__fireListenerList(true)
+        this.notifyUpdate(true)
         this.#unregisterResource()
         if (temp) temp.destroy()
         this.src = null

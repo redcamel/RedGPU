@@ -130,7 +130,7 @@ class HDRTexture extends ManagementResourceBase {
     destroy() {
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
-        this.__fireListenerList(true)
+        this.notifyUpdate(true)
         this.#unregisterResource()
         this.#src = null
         this.cacheKey = null
@@ -165,7 +165,7 @@ class HDRTexture extends ManagementResourceBase {
             this.#height = hdrData.height;
             await this.#createGPUTexture(hdrData);
             this.#onLoad?.(this);
-            this.__fireListenerList();
+            this.notifyUpdate();
         } catch (error) {
             console.error('HDR loading error:', error);
             this.#onError?.(error);
@@ -216,7 +216,7 @@ class HDRTexture extends ManagementResourceBase {
         this.#gpuTexture = value;
         this.#videoMemorySize = value ? calculateTextureByteSize(value) : 0;
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
-        this.__fireListenerList();
+        this.notifyUpdate();
     }
 
     #registerResource() {
