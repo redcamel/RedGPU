@@ -53,6 +53,7 @@ class MultiScatteringGenerator {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
+            label: 'MULTI_SCATTERING_GEN_BG',
             layout: this.#pipeline.getBindGroupLayout(0),
             entries: [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
@@ -62,8 +63,8 @@ class MultiScatteringGenerator {
             ]
         });
 
-        const commandEncoder = gpuDevice.createCommandEncoder();
-        const passEncoder = commandEncoder.beginComputePass();
+        const commandEncoder = gpuDevice.createCommandEncoder({label: 'MULTI_SCATTERING_GEN_COMMAND_ENCODER'});
+        const passEncoder = commandEncoder.beginComputePass({label: 'MULTI_SCATTERING_GEN_COMPUTE_PASS'});
         passEncoder.setPipeline(this.#pipeline);
         passEncoder.setBindGroup(0, bindGroup);
         passEncoder.dispatchWorkgroups(Math.ceil(this.width / 8), Math.ceil(this.height / 8));
@@ -87,6 +88,7 @@ class MultiScatteringGenerator {
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({
+            label: 'MULTI_SCATTERING_GEN_PIPELINE',
             layout: 'auto',
             compute: {module: shaderModule, entryPoint: 'main'}
         });

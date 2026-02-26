@@ -63,6 +63,7 @@ class CameraVolumeGenerator {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
+            label: 'CAMERA_VOLUME_GEN_BG',
             layout: this.#pipeline.getBindGroupLayout(0),
             entries: [
                 {binding: 0, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})},
@@ -73,8 +74,8 @@ class CameraVolumeGenerator {
             ]
         });
 
-        const commandEncoder = gpuDevice.createCommandEncoder();
-        const passEncoder = commandEncoder.beginComputePass();
+        const commandEncoder = gpuDevice.createCommandEncoder({label: 'CAMERA_VOLUME_GEN_COMMAND_ENCODER'});
+        const passEncoder = commandEncoder.beginComputePass({label: 'CAMERA_VOLUME_GEN_COMPUTE_PASS'});
         passEncoder.setPipeline(this.#pipeline);
         passEncoder.setBindGroup(0, bindGroup);
         passEncoder.dispatchWorkgroups(
@@ -104,6 +105,7 @@ class CameraVolumeGenerator {
 
         const shaderModule = this.#redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = this.#redGPUContext.gpuDevice.createComputePipeline({
+            label: 'CAMERA_VOLUME_GEN_PIPELINE',
             layout: 'auto',
             compute: {module: shaderModule, entryPoint: 'main'}
         });

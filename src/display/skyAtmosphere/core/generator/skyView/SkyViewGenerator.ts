@@ -54,6 +54,7 @@ class SkyViewGenerator {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
+            label: 'SKY_VIEW_GEN_BG',
             layout: this.#pipeline.getBindGroupLayout(0),
             entries: [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
@@ -64,8 +65,8 @@ class SkyViewGenerator {
             ]
         });
 
-        const commandEncoder = gpuDevice.createCommandEncoder();
-        const passEncoder = commandEncoder.beginComputePass();
+        const commandEncoder = gpuDevice.createCommandEncoder({label: 'SKY_VIEW_GEN_COMMAND_ENCODER'});
+        const passEncoder = commandEncoder.beginComputePass({label: 'SKY_VIEW_GEN_COMPUTE_PASS'});
         passEncoder.setPipeline(this.#pipeline);
         passEncoder.setBindGroup(0, bindGroup);
         passEncoder.dispatchWorkgroups(Math.ceil(this.width / 16), Math.ceil(this.height / 16));
@@ -89,6 +90,7 @@ class SkyViewGenerator {
 
         const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
         this.#pipeline = gpuDevice.createComputePipeline({
+            label: 'SKY_VIEW_GEN_PIPELINE',
             layout: 'auto',
             compute: {module: shaderModule, entryPoint: 'main'}
         });

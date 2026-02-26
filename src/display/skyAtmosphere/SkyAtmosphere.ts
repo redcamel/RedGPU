@@ -558,6 +558,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         passEncoder.setPipeline(pipeline);
 
         const bindGroup0 = gpuDevice.createBindGroup({
+            label: 'SKY_ATMOSPHERE_PE_BG_0',
             layout: this.#getBindGroupLayout0(useMSAA),
             entries: [
                 {binding: 0, resource: sourceTextureInfo.textureView},
@@ -571,6 +572,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         });
 
         const bindGroup1 = gpuDevice.createBindGroup({
+            label: 'SKY_ATMOSPHERE_PE_BG_1',
             layout: this.#bindGroupLayout1,
             entries: [
                 {binding: 0, resource: this.#outputTextureView},

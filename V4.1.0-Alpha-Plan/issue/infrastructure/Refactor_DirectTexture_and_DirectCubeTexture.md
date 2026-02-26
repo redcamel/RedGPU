@@ -25,6 +25,7 @@ RedGPU는 파일 경로(URL)를 통한 자산 로드 과정(`BitmapTexture`, `Cu
 - [x] Implement `ADirectTexture` abstract base class
 - [x] Use `#` (Private fields) for enhanced resource security
 - [x] Update all engine generators (IBL, SkyAtmosphere) to new standards
+- [x] Comprehensive GPU resource labeling for SkyAtmosphere system
 - [x] Export classes via `RedGPU.Resource` namespace
 
 ## 📊 Impact
