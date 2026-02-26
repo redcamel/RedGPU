@@ -6,8 +6,8 @@ import CubeTexture from "./CubeTexture";
 const MANAGED_STATE_KEY = 'managedCubeTextureState';
 
 /**
- * [KO] GPUTexture를 직접 주입받아 관리하는 다차원(Cube 및 3D) 텍스처 클래스입니다.
- * [EN] Multi-dimensional (Cube and 3D) texture class that directly injects and manages GPUTexture.
+ * [KO] 파일 경로(URL)를 통한 로드 과정 없이, GPUTexture를 직접 주입받아 관리하는 다차원(Cube 및 3D) 텍스처 클래스입니다.
+ * [EN] Multi-dimensional (Cube and 3D) texture class that directly injects and manages GPUTexture without loading from file paths (URLs).
  *
  * @category Texture
  */

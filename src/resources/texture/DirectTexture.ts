@@ -5,8 +5,8 @@ import ADirectTexture from "./core/ADirectTexture";
 const MANAGED_STATE_KEY = 'managedBitmapTextureState';
 
 /**
- * [KO] GPUTexture를 직접 주입받아 관리하는 2D 전용 텍스처 클래스입니다.
- * [EN] 2D-specific texture class that directly injects and manages GPUTexture.
+ * [KO] 파일 경로(URL)를 통한 로드 과정 없이, GPUTexture를 직접 주입받아 관리하는 2D 전용 텍스처 클래스입니다.
+ * [EN] 2D-specific texture class that directly injects and manages GPUTexture without loading from file paths (URLs).
  *
  * @category Texture
  */
