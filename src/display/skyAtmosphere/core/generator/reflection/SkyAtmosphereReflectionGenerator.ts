@@ -2,8 +2,7 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import reflectionShaderCode from "./skyAtmosphereReflectionShaderCode.wgsl";
-import TransmittanceLUTTexture from "../transmittance/TransmittanceLUTTexture";
-import MultiScatteringLUTTexture from "../multiScattering/MultiScatteringLUTTexture";
+import SkyAtmosphereLUTTexture from "../SkyAtmosphereLUTTexture";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import IBLCubeTexture from "../../../../../resources/texture/ibl/core/IBLCubeTexture";
@@ -54,7 +53,7 @@ class SkyAtmosphereReflectionGenerator {
      * @param transmittance - [KO] 투과율 LUT [EN] Transmittance LUT
      * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-scattering LUT
      */
-    async render(transmittance: TransmittanceLUTTexture, multiScat: MultiScatteringLUTTexture): Promise<void> {
+    async render(transmittance: SkyAtmosphereLUTTexture, multiScat: SkyAtmosphereLUTTexture): Promise<void> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
 
         // 1. 소스 큐브맵 렌더링 (6개 면)
@@ -115,12 +114,18 @@ class SkyAtmosphereReflectionGenerator {
 
     #getCubeMapFaceMatrices(): Float32Array[] {
         return [
-            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]), // Right (+X)
-            new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]), // Left (-X)
-            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),   // Top (+Y)
-            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 1]), // Bottom (-Y)
-            new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),  // Front (+Z)
-            new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1]) // Back (-Z)
+            // [KO] +X (Right): x=1, y=v, z=-u
+            new Float32Array([0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
+            // [KO] -X (Left): x=-1, y=v, z=u
+            new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
+            // [KO] +Y (Top): x=u, y=1, z=-v
+            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
+            // [KO] -Y (Bottom): x=u, y=-1, z=v
+            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
+            // [KO] +Z (Front): x=u, y=v, z=1
+            new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+            // [KO] -Z (Back): x=-u, y=v, z=-1
+            new Float32Array([-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
         ];
     }
 }

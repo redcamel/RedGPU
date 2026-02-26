@@ -16,6 +16,7 @@ import Sampler from "../../resources/sampler/Sampler";
 import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
+import SkyAtmosphereLUTTexture from "./core/generator/SkyAtmosphereLUTTexture";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'SKY_ATMOSPHERE_CORE');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
@@ -86,7 +87,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #computeShaderNonMSAA: GPUShaderModule;
     #cachedBindGroupLayouts: Map<string, GPUBindGroupLayout> = new Map();
     #cachedComputePipelines: Map<string, GPUComputePipeline> = new Map();
-    #currentMSAAState: boolean | null = null;
 
     #bindGroupLayout1: GPUBindGroupLayout;
     #outputTexture: GPUTexture;
@@ -451,27 +451,27 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /** [KO] 투과율 LUT 텍스처를 반환합니다. [EN] Returns the Transmittance LUT texture. */
-    get transmittanceTexture() {
+    get transmittanceTexture(): SkyAtmosphereLUTTexture {
         return this.#transmittanceGenerator.lutTexture;
     }
 
     /** [KO] 다중 산란 LUT 텍스처를 반환합니다. [EN] Returns the Multi-Scattering LUT texture. */
-    get multiScatteringTexture() {
+    get multiScatteringTexture(): SkyAtmosphereLUTTexture {
         return this.#multiScatteringGenerator.lutTexture;
     }
 
     /** [KO] 스카이 뷰 LUT 텍스처를 반환합니다. [EN] Returns the Sky-View LUT texture. */
-    get skyViewTexture() {
+    get skyViewTexture(): SkyAtmosphereLUTTexture {
         return this.#skyViewGenerator.lutTexture;
     }
 
     /** [KO] 카메라 볼륨(AP) LUT 텍스처를 반환합니다. [EN] Returns the Camera Volume (AP) LUT texture. */
-    get cameraVolumeTexture() {
+    get cameraVolumeTexture(): SkyAtmosphereLUTTexture {
         return this.#cameraVolumeGenerator.lutTexture;
     }
 
     /** [KO] 대기 조도(Irradiance) LUT 텍스처를 반환합니다. [EN] Returns the Atmospheric Irradiance LUT texture. */
-    get atmosphereIrradianceTexture() {
+    get atmosphereIrradianceTexture(): SkyAtmosphereLUTTexture {
         return this.#irradianceGenerator.lutTexture;
     }
 
