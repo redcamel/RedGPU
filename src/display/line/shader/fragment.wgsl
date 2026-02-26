@@ -2,7 +2,6 @@
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
-#redgpu_include skyAtmosphere.getAerialPerspective;
 
 struct Uniforms {
   	opacity:f32,
@@ -26,12 +25,6 @@ fn main(inputData:InputData) -> OutputFragment {
     
     var finalColor = inputData.vertexColor;
     finalColor.a = finalColor.a * uniforms.opacity;
-
-    // [KO] 공중 투시 효과 적용
-    // [EN] Apply Aerial Perspective effect
-    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
-        finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
-    }
 
     output.color = finalColor;
     output.gBufferNormal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
