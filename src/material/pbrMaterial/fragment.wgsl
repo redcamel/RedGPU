@@ -628,8 +628,13 @@ fn main(inputData:InputData) -> OutputFragment {
             // [KO] Specular 필터링: (HDR 반사 * 투과율) + 실시간 하늘 산란광
             // [EN] Specular Filtering: (HDR Reflection * Transmittance) + Real-time Sky Scattering
             let specTrans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
-            let specSkyUV = get_sky_view_uv(R, camH, earthR, atmH);
-            let specSkyScat = textureSampleLevel(skyViewTexture, atmosphereSampler, specSkyUV, 0.0).rgb * sunInt;
+            
+            // [KO] 큐브맵 기반 실시간 반사광 샘플링 (거칠기 대응)
+            // [EN] Cubemap-based real-time reflection sampling (roughness support)
+            let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+            let atmoMipLevel = roughnessParameter * atmoMipCount;
+            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, R, atmoMipLevel).rgb * sunInt;
+            
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
 
             // [KO] Diffuse 필터링: (HDR 조도 * 투과율) + 실시간 대기 조도(Irradiance)
@@ -782,11 +787,6 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useCutOff
         if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
-
-    // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
-    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
-        finalColor = getAerialPerspective(finalColor, input_vertexPosition);
-    }
 
     output.color = finalColor;
 

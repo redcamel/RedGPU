@@ -258,10 +258,6 @@ fn main(inputData:InputData) -> OutputFragment {
     if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;
     }
-    // [Atmosphere] 시스템 함수를 사용하여 Aerial Perspective 적용
-    if (systemUniforms.skyAtmosphere.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
-        finalColor = getAerialPerspective(finalColor, inputData.vertexPosition);
-    }
     output.color = finalColor;
 
     {
