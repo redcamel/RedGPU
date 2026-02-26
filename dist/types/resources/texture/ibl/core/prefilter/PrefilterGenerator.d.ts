@@ -35,10 +35,13 @@ declare class PrefilterGenerator {
      * @param size -
      * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
      * [EN] Size of one side of the generated cubemap (default: 512)
+     * @param destinationTexture -
+     * [KO] 결과물을 저장할 대상 텍스처 (선택)
+     * [EN] Target texture to store the result (optional)
      * @returns
-     * [KO] 생성된 Prefilter IBLCubeTexture
-     * [EN] Generated Prefilter IBLCubeTexture
+     * [KO] 생성된 또는 업데이트된 Prefilter IBLCubeTexture
+     * [EN] Generated or updated Prefilter IBLCubeTexture
      */
-    generate(sourceCubeTexture: GPUTexture, size?: number): Promise<IBLCubeTexture>;
+    generate(sourceCubeTexture: GPUTexture, size?: number, destinationTexture?: GPUTexture | IBLCubeTexture): Promise<IBLCubeTexture>;
 }
 export default PrefilterGenerator;

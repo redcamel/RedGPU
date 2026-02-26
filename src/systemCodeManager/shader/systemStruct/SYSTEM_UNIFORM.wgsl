@@ -44,11 +44,11 @@ struct SystemUniform {
 @group(0) @binding(11) var ibl_irradianceTexture: texture_cube<f32>;
 @group(0) @binding(12) var ibl_brdfLUTTexture: texture_2d<f32>;
 
-@group(0) @binding(14) var atmosphereSampler: sampler;
-@group(0) @binding(15) var transmittanceTexture: texture_2d<f32>;
+@group(0) @binding(13) var atmosphereSampler: sampler;
+@group(0) @binding(14) var transmittanceTexture: texture_2d<f32>;
 
-@group(0) @binding(17) var atmosphereIrradianceTexture: texture_2d<f32>;
-@group(0) @binding(18) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
+@group(0) @binding(15) var atmosphereIrradianceTexture: texture_2d<f32>;
+@group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
 
 #redgpu_include depth.getLinearizeDepth
 
