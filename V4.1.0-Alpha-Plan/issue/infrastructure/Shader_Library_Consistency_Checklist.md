@@ -42,6 +42,7 @@ RedGPU 엔진의 표준 좌표계(Right-handed, Y-Up, V-Down, NDC Y-Up)와 glTF 
 ### 6. 전역 좌표계 및 시스템 인프라 정렬 (Global Audit)
 *   **결과**: ✅ 완료.
     - `src/systemCodeManager/` 내의 모든 셰이더 함수가 **"Right-handed, Y-Up, V-Down"** 표준 하에 수학적으로 일관됨을 확인.
+    - **Sky-View Reflection Coordinates**: `SkyAtmosphereReflectionGenerator`의 큐브맵 면(Face) 생성 행렬을 WebGPU 표준에 맞춰 교정하여 월드 방향과 반사광 일치 확인.
     - **Expanded Constants**: `INV_PI2`, `SQRT2`, `FLT_MAX` 등 14종의 시스템 상수를 통합하여 연산 정밀도와 최적화 기반 마련.
     - **Vertex Normal Scale**: 노멀 맵이 없을 때에도 `-u_normalScale`을 적용하여 `NdotV` 및 `Iridescence` 각도 왜곡을 방지하도록 `pbr/phong` 재질 동기화 완료.
     - **Iridescence Logic**: 비물리적/수학적 오류(분모 제곱 누락, 임의 보정 등)를 제거하고 표준 물리 공식으로 복구 완료.

@@ -45,7 +45,7 @@ SkyAtmosphere는 월드 공간 내의 물리적 공기 밀도(Atmospheric Densit
 * **물리적 정합성**: 재질에서의 중복 적용(Double Fogging)을 원천 차단하여 정오의 과도한 산란광 문제를 해결하고 성능을 최적화하였습니다.
 * **동적 반사광 시스템**: `SkyAtmosphereReflectionGenerator`를 도입하여 실시간 대기색이 반영된 프리필터링된 큐브맵을 생성합니다.
 * **리소스 바인딩**:
-    * **Group 0**: Source Color, Depth, LUTs (3종: Transmittance, Irradiance, Reflection), Samplers를 바인딩합니다. (불필요한 CameraVolume, SkyView 2D 바인딩 제거 완료)
+    * **Group 0**: Source Color, Depth, LUTs (3종: Transmittance, Irradiance, Reflection), Samplers를 바인딩합니다. (바인딩 10~16번 순차 정렬 완료)
     * **Group 1**: Output Storage Texture, System Uniforms를 바인딩합니다.
 
 ### 3.2 합성 로직 (Composition Logic)
@@ -57,17 +57,17 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 
 ---
 
-## 4. 불필요 요소 및 정리 계획 (Redundancy and Cleanup Plan)
+## 4. 불필요 요소 및 정리 완료 사항 (Cleanup and Optimization Results)
 
-시스템 고도화 및 포스트 프로세스 통합에 따라 다음 요소들은 레거시로 분류되며 정리가 필요합니다.
+시스템 고도화 및 포스트 프로세스 통합에 따라 다음 요소들에 대한 정리가 완료되었습니다.
 
-### 4.1 레거시 코드 및 함수
-* **`getAerialPerspective.wgsl`**: 이제 대기 효과가 포스트 프로세스에서 일괄 적용되므로, 개별 재질용 함수는 더 이상 필요하지 않습니다. (제거 대상)
-* **`Uniforms.useAtmosphere`**: 개별 재질 유니폼에 포함된 이 플래그는 현재의 전역 뎁스 기반 포스트 프로세스 방식에서는 무의미합니다. (제거 및 메모리 정렬 최적화 대상)
+### 4.1 레거시 코드 및 함수 정리 (완료)
+* **`getAerialPerspective.wgsl` 제거**: 대기 효과가 포스트 프로세스로 일괄 통합됨에 따라 레거시 라이브러리 파일을 완전히 제거하고 `SystemCodeManager` 참조를 삭제하였습니다.
+* **`Uniforms.useAtmosphere` 제거**: 모든 재질(Material) 유니폼 구조체에서 불필요한 4바이트 플래그를 제거하여 메모리 효율을 높이고 데이터 정렬을 최적화하였습니다.
 
-### 4.2 리소스 및 바인딩 최적화
-* **Binding Gaps (13, 16)**: 최적화 과정에서 제거된 바인딩 슬롯입니다. 향후 바인딩 인덱스를 순차적으로 재정렬하여 구조를 단순화할 수 있습니다.
-* **`AtmosphereIrradianceGenerator` 해상도**: 현재 32x32 해상도는 실제 조도 연산 강도에 비해 품질 과잉(Overkill)일 수 있으며, 향후 성능 필요 시 해상도 축소를 검토합니다.
+### 4.2 리소스 및 바인딩 최적화 (완료)
+* **전역 바인딩 재정렬 (Binding 10~16)**: 기존의 빈 슬롯(13, 16)을 제거하고 바인딩 인덱스를 순차적으로 재정렬하여 시스템 바인드 그룹의 연속성을 확보하였습니다.
+* **구조체 단일화**: `AtmosphereParameters`를 제거하고 엔진 표준인 `SkyAtmosphere` 구조체로 모든 셰이더 정의를 통합하여 레이아웃 불일치 위험을 원천 차단하였습니다.
 
 ---
 
@@ -103,8 +103,12 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 1. **Dynamic IBL & Reflection Synchronization (완료)**: 
    * `AtmosphereIrradianceGenerator` 및 `SkyAtmosphereReflectionGenerator`를 통해 주변광 및 반사광의 실시간 동기화가 구현되었습니다.
    * PBR 재질에서 거칠기(Roughness)에 따른 부드러운 대기 반사광을 지원합니다.
-2. **Volumetric Cloud Interaction**: 대기 밀도 데이터를 활용하여 구름 시스템과의 광학적 상호작용(Shadowing, In-scattering)을 구현할 계획입니다.
-3. **Terrain Shadowing (God Rays)**: 지형 고도(Height Map) 데이터를 반영하여 대기 볼륨 내에 물리적인 그림자(Volumetric Shadows) 및 빛줄기(God Rays) 생성을 추진합니다.
+2. **Shared Uniform Buffer Optimization (완료)**: 
+   * `SkyAtmosphere`와 각 제너레이터 간의 중복 유니폼 버퍼를 제거하고 단일 공용 버퍼를 통해 데이터를 동기화하도록 최적화 완료하였습니다. (상세 내역은 `SkyAtmosphere_Uniform_Optimization.md` 참조)
+3. **Volumetric Cloud Interaction**: 
+   * 대기 밀도 데이터를 활용하여 구름 시스템과의 광학적 상호작용(Shadowing, In-scattering)을 구현할 계획입니다.
+4. **Terrain Shadowing (God Rays)**: 
+   * 지형 고도(Height Map) 데이터를 반영하여 대기 볼륨 내에 물리적인 그림자(Volumetric Shadows) 및 빛줄기(God Rays) 생성을 추진합니다.
 
 ---
 
