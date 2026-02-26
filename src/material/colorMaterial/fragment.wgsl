@@ -11,7 +11,6 @@ struct Uniforms {
     useTint:u32,
     tint:vec4<f32>,
     tintBlendMode:u32,
-    useAtmosphere:u32,
 };
 // Input structure for model data
 struct InputData {

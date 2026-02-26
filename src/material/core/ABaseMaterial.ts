@@ -30,11 +30,6 @@ interface ABaseMaterial {
      * [EN] Whether to use tint color
      */
     useTint: boolean;
-    /**
-     * [KO] 대기 효과(SkyAtmosphere) 사용 여부
-     * [EN] Whether to use atmospheric effects (SkyAtmosphere)
-     */
-    useAtmosphere: boolean;
 }
 
 /**
@@ -567,8 +562,7 @@ DefineForFragment.defineByPreset(ABaseMaterial, [
     DefineForFragment.PRESET_POSITIVE_NUMBER.OPACITY,
 ])
 DefineForFragment.defineBoolean(ABaseMaterial, [
-    ['useTint', false],
-    ['useAtmosphere', true]
+    ['useTint', false]
 ])
 DefineForFragment.defineColorRGBA(ABaseMaterial, [
     'tint', '#ff0000'

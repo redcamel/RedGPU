@@ -13,7 +13,6 @@ struct Uniforms {
   useTint: u32,
   tint: vec4<f32>,
   tintBlendMode: u32,
-  useAtmosphere: u32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;

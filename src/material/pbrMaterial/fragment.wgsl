@@ -51,7 +51,6 @@ struct Uniforms {
     useTint: u32,
     tint: vec4<f32>,
     tintBlendMode: u32,
-    useAtmosphere: u32,
 
     // [KO] 기본 색상 [EN] Base Color
     baseColorFactor: vec4<f32>,
@@ -617,7 +616,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
         // [KO] 대기 산란 필터링 및 조도 합성 (IBL 동기화)
         // [EN] Atmospheric Scattering Filtering and Irradiance Synthesis (IBL Synchronization)
-        if (systemUniforms.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
+        if (systemUniforms.useSkyAtmosphere == 1u) {
             let u_atmo = systemUniforms.skyAtmosphere;
             let camH = u_atmo.cameraHeight;
             let atmH = u_atmo.atmosphereHeight;
@@ -682,7 +681,7 @@ fn main(inputData:InputData) -> OutputFragment {
             }
             
             // [KO] 대기 필터링 적용 (Back side)
-            if (systemUniforms.useSkyAtmosphere == 1u && uniforms.useAtmosphere == 1u) {
+            if (systemUniforms.useSkyAtmosphere == 1u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
                 let backTrans = get_transmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
                 

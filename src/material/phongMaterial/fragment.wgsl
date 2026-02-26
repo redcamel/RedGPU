@@ -28,7 +28,6 @@ struct Uniforms {
     useTint:u32,
     tint:vec4<f32>,
     tintBlendMode:u32,
-    useAtmosphere:u32,
     //
     useSSR:u32,
     metallic:f32,

@@ -5,7 +5,6 @@
 
 struct Uniforms {
   	opacity:f32,
-    useAtmosphere:u32,
 };
 struct InputData {
     @builtin(position) position : vec4<f32>,
