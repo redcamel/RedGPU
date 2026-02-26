@@ -2,7 +2,7 @@
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(3) var atmosphereSampler: sampler;
-@group(0) @binding(4) var<uniform> params: AtmosphereParameters;
+@group(0) @binding(4) var<uniform> params: SkyAtmosphere;
 @group(0) @binding(5) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
 @compute @workgroup_size(8, 8, 1)

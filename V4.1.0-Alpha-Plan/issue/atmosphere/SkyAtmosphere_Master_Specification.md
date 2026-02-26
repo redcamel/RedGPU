@@ -45,8 +45,8 @@ SkyAtmosphere는 월드 공간 내의 물리적 공기 밀도(Atmospheric Densit
 * **물리적 정합성**: 재질에서의 중복 적용(Double Fogging)을 원천 차단하여 정오의 과도한 산란광 문제를 해결하고 성능을 최적화하였습니다.
 * **동적 반사광 시스템**: `SkyAtmosphereReflectionGenerator`를 도입하여 실시간 대기색이 반영된 프리필터링된 큐브맵을 생성합니다.
 * **리소스 바인딩**:
-    * **Group 0**: Source Color, Depth, LUTs (5종), Samplers를 바인딩합니다.
-    * **Group 1**: Output Storage Texture, System Uniforms, Atmosphere Parameters를 바인딩합니다.
+    * **Group 0**: Source Color, Depth, LUTs (3종: Transmittance, Irradiance, Reflection), Samplers를 바인딩합니다. (불필요한 CameraVolume, SkyView 2D 바인딩 제거 완료)
+    * **Group 1**: Output Storage Texture, System Uniforms를 바인딩합니다.
 
 ### 3.2 합성 로직 (Composition Logic)
 최종 픽셀 색상은 다음의 수식을 통해 결정됩니다.
@@ -57,7 +57,21 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 
 ---
 
-## 4. 수치 안정성 및 정밀도 (Numerical Stability and Precision)
+## 4. 불필요 요소 및 정리 계획 (Redundancy and Cleanup Plan)
+
+시스템 고도화 및 포스트 프로세스 통합에 따라 다음 요소들은 레거시로 분류되며 정리가 필요합니다.
+
+### 4.1 레거시 코드 및 함수
+* **`getAerialPerspective.wgsl`**: 이제 대기 효과가 포스트 프로세스에서 일괄 적용되므로, 개별 재질용 함수는 더 이상 필요하지 않습니다. (제거 대상)
+* **`Uniforms.useAtmosphere`**: 개별 재질 유니폼에 포함된 이 플래그는 현재의 전역 뎁스 기반 포스트 프로세스 방식에서는 무의미합니다. (제거 및 메모리 정렬 최적화 대상)
+
+### 4.2 리소스 및 바인딩 최적화
+* **Binding Gaps (13, 16)**: 최적화 과정에서 제거된 바인딩 슬롯입니다. 향후 바인딩 인덱스를 순차적으로 재정렬하여 구조를 단순화할 수 있습니다.
+* **`AtmosphereIrradianceGenerator` 해상도**: 현재 32x32 해상도는 실제 조도 연산 강도에 비해 품질 과잉(Overkill)일 수 있으며, 향후 성능 필요 시 해상도 축소를 검토합니다.
+
+---
+
+## 5. 수치 안정성 및 정밀도 (Numerical Stability and Precision)
 
 광대역 스케일(10km ~ 2,000,000km)에서의 수치적 정밀도 유지를 위해 다음과 같은 기술을 적용하였습니다.
 
@@ -71,7 +85,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 
 ---
 
-## 5. 비교 분석 (UE5 vs RedGPU)
+## 6. 비교 분석 (UE5 vs RedGPU)
 
 | 항목 | Unreal Engine (Epic Tier) | RedGPU (V4.1.0-Alpha) | 비고 |
 | :--- | :--- | :--- | :--- |
@@ -84,7 +98,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 
 ---
 
-## 6. 향후 과제 (Future Roadmap)
+## 7. 향후 과제 (Future Roadmap)
 
 1. **Dynamic IBL & Reflection Synchronization (완료)**: 
    * `AtmosphereIrradianceGenerator` 및 `SkyAtmosphereReflectionGenerator`를 통해 주변광 및 반사광의 실시간 동기화가 구현되었습니다.
@@ -94,7 +108,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 
 ---
 
-## 7. 시스템 전반의 변경 사항 (System-wide Changes)
+## 8. 시스템 전반의 변경 사항 (System-wide Changes)
 
 ### 7.1 SkyAtmosphere 전용 기능
 * **Post-Effect Pipeline Migration**: 기하 구조 의존성을 제거하고 Compute Shader 기반 패스로 전환하였습니다.

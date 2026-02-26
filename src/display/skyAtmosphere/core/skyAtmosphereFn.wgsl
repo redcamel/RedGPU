@@ -4,42 +4,11 @@
 #redgpu_include math.INV_PI
 #redgpu_include math.DEG_TO_RAD
 #redgpu_include math.EPSILON
+#redgpu_include systemStruct.SkyAtmosphere
 const MAX_TAU: f32 = 50.0;
 
-// [KO] 대기 산란 시스템 통합 파라미터 구조체 (16바이트 정렬 완료)
-struct AtmosphereParameters {
-    rayleighScattering: vec3<f32>,
-    mieAnisotropy: f32,
-    ozoneAbsorption: vec3<f32>,
-    ozoneLayerCenter: f32,
-    groundAlbedo: vec3<f32>,
-    groundAmbient: f32,
-    sunDirection: vec3<f32>,
-    sunSize: f32,
-    earthRadius: f32,
-    atmosphereHeight: f32,
-    mieScattering: f32,
-    mieExtinction: f32,
-    rayleighScaleHeight: f32,
-    mieScaleHeight: f32,
-    cameraHeight: f32,
-    multiScatteringAmbient: f32,
-    exposure: f32,
-    sunIntensity: f32,
-    heightFogDensity: f32,
-    heightFogFalloff: f32,
-    horizonHaze: f32,
-    mieGlow: f32,
-    mieHalo: f32,
-    groundShininess: f32,
-    groundSpecular: f32,
-    ozoneLayerWidth: f32,
-    padding0: f32,
-    padding1: f32,
-};
-
 // [KO] 레이-구체 교차점 계산
-fn get_ray_sphere_intersection(ray_origin: vec3<f32>, ray_dir: vec3<f32>, sphere_radius: f32) -> f32 {
+fn get_ray_sphere_intersection(ray_origin: vec3<u32>, ray_dir: vec3<f32>, sphere_radius: f32) -> f32 {
     let b = dot(ray_origin, ray_dir);
     let c = dot(ray_origin, ray_origin) - sphere_radius * sphere_radius;
     let delta = b * b - c;
@@ -102,7 +71,7 @@ fn get_ozone_density(h: f32, center: f32, width: f32) -> f32 {
 }
 
 // [KO] 전체 소멸 계수 계산 (Extinction)
-fn get_total_extinction(h: f32, params: AtmosphereParameters) -> vec3<f32> {
+fn get_total_extinction(h: f32, params: SkyAtmosphere) -> vec3<f32> {
     let rho_r = exp(-max(0.0, h) / params.rayleighScaleHeight);
     let rho_m = exp(-max(0.0, h) / params.mieScaleHeight);
     let rho_o = get_ozone_density(h, params.ozoneLayerCenter, params.ozoneLayerWidth);

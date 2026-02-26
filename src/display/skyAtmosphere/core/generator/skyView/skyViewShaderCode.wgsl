@@ -4,7 +4,7 @@
 @group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(3) var atmosphereSampler: sampler;
-@group(0) @binding(4) var<uniform> params: AtmosphereParameters;
+@group(0) @binding(4) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
