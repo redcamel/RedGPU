@@ -30,6 +30,24 @@ struct AtmosphereCoefficients {
     extinction: vec3<f32>
 };
 
+/**
+ * [KO] 단일 지점 산란 계산 결과 구조체
+ * [EN] Single point scattering calculation result structure
+ */
+struct ScatteringStepResult {
+    radiance: vec3<f32>,
+    extinction: vec3<f32>
+};
+
+/**
+ * [KO] 구간 적분 결과 구조체
+ * [EN] Segment integration result structure
+ */
+struct IntegratedResult {
+    radiance: vec3<f32>,
+    transmittance: vec3<f32>
+};
+
 // [KO] 레이-구체 교차점 계산
 fn getRaySphereIntersection(rayOrigin: vec3<f32>, rayDir: vec3<f32>, sphereRadius: f32) -> f32 {
     let b = dot(rayOrigin, rayDir);
@@ -59,9 +77,8 @@ fn getPlanetIntersection(origin: vec3<f32>, dir: vec3<f32>, r: f32) -> vec2<f32>
 
 // [KO] LUT UV 매핑 함수군 (UE5 표준)
 fn getTransmittanceUV(h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32> {
-    let H = clamp(h / atmosphereHeight, 0.0, 1.0);
     let mu = cosTheta * 0.5 + 0.5;
-    return vec2<f32>(mu, 1.0 - H);
+    return vec2<f32>(mu, 1.0 - clamp(h / atmosphereHeight, 0.0, 1.0));
 }
 
 fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
@@ -83,14 +100,13 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmospher
     return vec2<f32>(u, clamp(v, 0.0, 1.0));
 }
 
-// [KO] 페이즈 함수
-fn phaseRayleigh(cosTheta: f32) -> f32 {
-    return 3.0 / (16.0 * PI) * (1.0 + cosTheta * cosTheta);
-}
-
-fn phaseMie(cosTheta: f32, g: f32) -> f32 {
-    let g2 = g * g;
-    return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
+/**
+ * [KO] 행성 그림자 마스크 산출
+ * [EN] Calculate planet shadow mask
+ */
+fn getPlanetShadowMask(p: vec3<f32>, sunDir: vec3<f32>, r: f32, params: SkyAtmosphere) -> f32 {
+    if (params.useGround > 0.5 && getRaySphereIntersection(p, sunDir, r) > 0.0) { return 0.0; }
+    return 1.0;
 }
 
 /**
@@ -124,17 +140,99 @@ fn getAtmosphereCoefficients(d: AtmosphereDensities, params: SkyAtmosphere) -> A
     return c;
 }
 
-// [KO] 전체 소멸 계수 (기존 함수 유지, 리팩토링용)
+/**
+ * [KO] 다중 산란 에너지 조회
+ * [EN] Look up multi-scattering energy
+ */
+fn getMultiScatteringEnergy(p: vec3<f32>, sunDir: vec3<f32>, msTex: texture_2d<f32>, msSam: sampler, params: SkyAtmosphere) -> vec3<f32> {
+    let h = length(p) - params.earthRadius;
+    let up = p / length(p);
+    let cosSun = dot(up, sunDir);
+    let msUV = vec2<f32>(cosSun * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
+    return textureSampleLevel(msTex, msSam, msUV, 0.0).rgb;
+}
+
+/**
+ * [KO] 단일 지점에서의 산란광 및 소멸량 계산
+ * [EN] Calculate scattering radiance and extinction at a single point
+ */
+fn computeScatStep(
+    p: vec3<f32>, 
+    viewDir: vec3<f32>, 
+    sunDir: vec3<f32>, 
+    params: SkyAtmosphere, 
+    msTex: texture_2d<f32>, 
+    msSam: sampler
+) -> ScatteringStepResult {
+    let r = params.earthRadius;
+    let h = length(p) - r;
+    
+    let d = getAtmosphereDensities(h, params);
+    let c = getAtmosphereCoefficients(d, params);
+    let sunTrans = getPhysicalTransmittance(p, sunDir, r, params.atmosphereHeight, params);
+    let shadowMask = getPlanetShadowMask(p, sunDir, r, params);
+
+    let viewSunCos = dot(viewDir, sunDir);
+    let phase = c.scatR * phaseRayleigh(viewSunCos) + c.scatM * phaseMie(viewSunCos, params.mieAnisotropy) + c.scatF * phaseMie(viewSunCos, 0.7);
+    
+    let msEnergy = getMultiScatteringEnergy(p, sunDir, msTex, msSam, params);
+    let msScat = msEnergy * (c.scatR + c.scatM + c.scatF);
+
+    var res: ScatteringStepResult;
+    res.radiance = (phase * sunTrans * shadowMask + msScat * shadowMask);
+    res.extinction = c.extinction;
+    return res;
+}
+
+/**
+ * [KO] 특정 구간 적분 엔진
+ * [EN] Segment integration engine
+ */
+fn integrateScatSegment(
+    origin: vec3<f32>, 
+    dir: vec3<f32>, 
+    tMin: f32, 
+    tMax: f32, 
+    steps: u32, 
+    params: SkyAtmosphere, 
+    msTex: texture_2d<f32>, 
+    msSam: sampler,
+    radiance: ptr<function, vec3<f32>>, 
+    transmittance: ptr<function, vec3<f32>>
+) {
+    if (tMax <= tMin) { return; }
+    let stepSize = (tMax - tMin) / f32(steps);
+    for (var i = 0u; i < steps; i = i + 1u) {
+        let t = tMin + (f32(i) + 0.5) * stepSize;
+        let p = origin + dir * t;
+        
+        // [KO] useGround 모드에서 지면 아래 적분 스킵
+        if (params.useGround > 0.5 && (length(p) - params.earthRadius) < -0.001) { continue; }
+
+        let stepRes = computeScatStep(p, dir, params.sunDirection, params, msTex, msSam);
+        *radiance += *transmittance * stepRes.radiance * stepSize;
+        *transmittance *= exp(-stepRes.extinction * stepSize);
+    }
+}
+
+// [KO] 전체 소멸 계수 (레거시 호환용)
 fn getTotalExtinction(h: f32, params: SkyAtmosphere) -> vec3<f32> {
     let d = getAtmosphereDensities(h, params);
     let c = getAtmosphereCoefficients(d, params);
     return c.extinction;
 }
 
-/**
- * [KO] 특정 구간의 광학 깊이를 정밀하게 적분
- * [EN] Precisely integrate optical depth over a specific segment
- */
+// [KO] 페이즈 함수
+fn phaseRayleigh(cosTheta: f32) -> f32 {
+    return 3.0 / (16.0 * PI) * (1.0 + cosTheta * cosTheta);
+}
+
+fn phaseMie(cosTheta: f32, g: f32) -> f32 {
+    let g2 = g * g;
+    return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
+}
+
+// [KO] 구간별 광학 깊이 적분 함수
 fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {
     if (tMax <= tMin) { return vec3<f32>(0.0); }
     let stepSize = (tMax - tMin) / f32(steps);
@@ -148,8 +246,7 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
 }
 
 /**
- * [KO] 수동 태양 투과율 적분 (Hollow Shell 및 Ghost Planet 대응)
- * [EN] Manual sun transmittance integration (Handles Hollow Shell and Ghost Planet)
+ * [KO] 수동 태양 투과율 적분
  */
 fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
     let r = params.earthRadius;
@@ -176,7 +273,7 @@ fn getTransmittance(tTex: texture_2d<f32>, tSam: sampler, h: f32, cosTheta: f32,
     return textureSampleLevel(tTex, tSam, uv, 0.0).rgb;
 }
 
-// [KO] 물리 기반 투과율 (상황에 따라 LUT/수동 선택)
+// [KO] 물리 기반 투과율
 fn getPhysicalTransmittance(p: vec3<f32>, sunDir: vec3<f32>, r: f32, atmH: f32, params: SkyAtmosphere) -> vec3<f32> {
     let tMax = getRaySphereIntersection(p, sunDir, r + atmH);
     if (tMax <= 0.0) { return vec3<f32>(1.0); }
@@ -184,12 +281,9 @@ fn getPhysicalTransmittance(p: vec3<f32>, sunDir: vec3<f32>, r: f32, atmH: f32, 
     let intersect = getPlanetIntersection(p, sunDir, r);
     if (params.useGround > 0.5 && intersect.x > EPSILON) { return vec3<f32>(0.0); }
 
-    // [KO] 지면을 관통하거나 Ghost Planet 모드인 경우 수동 적분 수행
     if (params.useGround < 0.5 || (intersect.x > EPSILON && intersect.x < tMax)) {
         return getSunTransmittanceManual(p, sunDir, params);
     }
     
-    let h = length(p) - r;
-    let cosTheta = dot(normalize(p), sunDir);
-    return getSunTransmittanceManual(p, sunDir, params); // TODO: LUT 샘플링으로 최적화 가능하나 일단 일관성을 위해 유지
+    return getSunTransmittanceManual(p, sunDir, params);
 }

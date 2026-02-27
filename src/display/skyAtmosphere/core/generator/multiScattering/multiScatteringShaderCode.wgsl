@@ -4,31 +4,6 @@
 @group(0) @binding(0) var multiScatTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
 
-fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, sunDir: vec3<f32>, L1: ptr<function, vec3<f32>>, f1: ptr<function, vec3<f32>>, TPath: ptr<function, vec3<f32>>) {
-    if (tMax <= tMin) { return; }
-    let r = params.earthRadius;
-    let stepSize = (tMax - tMin) / f32(steps);
-    for (var i = 0u; i < steps; i = i + 1u) {
-        let t = tMin + (f32(i) + 0.5) * stepSize;
-        let p = origin + dir * t;
-        let h = length(p) - r;
-        
-        let d = getAtmosphereDensities(h, params);
-        let c = getAtmosphereCoefficients(d, params);
-        let sunT = getPhysicalTransmittance(p, sunDir, r, params.atmosphereHeight, params);
-        
-        var shadowMask = 1.0;
-        if (params.useGround > 0.5 && getRaySphereIntersection(p, sunDir, r) > 0.0) { shadowMask = 0.0; }
-
-        let scatTotal = c.scatR + c.scatM;
-        let extTotal = c.scatR + vec3<f32>(params.mieExtinction * d.rhoM);
-
-        *L1 += *TPath * sunT * scatTotal * (0.25 * INV_PI) * shadowMask * stepSize;
-        *f1 += *TPath * scatTotal * stepSize;
-        *TPath *= exp(-extTotal * stepSize);
-    }
-}
-
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let size = textureDimensions(multiScatTexture);
@@ -80,4 +55,27 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let output = (lumTotal / f32(sampleCount)) / (1.0 - min(fmsTotal, vec3<f32>(0.999)));
     textureStore(multiScatTexture, global_id.xy, vec4<f32>(output, 1.0));
+}
+
+fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, sunDir: vec3<f32>, L1: ptr<function, vec3<f32>>, f1: ptr<function, vec3<f32>>, TPath: ptr<function, vec3<f32>>) {
+    if (tMax <= tMin) { return; }
+    let r = params.earthRadius;
+    let stepSize = (tMax - tMin) / f32(steps);
+    for (var i = 0u; i < steps; i = i + 1u) {
+        let t = tMin + (f32(i) + 0.5) * stepSize;
+        let p = origin + dir * t;
+        let h = length(p) - r;
+        
+        let d = getAtmosphereDensities(h, params);
+        let c = getAtmosphereCoefficients(d, params);
+        let sunT = getPhysicalTransmittance(p, sunDir, r, params.atmosphereHeight, params);
+        let shadowMask = getPlanetShadowMask(p, sunDir, r, params);
+
+        let scatTotal = c.scatR + c.scatM;
+        let extTotal = c.scatR + vec3<f32>(params.mieExtinction * d.rhoM);
+
+        *L1 += *TPath * sunT * scatTotal * (0.25 * INV_PI) * shadowMask * stepSize;
+        *f1 += *TPath * scatTotal * stepSize;
+        *TPath *= exp(-extTotal * stepSize);
+    }
 }
