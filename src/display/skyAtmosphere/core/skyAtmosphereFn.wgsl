@@ -4,7 +4,6 @@
 #redgpu_include math.INV_PI
 #redgpu_include math.DEG_TO_RAD
 #redgpu_include math.EPSILON
-#redgpu_include math.hash.getHash3D_vec3
 #redgpu_include systemStruct.SkyAtmosphere
 // [KO] 대기 산란 공통 함수 [EN] Sky atmosphere common functions
 const MAX_TAU: f32 = 50.0;
@@ -148,40 +147,4 @@ fn getPhysicalTransmittance(p: vec3<f32>, sunDir: vec3<f32>, r: f32, atmH: f32, 
     }
     
     return exp(-min(optExt, vec3<f32>(MAX_TAU)));
-}
-
-// [KO] 높이 안개 투과율
-fn getHeightFogTransmittance(camH: f32, rayDirY: f32, dist: f32, density: f32, falloff: f32) -> f32 {
-    if (density <= 0.0) { return 1.0; }
-    let h = max(0.0, camH);
-    let k = falloff;
-    let y = rayDirY;
-    var exponent: f32;
-    if (abs(y) < EPSILON) {
-        exponent = density * exp(-k * h) * dist;
-    } else {
-        exponent = (density * exp(-k * h)) / (k * y) * (1.0 - exp(-k * y * dist));
-    }
-    return exp(-max(0.0, exponent));
-}
-
-/**
- * [KO] 지면 노이즈를 생성합니다. (표준 getHash3D_vec3 사용)
- * [EN] Generates ground noise. (Using standard getHash3D_vec3)
- */
-fn getGroundNoisePE(p: vec3<f32>) -> f32 {
-    let i = floor(p);
-    let f = fract(p);
-    let u = f * f * (3.0 - 2.0 * f);
-    
-    // [KO] 표준 math.getHash3D_vec3를 활용한 노이즈 합성
-    // [EN] Noise synthesis using standard math.getHash3D_vec3
-    return mix(mix(mix(dot(getHash3D_vec3(i + vec3<f32>(0.0, 0.0, 0.0)), f - vec3<f32>(0.0, 0.0, 0.0)),
-                       dot(getHash3D_vec3(i + vec3<f32>(1.0, 0.0, 0.0)), f - vec3<f32>(1.0, 0.0, 0.0)), u.x),
-                   mix(dot(getHash3D_vec3(i + vec3<f32>(0.0, 1.0, 0.0)), f - vec3<f32>(0.0, 1.0, 0.0)),
-                       dot(getHash3D_vec3(i + vec3<f32>(1.0, 1.0, 0.0)), f - vec3<f32>(1.0, 1.0, 0.0)), u.x), u.y),
-               mix(mix(dot(getHash3D_vec3(i + vec3<f32>(0.0, 0.0, 1.0)), f - vec3<f32>(0.0, 0.0, 1.0)),
-                       dot(getHash3D_vec3(i + vec3<f32>(1.0, 0.0, 1.0)), f - vec3<f32>(1.0, 0.0, 1.0)), u.x),
-                   mix(dot(getHash3D_vec3(i + vec3<f32>(0.0, 1.0, 1.0)), f - vec3<f32>(0.0, 1.0, 1.0)),
-                       dot(getHash3D_vec3(i + vec3<f32>(1.0, 1.0, 1.0)), f - vec3<f32>(1.0, 1.0, 1.0)), u.x), u.y), u.z);
 }

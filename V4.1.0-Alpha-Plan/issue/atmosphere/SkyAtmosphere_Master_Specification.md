@@ -81,7 +81,8 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 4. **Stable Linear Depth**: 개선된 선형 깊이 복구 공식(`(n * f) / max(1e-6, f - d * (f - n))`)을 통해 정밀도를 유지합니다.
 5. **Physical Sun Color Calculation**: 하드코딩된 태양색 대신 투과율 LUT를 샘플링하여 태양 고도와 카메라 위치에 따른 실시간 물리적 태양광 색상을 산출합니다.
 6. **Post-Process Only Integration**: 모든 재질(Material)에서의 `getAerialPerspective` 호출을 전면 제거하고 포스트 프로세스로 통합하였습니다. 이를 통해 뎁스 불연속성 문제와 물리적 중복 계산($T^2$)을 완벽히 해결하였습니다.
-7. **Physical Consistency in Fog Scattering**: Sky-View LUT와 Camera Volume LUT 간의 산란 로직을 통일하였습니다. 특히 높이 안개(Height Fog) 계산 시 Mie 페이즈 함수(g=0.7)를 양측에 동일하게 적용하고 밀도 감쇄 계수($\rho_f$)를 정확히 분리 적용하여 배경 하늘과 물체 위 안색의 일관성을 확보하였습니다.
+7. **Physical Consistency in Fog Scattering**: Sky-View LUT와 Camera Volume LUT 간의 산란 로직을 통일하였습니다. 특히 높이 안개(Height Fog) 계산 시 Mie 페이즈 함수(g=0.7)를 양측에 동일하게 적용하고 밀도 감쇄 계수($\rho_f$)를 정확히 분리 적용하여 배경 하늘과 물체 위 안개 색의 일관성을 확보하였습니다.
+8. **Artistic Symmetry in Hollow Shell Mode**: `useGround`가 비활성화된 경우 하반구의 대기 산란을 상반구의 미러링(`abs(viewElevation)`)으로 처리하여 예술적으로 완성도 높은 상하 대칭 노을을 구현했습니다. (new)
 
 ---
 

@@ -33,7 +33,7 @@
 | **Sky Depth** | `0.999999` | `computeCode.wgsl` | 뎁스 버퍼 값이 이보다 크면 배경(하늘)으로 판정 | ✅ |
 | **Transmittance End** | `0.001` | `skyViewShaderCode.wgsl` | 투과율이 이 값보다 낮아지면 루프 조기 종료 | ✅ |
 | **Sun Smoothness** | `0.001` | `computeCode.wgsl` | 태양 디스크 경계의 부드러움(smoothstep offset) | ✅ |
-| **Ground Offset** | `-0.001` | `cameraVolumeShaderCode.wgsl` | 지표면 충돌 판정 시 수치적 안정성을 위한 오프셋 | ✅ |
+| **Ground Offset** | `EPSILON` | `skyAtmosphereFn.wgsl` | 지표면 충돌 판정 시 수치적 안정성을 위한 오프셋 (기존 -0.001에서 통일) | ✅ |
 
 ## 4. LUT 텍스처 해상도 (Resolution)
 TS 파일의 멤버 변수로 정의되어 있으나 셰이더의 샘플링 로직과 밀접하게 연관되어 있습니다.
