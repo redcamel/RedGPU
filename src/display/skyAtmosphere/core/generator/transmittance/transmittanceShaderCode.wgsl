@@ -29,8 +29,10 @@ fn get_optical_depth(h: f32, cos_theta: f32) -> vec3<f32> {
 
     // [KO] 지면 충돌 확인 (자기 교차 방지를 위한 미세 오프셋)
     let t_earth = get_ray_sphere_intersection(ray_origin, ray_dir, r);
-    if (t_earth > 0.0) { 
-        // [KO] 지면 아래는 완전 불투명 처리하되, 지평선 부근에서 수치적 안정성 확보
+    
+    // [KO] useGround가 활성화된 경우에만 지면 아래를 불투명 처리합니다.
+    // [EN] Only treat below ground as opaque when useGround is enabled.
+    if (params.useGround > 0.5 && t_earth > 0.0) { 
         return vec3<f32>(MAX_TAU); 
     }
 

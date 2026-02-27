@@ -40,7 +40,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, r + params.atmosphereHeight);
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, r);
-    let dist_limit = select(t_max, t_earth, t_earth > 0.0);
+    
+    // [KO] useGround가 꺼져 있으면 지면 충돌을 무시하고 대기권 끝(t_max)까지 적분합니다.
+    // [EN] If useGround is off, ignore ground collision and integrate up to the atmosphere edge (t_max).
+    var dist_limit = select(t_max, t_earth, t_earth > 0.0);
+    if (params.useGround < 0.5) { dist_limit = t_max; }
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
@@ -59,9 +63,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let cos_sun = dot(up, params.sunDirection);
             let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
 
-            // 행성 그림자 (항상 물리적으로 계산)
+            // [KO] 행성 그림자 (useGround가 활성화된 경우에만 적용)
+            // [EN] Planet shadow (only applied when useGround is enabled)
             var shadow_mask = 1.0;
-            if (get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
+            if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
@@ -92,8 +97,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             if (all(transmittance < vec3<f32>(0.001))) { break; }
         }
 
-        // [KO] 지면 반사광 (useGround 활성화 시에만 추가)
-        if (t_earth > 0.0 && params.useGround > 0.5) {
+        // [KO] 지면 반사광 (useGround가 켜져 있고 실제 지면 충돌이 있을 때만 추가)
+        // [EN] Add ground radiance only if useGround is active and a real collision occurred.
+        if (params.useGround > 0.5 && t_earth > 0.0) {
             let hitPos = ray_origin + view_dir * t_earth;
             let up = normalize(hitPos);
             let cos_sun = dot(up, params.sunDirection);

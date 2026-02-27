@@ -40,11 +40,18 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let p_len = length(p);
             let cur_h = p_len - r;
 
-            // [KO] 지표면 아래인 경우 중단 (물리적 차단은 항상 유지)
-            if (cur_h < -0.001) { break; }
+            // [KO] useGround가 켜져 있는 경우에만 지표면 아래에서 적분을 중단합니다.
+            // [EN] Only break integration below ground when useGround is enabled.
+            if (params.useGround > 0.5 && cur_h < -0.001) { break; }
 
             let up = p / p_len;
             let cos_sun = dot(up, params.sunDirection);
+
+            // [KO] 행성 그림자 (useGround가 활성화된 경우에만 적용)
+            // [EN] Planet shadow (only applied when useGround is enabled)
+            var shadow_mask = 1.0;
+            if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
+
             let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
@@ -63,18 +70,18 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let scat_m = vec3<f32>(params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy));
             let scat_f = vec3<f32>(params.heightFogDensity * rho_f * phase_mie(view_sun_cos, 0.7)); // 안개용 페이즈 함수 (고정된 비등방성)
             
-            let step_scat = (scat_r + scat_m + scat_f) * sun_trans;
+            let step_scat = (scat_r + scat_m + scat_f) * sun_trans * shadow_mask;
 
             // [KO] 다중 산란 기여분 (에너지 보존 고려)
             let multi_scat_uv = vec2<f32>(clamp(cos_sun * 0.5 + 0.5, 0.0, 1.0), 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
             let multi_scat_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, multi_scat_uv, 0.0).rgb;
             let total_scat_coeff = params.rayleighScattering * rho_r + vec3<f32>((params.mieScattering * rho_m) + (params.heightFogDensity * rho_f));
-            let scat_ms = multi_scat_energy * total_scat_coeff;
+            let ms_scat = multi_scat_energy * total_scat_coeff * shadow_mask;
 
             // [KO] 전체 소멸 계수 (에너지 소실)
             let extinction = get_total_extinction(cur_h, params) + vec3<f32>(params.heightFogDensity * rho_f);
 
-            radiance += transmittance * (step_scat + scat_ms) * step_size;
+            radiance += transmittance * (step_scat + ms_scat) * step_size;
             transmittance *= exp(-extinction * step_size);
         }
     }

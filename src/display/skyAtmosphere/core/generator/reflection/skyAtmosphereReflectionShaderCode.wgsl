@@ -25,7 +25,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, r + params.atmosphereHeight);
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, r);
-    let dist_limit = select(t_max, t_earth, t_earth > 0.0);
+    
+    // [KO] useGround가 꺼져 있으면 지면 충돌을 무시하고 대기권 끝(t_max)까지 적분합니다.
+    // [EN] If useGround is off, ignore ground collision and integrate up to the atmosphere edge (t_max).
+    var dist_limit = select(t_max, t_earth, t_earth > 0.0);
+    if (params.useGround < 0.5) { dist_limit = t_max; }
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
@@ -41,12 +45,16 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let up = p / p_len;
             let cur_h = p_len - r;
 
+            // [KO] useGround가 켜져 있는 경우에만 지표면 아래에서 적분을 중단합니다.
+            if (params.useGround > 0.5 && cur_h < -0.001) { break; }
+
             let cos_sun = dot(up, params.sunDirection);
             let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
 
-            // [KO] 행성 그림자 (물리적 차단은 항상 발생)
+            // [KO] 행성 그림자 (useGround가 활성화된 경우에만 적용)
+            // [EN] Planet shadow (only applied when useGround is enabled)
             var shadow_mask = 1.0;
-            if (get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
+            if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
