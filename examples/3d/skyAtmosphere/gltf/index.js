@@ -122,9 +122,9 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
 
     // 2. Sun & Exposure
     const f_sun = pane.addFolder({title: '2. Sun & Exposure'});
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.01, label: 'Elevation'});
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.01, label: 'Azimuth'});
-    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.1, label: 'Intensity'});
-    f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'Sun Size'});
-    f_sun.addBinding(skyAtmosphere, 'exposure', {min: 0, max: 10, step: 0.01, label: 'Exposure'});
+    f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'Elevation'});
+    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'Azimuth'});
+    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.001, label: 'Intensity'});
+    f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.0001, label: 'Sun Size'});
+    f_sun.addBinding(skyAtmosphere, 'exposure', {min: 0, max: 10, step: 0.001, label: 'Exposure'});
 };

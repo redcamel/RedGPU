@@ -138,13 +138,19 @@ fn integrate_step(p: vec3<f32>, view_dir: vec3<f32>, step_size: f32, radiance: p
     var shadow_mask = 1.0;
     if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
 
-    let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
-    let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
-    
-    // [KO] 오존층 및 높이 안개 기여분
-    let ozone_dist = abs(cur_h - params.ozoneLayerCenter);
-    let rho_o = exp(-max(0.0, ozone_dist * ozone_dist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
-    let rho_f = exp(-max(0.0, cur_h) * params.heightFogFalloff);
+    // [KO] 행성 내부(cur_h < 0)는 진공으로 처리하여 밀도를 0으로 설정합니다.
+    var rho_r = 0.0;
+    var rho_m = 0.0;
+    var rho_f = 0.0;
+    var rho_o = 0.0;
+
+    if (cur_h >= 0.0) {
+        rho_r = exp(-cur_h / params.rayleighScaleHeight);
+        rho_m = exp(-cur_h / params.mieScaleHeight);
+        rho_f = exp(-cur_h * params.heightFogFalloff);
+        let ozone_dist = abs(cur_h - params.ozoneLayerCenter);
+        rho_o = exp(-max(0.0, ozone_dist * ozone_dist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
+    }
 
     let view_sun_cos = dot(view_dir, params.sunDirection);
     let scat_r = params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos);

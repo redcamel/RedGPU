@@ -54,13 +54,18 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             // [KO] 조명 에너지는 지면 가림을 무시하는 물리 투과율 사용
             let sun_trans = get_physical_transmittance(p, params.sunDirection, r, params.atmosphereHeight, params);
 
-            let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
-            let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
-            let rho_f = exp(-max(0.0, cur_h) * params.heightFogFalloff);
-            
-            // [KO] 오존층 흡수 기여분
-            let ozone_dist = abs(cur_h - params.ozoneLayerCenter);
-            let rho_o = exp(-max(0.0, ozone_dist * ozone_dist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
+            var rho_r = 0.0;
+            var rho_m = 0.0;
+            var rho_f = 0.0;
+            var rho_o = 0.0;
+
+            if (cur_h >= 0.0) {
+                rho_r = exp(-cur_h / params.rayleighScaleHeight);
+                rho_m = exp(-cur_h / params.mieScaleHeight);
+                rho_f = exp(-cur_h * params.heightFogFalloff);
+                let ozone_dist = abs(cur_h - params.ozoneLayerCenter);
+                rho_o = exp(-max(0.0, ozone_dist * ozone_dist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
+            }
 
             let view_sun_cos = dot(view_dir, params.sunDirection);
             

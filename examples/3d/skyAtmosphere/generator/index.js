@@ -78,10 +78,10 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
     
     const f_sun = pane.addFolder({ title: 'Sun Position' });
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, label: 'Sun Elevation' });
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, label: 'Sun Azimuth' });
+    f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, step: 0.0001, label: 'Sun Elevation' });
+    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, step: 0.0001, label: 'Sun Azimuth' });
 
     const f_artistic = pane.addFolder({ title: 'Artistic Controls' });
-    f_artistic.addBinding(skyAtmosphere, 'exposure', { min: 0, max: 10, label: 'Exposure' });
-    f_artistic.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100, label: 'Sun Intensity' });
+    f_artistic.addBinding(skyAtmosphere, 'exposure', { min: 0, max: 10, step: 0.001, label: 'Exposure' });
+    f_artistic.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100, step: 0.001, label: 'Sun Intensity' });
 };

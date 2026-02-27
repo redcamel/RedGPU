@@ -67,14 +67,16 @@ fn get_sky_view_uv(view_dir: vec3<f32>, view_height: f32, earth_radius: f32, atm
 
 // [KO] 오존 농도 분포 (Gaussian-like distribution)
 fn get_ozone_density(h: f32, center: f32, width: f32) -> f32 {
+    if (h < 0.0) { return 0.0; }
     let x = (h - center) / width;
     return max(0.0, 1.0 - abs(x));
 }
 
 // [KO] 전체 소멸 계수 계산 (Extinction)
 fn get_total_extinction(h: f32, params: SkyAtmosphere) -> vec3<f32> {
-    let rho_r = exp(-max(0.0, h) / params.rayleighScaleHeight);
-    let rho_m = exp(-max(0.0, h) / params.mieScaleHeight);
+    if (h < 0.0) { return vec3<f32>(0.0); }
+    let rho_r = exp(-h / params.rayleighScaleHeight);
+    let rho_m = exp(-h / params.mieScaleHeight);
     let rho_o = get_ozone_density(h, params.ozoneLayerCenter, params.ozoneLayerWidth);
     
     return params.rayleighScattering * rho_r + 
@@ -92,18 +94,58 @@ fn phase_mie(cos_theta: f32, g: f32) -> f32 {
     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cos_theta), 1.5));
 }
 
+// [KO] 구간별 광학 깊이 적분 함수
+fn integrate_optical_depth(origin: vec3<f32>, dir: vec3<f32>, t_min: f32, t_max: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {
+    if (t_max <= t_min) { return vec3<f32>(0.0); }
+    let step_size = (t_max - t_min) / f32(steps);
+    var opt_ext = vec3<f32>(0.0);
+    for (var i = 0u; i < steps; i = i + 1u) {
+        let t = t_min + (f32(i) + 0.5) * step_size;
+        let h = length(origin + dir * t) - params.earthRadius;
+        opt_ext += get_total_extinction(h, params) * step_size;
+    }
+    return opt_ext;
+}
+
 // [KO] 물리 기반 투과율 (지면 가림 무시, 조명 에너지용)
 fn get_physical_transmittance(p: vec3<f32>, sun_dir: vec3<f32>, r: f32, atm_h: f32, params: SkyAtmosphere) -> vec3<f32> {
     let t_max = get_ray_sphere_intersection(p, sun_dir, r + atm_h);
     if (t_max <= 0.0) { return vec3<f32>(1.0); }
-    let steps = 20u;
-    let step_size = t_max / f32(steps);
+
+    let b = dot(p, sun_dir);
+    let c = dot(p, p) - r * r;
+    let delta = b * b - c;
+    
     var opt_ext = vec3<f32>(0.0);
-    for (var i = 0u; i < steps; i = i + 1u) {
-        let t = (f32(i) + 0.5) * step_size;
-        let cur_h = length(p + sun_dir * t) - r;
-        opt_ext += get_total_extinction(cur_h, params) * step_size;
+    
+    // [KO] 지면 충돌 여부 확인
+    if (delta >= 0.0) {
+        let s = sqrt(delta);
+        let t_in = -b - s;
+        let t_out = -b + s;
+
+        // [KO] useGround가 켜져 있고 지평선 아래라면 즉시 0 반환
+        if (params.useGround > 0.5 && t_in > EPSILON) {
+             return vec3<f32>(0.0); 
+        }
+
+        // [KO] 지면 관통 시 (useGround가 꺼져 있는 경우 포함): 구간 분할 적분
+        if (t_in > EPSILON && t_in < t_max) {
+             // 1. 앞쪽 대기 구간 (진입점까지)
+             opt_ext += integrate_optical_depth(p, sun_dir, 0.0, t_in, 10u, params);
+             // 2. 뒤쪽 대기 구간 (탈출점부터 대기 끝까지)
+             if (t_out > 0.0 && t_max > t_out) {
+                 opt_ext += integrate_optical_depth(p, sun_dir, t_out, t_max, 10u, params);
+             }
+        } else {
+             // 지면을 비껴가는 일반적인 경로
+             opt_ext = integrate_optical_depth(p, sun_dir, 0.0, t_max, 20u, params);
+        }
+    } else {
+        // 지면과 전혀 만나지 않는 경로
+        opt_ext = integrate_optical_depth(p, sun_dir, 0.0, t_max, 20u, params);
     }
+    
     return exp(-min(opt_ext, vec3<f32>(MAX_TAU)));
 }
 
