@@ -92,15 +92,23 @@ if (t_earth <= 0.0 || uniforms.showGround < 0.5) {
         // [KO] Ghost Planet 모드: 지면은 물리적으로 존재하지만 시각적으로는 투과해야 하므로 직접 계산
         let r_val = uniforms.earthRadius;
         let ray_origin_sun = vec3<f32>(0.0, r_val + camH, 0.0);
-        let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, sunDir, r_val + uniforms.atmosphereHeight);
-        let step_size_sun = t_max_sun / 40.0;
-        var opt_ext_sun = vec3<f32>(0.0);
-        for (var i = 0u; i < 40u; i = i + 1u) {
-            let t_sun = (f32(i) + 0.5) * step_size_sun;
-            let cur_h_sun = length(ray_origin_sun + sunDir * t_sun) - r_val;
-            opt_ext_sun += get_total_extinction(cur_h_sun, uniforms) * step_size_sun;
+        
+        // [KO] 물리적 지면 가림 확인
+        // [EN] Check for physical ground occlusion
+        let t_earth_sun = get_ray_sphere_intersection(ray_origin_sun, sunDir, r_val);
+        if (t_earth_sun > 0.0) {
+            sun_trans = vec3<f32>(0.0);
+        } else {
+            let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, sunDir, r_val + uniforms.atmosphereHeight);
+            let step_size_sun = t_max_sun / 40.0;
+            var opt_ext_sun = vec3<f32>(0.0);
+            for (var i = 0u; i < 40u; i = i + 1u) {
+                let t_sun = (f32(i) + 0.5) * step_size_sun;
+                let cur_h_sun = length(ray_origin_sun + sunDir * t_sun) - r_val;
+                opt_ext_sun += get_total_extinction(cur_h_sun, uniforms) * step_size_sun;
+            }
+            sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
         }
-        sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
     } else {
         // [KO] 일반 모드 (지면 없음 또는 지면 보임): 이미 물리 상태가 반영된 LUT 사용
         sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, uniforms.atmosphereHeight);
@@ -108,7 +116,12 @@ if (t_earth <= 0.0 || uniforms.showGround < 0.5) {
     
     // [KO] 태양 디스크 합성: 물리적으로 올바른 강도 적용
     // [EN] Sun disk synthesis: apply physically correct intensity
-    atmosphereBackground += sun_mask * sun_trans * uniforms.sunIntensity;
+    // [KO] 물리적 지면(useGround)이 있는 경우 시선이 지면에 닿으면(t_earth > 0) 태양을 가립니다.
+    // [EN] If physical ground (useGround) exists, block the sun if the view hits the ground (t_earth > 0).
+    let is_occluded_by_ground = uniforms.useGround > 0.5 && t_earth > 0.0;
+    if (!is_occluded_by_ground || uniforms.showGround < 0.5) {
+        atmosphereBackground += sun_mask * sun_trans * uniforms.sunIntensity;
+    }
 }
 
 // [KO] 지평선 안개(Haze)는 Sky-View LUT와 Aerial Perspective LUT에 이미 물리적으로 통합되어 있습니다.

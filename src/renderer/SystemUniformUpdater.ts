@@ -177,7 +177,7 @@ class SystemUniformUpdater {
                 {key: 'groundSpecular', value: params?.groundSpecular || 0},
                 {key: 'ozoneLayerWidth', value: params?.ozoneLayerWidth || 0},
                 {key: 'useGround', value: params?.useGround !== undefined ? params.useGround : 1.0},
-                {key: 'padding1', value: 0},
+                {key: 'showGround', value: params?.showGround !== undefined ? params.showGround : 1.0},
             ]
         )
     }

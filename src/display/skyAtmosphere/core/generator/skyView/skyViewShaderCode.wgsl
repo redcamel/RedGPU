@@ -76,23 +76,32 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             if (is_ghost_planet) {
                 // [KO] Ghost Planet 모드: 지면은 물리적으로 존재하지만 배경 시각화를 위해 투과 처리
                 let ray_origin_sun = p;
-                let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, params.sunDirection, r + params.atmosphereHeight);
-                let step_size_sun = t_max_sun / 40.0;
-                var opt_ext_sun = vec3<f32>(0.0);
-                for (var j = 0u; j < 40u; j = j + 1u) {
-                    let t_sun = (f32(j) + 0.5) * step_size_sun;
-                    let cur_h_sun = length(ray_origin_sun + params.sunDirection * t_sun) - r;
-                    opt_ext_sun += get_total_extinction(cur_h_sun, params) * step_size_sun;
+                
+                // [KO] 물리적 지면 가림 확인
+                // [EN] Check for physical ground occlusion
+                let t_earth_sun = get_ray_sphere_intersection(ray_origin_sun, params.sunDirection, r);
+                if (t_earth_sun > 0.0) {
+                    sun_trans = vec3<f32>(0.0);
+                } else {
+                    let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, params.sunDirection, r + params.atmosphereHeight);
+                    let step_size_sun = t_max_sun / 40.0;
+                    var opt_ext_sun = vec3<f32>(0.0);
+                    for (var j = 0u; j < 40u; j = j + 1u) {
+                        let t_sun = (f32(j) + 0.5) * step_size_sun;
+                        let cur_h_sun = length(ray_origin_sun + params.sunDirection * t_sun) - r;
+                        opt_ext_sun += get_total_extinction(cur_h_sun, params) * step_size_sun;
+                    }
+                    sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
                 }
-                sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
             } else {
                 // [KO] 일반 모드: LUT 사용 (useGround가 꺼져 있다면 이미 가림이 없는 상태임)
                 sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
             }
 
-            // [KO] 행성 그림자 역시 배경에서는 showGround가 꺼져 있으면 제거합니다.
+            // [KO] 행성 그림자: 물리적 지면(useGround)이 있으면 배경 시각화 설정(showGround)과 상관없이 물리적으로 적용합니다.
+            // [EN] Planet shadow: If physical ground (useGround) exists, it is applied physically regardless of background visualization settings (showGround).
             var shadow_mask = 1.0;
-            if (effective_use_ground > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
+            if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);

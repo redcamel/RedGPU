@@ -27,7 +27,7 @@ RedGPU.init(
         view.skybox = skybox;
 
         // 2. 카메라 설정
-        view.rawCamera.nearClipping = 0.1;
+        view.rawCamera.nearClipping = 1;
         view.rawCamera.farClipping = 2000000;
         controller.pan = -90; 
         controller.tilt = -10;

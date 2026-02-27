@@ -21,7 +21,7 @@ RedGPU.init(
         view.skyAtmosphere = skyAtmosphere;
 
         // 2. 카메라 설정
-        view.rawCamera.nearClipping = 0.1;
+        view.rawCamera.nearClipping = 1;
         view.rawCamera.farClipping = 2000000;
         controller.pan = -90; // [KO] 태양 방향으로 카메라 회전 [EN] Pan camera to sun direction
         controller.tilt = -10;
