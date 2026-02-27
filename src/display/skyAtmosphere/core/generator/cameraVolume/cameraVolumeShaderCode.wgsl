@@ -40,7 +40,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let p_len = length(p);
             let cur_h = p_len - r;
 
-            // [KO] 지표면 아래인 경우 중단 (미세 오프셋으로 수평선 부근 안정성 확보)
+            // [KO] 지표면 아래인 경우 중단 (물리적 차단은 항상 유지)
             if (cur_h < -0.001) { break; }
 
             let up = p / p_len;

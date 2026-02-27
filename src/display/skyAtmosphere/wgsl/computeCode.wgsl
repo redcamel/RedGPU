@@ -72,19 +72,40 @@ let t_earth = get_ray_sphere_intersection(camPos, viewDir, r);
 
 if (t_earth > 0.0) {
     // [KO] 가려진 지면 영역 [EN] Occluded ground area
-    let hitPos = camPos + viewDir * t_earth;
-    let up = normalize(hitPos);
-    let cos_sun = dot(up, sunDir);
-    let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_sun, atmH);
-    
-    let albedo = uniforms.groundAlbedo * INV_PI;
-    let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
-    let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
-    
-    // [KO] 지면 조명: (직사광 + 산란광) * 알베도
-    // [EN] Ground lighting: (Direct + Scattered) * Albedo
-    let groundColor = (sun_trans * max(0.0, cos_sun) + skySample.rgb) * uniforms.sunIntensity * albedo;
-    atmosphereBackground = groundColor;
+    if (uniforms.useGround > 0.5) {
+        let hitPos = camPos + viewDir * t_earth;
+        let up = normalize(hitPos);
+        let cos_sun = dot(up, sunDir);
+        let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_sun, atmH);
+        
+        // [KO] 지면 조명: (직사광 + 환경광) * 알베도
+        // [EN] Ground lighting: (Direct + Ambient) * Albedo
+        let irradUV = vec2<f32>(cos_sun * 0.5 + 0.5, 0.0);
+        let irradiance = textureSampleLevel(atmosphereIrradianceTexture, atmosphereSampler, irradUV, 0.0).rgb;
+        let albedo = uniforms.groundAlbedo * INV_PI;
+        
+        var groundColor = (sun_trans * max(0.0, cos_sun) + irradiance) * uniforms.sunIntensity * albedo;
+        
+        // [KO] 지면 스펙큘러 (Phong 모델)
+        // [EN] Ground specular (Phong model)
+        let reflectDir = reflect(-sunDir, up);
+        let spec = pow(max(0.0, dot(reflectDir, -viewDir)), uniforms.groundShininess);
+        groundColor += sun_trans * spec * uniforms.groundSpecular * uniforms.sunIntensity;
+        
+        // [KO] 지면 영역 공중 원근법(Aerial Perspective) 적용
+        // [EN] Apply Aerial Perspective to ground area
+        let ap_dist_ground = clamp(t_earth, 0.0, max_ap_dist);
+        let ap_w_ground = clamp(sqrt(ap_dist_ground / max_ap_dist), 0.0, 0.999);
+        let ap_sample_ground = textureSampleLevel(cameraVolumeTexture, atmosphereSampler, vec3<f32>(ap_u, ap_v, ap_w_ground), 0.0);
+        
+        atmosphereBackground = (groundColor * ap_sample_ground.a) + (ap_sample_ground.rgb * uniforms.sunIntensity);
+    } else {
+        // [KO] 지면이 비활성화된 경우: 행성 그림자가 반영된 하늘색만 표시 (타버리는 현상 방지)
+        // [EN] When ground is disabled: show only sky color with planet shadow (prevent over-exposure)
+        let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
+        let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
+        atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
+    }
 } else {
     // [KO] 순수 하늘 영역 [EN] Pure sky area
     let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);

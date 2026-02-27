@@ -25,6 +25,6 @@ struct SkyAtmosphere {
     groundShininess: f32,
     groundSpecular: f32,
     ozoneLayerWidth: f32,
-    padding0: f32,
+    useGround: f32,
     padding1: f32,
 };

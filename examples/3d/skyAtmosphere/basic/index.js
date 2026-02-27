@@ -194,6 +194,18 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera);
 
+    const f_presets = pane.addFolder({title: '0. Cinematic Presets', expanded: true});
+    const apply = (el, az, exp, intensity) => {
+        skyAtmosphere.sunElevation = el;
+        skyAtmosphere.sunAzimuth = az;
+        skyAtmosphere.exposure = exp;
+        skyAtmosphere.sunIntensity = intensity;
+        pane.refresh();
+    };
+    f_presets.addButton({title: 'High Noon'}).on('click', () => apply(90, 0, 1.0, 22.0));
+    f_presets.addButton({title: 'Golden Sunset'}).on('click', () => apply(3.5, 0, 1.8, 22.0));
+    f_presets.addButton({title: 'Eerie Twilight'}).on('click', () => apply(-4, 0, 4.0, 10.0));
+
     const state = {enabled: true};
     pane.addBinding(state, 'enabled', {label: 'Enable Atmosphere'}).on('change', (v) => {
         targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
@@ -284,6 +296,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
 
     // 6. Ground Properties
     const f_ground = pane.addFolder({title: '6. Ground Properties', expanded: false});
+    f_ground.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
     const groundAlbedoProxy = {
         get r() {
             return skyAtmosphere.groundAlbedo[0];
@@ -320,16 +333,4 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_vol.addBinding(skyAtmosphere, 'horizonHaze', {min: 0, max: 10, label: 'Horizon Haze'});
     f_vol.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 10, label: 'Fog Density'});
     f_vol.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, label: 'Fog Falloff'});
-
-    const f_presets = pane.addFolder({title: 'Cinematic Presets', expanded: false});
-    const apply = (el, az, exp, intensity) => {
-        skyAtmosphere.sunElevation = el;
-        skyAtmosphere.sunAzimuth = az;
-        skyAtmosphere.exposure = exp;
-        skyAtmosphere.sunIntensity = intensity;
-        pane.refresh();
-    };
-    f_presets.addButton({title: 'High Noon'}).on('click', () => apply(90, 0, 1.0, 22.0));
-    f_presets.addButton({title: 'Golden Sunset'}).on('click', () => apply(3.5, 0, 1.8, 22.0));
-    f_presets.addButton({title: 'Eerie Twilight'}).on('click', () => apply(-4, 0, 4.0, 10.0));
 };

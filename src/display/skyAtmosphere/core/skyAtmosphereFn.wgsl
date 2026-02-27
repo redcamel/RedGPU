@@ -5,6 +5,7 @@
 #redgpu_include math.DEG_TO_RAD
 #redgpu_include math.EPSILON
 #redgpu_include systemStruct.SkyAtmosphere
+// [KO] 대기 산란 공통 함수 [EN] Sky atmosphere common functions
 const MAX_TAU: f32 = 50.0;
 
 // [KO] 레이-구체 교차점 계산

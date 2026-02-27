@@ -59,7 +59,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let cos_sun = dot(up, params.sunDirection);
             let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
 
-            // 행성 그림자
+            // 행성 그림자 (항상 물리적으로 계산)
             var shadow_mask = 1.0;
             if (get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
 
@@ -73,16 +73,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             let view_sun_cos = dot(view_dir, params.sunDirection);
             
-            // [KO] 물리적으로 올바른 산란광 계산 (안개용 페이즈 함수 0.7 추가)
-            // [EN] Physically correct scattering calculation (add phase function 0.7 for fog)
             let scat_r = params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos);
             let scat_m = vec3<f32>(params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy));
             let scat_f = vec3<f32>(params.heightFogDensity * rho_f * phase_mie(view_sun_cos, 0.7)); 
             
             let scat = (scat_r + scat_m + scat_f) * sun_trans * shadow_mask;
 
-            // [KO] 다중 산란 기여 (안개 밀도 rho_f를 정확히 반영)
-            // [EN] Multi-scattering contribution (correctly reflecting fog density rho_f)
             let ms_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
             let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, ms_uv, 0.0).rgb;
             
@@ -96,8 +92,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             if (all(transmittance < vec3<f32>(0.001))) { break; }
         }
 
-        // [KO] 지면과 충돌한 경우 지면 반사광 추가
-        if (t_earth > 0.0) {
+        // [KO] 지면 반사광 (useGround 활성화 시에만 추가)
+        if (t_earth > 0.0 && params.useGround > 0.5) {
             let hitPos = ray_origin + view_dir * t_earth;
             let up = normalize(hitPos);
             let cos_sun = dot(up, params.sunDirection);
