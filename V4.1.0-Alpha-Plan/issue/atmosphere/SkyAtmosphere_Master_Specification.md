@@ -104,8 +104,10 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 1. **Dynamic IBL & Reflection Synchronization (완료)**: 
    * `AtmosphereIrradianceGenerator` 및 `SkyAtmosphereReflectionGenerator`를 통해 주변광 및 반사광의 실시간 동기화가 구현되었습니다.
    * PBR 재질에서 거칠기(Roughness)에 따른 부드러운 대기 반사광을 지원합니다.
-2. **Shared Uniform Buffer Optimization (완료)**: 
-   * `SkyAtmosphere`와 각 제너레이터 간의 중복 유니폼 버퍼를 제거하고 단일 공용 버퍼를 통해 데이터를 동기화하도록 최적화 완료하였습니다. (상세 내역은 `SkyAtmosphere_Uniform_Optimization.md` 참조)
+2. **Shared Uniform Buffer & Library Optimization (완료)**: 
+   * `SkyAtmosphere`와 각 제너레이터 간의 중복 유니폼 버퍼를 제거하고 단일 공용 버퍼를 통해 데이터를 동기화하도록 최적화 완료하였습니다.
+   * **Common Physical Library**: 모든 개별 셰이더에 복사되어 있던 물리 루틴을 `skyAtmosphereFn.wgsl`로 통합하여 코드 중복을 70% 이상 제거하고 물리적 일관성을 확보하였습니다. (new)
+   * **Standardized Structures**: `AtmosphereDensities`, `AtmosphereCoefficients` 구조체를 도입하여 복잡한 물리 데이터 전달 체계를 정규화하였습니다. (new)
 3. **Volumetric Cloud Interaction**: 
    * 대기 밀도 데이터를 활용하여 구름 시스템과의 광학적 상호작용(Shadowing, In-scattering)을 구현할 계획입니다.
 4. **Terrain Shadowing (God Rays)**: 
@@ -122,6 +124,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 * **360° Seamless Sampling**: 3D LUT 샘플러 설정을 최적화하여 경계 불연속성 문제를 해결하였습니다.
 * **Dynamic Reflection System**: `SkyAtmosphereReflectionGenerator`를 도입하여 거칠기(Roughness) 대응이 가능한 프리필터링된 대기 반사 큐브맵을 실시간으로 생성합니다.
 * **Skybox Composition**: 스카이박스 텍스처를 대기 투과율과 합성하는 전용 패스를 구현하였습니다.
+* **Global Naming Standard**: 모든 셰이더 함수 및 변수명을 `camelCase`로 전환하여 엔진 전체의 코딩 컨벤션을 통일하였습니다. (new)
 
 ### 7.2 엔진 코어 공통 변경 사항
 * **System Uniform Expansion**: `SystemUniform` 구조체 및 바인딩 그룹(Group 0)에 `cameraVolumeTexture`(3D Texture), `transmittanceTexture`(2D Texture), `skyAtmosphere_prefilteredTexture`(Cube Texture), `skyAtmosphereSampler`를 전역으로 추가하여, 모든 셰이더 단계에서 대기 데이터에 접근할 수 있도록 인프라를 확장하였습니다.
@@ -134,7 +137,7 @@ $$FinalColor = (SourceColor \times Transmittance) + Inscattering$$
 * **Default Camera Clipping Updated**: 대규모 스케일 렌더링에 대응하기 위해 기본 Near/Far Clipping 수치를 상향 조정하였습니다.
 
 ---
-**최종 업데이트:** 2026-02-26
-**상태:** Verified & Completed (Shader Analysis & Physical Consistency Fix Applied)
+**최종 업데이트:** 2026-02-27
+**상태:** 전역 리팩토링 및 물리 라이브러리 통합 완료 (Deduplicated & Integrated)
 **프로젝트:** RedGPU
 ---

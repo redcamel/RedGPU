@@ -39,24 +39,26 @@
 1.  **Step 1: WGSL 구조체 수정**: `SkyAtmosphere.wgsl`에 `showGround` 필드 추가.
 2.  **Step 2: 클래스 프로퍼티 추가**: `SkyAtmosphere.ts`에 `showGround` getter/setter 구현 및 유니폼 업데이트 로직 반영.
 
-### Phase 2: 물리 엔진(LUT) 고도화
+### Phase 2: 물리 엔진(LUT) 고도화 (완료)
 1.  **Step 3: 생성기 셰이더 업데이트**: 4종의 주요 LUT 생성기(Transmittance, SkyView, Volume, Reflection)가 `useGround` 상태에 따라 적분 거리를 동적으로 결정하도록 수정.
-2.  **Step 4: 그림자 마스크 보완**: `useGround = false`일 때 행성 그림자(`shadow_mask`)가 생성되지 않도록 처리.
+    *   **고도화**: 지구 중심을 통과하는 거대 구간에 대해 **구간 분할 적분(Segmented Integration)**을 도입하여 밴딩 및 에너지 소실 문제 해결.
+2.  **Step 4: 그림자 마스크 보완**: `useGround = false`일 때 행성 그림자(`shadowMask`)가 생성되지 않도록 처리.
 
-### Phase 3: 시각적 합성 및 검증
+### Phase 3: 시각적 합성 및 검증 (완료)
 1.  **Step 5: 합성 셰이더 업데이트**: `computeCode.wgsl`에 `showGround` 조건부 렌더링 로직 적용.
+    *   **태양 가림**: 물리적 지면(`useGround`)이 활성화된 경우 지평선 아래 태양 디스크 자동 차단 로직 적용.
 2.  **Step 6: 예제 UI 반영**: `Use Ground`와 `Show Ground`를 독립적으로 제어할 수 있는 테스트 패널 구성.
-3.  **Step 7: 최종 검증**: 우주 공간 및 지평선 근처에서의 시각적 연속성 확인.
+3.  **Step 7: 최종 검증**: 우주 공간 및 지평선 근처에서의 시각적 연속성 확인 및 **예술적 대칭(Artistic Symmetry)** 적용 완료.
 
 ---
 
 ## 5. 기대 효과 (Expected Benefits)
 *   **UE 스타일 워크플로우**: 언리얼 엔진 사용자에게 익숙한 대기 제어 방식을 제공합니다.
 *   **완벽한 지형 합성**: 행성 구체 대신 사용자의 하이폴리곤 지형 메시가 대기 효과와 물리적으로 올바르게 어우러집니다.
-*   **비주얼 품질 향상**: 지평선에서 발생하는 급격한 색상 단절(Artifact)을 근본적으로 제거합니다.
+*   **비주얼 품질 향상**: 지평선에서 발생하는 급격한 색상 단절(Artifact)을 근본적으로 제거하고, 대칭형 노을을 통해 예술적 완성도를 높였습니다.
 
 ---
-**작성일:** 2026-02-27
-**상태:** 계획 업데이트 완료 (Updated)
+**최종 업데이트:** 2026-02-27
+**상태:** 구현 및 검증 완료 (Implemented & Verified)
 **프로젝트:** RedGPU
 ---
