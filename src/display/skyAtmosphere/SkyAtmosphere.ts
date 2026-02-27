@@ -16,8 +16,9 @@ import Sampler from "../../resources/sampler/Sampler";
 import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import DirectTexture from "../../resources/texture/DirectTexture";
+
 import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
+import DirectTexture from "../../resources/texture/DirectTexture";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'SKY_ATMOSPHERE_CORE');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;

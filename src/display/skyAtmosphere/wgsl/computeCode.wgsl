@@ -105,6 +105,10 @@ if (t_earth <= 0.0 || uniforms.showGround < 0.5) {
             for (var i = 0u; i < 40u; i = i + 1u) {
                 let t_sun = (f32(i) + 0.5) * step_size_sun;
                 let cur_h_sun = length(ray_origin_sun + sunDir * t_sun) - r_val;
+                
+                // [KO] 지면 내부(cur_h < 0)는 대기 밀도가 0인 것으로 간주하여 적분을 건너뜁니다.
+                if (uniforms.useGround > 0.5 && cur_h_sun < -0.001) { continue; }
+                
                 opt_ext_sun += get_total_extinction(cur_h_sun, uniforms) * step_size_sun;
             }
             sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
