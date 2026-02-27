@@ -56,11 +56,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
 
-    // [KO] 구간 설정: 지면 충돌 여부에 따라 적분 구간을 최적화합니다.
-    // [EN] Segment Setup: Optimize integration segments based on earth collision.
-    let hit_earth = params.useGround > 0.5 && t_earth_in > 0.0;
+    // [KO] 구간 설정: 광선이 행성 볼륨(Radius)과 교차하는지 확인합니다.
+    // [EN] Segment Setup: Check if the ray intersects the planet volume (Radius).
+    // [KO] useGround 여부와 상관없이, 구체 내부를 통과하는 경로는 구간 분할 적분이 필수적입니다.
+    let intersects_planet_volume = t_earth_in > 0.0;
     
-    if (hit_earth) {
+    if (intersects_planet_volume) {
         // --- Segment 1: Camera to Earth (Front Atmosphere) ---
         let steps_front = 32;
         let step_size_front = t_earth_in / f32(steps_front);
@@ -69,7 +70,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             integrate_step(ray_origin + view_dir * t, view_dir, step_size_front, &radiance, &transmittance);
         }
 
-        if (params.showGround > 0.5) {
+        if (params.useGround > 0.5 && params.showGround > 0.5) {
             // [KO] 일반 모드: 지면 반사광 추가 후 종료
             let hitPos = ray_origin + view_dir * t_earth_in;
             let up = normalize(hitPos);
@@ -80,7 +81,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             radiance += transmittance * (sun_trans * max(0.0, cos_sun) + ms_energy + params.groundAmbient) * albedo;
         } else if (t_earth_out > 0.0 && t_max > t_earth_out) {
             // --- Segment 2: Earth Exit to Atmosphere Top (Back Atmosphere) ---
-            // [KO] Ghost Planet 모드: 지면 너머의 대기를 정밀하게 적분하여 밴딩 제거
+            // [KO] Ghost Planet 또는 useGround=false 모드: 지면 너머의 대기를 정밀하게 적분하여 밴딩 제거
             let back_dist = t_max - t_earth_out;
             let steps_back = 32;
             let step_size_back = back_dist / f32(steps_back);
