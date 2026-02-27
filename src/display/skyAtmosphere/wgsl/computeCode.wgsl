@@ -76,13 +76,35 @@ let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
 let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
 atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
-if (t_earth <= 0.0) {
-    // [KO] 태양 디스크 합성 (지면에 가려지지 않은 경우에만)
-    // [EN] Sun disk synthesis (only if not occluded by the ground)
+if (t_earth <= 0.0 || uniforms.showGround < 0.5) {
+    // [KO] 태양 디스크 합성 (지면에 가려지지 않았거나 showGround가 꺼진 경우)
+    // [EN] Sun disk synthesis (only if not occluded by the ground or showGround is off)
     let view_sun_cos = dot(viewDir, sunDir);
     let sun_rad = uniforms.sunSize * DEG_TO_RAD;
     let sun_mask = smoothstep(cos(sun_rad) - 0.001, cos(sun_rad), view_sun_cos);
-    let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
+    
+    // [KO] showGround는 useGround가 켜져 있을 때만 의미가 있습니다.
+    // [EN] showGround is only meaningful when useGround is enabled.
+    let is_ghost_planet = uniforms.useGround > 0.5 && uniforms.showGround < 0.5;
+    
+    var sun_trans: vec3<f32>;
+    if (is_ghost_planet) {
+        // [KO] Ghost Planet 모드: 지면은 물리적으로 존재하지만 시각적으로는 투과해야 하므로 직접 계산
+        let r_val = uniforms.earthRadius;
+        let ray_origin_sun = vec3<f32>(0.0, r_val + camH, 0.0);
+        let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, sunDir, r_val + uniforms.atmosphereHeight);
+        let step_size_sun = t_max_sun / 40.0;
+        var opt_ext_sun = vec3<f32>(0.0);
+        for (var i = 0u; i < 40u; i = i + 1u) {
+            let t_sun = (f32(i) + 0.5) * step_size_sun;
+            let cur_h_sun = length(ray_origin_sun + sunDir * t_sun) - r_val;
+            opt_ext_sun += get_total_extinction(cur_h_sun, uniforms) * step_size_sun;
+        }
+        sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
+    } else {
+        // [KO] 일반 모드 (지면 없음 또는 지면 보임): 이미 물리 상태가 반영된 LUT 사용
+        sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, uniforms.atmosphereHeight);
+    }
     
     // [KO] 태양 디스크 합성: 물리적으로 올바른 강도 적용
     // [EN] Sun disk synthesis: apply physically correct intensity

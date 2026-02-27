@@ -75,7 +75,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         sunDirection: new Float32Array([0, 1, 0]),
         cameraHeight: 0.001,
         useGround: 1.0,
-        padding1: 0
+        showGround: 1.0
     };
 
     #sunElevation: number = 45;
@@ -463,6 +463,18 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtySkyView = true;
     }
 
+    /** [KO] 지면 렌더링 여부 [EN] Whether to render the ground */
+    get showGround(): boolean {
+        return !!this.#params.showGround;
+    }
+
+    set showGround(v: boolean) {
+        this.#params.showGround = v ? 1.0 : 0.0;
+        this.#dirtyUniformBuffer = true;
+        this.#dirtyLUT = true;
+        this.#dirtySkyView = true;
+    }
+
     /** [KO] 투과율 LUT 텍스처를 반환합니다. [EN] Returns the Transmittance LUT texture. */
     get transmittanceTexture(): DirectTexture {
         return this.#transmittanceGenerator.lutTexture;
@@ -545,7 +557,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         if (this.#dirtySkyView) {
             this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
-            this.#irradianceGenerator.render(this.#skyViewGenerator.lutTexture);
+            this.#irradianceGenerator.render(this.#skyViewGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#dirtySkyView = false;
         }

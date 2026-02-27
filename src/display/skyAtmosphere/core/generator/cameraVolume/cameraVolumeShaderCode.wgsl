@@ -1,10 +1,9 @@
 // [KO] Aerial Perspective 3D LUT 생성을 위한 Compute Shader
 
 @group(0) @binding(0) var cameraVolumeTexture: texture_storage_3d<rgba16float, write>;
-@group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
-@group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
-@group(0) @binding(3) var atmosphereSampler: sampler;
-@group(0) @binding(4) var<uniform> params: SkyAtmosphere;
+@group(0) @binding(1) var multiScatTexture: texture_2d<f32>;
+@group(0) @binding(2) var atmosphereSampler: sampler;
+@group(0) @binding(3) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(4, 4, 4)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -40,19 +39,20 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let p_len = length(p);
             let cur_h = p_len - r;
 
-            // [KO] useGround가 켜져 있는 경우에만 지표면 아래에서 적분을 중단합니다.
-            // [EN] Only break integration below ground when useGround is enabled.
-            if (params.useGround > 0.5 && cur_h < -0.001) { break; }
+            // [KO] useGround가 켜져 있는 경우에만 지표면 아래에서 적분을 스킵합니다.
+            // [EN] Only skip integration below ground when useGround is enabled.
+            if (params.useGround > 0.5 && cur_h < -0.001) { continue; }
 
             let up = p / p_len;
             let cos_sun = dot(up, params.sunDirection);
 
-            // [KO] 행성 그림자 (useGround가 활성화된 경우에만 적용)
-            // [EN] Planet shadow (only applied when useGround is enabled)
+            // [KO] 행성 그림자 (메시 조명을 위해 useGround에만 종속)
+            // [EN] Planet shadow (Dependent only on useGround for mesh lighting)
             var shadow_mask = 1.0;
             if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
 
-            let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
+            // [KO] 조명 에너지는 지면 가림을 무시하는 물리 투과율 사용
+            let sun_trans = get_physical_transmittance(p, params.sunDirection, r, params.atmosphereHeight, params);
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);

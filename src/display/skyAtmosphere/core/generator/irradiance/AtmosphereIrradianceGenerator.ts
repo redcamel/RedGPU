@@ -40,8 +40,9 @@ class AtmosphereIrradianceGenerator {
      * [EN] Renders the irradiance LUT.
      *
      * @param skyView - [KO] 스카이 뷰 LUT [EN] Sky-View LUT
+     * @param multiScat - [KO] 다중 산란 LUT [EN] Multi-Scattering LUT
      */
-    render(skyView: DirectTexture): void {
+    render(skyView: DirectTexture, multiScat: DirectTexture): void {
         const {gpuDevice} = this.#redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
@@ -50,8 +51,9 @@ class AtmosphereIrradianceGenerator {
             entries: [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
                 {binding: 1, resource: skyView.gpuTextureView},
-                {binding: 2, resource: this.#sampler.gpuSampler},
-                {binding: 3, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}}
+                {binding: 2, resource: multiScat.gpuTextureView},
+                {binding: 3, resource: this.#sampler.gpuSampler},
+                {binding: 4, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}}
             ]
         });
 

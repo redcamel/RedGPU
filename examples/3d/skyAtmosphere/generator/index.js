@@ -71,6 +71,11 @@ RedGPU.init(
 const renderTestPane = async (targetView, skyAtmosphere) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
     const pane = new Pane({ title: 'Atmosphere Generator Verifier' });
+
+    // [KO] Enable Atmosphere 바로 아래에 useGround 배치 (여기서는 Enable Atmosphere 바인딩이 없으므로 최상단 배치)
+    // [EN] Place useGround at the top (since there's no Enable Atmosphere binding here)
+    pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
+    pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
     
     const f_sun = pane.addFolder({ title: 'Sun Position' });
     f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, label: 'Sun Elevation' });

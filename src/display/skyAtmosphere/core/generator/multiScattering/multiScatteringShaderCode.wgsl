@@ -2,9 +2,7 @@
 #redgpu_include math.INV_PI
 
 @group(0) @binding(0) var multiScatTexture: texture_storage_2d<rgba16float, write>;
-@group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
-@group(0) @binding(2) var atmosphereSampler: sampler;
-@group(0) @binding(3) var<uniform> params: SkyAtmosphere;
+@group(0) @binding(1) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -52,7 +50,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 let up_p = cur_p / cur_p_len;
                 let cur_h = cur_p_len - r;
                 let cos_s = dot(up_p, sun_dir);
-                let sun_t = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_s, params.atmosphereHeight);
+                
+                // [KO] 조명 에너지 계산을 위해 지면 가림을 무시하는 물리 투과율 사용
+                let sun_t = get_physical_transmittance(cur_p, sun_dir, r, params.atmosphereHeight, params);
                 
                 // 행성 그림자
                 var shadow_mask = 1.0;
@@ -71,8 +71,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             if (t_earth > 0.0 && params.useGround > 0.5) {
                 let hit_p = ray_origin + ray_dir * t_earth;
-                let cos_s = max(0.0, dot(normalize(hit_p), sun_dir));
-                L1 += T_path * get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_s, params.atmosphereHeight) * cos_s * params.groundAlbedo * INV_PI;
+                let up_hit = normalize(hit_p);
+                let cos_s = max(0.0, dot(up_hit, sun_dir));
+                
+                // [KO] 지면 반사광 계산을 위한 투과율 (지면 가림 무시)
+                let sun_t_ground = get_physical_transmittance(hit_p, sun_dir, r, params.atmosphereHeight, params);
+                
+                L1 += T_path * sun_t_ground * cos_s * params.groundAlbedo * INV_PI;
             }
             lum_total += L1;
             fms_total += f1 / f32(sample_count);

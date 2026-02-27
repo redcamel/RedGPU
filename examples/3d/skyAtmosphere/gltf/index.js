@@ -87,6 +87,7 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera);
 
+    // 0. General Controls
     const state = {
         enabled: true,
         useIBL: true,
@@ -95,6 +96,10 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
     pane.addBinding(state, 'enabled', {label: 'Enable Atmosphere'}).on('change', (v) => {
         targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
     });
+    // [KO] Enable Atmosphere 바로 아래에 useGround 배치
+    // [EN] Place useGround directly under Enable Atmosphere
+    pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
+    pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
     pane.addBinding(state, 'useIBL', {label: 'Use IBL (Reflection)'}).on('change', (v) => {
         targetView.ibl = v.value ? ibl : null;
     });
@@ -102,15 +107,8 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
         targetView.skybox = v.value ? skybox : null;
     });
 
-    // 1. Sun & Exposure
-    const f_sun = pane.addFolder({title: '1. Sun & Exposure'});
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.01, label: 'Elevation'});
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.01, label: 'Azimuth'});
-    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.1, label: 'Intensity'});
-    f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'Sun Size'});
-    f_sun.addBinding(skyAtmosphere, 'exposure', {min: 0, max: 10, step: 0.01, label: 'Exposure'});
-
-    const f_presets = pane.addFolder({title: 'Cinematic Presets', expanded: false});
+    // 1. Cinematic Presets
+    const f_presets = pane.addFolder({title: '1. Cinematic Presets', expanded: false});
     const apply = (el, az, exp, intensity) => {
         skyAtmosphere.sunElevation = el;
         skyAtmosphere.sunAzimuth = az;
@@ -121,4 +119,12 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
     f_presets.addButton({title: 'High Noon'}).on('click', () => apply(90, 0, 1.0, 22.0));
     f_presets.addButton({title: 'Golden Sunset'}).on('click', () => apply(3.5, 0, 1.8, 22.0));
     f_presets.addButton({title: 'Eerie Twilight'}).on('click', () => apply(-4, 0, 4.0, 10.0));
+
+    // 2. Sun & Exposure
+    const f_sun = pane.addFolder({title: '2. Sun & Exposure'});
+    f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.01, label: 'Elevation'});
+    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.01, label: 'Azimuth'});
+    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.1, label: 'Intensity'});
+    f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'Sun Size'});
+    f_sun.addBinding(skyAtmosphere, 'exposure', {min: 0, max: 10, step: 0.01, label: 'Exposure'});
 };

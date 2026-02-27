@@ -1,7 +1,8 @@
 @group(0) @binding(0) var irradianceTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var skyViewTexture: texture_2d<f32>;
-@group(0) @binding(2) var atmosphereSampler: sampler;
-@group(0) @binding(3) var<uniform> params: SkyAtmosphere;
+@group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
+@group(0) @binding(3) var atmosphereSampler: sampler;
+@group(0) @binding(4) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -56,7 +57,22 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let L = tbn * localL;
             
             let skyUV = get_sky_view_uv(L, camH, r, atmH);
-            let skyRadiance = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
+            var skyRadiance = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
+            
+            // [KO] 지평선 아래 방향 샘플링 시, SkyView에서 지면이 지워졌다면 직접 지면 조도를 계산합니다.
+            // [EN] When sampling below the horizon, if the ground was removed from SkyView, calculate ground irradiance directly.
+            if (params.useGround > 0.5 && L.y < -0.001) {
+                let t_ground = get_ray_sphere_intersection(vec3<f32>(0.0, r + camH, 0.0), L, r);
+                if (t_ground > 0.0) {
+                    let hit_p = vec3<f32>(0.0, r + camH, 0.0) + L * t_ground;
+                    let cos_s = max(0.0, dot(normalize(hit_p), params.sunDirection));
+                    let sun_t = get_physical_transmittance(hit_p, params.sunDirection, r, atmH, params);
+                    let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(dot(normalize(hit_p), params.sunDirection) * 0.5 + 0.5, 0.0), 0.0).rgb;
+                    
+                    let ground_albedo = params.groundAlbedo * INV_PI;
+                    skyRadiance = (sun_t * cos_s + ms_energy + params.groundAmbient) * ground_albedo;
+                }
+            }
             
             irradiance += skyRadiance * cos_theta * sin_theta;
         }

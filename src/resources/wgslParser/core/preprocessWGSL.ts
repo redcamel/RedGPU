@@ -83,7 +83,7 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): s
             // [KO] 현재까지의 코드에서 라인 번호 계산
             // [EN] Calculate line number from current offset
             const lineNumber = currentSource.substring(0, offset).split('\n').length;
-            console.warn(`[preprocessWGSL] Duplicate include detected in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. This redundant include will be ignored.`);
+            // console.warn(`[preprocessWGSL] Duplicate include detected in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. This redundant include will be ignored.`);
             return '';
         }
 

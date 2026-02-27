@@ -57,9 +57,7 @@ class MultiScatteringGenerator {
             layout: this.#pipeline.getBindGroupLayout(0),
             entries: [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: transmittanceTexture.gpuTextureView},
-                {binding: 2, resource: this.#sampler.gpuSampler},
-                {binding: 3, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}}
+                {binding: 1, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}}
             ]
         });
 

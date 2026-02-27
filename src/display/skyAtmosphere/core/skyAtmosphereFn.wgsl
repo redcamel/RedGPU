@@ -92,6 +92,21 @@ fn phase_mie(cos_theta: f32, g: f32) -> f32 {
     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cos_theta), 1.5));
 }
 
+// [KO] 물리 기반 투과율 (지면 가림 무시, 조명 에너지용)
+fn get_physical_transmittance(p: vec3<f32>, sun_dir: vec3<f32>, r: f32, atm_h: f32, params: SkyAtmosphere) -> vec3<f32> {
+    let t_max = get_ray_sphere_intersection(p, sun_dir, r + atm_h);
+    if (t_max <= 0.0) { return vec3<f32>(1.0); }
+    let steps = 20u;
+    let step_size = t_max / f32(steps);
+    var opt_ext = vec3<f32>(0.0);
+    for (var i = 0u; i < steps; i = i + 1u) {
+        let t = (f32(i) + 0.5) * step_size;
+        let cur_h = length(p + sun_dir * t) - r;
+        opt_ext += get_total_extinction(cur_h, params) * step_size;
+    }
+    return exp(-min(opt_ext, vec3<f32>(MAX_TAU)));
+}
+
 // [KO] 높이 안개 투과율
 fn get_height_fog_transmittance(cam_h: f32, ray_dir_y: f32, dist: f32, density: f32, falloff: f32) -> f32 {
     if (density <= 0.0) { return 1.0; }

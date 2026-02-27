@@ -41,10 +41,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, r + params.atmosphereHeight);
     let t_earth = get_ray_sphere_intersection(ray_origin, view_dir, r);
     
-    // [KO] useGround가 꺼져 있으면 지면 충돌을 무시하고 대기권 끝(t_max)까지 적분합니다.
-    // [EN] If useGround is off, ignore ground collision and integrate up to the atmosphere edge (t_max).
-    var dist_limit = select(t_max, t_earth, t_earth > 0.0);
-    if (params.useGround < 0.5) { dist_limit = t_max; }
+    // [KO] 배경 시각화에서만 지면 가림 여부를 showGround에 종속시킵니다.
+    // [EN] Make ground occlusion dependent on showGround only for background visualization.
+    let effective_use_ground = params.useGround * params.showGround;
+
+    var dist_limit = t_max;
+    if (effective_use_ground > 0.5 && t_earth > 0.0) {
+        dist_limit = t_earth;
+    }
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
@@ -60,13 +64,35 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let up = p / p_len;
             let cur_h = p_len - r;
 
-            let cos_sun = dot(up, params.sunDirection);
-            let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
+            // [KO] effective_use_ground를 사용하여 showGround가 꺼져 있으면 지면 내부도 공기로 간주합니다.
+            if (effective_use_ground > 0.5 && cur_h < -0.001) { continue; }
 
-            // [KO] 행성 그림자 (useGround가 활성화된 경우에만 적용)
-            // [EN] Planet shadow (only applied when useGround is enabled)
+            let cos_sun = dot(up, params.sunDirection);
+            
+            // [KO] showGround는 useGround가 켜져 있을 때만 의미가 있습니다.
+            let is_ghost_planet = params.useGround > 0.5 && params.showGround < 0.5;
+
+            var sun_trans: vec3<f32>;
+            if (is_ghost_planet) {
+                // [KO] Ghost Planet 모드: 지면은 물리적으로 존재하지만 배경 시각화를 위해 투과 처리
+                let ray_origin_sun = p;
+                let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, params.sunDirection, r + params.atmosphereHeight);
+                let step_size_sun = t_max_sun / 40.0;
+                var opt_ext_sun = vec3<f32>(0.0);
+                for (var j = 0u; j < 40u; j = j + 1u) {
+                    let t_sun = (f32(j) + 0.5) * step_size_sun;
+                    let cur_h_sun = length(ray_origin_sun + params.sunDirection * t_sun) - r;
+                    opt_ext_sun += get_total_extinction(cur_h_sun, params) * step_size_sun;
+                }
+                sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
+            } else {
+                // [KO] 일반 모드: LUT 사용 (useGround가 꺼져 있다면 이미 가림이 없는 상태임)
+                sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
+            }
+
+            // [KO] 행성 그림자 역시 배경에서는 showGround가 꺼져 있으면 제거합니다.
             var shadow_mask = 1.0;
-            if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
+            if (effective_use_ground > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
 
             let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
             let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
@@ -99,7 +125,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         // [KO] 지면 반사광 (useGround가 켜져 있고 실제 지면 충돌이 있을 때만 추가)
         // [EN] Add ground radiance only if useGround is active and a real collision occurred.
-        if (params.useGround > 0.5 && t_earth > 0.0) {
+        if (params.useGround > 0.5 && params.showGround > 0.5 && t_earth > 0.0) {
             let hitPos = ray_origin + view_dir * t_earth;
             let up = normalize(hitPos);
             let cos_sun = dot(up, params.sunDirection);
