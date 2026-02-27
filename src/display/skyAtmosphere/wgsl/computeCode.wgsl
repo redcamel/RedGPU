@@ -11,14 +11,12 @@ let sceneSample = textureLoad(sourceTexture, id, 0);
 var sceneColor = sceneSample.rgb;
 let sceneAlpha = sceneSample.a;
 
-// [KO] 1. 시선 방향(viewDir) 재구축
 let invP = systemUniforms.projection.inverseProjectionMatrix;
 let viewSpaceDir = vec3<f32>((uv.x * 2.0 - 1.0) * invP[0][0], ((1.0 - uv.y) * 2.0 - 1.0) * invP[1][1], -1.0);
 let worldRotation = mat3x3<f32>(systemUniforms.camera.inverseViewMatrix[0].xyz, systemUniforms.camera.inverseViewMatrix[1].xyz, systemUniforms.camera.inverseViewMatrix[2].xyz);
 let viewDir = normalize(worldRotation * viewSpaceDir);
 let sunDir = normalize(uniforms.sunDirection);
 
-// [KO] 2. 공중 원근법(Aerial Perspective) 적용
 let rawDepth = fetchDepth(id);
 let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping) / 1000.0;
 let maxApDist = 100.0; 
@@ -35,18 +33,17 @@ if (rawDepth < 0.999999) {
     sceneColor = (sceneColor * apSample.a) + (apSample.rgb * uniforms.sunIntensity);
 }
 
-// [KO] 3. 대기 배경 연산
-let camPos = vec3<f32>(0.0, r + camH, 0.0);
-let tEarth = getRaySphereIntersection(camPos, viewDir, r);
 let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
 let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
 var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
+let camPos = vec3<f32>(0.0, r + camH, 0.0);
+let tEarth = getRaySphereIntersection(camPos, viewDir, r);
 if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
     let viewSunCos = dot(viewDir, sunDir);
     let sunRad = uniforms.sunSize * DEG_TO_RAD;
     let sunMask = smoothstep(cos(sunRad) - 0.001, cos(sunRad), viewSunCos);
-    let sunTrans = getPhysicalTransmittance(camPos, sunDir, r, atmH, uniforms);
+    let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, uniforms.atmosphereHeight);
     atmosphereBackground += sunMask * sunTrans * uniforms.sunIntensity;
 }
 
