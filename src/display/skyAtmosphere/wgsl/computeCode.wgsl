@@ -70,28 +70,15 @@ var atmosphereBackground: vec3<f32>;
 let camPos = vec3<f32>(0.0, r + camH, 0.0);
 let t_earth = get_ray_sphere_intersection(camPos, viewDir, r);
 
-if (t_earth > 0.0) {
-    // [KO] 가려진 지면 영역 [EN] Occluded ground area
-    let hitPos = camPos + viewDir * t_earth;
-    let up = normalize(hitPos);
-    let cos_sun = dot(up, sunDir);
-    let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_sun, atmH);
-    
-    let albedo = uniforms.groundAlbedo * INV_PI;
-    let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
-    let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
-    
-    // [KO] 지면 조명: (직사광 + 산란광) * 알베도
-    // [EN] Ground lighting: (Direct + Scattered) * Albedo
-    let groundColor = (sun_trans * max(0.0, cos_sun) + skySample.rgb) * uniforms.sunIntensity * albedo;
-    atmosphereBackground = groundColor;
-} else {
-    // [KO] 순수 하늘 영역 [EN] Pure sky area
-    let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
-    let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
-    atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
-    
-    // [KO] 태양 디스크 합성 [EN] Sun disk synthesis
+// [KO] 모든 배경 영역(하늘 및 지면)에 대해 Sky-View LUT를 사용하여 대기 효과가 통합된 색상을 가져옵니다.
+// [EN] Use Sky-View LUT for all background areas (sky and ground) to get colors with integrated atmospheric effects.
+let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
+let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
+atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
+
+if (t_earth <= 0.0) {
+    // [KO] 태양 디스크 합성 (지면에 가려지지 않은 경우에만)
+    // [EN] Sun disk synthesis (only if not occluded by the ground)
     let view_sun_cos = dot(viewDir, sunDir);
     let sun_rad = uniforms.sunSize * DEG_TO_RAD;
     let sun_mask = smoothstep(cos(sun_rad) - 0.001, cos(sun_rad), view_sun_cos);

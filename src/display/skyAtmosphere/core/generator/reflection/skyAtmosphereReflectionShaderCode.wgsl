@@ -86,7 +86,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let albedo = params.groundAlbedo * INV_PI;
             let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cos_sun * 0.5 + 0.5, 0.0), 0.0).rgb;
             
-            let ground_radiance = (sun_trans * max(0.0, cos_sun) + ms_energy) * albedo;
+            // [KO] 지면 반사광: (직사광 + 다중 산란광 + 환경광) * 알베도
+            // [EN] Ground radiance: (Direct light + Multi-scattered light + Ambient light) * Albedo
+            let ground_radiance = (sun_trans * max(0.0, cos_sun) + ms_energy + params.groundAmbient) * albedo;
             radiance += transmittance * ground_radiance;
         }
     }
