@@ -76,9 +76,10 @@ let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
 let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
 atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
-if (t_earth <= 0.0 || uniforms.showGround < 0.5) {
-    // [KO] 태양 디스크 합성 (지면에 가려지지 않았거나 showGround가 꺼진 경우)
-    // [EN] Sun disk synthesis (only if not occluded by the ground or showGround is off)
+// [KO] 태양 디스크 합성 조건: 물리적 지면이 없거나, 시선이 지면에 닿지 않거나, 지면을 숨긴 경우
+// [EN] Sun disk synthesis condition: no physical ground, or ray doesn't hit ground, or ground is hidden
+if (uniforms.useGround < 0.5 || t_earth <= 0.0 || uniforms.showGround < 0.5) {
+    // [KO] 태양 디스크 합성
     let view_sun_cos = dot(viewDir, sunDir);
     let sun_rad = uniforms.sunSize * DEG_TO_RAD;
     let sun_mask = smoothstep(cos(sun_rad) - 0.001, cos(sun_rad), view_sun_cos);
@@ -92,24 +93,32 @@ if (t_earth <= 0.0 || uniforms.showGround < 0.5) {
         // [KO] Ghost Planet 모드: 지면은 물리적으로 존재하지만 시각적으로는 투과해야 하므로 직접 계산
         let r_val = uniforms.earthRadius;
         let ray_origin_sun = vec3<f32>(0.0, r_val + camH, 0.0);
+        let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, sunDir, r_val + uniforms.atmosphereHeight);
         
-        // [KO] 물리적 지면 가림 확인
-        // [EN] Check for physical ground occlusion
-        let t_earth_sun = get_ray_sphere_intersection(ray_origin_sun, sunDir, r_val);
-        if (t_earth_sun > 0.0) {
-            sun_trans = vec3<f32>(0.0);
+        if (t_max_sun <= 0.0) {
+            sun_trans = vec3<f32>(1.0);
         } else {
-            let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, sunDir, r_val + uniforms.atmosphereHeight);
-            let step_size_sun = t_max_sun / 40.0;
+            // [KO] Ghost Planet 모드에서도 지면 관통 시 구간 분할 적분 적용
+            let b_sun = dot(ray_origin_sun, sunDir);
+            let c_sun = dot(ray_origin_sun, ray_origin_sun) - r_val * r_val;
+            let delta_sun = b_sun * b_sun - c_sun;
+            
             var opt_ext_sun = vec3<f32>(0.0);
-            for (var i = 0u; i < 40u; i = i + 1u) {
-                let t_sun = (f32(i) + 0.5) * step_size_sun;
-                let cur_h_sun = length(ray_origin_sun + sunDir * t_sun) - r_val;
+            if (delta_sun >= 0.0) {
+                let s_sun = sqrt(delta_sun);
+                let t_in_sun = -b_sun - s_sun;
+                let t_out_sun = -b_sun + s_sun;
                 
-                // [KO] 지면 내부(cur_h < 0)는 대기 밀도가 0인 것으로 간주하여 적분을 건너뜁니다.
-                if (uniforms.useGround > 0.5 && cur_h_sun < -0.001) { continue; }
-                
-                opt_ext_sun += get_total_extinction(cur_h_sun, uniforms) * step_size_sun;
+                if (t_in_sun > EPSILON && t_in_sun < t_max_sun) {
+                    opt_ext_sun += integrate_optical_depth(ray_origin_sun, sunDir, 0.0, t_in_sun, 16u, uniforms);
+                    if (t_out_sun > 0.0 && t_max_sun > t_out_sun) {
+                        opt_ext_sun += integrate_optical_depth(ray_origin_sun, sunDir, t_out_sun, t_max_sun, 16u, uniforms);
+                    }
+                } else {
+                    opt_ext_sun = integrate_optical_depth(ray_origin_sun, sunDir, 0.0, t_max_sun, 32u, uniforms);
+                }
+            } else {
+                opt_ext_sun = integrate_optical_depth(ray_origin_sun, sunDir, 0.0, t_max_sun, 32u, uniforms);
             }
             sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
         }

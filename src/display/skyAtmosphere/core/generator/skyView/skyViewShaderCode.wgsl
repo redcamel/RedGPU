@@ -35,7 +35,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         view_elevation = horizon_elevation - ratio * (horizon_elevation + HPI);
     }
 
-    let view_dir = vec3<f32>(cos(view_elevation) * cos(azimuth), sin(view_elevation), cos(view_elevation) * sin(azimuth));
+    // [KO] Artistic Symmetry: useGround가 꺼진 경우 상하 대칭을 위해 각도 반전
+    // [EN] Artistic Symmetry: Mirror elevation if useGround is disabled for perfect symmetry
+    var effective_view_elevation = view_elevation;
+    if (params.useGround < 0.5) {
+        effective_view_elevation = abs(view_elevation);
+    }
+
+    let view_dir = vec3<f32>(cos(effective_view_elevation) * cos(azimuth), sin(effective_view_elevation), cos(effective_view_elevation) * sin(azimuth));
     let ray_origin = vec3<f32>(0.0, h_c + r, 0.0);
 
     let t_max = get_ray_sphere_intersection(ray_origin, view_dir, r + params.atmosphereHeight);
@@ -116,18 +123,31 @@ fn integrate_step(p: vec3<f32>, view_dir: vec3<f32>, step_size: f32, radiance: p
     let is_ghost_planet = params.useGround > 0.5 && params.showGround < 0.5;
     
     if (is_ghost_planet) {
-        let t_earth_sun = get_ray_sphere_intersection(p, params.sunDirection, r);
-        if (t_earth_sun > 0.0) {
-            sun_trans = vec3<f32>(0.0);
+        let t_max_sun = get_ray_sphere_intersection(p, params.sunDirection, r + params.atmosphereHeight);
+        if (t_max_sun <= 0.0) {
+            sun_trans = vec3<f32>(1.0);
         } else {
-            let t_max_sun = get_ray_sphere_intersection(p, params.sunDirection, r + params.atmosphereHeight);
-            let step_size_sun = t_max_sun / 32.0;
+            // [KO] Ghost Planet 모드에서도 지면 관통 시 구간 분할 적분 적용
+            let b_sun = dot(p, params.sunDirection);
+            let c_sun = dot(p, p) - r * r;
+            let delta_sun = b_sun * b_sun - c_sun;
+            
             var opt_ext_sun = vec3<f32>(0.0);
-            for (var j = 0u; j < 32u; j = j + 1u) {
-                let t_sun = (f32(j) + 0.5) * step_size_sun;
-                let h_sun = length(p + params.sunDirection * t_sun) - r;
-                if (params.useGround > 0.5 && h_sun < -0.001) { continue; }
-                opt_ext_sun += get_total_extinction(h_sun, params) * step_size_sun;
+            if (delta_sun >= 0.0) {
+                let s_sun = sqrt(delta_sun);
+                let t_in_sun = -b_sun - s_sun;
+                let t_out_sun = -b_sun + s_sun;
+                
+                if (t_in_sun > EPSILON && t_in_sun < t_max_sun) {
+                    opt_ext_sun += integrate_optical_depth(p, params.sunDirection, 0.0, t_in_sun, 16u, params);
+                    if (t_out_sun > 0.0 && t_max_sun > t_out_sun) {
+                        opt_ext_sun += integrate_optical_depth(p, params.sunDirection, t_out_sun, t_max_sun, 16u, params);
+                    }
+                } else {
+                    opt_ext_sun = integrate_optical_depth(p, params.sunDirection, 0.0, t_max_sun, 32u, params);
+                }
+            } else {
+                opt_ext_sun = integrate_optical_depth(p, params.sunDirection, 0.0, t_max_sun, 32u, params);
             }
             sun_trans = exp(-min(opt_ext_sun, vec3<f32>(MAX_TAU)));
         }
