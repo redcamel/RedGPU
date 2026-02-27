@@ -17,124 +17,124 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let elevation = (uvw.y - 0.5) * PI;
     
     // [KO] Artistic Symmetry: useGround가 꺼진 경우 상하 대칭을 위해 각도 반전
-    var effective_elevation = elevation;
+    var effectiveElevation = elevation;
     if (params.useGround < 0.5) {
-        effective_elevation = abs(elevation);
+        effectiveElevation = abs(elevation);
     }
     
-    let view_dir = vec3<f32>(cos(effective_elevation) * cos(azimuth), sin(effective_elevation), cos(effective_elevation) * sin(azimuth));
+    let viewDir = vec3<f32>(cos(effectiveElevation) * cos(azimuth), sin(effectiveElevation), cos(effectiveElevation) * sin(azimuth));
     
     // 거리 매핑 (언리얼과 유사하게 비선형적으로 설정, 최대 100km)
-    let max_dist = 100.0;
-    let slice_dist = uvw.z * uvw.z * max_dist; 
+    let maxDist = 100.0;
+    let sliceDist = uvw.z * uvw.z * maxDist; 
 
     let r = params.earthRadius;
     let h_c = max(0.0001, params.cameraHeight);
-    let ray_origin = vec3<f32>(0.0, h_c + r, 0.0);
+    let rayOrigin = vec3<f32>(0.0, h_c + r, 0.0);
 
     // 적분 시작
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
 
-    // [KO] 지면 교차점 계산 (t_in, t_out 모두 확보)
-    let b = dot(ray_origin, view_dir);
-    let c = dot(ray_origin, ray_origin) - r * r;
+    // [KO] 지면 교차점 계산 (tIn, tOut 모두 확보)
+    let b = dot(rayOrigin, viewDir);
+    let c = dot(rayOrigin, rayOrigin) - r * r;
     let delta = b * b - c;
-    var t_earth_in = -1.0;
-    var t_earth_out = -1.0;
+    var tEarthIn = -1.0;
+    var tEarthOut = -1.0;
     if (delta >= 0.0) {
         let s = sqrt(delta);
-        t_earth_in = -b - s;
-        t_earth_out = -b + s;
+        tEarthIn = -b - s;
+        tEarthOut = -b + s;
     }
 
-    let intersects_planet_volume = t_earth_in > 0.0;
+    let intersectsPlanetVolume = tEarthIn > 0.0;
 
-    if (slice_dist > 0.0) {
-        if (intersects_planet_volume) {
+    if (sliceDist > 0.0) {
+        if (intersectsPlanetVolume) {
             // --- Segment 1: Camera to Earth (Front Atmosphere) ---
-            let t_front_end = min(slice_dist, t_earth_in);
-            let steps_front = 16;
-            let step_size_front = t_front_end / f32(steps_front);
-            for (var i = 0; i < steps_front; i = i + 1) {
-                let t = (f32(i) + 0.5) * step_size_front;
-                integrate_camera_volume_step(ray_origin + view_dir * t, view_dir, step_size_front, &radiance, &transmittance);
+            let tFrontEnd = min(sliceDist, tEarthIn);
+            let stepsFront = 16;
+            let stepSizeFront = tFrontEnd / f32(stepsFront);
+            for (var i = 0; i < stepsFront; i = i + 1) {
+                let t = (f32(i) + 0.5) * stepSizeFront;
+                integrateCameraVolumeStep(rayOrigin + viewDir * t, viewDir, stepSizeFront, &radiance, &transmittance);
             }
 
-            if (params.useGround < 0.5 && slice_dist > t_earth_out && t_earth_out > 0.0) {
+            if (params.useGround < 0.5 && sliceDist > tEarthOut && tEarthOut > 0.0) {
                 // --- Segment 2: Earth Exit to Slice Dist (Back Atmosphere) ---
-                let back_dist = slice_dist - t_earth_out;
-                let steps_back = 16;
-                let step_size_back = back_dist / f32(steps_back);
-                for (var i = 0; i < steps_back; i = i + 1) {
-                    let t = t_earth_out + (f32(i) + 0.5) * step_size_back;
-                    integrate_camera_volume_step(ray_origin + view_dir * t, view_dir, step_size_back, &radiance, &transmittance);
+                let backDist = sliceDist - tEarthOut;
+                let stepsBack = 16;
+                let stepSizeBack = backDist / f32(stepsBack);
+                for (var i = 0; i < stepsBack; i = i + 1) {
+                    let t = tEarthOut + (f32(i) + 0.5) * stepSizeBack;
+                    integrateCameraVolumeStep(rayOrigin + viewDir * t, viewDir, stepSizeBack, &radiance, &transmittance);
                 }
             }
         } else {
             // --- Single Segment: Standard Sky Path ---
             let steps = 32;
-            let step_size = slice_dist / f32(steps);
+            let stepSize = sliceDist / f32(steps);
             for (var i = 0; i < steps; i = i + 1) {
-                let t = (f32(i) + 0.5) * step_size;
-                integrate_camera_volume_step(ray_origin + view_dir * t, view_dir, step_size, &radiance, &transmittance);
+                let t = (f32(i) + 0.5) * stepSize;
+                integrateCameraVolumeStep(rayOrigin + viewDir * t, viewDir, stepSize, &radiance, &transmittance);
             }
         }
     }
 
     // 결과 저장 (RGB: 산란광, A: 평균 투과율)
-    let avg_trans = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
-    textureStore(cameraVolumeTexture, global_id, vec4<f32>(radiance, avg_trans));
+    let avgTrans = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
+    textureStore(cameraVolumeTexture, global_id, vec4<f32>(radiance, avgTrans));
 }
 
-fn integrate_camera_volume_step(p: vec3<f32>, view_dir: vec3<f32>, step_size: f32, radiance: ptr<function, vec3<f32>>, transmittance: ptr<function, vec3<f32>>) {
-    let p_len = length(p);
+fn integrateCameraVolumeStep(p: vec3<f32>, viewDir: vec3<f32>, stepSize: f32, radiance: ptr<function, vec3<f32>>, transmittance: ptr<function, vec3<f32>>) {
+    let pLen = length(p);
     let r = params.earthRadius;
-    let cur_h = p_len - r;
-    let up = p / p_len;
-    let cos_sun = dot(up, params.sunDirection);
+    let curH = pLen - r;
+    let up = p / pLen;
+    let cosSun = dot(up, params.sunDirection);
 
     // [KO] useGround가 켜져 있는 경우에만 지표면 아래에서 적분을 스킵합니다.
-    if (params.useGround > 0.5 && cur_h < -0.001) { return; }
+    if (params.useGround > 0.5 && curH < -0.001) { return; }
 
     // [KO] 조명 에너지는 지면 가림을 무시하는 물리 투과율 사용
-    let sun_trans = get_physical_transmittance(p, params.sunDirection, r, params.atmosphereHeight, params);
+    let sunTrans = getPhysicalTransmittance(p, params.sunDirection, r, params.atmosphereHeight, params);
 
-    // [KO] 행성 내부(cur_h < 0)는 진공으로 처리하여 밀도를 0으로 설정합니다.
-    var rho_r = 0.0;
-    var rho_m = 0.0;
-    var rho_f = 0.0;
-    var rho_o = 0.0;
+    // [KO] 행성 내부(curH < 0)는 진공으로 처리하여 밀도를 0으로 설정합니다.
+    var rhoR = 0.0;
+    var rhoM = 0.0;
+    var rhoF = 0.0;
+    var rhoO = 0.0;
 
-    if (cur_h >= 0.0) {
-        rho_r = exp(-cur_h / params.rayleighScaleHeight);
-        rho_m = exp(-cur_h / params.mieScaleHeight);
-        rho_f = exp(-cur_h * params.heightFogFalloff);
-        let ozone_dist = abs(cur_h - params.ozoneLayerCenter);
-        rho_o = exp(-max(0.0, ozone_dist * ozone_dist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
+    if (curH >= 0.0) {
+        rhoR = exp(-curH / params.rayleighScaleHeight);
+        rhoM = exp(-curH / params.mieScaleHeight);
+        rhoF = exp(-curH * params.heightFogFalloff);
+        let ozoneDist = abs(curH - params.ozoneLayerCenter);
+        rhoO = exp(-max(0.0, ozoneDist * ozoneDist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
     }
 
     // [KO] 행성 그림자
-    var shadow_mask = 1.0;
-    if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
+    var shadowMask = 1.0;
+    if (params.useGround > 0.5 && getRaySphereIntersection(p, params.sunDirection, r) > 0.0) { shadowMask = 0.0; }
 
-    let view_sun_cos = dot(view_dir, params.sunDirection);
+    let viewSunCos = dot(viewDir, params.sunDirection);
     
-    let scat_r = params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos);
-    let scat_m = vec3<f32>(params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy));
-    let scat_f = vec3<f32>(params.heightFogDensity * rho_f * phase_mie(view_sun_cos, 0.7)); 
+    let scatR = params.rayleighScattering * rhoR * phaseRayleigh(viewSunCos);
+    let scatM = vec3<f32>(params.mieScattering * rhoM * phaseMie(viewSunCos, params.mieAnisotropy));
+    let scatF = vec3<f32>(params.heightFogDensity * rhoF * phaseMie(viewSunCos, 0.7)); 
     
-    let step_scat = (scat_r + scat_m + scat_f) * sun_trans * shadow_mask;
+    let stepScat = (scatR + scatM + scatF) * sunTrans * shadowMask;
 
     // [KO] 다중 산란 기여분 (에너지 보존 고려)
-    let ms_uv = vec2<f32>(clamp(cos_sun * 0.5 + 0.5, 0.0, 1.0), 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
-    let multi_scat_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, ms_uv, 0.0).rgb;
-    let total_scat_coeff = params.rayleighScattering * rho_r + vec3<f32>((params.mieScattering * rho_m) + (params.heightFogDensity * rho_f));
-    let ms_scat = multi_scat_energy * total_scat_coeff * shadow_mask;
+    let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.0, 1.0), 1.0 - clamp(curH / params.atmosphereHeight, 0.0, 1.0));
+    let multiScatEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, msUV, 0.0).rgb;
+    let totalScatCoeff = params.rayleighScattering * rhoR + vec3<f32>((params.mieScattering * rhoM) + (params.heightFogDensity * rhoF));
+    let msScat = multiScatEnergy * totalScatCoeff * shadowMask;
 
     // [KO] 전체 소멸 계수 (에너지 소실)
-    let extinction = get_total_extinction(cur_h, params) + vec3<f32>(params.heightFogDensity * rho_f);
+    let extinction = getTotalExtinction(curH, params) + vec3<f32>(params.heightFogDensity * rhoF);
 
-    *radiance += *transmittance * (step_scat + ms_scat) * step_size;
-    *transmittance *= exp(-extinction * step_size);
+    *radiance += *transmittance * (stepScat + msScat) * stepSize;
+    *transmittance *= exp(-extinction * stepSize);
 }

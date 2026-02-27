@@ -27,7 +27,7 @@ fn getAtmosphereSunLight() -> AtmosphereSunLight {
     
     // [KO] 현재 고도와 태양 각도를 기반으로 대기 투과율(Transmittance)을 샘플링하여 실제 태양색 결정
     // [EN] Sample Atmospheric Transmittance based on current height and sun angle to determine actual sun color
-    sun.color = get_transmittance(
+    sun.color = getTransmittance(
         transmittanceTexture, 
         atmosphereSampler, 
         u_skyAtmosphere.cameraHeight, 

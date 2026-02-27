@@ -35,24 +35,3 @@ struct Uniforms {
 	useGround: f32,
 	showGround: f32
 };
-
-/**
- * [KO] 지면 노이즈를 생성합니다. (표준 getHash3D_vec3 사용)
- * [EN] Generates ground noise. (Using standard getHash3D_vec3)
- */
-fn get_ground_noise_pe(p: vec3<f32>) -> f32 {
-    let i = floor(p);
-    let f = fract(p);
-    let u = f * f * (3.0 - 2.0 * f);
-    
-    // [KO] 표준 math.getHash3D_vec3를 활용한 노이즈 합성
-    // [EN] Noise synthesis using standard math.getHash3D_vec3
-    return mix(mix(mix(dot(getHash3D_vec3(i + vec3<f32>(0.0, 0.0, 0.0)), f - vec3<f32>(0.0, 0.0, 0.0)),
-                       dot(getHash3D_vec3(i + vec3<f32>(1.0, 0.0, 0.0)), f - vec3<f32>(1.0, 0.0, 0.0)), u.x),
-                   mix(dot(getHash3D_vec3(i + vec3<f32>(0.0, 1.0, 0.0)), f - vec3<f32>(0.0, 1.0, 0.0)),
-                       dot(getHash3D_vec3(i + vec3<f32>(1.0, 1.0, 0.0)), f - vec3<f32>(1.0, 1.0, 0.0)), u.x), u.y),
-               mix(mix(dot(getHash3D_vec3(i + vec3<f32>(0.0, 0.0, 1.0)), f - vec3<f32>(0.0, 0.0, 1.0)),
-                       dot(getHash3D_vec3(i + vec3<f32>(1.0, 0.0, 1.0)), f - vec3<f32>(1.0, 0.0, 1.0)), u.x),
-                   mix(dot(getHash3D_vec3(i + vec3<f32>(0.0, 1.0, 1.0)), f - vec3<f32>(0.0, 1.0, 1.0)),
-                       dot(getHash3D_vec3(i + vec3<f32>(1.0, 1.0, 1.0)), f - vec3<f32>(1.0, 1.0, 1.0)), u.x), u.y), u.z);
-}

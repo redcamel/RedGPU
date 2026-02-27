@@ -625,7 +625,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
             // [KO] Specular 필터링: (HDR 반사 * 투과율) + 실시간 하늘 산란광
             // [EN] Specular Filtering: (HDR Reflection * Transmittance) + Real-time Sky Scattering
-            let specTrans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
+            let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
             
             // [KO] 큐브맵 기반 실시간 반사광 샘플링 (거칠기 대응)
             // [EN] Cubemap-based real-time reflection sampling (roughness support)
@@ -637,7 +637,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
             // [KO] Diffuse 필터링: (HDR 조도 * 투과율) + 실시간 대기 조도(Irradiance)
             // [EN] Diffuse Filtering: (HDR Irradiance * Transmittance) + Real-time Atmosphere Irradiance
-            let diffTrans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
+            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
             
             // [KO] 2D 조도 LUT 샘플링 (X: Elevation, Y: Relative Azimuth to Sun)
             let u_el = clamp((asin(clamp(N.y, -1.0, 1.0)) * INV_PI) + 0.5, 0.001, 0.999);
@@ -683,7 +683,7 @@ fn main(inputData:InputData) -> OutputFragment {
             // [KO] 대기 필터링 적용 (Back side)
             if (systemUniforms.useSkyAtmosphere == 1u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
-                let backTrans = get_transmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
+                let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
                 
                 // [KO] 큐브맵 기반 샘플링으로 교체 (skyViewTexture 의존성 제거)
                 // [EN] Replace with cubemap-based sampling (remove dependency on skyViewTexture)

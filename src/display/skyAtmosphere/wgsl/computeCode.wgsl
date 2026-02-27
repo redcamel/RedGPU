@@ -43,97 +43,97 @@ let depthKm = getLinearizeDepth(
     systemUniforms.camera.farClipping
 ) / 1000.0;
 
-let max_ap_dist = 100.0; 
-let ap_dist = clamp(depthKm, 0.0, max_ap_dist);
+let maxApDist = 100.0; 
+let apDist = clamp(depthKm, 0.0, maxApDist);
 
 // [KO] 3D LUT UVW 계산 (CameraVolumeGenerator와 매핑 위치 동기화)
 // [EN] Calculate 3D LUT UVW (Synchronize mapping with CameraVolumeGenerator)
 let azimuth = atan2(viewDir.z, viewDir.x);
 let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
 
-// [KO] ap_u(방위각)는 Repeat 샘플러를 사용하여 360도 경계에서 부드럽게 이어지도록 합니다.
-// [EN] ap_u (Azimuth) uses a repeat sampler for seamless 360-degree wrapping.
-let ap_u = (azimuth / PI2) + 0.5;
-let ap_v = clamp((elevation * INV_PI) + 0.5, 0.001, 0.999);
-let ap_w = clamp(sqrt(ap_dist / max_ap_dist), 0.0, 0.999);
-let ap_sample = textureSampleLevel(cameraVolumeTexture, atmosphereSampler, vec3<f32>(ap_u, ap_v, ap_w), 0.0);
+// [KO] apU(방위각)는 Repeat 샘플러를 사용하여 360도 경계에서 부드럽게 이어지도록 합니다.
+// [EN] apU (Azimuth) uses a repeat sampler for seamless 360-degree wrapping.
+let apU = (azimuth / PI2) + 0.5;
+let apV = clamp((elevation * INV_PI) + 0.5, 0.001, 0.999);
+let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
+let apSample = textureSampleLevel(cameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
 // [KO] 불투명 객체(depth < 0.999999)에 대한 산란 효과 적용
 // [EN] Apply scattering effect to opaque objects (depth < 0.999999)
 if (rawDepth < 0.999999) {
-    sceneColor = (sceneColor * ap_sample.a) + (ap_sample.rgb * uniforms.sunIntensity);
+    sceneColor = (sceneColor * apSample.a) + (apSample.rgb * uniforms.sunIntensity);
 }
 
 // [KO] 3. 대기 배경 연산 (하늘 영역)
 // [EN] 3. Atmosphere background calculation (Sky region)
 var atmosphereBackground: vec3<f32>;
 let camPos = vec3<f32>(0.0, r + camH, 0.0);
-let t_earth = get_ray_sphere_intersection(camPos, viewDir, r);
+let tEarth = getRaySphereIntersection(camPos, viewDir, r);
 
 // [KO] 모든 배경 영역(하늘 및 지면)에 대해 Sky-View LUT를 사용하여 대기 효과가 통합된 색상을 가져옵니다.
 // [EN] Use Sky-View LUT for all background areas (sky and ground) to get colors with integrated atmospheric effects.
-let skyUV = get_sky_view_uv(viewDir, camH, r, atmH);
+let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
 let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
 atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
 // [KO] 태양 디스크 합성 조건: 물리적 지면이 없거나, 시선이 지면에 닿지 않거나, 지면을 숨긴 경우
 // [EN] Sun disk synthesis condition: no physical ground, or ray doesn't hit ground, or ground is hidden
-if (uniforms.useGround < 0.5 || t_earth <= 0.0 || uniforms.showGround < 0.5) {
+if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
     // [KO] 태양 디스크 합성
-    let view_sun_cos = dot(viewDir, sunDir);
-    let sun_rad = uniforms.sunSize * DEG_TO_RAD;
-    let sun_mask = smoothstep(cos(sun_rad) - 0.001, cos(sun_rad), view_sun_cos);
+    let viewSunCos = dot(viewDir, sunDir);
+    let sunRad = uniforms.sunSize * DEG_TO_RAD;
+    let sunMask = smoothstep(cos(sunRad) - 0.001, cos(sunRad), viewSunCos);
     
     // [KO] showGround는 useGround가 켜져 있을 때만 의미가 있습니다.
     // [EN] showGround is only meaningful when useGround is enabled.
-    let is_ghost_planet = uniforms.useGround > 0.5 && uniforms.showGround < 0.5;
+    let isGhostPlanet = uniforms.useGround > 0.5 && uniforms.showGround < 0.5;
     
-    var sun_trans: vec3<f32>;
-    if (is_ghost_planet) {
+    var sunTrans: vec3<f32>;
+    if (isGhostPlanet) {
         // [KO] Ghost Planet 모드: 지면은 물리적으로 존재하지만 시각적으로는 투과해야 하므로 직접 계산
-        let r_val = uniforms.earthRadius;
-        let ray_origin_sun = vec3<f32>(0.0, r_val + camH, 0.0);
-        let t_max_sun = get_ray_sphere_intersection(ray_origin_sun, sunDir, r_val + uniforms.atmosphereHeight);
+        let rVal = uniforms.earthRadius;
+        let rayOriginSun = vec3<f32>(0.0, rVal + camH, 0.0);
+        let tMaxSun = getRaySphereIntersection(rayOriginSun, sunDir, rVal + uniforms.atmosphereHeight);
         
-        if (t_max_sun <= 0.0) {
-            sun_trans = vec3<f32>(1.0);
+        if (tMaxSun <= 0.0) {
+            sunTrans = vec3<f32>(1.0);
         } else {
             // [KO] Ghost Planet 모드에서도 지면 관통 시 구간 분할 적분 적용
-            let b_sun = dot(ray_origin_sun, sunDir);
-            let c_sun = dot(ray_origin_sun, ray_origin_sun) - r_val * r_val;
-            let delta_sun = b_sun * b_sun - c_sun;
+            let bSun = dot(rayOriginSun, sunDir);
+            let cSun = dot(rayOriginSun, rayOriginSun) - rVal * rVal;
+            let deltaSun = bSun * bSun - cSun;
             
-            var opt_ext_sun = vec3<f32>(0.0);
-            if (delta_sun >= 0.0) {
-                let s_sun = sqrt(delta_sun);
-                let t_in_sun = -b_sun - s_sun;
-                let t_out_sun = -b_sun + s_sun;
+            var optExtSun = vec3<f32>(0.0);
+            if (deltaSun >= 0.0) {
+                let sSun = sqrt(deltaSun);
+                let tInSun = -bSun - sSun;
+                let tOutSun = -bSun + sSun;
                 
-                if (t_in_sun > EPSILON && t_in_sun < t_max_sun) {
-                    opt_ext_sun += integrate_optical_depth(ray_origin_sun, sunDir, 0.0, t_in_sun, 16u, uniforms);
-                    if (t_out_sun > 0.0 && t_max_sun > t_out_sun) {
-                        opt_ext_sun += integrate_optical_depth(ray_origin_sun, sunDir, t_out_sun, t_max_sun, 16u, uniforms);
+                if (tInSun > EPSILON && tInSun < tMaxSun) {
+                    optExtSun += integrateOpticalDepth(rayOriginSun, sunDir, 0.0, tInSun, 16u, uniforms);
+                    if (tOutSun > 0.0 && tMaxSun > tOutSun) {
+                        optExtSun += integrateOpticalDepth(rayOriginSun, sunDir, tOutSun, tMaxSun, 16u, uniforms);
                     }
                 } else {
-                    opt_ext_sun = integrate_optical_depth(ray_origin_sun, sunDir, 0.0, t_max_sun, 32u, uniforms);
+                    optExtSun = integrateOpticalDepth(rayOriginSun, sunDir, 0.0, tMaxSun, 32u, uniforms);
                 }
             } else {
-                opt_ext_sun = integrate_optical_depth(ray_origin_sun, sunDir, 0.0, t_max_sun, 32u, uniforms);
+                optExtSun = integrateOpticalDepth(rayOriginSun, sunDir, 0.0, tMaxSun, 32u, uniforms);
             }
-            sun_trans = exp(-min(opt_ext_sun, vec3<f32>(50.0)));
+            sunTrans = exp(-min(optExtSun, vec3<f32>(50.0)));
         }
     } else {
         // [KO] 일반 모드 (지면 없음 또는 지면 보임): 이미 물리 상태가 반영된 LUT 사용
-        sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, uniforms.atmosphereHeight);
+        sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, uniforms.atmosphereHeight);
     }
     
     // [KO] 태양 디스크 합성: 물리적으로 올바른 강도 적용
     // [EN] Sun disk synthesis: apply physically correct intensity
-    // [KO] 물리적 지면(useGround)이 있는 경우 시선이 지면에 닿으면(t_earth > 0) 태양을 가립니다.
-    // [EN] If physical ground (useGround) exists, block the sun if the view hits the ground (t_earth > 0).
-    let is_occluded_by_ground = uniforms.useGround > 0.5 && t_earth > 0.0;
-    if (!is_occluded_by_ground || uniforms.showGround < 0.5) {
-        atmosphereBackground += sun_mask * sun_trans * uniforms.sunIntensity;
+    // [KO] 물리적 지면(useGround)이 있는 경우 시선이 지면에 닿으면(tEarth > 0) 태양을 가립니다.
+    // [EN] If physical ground (useGround) exists, block the sun if the view hits the ground (tEarth > 0).
+    let isOccludedByGround = uniforms.useGround > 0.5 && tEarth > 0.0;
+    if (!isOccludedByGround || uniforms.showGround < 0.5) {
+        atmosphereBackground += sunMask * sunTrans * uniforms.sunIntensity;
     }
 }
 

@@ -75,7 +75,7 @@ fn main(inputData: InputData) -> OutputFragment {
     // [EN] If atmosphere is enabled, reflect transmittance in alpha (Space is beyond the atmosphere)
     if (systemUniforms.useSkyAtmosphere == 1u) {
         let u_atmo = systemUniforms.skyAtmosphere;
-        let transmittance = get_transmittance(
+        let transmittance = getTransmittance(
             transmittanceTexture, 
             atmosphereSampler, 
             u_atmo.cameraHeight, 

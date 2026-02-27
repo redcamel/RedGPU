@@ -17,47 +17,47 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let azimuth = (uv.x - 0.5) * PI2;
 
     let r = params.earthRadius;
-    let h_c = max(0.0001, params.cameraHeight);
+    let camH = max(0.0001, params.cameraHeight);
     
     // 지평선 각도 계산
-    let horizon_cos = -sqrt(max(0.0, h_c * (2.0 * r + h_c))) / (r + h_c);
-    let horizon_elevation = asin(clamp(horizon_cos, -1.0, 1.0));
+    let horizonCos = -sqrt(max(0.0, camH * (2.0 * r + camH))) / (r + camH);
+    let horizonElevation = asin(clamp(horizonCos, -1.0, 1.0));
 
     // [UE5 표준 역매핑]
-    var view_elevation: f32;
+    var viewElevation: f32;
     if (uv.y < 0.5) {
         // [Sky Part] v = 0.5 * (1 - sqrt(ratio)) -> ratio = (1 - 2v)^2
         let ratio = (1.0 - 2.0 * uv.y) * (1.0 - 2.0 * uv.y);
-        view_elevation = horizon_elevation + ratio * (HPI - horizon_elevation);
+        viewElevation = horizonElevation + ratio * (HPI - horizonElevation);
     } else {
         // [Ground Part] v = 0.5 * (1 + sqrt(ratio)) -> ratio = (2v - 1)^2
         let ratio = (2.0 * uv.y - 1.0) * (2.0 * uv.y - 1.0);
-        view_elevation = horizon_elevation - ratio * (horizon_elevation + HPI);
+        viewElevation = horizonElevation - ratio * (horizonElevation + HPI);
     }
 
     // [KO] Artistic Symmetry: useGround가 꺼진 경우 상하 대칭을 위해 각도 반전
     // [EN] Artistic Symmetry: Mirror elevation if useGround is disabled for perfect symmetry
-    var effective_view_elevation = view_elevation;
+    var effectiveViewElevation = viewElevation;
     if (params.useGround < 0.5) {
-        effective_view_elevation = abs(view_elevation);
+        effectiveViewElevation = abs(viewElevation);
     }
 
-    let view_dir = vec3<f32>(cos(effective_view_elevation) * cos(azimuth), sin(effective_view_elevation), cos(effective_view_elevation) * sin(azimuth));
-    let ray_origin = vec3<f32>(0.0, h_c + r, 0.0);
+    let viewDir = vec3<f32>(cos(effectiveViewElevation) * cos(azimuth), sin(effectiveViewElevation), cos(effectiveViewElevation) * sin(azimuth));
+    let rayOrigin = vec3<f32>(0.0, camH + r, 0.0);
 
-    let t_max = get_ray_sphere_intersection(ray_origin, view_dir, r + params.atmosphereHeight);
+    let tMax = getRaySphereIntersection(rayOrigin, viewDir, r + params.atmosphereHeight);
     
-    // [KO] 지면 교차점 계산 (t_in, t_out 모두 확보)
-    // [EN] Calculate earth intersections (get both t_in and t_out)
-    let b = dot(ray_origin, view_dir);
-    let c = dot(ray_origin, ray_origin) - r * r;
+    // [KO] 지면 교차점 계산 (tIn, tOut 모두 확보)
+    // [EN] Calculate earth intersections (get both tIn and tOut)
+    let b = dot(rayOrigin, viewDir);
+    let c = dot(rayOrigin, rayOrigin) - r * r;
     let delta = b * b - c;
-    var t_earth_in = -1.0;
-    var t_earth_out = -1.0;
+    var tEarthIn = -1.0;
+    var tEarthOut = -1.0;
     if (delta >= 0.0) {
         let s = sqrt(delta);
-        t_earth_in = -b - s;
-        t_earth_out = -b + s;
+        tEarthIn = -b - s;
+        tEarthOut = -b + s;
     }
 
     var radiance = vec3<f32>(0.0);
@@ -65,45 +65,45 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // [KO] 구간 설정: 광선이 행성 볼륨(Radius)과 교차하는지 확인합니다.
     // [EN] Segment Setup: Check if the ray intersects the planet volume (Radius).
-    // [KO] useGround 여부와 상관없이, 구체 내부를 통과하는 경로는 구간 분할 적분이 필수적입니다.
-    let intersects_planet_volume = t_earth_in > 0.0;
+    // [KO] useGround 여부와 상관없이, 구체 내부를 통과하는 경로는 구간 분할 적분 필수적입니다.
+    let intersectsPlanetVolume = tEarthIn > 0.0;
     
-    if (intersects_planet_volume) {
+    if (intersectsPlanetVolume) {
         // --- Segment 1: Camera to Earth (Front Atmosphere) ---
-        let steps_front = 32;
-        let step_size_front = t_earth_in / f32(steps_front);
-        for (var i = 0; i < steps_front; i = i + 1) {
-            let t = (f32(i) + 0.5) * step_size_front;
-            integrate_step(ray_origin + view_dir * t, view_dir, step_size_front, &radiance, &transmittance);
+        let stepsFront = 32;
+        let stepSizeFront = tEarthIn / f32(stepsFront);
+        for (var i = 0; i < stepsFront; i = i + 1) {
+            let t = (f32(i) + 0.5) * stepSizeFront;
+            integrateStep(rayOrigin + viewDir * t, viewDir, stepSizeFront, &radiance, &transmittance);
         }
 
         if (params.useGround > 0.5 && params.showGround > 0.5) {
             // [KO] 일반 모드: 지면 반사광 추가 후 종료
-            let hitPos = ray_origin + view_dir * t_earth_in;
+            let hitPos = rayOrigin + viewDir * tEarthIn;
             let up = normalize(hitPos);
-            let cos_sun = dot(up, params.sunDirection);
-            let sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_sun, params.atmosphereHeight);
+            let cosSun = dot(up, params.sunDirection);
+            let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
             let albedo = params.groundAlbedo * INV_PI;
-            let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cos_sun * 0.5 + 0.5, 0.0), 0.0).rgb;
-            radiance += transmittance * (sun_trans * max(0.0, cos_sun) + ms_energy + params.groundAmbient) * albedo;
-        } else if (t_earth_out > 0.0 && t_max > t_earth_out) {
+            let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cosSun * 0.5 + 0.5, 0.0), 0.0).rgb;
+            radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy + params.groundAmbient) * albedo;
+        } else if (tEarthOut > 0.0 && tMax > tEarthOut) {
             // --- Segment 2: Earth Exit to Atmosphere Top (Back Atmosphere) ---
             // [KO] Ghost Planet 또는 useGround=false 모드: 지면 너머의 대기를 정밀하게 적분하여 밴딩 제거
-            let back_dist = t_max - t_earth_out;
-            let steps_back = 32;
-            let step_size_back = back_dist / f32(steps_back);
-            for (var i = 0; i < steps_back; i = i + 1) {
-                let t = t_earth_out + (f32(i) + 0.5) * step_size_back;
-                integrate_step(ray_origin + view_dir * t, view_dir, step_size_back, &radiance, &transmittance);
+            let backDist = tMax - tEarthOut;
+            let stepsBack = 32;
+            let stepSizeBack = backDist / f32(stepsBack);
+            for (var i = 0; i < stepsBack; i = i + 1) {
+                let t = tEarthOut + (f32(i) + 0.5) * stepSizeBack;
+                integrateStep(rayOrigin + viewDir * t, viewDir, stepSizeBack, &radiance, &transmittance);
             }
         }
-    } else if (t_max > 0.0) {
+    } else if (tMax > 0.0) {
         // --- Single Segment: Camera to Space (Normal Sky) ---
         let steps = 64;
-        let step_size = t_max / f32(steps);
+        let stepSize = tMax / f32(steps);
         for (var i = 0; i < steps; i = i + 1) {
-            let t = (f32(i) + 0.5) * step_size;
-            integrate_step(ray_origin + view_dir * t, view_dir, step_size, &radiance, &transmittance);
+            let t = (f32(i) + 0.5) * stepSize;
+            integrateStep(rayOrigin + viewDir * t, viewDir, stepSize, &radiance, &transmittance);
         }
     }
 
@@ -111,82 +111,82 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 
 // [KO] 개별 적분 단계 함수 (중복 제거)
-fn integrate_step(p: vec3<f32>, view_dir: vec3<f32>, step_size: f32, radiance: ptr<function, vec3<f32>>, transmittance: ptr<function, vec3<f32>>) {
-    let p_len = length(p);
+fn integrateStep(p: vec3<f32>, viewDir: vec3<f32>, stepSize: f32, radiance: ptr<function, vec3<f32>>, transmittance: ptr<function, vec3<f32>>) {
+    let pLen = length(p);
     let r = params.earthRadius;
-    let cur_h = p_len - r;
-    let up = p / p_len;
-    let cos_sun = dot(up, params.sunDirection);
+    let curH = pLen - r;
+    let up = p / pLen;
+    let cosSun = dot(up, params.sunDirection);
 
     // [KO] Ghost Planet 모드에서의 태양 투과율 계산 (지면 가림 고려)
-    var sun_trans: vec3<f32>;
-    let is_ghost_planet = params.useGround > 0.5 && params.showGround < 0.5;
+    var sunTrans: vec3<f32>;
+    let isGhostPlanet = params.useGround > 0.5 && params.showGround < 0.5;
     
-    if (is_ghost_planet) {
-        let t_max_sun = get_ray_sphere_intersection(p, params.sunDirection, r + params.atmosphereHeight);
-        if (t_max_sun <= 0.0) {
-            sun_trans = vec3<f32>(1.0);
+    if (isGhostPlanet) {
+        let tMaxSun = getRaySphereIntersection(p, params.sunDirection, r + params.atmosphereHeight);
+        if (tMaxSun <= 0.0) {
+            sunTrans = vec3<f32>(1.0);
         } else {
             // [KO] Ghost Planet 모드에서도 지면 관통 시 구간 분할 적분 적용
-            let b_sun = dot(p, params.sunDirection);
-            let c_sun = dot(p, p) - r * r;
-            let delta_sun = b_sun * b_sun - c_sun;
+            let bSun = dot(p, params.sunDirection);
+            let cSun = dot(p, p) - r * r;
+            let deltaSun = bSun * bSun - cSun;
             
-            var opt_ext_sun = vec3<f32>(0.0);
-            if (delta_sun >= 0.0) {
-                let s_sun = sqrt(delta_sun);
-                let t_in_sun = -b_sun - s_sun;
-                let t_out_sun = -b_sun + s_sun;
+            var optExtSun = vec3<f32>(0.0);
+            if (deltaSun >= 0.0) {
+                let sSun = sqrt(deltaSun);
+                let tInSun = -bSun - sSun;
+                let tOutSun = -bSun + sSun;
                 
-                if (t_in_sun > EPSILON && t_in_sun < t_max_sun) {
-                    opt_ext_sun += integrate_optical_depth(p, params.sunDirection, 0.0, t_in_sun, 16u, params);
-                    if (t_out_sun > 0.0 && t_max_sun > t_out_sun) {
-                        opt_ext_sun += integrate_optical_depth(p, params.sunDirection, t_out_sun, t_max_sun, 16u, params);
+                if (tInSun > EPSILON && tInSun < tMaxSun) {
+                    optExtSun += integrateOpticalDepth(p, params.sunDirection, 0.0, tInSun, 16u, params);
+                    if (tOutSun > 0.0 && tMaxSun > tOutSun) {
+                        optExtSun += integrateOpticalDepth(p, params.sunDirection, tOutSun, tMaxSun, 16u, params);
                     }
                 } else {
-                    opt_ext_sun = integrate_optical_depth(p, params.sunDirection, 0.0, t_max_sun, 32u, params);
+                    optExtSun = integrateOpticalDepth(p, params.sunDirection, 0.0, tMaxSun, 32u, params);
                 }
             } else {
-                opt_ext_sun = integrate_optical_depth(p, params.sunDirection, 0.0, t_max_sun, 32u, params);
+                optExtSun = integrateOpticalDepth(p, params.sunDirection, 0.0, tMaxSun, 32u, params);
             }
-            sun_trans = exp(-min(opt_ext_sun, vec3<f32>(MAX_TAU)));
+            sunTrans = exp(-min(optExtSun, vec3<f32>(MAX_TAU)));
         }
     } else {
-        sun_trans = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_sun, params.atmosphereHeight);
+        sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, curH, cosSun, params.atmosphereHeight);
     }
 
     // [KO] 행성 그림자
-    var shadow_mask = 1.0;
-    if (params.useGround > 0.5 && get_ray_sphere_intersection(p, params.sunDirection, r) > 0.0) { shadow_mask = 0.0; }
+    var shadowMask = 1.0;
+    if (params.useGround > 0.5 && getRaySphereIntersection(p, params.sunDirection, r) > 0.0) { shadowMask = 0.0; }
 
-    // [KO] 행성 내부(cur_h < 0)는 진공으로 처리하여 밀도를 0으로 설정합니다.
-    var rho_r = 0.0;
-    var rho_m = 0.0;
-    var rho_f = 0.0;
-    var rho_o = 0.0;
+    // [KO] 행성 내부(curH < 0)는 진공으로 처리하여 밀도를 0으로 설정합니다.
+    var rhoR = 0.0;
+    var rhoM = 0.0;
+    var rhoF = 0.0;
+    var rhoO = 0.0;
 
-    if (cur_h >= 0.0) {
-        rho_r = exp(-cur_h / params.rayleighScaleHeight);
-        rho_m = exp(-cur_h / params.mieScaleHeight);
-        rho_f = exp(-cur_h * params.heightFogFalloff);
-        let ozone_dist = abs(cur_h - params.ozoneLayerCenter);
-        rho_o = exp(-max(0.0, ozone_dist * ozone_dist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
+    if (curH >= 0.0) {
+        rhoR = exp(-curH / params.rayleighScaleHeight);
+        rhoM = exp(-curH / params.mieScaleHeight);
+        rhoF = exp(-curH * params.heightFogFalloff);
+        let ozoneDist = abs(curH - params.ozoneLayerCenter);
+        rhoO = exp(-max(0.0, ozoneDist * ozoneDist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
     }
 
-    let view_sun_cos = dot(view_dir, params.sunDirection);
-    let scat_r = params.rayleighScattering * rho_r * phase_rayleigh(view_sun_cos);
-    let scat_m = vec3<f32>(params.mieScattering * rho_m * phase_mie(view_sun_cos, params.mieAnisotropy));
-    let scat_f = vec3<f32>(params.heightFogDensity * rho_f * phase_mie(view_sun_cos, 0.7)); 
+    let viewSunCos = dot(viewDir, params.sunDirection);
+    let scatR = params.rayleighScattering * rhoR * phaseRayleigh(viewSunCos);
+    let scatM = vec3<f32>(params.mieScattering * rhoM * phaseMie(viewSunCos, params.mieAnisotropy));
+    let scatF = vec3<f32>(params.heightFogDensity * rhoF * phaseMie(viewSunCos, 0.7)); 
     
-    let scat = (scat_r + scat_m + scat_f) * sun_trans * shadow_mask;
+    let scat = (scatR + scatM + scatF) * sunTrans * shadowMask;
 
-    let ms_uv = vec2<f32>(cos_sun * 0.5 + 0.5, 1.0 - clamp(cur_h / params.atmosphereHeight, 0.0, 1.0));
-    let ms_energy = textureSampleLevel(multiScatTexture, atmosphereSampler, ms_uv, 0.0).rgb;
-    let total_scat_coeff = params.rayleighScattering * rho_r + vec3<f32>(params.mieScattering * rho_m + params.heightFogDensity * rho_f);
-    let ms_scat = ms_energy * total_scat_coeff * shadow_mask;
+    let msUV = vec2<f32>(cosSun * 0.5 + 0.5, 1.0 - clamp(curH / params.atmosphereHeight, 0.0, 1.0));
+    let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, msUV, 0.0).rgb;
+    let totalScatCoeff = params.rayleighScattering * rhoR + vec3<f32>(params.mieScattering * rhoM + params.heightFogDensity * rhoF);
+    let msScat = msEnergy * totalScatCoeff * shadowMask;
 
-    let extinction = get_total_extinction(cur_h, params) + vec3<f32>(params.heightFogDensity * rho_f);
+    let extinction = getTotalExtinction(curH, params) + vec3<f32>(params.heightFogDensity * rhoF);
 
-    *radiance += *transmittance * (scat + ms_scat) * step_size;
-    *transmittance *= exp(-extinction * step_size);
+    *radiance += *transmittance * (scat + msScat) * stepSize;
+    *transmittance *= exp(-extinction * stepSize);
 }
