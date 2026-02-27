@@ -48,22 +48,28 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             for(var j = 0; j < steps; j = j + 1) {
                 let t = (f32(j) + 0.5) * step_size;
                 let cur_p = ray_origin + ray_dir * t;
-                let cur_h = length(cur_p) - r;
-                let cos_s = dot(normalize(cur_p), sun_dir);
+                let cur_p_len = length(cur_p);
+                let up_p = cur_p / cur_p_len;
+                let cur_h = cur_p_len - r;
+                let cos_s = dot(up_p, sun_dir);
                 let sun_t = get_transmittance(transmittanceTexture, atmosphereSampler, cur_h, cos_s, params.atmosphereHeight);
                 
+                // 행성 그림자
+                var shadow_mask = 1.0;
+                if (get_ray_sphere_intersection(cur_p, sun_dir, r) > 0.0) { shadow_mask = 0.0; }
+
                 let rho_r = exp(-max(0.0, cur_h) / params.rayleighScaleHeight);
                 let rho_m = exp(-max(0.0, cur_h) / params.mieScaleHeight);
                 
                 let scat_total = params.rayleighScattering * rho_r + vec3<f32>(params.mieScattering * rho_m);
                 let ext_total = params.rayleighScattering * rho_r + vec3<f32>(params.mieExtinction * rho_m);
 
-                L1 += T_path * sun_t * scat_total * (0.25 * INV_PI) * step_size;
+                L1 += T_path * sun_t * scat_total * (0.25 * INV_PI) * shadow_mask * step_size;
                 f1 += T_path * scat_total * step_size;
                 T_path *= exp(-ext_total * step_size);
             }
 
-            if (t_earth > 0.0) {
+            if (t_earth > 0.0 && params.useGround > 0.5) {
                 let hit_p = ray_origin + ray_dir * t_earth;
                 let cos_s = max(0.0, dot(normalize(hit_p), sun_dir));
                 L1 += T_path * get_transmittance(transmittanceTexture, atmosphereSampler, 0.0, cos_s, params.atmosphereHeight) * cos_s * params.groundAlbedo * INV_PI;

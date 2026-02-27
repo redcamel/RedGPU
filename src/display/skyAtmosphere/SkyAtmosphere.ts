@@ -74,7 +74,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         groundSpecular: 4.0,
         sunDirection: new Float32Array([0, 1, 0]),
         cameraHeight: 0.001,
-        padding0: 0,
+        useGround: 1.0,
         padding1: 0
     };
 
@@ -451,6 +451,18 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtyUniformBuffer = true;
     }
 
+    /** [KO] 지면 렌더링 여부 [EN] Whether to render the ground */
+    get useGround(): boolean {
+        return !!this.#params.useGround;
+    }
+
+    set useGround(v: boolean) {
+        this.#params.useGround = v ? 1.0 : 0.0;
+        this.#dirtyUniformBuffer = true;
+        this.#dirtyLUT = true;
+        this.#dirtySkyView = true;
+    }
+
     /** [KO] 투과율 LUT 텍스처를 반환합니다. [EN] Returns the Transmittance LUT texture. */
     get transmittanceTexture(): DirectTexture {
         return this.#transmittanceGenerator.lutTexture;
@@ -567,7 +579,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 {binding: 3, resource: this.#multiScatteringGenerator.lutTexture.gpuTextureView},
                 {binding: 4, resource: this.skyViewTexture.gpuTextureView},
                 {binding: 5, resource: this.#cameraVolumeGenerator.lutTexture.gpuTexture.createView({dimension: '3d'})},
-                {binding: 6, resource: this.#sampler.gpuSampler}
+                {binding: 6, resource: this.#sampler.gpuSampler},
+                {binding: 7, resource: this.atmosphereIrradianceTexture.gpuTextureView}
             ]
         });
 
@@ -624,6 +637,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 '@group(0) @binding(4) var skyViewTexture : texture_2d<f32>;',
                 '@group(0) @binding(5) var cameraVolumeTexture : texture_3d<f32>;',
                 '@group(0) @binding(6) var atmosphereSampler : sampler;',
+                '@group(0) @binding(7) var atmosphereIrradianceTexture : texture_2d<f32>;',
                 '',
                 '@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM,
@@ -658,7 +672,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 {binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {}},
                 {binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {}},
                 {binding: 5, visibility: GPUShaderStage.COMPUTE, texture: {viewDimension: '3d'}},
-                {binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {}}
+                {binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {}},
+                {binding: 7, visibility: GPUShaderStage.COMPUTE, texture: {}}
             ]
         });
         this.#cachedBindGroupLayouts.set(key, bgl);

@@ -2,6 +2,7 @@
 #redgpu_include systemStruct.Projection
 #redgpu_include systemStruct.Time
 #redgpu_include systemStruct.SkyAtmosphere
+// [KO] 포스트 이펙트 시스템 유니폼 [EN] Post effect system uniform
 struct SystemUniform {
     projection: Projection,
     time: Time,
