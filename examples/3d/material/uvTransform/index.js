@@ -19,7 +19,7 @@ RedGPU.init(
 
 		const scene = new RedGPU.Display.Scene();
 		const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-		view.grid = true;
+		view.grid = false; // 그리드 비활성화
 		redGPUContext.addView(view);
 
 		// [KO] 조명 설정
@@ -34,9 +34,10 @@ RedGPU.init(
 		directionalLight.z = 10;
 		scene.lightManager.addDirectionalLight(directionalLight);
 
-		// [KO] 단일 비트맵 텍스처 생성
-		// [EN] Create a single bitmap texture
-		const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+		// [KO] 비트맵 텍스처 생성
+		// [EN] Create bitmap textures
+		const textureGrid = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+		const textureHTest = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg');
 
 		// [KO] 반복(Repeat) 설정이 적용된 샘플러 생성
 		// [EN] Create a sampler with repeat settings applied
@@ -44,51 +45,77 @@ RedGPU.init(
 		repeatSampler.addressModeU = 'repeat';
 		repeatSampler.addressModeV = 'repeat';
 
-		// [KO] 공용 머티리얼 설정
-		// [EN] Set up shared materials
-		const phongMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-		phongMaterial.diffuseTexture = texture;
-		phongMaterial.diffuseTextureSampler = repeatSampler; // [KO] 반복 샘플러 적용
+		// [KO] 머티리얼 설정
+		// [EN] Set up materials
+		const materialTop = new RedGPU.Material.BitmapMaterial(redGPUContext, textureGrid);
+		materialTop.diffuseTextureSampler = repeatSampler;
 
-		const bitmapMaterial = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
-		bitmapMaterial.diffuseTextureSampler = repeatSampler; // [KO] 반복 샘플러 적용
+		const materialBottom = new RedGPU.Material.BitmapMaterial(redGPUContext, textureHTest);
+		materialBottom.diffuseTextureSampler = repeatSampler;
 
 		// [KO] 프리미티브 정의
-		// [EN] Define primitives
 		const primitives = [
 			{ name: 'Box', geo: new RedGPU.Primitive.Box(redGPUContext) },
 			{ name: 'Sphere', geo: new RedGPU.Primitive.Sphere(redGPUContext) },
 			{ name: 'Torus', geo: new RedGPU.Primitive.Torus(redGPUContext) },
-			{ name: 'TorusKnot', geo: new RedGPU.Primitive.TorusKnot(redGPUContext) },
+			{ name: 'TorusKnot', geo: new RedGPU.Primitive.TorusKnot(redGPUContext, 0.7, 0.2) }, // 사이즈 축소
+			{ name: 'Circle', geo: new RedGPU.Primitive.Circle(redGPUContext, 1, 64, 0, Math.PI * 2, false) },
 			{ name: 'Cylinder', geo: new RedGPU.Primitive.Cylinder(redGPUContext) },
 			{ name: 'Plane', geo: new RedGPU.Primitive.Plane(redGPUContext) }
 		];
 
+		// [KO] 하단 Circle용 Radial 지오메트리 별도 생성
+		const circleRadialGeo = new RedGPU.Primitive.Circle(redGPUContext, 1, 64, 0, Math.PI * 2, true);
+
 		// [KO] 메시 배치
-		// [EN] Place meshes
 		const allMeshes = [];
-		const spacing = 3.0; // [KO] 공통 간격 [EN] Uniform spacing
-		const startX = -(primitives.length - 1) * spacing / 2;
-		const startY = spacing / 2;
+		const gap = 3.0; // 오브젝트 사이의 실제 간격을 조절하는 기준값
+		const startX = -(primitives.length - 1) * gap / 2;
+		const startY = gap / 2; // 상하 오브젝트 사이의 간격도 동일하게 유지
 
 		primitives.forEach((item, index) => {
-			const x = startX + index * spacing;
+			const x = startX + index * gap;
 
-			// [KO] 상단: PhongMaterial 메시
-			// [EN] Top: PhongMaterial meshes
-			const pMesh = new RedGPU.Display.Mesh(redGPUContext, item.geo, phongMaterial);
+			// [KO] 프리미티브 이름 라벨 추가 (중앙)
+			const nameLabel = new RedGPU.Display.TextField3D(redGPUContext);
+			nameLabel.text = item.name;
+			nameLabel.worldSize = 0.45;
+			nameLabel.color = '#888888'; // 회색으로 변경
+			nameLabel.x = x;
+			nameLabel.y = 0;
+			scene.addChild(nameLabel);
+
+			// [KO] 상단: Grid Texture (Circle은 Planar)
+			const pMesh = new RedGPU.Display.Mesh(redGPUContext, item.geo, materialTop);
 			pMesh.x = x;
 			pMesh.y = startY;
 			scene.addChild(pMesh);
 			allMeshes.push(pMesh);
 
-			// [KO] 하단: BitmapMaterial 메시
-			// [EN] Bottom: BitmapMaterial meshes
-			const bMesh = new RedGPU.Display.Mesh(redGPUContext, item.geo, bitmapMaterial);
+			// [KO] 하단: H-Test Texture (Circle은 Radial로 교체)
+			const geo = item.name === 'Circle' ? circleRadialGeo : item.geo;
+			const bMesh = new RedGPU.Display.Mesh(redGPUContext, geo, materialBottom);
 			bMesh.x = x;
 			bMesh.y = -startY;
 			scene.addChild(bMesh);
 			allMeshes.push(bMesh);
+
+			// [KO] Circle 전용 모드 라벨 추가
+			if (item.name === 'Circle') {
+				const planarLabel = new RedGPU.Display.TextField3D(redGPUContext);
+				planarLabel.text = 'Planar';
+				planarLabel.worldSize = 0.4;
+				planarLabel.x = x;
+				planarLabel.y = startY + 1.5;
+				scene.addChild(planarLabel);
+
+				const radialLabel = new RedGPU.Display.TextField3D(redGPUContext);
+				radialLabel.text = 'Radial';
+				radialLabel.worldSize = 0.4;
+				radialLabel.x = x;
+				radialLabel.y = -startY - 1.5;
+				scene.addChild(radialLabel);
+			}
 		});
 
 		const renderer = new RedGPU.Renderer();
@@ -108,23 +135,21 @@ RedGPU.init(
 				scrollInfo.offsetV += scrollInfo.speedV;
 
 				// [KO] 순환 처리
-				// [EN] Circular processing
 				if (scrollInfo.offsetU > 2) scrollInfo.offsetU -= 4;
 				if (scrollInfo.offsetV > 2) scrollInfo.offsetV -= 4;
 				if (scrollInfo.offsetU < -2) scrollInfo.offsetU += 4;
 				if (scrollInfo.offsetV < -2) scrollInfo.offsetV += 4;
 
 				const offset = [scrollInfo.offsetU, scrollInfo.offsetV];
-				phongMaterial.textureOffset = offset;
-				bitmapMaterial.textureOffset = offset;
+				materialTop.textureOffset = offset;
+				materialBottom.textureOffset = offset;
 			}
 		});
 
 		// [KO] UI 패널 구성
-		// [EN] Configure UI panel
 		renderTestPane(redGPUContext, {
-			phongMaterial,
-			bitmapMaterial,
+			materialTop,
+			materialBottom,
 			scrollInfo
 		});
 	},
@@ -142,7 +167,7 @@ async function renderTestPane(redGPUContext, testTarget) {
 	setDebugButtons(RedGPU, redGPUContext);
 
 	const pane = new Pane();
-	const { phongMaterial, bitmapMaterial, scrollInfo } = testTarget;
+	const { materialTop, materialBottom, scrollInfo } = testTarget;
 
 	// [KO] 자동 스크롤 제어 폴더
 	// [EN] Auto Scroll Control Folder
@@ -159,28 +184,28 @@ async function renderTestPane(redGPUContext, testTarget) {
 	folderManual.addBinding(scrollInfo, 'offsetU', { min: -2, max: 2, step: 0.0001, label: 'Offset U' }).on('change', (ev) => {
 		if (!scrollInfo.autoScroll) {
 			const val = [ev.value, scrollInfo.offsetV];
-			phongMaterial.textureOffset = val;
-			bitmapMaterial.textureOffset = val;
+			materialTop.textureOffset = val;
+			materialBottom.textureOffset = val;
 		}
 	});
 	folderManual.addBinding(scrollInfo, 'offsetV', { min: -2, max: 2, step: 0.0001, label: 'Offset V' }).on('change', (ev) => {
 		if (!scrollInfo.autoScroll) {
 			const val = [scrollInfo.offsetU, ev.value];
-			phongMaterial.textureOffset = val;
-			bitmapMaterial.textureOffset = val;
+			materialTop.textureOffset = val;
+			materialBottom.textureOffset = val;
 		}
 	});
 
 	// Scale
 	folderManual.addBinding(scrollInfo, 'scaleU', { min: 0.1, max: 10, step: 0.0001, label: 'Scale U' }).on('change', (ev) => {
 		const val = [ev.value, scrollInfo.scaleV];
-		phongMaterial.textureScale = val;
-		bitmapMaterial.textureScale = val;
+		materialTop.textureScale = val;
+		materialBottom.textureScale = val;
 	});
 	folderManual.addBinding(scrollInfo, 'scaleV', { min: 0.1, max: 10, step: 0.0001, label: 'Scale V' }).on('change', (ev) => {
 		const val = [scrollInfo.scaleU, ev.value];
-		phongMaterial.textureScale = val;
-		bitmapMaterial.textureScale = val;
+		materialTop.textureScale = val;
+		materialBottom.textureScale = val;
 	});
 
 	// [KO] 초기화 버튼
@@ -190,10 +215,10 @@ async function renderTestPane(redGPUContext, testTarget) {
 		scrollInfo.offsetV = 0;
 		scrollInfo.scaleU = 1;
 		scrollInfo.scaleV = 1;
-		phongMaterial.textureOffset = [0, 0];
-		bitmapMaterial.textureOffset = [0, 0];
-		phongMaterial.textureScale = [1, 1];
-		bitmapMaterial.textureScale = [1, 1];
+		materialTop.textureOffset = [0, 0];
+		materialBottom.textureOffset = [0, 0];
+		materialTop.textureScale = [1, 1];
+		materialBottom.textureScale = [1, 1];
 		pane.refresh();
 	});
 
