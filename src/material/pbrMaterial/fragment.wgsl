@@ -606,9 +606,10 @@ fn main(inputData:InputData) -> OutputFragment {
         // [KO] ibl (roughness에 따른 mipmap 레벨 적용) [EN] ibl (apply mipmap level based on roughness)
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
+        var iblMipmapCount: f32 = 0.0;
         
         if (u_usePrefilterTexture) {
-            let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
+            iblMipmapCount = f32(textureNumLevels(ibl_environmentTexture) - 1);
             var mipLevel = roughnessParameter * iblMipmapCount;
             reflectedColor = textureSampleLevel( ibl_environmentTexture, prefilterTextureSampler, R, mipLevel ).rgb;
             iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb;
@@ -675,7 +676,6 @@ fn main(inputData:InputData) -> OutputFragment {
             // [KO] 뒷면 반사광을 위한 샘플링 방향 [EN] Sampling direction for back side reflection
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
-                let iblMipmapCount:f32 = f32(textureNumLevels(ibl_environmentTexture) - 1);
                 var mipLevel = roughnessParameter * iblMipmapCount;
                 backScatteringColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, -N, mipLevel).rgb;
             }

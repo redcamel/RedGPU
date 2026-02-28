@@ -73,12 +73,6 @@ class Sphere extends Primitive {
 }
 
 const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-    // 재사용할 변수들
-    let thetaEnd = thetaStart + thetaLength;
-    let ix, iy;
-    let index = 0;
-    let grid = [];
-    let a, b, c, d;
     const vertex = new Float32Array(3);
     const normal = new Float32Array(3);
 
@@ -87,22 +81,30 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
     const gridX1 = widthSegments + 1;
 
     // 정점, 노멀, UV 생성
-    for (iy = 0; iy <= heightSegments; iy++) {
+    for (let iy = 0; iy <= heightSegments; iy++) {
         const v = iy / heightSegments;
-        for (ix = 0; ix <= widthSegments; ix++) {
+        for (let ix = 0; ix <= widthSegments; ix++) {
             const u = ix / widthSegments;
-            // 구면 좌표 → 직교 좌표 변환
-            vertex[0] = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-            vertex[1] = radius * Math.cos(thetaStart + v * thetaLength);
-            vertex[2] = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+            // [교정] 다른 프리미티브와 일관성을 위해 -PI/2 오프셋 추가
+            // u=0 -> phi=-PI/2 (Back), u=0.5 -> phi=PI/2 (Front)
+            const phi = phiStart + u * phiLength - Math.PI / 2;
+            const theta = thetaStart + v * thetaLength;
 
-            // 노멀 계산 (구면에서는 정점 위치를 정규화)
+            const sinTheta = Math.sin(theta);
+            const cosTheta = Math.cos(theta);
+
+            // 구면 좌표 → 직교 좌표 변환
+            vertex[0] = -radius * Math.cos(phi) * sinTheta;
+            vertex[1] = radius * cosTheta;
+            vertex[2] = radius * Math.sin(phi) * sinTheta;
+
+            // 노멀 계산
             normal[0] = vertex[0];
             normal[1] = vertex[1];
             normal[2] = vertex[2];
             vec3.normalize(normal, normal);
 
-            // UV 좌표
+            // UV & Packing
             PrimitiveUtils.interleavePacker(
                 interleaveData,
                 vertex[0], vertex[1], vertex[2],
