@@ -127,6 +127,7 @@ const renderTestPane = async (redGPUContext) => {
         height: 4,
         widthSegments: 10,
         heightSegments: 10,
+        flipY: false,
     };
 
     /**
@@ -140,7 +141,8 @@ const renderTestPane = async (redGPUContext) => {
             config.width,
             config.height,
             config.widthSegments,
-            config.heightSegments
+            config.heightSegments,
+            config.flipY
         );
 
         meshList.forEach(mesh => {
@@ -155,4 +157,5 @@ const renderTestPane = async (redGPUContext) => {
     folder.addBinding(config, 'height', {min: 1, max: 10, step: 1}).on('change', updateGeometry);
     folder.addBinding(config, 'widthSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
     folder.addBinding(config, 'heightSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
+    folder.addBinding(config, 'flipY').on('change', updateGeometry);
 };

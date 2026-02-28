@@ -86,13 +86,15 @@ class PrimitiveUtils {
     ) {
         const vertexOffset = interleaveData.length / 12; // [교정] 12개 속성 기준
 
-        // 1. Center Vertex
+        // 1. Center Vertex (최소 1개의 정점은 항상 생성하여 버퍼 크기 0 에러 방지)
         this.interleavePacker(
             interleaveData,
             center.x, center.y, center.z,
             normal.x, normal.y, normal.z,
             0.5, 0.5
         );
+
+        if (radius <= 0 || thetaLength === 0) return;
 
         // 2. Perimeter Vertices
         for (let s = 0; s <= segments; s++) {

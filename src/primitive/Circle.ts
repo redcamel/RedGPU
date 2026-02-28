@@ -55,11 +55,11 @@ class Circle extends Primitive {
         if (segments < 3) {
             throw new Error('segments must be 3 or greater');
         }
-        if (radius <= 0) {
-            throw new Error('radius must be greater than 0');
+        if (radius < 0) {
+            throw new Error('radius must be 0 or greater');
         }
-        if (thetaLength <= 0) {
-            throw new Error('thetaLength must be greater than 0');
+        if (thetaLength < 0) {
+            throw new Error('thetaLength must be 0 or greater');
         }
         const uniqueKey = `PRIMITIVE_CIRCLE_R${radius}_S${segments}_TS${thetaStart}_TL${thetaLength}`;
         super(redGPUContext, uniqueKey, () => makeData(
