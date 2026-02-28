@@ -44,31 +44,37 @@ const createPrimitive = (redGPUContext, scene) => {
             redGPUContext,
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
         ),
+        radialTest: new RedGPU.Material.BitmapMaterial(
+            redGPUContext,
+            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')
+        ),
         wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    const circleGeometry = new RedGPU.Primitive.Circle(redGPUContext, 1, 64);
-
     const gap = 3.5;
     const items = [
-        {material: materials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
-        {material: materials.solid, position: [0, 0, 0]},
-        {material: materials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
+        {material: materials.wireframe, position: [-gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, label: 'line-list (Planar)', isRadial: false},
+        {material: materials.solid, position: [-gap * 0.5, 0, 0], label: 'triangle-list (Planar)', isRadial: false},
+        {material: materials.radialTest, position: [gap * 0.5, 0, 0], label: 'triangle-list (Radial)', isRadial: true},
+        {material: materials.point, position: [gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'point-list (Planar)', isRadial: false},
     ];
 
-    items.forEach(({material, position, topology}) => {
+    items.forEach(({material, position, topology, label: labelText, isRadial}) => {
+        const circleGeometry = new RedGPU.Primitive.Circle(redGPUContext, 1, 64, 0, Math.PI * 2, isRadial);
         const mesh = new RedGPU.Display.Mesh(redGPUContext, circleGeometry, material);
+        if (!mesh.userData) mesh.userData = {}; // userData 초기화
+        mesh.userData.isRadial = isRadial; // 지오메트리 업데이트를 위해 저장
         if (topology) mesh.primitiveState.topology = topology;
         mesh.setPosition(...position);
         scene.addChild(mesh);
 
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.setPosition(position[0], 2.0, position[2]);
-        label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        label.text = labelText;
         label.color = '#ffffff';
         label.fontSize = 14;
-        label.worldSize = 0.7;
+        label.worldSize = 0.6;
         scene.addChild(label);
     });
 
@@ -98,14 +104,12 @@ const renderTestPane = async (redGPUContext) => {
 
     const updateGeometry = () => {
         const meshList = redGPUContext.viewList[0].scene.children;
-        const newGeometry = new RedGPU.Primitive.Circle(
-            redGPUContext,
-            config.radius, config.radialSegments, config.thetaStart, config.thetaLength
-        );
-
         meshList.forEach((mesh) => {
             if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.geometry = newGeometry;
+                mesh.geometry = new RedGPU.Primitive.Circle(
+                    redGPUContext,
+                    config.radius, config.radialSegments, config.thetaStart, config.thetaLength, mesh.userData.isRadial
+                );
             }
         });
     };

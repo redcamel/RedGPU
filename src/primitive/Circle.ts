@@ -25,7 +25,7 @@ class Circle extends Primitive {
      *
      * ### Example
      * ```typescript
-     * const circle = new RedGPU.Circle(redGPUContext, 1, 32, 0, Math.PI * 2);
+     * const circle = new RedGPU.Circle(redGPUContext, 1, 32, 0, Math.PI * 2, false);
      * ```
      *
      * @param redGPUContext -
@@ -43,13 +43,17 @@ class Circle extends Primitive {
      * @param thetaLength -
      * [KO] 원호 각도 (라디안, 기본값 2*PI)
      * [EN] Arc angle (radians, default 2*PI)
+     * @param isRadial -
+     * [KO] 방사형 UV 매핑 여부 (기본값 false)
+     * [EN] Whether to use radial UV mapping (default false)
      */
     constructor(
         redGPUContext: RedGPUContext,
         radius: number = 1,
         radialSegments: number = 32,
         thetaStart: number = 0,
-        thetaLength: number = Math.PI * 2
+        thetaLength: number = Math.PI * 2,
+        isRadial: boolean = false
     ) {
         // 유효성 검사
         if (radialSegments < 3) {
@@ -61,9 +65,9 @@ class Circle extends Primitive {
         if (thetaLength < 0) {
             throw new Error('thetaLength must be 0 or greater');
         }
-        const uniqueKey = `PRIMITIVE_CIRCLE_R${radius}_S${radialSegments}_TS${thetaStart}_TL${thetaLength}`;
+        const uniqueKey = `PRIMITIVE_CIRCLE_R${radius}_S${radialSegments}_TS${thetaStart}_TL${thetaLength}_IR${isRadial}`;
         super(redGPUContext, uniqueKey, () => makeData(
-            uniqueKey, redGPUContext, radius, radialSegments, thetaStart, thetaLength
+            uniqueKey, redGPUContext, radius, radialSegments, thetaStart, thetaLength, isRadial
         ));
     }
 }
@@ -74,21 +78,24 @@ const makeData = function (
     radius: number,
     radialSegments: number,
     thetaStart: number,
-    thetaLength: number
+    thetaLength: number,
+    isRadial: boolean
 ) {
     const interleaveData: number[] = [];
     const indexData: number[] = [];
 
-    // Circle 생성 (벡터 기반: XY 평면, Normal +Z)
+    // Circle 생성 (벡터 기반: XY 평면, Normal +Z 복구)
+    // [업계 표준] 12시(+Y) 기점, 반시계 방향(CCW) 회전
     PrimitiveUtils.generateCircleData(
         interleaveData, indexData,
         radius, radialSegments,
         thetaStart, thetaLength,
         {x: 0, y: 0, z: 0}, // center
-        {x: 1, y: 0, z: 0}, // uVector
-        {x: 0, y: 1, z: 0}, // vVector
-        {x: 0, y: 0, z: 1}, // normal
-        true                // isFront
+        {x: 1, y: 0, z: 0},  // uVector (+X)
+        {x: 0, y: 1, z: 0},  // vVector (+Y, 12시 기점)
+        {x: 0, y: 0, z: 1},  // normal (+Z)
+        true,               // isFront
+        isRadial
     );
 
     PrimitiveUtils.calculateTangents(interleaveData, indexData);

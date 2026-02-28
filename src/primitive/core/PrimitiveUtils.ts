@@ -69,6 +69,8 @@ class PrimitiveUtils {
     /**
      * [KO] 벡터 기반으로 임의의 평면에 원형 기하 데이터를 생성합니다.
      * [EN] Generates circular geometry data on an arbitrary plane based on vectors.
+     * 
+     * @param isRadial - [KO] 방사형 UV 매핑 여부 [EN] Whether to use radial UV mapping
      */
     static generateCircleData(
         interleaveData: number[],
@@ -81,23 +83,27 @@ class PrimitiveUtils {
         uVector: { x: number, y: number, z: number },
         vVector: { x: number, y: number, z: number },
         normal: { x: number, y: number, z: number },
-        isFront: boolean = true
+        isFront: boolean = true,
+        isRadial: boolean = false
     ) {
         const vertexOffset = interleaveData.length / 12;
 
-        // 1. Center Vertex (최소 1개의 정점은 항상 생성하여 버퍼 크기 0 에러 방지)
+        // 1. Center Vertex
+        // [교정] isRadial 모드일 때 중심점은 V=0 (거리 0), U는 각도의 중앙값(0.5)으로 설정
         this.interleavePacker(
             interleaveData,
             center.x, center.y, center.z,
             normal.x, normal.y, normal.z,
-            0.5, 0.5
+            isRadial ? 0.5 : 0.5, 
+            isRadial ? 0 : 0.5
         );
 
         if (radius <= 1e-6 || Math.abs(thetaLength) < 1e-6) return;
 
         // 2. Perimeter Vertices
         for (let s = 0; s <= radialSegments; s++) {
-            const angle = thetaStart + (s / radialSegments) * thetaLength;
+            const uRatio = s / radialSegments;
+            const angle = thetaStart + uRatio * thetaLength;
             const cosVal = Math.cos(angle);
             const sinVal = Math.sin(angle); 
 
@@ -106,10 +112,17 @@ class PrimitiveUtils {
             const posY = center.y + radius * (cosVal * vVector.y - sinVal * uVector.y);
             const posZ = center.z + radius * (cosVal * vVector.z - sinVal * uVector.z);
 
-            // [교정] 원형(Circle) 전용 방사형 UV 매핑 (U=0.5, V=0.5 가 중심)
-            // 12시 시작점(theta=0, pos=+V)일 때 UV는 (0.5, 0) 즉, 텍스처 상단 중앙이 됨
-            const uvX = 0.5 - (sinVal * 0.5);
-            const uvY = 0.5 - (cosVal * 0.5); // V-Down: cos=1(12시)일 때 v=0
+            // [교정] UV 매핑 모드 분기
+            let uvX, uvY;
+            if (!isRadial) {
+                // Planar (평면 투영): 텍스처를 판 위에 올려놓은 형태
+                uvX = 0.5 - (sinVal * 0.5);
+                uvY = 0.5 - (cosVal * 0.5);
+            } else {
+                // Radial (방사형/성장형 매핑): U = 각도(0~1), V = 중심으로부터의 거리(1)
+                uvX = uRatio; // 회전 각도
+                uvY = 1;      // 외곽선은 거리 1
+            }
 
             this.interleavePacker(
                 interleaveData,
