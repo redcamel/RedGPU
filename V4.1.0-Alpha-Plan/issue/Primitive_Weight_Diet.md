@@ -38,15 +38,19 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **수직 흐름** | **위 → 아래** | V=0은 도형의 가장 높은 곳, V=1은 가장 낮은 곳을 의미합니다. |
 | **수평 흐름** | **좌측 → 정면 → 우측** | 반시계 방향 회전에 따라 텍스처가 왼쪽(U=0)에서 정면(U=0.5)을 거쳐 오른쪽(U=1)으로 감쌉니다. |
 
-#### **Circle 전용 UV 옵션 (Circle UV Options)**
-원형(Circle) 지오메트리는 `isRadial` 옵션을 통해 두 가지 매핑 방식을 지원합니다:
+#### **원형 단면(Cap) 및 Circle UV 옵션**
+`Circle` 및 원형 단면을 가진 프리미티브(`Cylinder`, `Torus`)는 `isRadial` 계열 옵션을 통해 두 가지 매핑 방식을 지원합니다:
 1.  **Planar (isRadial: false, 기본값):**
-    *   텍스처를 원형 판 위에 그대로 올려놓은 형태입니다. (중심: UV 0.5, 0.5)
-    *   동전, 캔 뚜껑, 바닥 카펫 등 일반적인 원형 물체 표현에 사용됩니다.
+    *   텍스처를 단면 위에 그대로 올려놓은 형태입니다. (중심: UV 0.5, 0.5)
+    *   일반적인 물체 표현이나 뚜껑 로고 투영 등에 사용됩니다.
 2.  **Radial (isRadial: true):**
     *   **성장형/팽창형(Expansion) 매핑:** U축은 각도($0 \rightarrow 1$), V축은 중심에서의 거리($0 \rightarrow 1$)에 매핑됩니다.
-    *   텍스처의 **V 오프셋(V-Offset)**을 애니메이션하면 원이 중심에서 밖으로 커지거나 작아지는 효과를 구현할 수 있습니다.
-    *   진행률 바(Circular Progress), 레이더 스캔, 충격파 및 포탈 효과 등 VFX 구현에 최적화되어 있습니다.
+    *   텍스처의 **V 오프셋(V-Offset)** 애니메이션을 통해 원이 중심에서 밖으로 커지는 VFX 효과를 구현할 수 있습니다.
+
+**적용 대상:**
+- **Circle:** `isRadial`
+- **Cylinder:** `isRadialTop`, `isRadialBottom`
+- **Torus:** `isRadialCapStart`, `isRadialCapEnd` (Partial 모드 시)
 
 ### 4. 단면 제어 표준 (Capping)
 | 항목 | 명칭 표준 | 적용 대상 및 특징 |
@@ -71,11 +75,11 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | 클래스 | 이전 인자명 | 표준화된 인자명 | 상태 |
 | :--- | :--- | :--- | :---: |
 | **Box** | wSegments, hSegments, dSegments | widthSegments, heightSegments, depthSegments | 🟢 |
-| **Circle** | segments | radialSegments | 🟢 |
+| **Circle** | segments | radialSegments, isRadial | 🟢 |
 | **Plane / Ground** | wSegments, hSegments | widthSegments, heightSegments | 🟢 |
-| **Cylinder** | openEnded | capTop, capBottom | 🟢 |
+| **Cylinder** | openEnded | capTop, capBottom, isRadialTop, isRadialBottom | 🟢 |
 | **Torus** | radialSubv, bodySubv | radialSegments, tubularSegments | 🟢 |
-| **Torus** | start/endAngle, capped | thetaStart, thetaLength, capStart, capEnd | 🟢 |
+| **Torus** | start/endAngle, capped | thetaStart, thetaLength, capStart, capEnd, isRadialCapStart, isRadialCapEnd | 🟢 |
 | **TorusKnot** | tube, p, q | tubeRadius, windingsAroundAxis, windingsAroundCircle | 🟢 |
 | **Capsule** | cylinderHeight | height | 🟢 |
 
