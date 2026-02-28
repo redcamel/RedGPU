@@ -143,6 +143,8 @@ const makeData = function (
     // Indices (PrimitiveUtils.generateGridIndices 사용)
     PrimitiveUtils.generateGridIndices(indexData, 0, radialSegments, totalVerticalSegments, gridX1);
 
+    PrimitiveUtils.calculateTangents(interleaveData, indexData);
+
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
 };
 

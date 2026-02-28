@@ -1,3 +1,5 @@
+import calculateTangents from "../../math/calculateTangents";
+
 /**
  * [KO] 프리미티브 생성을 위한 공통 수학 및 데이터 처리 유틸리티 클래스입니다.
  * [EN] Utility class for common math and data processing for primitive generation.
@@ -210,6 +212,38 @@ class PrimitiveUtils {
                 const d = vertexOffset + (ix + 1) + gridX1 * iy;      // TR
                 indexData.push(a, b, d, b, c, d);
             }
+        }
+    }
+
+    /**
+     * [KO] 인덱스와 인터리브 데이터를 기반으로 탄젠트(Tangent)를 계산합니다. (P3, N3, U2, T4 구조 기준)
+     * [EN] Calculates tangents based on index and interleave data. (Based on P3, N3, U2, T4 structure)
+     */
+    static calculateTangents(interleaveData: number[], indexData: number[]) {
+        const vertices = [];
+        const normals = [];
+        const uvs = [];
+        const vertexCount = interleaveData.length / 12;
+
+        // 1. 데이터 추출 (De-interleave)
+        for (let i = 0; i < vertexCount; i++) {
+            const offset = i * 12;
+            vertices.push(interleaveData[offset], interleaveData[offset + 1], interleaveData[offset + 2]);
+            normals.push(interleaveData[offset + 3], interleaveData[offset + 4], interleaveData[offset + 5]);
+            uvs.push(interleaveData[offset + 6], interleaveData[offset + 7]);
+        }
+
+        // 2. 공통 수학 유틸리티 호출
+        const tangents = calculateTangents(vertices, normals, uvs, indexData);
+
+        // 3. 결과 반영 (Re-pack)
+        for (let i = 0; i < vertexCount; i++) {
+            const offset = i * 12;
+            const tOffset = i * 4;
+            interleaveData[offset + 8] = tangents[tOffset];
+            interleaveData[offset + 9] = tangents[tOffset + 1];
+            interleaveData[offset + 10] = tangents[tOffset + 2];
+            interleaveData[offset + 11] = tangents[tOffset + 3];
         }
     }
 

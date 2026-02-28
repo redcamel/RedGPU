@@ -67,6 +67,8 @@ const makeData = function (uniqueKey, redGPUContext, width, height, wSegments, h
         flipY
     );
 
+    PrimitiveUtils.calculateTangents(interleaveData, indexData);
+
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
 };
 

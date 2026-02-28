@@ -116,6 +116,8 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
     // [교정] 구체는 극점(Pole)에서 삼각형이 겹칠 수 있으나, 표준 그리드 인덱스 생성기를 사용하여 로직을 단순화합니다.
     PrimitiveUtils.generateGridIndices(indexData, 0, widthSegments, heightSegments, gridX1);
 
+    PrimitiveUtils.calculateTangents(interleaveData, indexData);
+
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
 };
 

@@ -91,6 +91,8 @@ const makeData = function (
         true                // isFront
     );
 
+    PrimitiveUtils.calculateTangents(interleaveData, indexData);
+
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
 };
 

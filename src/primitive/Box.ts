@@ -75,6 +75,8 @@ const makeData = function (uniqueKey, redGPUContext, width, height, depth, wSegm
     PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, height, depth / 2, wSegments, hSegments, 'x', 'y', 'z', 1, -1, 1); // pz
     PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, height, -depth / 2, wSegments, hSegments, 'x', 'y', 'z', -1, -1, -1); // nz
 
+    PrimitiveUtils.calculateTangents(interleaveData, indexData);
+
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
 };
 

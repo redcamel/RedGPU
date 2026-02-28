@@ -72,6 +72,8 @@ function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, rad
         }
     }
 
+    PrimitiveUtils.calculateTangents(interleaveData, indexData);
+
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
 }
 
