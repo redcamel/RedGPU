@@ -87,7 +87,8 @@ const makeData = function (uniqueKey, redGPUContext,
 
         for (let ring = 0; ring <= radialSubdivisions; ++ring) {
             const u = ring / radialSubdivisions;
-            const ringAngle = startAngle + u * range;
+            // [교정] 실린더/구체와 일관성을 위해 PI(180도) 오프셋 추가 (이음새를 뒤로 보냄)
+            const ringAngle = startAngle + u * range + Math.PI;
             const xSin = Math.sin(ringAngle);
             const zCos = Math.cos(ringAngle);
             const x = xSin * ringRadius;
@@ -100,7 +101,7 @@ const makeData = function (uniqueKey, redGPUContext,
                 interleaveData,
                 x, y, z,
                 nx, ny, nz,
-                u, 1 - v
+                u, v // [교정] V-Down 표준에 맞춰 v 그대로 사용
             );
         }
     }
