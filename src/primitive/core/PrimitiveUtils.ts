@@ -53,7 +53,6 @@ class PrimitiveUtils {
                 const uvX = ix / gridResolutionX;
                 const uvY = flipY ? (1 - iy / gridResolutionY) : (iy / gridResolutionY);
 
-                // [교정] interleavePacker 사용 (Tangent 자동 생성 로직은 추후 필요시 추가)
                 this.interleavePacker(
                     interleaveData,
                     pos.x, pos.y, pos.z,
@@ -63,7 +62,7 @@ class PrimitiveUtils {
             }
         }
 
-        // [교정] generateGridIndices 사용
+        // 평면은 표준 와인딩 사용
         this.generateGridIndices(indexData, vertexOffset, gridResolutionX, gridResolutionY, gridX1);
     }
 
@@ -100,20 +99,21 @@ class PrimitiveUtils {
         for (let s = 0; s <= radialSegments; s++) {
             const angle = thetaStart + (s / radialSegments) * thetaLength;
             const cos = Math.cos(angle);
-            const sin = Math.sin(angle);
+            const sin = Math.sin(angle); 
 
             const posX = center.x + radius * (cos * uVector.x + sin * vVector.x);
             const posY = center.y + radius * (cos * uVector.y + sin * vVector.y);
             const posZ = center.z + radius * (cos * uVector.z + sin * vVector.z);
 
+            // [교정] UV 매핑: V-Down 표준
             const uvX = (cos * 0.5) + 0.5;
-            const uvY = (sin * 0.5) + 0.5;
+            const uvY = 0.5 - (sin * 0.5);
 
             this.interleavePacker(
                 interleaveData,
                 posX, posY, posZ,
                 normal.x, normal.y, normal.z,
-                uvX, 1 - uvY
+                uvX, uvY
             );
         }
 
@@ -153,7 +153,6 @@ class PrimitiveUtils {
         const halfHeight = height / 2;
         const slope = (radiusBottom - radiusTop) / height;
 
-        // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지
         if (thetaLength === 0 || (radiusTop <= 0 && radiusBottom <= 0)) {
             this.interleavePacker(interleaveData, center.x, center.y, center.z, 0, 1, 0, 0, 0);
             return;
@@ -168,7 +167,7 @@ class PrimitiveUtils {
                 const u = ix / radialSegments;
                 const theta = u * thetaLength + thetaStart;
                 const cos = Math.cos(theta);
-                const sin = Math.sin(theta);
+                const sin = -Math.sin(theta); // [교정] 시계 방향 회전 (상단 캡과 일치)
 
                 // Position
                 const ringX = radius * (cos * uVector.x + sin * vVector.x);
@@ -179,7 +178,7 @@ class PrimitiveUtils {
                 const py = center.y + ringY + hOffset * axisVector.y;
                 const pz = center.z + ringZ + hOffset * axisVector.z;
 
-                // Normal (Ring direction + Slope)
+                // Normal
                 const rnx = cos * uVector.x + sin * vVector.x;
                 const rny = cos * uVector.y + sin * vVector.y;
                 const rnz = cos * uVector.z + sin * vVector.z;
@@ -198,19 +197,23 @@ class PrimitiveUtils {
             }
         }
 
-        this.generateGridIndices(indexData, vertexOffset, radialSegments, heightSegments, radialSegments + 1);
+        // [교정] 시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
+        this.generateGridIndices(indexData, vertexOffset, radialSegments, heightSegments, radialSegments + 1, false);
     }
 
     /**
-     * [KO] 격자형 인덱스 데이터를 생성합니다. (CCW 와인딩)
-     * [EN] Generates grid index data. (CCW winding)
+     * [KO] 격자형 인덱스 데이터를 생성합니다.
+     * [EN] Generates grid index data.
+     * 
+     * @param reverseWinding - [KO] 와인딩 방향 반전 여부 [EN] Whether to reverse winding direction
      */
     static generateGridIndices(
         indexData: number[],
         vertexOffset: number,
         gridX: number,
         gridY: number,
-        gridX1: number
+        gridX1: number,
+        reverseWinding: boolean = false
     ) {
         for (let iy = 0; iy < gridY; iy++) {
             for (let ix = 0; ix < gridX; ix++) {
@@ -218,7 +221,12 @@ class PrimitiveUtils {
                 const b = vertexOffset + ix + gridX1 * (iy + 1);      // BL
                 const c = vertexOffset + (ix + 1) + gridX1 * (iy + 1);  // BR
                 const d = vertexOffset + (ix + 1) + gridX1 * iy;      // TR
-                indexData.push(a, b, d, b, c, d);
+                
+                if (reverseWinding) {
+                    indexData.push(a, d, b, d, c, b);
+                } else {
+                    indexData.push(a, b, d, b, c, d);
+                }
             }
         }
     }

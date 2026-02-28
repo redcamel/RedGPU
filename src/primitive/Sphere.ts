@@ -91,19 +91,19 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
         const v = iy / heightSegments;
         for (let ix = 0; ix <= widthSegments; ix++) {
             const u = ix / widthSegments;
-            // [교정] 다른 프리미티브와 일관성을 위해 -PI/2 오프셋 추가
-            // u=0 -> phi=-PI/2 (Back), u=0.5 -> phi=PI/2 (Front)
-            const phi = phiStart + u * phiLength - Math.PI / 2;
+            // [교정] 3시 방향 시작, 시계 방향 회전 (sin 반전)
+            const phi = phiStart + u * phiLength;
             const theta = thetaStart + v * thetaLength;
 
             const sinTheta = Math.sin(theta);
             const cosTheta = Math.cos(theta);
+            const sinPhi = -Math.sin(phi);
+            const cosPhi = Math.cos(phi);
 
-            // 구면 좌표 → 직교 좌표 변환
-            vertex[0] = -radius * Math.cos(phi) * sinTheta;
+            // x = cos(phi)sin(theta), y = cos(theta), z = sin(phi)sin(theta)
+            vertex[0] = radius * cosPhi * sinTheta;
             vertex[1] = radius * cosTheta;
-            vertex[2] = radius * Math.sin(phi) * sinTheta;
-
+            vertex[2] = radius * sinPhi * sinTheta;
             // 노멀 계산
             normal[0] = vertex[0];
             normal[1] = vertex[1];
@@ -121,8 +121,8 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
     }
 
     // 인덱스 생성 (PrimitiveUtils.generateGridIndices 사용)
-    // [교정] 구체는 극점(Pole)에서 삼각형이 겹칠 수 있으나, 표준 그리드 인덱스 생성기를 사용하여 로직을 단순화합니다.
-    PrimitiveUtils.generateGridIndices(indexData, 0, widthSegments, heightSegments, gridX1);
+    // [교정] 회전체는 Visual CCW 시 인덱스를 뒤집어야 CCW 와인딩(바깥쪽이 앞면)이 됨
+    PrimitiveUtils.generateGridIndices(indexData, 0, widthSegments, heightSegments, gridX1, true);
 
     PrimitiveUtils.calculateTangents(interleaveData, indexData);
 

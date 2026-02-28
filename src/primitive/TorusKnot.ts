@@ -103,8 +103,8 @@ const makeData = function (uniqueKey, redGPUContext,
     const gridX1 = radialSegments + 1;
 
     for (let i = 0; i <= tubularSegments; ++i) {
-        // [교정] 실린더/구체/토러스와 일관성을 위해 PI(180도) 오프셋 추가 (이음새를 뒤로 보냄)
-        const u = i / tubularSegments * windingsAroundAxis * Math.PI * 2 + Math.PI;
+        // [교정] 0도 = 3시 방향(+X)에서 시작하여 CCW(반시계)로 회전
+        const u = i / tubularSegments * windingsAroundAxis * Math.PI * 2;
         calculatePositionOnCurve(u, windingsAroundAxis, windingsAroundCircle, radius, P1);
         calculatePositionOnCurve(u + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
         // calculate orthonormal basis

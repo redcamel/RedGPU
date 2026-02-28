@@ -175,4 +175,24 @@ const renderTestPane = async (redGPUContext) => {
     folder.addBinding(config, 'openEnded').on('change', updateGeometry);
     folder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+
+    const materialFolder = pane.addFolder({title: 'Material State', expanded: true});
+    materialFolder.addBinding(
+        {cullMode: RedGPU.GPU_CULL_MODE.BACK}, 
+        'cullMode', 
+        {
+            options: {
+                NONE: RedGPU.GPU_CULL_MODE.NONE,
+                BACK: RedGPU.GPU_CULL_MODE.BACK,
+                FRONT: RedGPU.GPU_CULL_MODE.FRONT
+            }
+        }
+    ).on('change', (ev) => {
+        const meshList = redGPUContext.viewList[0].scene.children;
+        meshList.forEach((mesh) => {
+            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
+                mesh.primitiveState.cullMode = ev.value;
+            }
+        });
+    });
 };

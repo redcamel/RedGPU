@@ -90,14 +90,16 @@ const makeData = function (uniqueKey, redGPUContext,
 
         for (let ring = 0; ring <= radialSegments; ++ring) {
             const u = ring / radialSegments;
-            // [교정] 실린더/구체와 일관성을 위해 PI(180도) 오프셋 추가 (이음새를 뒤로 보냄)
-            const ringAngle = thetaStart + u * thetaLength + Math.PI;
-            const xSin = Math.sin(ringAngle);
-            const zCos = Math.cos(ringAngle);
-            const x = xSin * ringRadius;
-            const z = zCos * ringRadius;
-            const nx = xSin * sliceSin;
-            const nz = zCos * sliceSin;
+            // [교정] 3시 방향 시작, 시계 방향 회전 (sin 반전)
+            const ringAngle = thetaStart + u * thetaLength;
+            const sinTheta = -Math.sin(ringAngle);
+            const cosTheta = Math.cos(ringAngle);
+            
+            // x = cos, z = sin (시계 방향)
+            const x = cosTheta * ringRadius;
+            const z = sinTheta * ringRadius;
+            const nx = cosTheta * sliceSin;
+            const nz = sinTheta * sliceSin;
 
             // Packing (12 floats)
             PrimitiveUtils.interleavePacker(
@@ -110,7 +112,8 @@ const makeData = function (uniqueKey, redGPUContext,
     }
 
     // Body Indices (PrimitiveUtils.generateGridIndices 사용)
-    PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1);
+    // [교정] 회전체는 Visual CCW 시 인덱스를 뒤집어야 CCW 와인딩(바깥쪽이 앞면)이 됨
+    PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1, true);
 
 
     // 2. Partial Torus일 경우 단면 막기 (Caps)

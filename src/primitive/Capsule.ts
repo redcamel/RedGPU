@@ -113,14 +113,15 @@ const makeData = function (
 
         for (let ix = 0; ix <= radialSegments; ix++) {
             const u = ix / radialSegments;
-            // [교정] 실린더/구체와 일관성을 위해 PI(180도) 오프셋 추가 (이음새를 뒤로 보냄)
-            const phi = u * Math.PI * 2 + Math.PI;
+            // [교정] 3시 방향 시작, 시계 방향 회전 (sin 반전)
+            const phi = u * Math.PI * 2;
 
-            const sinPhi = Math.sin(phi);
+            const sinPhi = -Math.sin(phi);
             const cosPhi = Math.cos(phi);
 
-            const x = currentRadius * sinPhi;
-            const z = currentRadius * cosPhi;
+            // x = cos, z = sin (시계 방향)
+            const x = currentRadius * cosPhi;
+            const z = currentRadius * sinPhi;
 
             // Normal calculation
             const normal = vec3.fromValues(
