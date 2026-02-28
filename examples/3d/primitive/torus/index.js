@@ -97,6 +97,8 @@ const renderTestPane = async (redGPUContext) => {
         thetaLength: Math.PI * 2,
         capStart: false,
         capEnd: false,
+        isRadialCapStart: false,
+        isRadialCapEnd: false,
         cullMode: RedGPU.GPU_CULL_MODE.BACK
     };
 
@@ -109,7 +111,8 @@ const renderTestPane = async (redGPUContext) => {
         const newGeometry = new RedGPU.Primitive.Torus(
             redGPUContext,
             config.radius, config.thickness, config.radialSegments, config.tubularSegments,
-            config.thetaStart, config.thetaLength, config.capStart, config.capEnd
+            config.thetaStart, config.thetaLength, config.capStart, config.capEnd,
+            config.isRadialCapStart, config.isRadialCapEnd
         );
 
         meshList.forEach(mesh => {
@@ -137,6 +140,8 @@ const renderTestPane = async (redGPUContext) => {
     folder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'capStart').on('change', updateGeometry);
     folder.addBinding(config, 'capEnd').on('change', updateGeometry);
+    folder.addBinding(config, 'isRadialCapStart').on('change', updateGeometry);
+    folder.addBinding(config, 'isRadialCapEnd').on('change', updateGeometry);
 
     const materialFolder = pane.addFolder({title: 'Material State', expanded: true});
     materialFolder.addBinding(config, 'cullMode', {

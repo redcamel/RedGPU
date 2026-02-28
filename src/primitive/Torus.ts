@@ -32,6 +32,8 @@ class Torus extends Primitive {
      * @param thetaLength - [KO] 원호 각도 [EN] Arc angle
      * @param capStart - [KO] 시작 지점 단면을 닫을지 여부 (기본값 false) [EN] Whether to close the start cap (default false)
      * @param capEnd - [KO] 끝 지점 단면을 닫을지 여부 (기본값 false) [EN] Whether to close the end cap (default false)
+     * @param isRadialCapStart - [KO] 시작 단면의 방사형 UV 여부 (기본값 false) [EN] Whether start cap uses radial UV (default false)
+     * @param isRadialCapEnd - [KO] 끝 단면의 방사형 UV 여부 (기본값 false) [EN] Whether end cap uses radial UV (default false)
      */
     constructor(redGPUContext: RedGPUContext,
                 radius = 1,
@@ -41,7 +43,9 @@ class Torus extends Primitive {
                 thetaStart = 0,
                 thetaLength = Math.PI * 2,
                 capStart = false,
-                capEnd = false
+                capEnd = false,
+                isRadialCapStart = false,
+                isRadialCapEnd = false
     ) {
         if (radialSegments < 3) {
             throw new Error('radialSegments must be 3 or greater');
@@ -49,7 +53,7 @@ class Torus extends Primitive {
         if (tubularSegments < 3) {
             throw new Error('tubularSegments must be 3 or greater');
         }
-        const uniqueKey = `PRIMITIVE_TORUS_R${radius}_T${thickness}_RSD${radialSegments}_BSD${tubularSegments}_SA${thetaStart}_EA${thetaLength}_CS${capStart}_CE${capEnd}`;
+        const uniqueKey = `PRIMITIVE_TORUS_R${radius}_T${thickness}_RSD${radialSegments}_BSD${tubularSegments}_SA${thetaStart}_EA${thetaLength}_CS${capStart}_CE${capEnd}_IRCS${isRadialCapStart}_IRCE${isRadialCapEnd}`;
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
             radius,
             thickness,
@@ -58,7 +62,9 @@ class Torus extends Primitive {
             thetaStart,
             thetaLength,
             capStart,
-            capEnd
+            capEnd,
+            isRadialCapStart,
+            isRadialCapEnd
         ));
     }
 }
@@ -71,7 +77,9 @@ const makeData = function (uniqueKey, redGPUContext,
                            thetaStart,
                            thetaLength,
                            capStart,
-                           capEnd
+                           capEnd,
+                           isRadialCapStart,
+                           isRadialCapEnd
 ) {
     thetaStart = thetaStart || 0;
     thetaLength = thetaLength === undefined ? Math.PI * 2 : thetaLength;
@@ -136,7 +144,8 @@ const makeData = function (uniqueKey, redGPUContext,
                 {x: -sSin, y: 0, z: -sCos}, // UVector (로컬 -Z 방향 유도)                  
                 {x: 0, y: 1, z: 0},         // VVector                
                 {x: sCos, y: 0, z: -sSin},  // Normal (시작면은 반대방향)                  
-                true                                        
+                true,
+                isRadialCapStart
             );
         }
 
@@ -154,7 +163,8 @@ const makeData = function (uniqueKey, redGPUContext,
                 {x: -eSin, y: 0, z: -eCos}, // UVector                  
                 {x: 0, y: 1, z: 0},         // VVector                
                 {x: -eCos, y: 0, z: eSin},  // Normal (끝면은 진행방향)
-                false                                       
+                false,
+                isRadialCapEnd
             );
         }
     }
