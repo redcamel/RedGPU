@@ -18,50 +18,6 @@ import Primitive from "./core/Primitive";
  * @category Primitive
  */
 class Circle extends Primitive {
-    #makeData = (function () {
-        return function (
-            uniqueKey: string,
-            redGPUContext: RedGPUContext,
-            radius: number,
-            segments: number,
-            thetaStart: number,
-            thetaLength: number
-        ) {
-            const interleaveData: number[] = [];
-            const indexData: number[] = [];
-            // 중심점 추가 (인덱스 0)
-            interleaveData.push(
-                0, 0, 0,        // 위치: 원점
-                0, 0, 1,        // 노멀: Z축 양의 방향
-                0.5, 0.5        // UV: 텍스처 중심
-            );
-            // 원주 정점들 생성
-            for (let s = 0; s <= segments; s++) {
-                const angle = thetaStart + (s / segments) * thetaLength;
-                const x = Math.cos(angle);
-                const y = Math.sin(angle);
-                // 위치 계산
-                const posX = radius * x;
-                const posY = radius * y;
-                const posZ = 0;
-                // UV 좌표 계산 (정규화된 x, y를 0~1 범위로 변환)
-                const u = (x + 1) / 2;
-                const v = (y + 1) / 2;
-                interleaveData.push(
-                    posX, posY, posZ,  // 위치
-                    0, 0, 1,           // 노멀 (Z축)
-                    u, v               // UV 좌표
-                );
-            }
-            // 인덱스 생성 (팬 형태)
-            for (let i = 1; i <= segments; i++) {
-                // 중심점(0) -> 현재 정점(i) -> 다음 정점(i+1)
-                indexData.push(0, i, i + 1);
-            }
-            return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
-        };
-    })();
-
     /**
      * [KO] Circle 인스턴스를 생성합니다.
      * [EN] Creates an instance of Circle.
@@ -109,12 +65,56 @@ class Circle extends Primitive {
         const cachedBufferState = redGPUContext.resourceManager.cachedBufferState;
         let geometry = cachedBufferState[uniqueKey];
         if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = this.#makeData(
+            geometry = cachedBufferState[uniqueKey] = makeData(
                 uniqueKey, redGPUContext, radius, segments, thetaStart, thetaLength
             );
         }
         this._setData(geometry);
     }
 }
+
+const makeData = (function () {
+    return function (
+        uniqueKey: string,
+        redGPUContext: RedGPUContext,
+        radius: number,
+        segments: number,
+        thetaStart: number,
+        thetaLength: number
+    ) {
+        const interleaveData: number[] = [];
+        const indexData: number[] = [];
+        // 중심점 추가 (인덱스 0)
+        interleaveData.push(
+            0, 0, 0,        // 위치: 원점
+            0, 0, 1,        // 노멀: Z축 양의 방향
+            0.5, 0.5        // UV: 텍스처 중심
+        );
+        // 원주 정점들 생성
+        for (let s = 0; s <= segments; s++) {
+            const angle = thetaStart + (s / segments) * thetaLength;
+            const x = Math.cos(angle);
+            const y = Math.sin(angle);
+            // 위치 계산
+            const posX = radius * x;
+            const posY = radius * y;
+            const posZ = 0;
+            // UV 좌표 계산 (정규화된 x, y를 0~1 범위로 변환)
+            const u = (x + 1) / 2;
+            const v = (y + 1) / 2;
+            interleaveData.push(
+                posX, posY, posZ,  // 위치
+                0, 0, 1,           // 노멀 (Z축)
+                u, v               // UV 좌표
+            );
+        }
+        // 인덱스 생성 (팬 형태)
+        for (let i = 1; i <= segments; i++) {
+            // 중심점(0) -> 현재 정점(i) -> 다음 정점(i+1)
+            indexData.push(0, i, i + 1);
+        }
+        return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
+    };
+})();
 
 export default Circle;
