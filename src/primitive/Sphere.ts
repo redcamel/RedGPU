@@ -89,28 +89,29 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
     // 정점, 노멀, UV 생성
     for (let iy = 0; iy <= heightSegments; iy++) {
         const v = iy / heightSegments;
+        const theta = thetaStart + v * thetaLength;
+        const sinTheta = Math.sin(theta);
+        const cosTheta = Math.cos(theta);
+
         for (let ix = 0; ix <= widthSegments; ix++) {
             const u = ix / widthSegments;
-            // [교정] 3시 방향 시작, 시계 방향 회전 (sin 반전)
+            // [교정] 3시 방향 시작, 시계 방향 회전 (Cylinder 안정화 공식 적용)
             const phi = phiStart + u * phiLength;
-            const theta = thetaStart + v * thetaLength;
-
-            const sinTheta = Math.sin(theta);
-            const cosTheta = Math.cos(theta);
-            const sinPhi = -Math.sin(phi);
+            const sinPhi = -Math.sin(phi); // 시계 방향
             const cosPhi = Math.cos(phi);
 
             // x = cos(phi)sin(theta), y = cos(theta), z = sin(phi)sin(theta)
             vertex[0] = radius * cosPhi * sinTheta;
             vertex[1] = radius * cosTheta;
             vertex[2] = radius * sinPhi * sinTheta;
+
             // 노멀 계산
             normal[0] = vertex[0];
             normal[1] = vertex[1];
             normal[2] = vertex[2];
             vec3.normalize(normal, normal);
 
-            // UV & Packing
+            // UV & Packing (v는 V-Down 표준 유지)
             PrimitiveUtils.interleavePacker(
                 interleaveData,
                 vertex[0], vertex[1], vertex[2],
@@ -121,8 +122,8 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
     }
 
     // 인덱스 생성 (PrimitiveUtils.generateGridIndices 사용)
-    // [교정] 회전체는 Visual CCW 시 인덱스를 뒤집어야 CCW 와인딩(바깥쪽이 앞면)이 됨
-    PrimitiveUtils.generateGridIndices(indexData, 0, widthSegments, heightSegments, gridX1, true);
+    // [교정] 시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
+    PrimitiveUtils.generateGridIndices(indexData, 0, widthSegments, heightSegments, gridX1, false);
 
     PrimitiveUtils.calculateTangents(interleaveData, indexData);
 
