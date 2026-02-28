@@ -2,60 +2,13 @@ import {vec3} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
 import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
+import PrimitiveUtils from "./core/PrimitiveUtils";
 
 /**
  * [KO] Cylinder(실린더) 기본 도형 클래스입니다.
  * [EN] Cylinder primitive geometry class.
- *
- * [KO] 상하 반지름, 높이 등을 기반으로 원기둥 형태의 정점 및 인덱스 데이터를 생성하여 관리합니다.
- * [EN] Generates and manages vertex and index data for a cylinder based on radius, height, etc.
- *
- * ### Example
- * ```typescript
- * // 반지름 1, 높이 2, 세그먼트 32짜리 실린더 생성
- * const cylinder = new RedGPU.Cylinder(redGPUContext, 1, 1, 2, 32);
- * ```
- * <iframe src="/RedGPU/examples/3d/primitive/cylinder/" style="width:100%; height:500px;"></iframe>
- * @category Primitive
  */
 class Cylinder extends Primitive {
-    /**
-     * [KO] Cylinder 인스턴스를 생성합니다.
-     * [EN] Creates an instance of Cylinder.
-     *
-     * ### Example
-     * ```typescript
-     * const cylinder = new RedGPU.Cylinder(redGPUContext, 1, 1, 2, 32);
-     * ```
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param radiusTop -
-     * [KO] 윗면 반지름 (기본값 1)
-     * [EN] Top radius (default 1)
-     * @param radiusBottom -
-     * [KO] 아랫면 반지름 (기본값 1)
-     * [EN] Bottom radius (default 1)
-     * @param height -
-     * [KO] 높이 (기본값 1)
-     * [EN] Height (default 1)
-     * @param radialSegments -
-     * [KO] 둘레 세그먼트 수 (기본값 8)
-     * [EN] Radial segments (default 8)
-     * @param heightSegments -
-     * [KO] 높이 세그먼트 수 (기본값 8)
-     * [EN] Height segments (default 8)
-     * @param openEnded -
-     * [KO] 캡 사용 안함 여부 (기본값 false)
-     * [EN] Whether the ends are open (default false)
-     * @param thetaStart -
-     * [KO] 시작 각도 (라디안, 기본값 0)
-     * [EN] Starting angle (radians, default 0)
-     * @param thetaLength -
-     * [KO] 원호 각도 (라디안, 기본값 2*PI)
-     * [EN] Arc angle (radians, default 2*PI)
-     */
     constructor(redGPUContext: RedGPUContext,
                 radiusTop: number = 1,
                 radiusBottom: number = 1,
@@ -66,136 +19,94 @@ class Cylinder extends Primitive {
                 thetaStart: number = 0.0,
                 thetaLength: number = Math.PI * 2
     ) {
-        const uniqueKey = `PRIMITIVE_CYLINDER_RT${radiusTop}_RB${radiusBottom}_H${height}_RS${radialSegments}_HS${heightSegments}_TS${openEnded}_TS${thetaStart}_TL${thetaLength}`;
+        const uniqueKey = `PRIMITIVE_CYLINDER_RT${radiusTop}_RB${radiusBottom}_H${height}_RS${radialSegments}_HS${heightSegments}_OE${openEnded}_TS${thetaStart}_TL${thetaLength}`;
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength));
     }
 }
 
-const makeData = (function () {
-    return function (uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
-        ////////////////////////////////////////////////////////////////////////////
-        // 데이터 생성!
-        // vertexBuffer Data
-        const interleaveData = [];
-        const indexData = [];
-        //
-        let index = 0;
-        const indexArray = [];
-        const halfHeight = height / 2;
+function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
+    const interleaveData = [];
+    const indexData = [];
+    const halfHeight = height / 2;
 
-        const generateTorso = function () {
-            let x, y;
-            const normal: any = [];
-            const vertex = [];
-            // this will be used to calculate the normal
-            const slope = (radiusBottom - radiusTop) / height;
-            // generate vertices, normals and uvs
-            for (y = 0; y <= heightSegments; y++) {
-                const indexRow = [];
-                const v = y / heightSegments;
-                // calculate the radius of the current row
-                const radius = v * (radiusBottom - radiusTop) + radiusTop;
-                for (x = 0; x <= radialSegments; x++) {
-                    const u = x / radialSegments;
-                    const theta = u * thetaLength + thetaStart;
-                    const sinTheta = Math.sin(theta);
-                    const cosTheta = Math.cos(theta);
-                    // vertex
-                    vertex[0] = radius * sinTheta;
-                    vertex[1] = -v * height + halfHeight;
-                    vertex[2] = radius * cosTheta;
-                    interleaveData.push(vertex[0], vertex[1], vertex[2]);
-                    // normal
-                    normal[0] = sinTheta;
-                    normal[1] = slope;
-                    normal[2] = cosTheta;
-                    vec3.normalize(normal, normal);
-                    interleaveData.push(normal[0], normal[1], normal[2]);
-                    // uv
-                    interleaveData.push(u, v);
-                    // save index of vertex in respective row
-                    indexRow.push(index++);
-                }
-                // now save vertices of the row in our index array
-                indexArray.push(indexRow);
-            }
-            // generate indices
-            for (x = 0; x < radialSegments; x++) {
-                for (y = 0; y < heightSegments; y++) {
-                    // we use the index array to access the correct indices
-                    const a = indexArray [y][x];
-                    const b = indexArray[y + 1][x];
-                    const c = indexArray[y + 1][x + 1];
-                    const d = indexArray[y][x + 1];
-                    // faces
-                    indexData.push(a, b, d);
-                    indexData.push(b, c, d);
-                }
-            }
-        };
-        const generateCap = function (top) {
-            let x, centerIndexStart, centerIndexEnd;
-            const uv = [];
-            const vertex = [];
-            const radius = (top === true) ? radiusTop : radiusBottom;
-            const sign = (top === true) ? 1 : -1;
-            // save the index of the first center vertex
-            centerIndexStart = index;
-            // first we generate the center vertex data of the cap.
-            // because the geometry needs one set of uvs per face,
-            // we must generate a center vertex per face/segment
-            for (x = 1; x <= radialSegments; x++) {
-                // vertex
-                interleaveData.push(0, halfHeight * sign, 0);
-                // normal
-                interleaveData.push(0, sign, 0);
-                // uv
-                interleaveData.push(0.5, 0.5);
-                // increase index
-                index++;
-            }
-            // save the index of the last center vertex
-            centerIndexEnd = index;
-            // now we generate the surrounding vertices, normals and uvs
-            for (x = 0; x <= radialSegments; x++) {
-                const u = x / radialSegments;
-                const theta = u * thetaLength + thetaStart;
-                const cosTheta = Math.cos(theta);
-                const sinTheta = Math.sin(theta);
-                // vertex
-                vertex[0] = radius * sinTheta;
-                vertex[1] = halfHeight * sign;
-                vertex[2] = radius * cosTheta;
-                interleaveData.push(vertex[0], vertex[1], vertex[2]);
-                // normal
-                interleaveData.push(0, sign, 0);
-                // uv
-                uv[0] = (cosTheta * 0.5) + 0.5;
-                uv[1] = (sinTheta * 0.5 * sign) + 0.5;
-                interleaveData.push(uv[0], 1 - uv[1]);
-                // increase index
-                index++;
-            }
-            // generate indices
-            for (x = 0; x < radialSegments; x++) {
-                const c = centerIndexStart + x;
-                const i = centerIndexEnd + x;
-                if (top === true) {
-                    // face top
-                    indexData.push(i, i + 1, c);
-                } else {
-                    // face bottom
-                    indexData.push(i + 1, i, c);
-                }
-            }
-        };
-        generateTorso();
-        if (openEnded === false) {
-            if (radiusTop > 0) generateCap(true);
-            if (radiusBottom > 0) generateCap(false);
+    // 1. Torso 생성 (Unreal Standard: Seam at back, front facing center of texture)
+    const indexArray = [];
+    let index = 0;
+    const slope = (radiusBottom - radiusTop) / height;
+
+    for (let iy = 0; iy <= heightSegments; iy++) {
+        const indexRow = [];
+        const v = iy / heightSegments;
+        const radius = v * (radiusBottom - radiusTop) + radiusTop;
+
+        for (let ix = 0; ix <= radialSegments; ix++) {
+            const u = ix / radialSegments;
+            // Unreal 스타일: 이음새를 -Z(뒤쪽)로 보내기 위해 PI만큼 오프셋
+            const theta = u * thetaLength + thetaStart + Math.PI; 
+            const sinTheta = Math.sin(theta);
+            const cosTheta = Math.cos(theta);
+
+            // Position
+            const x = radius * sinTheta;
+            const y = -v * height + halfHeight;
+            const z = radius * cosTheta;
+            interleaveData.push(x, y, z);
+
+            // Normal
+            const normal = vec3.fromValues(sinTheta, slope, cosTheta);
+            vec3.normalize(normal, normal);
+            interleaveData.push(normal[0], normal[1], normal[2]);
+
+            // UV
+            interleaveData.push(u, v);
+            indexRow.push(index++);
         }
-        return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
-    };
-})();
+        indexArray.push(indexRow);
+    }
 
-export default Cylinder
+    // Torso Indices
+    for (let ix = 0; ix < radialSegments; ix++) {
+        for (let iy = 0; iy < heightSegments; iy++) {
+            const a = indexArray[iy][ix];
+            const b = indexArray[iy + 1][ix];
+            const c = indexArray[iy + 1][ix + 1];
+            const d = indexArray[iy][ix + 1];
+            indexData.push(a, b, d);
+            indexData.push(b, c, d);
+        }
+    }
+
+    // 2. Caps 생성 (Unreal Standard Alignment)
+    if (!openEnded) {
+        if (radiusTop > 0) {
+            // Top Cap (+Y)
+            PrimitiveUtils.generateCircleData(
+                interleaveData, indexData,
+                radiusTop, radialSegments,
+                thetaStart + Math.PI, thetaLength, // 몸체와 동일한 각도 오프셋 적용
+                {x: 0, y: halfHeight, z: 0},
+                {x: 1, y: 0, z: 0},  // uVector: Right
+                {x: 0, y: 0, z: -1}, // vVector: Top
+                {x: 0, y: 1, z: 0},  // Normal: Up
+                true                 // CCW
+            );
+        }
+        if (radiusBottom > 0) {
+            // Bottom Cap (-Y)
+            PrimitiveUtils.generateCircleData(
+                interleaveData, indexData,
+                radiusBottom, radialSegments,
+                thetaStart + Math.PI, thetaLength,
+                {x: 0, y: -halfHeight, z: 0},
+                {x: 1, y: 0, z: 0},  // uVector: Right
+                {x: 0, y: 0, z: 1},   // vVector: Bottom (Unreal 스타일 바닥면 UV 정렬)
+                {x: 0, y: -1, z: 0}, // Normal: Down
+                true                 // CCW
+            );
+        }
+    }
+
+    return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
+}
+
+export default Cylinder;

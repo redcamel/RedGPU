@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
+import PrimitiveUtils from "./core/PrimitiveUtils";
 
 /**
  * [KO] Torus(토러스, 도넛) 기본 도형 클래스입니다.
@@ -22,32 +23,13 @@ class Torus extends Primitive {
      * [KO] Torus 인스턴스를 생성합니다.
      * [EN] Creates an instance of Torus.
      *
-     * ### Example
-     * ```typescript
-     * const torus = new RedGPU.Torus(redGPUContext, 1, 0.5, 16, 16, 0, Math.PI * 2);
-     * ```
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param radius -
-     * [KO] 중심 원 반지름 (기본값 1)
-     * [EN] Major radius (default 1)
-     * @param thickness -
-     * [KO] 단면(튜브) 반지름 (기본값 0.5)
-     * [EN] Minor radius/thickness (default 0.5)
-     * @param radialSubdivisions -
-     * [KO] 둘레 세그먼트 수 (기본값 16, 최소 3)
-     * [EN] Radial segments (default 16, min 3)
-     * @param bodySubdivisions -
-     * [KO] 단면 세그먼트 수 (기본값 16, 최소 3)
-     * [EN] Tubular segments (default 16, min 3)
-     * @param startAngle -
-     * [KO] 시작 각도 (라디안, 기본값 0)
-     * [EN] Starting angle (radians, default 0)
-     * @param endAngle -
-     * [KO] 끝 각도 (라디안, 기본값 2*PI)
-     * [EN] Ending angle (radians, default 2*PI)
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param radius - [KO] 중심 원 반지름 [EN] Major radius
+     * @param thickness - [KO] 단면(튜브) 반지름 [EN] Minor radius/thickness
+     * @param radialSubdivisions - [KO] 둘레 세그먼트 수 [EN] Radial segments
+     * @param bodySubdivisions - [KO] 단면 세그먼트 수 [EN] Tubular segments
+     * @param startAngle - [KO] 시작 각도 [EN] Starting angle
+     * @param endAngle - [KO] 끝 각도 [EN] Ending angle
      */
     constructor(redGPUContext: RedGPUContext,
                 radius = 1,
@@ -75,58 +57,90 @@ class Torus extends Primitive {
     }
 }
 
-const makeData = (function () {
-    return function (uniqueKey, redGPUContext,
-                     radius,
-                     thickness,
-                     radialSubdivisions,
-                     bodySubdivisions,
-                     startAngle,
-                     endAngle
-    ) {
-        ////////////////////////////////////////////////////////////////////////////
-        // 데이터 생성!
-        // vertexBuffer Data
-        startAngle = startAngle || 0;
-        endAngle = endAngle || Math.PI * 2;
-        const range = endAngle - startAngle;
-        const radialParts = radialSubdivisions + 1;
-        const bodyParts = bodySubdivisions + 1;
-        const interleaveData = [];
-        const indexData = [];
-        for (let slice = 0; slice < bodyParts; ++slice) {
-            const v = slice / bodySubdivisions;
-            const sliceAngle = v * Math.PI * 2;
-            const sliceSin = Math.sin(sliceAngle);
-            const ringRadius = radius + sliceSin * thickness;
-            const ny = Math.cos(sliceAngle);
-            const y = ny * thickness;
-            for (let ring = 0; ring < radialParts; ++ring) {
-                const u = ring / radialSubdivisions;
-                const ringAngle = startAngle + u * range;
-                const xSin = Math.sin(ringAngle);
-                const zCos = Math.cos(ringAngle);
-                const x = xSin * ringRadius;
-                const z = zCos * ringRadius;
-                const nx = xSin * sliceSin;
-                const nz = zCos * sliceSin;
-                interleaveData.push(x, y, z, nx, ny, nz, u, 1 - v);
-            }
-        }
-        for (let slice = 0; slice < bodySubdivisions; ++slice) {  // eslint-disable-line
-            for (let ring = 0; ring < radialSubdivisions; ++ring) {  // eslint-disable-line
-                const nextRingIndex = 1 + ring;
-                const nextSliceIndex = 1 + slice;
-                indexData.push(radialParts * slice + ring,
-                    radialParts * nextSliceIndex + ring,
-                    radialParts * slice + nextRingIndex);
-                indexData.push(radialParts * nextSliceIndex + ring,
-                    radialParts * nextSliceIndex + nextRingIndex,
-                    radialParts * slice + nextRingIndex);
-            }
-        }
-        return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
-    };
-})();
+const makeData = function (uniqueKey, redGPUContext,
+                           radius,
+                           thickness,
+                           radialSubdivisions,
+                           bodySubdivisions,
+                           startAngle,
+                           endAngle
+) {
+    startAngle = startAngle || 0;
+    endAngle = endAngle || Math.PI * 2;
+    const range = endAngle - startAngle;
+    const isPartial = Math.abs(range) < Math.PI * 2;
 
-export default Torus
+    const radialParts = radialSubdivisions + 1;
+    const bodyParts = bodySubdivisions + 1;
+    const interleaveData = [];
+    const indexData = [];
+
+    // 1. Torus Body 생성
+    for (let slice = 0; slice < bodyParts; ++slice) {
+        const v = slice / bodySubdivisions;
+        const sliceAngle = v * Math.PI * 2;
+        const sliceSin = Math.sin(sliceAngle);
+        const ringRadius = radius + sliceSin * thickness;
+        const ny = Math.cos(sliceAngle);
+        const y = ny * thickness;
+
+        for (let ring = 0; ring < radialParts; ++ring) {
+            const u = ring / radialSubdivisions;
+            const ringAngle = startAngle + u * range;
+            const xSin = Math.sin(ringAngle);
+            const zCos = Math.cos(ringAngle);
+            const x = xSin * ringRadius;
+            const z = zCos * ringRadius;
+            const nx = xSin * sliceSin;
+            const nz = zCos * sliceSin;
+            interleaveData.push(x, y, z, nx, ny, nz, u, 1 - v);
+        }
+    }
+
+    // Body Indices
+    for (let slice = 0; slice < bodySubdivisions; ++slice) {
+        for (let ring = 0; ring < radialSubdivisions; ++ring) {
+            const nextRingIndex = 1 + ring;
+            const nextSliceIndex = 1 + slice;
+            indexData.push(radialParts * slice + ring,
+                radialParts * nextSliceIndex + ring,
+                radialParts * slice + nextRingIndex);
+            indexData.push(radialParts * nextSliceIndex + ring,
+                radialParts * nextSliceIndex + nextRingIndex,
+                radialParts * slice + nextRingIndex);
+        }
+    }
+
+    // 2. Partial Torus일 경우 단면 막기 (Caps)
+    if (isPartial) {
+        // Start Angle Cap
+        const sSin = Math.sin(startAngle);
+        const sCos = Math.cos(startAngle);
+        PrimitiveUtils.generateCircleData(
+            interleaveData, indexData,
+            thickness, bodySubdivisions,
+            0, Math.PI * 2,
+            {x: sSin * radius, y: 0, z: sCos * radius}, // Center
+            {x: sSin, y: 0, z: sCos},                   // uVector (Radial)
+            {x: 0, y: 1, z: 0},                         // vVector (Up)
+            {x: -sCos, y: 0, z: sSin}                   // Normal (Reverse Tangent)
+        );
+
+        // End Angle Cap
+        const eSin = Math.sin(endAngle);
+        const eCos = Math.cos(endAngle);
+        PrimitiveUtils.generateCircleData(
+            interleaveData, indexData,
+            thickness, bodySubdivisions,
+            0, Math.PI * 2,
+            {x: eSin * radius, y: 0, z: eCos * radius}, // Center
+            {x: eSin, y: 0, z: eCos},                   // uVector (Radial)
+            {x: 0, y: 1, z: 0},                         // vVector (Up)
+            {x: eCos, y: 0, z: -eSin}                   // Normal (Tangent)
+        );
+    }
+
+    return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
+};
+
+export default Torus;

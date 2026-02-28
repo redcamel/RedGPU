@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
+import PrimitiveUtils from "./core/PrimitiveUtils";
 
 /**
  * [KO] Circle(원) 기본 도형 클래스입니다.
@@ -67,48 +68,30 @@ class Circle extends Primitive {
     }
 }
 
-const makeData = (function () {
-    return function (
-        uniqueKey: string,
-        redGPUContext: RedGPUContext,
-        radius: number,
-        segments: number,
-        thetaStart: number,
-        thetaLength: number
-    ) {
-        const interleaveData: number[] = [];
-        const indexData: number[] = [];
-        // 중심점 추가 (인덱스 0)
-        interleaveData.push(
-            0, 0, 0,        // 위치: 원점
-            0, 0, 1,        // 노멀: Z축 양의 방향
-            0.5, 0.5        // UV: 텍스처 중심
-        );
-        // 원주 정점들 생성
-        for (let s = 0; s <= segments; s++) {
-            const angle = thetaStart + (s / segments) * thetaLength;
-            const x = Math.cos(angle);
-            const y = Math.sin(angle);
-            // 위치 계산
-            const posX = radius * x;
-            const posY = radius * y;
-            const posZ = 0;
-            // UV 좌표 계산 (정규화된 x, y를 0~1 범위로 변환)
-            const u = (x + 1) / 2;
-            const v = (y + 1) / 2;
-            interleaveData.push(
-                posX, posY, posZ,  // 위치
-                0, 0, 1,           // 노멀 (Z축)
-                u, v               // UV 좌표
-            );
-        }
-        // 인덱스 생성 (팬 형태)
-        for (let i = 1; i <= segments; i++) {
-            // 중심점(0) -> 현재 정점(i) -> 다음 정점(i+1)
-            indexData.push(0, i, i + 1);
-        }
-        return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
-    };
-})();
+const makeData = function (
+    uniqueKey: string,
+    redGPUContext: RedGPUContext,
+    radius: number,
+    segments: number,
+    thetaStart: number,
+    thetaLength: number
+) {
+    const interleaveData: number[] = [];
+    const indexData: number[] = [];
+
+    // Circle 생성 (벡터 기반: XY 평면, Normal +Z)
+    PrimitiveUtils.generateCircleData(
+        interleaveData, indexData,
+        radius, segments,
+        thetaStart, thetaLength,
+        {x: 0, y: 0, z: 0}, // center
+        {x: 1, y: 0, z: 0}, // uVector
+        {x: 0, y: 1, z: 0}, // vVector
+        {x: 0, y: 0, z: 1}, // normal
+        true                // isFront
+    );
+
+    return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
+};
 
 export default Circle;

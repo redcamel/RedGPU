@@ -63,97 +63,95 @@ class Capsule extends Primitive {
     }
 }
 
-const makeData = (function () {
-    return function (
-        uniqueKey: string,
-        redGPUContext: RedGPUContext,
-        radius: number,
-        cylinderHeight: number,
-        radialSegments: number,
-        heightSegments: number,
-        capSegments: number
-    ) {
-        const interleaveData: number[] = [];
-        const indexData: number[] = [];
-        const grid: number[][] = [];
-        let index = 0;
+const makeData = function (
+    uniqueKey: string,
+    redGPUContext: RedGPUContext,
+    radius: number,
+    cylinderHeight: number,
+    radialSegments: number,
+    heightSegments: number,
+    capSegments: number
+) {
+    const interleaveData: number[] = [];
+    const indexData: number[] = [];
+    const grid: number[][] = [];
+    let index = 0;
 
-        const totalVerticalSegments = capSegments * 2 + heightSegments;
-        const halfCylinderHeight = cylinderHeight / 2;
+    const totalVerticalSegments = capSegments * 2 + heightSegments;
+    const halfCylinderHeight = cylinderHeight / 2;
 
-        const capArcLength = (Math.PI / 2) * radius;
-        const totalArcLength = capArcLength * 2 + cylinderHeight;
+    const capArcLength = (Math.PI / 2) * radius;
+    const totalArcLength = capArcLength * 2 + cylinderHeight;
 
-        for (let iy = 0; iy <= totalVerticalSegments; iy++) {
-            const verticesRow: number[] = [];
-            let y = 0;
-            let currentRadius = 0;
-            let currentDistance = 0;
+    for (let iy = 0; iy <= totalVerticalSegments; iy++) {
+        const verticesRow: number[] = [];
+        let y = 0;
+        let currentRadius = 0;
+        let currentDistance = 0;
 
-            if (iy < capSegments) {
-                // Top Cap
-                const theta = (iy / capSegments) * (Math.PI / 2);
-                y = halfCylinderHeight + radius * Math.cos(theta);
-                currentRadius = radius * Math.sin(theta);
-                currentDistance = (iy / capSegments) * capArcLength;
-            } else if (iy <= capSegments + heightSegments) {
-                // Cylinder Body
-                const t = (iy - capSegments) / heightSegments;
-                y = halfCylinderHeight - t * cylinderHeight;
-                currentRadius = radius;
-                currentDistance = capArcLength + t * cylinderHeight;
-            } else {
-                // Bottom Cap
-                const t = (iy - (capSegments + heightSegments)) / capSegments;
-                const theta = (Math.PI / 2) + t * (Math.PI / 2);
-                y = -halfCylinderHeight + radius * Math.cos(theta);
-                currentRadius = radius * Math.sin(theta);
-                currentDistance = capArcLength + cylinderHeight + t * capArcLength;
-            }
-
-            const v = currentDistance / totalArcLength;
-
-            for (let ix = 0; ix <= radialSegments; ix++) {
-                const u = ix / radialSegments;
-                const phi = u * Math.PI * 2;
-
-                const sinPhi = Math.sin(phi);
-                const cosPhi = Math.cos(phi);
-
-                const x = currentRadius * sinPhi;
-                const z = currentRadius * cosPhi;
-
-                // Position
-                interleaveData.push(x, y, z);
-
-                // Normal
-                const normal = vec3.fromValues(x, (iy < capSegments || iy > capSegments + heightSegments) ? (y - (iy < capSegments ? halfCylinderHeight : -halfCylinderHeight)) : 0, z);
-                vec3.normalize(normal, normal);
-                interleaveData.push(normal[0], normal[1], normal[2]);
-
-                // UV
-                interleaveData.push(u, 1 - v);
-
-                verticesRow.push(index++);
-            }
-            grid.push(verticesRow);
+        if (iy < capSegments) {
+            // Top Cap
+            const theta = (iy / capSegments) * (Math.PI / 2);
+            y = halfCylinderHeight + radius * Math.cos(theta);
+            currentRadius = radius * Math.sin(theta);
+            currentDistance = (iy / capSegments) * capArcLength;
+        } else if (iy <= capSegments + heightSegments) {
+            // Cylinder Body
+            const t = (iy - capSegments) / heightSegments;
+            y = halfCylinderHeight - t * cylinderHeight;
+            currentRadius = radius;
+            currentDistance = capArcLength + t * cylinderHeight;
+        } else {
+            // Bottom Cap
+            const t = (iy - (capSegments + heightSegments)) / capSegments;
+            const theta = (Math.PI / 2) + t * (Math.PI / 2);
+            y = -halfCylinderHeight + radius * Math.cos(theta);
+            currentRadius = radius * Math.sin(theta);
+            currentDistance = capArcLength + cylinderHeight + t * capArcLength;
         }
 
-        // Indices
-        for (let iy = 0; iy < totalVerticalSegments; iy++) {
-            for (let ix = 0; ix < radialSegments; ix++) {
-                const a = grid[iy][ix + 1];
-                const b = grid[iy][ix];
-                const c = grid[iy + 1][ix];
-                const d = grid[iy + 1][ix + 1];
+        const v = currentDistance / totalArcLength;
 
-                indexData.push(a, b, d);
-                indexData.push(b, c, d);
-            }
+        for (let ix = 0; ix <= radialSegments; ix++) {
+            const u = ix / radialSegments;
+            const phi = u * Math.PI * 2;
+
+            const sinPhi = Math.sin(phi);
+            const cosPhi = Math.cos(phi);
+
+            const x = currentRadius * sinPhi;
+            const z = currentRadius * cosPhi;
+
+            // Position
+            interleaveData.push(x, y, z);
+
+            // Normal
+            const normal = vec3.fromValues(x, (iy < capSegments || iy > capSegments + heightSegments) ? (y - (iy < capSegments ? halfCylinderHeight : -halfCylinderHeight)) : 0, z);
+            vec3.normalize(normal, normal);
+            interleaveData.push(normal[0], normal[1], normal[2]);
+
+            // UV
+            interleaveData.push(u, 1 - v);
+
+            verticesRow.push(index++);
         }
+        grid.push(verticesRow);
+    }
 
-        return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
-    };
-})();
+    // Indices
+    for (let iy = 0; iy < totalVerticalSegments; iy++) {
+        for (let ix = 0; ix < radialSegments; ix++) {
+            const a = grid[iy][ix + 1];
+            const b = grid[iy][ix];
+            const c = grid[iy + 1][ix];
+            const d = grid[iy + 1][ix + 1];
+
+            indexData.push(a, b, d);
+            indexData.push(b, c, d);
+        }
+    }
+
+    return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
+};
 
 export default Capsule;
