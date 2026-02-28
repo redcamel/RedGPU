@@ -30,6 +30,8 @@ class Torus extends Primitive {
      * @param tubularSegments - [KO] 단면 세그먼트 수 [EN] Tubular segments
      * @param thetaStart - [KO] 시작 각도 [EN] Starting angle
      * @param thetaLength - [KO] 원호 각도 [EN] Arc angle
+     * @param capStart - [KO] 시작 지점 단면을 닫을지 여부 (기본값 false) [EN] Whether to close the start cap (default false)
+     * @param capEnd - [KO] 끝 지점 단면을 닫을지 여부 (기본값 false) [EN] Whether to close the end cap (default false)
      */
     constructor(redGPUContext: RedGPUContext,
                 radius = 1,
@@ -37,7 +39,9 @@ class Torus extends Primitive {
                 radialSegments = 16,
                 tubularSegments = 16,
                 thetaStart = 0,
-                thetaLength = Math.PI * 2
+                thetaLength = Math.PI * 2,
+                capStart = false,
+                capEnd = false
     ) {
         if (radialSegments < 3) {
             throw new Error('radialSegments must be 3 or greater');
@@ -45,14 +49,16 @@ class Torus extends Primitive {
         if (tubularSegments < 3) {
             throw new Error('tubularSegments must be 3 or greater');
         }
-        const uniqueKey = `PRIMITIVE_TORUS_R${radius}_T${thickness}_RSD${radialSegments}_BSD${tubularSegments}_SA${thetaStart}_EA${thetaLength}`;
+        const uniqueKey = `PRIMITIVE_TORUS_R${radius}_T${thickness}_RSD${radialSegments}_BSD${tubularSegments}_SA${thetaStart}_EA${thetaLength}_CS${capStart}_CE${capEnd}`;
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
             radius,
             thickness,
             radialSegments,
             tubularSegments,
             thetaStart,
-            thetaLength
+            thetaLength,
+            capStart,
+            capEnd
         ));
     }
 }
@@ -63,7 +69,9 @@ const makeData = function (uniqueKey, redGPUContext,
                            radialSegments,
                            tubularSegments,
                            thetaStart,
-                           thetaLength
+                           thetaLength,
+                           capStart,
+                           capEnd
 ) {
     thetaStart = thetaStart || 0;
     thetaLength = thetaLength === undefined ? Math.PI * 2 : thetaLength;
@@ -90,18 +98,15 @@ const makeData = function (uniqueKey, redGPUContext,
 
         for (let ring = 0; ring <= radialSegments; ++ring) {
             const u = ring / radialSegments;
-            // [교정] 3시 방향 시작, 시계 방향 회전 (Sphere 안정화 공식과 동일)
             const ringAngle = thetaStart + u * thetaLength;
-            const sinTheta = -Math.sin(ringAngle); // 시계 방향
+            const sinTheta = -Math.sin(ringAngle); 
             const cosTheta = Math.cos(ringAngle);
             
-            // x = cos, z = sin (시계 방향 정점 배치)
             const x = cosTheta * ringRadius;
             const z = sinTheta * ringRadius;
             const nx = cosTheta * sliceSin;
             const nz = sinTheta * sliceSin;
 
-            // Packing (12 floats)
             PrimitiveUtils.interleavePacker(
                 interleaveData,
                 x, y, z,
@@ -111,39 +116,40 @@ const makeData = function (uniqueKey, redGPUContext,
         }
     }
 
-    // Body Indices (PrimitiveUtils.generateGridIndices 사용)
-    // [교정] 시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
     PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1, false);
-
 
     // 2. Partial Torus일 경우 단면 막기 (Caps)
     if (isPartial) {
-        // Start Angle Cap
-        const sSin = -Math.sin(thetaStart);
-        const sCos = Math.cos(thetaStart);
-        PrimitiveUtils.generateCircleData(
-            interleaveData, indexData,
-            thickness, tubularSegments,
-            0, Math.PI * 2,
-            {x: sCos * radius, y: 0, z: sSin * radius}, // Center
-            {x: sCos, y: 0, z: sSin},                   // uVector (Radial)
-            {x: 0, y: 1, z: 0},                         // vVector (Up)
-            {x: -sSin, y: 0, z: sCos}                   // Normal (Tangent 방향)
-        );
+        if (capStart) {
+            const sSin = Math.sin(thetaStart);
+            const sCos = Math.cos(thetaStart);
+            PrimitiveUtils.generateCircleData(
+                interleaveData, indexData,
+                thickness, tubularSegments,
+                0, Math.PI * 2,
+                {x: sCos * radius, y: 0, z: -sSin * radius}, 
+                {x: sCos, y: 0, z: -sSin},                   
+                {x: 0, y: 1, z: 0},                         
+                {x: sSin, y: 0, z: sCos},                   
+                true                                        
+            );
+        }
 
-        // End Angle Cap
-        const endAngle = thetaStart + thetaLength;
-        const eSin = -Math.sin(endAngle);
-        const eCos = Math.cos(endAngle);
-        PrimitiveUtils.generateCircleData(
-            interleaveData, indexData,
-            thickness, tubularSegments,
-            0, Math.PI * 2,
-            {x: eCos * radius, y: 0, z: eSin * radius}, // Center
-            {x: eCos, y: 0, z: eSin},                   // uVector (Radial)
-            {x: 0, y: 1, z: 0},                         // vVector (Up)
-            {x: sSin, y: 0, z: -sCos}                   // Normal (Reverse Tangent)
-        );
+        if (capEnd) {
+            const endAngle = thetaStart + thetaLength;
+            const eSin = Math.sin(endAngle);
+            const eCos = Math.cos(endAngle);
+            PrimitiveUtils.generateCircleData(
+                interleaveData, indexData,
+                thickness, tubularSegments,
+                0, Math.PI * 2,
+                {x: eCos * radius, y: 0, z: -eSin * radius}, 
+                {x: eCos, y: 0, z: -eSin},                   
+                {x: 0, y: 1, z: 0},                         
+                {x: eSin, y: 0, z: eCos}, 
+                false                                       
+            );
+        }
     }
 
     PrimitiveUtils.calculateTangents(interleaveData, indexData);

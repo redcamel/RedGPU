@@ -9,67 +9,81 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * [EN] Cylinder primitive geometry class.
  */
 class Cylinder extends Primitive {
+    /**
+     * [KO] Cylinder 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Cylinder.
+     *
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param radiusTop - [KO] 상단 반지름 [EN] Top radius
+     * @param radiusBottom - [KO] 하단 반지름 [EN] Bottom radius
+     * @param height - [KO] 높이 [EN] Height
+     * @param radialSegments - [KO] 원주 방향 분할 수 [EN] Radial segments
+     * @param heightSegments - [KO] 높이 방향 분할 수 [EN] Height segments
+     * @param capTop - [KO] 상단 단면을 닫을지 여부 (기본값 true) [EN] Whether to close the top cap (default true)
+     * @param capBottom - [KO] 하단 단면을 닫을지 여부 (기본값 true) [EN] Whether to close the bottom cap (default true)
+     * @param thetaStart - [KO] 시작 각도 [EN] Starting angle
+     * @param thetaLength - [KO] 원호 각도 [EN] Arc angle
+     */
     constructor(redGPUContext: RedGPUContext,
                 radiusTop: number = 1,
                 radiusBottom: number = 1,
                 height: number = 1,
                 radialSegments: number = 8,
                 heightSegments: number = 8,
-                openEnded: boolean = false,
+                capTop: boolean = true,
+                capBottom: boolean = true,
                 thetaStart: number = 0.0,
                 thetaLength: number = Math.PI * 2
     ) {
-        const uniqueKey = `PRIMITIVE_CYLINDER_RT${radiusTop}_RB${radiusBottom}_H${height}_RS${radialSegments}_HS${heightSegments}_OE${openEnded}_TS${thetaStart}_TL${thetaLength}`;
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength));
+        const uniqueKey = `PRIMITIVE_CYLINDER_RT${radiusTop}_RB${radiusBottom}_H${height}_RS${radialSegments}_HS${heightSegments}_CT${capTop}_CB${capBottom}_TS${thetaStart}_TL${thetaLength}`;
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, capTop, capBottom, thetaStart, thetaLength));
     }
 }
 
-function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
+function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, capTop, capBottom, thetaStart, thetaLength) {
     const interleaveData = [];
     const indexData = [];
     const halfHeight = height / 2;
     const uVector = {x: 1, y: 0, z: 0};
     const vVector = {x: 0, y: 0, z: 1};
 
-    // 1. Torso 생성 (PrimitiveUtils.generateCylinderTorsoData 사용)
+    // 1. Torso 생성
     PrimitiveUtils.generateCylinderTorsoData(
         interleaveData, indexData,
         radiusTop, radiusBottom, height,
         radialSegments, heightSegments,
-        thetaStart, thetaLength, // 0도 = 3시 방향(+X) 시작
+        thetaStart, thetaLength,
         {x: 0, y: 0, z: 0},
         uVector,
         vVector
     );
 
-    // 2. Caps 생성 (Standard Alignment)
-    if (!openEnded) {
-        if (radiusTop > 0) {
-            // Top Cap (+Y)
-            PrimitiveUtils.generateCircleData(
-                interleaveData, indexData,
-                radiusTop, radialSegments,
-                thetaStart, thetaLength,
-                {x: 0, y: halfHeight, z: 0},
-                uVector,  // uVector: Right (+X)
-                {x: 0, y: 0, z: -1}, // vVector: -Z (시계 방향 회전)
-                {x: 0, y: 1, z: 0},  // Normal: Up
-                true                 // CCW
-            );
-        }
-        if (radiusBottom > 0) {
-            // Bottom Cap (-Y)
-            PrimitiveUtils.generateCircleData(
-                interleaveData, indexData,
-                radiusBottom, radialSegments,
-                thetaStart, thetaLength,
-                {x: 0, y: -halfHeight, z: 0},
-                uVector,              // uVector: Right (+X)
-                {x: 0, y: 0, z: 1},    // vVector: +Z (바닥면에서 본 시계 방향 회전)
-                {x: 0, y: -1, z: 0}, // Normal: Down
-                true                 // CCW
-            );
-        }
+    // 2. Caps 생성
+    if (capTop && radiusTop > 0) {
+        // Top Cap (+Y)
+        PrimitiveUtils.generateCircleData(
+            interleaveData, indexData,
+            radiusTop, radialSegments,
+            thetaStart, thetaLength,
+            {x: 0, y: halfHeight, z: 0},
+            uVector,
+            {x: 0, y: 0, z: -1},
+            {x: 0, y: 1, z: 0},
+            true
+        );
+    }
+    if (capBottom && radiusBottom > 0) {
+        // Bottom Cap (-Y)
+        PrimitiveUtils.generateCircleData(
+            interleaveData, indexData,
+            radiusBottom, radialSegments,
+            thetaStart, thetaLength,
+            {x: 0, y: -halfHeight, z: 0},
+            uVector,
+            {x: 0, y: 0, z: 1},
+            {x: 0, y: -1, z: 0},
+            true
+        );
     }
 
     PrimitiveUtils.calculateTangents(interleaveData, indexData);

@@ -4,8 +4,8 @@ import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
  * [KO] Ground Primitive 예제
  * [EN] Ground Primitive example
  *
- * [KO] Ground 프리미티브 생성 및 크기, 세그먼트 속성을 실시간으로 제어하는 방법을 보여줍니다.
- * [EN] Demonstrates how to create a Ground primitive and control its size and segment properties in real-time.
+ * [KO] Ground 프리미티브 생성 및 모든 속성을 실시간으로 제어하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a Ground primitive and control all its properties in real-time.
  */
 
 const canvas = document.createElement('canvas');
@@ -26,11 +26,7 @@ RedGPU.init(
         createPrimitive(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-            // [KO] 매 프레임 실행될 로직
-            // [EN] Logic per frame
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
 
         renderTestPane(redGPUContext);
     },
@@ -42,13 +38,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] Ground 프리미티브들을 생성하고 정돈된 레이아웃으로 씬에 배치합니다.
- * [EN] Creates Ground primitives and places them in the scene with an organized layout.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
- * @param {RedGPU.Display.Scene} scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
- */
 const createPrimitive = (redGPUContext, scene) => {
     const materials = {
         solid: new RedGPU.Material.BitmapMaterial(
@@ -59,36 +48,21 @@ const createPrimitive = (redGPUContext, scene) => {
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    const defaultOptions = {
-        width: 4,
-        height: 4,
-        widthSegments: 10,
-        heightSegments: 10,
-    };
-
-    const groundGeometry = new RedGPU.Primitive.Ground(
-        redGPUContext,
-        defaultOptions.width,
-        defaultOptions.height,
-        defaultOptions.widthSegments,
-        defaultOptions.heightSegments
-    );
+    const groundGeometry = new RedGPU.Primitive.Ground(redGPUContext, 4, 4, 10, 10);
 
     const gap = 6.5;
-    const objects = [
+    const items = [
         {material: materials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
         {material: materials.solid, position: [0, 0, 0]},
         {material: materials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
     ];
 
-    objects.forEach(({material, position, topology}) => {
+    items.forEach(({material, position, topology}) => {
         const mesh = new RedGPU.Display.Mesh(redGPUContext, groundGeometry, material);
         if (topology) mesh.primitiveState.topology = topology;
         mesh.setPosition(...position);
         scene.addChild(mesh);
 
-        // [KO] 토폴로지 이름 라벨 생성
-        // [EN] Create topology name label
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.setPosition(position[0], 3.0, position[2]);
         label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
@@ -98,8 +72,6 @@ const createPrimitive = (redGPUContext, scene) => {
         scene.addChild(label);
     });
 
-    // [KO] 타이틀 라벨 생성
-    // [EN] Create title label
     const titleText = new RedGPU.Display.TextField3D(redGPUContext);
     titleText.setPosition(0, -3.3, 0);
     titleText.text = 'Customizable Ground Primitive';
@@ -110,12 +82,6 @@ const createPrimitive = (redGPUContext, scene) => {
     scene.addChild(titleText);
 };
 
-/**
- * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
- * [EN] Initializes the Tweakpane GUI for testing.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
- */
 const renderTestPane = async (redGPUContext) => {
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext)
@@ -128,21 +94,14 @@ const renderTestPane = async (redGPUContext) => {
         widthSegments: 10,
         heightSegments: 10,
         flipY: false,
+        cullMode: RedGPU.GPU_CULL_MODE.BACK
     };
 
-    /**
-     * [KO] 설정값 변경 시 Ground 지오메트리를 재생성하여 업데이트합니다.
-     * [EN] Recreates and updates the Ground geometry when configuration values change.
-     */
     const updateGeometry = () => {
         const meshList = redGPUContext.viewList[0].scene.children;
         const newGeometry = new RedGPU.Primitive.Ground(
             redGPUContext,
-            config.width,
-            config.height,
-            config.widthSegments,
-            config.heightSegments,
-            config.flipY
+            config.width, config.height, config.widthSegments, config.heightSegments, config.flipY
         );
 
         meshList.forEach(mesh => {
@@ -152,30 +111,28 @@ const renderTestPane = async (redGPUContext) => {
         });
     };
 
-    const folder = pane.addFolder({title: 'Ground Properties', expanded: true});
-    folder.addBinding(config, 'width', {min: 1, max: 10, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'height', {min: 1, max: 10, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'widthSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'heightSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'flipY').on('change', updateGeometry);
-
-    const materialFolder = pane.addFolder({title: 'Material State', expanded: true});
-    materialFolder.addBinding(
-        {cullMode: RedGPU.GPU_CULL_MODE.BACK}, 
-        'cullMode', 
-        {
-            options: {
-                NONE: RedGPU.GPU_CULL_MODE.NONE,
-                BACK: RedGPU.GPU_CULL_MODE.BACK,
-                FRONT: RedGPU.GPU_CULL_MODE.FRONT
-            }
-        }
-    ).on('change', (ev) => {
+    const updateMaterial = () => {
         const meshList = redGPUContext.viewList[0].scene.children;
         meshList.forEach((mesh) => {
             if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.primitiveState.cullMode = ev.value;
+                mesh.primitiveState.cullMode = config.cullMode;
             }
         });
-    });
+    };
+
+    const geometryFolder = pane.addFolder({title: 'Geometry Properties', expanded: true});
+    geometryFolder.addBinding(config, 'width', {min: 1, max: 10, step: 1}).on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'height', {min: 1, max: 10, step: 1}).on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'widthSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'heightSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'flipY').on('change', updateGeometry);
+
+    const materialFolder = pane.addFolder({title: 'Material State', expanded: true});
+    materialFolder.addBinding(config, 'cullMode', {
+        options: {
+            NONE: RedGPU.GPU_CULL_MODE.NONE,
+            BACK: RedGPU.GPU_CULL_MODE.BACK,
+            FRONT: RedGPU.GPU_CULL_MODE.FRONT
+        }
+    }).on('change', updateMaterial);
 };

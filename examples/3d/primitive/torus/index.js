@@ -4,8 +4,8 @@ import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
  * [KO] Torus Primitive 예제
  * [EN] Torus Primitive example
  *
- * [KO] Torus 프리미티브 생성 및 반지름, 두께, 세그먼트, 각도 속성을 실시간으로 제어하는 방법을 보여줍니다.
- * [EN] Demonstrates how to create a Torus primitive and control its radius, thickness, segments, and angle properties in real-time.
+ * [KO] Torus 프리미티브 생성 및 모든 속성을 실시간으로 제어하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a Torus primitive and control all its properties in real-time.
  */
 
 const canvas = document.createElement('canvas');
@@ -26,11 +26,7 @@ RedGPU.init(
         createPrimitive(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-            // [KO] 매 프레임 실행될 로직
-            // [EN] Logic per frame
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
 
         renderTestPane(redGPUContext);
     },
@@ -42,13 +38,6 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] Torus 프리미티브들을 생성하고 정돈된 레이아웃으로 씬에 배치합니다.
- * [EN] Creates Torus primitives and places them in the scene with an organized layout.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
- * @param {RedGPU.Display.Scene} scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
- */
 const createPrimitive = (redGPUContext, scene) => {
     const materials = {
         solid: new RedGPU.Material.BitmapMaterial(
@@ -59,24 +48,7 @@ const createPrimitive = (redGPUContext, scene) => {
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    const defaultOptions = {
-        radius: 1,
-        thickness: 0.5,
-        radialSubdivisions: 16,
-        bodySubdivisions: 16,
-        startAngle: 0,
-        endAngle: Math.PI * 2,
-    };
-
-    const torusGeometry = new RedGPU.Primitive.Torus(
-        redGPUContext,
-        defaultOptions.radius,
-        defaultOptions.thickness,
-        defaultOptions.radialSubdivisions,
-        defaultOptions.bodySubdivisions,
-        defaultOptions.startAngle,
-        defaultOptions.endAngle
-    );
+    const torusGeometry = new RedGPU.Primitive.Torus(redGPUContext, 1, 0.5, 16, 16);
 
     const gap = 4.5;
     const objects = [
@@ -91,8 +63,6 @@ const createPrimitive = (redGPUContext, scene) => {
         mesh.setPosition(...position);
         scene.addChild(mesh);
 
-        // [KO] 토폴로지 이름 라벨 생성
-        // [EN] Create topology name label
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.setPosition(position[0], 2.5, position[2]);
         label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
@@ -102,8 +72,6 @@ const createPrimitive = (redGPUContext, scene) => {
         scene.addChild(label);
     });
 
-    // [KO] 타이틀 라벨 생성
-    // [EN] Create title label
     const titleText = new RedGPU.Display.TextField3D(redGPUContext);
     titleText.setPosition(0, -2.8, 0);
     titleText.text = 'Customizable Torus Primitive';
@@ -114,12 +82,6 @@ const createPrimitive = (redGPUContext, scene) => {
     scene.addChild(titleText);
 };
 
-/**
- * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
- * [EN] Initializes the Tweakpane GUI for testing.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
- */
 const renderTestPane = async (redGPUContext) => {
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext)
@@ -133,6 +95,9 @@ const renderTestPane = async (redGPUContext) => {
         tubularSegments: 16,
         thetaStart: 0,
         thetaLength: Math.PI * 2,
+        capStart: false,
+        capEnd: false,
+        cullMode: RedGPU.GPU_CULL_MODE.BACK
     };
 
     /**
@@ -143,17 +108,22 @@ const renderTestPane = async (redGPUContext) => {
         const meshList = redGPUContext.viewList[0].scene.children;
         const newGeometry = new RedGPU.Primitive.Torus(
             redGPUContext,
-            config.radius,
-            config.thickness,
-            config.radialSegments,
-            config.tubularSegments,
-            config.thetaStart,
-            config.thetaLength
+            config.radius, config.thickness, config.radialSegments, config.tubularSegments,
+            config.thetaStart, config.thetaLength, config.capStart, config.capEnd
         );
 
         meshList.forEach(mesh => {
             if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
                 mesh.geometry = newGeometry;
+            }
+        });
+    };
+
+    const updateMaterial = () => {
+        const meshList = redGPUContext.viewList[0].scene.children;
+        meshList.forEach((mesh) => {
+            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
+                mesh.primitiveState.cullMode = config.cullMode;
             }
         });
     };
@@ -165,24 +135,15 @@ const renderTestPane = async (redGPUContext) => {
     folder.addBinding(config, 'tubularSegments', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
     folder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'capStart').on('change', updateGeometry);
+    folder.addBinding(config, 'capEnd').on('change', updateGeometry);
 
     const materialFolder = pane.addFolder({title: 'Material State', expanded: true});
-    materialFolder.addBinding(
-        {cullMode: RedGPU.GPU_CULL_MODE.BACK}, 
-        'cullMode', 
-        {
-            options: {
-                NONE: RedGPU.GPU_CULL_MODE.NONE,
-                BACK: RedGPU.GPU_CULL_MODE.BACK,
-                FRONT: RedGPU.GPU_CULL_MODE.FRONT
-            }
+    materialFolder.addBinding(config, 'cullMode', {
+        options: {
+            NONE: RedGPU.GPU_CULL_MODE.NONE,
+            BACK: RedGPU.GPU_CULL_MODE.BACK,
+            FRONT: RedGPU.GPU_CULL_MODE.FRONT
         }
-    ).on('change', (ev) => {
-        const meshList = redGPUContext.viewList[0].scene.children;
-        meshList.forEach((mesh) => {
-            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.primitiveState.cullMode = ev.value;
-            }
-        });
-    });
+    }).on('change', updateMaterial);
 };
