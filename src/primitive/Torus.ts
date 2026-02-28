@@ -73,7 +73,7 @@ const makeData = function (uniqueKey, redGPUContext,
     const indexData = [];
 
     // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
-    if (radius <= 0 || thickness <= 0 || thetaLength === 0) {
+    if (radius <= 0 || thickness <= 0 || Math.abs(thetaLength) < 1e-6) {
         PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
         return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
     }
@@ -90,12 +90,12 @@ const makeData = function (uniqueKey, redGPUContext,
 
         for (let ring = 0; ring <= radialSegments; ++ring) {
             const u = ring / radialSegments;
-            // [교정] 3시 방향 시작, 시계 방향 회전 (sin 반전)
+            // [교정] 3시 방향 시작, 시계 방향 회전 (Sphere 안정화 공식과 동일)
             const ringAngle = thetaStart + u * thetaLength;
-            const sinTheta = -Math.sin(ringAngle);
+            const sinTheta = -Math.sin(ringAngle); // 시계 방향
             const cosTheta = Math.cos(ringAngle);
             
-            // x = cos, z = sin (시계 방향)
+            // x = cos, z = sin (시계 방향 정점 배치)
             const x = cosTheta * ringRadius;
             const z = sinTheta * ringRadius;
             const nx = cosTheta * sliceSin;
@@ -106,43 +106,43 @@ const makeData = function (uniqueKey, redGPUContext,
                 interleaveData,
                 x, y, z,
                 nx, ny, nz,
-                u, v // [교정] V-Down 표준에 맞춰 v 그대로 사용
+                u, v
             );
         }
     }
 
     // Body Indices (PrimitiveUtils.generateGridIndices 사용)
-    // [교정] 회전체는 Visual CCW 시 인덱스를 뒤집어야 CCW 와인딩(바깥쪽이 앞면)이 됨
-    PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1, true);
+    // [교정] 시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
+    PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1, false);
 
 
     // 2. Partial Torus일 경우 단면 막기 (Caps)
     if (isPartial) {
         // Start Angle Cap
-        const sSin = Math.sin(thetaStart);
+        const sSin = -Math.sin(thetaStart);
         const sCos = Math.cos(thetaStart);
         PrimitiveUtils.generateCircleData(
             interleaveData, indexData,
             thickness, tubularSegments,
             0, Math.PI * 2,
-            {x: sSin * radius, y: 0, z: sCos * radius}, // Center
-            {x: sSin, y: 0, z: sCos},                   // uVector (Radial)
+            {x: sCos * radius, y: 0, z: sSin * radius}, // Center
+            {x: sCos, y: 0, z: sSin},                   // uVector (Radial)
             {x: 0, y: 1, z: 0},                         // vVector (Up)
-            {x: -sCos, y: 0, z: sSin}                   // Normal (Reverse Tangent)
+            {x: -sSin, y: 0, z: sCos}                   // Normal (Tangent 방향)
         );
 
         // End Angle Cap
         const endAngle = thetaStart + thetaLength;
-        const eSin = Math.sin(endAngle);
+        const eSin = -Math.sin(endAngle);
         const eCos = Math.cos(endAngle);
         PrimitiveUtils.generateCircleData(
             interleaveData, indexData,
             thickness, tubularSegments,
             0, Math.PI * 2,
-            {x: eSin * radius, y: 0, z: eCos * radius}, // Center
-            {x: eSin, y: 0, z: eCos},                   // uVector (Radial)
+            {x: eCos * radius, y: 0, z: eSin * radius}, // Center
+            {x: eCos, y: 0, z: eSin},                   // uVector (Radial)
             {x: 0, y: 1, z: 0},                         // vVector (Up)
-            {x: eCos, y: 0, z: -eSin}                   // Normal (Tangent)
+            {x: sSin, y: 0, z: -sCos}                   // Normal (Reverse Tangent)
         );
     }
 
