@@ -66,20 +66,12 @@ class Cylinder extends Primitive {
                 thetaStart: number = 0.0,
                 thetaLength: number = Math.PI * 2
     ) {
-        super(redGPUContext);
         const uniqueKey = `PRIMITIVE_CYLINDER_RT${radiusTop}_RB${radiusBottom}_H${height}_RS${radialSegments}_HS${heightSegments}_TS${openEnded}_TS${thetaStart}_TL${thetaLength}`;
-        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState
-        let geometry = cachedBufferState[uniqueKey]
-        if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength)
-        }
-        this._setData(geometry)
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength));
     }
 }
 
 const makeData = (function () {
-    let generateTorso;
-    let generateCap;
     return function (uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength) {
         ////////////////////////////////////////////////////////////////////////////
         // 데이터 생성!
@@ -90,12 +82,11 @@ const makeData = (function () {
         let index = 0;
         const indexArray = [];
         const halfHeight = height / 2;
-        let groupStart = 0;
-        generateTorso = function () {
+
+        const generateTorso = function () {
             let x, y;
             const normal: any = [];
             const vertex = [];
-            let groupCount = 0;
             // this will be used to calculate the normal
             const slope = (radiusBottom - radiusTop) / height;
             // generate vertices, normals and uvs
@@ -139,17 +130,13 @@ const makeData = (function () {
                     // faces
                     indexData.push(a, b, d);
                     indexData.push(b, c, d);
-                    // update group counter
-                    groupCount += 6;
                 }
             }
-            groupStart += groupCount;
         };
-        generateCap = function (top) {
+        const generateCap = function (top) {
             let x, centerIndexStart, centerIndexEnd;
             const uv = [];
             const vertex = [];
-            let groupCount = 0;
             const radius = (top === true) ? radiusTop : radiusBottom;
             const sign = (top === true) ? 1 : -1;
             // save the index of the first center vertex
@@ -200,10 +187,7 @@ const makeData = (function () {
                     // face bottom
                     indexData.push(i + 1, i, c);
                 }
-                groupCount += 3;
             }
-            // calculate new start value for groups
-            groupStart += groupCount;
         };
         generateTorso();
         if (openEnded === false) {
@@ -212,6 +196,6 @@ const makeData = (function () {
         }
         return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
     };
-})()
+})();
 
 export default Cylinder

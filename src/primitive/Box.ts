@@ -61,14 +61,11 @@ class Box extends Primitive {
         dSegments: number = 1,
         uvSize: number = 1
     ) {
-        super(redGPUContext);
+
         const uniqueKey = `PRIMITIVE_BOX_W${width}_H${height}_D${depth}_WS${wSegments}_HS${hSegments}_DS${dSegments}_UV${uvSize}`;
-        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState
-        let geometry = cachedBufferState[uniqueKey]
-        if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = makeData(uniqueKey, redGPUContext, width, height, depth, wSegments, hSegments, dSegments, uvSize)
-        }
-        this._setData(geometry)
+
+        super(redGPUContext,uniqueKey,()=>makeData(uniqueKey, redGPUContext, width, height, depth, wSegments, hSegments, dSegments, uvSize))
+
     }
 }
 

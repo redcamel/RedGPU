@@ -57,21 +57,15 @@ class TorusKnot extends Primitive {
                 p = 2,
                 q = 3
     ) {
-        super(redGPUContext);
         const uniqueKey = `PRIMITIVE_TORUS_NUT_R${radius}_T${tube}_TS${tubularSegments}_RS${radialSegments}_P${p}_Q${q}`;
-        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState
-        let geometry = cachedBufferState[uniqueKey]
-        if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = makeData(uniqueKey, redGPUContext,
-                radius,
-                tube,
-                tubularSegments,
-                radialSegments,
-                p,
-                q
-            )
-        }
-        this._setData(geometry)
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
+            radius,
+            tube,
+            tubularSegments,
+            radialSegments,
+            p,
+            q
+        ));
     }
 }
 

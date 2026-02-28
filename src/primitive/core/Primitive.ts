@@ -52,8 +52,14 @@ class Primitive {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      */
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, uniqueKey: string, makeData: () => Geometry) {
         validateRedGPUContext(redGPUContext)
+        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState
+        let geometry = cachedBufferState[uniqueKey]
+        if (!geometry) {
+            geometry = cachedBufferState[uniqueKey] = makeData()
+        }
+        this.#setData(geometry)
     }
 
     /**
@@ -133,9 +139,8 @@ class Primitive {
      * @param geometry -
      * [KO] 설정할 Geometry 인스턴스
      * [EN] Geometry instance to set
-     * @internal
      */
-    _setData(geometry: Geometry) {
+    #setData(geometry: Geometry) {
         this.#vertexBuffer = geometry.vertexBuffer
         this.#indexBuffer = geometry.indexBuffer
         if (this.#vertexBuffer) {

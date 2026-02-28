@@ -50,7 +50,6 @@ class Circle extends Primitive {
         thetaStart: number = 0,
         thetaLength: number = Math.PI * 2
     ) {
-        super(redGPUContext);
         // 유효성 검사
         if (segments < 3) {
             throw new Error('segments must be 3 or greater');
@@ -62,14 +61,9 @@ class Circle extends Primitive {
             throw new Error('thetaLength must be greater than 0');
         }
         const uniqueKey = `PRIMITIVE_CIRCLE_R${radius}_S${segments}_TS${thetaStart}_TL${thetaLength}`;
-        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState;
-        let geometry = cachedBufferState[uniqueKey];
-        if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = makeData(
-                uniqueKey, redGPUContext, radius, segments, thetaStart, thetaLength
-            );
-        }
-        this._setData(geometry);
+        super(redGPUContext, uniqueKey, () => makeData(
+            uniqueKey, redGPUContext, radius, segments, thetaStart, thetaLength
+        ));
     }
 }
 

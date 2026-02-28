@@ -50,14 +50,8 @@ class Ground extends Primitive {
      * [EN] Whether to flip UV on the Y-axis (default false)
      */
     constructor(redGPUContext: RedGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, uvSize = 1, flipY = false) {
-        super(redGPUContext);
         const uniqueKey = `PRIMITIVE_GROUND_W${width}_H${height}_WS${wSegments}_HS${hSegments}_UV${uvSize}_FY${flipY}`;
-        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState;
-        let geometry = cachedBufferState[uniqueKey];
-        if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = makeData(uniqueKey, redGPUContext, width, height, wSegments, hSegments, uvSize, flipY);
-        }
-        this._setData(geometry);
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, wSegments, hSegments, uvSize, flipY));
     }
 }
 

@@ -57,7 +57,6 @@ class Torus extends Primitive {
                 startAngle = 0,
                 endAngle = Math.PI * 2
     ) {
-        super(redGPUContext);
         if (radialSubdivisions < 3) {
             throw new Error('radialSubdivisions must be 3 or greater');
         }
@@ -65,19 +64,14 @@ class Torus extends Primitive {
             throw new Error('verticalSubdivisions must be 3 or greater');
         }
         const uniqueKey = `PRIMITIVE_TORUS_R${radius}_T${thickness}_RSD${radialSubdivisions}_BSD${bodySubdivisions}_SA${startAngle}_EA${endAngle}`;
-        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState
-        let geometry = cachedBufferState[uniqueKey]
-        if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = makeData(uniqueKey, redGPUContext,
-                radius,
-                thickness,
-                radialSubdivisions,
-                bodySubdivisions,
-                startAngle,
-                endAngle
-            )
-        }
-        this._setData(geometry)
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
+            radius,
+            thickness,
+            radialSubdivisions,
+            bodySubdivisions,
+            startAngle,
+            endAngle
+        ));
     }
 }
 

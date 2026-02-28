@@ -55,17 +55,11 @@ class Capsule extends Primitive {
         heightSegments: number = 1,
         capSegments: number = 12
     ) {
-        super(redGPUContext);
         const uniqueKey = `PRIMITIVE_CAPSULE_R${radius}_CH${cylinderHeight}_RS${radialSegments}_HS${heightSegments}_CS${capSegments}`;
-        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState;
-        let geometry = cachedBufferState[uniqueKey];
-        if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = makeData(
-                uniqueKey, redGPUContext, radius, cylinderHeight,
-                radialSegments, heightSegments, capSegments
-            );
-        }
-        this._setData(geometry);
+        super(redGPUContext, uniqueKey, () => makeData(
+            uniqueKey, redGPUContext, radius, cylinderHeight,
+            radialSegments, heightSegments, capSegments
+        ));
     }
 }
 

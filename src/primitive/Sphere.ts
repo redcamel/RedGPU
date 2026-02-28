@@ -67,17 +67,11 @@ class Sphere extends Primitive {
         thetaLength: number = Math.PI,
         uvSize: number = 1
     ) {
-        super(redGPUContext);
         const uniqueKey = `PRIMITIVE_SPHERE_R${radius}_WS${widthSegments}_HS${heightSegments}_PS${phiStart}_PL${phiLength}_TS${thetaStart}_TL${thetaLength}_UV${uvSize}`;
-        const cachedBufferState = redGPUContext.resourceManager.cachedBufferState;
-        let geometry = cachedBufferState[uniqueKey];
-        if (!geometry) {
-            geometry = cachedBufferState[uniqueKey] = makeData(
-                uniqueKey, redGPUContext, radius, widthSegments, heightSegments,
-                phiStart, phiLength, thetaStart, thetaLength, uvSize
-            );
-        }
-        this._setData(geometry);
+        super(redGPUContext, uniqueKey, () => makeData(
+            uniqueKey, redGPUContext, radius, widthSegments, heightSegments,
+            phiStart, phiLength, thetaStart, thetaLength, uvSize
+        ));
     }
 }
 
