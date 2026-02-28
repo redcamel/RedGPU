@@ -80,9 +80,9 @@ function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, rad
             thetaStart, thetaLength,
             {x: 0, y: -halfHeight, z: 0},
             uVector,
-            {x: 0, y: 0, z: 1},
+            {x: 0, y: 0, z: -1}, // [교정] 상단 조감 기준 반시계 회전 (CCW)
             {x: 0, y: -1, z: 0},
-            true
+            false // [교정] CCW 생성 궤적에서 -Y 면을 앞면으로 만들기 위해 인덱스 반전
         );
     }
 

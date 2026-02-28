@@ -95,9 +95,9 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
 
         for (let ix = 0; ix <= widthSegments; ix++) {
             const u = ix / widthSegments;
-            // [교정] 3시 방향 시작, 시계 방향 회전 (Cylinder 안정화 공식 적용)
+            // [교정] 3시 방향 시작, 상단 조감 기준 반시계 회전 (CCW)
             const phi = phiStart + u * phiLength;
-            const sinPhi = -Math.sin(phi); // 시계 방향
+            const sinPhi = -Math.sin(phi); // 반시계 방향 (CCW)
             const cosPhi = Math.cos(phi);
 
             // x = cos(phi)sin(theta), y = cos(theta), z = sin(phi)sin(theta)
@@ -122,7 +122,7 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
     }
 
     // 인덱스 생성 (PrimitiveUtils.generateGridIndices 사용)
-    // [교정] 시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
+    // [교정] 반시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
     PrimitiveUtils.generateGridIndices(indexData, 0, widthSegments, heightSegments, gridX1, false);
 
     PrimitiveUtils.calculateTangents(interleaveData, indexData);

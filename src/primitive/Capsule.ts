@@ -113,13 +113,13 @@ const makeData = function (
 
         for (let ix = 0; ix <= radialSegments; ix++) {
             const u = ix / radialSegments;
-            // [교정] 3시 방향 시작, 시계 방향 회전 (sin 반전)
+            // [교정] 3시 방향 시작, 상단 조감 기준 반시계 회전 (CCW)
             const phi = u * Math.PI * 2;
 
             const sinPhi = -Math.sin(phi);
             const cosPhi = Math.cos(phi);
 
-            // x = cos, z = sin (시계 방향)
+            // x = cos, z = sin (반시계 방향)
             const x = currentRadius * cosPhi;
             const z = currentRadius * sinPhi;
 

@@ -167,7 +167,7 @@ class PrimitiveUtils {
                 const u = ix / radialSegments;
                 const theta = u * thetaLength + thetaStart;
                 const cos = Math.cos(theta);
-                const sin = -Math.sin(theta); // [교정] 시계 방향 회전 (상단 캡과 일치)
+                const sin = -Math.sin(theta); // [교정] 상단 조감 기준 반시계 회전 (CCW)
 
                 // Position
                 const ringX = radius * (cos * uVector.x + sin * vVector.x);
@@ -197,7 +197,7 @@ class PrimitiveUtils {
             }
         }
 
-        // [교정] 시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
+        // [교정] 반시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
         this.generateGridIndices(indexData, vertexOffset, radialSegments, heightSegments, radialSegments + 1, false);
     }
 
