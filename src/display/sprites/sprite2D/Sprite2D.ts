@@ -57,7 +57,7 @@ class Sprite2D extends BaseSprite2D {
      * [EN] Material to apply to the sprite (optional)
      */
     constructor(redGPUContext: RedGPUContext, material?) {
-        super(redGPUContext, new Plane(redGPUContext, 1, 1, 1, 1, 1, true), material);
+        super(redGPUContext, new Plane(redGPUContext, 1, 1, 1, 1, true), material);
         this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
     }
 

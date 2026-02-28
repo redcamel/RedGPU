@@ -312,7 +312,7 @@ export default class Raycaster3D {
             const distance = vec3.distance(this.ray.origin, worldIntersectPoint);
             if (distance >= this.near && distance <= this.far) {
                 // UV Interpolation
-                // Assuming standard interleaved layout: [Px, Py, Pz, Nx, Ny, Nz, U, V] (Stride 8)
+                // [교정] 인터리브 레이아웃: [Px, Py, Pz, Nx, Ny, Nz, U, V, Tx, Ty, Tz, Tw] (Stride 12)
                 const uv0 = vec2.fromValues(data[i0 * stride + 6], data[i0 * stride + 7]);
                 const uv1 = vec2.fromValues(data[i1 * stride + 6], data[i1 * stride + 7]);
                 const uv2 = vec2.fromValues(data[i2 * stride + 6], data[i2 * stride + 7]);

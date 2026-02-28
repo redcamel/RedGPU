@@ -28,53 +28,19 @@ function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, rad
     const interleaveData = [];
     const indexData = [];
     const halfHeight = height / 2;
+    const uVector = {x: 1, y: 0, z: 0};
+    const vVector = {x: 0, y: 0, z: -1};
 
-    // 1. Torso 생성 (Unreal Standard: Seam at back, front facing center of texture)
-    const indexArray = [];
-    let index = 0;
-    const slope = (radiusBottom - radiusTop) / height;
-
-    for (let iy = 0; iy <= heightSegments; iy++) {
-        const indexRow = [];
-        const v = iy / heightSegments;
-        const radius = v * (radiusBottom - radiusTop) + radiusTop;
-
-        for (let ix = 0; ix <= radialSegments; ix++) {
-            const u = ix / radialSegments;
-            // Unreal 스타일: 이음새를 -Z(뒤쪽)로 보내기 위해 PI만큼 오프셋
-            const theta = u * thetaLength + thetaStart + Math.PI; 
-            const sinTheta = Math.sin(theta);
-            const cosTheta = Math.cos(theta);
-
-            // Position
-            const x = radius * sinTheta;
-            const y = -v * height + halfHeight;
-            const z = radius * cosTheta;
-            interleaveData.push(x, y, z);
-
-            // Normal
-            const normal = vec3.fromValues(sinTheta, slope, cosTheta);
-            vec3.normalize(normal, normal);
-            interleaveData.push(normal[0], normal[1], normal[2]);
-
-            // UV
-            interleaveData.push(u, v);
-            indexRow.push(index++);
-        }
-        indexArray.push(indexRow);
-    }
-
-    // Torso Indices
-    for (let ix = 0; ix < radialSegments; ix++) {
-        for (let iy = 0; iy < heightSegments; iy++) {
-            const a = indexArray[iy][ix];
-            const b = indexArray[iy + 1][ix];
-            const c = indexArray[iy + 1][ix + 1];
-            const d = indexArray[iy][ix + 1];
-            indexData.push(a, b, d);
-            indexData.push(b, c, d);
-        }
-    }
+    // 1. Torso 생성 (PrimitiveUtils.generateCylinderTorsoData 사용)
+    PrimitiveUtils.generateCylinderTorsoData(
+        interleaveData, indexData,
+        radiusTop, radiusBottom, height,
+        radialSegments, heightSegments,
+        thetaStart + Math.PI, thetaLength, // Unreal Standard: Seam at back
+        {x: 0, y: 0, z: 0},
+        uVector,
+        vVector
+    );
 
     // 2. Caps 생성 (Unreal Standard Alignment)
     if (!openEnded) {
@@ -83,10 +49,10 @@ function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, rad
             PrimitiveUtils.generateCircleData(
                 interleaveData, indexData,
                 radiusTop, radialSegments,
-                thetaStart + Math.PI, thetaLength, // 몸체와 동일한 각도 오프셋 적용
+                thetaStart + Math.PI, thetaLength,
                 {x: 0, y: halfHeight, z: 0},
-                {x: 1, y: 0, z: 0},  // uVector: Right
-                {x: 0, y: 0, z: -1}, // vVector: Top
+                uVector,  // uVector: Right (1, 0, 0)
+                vVector,  // vVector: Top in UV / Back in World (0, 0, -1)
                 {x: 0, y: 1, z: 0},  // Normal: Up
                 true                 // CCW
             );
@@ -98,8 +64,8 @@ function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, rad
                 radiusBottom, radialSegments,
                 thetaStart + Math.PI, thetaLength,
                 {x: 0, y: -halfHeight, z: 0},
-                {x: 1, y: 0, z: 0},  // uVector: Right
-                {x: 0, y: 0, z: 1},   // vVector: Bottom (Unreal 스타일 바닥면 UV 정렬)
+                uVector,              // uVector: Right (1, 0, 0)
+                {x: 0, y: 0, z: 1},    // vVector: Bottom (0, 0, 1) - 바닥면은 뒤집어서 렌더링되므로 V축 반전
                 {x: 0, y: -1, z: 0}, // Normal: Down
                 true                 // CCW
             );

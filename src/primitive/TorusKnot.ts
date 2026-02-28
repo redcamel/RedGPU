@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
+import PrimitiveUtils from "./core/PrimitiveUtils";
 
 /**
  * [KO] TorusKnot(토러스-노트, 매듭 토러스) 기본 도형 클래스입니다.
@@ -84,13 +85,16 @@ const makeData = function (uniqueKey, redGPUContext,
     radialSegments = Math.floor(radialSegments);
     const interleaveData = []
     const indexData = [];
-    const vertex = []
-    const normal = []
+    const vertex = [0, 0, 0]
+    const normal = [0, 0, 0]
     const P1 = [0, 0, 0]
     const P2 = [0, 0, 0]
     const B = [0, 0, 0]
     const T = [0, 0, 0]
     const N = [0, 0, 0]
+
+    const gridX1 = radialSegments + 1;
+
     for (let i = 0; i <= tubularSegments; ++i) {
         const u = i / tubularSegments * p * Math.PI * 2;
         calculatePositionOnCurve(u, p, q, radius, P1);
@@ -149,42 +153,35 @@ const makeData = function (uniqueKey, redGPUContext,
             vertex[0] = P1[0] + (cx * N[0] + cy * B[0]);
             vertex[1] = P1[1] + (cx * N[1] + cy * B[1]);
             vertex[2] = P1[2] + (cx * N[2] + cy * B[2]);
-            interleaveData.push(
-                vertex[0], vertex[1], vertex[2],
-            );
-            {
-                normal[0] = vertex[0] - P1[0];
-                normal[1] = vertex[1] - P1[1];
-                normal[2] = vertex[2] - P1[2];
-                let x = normal[0];
-                let y = normal[1];
-                let z = normal[2];
-                let len = x * x + y * y + z * z;
-                if (len > 0) {
-                    len = 1 / Math.sqrt(len);
-                }
-                normal[0] = normal[0] * len;
-                normal[1] = normal[1] * len;
-                normal[2] = normal[2] * len;
+
+            // Normal
+            normal[0] = vertex[0] - P1[0];
+            normal[1] = vertex[1] - P1[1];
+            normal[2] = vertex[2] - P1[2];
+            let nx = normal[0];
+            let ny = normal[1];
+            let nz = normal[2];
+            let len = nx * nx + ny * ny + nz * nz;
+            if (len > 0) {
+                len = 1 / Math.sqrt(len);
             }
-            interleaveData.push(
-                normal[0], normal[1], normal[2],
+            nx *= len;
+            ny *= len;
+            nz *= len;
+
+            // UV & Packing
+            PrimitiveUtils.interleavePacker(
+                interleaveData,
+                vertex[0], vertex[1], vertex[2],
+                nx, ny, nz,
                 i / tubularSegments, j / radialSegments
             );
         }
     }
-    for (let j = 1; j <= tubularSegments; j++) {
-        for (let i = 1; i <= radialSegments; i++) {
-            // indices
-            const a = (radialSegments + 1) * (j - 1) + (i - 1);
-            const b = (radialSegments + 1) * j + (i - 1);
-            const c = (radialSegments + 1) * j + i;
-            const d = (radialSegments + 1) * (j - 1) + i;
-            // faces
-            indexData.push(a, b, d);
-            indexData.push(b, c, d);
-        }
-    }
+
+    // Indices (PrimitiveUtils.generateGridIndices 사용)
+    PrimitiveUtils.generateGridIndices(indexData, 0, radialSegments, tubularSegments, gridX1);
+
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
 };
 

@@ -81,7 +81,7 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
                 this.#height = 1
             }
         });
-        this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
+        this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, true);
         this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
     }
 

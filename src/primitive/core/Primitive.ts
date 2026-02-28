@@ -63,8 +63,8 @@ class Primitive {
     }
 
     /**
-     * [KO] 기본 정점 레이아웃 구조(Position, Normal, UV)를 반환합니다.
-     * [EN] Returns the default vertex layout structure (Position, Normal, UV).
+     * [KO] 기본 정점 레이아웃 구조(Position, Normal, UV, Tangent)를 반환합니다.
+     * [EN] Returns the default vertex layout structure (Position, Normal, UV, Tangent).
      *
      * @returns
      * [KO] 정점 인터리브 구조 객체
@@ -76,6 +76,7 @@ class Primitive {
                 vertexPosition: VertexInterleaveType.float32x3,
                 vertexNormal: VertexInterleaveType.float32x3,
                 texcoord: VertexInterleaveType.float32x2,
+                tangent: VertexInterleaveType.float32x4,
             },
             `primitiveInterleaveStruct`
         )

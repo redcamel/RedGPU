@@ -2,6 +2,7 @@ import {vec3} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
 import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
+import PrimitiveUtils from "./core/PrimitiveUtils";
 
 /**
  * [KO] Sphere(구) 기본 도형 클래스입니다.
@@ -83,9 +84,10 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
 
     const interleaveData = [];
     const indexData = [];
+    const gridX1 = widthSegments + 1;
+
     // 정점, 노멀, UV 생성
     for (iy = 0; iy <= heightSegments; iy++) {
-        const verticesRow = [];
         const v = iy / heightSegments;
         for (ix = 0; ix <= widthSegments; ix++) {
             const u = ix / widthSegments;
@@ -93,36 +95,27 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
             vertex[0] = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
             vertex[1] = radius * Math.cos(thetaStart + v * thetaLength);
             vertex[2] = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-            interleaveData.push(vertex[0], vertex[1], vertex[2]);
+
             // 노멀 계산 (구면에서는 정점 위치를 정규화)
             normal[0] = vertex[0];
             normal[1] = vertex[1];
             normal[2] = vertex[2];
             vec3.normalize(normal, normal);
-            interleaveData.push(normal[0], normal[1], normal[2]);
+
             // UV 좌표
-            interleaveData.push(u, v);
-            verticesRow.push(index++);
-        }
-        grid.push(verticesRow);
-    }
-    // 인덱스 생성 (극점 처리 포함)
-    for (iy = 0; iy < heightSegments; iy++) {
-        for (ix = 0; ix < widthSegments; ix++) {
-            a = grid[iy][ix + 1];
-            b = grid[iy][ix];
-            c = grid[iy + 1][ix];
-            d = grid[iy + 1][ix + 1];
-            // 북극점 처리 (첫 번째 행에서 퇴화 삼각형 방지)
-            if (iy !== 0 || thetaStart > 0) {
-                indexData.push(a, b, d);
-            }
-            // 남극점 처리 (마지막 행에서 퇴화 삼각형 방지)
-            if (iy !== heightSegments - 1 || thetaEnd < Math.PI) {
-                indexData.push(b, c, d);
-            }
+            PrimitiveUtils.interleavePacker(
+                interleaveData,
+                vertex[0], vertex[1], vertex[2],
+                normal[0], normal[1], normal[2],
+                u, v
+            );
         }
     }
+
+    // 인덱스 생성 (PrimitiveUtils.generateGridIndices 사용)
+    // [교정] 구체는 극점(Pole)에서 삼각형이 겹칠 수 있으나, 표준 그리드 인덱스 생성기를 사용하여 로직을 단순화합니다.
+    PrimitiveUtils.generateGridIndices(indexData, 0, widthSegments, heightSegments, gridX1);
+
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
 };
 

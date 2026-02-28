@@ -2,6 +2,7 @@ import {vec3} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
 import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
+import PrimitiveUtils from "./core/PrimitiveUtils";
 
 /**
  * [KO] Capsule(캡슐) 기본 도형 클래스입니다.
@@ -74,8 +75,7 @@ const makeData = function (
 ) {
     const interleaveData: number[] = [];
     const indexData: number[] = [];
-    const grid: number[][] = [];
-    let index = 0;
+    const gridX1 = radialSegments + 1;
 
     const totalVerticalSegments = capSegments * 2 + heightSegments;
     const halfCylinderHeight = cylinderHeight / 2;
@@ -84,7 +84,6 @@ const makeData = function (
     const totalArcLength = capArcLength * 2 + cylinderHeight;
 
     for (let iy = 0; iy <= totalVerticalSegments; iy++) {
-        const verticesRow: number[] = [];
         let y = 0;
         let currentRadius = 0;
         let currentDistance = 0;
@@ -114,7 +113,8 @@ const makeData = function (
 
         for (let ix = 0; ix <= radialSegments; ix++) {
             const u = ix / radialSegments;
-            const phi = u * Math.PI * 2;
+            // [교정] 실린더/구체와 일관성을 위해 PI(180도) 오프셋 추가 (이음새를 뒤로 보냄)
+            const phi = u * Math.PI * 2 + Math.PI;
 
             const sinPhi = Math.sin(phi);
             const cosPhi = Math.cos(phi);
@@ -122,34 +122,26 @@ const makeData = function (
             const x = currentRadius * sinPhi;
             const z = currentRadius * cosPhi;
 
-            // Position
-            interleaveData.push(x, y, z);
-
-            // Normal
-            const normal = vec3.fromValues(x, (iy < capSegments || iy > capSegments + heightSegments) ? (y - (iy < capSegments ? halfCylinderHeight : -halfCylinderHeight)) : 0, z);
+            // Normal calculation
+            const normal = vec3.fromValues(
+                x, 
+                (iy < capSegments || iy > capSegments + heightSegments) ? (y - (iy < capSegments ? halfCylinderHeight : -halfCylinderHeight)) : 0, 
+                z
+            );
             vec3.normalize(normal, normal);
-            interleaveData.push(normal[0], normal[1], normal[2]);
 
-            // UV
-            interleaveData.push(u, 1 - v);
-
-            verticesRow.push(index++);
-        }
-        grid.push(verticesRow);
-    }
-
-    // Indices
-    for (let iy = 0; iy < totalVerticalSegments; iy++) {
-        for (let ix = 0; ix < radialSegments; ix++) {
-            const a = grid[iy][ix + 1];
-            const b = grid[iy][ix];
-            const c = grid[iy + 1][ix];
-            const d = grid[iy + 1][ix + 1];
-
-            indexData.push(a, b, d);
-            indexData.push(b, c, d);
+            // UV & Packing
+            PrimitiveUtils.interleavePacker(
+                interleaveData,
+                x, y, z,
+                normal[0], normal[1], normal[2],
+                u, v // [교정] V-Down 표준에 맞춰 v 그대로 사용
+            );
         }
     }
+
+    // Indices (PrimitiveUtils.generateGridIndices 사용)
+    PrimitiveUtils.generateGridIndices(indexData, 0, radialSegments, totalVerticalSegments, gridX1);
 
     return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
 };

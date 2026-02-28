@@ -76,7 +76,7 @@ class TextField2D extends BaseTextField2D {
             this.#width = width;
             this.#height = height;
         }, false);
-        this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
+        this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, true);
         this.useSmoothing = useSmoothing;
         this.primitiveState.cullMode = GPU_CULL_MODE.FRONT;
         keepLog(this)

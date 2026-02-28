@@ -76,7 +76,8 @@ const makeData = function (uniqueKey, redGPUContext,
     const indexData = [];
 
     // 1. Torus Body 생성
-    for (let slice = 0; slice < bodyParts; ++slice) {
+    const vertexOffset = interleaveData.length / 12;
+    for (let slice = 0; slice <= bodySubdivisions; ++slice) {
         const v = slice / bodySubdivisions;
         const sliceAngle = v * Math.PI * 2;
         const sliceSin = Math.sin(sliceAngle);
@@ -84,7 +85,7 @@ const makeData = function (uniqueKey, redGPUContext,
         const ny = Math.cos(sliceAngle);
         const y = ny * thickness;
 
-        for (let ring = 0; ring < radialParts; ++ring) {
+        for (let ring = 0; ring <= radialSubdivisions; ++ring) {
             const u = ring / radialSubdivisions;
             const ringAngle = startAngle + u * range;
             const xSin = Math.sin(ringAngle);
@@ -93,23 +94,20 @@ const makeData = function (uniqueKey, redGPUContext,
             const z = zCos * ringRadius;
             const nx = xSin * sliceSin;
             const nz = zCos * sliceSin;
-            interleaveData.push(x, y, z, nx, ny, nz, u, 1 - v);
+
+            // Packing (12 floats)
+            PrimitiveUtils.interleavePacker(
+                interleaveData,
+                x, y, z,
+                nx, ny, nz,
+                u, 1 - v
+            );
         }
     }
 
-    // Body Indices
-    for (let slice = 0; slice < bodySubdivisions; ++slice) {
-        for (let ring = 0; ring < radialSubdivisions; ++ring) {
-            const nextRingIndex = 1 + ring;
-            const nextSliceIndex = 1 + slice;
-            indexData.push(radialParts * slice + ring,
-                radialParts * nextSliceIndex + ring,
-                radialParts * slice + nextRingIndex);
-            indexData.push(radialParts * nextSliceIndex + ring,
-                radialParts * nextSliceIndex + nextRingIndex,
-                radialParts * slice + nextRingIndex);
-        }
-    }
+    // Body Indices (PrimitiveUtils.generateGridIndices 사용)
+    PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSubdivisions, bodySubdivisions, radialSubdivisions + 1);
+
 
     // 2. Partial Torus일 경우 단면 막기 (Caps)
     if (isPartial) {
