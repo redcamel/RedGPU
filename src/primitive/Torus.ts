@@ -99,13 +99,15 @@ const makeData = function (uniqueKey, redGPUContext,
         for (let ring = 0; ring <= radialSegments; ++ring) {
             const u = ring / radialSegments;
             const ringAngle = thetaStart + u * thetaLength;
-            const sinTheta = -Math.sin(ringAngle); 
+            const sinTheta = Math.sin(ringAngle); 
             const cosTheta = Math.cos(ringAngle);
             
-            const x = cosTheta * ringRadius;
-            const z = sinTheta * ringRadius;
-            const nx = cosTheta * sliceSin;
-            const nz = sinTheta * sliceSin;
+            // [업계 표준] 12시(-Z) 시작, CCW 회전 (-X 방향)
+            // x = -sin, z = -cos
+            const x = (-sinTheta) * ringRadius;
+            const z = (-cosTheta) * ringRadius;
+            const nx = (-sinTheta) * sliceSin;
+            const nz = (-cosTheta) * sliceSin;
 
             PrimitiveUtils.interleavePacker(
                 interleaveData,
@@ -123,14 +125,17 @@ const makeData = function (uniqueKey, redGPUContext,
         if (capStart) {
             const sSin = Math.sin(thetaStart);
             const sCos = Math.cos(thetaStart);
+            // 12시 시작 CCW 공식 (-sin, -cos) 에 맞춘 벡터
+            const startX = -sSin * radius;
+            const startZ = -sCos * radius;
             PrimitiveUtils.generateCircleData(
                 interleaveData, indexData,
                 thickness, tubularSegments,
                 0, Math.PI * 2,
-                {x: sCos * radius, y: 0, z: -sSin * radius}, 
-                {x: sCos, y: 0, z: -sSin},                   
-                {x: 0, y: 1, z: 0},                         
-                {x: sSin, y: 0, z: sCos},                   
+                {x: startX, y: 0, z: startZ}, 
+                {x: -sSin, y: 0, z: -sCos}, // UVector (로컬 -Z 방향 유도)                  
+                {x: 0, y: 1, z: 0},         // VVector                
+                {x: sCos, y: 0, z: -sSin},  // Normal (시작면은 반대방향)                  
                 true                                        
             );
         }
@@ -139,14 +144,16 @@ const makeData = function (uniqueKey, redGPUContext,
             const endAngle = thetaStart + thetaLength;
             const eSin = Math.sin(endAngle);
             const eCos = Math.cos(endAngle);
+            const endX = -eSin * radius;
+            const endZ = -eCos * radius;
             PrimitiveUtils.generateCircleData(
                 interleaveData, indexData,
                 thickness, tubularSegments,
                 0, Math.PI * 2,
-                {x: eCos * radius, y: 0, z: -eSin * radius}, 
-                {x: eCos, y: 0, z: -eSin},                   
-                {x: 0, y: 1, z: 0},                         
-                {x: eSin, y: 0, z: eCos}, 
+                {x: endX, y: 0, z: endZ}, 
+                {x: -eSin, y: 0, z: -eCos}, // UVector                  
+                {x: 0, y: 1, z: 0},         // VVector                
+                {x: -eCos, y: 0, z: eSin},  // Normal (끝면은 진행방향)
                 false                                       
             );
         }

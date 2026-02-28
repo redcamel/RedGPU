@@ -113,15 +113,14 @@ const makeData = function (
 
         for (let ix = 0; ix <= radialSegments; ix++) {
             const u = ix / radialSegments;
-            // [교정] 3시 방향 시작, 상단 조감 기준 반시계 회전 (CCW)
+            // [업계 표준] 12시(-Z) 시작, CCW 회전 (-X 방향)
             const phi = u * Math.PI * 2;
-
-            const sinPhi = -Math.sin(phi);
+            const sinPhi = Math.sin(phi);
             const cosPhi = Math.cos(phi);
 
-            // x = cos, z = sin (반시계 방향)
-            const x = currentRadius * cosPhi;
-            const z = currentRadius * sinPhi;
+            // x = -sin, z = -cos (12시 시작 CCW 궤적)
+            const x = currentRadius * (-sinPhi);
+            const z = currentRadius * (-cosPhi);
 
             // Normal calculation
             const normal = vec3.fromValues(

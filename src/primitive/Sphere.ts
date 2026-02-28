@@ -95,15 +95,15 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
 
         for (let ix = 0; ix <= widthSegments; ix++) {
             const u = ix / widthSegments;
-            // [교정] 3시 방향 시작, 상단 조감 기준 반시계 회전 (CCW)
+            // [업계 표준] 12시(-Z) 시작, CCW 회전 (-X 방향)
             const phi = phiStart + u * phiLength;
-            const sinPhi = -Math.sin(phi); // 반시계 방향 (CCW)
+            const sinPhi = Math.sin(phi);
             const cosPhi = Math.cos(phi);
 
-            // x = cos(phi)sin(theta), y = cos(theta), z = sin(phi)sin(theta)
-            vertex[0] = radius * cosPhi * sinTheta;
+            // x = -sin, z = -cos (12시 시작 CCW 궤적)
+            vertex[0] = radius * (-sinPhi) * sinTheta;
             vertex[1] = radius * cosTheta;
-            vertex[2] = radius * sinPhi * sinTheta;
+            vertex[2] = radius * (-cosPhi) * sinTheta;
 
             // 노멀 계산
             normal[0] = vertex[0];

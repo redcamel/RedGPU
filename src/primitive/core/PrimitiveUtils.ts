@@ -98,16 +98,18 @@ class PrimitiveUtils {
         // 2. Perimeter Vertices
         for (let s = 0; s <= radialSegments; s++) {
             const angle = thetaStart + (s / radialSegments) * thetaLength;
-            const cos = Math.cos(angle);
-            const sin = Math.sin(angle); 
+            const cosVal = Math.cos(angle);
+            const sinVal = Math.sin(angle); 
 
-            const posX = center.x + radius * (cos * uVector.x + sin * vVector.x);
-            const posY = center.y + radius * (cos * uVector.y + sin * vVector.y);
-            const posZ = center.z + radius * (cos * uVector.z + sin * vVector.z);
+            // [업계 표준] +V(12시) 시작, CCW 회전 (-U 방향)
+            const posX = center.x + radius * (cosVal * vVector.x - sinVal * uVector.x);
+            const posY = center.y + radius * (cosVal * vVector.y - sinVal * uVector.y);
+            const posZ = center.z + radius * (cosVal * vVector.z - sinVal * uVector.z);
 
-            // [교정] UV 매핑: V-Down 표준
-            const uvX = (cos * 0.5) + 0.5;
-            const uvY = 0.5 - (sin * 0.5);
+            // [교정] 원형(Circle) 전용 방사형 UV 매핑 (U=0.5, V=0.5 가 중심)
+            // 12시 시작점(theta=0, pos=+V)일 때 UV는 (0.5, 0) 즉, 텍스처 상단 중앙이 됨
+            const uvX = 0.5 - (sinVal * 0.5);
+            const uvY = 0.5 - (cosVal * 0.5); // V-Down: cos=1(12시)일 때 v=0
 
             this.interleavePacker(
                 interleaveData,
@@ -118,6 +120,7 @@ class PrimitiveUtils {
         }
 
         // 3. Indices (Triangle Fan)
+        // [표준] Center -> v1 -> v2 가 CCW 와인딩을 형성함 (U -> V 궤적이 CCW일 때)
         for (let i = 1; i <= radialSegments; i++) {
             const c = vertexOffset;
             const v1 = vertexOffset + i;
@@ -166,22 +169,22 @@ class PrimitiveUtils {
             for (let ix = 0; ix <= radialSegments; ix++) {
                 const u = ix / radialSegments;
                 const theta = u * thetaLength + thetaStart;
-                const cos = Math.cos(theta);
-                const sin = -Math.sin(theta); // [교정] 상단 조감 기준 반시계 회전 (CCW)
+                const cosVal = Math.cos(theta);
+                const sinVal = Math.sin(theta);
 
-                // Position
-                const ringX = radius * (cos * uVector.x + sin * vVector.x);
-                const ringY = radius * (cos * uVector.y + sin * vVector.y);
-                const ringZ = radius * (cos * uVector.z + sin * vVector.z);
+                // [업계 표준] +V(12시) 시작, CCW 회전 (-U 방향)
+                const ringX = radius * (cosVal * vVector.x - sinVal * uVector.x);
+                const ringY = radius * (cosVal * vVector.y - sinVal * uVector.y);
+                const ringZ = radius * (cosVal * vVector.z - sinVal * uVector.z);
 
                 const px = center.x + ringX + hOffset * axisVector.x;
                 const py = center.y + ringY + hOffset * axisVector.y;
                 const pz = center.z + ringZ + hOffset * axisVector.z;
 
                 // Normal
-                const rnx = cos * uVector.x + sin * vVector.x;
-                const rny = cos * uVector.y + sin * vVector.y;
-                const rnz = cos * uVector.z + sin * vVector.z;
+                const rnx = cosVal * vVector.x - sinVal * uVector.x;
+                const rny = cosVal * vVector.y - sinVal * uVector.y;
+                const rnz = cosVal * vVector.z - sinVal * uVector.z;
 
                 const nx = rnx + slope * axisVector.x;
                 const ny = rny + slope * axisVector.y;

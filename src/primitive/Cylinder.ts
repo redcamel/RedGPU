@@ -44,8 +44,10 @@ function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, rad
     const interleaveData = [];
     const indexData = [];
     const halfHeight = height / 2;
-    const uVector = {x: 1, y: 0, z: 0};
-    const vVector = {x: 0, y: 0, z: 1};
+
+    // [업계 표준] 12시(-Z) 기점, 반시계 방향(CCW) 회전 유도 벡터
+    const uVector = {x: 1, y: 0, z: 0};  // 로컬 수평축 (+X)
+    const vVector = {x: 0, y: 0, z: -1}; // 로컬 수직축 (12시 방향, -Z)
 
     // 1. Torso 생성
     PrimitiveUtils.generateCylinderTorsoData(
@@ -60,29 +62,29 @@ function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, rad
 
     // 2. Caps 생성
     if (capTop && radiusTop > 0) {
-        // Top Cap (+Y)
+        // Top Cap (+Y 바라봄)
         PrimitiveUtils.generateCircleData(
             interleaveData, indexData,
             radiusTop, radialSegments,
             thetaStart, thetaLength,
             {x: 0, y: halfHeight, z: 0},
             uVector,
-            {x: 0, y: 0, z: -1},
+            vVector,
             {x: 0, y: 1, z: 0},
             true
         );
     }
     if (capBottom && radiusBottom > 0) {
-        // Bottom Cap (-Y)
+        // Bottom Cap (-Y 바라봄)
         PrimitiveUtils.generateCircleData(
             interleaveData, indexData,
             radiusBottom, radialSegments,
             thetaStart, thetaLength,
             {x: 0, y: -halfHeight, z: 0},
             uVector,
-            {x: 0, y: 0, z: -1}, // [교정] 상단 조감 기준 반시계 회전 (CCW)
+            vVector,
             {x: 0, y: -1, z: 0},
-            false // [교정] CCW 생성 궤적에서 -Y 면을 앞면으로 만들기 위해 인덱스 반전
+            false // CCW 생성을 유지하면서 밑면을 앞면으로 설정
         );
     }
 
