@@ -75,7 +75,7 @@ class PrimitiveUtils {
         interleaveData: number[],
         indexData: number[],
         radius: number,
-        segments: number,
+        radialSegments: number,
         thetaStart: number,
         thetaLength: number,
         center: { x: number, y: number, z: number },
@@ -97,8 +97,8 @@ class PrimitiveUtils {
         if (radius <= 1e-6 || Math.abs(thetaLength) < 1e-6) return;
 
         // 2. Perimeter Vertices
-        for (let s = 0; s <= segments; s++) {
-            const angle = thetaStart + (s / segments) * thetaLength;
+        for (let s = 0; s <= radialSegments; s++) {
+            const angle = thetaStart + (s / radialSegments) * thetaLength;
             const cos = Math.cos(angle);
             const sin = Math.sin(angle);
 
@@ -118,7 +118,7 @@ class PrimitiveUtils {
         }
 
         // 3. Indices (Triangle Fan)
-        for (let i = 1; i <= segments; i++) {
+        for (let i = 1; i <= radialSegments; i++) {
             const c = vertexOffset;
             const v1 = vertexOffset + i;
             const v2 = vertexOffset + i + 1;

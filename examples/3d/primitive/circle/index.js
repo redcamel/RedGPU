@@ -111,7 +111,7 @@ const renderTestPane = async (redGPUContext) => {
 
     const config = {
         radius: 1,
-        segments: 64,
+        radialSegments: 64,
         thetaStart: 0,
         thetaLength: Math.PI * 2,
     };
@@ -125,7 +125,7 @@ const renderTestPane = async (redGPUContext) => {
         const newGeometry = new RedGPU.Primitive.Circle(
             redGPUContext,
             config.radius,
-            config.segments,
+            config.radialSegments,
             config.thetaStart,
             config.thetaLength
         );
@@ -139,7 +139,7 @@ const renderTestPane = async (redGPUContext) => {
 
     const folder = pane.addFolder({title: 'Circle Properties', expanded: true});
     folder.addBinding(config, 'radius', {min: 0.1, max: 5, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'segments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
+    folder.addBinding(config, 'radialSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
     folder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
 };

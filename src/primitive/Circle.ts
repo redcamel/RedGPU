@@ -34,7 +34,7 @@ class Circle extends Primitive {
      * @param radius -
      * [KO] 원 반지름 (기본값 1)
      * [EN] Circle radius (default 1)
-     * @param segments -
+     * @param radialSegments -
      * [KO] 세그먼트 수 (기본값 32, 최소 3)
      * [EN] Number of segments (default 32, min 3)
      * @param thetaStart -
@@ -47,13 +47,13 @@ class Circle extends Primitive {
     constructor(
         redGPUContext: RedGPUContext,
         radius: number = 1,
-        segments: number = 32,
+        radialSegments: number = 32,
         thetaStart: number = 0,
         thetaLength: number = Math.PI * 2
     ) {
         // 유효성 검사
-        if (segments < 3) {
-            throw new Error('segments must be 3 or greater');
+        if (radialSegments < 3) {
+            throw new Error('radialSegments must be 3 or greater');
         }
         if (radius < 0) {
             throw new Error('radius must be 0 or greater');
@@ -61,9 +61,9 @@ class Circle extends Primitive {
         if (thetaLength < 0) {
             throw new Error('thetaLength must be 0 or greater');
         }
-        const uniqueKey = `PRIMITIVE_CIRCLE_R${radius}_S${segments}_TS${thetaStart}_TL${thetaLength}`;
+        const uniqueKey = `PRIMITIVE_CIRCLE_R${radius}_S${radialSegments}_TS${thetaStart}_TL${thetaLength}`;
         super(redGPUContext, uniqueKey, () => makeData(
-            uniqueKey, redGPUContext, radius, segments, thetaStart, thetaLength
+            uniqueKey, redGPUContext, radius, radialSegments, thetaStart, thetaLength
         ));
     }
 }
@@ -72,7 +72,7 @@ const makeData = function (
     uniqueKey: string,
     redGPUContext: RedGPUContext,
     radius: number,
-    segments: number,
+    radialSegments: number,
     thetaStart: number,
     thetaLength: number
 ) {
@@ -82,7 +82,7 @@ const makeData = function (
     // Circle 생성 (벡터 기반: XY 평면, Normal +Z)
     PrimitiveUtils.generateCircleData(
         interleaveData, indexData,
-        radius, segments,
+        radius, radialSegments,
         thetaStart, thetaLength,
         {x: 0, y: 0, z: 0}, // center
         {x: 1, y: 0, z: 0}, // uVector
