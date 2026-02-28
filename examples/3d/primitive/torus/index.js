@@ -129,10 +129,10 @@ const renderTestPane = async (redGPUContext) => {
     const config = {
         radius: 1,
         thickness: 0.5,
-        radialSubdivisions: 16,
-        bodySubdivisions: 16,
-        startAngle: 0,
-        endAngle: Math.PI * 2,
+        radialSegments: 16,
+        tubularSegments: 16,
+        thetaStart: 0,
+        thetaLength: Math.PI * 2,
     };
 
     /**
@@ -145,10 +145,10 @@ const renderTestPane = async (redGPUContext) => {
             redGPUContext,
             config.radius,
             config.thickness,
-            config.radialSubdivisions,
-            config.bodySubdivisions,
-            config.startAngle,
-            config.endAngle
+            config.radialSegments,
+            config.tubularSegments,
+            config.thetaStart,
+            config.thetaLength
         );
 
         meshList.forEach(mesh => {
@@ -161,8 +161,8 @@ const renderTestPane = async (redGPUContext) => {
     const folder = pane.addFolder({title: 'Torus Properties', expanded: true});
     folder.addBinding(config, 'radius', {min: 0.5, max: 5, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'thickness', {min: 0.1, max: 2, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'radialSubdivisions', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'bodySubdivisions', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'startAngle', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'endAngle', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'radialSegments', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
+    folder.addBinding(config, 'tubularSegments', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
+    folder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
 };

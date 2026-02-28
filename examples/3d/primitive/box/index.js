@@ -113,9 +113,9 @@ const renderTestPane = async (redGPUContext) => {
         width: 1,
         height: 1,
         depth: 1,
-        segmentX: 2,
-        segmentY: 2,
-        segmentZ: 2,
+        widthSegments: 2,
+        heightSegments: 2,
+        depthSegments: 2,
     };
 
     /**
@@ -129,9 +129,9 @@ const renderTestPane = async (redGPUContext) => {
             config.width,
             config.height,
             config.depth,
-            config.segmentX,
-            config.segmentY,
-            config.segmentZ
+            config.widthSegments,
+            config.heightSegments,
+            config.depthSegments
         );
 
         meshList.forEach((mesh) => {
@@ -147,7 +147,7 @@ const renderTestPane = async (redGPUContext) => {
         boxFolder.addBinding(config, prop, {min: 0.1, max: 5, step: 0.1}).on('change', updateBoxGeometry);
     });
 
-    ['segmentX', 'segmentY', 'segmentZ'].forEach(prop => {
+    ['widthSegments', 'heightSegments', 'depthSegments'].forEach(prop => {
         boxFolder.addBinding(config, prop, {min: 1, max: 15, step: 1}).on('change', updateBoxGeometry);
     });
 };

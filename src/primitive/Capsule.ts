@@ -35,7 +35,7 @@ class Capsule extends Primitive {
      * @param radius -
      * [KO] 반지름 (기본값 0.5)
      * [EN] Radius (default 0.5)
-     * @param cylinderHeight -
+     * @param height -
      * [KO] 실린더 부분 높이 (기본값 1.0)
      * [EN] Cylinder part height (default 1.0)
      * @param radialSegments -
@@ -51,14 +51,14 @@ class Capsule extends Primitive {
     constructor(
         redGPUContext: RedGPUContext,
         radius: number = 0.5,
-        cylinderHeight: number = 1.0,
+        height: number = 1.0,
         radialSegments: number = 32,
         heightSegments: number = 1,
         capSegments: number = 12
     ) {
-        const uniqueKey = `PRIMITIVE_CAPSULE_R${radius}_CH${cylinderHeight}_RS${radialSegments}_HS${heightSegments}_CS${capSegments}`;
+        const uniqueKey = `PRIMITIVE_CAPSULE_R${radius}_CH${height}_RS${radialSegments}_HS${heightSegments}_CS${capSegments}`;
         super(redGPUContext, uniqueKey, () => makeData(
-            uniqueKey, redGPUContext, radius, cylinderHeight,
+            uniqueKey, redGPUContext, radius, height,
             radialSegments, heightSegments, capSegments
         ));
     }
@@ -68,7 +68,7 @@ const makeData = function (
     uniqueKey: string,
     redGPUContext: RedGPUContext,
     radius: number,
-    cylinderHeight: number,
+    height: number,
     radialSegments: number,
     heightSegments: number,
     capSegments: number
@@ -78,10 +78,10 @@ const makeData = function (
     const gridX1 = radialSegments + 1;
 
     const totalVerticalSegments = capSegments * 2 + heightSegments;
-    const halfCylinderHeight = cylinderHeight / 2;
+    const halfCylinderHeight = height / 2;
 
     const capArcLength = (Math.PI / 2) * radius;
-    const totalArcLength = capArcLength * 2 + cylinderHeight;
+    const totalArcLength = capArcLength * 2 + height;
 
     for (let iy = 0; iy <= totalVerticalSegments; iy++) {
         let y = 0;
@@ -97,16 +97,16 @@ const makeData = function (
         } else if (iy <= capSegments + heightSegments) {
             // Cylinder Body
             const t = (iy - capSegments) / heightSegments;
-            y = halfCylinderHeight - t * cylinderHeight;
+            y = halfCylinderHeight - t * height;
             currentRadius = radius;
-            currentDistance = capArcLength + t * cylinderHeight;
+            currentDistance = capArcLength + t * height;
         } else {
             // Bottom Cap
             const t = (iy - (capSegments + heightSegments)) / capSegments;
             const theta = (Math.PI / 2) + t * (Math.PI / 2);
             y = -halfCylinderHeight + radius * Math.cos(theta);
             currentRadius = radius * Math.sin(theta);
-            currentDistance = capArcLength + cylinderHeight + t * capArcLength;
+            currentDistance = capArcLength + height + t * capArcLength;
         }
 
         const v = currentDistance / totalArcLength;

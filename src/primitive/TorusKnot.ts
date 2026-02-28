@@ -34,7 +34,7 @@ class TorusKnot extends Primitive {
      * @param radius -
      * [KO] 전체 반지름 (기본값 1)
      * [EN] Overall radius (default 1)
-     * @param tube -
+     * @param tubeRadius -
      * [KO] 튜브(단면) 반지름 (기본값 0.4)
      * [EN] Tube radius (default 0.4)
      * @param tubularSegments -
@@ -52,16 +52,16 @@ class TorusKnot extends Primitive {
      */
     constructor(redGPUContext: RedGPUContext,
                 radius = 1,
-                tube = 0.4,
+                tubeRadius = 0.4,
                 tubularSegments = 64,
                 radialSegments = 8,
                 windingsAroundAxis = 2,
                 windingsAroundCircle = 3
     ) {
-        const uniqueKey = `PRIMITIVE_TORUS_NUT_R${radius}_T${tube}_TS${tubularSegments}_RS${radialSegments}_P${windingsAroundAxis}_Q${windingsAroundCircle}`;
+        const uniqueKey = `PRIMITIVE_TORUS_NUT_R${radius}_T${tubeRadius}_TS${tubularSegments}_RS${radialSegments}_P${windingsAroundAxis}_Q${windingsAroundCircle}`;
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
             radius,
-            tube,
+            tubeRadius,
             tubularSegments,
             radialSegments,
             windingsAroundAxis,
@@ -72,7 +72,7 @@ class TorusKnot extends Primitive {
 
 const makeData = function (uniqueKey, redGPUContext,
                            radius,
-                           tube,
+                           tubeRadius,
                            tubularSegments,
                            radialSegments,
                            windingsAroundAxis,
@@ -87,7 +87,7 @@ const makeData = function (uniqueKey, redGPUContext,
     const indexData = [];
 
     // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
-    if (radius <= 0 || tube <= 0) {
+    if (radius <= 0 || tubeRadius <= 0) {
         PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
         return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
     }
@@ -156,8 +156,8 @@ const makeData = function (uniqueKey, redGPUContext,
         }
         for (let j = 0; j <= radialSegments; ++j) {
             const v = j / radialSegments * Math.PI * 2;
-            const cx = -tube * Math.cos(v);
-            const cy = tube * Math.sin(v);
+            const cx = -tubeRadius * Math.cos(v);
+            const cy = tubeRadius * Math.sin(v);
             vertex[0] = P1[0] + (cx * N[0] + cy * B[0]);
             vertex[1] = P1[1] + (cx * N[1] + cy * B[1]);
             vertex[2] = P1[2] + (cx * N[2] + cy * B[2]);

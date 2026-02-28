@@ -37,23 +37,23 @@ class Ground extends Primitive {
      * @param height -
      * [KO] 세로 길이 (기본값 1)
      * [EN] Height (default 1)
-     * @param wSegments -
+     * @param widthSegments -
      * [KO] 가로(X축) 세그먼트 수 (기본값 1)
      * [EN] Width (X-axis) segments (default 1)
-     * @param hSegments -
+     * @param heightSegments -
      * [KO] 세로(Z축) 세그먼트 수 (기본값 1)
      * [EN] Height (Z-axis) segments (default 1)
      * @param flipY -
      * [KO] Y축 UV 뒤집기 여부 (기본값 false)
      * [EN] Whether to flip UV on the Y-axis (default false)
      */
-    constructor(redGPUContext: RedGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, flipY = false) {
-        const uniqueKey = `PRIMITIVE_GROUND_W${width}_H${height}_WS${wSegments}_HS${hSegments}_FY${flipY}`;
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, wSegments, hSegments, flipY));
+    constructor(redGPUContext: RedGPUContext, width = 1, height = 1, widthSegments = 1, heightSegments = 1, flipY = false) {
+        const uniqueKey = `PRIMITIVE_GROUND_W${width}_H${height}_WS${widthSegments}_HS${heightSegments}_FY${flipY}`;
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, widthSegments, heightSegments, flipY));
     }
 }
 
-const makeData = function (uniqueKey, redGPUContext, width, height, wSegments, hSegments, flipY) {
+const makeData = function (uniqueKey, redGPUContext, width, height, widthSegments, heightSegments, flipY) {
     const interleaveData = [];
     const indexData = [];
 
@@ -61,7 +61,7 @@ const makeData = function (uniqueKey, redGPUContext, width, height, wSegments, h
     PrimitiveUtils.generatePlaneData(
         interleaveData, indexData,
         width, height, 0,
-        wSegments, hSegments,
+        widthSegments, heightSegments,
         'x', 'z', 'y',
         1, 1, 1,
         flipY

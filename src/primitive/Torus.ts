@@ -26,33 +26,33 @@ class Torus extends Primitive {
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
      * @param radius - [KO] 중심 원 반지름 [EN] Major radius
      * @param thickness - [KO] 단면(튜브) 반지름 [EN] Minor radius/thickness
-     * @param radialSubdivisions - [KO] 둘레 세그먼트 수 [EN] Radial segments
-     * @param bodySubdivisions - [KO] 단면 세그먼트 수 [EN] Tubular segments
-     * @param startAngle - [KO] 시작 각도 [EN] Starting angle
-     * @param endAngle - [KO] 끝 각도 [EN] Ending angle
+     * @param radialSegments - [KO] 둘레 세그먼트 수 [EN] Radial segments
+     * @param tubularSegments - [KO] 단면 세그먼트 수 [EN] Tubular segments
+     * @param thetaStart - [KO] 시작 각도 [EN] Starting angle
+     * @param thetaLength - [KO] 원호 각도 [EN] Arc angle
      */
     constructor(redGPUContext: RedGPUContext,
                 radius = 1,
                 thickness = 0.5,
-                radialSubdivisions = 16,
-                bodySubdivisions = 16,
-                startAngle = 0,
-                endAngle = Math.PI * 2
+                radialSegments = 16,
+                tubularSegments = 16,
+                thetaStart = 0,
+                thetaLength = Math.PI * 2
     ) {
-        if (radialSubdivisions < 3) {
-            throw new Error('radialSubdivisions must be 3 or greater');
+        if (radialSegments < 3) {
+            throw new Error('radialSegments must be 3 or greater');
         }
-        if (bodySubdivisions < 3) {
-            throw new Error('verticalSubdivisions must be 3 or greater');
+        if (tubularSegments < 3) {
+            throw new Error('tubularSegments must be 3 or greater');
         }
-        const uniqueKey = `PRIMITIVE_TORUS_R${radius}_T${thickness}_RSD${radialSubdivisions}_BSD${bodySubdivisions}_SA${startAngle}_EA${endAngle}`;
+        const uniqueKey = `PRIMITIVE_TORUS_R${radius}_T${thickness}_RSD${radialSegments}_BSD${tubularSegments}_SA${thetaStart}_EA${thetaLength}`;
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
             radius,
             thickness,
-            radialSubdivisions,
-            bodySubdivisions,
-            startAngle,
-            endAngle
+            radialSegments,
+            tubularSegments,
+            thetaStart,
+            thetaLength
         ));
     }
 }
@@ -60,41 +60,38 @@ class Torus extends Primitive {
 const makeData = function (uniqueKey, redGPUContext,
                            radius,
                            thickness,
-                           radialSubdivisions,
-                           bodySubdivisions,
-                           startAngle,
-                           endAngle
+                           radialSegments,
+                           tubularSegments,
+                           thetaStart,
+                           thetaLength
 ) {
-    startAngle = startAngle || 0;
-    endAngle = endAngle || Math.PI * 2;
-    const range = endAngle - startAngle;
-    const isPartial = Math.abs(range) < Math.PI * 2;
+    thetaStart = thetaStart || 0;
+    thetaLength = thetaLength === undefined ? Math.PI * 2 : thetaLength;
+    const isPartial = Math.abs(thetaLength) < Math.PI * 2;
 
-    const radialParts = radialSubdivisions + 1;
-    const bodyParts = bodySubdivisions + 1;
     const interleaveData = [];
     const indexData = [];
 
     // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
-    if (radius <= 0 || thickness <= 0 || range === 0) {
+    if (radius <= 0 || thickness <= 0 || thetaLength === 0) {
         PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
         return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
     }
 
     // 1. Torus Body 생성
     const vertexOffset = interleaveData.length / 12;
-    for (let slice = 0; slice <= bodySubdivisions; ++slice) {
-        const v = slice / bodySubdivisions;
+    for (let slice = 0; slice <= tubularSegments; ++slice) {
+        const v = slice / tubularSegments;
         const sliceAngle = v * Math.PI * 2;
         const sliceSin = Math.sin(sliceAngle);
         const ringRadius = radius + sliceSin * thickness;
         const ny = Math.cos(sliceAngle);
         const y = ny * thickness;
 
-        for (let ring = 0; ring <= radialSubdivisions; ++ring) {
-            const u = ring / radialSubdivisions;
+        for (let ring = 0; ring <= radialSegments; ++ring) {
+            const u = ring / radialSegments;
             // [교정] 실린더/구체와 일관성을 위해 PI(180도) 오프셋 추가 (이음새를 뒤로 보냄)
-            const ringAngle = startAngle + u * range + Math.PI;
+            const ringAngle = thetaStart + u * thetaLength + Math.PI;
             const xSin = Math.sin(ringAngle);
             const zCos = Math.cos(ringAngle);
             const x = xSin * ringRadius;
@@ -113,17 +110,17 @@ const makeData = function (uniqueKey, redGPUContext,
     }
 
     // Body Indices (PrimitiveUtils.generateGridIndices 사용)
-    PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSubdivisions, bodySubdivisions, radialSubdivisions + 1);
+    PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1);
 
 
     // 2. Partial Torus일 경우 단면 막기 (Caps)
     if (isPartial) {
         // Start Angle Cap
-        const sSin = Math.sin(startAngle);
-        const sCos = Math.cos(startAngle);
+        const sSin = Math.sin(thetaStart);
+        const sCos = Math.cos(thetaStart);
         PrimitiveUtils.generateCircleData(
             interleaveData, indexData,
-            thickness, bodySubdivisions,
+            thickness, tubularSegments,
             0, Math.PI * 2,
             {x: sSin * radius, y: 0, z: sCos * radius}, // Center
             {x: sSin, y: 0, z: sCos},                   // uVector (Radial)
@@ -132,11 +129,12 @@ const makeData = function (uniqueKey, redGPUContext,
         );
 
         // End Angle Cap
+        const endAngle = thetaStart + thetaLength;
         const eSin = Math.sin(endAngle);
         const eCos = Math.cos(endAngle);
         PrimitiveUtils.generateCircleData(
             interleaveData, indexData,
-            thickness, bodySubdivisions,
+            thickness, tubularSegments,
             0, Math.PI * 2,
             {x: eSin * radius, y: 0, z: eCos * radius}, // Center
             {x: eSin, y: 0, z: eCos},                   // uVector (Radial)

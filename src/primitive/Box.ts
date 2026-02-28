@@ -39,13 +39,13 @@ class Box extends Primitive {
      * @param depth -
      * [KO] 박스 깊이 (기본값 1)
      * [EN] Box depth (default 1)
-     * @param wSegments -
+     * @param widthSegments -
      * [KO] 가로(X축) 세그먼트 수 (기본값 1)
      * [EN] Width (X-axis) segments (default 1)
-     * @param hSegments -
+     * @param heightSegments -
      * [KO] 세로(Y축) 세그먼트 수 (기본값 1)
      * [EN] Height (Y-axis) segments (default 1)
-     * @param dSegments -
+     * @param depthSegments -
      * [KO] 깊이(Z축) 세그먼트 수 (기본값 1)
      * [EN] Depth (Z-axis) segments (default 1)
      */
@@ -54,26 +54,26 @@ class Box extends Primitive {
         width: number = 1,
         height: number = 1,
         depth: number = 1,
-        wSegments: number = 1,
-        hSegments: number = 1,
-        dSegments: number = 1
+        widthSegments: number = 1,
+        heightSegments: number = 1,
+        depthSegments: number = 1
     ) {
-        const uniqueKey = `PRIMITIVE_BOX_W${width}_H${height}_D${depth}_WS${wSegments}_HS${hSegments}_DS${dSegments}`;
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, depth, wSegments, hSegments, dSegments))
+        const uniqueKey = `PRIMITIVE_BOX_W${width}_H${height}_D${depth}_WS${widthSegments}_HS${heightSegments}_DS${depthSegments}`;
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, depth, widthSegments, heightSegments, depthSegments))
     }
 }
 
-const makeData = function (uniqueKey, redGPUContext, width, height, depth, wSegments, hSegments, dSegments) {
+const makeData = function (uniqueKey, redGPUContext, width, height, depth, widthSegments, heightSegments, depthSegments) {
     const interleaveData = [];
     const indexData = [];
 
     // px, nx, py, ny, pz, nz 순서로 6개 면 생성
-    PrimitiveUtils.generatePlaneData(interleaveData, indexData, depth, height, width / 2, dSegments, hSegments, 'z', 'y', 'x', -1, -1, 1); // px
-    PrimitiveUtils.generatePlaneData(interleaveData, indexData, depth, height, -width / 2, dSegments, hSegments, 'z', 'y', 'x', 1, -1, -1); // nx
-    PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, depth, height / 2, wSegments, dSegments, 'x', 'z', 'y', 1, 1, 1); // py
-    PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, depth, -height / 2, wSegments, dSegments, 'x', 'z', 'y', 1, -1, -1); // ny
-    PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, height, depth / 2, wSegments, hSegments, 'x', 'y', 'z', 1, -1, 1); // pz
-    PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, height, -depth / 2, wSegments, hSegments, 'x', 'y', 'z', -1, -1, -1); // nz
+    PrimitiveUtils.generatePlaneData(interleaveData, indexData, depth, height, width / 2, depthSegments, heightSegments, 'z', 'y', 'x', -1, -1, 1); // px
+    PrimitiveUtils.generatePlaneData(interleaveData, indexData, depth, height, -width / 2, depthSegments, heightSegments, 'z', 'y', 'x', 1, -1, -1); // nx
+    PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, depth, height / 2, widthSegments, depthSegments, 'x', 'z', 'y', 1, 1, 1); // py
+    PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, depth, -height / 2, widthSegments, depthSegments, 'x', 'z', 'y', 1, -1, -1); // ny
+    PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, height, depth / 2, widthSegments, heightSegments, 'x', 'y', 'z', 1, -1, 1); // pz
+    PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, height, -depth / 2, widthSegments, heightSegments, 'x', 'y', 'z', -1, -1, -1); // nz
 
     PrimitiveUtils.calculateTangents(interleaveData, indexData);
 

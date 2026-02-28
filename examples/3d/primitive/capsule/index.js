@@ -61,7 +61,7 @@ const createPrimitive = (redGPUContext, scene) => {
 
     const defaultOptions = {
         radius: 0.5,
-        cylinderHeight: 1.0,
+        height: 1.0,
         radialSegments: 32,
         heightSegments: 1,
         capSegments: 12
@@ -70,7 +70,7 @@ const createPrimitive = (redGPUContext, scene) => {
     const capsuleGeometry = new RedGPU.Primitive.Capsule(
         redGPUContext,
         defaultOptions.radius,
-        defaultOptions.cylinderHeight,
+        defaultOptions.height,
         defaultOptions.radialSegments,
         defaultOptions.heightSegments,
         defaultOptions.capSegments
@@ -126,7 +126,7 @@ const renderTestPane = async (redGPUContext) => {
 
     const config = {
         radius: 0.5,
-        cylinderHeight: 1.0,
+        height: 1.0,
         radialSegments: 32,
         heightSegments: 1,
         capSegments: 12
@@ -141,7 +141,7 @@ const renderTestPane = async (redGPUContext) => {
         const newGeometry = new RedGPU.Primitive.Capsule(
             redGPUContext,
             config.radius,
-            config.cylinderHeight,
+            config.height,
             config.radialSegments,
             config.heightSegments,
             config.capSegments
@@ -155,7 +155,7 @@ const renderTestPane = async (redGPUContext) => {
     };
 
     const folder = pane.addFolder({title: 'Capsule Properties', expanded: true});
-    const props = ['radius', 'cylinderHeight', 'radialSegments', 'heightSegments', 'capSegments'];
+    const props = ['radius', 'height', 'radialSegments', 'heightSegments', 'capSegments'];
     const params = [
         {min: 0.1, max: 2, step: 0.1},
         {min: 0.1, max: 5, step: 0.1},

@@ -128,7 +128,7 @@ const renderTestPane = async (redGPUContext) => {
 
     const config = {
         radius: 1,
-        tube: 0.4,
+        tubeRadius: 0.4,
         tubularSegments: 64,
         radialSegments: 8,
         windingsAroundAxis: 2,
@@ -144,7 +144,7 @@ const renderTestPane = async (redGPUContext) => {
         const newGeometry = new RedGPU.Primitive.TorusKnot(
             redGPUContext,
             config.radius,
-            config.tube,
+            config.tubeRadius,
             config.tubularSegments,
             config.radialSegments,
             config.windingsAroundAxis,
@@ -160,7 +160,7 @@ const renderTestPane = async (redGPUContext) => {
 
     const folder = pane.addFolder({title: 'TorusKnot Properties', expanded: true});
     folder.addBinding(config, 'radius', {min: 0.5, max: 5, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'tube', {min: 0.1, max: 2, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'tubeRadius', {min: 0.1, max: 2, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'tubularSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
     folder.addBinding(config, 'radialSegments', {min: 3, max: 32, step: 1}).on('change', updateGeometry);
     folder.addBinding(config, 'windingsAroundAxis', {label: 'windingsAroundAxis (p)', min: 1, max: 10, step: 0.1}).on('change', updateGeometry);
