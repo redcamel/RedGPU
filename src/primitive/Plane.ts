@@ -24,7 +24,7 @@ class Plane extends Primitive {
      *
      * ### Example
      * ```typescript
-     * const plane = new RedGPU.Plane(redGPUContext, 1, 1, 1, 1, 1, false);
+     * const plane = new RedGPU.Plane(redGPUContext, 1, 1, 1, 1, false);
      * ```
      *
      * @param redGPUContext -
@@ -42,23 +42,20 @@ class Plane extends Primitive {
      * @param hSegments -
      * [KO] 세로(Y축) 세그먼트 수 (기본값 1)
      * [EN] Height (Y-axis) segments (default 1)
-     * @param uvSize -
-     * [KO] UV 스케일 (기본값 1)
-     * [EN] UV scale (default 1)
      * @param flipY -
      * [KO] Y축 UV 뒤집기 여부 (기본값 false)
      * [EN] Whether to flip UV on the Y-axis (default false)
      */
-    constructor(redGPUContext: RedGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, uvSize = 1, flipY = false) {
-        const uniqueKey = `PRIMITIVE_PLANE_W${width}_H${height}_WS${wSegments}_HS${hSegments}_UV${uvSize}_FY${flipY}`;
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, wSegments, hSegments, uvSize, flipY));
+    constructor(redGPUContext: RedGPUContext, width = 1, height = 1, wSegments = 1, hSegments = 1, flipY = false) {
+        const uniqueKey = `PRIMITIVE_PLANE_W${width}_H${height}_WS${wSegments}_HS${hSegments}_FY${flipY}`;
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, wSegments, hSegments, flipY));
     }
 }
 
 const makeData = (function () {
     const interleaveData = [];
     const indexData = [];
-    return function (uniqueKey, redGPUContext, width, height, wSegments, hSegments, uvSize, flipY) {
+    return function (uniqueKey, redGPUContext, width, height, wSegments, hSegments, flipY) {
         const width_half = width / 2;
         const height_half = height / 2;
         const gridX = Math.floor(wSegments) || 1;
@@ -71,10 +68,10 @@ const makeData = (function () {
         indexData.length = 0;
         for (let iy = 0; iy < gridY1; iy++) {
             const tY = iy * segment_height - height_half;
-            const uvY = flipY ? (1 - iy / gridY) * uvSize : (iy / gridY) * uvSize;
+            const uvY = flipY ? (1 - iy / gridY) : (iy / gridY);
             for (let ix = 0; ix < gridX1; ix++) {
                 const tX = ix * segment_width - width_half;
-                const texcoord = ix / gridX * uvSize;
+                const texcoord = ix / gridX;
                 interleaveData.push(
                     tX,
                     -tY,

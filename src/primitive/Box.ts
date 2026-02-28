@@ -23,7 +23,7 @@ class Box extends Primitive {
      *
      * ### Example
      * ```typescript
-     * const box = new RedGPU.Box(redGPUContext, 1, 1, 1, 1, 1, 1, 1);
+     * const box = new RedGPU.Box(redGPUContext, 1, 1, 1, 1, 1, 1);
      * ```
      *
      * @param redGPUContext -
@@ -47,9 +47,6 @@ class Box extends Primitive {
      * @param dSegments -
      * [KO] 깊이(Z축) 세그먼트 수 (기본값 1)
      * [EN] Depth (Z-axis) segments (default 1)
-     * @param uvSize -
-     * [KO] UV 스케일 (기본값 1)
-     * [EN] UV scale (default 1)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -58,14 +55,10 @@ class Box extends Primitive {
         depth: number = 1,
         wSegments: number = 1,
         hSegments: number = 1,
-        dSegments: number = 1,
-        uvSize: number = 1
+        dSegments: number = 1
     ) {
-
-        const uniqueKey = `PRIMITIVE_BOX_W${width}_H${height}_D${depth}_WS${wSegments}_HS${hSegments}_DS${dSegments}_UV${uvSize}`;
-
-        super(redGPUContext,uniqueKey,()=>makeData(uniqueKey, redGPUContext, width, height, depth, wSegments, hSegments, dSegments, uvSize))
-
+        const uniqueKey = `PRIMITIVE_BOX_W${width}_H${height}_D${depth}_WS${wSegments}_HS${hSegments}_DS${dSegments}`;
+        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, depth, wSegments, hSegments, dSegments))
     }
 }
 
@@ -78,8 +71,7 @@ const makeData = (function () {
         componentIndexU, componentIndexV, componentIndexW,
         directionComponentU, directionComponentV,
         width, height, depth,
-        gridResolutionX, gridResolutionY,
-        uvSize
+        gridResolutionX, gridResolutionY
     ) {
         let segmentWidth = width / gridResolutionX;
         let segmentHeight = height / gridResolutionY;
@@ -104,7 +96,7 @@ const makeData = (function () {
                 vector[componentIndexV] = 0;
                 vector[componentIndexW] = depth > 0 ? 1 : -1;
                 interleaveData.push(vector['x'], vector['y'], vector['z']); // normal
-                interleaveData.push(ix / gridResolutionX * uvSize, (iy / gridResolutionY * uvSize)); // uv
+                interleaveData.push(ix / gridResolutionX, (iy / gridResolutionY)); // uv
                 vertexCounter += 1; // counters
             }
         }
@@ -122,7 +114,7 @@ const makeData = (function () {
         groupStart += groupCount;
         numberOfVertices += vertexCounter;
     };
-    return function (uniqueKey, redGPUContext, width, height, depth, wSegments, hSegments, dSegments, uvSize) {
+    return function (uniqueKey, redGPUContext, width, height, depth, wSegments, hSegments, dSegments) {
         ////////////////////////////////////////////////////////////////////////////
         // 데이터 생성!
         // vertexBuffer Data
@@ -130,12 +122,12 @@ const makeData = (function () {
         let indexData = [];
         numberOfVertices = 0;
         groupStart = 0;
-        buildPlane(interleaveData, indexData, 'z', 'y', 'x', -1, -1, depth, height, width, dSegments, hSegments, uvSize); // px
-        buildPlane(interleaveData, indexData, 'z', 'y', 'x', 1, -1, depth, height, -width, dSegments, hSegments, uvSize); // nx
-        buildPlane(interleaveData, indexData, 'x', 'z', 'y', 1, 1, width, depth, height, wSegments, dSegments, uvSize); // py
-        buildPlane(interleaveData, indexData, 'x', 'z', 'y', 1, -1, width, depth, -height, wSegments, dSegments, uvSize); // ny
-        buildPlane(interleaveData, indexData, 'x', 'y', 'z', 1, -1, width, height, depth, wSegments, hSegments, uvSize); // pz
-        buildPlane(interleaveData, indexData, 'x', 'y', 'z', -1, -1, width, height, -depth, wSegments, hSegments, uvSize); // nz
+        buildPlane(interleaveData, indexData, 'z', 'y', 'x', -1, -1, depth, height, width, dSegments, hSegments); // px
+        buildPlane(interleaveData, indexData, 'z', 'y', 'x', 1, -1, depth, height, -width, dSegments, hSegments); // nx
+        buildPlane(interleaveData, indexData, 'x', 'z', 'y', 1, 1, width, depth, height, wSegments, dSegments); // py
+        buildPlane(interleaveData, indexData, 'x', 'z', 'y', 1, -1, width, depth, -height, wSegments, dSegments); // ny
+        buildPlane(interleaveData, indexData, 'x', 'y', 'z', 1, -1, width, height, depth, wSegments, hSegments); // pz
+        buildPlane(interleaveData, indexData, 'x', 'y', 'z', -1, -1, width, height, -depth, wSegments, hSegments); // nz
         return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
     };
 })()

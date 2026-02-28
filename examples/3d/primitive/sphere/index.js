@@ -67,7 +67,6 @@ const createPrimitive = (redGPUContext, scene) => {
         phiLength: Math.PI * 2,
         thetaStart: 0,
         thetaLength: Math.PI,
-        uvSize: 1,
     };
 
     const sphereGeometry = new RedGPU.Primitive.Sphere(
@@ -78,8 +77,7 @@ const createPrimitive = (redGPUContext, scene) => {
         defaultOptions.phiStart,
         defaultOptions.phiLength,
         defaultOptions.thetaStart,
-        defaultOptions.thetaLength,
-        defaultOptions.uvSize
+        defaultOptions.thetaLength
     );
 
     const gap = 3.5;
@@ -138,7 +136,6 @@ const renderTestPane = async (redGPUContext) => {
         phiLength: Math.PI * 2,
         thetaStart: 0,
         thetaLength: Math.PI,
-        uvSize: 1,
     };
 
     /**
@@ -155,8 +152,7 @@ const renderTestPane = async (redGPUContext) => {
             config.phiStart,
             config.phiLength,
             config.thetaStart,
-            config.thetaLength,
-            config.uvSize
+            config.thetaLength
         );
 
         meshList.forEach(mesh => {
@@ -174,5 +170,4 @@ const renderTestPane = async (redGPUContext) => {
     folder.addBinding(config, 'phiLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'uvSize', {min: 0.1, max: 5, step: 0.1}).on('change', updateGeometry);
 };

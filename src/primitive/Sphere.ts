@@ -52,9 +52,6 @@ class Sphere extends Primitive {
      * @param thetaLength -
      * [KO] 수직 각도 길이 (라디안, 기본값 PI)
      * [EN] Vertical angle length (radians, default PI)
-     * @param uvSize -
-     * [KO] UV 스케일 (기본값 1)
-     * [EN] UV scale (default 1)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -64,13 +61,12 @@ class Sphere extends Primitive {
         phiStart: number = 0,
         phiLength: number = Math.PI * 2,
         thetaStart: number = 0,
-        thetaLength: number = Math.PI,
-        uvSize: number = 1
+        thetaLength: number = Math.PI
     ) {
-        const uniqueKey = `PRIMITIVE_SPHERE_R${radius}_WS${widthSegments}_HS${heightSegments}_PS${phiStart}_PL${phiLength}_TS${thetaStart}_TL${thetaLength}_UV${uvSize}`;
+        const uniqueKey = `PRIMITIVE_SPHERE_R${radius}_WS${widthSegments}_HS${heightSegments}_PS${phiStart}_PL${phiLength}_TS${thetaStart}_TL${thetaLength}`;
         super(redGPUContext, uniqueKey, () => makeData(
             uniqueKey, redGPUContext, radius, widthSegments, heightSegments,
-            phiStart, phiLength, thetaStart, thetaLength, uvSize
+            phiStart, phiLength, thetaStart, thetaLength
         ));
     }
 }
@@ -84,7 +80,7 @@ const makeData = (function () {
     let a: number, b: number, c: number, d: number;
     const vertex = new Float32Array(3);
     const normal = new Float32Array(3);
-    return function (uniqueKey, redGPUContext, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength, uvSize) {
+    return function (uniqueKey, redGPUContext, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
         thetaEnd = thetaStart + thetaLength;
         index = 0;
         // 그리드 초기화 (내부 배열들도 정리)
@@ -109,7 +105,7 @@ const makeData = (function () {
                 vec3.normalize(normal, normal);
                 interleaveData.push(normal[0], normal[1], normal[2]);
                 // UV 좌표
-                interleaveData.push(u * uvSize, v * uvSize);
+                interleaveData.push(u, v);
                 verticesRow.push(index++);
             }
             grid.push(verticesRow);
