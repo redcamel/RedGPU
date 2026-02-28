@@ -84,7 +84,7 @@ class PrimitiveUtils {
         normal: { x: number, y: number, z: number },
         isFront: boolean = true
     ) {
-        const vertexOffset = interleaveData.length / 12; // [교정] 12개 속성 기준
+        const vertexOffset = interleaveData.length / 12;
 
         // 1. Center Vertex (최소 1개의 정점은 항상 생성하여 버퍼 크기 0 에러 방지)
         this.interleavePacker(
@@ -94,7 +94,7 @@ class PrimitiveUtils {
             0.5, 0.5
         );
 
-        if (radius <= 0 || thetaLength === 0) return;
+        if (radius <= 1e-6 || Math.abs(thetaLength) < 1e-6) return;
 
         // 2. Perimeter Vertices
         for (let s = 0; s <= segments; s++) {
@@ -152,6 +152,12 @@ class PrimitiveUtils {
         const vertexOffset = interleaveData.length / 12;
         const halfHeight = height / 2;
         const slope = (radiusBottom - radiusTop) / height;
+
+        // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지
+        if (thetaLength === 0 || (radiusTop <= 0 && radiusBottom <= 0)) {
+            this.interleavePacker(interleaveData, center.x, center.y, center.z, 0, 1, 0, 0, 0);
+            return;
+        }
 
         for (let iy = 0; iy <= heightSegments; iy++) {
             const v = iy / heightSegments;

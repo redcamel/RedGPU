@@ -80,6 +80,12 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
     const indexData = [];
     const gridX1 = widthSegments + 1;
 
+    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
+    if (radius <= 0 || Math.abs(phiLength) < 1e-6 || Math.abs(thetaLength) < 1e-6) {
+        PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
+        return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
+    }
+
     // 정점, 노멀, UV 생성
     for (let iy = 0; iy <= heightSegments; iy++) {
         const v = iy / heightSegments;

@@ -43,29 +43,29 @@ class TorusKnot extends Primitive {
      * @param radialSegments -
      * [KO] 단면 세그먼트 수 (기본값 8, 최소 3)
      * [EN] Radial segments (default 8, min 3)
-     * @param p -
-     * [KO] 매듭 파라미터 p (기본값 2)
-     * [EN] Knot parameter p (default 2)
-     * @param q -
-     * [KO] 매듭 파라미터 q (기본값 3)
-     * [EN] Knot parameter q (default 3)
+     * @param windingsAroundAxis -
+     * [KO] 매듭이 중심축을 따라 회전하는 횟수 (p, 기본값 2)
+     * [EN] Number of times the knot winds around the central axis (p, default 2)
+     * @param windingsAroundCircle -
+     * [KO] 매듭이 전체 둘레를 따라 회전하는 횟수 (q, 기본값 3)
+     * [EN] Number of times the knot winds around the major circle (q, default 3)
      */
     constructor(redGPUContext: RedGPUContext,
                 radius = 1,
                 tube = 0.4,
                 tubularSegments = 64,
                 radialSegments = 8,
-                p = 2,
-                q = 3
+                windingsAroundAxis = 2,
+                windingsAroundCircle = 3
     ) {
-        const uniqueKey = `PRIMITIVE_TORUS_NUT_R${radius}_T${tube}_TS${tubularSegments}_RS${radialSegments}_P${p}_Q${q}`;
+        const uniqueKey = `PRIMITIVE_TORUS_NUT_R${radius}_T${tube}_TS${tubularSegments}_RS${radialSegments}_P${windingsAroundAxis}_Q${windingsAroundCircle}`;
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
             radius,
             tube,
             tubularSegments,
             radialSegments,
-            p,
-            q
+            windingsAroundAxis,
+            windingsAroundCircle
         ));
     }
 }
@@ -75,8 +75,8 @@ const makeData = function (uniqueKey, redGPUContext,
                            tube,
                            tubularSegments,
                            radialSegments,
-                           p,
-                           q
+                           windingsAroundAxis,
+                           windingsAroundCircle
 ) {
     ////////////////////////////////////////////////////////////////////////////
     // 데이터 생성!
@@ -85,6 +85,13 @@ const makeData = function (uniqueKey, redGPUContext,
     radialSegments = Math.floor(radialSegments);
     const interleaveData = []
     const indexData = [];
+
+    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
+    if (radius <= 0 || tube <= 0) {
+        PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
+        return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
+    }
+
     const vertex = [0, 0, 0]
     const normal = [0, 0, 0]
     const P1 = [0, 0, 0]
@@ -97,9 +104,9 @@ const makeData = function (uniqueKey, redGPUContext,
 
     for (let i = 0; i <= tubularSegments; ++i) {
         // [교정] 실린더/구체/토러스와 일관성을 위해 PI(180도) 오프셋 추가 (이음새를 뒤로 보냄)
-        const u = i / tubularSegments * p * Math.PI * 2 + Math.PI;
-        calculatePositionOnCurve(u, p, q, radius, P1);
-        calculatePositionOnCurve(u + 0.01, p, q, radius, P2);
+        const u = i / tubularSegments * windingsAroundAxis * Math.PI * 2 + Math.PI;
+        calculatePositionOnCurve(u, windingsAroundAxis, windingsAroundCircle, radius, P1);
+        calculatePositionOnCurve(u + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
         // calculate orthonormal basis
         T[0] = P2[0] - P1[0];
         T[1] = P2[1] - P1[1];

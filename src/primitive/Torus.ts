@@ -75,6 +75,12 @@ const makeData = function (uniqueKey, redGPUContext,
     const interleaveData = [];
     const indexData = [];
 
+    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
+    if (radius <= 0 || thickness <= 0 || range === 0) {
+        PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
+        return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
+    }
+
     // 1. Torus Body 생성
     const vertexOffset = interleaveData.length / 12;
     for (let slice = 0; slice <= bodySubdivisions; ++slice) {

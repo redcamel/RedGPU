@@ -64,8 +64,8 @@ const createPrimitive = (redGPUContext, scene) => {
         tube: 0.4,
         tubularSegments: 64,
         radialSegments: 8,
-        p: 2,
-        q: 3,
+        windingsAroundAxis: 2,
+        windingsAroundCircle: 3,
     };
 
     const torusKnotGeometry = new RedGPU.Primitive.TorusKnot(
@@ -74,8 +74,8 @@ const createPrimitive = (redGPUContext, scene) => {
         defaultOptions.tube,
         defaultOptions.tubularSegments,
         defaultOptions.radialSegments,
-        defaultOptions.p,
-        defaultOptions.q
+        defaultOptions.windingsAroundAxis,
+        defaultOptions.windingsAroundCircle
     );
 
     const gap = 4.0;
@@ -131,8 +131,8 @@ const renderTestPane = async (redGPUContext) => {
         tube: 0.4,
         tubularSegments: 64,
         radialSegments: 8,
-        p: 2,
-        q: 3,
+        windingsAroundAxis: 2,
+        windingsAroundCircle: 3,
     };
 
     /**
@@ -147,8 +147,8 @@ const renderTestPane = async (redGPUContext) => {
             config.tube,
             config.tubularSegments,
             config.radialSegments,
-            config.p,
-            config.q
+            config.windingsAroundAxis,
+            config.windingsAroundCircle
         );
 
         meshList.forEach(mesh => {
@@ -163,6 +163,6 @@ const renderTestPane = async (redGPUContext) => {
     folder.addBinding(config, 'tube', {min: 0.1, max: 2, step: 0.1}).on('change', updateGeometry);
     folder.addBinding(config, 'tubularSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
     folder.addBinding(config, 'radialSegments', {min: 3, max: 32, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'p', {min: 1, max: 10, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'q', {min: 1, max: 10, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'windingsAroundAxis', {label: 'windingsAroundAxis (p)', min: 1, max: 10, step: 0.1}).on('change', updateGeometry);
+    folder.addBinding(config, 'windingsAroundCircle', {label: 'windingsAroundCircle (q)', min: 1, max: 10, step: 0.1}).on('change', updateGeometry);
 };
