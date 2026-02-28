@@ -44,36 +44,43 @@ const createPrimitive = (redGPUContext, scene) => {
             redGPUContext,
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
         ),
+        radialTest: new RedGPU.Material.BitmapMaterial(
+            redGPUContext,
+            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')
+        ),
         wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    const cylinderGeometry = new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 1, 8, 8, true, true, 0, Math.PI * 2);
-
-    const gap = 4.0;
+    const gap = 3.5;
     const items = [
-        {material: materials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
-        {material: materials.solid, position: [0, 0, 0]},
-        {material: materials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
+        {material: materials.wireframe, position: [-gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, label: 'line-list (Planar)', isRadialTop: false, isRadialBottom: false},
+        {material: materials.solid, position: [-gap * 0.5, 0, 0], label: 'triangle-list (Planar)', isRadialTop: false, isRadialBottom: false},
+        {material: materials.radialTest, position: [gap * 0.5, 0, 0], label: 'triangle-list (Radial)', isRadialTop: true, isRadialBottom: true},
+        {material: materials.point, position: [gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'point-list (Planar)', isRadialTop: false, isRadialBottom: false},
     ];
 
-    items.forEach(({material, position, topology}) => {
+    items.forEach(({material, position, topology, label: labelText, isRadialTop, isRadialBottom}) => {
+        const cylinderGeometry = new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 1, 32, 8, true, true, 0, Math.PI * 2, isRadialTop, isRadialBottom);
         const mesh = new RedGPU.Display.Mesh(redGPUContext, cylinderGeometry, material);
+        if (!mesh.userData) mesh.userData = {};
+        mesh.userData.isRadialTop = isRadialTop;
+        mesh.userData.isRadialBottom = isRadialBottom;
         if (topology) mesh.primitiveState.topology = topology;
         mesh.setPosition(...position);
         scene.addChild(mesh);
 
         const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.setPosition(position[0], 1.5, position[2]);
-        label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        label.setPosition(position[0], 1.8, position[2]);
+        label.text = labelText;
         label.color = '#ffffff';
         label.fontSize = 14;
-        label.worldSize = 0.7;
+        label.worldSize = 0.6;
         scene.addChild(label);
     });
 
     const titleText = new RedGPU.Display.TextField3D(redGPUContext);
-    titleText.setPosition(0, -1.8, 0);
+    titleText.setPosition(0, -2.3, 0);
     titleText.text = 'Customizable Cylinder Primitive';
     titleText.color = '#ffffff';
     titleText.fontSize = 48;
@@ -92,28 +99,30 @@ const renderTestPane = async (redGPUContext) => {
         radiusTop: 1,
         radiusBottom: 1.0,
         height: 1.0,
-        radialSegments: 8,
+        radialSegments: 32,
         heightSegments: 8,
         capTop: true,
         capBottom: true,
         thetaStart: 0,
         thetaLength: Math.PI * 2,
+        isRadialTop: false,
+        isRadialBottom: false,
         cullMode: RedGPU.GPU_CULL_MODE.BACK
     };
 
     const updateGeometry = () => {
         const meshList = redGPUContext.viewList[0].scene.children;
-        const newGeometry = new RedGPU.Primitive.Cylinder(
-            redGPUContext,
-            config.radiusTop, config.radiusBottom, config.height,
-            config.radialSegments, config.heightSegments,
-            config.capTop, config.capBottom,
-            config.thetaStart, config.thetaLength
-        );
-
         meshList.forEach(mesh => {
             if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.geometry = newGeometry;
+                mesh.geometry = new RedGPU.Primitive.Cylinder(
+                    redGPUContext,
+                    config.radiusTop, config.radiusBottom, config.height,
+                    config.radialSegments, config.heightSegments,
+                    config.capTop, config.capBottom,
+                    config.thetaStart, config.thetaLength,
+                    mesh.userData.isRadialTop !== undefined ? mesh.userData.isRadialTop : config.isRadialTop,
+                    mesh.userData.isRadialBottom !== undefined ? mesh.userData.isRadialBottom : config.isRadialBottom
+                );
             }
         });
     };
@@ -135,9 +144,6 @@ const renderTestPane = async (redGPUContext) => {
     geometryFolder.addBinding(config, 'heightSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
     geometryFolder.addBinding(config, 'capTop').on('change', updateGeometry);
     geometryFolder.addBinding(config, 'capBottom').on('change', updateGeometry);
-    geometryFolder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
-    geometryFolder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
-
     const materialFolder = pane.addFolder({title: 'Material State', expanded: true});
     materialFolder.addBinding(config, 'cullMode', {
         options: {
