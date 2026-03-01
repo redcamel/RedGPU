@@ -12,10 +12,11 @@ import GeometryGPURenderInfo from "./GeometryGPURenderInfo";
 /**
  * [KO] 모든 기본 도형(Primitive)의 기반이 되는 베이스 클래스입니다.
  * [EN] Base class for all primitive geometries.
- *
- * @category Core
  */
 class Primitive {
+    /**
+     * [KO] 기본 정점 레이아웃 구조를 정적 상수로 캐싱합니다. (메모리 할당 최적화)
+     */
     static readonly #INTERLEAVE_STRUCT = new VertexInterleavedStruct(
         {
             vertexPosition: VertexInterleaveType.float32x3,
@@ -26,9 +27,6 @@ class Primitive {
         `primitiveInterleaveStruct`
     );
 
-    /**
-     * [KO] 프리미티브 이름과 파라미터를 기반으로 고유 캐싱 키를 생성합니다.
-     */
     static generateUniqueKey(name: string, params: Record<string, any>): string {
         const paramString = Object.entries(params)
             .filter(([, value]) => value !== undefined)
@@ -53,7 +51,7 @@ class Primitive {
     }
 
     /**
-     * [KO] 기본 정점 레이아웃 구조를 반환합니다. (정적 캐싱됨)
+     * [KO] 캐싱된 정점 인터리브 구조를 반환합니다.
      */
     static get primitiveInterleaveStruct(): VertexInterleavedStruct {
         return this.#INTERLEAVE_STRUCT;
