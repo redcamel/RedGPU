@@ -82,62 +82,52 @@ const makeData = function (
     const capArcLength = (Math.PI / 2) * radius;
     const totalArcLength = capArcLength * 2 + height;
 
-    for (let iy = 0; iy <= totalVerticalSegments; iy++) {
-        let y = 0;
-        let currentRadius = 0;
-        let currentDistance = 0;
+    // 1. Top Cap (반구)
+    PrimitiveUtils.generateSphericalData(
+        interleaveData,
+        radius, radialSegments, capSegments,
+        0, Math.PI * 2,
+        0, Math.PI / 2,
+        halfCylinderHeight,
+        0, capArcLength / totalArcLength
+    );
 
-        if (iy < capSegments) {
-            // Top Cap
-            const theta = (iy / capSegments) * (Math.PI / 2);
-            y = halfCylinderHeight + radius * Math.cos(theta);
-            currentRadius = radius * Math.sin(theta);
-            currentDistance = (iy / capSegments) * capArcLength;
-        } else if (iy <= capSegments + heightSegments) {
-            // Cylinder Body
-            const t = (iy - capSegments) / heightSegments;
-            y = halfCylinderHeight - t * height;
-            currentRadius = radius;
-            currentDistance = capArcLength + t * height;
-        } else {
-            // Bottom Cap
-            const t = (iy - (capSegments + heightSegments)) / capSegments;
-            const theta = (Math.PI / 2) + t * (Math.PI / 2);
-            y = -halfCylinderHeight + radius * Math.cos(theta);
-            currentRadius = radius * Math.sin(theta);
-            currentDistance = capArcLength + height + t * capArcLength;
-        }
-
-        const v = currentDistance / totalArcLength;
+    // 2. Cylinder Body (몸통)
+    const bodyVStart = capArcLength / totalArcLength;
+    const bodyVEnd = (capArcLength + height) / totalArcLength;
+    
+    for (let iy = 1; iy <= heightSegments; iy++) {
+        const vRatio = iy / heightSegments;
+        const y = halfCylinderHeight - vRatio * height;
+        const v = bodyVStart + vRatio * (bodyVEnd - bodyVStart);
 
         for (let ix = 0; ix <= radialSegments; ix++) {
             const u = ix / radialSegments;
-            // [업계 표준] 12시(-Z) 시작, CCW 회전 (-X 방향)
             const phi = u * Math.PI * 2;
             const sinPhi = Math.sin(phi);
             const cosPhi = Math.cos(phi);
 
-            // x = -sin, z = -cos (12시 시작 CCW 궤적)
-            const x = currentRadius * (-sinPhi);
-            const z = currentRadius * (-cosPhi);
+            const x = radius * (-sinPhi);
+            const z = radius * (-cosPhi);
 
-            // Normal calculation
-            const normal = vec3.fromValues(
-                x, 
-                (iy < capSegments || iy > capSegments + heightSegments) ? (y - (iy < capSegments ? halfCylinderHeight : -halfCylinderHeight)) : 0, 
-                z
-            );
-            vec3.normalize(normal, normal);
-
-            // UV & Packing
             PrimitiveUtils.interleavePacker(
                 interleaveData,
                 x, y, z,
-                normal[0], normal[1], normal[2],
-                u, v // [교정] V-Down 표준에 맞춰 v 그대로 사용
+                -sinPhi, 0, -cosPhi, // Normal (수평 방향)
+                u, v
             );
         }
     }
+
+    // 3. Bottom Cap (반구)
+    PrimitiveUtils.generateSphericalData(
+        interleaveData,
+        radius, radialSegments, capSegments,
+        0, Math.PI * 2,
+        Math.PI / 2, Math.PI / 2,
+        -halfCylinderHeight,
+        bodyVEnd, 1
+    );
 
     // Indices (PrimitiveUtils.generateGridIndices 사용)
     PrimitiveUtils.generateGridIndices(indexData, 0, radialSegments, totalVerticalSegments, gridX1);

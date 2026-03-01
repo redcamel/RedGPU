@@ -72,9 +72,6 @@ class Sphere extends Primitive {
 }
 
 const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-    const vertex = new Float32Array(3);
-    const normal = new Float32Array(3);
-
     const interleaveData = [];
     const indexData = [];
     const gridX1 = widthSegments + 1;
@@ -85,40 +82,12 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
         return PrimitiveUtils.finalize(redGPUContext, interleaveData, [], uniqueKey);
     }
 
-    // 정점, 노멀, UV 생성
-    for (let iy = 0; iy <= heightSegments; iy++) {
-        const v = iy / heightSegments;
-        const theta = thetaStart + v * thetaLength;
-        const sinTheta = Math.sin(theta);
-        const cosTheta = Math.cos(theta);
-
-        for (let ix = 0; ix <= widthSegments; ix++) {
-            const u = ix / widthSegments;
-            // [업계 표준] 12시(-Z) 시작, CCW 회전 (-X 방향)
-            const phi = phiStart + u * phiLength;
-            const sinPhi = Math.sin(phi);
-            const cosPhi = Math.cos(phi);
-
-            // x = -sin, z = -cos (12시 시작 CCW 궤적)
-            vertex[0] = radius * (-sinPhi) * sinTheta;
-            vertex[1] = radius * cosTheta;
-            vertex[2] = radius * (-cosPhi) * sinTheta;
-
-            // 노멀 계산
-            normal[0] = vertex[0];
-            normal[1] = vertex[1];
-            normal[2] = vertex[2];
-            vec3.normalize(normal, normal);
-
-            // UV & Packing (v는 V-Down 표준 유지)
-            PrimitiveUtils.interleavePacker(
-                interleaveData,
-                vertex[0], vertex[1], vertex[2],
-                normal[0], normal[1], normal[2],
-                u, v
-            );
-        }
-    }
+    // 구체 데이터 생성 (PrimitiveUtils 사용)
+    PrimitiveUtils.generateSphericalData(
+        interleaveData,
+        radius, widthSegments, heightSegments,
+        phiStart, phiLength, thetaStart, thetaLength
+    );
 
     // 인덱스 생성 (PrimitiveUtils.generateGridIndices 사용)
     // [교정] 반시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)

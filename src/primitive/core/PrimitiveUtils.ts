@@ -233,6 +233,61 @@ class PrimitiveUtils {
     }
 
     /**
+     * [KO] 구체(Spherical) 형태의 기하 데이터를 생성합니다.
+     * [EN] Generates spherical geometry data.
+     * 
+     * @param yOffset - [KO] Y축 오프셋 (Capsule 등에서 사용) [EN] Y-axis offset (used in Capsule, etc.)
+     * @param uvVStart - [KO] UV V축 시작점 (기본값 0) [EN] UV V-axis start point (default 0)
+     * @param uvVEnd - [KO] UV V축 끝점 (기본값 1) [EN] UV V-axis end point (default 1)
+     */
+    static generateSphericalData(
+        interleaveData: number[],
+        radius: number,
+        widthSegments: number,
+        heightSegments: number,
+        phiStart: number,
+        phiLength: number,
+        thetaStart: number,
+        thetaLength: number,
+        yOffset: number = 0,
+        uvVStart: number = 0,
+        uvVEnd: number = 1
+    ) {
+        for (let iy = 0; iy <= heightSegments; iy++) {
+            const vRatio = iy / heightSegments;
+            const theta = thetaStart + vRatio * thetaLength;
+            const sinTheta = Math.sin(theta);
+            const cosTheta = Math.cos(theta);
+
+            // [교정] 지정된 UV 범위 내에서 v값 보간
+            const v = uvVStart + vRatio * (uvVEnd - uvVStart);
+
+            for (let ix = 0; ix <= widthSegments; ix++) {
+                const u = ix / widthSegments;
+                // [업계 표준] 12시(-Z) 시작, CCW 회전 (-X 방향)
+                const phi = phiStart + u * phiLength;
+                const sinPhi = Math.sin(phi);
+                const cosPhi = Math.cos(phi);
+
+                const x = radius * (-sinPhi) * sinTheta;
+                const y = radius * cosTheta + yOffset;
+                const z = radius * (-cosPhi) * sinTheta;
+
+                const nx = (-sinPhi) * sinTheta;
+                const ny = cosTheta;
+                const nz = (-cosPhi) * sinTheta;
+
+                this.interleavePacker(
+                    interleaveData,
+                    x, y, z,
+                    nx, ny, nz,
+                    u, v
+                );
+            }
+        }
+    }
+
+    /**
      * [KO] 벡터 기반으로 실린더의 몸통(Torso) 데이터를 생성합니다.
      * [EN] Generates cylinder torso data based on vectors.
      */
