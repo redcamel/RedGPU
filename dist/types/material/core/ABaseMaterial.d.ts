@@ -21,11 +21,6 @@ interface ABaseMaterial {
      * [EN] Whether to use tint color
      */
     useTint: boolean;
-    /**
-     * [KO] 대기 효과(SkyAtmosphere) 사용 여부
-     * [EN] Whether to use atmospheric effects (SkyAtmosphere)
-     */
-    useAtmosphere: boolean;
 }
 /**
  * [KO] 다양한 머티리얼의 공통 기반이 되는 추상 클래스입니다.

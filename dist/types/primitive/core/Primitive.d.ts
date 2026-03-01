@@ -27,10 +27,10 @@ declare class Primitive {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      */
-    constructor(redGPUContext: RedGPUContext);
+    constructor(redGPUContext: RedGPUContext, uniqueKey: string, makeData: () => Geometry);
     /**
-     * [KO] 기본 정점 레이아웃 구조(Position, Normal, UV)를 반환합니다.
-     * [EN] Returns the default vertex layout structure (Position, Normal, UV).
+     * [KO] 기본 정점 레이아웃 구조(Position, Normal, UV, Tangent)를 반환합니다.
+     * [EN] Returns the default vertex layout structure (Position, Normal, UV, Tangent).
      *
      * @returns
      * [KO] 정점 인터리브 구조 객체
@@ -75,15 +75,5 @@ declare class Primitive {
      * [EN] AABB instance
      */
     get volume(): AABB;
-    /**
-     * [KO] 지오메트리 데이터를 통해 내부 버퍼와 렌더 정보를 설정합니다.
-     * [EN] Sets internal buffers and render information using geometry data.
-     *
-     * @param geometry -
-     * [KO] 설정할 Geometry 인스턴스
-     * [EN] Geometry instance to set
-     * @internal
-     */
-    _setData(geometry: Geometry): void;
 }
 export default Primitive;

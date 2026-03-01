@@ -16,7 +16,6 @@ import Primitive from "./core/Primitive";
  * @category Primitive
  */
 declare class Sphere extends Primitive {
-    #private;
     /**
      * [KO] Sphere 인스턴스를 생성합니다.
      * [EN] Creates an instance of Sphere.
@@ -50,10 +49,7 @@ declare class Sphere extends Primitive {
      * @param thetaLength -
      * [KO] 수직 각도 길이 (라디안, 기본값 PI)
      * [EN] Vertical angle length (radians, default PI)
-     * @param uvSize -
-     * [KO] UV 스케일 (기본값 1)
-     * [EN] UV scale (default 1)
      */
-    constructor(redGPUContext: RedGPUContext, radius?: number, widthSegments?: number, heightSegments?: number, phiStart?: number, phiLength?: number, thetaStart?: number, thetaLength?: number, uvSize?: number);
+    constructor(redGPUContext: RedGPUContext, radius?: number, widthSegments?: number, heightSegments?: number, phiStart?: number, phiLength?: number, thetaStart?: number, thetaLength?: number);
 }
 export default Sphere;

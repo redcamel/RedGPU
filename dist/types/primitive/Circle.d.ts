@@ -16,14 +16,13 @@ import Primitive from "./core/Primitive";
  * @category Primitive
  */
 declare class Circle extends Primitive {
-    #private;
     /**
      * [KO] Circle 인스턴스를 생성합니다.
      * [EN] Creates an instance of Circle.
      *
      * ### Example
      * ```typescript
-     * const circle = new RedGPU.Circle(redGPUContext, 1, 32, 0, Math.PI * 2);
+     * const circle = new RedGPU.Circle(redGPUContext, 1, 32, 0, Math.PI * 2, false);
      * ```
      *
      * @param redGPUContext -
@@ -32,7 +31,7 @@ declare class Circle extends Primitive {
      * @param radius -
      * [KO] 원 반지름 (기본값 1)
      * [EN] Circle radius (default 1)
-     * @param segments -
+     * @param radialSegments -
      * [KO] 세그먼트 수 (기본값 32, 최소 3)
      * [EN] Number of segments (default 32, min 3)
      * @param thetaStart -
@@ -41,7 +40,10 @@ declare class Circle extends Primitive {
      * @param thetaLength -
      * [KO] 원호 각도 (라디안, 기본값 2*PI)
      * [EN] Arc angle (radians, default 2*PI)
+     * @param isRadial -
+     * [KO] 방사형 UV 매핑 여부 (기본값 false)
+     * [EN] Whether to use radial UV mapping (default false)
      */
-    constructor(redGPUContext: RedGPUContext, radius?: number, segments?: number, thetaStart?: number, thetaLength?: number);
+    constructor(redGPUContext: RedGPUContext, radius?: number, radialSegments?: number, thetaStart?: number, thetaLength?: number, isRadial?: boolean);
 }
 export default Circle;

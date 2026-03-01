@@ -16,7 +16,6 @@ import Primitive from "./core/Primitive";
  * @category Primitive
  */
 declare class Capsule extends Primitive {
-    #private;
     /**
      * [KO] Capsule 인스턴스를 생성합니다.
      * [EN] Creates an instance of Capsule.
@@ -32,7 +31,7 @@ declare class Capsule extends Primitive {
      * @param radius -
      * [KO] 반지름 (기본값 0.5)
      * [EN] Radius (default 0.5)
-     * @param cylinderHeight -
+     * @param height -
      * [KO] 실린더 부분 높이 (기본값 1.0)
      * [EN] Cylinder part height (default 1.0)
      * @param radialSegments -
@@ -45,6 +44,6 @@ declare class Capsule extends Primitive {
      * [KO] 상/하단 반구의 세로 분할 수 (기본값 12)
      * [EN] Cap segments for hemispheres (default 12)
      */
-    constructor(redGPUContext: RedGPUContext, radius?: number, cylinderHeight?: number, radialSegments?: number, heightSegments?: number, capSegments?: number);
+    constructor(redGPUContext: RedGPUContext, radius?: number, height?: number, radialSegments?: number, heightSegments?: number, capSegments?: number);
 }
 export default Capsule;

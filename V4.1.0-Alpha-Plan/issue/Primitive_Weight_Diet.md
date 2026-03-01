@@ -40,10 +40,10 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 
 #### **원형 단면(Cap) 및 Circle UV 옵션**
 `Circle` 및 원형 단면을 가진 프리미티브(`Cylinder`, `Torus`)는 `isRadial` 계열 옵션을 통해 두 가지 매핑 방식을 지원합니다:
-1.  **Planar (isRadial: false, 기본값):**
+1.  **Planar Mode (isRadial: false, 기본값):**
     *   텍스처를 단면 위에 그대로 올려놓은 형태입니다. (중심: UV 0.5, 0.5)
     *   일반적인 물체 표현이나 뚜껑 로고 투영 등에 사용됩니다.
-2.  **Radial (isRadial: true):**
+2.  **Radial Mode (isRadial: true):**
     *   **성장형/팽창형(Expansion) 매핑:** U축은 각도($0 \rightarrow 1$), V축은 중심에서의 거리($0 \rightarrow 1$)에 매핑됩니다.
     *   텍스처의 **V 오프셋(V-Offset)** 애니메이션을 통해 원이 중심에서 밖으로 커지는 VFX 효과를 구현할 수 있습니다.
 
@@ -60,6 +60,18 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 
 ---
 
+## 🛠️ 테스트 및 시각화 표준 (Standardized Examples)
+모든 프리미티브 예제는 기술적/시각적 검증을 위해 **4-메쉬 레이아웃**을 표준으로 채택합니다.
+
+| 메쉬 유형 | 적용 텍스처 / 모드 | 검증 목적 |
+| :--- | :--- | :--- |
+| **Line List** | ColorMaterial (Green) | 토폴로지 구조 및 정점 연결 상태 확인 |
+| **Triangle List (Grid)** | `UV_Grid_Sm.jpg` | 기하학적 UV 정렬 상태 및 왜곡 여부 확인 |
+| **Triangle List (Diffuse)** | `crate.png` 또는 `h_test.jpg` | 실제 텍스처 적용 시의 시각적 완성도 확인 |
+| **Point List** | ColorMaterial (Cyan) | 정점 분포 밀도 및 배치 상태 확인 |
+
+---
+
 ## 🛠️ 리팩토링 및 안정성 완료 현황 (Execution Status)
 
 ### 1. 로직 및 코어 시스템 개선
@@ -67,15 +79,16 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | :--- | :--- | :---: |
 | **PrimitiveUtils** | 평면/원형/몸통 생성, 그리드 인덱스, 탄젠트 계산 유틸리티화 | 🟢 |
 | **Architecture** | 베이스 클래스 uniqueKey 기반 자동 캐싱 및 makeData 외부화 | 🟢 |
-| **Data Layout** | 전 프리미티브 12-플로트(Tangent 포함) 스트라이드 적용 | 🟢 |
-| **Robustness** | 0값 시 "1정점 + 빈 인덱스" 전략 및 EPSILON 체크 반영 | 🟢 |
-| **Tooling** | 전 예제 패널 고도화 (전 속성 제어 및 cullMode 토글 추가) | 🟢 |
+| **Cone (New)** | 신규 원뿔 프리미티브 추가 및 실린더 로직 재사용 | 🟢 |
+| **UV Options** | `isRadial` (Planar Mode / Radial Mode) 옵션 통합 구현 | 🟢 |
+| **Tooling** | 전 예제 4-메쉬 레이아웃 및 고해상도 라벨링 표준화 | 🟢 |
 
 ### 2. 생성자 인자명 표준 마이그레이션 결과
 | 클래스 | 이전 인자명 | 표준화된 인자명 | 상태 |
 | :--- | :--- | :--- | :---: |
 | **Box** | wSegments, hSegments, dSegments | widthSegments, heightSegments, depthSegments | 🟢 |
 | **Circle** | segments | radialSegments, isRadial | 🟢 |
+| **Cone** | - | radius, height, radialSegments, heightSegments, capBottom | 🟢 |
 | **Plane / Ground** | wSegments, hSegments | widthSegments, heightSegments | 🟢 |
 | **Cylinder** | openEnded | capTop, capBottom, isRadialTop, isRadialBottom | 🟢 |
 | **Torus** | radialSubv, bodySubv | radialSegments, tubularSegments | 🟢 |
@@ -85,12 +98,23 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 
 ---
 
+## 🛠️ 코드 중복 제거 및 구조 최적화 (Code Refinement)
+
+| 분류 | 최적화 대상 및 전략 | 기대 효과 |
+| :--- | :--- | :--- |
+| **수학 로직 통합** | `Sphere`와 `Capsule`의 구체(Spherical) 생성 루프를 `PrimitiveUtils.generateSphericalData`로 통합 | 공식 일관성 확보 및 코드 중복 40% 절감 |
+| **후처리 캡슐화** | 탄젠트 연산 및 지오메트리 생성을 `PrimitiveUtils.finalizeGeometry` 정적 메소드로 일원화 | 각 프리미티브 파일의 반복 코드(boilerplate) 제거 |
+| **안전장치 표준화** | 0값(Radius, Length 등)에 대한 빈 데이터 반환 로직을 `PrimitiveUtils.validateDimensions`로 공통화 | 런타임 에러 방지 로직의 신뢰도 및 가독성 향상 |
+| **키 생성 헬퍼** | `uniqueKey` 생성 로직을 `Primitive.generateUniqueKey` 베이스 메소드로 정형화 | 키 생성 규칙 누락 방지 및 템플릿 코드 간소화 |
+
+---
+
 ## 🚀 향후 로드맵 (Roadmap)
 | 구분 | 대상 항목 | 필요성 및 기대 효과 | 우선순위 |
 | :--- | :--- | :--- | :---: |
+| **구조 개선** | **위 최적화 과제(4건) 실행** | 코드 슬림화 및 아키텍처 완성도 극대화 | 🔥 높음 |
 | **고도화** | 극점 토폴로지 최적화 | 중복 정점 제거를 통한 렌더링 효율 향상 | 🟢 보통 |
 | **고도화** | 6면 개별 UV 제어 | Box 각 면별 독립적 텍스처링 유연성 확보 | 🟢 보통 |
-| **신규** | **Cone (원뿔)** | 피라미드, 조명 범위 시각화 등에 필수적 | 🔥 높음 |
 | **신규** | **Ring (고리)** | UI, 포탈 효과, 궤도 시각화 등에 활용 | 🔥 높음 |
 | **신규** | **Polyhedrons** | 저폴리곤 구체 대체 및 추상 아트 구성 | 🟢 보통 |
 

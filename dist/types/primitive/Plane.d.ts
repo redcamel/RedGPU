@@ -16,14 +16,13 @@ import Primitive from "./core/Primitive";
  * @category Primitive
  */
 declare class Plane extends Primitive {
-    #private;
     /**
      * [KO] Plane 인스턴스를 생성합니다.
      * [EN] Creates an instance of Plane.
      *
      * ### Example
      * ```typescript
-     * const plane = new RedGPU.Plane(redGPUContext, 1, 1, 1, 1, 1, false);
+     * const plane = new RedGPU.Plane(redGPUContext, 1, 1, 1, 1, false);
      * ```
      *
      * @param redGPUContext -
@@ -35,19 +34,16 @@ declare class Plane extends Primitive {
      * @param height -
      * [KO] 세로 길이 (기본값 1)
      * [EN] Height (default 1)
-     * @param wSegments -
+     * @param widthSegments -
      * [KO] 가로(X축) 세그먼트 수 (기본값 1)
      * [EN] Width (X-axis) segments (default 1)
-     * @param hSegments -
+     * @param heightSegments -
      * [KO] 세로(Y축) 세그먼트 수 (기본값 1)
      * [EN] Height (Y-axis) segments (default 1)
-     * @param uvSize -
-     * [KO] UV 스케일 (기본값 1)
-     * [EN] UV scale (default 1)
      * @param flipY -
      * [KO] Y축 UV 뒤집기 여부 (기본값 false)
      * [EN] Whether to flip UV on the Y-axis (default false)
      */
-    constructor(redGPUContext: RedGPUContext, width?: number, height?: number, wSegments?: number, hSegments?: number, uvSize?: number, flipY?: boolean);
+    constructor(redGPUContext: RedGPUContext, width?: number, height?: number, widthSegments?: number, heightSegments?: number, flipY?: boolean);
 }
 export default Plane;

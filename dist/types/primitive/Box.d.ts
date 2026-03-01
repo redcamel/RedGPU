@@ -15,14 +15,13 @@ import Primitive from "./core/Primitive";
  * @category Primitive
  */
 declare class Box extends Primitive {
-    #private;
     /**
      * [KO] Box 인스턴스를 생성합니다.
      * [EN] Creates an instance of Box.
      *
      * ### Example
      * ```typescript
-     * const box = new RedGPU.Box(redGPUContext, 1, 1, 1, 1, 1, 1, 1);
+     * const box = new RedGPU.Box(redGPUContext, 1, 1, 1, 1, 1, 1);
      * ```
      *
      * @param redGPUContext -
@@ -37,19 +36,16 @@ declare class Box extends Primitive {
      * @param depth -
      * [KO] 박스 깊이 (기본값 1)
      * [EN] Box depth (default 1)
-     * @param wSegments -
+     * @param widthSegments -
      * [KO] 가로(X축) 세그먼트 수 (기본값 1)
      * [EN] Width (X-axis) segments (default 1)
-     * @param hSegments -
+     * @param heightSegments -
      * [KO] 세로(Y축) 세그먼트 수 (기본값 1)
      * [EN] Height (Y-axis) segments (default 1)
-     * @param dSegments -
+     * @param depthSegments -
      * [KO] 깊이(Z축) 세그먼트 수 (기본값 1)
      * [EN] Depth (Z-axis) segments (default 1)
-     * @param uvSize -
-     * [KO] UV 스케일 (기본값 1)
-     * [EN] UV scale (default 1)
      */
-    constructor(redGPUContext: RedGPUContext, width?: number, height?: number, depth?: number, wSegments?: number, hSegments?: number, dSegments?: number, uvSize?: number);
+    constructor(redGPUContext: RedGPUContext, width?: number, height?: number, depth?: number, widthSegments?: number, heightSegments?: number, depthSegments?: number);
 }
 export default Box;
