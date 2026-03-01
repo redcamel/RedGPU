@@ -23,6 +23,16 @@ class PrimitiveUtils {
         this.calculateTangents(interleaveData, indexData);
         return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
     }
+
+    /**
+     * [KO] 비정상적인 파라미터 요청 시 에러 방지를 위한 최소한의 빈 지오메트리를 생성하여 반환합니다. (1정점, 0인덱스)
+     * [EN] Creates and returns a minimal empty geometry (1 vertex, 0 indices) to prevent GPU errors for invalid parameters.
+     */
+    static getEmptyGeometry(redGPUContext: RedGPUContext, uniqueKey: string): Geometry {
+        const interleaveData = [];
+        this.interleavePacker(interleaveData, 0, 0, 0, 0, 1, 0, 0, 0);
+        return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
+    }
     /**
      * [KO] 특정 축 매핑을 기반으로 평면 기하 데이터를 생성합니다.
      * [EN] Generates plane geometry data based on specific axis mapping.

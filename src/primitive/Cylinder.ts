@@ -48,6 +48,11 @@ function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, rad
     const indexData = [];
     const halfHeight = height / 2;
 
+    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지
+    if ((radiusTop <= 0 && radiusBottom <= 0) || height <= 0 || Math.abs(thetaLength) < 1e-6) {
+        return PrimitiveUtils.getEmptyGeometry(redGPUContext, uniqueKey);
+    }
+
     // [업계 표준] 12시(-Z) 기점, 반시계 방향(CCW) 회전 유도 벡터
     const uVector = {x: 1, y: 0, z: 0};  // 로컬 수평축 (+X)
     const vVector = {x: 0, y: 0, z: -1}; // 로컬 수직축 (12시 방향, -Z)

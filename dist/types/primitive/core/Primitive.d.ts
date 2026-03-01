@@ -20,6 +20,11 @@ import AABB from "../../bound/AABB";
 declare class Primitive {
     #private;
     /**
+     * [KO] 프리미티브 이름과 파라미터를 기반으로 고유 캐싱 키를 생성합니다.
+     * [EN] Generates a unique caching key based on the primitive name and parameters.
+     */
+    static generateUniqueKey(name: string, params: Record<string, any>): string;
+    /**
      * [KO] Primitive 인스턴스를 생성합니다.
      * [EN] Creates an instance of Primitive.
      *

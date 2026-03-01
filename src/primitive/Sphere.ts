@@ -78,8 +78,7 @@ const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heig
 
     // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
     if (radius <= 0 || Math.abs(phiLength) < 1e-6 || Math.abs(thetaLength) < 1e-6) {
-        PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
-        return PrimitiveUtils.finalize(redGPUContext, interleaveData, [], uniqueKey);
+        return PrimitiveUtils.getEmptyGeometry(redGPUContext, uniqueKey);
     }
 
     // 구체 데이터 생성 (PrimitiveUtils 사용)

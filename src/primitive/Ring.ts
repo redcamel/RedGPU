@@ -48,6 +48,11 @@ function makeData(uniqueKey, redGPUContext, innerRadius, outerRadius, thetaSegme
     const interleaveData = [];
     const indexData = [];
 
+    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지
+    if (outerRadius <= 0 || Math.abs(thetaLength) < 1e-6) {
+        return PrimitiveUtils.getEmptyGeometry(redGPUContext, uniqueKey);
+    }
+
     // Ring 생성 (벡터 기반: XY 평면, Normal +Z)
     // [업계 표준] 12시(+Y) 기점, 반시계 방향(CCW) 회전
     PrimitiveUtils.generateRingData(
