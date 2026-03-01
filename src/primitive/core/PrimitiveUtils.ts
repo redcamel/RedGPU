@@ -147,6 +147,76 @@ class PrimitiveUtils {
     }
 
     /**
+     * [KO] 벡터 기반으로 임의의 평면에 링(Ring) 기하 데이터를 생성합니다.
+     * [EN] Generates ring geometry data on an arbitrary plane based on vectors.
+     * 
+     * @param isRadial - [KO] 방사형 UV 매핑 여부 [EN] Whether to use radial UV mapping
+     */
+    static generateRingData(
+        interleaveData: number[],
+        indexData: number[],
+        innerRadius: number,
+        outerRadius: number,
+        thetaSegments: number,
+        phiSegments: number,
+        thetaStart: number,
+        thetaLength: number,
+        center: { x: number, y: number, z: number },
+        uVector: { x: number, y: number, z: number },
+        vVector: { x: number, y: number, z: number },
+        normal: { x: number, y: number, z: number },
+        isFront: boolean = true,
+        isRadial: boolean = false
+    ) {
+        const vertexOffset = interleaveData.length / 12;
+
+        if (outerRadius <= 1e-6 || Math.abs(thetaLength) < 1e-6) {
+            this.interleavePacker(interleaveData, center.x, center.y, center.z, normal.x, normal.y, normal.z, 0.5, 0.5);
+            return;
+        }
+
+        // 1. Vertices 생성
+        for (let j = 0; j <= phiSegments; j++) {
+            const vRatio = j / phiSegments;
+            const radius = innerRadius + vRatio * (outerRadius - innerRadius);
+
+            for (let i = 0; i <= thetaSegments; i++) {
+                const uRatio = i / thetaSegments;
+                const angle = thetaStart + uRatio * thetaLength;
+                const cosVal = Math.cos(angle);
+                const sinVal = Math.sin(angle);
+
+                // [업계 표준] +V(12시) 시작, CCW 회전 (-U 방향)
+                const posX = center.x + radius * (cosVal * vVector.x - sinVal * uVector.x);
+                const posY = center.y + radius * (cosVal * vVector.y - sinVal * uVector.y);
+                const posZ = center.z + radius * (cosVal * vVector.z - sinVal * uVector.z);
+
+                // UV 매핑
+                let uvX, uvY;
+                if (!isRadial) {
+                    // Planar Mode
+                    uvX = 0.5 - (radius / outerRadius * sinVal * 0.5);
+                    uvY = 0.5 - (radius / outerRadius * cosVal * 0.5);
+                } else {
+                    // Radial Mode: U = 각도(0~1), V = 반지름(0~1)
+                    uvX = uRatio;
+                    uvY = vRatio;
+                }
+
+                this.interleavePacker(
+                    interleaveData,
+                    posX, posY, posZ,
+                    normal.x, normal.y, normal.z,
+                    uvX, uvY
+                );
+            }
+        }
+
+        // 2. Indices 생성 (Grid 기반)
+        this.generateGridIndices(indexData, vertexOffset, thetaSegments, phiSegments, thetaSegments + 1, !isFront);
+    }
+
+    /**
      * [KO] 벡터 기반으로 실린더의 몸통(Torso) 데이터를 생성합니다.
      * [EN] Generates cylinder torso data based on vectors.
      */
