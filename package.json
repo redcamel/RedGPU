@@ -35,7 +35,7 @@
     "gl-matrix": "^3.4.3",
     "mermaid": "^11.12.2",
     "postcss": "^8.5.6",
-    "rollup": "^4.44.1",
+    "rollup": "^4.59.0",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-string": "^3.0.0",
     "tslib": "^2.8.1",
