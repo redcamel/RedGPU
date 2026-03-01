@@ -28,11 +28,14 @@ class Primitive {
     );
 
     static generateUniqueKey(name: string, params: Record<string, any>): string {
-        const paramString = Object.entries(params)
-            .filter(([, value]) => value !== undefined)
-            .map(([key, value]) => `${key.toUpperCase()}${value}`)
-            .join('_');
-        return `PRIMITIVE_${name.toUpperCase()}_${paramString}`;
+        let uniqueKey = 'PRIMITIVE_' + name.toUpperCase();
+        for (const key in params) {
+            const value = params[key];
+            if (value !== undefined) {
+                uniqueKey += '_' + key.toUpperCase() + value;
+            }
+        }
+        return uniqueKey;
     }
 
     #gpuRenderInfo: GeometryGPURenderInfo;
