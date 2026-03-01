@@ -25,6 +25,32 @@ class PrimitiveUtils {
     }
 
     /**
+     * [KO] 그리드 형태의 정점 및 인덱스 생성을 통합 처리하는 핵심 유틸리티입니다.
+     * [EN] Core utility that integrates the generation of grid-type vertices and indices.
+     */
+    static generateGrid(
+        interleaveData: number[],
+        indexData: number[],
+        resolutionX: number,
+        resolutionY: number,
+        vertexCallback: (u: number, v: number, ix: number, iy: number) => void,
+        skipIndices: boolean = false,
+        reverseIndices: boolean = false
+    ) {
+        const vertexOffset = interleaveData.length / 12;
+        for (let iy = 0; iy <= resolutionY; iy++) {
+            const v = iy / resolutionY;
+            for (let ix = 0; ix <= resolutionX; ix++) {
+                const u = ix / resolutionX;
+                vertexCallback(u, v, ix, iy);
+            }
+        }
+        if (!skipIndices) {
+            this.generateGridIndices(indexData, vertexOffset, resolutionX, resolutionY, resolutionX + 1, reverseIndices);
+        }
+    }
+
+    /**
      * [KO] 비정상적인 파라미터 요청 시 에러 방지를 위한 최소한의 빈 지오메트리를 생성하여 반환합니다. (1정점, 0인덱스)
      * [EN] Creates and returns a minimal empty geometry (1 vertex, 0 indices) to prevent GPU errors for invalid parameters.
      */
@@ -74,31 +100,24 @@ class PrimitiveUtils {
         const indexData = [];
         const isPartial = Math.abs(thetaLength) < Math.PI * 2;
 
-        const vertexOffset = interleaveData.length / 12;
-        for (let slice = 0; slice <= tubularSegments; ++slice) {
-            const v = slice / tubularSegments;
+        this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
             const sliceAngle = v * Math.PI * 2;
             const sliceSin = Math.sin(sliceAngle);
             const ringRadius = radius + sliceSin * thickness;
             const ny = Math.cos(sliceAngle);
             const y = ny * thickness;
 
-            for (let ring = 0; ring <= radialSegments; ++ring) {
-                const u = ring / radialSegments;
-                const ringAngle = thetaStart + u * thetaLength;
-                const cosVal = Math.cos(ringAngle);
-                const sinVal = Math.sin(ringAngle);
+            const ringAngle = thetaStart + u * thetaLength;
+            const cosVal = Math.cos(ringAngle);
+            const sinVal = Math.sin(ringAngle);
 
-                const x = (-sinVal) * ringRadius;
-                const z = (-cosVal) * ringRadius;
-                const nx = (-sinVal) * sliceSin;
-                const nz = (-cosVal) * sliceSin;
+            const x = (-sinVal) * ringRadius;
+            const z = (-cosVal) * ringRadius;
+            const nx = (-sinVal) * sliceSin;
+            const nz = (-cosVal) * sliceSin;
 
-                this.interleavePacker(interleaveData, x, y, z, nx, ny, nz, u, v);
-            }
-        }
-
-        this.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1, false);
+            this.interleavePacker(interleaveData, x, y, z, nx, ny, nz, u, v);
+        });
 
         if (isPartial) {
             if (capStart) {
@@ -131,10 +150,10 @@ class PrimitiveUtils {
         const indexData = [];
         const P1 = [0, 0, 0], P2 = [0, 0, 0], B = [0, 0, 0], T = [0, 0, 0], N = [0, 0, 0];
 
-        for (let i = 0; i <= tubularSegments; ++i) {
-            const u = i / tubularSegments * windingsAroundAxis * Math.PI * 2;
-            this.#calculateTorusKnotPosition(u, windingsAroundAxis, windingsAroundCircle, radius, P1);
-            this.#calculateTorusKnotPosition(u + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
+        this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
+            const knotU = v * windingsAroundAxis * Math.PI * 2;
+            this.#calculateTorusKnotPosition(knotU, windingsAroundAxis, windingsAroundCircle, radius, P1);
+            this.#calculateTorusKnotPosition(knotU + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
 
             T[0] = P2[0] - P1[0]; T[1] = P2[1] - P1[1]; T[2] = P2[2] - P1[2];
             N[0] = P2[0] + P1[0]; N[1] = P2[1] + P1[1]; N[2] = P2[2] + P1[2];
@@ -147,17 +166,14 @@ class PrimitiveUtils {
             let nLen = Math.sqrt(N[0] * N[0] + N[1] * N[1] + N[2] * N[2]) || 1;
             N[0] /= nLen; N[1] /= nLen; N[2] /= nLen;
 
-            for (let j = 0; j <= radialSegments; ++j) {
-                const v = j / radialSegments * Math.PI * 2;
-                const cx = -tubeRadius * Math.cos(v), cy = tubeRadius * Math.sin(v);
-                const px = P1[0] + (cx * N[0] + cy * B[0]), py = P1[1] + (cx * N[1] + cy * B[1]), pz = P1[2] + (cx * N[2] + cy * B[2]);
-                const nx = px - P1[0], ny = py - P1[1], nz = pz - P1[2];
-                const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
-                this.interleavePacker(interleaveData, px, py, pz, nx / len, ny / len, nz / len, i / tubularSegments, j / radialSegments);
-            }
-        }
+            const radialV = u * Math.PI * 2;
+            const cx = -tubeRadius * Math.cos(radialV), cy = tubeRadius * Math.sin(radialV);
+            const px = P1[0] + (cx * N[0] + cy * B[0]), py = P1[1] + (cx * N[1] + cy * B[1]), pz = P1[2] + (cx * N[2] + cy * B[2]);
+            const nx = px - P1[0], ny = py - P1[1], nz = pz - P1[2];
+            const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+            this.interleavePacker(interleaveData, px, py, pz, nx / len, ny / len, nz / len, v, u);
+        });
 
-        this.generateGridIndices(indexData, 0, radialSegments, tubularSegments, radialSegments + 1);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
@@ -177,23 +193,16 @@ class PrimitiveUtils {
         uDir: number, vDir: number, wNormal: number,
         flipY: boolean = false
     ) {
-        const vertexOffset = interleaveData.length / 12;
-        const segmentWidth = width / gridResolutionX, segmentHeight = height / gridResolutionY;
-        const widthHalf = width / 2, heightHalf = height / 2;
-        const gridX1 = gridResolutionX + 1, gridY1 = gridResolutionY + 1;
-
         const pos = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
-        for (let iy = 0; iy < gridY1; iy++) {
-            const y = iy * segmentHeight - heightHalf;
-            for (let ix = 0; ix < gridX1; ix++) {
-                const x = ix * segmentWidth - widthHalf;
-                pos[uAxis] = x * uDir; pos[vAxis] = y * vDir; pos[wAxis] = wDepth;
-                normal[uAxis] = 0; normal[vAxis] = 0; normal[wAxis] = wNormal;
-                const uvX = ix / gridResolutionX, uvY = flipY ? (1 - iy / gridResolutionY) : (iy / gridResolutionY);
-                this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
-            }
-        }
-        this.generateGridIndices(indexData, vertexOffset, gridResolutionX, gridResolutionY, gridX1);
+
+        this.generateGrid(interleaveData, indexData, gridResolutionX, gridResolutionY, (u, v) => {
+            const x = (u - 0.5) * width;
+            const y = (v - 0.5) * height;
+            pos[uAxis] = x * uDir; pos[vAxis] = y * vDir; pos[wAxis] = wDepth;
+            normal[uAxis] = 0; normal[vAxis] = 0; normal[wAxis] = wNormal;
+            const uvY = flipY ? (1 - v) : v;
+            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, u, uvY);
+        });
     }
 
     /**
@@ -246,24 +255,21 @@ class PrimitiveUtils {
         isFront: boolean = true, isRadial: boolean = false,
         uvVStart: number = 0, uvVEnd: number = 1
     ) {
-        const vertexOffset = interleaveData.length / 12;
         if (outerRadius <= 1e-6 || Math.abs(thetaLength) < 1e-6) {
             this.interleavePacker(interleaveData, center.x, center.y, center.z, normal.x, normal.y, normal.z, 0.5, 0.5);
             return;
         }
-        for (let j = 0; j <= phiSegments; j++) {
-            const vRatio = j / phiSegments, radius = innerRadius + vRatio * (outerRadius - innerRadius);
-            const v = uvVStart + vRatio * (uvVEnd - uvVStart);
-            for (let i = 0; i <= thetaSegments; i++) {
-                const uRatio = i / thetaSegments, angle = thetaStart + uRatio * thetaLength;
-                const pos = {x: 0, y: 0, z: 0};
-                this.#calculateRadialPoint(center, radius, angle, uVector, vVector, pos);
-                const uvX = isRadial ? uRatio : 0.5 - (radius / outerRadius * Math.sin(angle) * 0.5);
-                const uvY = isRadial ? v : 0.5 - (radius / outerRadius * Math.cos(angle) * 0.5);
-                this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
-            }
-        }
-        this.generateGridIndices(indexData, vertexOffset, thetaSegments, phiSegments, thetaSegments + 1, !isFront);
+
+        this.generateGrid(interleaveData, indexData, thetaSegments, phiSegments, (u, v) => {
+            const radius = innerRadius + v * (outerRadius - innerRadius);
+            const angle = thetaStart + u * thetaLength;
+            const uvV = uvVStart + v * (uvVEnd - uvVStart);
+            const pos = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint(center, radius, angle, uVector, vVector, pos);
+            const uvX = isRadial ? u : 0.5 - (radius / outerRadius * Math.sin(angle) * 0.5);
+            const uvY = isRadial ? uvV : 0.5 - (radius / outerRadius * Math.cos(angle) * 0.5);
+            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
+        }, false, !isFront);
     }
 
     /**
@@ -274,15 +280,18 @@ class PrimitiveUtils {
         phiStart: number, phiLength: number, thetaStart: number, thetaLength: number,
         yOffset: number = 0, uvVStart: number = 0, uvVEnd: number = 1
     ) {
-        for (let iy = 0; iy <= heightSegments; iy++) {
-            const vRatio = iy / heightSegments, theta = thetaStart + vRatio * thetaLength;
-            const sinTheta = Math.sin(theta), cosTheta = Math.cos(theta), v = uvVStart + vRatio * (uvVEnd - uvVStart);
-            for (let ix = 0; ix <= widthSegments; ix++) {
-                const u = ix / widthSegments, phi = phiStart + u * phiLength, sinPhi = Math.sin(phi), cosPhi = Math.cos(phi);
-                const x = radius * (-sinPhi) * sinTheta, y = radius * cosTheta + yOffset, z = radius * (-cosPhi) * sinTheta;
-                this.interleavePacker(interleaveData, x, y, z, (-sinPhi) * sinTheta, cosTheta, (-cosPhi) * sinTheta, u, v);
-            }
-        }
+        this.generateGrid(interleaveData, [], widthSegments, heightSegments, (u, v) => {
+            const theta = thetaStart + v * thetaLength;
+            const phi = phiStart + u * phiLength;
+            const sinTheta = Math.sin(theta), cosTheta = Math.cos(theta);
+            const sinPhi = Math.sin(phi), cosPhi = Math.cos(phi);
+            const uvV = uvVStart + v * (uvVEnd - uvVStart);
+
+            const x = radius * (-sinPhi) * sinTheta;
+            const y = radius * cosTheta + yOffset;
+            const z = radius * (-cosPhi) * sinTheta;
+            this.interleavePacker(interleaveData, x, y, z, (-sinPhi) * sinTheta, cosTheta, (-cosPhi) * sinTheta, u, uvV);
+        }, true);
     }
 
     /**
@@ -297,26 +306,31 @@ class PrimitiveUtils {
         axisVector: { x: number, y: number, z: number } = {x: 0, y: 1, z: 0},
         skipIndices: boolean = false, uvVStart: number = 0, uvVEnd: number = 1
     ) {
-        const vertexOffset = interleaveData.length / 12, halfHeight = height / 2, slope = (radiusBottom - radiusTop) / height;
+        const halfHeight = height / 2, slope = (radiusBottom - radiusTop) / height;
         if (thetaLength === 0 || (radiusTop <= 0 && radiusBottom <= 0)) {
             this.interleavePacker(interleaveData, center.x, center.y, center.z, 0, 1, 0, 0, 0);
             return;
         }
-        for (let iy = 0; iy <= heightSegments; iy++) {
-            const vRatio = iy / heightSegments, radius = vRatio * (radiusBottom - radiusTop) + radiusTop;
-            const hOffset = halfHeight - vRatio * height, v = uvVStart + vRatio * (uvVEnd - uvVStart);
-            for (let ix = 0; ix <= radialSegments; ix++) {
-                const uRatio = ix / radialSegments, angle = uRatio * thetaLength + thetaStart;
-                const ringPos = {x: 0, y: 0, z: 0};
-                this.#calculateRadialPoint({x: 0, y: 0, z: 0}, radius, angle, uVector, vVector, ringPos);
-                const px = center.x + ringPos.x + hOffset * axisVector.x, py = center.y + ringPos.y + hOffset * axisVector.y, pz = center.z + ringPos.z + hOffset * axisVector.z;
-                const rnx = ringPos.x / (radius || 1), rny = ringPos.y / (radius || 1), rnz = ringPos.z / (radius || 1);
-                const nx = rnx + slope * axisVector.x, ny = rny + slope * axisVector.y, nz = rnz + slope * axisVector.z;
-                const nLen = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
-                this.interleavePacker(interleaveData, px, py, pz, nx / nLen, ny / nLen, nz / nLen, uRatio, v);
-            }
-        }
-        if (!skipIndices) this.generateGridIndices(indexData, vertexOffset, radialSegments, heightSegments, radialSegments + 1, false);
+
+        this.generateGrid(interleaveData, indexData, radialSegments, heightSegments, (u, v) => {
+            const radius = v * (radiusBottom - radiusTop) + radiusTop;
+            const angle = u * thetaLength + thetaStart;
+            const hOffset = halfHeight - v * height;
+            const uvV = uvVStart + v * (uvVEnd - uvVStart);
+
+            const ringPos = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, radius, angle, uVector, vVector, ringPos);
+
+            const px = center.x + ringPos.x + hOffset * axisVector.x;
+            const py = center.y + ringPos.y + hOffset * axisVector.y;
+            const pz = center.z + ringPos.z + hOffset * axisVector.z;
+
+            const rnx = ringPos.x / (radius || 1), rny = ringPos.y / (radius || 1), rnz = ringPos.z / (radius || 1);
+            const nx = rnx + slope * axisVector.x, ny = rny + slope * axisVector.y, nz = rnz + slope * axisVector.z;
+            const nLen = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+
+            this.interleavePacker(interleaveData, px, py, pz, nx / nLen, ny / nLen, nz / nLen, u, uvV);
+        }, skipIndices);
     }
 
     /**
