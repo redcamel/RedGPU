@@ -1,5 +1,4 @@
 import RedGPUContext from "../context/RedGPUContext";
-import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
 
@@ -91,7 +90,7 @@ const makeData = function (uniqueKey, redGPUContext,
     // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
     if (radius <= 0 || thickness <= 0 || Math.abs(thetaLength) < 1e-6) {
         PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
-        return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
+        return PrimitiveUtils.finalize(redGPUContext, interleaveData, [], uniqueKey);
     }
 
     // 1. Torus Body 생성
@@ -169,9 +168,7 @@ const makeData = function (uniqueKey, redGPUContext,
         }
     }
 
-    PrimitiveUtils.calculateTangents(interleaveData, indexData);
-
-    return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
+    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
 };
 
 export default Torus;

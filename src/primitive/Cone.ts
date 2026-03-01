@@ -1,5 +1,4 @@
 import RedGPUContext from "../context/RedGPUContext";
-import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
 
@@ -80,9 +79,7 @@ function makeData(uniqueKey, redGPUContext, radius, height, radialSegments, heig
         );
     }
 
-    PrimitiveUtils.calculateTangents(interleaveData, indexData);
-
-    return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
+    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
 }
 
 export default Cone;

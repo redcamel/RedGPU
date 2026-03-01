@@ -1,4 +1,7 @@
 import calculateTangents from "../../math/calculateTangents";
+import createPrimitiveGeometry from "./createPrimitiveGeometry";
+import RedGPUContext from "../../context/RedGPUContext";
+import Geometry from "../../geometry/Geometry";
 
 /**
  * [KO] 프리미티브 생성을 위한 공통 수학 및 데이터 처리 유틸리티 클래스입니다.
@@ -7,6 +10,19 @@ import calculateTangents from "../../math/calculateTangents";
  * @category Core
  */
 class PrimitiveUtils {
+    /**
+     * [KO] 탄젠트 계산 및 최종 지오메트리 생성을 통합 처리합니다.
+     * [EN] Integrates tangent calculation and final geometry creation.
+     */
+    static finalize(
+        redGPUContext: RedGPUContext,
+        interleaveData: number[],
+        indexData: number[],
+        uniqueKey: string
+    ): Geometry {
+        this.calculateTangents(interleaveData, indexData);
+        return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
     /**
      * [KO] 특정 축 매핑을 기반으로 평면 기하 데이터를 생성합니다.
      * [EN] Generates plane geometry data based on specific axis mapping.

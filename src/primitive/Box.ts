@@ -1,5 +1,4 @@
 import RedGPUContext from "../context/RedGPUContext";
-import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
 
@@ -75,9 +74,7 @@ const makeData = function (uniqueKey, redGPUContext, width, height, depth, width
     PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, height, depth / 2, widthSegments, heightSegments, 'x', 'y', 'z', 1, -1, 1); // pz
     PrimitiveUtils.generatePlaneData(interleaveData, indexData, width, height, -depth / 2, widthSegments, heightSegments, 'x', 'y', 'z', -1, -1, -1); // nz
 
-    PrimitiveUtils.calculateTangents(interleaveData, indexData);
-
-    return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
+    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
 };
 
 export default Box

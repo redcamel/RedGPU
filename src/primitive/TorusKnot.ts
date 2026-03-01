@@ -1,5 +1,4 @@
 import RedGPUContext from "../context/RedGPUContext";
-import createPrimitiveGeometry from "./core/createPrimitiveGeometry";
 import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
 
@@ -89,7 +88,7 @@ const makeData = function (uniqueKey, redGPUContext,
     // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
     if (radius <= 0 || tubeRadius <= 0) {
         PrimitiveUtils.interleavePacker(interleaveData, 0, 0, 0, 0, 0, 0, 0, 0);
-        return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
+        return PrimitiveUtils.finalize(redGPUContext, interleaveData, [], uniqueKey);
     }
 
     const vertex = [0, 0, 0]
@@ -190,9 +189,7 @@ const makeData = function (uniqueKey, redGPUContext,
     // Indices (PrimitiveUtils.generateGridIndices 사용)
     PrimitiveUtils.generateGridIndices(indexData, 0, radialSegments, tubularSegments, gridX1);
 
-    PrimitiveUtils.calculateTangents(interleaveData, indexData);
-
-    return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey)
+    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
 };
 
 function calculatePositionOnCurve(u, p, q, radius, position) {
