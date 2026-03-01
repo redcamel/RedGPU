@@ -1,4 +1,4 @@
-import calculateTangents from "../../math/calculateTangents";
+import {calculateTangentsInterleaved} from "../../math/calculateTangents";
 import createPrimitiveGeometry from "./createPrimitiveGeometry";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
@@ -267,17 +267,22 @@ class PrimitiveUtils {
     }
 
     static calculateTangents(interleaveData: number[], indexData: number[]) {
-        const vertices = [], normals = [], uvs = [], count = interleaveData.length / this.#STRIDE_FLOATS;
-        for (let i = 0; i < count; i++) {
-            const o = i * this.#STRIDE_FLOATS;
-            vertices.push(interleaveData[o], interleaveData[o + 1], interleaveData[o + 2]);
-            normals.push(interleaveData[o + 3], interleaveData[o + 4], interleaveData[o + 5]);
-            uvs.push(interleaveData[o + 6], interleaveData[o + 7]);
-        }
-        const tangents = calculateTangents(vertices, normals, uvs, indexData);
-        for (let i = 0; i < count; i++) {
-            const o = i * this.#STRIDE_FLOATS, to = i * 4;
-            interleaveData[o + 8] = tangents[to]; interleaveData[o + 9] = tangents[to + 1]; interleaveData[o + 10] = tangents[to + 2]; interleaveData[o + 11] = tangents[to + 3];
+        const stride = this.#STRIDE_FLOATS;
+        const typedInterleaveData = new Float32Array(interleaveData);
+        const typedIndexData = new Uint32Array(indexData);
+
+        calculateTangentsInterleaved(
+            typedInterleaveData,
+            typedIndexData,
+            stride,
+            0, // posOffset
+            3, // normalOffset
+            6, // uvOffset
+            8  // tangentOffset
+        );
+
+        for (let i = 0, len = typedInterleaveData.length; i < len; i++) {
+            interleaveData[i] = typedInterleaveData[i];
         }
     }
 
