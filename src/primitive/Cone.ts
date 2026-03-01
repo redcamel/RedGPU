@@ -39,51 +39,12 @@ class Cone extends Primitive {
                 capBottom: boolean = true,
                 thetaStart: number = 0.0,
                 thetaLength: number = Math.PI * 2
-                ) {
-                const uniqueKey = Primitive.generateUniqueKey('CONE', { radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength });
-                super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength));
-                }}
-
-function makeData(uniqueKey, redGPUContext, radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength) {
-    const interleaveData = [];
-    const indexData = [];
-    const halfHeight = height / 2;
-
-    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지
-    if (radius <= 0 || height <= 0 || Math.abs(thetaLength) < 1e-6) {
-        return PrimitiveUtils.getEmptyGeometry(redGPUContext, uniqueKey);
+    ) {
+        const uniqueKey = Primitive.generateUniqueKey('CONE', { radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength });
+        super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateConeData(
+            redGPUContext, radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength, uniqueKey
+        ));
     }
-
-    // [업계 표준] 12시(-Z) 기점, 반시계 방향(CCW) 회전 유도 벡터
-    const uVector = {x: 1, y: 0, z: 0};  // +X
-    const vVector = {x: 0, y: 0, z: -1}; // -Z (12시 방향)
-
-    // 1. Torso 생성 (상단 반지름을 0으로 설정하여 원뿔 형성)
-    PrimitiveUtils.generateCylinderTorsoData(
-        interleaveData, indexData,
-        0, radius, height,
-        radialSegments, heightSegments,
-        thetaStart, thetaLength,
-        {x: 0, y: 0, z: 0},
-        uVector,
-        vVector
-    );
-
-    // 2. Bottom Cap 생성
-    if (capBottom && radius > 0) {
-        PrimitiveUtils.generateCircleData(
-            interleaveData, indexData,
-            radius, radialSegments,
-            thetaStart, thetaLength,
-            {x: 0, y: -halfHeight, z: 0},
-            uVector,
-            vVector,
-            {x: 0, y: -1, z: 0},
-            false // CCW 생성을 유지하면서 밑면을 앞면으로 설정
-        );
-    }
-
-    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
 }
 
 export default Cone;
