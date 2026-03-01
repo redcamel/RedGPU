@@ -19,27 +19,46 @@ class PrimitiveUtils {
     static readonly #AXIS_DOWN = {x: 0, y: -1, z: 0};   // -Y
     
     // [KO] 내부 복합 연산용 Scratchpad 객체
-    // [EN] Scratchpad objects for internal complex calculations
     static readonly #SCRATCH_V1 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V2 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V3 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V4 = {x: 0, y: 0, z: 0};
+    static readonly #SCRATCH_V5 = {x: 0, y: 0, z: 0}; // 추가 확보
+    static readonly #SCRATCH_V6 = {x: 0, y: 0, z: 0}; // 추가 확보
 
     static finalize(redGPUContext: RedGPUContext, interleaveData: number[], indexData: number[], uniqueKey: string): Geometry {
         this.calculateTangents(interleaveData, indexData);
         return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
-    static generateGrid(interleaveData: number[], indexData: number[], resolutionX: number, resolutionY: number, vertexCallback: (u: number, v: number, ix: number, iy: number) => void, skipIndices: boolean = false, reverseIndices: boolean = false) {
+    /**
+     * [KO] 그리드 형태의 정점 및 인덱스 생성을 통합 처리합니다. 극점 최적화(Point Row)를 지원합니다.
+     */
+    static generateGrid(
+        interleaveData: number[], indexData: number[],
+        resolutionX: number, resolutionY: number,
+        vertexCallback: (u: number, v: number, ix: number, iy: number) => void,
+        skipIndices: boolean = false, reverseIndices: boolean = false,
+        topIsPoint: boolean = false, bottomIsPoint: boolean = false
+    ) {
         const vertexOffset = interleaveData.length / 12;
         for (let iy = 0; iy <= resolutionY; iy++) {
             const v = iy / resolutionY;
+            if (iy === 0 && topIsPoint) {
+                vertexCallback(0.5, v, 0, iy); // North Pole
+                continue;
+            }
+            if (iy === resolutionY && bottomIsPoint) {
+                vertexCallback(0.5, v, 0, iy); // South Pole
+                continue;
+            }
             for (let ix = 0; ix <= resolutionX; ix++) {
-                const u = ix / resolutionX;
-                vertexCallback(u, v, ix, iy);
+                vertexCallback(ix / resolutionX, v, ix, iy);
             }
         }
-        if (!skipIndices && indexData) this.generateGridIndices(indexData, vertexOffset, resolutionX, resolutionY, resolutionX + 1, reverseIndices);
+        if (!skipIndices && indexData) {
+            this.generateGridIndices(indexData, vertexOffset, resolutionX, resolutionY, resolutionX + 1, reverseIndices, topIsPoint, bottomIsPoint);
+        }
     }
 
     static getEmptyGeometry(redGPUContext: RedGPUContext, uniqueKey: string): Geometry {
@@ -112,16 +131,16 @@ class PrimitiveUtils {
             const theta = thetaStart + u * thetaLength, phi = v * Math.PI * 2;
             this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, theta, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1);
             this.#set(this.#SCRATCH_V2, this.#SCRATCH_V1.x * radius, 0, this.#SCRATCH_V1.z * radius);
-            this.#set(this.#SCRATCH_V3, -this.#SCRATCH_V1.x, 0, -this.#SCRATCH_V1.z); // uTube
-            this.#calculateRadialPoint(this.#SCRATCH_V2, thickness, phi, this.#SCRATCH_V3, this.#AXIS_UP, this.#SCRATCH_V4); // pos
-            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, phi, this.#SCRATCH_V3, this.#AXIS_UP, this.#SCRATCH_V1); // normal
+            this.#set(this.#SCRATCH_V3, -this.#SCRATCH_V1.x, 0, -this.#SCRATCH_V1.z); 
+            this.#calculateRadialPoint(this.#SCRATCH_V2, thickness, phi, this.#SCRATCH_V3, this.#AXIS_UP, this.#SCRATCH_V4); 
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, phi, this.#SCRATCH_V3, this.#AXIS_UP, this.#SCRATCH_V1); 
             this.interleavePacker(interleaveData, this.#SCRATCH_V4.x, this.#SCRATCH_V4.y, this.#SCRATCH_V4.z, this.#SCRATCH_V1.x, this.#SCRATCH_V1.y, this.#SCRATCH_V1.z, u, v);
         });
         if (isPartial) {
             if (capStart) {
-                this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, thetaStart, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1); // center
-                this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, thetaStart, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V2); // normal
-                this.#set(this.#SCRATCH_V3, Math.cos(thetaStart), 0, -Math.sin(thetaStart)); // tangent
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, thetaStart, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1);
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, thetaStart, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V2);
+                this.#set(this.#SCRATCH_V3, Math.cos(thetaStart), 0, -Math.sin(thetaStart));
                 this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, this.#SCRATCH_V1, this.#SCRATCH_V2, this.#AXIS_UP, this.#SCRATCH_V3, true, isRadialCapStart);
             }
             if (capEnd) {
@@ -145,9 +164,11 @@ class PrimitiveUtils {
             this.#set(this.#SCRATCH_V4, this.#SCRATCH_V2.x + this.#SCRATCH_V1.x, this.#SCRATCH_V2.y + this.#SCRATCH_V1.y, this.#SCRATCH_V2.z + this.#SCRATCH_V1.z); // N
             this.#cross(this.#SCRATCH_V3, this.#SCRATCH_V4, this.#SCRATCH_V2); this.#normalize(this.#SCRATCH_V2); // B
             this.#cross(this.#SCRATCH_V2, this.#SCRATCH_V3, this.#SCRATCH_V4); this.#normalize(this.#SCRATCH_V4); // N_fixed
-            const radialV = u * Math.PI * 2, uT = {x: -this.#SCRATCH_V2.x, y: -this.#SCRATCH_V2.y, z: -this.#SCRATCH_V2.z}, vT = {x: -this.#SCRATCH_V4.x, y: -this.#SCRATCH_V4.y, z: -this.#SCRATCH_V4.z};
-            this.#calculateRadialPoint(this.#SCRATCH_V1, tubeRadius, radialV, uT, vT, this.#SCRATCH_V3); // pos
-            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, radialV, uT, vT, this.#SCRATCH_V2); // normal
+            this.#set(this.#SCRATCH_V5, -this.#SCRATCH_V2.x, -this.#SCRATCH_V2.y, -this.#SCRATCH_V2.z); // uTube
+            this.#set(this.#SCRATCH_V6, -this.#SCRATCH_V4.x, -this.#SCRATCH_V4.y, -this.#SCRATCH_V4.z); // vTube
+            const radialV = u * Math.PI * 2;
+            this.#calculateRadialPoint(this.#SCRATCH_V1, tubeRadius, radialV, this.#SCRATCH_V5, this.#SCRATCH_V6, this.#SCRATCH_V3); // pos
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, radialV, this.#SCRATCH_V5, this.#SCRATCH_V6, this.#SCRATCH_V2); // normal
             this.interleavePacker(interleaveData, this.#SCRATCH_V3.x, this.#SCRATCH_V3.y, this.#SCRATCH_V3.z, this.#SCRATCH_V2.x, this.#SCRATCH_V2.y, this.#SCRATCH_V2.z, v, u);
         });
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
@@ -195,15 +216,17 @@ class PrimitiveUtils {
     }
 
     static generateSphericalData(interleaveData: number[], indexData: number[], radius: number, widthSegments: number, heightSegments: number, phiStart: number, phiLength: number, thetaStart: number, thetaLength: number, yOffset: number = 0, uvVStart: number = 0, uvVEnd: number = 1) {
+        const isNorth = (thetaStart === 0), isSouth = (Math.abs(thetaStart + thetaLength - Math.PI) < 1e-6);
         this.generateGrid(interleaveData, indexData, widthSegments, heightSegments, (u, v) => {
             const theta = thetaStart + v * thetaLength, phi = phiStart + u * phiLength, sinT = Math.sin(theta), cosT = Math.cos(theta), sinP = Math.sin(phi), cosP = Math.cos(phi), uvV = uvVStart + v * (uvVEnd - uvVStart);
             const nx = -sinP * sinT, ny = cosT, nz = -cosP * sinT;
             this.interleavePacker(interleaveData, radius * nx, radius * ny + yOffset, radius * nz, nx, ny, nz, u, uvV);
-        }, indexData === null);
+        }, indexData === null, false, isNorth, isSouth);
     }
 
     static generateCylinderTorsoData(interleaveData: number[], indexData: number[], radiusTop: number, radiusBottom: number, height: number, radialSegments: number, heightSegments: number, thetaStart: number, thetaLength: number, center: { x: number, y: number, z: number }, uV: { x: number, y: number, z: number }, vV: { x: number, y: number, z: number }, axisVector: { x: number, y: number, z: number } = {x: 0, y: 1, z: 0}, skipIndices: boolean = false, uvVStart: number = 0, uvVEnd: number = 1) {
         const halfH = height / 2, slope = (radiusBottom - radiusTop) / height;
+        const isTopPoint = (radiusTop === 0), isBottomPoint = (radiusBottom === 0);
         if (thetaLength === 0 || (radiusTop <= 0 && radiusBottom <= 0)) {
             this.interleavePacker(interleaveData, center.x, center.y, center.z, 0, 1, 0, 0, 0);
             return;
@@ -215,7 +238,7 @@ class PrimitiveUtils {
             const rnx = this.#SCRATCH_V1.x / (r || 1), rny = this.#SCRATCH_V1.y / (r || 1), rnz = this.#SCRATCH_V1.z / (r || 1), nx = rnx + slope * axisVector.x, ny = rny + slope * axisVector.y, nz = rnz + slope * axisVector.z;
             this.#set(this.#SCRATCH_V2, nx, ny, nz); this.#normalize(this.#SCRATCH_V2);
             this.interleavePacker(interleaveData, px, py, pz, this.#SCRATCH_V2.x, this.#SCRATCH_V2.y, this.#SCRATCH_V2.z, u, uvV);
-        }, skipIndices);
+        }, skipIndices, false, isTopPoint, isBottomPoint);
     }
 
     static #calculateRadialPoint(center: any, radius: number, angle: number, u: any, v: any, out: any) {
@@ -232,17 +255,32 @@ class PrimitiveUtils {
     static generateCapsuleData(redGPUContext: RedGPUContext, radius: number, height: number, radialSegments: number, heightSegments: number, capSegments: number, uniqueKey: string): Geometry {
         const interleaveData: number[] = [], indexData: number[] = [], gridX1 = radialSegments + 1, halfH = height / 2, capArc = (Math.PI / 2) * radius, totalArc = capArc * 2 + height, v1 = capArc / totalArc, v2 = (capArc + height) / totalArc;
         this.generateSphericalData(interleaveData, null, radius, radialSegments, capSegments, 0, Math.PI * 2, 0, Math.PI / 2, halfH, 0, v1);
-        this.generateCylinderTorsoData(interleaveData, null, radius, radius, height, radialSegments, heightSegments, 0, Math.PI * 2, this.#ZERO_VECTOR, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, this.#AXIS_UP, true, v1, v2);
+        this.generateCylinderTorsoData(interleaveData, null, radius, radius, height, radialSegments, heightSegments, 0, Math.PI * 2, this.#ZERO_VECTOR, this.#BASIS_U, this.#BASIS_V, this.#AXIS_UP, true, v1, v2);
         this.generateSphericalData(interleaveData, null, radius, radialSegments, capSegments, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2, -halfH, v2, 1);
-        this.generateGridIndices(indexData, 0, radialSegments, capSegments * 2 + heightSegments, gridX1);
+        this.generateGridIndices(indexData, 0, radialSegments, capSegments * 2 + heightSegments, gridX1, false, true, true);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
-    static generateGridIndices(indexData: number[], vertexOffset: number, gridX: number, gridY: number, gridX1: number, reverse: boolean = false) {
+    static generateGridIndices(indexData: number[], vertexOffset: number, gridX: number, gridY: number, gridX1: number, reverse: boolean = false, topIsPoint: boolean = false, bottomIsPoint: boolean = false) {
+        const rowStarts = [];
+        let current = vertexOffset;
+        for (let iy = 0; iy <= gridY; iy++) {
+            rowStarts.push(current);
+            if (iy === 0 && topIsPoint) current += 1;
+            else if (iy === gridY && bottomIsPoint) current += 1;
+            else current += gridX1;
+        }
         for (let iy = 0; iy < gridY; iy++) {
             for (let ix = 0; ix < gridX; ix++) {
-                const a = vertexOffset + ix + gridX1 * iy, b = vertexOffset + ix + gridX1 * (iy + 1), c = vertexOffset + (ix + 1) + gridX1 * (iy + 1), d = vertexOffset + (ix + 1) + gridX1 * iy;
-                if (reverse) indexData.push(a, d, b, d, c, b); else indexData.push(a, b, d, b, c, d);
+                const r1 = rowStarts[iy], r2 = rowStarts[iy + 1];
+                if (iy === 0 && topIsPoint) {
+                    if (reverse) indexData.push(r1, r2 + ix + 1, r2 + ix); else indexData.push(r1, r2 + ix, r2 + ix + 1);
+                } else if (iy === gridY - 1 && bottomIsPoint) {
+                    if (reverse) indexData.push(r1 + ix, r1 + ix + 1, r2); else indexData.push(r1 + ix, r2, r1 + ix + 1);
+                } else {
+                    const a = r1 + ix, b = r2 + ix, c = r2 + ix + 1, d = r1 + ix + 1;
+                    if (reverse) indexData.push(a, d, b, d, c, b); else indexData.push(a, b, d, b, c, d);
+                }
             }
         }
     }

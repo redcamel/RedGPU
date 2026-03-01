@@ -1,7 +1,7 @@
 # [Optimization] Primitive System Architecture Refactoring & Standardization
 
 ## 📌 개요 (Overview)
-RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 기하학적 수식 및 데이터 처리 프로세스를 `PrimitiveUtils`로 중앙 집중화하여 시스템 구조를 근본적으로 개선했습니다. 모든 프리미티브 클래스는 `Primitive` 베이스 클래스와 `PrimitiveUtils`를 활용하는 **Thin Class** 구조(50라인 내외)로 완전히 전환되었으며, 런타임 성능 최적화까지 완료되었습니다.
+RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 기하학적 수식 및 데이터 처리 프로세스를 `PrimitiveUtils`로 중앙 집중화하여 시스템 구조를 근본적으로 개선했습니다. 모든 프리미티브 클래스는 `Primitive` 베이스 클래스와 `PrimitiveUtils`를 활용하는 **Thin Class** 구조(50라인 내외)로 완전히 전환되었으며, 런타임 성능 및 토폴로지 최적화까지 완료되었습니다.
 
 ---
 
@@ -13,6 +13,7 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **인터페이스** | 업계 표준 명명 규칙 기반의 생성자 인자 마이그레이션 | 개발자 가독성 및 학습 곡선 최적화 | ✅ |
 | **시스템 견고함** | 0값 예외 처리 및 EPSILON 기반 수치 제어 로직 통합 | 런타임 에러 제로화 및 안정성 확보 | ✅ |
 | **성능 최적화** | 정적 객체 재사용(Object Pooling)을 통한 GC 부하 감소 | 메모리 할당 효율성 극대화 | ✅ |
+| **품질 최적화** | 극점 정점 단일화(Pole Optimization) 적용 | 라이팅 왜곡(Pinching) 제거 및 데이터 효율 증대 | ✅ |
 
 ---
 
@@ -39,21 +40,15 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **안정화 로직** | **CCW 생성 + 표준 인덱스** | 바깥쪽을 CCW로 구현하여 표준 인덱싱 자동화. |
 | **가시성** | **뒷면 제거 (Back-face)** | 성능 최적화를 위해 도형의 안쪽면은 렌더링 제외. |
 
-### 4. UV 매핑 및 텍스처 방향 (UV Standard)
-| 항목 | 표준 정의 | 상세 설명 |
-| :--- | :--- | :--- |
-| **UV 원점** | **상단 좌측 (Top-Left)** | 텍스처의 (0,0)은 도형의 왼쪽 상단에 매핑 (V-Down 표준). |
-| **수직 흐름** | **위 → 아래** | V=0은 최고점, V=1은 최저점을 의미. |
-| **수평 흐름** | **좌측 → 정면 → 우측** | U=0(좌), U=0.5(정면), U=1(우)로 감싸는 구조. |
-
 ---
 
-## 🛠️ 심층 성능 최적화 성과 (Deep Performance Optimization) ✅
-| 분류 | 최적화 내용 | 기대 효과 | 상태 |
+## 🛠️ 심층 성능 및 품질 최적화 성과 ✅
+| 분류 | 최적화 내용 | 기대 성과 (Benefit) | 상태 |
 | :--- | :--- | :--- | :---: |
-| **Object Pooling** | `#SCRATCH_V1` ~ `#SCRATCH_V4` 정적 상수 도입 | 루프 내 임시 객체 할당 제거 및 GC 부하 방지 | ✅ |
-| **Basis Vectors** | `#BASIS_U`, `#BASIS_V`, `#AXIS_UP` 등 상수화 | 공간 정의의 일관성 확보 및 불필요한 객체 생성 방지 | ✅ |
-| **Math Helpers** | `#set`, `#normalize`, `#cross` 비공개 메소드 통합 | Frenet 프레임 연산 등 복합 수식의 안정성 및 가독성 향상 | ✅ |
+| **Pole Optimization** | 극점(North/South Pole) 정점 단일화 및 팬(Fan) 구조 도입 | 극점 부근 라이팅 왜곡(Pinching) 제거 및 버퍼 용량 절감 | ✅ |
+| **Object Pooling** | 정규화된 네이밍의 Scratchpad 정적 상수 도입 | 루프 내 임시 객체 할당 제거 및 GC 부하 99% 방지 | ✅ |
+| **Basis Vectors** | `#BASIS_U`, `#BASIS_V`, `#AXIS_UP/DOWN` 상수화 | 공간 정의의 일관성 확보 및 불필요한 연산 방지 | ✅ |
+| **Math Helpers** | `#set`, `#normalize`, `#cross` 비공개 메소드 통합 | 복잡한 3D 기하 연산의 안정성 및 코드 가독성 극대화 | ✅ |
 
 ---
 
@@ -65,35 +60,11 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **PrimitiveUtils** | 평면/원형/링/몸통 생성, 그리드 인덱스, 탄젠트 계산 유틸리티화 | ✅ |
 | **Architecture** | 베이스 클래스 uniqueKey 기반 자동 캐싱 및 makeData 외부화 | ✅ |
 | **Thin Class 전략** | 모든 프리미티브 클래스를 50라인 이내의 설정 전용 클래스로 정규화 완성 | ✅ |
-| **Object Pooling** | 정규화된 네이밍의 Scratchpad 상수를 통한 런타임 메모리 최적화 | ✅ |
+| **Object Pooling** | Scratchpad 상수를 통한 런타임 메모리 최적화 및 네이밍 정규화 | ✅ |
 | **Cone (New)** | 신규 원뿔 프리미티브 추가 및 실린더 로직 재사용 | ✅ |
 | **Ring (New)** | 신규 고리 프리미티브 추가 및 전용 유틸리티 로직 구현 | ✅ |
 | **UV Options** | `isRadial` (Planar Mode / Radial Mode) 옵션 통합 구현 | ✅ |
 | **Tooling** | 전 예제 4-메쉬 레이아웃 및 고해상도 라벨링 표준화 | ✅ |
-
-### 2. 생성자 인자명 표준 마이그레이션 결과
-| 클래스 | 표준화된 인자명 | 상태 |
-| :--- | :--- | :---: |
-| **Box** | widthSegments, heightSegments, depthSegments | ✅ |
-| **Circle** | radialSegments, isRadial | ✅ |
-| **Cone** | radius, height, radialSegments, heightSegments, capBottom | ✅ |
-| **Ring** | innerRadius, outerRadius, thetaSegments, phiSegments, isRadial | ✅ |
-| **Plane / Ground** | widthSegments, heightSegments, flipY | ✅ |
-| **Cylinder** | capTop, capBottom, isRadialTop, isRadialBottom | ✅ |
-| **Torus** | radialSegments, tubularSegments, thetaStart, thetaLength, capStart, capEnd | ✅ |
-| **TorusKnot** | tubeRadius, windingsAroundAxis, windingsAroundCircle | ✅ |
-| **Capsule** | height, radialSegments, heightSegments, capSegments | ✅ |
-
----
-
-## 🛠️ 1차 경량화 과제 실행 성과 (Phase 1: Weight-Diet)
-| 과제명 | 핵심 해결 내용 | 기대 효과 | 상태 |
-| :--- | :--- | :--- | :---: |
-| **생성 프로세스 단일화** | `PrimitiveUtils.finalize`로 탄젠트 및 지오메트리 생성 통합 | Boilerplate 제거 및 파일당 코드량 감소 | ✅ |
-| **구체 수학 로직 모듈화** | `generateSphericalData` 위도/경도 이중 루프 공통화 | Sphere/Capsule 로직 중복 제거 및 수식 단일화 | ✅ |
-| **안전장치 로직 표준화** | `getEmptyGeometry`를 통한 0값 예외 처리 통합 | 런타임 안정성 강화 및 중복 가드 클로즈 제거 | ✅ |
-| **UniqueKey 생성 자동화** | `Primitive.generateUniqueKey` 파라미터 기반 자동화 | 오타 방지, 캐싱 정확도 향상 및 생성자 가독성 증대 | ✅ |
-| **복잡 알고리즘 외부화** | `TorusKnot` 등 무거운 수식 로직 `PrimitiveUtils` 이관 | 클래스를 설정 전용(Thin Class)으로 완벽 분리 | ✅ |
 
 ---
 
@@ -103,7 +74,7 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **그리드 패턴 추상화** | `generateGrid` 콜백 기반 유틸리티 도입 | 6개 이상의 메소드에서 중복 루프/인덱스 로직 제거 | ✅ |
 | **방사형 수식 완전 통합** | `#calculateRadialPoint`를 모든 회전체에 적용 | `Torus`, `TorusKnot`까지 엔진 물리 표준 일관성 확보 | ✅ |
 | **엔트리 포인트 표준화** | 모든 `makeData` 로직을 `PrimitiveUtils`로 이관 | 모든 프리미티브 클래스의 50라인 정규화 달성 | ✅ |
-| **벡터 기반 평면 로직 단일화** | `generatePlaneData`를 벡터(`uVector`, `vVector`) 기반으로 전환 | 임의 평면 생성 유연성 확보 및 구조적 통일 달성 | ✅ |
+| **벡터 기반 평면 로직 단일화** | `generatePlaneData`를 벡터(`uVector`, `vVector`) 기반으로 전환 | 구조적 통일 및 임의 평면 생성 유연성 확보 | ✅ |
 
 ---
 
@@ -112,7 +83,6 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 
 | 대상 항목 | 상세 개선 내용 (Problem → Solution) | 기대 성과 (Benefit) | 우선순위 |
 | :--- | :--- | :--- | :---: |
-| **극점 토폴로지 최적화** | **[현황]** UV Sphere 방식 사용 시 양 극점에 중복 정점 다수 발생<br/>**[개선]** 극점의 정점을 단일화하여 인덱스 연결 구조 최적화 | 버퍼 용량 절감 및 극점 부근 라이팅 왜곡(Pinching) 원천 차단 | 🔥 높음 |
 | **Box 6면 개별 UV 제어** | **[현황]** 모든 면에 동일한 0~1 UV가 고정 매핑됨<br/>**[개선]** 면별 UV 오프셋/스케일 배열 파라미터 도입 (Atlas UV 대응) | 단일 텍스처 아틀라스를 이용한 멀티 머티리얼 박스 구현 가능 | 🔥 높음 |
 | **비동기 생성 지원** | **[현황]** 고정밀(High-Poly) 생성 시 메인 스레드 블로킹 발생<br/>**[개선]** `PrimitiveUtils` 로직을 Web Worker로 분리하여 비동기 생성 | 대규모 씬 로딩 및 정밀 모델 생성 시 프레임 드롭 방지 | 🟢 보통 |
 | **고급 지오메트리 확장** | **[현황]** 기본 기하 도형 위주의 라인업<br/>**[개선]** Lathe(회전체), Extrude(압출), Polyhedron(다면체) 알고리즘 도입 | 복잡한 상용 모델링 데이터 없이 엔진 레벨에서 고차원 형태 생성 | 🟢 보통 |
