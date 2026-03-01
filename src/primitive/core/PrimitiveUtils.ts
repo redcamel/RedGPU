@@ -100,23 +100,26 @@ class PrimitiveUtils {
         const indexData = [];
         const isPartial = Math.abs(thetaLength) < Math.PI * 2;
 
+        const uVector = {x: 1, y: 0, z: 0}, vVector = {x: 0, y: 0, z: -1};
+
         this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
-            const sliceAngle = v * Math.PI * 2;
-            const sliceSin = Math.sin(sliceAngle);
-            const ringRadius = radius + sliceSin * thickness;
-            const ny = Math.cos(sliceAngle);
-            const y = ny * thickness;
+            const theta = thetaStart + u * thetaLength;
+            const phi = v * Math.PI * 2;
 
-            const ringAngle = thetaStart + u * thetaLength;
-            const cosVal = Math.cos(ringAngle);
-            const sinVal = Math.sin(ringAngle);
+            const majorRadial = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, 1.0, theta, uVector, vVector, majorRadial);
 
-            const x = (-sinVal) * ringRadius;
-            const z = (-cosVal) * ringRadius;
-            const nx = (-sinVal) * sliceSin;
-            const nz = (-cosVal) * sliceSin;
+            const centerTube = {x: majorRadial.x * radius, y: 0, z: majorRadial.z * radius};
+            const uTube = {x: -majorRadial.x, y: 0, z: -majorRadial.z}; // Inner direction
+            const vTube = {x: 0, y: 1, z: 0}; // Top direction
 
-            this.interleavePacker(interleaveData, x, y, z, nx, ny, nz, u, v);
+            const pos = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint(centerTube, thickness, phi, uTube, vTube, pos);
+
+            const normal = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, 1.0, phi, uTube, vTube, normal);
+
+            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, u, v);
         });
 
         if (isPartial) {
@@ -167,11 +170,16 @@ class PrimitiveUtils {
             N[0] /= nLen; N[1] /= nLen; N[2] /= nLen;
 
             const radialV = u * Math.PI * 2;
-            const cx = -tubeRadius * Math.cos(radialV), cy = tubeRadius * Math.sin(radialV);
-            const px = P1[0] + (cx * N[0] + cy * B[0]), py = P1[1] + (cx * N[1] + cy * B[1]), pz = P1[2] + (cx * N[2] + cy * B[2]);
-            const nx = px - P1[0], ny = py - P1[1], nz = pz - P1[2];
-            const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
-            this.interleavePacker(interleaveData, px, py, pz, nx / len, ny / len, nz / len, v, u);
+            const centerTube = {x: P1[0], y: P1[1], z: P1[2]};
+            const vTube = {x: -N[0], y: -N[1], z: -N[2]};
+            const uTube = {x: -B[0], y: -B[1], z: -B[2]};
+
+            const pos = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint(centerTube, tubeRadius, radialV, uTube, vTube, pos);
+            const normal = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, 1.0, radialV, uTube, vTube, normal);
+
+            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, v, u);
         });
 
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
