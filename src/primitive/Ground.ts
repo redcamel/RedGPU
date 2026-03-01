@@ -27,46 +27,26 @@ class Ground extends Primitive {
      * const ground = new RedGPU.Ground(redGPUContext, 10, 10, 1, 1, false);
      * ```
      *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param width -
-     * [KO] 가로 길이 (기본값 1)
-     * [EN] Width (default 1)
-     * @param height -
-     * [KO] 세로 길이 (기본값 1)
-     * [EN] Height (default 1)
-     * @param widthSegments -
-     * [KO] 가로(X축) 세그먼트 수 (기본값 1)
-     * [EN] Width (X-axis) segments (default 1)
-     * @param heightSegments -
-     * [KO] 세로(Z축) 세그먼트 수 (기본값 1)
-     * [EN] Height (Z-axis) segments (default 1)
-     * @param flipY -
-     * [KO] Y축 UV 뒤집기 여부 (기본값 false)
-     * [EN] Whether to flip UV on the Y-axis (default false)
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param width - [KO] 가로 길이 (기본값 1) [EN] Width (default 1)
+     * @param height - [KO] 세로 길이 (기본값 1) [EN] Height (default 1)
+     * @param widthSegments - [KO] 가로(X축) 세그먼트 수 (기본값 1) [EN] Width (X-axis) segments (default 1)
+     * @param heightSegments - [KO] 세로(Z축) 세그먼트 수 (기본값 1) [EN] Height (Z-axis) segments (default 1)
+     * @param flipY - [KO] Y축 UV 뒤집기 여부 (기본값 false) [EN] Whether to flip UV on the Y-axis (default false)
      */
-    constructor(redGPUContext: RedGPUContext, width = 1, height = 1, widthSegments = 1, heightSegments = 1, flipY = false) {
+    constructor(
+        redGPUContext: RedGPUContext,
+        width: number = 1,
+        height: number = 1,
+        widthSegments: number = 1,
+        heightSegments: number = 1,
+        flipY: boolean = false
+    ) {
         const uniqueKey = Primitive.generateUniqueKey('GROUND', { width, height, widthSegments, heightSegments, flipY });
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, widthSegments, heightSegments, flipY));
+        super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateGroundData(
+            redGPUContext, width, height, widthSegments, heightSegments, flipY, uniqueKey
+        ));
     }
 }
-
-const makeData = function (uniqueKey, redGPUContext, width, height, widthSegments, heightSegments, flipY) {
-    const interleaveData = [];
-    const indexData = [];
-
-    // XZ 평면 생성 (Y=0)
-    PrimitiveUtils.generatePlaneData(
-        interleaveData, indexData,
-        width, height, 0,
-        widthSegments, heightSegments,
-        'x', 'z', 'y',
-        1, 1, 1,
-        flipY
-    );
-
-    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
-};
 
 export default Ground;

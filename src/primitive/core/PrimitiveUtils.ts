@@ -73,12 +73,20 @@ class PrimitiveUtils {
         const interleaveData = [];
         const indexData = [];
 
-        this.generatePlaneData(interleaveData, indexData, depth, height, width / 2, depthSegments, heightSegments, 'z', 'y', 'x', -1, -1, 1); // px
-        this.generatePlaneData(interleaveData, indexData, depth, height, -width / 2, depthSegments, heightSegments, 'z', 'y', 'x', 1, -1, -1); // nx
-        this.generatePlaneData(interleaveData, indexData, width, depth, height / 2, widthSegments, depthSegments, 'x', 'z', 'y', 1, 1, 1); // py
-        this.generatePlaneData(interleaveData, indexData, width, depth, -height / 2, widthSegments, depthSegments, 'x', 'z', 'y', 1, -1, -1); // ny
-        this.generatePlaneData(interleaveData, indexData, width, height, depth / 2, widthSegments, heightSegments, 'x', 'y', 'z', 1, -1, 1); // pz
-        this.generatePlaneData(interleaveData, indexData, width, height, -depth / 2, widthSegments, heightSegments, 'x', 'y', 'z', -1, -1, -1); // nz
+        const w2 = width / 2, h2 = height / 2, d2 = depth / 2;
+
+        // PX (+X face)
+        this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: w2, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0}, {x: 1, y: 0, z: 0});
+        // NX (-X face)
+        this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: -w2, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: -1, z: 0}, {x: -1, y: 0, z: 0});
+        // PY (+Y face)
+        this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: 1, z: 0});
+        // NY (-Y face)
+        this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: -h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0});
+        // PZ (+Z face)
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: d2}, {x: 1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1});
+        // NZ (-Z face)
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: -d2}, {x: -1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: -1});
 
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
@@ -149,6 +157,7 @@ class PrimitiveUtils {
         redGPUContext: RedGPUContext,
         width: number, height: number,
         widthSegments: number, heightSegments: number,
+        flipY: boolean,
         uniqueKey: string
     ): Geometry {
         const interleaveData = [];
@@ -158,7 +167,32 @@ class PrimitiveUtils {
             return this.getEmptyGeometry(redGPUContext, uniqueKey);
         }
 
-        this.generatePlaneData(interleaveData, indexData, width, height, 0, widthSegments, heightSegments, 'x', 'y', 'z', 1, -1, 1);
+        // Standard XY plane facing +Z
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1}, flipY);
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
+     * [KO] 그라운드(Ground) 기하 데이터를 생성합니다.
+     * [EN] Generates ground geometry data.
+     */
+    static generateGroundData(
+        redGPUContext: RedGPUContext,
+        width: number, height: number,
+        widthSegments: number, heightSegments: number,
+        flipY: boolean,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+
+        if (width <= 0 || height <= 0) {
+            return this.getEmptyGeometry(redGPUContext, uniqueKey);
+        }
+
+        // Standard XZ plane facing +Y
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: 1, z: 0}, flipY);
 
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
@@ -322,21 +356,24 @@ class PrimitiveUtils {
      */
     static generatePlaneData(
         interleaveData: number[], indexData: number[],
-        width: number, height: number, wDepth: number,
+        width: number, height: number,
         gridResolutionX: number, gridResolutionY: number,
-        uAxis: 'x' | 'y' | 'z', vAxis: 'x' | 'y' | 'z', wAxis: 'x' | 'y' | 'z',
-        uDir: number, vDir: number, wNormal: number,
+        center: { x: number, y: number, z: number },
+        uVector: { x: number, y: number, z: number },
+        vVector: { x: number, y: number, z: number },
+        normal: { x: number, y: number, z: number },
         flipY: boolean = false
     ) {
-        const pos = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
-
         this.generateGrid(interleaveData, indexData, gridResolutionX, gridResolutionY, (u, v) => {
             const x = (u - 0.5) * width;
             const y = (v - 0.5) * height;
-            pos[uAxis] = x * uDir; pos[vAxis] = y * vDir; pos[wAxis] = wDepth;
-            normal[uAxis] = 0; normal[vAxis] = 0; normal[wAxis] = wNormal;
             const uvY = flipY ? (1 - v) : v;
-            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, u, uvY);
+
+            const px = center.x + x * uVector.x + y * vVector.x;
+            const py = center.y + x * uVector.y + y * vVector.y;
+            const pz = center.z + x * uVector.z + y * vVector.z;
+
+            this.interleavePacker(interleaveData, px, py, pz, normal.x, normal.y, normal.z, u, uvY);
         });
     }
 
