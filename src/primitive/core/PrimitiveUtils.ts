@@ -10,6 +10,21 @@ import Geometry from "../../geometry/Geometry";
  * @category Core
  */
 class PrimitiveUtils {
+    // [KO] 공유 기저 벡터 및 임시 객체 (메모리 재사용 최적화)
+    // [EN] Shared basis vectors and temporary objects (Memory reuse optimization)
+    static readonly #BASIS_U = {x: 1, y: 0, z: 0};      // +X
+    static readonly #BASIS_V = {x: 0, y: 0, z: -1};     // -Z (12 o'clock)
+    static readonly #ZERO_VECTOR = {x: 0, y: 0, z: 0};  // Origin
+    static readonly #AXIS_UP = {x: 0, y: 1, z: 0};      // +Y
+    static readonly #AXIS_DOWN = {x: 0, y: -1, z: 0};   // -Y
+    
+    // [KO] 내부 복합 연산용 Scratchpad 객체
+    // [EN] Scratchpad objects for internal complex calculations
+    static readonly #SCRATCH_V1 = {x: 0, y: 0, z: 0};
+    static readonly #SCRATCH_V2 = {x: 0, y: 0, z: 0};
+    static readonly #SCRATCH_V3 = {x: 0, y: 0, z: 0};
+    static readonly #SCRATCH_V4 = {x: 0, y: 0, z: 0};
+
     static finalize(redGPUContext: RedGPUContext, interleaveData: number[], indexData: number[], uniqueKey: string): Geometry {
         this.calculateTangents(interleaveData, indexData);
         return createPrimitiveGeometry(redGPUContext, interleaveData, indexData, uniqueKey);
@@ -35,12 +50,15 @@ class PrimitiveUtils {
 
     static generateBoxData(redGPUContext: RedGPUContext, width: number, height: number, depth: number, widthSegments: number, heightSegments: number, depthSegments: number, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [], w2 = width / 2, h2 = height / 2, d2 = depth / 2;
-        this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: w2, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0}, {x: 1, y: 0, z: 0});
-        this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: -w2, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: -1, z: 0}, {x: -1, y: 0, z: 0});
-        this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: 1, z: 0});
-        this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: -h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0});
-        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: d2}, {x: 1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1});
-        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: -d2}, {x: -1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: -1});
+        const faces = [
+            {c: {x: w2, y: 0, z: 0}, u: {x: 0, y: 0, z: -1}, v: {x: 0, y: -1, z: 0}, n: {x: 1, y: 0, z: 0}}, // PX
+            {c: {x: -w2, y: 0, z: 0}, u: {x: 0, y: 0, z: 1}, v: {x: 0, y: -1, z: 0}, n: {x: -1, y: 0, z: 0}}, // NX
+            {c: {x: 0, y: h2, z: 0}, u: {x: 1, y: 0, z: 0}, v: {x: 0, y: 0, z: 1}, n: {x: 0, y: 1, z: 0}}, // PY
+            {c: {x: 0, y: -h2, z: 0}, u: {x: 1, y: 0, z: 0}, v: {x: 0, y: 0, z: -1}, n: {x: 0, y: -1, z: 0}}, // NY
+            {c: {x: 0, y: 0, z: d2}, u: {x: 1, y: 0, z: 0}, v: {x: 0, y: -1, z: 0}, n: {x: 0, y: 0, z: 1}}, // PZ
+            {c: {x: 0, y: 0, z: -d2}, u: {x: -1, y: 0, z: 0}, v: {x: 0, y: -1, z: 0}, n: {x: 0, y: 0, z: -1}} // NZ
+        ];
+        faces.forEach(f => this.generatePlaneData(interleaveData, indexData, (f.n.x ? depth : width), (f.n.y ? depth : height), (f.n.x ? depthSegments : widthSegments), (f.n.y ? depthSegments : heightSegments), f.c, f.u, f.v, f.n));
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
@@ -52,74 +70,85 @@ class PrimitiveUtils {
     }
 
     static generateCylinderData(redGPUContext: RedGPUContext, radiusTop: number, radiusBottom: number, height: number, radialSegments: number, heightSegments: number, capTop: boolean, capBottom: boolean, thetaStart: number, thetaLength: number, isRadialTop: boolean, isRadialBottom: boolean, uniqueKey: string): Geometry {
-        const interleaveData = [], indexData = [], halfHeight = height / 2;
+        const interleaveData = [], indexData = [], halfH = height / 2;
         if ((radiusTop <= 0 && radiusBottom <= 0) || height <= 0 || Math.abs(thetaLength) < 1e-6) return this.getEmptyGeometry(redGPUContext, uniqueKey);
-        const uV = {x: 1, y: 0, z: 0}, vV = {x: 0, y: 0, z: -1};
-        this.generateCylinderTorsoData(interleaveData, indexData, radiusTop, radiusBottom, height, radialSegments, heightSegments, thetaStart, thetaLength, {x: 0, y: 0, z: 0}, uV, vV);
-        if (capTop && radiusTop > 0) this.generateCircleData(interleaveData, indexData, radiusTop, radialSegments, thetaStart, thetaLength, {x: 0, y: halfHeight, z: 0}, uV, vV, {x: 0, y: 1, z: 0}, true, isRadialTop);
-        if (capBottom && radiusBottom > 0) this.generateCircleData(interleaveData, indexData, radiusBottom, radialSegments, thetaStart, thetaLength, {x: 0, y: -halfHeight, z: 0}, uV, vV, {x: 0, y: -1, z: 0}, false, isRadialBottom);
+        this.generateCylinderTorsoData(interleaveData, indexData, radiusTop, radiusBottom, height, radialSegments, heightSegments, thetaStart, thetaLength, this.#ZERO_VECTOR, this.#BASIS_U, this.#BASIS_V);
+        if (capTop && radiusTop > 0) this.generateCircleData(interleaveData, indexData, radiusTop, radialSegments, thetaStart, thetaLength, {x: 0, y: halfH, z: 0}, this.#BASIS_U, this.#BASIS_V, this.#AXIS_UP, true, isRadialTop);
+        if (capBottom && radiusBottom > 0) this.generateCircleData(interleaveData, indexData, radiusBottom, radialSegments, thetaStart, thetaLength, {x: 0, y: -halfH, z: 0}, this.#BASIS_U, this.#BASIS_V, this.#AXIS_DOWN, false, isRadialBottom);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
     static generatePlaneEntryData(redGPUContext: RedGPUContext, width: number, height: number, widthSegments: number, heightSegments: number, flipY: boolean, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [];
         if (width <= 0 || height <= 0) return this.getEmptyGeometry(redGPUContext, uniqueKey);
-        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1}, flipY);
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, this.#ZERO_VECTOR, this.#BASIS_U, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1}, flipY);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
     static generateGroundData(redGPUContext: RedGPUContext, width: number, height: number, widthSegments: number, heightSegments: number, flipY: boolean, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [];
         if (width <= 0 || height <= 0) return this.getEmptyGeometry(redGPUContext, uniqueKey);
-        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: 1, z: 0}, flipY);
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, this.#ZERO_VECTOR, this.#BASIS_U, {x: 0, y: 0, z: 1}, this.#AXIS_UP, flipY);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
     static generateCircleEntryData(redGPUContext: RedGPUContext, radius: number, radialSegments: number, thetaStart: number, thetaLength: number, isRadial: boolean, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [];
         if (radius <= 0 || Math.abs(thetaLength) < 1e-6) return this.getEmptyGeometry(redGPUContext, uniqueKey);
-        const uVector = {x: 1, y: 0, z: 0}, vVector = {x: 0, y: 0, z: -1};
-        this.generateCircleData(interleaveData, indexData, radius, radialSegments, thetaStart, thetaLength, {x: 0, y: 0, z: 0}, uVector, vVector, {x: 0, y: 1, z: 0}, true, isRadial);
+        this.generateCircleData(interleaveData, indexData, radius, radialSegments, thetaStart, thetaLength, this.#ZERO_VECTOR, this.#BASIS_U, this.#BASIS_V, this.#AXIS_UP, true, isRadial);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
     static generateRingEntryData(redGPUContext: RedGPUContext, innerRadius: number, outerRadius: number, thetaSegments: number, phiSegments: number, thetaStart: number, thetaLength: number, isRadial: boolean, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [];
         if (outerRadius <= 0 || Math.abs(thetaLength) < 1e-6) return this.getEmptyGeometry(redGPUContext, uniqueKey);
-        const uVector = {x: 1, y: 0, z: 0}, vVector = {x: 0, y: 0, z: -1};
-        this.generateRingData(interleaveData, indexData, innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, {x: 0, y: 0, z: 0}, uVector, vVector, {x: 0, y: 1, z: 0}, true, isRadial);
+        this.generateRingData(interleaveData, indexData, innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, this.#ZERO_VECTOR, this.#BASIS_U, this.#BASIS_V, this.#AXIS_UP, true, isRadial);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
     static generateTorusData(redGPUContext: RedGPUContext, radius: number, thickness: number, radialSegments: number, tubularSegments: number, thetaStart: number, thetaLength: number, capStart: boolean, capEnd: boolean, isRadialCapStart: boolean, isRadialCapEnd: boolean, uniqueKey: string): Geometry {
-        const interleaveData = [], indexData = [], isPartial = Math.abs(thetaLength) < Math.PI * 2, uV = {x: 1, y: 0, z: 0}, vV = {x: 0, y: 0, z: -1};
+        const interleaveData = [], indexData = [], isPartial = Math.abs(thetaLength) < Math.PI * 2;
         this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
-            const theta = thetaStart + u * thetaLength, phi = v * Math.PI * 2, mR = {x: 0, y: 0, z: 0}, cT = {x: 0, y: 0, z: 0}, pos = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
-            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, 1.0, theta, uV, vV, mR);
-            this.#set(cT, mR.x * radius, 0, mR.z * radius);
-            const uT = {x: -mR.x, y: 0, z: -mR.z}, vT = {x: 0, y: 1, z: 0};
-            this.#calculateRadialPoint(cT, thickness, phi, uT, vT, pos);
-            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, 1.0, phi, uT, vT, normal);
-            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, u, v);
+            const theta = thetaStart + u * thetaLength, phi = v * Math.PI * 2;
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, theta, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1);
+            this.#set(this.#SCRATCH_V2, this.#SCRATCH_V1.x * radius, 0, this.#SCRATCH_V1.z * radius);
+            this.#set(this.#SCRATCH_V3, -this.#SCRATCH_V1.x, 0, -this.#SCRATCH_V1.z); // uTube
+            this.#calculateRadialPoint(this.#SCRATCH_V2, thickness, phi, this.#SCRATCH_V3, this.#AXIS_UP, this.#SCRATCH_V4); // pos
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, phi, this.#SCRATCH_V3, this.#AXIS_UP, this.#SCRATCH_V1); // normal
+            this.interleavePacker(interleaveData, this.#SCRATCH_V4.x, this.#SCRATCH_V4.y, this.#SCRATCH_V4.z, this.#SCRATCH_V1.x, this.#SCRATCH_V1.y, this.#SCRATCH_V1.z, u, v);
         });
         if (isPartial) {
-            if (capStart) this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, {x: -Math.sin(thetaStart) * radius, y: 0, z: -Math.cos(thetaStart) * radius}, {x: -Math.sin(thetaStart), y: 0, z: -Math.cos(thetaStart)}, {x: 0, y: 1, z: 0}, {x: Math.cos(thetaStart), y: 0, z: -Math.sin(thetaStart)}, true, isRadialCapStart);
-            if (capEnd) this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, {x: -Math.sin(thetaStart + thetaLength) * radius, y: 0, z: -Math.cos(thetaStart + thetaLength) * radius}, {x: -Math.sin(thetaStart + thetaLength), y: 0, z: -Math.cos(thetaStart + thetaLength)}, {x: 0, y: 1, z: 0}, {x: -Math.cos(thetaStart + thetaLength), y: 0, z: Math.sin(thetaStart + thetaLength)}, false, isRadialCapEnd);
+            if (capStart) {
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, thetaStart, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1); // center
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, thetaStart, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V2); // normal
+                this.#set(this.#SCRATCH_V3, Math.cos(thetaStart), 0, -Math.sin(thetaStart)); // tangent
+                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, this.#SCRATCH_V1, this.#SCRATCH_V2, this.#AXIS_UP, this.#SCRATCH_V3, true, isRadialCapStart);
+            }
+            if (capEnd) {
+                const angle = thetaStart + thetaLength;
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, angle, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1);
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, angle, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V2);
+                this.#set(this.#SCRATCH_V3, -Math.cos(angle), 0, Math.sin(angle));
+                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, this.#SCRATCH_V1, this.#SCRATCH_V2, this.#AXIS_UP, this.#SCRATCH_V3, false, isRadialCapEnd);
+            }
         }
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
     static generateTorusKnotData(redGPUContext: RedGPUContext, radius: number, tubeRadius: number, tubularSegments: number, radialSegments: number, windingsAroundAxis: number, windingsAroundCircle: number, uniqueKey: string): Geometry {
-        const interleaveData = [], indexData = [], P1 = {x: 0, y: 0, z: 0}, P2 = {x: 0, y: 0, z: 0}, B = {x: 0, y: 0, z: 0}, T = {x: 0, y: 0, z: 0}, N = {x: 0, y: 0, z: 0};
+        const interleaveData = [], indexData = [];
         this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
             const knotU = v * windingsAroundAxis * Math.PI * 2;
-            this.#calculateTorusKnotPosition(knotU, windingsAroundAxis, windingsAroundCircle, radius, P1);
-            this.#calculateTorusKnotPosition(knotU + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
-            this.#set(T, P2.x - P1.x, P2.y - P1.y, P2.z - P1.z); this.#set(N, P2.x + P1.x, P2.y + P1.y, P2.z + P1.z);
-            this.#cross(T, N, B); this.#normalize(B); this.#cross(B, T, N); this.#normalize(N);
-            const rV = u * Math.PI * 2, pos = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0}, uT = {x: -B.x, y: -B.y, z: -B.z}, vT = {x: -N.x, y: -N.y, z: -N.z};
-            this.#calculateRadialPoint(P1, tubeRadius, rV, uT, vT, pos); this.#calculateRadialPoint({x: 0, y: 0, z: 0}, 1.0, rV, uT, vT, normal);
-            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, v, u);
+            this.#calculateTorusKnotPosition(knotU, windingsAroundAxis, windingsAroundCircle, radius, this.#SCRATCH_V1); // P1
+            this.#calculateTorusKnotPosition(knotU + 0.01, windingsAroundAxis, windingsAroundCircle, radius, this.#SCRATCH_V2); // P2
+            this.#set(this.#SCRATCH_V3, this.#SCRATCH_V2.x - this.#SCRATCH_V1.x, this.#SCRATCH_V2.y - this.#SCRATCH_V1.y, this.#SCRATCH_V2.z - this.#SCRATCH_V1.z); // T
+            this.#set(this.#SCRATCH_V4, this.#SCRATCH_V2.x + this.#SCRATCH_V1.x, this.#SCRATCH_V2.y + this.#SCRATCH_V1.y, this.#SCRATCH_V2.z + this.#SCRATCH_V1.z); // N
+            this.#cross(this.#SCRATCH_V3, this.#SCRATCH_V4, this.#SCRATCH_V2); this.#normalize(this.#SCRATCH_V2); // B
+            this.#cross(this.#SCRATCH_V2, this.#SCRATCH_V3, this.#SCRATCH_V4); this.#normalize(this.#SCRATCH_V4); // N_fixed
+            const radialV = u * Math.PI * 2, uT = {x: -this.#SCRATCH_V2.x, y: -this.#SCRATCH_V2.y, z: -this.#SCRATCH_V2.z}, vT = {x: -this.#SCRATCH_V4.x, y: -this.#SCRATCH_V4.y, z: -this.#SCRATCH_V4.z};
+            this.#calculateRadialPoint(this.#SCRATCH_V1, tubeRadius, radialV, uT, vT, this.#SCRATCH_V3); // pos
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, radialV, uT, vT, this.#SCRATCH_V2); // normal
+            this.interleavePacker(interleaveData, this.#SCRATCH_V3.x, this.#SCRATCH_V3.y, this.#SCRATCH_V3.z, this.#SCRATCH_V2.x, this.#SCRATCH_V2.y, this.#SCRATCH_V2.z, v, u);
         });
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
@@ -141,10 +170,10 @@ class PrimitiveUtils {
         this.interleavePacker(interleaveData, center.x, center.y, center.z, normal.x, normal.y, normal.z, 0.5, isRadial ? uvVStart : 0.5);
         if (radius <= 1e-6 || Math.abs(thetaLength) < 1e-6) return;
         for (let s = 0; s <= radialSegments; s++) {
-            const uRatio = s / radialSegments, angle = thetaStart + uRatio * thetaLength, pos = {x: 0, y: 0, z: 0};
-            this.#calculateRadialPoint(center, radius, angle, uV, vV, pos);
+            const uRatio = s / radialSegments, angle = thetaStart + uRatio * thetaLength;
+            this.#calculateRadialPoint(center, radius, angle, uV, vV, this.#SCRATCH_V1);
             const uvX = isRadial ? uRatio : 0.5 - (Math.sin(angle) * 0.5), uvY = isRadial ? uvVEnd : 0.5 - (Math.cos(angle) * 0.5);
-            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
+            this.interleavePacker(interleaveData, this.#SCRATCH_V1.x, this.#SCRATCH_V1.y, this.#SCRATCH_V1.z, normal.x, normal.y, normal.z, uvX, uvY);
         }
         for (let i = 1; i <= radialSegments; i++) {
             const c = vertexOffset, v1 = vertexOffset + i, v2 = vertexOffset + i + 1;
@@ -158,17 +187,18 @@ class PrimitiveUtils {
             return;
         }
         this.generateGrid(interleaveData, indexData, thetaSegments, phiSegments, (u, v) => {
-            const r = innerRadius + v * (outerRadius - innerRadius), angle = thetaStart + u * thetaLength, uvV = uvVStart + v * (uvVEnd - uvVStart), pos = {x: 0, y: 0, z: 0};
-            this.#calculateRadialPoint(center, r, angle, uV, vV, pos);
+            const r = innerRadius + v * (outerRadius - innerRadius), angle = thetaStart + u * thetaLength, uvV = uvVStart + v * (uvVEnd - uvVStart);
+            this.#calculateRadialPoint(center, r, angle, uV, vV, this.#SCRATCH_V1);
             const uvX = isRadial ? u : 0.5 - (r / outerRadius * Math.sin(angle) * 0.5), uvY = isRadial ? uvV : 0.5 - (r / outerRadius * Math.cos(angle) * 0.5);
-            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
+            this.interleavePacker(interleaveData, this.#SCRATCH_V1.x, this.#SCRATCH_V1.y, this.#SCRATCH_V1.z, normal.x, normal.y, normal.z, uvX, uvY);
         }, false, !isFront);
     }
 
     static generateSphericalData(interleaveData: number[], indexData: number[], radius: number, widthSegments: number, heightSegments: number, phiStart: number, phiLength: number, thetaStart: number, thetaLength: number, yOffset: number = 0, uvVStart: number = 0, uvVEnd: number = 1) {
         this.generateGrid(interleaveData, indexData, widthSegments, heightSegments, (u, v) => {
             const theta = thetaStart + v * thetaLength, phi = phiStart + u * phiLength, sinT = Math.sin(theta), cosT = Math.cos(theta), sinP = Math.sin(phi), cosP = Math.cos(phi), uvV = uvVStart + v * (uvVEnd - uvVStart);
-            this.interleavePacker(interleaveData, radius * (-sinP) * sinT, radius * cosT + yOffset, radius * (-cosP) * sinT, (-sinP) * sinT, cosT, (-cosP) * sinT, u, uvV);
+            const nx = -sinP * sinT, ny = cosT, nz = -cosP * sinT;
+            this.interleavePacker(interleaveData, radius * nx, radius * ny + yOffset, radius * nz, nx, ny, nz, u, uvV);
         }, indexData === null);
     }
 
@@ -179,11 +209,12 @@ class PrimitiveUtils {
             return;
         }
         this.generateGrid(interleaveData, indexData, radialSegments, heightSegments, (u, v) => {
-            const r = v * (radiusBottom - radiusTop) + radiusTop, angle = u * thetaLength + thetaStart, hOff = halfH - v * height, uvV = uvVStart + v * (uvVEnd - uvVStart), ringPos = {x: 0, y: 0, z: 0};
-            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, r, angle, uV, vV, ringPos);
-            const px = center.x + ringPos.x + hOff * axisVector.x, py = center.y + ringPos.y + hOff * axisVector.y, pz = center.z + ringPos.z + hOff * axisVector.z;
-            const rnx = ringPos.x / (r || 1), rny = ringPos.y / (r || 1), rnz = ringPos.z / (r || 1), nx = rnx + slope * axisVector.x, ny = rny + slope * axisVector.y, nz = rnz + slope * axisVector.z, nLen = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
-            this.interleavePacker(interleaveData, px, py, pz, nx / nLen, ny / nLen, nz / nLen, u, uvV);
+            const r = v * (radiusBottom - radiusTop) + radiusTop, angle = u * thetaLength + thetaStart, hOff = halfH - v * height, uvV = uvVStart + v * (uvVEnd - uvVStart);
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, r, angle, uV, vV, this.#SCRATCH_V1);
+            const px = center.x + this.#SCRATCH_V1.x + hOff * axisVector.x, py = center.y + this.#SCRATCH_V1.y + hOff * axisVector.y, pz = center.z + this.#SCRATCH_V1.z + hOff * axisVector.z;
+            const rnx = this.#SCRATCH_V1.x / (r || 1), rny = this.#SCRATCH_V1.y / (r || 1), rnz = this.#SCRATCH_V1.z / (r || 1), nx = rnx + slope * axisVector.x, ny = rny + slope * axisVector.y, nz = rnz + slope * axisVector.z;
+            this.#set(this.#SCRATCH_V2, nx, ny, nz); this.#normalize(this.#SCRATCH_V2);
+            this.interleavePacker(interleaveData, px, py, pz, this.#SCRATCH_V2.x, this.#SCRATCH_V2.y, this.#SCRATCH_V2.z, u, uvV);
         }, skipIndices);
     }
 
@@ -201,7 +232,7 @@ class PrimitiveUtils {
     static generateCapsuleData(redGPUContext: RedGPUContext, radius: number, height: number, radialSegments: number, heightSegments: number, capSegments: number, uniqueKey: string): Geometry {
         const interleaveData: number[] = [], indexData: number[] = [], gridX1 = radialSegments + 1, halfH = height / 2, capArc = (Math.PI / 2) * radius, totalArc = capArc * 2 + height, v1 = capArc / totalArc, v2 = (capArc + height) / totalArc;
         this.generateSphericalData(interleaveData, null, radius, radialSegments, capSegments, 0, Math.PI * 2, 0, Math.PI / 2, halfH, 0, v1);
-        this.generateCylinderTorsoData(interleaveData, null, radius, radius, height, radialSegments, heightSegments, 0, Math.PI * 2, {x: 0, y: 0, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: 1, z: 0}, true, v1, v2);
+        this.generateCylinderTorsoData(interleaveData, null, radius, radius, height, radialSegments, heightSegments, 0, Math.PI * 2, this.#ZERO_VECTOR, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, this.#AXIS_UP, true, v1, v2);
         this.generateSphericalData(interleaveData, null, radius, radialSegments, capSegments, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2, -halfH, v2, 1);
         this.generateGridIndices(indexData, 0, radialSegments, capSegments * 2 + heightSegments, gridX1);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
