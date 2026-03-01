@@ -27,30 +27,14 @@ class Sphere extends Primitive {
      * const sphere = new RedGPU.Sphere(redGPUContext, 1, 32, 16);
      * ```
      *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param radius -
-     * [KO] 구 반지름 (기본값 1)
-     * [EN] Sphere radius (default 1)
-     * @param widthSegments -
-     * [KO] 가로 세그먼트 수 (기본값 16, 최소 3)
-     * [EN] Width segments (default 16, min 3)
-     * @param heightSegments -
-     * [KO] 세로 세그먼트 수 (기본값 16, 최소 2)
-     * [EN] Height segments (default 16, min 2)
-     * @param phiStart -
-     * [KO] 수평 시작 각도 (라디안, 기본값 0)
-     * [EN] Horizontal start angle (radians, default 0)
-     * @param phiLength -
-     * [KO] 수평 각도 길이 (라디안, 기본값 2*PI)
-     * [EN] Horizontal angle length (radians, default 2*PI)
-     * @param thetaStart -
-     * [KO] 수직 시작 각도 (라디안, 기본값 0)
-     * [EN] Vertical start angle (radians, default 0)
-     * @param thetaLength -
-     * [KO] 수직 각도 길이 (라디안, 기본값 PI)
-     * [EN] Vertical angle length (radians, default PI)
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param radius - [KO] 구 반지름 (기본값 1) [EN] Sphere radius (default 1)
+     * @param widthSegments - [KO] 가로 세그먼트 수 (기본값 16, 최소 3) [EN] Width segments (default 16, min 3)
+     * @param heightSegments - [KO] 세로 세그먼트 수 (기본값 16, 최소 2) [EN] Height segments (default 16, min 2)
+     * @param phiStart - [KO] 수평 시작 각도 (라디안, 기본값 0) [EN] Horizontal start angle (radians, default 0)
+     * @param phiLength - [KO] 수평 각도 길이 (라디안, 기본값 2*PI) [EN] Horizontal angle length (radians, default 2*PI)
+     * @param thetaStart - [KO] 수직 시작 각도 (라디안, 기본값 0) [EN] Vertical start angle (radians, default 0)
+     * @param thetaLength - [KO] 수직 각도 길이 (라디안, 기본값 PI) [EN] Vertical angle length (radians, default PI)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -63,35 +47,11 @@ class Sphere extends Primitive {
         thetaLength: number = Math.PI
     ) {
         const uniqueKey = Primitive.generateUniqueKey('SPHERE', { radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength });
-        super(redGPUContext, uniqueKey, () => makeData(
-            uniqueKey, redGPUContext, radius, widthSegments, heightSegments,
-            phiStart, phiLength, thetaStart, thetaLength
+        super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateSphereData(
+            redGPUContext, radius, widthSegments, heightSegments,
+            phiStart, phiLength, thetaStart, thetaLength, uniqueKey
         ));
     }
 }
-
-const makeData = function (uniqueKey, redGPUContext, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-    const interleaveData = [];
-    const indexData = [];
-    const gridX1 = widthSegments + 1;
-
-    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
-    if (radius <= 0 || Math.abs(phiLength) < 1e-6 || Math.abs(thetaLength) < 1e-6) {
-        return PrimitiveUtils.getEmptyGeometry(redGPUContext, uniqueKey);
-    }
-
-    // 구체 데이터 생성 (PrimitiveUtils 사용)
-    PrimitiveUtils.generateSphericalData(
-        interleaveData,
-        radius, widthSegments, heightSegments,
-        phiStart, phiLength, thetaStart, thetaLength
-    );
-
-    // 인덱스 생성 (PrimitiveUtils.generateGridIndices 사용)
-    // [교정] 반시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
-    PrimitiveUtils.generateGridIndices(indexData, 0, widthSegments, heightSegments, gridX1, false);
-
-    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
-};
 
 export default Sphere;

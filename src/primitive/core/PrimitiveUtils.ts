@@ -84,6 +84,133 @@ class PrimitiveUtils {
     }
 
     /**
+     * [KO] 구체(Sphere) 기하 데이터를 생성합니다.
+     * [EN] Generates sphere geometry data.
+     */
+    static generateSphereData(
+        redGPUContext: RedGPUContext,
+        radius: number, widthSegments: number, heightSegments: number,
+        phiStart: number, phiLength: number, thetaStart: number, thetaLength: number,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+
+        if (radius <= 0 || Math.abs(phiLength) < 1e-6 || Math.abs(thetaLength) < 1e-6) {
+            return this.getEmptyGeometry(redGPUContext, uniqueKey);
+        }
+
+        this.generateSphericalData(interleaveData, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength);
+        this.generateGridIndices(indexData, 0, widthSegments, heightSegments, widthSegments + 1, false);
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
+     * [KO] 실린더(Cylinder) 기하 데이터를 생성합니다.
+     * [EN] Generates cylinder geometry data.
+     */
+    static generateCylinderData(
+        redGPUContext: RedGPUContext,
+        radiusTop: number, radiusBottom: number, height: number,
+        radialSegments: number, heightSegments: number,
+        capTop: boolean, capBottom: boolean,
+        thetaStart: number, thetaLength: number,
+        isRadialTop: boolean, isRadialBottom: boolean,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+        const halfHeight = height / 2;
+
+        if ((radiusTop <= 0 && radiusBottom <= 0) || height <= 0 || Math.abs(thetaLength) < 1e-6) {
+            return this.getEmptyGeometry(redGPUContext, uniqueKey);
+        }
+
+        const uVector = {x: 1, y: 0, z: 0}, vVector = {x: 0, y: 0, z: -1};
+
+        this.generateCylinderTorsoData(interleaveData, indexData, radiusTop, radiusBottom, height, radialSegments, heightSegments, thetaStart, thetaLength, {x: 0, y: 0, z: 0}, uVector, vVector);
+
+        if (capTop && radiusTop > 0) {
+            this.generateCircleData(interleaveData, indexData, radiusTop, radialSegments, thetaStart, thetaLength, {x: 0, y: halfHeight, z: 0}, uVector, vVector, {x: 0, y: 1, z: 0}, true, isRadialTop);
+        }
+        if (capBottom && radiusBottom > 0) {
+            this.generateCircleData(interleaveData, indexData, radiusBottom, radialSegments, thetaStart, thetaLength, {x: 0, y: -halfHeight, z: 0}, uVector, vVector, {x: 0, y: -1, z: 0}, false, isRadialBottom);
+        }
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
+     * [KO] 평면(Plane) 기하 데이터를 생성합니다.
+     * [EN] Generates plane geometry data.
+     */
+    static generatePlaneEntryData(
+        redGPUContext: RedGPUContext,
+        width: number, height: number,
+        widthSegments: number, heightSegments: number,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+
+        if (width <= 0 || height <= 0) {
+            return this.getEmptyGeometry(redGPUContext, uniqueKey);
+        }
+
+        this.generatePlaneData(interleaveData, indexData, width, height, 0, widthSegments, heightSegments, 'x', 'y', 'z', 1, -1, 1);
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
+     * [KO] 원형(Circle) 기하 데이터를 생성합니다.
+     * [EN] Generates circle geometry data.
+     */
+    static generateCircleEntryData(
+        redGPUContext: RedGPUContext,
+        radius: number, radialSegments: number, thetaStart: number, thetaLength: number,
+        isRadial: boolean,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+
+        if (radius <= 0 || Math.abs(thetaLength) < 1e-6) {
+            return this.getEmptyGeometry(redGPUContext, uniqueKey);
+        }
+
+        const uVector = {x: 1, y: 0, z: 0}, vVector = {x: 0, y: 0, z: -1};
+        this.generateCircleData(interleaveData, indexData, radius, radialSegments, thetaStart, thetaLength, {x: 0, y: 0, z: 0}, uVector, vVector, {x: 0, y: 1, z: 0}, true, isRadial);
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
+     * [KO] 링(Ring) 기하 데이터를 생성합니다.
+     * [EN] Generates ring geometry data.
+     */
+    static generateRingEntryData(
+        redGPUContext: RedGPUContext,
+        innerRadius: number, outerRadius: number, thetaSegments: number, phiSegments: number,
+        thetaStart: number, thetaLength: number,
+        isRadial: boolean,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+
+        if (outerRadius <= 0 || Math.abs(thetaLength) < 1e-6) {
+            return this.getEmptyGeometry(redGPUContext, uniqueKey);
+        }
+
+        const uVector = {x: 1, y: 0, z: 0}, vVector = {x: 0, y: 0, z: -1};
+        this.generateRingData(interleaveData, indexData, innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, {x: 0, y: 0, z: 0}, uVector, vVector, {x: 0, y: 1, z: 0}, true, isRadial);
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
      * [KO] 토러스(Torus) 기하 데이터를 생성합니다.
      * [EN] Generates torus geometry data.
      */

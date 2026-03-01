@@ -1,4 +1,3 @@
-import {vec3} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
 import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
@@ -6,6 +5,16 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
 /**
  * [KO] Cylinder(실린더) 기본 도형 클래스입니다.
  * [EN] Cylinder primitive geometry class.
+ *
+ * [KO] 상/하단 반지름, 높이 등을 기반으로 실린더(원기둥) 형태의 데이터를 생성하여 관리합니다.
+ * [EN] Generates and manages cylindrical data based on top/bottom radius, height, etc.
+ *
+ * ### Example
+ * ```typescript
+ * const cylinder = new RedGPU.Cylinder(redGPUContext, 1, 1, 2);
+ * ```
+ * <iframe src="/RedGPU/examples/3d/primitive/cylinder/" style="width:100%; height:500px;"></iframe>
+ * @category Primitive
  */
 class Cylinder extends Primitive {
     /**
@@ -13,15 +22,15 @@ class Cylinder extends Primitive {
      * [EN] Creates an instance of Cylinder.
      *
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param radiusTop - [KO] 상단 반지름 [EN] Top radius
-     * @param radiusBottom - [KO] 하단 반지름 [EN] Bottom radius
-     * @param height - [KO] 높이 [EN] Height
-     * @param radialSegments - [KO] 원주 방향 분할 수 [EN] Radial segments
-     * @param heightSegments - [KO] 높이 방향 분할 수 [EN] Height segments
+     * @param radiusTop - [KO] 상단 반지름 (기본값 1) [EN] Top radius (default 1)
+     * @param radiusBottom - [KO] 하단 반지름 (기본값 1) [EN] Bottom radius (default 1)
+     * @param height - [KO] 높이 (기본값 1) [EN] Height (default 1)
+     * @param radialSegments - [KO] 원주 방향 분할 수 (기본값 8) [EN] Radial segments (default 8)
+     * @param heightSegments - [KO] 높이 방향 분할 수 (기본값 1) [EN] Height segments (default 1)
      * @param capTop - [KO] 상단 단면을 닫을지 여부 (기본값 true) [EN] Whether to close the top cap (default true)
      * @param capBottom - [KO] 하단 단면을 닫을지 여부 (기본값 true) [EN] Whether to close the bottom cap (default true)
-     * @param thetaStart - [KO] 시작 각도 [EN] Starting angle
-     * @param thetaLength - [KO] 원호 각도 [EN] Arc angle
+     * @param thetaStart - [KO] 시작 각도 (라디안, 기본값 0) [EN] Starting angle (radians, default 0)
+     * @param thetaLength - [KO] 원호 각도 (라디안, 기본값 2*PI) [EN] Arc angle (radians, default 2*PI)
      * @param isRadialTop - [KO] 상단 단면의 방사형 UV 여부 (기본값 false) [EN] Whether top cap uses radial UV (default false)
      * @param isRadialBottom - [KO] 하단 단면의 방사형 UV 여부 (기본값 false) [EN] Whether bottom cap uses radial UV (default false)
      */
@@ -30,7 +39,7 @@ class Cylinder extends Primitive {
                 radiusBottom: number = 1,
                 height: number = 1,
                 radialSegments: number = 8,
-                heightSegments: number = 8,
+                heightSegments: number = 1,
                 capTop: boolean = true,
                 capBottom: boolean = true,
                 thetaStart: number = 0.0,
@@ -39,66 +48,11 @@ class Cylinder extends Primitive {
                 isRadialBottom: boolean = false
     ) {
         const uniqueKey = Primitive.generateUniqueKey('CYLINDER', { radiusTop, radiusBottom, height, radialSegments, heightSegments, capTop, capBottom, thetaStart, thetaLength, isRadialTop, isRadialBottom });
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, capTop, capBottom, thetaStart, thetaLength, isRadialTop, isRadialBottom));
+        super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateCylinderData(
+            redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments,
+            capTop, capBottom, thetaStart, thetaLength, isRadialTop, isRadialBottom, uniqueKey
+        ));
     }
-}
-
-function makeData(uniqueKey, redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments, capTop, capBottom, thetaStart, thetaLength, isRadialTop, isRadialBottom) {
-    const interleaveData = [];
-    const indexData = [];
-    const halfHeight = height / 2;
-
-    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지
-    if ((radiusTop <= 0 && radiusBottom <= 0) || height <= 0 || Math.abs(thetaLength) < 1e-6) {
-        return PrimitiveUtils.getEmptyGeometry(redGPUContext, uniqueKey);
-    }
-
-    // [업계 표준] 12시(-Z) 기점, 반시계 방향(CCW) 회전 유도 벡터
-    const uVector = {x: 1, y: 0, z: 0};  // 로컬 수평축 (+X)
-    const vVector = {x: 0, y: 0, z: -1}; // 로컬 수직축 (12시 방향, -Z)
-
-    // 1. Torso 생성
-    PrimitiveUtils.generateCylinderTorsoData(
-        interleaveData, indexData,
-        radiusTop, radiusBottom, height,
-        radialSegments, heightSegments,
-        thetaStart, thetaLength,
-        {x: 0, y: 0, z: 0},
-        uVector,
-        vVector
-    );
-
-    // 2. Caps 생성
-    if (capTop && radiusTop > 0) {
-        // Top Cap (+Y 바라봄)
-        PrimitiveUtils.generateCircleData(
-            interleaveData, indexData,
-            radiusTop, radialSegments,
-            thetaStart, thetaLength,
-            {x: 0, y: halfHeight, z: 0},
-            uVector,
-            vVector,
-            {x: 0, y: 1, z: 0},
-            true,
-            isRadialTop
-        );
-    }
-    if (capBottom && radiusBottom > 0) {
-        // Bottom Cap (-Y 바라봄)
-        PrimitiveUtils.generateCircleData(
-            interleaveData, indexData,
-            radiusBottom, radialSegments,
-            thetaStart, thetaLength,
-            {x: 0, y: -halfHeight, z: 0},
-            uVector,
-            vVector,
-            {x: 0, y: -1, z: 0},
-            false, // CCW 생성을 유지하면서 밑면을 앞면으로 설정
-            isRadialBottom
-        );
-    }
-
-    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
 }
 
 export default Cylinder;
