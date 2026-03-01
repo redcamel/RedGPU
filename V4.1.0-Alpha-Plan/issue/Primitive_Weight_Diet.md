@@ -1,7 +1,7 @@
 # [Optimization] Primitive System Architecture Refactoring & Standardization
 
 ## 📌 개요 (Overview)
-RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 기하학적 수식 및 데이터 처리 프로세스를 `PrimitiveUtils`로 중앙 집중화하여 시스템 구조를 근본적으로 개선했습니다. 모든 프리미티브 클래스는 `Primitive` 베이스 클래스와 `PrimitiveUtils`를 활용하는 **Thin Class** 구조로 전환되었습니다.
+RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 기하학적 수식 및 데이터 처리 프로세스를 `PrimitiveUtils`로 중앙 집중화하여 시스템 구조를 근본적으로 개선했습니다. 모든 프리미티브 클래스는 `Primitive` 베이스 클래스와 `PrimitiveUtils`를 활용하는 **Thin Class** 구조(50라인 내외)로 완전히 전환되었습니다.
 
 ---
 
@@ -24,40 +24,26 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **회전 방향** | **상단 조감 기준 반시계 회전 (CCW)** | 정점이 생성되는 궤적은 12시(-Z) → 9시(-X) → 6시(+Z) → 3시(+X) 순서입니다. |
 | **정면 위치** | **u = 0.5 지점** | **[업계 표준]** 텍스처 가로축(U)의 중앙인 50% 지점이 카메라를 보는 정면(+Z축)입니다. |
 
-### 2. 앞면 정의 및 컬링 (Winding & Culling)
+### 2. 생성 방향 표준 (Orientation Standard)
+| 프리미티브 유형 | 생성 평면 | 노멀 방향 | 용도 및 업계 관례 |
+| :--- | :---: | :---: | :--- |
+| **Plane** | **XY (수직)** | **+Z** | **[UI/빌보드 표준]** 카메라를 마주 보는 수직 형태로 생성됩니다. |
+| **Ground** | **XZ (수평)** | **+Y** | **[지형/바닥 표준]** 월드 바닥에 누워 있는 형태로 생성됩니다. |
+| **Circle / Ring** | **XZ (수평)** | **+Y** | **[효과/표식 표준]** 언리얼/유니티 관례에 따라 바닥에 누운 형태로 생성됩니다. |
+
+### 3. 앞면 정의 및 컬링 (Winding & Culling)
 | 항목 | 표준 정의 | 상세 설명 |
 | :--- | :--- | :--- |
 | **앞면 (Front)** | **반시계 방향 (CCW)** | 정점 세 개를 반시계 방향으로 연결하는 면이 앞면입니다. |
 | **안정화 로직** | **CCW 생성 + 표준 인덱스** | 반시계 방향 정점 배치 후 표준 인덱스로 연결하여 바깥쪽을 CCW로 구현합니다. |
 | **가시성** | **뒷면 제거 (Back-face)** | 성능 최적화를 위해 도형의 안쪽면(뒷면)은 기본적으로 렌더링하지 않습니다. |
 
-### 3. UV 매핑 및 텍스처 방향 (UV Standard)
+### 4. UV 매핑 및 텍스처 방향 (UV Standard)
 | 항목 | 표준 정의 | 상세 설명 |
 | :--- | :--- | :--- |
 | **UV 원점** | **상단 좌측 (Top-Left)** | 텍스처의 (0,0)은 도형의 왼쪽 상단에 매핑됩니다. (V-Down 표준) |
 | **수직 흐름** | **위 → 아래** | V=0은 도형의 가장 높은 곳, V=1은 가장 낮은 곳을 의미합니다. |
 | **수평 흐름** | **좌측 → 정면 → 우측** | 반시계 방향 회전에 따라 텍스처가 왼쪽(U=0)에서 정면(U=0.5)을 거쳐 오른쪽(U=1)으로 감쌉니다. |
-
-#### **원형 단면(Cap) 및 Circle UV 옵션**
-`Circle` 및 원형 단면을 가진 프리미티브(`Cylinder`, `Torus`, `Ring`)는 `isRadial` 계열 옵션을 통해 두 가지 매핑 방식을 지원합니다:
-1.  **Planar Mode (isRadial: false, 기본값):**
-    *   텍스처를 단면 위에 그대로 올려놓은 형태입니다. (중심: UV 0.5, 0.5)
-    *   일반적인 물체 표현이나 뚜껑 로고 투영 등에 사용됩니다.
-2.  **Radial Mode (isRadial: true):**
-    *   **성장형/팽창형(Expansion) 매핑:** U축은 각도($0 \rightarrow 1$), V축은 중심에서의 거리($0 \rightarrow 1$)에 매핑됩니다.
-    *   텍스처의 **V 오프셋(V-Offset)** 애니메이션을 통해 원이 중심에서 밖으로 커지는 VFX 효과를 구현할 수 있습니다.
-
-**적용 대상:**
-- **Circle:** `isRadial`
-- **Cylinder:** `isRadialTop`, `isRadialBottom`
-- **Torus:** `isRadialCapStart`, `isRadialCapEnd` (Partial 모드 시)
-- **Ring:** `isRadial`
-
-### 4. 단면 제어 표준 (Capping)
-| 항목 | 명칭 표준 | 적용 대상 및 특징 |
-| :--- | :--- | :--- |
-| **수직 기둥** | **capTop, capBottom** | Cylinder: 위(+Y)와 아래(-Y) 단면을 개별적으로 제어 가능합니다. |
-| **회전 고리** | **capStart, capEnd** | Torus: 시작 각도와 끝 각도의 단면을 개별적으로 제어 가능합니다. |
 
 ---
 
@@ -68,7 +54,7 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | :--- | :--- | :---: |
 | **PrimitiveUtils** | 평면/원형/링/몸통 생성, 그리드 인덱스, 탄젠트 계산 유틸리티화 | ✅ |
 | **Architecture** | 베이스 클래스 uniqueKey 기반 자동 캐싱 및 makeData 외부화 | ✅ |
-| **Thin Class 전략** | 모든 프리미티브 클래스를 50~100라인 이내의 설정 전용 클래스로 전환 | ✅ |
+| **Thin Class 전략** | 모든 프리미티브 클래스를 50라인 이내의 설정 전용 클래스로 정규화 완성 | ✅ |
 | **Cone (New)** | 신규 원뿔 프리미티브 추가 및 실린더 로직 재사용 | ✅ |
 | **Ring (New)** | 신규 고리 프리미티브 추가 및 전용 유틸리티 로직 구현 | ✅ |
 | **UV Options** | `isRadial` (Planar Mode / Radial Mode) 옵션 통합 구현 | ✅ |
@@ -81,7 +67,7 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **Circle** | segments | radialSegments, isRadial | ✅ |
 | **Cone** | - | radius, height, radialSegments, heightSegments, capBottom | ✅ |
 | **Ring** | - | innerRadius, outerRadius, thetaSegments, phiSegments, isRadial | ✅ |
-| **Plane / Ground** | wSegments, hSegments | widthSegments, heightSegments | ✅ |
+| **Plane / Ground** | wSegments, hSegments | widthSegments, heightSegments, flipY | ✅ |
 | **Cylinder** | openEnded | capTop, capBottom, isRadialTop, isRadialBottom | ✅ |
 | **Torus** | radialSubv, bodySubv | radialSegments, tubularSegments | ✅ |
 | **Torus** | start/endAngle, capped | thetaStart, thetaLength, capStart, capEnd, isRadialCapStart, isRadialCapEnd | ✅ |
@@ -93,63 +79,35 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 ## 🛠️ 심층 분석 기반 5대 경량화 과제 (Deep Weight-Diet Strategy)
 
 ### 1. 생성 프로세스 단일화 (`PrimitiveUtils.finalize`) ✅
-*   **문제점:** 모든 프리미티브의 `makeData` 끝에서 `calculateTangents`와 `createPrimitiveGeometry`를 반복 호출함 (중복된 Boilerplate 코드).
-*   **해결:** 탄젠트 계산과 지오메트리 객체 생성을 하나의 정적 메소드로 통합.
-*   **효과:** 각 프리미티브 파일의 말단 로직을 1줄로 단축하고 임포트 의존성 제거.
+*   **해결:** 탄젠트 계산과 지오메트리 객체 생성을 하나의 정적 메소드로 통합하여 Boilerplate 제거.
 
 ### 2. 구체 수학 로직 모듈화 (`PrimitiveUtils.generateSphericalData`) ✅
-*   **문제점:** `Sphere`와 `Capsule` 반구 영역에서 위도/경도 기반의 복잡한 이중 루프 공식이 각각 중복 기재됨.
-*   **해결:** 구체 형태의 정점/노멀/UV를 생성하는 핵심 수학 루프를 유틸리티로 추출.
-*   **효과:** 12시 기점 CCW 공식 등 기하학적 수정을 한 곳에서 전역 관리 가능.
+*   **해결:** `Sphere`와 `Capsule` 반구 영역에서 중복되던 위도/경도 기반 이중 루프 공식을 유틸리티로 추출.
 
 ### 3. 안전장치 로직 표준화 (`PrimitiveUtils.getEmptyGeometry`) ✅
-*   **문제점:** 반지름이 0이거나 각도가 0일 때의 예외 처리 방식이 프리미티브마다 미세하게 다름 (어떤 곳은 1정점 생성, 어떤 곳은 빈 배열 반환).
-*   **해결:** 버퍼 에러를 방지하면서도 최소한의 정점만 갖는 '빈 지오메트리' 반환 로직을 표준화.
-*   **효과:** 런타임 안정성 강화 및 중복된 가드 클로즈(Guard Clause) 제거.
+*   **해결:** 반지름/각도가 0일 때의 예외 처리를 통합하여 런타임 안정성 강화 및 중복 코드 제거.
 
 ### 4. UniqueKey 생성 자동화 (`Primitive.generateUniqueKey`) ✅
-*   **문제점:** 생성자에서 수동으로 문자열 템플릿을 조합하여 `uniqueKey`를 만듦. 오타로 인한 캐싱 오류 위험이 큼.
-*   **해결:** 베이스 클래스에서 프리미티브 이름과 파라미터 객체를 받아 규칙에 맞는 키를 자동 생성하는 로직 도입.
-*   **효과:** 키 생성 규칙 강제화 및 생성자 코드의 가독성 비약적 향상.
+*   **해결:** 베이스 클래스에서 파라미터 기반 캐싱 키 자동 생성 로직 도입으로 오타 위험 제거 및 가독성 향상.
 
 ### 5. 복잡 알고리즘 외부화 (`TorusKnot` 등 무거운 수식 이관) ✅
-*   **문제점:** `TorusKnot`처럼 특수한 곡선 수식이 필요한 경우 클래스 파일 자체가 수백 라인으로 비대해짐.
-*   **해결:** 모든 순수 수학 알고리즘을 `PrimitiveUtils`로 이관하여 클래스는 오직 '설정'만 담당하도록 분리.
-*   **효과:** 프리미티브 클래스들의 평균 크기를 50라인 이하로 유지 (Thin Class 전략).
-
----
-
-## 🛠️ PrimitiveUtils 내부 정밀 튜닝 (Internal Precision Tuning)
-
-| 분류 | 최적화 대상 및 전략 | 기대 효과 | 상태 |
-| :--- | :--- | :--- | :---: |
-| **UV 범위 표준화** | `generateCylinderTorsoData`에 `uvVStart/End` 파라미터 추가 | `Capsule` 내부의 수동 UV 보정 루프 제거 및 코드 단순화 | ✅ |
-| **수학 공식 헬퍼화** | 방사형 좌표/노멀 연산(`center + radius * (cos*V - sin*U)`)을 내부 비공개 메소드로 통합 | `Circle`, `Ring`, `Cylinder` 간의 수식 일관성 100% 보장 | ✅ |
-| **인터페이스 통일** | 모든 유틸리티 생성 함수가 동일한 UV 범위 제어 사양을 따르도록 정렬 | 유틸리티의 예측 가능성 및 확장성 향상 | ✅ |
+*   **해결:** 모든 순수 수학 알고리즘을 `PrimitiveUtils`로 이관하여 클래스 파일 크기를 최소화.
 
 ---
 
 ## 🛠️ 2차 고도화 과제: 구조적 응집도 극대화 (Phase 2: Structural Cohesion)
-시스템의 완성도를 100%로 끌어올리기 위한 추가 정밀 리팩토링 과제입니다.
 
 ### 1. 그리드 패턴 추상화 (`generateGrid`) ✅
-*   **현황**: `Plane`, `Sphere`, `Cylinder`, `Torus` 등 대다수 프리미티브가 동일한 이중 루프(iy/ix) 구조를 중복 소유함.
-*   **해결**: 정점 생성 로직을 콜백으로 받는 공통 그리드 생성 유틸리티를 도입하여 루프 구조를 단일화.
-*   **성과**: `PrimitiveUtils.ts` 내 6개 이상의 메소드에서 중복 루프 제거 및 로직 응집도 향상.
+*   **해결**: `Plane`, `Sphere`, `Cylinder`, `Torus` 등 대다수 프리미티브가 공유하던 이중 루프 구조를 콜백 기반 유틸리티로 통합.
 
 ### 2. 방사형 수식의 완전 통합 (`#calculateRadialPoint` 확대) ✅
-*   **현황**: `Torus`와 `TorusKnot`은 여전히 독자적인 삼각함수 수식을 사용 중.
-*   **해결**: 모든 회전체 프리미티브가 `#calculateRadialPoint`를 공유하도록 통합하여 '12시 기점 CCW 회전' 표준을 한 곳에서 강제.
-*   **성과**: `Torus` 및 `TorusKnot`의 좌표/노멀 연산 로직을 표준 벡터 수식으로 교체하여 엔진 전역의 물리 표준 일관성 확보.
+*   **해결**: `Torus`와 `TorusKnot`까지 `#calculateRadialPoint` 표준 수식을 적용하여 엔진 전역의 물리 표준 일관성 완성.
 
 ### 3. 엔트리 포인트 표준화 (Thin Class 완성) ✅
-*   **현황**: `Sphere`, `Cylinder`, `Plane`, `Circle`, `Ring` 등은 여전히 클래스 내부에 `makeData` 로직이 일부 잔존함.
-*   **해결**: 모든 프리미티브의 엔트리 포인트를 `PrimitiveUtils`로 완전 이관하여, 모든 클래스 파일을 50라인 이내의 순수 설정 클래스로 정규화.
-*   **성과**: 모든 프리미티브 파일이 보일러플레이트 코드 없이 핵심 설정(Constructor)만 포함하게 되었으며, 엔진 전역의 클래스 구조적 통일성 완성.
+*   **해결**: `Sphere`, `Cylinder` 등 클래스 내부에 남은 `makeData` 로직을 `PrimitiveUtils`로 완전 이관. 모든 클래스 파일이 50라인 이내로 정규화됨.
 
-### 4. 벡터 기반 평면 로직 단일화 ⏳
-*   **현황**: `generatePlaneData`가 축 문자열(`'x'`, `'y'`, `'z'`) 기반으로 동작하여 다른 벡터 기반 메소드들과 이질적임.
-*   **해결**: 평면 생성 로직을 `uVector`, `vVector` 기반으로 리팩토링하여 `Box` 및 임의 평면 생성의 유연성 확보.
+### 4. 벡터 기반 평면 로직 단일화 ✅
+*   **해결**: `generatePlaneData`를 축 문자열 방식에서 벡터(`uVector`, `vVector`) 기반으로 리팩토링하여 임의 평면 생성 유연성 확보 및 구조적 통일 달성.
 
 ---
 
@@ -157,11 +115,11 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | 구분 | 대상 항목 | 필요성 및 기대 효과 | 우선순위 | 상태 |
 | :--- | :--- | :--- | :---: | :---: |
 | **구조 개선** | **위 5대 경량화 과제 실행** | 시스템 슬림화 및 아키텍처 완성도 극대화 | ✅ | ✅ |
-| **구조 개선** | **2차 고도화 과제 (4종) 실행** | 중복 0% 달성 및 클래스 정규화 완성 | 🔥 높음 | ⏳ 진행 중 |
+| **구조 개선** | **2차 고도화 과제 (4종) 실행** | 중복 0% 달성 및 클래스 정규화 완성 | ✅ | ✅ |
 | **유지보수** | **PrimitiveUtils 내부 정밀 튜닝** | 유틸리티 응집도 향상 및 복합 도형 생성 효율화 | ✅ | ✅ |
 | **고도화** | 극점 토폴로지 최적화 | 중복 정점 제거를 통한 렌더링 효율 향상 | 🟢 보통 | 🟢 |
 | **고도화** | 6면 개별 UV 제어 | Box 각 면별 독립적 텍스처링 유연성 확보 | 🟢 보통 | 🟢 |
 | **신규** | **Polyhedrons** | 저폴리곤 구체 대체 및 추상 아트 구성 | 🟢 보통 | 🟢 |
 
 ---
-**대상 버전:** V4.1.0-Alpha (Refining)
+**대상 버전:** V4.1.0-Alpha (완료)

@@ -16,7 +16,7 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 10;
-        controller.tilt = 0;
+        controller.tilt = -45;
         controller.speedDistance = 0.3;
 
         const scene = new RedGPU.Display.Scene();
