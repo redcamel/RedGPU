@@ -254,14 +254,21 @@ class PrimitiveUtils {
         const typedInterleaveData = new Float32Array(interleaveData);
         const typedIndexData = new Uint32Array(indexData);
 
+        // [KO] 구조체 정의에서 오프셋을 동적으로 추출 (결합도 제거)
+        const struct = Primitive.primitiveInterleaveStruct;
+        const posOffset = struct.getAttributeOffset('vertexPosition');
+        const normalOffset = struct.getAttributeOffset('vertexNormal');
+        const uvOffset = struct.getAttributeOffset('texcoord');
+        const tangentOffset = struct.getAttributeOffset('tangent');
+
         calculateTangentsInterleaved(
             typedInterleaveData,
             typedIndexData,
             stride,
-            0, // posOffset
-            3, // normalOffset
-            6, // uvOffset
-            8  // tangentOffset
+            posOffset,
+            normalOffset,
+            uvOffset,
+            tangentOffset
         );
 
         for (let i = 0, len = typedInterleaveData.length; i < len; i++) {

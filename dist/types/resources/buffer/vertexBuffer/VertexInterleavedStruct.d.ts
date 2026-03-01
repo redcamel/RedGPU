@@ -46,4 +46,11 @@ export default class VertexInterleavedStruct {
      * [EN] Returns the internal attribute definition map.
      */
     get define(): Record<string, VertexInterleavedStructElement>;
+    /**
+     * [KO] 특정 속성의 오프셋(float 단위 인덱스)을 반환합니다.
+     * [EN] Returns the offset (float unit index) of a specific attribute.
+     * @param attributeName - [KO] 속성 이름 [EN] Attribute name
+     * @returns [KO] float 단위 오프셋 [EN] Offset in float units
+     */
+    getAttributeOffset(attributeName: string): number;
 }
