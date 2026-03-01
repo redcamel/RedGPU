@@ -39,7 +39,7 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **수평 흐름** | **좌측 → 정면 → 우측** | 반시계 방향 회전에 따라 텍스처가 왼쪽(U=0)에서 정면(U=0.5)을 거쳐 오른쪽(U=1)으로 감쌉니다. |
 
 #### **원형 단면(Cap) 및 Circle UV 옵션**
-`Circle` 및 원형 단면을 가진 프리미티브(`Cylinder`, `Torus`)는 `isRadial` 계열 옵션을 통해 두 가지 매핑 방식을 지원합니다:
+`Circle` 및 원형 단면을 가진 프리미티브(`Cylinder`, `Torus`, `Ring`)는 `isRadial` 계열 옵션을 통해 두 가지 매핑 방식을 지원합니다:
 1.  **Planar Mode (isRadial: false, 기본값):**
     *   텍스처를 단면 위에 그대로 올려놓은 형태입니다. (중심: UV 0.5, 0.5)
     *   일반적인 물체 표현이나 뚜껑 로고 투영 등에 사용됩니다.
@@ -51,6 +51,7 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 - **Circle:** `isRadial`
 - **Cylinder:** `isRadialTop`, `isRadialBottom`
 - **Torus:** `isRadialCapStart`, `isRadialCapEnd` (Partial 모드 시)
+- **Ring:** `isRadial`
 
 ### 4. 단면 제어 표준 (Capping)
 | 항목 | 명칭 표준 | 적용 대상 및 특징 |
@@ -77,9 +78,10 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 ### 1. 로직 및 코어 시스템 개선
 | 항목 | 리팩토링 및 고도화 내용 | 상태 |
 | :--- | :--- | :---: |
-| **PrimitiveUtils** | 평면/원형/몸통 생성, 그리드 인덱스, 탄젠트 계산 유틸리티화 | 🟢 |
+| **PrimitiveUtils** | 평면/원형/링/몸통 생성, 그리드 인덱스, 탄젠트 계산 유틸리티화 | 🟢 |
 | **Architecture** | 베이스 클래스 uniqueKey 기반 자동 캐싱 및 makeData 외부화 | 🟢 |
 | **Cone (New)** | 신규 원뿔 프리미티브 추가 및 실린더 로직 재사용 | 🟢 |
+| **Ring (New)** | 신규 고리 프리미티브 추가 및 전용 유틸리티 로직 구현 | 🟢 |
 | **UV Options** | `isRadial` (Planar Mode / Radial Mode) 옵션 통합 구현 | 🟢 |
 | **Tooling** | 전 예제 4-메쉬 레이아웃 및 고해상도 라벨링 표준화 | 🟢 |
 
@@ -89,6 +91,7 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **Box** | wSegments, hSegments, dSegments | widthSegments, heightSegments, depthSegments | 🟢 |
 | **Circle** | segments | radialSegments, isRadial | 🟢 |
 | **Cone** | - | radius, height, radialSegments, heightSegments, capBottom | 🟢 |
+| **Ring** | - | innerRadius, outerRadius, thetaSegments, phiSegments, isRadial | 🟢 |
 | **Plane / Ground** | wSegments, hSegments | widthSegments, heightSegments | 🟢 |
 | **Cylinder** | openEnded | capTop, capBottom, isRadialTop, isRadialBottom | 🟢 |
 | **Torus** | radialSubv, bodySubv | radialSegments, tubularSegments | 🟢 |
@@ -115,7 +118,6 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | **구조 개선** | **위 최적화 과제(4건) 실행** | 코드 슬림화 및 아키텍처 완성도 극대화 | 🔥 높음 |
 | **고도화** | 극점 토폴로지 최적화 | 중복 정점 제거를 통한 렌더링 효율 향상 | 🟢 보통 |
 | **고도화** | 6면 개별 UV 제어 | Box 각 면별 독립적 텍스처링 유연성 확보 | 🟢 보통 |
-| **신규** | **Ring (고리)** | UI, 포탈 효과, 궤도 시각화 등에 활용 | 🔥 높음 |
 | **신규** | **Polyhedrons** | 저폴리곤 구체 대체 및 추상 아트 구성 | 🟢 보통 |
 
 ---
