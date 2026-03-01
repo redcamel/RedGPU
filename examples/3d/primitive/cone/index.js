@@ -1,11 +1,11 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
 
 /**
- * [KO] Plane Primitive 예제
- * [EN] Plane Primitive example
+ * [KO] Cone Primitive 예제
+ * [EN] Cone Primitive example
  *
- * [KO] Plane 프리미티브 생성 및 모든 속성을 실시간으로 제어하는 방법을 보여줍니다.
- * [EN] Demonstrates how to create a Plane primitive and control all its properties in real-time.
+ * [KO] Cone 프리미티브 생성 및 모든 속성을 실시간으로 제어하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a Cone primitive and control all its properties in real-time.
  */
 
 const canvas = document.createElement('canvas');
@@ -16,7 +16,7 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 10;
-        controller.tilt = 0;
+        controller.tilt = -15;
         controller.speedDistance = 0.3;
 
         const scene = new RedGPU.Display.Scene();
@@ -44,32 +44,32 @@ const createPrimitive = (redGPUContext, scene) => {
             redGPUContext,
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
         ),
-        visualTest: new RedGPU.Material.BitmapMaterial(
+        radialTest: new RedGPU.Material.BitmapMaterial(
             redGPUContext,
-            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/crate.png')
+            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')
         ),
         wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    const planeGeometry = new RedGPU.Primitive.Plane(redGPUContext, 4, 4, 10, 10);
+    const coneGeometry = new RedGPU.Primitive.Cone(redGPUContext, 1, 2, 32, 1, true, 0, Math.PI * 2);
 
-    const gap = 5.5;
-    const objects = [
+    const gap = 3.5;
+    const items = [
         {material: materials.wireframe, position: [-gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, label: 'Line List'},
         {material: materials.solid, position: [-gap * 0.5, 0, 0], label: 'Triangle List<br/>(Grid)'},
-        {material: materials.visualTest, position: [gap * 0.5, 0, 0], label: 'Triangle List<br/>(Diffuse)'},
+        {material: materials.radialTest, position: [gap * 0.5, 0, 0], label: 'Triangle List<br/>(Diffuse)'},
         {material: materials.point, position: [gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'Point List'},
     ];
 
-    objects.forEach(({material, position, topology, label: labelText}) => {
-        const mesh = new RedGPU.Display.Mesh(redGPUContext, planeGeometry, material);
+    items.forEach(({material, position, topology, label: labelText}) => {
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, coneGeometry, material);
         if (topology) mesh.primitiveState.topology = topology;
         mesh.setPosition(...position);
         scene.addChild(mesh);
 
         const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.setPosition(position[0], 3.0, position[2]);
+        label.setPosition(position[0], 2.2, position[2]);
         label.text = labelText;
         label.color = '#ffffff';
         label.fontSize = 32;
@@ -78,8 +78,8 @@ const createPrimitive = (redGPUContext, scene) => {
     });
 
     const titleText = new RedGPU.Display.TextField3D(redGPUContext);
-    titleText.setPosition(0, -3.3, 0);
-    titleText.text = 'Customizable Plane Primitive';
+    titleText.setPosition(0, -2.5, 0);
+    titleText.text = 'Customizable Cone Primitive';
     titleText.color = '#ffffff';
     titleText.fontSize = 96;
     titleText.fontWeight = 500;
@@ -88,25 +88,30 @@ const createPrimitive = (redGPUContext, scene) => {
 };
 
 const renderTestPane = async (redGPUContext) => {
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext)
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
     const pane = new Pane();
 
     const config = {
-        width: 4,
-        height: 4,
-        widthSegments: 10,
-        heightSegments: 10,
-        flipY: false,
+        radius: 1,
+        height: 2,
+        radialSegments: 32,
+        heightSegments: 1,
+        capBottom: true,
+        thetaStart: 0,
+        thetaLength: Math.PI * 2,
         cullMode: RedGPU.GPU_CULL_MODE.BACK
     };
 
     const updateGeometry = () => {
         const meshList = redGPUContext.viewList[0].scene.children;
-        const newGeometry = new RedGPU.Primitive.Plane(
+        const newGeometry = new RedGPU.Primitive.Cone(
             redGPUContext,
-            config.width, config.height, config.widthSegments, config.heightSegments, config.flipY
+            config.radius, config.height,
+            config.radialSegments, config.heightSegments,
+            config.capBottom,
+            config.thetaStart, config.thetaLength
         );
 
         meshList.forEach(mesh => {
@@ -125,12 +130,14 @@ const renderTestPane = async (redGPUContext) => {
         });
     };
 
-    const geometryFolder = pane.addFolder({title: 'Plane Properties', expanded: true});
-    geometryFolder.addBinding(config, 'width', {min: 1, max: 10, step: 1}).on('change', updateGeometry);
-    geometryFolder.addBinding(config, 'height', {min: 1, max: 10, step: 1}).on('change', updateGeometry);
-    geometryFolder.addBinding(config, 'widthSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
+    const geometryFolder = pane.addFolder({title: 'Geometry Properties', expanded: true});
+    geometryFolder.addBinding(config, 'radius', {min: 0, max: 2, step: 0.1}).on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'height', {min: 0.5, max: 5, step: 0.1}).on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'radialSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
     geometryFolder.addBinding(config, 'heightSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
-    geometryFolder.addBinding(config, 'flipY').on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'capBottom').on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+    geometryFolder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
 
     const materialFolder = pane.addFolder({title: 'Material State', expanded: true});
     materialFolder.addBinding(config, 'cullMode', {

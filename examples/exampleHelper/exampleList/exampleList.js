@@ -119,6 +119,15 @@ const ExampleList = [
                         },
                     },
                     {
+                        name: 'Cone',
+                        path: '3d/primitive/cone',
+                        description: {
+                            ko: `RedGPU가 지원하는 기본 Cone 프리미티브에 대한 샘플입니다. Cone 설정 옵션을 실시간으로 테스트할 수 있습니다.`, 
+                            en: `Samples for the basic Cone Primitives supported by RedGPU. Provides real-time testing of Cone configuration options.`
+
+                        },
+                    },
+                    {
                         name: 'Cylinder',
                         path: '3d/primitive/cylinder',
                         description: {

@@ -54,10 +54,10 @@ const createPrimitive = (redGPUContext, scene) => {
 
     const gap = 3.5;
     const items = [
-        {material: materials.wireframe, position: [-gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, label: 'line-list (Planar)', isRadial: false},
-        {material: materials.solid, position: [-gap * 0.5, 0, 0], label: 'triangle-list (Planar)', isRadial: false},
-        {material: materials.radialTest, position: [gap * 0.5, 0, 0], label: 'triangle-list (Radial)', isRadial: true},
-        {material: materials.point, position: [gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'point-list (Planar)', isRadial: false},
+        {material: materials.wireframe, position: [-gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, label: 'Line List<br/>(Planar Mode)', isRadial: false},
+        {material: materials.solid, position: [-gap * 0.5, 0, 0], label: 'Triangle List<br/>(Planar Mode)', isRadial: false},
+        {material: materials.radialTest, position: [gap * 0.5, 0, 0], label: 'Triangle List<br/>(Radial Mode)', isRadial: true},
+        {material: materials.point, position: [gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'Point List<br/>(Planar Mode)', isRadial: false},
     ];
 
     items.forEach(({material, position, topology, label: labelText, isRadial}) => {
@@ -73,8 +73,8 @@ const createPrimitive = (redGPUContext, scene) => {
         label.setPosition(position[0], 2.0, position[2]);
         label.text = labelText;
         label.color = '#ffffff';
-        label.fontSize = 14;
-        label.worldSize = 0.6;
+        label.fontSize = 32;
+        label.worldSize = labelText.includes('<br/>') ? 1.0 : 0.5;
         scene.addChild(label);
     });
 
@@ -82,7 +82,7 @@ const createPrimitive = (redGPUContext, scene) => {
     titleText.setPosition(0, -2.3, 0);
     titleText.text = 'Customizable Circle Primitive';
     titleText.color = '#ffffff';
-    titleText.fontSize = 48;
+    titleText.fontSize = 96;
     titleText.fontWeight = 500;
     titleText.worldSize = 1.3;
     scene.addChild(titleText);

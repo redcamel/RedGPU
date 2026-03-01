@@ -103,14 +103,14 @@ RedGPU.init(
 			// [KO] Circle/Cylinder 전용 모드 라벨 추가
 			if (item.name === 'Circle' || item.name === 'Cylinder') {
 				const planarLabel = new RedGPU.Display.TextField3D(redGPUContext);
-				planarLabel.text = 'Planar';
+				planarLabel.text = 'Planar Mode';
 				planarLabel.worldSize = 0.35;
 				planarLabel.x = x;
 				planarLabel.y = startY + 1.5;
 				scene.addChild(planarLabel);
 
 				const radialLabel = new RedGPU.Display.TextField3D(redGPUContext);
-				radialLabel.text = 'Radial';
+				radialLabel.text = 'Radial Mode';
 				radialLabel.worldSize = 0.35;
 				radialLabel.x = x;
 				radialLabel.y = -startY - 1.5;

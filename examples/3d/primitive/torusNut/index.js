@@ -44,6 +44,10 @@ const createPrimitive = (redGPUContext, scene) => {
             redGPUContext,
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
         ),
+        visualTest: new RedGPU.Material.BitmapMaterial(
+            redGPUContext,
+            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')
+        ),
         wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
         point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
@@ -52,12 +56,13 @@ const createPrimitive = (redGPUContext, scene) => {
 
     const gap = 4.0;
     const objects = [
-        {material: materials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
-        {material: materials.solid, position: [0, 0, 0]},
-        {material: materials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
+        {material: materials.wireframe, position: [-gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, label: 'Line List'},
+        {material: materials.solid, position: [-gap * 0.5, 0, 0], label: 'Triangle List<br/>(Grid)'},
+        {material: materials.visualTest, position: [gap * 0.5, 0, 0], label: 'Triangle List<br/>(Diffuse)'},
+        {material: materials.point, position: [gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'Point List'},
     ];
 
-    objects.forEach(({material, position, topology}) => {
+    objects.forEach(({material, position, topology, label: labelText}) => {
         const mesh = new RedGPU.Display.Mesh(redGPUContext, torusKnotGeometry, material);
         if (topology) mesh.primitiveState.topology = topology;
         mesh.setPosition(...position);
@@ -65,10 +70,10 @@ const createPrimitive = (redGPUContext, scene) => {
 
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.setPosition(position[0], 2.4, position[2]);
-        label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        label.text = labelText;
         label.color = '#ffffff';
-        label.fontSize = 14;
-        label.worldSize = 0.7;
+        label.fontSize = 32;
+        label.worldSize = labelText.includes('<br/>') ? 1.0 : 0.5;
         scene.addChild(label);
     });
 
@@ -76,7 +81,7 @@ const createPrimitive = (redGPUContext, scene) => {
     titleText.setPosition(0, -2.7, 0);
     titleText.text = 'Customizable TorusKnot Primitive';
     titleText.color = '#ffffff';
-    titleText.fontSize = 48;
+    titleText.fontSize = 96;
     titleText.fontWeight = 500;
     titleText.worldSize = 1.3;
     scene.addChild(titleText);
