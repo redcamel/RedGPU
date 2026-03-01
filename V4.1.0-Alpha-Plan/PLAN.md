@@ -55,18 +55,20 @@
 | **LUT 텍스처 리소스 통합** | ✅ 완료 | 5종의 개별 LUT 클래스를 `SkyAtmosphereLUTTexture`로 단일화하여 코드 중복 제거 |
 | **[Direct-Injected 큐브 텍스처 관리 표준화](issue/infrastructure/Refactor_IBLCubeTexture_to_DirectCubeTexture.md)** | ✅ 완료 | `IBLCubeTexture`를 범용 클래스로 분리 및 IBL 모듈 의존성 제거 |
 | **리소스 업데이트 API 정규화** | ✅ 완료 | `__fireListenerList`를 `notifyUpdate`로 리네임하여 엔진 전역 API 직관성 확보 |
+| **[프리미티브 시스템 아키텍처 리팩토링](issue/Primitive_Weight_Diet.md)** | ✅ 완료 | `PrimitiveUtils` 중심의 로직 통합, 12시 기점 CCW 표준 확립 및 5대 경량화 완수 |
 | **Import 전수 점검** | ⏳ 대기 | 전체 프로젝트 참조 무결성 확인 및 최적화 |
 
 ### 3.2 문서화 및 예제
 | 항목 | 우선순위 | 상태 | 상세 목표 |
 | :--- | :---: | :---: | :--- |
 | **SkyAtmosphere 가이드** | 🔴 최고 | ✅ 완료 | 물리 기반 하늘 설정 및 조명 연동 매뉴얼/예제 작성 완료 |
+| **프리미티브 표준화 예제** | 🟠 높음 | ✅ 완료 | 전 프리미티브 4-메쉬 레이아웃 및 고해상도 라벨링 표준화 완료 |
 | **API TypeDoc 보완** | 🟡 보통 | ✅ 진행 중 | 핵심 엔진 API 주석 보완 (KO/EN) 및 파편화 정리 |
 
 ---
 
 ## 4. 진행 상황 (Progress)
-- 전체 진행률: **75%** (리소스 관리 최적화 및 전역 API 정규화 완료)
+- 전체 진행률: **85%** (프리미티브 시스템 리팩토링 및 신규 지오메트리 통합 완료)
 
 ---
-**최종 업데이트:** 2026년 2월 26일
+**최종 업데이트:** 2026년 3월 1일

@@ -20,32 +20,13 @@ declare class TorusKnot extends Primitive {
      * [KO] TorusKnot 인스턴스를 생성합니다.
      * [EN] Creates an instance of TorusKnot.
      *
-     * ### Example
-     * ```typescript
-     * const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 64, 8, 2, 3);
-     * ```
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param radius -
-     * [KO] 전체 반지름 (기본값 1)
-     * [EN] Overall radius (default 1)
-     * @param tubeRadius -
-     * [KO] 튜브(단면) 반지름 (기본값 0.4)
-     * [EN] Tube radius (default 0.4)
-     * @param tubularSegments -
-     * [KO] 둘레 세그먼트 수 (기본값 64, 최소 3)
-     * [EN] Tubular segments (default 64, min 3)
-     * @param radialSegments -
-     * [KO] 단면 세그먼트 수 (기본값 8, 최소 3)
-     * [EN] Radial segments (default 8, min 3)
-     * @param windingsAroundAxis -
-     * [KO] 매듭이 중심축을 따라 회전하는 횟수 (p, 기본값 2)
-     * [EN] Number of times the knot winds around the central axis (p, default 2)
-     * @param windingsAroundCircle -
-     * [KO] 매듭이 전체 둘레를 따라 회전하는 횟수 (q, 기본값 3)
-     * [EN] Number of times the knot winds around the major circle (q, default 3)
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param radius - [KO] 전체 반지름 (기본값 1) [EN] Overall radius (default 1)
+     * @param tubeRadius - [KO] 튜브(단면) 반지름 (기본값 0.4) [EN] Tube radius (default 0.4)
+     * @param tubularSegments - [KO] 둘레 세그먼트 수 (기본값 64, 최소 3) [EN] Tubular segments (default 64, min 3)
+     * @param radialSegments - [KO] 단면 세그먼트 수 (기본값 8, 최소 3) [EN] Radial segments (default 8, min 3)
+     * @param windingsAroundAxis - [KO] 매듭이 중심축을 따라 회전하는 횟수 (p, 기본값 2) [EN] Number of times the knot winds around the central axis (p, default 2)
+     * @param windingsAroundCircle - [KO] 매듭이 전체 둘레를 따라 회전하는 횟수 (q, 기본값 3) [EN] Number of times the knot winds around the major circle (q, default 3)
      */
     constructor(redGPUContext: RedGPUContext, radius?: number, tubeRadius?: number, tubularSegments?: number, radialSegments?: number, windingsAroundAxis?: number, windingsAroundCircle?: number);
 }
