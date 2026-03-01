@@ -35,16 +35,16 @@ class Torus extends Primitive {
      * @param isRadialCapEnd - [KO] 끝 단면의 방사형 UV 여부 (기본값 false) [EN] Whether end cap uses radial UV (default false)
      */
     constructor(redGPUContext: RedGPUContext,
-                radius = 1,
-                thickness = 0.5,
-                radialSegments = 16,
-                tubularSegments = 16,
-                thetaStart = 0,
-                thetaLength = Math.PI * 2,
-                capStart = false,
-                capEnd = false,
-                isRadialCapStart = false,
-                isRadialCapEnd = false
+                radius: number = 1,
+                thickness: number = 0.5,
+                radialSegments: number = 16,
+                tubularSegments: number = 16,
+                thetaStart: number = 0,
+                thetaLength: number = Math.PI * 2,
+                capStart: boolean = false,
+                capEnd: boolean = false,
+                isRadialCapStart: boolean = false,
+                isRadialCapEnd: boolean = false
     ) {
         if (radialSegments < 3) throw new Error('radialSegments must be 3 or greater');
         if (tubularSegments < 3) throw new Error('tubularSegments must be 3 or greater');

@@ -82,8 +82,13 @@ RedGPU 프로젝트의 핵심 구성 요소인 재질(Material) 시스템 내의
     </tr>
     <tr>
       <td><b>탄젠트 데이터 활용</b></td>
-      <td>정점 데이터의 <code>Tangent</code> 속성을 사용하여 실시간 연산 부하 감소</td>
+      <td><code>PrimitiveUtils.calculateTangents</code> 최적화(TypedArray 직접 처리) 및 실시간 TBN 연산 부하 감소</td>
       <td align="center">🟡</td>
+    </tr>
+    <tr>
+      <td><b>리소스 생성 GC 최적화</b></td>
+      <td>지오메트리 생성 루프 내 객체 생성 최소화 (Scratchpad 활용 리팩토링)</td>
+      <td align="center">✅</td>
     </tr>
     <tr>
       <td><b>Shader Chunk 모듈화</b></td>

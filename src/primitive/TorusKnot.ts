@@ -14,7 +14,7 @@ import PrimitiveUtils from "./core/PrimitiveUtils";
  * // p=2, q=3 매듭 토러스 생성
  * const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 128, 16, 2, 3);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/torusNut/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/torusKnot/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 class TorusKnot extends Primitive {
@@ -31,12 +31,12 @@ class TorusKnot extends Primitive {
      * @param windingsAroundCircle - [KO] 매듭이 전체 둘레를 따라 회전하는 횟수 (q, 기본값 3) [EN] Number of times the knot winds around the major circle (q, default 3)
      */
     constructor(redGPUContext: RedGPUContext,
-                radius = 1,
-                tubeRadius = 0.4,
-                tubularSegments = 64,
-                radialSegments = 8,
-                windingsAroundAxis = 2,
-                windingsAroundCircle = 3
+                radius: number = 1,
+                tubeRadius: number = 0.4,
+                tubularSegments: number = 64,
+                radialSegments: number = 8,
+                windingsAroundAxis: number = 2,
+                windingsAroundCircle: number = 3
     ) {
         const uniqueKey = Primitive.generateUniqueKey('TORUS_KNOT', { radius, tubeRadius, tubularSegments, radialSegments, windingsAroundAxis, windingsAroundCircle });
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateTorusKnotData(

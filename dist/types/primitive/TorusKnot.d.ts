@@ -12,7 +12,7 @@ import Primitive from "./core/Primitive";
  * // p=2, q=3 매듭 토러스 생성
  * const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 128, 16, 2, 3);
  * ```
- * <iframe src="/RedGPU/examples/3d/primitive/torusNut/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/primitive/torusKnot/" style="width:100%; height:500px;"></iframe>
  * @category Primitive
  */
 declare class TorusKnot extends Primitive {
