@@ -18,13 +18,17 @@ class PrimitiveUtils {
     static readonly #AXIS_UP = {x: 0, y: 1, z: 0};      // +Y
     static readonly #AXIS_DOWN = {x: 0, y: -1, z: 0};   // -Y
     
-    // [KO] 내부 복합 연산용 Scratchpad 객체
+    // [KO] 내부 복합 연산용 Scratchpad 객체 (GC-Free 최적화)
     static readonly #SCRATCH_V1 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V2 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V3 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V4 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V5 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V6 = {x: 0, y: 0, z: 0};
+    static readonly #SCRATCH_V7 = {x: 0, y: 0, z: 0};
+    static readonly #SCRATCH_V8 = {x: 0, y: 0, z: 0};
+    static readonly #SCRATCH_V9 = {x: 0, y: 0, z: 0};
+    static readonly #SCRATCH_V10 = {x: 0, y: 0, z: 0};
 
     static get #STRIDE_FLOATS(): number {
         return Primitive.primitiveInterleaveStruct.arrayStride / 4;
@@ -115,7 +119,7 @@ class PrimitiveUtils {
         const interleaveData = [], indexData = [], isPartial = Math.abs(thetaLength) < Math.PI * 2;
         this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
             const theta = thetaStart + u * thetaLength, phi = v * Math.PI * 2;
-            const mR = {x: 0, y: 0, z: 0}, cT = {x: 0, y: 0, z: 0}, uT = {x: 0, y: 0, z: 0}, pos = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
+            const mR = this.#SCRATCH_V1, cT = this.#SCRATCH_V2, uT = this.#SCRATCH_V3, pos = this.#SCRATCH_V4, normal = this.#SCRATCH_V5;
             this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, theta, this.#BASIS_U, this.#BASIS_V, mR);
             this.#set(cT, mR.x * radius, 0, mR.z * radius);
             this.#set(uT, -mR.x, 0, -mR.z);
@@ -125,15 +129,15 @@ class PrimitiveUtils {
         });
         if (isPartial) {
             const uV = this.#BASIS_U, vV = this.#BASIS_V, up = this.#AXIS_UP;
+            const center = this.#SCRATCH_V1, normal = this.#SCRATCH_V2, tangent = this.#SCRATCH_V3;
             if (capStart) {
-                const center = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0}, tangent = {x: 0, y: 0, z: 0};
                 this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, thetaStart, uV, vV, center);
                 this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, thetaStart, uV, vV, normal);
                 this.#set(tangent, Math.cos(thetaStart), 0, -Math.sin(thetaStart));
                 this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, center, normal, up, tangent, true, isRadialCapStart);
             }
             if (capEnd) {
-                const angle = thetaStart + thetaLength, center = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0}, tangent = {x: 0, y: 0, z: 0};
+                const angle = thetaStart + thetaLength;
                 this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, angle, uV, vV, center);
                 this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, angle, uV, vV, normal);
                 this.#set(tangent, -Math.cos(angle), 0, Math.sin(angle));
@@ -147,14 +151,16 @@ class PrimitiveUtils {
         const interleaveData = [], indexData = [];
         this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
             const knotU = v * windingsAroundAxis * Math.PI * 2;
-            const P1 = {x: 0, y: 0, z: 0}, P2 = {x: 0, y: 0, z: 0}, T = {x: 0, y: 0, z: 0}, N = {x: 0, y: 0, z: 0}, B = {x: 0, y: 0, z: 0};
+            const P1 = this.#SCRATCH_V1, P2 = this.#SCRATCH_V2, T = this.#SCRATCH_V3, N = this.#SCRATCH_V4, B = this.#SCRATCH_V5, pos = this.#SCRATCH_V6, normal = this.#SCRATCH_V7, uT = this.#SCRATCH_V8, vT = this.#SCRATCH_V9;
             this.#calculateTorusKnotPosition(knotU, windingsAroundAxis, windingsAroundCircle, radius, P1);
             this.#calculateTorusKnotPosition(knotU + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
             this.#set(T, P2.x - P1.x, P2.y - P1.y, P2.z - P1.z);
             this.#set(N, P2.x + P1.x, P2.y + P1.y, P2.z + P1.z);
             this.#cross(T, N, B); this.#normalize(B);
             this.#cross(B, T, N); this.#normalize(N);
-            const radialV = u * Math.PI * 2, uT = {x: -B.x, y: -B.y, z: -B.z}, vT = {x: -N.x, y: -N.y, z: -N.z}, pos = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
+            const radialV = u * Math.PI * 2;
+            this.#set(uT, -B.x, -B.y, -B.z);
+            this.#set(vT, -N.x, -N.y, -N.z);
             this.#calculateRadialPoint(P1, tubeRadius, radialV, uT, vT, pos);
             this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, radialV, uT, vT, normal);
             this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, v, u);
@@ -178,8 +184,9 @@ class PrimitiveUtils {
         const vertexOffset = interleaveData.length / this.#STRIDE_FLOATS;
         this.interleavePacker(interleaveData, center.x, center.y, center.z, normal.x, normal.y, normal.z, 0.5, isRadial ? uvVStart : 0.5);
         if (radius <= 1e-6 || Math.abs(thetaLength) < 1e-6) return;
+        const pos = this.#SCRATCH_V10;
         for (let s = 0; s <= radialSegments; s++) {
-            const uRatio = s / radialSegments, angle = thetaStart + uRatio * thetaLength, pos = {x: 0, y: 0, z: 0};
+            const uRatio = s / radialSegments, angle = thetaStart + uRatio * thetaLength;
             this.#calculateRadialPoint(center, radius, angle, uV, vV, pos);
             const uvX = isRadial ? uRatio : 0.5 - (Math.sin(angle) * 0.5), uvY = isRadial ? uvVEnd : 0.5 - (Math.cos(angle) * 0.5);
             this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
@@ -195,8 +202,9 @@ class PrimitiveUtils {
             this.interleavePacker(interleaveData, center.x, center.y, center.z, normal.x, normal.y, normal.z, 0.5, 0.5);
             return;
         }
+        const pos = this.#SCRATCH_V10;
         this.generateGrid(interleaveData, indexData, thetaSegments, phiSegments, (u, v) => {
-            const r = innerRadius + v * (outerRadius - innerRadius), angle = thetaStart + u * thetaLength, uvV = uvVStart + v * (uvVEnd - uvVStart), pos = {x: 0, y: 0, z: 0};
+            const r = innerRadius + v * (outerRadius - innerRadius), angle = thetaStart + u * thetaLength, uvV = uvVStart + v * (uvVEnd - uvVStart);
             this.#calculateRadialPoint(center, r, angle, uV, vV, pos);
             const uvX = isRadial ? u : 0.5 - (r / outerRadius * Math.sin(angle) * 0.5), uvY = isRadial ? uvV : 0.5 - (r / outerRadius * Math.cos(angle) * 0.5);
             this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
@@ -217,9 +225,9 @@ class PrimitiveUtils {
             this.interleavePacker(interleaveData, center.x, center.y, center.z, 0, 1, 0, 0, 0);
             return;
         }
+        const ringPos = this.#SCRATCH_V1, normalDir = this.#SCRATCH_V2, normal = this.#SCRATCH_V3;
         this.generateGrid(interleaveData, indexData, radialSegments, heightSegments, (u, v) => {
             const r = v * (radiusBottom - radiusTop) + radiusTop, angle = u * thetaLength + thetaStart, hOff = halfH - v * height, uvV = uvVStart + v * (uvVEnd - uvVStart);
-            const ringPos = {x: 0, y: 0, z: 0}, normalDir = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
             this.#calculateRadialPoint({x: 0, y: 0, z: 0}, r, angle, uV, vV, ringPos);
             this.#calculateRadialPoint({x: 0, y: 0, z: 0}, 1.0, angle, uV, vV, normalDir);
             const px = center.x + ringPos.x + hOff * axisVector.x, py = center.y + ringPos.y + hOff * axisVector.y, pz = center.z + ringPos.z + hOff * axisVector.z;
