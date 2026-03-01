@@ -78,8 +78,8 @@ class PrimitiveUtils {
         const interleaveData = [], indexData = [], halfH = height / 2;
         if ((radiusTop <= 0 && radiusBottom <= 0) || height <= 0 || Math.abs(thetaLength) < 1e-6) return this.getEmptyGeometry(redGPUContext, uniqueKey);
         this.generateCylinderTorsoData(interleaveData, indexData, radiusTop, radiusBottom, height, radialSegments, heightSegments, thetaStart, thetaLength, this.#ZERO_VECTOR, this.#BASIS_U, this.#BASIS_V);
-        if (capTop && radiusTop > 0) this.generateCircleData(interleaveData, indexData, radiusTop, radialSegments, thetaStart, thetaLength, {x: 0, y: halfH, z: 0}, this.#BASIS_U, this.#BASIS_V, this.#AXIS_UP, true, isRadialTop);
-        if (capBottom && radiusBottom > 0) this.generateCircleData(interleaveData, indexData, radiusBottom, radialSegments, thetaStart, thetaLength, {x: 0, y: -halfH, z: 0}, this.#BASIS_U, this.#BASIS_V, this.#AXIS_DOWN, false, isRadialBottom);
+        if (capTop && radiusTop > 0) this.generateRingData(interleaveData, indexData, 0, radiusTop, radialSegments, 1, thetaStart, thetaLength, {x: 0, y: halfH, z: 0}, this.#BASIS_U, this.#BASIS_V, this.#AXIS_UP, true, isRadialTop);
+        if (capBottom && radiusBottom > 0) this.generateRingData(interleaveData, indexData, 0, radiusBottom, radialSegments, 1, thetaStart, thetaLength, {x: 0, y: -halfH, z: 0}, this.#BASIS_U, this.#BASIS_V, this.#AXIS_DOWN, false, isRadialBottom);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
@@ -104,7 +104,7 @@ class PrimitiveUtils {
     static generateCircleEntryData(redGPUContext: RedGPUContext, radius: number, radialSegments: number, thetaStart: number, thetaLength: number, isRadial: boolean, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [];
         if (radius <= 0 || Math.abs(thetaLength) < 1e-6) return this.getEmptyGeometry(redGPUContext, uniqueKey);
-        this.generateCircleData(interleaveData, indexData, radius, radialSegments, thetaStart, thetaLength, this.#ZERO_VECTOR, this.#BASIS_U, this.#BASIS_V, this.#AXIS_UP, true, isRadial);
+        this.generateRingData(interleaveData, indexData, 0, radius, radialSegments, 1, thetaStart, thetaLength, this.#ZERO_VECTOR, this.#BASIS_U, this.#BASIS_V, this.#AXIS_UP, true, isRadial);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
@@ -134,14 +134,14 @@ class PrimitiveUtils {
                 this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, thetaStart, uV, vV, center);
                 this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, thetaStart, uV, vV, normal);
                 this.#set(tangent, Math.cos(thetaStart), 0, -Math.sin(thetaStart));
-                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, center, normal, up, tangent, true, isRadialCapStart);
+                this.generateRingData(interleaveData, indexData, 0, thickness, tubularSegments, 1, 0, Math.PI * 2, center, normal, up, tangent, true, isRadialCapStart);
             }
             if (capEnd) {
                 const angle = thetaStart + thetaLength;
                 this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, angle, uV, vV, center);
                 this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, angle, uV, vV, normal);
                 this.#set(tangent, -Math.cos(angle), 0, Math.sin(angle));
-                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, center, normal, up, tangent, false, isRadialCapEnd);
+                this.generateRingData(interleaveData, indexData, 0, thickness, tubularSegments, 1, 0, Math.PI * 2, center, normal, up, tangent, false, isRadialCapEnd);
             }
         }
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
@@ -178,23 +178,6 @@ class PrimitiveUtils {
             const x = (u - 0.5) * width, y = (v - 0.5) * height, uvY = flipY ? (1 - v) : v;
             this.interleavePacker(interleaveData, center.x + x * uV.x + y * vV.x, center.y + x * uV.y + y * vV.y, center.z + x * uV.z + y * vV.z, normal.x, normal.y, normal.z, u, uvY);
         });
-    }
-
-    static generateCircleData(interleaveData: number[], indexData: number[], radius: number, radialSegments: number, thetaStart: number, thetaLength: number, center: { x: number, y: number, z: number }, uV: { x: number, y: number, z: number }, vV: { x: number, y: number, z: number }, normal: { x: number, y: number, z: number }, isFront: boolean = true, isRadial: boolean = false, uvVStart: number = 0, uvVEnd: number = 1) {
-        const vertexOffset = interleaveData.length / this.#STRIDE_FLOATS;
-        this.interleavePacker(interleaveData, center.x, center.y, center.z, normal.x, normal.y, normal.z, 0.5, isRadial ? uvVStart : 0.5);
-        if (radius <= 1e-6 || Math.abs(thetaLength) < 1e-6) return;
-        const pos = this.#SCRATCH_V10;
-        for (let s = 0; s <= radialSegments; s++) {
-            const uRatio = s / radialSegments, angle = thetaStart + uRatio * thetaLength;
-            this.#calculateRadialPoint(center, radius, angle, uV, vV, pos);
-            const uvX = isRadial ? uRatio : 0.5 - (Math.sin(angle) * 0.5), uvY = isRadial ? uvVEnd : 0.5 - (Math.cos(angle) * 0.5);
-            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
-        }
-        for (let i = 1; i <= radialSegments; i++) {
-            const c = vertexOffset, v1 = vertexOffset + i, v2 = vertexOffset + i + 1;
-            if (indexData) isFront ? indexData.push(c, v1, v2) : indexData.push(c, v2, v1);
-        }
     }
 
     static generateRingData(interleaveData: number[], indexData: number[], innerRadius: number, outerRadius: number, thetaSegments: number, phiSegments: number, thetaStart: number, thetaLength: number, center: { x: number, y: number, z: number }, uV: { x: number, y: number, z: number }, vV: { x: number, y: number, z: number }, normal: { x: number, y: number, z: number }, isFront: boolean = true, isRadial: boolean = false, uvVStart: number = 0, uvVEnd: number = 1) {
