@@ -18,6 +18,7 @@ class PrimitiveUtils {
     static readonly #AXIS_UP = {x: 0, y: 1, z: 0};      // +Y
     static readonly #AXIS_DOWN = {x: 0, y: -1, z: 0};   // -Y
     
+    // [KO] 내부 복합 연산용 Scratchpad 객체
     static readonly #SCRATCH_V1 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V2 = {x: 0, y: 0, z: 0};
     static readonly #SCRATCH_V3 = {x: 0, y: 0, z: 0};
@@ -53,7 +54,6 @@ class PrimitiveUtils {
 
     static generateBoxData(redGPUContext: RedGPUContext, width: number, height: number, depth: number, widthSegments: number, heightSegments: number, depthSegments: number, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [], w2 = width / 2, h2 = height / 2, d2 = depth / 2;
-        // PX, NX, PY, NY, PZ, NZ
         this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: w2, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0}, {x: 1, y: 0, z: 0});
         this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: -w2, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: -1, z: 0}, {x: -1, y: 0, z: 0});
         this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: 1, z: 0});
@@ -115,26 +115,29 @@ class PrimitiveUtils {
         const interleaveData = [], indexData = [], isPartial = Math.abs(thetaLength) < Math.PI * 2;
         this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
             const theta = thetaStart + u * thetaLength, phi = v * Math.PI * 2;
-            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, theta, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1);
-            this.#set(this.#SCRATCH_V2, this.#SCRATCH_V1.x * radius, 0, this.#SCRATCH_V1.z * radius);
-            this.#set(this.#SCRATCH_V3, -this.#SCRATCH_V1.x, 0, -this.#SCRATCH_V1.z); 
-            this.#calculateRadialPoint(this.#SCRATCH_V2, thickness, phi, this.#SCRATCH_V3, this.#AXIS_UP, this.#SCRATCH_V4); 
-            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, phi, this.#SCRATCH_V3, this.#AXIS_UP, this.#SCRATCH_V1); 
-            this.interleavePacker(interleaveData, this.#SCRATCH_V4.x, this.#SCRATCH_V4.y, this.#SCRATCH_V4.z, this.#SCRATCH_V1.x, this.#SCRATCH_V1.y, this.#SCRATCH_V1.z, u, v);
+            const mR = {x: 0, y: 0, z: 0}, cT = {x: 0, y: 0, z: 0}, uT = {x: 0, y: 0, z: 0}, pos = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, theta, this.#BASIS_U, this.#BASIS_V, mR);
+            this.#set(cT, mR.x * radius, 0, mR.z * radius);
+            this.#set(uT, -mR.x, 0, -mR.z);
+            this.#calculateRadialPoint(cT, thickness, phi, uT, this.#AXIS_UP, pos);
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, phi, uT, this.#AXIS_UP, normal);
+            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, u, v);
         });
         if (isPartial) {
+            const uV = this.#BASIS_U, vV = this.#BASIS_V, up = this.#AXIS_UP;
             if (capStart) {
-                this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, thetaStart, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1);
-                this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, thetaStart, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V2);
-                this.#set(this.#SCRATCH_V3, Math.cos(thetaStart), 0, -Math.sin(thetaStart));
-                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, this.#SCRATCH_V1, this.#SCRATCH_V2, this.#AXIS_UP, this.#SCRATCH_V3, true, isRadialCapStart);
+                const center = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0}, tangent = {x: 0, y: 0, z: 0};
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, thetaStart, uV, vV, center);
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, thetaStart, uV, vV, normal);
+                this.#set(tangent, Math.cos(thetaStart), 0, -Math.sin(thetaStart));
+                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, center, normal, up, tangent, true, isRadialCapStart);
             }
             if (capEnd) {
-                const angle = thetaStart + thetaLength;
-                this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, angle, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V1);
-                this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, angle, this.#BASIS_U, this.#BASIS_V, this.#SCRATCH_V2);
-                this.#set(this.#SCRATCH_V3, -Math.cos(angle), 0, Math.sin(angle));
-                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, this.#SCRATCH_V1, this.#SCRATCH_V2, this.#AXIS_UP, this.#SCRATCH_V3, false, isRadialCapEnd);
+                const angle = thetaStart + thetaLength, center = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0}, tangent = {x: 0, y: 0, z: 0};
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, radius, angle, uV, vV, center);
+                this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, angle, uV, vV, normal);
+                this.#set(tangent, -Math.cos(angle), 0, Math.sin(angle));
+                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2, center, normal, up, tangent, false, isRadialCapEnd);
             }
         }
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
@@ -144,18 +147,17 @@ class PrimitiveUtils {
         const interleaveData = [], indexData = [];
         this.generateGrid(interleaveData, indexData, radialSegments, tubularSegments, (u, v) => {
             const knotU = v * windingsAroundAxis * Math.PI * 2;
-            this.#calculateTorusKnotPosition(knotU, windingsAroundAxis, windingsAroundCircle, radius, this.#SCRATCH_V1);
-            this.#calculateTorusKnotPosition(knotU + 0.01, windingsAroundAxis, windingsAroundCircle, radius, this.#SCRATCH_V2);
-            this.#set(this.#SCRATCH_V3, this.#SCRATCH_V2.x - this.#SCRATCH_V1.x, this.#SCRATCH_V2.y - this.#SCRATCH_V1.y, this.#SCRATCH_V2.z - this.#SCRATCH_V1.z);
-            this.#set(this.#SCRATCH_V4, this.#SCRATCH_V2.x + this.#SCRATCH_V1.x, this.#SCRATCH_V2.y + this.#SCRATCH_V1.y, this.#SCRATCH_V2.z + this.#SCRATCH_V1.z);
-            this.#cross(this.#SCRATCH_V3, this.#SCRATCH_V4, this.#SCRATCH_V2); this.#normalize(this.#SCRATCH_V2);
-            this.#cross(this.#SCRATCH_V2, this.#SCRATCH_V3, this.#SCRATCH_V4); this.#normalize(this.#SCRATCH_V4);
-            this.#set(this.#SCRATCH_V5, -this.#SCRATCH_V2.x, -this.#SCRATCH_V2.y, -this.#SCRATCH_V2.z);
-            this.#set(this.#SCRATCH_V6, -this.#SCRATCH_V4.x, -this.#SCRATCH_V4.y, -this.#SCRATCH_V4.z);
-            const radialV = u * Math.PI * 2;
-            this.#calculateRadialPoint(this.#SCRATCH_V1, tubeRadius, radialV, this.#SCRATCH_V5, this.#SCRATCH_V6, this.#SCRATCH_V3);
-            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, radialV, this.#SCRATCH_V5, this.#SCRATCH_V6, this.#SCRATCH_V2);
-            this.interleavePacker(interleaveData, this.#SCRATCH_V3.x, this.#SCRATCH_V3.y, this.#SCRATCH_V3.z, this.#SCRATCH_V2.x, this.#SCRATCH_V2.y, this.#SCRATCH_V2.z, v, u);
+            const P1 = {x: 0, y: 0, z: 0}, P2 = {x: 0, y: 0, z: 0}, T = {x: 0, y: 0, z: 0}, N = {x: 0, y: 0, z: 0}, B = {x: 0, y: 0, z: 0};
+            this.#calculateTorusKnotPosition(knotU, windingsAroundAxis, windingsAroundCircle, radius, P1);
+            this.#calculateTorusKnotPosition(knotU + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
+            this.#set(T, P2.x - P1.x, P2.y - P1.y, P2.z - P1.z);
+            this.#set(N, P2.x + P1.x, P2.y + P1.y, P2.z + P1.z);
+            this.#cross(T, N, B); this.#normalize(B);
+            this.#cross(B, T, N); this.#normalize(N);
+            const radialV = u * Math.PI * 2, uT = {x: -B.x, y: -B.y, z: -B.z}, vT = {x: -N.x, y: -N.y, z: -N.z}, pos = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint(P1, tubeRadius, radialV, uT, vT, pos);
+            this.#calculateRadialPoint(this.#ZERO_VECTOR, 1.0, radialV, uT, vT, normal);
+            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, v, u);
         });
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
@@ -177,10 +179,10 @@ class PrimitiveUtils {
         this.interleavePacker(interleaveData, center.x, center.y, center.z, normal.x, normal.y, normal.z, 0.5, isRadial ? uvVStart : 0.5);
         if (radius <= 1e-6 || Math.abs(thetaLength) < 1e-6) return;
         for (let s = 0; s <= radialSegments; s++) {
-            const uRatio = s / radialSegments, angle = thetaStart + uRatio * thetaLength;
-            this.#calculateRadialPoint(center, radius, angle, uV, vV, this.#SCRATCH_V1);
+            const uRatio = s / radialSegments, angle = thetaStart + uRatio * thetaLength, pos = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint(center, radius, angle, uV, vV, pos);
             const uvX = isRadial ? uRatio : 0.5 - (Math.sin(angle) * 0.5), uvY = isRadial ? uvVEnd : 0.5 - (Math.cos(angle) * 0.5);
-            this.interleavePacker(interleaveData, this.#SCRATCH_V1.x, this.#SCRATCH_V1.y, this.#SCRATCH_V1.z, normal.x, normal.y, normal.z, uvX, uvY);
+            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
         }
         for (let i = 1; i <= radialSegments; i++) {
             const c = vertexOffset, v1 = vertexOffset + i, v2 = vertexOffset + i + 1;
@@ -194,10 +196,10 @@ class PrimitiveUtils {
             return;
         }
         this.generateGrid(interleaveData, indexData, thetaSegments, phiSegments, (u, v) => {
-            const r = innerRadius + v * (outerRadius - innerRadius), angle = thetaStart + u * thetaLength, uvV = uvVStart + v * (uvVEnd - uvVStart);
-            this.#calculateRadialPoint(center, r, angle, uV, vV, this.#SCRATCH_V1);
+            const r = innerRadius + v * (outerRadius - innerRadius), angle = thetaStart + u * thetaLength, uvV = uvVStart + v * (uvVEnd - uvVStart), pos = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint(center, r, angle, uV, vV, pos);
             const uvX = isRadial ? u : 0.5 - (r / outerRadius * Math.sin(angle) * 0.5), uvY = isRadial ? uvV : 0.5 - (r / outerRadius * Math.cos(angle) * 0.5);
-            this.interleavePacker(interleaveData, this.#SCRATCH_V1.x, this.#SCRATCH_V1.y, this.#SCRATCH_V1.z, normal.x, normal.y, normal.z, uvX, uvY);
+            this.interleavePacker(interleaveData, pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uvX, uvY);
         }, false, !isFront);
     }
 
@@ -217,11 +219,13 @@ class PrimitiveUtils {
         }
         this.generateGrid(interleaveData, indexData, radialSegments, heightSegments, (u, v) => {
             const r = v * (radiusBottom - radiusTop) + radiusTop, angle = u * thetaLength + thetaStart, hOff = halfH - v * height, uvV = uvVStart + v * (uvVEnd - uvVStart);
-            this.#calculateRadialPoint(this.#ZERO_VECTOR, r, angle, uV, vV, this.#SCRATCH_V1);
-            const px = center.x + this.#SCRATCH_V1.x + hOff * axisVector.x, py = center.y + this.#SCRATCH_V1.y + hOff * axisVector.y, pz = center.z + this.#SCRATCH_V1.z + hOff * axisVector.z;
-            const rnx = this.#SCRATCH_V1.x / (r || 1), rny = this.#SCRATCH_V1.y / (r || 1), rnz = this.#SCRATCH_V1.z / (r || 1), nx = rnx + slope * axisVector.x, ny = rny + slope * axisVector.y, nz = rnz + slope * axisVector.z;
-            this.#set(this.#SCRATCH_V2, nx, ny, nz); this.#normalize(this.#SCRATCH_V2);
-            this.interleavePacker(interleaveData, px, py, pz, this.#SCRATCH_V2.x, this.#SCRATCH_V2.y, this.#SCRATCH_V2.z, u, uvV);
+            const ringPos = {x: 0, y: 0, z: 0}, normalDir = {x: 0, y: 0, z: 0}, normal = {x: 0, y: 0, z: 0};
+            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, r, angle, uV, vV, ringPos);
+            this.#calculateRadialPoint({x: 0, y: 0, z: 0}, 1.0, angle, uV, vV, normalDir);
+            const px = center.x + ringPos.x + hOff * axisVector.x, py = center.y + ringPos.y + hOff * axisVector.y, pz = center.z + ringPos.z + hOff * axisVector.z;
+            this.#set(normal, normalDir.x + slope * axisVector.x, normalDir.y + slope * axisVector.y, normalDir.z + slope * axisVector.z);
+            this.#normalize(normal);
+            this.interleavePacker(interleaveData, px, py, pz, normal.x, normal.y, normal.z, u, uvV);
         }, skipIndices);
     }
 
