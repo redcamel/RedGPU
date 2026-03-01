@@ -24,7 +24,8 @@ declare class Plane extends Primitive {
      * @param height - [KO] 세로 길이 (기본값 1) [EN] Height (default 1)
      * @param widthSegments - [KO] 가로 분할 수 (기본값 1) [EN] Width segments (default 1)
      * @param heightSegments - [KO] 세로 분할 수 (기본값 1) [EN] Height segments (default 1)
+     * @param flipY - [KO] Y축 UV 뒤집기 여부 (기본값 false) [EN] Whether to flip UV on the Y-axis (default false)
      */
-    constructor(redGPUContext: RedGPUContext, width?: number, height?: number, widthSegments?: number, heightSegments?: number);
+    constructor(redGPUContext: RedGPUContext, width?: number, height?: number, widthSegments?: number, heightSegments?: number, flipY?: boolean);
 }
 export default Plane;
