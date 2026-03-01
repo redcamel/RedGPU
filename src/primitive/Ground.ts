@@ -47,7 +47,7 @@ class Ground extends Primitive {
      * [EN] Whether to flip UV on the Y-axis (default false)
      */
     constructor(redGPUContext: RedGPUContext, width = 1, height = 1, widthSegments = 1, heightSegments = 1, flipY = false) {
-        const uniqueKey = `PRIMITIVE_GROUND_W${width}_H${height}_WS${widthSegments}_HS${heightSegments}_FY${flipY}`;
+        const uniqueKey = Primitive.generateUniqueKey('GROUND', { width, height, widthSegments, heightSegments, flipY });
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, widthSegments, heightSegments, flipY));
     }
 }

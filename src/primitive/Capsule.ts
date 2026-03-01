@@ -55,7 +55,7 @@ class Capsule extends Primitive {
         heightSegments: number = 1,
         capSegments: number = 12
     ) {
-        const uniqueKey = `PRIMITIVE_CAPSULE_R${radius}_CH${height}_RS${radialSegments}_HS${heightSegments}_CS${capSegments}`;
+        const uniqueKey = Primitive.generateUniqueKey('CAPSULE', { radius, height, radialSegments, heightSegments, capSegments });
         super(redGPUContext, uniqueKey, () => makeData(
             uniqueKey, redGPUContext, radius, height,
             radialSegments, heightSegments, capSegments

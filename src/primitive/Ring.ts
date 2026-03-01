@@ -39,11 +39,10 @@ class Ring extends Primitive {
                 thetaStart: number = 0.0,
                 thetaLength: number = Math.PI * 2,
                 isRadial: boolean = false
-    ) {
-        const uniqueKey = `PRIMITIVE_RING_IR${innerRadius}_OR${outerRadius}_TS${thetaSegments}_PS${phiSegments}_TS${thetaStart}_TL${thetaLength}_IR${isRadial}`;
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, isRadial));
-    }
-}
+                ) {
+                const uniqueKey = Primitive.generateUniqueKey('RING', { innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, isRadial });
+                super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, isRadial));
+                }}
 
 function makeData(uniqueKey, redGPUContext, innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, isRadial) {
     const interleaveData = [];

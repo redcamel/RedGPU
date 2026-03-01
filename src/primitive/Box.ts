@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
+import {keepLog} from "../utils";
 
 /**
  * [KO] Box(박스) 기본 도형 클래스입니다.
@@ -57,7 +58,7 @@ class Box extends Primitive {
         heightSegments: number = 1,
         depthSegments: number = 1
     ) {
-        const uniqueKey = `PRIMITIVE_BOX_W${width}_H${height}_D${depth}_WS${widthSegments}_HS${heightSegments}_DS${depthSegments}`;
+        const uniqueKey = Primitive.generateUniqueKey('BOX', { width, height, depth, widthSegments, heightSegments, depthSegments });
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, width, height, depth, widthSegments, heightSegments, depthSegments))
     }
 }

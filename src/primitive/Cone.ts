@@ -39,11 +39,10 @@ class Cone extends Primitive {
                 capBottom: boolean = true,
                 thetaStart: number = 0.0,
                 thetaLength: number = Math.PI * 2
-    ) {
-        const uniqueKey = `PRIMITIVE_CONE_R${radius}_H${height}_RS${radialSegments}_HS${heightSegments}_CB${capBottom}_TS${thetaStart}_TL${thetaLength}`;
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength));
-    }
-}
+                ) {
+                const uniqueKey = Primitive.generateUniqueKey('CONE', { radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength });
+                super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext, radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength));
+                }}
 
 function makeData(uniqueKey, redGPUContext, radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength) {
     const interleaveData = [];

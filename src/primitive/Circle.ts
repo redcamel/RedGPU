@@ -64,7 +64,7 @@ class Circle extends Primitive {
         if (thetaLength < 0) {
             throw new Error('thetaLength must be 0 or greater');
         }
-        const uniqueKey = `PRIMITIVE_CIRCLE_R${radius}_S${radialSegments}_TS${thetaStart}_TL${thetaLength}_IR${isRadial}`;
+        const uniqueKey = Primitive.generateUniqueKey('CIRCLE', { radius, radialSegments, thetaStart, thetaLength, isRadial });
         super(redGPUContext, uniqueKey, () => makeData(
             uniqueKey, redGPUContext, radius, radialSegments, thetaStart, thetaLength, isRadial
         ));

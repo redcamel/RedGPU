@@ -57,7 +57,7 @@ class TorusKnot extends Primitive {
                 windingsAroundAxis = 2,
                 windingsAroundCircle = 3
     ) {
-        const uniqueKey = `PRIMITIVE_TORUS_NUT_R${radius}_T${tubeRadius}_TS${tubularSegments}_RS${radialSegments}_P${windingsAroundAxis}_Q${windingsAroundCircle}`;
+        const uniqueKey = Primitive.generateUniqueKey('TORUS_KNOT', { radius, tubeRadius, tubularSegments, radialSegments, windingsAroundAxis, windingsAroundCircle });
         super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
             radius,
             tubeRadius,
