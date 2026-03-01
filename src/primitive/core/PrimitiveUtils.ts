@@ -11,6 +11,61 @@ import Geometry from "../../geometry/Geometry";
  */
 class PrimitiveUtils {
     /**
+     * [KO] 캡슐(Capsule) 기하 데이터를 생성합니다.
+     * [EN] Generates capsule geometry data.
+     */
+    static generateCapsuleData(
+        redGPUContext: RedGPUContext,
+        radius: number, height: number,
+        radialSegments: number, heightSegments: number, capSegments: number,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData: number[] = [];
+        const indexData: number[] = [];
+        const gridX1 = radialSegments + 1;
+        const totalVerticalSegments = capSegments * 2 + heightSegments;
+        const halfCylinderHeight = height / 2;
+        const capArcLength = (Math.PI / 2) * radius;
+        const totalArcLength = capArcLength * 2 + height;
+
+        // 1. Top Cap (반구)
+        this.generateSphericalData(interleaveData, radius, radialSegments, capSegments, 0, Math.PI * 2, 0, Math.PI / 2, halfCylinderHeight, 0, capArcLength / totalArcLength);
+
+        // 2. Cylinder Body (몸통) - [공유 실현]
+        // 기존 루프를 제거하고 generateCylinderTorsoData를 skipIndices 모드로 호출
+        this.generateCylinderTorsoData(
+            interleaveData, indexData,
+            radius, radius, height,
+            radialSegments, heightSegments,
+            0, Math.PI * 2,
+            {x: 0, y: 0, z: 0},
+            {x: 1, y: 0, z: 0},  // uVector (+X)
+            {x: 0, y: 0, z: -1}, // vVector (-Z)
+            {x: 0, y: 1, z: 0},  // axisVector (+Y)
+            true // 인덱스 생성은 건너뛰고 정점만 추가
+        );
+
+        // [교정] Capsule은 몸통 정점 추가 시 UV V값이 0~1로 리셋되므로, 전체 캡슐 길이에 맞춰 수동 교정 필요
+        // (이 부분은 generateCylinderTorsoData에 uvVStart/End를 추가하여 더 개선할 수 있음)
+        const bodyVStart = capArcLength / totalArcLength;
+        const bodyVEnd = (capArcLength + height) / totalArcLength;
+        const bodyVertexCount = (heightSegments + 1) * gridX1;
+        const bodyStartIndex = interleaveData.length / 12 - bodyVertexCount;
+        
+        for (let i = 0; i < bodyVertexCount; i++) {
+            const offset = (bodyStartIndex + i) * 12 + 7; // UV V-offset
+            const localV = interleaveData[offset];
+            interleaveData[offset] = bodyVStart + localV * (bodyVEnd - bodyVStart);
+        }
+
+        // 3. Bottom Cap (반구)
+        this.generateSphericalData(interleaveData, radius, radialSegments, capSegments, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2, -halfCylinderHeight, bodyVEnd, 1);
+
+        this.generateGridIndices(indexData, 0, radialSegments, totalVerticalSegments, gridX1);
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
      * [KO] 탄젠트 계산 및 최종 지오메트리 생성을 통합 처리합니다.
      * [EN] Integrates tangent calculation and final geometry creation.
      */
@@ -447,7 +502,8 @@ class PrimitiveUtils {
         center: { x: number, y: number, z: number },
         uVector: { x: number, y: number, z: number },
         vVector: { x: number, y: number, z: number },
-        axisVector: { x: number, y: number, z: number } = {x: 0, y: 1, z: 0}
+        axisVector: { x: number, y: number, z: number } = {x: 0, y: 1, z: 0},
+        skipIndices: boolean = false // [추가] 인덱스 생성 건너뛰기 옵션
     ) {
         const vertexOffset = interleaveData.length / 12;
         const halfHeight = height / 2;
@@ -464,8 +520,8 @@ class PrimitiveUtils {
             const hOffset = halfHeight - v * height;
 
             for (let ix = 0; ix <= radialSegments; ix++) {
-                const u = ix / radialSegments;
-                const theta = u * thetaLength + thetaStart;
+                const uRatio = ix / radialSegments;
+                const theta = uRatio * thetaLength + thetaStart;
                 const cosVal = Math.cos(theta);
                 const sinVal = Math.sin(theta);
 
@@ -492,13 +548,15 @@ class PrimitiveUtils {
                     interleaveData,
                     px, py, pz,
                     nx / nLen, ny / nLen, nz / nLen,
-                    u, v
+                    uRatio, v
                 );
             }
         }
 
-        // [교정] 반시계 방향 정점 생성 + 표준 인덱스 = CCW 와인딩 (바깥쪽 앞면)
-        this.generateGridIndices(indexData, vertexOffset, radialSegments, heightSegments, radialSegments + 1, false);
+        // [교정] 인덱스 생성이 필요한 경우에만 실행
+        if (!skipIndices) {
+            this.generateGridIndices(indexData, vertexOffset, radialSegments, heightSegments, radialSegments + 1, false);
+        }
     }
 
     /**

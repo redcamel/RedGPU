@@ -1,4 +1,3 @@
-import {vec3} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
 import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
