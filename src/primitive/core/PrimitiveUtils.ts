@@ -34,6 +34,139 @@ class PrimitiveUtils {
         return createPrimitiveGeometry(redGPUContext, interleaveData, [], uniqueKey);
     }
     /**
+     * [KO] 박스(Box) 기하 데이터를 생성합니다.
+     * [EN] Generates box geometry data.
+     */
+    static generateBoxData(
+        redGPUContext: RedGPUContext,
+        width: number, height: number, depth: number,
+        widthSegments: number, heightSegments: number, depthSegments: number,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+
+        // px, nx, py, ny, pz, nz 순서로 6개 면 생성
+        this.generatePlaneData(interleaveData, indexData, depth, height, width / 2, depthSegments, heightSegments, 'z', 'y', 'x', -1, -1, 1); // px
+        this.generatePlaneData(interleaveData, indexData, depth, height, -width / 2, depthSegments, heightSegments, 'z', 'y', 'x', 1, -1, -1); // nx
+        this.generatePlaneData(interleaveData, indexData, width, depth, height / 2, widthSegments, depthSegments, 'x', 'z', 'y', 1, 1, 1); // py
+        this.generatePlaneData(interleaveData, indexData, width, depth, -height / 2, widthSegments, depthSegments, 'x', 'z', 'y', 1, -1, -1); // ny
+        this.generatePlaneData(interleaveData, indexData, width, height, depth / 2, widthSegments, heightSegments, 'x', 'y', 'z', 1, -1, 1); // pz
+        this.generatePlaneData(interleaveData, indexData, width, height, -depth / 2, widthSegments, heightSegments, 'x', 'y', 'z', -1, -1, -1); // nz
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
+     * [KO] 토러스(Torus) 기하 데이터를 생성합니다.
+     * [EN] Generates torus geometry data.
+     */
+    static generateTorusData(
+        redGPUContext: RedGPUContext,
+        radius: number, thickness: number,
+        radialSegments: number, tubularSegments: number,
+        thetaStart: number, thetaLength: number,
+        capStart: boolean, capEnd: boolean,
+        isRadialCapStart: boolean, isRadialCapEnd: boolean,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+        const isPartial = Math.abs(thetaLength) < Math.PI * 2;
+
+        const vertexOffset = interleaveData.length / 12;
+        for (let slice = 0; slice <= tubularSegments; ++slice) {
+            const v = slice / tubularSegments;
+            const sliceAngle = v * Math.PI * 2;
+            const sliceSin = Math.sin(sliceAngle);
+            const ringRadius = radius + sliceSin * thickness;
+            const ny = Math.cos(sliceAngle);
+            const y = ny * thickness;
+
+            for (let ring = 0; ring <= radialSegments; ++ring) {
+                const u = ring / radialSegments;
+                const ringAngle = thetaStart + u * thetaLength;
+                const sinTheta = Math.sin(ringAngle); 
+                const cosTheta = Math.cos(ringAngle);
+                
+                const x = (-sinTheta) * ringRadius;
+                const z = (-cosTheta) * ringRadius;
+                const nx = (-sinTheta) * sliceSin;
+                const nz = (-cosTheta) * sliceSin;
+
+                this.interleavePacker(interleaveData, x, y, z, nx, ny, nz, u, v);
+            }
+        }
+
+        this.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1, false);
+
+        if (isPartial) {
+            if (capStart) {
+                const sSin = Math.sin(thetaStart), sCos = Math.cos(thetaStart);
+                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2,
+                    {x: -sSin * radius, y: 0, z: -sCos * radius}, {x: -sSin, y: 0, z: -sCos}, {x: 0, y: 1, z: 0}, {x: sCos, y: 0, z: -sSin}, true, isRadialCapStart);
+            }
+            if (capEnd) {
+                const eSin = Math.sin(thetaStart + thetaLength), eCos = Math.cos(thetaStart + thetaLength);
+                this.generateCircleData(interleaveData, indexData, thickness, tubularSegments, 0, Math.PI * 2,
+                    {x: -eSin * radius, y: 0, z: -eCos * radius}, {x: -eSin, y: 0, z: -eCos}, {x: 0, y: 1, z: 0}, {x: -eCos, y: 0, z: eSin}, false, isRadialCapEnd);
+            }
+        }
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    /**
+     * [KO] 토러스 노트(TorusKnot) 기하 데이터를 생성합니다.
+     * [EN] Generates torus knot geometry data.
+     */
+    static generateTorusKnotData(
+        redGPUContext: RedGPUContext,
+        radius: number, tubeRadius: number,
+        tubularSegments: number, radialSegments: number,
+        windingsAroundAxis: number, windingsAroundCircle: number,
+        uniqueKey: string
+    ): Geometry {
+        const interleaveData = [];
+        const indexData = [];
+        const P1 = [0, 0, 0], P2 = [0, 0, 0], B = [0, 0, 0], T = [0, 0, 0], N = [0, 0, 0];
+
+        for (let i = 0; i <= tubularSegments; ++i) {
+            const u = i / tubularSegments * windingsAroundAxis * Math.PI * 2;
+            this.#calculateTorusKnotPosition(u, windingsAroundAxis, windingsAroundCircle, radius, P1);
+            this.#calculateTorusKnotPosition(u + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
+            
+            T[0] = P2[0] - P1[0]; T[1] = P2[1] - P1[1]; T[2] = P2[2] - P1[2];
+            N[0] = P2[0] + P1[0]; N[1] = P2[1] + P1[1]; N[2] = P2[2] + P1[2];
+            
+            B[0] = T[1] * N[2] - T[2] * N[1]; B[1] = T[2] * N[0] - T[0] * N[2]; B[2] = T[0] * N[1] - T[1] * N[0];
+            let bLen = Math.sqrt(B[0] * B[0] + B[1] * B[1] + B[2] * B[2]) || 1;
+            B[0] /= bLen; B[1] /= bLen; B[2] /= bLen;
+
+            N[0] = B[1] * T[2] - B[2] * T[1]; N[1] = B[2] * T[0] - B[0] * T[2]; N[2] = B[0] * T[1] - B[1] * T[0];
+            let nLen = Math.sqrt(N[0] * N[0] + N[1] * N[1] + N[2] * N[2]) || 1;
+            N[0] /= nLen; N[1] /= nLen; N[2] /= nLen;
+
+            for (let j = 0; j <= radialSegments; ++j) {
+                const v = j / radialSegments * Math.PI * 2;
+                const cx = -tubeRadius * Math.cos(v), cy = tubeRadius * Math.sin(v);
+                const px = P1[0] + (cx * N[0] + cy * B[0]), py = P1[1] + (cx * N[1] + cy * B[1]), pz = P1[2] + (cx * N[2] + cy * B[2]);
+                const nx = px - P1[0], ny = py - P1[1], nz = pz - P1[2];
+                const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+                this.interleavePacker(interleaveData, px, py, pz, nx / len, ny / len, nz / len, i / tubularSegments, j / radialSegments);
+            }
+        }
+
+        this.generateGridIndices(indexData, 0, radialSegments, tubularSegments, radialSegments + 1);
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    static #calculateTorusKnotPosition(u, p, q, radius, pos) {
+        const cu = Math.cos(u), su = Math.sin(u), quOverP = q / p * u, cs = Math.cos(quOverP);
+        pos[0] = radius * (2 + cs) * 0.5 * cu; pos[1] = radius * (2 + cs) * su * 0.5; pos[2] = radius * Math.sin(quOverP) * 0.5;
+    }
+
+    /**
      * [KO] 특정 축 매핑을 기반으로 평면 기하 데이터를 생성합니다.
      * [EN] Generates plane geometry data based on specific axis mapping.
      */

@@ -22,32 +22,13 @@ class TorusKnot extends Primitive {
      * [KO] TorusKnot 인스턴스를 생성합니다.
      * [EN] Creates an instance of TorusKnot.
      *
-     * ### Example
-     * ```typescript
-     * const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 64, 8, 2, 3);
-     * ```
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param radius -
-     * [KO] 전체 반지름 (기본값 1)
-     * [EN] Overall radius (default 1)
-     * @param tubeRadius -
-     * [KO] 튜브(단면) 반지름 (기본값 0.4)
-     * [EN] Tube radius (default 0.4)
-     * @param tubularSegments -
-     * [KO] 둘레 세그먼트 수 (기본값 64, 최소 3)
-     * [EN] Tubular segments (default 64, min 3)
-     * @param radialSegments -
-     * [KO] 단면 세그먼트 수 (기본값 8, 최소 3)
-     * [EN] Radial segments (default 8, min 3)
-     * @param windingsAroundAxis -
-     * [KO] 매듭이 중심축을 따라 회전하는 횟수 (p, 기본값 2)
-     * [EN] Number of times the knot winds around the central axis (p, default 2)
-     * @param windingsAroundCircle -
-     * [KO] 매듭이 전체 둘레를 따라 회전하는 횟수 (q, 기본값 3)
-     * [EN] Number of times the knot winds around the major circle (q, default 3)
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param radius - [KO] 전체 반지름 (기본값 1) [EN] Overall radius (default 1)
+     * @param tubeRadius - [KO] 튜브(단면) 반지름 (기본값 0.4) [EN] Tube radius (default 0.4)
+     * @param tubularSegments - [KO] 둘레 세그먼트 수 (기본값 64, 최소 3) [EN] Tubular segments (default 64, min 3)
+     * @param radialSegments - [KO] 단면 세그먼트 수 (기본값 8, 최소 3) [EN] Radial segments (default 8, min 3)
+     * @param windingsAroundAxis - [KO] 매듭이 중심축을 따라 회전하는 횟수 (p, 기본값 2) [EN] Number of times the knot winds around the central axis (p, default 2)
+     * @param windingsAroundCircle - [KO] 매듭이 전체 둘레를 따라 회전하는 횟수 (q, 기본값 3) [EN] Number of times the knot winds around the major circle (q, default 3)
      */
     constructor(redGPUContext: RedGPUContext,
                 radius = 1,
@@ -58,147 +39,11 @@ class TorusKnot extends Primitive {
                 windingsAroundCircle = 3
     ) {
         const uniqueKey = Primitive.generateUniqueKey('TORUS_KNOT', { radius, tubeRadius, tubularSegments, radialSegments, windingsAroundAxis, windingsAroundCircle });
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
-            radius,
-            tubeRadius,
-            tubularSegments,
-            radialSegments,
-            windingsAroundAxis,
-            windingsAroundCircle
+        super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateTorusKnotData(
+            redGPUContext, radius, tubeRadius, tubularSegments, radialSegments,
+            windingsAroundAxis, windingsAroundCircle, uniqueKey
         ));
     }
 }
 
-const makeData = function (uniqueKey, redGPUContext,
-                           radius,
-                           tubeRadius,
-                           tubularSegments,
-                           radialSegments,
-                           windingsAroundAxis,
-                           windingsAroundCircle
-) {
-    ////////////////////////////////////////////////////////////////////////////
-    // 데이터 생성!
-    // vertexBuffer Data
-    tubularSegments = Math.floor(tubularSegments);
-    radialSegments = Math.floor(radialSegments);
-    const interleaveData = []
-    const indexData = [];
-
-    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
-    if (radius <= 0 || tubeRadius <= 0) {
-        return PrimitiveUtils.getEmptyGeometry(redGPUContext, uniqueKey);
-    }
-
-    const vertex = [0, 0, 0]
-    const normal = [0, 0, 0]
-    const P1 = [0, 0, 0]
-    const P2 = [0, 0, 0]
-    const B = [0, 0, 0]
-    const T = [0, 0, 0]
-    const N = [0, 0, 0]
-
-    const gridX1 = radialSegments + 1;
-
-    for (let i = 0; i <= tubularSegments; ++i) {
-        // [교정] 0도 = 3시 방향(+X)에서 시작하여 CCW(반시계)로 회전
-        const u = i / tubularSegments * windingsAroundAxis * Math.PI * 2;
-        calculatePositionOnCurve(u, windingsAroundAxis, windingsAroundCircle, radius, P1);
-        calculatePositionOnCurve(u + 0.01, windingsAroundAxis, windingsAroundCircle, radius, P2);
-        // calculate orthonormal basis
-        T[0] = P2[0] - P1[0];
-        T[1] = P2[1] - P1[1];
-        T[2] = P2[2] - P1[2];
-        //
-        N[0] = P2[0] + P1[0];
-        N[1] = P2[1] + P1[1];
-        N[2] = P2[2] + P1[2];
-        {
-            const ax = T[0], ay = T[1], az = T[2];
-            const bx = N[0], by = N[1], bz = N[2];
-            B[0] = ay * bz - az * by;
-            B[1] = az * bx - ax * bz;
-            B[2] = ax * by - ay * bx;
-        }
-        {
-            const ax = B[0], ay = B[1], az = B[2];
-            const bx = T[0], by = T[1], bz = T[2];
-            N[0] = ay * bz - az * by;
-            N[1] = az * bx - ax * bz;
-            N[2] = ax * by - ay * bx;
-        }
-        // normalize B, N. T can be ignored, we don't use it
-        {
-            let x = B[0];
-            let y = B[1];
-            let z = B[2];
-            let len = x * x + y * y + z * z;
-            if (len > 0) {
-                len = 1 / Math.sqrt(len || 1);
-            }
-            B[0] = B[0] * len;
-            B[1] = B[1] * len;
-            B[2] = B[2] * len;
-        }
-        {
-            let x = N[0];
-            let y = N[1];
-            let z = N[2];
-            let len = x * x + y * y + z * z;
-            if (len > 0) {
-                len = 1 / Math.sqrt(len);
-            }
-            N[0] = N[0] * len;
-            N[1] = N[1] * len;
-            N[2] = N[2] * len;
-        }
-        for (let j = 0; j <= radialSegments; ++j) {
-            const v = j / radialSegments * Math.PI * 2;
-            const cx = -tubeRadius * Math.cos(v);
-            const cy = tubeRadius * Math.sin(v);
-            vertex[0] = P1[0] + (cx * N[0] + cy * B[0]);
-            vertex[1] = P1[1] + (cx * N[1] + cy * B[1]);
-            vertex[2] = P1[2] + (cx * N[2] + cy * B[2]);
-
-            // Normal
-            normal[0] = vertex[0] - P1[0];
-            normal[1] = vertex[1] - P1[1];
-            normal[2] = vertex[2] - P1[2];
-            let nx = normal[0];
-            let ny = normal[1];
-            let nz = normal[2];
-            let len = nx * nx + ny * ny + nz * nz;
-            if (len > 0) {
-                len = 1 / Math.sqrt(len);
-            }
-            nx *= len;
-            ny *= len;
-            nz *= len;
-
-            // UV & Packing
-            PrimitiveUtils.interleavePacker(
-                interleaveData,
-                vertex[0], vertex[1], vertex[2],
-                nx, ny, nz,
-                i / tubularSegments, j / radialSegments
-            );
-        }
-    }
-
-    // Indices (PrimitiveUtils.generateGridIndices 사용)
-    PrimitiveUtils.generateGridIndices(indexData, 0, radialSegments, tubularSegments, gridX1);
-
-    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
-};
-
-function calculatePositionOnCurve(u, p, q, radius, position) {
-    const cu = Math.cos(u);
-    const su = Math.sin(u);
-    const quOverP = q / p * u;
-    const cs = Math.cos(quOverP);
-    position[0] = radius * (2 + cs) * 0.5 * cu;
-    position[1] = radius * (2 + cs) * su * 0.5;
-    position[2] = radius * Math.sin(quOverP) * 0.5;
-}
-
-export default TorusKnot
+export default TorusKnot;

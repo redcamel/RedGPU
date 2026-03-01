@@ -46,128 +46,14 @@ class Torus extends Primitive {
                 isRadialCapStart = false,
                 isRadialCapEnd = false
     ) {
-        if (radialSegments < 3) {
-            throw new Error('radialSegments must be 3 or greater');
-        }
-        if (tubularSegments < 3) {
-            throw new Error('tubularSegments must be 3 or greater');
-        }
+        if (radialSegments < 3) throw new Error('radialSegments must be 3 or greater');
+        if (tubularSegments < 3) throw new Error('tubularSegments must be 3 or greater');
         const uniqueKey = Primitive.generateUniqueKey('TORUS', { radius, thickness, radialSegments, tubularSegments, thetaStart, thetaLength, capStart, capEnd, isRadialCapStart, isRadialCapEnd });
-        super(redGPUContext, uniqueKey, () => makeData(uniqueKey, redGPUContext,
-            radius,
-            thickness,
-            radialSegments,
-            tubularSegments,
-            thetaStart,
-            thetaLength,
-            capStart,
-            capEnd,
-            isRadialCapStart,
-            isRadialCapEnd
+        super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateTorusData(
+            redGPUContext, radius, thickness, radialSegments, tubularSegments,
+            thetaStart, thetaLength, capStart, capEnd, isRadialCapStart, isRadialCapEnd, uniqueKey
         ));
     }
 }
-
-const makeData = function (uniqueKey, redGPUContext,
-                           radius,
-                           thickness,
-                           radialSegments,
-                           tubularSegments,
-                           thetaStart,
-                           thetaLength,
-                           capStart,
-                           capEnd,
-                           isRadialCapStart,
-                           isRadialCapEnd
-) {
-    thetaStart = thetaStart || 0;
-    thetaLength = thetaLength === undefined ? Math.PI * 2 : thetaLength;
-    const isPartial = Math.abs(thetaLength) < Math.PI * 2;
-
-    const interleaveData = [];
-    const indexData = [];
-
-    // [안전장치] 최소 1개의 정점은 생성하여 0바이트 버퍼 에러 방지 (인덱스는 비워둠)
-    if (radius <= 0 || thickness <= 0 || Math.abs(thetaLength) < 1e-6) {
-        return PrimitiveUtils.getEmptyGeometry(redGPUContext, uniqueKey);
-    }
-
-    // 1. Torus Body 생성
-    const vertexOffset = interleaveData.length / 12;
-    for (let slice = 0; slice <= tubularSegments; ++slice) {
-        const v = slice / tubularSegments;
-        const sliceAngle = v * Math.PI * 2;
-        const sliceSin = Math.sin(sliceAngle);
-        const ringRadius = radius + sliceSin * thickness;
-        const ny = Math.cos(sliceAngle);
-        const y = ny * thickness;
-
-        for (let ring = 0; ring <= radialSegments; ++ring) {
-            const u = ring / radialSegments;
-            const ringAngle = thetaStart + u * thetaLength;
-            const sinTheta = Math.sin(ringAngle); 
-            const cosTheta = Math.cos(ringAngle);
-            
-            // [업계 표준] 12시(-Z) 시작, CCW 회전 (-X 방향)
-            // x = -sin, z = -cos
-            const x = (-sinTheta) * ringRadius;
-            const z = (-cosTheta) * ringRadius;
-            const nx = (-sinTheta) * sliceSin;
-            const nz = (-cosTheta) * sliceSin;
-
-            PrimitiveUtils.interleavePacker(
-                interleaveData,
-                x, y, z,
-                nx, ny, nz,
-                u, v
-            );
-        }
-    }
-
-    PrimitiveUtils.generateGridIndices(indexData, vertexOffset, radialSegments, tubularSegments, radialSegments + 1, false);
-
-    // 2. Partial Torus일 경우 단면 막기 (Caps)
-    if (isPartial) {
-        if (capStart) {
-            const sSin = Math.sin(thetaStart);
-            const sCos = Math.cos(thetaStart);
-            // 12시 시작 CCW 공식 (-sin, -cos) 에 맞춘 벡터
-            const startX = -sSin * radius;
-            const startZ = -sCos * radius;
-            PrimitiveUtils.generateCircleData(
-                interleaveData, indexData,
-                thickness, tubularSegments,
-                0, Math.PI * 2,
-                {x: startX, y: 0, z: startZ}, 
-                {x: -sSin, y: 0, z: -sCos}, // UVector (로컬 -Z 방향 유도)                  
-                {x: 0, y: 1, z: 0},         // VVector                
-                {x: sCos, y: 0, z: -sSin},  // Normal (시작면은 반대방향)                  
-                true,
-                isRadialCapStart
-            );
-        }
-
-        if (capEnd) {
-            const endAngle = thetaStart + thetaLength;
-            const eSin = Math.sin(endAngle);
-            const eCos = Math.cos(endAngle);
-            const endX = -eSin * radius;
-            const endZ = -eCos * radius;
-            PrimitiveUtils.generateCircleData(
-                interleaveData, indexData,
-                thickness, tubularSegments,
-                0, Math.PI * 2,
-                {x: endX, y: 0, z: endZ}, 
-                {x: -eSin, y: 0, z: -eCos}, // UVector                  
-                {x: 0, y: 1, z: 0},         // VVector                
-                {x: -eCos, y: 0, z: eSin},  // Normal (끝면은 진행방향)
-                false,
-                isRadialCapEnd
-            );
-        }
-    }
-
-    return PrimitiveUtils.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
-};
 
 export default Torus;
