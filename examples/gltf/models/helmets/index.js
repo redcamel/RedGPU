@@ -23,7 +23,14 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
+        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        skyAtmosphere.sunElevation = 5;
+        skyAtmosphere.sunAzimuth = 0;
+        skyAtmosphere.exposure = 1.5;
+        skyAtmosphere.horizonHaze = 0.8;
 
+        // View 속성에 직접 설정
+        view.skyAtmosphere = skyAtmosphere;
         loadGLTFGrid(view,
             [
                 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
@@ -107,5 +114,5 @@ const renderTestPane = async (redGPUContext, targetView) => {
     setDebugButtons(RedGPU, redGPUContext);
 
     const pane = new Pane();
-    createIblHelper(pane, targetView, RedGPU);
+    // createIblHelper(pane, targetView, RedGPU);
 };
