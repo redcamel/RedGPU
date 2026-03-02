@@ -179,57 +179,33 @@ class ParticleEmitter extends Mesh {
     }
 
     get vertexStateBuffers(): GPUVertexBufferLayout[] {
-        {
-            return [
-                {
-                    // vertex buffer
-                    arrayStride: 8 * 4,
-                    stepMode: "vertex",
-                    attributes: [
-                        {
-                            // vertex positions
-                            shaderLocation: 0,
-                            offset: 0,
-                            format: 'float32x3',
-                        },
-                        {
-                            // vertex normal
-                            shaderLocation: 1,
-                            offset: 3 * 4,
-                            format: 'float32x3',
-                        },
-                        {
-                            // vertex uv
-                            shaderLocation: 2,
-                            offset: 6 * 4,
-                            format: 'float32x2'
-                        }
-                    ],
-                },
-                {
-                    arrayStride: 12 * 4,
-                    stepMode: "instance",
-                    attributes: [
-                        {
-                            /* position*/
-                            shaderLocation: 3, offset: 4 * 4, format: 'float32x3'
-                        },
-                        {
-                            /* alpha*/
-                            shaderLocation: 4, offset: 7 * 4, format: 'float32'
-                        },
-                        {
-                            /* rotation*/
-                            shaderLocation: 5, offset: 8 * 4, format: 'float32x3'
-                        },
-                        {
-                            /* scale*/
-                            shaderLocation: 6, offset: 11 * 4, format: 'float32'
-                        },
-                    ]
-                },
-            ]
-        }
+        const primitiveBuffer = this.geometry.gpuRenderInfo.buffers[0];
+        const vertexAttributeCount = Array.from(primitiveBuffer.attributes).length;
+        return [
+            primitiveBuffer,
+            {
+                arrayStride: 12 * 4,
+                stepMode: "instance",
+                attributes: [
+                    {
+                        /* position*/
+                        shaderLocation: vertexAttributeCount, offset: 4 * 4, format: 'float32x3'
+                    },
+                    {
+                        /* alpha*/
+                        shaderLocation: vertexAttributeCount + 1, offset: 7 * 4, format: 'float32'
+                    },
+                    {
+                        /* rotation*/
+                        shaderLocation: vertexAttributeCount + 2, offset: 8 * 4, format: 'float32x3'
+                    },
+                    {
+                        /* scale*/
+                        shaderLocation: vertexAttributeCount + 3, offset: 11 * 4, format: 'float32'
+                    },
+                ]
+            },
+        ]
     }
 
     /**

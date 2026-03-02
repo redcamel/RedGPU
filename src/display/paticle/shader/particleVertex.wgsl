@@ -18,10 +18,11 @@ struct InputData {
     @location(0) a_position : vec3<f32>,
     @location(1) a_normal : vec3<f32>,
     @location(2) a_uv : vec2<f32>,
-    @location(3) position : vec3<f32>,
-    @location(4) alpha : f32,
-    @location(5) rotation : vec3<f32>,
-    @location(6) scale : f32,
+    @location(3) a_tangent : vec4<f32>,
+    @location(4) position : vec3<f32>,
+    @location(5) alpha : f32,
+    @location(6) rotation : vec3<f32>,
+    @location(7) scale : f32,
 };
 struct VertexOutput {
     @builtin(position) position : vec4<f32>,

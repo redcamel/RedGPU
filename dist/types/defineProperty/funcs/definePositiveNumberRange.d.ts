@@ -4,6 +4,6 @@ declare function definePositiveNumberRange(propertyKey: string, initValue?: numb
     value?: any;
     writable?: boolean;
     get: () => any;
-    set: (newValue: number) => void;
+    set: (v: any) => void;
 };
 export default definePositiveNumberRange;
