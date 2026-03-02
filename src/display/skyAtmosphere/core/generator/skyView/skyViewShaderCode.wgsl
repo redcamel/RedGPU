@@ -65,7 +65,7 @@ fn integrateSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, ste
     let sunDir = params.sunDirection;
     let viewSunCos = dot(dir, sunDir);
     let phaseR = phaseRayleigh(viewSunCos);
-    let phaseM = phaseMie(viewSunCos, params.mieAnisotropy);
+    let phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy);
     let phaseF = phaseMie(viewSunCos, 0.7);
 
     for (var i = 0u; i < steps; i = i + 1u) {

@@ -134,6 +134,12 @@ fn phaseMie(cosTheta: f32, g: f32) -> f32 {
     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
 }
 
+fn phaseMieDual(cosTheta: f32, g: f32) -> f32 {
+    // [KO] 이중 로브 Mie 산란: 80%의 부드러운 Glow(기본 g) + 20%의 날카로운 Halo(g=0.99)
+    // [EN] Dual-Lobe Mie Scattering: 80% soft Glow (base g) + 20% sharp Halo (g=0.99)
+    return mix(phaseMie(cosTheta, g), phaseMie(cosTheta, 0.99), 0.2);
+}
+
 fn getAtmosphereCoefficients(h: f32, params: SkyAtmosphere) -> AtmosphereCoefficients {
     var c: AtmosphereCoefficients;
     let d = getAtmosphereDensities(h, params);
