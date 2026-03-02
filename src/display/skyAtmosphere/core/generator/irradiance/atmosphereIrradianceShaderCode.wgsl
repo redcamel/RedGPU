@@ -59,8 +59,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let skyUV = getSkyViewUV(L, camH, r, atmH);
             var skyRadiance = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
             
-            // [KO] 지평선 아래 방향 샘플링 시, SkyView에서 지면이 지워졌다면 직접 지면 조도를 계산합니다.
-            // [EN] When sampling below the horizon, if the ground was removed from SkyView, calculate ground irradiance directly.
+            // [KO] 지평선 아래 방향 샘플링 시, 지면 조도를 계산합니다.
+            // [EN] When sampling below the horizon, calculate ground irradiance.
             if (params.useGround > 0.5 && L.y < -0.001) {
                 let tGround = getRaySphereIntersection(vec3<f32>(0.0, r + camH, 0.0), L, r);
                 if (tGround > 0.0) {

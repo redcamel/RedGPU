@@ -31,7 +31,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         if (intersect.x > 0.0) {
             let tEnd = min(sliceDist, intersect.x);
             integrateSegment(rayOrigin, viewDir, 0.0, tEnd, 16u, &radiance, &transmittance);
-            if (params.useGround < 0.5 && sliceDist > intersect.y && intersect.y > 0.0) {
+            if (params.showGround < 0.5 && sliceDist > intersect.y && intersect.y > 0.0) {
                 integrateSegment(rayOrigin, viewDir, intersect.y, sliceDist, 16u, &radiance, &transmittance);
             }
         } else {

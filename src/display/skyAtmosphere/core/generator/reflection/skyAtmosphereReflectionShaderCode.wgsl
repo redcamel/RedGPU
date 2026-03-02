@@ -28,15 +28,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     if (intersect.x > 0.0) {
         integrateSegment(rayOrigin, viewDir, 0.0, intersect.x, 16u, &radiance, &transmittance);
-        if (params.useGround > 0.5 && params.showGround > 0.5) {
+        if (params.useGround > 0.5) {
             let hitPos = rayOrigin + viewDir * intersect.x;
             let up = normalize(hitPos);
             let cosSun = dot(up, params.sunDirection);
             let sunTrans = getSunTransmittanceManual(hitPos, params.sunDirection, params);
             let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cosSun * 0.5 + 0.5, 1.0), 0.0).rgb;
             radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy + params.groundAmbient) * (params.groundAlbedo * INV_PI);
-        } else if (intersect.y > 0.0 && tMax > intersect.y) {
-            integrateSegment(rayOrigin, viewDir, intersect.y, tMax, 16u, &radiance, &transmittance);
         }
     } else if (tMax > 0.0) {
         integrateSegment(rayOrigin, viewDir, 0.0, tMax, 32u, &radiance, &transmittance);

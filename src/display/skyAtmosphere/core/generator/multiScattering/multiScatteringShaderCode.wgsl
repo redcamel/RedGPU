@@ -53,7 +53,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         fmsTotal += f1 / f32(sampleCount);
     }
 
-    let output = (lumTotal / f32(sampleCount)) / (1.0 - min(fmsTotal, vec3<f32>(0.999)));
+    let output = (lumTotal / f32(sampleCount)) / (1.0 - min(fmsTotal, vec3<f32>(0.9)));
     textureStore(multiScatTexture, global_id.xy, vec4<f32>(output, 1.0));
 }
 
