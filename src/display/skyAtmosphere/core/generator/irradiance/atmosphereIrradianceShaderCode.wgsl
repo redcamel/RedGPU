@@ -67,7 +67,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                     let hitP = vec3<f32>(0.0, r + camH, 0.0) + L * tGround;
                     let cosS = max(0.0, dot(normalize(hitP), params.sunDirection));
                     let sunT = getPhysicalTransmittance(hitP, params.sunDirection, r, atmH, params);
-                    let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(dot(normalize(hitP), params.sunDirection) * 0.5 + 0.5, 0.0), 0.0).rgb;
+                    let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(dot(normalize(hitP), params.sunDirection) * 0.5 + 0.5, 1.0), 0.0).rgb;
                     
                     let groundAlbedo = params.groundAlbedo * INV_PI;
                     skyRadiance = (sunT * cosS + msEnergy + params.groundAmbient) * groundAlbedo;

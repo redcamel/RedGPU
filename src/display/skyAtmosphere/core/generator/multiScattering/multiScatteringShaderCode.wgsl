@@ -73,8 +73,9 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
 
         let scatR = params.rayleighScattering * d.rhoR;
         let scatM = params.mieScattering * d.rhoM;
-        let scatTotal = scatR + scatM;
-        let extTotal = scatR + vec3<f32>(params.mieExtinction * d.rhoM);
+        let scatF = params.heightFogDensity * d.rhoF;
+        let scatTotal = scatR + vec3<f32>(scatM + scatF);
+        let extTotal = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 
         *L1 += *TPath * sunT * scatTotal * (0.25 * INV_PI) * shadowMask * stepSize;
         *f1 += *TPath * scatTotal * stepSize;
