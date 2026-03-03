@@ -57,104 +57,80 @@ class PrimitiveUtils {
     }
 
     static generateBoxData(redGPUContext: RedGPUContext, width: number, height: number, depth: number, widthSegments: number, heightSegments: number, depthSegments: number, uniqueKey: string): Geometry {
-        const interleaveData = [], indexData = [], w2 = width / 2, h2 = height / 2, d2 = depth / 2;
-        this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: w2, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0}, {x: 1, y: 0, z: 0});
-        this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: -w2, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: -1, z: 0}, {x: -1, y: 0, z: 0});
-        this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: 1, z: 0});
-        this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: -h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0});
-        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: d2}, {x: 1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1});
-        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: -d2}, {x: -1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: -1});
-        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+        return this.generateRoundedBoxData(redGPUContext, width, height, depth, widthSegments, heightSegments, depthSegments, 0, 0, uniqueKey);
     }
 
     static generateRoundedBoxData(redGPUContext: RedGPUContext, width: number, height: number, depth: number, widthSegments: number, heightSegments: number, depthSegments: number, radius: number, radiusSegments: number, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [], w2 = width / 2, h2 = height / 2, d2 = depth / 2;
         const r = Math.min(radius, w2, h2, d2);
-        if (r <= 0) return this.generateBoxData(redGPUContext, width, height, depth, widthSegments, heightSegments, depthSegments, uniqueKey);
+        const boxDim = r > 0 ? { w: width, h: height, d: depth, r } : null;
 
-        const totalWidthSegments = widthSegments + radiusSegments * 2;
-        const totalHeightSegments = heightSegments + radiusSegments * 2;
-        const totalDepthSegments = depthSegments + radiusSegments * 2;
-
-        const boxDim = { w: width, h: height, d: depth, r };
-
-        // [KO] 6개 면 생성 (3D 라운딩 로직 적용)
-        this.generateRoundedPlaneData(interleaveData, indexData, depth, height, totalDepthSegments, totalHeightSegments, radiusSegments, depthSegments, heightSegments, {x: w2, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0}, boxDim);
-        this.generateRoundedPlaneData(interleaveData, indexData, depth, height, totalDepthSegments, totalHeightSegments, radiusSegments, depthSegments, heightSegments, {x: -w2, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: -1, z: 0}, boxDim);
-        this.generateRoundedPlaneData(interleaveData, indexData, width, depth, totalWidthSegments, totalDepthSegments, radiusSegments, widthSegments, depthSegments, {x: 0, y: h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, boxDim);
-        this.generateRoundedPlaneData(interleaveData, indexData, width, depth, totalWidthSegments, totalDepthSegments, radiusSegments, widthSegments, depthSegments, {x: 0, y: -h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, boxDim);
-        this.generateRoundedPlaneData(interleaveData, indexData, width, height, totalWidthSegments, totalHeightSegments, radiusSegments, widthSegments, heightSegments, {x: 0, y: 0, z: d2}, {x: 1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, boxDim);
-        this.generateRoundedPlaneData(interleaveData, indexData, width, height, totalWidthSegments, totalHeightSegments, radiusSegments, widthSegments, heightSegments, {x: 0, y: 0, z: -d2}, {x: -1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, boxDim);
+        // [KO] 통합된 generatePlaneData를 사용하여 6개 면 생성
+        this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: w2, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0}, {x: 1, y: 0, z: 0}, r, radiusSegments, boxDim);
+        this.generatePlaneData(interleaveData, indexData, depth, height, depthSegments, heightSegments, {x: -w2, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: -1, z: 0}, {x: -1, y: 0, z: 0}, r, radiusSegments, boxDim);
+        this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: 1, z: 0}, r, radiusSegments, boxDim);
+        this.generatePlaneData(interleaveData, indexData, width, depth, widthSegments, depthSegments, {x: 0, y: -h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0}, r, radiusSegments, boxDim);
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: d2}, {x: 1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1}, r, radiusSegments, boxDim);
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, {x: 0, y: 0, z: -d2}, {x: -1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: -1}, r, radiusSegments, boxDim);
 
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
-    static generateRoundedPlaneData(
+    static generatePlaneData(
         interleaveData: number[], indexData: number[], 
         width: number, height: number, 
-        totalResX: number, totalResY: number, 
-        radiusSegments: number, 
-        mainSegmentsX: number, mainSegmentsY: number,
-        center: any, uV: any, vV: any, boxDim: any
+        mainSegmentsX: number, mainSegmentsY: number, 
+        center: any, uV: any, vV: any, normal: any,
+        radius: number = 0, radiusSegments: number = 0, 
+        boxDim: any = null, flipY: boolean = false
     ) {
-        const startIdx = interleaveData.length / 12;
-        const { w, h, d, r } = boxDim;
-        const innerW2 = w / 2 - r, innerH2 = h / 2 - r, innerD2 = d / 2 - r;
+        const startIdx = interleaveData.length / this.#STRIDE_FLOATS;
+        const totalResX = mainSegmentsX + radiusSegments * 2;
+        const totalResY = mainSegmentsY + radiusSegments * 2;
 
-        // [KO] 곡면 구간에 정점을 집중시키고, UV를 호 길이(Arc-Length)에 비례하여 계산하는 함수
-        const getNonUniformCoord = (index: number, size: number, r: number, rSeg: number, mSeg: number) => {
+        const getCoordInfo = (index: number, size: number, r: number, rSeg: number, mSeg: number) => {
+            if (r <= 0 || rSeg <= 0) {
+                const u = index / mSeg;
+                return { pos: (u - 0.5) * size, norm: 0, uv: u };
+            }
             const limit = size / 2 - r;
             const arcLength = (Math.PI / 2) * r;
             const totalLength = arcLength * 2 + (limit * 2);
-            
             if (index <= rSeg) {
-                // Left/Top Corner
-                const ratio = index / rSeg;
-                const angle = (1 - ratio) * Math.PI / 2;
-                const arcDist = ratio * arcLength;
-                return { pos: -limit - Math.sin(angle) * r, norm: -Math.sin(angle), uv: arcDist / totalLength };
+                const ratio = index / rSeg, angle = (1 - ratio) * Math.PI / 2;
+                return { pos: -limit - Math.sin(angle) * r, norm: -Math.sin(angle), uv: (ratio * arcLength) / totalLength };
             } else if (index <= rSeg + mSeg) {
-                // Flat Area
                 const ratio = (index - rSeg) / mSeg;
-                const arcDist = arcLength + ratio * (limit * 2);
-                return { pos: -limit + ratio * (limit * 2), norm: 0, uv: arcDist / totalLength };
+                return { pos: -limit + ratio * (limit * 2), norm: 0, uv: (arcLength + ratio * (limit * 2)) / totalLength };
             } else {
-                // Right/Bottom Corner
-                const ratio = (index - rSeg - mSeg) / rSeg;
-                const angle = ratio * Math.PI / 2;
-                const arcDist = arcLength + (limit * 2) + ratio * arcLength;
-                return { pos: limit + Math.sin(angle) * r, norm: Math.sin(angle), uv: arcDist / totalLength };
+                const ratio = (index - rSeg - mSeg) / rSeg, angle = ratio * Math.PI / 2;
+                return { pos: limit + Math.sin(angle) * r, norm: Math.sin(angle), uv: (arcLength + (limit * 2) + ratio * arcLength) / totalLength };
             }
         };
 
         for (let iy = 0; iy <= totalResY; iy++) {
-            const yInfo = getNonUniformCoord(iy, height, r, radiusSegments, mainSegmentsY);
+            const yInfo = getCoordInfo(iy, height, radius, radiusSegments, mainSegmentsY);
+            const uvY = flipY ? (1 - yInfo.uv) : yInfo.uv;
             for (let ix = 0; ix <= totalResX; ix++) {
-                const xInfo = getNonUniformCoord(ix, width, r, radiusSegments, mainSegmentsX);
+                const xInfo = getCoordInfo(ix, width, radius, radiusSegments, mainSegmentsX);
 
-                // 1. 기본 박스 면 위의 3D 좌표
                 let px = center.x + xInfo.pos * uV.x + yInfo.pos * vV.x;
                 let py = center.y + xInfo.pos * uV.y + yInfo.pos * vV.y;
                 let pz = center.z + xInfo.pos * uV.z + yInfo.pos * vV.z;
+                let nx = normal.x, ny = normal.y, nz = normal.z;
 
-                // 2. 3D Inner Box Clamping (핵심 라운딩 수식)
-                const cx = Math.max(-innerW2, Math.min(px, innerW2));
-                const cy = Math.max(-innerH2, Math.min(py, innerH2));
-                const cz = Math.max(-innerD2, Math.min(pz, innerD2));
-
-                const dx = px - cx, dy = py - cy, dz = pz - cz;
-                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1e-6;
-
-                // 3. 노멀 및 위치 확정
-                const nx = dx / dist, ny = dy / dist, nz = dz / dist;
-                px = cx + nx * r;
-                py = cy + ny * r;
-                pz = cz + nz * r;
-
-                this.interleavePacker(interleaveData, px, py, pz, nx, ny, nz, xInfo.uv, yInfo.uv);
+                if (boxDim) {
+                    const { w, h, d, r } = boxDim;
+                    const innerW2 = w / 2 - r, innerH2 = h / 2 - r, innerD2 = d / 2 - r;
+                    const cx = Math.max(-innerW2, Math.min(px, innerW2)), cy = Math.max(-innerH2, Math.min(py, innerH2)), cz = Math.max(-innerD2, Math.min(pz, innerD2));
+                    const dx = px - cx, dy = py - cy, dz = pz - cz;
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1e-6;
+                    nx = dx / dist; ny = dy / dist; nz = dz / dist;
+                    px = cx + nx * r; py = cy + ny * r; pz = cz + nz * r;
+                }
+                this.interleavePacker(interleaveData, px, py, pz, nx, ny, nz, xInfo.uv, uvY);
             }
         }
-
         this.generateGridIndices(indexData, startIdx, totalResX, totalResY, totalResX + 1);
     }
 
@@ -181,14 +157,14 @@ class PrimitiveUtils {
     static generatePlaneEntryData(redGPUContext: RedGPUContext, width: number, height: number, widthSegments: number, heightSegments: number, flipY: boolean, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [];
         if (width <= 0 || height <= 0) return this.getEmptyGeometry(redGPUContext, uniqueKey);
-        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, this.#ZERO_VECTOR, this.#BASIS_U, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1}, flipY);
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, this.#ZERO_VECTOR, this.#BASIS_U, {x: 0, y: -1, z: 0}, {x: 0, y: 0, z: 1}, 0, 0, null, flipY);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
     static generateGroundData(redGPUContext: RedGPUContext, width: number, height: number, widthSegments: number, heightSegments: number, flipY: boolean, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [];
         if (width <= 0 || height <= 0) return this.getEmptyGeometry(redGPUContext, uniqueKey);
-        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, this.#ZERO_VECTOR, this.#BASIS_U, {x: 0, y: 0, z: 1}, this.#AXIS_UP, flipY);
+        this.generatePlaneData(interleaveData, indexData, width, height, widthSegments, heightSegments, this.#ZERO_VECTOR, this.#BASIS_U, {x: 0, y: 0, z: 1}, this.#AXIS_UP, 0, 0, null, flipY);
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
@@ -262,13 +238,6 @@ class PrimitiveUtils {
     static #calculateTorusKnotPosition(u, p, q, radius, out) {
         const cu = Math.cos(u), su = Math.sin(u), quOverP = q / p * u, cs = Math.cos(quOverP);
         out.x = radius * (2 + cs) * 0.5 * cu; out.y = radius * (2 + cs) * su * 0.5; out.z = radius * Math.sin(quOverP) * 0.5;
-    }
-
-    static generatePlaneData(interleaveData: number[], indexData: number[], width: number, height: number, gridResX: number, gridResY: number, center: { x: number, y: number, z: number }, uV: { x: number, y: number, z: number }, vV: { x: number, y: number, z: number }, normal: { x: number, y: number, z: number }, flipY: boolean = false) {
-        this.generateGrid(interleaveData, indexData, gridResX, gridResY, (u, v) => {
-            const x = (u - 0.5) * width, y = (v - 0.5) * height, uvY = flipY ? (1 - v) : v;
-            this.interleavePacker(interleaveData, center.x + x * uV.x + y * vV.x, center.y + x * uV.y + y * vV.y, center.z + x * uV.z + y * vV.z, normal.x, normal.y, normal.z, u, uvY);
-        });
     }
 
     static generateRingData(interleaveData: number[], indexData: number[], innerRadius: number, outerRadius: number, thetaSegments: number, phiSegments: number, thetaStart: number, thetaLength: number, center: { x: number, y: number, z: number }, uV: { x: number, y: number, z: number }, vV: { x: number, y: number, z: number }, normal: { x: number, y: number, z: number }, isFront: boolean = true, isRadial: boolean = false, uvVStart: number = 0, uvVEnd: number = 1) {

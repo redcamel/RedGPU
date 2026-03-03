@@ -83,6 +83,7 @@ const createPrimitive = (redGPUContext, scene) => {
     // [EN] Define list of primitives to be created
     const primitives = [
         {constructor: RedGPU.Primitive.Box, args: [redGPUContext, 1, 1, 1, 2, 2, 2]},
+        {constructor: RedGPU.Primitive.RoundedBox, args: [redGPUContext, 1, 1, 1, 1, 1, 1, 0.25, 8]},
         {constructor: RedGPU.Primitive.Circle, args: [redGPUContext, 1, 64]},
         {constructor: RedGPU.Primitive.Cone, args: [redGPUContext, 1, 2, 32]},
         {constructor: RedGPU.Primitive.Cylinder, args: [redGPUContext, 0.5, 1, 2, 64, 64]},
