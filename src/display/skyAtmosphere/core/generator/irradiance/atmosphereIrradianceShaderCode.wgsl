@@ -3,6 +3,7 @@
 @group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(3) var atmosphereSampler: sampler;
 @group(0) @binding(4) var<uniform> params: SkyAtmosphere;
+@group(0) @binding(5) var atmosphereTransmittanceTexture: texture_2d<f32>;
 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -30,8 +31,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     ));
 
     // [KO] 법선 방향으로 정렬하기 위한 로컬 기저(TBN) 생성
-    let up = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(1.0, 0.0, 0.0), abs(normal.y) > 0.99);
-    let tangent = normalize(cross(up, normal));
+    let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(1.0, 0.0, 0.0), abs(normal.y) > 0.99);
+    let tangent = normalize(cross(upVec, normal));
     let bitangent = cross(normal, tangent);
     let tbn = mat3x3<f32>(tangent, normal, bitangent);
 
@@ -41,9 +42,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     var irradiance = vec3<f32>(0.0);
     
-    // [KO] 반구 샘플링 (람베르트 코사인 가중치 적분)
-    const samplesPhi = 12u;
-    const samplesTheta = 6u;
+    // [KO] 반구 샘플링 정밀도 향상
+    const samplesPhi = 64u;
+    const samplesTheta = 32u;
     
     for (var i = 0u; i < samplesPhi; i = i + 1u) {
         let phi = (f32(i) + 0.5) / f32(samplesPhi) * PI2;
@@ -60,17 +61,20 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             var skyRadiance = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
             
             // [KO] 지평선 아래 방향 샘플링 시, 지면 조도를 계산합니다.
-            // [EN] When sampling below the horizon, calculate ground irradiance.
             if (params.useGround > 0.5 && L.y < -0.001) {
                 let tGround = getRaySphereIntersection(vec3<f32>(0.0, r + camH, 0.0), L, r);
                 if (tGround > 0.0) {
                     let hitP = vec3<f32>(0.0, r + camH, 0.0) + L * tGround;
-                    let cosS = max(0.0, dot(normalize(hitP), params.sunDirection));
-                    let sunT = getPhysicalTransmittance(hitP, params.sunDirection, r, atmH, params);
-                    let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(dot(normalize(hitP), params.sunDirection) * 0.5 + 0.5, 1.0), 0.0).rgb;
+                    let hitNormal = normalize(hitP);
+                    let cosS = dot(hitNormal, params.sunDirection);
                     
+                    // [KO] LUT를 사용하여 투과율 및 다중 산란 에너지 계산
+                    let sunT = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, 0.0, cosS, atmH);
+                    let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cosS * 0.5 + 0.5, 1.0), 0.0).rgb;
+                    
+                    // [KO] 조도 유닛 정합 (msEnergy * PI)
                     let groundAlbedo = params.groundAlbedo * INV_PI;
-                    skyRadiance = (sunT * cosS + msEnergy + params.groundAmbient) * groundAlbedo;
+                    skyRadiance = (sunT * max(0.0, cosS) + msEnergy * PI + params.groundAmbient) * groundAlbedo;
                 }
             }
             
@@ -78,6 +82,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
 
-    irradiance = irradiance * (PI2 * HPI / f32(samplesPhi * samplesTheta));
+    // [KO] Irradiance(E)를 PI로 나누어 평균 Radiance(L) 형태로 저장 (PBR 재질과의 호환성)
+    // [EN] Divide Irradiance(E) by PI to store as average Radiance(L) (Compatibility with PBR materials)
+    irradiance = irradiance * (PI2 * HPI / f32(samplesPhi * samplesTheta)) * INV_PI;
+
     textureStore(irradianceTexture, global_id.xy, vec4<f32>(irradiance, 1.0));
 }
