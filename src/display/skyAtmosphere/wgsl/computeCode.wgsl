@@ -33,9 +33,7 @@ let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
 let apSample = textureSampleLevel(cameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
 if (rawDepth < 0.999999) {
-    // [KO] apSample.rgb에는 이미 sunIntensity가 반영된 산란광이 들어있음
-    // [EN] apSample.rgb already contains in-scattering with sunIntensity applied
-    // FinalColor = (SceneColor * Transmittance) + InScattering
+    // [KO] 이전의 정확한 합성 상태로 복구 (Scene * Transmittance + InScattering)
     sceneColor = (sceneColor * apSample.a) + apSample.rgb;
 }
 

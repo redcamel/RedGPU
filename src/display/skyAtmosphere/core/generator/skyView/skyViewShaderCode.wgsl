@@ -32,8 +32,16 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let viewDir = vec3<f32>(cos(viewElevation) * cos(azimuth), sin(viewElevation), cos(viewElevation) * sin(azimuth));
     let rayOrigin = vec3<f32>(0.0, camH + r, 0.0);
-    let tMax = getRaySphereIntersection(rayOrigin, viewDir, r + params.atmosphereHeight);
+    
+    var tMax = getRaySphereIntersection(rayOrigin, viewDir, r + params.atmosphereHeight);
     let intersect = getPlanetIntersection(rayOrigin, viewDir, r);
+
+    // [KO] 지하 시점에서 아래를 볼 때, 적분 거리가 지구 반대편(수만 km)으로 튀는 것을 방지
+    // [EN] Prevent integration distance from jumping to the other side of the planet when looking down from underground
+    if (camH < 0.0 && viewDir.y < 0.0) {
+        let tFloor = getRaySphereIntersection(rayOrigin, viewDir, r - 1.0);
+        if (tFloor > 0.0) { tMax = min(tMax, tFloor); }
+    }
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);

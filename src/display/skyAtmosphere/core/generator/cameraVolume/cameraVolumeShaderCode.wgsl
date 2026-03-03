@@ -21,7 +21,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let sliceDist = uvw.z * uvw.z * 100.0; 
 
     let r = params.earthRadius;
-    let rayOrigin = vec3<f32>(0.0, max(0.0001, params.cameraHeight) + r, 0.0);
+    let rayOrigin = vec3<f32>(0.0, params.cameraHeight + r, 0.0);
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
