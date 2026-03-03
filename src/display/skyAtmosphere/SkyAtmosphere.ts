@@ -514,7 +514,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /** [KO] 프리필터링된 대기 반사 큐브맵을 반환합니다. [EN] Returns the pre-filtered atmospheric reflection cubemap. */
-    get skyAtmosphereReflectionTexture(): DirectCubeTexture {
+    get atmosphereReflectionTexture(): DirectCubeTexture {
         return this.#reflectionGenerator.prefilteredTexture;
     }
 

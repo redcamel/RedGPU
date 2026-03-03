@@ -32,6 +32,7 @@ class ResourceBase {
      */
     #dirtyListeners: any[] = [];
     #resourceManagerKey: string
+    #revision: number = 0
 
     /**
      * [KO] ResourceBase 인스턴스를 생성합니다.
@@ -48,6 +49,11 @@ class ResourceBase {
         this.#resourceManagerKey = resourceManagerKey
         this.#redGPUContext = redGPUContext
         this.#gpuDevice = redGPUContext.gpuDevice
+    }
+
+    /** [KO] 리소스의 리비전(업데이트 횟수)을 반환합니다. [EN] Returns the revision (update count) of the resource. */
+    get revision(): number {
+        return this.#revision;
     }
 
     /**
@@ -150,6 +156,7 @@ class ResourceBase {
      * [EN] Whether to reset the listener list after firing (default: false)
      */
     notifyUpdate(resetList: boolean = false) {
+        this.#revision++;
         for (const listener of this.#dirtyListeners) listener(this);
         if (resetList) this.#dirtyListeners.length = 0
     }

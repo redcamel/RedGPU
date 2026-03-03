@@ -23,6 +23,8 @@ declare class ResourceBase {
      * [EN] Managed state key (optional)
      */
     protected constructor(redGPUContext: RedGPUContext, resourceManagerKey?: string);
+    /** [KO] 리소스의 리비전(업데이트 횟수)을 반환합니다. [EN] Returns the revision (update count) of the resource. */
+    get revision(): number;
     /**
      * [KO] 캐시 키를 반환합니다.
      * [EN] Returns the cache key.

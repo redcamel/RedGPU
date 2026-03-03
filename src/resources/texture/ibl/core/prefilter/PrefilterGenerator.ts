@@ -167,6 +167,7 @@ class PrefilterGenerator {
         uniformBuffers.forEach(buf => buf.destroy());
 
         if (destinationTexture instanceof DirectCubeTexture) {
+            destinationTexture.notifyUpdate();
             return destinationTexture;
         }
         return new DirectCubeTexture(this.#redGPUContext, `Prefilter_Map_${createUUID()}`, prefilterGPUTexture);
