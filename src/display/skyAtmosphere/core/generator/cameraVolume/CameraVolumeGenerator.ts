@@ -7,6 +7,7 @@ import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
+import createUUID from "../../../../../utils/uuid/createUUID";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_VOLUME_GENERATOR');
 
@@ -43,7 +44,7 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, 'CameraVolumeLUTTexture', this.createLUTTexture(true));
+        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `CameraVolumeLUTTexture_${createUUID()}`, this.createLUTTexture(true));
         this.pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
             label: 'CAMERA_VOLUME_GEN_PIPELINE',
             layout: 'auto',

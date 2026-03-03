@@ -6,6 +6,7 @@ import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
+import createUUID from "../../../../../utils/uuid/createUUID";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + skyViewShaderCode, 'SKY_VIEW_GENERATOR');
 
@@ -42,7 +43,7 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectTexture(this.redGPUContext, 'SkyViewLUTTexture', this.createLUTTexture());
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyViewLUTTexture_${createUUID()}`, this.createLUTTexture());
         this.pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
             label: 'SKY_VIEW_GEN_PIPELINE',
             layout: 'auto',

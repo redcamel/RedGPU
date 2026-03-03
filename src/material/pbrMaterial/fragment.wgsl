@@ -645,7 +645,9 @@ fn main(inputData:InputData) -> OutputFragment {
             
             let sun_azimuth = atan2(u_atmo.sunDirection.z, u_atmo.sunDirection.x);
             let pixel_azimuth = atan2(N.z, N.x);
-            let rel_azimuth = pixel_azimuth - sun_azimuth;
+            var rel_azimuth = pixel_azimuth - sun_azimuth;
+            if (rel_azimuth < -PI) { rel_azimuth += PI2; }
+            if (rel_azimuth > PI) { rel_azimuth -= PI2; }
             let v_az = clamp((rel_azimuth / PI2) + 0.5, 0.001, 0.999);
             
             let skyIrradiance = textureSampleLevel(atmosphereIrradianceTexture, atmosphereSampler, vec2<f32>(u_el, v_az), 0.0).rgb * sunInt;

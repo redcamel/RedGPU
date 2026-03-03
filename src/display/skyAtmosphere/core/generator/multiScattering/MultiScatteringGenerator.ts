@@ -6,6 +6,7 @@ import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
+import createUUID from "../../../../../utils/uuid/createUUID";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + multiScatteringShaderCode, 'MULTI_SCATTERING_GENERATOR');
 
@@ -39,7 +40,7 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectTexture(this.redGPUContext, 'MultiScatteringLUTTexture', this.createLUTTexture());
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `MultiScatteringLUTTexture_${createUUID()}`, this.createLUTTexture());
         this.pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
             label: 'MULTI_SCATTERING_GEN_PIPELINE',
             layout: 'auto',

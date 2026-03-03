@@ -36,14 +36,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let tbn = mat3x3<f32>(tangent, normal, bitangent);
 
     let r = params.earthRadius;
-    let camH = params.cameraHeight;
+    let camH = max(0.0001, params.cameraHeight);
     let atmH = params.atmosphereHeight;
 
     var irradiance = vec3<f32>(0.0);
     
     // [KO] 반구 샘플링 (람베르트 코사인 가중치 적분)
-    const samplesPhi = 12u;
-    const samplesTheta = 6u;
+    const samplesPhi = 32u;
+    const samplesTheta = 16u;
     
     for (var i = 0u; i < samplesPhi; i = i + 1u) {
         let phi = (f32(i) + 0.5) / f32(samplesPhi) * PI2;
