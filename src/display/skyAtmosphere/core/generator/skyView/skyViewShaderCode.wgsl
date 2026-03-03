@@ -47,7 +47,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var transmittance = vec3<f32>(1.0);
 
     if (intersect.x > 0.0) {
-        integrateSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, true, &radiance, &transmittance);
         
         if (params.useGround > 0.5 && params.showGround > 0.5) {
             let hitPos = rayOrigin + viewDir * intersect.x;
@@ -57,57 +57,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cosSun * 0.5 + 0.5, 1.0), 0.0).rgb;
             radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy + params.groundAmbient) * (params.groundAlbedo * INV_PI);
         } else if (intersect.y > 0.0 && tMax > intersect.y) {
-            integrateSegment(rayOrigin, viewDir, intersect.y, tMax, 32u, &radiance, &transmittance);
+            integrateScatSegment(rayOrigin, viewDir, intersect.y, tMax, 32u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, true, &radiance, &transmittance);
         }
     } else if (tMax > 0.0) {
-        integrateSegment(rayOrigin, viewDir, 0.0, tMax, 64u, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, true, &radiance, &transmittance);
     }
 
     textureStore(skyViewTexture, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
-}
-
-fn integrateSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, radiance: ptr<function, vec3<f32>>, transmittance: ptr<function, vec3<f32>>) {
-    if (tMax <= tMin) { return; }
-    let r = params.earthRadius;
-    let stepSize = (tMax - tMin) / f32(steps);
-    let sunDir = params.sunDirection;
-    let viewSunCos = dot(dir, sunDir);
-    let phaseR = phaseRayleigh(viewSunCos);
-    let phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy);
-    let phaseF = phaseMie(viewSunCos, 0.7);
-
-    for (var i = 0u; i < steps; i = i + 1u) {
-        let t = tMin + (f32(i) + 0.5) * stepSize;
-        let p = origin + dir * t;
-        let pLen = length(p);
-        let h = pLen - r;
-        if (params.useGround > 0.5 && h < -0.001) { continue; }
-
-        let up = p / pLen;
-        let cosSun = dot(up, sunDir);
-        
-        // LUT 사용 (성능 핵심)
-        let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, h, cosSun, params.atmosphereHeight);
-        let shadowMask = select(1.0, 0.0, params.useGround > 0.5 && getRaySphereIntersection(p, sunDir, r) > 0.0);
-
-        let rhoR = exp(-h / params.rayleighScaleHeight);
-        let rhoM = exp(-h / params.mieScaleHeight);
-        let rhoF = exp(-h * params.heightFogFalloff);
-        let ozoneDist = abs(h - params.ozoneLayerCenter);
-        let rhoO = exp(-max(0.0, ozoneDist * ozoneDist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
-
-        let scatR = params.rayleighScattering * rhoR;
-        let scatM = params.mieScattering * rhoM;
-        let scatF = params.heightFogDensity * rhoF;
-        
-        let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
-        
-        let msUV = vec2<f32>(cosSun * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
-        let msScat = textureSampleLevel(multiScatTexture, atmosphereSampler, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
-
-        let ext = scatR + vec3<f32>(params.mieExtinction * rhoM) + params.ozoneAbsorption * rhoO + vec3<f32>(scatF);
-
-        *radiance += *transmittance * (stepScat + msScat) * stepSize;
-        *transmittance *= exp(-ext * stepSize);
-    }
 }

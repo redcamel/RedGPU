@@ -4,87 +4,49 @@ import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
+import Sampler from "../../../../../resources/sampler/Sampler";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'TRANSMITTANCE_GENERATOR');
-
 
 /**
  * [KO] 대기 투과율(Transmittance) LUT 생성을 담당하는 클래스입니다.
  * [EN] Class responsible for generating Atmospheric Transmittance LUT.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- *
- * @category PostEffect
  */
-class TransmittanceGenerator {
-    /** [KO] 텍스처 가로 크기 [EN] Texture width */
-    readonly width: number = 256;
-    /** [KO] 텍스처 세로 크기 [EN] Texture height */
-    readonly height: number = 64;
-    #redGPUContext: RedGPUContext;
+class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;
-    #pipeline: GPUComputePipeline;
-    #bindGroup: GPUBindGroup;
-    #sharedUniformBuffer: UniformBuffer;
 
-    constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer) {
-        this.#redGPUContext = redGPUContext;
-        this.#sharedUniformBuffer = sharedUniformBuffer;
+    constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
+        super(redGPUContext, sharedUniformBuffer, sampler, 'TRANSMITTANCE_GEN', 256, 64);
         this.#init();
     }
 
-    /** [KO] 생성된 LUT 텍스처를 반환합니다. [EN] Returns the generated LUT texture. */
     get lutTexture(): DirectTexture {
         return this.#lutTexture;
     }
 
-    /**
-     * [KO] 투과율 LUT를 렌더링합니다.
-     * [EN] Renders the Transmittance LUT.
-     */
     render(): void {
-        const {gpuDevice} = this.#redGPUContext;
-
-        const commandEncoder = gpuDevice.createCommandEncoder({label: 'TRANSMITTANCE_GEN_COMMAND_ENCODER'});
-        const passEncoder = commandEncoder.beginComputePass({label: 'TRANSMITTANCE_GEN_COMPUTE_PASS'});
-        passEncoder.setPipeline(this.#pipeline);
-        passEncoder.setBindGroup(0, this.#bindGroup);
-        passEncoder.dispatchWorkgroups(Math.ceil(this.width / 16), Math.ceil(this.height / 16));
-        passEncoder.end();
-        gpuDevice.queue.submit([commandEncoder.finish()]);
-        this.#lutTexture.notifyUpdate();
+        const {gpuDevice} = this.redGPUContext;
+        const bindGroup = gpuDevice.createBindGroup({
+            label: 'TRANSMITTANCE_GEN_BG',
+            layout: this.pipeline.getBindGroupLayout(0),
+            entries: [
+                {binding: 0, resource: this.#lutTexture.gpuTextureView},
+                {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+            ]
+        });
+        this.gpuRender(bindGroup);
     }
 
     #init(): void {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
-        
-        const gpuTexture = resourceManager.createManagedTexture({
-            label: 'TransmittanceLUTTexture',
-            size: [this.width, this.height, 1],
-            dimension: '2d',
-            format: 'rgba16float',
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
-        });
-
-        this.#lutTexture = new DirectTexture(this.#redGPUContext, 'TransmittanceLUTTexture', gpuTexture);
-
-        const shaderModule = gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource});
-        this.#pipeline = gpuDevice.createComputePipeline({
+        this.#lutTexture = new DirectTexture(this.redGPUContext, 'TransmittanceLUTTexture', this.createLUTTexture());
+        this.pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
             label: 'TRANSMITTANCE_GEN_PIPELINE',
             layout: 'auto',
-            compute: {module: shaderModule, entryPoint: 'main'}
-        });
-
-        this.#bindGroup = gpuDevice.createBindGroup({
-            label: 'TRANSMITTANCE_GEN_BG',
-            layout: this.#pipeline.getBindGroupLayout(0),
-            entries: [
-                {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: {buffer: this.#sharedUniformBuffer.gpuBuffer}}
-            ]
+            compute: {
+                module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),
+                entryPoint: 'main'
+            }
         });
     }
 }

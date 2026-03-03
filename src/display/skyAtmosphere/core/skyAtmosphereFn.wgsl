@@ -150,3 +150,66 @@ fn getAtmosphereCoefficients(h: f32, params: SkyAtmosphere) -> AtmosphereCoeffic
     c.extinction = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
     return c;
 }
+
+// [KO] 공용 대기 산란 적분 함수 (Deduplicated Physics Engine)
+// [EN] Shared atmospheric scattering integration function
+fn integrateScatSegment(
+    origin: vec3<f32>, dir: vec3<f32>, 
+    tMin: f32, tMax: f32, steps: u32, 
+    params: SkyAtmosphere,
+    tTex: texture_2d<f32>, tSam: sampler, // Transmittance LUT (Optional)
+    multiScatTexture: texture_2d<f32>,
+    useLUT: bool,
+    radiance: ptr<function, vec3<f32>>, 
+    transmittance: ptr<function, vec3<f32>>
+) {
+    if (tMax <= tMin) { return; }
+    let r = params.earthRadius;
+    let stepSize = (tMax - tMin) / f32(steps);
+    let sunDir = params.sunDirection;
+    let viewSunCos = dot(dir, sunDir);
+    
+    let phaseR = phaseRayleigh(viewSunCos);
+    let phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy);
+    let phaseF = phaseMie(viewSunCos, 0.7);
+
+    for (var i = 0u; i < steps; i = i + 1u) {
+        let t = tMin + (f32(i) + 0.5) * stepSize;
+        let p = origin + dir * t;
+        let pLen = length(p);
+        let h = pLen - r;
+        
+        // [KO] 지하 1km까지는 적분 허용, 그 이상은 건너뜀 (Logical Consistency)
+        if (params.useGround > 0.5 && h < -1.0) { continue; }
+
+        let up = p / pLen;
+        let cosSun = dot(up, sunDir);
+        
+        // [KO] 태양 투과율 계산 (LUT 사용 또는 수동 적분 선택)
+        var sunTrans: vec3<f32>;
+        if (useLUT) {
+            sunTrans = getTransmittance(tTex, tSam, h, cosSun, params.atmosphereHeight);
+        } else {
+            sunTrans = getSunTransmittanceManual(p, sunDir, params);
+        }
+        
+        let shadowMask = select(1.0, 0.0, params.useGround > 0.5 && getRaySphereIntersection(p, sunDir, r) > 0.0);
+        let d = getAtmosphereDensities(h, params);
+
+        let scatR = params.rayleighScattering * d.rhoR;
+        let scatM = params.mieScattering * d.rhoM;
+        let scatF = params.heightFogDensity * d.rhoF;
+        
+        // Single Scattering
+        let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
+        
+        // Multi Scattering Approximation
+        let msUV = vec2<f32>(cosSun * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
+        let msScat = textureSampleLevel(multiScatTexture, tSam, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
+
+        let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
+
+        *radiance += *transmittance * (stepScat + msScat) * stepSize;
+        *transmittance *= exp(-ext * stepSize);
+    }
+}

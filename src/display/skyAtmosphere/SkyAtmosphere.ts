@@ -110,19 +110,19 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
         this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength), 'SKY_ATMOSPHERE_SHARED_UNIFORM_BUFFER');
 
-        this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext, this.#sharedUniformBuffer);
-        this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext, this.#sharedUniformBuffer);
-        this.#skyViewGenerator = new SkyViewGenerator(redGPUContext, this.#sharedUniformBuffer);
-        this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext, this.#sharedUniformBuffer);
-        this.#irradianceGenerator = new AtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer);
-        this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, this.#sharedUniformBuffer);
-
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: 'linear',
             minFilter: 'linear',
             addressModeU: 'repeat',
             addressModeV: 'clamp-to-edge'
         });
+
+        this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#skyViewGenerator = new SkyViewGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#irradianceGenerator = new AtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
 
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
             label: 'SKY_ATMOSPHERE_PE_BGL_1',
