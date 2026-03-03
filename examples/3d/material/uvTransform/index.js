@@ -60,7 +60,8 @@ RedGPU.init(
             [
                 { name: 'Ground', geo: new RedGPU.Primitive.Ground(redGPUContext) },
                 { name: 'Circle', geo: new RedGPU.Primitive.Circle(redGPUContext, 1, 64, 0, Math.PI * 2, false) },
-                { name: 'Ring', geo: new RedGPU.Primitive.Ring(redGPUContext, 0.5, 1, 64, 1, 0, Math.PI * 2, false) }
+                { name: 'Ring', geo: new RedGPU.Primitive.Ring(redGPUContext, 0.5, 1, 64, 1, 0, Math.PI * 2, false) },
+                { name: 'RoundedBox', geo: new RedGPU.Primitive.RoundedBox(redGPUContext) }
             ]
         ];
 
