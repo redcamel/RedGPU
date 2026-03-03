@@ -352,7 +352,7 @@ class View3D extends AView {
             if (prevInfo) {
                 needResetBindGroup = (
                     prevInfo.ibl !== ibl ||
-                    prevInfo.skyAtmosphere !== skyAtmosphere ||
+                    prevInfo.skyAtmosphereReflectionTexture !== skyAtmosphere?.skyAtmosphereReflectionTexture ||
                     prevInfo.ibl_prefilterTexture !== ibl_prefilterTexture ||
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
