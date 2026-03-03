@@ -552,7 +552,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         // [EN] Calculate relative height based on seaLevel
         const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0) - this.#params.seaLevel);
 
-        if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.01) {
+        if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.0001) {
             this.#params.cameraHeight = currentHeightKm;
             this.#dirtySkyView = true;
             this.#dirtyUniformBuffer = true;
