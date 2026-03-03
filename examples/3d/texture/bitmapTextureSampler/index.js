@@ -55,6 +55,7 @@ const addSingleMesh = (redGPUContext, scene) => {
     const diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/UV_Grid_Sm.jpg");
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext);
     material.diffuseTexture = diffuseTexture;
+    material.textureScale = [2, 2];
 
     const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
     mesh.setPosition(0, 0, 0);

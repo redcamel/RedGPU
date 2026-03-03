@@ -215,6 +215,7 @@ const createMaterialWithSampler = (redGPUContext, sampler) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/texture/crate.png");
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext);
     material.diffuseTexture = texture;
+    material.textureScale = [2, 2];
 
     material.diffuseTextureSampler.addressModeU = sampler.addressModeU;
     material.diffuseTextureSampler.addressModeV = sampler.addressModeV;
