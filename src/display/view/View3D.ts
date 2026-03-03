@@ -35,9 +35,6 @@ let temp3 = mat4.create()
 /**
  * [KO] 3D 렌더링을 위한 뷰 클래스입니다.
  * [EN] View class for 3D rendering.
- *
- * [KO] AView를 확장하여 3D 장면 렌더링, 조명, 그림자, 포스트 이펙트, IBL(이미지 기반 조명) 처리 등을 담당합니다.
- * [EN] Extends AView to handle 3D scene rendering, lighting, shadows, post-effects, and IBL (Image-Based Lighting) processing.
  */
 class View3D extends AView {
     #systemUniform_Vertex_StructInfo: any = UNIFORM_STRUCT;
@@ -76,67 +73,26 @@ class View3D extends AView {
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
     }
 
-    get clusterLightManager(): ClusterLightManager {
-        return this.#clusterLightManager;
-    }
-
-    get viewRenderTextureManager(): ViewRenderTextureManager {
-        return this.#viewRenderTextureManager;
-    }
-
-    get systemUniform_Vertex_StructInfo(): any {
-        return this.#systemUniform_Vertex_StructInfo;
-    }
-
-    get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup {
-        return this.#systemUniform_Vertex_UniformBindGroup;
-    }
-
-    get systemUniform_Vertex_UniformBuffer(): UniformBuffer {
-        return this.#systemUniform_Vertex_UniformBuffer;
-    }
-
-    get ibl(): IBL {
-        return this.#ibl;
-    }
-
-    set ibl(value: IBL) {
-        this.#ibl = value;
-    }
-
-    get postEffectManager(): PostEffectManager {
-        return this.#postEffectManager;
-    }
-
-    get toneMappingManager(): ToneMappingManager {
-        return this.#toneMappingManager;
-    }
-
-    get renderViewStateData(): RenderViewStateData {
-        return this.#renderViewStateData;
-    }
-
-    get skybox(): SkyBox {
-        return this.#skybox;
-    }
-
+    get clusterLightManager(): ClusterLightManager { return this.#clusterLightManager; }
+    get viewRenderTextureManager(): ViewRenderTextureManager { return this.#viewRenderTextureManager; }
+    get systemUniform_Vertex_StructInfo(): any { return this.#systemUniform_Vertex_StructInfo; }
+    get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup { return this.#systemUniform_Vertex_UniformBindGroup; }
+    get systemUniform_Vertex_UniformBuffer(): UniformBuffer { return this.#systemUniform_Vertex_UniformBuffer; }
+    get ibl(): IBL { return this.#ibl; }
+    set ibl(value: IBL) { this.#ibl = value; }
+    get postEffectManager(): PostEffectManager { return this.#postEffectManager; }
+    get toneMappingManager(): ToneMappingManager { return this.#toneMappingManager; }
+    get renderViewStateData(): RenderViewStateData { return this.#renderViewStateData; }
+    get skybox(): SkyBox { return this.#skybox; }
     set skybox(value: SkyBox) {
         const {resourceManager} = this.redGPUContext
         const prevTexture = this.#skybox?.skyboxTexture
         const newTexture = value?.skyboxTexture
-        if (prevTexture && prevTexture !== newTexture) {
-            this.#manageIBLResourceState(resourceManager, prevTexture.cacheKey, false);
-        }
+        if (prevTexture && prevTexture !== newTexture) this.#manageIBLResourceState(resourceManager, prevTexture.cacheKey, false);
         this.#skybox = value;
     }
-
-    get skyAtmosphere(): SkyAtmosphere {
-        return this.#skyAtmosphere;
-    }
-
-    set skyAtmosphere(value: SkyAtmosphere) {
-        this.#skyAtmosphere = value;
-    }
+    get skyAtmosphere(): SkyAtmosphere { return this.#skyAtmosphere; }
+    set skyAtmosphere(value: SkyAtmosphere) { this.#skyAtmosphere = value; }
 
     get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor {
         const {antialiasingManager} = this.redGPUContext
@@ -148,9 +104,7 @@ class View3D extends AView {
         }
     }
 
-    get noneJitterProjectionViewMatrix(): mat4 {
-        return this.#noneJitterProjectionViewMatrix;
-    }
+    get noneJitterProjectionViewMatrix(): mat4 { return this.#noneJitterProjectionViewMatrix; }
 
     update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
         const {scene, redGPUContext, ibl, skyAtmosphere} = this
@@ -176,7 +130,6 @@ class View3D extends AView {
                     prevInfo.ibl !== ibl ||
                     prevInfo.skyAtmosphere !== skyAtmosphere ||
                     prevInfo.atmosphereReflectionTexture !== atmosphereReflectionTexture ||
-                    // [KO] 텍스처 객체는 같더라도 내부 내용물(revision)이 바뀌었는지 체크
                     prevInfo.atmosphereReflectionTextureRevision !== atmosphereReflectionTexture?.revision ||
                     prevInfo.atmosphereIrradianceTexture !== atmosphereIrradianceTexture ||
                     prevInfo.atmosphereIrradianceTextureRevision !== atmosphereIrradianceTexture?.revision ||
@@ -209,18 +162,12 @@ class View3D extends AView {
     }
 
     #updateSystemUniform() {
-        const {
-            inverseProjectionMatrix,
-            noneJitterProjectionMatrix,
-            projectionMatrix,
-            rawCamera,
-        } = this;
+        const { inverseProjectionMatrix, noneJitterProjectionMatrix, projectionMatrix, rawCamera } = this;
         const {redGPUContext, systemUniform_Vertex_UniformBuffer} = this
         const {gpuDevice} = redGPUContext
         const {lightManager, shadowManager} = this.scene
         const {viewMatrix} = rawCamera
         const structInfo = this.systemUniform_Vertex_StructInfo;
-        const {gpuBuffer} = systemUniform_Vertex_UniformBuffer;
         const {members} = structInfo
         {
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
@@ -256,15 +203,13 @@ class View3D extends AView {
                 {key: 'directionalLightViewMatrix', value: lightManager.getDirectionalLightViewMatrix(this)},
             ]);
         }
-        {
-            lightManager.directionalLights.forEach((light: DirectionalLight) => {
-                if (light.enableDebugger) {
-                    if (!light.drawDebugger) light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light)
-                    light.drawDebugger.render(this.renderViewStateData)
-                }
-            })
-        }
-        gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
+        lightManager.directionalLights.forEach((light: DirectionalLight) => {
+            if (light.enableDebugger) {
+                if (!light.drawDebugger) light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light)
+                light.drawDebugger.render(this.renderViewStateData)
+            }
+        })
+        gpuDevice.queue.writeBuffer(systemUniform_Vertex_UniformBuffer.gpuBuffer, 0, this.#uniformData);
     }
 
     #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
@@ -289,16 +234,10 @@ class View3D extends AView {
                 {binding: 10, resource: resourceManager.getGPUResourceCubeTextureView(ibl_prefilterTexture, ibl_prefilterTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
                 {binding: 11, resource: resourceManager.getGPUResourceCubeTextureView(ibl_irradianceTexture, ibl_irradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
                 {binding: 12, resource: resourceManager.brdfGenerator.brdfLUTTexture?.createView() || resourceManager.emptyBitmapTextureView},
-                {binding: 13, resource: this.skyAtmosphere ? this.skyAtmosphere.skyAtmosphereSampler.gpuSampler : this.#basicSampler},
-                {binding: 14, resource: this.skyAtmosphere ? this.skyAtmosphere.transmittanceTexture.gpuTextureView : resourceManager.emptyBitmapTextureView},
+                {binding: 13, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereSampler.gpuSampler : this.#basicSampler},
+                {binding: 14, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereTransmittanceTexture.gpuTextureView : resourceManager.emptyBitmapTextureView},
                 {binding: 15, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereIrradianceTexture.gpuTextureView : resourceManager.emptyBitmapTextureView},
-                {
-                    binding: 16,
-                    resource: resourceManager.getGPUResourceCubeTextureView(
-                        this.skyAtmosphere?.atmosphereReflectionTexture,
-                        this.skyAtmosphere?.atmosphereReflectionTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor
-                    )
-                },
+                {binding: 16, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.atmosphereReflectionTexture, this.skyAtmosphere?.atmosphereReflectionTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
@@ -306,10 +245,7 @@ class View3D extends AView {
     }
 
     #updateIBLResourceStates(resourceManager: ResourceManager, ibl_prefilterTexture: any, ibl_irradianceTexture: any) {
-        const textureUpdates = [
-            [this.#prevIBL_prefilterTexture, ibl_prefilterTexture],
-            [this.#prevIBL_irradianceTexture, ibl_irradianceTexture]
-        ];
+        const textureUpdates = [[this.#prevIBL_prefilterTexture, ibl_prefilterTexture], [this.#prevIBL_irradianceTexture, ibl_irradianceTexture]];
         textureUpdates.forEach(([prevTexture, newTexture]) => {
             if (prevTexture && prevTexture !== newTexture) this.#manageIBLResourceState(resourceManager, prevTexture.cacheKey, false);
             if (newTexture && prevTexture !== newTexture) this.#manageIBLResourceState(resourceManager, newTexture.cacheKey, true);

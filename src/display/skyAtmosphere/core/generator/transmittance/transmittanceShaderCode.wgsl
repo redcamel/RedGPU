@@ -1,11 +1,11 @@
 // [KO] UE5 표준 Transmittance LUT 생성
 
-@group(0) @binding(0) var transmittanceTexture: texture_storage_2d<rgba16float, write>;
+@group(0) @binding(0) var atmosphereTransmittanceTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(transmittanceTexture);
+    let size = textureDimensions(atmosphereTransmittanceTexture);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
     // [KO] 텍셀 중심 매핑으로 정밀도 향상
@@ -18,7 +18,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let h = clamp((1.0 - uv.y) * params.atmosphereHeight, 0.0, params.atmosphereHeight);
 
     let T = exp(-min(getOpticalDepth(h, cosTheta), vec3<f32>(MAX_TAU)));
-    textureStore(transmittanceTexture, global_id.xy, vec4<f32>(T, 1.0));
+    textureStore(atmosphereTransmittanceTexture, global_id.xy, vec4<f32>(T, 1.0));
 }
 
 fn getOpticalDepth(h: f32, cosTheta: f32) -> vec3<f32> {

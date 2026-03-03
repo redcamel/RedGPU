@@ -1,14 +1,14 @@
 // [KO] Aerial Perspective 3D LUT 생성을 위한 Compute Shader
 
-@group(0) @binding(0) var cameraVolumeTexture: texture_storage_3d<rgba16float, write>;
-@group(0) @binding(1) var multiScatTexture: texture_2d<f32>;
+@group(0) @binding(0) var atmosphereCameraVolumeTexture: texture_storage_3d<rgba16float, write>;
+@group(0) @binding(1) var atmosphereMultiScatTexture: texture_2d<f32>;
 @group(0) @binding(2) var atmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
-@group(0) @binding(4) var transmittanceTexture: texture_2d<f32>;
+@group(0) @binding(4) var atmosphereTransmittanceTexture: texture_2d<f32>;
 
 @compute @workgroup_size(4, 4, 4)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(cameraVolumeTexture);
+    let size = textureDimensions(atmosphereCameraVolumeTexture);
     if (global_id.x >= size.x || global_id.y >= size.y || global_id.z >= size.z) { return; }
 
     let uvw = (vec3<f32>(global_id) + 0.5) / vec3<f32>(size);
@@ -32,14 +32,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         if (intersect.x > 0.0) {
             let tEnd = min(sliceDist, intersect.x);
             // [KO] 공용 적분 함수 호출 (수동 투과율 계산 모드)
-            integrateScatSegment(rayOrigin, viewDir, 0.0, tEnd, 16u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, false, &radiance, &transmittance);
+            integrateScatSegment(rayOrigin, viewDir, 0.0, tEnd, 16u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, &radiance, &transmittance);
             if (params.showGround < 0.5 && sliceDist > intersect.y && intersect.y > 0.0) {
-                integrateScatSegment(rayOrigin, viewDir, intersect.y, sliceDist, 16u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, false, &radiance, &transmittance);
+                integrateScatSegment(rayOrigin, viewDir, intersect.y, sliceDist, 16u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, &radiance, &transmittance);
             }
         } else {
-            integrateScatSegment(rayOrigin, viewDir, 0.0, sliceDist, 32u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, false, &radiance, &transmittance);
+            integrateScatSegment(rayOrigin, viewDir, 0.0, sliceDist, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, &radiance, &transmittance);
         }
     }
 
-    textureStore(cameraVolumeTexture, global_id, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
+    textureStore(atmosphereCameraVolumeTexture, global_id, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
 }

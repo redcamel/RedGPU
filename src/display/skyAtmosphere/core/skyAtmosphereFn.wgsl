@@ -64,9 +64,9 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmospher
     return vec2<f32>(u, clamp(v, 0.0, 1.0));
 }
 
-fn getTransmittance(tTex: texture_2d<f32>, tSam: sampler, h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec3<f32> {
+fn getTransmittance(atmosphereTransmittanceTexture: texture_2d<f32>, atmosphereSampler: sampler, h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec3<f32> {
     let uv = getTransmittanceUV(h, cosTheta, atmosphereHeight);
-    return textureSampleLevel(tTex, tSam, uv, 0.0).rgb;
+    return textureSampleLevel(atmosphereTransmittanceTexture, atmosphereSampler, uv, 0.0).rgb;
 }
 
 fn getPlanetShadowMask(p: vec3<f32>, sunDir: vec3<f32>, r: f32, params: SkyAtmosphere) -> f32 {
@@ -135,8 +135,6 @@ fn phaseMie(cosTheta: f32, g: f32) -> f32 {
 }
 
 fn phaseMieDual(cosTheta: f32, g: f32) -> f32 {
-    // [KO] 이중 로브 Mie 산란: 80%의 부드러운 Glow(기본 g) + 20%의 날카로운 Halo(g=0.99)
-    // [EN] Dual-Lobe Mie Scattering: 80% soft Glow (base g) + 20% sharp Halo (g=0.99)
     return mix(phaseMie(cosTheta, g), phaseMie(cosTheta, 0.99), 0.2);
 }
 
@@ -151,14 +149,13 @@ fn getAtmosphereCoefficients(h: f32, params: SkyAtmosphere) -> AtmosphereCoeffic
     return c;
 }
 
-// [KO] 공용 대기 산란 적분 함수 (Deduplicated Physics Engine)
-// [EN] Shared atmospheric scattering integration function
 fn integrateScatSegment(
     origin: vec3<f32>, dir: vec3<f32>, 
     tMin: f32, tMax: f32, steps: u32, 
     params: SkyAtmosphere,
-    tTex: texture_2d<f32>, tSam: sampler, // Transmittance LUT (Optional)
-    multiScatTexture: texture_2d<f32>,
+    atmosphereTransmittanceTexture: texture_2d<f32>, 
+    atmosphereSampler: sampler,
+    atmosphereMultiScatTexture: texture_2d<f32>,
     useLUT: bool,
     radiance: ptr<function, vec3<f32>>, 
     transmittance: ptr<function, vec3<f32>>
@@ -179,16 +176,14 @@ fn integrateScatSegment(
         let pLen = length(p);
         let h = pLen - r;
         
-        // [KO] 지하 1km까지는 적분 허용, 그 이상은 건너뜀 (Logical Consistency)
-        if (params.useGround > 0.5 && h < -1.0) { continue; }
+        if (params.useGround > 0.5 && h < 0.0) { continue; }
 
         let up = p / pLen;
         let cosSun = dot(up, sunDir);
         
-        // [KO] 태양 투과율 계산 (LUT 사용 또는 수동 적분 선택)
         var sunTrans: vec3<f32>;
         if (useLUT) {
-            sunTrans = getTransmittance(tTex, tSam, h, cosSun, params.atmosphereHeight);
+            sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, h, cosSun, params.atmosphereHeight);
         } else {
             sunTrans = getSunTransmittanceManual(p, sunDir, params);
         }
@@ -200,12 +195,10 @@ fn integrateScatSegment(
         let scatM = params.mieScattering * d.rhoM;
         let scatF = params.heightFogDensity * d.rhoF;
         
-        // Single Scattering
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
         
-        // Multi Scattering Approximation
         let msUV = vec2<f32>(cosSun * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
-        let msScat = textureSampleLevel(multiScatTexture, tSam, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
+        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
 
         let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 

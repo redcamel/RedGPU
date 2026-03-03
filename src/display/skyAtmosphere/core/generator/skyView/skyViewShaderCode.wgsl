@@ -1,14 +1,14 @@
 // [KO] UE5 표준 Sky-View LUT 생성
 
-@group(0) @binding(0) var skyViewTexture: texture_storage_2d<rgba16float, write>;
-@group(0) @binding(1) var transmittanceTexture: texture_2d<f32>;
-@group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
+@group(0) @binding(0) var atmosphereSkyViewTexture: texture_storage_2d<rgba16float, write>;
+@group(0) @binding(1) var atmosphereTransmittanceTexture: texture_2d<f32>;
+@group(0) @binding(2) var atmosphereMultiScatTexture: texture_2d<f32>;
 @group(0) @binding(3) var atmosphereSampler: sampler;
 @group(0) @binding(4) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(skyViewTexture);
+    let size = textureDimensions(atmosphereSkyViewTexture);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
@@ -47,21 +47,21 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var transmittance = vec3<f32>(1.0);
 
     if (intersect.x > 0.0) {
-        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, true, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, &radiance, &transmittance);
         
         if (params.useGround > 0.5 && params.showGround > 0.5) {
             let hitPos = rayOrigin + viewDir * intersect.x;
             let up = normalize(hitPos);
             let cosSun = dot(up, params.sunDirection);
-            let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
-            let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cosSun * 0.5 + 0.5, 1.0), 0.0).rgb;
+            let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
+            let msEnergy = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, vec2<f32>(cosSun * 0.5 + 0.5, 1.0), 0.0).rgb;
             radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy + params.groundAmbient) * (params.groundAlbedo * INV_PI);
         } else if (intersect.y > 0.0 && tMax > intersect.y) {
-            integrateScatSegment(rayOrigin, viewDir, intersect.y, tMax, 32u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, true, &radiance, &transmittance);
+            integrateScatSegment(rayOrigin, viewDir, intersect.y, tMax, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, &radiance, &transmittance);
         }
     } else if (tMax > 0.0) {
-        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, transmittanceTexture, atmosphereSampler, multiScatTexture, true, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, &radiance, &transmittance);
     }
 
-    textureStore(skyViewTexture, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
+    textureStore(atmosphereSkyViewTexture, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
 }

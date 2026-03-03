@@ -30,7 +30,7 @@ let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
 
 // [KO] Aerial Perspective 3D LUT 샘플링
 // [EN] Sample Aerial Perspective 3D LUT
-let apSample = textureSampleLevel(cameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
+let apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
 if (rawDepth < 0.999999) {
     // [KO] 이전의 정확한 합성 상태로 복구 (Scene * Transmittance + InScattering)
@@ -40,7 +40,7 @@ if (rawDepth < 0.999999) {
 // [KO] 매핑 안정화를 위한 클램핑 고도 (Sea Level Offset 반영된 camH 기준)
 let mappingH = max(0.0, camH);
 let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
-let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
+let skySample = textureSampleLevel(atmosphereSkyViewTexture, atmosphereSampler, skyUV, 0.0);
 var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
 let camPos = vec3<f32>(0.0, r + camH, 0.0);
@@ -49,7 +49,7 @@ if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
     let viewSunCos = dot(viewDir, sunDir);
     let sunRad = uniforms.sunSize * DEG_TO_RAD;
     let sunMask = smoothstep(cos(sunRad) - 0.001, cos(sunRad), viewSunCos);
-    let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
+    let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
     atmosphereBackground += sunMask * sunTrans * uniforms.sunIntensity;
 }
 

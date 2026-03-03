@@ -1,12 +1,12 @@
 // [KO] UE5 표준 Multi-Scattering LUT 생성
 #redgpu_include math.INV_PI
 
-@group(0) @binding(0) var multiScatTexture: texture_storage_2d<rgba16float, write>;
+@group(0) @binding(0) var atmosphereMultiScatTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(multiScatTexture);
+    let size = textureDimensions(atmosphereMultiScatTexture);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
@@ -54,7 +54,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     let output = (lumTotal / f32(sampleCount)) / (1.0 - min(fmsTotal, vec3<f32>(0.9)));
-    textureStore(multiScatTexture, global_id.xy, vec4<f32>(output, 1.0));
+    textureStore(atmosphereMultiScatTexture, global_id.xy, vec4<f32>(output, 1.0));
 }
 
 fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, sunDir: vec3<f32>, L1: ptr<function, vec3<f32>>, f1: ptr<function, vec3<f32>>, TPath: ptr<function, vec3<f32>>) {

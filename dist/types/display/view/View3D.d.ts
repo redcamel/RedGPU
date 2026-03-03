@@ -16,9 +16,6 @@ import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
 /**
  * [KO] 3D 렌더링을 위한 뷰 클래스입니다.
  * [EN] View class for 3D rendering.
- *
- * [KO] AView를 확장하여 3D 장면 렌더링, 조명, 그림자, 포스트 이펙트, IBL(이미지 기반 조명) 처리 등을 담당합니다.
- * [EN] Extends AView to handle 3D scene rendering, lighting, shadows, post-effects, and IBL (Image-Based Lighting) processing.
  */
 declare class View3D extends AView {
     #private;
