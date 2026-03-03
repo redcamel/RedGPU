@@ -24,9 +24,8 @@ RedGPU.init(
 
         // 1. SkyAtmosphere 초기화
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        skyAtmosphere.sunElevation = 5;
+        skyAtmosphere.sunElevation = 45;
         skyAtmosphere.sunAzimuth = 0;
-        skyAtmosphere.exposure = 1.5;
         view.skyAtmosphere = skyAtmosphere;
 
         // 4. 모델 로드
