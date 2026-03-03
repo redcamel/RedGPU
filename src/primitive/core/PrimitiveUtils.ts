@@ -67,6 +67,97 @@ class PrimitiveUtils {
         return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
     }
 
+    static generateRoundedBoxData(redGPUContext: RedGPUContext, width: number, height: number, depth: number, widthSegments: number, heightSegments: number, depthSegments: number, radius: number, radiusSegments: number, uniqueKey: string): Geometry {
+        const interleaveData = [], indexData = [], w2 = width / 2, h2 = height / 2, d2 = depth / 2;
+        const r = Math.min(radius, w2, h2, d2);
+        if (r <= 0) return this.generateBoxData(redGPUContext, width, height, depth, widthSegments, heightSegments, depthSegments, uniqueKey);
+
+        const totalWidthSegments = widthSegments + radiusSegments * 2;
+        const totalHeightSegments = heightSegments + radiusSegments * 2;
+        const totalDepthSegments = depthSegments + radiusSegments * 2;
+
+        const boxDim = { w: width, h: height, d: depth, r };
+
+        // [KO] 6개 면 생성 (3D 라운딩 로직 적용)
+        this.generateRoundedPlaneData(interleaveData, indexData, depth, height, totalDepthSegments, totalHeightSegments, radiusSegments, depthSegments, heightSegments, {x: w2, y: 0, z: 0}, {x: 0, y: 0, z: -1}, {x: 0, y: -1, z: 0}, boxDim);
+        this.generateRoundedPlaneData(interleaveData, indexData, depth, height, totalDepthSegments, totalHeightSegments, radiusSegments, depthSegments, heightSegments, {x: -w2, y: 0, z: 0}, {x: 0, y: 0, z: 1}, {x: 0, y: -1, z: 0}, boxDim);
+        this.generateRoundedPlaneData(interleaveData, indexData, width, depth, totalWidthSegments, totalDepthSegments, radiusSegments, widthSegments, depthSegments, {x: 0, y: h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1}, boxDim);
+        this.generateRoundedPlaneData(interleaveData, indexData, width, depth, totalWidthSegments, totalDepthSegments, radiusSegments, widthSegments, depthSegments, {x: 0, y: -h2, z: 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: -1}, boxDim);
+        this.generateRoundedPlaneData(interleaveData, indexData, width, height, totalWidthSegments, totalHeightSegments, radiusSegments, widthSegments, heightSegments, {x: 0, y: 0, z: d2}, {x: 1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, boxDim);
+        this.generateRoundedPlaneData(interleaveData, indexData, width, height, totalWidthSegments, totalHeightSegments, radiusSegments, widthSegments, heightSegments, {x: 0, y: 0, z: -d2}, {x: -1, y: 0, z: 0}, {x: 0, y: -1, z: 0}, boxDim);
+
+        return this.finalize(redGPUContext, interleaveData, indexData, uniqueKey);
+    }
+
+    static generateRoundedPlaneData(
+        interleaveData: number[], indexData: number[], 
+        width: number, height: number, 
+        totalResX: number, totalResY: number, 
+        radiusSegments: number, 
+        mainSegmentsX: number, mainSegmentsY: number,
+        center: any, uV: any, vV: any, boxDim: any
+    ) {
+        const startIdx = interleaveData.length / 12;
+        const { w, h, d, r } = boxDim;
+        const innerW2 = w / 2 - r, innerH2 = h / 2 - r, innerD2 = d / 2 - r;
+
+        // [KO] 곡면 구간에 정점을 집중시키고, UV를 호 길이(Arc-Length)에 비례하여 계산하는 함수
+        const getNonUniformCoord = (index: number, size: number, r: number, rSeg: number, mSeg: number) => {
+            const limit = size / 2 - r;
+            const arcLength = (Math.PI / 2) * r;
+            const totalLength = arcLength * 2 + (limit * 2);
+            
+            if (index <= rSeg) {
+                // Left/Top Corner
+                const ratio = index / rSeg;
+                const angle = (1 - ratio) * Math.PI / 2;
+                const arcDist = ratio * arcLength;
+                return { pos: -limit - Math.sin(angle) * r, norm: -Math.sin(angle), uv: arcDist / totalLength };
+            } else if (index <= rSeg + mSeg) {
+                // Flat Area
+                const ratio = (index - rSeg) / mSeg;
+                const arcDist = arcLength + ratio * (limit * 2);
+                return { pos: -limit + ratio * (limit * 2), norm: 0, uv: arcDist / totalLength };
+            } else {
+                // Right/Bottom Corner
+                const ratio = (index - rSeg - mSeg) / rSeg;
+                const angle = ratio * Math.PI / 2;
+                const arcDist = arcLength + (limit * 2) + ratio * arcLength;
+                return { pos: limit + Math.sin(angle) * r, norm: Math.sin(angle), uv: arcDist / totalLength };
+            }
+        };
+
+        for (let iy = 0; iy <= totalResY; iy++) {
+            const yInfo = getNonUniformCoord(iy, height, r, radiusSegments, mainSegmentsY);
+            for (let ix = 0; ix <= totalResX; ix++) {
+                const xInfo = getNonUniformCoord(ix, width, r, radiusSegments, mainSegmentsX);
+
+                // 1. 기본 박스 면 위의 3D 좌표
+                let px = center.x + xInfo.pos * uV.x + yInfo.pos * vV.x;
+                let py = center.y + xInfo.pos * uV.y + yInfo.pos * vV.y;
+                let pz = center.z + xInfo.pos * uV.z + yInfo.pos * vV.z;
+
+                // 2. 3D Inner Box Clamping (핵심 라운딩 수식)
+                const cx = Math.max(-innerW2, Math.min(px, innerW2));
+                const cy = Math.max(-innerH2, Math.min(py, innerH2));
+                const cz = Math.max(-innerD2, Math.min(pz, innerD2));
+
+                const dx = px - cx, dy = py - cy, dz = pz - cz;
+                const dist = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1e-6;
+
+                // 3. 노멀 및 위치 확정
+                const nx = dx / dist, ny = dy / dist, nz = dz / dist;
+                px = cx + nx * r;
+                py = cy + ny * r;
+                pz = cz + nz * r;
+
+                this.interleavePacker(interleaveData, px, py, pz, nx, ny, nz, xInfo.uv, yInfo.uv);
+            }
+        }
+
+        this.generateGridIndices(indexData, startIdx, totalResX, totalResY, totalResX + 1);
+    }
+
     static generateSphereData(redGPUContext: RedGPUContext, radius: number, widthSegments: number, heightSegments: number, phiStart: number, phiLength: number, thetaStart: number, thetaLength: number, uniqueKey: string): Geometry {
         const interleaveData = [], indexData = [];
         if (radius <= 0 || Math.abs(phiLength) < 1e-6 || Math.abs(thetaLength) < 1e-6) return this.getEmptyGeometry(redGPUContext, uniqueKey);

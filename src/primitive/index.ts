@@ -17,6 +17,7 @@ import Cylinder from "./Cylinder";
 import Ground from "./Ground";
 import Plane from "./Plane";
 import Ring from "./Ring";
+import RoundedBox from "./RoundedBox";
 import Sphere from "./Sphere";
 import Torus from "./Torus";
 import TorusKnot from "./TorusKnot";
@@ -31,6 +32,7 @@ export {
     Cone,
     Cylinder,
     Box,
+    RoundedBox,
     Capsule,
     Ground,
     Ring

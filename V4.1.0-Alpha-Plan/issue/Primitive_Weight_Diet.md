@@ -80,7 +80,7 @@ RedGPU 프리미티브 시스템의 고질적인 중복 로직을 제거하고, 
 | 대상 항목 | 기하학적 명세 및 기대 효과 | 우선순위 | 상태 |
 | :--- | :--- | :---: | :---: |
 | **IcoSphere** | **[Uniform Topology]** 정이십면체를 기반으로 면을 균일하게 재귀 분할(Recursive Subdivision)하여 생성. UV Sphere의 극점 핀칭 문제를 해결하고 지형 생성(Terrain) 및 물리 충돌 정밀도 극대화 | 💎 높음 | ⏳ 예정 |
-| **RoundedBox** | **[Specular Optimization]** 8개의 Corner Sphere와 12개의 Edge Cylinder를 결합하여 모서리가 둥근 상자 생성. 사실적인 하이라이트 맺힘을 유도하여 제품 렌더링 품질을 비약적으로 상승 | ✨ 보통 | ⏳ 예정 |
+| **RoundedBox** | **[Specular Optimization]** 3D Inner Box Clamping 기법을 적용하여 8개의 코너와 12개의 엣지를 완벽한 구면/원기둥 곡면으로 생성. 언리얼 엔진 표준인 호 길이 비례(Arc-Length Proportional) UV 매핑을 통해 텍스처 왜곡 방지 및 정교한 하이라이트 구현 | ✨ 보통 | ✅ 완료 |
 | **Platonic Solids** | **[Geometric Primitives]** 정사면체(Tetra), 정팔면체(Octa), 정십이면체(Dodeca) 등 기하학적 최소 단위 세트 제공. 로우폴리 스타일 아트 및 파티클 시스템의 기초 입자로 활용 | 📐 보통 | ⏳ 예정 |
 | **Tube** | **[Hollow Cylinder]** 내경과 외경을 모두 갖는 파이프 형태의 기둥 생성. 전선, 배관, 기계 부품 시뮬레이션 등에 특화된 기하 데이터 제공 | 🛠️ 낮음 | ⏳ 예정 |
 

@@ -110,6 +110,14 @@ const ExampleList = [
                         },
                     },
                     {
+                        name: 'RoundedBox',
+                        path: '3d/primitive/roundedBox',
+                        description: {
+                            ko: `모서리가 둥근 박스 프리미티브에 대한 샘플입니다. 반지름(radius) 및 분할 수 설정을 통해 부드러운 모서리를 가진 박스를 생성하고 테스트할 수 있습니다.`, 
+                            en: `Samples for the RoundedBox Primitive. You can create and test boxes with smooth corners by configuring radius and segment settings.`
+                        },
+                    },
+                    {
                         name: 'Circle',
                         path: '3d/primitive/circle',
                         description: {
