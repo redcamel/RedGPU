@@ -29,8 +29,8 @@ RedGPU.init(
         controller.speedDistance = 100;
 
         // 이동 제한
-        controller.minTilt = -88;
-        controller.maxTilt = 0;
+        // controller.minTilt = -88;
+        // controller.maxTilt = 0;
         controller.minDistance = 10;
         controller.maxDistance = 1000000;
 
@@ -229,6 +229,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     const f_geo = pane.addFolder({title: '3. Atmosphere Geometry', expanded: false});
     f_geo.addBinding(skyAtmosphere, 'earthRadius', {min: 1000, max: 10000, step: 0.01, label: 'Earth Radius (km)'});
     f_geo.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 10, max: 200, step: 0.01, label: 'Atmo Height (km)'});
+    f_geo.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'Sea Level (km)'});
 
     // 4. Rayleigh Scattering
     const f_rayleigh = pane.addFolder({title: '4. Rayleigh Scattering', expanded: false});

@@ -27,4 +27,5 @@ struct SkyAtmosphere {
     ozoneLayerWidth: f32,
     useGround: f32,
     showGround: f32,
+    seaLevel: f32,
 };

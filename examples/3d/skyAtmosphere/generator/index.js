@@ -76,6 +76,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     // [EN] Place useGround at the top (since there's no Enable Atmosphere binding here)
     pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
     pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
+    pane.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'Sea Level (km)'});
     
     const f_sun = pane.addFolder({ title: 'Sun Position' });
     f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, step: 0.0001, label: 'Sun Elevation' });

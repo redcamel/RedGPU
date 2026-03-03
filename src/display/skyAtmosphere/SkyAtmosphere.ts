@@ -76,7 +76,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         sunDirection: new Float32Array([0, 1, 0]),
         cameraHeight: 0.001,
         useGround: 1.0,
-        showGround: 1.0
+        showGround: 1.0,
+        seaLevel: 0.0
     };
 
     #sunElevation: number = 45;
@@ -137,6 +138,17 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
         this.#initShaders();
         this.#updateSunDirection();
+    }
+
+    /** [KO] 지표면 기준 고도 (km) [EN] Sea level offset (km) */
+    get seaLevel(): number {
+        return this.#params.seaLevel;
+    }
+
+    set seaLevel(v: number) {
+        this.#params.seaLevel = v;
+        this.#dirtyUniformBuffer = true;
+        this.#dirtySkyView = true;
     }
 
     /** [KO] 태양 고도 (도) [EN] Sun elevation (degrees) */
@@ -535,7 +547,10 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         const {gpuDevice, resourceManager} = this.redGPUContext;
         const {rawCamera} = view;
         const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
-        const currentHeightKm = Math.max(0.001, cameraPos[1] / 1000.0);
+        
+        // [KO] seaLevel 기준 상대 고도 계산
+        // [EN] Calculate relative height based on seaLevel
+        const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0) - this.#params.seaLevel);
 
         if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.01) {
             this.#params.cameraHeight = currentHeightKm;

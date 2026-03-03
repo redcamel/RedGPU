@@ -114,5 +114,15 @@ const renderTestPane = async (redGPUContext, targetView) => {
     setDebugButtons(RedGPU, redGPUContext);
 
     const pane = new Pane();
+    const {skyAtmosphere} = targetView;
+    if (skyAtmosphere) {
+        pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
+        pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
+        pane.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'Sea Level (km)'});
+
+        const f_sun = pane.addFolder({title: 'Sun Position'});
+        f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'Sun Elevation'});
+        f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'Sun Azimuth'});
+    }
     // createIblHelper(pane, targetView, RedGPU);
 };
