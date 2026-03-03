@@ -1,52 +1,47 @@
-# [Issue] SkyAtmosphere Underground View & Aerial Perspective Fix
+# [Issue] SkyAtmosphere Naming Standardization & Logic Consistency
 
-## 1. 현상 요약 (Issue Summary) - [해결 완료]
-카메라 또는 오브젝트가 **월드 좌표 Y < 0 (지표면 아래)**에 위치할 때 대기 효과가 나타나지 않던 문제와, 근거리 물체가 안개에 의해 비정상적으로 밝게 가려지던 현상을 해결했습니다.
+## 1. 개요 (Overview) - [완료]
+`SkyAtmosphere` 시스템의 리소스 명칭을 표준화하고, 물리 시뮬레이션의 논리적 정합성을 최종 확정했습니다.
 
-## 2. 원인 분석 및 해결 (Root Cause & Solution)
+---
 
-### 2.1 지표면 기준점 이동 (Sea Level Offset 도입)
-*   **원인**: 월드 좌표 Y=0이 물리적 지표면으로 고정되어 있어 지하 시뮬레이션이 불가능했습니다.
-*   **해결**: `SkyAtmosphere.seaLevel` (km) 속성을 추가했습니다.
-    *   사용자가 `seaLevel = -1.0` 설정 시, 월드 좌표 Y=-1000m 지점이 대기 시뮬레이션의 해수면(Altitude 0)이 됩니다.
-    *   카메라의 월드 고도를 상대 고도로 변환하여 전달함으로써 언리얼 엔진과 동일한 유연성을 확보했습니다.
+## 2. 주요 확정 사항 (Final Decisions)
 
-### 2.2 거리 기반 안개 합성 로직 오류 수정 및 최적화
-*   **원인**: `computeCode.wgsl`에서 Aerial Perspective 3D LUT 값에 `sunIntensity`를 중복으로 곱하고 있었습니다. 이로 인해 안개가 물리적 수치보다 수십 배 밝아져 근거리 물체를 하얗게 가려버리는 현상이 발생했습니다.
-*   **해결**: 중복 곱셈을 제거하고 물체 밝기에 맞는 최적의 안개 밝기 밸런스를 복구했습니다.
-*   **최종 결정 (Z-Depth vs Euclidean Distance)**: 
-    *   **Euclidean Distance (Ray Length)**: 수학적으로는 맞으나, 광각 카메라에서 화면 외곽의 안개가 급격히 진해지는 '어항 효과(Fish-eye)'를 유발합니다.
-    *   **Z-Depth (Planar Distance)**: **[최종 채택]** 화면 전체에서 안개의 밀도 평면이 카메라와 평행하게 유지되어 더 안정적인 거리감과 깨끗한 외곽 비주얼을 제공합니다.
+### 2.1 리소스 명칭 표준화 (Naming Convention)
+*   **규칙**: 모든 대기 관련 공개/내부 리소스에 **`atmosphere` 접두어**를 일관되게 적용했습니다.
+*   **변경 내역**:
+    *   `skyAtmosphereReflectionTexture` → **`atmosphereReflectionTexture`**
+    *   `transmittanceTexture` → **`atmosphereTransmittanceTexture`**
+    *   `skyViewTexture` → **`atmosphereSkyViewTexture`**
+    *   `cameraVolumeTexture` → **`atmosphereCameraVolumeTexture`**
+    *   `skyAtmosphereSampler` → **`atmosphereSampler`**
+*   **이점**: 엔진 전역(View3D, Material 등)에서 대기 시스템 소유의 리소스를 즉시 식별 가능.
 
-### 2.3 매핑 안정화 및 정밀도 향상
-*   **해결**: `skyViewShaderCode.wgsl`에서 지하 시점(Looking down) 시 적분 거리가 지구 반대편까지 튀는 현상을 방지하기 위해 `tMax`를 지하 1km 지점에서 클램핑하도록 보정했습니다. 이로써 지하 시점의 Sky-View LUT 그라데이션이 깨지는 현상을 근본적으로 해결했습니다.
-*   **해결**: 카메라 이동 감지 임계값을 10m에서 10cm로 낮추어 근거리 반응성을 개선했습니다.
+### 2.2 물리 시뮬레이션 논리 유지 (Logic Integrity)
+*   **지표면 기준**: 지하 1km 시뮬레이션 시의 수치적 불안정성으로 인해, 시각적으로 가장 정확한 **Y=0(해수면) 기준 물리 모델**로 복구했습니다.
+*   **거리 기반 안개 (AP)**: 유클리드 거리 대신 **Z-Depth 방식**을 최종 채택하여 광각에서의 시각적 왜곡(어항 효과)을 방지하고 화면 전체의 평면적 일관성을 확보했습니다.
+*   **지하 아티팩트 방어**: 지하에서 아래를 볼 때 적분 거리가 무한대로 튀는 현상을 막기 위한 `tMax` 클램핑 로직은 유지하여 수치 안정성을 높였습니다.
 
-### 2.4 실시간 반사광(IBL) 갱신 시스템 고도화
-*   **문제**: 대기 상태가 실시간으로 변함에도 불구하고 glTF 모델(PBR)의 반사광(IBL)이 즉시 갱신되지 않는 현상이 발견되었습니다.
-*   **원인**: `View3D`의 바인드 그룹 갱신 로직이 객체의 참조 주소값만 비교하여, 내부 데이터(텍스처 내용물)의 변화를 감지하지 못했습니다.
-*   **해결 (Unreal Engine 컨벤션 채택)**:
-    *   **`revision` 시스템 도입**: 모든 리소스의 최상위 클래스(`ResourceBase`)에 `revision` 카운터를 추가했습니다.
-    *   `notifyUpdate()` 호출 시 `revision`이 증가하며, `View3D`는 이 리비전 번호의 변화를 보고 바인드 그룹을 즉각 재구성합니다.
-    *   이를 통해 객체 재생성 없이도 실시간 대기 반사광이 glTF 모델에 즉각 반영되는 고성능 갱신 구조를 완성했습니다.
+### 2.3 실시간 IBL 갱신 시스템
+*   **`revision` 시스템 고착**: 언리얼 엔진 컨벤션을 따라 `ResourceBase`에 `revision` 카운터를 도입했습니다.
+*   **내용물 감지**: 텍스처 객체 참조가 같아도 내부 데이터가 갱신되면 `revision` 변화를 보고 IBL 바인드 그룹을 즉시 재구성합니다.
 
 ---
 
 ## 3. 적용 가이드 (Usage Guide)
 
-1.  **지하 월드 구축 시**: `skyAtmosphere.seaLevel = -1.0;` (지하 1km 기준 설정 예시)
-2.  **안개 강도 조절**: `mieScattering` 또는 `sunIntensity`를 통해 전체적인 공중 투시 강도를 조절합니다.
-3.  **실시간 IBL 연동**: `view.iblTexture = skyAtmosphere.skyAtmosphereReflectionTexture;` 설정 시 대기 변화에 따른 실시간 반사가 glTF에 자동 적용됩니다.
+1.  **지하 월드 구축 시**: `skyAtmosphere.seaLevel = -1.0;` 속성을 사용하여 지표면 오프셋을 조절합니다. (물리 수식은 상대 고도를 사용하여 안정적으로 동작)
+2.  **실시간 IBL 연동**: `view.iblTexture = skyAtmosphere.atmosphereReflectionTexture;` 설정 시 대기 변화가 glTF에 자동 반영됩니다.
 
 ---
 
 ## 4. 기대 효과 (Expected Benefits)
-*   지하 동굴, 깊은 협곡 등 다양한 고도 설계를 가진 월드에서 완벽한 대기 시뮬레이션 지원.
-*   근거리 및 원거리 물체의 시각적 정합성 확보 (안개 뚫림 및 과도한 밝기 현상 해결).
-*   **실시간 조명 동기화**: 대기색 변화가 glTF 모델의 반사광에 지연 없이 반영되는 높은 수준의 시각적 몰입감 제공.
-*   언리얼 엔진 수준의 환경 제어 및 리소스 관리 워크플로우 제공.
+*   **완벽한 비주얼 정합성**: 화면 외곽까지 깨끗한 거리 기반 안개 효과.
+*   **전문적인 명칭 체계**: 접두어 통일을 통한 코드 가독성 및 유지보수성 향상.
+*   **실시간 조명 동기화**: 대기 상태 변화가 PBR 모델의 반사에 즉각 반영.
 
 ---
-**최종 수정일:** 2026-03-02
-**상태:** 해결 완료 (Resolved)
+**최종 업데이트:** 2026-03-02
+**상태:** 최종 완료 (Finalized)
 **프로젝트:** RedGPU
+
