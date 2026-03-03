@@ -6,6 +6,7 @@ import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
+import createUUID from "../../../../../utils/uuid/createUUID";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'TRANSMITTANCE_GENERATOR');
 
@@ -39,7 +40,7 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectTexture(this.redGPUContext, 'TransmittanceLUTTexture', this.createLUTTexture());
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `TransmittanceLUTTexture_${createUUID()}`, this.createLUTTexture());
         this.pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
             label: 'TRANSMITTANCE_GEN_PIPELINE',
             layout: 'auto',

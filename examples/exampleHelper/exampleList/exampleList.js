@@ -531,6 +531,14 @@ const ExampleList = [
                                 },
                             },
                             {
+                                name: 'SkyAtmosphere Test',
+                                path: '3d/skyAtmosphere/skyAtmosphereTest',
+                                description: {
+                                    ko: `SkyAtmosphere 시스템과 PBR 재질의 실시간 동기화를 테스트하는 예제입니다.`,
+                                    en: `Example testing real-time synchronization between SkyAtmosphere system and PBR materials.`
+                                },
+                            },
+                            {
                                 name: 'SkyAtmosphere Generator (LUT)',
                                 path: '3d/skyAtmosphere/generator',
                                 description: {
