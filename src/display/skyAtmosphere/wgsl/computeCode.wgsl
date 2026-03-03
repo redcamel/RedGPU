@@ -27,12 +27,20 @@ let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
 let apU = (azimuth / PI2) + 0.5;
 let apV = clamp((elevation * INV_PI) + 0.5, 0.001, 0.999);
 let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
+
+// [KO] Aerial Perspective 3D LUT 샘플링
+// [EN] Sample Aerial Perspective 3D LUT
 let apSample = textureSampleLevel(cameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
 if (rawDepth < 0.999999) {
-    sceneColor = (sceneColor * apSample.a) + (apSample.rgb * uniforms.sunIntensity);
+    // [KO] apSample.rgb에는 이미 sunIntensity가 반영된 산란광이 들어있음
+    // [EN] apSample.rgb already contains in-scattering with sunIntensity applied
+    // FinalColor = (SceneColor * Transmittance) + InScattering
+    sceneColor = (sceneColor * apSample.a) + apSample.rgb;
 }
 
+// [KO] 매핑 안정화를 위한 클램핑 고도 (Sea Level Offset 반영된 camH 기준)
+let mappingH = max(0.0, camH);
 let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
 let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
 var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
@@ -43,7 +51,7 @@ if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
     let viewSunCos = dot(viewDir, sunDir);
     let sunRad = uniforms.sunSize * DEG_TO_RAD;
     let sunMask = smoothstep(cos(sunRad) - 0.001, cos(sunRad), viewSunCos);
-    let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, uniforms.atmosphereHeight);
+    let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
     atmosphereBackground += sunMask * sunTrans * uniforms.sunIntensity;
 }
 
