@@ -26,7 +26,7 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         return this.#lutTexture;
     }
 
-    render(skyView: DirectTexture, multiScat: DirectTexture): void {
+    render(transmittance: DirectTexture, skyView: DirectTexture, multiScat: DirectTexture): void {
         const {gpuDevice} = this.redGPUContext;
         const bindGroup = gpuDevice.createBindGroup({
             label: 'ATMOSPHERE_IRRADIANCE_GEN_BG',
@@ -36,7 +36,8 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 1, resource: skyView.gpuTextureView},
                 {binding: 2, resource: multiScat.gpuTextureView},
                 {binding: 3, resource: this.sampler.gpuSampler},
-                {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+                {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+                {binding: 5, resource: transmittance.gpuTextureView}
             ]
         });
         this.gpuRender(bindGroup, [8, 8, 1]);
