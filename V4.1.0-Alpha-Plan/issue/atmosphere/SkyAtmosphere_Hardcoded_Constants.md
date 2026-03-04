@@ -22,7 +22,9 @@
 | :--- | :--- | :--- | :--- | :---: |
 | **Max Aerial Dist** | `aerialPerspectiveMaxDistance` | `cameraVolumeShaderCode.wgsl`, `computeCode.wgsl` | 공중 투시 효과가 적용되는 최대 거리 (유니폼 연결 완료) | ✅ |
 | **MAX_TAU** | `50.0` | `skyAtmosphereFn.wgsl` | 최대 광학 두께(Optical Depth). 지면 아래 처리 시 사용 | ✅ |
-| **Fog Anisotropy** | `0.7` | `cameraVolumeShaderCode.wgsl`, `skyViewShaderCode.wgsl` | 안개용 Mie 페이즈 함수의 비등방성(g) 값 | ✅ |
+| **Mie Halo Anisotropy** | `mieHalo` | `skyAtmosphereFn.wgsl` | 태양 주변 후광(Halo)용 Mie 산란 비등방성 (유니폼 연결 완료) | ✅ |
+| **Mie Glow Mix** | `mieGlow` | `skyAtmosphereFn.wgsl` | 주 산란과 후광 산란의 혼합 비율 (유니폼 연결 완료) | ✅ |
+| **Fog Anisotropy** | `0.7` | `skyAtmosphereFn.wgsl` | 안개용 Mie 페이즈 함수의 비등방성(g) 값 | ✅ |
 | **Sun Disk Scale** | `100.0` | `computeCode.wgsl` | 태양 디스크 렌더링 시 강도 가중치 | ✅ |
 
 ## 3. 임계값 및 판정 로직 (Thresholds & Magic Numbers)

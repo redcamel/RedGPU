@@ -330,6 +330,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     const f_vol = pane.addFolder({title: '8. Volumetric & Artistic', expanded: false});
     f_vol.addBinding(skyAtmosphere, 'multiScatteringAmbient', {min: 0, max: 1, step: 0.001, label: 'Multi-Scat Ambient'});
     f_vol.addBinding(skyAtmosphere, 'horizonHaze', {min: 0, max: 10, step: 0.01, label: 'Horizon Haze'});
+    f_vol.addBinding(skyAtmosphere, 'aerialPerspectiveMaxDistance', {min: 1, max: 1000, step: 1, label: 'AP Max Distance (km)'});
     f_vol.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 10, step: 0.001, label: 'Fog Density'});
     f_vol.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.0001, label: 'Fog Falloff'});
 };

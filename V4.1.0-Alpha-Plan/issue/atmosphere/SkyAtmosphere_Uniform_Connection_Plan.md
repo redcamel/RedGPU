@@ -9,9 +9,9 @@
 *   **현상**: AP 효과의 기준 거리(`100.0` km)가 `cameraVolumeShaderCode.wgsl`와 `computeCode.wgsl` 양쪽에 하드코딩되어 있음.
 *   **해결**: `aerialPerspectiveMaxDistance` 항목을 유니폼에 추가하여 두 셰이더의 샘플링/적분 기준을 동기화 완료. (2026-03-04)
 
-### 2.2 Mie Phase Function 파라미터 연결
+### 2.2 Mie Phase Function 파라미터 연결 - [완료]
 *   **현상**: `skyAtmosphereFn.wgsl`의 `phaseMieDual` 함수 내에 `0.99`(Halo)와 `0.2`(Glow Mix)가 고정값으로 사용됨.
-*   **해결**: 기존 유니폼 항목인 `mieHalo`와 `mieGlow`를 실제 셰이더 수식에 연결.
+*   **해결**: 기존 유니폼 항목인 `mieHalo`와 `mieGlow`를 실제 셰이더 수식에 연결 완료. (2026-03-04)
 
 ### 2.3 높이 안개 비등방성 (Height Fog Anisotropy)
 *   **현상**: `integrateScatSegment` 함수 내에서 안개용 Mie 산란 계수로 `0.7`이 하드코딩됨.
