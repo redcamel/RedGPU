@@ -134,8 +134,8 @@ fn phaseMie(cosTheta: f32, g: f32) -> f32 {
     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
 }
 
-fn phaseMieDual(cosTheta: f32, g: f32) -> f32 {
-    return mix(phaseMie(cosTheta, g), phaseMie(cosTheta, 0.99), 0.2);
+fn phaseMieDual(cosTheta: f32, g: f32, halo: f32, glow: f32) -> f32 {
+    return mix(phaseMie(cosTheta, g), phaseMie(cosTheta, halo), glow);
 }
 
 fn getAtmosphereCoefficients(h: f32, params: SkyAtmosphere) -> AtmosphereCoefficients {
@@ -167,8 +167,8 @@ fn integrateScatSegment(
     let viewSunCos = dot(dir, sunDir);
     
     let phaseR = phaseRayleigh(viewSunCos);
-    let phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy);
-    let phaseF = phaseMie(viewSunCos, 0.7);
+    let phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy, params.mieHalo, params.mieGlow);
+    let phaseF = phaseMie(viewSunCos, params.heightFogAnisotropy);
 
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;

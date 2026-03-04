@@ -34,5 +34,6 @@ struct Uniforms {
 	ozoneLayerWidth: f32,
 	useGround: f32,
 	showGround: f32,
-	seaLevel: f32
+	seaLevel: f32,
+	aerialPerspectiveMaxDistance: f32
 };
