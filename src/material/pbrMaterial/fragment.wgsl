@@ -531,10 +531,10 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [Atmosphere Sun Light]
-    if (systemUniforms.useSkyAtmosphere == 1u) {
-        let atmoSun = getAtmosphereSunLight();
-        totalDirectLighting += calcLight(atmoSun.color, atmoSun.intensity, N, V, atmoSun.direction, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
-    }
+//    if (systemUniforms.useSkyAtmosphere == 1u) {
+//        let atmoSun = getAtmosphereSunLight();
+//        totalDirectLighting += calcLight(atmoSun.color, atmoSun.intensity, N, V, atmoSun.direction, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+//    }
 
     // [KO] 직접 조명 계산 - Point/Spot Lights (Clustered) [EN] Direct lighting calculation - Point/Spot Lights (Clustered)
     {
@@ -640,21 +640,9 @@ fn main(inputData:InputData) -> OutputFragment {
             // [EN] Diffuse Filtering: (HDR Irradiance * Transmittance) + Real-time Atmosphere Irradiance
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
             
-            // [KO] 2D 조도 LUT 샘플링 (X: Elevation, Y: Relative Azimuth to Sun)
-            let u_el = clamp((asin(clamp(N.y, -1.0, 1.0)) * INV_PI) + 0.5, 0.001, 0.999);
-            
-            let sun_azimuth = atan2(u_atmo.sunDirection.z, u_atmo.sunDirection.x);
-            let pixel_azimuth = atan2(N.z, N.x);
-            var rel_azimuth = pixel_azimuth - sun_azimuth;
-            
-            // [KO] 상대 방위각 래핑 [-PI, PI]
-            // [EN] Wrap relative azimuth to [-PI, PI]
-            if (rel_azimuth > PI) { rel_azimuth -= PI2; }
-            if (rel_azimuth < -PI) { rel_azimuth += PI2; }
-            
-            let v_az = clamp((rel_azimuth / PI2) + 0.5, 0.001, 0.999);
-            
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceTexture, atmosphereSampler, vec2<f32>(u_el, v_az), 0.0).rgb * sunInt;
+            // [KO] 큐브맵 기반 조도 샘플링 (2D LUT 방식에서 업그레이드)
+            // [EN] Cubemap-based Irradiance sampling (upgraded from 2D LUT method)
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceTexture, prefilterTextureSampler, N, 0.0).rgb * sunInt;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 

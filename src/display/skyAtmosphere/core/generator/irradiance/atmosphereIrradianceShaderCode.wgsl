@@ -1,90 +1,83 @@
-@group(0) @binding(0) var irradianceTexture: texture_storage_2d<rgba16float, write>;
-@group(0) @binding(1) var skyViewTexture: texture_2d<f32>;
-@group(0) @binding(2) var multiScatTexture: texture_2d<f32>;
-@group(0) @binding(3) var atmosphereSampler: sampler;
-@group(0) @binding(4) var<uniform> params: SkyAtmosphere;
-@group(0) @binding(5) var atmosphereTransmittanceTexture: texture_2d<f32>;
+@group(0) @binding(0) var reflectionTexture: texture_cube<f32>;
+@group(0) @binding(1) var atmosphereSampler: sampler;
+@group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
+@group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
 
-@compute @workgroup_size(8, 8)
+#redgpu_include math.PI
+#redgpu_include math.PI2
+#redgpu_include math.INV_PI
+#redgpu_include math.tnb.getTBN
+
+fn radicalInverse_VdC(bits_in: u32) -> f32 {
+    var bits = bits_in;
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return f32(bits) * 2.3283064365386963e-10;
+}
+
+fn hammersley(i: u32, n: u32) -> vec2<f32> {
+    return vec2<f32>(f32(i) / f32(n), radicalInverse_VdC(i));
+}
+
+@compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(irradianceTexture);
-    if (global_id.x >= size.x || global_id.y >= size.y) { return; }
-
-    // [KO] 2D 매핑: x = Elevation, y = Relative Azimuth to Sun
-    // [EN] 2D Mapping: x = Elevation, y = Relative Azimuth to Sun
-    let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
+    let size_u = textureDimensions(outTexture).xy;
+    let size = vec2<f32>(size_u);
     
-    // 법선 벡터의 고도 (Elevation)
-    let elevation = (uv.x - 0.5) * PI; 
-    // 법선 벡터의 태양 대비 방위각 (Relative Azimuth)
-    let relAzimuth = (uv.y - 0.5) * PI2;
-
-    // [KO] 태양의 실제 방위각 고려
-    let sunAzimuth = atan2(params.sunDirection.z, params.sunDirection.x);
-    let worldAzimuth = sunAzimuth + relAzimuth;
-
-    // 최종 법선 벡터 구축
-    let normal = normalize(vec3<f32>(
-        cos(elevation) * cos(worldAzimuth),
-        sin(elevation),
-        cos(elevation) * sin(worldAzimuth)
-    ));
-
-    // [KO] 법선 방향으로 정렬하기 위한 로컬 기저(TBN) 생성
-    let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(1.0, 0.0, 0.0), abs(normal.y) > 0.99);
-    let tangent = normalize(cross(upVec, normal));
-    let bitangent = cross(normal, tangent);
-    let tbn = mat3x3<f32>(tangent, normal, bitangent);
-
-    let r = params.earthRadius;
-    let camH = params.cameraHeight;
-    let atmH = params.atmosphereHeight;
-
-    var irradiance = vec3<f32>(0.0);
-    
-    // [KO] 반구 샘플링 정밀도 향상
-    const samplesPhi = 64u;
-    const samplesTheta = 32u;
-    
-    for (var i = 0u; i < samplesPhi; i = i + 1u) {
-        let phi = (f32(i) + 0.5) / f32(samplesPhi) * PI2;
-        for (var j = 0u; j < samplesTheta; j = j + 1u) {
-            let theta = (f32(j) + 0.5) / f32(samplesTheta) * HPI;
-            
-            let cosTheta = cos(theta);
-            let sinTheta = sin(theta);
-            let localL = vec3<f32>(sinTheta * cos(phi), cosTheta, sinTheta * sin(phi));
-            
-            let L = tbn * localL;
-            
-            let skyUV = getSkyViewUV(L, camH, r, atmH);
-            var skyRadiance = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
-            
-            // [KO] 지평선 아래 방향 샘플링 시, 지면 조도를 계산합니다.
-            if (params.useGround > 0.5 && L.y < -0.001) {
-                let tGround = getRaySphereIntersection(vec3<f32>(0.0, r + camH, 0.0), L, r);
-                if (tGround > 0.0) {
-                    let hitP = vec3<f32>(0.0, r + camH, 0.0) + L * tGround;
-                    let hitNormal = normalize(hitP);
-                    let cosS = dot(hitNormal, params.sunDirection);
-                    
-                    // [KO] LUT를 사용하여 투과율 및 다중 산란 에너지 계산
-                    let sunT = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, 0.0, cosS, atmH);
-                    let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(cosS * 0.5 + 0.5, 1.0), 0.0).rgb;
-                    
-                    // [KO] 조도 유닛 정합 (msEnergy * PI)
-                    let groundAlbedo = params.groundAlbedo * INV_PI;
-                    skyRadiance = (sunT * max(0.0, cosS) + msEnergy * PI + params.groundAmbient) * groundAlbedo;
-                }
-            }
-            
-            irradiance += skyRadiance * cosTheta * sinTheta;
-        }
+    if (global_id.x >= size_u.x || global_id.y >= size_u.y || global_id.z >= 6u) {
+        return;
     }
 
-    // [KO] Irradiance(E)를 PI로 나누어 평균 Radiance(L) 형태로 저장 (PBR 재질과의 호환성)
-    // [EN] Divide Irradiance(E) by PI to store as average Radiance(L) (Compatibility with PBR materials)
-    irradiance = irradiance * (PI2 * HPI / f32(samplesPhi * samplesTheta)) * INV_PI;
+    let face = global_id.z;
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
+    
+    let x = uv.x * 2.0 - 1.0;
+    let y = uv.y * 2.0 - 1.0;
 
-    textureStore(irradianceTexture, global_id.xy, vec4<f32>(irradiance, 1.0));
+    let localPos = vec4<f32>(x, y, 1.0, 1.0);
+    let normal = normalize((faceMatrices[face] * localPos).xyz);
+
+    let up = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(normal.z) < 0.999);
+    let tbn = getTBN(normal, up);
+
+    var irradiance = vec3<f32>(0.0);
+    let totalSamples = 1024u;
+
+    // [KO] 소스 반사 맵의 해상도 정보 추출
+    // [EN] Extract resolution info of the source reflection map
+    let envSize = f32(textureDimensions(reflectionTexture).x);
+    let saTexel = 4.0 * PI / (6.0 * envSize * envSize); // [KO] 텍셀당 입체각 [EN] Solid angle per texel
+
+    for (var i = 0u; i < totalSamples; i = i + 1u) {
+        let xi = hammersley(i, totalSamples);
+
+        // [KO] 코사인 가중치 반구 샘플링
+        let phi = PI2 * xi.x;
+        let cosTheta = sqrt(1.0 - xi.y);
+        let sinTheta = sqrt(xi.y);
+
+        let sampleVec = vec3<f32>(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
+        let worldSample = normalize(tbn * sampleVec);
+
+        // [KO] 노이즈 억제를 위한 밉맵 필터링 (표준 IBL 기법)
+        // [EN] Mipmap filtering for noise suppression (Standard IBL technique)
+        let pdf = max(cosTheta, 0.001) * INV_PI;
+        let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
+        // [KO] 샘플 입체각에 따른 밉 레벨 계산 (약간 더 높은 밉을 선택하여 부드럽게 처리)
+        // [EN] Mip level calculation based on sample solid angle (bias towards higher mips for smoothness)
+        let mipLevel = max(0.5 * log2(saSample / saTexel) + 1.0, 0.0);
+
+        let sampleColor = textureSampleLevel(reflectionTexture, atmosphereSampler, worldSample, mipLevel).rgb;
+        
+        // [KO] Firefly Clamping (튀는 샘플 강하게 억제)
+        // [EN] Firefly Clamping (Aggressively suppress outlier samples)
+        irradiance += min(sampleColor, vec3<f32>(20.0));
+    }
+
+    irradiance = irradiance / f32(totalSamples);
+
+    textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
 }

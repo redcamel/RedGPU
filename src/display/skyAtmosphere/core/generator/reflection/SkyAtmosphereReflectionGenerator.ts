@@ -22,7 +22,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #faceMatrixBuffer: UniformBuffer;
 
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_REFL_GEN', 128, 128, 6);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_REFL_GEN', 256, 256, 6);
         this.#init();
     }
 
@@ -34,7 +34,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         return this.#prefilteredTexture;
     }
 
-    async render(transmittance: DirectTexture, multiScat: DirectTexture): Promise<void> {
+    async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
         const {gpuDevice, resourceManager} = this.redGPUContext;
 
         const bindGroup = gpuDevice.createBindGroup({
@@ -45,7 +45,8 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 2, resource: this.sampler.gpuSampler},
                 {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
                 {binding: 4, resource: {buffer: this.#faceMatrixBuffer.gpuBuffer}},
-                {binding: 5, resource: transmittance.gpuTextureView}
+                {binding: 5, resource: transmittance.gpuTextureView},
+                {binding: 6, resource: skyView.gpuTextureView}
             ]
         });
 
@@ -87,12 +88,12 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
     #getCubeMapFaceMatrices(): Float32Array[] {
         return [
-            new Float32Array([0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
-            new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
-            new Float32Array([-1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
+            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
+            new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
+            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
+            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
+            new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+            new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
         ];
     }
 }

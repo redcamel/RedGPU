@@ -55,7 +55,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let cosSun = dot(up, params.sunDirection);
             let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
             let msEnergy = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, vec2<f32>(cosSun * 0.5 + 0.5, 1.0), 0.0).rgb;
-            radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy + params.groundAmbient) * (params.groundAlbedo * INV_PI);
+            // [KO] 지면 반사광: (직접광 + 다중산란광 * PI) * Albedo / PI
+            // [EN] Ground radiance: (Direct + Multi-Scattered * PI) * Albedo / PI
+            radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy * PI + params.groundAmbient) * (params.groundAlbedo * INV_PI);
         } else if (intersect.y > 0.0 && tMax > intersect.y) {
             integrateScatSegment(rayOrigin, viewDir, intersect.y, tMax, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, &radiance, &transmittance);
         }

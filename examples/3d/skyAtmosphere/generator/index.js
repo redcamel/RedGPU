@@ -38,24 +38,55 @@ RedGPU.init(
             return sprite;
         };
 
-        // 3. LUT 텍스처 시각화 (위치 조정)
-        const transmittance = skyAtmosphere.transmittanceTexture;
-        const multiScat = skyAtmosphere.multiScatteringTexture;
-        const skyView = skyAtmosphere.skyViewTexture;
+        // 3. LUT 텍스처 시각화 (위치 및 레이아웃 조정)
+        const transmittance = skyAtmosphere.atmosphereTransmittanceTexture;
+        const multiScat = skyAtmosphere.atmosphereMultiScatteringTexture;
+        const skyView = skyAtmosphere.atmosphereSkyViewTexture;
         const irradiance = skyAtmosphere.atmosphereIrradianceTexture;
+        const reflection = skyAtmosphere.atmosphereReflectionTexture;
 
-        if (transmittance) createLUTSprite(transmittance, 'Transmittance LUT', -6, 6);
-        if (multiScat) createLUTSprite(multiScat, 'Multi-Scat LUT', 0, 6);
-        if (skyView) createLUTSprite(skyView, 'Sky-View LUT (Zenith:Top)', 6, 6);
-        if (irradiance) {
-            const s = createLUTSprite(irradiance, 'Atmosphere Irradiance LUT (2D)', 0, 0);
-            s.scaleY = 1.0; // 2D LUT 시각화 비율 복구
-        }
+        // [KO] 2D LUT들은 상단에 배치
+        if (transmittance) createLUTSprite(transmittance, 'Transmittance LUT', -6, 8);
+        if (multiScat) createLUTSprite(multiScat, 'Multi-Scat LUT', 0, 8);
+        if (skyView) createLUTSprite(skyView, 'Sky-View LUT', 6, 8);
+
+        // 4. 라이팅 검증을 위한 두 개의 구체 배치
+        const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 2.5, 32, 32);
+
+        // [KO] 왼쪽: 완전 금속 구체 (반사 큐브맵 확인용)
+        // [EN] Left: Fully metallic sphere (to verify reflection cubemap)
+        const metallicMat = new RedGPU.Material.PBRMaterial(redGPUContext);
+        metallicMat.metallicFactor = 1.0;
+        metallicMat.roughnessFactor = 0.0;
+        const metallicVerifier = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, metallicMat);
+        metallicVerifier.x = -4;
+        scene.addChild(metallicVerifier);
+
+        const metallicLabel = new RedGPU.Display.TextField3D(redGPUContext, 'Specular (Reflection)');
+        metallicLabel.x = -4; metallicLabel.y = -3.5;
+        metallicLabel.worldSize = 0.6;
+        metallicLabel.color = '#ffcc00';
+        scene.addChild(metallicLabel);
+
+        // [KO] 오른쪽: 완전 디퓨즈 구체 (조도 큐브맵 확인용)
+        // [EN] Right: Fully diffuse sphere (to verify irradiance cubemap)
+        const diffuseMat = new RedGPU.Material.PBRMaterial(redGPUContext);
+        diffuseMat.metallicFactor = 0.0;
+        diffuseMat.roughnessFactor = 1.0;
+        const diffuseVerifier = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, diffuseMat);
+        diffuseVerifier.x = 4;
+        scene.addChild(diffuseVerifier);
+
+        const diffuseLabel = new RedGPU.Display.TextField3D(redGPUContext, 'Diffuse (Irradiance)');
+        diffuseLabel.x = 4; diffuseLabel.y = -3.5;
+        diffuseLabel.worldSize = 0.6;
+        diffuseLabel.color = '#00ccff';
+        scene.addChild(diffuseLabel);
 
         const infoLabel = new RedGPU.Display.TextField3D(redGPUContext, '3D Camera Volume LUT (Aerial Perspective) is active in background');
-        infoLabel.x = 0; infoLabel.y = 1;
-        infoLabel.worldSize = 0.6;
-        infoLabel.color = '#ccc';
+        infoLabel.x = 0; infoLabel.y = -6;
+        infoLabel.worldSize = 0.5;
+        infoLabel.color = '#999';
         scene.addChild(infoLabel);
         
         const renderer = new RedGPU.Renderer(redGPUContext);
