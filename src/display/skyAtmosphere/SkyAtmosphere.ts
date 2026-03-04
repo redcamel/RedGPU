@@ -66,7 +66,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         cameraHeight: 0.001,
         useGround: 1.0,
         showGround: 1.0,
-        seaLevel: 0.0
+        seaLevel: 0.0,
+        aerialPerspectiveMaxDistance: 100.0
     };
 
     #sunElevation: number = 45;
@@ -150,6 +151,15 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     get sunDirection(): Float32Array { return this.#params.sunDirection; }
     get params() { return this.#params; }
     get cameraHeight(): number { return this.#params.cameraHeight; }
+
+    /** [KO] 공중 투시 효과 최대 거리 (km) [EN] Aerial Perspective max distance (km) */
+    get aerialPerspectiveMaxDistance(): number { return this.#params.aerialPerspectiveMaxDistance; }
+    set aerialPerspectiveMaxDistance(v: number) {
+        validatePositiveNumberRange(v, 1, 1000);
+        this.#params.aerialPerspectiveMaxDistance = v;
+        this.#dirtyUniformBuffer = true;
+        this.#dirtySkyView = true;
+    }
 
     /** [KO] 노출 (Exposure) [EN] Exposure */
     get exposure(): number { return this.#params.exposure; }
