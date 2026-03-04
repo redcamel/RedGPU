@@ -13,9 +13,9 @@
 *   **현상**: `skyAtmosphereFn.wgsl`의 `phaseMieDual` 함수 내에 `0.99`(Halo)와 `0.2`(Glow Mix)가 고정값으로 사용됨.
 *   **해결**: 기존 유니폼 항목인 `mieHalo`와 `mieGlow`를 실제 셰이더 수식에 연결 완료. (2026-03-04)
 
-### 2.3 높이 안개 비등방성 (Height Fog Anisotropy)
+### 2.3 높이 안개 비등방성 (Height Fog Anisotropy) - [완료]
 *   **현상**: `integrateScatSegment` 함수 내에서 안개용 Mie 산란 계수로 `0.7`이 하드코딩됨.
-*   **해결**: `heightFogAnisotropy` 유니폼을 추가하여 안개의 전방 산란 강도를 조절 가능하게 변경.
+*   **해결**: `heightFogAnisotropy` 유니폼을 추가하여 안개의 전방 산란 강도를 조절 가능하게 변경 완료. (2026-03-04)
 
 ### 2.4 적분 단계 수 (Integration Steps) 유니폼화
 *   **현상**: 각 LUT 생성기(`Transmittance`, `SkyView`, `Volume` 등)의 루프 횟수가 셰이더에 고정되어 있어 저사양 기기 최적화가 어려움.

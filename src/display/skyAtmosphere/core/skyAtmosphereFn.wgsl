@@ -168,7 +168,7 @@ fn integrateScatSegment(
     
     let phaseR = phaseRayleigh(viewSunCos);
     let phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy, params.mieHalo, params.mieGlow);
-    let phaseF = phaseMie(viewSunCos, 0.7);
+    let phaseF = phaseMie(viewSunCos, params.heightFogAnisotropy);
 
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;

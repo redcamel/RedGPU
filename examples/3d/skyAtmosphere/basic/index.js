@@ -333,4 +333,5 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_vol.addBinding(skyAtmosphere, 'aerialPerspectiveMaxDistance', {min: 1, max: 1000, step: 1, label: 'AP Max Distance (km)'});
     f_vol.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 10, step: 0.001, label: 'Fog Density'});
     f_vol.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.0001, label: 'Fog Falloff'});
+    f_vol.addBinding(skyAtmosphere, 'heightFogAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Fog Anisotropy (g)'});
 };

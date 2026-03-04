@@ -29,6 +29,6 @@ struct SkyAtmosphere {
     showGround: f32,
     seaLevel: f32,
     aerialPerspectiveMaxDistance: f32,
+    heightFogAnisotropy: f32,
     padding1: f32,
-    padding2: f32,
 };

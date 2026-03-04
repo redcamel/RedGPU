@@ -67,7 +67,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         useGround: 1.0,
         showGround: 1.0,
         seaLevel: 0.0,
-        aerialPerspectiveMaxDistance: 100.0
+        aerialPerspectiveMaxDistance: 100.0,
+        heightFogAnisotropy: 0.7
     };
 
     #sunElevation: number = 45;
@@ -157,6 +158,15 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set aerialPerspectiveMaxDistance(v: number) {
         validatePositiveNumberRange(v, 1, 1000);
         this.#params.aerialPerspectiveMaxDistance = v;
+        this.#dirtyUniformBuffer = true;
+        this.#dirtySkyView = true;
+    }
+
+    /** [KO] 높이 안개 비등방성 [EN] Height fog anisotropy (g) */
+    get heightFogAnisotropy(): number { return this.#params.heightFogAnisotropy; }
+    set heightFogAnisotropy(v: number) {
+        validateNumberRange(v, 0, 0.999);
+        this.#params.heightFogAnisotropy = v;
         this.#dirtyUniformBuffer = true;
         this.#dirtySkyView = true;
     }
