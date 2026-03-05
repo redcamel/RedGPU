@@ -71,25 +71,25 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let mipLevel = max(0.5 * log2(saSample / saTexel) + 1.0, 0.0);
 
         let sampleColor = textureSampleLevel(reflectionTexture, atmosphereSampler, worldSample, mipLevel).rgb;
-        
         irradiance += min(sampleColor, vec3<f32>(20.0));
     }
 
-    // [KO] 적분 결과 (Unit scale)
-    irradiance = (irradiance / f32(totalSamples)) * PI;
+    // [KO] 몬테카를로 적분 결과 (Unit scale)
+    // [KO] (sum / N) * PI 가 총 Irradiance 이지만, 머티리얼에서 Albedo와 그냥 곱하기 위해 PI로 미리 나눈 값을 저장합니다.
+    // [EN] (sum / N) * PI is the total Irradiance, but we store the value pre-divided by PI to multiply with Albedo in the material.
+    irradiance = (irradiance / f32(totalSamples));
 
     // [KO] 태양의 직접 기여도 추가 (분석적 모델)
-    // [EN] Add direct contribution from the sun (analytical model)
+    // [KO] 머티리얼에서 최종적으로 sunIntensity를 곱하므로, 여기서는 (Transmittance * NdotL) / PI 만 더해줍니다.
+    // [EN] Add direct contribution from sun (analytical model).
+    // [EN] Since material eventually multiplies by sunIntensity, we only add (Transmittance * NdotL) / PI here.
     let sunDir = params.sunDirection;
     let NdotL = max(dot(normal, sunDir), 0.0);
     if (NdotL > 0.0) {
         let camH = params.cameraHeight;
         let atmH = params.atmosphereHeight;
         let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
-        
-        // [KO] 태양의 직접 조도 (Unit radiance 기준)
-        // [EN] Direct irradiance from sun (Unit radiance based)
-        irradiance += sunTrans * NdotL;
+        irradiance += (sunTrans * NdotL) * INV_PI;
     }
 
     textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
