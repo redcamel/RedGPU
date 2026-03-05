@@ -20,8 +20,18 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../resources/texture/DirectTexture";
 
+import backgroundVertexShaderCode from "./wgsl/background_vertex.wgsl";
+import backgroundFragmentShaderCode from "./wgsl/background_fragment.wgsl";
+import Box from "../../primitive/Box";
+import {mat4} from "gl-matrix";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
+import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
+
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'SKY_ATMOSPHERE_CORE');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
+
+const BACKGROUND_SHADER_INFO = parseWGSL(backgroundVertexShaderCode, 'SKY_ATMOSPHERE_BACKGROUND_VERTEX');
+const BACKGROUND_UNIFORM_STRUCT = BACKGROUND_SHADER_INFO.uniforms.vertexUniforms;
 
 /**
  * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 클래스입니다.
@@ -36,6 +46,17 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #reflectionGenerator: SkyAtmosphereReflectionGenerator;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
+
+    #backgroundMesh: Box;
+    #backgroundPipeline: GPURenderPipeline;
+    #backgroundBindGroupLayout1: GPUBindGroupLayout;
+    #backgroundBindGroupLayout2: GPUBindGroupLayout;
+    #backgroundBindGroup1: GPUBindGroup;
+    #backgroundBindGroup2: GPUBindGroup;
+    #backgroundUniformBuffer: UniformBuffer;
+    #backgroundRenderBundle: GPURenderBundle;
+    #dirtyBackgroundPipeline: boolean = true;
+    #prevBackgroundSystemUniformBindGroup: GPUBindGroup;
 
     #params = {
         earthRadius: 6360.0,
@@ -121,6 +142,157 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
         this.#initShaders();
         this.#updateSunDirection();
+        this.#initBackgroundResources();
+    }
+
+    #initBackgroundResources() {
+        const {gpuDevice} = this.redGPUContext;
+        this.#backgroundMesh = new Box(this.redGPUContext);
+        this.#backgroundUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(BACKGROUND_UNIFORM_STRUCT.arrayBufferByteLength), 'SKY_ATMOSPHERE_BACKGROUND_VERTEX_UNIFORM_BUFFER');
+        this.#backgroundUniformBuffer.writeOnlyBuffer(BACKGROUND_UNIFORM_STRUCT.members.modelMatrix, mat4.create());
+
+        this.#backgroundBindGroupLayout1 = gpuDevice.createBindGroupLayout({
+            label: 'SKY_ATMOSPHERE_BACKGROUND_BGL_1',
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}}
+            ]
+        });
+
+        this.#backgroundBindGroupLayout2 = gpuDevice.createBindGroupLayout({
+            label: 'SKY_ATMOSPHERE_BACKGROUND_BGL_2',
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+                {binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+                {binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: {}}
+            ]
+        });
+
+        this.#backgroundBindGroup1 = gpuDevice.createBindGroup({
+            label: 'SKY_ATMOSPHERE_BACKGROUND_BG_1',
+            layout: this.#backgroundBindGroupLayout1,
+            entries: [
+                {binding: 0, resource: {buffer: this.#backgroundUniformBuffer.gpuBuffer}}
+            ]
+        });
+    }
+
+    #updateBackgroundPipeline(useMSAA: boolean) {
+        const {gpuDevice, resourceManager} = this.redGPUContext;
+        const vertexModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_BACKGROUND_VERTEX', {code: backgroundVertexShaderCode});
+        const fragmentModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_BACKGROUND_FRAGMENT', {code: backgroundFragmentShaderCode});
+
+        this.#backgroundPipeline = gpuDevice.createRenderPipeline({
+            label: 'SKY_ATMOSPHERE_BACKGROUND_PIPELINE',
+            layout: gpuDevice.createPipelineLayout({
+                bindGroupLayouts: [
+                    resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
+                    this.#backgroundBindGroupLayout1,
+                    this.#backgroundBindGroupLayout2
+                ]
+            }),
+            vertex: {
+                module: vertexModule,
+                entryPoint: 'main',
+                buffers: this.#backgroundMesh.gpuRenderInfo.buffers
+            },
+            fragment: {
+                module: fragmentModule,
+                entryPoint: 'main',
+                targets: [
+                    {format: 'rgba16float'}, // Color
+                    {format: navigator.gpu.getPreferredCanvasFormat()}, // Normal
+                    {format: 'rgba16float'} // Motion Vector
+                ]
+            },
+            primitive: {topology: 'triangle-list', cullMode: 'none'},
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: false,
+                depthCompare: 'less-equal'
+            },
+            multisample: {count: useMSAA ? 4 : 1}
+        });
+    }
+
+    renderBackground(renderViewStateData: RenderViewStateData) {
+        const {currentRenderPassEncoder, view} = renderViewStateData;
+        const {gpuDevice, antialiasingManager} = this.redGPUContext;
+        const {useMSAA} = antialiasingManager;
+
+        // LUT 업데이트 수행 (Ensure LUTs are up to date)
+        this.#updateLUTs(view);
+
+        if (this.#dirtyBackgroundPipeline || antialiasingManager.changedMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+            this.#updateBackgroundPipeline(useMSAA);
+            this.#dirtyBackgroundPipeline = false;
+            this.#prevBackgroundSystemUniformBindGroup = view.systemUniform_Vertex_UniformBindGroup;
+
+            this.#backgroundBindGroup2 = gpuDevice.createBindGroup({
+                label: 'SKY_ATMOSPHERE_BACKGROUND_BG_2',
+                layout: this.#backgroundBindGroupLayout2,
+                entries: [
+                    {binding: 0, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
+                    {binding: 1, resource: this.atmosphereSkyViewTexture.gpuTextureView},
+                    {binding: 2, resource: this.#sampler.gpuSampler}
+                ]
+            });
+
+            const bundleEncoder = gpuDevice.createRenderBundleEncoder({
+                ...view.basicRenderBundleEncoderDescriptor,
+                label: 'SKY_ATMOSPHERE_BACKGROUND_BUNDLE_ENCODER'
+            });
+
+            bundleEncoder.setPipeline(this.#backgroundPipeline);
+            bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+            bundleEncoder.setBindGroup(1, this.#backgroundBindGroup1);
+            bundleEncoder.setBindGroup(2, this.#backgroundBindGroup2);
+            bundleEncoder.setVertexBuffer(0, this.#backgroundMesh.vertexBuffer.gpuBuffer);
+            bundleEncoder.setIndexBuffer(this.#backgroundMesh.indexBuffer.gpuBuffer, this.#backgroundMesh.indexBuffer.format);
+            bundleEncoder.drawIndexed(this.#backgroundMesh.indexBuffer.indexCount);
+
+            this.#backgroundRenderBundle = bundleEncoder.finish({label: 'SKY_ATMOSPHERE_BACKGROUND_BUNDLE'});
+        }
+
+        currentRenderPassEncoder.executeBundles([this.#backgroundRenderBundle]);
+    }
+
+    #updateLUTs(view: View3D) {
+        const {rawCamera} = view;
+        const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
+        const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0) - this.#params.seaLevel);
+
+        if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.0001) {
+            this.#params.cameraHeight = currentHeightKm;
+            this.#dirtySkyView = true;
+            this.#dirtyUniformBuffer = true;
+        }
+
+        if (this.#dirtyUniformBuffer) {
+            this.#updateSharedUniformBuffer();
+            this.#dirtyUniformBuffer = false;
+        }
+
+        if (this.#dirtyLUT) {
+            this.#transmittanceGenerator.render();
+            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
+            this.#dirtyLUT = false;
+            this.#dirtySkyView = true;
+        }
+
+        if (this.#dirtySkyView) {
+            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            
+            // [KO] Reflection을 먼저 렌더링 (Irradiance의 소스로 사용)
+            // [EN] Render Reflection first (used as source for Irradiance)
+            this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+            
+            // [KO] 이제 Irradiance는 Reflection 소스 큐브맵(Raw)을 적분하여 생성
+            // [EN] Now Irradiance is generated by integrating the Reflection source cubemap (Raw)
+            this.#irradianceGenerator.render(this.#reflectionGenerator.sourceCubeTexture.createView({dimension: 'cube'}), this.#transmittanceGenerator.lutTexture);
+            
+            this.#dirtySkyView = false;
+        }
     }
 
     /** [KO] 지표면 기준 고도 (km) [EN] Sea level offset (km) */
@@ -384,42 +556,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         const {gpuDevice, resourceManager} = this.redGPUContext;
-        const {rawCamera} = view;
-        const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
-        const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0) - this.#params.seaLevel);
-
-        if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.0001) {
-            this.#params.cameraHeight = currentHeightKm;
-            this.#dirtySkyView = true;
-            this.#dirtyUniformBuffer = true;
-        }
-
-        if (this.#dirtyUniformBuffer) {
-            this.#updateSharedUniformBuffer();
-            this.#dirtyUniformBuffer = false;
-        }
-
-        if (this.#dirtyLUT) {
-            this.#transmittanceGenerator.render();
-            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
-            this.#dirtyLUT = false;
-            this.#dirtySkyView = true;
-        }
-
-        if (this.#dirtySkyView) {
-            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
-            this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
-            
-            // [KO] Reflection을 먼저 렌더링 (Irradiance의 소스로 사용)
-            // [EN] Render Reflection first (used as source for Irradiance)
-            this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-            
-            // [KO] 이제 Irradiance는 Reflection 소스 큐브맵(Raw)을 적분하여 생성
-            // [EN] Now Irradiance is generated by integrating the Reflection source cubemap (Raw)
-            this.#irradianceGenerator.render(this.#reflectionGenerator.sourceCubeTexture.createView({dimension: 'cube'}), this.#transmittanceGenerator.lutTexture);
-            
-            this.#dirtySkyView = false;
-        }
+        
+        // LUT 업데이트 수행 (Ensure LUTs are up to date)
+        this.#updateLUTs(view);
 
         if (!this.#outputTexture || this.#prevDimensions?.width !== width || this.#prevDimensions?.height !== height) {
             if (this.#outputTexture) this.#outputTexture.destroy();
