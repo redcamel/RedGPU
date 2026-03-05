@@ -67,6 +67,7 @@ import getAnisotropicSpecularBRDF_wgsl from './shader/KHR/KHR_materials_anisotro
 import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
 import getAtmosphereSunLight_wgsl from './shader/lighting/skyAtmosphere/getAtmosphereSunLight.wgsl';
 import skyAtmosphereFn_wgsl from '../display/skyAtmosphere/core/skyAtmosphereFn.wgsl';
+import transmittanceShaderCode_wgsl from '../display/skyAtmosphere/core/generator/transmittance/transmittanceShaderCode.wgsl';
 import meshEntryPointPickingVertex_wgsl from './shader/entryPoint/mesh/entryPointPickingVertex.wgsl';
 import meshEntryPointPickingFragment_wgsl from './shader/entryPoint/mesh/entryPointPickingFragment.wgsl';
 import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPointShadowVertex.wgsl';
@@ -248,6 +249,7 @@ export namespace LightingLibrary {
 export namespace SkyAtmosphereLibrary {
     export const getAtmosphereSunLight = getAtmosphereSunLight_wgsl;
     export const skyAtmosphereFn = skyAtmosphereFn_wgsl;
+    export const transmittanceShaderCode = transmittanceShaderCode_wgsl;
 }
 
 /**

@@ -54,7 +54,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     for (var i = 0u; i < totalSamples; i = i + 1u) {
         let xi = hammersley(i, totalSamples);
 
-        // [KO] 코사인 가중치 반구 샘플링
+        // [KO] 코사인 가중치 반구 샘플링 (PDF = cos(theta) / PI)
         let phi = PI2 * xi.x;
         let cosTheta = sqrt(1.0 - xi.y);
         let sinTheta = sqrt(xi.y);
@@ -66,18 +66,18 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // [EN] Mipmap filtering for noise suppression (Standard IBL technique)
         let pdf = max(cosTheta, 0.001) * INV_PI;
         let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
-        // [KO] 샘플 입체각에 따른 밉 레벨 계산 (약간 더 높은 밉을 선택하여 부드럽게 처리)
-        // [EN] Mip level calculation based on sample solid angle (bias towards higher mips for smoothness)
+        // [KO] 샘플 입체각에 따른 밉 레벨 계산
         let mipLevel = max(0.5 * log2(saSample / saTexel) + 1.0, 0.0);
 
         let sampleColor = textureSampleLevel(reflectionTexture, atmosphereSampler, worldSample, mipLevel).rgb;
         
-        // [KO] Firefly Clamping (튀는 샘플 강하게 억제)
-        // [EN] Firefly Clamping (Aggressively suppress outlier samples)
+        // [KO] 튀는 샘플 강하게 억제
         irradiance += min(sampleColor, vec3<f32>(20.0));
     }
 
-    irradiance = irradiance / f32(totalSamples);
+    // [KO] 코사인 가중 샘플링의 몬테카를로 추정값: (sum(f) / N) * PI
+    // [EN] Monte Carlo estimator for cosine-weighted sampling: (sum(f) / N) * PI
+    irradiance = (irradiance / f32(totalSamples)) * PI;
 
     textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
 }

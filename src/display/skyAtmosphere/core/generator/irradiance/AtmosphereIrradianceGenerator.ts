@@ -6,6 +6,7 @@ import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/Uniform
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
 
 const SHADER_INFO = parseWGSL(atmosphereIrradianceShaderCode, 'ATMOSPHERE_IRRADIANCE_GENERATOR');
 
