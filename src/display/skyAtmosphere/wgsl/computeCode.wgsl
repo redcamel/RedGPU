@@ -19,7 +19,7 @@ let sunDir = normalize(uniforms.sunDirection);
 
 let rawDepth = fetchDepth(id);
 let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping) / 1000.0;
-let maxApDist = 100.0; 
+let maxApDist = uniforms.aerialPerspectiveMaxDistance; 
 let apDist = clamp(depthKm, 0.0, maxApDist);
 
 let azimuth = atan2(viewDir.z, viewDir.x);
