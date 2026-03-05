@@ -170,7 +170,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // [Atmosphere Sun Light]
     if (systemUniforms.useSkyAtmosphere == 1u) {
-        let atmoSun = getAtmosphereSunLight();
+        let atmoSun = getAtmosphereSunLight(input_vertexPosition);
         mixColor += getPhongLight(
             atmoSun.color, atmoSun.intensity, atmoSun.direction,
             N, V, u_shininess, specularSamplerValue,

@@ -15,9 +15,10 @@ struct AtmosphereSunLight {
  * [KO] 시스템 유니폼으로부터 대기 태양광 정보를 추출합니다.
  * [EN] Extracts atmospheric sun light information from system uniforms.
  *
+ * @param worldPosition - [KO] 월드 공간 좌표 [EN] World space position
  * @returns [KO] 태양 정보 구조체 [EN] Sun light information structure
  */
-fn getAtmosphereSunLight() -> AtmosphereSunLight {
+fn getAtmosphereSunLight(worldPosition: vec3<f32>) -> AtmosphereSunLight {
     var sun: AtmosphereSunLight;
     let u_skyAtmosphere = systemUniforms.skyAtmosphere;
     
@@ -25,12 +26,13 @@ fn getAtmosphereSunLight() -> AtmosphereSunLight {
     sun.direction = sunDir;
     sun.intensity = u_skyAtmosphere.sunIntensity;
     
-    // [KO] 현재 고도와 태양 각도를 기반으로 대기 투과율(Transmittance)을 샘플링하여 실제 태양색 결정
-    // [EN] Sample Atmospheric Transmittance based on current height and sun angle to determine actual sun color
+    // [KO] 현재 픽셀의 고도와 태양 각도를 기반으로 대기 투과율(Transmittance)을 샘플링하여 실제 태양색 결정
+    // [EN] Sample Atmospheric Transmittance based on current pixel's height and sun angle to determine actual sun color
+    let h = max(0.001, (worldPosition.y / 1000.0) - u_skyAtmosphere.seaLevel);
     sun.color = getTransmittance(
         transmittanceTexture, 
         atmosphereSampler, 
-        u_skyAtmosphere.cameraHeight, 
+        h, 
         sunDir.y, 
         u_skyAtmosphere.atmosphereHeight
     );

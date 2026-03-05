@@ -52,7 +52,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         multiScatteringAmbient: 1.0,
         sunSize: 0.5,
         sunIntensity: 10.0,
-        exposure: 1.0,
         heightFogDensity: 0.0,
         heightFogFalloff: 0.1,
         horizonHaze: 0.0,

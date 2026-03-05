@@ -69,7 +69,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera);
 
-    const f_sun = pane.addFolder({title: 'Sun & Exposure', expanded: true});
+    const f_sun = pane.addFolder({title: 'Sun Position', expanded: true});
     
     // [KO] 태양 위치 조절용 2D 피커 추가
     // [EN] Add 2D picker for sun position control
@@ -86,9 +86,22 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.01, label: 'Elevation'});
     f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.01, label: 'Azimuth'});
     f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.1, label: 'Intensity'});
-    f_sun.addBinding(skyAtmosphere, 'exposure', {min: 0, max: 10, step: 0.1, label: 'Exposure'});
 
-    const f_atmos = pane.addFolder({title: 'Atmosphere', expanded: false});
+    const f_tonemapping = pane.addFolder({title: 'ToneMapping (Global)', expanded: true});
+    f_tonemapping.addBinding(targetView.toneMappingManager, 'mode', {
+        options: {
+            LINEAR: RedGPU.ToneMapping.TONE_MAPPING_MODE.LINEAR,
+            KHRONOS_PBR_NEUTRAL: RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL,
+            ACES_FILMIC_NARKOWICZ: RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ,
+            ACES_FILMIC_HILL: RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL,
+        },
+        label: 'Mode'
+    });
+    f_tonemapping.addBinding(targetView.toneMappingManager, 'exposure', {min: 0, max: 10, step: 0.01, label: 'Exposure'});
+    f_tonemapping.addBinding(targetView.toneMappingManager, 'contrast', {min: 0, max: 2, step: 0.01, label: 'Contrast'});
+    f_tonemapping.addBinding(targetView.toneMappingManager, 'brightness', {min: -1, max: 1, step: 0.01, label: 'Brightness'});
+
+    const f_atmos = pane.addFolder({title: 'Atmosphere Details', expanded: false});
     f_atmos.addBinding(skyAtmosphere, 'horizonHaze', {min: 0, max: 10, step: 0.01, label: 'Horizon Haze'});
     f_atmos.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 1, step: 0.001, label: 'Fog Density'});
 

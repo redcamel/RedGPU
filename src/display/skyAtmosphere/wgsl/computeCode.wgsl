@@ -54,4 +54,4 @@ if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
 }
 
 let finalColor = mix(atmosphereBackground, sceneColor, sceneAlpha);
-textureStore(outputTexture, id, vec4<f32>(finalColor * uniforms.exposure, 1.0));
+textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));

@@ -20,7 +20,6 @@ struct Uniforms {
 	cameraHeight: f32,
 	multiScatteringAmbient: f32,
 	
-	exposure: f32,
 	sunIntensity: f32,
 	heightFogDensity: f32,
 	heightFogFalloff: f32,
