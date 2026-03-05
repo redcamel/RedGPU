@@ -1,12 +1,12 @@
-import RedGPUContext from "../../../../../context/RedGPUContext";
-import Sampler from "../../../../../resources/sampler/Sampler";
+import RedGPUContext from "../../../../../../context/RedGPUContext";
+import Sampler from "../../../../../../resources/sampler/Sampler";
 import atmosphereIrradianceShaderCode from "./atmosphereIrradianceShaderCode.wgsl";
-import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
-import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
-import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
-import createUUID from "../../../../../utils/uuid/createUUID";
-import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
-import DirectTexture from "../../../../../resources/texture/DirectTexture";
+import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
+import createUUID from "../../../../../../utils/uuid/createUUID";
+import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
+import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 
 const SHADER_INFO = parseWGSL(atmosphereIrradianceShaderCode, 'ATMOSPHERE_IRRADIANCE_GENERATOR');
 

@@ -7,8 +7,8 @@ import TransmittanceGenerator from "./core/generator/transmittance/Transmittance
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import CameraVolumeGenerator from "./core/generator/cameraVolume/CameraVolumeGenerator";
-import AtmosphereIrradianceGenerator from "./core/generator/irradiance/AtmosphereIrradianceGenerator";
-import SkyAtmosphereReflectionGenerator from "./core/generator/reflection/SkyAtmosphereReflectionGenerator";
+import AtmosphereIrradianceGenerator from "./core/generator/ibl/irradiance/AtmosphereIrradianceGenerator";
+import SkyAtmosphereReflectionGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionGenerator";
 import skyAtmosphereFn from "./core/skyAtmosphereFn.wgsl";
 import transmittanceShaderCode from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import computeCode from "./wgsl/computeCode.wgsl";

@@ -1,14 +1,14 @@
-import RedGPUContext from "../../../../../context/RedGPUContext";
-import Sampler from "../../../../../resources/sampler/Sampler";
-import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
+import RedGPUContext from "../../../../../../context/RedGPUContext";
+import Sampler from "../../../../../../resources/sampler/Sampler";
+import skyAtmosphereFn from "../../../skyAtmosphereFn.wgsl";
 import reflectionShaderCode from "./skyAtmosphereReflectionShaderCode.wgsl";
-import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
-import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
-import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
-import DirectTexture from "../../../../../resources/texture/DirectTexture";
-import createUUID from "../../../../../utils/uuid/createUUID";
-import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
-import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
+import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
+import DirectTexture from "../../../../../../resources/texture/DirectTexture";
+import createUUID from "../../../../../../utils/uuid/createUUID";
+import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
+import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR');
 
