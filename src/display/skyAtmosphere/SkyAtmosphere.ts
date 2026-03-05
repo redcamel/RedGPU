@@ -171,14 +171,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtySkyView = true;
     }
 
-    /** [KO] 노출 (Exposure) [EN] Exposure */
-    get exposure(): number { return this.#params.exposure; }
-    set exposure(v: number) {
-        validatePositiveNumberRange(v, 0, 100);
-        this.#params.exposure = v;
-        this.#dirtyUniformBuffer = true;
-    }
-
     /** [KO] 태양 강도 [EN] Sun intensity */
     get sunIntensity(): number { return this.#params.sunIntensity; }
     set sunIntensity(v: number) {
