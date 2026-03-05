@@ -49,10 +49,12 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmospher
     let azimuth = atan2(viewDir.z, viewDir.x);
     let u = (azimuth / PI2) + 0.5;
     let r = earthRadius;
-    let h = max(0.0, viewHeight);
+    let h = max(0.0001, viewHeight);
+    
     let horizonCos = -sqrt(max(0.0, h * (2.0 * r + h))) / (r + h);
     let horizonElevation = asin(clamp(horizonCos, -1.0, 1.0));
     let viewElevation = asin(clamp(viewDir.y, -1.0, 1.0));
+
     var v: f32;
     if (viewElevation >= horizonElevation) {
         let ratio = (viewElevation - horizonElevation) / (HPI - horizonElevation);

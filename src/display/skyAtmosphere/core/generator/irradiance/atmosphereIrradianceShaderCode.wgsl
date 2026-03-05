@@ -1,7 +1,12 @@
+#redgpu_include systemStruct.SkyAtmosphere
+#redgpu_include skyAtmosphere.skyAtmosphereFn
+
 @group(0) @binding(0) var reflectionTexture: texture_cube<f32>;
 @group(0) @binding(1) var atmosphereSampler: sampler;
 @group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
+@group(0) @binding(4) var<uniform> params: SkyAtmosphere;
+@group(0) @binding(5) var transmittanceTexture: texture_2d<f32>;
 
 #redgpu_include math.PI
 #redgpu_include math.PI2
@@ -40,21 +45,15 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let localPos = vec4<f32>(x, y, 1.0, 1.0);
     let normal = normalize((faceMatrices[face] * localPos).xyz);
 
-    let up = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(normal.z) < 0.999);
+    let up = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(1.0, 0.0, 0.0), abs(normal.y) > 0.999);
     let tbn = getTBN(normal, up);
 
     var irradiance = vec3<f32>(0.0);
-    // [KO] 샘플 수를 2048개로 늘려 아주 밝고 작은 태양 에너지를 안정적으로 포착
-    // [EN] Increase sample count to 2048 to stably capture very bright and small sun energy
-    let totalSamples = 2048u;
-
-    let envSize = f32(textureDimensions(reflectionTexture).x);
-    let saTexel = 4.0 * PI / (6.0 * envSize * envSize);
+    let totalSamples = 1024u;
 
     for (var i = 0u; i < totalSamples; i = i + 1u) {
         let xi = hammersley(i, totalSamples);
 
-        // [KO] 코사인 가중치 반구 샘플링
         let phi = PI2 * xi.x;
         let cosTheta = sqrt(1.0 - xi.y);
         let sinTheta = sqrt(xi.y);
@@ -62,15 +61,29 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let sampleVec = vec3<f32>(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
         let worldSample = normalize(tbn * sampleVec);
 
-        let pdf = max(cosTheta, 0.001) * INV_PI;
-        let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
-        // [KO] Mip Bias를 약간 주어 (1.0 -> 1.5) 샘플링 노이즈를 부드럽게 억제
-        let mipLevel = max(0.5 * log2(saSample / saTexel) + 1.5, 0.0);
-
-        let sampleColor = textureSampleLevel(reflectionTexture, atmosphereSampler, worldSample, mipLevel).rgb;
+        // [KO] 소스 큐브맵의 밉맵을 활용하여 부드러운 적분 수행
+        let sampleColor = textureSampleLevel(reflectionTexture, atmosphereSampler, worldSample, 5.0).rgb;
         irradiance += sampleColor;
     }
 
-    // [KO] (sum / N) 은 Irradiance / PI 에 해당함 (머티리얼 호환성)
-    textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance / f32(totalSamples), 1.0));
+    // [KO] 적분 결과 (Unit scale)
+    irradiance = irradiance / f32(totalSamples);
+
+    // [KO] 태양의 직접 기여도 추가 (분석적 모델)
+    // [KO] 정오(SunElevation 90)일 때 대기 투과율이 최대이므로 가장 밝게 표현됩니다.
+    let sunDir = params.sunDirection;
+    let NdotL = max(dot(normal, sunDir), 0.0);
+    if (NdotL > 0.0) {
+        let camH = params.cameraHeight;
+        let atmH = params.atmosphereHeight;
+        
+        // [KO] 태양의 대기 투과율 계산 (고도각 sunDir.y 기준)
+        let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
+        
+        // [KO] 태양의 직접 조도 (E = L * cos(theta))
+        // [KO] 머티리얼에서 최종적으로 sunIntensity를 곱하므로, 여기서는 (Transmittance * NdotL) / PI 만 더해줍니다.
+        irradiance += (sunTrans * NdotL) * INV_PI;
+    }
+
+    textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
 }
