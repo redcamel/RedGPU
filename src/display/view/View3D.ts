@@ -236,7 +236,7 @@ class View3D extends AView {
                 {binding: 12, resource: resourceManager.brdfGenerator.brdfLUTTexture?.createView() || resourceManager.emptyBitmapTextureView},
                 {binding: 13, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereSampler.gpuSampler : this.#basicSampler},
                 {binding: 14, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereTransmittanceTexture.gpuTextureView : resourceManager.emptyBitmapTextureView},
-                {binding: 15, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereIrradianceTexture.gpuTextureView : resourceManager.emptyBitmapTextureView},
+                {binding: 15, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.atmosphereIrradianceTexture, this.skyAtmosphere?.atmosphereIrradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
                 {binding: 16, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.atmosphereReflectionTexture, this.skyAtmosphere?.atmosphereReflectionTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
             ]
         }

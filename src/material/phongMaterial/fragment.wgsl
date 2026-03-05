@@ -77,6 +77,11 @@ struct InputData {
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
+
+    // [KO] 입력 데이터 추출 [EN] Extract input data
+    let input_vertexNormal = inputData.vertexNormal.xyz;
+    let input_vertexPosition = inputData.vertexPosition.xyz;
+
     // AmbientLight
     let u_ambientLight = systemUniforms.ambientLight;
     let u_ambientLightColor = u_ambientLight.color;
@@ -105,7 +110,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_specularStrength = uniforms.specularStrength;
     let u_shininess = uniforms.shininess;
     let u_opacity = uniforms.opacity;
-    let V = getViewDirection(inputData.vertexPosition, u_cameraPosition);
+    let V = getViewDirection(input_vertexPosition, u_cameraPosition);
 
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != .0;
@@ -114,10 +119,10 @@ fn main(inputData:InputData) -> OutputFragment {
     //
 
     // Vertex Normal
-    var N = normalize(inputData.vertexNormal) ;
+    var N = normalize(input_vertexNormal) ;
     #redgpu_if normalTexture
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
-        let tbn = getTBNFromCotangent(N, inputData.vertexPosition, inputData.uv);
+        let tbn = getTBNFromCotangent(N, input_vertexPosition, inputData.uv);
         N = getNormalFromNormalMap(normalSamplerColor, tbn, -u_normalScale);
     #redgpu_endIf
     //
@@ -191,7 +196,7 @@ fn main(inputData:InputData) -> OutputFragment {
          let u_clusterLightRadius = clusterLightList.lights[i].radius;
          let u_isSpotLight = clusterLightList.lights[i].isSpotLight;
 
-         let lightDir = u_clusterLightPosition - inputData.vertexPosition;
+         let lightDir = u_clusterLightPosition - input_vertexPosition;
          let lightDistance = length(lightDir);
 
          // 거리 범위 체크
