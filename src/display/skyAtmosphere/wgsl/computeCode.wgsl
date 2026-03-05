@@ -32,26 +32,34 @@ let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
 // [EN] Sample Aerial Perspective 3D LUT
 let apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
+// [KO] 최종 색상 결정
+// [EN] Determine final color
+var finalColor: vec3<f32>;
+
 if (rawDepth < 0.999999) {
-    // [KO] 이전의 정확한 합성 상태로 복구 (Scene * Transmittance + InScattering)
-    sceneColor = (sceneColor * apSample.a) + apSample.rgb;
+    // [KO] 물체가 있는 경우: 배경(하늘/지면)을 그리지 않고 기존 색상만 출력합니다. (텍스처 테스트용)
+    // [EN] If there is an object: Do not draw the background (sky/ground) and only output the existing color. (For texture testing)
+    finalColor = sceneColor;
+} else {
+    // [KO] 물체가 없는 경우(배경): 대기, 태양, 지면을 계산하여 출력합니다.
+    // [EN] If there is no object (background): Calculate and output atmosphere, sun, and ground.
+    
+    // [KO] 매핑 안정화를 위한 클램핑 고도 (Sea Level Offset 반영된 camH 기준)
+    let mappingH = max(0.0, camH);
+    let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
+    let skySample = textureSampleLevel(atmosphereSkyViewTexture, atmosphereSampler, skyUV, 0.0);
+    var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
+
+    let camPos = vec3<f32>(0.0, r + camH, 0.0);
+    let tEarth = getRaySphereIntersection(camPos, viewDir, r);
+    if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
+        let viewSunCos = dot(viewDir, sunDir);
+        let sunRad = uniforms.sunSize * DEG_TO_RAD;
+        let sunMask = smoothstep(cos(sunRad) - 0.001, cos(sunRad), viewSunCos);
+        let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
+        atmosphereBackground += sunMask * sunTrans * uniforms.sunIntensity;
+    }
+    finalColor = atmosphereBackground;
 }
 
-// [KO] 매핑 안정화를 위한 클램핑 고도 (Sea Level Offset 반영된 camH 기준)
-let mappingH = max(0.0, camH);
-let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
-let skySample = textureSampleLevel(atmosphereSkyViewTexture, atmosphereSampler, skyUV, 0.0);
-var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
-
-let camPos = vec3<f32>(0.0, r + camH, 0.0);
-let tEarth = getRaySphereIntersection(camPos, viewDir, r);
-if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
-    let viewSunCos = dot(viewDir, sunDir);
-    let sunRad = uniforms.sunSize * DEG_TO_RAD;
-    let sunMask = smoothstep(cos(sunRad) - 0.001, cos(sunRad), viewSunCos);
-    let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
-    atmosphereBackground += sunMask * sunTrans * uniforms.sunIntensity;
-}
-
-let finalColor = mix(atmosphereBackground, sceneColor, sceneAlpha);
 textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));
