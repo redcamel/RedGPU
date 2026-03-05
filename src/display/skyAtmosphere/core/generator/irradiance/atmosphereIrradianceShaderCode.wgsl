@@ -1,12 +1,7 @@
-#redgpu_include systemStruct.SkyAtmosphere
-#redgpu_include skyAtmosphere.skyAtmosphereFn
-
 @group(0) @binding(0) var reflectionTexture: texture_cube<f32>;
 @group(0) @binding(1) var atmosphereSampler: sampler;
 @group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(3) var<uniform> faceMatrices: array<mat4x4<f32>, 6>;
-@group(0) @binding(4) var<uniform> params: SkyAtmosphere;
-@group(0) @binding(5) var transmittanceTexture: texture_2d<f32>;
 
 #redgpu_include math.PI
 #redgpu_include math.PI2
@@ -49,9 +44,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let tbn = getTBN(normal, up);
 
     var irradiance = vec3<f32>(0.0);
-    let totalSamples = 1024u;
+    // [KO] 샘플 수를 2048개로 늘려 아주 밝고 작은 태양 에너지를 안정적으로 포착
+    // [EN] Increase sample count to 2048 to stably capture very bright and small sun energy
+    let totalSamples = 2048u;
 
-    // [KO] 소스 반사 맵의 해상도 정보 추출
     let envSize = f32(textureDimensions(reflectionTexture).x);
     let saTexel = 4.0 * PI / (6.0 * envSize * envSize);
 
@@ -68,29 +64,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         let pdf = max(cosTheta, 0.001) * INV_PI;
         let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
-        let mipLevel = max(0.5 * log2(saSample / saTexel) + 1.0, 0.0);
+        // [KO] Mip Bias를 약간 주어 (1.0 -> 1.5) 샘플링 노이즈를 부드럽게 억제
+        let mipLevel = max(0.5 * log2(saSample / saTexel) + 1.5, 0.0);
 
         let sampleColor = textureSampleLevel(reflectionTexture, atmosphereSampler, worldSample, mipLevel).rgb;
-        irradiance += min(sampleColor, vec3<f32>(20.0));
+        irradiance += sampleColor;
     }
 
-    // [KO] 몬테카를로 적분 결과 (Unit scale)
-    // [KO] (sum / N) * PI 가 총 Irradiance 이지만, 머티리얼에서 Albedo와 그냥 곱하기 위해 PI로 미리 나눈 값을 저장합니다.
-    // [EN] (sum / N) * PI is the total Irradiance, but we store the value pre-divided by PI to multiply with Albedo in the material.
-    irradiance = (irradiance / f32(totalSamples));
-
-    // [KO] 태양의 직접 기여도 추가 (분석적 모델)
-    // [KO] 머티리얼에서 최종적으로 sunIntensity를 곱하므로, 여기서는 (Transmittance * NdotL) / PI 만 더해줍니다.
-    // [EN] Add direct contribution from sun (analytical model).
-    // [EN] Since material eventually multiplies by sunIntensity, we only add (Transmittance * NdotL) / PI here.
-    let sunDir = params.sunDirection;
-    let NdotL = max(dot(normal, sunDir), 0.0);
-    if (NdotL > 0.0) {
-        let camH = params.cameraHeight;
-        let atmH = params.atmosphereHeight;
-        let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
-        irradiance += (sunTrans * NdotL) * INV_PI;
-    }
-
-    textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
+    // [KO] (sum / N) 은 Irradiance / PI 에 해당함 (머티리얼 호환성)
+    textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance / f32(totalSamples), 1.0));
 }

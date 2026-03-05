@@ -6,7 +6,6 @@ import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/Uniform
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
-import DirectTexture from "../../../../../resources/texture/DirectTexture";
 
 const SHADER_INFO = parseWGSL(atmosphereIrradianceShaderCode, 'ATMOSPHERE_IRRADIANCE_GENERATOR');
 
@@ -27,7 +26,7 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         return this.#lutTexture;
     }
 
-    render(reflectionCube: DirectCubeTexture, transmittance: DirectTexture): void {
+    render(reflectionCube: DirectCubeTexture): void {
         const {gpuDevice} = this.redGPUContext;
         const bindGroup = gpuDevice.createBindGroup({
             label: 'ATMOSPHERE_IRRADIANCE_GEN_BG',
@@ -36,9 +35,7 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 0, resource: reflectionCube.gpuTexture.createView({dimension: 'cube'})},
                 {binding: 1, resource: this.sampler.gpuSampler},
                 {binding: 2, resource: this.#lutTexture.gpuTexture.createView({dimension: '2d-array'})},
-                {binding: 3, resource: {buffer: this.#faceMatrixBuffer.gpuBuffer}},
-                {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-                {binding: 5, resource: transmittance.gpuTextureView}
+                {binding: 3, resource: {buffer: this.#faceMatrixBuffer.gpuBuffer}}
             ]
         });
         
