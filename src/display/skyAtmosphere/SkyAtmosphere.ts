@@ -75,9 +75,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         heightFogDensity: 0.0,
         heightFogFalloff: 0.1,
         groundAmbient: 0.0,
-        groundAlbedo: [0.15, 0.15, 0.15],
-        mieGlow: 0.75,
-        mieHalo: 0.99,
+        groundAlbedo: [0.1, 0.1, 0.1],
+        mieGlow: 0.8,
+        mieHalo: 0.998,
         sunDirection: new Float32Array([0, 1, 0]),
         cameraHeight: 0.001,
         useGround: 1.0,
@@ -85,8 +85,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         seaLevel: 0.0,
         aerialPerspectiveMaxDistance: 100.0,
         heightFogAnisotropy: 0.7,
-        solarIntensityMult: 250.0,
-        sunLimbDarkening: 0.8,
+        solarIntensityMult: 500.0,
+        sunLimbDarkening: 0.67,
         skyViewScatMult: 1.0
     };
 
@@ -498,6 +498,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieGlow(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieGlow = v;
+        this.#dirtySkyView = true; // [KO] LUT 생성 시 (1-Glow) 가중치가 적용되므로 재생성 필요 [EN] Needs regeneration as (1-Glow) weight is applied during LUT generation
         this.#dirtyUniformBuffer = true;
     }
 
@@ -505,6 +506,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieHalo(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieHalo = v;
+        // [KO] mieHalo는 실시간 Mie Glow 계산에만 사용되므로 유니폼 버퍼만 업데이트 [EN] mieHalo is only used for real-time Mie Glow calculation, so only update uniform buffer
         this.#dirtyUniformBuffer = true;
     }
 
