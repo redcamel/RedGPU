@@ -207,16 +207,18 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
 
     // 1. Cinematic Presets
     const f_presets = pane.addFolder({title: '1. Cinematic Presets', expanded: true});
-    const apply = (el, az, exp, intensity) => {
+    const apply = (el, az, exp, intensity, solarMult, limb) => {
         skyAtmosphere.sunElevation = el;
         skyAtmosphere.sunAzimuth = az;
         targetView.toneMappingManager.exposure = exp;
         skyAtmosphere.sunIntensity = intensity;
+        skyAtmosphere.solarIntensityMult = solarMult;
+        skyAtmosphere.sunLimbDarkening = limb;
         pane.refresh();
     };
-    f_presets.addButton({title: 'High Noon'}).on('click', () => apply(90, 0, 1.0, 22.0));
-    f_presets.addButton({title: 'Golden Sunset'}).on('click', () => apply(3.5, 0, 1.8, 22.0));
-    f_presets.addButton({title: 'Eerie Twilight'}).on('click', () => apply(-4, 0, 4.0, 10.0));
+    f_presets.addButton({title: 'High Noon'}).on('click', () => apply(90, 0, 1.0, 22.0, 500.0, 0.4));
+    f_presets.addButton({title: 'Golden Sunset'}).on('click', () => apply(3.5, 0, 1.8, 22.0, 150.0, 0.8));
+    f_presets.addButton({title: 'Eerie Twilight'}).on('click', () => apply(-4, 0, 4.0, 10.0, 50.0, 1.2));
 
     // 2. Sun & Exposure
     const f_sun = pane.addFolder({title: '2. Sun & Exposure'});

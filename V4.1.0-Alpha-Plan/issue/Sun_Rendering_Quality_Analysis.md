@@ -14,6 +14,7 @@
 - `background_fragment.wgsl`의 렌더링 로직을 물리 기반 모델로 전면 교체.
 - 태양 본체 전용 HDR 강도 계수(`solarIntensityMult`) 및 입체감 제어 계수(`sunLimbDarkening`) 도입.
 - 픽셀 단위 고도 계산을 통한 정밀한 대기 투과율 산출 로직 구현.
+- 시스템 유니폼 최적화 및 레거시 필드 정리 완료.
 
 ## 3. 구현된 물리적 특성 (Implemented Physical Features)
 
@@ -22,7 +23,7 @@
 | **Limb Darkening** | 태양 광구 깊이에 따른 온도 차이 모사 | 태양이 입체적인 구체로 표현됨 |
 | **Solar HDR Scaling** | 태양의 압도적인 물리적 휘도 반영 | 강렬하고 사실적인 Bloom/Glare 발생 |
 | **Per-pixel Transmittance** | 대기층 두께의 미세한 차이 반영 | 노을 시 태양 하단이 더 붉고 어둡게 변함 |
-| **Horizon Squashing** | 대기 밀도 차이에 의한 굴절 효과 | 지평선 근처에서 태양이 타원형으로 압축됨 |
+| **Horizon Squashing** | 대기 밀도 차이에 의한 빛의 굴절 효과 | 지평선 근처에서 태양이 타원형으로 압축됨 |
 
 ## 4. 해결 설계 요약 (Final Solution Summary)
 
@@ -32,10 +33,11 @@
 
 ### 4.2 고휘도 에너지 스케일링 (Solar HDR Boost)
 - `solarIntensityMult`를 통해 태양 본체 에너지를 대기 산란광 대비 최대 수천 배까지 확장.
+- 기본값 최적화: `solarIntensityMult = 250.0`, `sunLimbDarkening = 0.8`.
 
 ### 4.3 동적 형태 및 색상 보정 (Dynamic Morphing)
-- `viewDir.y` 기반 픽셀별 투과율 샘플링.
-- `squashFactor`를 이용한 수직 축 각거리 보정으로 타원형 태양 구현.
+- `viewDir.y` 기반 픽셀별 투과율 샘플링으로 노을 퀄리티 향상.
+- `squashFactor`를 이용한 수직 축 각거리 보정으로 타원형 태양 구현 (수평선 근처 최대 15% 압축).
 
 ## 5. 세부 작업 순서 및 로드맵 (Detailed Roadmap)
 
@@ -51,13 +53,13 @@
 - [x] **Per-pixel Transmittance**: 태양 내부 픽셀별 투과율 그라데이션 구현 완료.
 - [x] **Horizon Squashing**: 지평선 부근 타원형 압축 효과 구현 완료.
 
-### 🎨 4단계: 최종 밸런스 및 파라미터 노출 (In Progress 🚧)
-- [ ] 다양한 시나리오(낮, 일몰, 박명)별 파라미터 최적화.
-- [ ] 외부 API 및 문서화 최종 점검.
+### 🎨 4단계: 최종 밸런스 및 파라미터 노출 (Completed ✅)
+- [x] 시간대별 시네마틱 프리셋(High Noon, Golden Sunset, Eerie Twilight) 최적화.
+- [x] 외부 API(`SkyAtmosphere.ts`) 및 테스트 패널(Tweakpane) 최종 업데이트 완료.
 
----
 ## 6. 관련 파일 (Target Files)
 - `src/display/skyAtmosphere/wgsl/background_fragment.wgsl` (렌더링 핵심)
 - `src/display/skyAtmosphere/SkyAtmosphere.ts` (파라미터 제어)
 - `src/systemCodeManager/shader/systemStruct/SkyAtmosphere.wgsl` (구조 정의)
 - `src/renderer/SystemUniformUpdater.ts` (데이터 전달)
+- `examples/3d/skyAtmosphere/basic/index.js` (시네마틱 프리셋 적용)
