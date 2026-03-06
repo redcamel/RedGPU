@@ -18,7 +18,7 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;
 
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_VIEW_GEN', 200, 200);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_VIEW_GEN', 512, 256);
         this.#init();
     }
 

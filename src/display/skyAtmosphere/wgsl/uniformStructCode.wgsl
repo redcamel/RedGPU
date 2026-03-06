@@ -28,5 +28,6 @@ struct Uniforms {
 	groundAmbient: f32,
 	solarIntensityMult: f32,
 	sunLimbDarkening: f32,
-	seaLevel: f32
+	seaLevel: f32,
+	skyViewScatMult: f32
 };

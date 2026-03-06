@@ -178,6 +178,7 @@ class SystemUniformUpdater {
                 {key: 'solarIntensityMult', value: params?.solarIntensityMult || 1.0},
                 {key: 'sunLimbDarkening', value: params?.sunLimbDarkening || 0.0},
                 {key: 'seaLevel', value: params?.seaLevel || 0.0},
+                {key: 'skyViewScatMult', value: params?.skyViewScatMult || 1.0},
             ]
         )
     }

@@ -86,7 +86,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         aerialPerspectiveMaxDistance: 100.0,
         heightFogAnisotropy: 0.7,
         solarIntensityMult: 250.0,
-        sunLimbDarkening: 0.8
+        sunLimbDarkening: 0.8,
+        skyViewScatMult: 1.0
     };
 
     #sunElevation: number = 45;

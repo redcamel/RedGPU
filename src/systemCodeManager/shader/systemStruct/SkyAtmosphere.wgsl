@@ -27,4 +27,5 @@ struct SkyAtmosphere {
     solarIntensityMult: f32,
     sunLimbDarkening: f32,
     seaLevel: f32,
+    skyViewScatMult: f32,
 };
