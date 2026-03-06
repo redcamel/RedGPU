@@ -37,7 +37,15 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let tEarth = getRaySphereIntersection(camPos, viewDir, r);
     
     if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
-        let viewSunCos = dot(viewDir, sunDir);
+        // [KO] 수평선 압축(Horizon Squashing) 보정: 고도가 낮을 때 태양이 수직으로 납작해지는 효과
+        // [EN] Horizon Squashing correction: Effect where the sun flattens vertically at low elevations
+        let sunElevationParam = saturate(sunDir.y * 10.0); // [KO] 고도 약 5.7도 이하에서 작동 [EN] Works below ~5.7 deg elevation
+        let squashFactor = mix(0.85, 1.0, sunElevationParam); // [KO] 최대 15% 압축 [EN] Max 15% squashing
+        
+        let verticalDist = viewDir.y - sunDir.y;
+        let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist);
+        let viewSunCos = dot(viewDir, sunDir) - squashCorrection;
+
         let sunRad = uniforms.sunSize * DEG_TO_RAD;
         let cosSunRad = cos(sunRad);
         
