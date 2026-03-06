@@ -6,8 +6,8 @@
 ## 2. 현상 분석 (Current State Analysis)
 
 ### 2.1 시각적 결함 (Visual Defects)
-- **Flat Disk Syndrome**: 태양 본체의 밝기가 균일하여 입체감이 결여됨.
-- **Intensity Compression**: 태양 본체의 HDR 에너지가 대기 산란광에 비해 충분히 높지 않아 Bloom 효과가 미약함.
+- **Flat Disk Syndrome**: 태양 본체의 밝기가 균일하여 입체감이 결여됨. (Resolved ✅)
+- **Intensity Compression**: 태양 본체의 HDR 에너지가 대기 산란광에 비해 충분히 높지 않아 Bloom 효과가 미약함. (Resolved ✅)
 - **Horizon Aliasing/Step**: 저고도에서 지평선과 태양의 경계가 부자연스럽게 절단되거나 색상 그라데이션이 부족함.
 
 ### 2.2 기술적 제약 (Technical Constraints)
@@ -43,16 +43,17 @@
 ## 5. 세부 작업 순서 및 로드맵 (Detailed Roadmap)
 
 ### 🚀 1단계: 파라미터 확장 및 유니폼 구조 설계 (Completed ✅)
-- [x] **레거시 유니폼 정리**: 사용되지 않는 필드(`multiScatteringAmbient`, `horizonHaze` 등) 제거.
+- [x] **레거시 유니폼 정리**: 사용되지 않는 필드 제거 및 구조체 최적화.
 - [x] **신규 파라미터 추가**: `solarIntensityMult`, `sunLimbDarkening` 필드 구축.
-- [x] **구조체 동기화**: `SkyAtmosphere.wgsl`, `uniformStructCode.wgsl`, `SkyAtmosphere.ts` 업데이트 완료.
-- [x] **테스트 환경 구축**: `skyAtmosphereTest` 예제 패널에 신규 파라미터 조작부 추가.
+- [x] **시스템 동기화**: `SystemUniformUpdater.ts` 및 WGSL 구조체 업데이트 완료.
+- [x] **테스트 환경 구축**: 예제 패널에 품질 제어 항목 반영.
 
-### ☀️ 2단계: 태양 본체 렌더링 고도화 - Phase 1 (In Progress 🚧)
-- [ ] `background_fragment.wgsl`의 `sunMask` 계산 로직 수정 (Limb Darkening 추가).
-- [ ] 태양 본체 강도 보정 계수(`solarIntensityMult`) 적용.
+### ☀️ 2단계: 태양 본체 렌더링 고도화 - Phase 1 (Completed ✅)
+- [x] **Limb Darkening 구현**: 비선형 감쇠 수식 적용으로 태양 입체감 확보.
+- [x] **Solar HDR Boost**: `solarIntensityMult` 적용으로 강렬한 Bloom 연동.
+- [x] **Bug Fix**: `Limb Darkening`이 0일 때 발생하는 검은 테두리(Undef arithmetic) 보정.
 
-### 🌅 3단계: 사실성 강화 보정 - Phase 2
+### 🌅 3단계: 사실성 강화 보정 - Phase 2 (In Progress 🚧)
 - [ ] 태양 픽셀별 투과율 개별 계산 로직 추가.
 - [ ] 수평선 근처 수직 스케일 압축(Squash) 보정 수식 도입.
 
@@ -65,3 +66,4 @@
 - `src/display/skyAtmosphere/core/skyAtmosphereFn.wgsl` (수식 라이브러리)
 - `src/display/skyAtmosphere/SkyAtmosphere.ts` (파라미터 전달)
 - `src/systemCodeManager/shader/systemStruct/SkyAtmosphere.wgsl` (유니폼 구조 정의)
+- `src/renderer/SystemUniformUpdater.ts` (시스템 유니폼 쓰기 로직)
