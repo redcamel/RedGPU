@@ -70,25 +70,23 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         ozoneAbsorption: [0.000650, 0.001881, 0.000085],
         ozoneLayerCenter: 25.0,
         ozoneLayerWidth: 15.0,
-        multiScatteringAmbient: 1.0,
         sunSize: 0.5,
         sunIntensity: 10.0,
         heightFogDensity: 0.0,
         heightFogFalloff: 0.1,
-        horizonHaze: 0.0,
         groundAmbient: 0.0,
         groundAlbedo: [0.15, 0.15, 0.15],
         mieGlow: 0.75,
         mieHalo: 0.99,
-        groundShininess: 512.0,
-        groundSpecular: 4.0,
         sunDirection: new Float32Array([0, 1, 0]),
         cameraHeight: 0.001,
         useGround: 1.0,
         showGround: 1.0,
         seaLevel: 0.0,
         aerialPerspectiveMaxDistance: 100.0,
-        heightFogAnisotropy: 0.7
+        heightFogAnisotropy: 0.7,
+        solarIntensityMult: 100.0,
+        sunLimbDarkening: 0.5
     };
 
     #sunElevation: number = 45;
@@ -537,6 +535,22 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtyUniformBuffer = true;
         this.#dirtyLUT = true;
         this.#dirtySkyView = true;
+    }
+
+    /** [KO] 태양 본체 강도 배율 [EN] Sun disk intensity multiplier */
+    get solarIntensityMult(): number { return this.#params.solarIntensityMult; }
+    set solarIntensityMult(v: number) {
+        validatePositiveNumberRange(v, 1, 100000);
+        this.#params.solarIntensityMult = v;
+        this.#dirtyUniformBuffer = true;
+    }
+
+    /** [KO] 태양 주연 감광 계수 [EN] Sun limb darkening exponent */
+    get sunLimbDarkening(): number { return this.#params.sunLimbDarkening; }
+    set sunLimbDarkening(v: number) {
+        validateNumberRange(v, 0, 10.0);
+        this.#params.sunLimbDarkening = v;
+        this.#dirtyUniformBuffer = true;
     }
 
     /** [KO] 투과율 LUT 텍스처 [EN] Atmospheric Transmittance LUT texture */
