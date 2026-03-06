@@ -52,8 +52,10 @@ fn main(input : VertexOutput) -> FragmentOutput {
             let limbDarkening = pow(max(0.00001, 1.0 - normalizedDist), uniforms.sunLimbDarkening);
             
             // [KO] 투과율 및 부스트된 강도 적용
+            // [KO] 픽셀 단위 투과율(Per-pixel Transmittance) 보정: 각 픽셀의 시선 방향 고도(viewDir.y)를 사용하여 투과율 재계산
             // [EN] Apply transmittance and boosted intensity
-            let sunTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
+            // [EN] Per-pixel Transmittance: Recalculate transmittance using each pixel's view direction elevation (viewDir.y)
+            let sunTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, viewDir.y, uniforms.atmosphereHeight);
             atmosphereBackground += sunMask * limbDarkening * sunTrans * (uniforms.sunIntensity * uniforms.solarIntensityMult);
         }
     }
