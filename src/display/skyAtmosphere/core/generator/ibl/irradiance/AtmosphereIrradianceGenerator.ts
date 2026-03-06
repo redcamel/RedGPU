@@ -42,7 +42,6 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 0, resource: reflectionCubeView},
                 {binding: 1, resource: this.sampler.gpuSampler},
                 {binding: 2, resource: this.#lutTexture.gpuTexture.createView({dimension: '2d-array'})},
-                {binding: 3, resource: {buffer: this.#faceMatrixBuffer.gpuBuffer}},
                 {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
                 {binding: 5, resource: transmittance.gpuTextureView}
             ]

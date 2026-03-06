@@ -22,7 +22,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let r = params.earthRadius;
     let camH = params.cameraHeight;
     let atmH = params.atmosphereHeight;
-    let sunDir = params.sunDirection;
+    let sunDir = normalize(params.sunDirection);
     let sunRad = params.sunSize * DEG_TO_RAD;
 
     var totalRadiance = vec3<f32>(0.0);
@@ -36,30 +36,29 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     for (var i = 0u; i < 4u; i = i + 1u) {
         let uv = (vec2<f32>(global_id.xy) + 0.5 + offsets[i]) / size;
-        let x = uv.x * 2.0 - 1.0;
-        let y = uv.y * 2.0 - 1.0;
-        let localPos = vec4<f32>(x, y, 1.0, 1.0);
         
-        // [KO] 엔진 표준 행렬을 사용하여 방향 계산
-        // [EN] Calculate direction using engine standard matrices
-        let viewDir = normalize((faceMatrices[face] * localPos).xyz);
+        // [KO] WebGPU 표준 큐브맵 좌표계에 따른 방향 계산
+        // [EN] Calculate direction according to WebGPU standard cubemap coordinate system
+        let tex = uv * 2.0 - 1.0;
+        var dir: vec3<f32>;
+        switch (face) {
+            case 0u: { dir = vec3<f32>(1.0, -tex.y, -tex.x); } // +X
+            case 1u: { dir = vec3<f32>(-1.0, -tex.y, tex.x); } // -X
+            case 2u: { dir = vec3<f32>(tex.x, 1.0, tex.y); }  // +Y
+            case 3u: { dir = vec3<f32>(tex.x, -1.0, -tex.y); } // -Y
+            case 4u: { dir = vec3<f32>(tex.x, -tex.y, 1.0); }  // +Z
+            case 5u: { dir = vec3<f32>(-tex.x, -tex.y, -1.0); } // -Z
+            default: { dir = vec3<f32>(0.0); }
+        }
+        let viewDir = normalize(dir);
 
-        // 1. Sky-View LUT 샘플링
+        // 1. Sky-View LUT 샘플링 (Unit scale)
         let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
-        var radiance = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
-
-        // [KO] 하이브리드 Mie Glow (Reflection): IBL에도 날카로운 피크 합산
-        // [EN] Hybrid Mie Glow (Reflection): Add sharp peaks even to IBL
-        let mappingH = max(0.0, camH);
-        let viewSunCos = dot(viewDir, sunDir);
-        let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, mappingH, sunDir.y, atmH);
-        let skyTrans = getTransmittance(transmittanceTexture, atmosphereSampler, mappingH, viewDir.y, atmH);
-        let miePhaseSharp = phaseMie(viewSunCos, params.mieHalo);
-        let mieGlowAmount = (params.sunIntensity * params.skyViewScatMult) * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
-                            * (miePhaseSharp * params.mieGlow) * (1.0 - skyTrans);
-        radiance += mieGlowAmount;
+        let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
+        var radiance = skySample.rgb;
 
         // 2. 지면 반사 보정
+
         if (params.useGround > 0.5 && viewDir.y < -0.001) {
             let tEarth = getRaySphereIntersection(vec3<f32>(0.0, r + camH, 0.0), viewDir, r);
             if (tEarth > 0.0) {
@@ -73,7 +72,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
 
         // 3. 태양 디스크 (Unit radiance)
-        let sunMask = smoothstep(cos(sunRad + 0.002), cos(sunRad), viewSunCos);
+        let viewSunCos = dot(viewDir, sunDir);
+        let sunMask = smoothstep(cos(sunRad + 0.01), cos(sunRad), viewSunCos);
         if (sunMask > 0.0) {
             let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
             radiance += sunMask * sunTrans;

@@ -34,9 +34,11 @@ fn main(input : VertexOutput) -> FragmentOutput {
     var atmosphereBackground = skySample.rgb * (uniforms.sunIntensity * uniforms.skyViewScatMult);
 
     // [KO] 하이브리드 Mie Glow: LUT에 없는 날카로운 산란 피크를 실시간으로 합산
+    // [KO] float16 오버플로우 방지를 위해 비등방성(g)을 0.99로 제한
     // [EN] Hybrid Mie Glow: Add sharp scattering peaks not present in LUT in real-time
+    // [EN] Limit anisotropy (g) to 0.99 to prevent float16 overflow
     let viewSunCos = dot(viewDir, sunDir);
-    let miePhaseSharp = phaseMie(viewSunCos, uniforms.mieHalo);
+    let miePhaseSharp = phaseMie(viewSunCos, min(uniforms.mieHalo, 0.99));
     let sunTransForGlow = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
     
     // [KO] 산란 강도 근사: SunIntensity * Transmittance * (Scat/Ext) * Phase * Glow * (1 - RayTrans)

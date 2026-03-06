@@ -39,11 +39,20 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let face = global_id.z;
     let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
     
-    let x = uv.x * 2.0 - 1.0;
-    let y = uv.y * 2.0 - 1.0;
-
-    let localPos = vec4<f32>(x, y, 1.0, 1.0);
-    let normal = normalize((faceMatrices[face] * localPos).xyz);
+    // [KO] WebGPU 표준 큐브맵 좌표계에 따른 방향 계산 (Normal)
+    // [EN] Calculate direction (Normal) according to WebGPU standard cubemap coordinate system
+    let tex = uv * 2.0 - 1.0;
+    var dir: vec3<f32>;
+    switch (face) {
+        case 0u: { dir = vec3<f32>(1.0, -tex.y, -tex.x); } // +X
+        case 1u: { dir = vec3<f32>(-1.0, -tex.y, tex.x); } // -X
+        case 2u: { dir = vec3<f32>(tex.x, 1.0, tex.y); }  // +Y
+        case 3u: { dir = vec3<f32>(tex.x, -1.0, -tex.y); } // -Y
+        case 4u: { dir = vec3<f32>(tex.x, -tex.y, 1.0); }  // +Z
+        case 5u: { dir = vec3<f32>(-tex.x, -tex.y, -1.0); } // -Z
+        default: { dir = vec3<f32>(0.0); }
+    }
+    let normal = normalize(dir);
 
     let up = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(1.0, 0.0, 0.0), abs(normal.y) > 0.999);
     let tbn = getTBN(normal, up);

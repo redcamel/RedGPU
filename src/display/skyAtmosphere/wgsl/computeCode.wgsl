@@ -36,7 +36,7 @@ let sunDir = normalize(uniforms.sunDirection);
 let viewSunCos = dot(viewDir, sunDir);
 let mappingH = max(0.0, camH);
 let sunTransForGlow = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
-let miePhaseSharp = phaseMie(viewSunCos, uniforms.mieHalo);
+let miePhaseSharp = phaseMie(viewSunCos, min(uniforms.mieHalo, 0.99));
 let mieGlowAmount = (uniforms.sunIntensity * uniforms.skyViewScatMult) * sunTransForGlow * (uniforms.mieScattering / max(0.0001, uniforms.mieExtinction)) 
                     * (miePhaseSharp * uniforms.mieGlow) * (1.0 - apSample.a);
 

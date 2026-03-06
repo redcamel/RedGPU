@@ -49,7 +49,6 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 1, resource: multiScat.gpuTextureView},
                 {binding: 2, resource: this.sampler.gpuSampler},
                 {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-                {binding: 4, resource: {buffer: this.#faceMatrixBuffer.gpuBuffer}},
                 {binding: 5, resource: transmittance.gpuTextureView},
                 {binding: 6, resource: skyView.gpuTextureView}
             ]
