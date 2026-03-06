@@ -32,12 +32,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         if (intersect.x > 0.0) {
             let tEnd = min(sliceDist, intersect.x);
             // [KO] 공용 적분 함수 호출 (수동 투과율 계산 모드)
-            integrateScatSegment(rayOrigin, viewDir, 0.0, tEnd, 16u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, &radiance, &transmittance);
+            integrateScatSegment(rayOrigin, viewDir, 0.0, tEnd, 16u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, false, &radiance, &transmittance);
             if (params.showGround < 0.5 && sliceDist > intersect.y && intersect.y > 0.0) {
-                integrateScatSegment(rayOrigin, viewDir, intersect.y, sliceDist, 16u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, &radiance, &transmittance);
+                integrateScatSegment(rayOrigin, viewDir, intersect.y, sliceDist, 16u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, false, &radiance, &transmittance);
             }
         } else {
-            integrateScatSegment(rayOrigin, viewDir, 0.0, sliceDist, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, &radiance, &transmittance);
+            integrateScatSegment(rayOrigin, viewDir, 0.0, sliceDist, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, false, &radiance, &transmittance);
         }
     }
 

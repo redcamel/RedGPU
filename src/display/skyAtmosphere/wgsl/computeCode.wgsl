@@ -30,8 +30,19 @@ let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
 // [EN] Sample Aerial Perspective 3D LUT
 let apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
-// [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광을 더합니다.
-// [EN] Determine final color: Multiply scene color by transmittance and add scattered light.
-let finalColor = sceneColor * apSample.a + apSample.rgb;
+// [KO] 하이브리드 Mie Glow (AP): 공중 투시 효과에도 날카로운 피크 합산
+// [EN] Hybrid Mie Glow (AP): Add sharp peaks even to aerial perspective effects
+let sunDir = normalize(uniforms.sunDirection);
+let viewSunCos = dot(viewDir, sunDir);
+let mappingH = max(0.0, camH);
+let sunTransForGlow = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
+let miePhaseSharp = phaseMie(viewSunCos, uniforms.mieHalo);
+let mieGlowAmount = (uniforms.sunIntensity * uniforms.skyViewScatMult) * sunTransForGlow * (uniforms.mieScattering / max(0.0001, uniforms.mieExtinction)) 
+                    * (miePhaseSharp * uniforms.mieGlow) * (1.0 - apSample.a);
+
+// [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광(LUT + Glow)을 더합니다.
+// [EN] Determine final color: Multiply scene color by transmittance and add scattered light (LUT + Glow).
+let finalScattering = apSample.rgb + mieGlowAmount;
+let finalColor = sceneColor * apSample.a + finalScattering;
 
 textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));

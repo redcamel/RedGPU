@@ -33,6 +33,20 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let skySample = textureSampleLevel(bg_atmosphereSkyViewTexture, bg_atmosphereSampler, skyUV, 0.0);
     var atmosphereBackground = skySample.rgb * (uniforms.sunIntensity * uniforms.skyViewScatMult);
 
+    // [KO] 하이브리드 Mie Glow: LUT에 없는 날카로운 산란 피크를 실시간으로 합산
+    // [EN] Hybrid Mie Glow: Add sharp scattering peaks not present in LUT in real-time
+    let viewSunCos = dot(viewDir, sunDir);
+    let miePhaseSharp = phaseMie(viewSunCos, uniforms.mieHalo);
+    let sunTransForGlow = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
+    
+    // [KO] 산란 강도 근사: SunIntensity * Transmittance * (Scat/Ext) * Phase * Glow * (1 - RayTrans)
+    // [EN] Scattering intensity approximation: SunIntensity * Transmittance * (Scat/Ext) * Phase * Glow * (1 - RayTrans)
+    let skyTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, viewDir.y, uniforms.atmosphereHeight);
+    let mieGlowAmount = (uniforms.sunIntensity * uniforms.skyViewScatMult) * sunTransForGlow * (uniforms.mieScattering / max(0.0001, uniforms.mieExtinction)) 
+                        * (miePhaseSharp * uniforms.mieGlow) * (1.0 - skyTrans);
+    
+    atmosphereBackground += mieGlowAmount;
+
     let camPos = vec3<f32>(0.0, r + camH, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, r);
     

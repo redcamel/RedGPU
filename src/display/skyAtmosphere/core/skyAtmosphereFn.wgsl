@@ -163,6 +163,7 @@ fn integrateScatSegment(
     atmosphereSampler: sampler,
     atmosphereMultiScatTexture: texture_2d<f32>,
     useLUT: bool,
+    includeGlow: bool,
     radiance: ptr<function, vec3<f32>>, 
     transmittance: ptr<function, vec3<f32>>
 ) {
@@ -173,7 +174,16 @@ fn integrateScatSegment(
     let viewSunCos = dot(dir, sunDir);
     
     let phaseR = phaseRayleigh(viewSunCos);
-    let phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy, params.mieHalo, params.mieGlow);
+    
+    // [KO] includeGlow가 false이면 넓은 산란(Anisotropy)에 (1-Glow) 가중치 적용 (에너지 보존)
+    // [EN] If includeGlow is false, apply (1-Glow) weight to broad scattering (Anisotropy) for energy conservation
+    var phaseM: f32;
+    if (includeGlow) {
+        phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy, params.mieHalo, params.mieGlow);
+    } else {
+        phaseM = phaseMie(viewSunCos, params.mieAnisotropy) * (1.0 - params.mieGlow);
+    }
+    
     let phaseF = phaseMie(viewSunCos, params.heightFogAnisotropy);
 
     for (var i = 0u; i < steps; i = i + 1u) {

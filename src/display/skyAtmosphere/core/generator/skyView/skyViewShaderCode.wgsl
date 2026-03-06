@@ -51,7 +51,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var transmittance = vec3<f32>(1.0);
 
     if (intersect.x > 0.0) {
-        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
         
         if (params.useGround > 0.5 && params.showGround > 0.5) {
             let hitPos = rayOrigin + viewDir * intersect.x;
@@ -63,10 +63,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             // [EN] Ground radiance: (Direct + Multi-Scattered * PI) * Albedo / PI
             radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy * PI + params.groundAmbient) * (params.groundAlbedo * INV_PI);
         } else if (intersect.y > 0.0 && tMax > intersect.y) {
-            integrateScatSegment(rayOrigin, viewDir, intersect.y, tMax, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, &radiance, &transmittance);
+            integrateScatSegment(rayOrigin, viewDir, intersect.y, tMax, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
         }
     } else if (tMax > 0.0) {
-        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
     }
 
     textureStore(atmosphereSkyViewTexture, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));

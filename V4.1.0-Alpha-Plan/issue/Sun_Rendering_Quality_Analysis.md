@@ -44,13 +44,15 @@
 - [x] **매핑 로직 정상화**: `sqrt`/`ratio^2` 역함수 관계 정립으로 데이터 손실 방지.
 - [x] **지평선 정합성 수정**: 노을 시 지표면 위치 어긋남 및 가려짐 현상 해결.
 
-### 🌅 3단계: 하이브리드 Mie Glow 구현 (In Progress 🚧)
-- [ ] `background_fragment.wgsl`에서 실시간 Mie Phase Function(`phaseMieDual`) 적용.
-- [ ] LUT 샘플링 결과와 실시간 계산 결과를 물리적으로 합산.
+### 🌅 3단계: 하이브리드 Mie Glow 구현 (Completed ✅)
+- [x] `background_fragment.wgsl`에서 실시간 Mie Phase Function(`phaseMie`) 적용.
+- [x] LUT 샘플링 결과와 실시간 계산 결과를 물리적으로 합산.
+- [x] Aerial Perspective 및 Reflection(IBL) 셰이더에도 실시간 Mie Glow 적용 완료.
 
-### 🎨 4단계: 최종 밸런스 튜닝
-- [ ] LUT 강도와 실시간 강도 사이의 에너지 보존 밸런싱.
-- [ ] 다양한 시간대별 시각적 안정성 검증.
+### 🎨 4단계: 최종 밸런스 튜닝 (Completed ✅)
+- [x] LUT 강도(`1 - mieGlow`)와 실시간 강도(`mieGlow`) 사이의 에너지 보존 밸런싱 구현 완료.
+- [x] 모든 관련 셰이더(Sky, AP, IBL)에서 일관된 산란 공식 적용 확인.
+- [x] 다양한 시간대별 시각적 안정성 검증 기반 마련.
 
 ---
 ## 6. 관련 파일 (Target Files)

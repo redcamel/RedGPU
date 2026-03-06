@@ -48,6 +48,17 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
         var radiance = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
 
+        // [KO] 하이브리드 Mie Glow (Reflection): IBL에도 날카로운 피크 합산
+        // [EN] Hybrid Mie Glow (Reflection): Add sharp peaks even to IBL
+        let mappingH = max(0.0, camH);
+        let viewSunCos = dot(viewDir, sunDir);
+        let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, mappingH, sunDir.y, atmH);
+        let skyTrans = getTransmittance(transmittanceTexture, atmosphereSampler, mappingH, viewDir.y, atmH);
+        let miePhaseSharp = phaseMie(viewSunCos, params.mieHalo);
+        let mieGlowAmount = (params.sunIntensity * params.skyViewScatMult) * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
+                            * (miePhaseSharp * params.mieGlow) * (1.0 - skyTrans);
+        radiance += mieGlowAmount;
+
         // 2. 지면 반사 보정
         if (params.useGround > 0.5 && viewDir.y < -0.001) {
             let tEarth = getRaySphereIntersection(vec3<f32>(0.0, r + camH, 0.0), viewDir, r);
@@ -62,7 +73,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
 
         // 3. 태양 디스크 (Unit radiance)
-        let viewSunCos = dot(viewDir, sunDir);
         let sunMask = smoothstep(cos(sunRad + 0.002), cos(sunRad), viewSunCos);
         if (sunMask > 0.0) {
             let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
