@@ -21,11 +21,15 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     var viewElevation: f32;
     if (uv.y < 0.5) {
-        let ratio = (1.0 - 2.0 * uv.y) * (1.0 - 2.0 * uv.y);
-        viewElevation = horizonElevation + ratio * (HPI - horizonElevation);
+        // [KO] 지평선 위쪽: 제곱 공식을 사용하여 지평선 부근 픽셀 밀도 상향
+        // [EN] Above horizon: Use square formula to increase pixel density near the horizon
+        let ratio = 1.0 - (uv.y * 2.0);
+        viewElevation = horizonElevation + ratio * ratio * (HPI - horizonElevation);
     } else {
-        let ratio = (2.0 * uv.y - 1.0) * (2.0 * uv.y - 1.0);
-        viewElevation = horizonElevation - ratio * (horizonElevation + HPI);
+        // [KO] 지평선 아래쪽: 제곱 공식을 사용하여 지평선 부근 픽셀 밀도 상향
+        // [EN] Below horizon: Use square formula to increase pixel density near the horizon
+        let ratio = (uv.y - 0.5) * 2.0;
+        viewElevation = horizonElevation - ratio * ratio * (horizonElevation + HPI);
     }
 
     if (params.useGround < 0.5) { viewElevation = abs(viewElevation); }

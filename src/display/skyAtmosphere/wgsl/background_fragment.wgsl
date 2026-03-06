@@ -31,7 +31,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let mappingH = max(0.0, camH);
     let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
     let skySample = textureSampleLevel(bg_atmosphereSkyViewTexture, bg_atmosphereSampler, skyUV, 0.0);
-    var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
+    var atmosphereBackground = skySample.rgb * (uniforms.sunIntensity * uniforms.skyViewScatMult);
 
     let camPos = vec3<f32>(0.0, r + camH, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, r);

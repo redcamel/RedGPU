@@ -57,9 +57,13 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmospher
 
     var v: f32;
     if (viewElevation >= horizonElevation) {
+        // [KO] 지평선 위쪽: 제곱근을 사용하여 지평선 근처 정밀도 확보
+        // [EN] Above horizon: Use sqrt to ensure precision near the horizon
         let ratio = (viewElevation - horizonElevation) / (HPI - horizonElevation);
         v = 0.5 * (1.0 - sqrt(max(0.0, ratio)));
     } else {
+        // [KO] 지평선 아래쪽: 제곱근을 사용하여 지평선 근처 정밀도 확보
+        // [EN] Below horizon: Use sqrt to ensure precision near the horizon
         let ratio = (horizonElevation - viewElevation) / (horizonElevation + HPI);
         v = 0.5 * (1.0 + sqrt(max(0.0, ratio)));
     }
