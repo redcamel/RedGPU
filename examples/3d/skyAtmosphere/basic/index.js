@@ -14,11 +14,10 @@ RedGPU.init(
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         skyAtmosphere.sunElevation = 5;
         skyAtmosphere.sunAzimuth = 0;
-        skyAtmosphere.exposure = 1.5;
-        skyAtmosphere.horizonHaze = 0.8;
 
         // View 속성에 직접 설정
         view.skyAtmosphere = skyAtmosphere;
+        view.toneMappingManager.exposure = 1.5;
 
         // 2. 카메라 설정
         view.rawCamera.nearClipping = 1;
@@ -211,7 +210,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     const apply = (el, az, exp, intensity) => {
         skyAtmosphere.sunElevation = el;
         skyAtmosphere.sunAzimuth = az;
-        skyAtmosphere.exposure = exp;
+        targetView.toneMappingManager.exposure = exp;
         skyAtmosphere.sunIntensity = intensity;
         pane.refresh();
     };
@@ -224,8 +223,10 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'Elevation'});
     f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'Azimuth'});
     f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.001, label: 'Intensity'});
+    f_sun.addBinding(skyAtmosphere, 'solarIntensityMult', {min: 1, max: 1000, step: 1, label: 'Solar Intensity Mult'});
+    f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'Limb Darkening'});
     f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.0001, label: 'Sun Size'});
-    f_sun.addBinding(skyAtmosphere, 'exposure', {min: 0, max: 10, step: 0.001, label: 'Exposure'});
+    f_sun.addBinding(targetView.toneMappingManager, 'exposure', {min: 0, max: 10, step: 0.001, label: 'Exposure'});
 
     // 3. Atmosphere Geometry
     const f_geo = pane.addFolder({title: '3. Atmosphere Geometry', expanded: false});
@@ -323,13 +324,9 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_ground.addBinding(groundAlbedoProxy, 'g', {min: 0, max: 1, step: 0.001, label: 'Albedo G'});
     f_ground.addBinding(groundAlbedoProxy, 'b', {min: 0, max: 1, step: 0.001, label: 'Albedo B'});
     f_ground.addBinding(skyAtmosphere, 'groundAmbient', {min: 0, max: 10, step: 0.001, label: 'Ambient'});
-    f_ground.addBinding(skyAtmosphere, 'groundShininess', {min: 1, max: 2048, step: 0.01, label: 'Shininess'});
-    f_ground.addBinding(skyAtmosphere, 'groundSpecular', {min: 0, max: 100, step: 0.01, label: 'Specular'});
 
     // 8. Volumetric & Artistic
     const f_vol = pane.addFolder({title: '8. Volumetric & Artistic', expanded: false});
-    f_vol.addBinding(skyAtmosphere, 'multiScatteringAmbient', {min: 0, max: 1, step: 0.001, label: 'Multi-Scat Ambient'});
-    f_vol.addBinding(skyAtmosphere, 'horizonHaze', {min: 0, max: 10, step: 0.01, label: 'Horizon Haze'});
     f_vol.addBinding(skyAtmosphere, 'aerialPerspectiveMaxDistance', {min: 1, max: 1000, step: 1, label: 'AP Max Distance (km)'});
     f_vol.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 10, step: 0.001, label: 'Fog Density'});
     f_vol.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.0001, label: 'Fog Falloff'});

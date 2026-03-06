@@ -39,9 +39,23 @@ fn main(input : VertexOutput) -> FragmentOutput {
     if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
         let viewSunCos = dot(viewDir, sunDir);
         let sunRad = uniforms.sunSize * DEG_TO_RAD;
-        let sunMask = smoothstep(cos(sunRad) - 0.001, cos(sunRad), viewSunCos);
-        let sunTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
-        atmosphereBackground += sunMask * sunTrans * uniforms.sunIntensity;
+        let cosSunRad = cos(sunRad);
+        
+        // [KO] 태양 경계 안티앨리어싱 마스크
+        // [EN] Anti-aliasing mask for sun edge
+        let sunMask = smoothstep(cosSunRad - 0.0005, cosSunRad, viewSunCos);
+        
+        if (sunMask > 0.0) {
+            // [KO] 물리적 주연 감광(Limb Darkening) 계산: 중심에서 가장자리로 갈수록 비선형적으로 어두워짐
+            // [EN] Physical Limb Darkening: Non-linearly darkens from center to edge
+            let normalizedDist = saturate((1.0 - viewSunCos) / max(0.00001, 1.0 - cosSunRad));
+            let limbDarkening = pow(max(0.00001, 1.0 - normalizedDist), uniforms.sunLimbDarkening);
+            
+            // [KO] 투과율 및 부스트된 강도 적용
+            // [EN] Apply transmittance and boosted intensity
+            let sunTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
+            atmosphereBackground += sunMask * limbDarkening * sunTrans * (uniforms.sunIntensity * uniforms.solarIntensityMult);
+        }
     }
     
     var output : FragmentOutput;
