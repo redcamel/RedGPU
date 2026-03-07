@@ -40,9 +40,10 @@ let apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampl
 
 // [KO] 최종 산란광 계산: LUT 샘플에 태양 강도 배율 적용
 // [EN] Final scattering calculation: Apply sun intensity multiplier to LUT sample
-let finalScattering = apSample.rgb * (uniforms.sunIntensity * uniforms.skyViewScatMult);
+let finalScattering = apSample.rgb * uniforms.sunIntensity;
 
 // [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광을 더합니다.
+
 // [EN] Determine final color: Multiply scene color by transmittance and add scattered light.
 let finalColor = sceneColor * apSample.a + finalScattering;
 

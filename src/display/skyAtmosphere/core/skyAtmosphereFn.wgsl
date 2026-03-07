@@ -126,7 +126,11 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
         let h = length(origin + dir * t) - params.earthRadius;
         if (h < 0.0) { continue; }
         let d = getAtmosphereDensities(h, params);
-        optExt += (params.rayleighScattering * d.rhoR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO) * stepSize;
+        // [KO] 산란 배율을 Rayleigh와 Mie 소산 항에 모두 적용
+        // [EN] Apply scattering multiplier to both Rayleigh and Mie extinction terms
+        optExt += (params.rayleighScattering * d.rhoR * params.skyViewScatMult 
+                   + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) 
+                   + params.ozoneAbsorption * d.rhoO) * stepSize;
     }
     return optExt;
 }
@@ -237,16 +241,18 @@ fn integrateScatSegment(
         let shadowMask = select(1.0, 0.0, params.useGround > 0.5 && getRaySphereIntersection(p, sunDir, r) > 0.0);
         let d = getAtmosphereDensities(h, params);
 
-        let scatR = params.rayleighScattering * d.rhoR;
-        let scatM = params.mieScattering * d.rhoM;
-        let scatF = params.heightFogDensity * d.rhoF;
+        let scatR = params.rayleighScattering * d.rhoR * params.skyViewScatMult;
+        let scatM = params.mieScattering * d.rhoM * params.skyViewScatMult;
+        let scatF = params.heightFogDensity * d.rhoF * params.skyViewScatMult;
         
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
         
         let msUV = vec2<f32>(cosSun * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
         let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
 
-        let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
+        // [KO] Mie 소산 항에도 배율 적용
+        // [EN] Apply multiplier to Mie extinction term as well
+        let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 
         *radiance += *transmittance * (stepScat + msScat) * stepSize;
         *transmittance *= exp(-ext * stepSize);

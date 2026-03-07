@@ -31,7 +31,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let mappingH = max(0.0, camH);
     let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
     let skySample = textureSampleLevel(bg_atmosphereSkyViewTexture, bg_atmosphereSampler, skyUV, 0.0);
-    var atmosphereBackground = skySample.rgb * (uniforms.sunIntensity * uniforms.skyViewScatMult);
+    var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
     // [KO] 하이브리드 Mie Glow: LUT에 없는 날카로운 산란 피크를 실시간으로 합산
     let skyTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, viewDir.y, uniforms.atmosphereHeight);

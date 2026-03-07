@@ -71,11 +71,13 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let sunT = getPhysicalTransmittance(p, sunDir, r, params.atmosphereHeight, params);
         let shadowMask = getPlanetShadowMask(p, sunDir, r, params);
 
-        let scatR = params.rayleighScattering * d.rhoR;
-        let scatM = params.mieScattering * d.rhoM;
-        let scatF = params.heightFogDensity * d.rhoF;
+        let scatR = params.rayleighScattering * d.rhoR * params.skyViewScatMult;
+        let scatM = params.mieScattering * d.rhoM * params.skyViewScatMult;
+        let scatF = params.heightFogDensity * d.rhoF * params.skyViewScatMult;
         let scatTotal = scatR + vec3<f32>(scatM + scatF);
-        let extTotal = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
+        // [KO] Mie 소산 항에도 배율 적용
+        // [EN] Apply multiplier to Mie extinction term as well
+        let extTotal = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 
         *L1 += *TPath * sunT * scatTotal * (0.25 * INV_PI) * shadowMask * stepSize;
         *f1 += *TPath * scatTotal * stepSize;

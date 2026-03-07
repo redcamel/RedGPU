@@ -560,6 +560,16 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtyUniformBuffer = true;
     }
 
+    /** [KO] 대기 산란 강도 배율 [EN] Sky view scattering multiplier */
+    get skyViewScatMult(): number { return this.#params.skyViewScatMult; }
+    set skyViewScatMult(v: number) {
+        validatePositiveNumberRange(v, 0, 100.0);
+        this.#params.skyViewScatMult = v;
+        // [KO] 산란 계수 자체가 변하므로 모든 LUT를 재생성해야 함
+        this.#dirtyLUT = true;
+        this.#dirtyUniformBuffer = true;
+    }
+
     /** [KO] 투과율 LUT 텍스처 [EN] Atmospheric Transmittance LUT texture */
     get atmosphereTransmittanceTexture(): DirectTexture { return this.#transmittanceGenerator.lutTexture; }
     /** [KO] 다중 산란 LUT 텍스처 [EN] Atmospheric Multi-Scattering LUT texture */
