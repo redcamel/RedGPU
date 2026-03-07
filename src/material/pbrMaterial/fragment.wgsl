@@ -748,7 +748,19 @@ fn main(inputData:InputData) -> OutputFragment {
                  let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
                  let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
-                 let clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
+                 var clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
+
+                 // [KO] 대기 산란 필터링 적용 (Clearcoat Specular)
+                 // [EN] Apply Atmospheric Scattering Filtering (Clearcoat Specular)
+                 if (systemUniforms.useSkyAtmosphere == 1u) {
+                     let u_atmo = systemUniforms.skyAtmosphere;
+                     let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, clearcoatR.y, u_atmo.atmosphereHeight);
+                     let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+                     let atmoMipLevel = clearcoatRoughnessParameter * atmoMipCount;
+                     let ccSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, clearcoatR, atmoMipLevel).rgb * u_atmo.sunIntensity;
+                     clearcoatPrefilteredColor = (clearcoatPrefilteredColor * ccTrans) + ccSkyScat;
+                 }
+
                  let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
                  let clearcoatF0 = vec3<f32>(0.04);
                  let clearcoatF = clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y;

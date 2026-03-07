@@ -35,6 +35,7 @@ RedGPU.init(
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb');
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF-Binary/ClearcoatWicker.glb');
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF-Binary/Corset.glb');
+        loadGLTF(view,  'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF-Binary/GlassHurricaneCandleHolder.glb');
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext);
@@ -53,7 +54,8 @@ function loadGLTF(view, url) {
         if (url.includes('Corset')) { mesh.setScale(40); mesh.z = 2; mesh.y = -2; }
         if (url.includes('ClearcoatWicker')) { mesh.setScale(3); mesh.x = -6; mesh.y = -1.5; }
         if (url.includes('TransmissionTest')) { mesh.setScale(5); }
-        if (url.includes('MosquitoInAmber')) { mesh.setScale(20); mesh.x = 7; }
+        if (url.includes('MosquitoInAmber')) { mesh.setScale(20); mesh.x = 8; }
+        if (url.includes('GlassHurricaneCandleHolder')) { mesh.setScale(12); mesh.x = 5; mesh.y = -2 }
     });
 }
 
