@@ -42,7 +42,15 @@ var apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampl
 // [EN] Hybrid Mie Glow (AP): Add sharp peaks even to aerial perspective effects
 let sunDir = normalize(uniforms.sunDirection);
 let mappingH = max(0.0, camH);
-let mieGlowUnit = getMieGlowAmountUnit(viewDir, sunDir, mappingH, uniforms, atmosphereTransmittanceTexture, atmosphereSampler, vec3<f32>(apSample.a));
+var mieGlowUnit = getMieGlowAmountUnit(viewDir, sunDir, mappingH, uniforms, atmosphereTransmittanceTexture, atmosphereSampler, vec3<f32>(apSample.a));
+
+// [KO] 오브젝트 폐쇄 보정: 오브젝트가 태양을 가리는 경우, 그 앞쪽 대기는 그림자 영역에 있으므로 Glow를 감쇄시킵니다.
+// [KO] Shadow Map이 없는 경우를 대비한 근사치로, 오브젝트 표면에서 Glow가 튀는 현상을 억제합니다.
+// [EN] Object occlusion correction: When an object blocks the sun, the atmosphere in front is in shadow, so attenuate Glow.
+// [EN] As an approximation for cases without Shadow Map, suppress Glow popping on object surfaces.
+let viewSunCos = dot(viewDir, sunDir);
+let occlusionFactor = mix(1.0, saturate(1.0 - viewSunCos), 0.5); // [KO] 태양 방향일수록 오브젝트 위의 Glow를 억제 [EN] Suppress Glow on objects towards sun direction
+mieGlowUnit *= occlusionFactor;
 
 // [KO] 근거리 보정: 아주 가까운 거리(약 50m 이내)에서는 LUT의 정밀도 한계로 인해 안개가 맺히는 현상이 있음.
 // [KO] 이를 방지하기 위해 거리에 비례하여 효과를 페이드아웃 처리.
@@ -53,7 +61,7 @@ apSample = vec4<f32>(apSample.rgb * nearFade, mix(1.0, apSample.a, nearFade));
 
 // [KO] 최종 산란광 계산: LUT 샘플과 Mie Glow에 태양 강도 배율 적용
 // [EN] Final scattering calculation: Apply sun intensity multiplier to LUT sample and Mie Glow
-let finalScattering = (apSample.rgb + mieGlowUnit) * uniforms.sunIntensity;
+let finalScattering = (apSample.rgb + mieGlowUnit * nearFade) * uniforms.sunIntensity;
 
 // [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광을 더합니다.
 
