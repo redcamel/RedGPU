@@ -20,7 +20,6 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
     #sourceCubeTextureView: GPUTextureView;
     #prefilteredTexture: DirectCubeTexture;
-    #faceMatrixBuffer: UniformBuffer;
 
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
         super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_REFL_GEN', 256, 256, 6);
@@ -49,8 +48,8 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 1, resource: multiScat.gpuTextureView},
                 {binding: 2, resource: this.sampler.gpuSampler},
                 {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-                {binding: 5, resource: transmittance.gpuTextureView},
-                {binding: 6, resource: skyView.gpuTextureView}
+                {binding: 4, resource: transmittance.gpuTextureView},
+                {binding: 5, resource: skyView.gpuTextureView}
             ]
         });
 
@@ -92,11 +91,6 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
         this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SKY_ATMOSPHERE_REFL_FIXED_${createUUID()}`);
 
-        const faceMatrices = this.#getCubeMapFaceMatrices();
-        const faceMatrixData = new Float32Array(16 * 6);
-        faceMatrices.forEach((m, i) => faceMatrixData.set(m, i * 16));
-        this.#faceMatrixBuffer = new UniformBuffer(this.redGPUContext, faceMatrixData.buffer, 'SKY_REFL_GEN_FACE_MATRIX_BUFFER');
-
         this.pipeline = gpuDevice.createComputePipeline({
             label: 'SKY_ATMOSPHERE_REFLECTION_GEN_PIPELINE',
             layout: 'auto',
@@ -105,23 +99,6 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
                 entryPoint: 'main'
             }
         });
-    }
-
-    #getCubeMapFaceMatrices(): Float32Array[] {
-        return [
-            // +X (WebGPU Face 0)
-            new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]),
-            // -X (WebGPU Face 1)
-            new Float32Array([0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 0, 1]),
-            // +Y (WebGPU Face 2)
-            new Float32Array([1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]),
-            // -Y (WebGPU Face 3)
-            new Float32Array([1, 0, 0, 0, 0, 0, -1, 0, 0, -1, 0, 0, 0, 0, 0, 1]),
-            // +Z (WebGPU Face 4)
-            new Float32Array([1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
-            // -Z (WebGPU Face 5)
-            new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
-        ];
     }
 }
 
