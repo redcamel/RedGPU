@@ -144,6 +144,36 @@ fn phaseMieDual(cosTheta: f32, g: f32, halo: f32, glow: f32) -> f32 {
     return mix(phaseMie(cosTheta, g), phaseMie(cosTheta, halo), glow);
 }
 
+/**
+ * [KO] 실시간 Mie Glow(Hybrid) 강도를 계산합니다.
+ * [EN] Calculates real-time Mie Glow (Hybrid) intensity.
+ * @param viewDir - [KO] 시선 방향 [EN] View direction
+ * @param sunDir - [KO] 태양 방향 [EN] Sun direction
+ * @param h - [KO] 현재 고도 [EN] Current height
+ * @param params - [KO] 대기 산란 파라미터 [EN] SkyAtmosphere parameters
+ * @param transmittanceTexture - [KO] 투과율 LUT [EN] Transmittance LUT
+ * @param atmosphereSampler - [KO] 샘플러 [EN] Sampler
+ * @param transToEdge - [KO] 시점부터 끝(또는 씬 깊이)까지의 투과율 [EN] Transmittance from camera to edge (or scene depth)
+ */
+fn getMieGlowAmount(
+    viewDir: vec3<f32>, 
+    sunDir: vec3<f32>, 
+    h: f32, 
+    params: SkyAtmosphere, 
+    transmittanceTexture: texture_2d<f32>, 
+    atmosphereSampler: sampler,
+    transToEdge: vec3<f32> 
+) -> vec3<f32> {
+    let viewSunCos = dot(viewDir, sunDir);
+    // [KO] float16 오버플로우 방지를 위해 비등방성(g)을 0.99로 제한
+    let miePhaseSharp = phaseMie(viewSunCos, min(params.mieHalo, 0.99));
+    let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, sunDir.y, params.atmosphereHeight);
+    
+    // [KO] 산란 강도 근사: SunIntensity * Transmittance * (Scat/Ext) * Phase * Glow * (1 - RayTrans)
+    return (params.sunIntensity * params.skyViewScatMult) * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
+                        * (miePhaseSharp * params.mieGlow) * (1.0 - transToEdge);
+}
+
 fn getAtmosphereCoefficients(h: f32, params: SkyAtmosphere) -> AtmosphereCoefficients {
     var c: AtmosphereCoefficients;
     let d = getAtmosphereDensities(h, params);

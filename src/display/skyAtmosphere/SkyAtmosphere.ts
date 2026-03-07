@@ -87,7 +87,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         heightFogAnisotropy: 0.7,
         solarIntensityMult: 500.0,
         sunLimbDarkening: 0.67,
-        skyViewScatMult: 1.0
+        skyViewScatMult: 1.0,
+        horizonHaze: 0.0,
+        multiScatteringAmbient: 0.0,
+        groundShininess: 128.0,
+        groundSpecular: 0.05
     };
 
     #sunElevation: number = 45;

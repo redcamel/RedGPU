@@ -16,6 +16,14 @@ let worldRotation = mat3x3<f32>(systemUniforms.camera.inverseViewMatrix[0].xyz, 
 let viewDir = normalize(worldRotation * viewSpaceDir);
 
 let rawDepth = fetchDepth(id);
+
+// [KO] 배경 픽셀(이미 renderBackground에서 연산됨)인 경우 연산을 건너뜁니다.
+// [EN] Skip calculation if it is a background pixel (already calculated in renderBackground).
+if (rawDepth >= 1.0) {
+    textureStore(outputTexture, id, vec4<f32>(sceneColor, 1.0));
+    return;
+}
+
 let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping) / 1000.0;
 let maxApDist = uniforms.aerialPerspectiveMaxDistance; 
 let apDist = clamp(depthKm, 0.0, maxApDist);
@@ -26,23 +34,16 @@ let apU = (azimuth / PI2) + 0.5;
 let apV = clamp((elevation * INV_PI) + 0.5, 0.001, 0.999);
 let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
 
-// [KO] Aerial Perspective 3D LUT 샘플링
-// [EN] Sample Aerial Perspective 3D LUT
+// [KO] Aerial Perspective 3D LUT 샘플링 (단위 강도)
+// [EN] Sample Aerial Perspective 3D LUT (Unit intensity)
 let apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
-// [KO] 하이브리드 Mie Glow (AP): 공중 투시 효과에도 날카로운 피크 합산
-// [EN] Hybrid Mie Glow (AP): Add sharp peaks even to aerial perspective effects
-let sunDir = normalize(uniforms.sunDirection);
-let viewSunCos = dot(viewDir, sunDir);
-let mappingH = max(0.0, camH);
-let sunTransForGlow = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
-let miePhaseSharp = phaseMie(viewSunCos, min(uniforms.mieHalo, 0.99));
-let mieGlowAmount = (uniforms.sunIntensity * uniforms.skyViewScatMult) * sunTransForGlow * (uniforms.mieScattering / max(0.0001, uniforms.mieExtinction)) 
-                    * (miePhaseSharp * uniforms.mieGlow) * (1.0 - apSample.a);
+// [KO] 최종 산란광 계산: LUT 샘플에 태양 강도 배율 적용
+// [EN] Final scattering calculation: Apply sun intensity multiplier to LUT sample
+let finalScattering = apSample.rgb * (uniforms.sunIntensity * uniforms.skyViewScatMult);
 
-// [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광(LUT + Glow)을 더합니다.
-// [EN] Determine final color: Multiply scene color by transmittance and add scattered light (LUT + Glow).
-let finalScattering = apSample.rgb + mieGlowAmount;
+// [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광을 더합니다.
+// [EN] Determine final color: Multiply scene color by transmittance and add scattered light.
 let finalColor = sceneColor * apSample.a + finalScattering;
 
 textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));
