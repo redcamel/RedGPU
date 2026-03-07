@@ -42,7 +42,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             case 5u: { dir = vec3<f32>(-tex.x, -tex.y, -1.0); } // -Z
             default: { dir = vec3<f32>(0.0); }
         }
-        let viewDir = normalize(dir);
+        var viewDir = normalize(dir);
+        
+        // [KO] Zenith/Nadir 부근에서의 수치적 안정성 확보 (atan2 NaN 방지)
+        if (abs(viewDir.y) > 0.9999) {
+            viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
+        }
 
         let camPos = vec3<f32>(0.0, r + camH, 0.0);
         let tEarth = getRaySphereIntersection(camPos, viewDir, r);

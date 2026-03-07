@@ -1,4 +1,5 @@
 // [KO] UE5 표준 Sky-View LUT 생성
+#redgpu_include math.INV_PI
 
 @group(0) @binding(0) var atmosphereSkyViewTexture: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var atmosphereTransmittanceTexture: texture_2d<f32>;
@@ -21,49 +22,43 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     var viewElevation: f32;
     if (uv.y < 0.5) {
-        // [KO] 지평선 위쪽: 제곱 공식을 사용하여 지평선 부근 픽셀 밀도 상향
-        // [EN] Above horizon: Use square formula to increase pixel density near the horizon
         let ratio = 1.0 - (uv.y * 2.0);
         viewElevation = horizonElevation + ratio * ratio * (HPI - horizonElevation);
     } else {
-        // [KO] 지평선 아래쪽: 제곱 공식을 사용하여 지평선 부근 픽셀 밀도 상향
-        // [EN] Below horizon: Use square formula to increase pixel density near the horizon
         let ratio = (uv.y - 0.5) * 2.0;
         viewElevation = horizonElevation - ratio * ratio * (horizonElevation + HPI);
     }
 
     if (params.useGround < 0.5) { viewElevation = abs(viewElevation); }
 
-    let viewDir = vec3<f32>(cos(viewElevation) * cos(azimuth), sin(viewElevation), cos(viewElevation) * sin(azimuth));
-    let rayOrigin = vec3<f32>(0.0, camH + r, 0.0);
+    var viewDir = vec3<f32>(cos(viewElevation) * cos(azimuth), sin(viewElevation), cos(viewElevation) * sin(azimuth));
     
+    // [KO] 양극점 특이점 방지 (수직 방향 안정화)
+    if (abs(viewElevation) > (HPI - 0.0001)) {
+        viewDir = vec3<f32>(0.0, sign(viewElevation), 0.0);
+    }
+
+    let rayOrigin = vec3<f32>(0.0, camH + r, 0.0);
     var tMax = getRaySphereIntersection(rayOrigin, viewDir, r + params.atmosphereHeight);
     let intersect = getPlanetIntersection(rayOrigin, viewDir, r);
-
-    // [KO] 지하 시점에서 아래를 볼 때, 적분 거리가 지구 반대편(수만 km)으로 튀는 것을 방지
-    // [EN] Prevent integration distance from jumping to the other side of the planet when looking down from underground
-    if (camH < 0.0 && viewDir.y < 0.0) {
-        let tFloor = getRaySphereIntersection(rayOrigin, viewDir, r - 1.0);
-        if (tFloor > 0.0) { tMax = min(tMax, tFloor); }
-    }
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
 
     if (intersect.x > 0.0) {
+        // [KO] 지면까지의 대기 산란 적분
         integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
         
         if (params.useGround > 0.5 && params.showGround > 0.5) {
-            let hitPos = rayOrigin + viewDir * intersect.x;
-            let up = normalize(hitPos);
-            let cosSun = dot(up, params.sunDirection);
+            // [KO] 지면 반사광 계산 안정화
+            // [KO] hitPos 대신 카메라 수직 상단을 기준으로 cosSun을 단순화하여 수평선 부근의 특이점을 제거합니다.
+            let cosSun = params.sunDirection.y; 
             let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
-            let msEnergy = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, vec2<f32>(cosSun * 0.5 + 0.5, 1.0), 0.0).rgb;
-            // [KO] 지면 반사광: (직접광 + 다중산란광 * PI) * Albedo / PI
-            // [EN] Ground radiance: (Direct + Multi-Scattered * PI) * Albedo / PI
+            let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.01, 0.99), 1.0);
+            let msEnergy = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb;
+            
+            // [KO] 지면 반사광 합성 (Transmittance는 적분 함수에서 누적된 값 사용)
             radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy * PI + params.groundAmbient) * (params.groundAlbedo * INV_PI);
-        } else if (intersect.y > 0.0 && tMax > intersect.y) {
-            integrateScatSegment(rayOrigin, viewDir, intersect.y, tMax, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
         }
     } else if (tMax > 0.0) {
         integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);

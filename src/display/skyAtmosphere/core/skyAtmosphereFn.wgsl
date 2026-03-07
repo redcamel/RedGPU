@@ -46,7 +46,14 @@ fn getTransmittanceUV(h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32>
 }
 
 fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
-    let azimuth = atan2(viewDir.z, viewDir.x);
+    // [KO] Zenith/Nadir 부근에서의 atan2(0, 0) 특이점 방지
+    // [EN] Avoid atan2(0, 0) singularity near Zenith/Nadir
+    var azimuth: f32;
+    if (abs(viewDir.z) < 1e-6 && abs(viewDir.x) < 1e-6) {
+        azimuth = 0.0;
+    } else {
+        azimuth = atan2(viewDir.z, viewDir.x);
+    }
     let u = (azimuth / PI2) + 0.5;
     let r = earthRadius;
     let h = max(0.0001, viewHeight);
