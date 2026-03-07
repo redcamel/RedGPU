@@ -36,7 +36,14 @@ let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
 
 // [KO] Aerial Perspective 3D LUT 샘플링 (단위 강도)
 // [EN] Sample Aerial Perspective 3D LUT (Unit intensity)
-let apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
+var apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
+
+// [KO] 근거리 보정: 아주 가까운 거리(약 50m 이내)에서는 LUT의 정밀도 한계로 인해 안개가 맺히는 현상이 있음.
+// [KO] 이를 방지하기 위해 거리에 비례하여 효과를 페이드아웃 처리.
+// [EN] Near-field correction: Due to LUT precision limits, fog may appear at very close distances.
+// [EN] To prevent this, fade out the effect proportional to distance.
+let nearFade = saturate(apDist * 20.0); // 0.05km(50m) 지점에서 1.0이 됨
+apSample = vec4<f32>(apSample.rgb * nearFade, mix(1.0, apSample.a, nearFade));
 
 // [KO] 최종 산란광 계산: LUT 샘플에 태양 강도 배율 적용
 // [EN] Final scattering calculation: Apply sun intensity multiplier to LUT sample
