@@ -76,23 +76,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // [KO] 적분 결과 (Unit scale)
+    // [KO] 소스 큐브맵(reflectionTexture)에 이미 태양 본체와 Mie Glow가 포함되어 있으므로, 
+    // [KO] 별도의 분석적 태양 기여도 추가 없이 적분값만 사용하여 중복 합산을 방지합니다.
     irradiance = irradiance / f32(totalSamples);
-
-    // [KO] 태양의 직접 기여도 추가 (분석적 모델)
-    // [KO] 정오(SunElevation 90)일 때 대기 투과율이 최대이므로 가장 밝게 표현됩니다.
-    let sunDir = params.sunDirection;
-    let NdotL = max(dot(normal, sunDir), 0.0);
-    if (NdotL > 0.0) {
-        let camH = params.cameraHeight;
-        let atmH = params.atmosphereHeight;
-        
-        // [KO] 태양의 대기 투과율 계산 (고도각 sunDir.y 기준)
-        let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
-        
-        // [KO] 태양의 직접 조도 (E = L * cos(theta))
-        // [KO] 머티리얼에서 최종적으로 sunIntensity를 곱하므로, 여기서는 (Transmittance * NdotL) / PI 만 더해줍니다.
-        irradiance += (sunTrans * NdotL) * INV_PI;
-    }
 
     textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
 }

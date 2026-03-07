@@ -35,7 +35,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
 
     // [KO] 하이브리드 Mie Glow: LUT에 없는 날카로운 산란 피크를 실시간으로 합산
     let skyTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, viewDir.y, uniforms.atmosphereHeight);
-    let mieGlowAmount = getMieGlowAmount(viewDir, sunDir, mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, skyTrans);
+    let mieGlowAmount = getMieGlowAmountUnit(viewDir, sunDir, mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, skyTrans) * uniforms.sunIntensity;
     atmosphereBackground += mieGlowAmount;
 
     let camPos = vec3<f32>(0.0, r + camH, 0.0);

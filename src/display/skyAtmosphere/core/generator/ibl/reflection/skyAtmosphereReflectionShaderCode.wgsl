@@ -65,7 +65,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             if (sunShadow > 0.0) {
                 let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, clamp(cosS, 0.0, 1.0), atmH);
                 let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-                // [KO] sunIntensity 제거
                 radiance = (sunT * max(0.0, cosS) + msEnergy * PI + params.groundAmbient) * (params.groundAlbedo * INV_PI) * sunShadow;
             } else {
                 radiance = params.groundAmbient * (params.groundAlbedo * INV_PI);
@@ -74,27 +73,30 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             // 2. 하늘 광휘 (Unit scale)
             let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
             let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
-            radiance = skySample.rgb; // [KO] sunIntensity 제거
+            radiance = skySample.rgb;
 
             // 3. Mie Glow (Unit scale)
             let viewSunCos = clamp(dot(viewDir, sunDir), -1.0, 1.0);
-            let skyTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
             let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, params.atmosphereHeight);
             
+            // [KO] 시선 투과율(skyTrans)을 Zenith 안정화를 위해 별도 정의 (Mie Glow 식에서는 제거하여 고정 원 제거)
+            let skyTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
+
             let miePhaseStable = phaseMie(viewSunCos, 0.80); 
-            // [KO] sunIntensity 및 skyViewScatMult 제거 (LUT 생성 로직에 이미 포함됨)
             let mieGlowStable = sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
-                                * (miePhaseStable * params.mieGlow) * (1.0 - skyTrans);
+                                * (miePhaseStable * params.mieGlow);
             radiance += mieGlowStable;
 
             // 4. 태양 본체 (Unit scale)
             let sunRad = params.sunSize * DEG_TO_RAD;
             let cosSunRad = cos(sunRad);
-            let sunMask = smoothstep(cosSunRad - 0.005, cosSunRad, viewSunCos);
+            // [KO] 태양 경계 안티앨리어싱: 실제 크기를 유지하며 미세하게만 부드럽게 처리 (0.001)
+            // [EN] Sun edge anti-aliasing: Maintain actual size and slightly soften (0.001)
+            let sunMask = smoothstep(cosSunRad - 0.001, cosSunRad, viewSunCos);
             if (sunMask > 0.0) {
                 let normalizedDist = saturate((1.0 - viewSunCos) / max(0.00001, 1.0 - cosSunRad));
                 let limbDarkening = pow(max(0.00001, 1.0 - normalizedDist), params.sunLimbDarkening);
-                // [KO] sunIntensity 제거, 태양 본체 비율만 유지
+                // [KO] 태양 본체 계산에는 시선 방향의 투과율(skyTrans) 사용
                 radiance += sunMask * limbDarkening * skyTrans * (params.solarIntensityMult * 0.1);
             }
         }
@@ -102,6 +104,5 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         totalRadiance += radiance;
     }
 
-    // [KO] 최종 평균 및 저장 (Unit scale이므로 클램핑 범위 대폭 축소)
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(min(totalRadiance * 0.25, vec3<f32>(100.0)), 1.0));
 }

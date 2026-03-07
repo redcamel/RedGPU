@@ -38,6 +38,12 @@ let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
 // [EN] Sample Aerial Perspective 3D LUT (Unit intensity)
 var apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
+// [KO] 하이브리드 Mie Glow (AP): 공중 투시 효과에도 날카로운 피크 합산
+// [EN] Hybrid Mie Glow (AP): Add sharp peaks even to aerial perspective effects
+let sunDir = normalize(uniforms.sunDirection);
+let mappingH = max(0.0, camH);
+let mieGlowUnit = getMieGlowAmountUnit(viewDir, sunDir, mappingH, uniforms, atmosphereTransmittanceTexture, atmosphereSampler, vec3<f32>(apSample.a));
+
 // [KO] 근거리 보정: 아주 가까운 거리(약 50m 이내)에서는 LUT의 정밀도 한계로 인해 안개가 맺히는 현상이 있음.
 // [KO] 이를 방지하기 위해 거리에 비례하여 효과를 페이드아웃 처리.
 // [EN] Near-field correction: Due to LUT precision limits, fog may appear at very close distances.
@@ -45,9 +51,9 @@ var apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampl
 let nearFade = saturate(apDist * 20.0); // 0.05km(50m) 지점에서 1.0이 됨
 apSample = vec4<f32>(apSample.rgb * nearFade, mix(1.0, apSample.a, nearFade));
 
-// [KO] 최종 산란광 계산: LUT 샘플에 태양 강도 배율 적용
-// [EN] Final scattering calculation: Apply sun intensity multiplier to LUT sample
-let finalScattering = apSample.rgb * uniforms.sunIntensity;
+// [KO] 최종 산란광 계산: LUT 샘플과 Mie Glow에 태양 강도 배율 적용
+// [EN] Final scattering calculation: Apply sun intensity multiplier to LUT sample and Mie Glow
+let finalScattering = (apSample.rgb + mieGlowUnit) * uniforms.sunIntensity;
 
 // [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광을 더합니다.
 

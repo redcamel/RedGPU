@@ -47,7 +47,6 @@ fn getTransmittanceUV(h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32>
 
 fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
     // [KO] Zenith/Nadir 부근에서의 atan2(0, 0) 특이점 방지
-    // [EN] Avoid atan2(0, 0) singularity near Zenith/Nadir
     var azimuth: f32;
     if (abs(viewDir.z) < 1e-6 && abs(viewDir.x) < 1e-6) {
         azimuth = 0.0;
@@ -64,13 +63,9 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmospher
 
     var v: f32;
     if (viewElevation >= horizonElevation) {
-        // [KO] 지평선 위쪽: 제곱근을 사용하여 지평선 근처 정밀도 확보
-        // [EN] Above horizon: Use sqrt to ensure precision near the horizon
         let ratio = (viewElevation - horizonElevation) / (HPI - horizonElevation);
         v = 0.5 * (1.0 - sqrt(max(0.0, ratio)));
     } else {
-        // [KO] 지평선 아래쪽: 제곱근을 사용하여 지평선 근처 정밀도 확보
-        // [EN] Below horizon: Use sqrt to ensure precision near the horizon
         let ratio = (horizonElevation - viewElevation) / (horizonElevation + HPI);
         v = 0.5 * (1.0 + sqrt(max(0.0, ratio)));
     }
@@ -133,8 +128,7 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
         let h = length(origin + dir * t) - params.earthRadius;
         if (h < 0.0) { continue; }
         let d = getAtmosphereDensities(h, params);
-        // [KO] 산란 배율을 Rayleigh와 Mie 소산 항에 모두 적용
-        // [EN] Apply scattering multiplier to both Rayleigh and Mie extinction terms
+        // [KO] 산란 배율 적용
         optExt += (params.rayleighScattering * d.rhoR * params.skyViewScatMult 
                    + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) 
                    + params.ozoneAbsorption * d.rhoO) * stepSize;
@@ -156,17 +150,10 @@ fn phaseMieDual(cosTheta: f32, g: f32, halo: f32, glow: f32) -> f32 {
 }
 
 /**
- * [KO] 실시간 Mie Glow(Hybrid) 강도를 계산합니다.
- * [EN] Calculates real-time Mie Glow (Hybrid) intensity.
- * @param viewDir - [KO] 시선 방향 [EN] View direction
- * @param sunDir - [KO] 태양 방향 [EN] Sun direction
- * @param h - [KO] 현재 고도 [EN] Current height
- * @param params - [KO] 대기 산란 파라미터 [EN] SkyAtmosphere parameters
- * @param transmittanceTexture - [KO] 투과율 LUT [EN] Transmittance LUT
- * @param atmosphereSampler - [KO] 샘플러 [EN] Sampler
- * @param transToEdge - [KO] 시점부터 끝(또는 씬 깊이)까지의 투과율 [EN] Transmittance from camera to edge (or scene depth)
+ * [KO] 실시간 Mie Glow(Hybrid) 강도를 계산합니다. (Unit Scale)
+ * [EN] Calculates real-time Mie Glow (Hybrid) intensity (Unit Scale).
  */
-fn getMieGlowAmount(
+fn getMieGlowAmountUnit(
     viewDir: vec3<f32>, 
     sunDir: vec3<f32>, 
     h: f32, 
@@ -176,24 +163,13 @@ fn getMieGlowAmount(
     transToEdge: vec3<f32> 
 ) -> vec3<f32> {
     let viewSunCos = dot(viewDir, sunDir);
-    // [KO] float16 오버플로우 방지를 위해 비등방성(g)을 0.99로 제한
-    let miePhaseSharp = phaseMie(viewSunCos, min(params.mieHalo, 0.99));
+    // [KO] float16 오버플로우 및 파이어플라이 방지를 위해 g를 0.98로 소폭 하향
+    let miePhaseSharp = phaseMie(viewSunCos, min(params.mieHalo, 0.98));
     let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, sunDir.y, params.atmosphereHeight);
     
-    // [KO] 산란 강도 근사: SunIntensity * Transmittance * (Scat/Ext) * Phase * Glow * (1 - RayTrans)
-    return (params.sunIntensity * params.skyViewScatMult) * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
+    // [KO] 산란 배율(skyViewScatMult)은 포함하되 sunIntensity는 외부에서 곱하도록 Unit Scale로 반환
+    return params.skyViewScatMult * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
                         * (miePhaseSharp * params.mieGlow) * (1.0 - transToEdge);
-}
-
-fn getAtmosphereCoefficients(h: f32, params: SkyAtmosphere) -> AtmosphereCoefficients {
-    var c: AtmosphereCoefficients;
-    let d = getAtmosphereDensities(h, params);
-    let scatR = params.rayleighScattering * d.rhoR;
-    let scatM = params.mieScattering * d.rhoM;
-    let scatF = params.heightFogDensity * d.rhoF;
-    c.scatTotal = scatR + vec3<f32>(scatM + scatF);
-    c.extinction = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
-    return c;
 }
 
 fn integrateScatSegment(
@@ -216,8 +192,6 @@ fn integrateScatSegment(
     
     let phaseR = phaseRayleigh(viewSunCos);
     
-    // [KO] includeGlow가 false이면 넓은 산란(Anisotropy)에 (1-Glow) 가중치 적용 (에너지 보존)
-    // [EN] If includeGlow is false, apply (1-Glow) weight to broad scattering (Anisotropy) for energy conservation
     var phaseM: f32;
     if (includeGlow) {
         phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy, params.mieHalo, params.mieGlow);
@@ -254,11 +228,10 @@ fn integrateScatSegment(
         
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
         
+        // [KO] 중복 배율 제거: msScat 계산 시 scatR/M/F에 이미 skyViewScatMult가 포함되어 있으므로 추가 배율 없이 합산
         let msUV = vec2<f32>(cosSun * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
         let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
 
-        // [KO] Mie 소산 항에도 배율 적용
-        // [EN] Apply multiplier to Mie extinction term as well
         let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 
         *radiance += *transmittance * (stepScat + msScat) * stepSize;
