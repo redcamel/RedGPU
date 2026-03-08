@@ -98,8 +98,11 @@ fn getAtmosphereDensities(h: f32, params: SkyAtmosphere) -> AtmosphereDensities 
         d.rhoR = exp(-h / params.rayleighScaleHeight);
         d.rhoM = exp(-h / params.mieScaleHeight);
         d.rhoF = exp(-h * params.heightFogFalloff);
+        
+        // [KO] 오존층 밀도: 물리적으로 더 정확한 Tent Function 기반 프로파일 (Hillaire 2020)
+        // [EN] Ozone density: Physically more accurate Tent Function based profile (Hillaire 2020)
         let ozoneDist = abs(h - params.ozoneLayerCenter);
-        d.rhoO = exp(-max(0.0, ozoneDist * ozoneDist) / (params.ozoneLayerWidth * params.ozoneLayerWidth));
+        d.rhoO = max(0.0, 1.0 - ozoneDist / params.ozoneLayerWidth);
     }
     return d;
 }
@@ -237,12 +240,29 @@ fn getMieGlowAmountUnit(
     let sharpPhase = phaseMie(viewSunCos, min(halo, 0.98));
 
     // [KO] 태양 방향의 투과율 참조 (카메라 높이 h 기준)
-    let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, params.sunDirection.y, params.atmosphereHeight);
+    // [KO] 수평선 부근의 감쇄를 보정하여 노을 환경에서 글로우가 부자연스럽게 사라지는 현상 방지
+    // [EN] Reference sun transmittance (based on camera height h)
+    // [EN] Prevent glow from disappearing unnaturally in sunset environments by correcting horizon attenuation
+    let sunDirY = params.sunDirection.y;
+    let sunCosTheta = max(0.01, sunDirY + 0.05); 
+    let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, sunCosTheta, params.atmosphereHeight);
     
     // [KO] (params.mieScattering / params.mieExtinction)은 단일 산란 알베도(SSA) 역할
     // [EN] (params.mieScattering / params.mieExtinction) acts as Single Scattering Albedo (SSA)
-    return params.skyViewScatMult * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
+    var glow = params.skyViewScatMult * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
                         * (sharpPhase * params.mieGlow) * (1.0 - transToEdge);
+
+    // [KO] 휘도 피크 억제 (Soft-Knee Clamping): f16 텍스처 안정성 확보 및 시각적 타버림 방지
+    // [EN] Suppress radiance peaks (Soft-Knee Clamping): Ensure f16 texture stability and prevent visual burnout
+    let luma = dot(glow, vec3<f32>(0.299, 0.587, 0.114));
+    let threshold = 100.0;
+    if (luma > threshold) {
+        // [KO] 임계값(100.0) 이상에서 에너지를 부드럽게 수렴시켜 수치적 폭주 방지
+        // [EN] Softly converge energy above the threshold (100.0) to prevent numerical explosion
+        let softLuma = threshold + (luma - threshold) / (1.0 + (luma - threshold) / threshold);
+        glow = glow * (softLuma / luma);
+    }
+    return glow;
 }
 
 fn integrateScatSegment(
