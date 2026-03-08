@@ -27,11 +27,11 @@
 
 ## 3. 향후 과제 (Remaining Tasks)
 
-### 3.1 투과율 LUT 매핑 정밀도 (Transmittance LUT Parameterization) - P2
-*   $\cos\theta$ 매핑을 선형에서 비선형(수평선 가중치)으로 변경하여 일출/일몰 시의 정밀도를 향상할 필요가 있습니다.
+### 3.1 투과율 LUT 매핑 정밀도 (Transmittance LUT Parameterization) - P2 (**완료**)
+*   $\cos\theta$ 매핑을 선형에서 비선형(수평선 가중치)으로 변경하여 일출/일몰 시의 정밀도를 향상했습니다.
 
-### 3.2 미사용 파라미터 및 데드 코드 정리 (Code Cleanup) - P3
-*   `groundSpecular`, `multiScatteringAmbient` 등 셰이더에서 사용되지 않는 파라미터들을 구조체 및 API에서 제거해야 합니다.
+### 3.2 미사용 파라미터 및 데드 코드 정리 (Code Cleanup) - P3 (**완료**)
+*   `horizonHaze`, `groundSpecular`, `groundShininess`, `multiScatteringAmbient` 등 셰이더에서 사용되지 않는 파라미터들을 구조체 및 API에서 제거했습니다.
 
 ### 3.3 체적 그림자 지원 (Volumetric Shadows) - P4
 *   Shadow Map을 Aerial Perspective LUT에 통합하여 God Rays 효과를 구현하는 고도화 작업이 가능합니다.

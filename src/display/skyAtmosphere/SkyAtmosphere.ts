@@ -88,11 +88,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         heightFogAnisotropy: 0.7,
         solarIntensityMult: 1.0,
         sunLimbDarkening: 0.67,
-        skyViewScatMult: 1.0,
-        horizonHaze: 0.0,
-        multiScatteringAmbient: 0.0,
-        groundShininess: 128.0,
-        groundSpecular: 0.05
+        skyViewScatMult: 1.0
     };
 
     #sunElevation: number = 45;
@@ -422,13 +418,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtyUniformBuffer = true;
     }
 
-    get horizonHaze(): number { return this.#params.horizonHaze; }
-    set horizonHaze(v: number) {
-        validatePositiveNumberRange(v, 0, 10);
-        this.#params.horizonHaze = v;
-        this.#dirtyUniformBuffer = true;
-    }
-
     get groundAlbedo(): [number, number, number] {
         return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]];
     }
@@ -475,14 +464,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 1, 50);
         this.#params.ozoneLayerWidth = v;
         this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-    }
-
-    get multiScatteringAmbient(): number { return this.#params.multiScatteringAmbient; }
-    set multiScatteringAmbient(v: number) {
-        validatePositiveNumberRange(v, 0, 1.0);
-        this.#params.multiScatteringAmbient = v;
-        this.#dirtySkyView = true;
         this.#dirtyUniformBuffer = true;
     }
 

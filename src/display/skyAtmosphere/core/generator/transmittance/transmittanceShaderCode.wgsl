@@ -11,7 +11,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [KO] 텍셀 중심 매핑으로 정밀도 향상
     // [EN] Improve precision with pixel center mapping
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
-    let cosTheta = uv.x * 2.0 - 1.0;
+    
+    // [KO] 수평선(cosTheta = 0) 부근에 더 많은 텍셀을 할당하기 위한 비선형 역매핑
+    // [EN] Non-linear inverse mapping to allocate more texels near the horizon (cosTheta = 0)
+    let x = uv.x * 2.0 - 1.0;
+    let cosTheta = sign(x) * x * x;
     
     // [KO] V = 1.0 - (h / H_atm) -> h = (1.0 - V) * H_atm
     // [EN] V = 1.0 - (h / H_atm) -> h = (1.0 - V) * H_atm

@@ -45,8 +45,12 @@ fn getPlanetIntersection(origin: vec3<f32>, dir: vec3<f32>, r: f32) -> vec2<f32>
 }
 
 fn getTransmittanceUV(h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32> {
-    let mu = cosTheta * 0.5 + 0.5;
-    return vec2<f32>(mu, 1.0 - clamp(h / atmosphereHeight, 0.0, 1.0));
+    // [KO] 수평선(cosTheta = 0) 부근의 정밀도를 높이기 위한 비선형 매핑
+    // [EN] Non-linear mapping to increase precision near the horizon (cosTheta = 0)
+    let mu = cosTheta;
+    let u = 0.5 + 0.5 * sign(mu) * sqrt(abs(mu));
+    let v = 1.0 - clamp(h / atmosphereHeight, 0.0, 1.0);
+    return vec2<f32>(u, v);
 }
 
 fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
