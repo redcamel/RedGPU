@@ -82,7 +82,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // [EN] 4. Remove Sun Disk: To prevent duplication with PBR direct light and sampling noise, the disk is not rendered.
         }
 
-        // [KO] 결과 저장: Unit scale 데이터를 물리적 sunIntensity로 상향하여 IBL 휘도 완성
-        // [EN] Store results: Upscale Unit scale data to physical sunIntensity to complete IBL radiance
-        textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance * params.sunIntensity, 1.0));
+        // [KO] 결과 저장: Unit scale 데이터로 저장 (Intensity는 머티리얼 샘플링 시 적용)
+        // [EN] Store results: Store as unit scale data (Intensity is applied during material sampling)
+        textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
         }

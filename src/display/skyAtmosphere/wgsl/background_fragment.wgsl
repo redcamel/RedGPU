@@ -40,7 +40,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
         // [KO] 수평선 압축(Horizon Squashing) 보정: 고도가 낮을 때 태양이 수직으로 납작해지는 효과
         // [KO] 비물리적인 급격한 배율을 제거하고 실제 태양 고도에 따라 부드럽게 감쇄되도록 처리
         let sunElevationParam = saturate(sunDir.y); 
-        let squashFactor = mix(0.85, 1.0, sunElevationParam); 
+        let squashFactor = mix(0.85, 1.0, sunElevationParam);
         
         let verticalDist = viewDir.y - sunDir.y; // ㅅㄷㄴㅅ
         // [KO] 천장(Zenith) 부근에서 보정치가 커져서 발생하는 아티팩트 방지를 위해 태양 근처(dot > 0)에서만 적용
@@ -58,8 +58,10 @@ fn main(input : VertexOutput) -> FragmentOutput {
         atmosphereBackground += sunRadiance * (uniforms.sunIntensity * uniforms.solarIntensityMult);
     } else {
          // [KO] 지면에 가려진 경우에도 일반적인 산란광과 Glow는 존재할 수 있음 (수평선 근처)
-         let skyTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, viewDir.y, uniforms.atmosphereHeight);
-         let mieGlowAmount = getMieGlowAmountUnit(dot(viewDir, sunDir), mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, skyTrans, 0.0) * uniforms.sunIntensity;
+         // [KO] 지면까지의 투과율(skySample.a)을 사용하여 산란 광량을 정확하게 제한 (중복 계산 방지)
+         // [EN] Scat glow can exist even when obscured by the ground (near the horizon).
+         // [EN] Use the transmittance to the ground (skySample.a) to correctly limit the scattered light amount.
+         let mieGlowAmount = getMieGlowAmountUnit(dot(viewDir, sunDir), mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, vec3<f32>(skySample.a), 0.0) * uniforms.sunIntensity;
          atmosphereBackground += mieGlowAmount;
     }
     
