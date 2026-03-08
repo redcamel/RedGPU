@@ -504,19 +504,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtyUniformBuffer = true;
     }
 
-    get groundShininess(): number { return this.#params.groundShininess; }
-    set groundShininess(v: number) {
-        validatePositiveNumberRange(v, 1, 2048);
-        this.#params.groundShininess = v;
-        this.#dirtyUniformBuffer = true;
-    }
-
-    get groundSpecular(): number { return this.#params.groundSpecular; }
-    set groundSpecular(v: number) {
-        validatePositiveNumberRange(v, 0, 100);
-        this.#params.groundSpecular = v;
-        this.#dirtyUniformBuffer = true;
-    }
 
     get useGround(): boolean { return !!this.#params.useGround; }
     set useGround(v: boolean) {
