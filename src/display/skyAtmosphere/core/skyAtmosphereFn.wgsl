@@ -230,20 +230,19 @@ fn getMieGlowAmountUnit(
 ) -> vec3<f32> {
     let halo = select(params.mieHalo, overrideHalo, overrideHalo > 0.0);
     
-    // [KO] 전체 Mie 에너지는 보존하면서 위상 함수만 분리하여 처리
-    // [KO] Glow = (Sharp Phase - Base Phase) * Glow Amount
-    // [EN] Conserve total Mie energy while processing phase functions separately
-    // [EN] Glow = (Sharp Phase - Base Phase) * Glow Amount
-    let basePhase = phaseMie(viewSunCos, params.mieAnisotropy);
+    // [KO] LUT에서 누락된 '날카로운(Sharp)' Mie 성분만 별도로 계산하여 합산
+    // [KO] LUT 생성 시 Mie 산란의 (1.0 - mieGlow) 비중만 계산했으므로, 나머지를 보충함
+    // [EN] Separately calculate and add only the 'Sharp' Mie component missing from the LUT
+    // [EN] Since only (1.0 - mieGlow) of Mie scattering was calculated during LUT generation, the rest is supplemented
     let sharpPhase = phaseMie(viewSunCos, min(halo, 0.98));
-    let diffPhase = max(0.0, sharpPhase - basePhase);
 
+    // [KO] 태양 방향의 투과율 참조 (카메라 높이 h 기준)
     let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, params.sunDirection.y, params.atmosphereHeight);
     
     // [KO] (params.mieScattering / params.mieExtinction)은 단일 산란 알베도(SSA) 역할
     // [EN] (params.mieScattering / params.mieExtinction) acts as Single Scattering Albedo (SSA)
     return params.skyViewScatMult * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
-                        * (diffPhase * params.mieGlow) * (1.0 - transToEdge);
+                        * (sharpPhase * params.mieGlow) * (1.0 - transToEdge);
 }
 
 fn integrateScatSegment(
