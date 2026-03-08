@@ -224,12 +224,21 @@ fn getMieGlowAmountUnit(
     overrideHalo: f32 // [KO] 비등방성 계수 오버라이드 (0.0이면 기본값 사용)
 ) -> vec3<f32> {
     let halo = select(params.mieHalo, overrideHalo, overrideHalo > 0.0);
-    // [KO] f16 오버플로우 방지를 위해 g를 제한
-    let miePhaseSharp = phaseMie(viewSunCos, min(halo, 0.98));
+    
+    // [KO] 전체 Mie 에너지는 보존하면서 위상 함수만 분리하여 처리
+    // [KO] Glow = (Sharp Phase - Base Phase) * Glow Amount
+    // [EN] Conserve total Mie energy while processing phase functions separately
+    // [EN] Glow = (Sharp Phase - Base Phase) * Glow Amount
+    let basePhase = phaseMie(viewSunCos, params.mieAnisotropy);
+    let sharpPhase = phaseMie(viewSunCos, min(halo, 0.98));
+    let diffPhase = max(0.0, sharpPhase - basePhase);
+
     let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, params.sunDirection.y, params.atmosphereHeight);
     
+    // [KO] (params.mieScattering / params.mieExtinction)은 단일 산란 알베도(SSA) 역할
+    // [EN] (params.mieScattering / params.mieExtinction) acts as Single Scattering Albedo (SSA)
     return params.skyViewScatMult * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
-                        * (miePhaseSharp * params.mieGlow) * (1.0 - transToEdge);
+                        * (diffPhase * params.mieGlow) * (1.0 - transToEdge);
 }
 
 fn integrateScatSegment(
@@ -254,8 +263,14 @@ fn integrateScatSegment(
     
     var phaseM: f32;
     if (includeGlow) {
+        // [KO] 전체 에너지가 1로 정규화된 듀얼 위상 함수 사용
+        // [EN] Use dual phase function normalized to total energy of 1
         phaseM = phaseMieDual(viewSunCos, params.mieAnisotropy, params.mieHalo, params.mieGlow);
     } else {
+        // [KO] Glow로 빠져나갈 에너지를 제외한 '기본 Mie' 성분만 계산 (에너지 보존)
+        // [KO] Integral of phaseM is (1.0 - mieGlow).
+        // [EN] Calculate only the 'Base Mie' component excluding the energy that will go to Glow (Energy conservation)
+        // [EN] Integral of phaseM is (1.0 - mieGlow).
         phaseM = phaseMie(viewSunCos, params.mieAnisotropy) * (1.0 - params.mieGlow);
     }
     

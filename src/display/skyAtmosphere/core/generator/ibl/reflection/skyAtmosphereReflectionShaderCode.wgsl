@@ -65,9 +65,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             if (sunShadow > 0.0) {
                 let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, clamp(cosS, 0.0, 1.0), atmH);
                 let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-                radiance = (sunT * max(0.0, cosS) + msEnergy * PI + params.groundAmbient) * (params.groundAlbedo * INV_PI) * sunShadow;
+                // [KO] msEnergy * PI: 전역 환경광 조도(Irradiance) 반영
+                // [EN] msEnergy * PI: Reflect global environment irradiance
+                radiance = (sunT * max(0.0, cosS) + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
             } else {
-                radiance = params.groundAmbient * (params.groundAlbedo * INV_PI);
+                // [KO] 그림자 영역에서도 Multi-Scattering에 의한 하늘 환경광은 존재함
+                // [EN] Even in shadow areas, sky environment light due to Multi-Scattering exists
+                let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(0.5, 1.0), 0.0).rgb; // [KO] 평균 조도 근사 [EN] Average irradiance approximation
+                radiance = (msEnergy * PI) * (params.groundAlbedo * INV_PI);
             }
         } else {
             // 2. 하늘 광휘 (Unit scale)
@@ -104,5 +109,5 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         totalRadiance += radiance;
     }
 
-    textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(min(totalRadiance * 0.25, vec3<f32>(100.0)), 1.0));
+    textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(totalRadiance * 0.25, 1.0));
 }

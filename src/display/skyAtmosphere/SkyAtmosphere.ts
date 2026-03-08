@@ -438,7 +438,15 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtyUniformBuffer = true;
     }
 
+    /**
+     * [KO] 지면 환경광 강도입니다.
+     * [EN] Ground ambient light intensity.
+     * @deprecated
+     * [KO] 이 값은 더 이상 사용되지 않습니다. 이제 Multi-Scattering LUT를 통한 물리 기반 환경광이 자동으로 적용됩니다.
+     * [EN] This value is no longer used. Physically-based environment light via Multi-Scattering LUT is now automatically applied.
+     */
     get groundAmbient(): number { return this.#params.groundAmbient; }
+
     set groundAmbient(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.groundAmbient = v;
