@@ -39,6 +39,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let hitP = rayOrigin + rayDir * intersect.x;
             let sunTGround = getPhysicalTransmittance(hitP, sunDir, r, params.atmosphereHeight, params);
             L1 += TPath * sunTGround * max(0.0, dot(normalize(hitP), sunDir)) * params.groundAlbedo * INV_PI;
+
+            // [KO] 지면에 도달한 에너지가 지면 반사율만큼 반사되어 다음 산란에 기여함
+            // [EN] Energy reaching the ground is reflected by the ground albedo and contributes to the next scattering
+            f1 += TPath * params.groundAlbedo;
         } else {
             if (params.useGround < 0.5 && intersect.x > 0.0) {
                 integrateMultiScatSegment(rayOrigin, rayDir, 0.0, intersect.x, 16u, sunDir, &L1, &f1, &TPath);
@@ -61,6 +65,14 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
     if (tMax <= tMin) { return; }
     let r = params.earthRadius;
     let stepSize = (tMax - tMin) / f32(steps);
+
+    // [KO] L1 계산을 위한 위상 함수 값 미리 계산
+    // [EN] Pre-calculate phase function values for L1 calculation
+    let viewSunCos = dot(dir, sunDir);
+    let phaseR = phaseRayleigh(viewSunCos);
+    let phaseM = phaseMie(viewSunCos, params.mieAnisotropy);
+    let phaseF = phaseMie(viewSunCos, params.heightFogAnisotropy);
+
     for (var j = 0u; j < steps; j = j + 1u) {
         let t = tMin + (f32(j) + 0.5) * stepSize;
         let p = origin + dir * t;
@@ -74,12 +86,18 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let scatR = params.rayleighScattering * d.rhoR * params.skyViewScatMult;
         let scatM = params.mieScattering * d.rhoM * params.skyViewScatMult;
         let scatF = params.heightFogDensity * d.rhoF * params.skyViewScatMult;
+        
+        // [KO] f1은 다음 산란으로 넘어가는 평균 에너지를 나타내므로 등방성(Integral of Phase = 1) 가정을 유지
+        // [EN] f1 represents the average energy passed to the next scattering, so keep the isotropic (Integral of Phase = 1) assumption
         let scatTotal = scatR + vec3<f32>(scatM + scatF);
-        // [KO] Mie 소산 항에도 배율 적용
-        // [EN] Apply multiplier to Mie extinction term as well
+        
+        // [KO] L1(첫 번째 산란)은 태양 방향에 따른 실제 위상 함수를 적용하여 더 정밀하게 수집
+        // [EN] L1 (first scattering) is collected more precisely by applying the actual phase function according to the sun direction
+        let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF));
+
         let extTotal = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 
-        *L1 += *TPath * sunT * scatTotal * (0.25 * INV_PI) * shadowMask * stepSize;
+        *L1 += *TPath * sunT * stepScat * shadowMask * stepSize;
         *f1 += *TPath * scatTotal * stepSize;
         *TPath *= exp(-extTotal * stepSize);
     }
