@@ -6,7 +6,7 @@
 #redgpu_include math.EPSILON
 #redgpu_include systemStruct.SkyAtmosphere
 
-const MAX_TAU: f32 = 50.0;
+const MAX_TAU: f32 = 100.0;
 
 // [KO] 태양 물리 상수 (기본값 계산용)
 const SUN_ANGULAR_RADIUS_RAD: f32 = 0.00465; // 0.2665 degrees
@@ -47,7 +47,7 @@ fn getPlanetIntersection(origin: vec3<f32>, dir: vec3<f32>, r: f32) -> vec2<f32>
 fn getTransmittanceUV(h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32> {
     // [KO] 수평선(cosTheta = 0) 부근의 정밀도를 높이기 위한 비선형 매핑
     // [EN] Non-linear mapping to increase precision near the horizon (cosTheta = 0)
-    let mu = cosTheta;
+    let mu = clamp(cosTheta, -1.0, 1.0);
     let u = 0.5 + 0.5 * sign(mu) * sqrt(abs(mu));
     let v = 1.0 - clamp(h / atmosphereHeight, 0.0, 1.0);
     return vec2<f32>(u, v);
@@ -114,12 +114,12 @@ fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosph
     let intersect = getPlanetIntersection(p, sunDir, r);
     var optExt = vec3<f32>(0.0);
     if (intersect.x > EPSILON && intersect.x < tMax) {
-        optExt += integrateOpticalDepth(p, sunDir, 0.0, intersect.x, 10u, params);
+        optExt += integrateOpticalDepth(p, sunDir, 0.0, intersect.x, 20u, params);
         if (intersect.y > 0.0 && tMax > intersect.y) {
-            optExt += integrateOpticalDepth(p, sunDir, intersect.y, tMax, 10u, params);
+            optExt += integrateOpticalDepth(p, sunDir, intersect.y, tMax, 20u, params);
         }
     } else {
-        optExt = integrateOpticalDepth(p, sunDir, 0.0, tMax, 20u, params);
+        optExt = integrateOpticalDepth(p, sunDir, 0.0, tMax, 40u, params);
     }
     return exp(-min(optExt, vec3<f32>(MAX_TAU)));
 }
@@ -240,11 +240,9 @@ fn getMieGlowAmountUnit(
     let sharpPhase = phaseMie(viewSunCos, min(halo, 0.98));
 
     // [KO] 태양 방향의 투과율 참조 (카메라 높이 h 기준)
-    // [KO] 수평선 부근의 감쇄를 보정하여 노을 환경에서 글로우가 부자연스럽게 사라지는 현상 방지
     // [EN] Reference sun transmittance (based on camera height h)
-    // [EN] Prevent glow from disappearing unnaturally in sunset environments by correcting horizon attenuation
     let sunDirY = params.sunDirection.y;
-    let sunCosTheta = max(0.01, sunDirY + 0.05); 
+    let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
     let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, sunCosTheta, params.atmosphereHeight);
     
     // [KO] (params.mieScattering / params.mieExtinction)은 단일 산란 알베도(SSA) 역할
@@ -328,7 +326,7 @@ fn integrateScatSegment(
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
         
         // [KO] 중복 배율 제거: msScat 계산 시 scatR/M/F에 이미 skyViewScatMult가 포함되어 있으므로 추가 배율 없이 합산
-        let msUV = vec2<f32>(cosSun * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
+        let msUV = vec2<f32>(clamp(cosSun, -1.0, 1.0) * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
         let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
 
         let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);

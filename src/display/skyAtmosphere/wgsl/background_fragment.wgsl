@@ -38,11 +38,14 @@ fn main(input : VertexOutput) -> FragmentOutput {
 
     if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
         // [KO] 수평선 압축(Horizon Squashing) 보정: 고도가 낮을 때 태양이 수직으로 납작해지는 효과
-        let sunElevationParam = saturate(sunDir.y * 10.0); 
+        // [KO] 비물리적인 급격한 배율을 제거하고 실제 태양 고도에 따라 부드럽게 감쇄되도록 처리
+        let sunElevationParam = saturate(sunDir.y); 
         let squashFactor = mix(0.85, 1.0, sunElevationParam); 
         
         let verticalDist = viewDir.y - sunDir.y;
-        let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist);
+        // [KO] 천장(Zenith) 부근에서 보정치가 커져서 발생하는 아티팩트 방지를 위해 태양 근처(dot > 0)에서만 적용
+        // [EN] Apply only near the sun (dot > 0) to prevent artifacts caused by large correction values near the Zenith
+        let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) * saturate(dot(viewDir, sunDir) * 5.0);
         let viewSunCos = dot(viewDir, sunDir) - squashCorrection;
 
         // [KO] 하이브리드 Mie Glow: 압축 보정된 방향을 사용하여 태양과 일치시킴

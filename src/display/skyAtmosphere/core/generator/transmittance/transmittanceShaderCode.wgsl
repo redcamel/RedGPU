@@ -21,7 +21,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [EN] V = 1.0 - (h / H_atm) -> h = (1.0 - V) * H_atm
     let h = clamp((1.0 - uv.y) * params.atmosphereHeight, 0.0, params.atmosphereHeight);
 
-    let T = exp(-min(getOpticalDepth(h, cosTheta), vec3<f32>(MAX_TAU)));
+    let T = exp(-min(getOpticalDepth(h, cosTheta), vec3<f32>(100.0)));
     textureStore(atmosphereTransmittanceTexture, global_id.xy, vec4<f32>(T, 1.0));
 }
 

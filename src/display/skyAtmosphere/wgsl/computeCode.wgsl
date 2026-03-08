@@ -87,10 +87,9 @@ let camPos = vec3<f32>(0.0, camH + r, 0.0);
 // 1. Planet Shadow: Remove Glow if the Earth blocks the sun
 let planetShadow = getPlanetShadowMask(camPos, sunDir, r, uniforms);
 
-// 2. 지면 방향 감쇄 (Nadir Attenuation): 지면(아래)을 볼수록 대기 산란광이 차단됨을 반영
-// 2. Nadir Attenuation: Reflects that atmospheric scattering is blocked as you look towards the ground (down)
-let nadirFactor = saturate(viewDir.y + 0.1) / 1.1; // [KO] 수평선 아래로 갈수록 감쇄 [EN] Attenuate as it goes below the horizon
-let occlusionFactor = planetShadow * mix(0.5, 1.0, nadirFactor);
+// 2. 지면 방향 감쇄 (Nadir Attenuation): 물리적 산란 계산에 맡기고 인위적 감쇄 제거
+// 2. Nadir Attenuation: Rely on physical scattering calculation and remove artificial attenuation
+let occlusionFactor = planetShadow;
 
 mieGlowUnit *= occlusionFactor;
 

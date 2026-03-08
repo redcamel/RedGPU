@@ -33,10 +33,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     var viewDir = vec3<f32>(cos(viewElevation) * cos(azimuth), sin(viewElevation), cos(viewElevation) * sin(azimuth));
     
-    // [KO] 양극점(Zenith/Nadir) 특이점 방지 범위를 확대하여 LUT 상/하단 라인을 완벽히 균일화합니다. (약 3도 범위)
-    // [EN] Expand stabilization radius near Zenith/Nadir to ensure perfectly uniform LUT top/bottom rows.
-    if (abs(viewElevation) > (HPI - 0.05)) {
-        viewDir = vec3<f32>(0.0, sign(viewElevation), 0.0);
+    // [KO] 양극점(Zenith/Nadir) 부근의 수치적 안정성을 위해 최소한의 epsilon만 적용합니다.
+    // [EN] Apply minimum epsilon for numerical stability near poles (Zenith/Nadir).
+    if (abs(viewDir.y) > (1.0 - 1e-6)) {
+        viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
     }
 
     let rayOrigin = vec3<f32>(0.0, camH + r, 0.0);
