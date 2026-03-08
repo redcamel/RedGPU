@@ -66,24 +66,23 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             radiance = (msEnergy * PI) * (params.groundAlbedo * INV_PI);
         }
     } else {
-        // 2. 하늘 광휘
+        // 2. 하늘 광휘 (Unit scale)
         let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
         let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
         radiance = skySample.rgb;
 
-        // 3. Mie Glow (안정적인 모델)
-        let viewSunCos = dot(viewDir, sunDir);
-        let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, params.atmosphereHeight);
-        let skyTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
-
-        let miePhaseStable = phaseMie(viewSunCos, 0.80); 
-        let mieGlowStable = sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
-                            * (miePhaseStable * params.mieGlow);
+        // 3. Mie Glow (Unit scale)
+        // [KO] 공용 함수 getMieGlowAmountUnit을 사용하여 물리적 일치성 및 Soft-Knee 클램핑 확보
+        // [EN] Use the common function getMieGlowAmountUnit to ensure physical consistency and soft-knee clamping
+        let viewSunCos = clamp(dot(viewDir, sunDir), -1.0, 1.0);
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, vec3<f32>(0.0), 0.80);
         radiance += mieGlowStable;
 
         // [KO] 4. 태양 본체 제거: PBR 직접광과의 중복 및 샘플링 노이즈 방지를 위해 본체는 그리지 않습니다.
         // [EN] 4. Remove Sun Disk: To prevent duplication with PBR direct light and sampling noise, the disk is not rendered.
         }
 
-        textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
+        // [KO] 결과 저장: Unit scale 데이터를 물리적 sunIntensity로 상향하여 IBL 휘도 완성
+        // [EN] Store results: Upscale Unit scale data to physical sunIntensity to complete IBL radiance
+        textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance * params.sunIntensity, 1.0));
         }
