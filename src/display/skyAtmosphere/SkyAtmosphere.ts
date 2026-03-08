@@ -27,6 +27,7 @@ import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 
+// [KO] WGSL 셰이더 소스 정보 (물리 기반 시스템)
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'SKY_ATMOSPHERE_CORE');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
@@ -85,7 +86,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         seaLevel: 0.0,
         aerialPerspectiveMaxDistance: 100.0,
         heightFogAnisotropy: 0.7,
-        solarIntensityMult: 20.0,
+        solarIntensityMult: 1.0,
         sunLimbDarkening: 0.67,
         skyViewScatMult: 1.0,
         horizonHaze: 0.0,

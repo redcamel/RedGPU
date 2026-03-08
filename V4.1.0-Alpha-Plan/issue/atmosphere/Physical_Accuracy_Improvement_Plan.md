@@ -12,7 +12,15 @@
     *   `background_fragment.wgsl`에서는 `sunIntensity * solarIntensityMult`를 사용.
     *   `skyAtmosphereReflectionShaderCode.wgsl`에서는 `solarIntensityMult * 0.1`이라는 임의의 상수를 곱함.
     *   태양 본체의 밝기가 대기 산란광(SkyView)에 비해 물리적으로 얼마나 더 밝아야 하는지에 대한 절대적인 기준이 모호함.
-*   **물리적 수정 방향**: 태양의 고체각(Solid Angle)과 태양 상수(Solar Constant)를 기반으로, 대기 상층부에서의 태양 광도(Irradiance)와 대기 산란광의 비율을 물리적으로 고정(Calibration).
+*   **물리적 이론 근거**:
+    *   **태양 고체각($\Omega_{sun}$)**: 태양의 각반지름 $\alpha \approx 0.2665^\circ$ 기준, $\Omega_{sun} = 2\pi(1 - \cos\alpha) \approx 6.794 \times 10^{-5}$ sr.
+    *   **태양 휘도($L_{sun}$)**: 태양 상수(대기권 밖 광도)를 $E_{sc}$라고 할 때, $L_{sun} = E_{sc} / \Omega_{sun}$.
+    *   결론적으로 태양 본체는 산란광에 비해 약 **14,718배** ($1 / \Omega_{sun}$) 밝아야 함.
+*   **수정 계획**:
+    1.  **파라미터 정규화**: `solarIntensityMult` 의존성 제거 및 `1 / \Omega_{sun}`을 물리 상수로 도입.
+    2.  **공통 함수 도입**: `skyAtmosphereFn.wgsl`에 `getSunDiskRadiance` 물리 기반 함수 추가.
+    3.  **셰이더 통합**: 배경(`background`), 반사(`reflection`), AP(`compute`) 단계의 태양/Glow 배율을 해당 상수로 통일.
+    4.  **PBR 연동**: 라이팅 엔진의 직접광 스케일과 대기 시스템의 IBL 스케일을 물리 단위계로 일치시킴.
 *   **우선순위**: P0 (최상) / **중요도**: 상
 
 ### 2.2 다중 산란(Multi-Scattering)의 위상 함수 근사화 개선
@@ -51,7 +59,7 @@
 
 | 항목 | 우선순위 | 중요도 | 상태 |
 | :--- | :---: | :---: | :---: |
-| **태양 강도 스케일 통합** | **P0** | **상** | 대기 |
+| **태양 강도 스케일 통합** | **P0** | **상** | **완료** |
 | **지면 반사 PBR 연동** | **P1** | **중** | 대기 |
 | **Mie Glow 에너지 정규화** | **P1** | **중** | 대기 |
 | **반사 큐브맵 클램핑 개선** | **P1** | **중** | 대기 |

@@ -8,6 +8,10 @@
 
 const MAX_TAU: f32 = 50.0;
 
+// [KO] 태양 물리 상수 (기본값 계산용)
+const SUN_ANGULAR_RADIUS_RAD: f32 = 0.00465; // 0.2665 degrees
+const SUN_SOLID_ANGLE_BASE: f32 = 6.794e-5;
+
 struct AtmosphereDensities {
     rhoR: f32, rhoM: f32, rhoF: f32, rhoO: f32
 };
@@ -150,24 +154,80 @@ fn phaseMieDual(cosTheta: f32, g: f32, halo: f32, glow: f32) -> f32 {
 }
 
 /**
+ * [KO] 태양 본체의 물리적 휘도(Radiance)를 계산합니다. (Unit Scale)
+ * [EN] Calculates the physical radiance of the sun disk. (Unit Scale)
+ */
+fn getSunDiskRadianceUnit(
+    viewSunCos: f32,
+    sunSize: f32,
+    sunLimbDarkening: f32,
+    skyTrans: vec3<f32>,
+    edgeSoftness: f32 
+) -> vec3<f32> {
+    let sunRad = sunSize * DEG_TO_RAD;
+    let cosSunRad = cos(sunRad);
+    
+    // [KO] 고체각 기반 휘도 배율 계산 (에너지 보존)
+    let solidAngle = PI2 * (1.0 - cosSunRad);
+    
+    // [KO] f16 오버플로우 방지 (최소 고체각 제한: 약 0.5도 기준)
+    let radianceScale = 1.0 / max(2e-4, solidAngle); 
+
+    let dist = (1.0 - viewSunCos) / max(1e-7, 1.0 - cosSunRad);
+    let sunMask = 1.0 - smoothstep(1.0 - edgeSoftness, 1.0, dist);
+    if (sunMask <= 0.0) { return vec3<f32>(0.0); }
+
+    // [KO] 주연 감광 및 정규화
+    let limbDarkening = pow(max(1e-7, 1.0 - saturate(dist)), sunLimbDarkening);
+    let energyNormalization = sunLimbDarkening + 1.0;
+
+    return (radianceScale * limbDarkening * energyNormalization * sunMask) * skyTrans;
+}
+
+/**
+ * [KO] IBL(반사 큐브맵) 전용 태양 휘도를 계산합니다. (Gaussian 모델)
+ * [EN] Calculates sun radiance for IBL using a Gaussian-like profile. (Unit Scale)
+ */
+fn getSunDiskRadianceIBL(
+    viewSunCos: f32,
+    sunLimbDarkening: f32,
+    skyTrans: vec3<f32>
+) -> vec3<f32> {
+    // [KO] IBL 안정성을 위해 태양 반지름을 약 4도(sigma=2.0)로 크게 분산시킴.
+    // [KO] Gaussian profile: L = L0 * exp(-(1-cosTheta)/(1-cosAlpha))
+    const IBL_SUN_ALPHA: f32 = 0.07; // ~4 degrees
+    const IBL_SUN_COS: f32 = 0.9975; // cos(IBL_SUN_ALPHA)
+    const IBL_RADIANCE_SCALE: f32 = 63.66; // 1.0 / (2 * PI * (1 - IBL_SUN_COS))
+
+    let diff = saturate(1.0 - viewSunCos);
+    let sigma_sq = 1.0 - IBL_SUN_COS;
+    
+    // [KO] Exponential falloff (Gaussian approximation)
+    let falloff = exp(-diff / max(1e-7, sigma_sq));
+    if (falloff < 0.001) { return vec3<f32>(0.0); }
+
+    // [KO] 에너지 정규화 (주연 감광 무시하고 가우시안 면적으로 정규화)
+    return (IBL_RADIANCE_SCALE * falloff) * skyTrans;
+}
+
+/**
  * [KO] 실시간 Mie Glow(Hybrid) 강도를 계산합니다. (Unit Scale)
  * [EN] Calculates real-time Mie Glow (Hybrid) intensity (Unit Scale).
  */
 fn getMieGlowAmountUnit(
-    viewDir: vec3<f32>, 
-    sunDir: vec3<f32>, 
+    viewSunCos: f32,
     h: f32, 
     params: SkyAtmosphere, 
     transmittanceTexture: texture_2d<f32>, 
     atmosphereSampler: sampler,
-    transToEdge: vec3<f32> 
+    transToEdge: vec3<f32>,
+    overrideHalo: f32 // [KO] 비등방성 계수 오버라이드 (0.0이면 기본값 사용)
 ) -> vec3<f32> {
-    let viewSunCos = dot(viewDir, sunDir);
-    // [KO] float16 오버플로우 및 파이어플라이 방지를 위해 g를 0.98로 소폭 하향
-    let miePhaseSharp = phaseMie(viewSunCos, min(params.mieHalo, 0.98));
-    let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, sunDir.y, params.atmosphereHeight);
+    let halo = select(params.mieHalo, overrideHalo, overrideHalo > 0.0);
+    // [KO] f16 오버플로우 방지를 위해 g를 제한
+    let miePhaseSharp = phaseMie(viewSunCos, min(halo, 0.98));
+    let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, params.sunDirection.y, params.atmosphereHeight);
     
-    // [KO] 산란 배율(skyViewScatMult)은 포함하되 sunIntensity는 외부에서 곱하도록 Unit Scale로 반환
     return params.skyViewScatMult * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
                         * (miePhaseSharp * params.mieGlow) * (1.0 - transToEdge);
 }

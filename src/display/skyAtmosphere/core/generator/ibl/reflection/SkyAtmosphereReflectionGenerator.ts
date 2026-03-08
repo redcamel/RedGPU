@@ -10,6 +10,7 @@ import createUUID from "../../../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 
+// [KO] 리플렉션 생성용 셰이더 정보
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR');
 
 /**
