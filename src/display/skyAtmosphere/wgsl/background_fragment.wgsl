@@ -42,7 +42,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
         let sunElevationParam = saturate(sunDir.y); 
         let squashFactor = mix(0.85, 1.0, sunElevationParam); 
         
-        let verticalDist = viewDir.y - sunDir.y;
+        let verticalDist = viewDir.y - sunDir.y; // ㅅㄷㄴㅅ
         // [KO] 천장(Zenith) 부근에서 보정치가 커져서 발생하는 아티팩트 방지를 위해 태양 근처(dot > 0)에서만 적용
         // [EN] Apply only near the sun (dot > 0) to prevent artifacts caused by large correction values near the Zenith
         let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) * saturate(dot(viewDir, sunDir) * 5.0);
