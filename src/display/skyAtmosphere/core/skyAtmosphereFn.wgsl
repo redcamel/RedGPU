@@ -170,8 +170,9 @@ fn getSunDiskRadianceUnit(
     // [KO] 고체각 기반 휘도 배율 계산 (에너지 보존)
     let solidAngle = PI2 * (1.0 - cosSunRad);
     
-    // [KO] f16 오버플로우 방지 (최소 고체각 제한: 약 0.5도 기준)
-    let radianceScale = 1.0 / max(2e-4, solidAngle); 
+    // [KO] f16 오버플로우 방지 및 물리적 정확도 확보 (최소 고체각 제한: 태양 물리 상수 6.794e-5 기준)
+    // [EN] Prevent f16 overflow and ensure physical accuracy (Minimum solid angle limit: based on sun physical constant 6.794e-5)
+    let radianceScale = 1.0 / max(6.7e-5, solidAngle); 
 
     let dist = (1.0 - viewSunCos) / max(1e-7, 1.0 - cosSunRad);
     let sunMask = 1.0 - smoothstep(1.0 - edgeSoftness, 1.0, dist);
