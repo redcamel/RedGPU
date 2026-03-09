@@ -616,7 +616,7 @@ fn main(inputData:InputData) -> OutputFragment {
             let u_atmo = systemUniforms.skyAtmosphere;
             let camH = u_atmo.cameraHeight;
             let atmH = u_atmo.atmosphereHeight;
-            let earthR = u_atmo.earthRadius;
+            let earthR = u_atmo.bottomRadius;
             let sunInt = u_atmo.sunIntensity;
 
             // [KO] Specular 필터링: (HDR 반사 * 투과율) + 실시간 하늘 산란광

@@ -55,7 +55,7 @@ fn getTransmittanceUV(h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32>
     return vec2<f32>(u, v);
 }
 
-fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
+fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, bottomRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
     // [KO] Zenith/Nadir 부근에서의 atan2(0, 0) 특이점 방지
     var azimuth: f32;
     if (abs(viewDir.z) < 1e-6 && abs(viewDir.x) < 1e-6) {
@@ -65,7 +65,7 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmospher
     }
     // [KO] 방위각(Azimuth) U축에도 경계면 블리딩 방지를 위한 안전 클램핑 추가
     let u = clamp((azimuth / PI2) + 0.5, 0.001, 0.999);
-    let r = earthRadius;
+    let r = bottomRadius;
     let h = max(0.0001, viewHeight);
     
     let horizonCos = -sqrt(max(0.0, h * (2.0 * r + h))) / (r + h);
@@ -100,20 +100,20 @@ fn getAtmosphereDensities(h: f32, params: SkyAtmosphere) -> AtmosphereDensities 
     if (h < 0.0) {
         d.rhoR = 0.0; d.rhoM = 0.0; d.rhoF = 0.0; d.rhoO = 0.0;
     } else {
-        d.rhoR = exp(-h / params.rayleighScaleHeight);
-        d.rhoM = exp(-h / params.mieScaleHeight);
+        d.rhoR = exp(-h / params.rayleighExponentialDistribution);
+        d.rhoM = exp(-h / params.mieExponentialDistribution);
         d.rhoF = exp(-h * params.heightFogFalloff);
         
-        // [KO] 오존층 밀도: 물리적으로 더 정확한 Tent Function 기반 프로파일 (Hillaire 2020)
-        // [EN] Ozone density: Physically more accurate Tent Function based profile (Hillaire 2020)
-        let ozoneDist = abs(h - params.ozoneLayerCenter);
-        d.rhoO = max(0.0, 1.0 - ozoneDist / params.ozoneLayerWidth);
+        // [KO] 흡수층(오존) 밀도: 물리적으로 더 정확한 Tent Function 기반 프로파일 (Hillaire 2020)
+        // [EN] Absorption layer (Ozone) density: Physically more accurate Tent Function based profile (Hillaire 2020)
+        let ozoneDist = abs(h - params.absorptionTipAltitude);
+        d.rhoO = max(0.0, 1.0 - ozoneDist / params.absorptionTentWidth);
     }
     return d;
 }
 
 fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
-    let r = params.earthRadius;
+    let r = params.bottomRadius;
     let tMax = getRaySphereIntersection(p, sunDir, r + params.atmosphereHeight);
     if (tMax <= 0.0) { return vec3<f32>(1.0); }
     let intersect = getPlanetIntersection(p, sunDir, r);
@@ -141,13 +141,16 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
     var optExt = vec3<f32>(0.0);
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
-        let h = length(origin + dir * t) - params.earthRadius;
+        let h = length(origin + dir * t) - params.bottomRadius;
         if (h < 0.0) { continue; }
         let d = getAtmosphereDensities(h, params);
-        // [KO] 산란 배율 적용
-        optExt += (params.rayleighScattering * d.rhoR * params.skyViewScatMult 
-                   + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) 
-                   + params.ozoneAbsorption * d.rhoO) * stepSize;
+        // [KO] 산란 및 흡수 배율 적용
+        // [EN] Apply scattering and absorption scaling
+        let scatR = params.rayleighScattering * d.rhoR * params.skyLuminanceFactor;
+        let mieExt = (params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor;
+        let absC = params.absorptionCoefficient * d.rhoO;
+        
+        optExt += (scatR + vec3<f32>(mieExt) + absC) * stepSize;
     }
     return optExt;
 }
@@ -293,11 +296,11 @@ fn getMieGlowAmountUnit(
     let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
     let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, sunCosTheta, params.atmosphereHeight);
     
-    // [KO] 중복 배율 제거: (1.0 - transToEdge) 내부에 이미 skyViewScatMult가 반영되어 있으므로 추가 배율 없이 계산
-    // [KO] (params.mieScattering / params.mieExtinction)은 단일 산란 알베도(SSA) 역할
-    // [EN] Remove redundant multiplier: Since skyViewScatMult is already reflected in (1.0 - transToEdge)
-    // [EN] (params.mieScattering / params.mieExtinction) acts as Single Scattering Albedo (SSA)
-    var glow = sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
+    // [KO] 중복 배율 제거: (1.0 - transToEdge) 내부에 이미 skyLuminanceFactor가 반영되어 있으므로 추가 배율 없이 계산
+    // [KO] (params.mieScattering / (params.mieScattering + params.mieAbsorption))은 단일 산란 알베도(SSA) 역할
+    // [EN] Remove redundant multiplier: Since skyLuminanceFactor is already reflected in (1.0 - transToEdge)
+    // [EN] (params.mieScattering / (params.mieScattering + params.mieAbsorption)) acts as Single Scattering Albedo (SSA)
+    var glow = sunTransForGlow * (params.mieScattering / max(0.0001, params.mieScattering + params.mieAbsorption)) 
                         * (sharpPhase * params.mieGlow) * (1.0 - transToEdge);
 
     // [KO] 휘도 피크 억제 (Soft-Knee Clamping): f16 텍스처 안정성 확보 및 시각적 타버림 방지
@@ -326,7 +329,7 @@ fn integrateScatSegment(
     transmittance: ptr<function, vec3<f32>>
 ) {
     if (tMax <= tMin) { return; }
-    let r = params.earthRadius;
+    let r = params.bottomRadius;
     let stepSize = (tMax - tMin) / f32(steps);
     let sunDir = params.sunDirection;
     let viewSunCos = dot(dir, sunDir);
@@ -369,9 +372,9 @@ fn integrateScatSegment(
         let shadowMask = select(1.0, 0.0, params.useGround > 0.5 && getRaySphereIntersection(p, sunDir, r) > 0.0);
         let d = getAtmosphereDensities(h, params);
 
-        let scatR = params.rayleighScattering * d.rhoR * params.skyViewScatMult;
-        let scatM = params.mieScattering * d.rhoM * params.skyViewScatMult;
-        let scatF = params.heightFogDensity * d.rhoF * params.skyViewScatMult;
+        let scatR = params.rayleighScattering * d.rhoR * params.skyLuminanceFactor;
+        let scatM = params.mieScattering * d.rhoM * params.skyLuminanceFactor;
+        let scatF = params.heightFogDensity * d.rhoF * params.skyLuminanceFactor;
         
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
         
@@ -383,7 +386,7 @@ fn integrateScatSegment(
         // [KO] msScat에도 solarIntensityMult를 적용하여 전체적인 간접 산란광의 밝기 일관성 확보
         let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask * params.solarIntensityMult;
 
-        let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
+        let ext = scatR + vec3<f32>((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO + vec3<f32>(scatF);
 
         *radiance += *transmittance * (stepScat + msScat) * stepSize;
         *transmittance *= exp(-ext * stepSize);

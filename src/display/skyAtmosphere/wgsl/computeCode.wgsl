@@ -25,7 +25,7 @@ if (rawDepth >= 1.0) {
 }
 
 let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping) / 1000.0;
-let maxApDist = uniforms.aerialPerspectiveMaxDistance; 
+let maxApDist = uniforms.aerialPerspectiveDistanceScale; 
 let apDist = clamp(depthKm, 0.0, maxApDist);
 
 let azimuth = atan2(viewDir.z, viewDir.x);
@@ -52,9 +52,9 @@ if (apDist < 0.2) { // 200m 이내 [Within 200m]
     let d = getAtmosphereDensities(mappingH, uniforms);
     let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
 
-    let scatR = uniforms.rayleighScattering * d.rhoR * uniforms.skyViewScatMult;
-    let scatM = uniforms.mieScattering * d.rhoM * uniforms.skyViewScatMult;
-    let scatF = uniforms.heightFogDensity * d.rhoF * uniforms.skyViewScatMult;
+    let scatR = uniforms.rayleighScattering * d.rhoR * uniforms.skyLuminanceFactor;
+    let scatM = uniforms.mieScattering * d.rhoM * uniforms.skyLuminanceFactor;
+    let scatF = uniforms.heightFogDensity * d.rhoF * uniforms.skyLuminanceFactor;
 
     // [KO] 분석적 산란광 계산 (LUT에 포함된 Rayleigh + MieBase + FogBase)
     // [EN] Analytical scattering calculation (Rayleigh + MieBase + FogBase included in LUT)
@@ -63,7 +63,7 @@ if (apDist < 0.2) { // 200m 이내 [Within 200m]
     let phaseF = phaseMie(viewSunCos, uniforms.heightFogAnisotropy);
 
     let localScat = (scatR * phaseR + vec3<f32>(scatM * phaseM_Base + scatF * phaseF)) * sunTrans;
-    let localExt = scatR + vec3<f32>(uniforms.mieExtinction * d.rhoM * uniforms.skyViewScatMult) + uniforms.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
+    let localExt = scatR + vec3<f32>((uniforms.mieScattering + uniforms.mieAbsorption) * d.rhoM * uniforms.skyLuminanceFactor) + uniforms.absorptionCoefficient * d.rhoO + vec3<f32>(scatF);
 
     // [KO] 0~200m 구간에 대해 선형 근사 및 LUT와 부드럽게 블렌딩
     // [EN] Linear approximation for 0~200m segment and smooth blending with LUT
@@ -95,7 +95,7 @@ mieGlowUnit *= occlusionFactor;
 
 // [KO] 최종 산란광 계산: LUT 샘플과 Mie Glow에 태양 강도 배율 적용
 // [EN] Final scattering calculation: Apply sun intensity multiplier to LUT sample and Mie Glow
-// [KO] 하늘 산란광(apSample)은 sunIntensity만, Mie Glow는 solarIntensityMult를 추가 적용
+// [KO] 하늘 산란광(apSample)은 sunIntensity만, Mie Glow원은 solarIntensityMult를 추가 적용
 let finalScattering = apSample.rgb * uniforms.sunIntensity + mieGlowUnit * (uniforms.sunIntensity * uniforms.solarIntensityMult);
 
 // [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광을 더합니다.

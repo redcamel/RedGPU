@@ -13,7 +13,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let cosSunTheta = uv.x * 2.0 - 1.0;
     let h = clamp((1.0 - uv.y) * params.atmosphereHeight, 0.0, params.atmosphereHeight);
 
-    let r = params.earthRadius;
+    let r = params.bottomRadius;
     let rayOrigin = vec3<f32>(0.0, h + r, 0.0);
     let sunDir = vec3<f32>(sqrt(max(0.0, 1.0 - cosSunTheta * cosSunTheta)), cosSunTheta, 0.0);
 
@@ -63,7 +63,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
 fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, sunDir: vec3<f32>, L1: ptr<function, vec3<f32>>, f1: ptr<function, vec3<f32>>, TPath: ptr<function, vec3<f32>>) {
     if (tMax <= tMin) { return; }
-    let r = params.earthRadius;
+    let r = params.bottomRadius;
     let stepSize = (tMax - tMin) / f32(steps);
 
     // [KO] L1 계산을 위한 위상 함수 값 미리 계산
@@ -83,8 +83,8 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let sunT = getPhysicalTransmittance(p, sunDir, r, params.atmosphereHeight, params);
         let shadowMask = getPlanetShadowMask(p, sunDir, r, params);
 
-        // [KO] LUT 생성 시에는 skyViewScatMult를 제외한 물리적 기본 산란 계수만 사용 (중복 방지)
-        // [EN] Use only physical base scattering coefficients excluding skyViewScatMult when generating LUT (prevent duplication)
+        // [KO] LUT 생성 시에는 skyLuminanceFactor를 제외한 물리적 기본 산란 계수만 사용 (중복 방지)
+        // [EN] Use only physical base scattering coefficients excluding skyLuminanceFactor when generating LUT (prevent duplication)
         let scatR = params.rayleighScattering * d.rhoR;
         let scatM = params.mieScattering * d.rhoM;
         let scatF = params.heightFogDensity * d.rhoF;
@@ -95,7 +95,7 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         // [KO] L1(첫 번째 산란)은 태양 방향에 따른 실제 위상 함수를 적용하여 더 정밀하게 수집
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF));
 
-        let extTotal = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
+        let extTotal = scatR + vec3<f32>((params.mieScattering + params.mieAbsorption) * d.rhoM) + params.absorptionCoefficient * d.rhoO + vec3<f32>(scatF);
 
         *L1 += *TPath * sunT * stepScat * shadowMask * stepSize;
         *f1 += *TPath * scatTotal * stepSize;

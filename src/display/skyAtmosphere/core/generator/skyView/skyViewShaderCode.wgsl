@@ -14,7 +14,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
     let azimuth = (uv.x - 0.5) * PI2;
-    let r = params.earthRadius;
+    let r = params.bottomRadius;
     let camH = max(0.0001, params.cameraHeight);
     
     let horizonCos = -sqrt(max(0.0, camH * (2.0 * r + camH))) / (r + camH);

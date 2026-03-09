@@ -69,17 +69,17 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #prevBackgroundSystemUniformBindGroup: GPUBindGroup;
 
     #params = {
-        earthRadius: 6360.0,
+        bottomRadius: 6360.0,
         atmosphereHeight: 100.0,
         mieScattering: 0.003996,
-        mieExtinction: 0.004440,
+        mieAbsorption: 0.000444,
         rayleighScattering: [0.005802, 0.013558, 0.033100],
-        rayleighScaleHeight: 8.0,
-        mieScaleHeight: 1.2,
+        rayleighExponentialDistribution: 8.0,
+        mieExponentialDistribution: 1.2,
         mieAnisotropy: 0.8,
-        ozoneAbsorption: [0.000650, 0.001881, 0.000085],
-        ozoneLayerCenter: 25.0,
-        ozoneLayerWidth: 15.0,
+        absorptionCoefficient: [0.000650, 0.001881, 0.000085],
+        absorptionTipAltitude: 25.0,
+        absorptionTentWidth: 15.0,
         sunSize: 0.533,
         sunIntensity: 10.0,
         heightFogDensity: 0.0,
@@ -93,11 +93,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         useGround: 1.0,
         showGround: 1.0,
         seaLevel: 0.0,
-        aerialPerspectiveMaxDistance: 100.0,
+        aerialPerspectiveDistanceScale: 100.0,
         heightFogAnisotropy: 0.7,
         solarIntensityMult: 1.0,
         sunLimbDarkening: 0.67,
-        skyViewScatMult: 1.0
+        skyLuminanceFactor: 1.0
     };
 
     #sunElevation: number = 45;
@@ -374,13 +374,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     get cameraHeight(): number { return this.#params.cameraHeight; }
 
     /**
-     * [KO] 공중 투시(Aerial Perspective) 효과가 적용될 최대 거리 (km)입니다.
-     * [EN] Maximum distance (km) for Aerial Perspective effect.
+     * [KO] 공중 투시(Aerial Perspective) 효과가 적용될 거리 스케일 (km)입니다.
+     * [EN] Distance scale (km) for Aerial Perspective effect.
      */
-    get aerialPerspectiveMaxDistance(): number { return this.#params.aerialPerspectiveMaxDistance; }
-    set aerialPerspectiveMaxDistance(v: number) {
+    get aerialPerspectiveDistanceScale(): number { return this.#params.aerialPerspectiveDistanceScale; }
+    set aerialPerspectiveDistanceScale(v: number) {
         validatePositiveNumberRange(v, 1, 1000);
-        this.#params.aerialPerspectiveMaxDistance = v;
+        this.#params.aerialPerspectiveDistanceScale = v;
         this.#dirtyUniformBuffer = true;
         this.#dirtySkyView = true;
     }
@@ -409,13 +409,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 지구(행성)의 반지름 (km)입니다.
-     * [EN] Earth (planet) radius (km).
+     * [KO] 행성의 바닥 반지름 (km)입니다.
+     * [EN] Planet bottom radius (km).
      */
-    get earthRadius(): number { return this.#params.earthRadius; }
-    set earthRadius(v: number) {
+    get bottomRadius(): number { return this.#params.bottomRadius; }
+    set bottomRadius(v: number) {
         validatePositiveNumberRange(v, 1);
-        this.#params.earthRadius = v;
+        this.#params.bottomRadius = v;
         this.#dirtyLUT = true;
         this.#dirtyUniformBuffer = true;
     }
@@ -445,13 +445,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 미 소멸(Mie Extinction) 계수입니다.
-     * [EN] Mie Extinction coefficient.
+     * [KO] 미 흡수(Mie Absorption) 계수입니다.
+     * [EN] Mie Absorption coefficient.
      */
-    get mieExtinction(): number { return this.#params.mieExtinction; }
-    set mieExtinction(v: number) {
+    get mieAbsorption(): number { return this.#params.mieAbsorption; }
+    set mieAbsorption(v: number) {
         validatePositiveNumberRange(v, 0, 1.0);
-        this.#params.mieExtinction = v;
+        this.#params.mieAbsorption = v;
         this.#dirtyLUT = true;
         this.#dirtyUniformBuffer = true;
     }
@@ -470,25 +470,25 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 레일리 산란의 고도 척도(Scale Height, km)입니다.
-     * [EN] Scale Height (km) for Rayleigh scattering.
+     * [KO] 레일리 산란의 고도 별 지수 분포(Scale Height, km)입니다.
+     * [EN] Rayleigh exponential distribution (Scale Height, km).
      */
-    get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
-    set rayleighScaleHeight(v: number) {
+    get rayleighExponentialDistribution(): number { return this.#params.rayleighExponentialDistribution; }
+    set rayleighExponentialDistribution(v: number) {
         validatePositiveNumberRange(v, 0.1, 100);
-        this.#params.rayleighScaleHeight = v;
+        this.#params.rayleighExponentialDistribution = v;
         this.#dirtyLUT = true;
         this.#dirtyUniformBuffer = true;
     }
 
     /**
-     * [KO] 미 산란의 고도 척도(Scale Height, km)입니다.
-     * [EN] Scale Height (km) for Mie scattering.
+     * [KO] 미 산란의 고도 별 지수 분포(Scale Height, km)입니다.
+     * [EN] Mie exponential distribution (Scale Height, km).
      */
-    get mieScaleHeight(): number { return this.#params.mieScaleHeight; }
-    set mieScaleHeight(v: number) {
+    get mieExponentialDistribution(): number { return this.#params.mieExponentialDistribution; }
+    set mieExponentialDistribution(v: number) {
         validatePositiveNumberRange(v, 0.1, 100);
-        this.#params.mieScaleHeight = v;
+        this.#params.mieExponentialDistribution = v;
         this.#dirtyLUT = true;
         this.#dirtyUniformBuffer = true;
     }
@@ -521,10 +521,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     /**
      * [KO] 지면 환경광 강도입니다.
      * [EN] Ground ambient light intensity.
-     *
-     * @deprecated
-     * [KO] 이 값은 더 이상 사용되지 않습니다. 이제 Multi-Scattering LUT를 통한 물리 기반 환경광이 자동으로 적용됩니다.
-     * [EN] This value is no longer used. Physically-based environment light via Multi-Scattering LUT is now automatically applied.
      */
     get groundAmbient(): number { return this.#params.groundAmbient; }
     set groundAmbient(v: number) {
@@ -534,38 +530,38 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 오존 흡수(Ozone Absorption) 계수 [R, G, B] 배열입니다.
-     * [EN] Ozone Absorption coefficient [R, G, B] array.
+     * [KO] 대기 중 흡수 물질(오존 등)의 흡수 계수 [R, G, B] 배열입니다.
+     * [EN] Absorption coefficient [R, G, B] array for atmospheric absorbers (e.g. Ozone).
      */
-    get ozoneAbsorption(): [number, number, number] {
-        return [this.#params.ozoneAbsorption[0], this.#params.ozoneAbsorption[1], this.#params.ozoneAbsorption[2]];
+    get absorptionCoefficient(): [number, number, number] {
+        return [this.#params.absorptionCoefficient[0], this.#params.absorptionCoefficient[1], this.#params.absorptionCoefficient[2]];
     }
-    set ozoneAbsorption(v: [number, number, number]) {
-        this.#params.ozoneAbsorption = [...v];
+    set absorptionCoefficient(v: [number, number, number]) {
+        this.#params.absorptionCoefficient = [...v];
         this.#dirtyLUT = true;
         this.#dirtyUniformBuffer = true;
     }
 
     /**
-     * [KO] 오존층의 중심 고도 (km)입니다.
-     * [EN] Center altitude (km) of the ozone layer.
+     * [KO] 흡수층(Tent Distribution)의 중심 고도 (km)입니다.
+     * [EN] Center altitude (km) of the absorption tip (Tent Distribution).
      */
-    get ozoneLayerCenter(): number { return this.#params.ozoneLayerCenter; }
-    set ozoneLayerCenter(v: number) {
+    get absorptionTipAltitude(): number { return this.#params.absorptionTipAltitude; }
+    set absorptionTipAltitude(v: number) {
         validatePositiveNumberRange(v, 0, 100);
-        this.#params.ozoneLayerCenter = v;
+        this.#params.absorptionTipAltitude = v;
         this.#dirtyLUT = true;
         this.#dirtyUniformBuffer = true;
     }
 
     /**
-     * [KO] 오존층의 두께 너비 (km)입니다.
-     * [EN] Thickness width (km) of the ozone layer.
+     * [KO] 흡수층의 두께 너비 (km)입니다.
+     * [EN] Thickness width (km) of the absorption tent.
      */
-    get ozoneLayerWidth(): number { return this.#params.ozoneLayerWidth; }
-    set ozoneLayerWidth(v: number) {
+    get absorptionTentWidth(): number { return this.#params.absorptionTentWidth; }
+    set absorptionTentWidth(v: number) {
         validatePositiveNumberRange(v, 1, 50);
-        this.#params.ozoneLayerWidth = v;
+        this.#params.absorptionTentWidth = v;
         this.#dirtyLUT = true;
         this.#dirtyUniformBuffer = true;
     }
@@ -673,13 +669,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 대기 산란의 전체 강도 배율입니다.
-     * [EN] Overall intensity multiplier for atmospheric scattering.
+     * [KO] 대기 산란의 전체 휘도 배율입니다.
+     * [EN] Overall luminance factor for atmospheric scattering.
      */
-    get skyViewScatMult(): number { return this.#params.skyViewScatMult; }
-    set skyViewScatMult(v: number) {
+    get skyLuminanceFactor(): number { return this.#params.skyLuminanceFactor; }
+    set skyLuminanceFactor(v: number) {
         validatePositiveNumberRange(v, 0, 100.0);
-        this.#params.skyViewScatMult = v;
+        this.#params.skyLuminanceFactor = v;
         this.#dirtyLUT = true;
         this.#dirtyUniformBuffer = true;
     }
@@ -850,7 +846,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
                 '    let uniforms = systemUniforms.skyAtmosphere;',
                 '    let camH = uniforms.cameraHeight;',
-                '    let r = uniforms.earthRadius;',
+                '    let r = uniforms.bottomRadius;',
                 '    let atmH = uniforms.atmosphereHeight;',
                 computeCode,
                 '}'

@@ -22,7 +22,7 @@ struct FragmentOutput {
 fn main(input : VertexOutput) -> FragmentOutput {
     let uniforms = systemUniforms.skyAtmosphere;
     let camH = uniforms.cameraHeight;
-    let r = uniforms.earthRadius;
+    let r = uniforms.bottomRadius;
     let atmH = uniforms.atmosphereHeight;
     let viewDir = normalize(input.vertexPosition.xyz);
     let sunDir = normalize(uniforms.sunDirection);

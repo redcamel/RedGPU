@@ -26,7 +26,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 
 fn getOpticalDepth(h: f32, cosTheta: f32) -> vec3<f32> {
-    let r = params.earthRadius;
+    let r = params.bottomRadius;
     let rayOrigin = vec3<f32>(0.0, h + r, 0.0);
     let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
     let rayDir = vec3<f32>(sinTheta, cosTheta, 0.0);

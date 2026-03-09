@@ -19,9 +19,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (params.useGround < 0.5) { effectiveElevation = abs(elevation); }
     
     let viewDir = vec3<f32>(cos(effectiveElevation) * cos(azimuth), sin(effectiveElevation), cos(effectiveElevation) * sin(azimuth));
-    let sliceDist = uvw.z * uvw.z * params.aerialPerspectiveMaxDistance; 
+    let sliceDist = uvw.z * uvw.z * params.aerialPerspectiveDistanceScale; 
 
-    let r = params.earthRadius;
+    let r = params.bottomRadius;
     let rayOrigin = vec3<f32>(0.0, params.cameraHeight + r, 0.0);
 
     var radiance = vec3<f32>(0.0);
