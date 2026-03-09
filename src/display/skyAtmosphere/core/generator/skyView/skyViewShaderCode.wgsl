@@ -47,23 +47,19 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var transmittance = vec3<f32>(1.0);
 
     if (intersect.x > 0.0) {
-        // [KO] 지면까지의 대기 산란 적분
+        // [KO] 지면까지의 대기 산란 적분 (단위 휘도)
         integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
         
         if (params.useGround > 0.5 && params.showGround > 0.5) {
             // [KO] 지면 반사광 계산 안정화
-            // [KO] hitPos 대신 카메라 수직 상단을 기준으로 cosSun을 단순화하여 수평선 부근의 특이점을 제거합니다.
             let cosSun = params.sunDirection.y; 
             let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
             let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.01, 0.99), 1.0);
             let msEnergy = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb;
 
-            // [KO] 지면 반사광 합성 (Transmittance는 적분 함수에서 누적된 값 사용)
-            // [KO] sunIntensity를 직사광에 적용하여 일관성 확보
-            // [KO] msEnergy * PI: 전역 환경광 조도(Irradiance)를 나타냄
-            // [EN] Combine ground reflection (Transmittance uses the value accumulated in the integration function)
-            // [EN] msEnergy * PI: Represents global environment irradiance
-            radiance += transmittance * (sunTrans * max(0.0, cosSun) * params.sunIntensity + msEnergy * PI) * (params.groundAlbedo * INV_PI);
+            // [KO] 지면 반사광 합성 (모두 단위 휘도로 계산하여 중복 합산 방지)
+            // [EN] Combine ground reflection (calculate in unit radiance to prevent redundant summation)
+            radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy * PI) * (params.groundAlbedo * INV_PI);
         }
     } else if (tMax > 0.0) {
         integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);

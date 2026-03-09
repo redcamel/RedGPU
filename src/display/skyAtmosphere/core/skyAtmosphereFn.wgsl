@@ -399,8 +399,8 @@ fn integrateScatSegment(
         // [EN] so multiply it directly with the current total scattering coefficient (scaled).
         let scatTotal = scatR + vec3<f32>(scatM + scatF);
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - h / params.atmosphereHeight, 0.001, 0.999));
-        // [KO] msScat에도 sunIntensity를 적용하여 전체적인 간접 산란광의 밝기 일관성 확보
-        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask * params.sunIntensity;
+        // [KO] MS 에너지는 단위 강도로 계산 (sunIntensity는 렌더링 시점에만 적용)
+        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask;
 
         let ext = scatR + vec3<f32>((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO + vec3<f32>(scatF);
 

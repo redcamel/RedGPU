@@ -67,6 +67,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         if (sunShadow > 0.0) {
             let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, cosS, atmH);
             let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
+            // [KO] 지면 반사광 합성 (단위 휘도)
             groundRadiance = (sunT * max(0.0, cosS) + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
         } else {
             // [KO] 그림자 영역에서도 태양 고도(cosS)를 반영한 동적 환경광 샘플링 적용
