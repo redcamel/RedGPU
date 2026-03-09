@@ -87,7 +87,18 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, bottomRadius: f32, atmosphe
 
 fn getTransmittance(atmosphereTransmittanceTexture: texture_2d<f32>, atmosphereSampler: sampler, h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec3<f32> {
     let uv = getTransmittanceUV(h, cosTheta, atmosphereHeight);
-    return textureSampleLevel(atmosphereTransmittanceTexture, atmosphereSampler, uv, 0.0).rgb;
+    var transmittance = textureSampleLevel(atmosphereTransmittanceTexture, atmosphereSampler, uv, 0.0).rgb;
+    
+    // [KO] mu < 0(지평선 아래)일 때 하드웨어 보간에 의한 빛 누출 방지
+    // [EN] Prevent light leaking due to hardware interpolation when mu < 0 (below horizon)
+    let mu = clamp(cosTheta, -1.0, 1.0);
+    if (mu < 0.0) {
+        // [KO] 지면 물리 모드에서는 지평선 아래를 완전히 차단
+        // [EN] In ground physics mode, block below horizon completely
+        let groundMask = smoothstep(-0.015, 0.0, mu); 
+        transmittance *= groundMask;
+    }
+    return transmittance;
 }
 
 fn getPlanetShadowMask(p: vec3<f32>, sunDir: vec3<f32>, r: f32, params: SkyAtmosphere) -> f32 {
@@ -117,6 +128,11 @@ fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosph
     let tMax = getRaySphereIntersection(p, sunDir, r + params.atmosphereHeight);
     if (tMax <= 0.0) { return vec3<f32>(1.0); }
     let intersect = getPlanetIntersection(p, sunDir, r);
+    
+    // [KO] 지면 차폐 확인: 태양 방향으로 지면과 충돌하는 경우 투과율 0
+    // [EN] Check for ground occlusion: transmittance is 0 if colliding with ground in sun direction
+    if (params.useGround > 0.5 && intersect.x > EPSILON) { return vec3<f32>(0.0); }
+
     var optExt = vec3<f32>(0.0);
     if (intersect.x > EPSILON && intersect.x < tMax) {
         optExt += integrateOpticalDepth(p, sunDir, 0.0, intersect.x, 20u, params);
