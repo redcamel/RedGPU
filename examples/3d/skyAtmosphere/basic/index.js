@@ -232,7 +232,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
 
     // 3. Atmosphere Geometry
     const f_geo = pane.addFolder({title: '3. Atmosphere Geometry', expanded: false});
-    f_geo.addBinding(skyAtmosphere, 'earthRadius', {min: 1000, max: 10000, step: 0.01, label: 'Earth Radius (km)'});
+    f_geo.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 0.01, label: 'Earth Radius (km)'});
     f_geo.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 10, max: 200, step: 0.01, label: 'Atmo Height (km)'});
     f_geo.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'Sea Level (km)'});
 
@@ -261,44 +261,44 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_rayleigh.addBinding(rayleighProxy, 'r', {min: 0, max: 0.1, step: 0.0001, label: 'Scat R'});
     f_rayleigh.addBinding(rayleighProxy, 'g', {min: 0, max: 0.1, step: 0.0001, label: 'Scat G'});
     f_rayleigh.addBinding(rayleighProxy, 'b', {min: 0, max: 0.1, step: 0.0001, label: 'Scat B'});
-    f_rayleigh.addBinding(skyAtmosphere, 'rayleighScaleHeight', {min: 0.1, max: 50, step: 0.001, label: 'Scale Height (km)'});
+    f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 50, step: 0.001, label: 'Scale Height (km)'});
 
     // 5. Mie Scattering
     const f_mie = pane.addFolder({title: '5. Mie Scattering', expanded: false});
     f_mie.addBinding(skyAtmosphere, 'mieScattering', {min: 0, max: 0.1, step: 0.00001, label: 'Scat Coeff'});
-    f_mie.addBinding(skyAtmosphere, 'mieExtinction', {min: 0, max: 0.1, step: 0.00001, label: 'Ext Coeff'});
-    f_mie.addBinding(skyAtmosphere, 'mieScaleHeight', {min: 0.1, max: 20, step: 0.001, label: 'Scale Height (km)'});
+    f_mie.addBinding(skyAtmosphere, 'mieAbsorption', {min: 0, max: 0.1, step: 0.00001, label: 'Ext Coeff'});
+    f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 20, step: 0.001, label: 'Scale Height (km)'});
     f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.0001, label: 'Anisotropy (g)'});
     f_mie.addBinding(skyAtmosphere, 'mieGlow', {min: 0, max: 0.999, step: 0.001, label: 'Glow'});
     f_mie.addBinding(skyAtmosphere, 'mieHalo', {min: 0, max: 0.999, step: 0.001, label: 'Halo'});
 
     // 6. Ozone Layer
     const f_ozone = pane.addFolder({title: '6. Ozone Layer', expanded: false});
-    const ozoneProxy = {
-        get r() { return skyAtmosphere.ozoneAbsorption[0]; },
+    const absorptionProxy = {
+        get r() { return skyAtmosphere.absorptionCoefficient[0]; },
         set r(v) {
-            const t = [...skyAtmosphere.ozoneAbsorption];
+            const t = [...skyAtmosphere.absorptionCoefficient];
             t[0] = v;
-            skyAtmosphere.ozoneAbsorption = t;
+            skyAtmosphere.absorptionCoefficient = t;
         },
-        get g() { return skyAtmosphere.ozoneAbsorption[1]; },
+        get g() { return skyAtmosphere.absorptionCoefficient[1]; },
         set g(v) {
-            const t = [...skyAtmosphere.ozoneAbsorption];
+            const t = [...skyAtmosphere.absorptionCoefficient];
             t[1] = v;
-            skyAtmosphere.ozoneAbsorption = t;
+            skyAtmosphere.absorptionCoefficient = t;
         },
-        get b() { return skyAtmosphere.ozoneAbsorption[2]; },
+        get b() { return skyAtmosphere.absorptionCoefficient[2]; },
         set b(v) {
-            const t = [...skyAtmosphere.ozoneAbsorption];
+            const t = [...skyAtmosphere.absorptionCoefficient];
             t[2] = v;
-            skyAtmosphere.ozoneAbsorption = t;
+            skyAtmosphere.absorptionCoefficient = t;
         }
     };
-    f_ozone.addBinding(ozoneProxy, 'r', {min: 0, max: 0.01, step: 0.0001, label: 'Abs R'});
-    f_ozone.addBinding(ozoneProxy, 'g', {min: 0, max: 0.01, step: 0.0001, label: 'Abs G'});
-    f_ozone.addBinding(ozoneProxy, 'b', {min: 0, max: 0.01, step: 0.0001, label: 'Abs B'});
-    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerCenter', {min: 0, max: 100, step: 0.01, label: 'Center (km)'});
-    f_ozone.addBinding(skyAtmosphere, 'ozoneLayerWidth', {min: 1, max: 50, step: 0.01, label: 'Width (km)'});
+    f_ozone.addBinding(absorptionProxy, 'r', {min: 0, max: 0.01, step: 0.0001, label: 'Abs R'});
+    f_ozone.addBinding(absorptionProxy, 'g', {min: 0, max: 0.01, step: 0.0001, label: 'Abs G'});
+    f_ozone.addBinding(absorptionProxy, 'b', {min: 0, max: 0.01, step: 0.0001, label: 'Abs B'});
+    f_ozone.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.01, label: 'Center (km)'});
+    f_ozone.addBinding(skyAtmosphere, 'absorptionTentWidth', {min: 1, max: 50, step: 0.01, label: 'Width (km)'});
 
     // 7. Ground Properties
     const f_ground = pane.addFolder({title: '7. Ground Properties', expanded: false});
@@ -329,7 +329,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
 
     // 8. Volumetric & Artistic
     const f_vol = pane.addFolder({title: '8. Volumetric & Artistic', expanded: false});
-    f_vol.addBinding(skyAtmosphere, 'aerialPerspectiveMaxDistance', {min: 1, max: 1000, step: 1, label: 'AP Max Distance (km)'});
+    f_vol.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'AP Max Distance (km)'});
     f_vol.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 10, step: 0.001, label: 'Fog Density'});
     f_vol.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.0001, label: 'Fog Falloff'});
     f_vol.addBinding(skyAtmosphere, 'heightFogAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Fog Anisotropy (g)'});

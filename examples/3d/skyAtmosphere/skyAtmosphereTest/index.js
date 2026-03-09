@@ -61,7 +61,7 @@ function loadGLTF(view, url) {
 
 const renderTestPane = async (targetView, skyAtmosphere) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane({title: 'SkyAtmosphere Test', expanded: true});
+    const pane = new Pane({title: 'SkyAtmosphere Test (UE5 Aligned)', expanded: true});
 
     const {
         createFieldOfView,
@@ -71,10 +71,8 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera);
 
-    const f_sun = pane.addFolder({title: 'Sun Position', expanded: true});
+    const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
     
-    // [KO] 태양 위치 조절용 2D 피커 추가
-    // [EN] Add 2D picker for sun position control
     const sunPosState = { pos: { x: skyAtmosphere.sunAzimuth, y: skyAtmosphere.sunElevation } };
     f_sun.addBinding(sunPosState, 'pos', {
         x: { min: -180, max: 180, step: 0.1 },
@@ -85,13 +83,79 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
         skyAtmosphere.sunElevation = ev.value.y;
     });
 
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.01, label: 'Elevation'});
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.01, label: 'Azimuth'});
     f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.1, label: 'Intensity'});
     f_sun.addBinding(skyAtmosphere, 'solarIntensityMult', {min: 1, max: 100, step: 0.1, label: 'Solar Intensity Mult'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'Limb Darkening'});
 
-    const f_tonemapping = pane.addFolder({title: 'ToneMapping (Global)', expanded: true});
+    // 1. Planet
+    const f_planet = pane.addFolder({title: 'Planet', expanded: false});
+    f_planet.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 1, label: 'Bottom Radius (km)'});
+    f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1, label: 'Atmosphere Height (km)'});
+    f_planet.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'Sea Level Offset (km)'});
+    
+    const groundState = {
+        albedo: {
+            r: skyAtmosphere.groundAlbedo[0],
+            g: skyAtmosphere.groundAlbedo[1],
+            b: skyAtmosphere.groundAlbedo[2]
+        }
+    };
+    f_planet.addBinding(groundState, 'albedo', {color: {type: 'float'}, label: 'Ground Albedo'}).on('change', (ev) => {
+        skyAtmosphere.groundAlbedo = [ev.value.r, ev.value.g, ev.value.b];
+    });
+    f_planet.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
+    f_planet.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground (Physics)'});
+
+    // 2. Rayleigh
+    const f_rayleigh = pane.addFolder({title: 'Rayleigh', expanded: false});
+    const rayleighState = {
+        scat: {
+            r: skyAtmosphere.rayleighScattering[0],
+            g: skyAtmosphere.rayleighScattering[1],
+            b: skyAtmosphere.rayleighScattering[2]
+        }
+    };
+    f_rayleigh.addBinding(rayleighState, 'scat', {color: {type: 'float'}, label: 'Scattering'}).on('change', (ev) => {
+        skyAtmosphere.rayleighScattering = [ev.value.r, ev.value.g, ev.value.b];
+    });
+    f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 20, step: 0.1, label: 'Scale Height (km)'});
+
+    // 3. Mie
+    const f_mie = pane.addFolder({title: 'Mie', expanded: false});
+    f_mie.addBinding(skyAtmosphere, 'mieScattering', {min: 0, max: 0.1, step: 0.0001, label: 'Scattering Coeff'});
+    f_mie.addBinding(skyAtmosphere, 'mieAbsorption', {min: 0, max: 0.1, step: 0.0001, label: 'Absorption Coeff'});
+    f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Anisotropy (g)'});
+    f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 10, step: 0.1, label: 'Scale Height (km)'});
+
+    // 4. Absorption (Ozone)
+    const f_absorption = pane.addFolder({title: 'Absorption (Ozone)', expanded: false});
+    const absorptionState = {
+        coeff: {
+            r: skyAtmosphere.absorptionCoefficient[0],
+            g: skyAtmosphere.absorptionCoefficient[1],
+            b: skyAtmosphere.absorptionCoefficient[2]
+        }
+    };
+    f_absorption.addBinding(absorptionState, 'coeff', {color: {type: 'float'}, label: 'Absorption Coeff'}).on('change', (ev) => {
+        skyAtmosphere.absorptionCoefficient = [ev.value.r, ev.value.g, ev.value.b];
+    });
+    f_absorption.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1, label: 'Tip Altitude (km)'});
+    f_absorption.addBinding(skyAtmosphere, 'absorptionTentWidth', {min: 1, max: 100, step: 0.1, label: 'Tent Width (km)'});
+
+    // 5. Artistic Controls
+    const f_artistic = pane.addFolder({title: 'Artistic Controls', expanded: true});
+    f_artistic.addBinding(skyAtmosphere, 'skyLuminanceFactor', {min: 0, max: 10, step: 0.1, label: 'Sky Luminance Factor'});
+    f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'AP Distance Scale (km)'});
+    f_artistic.addBinding(skyAtmosphere, 'mieGlow', {min: 0, max: 1, step: 0.01, label: 'Mie Glow'});
+    f_artistic.addBinding(skyAtmosphere, 'mieHalo', {min: 0, max: 0.999, step: 0.001, label: 'Mie Halo (g)'});
+
+    // 6. Height Fog
+    const f_fog = pane.addFolder({title: 'Height Fog', expanded: false});
+    f_fog.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 1, step: 0.001, label: 'Density'});
+    f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.001, label: 'Falloff'});
+    f_fog.addBinding(skyAtmosphere, 'heightFogAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Anisotropy (g)'});
+
+    const f_tonemapping = pane.addFolder({title: 'ToneMapping (Global)', expanded: false});
     f_tonemapping.addBinding(targetView.toneMappingManager, 'mode', {
         options: {
             LINEAR: RedGPU.ToneMapping.TONE_MAPPING_MODE.LINEAR,
@@ -104,27 +168,6 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_tonemapping.addBinding(targetView.toneMappingManager, 'exposure', {min: 0, max: 10, step: 0.01, label: 'Exposure'});
     f_tonemapping.addBinding(targetView.toneMappingManager, 'contrast', {min: 0, max: 2, step: 0.01, label: 'Contrast'});
     f_tonemapping.addBinding(targetView.toneMappingManager, 'brightness', {min: -1, max: 1, step: 0.01, label: 'Brightness'});
-
-    const f_atmos = pane.addFolder({title: 'Atmosphere Details', expanded: true});
-    f_atmos.addBinding(skyAtmosphere, 'skyViewScatMult', {min: 0, max: 10, step: 0.1, label: 'Scattering Mult'});
-    f_atmos.addBinding(skyAtmosphere, 'mieGlow', {min: 0, max: 1, step: 0.01, label: 'Mie Glow'});
-    f_atmos.addBinding(skyAtmosphere, 'mieHalo', {min: 0, max: 0.999, step: 0.001, label: 'Mie Halo (g)'});
-    f_atmos.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Mie Anisotropy (g)'});
-    f_atmos.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 1, step: 0.001, label: 'Fog Density'});
-
-    const f_ground = pane.addFolder({title: 'Ground Settings', expanded: false});
-    const groundState = {
-        albedo: {
-            r: skyAtmosphere.groundAlbedo[0],
-            g: skyAtmosphere.groundAlbedo[1],
-            b: skyAtmosphere.groundAlbedo[2]
-        }
-    };
-    f_ground.addBinding(groundState, 'albedo', {color: {type: 'float'}, label: 'Ground Albedo'}).on('change', (ev) => {
-        skyAtmosphere.groundAlbedo = [ev.value.r, ev.value.g, ev.value.b];
-    });
-    f_ground.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
-    f_ground.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground (Physics)'});
 
     const state = {enabled: true};
     pane.addBinding(state, 'enabled', {label: 'Enable Atmosphere'}).on('change', (v) => {
