@@ -36,33 +36,39 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let camPos = vec3<f32>(0.0, r + camH, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, r);
 
+    // [KO] 수평선 압축(Horizon Squashing) 보정: 고도가 낮을 때 태양이 수직으로 납작해지는 효과
+    // [KO] 천장(Zenith) 부근에서 불필요한 보정이 적용되지 않도록 saturate(sunDir.y) 대신 구체적인 높이 기반 감쇄 적용
+    let sunElevationParam = saturate(sunDir.y); 
+    let squashFactor = mix(0.85, 1.0, sunElevationParam);
+    
+    let verticalDist = viewDir.y - sunDir.y;
+    // [KO] 천장(Zenith) 부근에서 보정치가 커져서 발생하는 아티팩트 방지를 위해 태양 근처(dot > 0.0) 및 지평선 근처에서만 적용
+    // [EN] Apply only near the sun (dot > 0.0) and near the horizon to prevent artifacts near the Zenith
+    let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) 
+                           * saturate(dot(viewDir, sunDir) * 10.0) * (1.0 - sunElevationParam * sunElevationParam);
+    let viewSunCos = dot(viewDir, sunDir) - squashCorrection;
+
+    // [KO] 지면 차폐 여부 및 투과율 결정
+    // [EN] Determine ground occlusion and transmittance
+    let isGroundHit = uniforms.useGround > 0.5 && tEarth > 0.0;
+    let transToEdge = select(getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, viewDir.y, uniforms.atmosphereHeight), vec3<f32>(skySample.a), isGroundHit);
+
+    // [KO] 하이브리드 Mie Glow: 압축 보정된 방향을 사용하여 태양과 일치시킴
+    // [EN] Hybrid Mie Glow: Use corrected direction to match sun
+    let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, transToEdge, 0.0) * uniforms.sunIntensity;
+    atmosphereBackground += mieGlowAmount;
+
     if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
-        // [KO] 수평선 압축(Horizon Squashing) 보정: 고도가 낮을 때 태양이 수직으로 납작해지는 효과
-        // [KO] 비물리적인 급격한 배율을 제거하고 실제 태양 고도에 따라 부드럽게 감쇄되도록 처리
-        let sunElevationParam = saturate(sunDir.y); 
-        let squashFactor = mix(0.85, 1.0, sunElevationParam);
-        
-        let verticalDist = viewDir.y - sunDir.y; // ㅅㄷㄴㅅ
-        // [KO] 천장(Zenith) 부근에서 보정치가 커져서 발생하는 아티팩트 방지를 위해 태양 근처(dot > 0)에서만 적용
-        // [EN] Apply only near the sun (dot > 0) to prevent artifacts caused by large correction values near the Zenith
-        let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) * saturate(dot(viewDir, sunDir) * 5.0);
-        let viewSunCos = dot(viewDir, sunDir) - squashCorrection;
-
-        // [KO] 하이브리드 Mie Glow: 압축 보정된 방향을 사용하여 태양과 일치시킴
-        let skyTrans = getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, viewDir.y, uniforms.atmosphereHeight);
-        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, skyTrans, 0.0) * uniforms.sunIntensity;
-        atmosphereBackground += mieGlowAmount;
-
-        // [KO] 투과율 및 물리적 휘도 적용 (Unit Scale * sunIntensity * solarIntensityMult)
-        let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, skyTrans, 0.01);
-        atmosphereBackground += sunRadiance * (uniforms.sunIntensity * uniforms.solarIntensityMult);
-    } else {
-         // [KO] 지면에 가려진 경우에도 일반적인 산란광과 Glow는 존재할 수 있음 (수평선 근처)
-         // [KO] 지면까지의 투과율(skySample.a)을 사용하여 산란 광량을 정확하게 제한 (중복 계산 방지)
-         // [EN] Scat glow can exist even when obscured by the ground (near the horizon).
-         // [EN] Use the transmittance to the ground (skySample.a) to correctly limit the scattered light amount.
-         let mieGlowAmount = getMieGlowAmountUnit(dot(viewDir, sunDir), mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, vec3<f32>(skySample.a), 0.0) * uniforms.sunIntensity;
-         atmosphereBackground += mieGlowAmount;
+        // [KO] 태양 원반(Sun Disk) 물리적 휘도 적용
+        // [KO] 지면에 가려지지 않은 경우에만 태양 본체를 렌더링 (tEarth <= 0.0)
+        // [EN] Apply physical radiance of sun disk
+        // [EN] Render sun only when not obscured by ground (tEarth <= 0.0)
+        if (tEarth <= 0.0 || uniforms.useGround < 0.5) {
+            // [KO] 태양 원반은 관찰 방향 대기 투과율(transToEdge)에 의해 감쇄됨
+            // [EN] Sun disk is attenuated by transmittance in view direction (transToEdge)
+            let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01);
+            atmosphereBackground += sunRadiance * (uniforms.sunIntensity * uniforms.solarIntensityMult);
+        }
     }
     
     var output : FragmentOutput;

@@ -138,7 +138,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             magFilter: 'linear',
             minFilter: 'linear',
             mipmapFilter: 'linear',
-            addressModeU: 'repeat',
+            addressModeU: 'clamp-to-edge',
             addressModeV: 'clamp-to-edge'
         });
 

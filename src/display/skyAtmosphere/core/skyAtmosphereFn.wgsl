@@ -48,8 +48,10 @@ fn getTransmittanceUV(h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32>
     // [KO] 수평선(cosTheta = 0) 부근의 정밀도를 높이기 위한 비선형 매핑
     // [EN] Non-linear mapping to increase precision near the horizon (cosTheta = 0)
     let mu = clamp(cosTheta, -1.0, 1.0);
-    let u = 0.5 + 0.5 * sign(mu) * sqrt(abs(mu));
-    let v = 1.0 - clamp(h / atmosphereHeight, 0.0, 1.0);
+    // [KO] 경계면 블리딩 방지를 위한 안전 클램핑 (0.001 ~ 0.999)
+    // [EN] Safe clamping (0.001 to 0.999) to prevent edge bleeding
+    let u = clamp(0.5 + 0.5 * sign(mu) * sqrt(abs(mu)), 0.001, 0.999);
+    let v = clamp(1.0 - h / atmosphereHeight, 0.001, 0.999);
     return vec2<f32>(u, v);
 }
 
@@ -77,7 +79,9 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmospher
         let ratio = (horizonElevation - viewElevation) / (horizonElevation + HPI);
         v = 0.5 * (1.0 + sqrt(max(0.0, ratio)));
     }
-    return vec2<f32>(u, clamp(v, 0.0, 1.0));
+    // [KO] 수평선 및 양극점(Zenith/Nadir)에서의 아티팩트 방지를 위한 v축 클램핑
+    // [EN] v-axis clamping to prevent artifacts at the horizon and poles (Zenith/Nadir)
+    return vec2<f32>(u, clamp(v, 0.001, 0.999));
 }
 
 fn getTransmittance(atmosphereTransmittanceTexture: texture_2d<f32>, atmosphereSampler: sampler, h: f32, cosTheta: f32, atmosphereHeight: f32) -> vec3<f32> {
