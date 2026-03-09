@@ -58,7 +58,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let tbn = getTBN(normal, up);
 
     var irradiance = vec3<f32>(0.0);
+    var totalWeight = 0.0;
     let totalSamples = 1024u;
+
+    // [KO] 원본 큐브맵의 해상도를 기반으로 텍셀 입체각 계산
+    let envSize = f32(textureDimensions(reflectionTexture).x);
+    let saTexel = 4.0 * PI / (6.0 * envSize * envSize);
 
     for (var i = 0u; i < totalSamples; i = i + 1u) {
         let xi = hammersley(i, totalSamples);
@@ -70,15 +75,22 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let sampleVec = vec3<f32>(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
         let worldSample = normalize(tbn * sampleVec);
 
-        // [KO] 소스 큐브맵의 밉맵을 활용하여 부드러운 적분 수행
-        let sampleColor = textureSampleLevel(reflectionTexture, atmosphereSampler, worldSample, 5.0).rgb;
+        // [KO] 코사인 가중치 기반 PDF 계산
+        let pdf = max(cosTheta, 0.001) * INV_PI;
+        let saSample = 1.0 / (f32(totalSamples) * pdf + 0.0001);
+        let mipLevel = max(0.5 * log2(saSample / saTexel), 0.0);
+
+        // [KO] 동적 LOD를 적용하여 부드러운 적분 수행 및 Bleeding 방지
+        let sampleColor = textureSampleLevel(reflectionTexture, atmosphereSampler, worldSample, mipLevel).rgb;
+        
         irradiance += sampleColor;
+        totalWeight += 1.0;
     }
 
     // [KO] 적분 결과 (Unit scale)
     // [KO] 소스 큐브맵(reflectionTexture)에 이미 태양 본체와 Mie Glow가 포함되어 있으므로, 
     // [KO] 별도의 분석적 태양 기여도 추가 없이 적분값만 사용하여 중복 합산을 방지합니다.
-    irradiance = irradiance / f32(totalSamples);
+    irradiance = irradiance / totalWeight;
 
     textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
 }
