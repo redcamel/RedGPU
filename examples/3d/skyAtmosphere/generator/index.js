@@ -103,17 +103,14 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
     const pane = new Pane({ title: 'Atmosphere Generator Verifier' });
 
-    // [KO] Enable Atmosphere 바로 아래에 useGround 배치 (여기서는 Enable Atmosphere 바인딩이 없으므로 최상단 배치)
-    // [EN] Place useGround at the top (since there's no Enable Atmosphere binding here)
-    pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
-    pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
-    pane.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'Sea Level (km)'});
+    pane.addBinding(skyAtmosphere, 'useGround', {label: 'useGround (physics)'});
+    pane.addBinding(skyAtmosphere, 'showGround', {label: 'showGround'});
+    pane.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'seaLevel (km)'});
     
     const f_sun = pane.addFolder({ title: 'Sun Position' });
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, step: 0.0001, label: 'Sun Elevation' });
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, step: 0.0001, label: 'Sun Azimuth' });
+    f_sun.addBinding(skyAtmosphere, 'sunElevation', { min: -90, max: 90, step: 0.0001, label: 'sunElevation' });
+    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', { min: -360, max: 360, step: 0.0001, label: 'sunAzimuth' });
 
     const f_artistic = pane.addFolder({ title: 'Artistic Controls' });
-    f_artistic.addBinding(skyAtmosphere, 'exposure', { min: 0, max: 10, step: 0.001, label: 'Exposure' });
-    f_artistic.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100, step: 0.001, label: 'Sun Intensity' });
+    f_artistic.addBinding(skyAtmosphere, 'sunIntensity', { min: 0, max: 100, step: 0.001, label: 'sunIntensity' });
 };
