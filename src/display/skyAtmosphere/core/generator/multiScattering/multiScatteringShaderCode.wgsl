@@ -83,19 +83,19 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let sunT = getPhysicalTransmittance(p, sunDir, r, params.atmosphereHeight, params);
         let shadowMask = getPlanetShadowMask(p, sunDir, r, params);
 
-        let scatR = params.rayleighScattering * d.rhoR * params.skyViewScatMult;
-        let scatM = params.mieScattering * d.rhoM * params.skyViewScatMult;
-        let scatF = params.heightFogDensity * d.rhoF * params.skyViewScatMult;
+        // [KO] LUT 생성 시에는 skyViewScatMult를 제외한 물리적 기본 산란 계수만 사용 (중복 방지)
+        // [EN] Use only physical base scattering coefficients excluding skyViewScatMult when generating LUT (prevent duplication)
+        let scatR = params.rayleighScattering * d.rhoR;
+        let scatM = params.mieScattering * d.rhoM;
+        let scatF = params.heightFogDensity * d.rhoF;
         
         // [KO] f1은 다음 산란으로 넘어가는 평균 에너지를 나타내므로 등방성(Integral of Phase = 1) 가정을 유지
-        // [EN] f1 represents the average energy passed to the next scattering, so keep the isotropic (Integral of Phase = 1) assumption
         let scatTotal = scatR + vec3<f32>(scatM + scatF);
         
         // [KO] L1(첫 번째 산란)은 태양 방향에 따른 실제 위상 함수를 적용하여 더 정밀하게 수집
-        // [EN] L1 (first scattering) is collected more precisely by applying the actual phase function according to the sun direction
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF));
 
-        let extTotal = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
+        let extTotal = scatR + vec3<f32>(params.mieExtinction * d.rhoM) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 
         *L1 += *TPath * sunT * stepScat * shadowMask * stepSize;
         *f1 += *TPath * scatTotal * stepSize;

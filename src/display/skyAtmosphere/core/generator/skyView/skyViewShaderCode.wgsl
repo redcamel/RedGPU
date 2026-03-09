@@ -59,10 +59,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let msEnergy = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb;
             
             // [KO] 지면 반사광 합성 (Transmittance는 적분 함수에서 누적된 값 사용)
+            // [KO] solarIntensityMult를 직사광에 적용하여 일관성 확보
             // [KO] msEnergy * PI: 전역 환경광 조도(Irradiance)를 나타냄
             // [EN] Combine ground reflection (Transmittance uses the value accumulated in the integration function)
             // [EN] msEnergy * PI: Represents global environment irradiance
-            radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy * PI) * (params.groundAlbedo * INV_PI);
+            radiance += transmittance * (sunTrans * max(0.0, cosSun) * params.solarIntensityMult + msEnergy * PI) * (params.groundAlbedo * INV_PI);
         }
     } else if (tMax > 0.0) {
         integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);

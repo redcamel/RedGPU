@@ -375,13 +375,12 @@ fn integrateScatSegment(
         
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
         
-        // [KO] 중복 배율 제거: msLUT(Radiance)와 ScatteringCoeff를 곱할 때, 
-        // [KO] msLUT가 이미 skyViewScatMult에 비례하므로 여기서는 물리적 기본 산란 계수만 사용하여 중복을 방지합니다.
-        // [EN] Remove redundant multiplier: msLUT is already proportional to skyViewScatMult, 
-        // [EN] so use only physical base scattering coefficients here.
-        let baseScatTotal = (params.rayleighScattering * d.rhoR + vec3<f32>(params.mieScattering * d.rhoM + params.heightFogDensity * d.rhoF));
+        // [KO] 다중 산란광 계산: msLUT는 전체 산란 에너지 보정 비율이므로, 현재의 전체 산란 계수(scaled)와 직접 곱합니다.
+        // [EN] Multi-Scattering calculation: msLUT is the total scattering energy compensation ratio, 
+        // [EN] so multiply it directly with the current total scattering coefficient (scaled).
+        let scatTotal = scatR + vec3<f32>(scatM + scatF);
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - h / params.atmosphereHeight, 0.001, 0.999));
-        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * baseScatTotal * shadowMask;
+        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask;
 
         let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 

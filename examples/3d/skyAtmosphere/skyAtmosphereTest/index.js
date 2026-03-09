@@ -88,7 +88,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.01, label: 'Elevation'});
     f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.01, label: 'Azimuth'});
     f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.1, label: 'Intensity'});
-    f_sun.addBinding(skyAtmosphere, 'solarIntensityMult', {min: 1, max: 1000, step: 1, label: 'Solar Intensity Mult'});
+    f_sun.addBinding(skyAtmosphere, 'solarIntensityMult', {min: 1, max: 100, step: 0.1, label: 'Solar Intensity Mult'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'Limb Darkening'});
 
     const f_tonemapping = pane.addFolder({title: 'ToneMapping (Global)', expanded: true});
@@ -105,8 +105,26 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_tonemapping.addBinding(targetView.toneMappingManager, 'contrast', {min: 0, max: 2, step: 0.01, label: 'Contrast'});
     f_tonemapping.addBinding(targetView.toneMappingManager, 'brightness', {min: -1, max: 1, step: 0.01, label: 'Brightness'});
 
-    const f_atmos = pane.addFolder({title: 'Atmosphere Details', expanded: false});
+    const f_atmos = pane.addFolder({title: 'Atmosphere Details', expanded: true});
+    f_atmos.addBinding(skyAtmosphere, 'skyViewScatMult', {min: 0, max: 10, step: 0.1, label: 'Scattering Mult'});
+    f_atmos.addBinding(skyAtmosphere, 'mieGlow', {min: 0, max: 1, step: 0.01, label: 'Mie Glow'});
+    f_atmos.addBinding(skyAtmosphere, 'mieHalo', {min: 0, max: 0.999, step: 0.001, label: 'Mie Halo (g)'});
+    f_atmos.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Mie Anisotropy (g)'});
     f_atmos.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 1, step: 0.001, label: 'Fog Density'});
+
+    const f_ground = pane.addFolder({title: 'Ground Settings', expanded: false});
+    const groundState = {
+        albedo: {
+            r: skyAtmosphere.groundAlbedo[0],
+            g: skyAtmosphere.groundAlbedo[1],
+            b: skyAtmosphere.groundAlbedo[2]
+        }
+    };
+    f_ground.addBinding(groundState, 'albedo', {color: {type: 'float'}, label: 'Ground Albedo'}).on('change', (ev) => {
+        skyAtmosphere.groundAlbedo = [ev.value.r, ev.value.g, ev.value.b];
+    });
+    f_ground.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
+    f_ground.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground (Physics)'});
 
     const state = {enabled: true};
     pane.addBinding(state, 'enabled', {label: 'Enable Atmosphere'}).on('change', (v) => {

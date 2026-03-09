@@ -49,6 +49,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let isGround = params.useGround > 0.5 && tEarth > 0.0 && viewDir.y < -0.0001;
 
     var radiance = vec3<f32>(0.0);
+    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
 
     if (isGround) {
         // 1. 지면 반사광
@@ -62,7 +63,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         if (sunShadow > 0.0) {
             let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, clamp(cosS, 0.0, 1.0), atmH);
             let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-            groundRadiance = (sunT * max(0.0, cosS) + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
+            // [KO] 지면 직사광에도 solarIntensityMult 적용
+            groundRadiance = (sunT * max(0.0, cosS) * params.solarIntensityMult + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
         } else {
             // [KO] 그림자 영역에서도 태양 고도(cosS)를 반영한 동적 환경광 샘플링 적용
             let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
@@ -76,9 +78,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         
         // 지평선에 가까울수록 시야의 하늘 산란(SkyView) 에너지를 샘플링하여 더해줌
         let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
-        let inScattering = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
+        let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
+        let inScattering = skySample.rgb;
 
-        radiance = groundRadiance * viewTransmittance + inScattering;
+        // [KO] 지면 위로 번지는 Mie Glow 추가 (배경 렌더링과 일치)
+        let transToEdge = vec3<f32>(skySample.a);
+        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, 0.80) * params.solarIntensityMult;
+
+        radiance = groundRadiance * viewTransmittance + inScattering + mieGlowAmount;
 
     } else {
         // 2. 하늘 광휘 (Unit scale)
@@ -87,19 +94,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         radiance = skySample.rgb;
 
         // 3. Mie Glow (Unit scale)
-        // [KO] 공용 함수 getMieGlowAmountUnit을 사용하여 물리적 일치성 및 Soft-Knee 클램핑 확보
-        // [EN] Use the common function getMieGlowAmountUnit to ensure physical consistency and soft-knee clamping
-        let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-        
         // [KO] 하늘 방향 투과율 참조 (Glow 감쇄용)
         let transToEdge = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, 0.80);
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, 0.80) * params.solarIntensityMult;
         radiance += mieGlowStable;
 
-        // [KO] 4. 태양 본체(Sun Disk) 복구: Specular IBL 반사맵에서는 눈부신 태양광(Sun Glint)이 필수적임
-        // [EN] 4. Restore Sun Disk: Brilliant sunlight (Sun Glint) is essential in Specular IBL reflection maps
-        // [KO] IBL 전용 가우시안 태양 모델을 사용하여 에일리어싱을 방지하고 에너지를 보존합니다.
-        // [EN] Use the IBL-specific Gaussian sun model to prevent aliasing and preserve energy.
+        // [KO] 4. 태양 본체(Sun Disk) 복구
         radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, transToEdge) * params.solarIntensityMult;
     }
 
