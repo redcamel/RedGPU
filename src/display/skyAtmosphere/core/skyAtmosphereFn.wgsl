@@ -380,7 +380,8 @@ fn integrateScatSegment(
         // [EN] so multiply it directly with the current total scattering coefficient (scaled).
         let scatTotal = scatR + vec3<f32>(scatM + scatF);
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - h / params.atmosphereHeight, 0.001, 0.999));
-        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask;
+        // [KO] msScat에도 solarIntensityMult를 적용하여 전체적인 간접 산란광의 밝기 일관성 확보
+        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask * params.solarIntensityMult;
 
         let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 

@@ -31,6 +31,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let mappingH = max(0.0, camH);
     let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
     let skySample = textureSampleLevel(bg_atmosphereSkyViewTexture, bg_atmosphereSampler, skyUV, 0.0);
+    // [KO] 하늘 산란광은 sunIntensity만 적용 (solarIntensityMult는 태양 본체용)
     var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
     let camPos = vec3<f32>(0.0, r + camH, 0.0);

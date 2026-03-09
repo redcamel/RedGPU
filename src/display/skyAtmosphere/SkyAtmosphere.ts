@@ -81,7 +81,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         ozoneLayerCenter: 25.0,
         ozoneLayerWidth: 15.0,
         sunSize: 0.533,
-        sunIntensity: 1.0,
+        sunIntensity: 10.0,
         heightFogDensity: 0.0,
         heightFogFalloff: 0.1,
         groundAmbient: 0.0,
