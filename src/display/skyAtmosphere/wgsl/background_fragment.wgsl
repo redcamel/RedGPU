@@ -59,8 +59,9 @@ fn main(input : VertexOutput) -> FragmentOutput {
         if (tEarth <= 0.0 || uniforms.useGround < 0.5) {
             // [KO] 태양 원반은 관찰 방향 대기 투과율(transToEdge)에 의해 감쇄됨
             // [EN] Sun disk is attenuated by transmittance in view direction (transToEdge)
-            // [KO] edgeSoftness를 0.1로 높여 점 아티팩트(Fireflies) 방지
-            let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.1);
+            // [KO] edgeSoftness를 0.01로 낮추어 날카로운 태양 원반 형태 구현
+            // [EN] Sharpen sun disk by lowering edgeSoftness to 0.01
+            let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01);
             atmosphereBackground += sunRadiance * uniforms.sunIntensity;
         }
     }

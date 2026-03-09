@@ -5,6 +5,7 @@
 #redgpu_include math.DEG_TO_RAD
 #redgpu_include math.EPSILON
 #redgpu_include systemStruct.SkyAtmosphere
+#redgpu_include color.getLuminance
 
 const MAX_TAU: f32 = 100.0;
 
@@ -221,9 +222,9 @@ fn getSunDiskRadianceUnit(
     // [KO] 고체각 기반 휘도 배율 계산 (에너지 보존)
     let solidAngle = PI2 * (1.0 - cosSunRad);
     
-    // [KO] f16 오버플로우 방지 및 물리적 정확도 확보 (최소 고체각 제한: 태양 물리 상수 6.794e-5 기준)
-    // [EN] Prevent f16 overflow and ensure physical accuracy (Minimum solid angle limit: based on sun physical constant 6.794e-5)
-    let radianceScale = 1.0 / max(6.7e-5, solidAngle); 
+    // [KO] 태양 코어를 더 밝게 만들기 위해 배율 상향 (물리 상수 대비 약 2배 강조)
+    // [EN] Boost radiance scale to make the sun core brighter (about 2x emphasis over physical constants)
+    let radianceScale = 2.0 / max(6.7e-5, solidAngle); 
 
     let dist = (1.0 - viewSunCos) / max(1e-7, 1.0 - cosSunRad);
     let sunMask = 1.0 - smoothstep(1.0 - edgeSoftness, 1.0, dist);
@@ -235,10 +236,12 @@ fn getSunDiskRadianceUnit(
 
     var radiance = (radianceScale * limbDarkening * energyNormalization * sunMask) * skyTrans;
 
-    // [KO] 휘도 피크 억제 (Soft-Knee Clamping): 점 아티팩트 및 f16 폭주 방지
-    // [EN] Suppress radiance peaks (Soft-Knee Clamping): Prevent dot artifacts and f16 explosion
-    let luma = dot(radiance, vec3<f32>(0.299, 0.587, 0.114));
-    let threshold = 500.0; // 태양 본체는 Mie Glow보다 높은 임계값 적용
+    // [KO] 휘도 피크를 f16 한계 부근까지 확장 (2000 -> 60000)
+    // [KO] 이를 통해 톤매핑 후 태양이 훨씬 더 작고 날카롭게 보이게 됩니다.
+    // [EN] Expand radiance peaks near f16 limits (2000 -> 60000)
+    // [EN] This makes the sun look much smaller and sharper after tone mapping.
+    let luma = getLuminance(radiance);
+    let threshold = 60000.0; 
     if (luma > threshold) {
         let softLuma = threshold + (luma - threshold) / (1.0 + (luma - threshold) / threshold);
         radiance = radiance * (softLuma / luma);
@@ -275,7 +278,7 @@ fn getSunDiskRadianceIBL(
     var radiance = (IBL_RADIANCE_SCALE * falloff) * skyTrans;
 
     // [KO] IBL 휘도 피크 억제: 샘플링 시 에일리언싱 및 Fireflies 방지
-    let luma = dot(radiance, vec3<f32>(0.299, 0.587, 0.114));
+    let luma = getLuminance(radiance);
     let threshold = 100.0; // 넓어진 면적에 맞춰 임계값을 더 낮춰 수치적 안정성 확보
     if (luma > threshold) {
         let softLuma = threshold + (luma - threshold) / (1.0 + (luma - threshold) / threshold);
@@ -301,31 +304,24 @@ fn getMieGlowAmountUnit(
     let halo = select(params.mieHalo, overrideHalo, overrideHalo > 0.0);
     
     // [KO] LUT에서 누락된 '날카로운(Sharp)' Mie 성분만 별도로 계산하여 합산
-    // [KO] LUT 생성 시 Mie 산란의 (1.0 - mieGlow) 비중만 계산했으므로, 나머지를 보충함
-    // [EN] Separately calculate and add only the 'Sharp' Mie component missing from the LUT
-    // [EN] Since only (1.0 - mieGlow) of Mie scattering was calculated during LUT generation, the rest is supplemented
     let sharpPhase = phaseMie(viewSunCos, min(halo, 0.98));
 
     // [KO] 태양 방향의 투과율 참조 (카메라 높이 h 기준)
-    // [EN] Reference sun transmittance (based on camera height h)
     let sunDirY = params.sunDirection.y;
     let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
     let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, sunCosTheta, params.atmosphereHeight);
     
-    // [KO] 중복 배율 제거: (1.0 - transToEdge) 내부에 이미 skyLuminanceFactor가 반영되어 있으므로 추가 배율 없이 계산
-    // [KO] (params.mieScattering / (params.mieScattering + params.mieAbsorption))은 단일 산란 알베도(SSA) 역할
-    // [EN] Remove redundant multiplier: Since skyLuminanceFactor is already reflected in (1.0 - transToEdge)
-    // [EN] (params.mieScattering / (params.mieScattering + params.mieAbsorption)) acts as Single Scattering Albedo (SSA)
+    // [KO] 하늘 영역의 번짐을 극도로 억제하기 위해 글로우 강도 추가 하향 (0.15배 감쇄)
+    // [EN] Extremely suppress sky area bleeding by reducing glow intensity (0.15x attenuation)
+    const GLOW_SUPPRESS: f32 = 0.15;
+    
     var glow = sunTransForGlow * (params.mieScattering / max(0.0001, params.mieScattering + params.mieAbsorption)) 
-                        * (sharpPhase * params.mieGlow) * (1.0 - transToEdge);
+                        * (sharpPhase * params.mieGlow) * (1.0 - transToEdge) * GLOW_SUPPRESS;
 
-    // [KO] 휘도 피크 억제 (Soft-Knee Clamping): f16 텍스처 안정성 확보 및 시각적 타버림 방지
-    // [EN] Suppress radiance peaks (Soft-Knee Clamping): Ensure f16 texture stability and prevent visual burnout
-    let luma = dot(glow, vec3<f32>(0.299, 0.587, 0.114));
+    // [KO] 휘도 피크 억제 (Soft-Knee Clamping): 글로우 번짐 방지
+    let luma = getLuminance(glow);
     let threshold = 100.0;
     if (luma > threshold) {
-        // [KO] 임계값(100.0) 이상에서 에너지를 부드럽게 수렴시켜 수치적 폭주 방지
-        // [EN] Softly converge energy above the threshold (100.0) to prevent numerical explosion
         let softLuma = threshold + (luma - threshold) / (1.0 + (luma - threshold) / threshold);
         glow = glow * (softLuma / luma);
     }
