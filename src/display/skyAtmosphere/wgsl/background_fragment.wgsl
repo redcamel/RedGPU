@@ -37,16 +37,8 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let tEarth = getRaySphereIntersection(camPos, viewDir, r);
 
     // [KO] 수평선 압축(Horizon Squashing) 보정: 고도가 낮을 때 태양이 수직으로 납작해지는 효과
-    // [KO] 천장(Zenith) 부근에서 불필요한 보정이 적용되지 않도록 saturate(sunDir.y) 대신 구체적인 높이 기반 감쇄 적용
-    let sunElevationParam = saturate(sunDir.y); 
-    let squashFactor = mix(0.85, 1.0, sunElevationParam);
-    
-    let verticalDist = viewDir.y - sunDir.y;
-    // [KO] 천장(Zenith) 부근에서 보정치가 커져서 발생하는 아티팩트 방지를 위해 태양 근처(dot > 0.0) 및 지평선 근처에서만 적용
-    // [EN] Apply only near the sun (dot > 0.0) and near the horizon to prevent artifacts near the Zenith
-    let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) 
-                           * saturate(dot(viewDir, sunDir) * 10.0) * (1.0 - sunElevationParam * sunElevationParam);
-    let viewSunCos = dot(viewDir, sunDir) - squashCorrection;
+    // [EN] Horizon Squashing correction: The sun becomes vertically flat when the altitude is low
+    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
 
     // [KO] 지면 차폐 여부 및 투과율 결정
     // [EN] Determine ground occlusion and transmittance
@@ -66,7 +58,8 @@ fn main(input : VertexOutput) -> FragmentOutput {
         if (tEarth <= 0.0 || uniforms.useGround < 0.5) {
             // [KO] 태양 원반은 관찰 방향 대기 투과율(transToEdge)에 의해 감쇄됨
             // [EN] Sun disk is attenuated by transmittance in view direction (transToEdge)
-            let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01);
+            // [KO] edgeSoftness를 0.1로 높여 점 아티팩트(Fireflies) 방지
+            let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.1);
             atmosphereBackground += sunRadiance * (uniforms.sunIntensity * uniforms.solarIntensityMult);
         }
     }
