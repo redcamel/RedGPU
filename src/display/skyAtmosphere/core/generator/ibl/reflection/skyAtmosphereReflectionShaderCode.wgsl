@@ -90,7 +90,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // [KO] 공용 함수 getMieGlowAmountUnit을 사용하여 물리적 일치성 및 Soft-Knee 클램핑 확보
         // [EN] Use the common function getMieGlowAmountUnit to ensure physical consistency and soft-knee clamping
         let viewSunCos = clamp(dot(viewDir, sunDir), -1.0, 1.0);
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, vec3<f32>(0.0), 0.80);
+        
+        // [KO] 하늘 방향 투과율 참조 (Glow 감쇄용)
+        let transToEdge = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, 0.80);
         radiance += mieGlowStable;
 
         // [KO] 4. 태양 본체(Sun Disk) 복구: Specular IBL 반사맵에서는 눈부신 태양광(Sun Glint)이 필수적임

@@ -30,9 +30,9 @@ let apDist = clamp(depthKm, 0.0, maxApDist);
 
 let azimuth = atan2(viewDir.z, viewDir.x);
 let elevation = asin(clamp(viewDir.y, -1.0, 1.0));
-let apU = (azimuth / PI2) + 0.5;
+let apU = clamp((azimuth / PI2) + 0.5, 0.001, 0.999);
 let apV = clamp((elevation * INV_PI) + 0.5, 0.001, 0.999);
-let apW = clamp(sqrt(apDist / maxApDist), 0.0, 0.999);
+let apW = clamp(sqrt(apDist / maxApDist), 0.001, 0.999);
 
 // [KO] Aerial Perspective 3D LUT 샘플링 (단위 강도)
 // [EN] Sample Aerial Perspective 3D LUT (Unit intensity)

@@ -63,7 +63,8 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, earthRadius: f32, atmospher
     } else {
         azimuth = atan2(viewDir.z, viewDir.x);
     }
-    let u = (azimuth / PI2) + 0.5;
+    // [KO] 방위각(Azimuth) U축에도 경계면 블리딩 방지를 위한 안전 클램핑 추가
+    let u = clamp((azimuth / PI2) + 0.5, 0.001, 0.999);
     let r = earthRadius;
     let h = max(0.0001, viewHeight);
     
@@ -330,7 +331,8 @@ fn integrateScatSegment(
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
         
         // [KO] 중복 배율 제거: msScat 계산 시 scatR/M/F에 이미 skyViewScatMult가 포함되어 있으므로 추가 배율 없이 합산
-        let msUV = vec2<f32>(clamp(cosSun, -1.0, 1.0) * 0.5 + 0.5, 1.0 - clamp(h / params.atmosphereHeight, 0.0, 1.0));
+        // [KO] 경계면 블리딩 방지를 위한 안전 클램핑 추가
+        let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - h / params.atmosphereHeight, 0.001, 0.999));
         let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
 
         let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
