@@ -57,14 +57,29 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let cosS = dot(hitNormal, sunDir);
         let sunShadow = smoothstep(-0.01, 0.01, cosS);
         
+        var groundRadiance = vec3<f32>(0.0);
+
         if (sunShadow > 0.0) {
             let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, clamp(cosS, 0.0, 1.0), atmH);
             let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-            radiance = (sunT * max(0.0, cosS) + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
+            groundRadiance = (sunT * max(0.0, cosS) + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
         } else {
-            let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(0.5, 1.0), 0.0).rgb;
-            radiance = (msEnergy * PI) * (params.groundAlbedo * INV_PI);
+            // [KO] 그림자 영역에서도 태양 고도(cosS)를 반영한 동적 환경광 샘플링 적용
+            let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
+            groundRadiance = (msEnergy * PI) * (params.groundAlbedo * INV_PI);
         }
+
+        // [KO] 대기 원근감(Aerial Perspective) 계산
+        // [KO] 지면에서 반사된 빛은 투과율(Transmittance)만큼 감쇠되고, 그 사이에 하늘색(In-Scattering)이 더해져야 합니다.
+        let viewZenithCosAngle = dot(hitNormal, -viewDir);
+        let viewTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewZenithCosAngle, atmH);
+        
+        // 지평선에 가까울수록 시야의 하늘 산란(SkyView) 에너지를 샘플링하여 더해줌
+        let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
+        let inScattering = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
+
+        radiance = groundRadiance * viewTransmittance + inScattering;
+
     } else {
         // 2. 하늘 광휘 (Unit scale)
         let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
@@ -78,11 +93,17 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, vec3<f32>(0.0), 0.80);
         radiance += mieGlowStable;
 
-        // [KO] 4. 태양 본체 제거: PBR 직접광과의 중복 및 샘플링 노이즈 방지를 위해 본체는 그리지 않습니다.
-        // [EN] 4. Remove Sun Disk: To prevent duplication with PBR direct light and sampling noise, the disk is not rendered.
+        // [KO] 4. 태양 본체(Sun Disk) 복구: Specular IBL 반사맵에서는 눈부신 태양광(Sun Glint)이 필수적임
+        let sunAngularRadius = 0.00465; // 약 0.26도 (태양의 시반경)
+        let sunSolidAngle = PI * sunAngularRadius * sunAngularRadius;
+        if (acos(viewSunCos) < sunAngularRadius) {
+            let sunLuminance = vec3<f32>(1.0); // 태양의 고유 에너지
+            let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewSunCos, atmH);
+            radiance += sunLuminance * sunT * 1000.0; // 분석적 밝기 부스팅 (IBL 캡처용)
         }
+    }
 
-        // [KO] 결과 저장: Unit scale 데이터로 저장 (Intensity는 머티리얼 샘플링 시 적용)
-        // [EN] Store results: Store as unit scale data (Intensity is applied during material sampling)
-        textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
-        }
+    // [KO] 결과 저장: Unit scale 데이터로 저장 (Intensity는 머티리얼 샘플링 시 적용)
+    // [EN] Store results: Store as unit scale data (Intensity is applied during material sampling)
+    textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
+}
