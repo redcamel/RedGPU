@@ -14,8 +14,6 @@ RedGPU.init(
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         skyAtmosphere.sunElevation = 5;
         skyAtmosphere.sunAzimuth = 0;
-        skyAtmosphere.exposure = 1.5;
-        skyAtmosphere.horizonHaze = 0.8;
 
         // IBL 초기화
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
@@ -25,6 +23,7 @@ RedGPU.init(
         view.skyAtmosphere = skyAtmosphere;
         view.ibl = ibl;
         view.skybox = skybox;
+        view.toneMappingManager.exposure = 1.5;
 
         // 2. 카메라 설정
         view.rawCamera.nearClipping = 1;
@@ -96,10 +95,8 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
     pane.addBinding(state, 'enabled', {label: 'Enable Atmosphere'}).on('change', (v) => {
         targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
     });
-    // [KO] Enable Atmosphere 바로 아래에 useGround 배치
-    // [EN] Place useGround directly under Enable Atmosphere
-    pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
-    pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
+    pane.addBinding(skyAtmosphere, 'useGround', {label: 'useGround (physics)'});
+    pane.addBinding(skyAtmosphere, 'showGround', {label: 'showGround'});
     pane.addBinding(state, 'useIBL', {label: 'Use IBL (Reflection)'}).on('change', (v) => {
         targetView.ibl = v.value ? ibl : null;
     });
@@ -112,7 +109,7 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
     const apply = (el, az, exp, intensity) => {
         skyAtmosphere.sunElevation = el;
         skyAtmosphere.sunAzimuth = az;
-        skyAtmosphere.exposure = exp;
+        targetView.toneMappingManager.exposure = exp;
         skyAtmosphere.sunIntensity = intensity;
         pane.refresh();
     };
@@ -120,11 +117,11 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
     f_presets.addButton({title: 'Golden Sunset'}).on('click', () => apply(3.5, 0, 1.8, 22.0));
     f_presets.addButton({title: 'Eerie Twilight'}).on('click', () => apply(-4, 0, 4.0, 10.0));
 
-    // 2. Sun & Exposure
-    const f_sun = pane.addFolder({title: '2. Sun & Exposure'});
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'Elevation'});
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'Azimuth'});
-    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.001, label: 'Intensity'});
-    f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.0001, label: 'Sun Size'});
-    f_sun.addBinding(skyAtmosphere, 'exposure', {min: 0, max: 10, step: 0.001, label: 'Exposure'});
+    // 2. Sun Configuration
+    const f_sun = pane.addFolder({title: '2. Sun Configuration'});
+    f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
+    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
+    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.001, label: 'sunIntensity'});
+    f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.0001, label: 'sunSize'});
+    f_sun.addBinding(targetView.toneMappingManager, 'exposure', {min: 0, max: 10, step: 0.001, label: 'exposure'});
 };

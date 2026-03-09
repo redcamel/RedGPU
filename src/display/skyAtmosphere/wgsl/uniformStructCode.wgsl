@@ -26,7 +26,6 @@ struct Uniforms {
 	aerialPerspectiveDistanceScale: f32,
 	heightFogAnisotropy: f32,
 	groundAmbient: f32,
-	solarIntensityMult: f32,
 	sunLimbDarkening: f32,
 	seaLevel: f32,
 	skyLuminanceFactor: f32

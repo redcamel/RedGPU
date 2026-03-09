@@ -95,7 +95,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         seaLevel: 0.0,
         aerialPerspectiveDistanceScale: 100.0,
         heightFogAnisotropy: 0.7,
-        solarIntensityMult: 1.0,
         sunLimbDarkening: 0.67,
         skyLuminanceFactor: 1.0
     };
@@ -644,17 +643,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtyUniformBuffer = true;
         this.#dirtyLUT = true;
         this.#dirtySkyView = true;
-    }
-
-    /**
-     * [KO] 태양 본체의 강도 배율입니다.
-     * [EN] Intensity multiplier for the sun disk.
-     */
-    get solarIntensityMult(): number { return this.#params.solarIntensityMult; }
-    set solarIntensityMult(v: number) {
-        validatePositiveNumberRange(v, 1, 100000);
-        this.#params.solarIntensityMult = v;
-        this.#dirtyUniformBuffer = true;
     }
 
     /**

@@ -67,8 +67,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         if (sunShadow > 0.0) {
             let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, cosS, atmH);
             let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-            // [KO] 지면 직사광에도 solarIntensityMult 적용
-            groundRadiance = (sunT * max(0.0, cosS) * params.solarIntensityMult + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
+            groundRadiance = (sunT * max(0.0, cosS) + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
         } else {
             // [KO] 그림자 영역에서도 태양 고도(cosS)를 반영한 동적 환경광 샘플링 적용
             let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
@@ -87,7 +86,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         // [KO] 지면 위로 번지는 Mie Glow 추가 (배경 렌더링과 일치)
         let transToEdge = vec3<f32>(skySample.a);
-        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, 0.80) * params.solarIntensityMult;
+        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, 0.80);
 
         radiance = groundRadiance * viewTransmittance + inScattering + mieGlowAmount;
 
@@ -100,13 +99,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // 3. Mie Glow (Unit scale)
         // [KO] 하늘 방향 투과율 참조 (Glow 감쇄용)
         let transToViewEdge = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToViewEdge, 0.80) * params.solarIntensityMult;
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToViewEdge, 0.80);
         radiance += mieGlowStable;
 
         // [KO] 4. 태양 본체(Sun Disk) 복구
-        // [KO] viewTransmittance 대신 sunTrans를 사용하여 지평선 아래 태양 빛 누출 방지
-        // [EN] Use sunTrans instead of viewTransmittance to prevent sun light leakage below horizon
-        radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, sunTrans) * params.solarIntensityMult;
+        // [KO] sunTrans를 사용하여 지평선 아래 태양 빛 누출 방지
+        radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, sunTrans);
     }
 
     // [KO] 점 아티팩트(Fireflies) 방지를 위한 최종 안전 클램핑

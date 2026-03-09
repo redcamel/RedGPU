@@ -175,7 +175,6 @@ class SystemUniformUpdater {
                 {key: 'aerialPerspectiveDistanceScale', value: params?.aerialPerspectiveDistanceScale || 100.0},
                 {key: 'heightFogAnisotropy', value: params?.heightFogAnisotropy || 0},
                 {key: 'groundAmbient', value: params?.groundAmbient || 0},
-                {key: 'solarIntensityMult', value: params?.solarIntensityMult || 1.0},
                 {key: 'sunLimbDarkening', value: params?.sunLimbDarkening || 0.0},
                 {key: 'seaLevel', value: params?.seaLevel || 0.0},
                 {key: 'skyLuminanceFactor', value: params?.skyLuminanceFactor || 1.0},

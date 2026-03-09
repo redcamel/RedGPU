@@ -76,7 +76,6 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
     f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
     f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 100, step: 0.1, label: 'sunIntensity'});
-    f_sun.addBinding(skyAtmosphere, 'solarIntensityMult', {min: 1, max: 100, step: 0.1, label: 'solarIntensityMult'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'sunLimbDarkening'});
 
     // 1. Planet

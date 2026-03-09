@@ -31,7 +31,6 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let mappingH = max(0.0, camH);
     let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
     let skySample = textureSampleLevel(bg_atmosphereSkyViewTexture, bg_atmosphereSampler, skyUV, 0.0);
-    // [KO] 하늘 산란광은 sunIntensity만 적용 (solarIntensityMult는 태양 본체용)
     var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
     let camPos = vec3<f32>(0.0, r + camH, 0.0);
@@ -48,9 +47,8 @@ fn main(input : VertexOutput) -> FragmentOutput {
 
     // [KO] 하이브리드 Mie Glow: 압축 보정된 방향을 사용하여 태양과 일치시킴
     // [EN] Hybrid Mie Glow: Use corrected direction to match sun
-    // [KO] solarIntensityMult를 적용하여 태양 본체와의 시각적 일관성 확보
     let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, transToEdge, 0.0) 
-                        * (uniforms.sunIntensity * uniforms.solarIntensityMult);
+                        * uniforms.sunIntensity;
     atmosphereBackground += mieGlowAmount;
 
     if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
@@ -63,7 +61,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
             // [EN] Sun disk is attenuated by transmittance in view direction (transToEdge)
             // [KO] edgeSoftness를 0.1로 높여 점 아티팩트(Fireflies) 방지
             let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.1);
-            atmosphereBackground += sunRadiance * (uniforms.sunIntensity * uniforms.solarIntensityMult);
+            atmosphereBackground += sunRadiance * uniforms.sunIntensity;
         }
     }
     
