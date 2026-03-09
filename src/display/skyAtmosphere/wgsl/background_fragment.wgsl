@@ -47,7 +47,9 @@ fn main(input : VertexOutput) -> FragmentOutput {
 
     // [KO] 하이브리드 Mie Glow: 압축 보정된 방향을 사용하여 태양과 일치시킴
     // [EN] Hybrid Mie Glow: Use corrected direction to match sun
-    let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, transToEdge, 0.0) * uniforms.sunIntensity;
+    // [KO] solarIntensityMult를 적용하여 태양 본체와의 물리적 일관성 확보
+    let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, transToEdge, 0.0) 
+                        * (uniforms.sunIntensity * uniforms.solarIntensityMult);
     atmosphereBackground += mieGlowAmount;
 
     if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {

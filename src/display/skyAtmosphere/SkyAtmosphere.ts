@@ -85,9 +85,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         heightFogDensity: 0.0,
         heightFogFalloff: 0.1,
         groundAmbient: 0.0,
-        groundAlbedo: [0.3, 0.3, 0.3],
-        mieGlow: 0.5,
-        mieHalo: 0.95,
+        groundAlbedo: [0.1, 0.1, 0.1],
+        mieGlow: 0.1,
+        mieHalo: 0.8,
         sunDirection: new Float32Array([0, 1, 0]),
         cameraHeight: 0.001,
         useGround: 1.0,
@@ -95,7 +95,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         seaLevel: 0.0,
         aerialPerspectiveMaxDistance: 100.0,
         heightFogAnisotropy: 0.7,
-        solarIntensityMult: 1.0,
+        solarIntensityMult: 10.0,
         sunLimbDarkening: 0.67,
         skyViewScatMult: 1.0
     };

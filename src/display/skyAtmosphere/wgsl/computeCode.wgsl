@@ -95,7 +95,8 @@ mieGlowUnit *= occlusionFactor;
 
 // [KO] 최종 산란광 계산: LUT 샘플과 Mie Glow에 태양 강도 배율 적용
 // [EN] Final scattering calculation: Apply sun intensity multiplier to LUT sample and Mie Glow
-let finalScattering = (apSample.rgb + mieGlowUnit) * uniforms.sunIntensity;
+// [KO] Mie Glow 부분에 solarIntensityMult를 추가로 적용하여 태양 밝기 설정과 동기화
+let finalScattering = apSample.rgb * uniforms.sunIntensity + mieGlowUnit * (uniforms.sunIntensity * uniforms.solarIntensityMult);
 
 // [KO] 최종 색상 결정: 씬 색상에 투과율을 곱하고 산란광을 더합니다.
 // [EN] Determine final color: Multiply scene color by transmittance and add scattered light.

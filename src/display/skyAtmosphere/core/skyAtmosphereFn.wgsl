@@ -169,6 +169,26 @@ fn phaseMieDual(cosTheta: f32, g: f32, halo: f32, glow: f32) -> f32 {
  * [KO] 태양 본체의 물리적 휘도(Radiance)를 계산합니다. (Unit Scale)
  * [EN] Calculates the physical radiance of the sun disk. (Unit Scale)
  */
+/**
+ * [KO] 수평선 근처에서 태양이 수직으로 압축되는 효과를 반영한 View-Sun Cosine 값을 계산합니다.
+ * [EN] Calculates the View-Sun Cosine value reflecting the vertical squashing effect of the sun near the horizon.
+ */
+fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
+    let sunElevationParam = saturate(sunDir.y);
+    let squashFactor = mix(0.85, 1.0, sunElevationParam);
+    let verticalDist = viewDir.y - sunDir.y;
+    
+    // [KO] 천장(Zenith) 및 태양 반대편에서의 아티팩트 방지를 위한 가드 조건
+    let correctionGuard = saturate(dot(viewDir, sunDir) * 10.0) * (1.0 - sunElevationParam * sunElevationParam);
+    let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) * correctionGuard;
+    
+    return dot(viewDir, sunDir) - squashCorrection;
+}
+
+/**
+ * [KO] 태양 본체의 물리적 휘도(Radiance)를 계산합니다. (Unit Scale)
+ * [EN] Calculates the physical radiance of the sun disk. (Unit Scale)
+ */
 fn getSunDiskRadianceUnit(
     viewSunCos: f32,
     sunSize: f32,
@@ -194,7 +214,18 @@ fn getSunDiskRadianceUnit(
     let limbDarkening = pow(max(1e-7, 1.0 - saturate(dist)), sunLimbDarkening);
     let energyNormalization = sunLimbDarkening + 1.0;
 
-    return (radianceScale * limbDarkening * energyNormalization * sunMask) * skyTrans;
+    var radiance = (radianceScale * limbDarkening * energyNormalization * sunMask) * skyTrans;
+
+    // [KO] 휘도 피크 억제 (Soft-Knee Clamping): 점 아티팩트 및 f16 폭주 방지
+    // [EN] Suppress radiance peaks (Soft-Knee Clamping): Prevent dot artifacts and f16 explosion
+    let luma = dot(radiance, vec3<f32>(0.299, 0.587, 0.114));
+    let threshold = 500.0; // 태양 본체는 Mie Glow보다 높은 임계값 적용
+    if (luma > threshold) {
+        let softLuma = threshold + (luma - threshold) / (1.0 + (luma - threshold) / threshold);
+        radiance = radiance * (softLuma / luma);
+    }
+
+    return radiance;
 }
 
 /**
@@ -206,11 +237,13 @@ fn getSunDiskRadianceIBL(
     sunLimbDarkening: f32,
     skyTrans: vec3<f32>
 ) -> vec3<f32> {
-    // [KO] IBL 안정성을 위해 태양 반지름을 약 4도(sigma=2.0)로 크게 분산시킴.
-    // [KO] Gaussian profile: L = L0 * exp(-(1-cosTheta)/(1-cosAlpha))
-    const IBL_SUN_ALPHA: f32 = 0.07; // ~4 degrees
-    const IBL_SUN_COS: f32 = 0.9975; // cos(IBL_SUN_ALPHA)
-    const IBL_RADIANCE_SCALE: f32 = 63.66; // 1.0 / (2 * PI * (1 - IBL_SUN_COS))
+    // [KO] IBL 안정성을 위해 태양 반지름을 약 15도(sigma=7.5)로 대폭 분산시킴.
+    // [KO] 중요도 샘플링(Importance Sampling) 시 샘플들이 태양을 놓치지 않도록 충분히 넓은 영역을 확보합니다.
+    // [EN] Spread the sun radius to about 15 degrees (sigma=7.5) for maximum IBL stability.
+    // [EN] Ensure a wide enough area so that importance sampling doesn't miss the sun.
+    const IBL_SUN_ALPHA: f32 = 0.26; // ~15 degrees
+    const IBL_SUN_COS: f32 = 0.9659; // cos(IBL_SUN_ALPHA)
+    const IBL_RADIANCE_SCALE: f32 = 4.66; // 1.0 / (2 * PI * (1 - IBL_SUN_COS))
 
     let diff = saturate(1.0 - viewSunCos);
     let sigma_sq = 1.0 - IBL_SUN_COS;
@@ -219,8 +252,18 @@ fn getSunDiskRadianceIBL(
     let falloff = exp(-diff / max(1e-7, sigma_sq));
     if (falloff < 0.001) { return vec3<f32>(0.0); }
 
-    // [KO] 에너지 정규화 (주연 감광 무시하고 가우시안 면적으로 정규화)
-    return (IBL_RADIANCE_SCALE * falloff) * skyTrans;
+    // [KO] 에너지 정규화
+    var radiance = (IBL_RADIANCE_SCALE * falloff) * skyTrans;
+
+    // [KO] IBL 휘도 피크 억제: 샘플링 시 에일리언싱 및 Fireflies 방지
+    let luma = dot(radiance, vec3<f32>(0.299, 0.587, 0.114));
+    let threshold = 100.0; // 넓어진 면적에 맞춰 임계값을 더 낮춰 수치적 안정성 확보
+    if (luma > threshold) {
+        let softLuma = threshold + (luma - threshold) / (1.0 + (luma - threshold) / threshold);
+        radiance = radiance * (softLuma / luma);
+    }
+
+    return radiance;
 }
 
 /**
@@ -250,9 +293,11 @@ fn getMieGlowAmountUnit(
     let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
     let sunTransForGlow = getTransmittance(transmittanceTexture, atmosphereSampler, h, sunCosTheta, params.atmosphereHeight);
     
+    // [KO] 중복 배율 제거: (1.0 - transToEdge) 내부에 이미 skyViewScatMult가 반영되어 있으므로 추가 배율 없이 계산
     // [KO] (params.mieScattering / params.mieExtinction)은 단일 산란 알베도(SSA) 역할
+    // [EN] Remove redundant multiplier: Since skyViewScatMult is already reflected in (1.0 - transToEdge)
     // [EN] (params.mieScattering / params.mieExtinction) acts as Single Scattering Albedo (SSA)
-    var glow = params.skyViewScatMult * sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
+    var glow = sunTransForGlow * (params.mieScattering / max(0.0001, params.mieExtinction)) 
                         * (sharpPhase * params.mieGlow) * (1.0 - transToEdge);
 
     // [KO] 휘도 피크 억제 (Soft-Knee Clamping): f16 텍스처 안정성 확보 및 시각적 타버림 방지
@@ -330,10 +375,13 @@ fn integrateScatSegment(
         
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM + scatF * phaseF)) * sunTrans * shadowMask;
         
-        // [KO] 중복 배율 제거: msScat 계산 시 scatR/M/F에 이미 skyViewScatMult가 포함되어 있으므로 추가 배율 없이 합산
-        // [KO] 경계면 블리딩 방지를 위한 안전 클램핑 추가
+        // [KO] 중복 배율 제거: msLUT(Radiance)와 ScatteringCoeff를 곱할 때, 
+        // [KO] msLUT가 이미 skyViewScatMult에 비례하므로 여기서는 물리적 기본 산란 계수만 사용하여 중복을 방지합니다.
+        // [EN] Remove redundant multiplier: msLUT is already proportional to skyViewScatMult, 
+        // [EN] so use only physical base scattering coefficients here.
+        let baseScatTotal = (params.rayleighScattering * d.rhoR + vec3<f32>(params.mieScattering * d.rhoM + params.heightFogDensity * d.rhoF));
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - h / params.atmosphereHeight, 0.001, 0.999));
-        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * (scatR + vec3<f32>(scatM + scatF)) * shadowMask;
+        let msScat = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb * baseScatTotal * shadowMask;
 
         let ext = scatR + vec3<f32>(params.mieExtinction * d.rhoM * params.skyViewScatMult) + params.ozoneAbsorption * d.rhoO + vec3<f32>(scatF);
 

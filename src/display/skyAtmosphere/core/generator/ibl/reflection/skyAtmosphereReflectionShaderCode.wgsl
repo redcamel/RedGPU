@@ -89,7 +89,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // 3. Mie Glow (Unit scale)
         // [KO] 공용 함수 getMieGlowAmountUnit을 사용하여 물리적 일치성 및 Soft-Knee 클램핑 확보
         // [EN] Use the common function getMieGlowAmountUnit to ensure physical consistency and soft-knee clamping
-        let viewSunCos = clamp(dot(viewDir, sunDir), -1.0, 1.0);
+        let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
         
         // [KO] 하늘 방향 투과율 참조 (Glow 감쇄용)
         let transToEdge = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
@@ -97,13 +97,19 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         radiance += mieGlowStable;
 
         // [KO] 4. 태양 본체(Sun Disk) 복구: Specular IBL 반사맵에서는 눈부신 태양광(Sun Glint)이 필수적임
-        let sunAngularRadius = 0.00465; // 약 0.26도 (태양의 시반경)
-        let sunSolidAngle = PI * sunAngularRadius * sunAngularRadius;
-        if (acos(viewSunCos) < sunAngularRadius) {
-            let sunLuminance = vec3<f32>(1.0); // 태양의 고유 에너지
-            let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewSunCos, atmH);
-            radiance += sunLuminance * sunT * 1000.0; // 분석적 밝기 부스팅 (IBL 캡처용)
-        }
+        // [EN] 4. Restore Sun Disk: Brilliant sunlight (Sun Glint) is essential in Specular IBL reflection maps
+        // [KO] IBL 전용 가우시안 태양 모델을 사용하여 에일리어싱을 방지하고 에너지를 보존합니다.
+        // [EN] Use the IBL-specific Gaussian sun model to prevent aliasing and preserve energy.
+        radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, transToEdge) * params.solarIntensityMult;
+    }
+
+    // [KO] 점 아티팩트(Fireflies) 방지를 위한 최종 안전 클램핑
+    // [EN] Final safe clamping to prevent dot artifacts (Fireflies)
+    let finalLuma = dot(radiance, vec3<f32>(0.299, 0.587, 0.114));
+    let finalThreshold = 100.0; // IBL 샘플링 안정성을 위해 임계값 대폭 하향 (1000.0 -> 100.0)
+    if (finalLuma > finalThreshold) {
+        let softLuma = finalThreshold + (finalLuma - finalThreshold) / (1.0 + (finalLuma - finalThreshold) / finalThreshold);
+        radiance = radiance * (softLuma / finalLuma);
     }
 
     // [KO] 결과 저장: Unit scale 데이터로 저장 (Intensity는 머티리얼 샘플링 시 적용)
