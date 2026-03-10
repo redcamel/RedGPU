@@ -314,7 +314,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-            this.#irradianceGenerator.render(this.#reflectionGenerator.sourceCubeTexture.createView({dimension: 'cube'}), this.#transmittanceGenerator.lutTexture);
+            this.#irradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
             this.#dirtySkyView = false;
         }
     }
