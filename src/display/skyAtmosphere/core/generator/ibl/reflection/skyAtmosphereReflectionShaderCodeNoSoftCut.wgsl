@@ -1,4 +1,4 @@
-@group(0) @binding(0) var outputTexture: texture_storage_2d_array<rgba16float, write>;
+﻿@group(0) @binding(0) var outputTexture: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(1) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(2) var atmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
@@ -23,12 +23,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let atmH = params.atmosphereHeight;
     let sunDir = normalize(params.sunDirection);
 
-    // [KO] IBL용 태양 성분 감쇄 계수 (안정성 확보를 위해 직접광보다 낮게 설정)
+    // [KO] IBL???쒖뼇 ?깅텇 媛먯뇙 怨꾩닔 (?덉젙???뺣낫瑜??꾪빐 吏곸젒愿묐낫????쾶 ?ㅼ젙)
     // [EN] Physical IBL: no extra damping for sun/glow terms.
-    // [KO] 태양의 카메라 도달 투과율을 미리 계산 (가시성 제어용)
+    // [KO] ?쒖뼇??移대찓???꾨떖 ?ш낵?⑥쓣 誘몃━ 怨꾩궛 (媛?쒖꽦 ?쒖뼱??
     let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
 
-    // [KO] 단일 샘플링 방향 계산 (Roughly draw approach)
+    // [KO] ?⑥씪 ?섑뵆留?諛⑺뼢 怨꾩궛 (Roughly draw approach)
     let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
     let tex = uv * 2.0 - 1.0;
     var dir: vec3<f32>;
@@ -55,7 +55,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
 
     if (isGround) {
-        // 1. 지면 반사광
+        // 1. 吏硫?諛섏궗愿?
         let hitP = camPos + viewDir * tEarth;
         let hitNormal = normalize(hitP);
         let cosS = dot(hitNormal, sunDir);
@@ -79,24 +79,24 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
         let inScattering = skySample.rgb;
 
-        // [KO] 지면 위로 번지는 Mie Glow 추가 (감쇄 적용)
+        // [KO] 吏硫??꾨줈 踰덉???Mie Glow 異붽? (媛먯뇙 ?곸슜)
         let transToEdge = vec3<f32>(skySample.a);
         let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, 0.80);
 
         radiance = groundRadiance * viewTransmittance + inScattering + mieGlowAmount;
 
     } else {
-        // 2. 하늘 광휘 (Unit scale)
+        // 2. ?섎뒛 愿묓쐶 (Unit scale)
         let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
         let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
         radiance = skySample.rgb;
 
-        // 3. Mie Glow (Unit scale, 감쇄 적용)
+        // 3. Mie Glow (Unit scale, 媛먯뇙 ?곸슜)
         let transToViewEdge = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
         let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToViewEdge, 0.80);
         radiance += mieGlowStable;
 
-        // [KO] 4. 태양 본체(Sun Disk) 복구 (감쇄 적용)
+        // [KO] 4. ?쒖뼇 蹂몄껜(Sun Disk) 蹂듦뎄 (媛먯뇙 ?곸슜)
         let sunRad = params.sunSize * DEG_TO_RAD;
         let lobeHalfAngle = clamp(sunRad * 1.0, 0.002, 0.18);
         let cosHalf = cos(lobeHalfAngle);
@@ -106,14 +106,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let sunLobe = sunLobeNorm * pow(viewSun, sunLobePower);
         radiance += sunTrans * sunLobe;
 
-        // Soft-cut: outside the highlight, blend back to sky to hide ring artifacts.
-        let cosCore = cos(lobeHalfAngle * 0.9);
-        let cosEdge = cos(lobeHalfAngle * 1.2);
-        let lobeMask = smoothstep(cosEdge, cosCore, viewSun);
-        radiance = mix(skySample.rgb, radiance, lobeMask);
     }
 
-    // [KO] IBL 샘플링 안정성을 위해 임계값 대폭 하향 (100.0 -> 50.0)
+    // [KO] IBL ?섑뵆留??덉젙?깆쓣 ?꾪빐 ?꾧퀎媛?????섑뼢 (100.0 -> 50.0)
     // [EN] Physical IBL: keep radiance unclamped.
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }
