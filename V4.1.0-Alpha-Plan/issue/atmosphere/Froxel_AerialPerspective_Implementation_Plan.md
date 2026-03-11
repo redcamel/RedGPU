@@ -70,7 +70,26 @@ $$W = \left(\frac{d}{d_{max}}\right)^{power}$$
 
 ---
 
+## 7. 향후 과제: Stage 3 시각적 완성도 향상 (TODO)
+
+### [ ] Task 3.1: 노이즈 기반 Dithering 도입
+* **목적**: 3D LUT 보간 과정에서 발생하는 미세한 밴딩(Banding) 현상 제거.
+* **내용**: `computeCode.wgsl`에서 샘플링 좌표 또는 결과값에 Blue Noise/Interleaved Gradient Noise를 적용.
+
+### [ ] Task 3.2: Temporal Filtering (Time-slicing) 검토
+* **목적**: 카메라 급회전 시 발생하는 지터링 억제 및 프레임 부하 분산.
+* **내용**: 
+    * 프레임당 격자의 일부만 업데이트하거나, 이전 프레임 결과를 90% 이상 유지하는 지수 이동 평균(EMA) 필터 적용.
+    * 핑퐁(Ping-pong) 텍스처 구조 설계.
+
+### [ ] Task 3.3: Volumetric Shadows (God Rays) 프로토타이핑
+* **목적**: UE5 수준의 빛 내림 효과 구현.
+* **내용**: `CameraVolumeGenerator` 적분 루프 내에서 Directional Light의 Shadow Map 샘플링 연동.
+
+---
+
 ## 🔗 관련 문서 (Related Documents)
+
 
 
 * **[분석 보고서] [SkyAtmosphere 구현 심층 분석 및 UE5 비교 보고서](./SkyAtmosphere_UE5_Comparison_Analysis.md)**

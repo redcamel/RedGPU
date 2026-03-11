@@ -63,6 +63,7 @@ RedGPU의 `SkyAtmosphere` 시스템은 Sebastien Hillaire(2020)의 물리 기반
 
 ## 5. 기술적 최종 점검 및 판단 (Technical Final Check)
 * **성능 타당성**: Froxel 방식은 매 프레임 재계산이 필요하지만, WebGPU의 Compute Shader 성능으로 약 3.2만 개의 보셀 연산(보셀당 16~20단계 적분)은 최신 GPU에서 충분히 감당 가능함.
+* **물리적 정밀도**: 기존 `seaLevel` 시스템과의 100% 호환성 확인됨. CPU에서 전처리된 고도 데이터를 GPU가 정확히 상대 좌표로 처리함.
 * **시각적 이득**: 기존의 하드코딩된 근거리 보정(`if apDist < 0.2`)을 제거하고 순수 물리 수식으로 통합 가능함.
 * **확장성**: 이 구조는 향후 **Volumetric Shadows(God Rays)** 구현을 위한 필수적인 데이터 구조임.
 
