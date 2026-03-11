@@ -2,7 +2,8 @@
 // [EN] Generates a 3D random vector by converting a 3D position to integers. (Stable Grid-based)
 fn getHash3D_vec3(position: vec3<f32>) -> vec3<f32> {
     var q = vec3<u32>(abs(position));
-    var x = q.x ^ q.y ^ q.z;
+    // [KO] 소수 곱셈을 이용한 정밀 비트 혼합 (일직선 패턴 방지)
+    var x = (q.x * 73856093u) ^ (q.y * 19349663u) ^ (q.z * 83492791u);
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = (x >> 16u) ^ x;

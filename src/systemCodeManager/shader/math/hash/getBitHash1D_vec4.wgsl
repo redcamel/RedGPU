@@ -2,7 +2,8 @@
 // [EN] Generates a 1D random number by preserving the bit structure of a 4D vector. (Ultra-precise)
 fn getBitHash1D_vec4(v: vec4<f32>) -> f32 {
     var q = bitcast<vec4<u32>>(v);
-    var x = q.x ^ q.y ^ q.z ^ q.w;
+    // [KO] 소수 곱셈을 이용한 정밀 비트 혼합
+    var x = (q.x * 73856093u) ^ (q.y * 19349663u) ^ (q.z * 83492791u) ^ (q.w * 4000000007u);
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = (x >> 16u) ^ x;

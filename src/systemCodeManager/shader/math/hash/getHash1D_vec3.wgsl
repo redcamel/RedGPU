@@ -2,7 +2,8 @@
 // [EN] Generates a 1D random number (0.0 ~ 1.0) by converting a 3D vector to integers. (Stable Grid-based)
 fn getHash1D_vec3(v: vec3<f32>) -> f32 {
     let q = vec3<u32>(abs(v));
-    var x = q.x ^ q.y ^ q.z;
+    // [KO] 소수 곱셈을 이용한 정밀 비트 혼합
+    var x = (q.x * 73856093u) ^ (q.y * 19349663u) ^ (q.z * 83492791u);
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = (x >> 16u) ^ x;

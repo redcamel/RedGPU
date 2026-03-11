@@ -2,7 +2,8 @@
 // [EN] Generates a 1D random number (0.0 ~ 1.0) by converting a 4D vector to integers. (Stable Grid-based)
 fn getHash1D_vec4(v: vec4<f32>) -> f32 {
     let q = vec4<u32>(abs(v));
-    var x = q.x ^ q.y ^ q.z ^ q.w;
+    // [KO] 소수 곱셈을 이용한 정밀 비트 혼합
+    var x = (q.x * 73856093u) ^ (q.y * 19349663u) ^ (q.z * 83492791u) ^ (q.w * 4000000007u);
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = ((x >> 16u) ^ x) * 0x45d9f3bu;
     x = (x >> 16u) ^ x;
