@@ -19,7 +19,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let face = global_id.z;
     
     let r = params.bottomRadius;
-    let camH = params.cameraHeight;
+    let camH = 0.0; // [KO] IBL은 지표면 기준(0.0)으로 고정하여 카메라 이동에 독립적으로 설정 [EN] Fix IBL to ground level (0.0) to make it independent of camera movement
     let atmH = params.atmosphereHeight;
     let sunDir = normalize(params.sunDirection);
 

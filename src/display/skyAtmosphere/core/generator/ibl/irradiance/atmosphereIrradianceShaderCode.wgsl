@@ -18,7 +18,7 @@
 // [EN] Atmosphere radiance calculation function (Same logic as Reflection Generator)
 fn getAtmosphereRadiance(viewDir: vec3<f32>) -> vec3<f32> {
     let r = params.bottomRadius;
-    let camH = params.cameraHeight;
+    let camH = 0.0; // [KO] IBL은 지표면 기준(0.0)으로 고정하여 카메라 이동에 독립적으로 설정 [EN] Fix IBL to ground level (0.0) to make it independent of camera movement
     let atmH = params.atmosphereHeight;
     let sunDir = normalize(params.sunDirection);
 

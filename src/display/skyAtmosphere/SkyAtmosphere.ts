@@ -103,6 +103,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #sunAzimuth: number = 0;
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
+    #dirtyIBL: boolean = true;
     #dirtyUniformBuffer: boolean = true;
 
     #computeShaderMSAA: GPUShaderModule;
@@ -308,14 +309,19 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
             this.#dirtyLUT = false;
             this.#dirtySkyView = true;
+            this.#dirtyIBL = true;
         }
 
         if (this.#dirtySkyView) {
             this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#dirtySkyView = false;
+        }
+
+        if (this.#dirtyIBL) {
             this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
             this.#irradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-            this.#dirtySkyView = false;
+            this.#dirtyIBL = false;
         }
     }
 
@@ -328,6 +334,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#params.seaLevel = v;
         this.#dirtyUniformBuffer = true;
         this.#dirtySkyView = true;
+        this.#dirtyIBL = true;
     }
 
     /**
@@ -894,6 +901,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#params.sunDirection[2] = Math.sin(phi) * Math.sin(theta);
 
         this.#dirtySkyView = true;
+        this.#dirtyIBL = true;
     }
 }
 
