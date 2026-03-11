@@ -61,7 +61,7 @@ function loadGLTF(view, url) {
 
 const renderTestPane = async (targetView, skyAtmosphere) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane({title: 'SkyAtmosphere Test (UE5 Aligned)', expanded: true});
+    const pane = new Pane({title: 'SkyAtmosphere Test', expanded: true});
 
     const {
         createFieldOfView,
@@ -72,14 +72,12 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     createFieldOfView(pane, targetView.camera);
 
     const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
-    
     f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
     f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
     f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 10000, step: 0.1, label: 'sunIntensity'});
     f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'sunSize'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'sunLimbDarkening'});
 
-    // 1. Planet
     const f_planet = pane.addFolder({title: 'Planet', expanded: false});
     f_planet.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 1, label: 'bottomRadius (km)'});
     f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1, label: 'atmosphereHeight (km)'});
@@ -100,7 +98,6 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_planet.addBinding(skyAtmosphere, 'showGround', {label: 'showGround'});
     f_planet.addBinding(skyAtmosphere, 'useGround', {label: 'useGround (physics)'});
 
-    // 2. Rayleigh
     const f_rayleigh = pane.addFolder({title: 'Rayleigh', expanded: false});
     const rayleighState = {
         scat: {
@@ -114,14 +111,14 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     });
     f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'rayleighExponentialDistribution (km)'});
 
-    // 3. Mie
     const f_mie = pane.addFolder({title: 'Mie', expanded: false});
     f_mie.addBinding(skyAtmosphere, 'mieScattering', {min: 0, max: 1.0, step: 0.0001, label: 'mieScattering'});
     f_mie.addBinding(skyAtmosphere, 'mieAbsorption', {min: 0, max: 1.0, step: 0.0001, label: 'mieAbsorption'});
     f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'mieAnisotropy (g)'});
     f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'mieExponentialDistribution (km)'});
+    f_mie.addBinding(skyAtmosphere, 'mieGlow', {min: 0, max: 0.999, step: 0.01, label: 'mieGlow'});
+    f_mie.addBinding(skyAtmosphere, 'mieHalo', {min: 0, max: 0.999, step: 0.001, label: 'mieHalo (g)'});
 
-    // 4. Absorption (Ozone)
     const f_absorption = pane.addFolder({title: 'Absorption (Ozone)', expanded: false});
     const absorptionState = {
         coeff: {
@@ -136,14 +133,10 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_absorption.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1, label: 'absorptionTipAltitude (km)'});
     f_absorption.addBinding(skyAtmosphere, 'absorptionTentWidth', {min: 1, max: 50, step: 0.1, label: 'absorptionTentWidth (km)'});
 
-    // 5. Artistic Controls
     const f_artistic = pane.addFolder({title: 'Artistic Controls', expanded: true});
     f_artistic.addBinding(skyAtmosphere, 'skyLuminanceFactor', {min: 0, max: 100, step: 0.1, label: 'skyLuminanceFactor'});
     f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'aerialPerspectiveDistanceScale (km)'});
-    f_artistic.addBinding(skyAtmosphere, 'mieGlow', {min: 0, max: 0.999, step: 0.01, label: 'mieGlow'});
-    f_artistic.addBinding(skyAtmosphere, 'mieHalo', {min: 0, max: 0.999, step: 0.001, label: 'mieHalo (g)'});
 
-    // 6. Height Fog
     const f_fog = pane.addFolder({title: 'Height Fog', expanded: false});
     f_fog.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 10, step: 0.001, label: 'heightFogDensity'});
     f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.001, label: 'heightFogFalloff'});
