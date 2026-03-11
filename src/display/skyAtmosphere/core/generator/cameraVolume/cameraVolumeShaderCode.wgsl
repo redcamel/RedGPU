@@ -1,8 +1,8 @@
-// [KO] Aerial Perspective 3D LUT 생성을 위한 Compute Shader
+// [KO] Frustum-Aligned Aerial Perspective 3D LUT 생성을 위한 Compute Shader
+#redgpu_include SYSTEM_UNIFORM;
 
-@group(0) @binding(0) var atmosphereCameraVolumeTexture: texture_storage_3d<rgba16float, write>;
-@group(0) @binding(1) var atmosphereMultiScatTexture: texture_2d<f32>;
-@group(0) @binding(2) var atmosphereSampler: sampler;
+@group(0) @binding(1) var atmosphereCameraVolumeTexture: texture_storage_3d<rgba16float, write>;
+@group(0) @binding(2) var atmosphereMultiScatTexture: texture_2d<f32>;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
 @group(0) @binding(4) var atmosphereTransmittanceTexture: texture_2d<f32>;
 
@@ -12,17 +12,28 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (global_id.x >= size.x || global_id.y >= size.y || global_id.z >= size.z) { return; }
 
     let uvw = (vec3<f32>(global_id) + 0.5) / vec3<f32>(size);
-    let azimuth = (uvw.x - 0.5) * 2.0 * PI;
-    let elevation = (uvw.y - 0.5) * PI;
     
-    var effectiveElevation = elevation;
-    if (params.useGround < 0.5) { effectiveElevation = abs(elevation); }
+    // [KO] Frustum Ray 추출 (Post-Effect 단계와 동일한 로직 적용)
+    // [EN] Extract Frustum Ray (Apply identical logic to Post-Effect stage)
+    let invP = systemUniforms.projection.inverseProjectionMatrix;
+    let invV = systemUniforms.camera.inverseViewMatrix;
     
-    let viewDir = vec3<f32>(cos(effectiveElevation) * cos(azimuth), sin(effectiveElevation), cos(effectiveElevation) * sin(azimuth));
+    // [KO] NDC Y축: UV(0~1, 위가 0) -> NDC(-1~1, 위가 1)
+    let ndc = vec2<f32>(uvw.x * 2.0 - 1.0, (1.0 - uvw.y) * 2.0 - 1.0);
+    
+    // [KO] View Space Direction (Z = -1.0 방향)
+    let viewSpaceDir = normalize(vec3<f32>(ndc.x * invP[0][0], ndc.y * invP[1][1], -1.0));
+    
+    // [KO] World Space Direction (Rotation only)
+    let worldRotation = mat3x3<f32>(invV[0].xyz, invV[1].xyz, invV[2].xyz);
+    let viewDir = normalize(worldRotation * viewSpaceDir);
+    
+    // [KO] 비선형 깊이 매핑 (지수 분포)
     let sliceDist = uvw.z * uvw.z * params.aerialPerspectiveDistanceScale; 
 
     let r = params.bottomRadius;
-    let rayOrigin = vec3<f32>(0.0, params.cameraHeight + r, 0.0);
+    let camH = params.cameraHeight;
+    let rayOrigin = vec3<f32>(0.0, camH + r, 0.0);
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
@@ -31,15 +42,15 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (sliceDist > 0.0) {
         if (intersect.x > 0.0) {
             let tEnd = min(sliceDist, intersect.x);
-            // [KO] 공용 적분 함수 호출 (수동 투과율 계산 모드)
-            integrateScatSegment(rayOrigin, viewDir, 0.0, tEnd, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, false, &radiance, &transmittance);
-            if (params.showGround < 0.5 && sliceDist > intersect.y && intersect.y > 0.0) {
-                integrateScatSegment(rayOrigin, viewDir, intersect.y, sliceDist, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, false, &radiance, &transmittance);
-            }
+            // [KO] 지면과 충돌하는 경우, 지면까지만 적분
+            integrateScatSegment(rayOrigin, viewDir, 0.0, tEnd, 24u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
         } else {
-            integrateScatSegment(rayOrigin, viewDir, 0.0, sliceDist, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, false, false, &radiance, &transmittance);
+            // [KO] 하늘 방향 적분
+            integrateScatSegment(rayOrigin, viewDir, 0.0, sliceDist, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
         }
     }
 
-    textureStore(atmosphereCameraVolumeTexture, global_id, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
+    // [KO] Alpha 채널에는 평균 투과율 저장
+    let avgTrans = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
+    textureStore(atmosphereCameraVolumeTexture, global_id, vec4<f32>(radiance, avgTrans));
 }

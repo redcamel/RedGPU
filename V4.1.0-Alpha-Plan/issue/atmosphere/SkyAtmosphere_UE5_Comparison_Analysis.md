@@ -13,8 +13,8 @@ RedGPU의 `SkyAtmosphere` 시스템은 Sebastien Hillaire(2020)의 물리 기반
 | **LUT 파이프라인** | **95%** | Transmittance, Multi-Scat, Sky-View, AP(3D)의 4단계 구조가 UE5와 동일하게 설계됨. |
 | **물리적 산란 모델** | **90%** | Rayleigh/Mie/Ozone/Ground Albedo 및 Height Fog의 물리적 통합이 우수함. |
 | **IBL 및 태양 렌더링** | **90%** | Limb Darkening 적용 및 1024 샘플 Hammersley 적분을 통한 고퀄리티 IBL 생성. |
-| **공중 투시 (AP)** | **70%** | Spherical 3D LUT 사용으로 인한 해상도 낭비 및 God Rays(Shadowing) 누락. |
-| **최적화 및 확장성** | **65%** | 실시간 파라미터 변경 시 발생하는 프레임 드랍(Temporal 분산 처리 부재). |
+| **공중 투시 (AP)** | **90%** | Frustum-Aligned Froxel 격자 도입 완료. Z-depth vs Ray-length 오차 보정 및 근거리 분석적 보정 적용. |
+| **최적화 및 확장성** | **75%** | Froxel 매 프레임 업데이트 적용. 향후 Temporal 분산 처리(Stage 3) 필요. |
 
 ---
 
@@ -24,9 +24,12 @@ RedGPU의 `SkyAtmosphere` 시스템은 Sebastien Hillaire(2020)의 물리 기반
 * **UE5 방식 호환**: 투과율의 비선형 매핑(`getTransmittanceUV`)과 다중 산란의 에너지 보존 로직이 교과서적으로 구현됨.
 * **강점**: 대기 산란 루프(`integrateScatSegment`) 내부에 `heightFog`를 물리적으로 통합하여 일관된 대기 표현이 가능함. 예술적 제어를 위한 `phaseMieDual` 하이브리드 접근법이 돋보임.
 
-### 3.2 공중 투시 (Aerial Perspective) 적용의 한계
-* **Frustum vs Spherical**: UE5는 화면 좌표계(Froxel)를 사용하여 해상도를 집중시키지만, 현재 RedGPU는 전방위 구면 좌표계를 사용하여 시야 밖 데이터까지 계산하므로 정밀도가 떨어짐.
-* **근거리 보정**: 이를 해결하기 위해 `computeCode.wgsl`에서 0~200m 구간에 분석적 근사(Analytical Approximation)를 적용한 것은 훌륭한 Workaround임.
+### 3.2 공중 투시 (Aerial Perspective) - Froxel 도입 완료
+* **Frustum Alignment**: 기존 Spherical 3D LUT를 제거하고 카메라 절두체에 정렬된 Froxel 격자 구조로 전면 교체함.
+* **정밀도 보정**: 
+    * `RayLengthRatio`를 도입하여 Z-depth와 실제 광선 길이 간의 단위 불일치 해결.
+    * 3D LUT 해상도 한계 극복을 위해 200m 이내 영역에 대한 **분석적 근거리 보정(Analytical Near-field Fix)** 적용.
+* **God Rays 기초**: Froxel 구조 완성을 통해 섀도우 맵 연동(Volumetric Shadows)을 위한 기술적 토대 마련.
 
 ### 3.3 최적화 이슈
 * **동적 환경의 병목**: 태양 위치 변경 시 모든 LUT와 IBL(GGX 프리필터링 포함)을 한 프레임에 재계산함. 상용 엔진 수준의 부드러운 시간 변화(Time-of-Day)를 위해서는 연산 분산이 필수적임.
@@ -58,6 +61,14 @@ RedGPU의 `SkyAtmosphere` 시스템은 Sebastien Hillaire(2020)의 물리 기반
 
 ---
 
+## 5. 기술적 최종 점검 및 판단 (Technical Final Check)
+* **성능 타당성**: Froxel 방식은 매 프레임 재계산이 필요하지만, WebGPU의 Compute Shader 성능으로 약 3.2만 개의 보셀 연산(보셀당 16~20단계 적분)은 최신 GPU에서 충분히 감당 가능함.
+* **시각적 이득**: 기존의 하드코딩된 근거리 보정(`if apDist < 0.2`)을 제거하고 순수 물리 수식으로 통합 가능함.
+* **확장성**: 이 구조는 향후 **Volumetric Shadows(God Rays)** 구현을 위한 필수적인 데이터 구조임.
+
+---
+
 ## 🔗 관련 문서 (Related Documents)
+
 * **[구현 계획서] [Frustum-Aligned 3D Froxel Aerial Perspective 도입 계획](./Froxel_AerialPerspective_Implementation_Plan.md)**
 

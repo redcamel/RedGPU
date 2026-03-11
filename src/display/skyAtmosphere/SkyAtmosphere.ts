@@ -295,9 +295,12 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
         if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.0001) {
             this.#params.cameraHeight = currentHeightKm;
-            this.#dirtySkyView = true;
             this.#dirtyUniformBuffer = true;
         }
+
+        // [KO] Froxel AP는 카메라의 위치/회전에 종속적이므로 매 프레임 갱신을 원칙으로 함
+        // [EN] Froxel AP is dependent on camera position/rotation, so it's updated every frame by default
+        this.#dirtySkyView = true;
 
         if (this.#dirtyUniformBuffer) {
             this.#updateSharedUniformBuffer();
@@ -314,7 +317,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
         if (this.#dirtySkyView) {
             this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
-            this.#cameraVolumeGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#cameraVolumeGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#dirtySkyView = false;
         }
 
@@ -842,7 +845,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 				fn fetchDepth(pos: vec2<u32>) -> f32 {
 					let dSize = textureDimensions(depthTexture);
 					let clampedPos = min(pos, dSize - 1u);
-					${useMSAA ? 'return textureLoad(depthTexture, clampedPos, 0);' : 'return textureLoad(depthTexture, clampedPos, 0);'}
+					return textureLoad(depthTexture, clampedPos, 0);
 				}
 			`;
 

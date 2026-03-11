@@ -9,6 +9,8 @@ import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
+import View3D from "../../../../display/view/View3D";
+
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_VOLUME_GENERATOR');
 
 /**
@@ -21,7 +23,7 @@ const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_
  * @example
  * ```typescript
  * const cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext, sharedUniformBuffer, sampler);
- * cameraVolumeGenerator.render(transmittanceTexture, multiScatteringTexture);
+ * cameraVolumeGenerator.render(view, transmittanceTexture, multiScatteringTexture);
  * ```
  * @category SkyAtmosphere
  */
@@ -43,7 +45,7 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'CAMERA_VOLUME_GEN', 64, 64, 32);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'CAMERA_VOLUME_GEN', 32, 32, 32);
         this.#init();
     }
 
@@ -61,8 +63,11 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
      *
      * @example
      * ```typescript
-     * cameraVolumeGenerator.render(transmittance, multiScat);
+     * cameraVolumeGenerator.render(view, transmittance, multiScat);
      * ```
+     * @param view -
+     * [KO] 렌더링에 사용되는 3D 뷰
+     * [EN] 3D view used for rendering
      * @param transmittance -
      * [KO] 투과율 LUT 텍스처
      * [EN] Transmittance LUT texture
@@ -70,17 +75,26 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 다중 산란 LUT 텍스처
      * [EN] Multi-Scattering LUT texture
      */
-    render(transmittance: DirectTexture, multiScat: DirectTexture): void {
+    render(view: View3D, transmittance: DirectTexture, multiScat: DirectTexture): void {
         const {gpuDevice} = this.redGPUContext;
+        // [KO] View3D의 정확한 프로퍼티명인 systemUniform_Vertex_UniformBuffer를 사용하여 버퍼 추출
+        const systemBuffer = view.systemUniform_Vertex_UniformBuffer?.gpuBuffer;
+        
+        if (!systemBuffer) {
+            console.warn('CameraVolumeGenerator: systemUniform_Vertex_UniformBuffer is not ready yet.');
+            return;
+        }
+
         const bindGroup = gpuDevice.createBindGroup({
             label: 'CAMERA_VOLUME_GEN_BG',
             layout: this.pipeline.getBindGroupLayout(0),
             entries: [
-                {binding: 0, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})},
-                {binding: 1, resource: multiScat.gpuTextureView},
-                {binding: 2, resource: this.sampler.gpuSampler},
-                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-                {binding: 4, resource: transmittance.gpuTextureView}
+                {binding: 0, resource: {buffer: systemBuffer}}, // systemUniforms
+                {binding: 1, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})}, // atmosphereCameraVolumeTexture
+                {binding: 2, resource: multiScat.gpuTextureView}, // atmosphereMultiScatTexture
+                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, // params
+                {binding: 4, resource: transmittance.gpuTextureView}, // atmosphereTransmittanceTexture
+                {binding: 13, resource: this.sampler.gpuSampler} // atmosphereSampler
             ]
         });
         this.gpuRender(bindGroup, [4, 4, 4]);

@@ -21,41 +21,57 @@ $$W = \left(\frac{d}{d_{max}}\right)^{power}$$
 
 ---
 
-## 3. 단계별 구현 로직
+## 3. 단계별 구현 로직 (완료)
 
-### 단계 1: `CameraVolumeGenerator` 리팩토링
-* **Texture Dimension**: Viewport의 가로세로 비를 고려하거나 고정된 저해상도 격자(예: 32x32)를 할당하도록 수정.
-* **Update Frequency**: 카메라의 회전/이동에 따라 **매 프레임 재계산**이 필요함 (현재는 카메라 고도 변화 시에만 갱신됨).
+### [V] 단계 1: `CameraVolumeGenerator` 리팩토링
+* **Texture Dimension**: 효율적인 실시간 연산을 위해 32x32x32 해상도 적용.
+* **Update Frequency**: 카메라의 회전/이동에 대응하여 매 프레임 재계산 로직 구축.
 
-### 단계 2: `cameraVolumeShaderCode.wgsl` 수정
-* **UVW to World Position**:
-    1. UV를 Screen Space NDC로 변환.
-    2. W를 비선형 깊이 공식으로 실제 거리 $d$로 변환.
-    3. Inverse Projection/View Matrix를 사용하여 World Position 추출.
-* **Scattering Integration**: 추출된 World Position까지의 산란광 및 투과율을 `integrateScatSegment`로 계산하여 저장.
+### [V] 단계 2: `cameraVolumeShaderCode.wgsl` 수정
+* **NDC to World**: Inverse View/Projection Matrix를 사용하여 정확한 절두체 레이 방향 추출.
+* **Camera-Relative Origin**: 정밀도 유지를 위해 카메라 상대 좌표계를 사용하여 산란 적분 수행.
 
-### 단계 3: `computeCode.wgsl` (Post-Effect) 수정
-* **Sampling Logic**:
-    1. 픽셀의 Depth 값을 읽어 선형 거리 $d$ 계산.
-    2. Screen UV와 깊이 $d$를 기반으로 Froxel UVW 계산.
-    3. `textureSampleLevel`을 사용하여 산란광 및 투과율 페치.
-* **근거리 보정 제거**: Froxel 도입 시 근거리 정밀도가 확보되므로, 기존의 Analytical Approximation(200m 이내 직접 계산) 코드를 제거하여 단순화 가능.
+### [V] 단계 3: `computeCode.wgsl` (Post-Effect) 수정
+* **Ray Length Correction**: 수직 Z-depth를 실제 광선 길이로 변환하는 `RayLengthRatio` 도입 (화면 가장자리 정밀도 해결).
+* **Near-field Fix**: 3D LUT 해상도 한계를 보완하기 위해 200m 이내 영역에 대한 분석적 적분(Analytical Integration) 결합.
 
 ---
 
-## 4. 기대 효과
-1. **정밀도 향상**: 화면에 보이는 영역에만 3D 텍셀을 집중시켜 안개와 빛의 산란이 훨씬 부드럽게 표현됨.
-2. **에일리어싱 감소**: 구면 좌표계의 극점(Zenith/Nadir) 부근에서 발생하는 아티팩트 원천 차단.
-3. **God Rays 기초 확보**: 향후 Froxel 기반 볼륨 렌더링을 확장하여 섀도우 맵과 연동 시 물리적인 빛 내림(Volumetric Shadows) 구현이 용이해짐.
+## 4. 기대 효과 및 성과
+1. **정밀도 향상**: 화면 전체에 걸쳐 균일하고 물리적으로 정확한 공중 투시 효과 구현.
+2. **근거리 아티팩트 제거**: 카메라 주변 물체가 안개에 덮이는 현상(Over-fogging) 완벽 해결.
+3. **God Rays 기초 확보**: Froxel 구조 완성을 통해 Volumetric Shadows 구현을 위한 데이터 파이프라인 완성.
 
 ---
 
-## 5. 리스크 및 고려사항
-* **카메라 이동 시 지터링(Jittering)**: 격자가 카메라에 고정되어 있으므로, 이동 시 텍셀 간 보간에 의한 미세한 떨림이 발생할 수 있음. (Temporal Filter로 해결 가능)
-* **메모리 사용량**: 3D Texture의 해상도가 높아질 경우 비디오 메모리 점유율 상승 주의.
+## 5. 리스크 관리 및 최적화 전략 (Risk Management)
+
+### 5.1 성능 최적화 (Performance)
+* **보셀당 적분 단계 최적화**: 기존 64단계 적분을 Froxel 격자에서는 16~24단계로 조정하여 연산 부하를 낮춤 (격자의 누적 효과로 인해 시각적 손실 최소화).
+* **비동기 컴퓨팅(Async Compute)**: WebGPU 환경에서 렌더링 파이프라인과 독립적으로 Compute Pass를 배치하여 효율성 증대.
+
+### 5.2 정밀도 및 아티팩트 방지
+* **Exponential Depth Mapping**: $W = (d/d_{max})^{power}$ 공식을 적용하여 근거리 보셀 밀도를 높임 (Near Plane은 0.1~1.0km 사이의 상수로 설정).
+* **Dithering & Filtering**: 3D Texture 샘플링 시 Trilinear Filtering을 사용하고, `computeCode.wgsl`에 노이즈 기반 Dithering을 추가하여 밴딩(Banding) 현상 방지.
+* **Temporal Filtering**: 카메라 이동 시 발생하는 미세한 지터링(Shimmering)을 억제하기 위해 이전 프레임 데이터를 90~95% 비율로 블렌딩하는 로직 검토.
+
+---
+
+## 6. 현실적 구현을 위한 3대 핵심 가이드 (Implementation Guide)
+
+### 6.1 카메라 상대 좌표계 사용 (Camera-Relative)
+월드 좌표($10^6$ 단위)에서 발생하는 정밀도 오차를 방지하기 위해, 보셀의 위치 계산은 카메라 원점(0,0,0) 기준으로 수행하고, 산란 적분 함수에만 절대 고도를 전달하여 계산합니다.
+
+### 6.2 프레임 간 데이터 가중치 제어
+매 프레임 재계산 시 발생하는 미세한 노이즈를 잡기 위해, `Froxel LUT` 텍스처를 두 개(Ping-Pong) 준비하여 이전 프레임의 결과와 현재 결과를 `mix(prev, curr, 0.1)` 형태로 섞어주는 **Temporal Amortization**을 고려해야 합니다.
+
+### 6.3 뷰포트 비율 보정
+셰이더 내에서 `ScreenCoord = (f32(x)/32.0, f32(y)/32.0)`으로 고정하지 않고, `systemUniforms.projection`에서 전달되는 가로세로 비율을 곱해 절두체의 형태를 물리적으로 정확하게 유지해야 합니다.
 
 ---
 
 ## 🔗 관련 문서 (Related Documents)
+
+
 * **[분석 보고서] [SkyAtmosphere 구현 심층 분석 및 UE5 비교 보고서](./SkyAtmosphere_UE5_Comparison_Analysis.md)**
 
