@@ -40,7 +40,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let t = clamp(uniforms.roughness, 0.0, 1.0);
     let curve = pow(t, 3.0) / 6.0;
 //    let mixed = mix(soft, noSoft, curve);
-    let mixed = mix(soft, noSoft, pow(t, 2.0));
+    let mixed = mix(soft, noSoft, pow(t, 2.2));
 //    let mixed = mix(noSoft, noSoft, curve);
 
     textureStore(outTexture, global_id.xy, global_id.z, vec4<f32>(mixed, 1.0));
