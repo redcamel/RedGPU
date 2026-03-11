@@ -97,8 +97,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         radiance += mieGlowStable;
 
         // [KO] 4. ?쒖뼇 蹂몄껜(Sun Disk) 蹂듦뎄 (媛먯뇙 ?곸슜)
-        let sunRad = params.sunSize * DEG_TO_RAD;
-        let lobeHalfAngle = clamp(sunRad * 1.0, 0.002, 0.18);
+        let sunRad = (5.0) * DEG_TO_RAD;
+        let lobeHalfAngle = clamp(sunRad * 8.0, 0.02, 0.7);
         let cosHalf = cos(lobeHalfAngle);
         let sunLobePower = clamp(log(0.5) / log(max(1e-4, cosHalf)), 2.0, 128.0);
         let sunLobeNorm: f32 = (sunLobePower + 1.0) * (0.5 * INV_PI);
