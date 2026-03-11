@@ -38,7 +38,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let soft = textureSampleLevel(softCutTexture, combineSampler, viewDir, mip).rgb;
     let noSoft = textureSampleLevel(noSoftCutTexture, combineSampler, viewDir, mip).rgb;
     let t = clamp(uniforms.roughness, 0.0, 1.0);
-    let curve = pow(t, 4.0);
+    let curve = pow(t, 3.0)/4.0;
     let mixed = mix(soft, noSoft, curve);
 
     textureStore(outTexture, global_id.xy, global_id.z, vec4<f32>(mixed, 1.0));

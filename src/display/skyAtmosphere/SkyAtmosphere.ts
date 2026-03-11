@@ -596,6 +596,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         validatePositiveNumberRange(v, 0.01, 10.0);
         this.#params.sunSize = v;
         this.#dirtyUniformBuffer = true;
+        this.#dirtySkyView = true;
     }
 
     /**
