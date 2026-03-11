@@ -12,6 +12,9 @@
     * 공중 투시(Aerial Perspective) 정밀도 향상을 위한 핵심 기술 로드맵.
     * 단계별 구현 로직 및 리스크 관리 전략.
 
+3. **[Sky Background 개선 계획서](./SkyBackground_Improvement_Plan.md)**
+    * 하늘 배경의 디테일(모션 벡터, 디더링, 별 필드 등) 향상을 위한 가이드.
+
 ---
 
 ## 🚀 로드맵 (Roadmap)
