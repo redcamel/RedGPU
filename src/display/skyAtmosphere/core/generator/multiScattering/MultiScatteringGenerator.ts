@@ -67,7 +67,6 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 투과율 LUT 텍스처 (계산에 참조됨)
      * [EN] Transmittance LUT texture (referenced for calculation)
      */
-    // @ts-ignore
     render(transmittanceTexture: DirectTexture): void {
         if (!this.#bindGroup) {
             const {gpuDevice} = this.redGPUContext;
@@ -80,7 +79,7 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
                 ]
             });
         }
-        super.render(this.#bindGroup, [8, 8, 1]);
+        this.executeComputePass(this.#bindGroup, [8, 8, 1]);
     }
 
     #init(): void {

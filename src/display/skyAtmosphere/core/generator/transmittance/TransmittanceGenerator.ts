@@ -64,7 +64,6 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
      * transmittanceGenerator.render();
      * ```
      */
-    // @ts-ignore
     render(): void {
         if (!this.#bindGroup) {
             const {gpuDevice} = this.redGPUContext;
@@ -77,7 +76,7 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
                 ]
             });
         }
-        super.render(this.#bindGroup);
+        this.executeComputePass(this.#bindGroup);
     }
 
     #init(): void {

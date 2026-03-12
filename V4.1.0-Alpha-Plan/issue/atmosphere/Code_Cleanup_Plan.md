@@ -38,12 +38,12 @@
 ### Step 1: Generator 기반 강화 (P0)
 | 진행 상황 | 대상 파일 | 주요 변경 사항 | 비고 |
 | :---: | :--- | :--- | :--- |
-| **완료** | `ASkyAtmosphereLUTGenerator.ts` | `protected` 변수 4종 및 `readonly` 속성 4종을 Private Field(`#`)로 캡슐화 | 외부/자식 클래스용 Getter/Setter 구현 추가 |
-| **완료** | `ASkyAtmosphereLUTGenerator.ts` | `gpuRender`를 `render`로 개명 및 `public` 전환 | 자식 클래스의 오버라이딩 일관성 확보 |
-| **완료** | `TransmittanceGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `@ts-ignore` 및 `super.render()` 활용 |
-| **완료** | `MultiScatteringGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `@ts-ignore` 및 `super.render()` 활용 |
-| **완료** | `SkyViewGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `@ts-ignore` 및 `super.render()` 활용 |
-| **완료** | `AtmosphereIrradianceGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `@ts-ignore` 및 `super.render()` 활용 |
+| **완료** | `ASkyAtmosphereLUTGenerator.ts` | `protected` 변수 4종 및 `readonly` 속성 4종을 Private Field(`#`)로 캡슐화 | 외부/자식 클래스용 Getter/Setter 구현 추가. `protected` 키워드 제거(public 전환). |
+| **완료** | `ASkyAtmosphereLUTGenerator.ts` | `gpuRender`를 `executeComputePass`로 개명 | 자식 클래스 오버라이딩 충돌 회피 (`render` 시그니처 보존) |
+| **완료** | `TransmittanceGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `this.executeComputePass()` 활용 (`@ts-ignore` 제거) |
+| **완료** | `MultiScatteringGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `this.executeComputePass()` 활용 (`@ts-ignore` 제거) |
+| **완료** | `SkyViewGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `this.executeComputePass()` 활용 (`@ts-ignore` 제거) |
+| **완료** | `AtmosphereIrradianceGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `this.executeComputePass()` 활용 (`@ts-ignore` 제거) |
 | **완료** | `CameraVolumeGenerator.ts` | 조건부 바인드 그룹 캐싱 적용 | `View3D`의 UniformBuffer 갱신 여부 감지 로직 포함 |
 | **완료** | `SkyAtmosphereReflectionGenerator.ts` | 다중 바인드 그룹 캐싱 적용 | `SoftCut`, `NoSoftCut`, `combine` 루프용 배열 캐싱 적용 |
 

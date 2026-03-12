@@ -110,7 +110,7 @@ abstract class ASkyAtmosphereLUTGenerator {
      * [KO] 워크그룹 크기 (기본값: [16, 16, 1])
      * [EN] Workgroup size (Default: [16, 16, 1])
      */
-    render(
+    executeComputePass(
         bindGroup: GPUBindGroup,
         workgroupSize: [number, number, number] = [16, 16, 1]
     ): void {

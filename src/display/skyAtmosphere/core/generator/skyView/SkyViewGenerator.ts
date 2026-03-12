@@ -70,7 +70,6 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 다중 산란 LUT 텍스처
      * [EN] Multi-Scattering LUT texture
      */
-    // @ts-ignore
     render(transmittance: DirectTexture, multiScat: DirectTexture): void {
         if (!this.#bindGroup) {
             const {gpuDevice} = this.redGPUContext;
@@ -86,7 +85,7 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
                 ]
             });
         }
-        super.render(this.#bindGroup);
+        this.executeComputePass(this.#bindGroup);
     }
 
     #init(): void {

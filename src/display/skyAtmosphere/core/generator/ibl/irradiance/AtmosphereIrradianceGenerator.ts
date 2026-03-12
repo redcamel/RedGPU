@@ -73,8 +73,7 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	 * [KO] 스카이 뷰 LUT 텍스처
 	 * [EN] Sky-View LUT texture
 	 */
-    // @ts-ignore
-	render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): void {
+    render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): void {
 		if (!this.#bindGroup) {
 			const {gpuDevice} = this.redGPUContext;
 			this.#bindGroup = gpuDevice.createBindGroup({
@@ -91,7 +90,7 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 			});
 		}
 
-		super.render(this.#bindGroup, [8, 8, 1]);
+		this.executeComputePass(this.#bindGroup, [8, 8, 1]);
 	}
 
 	#init(): void {

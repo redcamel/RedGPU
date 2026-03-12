@@ -78,7 +78,6 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 다중 산란 LUT 텍스처
      * [EN] Multi-Scattering LUT texture
      */
-    // @ts-ignore
     render(view: View3D, transmittance: DirectTexture, multiScat: DirectTexture): void {
         const {gpuDevice} = this.redGPUContext;
         // [KO] View3D의 정확한 프로퍼티명인 systemUniform_Vertex_UniformBuffer를 사용하여 버퍼 추출
@@ -105,7 +104,7 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
             });
         }
         
-        super.render(this.#bindGroup, [4, 4, 4]);
+        this.executeComputePass(this.#bindGroup, [4, 4, 4]);
     }
 
     #init(): void {
