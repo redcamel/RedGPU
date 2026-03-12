@@ -14,84 +14,6 @@
 #redgpu_include math.tnb.getTBN
 #redgpu_include color.getLuminance
 
-// [KO] 대기 휘도 계산 함수 (Reflection Generator의 로직과 동일)
-// [EN] Atmosphere radiance calculation function (Same logic as Reflection Generator)
-fn getAtmosphereRadiance(viewDir: vec3<f32>) -> vec3<f32> {
-    let r = params.bottomRadius;
-    let camH = 0.0; // [KO] IBL은 지표면 기준(0.0)으로 고정하여 카메라 이동에 독립적으로 설정 [EN] Fix IBL to ground level (0.0) to make it independent of camera movement
-    let atmH = params.atmosphereHeight;
-    let sunDir = normalize(params.sunDirection);
-
-    // [KO] IBL용 태양 성분 감쇄 계수 (안정성 확보를 위해 직접광보다 낮게 설정)
-    // [EN] Sun component damping factor for IBL (set lower than direct light for stability)
-    const IBL_SUN_DAMP: f32 = 0.5;
-
-    // [KO] 태양의 카메라 도달 투과율을 미리 계산 (가시성 제어용)
-    let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
-
-    let camPos = vec3<f32>(0.0, r + camH, 0.0);
-    let tEarth = getRaySphereIntersection(camPos, viewDir, r);
-    let isGround = params.useGround > 0.5 && tEarth > 0.0 && viewDir.y < -0.0001;
-
-    var radiance = vec3<f32>(0.0);
-    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-
-    if (isGround) {
-        // 1. 지면 반사광
-        let hitP = camPos + viewDir * tEarth;
-        let hitNormal = normalize(hitP);
-        let cosS = dot(hitNormal, sunDir);
-        let sunShadow = smoothstep(-0.01, 0.01, cosS);
-        
-        var groundRadiance = vec3<f32>(0.0);
-
-        if (sunShadow > 0.0) {
-            let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, cosS, atmH);
-            let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-            groundRadiance = (sunT * max(0.0, cosS) + msEnergy * PI) * (params.groundAlbedo * INV_PI) * sunShadow;
-        } else {
-            let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-            groundRadiance = (msEnergy * PI) * (params.groundAlbedo * INV_PI);
-        }
-
-        let viewZenithCosAngle = dot(hitNormal, -viewDir);
-        let viewTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewZenithCosAngle, atmH);
-        
-        let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
-        let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
-        let inScattering = skySample.rgb;
-
-        // [KO] 지면 위로 번지는 Mie Glow 추가 (감쇄 적용)
-        let transToEdge = vec3<f32>(skySample.a);
-        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, 0.80) * IBL_SUN_DAMP;
-
-        radiance = groundRadiance * viewTransmittance + inScattering + mieGlowAmount;
-
-    } else {
-        // 2. 하늘 광휘 (Unit scale)
-        let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
-        let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
-        radiance = skySample.rgb;
-
-        // 3. Mie Glow (Unit scale, 감쇄 적용)
-        let transToViewEdge = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToViewEdge, 0.80) * IBL_SUN_DAMP;
-        radiance += mieGlowStable;
-
-        // [KO] 4. 태양 본체(Sun Disk) 복구 (감쇄 적용)
-        radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, sunTrans) * IBL_SUN_DAMP;
-    }
-
-    // [KO] IBL 샘플링 안정성을 위해 임계값 대폭 하향 (100.0 -> 50.0)
-    let finalLuma = getLuminance(radiance);
-    let finalThreshold = 50.0; 
-    if (finalLuma > finalThreshold) {
-        let softLuma = finalThreshold + (finalLuma - finalThreshold) / (1.0 + (finalLuma - finalThreshold) / finalThreshold);
-        radiance = radiance * (softLuma / finalLuma);
-    }
-    return radiance;
-}
-
 fn radicalInverse_VdC(bits_in: u32) -> f32 {
     var bits = bits_in;
     bits = (bits << 16u) | (bits >> 16u);
@@ -120,17 +42,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     
     // [KO] WebGPU 표준 큐브맵 좌표계에 따른 방향 계산 (Normal)
     // [EN] Calculate direction (Normal) according to WebGPU standard cubemap coordinate system
-    let tex = uv * 2.0 - 1.0;
-    var dir: vec3<f32>;
-    switch (face) {
-        case 0u: { dir = vec3<f32>(1.0, -tex.y, -tex.x); } // +X
-        case 1u: { dir = vec3<f32>(-1.0, -tex.y, tex.x); } // -X
-        case 2u: { dir = vec3<f32>(tex.x, 1.0, tex.y); }  // +Y
-        case 3u: { dir = vec3<f32>(tex.x, -1.0, -tex.y); } // -Y
-        case 4u: { dir = vec3<f32>(tex.x, -tex.y, 1.0); }  // +Z
-        case 5u: { dir = vec3<f32>(-tex.x, -tex.y, -1.0); } // -Z
-        default: { dir = vec3<f32>(0.0); }
-    }
+    let dir = getCubeMapDirection(uv, face);
     let normal = normalize(dir);
 
     let up = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(1.0, 0.0, 0.0), abs(normal.y) > 0.999);
@@ -152,7 +64,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         // [KO] 텍스처 샘플링 대신 대기 휘도를 직접 계산 (완벽한 독립화)
         // [EN] Directly calculate atmosphere radiance instead of texture sampling (complete independence)
-        irradiance += getAtmosphereRadiance(worldSample);
+        irradiance += evaluateIBLRadiance(worldSample, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler, 0u);
         totalWeight += 1.0;
     }
 

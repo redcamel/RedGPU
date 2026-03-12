@@ -14,7 +14,7 @@ import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 
 const SOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_SOFTCUT');
 const NOSOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCodeNoSoftCut, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_NOSOFTCUT');
-const COMBINE_SHADER_INFO = parseWGSL(reflectionCombineShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_COMBINE');
+const COMBINE_SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionCombineShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_COMBINE');
 
 /**
  * [KO] ?ㅼ떆媛??湲??곕? ?곗씠?곕? 湲곕컲?쇰줈 ?꾨━?꾪꽣留곷맂 諛섏궗 ?먮툕留듭쓣 ?앹꽦?섎뒗 ?대옒?ㅼ엯?덈떎.

@@ -404,3 +404,132 @@ fn integrateScatSegment(
         *transmittance *= exp(-ext * stepSize);
     }
 }
+
+// [KO] 큐브맵 UV 및 Face 인덱스를 기반으로 방향 벡터(Normal/ViewDir)를 반환합니다.
+fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
+    let tex = uv * 2.0 - 1.0;
+    var dir: vec3<f32>;
+    switch (face) {
+        case 0u: { dir = vec3<f32>(1.0, -tex.y, -tex.x); } // +X
+        case 1u: { dir = vec3<f32>(-1.0, -tex.y, tex.x); } // -X
+        case 2u: { dir = vec3<f32>(tex.x, 1.0, tex.y); }  // +Y
+        case 3u: { dir = vec3<f32>(tex.x, -1.0, -tex.y); } // -Y
+        case 4u: { dir = vec3<f32>(tex.x, -tex.y, 1.0); }  // +Z
+        case 5u: { dir = vec3<f32>(-tex.x, -tex.y, -1.0); } // -Z
+        default: { dir = vec3<f32>(0.0); }
+    }
+    return dir;
+}
+
+// [KO] 대기 산란 지면 반사광(Ground Radiance)을 계산합니다.
+fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>) -> vec3<f32> {
+    let sunShadow = smoothstep(-0.01, 0.01, cosSun);
+    var groundRadiance = vec3<f32>(0.0);
+    if (sunShadow > 0.0) {
+        groundRadiance = (sunTrans * max(0.0, cosSun) + msEnergy * PI) * (groundAlbedo * INV_PI) * sunShadow;
+    } else {
+        groundRadiance = (msEnergy * PI) * (groundAlbedo * INV_PI);
+    }
+    return groundRadiance;
+}
+
+// [KO] 태양 본체 스페큘러(Specular Sun Lobe) 강도를 계산합니다.
+fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
+    let cosHalf = cos(lobeHalfAngle);
+    let sunLobePower = clamp(log(0.5) / log(max(1e-4, cosHalf)), 2.0, 128.0);
+    let sunLobeNorm = (sunLobePower + 1.0) * (0.5 * INV_PI);
+    return sunLobeNorm * pow(max(0.0, viewSun), sunLobePower);
+}
+
+// [KO] IBL 및 Reflection용 대기 휘도(Radiance)를 통합 평가합니다.
+// mode: 0 = Irradiance, 1 = ReflectionSoftCut, 2 = ReflectionNoSoftCut
+fn evaluateIBLRadiance(
+    viewDir: vec3<f32>, 
+    params: SkyAtmosphere, 
+    transmittanceTexture: texture_2d<f32>, 
+    multiScatTexture: texture_2d<f32>, 
+    skyViewTexture: texture_2d<f32>, 
+    atmosphereSampler: sampler, 
+    mode: u32
+) -> vec3<f32> {
+    let r = params.bottomRadius;
+    let camH = 0.0;
+    let atmH = params.atmosphereHeight;
+    let sunDir = normalize(params.sunDirection);
+
+    let IBL_SUN_DAMP = select(1.0, 0.5, mode == 0u);
+    let sunTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, sunDir.y, atmH);
+
+    let camPos = vec3<f32>(0.0, r + camH, 0.0);
+    let tEarth = getRaySphereIntersection(camPos, viewDir, r);
+    let isGround = params.useGround > 0.5 && tEarth > 0.0 && viewDir.y < -0.0001;
+
+    var radiance = vec3<f32>(0.0);
+    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
+
+    if (isGround) {
+        let hitP = camPos + viewDir * tEarth;
+        let hitNormal = normalize(hitP);
+        let cosS = dot(hitNormal, sunDir);
+        let sunT = getTransmittance(transmittanceTexture, atmosphereSampler, 0.0, cosS, atmH);
+        let msEnergy = textureSampleLevel(multiScatTexture, atmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
+        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo);
+
+        let viewZenithCosAngle = dot(hitNormal, -viewDir);
+        let viewTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewZenithCosAngle, atmH);
+        
+        let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
+        let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
+        let inScattering = skySample.rgb;
+
+        let transToEdge = vec3<f32>(skySample.a);
+        let glowHalo = select(0.80, 0.65, mode == 1u);
+        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToEdge, glowHalo) * IBL_SUN_DAMP;
+
+        radiance = groundRadiance * viewTransmittance + inScattering + mieGlowAmount;
+    } else {
+        let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
+        let skySample = textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0);
+        radiance = skySample.rgb;
+
+        let transToViewEdge = getTransmittance(transmittanceTexture, atmosphereSampler, camH, viewDir.y, atmH);
+        let glowHalo = select(0.80, 0.65, mode == 1u);
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, camH, params, transmittanceTexture, atmosphereSampler, transToViewEdge, glowHalo) * IBL_SUN_DAMP;
+        radiance += mieGlowStable;
+
+        if (mode == 0u) {
+            radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, sunTrans) * IBL_SUN_DAMP;
+        } else {
+            let viewSun = max(0.0, dot(viewDir, sunDir));
+            if (mode == 1u) {
+                // SoftCut
+                let sunRad = 0.25 * DEG_TO_RAD;
+                let lobeHalfAngle = clamp(sunRad, 0.002, 0.09);
+                let sunLobe = getSpecularSunLobe(viewSun, lobeHalfAngle);
+                radiance += sunTrans * sunLobe;
+
+                let cosCore = cos(lobeHalfAngle * 0.9);
+                let cosEdge = cos(lobeHalfAngle * 1.2);
+                let lobeMask = smoothstep(cosEdge, cosCore, viewSun);
+                radiance = mix(skySample.rgb, radiance, lobeMask);
+            } else if (mode == 2u) {
+                // NoSoftCut
+                let sunRad = 5.0 * DEG_TO_RAD;
+                let lobeHalfAngle = clamp(sunRad, 0.1, 0.6);
+                let sunLobe = getSpecularSunLobe(viewSun, lobeHalfAngle);
+                radiance += sunTrans * sunLobe;
+            }
+        }
+    }
+
+    if (mode == 0u) {
+        let finalLuma = getLuminance(radiance);
+        let finalThreshold = 50.0; 
+        if (finalLuma > finalThreshold) {
+            let softLuma = finalThreshold + (finalLuma - finalThreshold) / (1.0 + (finalLuma - finalThreshold) / finalThreshold);
+            radiance = radiance * (softLuma / finalLuma);
+        }
+    }
+
+    return radiance;
+}

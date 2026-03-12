@@ -59,7 +59,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             // [KO] 지면 반사광 합성 (모두 단위 휘도로 계산하여 중복 합산 방지)
             // [EN] Combine ground reflection (calculate in unit radiance to prevent redundant summation)
-            radiance += transmittance * (sunTrans * max(0.0, cosSun) + msEnergy * PI) * (params.groundAlbedo * INV_PI);
+            let groundRadiance = evaluateGroundRadiance(cosSun, sunTrans, msEnergy, params.groundAlbedo);
+            radiance += transmittance * groundRadiance;
         }
     } else if (tMax > 0.0) {
         integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);

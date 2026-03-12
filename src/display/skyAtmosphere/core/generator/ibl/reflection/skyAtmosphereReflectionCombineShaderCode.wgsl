@@ -21,18 +21,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let face = global_id.z;
 
     let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
-    let tex = uv * 2.0 - 1.0;
-    var dir: vec3<f32>;
-    switch (face) {
-        case 0u: { dir = vec3<f32>(1.0, -tex.y, -tex.x); } // +X
-        case 1u: { dir = vec3<f32>(-1.0, -tex.y, tex.x); } // -X
-        case 2u: { dir = vec3<f32>(tex.x, 1.0, tex.y); }  // +Y
-        case 3u: { dir = vec3<f32>(tex.x, -1.0, -tex.y); } // -Y
-        case 4u: { dir = vec3<f32>(tex.x, -tex.y, 1.0); }  // +Z
-        case 5u: { dir = vec3<f32>(-tex.x, -tex.y, -1.0); } // -Z
-        default: { dir = vec3<f32>(0.0); }
-    }
-    let viewDir = normalize(dir);
+    let viewDir = normalize(getCubeMapDirection(uv, face));
 
     let mip = uniforms.mipLevel;
     let soft = textureSampleLevel(softCutTexture, combineSampler, viewDir, mip).rgb;
