@@ -58,6 +58,16 @@
 *   **방향성 논의 결과**: `SystemCodeManager`를 오염시키지 않고, 번들러의 Native Import 및 TS 템플릿 리터럴을 활용하여 조립(Composition)하는 방향이 논의됨.
 *   **상태**: 추가적인 아키텍처 결정 전까지 작업 홀딩.
 
+### Step 4: WGSL 셰이더 내 공통 물리 로직 분리 및 통합 (P1)
+여러 `.wgsl` 파일에 중복으로 하드코딩된 대기 산란 관련 수식과 유틸리티 함수들을 식별하고 `core/skyAtmosphereFn.wgsl`로 분리하여 유지보수성을 극대화합니다.
+
+| 분류 (Category) | 중복 발견 위치 | 통합될 함수 시그니처 (제안) | 기대 효과 |
+| :--- | :--- | :--- | :--- |
+| **큐브맵 벡터 매핑** | `Irradiance`, `Reflection (Soft/NoSoft)`, `Combine` (총 4곳) | `fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32>` | 15줄 가량의 `switch(face)` 계산식 중복 제거 및 가독성 확보 |
+| **지면 반사광 계산** | `SkyView`, `Irradiance`, `Reflection (Soft/NoSoft)` (총 4곳) | `fn evaluateGroundRadiance(cosSun, sunTrans, msEnergy, groundAlbedo)` | Albedo와 MS 에너지를 이용한 적분 식의 파편화 방지 및 무결성 확보 |
+| **태양 본체 스페큘러** | `Reflection (SoftCut)`, `Reflection (NoSoftCut)` (총 2곳) | `fn getSpecularSunLobe(viewSunCos, lobeHalfAngle, sunTrans)` | Sun Lobe 계산을 위한 `pow(viewSun, sunLobePower)` 로직 통합 보존 |
+| **IBL 평가 거시 구조** | `Irradiance`, `Reflection (Soft/NoSoft)` (총 3곳) | `isGround` 판단 후 `SkyView` 및 `Mie Glow`를 합성하는 매크로 블록의 단순화 | 각 IBL 셰이더 파일의 `main()` 함수가 10줄 이내로 극단적 압축 가능 |
+
 ---
 
 ## 4. 자체 점검 결과 (Self-Review)

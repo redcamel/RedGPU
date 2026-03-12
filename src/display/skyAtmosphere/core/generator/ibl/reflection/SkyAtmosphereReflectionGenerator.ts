@@ -236,8 +236,6 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
             new ArrayBuffer(16),
             'SKY_ATMOSPHERE_REFL_COMBINE_UBO'
         );
-
-        this.pipeline = this.#softCutPipeline;
     }
 
     #computeRender(
