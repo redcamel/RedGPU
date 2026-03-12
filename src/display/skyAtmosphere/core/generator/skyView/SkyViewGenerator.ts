@@ -1,14 +1,14 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
-import skyViewShaderCode from "./skyViewShaderCode.wgsl";
-import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
+import skyViewShaderCode_wgsl from "./skyViewShaderCode.wgsl";
+import skyAtmosphereFn_wgsl from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + skyViewShaderCode, 'SKY_VIEW_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + skyViewShaderCode_wgsl, 'SKY_VIEW_GENERATOR');
 
 /**
  * [KO] 카메라 시점에서의 전방위 하늘색 데이터를 담는 Sky-View LUT 생성을 담당하는 클래스입니다.

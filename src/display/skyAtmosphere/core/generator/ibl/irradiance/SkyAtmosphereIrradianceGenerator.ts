@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
-import skyAtmosphereIrradianceShaderCode from "./skyAtmosphereIrradianceShaderCode.wgsl";
+import skyAtmosphereIrradianceShaderCode_wgsl from "./skyAtmosphereIrradianceShaderCode.wgsl";
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
@@ -8,7 +8,7 @@ import createUUID from "../../../../../../utils/uuid/createUUID";
 import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereIrradianceShaderCode, 'SKY_ATMOSPHERE_IRRADIANCE_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereIrradianceShaderCode_wgsl, 'SKY_ATMOSPHERE_IRRADIANCE_GENERATOR');
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 물리적으로 일치하는 조도(Irradiance) 큐브맵을 생성하는 클래스입니다.

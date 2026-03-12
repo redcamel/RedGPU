@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
-import aerialPerspectiveShaderCode from "./aerialPerspectiveShaderCode.wgsl";
-import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
+import aerialPerspectiveShaderCode_wgsl from "./aerialPerspectiveShaderCode.wgsl";
+import skyAtmosphereFn_wgsl from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
@@ -12,7 +12,7 @@ import View3D from "../../../../view/View3D";
 
 
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + aerialPerspectiveShaderCode, 'AERIAL_PERSPECTIVE_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + aerialPerspectiveShaderCode_wgsl, 'AERIAL_PERSPECTIVE_GENERATOR');
 
 /**
  * [KO] 거리별 공중 투시(Aerial Perspective)를 위한 3D LUT 생성을 담당하는 클래스입니다.

@@ -93,6 +93,19 @@ WGSL 코드를 TypeScript JSDoc으로 자동 동기화하는 과정에서 발생
 | **완료** | **변수명 (WGSL)** | `camH`, `mappingH`, `h` ➡️ `viewHeight`, `atmH` ➡️ `atmosphereHeight` | 파편화된 높이/고도 관련 변수명을 의미론적으로 통일 |
 | **완료** | **API 정규화** | `SkyAtmosphere.ts` 및 `View3D.ts` 내 관련 Getter 및 바인딩 명칭 일괄 수정 | 외부 노출 API와 내부 로직의 네이밍 정합성 확보 |
 
+### Step 8: WGSL 임포트 변수명 규칙 통일 (P2)
+TypeScript 파일 내에서 `.wgsl` 파일을 임포트할 때 사용하는 변수명을 `XXX_wgsl` 형식으로 통일하여 리소스의 성격을 명확히 합니다.
+
+| 진행 상황 | 대상 파일 | 변경 전 | 변경 후 (XXX_wgsl) |
+| :---: | :--- | :--- | :--- |
+| **완료** | `SkyAtmosphere.ts` | `skyAtmosphereFn`, `computeCode` 등 | `skyAtmosphereFn_wgsl`, `computeCode_wgsl` 등 |
+| **완료** | `AerialPerspectiveGenerator.ts` | `aerialPerspectiveShaderCode` 등 | `aerialPerspectiveShaderCode_wgsl` 등 |
+| **완료** | `SkyAtmosphereIrradianceGenerator.ts` | `skyAtmosphereIrradianceShaderCode` | `skyAtmosphereIrradianceShaderCode_wgsl` |
+| **완료** | `SkyAtmosphereReflectionGenerator.ts` | `reflectionShaderCode` 등 | `reflectionShaderCode_wgsl` 등 |
+| **완료** | `MultiScatteringGenerator.ts` | `multiScatteringShaderCode` 등 | `multiScatteringShaderCode_wgsl` 등 |
+| **완료** | `SkyViewGenerator.ts` | `skyViewShaderCode` 등 | `skyViewShaderCode_wgsl` 등 |
+| **완료** | `TransmittanceGenerator.ts` | `transmittanceShaderCode` 등 | `transmittanceShaderCode_wgsl` 등 |
+
 ## 4. 자체 점검 결과 (Self-Review)
 
 *   **점검 1차 (논리 무결성)**: 개선 후에도 물리 적분(Integration) 횟수, 샘플링 공식, LUT 해상도는 변함이 없는가? -> **YES**

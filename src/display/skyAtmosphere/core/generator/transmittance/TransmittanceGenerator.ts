@@ -1,14 +1,14 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import transmittanceShaderCode from "./transmittanceShaderCode.wgsl";
+import transmittanceShaderCode_wgsl from "./transmittanceShaderCode.wgsl";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
-import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
+import skyAtmosphereFn_wgsl from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'TRANSMITTANCE_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl, 'TRANSMITTANCE_GENERATOR');
 
 /**
  * [KO] 대기 투과율(Transmittance) LUT 생성을 담당하는 클래스입니다.

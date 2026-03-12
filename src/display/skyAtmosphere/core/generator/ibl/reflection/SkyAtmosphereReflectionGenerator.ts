@@ -1,9 +1,9 @@
 import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
-import skyAtmosphereFn from "../../../skyAtmosphereFn.wgsl";
-import reflectionShaderCode from "./skyAtmosphereReflectionShaderCode.wgsl";
-import reflectionShaderCodeNoSoftCut from "./skyAtmosphereReflectionShaderCodeNoSoftCut.wgsl";
-import reflectionCombineShaderCode from "./skyAtmosphereReflectionCombineShaderCode.wgsl";
+import skyAtmosphereFn_wgsl from "../../../skyAtmosphereFn.wgsl";
+import reflectionShaderCode_wgsl from "./skyAtmosphereReflectionShaderCode.wgsl";
+import reflectionShaderCodeNoSoftCut_wgsl from "./skyAtmosphereReflectionShaderCodeNoSoftCut.wgsl";
+import reflectionCombineShaderCode_wgsl from "./skyAtmosphereReflectionCombineShaderCode.wgsl";
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
@@ -12,9 +12,9 @@ import createUUID from "../../../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 
-const SOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_SOFTCUT');
-const NOSOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCodeNoSoftCut, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_NOSOFTCUT');
-const COMBINE_SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionCombineShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_COMBINE');
+const SOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionShaderCode_wgsl, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_SOFTCUT');
+const NOSOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionShaderCodeNoSoftCut_wgsl, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_NOSOFTCUT');
+const COMBINE_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionCombineShaderCode_wgsl, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_COMBINE');
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사 큐브맵을 생성하는 클래스입니다.

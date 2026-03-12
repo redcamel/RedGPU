@@ -9,9 +9,9 @@ import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import AerialPerspectiveGenerator from "./core/generator/aerialPerspective/AerialPerspectiveGenerator";
 import SkyAtmosphereIrradianceGenerator from "./core/generator/ibl/irradiance/SkyAtmosphereIrradianceGenerator";
 import SkyAtmosphereReflectionGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionGenerator";
-import skyAtmosphereFn from "./core/skyAtmosphereFn.wgsl";
-import transmittanceShaderCode from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
-import computeCode from "./wgsl/computeCode.wgsl";
+import skyAtmosphereFn_wgsl from "./core/skyAtmosphereFn.wgsl";
+import transmittanceShaderCode_wgsl from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
+import computeCode_wgsl from "./wgsl/computeCode.wgsl";
 import Sampler from "../../resources/sampler/Sampler";
 import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -20,17 +20,17 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../resources/texture/DirectTexture";
 
-import backgroundVertexShaderCode from "./wgsl/background_vertex.wgsl";
-import backgroundFragmentShaderCode from "./wgsl/background_fragment.wgsl";
+import backgroundVertexShaderCode_wgsl from "./wgsl/background_vertex.wgsl";
+import backgroundFragmentShaderCode_wgsl from "./wgsl/background_fragment.wgsl";
 import Box from "../../primitive/Box";
 import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'SKY_ATMOSPHERE_CORE');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl, 'SKY_ATMOSPHERE_CORE');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
-const BACKGROUND_SHADER_INFO = parseWGSL(backgroundVertexShaderCode, 'SKY_ATMOSPHERE_BACKGROUND_VERTEX');
+const BACKGROUND_SHADER_INFO = parseWGSL(backgroundVertexShaderCode_wgsl, 'SKY_ATMOSPHERE_BACKGROUND_VERTEX');
 const BACKGROUND_UNIFORM_STRUCT = BACKGROUND_SHADER_INFO.uniforms.vertexUniforms;
 
 /**
@@ -207,8 +207,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     #updateBackgroundPipeline(useMSAA: boolean) {
         const {gpuDevice, resourceManager} = this.redGPUContext;
-        const vertexModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_BACKGROUND_VERTEX', {code: backgroundVertexShaderCode});
-        const fragmentModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_BACKGROUND_FRAGMENT', {code: backgroundFragmentShaderCode});
+        const vertexModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_BACKGROUND_VERTEX', {code: backgroundVertexShaderCode_wgsl});
+        const fragmentModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_BACKGROUND_FRAGMENT', {code: backgroundFragmentShaderCode_wgsl});
 
         this.#backgroundPipeline = gpuDevice.createRenderPipeline({
             label: 'SKY_ATMOSPHERE_BACKGROUND_PIPELINE',
@@ -811,7 +811,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
             return [
                 '#redgpu_include depth.getLinearizeDepth',
-                skyAtmosphereFn,
+                skyAtmosphereFn_wgsl,
                 '@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
                 depthTextureDeclaration,
                 '@group(0) @binding(2) var transmittanceLUT : texture_2d<f32>;',
@@ -832,7 +832,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 '    let viewHeight = uniforms.cameraHeight;',
                 '    let bottomRadius = uniforms.bottomRadius;',
                 '    let atmosphereHeight = uniforms.atmosphereHeight;',
-                computeCode,
+                computeCode_wgsl,
                 '}'
             ].join('\n');
         };
