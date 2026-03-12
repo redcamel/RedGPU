@@ -8,8 +8,9 @@ import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/Uniform
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
+import View3D from "../../../../view/View3D";
 
-import View3D from "../../../../display/view/View3D";
+
 
 const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_VOLUME_GENERATOR');
 
