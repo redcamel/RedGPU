@@ -116,6 +116,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #outputTextureView: GPUTextureView;
     #prevDimensions: { width: number, height: number };
 
+
+    #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
+        this.#dirtyUniformBuffer = true;
+        if (lut) this.#dirtyLUT = true;
+        if (skyView) this.#dirtySkyView = true;
+        if (ibl) this.#dirtyIBL = true;
+    }
+
     /**
      * [KO] SkyAtmosphere 인스턴스를 생성합니다.
      * [EN] Creates a SkyAtmosphere instance.
@@ -335,9 +343,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     get seaLevel(): number { return this.#params.seaLevel; }
     set seaLevel(v: number) {
         this.#params.seaLevel = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtySkyView = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, true, true);
     }
 
     /**
@@ -390,9 +396,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set aerialPerspectiveDistanceScale(v: number) {
         validatePositiveNumberRange(v, 1, 1000);
         this.#params.aerialPerspectiveDistanceScale = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtySkyView = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, true, true);
     }
 
     /**
@@ -403,9 +407,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set heightFogAnisotropy(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.heightFogAnisotropy = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtySkyView = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, true, true);
     }
 
     /**
@@ -416,8 +418,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set sunIntensity(v: number) {
         validatePositiveNumberRange(v, 0, 10000);
         this.#params.sunIntensity = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, false, true);
     }
 
     /**
@@ -428,9 +429,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set bottomRadius(v: number) {
         validatePositiveNumberRange(v, 1);
         this.#params.bottomRadius = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -441,9 +440,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set atmosphereHeight(v: number) {
         validatePositiveNumberRange(v, 1);
         this.#params.atmosphereHeight = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -454,9 +451,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieScattering(v: number) {
         validatePositiveNumberRange(v, 0, 1.0);
         this.#params.mieScattering = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -467,9 +462,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieAbsorption(v: number) {
         validatePositiveNumberRange(v, 0, 1.0);
         this.#params.mieAbsorption = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -481,9 +474,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
     set rayleighScattering(v: [number, number, number]) {
         this.#params.rayleighScattering = [...v];
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -494,9 +485,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set rayleighExponentialDistribution(v: number) {
         validatePositiveNumberRange(v, 0.1, 100);
         this.#params.rayleighExponentialDistribution = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -507,9 +496,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieExponentialDistribution(v: number) {
         validatePositiveNumberRange(v, 0.1, 100);
         this.#params.mieExponentialDistribution = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -520,9 +507,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieAnisotropy(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieAnisotropy = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -534,9 +519,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
     set groundAlbedo(v: [number, number, number]) {
         this.#params.groundAlbedo = [...v];
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -547,8 +530,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set groundAmbient(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.groundAmbient = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, false, true);
     }
 
     /**
@@ -560,9 +542,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
     set absorptionCoefficient(v: [number, number, number]) {
         this.#params.absorptionCoefficient = [...v];
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -573,9 +553,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set absorptionTipAltitude(v: number) {
         validatePositiveNumberRange(v, 0, 100);
         this.#params.absorptionTipAltitude = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -586,9 +564,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set absorptionTentWidth(v: number) {
         validatePositiveNumberRange(v, 1, 50);
         this.#params.absorptionTentWidth = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**
@@ -599,8 +575,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set heightFogDensity(v: number) {
         validatePositiveNumberRange(v, 0, 10);
         this.#params.heightFogDensity = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, false, true);
     }
 
     /**
@@ -611,8 +586,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set heightFogFalloff(v: number) {
         validatePositiveNumberRange(v, 0.001, 10);
         this.#params.heightFogFalloff = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, false, true);
     }
 
     /**
@@ -623,9 +597,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set sunSize(v: number) {
         validatePositiveNumberRange(v, 0.01, 10.0);
         this.#params.sunSize = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtySkyView = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, true, true);
     }
 
     /**
@@ -636,9 +608,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieGlow(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieGlow = v;
-        this.#dirtySkyView = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, true, true);
     }
 
     /**
@@ -649,8 +619,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set mieHalo(v: number) {
         validateNumberRange(v, 0, 0.999);
         this.#params.mieHalo = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, false, true);
     }
 
     /**
@@ -660,10 +629,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     get useGround(): boolean { return !!this.#params.useGround; }
     set useGround(v: boolean) {
         this.#params.useGround = v ? 1.0 : 0.0;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyLUT = true;
-        this.#dirtySkyView = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, true, true);
     }
 
     /**
@@ -673,10 +639,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     get showGround(): boolean { return !!this.#params.showGround; }
     set showGround(v: boolean) {
         this.#params.showGround = v ? 1.0 : 0.0;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyLUT = true;
-        this.#dirtySkyView = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, true, true);
     }
 
     /**
@@ -687,8 +650,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set sunLimbDarkening(v: number) {
         validateNumberRange(v, 0, 10.0);
         this.#params.sunLimbDarkening = v;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(false, false, true);
     }
 
     /**
@@ -699,9 +661,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set skyLuminanceFactor(v: number) {
         validatePositiveNumberRange(v, 0, 100.0);
         this.#params.skyLuminanceFactor = v;
-        this.#dirtyLUT = true;
-        this.#dirtyUniformBuffer = true;
-        this.#dirtyIBL = true;
+        this.#markDirty(true, false, true);
     }
 
     /**

@@ -41,6 +41,10 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #noSoftCutPipeline: GPUComputePipeline;
     #combinePipeline: GPUComputePipeline;
     #combineUniformBuffer: UniformBuffer;
+    
+    #softCutBindGroup: GPUBindGroup;
+    #noSoftCutBindGroup: GPUBindGroup;
+    #combineBindGroups: GPUBindGroup[] = [];
 
     /**
      * [KO] SkyAtmosphereReflectionGenerator ?몄뒪?댁뒪瑜?珥덇린?뷀빀?덈떎.
@@ -113,34 +117,39 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] ?ㅼ뭅??酉?LUT ?띿뒪泥?
      * [EN] Sky-View LUT texture
      */
+    // @ts-ignore
     async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
         const {gpuDevice, resourceManager} = this.redGPUContext;
 
-        const bindGroupSoft = gpuDevice.createBindGroup({
-            layout: this.#softCutPipeline.getBindGroupLayout(0),
-            entries: [
-                {binding: 0, resource: this.#sourceCubeTextureView},
-                {binding: 1, resource: multiScat.gpuTextureView},
-                {binding: 2, resource: this.sampler.gpuSampler},
-                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-                {binding: 4, resource: transmittance.gpuTextureView},
-                {binding: 5, resource: skyView.gpuTextureView}
-            ]
-        });
+        if (!this.#softCutBindGroup) {
+            this.#softCutBindGroup = gpuDevice.createBindGroup({
+                layout: this.#softCutPipeline.getBindGroupLayout(0),
+                entries: [
+                    {binding: 0, resource: this.#sourceCubeTextureView},
+                    {binding: 1, resource: multiScat.gpuTextureView},
+                    {binding: 2, resource: this.sampler.gpuSampler},
+                    {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+                    {binding: 4, resource: transmittance.gpuTextureView},
+                    {binding: 5, resource: skyView.gpuTextureView}
+                ]
+            });
+        }
 
-        const bindGroupNoSoft = gpuDevice.createBindGroup({
-            layout: this.#noSoftCutPipeline.getBindGroupLayout(0),
-            entries: [
-                {binding: 0, resource: this.#sourceCubeTextureView},
-                {binding: 1, resource: multiScat.gpuTextureView},
-                {binding: 2, resource: this.sampler.gpuSampler},
-                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-                {binding: 4, resource: transmittance.gpuTextureView},
-                {binding: 5, resource: skyView.gpuTextureView}
-            ]
-        });
+        if (!this.#noSoftCutBindGroup) {
+            this.#noSoftCutBindGroup = gpuDevice.createBindGroup({
+                layout: this.#noSoftCutPipeline.getBindGroupLayout(0),
+                entries: [
+                    {binding: 0, resource: this.#sourceCubeTextureView},
+                    {binding: 1, resource: multiScat.gpuTextureView},
+                    {binding: 2, resource: this.sampler.gpuSampler},
+                    {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+                    {binding: 4, resource: transmittance.gpuTextureView},
+                    {binding: 5, resource: skyView.gpuTextureView}
+                ]
+            });
+        }
 
-        this.#computeRender(this.#softCutPipeline, bindGroupSoft, [8, 8, 1]);
+        this.#computeRender(this.#softCutPipeline, this.#softCutBindGroup, [8, 8, 1]);
 
         resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
             size: [this.width, this.height, 6],
@@ -152,7 +161,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
         await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, this.#prefilteredTextureSoftCut);
 
-        this.#computeRender(this.#noSoftCutPipeline, bindGroupNoSoft, [8, 8, 1]);
+        this.#computeRender(this.#noSoftCutPipeline, this.#noSoftCutBindGroup, [8, 8, 1]);
 
         resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
             size: [this.width, this.height, 6],

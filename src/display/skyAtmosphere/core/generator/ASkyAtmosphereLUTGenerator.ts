@@ -11,34 +11,34 @@ import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
  * @category SkyAtmosphere
  */
 abstract class ASkyAtmosphereLUTGenerator {
-    protected redGPUContext: RedGPUContext;
-    protected sharedUniformBuffer: UniformBuffer;
-    protected sampler: Sampler;
-    protected pipeline: GPUComputePipeline;
+    #redGPUContext: RedGPUContext;
+    #sharedUniformBuffer: UniformBuffer;
+    #sampler: Sampler;
+    #pipeline: GPUComputePipeline;
 
     /**
      * [KO] 생성기의 레이블입니다.
      * [EN] Label of the generator.
      */
-    readonly label: string;
+    #label: string;
 
     /**
      * [KO] 생성할 LUT의 너비입니다.
      * [EN] Width of the LUT to be generated.
      */
-    readonly width: number;
+    #width: number;
 
     /**
      * [KO] 생성할 LUT의 높이입니다.
      * [EN] Height of the LUT to be generated.
      */
-    readonly height: number;
+    #height: number;
 
     /**
      * [KO] 생성할 LUT의 깊이(또는 레이어 수)입니다.
      * [EN] Depth (or number of layers) of the LUT to be generated.
      */
-    readonly depth: number;
+    #depth: number;
 
     /**
      * [KO] ASkyAtmosphereLUTGenerator 인스턴스를 초기화합니다.
@@ -66,21 +66,32 @@ abstract class ASkyAtmosphereLUTGenerator {
      * [KO] LUT 깊이 (기본값: 1)
      * [EN] LUT depth (Default: 1)
      */
-    protected constructor(
+    constructor(
         redGPUContext: RedGPUContext,
         sharedUniformBuffer: UniformBuffer,
         sampler: Sampler,
         label: string,
         width: number, height: number, depth: number = 1
     ) {
-        this.redGPUContext = redGPUContext;
-        this.sharedUniformBuffer = sharedUniformBuffer;
-        this.sampler = sampler;
-        this.label = label;
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
+        this.#redGPUContext = redGPUContext;
+        this.#sharedUniformBuffer = sharedUniformBuffer;
+        this.#sampler = sampler;
+        this.#label = label;
+        this.#width = width;
+        this.#height = height;
+        this.#depth = depth;
     }
+
+    get redGPUContext(): RedGPUContext { return this.#redGPUContext; }
+    get sharedUniformBuffer(): UniformBuffer { return this.#sharedUniformBuffer; }
+    get sampler(): Sampler { return this.#sampler; }
+    get pipeline(): GPUComputePipeline { return this.#pipeline; }
+    set pipeline(value: GPUComputePipeline) { this.#pipeline = value; }
+
+    get label(): string { return this.#label; }
+    get width(): number { return this.#width; }
+    get height(): number { return this.#height; }
+    get depth(): number { return this.#depth; }
 
     /**
      * [KO] 생성된 LUT 텍스처를 반환합니다.
@@ -99,20 +110,20 @@ abstract class ASkyAtmosphereLUTGenerator {
      * [KO] 워크그룹 크기 (기본값: [16, 16, 1])
      * [EN] Workgroup size (Default: [16, 16, 1])
      */
-    protected gpuRender(
+    render(
         bindGroup: GPUBindGroup,
         workgroupSize: [number, number, number] = [16, 16, 1]
     ): void {
-        const {gpuDevice} = this.redGPUContext;
-        const commandEncoder = gpuDevice.createCommandEncoder({label: `${this.label}_COMMAND_ENCODER`});
-        const passEncoder = commandEncoder.beginComputePass({label: `${this.label}_COMPUTE_PASS`});
+        const {gpuDevice} = this.#redGPUContext;
+        const commandEncoder = gpuDevice.createCommandEncoder({label: `${this.#label}_COMMAND_ENCODER`});
+        const passEncoder = commandEncoder.beginComputePass({label: `${this.#label}_COMPUTE_PASS`});
 
-        passEncoder.setPipeline(this.pipeline);
+        passEncoder.setPipeline(this.#pipeline);
         passEncoder.setBindGroup(0, bindGroup);
         passEncoder.dispatchWorkgroups(
-            Math.ceil(this.width / workgroupSize[0]),
-            Math.ceil(this.height / workgroupSize[1]),
-            Math.ceil(this.depth / workgroupSize[2])
+            Math.ceil(this.#width / workgroupSize[0]),
+            Math.ceil(this.#height / workgroupSize[1]),
+            Math.ceil(this.#depth / workgroupSize[2])
         );
         passEncoder.end();
 
@@ -131,11 +142,11 @@ abstract class ASkyAtmosphereLUTGenerator {
      * [KO] 생성된 GPUTexture
      * [EN] The generated GPUTexture
      */
-    protected createLUTTexture(is3D: boolean = false): GPUTexture {
-        const {resourceManager} = this.redGPUContext;
+    createLUTTexture(is3D: boolean = false): GPUTexture {
+        const {resourceManager} = this.#redGPUContext;
         return resourceManager.createManagedTexture({
-            label: `${this.label}_Texture`,
-            size: [this.width, this.height, this.depth],
+            label: `${this.#label}_Texture`,
+            size: [this.#width, this.#height, this.#depth],
             dimension: is3D ? '3d' : '2d',
             format: 'rgba16float',
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC

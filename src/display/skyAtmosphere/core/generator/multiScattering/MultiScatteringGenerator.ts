@@ -26,6 +26,7 @@ const SHADER_INFO = parseWGSL(skyAtmosphereFn + multiScatteringShaderCode, 'MULT
  */
 class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;
+    #bindGroup: GPUBindGroup;
 
     /**
      * [KO] MultiScatteringGenerator 인스턴스를 초기화합니다.
@@ -66,17 +67,20 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 투과율 LUT 텍스처 (계산에 참조됨)
      * [EN] Transmittance LUT texture (referenced for calculation)
      */
+    // @ts-ignore
     render(transmittanceTexture: DirectTexture): void {
-        const {gpuDevice} = this.redGPUContext;
-        const bindGroup = gpuDevice.createBindGroup({
-            label: 'MULTI_SCATTERING_GEN_BG',
-            layout: this.pipeline.getBindGroupLayout(0),
-            entries: [
-                {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
-            ]
-        });
-        this.gpuRender(bindGroup, [8, 8, 1]);
+        if (!this.#bindGroup) {
+            const {gpuDevice} = this.redGPUContext;
+            this.#bindGroup = gpuDevice.createBindGroup({
+                label: 'MULTI_SCATTERING_GEN_BG',
+                layout: this.pipeline.getBindGroupLayout(0),
+                entries: [
+                    {binding: 0, resource: this.#lutTexture.gpuTextureView},
+                    {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+                ]
+            });
+        }
+        super.render(this.#bindGroup, [8, 8, 1]);
     }
 
     #init(): void {

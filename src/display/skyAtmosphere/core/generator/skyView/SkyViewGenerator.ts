@@ -26,6 +26,7 @@ const SHADER_INFO = parseWGSL(skyAtmosphereFn + skyViewShaderCode, 'SKY_VIEW_GEN
  */
 class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;
+    #bindGroup: GPUBindGroup;
 
     /**
      * [KO] SkyViewGenerator 인스턴스를 초기화합니다.
@@ -69,20 +70,23 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 다중 산란 LUT 텍스처
      * [EN] Multi-Scattering LUT texture
      */
+    // @ts-ignore
     render(transmittance: DirectTexture, multiScat: DirectTexture): void {
-        const {gpuDevice} = this.redGPUContext;
-        const bindGroup = gpuDevice.createBindGroup({
-            label: 'SKY_VIEW_GEN_BG',
-            layout: this.pipeline.getBindGroupLayout(0),
-            entries: [
-                {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: transmittance.gpuTextureView},
-                {binding: 2, resource: multiScat.gpuTextureView},
-                {binding: 3, resource: this.sampler.gpuSampler},
-                {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
-            ]
-        });
-        this.gpuRender(bindGroup);
+        if (!this.#bindGroup) {
+            const {gpuDevice} = this.redGPUContext;
+            this.#bindGroup = gpuDevice.createBindGroup({
+                label: 'SKY_VIEW_GEN_BG',
+                layout: this.pipeline.getBindGroupLayout(0),
+                entries: [
+                    {binding: 0, resource: this.#lutTexture.gpuTextureView},
+                    {binding: 1, resource: transmittance.gpuTextureView},
+                    {binding: 2, resource: multiScat.gpuTextureView},
+                    {binding: 3, resource: this.sampler.gpuSampler},
+                    {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+                ]
+            });
+        }
+        super.render(this.#bindGroup);
     }
 
     #init(): void {

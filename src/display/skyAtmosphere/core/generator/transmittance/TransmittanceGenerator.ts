@@ -26,6 +26,7 @@ const SHADER_INFO = parseWGSL(skyAtmosphereFn + transmittanceShaderCode, 'TRANSM
  */
 class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;
+    #bindGroup: GPUBindGroup;
 
     /**
      * [KO] TransmittanceGenerator 인스턴스를 초기화합니다.
@@ -63,17 +64,20 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
      * transmittanceGenerator.render();
      * ```
      */
+    // @ts-ignore
     render(): void {
-        const {gpuDevice} = this.redGPUContext;
-        const bindGroup = gpuDevice.createBindGroup({
-            label: 'TRANSMITTANCE_GEN_BG',
-            layout: this.pipeline.getBindGroupLayout(0),
-            entries: [
-                {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
-            ]
-        });
-        this.gpuRender(bindGroup);
+        if (!this.#bindGroup) {
+            const {gpuDevice} = this.redGPUContext;
+            this.#bindGroup = gpuDevice.createBindGroup({
+                label: 'TRANSMITTANCE_GEN_BG',
+                layout: this.pipeline.getBindGroupLayout(0),
+                entries: [
+                    {binding: 0, resource: this.#lutTexture.gpuTextureView},
+                    {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+                ]
+            });
+        }
+        super.render(this.#bindGroup);
     }
 
     #init(): void {
