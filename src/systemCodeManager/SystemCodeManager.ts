@@ -3182,7 +3182,7 @@ export namespace SkyAtmosphereLibrary {
      * }
      * ```
      */
-    export const transmittanceShaderCode = transmittanceShaderCode_wgsl;
+    export const transmittanceLUT = transmittanceShaderCode_wgsl;
 }
 
 /**

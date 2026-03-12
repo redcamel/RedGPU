@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
-import atmosphereIrradianceShaderCode from "./atmosphereIrradianceShaderCode.wgsl";
+import skyAtmosphereIrradianceShaderCode from "./skyAtmosphereIrradianceShaderCode.wgsl";
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
@@ -8,7 +8,7 @@ import createUUID from "../../../../../../utils/uuid/createUUID";
 import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 
-const SHADER_INFO = parseWGSL(atmosphereIrradianceShaderCode, 'ATMOSPHERE_IRRADIANCE_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereIrradianceShaderCode, 'SKY_ATMOSPHERE_IRRADIANCE_GENERATOR');
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 물리적으로 일치하는 조도(Irradiance) 큐브맵을 생성하는 클래스입니다.
@@ -19,19 +19,19 @@ const SHADER_INFO = parseWGSL(atmosphereIrradianceShaderCode, 'ATMOSPHERE_IRRADI
  *
  * @example
  * ```typescript
- * const irradianceGenerator = new AtmosphereIrradianceGenerator(redGPUContext, sharedUniformBuffer, sampler);
- * irradianceGenerator.render(transmittance, multiScat, skyView);
+ * const skyAtmosphereIrradianceGenerator = new SkyAtmosphereIrradianceGenerator(redGPUContext, sharedUniformBuffer, sampler);
+ * skyAtmosphereIrradianceGenerator.render(transmittance, multiScat, skyView);
  * ```
  * @category SkyAtmosphere
  */
-class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
+class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	#lutTexture: DirectCubeTexture;
 	#bindGroup: GPUBindGroup;
 	#pipeline: GPUComputePipeline;
 
 	/**
-	 * [KO] AtmosphereIrradianceGenerator 인스턴스를 초기화합니다.
-	 * [EN] Initializes an AtmosphereIrradianceGenerator instance.
+	 * [KO] SkyAtmosphereIrradianceGenerator 인스턴스를 초기화합니다.
+	 * [EN] Initializes a SkyAtmosphereIrradianceGenerator instance.
 	 *
 	 * @param redGPUContext -
 	 * [KO] RedGPU 컨텍스트
@@ -44,7 +44,7 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	 * [EN] Sampler to be used for LUT sampling
 	 */
 	constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-		super(redGPUContext, sharedUniformBuffer, sampler, 'ATMOSPHERE_IRRADIANCE_GEN', 32, 32, 6);
+		super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_ATMOSPHERE_IRRADIANCE_GEN', 32, 32, 6);
 		this.#init();
 	}
 
@@ -62,7 +62,7 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	 *
 	 * @example
 	 * ```typescript
-	 * irradianceGenerator.render(transmittance, multiScat, skyView);
+	 * skyAtmosphereIrradianceGenerator.render(transmittance, multiScat, skyView);
 	 * ```
 	 * @param transmittance -
 	 * [KO] 투과율 LUT 텍스처
@@ -78,15 +78,15 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 		if (!this.#bindGroup) {
 			const {gpuDevice} = this.redGPUContext;
 			this.#bindGroup = gpuDevice.createBindGroup({
-				label: 'ATMOSPHERE_IRRADIANCE_GEN_BG',
+				label: 'SKY_ATMOSPHERE_IRRADIANCE_GEN_BG',
 				layout: this.#pipeline.getBindGroupLayout(0),
 				entries: [
-					{binding: 0, resource: multiScat.gpuTextureView},
-					{binding: 1, resource: this.sampler.gpuSampler},
-					{binding: 2, resource: this.#lutTexture.gpuTexture.createView({dimension: '2d-array'})},
-					{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-					{binding: 4, resource: transmittance.gpuTextureView},
-					{binding: 5, resource: skyView.gpuTextureView}
+					{binding: 0, resource: multiScat.gpuTextureView}, // multiScatLUT
+					{binding: 1, resource: this.sampler.gpuSampler}, // skyAtmosphereSampler
+					{binding: 2, resource: this.#lutTexture.gpuTexture.createView({dimension: '2d-array'})}, // skyAtmosphereIrradianceLUT
+					{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, // params
+					{binding: 4, resource: transmittance.gpuTextureView}, // transmittanceLUT
+					{binding: 5, resource: skyView.gpuTextureView} // skyViewLUT
 				]
 			});
 		}
@@ -96,10 +96,10 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 
 	#init(): void {
 		const {gpuDevice} = this.redGPUContext;
-		this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `AtmosphereIrradianceCubeTexture_${createUUID()}`, this.createLUTTexture(false));
+		this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphereIrradianceCubeTexture_${createUUID()}`, this.createLUTTexture(false));
 
 		this.#pipeline = gpuDevice.createComputePipeline({
-			label: 'ATMOSPHERE_IRRADIANCE_GEN_PIPELINE',
+			label: 'SKY_ATMOSPHERE_IRRADIANCE_GEN_PIPELINE',
 			layout: 'auto',
 			compute: {
 				module: gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),
@@ -109,4 +109,4 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	}
 }
 
-export default AtmosphereIrradianceGenerator;
+export default SkyAtmosphereIrradianceGenerator;

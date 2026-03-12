@@ -72,8 +72,8 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
                 label: 'TRANSMITTANCE_GEN_BG',
                 layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
-                    {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                    {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+                    {binding: 0, resource: this.#lutTexture.gpuTextureView}, // transmittanceLUT
+                    {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}} // params
                 ]
             });
         }

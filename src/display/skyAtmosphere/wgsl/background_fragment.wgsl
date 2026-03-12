@@ -14,27 +14,27 @@ struct FragmentOutput {
     @location(2) motionVector : vec4<f32>,
 };
 
-@group(2) @binding(0) var bg_atmosphereTransmittanceTexture : texture_2d<f32>;
-@group(2) @binding(1) var bg_atmosphereSkyViewTexture : texture_2d<f32>;
-@group(2) @binding(2) var bg_atmosphereSampler : sampler;
+@group(2) @binding(0) var bg_transmittanceLUT : texture_2d<f32>;
+@group(2) @binding(1) var bg_skyViewLUT : texture_2d<f32>;
+@group(2) @binding(2) var bg_skyAtmosphereSampler : sampler;
 
 @fragment
 fn main(input : VertexOutput) -> FragmentOutput {
     let uniforms = systemUniforms.skyAtmosphere;
-    let camH = uniforms.cameraHeight;
-    let r = uniforms.bottomRadius;
-    let atmH = uniforms.atmosphereHeight;
+    let bottomRadius = uniforms.bottomRadius;
+    let atmosphereHeight = uniforms.atmosphereHeight;
     let viewDir = normalize(input.vertexPosition.xyz);
     let sunDir = normalize(uniforms.sunDirection);
 
-    // [KO] 매핑 안정화를 위한 클램핑 고도 (Sea Level Offset 반영된 camH 기준)
-    let mappingH = max(0.0, camH);
-    let skyUV = getSkyViewUV(viewDir, camH, r, atmH);
-    let skySample = textureSampleLevel(bg_atmosphereSkyViewTexture, bg_atmosphereSampler, skyUV, 0.0);
+    // [KO] 매핑 안정화를 위한 클램핑 고도 (Sea Level Offset 반영된 viewHeight 기준)
+    var viewHeight = uniforms.cameraHeight;
+    viewHeight = max(0.0, viewHeight);
+    let skyUV = getSkyViewUV(viewDir, viewHeight, bottomRadius, atmosphereHeight);
+    let skySample = textureSampleLevel(bg_skyViewLUT, bg_skyAtmosphereSampler, skyUV, 0.0);
     var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
 
-    let camPos = vec3<f32>(0.0, r + camH, 0.0);
-    let tEarth = getRaySphereIntersection(camPos, viewDir, r);
+    let camPos = vec3<f32>(0.0, bottomRadius + viewHeight, 0.0);
+    let tEarth = getRaySphereIntersection(camPos, viewDir, bottomRadius);
 
     // [KO] 수평선 압축(Horizon Squashing) 보정: 고도가 낮을 때 태양이 수직으로 납작해지는 효과
     // [EN] Horizon Squashing correction: The sun becomes vertically flat when the altitude is low
@@ -43,11 +43,11 @@ fn main(input : VertexOutput) -> FragmentOutput {
     // [KO] 지면 차폐 여부 및 투과율 결정
     // [EN] Determine ground occlusion and transmittance
     let isGroundHit = uniforms.useGround > 0.5 && tEarth > 0.0;
-    let transToEdge = select(getTransmittance(bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, mappingH, viewDir.y, uniforms.atmosphereHeight), vec3<f32>(skySample.a), isGroundHit);
+    let transToEdge = select(getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, viewHeight, viewDir.y, uniforms.atmosphereHeight), vec3<f32>(skySample.a), isGroundHit);
 
     // [KO] 하이브리드 Mie Glow: 압축 보정된 방향을 사용하여 태양과 일치시킴
     // [EN] Hybrid Mie Glow: Use corrected direction to match sun
-    let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, bg_atmosphereTransmittanceTexture, bg_atmosphereSampler, transToEdge, 0.0) 
+    let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, transToEdge, 0.0) 
                         * uniforms.sunIntensity;
     atmosphereBackground += mieGlowAmount;
 

@@ -1,20 +1,20 @@
 // [KO] UE5 표준 Multi-Scattering LUT 생성
 #redgpu_include math.INV_PI
 
-@group(0) @binding(0) var atmosphereMultiScatTexture: texture_storage_2d<rgba16float, write>;
+@group(0) @binding(0) var multiScatLUT: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(atmosphereMultiScatTexture);
+    let size = textureDimensions(multiScatLUT);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
     let cosSunTheta = uv.x * 2.0 - 1.0;
-    let h = clamp((1.0 - uv.y) * params.atmosphereHeight, 0.0, params.atmosphereHeight);
+    let viewHeight = clamp((1.0 - uv.y) * params.atmosphereHeight, 0.0, params.atmosphereHeight);
 
-    let r = params.bottomRadius;
-    let rayOrigin = vec3<f32>(0.0, h + r, 0.0);
+    let bottomRadius = params.bottomRadius;
+    let rayOrigin = vec3<f32>(0.0, viewHeight + bottomRadius, 0.0);
     let sunDir = vec3<f32>(sqrt(max(0.0, 1.0 - cosSunTheta * cosSunTheta)), cosSunTheta, 0.0);
 
     var lumTotal = vec3<f32>(0.0);
@@ -27,8 +27,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let phi = (sqrt(5.0) + 1.0) * PI * step;
         let rayDir = vec3<f32>(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
 
-        let tMax = getRaySphereIntersection(rayOrigin, rayDir, r + params.atmosphereHeight);
-        let intersect = getPlanetIntersection(rayOrigin, rayDir, r);
+        let tMax = getRaySphereIntersection(rayOrigin, rayDir, bottomRadius + params.atmosphereHeight);
+        let intersect = getPlanetIntersection(rayOrigin, rayDir, bottomRadius);
 
         var L1 = vec3<f32>(0.0);
         var f1 = vec3<f32>(0.0);
@@ -37,7 +37,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         if (params.useGround > 0.5 && intersect.x > 0.0) {
             integrateMultiScatSegment(rayOrigin, rayDir, 0.0, intersect.x, 16u, sunDir, &L1, &f1, &TPath);
             let hitP = rayOrigin + rayDir * intersect.x;
-            let sunTGround = getPhysicalTransmittance(hitP, sunDir, r, params.atmosphereHeight, params);
+            let sunTGround = getPhysicalTransmittance(hitP, sunDir, bottomRadius, params.atmosphereHeight, params);
             L1 += TPath * sunTGround * max(0.0, dot(normalize(hitP), sunDir)) * params.groundAlbedo * INV_PI;
 
             // [KO] 지면에 도달한 에너지가 지면 반사율만큼 반사되어 다음 산란에 기여함
@@ -58,12 +58,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     let output = (lumTotal / f32(sampleCount)) / (1.0 - min(fmsTotal, vec3<f32>(0.99)));
-    textureStore(atmosphereMultiScatTexture, global_id.xy, vec4<f32>(output, 1.0));
+    textureStore(multiScatLUT, global_id.xy, vec4<f32>(output, 1.0));
 }
 
 fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, sunDir: vec3<f32>, L1: ptr<function, vec3<f32>>, f1: ptr<function, vec3<f32>>, TPath: ptr<function, vec3<f32>>) {
     if (tMax <= tMin) { return; }
-    let r = params.bottomRadius;
+    let bottomRadius = params.bottomRadius;
     let stepSize = (tMax - tMin) / f32(steps);
 
     // [KO] L1 계산을 위한 위상 함수 값 미리 계산
@@ -77,11 +77,11 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let t = tMin + (f32(j) + 0.5) * stepSize;
         let p = origin + dir * t;
         let pLen = length(p);
-        let h = pLen - r;
+        let viewHeight = pLen - bottomRadius;
         
-        let d = getAtmosphereDensities(h, params);
-        let sunT = getPhysicalTransmittance(p, sunDir, r, params.atmosphereHeight, params);
-        let shadowMask = getPlanetShadowMask(p, sunDir, r, params);
+        let d = getAtmosphereDensities(viewHeight, params);
+        let sunT = getPhysicalTransmittance(p, sunDir, bottomRadius, params.atmosphereHeight, params);
+        let shadowMask = getPlanetShadowMask(p, sunDir, bottomRadius, params);
 
         // [KO] LUT 생성 시에는 skyLuminanceFactor를 제외한 물리적 기본 산란 계수만 사용 (중복 방지)
         // [EN] Use only physical base scattering coefficients excluding skyLuminanceFactor when generating LUT (prevent duplication)

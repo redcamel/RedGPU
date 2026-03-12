@@ -26,6 +26,7 @@ if (rawDepth >= 1.0) {
     return;
 }
 
+var mappingH: f32 = 0.0;
 let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping) / 1000.0;
 // [KO] 수직 깊이(depthKm)를 레이 길이(actualDist)로 변환
 let actualDist = depthKm * rayLengthRatio;
@@ -38,15 +39,15 @@ let apV = uv.y;
 let apW = clamp(sqrt(apDist / maxApDist), 0.0, 1.0);
 
 // [KO] 3D LUT 샘플링
-var apSample = textureSampleLevel(atmosphereCameraVolumeTexture, atmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
+var apSample = textureSampleLevel(aerialPerspectiveLUT, skyAtmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
 
 // [KO] 근거리 보정 (Analytical Approximation): 
 // [KO] 3D LUT의 해상도 한계로 인한 근거리 아티팩트(0m에서도 안개가 끼는 현상) 방지
 if (actualDist < 0.2) { // 200m 이내
-    let mappingH = max(0.0, camH);
+    mappingH = max(0.0, viewHeight);
     let d = getAtmosphereDensities(mappingH, uniforms);
     let sunDir = normalize(uniforms.sunDirection);
-    let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
+    let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
 
     // [KO] 물리적 기본 산란 및 소멸 계수 계산
     let scatR = uniforms.rayleighScattering * d.rhoR * uniforms.skyLuminanceFactor;
@@ -72,12 +73,12 @@ if (actualDist < 0.2) { // 200m 이내
 // [KO] 하이브리드 Mie Glow (AP)
 let sunDir = normalize(uniforms.sunDirection);
 let viewSunCos = dot(viewDir, sunDir);
-let mappingH = max(0.0, camH);
-var mieGlowUnit = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, atmosphereTransmittanceTexture, atmosphereSampler, vec3<f32>(apSample.a), 0.0);
+mappingH = max(0.0, viewHeight);
+var mieGlowUnit = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, skyAtmosphereSampler, vec3<f32>(apSample.a), 0.0);
 
 // [KO] 물리적 오클루전
-let camPos = vec3<f32>(0.0, camH + r, 0.0);
-let occlusionFactor = getPlanetShadowMask(camPos, sunDir, r, uniforms);
+let camPos = vec3<f32>(0.0, viewHeight + bottomRadius, 0.0);
+let occlusionFactor = getPlanetShadowMask(camPos, sunDir, bottomRadius, uniforms);
 mieGlowUnit *= occlusionFactor;
 
 // [KO] 최종 산란광 및 색상 결정

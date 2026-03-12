@@ -3,7 +3,7 @@
 #redgpu_include math.hash.getHammersley
 
 @group(0) @binding(0) var multiScatTexture: texture_2d<f32>;
-@group(0) @binding(1) var atmosphereSampler: sampler;
+@group(0) @binding(1) var skyAtmosphereSampler: sampler;
 @group(0) @binding(2) var outTexture: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
 @group(0) @binding(4) var transmittanceTexture: texture_2d<f32>;
@@ -51,7 +51,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         // [KO] 텍스처 샘플링 대신 대기 휘도를 직접 계산 (완벽한 독립화)
         // [EN] Directly calculate atmosphere radiance instead of texture sampling (complete independence)
-        irradiance += evaluateIBLRadiance(worldSample, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler, 0u);
+        irradiance += evaluateIBLRadiance(worldSample, params, transmittanceTexture, multiScatTexture, skyViewTexture, skyAtmosphereSampler, 0u);
         totalWeight += 1.0;
     }
 

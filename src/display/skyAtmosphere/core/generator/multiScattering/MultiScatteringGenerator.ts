@@ -68,14 +68,14 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 투과율 LUT 텍스처 (계산에 참조됨)
      * [EN] Transmittance LUT texture (referenced for calculation)
      */
-    render(transmittanceTexture: DirectTexture): void {
+    render(transmittanceLUT: DirectTexture): void {
         if (!this.#bindGroup) {
             const {gpuDevice} = this.redGPUContext;
             this.#bindGroup = gpuDevice.createBindGroup({
                 label: 'MULTI_SCATTERING_GEN_BG',
                 layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
-                    {binding: 0, resource: this.#lutTexture.gpuTextureView},
+                    {binding: 0, resource: this.#lutTexture.gpuTextureView}, // multiScatLUT
                     {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
                 ]
             });
@@ -84,7 +84,7 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectTexture(this.redGPUContext, `MultiScatteringLUTTexture_${createUUID()}`, this.createLUTTexture());
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `MultiScatLUTTexture_${createUUID()}`, this.createLUTTexture());
         this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
             label: 'MULTI_SCATTERING_GEN_PIPELINE',
             layout: 'auto',

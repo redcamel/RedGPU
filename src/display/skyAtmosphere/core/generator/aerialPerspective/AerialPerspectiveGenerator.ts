@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
-import cameraVolumeShaderCode from "./cameraVolumeShaderCode.wgsl";
+import aerialPerspectiveShaderCode from "./aerialPerspectiveShaderCode.wgsl";
 import skyAtmosphereFn from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -12,7 +12,7 @@ import View3D from "../../../../view/View3D";
 
 
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_VOLUME_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn + aerialPerspectiveShaderCode, 'AERIAL_PERSPECTIVE_GENERATOR');
 
 /**
  * [KO] 거리별 공중 투시(Aerial Perspective)를 위한 3D LUT 생성을 담당하는 클래스입니다.
@@ -23,20 +23,20 @@ const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_
  *
  * @example
  * ```typescript
- * const cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext, sharedUniformBuffer, sampler);
- * cameraVolumeGenerator.render(view, transmittanceTexture, multiScatteringTexture);
+ * const aerialPerspectiveGenerator = new AerialPerspectiveGenerator(redGPUContext, sharedUniformBuffer, sampler);
+ * aerialPerspectiveGenerator.render(view, transmittanceTexture, multiScatteringTexture);
  * ```
  * @category SkyAtmosphere
  */
-class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
+class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectCubeTexture;
     #bindGroup: GPUBindGroup;
     #pipeline: GPUComputePipeline;
     #prevSystemBuffer: GPUBuffer;
 
     /**
-     * [KO] CameraVolumeGenerator 인스턴스를 초기화합니다.
-     * [EN] Initializes a CameraVolumeGenerator instance.
+     * [KO] AerialPerspectiveGenerator 인스턴스를 초기화합니다.
+     * [EN] Initializes a AerialPerspectiveGenerator instance.
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
@@ -49,7 +49,7 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'CAMERA_VOLUME_GEN', 32, 32, 32);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'AERIAL_PERSPECTIVE_GEN', 32, 32, 32);
         this.#init();
     }
 
@@ -67,7 +67,7 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
      *
      * @example
      * ```typescript
-     * cameraVolumeGenerator.render(view, transmittance, multiScat);
+     * aerialPerspectiveGenerator.render(view, transmittance, multiScat);
      * ```
      * @param view -
      * [KO] 렌더링에 사용되는 3D 뷰
@@ -85,22 +85,22 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
         const systemBuffer = view.systemUniform_Vertex_UniformBuffer?.gpuBuffer;
         
         if (!systemBuffer) {
-            console.warn('CameraVolumeGenerator: systemUniform_Vertex_UniformBuffer is not ready yet.');
+            console.warn('AerialPerspectiveGenerator: systemUniform_Vertex_UniformBuffer is not ready yet.');
             return;
         }
 
         if (!this.#bindGroup || this.#prevSystemBuffer !== systemBuffer) {
             this.#prevSystemBuffer = systemBuffer;
             this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'CAMERA_VOLUME_GEN_BG',
+                label: 'AERIAL_PERSPECTIVE_GEN_BG',
                 layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: {buffer: systemBuffer}}, // systemUniforms
-                    {binding: 1, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})}, // atmosphereCameraVolumeTexture
-                    {binding: 2, resource: multiScat.gpuTextureView}, // atmosphereMultiScatTexture
+                    {binding: 1, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})}, // aerialPerspectiveLUT
+                    {binding: 2, resource: multiScat.gpuTextureView}, // multiScatLUT
                     {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, // params
-                    {binding: 4, resource: transmittance.gpuTextureView}, // atmosphereTransmittanceTexture
-                    {binding: 13, resource: this.sampler.gpuSampler} // atmosphereSampler
+                    {binding: 4, resource: transmittance.gpuTextureView}, // transmittanceLUT
+                    {binding: 13, resource: this.sampler.gpuSampler} // skyAtmosphereSampler
                 ]
             });
         }
@@ -109,9 +109,9 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `CameraVolumeLUTTexture_${createUUID()}`, this.createLUTTexture(true));
+        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `AerialPerspectiveLUTTexture_${createUUID()}`, this.createLUTTexture(true));
         this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'CAMERA_VOLUME_GEN_PIPELINE',
+            label: 'AERIAL_PERSPECTIVE_GEN_PIPELINE',
             layout: 'auto',
             compute: {
                 module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),
@@ -121,4 +121,4 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
     }
 }
 
-export default CameraVolumeGenerator;
+export default AerialPerspectiveGenerator;

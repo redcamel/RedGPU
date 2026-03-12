@@ -637,7 +637,7 @@ fn main(inputData:InputData) -> OutputFragment {
             
             // [KO] 큐브맵 기반 조도 샘플링 (2D LUT 방식에서 업그레이드)
             // [EN] Cubemap-based Irradiance sampling (upgraded from 2D LUT method)
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceTexture, atmosphereSampler, N, 0.0).rgb * sunInt;
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * sunInt;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 

@@ -6,8 +6,8 @@ import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../postEffe
 import TransmittanceGenerator from "./core/generator/transmittance/TransmittanceGenerator";
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
-import CameraVolumeGenerator from "./core/generator/cameraVolume/CameraVolumeGenerator";
-import AtmosphereIrradianceGenerator from "./core/generator/ibl/irradiance/AtmosphereIrradianceGenerator";
+import AerialPerspectiveGenerator from "./core/generator/aerialPerspective/AerialPerspectiveGenerator";
+import SkyAtmosphereIrradianceGenerator from "./core/generator/ibl/irradiance/SkyAtmosphereIrradianceGenerator";
 import SkyAtmosphereReflectionGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionGenerator";
 import skyAtmosphereFn from "./core/skyAtmosphereFn.wgsl";
 import transmittanceShaderCode from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
@@ -51,8 +51,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #transmittanceGenerator: TransmittanceGenerator;
     #multiScatteringGenerator: MultiScatteringGenerator;
     #skyViewGenerator: SkyViewGenerator;
-    #cameraVolumeGenerator: CameraVolumeGenerator;
-    #irradianceGenerator: AtmosphereIrradianceGenerator;
+    #aerialPerspectiveGenerator: AerialPerspectiveGenerator;
+    #skyAtmosphereIrradianceGenerator: SkyAtmosphereIrradianceGenerator;
     #reflectionGenerator: SkyAtmosphereReflectionGenerator;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
@@ -153,8 +153,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#skyViewGenerator = new SkyViewGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        this.#cameraVolumeGenerator = new CameraVolumeGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        this.#irradianceGenerator = new AtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#aerialPerspectiveGenerator = new AerialPerspectiveGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#skyAtmosphereIrradianceGenerator = new SkyAtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
 
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
@@ -272,7 +272,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 layout: this.#backgroundBindGroupLayout2,
                 entries: [
                     {binding: 0, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
-                    {binding: 1, resource: this.atmosphereSkyViewTexture.gpuTextureView},
+                    {binding: 1, resource: this.skyViewLUT.gpuTextureView},
                     {binding: 2, resource: this.#sampler.gpuSampler}
                 ]
             });
@@ -325,13 +325,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
         if (this.#dirtySkyView) {
             this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
-            this.#cameraVolumeGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#aerialPerspectiveGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#dirtySkyView = false;
         }
 
         if (this.#dirtyIBL) {
             this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-            this.#irradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+            this.#skyAtmosphereIrradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
             this.#dirtyIBL = false;
         }
     }
@@ -668,37 +668,37 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [KO] 대기 투과율(Transmittance) LUT 텍스처를 반환합니다.
      * [EN] Returns the atmospheric Transmittance LUT texture.
      */
-    get atmosphereTransmittanceTexture(): DirectTexture { return this.#transmittanceGenerator.lutTexture; }
+    get transmittanceLUT(): DirectTexture { return this.#transmittanceGenerator.lutTexture; }
 
     /**
      * [KO] 다중 산란(Multi-Scattering) LUT 텍스처를 반환합니다.
      * [EN] Returns the atmospheric Multi-Scattering LUT texture.
      */
-    get atmosphereMultiScatteringTexture(): DirectTexture { return this.#multiScatteringGenerator.lutTexture; }
+    get multiScatLUT(): DirectTexture { return this.#multiScatteringGenerator.lutTexture; }
 
     /**
      * [KO] 스카이 뷰(Sky-View) LUT 텍스처를 반환합니다.
      * [EN] Returns the atmospheric Sky-View LUT texture.
      */
-    get atmosphereSkyViewTexture(): DirectTexture { return this.#skyViewGenerator.lutTexture; }
+    get skyViewLUT(): DirectTexture { return this.#skyViewGenerator.lutTexture; }
 
     /**
      * [KO] 카메라 볼륨(AP) LUT 텍스처를 반환합니다.
      * [EN] Returns the atmospheric Camera Volume (AP) LUT texture.
      */
-    get atmosphereCameraVolumeTexture(): DirectCubeTexture { return this.#cameraVolumeGenerator.lutTexture; }
+    get aerialPerspectiveLUT(): DirectCubeTexture { return this.#aerialPerspectiveGenerator.lutTexture; }
 
     /**
      * [KO] 대기 조도(Irradiance) LUT 텍스처를 반환합니다.
      * [EN] Returns the atmospheric Irradiance LUT texture.
      */
-    get atmosphereIrradianceTexture(): DirectCubeTexture { return this.#irradianceGenerator.lutTexture; }
+    get skyAtmosphereIrradianceLUT(): DirectCubeTexture { return this.#skyAtmosphereIrradianceGenerator.lutTexture; }
 
     /**
      * [KO] 프리필터링된 대기 반사 큐브맵을 반환합니다.
      * [EN] Returns the pre-filtered atmospheric reflection cubemap.
      */
-    get atmosphereReflectionTexture(): DirectCubeTexture { return this.#reflectionGenerator.prefilteredTexture; }
+    get skyAtmosphereReflectionLUT(): DirectCubeTexture { return this.#reflectionGenerator.prefilteredTexture; }
 
     /**
      * [KO] 대기 산란 전용 샘플러를 반환합니다.
@@ -761,10 +761,10 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 {binding: 1, resource: view.viewRenderTextureManager.depthTextureView},
                 {binding: 2, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
                 {binding: 3, resource: this.#multiScatteringGenerator.lutTexture.gpuTextureView},
-                {binding: 4, resource: this.atmosphereSkyViewTexture.gpuTextureView},
-                {binding: 5, resource: this.atmosphereCameraVolumeTexture.gpuTexture.createView({dimension: '3d'})},
+                {binding: 4, resource: this.skyViewLUT.gpuTextureView},
+                {binding: 5, resource: this.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})},
                 {binding: 6, resource: this.atmosphereSampler.gpuSampler},
-                {binding: 7, resource: this.atmosphereIrradianceTexture.gpuTextureView}
+                {binding: 7, resource: this.skyAtmosphereIrradianceLUT.gpuTextureView}
             ]
         });
 
@@ -814,12 +814,12 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 skyAtmosphereFn,
                 '@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
                 depthTextureDeclaration,
-                '@group(0) @binding(2) var atmosphereTransmittanceTexture : texture_2d<f32>;',
-                '@group(0) @binding(3) var atmosphereMultiScatteringTexture : texture_2d<f32>;',
-                '@group(0) @binding(4) var atmosphereSkyViewTexture : texture_2d<f32>;',
-                '@group(0) @binding(5) var atmosphereCameraVolumeTexture : texture_3d<f32>;',
-                '@group(0) @binding(6) var atmosphereSampler : sampler;',
-                '@group(0) @binding(7) var atmosphereIrradianceTexture : texture_cube<f32>;',
+                '@group(0) @binding(2) var transmittanceLUT : texture_2d<f32>;',
+                '@group(0) @binding(3) var multiScatLUT : texture_2d<f32>;',
+                '@group(0) @binding(4) var skyViewLUT : texture_2d<f32>;',
+                '@group(0) @binding(5) var aerialPerspectiveLUT : texture_3d<f32>;',
+                '@group(0) @binding(6) var skyAtmosphereSampler : sampler;',
+                '@group(0) @binding(7) var skyAtmosphereIrradianceLUT : texture_cube<f32>;',
                 '',
                 '@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM,
@@ -829,9 +829,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 '@compute @workgroup_size(16, 16)',
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
                 '    let uniforms = systemUniforms.skyAtmosphere;',
-                '    let camH = uniforms.cameraHeight;',
-                '    let r = uniforms.bottomRadius;',
-                '    let atmH = uniforms.atmosphereHeight;',
+                '    let viewHeight = uniforms.cameraHeight;',
+                '    let bottomRadius = uniforms.bottomRadius;',
+                '    let atmosphereHeight = uniforms.atmosphereHeight;',
                 computeCode,
                 '}'
             ].join('\n');

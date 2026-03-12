@@ -61,7 +61,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_REFL_GEN', 256, 256, 6);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_ATMOSPHERE_REFLECTION_GEN', 256, 256, 6);
         this.#init();
     }
 

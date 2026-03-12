@@ -122,17 +122,17 @@ class View3D extends AView {
             let needResetBindGroup = true
             let prevInfo = this.#prevInfoList[key]
             
-            const atmosphereReflectionTexture = skyAtmosphere?.atmosphereReflectionTexture;
-            const atmosphereIrradianceTexture = skyAtmosphere?.atmosphereIrradianceTexture;
+            const skyAtmosphereReflectionLUT = skyAtmosphere?.skyAtmosphereReflectionLUT;
+            const skyAtmosphereIrradianceLUT = skyAtmosphere?.skyAtmosphereIrradianceLUT;
 
             if (prevInfo) {
                 needResetBindGroup = (
                     prevInfo.ibl !== ibl ||
                     prevInfo.skyAtmosphere !== skyAtmosphere ||
-                    prevInfo.atmosphereReflectionTexture !== atmosphereReflectionTexture ||
-                    prevInfo.atmosphereReflectionTextureRevision !== atmosphereReflectionTexture?.revision ||
-                    prevInfo.atmosphereIrradianceTexture !== atmosphereIrradianceTexture ||
-                    prevInfo.atmosphereIrradianceTextureRevision !== atmosphereIrradianceTexture?.revision ||
+                    prevInfo.skyAtmosphereReflectionLUT !== skyAtmosphereReflectionLUT ||
+                    prevInfo.skyAtmosphereReflectionLUTRevision !== skyAtmosphereReflectionLUT?.revision ||
+                    prevInfo.skyAtmosphereIrradianceLUT !== skyAtmosphereIrradianceLUT ||
+                    prevInfo.skyAtmosphereIrradianceLUTRevision !== skyAtmosphereIrradianceLUT?.revision ||
                     prevInfo.ibl_prefilterTexture !== ibl_prefilterTexture ||
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
@@ -146,10 +146,10 @@ class View3D extends AView {
             this.#prevInfoList[key] = {
                 ibl,
                 skyAtmosphere,
-                atmosphereReflectionTexture,
-                atmosphereReflectionTextureRevision: atmosphereReflectionTexture?.revision,
-                atmosphereIrradianceTexture,
-                atmosphereIrradianceTextureRevision: atmosphereIrradianceTexture?.revision,
+                skyAtmosphereReflectionLUT,
+                skyAtmosphereReflectionLUTRevision: skyAtmosphereReflectionLUT?.revision,
+                skyAtmosphereIrradianceLUT,
+                skyAtmosphereIrradianceLUTRevision: skyAtmosphereIrradianceLUT?.revision,
                 ibl_prefilterTexture,
                 ibl_irradianceTexture,
                 renderPath1ResultTextureView,
@@ -235,9 +235,9 @@ class View3D extends AView {
                 {binding: 11, resource: resourceManager.getGPUResourceCubeTextureView(ibl_irradianceTexture, ibl_irradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
                 {binding: 12, resource: resourceManager.brdfGenerator.brdfLUTTexture?.createView() || resourceManager.emptyBitmapTextureView},
                 {binding: 13, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereSampler.gpuSampler : this.#basicSampler},
-                {binding: 14, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereTransmittanceTexture.gpuTextureView : resourceManager.emptyBitmapTextureView},
-                {binding: 15, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.atmosphereIrradianceTexture, this.skyAtmosphere?.atmosphereIrradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
-                {binding: 16, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.atmosphereReflectionTexture, this.skyAtmosphere?.atmosphereReflectionTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
+                {binding: 14, resource: this.skyAtmosphere ? this.skyAtmosphere.transmittanceLUT.gpuTextureView : resourceManager.emptyBitmapTextureView},
+                {binding: 15, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereIrradianceLUT, this.skyAtmosphere?.skyAtmosphereIrradianceLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
+                {binding: 16, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereReflectionLUT, this.skyAtmosphere?.skyAtmosphereReflectionLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);

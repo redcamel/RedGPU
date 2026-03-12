@@ -76,7 +76,22 @@
 | **완료** | **Frustum Ray 추출** | `CameraVolume`, `ComputePostEffect` (총 2곳) | `fn getFrustumRayDirection(uv, invP, invV)`를 `skyAtmosphereFn`에 추가하여 NDC->World 변환의 중복 제거 |
 | **완료** | **Hammersley 시퀀스** | `Irradiance` 등 IBL 관련 셰이더 내부 하드코딩 | IBL 중요도 샘플링에 쓰이는 `radicalInverse_VdC` 및 `hammersley` 함수를 `getRadicalInverseVanDerCorput`과 `getHammersley`로 명확히 명명하여 `SystemCodeManager`의 `math.hash` 모듈로 이관 및 엔진(BRDF, Prefilter 등) 전반에 걸쳐 일괄 적용 |
 
+### Step 6: 빌드 자동화 스크립트(syncShaderDoc.js) 안정화 (P2)
+WGSL 코드를 TypeScript JSDoc으로 자동 동기화하는 과정에서 발생한 구문 파괴 문제를 해결하여 빌드 시스템의 안정성을 확보했습니다.
 
+| 진행 상황 | 대상 컴포넌트 | 주요 변경 사항 | 기대 효과 |
+| :---: | :--- | :--- | :--- |
+| **완료** | `syncShaderDoc.js` | JSDoc 내 WGSL 블록 주석(`*/`) 이스케이프 로직 추가 | WGSL 소스 내의 주석이 TS 파일을 깨트리는 현상 방지 및 정상적인 JSDoc 생성 보장 |
+
+### Step 7: 명칭 통일 및 UE5 표준화 (P1)
+모듈 전반의 용어를 언리얼 엔진 5(UE5) 및 그래픽스 표준 명칭으로 통일하여 가독성과 유지보수성을 극대화했습니다.
+
+| 진행 상황 | 분류 (Category) | 주요 변경 사항 | 비고 |
+| :---: | :--- | :--- | :--- |
+| **완료** | **클래스명** | `CameraVolume` ➡️ `AerialPerspective`, `AtmosphereIrradiance` ➡️ `SkyAtmosphereIrradiance` | UE5 공식 명칭 반영 및 접두어 통일 |
+| **완료** | **리소스명 (LUT)** | `atmosphere*Texture` ➡️ `*LUT` (예: `transmittanceLUT`, `skyViewLUT` 등) | LUT 리소스의 성격을 명확히 규정 |
+| **완료** | **변수명 (WGSL)** | `camH`, `mappingH`, `h` ➡️ `viewHeight`, `atmH` ➡️ `atmosphereHeight` | 파편화된 높이/고도 관련 변수명을 의미론적으로 통일 |
+| **완료** | **API 정규화** | `SkyAtmosphere.ts` 및 `View3D.ts` 내 관련 Getter 및 바인딩 명칭 일괄 수정 | 외부 노출 API와 내부 로직의 네이밍 정합성 확보 |
 
 ## 4. 자체 점검 결과 (Self-Review)
 

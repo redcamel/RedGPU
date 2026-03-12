@@ -1,23 +1,23 @@
 // [KO] UE5 표준 Sky-View LUT 생성
 #redgpu_include math.INV_PI
 
-@group(0) @binding(0) var atmosphereSkyViewTexture: texture_storage_2d<rgba16float, write>;
-@group(0) @binding(1) var atmosphereTransmittanceTexture: texture_2d<f32>;
-@group(0) @binding(2) var atmosphereMultiScatTexture: texture_2d<f32>;
-@group(0) @binding(3) var atmosphereSampler: sampler;
+@group(0) @binding(0) var skyViewLUT: texture_storage_2d<rgba16float, write>;
+@group(0) @binding(1) var transmittanceLUT: texture_2d<f32>;
+@group(0) @binding(2) var multiScatLUT: texture_2d<f32>;
+@group(0) @binding(3) var skyAtmosphereSampler: sampler;
 @group(0) @binding(4) var<uniform> params: SkyAtmosphere;
 
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let size = textureDimensions(atmosphereSkyViewTexture);
+    let size = textureDimensions(skyViewLUT);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
     let azimuth = (uv.x - 0.5) * PI2;
-    let r = params.bottomRadius;
-    let camH = max(0.0001, params.cameraHeight);
+    let bottomRadius = params.bottomRadius;
+    let viewHeight = max(0.0001, params.cameraHeight);
     
-    let horizonCos = -sqrt(max(0.0, camH * (2.0 * r + camH))) / (r + camH);
+    let horizonCos = -sqrt(max(0.0, viewHeight * (2.0 * bottomRadius + viewHeight))) / (bottomRadius + viewHeight);
     let horizonElevation = asin(clamp(horizonCos, -1.0, 1.0));
 
     var viewElevation: f32;
@@ -39,23 +39,23 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
     }
 
-    let rayOrigin = vec3<f32>(0.0, camH + r, 0.0);
-    var tMax = getRaySphereIntersection(rayOrigin, viewDir, r + params.atmosphereHeight);
-    let intersect = getPlanetIntersection(rayOrigin, viewDir, r);
+    let rayOrigin = vec3<f32>(0.0, viewHeight + bottomRadius, 0.0);
+    var tMax = getRaySphereIntersection(rayOrigin, viewDir, bottomRadius + params.atmosphereHeight);
+    let intersect = getPlanetIntersection(rayOrigin, viewDir, bottomRadius);
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
 
     if (intersect.x > 0.0) {
         // [KO] 지면까지의 대기 산란 적분 (단위 휘도)
-        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, false, &radiance, &transmittance);
         
         if (params.useGround > 0.5 && params.showGround > 0.5) {
             // [KO] 지면 반사광 계산 안정화
             let cosSun = params.sunDirection.y; 
-            let sunTrans = getTransmittance(atmosphereTransmittanceTexture, atmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
+            let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
             let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.01, 0.99), 1.0);
-            let msEnergy = textureSampleLevel(atmosphereMultiScatTexture, atmosphereSampler, msUV, 0.0).rgb;
+            let msEnergy = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb;
 
             // [KO] 지면 반사광 합성 (모두 단위 휘도로 계산하여 중복 합산 방지)
             // [EN] Combine ground reflection (calculate in unit radiance to prevent redundant summation)
@@ -63,8 +63,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             radiance += transmittance * groundRadiance;
         }
     } else if (tMax > 0.0) {
-        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, atmosphereTransmittanceTexture, atmosphereSampler, atmosphereMultiScatTexture, true, false, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, false, &radiance, &transmittance);
     }
 
-    textureStore(atmosphereSkyViewTexture, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
+    textureStore(skyViewLUT, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
 }
