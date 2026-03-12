@@ -12,7 +12,7 @@
 #redgpu_include math.tnb.getTBN
 
 // Hammersley 시퀀스를 위한 비트 반전 함수 (표준 IBL 기법)
-fn radicalInverse_VdC(bits_in: u32) -> f32 {
+fn radicalInverse_VanDerCorput(bits_in: u32) -> f32 {
     var bits = bits_in;
     bits = (bits << 16u) | (bits >> 16u);
     bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
@@ -23,7 +23,7 @@ fn radicalInverse_VdC(bits_in: u32) -> f32 {
 }
 
 fn hammersley(i: u32, n: u32) -> vec2<f32> {
-    return vec2<f32>(f32(i) / f32(n), radicalInverse_VdC(i));
+    return vec2<f32>(f32(i) / f32(n), radicalInverse_VanDerCorput(i));
 }
 
 @compute @workgroup_size(8, 8, 1)

@@ -5,7 +5,7 @@
 #redgpu_include math.PI2
 #redgpu_include math.tnb.getTBN
 
-fn radicalInverse_VdC(bits: u32) -> f32 {
+fn radicalInverse_VanDerCorput(bits: u32) -> f32 {
     var b = bits;
     b = (b << 16u) | (b >> 16u);
     b = ((b & 0x55555555u) << 1u) | ((b & 0xAAAAAAAAu) >> 1u);
@@ -16,7 +16,7 @@ fn radicalInverse_VdC(bits: u32) -> f32 {
 }
 
 fn hammersley(i: u32, N: u32) -> vec2<f32> {
-    return vec2<f32>(f32(i) / f32(N), radicalInverse_VdC(i));
+    return vec2<f32>(f32(i) / f32(N), radicalInverse_VanDerCorput(i));
 }
 
 fn importanceSampleGGX(Xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32> {

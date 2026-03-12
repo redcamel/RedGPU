@@ -61,12 +61,20 @@
 ### Step 4: WGSL 셰이더 내 공통 물리 로직 분리 및 통합 (P1)
 여러 `.wgsl` 파일에 중복으로 하드코딩된 대기 산란 관련 수식과 유틸리티 함수들을 식별하고 `core/skyAtmosphereFn.wgsl`로 분리하여 유지보수성을 극대화합니다.
 
-| 분류 (Category) | 중복 발견 위치 | 통합될 함수 시그니처 (제안) | 기대 효과 |
-| :--- | :--- | :--- | :--- |
-| **큐브맵 벡터 매핑** | `Irradiance`, `Reflection (Soft/NoSoft)`, `Combine` (총 4곳) | `fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32>` | 15줄 가량의 `switch(face)` 계산식 중복 제거 및 가독성 확보 |
-| **지면 반사광 계산** | `SkyView`, `Irradiance`, `Reflection (Soft/NoSoft)` (총 4곳) | `fn evaluateGroundRadiance(cosSun, sunTrans, msEnergy, groundAlbedo)` | Albedo와 MS 에너지를 이용한 적분 식의 파편화 방지 및 무결성 확보 |
-| **태양 본체 스페큘러** | `Reflection (SoftCut)`, `Reflection (NoSoftCut)` (총 2곳) | `fn getSpecularSunLobe(viewSunCos, lobeHalfAngle, sunTrans)` | Sun Lobe 계산을 위한 `pow(viewSun, sunLobePower)` 로직 통합 보존 |
-| **IBL 평가 거시 구조** | `Irradiance`, `Reflection (Soft/NoSoft)` (총 3곳) | `isGround` 판단 후 `SkyView` 및 `Mie Glow`를 합성하는 매크로 블록의 단순화 | 각 IBL 셰이더 파일의 `main()` 함수가 10줄 이내로 극단적 압축 가능 |
+| 진행 상황 | 분류 (Category) | 중복 발견 위치 | 통합된 함수 시그니처 | 기대 효과 |
+| :---: | :--- | :--- | :--- | :--- |
+| **완료** | **큐브맵 벡터 매핑** | `Irradiance`, `Reflection (Soft/NoSoft)`, `Combine` (총 4곳) | `fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32>` | 15줄 가량의 `switch(face)` 계산식 중복 제거 및 가독성 확보 |
+| **완료** | **지면 반사광 계산** | `SkyView`, `Irradiance`, `Reflection (Soft/NoSoft)` (총 4곳) | `fn evaluateGroundRadiance(cosSun, sunTrans, msEnergy, groundAlbedo)` | Albedo와 MS 에너지를 이용한 적분 식의 파편화 방지 및 무결성 확보 |
+| **완료** | **태양 본체 스페큘러** | `Reflection (SoftCut)`, `Reflection (NoSoftCut)` (총 2곳) | `fn getSpecularSunLobe(viewSunCos, lobeHalfAngle, sunTrans)` | Sun Lobe 계산을 위한 `pow(viewSun, sunLobePower)` 로직 통합 보존 |
+| **완료** | **IBL 평가 거시 구조** | `Irradiance`, `Reflection (Soft/NoSoft)` (총 3곳) | `fn evaluateIBLRadiance(...)` | 각 IBL 셰이더 파일의 `main()` 함수가 10줄 이내로 극단적 압축 달성 |
+
+### Step 5: WGSL 추가 공통 로직 식별 및 시스템 레벨 편입 (P2)
+정밀 분석을 통해 식별된 2차 중복 요소들을 정리하고, 범용성이 높은 수학 로직은 시스템 코어(`math`)로 편입합니다.
+
+| 진행 상황 | 분류 (Category) | 중복 발견 위치 | 통합 전략 및 기대 효과 |
+| :---: | :--- | :--- | :--- |
+| **완료** | **Frustum Ray 추출** | `CameraVolume`, `ComputePostEffect` (총 2곳) | `fn getFrustumRayDirection(uv, invP, invV)`를 `skyAtmosphereFn`에 추가하여 NDC->World 변환의 중복 제거 |
+| **완료** | **Hammersley 시퀀스** | `Irradiance` 등 IBL 관련 셰이더 내부 하드코딩 | IBL 중요도 샘플링에 쓰이는 `radicalInverse_VdC` 및 `hammersley` 함수를 `getRadicalInverseVanDerCorput`과 `getHammersley`로 명확히 명명하여 `SystemCodeManager`의 `math.hash` 모듈로 이관 및 엔진(BRDF, Prefilter 등) 전반에 걸쳐 일괄 적용 |
 
 ---
 

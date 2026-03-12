@@ -13,6 +13,8 @@ import getBitHash1D_vec3_wgsl from './shader/math/hash/getBitHash1D_vec3.wgsl';
 import getBitHash1D_vec4_wgsl from './shader/math/hash/getBitHash1D_vec4.wgsl';
 import getBitHash2D_vec2_wgsl from './shader/math/hash/getBitHash2D_vec2.wgsl';
 import getBitHash3D_vec3_wgsl from './shader/math/hash/getBitHash3D_vec3.wgsl';
+import getRadicalInverseVanDerCorput_wgsl from './shader/math/hash/getRadicalInverseVanDerCorput.wgsl';
+import getHammersley_wgsl from './shader/math/hash/getHammersley.wgsl';
 import getNDCFromDepth_wgsl from './shader/math/reconstruct/getNDCFromDepth.wgsl';
 import getWorldPositionFromDepth_wgsl from './shader/math/reconstruct/getWorldPositionFromDepth.wgsl';
 import getViewPositionFromDepth_wgsl from './shader/math/reconstruct/getViewPositionFromDepth.wgsl';
@@ -107,6 +109,8 @@ export namespace MathLibrary {
         export const getBitHash1D_vec4 = getBitHash1D_vec4_wgsl;
         export const getBitHash2D_vec2 = getBitHash2D_vec2_wgsl;
         export const getBitHash3D_vec3 = getBitHash3D_vec3_wgsl;
+        export const getRadicalInverseVanDerCorput = getRadicalInverseVanDerCorput_wgsl;
+        export const getHammersley = getHammersley_wgsl;
     }
 
     export const getInterleavedGradientNoise = getInterleavedGradientNoise_wgsl;

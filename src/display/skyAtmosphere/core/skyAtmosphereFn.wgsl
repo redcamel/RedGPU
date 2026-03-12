@@ -533,3 +533,11 @@ fn evaluateIBLRadiance(
 
     return radiance;
 }
+
+// [KO] NDC 좌표와 역투영/역뷰 매핑 행렬을 통해 Frustum Ray 방향 벡터를 반환합니다.
+fn getFrustumRayDirection(uv: vec2<f32>, invP: mat4x4<f32>, invV: mat4x4<f32>) -> vec3<f32> {
+    let ndc = vec2<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0);
+    let viewSpaceDir = normalize(vec3<f32>(ndc.x * invP[0][0], ndc.y * invP[1][1], -1.0));
+    let worldRotation = mat3x3<f32>(invV[0].xyz, invV[1].xyz, invV[2].xyz);
+    return normalize(worldRotation * viewSpaceDir);
+}
