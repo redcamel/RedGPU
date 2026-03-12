@@ -39,7 +39,7 @@
 | 진행 상황 | 대상 파일 | 주요 변경 사항 | 비고 |
 | :---: | :--- | :--- | :--- |
 | **완료** | `ASkyAtmosphereLUTGenerator.ts` | `protected` 변수 4종 및 `readonly` 속성 4종을 Private Field(`#`)로 캡슐화 | 외부/자식 클래스용 Getter/Setter 구현 추가. `protected` 키워드 제거(public 전환). |
-| **완료** | `ASkyAtmosphereLUTGenerator.ts` | `gpuRender`를 `executeComputePass`로 개명 | 자식 클래스 오버라이딩 충돌 회피 (`render` 시그니처 보존) |
+| **완료** | `ASkyAtmosphereLUTGenerator.ts` | `gpuRender`를 `executeComputePass`로 개명 및 파이프라인 의존성 주입(DI) 적용 | 부모 클래스의 불필요한 `#pipeline` 상태 제거 및 자식 클래스의 명확한 파이프라인 관리 보장 |
 | **완료** | `TransmittanceGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `this.executeComputePass()` 활용 (`@ts-ignore` 제거) |
 | **완료** | `MultiScatteringGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `this.executeComputePass()` 활용 (`@ts-ignore` 제거) |
 | **완료** | `SkyViewGenerator.ts` | 단일 바인드 그룹 캐싱 로직 적용 (`#bindGroup`) | `this.executeComputePass()` 활용 (`@ts-ignore` 제거) |
@@ -54,9 +54,9 @@
 | **완료** | `SkyAtmosphere.ts` (Setters) | 30여 개 파라미터 Setter 내 중복 로직 통합 | 코드 라인 수 대폭 감소 및 가독성 증가 |
 | **완료** | `SkyAtmosphere.ts` (Uniforms) | `#updateSharedUniformBuffer` 일괄 복사 방식으로 개편 | 매 루프 발생하던 `queue.writeBuffer()`를 1회로 압축하여 CPU 부하 감소 |
 
-### Step 3: 셰이더 리소스 정규화 (P1)
-1.  `wgsl/computeCode.wgsl`과 연동되는 메인 엔트리 포인트를 순수 WGSL 파일로 분리.
-2.  TS 코드에서는 리소스 바인딩 레이아웃 정보만 관리하도록 책임 분리.
+### Step 3: 셰이더 리소스 정규화 (P1) - **[현재 보류 (On Hold)]**
+*   **방향성 논의 결과**: `SystemCodeManager`를 오염시키지 않고, 번들러의 Native Import 및 TS 템플릿 리터럴을 활용하여 조립(Composition)하는 방향이 논의됨.
+*   **상태**: 추가적인 아키텍처 결정 전까지 작업 홀딩.
 
 ---
 

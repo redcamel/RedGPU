@@ -27,6 +27,7 @@ const SHADER_INFO = parseWGSL(skyAtmosphereFn + skyViewShaderCode, 'SKY_VIEW_GEN
 class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;
     #bindGroup: GPUBindGroup;
+    #pipeline: GPUComputePipeline;
 
     /**
      * [KO] SkyViewGenerator 인스턴스를 초기화합니다.
@@ -75,7 +76,7 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
             const {gpuDevice} = this.redGPUContext;
             this.#bindGroup = gpuDevice.createBindGroup({
                 label: 'SKY_VIEW_GEN_BG',
-                layout: this.pipeline.getBindGroupLayout(0),
+                layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: this.#lutTexture.gpuTextureView},
                     {binding: 1, resource: transmittance.gpuTextureView},
@@ -85,12 +86,12 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
                 ]
             });
         }
-        this.executeComputePass(this.#bindGroup);
+        this.executeComputePass(this.#pipeline, this.#bindGroup);
     }
 
     #init(): void {
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyViewLUTTexture_${createUUID()}`, this.createLUTTexture());
-        this.pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
+        this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
             label: 'SKY_VIEW_GEN_PIPELINE',
             layout: 'auto',
             compute: {

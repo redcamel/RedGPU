@@ -27,6 +27,7 @@ const SHADER_INFO = parseWGSL(atmosphereIrradianceShaderCode, 'ATMOSPHERE_IRRADI
 class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	#lutTexture: DirectCubeTexture;
 	#bindGroup: GPUBindGroup;
+	#pipeline: GPUComputePipeline;
 
 	/**
 	 * [KO] AtmosphereIrradianceGenerator 인스턴스를 초기화합니다.
@@ -78,7 +79,7 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 			const {gpuDevice} = this.redGPUContext;
 			this.#bindGroup = gpuDevice.createBindGroup({
 				label: 'ATMOSPHERE_IRRADIANCE_GEN_BG',
-				layout: this.pipeline.getBindGroupLayout(0),
+				layout: this.#pipeline.getBindGroupLayout(0),
 				entries: [
 					{binding: 0, resource: multiScat.gpuTextureView},
 					{binding: 1, resource: this.sampler.gpuSampler},
@@ -90,14 +91,14 @@ class AtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 			});
 		}
 
-		this.executeComputePass(this.#bindGroup, [8, 8, 1]);
+		this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);
 	}
 
 	#init(): void {
 		const {gpuDevice} = this.redGPUContext;
 		this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `AtmosphereIrradianceCubeTexture_${createUUID()}`, this.createLUTTexture(false));
 
-		this.pipeline = gpuDevice.createComputePipeline({
+		this.#pipeline = gpuDevice.createComputePipeline({
 			label: 'ATMOSPHERE_IRRADIANCE_GEN_PIPELINE',
 			layout: 'auto',
 			compute: {

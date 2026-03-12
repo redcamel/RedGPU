@@ -31,6 +31,7 @@ const SHADER_INFO = parseWGSL(skyAtmosphereFn + cameraVolumeShaderCode, 'CAMERA_
 class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectCubeTexture;
     #bindGroup: GPUBindGroup;
+    #pipeline: GPUComputePipeline;
     #prevSystemBuffer: GPUBuffer;
 
     /**
@@ -92,7 +93,7 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
             this.#prevSystemBuffer = systemBuffer;
             this.#bindGroup = gpuDevice.createBindGroup({
                 label: 'CAMERA_VOLUME_GEN_BG',
-                layout: this.pipeline.getBindGroupLayout(0),
+                layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: {buffer: systemBuffer}}, // systemUniforms
                     {binding: 1, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})}, // atmosphereCameraVolumeTexture
@@ -104,12 +105,12 @@ class CameraVolumeGenerator extends ASkyAtmosphereLUTGenerator {
             });
         }
         
-        this.executeComputePass(this.#bindGroup, [4, 4, 4]);
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [4, 4, 4]);
     }
 
     #init(): void {
         this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `CameraVolumeLUTTexture_${createUUID()}`, this.createLUTTexture(true));
-        this.pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
+        this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
             label: 'CAMERA_VOLUME_GEN_PIPELINE',
             layout: 'auto',
             compute: {

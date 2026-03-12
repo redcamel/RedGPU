@@ -14,7 +14,6 @@ abstract class ASkyAtmosphereLUTGenerator {
     #redGPUContext: RedGPUContext;
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
-    #pipeline: GPUComputePipeline;
 
     /**
      * [KO] 생성기의 레이블입니다.
@@ -85,8 +84,6 @@ abstract class ASkyAtmosphereLUTGenerator {
     get redGPUContext(): RedGPUContext { return this.#redGPUContext; }
     get sharedUniformBuffer(): UniformBuffer { return this.#sharedUniformBuffer; }
     get sampler(): Sampler { return this.#sampler; }
-    get pipeline(): GPUComputePipeline { return this.#pipeline; }
-    set pipeline(value: GPUComputePipeline) { this.#pipeline = value; }
 
     get label(): string { return this.#label; }
     get width(): number { return this.#width; }
@@ -103,6 +100,9 @@ abstract class ASkyAtmosphereLUTGenerator {
      * [KO] 표준 컴퓨팅 패스를 실행하여 LUT를 렌더링합니다.
      * [EN] Executes a standard compute pass to render the LUT.
      *
+     * @param pipeline -
+     * [KO] 컴퓨팅 패스에 사용할 파이프라인
+     * [EN] Compute pipeline to be used for the compute pass
      * @param bindGroup -
      * [KO] 컴퓨팅 패스에 사용할 바인드 그룹
      * [EN] Bind group to be used for the compute pass
@@ -111,6 +111,7 @@ abstract class ASkyAtmosphereLUTGenerator {
      * [EN] Workgroup size (Default: [16, 16, 1])
      */
     executeComputePass(
+        pipeline: GPUComputePipeline,
         bindGroup: GPUBindGroup,
         workgroupSize: [number, number, number] = [16, 16, 1]
     ): void {
@@ -118,7 +119,7 @@ abstract class ASkyAtmosphereLUTGenerator {
         const commandEncoder = gpuDevice.createCommandEncoder({label: `${this.#label}_COMMAND_ENCODER`});
         const passEncoder = commandEncoder.beginComputePass({label: `${this.#label}_COMPUTE_PASS`});
 
-        passEncoder.setPipeline(this.#pipeline);
+        passEncoder.setPipeline(pipeline);
         passEncoder.setBindGroup(0, bindGroup);
         passEncoder.dispatchWorkgroups(
             Math.ceil(this.#width / workgroupSize[0]),
