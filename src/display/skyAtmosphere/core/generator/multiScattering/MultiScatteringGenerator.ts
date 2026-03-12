@@ -8,7 +8,7 @@ import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + multiScatteringShaderCode_wgsl, 'MULTI_SCATTERING_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + multiScatteringShaderCode_wgsl, 'SkyAtmosphere_MultiScattering_Generator');
 
 /**
  * [KO] 다중 산란(Multi-Scattering) 에너지 보정을 위한 LUT 생성을 담당하는 클래스입니다.
@@ -44,7 +44,7 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'MULTI_SCATTERING_GEN', 32, 32);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'MultiScattering_Gen', 32, 32);
         this.#init();
     }
 
@@ -72,7 +72,7 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
         if (!this.#bindGroup) {
             const {gpuDevice} = this.redGPUContext;
             this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'MULTI_SCATTERING_GEN_BG',
+                label: 'SkyAtmosphere_MultiScattering_BindGroup',
                 layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: this.#lutTexture.gpuTextureView}, // multiScatLUT
@@ -84,9 +84,9 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectTexture(this.redGPUContext, `MultiScatLUTTexture_${createUUID()}`, this.createLUTTexture());
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_MultiScat_LUTTexture_${createUUID()}`, this.createLUTTexture());
         this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'MULTI_SCATTERING_GEN_PIPELINE',
+            label: 'SkyAtmosphere_MultiScattering_Pipeline',
             layout: 'auto',
             compute: {
                 module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),

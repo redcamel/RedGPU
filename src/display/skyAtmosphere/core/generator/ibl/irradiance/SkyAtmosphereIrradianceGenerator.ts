@@ -8,7 +8,7 @@ import createUUID from "../../../../../../utils/uuid/createUUID";
 import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereIrradianceShaderCode_wgsl, 'SKY_ATMOSPHERE_IRRADIANCE_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereIrradianceShaderCode_wgsl, 'SkyAtmosphere_Irradiance_Generator');
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 물리적으로 일치하는 조도(Irradiance) 큐브맵을 생성하는 클래스입니다.
@@ -44,7 +44,7 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	 * [EN] Sampler to be used for LUT sampling
 	 */
 	constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-		super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_ATMOSPHERE_IRRADIANCE_GEN', 32, 32, 6);
+		super(redGPUContext, sharedUniformBuffer, sampler, 'Irradiance_Gen', 32, 32, 6);
 		this.#init();
 	}
 
@@ -78,7 +78,7 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 		if (!this.#bindGroup) {
 			const {gpuDevice} = this.redGPUContext;
 			this.#bindGroup = gpuDevice.createBindGroup({
-				label: 'SKY_ATMOSPHERE_IRRADIANCE_GEN_BG',
+				label: 'SkyAtmosphere_Irradiance_BindGroup',
 				layout: this.#pipeline.getBindGroupLayout(0),
 				entries: [
 					{binding: 0, resource: multiScat.gpuTextureView}, // multiScatLUT
@@ -96,10 +96,10 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 
 	#init(): void {
 		const {gpuDevice} = this.redGPUContext;
-		this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphereIrradianceCubeTexture_${createUUID()}`, this.createLUTTexture(false));
+		this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`, this.createLUTTexture(false));
 
 		this.#pipeline = gpuDevice.createComputePipeline({
-			label: 'SKY_ATMOSPHERE_IRRADIANCE_GEN_PIPELINE',
+			label: 'SkyAtmosphere_Irradiance_Pipeline',
 			layout: 'auto',
 			compute: {
 				module: gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),

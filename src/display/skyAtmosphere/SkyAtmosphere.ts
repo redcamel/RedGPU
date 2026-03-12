@@ -27,10 +27,10 @@ import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl, 'SKY_ATMOSPHERE_CORE');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl, 'SkyAtmosphere_Core');
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
-const BACKGROUND_SHADER_INFO = parseWGSL(backgroundVertexShaderCode_wgsl, 'SKY_ATMOSPHERE_BACKGROUND_VERTEX');
+const BACKGROUND_SHADER_INFO = parseWGSL(backgroundVertexShaderCode_wgsl, 'SkyAtmosphere_Background_Vertex');
 const BACKGROUND_UNIFORM_STRUCT = BACKGROUND_SHADER_INFO.uniforms.vertexUniforms;
 
 /**
@@ -140,7 +140,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         super(redGPUContext);
         const {gpuDevice} = redGPUContext;
 
-        this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength), 'SKY_ATMOSPHERE_SHARED_UNIFORM_BUFFER');
+        this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength), 'SkyAtmosphere_Shared_UniformBuffer');
 
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: 'linear',
@@ -158,7 +158,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
 
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
-            label: 'SKY_ATMOSPHERE_PE_BGL_1',
+            label: 'SkyAtmosphere_PE_BindGroupLayout_1',
             entries: [
                 {
                     binding: 0,
@@ -207,11 +207,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     #updateBackgroundPipeline(useMSAA: boolean) {
         const {gpuDevice, resourceManager} = this.redGPUContext;
-        const vertexModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_BACKGROUND_VERTEX', {code: backgroundVertexShaderCode_wgsl});
-        const fragmentModule = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_BACKGROUND_FRAGMENT', {code: backgroundFragmentShaderCode_wgsl});
+        const vertexModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Vertex_ShaderModule', {code: backgroundVertexShaderCode_wgsl});
+        const fragmentModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Fragment_ShaderModule', {code: backgroundFragmentShaderCode_wgsl});
 
         this.#backgroundPipeline = gpuDevice.createRenderPipeline({
-            label: 'SKY_ATMOSPHERE_BACKGROUND_PIPELINE',
+            label: 'SkyAtmosphere_Background_Pipeline',
             layout: gpuDevice.createPipelineLayout({
                 bindGroupLayouts: [
                     resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
@@ -837,8 +837,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             ].join('\n');
         };
 
-        this.#computeShaderMSAA = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_PE_MSAA', {code: createCode(true)});
-        this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule('SKY_ATMOSPHERE_PE_NON_MSAA', {code: createCode(false)});
+        this.#computeShaderMSAA = resourceManager.createGPUShaderModule('SkyAtmosphere_PE_MSAA_ShaderModule', {code: createCode(true)});
+        this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule('SkyAtmosphere_PE_NonMSAA_ShaderModule', {code: createCode(false)});
     }
 
     #getBindGroupLayout0(useMSAA: boolean): GPUBindGroupLayout {

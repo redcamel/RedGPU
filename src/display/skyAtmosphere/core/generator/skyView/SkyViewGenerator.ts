@@ -8,7 +8,7 @@ import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/Uniform
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + skyViewShaderCode_wgsl, 'SKY_VIEW_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + skyViewShaderCode_wgsl, 'SkyAtmosphere_SkyView_Generator');
 
 /**
  * [KO] 카메라 시점에서의 전방위 하늘색 데이터를 담는 Sky-View LUT 생성을 담당하는 클래스입니다.
@@ -44,7 +44,7 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_VIEW_GEN', 512, 256);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'SkyView_Gen', 512, 256);
         this.#init();
     }
 
@@ -75,7 +75,7 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
         if (!this.#bindGroup) {
             const {gpuDevice} = this.redGPUContext;
             this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'SKY_VIEW_GEN_BG',
+                label: 'SkyAtmosphere_SkyView_BindGroup',
                 layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: this.#lutTexture.gpuTextureView}, // skyViewLUT
@@ -90,9 +90,9 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyViewLUTTexture_${createUUID()}`, this.createLUTTexture());
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_SkyView_LUTTexture_${createUUID()}`, this.createLUTTexture());
         this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'SKY_VIEW_GEN_PIPELINE',
+            label: 'SkyAtmosphere_SkyView_Pipeline',
             layout: 'auto',
             compute: {
                 module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),

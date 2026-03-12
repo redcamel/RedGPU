@@ -12,7 +12,7 @@ import View3D from "../../../../view/View3D";
 
 
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + aerialPerspectiveShaderCode_wgsl, 'AERIAL_PERSPECTIVE_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + aerialPerspectiveShaderCode_wgsl, 'SkyAtmosphere_AerialPerspective_Generator');
 
 /**
  * [KO] 거리별 공중 투시(Aerial Perspective)를 위한 3D LUT 생성을 담당하는 클래스입니다.
@@ -49,7 +49,7 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'AERIAL_PERSPECTIVE_GEN', 32, 32, 32);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'AerialPerspective_Gen', 32, 32, 32);
         this.#init();
     }
 
@@ -92,7 +92,7 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
         if (!this.#bindGroup || this.#prevSystemBuffer !== systemBuffer) {
             this.#prevSystemBuffer = systemBuffer;
             this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'AERIAL_PERSPECTIVE_GEN_BG',
+                label: 'SkyAtmosphere_AerialPerspective_BindGroup',
                 layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: {buffer: systemBuffer}}, // systemUniforms
@@ -109,9 +109,9 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `AerialPerspectiveLUTTexture_${createUUID()}`, this.createLUTTexture(true));
+        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_AerialPerspective_LUTTexture_${createUUID()}`, this.createLUTTexture(true));
         this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'AERIAL_PERSPECTIVE_GEN_PIPELINE',
+            label: 'SkyAtmosphere_AerialPerspective_Pipeline',
             layout: 'auto',
             compute: {
                 module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),

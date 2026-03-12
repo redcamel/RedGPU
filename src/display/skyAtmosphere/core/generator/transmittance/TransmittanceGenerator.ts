@@ -8,7 +8,7 @@ import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl, 'TRANSMITTANCE_GENERATOR');
+const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl, 'SkyAtmosphere_Transmittance_Generator');
 
 /**
  * [KO] 대기 투과율(Transmittance) LUT 생성을 담당하는 클래스입니다.
@@ -44,7 +44,7 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'TRANSMITTANCE_GEN', 256, 64);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'Transmittance_Gen', 256, 64);
         this.#init();
     }
 
@@ -69,7 +69,7 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
         if (!this.#bindGroup) {
             const {gpuDevice} = this.redGPUContext;
             this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'TRANSMITTANCE_GEN_BG',
+                label: 'SkyAtmosphere_Transmittance_BindGroup',
                 layout: this.#pipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: this.#lutTexture.gpuTextureView}, // transmittanceLUT
@@ -81,9 +81,9 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectTexture(this.redGPUContext, `TransmittanceLUTTexture_${createUUID()}`, this.createLUTTexture());
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_Transmittance_LUTTexture_${createUUID()}`, this.createLUTTexture());
         this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'TRANSMITTANCE_GEN_PIPELINE',
+            label: 'SkyAtmosphere_Transmittance_Pipeline',
             layout: 'auto',
             compute: {
                 module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),

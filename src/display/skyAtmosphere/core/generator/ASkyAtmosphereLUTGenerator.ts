@@ -116,8 +116,8 @@ abstract class ASkyAtmosphereLUTGenerator {
         workgroupSize: [number, number, number] = [16, 16, 1]
     ): void {
         const {gpuDevice} = this.#redGPUContext;
-        const commandEncoder = gpuDevice.createCommandEncoder({label: `${this.#label}_COMMAND_ENCODER`});
-        const passEncoder = commandEncoder.beginComputePass({label: `${this.#label}_COMPUTE_PASS`});
+        const commandEncoder = gpuDevice.createCommandEncoder({label: `SkyAtmosphere_${this.#label}_CommandEncoder`});
+        const passEncoder = commandEncoder.beginComputePass({label: `SkyAtmosphere_${this.#label}_ComputePass`});
 
         passEncoder.setPipeline(pipeline);
         passEncoder.setBindGroup(0, bindGroup);
@@ -146,7 +146,7 @@ abstract class ASkyAtmosphereLUTGenerator {
     createLUTTexture(is3D: boolean = false): GPUTexture {
         const {resourceManager} = this.#redGPUContext;
         return resourceManager.createManagedTexture({
-            label: `${this.#label}_Texture`,
+            label: `SkyAtmosphere_${this.#label}_Texture`,
             size: [this.#width, this.#height, this.#depth],
             dimension: is3D ? '3d' : '2d',
             format: 'rgba16float',

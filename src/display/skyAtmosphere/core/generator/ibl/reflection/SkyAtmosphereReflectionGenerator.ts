@@ -12,9 +12,9 @@ import createUUID from "../../../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 
-const SOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionShaderCode_wgsl, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_SOFTCUT');
-const NOSOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionShaderCodeNoSoftCut_wgsl, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_NOSOFTCUT');
-const COMBINE_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionCombineShaderCode_wgsl, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_COMBINE');
+const SOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionShaderCode_wgsl, 'SkyAtmosphere_Reflection_Generator_SoftCut');
+const NOSOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionShaderCodeNoSoftCut_wgsl, 'SkyAtmosphere_Reflection_Generator_NoSoftCut');
+const COMBINE_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionCombineShaderCode_wgsl, 'SkyAtmosphere_Reflection_Generator_Combine');
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사 큐브맵을 생성하는 클래스입니다.
@@ -61,7 +61,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'SKY_ATMOSPHERE_REFLECTION_GEN', 256, 256, 6);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'Reflection_Gen', 256, 256, 6);
         this.#init();
     }
 
@@ -113,6 +113,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
         if (!this.#softCutBindGroup) {
             this.#softCutBindGroup = gpuDevice.createBindGroup({
+                label: 'SkyAtmosphere_Reflection_BindGroup_SoftCut',
                 layout: this.#softCutPipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: this.#sourceCubeTextureView},
@@ -127,6 +128,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
         if (!this.#noSoftCutBindGroup) {
             this.#noSoftCutBindGroup = gpuDevice.createBindGroup({
+                label: 'SkyAtmosphere_Reflection_BindGroup_NoSoftCut',
                 layout: this.#noSoftCutPipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: this.#sourceCubeTextureView},
@@ -171,7 +173,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         const mipLevelCount = getMipLevelCount(this.width, this.height);
 
         this.#sourceCubeTexture = gpuDevice.createTexture({
-            label: 'SkyAtmosphere_Reflection_Source_Cube',
+            label: 'SkyAtmosphere_Reflection_Source_CubeTexture',
             size: [this.width, this.height, 6],
             format: 'rgba16float',
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
@@ -183,19 +185,19 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
             mipLevelCount: 1
         });
 
-        this.#prefilteredTextureSoftCut = new DirectCubeTexture(this.redGPUContext, `SKY_ATMOSPHERE_REFL_SOFTCUT_${createUUID()}`);
-        this.#prefilteredTextureNoSoftCut = new DirectCubeTexture(this.redGPUContext, `SKY_ATMOSPHERE_REFL_NOSOFTCUT_${createUUID()}`);
+        this.#prefilteredTextureSoftCut = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_SoftCut_LUTTexture_${createUUID()}`);
+        this.#prefilteredTextureNoSoftCut = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_NoSoftCut_LUTTexture_${createUUID()}`);
         this.#combinedCubeTexture = gpuDevice.createTexture({
-            label: 'SkyAtmosphere_Reflection_Combined_Cube',
+            label: 'SkyAtmosphere_Reflection_Combined_CubeTexture',
             size: [this.width, this.height, 6],
             format: 'rgba16float',
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
             mipLevelCount: mipLevelCount
         });
-        this.#prefilteredTextureCombined = new DirectCubeTexture(this.redGPUContext, `SKY_ATMOSPHERE_REFL_COMBINED_${createUUID()}`, this.#combinedCubeTexture);
+        this.#prefilteredTextureCombined = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_Combined_LUTTexture_${createUUID()}`, this.#combinedCubeTexture);
 
         this.#softCutPipeline = gpuDevice.createComputePipeline({
-            label: 'SKY_ATMOSPHERE_REFLECTION_GEN_PIPELINE_SOFTCUT',
+            label: 'SkyAtmosphere_Reflection_Pipeline_SoftCut',
             layout: 'auto',
             compute: {
                 module: gpuDevice.createShaderModule({code: SOFTCUT_SHADER_INFO.defaultSource}),
@@ -204,7 +206,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         });
 
         this.#noSoftCutPipeline = gpuDevice.createComputePipeline({
-            label: 'SKY_ATMOSPHERE_REFLECTION_GEN_PIPELINE_NOSOFTCUT',
+            label: 'SkyAtmosphere_Reflection_Pipeline_NoSoftCut',
             layout: 'auto',
             compute: {
                 module: gpuDevice.createShaderModule({code: NOSOFTCUT_SHADER_INFO.defaultSource}),
@@ -213,7 +215,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         });
 
         this.#combinePipeline = gpuDevice.createComputePipeline({
-            label: 'SKY_ATMOSPHERE_REFLECTION_GEN_PIPELINE_COMBINE',
+            label: 'SkyAtmosphere_Reflection_Pipeline_Combine',
             layout: 'auto',
             compute: {
                 module: gpuDevice.createShaderModule({code: COMBINE_SHADER_INFO.defaultSource}),
@@ -224,7 +226,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         this.#combineUniformBuffer = new UniformBuffer(
             this.redGPUContext,
             new ArrayBuffer(16),
-            'SKY_ATMOSPHERE_REFL_COMBINE_UBO'
+            'SkyAtmosphere_Reflection_Combine_UniformBuffer'
         );
     }
 
@@ -237,8 +239,8 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         depth: number = this.depth
     ): void {
         const {gpuDevice} = this.redGPUContext;
-        const commandEncoder = gpuDevice.createCommandEncoder({label: `${this.label}_COMMAND_ENCODER`});
-        const passEncoder = commandEncoder.beginComputePass({label: `${this.label}_COMPUTE_PASS`});
+        const commandEncoder = gpuDevice.createCommandEncoder({label: `SkyAtmosphere_${this.label}_CommandEncoder`});
+        const passEncoder = commandEncoder.beginComputePass({label: `SkyAtmosphere_${this.label}_ComputePass`});
 
         passEncoder.setPipeline(pipeline);
         passEncoder.setBindGroup(0, bindGroup);
@@ -275,6 +277,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
             });
 
             const bindGroup = gpuDevice.createBindGroup({
+                label: `SkyAtmosphere_Reflection_BindGroup_Combine_Mip_${mip}`,
                 layout: this.#combinePipeline.getBindGroupLayout(0),
                 entries: [
                     {binding: 0, resource: this.#prefilteredTextureSoftCut.gpuTextureView},
