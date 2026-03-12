@@ -4,20 +4,9 @@
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.tnb.getTBN
+#redgpu_include math.hash.getHammersley
 
-fn radicalInverse_VanDerCorput(bits: u32) -> f32 {
-    var b = bits;
-    b = (b << 16u) | (b >> 16u);
-    b = ((b & 0x55555555u) << 1u) | ((b & 0xAAAAAAAAu) >> 1u);
-    b = ((b & 0x33333333u) << 2u) | ((b & 0xCCCCCCCCu) >> 2u);
-    b = ((b & 0x0F0F0F0Fu) << 4u) | ((b & 0xF0F0F0F0u) >> 4u);
-    b = ((b & 0x00FF00FFu) << 8u) | ((b & 0xFF00FF00u) >> 8u);
-    return f32(b) * 2.3283064365386963e-10; // / 0x100000000
-}
 
-fn hammersley(i: u32, N: u32) -> vec2<f32> {
-    return vec2<f32>(f32(i) / f32(N), radicalInverse_VanDerCorput(i));
-}
 
 fn importanceSampleGGX(Xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32> {
     let a = roughness * roughness;
@@ -63,7 +52,7 @@ fn integrateBRDF(in_NdotV: f32, roughness: f32) -> vec2<f32> {
     let sampleCount = 1024u;
 
     for (var i = 0u; i < sampleCount; i = i + 1u) {
-        let Xi = hammersley(i, sampleCount);
+        let Xi = getHammersley(i, sampleCount);
         let H = importanceSampleGGX(Xi, N, roughness);
         let L = normalize(2.0 * dot(V, H) * H - V);
 
