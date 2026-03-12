@@ -76,7 +76,7 @@
 | **완료** | **Frustum Ray 추출** | `CameraVolume`, `ComputePostEffect` (총 2곳) | `fn getFrustumRayDirection(uv, invP, invV)`를 `skyAtmosphereFn`에 추가하여 NDC->World 변환의 중복 제거 |
 | **완료** | **Hammersley 시퀀스** | `Irradiance` 등 IBL 관련 셰이더 내부 하드코딩 | IBL 중요도 샘플링에 쓰이는 `radicalInverse_VdC` 및 `hammersley` 함수를 `getRadicalInverseVanDerCorput`과 `getHammersley`로 명확히 명명하여 `SystemCodeManager`의 `math.hash` 모듈로 이관 및 엔진(BRDF, Prefilter 등) 전반에 걸쳐 일괄 적용 |
 
----
+
 
 ## 4. 자체 점검 결과 (Self-Review)
 
