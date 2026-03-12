@@ -1,4 +1,4 @@
-﻿import RedGPUContext from "../../../../../../context/RedGPUContext";
+import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
 import skyAtmosphereFn from "../../../skyAtmosphereFn.wgsl";
 import reflectionShaderCode from "./skyAtmosphereReflectionShaderCode.wgsl";
@@ -17,10 +17,10 @@ const NOSOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionShaderCodeNo
 const COMBINE_SHADER_INFO = parseWGSL(skyAtmosphereFn + reflectionCombineShaderCode, 'SKY_ATMOSPHERE_REFLECTION_GENERATOR_COMBINE');
 
 /**
- * [KO] ?ㅼ떆媛??湲??곕? ?곗씠?곕? 湲곕컲?쇰줈 ?꾨━?꾪꽣留곷맂 諛섏궗 ?먮툕留듭쓣 ?앹꽦?섎뒗 ?대옒?ㅼ엯?덈떎.
+ * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사 큐브맵을 생성하는 클래스입니다.
  * [EN] Class that generates a pre-filtered reflection cubemap based on real-time atmospheric scattering data.
  *
- * [KO] ?湲??곕? ?곗씠?곕? ?먮툕留듭쑝濡??뚮뜑留곹븳 ?? GGX ?꾨━?꾪꽣留곸쓣 ?듯빐 嫄곗튌湲?Roughness)蹂?諛섏궗 ?곗씠?곕? ?앹꽦?⑸땲??
+ * [KO] 대기 산란 데이터를 큐브맵으로 렌더링한 후 GGX 프리필터링을 통해 거칠기(Roughness)별 반사 데이터를 생성합니다.
  * [EN] Renders atmospheric scattering data to a cubemap, then generates reflection data by roughness through GGX pre-filtering.
  *
  * @example
@@ -47,17 +47,17 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #combineBindGroups: GPUBindGroup[] = [];
 
     /**
-     * [KO] SkyAtmosphereReflectionGenerator ?몄뒪?댁뒪瑜?珥덇린?뷀빀?덈떎.
+     * [KO] SkyAtmosphereReflectionGenerator 인스턴스를 초기화합니다.
      * [EN] Initializes a SkyAtmosphereReflectionGenerator instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 而⑦뀓?ㅽ듃
+     * [KO] RedGPU 컨텍스트
      * [EN] RedGPU context
      * @param sharedUniformBuffer -
-     * [KO] 怨듭쑀 ?좊땲??踰꾪띁
+     * [KO] 공유 유니폼 버퍼
      * [EN] Shared uniform buffer
      * @param sampler -
-     * [KO] LUT ?섑뵆留곸뿉 ?ъ슜???섑뵆??
+     * [KO] LUT 샘플링에 사용할 샘플러
      * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
@@ -66,7 +66,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] ?뚮뜑留??뚯뒪濡??ъ슜???먮낯 ?먮툕留??띿뒪泥섎? 諛섑솚?⑸땲??
+     * [KO] 렌더링 소스로 사용되는 원본 큐브맵 텍스처를 반환합니다.
      * [EN] Returns the source cubemap texture used for rendering.
      */
     get sourceCubeTexture(): GPUTexture {
@@ -74,7 +74,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] ?꾨━?꾪꽣留곸씠 ?꾨즺??寃곌낵 ?먮툕留??띿뒪泥섎? 諛섑솚?⑸땲??
+     * [KO] 프리필터링이 완료된 결과 큐브맵 텍스처를 반환합니다.
      * [EN] Returns the resulting pre-filtered cubemap texture.
      */
     get prefilteredTexture(): DirectCubeTexture {
@@ -82,17 +82,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] ?뚰봽?몄뻔 誘몄쟻???꾨━?꾪꽣 寃곌낵瑜?諛섑솚?⑸땲??
-     * [EN] Returns the pre-filtered cubemap without soft-cut.
-     */
-
-    /**
-     * [KO] ?뚰봽?몄뻔 ?곸슜 ?꾨━?꾪꽣 寃곌낵瑜?諛섑솚?⑸땲??
-     * [EN] Returns the pre-filtered cubemap with soft-cut.
-     */
-
-    /**
-     * [KO] ?앹꽦??諛섏궗 ?먮툕留??꾨━?꾪꽣留곷맂 寃곌낵)??諛섑솚?⑸땲??
+     * [KO] 생성된 반사 큐브맵(프리필터링된 결과)을 반환합니다.
      * [EN] Returns the generated reflection cubemap (pre-filtered result).
      */
     get lutTexture(): DirectCubeTexture {
@@ -100,7 +90,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] 諛섏궗 ?먮툕留듭쓣 ?앹꽦?섍퀬 ?꾨━?꾪꽣留곸쓣 ?섑뻾?⑸땲??
+     * [KO] 반사 큐브맵을 생성하고 프리필터링을 수행합니다.
      * [EN] Generates the reflection cubemap and performs pre-filtering.
      *
      * @example
@@ -108,13 +98,13 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
      * await reflectionGenerator.render(transmittance, multiScat, skyView);
      * ```
      * @param transmittance -
-     * [KO] ?ш낵??LUT ?띿뒪泥?
+     * [KO] 투과율 LUT 텍스처
      * [EN] Transmittance LUT texture
      * @param multiScat -
-     * [KO] ?ㅼ쨷 ?곕? LUT ?띿뒪泥?
+     * [KO] 다중 산란 LUT 텍스처
      * [EN] Multi-Scattering LUT texture
      * @param skyView -
-     * [KO] ?ㅼ뭅??酉?LUT ?띿뒪泥?
+     * [KO] 스카이 뷰 LUT 텍스처
      * [EN] Sky-View LUT texture
      */
     // @ts-ignore
@@ -303,4 +293,3 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 }
 
 export default SkyAtmosphereReflectionGenerator;
-
