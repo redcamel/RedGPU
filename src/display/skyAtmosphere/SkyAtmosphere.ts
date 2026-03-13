@@ -112,6 +112,16 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #cachedComputePipelines: Map<string, GPUComputePipeline> = new Map();
 
     #bindGroupLayout1: GPUBindGroupLayout;
+    #bindGroup0_swap0: GPUBindGroup;
+    #bindGroup0_swap1: GPUBindGroup;
+    #bindGroup1: GPUBindGroup;
+    #prevSourceView_swap0: GPUTextureView;
+    #prevSourceView_swap1: GPUTextureView;
+    #prevDepthView_swap0: GPUTextureView;
+    #prevDepthView_swap1: GPUTextureView;
+    #prevPEUniformBuffer: GPUBuffer;
+    #prevMSAA: boolean;
+    #prevMSAAID: string;
     #outputTexture: GPUTexture;
     #outputTextureView: GPUTextureView;
     #prevDimensions: { width: number, height: number };
@@ -689,10 +699,20 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [EN] Rendering result texture information
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-        const {gpuDevice, resourceManager} = this.redGPUContext;
+        const {gpuDevice, resourceManager, antialiasingManager} = this.redGPUContext;
         this.#updateLUTs(view);
 
-        if (!this.#outputTexture || this.#prevDimensions?.width !== width || this.#prevDimensions?.height !== height) {
+        const {useMSAA, msaaID} = antialiasingManager;
+        const depthView = view.viewRenderTextureManager.depthTextureView;
+        const peUniformBuffer = view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer;
+
+        // [KO] 리소스 변경 감지 플래그 정의 (ASinglePassPostEffect 패턴 준수)
+        // [EN] Define resource change detection flags (Following ASinglePassPostEffect pattern)
+        const dimensionsChanged = !this.#outputTexture || this.#prevDimensions?.width !== width || this.#prevDimensions?.height !== height;
+        const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
+        const peUniformBufferChanged = this.#prevPEUniformBuffer !== peUniformBuffer;
+
+        if (dimensionsChanged) {
             if (this.#outputTexture) this.#outputTexture.destroy();
             this.#outputTexture = resourceManager.createManagedTexture({
                 size: {width, height},
@@ -704,42 +724,79 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#prevDimensions = {width, height};
         }
 
+        const pipeline = this.#getPipeline(useMSAA);
+
+        // [KO] bindGroup0 최적화: swap0/swap1 각각에 대해 변경 감지 및 캐싱 수행
+        // [EN] bindGroup0 optimization: Perform change detection and caching for swap0/swap1 respectively
+        let currentBindGroup0: GPUBindGroup;
+        if (view.renderViewStateData.swapBufferIndex === 0) {
+            if (!this.#bindGroup0_swap0 || msaaChanged || this.#prevSourceView_swap0 !== sourceTextureInfo.textureView || this.#prevDepthView_swap0 !== depthView) {
+                this.#prevSourceView_swap0 = sourceTextureInfo.textureView;
+                this.#prevDepthView_swap0 = depthView;
+                this.#bindGroup0_swap0 = gpuDevice.createBindGroup({
+                    label: 'SKY_ATMOSPHERE_PE_BG_0_SWAP0',
+                    layout: this.#getBindGroupLayout0(useMSAA),
+                    entries: [
+                        {binding: 0, resource: sourceTextureInfo.textureView},
+                        {binding: 1, resource: depthView},
+                        {binding: 2, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
+                        {binding: 3, resource: this.#multiScatteringGenerator.lutTexture.gpuTextureView},
+                        {binding: 4, resource: this.skyViewLUT.gpuTextureView},
+                        {binding: 5, resource: this.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})},
+                        {binding: 6, resource: this.atmosphereSampler.gpuSampler},
+                        {binding: 7, resource: this.skyAtmosphereIrradianceLUT.gpuTextureView}
+                    ]
+                });
+            }
+            currentBindGroup0 = this.#bindGroup0_swap0;
+        } else {
+            if (!this.#bindGroup0_swap1 || msaaChanged || this.#prevSourceView_swap1 !== sourceTextureInfo.textureView || this.#prevDepthView_swap1 !== depthView) {
+                this.#prevSourceView_swap1 = sourceTextureInfo.textureView;
+                this.#prevDepthView_swap1 = depthView;
+                this.#bindGroup0_swap1 = gpuDevice.createBindGroup({
+                    label: 'SKY_ATMOSPHERE_PE_BG_0_SWAP1',
+                    layout: this.#getBindGroupLayout0(useMSAA),
+                    entries: [
+                        {binding: 0, resource: sourceTextureInfo.textureView},
+                        {binding: 1, resource: depthView},
+                        {binding: 2, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
+                        {binding: 3, resource: this.#multiScatteringGenerator.lutTexture.gpuTextureView},
+                        {binding: 4, resource: this.skyViewLUT.gpuTextureView},
+                        {binding: 5, resource: this.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})},
+                        {binding: 6, resource: this.atmosphereSampler.gpuSampler},
+                        {binding: 7, resource: this.skyAtmosphereIrradianceLUT.gpuTextureView}
+                    ]
+                });
+            }
+            currentBindGroup0 = this.#bindGroup0_swap1;
+        }
+
+        // [KO] bindGroup1 최적화: 출력 텍스처(크기 변경 포함)나 시스템 유니폼 버퍼가 변경된 경우에만 생성
+        // [EN] bindGroup1 optimization: Generate only when output texture (including size change) or system uniform buffer changes
+        if (!this.#bindGroup1 || dimensionsChanged || peUniformBufferChanged) {
+            this.#prevPEUniformBuffer = peUniformBuffer;
+            this.#bindGroup1 = gpuDevice.createBindGroup({
+                label: 'SKY_ATMOSPHERE_PE_BG_1',
+                layout: this.#bindGroupLayout1,
+                entries: [
+                    {binding: 0, resource: this.#outputTextureView},
+                    {binding: 1, resource: {buffer: peUniformBuffer}}
+                ]
+            });
+        }
+
         const commandEncoder = gpuDevice.createCommandEncoder({label: 'SkyAtmosphere_PE_Pass'});
         const passEncoder = commandEncoder.beginComputePass();
 
-        const {useMSAA} = this.redGPUContext.antialiasingManager;
-        const pipeline = this.#getPipeline(useMSAA);
         passEncoder.setPipeline(pipeline);
-
-        const bindGroup0 = gpuDevice.createBindGroup({
-            label: 'SKY_ATMOSPHERE_PE_BG_0',
-            layout: this.#getBindGroupLayout0(useMSAA),
-            entries: [
-                {binding: 0, resource: sourceTextureInfo.textureView},
-                {binding: 1, resource: view.viewRenderTextureManager.depthTextureView},
-                {binding: 2, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
-                {binding: 3, resource: this.#multiScatteringGenerator.lutTexture.gpuTextureView},
-                {binding: 4, resource: this.skyViewLUT.gpuTextureView},
-                {binding: 5, resource: this.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})},
-                {binding: 6, resource: this.atmosphereSampler.gpuSampler},
-                {binding: 7, resource: this.skyAtmosphereIrradianceLUT.gpuTextureView}
-            ]
-        });
-
-        const bindGroup1 = gpuDevice.createBindGroup({
-            label: 'SKY_ATMOSPHERE_PE_BG_1',
-            layout: this.#bindGroupLayout1,
-            entries: [
-                {binding: 0, resource: this.#outputTextureView},
-                {binding: 1, resource: {buffer: view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer}}
-            ]
-        });
-
-        passEncoder.setBindGroup(0, bindGroup0);
-        passEncoder.setBindGroup(1, bindGroup1);
+        passEncoder.setBindGroup(0, currentBindGroup0);
+        passEncoder.setBindGroup(1, this.#bindGroup1);
         passEncoder.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16));
         passEncoder.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
+
+        this.#prevMSAA = useMSAA;
+        this.#prevMSAAID = msaaID;
 
         return {texture: this.#outputTexture, textureView: this.#outputTextureView};
     }
