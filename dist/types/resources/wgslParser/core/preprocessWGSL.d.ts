@@ -28,10 +28,13 @@ export interface PreprocessedWGSLResult {
  * @param code -
  * [KO] 전처리할 WGSL 소스 코드
  * [EN] WGSL source code to preprocess
+ * @param injectLibrary -
+ * [KO] 주입된 로컬 라이브러리 객체 (선택)
+ * [EN] Injected local library object (optional)
  * @returns
  * [KO] 전처리 결과 객체 (캐시 키, 기본 소스, 변형 생성기 등 포함)
  * [EN] Preprocessing result object (including cache key, default source, and variant generator)
  * @category WGSL
  */
-declare const preprocessWGSL: (sourceName: string, code: string) => PreprocessedWGSLResult;
+declare const preprocessWGSL: (sourceName: string, code: string, injectLibrary?: Record<string, string>) => PreprocessedWGSLResult;
 export default preprocessWGSL;

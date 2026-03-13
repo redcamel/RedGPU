@@ -9,7 +9,6 @@ import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import AerialPerspectiveGenerator from "./core/generator/aerialPerspective/AerialPerspectiveGenerator";
 import SkyAtmosphereIrradianceGenerator from "./core/generator/ibl/irradiance/SkyAtmosphereIrradianceGenerator";
 import SkyAtmosphereReflectionGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionGenerator";
-import skyAtmosphereFn_wgsl from "./core/skyAtmosphereFn.wgsl";
 import transmittanceShaderCode_wgsl from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import computeCode_wgsl from "./wgsl/computeCode.wgsl";
 import Sampler from "../../resources/sampler/Sampler";
@@ -26,8 +25,9 @@ import Box from "../../primitive/Box";
 import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
+import AtmosphereShaderLibrary from "./core/AtmosphereShaderLibrary";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl);
+const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl, AtmosphereShaderLibrary);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 const BACKGROUND_SHADER_INFO = parseWGSL('SkyAtmosphere_Background_Vertex', backgroundVertexShaderCode_wgsl);
@@ -809,9 +809,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 				}
 			`;
 
-            return [
+            const rawCode = [
                 '#redgpu_include depth.getLinearizeDepth',
-                skyAtmosphereFn_wgsl,
+                '#redgpu_include skyAtmosphere.skyAtmosphereFn',
                 '@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
                 depthTextureDeclaration,
                 '@group(0) @binding(2) var transmittanceLUT : texture_2d<f32>;',
@@ -835,6 +835,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 computeCode_wgsl,
                 '}'
             ].join('\n');
+
+            return parseWGSL(`SkyAtmosphere_PE_Code_${useMSAA ? 'MSAA' : 'NonMSAA'}`, rawCode, AtmosphereShaderLibrary).defaultSource;
         };
 
         this.#computeShaderMSAA = resourceManager.createGPUShaderModule('SkyAtmosphere_PE_MSAA_ShaderModule', {code: createCode(true)});

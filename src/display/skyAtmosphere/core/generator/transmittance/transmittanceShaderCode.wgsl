@@ -1,4 +1,5 @@
 // [KO] UE5 표준 Transmittance LUT 생성
+#redgpu_include skyAtmosphere.skyAtmosphereFn
 
 @group(0) @binding(0) var transmittanceLUT: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> params: SkyAtmosphere;

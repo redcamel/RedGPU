@@ -1,5 +1,6 @@
 // [KO] Frustum-Aligned Aerial Perspective 3D LUT 생성을 위한 Compute Shader
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include skyAtmosphere.skyAtmosphereFn
 
 @group(0) @binding(1) var aerialPerspectiveLUT: texture_storage_3d<rgba16float, write>;
 @group(0) @binding(2) var multiScatLUT: texture_2d<f32>;

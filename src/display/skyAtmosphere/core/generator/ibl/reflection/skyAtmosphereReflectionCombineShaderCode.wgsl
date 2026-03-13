@@ -1,4 +1,5 @@
 // [EN] Combine prefiltered cubemaps (soft-cut / no-soft-cut) by roughness.
+#redgpu_include skyAtmosphere.skyAtmosphereFn
 
 @group(0) @binding(0) var softCutTexture: texture_cube<f32>;
 @group(0) @binding(1) var noSoftCutTexture: texture_cube<f32>;

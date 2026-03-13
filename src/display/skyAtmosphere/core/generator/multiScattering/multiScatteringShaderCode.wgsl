@@ -1,4 +1,5 @@
 // [KO] UE5 표준 Multi-Scattering LUT 생성
+#redgpu_include skyAtmosphere.skyAtmosphereFn
 #redgpu_include math.INV_PI
 
 @group(0) @binding(0) var multiScatLUT: texture_storage_2d<rgba16float, write>;

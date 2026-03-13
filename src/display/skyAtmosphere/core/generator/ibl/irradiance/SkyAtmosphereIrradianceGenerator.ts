@@ -7,8 +7,9 @@ import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../../utils/uuid/createUUID";
 import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../../../../../resources/texture/DirectTexture";
+import AtmosphereShaderLibrary from "../../../AtmosphereShaderLibrary";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_Irradiance_Generator', skyAtmosphereIrradianceShaderCode_wgsl);
+const SHADER_INFO = parseWGSL('SkyAtmosphere_Irradiance_Generator', skyAtmosphereIrradianceShaderCode_wgsl, AtmosphereShaderLibrary);
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 물리적으로 일치하는 조도(Irradiance) 큐브맵을 생성하는 클래스입니다.

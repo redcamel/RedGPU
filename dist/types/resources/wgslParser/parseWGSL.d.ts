@@ -11,10 +11,24 @@
  * @param code -
  * [KO] 파싱할 WGSL 셰이더 코드 문자열
  * [EN] WGSL shader code string to parse
+ * @param injectLibrary -
+ * [KO] 주입된 로컬 라이브러리 객체 (선택)
+ * [EN] Injected local library object (optional)
  * @returns
  * [KO] 리플렉션 정보 및 전처리된 소스 코드를 포함하는 객체
  * [EN] An object containing reflection information and preprocessed source code
  * @category WGSL
  */
-declare const parseWGSL: (sourceName: string, code: string) => any;
+declare const parseWGSL: (sourceName: string, code: string, injectLibrary?: Record<string, string>) => {
+    uniforms: any;
+    storage: any;
+    samplers: any;
+    textures: any;
+    vertexEntries: string[];
+    fragmentEntries: string[];
+    computeEntries: string[];
+    defaultSource: string;
+    shaderSourceVariant: any;
+    conditionalBlocks: string[];
+};
 export default parseWGSL;

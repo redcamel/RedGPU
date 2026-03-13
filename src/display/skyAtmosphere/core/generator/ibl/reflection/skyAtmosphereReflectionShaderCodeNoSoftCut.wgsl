@@ -1,4 +1,5 @@
-﻿@group(0) @binding(0) var outputTexture: texture_storage_2d_array<rgba16float, write>;
+﻿#redgpu_include skyAtmosphere.skyAtmosphereFn
+@group(0) @binding(0) var outputTexture: texture_storage_2d_array<rgba16float, write>;
 @group(0) @binding(1) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(2) var atmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;

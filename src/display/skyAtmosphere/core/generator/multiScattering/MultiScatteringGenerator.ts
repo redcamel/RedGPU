@@ -1,14 +1,14 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import multiScatteringShaderCode_wgsl from "./multiScatteringShaderCode.wgsl";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
-import skyAtmosphereFn_wgsl from "../../skyAtmosphereFn.wgsl";
 import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
+import AtmosphereShaderLibrary from "../../AtmosphereShaderLibrary";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_MultiScattering_Generator', skyAtmosphereFn_wgsl + multiScatteringShaderCode_wgsl);
+const SHADER_INFO = parseWGSL('SkyAtmosphere_MultiScattering_Generator', multiScatteringShaderCode_wgsl, AtmosphereShaderLibrary);
 
 /**
  * [KO] 다중 산란(Multi-Scattering) 에너지 보정을 위한 LUT 생성을 담당하는 클래스입니다.

@@ -1,6 +1,5 @@
 import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
-import skyAtmosphereFn_wgsl from "../../../skyAtmosphereFn.wgsl";
 import reflectionShaderCode_wgsl from "./skyAtmosphereReflectionShaderCode.wgsl";
 import reflectionShaderCodeNoSoftCut_wgsl from "./skyAtmosphereReflectionShaderCodeNoSoftCut.wgsl";
 import reflectionCombineShaderCode_wgsl from "./skyAtmosphereReflectionCombineShaderCode.wgsl";
@@ -11,10 +10,11 @@ import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 import createUUID from "../../../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
+import AtmosphereShaderLibrary from "../../../AtmosphereShaderLibrary";
 
-const SOFTCUT_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_SoftCut', skyAtmosphereFn_wgsl + reflectionShaderCode_wgsl);
-const NOSOFTCUT_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_NoSoftCut', skyAtmosphereFn_wgsl + reflectionShaderCodeNoSoftCut_wgsl);
-const COMBINE_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_Combine', skyAtmosphereFn_wgsl + reflectionCombineShaderCode_wgsl);
+const SOFTCUT_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_SoftCut', reflectionShaderCode_wgsl, AtmosphereShaderLibrary);
+const NOSOFTCUT_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_NoSoftCut', reflectionShaderCodeNoSoftCut_wgsl, AtmosphereShaderLibrary);
+const COMBINE_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_Combine', reflectionCombineShaderCode_wgsl, AtmosphereShaderLibrary);
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사 큐브맵을 생성하는 클래스입니다.
