@@ -34,6 +34,7 @@ export interface PreprocessedWGSLResult {
 }
 
 const preprocessCache = new Map<string, PreprocessedWGSLResult>();
+const sourceNameRegistry = new Map<string, string>();
 
 /**
  * [KO] 코드 해시를 생성합니다.
@@ -250,7 +251,20 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
  * @category WGSL
  */
 const preprocessWGSL = (code: string, sourceName?: string): PreprocessedWGSLResult => {
-    const cacheKey = generateCodeHash(code + (sourceName || ''));
+    const codeHash = generateCodeHash(code);
+    if (sourceName) {
+        const existingHash = sourceNameRegistry.get(sourceName);
+        if (existingHash && existingHash !== codeHash) {
+            console.warn(
+                `[preprocessWGSL] Warning: Shader name "${sourceName}" is already registered with different code.\n` +
+                `[KO] 경고: 셰이더 이름 "${sourceName}"이(가) 이미 다른 코드에 대해 등록되어 있습니다. 이는 디버깅 시 혼란을 야기할 수 있습니다.`
+            );
+        } else {
+            sourceNameRegistry.set(sourceName, codeHash);
+        }
+    }
+
+    const cacheKey = `${codeHash}_${code.length}`;
     const cachedResult = preprocessCache.get(cacheKey);
     if (cachedResult) {
         // console.log('🚀 캐시에서 WGSL 로드:', cacheKey);
