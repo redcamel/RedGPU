@@ -730,7 +730,7 @@ class ResourceManager {
 
     #createAndCacheModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
         const {code} = gpuShaderModuleDescriptor
-        const newCode = preprocessWGSL(code).defaultSource
+        const newCode = preprocessWGSL(name, code).defaultSource
         const newModule: GPUShaderModule = this.redGPUContext.gpuDevice.createShaderModule({
             ...gpuShaderModuleDescriptor,
             code: newCode,

@@ -6,7 +6,7 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 
-const SHADER_INFO = parseWGSL(fragmentModuleSource, 'BITMAP_MATERIAL')
+const SHADER_INFO = parseWGSL('BITMAP_MATERIAL', fragmentModuleSource)
 
 /**
  * [KO] 비트맵 텍스처 기반 머티리얼의 공통 속성 인터페이스

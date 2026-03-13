@@ -239,18 +239,18 @@ const logDuplicateKeys = (conditionalBlocks: ConditionalBlock[]): void => {
  * [KO] 이 함수는 #redgpu_include, REDGPU_DEFINE_*, #redgpu_if 등 RedGPU 전용 매크로를 처리하고, 셰이더 변형(variant) 생성을 위한 정보를 추출합니다.
  * [EN] This function processes RedGPU-specific macros such as #redgpu_include, REDGPU_DEFINE_*, and #redgpu_if, and extracts information for generating shader variants.
  *
- * @param code -
- * [KO] 전처리할 WGSL 소스 코드
- * [EN] WGSL source code to preprocess
  * @param sourceName -
  * [KO] 셰이더 소스 식별 이름 (경고 출력용)
  * [EN] Shader source identifier name (for warnings)
+ * @param code -
+ * [KO] 전처리할 WGSL 소스 코드
+ * [EN] WGSL source code to preprocess
  * @returns
  * [KO] 전처리 결과 객체 (캐시 키, 기본 소스, 변형 생성기 등 포함)
  * [EN] Preprocessing result object (including cache key, default source, and variant generator)
  * @category WGSL
  */
-const preprocessWGSL = (code: string, sourceName?: string): PreprocessedWGSLResult => {
+const preprocessWGSL = (sourceName: string, code: string): PreprocessedWGSLResult => {
     const codeHash = generateCodeHash(code);
     if (sourceName) {
         const existingHash = sourceNameRegistry.get(sourceName);
@@ -259,6 +259,7 @@ const preprocessWGSL = (code: string, sourceName?: string): PreprocessedWGSLResu
                 `[preprocessWGSL] Warning: Shader name "${sourceName}" is already registered with different code.\n` +
                 `[KO] 경고: 셰이더 이름 "${sourceName}"이(가) 이미 다른 코드에 대해 등록되어 있습니다. 이는 디버깅 시 혼란을 야기할 수 있습니다.`
             );
+            console.trace(); // 호출 스택 출력
         } else {
             sourceNameRegistry.set(sourceName, codeHash);
         }

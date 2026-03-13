@@ -250,8 +250,8 @@ abstract class ASinglePassPostEffect {
             {code: computeCodes.nonMsaa}
         )
         // SHADER_INFO 파싱
-        this.#SHADER_INFO_MSAA = parseWGSL(computeCodes.msaa, `${name}_MSAA`)
-        this.#SHADER_INFO_NON_MSAA = parseWGSL(computeCodes.nonMsaa, `${name}_NonMSAA`)
+        this.#SHADER_INFO_MSAA = parseWGSL(`${name}_MSAA`, computeCodes.msaa)
+        this.#SHADER_INFO_NON_MSAA = parseWGSL(`${name}_NonMSAA`, computeCodes.nonMsaa)
         // MSAA 정보 저장
         const STORAGE_STRUCT = this.#SHADER_INFO_MSAA.storage;
         const UNIFORM_STRUCT = this.#SHADER_INFO_MSAA.uniforms;

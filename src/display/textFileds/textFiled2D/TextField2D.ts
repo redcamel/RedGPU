@@ -12,7 +12,7 @@ import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField2DVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_2D'
-const SHADER_INFO = parseWGSL(vertexModuleSource, 'TEXTFIELD2D_VERTEX');
+const SHADER_INFO = parseWGSL('TEXTFIELD2D_VERTEX', vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 const BaseTextField2D = mixInMesh2D(ATextField);
 

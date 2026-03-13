@@ -204,7 +204,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
             this.#textureComputeShaderModule,
             this.#textureComputeBindGroupLayout
         );
-        const SHADER_INFO = parseWGSL(textureComputeShader, 'ANoiseTexture');
+        const SHADER_INFO = parseWGSL('ANoiseTexture', textureComputeShader);
         this.#uniformInfo = SHADER_INFO.uniforms.uniforms;
         const uniformData = new ArrayBuffer(this.#uniformInfo.arrayBufferByteLength);
         this.#uniformBuffer = new UniformBuffer(

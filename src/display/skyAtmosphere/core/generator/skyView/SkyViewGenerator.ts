@@ -8,7 +8,7 @@ import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/Uniform
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + skyViewShaderCode_wgsl, 'SkyAtmosphere_SkyView_Generator');
+const SHADER_INFO = parseWGSL('SkyAtmosphere_SkyView_Generator', skyAtmosphereFn_wgsl + skyViewShaderCode_wgsl);
 
 /**
  * [KO] 카메라 시점에서의 전방위 하늘색 데이터를 담는 Sky-View LUT 생성을 담당하는 클래스입니다.

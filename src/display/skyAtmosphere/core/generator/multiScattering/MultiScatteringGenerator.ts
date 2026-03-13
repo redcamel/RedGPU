@@ -8,7 +8,7 @@ import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + multiScatteringShaderCode_wgsl, 'SkyAtmosphere_MultiScattering_Generator');
+const SHADER_INFO = parseWGSL('SkyAtmosphere_MultiScattering_Generator', skyAtmosphereFn_wgsl + multiScatteringShaderCode_wgsl);
 
 /**
  * [KO] 다중 산란(Multi-Scattering) 에너지 보정을 위한 LUT 생성을 담당하는 클래스입니다.

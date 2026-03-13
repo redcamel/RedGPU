@@ -17,7 +17,7 @@ redUnit.testGroup(
             // [EN] Test top-level SYSTEM_UNIFORM include
             const testCode = `#redgpu_include SYSTEM_UNIFORM`;
             try {
-                const result = preprocessWGSL(testCode);
+                const result = preprocessWGSL('TestShader', testCode);
                 const hasContent = result.defaultSource.includes('struct SystemUniform');
                 const tagRemoved = !result.defaultSource.includes('#redgpu_include');
                 run(hasContent && tagRemoved);
@@ -31,7 +31,7 @@ redUnit.testGroup(
             // [EN] Test hierarchical math.getHash1D include
             const testCode = `#redgpu_include math.getHash1D`;
             try {
-                const result = preprocessWGSL(testCode);
+                const result = preprocessWGSL('TestShader', testCode);
                 const hasContent = result.defaultSource.includes('fn getHash1D');
                 const tagRemoved = !result.defaultSource.includes('#redgpu_include');
                 run(hasContent && tagRemoved);
@@ -45,7 +45,7 @@ redUnit.testGroup(
             // [EN] Test hierarchical color.get_luminance include
             const testCode = `#redgpu_include color.get_luminance`;
             try {
-                const result = preprocessWGSL(testCode);
+                const result = preprocessWGSL('TestShader', testCode);
                 const hasContent = result.defaultSource.includes('fn get_luminance');
                 run(hasContent);
             } catch (e) {
@@ -58,7 +58,7 @@ redUnit.testGroup(
             // [EN] Test hierarchical math.getNDCFromDepth include
             const testCode = `#redgpu_include math.getNDCFromDepth`;
             try {
-                const result = preprocessWGSL(testCode);
+                const result = preprocessWGSL('TestShader', testCode);
                 const hasContent = result.defaultSource.includes('fn getNDCFromDepth');
                 run(hasContent);
             } catch (e) {
@@ -69,7 +69,7 @@ redUnit.testGroup(
         runner.defineTest('Define Logic (REDGPU_DEFINE_*)', function (run) {
             const code = `let x = REDGPU_DEFINE_TILE_COUNT_X;`;
             try {
-                const result = preprocessWGSL(code);
+                const result = preprocessWGSL('TestShader', code);
                 const pass = !result.defaultSource.includes('REDGPU_DEFINE_TILE_COUNT_X') && result.defaultSource.includes('let x = ');
                 run(pass);
             } catch (e) {
@@ -83,7 +83,7 @@ redUnit.testGroup(
             const testCode = `#redgpu_include math.PI\n#redgpu_include math.PI`;
             try {
                 // [KO] 식별 이름을 함께 전달하여 테스트
-                const result = preprocessWGSL(testCode, 'TEST_DUPLICATE_INCLUDE');
+                const result = preprocessWGSL('TEST_DUPLICATE_INCLUDE', testCode);
                 
                 // [KO] PI 정의 패턴을 찾습니다. (공백 무시)
                 const piPattern = /const\s+PI\s*:\s*f32\s*=\s*3\.141592653589793\s*;/g;
@@ -111,7 +111,7 @@ redUnit.testGroup(
                 #redgpu_endIf
             `;
             try {
-                const result = preprocessWGSL(code);
+                const result = preprocessWGSL('TestShader', code);
                 const gen = result.shaderSourceVariant;
 
                 const srcTrue = gen.getVariant('USE_TEST');
@@ -137,7 +137,7 @@ redUnit.testGroup(
                 #redgpu_endIf
             `;
             try {
-                const result = preprocessWGSL(code);
+                const result = preprocessWGSL('TestShader', code);
                 const gen = result.shaderSourceVariant;
 
                 const srcBoth = gen.getVariant('OUTER+INNER');
@@ -165,7 +165,7 @@ redUnit.testGroup(
                 #redgpu_endIf
             `;
             try {
-                preprocessWGSL(code);
+                preprocessWGSL('TestShader', code);
                 run(false, 'Should have thrown an error for mismatched endIf');
             } catch (e) {
                 run(e.message.includes('Mismatched #redgpu_endIf'));
@@ -176,7 +176,7 @@ redUnit.testGroup(
             // [KO] 존재하지 않는 경로 인클루드 시 에러 발생 테스트
             const code = `#redgpu_include non.existent.path`;
             try {
-                preprocessWGSL(code, 'TEST_INVALID_PATH');
+                preprocessWGSL('TEST_INVALID_PATH', code);
                 run(false, 'Should have thrown an error for non-existent path');
             } catch (e) {
                 run(e.message.includes('Path not found'));
@@ -188,7 +188,7 @@ redUnit.testGroup(
             // [EN] math is an object (Namespace), not a string, so include should throw an error
             const code = `#redgpu_include math`;
             try {
-                preprocessWGSL(code, 'TEST_INVALID_TARGET');
+                preprocessWGSL('TEST_INVALID_TARGET', code);
                 run(false, 'Should have thrown an error for non-string target');
             } catch (e) {
                 run(e.message.includes('Target is not a WGSL string'));

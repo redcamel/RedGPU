@@ -12,7 +12,7 @@ import View3D from "../../../../view/View3D";
 
 
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + aerialPerspectiveShaderCode_wgsl, 'SkyAtmosphere_AerialPerspective_Generator');
+const SHADER_INFO = parseWGSL('SkyAtmosphere_AerialPerspective_Generator', skyAtmosphereFn_wgsl + aerialPerspectiveShaderCode_wgsl);
 
 /**
  * [KO] 거리별 공중 투시(Aerial Perspective)를 위한 3D LUT 생성을 담당하는 클래스입니다.

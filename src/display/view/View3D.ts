@@ -26,7 +26,7 @@ import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
 
-const SHADER_INFO = parseWGSL(ShaderLibrary.SYSTEM_UNIFORM, 'VIEW3D_SYSTEM_UNIFORM')
+const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 let temp = mat4.create()
 let temp2 = mat4.create()

@@ -7,7 +7,7 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 
-const SHADER_INFO = parseWGSL(fragmentModuleSource, 'PHONG_MATERIAL')
+const SHADER_INFO = parseWGSL('PHONG_MATERIAL', fragmentModuleSource)
 
 /**
  * [KO] PhongMaterial의 공통 속성 인터페이스

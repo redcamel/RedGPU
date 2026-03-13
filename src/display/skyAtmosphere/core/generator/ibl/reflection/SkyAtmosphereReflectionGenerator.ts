@@ -12,9 +12,9 @@ import createUUID from "../../../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 
-const SOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionShaderCode_wgsl, 'SkyAtmosphere_Reflection_Generator_SoftCut');
-const NOSOFTCUT_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionShaderCodeNoSoftCut_wgsl, 'SkyAtmosphere_Reflection_Generator_NoSoftCut');
-const COMBINE_SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + reflectionCombineShaderCode_wgsl, 'SkyAtmosphere_Reflection_Generator_Combine');
+const SOFTCUT_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_SoftCut', skyAtmosphereFn_wgsl + reflectionShaderCode_wgsl);
+const NOSOFTCUT_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_NoSoftCut', skyAtmosphereFn_wgsl + reflectionShaderCodeNoSoftCut_wgsl);
+const COMBINE_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_Combine', skyAtmosphereFn_wgsl + reflectionCombineShaderCode_wgsl);
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사 큐브맵을 생성하는 클래스입니다.

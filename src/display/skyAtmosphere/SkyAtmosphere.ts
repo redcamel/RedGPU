@@ -27,10 +27,10 @@ import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl, 'SkyAtmosphere_Core');
+const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
-const BACKGROUND_SHADER_INFO = parseWGSL(backgroundVertexShaderCode_wgsl, 'SkyAtmosphere_Background_Vertex');
+const BACKGROUND_SHADER_INFO = parseWGSL('SkyAtmosphere_Background_Vertex', backgroundVertexShaderCode_wgsl);
 const BACKGROUND_UNIFORM_STRUCT = BACKGROUND_SHADER_INFO.uniforms.vertexUniforms;
 
 /**

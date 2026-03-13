@@ -8,7 +8,7 @@ import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL(skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl, 'SkyAtmosphere_Transmittance_Generator');
+const SHADER_INFO = parseWGSL('SkyAtmosphere_Transmittance_Generator', skyAtmosphereFn_wgsl + transmittanceShaderCode_wgsl);
 
 /**
  * [KO] 대기 투과율(Transmittance) LUT 생성을 담당하는 클래스입니다.

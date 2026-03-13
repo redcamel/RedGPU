@@ -16,7 +16,7 @@ interface TextField3D {
 }
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_3D'
-const SHADER_INFO = parseWGSL(vertexModuleSource, 'TEXTFIELD3D_VERTEX');
+const SHADER_INFO = parseWGSL('TEXTFIELD3D_VERTEX', vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 /**

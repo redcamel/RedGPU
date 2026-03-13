@@ -9,7 +9,7 @@ import LINE_TYPE from "./LINE_TYPE";
 import vertexModuleSource from "./shader/lineVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_2D'
-const SHADER_INFO = parseWGSL(vertexModuleSource, 'LINE2D_VERTEX');
+const SHADER_INFO = parseWGSL('LINE2D_VERTEX', vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 /**
