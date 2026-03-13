@@ -142,19 +142,15 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 	 * [EN] Creates a bind group for reflection rendering.
 	 */
 	#createReflectionBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
-		return this.redGPUContext.gpuDevice.createBindGroup({
-			label: `SkyAtmosphere_Reflection_BindGroup_${createUUID()}`,
-			layout: this.#reflectionPipeline.getBindGroupLayout(0),
-			entries: [
-				{binding: 0, resource: this.#sourceCubeTextureView},
-				{binding: 1, resource: multiScat.gpuTextureView},
-				{binding: 2, resource: this.sampler.gpuSampler},
-				{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-				{binding: 4, resource: transmittance.gpuTextureView},
-				{binding: 5, resource: skyView.gpuTextureView},
-				{binding: 6, resource: {buffer: this.#reflectionParamsUniformBuffer.gpuBuffer}}
-			]
-		});
+		return this.createBindGroup(`SkyAtmosphere_Reflection_BindGroup_${createUUID()}`, this.#reflectionPipeline, [
+			{binding: 0, resource: this.#sourceCubeTextureView},
+			{binding: 1, resource: multiScat.gpuTextureView},
+			{binding: 2, resource: this.sampler.gpuSampler},
+			{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+			{binding: 4, resource: transmittance.gpuTextureView},
+			{binding: 5, resource: skyView.gpuTextureView},
+			{binding: 6, resource: {buffer: this.#reflectionParamsUniformBuffer.gpuBuffer}}
+		]);
 	}
 
 	/**
@@ -207,23 +203,12 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 		this.#reflectionParamsUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(32), 'SkyAtmosphere_Reflection_Params_UniformBuffer');
 
 		// Pipelines
-		const createPipeline = (label: string, shaderInfo: any) => gpuDevice.createComputePipeline({
-			label: `SkyAtmosphere_Reflection_Pipeline_${label}`,
-			layout: 'auto',
-			compute: {
-				module: gpuDevice.createShaderModule({code: shaderInfo.defaultSource}),
-				entryPoint: 'main'
-			}
-		});
-
-		this.#reflectionPipeline = createPipeline('Base', REFLECTION_SHADER_INFO);
-		this.#combinePipeline = createPipeline('Combine', COMBINE_SHADER_INFO);
+		this.#reflectionPipeline = this.createComputePipeline('Base', REFLECTION_SHADER_INFO.defaultSource);
+		this.#combinePipeline = this.createComputePipeline('Combine', COMBINE_SHADER_INFO.defaultSource);
 	}
 
 	#initCombineBindGroups(): void {
-		const {gpuDevice} = this.redGPUContext;
 		const mipLevelCount = getMipLevelCount(this.width, this.height);
-		const layout = this.#combinePipeline.getBindGroupLayout(0);
 
 		for (let mip = 0; mip < mipLevelCount; mip++) {
 			const outputView = this.#combinedCubeTexture.createView({
@@ -234,17 +219,13 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 				arrayLayerCount: 6
 			});
 
-			this.#combineBindGroups[mip] = gpuDevice.createBindGroup({
-				label: `SkyAtmosphere_Reflection_BindGroup_Combine_Mip_${mip}`,
-				layout: layout,
-				entries: [
-					{binding: 0, resource: this.#prefilteredTextureSoftCut.gpuTextureView},
-					{binding: 1, resource: this.#prefilteredTextureNoSoftCut.gpuTextureView},
-					{binding: 2, resource: this.sampler.gpuSampler},
-					{binding: 3, resource: outputView},
-					{binding: 4, resource: {buffer: this.#combineUniformBuffer.gpuBuffer}}
-				]
-			});
+			this.#combineBindGroups[mip] = this.createBindGroup(`SkyAtmosphere_Reflection_BindGroup_Combine_Mip_${mip}`, this.#combinePipeline, [
+				{binding: 0, resource: this.#prefilteredTextureSoftCut.gpuTextureView},
+				{binding: 1, resource: this.#prefilteredTextureNoSoftCut.gpuTextureView},
+				{binding: 2, resource: this.sampler.gpuSampler},
+				{binding: 3, resource: outputView},
+				{binding: 4, resource: {buffer: this.#combineUniformBuffer.gpuBuffer}}
+			]);
 		}
 	}
 

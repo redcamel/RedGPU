@@ -337,14 +337,21 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
+     * [KO] 파라미터 업데이트를 위한 통합 헬퍼 메서드입니다.
+     * [EN] Integrated helper method for parameter updates.
+     */
+    #setParam(key: string, value: any, lut: boolean, skyView: boolean, ibl: boolean, validator?: (v: any) => void): void {
+        if (validator) validator(value);
+        (this.#params as any)[key] = value;
+        this.#markDirty(lut, skyView, ibl);
+    }
+
+    /**
      * [KO] 지표면 기준 고도 오프셋 (km)입니다.
      * [EN] Sea level altitude offset (km).
      */
     get seaLevel(): number { return this.#params.seaLevel; }
-    set seaLevel(v: number) {
-        this.#params.seaLevel = v;
-        this.#markDirty(false, true, true);
-    }
+    set seaLevel(v: number) { this.#setParam('seaLevel', v, false, true, true); }
 
     /**
      * [KO] 태양의 고도 (도, -90 ~ 90)입니다.
@@ -394,9 +401,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get aerialPerspectiveDistanceScale(): number { return this.#params.aerialPerspectiveDistanceScale; }
     set aerialPerspectiveDistanceScale(v: number) {
-        validatePositiveNumberRange(v, 1, 1000);
-        this.#params.aerialPerspectiveDistanceScale = v;
-        this.#markDirty(false, true, true);
+        this.#setParam('aerialPerspectiveDistanceScale', v, false, true, true, (v) => validatePositiveNumberRange(v, 1, 1000));
     }
 
     /**
@@ -405,9 +410,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get heightFogAnisotropy(): number { return this.#params.heightFogAnisotropy; }
     set heightFogAnisotropy(v: number) {
-        validateNumberRange(v, 0, 0.999);
-        this.#params.heightFogAnisotropy = v;
-        this.#markDirty(false, true, true);
+        this.#setParam('heightFogAnisotropy', v, false, true, true, (v) => validateNumberRange(v, 0, 0.999));
     }
 
     /**
@@ -416,9 +419,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get sunIntensity(): number { return this.#params.sunIntensity; }
     set sunIntensity(v: number) {
-        validatePositiveNumberRange(v, 0, 10000);
-        this.#params.sunIntensity = v;
-        this.#markDirty(false, false, true);
+        this.#setParam('sunIntensity', v, false, false, true, (v) => validatePositiveNumberRange(v, 0, 10000));
     }
 
     /**
@@ -427,9 +428,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get bottomRadius(): number { return this.#params.bottomRadius; }
     set bottomRadius(v: number) {
-        validatePositiveNumberRange(v, 1);
-        this.#params.bottomRadius = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('bottomRadius', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
     }
 
     /**
@@ -438,9 +437,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get atmosphereHeight(): number { return this.#params.atmosphereHeight; }
     set atmosphereHeight(v: number) {
-        validatePositiveNumberRange(v, 1);
-        this.#params.atmosphereHeight = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('atmosphereHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
     }
 
     /**
@@ -449,9 +446,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get mieScattering(): number { return this.#params.mieScattering; }
     set mieScattering(v: number) {
-        validatePositiveNumberRange(v, 0, 1.0);
-        this.#params.mieScattering = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('mieScattering', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 1.0));
     }
 
     /**
@@ -460,9 +455,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get mieAbsorption(): number { return this.#params.mieAbsorption; }
     set mieAbsorption(v: number) {
-        validatePositiveNumberRange(v, 0, 1.0);
-        this.#params.mieAbsorption = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('mieAbsorption', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 1.0));
     }
 
     /**
@@ -473,8 +466,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]];
     }
     set rayleighScattering(v: [number, number, number]) {
-        this.#params.rayleighScattering = [...v];
-        this.#markDirty(true, false, true);
+        this.#setParam('rayleighScattering', [...v], true, false, true);
     }
 
     /**
@@ -483,9 +475,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get rayleighExponentialDistribution(): number { return this.#params.rayleighExponentialDistribution; }
     set rayleighExponentialDistribution(v: number) {
-        validatePositiveNumberRange(v, 0.1, 100);
-        this.#params.rayleighExponentialDistribution = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('rayleighExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
     }
 
     /**
@@ -494,9 +484,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get mieExponentialDistribution(): number { return this.#params.mieExponentialDistribution; }
     set mieExponentialDistribution(v: number) {
-        validatePositiveNumberRange(v, 0.1, 100);
-        this.#params.mieExponentialDistribution = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('mieExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
     }
 
     /**
@@ -505,9 +493,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
     set mieAnisotropy(v: number) {
-        validateNumberRange(v, 0, 0.999);
-        this.#params.mieAnisotropy = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('mieAnisotropy', v, true, false, true, (v) => validateNumberRange(v, 0, 0.999));
     }
 
     /**
@@ -518,8 +504,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]];
     }
     set groundAlbedo(v: [number, number, number]) {
-        this.#params.groundAlbedo = [...v];
-        this.#markDirty(true, false, true);
+        this.#setParam('groundAlbedo', [...v], true, false, true);
     }
 
     /**
@@ -528,9 +513,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get groundAmbient(): number { return this.#params.groundAmbient; }
     set groundAmbient(v: number) {
-        validatePositiveNumberRange(v, 0, 10);
-        this.#params.groundAmbient = v;
-        this.#markDirty(false, false, true);
+        this.#setParam('groundAmbient', v, false, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
     }
 
     /**
@@ -541,8 +524,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         return [this.#params.absorptionCoefficient[0], this.#params.absorptionCoefficient[1], this.#params.absorptionCoefficient[2]];
     }
     set absorptionCoefficient(v: [number, number, number]) {
-        this.#params.absorptionCoefficient = [...v];
-        this.#markDirty(true, false, true);
+        this.#setParam('absorptionCoefficient', [...v], true, false, true);
     }
 
     /**
@@ -551,9 +533,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get absorptionTipAltitude(): number { return this.#params.absorptionTipAltitude; }
     set absorptionTipAltitude(v: number) {
-        validatePositiveNumberRange(v, 0, 100);
-        this.#params.absorptionTipAltitude = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 100));
     }
 
     /**
@@ -562,9 +542,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get absorptionTentWidth(): number { return this.#params.absorptionTentWidth; }
     set absorptionTentWidth(v: number) {
-        validatePositiveNumberRange(v, 1, 50);
-        this.#params.absorptionTentWidth = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('absorptionTentWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
     }
 
     /**
@@ -573,9 +551,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get heightFogDensity(): number { return this.#params.heightFogDensity; }
     set heightFogDensity(v: number) {
-        validatePositiveNumberRange(v, 0, 10);
-        this.#params.heightFogDensity = v;
-        this.#markDirty(false, false, true);
+        this.#setParam('heightFogDensity', v, false, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
     }
 
     /**
@@ -584,9 +560,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get heightFogFalloff(): number { return this.#params.heightFogFalloff; }
     set heightFogFalloff(v: number) {
-        validatePositiveNumberRange(v, 0.001, 10);
-        this.#params.heightFogFalloff = v;
-        this.#markDirty(false, false, true);
+        this.#setParam('heightFogFalloff', v, false, false, true, (v) => validatePositiveNumberRange(v, 0.001, 10));
     }
 
     /**
@@ -595,9 +569,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get sunSize(): number { return this.#params.sunSize; }
     set sunSize(v: number) {
-        validatePositiveNumberRange(v, 0.01, 10.0);
-        this.#params.sunSize = v;
-        this.#markDirty(false, true, true);
+        this.#setParam('sunSize', v, false, true, true, (v) => validatePositiveNumberRange(v, 0.01, 10.0));
     }
 
     /**
@@ -606,9 +578,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get mieGlow(): number { return this.#params.mieGlow; }
     set mieGlow(v: number) {
-        validateNumberRange(v, 0, 0.999);
-        this.#params.mieGlow = v;
-        this.#markDirty(false, true, true);
+        this.#setParam('mieGlow', v, false, true, true, (v) => validateNumberRange(v, 0, 0.999));
     }
 
     /**
@@ -617,9 +587,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get mieHalo(): number { return this.#params.mieHalo; }
     set mieHalo(v: number) {
-        validateNumberRange(v, 0, 0.999);
-        this.#params.mieHalo = v;
-        this.#markDirty(false, false, true);
+        this.#setParam('mieHalo', v, false, false, true, (v) => validateNumberRange(v, 0, 0.999));
     }
 
     /**
@@ -627,20 +595,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [EN] Sets whether to use the ground.
      */
     get useGround(): boolean { return !!this.#params.useGround; }
-    set useGround(v: boolean) {
-        this.#params.useGround = v ? 1.0 : 0.0;
-        this.#markDirty(true, true, true);
-    }
+    set useGround(v: boolean) { this.#setParam('useGround', v ? 1.0 : 0.0, true, true, true); }
 
     /**
      * [KO] 지면 표시 여부를 설정합니다.
      * [EN] Sets whether to show the ground.
      */
     get showGround(): boolean { return !!this.#params.showGround; }
-    set showGround(v: boolean) {
-        this.#params.showGround = v ? 1.0 : 0.0;
-        this.#markDirty(true, true, true);
-    }
+    set showGround(v: boolean) { this.#setParam('showGround', v ? 1.0 : 0.0, true, true, true); }
 
     /**
      * [KO] 태양의 주연 감광(Limb Darkening) 계수입니다.
@@ -648,9 +610,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get sunLimbDarkening(): number { return this.#params.sunLimbDarkening; }
     set sunLimbDarkening(v: number) {
-        validateNumberRange(v, 0, 10.0);
-        this.#params.sunLimbDarkening = v;
-        this.#markDirty(false, false, true);
+        this.#setParam('sunLimbDarkening', v, false, false, true, (v) => validateNumberRange(v, 0, 10.0));
     }
 
     /**
@@ -659,9 +619,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get skyLuminanceFactor(): number { return this.#params.skyLuminanceFactor; }
     set skyLuminanceFactor(v: number) {
-        validatePositiveNumberRange(v, 0, 100.0);
-        this.#params.skyLuminanceFactor = v;
-        this.#markDirty(true, false, true);
+        this.#setParam('skyLuminanceFactor', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 100.0));
     }
 
     /**
@@ -797,23 +755,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #initShaders(): void {
         const {resourceManager} = this.redGPUContext;
         const createCode = (useMSAA: boolean) => {
-            const depthTextureDeclaration = useMSAA
-                ? '@group(0) @binding(1) var depthTexture : texture_depth_multisampled_2d;'
-                : '@group(0) @binding(1) var depthTexture : texture_depth_2d;';
-
-            const fetchDepthFunction = `
-				fn fetchDepth(pos: vec2<u32>) -> f32 {
-					let dSize = textureDimensions(depthTexture);
-					let clampedPos = min(pos, dSize - 1u);
-					return textureLoad(depthTexture, clampedPos, 0);
-				}
-			`;
-
             const rawCode = [
                 '#redgpu_include depth.getLinearizeDepth',
                 '#redgpu_include skyAtmosphere.skyAtmosphereFn',
                 '@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
-                depthTextureDeclaration,
+                `@group(0) @binding(1) var depthTexture : ${useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d'};`,
                 '@group(0) @binding(2) var transmittanceLUT : texture_2d<f32>;',
                 '@group(0) @binding(3) var multiScatLUT : texture_2d<f32>;',
                 '@group(0) @binding(4) var skyViewLUT : texture_2d<f32>;',
@@ -824,7 +770,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 '@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM,
                 '',
-                fetchDepthFunction,
+                'fn fetchDepth(pos: vec2<u32>) -> f32 {',
+                '    let dSize = textureDimensions(depthTexture);',
+                '    let clampedPos = min(pos, dSize - 1u);',
+                '    return textureLoad(depthTexture, clampedPos, 0);',
+                '}',
                 '',
                 '@compute @workgroup_size(16, 16)',
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',

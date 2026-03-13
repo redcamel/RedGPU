@@ -73,32 +73,20 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
      */
     render(transmittanceLUT: DirectTexture, multiScatLUT: DirectTexture): void {
         if (!this.#bindGroup) {
-            const {gpuDevice} = this.redGPUContext;
-            this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'SkyAtmosphere_SkyView_BindGroup',
-                layout: this.#pipeline.getBindGroupLayout(0),
-                entries: [
-                    {binding: 0, resource: this.#lutTexture.gpuTextureView}, // skyViewLUT
-                    {binding: 1, resource: transmittanceLUT.gpuTextureView}, // transmittanceLUT
-                    {binding: 2, resource: multiScatLUT.gpuTextureView}, // multiScatLUT
-                    {binding: 3, resource: this.sampler.gpuSampler}, // skyAtmosphereSampler
-                    {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}} // params
-                ]
-            });
+            this.#bindGroup = this.createBindGroup('SkyAtmosphere_SkyView_BindGroup', this.#pipeline, [
+                {binding: 0, resource: this.#lutTexture.gpuTextureView}, // skyViewLUT
+                {binding: 1, resource: transmittanceLUT.gpuTextureView}, // transmittanceLUT
+                {binding: 2, resource: multiScatLUT.gpuTextureView}, // multiScatLUT
+                {binding: 3, resource: this.sampler.gpuSampler}, // skyAtmosphereSampler
+                {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}} // params
+            ]);
         }
         this.executeComputePass(this.#pipeline, this.#bindGroup);
     }
 
     #init(): void {
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_SkyView_LUTTexture_${createUUID()}`, this.createLUTTexture());
-        this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'SkyAtmosphere_SkyView_Pipeline',
-            layout: 'auto',
-            compute: {
-                module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),
-                entryPoint: 'main'
-            }
-        });
+        this.#pipeline = this.createComputePipeline('SkyAtmosphere_SkyView_Pipeline', SHADER_INFO.defaultSource);
     }
 }
 

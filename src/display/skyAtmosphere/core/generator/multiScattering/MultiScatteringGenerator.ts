@@ -70,29 +70,17 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
      */
     render(transmittanceLUT: DirectTexture): void {
         if (!this.#bindGroup) {
-            const {gpuDevice} = this.redGPUContext;
-            this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'SkyAtmosphere_MultiScattering_BindGroup',
-                layout: this.#pipeline.getBindGroupLayout(0),
-                entries: [
-                    {binding: 0, resource: this.#lutTexture.gpuTextureView}, // multiScatLUT
-                    {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
-                ]
-            });
+            this.#bindGroup = this.createBindGroup('SkyAtmosphere_MultiScattering_BindGroup', this.#pipeline, [
+                {binding: 0, resource: this.#lutTexture.gpuTextureView}, // multiScatLUT
+                {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+            ]);
         }
         this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);
     }
 
     #init(): void {
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_MultiScat_LUTTexture_${createUUID()}`, this.createLUTTexture());
-        this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'SkyAtmosphere_MultiScattering_Pipeline',
-            layout: 'auto',
-            compute: {
-                module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),
-                entryPoint: 'main'
-            }
-        });
+        this.#pipeline = this.createComputePipeline('SkyAtmosphere_MultiScattering_Pipeline', SHADER_INFO.defaultSource);
     }
 }
 

@@ -97,6 +97,34 @@ abstract class ASkyAtmosphereLUTGenerator {
     abstract get lutTexture(): DirectTexture | DirectCubeTexture;
 
     /**
+     * [KO] 표준 컴퓨팅 파이프라인을 생성합니다.
+     * [EN] Creates a standard compute pipeline.
+     */
+    protected createComputePipeline(label: string, shaderCode: string): GPUComputePipeline {
+        const {gpuDevice} = this.#redGPUContext;
+        return gpuDevice.createComputePipeline({
+            label,
+            layout: 'auto',
+            compute: {
+                module: gpuDevice.createShaderModule({code: shaderCode}),
+                entryPoint: 'main'
+            }
+        });
+    }
+
+    /**
+     * [KO] 표준 바인드 그룹을 생성합니다.
+     * [EN] Creates a standard bind group.
+     */
+    protected createBindGroup(label: string, pipeline: GPUComputePipeline, entries: GPUBindGroupEntry[]): GPUBindGroup {
+        return this.#redGPUContext.gpuDevice.createBindGroup({
+            label,
+            layout: pipeline.getBindGroupLayout(0),
+            entries
+        });
+    }
+
+    /**
      * [KO] 표준 컴퓨팅 패스를 실행하여 LUT를 렌더링합니다.
      * [EN] Executes a standard compute pass to render the LUT.
      *

@@ -67,29 +67,17 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
      */
     render(): void {
         if (!this.#bindGroup) {
-            const {gpuDevice} = this.redGPUContext;
-            this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'SkyAtmosphere_Transmittance_BindGroup',
-                layout: this.#pipeline.getBindGroupLayout(0),
-                entries: [
-                    {binding: 0, resource: this.#lutTexture.gpuTextureView}, // transmittanceLUT
-                    {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}} // params
-                ]
-            });
+            this.#bindGroup = this.createBindGroup('SkyAtmosphere_Transmittance_BindGroup', this.#pipeline, [
+                {binding: 0, resource: this.#lutTexture.gpuTextureView}, // transmittanceLUT
+                {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}} // params
+            ]);
         }
         this.executeComputePass(this.#pipeline, this.#bindGroup);
     }
 
     #init(): void {
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_Transmittance_LUTTexture_${createUUID()}`, this.createLUTTexture());
-        this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'SkyAtmosphere_Transmittance_Pipeline',
-            layout: 'auto',
-            compute: {
-                module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),
-                entryPoint: 'main'
-            }
-        });
+        this.#pipeline = this.createComputePipeline('SkyAtmosphere_Transmittance_Pipeline', SHADER_INFO.defaultSource);
     }
 }
 

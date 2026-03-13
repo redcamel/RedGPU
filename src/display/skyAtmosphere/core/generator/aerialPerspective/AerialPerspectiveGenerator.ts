@@ -78,8 +78,6 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Multi-Scattering LUT texture
      */
     render(view: View3D, transmittance: DirectTexture, multiScat: DirectTexture): void {
-        const {gpuDevice} = this.redGPUContext;
-        // [KO] View3D의 정확한 프로퍼티명인 systemUniform_Vertex_UniformBuffer를 사용하여 버퍼 추출
         const systemBuffer = view.systemUniform_Vertex_UniformBuffer?.gpuBuffer;
         
         if (!systemBuffer) {
@@ -89,18 +87,14 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
 
         if (!this.#bindGroup || this.#prevSystemBuffer !== systemBuffer) {
             this.#prevSystemBuffer = systemBuffer;
-            this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'SkyAtmosphere_AerialPerspective_BindGroup',
-                layout: this.#pipeline.getBindGroupLayout(0),
-                entries: [
-                    {binding: 0, resource: {buffer: systemBuffer}}, // systemUniforms
-                    {binding: 1, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})}, // aerialPerspectiveLUT
-                    {binding: 2, resource: multiScat.gpuTextureView}, // multiScatLUT
-                    {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, // params
-                    {binding: 4, resource: transmittance.gpuTextureView}, // transmittanceLUT
-                    {binding: 13, resource: this.sampler.gpuSampler} // skyAtmosphereSampler
-                ]
-            });
+            this.#bindGroup = this.createBindGroup('SkyAtmosphere_AerialPerspective_BindGroup', this.#pipeline, [
+                {binding: 0, resource: {buffer: systemBuffer}}, // systemUniforms
+                {binding: 1, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})}, // aerialPerspectiveLUT
+                {binding: 2, resource: multiScat.gpuTextureView}, // multiScatLUT
+                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, // params
+                {binding: 4, resource: transmittance.gpuTextureView}, // transmittanceLUT
+                {binding: 13, resource: this.sampler.gpuSampler} // skyAtmosphereSampler
+            ]);
         }
         
         this.executeComputePass(this.#pipeline, this.#bindGroup, [4, 4, 4]);
@@ -108,14 +102,7 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
 
     #init(): void {
         this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_AerialPerspective_LUTTexture_${createUUID()}`, this.createLUTTexture(true));
-        this.#pipeline = this.redGPUContext.gpuDevice.createComputePipeline({
-            label: 'SkyAtmosphere_AerialPerspective_Pipeline',
-            layout: 'auto',
-            compute: {
-                module: this.redGPUContext.gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),
-                entryPoint: 'main'
-            }
-        });
+        this.#pipeline = this.createComputePipeline('SkyAtmosphere_AerialPerspective_Pipeline', SHADER_INFO.defaultSource);
     }
 }
 

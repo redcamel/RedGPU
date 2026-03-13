@@ -77,36 +77,22 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	 */
     render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): void {
 		if (!this.#bindGroup) {
-			const {gpuDevice} = this.redGPUContext;
-			this.#bindGroup = gpuDevice.createBindGroup({
-				label: 'SkyAtmosphere_Irradiance_BindGroup',
-				layout: this.#pipeline.getBindGroupLayout(0),
-				entries: [
-					{binding: 0, resource: multiScat.gpuTextureView}, // multiScatLUT
-					{binding: 1, resource: this.sampler.gpuSampler}, // skyAtmosphereSampler
-					{binding: 2, resource: this.#lutTexture.gpuTexture.createView({dimension: '2d-array'})}, // skyAtmosphereIrradianceLUT
-					{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, // params
-					{binding: 4, resource: transmittance.gpuTextureView}, // transmittanceLUT
-					{binding: 5, resource: skyView.gpuTextureView} // skyViewLUT
-				]
-			});
+			this.#bindGroup = this.createBindGroup('SkyAtmosphere_Irradiance_BindGroup', this.#pipeline, [
+				{binding: 0, resource: multiScat.gpuTextureView}, // multiScatLUT
+				{binding: 1, resource: this.sampler.gpuSampler}, // skyAtmosphereSampler
+				{binding: 2, resource: this.#lutTexture.gpuTexture.createView({dimension: '2d-array'})}, // skyAtmosphereIrradianceLUT
+				{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, // params
+				{binding: 4, resource: transmittance.gpuTextureView}, // transmittanceLUT
+				{binding: 5, resource: skyView.gpuTextureView} // skyViewLUT
+			]);
 		}
 
 		this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);
 	}
 
 	#init(): void {
-		const {gpuDevice} = this.redGPUContext;
 		this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`, this.createLUTTexture(false));
-
-		this.#pipeline = gpuDevice.createComputePipeline({
-			label: 'SkyAtmosphere_Irradiance_Pipeline',
-			layout: 'auto',
-			compute: {
-				module: gpuDevice.createShaderModule({code: SHADER_INFO.defaultSource}),
-				entryPoint: 'main'
-			}
-		});
+		this.#pipeline = this.createComputePipeline('SkyAtmosphere_Irradiance_Pipeline', SHADER_INFO.defaultSource);
 	}
 }
 
