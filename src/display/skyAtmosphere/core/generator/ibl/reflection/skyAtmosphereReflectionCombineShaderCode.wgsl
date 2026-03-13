@@ -27,11 +27,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let mip = uniforms.mipLevel;
     let soft = textureSampleLevel(softCutTexture, combineSampler, viewDir, mip).rgb;
     let noSoft = textureSampleLevel(noSoftCutTexture, combineSampler, viewDir, mip).rgb;
+    
+    // [KO] 거칠기에 따른 보간 곡선 적용 (비선형적 변화를 위해 pow 2.2 사용)
+    // [EN] Apply interpolation curve according to roughness (use pow 2.2 for non-linear change).
     let t = clamp(uniforms.roughness, 0.0, 1.0);
-    let curve = pow(t, 3.0) / 6.0;
-//    let mixed = mix(soft, noSoft, curve);
     let mixed = mix(soft, noSoft, pow(t, 2.2));
-//    let mixed = mix(noSoft, noSoft, curve);
 
     textureStore(outTexture, global_id.xy, global_id.z, vec4<f32>(mixed, 1.0));
 }
