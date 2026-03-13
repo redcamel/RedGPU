@@ -149,6 +149,9 @@ const reflectCache = new Map<string, any>();
  * @category WGSL
  */
 const parseWGSL = (sourceName: string, code: string) => {
+    if (!sourceName) {
+        throw new Error(`[parseWGSL] sourceName is required. (provided: ${sourceName})`);
+    }
     code = ensureVertexIndexBuiltin(code)
     const {
         defaultSource,

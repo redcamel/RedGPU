@@ -157,6 +157,16 @@ redUnit.testGroup(
 redUnit.testGroup(
     'preprocessWGSL - Error Handling',
     (runner) => {
+        runner.defineTest('Missing sourceName', function (run) {
+            const code = `let x = 1;`;
+            try {
+                preprocessWGSL('', code);
+                run(false, 'Should have thrown an error for missing sourceName');
+            } catch (e) {
+                run(e.message.includes('sourceName is required'));
+            }
+        }, true);
+
         runner.defineTest('Mismatched #redgpu_endIf', function (run) {
             const code = `
                 #redgpu_if TEST
