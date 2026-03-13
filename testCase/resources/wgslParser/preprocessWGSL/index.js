@@ -10,7 +10,7 @@ if (!preprocessWGSL) {
 }
 
 redUnit.testGroup(
-    'preprocessWGSL - Core Functionality (SystemCodeManager)',
+    'preprocessWGSL - Core Functionality (ShaderLibrary)',
     (runner) => {
         runner.defineTest('Flat Path Include (SYSTEM_UNIFORM)', function (run) {
             // [KO] 최상위 레벨의 SYSTEM_UNIFORM 인클루드 테스트

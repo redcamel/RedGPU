@@ -8,12 +8,12 @@
  */
 import init from "./init";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
-import SystemCodeManager from "./systemCodeManager/SystemCodeManager";
+import ShaderLibrary from "./systemCodeManager/ShaderLibrary";
 
 export * as Bound from "./bound";
 export {
     init,
-    SystemCodeManager,
+    ShaderLibrary,
     GLTFLoader
 }
 

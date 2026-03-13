@@ -1,14 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const SYSTEM_CODE_MANAGER_PATH = path.join(__dirname, '../src/systemCodeManager/SystemCodeManager.ts');
+const SYSTEM_CODE_MANAGER_PATH = path.join(__dirname, '../src/systemCodeManager/ShaderLibrary.ts');
 const BASE_DIR = path.dirname(SYSTEM_CODE_MANAGER_PATH);
 
 function syncShaderDoc() {
-    console.log('🚀 Syncing WGSL to SystemCodeManager (Full Auto JSDoc Mode)...');
+    console.log('🚀 Syncing WGSL to ShaderLibrary (Full Auto JSDoc Mode)...');
     
     if (!fs.existsSync(SYSTEM_CODE_MANAGER_PATH)) {
-        console.error('❌ SystemCodeManager.ts not found');
+        console.error('❌ ShaderLibrary.ts not found');
         return;
     }
 

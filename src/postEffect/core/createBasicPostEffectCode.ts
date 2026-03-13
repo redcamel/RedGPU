@@ -1,4 +1,4 @@
-import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
+import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
@@ -12,7 +12,7 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
       ${effect.useDepthTexture ? `@group(0) @binding(1) var depthTexture : ${depthTextureType}` : ''};
       ${effect.useGBufferNormalTexture ? `@group(0) @binding(${effect.useDepthTexture ? 2 : 1}) var gBufferNormalTexture : texture_2d<f32>` : ''};
       @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
-      ${SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM}
+      ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
       ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}
       @compute @workgroup_size(${WORK_SIZE_X},${WORK_SIZE_Y},${WORK_SIZE_Z})
       fn main ( 

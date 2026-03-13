@@ -8,7 +8,7 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {keepLog} from "../../utils";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import {ASinglePassPostEffectResult} from "../../postEffect/core/ASinglePassPostEffect";
-import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
+import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -272,7 +272,7 @@ class TAA {
 				@group(0) @binding(5) var historyDepthTexture : texture_depth_2d;
 				
 				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
-				${SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM}
+				${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
 				@group(1) @binding(2) var<uniform> uniforms: Uniforms;
 				
 				@compute @workgroup_size(${this.#WORK_SIZE_X}, ${this.#WORK_SIZE_Y}, ${this.#WORK_SIZE_Z})

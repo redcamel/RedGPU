@@ -22,7 +22,7 @@
 ### 2.3 셰이더 컴파일 및 문자열 조합 (Medium Importance)
 *   **현황**: `SkyAtmosphere.ts`의 `#initShaders` 메서드에서 대량의 WGSL 코드를 배열 `join('\n')` 방식으로 조합함.
 *   **문제점**: 셰이더 코드 가독성이 떨어지고 IDE의 구문 강조(Syntax Highlighting) 혜택을 받지 못함.
-*   **개선**: 조합 로직을 별도의 `.wgsl` 파일로 완전히 이동시키거나, `SystemCodeManager`를 활용한 템플릿 방식으로 정규화.
+*   **개선**: 조합 로직을 별도의 `.wgsl` 파일로 완전히 이동시키거나, `ShaderLibrary`를 활용한 템플릿 방식으로 정규화.
 *   **우선순위**: **P1 (높음)**
 
 ### 2.4 IBL 생성기(Reflection/Irradiance) 흐름 정규화 (Low Importance)
@@ -55,7 +55,7 @@
 | **완료** | `SkyAtmosphere.ts` (Uniforms) | `#updateSharedUniformBuffer` 일괄 복사 방식으로 개편 | 매 루프 발생하던 `queue.writeBuffer()`를 1회로 압축하여 CPU 부하 감소 |
 
 ### Step 3: 셰이더 리소스 정규화 (P1) - **[현재 보류 (On Hold)]**
-*   **방향성 논의 결과**: `SystemCodeManager`를 오염시키지 않고, 번들러의 Native Import 및 TS 템플릿 리터럴을 활용하여 조립(Composition)하는 방향이 논의됨.
+*   **방향성 논의 결과**: `ShaderLibrary`를 오염시키지 않고, 번들러의 Native Import 및 TS 템플릿 리터럴을 활용하여 조립(Composition)하는 방향이 논의됨.
 *   **상태**: 추가적인 아키텍처 결정 전까지 작업 홀딩.
 
 ### Step 4: WGSL 셰이더 내 공통 물리 로직 분리 및 통합 (P1)
@@ -74,7 +74,7 @@
 | 진행 상황 | 분류 (Category) | 중복 발견 위치 | 통합 전략 및 기대 효과 |
 | :---: | :--- | :--- | :--- |
 | **완료** | **Frustum Ray 추출** | `CameraVolume`, `ComputePostEffect` (총 2곳) | `fn getFrustumRayDirection(uv, invP, invV)`를 `skyAtmosphereFn`에 추가하여 NDC->World 변환의 중복 제거 |
-| **완료** | **Hammersley 시퀀스** | `Irradiance` 등 IBL 관련 셰이더 내부 하드코딩 | IBL 중요도 샘플링에 쓰이는 `radicalInverse_VdC` 및 `hammersley` 함수를 `getRadicalInverseVanDerCorput`과 `getHammersley`로 명확히 명명하여 `SystemCodeManager`의 `math.hash` 모듈로 이관 및 엔진(BRDF, Prefilter 등) 전반에 걸쳐 일괄 적용 |
+| **완료** | **Hammersley 시퀀스** | `Irradiance` 등 IBL 관련 셰이더 내부 하드코딩 | IBL 중요도 샘플링에 쓰이는 `radicalInverse_VdC` 및 `hammersley` 함수를 `getRadicalInverseVanDerCorput`과 `getHammersley`로 명확히 명명하여 `ShaderLibrary`의 `math.hash` 모듈로 이관 및 엔진(BRDF, Prefilter 등) 전반에 걸쳐 일괄 적용 |
 
 ### Step 6: 빌드 자동화 스크립트(syncShaderDoc.js) 안정화 (P2)
 WGSL 코드를 TypeScript JSDoc으로 자동 동기화하는 과정에서 발생한 구문 파괴 문제를 해결하여 빌드 시스템의 안정성을 확보했습니다.

@@ -9,7 +9,7 @@ import PostEffectManager from "../../postEffect/PostEffectManager";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
-import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
+import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import CubeTexture from "../../resources/texture/CubeTexture";
 import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
@@ -26,7 +26,7 @@ import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
 
-const SHADER_INFO = parseWGSL(SystemCodeManager.SYSTEM_UNIFORM, 'VIEW3D_SYSTEM_UNIFORM')
+const SHADER_INFO = parseWGSL(ShaderLibrary.SYSTEM_UNIFORM, 'VIEW3D_SYSTEM_UNIFORM')
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
 let temp = mat4.create()
 let temp2 = mat4.create()

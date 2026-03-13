@@ -1,5 +1,5 @@
 import PassClustersLightHelper from "../../../light/clusterLight/core/PassClustersLightHelper";
-import SystemCodeManager from "../../../systemCodeManager/SystemCodeManager";
+import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 import ShaderVariantGenerator from "./ShaderVariantGenerator";
 
 const includePattern = /#redgpu_include\s+([\w.]+)/g;
@@ -75,8 +75,8 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): s
     const includedPaths = new Set<string>();
 
     /**
-     * [KO] 점 표기법 경로를 해석하여 SystemCodeManager에서 WGSL 문자열을 찾습니다.
-     * [EN] Resolves dot-notation paths to find WGSL strings in SystemCodeManager.
+     * [KO] 점 표기법 경로를 해석하여 ShaderLibrary에서 WGSL 문자열을 찾습니다.
+     * [EN] Resolves dot-notation paths to find WGSL strings in ShaderLibrary.
      */
     const resolvePath = (path: string, offset: number, currentSource: string): string | null => {
         if (includedPaths.has(path)) {
@@ -88,13 +88,13 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): s
         }
 
         const parts = path.split('.');
-        let current: any = SystemCodeManager;
+        let current: any = ShaderLibrary;
         for (const part of parts) {
             if (current && typeof current === 'object' && part in current) {
                 current = current[part];
             } else {
                 const lineNumber = currentSource.substring(0, offset).split('\n').length;
-                throw new Error(`[preprocessWGSL] Invalid include path in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Path not found in SystemCodeManager.`);
+                throw new Error(`[preprocessWGSL] Invalid include path in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Path not found in ShaderLibrary.`);
             }
         }
 

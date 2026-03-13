@@ -13,7 +13,7 @@ import skyAtmosphereFn_wgsl from "./core/skyAtmosphereFn.wgsl";
 import transmittanceShaderCode_wgsl from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import computeCode_wgsl from "./wgsl/computeCode.wgsl";
 import Sampler from "../../resources/sampler/Sampler";
-import SystemCodeManager from "../../systemCodeManager/SystemCodeManager";
+import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 
@@ -822,7 +822,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 '@group(0) @binding(7) var skyAtmosphereIrradianceLUT : texture_cube<f32>;',
                 '',
                 '@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
-                SystemCodeManager.POST_EFFECT_SYSTEM_UNIFORM,
+                ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM,
                 '',
                 fetchDepthFunction,
                 '',
