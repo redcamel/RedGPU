@@ -161,26 +161,18 @@ fn main(inputData:InputData) -> OutputFragment {
        visibility = 1.0;
     }
 
-    for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
-        let u_directionalLightDirection = u_directionalLights[i].direction;
-        let u_directionalLightColor = u_directionalLights[i].color;
-        let u_directionalLightIntensity = u_directionalLights[i].intensity;
+    if (systemUniforms.useSkyAtmosphere != 1u) {
+        for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
+            let u_directionalLightDirection = u_directionalLights[i].direction;
+            let u_directionalLightColor = u_directionalLights[i].color;
+            let u_directionalLightIntensity = u_directionalLights[i].intensity;
 
-         mixColor += getPhongLight(
-            u_directionalLightColor, u_directionalLightIntensity * visibility, -normalize(u_directionalLightDirection),
-            N, V, u_shininess, specularSamplerValue,
-            diffuseColor, u_specularColor, u_specularStrength
-        );
-    }
-
-    // [Atmosphere Sun Light]
-    if (systemUniforms.useSkyAtmosphere == 1u) {
-        let atmoSun = getAtmosphereSunLight(input_vertexPosition);
-        mixColor += getPhongLight(
-            atmoSun.color, atmoSun.intensity, atmoSun.direction,
-            N, V, u_shininess, specularSamplerValue,
-            diffuseColor, u_specularColor, u_specularStrength
-        );
+             mixColor += getPhongLight(
+                u_directionalLightColor, u_directionalLightIntensity * visibility, -normalize(u_directionalLightDirection),
+                N, V, u_shininess, specularSamplerValue,
+                diffuseColor, u_specularColor, u_specularStrength
+            );
+        }
     }
 
     // PointLight

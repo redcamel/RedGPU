@@ -32,7 +32,7 @@
 #redgpu_include lighting.getDiffuseBTDF
 #redgpu_include lighting.getFresnelMix
 #redgpu_include lighting.getFresnelCoat
-#redgpu_include skyAtmosphere.getAtmosphereSunLight
+#redgpu_include skyAtmosphere.skyAtmosphereFn
 
 /**
  * [KO] PBR 재질을 위한 유니폼 구조체입니다. 다양한 KHR 확장을 지원합니다.
@@ -526,8 +526,10 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // [KO] 직접 조명 계산 - Directional Light [EN] Direct lighting calculation - Directional Light
     var totalDirectLighting = vec3<f32>(0.0);
-    for (var i = 0u; i < u_directionalLightCount; i++) {
-        totalDirectLighting += calcLight(u_directionalLights[i].color, u_directionalLights[i].intensity * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+    if (systemUniforms.useSkyAtmosphere != 1u) {
+        for (var i = 0u; i < u_directionalLightCount; i++) {
+            totalDirectLighting += calcLight(u_directionalLights[i].color, u_directionalLights[i].intensity * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+        }
     }
 
 

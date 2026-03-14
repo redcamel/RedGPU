@@ -123,35 +123,6 @@ class DirectionalLight extends ABaseLight {
     }
 
     /**
-     * [KO] 이 광원이 SkyAtmosphere의 태양 소스로 사용될지 여부입니다.
-     * [EN] Whether this light is used as the sun source for SkyAtmosphere.
-     * @defaultValue false
-     */
-    #isAtmosphereSun: boolean = false;
-
-    /**
-     * [KO] 이 광원이 SkyAtmosphere의 태양 소스로 사용될지 여부를 반환합니다.
-     * [EN] Returns whether this light is used as the sun source for SkyAtmosphere.
-     * @returns
-     * [KO] 태양 소스 사용 여부
-     * [EN] Whether it is used as a sun source
-     */
-    get isAtmosphereSun(): boolean {
-        return this.#isAtmosphereSun;
-    }
-
-    /**
-     * [KO] 이 광원이 SkyAtmosphere의 태양 소스로 사용될지 여부를 설정합니다.
-     * [EN] Sets whether this light is used as the sun source for SkyAtmosphere.
-     * @param value -
-     * [KO] 태양 소스 사용 여부
-     * [EN] Whether it is used as a sun source
-     */
-    set isAtmosphereSun(value: boolean) {
-        this.#isAtmosphereSun = value;
-    }
-
-    /**
      * [KO] 광원의 전체 방향 벡터를 반환합니다.
      * [EN] Returns the full direction vector of the light.
      * @returns

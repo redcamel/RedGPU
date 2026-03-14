@@ -323,24 +323,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     #updateSunInfo(view: View3D): void {
         const findSource = (): DirectionalLight | null => {
+            // [KO] 명시적으로 지정된 소스가 있으면 최우선 사용
+            // [EN] Use explicitly specified source as top priority
             if (this.#sunSource) return this.#sunSource;
-            // [KO] 씬의 광원 목록이 변경되었을 수 있으므로 활성 소스를 매 프레임 재검증하되, 속도 최적화를 위해 인덱스 순회
-            // [EN] Re-verify active source every frame as scene lights might have changed, using index traversal for speed optimization
+            
+            // [KO] 규약에 따라 씬의 첫 번째 직사광(index 0)을 태양 소스로 사용
+            // [EN] By convention, use the first directional light (index 0) in the scene as the sun source
             const lights = view.scene.lightManager.directionalLights;
-            if (this.#activeSunSource && lights.includes(this.#activeSunSource)) {
-                if (this.#activeSunSource.isAtmosphereSun) return this.#activeSunSource;
-            }
-
-            let firstSun: DirectionalLight = null;
-            for (let i = 0, len = lights.length; i < len; i++) {
-                if (lights[i].isAtmosphereSun) {
-                    this.#activeSunSource = lights[i];
-                    return lights[i];
-                }
-                if (!firstSun) firstSun = lights[i];
-            }
-            this.#activeSunSource = firstSun || null;
-            return this.#activeSunSource;
+            return lights[0] || null;
         };
 
         const source = findSource();
@@ -349,14 +339,10 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             const currentDir = this.#params.sunDirection;
             const EPSILON = 0.0001;
 
-            // [KO] DirectionalLight의 방향(빛이 나가는 방향)을 반전하여 태양의 위치 벡터로 변환
-            // [EN] Negate DirectionalLight's direction (light forward) to convert it to sun position vector
             const targetDirX = -dir[0];
             const targetDirY = -dir[1];
             const targetDirZ = -dir[2];
 
-            // [KO] Epsilon 기반 비교로 미세한 지터에 의한 불필요한 갱신 방지
-            // [EN] Epsilon-based comparison to prevent unnecessary updates due to fine jitter
             if (
                 Math.abs(targetDirX - currentDir[0]) > EPSILON ||
                 Math.abs(targetDirY - currentDir[1]) > EPSILON ||
