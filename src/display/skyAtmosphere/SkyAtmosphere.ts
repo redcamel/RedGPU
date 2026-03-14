@@ -26,6 +26,7 @@ import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import AtmosphereShaderLibrary from "./core/AtmosphereShaderLibrary";
+import DirectionalLight from "../../light/lights/DirectionalLight";
 
 const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl, AtmosphereShaderLibrary);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
@@ -99,12 +100,16 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         skyLuminanceFactor: 1.0
     };
 
-    #sunElevation: number = 45;
-    #sunAzimuth: number = 0;
+    #sunSource: DirectionalLight = null;
+    #activeSunSource: DirectionalLight = null;
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
     #dirtyIBL: boolean = true;
     #dirtyUniformBuffer: boolean = true;
+
+    #lastUpdateFrame: number = -1;
+    #prevCameraMatrix: mat4 = mat4.create();
+    #isUpdatingIBL: boolean = false;
 
     #computeShaderMSAA: GPUShaderModule;
     #computeShaderNonMSAA: GPUShaderModule;
@@ -180,7 +185,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         });
 
         this.#initShaders();
-        this.#updateSunDirection();
         this.#initBackgroundResources();
     }
 
@@ -270,7 +274,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         const {gpuDevice, antialiasingManager} = this.redGPUContext;
         const {useMSAA} = antialiasingManager;
 
-        this.#updateLUTs(view);
+        this.#performUpdate(view);
 
         if (this.#dirtyBackgroundPipeline || antialiasingManager.changedMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
             this.#updateBackgroundPipeline(useMSAA);
@@ -306,6 +310,71 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         currentRenderPassEncoder.executeBundles([this.#backgroundRenderBundle]);
     }
 
+    #performUpdate(view: View3D) {
+        // [KO] 동일 프레임에서 중복 업데이트 방지 (renderBackground와 render가 모두 활성화된 경우 대응)
+        // [EN] Prevent redundant updates in the same frame (handles cases where both renderBackground and render are active)
+        const currentFrame = view.renderViewStateData.frameIndex;
+        if (this.#lastUpdateFrame === currentFrame) return;
+        this.#lastUpdateFrame = currentFrame;
+
+        this.#updateSunInfo(view);
+        this.#updateLUTs(view);
+    }
+
+    #updateSunInfo(view: View3D): void {
+        const findSource = (): DirectionalLight | null => {
+            if (this.#sunSource) return this.#sunSource;
+            // [KO] 씬의 광원 목록이 변경되었을 수 있으므로 활성 소스를 매 프레임 재검증하되, 속도 최적화를 위해 인덱스 순회
+            // [EN] Re-verify active source every frame as scene lights might have changed, using index traversal for speed optimization
+            const lights = view.scene.lightManager.directionalLights;
+            if (this.#activeSunSource && lights.includes(this.#activeSunSource)) {
+                if (this.#activeSunSource.isAtmosphereSun) return this.#activeSunSource;
+            }
+
+            let firstSun: DirectionalLight = null;
+            for (let i = 0, len = lights.length; i < len; i++) {
+                if (lights[i].isAtmosphereSun) {
+                    this.#activeSunSource = lights[i];
+                    return lights[i];
+                }
+                if (!firstSun) firstSun = lights[i];
+            }
+            this.#activeSunSource = firstSun || null;
+            return this.#activeSunSource;
+        };
+
+        const source = findSource();
+        if (source) {
+            const dir = source.direction;
+            const currentDir = this.#params.sunDirection;
+            const EPSILON = 0.0001;
+
+            // [KO] DirectionalLight의 방향(빛이 나가는 방향)을 반전하여 태양의 위치 벡터로 변환
+            // [EN] Negate DirectionalLight's direction (light forward) to convert it to sun position vector
+            const targetDirX = -dir[0];
+            const targetDirY = -dir[1];
+            const targetDirZ = -dir[2];
+
+            // [KO] Epsilon 기반 비교로 미세한 지터에 의한 불필요한 갱신 방지
+            // [EN] Epsilon-based comparison to prevent unnecessary updates due to fine jitter
+            if (
+                Math.abs(targetDirX - currentDir[0]) > EPSILON ||
+                Math.abs(targetDirY - currentDir[1]) > EPSILON ||
+                Math.abs(targetDirZ - currentDir[2]) > EPSILON
+            ) {
+                currentDir[0] = targetDirX;
+                currentDir[1] = targetDirY;
+                currentDir[2] = targetDirZ;
+                this.#markDirty(false, true, true);
+            }
+
+            if (Math.abs(this.#params.sunIntensity - source.intensity) > EPSILON) {
+                this.#params.sunIntensity = source.intensity;
+                this.#markDirty(false, false, true);
+            }
+        }
+    }
+
     #updateLUTs(view: View3D) {
         const {rawCamera} = view;
         const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
@@ -316,9 +385,21 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#dirtyUniformBuffer = true;
         }
 
-        // [KO] Froxel AP는 카메라의 위치/회전에 종속적이므로 매 프레임 갱신을 원칙으로 함
-        // [EN] Froxel AP is dependent on camera position/rotation, so it's updated every frame by default
-        this.#dirtySkyView = true;
+        // [KO] 카메라 행렬 변경 감지: AP LUT는 카메라 위치/회전에 종속적이므로 이동 시에만 갱신
+        // [EN] Camera matrix change detection: AP LUT is dependent on camera pos/rot, so update only when moved
+        const camMatrix = rawCamera.viewMatrix;
+        let camMoved = false;
+        for (let i = 0; i < 16; i++) {
+            if (Math.abs(camMatrix[i] - this.#prevCameraMatrix[i]) > 0.0001) {
+                camMoved = true;
+                break;
+            }
+        }
+
+        if (camMoved) {
+            mat4.copy(this.#prevCameraMatrix, camMatrix);
+            this.#dirtySkyView = true;
+        }
 
         if (this.#dirtyUniformBuffer) {
             this.#updateSharedUniformBuffer();
@@ -339,9 +420,15 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#dirtySkyView = false;
         }
 
-        if (this.#dirtyIBL) {
-            this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-            this.#skyAtmosphereIrradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+        if (this.#dirtyIBL && !this.#isUpdatingIBL) {
+            // [KO] IBL 생성은 매우 무거우므로 중복 실행을 방지하기 위해 락(Lock) 메커니즘 적용
+            // [EN] IBL generation is very heavy, so apply a lock mechanism to prevent redundant execution
+            this.#isUpdatingIBL = true;
+            (async () => {
+                await this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+                await this.#skyAtmosphereIrradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+                this.#isUpdatingIBL = false;
+            })();
             this.#dirtyIBL = false;
         }
     }
@@ -364,27 +451,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set seaLevel(v: number) { this.#setParam('seaLevel', v, false, true, true); }
 
     /**
-     * [KO] 태양의 고도 (도, -90 ~ 90)입니다.
-     * [EN] Sun elevation (degrees, -90 to 90).
+     * [KO] 대기 산란의 광원 데이터를 제공할 DirectionalLight를 설정합니다.
+     * [EN] Sets the DirectionalLight that will provide light source data for atmospheric scattering.
      */
-    get sunElevation(): number { return this.#sunElevation; }
-    set sunElevation(v: number) {
-        validateNumberRange(v, -90, 90);
-        this.#sunElevation = v;
-        this.#updateSunDirection();
-        this.#dirtyUniformBuffer = true;
-    }
-
-    /**
-     * [KO] 태양의 방위각 (도, -360 ~ 360)입니다.
-     * [EN] Sun azimuth (degrees, -360 to 360).
-     */
-    get sunAzimuth(): number { return this.#sunAzimuth; }
-    set sunAzimuth(v: number) {
-        validateNumberRange(v, -360, 360);
-        this.#sunAzimuth = v;
-        this.#updateSunDirection();
-        this.#dirtyUniformBuffer = true;
+    get sunSource(): DirectionalLight { return this.#sunSource; }
+    set sunSource(v: DirectionalLight) {
+        this.#sunSource = v;
+        this.#activeSunSource = v;
+        this.#markDirty(false, true, true);
     }
 
     /**
@@ -543,7 +617,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get absorptionTipAltitude(): number { return this.#params.absorptionTipAltitude; }
     set absorptionTipAltitude(v: number) {
-        this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 100));
+        this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(0, 100));
     }
 
     /**
@@ -700,7 +774,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         const {gpuDevice, resourceManager, antialiasingManager} = this.redGPUContext;
-        this.#updateLUTs(view);
+        this.#performUpdate(view);
 
         const {useMSAA, msaaID} = antialiasingManager;
         const depthView = view.viewRenderTextureManager.depthTextureView;
@@ -803,10 +877,23 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     #updateSharedUniformBuffer(): void {
         const {members} = UNIFORM_STRUCT;
+        const dataViewF32 = this.#sharedUniformBuffer.dataViewF32;
+        const dataViewU32 = this.#sharedUniformBuffer.dataViewU32;
+
         for (const [key, member] of Object.entries(members)) {
-            const value = this.#params[key];
-            if (value !== undefined) this.#sharedUniformBuffer.writeOnlyBuffer(member, value);
+            const value = (this.#params as any)[key];
+            if (value !== undefined) {
+                const targetMember = member as any;
+                const offset = targetMember.uniformOffset / 4;
+                if (typeof value === 'number') {
+                    if (targetMember.View === Float32Array) dataViewF32[offset] = value;
+                    else dataViewU32[offset] = value;
+                } else if (value instanceof Float32Array || Array.isArray(value)) {
+                    for (let i = 0; i < value.length; i++) dataViewF32[offset + i] = value[i];
+                }
+            }
         }
+        this.redGPUContext.gpuDevice.queue.writeBuffer(this.#sharedUniformBuffer.gpuBuffer, 0, this.#sharedUniformBuffer.data);
     }
 
     #initShaders(): void {
@@ -888,17 +975,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         });
         this.#cachedComputePipelines.set(key, pipeline);
         return pipeline;
-    }
-
-    #updateSunDirection(): void {
-        const phi = (90 - this.#sunElevation) * (Math.PI / 180);
-        const theta = (this.#sunAzimuth) * (Math.PI / 180);
-        this.#params.sunDirection[0] = Math.sin(phi) * Math.cos(theta);
-        this.#params.sunDirection[1] = Math.cos(phi);
-        this.#params.sunDirection[2] = Math.sin(phi) * Math.sin(theta);
-
-        this.#dirtySkyView = true;
-        this.#dirtyIBL = true;
     }
 }
 
