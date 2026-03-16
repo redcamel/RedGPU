@@ -165,10 +165,10 @@ fn main(inputData:InputData) -> OutputFragment {
         for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
             let u_directionalLightDirection = u_directionalLights[i].direction;
             let u_directionalLightColor = u_directionalLights[i].color;
-            let u_directionalLightLux = u_directionalLights[i].lux;
+            let u_directionalLightIntensity = u_directionalLights[i].intensity;
 
              mixColor += getPhongLight(
-                u_directionalLightColor, u_directionalLightLux * visibility, -normalize(u_directionalLightDirection),
+                u_directionalLightColor, u_directionalLightIntensity * visibility, -normalize(u_directionalLightDirection),
                 N, V, u_shininess, specularSamplerValue,
                 diffuseColor, u_specularColor, u_specularStrength
             );

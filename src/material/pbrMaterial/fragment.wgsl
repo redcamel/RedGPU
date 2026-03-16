@@ -528,7 +528,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var totalDirectLighting = vec3<f32>(0.0);
     if (systemUniforms.useSkyAtmosphere != 1u) {
         for (var i = 0u; i < u_directionalLightCount; i++) {
-            totalDirectLighting += calcLight(u_directionalLights[i].color, u_directionalLights[i].lux * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+            totalDirectLighting += calcLight(u_directionalLights[i].color, u_directionalLights[i].intensity * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
         }
     }
 

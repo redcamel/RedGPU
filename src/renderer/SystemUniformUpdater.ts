@@ -349,8 +349,8 @@ class SystemUniformUpdater {
                         value: light.color.rgbNormalLinear,
                     },
                     {
-                        key: 'lux',
-                        value: light.lux,
+                        key: 'intensity',
+                        value: light.intensity,
                     }
                 ]
             )
