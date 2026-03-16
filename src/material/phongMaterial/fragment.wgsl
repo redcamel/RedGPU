@@ -165,10 +165,10 @@ fn main(inputData:InputData) -> OutputFragment {
         for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
             let u_directionalLightDirection = u_directionalLights[i].direction;
             let u_directionalLightColor = u_directionalLights[i].color;
-            let u_directionalLightIntensity = u_directionalLights[i].intensity;
+            let u_directionalLightLux = u_directionalLights[i].lux;
 
              mixColor += getPhongLight(
-                u_directionalLightColor, u_directionalLightIntensity * visibility, -normalize(u_directionalLightDirection),
+                u_directionalLightColor, u_directionalLightLux * visibility, -normalize(u_directionalLightDirection),
                 N, V, u_shininess, specularSamplerValue,
                 diffuseColor, u_specularColor, u_specularStrength
             );
@@ -245,7 +245,7 @@ fn main(inputData:InputData) -> OutputFragment {
         mixColor = mixColor * textureSample(aoTexture, aoTextureSampler, inputData.uv).rgb * u_aoStrength;
     #redgpu_endIf
     //
-    finalColor = vec4<f32>(mixColor + emissiveColor, resultAlpha);
+    finalColor = vec4<f32>((mixColor + emissiveColor) * u_camera.exposure, resultAlpha);
     #redgpu_if useTint
         finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf

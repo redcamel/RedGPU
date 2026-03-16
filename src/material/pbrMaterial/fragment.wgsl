@@ -528,7 +528,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var totalDirectLighting = vec3<f32>(0.0);
     if (systemUniforms.useSkyAtmosphere != 1u) {
         for (var i = 0u; i < u_directionalLightCount; i++) {
-            totalDirectLighting += calcLight(u_directionalLights[i].color, u_directionalLights[i].intensity * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+            totalDirectLighting += calcLight(u_directionalLights[i].color, u_directionalLights[i].lux * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
         }
     }
 
@@ -772,11 +772,11 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_endIf
 
         let environmentIntensity = 1.0;
-        let surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter;
+        let surfaceColor = (totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter) * u_camera.exposure;
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
     } else {
         let ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * occlusionParameter;
-        finalColor = vec4<f32>(totalDirectLighting + ambientContribution, resultAlpha);
+        finalColor = vec4<f32>((totalDirectLighting + ambientContribution) * u_camera.exposure, resultAlpha);
     }
 
     // [KO] 에미시브 합산 [EN] Emissive addition
@@ -784,7 +784,7 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if emissiveTexture
         emissiveSamplerColor = textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
     #redgpu_endIf
-    finalColor += vec4<f32>(emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0.0);
+    finalColor += vec4<f32>(emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength * u_camera.exposure, 0.0);
 
     // [KO] 컷오프 판단 [EN] Cut-off check
     #redgpu_if useCutOff

@@ -94,6 +94,27 @@ class PerspectiveCamera {
     #farClipping: number = 100000;
 
     /**
+     * [KO] ISO 감도
+     * [EN] ISO sensitivity
+     * @defaultValue 100
+     */
+    #iso: number = 100;
+
+    /**
+     * [KO] 조리개 값 (f-number)
+     * [EN] Aperture (f-number)
+     * @defaultValue 16
+     */
+    #aperture: number = 16;
+
+    /**
+     * [KO] 셔터 스피드 (초)
+     * [EN] Shutter speed (seconds)
+     * @defaultValue 1/125
+     */
+    #shutterSpeed: number = 1 / 125;
+
+    /**
      * [KO] 카메라 이름
      * [EN] Camera name
      */
@@ -109,6 +130,75 @@ class PerspectiveCamera {
      * ```
      */
     constructor() {
+    }
+
+    /**
+     * [KO] ISO 감도를 반환합니다.
+     * [EN] Returns the ISO sensitivity.
+     * @returns
+     * [KO] ISO 감도
+     * [EN] ISO sensitivity
+     */
+    get iso(): number {
+        return this.#iso;
+    }
+
+    /**
+     * [KO] ISO 감도를 설정합니다.
+     * [EN] Sets the ISO sensitivity.
+     * @param value -
+     * [KO] ISO 감도 (기본값: 100)
+     * [EN] ISO sensitivity (default: 100)
+     */
+    set iso(value: number) {
+        validateNumber(value);
+        this.#iso = value;
+    }
+
+    /**
+     * [KO] 조리개 값을 반환합니다.
+     * [EN] Returns the aperture value.
+     * @returns
+     * [KO] 조리개 값
+     * [EN] Aperture value
+     */
+    get aperture(): number {
+        return this.#aperture;
+    }
+
+    /**
+     * [KO] 조리개 값을 설정합니다.
+     * [EN] Sets the aperture value.
+     * @param value -
+     * [KO] 조리개 값 (f-number, 기본값: 16)
+     * [EN] Aperture value (f-number, default: 16)
+     */
+    set aperture(value: number) {
+        validateNumber(value);
+        this.#aperture = value;
+    }
+
+    /**
+     * [KO] 셔터 스피드를 반환합니다.
+     * [EN] Returns the shutter speed.
+     * @returns
+     * [KO] 셔터 스피드
+     * [EN] Shutter speed
+     */
+    get shutterSpeed(): number {
+        return this.#shutterSpeed;
+    }
+
+    /**
+     * [KO] 셔터 스피드를 설정합니다.
+     * [EN] Sets the shutter speed.
+     * @param value -
+     * [KO] 셔터 스피드 (초 단위, 기본값: 1/125)
+     * [EN] Shutter speed (seconds, default: 1/125)
+     */
+    set shutterSpeed(value: number) {
+        validateNumber(value);
+        this.#shutterSpeed = value;
     }
 
     /**

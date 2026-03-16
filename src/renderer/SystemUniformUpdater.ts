@@ -44,6 +44,15 @@ class SystemUniformUpdater {
     ) {
         const {viewMatrix, position} = camera
         const camera2DYn = camera instanceof Camera2D;
+
+        // EV100 및 노출 계산
+        let exposure = 1.0;
+        if (!camera2DYn) {
+            const cam = camera as PerspectiveCamera;
+            const ev100 = Math.log2((cam.aperture * cam.aperture) / cam.shutterSpeed) - Math.log2(cam.iso / 100);
+            exposure = 1.0 / (1.2 * Math.pow(2.0, ev100));
+        }
+
         updateSystemUniformData(
             cameraMembers, uniformDataF32, uniformDataU32,
             [
@@ -71,6 +80,10 @@ class SystemUniformUpdater {
                     key: 'fieldOfView',
                     //@ts-ignore
                     value: camera.fieldOfView * Math.PI / 180,
+                },
+                {
+                    key: 'exposure',
+                    value: exposure,
                 }
             ]
         )
@@ -336,8 +349,8 @@ class SystemUniformUpdater {
                         value: light.color.rgbNormalLinear,
                     },
                     {
-                        key: 'intensity',
-                        value: light.intensity,
+                        key: 'lux',
+                        value: light.lux,
                     }
                 ]
             )
