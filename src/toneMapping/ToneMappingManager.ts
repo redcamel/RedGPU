@@ -74,8 +74,12 @@ class ToneMappingManager {
         return this.#exposure;
     }
 
-    /** [KO] 노출값(Exposure)을 설정합니다. (기본값: 1.0) [EN] Sets the exposure value. (Default: 1.0) */
+    /**
+     * @deprecated [KO] ToneMappingManager의 exposure는 더 이상 권장되지 않습니다. 물리 기반 렌더링을 위해 Camera의 aperture, shutterSpeed, iso를 사용하십시오.
+     * [EN] ToneMappingManager.exposure is deprecated. Use Camera's aperture, shutterSpeed, and iso for physically based rendering instead.
+     */
     set exposure(value: number) {
+        console.warn("[RedGPU] ToneMappingManager.exposure is deprecated. Use Camera's physical properties (aperture, shutterSpeed, iso) to control exposure instead.");
         validatePositiveNumberRange(value, 0)
         this.#exposure = value;
         if (this.#toneMapping) this.#toneMapping.exposure = value;
