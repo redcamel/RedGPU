@@ -30,6 +30,46 @@ declare class PerspectiveCamera {
      */
     constructor();
     /**
+     * [KO] 물리적 노출 지수(EV100)를 반환합니다.
+     * [EN] Returns the physical exposure value (EV100).
+     */
+    get ev100(): number;
+    /**
+     * [KO] 물리적 노출 배율(Exposure)을 반환합니다.
+     * [EN] Returns the physical exposure multiplier.
+     */
+    get exposure(): number;
+    /**
+     * [KO] 조리개(f-stop) 값을 반환합니다.
+     * [EN] Returns the aperture (f-stop) value.
+     */
+    get aperture(): number;
+    /**
+     * [KO] 조리개(f-stop) 값을 설정합니다.
+     * [EN] Sets the aperture (f-stop) value.
+     */
+    set aperture(value: number);
+    /**
+     * [KO] 셔터 속도(초 단위)를 반환합니다.
+     * [EN] Returns the shutter speed (in seconds).
+     */
+    get shutterSpeed(): number;
+    /**
+     * [KO] 셔터 속도(초 단위)를 설정합니다.
+     * [EN] Sets the shutter speed (in seconds).
+     */
+    set shutterSpeed(value: number);
+    /**
+     * [KO] 센서 감도(ISO)를 반환합니다.
+     * [EN] Returns the sensor sensitivity (ISO).
+     */
+    get iso(): number;
+    /**
+     * [KO] 센서 감도(ISO)를 설정합니다.
+     * [EN] Sets the sensor sensitivity (ISO).
+     */
+    set iso(value: number);
+    /**
      * [KO] X축 회전값을 반환합니다. (라디안)
      * [EN] Returns the X rotation value. (radians)
      *

@@ -1,0 +1,11 @@
+{
+  "general": {
+    "previewFeatures": true
+  },
+  "ui": {
+    "showModelInfoInChat": true
+  },
+  "model": {
+    "name": "auto"
+  }
+}
