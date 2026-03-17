@@ -3,8 +3,10 @@
  * [EN] Provides core base classes and common interfaces for the camera system.
  * @packageDocumentation
  */
+import ACamera from "./ACamera";
 import AController from "./AController";
 
 export {
+    ACamera,
     AController
 }

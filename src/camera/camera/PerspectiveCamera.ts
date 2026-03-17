@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
+import ACamera from "../core/ACamera";
 
 /**
  * [KO] 원근 투영을 사용하는 카메라입니다.
@@ -20,13 +20,7 @@ import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
  * ```
  * @category Camera
  */
-class PerspectiveCamera {
-    /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number;
-
+class PerspectiveCamera extends ACamera {
     /**
      * [KO] up 벡터 (기본값 [0, 1, 0])
      * [EN] Up vector (default [0, 1, 0])
@@ -94,48 +88,6 @@ class PerspectiveCamera {
     #farClipping: number = 100000;
 
     /**
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    #name: string;
-
-    /**
-     * [KO] 조리개 (f-stop)
-     * [EN] Aperture (f-stop)
-     */
-    #aperture: number = 16.0;
-
-    /**
-     * [KO] 셔터 속도 (초)
-     * [EN] Shutter speed (seconds)
-     */
-    #shutterSpeed: number = 1 / 125;
-
-    /**
-     * [KO] 센서 감도 (ISO)
-     * [EN] Sensor sensitivity (ISO)
-     */
-    #iso: number = 100;
-
-    /**
-     * [KO] 캐시된 EV100
-     * [EN] Cached EV100
-     */
-    #ev100: number = 0;
-
-    /**
-     * [KO] 캐시된 물리 노출 배율
-     * [EN] Cached physical exposure multiplier
-     */
-    #exposure: number = 0;
-
-    /**
-     * [KO] 노출 값이 다시 계산되어야 하는지 여부
-     * [EN] Whether the exposure needs to be recalculated
-     */
-    #exposureDirty: boolean = true;
-
-    /**
      * [KO] PerspectiveCamera 인스턴스를 생성합니다.
      * [EN] Creates an instance of PerspectiveCamera.
      *
@@ -145,87 +97,7 @@ class PerspectiveCamera {
      * ```
      */
     constructor() {
-    }
-
-    /**
-     * [KO] 물리적 노출 지수(EV100)를 반환합니다.
-     * [EN] Returns the physical exposure value (EV100).
-     */
-    get ev100(): number {
-        if (this.#exposureDirty) this.#updateExposure();
-        return this.#ev100;
-    }
-
-    /**
-     * [KO] 물리적 노출 배율(Exposure)을 반환합니다.
-     * [EN] Returns the physical exposure multiplier.
-     */
-    get exposure(): number {
-        if (this.#exposureDirty) this.#updateExposure();
-        return this.#exposure;
-    }
-
-    /**
-     * [KO] 조리개(f-stop) 값을 반환합니다.
-     * [EN] Returns the aperture (f-stop) value.
-     */
-    get aperture(): number {
-        return this.#aperture;
-    }
-
-    /**
-     * [KO] 조리개(f-stop) 값을 설정합니다.
-     * [EN] Sets the aperture (f-stop) value.
-     */
-    set aperture(value: number) {
-        validateNumber(value);
-        if (this.#aperture === value) return;
-        this.#aperture = value;
-        this.#exposureDirty = true;
-    }
-
-    /**
-     * [KO] 셔터 속도(초 단위)를 반환합니다.
-     * [EN] Returns the shutter speed (in seconds).
-     */
-    get shutterSpeed(): number {
-        return this.#shutterSpeed;
-    }
-
-    /**
-     * [KO] 셔터 속도(초 단위)를 설정합니다.
-     * [EN] Sets the shutter speed (in seconds).
-     */
-    set shutterSpeed(value: number) {
-        validateNumber(value);
-        if (this.#shutterSpeed === value) return;
-        this.#shutterSpeed = value;
-        this.#exposureDirty = true;
-    }
-
-    /**
-     * [KO] 센서 감도(ISO)를 반환합니다.
-     * [EN] Returns the sensor sensitivity (ISO).
-     */
-    get iso(): number {
-        return this.#iso;
-    }
-
-    /**
-     * [KO] 센서 감도(ISO)를 설정합니다.
-     * [EN] Sets the sensor sensitivity (ISO).
-     */
-    set iso(value: number) {
-        validateNumber(value);
-        if (this.#iso === value) return;
-        this.#iso = value;
-        this.#exposureDirty = true;
-    }
-
-    #updateExposure(): void {
-        this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
-        this.#exposure = 1 / (1.2 * Math.pow(2, this.#ev100));
-        this.#exposureDirty = false;
+        super();
     }
 
     /**
@@ -266,7 +138,7 @@ class PerspectiveCamera {
 
     /**
      * [KO] Y축 회전값을 설정합니다. (라디안)
-     * [EN] Sets the Y rotation value. (radians)
+     * [EN] Sets the X rotation value. (radians)
      *
      * @param value -
      * [KO] 설정할 회전값
@@ -290,7 +162,7 @@ class PerspectiveCamera {
 
     /**
      * [KO] Z축 회전값을 설정합니다. (라디안)
-     * [EN] Sets the Z rotation value. (radians)
+     * [EN] Sets the X rotation value. (radians)
      *
      * @param value -
      * [KO] 설정할 회전값
@@ -373,31 +245,6 @@ class PerspectiveCamera {
     set farClipping(value: number) {
         validateNumber(value);
         this.#farClipping = value;
-    }
-
-    /**
-     * [KO] 카메라 이름을 반환합니다.
-     * [EN] Returns the camera name.
-     *
-     * @returns
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 카메라 이름을 설정합니다.
-     * [EN] Sets the camera name.
-     *
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**
