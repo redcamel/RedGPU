@@ -25,7 +25,7 @@ class AutoExposure {
     #adaptationBindGroupLayout1: GPUBindGroupLayout;
     
     #uniformBuffer: UniformBuffer;
-    #speed: number = 1.0;
+    #speed: number = 3.0;
     #adjustmentSpeedUp: number = 2.0;
     #adjustmentSpeedDown: number = 1.0;
     #targetLuminance: number = 0.18;

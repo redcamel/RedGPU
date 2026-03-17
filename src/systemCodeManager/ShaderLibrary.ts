@@ -3003,19 +3003,17 @@ export namespace SkyAtmosphereLibrary {
      * }
      * 
      * // [KO] IBL 및 Reflection용 대기 휘도(Radiance)를 통합 평가합니다.
-     * // mode: 0 = Irradiance, 1 = ReflectionSoftCut, 2 = ReflectionNoSoftCut
      * fn evaluateIBLRadiance(
      *     viewDir: vec3<f32>, 
      *     params: SkyAtmosphere, 
-     *     transmittanceTexture: texture_2d<f32>, 
-     *     multiScatTexture: texture_2d<f32>, 
-     *     skyViewTexture: texture_2d<f32>, 
-     *     atmosphereSampler: sampler, 
-     *     mode: u32
+     *     transmittanceLUT: texture_2d<f32>, 
+     *     multiScatLUT: texture_2d<f32>, 
+     *     skyViewLUT: texture_2d<f32>, 
+     *     skyAtmosphereSampler: sampler
      * ) -> vec3<f32> {
      *     let r = params.bottomRadius;
-     *     let camH = 0.0;
-     *     let atmH = params.atmosphereHeight;
+     *     let viewHeight = 0.0;
+     *     let atmosphereHeight = params.atmosphereHeight;
      *     let sunDir = normalize(params.sunDirection);
      * 
      *     let IBL_SUN_DAMP = select(1.0, 0.5, mode == 0u);

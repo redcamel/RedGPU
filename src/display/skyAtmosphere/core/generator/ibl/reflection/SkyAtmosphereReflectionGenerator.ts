@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
 import reflectionShaderCode_wgsl from "./skyAtmosphereReflectionShaderCode.wgsl";
-import reflectionCombineShaderCode_wgsl from "./skyAtmosphereReflectionCombineShaderCode.wgsl";
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
@@ -12,7 +11,6 @@ import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 import AtmosphereShaderLibrary from "../../../AtmosphereShaderLibrary";
 
 const REFLECTION_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator', reflectionShaderCode_wgsl, AtmosphereShaderLibrary);
-const COMBINE_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_Combine', reflectionCombineShaderCode_wgsl, AtmosphereShaderLibrary);
 
 /**
  * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사 큐브맵을 생성하는 클래스입니다.
@@ -31,18 +29,9 @@ const COMBINE_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator_Combin
 class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 	#sourceCubeTexture: GPUTexture;
 	#sourceCubeTextureView: GPUTextureView;
-	#prefilteredTextureSoftCut: DirectCubeTexture;
-	#prefilteredTextureNoSoftCut: DirectCubeTexture;
-	#prefilteredTextureCombined: DirectCubeTexture;
-	#combinedCubeTexture: GPUTexture;
+	#prefilteredTexture: DirectCubeTexture;
 	#reflectionPipeline: GPUComputePipeline;
-	#combinePipeline: GPUComputePipeline;
-	#combineUniformBuffer: UniformBuffer;
-	#reflectionParamsUniformBuffer: UniformBuffer;
-
-	#reflectionBindGroupSoftCut: GPUBindGroup;
-	#reflectionBindGroupNoSoftCut: GPUBindGroup;
-	#combineBindGroups: GPUBindGroup[] = [];
+	#reflectionBindGroup: GPUBindGroup;
 
 	/**
 	 * [KO] SkyAtmosphereReflectionGenerator 인스턴스를 초기화합니다.
@@ -76,7 +65,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 	 * [EN] Returns the resulting pre-filtered cubemap texture.
 	 */
 	get prefilteredTexture(): DirectCubeTexture {
-		return this.#prefilteredTextureCombined;
+		return this.#prefilteredTexture;
 	}
 
 	/**
@@ -84,7 +73,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 	 * [EN] Returns the generated reflection cubemap (pre-filtered result).
 	 */
 	get lutTexture(): DirectCubeTexture {
-		return this.#prefilteredTextureCombined;
+		return this.#prefilteredTexture;
 	}
 
 	/**
@@ -107,34 +96,15 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 	 */
 	// @ts-ignore
 	async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
-		const {gpuDevice} = this.redGPUContext;
-
 		// [KO] 바인드 그룹이 없는 경우 초기화합니다.
 		// [EN] Initialize bind groups if they don't exist.
-		if (!this.#reflectionBindGroupSoftCut) {
-			this.#reflectionBindGroupSoftCut = this.#createReflectionBindGroup(transmittance, multiScat, skyView);
-			this.#reflectionBindGroupNoSoftCut = this.#createReflectionBindGroup(transmittance, multiScat, skyView);
+		if (!this.#reflectionBindGroup) {
+			this.#reflectionBindGroup = this.#createReflectionBindGroup(transmittance, multiScat, skyView);
 		}
 
-		// [KO] SoftCut 반사 패스 (모드 1u)
-		// [EN] SoftCut reflection pass (mode 1u)
-		this.#reflectionParamsUniformBuffer.dataViewU32[0] = 1;
-		gpuDevice.queue.writeBuffer(this.#reflectionParamsUniformBuffer.gpuBuffer, 0, this.#reflectionParamsUniformBuffer.data);
-		await this.#processReflectionPass(this.#reflectionPipeline, this.#reflectionBindGroupSoftCut, this.#prefilteredTextureSoftCut);
-
-		// [KO] NoSoftCut 반사 패스 (모드 2u)
-		// [EN] NoSoftCut reflection pass (mode 2u)
-		this.#reflectionParamsUniformBuffer.dataViewU32[0] = 2;
-		gpuDevice.queue.writeBuffer(this.#reflectionParamsUniformBuffer.gpuBuffer, 0, this.#reflectionParamsUniformBuffer.data);
-		await this.#processReflectionPass(this.#reflectionPipeline, this.#reflectionBindGroupNoSoftCut, this.#prefilteredTextureNoSoftCut);
-
-		// [KO] 컴바인 바인드 그룹 초기화 (뷰가 준비된 시점)
-		if (this.#combineBindGroups.length === 0) {
-			this.#initCombineBindGroups();
-		}
-
-		// [KO] 두 결과물을 거칠기에 따라 혼합
-		this.#combinePrefilteredTextures();
+		// [KO] 반사 패스 실행
+		// [EN] Execute reflection pass
+		await this.#processReflectionPass(this.#reflectionPipeline, this.#reflectionBindGroup, this.#prefilteredTexture);
 	}
 
 	/**
@@ -148,8 +118,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 			{binding: 2, resource: this.sampler.gpuSampler},
 			{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
 			{binding: 4, resource: transmittance.gpuTextureView},
-			{binding: 5, resource: skyView.gpuTextureView},
-			{binding: 6, resource: {buffer: this.#reflectionParamsUniformBuffer.gpuBuffer}}
+			{binding: 5, resource: skyView.gpuTextureView}
 		]);
 	}
 
@@ -186,47 +155,10 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 			mipLevelCount: 1
 		});
 
-		this.#prefilteredTextureSoftCut = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_SoftCut_LUTTexture_${createUUID()}`);
-		this.#prefilteredTextureNoSoftCut = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_NoSoftCut_LUTTexture_${createUUID()}`);
-
-		this.#combinedCubeTexture = gpuDevice.createTexture({
-			label: 'SkyAtmosphere_Reflection_Combined_CubeTexture',
-			size: [this.width, this.height, 6],
-			format: 'rgba16float',
-			usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
-			mipLevelCount: mipLevelCount
-		});
-		this.#prefilteredTextureCombined = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_Combined_LUTTexture_${createUUID()}`, this.#combinedCubeTexture);
-
-		// Uniform Buffers
-		this.#combineUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(16), 'SkyAtmosphere_Reflection_Combine_UniformBuffer');
-		this.#reflectionParamsUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(32), 'SkyAtmosphere_Reflection_Params_UniformBuffer');
+		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_LUTTexture_${createUUID()}`);
 
 		// Pipelines
 		this.#reflectionPipeline = this.createComputePipeline('Base', REFLECTION_SHADER_INFO.defaultSource);
-		this.#combinePipeline = this.createComputePipeline('Combine', COMBINE_SHADER_INFO.defaultSource);
-	}
-
-	#initCombineBindGroups(): void {
-		const mipLevelCount = getMipLevelCount(this.width, this.height);
-
-		for (let mip = 0; mip < mipLevelCount; mip++) {
-			const outputView = this.#combinedCubeTexture.createView({
-				dimension: '2d-array',
-				baseMipLevel: mip,
-				mipLevelCount: 1,
-				baseArrayLayer: 0,
-				arrayLayerCount: 6
-			});
-
-			this.#combineBindGroups[mip] = this.createBindGroup(`SkyAtmosphere_Reflection_BindGroup_Combine_Mip_${mip}`, this.#combinePipeline, [
-				{binding: 0, resource: this.#prefilteredTextureSoftCut.gpuTextureView},
-				{binding: 1, resource: this.#prefilteredTextureNoSoftCut.gpuTextureView},
-				{binding: 2, resource: this.sampler.gpuSampler},
-				{binding: 3, resource: outputView},
-				{binding: 4, resource: {buffer: this.#combineUniformBuffer.gpuBuffer}}
-			]);
-		}
 	}
 
 	#computeRender(
@@ -251,26 +183,6 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 		passEncoder.end();
 
 		gpuDevice.queue.submit([commandEncoder.finish()]);
-	}
-
-	#combinePrefilteredTextures(): void {
-		const {gpuDevice} = this.redGPUContext;
-		const mipLevelCount = getMipLevelCount(this.width, this.height);
-
-		for (let mip = 0; mip < mipLevelCount; mip++) {
-			const mipWidth = Math.max(1, this.width >> mip);
-			const mipHeight = Math.max(1, this.height >> mip);
-			const roughness = mipLevelCount > 1 ? mip / (mipLevelCount - 1) : 0.0;
-
-			const uniformView = this.#combineUniformBuffer.dataViewF32;
-			uniformView[0] = roughness;
-			uniformView[1] = mip;
-			gpuDevice.queue.writeBuffer(this.#combineUniformBuffer.gpuBuffer, 0, this.#combineUniformBuffer.data);
-
-			this.#computeRender(this.#combinePipeline, this.#combineBindGroups[mip], [8, 8, 1], mipWidth, mipHeight, 6);
-		}
-
-		this.#prefilteredTextureCombined.notifyUpdate();
 	}
 }
 

@@ -6,15 +6,6 @@
 @group(0) @binding(4) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(5) var skyViewTexture: texture_2d<f32>;
 
-struct ReflectionParams {
-    mode: u32,
-    pad0: u32,
-    pad1: u32,
-    pad2: u32,
-    _pad: vec4<u32>
-}
-@group(0) @binding(6) var<uniform> reflectionParams: ReflectionParams;
-
 #redgpu_include math.PI
 #redgpu_include math.PI2
 #redgpu_include math.DEG_TO_RAD
@@ -36,9 +27,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
     }
 
-    // [KO] reflectionParams.mode를 사용하여 SoftCut(1u) 또는 NoSoftCut(2u) 결정
-    // [EN] Determine SoftCut (1u) or NoSoftCut (2u) using reflectionParams.mode
-    let radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler, reflectionParams.mode);
+    // [KO] 태양 디스크 및 스펙큘러 로브를 제외한 대기 산란 휘도만 평가
+    // [EN] Evaluate only atmospheric scattering radiance excluding sun disk and specular lobe
+    let radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
 
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }

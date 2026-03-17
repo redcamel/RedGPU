@@ -442,23 +442,18 @@ fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
 }
 
 // [KO] IBL 및 Reflection용 대기 휘도(Radiance)를 통합 평가합니다.
-// mode: 0 = Irradiance, 1 = ReflectionSoftCut, 2 = ReflectionNoSoftCut
 fn evaluateIBLRadiance(
     viewDir: vec3<f32>, 
     params: SkyAtmosphere, 
     transmittanceLUT: texture_2d<f32>, 
     multiScatLUT: texture_2d<f32>, 
     skyViewLUT: texture_2d<f32>, 
-    skyAtmosphereSampler: sampler, 
-    mode: u32
+    skyAtmosphereSampler: sampler
 ) -> vec3<f32> {
     let r = params.bottomRadius;
     let viewHeight = 0.0;
     let atmosphereHeight = params.atmosphereHeight;
     let sunDir = normalize(params.sunDirection);
-
-    let IBL_SUN_DAMP = select(1.0, 0.5, mode == 0u);
-    let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunDir.y, atmosphereHeight);
 
     let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, params.bottomRadius);
@@ -483,8 +478,7 @@ fn evaluateIBLRadiance(
         let inScattering = skySample.rgb;
 
         let transToEdge = vec3<f32>(skySample.a);
-        let glowHalo = select(0.80, 0.65, mode == 1u);
-        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, glowHalo) * IBL_SUN_DAMP;
+        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.80);
 
         radiance = groundRadiance * viewTransmittance + inScattering + mieGlowAmount;
     } else {
@@ -493,42 +487,8 @@ fn evaluateIBLRadiance(
         radiance = skySample.rgb;
 
         let transToViewEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight);
-        let glowHalo = select(0.80, 0.65, mode == 1u);
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, glowHalo) * IBL_SUN_DAMP;
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.80);
         radiance += mieGlowStable;
-
-        if (mode == 0u) {
-            radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, sunTrans) * IBL_SUN_DAMP;
-        } else {
-            let viewSun = max(0.0, dot(viewDir, sunDir));
-            if (mode == 1u) {
-                // SoftCut
-                let sunRad = 0.25 * DEG_TO_RAD;
-                let lobeHalfAngle = clamp(sunRad, 0.002, 0.09);
-                let sunLobe = getSpecularSunLobe(viewSun, lobeHalfAngle);
-                radiance += sunTrans * sunLobe;
-
-                let cosCore = cos(lobeHalfAngle * 0.9);
-                let cosEdge = cos(lobeHalfAngle * 1.2);
-                let lobeMask = smoothstep(cosEdge, cosCore, viewSun);
-                radiance = mix(skySample.rgb, radiance, lobeMask);
-            } else if (mode == 2u) {
-                // NoSoftCut
-                let sunRad = 5.0 * DEG_TO_RAD;
-                let lobeHalfAngle = clamp(sunRad, 0.1, 0.6);
-                let sunLobe = getSpecularSunLobe(viewSun, lobeHalfAngle);
-                radiance += sunTrans * sunLobe;
-            }
-        }
-    }
-
-    if (mode == 0u) {
-        let finalLuma = getLuminance(radiance);
-        let finalThreshold = 50.0; 
-        if (finalLuma > finalThreshold) {
-            let softLuma = finalThreshold + (finalLuma - finalThreshold) / (1.0 + (finalLuma - finalThreshold) / finalThreshold);
-            radiance = radiance * (softLuma / finalLuma);
-        }
     }
 
     return radiance;

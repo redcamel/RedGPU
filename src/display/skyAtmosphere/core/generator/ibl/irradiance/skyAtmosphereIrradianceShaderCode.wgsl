@@ -51,7 +51,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         // [KO] 텍스처 샘플링 대신 대기 휘도를 직접 계산 (완벽한 독립화)
         // [EN] Directly calculate atmosphere radiance instead of texture sampling (complete independence)
-        irradiance += evaluateIBLRadiance(worldSample, params, transmittanceTexture, multiScatTexture, skyViewTexture, skyAtmosphereSampler, 0u);
+        irradiance += evaluateIBLRadiance(worldSample, params, transmittanceTexture, multiScatTexture, skyViewTexture, skyAtmosphereSampler);
         totalWeight += 1.0;
     }
 
