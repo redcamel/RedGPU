@@ -26,9 +26,9 @@ class PointLight extends ABaseLight {
     /**
      * [KO] 광원의 영향을 미치는 반경입니다.
      * [EN] Radius affected by the light.
-     * @defaultValue 1
+     * @defaultValue 10
      */
-    #radius: number = 1;
+    #radius: number = 10;
     /**
      * [KO] 광원의 X 좌표입니다.
      * [EN] X coordinate of the light.
@@ -55,10 +55,10 @@ class PointLight extends ABaseLight {
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffffff')
      * [EN] Color of the light (hex string, e.g., '#ffffff')
      * @param intensity -
-     * [KO] 광원의 세기 (기본값: 1)
-     * [EN] Intensity of the light (default: 1)
+     * [KO] 광원의 세기 (기본값: 1000 Lumen)
+     * [EN] Intensity of the light (default: 1000 Lumen)
      */
-    constructor(color: string = '#fff', intensity: number = 1) {
+    constructor(color: string = '#fff', intensity: number = 1000) {
         super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
     }
 
