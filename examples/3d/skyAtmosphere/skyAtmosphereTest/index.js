@@ -28,6 +28,10 @@ RedGPU.init(
         skyAtmosphere.sunAzimuth = 0;
         view.skyAtmosphere = skyAtmosphere;
 
+        // 2. 디렉셔널 라이트 추가
+        const directionalLight = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#fff', 10);
+        directionalLight.enableDebugger = true;
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         // 4. 모델 로드
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf');

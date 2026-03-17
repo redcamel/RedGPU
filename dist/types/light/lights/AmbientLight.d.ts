@@ -20,8 +20,8 @@ declare class AmbientLight extends ABaseLight {
      * [KO] 광원의 색상 (기본값: 연한 하늘색 #ADD8E6)
      * [EN] Color of the light (default: light sky blue #ADD8E6)
      * @param intensity -
-     * [KO] 광원의 세기 (기본값: 0.1)
-     * [EN] Intensity of the light (default: 0.1)
+     * [KO] 광원의 세기 (기본값: 0)
+     * [EN] Intensity of the light (default: 0)
      */
     constructor(color?: string, intensity?: number);
 }

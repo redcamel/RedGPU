@@ -90,6 +90,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         mieGlow: 0.5,
         mieHalo: 0.8,
         sunDirection: new Float32Array([0, 1, 0]),
+        sunElevation: 90.0,
+        sunAzimuth: 0.0,
         cameraHeight: 0.001,
         useGround: 1.0,
         showGround: 1.0,
@@ -334,6 +336,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         };
 
         const source = findSource();
+        this.#activeSunSource = source;
         if (source) {
             const dir = source.direction;
             const currentDir = this.#params.sunDirection;
@@ -351,6 +354,12 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 currentDir[0] = targetDirX;
                 currentDir[1] = targetDirY;
                 currentDir[2] = targetDirZ;
+
+                // [KO] 광원 방향이 변경되었으므로 구면 좌표계(고도, 방위각) 동기화
+                // [EN] Since light direction changed, sync spherical coordinates (elevation, azimuth)
+                this.#params.sunElevation = Math.asin(currentDir[1]) * 180 / Math.PI;
+                this.#params.sunAzimuth = Math.atan2(currentDir[2], currentDir[0]) * 180 / Math.PI;
+
                 this.#markDirty(false, true, true);
             }
 
@@ -435,6 +444,49 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get seaLevel(): number { return this.#params.seaLevel; }
     set seaLevel(v: number) { this.#setParam('seaLevel', v, false, true, true); }
+
+    /**
+     * [KO] 태양의 고도(Elevation, 도)입니다.
+     * [EN] Sun elevation (degrees).
+     */
+    get sunElevation(): number { return this.#params.sunElevation; }
+    set sunElevation(v: number) {
+        this.#params.sunElevation = v;
+        this.#updateDirectionFromSpherical();
+    }
+
+    /**
+     * [KO] 태양의 방위각(Azimuth, 도)입니다.
+     * [EN] Sun azimuth (degrees).
+     */
+    get sunAzimuth(): number { return this.#params.sunAzimuth; }
+    set sunAzimuth(v: number) {
+        this.#params.sunAzimuth = v;
+        this.#updateDirectionFromSpherical();
+    }
+
+    #updateDirectionFromSpherical() {
+        const el = this.#params.sunElevation * Math.PI / 180;
+        const az = this.#params.sunAzimuth * Math.PI / 180;
+
+        const cosEl = Math.cos(el);
+        const x = cosEl * Math.cos(az);
+        const y = Math.sin(el);
+        const z = cosEl * Math.sin(az);
+
+        const currentDir = this.#params.sunDirection;
+        currentDir[0] = x;
+        currentDir[1] = y;
+        currentDir[2] = z;
+
+        // [KO] 활성 광원이 존재하면 해당 광원의 방향도 업데이트 (광원 방향 = -태양 방향)
+        // [EN] If an active light source exists, update its direction as well (light direction = -sun direction)
+        if (this.#activeSunSource) {
+            this.#activeSunSource.direction = [-x, -y, -z];
+        }
+
+        this.#markDirty(false, true, true);
+    }
 
     /**
      * [KO] 대기 산란의 광원 데이터를 제공할 DirectionalLight를 설정합니다.
