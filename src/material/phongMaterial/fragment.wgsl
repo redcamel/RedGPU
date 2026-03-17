@@ -142,9 +142,10 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
     var mixColor:vec3<f32> = vec3<f32>(0.0);
 
-    // 암비안트 라이트 처리 추가
+    // [KO] 암비안트 라이트 처리 (에너지 보존을 위해 1/PI 적용)
+    // [EN] Ambient light processing (apply 1/PI for energy conservation)
     let ambientContribution = u_ambientLightColor * u_ambientLightIntensity;
-    let ambientDiffuse = diffuseColor * ambientContribution;
+    let ambientDiffuse = diffuseColor * ambientContribution * (1.0 / PI);
     mixColor += ambientDiffuse;
 
     var visibility:f32 = 1.0;
@@ -220,10 +221,10 @@ fn main(inputData:InputData) -> OutputFragment {
              );
          }
 
-         // [KO] getPhongLight를 사용하여 포인트/스폿 라이트 계산
-         // [EN] Calculate point/spot light using getPhongLight
+         // [KO] getPhongLight를 사용하여 포인트/스폿 라이트 계산 (Lumen -> Illuminance 변환 포함)
+         // [EN] Calculate point/spot light using getPhongLight (including Lumen to Illuminance conversion)
          mixColor += getPhongLight(
-             u_clusterLightColor, u_clusterLightIntensity * finalAttenuation, L,
+             u_clusterLightColor, (u_clusterLightIntensity * finalAttenuation) / (4.0 * PI), L,
              N, V, u_shininess, specularSamplerValue,
              diffuseColor, u_specularColor, u_specularStrength
          );
@@ -245,7 +246,9 @@ fn main(inputData:InputData) -> OutputFragment {
         mixColor = mixColor * textureSample(aoTexture, aoTextureSampler, inputData.uv).rgb * u_aoStrength;
     #redgpu_endIf
     //
-    finalColor = vec4<f32>(mixColor + emissiveColor, resultAlpha);
+    // [KO] 최종 조명 결과에 카메라 노출(Exposure) 적용
+    // [EN] Apply camera exposure to the final lighting result
+    finalColor = vec4<f32>((mixColor + emissiveColor) * u_camera.exposure, resultAlpha);
     #redgpu_if useTint
         finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
