@@ -1,6 +1,5 @@
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import PerspectiveCamera from "./PerspectiveCamera";
 
 /**
@@ -21,18 +20,6 @@ import PerspectiveCamera from "./PerspectiveCamera";
  * @category Camera
  */
 class OrthographicCamera extends PerspectiveCamera {
-    /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number;
-
-    /**
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    #name: string;
-
     /**
      * [KO] 투영 상단
      * [EN] Projection top
@@ -263,31 +250,6 @@ class OrthographicCamera extends PerspectiveCamera {
     set maxZoom(value: number) {
         validateNumberRange(value, 0.01);
         this.#maxZoom = value;
-    }
-
-    /**
-     * [KO] 카메라 이름을 반환합니다.
-     * [EN] Returns the camera name.
-     *
-     * @returns
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 카메라 이름을 설정합니다.
-     * [EN] Sets the camera name.
-     *
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**
