@@ -69,15 +69,15 @@ class SpotLight extends ABaseLight {
     /**
      * [KO] 내부 컷오프 각도 (degree)입니다.
      * [EN] Inner cutoff angle (degrees).
-     * @defaultValue 15.0
+     * @defaultValue 0.0
      */
-    #innerCutoff: number = 15.0;
+    #innerCutoff: number = 0.0;
     /**
      * [KO] 외부 컷오프 각도 (degree)입니다.
      * [EN] Outer cutoff angle (degrees).
-     * @defaultValue 22.5
+     * @defaultValue 44.0
      */
-    #outerCutoff: number = 22.5;
+    #outerCutoff: number = 44.0;
 
     /**
      * [KO] 새로운 SpotLight 인스턴스를 생성합니다.
@@ -86,10 +86,10 @@ class SpotLight extends ABaseLight {
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffffff')
      * [EN] Color of the light (hex string, e.g., '#ffffff')
      * @param intensity -
-     * [KO] 광원의 세기 (기본값: 1000 Lumen)
-     * [EN] Intensity of the light (default: 1000 Lumen)
+     * [KO] 광원의 세기 (기본값: 100 Lumen)
+     * [EN] Intensity of the light (default: 100 Lumen)
      */
-    constructor(color: string = '#fff', intensity: number = 1000) {
+    constructor(color: string = '#fff', intensity: number = 100) {
         super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
     }
 

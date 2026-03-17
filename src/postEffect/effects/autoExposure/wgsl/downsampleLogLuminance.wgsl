@@ -23,7 +23,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         for (var x = start.x; x < end.x; x = x + 1u) {
             let color = textureLoad(sourceTexture, vec2<i32>(i32(x), i32(y)), 0).rgb;
             let lum = getLuminance(color);
-            avgLogLum += log(max(lum, 0.0001));
+            avgLogLum += log(max(lum, 0.000001));
             count += 1.0;
         }
     }

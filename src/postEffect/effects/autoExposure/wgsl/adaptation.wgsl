@@ -38,7 +38,7 @@ fn main(
         let currentLum = exp(avgLogLum);
         
         // Eye adaptation
-        let prevLum = adaptedLuminance;
+        let prevLum = max(adaptedLuminance, 0.000001);
         let diff = currentLum - prevLum;
         let speedMult = select(uniforms.adjustmentSpeedDown, uniforms.adjustmentSpeedUp, diff > 0.0);
         

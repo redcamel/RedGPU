@@ -22,13 +22,13 @@ abstract class ACamera {
      * [KO] 조리개 (f-stop)
      * [EN] Aperture (f-stop)
      */
-    #aperture: number = 16.0;
+    #aperture: number = 2.8;
 
     /**
      * [KO] 셔터 속도 (초)
      * [EN] Shutter speed (seconds)
      */
-    #shutterSpeed: number = 1 / 125;
+    #shutterSpeed: number = 1 / 60;
 
     /**
      * [KO] 센서 감도 (ISO)

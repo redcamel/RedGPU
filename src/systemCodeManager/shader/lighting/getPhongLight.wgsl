@@ -1,25 +1,14 @@
 #redgpu_include math.PI
+#redgpu_include lighting.getLightDistanceAttenuation
 
 /**
- * [KO] 에너지 보존이 적용된 물리 기반 Phong 모델 조명 기여도를 계산합니다.
- * [EN] Calculates light contribution based on the physically based Phong model with energy conservation.
- *
- * @param lightColor - [KO] 광색 [EN] Light color
- * @param lightIntensity - [KO] 조도 (그림자 및 감쇄가 포함된 최종 Illuminance) [EN] Illuminance (final illuminance including shadow and attenuation)
- * @param surfaceToLight - [KO] 픽셀에서 광원을 향하는 벡터 [EN] Vector from surface to light source
- * @param N - [KO] 표면 법선 벡터 [EN] Surface normal vector
- * @param V - [KO] 시선 방향 벡터 (Surface-to-Eye) [EN] View direction vector
- * @param shininess - [KO] 광택도 [EN] Shininess (specular power)
- * @param specularSamplerValue - [KO] 스펙큘러 텍스처 샘플링 값 [EN] Specular texture sampled value
- * @param diffuseColor - [KO] 표면의 디퓨즈 색상 [EN] Surface diffuse color
- * @param specularColor - [KO] 표면의 스펙큘러 색상 [EN] Surface specular color
- * @param specularStrength - [KO] 스펙큘러 강도 계수 [EN] Specular strength factor
- * @returns [KO] 계산된 조명 색상 (RGB) [EN] Calculated light color (RGB)
+ * [KO] 에너지 보존이 적용된 물리 기반 Phong BRDF를 계산합니다. (내부 계산용)
+ * [EN] Calculates physically based Phong BRDF with energy conservation. (Internal use)
  */
-fn getPhongLight(
+fn calcPhongBRDF(
     lightColor: vec3<f32>,
-    lightIntensity: f32,
-    surfaceToLight: vec3<f32>,
+    illuminance: vec3<f32>,
+    L: vec3<f32>,
     N: vec3<f32>,
     V: vec3<f32>,
     shininess: f32,
@@ -28,25 +17,61 @@ fn getPhongLight(
     specularColor: vec3<f32>,
     specularStrength: f32
 ) -> vec3<f32> {
-    let L = normalize(surfaceToLight);
-    let R = reflect(-L, N); // [KO] 입사광(-L)을 법선(N) 기준으로 반사 [EN] Reflect incident light (-L) based on normal (N)
-    
+    let R = reflect(-L, N);
     let NdotL = max(dot(N, L), 0.0);
     
-    // [KO] 에너지 보존 Diffuse (Lambertian): 1 / PI
-    // [EN] Energy conserving Diffuse (Lambertian): 1 / PI
-    let diffuseBRDF = 1.0 / PI;
-    let diffuseTerm = diffuseBRDF * NdotL;
+    // Diffuse (Lambertian): 1 / PI
+    let diffuseTerm = (1.0 / PI) * NdotL;
     
-    // [KO] 에너지 보존 Specular (Phong): (shininess + 2) / (2 * PI)
-    // [EN] Energy conserving Specular (Phong): (shininess + 2) / (2 * PI)
+    // Specular (Phong): (shininess + 2) / (2 * PI)
     let specularNormalization = (shininess + 2.0) / (2.0 * PI);
-    let specularBRDF = specularNormalization * pow(max(dot(R, V), 0.0), shininess);
-    let specularTerm = specularBRDF * specularSamplerValue * step(0.0, NdotL);
+    let specularTerm = specularNormalization * pow(max(dot(R, V), 0.0), shininess) * specularSamplerValue * step(0.0, NdotL);
 
-    let finalLightColor = lightColor * lightIntensity;
-    let diffuseContribution = diffuseColor * finalLightColor * diffuseTerm;
-    let specularContribution = (specularColor * specularStrength) * finalLightColor * specularTerm;
+    return (diffuseColor * illuminance * diffuseTerm) + (specularColor * specularStrength * illuminance * specularTerm);
+}
 
-    return diffuseContribution + specularContribution;
+/**
+ * [KO] 방향성 광원(Lux 기반)에 대한 Phong 조명을 계산합니다.
+ * [EN] Calculates Phong lighting for a directional light (Lux based).
+ */
+fn getDirectionalLightPhong(
+    lightColor: vec3<f32>,
+    intensityLux: f32,
+    L: vec3<f32>,
+    N: vec3<f32>,
+    V: vec3<f32>,
+    shininess: f32,
+    specularSamplerValue: f32,
+    diffuseColor: vec3<f32>,
+    specularColor: vec3<f32>,
+    specularStrength: f32
+) -> vec3<f32> {
+    let illuminance = lightColor * intensityLux;
+    return calcPhongBRDF(lightColor, illuminance, L, N, V, shininess, specularSamplerValue, diffuseColor, specularColor, specularStrength);
+}
+
+/**
+ * [KO] 점/스폿 광원(Lumen 기반)에 대한 Phong 조명을 계산합니다.
+ * [EN] Calculates Phong lighting for point/spot lights (Lumen based).
+ */
+fn getPointLightPhong(
+    lightColor: vec3<f32>,
+    intensityLumen: f32,
+    lightDistance: f32,
+    lightRadius: f32,
+    L: vec3<f32>,
+    N: vec3<f32>,
+    V: vec3<f32>,
+    shininess: f32,
+    specularSamplerValue: f32,
+    diffuseColor: vec3<f32>,
+    specularColor: vec3<f32>,
+    specularStrength: f32
+) -> vec3<f32> {
+    // 1. 거리 감쇄 (1/d^2 + Windowing)
+    let attenuation = getLightDistanceAttenuation(lightDistance, lightRadius);
+    // 2. Lumen -> Illuminance (Lux) 변환: Phi / (4 * PI * d^2)
+    let illuminance = lightColor * (intensityLumen * attenuation / (4.0 * PI));
+    
+    return calcPhongBRDF(lightColor, illuminance, L, N, V, shininess, specularSamplerValue, diffuseColor, specularColor, specularStrength);
 }

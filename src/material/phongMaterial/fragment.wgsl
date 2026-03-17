@@ -168,7 +168,7 @@ fn main(inputData:InputData) -> OutputFragment {
             let u_directionalLightColor = u_directionalLights[i].color;
             let u_directionalLightIntensity = u_directionalLights[i].intensity;
 
-             mixColor += getPhongLight(
+             mixColor += getDirectionalLightPhong(
                 u_directionalLightColor, u_directionalLightIntensity * visibility, -normalize(u_directionalLightDirection),
                 N, V, u_shininess, specularSamplerValue,
                 diffuseColor, u_specularColor, u_specularStrength
@@ -176,55 +176,42 @@ fn main(inputData:InputData) -> OutputFragment {
         }
     }
 
-    // PointLight
+    // PointLight / SpotLight Loop
     let clusterIndex = getClusterLightClusterIndex(inputData.position);
     let lightOffset  = clusterLightGrid.cells[clusterIndex].offset;
     let lightCount:u32   = clusterLightGrid.cells[clusterIndex].count;
 
     for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
          let i = clusterLightGrid.indices[lightOffset + lightIndex];
-         let u_clusterLightPosition = clusterLightList.lights[i].position;
-         let u_clusterLightColor = clusterLightList.lights[i].color;
-         let u_clusterLightIntensity = clusterLightList.lights[i].intensity;
-         let u_clusterLightRadius = clusterLightList.lights[i].radius;
-         let u_isSpotLight = clusterLightList.lights[i].isSpotLight;
-
-         let lightDir = u_clusterLightPosition - input_vertexPosition;
+         let tLight = clusterLightList.lights[i];
+         
+         let lightDir = tLight.position - input_vertexPosition;
          let lightDistance = length(lightDir);
 
          // 거리 범위 체크
-         if (lightDistance > u_clusterLightRadius) {
+         if (lightDistance > tLight.radius) {
              continue;
          }
 
          let L = normalize(lightDir);
-         let attenuation = getLightDistanceAttenuation(lightDistance, u_clusterLightRadius);
+         var angleAttenuation = 1.0;
 
-         var finalAttenuation = attenuation;
-
-         // 스폿라이트 처리
-         if (u_isSpotLight > 0.0) {
-             let u_clusterLightDirection = normalize(vec3<f32>(
-                 clusterLightList.lights[i].directionX,
-                 clusterLightList.lights[i].directionY,
-                 clusterLightList.lights[i].directionZ
-             ));
-             
-             // 라이트에서 버텍스로의 방향
-             let lightToVertex = normalize(-L);
-             
-             finalAttenuation *= getLightAngleAttenuation(
-                 lightToVertex, 
-                 u_clusterLightDirection, 
-                 clusterLightList.lights[i].innerCutoff, 
-                 clusterLightList.lights[i].outerCutoff
+         // 스폿라이트 각도 감쇄 계산 (개별 필드 directionX, Y, Z 참조)
+         if (tLight.isSpotLight > 0.0) {
+             let lightDirection = normalize(vec3<f32>(tLight.directionX, tLight.directionY, tLight.directionZ));
+             angleAttenuation = getLightAngleAttenuation(
+                 normalize(-L), 
+                 lightDirection, 
+                 tLight.innerCutoff, 
+                 tLight.outerCutoff
              );
          }
 
-         // [KO] getPhongLight를 사용하여 포인트/스폿 라이트 계산 (Lumen -> Illuminance 변환 포함)
-         // [EN] Calculate point/spot light using getPhongLight (including Lumen to Illuminance conversion)
-         mixColor += getPhongLight(
-             u_clusterLightColor, (u_clusterLightIntensity * finalAttenuation) / (4.0 * PI), L,
+         if (angleAttenuation <= 0.0) { continue; }
+
+         // [KO] 점광원 전용 함수(Lumen 기반) 호출.
+         mixColor += getPointLightPhong(
+             tLight.color, tLight.intensity * angleAttenuation, lightDistance, tLight.radius, L,
              N, V, u_shininess, specularSamplerValue,
              diffuseColor, u_specularColor, u_specularStrength
          );
@@ -246,9 +233,9 @@ fn main(inputData:InputData) -> OutputFragment {
         mixColor = mixColor * textureSample(aoTexture, aoTextureSampler, inputData.uv).rgb * u_aoStrength;
     #redgpu_endIf
     //
-    // [KO] 최종 조명 결과에 카메라 노출(Exposure) 적용
-    // [EN] Apply camera exposure to the final lighting result
-    finalColor = vec4<f32>((mixColor + emissiveColor) * u_camera.exposure, resultAlpha);
+    // [KO] 최종 조명 결과 (Raw HDR)
+    // [EN] Final lighting result (Raw HDR)
+    finalColor = vec4<f32>(mixColor + emissiveColor, resultAlpha);
     #redgpu_if useTint
         finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf

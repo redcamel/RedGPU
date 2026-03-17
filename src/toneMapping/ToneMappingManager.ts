@@ -99,6 +99,8 @@ class ToneMappingManager {
 
     #updateExposure(): void {
         if (this.#toneMapping) {
+            // [KO] 이제 프래그먼트 셰이더가 Raw HDR을 출력하므로, 톤 매핑 시 물리적 노출과 자동 노출 배율을 결합하여 적용
+            // [EN] Since fragment shaders now output raw HDR, combine physical exposure and auto exposure multiplier during tone mapping
             this.#toneMapping.exposure = this.#exposure * this.#autoExposureMultiplier;
         }
     }
