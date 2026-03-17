@@ -25,7 +25,7 @@ fn calcPhongBRDF(
     
     // Specular (Phong): (shininess + 2) / (2 * PI)
     let specularNormalization = (shininess + 2.0) / (2.0 * PI);
-    let specularTerm = specularNormalization * pow(max(dot(R, V), 0.0), shininess) * specularSamplerValue * step(0.0, NdotL);
+    let specularTerm = specularNormalization * pow(max(dot(R, V), 0.0), shininess) * specularSamplerValue * NdotL;
 
     return (diffuseColor * illuminance * diffuseTerm) + (specularColor * specularStrength * illuminance * specularTerm);
 }

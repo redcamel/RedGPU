@@ -1,11 +1,8 @@
 import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 /**
- * [KO] Directional Light 예제
- * [EN] Directional Light example
- *
- * [KO] Directional Light의 사용법과 속성 제어 방법을 보여줍니다.
- * [EN] Demonstrates the usage and property control of Directional Light.
+ * [KO] Directional Light Lighting Studio 예제 (UE5 스타일)
+ * [EN] Directional Light Lighting Studio Example (UE5 Style)
  */
 
 const canvas = document.createElement('canvas');
@@ -15,23 +12,30 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 35;
         controller.speedDistance = 0.5;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         view.axis = true;
+        
+        // [KO] 자동 노출 활성화 (태양광과 같은 강한 빛에 적응하기 위해 필수)
+        // [EN] Enable Auto Exposure (Essential for adapting to strong light like sunlight)
+        view.postEffectManager.useAutoExposure = true;
+        
         redGPUContext.addView(view);
 
         const light = createDirectionalLight(scene);
-        const mesh = createSampleMesh(redGPUContext, scene);
+        createMaterialStudio(redGPUContext, scene);
+        createStudioEnvironment(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         const render = () => {
         };
         renderer.start(redGPUContext, render);
 
-        renderTestPaneWithLightControl(redGPUContext, mesh, light, view);
+        renderTestPaneWithLightControl(redGPUContext, light, view);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -41,135 +45,143 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] Directional Light를 생성합니다.
- * [EN] Creates a Directional Light.
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Light.DirectionalLight}
- */
 const createDirectionalLight = (scene) => {
+    // [KO] UE5 기본값인 10 Lux로 시작 (태양광 표준인 100,000 Lux는 UI에서 테스트 가능)
+    // [EN] Start with 10 Lux, the UE5 default (Sunlight standard 100,000 Lux can be tested in UI)
     const direction = [-1, -1, -1];
-    const light = new RedGPU.Light.DirectionalLight(direction, '#fff');
-    light.intensity = 50000; // 초기값 50,000 Lux
+    const light = new RedGPU.Light.DirectionalLight(direction, '#fff', 10);
     light.enableDebugger = true;
     scene.lightManager.addDirectionalLight(light);
     return light;
 };
 
-/**
- * [KO] 샘플 메시를 생성합니다.
- * [EN] Creates a sample mesh.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Display.Mesh}
- */
-const createSampleMesh = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+const createStudioEnvironment = (redGPUContext, scene) => {
+    const studioMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#888');
+    studioMaterial.specularStrength = 0.2;
+    studioMaterial.shininess = 32;
 
-    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32, 32);
-    const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-    scene.addChild(mesh);
+    // Floor
+    const floorGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 100);
+    const floor = new RedGPU.Display.Mesh(redGPUContext, floorGeo, studioMaterial);
+    floor.rotationX = -90;
+    floor.y = -6;
+    scene.addChild(floor);
 
-    return mesh;
+    // Back Wall
+    const wallGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 60);
+    const wall = new RedGPU.Display.Mesh(redGPUContext, wallGeo, studioMaterial);
+    wall.z = -25;
+    wall.y = 24;
+    scene.addChild(wall);
 };
 
-/**
- * [KO] 조명 및 카메라 제어용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for light and camera control.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Mesh} mesh
- * @param {RedGPU.Light.DirectionalLight} light
- * @param {RedGPU.Display.View3D} view
- */
-const renderTestPaneWithLightControl = async (redGPUContext, mesh, light, view) => {
+const createMaterialStudio = (redGPUContext, scene) => {
+    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2.5, 32, 32, 32);
+    const rows = 2;
+    const cols = 5;
+    const spacing = 8;
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const metallic = row === 1 ? 1.0 : 0.0;
+            const roughness = col / (cols - 1);
+            
+            const material = new RedGPU.Material.PhongMaterial(redGPUContext, metallic === 1.0 ? '#fff' : '#ff4444');
+            material.metallic = metallic;
+            material.roughness = roughness;
+            material.shininess = Math.pow(2, (1.0 - roughness) * 10 + 2);
+
+            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+            const x = col * spacing - ((cols - 1) * spacing) / 2;
+            const y = row * spacing - ((rows - 1) * spacing) / 2;
+            
+            mesh.setPosition(x, y + 2, 0);
+            scene.addChild(mesh);
+        }
+    }
+};
+
+const renderTestPaneWithLightControl = async (redGPUContext, light, view) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const pane = new Pane();
     const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext);
 
     const camera = view.rawCamera;
+    const toneMappingManager = view.toneMappingManager;
 
+    // 1. Light Folder
     const lightConfig = {
+        intensity: light.intensity,
+        color: {r: light.color.r, g: light.color.g, b: light.color.b},
         directionX: light.direction[0],
         directionY: light.direction[1],
         directionZ: light.direction[2],
-        intensity: light.intensity,
-        color: {r: light.color.r, g: light.color.g, b: light.color.b},
-        enableDebugger: light.enableDebugger
     };
 
-    const lightFolder = pane.addFolder({title: 'Directional Light (Lux)', expanded: true});
-    lightFolder.addBinding(lightConfig, 'directionX', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
-        light.direction = [evt.value, lightConfig.directionY, lightConfig.directionZ];
-    });
-    lightFolder.addBinding(lightConfig, 'directionY', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
-        light.direction = [lightConfig.directionX, evt.value, lightConfig.directionZ];
-    });
-    lightFolder.addBinding(lightConfig, 'directionZ', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
-        light.direction = [lightConfig.directionX, lightConfig.directionY, evt.value];
-    });
-    lightFolder.addBinding(lightConfig, 'intensity', {min: 0, max: 150000, step: 100}).on('change', (evt) => {
-        light.intensity = evt.value;
-    });
-    lightFolder.addBinding(lightConfig, "color", {picker: "inline", view: "color", expanded: true})
-        .on("change", (ev) => {
-            const {r, g, b} = ev.value;
-            light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
-        });
-    lightFolder.addBinding(lightConfig, 'enableDebugger').on('change', (evt) => {
-        light.enableDebugger = evt.value;
+    const lightFolder = pane.addFolder({title: 'Light: Directional', expanded: true});
+    
+    const lightPropFolder = lightFolder.addFolder({title: 'Intensity & Color', expanded: true});
+    lightPropFolder.addBinding(lightConfig, 'intensity', {
+        label: 'Intensity (Lux)',
+        min: 0, 
+        max: 120000, 
+        step: 10
+    }).on('change', (evt) => { light.intensity = evt.value; });
+    
+    lightPropFolder.addBinding(lightConfig, 'color', {picker: 'inline', view: 'color'}).on('change', (evt) => {
+        const {r, g, b} = evt.value;
+        light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
     });
 
+    const lightPosFolder = lightFolder.addFolder({title: 'Direction', expanded: true});
+    lightPosFolder.addBinding(lightConfig, 'directionX', {min: -1, max: 1, step: 0.01, label: 'Dir X'}).on('change', () => { light.direction = [lightConfig.directionX, lightConfig.directionY, lightConfig.directionZ]; });
+    lightPosFolder.addBinding(lightConfig, 'directionY', {min: -1, max: 1, step: 0.01, label: 'Dir Y'}).on('change', () => { light.direction = [lightConfig.directionX, lightConfig.directionY, lightConfig.directionZ]; });
+    lightPosFolder.addBinding(lightConfig, 'directionZ', {min: -1, max: 1, step: 0.01, label: 'Dir Z'}).on('change', () => { light.direction = [lightConfig.directionX, lightConfig.directionY, lightConfig.directionZ]; });
+    
+    lightFolder.addBinding(light, 'enableDebugger', {label: 'Show Debugger'});
+
+    // 2. Camera Folder
     const cameraConfig = {
         aperture: camera.aperture,
-        shutterSpeed: 1 / camera.shutterSpeed, // Display as denominator (e.g., 125 for 1/125s)
+        shutterSpeed: 1 / camera.shutterSpeed,
         iso: camera.iso,
+        useAutoExposure: view.postEffectManager.useAutoExposure,
         ev100: camera.ev100,
-        exposure: camera.exposure,
-        useAutoExposure: view.postEffectManager.useAutoExposure
+        autoExposureMultiplier: toneMappingManager.autoExposureMultiplier
     };
+    const cameraFolder = pane.addFolder({title: 'Camera: Physical Settings', expanded: true});
+    cameraFolder.addBinding(cameraConfig, 'useAutoExposure', {label: 'Auto Exposure'}).on('change', (evt) => { view.postEffectManager.useAutoExposure = evt.value; });
+    
+    const lensFolder = cameraFolder.addFolder({title: 'Lens & Sensor', expanded: false});
+    lensFolder.addBinding(cameraConfig, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'}).on('change', (evt) => { camera.aperture = evt.value; });
+    lensFolder.addBinding(cameraConfig, 'shutterSpeed', {min: 1, max: 4000, step: 1, label: 'Shutter Speed (1/s)'}).on('change', (evt) => { camera.shutterSpeed = 1 / evt.value; });
+    lensFolder.addBinding(cameraConfig, 'iso', {min: 100, max: 6400, step: 100, label: 'ISO (Sensitivity)'}).on('change', (evt) => { camera.iso = evt.value; });
+    
+    const exposureMonitor = cameraFolder.addFolder({title: 'Exposure Status', expanded: true});
+    exposureMonitor.addBinding(cameraConfig, 'ev100', {readonly: true, format: (v) => v.toFixed(2), label: 'EV100'});
+    exposureMonitor.addBinding(cameraConfig, 'autoExposureMultiplier', {readonly: true, format: (v) => v.toFixed(4), label: 'Exposure Mult'});
 
-    const cameraFolder = pane.addFolder({title: 'Physical Camera & Exposure', expanded: true});
-    cameraFolder.addBinding(cameraConfig, 'useAutoExposure').on('change', (evt) => {
-        view.postEffectManager.useAutoExposure = evt.value;
-    });
-    cameraFolder.addBinding(cameraConfig, 'aperture', {min: 1.0, max: 32.0, step: 0.1}).on('change', (evt) => {
-        camera.aperture = evt.value;
-        cameraConfig.ev100 = camera.ev100;
-        cameraConfig.exposure = camera.exposure;
-        pane.refresh();
-    });
-    cameraFolder.addBinding(cameraConfig, 'shutterSpeed', {min: 1, max: 4000, step: 1}).on('change', (evt) => {
-        camera.shutterSpeed = 1 / evt.value;
-        cameraConfig.ev100 = camera.ev100;
-        cameraConfig.exposure = camera.exposure;
-        pane.refresh();
-    });
-    cameraFolder.addBinding(cameraConfig, 'iso', {min: 100, max: 3200, step: 100}).on('change', (evt) => {
-        camera.iso = evt.value;
-        cameraConfig.ev100 = camera.ev100;
-        cameraConfig.exposure = camera.exposure;
-        pane.refresh();
-    });
-    cameraFolder.addBinding(cameraConfig, 'ev100', {readonly: true, format: (v) => v.toFixed(2)});
-    cameraFolder.addBinding(cameraConfig, 'exposure', {readonly: true, format: (v) => v.toExponential(4)});
-
-    const meshConfig = {
-        x: mesh.x,
-        y: mesh.y,
-        z: mesh.z,
+    // 3. Post Process Folder
+    const tmConfig = {
+        mode: toneMappingManager.mode,
+        exposureOffset: toneMappingManager.exposure
     };
+    const tmFolder = pane.addFolder({title: 'PostProcess: Color Grading', expanded: false});
+    tmFolder.addBinding(tmConfig, 'mode', {
+        label: 'Tone Curve',
+        options: {
+            Linear: RedGPU.ToneMapping.TONE_MAPPING_MODE.LINEAR,
+            'ACES Filmic (UE5 Style)': RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL,
+            'Khronos PBR Neutral': RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL,
+        }
+    }).on('change', (evt) => { toneMappingManager.mode = evt.value; });
+    tmFolder.addBinding(tmConfig, 'exposureOffset', {min: 0, max: 10, step: 0.01, label: 'Exposure Compensation'});
 
-    const positionFolder = pane.addFolder({title: 'Mesh Position', expanded: false});
-    positionFolder.addBinding(meshConfig, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        mesh.setPosition(evt.value, meshConfig.y, meshConfig.z);
-    });
-    positionFolder.addBinding(meshConfig, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        mesh.setPosition(meshConfig.x, evt.value, meshConfig.z);
-    });
-    positionFolder.addBinding(meshConfig, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        mesh.setPosition(meshConfig.x, meshConfig.y, evt.value);
-    });
-
+    // Monitoring Loop
+    setInterval(() => {
+        cameraConfig.ev100 = camera.ev100;
+        cameraConfig.autoExposureMultiplier = toneMappingManager.autoExposureMultiplier;
+        pane.refresh();
+    }, 100);
 };
