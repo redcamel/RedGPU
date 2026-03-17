@@ -35,6 +35,7 @@ class ToneMappingManager {
     #mode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL;
 
     #exposure: number = 1.0;
+    #autoExposureMultiplier: number = 1.0;
     #contrast: number = 1.0;
     #brightness: number = 0.0;
 
@@ -74,6 +75,17 @@ class ToneMappingManager {
         return this.#exposure;
     }
 
+    /** [KO] 자동 노출 배율을 반환합니다. [EN] Returns the auto-exposure multiplier. */
+    get autoExposureMultiplier(): number {
+        return this.#autoExposureMultiplier;
+    }
+
+    /** [KO] 자동 노출 배율을 설정합니다. [EN] Sets the auto-exposure multiplier. */
+    set autoExposureMultiplier(value: number) {
+        this.#autoExposureMultiplier = value;
+        this.#updateExposure();
+    }
+
     /**
      * @deprecated [KO] ToneMappingManager의 exposure는 더 이상 권장되지 않습니다. 물리 기반 렌더링을 위해 Camera의 aperture, shutterSpeed, iso를 사용하십시오.
      * [EN] ToneMappingManager.exposure is deprecated. Use Camera's aperture, shutterSpeed, and iso for physically based rendering instead.
@@ -82,7 +94,13 @@ class ToneMappingManager {
         console.warn("[RedGPU] ToneMappingManager.exposure is deprecated. Use Camera's physical properties (aperture, shutterSpeed, iso) to control exposure instead.");
         validatePositiveNumberRange(value, 0)
         this.#exposure = value;
-        if (this.#toneMapping) this.#toneMapping.exposure = value;
+        this.#updateExposure();
+    }
+
+    #updateExposure(): void {
+        if (this.#toneMapping) {
+            this.#toneMapping.exposure = this.#exposure * this.#autoExposureMultiplier;
+        }
     }
 
     /** [KO] 명암 대비(Contrast)를 반환합니다. [EN] Returns the contrast. */
@@ -148,7 +166,7 @@ class ToneMappingManager {
         }
 
         if (this.#toneMapping) {
-            this.#toneMapping.exposure = this.#exposure;
+            this.#toneMapping.exposure = this.#exposure * this.#autoExposureMultiplier;
             this.#toneMapping.contrast = this.#contrast;
             this.#toneMapping.brightness = this.#brightness;
         }

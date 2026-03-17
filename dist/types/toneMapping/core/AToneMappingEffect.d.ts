@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
+import ASinglePassPostEffect, { ASinglePassPostEffectResult } from "../../postEffect/core/ASinglePassPostEffect";
+import View3D from "../../display/view/View3D";
 /**
  * [KO] 모든 톤 매핑 이펙트의 기본 추상 클래스입니다.
  * [EN] Base abstract class for all tone mapping effects.
@@ -30,5 +31,6 @@ declare class AToneMappingEffect extends ASinglePassPostEffect {
      * [EN] Updates all internal uniforms at once.
      */
     updateUniforms(): void;
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult;
 }
 export default AToneMappingEffect;

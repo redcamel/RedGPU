@@ -31,6 +31,7 @@ import DOF from "./effects/lens/dof/DOF";
 import LensDistortion from "./effects/lens/lensDistortion/LensDistortion";
 import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
+import AutoExposure from "./effects/autoExposure/AutoExposure";
 import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
 
@@ -66,6 +67,7 @@ export {
     // Visual Effects
     FilmGrain,
     OldBloom,
+    AutoExposure,
     Sharpen,
     // Utility Effects
     Convolution,

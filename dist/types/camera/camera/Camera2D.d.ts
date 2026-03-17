@@ -1,4 +1,5 @@
 import { mat4 } from "gl-matrix";
+import ACamera from "../core/ACamera";
 /**
  * [KO] 2D 환경에서 객체를 관찰하는 카메라입니다.
  * [EN] Camera for observing objects in a 2D environment.
@@ -15,7 +16,7 @@ import { mat4 } from "gl-matrix";
  * ```
  * @category Camera
  */
-declare class Camera2D {
+declare class Camera2D extends ACamera {
     #private;
     /**
      * [KO] Camera2D 인스턴스를 생성합니다.
@@ -27,64 +28,6 @@ declare class Camera2D {
      * ```
      */
     constructor();
-    /**
-     * [KO] 물리적 노출 지수(EV100)를 반환합니다.
-     * [EN] Returns the physical exposure value (EV100).
-     */
-    get ev100(): number;
-    /**
-     * [KO] 물리적 노출 배율(Exposure)을 반환합니다.
-     * [EN] Returns the physical exposure multiplier.
-     */
-    get exposure(): number;
-    /**
-     * [KO] 조리개(f-stop) 값을 반환합니다.
-     * [EN] Returns the aperture (f-stop) value.
-     */
-    get aperture(): number;
-    /**
-     * [KO] 조리개(f-stop) 값을 설정합니다.
-     * [EN] Sets the aperture (f-stop) value.
-     */
-    set aperture(value: number);
-    /**
-     * [KO] 셔터 속도(초 단위)를 반환합니다.
-     * [EN] Returns the shutter speed (in seconds).
-     */
-    get shutterSpeed(): number;
-    /**
-     * [KO] 셔터 속도(초 단위)를 설정합니다.
-     * [EN] Sets the shutter speed (in seconds).
-     */
-    set shutterSpeed(value: number);
-    /**
-     * [KO] 센서 감도(ISO)를 반환합니다.
-     * [EN] Returns the sensor sensitivity (ISO).
-     */
-    get iso(): number;
-    /**
-     * [KO] 센서 감도(ISO)를 설정합니다.
-     * [EN] Sets the sensor sensitivity (ISO).
-     */
-    set iso(value: number);
-    /**
-     * [KO] 카메라 이름을 반환합니다.
-     * [EN] Returns the camera name.
-     *
-     * @returns
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    get name(): string;
-    /**
-     * [KO] 카메라 이름을 설정합니다.
-     * [EN] Sets the camera name.
-     *
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string);
     /**
      * [KO] 모델 행렬을 반환합니다.
      * [EN] Returns the model matrix.

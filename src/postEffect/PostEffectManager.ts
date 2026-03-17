@@ -12,6 +12,8 @@ import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
 import SystemUniformUpdater from "../renderer/SystemUniformUpdater";
+import AutoExposure from "./effects/autoExposure/AutoExposure";
+import ToneMappingManager from "../toneMapping/ToneMappingManager";
 
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -120,6 +122,8 @@ class PostEffectManager {
     #useSSAO: boolean = false;
     #ssr: SSR;
     #useSSR: boolean = false;
+    #autoExposure: AutoExposure;
+    #useAutoExposure: boolean = true;
 
     /**
      * [KO] PostEffectManager 인스턴스를 생성합니다.
@@ -132,6 +136,33 @@ class PostEffectManager {
     constructor(view: View3D) {
         this.#view = view;
         this.#init()
+    }
+
+    /**
+     * [KO] 자동 노출(Auto Exposure) 사용 여부를 반환합니다.
+     * [EN] Returns whether Auto Exposure is used.
+     */
+    get useAutoExposure(): boolean {
+        return this.#useAutoExposure;
+    }
+
+    /**
+     * [KO] 자동 노출(Auto Exposure) 사용 여부를 설정합니다.
+     * [EN] Sets whether Auto Exposure is used.
+     */
+    set useAutoExposure(value: boolean) {
+        this.#useAutoExposure = value;
+    }
+
+    /**
+     * [KO] 자동 노출(Auto Exposure) 인스턴스를 반환합니다.
+     * [EN] Returns the Auto Exposure instance.
+     */
+    get autoExposure(): AutoExposure {
+        if (!this.#autoExposure) {
+            this.#autoExposure = new AutoExposure(this.#view.redGPUContext);
+        }
+        return this.#autoExposure;
     }
 
     /**
@@ -328,7 +359,7 @@ class PostEffectManager {
      * [EN] Rendering result texture information
      */
     render() {
-        const {viewRenderTextureManager, redGPUContext, taa, fxaa, toneMappingManager} = this.#view;
+        const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
         const {antialiasingManager} = redGPUContext
         const {useMSAA, useFXAA, useTAA} = antialiasingManager;
         const {gBufferColorTextureView, gBufferColorResolveTextureView, gBufferColorTexture} = viewRenderTextureManager;
@@ -352,6 +383,15 @@ class PostEffectManager {
                 currentTextureView
             );
         }
+
+        // Auto Exposure 처리 (HDR 공간에서 수행)
+        if (this.#useAutoExposure) {
+            this.autoExposure.render(this.#view, currentTextureView);
+            this.#view.toneMappingManager.autoExposureMultiplier = this.autoExposure.currentExposureMultiplier;
+        } else {
+            this.#view.toneMappingManager.autoExposureMultiplier = 1.0;
+        }
+
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(
                 this.#view,
@@ -361,7 +401,7 @@ class PostEffectManager {
             );
         });
         {
-            currentTextureView = toneMappingManager.render(
+            currentTextureView = this.#view.toneMappingManager.render(
                 width,
                 height,
                 currentTextureView

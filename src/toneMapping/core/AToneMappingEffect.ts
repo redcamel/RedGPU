@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
+import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../postEffect/core/ASinglePassPostEffect";
+import View3D from "../../display/view/View3D";
 
 /**
  * [KO] 모든 톤 매핑 이펙트의 기본 추상 클래스입니다.
@@ -64,6 +65,12 @@ class AToneMappingEffect extends ASinglePassPostEffect {
         this.updateUniform('exposure', this.#exposure);
         this.updateUniform('contrast', this.#contrast);
         this.updateUniform('brightness', this.#brightness);
+    }
+
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+        // ASinglePassPostEffect의 render를 호출하기 전에 자동 노출용 추가 바인딩 처리가 필요할 수 있음
+        // 여기서는 기본 render를 호출하고, ASinglePassPostEffect가 이를 처리할 수 있게 확장하는 방향으로 검토
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 

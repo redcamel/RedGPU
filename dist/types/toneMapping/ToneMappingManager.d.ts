@@ -36,6 +36,10 @@ declare class ToneMappingManager {
     set mode(value: TONE_MAPPING_MODE);
     /** [KO] 노출값(Exposure)을 반환합니다. [EN] Returns the exposure value. */
     get exposure(): number;
+    /** [KO] 자동 노출 배율을 반환합니다. [EN] Returns the auto-exposure multiplier. */
+    get autoExposureMultiplier(): number;
+    /** [KO] 자동 노출 배율을 설정합니다. [EN] Sets the auto-exposure multiplier. */
+    set autoExposureMultiplier(value: number);
     /**
      * @deprecated [KO] ToneMappingManager의 exposure는 더 이상 권장되지 않습니다. 물리 기반 렌더링을 위해 Camera의 aperture, shutterSpeed, iso를 사용하십시오.
      * [EN] ToneMappingManager.exposure is deprecated. Use Camera's aperture, shutterSpeed, and iso for physically based rendering instead.

@@ -155,24 +155,6 @@ declare class OrthographicCamera extends PerspectiveCamera {
      */
     set maxZoom(value: number);
     /**
-     * [KO] 카메라 이름을 반환합니다.
-     * [EN] Returns the camera name.
-     *
-     * @returns
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    get name(): string;
-    /**
-     * [KO] 카메라 이름을 설정합니다.
-     * [EN] Sets the camera name.
-     *
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string);
-    /**
      * [KO] 줌을 설정합니다.
      * [EN] Sets the zoom level.
      *

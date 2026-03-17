@@ -4,6 +4,7 @@ import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
+import AutoExposure from "./effects/autoExposure/AutoExposure";
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
  * [EN] Class for managing post-processing effects.
@@ -33,6 +34,21 @@ declare class PostEffectManager {
      * [EN] View3D instance
      */
     constructor(view: View3D);
+    /**
+     * [KO] 자동 노출(Auto Exposure) 사용 여부를 반환합니다.
+     * [EN] Returns whether Auto Exposure is used.
+     */
+    get useAutoExposure(): boolean;
+    /**
+     * [KO] 자동 노출(Auto Exposure) 사용 여부를 설정합니다.
+     * [EN] Sets whether Auto Exposure is used.
+     */
+    set useAutoExposure(value: boolean);
+    /**
+     * [KO] 자동 노출(Auto Exposure) 인스턴스를 반환합니다.
+     * [EN] Returns the Auto Exposure instance.
+     */
+    get autoExposure(): AutoExposure;
     /**
      * [KO] SSAO 사용 여부를 반환합니다.
      * [EN] Returns whether SSAO is used.
