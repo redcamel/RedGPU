@@ -37,6 +37,21 @@ abstract class ACamera {
     #iso: number = 100;
 
     /**
+     * [KO] 노출 보정 (Exposure Compensation / Bias)
+     * [EN] Exposure compensation (Bias)
+     */
+    #exposureCompensation: number = 0;
+
+    /**
+     * [KO] 교정 상수 (Calibration Constant, K)
+     * [EN] Calibration constant (K)
+     * @description
+     * [KO] 언리얼 엔진 5 및 사진학적 표준 (18% Middle Gray 기준 K = 1.2)
+     * [EN] Unreal Engine 5 and photographic standard (K = 1.2 based on 18% Middle Gray)
+     */
+    static readonly CALIBRATION_CONSTANT: number = 1.2;
+
+    /**
      * [KO] 캐시된 EV100
      * [EN] Cached EV100
      */
@@ -70,6 +85,25 @@ abstract class ACamera {
     get exposure(): number {
         if (this.#exposureDirty) this.#updateExposure();
         return this.#exposure;
+    }
+
+    /**
+     * [KO] 노출 보정(Exposure Compensation) 값을 반환합니다.
+     * [EN] Returns the exposure compensation value.
+     */
+    get exposureCompensation(): number {
+        return this.#exposureCompensation;
+    }
+
+    /**
+     * [KO] 노출 보정(Exposure Compensation) 값을 설정합니다.
+     * [EN] Sets the exposure compensation value.
+     */
+    set exposureCompensation(value: number) {
+        validateNumber(value);
+        if (this.#exposureCompensation === value) return;
+        this.#exposureCompensation = value;
+        this.#exposureDirty = true;
     }
 
     /**
@@ -147,8 +181,14 @@ abstract class ACamera {
     }
 
     #updateExposure(): void {
+        // [KO] EV100 = log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
         this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
-        this.#exposure = 1 / (1.2 * Math.pow(2, this.#ev100));
+
+        // [KO] Exposure Scale = 1 / (K * 2^EV100) * 2^Bias
+        // [EN] Exposure Scale = 1 / (K * 2^EV100) * 2^Bias
+        const baseExposure = 1 / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
+        this.#exposure = baseExposure * Math.pow(2, this.#exposureCompensation);
+
         this.#exposureDirty = false;
     }
 }
