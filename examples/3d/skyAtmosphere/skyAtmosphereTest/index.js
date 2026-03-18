@@ -22,18 +22,18 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // 1. SkyAtmosphere 초기화
+        // 1. 디렉셔널 라이트 먼저 추가 (SkyAtmosphere가 자동 감지)
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        directionalLight.enableDebugger = true;
+        scene.lightManager.addDirectionalLight(directionalLight);
+
+        // 2. SkyAtmosphere 초기화 (자동으로 directionalLight를 태양 광원으로 사용)
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         skyAtmosphere.sunElevation = 80;
         skyAtmosphere.sunAzimuth = 0;
         view.skyAtmosphere = skyAtmosphere;
 
-        // 2. 디렉셔널 라이트 추가
-        const directionalLight = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#fff', 10);
-        directionalLight.enableDebugger = true;
-        scene.lightManager.addDirectionalLight(directionalLight);
-
-        // 4. 모델 로드
+        // 3. 모델 로드
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf');
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF-Binary/TransmissionTest.glb');
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb');

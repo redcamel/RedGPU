@@ -102,8 +102,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         skyLuminanceFactor: 1.0
     };
 
-    #sunSource: DirectionalLight = null;
     #activeSunSource: DirectionalLight = null;
+    #prevSunSource: DirectionalLight = null;
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
     #dirtyIBL: boolean = true;
@@ -324,39 +324,49 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     #updateSunInfo(view: View3D): void {
-        const findSource = (): DirectionalLight | null => {
-            // [KO] 명시적으로 지정된 소스가 있으면 최우선 사용
-            // [EN] Use explicitly specified source as top priority
-            if (this.#sunSource) return this.#sunSource;
-            
-            // [KO] 규약에 따라 씬의 첫 번째 직사광(index 0)을 태양 소스로 사용
-            // [EN] By convention, use the first directional light (index 0) in the scene as the sun source
-            const lights = view.scene.lightManager.directionalLights;
-            return lights[0] || null;
-        };
+        // [KO] 규약에 따라 씬의 첫 번째 직사광(index 0)을 태양 소스로 자동 사용
+        // [EN] By convention, automatically use the first directional light (index 0) in the scene as the sun source
+        const lights = view.scene.lightManager.directionalLights;
+        const source = lights[0] || null;
 
-        const source = findSource();
-        this.#activeSunSource = source;
+        // [KO] 광원이 변경되었는지 감지
+        // [EN] Detect if the light source has changed
+        const sourceChanged = this.#prevSunSource !== source;
+        if (sourceChanged) {
+            this.#prevSunSource = source;
+            this.#activeSunSource = source;
+        }
+
         if (source) {
             const dir = source.direction;
             const currentDir = this.#params.sunDirection;
             const EPSILON = 0.0001;
 
-            const targetDirX = -dir[0];
-            const targetDirY = -dir[1];
-            const targetDirZ = -dir[2];
+            // [KO] DirectionalLight 방향 정규화 (크기가 1이 아닐 수 있음)
+            // [EN] Normalize DirectionalLight direction (magnitude may not be 1)
+            const dirLen = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+            const normalizedDirX = dirLen > EPSILON ? dir[0] / dirLen : dir[0];
+            const normalizedDirY = dirLen > EPSILON ? dir[1] / dirLen : dir[1];
+            const normalizedDirZ = dirLen > EPSILON ? dir[2] / dirLen : dir[2];
 
-            if (
+            const targetDirX = -normalizedDirX;
+            const targetDirY = -normalizedDirY;
+            const targetDirZ = -normalizedDirZ;
+
+            const directionChanged =
                 Math.abs(targetDirX - currentDir[0]) > EPSILON ||
                 Math.abs(targetDirY - currentDir[1]) > EPSILON ||
-                Math.abs(targetDirZ - currentDir[2]) > EPSILON
-            ) {
+                Math.abs(targetDirZ - currentDir[2]) > EPSILON;
+
+            // [KO] 광원이 교체되었거나 방향이 변경된 경우 DirectionalLight → SkyAtmosphere 동기화
+            // [EN] Synchronize DirectionalLight → SkyAtmosphere if light source changed or direction changed
+            if (sourceChanged || directionChanged) {
                 currentDir[0] = targetDirX;
                 currentDir[1] = targetDirY;
                 currentDir[2] = targetDirZ;
 
-                // [KO] 광원 방향이 변경되었으므로 구면 좌표계(고도, 방위각) 동기화
-                // [EN] Since light direction changed, sync spherical coordinates (elevation, azimuth)
+                // [KO] 광원 방향을 구면 좌표계(고도, 방위각)로 변환 (정규화된 벡터 사용)
+                // [EN] Convert light direction to spherical coordinates (elevation, azimuth) using normalized vector
                 this.#params.sunElevation = Math.asin(currentDir[1]) * 180 / Math.PI;
                 this.#params.sunAzimuth = Math.atan2(currentDir[2], currentDir[0]) * 180 / Math.PI;
 
@@ -489,15 +499,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 대기 산란의 광원 데이터를 제공할 DirectionalLight를 설정합니다.
-     * [EN] Sets the DirectionalLight that will provide light source data for atmospheric scattering.
+     * [KO] 현재 태양 광원으로 사용 중인 DirectionalLight를 반환합니다.
+     * [EN] Returns the DirectionalLight currently being used as the sun source.
+     *
+     * [KO] 씬의 첫 번째 DirectionalLight (index 0)가 자동으로 사용됩니다.
+     * [EN] The first DirectionalLight (index 0) in the scene is automatically used.
      */
-    get sunSource(): DirectionalLight { return this.#sunSource; }
-    set sunSource(v: DirectionalLight) {
-        this.#sunSource = v;
-        this.#activeSunSource = v;
-        this.#markDirty(false, true, true);
-    }
+    get sunSource(): DirectionalLight { return this.#activeSunSource; }
 
     /**
      * [KO] 태양의 방향 벡터 (정규화됨)를 반환합니다.
