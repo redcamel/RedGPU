@@ -508,7 +508,32 @@ fn main(inputData:InputData) -> OutputFragment {
     // [KO] 투과 및 배경 샘플링 처리 [EN] Transmission and background sampling
     var transmissionRefraction = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
+    {
         transmissionRefraction = getTransmissionRefraction(u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor, ior, roughnessParameter, albedo, systemUniforms.projection.projectionViewMatrix, input_vertexPosition, input_ndcPosition, V, N, renderPath1ResultTexture, renderPath1ResultTextureSampler);
+        
+        // [KO] 배경 텍스처는 이미 노출이 적용된 상태이므로, 물리적 합성을 위해 노출을 제거하여 원본 휘도로 복원
+        // [EN] Since the background texture is already exposed, revert it to original radiance for physical synthesis
+        if (systemUniforms.preExposure > 0.0) {
+            transmissionRefraction /= systemUniforms.preExposure;
+        }
+
+        // [KO] 볼륨 감쇄(Beer-Lambert Law) 전역 적용
+        // [EN] Apply volume attenuation (Beer-Lambert Law) globally
+        #redgpu_if useKHR_materials_volume
+        if (u_useKHR_materials_volume) {
+            let localNodeScale = inputData.localNodeScale_volumeScale[0];
+            let scaledThickness = thicknessParameter * localNodeScale;
+            let safeAttenuationColor = clamp(u_KHR_attenuationColor, vec3<f32>(EPSILON), vec3<f32>(1.0));
+            let safeAttenuationDistance = max(u_KHR_attenuationDistance, EPSILON);
+            let attenuationCoefficient = -log(safeAttenuationColor) / safeAttenuationDistance;
+            
+            // 굴절각을 고려한 대략적인 투과 거리 계산 (NdotV 기반 근사)
+            let pathLength = scaledThickness / max(NdotV, 0.01);
+            let volumeTransmittance = exp(-attenuationCoefficient * pathLength);
+            transmissionRefraction *= volumeTransmittance;
+        }
+        #redgpu_endIf
+    }
     #redgpu_endIf
 
     // [KO] 기본 F0 계산 [EN] Base F0 calculation
@@ -530,27 +555,29 @@ fn main(inputData:InputData) -> OutputFragment {
         let lightIntensity = u_directionalLights[i].intensity;
         let L = -normalize(u_directionalLights[i].direction);
         
-        // [KO] 기본 에너지 계산 (강도 * 노출 * 가시성)
-        // [EN] Basic energy calculation (intensity * exposure * visibility)
-        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
-        
-        // [KO] 람베르시안 및 물리 기반 보정: Lux(조도)를 Radiance(휘도)로 변환 (1/PI)
-        // [EN] Lambertian and PBR correction: Convert Lux (Irradiance) to Radiance (1/PI)
-        finalLightColor *= INV_PI;
+        // [KO] 통합 에너지 계산 (색상 * 강도 * 노출 * 가시성 * 람베르시안보정)
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility * INV_PI;
 
         // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용 (분광 감쇄)
-        // [EN] Apply atmospheric transmittance to sun light (first directional light) when SkyAtmosphere is enabled (Spectral attenuation)
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
             let u_atmo = systemUniforms.skyAtmosphere;
-            // 표면 고도 km 계산 및 해수면 오프셋 적용
             let surfaceHeightKm = max(0.0, (input_vertexPosition.y / 1000.0) - u_atmo.seaLevel);
             let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
-            
-            // [KO] 분광 투과율 적용
             finalLightColor *= atmosphereTransmittance;
         }
 
-        totalDirectLighting += calcLight(finalLightColor, N, V, L, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+        totalDirectLighting += calcLight(
+            finalLightColor,
+            N, V, L, VdotN,
+            roughnessParameter, metallicParameter, albedo,
+            F0, ior,
+            specularColor, specularParameter,
+            u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
+            transmissionParameter,
+            sheenColor, sheenRoughnessParameter,
+            anisotropy, anisotropicT, anisotropicB,
+            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
+        );
     }
 
 
@@ -583,16 +610,22 @@ fn main(inputData:InputData) -> OutputFragment {
              finalAttenuation *= getLightAngleAttenuation(lightToVertex, u_clusterLightDirection, targetLight.innerCutoff, targetLight.outerCutoff);
          }
 
-         // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출)
-         // [EN] Combined energy calculation (color * intensity * attenuation * exposure)
-         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
-         
-         // [KO] 물리 기반 보정 (Lumen to Radiance): 광속을 휘도로 변환 (1/PI)
-         // [EN] Physical correction (Lumen to Radiance): Convert luminous flux to radiance (1/PI)
-         finalLightColor *= INV_PI;
+         // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출 * 람베르시안보정)
+         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure * INV_PI;
 
-         // [KO] calcLight 함수 호출 (25개 인자) [EN] Call calcLight function (25 arguments)
-         totalDirectLighting += calcLight(finalLightColor, N, V, L, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+         // [KO] calcLight 함수 호출 (24개 인자) [EN] Call calcLight function (24 arguments)
+         totalDirectLighting += calcLight(
+            finalLightColor,
+            N, V, L, VdotN,
+            roughnessParameter, metallicParameter, albedo,
+            F0, ior,
+            specularColor, specularParameter,
+            u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
+            transmissionParameter,
+            sheenColor, sheenRoughnessParameter,
+            anisotropy, anisotropicT, anisotropicB,
+            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
+        );
         }
     }
 
@@ -678,95 +711,60 @@ fn main(inputData:InputData) -> OutputFragment {
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
 
         // [KO] 거칠기를 고려한 다이렉트와 간접 반사율 계산 (Split Sum Approximation)
-        // [EN] Calculates direct and indirect reflectance considering roughness (Split Sum Approximation)
-        var F_IBL_dielectric = F0_dielectric * envBRDF.x + envBRDF.y;
-        var F_IBL_metal      = F0_metal      * envBRDF.x + envBRDF.y;
-        var F_IBL            = F0            * envBRDF.x + envBRDF.y;
+        let F_IBL_dielectric = getFresnelSchlick(NdotV, F0_dielectric) * envBRDF.x + envBRDF.y;
+        let F_IBL_metal      = getFresnelSchlick(NdotV, F0_metal) * envBRDF.x + envBRDF.y;
+        let F_IBL            = getFresnelSchlick(NdotV, F0) * envBRDF.x + envBRDF.y;
 
-        let a2 = roughnessParameter * roughnessParameter;
-        let G_smith = NdotV / (NdotV * (1.0 - a2) + a2);
+        // [KO] ibl 스펙큘러 반사 [EN] ibl Specular Reflection
+        let envIBL_SPECULAR:vec3<f32> = reflectedColor * F_IBL * specularParameter ;
 
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
-        let effectiveTransmission = transmissionParameter * (1.0 - metallicParameter);
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric) * INV_PI;
 
         // [KO] ibl 확산 투과 (Diffuse Transmission) [EN] ibl Diffuse Transmission
         #redgpu_if useKHR_materials_diffuse_transmission
         {
-            // [KO] 뒷면 반사광을 위한 샘플링 방향 [EN] Sampling direction for back side reflection
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
-                var mipLevel = roughnessParameter * iblMipmapCount;
+                let mipLevel = roughnessParameter * iblMipmapCount;
                 backScatteringColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, -N, mipLevel).rgb;
             }
-            
-            // [KO] 대기 필터링 적용 (Back side)
             if (systemUniforms.useSkyAtmosphere == 1u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
                 let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-                
-                // [KO] 큐브맵 기반 샘플링으로 교체 (skyViewTexture 의존성 제거)
-                // [EN] Replace with cubemap-based sampling (remove dependency on skyViewTexture)
                 let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * u_atmo.sunIntensity;
                 backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
             }
-
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
-            // [KO] 반사광 및 투과 효과 혼합 [EN] Mix reflection and transmission effects
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
         #redgpu_endIf
 
-        // [KO] ibl 스펙큘러 [EN] ibl Specular
-        var envIBL_SPECULAR:vec3<f32>;
-        envIBL_SPECULAR = reflectedColor * F_IBL * specularParameter ;
-
-        // [KO] ibl 스펙큘러 BTDF [EN] ibl Specular BTDF
+        // [KO] ibl 스펙큘러 투과(굴절) [EN] ibl Specular BTDF (Refraction)
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
         #redgpu_if useKHR_materials_transmission
-            var refractedDir: vec3<f32>;
-            let eta = 1.0 / ior;
-            if (abs(ior - 1.0) < EPSILON) { refractedDir = V; }
-            else { refractedDir = refract(-V, -N, eta); }
-
-            if(length(refractedDir) > EPSILON) {
-                let NdotT = abs(dot(N, normalize(refractedDir)));
-                let F_transmission = vec3<f32>(1.0) - mix(F_IBL_dielectric,F_IBL_metal,metallicParameter);
-
-                var attenuatedBackground = transmissionRefraction;
-                 if (u_useKHR_materials_volume) {
-                     let localNodeScale = inputData.localNodeScale_volumeScale[0];
-                     let volumeScale = inputData.localNodeScale_volumeScale[1];
-                     let scaledThickness = thicknessParameter * localNodeScale ;
-                     let safeAttenuationColor = clamp(u_KHR_attenuationColor, vec3<f32>(EPSILON), vec3<f32>(1.0));
-                     let safeAttenuationDistance = max(u_KHR_attenuationDistance, EPSILON);
-                     let attenuationCoefficient = -log(safeAttenuationColor) / safeAttenuationDistance;
-                     let cosTheta = max(NdotT, 0.001);
-                     let pathLength = scaledThickness / cosTheta;
-                     let transmittance = exp(-attenuationCoefficient * pathLength);
-                     attenuatedBackground *= transmittance;
-                 }else{
-                     attenuatedBackground *= albedo;
-                 }
-                envIBL_SPECULAR_BTDF = attenuatedBackground * F_transmission * transmissionParameter + reflectedColor * G_smith * mix(F_IBL_dielectric,F_IBL_metal,metallicParameter) * NdotT;
-            }
+        if (transmissionParameter > 0.0) {
+            envIBL_SPECULAR_BTDF = transmissionRefraction * (vec3<f32>(1.0) - F_IBL_dielectric);
+        }
         #redgpu_endIf
 
-        // [KO] ibl 다이렉트 속성 [EN] ibl dielectric attribute
-        let envIBL_DIELECTRIC = mix(envIBL_DIFFUSE ,envIBL_SPECULAR_BTDF, transmissionParameter) + envIBL_SPECULAR  ;
+        // [KO] 비금속(Dielectric) 속성 결합
+        let envIBL_DIELECTRIC = envIBL_SPECULAR + mix(envIBL_DIFFUSE, envIBL_SPECULAR_BTDF, transmissionParameter);
+
+        // [KO] ibl Metal 계산 [EN] ibl Metal calculation
+        let envIBL_METAL = reflectedColor * F_IBL_metal;
 
         // [KO] ibl Sheen 계산 [EN] ibl Sheen calculation
         var sheenIBLContribution = vec3<f32>(0.0);
         var sheenAlbedoScaling: f32 = 1.0;
-        let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
         #redgpu_if useKHR_materials_sheen
+        {
+            let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
             let sheenResult = getSheenIBL(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_irradianceTexture, prefilterTextureSampler);
             sheenIBLContribution = sheenResult.sheenIBLContribution;
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
+        }
         #redgpu_endIf
-
-        // [KO] ibl Metal 계산 [EN] ibl Metal calculation
-        let envIBL_METAL = reflectedColor * F_IBL_metal;
 
         // [KO] ibl 최종 혼합 [EN] ibl final blend
         let metallicPart = envIBL_METAL * metallicParameter ;
@@ -781,8 +779,6 @@ fn main(inputData:InputData) -> OutputFragment {
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
                  var clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
 
-                 // [KO] 대기 산란 필터링 적용 (Clearcoat Specular)
-                 // [EN] Apply Atmospheric Scattering Filtering (Clearcoat Specular)
                  if (systemUniforms.useSkyAtmosphere == 1u) {
                      let u_atmo = systemUniforms.skyAtmosphere;
                      let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, clearcoatR.y, u_atmo.atmosphereHeight);
@@ -794,18 +790,46 @@ fn main(inputData:InputData) -> OutputFragment {
 
                  let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
                  let clearcoatF0 = vec3<f32>(0.04);
-                 let clearcoatF = clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y;
-                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatF * clearcoatParameter;
-                 indirectLighting = clearcoatSpecularIBL + (1.0 - max(clearcoatF.x, max(clearcoatF.y, clearcoatF.z)) * clearcoatParameter) * indirectLighting;
+                 let clearcoatF = getFresnelSchlick(clearcoatNdotV, clearcoatF0) * clearcoatParameter;
+                 
+                 // [KO] 클리어코트 스펙큘러 IBL에 preExposure 적용하여 베이스와 단위 일치
+                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatF * systemUniforms.preExposure;
+                 indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - clearcoatF) * indirectLighting;
             }
         #redgpu_endIf
 
         let environmentIntensity = 1.0;
-        let surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter;
+        var surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter;
+        
+        // [KO] 최종 배경 굴절 합성 (IBL 모드)
+        // [EN] Final background refraction composition (IBL mode)
+        // [KO] IBL 경로에서는 envIBL_SPECULAR_BTDF에 의해 이미 배경이 포함되어 있을 수 있으므로, 
+        // [KO] 중복 합성을 방지하기 위해 구조적으로 검토가 필요함. 
+        // [KO] 여기서는 IBL이 없는 경우와 동일한 결과를 위해 노출 단위를 맞춰 합성함.
+        #redgpu_if useKHR_materials_transmission
+        if (transmissionParameter > 0.0) {
+            let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
+            // [KO] transmissionRefraction은 un-exposed 상태이므로 preExposure를 다시 곱함
+            surfaceColor = mix(surfaceColor, transmissionRefraction * systemUniforms.preExposure, transmissionWeight);
+        }
+        #redgpu_endIf
+
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
     } else {
-        let ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * occlusionParameter * systemUniforms.preExposure;
-        finalColor = vec4<f32>(totalDirectLighting + ambientContribution, resultAlpha);
+        // [KO] 환경광 물리 기반 보정 (Lux to Radiance)
+        let ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * occlusionParameter * systemUniforms.preExposure * INV_PI;
+        var surfaceColor = totalDirectLighting + ambientContribution;
+
+        // [KO] 최종 배경 굴절 합성 (비 IBL 모드)
+        #redgpu_if useKHR_materials_transmission
+        if (transmissionParameter > 0.0) {
+            let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
+            // [KO] transmissionRefraction은 un-exposed 상태이므로 preExposure를 다시 곱함
+            surfaceColor = mix(surfaceColor, transmissionRefraction * systemUniforms.preExposure, transmissionWeight);
+        }
+        #redgpu_endIf
+
+        finalColor = vec4<f32>(surfaceColor, resultAlpha);
     }
 
     // [KO] 에미시브 합산 [EN] Emissive addition
@@ -813,7 +837,8 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if emissiveTexture
         emissiveSamplerColor = textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
     #redgpu_endIf
-    finalColor += vec4<f32>(emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength * systemUniforms.preExposure, 0.0);
+    // [KO] 에미시브 물리 기반 보정 (Intensity to Radiance)
+    finalColor += vec4<f32>(emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength * systemUniforms.preExposure * INV_PI, 0.0);
 
     // [KO] 컷오프 판단 [EN] Cut-off check
     #redgpu_if useCutOff
@@ -839,13 +864,15 @@ fn main(inputData:InputData) -> OutputFragment {
 /**
  * [KO] 빛의 기여도를 계산하는 핵심 함수입니다. [EN] Core function to calculate light contribution.
  */
+/**
+ * [KO] 빛의 기여도를 계산하는 핵심 함수입니다. [EN] Core function to calculate light contribution.
+ */
 fn calcLight(
     lightColor:vec3<f32>,
     N:vec3<f32>, V:vec3<f32>, L:vec3<f32>,
     VdotN:f32,
     roughnessParameter:f32, metallicParameter:f32, albedo:vec3<f32>,
     F0:vec3<f32>, ior:f32,
-    transmissionRefraction:vec3<f32>,
     specularColor:vec3<f32>, specularParameter:f32,
     u_useKHR_materials_diffuse_transmission:bool, diffuseTransmissionParameter:f32, diffuseTransmissionColor:vec3<f32>,
     transmissionParameter:f32,
@@ -853,21 +880,18 @@ fn calcLight(
     anisotropy:f32, anisotropicT:vec3<f32>, anisotropicB:vec3<f32>,
     clearcoatParameter:f32, clearcoatRoughnessParameter:f32, clearcoatNormal:vec3<f32>
 ) -> vec3<f32>{
-    let dLight = lightColor; // [KO] 이미 intensity와 preExposure가 곱해진 상태 [EN] Already multiplied by intensity and preExposure
+    let dLight = lightColor; // [KO] 이미 모든 감쇄 및 노출이 곱해진 최종 에너지 [EN] Final energy with all attenuation and exposure applied
 
     let NdotL_origin = dot(N, L);
     let NdotL = max(NdotL_origin, 0.04);
-    let NdotV = max(dot(N, V), 0.04);
     let H = normalize(L + V);
     let LdotH = max(dot(L, H), 0.0);
     let NdotH = max(dot(N, H), 0.0);
     let VdotH = max(dot(V, H), 0.0);
 
-    var DIFFUSE_BRDF:vec3<f32> = getDiffuseBRDFDisney(NdotL, NdotV, LdotH, roughnessParameter, albedo);
-    #redgpu_if useKHR_materials_diffuse_transmission
-        DIFFUSE_BRDF = mix(DIFFUSE_BRDF, getDiffuseBTDF(N, L, diffuseTransmissionColor), diffuseTransmissionParameter);
-    #redgpu_endIf
-
+    // [KO] 반사(Reflection) 파트 계산
+    var DIFFUSE_BRDF:vec3<f32> = getDiffuseBRDFDisney(NdotL, VdotN, LdotH, roughnessParameter, albedo);
+    
     var SPECULAR_BRDF:vec3<f32>;
     if (anisotropy > 0.0) {
         #redgpu_if useKHR_materials_anisotropy
@@ -877,18 +901,19 @@ fn calcLight(
             var TdotH = dot(anisotropicT, H);
             var BdotH = dot(anisotropicB, H);
             var BdotV = dot(anisotropicB, V);
-            SPECULAR_BRDF =  getAnisotropicSpecularBRDF(albedo, roughnessParameter * roughnessParameter, VdotH, NdotL, NdotV, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy);
+            SPECULAR_BRDF =  getAnisotropicSpecularBRDF(albedo, roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy);
         #redgpu_endIf
     }else{
-        SPECULAR_BRDF = getSpecularBRDF( albedo, roughnessParameter, NdotH, NdotV, NdotL, LdotH);
+        SPECULAR_BRDF = getSpecularBRDF( albedo, roughnessParameter, NdotH, VdotN, NdotL, LdotH);
     }
 
-    let METAL_BRDF = getConductorFresnel( albedo, SPECULAR_BRDF, VdotH);;
+    let METAL_BRDF = getConductorFresnel( albedo, SPECULAR_BRDF, VdotH);
 
+    // [KO] 투과(Transmission) 파트 계산
     var SPECULAR_BTDF =  vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
         if(transmissionParameter > 0.0){
-            SPECULAR_BTDF = getSpecularBTDF( NdotV, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
+            SPECULAR_BTDF = getSpecularBTDF( VdotN, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
         }
     #redgpu_endIf
 
@@ -899,52 +924,68 @@ fn calcLight(
     #redgpu_if useKHR_materials_sheen
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
         if(sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001 && dot(N,V) > 0.0) {
-            let NdotV_sheen = dot(N, V);
             let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
             let invR = 1.0 / sheenRoughnessAlpha;
             let cos2h = NdotH * NdotH;
             let sin2h = 1.0 - cos2h;
             let sheenDistribution = (2.0 + invR) * pow(sin2h, invR * 0.5) / PI2;
-            let sheen_visibility =  1.0 / ((1.0 + getSheenLambda(NdotV_sheen, sheenRoughnessAlpha) + getSheenLambda(NdotL, sheenRoughnessAlpha)) * (4.0 * NdotV_sheen * NdotL));
+            let sheen_visibility =  1.0 / ((1.0 + getSheenLambda(VdotN, sheenRoughnessAlpha) + getSheenLambda(NdotL, sheenRoughnessAlpha)) * (4.0 * VdotN * NdotL));
             let LdotN = max(dot(L, N), 0.04);
             let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
-            let E_VdotN = 1.0 - pow(1.0 - NdotV_sheen, 5.0);
+            let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
             sheen_albedo_scaling = max(min(1.0 - maxSheenColor * E_VdotN, 1.0 - maxSheenColor * E_LdotN), 0.04);
             SHEEN_BRDF = sheenColor * sheenDistribution * sheen_visibility;
         }
     #redgpu_endIf
 
-    // [KO] 금속성 및 다이렉트 속성 결합 [EN] Combine metallic and dielectric attributes
     let metallicPart = METAL_BRDF * metallicParameter * sheen_albedo_scaling  ;
-    let dielectricPart = DIELECTRIC_BRDF * sheen_albedo_scaling ;
-    let sheenPart = SHEEN_BRDF;
-    var directLighting = (metallicPart  + dielectricPart + sheenPart);
-
-    #redgpu_if useKHR_materials_transmission
-        if(transmissionParameter > 0.0) {
-            // [KO] 투과 가중치에 따라 배경색 혼합 [EN] Mix background color according to transmission weight
-            let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
-            directLighting = mix(directLighting, transmissionRefraction , transmissionWeight);
-        }
+    
+    // [KO] 확산(Diffuse) 성분 합성: 앞면 반사와 뒷면 투과(Diffuse Transmission)를 파라미터에 따라 혼합
+    var diffuse_term = DIFFUSE_BRDF * max(NdotL_origin, 0.0);
+    #redgpu_if useKHR_materials_diffuse_transmission
+    if (u_useKHR_materials_diffuse_transmission) {
+        let diffuseTransmissionBTDF = getDiffuseBTDF(N, L, diffuseTransmissionColor);
+        // 반사광과 투과광을 파라미터에 따라 물리적으로 혼합
+        diffuse_term = mix(diffuse_term, diffuseTransmissionBTDF * max(-NdotL_origin, 0.0), diffuseTransmissionParameter);
+    }
     #redgpu_endIf
+
+    // [KO] 비금속(Dielectric) 성분 합성
+    // 1. 스펙큘러 반사(Front)
+    let dielec_spec_reflect = SPECULAR_BRDF * max(NdotL_origin, 0.0);
+    // 2. 스펙큘러 투과(Back - Glass)
+    var dielec_spec_transmit = vec3<f32>(0.0);
+    #redgpu_if useKHR_materials_transmission
+    if (transmissionParameter > 0.0) {
+        dielec_spec_transmit = SPECULAR_BTDF * max(-NdotL_origin, 0.0);
+    }
+    #redgpu_endIf
+
+    // [KO] 프레넬을 이용한 스펙큘러와 확산/투과 층의 물리적 레이어링
+    // [EN] Physical layering of specular and diffuse/transmission layers using Fresnel
+    let F = getFresnelSchlick(VdotH, F0);
+    let dielectricPart = F * dielec_spec_reflect + (vec3<f32>(1.0) - F) * (mix(diffuse_term, dielec_spec_transmit, transmissionParameter)) * sheen_albedo_scaling;
+
+    let sheenPart = SHEEN_BRDF * max(NdotL_origin, 0.0);
+    var result = (metallicPart * max(NdotL_origin, 0.0) + dielectricPart + sheenPart);
 
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
-            let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.04);
+            let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
             let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
             let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
-            let CLEARCOAT_BRDF = getSpecularBRDF( F0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
-            directLighting = getFresnelCoat(clearcoatNdotV, ior, clearcoatParameter, directLighting, CLEARCOAT_BRDF);
+            let clearcoatF0 = vec3<f32>(0.04);
+            
+            // [KO] 클리어코트 전용 스펙큘러 BRDF 계산
+            let CLEARCOAT_SPEC = getSpecularBRDF(clearcoatF0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
+            
+            // [KO] 클리어코트 프레넬 계산 (하부 레이어 감쇄용)
+            let coatF = getFresnelSchlick(clearcoatNdotV, clearcoatF0) * clearcoatParameter;
+            
+            // [KO] 최종 합성: 클리어코트 반사 + (1 - 클리어코트프레넬) * 하부 레이어
+            result = (CLEARCOAT_SPEC * clearcoatNdotL) + (vec3<f32>(1.0) - coatF) * result;
         }
     #redgpu_endIf
 
-    var lightDirection: f32;
-    #redgpu_if useKHR_materials_diffuse_transmission
-        lightDirection = mix(abs(NdotL_origin), 1.0, diffuseTransmissionParameter);
-    #redgpu_else
-        lightDirection = max(NdotL_origin, 0.0);
-    #redgpu_endIf
-
-    let lightContribution = directLighting * dLight * lightDirection;
-    return lightContribution;
+    return result * dLight;
 }

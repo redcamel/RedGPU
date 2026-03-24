@@ -202,7 +202,7 @@ class View3D extends AView {
                 {key: 'directionalLightProjectionMatrix', value: lightManager.getDirectionalLightProjectionMatrix(this)},
                 {key: 'directionalLightViewMatrix', value: lightManager.getDirectionalLightViewMatrix(this)},
                 {key: 'preExposure', value: this.rawCamera.exposure * this.toneMappingManager.exposure * this.toneMappingManager.autoExposureMultiplier},
-            ]);
+                ]);
         }
         lightManager.directionalLights.forEach((light: DirectionalLight) => {
             if (light.enableDebugger) {
