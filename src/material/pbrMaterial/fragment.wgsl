@@ -527,20 +527,30 @@ fn main(inputData:InputData) -> OutputFragment {
     // [KO] 직접 조명 계산 - Directional Light (Lux-based) [EN] Direct lighting calculation - Directional Light (Lux-based)
     var totalDirectLighting = vec3<f32>(0.0);
     for (var i = 0u; i < u_directionalLightCount; i++) {
-        var lightIntensity = u_directionalLights[i].intensity;
+        let lightIntensity = u_directionalLights[i].intensity;
+        let L = -normalize(u_directionalLights[i].direction);
         
-        // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용
-        // [EN] Apply atmospheric transmittance to sun light (first directional light) when SkyAtmosphere is enabled
+        // [KO] 기본 에너지 계산 (강도 * 노출 * 가시성)
+        // [EN] Basic energy calculation (intensity * exposure * visibility)
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
+        
+        // [KO] 람베르시안 및 물리 기반 보정: Lux(조도)를 Radiance(휘도)로 변환 (1/PI)
+        // [EN] Lambertian and PBR correction: Convert Lux (Irradiance) to Radiance (1/PI)
+        finalLightColor *= INV_PI;
+
+        // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용 (분광 감쇄)
+        // [EN] Apply atmospheric transmittance to sun light (first directional light) when SkyAtmosphere is enabled (Spectral attenuation)
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
             let u_atmo = systemUniforms.skyAtmosphere;
-            let L = -normalize(u_directionalLights[i].direction);
-            // 표면 고도 km 계산 (World Y / 1000)
-            let surfaceHeightKm = max(0.0, input_vertexPosition.y / 1000.0);
+            // 표면 고도 km 계산 및 해수면 오프셋 적용
+            let surfaceHeightKm = max(0.0, (input_vertexPosition.y / 1000.0) - u_atmo.seaLevel);
             let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
-            lightIntensity *= getLuminance(atmosphereTransmittance); // 혹은 채널별 곱셈 적용 가능하나 보통 휘도 기반 감쇄 사용
+            
+            // [KO] 분광 투과율 적용
+            finalLightColor *= atmosphereTransmittance;
         }
 
-        totalDirectLighting += calcLight(u_directionalLights[i].color, lightIntensity * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+        totalDirectLighting += calcLight(finalLightColor, N, V, L, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
     }
 
 
@@ -573,8 +583,16 @@ fn main(inputData:InputData) -> OutputFragment {
              finalAttenuation *= getLightAngleAttenuation(lightToVertex, u_clusterLightDirection, targetLight.innerCutoff, targetLight.outerCutoff);
          }
 
-         // [KO] calcLight 함수 호출 [EN] Call calcLight function
-         totalDirectLighting += calcLight(targetLight.color, targetLight.intensity * finalAttenuation, N, V, L, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+         // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출)
+         // [EN] Combined energy calculation (color * intensity * attenuation * exposure)
+         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
+         
+         // [KO] 물리 기반 보정 (Lumen to Radiance): 광속을 휘도로 변환 (1/PI)
+         // [EN] Physical correction (Lumen to Radiance): Convert luminous flux to radiance (1/PI)
+         finalLightColor *= INV_PI;
+
+         // [KO] calcLight 함수 호출 (25개 인자) [EN] Call calcLight function (25 arguments)
+         totalDirectLighting += calcLight(finalLightColor, N, V, L, VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
         }
     }
 
@@ -822,7 +840,7 @@ fn main(inputData:InputData) -> OutputFragment {
  * [KO] 빛의 기여도를 계산하는 핵심 함수입니다. [EN] Core function to calculate light contribution.
  */
 fn calcLight(
-    lightColor:vec3<f32>, lightIntensity:f32,
+    lightColor:vec3<f32>,
     N:vec3<f32>, V:vec3<f32>, L:vec3<f32>,
     VdotN:f32,
     roughnessParameter:f32, metallicParameter:f32, albedo:vec3<f32>,
@@ -835,7 +853,7 @@ fn calcLight(
     anisotropy:f32, anisotropicT:vec3<f32>, anisotropicB:vec3<f32>,
     clearcoatParameter:f32, clearcoatRoughnessParameter:f32, clearcoatNormal:vec3<f32>
 ) -> vec3<f32>{
-    let dLight = lightColor * lightIntensity * systemUniforms.preExposure ;
+    let dLight = lightColor; // [KO] 이미 intensity와 preExposure가 곱해진 상태 [EN] Already multiplied by intensity and preExposure
 
     let NdotL_origin = dot(N, L);
     let NdotL = max(NdotL_origin, 0.04);
