@@ -549,7 +549,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get sunIntensity(): number { return this.#params.sunIntensity; }
     set sunIntensity(v: number) {
-        validatePositiveNumberRange(v, 0, 10000);
+        validatePositiveNumberRange(v, 0, 200000);
         this.#params.sunIntensity = v;
 
         // [KO] 활성 광원이 존재하면 해당 광원의 세기도 업데이트

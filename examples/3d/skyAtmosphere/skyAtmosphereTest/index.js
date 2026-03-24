@@ -31,6 +31,7 @@ RedGPU.init(
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         skyAtmosphere.sunElevation = 80;
         skyAtmosphere.sunAzimuth = 0;
+        skyAtmosphere.sunIntensity = 100000; // 물리적 단위 (Lux)
         view.skyAtmosphere = skyAtmosphere;
 
         // 3. 모델 로드
@@ -78,9 +79,15 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
     f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
     f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
-    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 10000, step: 0.1, label: 'sunIntensity'});
+    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 200000, step: 1, label: 'sunIntensity (Lux)'});
     f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'sunSize'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'sunLimbDarkening'});
+
+    const f_camera = pane.addFolder({title: 'Camera Exposure', expanded: true});
+    f_camera.addBinding(targetView.camera, 'exposureCompensation', {min: -10, max: 10, step: 0.1, label: 'Exposure Bias'});
+    f_camera.addBinding(targetView.camera, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'});
+    f_camera.addBinding(targetView.camera, 'shutterSpeed', {min: 1/4000, max: 1, step: 0.0001, label: 'Shutter Speed (s)'});
+    f_camera.addBinding(targetView.camera, 'iso', {min: 50, max: 3200, step: 1, label: 'ISO'});
 
     const f_planet = pane.addFolder({title: 'Planet', expanded: false});
     f_planet.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 1, label: 'bottomRadius (km)'});

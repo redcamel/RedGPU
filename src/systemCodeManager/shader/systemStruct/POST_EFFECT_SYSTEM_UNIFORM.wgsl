@@ -8,6 +8,7 @@ struct SystemUniform {
     time: Time,
     camera:Camera,
     useSkyAtmosphere: u32,
+    preExposure: f32,
     skyAtmosphere:SkyAtmosphere,
 };
 

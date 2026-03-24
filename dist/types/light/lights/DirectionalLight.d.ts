@@ -25,8 +25,8 @@ declare class DirectionalLight extends ABaseLight {
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffcc00')
      * [EN] Color of the light (hex string, e.g., '#ffcc00')
      * @param intensity -
-     * [KO] 광원의 세기 (기본값: 10 Lux)
-     * [EN] Intensity of the light (default: 10 Lux)
+     * [KO] 광원의 세기 (기본값: 100,000 Lux)
+     * [EN] Intensity of the light (default: 100,000 Lux)
      */
     constructor(direction?: [number, number, number], color?: string, intensity?: number);
     /**

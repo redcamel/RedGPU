@@ -527,7 +527,20 @@ fn main(inputData:InputData) -> OutputFragment {
     // [KO] 직접 조명 계산 - Directional Light (Lux-based) [EN] Direct lighting calculation - Directional Light (Lux-based)
     var totalDirectLighting = vec3<f32>(0.0);
     for (var i = 0u; i < u_directionalLightCount; i++) {
-        totalDirectLighting += calcLight(u_directionalLights[i].color, u_directionalLights[i].intensity * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
+        var lightIntensity = u_directionalLights[i].intensity;
+        
+        // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용
+        // [EN] Apply atmospheric transmittance to sun light (first directional light) when SkyAtmosphere is enabled
+        if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let L = -normalize(u_directionalLights[i].direction);
+            // 표면 고도 km 계산 (World Y / 1000)
+            let surfaceHeightKm = max(0.0, input_vertexPosition.y / 1000.0);
+            let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
+            lightIntensity *= getLuminance(atmosphereTransmittance); // 혹은 채널별 곱셈 적용 가능하나 보통 휘도 기반 감쇄 사용
+        }
+
+        totalDirectLighting += calcLight(u_directionalLights[i].color, lightIntensity * visibility, N, V, -normalize(u_directionalLights[i].direction), VdotN, roughnessParameter, metallicParameter, albedo, F0, ior, transmissionRefraction, specularColor, specularParameter, u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor, transmissionParameter, sheenColor, sheenRoughnessParameter, anisotropy, anisotropicT, anisotropicB, clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal);
     }
 
 
@@ -740,7 +753,7 @@ fn main(inputData:InputData) -> OutputFragment {
         // [KO] ibl 최종 혼합 [EN] ibl final blend
         let metallicPart = envIBL_METAL * metallicParameter ;
         let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ;
-        var indirectLighting = (metallicPart + dielectricPart) * sheenAlbedoScaling + sheenIBLContribution;
+        var indirectLighting = ((metallicPart + dielectricPart) * sheenAlbedoScaling + sheenIBLContribution) * systemUniforms.preExposure;
 
         // [KO] ibl 클리어코트 계산 [EN] ibl clearcoat calculation
         #redgpu_if useKHR_materials_clearcoat
@@ -773,7 +786,7 @@ fn main(inputData:InputData) -> OutputFragment {
         let surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter;
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
     } else {
-        let ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * occlusionParameter;
+        let ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * occlusionParameter * systemUniforms.preExposure;
         finalColor = vec4<f32>(totalDirectLighting + ambientContribution, resultAlpha);
     }
 
@@ -782,7 +795,7 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if emissiveTexture
         emissiveSamplerColor = textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
     #redgpu_endIf
-    finalColor += vec4<f32>(emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength, 0.0);
+    finalColor += vec4<f32>(emissiveSamplerColor.rgb * u_emissiveFactor * u_emissiveStrength * systemUniforms.preExposure, 0.0);
 
     // [KO] 컷오프 판단 [EN] Cut-off check
     #redgpu_if useCutOff
@@ -822,7 +835,7 @@ fn calcLight(
     anisotropy:f32, anisotropicT:vec3<f32>, anisotropicB:vec3<f32>,
     clearcoatParameter:f32, clearcoatRoughnessParameter:f32, clearcoatNormal:vec3<f32>
 ) -> vec3<f32>{
-    let dLight = lightColor * lightIntensity ;
+    let dLight = lightColor * lightIntensity * systemUniforms.preExposure ;
 
     let NdotL_origin = dot(N, L);
     let NdotL = max(NdotL_origin, 0.04);

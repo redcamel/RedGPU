@@ -82,7 +82,7 @@ let occlusionFactor = getPlanetShadowMask(camPos, sunDir, bottomRadius, uniforms
 mieGlowUnit *= occlusionFactor;
 
 // [KO] 최종 산란광 및 색상 결정
-let finalScattering = (apSample.rgb + mieGlowUnit) * uniforms.sunIntensity;
+let finalScattering = (apSample.rgb + mieGlowUnit) * uniforms.sunIntensity * systemUniforms.preExposure;
 let finalColor = sceneColor * saturate(apSample.a) + finalScattering;
 
 textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));

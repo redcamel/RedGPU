@@ -99,9 +99,9 @@ class ToneMappingManager {
 
     #updateExposure(): void {
         if (this.#toneMapping) {
-            // [KO] 이제 프래그먼트 셰이더가 Raw HDR을 출력하므로, 톤 매핑 시 물리적 노출과 자동 노출 배율을 결합하여 적용
-            // [EN] Since fragment shaders now output raw HDR, combine physical exposure and auto exposure multiplier during tone mapping
-            this.#toneMapping.exposure = this.#exposure * this.#autoExposureMultiplier;
+            // [KO] 이제 셰이더에서 Pre-Exposure(systemUniforms.exposure)가 적용되므로, 톤 매핑 시의 노출 배율은 1.0으로 고정합니다.
+            // [EN] Since Pre-Exposure (systemUniforms.exposure) is now applied in shaders, fix the exposure multiplier during tone mapping to 1.0.
+            this.#toneMapping.exposure = 1.0;
         }
     }
 
@@ -168,7 +168,7 @@ class ToneMappingManager {
         }
 
         if (this.#toneMapping) {
-            this.#toneMapping.exposure = this.#exposure * this.#autoExposureMultiplier;
+            this.#toneMapping.exposure = 1.0;
             this.#toneMapping.contrast = this.#contrast;
             this.#toneMapping.brightness = this.#brightness;
         }

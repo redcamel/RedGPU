@@ -1,5 +1,6 @@
 import ColorRGB from "../../color/ColorRGB";
 import ADrawDebuggerLight from "../../display/drawDebugger/light/ADrawDebuggerLight";
+import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 
 /**
  * [KO] 모든 광원 클래스의 기본이 되는 추상 클래스입니다.
@@ -113,6 +114,7 @@ abstract class ABaseLight {
      * [EN] Number value (e.g., 1.0)
      */
     set intensity(value: number) {
+        validatePositiveNumberRange(value, 0);
         this.#intensity = value;
     }
 }

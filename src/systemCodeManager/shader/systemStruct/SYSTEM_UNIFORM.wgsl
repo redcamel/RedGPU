@@ -18,6 +18,7 @@ struct SystemUniform {
 	  usePrefilterTexture:u32,
 	  isView3D:u32,
 	  useSkyAtmosphere:u32,
+	  preExposure:f32,
 	  //
 	  skyAtmosphere:SkyAtmosphere,
 	  shadow:Shadow,

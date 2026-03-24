@@ -29,8 +29,8 @@ declare class SpotLight extends ABaseLight {
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffffff')
      * [EN] Color of the light (hex string, e.g., '#ffffff')
      * @param intensity -
-     * [KO] 광원의 세기 (기본값: 100 Lumen)
-     * [EN] Intensity of the light (default: 100 Lumen)
+     * [KO] 광원의 세기 (기본값: 1,000 Lumen)
+     * [EN] Intensity of the light (default: 1,000 Lumen)
      */
     constructor(color?: string, intensity?: number);
     /**

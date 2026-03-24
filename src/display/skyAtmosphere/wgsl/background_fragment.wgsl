@@ -31,7 +31,9 @@ fn main(input : VertexOutput) -> FragmentOutput {
     viewHeight = max(0.0, viewHeight);
     let skyUV = getSkyViewUV(viewDir, viewHeight, bottomRadius, atmosphereHeight);
     let skySample = textureSampleLevel(bg_skyViewLUT, bg_skyAtmosphereSampler, skyUV, 0.0);
-    var atmosphereBackground = skySample.rgb * uniforms.sunIntensity;
+    
+    let exposedSunIntensity = uniforms.sunIntensity * systemUniforms.preExposure;
+    var atmosphereBackground = skySample.rgb * exposedSunIntensity;
 
     let camPos = vec3<f32>(0.0, bottomRadius + viewHeight, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, bottomRadius);
@@ -48,7 +50,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     // [KO] 하이브리드 Mie Glow: 압축 보정된 방향을 사용하여 태양과 일치시킴
     // [EN] Hybrid Mie Glow: Use corrected direction to match sun
     let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, transToEdge, 0.0) 
-                        * uniforms.sunIntensity;
+                        * exposedSunIntensity;
     atmosphereBackground += mieGlowAmount;
 
     if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
@@ -62,7 +64,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
             // [KO] edgeSoftness를 0.01로 낮추어 날카로운 태양 원반 형태 구현
             // [EN] Sharpen sun disk by lowering edgeSoftness to 0.01
             let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01);
-            atmosphereBackground += sunRadiance * uniforms.sunIntensity;
+            atmosphereBackground += sunRadiance * exposedSunIntensity;
         }
     }
     
