@@ -555,8 +555,9 @@ fn main(inputData:InputData) -> OutputFragment {
         let lightIntensity = u_directionalLights[i].intensity;
         let L = -normalize(u_directionalLights[i].direction);
         
-        // [KO] 통합 에너지 계산 (색상 * 강도 * 노출 * 가시성 * 람베르시안보정)
-        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility * INV_PI;
+        // [KO] 통합 에너지 계산 (색상 * 강도 * 노출 * 가시성)
+        // [KO] INV_PI 보정은 calcLight 내부의 BRDF 함수에서 처리되므로 여기서는 제거
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
 
         // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용 (분광 감쇄)
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
@@ -941,11 +942,12 @@ fn calcLight(
     let metallicPart = METAL_BRDF * metallicParameter * sheen_albedo_scaling  ;
     
     // [KO] 확산(Diffuse) 성분 합성: 앞면 반사와 뒷면 투과(Diffuse Transmission)를 파라미터에 따라 혼합
-    var diffuse_term = DIFFUSE_BRDF * max(NdotL_origin, 0.0);
+    // [KO] getDiffuseBRDFDisney 내부에서 이미 NdotL을 곱하므로 여기서는 생략
+    var diffuse_term = DIFFUSE_BRDF;
     #redgpu_if useKHR_materials_diffuse_transmission
     if (u_useKHR_materials_diffuse_transmission) {
         let diffuseTransmissionBTDF = getDiffuseBTDF(N, L, diffuseTransmissionColor);
-        // 반사광과 투과광을 파라미터에 따라 물리적으로 혼합
+        // [KO] 투과 BTDF도 보통 코사인을 포함하므로 단위를 맞춰 합성
         diffuse_term = mix(diffuse_term, diffuseTransmissionBTDF * max(-NdotL_origin, 0.0), diffuseTransmissionParameter);
     }
     #redgpu_endIf
