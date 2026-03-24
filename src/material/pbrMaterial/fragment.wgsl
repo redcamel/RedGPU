@@ -611,8 +611,9 @@ fn main(inputData:InputData) -> OutputFragment {
              finalAttenuation *= getLightAngleAttenuation(lightToVertex, u_clusterLightDirection, targetLight.innerCutoff, targetLight.outerCutoff);
          }
 
-         // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출 * 람베르시안보정)
-         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure * INV_PI;
+         // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출)
+         // [KO] INV_PI 보정은 calcLight 내부의 BRDF 함수에서 처리되므로 여기서는 제거
+         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
 
          // [KO] calcLight 함수 호출 (24개 인자) [EN] Call calcLight function (24 arguments)
          totalDirectLighting += calcLight(
@@ -886,14 +887,13 @@ fn calcLight(
     let NdotL_origin = dot(N, L);
     let NdotL = max(NdotL_origin, 0.04);
     let H = normalize(L + V);
-    let LdotH = max(dot(L, H), 0.0);
     let NdotH = max(dot(N, H), 0.0);
+    let LdotH = max(dot(L, H), 0.0);
     let VdotH = max(dot(V, H), 0.0);
 
-    // [KO] 반사(Reflection) 파트 계산
-    var DIFFUSE_BRDF:vec3<f32> = getDiffuseBRDFDisney(NdotL, VdotN, LdotH, roughnessParameter, albedo);
-    
-    var SPECULAR_BRDF:vec3<f32>;
+    // [KO] 1. 스페큘러 반사(Specular Reflection) BRDF 계산
+    // [KO] F0는 이미 main에서 금속성에 따라 적절히 믹싱되어 넘어옴
+    var SPEC_BRDF: vec3<f32>;
     if (anisotropy > 0.0) {
         #redgpu_if useKHR_materials_anisotropy
             var TdotL = dot(anisotropicT, L);
@@ -902,75 +902,70 @@ fn calcLight(
             var TdotH = dot(anisotropicT, H);
             var BdotH = dot(anisotropicB, H);
             var BdotV = dot(anisotropicB, V);
-            SPECULAR_BRDF =  getAnisotropicSpecularBRDF(albedo, roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy);
+            SPEC_BRDF = getAnisotropicSpecularBRDF(F0, roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy);
         #redgpu_endIf
-    }else{
-        SPECULAR_BRDF = getSpecularBRDF( albedo, roughnessParameter, NdotH, VdotN, NdotL, LdotH);
+    } else {
+        SPEC_BRDF = getSpecularBRDF(F0, roughnessParameter, NdotH, VdotN, NdotL, LdotH);
     }
 
-    let METAL_BRDF = getConductorFresnel( albedo, SPECULAR_BRDF, VdotH);
-
-    // [KO] 투과(Transmission) 파트 계산
-    var SPECULAR_BTDF =  vec3<f32>(0.0);
-    #redgpu_if useKHR_materials_transmission
-        if(transmissionParameter > 0.0){
-            SPECULAR_BTDF = getSpecularBTDF( VdotN, NdotL, NdotH, VdotH, LdotH, roughnessParameter, albedo, ior);
-        }
+    // [KO] 2. 확산(Diffuse) 파트 계산
+    // [KO] getDiffuseBRDFDisney는 내부적으로 NdotL과 INV_PI를 포함함
+    var diffuse_term = getDiffuseBRDFDisney(NdotL, VdotN, LdotH, roughnessParameter, albedo);
+    
+    #redgpu_if useKHR_materials_diffuse_transmission
+    if (u_useKHR_materials_diffuse_transmission) {
+        let diffuseTransmissionBTDF = getDiffuseBTDF(N, L, diffuseTransmissionColor);
+        diffuse_term = mix(diffuse_term, diffuseTransmissionBTDF * max(-NdotL_origin, 0.0), diffuseTransmissionParameter);
+    }
     #redgpu_endIf
 
-    let DIELECTRIC_BRDF = getFresnelMix(F0, specularParameter, mix(DIFFUSE_BRDF, SPECULAR_BTDF, transmissionParameter), SPECULAR_BRDF, VdotH);
+    // [KO] 3. 투과(Transmission) 파트 계산
+    var dielec_spec_transmit = vec3<f32>(0.0);
+    #redgpu_if useKHR_materials_transmission
+    if (transmissionParameter > 0.0) {
+        dielec_spec_transmit = getSpecularBTDF(VdotN, NdotL, NdotH, VdotH, LdotH, roughnessParameter, F0, ior) * max(-NdotL_origin, 0.0);
+    }
+    #redgpu_endIf
 
-    var SHEEN_BRDF:vec3<f32> = vec3<f32>(0.0);
-    var sheen_albedo_scaling:f32 = 1.0;
+    // [KO] 4. Sheen (천/패브릭) 파트 계산
+    var SHEEN_BRDF: vec3<f32> = vec3<f32>(0.0);
+    var sheen_albedo_scaling: f32 = 1.0;
     #redgpu_if useKHR_materials_sheen
+    {
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-        if(sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001 && dot(N,V) > 0.0) {
+        if (sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001) {
             let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
             let invR = 1.0 / sheenRoughnessAlpha;
             let cos2h = NdotH * NdotH;
             let sin2h = 1.0 - cos2h;
             let sheenDistribution = (2.0 + invR) * pow(sin2h, invR * 0.5) / PI2;
-            let sheen_visibility =  1.0 / ((1.0 + getSheenLambda(VdotN, sheenRoughnessAlpha) + getSheenLambda(NdotL, sheenRoughnessAlpha)) * (4.0 * VdotN * NdotL));
-            let LdotN = max(dot(L, N), 0.04);
-            let E_LdotN = 1.0 - pow(1.0 - LdotN, 5.0);
+            let sheen_visibility = 1.0 / ((1.0 + getSheenLambda(VdotN, sheenRoughnessAlpha) + getSheenLambda(NdotL, sheenRoughnessAlpha)) * (4.0 * VdotN * NdotL));
+            
+            let E_LdotN = 1.0 - pow(1.0 - NdotL, 5.0);
             let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
             sheen_albedo_scaling = max(min(1.0 - maxSheenColor * E_VdotN, 1.0 - maxSheenColor * E_LdotN), 0.04);
             SHEEN_BRDF = sheenColor * sheenDistribution * sheen_visibility;
         }
-    #redgpu_endIf
-
-    let metallicPart = METAL_BRDF * metallicParameter * sheen_albedo_scaling  ;
-    
-    // [KO] 확산(Diffuse) 성분 합성: 앞면 반사와 뒷면 투과(Diffuse Transmission)를 파라미터에 따라 혼합
-    // [KO] getDiffuseBRDFDisney 내부에서 이미 NdotL을 곱하므로 여기서는 생략
-    var diffuse_term = DIFFUSE_BRDF;
-    #redgpu_if useKHR_materials_diffuse_transmission
-    if (u_useKHR_materials_diffuse_transmission) {
-        let diffuseTransmissionBTDF = getDiffuseBTDF(N, L, diffuseTransmissionColor);
-        // [KO] 투과 BTDF도 보통 코사인을 포함하므로 단위를 맞춰 합성
-        diffuse_term = mix(diffuse_term, diffuseTransmissionBTDF * max(-NdotL_origin, 0.0), diffuseTransmissionParameter);
     }
     #redgpu_endIf
 
-    // [KO] 비금속(Dielectric) 성분 합성
-    // 1. 스펙큘러 반사(Front)
-    let dielec_spec_reflect = SPECULAR_BRDF * max(NdotL_origin, 0.0);
-    // 2. 스펙큘러 투과(Back - Glass)
-    var dielec_spec_transmit = vec3<f32>(0.0);
-    #redgpu_if useKHR_materials_transmission
-    if (transmissionParameter > 0.0) {
-        dielec_spec_transmit = SPECULAR_BTDF * max(-NdotL_origin, 0.0);
-    }
-    #redgpu_endIf
-
-    // [KO] 프레넬을 이용한 스펙큘러와 확산/투과 층의 물리적 레이어링
-    // [EN] Physical layering of specular and diffuse/transmission layers using Fresnel
+    // [KO] 5. 물리적 레이어링 (Energy Conservation)
+    // [KO] 스페큘러 BRDF에는 이미 프레넬이 포함되어 있으므로, 하부 레이어 감쇄를 위해 프레넬만 별도로 계산
     let F = getFresnelSchlick(VdotH, F0);
-    let dielectricPart = F * dielec_spec_reflect + (vec3<f32>(1.0) - F) * (mix(diffuse_term, dielec_spec_transmit, transmissionParameter)) * sheen_albedo_scaling;
+    
+    // [KO] 비금속(Dielectric) 레이어링: Specular + (1-F) * (Diffuse or Transmit)
+    let dielectricPart = (SPEC_BRDF * max(NdotL_origin, 0.0)) + (vec3<f32>(1.0) - F) * mix(diffuse_term, dielec_spec_transmit, transmissionParameter);
 
-    let sheenPart = SHEEN_BRDF * max(NdotL_origin, 0.0);
-    var result = (metallicPart * max(NdotL_origin, 0.0) + dielectricPart + sheenPart);
+    // [KO] 금속(Metallic) 레이어링: 금속은 확산광이나 투과광이 없음
+    let metallicPart = SPEC_BRDF * max(NdotL_origin, 0.0);
 
+    // [KO] 금속성 파라미터에 따른 최종 합성
+    var result = mix(dielectricPart, metallicPart, metallicParameter);
+
+    // [KO] Sheen 레이어링: Sheen + AlbedoScaling * Base
+    result = result * sheen_albedo_scaling + SHEEN_BRDF * max(NdotL_origin, 0.0);
+
+    // [KO] 6. Clearcoat (코팅층) 합성
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
             let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
@@ -978,13 +973,9 @@ fn calcLight(
             let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
             let clearcoatF0 = vec3<f32>(0.04);
             
-            // [KO] 클리어코트 전용 스펙큘러 BRDF 계산
             let CLEARCOAT_SPEC = getSpecularBRDF(clearcoatF0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
-            
-            // [KO] 클리어코트 프레넬 계산 (하부 레이어 감쇄용)
             let coatF = getFresnelSchlick(clearcoatNdotV, clearcoatF0) * clearcoatParameter;
             
-            // [KO] 최종 합성: 클리어코트 반사 + (1 - 클리어코트프레넬) * 하부 레이어
             result = (CLEARCOAT_SPEC * clearcoatNdotL) + (vec3<f32>(1.0) - coatF) * result;
         }
     #redgpu_endIf
