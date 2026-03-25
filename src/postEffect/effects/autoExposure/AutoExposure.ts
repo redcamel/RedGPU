@@ -29,6 +29,9 @@ class AutoExposure {
     #adjustmentSpeedUp: number = 2.0;
     #adjustmentSpeedDown: number = 1.0;
     #targetLuminance: number = 0.18;
+    #minLuminance: number = 0.03;
+    #maxLuminance: number = 2.0;
+    #maxExposureMultiplier: number = 8.0;
     
     #prevTime: number = 0;
     #currentExposureMultiplier: number = 1.0;
@@ -67,8 +70,8 @@ class AutoExposure {
         });
         this.#intermediateLuminanceTextureView = this.#intermediateLuminanceTexture.createView();
         
-        // Uniform buffer
-        const uniformData = new Float32Array([this.#speed, this.#adjustmentSpeedUp, this.#adjustmentSpeedDown, this.#targetLuminance]);
+        // Uniform buffer (deltaTime, speed, speedUp, speedDown, targetLum, minLum, maxLum)
+        const uniformData = new Float32Array([0, this.#speed, this.#adjustmentSpeedUp, this.#adjustmentSpeedDown, this.#targetLuminance, this.#minLuminance, this.#maxLuminance]);
         this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }
 
@@ -116,7 +119,19 @@ class AutoExposure {
         this.#prevTime = currentTime;
         
         // Update uniforms
-        gpuDevice.queue.writeBuffer(this.#uniformBuffer.gpuBuffer, 0, new Float32Array([deltaTime]));
+        gpuDevice.queue.writeBuffer(
+            this.#uniformBuffer.gpuBuffer, 
+            0, 
+            new Float32Array([
+                deltaTime, 
+                this.#speed, 
+                this.#adjustmentSpeedUp, 
+                this.#adjustmentSpeedDown, 
+                this.#targetLuminance, 
+                this.#minLuminance, 
+                this.#maxLuminance
+            ])
+        );
         
         const encoder = gpuDevice.createCommandEncoder({ label: 'AutoExposure_CommandEncoder' });
         
@@ -170,7 +185,8 @@ class AutoExposure {
                 this.#readBuffer.unmap();
                 
                 // finalExposure = target / average
-                this.#currentExposureMultiplier = this.#targetLuminance / Math.max(adaptedLum, 0.0001);
+                let exposure = this.#targetLuminance / Math.max(adaptedLum, 0.0001);
+                this.#currentExposureMultiplier = Math.min(exposure, this.#maxExposureMultiplier);
                 this.#isReading = false;
             });
         } else {

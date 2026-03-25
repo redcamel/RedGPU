@@ -307,7 +307,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // [KO] 시선 방향 벡터 계산 [EN] View direction vector calculation
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
-    let NdotV = max(dot(N, V), 0.04);
+    let NdotV = max(dot(N, V), 1e-4);
     let VdotN = max(dot(V, N), 0.0);
 
     // [KO] 그림자 가시성 계산 [EN] Shadow visibility calculation
@@ -556,8 +556,8 @@ fn main(inputData:InputData) -> OutputFragment {
         let L = -normalize(u_directionalLights[i].direction);
         
         // [KO] 통합 에너지 계산 (색상 * 강도 * 노출 * 가시성)
-        // [KO] INV_PI 보정은 calcLight 내부의 BRDF 함수에서 처리되므로 여기서는 제거
-        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
+        // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환하기 위해 INV_PI 적용
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility * INV_PI;
 
         // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용 (분광 감쇄)
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
@@ -612,8 +612,8 @@ fn main(inputData:InputData) -> OutputFragment {
          }
 
          // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출)
-         // [KO] INV_PI 보정은 calcLight 내부의 BRDF 함수에서 처리되므로 여기서는 제거
-         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
+         // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환하기 위해 INV_PI 적용
+         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure * INV_PI;
 
          // [KO] calcLight 함수 호출 (24개 인자) [EN] Call calcLight function (24 arguments)
          totalDirectLighting += calcLight(
@@ -883,7 +883,7 @@ fn calcLight(
     let dLight = lightColor; // [KO] 이미 모든 감쇄 및 노출이 곱해진 최종 에너지 [EN] Final energy with all attenuation and exposure applied
 
     let NdotL_origin = dot(N, L);
-    let NdotL = max(NdotL_origin, 0.04);
+    let NdotL = max(NdotL_origin, 0.0);
     let H = normalize(L + V);
     let NdotH = max(dot(N, H), 0.0);
     let LdotH = max(dot(L, H), 0.0);
@@ -967,7 +967,7 @@ fn calcLight(
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
             let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
-            let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
+            let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-4);
             let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
             let clearcoatF0 = vec3<f32>(0.04);
             
