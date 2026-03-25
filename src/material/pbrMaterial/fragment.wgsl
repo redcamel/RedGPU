@@ -713,9 +713,9 @@ fn main(inputData:InputData) -> OutputFragment {
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
 
         // [KO] 거칠기를 고려한 다이렉트와 간접 반사율 계산 (Split Sum Approximation)
-        let F_IBL_dielectric = getFresnelSchlick(NdotV, F0_dielectric) * envBRDF.x + envBRDF.y;
-        let F_IBL_metal      = getFresnelSchlick(NdotV, F0_metal) * envBRDF.x + envBRDF.y;
-        let F_IBL            = getFresnelSchlick(NdotV, F0) * envBRDF.x + envBRDF.y;
+        let F_IBL_dielectric = F0_dielectric * envBRDF.x + envBRDF.y;
+        let F_IBL_metal      = F0_metal * envBRDF.x + envBRDF.y;
+        let F_IBL            = F0 * envBRDF.x + envBRDF.y;
 
         // [KO] ibl 스펙큘러 반사 [EN] ibl Specular Reflection
         let envIBL_SPECULAR:vec3<f32> = reflectedColor * F_IBL * specularParameter ;
