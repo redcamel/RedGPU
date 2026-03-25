@@ -37,7 +37,7 @@ fn getSheenIBL(
     let R = getReflectionVectorFromViewDirection(V, N);
 
     let mipLevel = sheenRoughness * iblMipmapCount;
-    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb;
+    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb  / systemUniforms.preExposure;
 
     let sheenDFG = getSheenCharlieDFG(NdotV, sheenRoughness);
     let contribution = sheenRadiance * sheenColor * sheenDFG;

@@ -668,12 +668,12 @@ fn main(inputData:InputData) -> OutputFragment {
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
         var iblMipmapCount: f32 = 0.0;
-        
+
         if (u_usePrefilterTexture) {
             iblMipmapCount = f32(textureNumLevels(ibl_environmentTexture) - 1);
             var mipLevel = roughnessParameter * iblMipmapCount;
-            reflectedColor = textureSampleLevel( ibl_environmentTexture, prefilterTextureSampler, R, mipLevel ).rgb;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb;
+            reflectedColor = textureSampleLevel( ibl_environmentTexture, prefilterTextureSampler, R, mipLevel ).rgb  / systemUniforms.preExposure;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb  / systemUniforms.preExposure;
         }
 
         // [KO] 대기 산란 필터링 및 조도 합성 (IBL 동기화)
@@ -721,7 +721,7 @@ fn main(inputData:InputData) -> OutputFragment {
         let envIBL_SPECULAR:vec3<f32> = reflectedColor * F_IBL * specularParameter ;
 
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric) * INV_PI;
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
 
         // [KO] ibl 확산 투과 (Diffuse Transmission) [EN] ibl Diffuse Transmission
         #redgpu_if useKHR_materials_diffuse_transmission
@@ -729,7 +729,7 @@ fn main(inputData:InputData) -> OutputFragment {
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
                 let mipLevel = roughnessParameter * iblMipmapCount;
-                backScatteringColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, -N, mipLevel).rgb;
+                backScatteringColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, -N, mipLevel).rgb / systemUniforms.preExposure;
             }
             if (systemUniforms.useSkyAtmosphere == 1u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
@@ -779,7 +779,7 @@ fn main(inputData:InputData) -> OutputFragment {
                  let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
                  let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
-                 var clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb;
+                 var clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb / systemUniforms.preExposure;
 
                  if (systemUniforms.useSkyAtmosphere == 1u) {
                      let u_atmo = systemUniforms.skyAtmosphere;
