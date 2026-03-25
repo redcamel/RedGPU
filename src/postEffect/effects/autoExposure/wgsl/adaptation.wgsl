@@ -5,69 +5,71 @@ struct AutoExposureUniforms {
     adjustmentSpeedDown: f32,
     targetLuminance: f32,
     minLuminance: f32,
-    maxLuminance: f32
+    maxLuminance: f32,
+    minLogLum: f32,
+    logLumRange: f32,
+    lowPercentile: f32,
+    highPercentile: f32,
+    invLogLumRange: f32,
+    width: f32,
+    height: f32
 };
 
-@group(0) @binding(0) var sourceTexture : texture_2d<f32>;
-@group(1) @binding(0) var<storage, read_write> adaptedLuminance : f32;
-@group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;
+@group(0) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 64>;
+@group(0) @binding(1) var<storage, read_write> adaptedLuminance : f32;
+@group(0) @binding(2) var<uniform> uniforms : AutoExposureUniforms;
 
-var<workgroup> sharedLum: array<f32, 256>;
-var<workgroup> sharedWeight: array<f32, 256>;
+@compute @workgroup_size(1, 1, 1)
+fn main() {
+    var countBuffer: array<u32, 64>;
+    var totalPixels: u32 = 0u;
 
-@compute @workgroup_size(16, 16, 1)
-fn main(
-    @builtin(local_invocation_index) local_index: u32,
-    @builtin(global_invocation_id) global_id: vec3<u32>
-) {
-    let size = textureDimensions(sourceTexture);
-    var lum: f32 = 0.0;
-    var weight: f32 = 0.0;
-    if (global_id.x < size.x && global_id.y < size.y) {
-        let tex = textureLoad(sourceTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0);
-        // tex.r: average log luminance of the block
-        // tex.g: count of samples in the block
-        lum = tex.r * tex.g;
-        weight = tex.g;
+    // [KO] 히스토그램 데이터 읽기 및 초기화 [EN] Read and clear histogram data
+    for (var i = 0u; i < 64u; i = i + 1u) {
+        let val = atomicExchange(&histogram[i], 0u);
+        countBuffer[i] = val;
+        totalPixels += val;
     }
 
-    sharedLum[local_index] = lum;
-    sharedWeight[local_index] = weight;
-    workgroupBarrier();
+    if (totalPixels == 0u) { return; }
 
-    // Simple reduction
-    for (var i = 128u; i > 0u; i = i >> 1u) {
-        if (local_index < i) {
-            sharedLum[local_index] += sharedLum[local_index + i];
-            sharedWeight[local_index] += sharedWeight[local_index + i];
+    // [KO] 언리얼 스타일의 퍼센타일 기반 필터링
+    // [EN] Unreal-style percentile-based filtering
+    let minPixel = u32(f32(totalPixels) * uniforms.lowPercentile);
+    let maxPixel = u32(f32(totalPixels) * uniforms.highPercentile);
+
+    var pixelCounter: u32 = 0u;
+    var weightedLogLumSum: f32 = 0.0;
+    var weightedPixelCount: f32 = 0.0;
+
+    for (var i = 0u; i < 64u; i = i + 1u) {
+        let nextCounter = pixelCounter + countBuffer[i];
+        
+        // [KO] 유효 범위(low ~ high percentile) 내의 픽셀들만 선별
+        // [EN] Filter pixels within the valid percentile range
+        let validPixels = max(0.0, f32(min(nextCounter, maxPixel)) - f32(max(pixelCounter, minPixel)));
+        if (validPixels > 0.0) {
+            let logLum = uniforms.minLogLum + (f32(i) / 63.0) * uniforms.logLumRange;
+            weightedLogLumSum += logLum * validPixels;
+            weightedPixelCount += validPixels;
         }
-        workgroupBarrier();
+        pixelCounter = nextCounter;
     }
 
-    if (local_index == 0u) {
-        let totalWeight = max(sharedWeight[0], 1.0);
-        let avgLogLum = sharedLum[0] / totalWeight;
-        
-        // [KO] 기하 평균 휘도 계산 (Geometric Mean)
-        // [EN] Calculate Geometric Mean Luminance
-        let currentLum = exp(avgLogLum);
+    // [KO] 기하 평균 휘도 산출 (Geometric Mean via Log2)
+    // [EN] Calculate geometric mean luminance
+    let avgLogLum = weightedLogLumSum / max(weightedPixelCount, 1.0);
+    let currentLum = pow(2.0, avgLogLum);
 
-        // [KO] 이전 적응 휘도값 (0 나누기 방지)
-        // [EN] Previous adapted luminance value (prevent divide by zero)
-        let prevLum = max(adaptedLuminance, 0.001);
-        
-        // [KO] 밝아질 때와 어두워질 때의 속도 차별화 (언리얼 방식)
-        // [EN] Differentiate speeds for getting brighter vs darker (Unreal style)
-        let diff = currentLum - prevLum;
-        let speedMult = select(uniforms.adjustmentSpeedDown, uniforms.adjustmentSpeedUp, diff > 0.0);
-
-        // [KO] 시간 변화량(deltaTime)을 고려하여 부드럽게 적응
-        // [EN] Adapt smoothly considering deltaTime
-        let adaptationFactor = 1.0 - exp(-uniforms.speed * speedMult * uniforms.deltaTime);
-        var nextLum = prevLum + diff * adaptationFactor;
-
-        // [KO] 휘도 범위를 제한하여 어두운 곳에서 너무 밝아지거나 밝은 곳에서 너무 어두워지는 것을 방지
-        // [EN] Limit luminance range to prevent over-brightness in dark areas or over-darkness in bright areas
-        adaptedLuminance = clamp(nextLum, uniforms.minLuminance, uniforms.maxLuminance);
-    }
+    // [KO] 눈 적응 시뮬레이션 [EN] Eye adaptation simulation
+    let prevLum = max(adaptedLuminance, 0.001);
+    let diff = currentLum - prevLum;
+    let speed = select(uniforms.adjustmentSpeedDown, uniforms.adjustmentSpeedUp, diff > 0.0);
+    
+    // [KO] 지수 감쇄 공식 (언리얼 방식) [EN] Exponential decay formula (Unreal style)
+    let adaptationFactor = 1.0 - exp(-uniforms.speed * speed * uniforms.deltaTime);
+    var nextLum = prevLum + diff * adaptationFactor;
+    
+    // [KO] 휘도 범위 제한 [EN] Limit luminance range
+    adaptedLuminance = clamp(nextLum, uniforms.minLuminance, uniforms.maxLuminance);
 }

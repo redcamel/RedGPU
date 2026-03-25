@@ -13,8 +13,7 @@ import adaptationCode from "./wgsl/adaptation.wgsl";
 class AutoExposure {
     readonly #redGPUContext: RedGPUContext;
     #adaptedLuminanceBuffer: StorageBuffer;
-    #intermediateLuminanceTexture: GPUTexture;
-    #intermediateLuminanceTextureView: GPUTextureView;
+    #histogramBuffer: StorageBuffer;
     
     #downsamplePipeline: GPUComputePipeline;
     #adaptationPipeline: GPUComputePipeline;
@@ -22,7 +21,6 @@ class AutoExposure {
     #downsampleBindGroupLayout0: GPUBindGroupLayout;
     #downsampleBindGroupLayout1: GPUBindGroupLayout;
     #adaptationBindGroupLayout0: GPUBindGroupLayout;
-    #adaptationBindGroupLayout1: GPUBindGroupLayout;
     
     #uniformBuffer: UniformBuffer;
     #speed: number = 3.0;
@@ -32,6 +30,12 @@ class AutoExposure {
     #minLuminance: number = 0.03;
     #maxLuminance: number = 2.0;
     #maxExposureMultiplier: number = 8.0;
+
+    // [KO] 히스토그램 파라미터 [EN] Histogram parameters
+    #minLogLum: number = -10.0;
+    #maxLogLum: number = 10.0;
+    #lowPercentile: number = 0.1;  // [KO] 하위 10% 제외 [EN] Exclude bottom 10%
+    #highPercentile: number = 0.9; // [KO] 상위 10% 제외 [EN] Exclude top 10%
     
     #prevTime: number = 0;
     #currentExposureMultiplier: number = 1.0;
@@ -54,24 +58,18 @@ class AutoExposure {
         const initialData = new Float32Array([this.#targetLuminance]);
         this.#adaptedLuminanceBuffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedLuminance');
         
+        // [KO] 히스토그램 버퍼 (64 bins) [EN] Histogram buffer (64 bins)
+        this.#histogramBuffer = new StorageBuffer(this.#redGPUContext, new Uint32Array(64).buffer, 'AutoExposure_HistogramBuffer');
+
         // Readback buffer
         this.#readBuffer = gpuDevice.createBuffer({
             size: 4,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
             label: 'AutoExposure_ReadBuffer'
         });
-
-        // Intermediate 16x16 luminance texture
-        this.#intermediateLuminanceTexture = this.#redGPUContext.resourceManager.createManagedTexture({
-            size: [16, 16, 1],
-            format: 'rgba16float',
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
-            label: 'AutoExposure_IntermediateLuminance'
-        });
-        this.#intermediateLuminanceTextureView = this.#intermediateLuminanceTexture.createView();
         
-        // Uniform buffer (deltaTime, speed, speedUp, speedDown, targetLum, minLum, maxLum)
-        const uniformData = new Float32Array([0, this.#speed, this.#adjustmentSpeedUp, this.#adjustmentSpeedDown, this.#targetLuminance, this.#minLuminance, this.#maxLuminance]);
+        // [KO] 통합 유니폼 데이터 구성 (총 14개 요소) [EN] Unified uniform data configuration (total 14 elements)
+        const uniformData = new Float32Array(14);
         this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }
 
@@ -81,21 +79,21 @@ class AutoExposure {
         const downsampleModule = resourceManager.createGPUShaderModule('AutoExposure_Downsample', { code: downsampleLogLuminanceCode });
         const adaptationModule = resourceManager.createGPUShaderModule('AutoExposure_Adaptation', { code: adaptationCode });
         
-        // 리플렉션 오류를 피하기 위해 수동으로 레이아웃 정의 (Manual Layout Definition)
         this.#downsampleBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Downsample_BGL0', {
             entries: [{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} }]
         });
         this.#downsampleBindGroupLayout1 = resourceManager.createBindGroupLayout('AutoExposure_Downsample_BGL1', {
-            entries: [{ binding: 0, visibility: GPUShaderStage.COMPUTE, storageTexture: { format: 'rgba16float', access: 'write-only' } }]
-        });
-        
-        this.#adaptationBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Adaptation_BGL0', {
-            entries: [{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} }]
-        });
-        this.#adaptationBindGroupLayout1 = resourceManager.createBindGroupLayout('AutoExposure_Adaptation_BGL1', {
             entries: [
                 { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
                 { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }
+            ]
+        });
+        
+        this.#adaptationBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Adaptation_BGL0', {
+            entries: [
+                { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
+                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
+                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }
             ]
         });
         
@@ -107,18 +105,21 @@ class AutoExposure {
         
         this.#adaptationPipeline = gpuDevice.createComputePipeline({
             label: 'AutoExposure_Adaptation_Pipeline',
-            layout: gpuDevice.createPipelineLayout({ bindGroupLayouts: [this.#adaptationBindGroupLayout0, this.#adaptationBindGroupLayout1] }),
+            layout: gpuDevice.createPipelineLayout({ bindGroupLayouts: [this.#adaptationBindGroupLayout0] }),
             compute: { module: adaptationModule, entryPoint: 'main' }
         });
     }
 
     render(view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
         const {gpuDevice} = this.#redGPUContext;
+        const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
         const currentTime = performance.now();
         const deltaTime = this.#prevTime === 0 ? 0.016 : (currentTime - this.#prevTime) / 1000;
         this.#prevTime = currentTime;
         
-        // Update uniforms
+        const logLumRange = this.#maxLogLum - this.#minLogLum;
+        
+        // Update uniforms (총 14개 필드 순서 유지)
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer, 
             0, 
@@ -129,46 +130,52 @@ class AutoExposure {
                 this.#adjustmentSpeedDown, 
                 this.#targetLuminance, 
                 this.#minLuminance, 
-                this.#maxLuminance
+                this.#maxLuminance,
+                this.#minLogLum,
+                logLumRange,
+                this.#lowPercentile,
+                this.#highPercentile,
+                1.0 / logLumRange,
+                width,
+                height
             ])
         );
         
         const encoder = gpuDevice.createCommandEncoder({ label: 'AutoExposure_CommandEncoder' });
         
-        // Pass 1: Downsample to 16x16 log-luminance
+        // Pass 1: Generate Histogram
         const downsampleBindGroup0 = gpuDevice.createBindGroup({
             layout: this.#downsampleBindGroupLayout0,
             entries: [{ binding: 0, resource: sourceTextureInfo.textureView }]
         });
         const downsampleBindGroup1 = gpuDevice.createBindGroup({
             layout: this.#downsampleBindGroupLayout1,
-            entries: [{ binding: 0, resource: this.#intermediateLuminanceTextureView }]
+            entries: [
+                { binding: 0, resource: { buffer: this.#histogramBuffer.gpuBuffer } },
+                { binding: 1, resource: { buffer: this.#uniformBuffer.gpuBuffer } }
+            ]
         });
         
         const pass1 = encoder.beginComputePass();
         pass1.setPipeline(this.#downsamplePipeline);
         pass1.setBindGroup(0, downsampleBindGroup0);
         pass1.setBindGroup(1, downsampleBindGroup1);
-        pass1.dispatchWorkgroups(1, 1, 1);
+        pass1.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16), 1);
         pass1.end();
         
-        // Pass 2: Reduce to 1x1 and Adapt
+        // Pass 2: Average Histogram and Adapt
         const adaptationBindGroup0 = gpuDevice.createBindGroup({
             layout: this.#adaptationBindGroupLayout0,
-            entries: [{ binding: 0, resource: this.#intermediateLuminanceTextureView }]
-        });
-        const adaptationBindGroup1 = gpuDevice.createBindGroup({
-            layout: this.#adaptationBindGroupLayout1,
             entries: [
-                { binding: 0, resource: { buffer: this.#adaptedLuminanceBuffer.gpuBuffer } },
-                { binding: 1, resource: { buffer: this.#uniformBuffer.gpuBuffer } }
+                { binding: 0, resource: { buffer: this.#histogramBuffer.gpuBuffer } },
+                { binding: 1, resource: { buffer: this.#adaptedLuminanceBuffer.gpuBuffer } },
+                { binding: 2, resource: { buffer: this.#uniformBuffer.gpuBuffer } }
             ]
         });
         
         const pass2 = encoder.beginComputePass();
         pass2.setPipeline(this.#adaptationPipeline);
         pass2.setBindGroup(0, adaptationBindGroup0);
-        pass2.setBindGroup(1, adaptationBindGroup1);
         pass2.dispatchWorkgroups(1, 1, 1);
         pass2.end();
         
