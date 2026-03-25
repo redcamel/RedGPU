@@ -21,12 +21,15 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     
     for (var y = start.y; y < end.y; y = y + 1u) {
         for (var x = start.x; x < end.x; x = x + 1u) {
-            let color = textureLoad(sourceTexture, vec2<i32>(i32(x), i32(y)), 0).rgb;
-            let lum = getLuminance(color);
-            avgLogLum += log(max(lum, 0.000001));
-            count += 1.0;
+            let texColor = textureLoad(sourceTexture, vec2<i32>(i32(x), i32(y)), 0);
+            if (texColor.a > 0.0) {
+                let lum = getLuminance(texColor.rgb);
+                avgLogLum += log(max(lum, 0.000001));
+                count += 1.0;
+            }
         }
     }
     
-    textureStore(outputTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), vec4<f32>(avgLogLum / max(count, 1.0), 0.0, 0.0, 1.0));
+    let finalAvg = select(0.0, avgLogLum / count, count > 0.0);
+    textureStore(outputTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), vec4<f32>(finalAvg, count, 0.0, 1.0));
 }

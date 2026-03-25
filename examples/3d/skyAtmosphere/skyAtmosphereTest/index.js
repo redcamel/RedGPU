@@ -74,7 +74,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
 
     setDebugButtons(RedGPU, targetView.redGPUContext);
-    createFieldOfView(pane, targetView.camera);
+    createFieldOfView(pane, targetView.rawCamera);
 
     const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
     f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
@@ -84,10 +84,10 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'sunLimbDarkening'});
 
     const f_camera = pane.addFolder({title: 'Camera Exposure', expanded: true});
-    f_camera.addBinding(targetView.camera, 'exposureCompensation', {min: -10, max: 10, step: 0.1, label: 'Exposure Bias'});
-    f_camera.addBinding(targetView.camera, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'});
-    f_camera.addBinding(targetView.camera, 'shutterSpeed', {min: 1/4000, max: 1, step: 0.0001, label: 'Shutter Speed (s)'});
-    f_camera.addBinding(targetView.camera, 'iso', {min: 50, max: 3200, step: 1, label: 'ISO'});
+    f_camera.addBinding(targetView.rawCamera, 'exposureCompensation', {min: -10, max: 10, step: 0.1, label: 'Exposure Bias'});
+    f_camera.addBinding(targetView.rawCamera, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'});
+    f_camera.addBinding(targetView.rawCamera, 'shutterSpeed', {min: 1/4000, max: 1, step: 0.0001, label: 'Shutter Speed (s)'});
+    f_camera.addBinding(targetView.rawCamera, 'iso', {min: 50, max: 3200, step: 1, label: 'ISO'});
 
     const f_planet = pane.addFolder({title: 'Planet', expanded: false});
     f_planet.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 1, label: 'bottomRadius (km)'});
@@ -163,6 +163,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
         },
         label: 'mode'
     });
+    f_tonemapping.addBinding(targetView.toneMappingManager, 'exposure', {min: 0, max: 10, step: 0.01, label: 'exposure'});
     f_tonemapping.addBinding(targetView.toneMappingManager, 'contrast', {min: 0, max: 2, step: 0.01, label: 'contrast'});
     f_tonemapping.addBinding(targetView.toneMappingManager, 'brightness', {min: -1, max: 1, step: 0.01, label: 'brightness'});
 

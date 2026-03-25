@@ -1,4 +1,4 @@
-import * as RedGPU from "../../../../dist/index.js";
+import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -75,23 +75,29 @@ RedGPU.init(
 );
 
 const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js");
+    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
     const pane = new Pane({title: 'SkyAtmosphere glTF', expanded: true});
 
     const {
         createFieldOfView,
         setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js");
+    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
 
     setDebugButtons(RedGPU, targetView.redGPUContext);
-    createFieldOfView(pane, targetView.camera);
+    createFieldOfView(pane, targetView.rawCamera);
 
     const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
     f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
     f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
-    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 10000, step: 0.1, label: 'sunIntensity'});
+    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 200000, step: 1, label: 'sunIntensity (Lux)'});
     f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'sunSize'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'sunLimbDarkening'});
+
+    const f_camera = pane.addFolder({title: 'Camera Exposure', expanded: false});
+    f_camera.addBinding(targetView.rawCamera, 'exposureCompensation', {min: -10, max: 10, step: 0.1, label: 'Exposure Bias'});
+    f_camera.addBinding(targetView.rawCamera, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'});
+    f_camera.addBinding(targetView.rawCamera, 'shutterSpeed', {min: 1/4000, max: 1, step: 0.0001, label: 'Shutter Speed (s)'});
+    f_camera.addBinding(targetView.rawCamera, 'iso', {min: 50, max: 3200, step: 1, label: 'ISO'});
 
     const f_planet = pane.addFolder({title: 'Planet', expanded: false});
     f_planet.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 1, label: 'bottomRadius (km)'});
@@ -157,8 +163,19 @@ const renderTestPane = async (targetView, skyAtmosphere, ibl, skybox) => {
     f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.001, label: 'heightFogFalloff'});
     f_fog.addBinding(skyAtmosphere, 'heightFogAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'heightFogAnisotropy (g)'});
 
-    const f_tonemapping = pane.addFolder({title: 'ToneMapping', expanded: false});
+    const f_tonemapping = pane.addFolder({title: 'ToneMapping (Global)', expanded: false});
+    f_tonemapping.addBinding(targetView.toneMappingManager, 'mode', {
+        options: {
+            LINEAR: RedGPU.ToneMapping.TONE_MAPPING_MODE.LINEAR,
+            KHRONOS_PBR_NEUTRAL: RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL,
+            ACES_FILMIC_NARKOWICZ: RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ,
+            ACES_FILMIC_HILL: RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL,
+        },
+        label: 'mode'
+    });
     f_tonemapping.addBinding(targetView.toneMappingManager, 'exposure', {min: 0, max: 10, step: 0.01, label: 'exposure'});
+    f_tonemapping.addBinding(targetView.toneMappingManager, 'contrast', {min: 0, max: 2, step: 0.01, label: 'contrast'});
+    f_tonemapping.addBinding(targetView.toneMappingManager, 'brightness', {min: -1, max: 1, step: 0.01, label: 'brightness'});
 
     const state = {
         enabled: true,
