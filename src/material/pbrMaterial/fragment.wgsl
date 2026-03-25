@@ -806,20 +806,8 @@ fn main(inputData:InputData) -> OutputFragment {
         let environmentIntensity = 1.0;
         var surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter;
 
-        // [KO] 에미시브 계산 [EN] Emissive calculation
-        var emissiveColor = u_emissiveFactor * u_emissiveStrength;
-        #redgpu_if emissiveTexture
-            emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
-        #redgpu_endIf
-        
-        // [KO] 에미시브 물리 기반 보정 및 합산 (Intensity to Radiance)
-        // [EN] Physically-based emissive correction and addition (Intensity to Radiance)
-        surfaceColor += emissiveColor;
-        
-        // [KO] 에미시브 기여도를 알파에도 반영 (에미시브가 있을 경우 투명도 무시 방지)
-        // [EN] Reflect emissive contribution in alpha (prevents discard/transparency when emissive is present)
-        resultAlpha = clamp(resultAlpha + max(emissiveColor.r, max(emissiveColor.g, emissiveColor.b)), 0.0, 1.0);
-        
+
+
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
     } else {
         // [KO] 환경광 물리 기반 보정 (Lux to Radiance)
@@ -830,7 +818,6 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
             let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
-            // [KO] ambientContribution과 refraction만 믹스하여 totalDirectLighting(스페큘러 포함)에 더함
             surfaceColor += mix(ambientContribution, transmissionRefraction * systemUniforms.preExposure, transmissionWeight);
         } else {
             surfaceColor += ambientContribution;
@@ -839,18 +826,19 @@ fn main(inputData:InputData) -> OutputFragment {
             surfaceColor += ambientContribution;
         #redgpu_endIf
 
-        // [KO] 에미시브 계산 (비 IBL 모드) [EN] Emissive calculation (Non-IBL mode)
-        var emissiveColor = u_emissiveFactor * u_emissiveStrength;
-        #redgpu_if emissiveTexture
-            emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
-        #redgpu_endIf
-        surfaceColor += emissiveColor;
-        
-        // [KO] 에미시브 기여도를 알파에도 반영
-        resultAlpha = clamp(resultAlpha + max(emissiveColor.r, max(emissiveColor.g, emissiveColor.b)), 0.0, 1.0);
+
 
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
     }
+    // [KO] 에미시브 계산 [EN] Emissive calculation
+    var emissiveColor = u_emissiveFactor * u_emissiveStrength;
+    #redgpu_if emissiveTexture
+        emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
+    #redgpu_endIf
+
+    // [KO] 에미시브 물리 기반 보정 및 합산 (Intensity to Radiance)
+    // [EN] Physically-based emissive correction and addition (Intensity to Radiance)
+    finalColor = vec4<f32>(finalColor.rgb + emissiveColor, resultAlpha);
 
     // [KO] 컷오프 판단 [EN] Cut-off check
     #redgpu_if useCutOff

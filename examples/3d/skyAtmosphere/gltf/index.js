@@ -10,6 +10,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
+        scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight())
         // 1. SkyAtmosphere 초기화
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         skyAtmosphere.sunElevation = 5;
