@@ -816,6 +816,10 @@ fn main(inputData:InputData) -> OutputFragment {
         // [EN] Physically-based emissive correction and addition (Intensity to Radiance)
         surfaceColor += emissiveColor;
         
+        // [KO] 에미시브 기여도를 알파에도 반영 (에미시브가 있을 경우 투명도 무시 방지)
+        // [EN] Reflect emissive contribution in alpha (prevents discard/transparency when emissive is present)
+        resultAlpha = clamp(resultAlpha + max(emissiveColor.r, max(emissiveColor.g, emissiveColor.b)), 0.0, 1.0);
+        
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
     } else {
         // [KO] 환경광 물리 기반 보정 (Lux to Radiance)
@@ -841,6 +845,9 @@ fn main(inputData:InputData) -> OutputFragment {
             emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
         #redgpu_endIf
         surfaceColor += emissiveColor;
+        
+        // [KO] 에미시브 기여도를 알파에도 반영
+        resultAlpha = clamp(resultAlpha + max(emissiveColor.r, max(emissiveColor.g, emissiveColor.b)), 0.0, 1.0);
 
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
     }
