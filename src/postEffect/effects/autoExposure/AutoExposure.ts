@@ -26,11 +26,8 @@ class AutoExposure {
     #uniformBuffer: UniformBuffer;
     #maxExposureMultiplier: number = 64.0;
 
-    // [KO] 히스토그램 파라미터 [EN] Histogram parameters
-    #lowPercentile: number = 0.0;  // [KO] 하위 10% 제외 [EN] Exclude bottom 10%
-    #highPercentile: number = 1.0; // [KO] 상위 10% 제외 [EN] Exclude top 10%
-    
     #prevTime: number = 0;
+
     #currentExposureMultiplier: number = 1.0;
     #readBuffer: GPUBuffer;
     #isReading: boolean = false;
@@ -129,8 +126,8 @@ class AutoExposure {
                 rawCamera.maxEV100,
                 ACamera.CALIBRATION_CONSTANT,
                 ev100Range,
-                this.#lowPercentile,
-                this.#highPercentile,
+                rawCamera.lowPercentile,
+                rawCamera.highPercentile,
                 1.0 / ev100Range,
                 width,
                 height

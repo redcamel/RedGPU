@@ -73,6 +73,18 @@ abstract class ACamera {
     #adaptationSpeedDown: number = 1.0;
 
     /**
+     * [KO] 히스토그램 분석 범위 (하위 퍼센트 제외)
+     * [EN] Histogram analysis range (exclude bottom percentile)
+     */
+    #lowPercentile: number = 0.1;
+
+    /**
+     * [KO] 히스토그램 분석 범위 (상위 퍼센트 제외)
+     * [EN] Histogram analysis range (exclude top percentile)
+     */
+    #highPercentile: number = 0.9;
+
+    /**
      * [KO] 교정 상수 (Calibration Constant, K)
      * [EN] Calibration constant (K)
      * @description
@@ -219,6 +231,40 @@ abstract class ACamera {
     set adaptationSpeedDown(value: number) {
         validateNumber(value);
         this.#adaptationSpeedDown = value;
+    }
+
+    /**
+     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 반환합니다.
+     * [EN] Returns the histogram analysis range (exclude bottom percentile).
+     */
+    get lowPercentile(): number {
+        return this.#lowPercentile;
+    }
+
+    /**
+     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 설정합니다.
+     * [EN] Sets the histogram analysis range (exclude bottom percentile).
+     */
+    set lowPercentile(value: number) {
+        validateNumber(value);
+        this.#lowPercentile = value;
+    }
+
+    /**
+     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 반환합니다.
+     * [EN] Returns the histogram analysis range (exclude top percentile).
+     */
+    get highPercentile(): number {
+        return this.#highPercentile;
+    }
+
+    /**
+     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 설정합니다.
+     * [EN] Sets the histogram analysis range (exclude top percentile).
+     */
+    set highPercentile(value: number) {
+        validateNumber(value);
+        this.#highPercentile = value;
     }
 
     /**
