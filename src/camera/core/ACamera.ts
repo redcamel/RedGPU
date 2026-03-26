@@ -28,7 +28,7 @@ abstract class ACamera {
      * [KO] 셔터 속도 (초)
      * [EN] Shutter speed (seconds)
      */
-    #shutterSpeed: number = 1 / 1000;
+    #shutterSpeed: number = 1 / 60;
 
     /**
      * [KO] 센서 감도 (ISO)
@@ -40,7 +40,7 @@ abstract class ACamera {
      * [KO] 노출 보정 (Exposure Compensation / Bias)
      * [EN] Exposure compensation (Bias)
      */
-    #exposureCompensation: number = 0;
+    #exposureCompensation: number = 1.0;
 
     /**
      * [KO] 목표 휘도 (18% Middle Gray 기준)
@@ -52,7 +52,7 @@ abstract class ACamera {
      * [KO] 자동 노출 최소 범위 (EV100)
      * [EN] Minimum auto-exposure limit (EV100)
      */
-    #minEV100: number = -10.0;
+    #minEV100: number = 1.0;
 
     /**
      * [KO] 자동 노출 최대 범위 (EV100)
@@ -64,7 +64,7 @@ abstract class ACamera {
      * [KO] 눈 적응 속도 (밝아질 때)
      * [EN] Eye adaptation speed (brightening)
      */
-    #adaptationSpeedUp: number = 2.0;
+    #adaptationSpeedUp: number = 3.0;
 
     /**
      * [KO] 눈 적응 속도 (어두워질 때)
@@ -76,13 +76,13 @@ abstract class ACamera {
      * [KO] 히스토그램 분석 범위 (하위 퍼센트 제외)
      * [EN] Histogram analysis range (exclude bottom percentile)
      */
-    #lowPercentile: number = 0.1;
+    #lowPercentile: number = 0.8;
 
     /**
      * [KO] 히스토그램 분석 범위 (상위 퍼센트 제외)
      * [EN] Histogram analysis range (exclude top percentile)
      */
-    #highPercentile: number = 0.9;
+    #highPercentile: number = 0.98;
 
     /**
      * [KO] 교정 상수 (Calibration Constant, K)
