@@ -27,7 +27,7 @@ class AutoExposure {
     #speed: number = 3.0;
     #adjustmentSpeedUp: number = 2.0;
     #adjustmentSpeedDown: number = 1.0;
-    #exposureCompensation: number = 0.0;
+    #targetLuminance: number = 0.18; // [KO] 목표 휘도 (18% Middle Gray) [EN] Target luminance (18% Middle Gray)
     #minEV100: number = -10.0;
     #maxEV100: number = 20.0;
     #maxExposureMultiplier: number = 64.0;
@@ -51,12 +51,21 @@ class AutoExposure {
         return this.#currentExposureMultiplier;
     }
 
+    get targetLuminance(): number { return this.#targetLuminance; }
+    set targetLuminance(value: number) { this.#targetLuminance = value; }
+
+    get minEV100(): number { return this.#minEV100; }
+    set minEV100(value: number) { this.#minEV100 = value; }
+
+    get maxEV100(): number { return this.#maxEV100; }
+    set maxEV100(value: number) { this.#maxEV100 = value; }
+
     #initResources() {
         const {gpuDevice} = this.#redGPUContext;
         
-        // [KO] 초기 EV100 값 설정 (대략적인 중간 밝기)
-        // [EN] Set initial EV100 value (approx. middle brightness)
-        const initialData = new Float32Array([10.0]);
+        // [KO] 초기 EV100 값 설정 (0.18 휘도에 해당하는 약 3.9 EV)
+        // [EN] Set initial EV100 value (approx. 3.9 EV for 0.18 luminance)
+        const initialData = new Float32Array([3.9]);
         this.#adaptedEV100Buffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
         
         // [KO] 히스토그램 버퍼 (64 bins) [EN] Histogram buffer (64 bins)
@@ -114,6 +123,7 @@ class AutoExposure {
     render(view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
         const {gpuDevice} = this.#redGPUContext;
         const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
+        const {rawCamera} = view;
         const currentTime = performance.now();
         const deltaTime = this.#prevTime === 0 ? 0.016 : (currentTime - this.#prevTime) / 1000;
         this.#prevTime = currentTime;
@@ -129,7 +139,7 @@ class AutoExposure {
                 this.#speed, 
                 this.#adjustmentSpeedUp, 
                 this.#adjustmentSpeedDown, 
-                this.#exposureCompensation, 
+                rawCamera.exposureCompensation, 
                 this.#minEV100, 
                 this.#maxEV100,
                 ACamera.CALIBRATION_CONSTANT,
@@ -192,11 +202,14 @@ class AutoExposure {
                 const adaptedEV100 = data[0];
                 this.#readBuffer.unmap();
                 
-                // [KO] 물리 기반 노출 배율 계산
-                // [EN] Calculate physical exposure multiplier
-                // Exposure = 1 / (K * 2^EV100) * 2^Bias
-                const baseExposure = 1 / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, adaptedEV100));
-                let exposure = baseExposure * Math.pow(2, this.#exposureCompensation);
+                // [KO] 물리적 휘도 환산: L = (2^EV100 * K) / 100
+                // [EN] Convert to physical luminance: L = (2^EV100 * K) / 100
+                const physicalLuminance = (Math.pow(2, adaptedEV100) * ACamera.CALIBRATION_CONSTANT) / 100;
+
+                // [KO] 카메라의 exposureCompensation을 반영한 최종 노출 배율 계산
+                // [EN] Final exposure calculation reflecting camera's exposureCompensation
+                // Exposure = (TargetLuminance / PhysicalLuminance) * 2^Bias
+                let exposure = (this.#targetLuminance / Math.max(physicalLuminance, 0.0001)) * Math.pow(2, rawCamera.exposureCompensation);
                 
                 this.#currentExposureMultiplier = Math.min(exposure, this.#maxExposureMultiplier);
                 this.#isReading = false;
