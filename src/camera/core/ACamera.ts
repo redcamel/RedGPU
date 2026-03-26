@@ -42,7 +42,11 @@ abstract class ACamera {
      */
     #exposureCompensation: number = 0.0;
 
-
+    /**
+     * [KO] 목표 휘도 (18% Middle Gray 기준)
+     * [EN] Target luminance (based on 18% Middle Gray)
+     */
+    #targetLuminance: number = 0.18;
 
     /**
      * [KO] 자동 노출 최소 범위 (EV100)
@@ -328,27 +332,28 @@ abstract class ACamera {
         if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
         return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
     }
-/**
- * [KO] 목표 휘도 (18% Middle Gray 기준)
- * [EN] Target luminance (based on 18% Middle Gray)
- */
-#targetLuminance: number = 0.18;
 
-...
+    /**
+     * [KO] 카메라 이름을 설정합니다.
+     * [EN] Sets the camera name.
+     */
+    set name(value: string) {
+        this.#name = value;
+    }
 
-#updateExposure(): void {
-    // [KO] EV100 = log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
-    this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
+    #updateExposure(): void {
+        // [KO] EV100 = log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
+        this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
 
-    // [KO] 수동 노출 배율 계산 (UE5 표준 물리 공식)
-    // [EN] Manual exposure scale calculation (UE5 standard physical formula)
-    // [KO] 공식: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-    // [EN] Formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-    // [KO] 100은 ISO 100 기준 물리 상수로, 이를 통해 targetLuminance가 실제 시각적 목표치가 됩니다.
-    this.#exposure = (100 * this.#targetLuminance * Math.pow(2, this.#exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
+        // [KO] 수동 노출 배율 계산 (UE5 표준 물리 공식)
+        // [EN] Manual exposure scale calculation (UE5 standard physical formula)
+        // [KO] 공식: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+        // [EN] Formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+        // [KO] 100은 ISO 100 기준 물리 상수로, 이를 통해 targetLuminance가 실제 시각적 목표치가 됩니다.
+        this.#exposure = (100 * this.#targetLuminance * Math.pow(2, this.#exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
 
-    this.#exposureDirty = false;
-}
+        this.#exposureDirty = false;
+    }
 }
 
 export default ACamera;
