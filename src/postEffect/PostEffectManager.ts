@@ -152,6 +152,11 @@ class PostEffectManager {
      */
     set useAutoExposure(value: boolean) {
         this.#useAutoExposure = value;
+        if (value) {
+            // [KO] 자동 노출을 켤 때 카메라의 현재 EV100 값을 초기값으로 설정하여 급격한 변화를 방지합니다.
+            // [EN] Set the camera's current EV100 as the initial value when enabling auto exposure to prevent sudden changes.
+            this.autoExposure.currentAdaptedEV100 = this.#view.rawCamera.ev100;
+        }
     }
 
     /**
@@ -387,9 +392,6 @@ class PostEffectManager {
         // Auto Exposure 처리 (HDR 공간에서 수행)
         if (this.#useAutoExposure) {
             this.autoExposure.render(this.#view, currentTextureView);
-            this.#view.toneMappingManager.autoExposureMultiplier = this.autoExposure.currentExposureMultiplier;
-        } else {
-            this.#view.toneMappingManager.autoExposureMultiplier = 1.0;
         }
 
         this.#postEffects.forEach(effect => {

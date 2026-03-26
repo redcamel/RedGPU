@@ -25,6 +25,7 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
+import ACamera from "../../camera/core/ACamera";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -201,7 +202,22 @@ class View3D extends AView {
                 {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},
                 {key: 'directionalLightProjectionMatrix', value: lightManager.getDirectionalLightProjectionMatrix(this)},
                 {key: 'directionalLightViewMatrix', value: lightManager.getDirectionalLightViewMatrix(this)},
-                {key: 'preExposure', value: this.rawCamera.exposure * this.toneMappingManager.exposure * this.toneMappingManager.autoExposureMultiplier},
+                {
+                    key: 'preExposure',
+                    value: (() => {
+                        const {rawCamera, postEffectManager} = this;
+                        // [KO] 모드에 따라 EV100 선택 (자동 노출 시에는 적응된 EV100 사용)
+                        // [EN] Select EV100 based on mode (use adapted EV100 for auto exposure)
+                        const ev100 = postEffectManager.useAutoExposure
+                            ? postEffectManager.autoExposure.currentAdaptedEV100
+                            : rawCamera.ev100;
+
+                        // [KO] ACamera와 동일한 물리적 노출 공식 적용 (targetLuminance / (K * 2^EV100)) * 2^EC
+                        // [EN] Apply the same physical exposure formula as ACamera
+                        const luminanceScale = rawCamera.targetLuminance / ACamera.CALIBRATION_CONSTANT;
+                        return (luminanceScale * Math.pow(2, rawCamera.exposureCompensation)) / Math.pow(2, ev100);
+                    })()
+                },
                 ]);
         }
         lightManager.directionalLights.forEach((light: DirectionalLight) => {

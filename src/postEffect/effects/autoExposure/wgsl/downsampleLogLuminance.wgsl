@@ -17,7 +17,9 @@ struct AutoExposureUniforms {
     highPercentile: f32,
     invEv100Range: f32,
     width: f32,
-    height: f32
+    height: f32,
+    currentPreExposure: f32,
+    _pad: f32
 };
 @group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;
 
@@ -29,14 +31,17 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     if (global_id.x % 2u != 0u || global_id.y % 2u != 0u) { return; }
 
     let color = textureLoad(sourceTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0).rgb;
-    let lum = getLuminance(color);
+    
+    // [KO] 현재 적용된 노출을 나누어 원본 휘도(Raw Luminance)를 복원합니다.
+    // [EN] Recover the raw luminance by dividing by the currently applied exposure.
+    let lum = getLuminance(color) / max(uniforms.currentPreExposure, 0.0001);
 
     // [KO] 유효한 휘도 범위인 경우 히스토그램 빈에 추가
     // [EN] Add to histogram bin if within valid luminance range
     if (lum > 0.0001) {
-        // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
-        // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
-        let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
+        // [KO] 휘도를 EV100으로 변환: EV100 = log2(L / K)
+        // [EN] Convert luminance to EV100: EV100 = log2(L / K)
+        let ev100 = log2(lum / uniforms.calibrationConstant);
         
         let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
         let binIndex = u32(normalizedEV100 * 63.0);

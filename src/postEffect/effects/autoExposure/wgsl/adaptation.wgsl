@@ -12,7 +12,9 @@ struct AutoExposureUniforms {
     highPercentile: f32,
     invEv100Range: f32,
     width: f32,
-    height: f32
+    height: f32,
+    currentPreExposure: f32,
+    _pad: f32
 };
 
 @group(0) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 64>;

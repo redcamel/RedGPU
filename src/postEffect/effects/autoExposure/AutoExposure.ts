@@ -28,7 +28,7 @@ class AutoExposure {
 
     #prevTime: number = 0;
 
-    #currentExposureMultiplier: number = 1.0;
+    #currentAdaptedEV100: number = 3.9;
     #readBuffer: GPUBuffer;
     #isReading: boolean = false;
 
@@ -38,8 +38,22 @@ class AutoExposure {
         this.#initPipelines();
     }
 
-    get currentExposureMultiplier(): number {
-        return this.#currentExposureMultiplier;
+    /**
+     * [KO] 현재 적응된 EV100 값을 반환합니다.
+     * [EN] Returns the currently adapted EV100 value.
+     */
+    get currentAdaptedEV100(): number {
+        return this.#currentAdaptedEV100;
+    }
+
+    /**
+     * [KO] 현재 적응된 EV100 값을 설정합니다. (GPU 버퍼도 함께 갱신)
+     * [EN] Sets the currently adapted EV100 value. (Also updates the GPU buffer)
+     */
+    set currentAdaptedEV100(value: number) {
+        this.#currentAdaptedEV100 = value;
+        const initialData = new Float32Array([value]);
+        this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, initialData.buffer);
     }
 
     #initResources() {
@@ -60,8 +74,8 @@ class AutoExposure {
             label: 'AutoExposure_ReadBuffer'
         });
         
-        // [KO] 통합 유니폼 데이터 구성 (총 14개 요소) [EN] Unified uniform data configuration (total 14 elements)
-        const uniformData = new Float32Array(14);
+        // [KO] 통합 유니폼 데이터 구성 (총 16개 요소) [EN] Unified uniform data configuration (total 16 elements)
+        const uniformData = new Float32Array(16);
         this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }
 
@@ -105,14 +119,24 @@ class AutoExposure {
     render(view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
         const {gpuDevice} = this.#redGPUContext;
         const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
-        const {rawCamera} = view;
+        const {rawCamera, toneMappingManager} = view;
         const currentTime = performance.now();
         const deltaTime = this.#prevTime === 0 ? 0.016 : (currentTime - this.#prevTime) / 1000;
         this.#prevTime = currentTime;
         
         const ev100Range = rawCamera.maxEV100 - rawCamera.minEV100;
         
-        // Update uniforms (총 14개 필드 순서 유지)
+        // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
+        // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
+        const currentPreExposure = (() => {
+            const ev100 = view.postEffectManager.useAutoExposure
+                ? this.#currentAdaptedEV100
+                : rawCamera.ev100;
+            const luminanceScale = rawCamera.targetLuminance / ACamera.CALIBRATION_CONSTANT;
+            return (luminanceScale * Math.pow(2, rawCamera.exposureCompensation)) / Math.pow(2, ev100);
+        })();
+
+        // Update uniforms (총 16개 필드 순서 유지)
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer, 
             0, 
@@ -130,7 +154,9 @@ class AutoExposure {
                 rawCamera.highPercentile,
                 1.0 / ev100Range,
                 width,
-                height
+                height,
+                currentPreExposure,
+                0 // _pad
             ])
         );
         
@@ -181,18 +207,8 @@ class AutoExposure {
             
             this.#readBuffer.mapAsync(GPUMapMode.READ).then(() => {
                 const data = new Float32Array(this.#readBuffer.getMappedRange());
-                const adaptedEV100 = data[0];
+                this.#currentAdaptedEV100 = data[0];
                 this.#readBuffer.unmap();
-                
-                // [KO] 물리적 휘도 환산: L = (2^EV100 * K) / 100
-                // [EN] Convert to physical luminance: L = (2^EV100 * K) / 100
-                const physicalLuminance = (Math.pow(2, adaptedEV100) * ACamera.CALIBRATION_CONSTANT) / 100;
-
-                // [KO] 카메라의 설정을 반영한 최종 노출 배율 계산
-                // [EN] Final exposure calculation reflecting camera's settings
-                let exposure = (rawCamera.targetLuminance / Math.max(physicalLuminance, 0.0001)) * Math.pow(2, rawCamera.exposureCompensation);
-                
-                this.#currentExposureMultiplier = Math.min(exposure, this.#maxExposureMultiplier);
                 this.#isReading = false;
             });
         } else {

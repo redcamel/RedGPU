@@ -11,8 +11,8 @@ import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validate
 import validateNumberRange from "../runtimeChecker/validateFunc/validateNumberRange";
 
 /**
- * [KO] 톤 매핑, 노출, 대비, 밝기를 통합 관리하는 클래스입니다.
- * [EN] Class that integrates and manages tone mapping, exposure, contrast, and brightness.
+ * [KO] 톤 매핑, 대비, 밝기를 통합 관리하는 클래스입니다.
+ * [EN] Class that integrates and manages tone mapping, contrast, and brightness.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -24,7 +24,6 @@ import validateNumberRange from "../runtimeChecker/validateFunc/validateNumberRa
  * // View3D를 통해 접근합니다. (Access through View3D)
  * const toneMappingManager = view.toneMappingManager;
  * toneMappingManager.mode = RedGPU.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
- * toneMappingManager.exposure = 1.2;
  * ```
  * @category ToneMapping
  */
@@ -34,8 +33,6 @@ class ToneMappingManager {
     #toneMapping?: AToneMappingEffect;
     #mode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL;
 
-    #exposure: number = 1.0;
-    #autoExposureMultiplier: number = 1.0;
     #contrast: number = 1.0;
     #brightness: number = 0.0;
 
@@ -67,41 +64,6 @@ class ToneMappingManager {
         if (this.#toneMapping) {
             this.#toneMapping.clear();
             this.#toneMapping = undefined;
-        }
-    }
-
-    /** [KO] 노출값(Exposure)을 반환합니다. [EN] Returns the exposure value. */
-    get exposure(): number {
-        return this.#exposure;
-    }
-
-    /** [KO] 자동 노출 배율을 반환합니다. [EN] Returns the auto-exposure multiplier. */
-    get autoExposureMultiplier(): number {
-        return this.#autoExposureMultiplier;
-    }
-
-    /** [KO] 자동 노출 배율을 설정합니다. [EN] Sets the auto-exposure multiplier. */
-    set autoExposureMultiplier(value: number) {
-        this.#autoExposureMultiplier = value;
-        this.#updateExposure();
-    }
-
-    /**
-     * @deprecated [KO] ToneMappingManager의 exposure는 더 이상 권장되지 않습니다. 물리 기반 렌더링을 위해 Camera의 aperture, shutterSpeed, iso를 사용하십시오.
-     * [EN] ToneMappingManager.exposure is deprecated. Use Camera's aperture, shutterSpeed, and iso for physically based rendering instead.
-     */
-    set exposure(value: number) {
-        console.warn("[RedGPU] ToneMappingManager.exposure is deprecated. Use Camera's physical properties (aperture, shutterSpeed, iso) to control exposure instead.");
-        validatePositiveNumberRange(value, 0)
-        this.#exposure = value;
-        this.#updateExposure();
-    }
-
-    #updateExposure(): void {
-        if (this.#toneMapping) {
-            // [KO] 이제 셰이더에서 Pre-Exposure(systemUniforms.exposure)가 적용되므로, 톤 매핑 시의 노출 배율은 1.0으로 고정합니다.
-            // [EN] Since Pre-Exposure (systemUniforms.exposure) is now applied in shaders, fix the exposure multiplier during tone mapping to 1.0.
-            this.#toneMapping.exposure = 1.0;
         }
     }
 
@@ -168,7 +130,6 @@ class ToneMappingManager {
         }
 
         if (this.#toneMapping) {
-            this.#toneMapping.exposure = 1.0;
             this.#toneMapping.contrast = this.#contrast;
             this.#toneMapping.brightness = this.#brightness;
         }

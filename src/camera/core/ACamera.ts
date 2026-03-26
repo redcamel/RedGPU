@@ -40,7 +40,7 @@ abstract class ACamera {
      * [KO] 노출 보정 (Exposure Compensation / Bias)
      * [EN] Exposure compensation (Bias)
      */
-    #exposureCompensation: number = 1.0;
+    #exposureCompensation: number = 0.0;
 
     /**
      * [KO] 목표 휘도 (18% Middle Gray 기준)
@@ -345,11 +345,12 @@ abstract class ACamera {
         // [KO] EV100 = log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
         this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
 
-        // [KO] 수동 노출 배율 계산 (K * 2^EV100)
-        // [EN] Manual exposure scale calculation (K * 2^EV100)
-        // [KO] 노출 보정(Bias)은 최종 단계에서만 적용되도록 수동 계산식에서 분리함.
-        // [EN] Exposure compensation (Bias) is separated from the manual calculation to be applied only in the final stage.
-        this.#exposure = 1 / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
+        // [KO] 물리 기반 노출 배율 계산
+        // [EN] Physically based exposure scale calculation
+        // [KO] 공식: (targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+        // [EN] Formula: (targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+        const luminanceScale = this.#targetLuminance / ACamera.CALIBRATION_CONSTANT;
+        this.#exposure = (luminanceScale * Math.pow(2, this.#exposureCompensation)) / Math.pow(2, this.#ev100);
 
         this.#exposureDirty = false;
     }

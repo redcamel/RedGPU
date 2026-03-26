@@ -8,8 +8,6 @@ import View3D from "../../display/view/View3D";
  * @category ToneMapping
  */
 class AToneMappingEffect extends ASinglePassPostEffect {
-    /** [KO] 노출값. 0.1~5.0, 기본값 1.0 [EN] Exposure value. 0.1 to 5.0, default 1.0 */
-    #exposure: number = 1.0;
     /** [KO] 명암 강도. 0.5~2.0, 기본값 1.0 [EN] Contrast strength. 0.5 to 2.0, default 1.0 */
     #contrast: number = 1.0;
     /** [KO] 밝기 조절. -1.0~1.0, 기본값 0.0 [EN] Brightness adjustment. -1.0 to 1.0, default 0.0 */
@@ -22,17 +20,6 @@ class AToneMappingEffect extends ASinglePassPostEffect {
      */
     protected constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-    }
-
-    /** [KO] 노출값을 반환합니다. [EN] Returns the exposure value. */
-    get exposure(): number {
-        return this.#exposure;
-    }
-
-    /** [KO] 노출값을 설정합니다. [EN] Sets the exposure value. */
-    set exposure(value: number) {
-        this.#exposure = Math.max(0.1, Math.min(5.0, value));
-        this.updateUniform('exposure', this.#exposure);
     }
 
     /** [KO] 명암 강도를 반환합니다. [EN] Returns the contrast strength. */
@@ -62,14 +49,11 @@ class AToneMappingEffect extends ASinglePassPostEffect {
      * [EN] Updates all internal uniforms at once.
      */
     updateUniforms(): void {
-        this.updateUniform('exposure', this.#exposure);
         this.updateUniform('contrast', this.#contrast);
         this.updateUniform('brightness', this.#brightness);
     }
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-        // ASinglePassPostEffect의 render를 호출하기 전에 자동 노출용 추가 바인딩 처리가 필요할 수 있음
-        // 여기서는 기본 render를 호출하고, ASinglePassPostEffect가 이를 처리할 수 있게 확장하는 방향으로 검토
         return super.render(view, width, height, sourceTextureInfo);
     }
 }
