@@ -130,28 +130,30 @@ class AutoExposure {
         // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
         const currentPreExposure = (() => {
             const ev100 = view.postEffectManager.useAutoExposure
-                ? this.#currentAdaptedEV100
+                ? this.currentAdaptedEV100
                 : rawCamera.ev100;
-            const luminanceScale = rawCamera.targetLuminance / ACamera.CALIBRATION_CONSTANT;
-            return (luminanceScale * Math.pow(2, rawCamera.exposureCompensation)) / Math.pow(2, ev100);
+            // [KO] 표준 물리 카메라 공식 적용: 2^ExposureCompensation / (K * 2^EV100)
+            // [EN] Apply standard physical camera formula: 2^ExposureCompensation / (K * 2^EV100)
+            return Math.pow(2, rawCamera.exposureCompensation) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
         })();
 
         // Update uniforms (총 16개 필드 순서 유지)
+        const camera = rawCamera as ACamera;
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer, 
             0, 
             new Float32Array([
                 deltaTime, 
-                1.0, // unused speed (will be removed in shader later)
-                rawCamera.adaptationSpeedUp, 
-                rawCamera.adaptationSpeedDown, 
-                rawCamera.exposureCompensation, 
-                rawCamera.minEV100, 
-                rawCamera.maxEV100,
+                camera.targetLuminance, 
+                camera.adaptationSpeedUp, 
+                camera.adaptationSpeedDown, 
+                camera.exposureCompensation, 
+                camera.minEV100, 
+                camera.maxEV100,
                 ACamera.CALIBRATION_CONSTANT,
                 ev100Range,
-                rawCamera.lowPercentile,
-                rawCamera.highPercentile,
+                camera.lowPercentile,
+                camera.highPercentile,
                 1.0 / ev100Range,
                 width,
                 height,

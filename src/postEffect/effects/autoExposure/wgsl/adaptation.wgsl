@@ -1,6 +1,6 @@
 struct AutoExposureUniforms {
     deltaTime: f32,
-    unusedSpeed: f32,
+    targetLuminance: f32,
     adjustmentSpeedUp: f32,
     adjustmentSpeedDown: f32,
     exposureCompensation: f32,
@@ -35,8 +35,7 @@ fn main() {
 
     if (totalPixels == 0u) { return; }
 
-    // [KO] 언리얼 스타일의 퍼센타일 기반 필터링
-    // [EN] Unreal-style percentile-based filtering
+    // [KO] 퍼센타일 기반 필터링 [EN] Percentile-based filtering
     let minPixel = u32(f32(totalPixels) * uniforms.lowPercentile);
     let maxPixel = u32(f32(totalPixels) * uniforms.highPercentile);
 
@@ -59,19 +58,23 @@ fn main() {
     }
 
     // [KO] 평균 EV100 산출 [EN] Calculate average EV100
-    let currentEV100 = weightedEV100Sum / max(weightedPixelCount, 1.0);
+    let avgEV100 = weightedEV100Sum / max(weightedPixelCount, 1.0);
+
+    // [KO] 목표 휘도를 달성하기 위한 EV로 보정
+    // [EN] Offset EV to achieve the target luminance
+    // [KO] log2(L_avg / K)에서 log2(targetLuminance)를 빼주어 최종 공식 (1 / (K * 2^EV))이 targetLuminance를 만들도록 함.
+    let targetEV100 = avgEV100 - log2(uniforms.targetLuminance);
 
     // [KO] 눈 적응 시뮬레이션 (EV100 공간에서 수행)
     // [EN] Eye adaptation simulation (performed in EV100 space)
     let prevEV100 = adaptedEV100;
-    let diff = currentEV100 - prevEV100;
+    let diff = targetEV100 - prevEV100;
     
     // [KO] 밝아질 때와 어두워질 때의 속도 차이 적용
     // [EN] Apply different speeds for brightening and darkening
     let speed = select(uniforms.adjustmentSpeedDown, uniforms.adjustmentSpeedUp, diff > 0.0);
     
     // [KO] 지수 감쇄 공식 (언리얼 방식) [EN] Exponential decay formula (Unreal style)
-    // [KO] 이제 speed 파라미터가 하나로 통합되었습니다.
     let adaptationFactor = 1.0 - exp(-speed * uniforms.deltaTime);
     var nextEV100 = prevEV100 + diff * adaptationFactor;
     

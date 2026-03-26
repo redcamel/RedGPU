@@ -136,6 +136,11 @@ class PostEffectManager {
     constructor(view: View3D) {
         this.#view = view;
         this.#init()
+        // [KO] 초기 구동 시 카메라의 현재 EV100을 자동 노출 시스템에 동기화합니다.
+        // [EN] Sync the camera's current EV100 to the auto exposure system during initial startup.
+        if (this.#useAutoExposure) {
+            this.autoExposure.currentAdaptedEV100 = this.#view.rawCamera.ev100;
+        }
     }
 
     /**

@@ -5,7 +5,7 @@
 
 struct AutoExposureUniforms {
     deltaTime: f32,
-    unusedSpeed: f32,
+    targetLuminance: f32,
     adjustmentSpeedUp: f32,
     adjustmentSpeedDown: f32,
     exposureCompensation: f32,
