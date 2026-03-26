@@ -670,9 +670,9 @@ fn main(inputData:InputData) -> OutputFragment {
         var iblMipmapCount: f32 = 0.0;
 
         if (u_usePrefilterTexture) {
-            iblMipmapCount = f32(textureNumLevels(ibl_environmentTexture) - 1);
+            iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
             var mipLevel = roughnessParameter * iblMipmapCount;
-            reflectedColor = textureSampleLevel( ibl_environmentTexture, prefilterTextureSampler, R, mipLevel ).rgb  / systemUniforms.preExposure;
+            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb  / systemUniforms.preExposure;
             iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb  / systemUniforms.preExposure;
         }
 
@@ -729,7 +729,7 @@ fn main(inputData:InputData) -> OutputFragment {
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
                 let mipLevel = roughnessParameter * iblMipmapCount;
-                backScatteringColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, -N, mipLevel).rgb / systemUniforms.preExposure;
+                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb / systemUniforms.preExposure;
             }
             if (systemUniforms.useSkyAtmosphere == 1u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
@@ -779,7 +779,7 @@ fn main(inputData:InputData) -> OutputFragment {
                  let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
                  let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
-                 var clearcoatPrefilteredColor = textureSampleLevel(ibl_environmentTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb / systemUniforms.preExposure;
+                 var clearcoatPrefilteredColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb / systemUniforms.preExposure;
 
                  if (systemUniforms.useSkyAtmosphere == 1u) {
                      let u_atmo = systemUniforms.skyAtmosphere;

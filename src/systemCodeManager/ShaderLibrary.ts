@@ -3569,7 +3569,7 @@ export namespace ShaderLibrary {
      * @group(0) @binding(7) var renderPath1ResultTextureSampler: sampler;
      * @group(0) @binding(8) var renderPath1ResultTexture: texture_2d<f32>;
      * @group(0) @binding(9) var packedTextureSampler: sampler;
-     * @group(0) @binding(10) var ibl_environmentTexture: texture_cube<f32>;
+     * @group(0) @binding(10) var ibl_prefilterTexture: texture_cube<f32>;
      * @group(0) @binding(11) var ibl_irradianceTexture: texture_cube<f32>;
      * @group(0) @binding(12) var ibl_brdfLUTTexture: texture_2d<f32>;
      * 
