@@ -8,14 +8,14 @@ struct AutoExposureUniforms {
     speed: f32,
     adjustmentSpeedUp: f32,
     adjustmentSpeedDown: f32,
-    targetLuminance: f32,
-    minLuminance: f32,
-    maxLuminance: f32,
-    minLogLum: f32,
-    logLumRange: f32,
+    exposureCompensation: f32,
+    minEV100: f32,
+    maxEV100: f32,
+    calibrationConstant: f32,
+    ev100Range: f32,
     lowPercentile: f32,
     highPercentile: f32,
-    invLogLumRange: f32,
+    invEv100Range: f32,
     width: f32,
     height: f32
 };
@@ -34,8 +34,12 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     // [KO] 유효한 휘도 범위인 경우 히스토그램 빈에 추가
     // [EN] Add to histogram bin if within valid luminance range
     if (lum > 0.0001) {
-        let logLum = clamp((log2(lum) - uniforms.minLogLum) * uniforms.invLogLumRange, 0.0, 1.0);
-        let binIndex = u32(logLum * 63.0);
+        // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
+        // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
+        let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
+        
+        let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
+        let binIndex = u32(normalizedEV100 * 63.0);
         atomicAdd(&histogram[binIndex], 1u);
     }
 }

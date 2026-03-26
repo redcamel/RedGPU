@@ -5,6 +5,7 @@ import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import downsampleLogLuminanceCode from "./wgsl/downsampleLogLuminance.wgsl";
 import adaptationCode from "./wgsl/adaptation.wgsl";
+import ACamera from "../../../camera/core/ACamera";
 
 /**
  * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
@@ -12,7 +13,7 @@ import adaptationCode from "./wgsl/adaptation.wgsl";
  */
 class AutoExposure {
     readonly #redGPUContext: RedGPUContext;
-    #adaptedLuminanceBuffer: StorageBuffer;
+    #adaptedEV100Buffer: StorageBuffer;
     #histogramBuffer: StorageBuffer;
     
     #downsamplePipeline: GPUComputePipeline;
@@ -26,14 +27,12 @@ class AutoExposure {
     #speed: number = 3.0;
     #adjustmentSpeedUp: number = 2.0;
     #adjustmentSpeedDown: number = 1.0;
-    #targetLuminance: number = 0.18;
-    #minLuminance: number = 0.03;
-    #maxLuminance: number = 2.0;
-    #maxExposureMultiplier: number = 8.0;
+    #exposureCompensation: number = 0.0;
+    #minEV100: number = -10.0;
+    #maxEV100: number = 20.0;
+    #maxExposureMultiplier: number = 64.0;
 
     // [KO] 히스토그램 파라미터 [EN] Histogram parameters
-    #minLogLum: number = -10.0;
-    #maxLogLum: number = 10.0;
     #lowPercentile: number = 0.1;  // [KO] 하위 10% 제외 [EN] Exclude bottom 10%
     #highPercentile: number = 0.9; // [KO] 상위 10% 제외 [EN] Exclude top 10%
     
@@ -54,9 +53,11 @@ class AutoExposure {
 
     #initResources() {
         const {gpuDevice} = this.#redGPUContext;
-        // Adapted luminance buffer (initialized to target luminance)
-        const initialData = new Float32Array([this.#targetLuminance]);
-        this.#adaptedLuminanceBuffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedLuminance');
+        
+        // [KO] 초기 EV100 값 설정 (대략적인 중간 밝기)
+        // [EN] Set initial EV100 value (approx. middle brightness)
+        const initialData = new Float32Array([10.0]);
+        this.#adaptedEV100Buffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
         
         // [KO] 히스토그램 버퍼 (64 bins) [EN] Histogram buffer (64 bins)
         this.#histogramBuffer = new StorageBuffer(this.#redGPUContext, new Uint32Array(64).buffer, 'AutoExposure_HistogramBuffer');
@@ -117,7 +118,7 @@ class AutoExposure {
         const deltaTime = this.#prevTime === 0 ? 0.016 : (currentTime - this.#prevTime) / 1000;
         this.#prevTime = currentTime;
         
-        const logLumRange = this.#maxLogLum - this.#minLogLum;
+        const ev100Range = this.#maxEV100 - this.#minEV100;
         
         // Update uniforms (총 14개 필드 순서 유지)
         gpuDevice.queue.writeBuffer(
@@ -128,14 +129,14 @@ class AutoExposure {
                 this.#speed, 
                 this.#adjustmentSpeedUp, 
                 this.#adjustmentSpeedDown, 
-                this.#targetLuminance, 
-                this.#minLuminance, 
-                this.#maxLuminance,
-                this.#minLogLum,
-                logLumRange,
+                this.#exposureCompensation, 
+                this.#minEV100, 
+                this.#maxEV100,
+                ACamera.CALIBRATION_CONSTANT,
+                ev100Range,
                 this.#lowPercentile,
                 this.#highPercentile,
-                1.0 / logLumRange,
+                1.0 / ev100Range,
                 width,
                 height
             ])
@@ -168,7 +169,7 @@ class AutoExposure {
             layout: this.#adaptationBindGroupLayout0,
             entries: [
                 { binding: 0, resource: { buffer: this.#histogramBuffer.gpuBuffer } },
-                { binding: 1, resource: { buffer: this.#adaptedLuminanceBuffer.gpuBuffer } },
+                { binding: 1, resource: { buffer: this.#adaptedEV100Buffer.gpuBuffer } },
                 { binding: 2, resource: { buffer: this.#uniformBuffer.gpuBuffer } }
             ]
         });
@@ -181,18 +182,22 @@ class AutoExposure {
         
         // 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 및 비동기 읽기 시작
         if (!this.#isReading) {
-            encoder.copyBufferToBuffer(this.#adaptedLuminanceBuffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
+            encoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
             
             this.#isReading = true;
             gpuDevice.queue.submit([encoder.finish()]);
             
             this.#readBuffer.mapAsync(GPUMapMode.READ).then(() => {
                 const data = new Float32Array(this.#readBuffer.getMappedRange());
-                const adaptedLum = data[0];
+                const adaptedEV100 = data[0];
                 this.#readBuffer.unmap();
                 
-                // finalExposure = target / average
-                let exposure = this.#targetLuminance / Math.max(adaptedLum, 0.0001);
+                // [KO] 물리 기반 노출 배율 계산
+                // [EN] Calculate physical exposure multiplier
+                // Exposure = 1 / (K * 2^EV100) * 2^Bias
+                const baseExposure = 1 / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, adaptedEV100));
+                let exposure = baseExposure * Math.pow(2, this.#exposureCompensation);
+                
                 this.#currentExposureMultiplier = Math.min(exposure, this.#maxExposureMultiplier);
                 this.#isReading = false;
             });
@@ -203,7 +208,7 @@ class AutoExposure {
     }
 
     get adaptedLuminanceBuffer(): StorageBuffer {
-        return this.#adaptedLuminanceBuffer;
+        return this.#adaptedEV100Buffer;
     }
 }
 
