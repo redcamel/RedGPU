@@ -1,6 +1,6 @@
 struct AutoExposureUniforms {
     deltaTime: f32,
-    speed: f32,
+    unusedSpeed: f32,
     adjustmentSpeedUp: f32,
     adjustmentSpeedDown: f32,
     exposureCompensation: f32,
@@ -69,7 +69,8 @@ fn main() {
     let speed = select(uniforms.adjustmentSpeedDown, uniforms.adjustmentSpeedUp, diff > 0.0);
     
     // [KO] 지수 감쇄 공식 (언리얼 방식) [EN] Exponential decay formula (Unreal style)
-    let adaptationFactor = 1.0 - exp(-uniforms.speed * speed * uniforms.deltaTime);
+    // [KO] 이제 speed 파라미터가 하나로 통합되었습니다.
+    let adaptationFactor = 1.0 - exp(-speed * uniforms.deltaTime);
     var nextEV100 = prevEV100 + diff * adaptationFactor;
     
     // [KO] EV100 범위 제한 [EN] Limit EV100 range

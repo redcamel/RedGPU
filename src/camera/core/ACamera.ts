@@ -43,6 +43,36 @@ abstract class ACamera {
     #exposureCompensation: number = 0;
 
     /**
+     * [KO] 목표 휘도 (18% Middle Gray 기준)
+     * [EN] Target luminance (based on 18% Middle Gray)
+     */
+    #targetLuminance: number = 0.18;
+
+    /**
+     * [KO] 자동 노출 최소 범위 (EV100)
+     * [EN] Minimum auto-exposure limit (EV100)
+     */
+    #minEV100: number = -10.0;
+
+    /**
+     * [KO] 자동 노출 최대 범위 (EV100)
+     * [EN] Maximum auto-exposure limit (EV100)
+     */
+    #maxEV100: number = 20.0;
+
+    /**
+     * [KO] 눈 적응 속도 (밝아질 때)
+     * [EN] Eye adaptation speed (brightening)
+     */
+    #adaptationSpeedUp: number = 2.0;
+
+    /**
+     * [KO] 눈 적응 속도 (어두워질 때)
+     * [EN] Eye adaptation speed (darkening)
+     */
+    #adaptationSpeedDown: number = 1.0;
+
+    /**
      * [KO] 교정 상수 (Calibration Constant, K)
      * [EN] Calibration constant (K)
      * @description
@@ -104,6 +134,91 @@ abstract class ACamera {
         if (this.#exposureCompensation === value) return;
         this.#exposureCompensation = value;
         this.#exposureDirty = true;
+    }
+
+    /**
+     * [KO] 목표 휘도를 반환합니다.
+     * [EN] Returns the target luminance.
+     */
+    get targetLuminance(): number {
+        return this.#targetLuminance;
+    }
+
+    /**
+     * [KO] 목표 휘도를 설정합니다.
+     * [EN] Sets the target luminance.
+     */
+    set targetLuminance(value: number) {
+        validateNumber(value);
+        this.#targetLuminance = value;
+    }
+
+    /**
+     * [KO] 자동 노출 최소 EV100을 반환합니다.
+     * [EN] Returns the minimum EV100 for auto-exposure.
+     */
+    get minEV100(): number {
+        return this.#minEV100;
+    }
+
+    /**
+     * [KO] 자동 노출 최소 EV100을 설정합니다.
+     * [EN] Sets the minimum EV100 for auto-exposure.
+     */
+    set minEV100(value: number) {
+        validateNumber(value);
+        this.#minEV100 = value;
+    }
+
+    /**
+     * [KO] 자동 노출 최대 EV100을 반환합니다.
+     * [EN] Returns the maximum EV100 for auto-exposure.
+     */
+    get maxEV100(): number {
+        return this.#maxEV100;
+    }
+
+    /**
+     * [KO] 자동 노출 최대 EV100을 설정합니다.
+     * [EN] Sets the maximum EV100 for auto-exposure.
+     */
+    set maxEV100(value: number) {
+        validateNumber(value);
+        this.#maxEV100 = value;
+    }
+
+    /**
+     * [KO] 눈 적응 속도(밝아질 때)를 반환합니다.
+     * [EN] Returns the eye adaptation speed (brightening).
+     */
+    get adaptationSpeedUp(): number {
+        return this.#adaptationSpeedUp;
+    }
+
+    /**
+     * [KO] 눈 적응 속도(밝아질 때)를 설정합니다.
+     * [EN] Sets the eye adaptation speed (brightening).
+     */
+    set adaptationSpeedUp(value: number) {
+        validateNumber(value);
+        this.#adaptationSpeedUp = value;
+    }
+
+    /**
+     * [KO] 눈 적응 속도(어두워질 때)를 반환합니다.
+     * [EN] Returns the eye adaptation speed (darkening).
+     */
+    get adaptationSpeedDown(): number {
+        return this.#adaptationSpeedDown;
+    }
+
+    /**
+     * [KO] 눈 적응 속도(어두워질 때)를 설정합니다.
+     * [EN] Sets the eye adaptation speed (darkening).
+     */
+    set adaptationSpeedDown(value: number) {
+        validateNumber(value);
+        this.#adaptationSpeedDown = value;
     }
 
     /**
@@ -184,10 +299,11 @@ abstract class ACamera {
         // [KO] EV100 = log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
         this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
 
-        // [KO] Exposure Scale = 1 / (K * 2^EV100) * 2^Bias
-        // [EN] Exposure Scale = 1 / (K * 2^EV100) * 2^Bias
-        const baseExposure = 1 / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
-        this.#exposure = baseExposure * Math.pow(2, this.#exposureCompensation);
+        // [KO] 수동 노출 배율 계산 (K * 2^EV100)
+        // [EN] Manual exposure scale calculation (K * 2^EV100)
+        // [KO] 노출 보정(Bias)은 최종 단계에서만 적용되도록 수동 계산식에서 분리함.
+        // [EN] Exposure compensation (Bias) is separated from the manual calculation to be applied only in the final stage.
+        this.#exposure = 1 / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
 
         this.#exposureDirty = false;
     }
