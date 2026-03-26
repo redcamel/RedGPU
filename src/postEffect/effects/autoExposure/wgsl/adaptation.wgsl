@@ -62,8 +62,9 @@ fn main() {
 
     // [KO] 목표 휘도를 달성하기 위한 EV로 보정
     // [EN] Offset EV to achieve the target luminance
-    // [KO] log2(L_avg / K)에서 log2(targetLuminance)를 빼주어 최종 공식 (1 / (K * 2^EV))이 targetLuminance를 만들도록 함.
-    let targetEV100 = avgEV100 - log2(uniforms.targetLuminance);
+    // [KO] UE5 물리 모델 기준: targetLuminance가 0.18일 때 장면의 평균 휘도를 0.18로 맞추는 EV를 추적합니다.
+    // [EN] UE5 physical model: When targetLuminance is 0.18, track the EV that targets the average raw luminance to 0.18.
+    let targetEV100 = avgEV100 - log2(uniforms.targetLuminance / 0.18);
 
     // [KO] 눈 적응 시뮬레이션 (EV100 공간에서 수행)
     // [EN] Eye adaptation simulation (performed in EV100 space)

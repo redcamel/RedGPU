@@ -39,9 +39,9 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     // [KO] 유효한 휘도 범위인 경우 히스토그램 빈에 추가
     // [EN] Add to histogram bin if within valid luminance range
     if (lum > 0.0001) {
-        // [KO] 휘도를 EV100으로 변환: EV100 = log2(L / K)
-        // [EN] Convert luminance to EV100: EV100 = log2(L / K)
-        let ev100 = log2(lum / uniforms.calibrationConstant);
+        // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
+        // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
+        let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
         
         let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
         let binIndex = u32(normalizedEV100 * 63.0);
