@@ -43,10 +43,10 @@ abstract class ACamera {
     #exposureCompensation: number = 0.0;
 
     /**
-     * [KO] 목표 휘도 (18% Middle Gray 기준)
-     * [EN] Target luminance (based on 18% Middle Gray)
+     * [KO] 목표 휘도 (엔진 표준 1.0 기준)
+     * [EN] Target luminance (based on engine standard 1.0)
      */
-    #targetLuminance: number = 0.18;
+    #targetLuminance: number = 1.0;
 
     /**
      * [KO] 자동 노출 최소 범위 (EV100)
@@ -345,11 +345,12 @@ abstract class ACamera {
         // [KO] EV100 = log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
         this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
 
-        // [KO] 수동 노출 배율 계산 (표준 물리 카메라 공식)
-        // [EN] Manual exposure scale calculation (Standard physical camera formula)
-        // [KO] 공식: 2^ExposureCompensation / (K * 2^EV100)
-        // [EN] Formula: 2^ExposureCompensation / (K * 2^EV100)
-        this.#exposure = Math.pow(2, this.#exposureCompensation) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
+        // [KO] 수동 노출 배율 계산 (엔진 최적화 공식)
+        // [EN] Manual exposure scale calculation (Engine optimized formula)
+        // [KO] 공식: (targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+        // [EN] Formula: (targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+        // [KO] 기준점(targetLuminance)을 1.0으로 설정하여 별도의 보정 없이도 밝은 화면을 제공합니다.
+        this.#exposure = (this.#targetLuminance * Math.pow(2, this.#exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
 
         this.#exposureDirty = false;
     }

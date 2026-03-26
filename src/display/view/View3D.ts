@@ -212,9 +212,9 @@ class View3D extends AView {
                             ? postEffectManager.autoExposure.currentAdaptedEV100
                             : rawCamera.ev100;
 
-                        // [KO] 표준 물리 카메라 공식 적용: 2^ExposureCompensation / (K * 2^EV100)
-                        // [EN] Apply standard physical camera formula: 2^ExposureCompensation / (K * 2^EV100)
-                        return Math.pow(2, rawCamera.exposureCompensation) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
+                        // [KO] 엔진 최적화 노출 공식 적용: (targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+                        // [EN] Apply engine optimized exposure formula: (targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+                        return (rawCamera.targetLuminance * Math.pow(2, rawCamera.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
                     })()
                 },
                 ]);
