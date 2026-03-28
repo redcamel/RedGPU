@@ -556,8 +556,8 @@ fn main(inputData:InputData) -> OutputFragment {
         let L = -normalize(u_directionalLights[i].direction);
         
         // [KO] 통합 에너지 계산 (색상 * 강도 * 노출 * 가시성)
-        // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환하기 위해 INV_PI 적용
-        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility * INV_PI;
+        // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환 (getDiffuseBRDFDisney가 내부적으로 INV_PI를 처리함)
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
 
         // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용 (분광 감쇄)
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
@@ -612,8 +612,8 @@ fn main(inputData:InputData) -> OutputFragment {
          }
 
          // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출)
-         // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환하기 위해 INV_PI 적용
-         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure * INV_PI;
+         // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환 (calcLight가 내부적으로 INV_PI를 처리함)
+         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
 
          // [KO] calcLight 함수 호출 (24개 인자) [EN] Call calcLight function (24 arguments)
          totalDirectLighting += calcLight(
