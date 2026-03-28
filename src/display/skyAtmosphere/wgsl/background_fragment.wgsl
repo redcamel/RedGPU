@@ -26,7 +26,6 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let viewDir = normalize(input.vertexPosition.xyz);
     let sunDir = normalize(uniforms.sunDirection);
 
-    // [KO] 매핑 안정화를 위한 클램핑 고도 (Sea Level Offset 반영된 viewHeight 기준)
     var viewHeight = uniforms.cameraHeight;
     viewHeight = max(0.0, viewHeight);
     let skyUV = getSkyViewUV(viewDir, viewHeight, bottomRadius, atmosphereHeight);
@@ -37,35 +36,18 @@ fn main(input : VertexOutput) -> FragmentOutput {
 
     let camPos = vec3<f32>(0.0, bottomRadius + viewHeight, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, bottomRadius);
-
-    // [KO] 수평선 압축(Horizon Squashing) 보정: 고도가 낮을 때 태양이 수직으로 납작해지는 효과
-    // [EN] Horizon Squashing correction: The sun becomes vertically flat when the altitude is low
     let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
 
-    // [KO] 지면 차폐 여부 및 투과율 결정
-    // [EN] Determine ground occlusion and transmittance
-    let isGroundHit = uniforms.useGround > 0.5 && tEarth > 0.0;
+    let isGroundHit = uniforms.bottomRadius > 0.0 && tEarth > 0.0;
     let transToEdge = select(getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, viewHeight, viewDir.y, uniforms.atmosphereHeight), vec3<f32>(skySample.a), isGroundHit);
 
-    // [KO] 하이브리드 Mie Glow: 압축 보정된 방향을 사용하여 태양과 일치시킴
-    // [EN] Hybrid Mie Glow: Use corrected direction to match sun
     let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, transToEdge, 0.0) 
                         * exposedSunIntensity;
     atmosphereBackground += mieGlowAmount;
 
-    if (uniforms.useGround < 0.5 || tEarth <= 0.0 || uniforms.showGround < 0.5) {
-        // [KO] 태양 원반(Sun Disk) 물리적 휘도 적용
-        // [KO] 지면에 가려지지 않은 경우에만 태양 본체를 렌더링 (tEarth <= 0.0)
-        // [EN] Apply physical radiance of sun disk
-        // [EN] Render sun only when not obscured by ground (tEarth <= 0.0)
-        if (tEarth <= 0.0 || uniforms.useGround < 0.5) {
-            // [KO] 태양 원반은 관찰 방향 대기 투과율(transToEdge)에 의해 감쇄됨
-            // [EN] Sun disk is attenuated by transmittance in view direction (transToEdge)
-            // [KO] edgeSoftness를 0.01로 낮추어 날카로운 태양 원반 형태 구현
-            // [EN] Sharpen sun disk by lowering edgeSoftness to 0.01
-            let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01);
-            atmosphereBackground += sunRadiance * exposedSunIntensity;
-        }
+    if (tEarth <= 0.0 || uniforms.bottomRadius <= 0.0) {
+        let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01, uniforms);
+        atmosphereBackground += sunRadiance * exposedSunIntensity;
     }
     
     var output : FragmentOutput;

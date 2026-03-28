@@ -562,7 +562,7 @@ fn main(inputData:InputData) -> OutputFragment {
         // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용 (분광 감쇄)
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
             let u_atmo = systemUniforms.skyAtmosphere;
-            let surfaceHeightKm = max(0.0, (input_vertexPosition.y / 1000.0) - u_atmo.seaLevel);
+            let surfaceHeightKm = max(0.0, input_vertexPosition.y / 1000.0);
             let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
             finalLightColor *= atmosphereTransmittance;
         }

@@ -25,13 +25,13 @@ RedGPU.init(
         // 1. 디렉셔널 라이트 먼저 추가 (SkyAtmosphere가 자동 감지)
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.enableDebugger = true;
+        directionalLight.elevation = 80;
+        directionalLight.azimuth = 0;
+        directionalLight.intensity = 100000; // 물리적 단위 (Lux)
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 2. SkyAtmosphere 초기화 (자동으로 directionalLight를 태양 광원으로 사용)
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        skyAtmosphere.sunElevation = 80;
-        skyAtmosphere.sunAzimuth = 0;
-        skyAtmosphere.sunIntensity = 100000; // 물리적 단위 (Lux)
         view.skyAtmosphere = skyAtmosphere;
 
         // 3. 모델 로드
@@ -45,7 +45,7 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext);
 
-        renderTestPane(view, skyAtmosphere);
+        renderTestPane(view, skyAtmosphere, directionalLight);
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
@@ -64,7 +64,7 @@ function loadGLTF(view, url) {
     });
 }
 
-const renderTestPane = async (targetView, skyAtmosphere) => {
+const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
     const pane = new Pane({title: 'SkyAtmosphere Test', expanded: true});
 
@@ -76,10 +76,10 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.rawCamera);
 
-    const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
-    f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
-    f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
-    f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 200000, step: 1, label: 'sunIntensity (Lux)'});
+    const f_sun = pane.addFolder({title: 'Sun Configuration (via Light)', expanded: true});
+    f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
+    f_sun.addBinding(sunSource, 'azimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
+    f_sun.addBinding(sunSource, 'intensity', {min: 0, max: 200000, step: 1, label: 'sunIntensity (Lux)'});
     f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'sunSize'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'sunLimbDarkening'});
 
@@ -92,23 +92,7 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     const f_planet = pane.addFolder({title: 'Planet', expanded: false});
     f_planet.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 1, label: 'bottomRadius (km)'});
     f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1, label: 'atmosphereHeight (km)'});
-    f_planet.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'seaLevel (km)'});
-    f_planet.addBinding(skyAtmosphere, 'cameraHeight', {readonly: true, interval: 100, label: 'cameraHeight (km)'});
-    f_planet.addBinding(skyAtmosphere, 'groundAmbient', {min: 0, max: 10, step: 0.01, label: 'groundAmbient'});
     
-    const groundState = {
-        albedo: {
-            r: skyAtmosphere.groundAlbedo[0],
-            g: skyAtmosphere.groundAlbedo[1],
-            b: skyAtmosphere.groundAlbedo[2]
-        }
-    };
-    f_planet.addBinding(groundState, 'albedo', {color: {type: 'float'}, label: 'groundAlbedo'}).on('change', (ev) => {
-        skyAtmosphere.groundAlbedo = [ev.value.r, ev.value.g, ev.value.b];
-    });
-    f_planet.addBinding(skyAtmosphere, 'showGround', {label: 'showGround'});
-    f_planet.addBinding(skyAtmosphere, 'useGround', {label: 'useGround (physics)'});
-
     const f_rayleigh = pane.addFolder({title: 'Rayleigh', expanded: false});
     const rayleighState = {
         scat: {
@@ -127,8 +111,6 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
     f_mie.addBinding(skyAtmosphere, 'mieAbsorption', {min: 0, max: 1.0, step: 0.0001, label: 'mieAbsorption'});
     f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'mieAnisotropy (g)'});
     f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'mieExponentialDistribution (km)'});
-    f_mie.addBinding(skyAtmosphere, 'mieGlow', {min: 0, max: 0.999, step: 0.01, label: 'mieGlow'});
-    f_mie.addBinding(skyAtmosphere, 'mieHalo', {min: 0, max: 0.999, step: 0.001, label: 'mieHalo (g)'});
 
     const f_absorption = pane.addFolder({title: 'Absorption (Ozone)', expanded: false});
     const absorptionState = {
@@ -146,12 +128,8 @@ const renderTestPane = async (targetView, skyAtmosphere) => {
 
     const f_artistic = pane.addFolder({title: 'Artistic Controls', expanded: true});
     f_artistic.addBinding(skyAtmosphere, 'skyLuminanceFactor', {min: 0, max: 100, step: 0.1, label: 'skyLuminanceFactor'});
+    f_artistic.addBinding(skyAtmosphere, 'multiScatteringFactor', {min: 0, max: 10, step: 0.01, label: 'multiScatteringFactor'});
     f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'aerialPerspectiveDistanceScale (km)'});
-
-    const f_fog = pane.addFolder({title: 'Height Fog', expanded: false});
-    f_fog.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 10, step: 0.001, label: 'heightFogDensity'});
-    f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.001, label: 'heightFogFalloff'});
-    f_fog.addBinding(skyAtmosphere, 'heightFogAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'heightFogAnisotropy (g)'});
 
     const f_tonemapping = pane.addFolder({title: 'ToneMapping (Global)', expanded: false});
     f_tonemapping.addBinding(targetView.toneMappingManager, 'mode', {

@@ -28,7 +28,7 @@ fn getAtmosphereSunLight(worldPosition: vec3<f32>) -> AtmosphereSunLight {
     
     // [KO] 현재 픽셀의 고도와 태양 각도를 기반으로 대기 투과율(Transmittance)을 샘플링하여 실제 태양색 결정
     // [EN] Sample Atmospheric Transmittance based on current pixel's height and sun angle to determine actual sun color
-    let h = max(0.001, (worldPosition.y / 1000.0) - u_skyAtmosphere.seaLevel);
+    let h = max(0.001, worldPosition.y / 1000.0);
     sun.color = getTransmittance(
         transmittanceTexture, 
         atmosphereSampler, 

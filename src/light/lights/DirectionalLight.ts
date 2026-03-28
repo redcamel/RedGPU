@@ -17,24 +17,12 @@ import ABaseLight from "../core/ABaseLight";
  * @category Light
  */
 class DirectionalLight extends ABaseLight {
-    /**
-     * [KO] 광원의 X 방향 벡터 값입니다.
-     * [EN] X direction vector value of the light.
-     * @defaultValue -1
-     */
     #directionX: number = -1;
-    /**
-     * [KO] 광원의 Y 방향 벡터 값입니다.
-     * [EN] Y direction vector value of the light.
-     * @defaultValue -1
-     */
     #directionY: number = -1;
-    /**
-     * [KO] 광원의 Z 방향 벡터 값입니다.
-     * [EN] Z direction vector value of the light.
-     * @defaultValue -1
-     */
     #directionZ: number = -1;
+
+    #elevation: number = 35.264389682754654;
+    #azimuth: number = 45;
 
     /**
      * [KO] 새로운 DirectionalLight 인스턴스를 생성합니다.
@@ -51,83 +39,94 @@ class DirectionalLight extends ABaseLight {
      */
     constructor(direction: [number, number, number] = [-1, -1, -1], color: string = '#fff', intensity: number = 100000) {
         super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
-        this.#directionX = direction[0];
-        this.#directionY = direction[1];
-        this.#directionZ = direction[2];
+        this.direction = direction;
+    }
+
+    #updateDirectionFromSpherical() {
+        const el = this.#elevation * Math.PI / 180;
+        const az = this.#azimuth * Math.PI / 180;
+
+        const cosEl = Math.cos(el);
+        const x = cosEl * Math.cos(az);
+        const y = Math.sin(el);
+        const z = cosEl * Math.sin(az);
+
+        // [KO] 라이트의 방향은 "광원에서 지면으로" 향하므로 태양 방향의 역벡터를 사용합니다.
+        // [EN] Since the light direction is "from light to surface", use the inverse vector of the sun direction.
+        this.#directionX = -x;
+        this.#directionY = -y;
+        this.#directionZ = -z;
+    }
+
+    #updateSphericalFromDirection() {
+        // [KO] 라이트 방향 벡터의 역벡터(지면에서 광원을 향하는 방향)를 사용하여 각도 계산
+        // [EN] Calculate angles using the inverse light direction vector (direction from surface to light)
+        const x = -this.#directionX;
+        const y = -this.#directionY;
+        const z = -this.#directionZ;
+
+        const len = Math.sqrt(x * x + y * y + z * z);
+        const nx = x / len;
+        const ny = y / len;
+        const nz = z / len;
+
+        this.#elevation = Math.asin(ny) * 180 / Math.PI;
+        this.#azimuth = Math.atan2(nz, nx) * 180 / Math.PI;
     }
 
     /**
-     * [KO] 광원의 X 방향 벡터 값을 반환합니다.
-     * [EN] Returns the X direction vector value of the light.
-     * @returns
-     * [KO] X 방향 벡터 값
-     * [EN] X direction vector value
+     * [KO] 광원의 고도(Elevation, 도)입니다.
+     * [EN] Elevation of the light source (degrees).
      */
-    get directionX(): number {
-        return this.#directionX;
+    get elevation(): number { return this.#elevation; }
+    set elevation(value: number) {
+        this.#elevation = value;
+        this.#updateDirectionFromSpherical();
     }
 
     /**
-     * [KO] 광원의 X 방향 벡터 값을 설정합니다.
-     * [EN] Sets the X direction vector value of the light.
-     * @param value -
-     * [KO] X 방향 벡터 값
-     * [EN] X direction vector value
+     * [KO] 광원의 방위각(Azimuth, 도)입니다.
+     * [EN] Azimuth of the light source (degrees).
      */
+    get azimuth(): number { return this.#azimuth; }
+    set azimuth(value: number) {
+        this.#azimuth = value;
+        this.#updateDirectionFromSpherical();
+    }
+
+    /**
+     * [KO] 광원의 X 방향 벡터 값입니다.
+     * [EN] X direction vector value of the light.
+     */
+    get directionX(): number { return this.#directionX; }
     set directionX(value: number) {
         this.#directionX = value;
+        this.#updateSphericalFromDirection();
     }
 
     /**
-     * [KO] 광원의 Y 방향 벡터 값을 반환합니다.
-     * [EN] Returns the Y direction vector value of the light.
-     * @returns
-     * [KO] Y 방향 벡터 값
-     * [EN] Y direction vector value
+     * [KO] 광원의 Y 방향 벡터 값입니다.
+     * [EN] Y direction vector value of the light.
      */
-    get directionY(): number {
-        return this.#directionY;
-    }
-
-    /**
-     * [KO] 광원의 Y 방향 벡터 값을 설정합니다.
-     * [EN] Sets the Y direction vector value of the light.
-     * @param value -
-     * [KO] Y 방향 벡터 값
-     * [EN] Y direction vector value
-     */
+    get directionY(): number { return this.#directionY; }
     set directionY(value: number) {
         this.#directionY = value;
+        this.#updateSphericalFromDirection();
     }
 
     /**
-     * [KO] 광원의 Z 방향 벡터 값을 반환합니다.
-     * [EN] Returns the Z direction vector value of the light.
-     * @returns
-     * [KO] Z 방향 벡터 값
-     * [EN] Z direction vector value
+     * [KO] 광원의 Z 방향 벡터 값입니다.
+     * [EN] Z direction vector value of the light.
      */
-    get directionZ(): number {
-        return this.#directionZ;
-    }
-
-    /**
-     * [KO] 광원의 Z 방향 벡터 값을 설정합니다.
-     * [EN] Sets the Z direction vector value of the light.
-     * @param value -
-     * [KO] Z 방향 벡터 값
-     * [EN] Z direction vector value
-     */
+    get directionZ(): number { return this.#directionZ; }
     set directionZ(value: number) {
         this.#directionZ = value;
+        this.#updateSphericalFromDirection();
     }
 
     /**
      * [KO] 광원의 전체 방향 벡터를 반환합니다.
      * [EN] Returns the full direction vector of the light.
-     * @returns
-     * [KO] 방향 벡터 [x, y, z]
-     * [EN] Direction vector [x, y, z]
      */
     get direction(): [number, number, number] {
         return [this.#directionX, this.#directionY, this.#directionZ];
@@ -136,14 +135,12 @@ class DirectionalLight extends ABaseLight {
     /**
      * [KO] 광원의 전체 방향 벡터를 설정합니다.
      * [EN] Sets the full direction vector of the light.
-     * @param value -
-     * [KO] 방향 벡터 [x, y, z]
-     * [EN] Direction vector [x, y, z]
      */
     set direction(value: [number, number, number]) {
         this.#directionX = value[0];
         this.#directionY = value[1];
         this.#directionZ = value[2];
+        this.#updateSphericalFromDirection();
     }
 }
 

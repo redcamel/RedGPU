@@ -30,12 +30,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         viewElevation = horizonElevation - ratio * ratio * (horizonElevation + HPI);
     }
 
-    if (params.useGround < 0.5) { viewElevation = abs(viewElevation); }
-
     var viewDir = vec3<f32>(cos(viewElevation) * cos(azimuth), sin(viewElevation), cos(viewElevation) * sin(azimuth));
     
-    // [KO] 양극점(Zenith/Nadir) 부근의 수치적 안정성을 위해 최소한의 epsilon만 적용합니다.
-    // [EN] Apply minimum epsilon for numerical stability near poles (Zenith/Nadir).
     if (abs(viewDir.y) > (1.0 - 1e-6)) {
         viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
     }
@@ -48,23 +44,18 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var transmittance = vec3<f32>(1.0);
 
     if (intersect.x > 0.0) {
-        // [KO] 지면까지의 대기 산란 적분 (단위 휘도)
-        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, 32u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, false, &radiance, &transmittance);
-        
-        if (params.useGround > 0.5 && params.showGround > 0.5) {
-            // [KO] 지면 반사광 계산 안정화
+        integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, SKY_VIEW_STEPS / 2u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, &radiance, &transmittance);
+
+        if (params.bottomRadius > 0.0) {
             let cosSun = params.sunDirection.y; 
             let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
             let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.01, 0.99), 1.0);
             let msEnergy = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb;
-
-            // [KO] 지면 반사광 합성 (모두 단위 휘도로 계산하여 중복 합산 방지)
-            // [EN] Combine ground reflection (calculate in unit radiance to prevent redundant summation)
-            let groundRadiance = evaluateGroundRadiance(cosSun, sunTrans, msEnergy, params.groundAlbedo);
+            let groundRadiance = evaluateGroundRadiance(cosSun, sunTrans, msEnergy);
             radiance += transmittance * groundRadiance;
         }
     } else if (tMax > 0.0) {
-        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, 64u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, false, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, SKY_VIEW_STEPS, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, &radiance, &transmittance);
     }
 
     textureStore(skyViewLUT, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));

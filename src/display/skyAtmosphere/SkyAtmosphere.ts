@@ -38,8 +38,8 @@ const BACKGROUND_UNIFORM_STRUCT = BACKGROUND_SHADER_INFO.uniforms.vertexUniforms
  * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 클래스입니다.
  * [EN] Physics-based Atmospheric Scattering class.
  *
- * [KO] 실시간 태양 위치 및 대기 조성 파라미터를 기반으로 하늘의 색상, 태양 본체, 미 산란(Mie Glow) 및 공중 투시(Aerial Perspective) 효과를 시뮬레이션합니다.
- * [EN] Simulates sky color, sun disk, Mie Glow, and Aerial Perspective effects based on real-time sun position and atmospheric composition parameters.
+ * [KO] 실시간 태양 위치 및 대기 조성 파라미터를 기반으로 하늘의 색상, 태양 본체 및 공중 투시(Aerial Perspective) 효과를 시뮬레이션합니다.
+ * [EN] Simulates sky color, sun disk, and Aerial Perspective effects based on real-time sun position and atmospheric composition parameters.
  *
  * @example
  * ```typescript
@@ -70,36 +70,25 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #prevBackgroundSystemUniformBindGroup: GPUBindGroup;
 
     #params = {
-        bottomRadius: 6360.0,
-        atmosphereHeight: 100.0,
-        mieScattering: 0.003996,
-        mieAbsorption: 0.000444,
         rayleighScattering: [0.005802, 0.013558, 0.033100],
         rayleighExponentialDistribution: 8.0,
-        mieExponentialDistribution: 1.2,
+        mieScattering: 0.003996,
+        mieAbsorption: 0.000444,
         mieAnisotropy: 0.8,
+        mieExponentialDistribution: 1.2,
         absorptionCoefficient: [0.000650, 0.001881, 0.000085],
         absorptionTipAltitude: 25.0,
         absorptionTentWidth: 15.0,
-        sunSize: 0.533,
-        sunIntensity: 10.0,
-        heightFogDensity: 0.0,
-        heightFogFalloff: 0.1,
-        groundAmbient: 0.0,
-        groundAlbedo: [0.1, 0.1, 0.1],
-        mieGlow: 0.5,
-        mieHalo: 0.8,
+        bottomRadius: 6360.0,
+        atmosphereHeight: 100.0,
+        multiScatteringFactor: 1.0,
+        skyLuminanceFactor: 1.0,
         sunDirection: new Float32Array([0, 1, 0]),
-        sunElevation: 90.0,
-        sunAzimuth: 0.0,
-        cameraHeight: 0.001,
-        useGround: 1.0,
-        showGround: 1.0,
-        seaLevel: 0.0,
-        aerialPerspectiveDistanceScale: 100.0,
-        heightFogAnisotropy: 0.7,
+        sunIntensity: 10.0,
+        sunSize: 0.533,
         sunLimbDarkening: 0.67,
-        skyLuminanceFactor: 1.0
+        aerialPerspectiveDistanceScale: 100.0,
+        cameraHeight: 0.001
     };
 
     #activeSunSource: DirectionalLight = null;
@@ -313,8 +302,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     #performUpdate(view: View3D) {
-        // [KO] 동일 프레임에서 중복 업데이트 방지 (renderBackground와 render가 모두 활성화된 경우 대응)
-        // [EN] Prevent redundant updates in the same frame (handles cases where both renderBackground and render are active)
         const currentFrame = view.renderViewStateData.frameIndex;
         if (this.#lastUpdateFrame === currentFrame) return;
         this.#lastUpdateFrame = currentFrame;
@@ -324,13 +311,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     #updateSunInfo(view: View3D): void {
-        // [KO] 규약에 따라 씬의 첫 번째 직사광(index 0)을 태양 소스로 자동 사용
-        // [EN] By convention, automatically use the first directional light (index 0) in the scene as the sun source
         const lights = view.scene.lightManager.directionalLights;
         const source = lights[0] || null;
-
-        // [KO] 광원이 변경되었는지 감지
-        // [EN] Detect if the light source has changed
         const sourceChanged = this.#prevSunSource !== source;
         if (sourceChanged) {
             this.#prevSunSource = source;
@@ -341,9 +323,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             const dir = source.direction;
             const currentDir = this.#params.sunDirection;
             const EPSILON = 0.0001;
-
-            // [KO] DirectionalLight 방향 정규화 (크기가 1이 아닐 수 있음)
-            // [EN] Normalize DirectionalLight direction (magnitude may not be 1)
             const dirLen = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
             const normalizedDirX = dirLen > EPSILON ? dir[0] / dirLen : dir[0];
             const normalizedDirY = dirLen > EPSILON ? dir[1] / dirLen : dir[1];
@@ -358,18 +337,10 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 Math.abs(targetDirY - currentDir[1]) > EPSILON ||
                 Math.abs(targetDirZ - currentDir[2]) > EPSILON;
 
-            // [KO] 광원이 교체되었거나 방향이 변경된 경우 DirectionalLight → SkyAtmosphere 동기화
-            // [EN] Synchronize DirectionalLight → SkyAtmosphere if light source changed or direction changed
             if (sourceChanged || directionChanged) {
                 currentDir[0] = targetDirX;
                 currentDir[1] = targetDirY;
                 currentDir[2] = targetDirZ;
-
-                // [KO] 광원 방향을 구면 좌표계(고도, 방위각)로 변환 (정규화된 벡터 사용)
-                // [EN] Convert light direction to spherical coordinates (elevation, azimuth) using normalized vector
-                this.#params.sunElevation = Math.asin(currentDir[1]) * 180 / Math.PI;
-                this.#params.sunAzimuth = Math.atan2(currentDir[2], currentDir[0]) * 180 / Math.PI;
-
                 this.#markDirty(false, true, true);
             }
 
@@ -383,15 +354,13 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #updateLUTs(view: View3D) {
         const {rawCamera} = view;
         const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
-        const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0) - this.#params.seaLevel);
+        const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0));
 
         if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.0001) {
             this.#params.cameraHeight = currentHeightKm;
             this.#dirtyUniformBuffer = true;
         }
 
-        // [KO] 카메라 행렬 변경 감지: AP LUT는 카메라 위치/회전에 종속적이므로 이동 시에만 갱신
-        // [EN] Camera matrix change detection: AP LUT is dependent on camera pos/rot, so update only when moved
         const camMatrix = rawCamera.viewMatrix;
         let camMoved = false;
         for (let i = 0; i < 16; i++) {
@@ -426,8 +395,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         }
 
         if (this.#dirtyIBL && !this.#isUpdatingIBL) {
-            // [KO] IBL 생성은 매우 무거우므로 중복 실행을 방지하기 위해 락(Lock) 메커니즘 적용
-            // [EN] IBL generation is very heavy, so apply a lock mechanism to prevent redundant execution
             this.#isUpdatingIBL = true;
             (async () => {
                 await this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
@@ -438,80 +405,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         }
     }
 
-    /**
-     * [KO] 파라미터 업데이트를 위한 통합 헬퍼 메서드입니다.
-     * [EN] Integrated helper method for parameter updates.
-     */
     #setParam(key: string, value: any, lut: boolean, skyView: boolean, ibl: boolean, validator?: (v: any) => void): void {
         if (validator) validator(value);
         (this.#params as any)[key] = value;
         this.#markDirty(lut, skyView, ibl);
     }
-
-    /**
-     * [KO] 지표면 기준 고도 오프셋 (km)입니다.
-     * [EN] Sea level altitude offset (km).
-     */
-    get seaLevel(): number { return this.#params.seaLevel; }
-    set seaLevel(v: number) { this.#setParam('seaLevel', v, false, true, true); }
-
-    /**
-     * [KO] 태양의 고도(Elevation, 도)입니다.
-     * [EN] Sun elevation (degrees).
-     */
-    get sunElevation(): number { return this.#params.sunElevation; }
-    set sunElevation(v: number) {
-        this.#params.sunElevation = v;
-        this.#updateDirectionFromSpherical();
-    }
-
-    /**
-     * [KO] 태양의 방위각(Azimuth, 도)입니다.
-     * [EN] Sun azimuth (degrees).
-     */
-    get sunAzimuth(): number { return this.#params.sunAzimuth; }
-    set sunAzimuth(v: number) {
-        this.#params.sunAzimuth = v;
-        this.#updateDirectionFromSpherical();
-    }
-
-    #updateDirectionFromSpherical() {
-        const el = this.#params.sunElevation * Math.PI / 180;
-        const az = this.#params.sunAzimuth * Math.PI / 180;
-
-        const cosEl = Math.cos(el);
-        const x = cosEl * Math.cos(az);
-        const y = Math.sin(el);
-        const z = cosEl * Math.sin(az);
-
-        const currentDir = this.#params.sunDirection;
-        currentDir[0] = x;
-        currentDir[1] = y;
-        currentDir[2] = z;
-
-        // [KO] 활성 광원이 존재하면 해당 광원의 방향도 업데이트 (광원 방향 = -태양 방향)
-        // [EN] If an active light source exists, update its direction as well (light direction = -sun direction)
-        if (this.#activeSunSource) {
-            this.#activeSunSource.direction = [-x, -y, -z];
-        }
-
-        this.#markDirty(false, true, true);
-    }
-
-    /**
-     * [KO] 현재 태양 광원으로 사용 중인 DirectionalLight를 반환합니다.
-     * [EN] Returns the DirectionalLight currently being used as the sun source.
-     *
-     * [KO] 씬의 첫 번째 DirectionalLight (index 0)가 자동으로 사용됩니다.
-     * [EN] The first DirectionalLight (index 0) in the scene is automatically used.
-     */
-    get sunSource(): DirectionalLight { return this.#activeSunSource; }
-
-    /**
-     * [KO] 태양의 방향 벡터 (정규화됨)를 반환합니다.
-     * [EN] Returns the sun direction vector (normalized).
-     */
-    get sunDirection(): Float32Array { return this.#params.sunDirection; }
 
     /**
      * [KO] 대기 산란 파라미터 객체를 반환합니다.
@@ -520,45 +418,12 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     get params() { return this.#params; }
 
     /**
-     * [KO] 현재 카메라의 행성 중심 기준 고도 (km)를 반환합니다.
-     * [EN] Returns the current camera altitude from planet center (km).
-     */
-    get cameraHeight(): number { return this.#params.cameraHeight; }
-
-    /**
      * [KO] 공중 투시(Aerial Perspective) 효과가 적용될 거리 스케일 (km)입니다.
      * [EN] Distance scale (km) for Aerial Perspective effect.
      */
     get aerialPerspectiveDistanceScale(): number { return this.#params.aerialPerspectiveDistanceScale; }
     set aerialPerspectiveDistanceScale(v: number) {
         this.#setParam('aerialPerspectiveDistanceScale', v, false, true, true, (v) => validatePositiveNumberRange(v, 1, 1000));
-    }
-
-    /**
-     * [KO] 높이 안개의 비등방성 계수 (g, 0 ~ 0.999)입니다.
-     * [EN] Anisotropy factor for height fog (g, 0 to 0.999).
-     */
-    get heightFogAnisotropy(): number { return this.#params.heightFogAnisotropy; }
-    set heightFogAnisotropy(v: number) {
-        this.#setParam('heightFogAnisotropy', v, false, true, true, (v) => validateNumberRange(v, 0, 0.999));
-    }
-
-    /**
-     * [KO] 태양의 조도 강도입니다.
-     * [EN] Sun's illuminance intensity.
-     */
-    get sunIntensity(): number { return this.#params.sunIntensity; }
-    set sunIntensity(v: number) {
-        validatePositiveNumberRange(v, 0, 200000);
-        this.#params.sunIntensity = v;
-
-        // [KO] 활성 광원이 존재하면 해당 광원의 세기도 업데이트
-        // [EN] If an active light source exists, update its intensity as well
-        if (this.#activeSunSource) {
-            this.#activeSunSource.intensity = v;
-        }
-
-        this.#markDirty(false, false, true);
     }
 
     /**
@@ -636,26 +501,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 지면의 반사율(Albedo) [R, G, B] 배열입니다.
-     * [EN] Ground Albedo [R, G, B] array.
-     */
-    get groundAlbedo(): [number, number, number] {
-        return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]];
-    }
-    set groundAlbedo(v: [number, number, number]) {
-        this.#setParam('groundAlbedo', [...v], true, false, true);
-    }
-
-    /**
-     * [KO] 지면 환경광 강도입니다.
-     * [EN] Ground ambient light intensity.
-     */
-    get groundAmbient(): number { return this.#params.groundAmbient; }
-    set groundAmbient(v: number) {
-        this.#setParam('groundAmbient', v, false, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
-    }
-
-    /**
      * [KO] 대기 중 흡수 물질(오존 등)의 흡수 계수 [R, G, B] 배열입니다.
      * [EN] Absorption coefficient [R, G, B] array for atmospheric absorbers (e.g. Ozone).
      */
@@ -685,21 +530,12 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 높이 안개의 밀도 계수입니다.
-     * [EN] Density coefficient for height fog.
+     * [KO] 다중 산란(Multi-Scattering) 에너지 보정 배율입니다.
+     * [EN] Multi-Scattering energy compensation factor.
      */
-    get heightFogDensity(): number { return this.#params.heightFogDensity; }
-    set heightFogDensity(v: number) {
-        this.#setParam('heightFogDensity', v, false, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
-    }
-
-    /**
-     * [KO] 높이 안개의 감쇄 지수(Falloff)입니다.
-     * [EN] Falloff exponent for height fog.
-     */
-    get heightFogFalloff(): number { return this.#params.heightFogFalloff; }
-    set heightFogFalloff(v: number) {
-        this.#setParam('heightFogFalloff', v, false, false, true, (v) => validatePositiveNumberRange(v, 0.001, 10));
+    get multiScatteringFactor(): number { return this.#params.multiScatteringFactor; }
+    set multiScatteringFactor(v: number) {
+        this.#setParam('multiScatteringFactor', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
     }
 
     /**
@@ -710,38 +546,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     set sunSize(v: number) {
         this.#setParam('sunSize', v, false, true, true, (v) => validatePositiveNumberRange(v, 0.01, 10.0));
     }
-
-    /**
-     * [KO] 미 산란 글로우(Mie Glow) 강도 (0 ~ 0.999)입니다.
-     * [EN] Mie Glow intensity (0 to 0.999).
-     */
-    get mieGlow(): number { return this.#params.mieGlow; }
-    set mieGlow(v: number) {
-        this.#setParam('mieGlow', v, false, true, true, (v) => validateNumberRange(v, 0, 0.999));
-    }
-
-    /**
-     * [KO] 미 산란 헤일로(Mie Halo)의 비등방성 계수 (0 ~ 0.999)입니다.
-     * [EN] Anisotropy factor for Mie Halo (0 to 0.999).
-     */
-    get mieHalo(): number { return this.#params.mieHalo; }
-    set mieHalo(v: number) {
-        this.#setParam('mieHalo', v, false, false, true, (v) => validateNumberRange(v, 0, 0.999));
-    }
-
-    /**
-     * [KO] 지면 사용 여부를 설정합니다.
-     * [EN] Sets whether to use the ground.
-     */
-    get useGround(): boolean { return !!this.#params.useGround; }
-    set useGround(v: boolean) { this.#setParam('useGround', v ? 1.0 : 0.0, true, true, true); }
-
-    /**
-     * [KO] 지면 표시 여부를 설정합니다.
-     * [EN] Sets whether to show the ground.
-     */
-    get showGround(): boolean { return !!this.#params.showGround; }
-    set showGround(v: boolean) { this.#setParam('showGround', v ? 1.0 : 0.0, true, true, true); }
 
     /**
      * [KO] 태양의 주연 감광(Limb Darkening) 계수입니다.
@@ -803,30 +607,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      */
     get atmosphereSampler() { return this.#sampler; }
 
-    /**
-     * [KO] 대기 산란 포스트 이펙트를 실행합니다.
-     * [EN] Executes the atmospheric scattering post-effect.
-     *
-     * @example
-     * ```typescript
-     * const result = skyAtmosphere.render(view, width, height, sourceTextureInfo);
-     * ```
-     * @param view -
-     * [KO] 렌더링에 사용되는 3D 뷰
-     * [EN] 3D view used for rendering
-     * @param width -
-     * [KO] 렌더링 너비
-     * [EN] Rendering width
-     * @param height -
-     * [KO] 렌더링 높이
-     * [EN] Rendering height
-     * @param sourceTextureInfo -
-     * [KO] 소스 텍스처 정보
-     * [EN] Source texture information
-     * @returns
-     * [KO] 렌더링 결과 텍스처 정보
-     * [EN] Rendering result texture information
-     */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         const {gpuDevice, resourceManager, antialiasingManager} = this.redGPUContext;
         this.#performUpdate(view);
@@ -835,8 +615,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         const depthView = view.viewRenderTextureManager.depthTextureView;
         const peUniformBuffer = view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer;
 
-        // [KO] 리소스 변경 감지 플래그 정의 (ASinglePassPostEffect 패턴 준수)
-        // [EN] Define resource change detection flags (Following ASinglePassPostEffect pattern)
         const dimensionsChanged = !this.#outputTexture || this.#prevDimensions?.width !== width || this.#prevDimensions?.height !== height;
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
         const peUniformBufferChanged = this.#prevPEUniformBuffer !== peUniformBuffer;
@@ -855,8 +633,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
         const pipeline = this.#getPipeline(useMSAA);
 
-        // [KO] bindGroup0 최적화: swap0/swap1 각각에 대해 변경 감지 및 캐싱 수행
-        // [EN] bindGroup0 optimization: Perform change detection and caching for swap0/swap1 respectively
         let currentBindGroup0: GPUBindGroup;
         if (view.renderViewStateData.swapBufferIndex === 0) {
             if (!this.#bindGroup0_swap0 || msaaChanged || this.#prevSourceView_swap0 !== sourceTextureInfo.textureView || this.#prevDepthView_swap0 !== depthView) {
@@ -900,8 +676,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             currentBindGroup0 = this.#bindGroup0_swap1;
         }
 
-        // [KO] bindGroup1 최적화: 출력 텍스처(크기 변경 포함)나 시스템 유니폼 버퍼가 변경된 경우에만 생성
-        // [EN] bindGroup1 optimization: Generate only when output texture (including size change) or system uniform buffer changes
         if (!this.#bindGroup1 || dimensionsChanged || peUniformBufferChanged) {
             this.#prevPEUniformBuffer = peUniformBuffer;
             this.#bindGroup1 = gpuDevice.createBindGroup({

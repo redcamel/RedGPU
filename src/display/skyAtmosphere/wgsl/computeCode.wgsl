@@ -43,7 +43,7 @@ var apSample = textureSampleLevel(aerialPerspectiveLUT, skyAtmosphereSampler, ve
 
 // [KO] 근거리 보정 (Analytical Approximation): 
 // [KO] 3D LUT의 해상도 한계로 인한 근거리 아티팩트(0m에서도 안개가 끼는 현상) 방지
-if (actualDist < 0.2) { // 200m 이내
+if (actualDist < NEAR_FIELD_CORRECTION_DIST) { 
     mappingH = max(0.0, viewHeight);
     let d = getAtmosphereDensities(mappingH, uniforms);
     let sunDir = normalize(uniforms.sunDirection);
@@ -52,21 +52,19 @@ if (actualDist < 0.2) { // 200m 이내
     // [KO] 물리적 기본 산란 및 소멸 계수 계산
     let scatR = uniforms.rayleighScattering * d.rhoR * uniforms.skyLuminanceFactor;
     let scatM = uniforms.mieScattering * d.rhoM * uniforms.skyLuminanceFactor;
-    let scatF = uniforms.heightFogDensity * d.rhoF * uniforms.skyLuminanceFactor;
 
     let phaseR = phaseRayleigh(dot(viewDir, sunDir));
-    let phaseM_Base = phaseMie(dot(viewDir, sunDir), uniforms.mieAnisotropy) * (1.0 - uniforms.mieGlow);
-    let phaseF = phaseMie(dot(viewDir, sunDir), uniforms.heightFogAnisotropy);
+    let phaseM = phaseMie(dot(viewDir, sunDir), uniforms.mieAnisotropy);
 
-    let localScat = (scatR * phaseR + vec3<f32>(scatM * phaseM_Base + scatF * phaseF)) * sunTrans;
-    let localExt = scatR + vec3<f32>((uniforms.mieScattering + uniforms.mieAbsorption) * d.rhoM * uniforms.skyLuminanceFactor) + uniforms.absorptionCoefficient * d.rhoO + vec3<f32>(scatF);
+    let localScat = (scatR * phaseR + vec3<f32>(scatM * phaseM)) * sunTrans;
+    let localExt = scatR + vec3<f32>((uniforms.mieScattering + uniforms.mieAbsorption) * d.rhoM * uniforms.skyLuminanceFactor) + uniforms.absorptionCoefficient * d.rhoO;
 
-    // 0~200m 구간에 대해 선형 근사 및 LUT와 부드럽게 블렌딩
+    // [KO] 선형 근사 및 LUT와 부드럽게 블렌딩
     let analyticalScat = localScat * actualDist;
     let analyticalTrans = exp(-localExt * actualDist);
     let analyticalA = (analyticalTrans.r + analyticalTrans.g + analyticalTrans.b) / 3.0;
 
-    let blend = smoothstep(0.0, 0.2, actualDist);
+    let blend = smoothstep(0.0, NEAR_FIELD_CORRECTION_DIST, actualDist);
     apSample = mix(vec4<f32>(analyticalScat, analyticalA), apSample, blend);
 }
 
