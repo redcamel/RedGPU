@@ -72,13 +72,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #params = {
         rayleighScattering: [0.005802, 0.013558, 0.033100],
         rayleighExponentialDistribution: 8.0,
-        mieScattering: 0.003996,
-        mieAbsorption: 0.000444,
+        mieScattering: [0.003996, 0.003996, 0.003996],
+        mieAbsorption: [0.000444, 0.000444, 0.000444],
         mieAnisotropy: 0.8,
         mieExponentialDistribution: 1.2,
         absorptionCoefficient: [0.000650, 0.001881, 0.000085],
         absorptionTipAltitude: 25.0,
         absorptionTentWidth: 15.0,
+        groundAlbedo: [0.1, 0.1, 0.1],
         bottomRadius: 6360.0,
         atmosphereHeight: 100.0,
         multiScatteringFactor: 1.0,
@@ -445,21 +446,25 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 미 산란(Mie Scattering) 계수입니다.
-     * [EN] Mie Scattering coefficient.
+     * [KO] 미 산란(Mie Scattering) 계수 [R, G, B] 배열입니다.
+     * [EN] Mie Scattering coefficient [R, G, B] array.
      */
-    get mieScattering(): number { return this.#params.mieScattering; }
-    set mieScattering(v: number) {
-        this.#setParam('mieScattering', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 1.0));
+    get mieScattering(): [number, number, number] {
+        return [this.#params.mieScattering[0], this.#params.mieScattering[1], this.#params.mieScattering[2]];
+    }
+    set mieScattering(v: [number, number, number]) {
+        this.#setParam('mieScattering', [...v], true, false, true);
     }
 
     /**
-     * [KO] 미 흡수(Mie Absorption) 계수입니다.
-     * [EN] Mie Absorption coefficient.
+     * [KO] 미 흡수(Mie Absorption) 계수 [R, G, B] 배열입니다.
+     * [EN] Mie Absorption coefficient [R, G, B] array.
      */
-    get mieAbsorption(): number { return this.#params.mieAbsorption; }
-    set mieAbsorption(v: number) {
-        this.#setParam('mieAbsorption', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 1.0));
+    get mieAbsorption(): [number, number, number] {
+        return [this.#params.mieAbsorption[0], this.#params.mieAbsorption[1], this.#params.mieAbsorption[2]];
+    }
+    set mieAbsorption(v: [number, number, number]) {
+        this.#setParam('mieAbsorption', [...v], true, false, true);
     }
 
     /**
@@ -498,6 +503,17 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
     set mieAnisotropy(v: number) {
         this.#setParam('mieAnisotropy', v, true, false, true, (v) => validateNumberRange(v, 0, 0.999));
+    }
+
+    /**
+     * [KO] 지면의 반사율(Albedo) [R, G, B] 배열입니다.
+     * [EN] Ground Albedo [R, G, B] array.
+     */
+    get groundAlbedo(): [number, number, number] {
+        return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]];
+    }
+    set groundAlbedo(v: [number, number, number]) {
+        this.#setParam('groundAlbedo', [...v], true, false, true);
     }
 
     /**

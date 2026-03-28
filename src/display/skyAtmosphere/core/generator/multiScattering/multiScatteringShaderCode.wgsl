@@ -38,8 +38,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             integrateMultiScatSegment(rayOrigin, rayDir, 0.0, intersect.x, MULTI_SCAT_STEPS, sunDir, &L1, &f1, &TPath);
             let hitP = rayOrigin + rayDir * intersect.x;
             let sunTGround = getPhysicalTransmittance(hitP, sunDir, bottomRadius, params.atmosphereHeight, params);
-            L1 += TPath * sunTGround * max(0.0, dot(normalize(hitP), sunDir)) * GROUND_ALBEDO * INV_PI;
-            f1 += TPath * GROUND_ALBEDO;
+            L1 += TPath * sunTGround * max(0.0, dot(normalize(hitP), sunDir)) * params.groundAlbedo * INV_PI;
+            f1 += TPath * params.groundAlbedo;
         } else {
             if (params.bottomRadius <= 0.0 && intersect.x > 0.0) {
                 integrateMultiScatSegment(rayOrigin, rayDir, 0.0, intersect.x, MULTI_SCAT_STEPS, sunDir, &L1, &f1, &TPath);

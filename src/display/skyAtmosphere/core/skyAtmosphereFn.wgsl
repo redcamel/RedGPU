@@ -30,9 +30,6 @@ const IBL_SUN_ALPHA: f32 = 0.26;
 const IBL_RADIANCE_THRESHOLD: f32 = 100.0;
 const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
 
-// [KO] 언리얼 표준 Ground Albedo (약 0.1)
-const GROUND_ALBEDO: vec3<f32> = vec3<f32>(0.1);
-
 struct AtmosphereDensities {
     rhoR: f32, rhoM: f32, rhoO: f32
 };
@@ -168,7 +165,7 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
         let mieExt = (params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor;
         let absC = params.absorptionCoefficient * d.rhoO;
         
-        optExt += (scatR + vec3<f32>(mieExt) + absC) * stepSize;
+        optExt += (scatR + mieExt + absC) * stepSize;
     }
     return optExt;
 }
@@ -258,7 +255,7 @@ fn getMieGlowAmountUnit(
     let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
     let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunCosTheta, params.atmosphereHeight);
     
-    var glow = sunTransForGlow * (params.mieScattering / max(0.0001, params.mieScattering + params.mieAbsorption)) 
+    var glow = sunTransForGlow * (params.mieScattering / max(vec3<f32>(0.0001), params.mieScattering + params.mieAbsorption)) 
                         * (sharpPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS;
 
     let luma = getLuminance(glow);
@@ -312,13 +309,13 @@ fn integrateScatSegment(
         let scatR = params.rayleighScattering * d.rhoR * params.skyLuminanceFactor;
         let scatM = params.mieScattering * d.rhoM * params.skyLuminanceFactor;
         
-        let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM)) * sunTrans * shadowMask;
+        let stepScat = (scatR * phaseR + scatM * phaseM) * sunTrans * shadowMask;
         
-        let scatTotal = scatR + vec3<f32>(scatM);
+        let scatTotal = scatR + scatM;
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight / params.atmosphereHeight, 0.001, 0.999));
         let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask * params.multiScatteringFactor;
 
-        let ext = scatR + vec3<f32>((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO;
+        let ext = scatR + ((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO;
 
         *radiance += *transmittance * (stepScat + msScat) * stepSize;
         *transmittance *= exp(-ext * stepSize);
@@ -340,13 +337,13 @@ fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
     return dir;
 }
 
-fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>) -> vec3<f32> {
+fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>) -> vec3<f32> {
     let sunShadow = smoothstep(-0.01, 0.01, cosSun);
     var groundRadiance = vec3<f32>(0.0);
     if (sunShadow > 0.0) {
-        groundRadiance = (sunTrans * max(0.0, cosSun) + msEnergy * PI) * (GROUND_ALBEDO * INV_PI) * sunShadow;
+        groundRadiance = (sunTrans * max(0.0, cosSun) + msEnergy * PI) * (groundAlbedo * INV_PI) * sunShadow;
     } else {
-        groundRadiance = (msEnergy * PI) * (GROUND_ALBEDO * INV_PI);
+        groundRadiance = (msEnergy * PI) * (groundAlbedo * INV_PI);
     }
     return groundRadiance;
 }
@@ -384,7 +381,7 @@ fn evaluateIBLRadiance(
         let cosS = dot(hitNormal, sunDir);
         let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosS, atmosphereHeight);
         let msEnergy = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy);
+        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo);
 
         let viewZenithCosAngle = dot(hitNormal, -viewDir);
         let viewTransmittance = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewZenithCosAngle, atmosphereHeight);

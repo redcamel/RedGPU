@@ -93,6 +93,17 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     f_planet.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 1, label: 'bottomRadius (km)'});
     f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1, label: 'atmosphereHeight (km)'});
     
+    const groundState = {
+        albedo: {
+            r: skyAtmosphere.groundAlbedo[0],
+            g: skyAtmosphere.groundAlbedo[1],
+            b: skyAtmosphere.groundAlbedo[2]
+        }
+    };
+    f_planet.addBinding(groundState, 'albedo', {color: {type: 'float'}, label: 'groundAlbedo'}).on('change', (ev) => {
+        skyAtmosphere.groundAlbedo = [ev.value.r, ev.value.g, ev.value.b];
+    });
+
     const f_rayleigh = pane.addFolder({title: 'Rayleigh', expanded: false});
     const rayleighState = {
         scat: {
@@ -107,8 +118,26 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'rayleighExponentialDistribution (km)'});
 
     const f_mie = pane.addFolder({title: 'Mie', expanded: false});
-    f_mie.addBinding(skyAtmosphere, 'mieScattering', {min: 0, max: 1.0, step: 0.0001, label: 'mieScattering'});
-    f_mie.addBinding(skyAtmosphere, 'mieAbsorption', {min: 0, max: 1.0, step: 0.0001, label: 'mieAbsorption'});
+    const mieScatState = {
+        scat: {
+            r: skyAtmosphere.mieScattering[0],
+            g: skyAtmosphere.mieScattering[1],
+            b: skyAtmosphere.mieScattering[2]
+        }
+    };
+    f_mie.addBinding(mieScatState, 'scat', {color: {type: 'float'}, label: 'mieScattering'}).on('change', (ev) => {
+        skyAtmosphere.mieScattering = [ev.value.r, ev.value.g, ev.value.b];
+    });
+    const mieAbsState = {
+        abs: {
+            r: skyAtmosphere.mieAbsorption[0],
+            g: skyAtmosphere.mieAbsorption[1],
+            b: skyAtmosphere.mieAbsorption[2]
+        }
+    };
+    f_mie.addBinding(mieAbsState, 'abs', {color: {type: 'float'}, label: 'mieAbsorption'}).on('change', (ev) => {
+        skyAtmosphere.mieAbsorption = [ev.value.r, ev.value.g, ev.value.b];
+    });
     f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'mieAnisotropy (g)'});
     f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'mieExponentialDistribution (km)'});
 
