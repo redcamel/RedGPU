@@ -719,7 +719,8 @@ fn main(inputData:InputData) -> OutputFragment {
         let envIBL_SPECULAR:vec3<f32> = reflectedColor * F_IBL * specularParameter ;
 
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+        // [KO] Irradiance(E)를 Radiance(L)로 변환하기 위해 INV_PI 적용
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric) * INV_PI;
 
         // [KO] ibl 확산 투과 (Diffuse Transmission) [EN] ibl Diffuse Transmission
         #redgpu_if useKHR_materials_diffuse_transmission
