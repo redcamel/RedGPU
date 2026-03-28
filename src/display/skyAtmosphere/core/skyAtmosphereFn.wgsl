@@ -23,10 +23,10 @@ const IRRADIANCE_SAMPLES: u32 = 1024u;
 
 // [KO] 렌더링 상수를 정의합니다.
 const SUN_RADIANCE_BOOST: f32 = 1.0;
-const SUN_RADIANCE_THRESHOLD: f32 = 60000.0;
-const MIE_GLOW_SUPPRESS: f32 = 0.05;
-const MIE_GLOW_THRESHOLD: f32 = 100.0;
-const IBL_RADIANCE_THRESHOLD: f32 = 100.0;
+const SUN_RADIANCE_THRESHOLD: f32 = 65000.0;
+const MIE_GLOW_SUPPRESS: f32 = 0.10;
+const MIE_GLOW_THRESHOLD: f32 = 40000.0;
+const IBL_RADIANCE_THRESHOLD: f32 = 60000.0;
 const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
 
 struct AtmosphereDensities {
@@ -357,10 +357,10 @@ fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>,
     // [EN] Ground radiance calculation: (Direct Irradiance + Multi-scattering Irradiance) * (Albedo / PI)
     if (sunShadow > 0.0) {
         // [KO] 지면은 거칠기 때문에 하늘만큼 밝은 정반사를 일으키지 않음. 물리적 기반 하에 에너지 보존을 강화하여 차분하게 표현
-        // [KO] 다중 산란 에너지(msEnergy)는 하늘 전체의 에너지를 담고 있으므로 지면에서는 이를 1/PI로 나누어 평균 휘도 기여도로 변환하여 합산
-        groundRadiance = (sunTrans * max(0.0, cosSun) + msEnergy * INV_PI) * (groundAlbedo * INV_PI) * sunShadow;
+        // [KO] 다중 산란 에너지(msEnergy)는 이미 적분된 조도 성분이므로 직접 조도와 그대로 합산
+        groundRadiance = (sunTrans * max(0.0, cosSun) + msEnergy) * (groundAlbedo * INV_PI) * sunShadow;
     } else {
-        groundRadiance = (msEnergy * INV_PI) * (groundAlbedo * INV_PI);
+        groundRadiance = msEnergy * (groundAlbedo * INV_PI);
     }
     
     return groundRadiance * sunIntensity;
