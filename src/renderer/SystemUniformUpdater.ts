@@ -176,11 +176,11 @@ class SystemUniformUpdater {
             skyAtmosphereMembers, uniformDataF32, uniformDataU32,
             [
                 {key: 'rayleighScattering', value: params?.rayleighScattering || [0, 0, 0]},
-                {key: 'rayleighScaleHeight', value: params?.rayleighExponentialDistribution || 0},
+                {key: 'rayleighScaleHeight', value: params?.rayleighScaleHeight || 0},
                 {key: 'mieScattering', value: params?.mieScattering || [0, 0, 0]},
                 {key: 'mieAnisotropy', value: params?.mieAnisotropy || 0},
                 {key: 'mieAbsorption', value: params?.mieAbsorption || [0, 0, 0]},
-                {key: 'mieScaleHeight', value: params?.mieExponentialDistribution || 0},
+                {key: 'mieScaleHeight', value: params?.mieScaleHeight || 0},
                 {key: 'absorptionCoefficient', value: params?.absorptionCoefficient || [0, 0, 0]},
                 {key: 'absorptionTipAltitude', value: params?.absorptionTipAltitude || 0},
                 {key: 'groundAlbedo', value: params?.groundAlbedo || [0, 0, 0]},
