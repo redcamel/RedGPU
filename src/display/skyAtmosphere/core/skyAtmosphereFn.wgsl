@@ -116,10 +116,10 @@ fn getAtmosphereDensities(viewHeight: f32, params: SkyAtmosphere) -> AtmosphereD
     if (viewHeight < 0.0) {
         d.rhoR = 0.0; d.rhoM = 0.0; d.rhoO = 0.0;
     } else {
-        d.rhoR = exp(-viewHeight / params.rayleighExponentialDistribution);
-        d.rhoM = exp(-viewHeight / params.mieExponentialDistribution);
+        d.rhoR = exp(-viewHeight / params.rayleighScaleHeight);
+        d.rhoM = exp(-viewHeight / params.mieScaleHeight);
         let ozoneDist = abs(viewHeight - params.absorptionTipAltitude);
-        d.rhoO = max(0.0, 1.0 - ozoneDist / params.absorptionTentWidth);
+        d.rhoO = max(0.0, 1.0 - ozoneDist / params.absorptionTipWidth);
     }
     return d;
 }
@@ -147,9 +147,19 @@ fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosph
 }
 
 fn getPhysicalTransmittance(p: vec3<f32>, sunDir: vec3<f32>, r: f32, atmosphereHeight: f32, params: SkyAtmosphere) -> vec3<f32> {
-    let intersect = getPlanetIntersection(p, sunDir, r);
+    // [KO] 지평선 아래에서 대기가 너무 어두워지는 것을 방지하기 위해 태양 고도 보정
+    let minElevationRad = params.transmittanceMinLightElevationAngle * DEG_TO_RAD;
+    var adjustedSunDir = sunDir;
+    if (sunDir.y < sin(minElevationRad)) {
+        let cosEl = cos(minElevationRad);
+        let sinEl = sin(minElevationRad);
+        let horizontalDir = normalize(vec3<f32>(sunDir.x, 0.0, sunDir.z));
+        adjustedSunDir = vec3<f32>(horizontalDir.x * cosEl, sinEl, horizontalDir.z * cosEl);
+    }
+
+    let intersect = getPlanetIntersection(p, adjustedSunDir, r);
     if (r > 0.0 && intersect.x > EPSILON) { return vec3<f32>(0.0); }
-    return getSunTransmittanceManual(p, sunDir, params);
+    return getSunTransmittanceManual(p, adjustedSunDir, params);
 }
 
 fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {

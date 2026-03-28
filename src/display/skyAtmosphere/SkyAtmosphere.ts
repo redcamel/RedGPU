@@ -71,24 +71,26 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     #params = {
         rayleighScattering: [0.005802, 0.013558, 0.033100],
-        rayleighExponentialDistribution: 8.0,
+        rayleighScaleHeight: 8.0,
         mieScattering: [0.003996, 0.003996, 0.003996],
-        mieAbsorption: [0.000444, 0.000444, 0.000444],
         mieAnisotropy: 0.8,
-        mieExponentialDistribution: 1.2,
+        mieAbsorption: [0.000444, 0.000444, 0.000444],
+        mieScaleHeight: 1.2,
         absorptionCoefficient: [0.000650, 0.001881, 0.000085],
         absorptionTipAltitude: 25.0,
-        absorptionTentWidth: 15.0,
         groundAlbedo: [0.1, 0.1, 0.1],
+        absorptionTipWidth: 15.0,
+        skyLuminanceFactor: [1.0, 1.0, 1.0],
+        multiScatteringFactor: 1.0,
+        sunDirection: new Float32Array([0, 1, 0]),
+        transmittanceMinLightElevationAngle: -90.0,
         bottomRadius: 6360.0,
         atmosphereHeight: 100.0,
-        multiScatteringFactor: 1.0,
-        skyLuminanceFactor: 1.0,
-        sunDirection: new Float32Array([0, 1, 0]),
+        aerialPerspectiveDistanceScale: 100.0,
+        aerialPerspectiveStartDepth: 0.0,
         sunIntensity: 10.0,
         sunSize: 0.533,
         sunLimbDarkening: 0.67,
-        aerialPerspectiveDistanceScale: 100.0,
         cameraHeight: 0.001
     };
 
@@ -428,6 +430,24 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
+     * [KO] 공중 투시(Aerial Perspective) 효과가 시작되는 최소 깊이 (km)입니다.
+     * [EN] Minimum depth (km) where Aerial Perspective effect starts.
+     */
+    get aerialPerspectiveStartDepth(): number { return this.#params.aerialPerspectiveStartDepth; }
+    set aerialPerspectiveStartDepth(v: number) {
+        this.#setParam('aerialPerspectiveStartDepth', v, false, true, true, (v) => validatePositiveNumberRange(v, 0, 100));
+    }
+
+    /**
+     * [KO] 태양이 지평선 아래로 내려갔을 때 대기가 어두워지는 것을 방지하는 최소 고도 각도 (도)입니다.
+     * [EN] Minimum elevation angle (degrees) to prevent the atmosphere from becoming too dark when the sun is below the horizon.
+     */
+    get transmittanceMinLightElevationAngle(): number { return this.#params.transmittanceMinLightElevationAngle; }
+    set transmittanceMinLightElevationAngle(v: number) {
+        this.#setParam('transmittanceMinLightElevationAngle', v, true, true, true, (v) => validateNumberRange(v, -90, 90));
+    }
+
+    /**
      * [KO] 행성의 바닥 반지름 (km)입니다.
      * [EN] Planet bottom radius (km).
      */
@@ -482,18 +502,18 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [KO] 레일리 산란의 고도 별 지수 분포(Scale Height, km)입니다.
      * [EN] Rayleigh exponential distribution (Scale Height, km).
      */
-    get rayleighExponentialDistribution(): number { return this.#params.rayleighExponentialDistribution; }
-    set rayleighExponentialDistribution(v: number) {
-        this.#setParam('rayleighExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
+    get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
+    set rayleighScaleHeight(v: number) {
+        this.#setParam('rayleighScaleHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
     }
 
     /**
      * [KO] 미 산란의 고도 별 지수 분포(Scale Height, km)입니다.
      * [EN] Mie exponential distribution (Scale Height, km).
      */
-    get mieExponentialDistribution(): number { return this.#params.mieExponentialDistribution; }
-    set mieExponentialDistribution(v: number) {
-        this.#setParam('mieExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
+    get mieScaleHeight(): number { return this.#params.mieScaleHeight; }
+    set mieScaleHeight(v: number) {
+        this.#setParam('mieScaleHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
     }
 
     /**
@@ -540,9 +560,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [KO] 흡수층의 두께 너비 (km)입니다.
      * [EN] Thickness width (km) of the absorption tent.
      */
-    get absorptionTentWidth(): number { return this.#params.absorptionTentWidth; }
-    set absorptionTentWidth(v: number) {
-        this.#setParam('absorptionTentWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
+    get absorptionTipWidth(): number { return this.#params.absorptionTipWidth; }
+    set absorptionTipWidth(v: number) {
+        this.#setParam('absorptionTipWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
     }
 
     /**
@@ -573,12 +593,14 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 대기 산란의 전체 휘도 배율입니다.
-     * [EN] Overall luminance factor for atmospheric scattering.
+     * [KO] 대기 산란의 전체 휘도 및 색상 틴트 배율 [R, G, B] 배열입니다.
+     * [EN] Overall luminance and color tint factor [R, G, B] array for atmospheric scattering.
      */
-    get skyLuminanceFactor(): number { return this.#params.skyLuminanceFactor; }
-    set skyLuminanceFactor(v: number) {
-        this.#setParam('skyLuminanceFactor', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 100.0));
+    get skyLuminanceFactor(): [number, number, number] {
+        return [this.#params.skyLuminanceFactor[0], this.#params.skyLuminanceFactor[1], this.#params.skyLuminanceFactor[2]];
+    }
+    set skyLuminanceFactor(v: [number, number, number]) {
+        this.#setParam('skyLuminanceFactor', [...v], true, false, true);
     }
 
     /**

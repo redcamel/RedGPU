@@ -115,7 +115,7 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     f_rayleigh.addBinding(rayleighState, 'scat', {color: {type: 'float'}, label: 'rayleighScattering'}).on('change', (ev) => {
         skyAtmosphere.rayleighScattering = [ev.value.r, ev.value.g, ev.value.b];
     });
-    f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'rayleighExponentialDistribution (km)'});
+    f_rayleigh.addBinding(skyAtmosphere, 'rayleighScaleHeight', {min: 0.1, max: 100, step: 0.1, label: 'rayleighScaleHeight (km)'});
 
     const f_mie = pane.addFolder({title: 'Mie', expanded: false});
     const mieScatState = {
@@ -139,7 +139,7 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
         skyAtmosphere.mieAbsorption = [ev.value.r, ev.value.g, ev.value.b];
     });
     f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'mieAnisotropy (g)'});
-    f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'mieExponentialDistribution (km)'});
+    f_mie.addBinding(skyAtmosphere, 'mieScaleHeight', {min: 0.1, max: 100, step: 0.1, label: 'mieScaleHeight (km)'});
 
     const f_absorption = pane.addFolder({title: 'Absorption (Ozone)', expanded: false});
     const absorptionState = {
@@ -153,12 +153,23 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
         skyAtmosphere.absorptionCoefficient = [ev.value.r, ev.value.g, ev.value.b];
     });
     f_absorption.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1, label: 'absorptionTipAltitude (km)'});
-    f_absorption.addBinding(skyAtmosphere, 'absorptionTentWidth', {min: 1, max: 50, step: 0.1, label: 'absorptionTentWidth (km)'});
+    f_absorption.addBinding(skyAtmosphere, 'absorptionTipWidth', {min: 1, max: 50, step: 0.1, label: 'absorptionTipWidth (km)'});
 
     const f_artistic = pane.addFolder({title: 'Artistic Controls', expanded: true});
-    f_artistic.addBinding(skyAtmosphere, 'skyLuminanceFactor', {min: 0, max: 100, step: 0.1, label: 'skyLuminanceFactor'});
+    const luminanceState = {
+        tint: {
+            r: skyAtmosphere.skyLuminanceFactor[0],
+            g: skyAtmosphere.skyLuminanceFactor[1],
+            b: skyAtmosphere.skyLuminanceFactor[2]
+        }
+    };
+    f_artistic.addBinding(luminanceState, 'tint', {color: {type: 'float'}, label: 'skyLuminanceFactor'}).on('change', (ev) => {
+        skyAtmosphere.skyLuminanceFactor = [ev.value.r, ev.value.g, ev.value.b];
+    });
     f_artistic.addBinding(skyAtmosphere, 'multiScatteringFactor', {min: 0, max: 10, step: 0.01, label: 'multiScatteringFactor'});
-    f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'aerialPerspectiveDistanceScale (km)'});
+    f_artistic.addBinding(skyAtmosphere, 'transmittanceMinLightElevationAngle', {min: -90, max: 90, step: 0.1, label: 'minLightElevationAngle'});
+    f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'apDistanceScale (km)'});
+    f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveStartDepth', {min: 0, max: 100, step: 0.1, label: 'apStartDepth (km)'});
 
     const f_tonemapping = pane.addFolder({title: 'ToneMapping (Global)', expanded: false});
     f_tonemapping.addBinding(targetView.toneMappingManager, 'mode', {

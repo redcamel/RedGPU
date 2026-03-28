@@ -31,7 +31,9 @@ let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, sy
 // [KO] 수직 깊이(depthKm)를 레이 길이(actualDist)로 변환
 let actualDist = depthKm * rayLengthRatio;
 let maxApDist = uniforms.aerialPerspectiveDistanceScale; 
-let apDist = clamp(actualDist, 0.0, maxApDist);
+
+// [KO] 공중 투시 시작 깊이(Start Depth) 보정 적용
+let apDist = clamp(actualDist - uniforms.aerialPerspectiveStartDepth, 0.0, maxApDist);
 
 // [KO] Frustum-Aligned Froxel AP 샘플링 좌표 계산
 let apU = uv.x;
