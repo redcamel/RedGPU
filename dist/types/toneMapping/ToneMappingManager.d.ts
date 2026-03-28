@@ -3,8 +3,8 @@ import AToneMappingEffect from "./core/AToneMappingEffect";
 import TONE_MAPPING_MODE from "./TONE_MAPPING_MODE";
 import { ASinglePassPostEffectResult } from "../postEffect/core/ASinglePassPostEffect";
 /**
- * [KO] 톤 매핑, 노출, 대비, 밝기를 통합 관리하는 클래스입니다.
- * [EN] Class that integrates and manages tone mapping, exposure, contrast, and brightness.
+ * [KO] 톤 매핑, 대비, 밝기를 통합 관리하는 클래스입니다.
+ * [EN] Class that integrates and manages tone mapping, contrast, and brightness.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -16,7 +16,6 @@ import { ASinglePassPostEffectResult } from "../postEffect/core/ASinglePassPostE
  * // View3D를 통해 접근합니다. (Access through View3D)
  * const toneMappingManager = view.toneMappingManager;
  * toneMappingManager.mode = RedGPU.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
- * toneMappingManager.exposure = 1.2;
  * ```
  * @category ToneMapping
  */
@@ -34,17 +33,6 @@ declare class ToneMappingManager {
     get mode(): TONE_MAPPING_MODE;
     /** [KO] 톤 매핑 모드를 설정합니다. [EN] Sets the tone mapping mode. */
     set mode(value: TONE_MAPPING_MODE);
-    /** [KO] 노출값(Exposure)을 반환합니다. [EN] Returns the exposure value. */
-    get exposure(): number;
-    /** [KO] 자동 노출 배율을 반환합니다. [EN] Returns the auto-exposure multiplier. */
-    get autoExposureMultiplier(): number;
-    /** [KO] 자동 노출 배율을 설정합니다. [EN] Sets the auto-exposure multiplier. */
-    set autoExposureMultiplier(value: number);
-    /**
-     * @deprecated [KO] ToneMappingManager의 exposure는 더 이상 권장되지 않습니다. 물리 기반 렌더링을 위해 Camera의 aperture, shutterSpeed, iso를 사용하십시오.
-     * [EN] ToneMappingManager.exposure is deprecated. Use Camera's aperture, shutterSpeed, and iso for physically based rendering instead.
-     */
-    set exposure(value: number);
     /** [KO] 명암 대비(Contrast)를 반환합니다. [EN] Returns the contrast. */
     get contrast(): number;
     /** [KO] 명암 대비(Contrast)를 설정합니다. (0.0 ~ 2.0, 기본값: 1.0) [EN] Sets the contrast. (0.0 to 2.0, Default: 1.0) */

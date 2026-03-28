@@ -14,10 +14,6 @@ declare class AToneMappingEffect extends ASinglePassPostEffect {
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
      */
     protected constructor(redGPUContext: RedGPUContext);
-    /** [KO] 노출값을 반환합니다. [EN] Returns the exposure value. */
-    get exposure(): number;
-    /** [KO] 노출값을 설정합니다. [EN] Sets the exposure value. */
-    set exposure(value: number);
     /** [KO] 명암 강도를 반환합니다. [EN] Returns the contrast strength. */
     get contrast(): number;
     /** [KO] 명암 강도를 설정합니다. [EN] Sets the contrast strength. */

@@ -42,6 +42,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         totalWeight += 1.0;
     }
 
-    irradiance = irradiance / totalWeight;
+    // [KO] 코사인 가중치 샘플링에 따른 물리적 조도 보정 (E = PI * Average Radiance)
+    // [EN] Physical irradiance correction for cosine-weighted sampling (E = PI * Average Radiance)
+    irradiance = (irradiance * PI) / totalWeight;
     textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
 }
