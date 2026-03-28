@@ -327,10 +327,10 @@ fn integrateScatSegment(
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight / params.atmosphereHeight, 0.001, 0.999));
         let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask * params.multiScatteringFactor;
 
-        let ext = scatR + ((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO;
-
-        *radiance += *transmittance * (stepScat + msScat) * stepSize;
-        *transmittance *= exp(-ext * stepSize);
+        // [KO] 태양 강도 적용 (단위 계수에서 광휘로 변환)
+        // [EN] Apply sun intensity (convert from unit factor to radiance)
+        *radiance += *transmittance * (stepScat + msScat) * stepSize * params.sunIntensity;
+        *transmittance *= exp(-((scatR + ((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO)) * stepSize);
     }
 }
 
@@ -349,7 +349,7 @@ fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
     return dir;
 }
 
-fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>) -> vec3<f32> {
+fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>, sunIntensity: f32) -> vec3<f32> {
     let sunShadow = smoothstep(-0.01, 0.01, cosSun);
     var groundRadiance = vec3<f32>(0.0);
     if (sunShadow > 0.0) {
@@ -357,7 +357,7 @@ fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>,
     } else {
         groundRadiance = (msEnergy * PI) * (groundAlbedo * INV_PI);
     }
-    return groundRadiance;
+    return groundRadiance * sunIntensity;
 }
 
 fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
@@ -393,7 +393,7 @@ fn evaluateIBLRadiance(
         let cosS = dot(hitNormal, sunDir);
         let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosS, atmosphereHeight);
         let msEnergy = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo);
+        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo, params.sunIntensity);
 
         let viewZenithCosAngle = dot(hitNormal, -viewDir);
         let viewTransmittance = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewZenithCosAngle, atmosphereHeight);
@@ -403,7 +403,7 @@ fn evaluateIBLRadiance(
         let inScattering = skySample.rgb;
 
         let transToEdge = vec3<f32>(skySample.a);
-        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.80);
+        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.80) * params.sunIntensity;
 
         radiance = groundRadiance * viewTransmittance + inScattering + mieGlowAmount;
     } else {
@@ -412,7 +412,7 @@ fn evaluateIBLRadiance(
         radiance = skySample.rgb;
 
         let transToViewEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight);
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.80);
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.80) * params.sunIntensity;
         radiance += mieGlowStable;
     }
 

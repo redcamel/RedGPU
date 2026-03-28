@@ -683,17 +683,16 @@ fn main(inputData:InputData) -> OutputFragment {
             let camH = u_atmo.cameraHeight;
             let atmH = u_atmo.atmosphereHeight;
             let earthR = u_atmo.groundRadius;
-            let sunInt = u_atmo.sunIntensity;
 
             // [KO] Specular 필터링: (HDR 반사 * 투과율) + 실시간 하늘 산란광
             // [EN] Specular Filtering: (HDR Reflection * Transmittance) + Real-time Sky Scattering
             let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
             
             // [KO] 큐브맵 기반 실시간 반사광 샘플링 (거칠기 대응)
-            // [EN] Cubemap-based real-time reflection sampling (roughness support)
+            // [KO] 생성기에서 이미 sunIntensity가 적용된 상태임
             let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
             let atmoMipLevel = roughnessParameter * atmoMipCount;
-            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * sunInt;
+            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb;
             
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
 
@@ -702,8 +701,7 @@ fn main(inputData:InputData) -> OutputFragment {
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
             
             // [KO] 큐브맵 기반 조도 샘플링 (2D LUT 방식에서 업그레이드)
-            // [EN] Cubemap-based Irradiance sampling (upgraded from 2D LUT method)
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * sunInt;
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
@@ -734,7 +732,8 @@ fn main(inputData:InputData) -> OutputFragment {
             if (systemUniforms.useSkyAtmosphere == 1u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
                 let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * u_atmo.sunIntensity;
+                // [KO] 생성기에서 이미 sunIntensity가 적용됨
+                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb;
                 backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
             }
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
@@ -786,7 +785,8 @@ fn main(inputData:InputData) -> OutputFragment {
                      let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, clearcoatR.y, u_atmo.atmosphereHeight);
                      let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
                      let atmoMipLevel = clearcoatRoughnessParameter * atmoMipCount;
-                     let ccSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, clearcoatR, atmoMipLevel).rgb * u_atmo.sunIntensity;
+                     // [KO] 생성기에서 이미 sunIntensity가 적용됨
+                     let ccSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, clearcoatR, atmoMipLevel).rgb;
                      clearcoatPrefilteredColor = (clearcoatPrefilteredColor * ccTrans) + ccSkyScat;
                  }
 

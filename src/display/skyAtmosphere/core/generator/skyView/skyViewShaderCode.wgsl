@@ -51,7 +51,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
             let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.01, 0.99), 1.0);
             let msEnergy = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb;
-            let groundRadiance = evaluateGroundRadiance(cosSun, sunTrans, msEnergy, params.groundAlbedo);
+            let groundRadiance = evaluateGroundRadiance(cosSun, sunTrans, msEnergy, params.groundAlbedo, params.sunIntensity);
             radiance += transmittance * groundRadiance;
         }
     } else if (tMax > 0.0) {

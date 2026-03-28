@@ -31,8 +31,9 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let skyUV = getSkyViewUV(viewDir, viewHeight, groundRadius, atmosphereHeight);
     let skySample = textureSampleLevel(bg_skyViewLUT, bg_skyAtmosphereSampler, skyUV, 0.0);
     
-    let exposedSunIntensity = uniforms.sunIntensity * systemUniforms.preExposure;
-    var atmosphereBackground = skySample.rgb * exposedSunIntensity;
+    // [KO] skySample.rgb는 생성기에서 이미 sunIntensity가 곱해진 상태임 (Radiance 단위)
+    // [EN] skySample.rgb already has sunIntensity multiplied at the generator (Radiance unit)
+    var atmosphereBackground = skySample.rgb * systemUniforms.preExposure;
 
     let camPos = vec3<f32>(0.0, groundRadius + viewHeight, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, groundRadius);
@@ -41,13 +42,18 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let isGroundHit = uniforms.groundRadius > 0.0 && tEarth > 0.0;
     let transToEdge = select(getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, viewHeight, viewDir.y, uniforms.atmosphereHeight), vec3<f32>(skySample.a), isGroundHit);
 
+    // [KO] Mie Glow 및 Sun Disk는 단위 휘도를 반환하므로 sunIntensity와 preExposure를 모두 곱해줌
+    // [EN] Mie Glow and Sun Disk return unit radiance, so multiply by both sunIntensity and preExposure
+    let exposedSunIntensity = uniforms.sunIntensity * systemUniforms.preExposure;
+    
     let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, transToEdge, 0.0) 
                         * exposedSunIntensity;
     atmosphereBackground += mieGlowAmount;
 
     if (tEarth <= 0.0 || uniforms.groundRadius <= 0.0) {
-        let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01, uniforms);
-        atmosphereBackground += sunRadiance * exposedSunIntensity;
+        let sunRadiance = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01, uniforms)
+                        * exposedSunIntensity;
+        atmosphereBackground += sunRadiance;
     }
     
     var output : FragmentOutput;
