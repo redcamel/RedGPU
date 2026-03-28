@@ -71,20 +71,20 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     #params = {
         rayleighScattering: [0.005802, 0.013558, 0.033100],
-        rayleighScaleHeight: 8.0,
+        rayleighExponentialDistribution: 8.0,
         mieScattering: [0.003996, 0.003996, 0.003996],
         mieAnisotropy: 0.8,
         mieAbsorption: [0.000444, 0.000444, 0.000444],
-        mieScaleHeight: 1.2,
+        mieExponentialDistribution: 1.2,
         absorptionCoefficient: [0.000650, 0.001881, 0.000085],
         absorptionTipAltitude: 25.0,
         groundAlbedo: [0.1, 0.1, 0.1],
-        absorptionTipWidth: 15.0,
+        absorptionTentWidth: 15.0,
         skyLuminanceFactor: [1.0, 1.0, 1.0],
         multiScatteringFactor: 1.0,
         sunDirection: new Float32Array([0, 1, 0]),
         transmittanceMinLightElevationAngle: -90.0,
-        bottomRadius: 6360.0,
+        groundRadius: 6360.0,
         atmosphereHeight: 100.0,
         aerialPerspectiveDistanceScale: 100.0,
         aerialPerspectiveStartDepth: 0.0,
@@ -451,9 +451,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [KO] 행성의 바닥 반지름 (km)입니다.
      * [EN] Planet bottom radius (km).
      */
-    get bottomRadius(): number { return this.#params.bottomRadius; }
-    set bottomRadius(v: number) {
-        this.#setParam('bottomRadius', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
+    get groundRadius(): number { return this.#params.groundRadius; }
+    set groundRadius(v: number) {
+        this.#setParam('groundRadius', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
     }
 
     /**
@@ -502,18 +502,18 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [KO] 레일리 산란의 고도 별 지수 분포(Scale Height, km)입니다.
      * [EN] Rayleigh exponential distribution (Scale Height, km).
      */
-    get rayleighScaleHeight(): number { return this.#params.rayleighScaleHeight; }
-    set rayleighScaleHeight(v: number) {
-        this.#setParam('rayleighScaleHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
+    get rayleighExponentialDistribution(): number { return this.#params.rayleighExponentialDistribution; }
+    set rayleighExponentialDistribution(v: number) {
+        this.#setParam('rayleighExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
     }
 
     /**
      * [KO] 미 산란의 고도 별 지수 분포(Scale Height, km)입니다.
      * [EN] Mie exponential distribution (Scale Height, km).
      */
-    get mieScaleHeight(): number { return this.#params.mieScaleHeight; }
-    set mieScaleHeight(v: number) {
-        this.#setParam('mieScaleHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
+    get mieExponentialDistribution(): number { return this.#params.mieExponentialDistribution; }
+    set mieExponentialDistribution(v: number) {
+        this.#setParam('mieExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
     }
 
     /**
@@ -560,9 +560,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [KO] 흡수층의 두께 너비 (km)입니다.
      * [EN] Thickness width (km) of the absorption tent.
      */
-    get absorptionTipWidth(): number { return this.#params.absorptionTipWidth; }
-    set absorptionTipWidth(v: number) {
-        this.#setParam('absorptionTipWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
+    get absorptionTentWidth(): number { return this.#params.absorptionTentWidth; }
+    set absorptionTentWidth(v: number) {
+        this.#setParam('absorptionTentWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
     }
 
     /**
@@ -791,7 +791,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
                 '    let uniforms = systemUniforms.skyAtmosphere;',
                 '    let viewHeight = uniforms.cameraHeight;',
-                '    let bottomRadius = uniforms.bottomRadius;',
+                '    let groundRadius = uniforms.groundRadius;',
                 '    let atmosphereHeight = uniforms.atmosphereHeight;',
                 computeCode_wgsl,
                 '}'

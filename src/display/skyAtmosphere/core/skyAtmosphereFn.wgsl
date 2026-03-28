@@ -69,7 +69,7 @@ fn getTransmittanceUV(viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> 
     return vec2<f32>(u, v);
 }
 
-fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, bottomRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
+fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, groundRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
     var azimuth: f32;
     if (abs(viewDir.z) < 1e-6 && abs(viewDir.x) < 1e-6) {
         azimuth = 0.0;
@@ -77,7 +77,7 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, bottomRadius: f32, atmosphe
         azimuth = atan2(viewDir.z, viewDir.x);
     }
     let u = clamp((azimuth / PI2) + 0.5, 0.001, 0.999);
-    let r = bottomRadius;
+    let r = groundRadius;
     let h = max(0.0001, viewHeight);
     
     let horizonCos = -sqrt(max(0.0, h * (2.0 * r + h))) / (r + h);
@@ -116,16 +116,16 @@ fn getAtmosphereDensities(viewHeight: f32, params: SkyAtmosphere) -> AtmosphereD
     if (viewHeight < 0.0) {
         d.rhoR = 0.0; d.rhoM = 0.0; d.rhoO = 0.0;
     } else {
-        d.rhoR = exp(-viewHeight / params.rayleighScaleHeight);
-        d.rhoM = exp(-viewHeight / params.mieScaleHeight);
+        d.rhoR = exp(-viewHeight / params.rayleighExponentialDistribution);
+        d.rhoM = exp(-viewHeight / params.mieExponentialDistribution);
         let ozoneDist = abs(viewHeight - params.absorptionTipAltitude);
-        d.rhoO = max(0.0, 1.0 - ozoneDist / params.absorptionTipWidth);
+        d.rhoO = max(0.0, 1.0 - ozoneDist / params.absorptionTentWidth);
     }
     return d;
 }
 
 fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
-    let r = params.bottomRadius;
+    let r = params.groundRadius;
     let tMax = getRaySphereIntersection(p, sunDir, r + params.atmosphereHeight);
     if (tMax <= 0.0) { return vec3<f32>(1.0); }
     let intersect = getPlanetIntersection(p, sunDir, r);
@@ -168,7 +168,7 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
     var optExt = vec3<f32>(0.0);
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
-        let viewHeight = length(origin + dir * t) - params.bottomRadius;
+        let viewHeight = length(origin + dir * t) - params.groundRadius;
         if (viewHeight < 0.0) { continue; }
         let d = getAtmosphereDensities(viewHeight, params);
         let scatR = params.rayleighScattering * d.rhoR * params.skyLuminanceFactor;
@@ -288,7 +288,7 @@ fn integrateScatSegment(
     transmittance: ptr<function, vec3<f32>>
 ) {
     if (tMax <= tMin) { return; }
-    let r = params.bottomRadius;
+    let r = params.groundRadius;
     let stepSize = (tMax - tMin) / f32(steps);
     let sunDir = params.sunDirection;
     let viewSunCos = dot(dir, sunDir);
@@ -373,13 +373,13 @@ fn evaluateIBLRadiance(
     skyViewLUT: texture_2d<f32>, 
     skyAtmosphereSampler: sampler
 ) -> vec3<f32> {
-    let r = params.bottomRadius;
+    let r = params.groundRadius;
     let viewHeight = 0.0;
     let atmosphereHeight = params.atmosphereHeight;
     let sunDir = normalize(params.sunDirection);
 
     let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
-    let tEarth = getRaySphereIntersection(camPos, viewDir, params.bottomRadius);
+    let tEarth = getRaySphereIntersection(camPos, viewDir, params.groundRadius);
     let isGround = r > 0.0 && tEarth > 0.0 && viewDir.y < -0.0001;
 
     var radiance = vec3<f32>(0.0);

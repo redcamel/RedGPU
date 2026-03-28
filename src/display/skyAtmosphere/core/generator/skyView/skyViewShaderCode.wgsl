@@ -15,10 +15,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let uv = (vec2<f32>(global_id.xy) + 0.5) / vec2<f32>(size);
     let azimuth = (uv.x - 0.5) * PI2;
-    let bottomRadius = params.bottomRadius;
+    let groundRadius = params.groundRadius;
     let viewHeight = max(0.0001, params.cameraHeight);
     
-    let horizonCos = -sqrt(max(0.0, viewHeight * (2.0 * bottomRadius + viewHeight))) / (bottomRadius + viewHeight);
+    let horizonCos = -sqrt(max(0.0, viewHeight * (2.0 * groundRadius + viewHeight))) / (groundRadius + viewHeight);
     let horizonElevation = asin(clamp(horizonCos, -1.0, 1.0));
 
     var viewElevation: f32;
@@ -36,9 +36,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
     }
 
-    let rayOrigin = vec3<f32>(0.0, viewHeight + bottomRadius, 0.0);
-    var tMax = getRaySphereIntersection(rayOrigin, viewDir, bottomRadius + params.atmosphereHeight);
-    let intersect = getPlanetIntersection(rayOrigin, viewDir, bottomRadius);
+    let rayOrigin = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);
+    var tMax = getRaySphereIntersection(rayOrigin, viewDir, groundRadius + params.atmosphereHeight);
+    let intersect = getPlanetIntersection(rayOrigin, viewDir, groundRadius);
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
@@ -46,7 +46,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (intersect.x > 0.0) {
         integrateScatSegment(rayOrigin, viewDir, 0.0, intersect.x, SKY_VIEW_STEPS / 2u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, &radiance, &transmittance);
 
-        if (params.bottomRadius > 0.0) {
+        if (params.groundRadius > 0.0) {
             let cosSun = params.sunDirection.y; 
             let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosSun, params.atmosphereHeight);
             let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.01, 0.99), 1.0);

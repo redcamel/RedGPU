@@ -77,8 +77,8 @@ mappingH = max(0.0, viewHeight);
 var mieGlowUnit = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, skyAtmosphereSampler, vec3<f32>(apSample.a), 0.0);
 
 // [KO] 물리적 오클루전
-let camPos = vec3<f32>(0.0, viewHeight + bottomRadius, 0.0);
-let occlusionFactor = getPlanetShadowMask(camPos, sunDir, bottomRadius, uniforms);
+let camPos = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);
+let occlusionFactor = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
 mieGlowUnit *= occlusionFactor;
 
 // [KO] 최종 산란광 및 색상 결정

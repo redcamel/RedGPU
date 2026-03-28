@@ -22,13 +22,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let viewDir = normalize(worldRotation * viewSpaceDir);
     let sliceDist = uvw.z * uvw.z * params.aerialPerspectiveDistanceScale; 
 
-    let bottomRadius = params.bottomRadius;
+    let groundRadius = params.groundRadius;
     let viewHeight = params.cameraHeight;
-    let rayOrigin = vec3<f32>(0.0, viewHeight + bottomRadius, 0.0);
+    let rayOrigin = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);
 
     var radiance = vec3<f32>(0.0);
     var transmittance = vec3<f32>(1.0);
-    let intersect = getPlanetIntersection(rayOrigin, viewDir, bottomRadius);
+    let intersect = getPlanetIntersection(rayOrigin, viewDir, groundRadius);
 
     if (sliceDist > 0.0) {
         if (intersect.x > 0.0) {

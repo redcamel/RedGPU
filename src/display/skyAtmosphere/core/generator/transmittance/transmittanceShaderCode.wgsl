@@ -19,16 +19,16 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 }
 
 fn getOpticalDepth(viewHeight: f32, cosTheta: f32) -> vec3<f32> {
-    let bottomRadius = params.bottomRadius;
-    let rayOrigin = vec3<f32>(0.0, viewHeight + bottomRadius, 0.0);
+    let groundRadius = params.groundRadius;
+    let rayOrigin = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);
     let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
     let rayDir = vec3<f32>(sinTheta, cosTheta, 0.0);
 
-    let tMax = getRaySphereIntersection(rayOrigin, rayDir, bottomRadius + params.atmosphereHeight);
+    let tMax = getRaySphereIntersection(rayOrigin, rayDir, groundRadius + params.atmosphereHeight);
     if (tMax <= 0.0) { return vec3<f32>(0.0); }
 
     let b = dot(rayOrigin, rayDir);
-    let c = dot(rayOrigin, rayOrigin) - bottomRadius * bottomRadius;
+    let c = dot(rayOrigin, rayOrigin) - groundRadius * groundRadius;
     let delta = b * b - c;
     
     var optExt = vec3<f32>(0.0);
@@ -37,7 +37,7 @@ fn getOpticalDepth(viewHeight: f32, cosTheta: f32) -> vec3<f32> {
         let tIn = -b - s;
         let tOut = -b + s;
 
-        if (params.bottomRadius > 0.0 && tIn > EPSILON) { 
+        if (params.groundRadius > 0.0 && tIn > EPSILON) { 
             return vec3<f32>(MAX_TAU); 
         }
 
