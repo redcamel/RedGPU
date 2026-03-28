@@ -78,19 +78,19 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         mieExponentialDistribution: 1.2,
         absorptionCoefficient: [0.000650, 0.001881, 0.000085],
         absorptionTipAltitude: 25.0,
-        groundAlbedo: [0.1, 0.1, 0.1],
+        groundAlbedo: [0.4, 0.4, 0.4],
         absorptionTentWidth: 15.0,
         skyLuminanceFactor: [1.0, 1.0, 1.0],
         multiScatteringFactor: 1.0,
         sunDirection: new Float32Array([0, 1, 0]),
         transmittanceMinLightElevationAngle: -90.0,
         groundRadius: 6360.0,
-        atmosphereHeight: 100.0,
+        atmosphereHeight: 60.0,
         aerialPerspectiveDistanceScale: 100.0,
         aerialPerspectiveStartDepth: 0.0,
-        sunIntensity: 10.0,
+        sunIntensity: 100000.0,
         sunSize: 0.533,
-        sunLimbDarkening: 0.67,
+        sunLimbDarkening: 0.5,
         cameraHeight: 0.001
     };
 
