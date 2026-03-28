@@ -22,7 +22,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let face = global_id.z;
     
     var totalRadiance = vec3<f32>(0.0);
-    const SAMPLE_COUNT: u32 = 4u; // [KO] 고품질 적분을 위한 샘플 수
+    const SAMPLE_COUNT: u32 = 8u; // [KO] 고품질 적분을 위한 샘플 수 (UE5 등급)
 
     for (var i = 0u; i < SAMPLE_COUNT; i = i + 1u) {
         let offset = getHammersley(i, SAMPLE_COUNT) - 0.5;

@@ -15,16 +15,16 @@ const SUN_SOLID_ANGLE_BASE: f32 = 6.794e-5;
 
 // [KO] 품질 상수 (내부적으로 고정)
 const TRANSMITTANCE_STEPS: u32 = 40u;
-const MULTI_SCAT_STEPS: u32 = 20u;
+const MULTI_SCAT_STEPS: u32 = 40u; // [KO] 20u에서 상향
 const SKY_VIEW_STEPS: u32 = 128u;
-const AP_STEPS: u32 = 32u;
-const MULTI_SCAT_SAMPLES: u32 = 128u; // [KO] 64u에서 상향 조정
+const AP_STEPS: u32 = 64u; // [KO] 32u에서 상향
+const MULTI_SCAT_SAMPLES: u32 = 128u;
 const IRRADIANCE_SAMPLES: u32 = 256u;
 
 // [KO] 렌더링 상수를 정의합니다.
 const SUN_RADIANCE_BOOST: f32 = 1.0;
 const SUN_RADIANCE_THRESHOLD: f32 = 65000.0;
-const MIE_GLOW_SUPPRESS: f32 = 0.10;
+const MIE_GLOW_SUPPRESS: f32 = 0.40; // [KO] 0.10에서 상향 (UE5 스타일의 강력한 글로우)
 const MIE_GLOW_THRESHOLD: f32 = 40000.0;
 const IBL_RADIANCE_THRESHOLD: f32 = 60000.0;
 const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
@@ -188,6 +188,13 @@ fn phaseMie(cosTheta: f32, g: f32) -> f32 {
     return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
 }
 
+// [KO] LUT 생성에 사용되는 안정적인(부드러운) Mie 위상 함수
+// [EN] Stable (smooth) Mie phase function used for LUT generation
+fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
+    // [KO] 비등방성 계수를 낮추어 LUT에서의 픽셀화를 방지
+    return phaseMie(cosTheta, min(g, 0.65));
+}
+
 fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
     let sunElevationParam = saturate(sunDir.y);
     let squashFactor = mix(0.85, 1.0, sunElevationParam);
@@ -262,13 +269,19 @@ fn getMieGlowAmountUnit(
     overrideHalo: f32 
 ) -> vec3<f32> {
     let halo = select(params.mieAnisotropy, overrideHalo, overrideHalo > 0.0);
-    let sharpPhase = phaseMie(viewSunCos, min(halo, 0.98));
+    
+    // [KO] 언리얼 엔진 스타일의 하이브리드 글로우: (날카로운 위상 - LUT에 포함된 부드러운 위상)
+    // [EN] Unreal Engine style hybrid glow: (Sharp Phase - Smooth Phase included in LUT)
+    let sharpPhase = phaseMie(viewSunCos, min(halo, 0.99));
+    let stablePhase = phaseMieStable(viewSunCos, params.mieAnisotropy);
+    let diffPhase = max(0.0, sharpPhase - stablePhase);
+
     let sunDirY = params.sunDirection.y;
     let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
     let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunCosTheta, params.atmosphereHeight);
     
     var glow = sunTransForGlow * (params.mieScattering / max(vec3<f32>(0.0001), params.mieScattering + params.mieAbsorption)) 
-                        * (sharpPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS;
+                        * (diffPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS;
 
     let luma = getLuminance(glow);
     if (luma > MIE_GLOW_THRESHOLD) {
@@ -295,7 +308,10 @@ fn integrateScatSegment(
     let sunDir = params.sunDirection;
     let viewSunCos = dot(dir, sunDir);
     let phaseR = phaseRayleigh(viewSunCos);
-    let phaseM = phaseMie(viewSunCos, params.mieAnisotropy);
+    
+    // [KO] LUT 생성 시에는 부드러운 위상 함수를 사용하여 픽셀화 방지
+    // [EN] Use a smooth phase function during LUT generation to prevent pixelation
+    let phaseM = select(phaseMie(viewSunCos, params.mieAnisotropy), phaseMieStable(viewSunCos, params.mieAnisotropy), useLUT);
 
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
