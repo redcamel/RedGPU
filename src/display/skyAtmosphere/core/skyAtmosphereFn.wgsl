@@ -427,7 +427,8 @@ fn evaluateIBLRadiance(
 
         // [KO] 지평선 근처의 미 산란 글로우 보강 (선명한 수평선 및 파란늘 밝기 확보)
         let transToViewEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight);
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.80) * params.sunIntensity;
+        // [KO] 리플렉션의 생동감을 위해 헤일로 강도를 0.90으로 상향 (태양 주변의 강력한 산란광 표현)
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.90) * params.sunIntensity;
         radiance += mieGlowStable;
     }
 
