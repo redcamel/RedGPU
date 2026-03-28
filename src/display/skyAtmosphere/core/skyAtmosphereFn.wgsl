@@ -16,10 +16,10 @@ const SUN_SOLID_ANGLE_BASE: f32 = 6.794e-5;
 // [KO] 품질 상수 (내부적으로 고정)
 const TRANSMITTANCE_STEPS: u32 = 40u;
 const MULTI_SCAT_STEPS: u32 = 20u;
-const SKY_VIEW_STEPS: u32 = 64u;
+const SKY_VIEW_STEPS: u32 = 128u;
 const AP_STEPS: u32 = 32u;
-const MULTI_SCAT_SAMPLES: u32 = 64u;
-const IRRADIANCE_SAMPLES: u32 = 1024u;
+const MULTI_SCAT_SAMPLES: u32 = 128u; // [KO] 64u에서 상향 조정
+const IRRADIANCE_SAMPLES: u32 = 256u;
 
 // [KO] 렌더링 상수를 정의합니다.
 const SUN_RADIANCE_BOOST: f32 = 1.0;
