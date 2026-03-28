@@ -29,7 +29,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // [KO] 태양 디스크 및 스펙큘러 로브를 제외한 대기 산란 휘도만 평가
     // [EN] Evaluate only atmospheric scattering radiance excluding sun disk and specular lobe
-    let radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
+    var radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
+
+    // [KO] IBL 광량 보정 (Irradiance와 일관성 유지 및 보고된 광량 부족 해결)
+    // [EN] IBL radiance correction (consistent with Irradiance and addressing reported insufficiency)
+    radiance *= PI;
 
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }

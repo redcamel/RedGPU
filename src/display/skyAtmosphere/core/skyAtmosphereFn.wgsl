@@ -22,11 +22,10 @@ const MULTI_SCAT_SAMPLES: u32 = 64u;
 const IRRADIANCE_SAMPLES: u32 = 1024u;
 
 // [KO] 렌더링 상수를 정의합니다.
-const SUN_RADIANCE_BOOST: f32 = 2.0;
+const SUN_RADIANCE_BOOST: f32 = 1.0;
 const SUN_RADIANCE_THRESHOLD: f32 = 60000.0;
-const MIE_GLOW_SUPPRESS: f32 = 0.15;
+const MIE_GLOW_SUPPRESS: f32 = 0.05;
 const MIE_GLOW_THRESHOLD: f32 = 100.0;
-const IBL_SUN_ALPHA: f32 = 0.26;
 const IBL_RADIANCE_THRESHOLD: f32 = 100.0;
 const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
 
@@ -206,7 +205,7 @@ fn getSunDiskRadianceUnit(
     edgeSoftness: f32,
     params: SkyAtmosphere
 ) -> vec3<f32> {
-    let sunRad = sunSize * DEG_TO_RAD;
+    let sunRad = (sunSize * 0.5) * DEG_TO_RAD;
     let cosSunRad = cos(sunRad);
     let solidAngle = PI2 * (1.0 - cosSunRad);
     let radianceScale = SUN_RADIANCE_BOOST / max(6.7e-5, solidAngle); 
@@ -234,7 +233,10 @@ fn getSunDiskRadianceIBL(
     skyTrans: vec3<f32>,
     params: SkyAtmosphere
 ) -> vec3<f32> {
-    let cosAlpha = cos(IBL_SUN_ALPHA);
+    let sunRad = (params.sunSize * 0.5) * DEG_TO_RAD;
+    let iblAlpha = sunRad * 2.0; 
+    let cosAlpha = cos(iblAlpha);
+    
     let radScale = 1.0 / (PI2 * (1.0 - cosAlpha));
     let diff = saturate(1.0 - viewSunCos);
     let sigma_sq = 1.0 - cosAlpha;
