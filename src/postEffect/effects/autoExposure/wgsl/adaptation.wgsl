@@ -60,11 +60,10 @@ fn main() {
     // [KO] 평균 EV100 산출 [EN] Calculate average EV100
     let avgEV100 = weightedEV100Sum / max(weightedPixelCount, 1.0);
 
-    // [KO] 목표 휘도를 달성하기 위한 EV로 보정
-    // [EN] Offset EV to achieve the target luminance
-    // [KO] UE5 물리 모델 기준: targetLuminance가 0.18일 때 장면의 평균 휘도를 0.18로 맞추는 EV를 추적합니다.
-    // [EN] UE5 physical model: When targetLuminance is 0.18, track the EV that targets the average raw luminance to 0.18.
-    let targetEV100 = avgEV100 - log2(uniforms.targetLuminance / 0.18);
+    // [KO] 목표 휘도 및 사용자의 노출 보정(Compensation)을 반영한 목표 EV100 결정
+    // [EN] Determine target EV100 reflecting target luminance and user's exposure compensation
+    // [KO] exposureCompensation을 차감함으로써 사용자가 밝기를 높이면 목표 EV가 낮아져(노출 증가) 의도가 유지됨
+    let targetEV100 = avgEV100 - log2(uniforms.targetLuminance / 0.18) - uniforms.exposureCompensation;
 
     // [KO] 눈 적응 시뮬레이션 (EV100 공간에서 수행)
     // [EN] Eye adaptation simulation (performed in EV100 space)

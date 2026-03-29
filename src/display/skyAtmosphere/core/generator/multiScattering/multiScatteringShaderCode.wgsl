@@ -38,6 +38,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             integrateMultiScatSegment(rayOrigin, rayDir, 0.0, intersect.x, MULTI_SCAT_STEPS, sunDir, &L1, &f1, &TPath);
             let hitP = rayOrigin + rayDir * intersect.x;
             let sunTGround = getPhysicalTransmittance(hitP, sunDir, groundRadius, params.atmosphereHeight, params);
+            
+            // [KO] 지면 반사 에너지는 (입사 직사광 * 알베도 * INV_PI)
             L1 += TPath * sunTGround * max(0.0, dot(normalize(hitP), sunDir)) * params.groundAlbedo * INV_PI;
             f1 += TPath * params.groundAlbedo;
         } else {
@@ -54,6 +56,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         fmsTotal += f1 / f32(MULTI_SCAT_SAMPLES);
     }
 
+    // [KO] 무한 급수 합산 (에너지 보전)
     let output = (lumTotal / f32(MULTI_SCAT_SAMPLES)) / (1.0 - min(fmsTotal, vec3<f32>(0.99)));
     textureStore(multiScatLUT, global_id.xy, vec4<f32>(output, 1.0));
 }
@@ -77,16 +80,24 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let sunT = getPhysicalTransmittance(p, sunDir, groundRadius, params.atmosphereHeight, params);
         let shadowMask = getPlanetShadowMask(p, sunDir, groundRadius, params);
 
-        let scatR = params.rayleighScattering * d.rhoR * params.skyLuminanceFactor;
-        let scatM = params.mieScattering * d.rhoM * params.skyLuminanceFactor;
-        
-        let scatTotal = scatR + vec3<f32>(scatM);
-        let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM));
+        // [KO] 물리적 계수
+        let scatR_phys = params.rayleighScattering * d.rhoR;
+        let scatM_phys = params.mieScattering * d.rhoM;
+        let mieAbs_phys = params.mieAbsorption * d.rhoM;
+        let ozoneAbs_phys = params.absorptionCoefficient * d.rhoO;
 
-        let extTotal = scatR + vec3<f32>((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO;
+        // [KO] 시각적 산란광 계산 시에만 skyLuminanceFactor 적용
+        let scatR_luminous = scatR_phys * params.skyLuminanceFactor;
+        let scatM_luminous = scatM_phys * params.skyLuminanceFactor;
+        
+        let scatTotal_luminous = scatR_luminous + scatM_luminous;
+        let stepScat = (scatR_luminous * phaseR + scatM_luminous * phaseM);
 
         *L1 += *TPath * sunT * stepScat * shadowMask * stepSize;
-        *f1 += *TPath * scatTotal * stepSize;
-        *TPath *= exp(-extTotal * stepSize);
+        *f1 += *TPath * (scatR_phys + scatM_phys) * stepSize; // f1은 순수 물리적 산란 비율
+        
+        // [KO] 소멸 계산 시 skyLuminanceFactor 배제 (핵심)
+        let extTotal_phys = scatR_phys + scatM_phys + mieAbs_phys + ozoneAbs_phys;
+        *TPath *= exp(-extTotal_phys * stepSize);
     }
 }

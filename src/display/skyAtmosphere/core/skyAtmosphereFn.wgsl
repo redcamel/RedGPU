@@ -167,11 +167,13 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
         let viewHeight = length(origin + dir * t) - params.groundRadius;
         if (viewHeight < 0.0) { continue; }
         let d = getAtmosphereDensities(viewHeight, params);
-        let scatR = params.rayleighScattering * d.rhoR * params.skyLuminanceFactor;
-        let mieExt = (params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor;
-        let absC = params.absorptionCoefficient * d.rhoO;
         
-        optExt += (scatR + mieExt + absC) * stepSize;
+        // [KO] 에너 보전을 위해 밀도(Extinction) 계산 시 skyLuminanceFactor를 제외한 순수 물리 계수 사용
+        let scatR_phys = params.rayleighScattering * d.rhoR;
+        let mieExt_phys = (params.mieScattering + params.mieAbsorption) * d.rhoM;
+        let absC_phys = params.absorptionCoefficient * d.rhoO;
+        
+        optExt += (scatR_phys + mieExt_phys + absC_phys) * stepSize;
     }
     return optExt;
 }
@@ -268,8 +270,9 @@ fn getMieGlowAmountUnit(
     let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunCosTheta, params.atmosphereHeight);
     
     // [KO] 에너지를 깎는 소프트 클램핑 로직 제거 (HDR 보존)
+    // [KO] 미 산란 글로우에도 skyLuminanceFactor를 적용하여 시각적 일관성 유지
     return sunTransForGlow * (params.mieScattering / max(vec3<f32>(0.0001), params.mieScattering + params.mieAbsorption)) 
-                        * (diffPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS;
+                        * (diffPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS * params.skyLuminanceFactor;
 }
 
 fn integrateScatSegment(
@@ -315,21 +318,29 @@ fn integrateScatSegment(
         let shadowMask = select(1.0, 0.0, r > 0.0 && getRaySphereIntersection(p, sunDir, r) > 0.0);
         let d = getAtmosphereDensities(viewHeight, params);
 
-        let scatR = params.rayleighScattering * d.rhoR * params.skyLuminanceFactor;
-        let scatM = params.mieScattering * d.rhoM * params.skyLuminanceFactor;
+        // [KO] 물리적 계수와 아티스트용 발광 계수를 분리
+        let scatR_phys = params.rayleighScattering * d.rhoR;
+        let scatM_phys = params.mieScattering * d.rhoM;
+        let mieAbs_phys = params.mieAbsorption * d.rhoM;
+        let ozoneAbs_phys = params.absorptionCoefficient * d.rhoO;
+
+        // [KO] 산란광 계산 시에만 skyLuminanceFactor 적용
+        let scatR_luminous = scatR_phys * params.skyLuminanceFactor;
+        let scatM_luminous = scatM_phys * params.skyLuminanceFactor;
         
-        let stepScat = (scatR * phaseR + scatM * phaseM) * sunTrans * shadowMask;
+        let stepScat = (scatR_luminous * phaseR + scatM_luminous * phaseM) * sunTrans * shadowMask;
         
-        let scatTotal = scatR + scatM;
+        let scatTotal_luminous = scatR_luminous + scatM_luminous;
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight / params.atmosphereHeight, 0.001, 0.999));
         
-        // [KO] MS 에너지는 단위 강도로 계산 (sunIntensity는 렌더링 시점에만 적용)
-        let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask * params.multiScatteringFactor;
+        // [KO] MS 에너지는 단위 강도로 계산
+        let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal_luminous * shadowMask * params.multiScatteringFactor;
 
-        // [KO] 단위 계수 기반의 광휘를 누적합니다. (sunIntensity는 최종 합성 시 곱해줌)
-        // [EN] Accumulate radiance based on unit coefficients. (sunIntensity is multiplied during final composition)
         *radiance += *transmittance * (stepScat + msScat) * stepSize;
-        *transmittance *= exp(-((scatR + ((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO)) * stepSize);
+        
+        // [KO] 소멸(Extinction) 계산 시에는 skyLuminanceFactor를 절대 곱하지 않음 (에너지 보전 핵심)
+        let extinction_phys = scatR_phys + scatM_phys + mieAbs_phys + ozoneAbs_phys;
+        *transmittance *= exp(-extinction_phys * stepSize);
     }
 }
 
