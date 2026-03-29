@@ -379,49 +379,25 @@ fn evaluateIBLRadiance(
     let atmosphereHeight = params.atmosphereHeight;
     let sunDir = normalize(params.sunDirection);
 
+    let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
+    let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
+    
+    // [KO] SkyViewLUT는 이미 전방위 광휘(Unit Radiance)를 포함함 (지면 히트 시 지면 반사광 포함)
+    var radiance = skySample.rgb;
+
+    // [KO] 하이브리드 Mie Glow 보강 (LUT의 부드러운 위상 보완)
+    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
+    
+    // 지면 히트 여부 판단
     let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
-    let tEarth = getRaySphereIntersection(camPos, viewDir, params.groundRadius);
+    let tEarth = getRaySphereIntersection(camPos, viewDir, r);
     let isGround = r > 0.0 && tEarth > 0.0 && viewDir.y < -0.0001;
 
-    var radiance = vec3<f32>(0.0);
-    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-
-    if (isGround) {
-        let hitP = camPos + viewDir * tEarth;
-        let hitNormal = normalize(hitP);
-        let cosS = dot(hitNormal, sunDir);
-        let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosS, atmosphereHeight);
-        let msEnergy = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
-        
-        // [KO] 지면 자체의 단위 휘도 평가
-        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo);
-
-        // [KO] 지면으로부터 실제 카메라 고도까지의 투과율 계산
-        let viewZenithCosAngle = dot(hitNormal, -viewDir);
-        let viewTransmittance = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, viewZenithCosAngle, atmosphereHeight);
-        
-        // [KO] 카메라와 지면 사이의 대기 산란광 (in-scattering)
-        let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
-        let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
-        let atmosphericInScattering = skySample.rgb * (1.0 - viewTransmittance);
-
-        let transToEdge = vec3<f32>(skySample.a);
-        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.90);
-
-        // [KO] 최종 합성 (단위 광휘 유지)
-        radiance = groundRadiance * viewTransmittance + atmosphericInScattering + mieGlowAmount * (1.0 - viewTransmittance);
-    } else {
-        let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
-        let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
-        
-        // [KO] 하늘 휘도 (단위 광휘)
-        radiance = skySample.rgb;
-
-        // [KO] 지평선 근처의 미 산란 글로우 보강
-        let transToViewEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight);
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.90);
-        radiance += mieGlowStable;
-    }
+    // 투과율: 지면 히트 시에는 skySample.a(카메라~지면), 하늘 히트 시에는 계산된 값(카메라~대기경계) 사용
+    let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
+    
+    let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.90);
+    radiance += mieGlow;
 
     return radiance;
 }
