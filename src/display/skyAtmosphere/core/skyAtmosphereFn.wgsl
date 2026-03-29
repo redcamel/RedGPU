@@ -23,10 +23,7 @@ const IRRADIANCE_SAMPLES: u32 = 256u;
 
 // [KO] 렌더링 상수를 정의합니다.
 const SUN_RADIANCE_BOOST: f32 = 1.0;
-const SUN_RADIANCE_THRESHOLD: f32 = 100000.0;
 const MIE_GLOW_SUPPRESS: f32 = 0.40; // [KO] 0.10에서 상향 (UE5 스타일의 강력한 글로우)
-const MIE_GLOW_THRESHOLD: f32 = 80000.0;
-const IBL_RADIANCE_THRESHOLD: f32 = 90000.0;
 const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
 
 struct AtmosphereDensities {
@@ -191,8 +188,9 @@ fn phaseMie(cosTheta: f32, g: f32) -> f32 {
 // [KO] LUT 생성에 사용되는 안정적인(부드러운) Mie 위상 함수
 // [EN] Stable (smooth) Mie phase function used for LUT generation
 fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
-    // [KO] 비등방성 계수를 낮추어 LUT에서의 픽셀화를 방지
-    return phaseMie(cosTheta, min(g, 0.65));
+    // [KO] 비등방성 계수를 낮추어 LUT에서의 픽셀화를 방지하되, 시각적 광량 보존을 위해 이전보다 상향 (0.65 -> 0.80)
+    // [EN] Lower the anisotropy coefficient to prevent pixelation in the LUT, but increase it compared to before (0.65 -> 0.80) to preserve visual light amount.
+    return phaseMie(cosTheta, min(g, 0.80));
 }
 
 fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
@@ -224,14 +222,8 @@ fn getSunDiskRadianceUnit(
     let limbDarkening = pow(max(1e-7, 1.0 - saturate(dist)), sunLimbDarkening);
     let energyNormalization = sunLimbDarkening + 1.0;
 
-    var radiance = (radianceScale * limbDarkening * energyNormalization * sunMask) * skyTrans;
-
-    let luma = getLuminance(radiance);
-    if (luma > SUN_RADIANCE_THRESHOLD) {
-        let softLuma = SUN_RADIANCE_THRESHOLD + (luma - SUN_RADIANCE_THRESHOLD) / (1.0 + (luma - SUN_RADIANCE_THRESHOLD) / SUN_RADIANCE_THRESHOLD);
-        radiance = radiance * (softLuma / luma);
-    }
-    return radiance;
+    // [KO] 에너지를 깎는 소프트 클램핑 로직 제거 (HDR 보존)
+    return (radianceScale * limbDarkening * energyNormalization * sunMask) * skyTrans;
 }
 
 fn getSunDiskRadianceIBL(
@@ -250,13 +242,8 @@ fn getSunDiskRadianceIBL(
     let falloff = exp(-diff / max(1e-7, sigma_sq));
     if (falloff < 0.001) { return vec3<f32>(0.0); }
 
-    var radiance = (radScale * falloff) * skyTrans;
-    let luma = getLuminance(radiance);
-    if (luma > IBL_RADIANCE_THRESHOLD) {
-        let softLuma = IBL_RADIANCE_THRESHOLD + (luma - IBL_RADIANCE_THRESHOLD) / (1.0 + (luma - IBL_RADIANCE_THRESHOLD) / IBL_RADIANCE_THRESHOLD);
-        radiance = radiance * (softLuma / luma);
-    }
-    return radiance;
+    // [KO] 에너지를 깎는 소프트 클램핑 로직 제거 (HDR 보존)
+    return (radScale * falloff) * skyTrans;
 }
 
 fn getMieGlowAmountUnit(
@@ -280,15 +267,9 @@ fn getMieGlowAmountUnit(
     let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
     let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunCosTheta, params.atmosphereHeight);
     
-    var glow = sunTransForGlow * (params.mieScattering / max(vec3<f32>(0.0001), params.mieScattering + params.mieAbsorption)) 
+    // [KO] 에너지를 깎는 소프트 클램핑 로직 제거 (HDR 보존)
+    return sunTransForGlow * (params.mieScattering / max(vec3<f32>(0.0001), params.mieScattering + params.mieAbsorption)) 
                         * (diffPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS;
-
-    let luma = getLuminance(glow);
-    if (luma > MIE_GLOW_THRESHOLD) {
-        let softLuma = MIE_GLOW_THRESHOLD + (luma - MIE_GLOW_THRESHOLD) / (1.0 + (luma - MIE_GLOW_THRESHOLD) / MIE_GLOW_THRESHOLD);
-        glow = glow * (softLuma / luma);
-    }
-    return glow;
 }
 
 fn integrateScatSegment(
@@ -371,12 +352,12 @@ fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>,
     let sunShadow = smoothstep(-0.01, 0.01, cosSun);
     var groundRadiance = vec3<f32>(0.0);
     
-    // [KO] 지면 반사광 계산: (직사광 조도 * INV_PI + 다중산란 광휘) * 알베도
-    // [EN] Ground radiance calculation: (Direct Irradiance * INV_PI + Multi-scattering Radiance) * Albedo
+    // [KO] 지면 반사광 계산: (직사광 조도 + 다중산란 광휘) * 알베도
+    // [EN] Ground radiance calculation: (Direct Irradiance + Multi-scattering Radiance) * Albedo
     if (sunShadow > 0.0) {
         // [KO] 지면은 거칠기 때문에 하늘만큼 밝은 정반사를 일으키지 않음. 물리적 기반 하에 에너지 보존을 강화하여 차분하게 표현
-        // [KO] 다중 산란 에너지(msEnergy)는 이미 적분된 광휘 성분이므로 INV_PI를 곱하지 않고 직접 합산
-        groundRadiance = (sunTrans * max(0.0, cosSun) * INV_PI + msEnergy) * groundAlbedo * sunShadow;
+        // [KO] 시각적 활력을 위해 직사광 성분에서도 INV_PI를 제거하여 에너지를 보강함
+        groundRadiance = (sunTrans * max(0.0, cosSun) + msEnergy) * groundAlbedo * sunShadow;
     } else {
         groundRadiance = msEnergy * groundAlbedo;
     }
