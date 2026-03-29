@@ -167,17 +167,20 @@ abstract class ASkyAtmosphereLUTGenerator {
      * @param is3D -
      * [KO] 3D 텍스처 여부 (기본값: false)
      * [EN] Whether it is a 3D texture (Default: false)
+     * @param format -
+     * [KO] 텍스처 포맷 (기본값: 'rgba16float')
+     * [EN] Texture format (Default: 'rgba16float')
      * @returns
      * [KO] 생성된 GPUTexture
      * [EN] The generated GPUTexture
      */
-    createLUTTexture(is3D: boolean = false): GPUTexture {
+    createLUTTexture(is3D: boolean = false, format: GPUTextureFormat = 'rgba16float'): GPUTexture {
         const {resourceManager} = this.#redGPUContext;
         return resourceManager.createManagedTexture({
             label: `SkyAtmosphere_${this.#label}_Texture`,
             size: [this.#width, this.#height, this.#depth],
             dimension: is3D ? '3d' : '2d',
-            format: 'rgba16float',
+            format: format,
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
         });
     }

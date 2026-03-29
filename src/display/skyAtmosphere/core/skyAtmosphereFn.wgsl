@@ -23,10 +23,10 @@ const IRRADIANCE_SAMPLES: u32 = 256u;
 
 // [KO] 렌더링 상수를 정의합니다.
 const SUN_RADIANCE_BOOST: f32 = 1.0;
-const SUN_RADIANCE_THRESHOLD: f32 = 65000.0;
+const SUN_RADIANCE_THRESHOLD: f32 = 100000.0;
 const MIE_GLOW_SUPPRESS: f32 = 0.40; // [KO] 0.10에서 상향 (UE5 스타일의 강력한 글로우)
-const MIE_GLOW_THRESHOLD: f32 = 40000.0;
-const IBL_RADIANCE_THRESHOLD: f32 = 60000.0;
+const MIE_GLOW_THRESHOLD: f32 = 80000.0;
+const IBL_RADIANCE_THRESHOLD: f32 = 90000.0;
 const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
 
 struct AtmosphereDensities {
@@ -341,11 +341,13 @@ fn integrateScatSegment(
         
         let scatTotal = scatR + scatM;
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight / params.atmosphereHeight, 0.001, 0.999));
+        
+        // [KO] MS 에너지는 단위 강도로 계산 (sunIntensity는 렌더링 시점에만 적용)
         let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal * shadowMask * params.multiScatteringFactor;
 
-        // [KO] 태양 강도 적용 (단위 계수에서 광휘로 변환)
-        // [EN] Apply sun intensity (convert from unit factor to radiance)
-        *radiance += *transmittance * (stepScat + msScat) * stepSize * params.sunIntensity;
+        // [KO] 단위 계수 기반의 광휘를 누적합니다. (sunIntensity는 최종 합성 시 곱해줌)
+        // [EN] Accumulate radiance based on unit coefficients. (sunIntensity is multiplied during final composition)
+        *radiance += *transmittance * (stepScat + msScat) * stepSize;
         *transmittance *= exp(-((scatR + ((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO)) * stepSize);
     }
 }
@@ -369,17 +371,18 @@ fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>,
     let sunShadow = smoothstep(-0.01, 0.01, cosSun);
     var groundRadiance = vec3<f32>(0.0);
     
-    // [KO] 지면 반사광 계산: (직사광 조도 + 다중산란 조도) * (알베도 / PI)
-    // [EN] Ground radiance calculation: (Direct Irradiance + Multi-scattering Irradiance) * (Albedo / PI)
+    // [KO] 지면 반사광 계산: (직사광 조도 * INV_PI + 다중산란 광휘) * 알베도
+    // [EN] Ground radiance calculation: (Direct Irradiance * INV_PI + Multi-scattering Radiance) * Albedo
     if (sunShadow > 0.0) {
         // [KO] 지면은 거칠기 때문에 하늘만큼 밝은 정반사를 일으키지 않음. 물리적 기반 하에 에너지 보존을 강화하여 차분하게 표현
-        // [KO] 다중 산란 에너지(msEnergy)는 이미 적분된 조도 성분이므로 직접 조도와 그대로 합산
-        groundRadiance = (sunTrans * max(0.0, cosSun) + msEnergy) * (groundAlbedo * INV_PI) * sunShadow;
+        // [KO] 다중 산란 에너지(msEnergy)는 이미 적분된 광휘 성분이므로 INV_PI를 곱하지 않고 직접 합산
+        groundRadiance = (sunTrans * max(0.0, cosSun) * INV_PI + msEnergy) * groundAlbedo * sunShadow;
     } else {
-        groundRadiance = msEnergy * (groundAlbedo * INV_PI);
+        groundRadiance = msEnergy * groundAlbedo;
     }
     
-    return groundRadiance * sunIntensity;
+    // [KO] 단위 광휘를 반환합니다. (sunIntensity는 호출부에서 선택적으로 적용 가능하나, 기본적으로 LUT 저장용은 제외)
+    return groundRadiance;
 }
 
 fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
@@ -416,8 +419,8 @@ fn evaluateIBLRadiance(
         let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosS, atmosphereHeight);
         let msEnergy = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
         
-        // [KO] 지면 자체의 휘도 평가 (직사광 + 간접광)
-        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo, params.sunIntensity);
+        // [KO] 지면 자체의 단위 휘도 평가 (직사광 + 간접광)
+        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo, 1.0);
 
         // [KO] 지면으로부터 실제 카메라 고도까지의 투과율 계산
         let viewZenithCosAngle = dot(hitNormal, -viewDir);
@@ -430,21 +433,22 @@ fn evaluateIBLRadiance(
         let atmosphericInScattering = skySample.rgb * (1.0 - viewTransmittance);
 
         let transToEdge = vec3<f32>(skySample.a);
-        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.80) * params.sunIntensity;
+        let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.90);
 
         // [KO] 최종 합성: (지면 휘도 * 대기 감쇄) + 대기 산란광 + 미 글로우
+        // [KO] IBL 생성기에서 사용되므로 단위 광휘(Unit Radiance)를 유지합니다.
         radiance = groundRadiance * viewTransmittance + atmosphericInScattering + mieGlowAmount * (1.0 - viewTransmittance);
     } else {
         let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
         let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
         
-        // [KO] 하늘 휘도 (skySample은 이미 sunIntensity가 포함된 Radiance임)
+        // [KO] 하늘 휘도 (Sky-View LUT가 이제 단위 광휘를 저장함)
         radiance = skySample.rgb;
 
         // [KO] 지평선 근처의 미 산란 글로우 보강 (선명한 수평선 및 파란늘 밝기 확보)
         let transToViewEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight);
         // [KO] 리플렉션의 생동감을 위해 헤일로 강도를 0.90으로 상향 (태양 주변의 강력한 산란광 표현)
-        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.90) * params.sunIntensity;
+        let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.90);
         radiance += mieGlowStable;
     }
 

@@ -74,7 +74,7 @@ if (actualDist < NEAR_FIELD_CORRECTION_DIST) {
 let sunDir = normalize(uniforms.sunDirection);
 let viewSunCos = dot(viewDir, sunDir);
 mappingH = max(0.0, viewHeight);
-var mieGlowUnit = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, skyAtmosphereSampler, vec3<f32>(apSample.a), 0.0);
+var mieGlowUnit = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, skyAtmosphereSampler, vec3<f32>(apSample.a), 0.9);
 
 // [KO] 물리적 오클루전
 let camPos = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);
@@ -82,8 +82,8 @@ let occlusionFactor = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms
 mieGlowUnit *= occlusionFactor;
 
 // [KO] 최종 산란광 및 색상 결정
-// [KO] apSample.rgb는 이미 sunIntensity가 포함된 상태임
-let finalScattering = apSample.rgb * systemUniforms.preExposure + mieGlowUnit * uniforms.sunIntensity * systemUniforms.preExposure;
+// [KO] apSample.rgb는 이제 단위 광휘(Unit Radiance)를 저장하므로 sunIntensity를 곱해줍니다.
+let finalScattering = (apSample.rgb + mieGlowUnit) * uniforms.sunIntensity * systemUniforms.preExposure;
 let finalColor = sceneColor * saturate(apSample.a) + finalScattering;
 
 textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));

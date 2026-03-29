@@ -85,7 +85,7 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
-        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_SkyView_LUTTexture_${createUUID()}`, this.createLUTTexture());
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_SkyView_LUTTexture_${createUUID()}`, this.createLUTTexture(false));
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_SkyView_Pipeline', SHADER_INFO.defaultSource);
     }
 }
