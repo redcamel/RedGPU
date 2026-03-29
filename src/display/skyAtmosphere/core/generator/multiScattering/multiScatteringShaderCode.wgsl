@@ -77,13 +77,13 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let sunT = getPhysicalTransmittance(p, sunDir, groundRadius, params.atmosphereHeight, params);
         let shadowMask = getPlanetShadowMask(p, sunDir, groundRadius, params);
 
-        let scatR = params.rayleighScattering * d.rhoR;
-        let scatM = params.mieScattering * d.rhoM;
+        let scatR = params.rayleighScattering * d.rhoR * params.skyLuminanceFactor;
+        let scatM = params.mieScattering * d.rhoM * params.skyLuminanceFactor;
         
         let scatTotal = scatR + vec3<f32>(scatM);
         let stepScat = (scatR * phaseR + vec3<f32>(scatM * phaseM));
 
-        let extTotal = scatR + vec3<f32>((params.mieScattering + params.mieAbsorption) * d.rhoM) + params.absorptionCoefficient * d.rhoO;
+        let extTotal = scatR + vec3<f32>((params.mieScattering + params.mieAbsorption) * d.rhoM * params.skyLuminanceFactor) + params.absorptionCoefficient * d.rhoO;
 
         *L1 += *TPath * sunT * stepScat * shadowMask * stepSize;
         *f1 += *TPath * scatTotal * stepSize;

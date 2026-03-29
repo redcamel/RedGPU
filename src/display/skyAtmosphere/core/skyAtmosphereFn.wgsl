@@ -348,29 +348,22 @@ fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
     return dir;
 }
 
-fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>, sunIntensity: f32) -> vec3<f32> {
+fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>) -> vec3<f32> {
     let sunShadow = smoothstep(-0.01, 0.01, cosSun);
     var groundRadiance = vec3<f32>(0.0);
     
-    // [KO] 지면 반사광 계산: (직사광 조도 + 다중산란 광휘) * 알베도
-    // [EN] Ground radiance calculation: (Direct Irradiance + Multi-scattering Radiance) * Albedo
+    // [KO] 지면 반사광 계산: (직사광 조도 * INV_PI + 다중산란 광휘) * 알베도
+    // [EN] Ground radiance calculation: (Direct Irradiance * INV_PI + Multi-scattering Radiance) * Albedo
     if (sunShadow > 0.0) {
-        // [KO] 지면은 거칠기 때문에 하늘만큼 밝은 정반사를 일으키지 않음. 물리적 기반 하에 에너지 보존을 강화하여 차분하게 표현
-        // [KO] 시각적 활력을 위해 직사광 성분에서도 INV_PI를 제거하여 에너지를 보강함
-        groundRadiance = (sunTrans * max(0.0, cosSun) + msEnergy) * groundAlbedo * sunShadow;
+        // [KO] Lambertian 반사 시 직사광 조도(E)에 INV_PI를 곱하여 반사 광휘(L)로 변환
+        // [KO] msEnergy는 이미 적분된 평균 광휘 성분이므로 그대로 합산
+        groundRadiance = (sunTrans * max(0.0, cosSun) * INV_PI + msEnergy) * groundAlbedo * sunShadow;
     } else {
         groundRadiance = msEnergy * groundAlbedo;
     }
     
-    // [KO] 단위 광휘를 반환합니다. (sunIntensity는 호출부에서 선택적으로 적용 가능하나, 기본적으로 LUT 저장용은 제외)
+    // [KO] 단위 광휘를 반환합니다.
     return groundRadiance;
-}
-
-fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
-    let cosHalf = cos(lobeHalfAngle);
-    let sunLobePower = clamp(log(0.5) / log(max(1e-4, cosHalf)), 2.0, 128.0);
-    let sunLobeNorm = (sunLobePower + 1.0) * (0.5 * INV_PI);
-    return sunLobeNorm * pow(max(0.0, viewSun), sunLobePower);
 }
 
 fn evaluateIBLRadiance(
@@ -400,15 +393,14 @@ fn evaluateIBLRadiance(
         let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, cosS, atmosphereHeight);
         let msEnergy = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, vec2<f32>(clamp(cosS * 0.5 + 0.5, 0.0, 1.0), 1.0), 0.0).rgb;
         
-        // [KO] 지면 자체의 단위 휘도 평가 (직사광 + 간접광)
-        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo, 1.0);
+        // [KO] 지면 자체의 단위 휘도 평가
+        let groundRadiance = evaluateGroundRadiance(cosS, sunT, msEnergy, params.groundAlbedo);
 
         // [KO] 지면으로부터 실제 카메라 고도까지의 투과율 계산
         let viewZenithCosAngle = dot(hitNormal, -viewDir);
         let viewTransmittance = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, viewZenithCosAngle, atmosphereHeight);
         
         // [KO] 카메라와 지면 사이의 대기 산란광 (in-scattering)
-        // [KO] 수평선 부근에서 지면과 하늘이 자연스럽게 이어지도록 보강
         let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
         let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
         let atmosphericInScattering = skySample.rgb * (1.0 - viewTransmittance);
@@ -416,19 +408,17 @@ fn evaluateIBLRadiance(
         let transToEdge = vec3<f32>(skySample.a);
         let mieGlowAmount = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.90);
 
-        // [KO] 최종 합성: (지면 휘도 * 대기 감쇄) + 대기 산란광 + 미 글로우
-        // [KO] IBL 생성기에서 사용되므로 단위 광휘(Unit Radiance)를 유지합니다.
+        // [KO] 최종 합성 (단위 광휘 유지)
         radiance = groundRadiance * viewTransmittance + atmosphericInScattering + mieGlowAmount * (1.0 - viewTransmittance);
     } else {
         let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
         let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
         
-        // [KO] 하늘 휘도 (Sky-View LUT가 이제 단위 광휘를 저장함)
+        // [KO] 하늘 휘도 (단위 광휘)
         radiance = skySample.rgb;
 
-        // [KO] 지평선 근처의 미 산란 글로우 보강 (선명한 수평선 및 파란늘 밝기 확보)
+        // [KO] 지평선 근처의 미 산란 글로우 보강
         let transToViewEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight);
-        // [KO] 리플렉션의 생동감을 위해 헤일로 강도를 0.90으로 상향 (태양 주변의 강력한 산란광 표현)
         let mieGlowStable = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToViewEdge, 0.90);
         radiance += mieGlowStable;
     }
