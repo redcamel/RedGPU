@@ -69,7 +69,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         totalWeight += 1.0;
     }
 
-    irradiance = irradiance / totalWeight;
+    irradiance = (irradiance / totalWeight) * PI;
 
     textureStore(outTexture, global_id.xy, face, vec4<f32>(irradiance, 1.0));
 }

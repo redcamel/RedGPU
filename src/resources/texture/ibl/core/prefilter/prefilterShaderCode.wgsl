@@ -92,7 +92,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let pdf = (D * NdotH / (4.0 * VdotH)) + 0.0001;
             
             let saSample = 1.0 / (f32(numSamples) * pdf + 0.0001);
-            let mipLevel = max(0.25 * log2(saSample / saTexel), 0.0);
+            let mipLevel = max(0.5 * log2(saSample / saTexel), 0.0);
 
             prefilteredColor += textureSampleLevel(environmentTexture, textureSampler, L, mipLevel).rgb * NdotL;
             totalWeight += NdotL;
