@@ -43,10 +43,10 @@ abstract class ACamera {
     #exposureCompensation: number = 0.0;
 
     /**
-     * [KO] 목표 휘도 (18% Middle Gray 기준)
-     * [EN] Target luminance (based on 18% Middle Gray)
+     * [KO] 목표 휘도 (29% Middle Gray 기준)
+     * [EN] Target luminance (based on 29% Middle Gray)
      */
-    #targetLuminance: number = 0.18;
+    #targetLuminance: number = 0.29;
 
     /**
      * [KO] 자동 노출 최소 범위 (EV100)
