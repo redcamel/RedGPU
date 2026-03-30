@@ -75,3 +75,40 @@ fn getPointLightPhong(
     
     return calcPhongBRDF(lightColor, illuminance, L, N, V, shininess, specularSamplerValue, diffuseColor, specularColor, specularStrength);
 }
+
+/**
+ * [KO] 대기 투과율이 적용된 태양광 Phong 조명을 계산합니다.
+ * [EN] Calculates sun light Phong lighting with atmospheric transmittance.
+ */
+fn getAtmosphereSunLightPhong(
+    lightColor: vec3<f32>,
+    intensityLux: f32,
+    L: vec3<f32>,
+    N: vec3<f32>,
+    V: vec3<f32>,
+    shininess: f32,
+    specularSamplerValue: f32,
+    diffuseColor: vec3<f32>,
+    specularColor: vec3<f32>,
+    specularStrength: f32,
+    worldPos: vec3<f32>,
+    cameraPos: vec3<f32>,
+    params: SkyAtmosphere,
+    atmosphereSampler: sampler,
+    transmittanceLUT: texture_2d<f32>
+) -> vec3<f32> {
+    // [KO] 대기 투과율 계산 (지면 기준 높이 Km 변환)
+    let groundRadius = params.groundRadius;
+    let atmosphereHeight = params.atmosphereHeight;
+    let up = normalize(worldPos + vec3<f32>(0.0, groundRadius, 0.0));
+    let viewHeight = length(worldPos + vec3<f32>(0.0, groundRadius, 0.0)) - groundRadius;
+    let cosSun = dot(up, L);
+
+    // [KO] 투과율 LUT 참조
+    let sunTransmittance = getTransmittance(transmittanceLUT, atmosphereSampler, max(0.0, viewHeight), cosSun, atmosphereHeight);
+    
+    // [KO] 투과율이 적용된 최종 조도
+    let illuminance = lightColor * intensityLux * sunTransmittance;
+    
+    return calcPhongBRDF(lightColor, illuminance, L, N, V, shininess, specularSamplerValue, diffuseColor, specularColor, specularStrength);
+}

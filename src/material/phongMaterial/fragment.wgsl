@@ -9,7 +9,7 @@
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;
 #redgpu_include lighting.getPhongLight;
-#redgpu_include skyAtmosphere.getAtmosphereSunLight
+#redgpu_include skyAtmosphere.skyAtmosphereFn
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -162,14 +162,33 @@ fn main(inputData:InputData) -> OutputFragment {
        visibility = 1.0;
     }
 
-    if (systemUniforms.useSkyAtmosphere != 1u) {
-        for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
-            let u_directionalLightDirection = u_directionalLights[i].direction;
-            let u_directionalLightColor = u_directionalLights[i].color;
-            let u_directionalLightIntensity = u_directionalLights[i].intensity;
+    // [KO] 방향성 광원 계산
+    // [EN] Directional light calculation
+    for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
+        let u_directionalLightDirection = u_directionalLights[i].direction;
+        let u_directionalLightColor = u_directionalLights[i].color;
+        let u_directionalLightIntensity = u_directionalLights[i].intensity;
 
-             mixColor += getDirectionalLightPhong(
-                u_directionalLightColor, u_directionalLightIntensity * visibility, -normalize(u_directionalLightDirection),
+        var lightVisibility = 1.0;
+        if (i == 0u) {
+            // 첫 번째 광원(태양)에만 그림자 적용
+            lightVisibility = visibility;
+        }
+
+        if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
+            // [KO] 대기 산란 모드일 때 첫 번째 광원은 대기 투과율이 반영된 태양광으로 처리
+            // [EN] In SkyAtmosphere mode, the first light is treated as sun light with atmospheric transmittance
+            mixColor += getAtmosphereSunLightPhong(
+                u_directionalLightColor, u_directionalLightIntensity * lightVisibility, -normalize(u_directionalLightDirection),
+                N, V, u_shininess, specularSamplerValue,
+                diffuseColor, u_specularColor, u_specularStrength,
+                input_vertexPosition, u_cameraPosition, systemUniforms.skyAtmosphere,
+                atmosphereSampler, transmittanceTexture
+            );
+        } else {
+            // 일반적인 퐁 라이팅 계산
+            mixColor += getDirectionalLightPhong(
+                u_directionalLightColor, u_directionalLightIntensity * lightVisibility, -normalize(u_directionalLightDirection),
                 N, V, u_shininess, specularSamplerValue,
                 diffuseColor, u_specularColor, u_specularStrength
             );
@@ -233,9 +252,9 @@ fn main(inputData:InputData) -> OutputFragment {
         mixColor = mixColor * textureSample(aoTexture, aoTextureSampler, inputData.uv).rgb * u_aoStrength;
     #redgpu_endIf
     //
-    // [KO] 최종 조명 결과 (Raw HDR)
-    // [EN] Final lighting result (Raw HDR)
-    finalColor = vec4<f32>(mixColor + emissiveColor, resultAlpha);
+    // [KO] 최종 조명 결과 (Raw HDR * Pre-Exposure 적용)
+    // [EN] Final lighting result (Raw HDR * Pre-Exposure applied)
+    finalColor = vec4<f32>((mixColor + emissiveColor) * systemUniforms.preExposure, resultAlpha);
     #redgpu_if useTint
         finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
