@@ -27,7 +27,7 @@ const SHADER_INFO = parseWGSL('SkyAtmosphere_AerialPerspective_Generator', aeria
  * @category SkyAtmosphere
  */
 class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
-    #lutTexture: DirectCubeTexture;
+    #lutTexture: DirectCubeTexture; // [KO] 3D 및 Cube 텍스처를 담당하는 DirectCubeTexture 사용
     #bindGroup: GPUBindGroup;
     #pipeline: GPUComputePipeline;
     #prevSystemBuffer: GPUBuffer;
@@ -35,18 +35,9 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
     /**
      * [KO] AerialPerspectiveGenerator 인스턴스를 초기화합니다.
      * [EN] Initializes a AerialPerspectiveGenerator instance.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU context
-     * @param sharedUniformBuffer -
-     * [KO] 공유 유니폼 버퍼
-     * [EN] Shared uniform buffer
-     * @param sampler -
-     * [KO] LUT 샘플링에 사용할 샘플러
-     * [EN] Sampler to be used for LUT sampling
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
+        // [KO] UE5 표준: 32x32x32 혹은 32x32x16 사용
         super(redGPUContext, sharedUniformBuffer, sampler, 'AerialPerspective_Gen', 32, 32, 32);
         this.#init();
     }
@@ -62,24 +53,10 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
     /**
      * [KO] 카메라 볼륨 LUT를 렌더링(Compute)합니다.
      * [EN] Renders (computes) the Camera Volume LUT.
-     *
-     * @example
-     * ```typescript
-     * aerialPerspectiveGenerator.render(view, transmittance, multiScat);
-     * ```
-     * @param view -
-     * [KO] 렌더링에 사용되는 3D 뷰
-     * [EN] 3D view used for rendering
-     * @param transmittance -
-     * [KO] 투과율 LUT 텍스처
-     * [EN] Transmittance LUT texture
-     * @param multiScat -
-     * [KO] 다중 산란 LUT 텍스처
-     * [EN] Multi-Scattering LUT texture
      */
     render(view: View3D, transmittance: DirectTexture, multiScat: DirectTexture): void {
         const systemBuffer = view.systemUniform_Vertex_UniformBuffer?.gpuBuffer;
-        
+
         if (!systemBuffer) {
             console.warn('AerialPerspectiveGenerator: systemUniform_Vertex_UniformBuffer is not ready yet.');
             return;
@@ -89,19 +66,21 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
             this.#prevSystemBuffer = systemBuffer;
             this.#bindGroup = this.createBindGroup('SkyAtmosphere_AerialPerspective_BindGroup', this.#pipeline, [
                 {binding: 0, resource: {buffer: systemBuffer}}, // systemUniforms
-                {binding: 1, resource: this.#lutTexture.gpuTexture.createView({dimension: '3d'})}, // aerialPerspectiveLUT
+                {binding: 1, resource: this.#lutTexture.gpuTextureView}, // aerialPerspectiveLUT (DirectCubeTexture에서 자동 생성된 3D 뷰 사용)
                 {binding: 2, resource: multiScat.gpuTextureView}, // multiScatLUT
                 {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, // params
                 {binding: 4, resource: transmittance.gpuTextureView}, // transmittanceLUT
                 {binding: 13, resource: this.sampler.gpuSampler} // skyAtmosphereSampler
             ]);
         }
-        
-        this.executeComputePass(this.#pipeline, this.#bindGroup, [4, 4, 4]);
+
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 4]); // [KO] 워크그룹 사이즈 최적화
     }
 
     #init(): void {
-        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_AerialPerspective_LUTTexture_${createUUID()}`, this.createLUTTexture(true));
+        // [KO] createLUTTexture(true)는 내부적으로 3D 텍스처를 생성함
+        const gpuTexture = this.createLUTTexture(true);
+        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_AerialPerspective_LUTTexture_${createUUID()}`, gpuTexture);
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_AerialPerspective_Pipeline', SHADER_INFO.defaultSource);
     }
 }

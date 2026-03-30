@@ -24,34 +24,19 @@ fn getOpticalDepth(viewHeight: f32, cosTheta: f32) -> vec3<f32> {
     let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
     let rayDir = vec3<f32>(sinTheta, cosTheta, 0.0);
 
+    // [KO] 대기 경계와의 교차점 찾기
+    // [EN] Find intersection with atmosphere boundary
     let tMax = getRaySphereIntersection(rayOrigin, rayDir, groundRadius + params.atmosphereHeight);
     if (tMax <= 0.0) { return vec3<f32>(0.0); }
 
-    let b = dot(rayOrigin, rayDir);
-    let c = dot(rayOrigin, rayOrigin) - groundRadius * groundRadius;
-    let delta = b * b - c;
-    
-    var optExt = vec3<f32>(0.0);
-    if (delta >= 0.0) {
-        let s = sqrt(delta);
-        let tIn = -b - s;
-        let tOut = -b + s;
-
-        if (params.groundRadius > 0.0 && tIn > EPSILON) { 
-            return vec3<f32>(MAX_TAU); 
-        }
-
-        if (tIn > EPSILON && tIn < tMax) {
-             optExt += integrateOpticalDepth(rayOrigin, rayDir, 0.0, tIn, TRANSMITTANCE_STEPS / 2u, params);
-             if (tOut > 0.0 && tMax > tOut) {
-                 optExt += integrateOpticalDepth(rayOrigin, rayDir, tOut, tMax, TRANSMITTANCE_STEPS / 2u, params);
-             }
-        } else {
-             optExt = integrateOpticalDepth(rayOrigin, rayDir, 0.0, tMax, TRANSMITTANCE_STEPS, params);
-        }
-    } else {
-        optExt = integrateOpticalDepth(rayOrigin, rayDir, 0.0, tMax, TRANSMITTANCE_STEPS, params);
+    // [KO] 지면과의 교차 확인 (UE5 방식: 지면에 가리면 투과율 0)
+    // [EN] Check for ground intersection (UE5 style: transmittance is 0 if obscured by ground)
+    let tEarth = getRaySphereIntersection(rayOrigin, rayDir, groundRadius);
+    if (groundRadius > 0.0 && tEarth > 0.0) {
+        return vec3<f32>(MAX_TAU);
     }
 
-    return optExt;
+    // [KO] 대기 경계까지 광학적 깊이 적분
+    // [EN] Integrate optical depth to the atmosphere boundary
+    return integrateOpticalDepth(rayOrigin, rayDir, 0.0, tMax, TRANSMITTANCE_STEPS, params);
 }

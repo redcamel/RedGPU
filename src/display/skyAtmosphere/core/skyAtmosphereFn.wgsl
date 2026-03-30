@@ -257,12 +257,17 @@ fn getMieGlowAmountUnit(
     transToEdge: vec3<f32>,
     overrideHalo: f32 
 ) -> vec3<f32> {
-    let halo = select(params.mieAnisotropy, overrideHalo, overrideHalo > 0.0);
-    
     // [KO] 언리얼 엔진 스타일의 하이브리드 글로우: (날카로운 위상 - LUT에 포함된 부드러운 위상)
     // [EN] Unreal Engine style hybrid glow: (Sharp Phase - Smooth Phase included in LUT)
-    let sharpPhase = phaseMie(viewSunCos, min(halo, 0.99));
-    let stablePhase = phaseMieStable(viewSunCos, params.mieAnisotropy);
+    // [KO] LUT 생성 시 비등방성 계수는 보통 0.80으로 제한되므로, 그 이상의 날카로운 성분을 별도로 계산하여 합산함
+    let actualAnisotropy = params.mieAnisotropy;
+    let halo = select(actualAnisotropy, overrideHalo, overrideHalo > 0.0);
+    
+    let sharpG = min(max(halo, 0.88), 0.98); 
+    let stableG = min(actualAnisotropy, 0.80);
+
+    let sharpPhase = phaseMie(viewSunCos, sharpG);
+    let stablePhase = phaseMie(viewSunCos, stableG);
     let diffPhase = max(0.0, sharpPhase - stablePhase);
 
     let sunDirY = params.sunDirection.y;
@@ -407,7 +412,7 @@ fn evaluateIBLRadiance(
     // 투과율: 지면 히트 시에는 skySample.a(카메라~지면), 하늘 히트 시에는 계산된 값(카메라~대기경계) 사용
     let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
     
-    let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.90);
+    let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
     radiance += mieGlow;
 
     return radiance;
