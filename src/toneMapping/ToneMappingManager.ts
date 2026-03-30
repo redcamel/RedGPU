@@ -9,10 +9,11 @@ import ToneACESFilmicHill from "./ACESFilmicHill/ToneACESFilmicHill";
 import {ASinglePassPostEffectResult} from "../postEffect/core/ASinglePassPostEffect";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateNumberRange from "../runtimeChecker/validateFunc/validateNumberRange";
+import validateNumber from "../runtimeChecker/validateFunc/validateNumber";
 
 /**
- * [KO] 톤 매핑, 대비, 밝기를 통합 관리하는 클래스입니다.
- * [EN] Class that integrates and manages tone mapping, contrast, and brightness.
+ * [KO] 톤 매핑, 대비, 밝기 및 노출 설정을 통합 관리하는 클래스입니다.
+ * [EN] Class that integrates and manages tone mapping, contrast, brightness, and exposure settings.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -36,6 +37,20 @@ class ToneMappingManager {
     #contrast: number = 1.0;
     #brightness: number = 0.0;
 
+    // [KO] 노출 관련 속성 (ACamera에서 이전됨)
+    // [EN] Exposure related properties (Moved from ACamera)
+    #exposureCompensation: number = 0.0;
+    #targetLuminance: number = 0.29;
+
+    // [KO] 자동 노출 알고리즘 파라미터
+    // [EN] Auto-exposure algorithm parameters
+    #minEV100: number = 1.0;
+    #maxEV100: number = 20.0;
+    #adaptationSpeedUp: number = 3.0;
+    #adaptationSpeedDown: number = 1.0;
+    #lowPercentile: number = 0.8;
+    #highPercentile: number = 0.98;
+
     /**
      * [KO] ToneMappingManager 인스턴스를 생성합니다. (내부 시스템 전용)
      * [EN] Creates a ToneMappingManager instance. (Internal system only)
@@ -57,13 +72,28 @@ class ToneMappingManager {
         return this.#mode;
     }
 
-    /** [KO] 톤 매핑 모드를 설정합니다. [EN] Sets the tone mapping mode. */
+    /** [KO] 톤 매핑 모드를 설정합니다. (모드에 따라 최적의 targetLuminance가 자동 설정됩니다.) [EN] Sets the tone mapping mode. (Optimum targetLuminance is automatically set according to the mode.) */
     set mode(value: TONE_MAPPING_MODE) {
         if (this.#mode === value) return;
         this.#mode = value;
         if (this.#toneMapping) {
             this.#toneMapping.clear();
             this.#toneMapping = undefined;
+        }
+
+        // [KO] 모드별 최적 targetLuminance 자동 설정
+        // [EN] Automatically set optimal targetLuminance for each mode
+        switch (value) {
+            case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
+                this.#targetLuminance = 0.29;
+                break;
+            case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
+            case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
+                this.#targetLuminance = 0.40;
+                break;
+            default:
+                this.#targetLuminance = 0.29;
+                break;
         }
     }
 
@@ -89,6 +119,94 @@ class ToneMappingManager {
         validateNumberRange(value, -1, 1)
         this.#brightness = value;
         if (this.#toneMapping) this.#toneMapping.brightness = value;
+    }
+
+    /** [KO] 노출 보정(Exposure Compensation) 값을 반환합니다. [EN] Returns the exposure compensation value. */
+    get exposureCompensation(): number {
+        return this.#exposureCompensation;
+    }
+
+    /** [KO] 노출 보정(Exposure Compensation) 값을 설정합니다. [EN] Sets the exposure compensation value. */
+    set exposureCompensation(value: number) {
+        validateNumber(value);
+        this.#exposureCompensation = value;
+    }
+
+    /** [KO] 목표 휘도를 반환합니다. [EN] Returns the target luminance. */
+    get targetLuminance(): number {
+        return this.#targetLuminance;
+    }
+
+    /** [KO] 목표 휘도를 설정합니다. [EN] Sets the target luminance. */
+    set targetLuminance(value: number) {
+        validateNumber(value);
+        this.#targetLuminance = value;
+    }
+
+    /** [KO] 자동 노출 최소 EV100을 반환합니다. [EN] Returns the minimum EV100 for auto-exposure. */
+    get minEV100(): number {
+        return this.#minEV100;
+    }
+
+    /** [KO] 자동 노출 최소 EV100을 설정합니다. [EN] Sets the minimum EV100 for auto-exposure. */
+    set minEV100(value: number) {
+        validateNumber(value);
+        this.#minEV100 = value;
+    }
+
+    /** [KO] 자동 노출 최대 EV100을 반환합니다. [EN] Returns the maximum EV100 for auto-exposure. */
+    get maxEV100(): number {
+        return this.#maxEV100;
+    }
+
+    /** [KO] 자동 노출 최대 EV100을 설정합니다. [EN] Sets the maximum EV100 for auto-exposure. */
+    set maxEV100(value: number) {
+        validateNumber(value);
+        this.#maxEV100 = value;
+    }
+
+    /** [KO] 눈 적응 속도(밝아질 때)를 반환합니다. [EN] Returns the eye adaptation speed (brightening). */
+    get adaptationSpeedUp(): number {
+        return this.#adaptationSpeedUp;
+    }
+
+    /** [KO] 눈 적응 속도(밝아질 때)를 설정합니다. [EN] Sets the eye adaptation speed (brightening). */
+    set adaptationSpeedUp(value: number) {
+        validateNumber(value);
+        this.#adaptationSpeedUp = value;
+    }
+
+    /** [KO] 눈 적응 속도(어두워질 때)를 반환합니다. [EN] Returns the eye adaptation speed (darkening). */
+    get adaptationSpeedDown(): number {
+        return this.#adaptationSpeedDown;
+    }
+
+    /** [KO] 눈 적응 속도(어두워질 때)를 설정합니다. [EN] Sets the eye adaptation speed (darkening). */
+    set adaptationSpeedDown(value: number) {
+        validateNumber(value);
+        this.#adaptationSpeedDown = value;
+    }
+
+    /** [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 반환합니다. [EN] Returns the histogram analysis range (exclude bottom percentile). */
+    get lowPercentile(): number {
+        return this.#lowPercentile;
+    }
+
+    /** [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 설정합니다. [EN] Sets the histogram analysis range (exclude bottom percentile). */
+    set lowPercentile(value: number) {
+        validateNumber(value);
+        this.#lowPercentile = value;
+    }
+
+    /** [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 반환합니다. [EN] Returns the histogram analysis range (exclude top percentile). */
+    get highPercentile(): number {
+        return this.#highPercentile;
+    }
+
+    /** [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 설정합니다. [EN] Sets the histogram analysis range (exclude top percentile). */
+    set highPercentile(value: number) {
+        validateNumber(value);
+        this.#highPercentile = value;
     }
 
     /**

@@ -78,11 +78,6 @@ class SystemUniformUpdater {
                     value: camera.ev100,
                 },
                 {
-                    key: 'exposure',
-                    //@ts-ignore
-                    value: camera.exposure,
-                },
-                {
                     key: 'aperture',
                     //@ts-ignore
                     value: camera.aperture,

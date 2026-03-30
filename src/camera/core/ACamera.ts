@@ -37,54 +37,6 @@ abstract class ACamera {
     #iso: number = 100;
 
     /**
-     * [KO] 노출 보정 (Exposure Compensation / Bias)
-     * [EN] Exposure compensation (Bias)
-     */
-    #exposureCompensation: number = 0.0;
-
-    /**
-     * [KO] 목표 휘도 (29% Middle Gray 기준)
-     * [EN] Target luminance (based on 29% Middle Gray)
-     */
-    #targetLuminance: number = 0.29;
-
-    /**
-     * [KO] 자동 노출 최소 범위 (EV100)
-     * [EN] Minimum auto-exposure limit (EV100)
-     */
-    #minEV100: number = 1.0;
-
-    /**
-     * [KO] 자동 노출 최대 범위 (EV100)
-     * [EN] Maximum auto-exposure limit (EV100)
-     */
-    #maxEV100: number = 20.0;
-
-    /**
-     * [KO] 눈 적응 속도 (밝아질 때)
-     * [EN] Eye adaptation speed (brightening)
-     */
-    #adaptationSpeedUp: number = 3.0;
-
-    /**
-     * [KO] 눈 적응 속도 (어두워질 때)
-     * [EN] Eye adaptation speed (darkening)
-     */
-    #adaptationSpeedDown: number = 1.0;
-
-    /**
-     * [KO] 히스토그램 분석 범위 (하위 퍼센트 제외)
-     * [EN] Histogram analysis range (exclude bottom percentile)
-     */
-    #lowPercentile: number = 0.8;
-
-    /**
-     * [KO] 히스토그램 분석 범위 (상위 퍼센트 제외)
-     * [EN] Histogram analysis range (exclude top percentile)
-     */
-    #highPercentile: number = 0.98;
-
-    /**
      * [KO] 교정 상수 (Calibration Constant, K)
      * [EN] Calibration constant (K)
      * @description
@@ -100,12 +52,6 @@ abstract class ACamera {
     #ev100: number = 0;
 
     /**
-     * [KO] 캐시된 물리 노출 배율
-     * [EN] Cached physical exposure multiplier
-     */
-    #exposure: number = 0;
-
-    /**
      * [KO] 노출 값이 다시 계산되어야 하는지 여부
      * [EN] Whether the exposure needs to be recalculated
      */
@@ -118,153 +64,6 @@ abstract class ACamera {
     get ev100(): number {
         if (this.#exposureDirty) this.#updateExposure();
         return this.#ev100;
-    }
-
-    /**
-     * [KO] 물리적 노출 배율(Exposure)을 반환합니다.
-     * [EN] Returns the physical exposure multiplier.
-     */
-    get exposure(): number {
-        if (this.#exposureDirty) this.#updateExposure();
-        return this.#exposure;
-    }
-
-    /**
-     * [KO] 노출 보정(Exposure Compensation) 값을 반환합니다.
-     * [EN] Returns the exposure compensation value.
-     */
-    get exposureCompensation(): number {
-        return this.#exposureCompensation;
-    }
-
-    /**
-     * [KO] 노출 보정(Exposure Compensation) 값을 설정합니다.
-     * [EN] Sets the exposure compensation value.
-     */
-    set exposureCompensation(value: number) {
-        validateNumber(value);
-        if (this.#exposureCompensation === value) return;
-        this.#exposureCompensation = value;
-        this.#exposureDirty = true;
-    }
-
-    /**
-     * [KO] 목표 휘도를 반환합니다.
-     * [EN] Returns the target luminance.
-     */
-    get targetLuminance(): number {
-        return this.#targetLuminance;
-    }
-
-    /**
-     * [KO] 목표 휘도를 설정합니다.
-     * [EN] Sets the target luminance.
-     */
-    set targetLuminance(value: number) {
-        validateNumber(value);
-        this.#targetLuminance = value;
-    }
-
-    /**
-     * [KO] 자동 노출 최소 EV100을 반환합니다.
-     * [EN] Returns the minimum EV100 for auto-exposure.
-     */
-    get minEV100(): number {
-        return this.#minEV100;
-    }
-
-    /**
-     * [KO] 자동 노출 최소 EV100을 설정합니다.
-     * [EN] Sets the minimum EV100 for auto-exposure.
-     */
-    set minEV100(value: number) {
-        validateNumber(value);
-        this.#minEV100 = value;
-    }
-
-    /**
-     * [KO] 자동 노출 최대 EV100을 반환합니다.
-     * [EN] Returns the maximum EV100 for auto-exposure.
-     */
-    get maxEV100(): number {
-        return this.#maxEV100;
-    }
-
-    /**
-     * [KO] 자동 노출 최대 EV100을 설정합니다.
-     * [EN] Sets the maximum EV100 for auto-exposure.
-     */
-    set maxEV100(value: number) {
-        validateNumber(value);
-        this.#maxEV100 = value;
-    }
-
-    /**
-     * [KO] 눈 적응 속도(밝아질 때)를 반환합니다.
-     * [EN] Returns the eye adaptation speed (brightening).
-     */
-    get adaptationSpeedUp(): number {
-        return this.#adaptationSpeedUp;
-    }
-
-    /**
-     * [KO] 눈 적응 속도(밝아질 때)를 설정합니다.
-     * [EN] Sets the eye adaptation speed (brightening).
-     */
-    set adaptationSpeedUp(value: number) {
-        validateNumber(value);
-        this.#adaptationSpeedUp = value;
-    }
-
-    /**
-     * [KO] 눈 적응 속도(어두워질 때)를 반환합니다.
-     * [EN] Returns the eye adaptation speed (darkening).
-     */
-    get adaptationSpeedDown(): number {
-        return this.#adaptationSpeedDown;
-    }
-
-    /**
-     * [KO] 눈 적응 속도(어두워질 때)를 설정합니다.
-     * [EN] Sets the eye adaptation speed (darkening).
-     */
-    set adaptationSpeedDown(value: number) {
-        validateNumber(value);
-        this.#adaptationSpeedDown = value;
-    }
-
-    /**
-     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 반환합니다.
-     * [EN] Returns the histogram analysis range (exclude bottom percentile).
-     */
-    get lowPercentile(): number {
-        return this.#lowPercentile;
-    }
-
-    /**
-     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 설정합니다.
-     * [EN] Sets the histogram analysis range (exclude bottom percentile).
-     */
-    set lowPercentile(value: number) {
-        validateNumber(value);
-        this.#lowPercentile = value;
-    }
-
-    /**
-     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 반환합니다.
-     * [EN] Returns the histogram analysis range (exclude top percentile).
-     */
-    get highPercentile(): number {
-        return this.#highPercentile;
-    }
-
-    /**
-     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 설정합니다.
-     * [EN] Sets the histogram analysis range (exclude top percentile).
-     */
-    set highPercentile(value: number) {
-        validateNumber(value);
-        this.#highPercentile = value;
     }
 
     /**
@@ -343,15 +142,8 @@ abstract class ACamera {
 
     #updateExposure(): void {
         // [KO] EV100 = log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
+        // [EN] EV100 = log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
         this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
-
-        // [KO] 수동 노출 배율 계산 (UE5 표준 물리 공식)
-        // [EN] Manual exposure scale calculation (UE5 standard physical formula)
-        // [KO] 공식: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-        // [EN] Formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-        // [KO] 100은 ISO 100 기준 물리 상수로, 이를 통해 targetLuminance가 실제 시각적 목표치가 됩니다.
-        this.#exposure = (100 * this.#targetLuminance * Math.pow(2, this.#exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, this.#ev100));
-
         this.#exposureDirty = false;
     }
 }

@@ -124,7 +124,7 @@ class AutoExposure {
         const deltaTime = this.#prevTime === 0 ? 0.016 : (currentTime - this.#prevTime) / 1000;
         this.#prevTime = currentTime;
         
-        const ev100Range = rawCamera.maxEV100 - rawCamera.minEV100;
+        const ev100Range = toneMappingManager.maxEV100 - toneMappingManager.minEV100;
         
         // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
         // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
@@ -134,26 +134,25 @@ class AutoExposure {
                 : rawCamera.ev100;
             // [KO] UE5 표준 물리 노출 공식 적용: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
             // [EN] Apply UE5 standard physical exposure formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-            return (100 * rawCamera.targetLuminance * Math.pow(2, rawCamera.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
+            return (100 * toneMappingManager.targetLuminance * Math.pow(2, toneMappingManager.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
         })();
 
         // Update uniforms (총 16개 필드 순서 유지)
-        const camera = rawCamera as ACamera;
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer, 
             0, 
             new Float32Array([
                 deltaTime, 
-                camera.targetLuminance, 
-                camera.adaptationSpeedUp, 
-                camera.adaptationSpeedDown, 
-                camera.exposureCompensation, 
-                camera.minEV100, 
-                camera.maxEV100,
+                toneMappingManager.targetLuminance, 
+                toneMappingManager.adaptationSpeedUp, 
+                toneMappingManager.adaptationSpeedDown, 
+                toneMappingManager.exposureCompensation, 
+                toneMappingManager.minEV100, 
+                toneMappingManager.maxEV100,
                 ACamera.CALIBRATION_CONSTANT,
                 ev100Range,
-                camera.lowPercentile,
-                camera.highPercentile,
+                toneMappingManager.lowPercentile,
+                toneMappingManager.highPercentile,
                 1.0 / ev100Range,
                 width,
                 height,
