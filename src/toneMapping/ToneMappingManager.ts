@@ -40,7 +40,7 @@ class ToneMappingManager {
     // [KO] 노출 관련 속성 (ACamera에서 이전됨)
     // [EN] Exposure related properties (Moved from ACamera)
     #exposureCompensation: number = 0.0;
-    #targetLuminance: number = 0.29;
+    #targetLuminance: number = 0.18;
 
     // [KO] 자동 노출 알고리즘 파라미터
     // [EN] Auto-exposure algorithm parameters

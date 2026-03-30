@@ -7,7 +7,6 @@ import TransmittanceGenerator from "./core/generator/transmittance/Transmittance
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import AerialPerspectiveGenerator from "./core/generator/aerialPerspective/AerialPerspectiveGenerator";
-import SkyAtmosphereIrradianceGenerator from "./core/generator/ibl/irradiance/SkyAtmosphereIrradianceGenerator";
 import SkyAtmosphereReflectionGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionGenerator";
 import transmittanceShaderCode_wgsl from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import computeCode_wgsl from "./wgsl/computeCode.wgsl";
@@ -27,6 +26,7 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import AtmosphereShaderLibrary from "./core/AtmosphereShaderLibrary";
 import DirectionalLight from "../../light/lights/DirectionalLight";
+import createUUID from "../../utils/uuid/createUUID";
 
 const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl, AtmosphereShaderLibrary);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
@@ -53,7 +53,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #multiScatteringGenerator: MultiScatteringGenerator;
     #skyViewGenerator: SkyViewGenerator;
     #aerialPerspectiveGenerator: AerialPerspectiveGenerator;
-    #skyAtmosphereIrradianceGenerator: SkyAtmosphereIrradianceGenerator;
+    #irradianceLUT: DirectCubeTexture;
     #reflectionGenerator: SkyAtmosphereReflectionGenerator;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
@@ -163,7 +163,16 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#skyViewGenerator = new SkyViewGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#aerialPerspectiveGenerator = new AerialPerspectiveGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        this.#skyAtmosphereIrradianceGenerator = new SkyAtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#irradianceLUT = new DirectCubeTexture(redGPUContext, `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`,
+            this.redGPUContext.resourceManager.createManagedTexture({
+                size: [32, 32, 6],
+                format: 'rgba16float',
+                usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+                dimension: '2d',
+                mipLevelCount: 1,
+                label: 'SkyAtmosphere_Irradiance_LUT'
+            })
+        );
         this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
 
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
@@ -401,7 +410,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#isUpdatingIBL = true;
             (async () => {
                 await this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-                await this.#skyAtmosphereIrradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+                await this.redGPUContext.resourceManager.irradianceGenerator.render(this.#reflectionGenerator.sourceCubeTexture, this.#irradianceLUT.gpuTexture);
+                this.#irradianceLUT.notifyUpdate();
                 this.#isUpdatingIBL = false;
             })();
             this.#dirtyIBL = false;
@@ -631,7 +641,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [KO] 대기 조도(Irradiance) LUT 텍스처를 반환합니다.
      * [EN] Returns the atmospheric Irradiance LUT texture.
      */
-    get skyAtmosphereIrradianceLUT(): DirectCubeTexture { return this.#skyAtmosphereIrradianceGenerator.lutTexture; }
+    get skyAtmosphereIrradianceLUT(): DirectCubeTexture { return this.#irradianceLUT; }
 
     /**
      * [KO] 프리필터링된 대기 반사 큐브맵을 반환합니다.

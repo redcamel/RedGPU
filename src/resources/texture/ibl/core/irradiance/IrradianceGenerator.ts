@@ -62,7 +62,7 @@ class IrradianceGenerator {
      * [EN] Generated Irradiance DirectCubeTexture
      */
     async generate(sourceCubeTexture: GPUTexture, size: number = 32): Promise<DirectCubeTexture> {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const {resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
 
         // 1. 결과용 큐브 텍스처 생성
@@ -75,7 +75,27 @@ class IrradianceGenerator {
             label: `Irradiance_Map_Texture_${createUUID()}`
         });
 
-        // 2. 파이프라인 생성 (지연 생성 및 캐싱)
+        await this.render(sourceCubeTexture, irradianceGPUTexture);
+
+        return new DirectCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
+    }
+
+    /**
+     * [KO] 소스 큐브 텍스처로부터 Irradiance를 계산하여 대상 GPUTexture에 렌더링합니다.
+     * [EN] Calculates Irradiance from the source cube texture and renders it to the target GPUTexture.
+     *
+     * @param sourceCubeTexture -
+     * [KO] 소스 환경맵 (큐브)
+     * [EN] Source environment map (Cube)
+     * @param targetTexture -
+     * [KO] 대상 GPUTexture (2D Array, 6 layers)
+     * [EN] Target GPUTexture (2D Array, 6 layers)
+     */
+    async render(sourceCubeTexture: GPUTexture, targetTexture: GPUTexture): Promise<void> {
+        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const size = targetTexture.width;
+
+        // 1. 파이프라인 생성 (지연 생성 및 캐싱)
         if (!this.#shaderModule) {
             this.#shaderModule = resourceManager.createGPUShaderModule(
                 'IRRADIANCE_GENERATOR_SHADER_MODULE',
@@ -94,7 +114,7 @@ class IrradianceGenerator {
             });
         }
 
-        // 3. 6개 면 연산
+        // 2. 6개 면 연산
         const commandEncoder = gpuDevice.createCommandEncoder({label: 'Irradiance_Generator_Command_Encoder'});
         const faceMatrices = this.#getCubeMapFaceMatrices();
 
@@ -112,7 +132,7 @@ class IrradianceGenerator {
             entries: [
                 {binding: 0, resource: sourceCubeTexture.createView({dimension: 'cube'})},
                 {binding: 1, resource: this.#sampler.gpuSampler},
-                {binding: 2, resource: irradianceGPUTexture.createView({dimension: '2d-array'})},
+                {binding: 2, resource: targetTexture.createView({dimension: '2d-array'})},
                 {binding: 3, resource: {buffer: uniformBuffer}}
             ]
         });
@@ -131,8 +151,6 @@ class IrradianceGenerator {
 
         // 임시 버퍼 정리
         uniformBuffer.destroy();
-
-        return new DirectCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {
