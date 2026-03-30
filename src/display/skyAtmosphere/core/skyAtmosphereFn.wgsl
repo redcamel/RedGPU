@@ -418,6 +418,56 @@ fn evaluateIBLRadiance(
     return radiance;
 }
 
+// [KO] 태양 본체 스페큘러(Specular Sun Lobe) 강도를 계산합니다.
+fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
+    let cosHalf = cos(lobeHalfAngle);
+    let sunLobePower = clamp(log(0.5) / log(max(1e-4, cosHalf)), 2.0, 128.0);
+    let sunLobeNorm = (sunLobePower + 1.0) * (0.5 * INV_PI);
+    return sunLobeNorm * pow(max(0.0, viewSun), sunLobePower);
+}
+
+// [KO] 에너지 보정된 IBL용 대기 휘도를 평가합니다. (태양 본체 대신 넓은 로브 사용)
+fn evaluateIBLRadianceCompensated(
+    viewDir: vec3<f32>, 
+    params: SkyAtmosphere, 
+    transmittanceLUT: texture_2d<f32>, 
+    multiScatLUT: texture_2d<f32>, 
+    skyViewLUT: texture_2d<f32>, 
+    skyAtmosphereSampler: sampler
+) -> vec3<f32> {
+    let r = params.groundRadius;
+    let viewHeight = max(0.0, params.cameraHeight);
+    let atmosphereHeight = params.atmosphereHeight;
+    let sunDir = normalize(params.sunDirection);
+
+    let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
+    let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
+    
+    var radiance = skySample.rgb;
+
+    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
+    
+    let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
+    let tEarth = getRaySphereIntersection(camPos, viewDir, r);
+    let isGround = r > 0.0 && tEarth > 0.0 && viewDir.y < -0.0001;
+
+    let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
+    
+    let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
+    radiance += mieGlow;
+
+    // [KO] 태양 본체 대신 넓은 에너지 보정 로브 적용 (조도 계산용)
+    if (!isGround) {
+        let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunDir.y, atmosphereHeight);
+        let sunRad = (params.sunSize * 0.5) * DEG_TO_RAD;
+        let lobeHalfAngle = clamp(sunRad * 4.0, 0.1, 0.6); // [KO] 태양 에너지를 넓게 퍼트림
+        let sunLobe = getSpecularSunLobe(viewSunCos, lobeHalfAngle);
+        radiance += sunTrans * sunLobe;
+    }
+
+    return radiance;
+}
+
 fn getFrustumRayDirection(uv: vec2<f32>, invP: mat4x4<f32>, invV: mat4x4<f32>) -> vec3<f32> {
     let ndc = vec2<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0);
     let viewSpaceDir = normalize(vec3<f32>(ndc.x * invP[0][0], ndc.y * invP[1][1], -1.0));

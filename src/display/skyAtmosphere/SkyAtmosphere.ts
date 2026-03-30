@@ -8,6 +8,7 @@ import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScat
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import AerialPerspectiveGenerator from "./core/generator/aerialPerspective/AerialPerspectiveGenerator";
 import SkyAtmosphereReflectionGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionGenerator";
+import SkyAtmosphereReflectionEnergyCompensatedGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionEnergyCompensatedGenerator";
 import transmittanceShaderCode_wgsl from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import computeCode_wgsl from "./wgsl/computeCode.wgsl";
 import Sampler from "../../resources/sampler/Sampler";
@@ -55,6 +56,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #aerialPerspectiveGenerator: AerialPerspectiveGenerator;
     #irradianceLUT: DirectCubeTexture;
     #reflectionGenerator: SkyAtmosphereReflectionGenerator;
+    #reflectionEnergyCompensatedGenerator: SkyAtmosphereReflectionEnergyCompensatedGenerator;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
 
@@ -174,6 +176,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             })
         );
         this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#reflectionEnergyCompensatedGenerator = new SkyAtmosphereReflectionEnergyCompensatedGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
 
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
             label: 'SkyAtmosphere_PE_BindGroupLayout_1',
@@ -410,7 +413,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#isUpdatingIBL = true;
             (async () => {
                 await this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-                await this.redGPUContext.resourceManager.irradianceGenerator.render(this.#reflectionGenerator.sourceCubeTexture, this.#irradianceLUT.gpuTexture);
+                await this.#reflectionEnergyCompensatedGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+                await this.redGPUContext.resourceManager.irradianceGenerator.render(this.#reflectionEnergyCompensatedGenerator.sourceCubeTexture, this.#irradianceLUT.gpuTexture);
                 this.#irradianceLUT.notifyUpdate();
                 this.#isUpdatingIBL = false;
             })();

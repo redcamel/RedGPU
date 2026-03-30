@@ -83,18 +83,18 @@ class ToneMappingManager {
 
         // [KO] 모드별 최적 targetLuminance 자동 설정
         // [EN] Automatically set optimal targetLuminance for each mode
-        switch (value) {
-            case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
-                this.#targetLuminance = 0.29;
-                break;
-            case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
-            case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
-                this.#targetLuminance = 0.40;
-                break;
-            default:
-                this.#targetLuminance = 0.29;
-                break;
-        }
+        // switch (value) {
+        //     case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
+        //         this.#targetLuminance = 0.29;
+        //         break;
+        //     case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
+        //     case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
+        //         this.#targetLuminance = 0.40;
+        //         break;
+        //     default:
+        //         this.#targetLuminance = 0.29;
+        //         break;
+        // }
     }
 
     /** [KO] 명암 대비(Contrast)를 반환합니다. [EN] Returns the contrast. */
