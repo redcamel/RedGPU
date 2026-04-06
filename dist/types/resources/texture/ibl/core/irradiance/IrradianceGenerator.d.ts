@@ -40,5 +40,17 @@ declare class IrradianceGenerator {
      * [EN] Generated Irradiance DirectCubeTexture
      */
     generate(sourceCubeTexture: GPUTexture, size?: number): Promise<DirectCubeTexture>;
+    /**
+     * [KO] 소스 큐브 텍스처로부터 Irradiance를 계산하여 대상 GPUTexture에 렌더링합니다.
+     * [EN] Calculates Irradiance from the source cube texture and renders it to the target GPUTexture.
+     *
+     * @param sourceCubeTexture -
+     * [KO] 소스 환경맵 (큐브)
+     * [EN] Source environment map (Cube)
+     * @param targetTexture -
+     * [KO] 대상 GPUTexture (2D Array, 6 layers)
+     * [EN] Target GPUTexture (2D Array, 6 layers)
+     */
+    render(sourceCubeTexture: GPUTexture, targetTexture: GPUTexture): Promise<void>;
 }
 export default IrradianceGenerator;

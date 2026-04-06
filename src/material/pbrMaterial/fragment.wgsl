@@ -713,10 +713,11 @@ fn main(inputData:InputData) -> OutputFragment {
         // [KO] 거칠기를 고려한 다이렉트와 간접 반사율 계산 (Split Sum Approximation)
         let F_IBL_dielectric = F0_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal      = F0_metal * envBRDF.x + envBRDF.y;
-        let F_IBL            = F0 * envBRDF.x + envBRDF.y;
+        // [KO] F_IBL은 최종 믹싱된 스펙큘러 반사율을 나타냅니다. (specularParameter는 비금속에만 적용)
+        let F_IBL            = mix(F_IBL_dielectric * specularParameter, F_IBL_metal, metallicParameter);
 
         // [KO] ibl 스펙큘러 반사 [EN] ibl Specular Reflection
-        let envIBL_SPECULAR:vec3<f32> = reflectedColor * F_IBL * specularParameter ;
+        let envIBL_SPECULAR:vec3<f32> = reflectedColor * F_IBL;
 
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
         // [KO] Irradiance(E)를 Radiance(L)로 변환하기 위해 INV_PI 적용
@@ -750,28 +751,23 @@ fn main(inputData:InputData) -> OutputFragment {
         }
         #redgpu_endIf
 
-        // [KO] 비금속(Dielectric) 속성 결합
-        let envIBL_DIELECTRIC = envIBL_SPECULAR + mix(envIBL_DIFFUSE, envIBL_SPECULAR_BTDF, transmissionParameter);
-
-        // [KO] ibl Metal 계산 [EN] ibl Metal calculation
-        let envIBL_METAL = reflectedColor * F_IBL_metal;
-
         // [KO] ibl Sheen 계산 [EN] ibl Sheen calculation
         var sheenIBLContribution = vec3<f32>(0.0);
         var sheenAlbedoScaling: f32 = 1.0;
         #redgpu_if useKHR_materials_sheen
         {
             let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-            let sheenResult = getSheenIBL(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_irradianceTexture, prefilterTextureSampler);
+            // [KO] Sheen은 스펙큘러성 하이라이트이므로 prefilterTexture를 사용하여 샘플링합니다.
+            let sheenResult = getSheenIBL(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
             sheenIBLContribution = sheenResult.sheenIBLContribution;
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         }
         #redgpu_endIf
 
         // [KO] ibl 최종 혼합 [EN] ibl final blend
-        let metallicPart = envIBL_METAL * metallicParameter ;
-        let dielectricPart = envIBL_DIELECTRIC * (1.0 - metallicParameter) ;
-        var indirectLighting = ((metallicPart + dielectricPart) * sheenAlbedoScaling + sheenIBLContribution) * systemUniforms.preExposure;
+        // [KO] Specular는 이미 Metal/Dielectric 믹싱이 완료됨. Diffuse/Transmission은 비금속 파트에만 적용.
+        let baseIndirect = envIBL_SPECULAR + (1.0 - metallicParameter) * mix(envIBL_DIFFUSE, envIBL_SPECULAR_BTDF, transmissionParameter);
+        var indirectLighting = (baseIndirect * sheenAlbedoScaling + sheenIBLContribution) * systemUniforms.preExposure;
 
         // [KO] ibl 클리어코트 계산 [EN] ibl clearcoat calculation
         #redgpu_if useKHR_materials_clearcoat
@@ -793,8 +789,8 @@ fn main(inputData:InputData) -> OutputFragment {
 
                  let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
                  let clearcoatF0 = vec3<f32>(0.04);
-                 // [KO] Split Sum Approximation: F * Scale + Bias
-                 let clearcoatIBL_F = (getFresnelSchlick(clearcoatNdotV, clearcoatF0) * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y) * clearcoatParameter;
+                 // [KO] Split Sum Approximation: F * Scale + Bias. getFresnelSchlick 중복 적용을 제거함.
+                 let clearcoatIBL_F = (clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y) * clearcoatParameter;
                  
                  // [KO] 클리어코트 스펙큘러 IBL에 preExposure 적용하여 베이스와 단위 일치
                  let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatIBL_F * systemUniforms.preExposure;
