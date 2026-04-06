@@ -282,7 +282,7 @@ fn main(inputData:InputData) -> OutputFragment {
         var fdy:vec3<f32> = dpdy(input_vertexPosition);
         var faceNormal:vec3<f32> = normalize(cross(fdy,fdx));
         if (dot(N, faceNormal) < 0.0) {
-            N = -N;
+            N = select(-N, N, u_useVertexTangent);
             backFaceYn = true;
         };
     }
