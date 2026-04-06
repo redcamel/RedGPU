@@ -370,16 +370,16 @@ fn main(inputData:InputData) -> OutputFragment {
                 let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
                 clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
             #redgpu_endIf
-            var clearcoatNormalSampler =  textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV);
             #redgpu_if useKHR_clearcoatNormalTexture
             {
                 var targetUv = KHR_clearcoatNormalUV;
                 if(backFaceYn){ targetUv = 1.0 - targetUv; }
-                clearcoatNormal = clearcoatNormalSampler.rgb;
+                let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, targetUv).rgb;
+                
                 // [KO] 클리어코트 TBN은 변형된 N이 아닌 기하 법선(geometricNormal)을 기준으로 구축해야 합니다.
                 // [EN] Clearcoat TBN should be constructed based on the geometricNormal, not the perturbed N.
                 let clearcoatTBN = getTBNFromCotangent(geometricNormal, input_vertexPosition, targetUv);
-                clearcoatNormal = getNormalFromNormalMap(vec3<f32>(clearcoatNormalSampler.r, 1.0 - clearcoatNormalSampler.g, clearcoatNormalSampler.b), clearcoatTBN, -u_KHR_clearcoatNormalScale);
+                clearcoatNormal = getNormalFromNormalMap(vec3<f32>(clearcoatNormalSamplerColor.r, 1.0 - clearcoatNormalSamplerColor.g, clearcoatNormalSamplerColor.b), clearcoatTBN, -u_KHR_clearcoatNormalScale);
                 if(u_useVertexTangent){ if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; } }
                 clearcoatNormal = normalize(clearcoatNormal);
             }
