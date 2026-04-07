@@ -351,7 +351,7 @@ fn main(inputData:InputData) -> OutputFragment {
         metallicParameter = metallicRoughnessSample.b * metallicParameter;
         roughnessParameter = metallicRoughnessSample.g * roughnessParameter;
     #redgpu_endIf
-    roughnessParameter = max(roughnessParameter, 0.001);
+    roughnessParameter = max(roughnessParameter, 0.04);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
 
     // [KO] 클리어코트 처리 [EN] Clearcoat processing
@@ -527,7 +527,7 @@ fn main(inputData:InputData) -> OutputFragment {
             let attenuationCoefficient = -log(safeAttenuationColor) / safeAttenuationDistance;
             
             // 굴절각을 고려한 대략적인 투과 거리 계산 (NdotV 기반 근사)
-            let pathLength = scaledThickness / max(NdotV, 0.01);
+            let pathLength = scaledThickness / max(NdotV, 0.04);
             let volumeTransmittance = exp(-attenuationCoefficient * pathLength);
             transmissionRefraction *= volumeTransmittance;
         }
