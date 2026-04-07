@@ -374,7 +374,7 @@ fn main(inputData:InputData) -> OutputFragment {
                 var targetUv = KHR_clearcoatNormalUV;
                 if(backFaceYn){ targetUv = 1.0 - targetUv; }
                 let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, targetUv).rgb;
-                
+
                 // [KO] 클리어코트 TBN은 변형된 N이 아닌 기하 법선(geometricNormal)을 기준으로 구축해야 합니다.
                 // [EN] Clearcoat TBN should be constructed based on the geometricNormal, not the perturbed N.
                 let clearcoatTBN = getTBNFromCotangent(geometricNormal, input_vertexPosition, targetUv);
@@ -509,7 +509,7 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useKHR_materials_transmission
     {
         transmissionRefraction = getTransmissionRefraction(u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor, ior, roughnessParameter, albedo, systemUniforms.projection.projectionViewMatrix, input_vertexPosition, input_ndcPosition, V, N, renderPath1ResultTexture, renderPath1ResultTextureSampler);
-        
+
         // [KO] 배경 텍스처는 이미 노출이 적용된 상태이므로, 물리적 합성을 위해 노출을 제거하여 원본 휘도로 복원
         // [EN] Since the background texture is already exposed, revert it to original radiance for physical synthesis
         if (systemUniforms.preExposure > 0.0) {
@@ -525,7 +525,7 @@ fn main(inputData:InputData) -> OutputFragment {
             let safeAttenuationColor = clamp(u_KHR_attenuationColor, vec3<f32>(EPSILON), vec3<f32>(1.0));
             let safeAttenuationDistance = max(u_KHR_attenuationDistance, EPSILON);
             let attenuationCoefficient = -log(safeAttenuationColor) / safeAttenuationDistance;
-            
+
             // 굴절각을 고려한 대략적인 투과 거리 계산 (NdotV 기반 근사)
             let pathLength = scaledThickness / max(NdotV, 0.04);
             let volumeTransmittance = exp(-attenuationCoefficient * pathLength);
@@ -554,7 +554,7 @@ fn main(inputData:InputData) -> OutputFragment {
     for (var i = 0u; i < u_directionalLightCount; i++) {
         let lightIntensity = u_directionalLights[i].intensity;
         let L = -normalize(u_directionalLights[i].direction);
-        
+
         // [KO] 통합 에너지 계산 (색상 * 강도 * 노출 * 가시성)
         // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환 (getDiffuseBRDFDisney가 내부적으로 INV_PI를 처리함)
         var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
@@ -687,19 +687,19 @@ fn main(inputData:InputData) -> OutputFragment {
             // [KO] Specular 필터링: (HDR 반사 * 투과율) + 실시간 하늘 산란광
             // [EN] Specular Filtering: (HDR Reflection * Transmittance) + Real-time Sky Scattering
             let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
-            
+
             // [KO] 큐브맵 기반 실시간 반사광 샘플링 (거칠기 대응)
             // [KO] 생성기가 이제 '단위 광휘'를 저장하므로 sunIntensity를 곱해줍니다.
             let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
             let atmoMipLevel = roughnessParameter * atmoMipCount;
             let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * u_atmo.sunIntensity;
-            
+
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
 
             // [KO] Diffuse 필터링: (HDR 조도 * 투과율) + 실시간 대기 조도(Irradiance)
             // [EN] Diffuse Filtering: (HDR Irradiance * Transmittance) + Real-time Atmosphere Irradiance
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            
+
             // [KO] 큐브맵 기반 조도 샘플링 (단위 광휘에 sunIntensity 곱셈)
             let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * u_atmo.sunIntensity;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
@@ -838,7 +838,7 @@ fn main(inputData:InputData) -> OutputFragment {
     } else {
         // [KO] 환경광 물리 기반 보정 (Lux to Radiance)
         let ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * occlusionParameter * systemUniforms.preExposure * INV_PI;
-        
+
         // [KO] 최종 배경 굴절 합성 (비 IBL 모드)
         var surfaceColor = totalDirectLighting;
         #redgpu_if useKHR_materials_transmission
@@ -934,7 +934,7 @@ fn calcLight(
     // [KO] 2. 하부 레이어(Diffuse + Specular Transmission) 계산
     // [KO] getDiffuseBRDFDisney는 내부적으로 NdotL과 INV_PI를 포함함
     let diffuse_reflection = getDiffuseBRDFDisney(NdotL, VdotN, LdotH, roughnessParameter, albedo);
-    
+
     // [KO] 확산 투과 (Thin-walled)
     var diffuse_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_diffuse_transmission
@@ -953,7 +953,7 @@ fn calcLight(
 
     // [KO] 3. 물리적 레이어링 (Energy Conservation)
     let F = getFresnelSchlick(VdotH, F0);
-    
+
     // [KO] specularParameter를 고려한 최종 스펙큘러 가중치 (비금속용)
     let specular_weight = F * specularParameter;
 
@@ -981,11 +981,11 @@ fn calcLight(
             let cos2h = NdotH * NdotH;
             let sin2h = 1.0 - cos2h;
             let sheenDistribution = (2.0 + 1.0 / sheenRoughnessAlpha) * pow(sin2h, 0.5 / sheenRoughnessAlpha) / PI2;
-            
+
             let E_LdotN = 1.0 - pow(1.0 - NdotL, 5.0);
             let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
             let sheen_albedo_scaling = max(min(1.0 - maxSheenColor * E_VdotN, 1.0 - maxSheenColor * E_LdotN), 0.04);
-            
+
             // Sheen은 베이스 레이어 위에 얹어짐
             result = result * sheen_albedo_scaling + (sheenColor * sheenDistribution * sheen_visibility * max(NdotL_origin, 0.0));
         }
