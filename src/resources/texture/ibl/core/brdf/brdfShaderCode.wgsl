@@ -39,9 +39,9 @@ fn geometrySmith(N: vec3<f32>, V: vec3<f32>, L: vec3<f32>, roughness: f32) -> f3
 }
 
 fn integrateBRDF(in_NdotV: f32, roughness: f32) -> vec2<f32> {
-    let NdotV = max(in_NdotV, 0.001);
+    let NdotV = max(in_NdotV, 0.0);
     var V: vec3<f32>;
-    V.x = sqrt(1.0 - NdotV * NdotV);
+    V.x = sqrt(max(0.0, 1.0 - NdotV * NdotV));
     V.y = 0.0;
     V.z = NdotV;
 
@@ -49,7 +49,7 @@ fn integrateBRDF(in_NdotV: f32, roughness: f32) -> vec2<f32> {
     var B = 0.0;
 
     let N = vec3<f32>(0.0, 0.0, 1.0);
-    let sampleCount = 1024u;
+    let sampleCount = 2048u;
 
     for (var i = 0u; i < sampleCount; i = i + 1u) {
         let Xi = getHammersley(i, sampleCount);
@@ -62,7 +62,7 @@ fn integrateBRDF(in_NdotV: f32, roughness: f32) -> vec2<f32> {
 
         if (NdotL > 0.0) {
             let G = geometrySmith(N, V, L, roughness);
-            let G_Vis = (G * VdotH) / (max(NdotH * NdotV, 0.001));
+            let G_Vis = (G * VdotH) / (max(NdotH * NdotV, 1e-8));
             let Fc = pow(1.0 - VdotH, 5.0);
 
             A = A + (1.0 - Fc) * G_Vis;
@@ -93,10 +93,12 @@ fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
 
 @fragment
 fn fs_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
-    // [KO] WebGPU NDC는 하단이 -1, 상단이 1입니다.
-    // [KO] 텍스처의 0행(상단)을 Roughness 0으로 만들기 위해 y축을 뒤집습니다.
-    // [EN] WebGPU NDC is -1 at the bottom and 1 at the top.
-    // [EN] Flip the y-axis to make the 0th row (top) of the texture Roughness 0.
+    // [KO] WebGPU NDC는 하단이 -1, 상단이 1입니다. 즉 uv.y=1인 지점이 텍스처의 0행(상단)입니다.
+    // [KO] PBR 쉐이더의 샘플링 방식(v=0에서 roughness=0 기대)과 일치시키기 위해 
+    // [KO] uv.y=1일 때 roughness=0이 되도록 1.0 - uv.y를 적용합니다.
+    // [EN] WebGPU NDC is -1 at the bottom and 1 at the top. So uv.y=1 is the 0th row (top).
+    // [EN] To match the PBR shader's sampling (expects roughness=0 at v=0),
+    // [EN] we apply 1.0 - uv.y so that roughness=0 when uv.y=1.
     let integratedBRDF = integrateBRDF(uv.x, 1.0 - uv.y);
     return vec4<f32>(integratedBRDF, 0.0, 1.0);
 }

@@ -307,8 +307,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // [KO] 시선 방향 벡터 계산 [EN] View direction vector calculation
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
-    let NdotV = max(dot(N, V), 1e-4);
-    let VdotN = max(dot(V, N), 0.0);
+    let NdotV = max(abs(dot(N, V)), 1e-6);
 
     // [KO] 그림자 가시성 계산 [EN] Shadow visibility calculation
     var visibility:f32 = 1.0;
@@ -352,7 +351,7 @@ fn main(inputData:InputData) -> OutputFragment {
         metallicParameter = metallicRoughnessSample.b * metallicParameter;
         roughnessParameter = metallicRoughnessSample.g * roughnessParameter;
     #redgpu_endIf
-    roughnessParameter = max(roughnessParameter, 0.045);
+    roughnessParameter = max(roughnessParameter, 0.001);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
 
     // [KO] 클리어코트 처리 [EN] Clearcoat processing
@@ -537,7 +536,8 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // [KO] 기본 F0 계산 [EN] Base F0 calculation
-    let F0_dielectric_base = vec3(pow((1.0 - ior) / (1.0 + ior), 2.0));
+    let f0_factor = (ior - 1.0) / (ior + 1.0);
+    let F0_dielectric_base = vec3(f0_factor * f0_factor);
     var F0_dielectric = F0_dielectric_base *  specularColor;
     var F0_metal = baseColor.rgb;
 
@@ -569,7 +569,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
         totalDirectLighting += calcLight(
             finalLightColor,
-            N, V, L, VdotN,
+            N, V, L, NdotV,
             roughnessParameter, metallicParameter, albedo,
             F0, ior,
             specularColor, specularParameter,
@@ -618,7 +618,7 @@ fn main(inputData:InputData) -> OutputFragment {
          // [KO] calcLight 함수 호출 (24개 인자) [EN] Call calcLight function (24 arguments)
          totalDirectLighting += calcLight(
             finalLightColor,
-            N, V, L, VdotN,
+            N, V, L, NdotV,
             roughnessParameter, metallicParameter, albedo,
             F0, ior,
             specularColor, specularParameter,
@@ -634,7 +634,7 @@ fn main(inputData:InputData) -> OutputFragment {
     // [KO] 간접 조명 계산 - IBL [EN] Indirect lighting calculation - IBL
     if (u_usePrefilterTexture || systemUniforms.useSkyAtmosphere == 1u) {
         var R = getReflectionVectorFromViewDirection(V, N);
-        let NdotV = max(dot(N, V),1e-4);
+        let NdotV_IBL = max(abs(dot(N, V)), 1e-6);
 
         #redgpu_if useKHR_materials_anisotropy
         {
@@ -653,12 +653,12 @@ fn main(inputData:InputData) -> OutputFragment {
             let TdotV = dot(anisotropicT, V);
             let BdotV = dot(anisotropicB, V);
             R = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
-            let VdotN = max(1e-4, dot(V, N));
+            let VdotN = max(1e-6, abs(dot(V, N)));
             let oneMinusVdotN = 1.0 - VdotN;
             let directionFactor = oneMinusVdotN * oneMinusVdotN * oneMinusVdotN;
             let VdotT_abs = abs(TdotV);
             let VdotB_abs = abs(BdotV);
-            let totalWeight = max(1e-4, VdotT_abs + VdotB_abs);
+            let totalWeight = max(1e-6, VdotT_abs + VdotB_abs);
             let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
             roughnessParameter = weightedRoughness;
         }
@@ -708,20 +708,25 @@ fn main(inputData:InputData) -> OutputFragment {
         // [KO] ibl (BRDF LUT 샘플링) [EN] ibl BRDF LUT sampling
         // [KO] NdotV와 Roughness를 좌표로 사용하여 미리 계산된 Scale(x)와 Bias(y) 값을 가져옵니다.
         // [EN] Uses NdotV and Roughness as coordinates to fetch pre-calculated Scale(x) and Bias(y) values.
-        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV_IBL, roughnessParameter), 0.0).rg;
 
         // [KO] 거칠기를 고려한 다이렉트와 간접 반사율 계산 (Split Sum Approximation)
         let F_IBL_dielectric = F0_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal      = F0_metal * envBRDF.x + envBRDF.y;
-        // [KO] F_IBL은 최종 믹싱된 스펙큘러 반사율을 나타냅니다. (specularParameter는 비금속에만 적용)
-        let F_IBL            = mix(F_IBL_dielectric * specularParameter, F_IBL_metal, metallicParameter);
+        
+        // [KO] 에너지 보존을 위한 최종 다이렉트 가중치 계산 (specularParameter 포함)
+        let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
+        
+        // [KO] F_IBL은 최종 믹싱된 스펙큘러 반사율을 나타냅니다.
+        let F_IBL            = mix(F_IBL_dielectric_weight, F_IBL_metal, metallicParameter);
 
         // [KO] ibl 스펙큘러 반사 [EN] ibl Specular Reflection
         let envIBL_SPECULAR:vec3<f32> = reflectedColor * F_IBL;
 
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
         // [KO] Irradiance(E)를 Radiance(L)로 변환하기 위해 INV_PI 적용
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric) * INV_PI;
+        // [KO] specularParameter가 적용된 가중치를 사용하여 에너지 보존
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * INV_PI;
 
         // [KO] ibl 확산 투과 (Diffuse Transmission) [EN] ibl Diffuse Transmission
         #redgpu_if useKHR_materials_diffuse_transmission
@@ -738,7 +743,7 @@ fn main(inputData:InputData) -> OutputFragment {
                 let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * u_atmo.sunIntensity;
                 backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
             }
-            let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric);
+            let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight);
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
         #redgpu_endIf
@@ -747,7 +752,7 @@ fn main(inputData:InputData) -> OutputFragment {
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
-            envIBL_SPECULAR_BTDF = transmissionRefraction * (vec3<f32>(1.0) - F_IBL_dielectric);
+            envIBL_SPECULAR_BTDF = transmissionRefraction * (vec3<f32>(1.0) - F_IBL_dielectric_weight);
         }
         #redgpu_endIf
 
@@ -773,7 +778,7 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
                  let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
-                 let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
+                 let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 1e-6);
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
                  var clearcoatPrefilteredColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb / systemUniforms.preExposure;
 
@@ -789,14 +794,16 @@ fn main(inputData:InputData) -> OutputFragment {
 
                  let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
                  let clearcoatF0 = vec3<f32>(0.04);
-                 // [KO] Split Sum Approximation: F * Scale + Bias. getFresnelSchlick 중복 적용을 제거함.
+                 
+                 // [KO] Split Sum Approximation: F * Scale + Bias.
+                 // [KO] 클리어코트 레이어의 통합 프레넬 가중치를 계산합니다.
                  let clearcoatIBL_F = (clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y) * clearcoatParameter;
                  
                  // [KO] 클리어코트 스펙큘러 IBL에 preExposure 적용하여 베이스와 단위 일치
                  let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatIBL_F * systemUniforms.preExposure;
-                 // [KO] 하부 레이어 투과 가중치 (Fresnel 기반 차폐)
-                 let coatCoverage = getFresnelSchlick(clearcoatNdotV, clearcoatF0) * clearcoatParameter;
-                 indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - coatCoverage) * indirectLighting;
+                 
+                 // [KO] 하부 레이어 투과 가중치 (에너지 보존을 위해 LUT 기반 가중치와 일관성 유지)
+                 indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - clearcoatIBL_F) * indirectLighting;
             }
         #redgpu_endIf
 
@@ -925,13 +932,16 @@ fn calcLight(
     // [KO] 3. 물리적 레이어링 (Energy Conservation)
     let F = getFresnelSchlick(VdotH, F0);
     
+    // [KO] specularParameter를 고려한 최종 스펙큘러 가중치 (비금속용)
+    let specular_weight = F * specularParameter;
+
     // [KO] 확산층 통합
     let total_diffuse = mix(diffuse_reflection, diffuse_transmission, diffuseTransmissionParameter);
 
     // [KO] 비금속(Dielectric) 파트 합성
-    // [KO] SpecularReflection + mix((1-F)*Diffuse, SpecularTransmission, Factor)
-    // [KO] specular_transmission은 이미 (1-F)를 포함하므로 별도로 곱하지 않음
-    let dielectricPart = (SPEC_BRDF * max(NdotL_origin, 0.0)) + mix((vec3<f32>(1.0) - F) * total_diffuse, specular_transmission, transmissionParameter);
+    // [KO] SpecularReflection + mix((1-F_weight)*Diffuse, SpecularTransmission, Factor)
+    // [KO] specular_transmission은 이미 (1-F)를 포함하므로 별도로 가중치를 조절하여 합산
+    let dielectricPart = (SPEC_BRDF * specularParameter * max(NdotL_origin, 0.0)) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter);
 
     // [KO] 금속(Metallic) 파트 합성
     let metallicPart = SPEC_BRDF * max(NdotL_origin, 0.0);
@@ -964,7 +974,7 @@ fn calcLight(
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
             let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
-            let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-4);
+            let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-6);
             let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
             let clearcoatF0 = vec3<f32>(0.04);
             

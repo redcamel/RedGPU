@@ -25,8 +25,14 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     let face = global_id.z;
-    let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
     
+    // [KO] UV를 로컬 좌표 (-1.0 ~ 1.0)로 변환 (중앙 샘플링 보정)
+    // [KO] WebGPU 큐브맵 스펙 (v = -y)에 따라 y = -1인 지점이 텍스처의 상단(uv.y = 0)이 되며,
+    // [KO] 결과적으로 월드의 '위(Up)' 방향이 텍스처 상단에 저장되는 정방향 로직입니다.
+    // [EN] Convert UV to local coordinates (-1.0 ~ 1.0) (center sampling correction)
+    // [EN] According to the WebGPU cubemap spec (v = -y), the point y = -1 becomes the top of the texture (uv.y = 0),
+    // [EN] resulting in a forward logic where the world's 'Up' direction is stored at the top of the texture.
+    let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
     let x = uv.x * 2.0 - 1.0;
     let y = uv.y * 2.0 - 1.0;
 
