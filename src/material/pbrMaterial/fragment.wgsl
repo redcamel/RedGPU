@@ -710,17 +710,38 @@ fn main(inputData:InputData) -> OutputFragment {
         // [EN] Uses NdotV and Roughness as coordinates to fetch pre-calculated Scale(x) and Bias(y) values.
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV_IBL, roughnessParameter), 0.0).rg;
 
+        // [KO] 다중 산란 에너지 보상 (Multi-scattering Energy Compensation)
+        // [KO] 싱글 스캐터링에서 소실된 에너지를 NdotV와 거칠기에 따라 물리적으로 보상합니다.
+        let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 0.01) - 1.0);
+        reflectedColor *= energyCompensation;
+
+        // [KO] 프레넬-거칠기 보정 (Fresnel-Roughness Correction)
+        // [KO] 거친 표면에서 외곽 반사광이 급격히 사라지는 현상을 방지하고, 물리적으로 타당한 엣지 반사를 강화합니다.
+        // [KO] NdotV를 기반으로 한 Schlick 근사를 활용하여 외곽(Grazing Angle)의 반사 강도를 조절합니다.
+        let FR_dielectric = F0_dielectric + (max(vec3<f32>(1.0 - roughnessParameter), F0_dielectric) - F0_dielectric) * pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), 5.0);
+        let FR_metal = F0_metal + (max(vec3<f32>(1.0 - roughnessParameter), F0_metal) - F0_metal) * pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), 5.0);
+
+        // [KO] 지평선 감쇄(Horizon Occlusion) 및 최종 반사광 보정
+        // [KO] 제곱을 제거하여 외곽 에너지를 더 보존합니다.
+        let horizonOcclusion = clamp(1.0 + dot(R, N), 0.0, 1.0);
+        reflectedColor *= horizonOcclusion;
+
         // [KO] 거칠기를 고려한 다이렉트와 간접 반사율 계산 (Split Sum Approximation)
-        let F_IBL_dielectric = F0_dielectric * envBRDF.x + envBRDF.y;
-        let F_IBL_metal      = F0_metal * envBRDF.x + envBRDF.y;
-        
+        // [KO] 보정된 프레넬 항(FR)을 반영하여 최종 스펙큘러 가중치를 결정합니다.
+        let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
+        let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
+
         // [KO] 에너지 보존을 위한 최종 다이렉트 가중치 계산 (specularParameter 포함)
         let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
-        
+
+        // [KO] Specular Occlusion 계산 (AO가 반사광에 미치는 영향을 거칠기에 따라 보정)
+        // [EN] Specular Occlusion (Compensates AO effect on reflections based on roughness)
+        let specularOcclusion = clamp(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * roughnessParameter - 1.0)) - 1.0 + occlusionParameter, 0.0, 1.0);
+
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
         // [KO] Irradiance(E)를 Radiance(L)로 변환하기 위해 INV_PI 적용
         // [KO] specularParameter가 적용된 가중치를 사용하여 에너지 보존
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * INV_PI;
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * INV_PI * occlusionParameter;
 
         // [KO] ibl 확산 투과 (Diffuse Transmission) [EN] ibl Diffuse Transmission
         #redgpu_if useKHR_materials_diffuse_transmission
@@ -746,7 +767,7 @@ fn main(inputData:InputData) -> OutputFragment {
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
-            envIBL_SPECULAR_BTDF = transmissionRefraction * (vec3<f32>(1.0) - F_IBL_dielectric_weight);
+            envIBL_SPECULAR_BTDF = transmissionRefraction * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * specularOcclusion;
         }
         #redgpu_endIf
 
@@ -764,12 +785,12 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_endIf
 
         // [KO] IBL 구성 요소 계산 (Dielectric) [EN] Compute IBL components (Dielectric)
-        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weight;
+        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weight * specularOcclusion;
         let ibl_diffuse_dielectric = mix(envIBL_DIFFUSE, envIBL_SPECULAR_BTDF, transmissionParameter);
         let dielectricPart_IBL = ibl_specular_dielectric + ibl_diffuse_dielectric;
 
         // [KO] IBL 구성 요소 계산 (Metallic) [EN] Compute IBL components (Metallic)
-        let metallicPart_IBL = reflectedColor * F_IBL_metal;
+        let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
 
         // [KO] 금속성 및 Sheen에 따른 최종 간접 조명 혼합 [EN] Final indirect lighting blend based on metallic and sheen
         let baseIndirect = mix(dielectricPart_IBL, metallicPart_IBL, metallicParameter);
@@ -795,21 +816,21 @@ fn main(inputData:InputData) -> OutputFragment {
 
                  let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
                  let clearcoatF0 = vec3<f32>(0.04);
-                 
+
                  // [KO] Split Sum Approximation: F * Scale + Bias.
                  // [KO] 클리어코트 레이어의 통합 프레넬 가중치를 계산합니다.
                  let clearcoatIBL_F = (clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y) * clearcoatParameter;
-                 
+
                  // [KO] 클리어코트 스펙큘러 IBL에 preExposure 적용하여 베이스와 단위 일치
                  let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatIBL_F * systemUniforms.preExposure;
-                 
+
                  // [KO] 하부 레이어 투과 가중치 (에너지 보존을 위해 LUT 기반 가중치와 일관성 유지)
                  indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - clearcoatIBL_F) * indirectLighting;
             }
         #redgpu_endIf
 
         let environmentIntensity = 1.0;
-        var surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity * occlusionParameter;
+        var surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity;
 
 
 
