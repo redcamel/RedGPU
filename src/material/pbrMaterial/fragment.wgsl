@@ -717,12 +717,6 @@ fn main(inputData:InputData) -> OutputFragment {
         // [KO] 에너지 보존을 위한 최종 다이렉트 가중치 계산 (specularParameter 포함)
         let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
         
-        // [KO] F_IBL은 최종 믹싱된 스펙큘러 반사율을 나타냅니다.
-        let F_IBL            = mix(F_IBL_dielectric_weight, F_IBL_metal, metallicParameter);
-
-        // [KO] ibl 스펙큘러 반사 [EN] ibl Specular Reflection
-        let envIBL_SPECULAR:vec3<f32> = reflectedColor * F_IBL;
-
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
         // [KO] Irradiance(E)를 Radiance(L)로 변환하기 위해 INV_PI 적용
         // [KO] specularParameter가 적용된 가중치를 사용하여 에너지 보존
@@ -734,7 +728,7 @@ fn main(inputData:InputData) -> OutputFragment {
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
                 let mipLevel = roughnessParameter * iblMipmapCount;
-                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb / systemUniforms.preExposure;
+                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb  / systemUniforms.preExposure;
             }
             if (systemUniforms.useSkyAtmosphere == 1u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
@@ -769,9 +763,16 @@ fn main(inputData:InputData) -> OutputFragment {
         }
         #redgpu_endIf
 
-        // [KO] ibl 최종 혼합 [EN] ibl final blend
-        // [KO] Specular는 이미 Metal/Dielectric 믹싱이 완료됨. Diffuse/Transmission은 비금속 파트에만 적용.
-        let baseIndirect = envIBL_SPECULAR + (1.0 - metallicParameter) * mix(envIBL_DIFFUSE, envIBL_SPECULAR_BTDF, transmissionParameter);
+        // [KO] IBL 구성 요소 계산 (Dielectric) [EN] Compute IBL components (Dielectric)
+        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weight;
+        let ibl_diffuse_dielectric = mix(envIBL_DIFFUSE, envIBL_SPECULAR_BTDF, transmissionParameter);
+        let dielectricPart_IBL = ibl_specular_dielectric + ibl_diffuse_dielectric;
+
+        // [KO] IBL 구성 요소 계산 (Metallic) [EN] Compute IBL components (Metallic)
+        let metallicPart_IBL = reflectedColor * F_IBL_metal;
+
+        // [KO] 금속성 및 Sheen에 따른 최종 간접 조명 혼합 [EN] Final indirect lighting blend based on metallic and sheen
+        let baseIndirect = mix(dielectricPart_IBL, metallicPart_IBL, metallicParameter);
         var indirectLighting = (baseIndirect * sheenAlbedoScaling + sheenIBLContribution) * systemUniforms.preExposure;
 
         // [KO] ibl 클리어코트 계산 [EN] ibl clearcoat calculation
@@ -780,7 +781,7 @@ fn main(inputData:InputData) -> OutputFragment {
                  let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
                  let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 1e-6);
                  let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
-                 var clearcoatPrefilteredColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb / systemUniforms.preExposure;
+                 var clearcoatPrefilteredColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb  / systemUniforms.preExposure;
 
                  if (systemUniforms.useSkyAtmosphere == 1u) {
                      let u_atmo = systemUniforms.skyAtmosphere;
