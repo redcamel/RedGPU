@@ -717,12 +717,15 @@ fn main(inputData:InputData) -> OutputFragment {
 
         // [KO] 프레넬-거칠기 보정 (Fresnel-Roughness Correction)
         // [KO] 거친 표면에서 외곽 반사광이 급격히 사라지는 현상을 방지하고, 물리적으로 타당한 엣지 반사를 강화합니다.
-        // [KO] NdotV를 기반으로 한 Schlick 근사를 활용하여 외곽(Grazing Angle)의 반사 강도를 조절합니다.
-        let FR_dielectric = F0_dielectric + (max(vec3<f32>(1.0 - roughnessParameter), F0_dielectric) - F0_dielectric) * pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), 5.0);
-        let FR_metal = F0_metal + (max(vec3<f32>(1.0 - roughnessParameter), F0_metal) - F0_metal) * pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), 5.0);
+        // [KO] 표준(5.0)보다 살짝 더 느슨한 곡선(3.0)과 상향된 F90 하한선을 적용하여 에너지를 보충합니다.
+        let fresnelPower = 5.0 - 2.0 * roughnessParameter;
+        let F90_dielectric = max(vec3<f32>(1.0 - roughnessParameter * 0.8), F0_dielectric);
+        let F90_metal = max(vec3<f32>(1.0 - roughnessParameter * 0.8), F0_metal);
+
+        let FR_dielectric = F0_dielectric + (F90_dielectric - F0_dielectric) * pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), fresnelPower);
+        let FR_metal = F0_metal + (F90_metal - F0_metal) * pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), fresnelPower);
 
         // [KO] 지평선 감쇄(Horizon Occlusion) 및 최종 반사광 보정
-        // [KO] 제곱을 제거하여 외곽 에너지를 더 보존합니다.
         let horizonOcclusion = clamp(1.0 + dot(R, N), 0.0, 1.0);
         reflectedColor *= horizonOcclusion;
 
@@ -735,8 +738,8 @@ fn main(inputData:InputData) -> OutputFragment {
         let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
 
         // [KO] Specular Occlusion 계산 (AO가 반사광에 미치는 영향을 거칠기에 따라 보정)
-        // [EN] Specular Occlusion (Compensates AO effect on reflections based on roughness)
-        let specularOcclusion = clamp(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * roughnessParameter - 1.0)) - 1.0 + occlusionParameter, 0.0, 1.0);
+        // [KO] 지수 부분을 조정하여 AO가 반사광을 너무 급격히 죽이지 않도록 완화합니다.
+        let specularOcclusion = clamp(pow(NdotV_IBL + occlusionParameter, 0.5 + roughnessParameter) - 1.0 + occlusionParameter, 0.0, 1.0);
 
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
         // [KO] Irradiance(E)를 Radiance(L)로 변환하기 위해 INV_PI 적용
@@ -831,7 +834,6 @@ fn main(inputData:InputData) -> OutputFragment {
 
         let environmentIntensity = 1.0;
         var surfaceColor = totalDirectLighting + indirectLighting * environmentIntensity;
-
 
 
         finalColor = vec4<f32>(surfaceColor, resultAlpha);
