@@ -123,7 +123,7 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if normalTexture
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
         let tbn = getTBNFromCotangent(N, input_vertexPosition, inputData.uv);
-        N = getNormalFromNormalMap(normalSamplerColor, tbn, -u_normalScale);
+        N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale);
     #redgpu_endIf
     //
     var finalColor:vec4<f32>;

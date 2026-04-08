@@ -277,43 +277,48 @@ fn main(inputData:InputData) -> OutputFragment {
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
 
     // [KO] 법선 벡터(Normal) 계산 및 이면 렌더링 처리 [EN] Normal vector calculation and double-sided rendering
-    var N:vec3<f32> = normalize(input_vertexNormal.xyz);
+    let baseNormal:vec3<f32> = normalize(input_vertexNormal.xyz);
+    var N:vec3<f32> = baseNormal;
     var backFaceYn:bool = false;
+    let hasVertexTangent:bool = u_useVertexTangent && (dot(input_vertexTangent.xyz, input_vertexTangent.xyz) > 0.0);
     #redgpu_if doubleSided
     {
         // [KO] vFrontFacing과 유사한 안정적인 판정을 위해 정점 법선과 시선 벡터 활용
-        if (dot(N, V) < 0.0) {
-            N = select(-N, N, u_useVertexTangent);
+        if (dot(baseNormal, V) < 0.0) {
             backFaceYn = true;
         }
     }
     #redgpu_endIf
 
+    // [KO] 정점 탄젠트 유무에 관계없이 기본 노멀은 TBN 구축을 위해 보존합니다.
+    // [EN] Preserve base normal for TBN construction regardless of vertex tangent.
     // [KO] 클리어코트 층 등을 위해 변형 전 기하 법선을 보존합니다. [EN] Preserves the geometric normal before perturbation for clearcoat, etc.
     let geometricNormal = N;
 
     #redgpu_if normalTexture
     {
-        var targetUv = normalUV;
-        let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, targetUv).rgb;
+        var normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
 
         // [KO] 미분(dpdx, dpdy) 기반 TBN은 Uniform Control Flow에서 계산되어야 하므로 분기문 바깥에서 호출
         // [EN] TBN based on derivatives (dpdx, dpdy) must be called in Uniform Control Flow, so it's called outside the branch.
-        var tbn = getTBNFromCotangent(N, input_vertexPosition, targetUv);
+        var tbn = getTBNFromCotangent(geometricNormal, input_vertexPosition,select( 1.0 - normalUV,normalUV,backFaceYn));
         
         // [KO] 정점 탄젠트가 가용한 경우 이를 우선적으로 사용하여 TBN을 덮어씀
         // [EN] If vertex tangent is available, override TBN using it preferentially.
-        if (u_useVertexTangent && length(input_vertexTangent.xyz) > 0.0) {
-            tbn = getTBNFromVertexTangent(N, input_vertexTangent);
+        if (hasVertexTangent) {
+            tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
         }
 
         // [KO] glTF 표준(OpenGL 방식, Y+)을 따르며, getNormalFromNormalMap 내부에서 적절히 처리되도록 strength를 양수로 전달합니다.
-        N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale);
-        
-        // [KO] 이면 렌더링 시 법선 방향 보정 (정점 탄젠트가 있을 때만 마지막에 반전)
-        N = select(N, select(N, -N, backFaceYn), u_useVertexTangent);
+        N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale );
     }
     #redgpu_endIf
+
+    // [KO] 이면 렌더링(double-sided) 시 최종적으로 노멀을 카메라 방향으로 반전
+    // [EN] Final normal flip towards camera for double-sided rendering
+    if (backFaceYn) {
+        N = -N;
+    }
     N = normalize(N);
 
     // [KO] 시선 방향 벡터 계산 [EN] View direction vector calculation
@@ -388,8 +393,8 @@ fn main(inputData:InputData) -> OutputFragment {
                 // [KO] 클리어코트 TBN은 변형된 N이 아닌 기하 법선(geometricNormal)을 기준으로 구축해야 합니다.
                 // [EN] Clearcoat TBN should be constructed based on the geometricNormal, not the perturbed N.
                 let clearcoatTBN = getTBNFromCotangent(geometricNormal, input_vertexPosition, targetUv);
-                clearcoatNormal = getNormalFromNormalMap(vec3<f32>(clearcoatNormalSamplerColor.r, 1.0 - clearcoatNormalSamplerColor.g, clearcoatNormalSamplerColor.b), clearcoatTBN, -u_KHR_clearcoatNormalScale);
-                if(u_useVertexTangent){ if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; } }
+                clearcoatNormal = getNormalFromNormalMap(clearcoatNormalSamplerColor, clearcoatTBN, u_KHR_clearcoatNormalScale);
+                if(hasVertexTangent){ if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; } }
                 clearcoatNormal = normalize(clearcoatNormal);
             }
             #redgpu_endIf
