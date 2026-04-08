@@ -12,8 +12,13 @@ fn getTBNFromCotangent(inputNormal: vec3<f32>, inputWorldPos: vec3<f32>, inputUV
     // 픽셀 미분을 통한 위치 및 UV 변화량 계산
     let dp1 = dpdx(inputWorldPos);
     let dp2 = dpdy(inputWorldPos);
-    let duv1 = dpdx(inputUV);
-    let duv2 = dpdy(inputUV);
+    var duv1 = dpdx(inputUV);
+    var duv2 = dpdy(inputUV);
+
+    // [KO] UV 래핑 보정: 0.0 <-> 1.0 경계에서 미분 값이 급증하는 현상 방지
+    // [EN] UV Wrap correction: Prevents derivative spikes at 0.0 <-> 1.0 boundaries
+    duv1 = duv1 - round(duv1);
+    duv2 = duv2 - round(duv2);
 
     // 연립 방정식을 풀어 탄젠트와 비탄젠트 방향 도출 (Schüler's technique)
     let dp2perp = cross(dp2, inputNormal);
@@ -22,6 +27,6 @@ fn getTBNFromCotangent(inputNormal: vec3<f32>, inputWorldPos: vec3<f32>, inputUV
     let bitangent = dp2perp * duv1.y + dp1perp * duv2.y;
 
     // Gram-Schmidt 직교화 및 행렬 구성
-    let invmax = inverseSqrt(max(dot(tangent, tangent), dot(bitangent, bitangent)));
+    let invmax = inverseSqrt(max(dot(tangent, tangent), dot(bitangent, bitangent)) + 1e-10);
     return mat3x3<f32>(tangent * invmax, bitangent * invmax, inputNormal);
 }

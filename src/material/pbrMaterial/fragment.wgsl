@@ -294,8 +294,8 @@ fn main(inputData:InputData) -> OutputFragment {
 
     #redgpu_if normalTexture
     {
-        var targetUv = select(normalUV, 1.0 - normalUV, backFaceYn);
-        let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
+        var targetUv = normalUV;
+        let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, targetUv).rgb;
 
         // [KO] 미분(dpdx, dpdy) 기반 TBN은 Uniform Control Flow에서 계산되어야 하므로 분기문 바깥에서 호출
         // [EN] TBN based on derivatives (dpdx, dpdy) must be called in Uniform Control Flow, so it's called outside the branch.
@@ -309,6 +309,8 @@ fn main(inputData:InputData) -> OutputFragment {
 
         // [KO] glTF 표준(OpenGL 방식, Y+)을 따르며, getNormalFromNormalMap 내부에서 적절히 처리되도록 strength를 양수로 전달합니다.
         N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale);
+        
+        // [KO] 이면 렌더링 시 법선 방향 보정 (정점 탄젠트가 있을 때만 마지막에 반전)
         N = select(N, select(N, -N, backFaceYn), u_useVertexTangent);
     }
     #redgpu_endIf
