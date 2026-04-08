@@ -1,5 +1,5 @@
 #redgpu_include lighting.getDistributionGGX
-#redgpu_include lighting.getGeometrySmith
+#redgpu_include lighting.getSpecularVisibility
 #redgpu_include lighting.getFresnelSchlick
 #redgpu_include math.EPSILON
 
@@ -8,8 +8,8 @@
  * [KO] Cook-Torrance 모델을 사용하여 물리 기반 스펙큘러 BRDF를 계산합니다.
  * [EN] Calculates Physically-Based Specular BRDF using the Cook-Torrance model.
  *
- * [KO] 하이라이트의 선명도와 물리적 정확성을 위해 분모의 0 나누기 방지 처리를 최적화하였습니다.
- * [EN] Optimized the denominator's division-by-zero prevention for better highlight sharpness and physical accuracy.
+ * [KO] 하이라이트의 선명도와 수치적 안정성을 위해 높이 상관(Height-Correlated) 가시성 함수를 사용합니다.
+ * [EN] Uses a Height-Correlated visibility function for highlight sharpness and numerical stability.
  *
  * @param F0 - [KO] 기본 반사율 [EN] Base reflectance
  * @param roughness - [KO] 표면 거칠기 [EN] Surface roughness
@@ -30,17 +30,13 @@ fn getSpecularBRDF(
     // 1. Distribution (D)
     let D = getDistributionGGX(NdotH, roughness);
 
-    // 2. Geometric Shadowing (G)
-    let G = getGeometrySmith(NdotV, NdotL, roughness);
+    // 2. Visibility (V) - Includes Geometry term and 1/(4*NoL*NoV)
+    // [KO] 기존 분리된 G와 분모 계산 방식에서 발생하는 수치적 아티팩트(십자 형태 음영 등)를 방지하기 위해 통합된 가시성 함수 사용
+    // [EN] Uses an integrated visibility function to prevent numerical artifacts (such as cross-shaped shading) that occur in the separate G and denominator calculation.
+    let V = getSpecularVisibility(NdotV, NdotL, roughness);
 
     // 3. Fresnel (F)
     let F = getFresnelSchlick(LdotH, F0);
 
-    // 4. Cook-Torrance BRDF 합산
-    // [KO] 분모를 시스템 표준 EPSILON을 사용하여 방어함으로써 수치적 안정성과 정밀도 확보
-    // [EN] Ensures numerical stability and precision by protecting the denominator using the system standard EPSILON.
-    let numerator = D * G * F;
-    let denominator = 4.0 * max(NdotV, EPSILON) * max(NdotL, EPSILON);
-
-    return numerator / denominator;
+    return D * V * F;
 }

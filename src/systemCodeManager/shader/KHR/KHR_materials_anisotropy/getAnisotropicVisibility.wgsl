@@ -21,5 +21,5 @@ fn getAnisotropicVisibility(
    let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
    let GGXL = NdotV * length(vec3<f32>(at * TdotL, ab * BdotL, NdotL));
    let v = 0.5 / max(GGXV + GGXL, EPSILON);
-   return clamp(v, 0.0, 1.0);
+   return v;
 }

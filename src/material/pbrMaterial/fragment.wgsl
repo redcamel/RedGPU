@@ -26,7 +26,7 @@
 #redgpu_include lighting.getConductorFresnel
 #redgpu_include lighting.getIridescentFresnel
 #redgpu_include lighting.getDistributionGGX
-#redgpu_include lighting.getGeometrySmith
+#redgpu_include lighting.getSpecularVisibility
 #redgpu_include lighting.getSpecularBRDF
 #redgpu_include lighting.getSpecularBTDF
 #redgpu_include lighting.getDiffuseBTDF
@@ -273,18 +273,19 @@ fn main(inputData:InputData) -> OutputFragment {
     let KHR_diffuseTransmissionColorUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionColorTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionColorTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_scale);
     let KHR_anisotropyUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_anisotropyTexture_texCoord_index, uniforms.use_KHR_anisotropyTexture_KHR_texture_transform, uniforms.KHR_anisotropyTexture_KHR_texture_transform_offset, uniforms.KHR_anisotropyTexture_KHR_texture_transform_rotation, uniforms.KHR_anisotropyTexture_KHR_texture_transform_scale);
 
+    // [KO] 시선 방향 벡터 계산 [EN] View direction vector calculation
+    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
+
     // [KO] 법선 벡터(Normal) 계산 및 이면 렌더링 처리 [EN] Normal vector calculation and double-sided rendering
     var N:vec3<f32> = normalize(input_vertexNormal.xyz);
     var backFaceYn:bool = false;
     #redgpu_if doubleSided
     {
-        var fdx:vec3<f32> = dpdx(input_vertexPosition);
-        var fdy:vec3<f32> = dpdy(input_vertexPosition);
-        var faceNormal:vec3<f32> = normalize(cross(fdy,fdx));
-        if (dot(N, faceNormal) < 0.0) {
+        // [KO] vFrontFacing과 유사한 안정적인 판정을 위해 정점 법선과 시선 벡터 활용
+        if (dot(N, V) < 0.0) {
             N = select(-N, N, u_useVertexTangent);
             backFaceYn = true;
-        };
+        }
     }
     #redgpu_endIf
 
@@ -295,18 +296,25 @@ fn main(inputData:InputData) -> OutputFragment {
     {
         var targetUv = select(normalUV, 1.0 - normalUV, backFaceYn);
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
-        let tbn = getTBNFromCotangent(N, input_vertexPosition, targetUv);
-        N = getNormalFromNormalMap(vec3<f32>(normalSamplerColor.r, 1.0 - normalSamplerColor.g, normalSamplerColor.b), tbn, -u_normalScale);
+
+        // [KO] 미분(dpdx, dpdy) 기반 TBN은 Uniform Control Flow에서 계산되어야 하므로 분기문 바깥에서 호출
+        // [EN] TBN based on derivatives (dpdx, dpdy) must be called in Uniform Control Flow, so it's called outside the branch.
+        var tbn = getTBNFromCotangent(N, input_vertexPosition, targetUv);
+        
+        // [KO] 정점 탄젠트가 가용한 경우 이를 우선적으로 사용하여 TBN을 덮어씀
+        // [EN] If vertex tangent is available, override TBN using it preferentially.
+        if (u_useVertexTangent && length(input_vertexTangent.xyz) > 0.0) {
+            tbn = getTBNFromVertexTangent(N, input_vertexTangent);
+        }
+
+        // [KO] glTF 표준(OpenGL 방식, Y+)을 따르며, getNormalFromNormalMap 내부에서 적절히 처리되도록 strength를 양수로 전달합니다.
+        N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale);
         N = select(N, select(N, -N, backFaceYn), u_useVertexTangent);
     }
-    #redgpu_else
-    {
-      N = N * u_normalScale;
-    }
     #redgpu_endIf
+    N = normalize(N);
 
     // [KO] 시선 방향 벡터 계산 [EN] View direction vector calculation
-    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let NdotV = max(abs(dot(N, V)), 1e-6);
 
     // [KO] 그림자 가시성 계산 [EN] Shadow visibility calculation
@@ -637,6 +645,7 @@ fn main(inputData:InputData) -> OutputFragment {
         let NdotV_IBL = max(abs(dot(N, V)), 1e-6);
 
         #redgpu_if useKHR_materials_anisotropy
+        if (anisotropy > 0.0)
         {
             var bentNormal = cross(anisotropicB, V);
             bentNormal = normalize(cross(bentNormal, anisotropicB));
@@ -660,7 +669,7 @@ fn main(inputData:InputData) -> OutputFragment {
             let VdotB_abs = abs(BdotV);
             let totalWeight = max(1e-6, VdotT_abs + VdotB_abs);
             let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
-            roughnessParameter = weightedRoughness;
+            roughnessParameter = max(weightedRoughness, 0.04);
         }
         #redgpu_endIf
 
@@ -707,12 +716,13 @@ fn main(inputData:InputData) -> OutputFragment {
 
         // [KO] ibl (BRDF LUT 샘플링) [EN] ibl BRDF LUT sampling
         // [KO] NdotV와 Roughness를 좌표로 사용하여 미리 계산된 Scale(x)와 Bias(y) 값을 가져옵니다.
-        // [EN] Uses NdotV and Roughness as coordinates to fetch pre-calculated Scale(x) and Bias(y) values.
-        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV_IBL, roughnessParameter), 0.0).rg;
+        // [KO] 텍스처 경계에서의 아티팩트 방지를 위해 좌표 범위를 미세하게 클램핑합니다.
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
 
         // [KO] 다중 산란 에너지 보상 (Multi-scattering Energy Compensation)
         // [KO] 싱글 스캐터링에서 소실된 에너지를 NdotV와 거칠기에 따라 물리적으로 보상합니다.
-        let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 0.01) - 1.0);
+        // [KO] 과도한 증폭 방지를 위해 최대 보상 수치를 2.0으로 제한합니다.
+        let energyCompensation = 1.0 + F0 * clamp(1.0 / max(envBRDF.x + envBRDF.y, 0.01) - 1.0, 0.0, 1.0);
         reflectedColor *= energyCompensation;
 
         // [KO] 프레넬-거칠기 보정 (Fresnel-Roughness Correction)
@@ -737,13 +747,13 @@ fn main(inputData:InputData) -> OutputFragment {
         // [KO] 에너지 보존을 위한 최종 다이렉트 가중치 계산 (specularParameter 포함)
         let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
 
-        // [KO] Specular Occlusion 계산 (AO가 반사광에 미치는 영향을 거칠기에 따라 보정)
-        // [KO] 지수 부분을 조정하여 AO가 반사광을 너무 급격히 죽이지 않도록 완화합니다.
-        let specularOcclusion = clamp(pow(NdotV_IBL + occlusionParameter, 0.5 + roughnessParameter) - 1.0 + occlusionParameter, 0.0, 1.0);
+        // [KO] Specular Occlusion 계산 (AO가 반사광에 미치는 영향을 보정)
+        // [KO] 기존 pow 기반 식 대신 지평선 감쇄와 결합된 더 안정적인 방식을 사용합니다.
+        let specularOcclusion = saturate(dot(R, N) + occlusionParameter);
 
         // [KO] 언리얼 스타일의 에너지 보존: 시점 의존적 프레넬 대신 통합된 Specular Albedo 기반 마스킹
         // [EN] Unreal-style energy conservation: Masking based on integrated Specular Albedo instead of view-dependent Fresnel
-        let specularAlbedo_IBL = F0_dielectric * envBRDF.x + envBRDF.y;
+        let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
         let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * specularParameter);
 
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
