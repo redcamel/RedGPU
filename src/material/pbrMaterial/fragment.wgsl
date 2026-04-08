@@ -741,10 +741,15 @@ fn main(inputData:InputData) -> OutputFragment {
         // [KO] 지수 부분을 조정하여 AO가 반사광을 너무 급격히 죽이지 않도록 완화합니다.
         let specularOcclusion = clamp(pow(NdotV_IBL + occlusionParameter, 0.5 + roughnessParameter) - 1.0 + occlusionParameter, 0.0, 1.0);
 
+        // [KO] 언리얼 스타일의 에너지 보존: 시점 의존적 프레넬 대신 통합된 Specular Albedo 기반 마스킹
+        // [EN] Unreal-style energy conservation: Masking based on integrated Specular Albedo instead of view-dependent Fresnel
+        let specularAlbedo_IBL = F0_dielectric * envBRDF.x + envBRDF.y;
+        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * specularParameter);
+
         // [KO] ibl 확산광(Diffuse) [EN] ibl Diffuse
         // [KO] Irradiance(E)를 Radiance(L)로 변환하기 위해 INV_PI 적용
-        // [KO] specularParameter가 적용된 가중치를 사용하여 에너지 보존
-        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * INV_PI * occlusionParameter;
+        // [KO] specularAlbedo를 차감하여 에너지 보존을 보장함
+        var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * diffuseWeight_IBL * INV_PI * occlusionParameter;
 
         // [KO] ibl 확산 투과 (Diffuse Transmission) [EN] ibl Diffuse Transmission
         #redgpu_if useKHR_materials_diffuse_transmission
