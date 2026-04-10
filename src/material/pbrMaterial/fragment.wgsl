@@ -20,6 +20,7 @@
 #redgpu_include KHR.KHR_texture_transform.getKHRTextureTransformUV;
 #redgpu_include KHR.KHR_materials_sheen.getSheenIBL;
 #redgpu_include KHR.KHR_materials_sheen.getSheenLambda;
+#redgpu_include KHR.KHR_materials_sheen.getSheenCharlieE;
 #redgpu_include KHR.KHR_materials_anisotropy.getAnisotropicSpecularBRDF;
 #redgpu_include lighting.getDiffuseBRDFDisney;
 #redgpu_include lighting.getFresnelSchlick
@@ -1000,18 +1001,25 @@ fn calcLight(
     {
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
         if (sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001) {
-            let sheenRoughnessAlpha = sheenRoughnessParameter * sheenRoughnessParameter;
-            let sheen_visibility = 1.0 / ((1.0 + getSheenLambda(VdotN, sheenRoughnessAlpha) + getSheenLambda(NdotL, sheenRoughnessAlpha)) * (4.0 * VdotN * NdotL));
+            let sheenRoughness = max(sheenRoughnessParameter, 0.000001);
+            
+            // [KO] Charlie Sheen 분포 항 (Distribution term)
+            // [EN] Charlie Sheen distribution term
+            let invAlpha = 1.0 / sheenRoughness;
             let cos2h = NdotH * NdotH;
-            let sin2h = 1.0 - cos2h;
-            let sheenDistribution = (2.0 + 1.0 / sheenRoughnessAlpha) * pow(sin2h, 0.5 / sheenRoughnessAlpha) / PI2;
+            let sin2h = max(1.0 - cos2h, 0.0078125); // [KO] pow(sin2h, ...) 안정성을 위해 하한선 설정
+            let sheenDistribution = (2.0 + invAlpha) * pow(sin2h, invAlpha * 0.5) / (2.0 * PI);
 
-            let E_LdotN = 1.0 - pow(1.0 - NdotL, 5.0);
-            let E_VdotN = 1.0 - pow(1.0 - VdotN, 5.0);
-            let sheen_albedo_scaling = max(min(1.0 - maxSheenColor * E_VdotN, 1.0 - maxSheenColor * E_LdotN), 0.04);
+            // [KO] Neubelt 가시성 항 (Visibility term) - glTF 스펙 권장 모델
+            // [EN] Neubelt visibility term - Recommended by glTF spec
+            let sheen_visibility = 1.0 / (4.0 * (NdotL + VdotN - NdotL * VdotN));
 
-            // Sheen은 베이스 레이어 위에 얹어짐
-            result = result * sheen_albedo_scaling + (sheenColor * sheenDistribution * sheen_visibility * max(NdotL_origin, 0.0));
+            // [KO] 에너지 보존을 위한 알베도 스케일링 [EN] Albedo scaling for energy conservation
+            let sheen_albedo_scaling = 1.0 - maxSheenColor * getSheenCharlieE(VdotN, sheenRoughness);
+
+            // [KO] Sheen은 베이스 레이어 위에 얹어짐 (NdotL은 조명 방정식의 일부로 결합)
+            let sheen_brdf = sheenColor * sheenDistribution * sheen_visibility;
+            result = result * sheen_albedo_scaling + (sheen_brdf * NdotL);
         }
     }
     #redgpu_endIf
