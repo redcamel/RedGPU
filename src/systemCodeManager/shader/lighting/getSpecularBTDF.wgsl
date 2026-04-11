@@ -37,7 +37,7 @@ fn getSpecularBTDF(
     let D: f32 = mix(1.0, D_rough, t);
 
     // 2. G (Geometric) 계산
-    let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * NdotL) / VdotH));
+    let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * abs(NdotL)) / VdotH));
 
     // 3. F (Fresnel) 계산
     let F: vec3<f32> = getFresnelSchlick(VdotH, F0);
@@ -45,15 +45,15 @@ fn getSpecularBTDF(
     let denom = (eta * VdotH + LdotH) * (eta * VdotH + LdotH);
 
     // 4. BTDF 공식 적용
-    // [KO] 분모에 시스템 표준 EPSILON을 적용하여 일관된 정밀도 유지
-    // [EN] Applies the system standard EPSILON to the denominator for consistent precision.
+    // [KO] 분모에 abs(NdotL)을 추가하여 표준 PBR BTDF 공식을 따름 (렌더링 방정식의 NdotL과 상쇄됨)
+    // [EN] Adds abs(NdotL) to the denominator to follow the standard PBR BTDF formula (cancels with NdotL in the rendering equation).
     let btdf: vec3<f32> =
         (vec3<f32>(1.0) - F) *
         abs(VdotH * LdotH) *
         (eta * eta) *
         D *
         G /
-        (max(NdotV, EPSILON) * max(denom, EPSILON));
+        (max(NdotV, EPSILON) * max(abs(NdotL), EPSILON) * max(denom, EPSILON));
 
     return btdf;
 }

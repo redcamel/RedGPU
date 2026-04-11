@@ -13,8 +13,12 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let alpha2 = alpha * alpha;
 
-    let GGXV = NdotL * sqrt(NdotV * NdotV * (1.0 - alpha2) + alpha2);
-    let GGXL = NdotV * sqrt(NdotL * NdotL * (1.0 - alpha2) + alpha2);
+    // [KO] grazing angle에서의 수치적 발산을 방지하기 위해 최소값 제한
+    let safeNdotV = max(NdotV, 1e-4);
+    let safeNdotL = max(NdotL, 1e-4);
+
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
 
     return 0.5 / max(GGXV + GGXL, EPSILON);
 }

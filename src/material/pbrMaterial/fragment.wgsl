@@ -868,7 +868,10 @@ fn main(inputData:InputData) -> OutputFragment {
         var surfaceColor = totalDirectLighting;
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
-            let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - F0);
+            // [KO] IBL이 없는 직사광 위주 환경에서 외곽 음영을 복구하기 위해 시점 의존적 프레넬 적용
+            // [EN] Apply view-dependent Fresnel to restore edge shading in non-IBL (direct light dominant) environments
+            let transmissionFresnel = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - NdotV, 5.0);
+            let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - transmissionFresnel);
             surfaceColor += mix(ambientContribution, transmissionRefraction * systemUniforms.preExposure, transmissionWeight);
         } else {
             surfaceColor += ambientContribution;
@@ -964,7 +967,8 @@ fn calcLight(
     var diffuse_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_diffuse_transmission
     if (u_useKHR_materials_diffuse_transmission) {
-        diffuse_transmission = getDiffuseBTDF(N, L, diffuseTransmissionColor) * max(-NdotL_origin, 0.0);
+        // [KO] getDiffuseBTDF 내부에서 이미 max(-NdotL, 0)가 곱해지므로 중복 곱셈 제거
+        diffuse_transmission = getDiffuseBTDF(N, L, diffuseTransmissionColor);
     }
     #redgpu_endIf
 
