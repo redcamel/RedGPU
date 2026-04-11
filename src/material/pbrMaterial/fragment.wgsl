@@ -293,8 +293,6 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // [KO] 정점 탄젠트 유무에 관계없이 기본 노멀은 TBN 구축을 위해 보존합니다.
     // [EN] Preserve base normal for TBN construction regardless of vertex tangent.
-    // [KO] 클리어코트 층 등을 위해 변형 전 기하 법선을 보존합니다. [EN] Preserves the geometric normal before perturbation for clearcoat, etc.
-    let geometricNormal = N;
 
     #redgpu_if normalTexture
     {
@@ -302,7 +300,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
         // [KO] 미분(dpdx, dpdy) 기반 TBN은 Uniform Control Flow에서 계산되어야 하므로 분기문 바깥에서 호출
         // [EN] TBN based on derivatives (dpdx, dpdy) must be called in Uniform Control Flow, so it's called outside the branch.
-        var tbn = getTBNFromCotangent(geometricNormal, input_vertexPosition,select( 1.0 - normalUV,normalUV,backFaceYn));
+        var tbn = getTBNFromCotangent(baseNormal, input_vertexPosition,select( 1.0 - normalUV,normalUV,backFaceYn));
         
         // [KO] 정점 탄젠트가 가용한 경우 이를 우선적으로 사용하여 TBN을 덮어씀
         // [EN] If vertex tangent is available, override TBN using it preferentially.
@@ -373,7 +371,9 @@ fn main(inputData:InputData) -> OutputFragment {
     // [KO] 클리어코트 처리 [EN] Clearcoat processing
     var clearcoatParameter = u_KHR_clearcoatFactor;
     var clearcoatRoughnessParameter = u_KHR_clearcoatRoughnessFactor ;
-    var clearcoatNormal:vec3<f32> = N;
+    // [KO] 클리어코트 노멀은 베이스 노멀 맵의 영향을 받지 않는 기하 법선으로 초기화해야 합니다. (glTF 사양 준수)
+    // [EN] Clearcoat normal should be initialized with the geometric normal, unaffected by the base normal map.
+    var clearcoatNormal:vec3<f32> = select(baseNormal, -baseNormal, backFaceYn);
     #redgpu_if useKHR_materials_clearcoat
     {
         if(clearcoatParameter != 0.0){
@@ -388,17 +388,23 @@ fn main(inputData:InputData) -> OutputFragment {
             #redgpu_if useKHR_clearcoatNormalTexture
             {
                 var targetUv = KHR_clearcoatNormalUV;
-                if(backFaceYn){ targetUv = 1.0 - targetUv; }
                 let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, targetUv).rgb;
 
-                // [KO] 클리어코트 TBN은 변형된 N이 아닌 기하 법선(geometricNormal)을 기준으로 구축해야 합니다.
-                // [EN] Clearcoat TBN should be constructed based on the geometricNormal, not the perturbed N.
-                let clearcoatTBN = getTBNFromCotangent(geometricNormal, input_vertexPosition, targetUv);
-                clearcoatNormal = getNormalFromNormalMap(clearcoatNormalSamplerColor, clearcoatTBN, u_KHR_clearcoatNormalScale);
-                if(hasVertexTangent){ if(backFaceYn ){ clearcoatNormal = -clearcoatNormal; } }
-                clearcoatNormal = normalize(clearcoatNormal);
+                // [KO] 클리어코트 TBN은 상단 메인 노멀 로직과 동일하게 기하 법선(baseNormal)을 기준으로 구축합니다.
+                var clearcoatTBN = getTBNFromCotangent(baseNormal, input_vertexPosition, select(1.0 - targetUv, targetUv, backFaceYn));
+                if (hasVertexTangent) {
+                    clearcoatTBN = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
+                }
+
+                // [KO] 텍스처로부터 얻은 노멀은 아직 이면 처리가 되지 않은 상태이므로 수동으로 반전합니다.
+                let texturedNormal = getNormalFromNormalMap(clearcoatNormalSamplerColor, clearcoatTBN, u_KHR_clearcoatNormalScale);
+                clearcoatNormal = select(texturedNormal, -texturedNormal, backFaceYn);
             }
             #redgpu_endIf
+
+            // [KO] 초기화 시 사용된 N은 이미 상단(line 371)에서 반전 처리되었으므로, 
+            // [KO] 텍스처가 없는 경우 여기서 추가 반전을 하지 않아야 이중 반전을 피할 수 있습니다.
+            clearcoatNormal = normalize(clearcoatNormal);
         }
     }
     #redgpu_endIf
@@ -840,18 +846,21 @@ fn main(inputData:InputData) -> OutputFragment {
                      clearcoatPrefilteredColor = (clearcoatPrefilteredColor * ccTrans) + ccSkyScat;
                  }
 
-                 let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), 0.0).rg;
+                 let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
                  let clearcoatF0 = vec3<f32>(0.04);
 
-                 // [KO] Split Sum Approximation: F * Scale + Bias.
-                 // [KO] 클리어코트 레이어의 통합 프레넬 가중치를 계산합니다.
-                 let clearcoatIBL_F = (clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y) * clearcoatParameter;
+                 // [KO] 시점 의존적 프레넬 계산 (베이스 레이어 감쇄용)
+                 // [EN] Calculate view-dependent Fresnel (for base layer dimming)
+                 let coatF = getFresnelSchlick(clearcoatNdotV, clearcoatF0) * clearcoatParameter;
 
-                 // [KO] 클리어코트 스펙큘러 IBL에 preExposure 적용하여 베이스와 단위 일치
-                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatIBL_F * systemUniforms.preExposure;
+                 // [KO] 클리어코트 IBL 반사광 (Split Sum 적분)
+                 // [KO] factor는 사양에 따라 스펙큘러 전체에 곱해짐
+                 let clearcoatIBL_Weight = (clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y);
+                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatIBL_Weight * clearcoatParameter * systemUniforms.preExposure;
 
-                 // [KO] 하부 레이어 투과 가중치 (에너지 보존을 위해 LUT 기반 가중치와 일관성 유지)
-                 indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - clearcoatIBL_F) * indirectLighting;
+                 // [KO] 최종 결합 (GLTF 사양: base * (1 - F_c * factor) + clearcoat * factor)
+                 // [EN] Final combination: base * (1 - F_c * factor) + clearcoat * factor
+                 indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - coatF) * indirectLighting;
             }
         #redgpu_endIf
 
