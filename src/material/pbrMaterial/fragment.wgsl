@@ -958,6 +958,7 @@ fn calcLight(
     } else {
         SPEC_BRDF = getSpecularBRDF(F0, roughnessParameter, NdotH, VdotN, NdotL, LdotH);
     }
+    if (abs(ior - 1.0) < EPSILON) { SPEC_BRDF = vec3<f32>(0.0); }
 
     // [KO] 2. 하부 레이어(Diffuse + Specular Transmission) 계산
     // [KO] getDiffuseBRDFDisney는 내부적으로 NdotL과 INV_PI를 포함함
@@ -977,11 +978,14 @@ fn calcLight(
     #redgpu_if useKHR_materials_transmission
     if (transmissionParameter > 0.0) {
         specular_transmission = getSpecularBTDF(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, F0, ior) * max(-NdotL_origin, 0.0);
+        // [KO] IOR이 1.0인 경우 BTDF 공식의 특이점(발산)을 방지하기 위해 0으로 처리
+        if (abs(ior - 1.0) < EPSILON) { specular_transmission = vec3<f32>(0.0); }
     }
     #redgpu_endIf
 
     // [KO] 3. 물리적 레이어링 (Energy Conservation)
-    let F = getFresnelSchlick(VdotH, F0);
+    var F = getFresnelSchlick(VdotH, F0);
+    if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
 
     // [KO] specularParameter를 고려한 최종 스펙큘러 가중치 (비금속용)
     let specular_weight = F * specularParameter;
