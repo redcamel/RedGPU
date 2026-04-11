@@ -593,13 +593,14 @@ fn main(inputData:InputData) -> OutputFragment {
             finalLightColor,
             N, V, L, NdotV,
             roughnessParameter, metallicParameter, albedo,
-            F0, ior,
+            F0_dielectric_base, ior,
             specularColor, specularParameter,
             u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
             transmissionParameter,
             sheenColor, sheenRoughnessParameter,
             anisotropy, anisotropicT, anisotropicB,
-            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
+            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
+            u_useKHR_materials_iridescence, iridescenceParameter, u_KHR_iridescenceIor, iridescenceThickness
         );
     }
 
@@ -637,18 +638,19 @@ fn main(inputData:InputData) -> OutputFragment {
          // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환 (calcLight가 내부적으로 INV_PI를 처리함)
          var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
 
-         // [KO] calcLight 함수 호출 (24개 인자) [EN] Call calcLight function (24 arguments)
+         // [KO] calcLight 함수 호출 (28개 인자) [EN] Call calcLight function (28 arguments)
          totalDirectLighting += calcLight(
             finalLightColor,
             N, V, L, NdotV,
             roughnessParameter, metallicParameter, albedo,
-            F0, ior,
+            F0_dielectric_base, ior,
             specularColor, specularParameter,
             u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
             transmissionParameter,
             sheenColor, sheenRoughnessParameter,
             anisotropy, anisotropicT, anisotropicB,
-            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
+            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
+            u_useKHR_materials_iridescence, iridescenceParameter, u_KHR_iridescenceIor, iridescenceThickness
         );
         }
     }
@@ -935,13 +937,14 @@ fn calcLight(
     N:vec3<f32>, V:vec3<f32>, L:vec3<f32>,
     VdotN:f32,
     roughnessParameter:f32, metallicParameter:f32, albedo:vec3<f32>,
-    F0:vec3<f32>, ior:f32,
+    F0_base:vec3<f32>, ior:f32,
     specularColor:vec3<f32>, specularParameter:f32,
     u_useKHR_materials_diffuse_transmission:bool, diffuseTransmissionParameter:f32, diffuseTransmissionColor:vec3<f32>,
     transmissionParameter:f32,
     sheenColor:vec3<f32>, sheenRoughnessParameter:f32,
     anisotropy:f32, anisotropicT:vec3<f32>, anisotropicB:vec3<f32>,
-    clearcoatParameter:f32, clearcoatRoughnessParameter:f32, clearcoatNormal:vec3<f32>
+    clearcoatParameter:f32, clearcoatRoughnessParameter:f32, clearcoatNormal:vec3<f32>,
+    useIridescence:bool, iridescenceFactor:f32, iridescenceIor:f32, iridescenceThickness:f32
 ) -> vec3<f32>{
     let dLight = lightColor; // [KO] 이미 모든 감쇄 및 노출이 곱해진 최종 에너지 [EN] Final energy with all attenuation and exposure applied
 
@@ -952,8 +955,30 @@ fn calcLight(
     let LdotH = max(dot(L, H), 0.0);
     let VdotH = max(dot(V, H), 0.0);
 
+    // [KO] 프레넬(F) 통합 계산
+    // [KO] 박막 간섭이 활성화된 경우 표준 Schlick 대신 Iridescent Fresnel 사용 (glTF 사양 준수)
+    var F: vec3<f32>;
+    let dielectric_f0 = F0_base * specularColor;
+    let metal_f0 = albedo;
+    let combined_f0 = mix(dielectric_f0, metal_f0, metallicParameter);
+
+    if (useIridescence && iridescenceFactor > 0.0) {
+        let F_irid_dielectric = getIridescentFresnel(1.0, iridescenceIor, dielectric_f0, iridescenceThickness, iridescenceFactor, VdotH);
+        let F_irid_metal = getIridescentFresnel(1.0, iridescenceIor, metal_f0, iridescenceThickness, iridescenceFactor, VdotH);
+        F = mix(F_irid_dielectric, F_irid_metal, metallicParameter);
+    } else {
+        F = getFresnelSchlick(VdotH, combined_f0);
+    }
+
+    // [KO] IOR이 1.0인 경우 프레넬 반사 제로화 (물리적 예외 처리)
+    if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
+
     // [KO] 1. 스페큘러 반사(Specular Reflection) BRDF 계산
-    var SPEC_BRDF: vec3<f32>;
+    // [KO] getSpecularBRDF 대신 D와 V(Visibility) 항만 따로 가져와서 이미 계산된 F와 결합
+    let D = getDistributionGGX(NdotH, roughnessParameter);
+    let Vis = getSpecularVisibility(VdotN, NdotL, roughnessParameter);
+    var SPEC_BRDF = D * Vis * F;
+
     if (anisotropy > 0.0) {
         #redgpu_if useKHR_materials_anisotropy
             var TdotL = dot(anisotropicT, L);
@@ -962,11 +987,12 @@ fn calcLight(
             var TdotH = dot(anisotropicT, H);
             var BdotH = dot(anisotropicB, H);
             var BdotV = dot(anisotropicB, V);
-            SPEC_BRDF = getAnisotropicSpecularBRDF(F0, roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy);
+            // [KO] 이방성 BRDF 계산 시에도 통합된 F를 사용하여 중복 계산 방지
+            SPEC_BRDF = getAnisotropicSpecularBRDF(vec3<f32>(1.0), roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy) * F;
         #redgpu_endIf
-    } else {
-        SPEC_BRDF = getSpecularBRDF(F0, roughnessParameter, NdotH, VdotN, NdotL, LdotH);
     }
+    
+    // [KO] IOR이 1.0인 경우 스펙큘러 제로화
     if (abs(ior - 1.0) < EPSILON) { SPEC_BRDF = vec3<f32>(0.0); }
 
     // [KO] 2. 하부 레이어(Diffuse + Specular Transmission) 계산
@@ -986,16 +1012,13 @@ fn calcLight(
     var specular_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
     if (transmissionParameter > 0.0) {
-        specular_transmission = getSpecularBTDF(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, F0, ior) * max(-NdotL_origin, 0.0);
-        // [KO] IOR이 1.0인 경우 BTDF 공식의 특이점(발산)을 방지하기 위해 0으로 처리
+        // [KO] 투과 시에도 박막 간섭이 적용된 (1-F) 에너지를 고려함
+        specular_transmission = getSpecularBTDF(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, combined_f0, ior) * max(-NdotL_origin, 0.0);
         if (abs(ior - 1.0) < EPSILON) { specular_transmission = vec3<f32>(0.0); }
     }
     #redgpu_endIf
 
     // [KO] 3. 물리적 레이어링 (Energy Conservation)
-    var F = getFresnelSchlick(VdotH, F0);
-    if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
-
     // [KO] specularParameter를 고려한 최종 스펙큘러 가중치 (비금속용)
     let specular_weight = F * specularParameter;
 
@@ -1004,11 +1027,11 @@ fn calcLight(
 
     // [KO] 비금속(Dielectric) 파트 합성
     // [KO] SpecularReflection + mix((1-F_weight)*Diffuse, SpecularTransmission, Factor)
-    // [KO] specular_transmission은 이미 (1-F)를 포함하므로 별도로 가중치를 조절하여 합산
-    let dielectricPart = (SPEC_BRDF * specularParameter * max(NdotL_origin, 0.0)) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter);
+    // [KO] specular_transmission은 이미 내부적으로 굴절 에너지를 포함함
+    let dielectricPart = (SPEC_BRDF * specularParameter * NdotL) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter);
 
     // [KO] 금속(Metallic) 파트 합성
-    let metallicPart = SPEC_BRDF * max(NdotL_origin, 0.0);
+    let metallicPart = SPEC_BRDF * NdotL;
 
     // 금속성 믹싱
     var result = mix(dielectricPart, metallicPart, metallicParameter);

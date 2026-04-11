@@ -19,7 +19,7 @@ struct AutoExposureUniforms {
     width: f32,
     height: f32,
     currentPreExposure: f32,
-    _pad: f32
+    maxExposureMultiplier: f32
 };
 @group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;
 

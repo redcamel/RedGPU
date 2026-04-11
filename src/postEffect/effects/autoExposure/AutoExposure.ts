@@ -157,7 +157,7 @@ class AutoExposure {
                 width,
                 height,
                 currentPreExposure,
-                0 // _pad
+                this.#maxExposureMultiplier
             ])
         );
         

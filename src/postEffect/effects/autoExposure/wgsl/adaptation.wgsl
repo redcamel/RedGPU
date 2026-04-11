@@ -14,7 +14,7 @@ struct AutoExposureUniforms {
     width: f32,
     height: f32,
     currentPreExposure: f32,
-    _pad: f32
+    maxExposureMultiplier: f32
 };
 
 @group(0) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 64>;
@@ -51,8 +51,12 @@ fn main() {
         let validPixels = max(0.0, f32(min(nextCounter, maxPixel)) - f32(max(pixelCounter, minPixel)));
         if (validPixels > 0.0) {
             let ev100 = uniforms.minEV100 + (f32(i) / 63.0) * uniforms.ev100Range;
-            weightedEV100Sum += ev100 * validPixels;
-            weightedPixelCount += validPixels;
+            
+            // [KO] 하이라이트 보호 가중치: 밝은 픽셀에 약간 더 가중치를 주어 어두운 곳에서의 과노출 방지
+            // [EN] Highlight protection weight: Give slightly more weight to brighter pixels to prevent over-exposure in dark areas
+            let weight = 1.0 + (f32(i) / 63.0) * 2.0; 
+            weightedEV100Sum += ev100 * validPixels * weight;
+            weightedPixelCount += validPixels * weight;
         }
         pixelCounter = nextCounter;
     }
@@ -62,8 +66,13 @@ fn main() {
 
     // [KO] 목표 휘도 및 사용자의 노출 보정(Compensation)을 반영한 목표 EV100 결정
     // [EN] Determine target EV100 reflecting target luminance and user's exposure compensation
-    // [KO] exposureCompensation을 차감함으로써 사용자가 밝기를 높이면 목표 EV가 낮아져(노출 증가) 의도가 유지됨
-    let targetEV100 = avgEV100 - log2(uniforms.targetLuminance / 0.18) - uniforms.exposureCompensation;
+    var targetEV100 = avgEV100 - log2(uniforms.targetLuminance / 0.18) - uniforms.exposureCompensation;
+
+    // [KO] 노출 배율 제한 적용 (너무 어두울 때 스페큘러가 타는 현상 방지)
+    // [EN] Apply exposure multiplier limit (prevents specular blooming in very dark scenes)
+    // [KO] EV100 공식 역산을 통해 최대 노출 배율에 해당하는 최소 EV100 결정
+    let minPossibleEV100 = log2((100.0 * uniforms.targetLuminance * pow(2.0, uniforms.exposureCompensation)) / (uniforms.calibrationConstant * uniforms.maxExposureMultiplier));
+    targetEV100 = max(targetEV100, minPossibleEV100);
 
     // [KO] 눈 적응 시뮬레이션 (EV100 공간에서 수행)
     // [EN] Eye adaptation simulation (performed in EV100 space)
