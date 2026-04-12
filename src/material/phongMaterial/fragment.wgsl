@@ -1,7 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include color.getTintBlendMode;
 #redgpu_include shadow.getDirectionalShadowVisibility;
-#redgpu_include math.tnb.getTBNFromCotangent
+#redgpu_include math.tnb.getTBNFromVertexTangent
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.OutputFragment;
@@ -50,6 +50,8 @@ struct InputData {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+
+    @location(3) vertexTangent: vec4<f32>,
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
@@ -122,7 +124,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var N = normalize(input_vertexNormal) ;
     #redgpu_if normalTexture
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
-        let tbn = getTBNFromCotangent(N, input_vertexPosition, inputData.uv);
+        let tbn = getTBNFromVertexTangent(N, inputData.vertexTangent);
         N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale);
     #redgpu_endIf
     N = normalize(N);

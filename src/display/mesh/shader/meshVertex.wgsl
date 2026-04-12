@@ -101,6 +101,9 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexNormal = normalPosition.xyz;
     output.uv = input_uv * vertexUniforms.uvTransform.zw + vertexUniforms.uvTransform.xy;
 
+    let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
+    output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
+
     output.combinedOpacity = vertexUniforms.combinedOpacity;
 
     // Shadow calculation
