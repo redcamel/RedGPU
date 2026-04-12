@@ -17,12 +17,10 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
-        view.axis = true;
+        // view.grid = true;
+        // view.axis = true;
         
-        // [KO] 자동 노출 활성화 (태양광과 같은 강한 빛에 적응하기 위해 필수)
-        // [EN] Enable Auto Exposure (Essential for adapting to strong light like sunlight)
-        view.postEffectManager.useAutoExposure = true;
+
         
         redGPUContext.addView(view);
 
