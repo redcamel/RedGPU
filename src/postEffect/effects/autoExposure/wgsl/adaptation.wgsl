@@ -40,29 +40,34 @@ fn main() {
     let maxPixel = u32(f32(totalPixels) * uniforms.highPercentile);
 
     var pixelCounter: u32 = 0u;
-    var weightedEV100Sum: f32 = 0.0;
+    var weightedLuminanceSum: f32 = 0.0;
     var weightedPixelCount: f32 = 0.0;
 
     for (var i = 0u; i < 64u; i = i + 1u) {
         let nextCounter = pixelCounter + countBuffer[i];
         
-        // [KO] 유효 범위(low ~ high percentile) 내의 픽셀들만 선별
-        // [EN] Filter pixels within the valid percentile range
         let validPixels = max(0.0, f32(min(nextCounter, maxPixel)) - f32(max(pixelCounter, minPixel)));
         if (validPixels > 0.0) {
             let ev100 = uniforms.minEV100 + (f32(i) / 63.0) * uniforms.ev100Range;
             
-            // [KO] 하이라이트 보호 가중치: 밝은 픽셀에 약간 더 가중치를 주어 어두운 곳에서의 과노출 방지
-            // [EN] Highlight protection weight: Give slightly more weight to brighter pixels to prevent over-exposure in dark areas
-            let weight = 1.0 + (f32(i) / 63.0) * 2.0; 
-            weightedEV100Sum += ev100 * validPixels * weight;
+            // [KO] EV100을 선형 휘도(Luminance)로 변환: L = (2^EV100 * K) / 100
+            // [EN] Convert EV100 to linear luminance: L = (2^EV100 * K) / 100
+            let lum = (pow(2.0, ev100) * uniforms.calibrationConstant) / 100.0;
+            
+            // [KO] 하이라이트 보호 가중치: 선형 휘도와 결합하여 밝은 영역에 대한 억제력 대폭 강화
+            // [EN] Highlight protection weight: Combine with linear luminance to greatly strengthen suppression of bright areas
+            let weight = pow(2.0, (f32(i) / 63.0) * 4.0); 
+            weightedLuminanceSum += lum * validPixels * weight;
             weightedPixelCount += validPixels * weight;
         }
         pixelCounter = nextCounter;
     }
 
-    // [KO] 평균 EV100 산출 [EN] Calculate average EV100
-    let avgEV100 = weightedEV100Sum / max(weightedPixelCount, 1.0);
+    // [KO] 선형 공간에서의 평균 휘도 산출 [EN] Calculate average luminance in linear space
+    let avgLuminance = weightedLuminanceSum / max(weightedPixelCount, 1.0);
+
+    // [KO] 평균 휘도를 다시 EV100으로 변환 [EN] Convert average luminance back to EV100
+    let avgEV100 = log2(avgLuminance * 100.0 / uniforms.calibrationConstant);
 
     // [KO] 목표 휘도 및 사용자의 노출 보정(Compensation)을 반영한 목표 EV100 결정
     // [EN] Determine target EV100 reflecting target luminance and user's exposure compensation

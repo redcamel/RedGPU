@@ -49,7 +49,8 @@ class ToneMappingManager {
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
     #lowPercentile: number = 0.8;
-    #highPercentile: number = 0.98;
+    #highPercentile: number = 1.0;
+    #maxExposureMultiplier: number = 1.0;
 
     /**
      * [KO] ToneMappingManager 인스턴스를 생성합니다. (내부 시스템 전용)
@@ -207,6 +208,17 @@ class ToneMappingManager {
     set highPercentile(value: number) {
         validateNumber(value);
         this.#highPercentile = value;
+    }
+
+    /** [KO] 자동 노출의 최대 증폭 배율을 반환합니다. [EN] Returns the maximum exposure multiplier for auto-exposure. */
+    get maxExposureMultiplier(): number {
+        return this.#maxExposureMultiplier;
+    }
+
+    /** [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 16.0) [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 16.0) */
+    set maxExposureMultiplier(value: number) {
+        validatePositiveNumberRange(value, 1.0, 64.0);
+        this.#maxExposureMultiplier = value;
     }
 
     /**

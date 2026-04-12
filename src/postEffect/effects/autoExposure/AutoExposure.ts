@@ -24,7 +24,6 @@ class AutoExposure {
     #adaptationBindGroupLayout0: GPUBindGroupLayout;
     
     #uniformBuffer: UniformBuffer;
-    #maxExposureMultiplier: number = 64.0;
 
     #prevTime: number = 0;
 
@@ -157,7 +156,7 @@ class AutoExposure {
                 width,
                 height,
                 currentPreExposure,
-                this.#maxExposureMultiplier
+                toneMappingManager.maxExposureMultiplier
             ])
         );
         
