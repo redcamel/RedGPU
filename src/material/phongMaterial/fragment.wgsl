@@ -254,7 +254,7 @@ fn main(inputData:InputData) -> OutputFragment {
     //
     // [KO] 최종 조명 결과 (Raw HDR * Pre-Exposure 적용)
     // [EN] Final lighting result (Raw HDR * Pre-Exposure applied)
-    finalColor = vec4<f32>((mixColor + emissiveColor) * systemUniforms.preExposure, resultAlpha);
+    finalColor = vec4<f32>((mixColor  * systemUniforms.preExposure) + emissiveColor, resultAlpha);
     #redgpu_if useTint
         finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_endIf
