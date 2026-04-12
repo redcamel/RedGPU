@@ -20,6 +20,7 @@ import parseAttributeInfo_GLTF from "./parseAttributeInfo_GLTF";
 import parseIndicesInfo_GLTF from "./parseIndicesInfo_GLTF";
 import parseInterleaveData_GLTF from "./parseInterleaveData_GLTF";
 import parseSparse_GLTF from "./parseSparse_GLTF";
+import calculateTangents from "../../../math/calculateTangents";
 
 const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMesh: GltfMesh, nodeGlTfId: GlTfId) {
     const {redGPUContext} = gltfLoader
@@ -155,11 +156,11 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         {
 
             // keepLog(tangents)
-            // if (tangents.length > 0) {
-            //     // tangents = calculateTangents(vertices, normalData, uvs, indices, tangents);
-            // } else {
-            //     tangents = calculateTangents(vertices, normalData, uvs, indices);
-            // }
+            if (tangents.length > 0) {
+                // tangents = calculateTangents(vertices, normalData, uvs, indices, tangents);
+            } else {
+                tangents = Array.from(calculateTangents(vertices, normalData, uvs, indices)) ;
+            }
             // tMaterial.useVertexTangent = true;
         }
         if (tangents.length) tMaterial.useVertexTangent = true;

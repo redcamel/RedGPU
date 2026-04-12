@@ -88,12 +88,12 @@ export const calculateTangentsInterleaved = (
 
         tx /= len; ty /= len; tz /= len;
         const crossX = ny * tz - nz * ty, crossY = nz * tx - nx * tz, crossZ = nx * ty - ny * tx;
-        const w = (crossX * t2x + crossY * t2y + crossZ * t2z) < 0 ? -1 : 1;
+        const w = (crossX * t2x + crossY * t2y + crossZ * t2z) < 0 ? 1 : -1;
 
         interleaveData[o + tangentOffset] = tx;
         interleaveData[o + tangentOffset + 1] = ty;
         interleaveData[o + tangentOffset + 2] = tz;
-        interleaveData[o + tangentOffset + 3] = w;
+        interleaveData[o + tangentOffset + 3] = -w;
     }
 };
 

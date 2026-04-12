@@ -15,7 +15,6 @@
 #redgpu_include math.direction.getReflectionVectorFromViewDirection
 #redgpu_include math.tnb.getTBNFromVertexTangent
 #redgpu_include math.tnb.getTBN
-#redgpu_include math.tnb.getTBNFromCotangent
 #redgpu_include math.tnb.getNormalFromNormalMap;
 #redgpu_include KHR.KHR_texture_transform.getKHRTextureTransformUV;
 #redgpu_include KHR.KHR_materials_sheen.getSheenIBL;
@@ -281,7 +280,6 @@ fn main(inputData:InputData) -> OutputFragment {
     let baseNormal:vec3<f32> = normalize(input_vertexNormal.xyz);
     var N:vec3<f32> = baseNormal;
     var backFaceYn:bool = false;
-    let hasVertexTangent:bool = u_useVertexTangent && (dot(input_vertexTangent.xyz, input_vertexTangent.xyz) > 0.0);
     #redgpu_if doubleSided
     {
         // [KO] vFrontFacing과 유사한 안정적인 판정을 위해 정점 법선과 시선 벡터 활용
@@ -291,24 +289,10 @@ fn main(inputData:InputData) -> OutputFragment {
     }
     #redgpu_endIf
 
-    // [KO] 정점 탄젠트 유무에 관계없이 기본 노멀은 TBN 구축을 위해 보존합니다.
-    // [EN] Preserve base normal for TBN construction regardless of vertex tangent.
-
     #redgpu_if normalTexture
     {
         var normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
-
-        // [KO] 미분(dpdx, dpdy) 기반 TBN은 Uniform Control Flow에서 계산되어야 하므로 분기문 바깥에서 호출
-        // [EN] TBN based on derivatives (dpdx, dpdy) must be called in Uniform Control Flow, so it's called outside the branch.
-        var tbn = getTBNFromCotangent(baseNormal, input_vertexPosition,select( 1.0 - normalUV,normalUV,backFaceYn));
-        
-        // [KO] 정점 탄젠트가 가용한 경우 이를 우선적으로 사용하여 TBN을 덮어씀
-        // [EN] If vertex tangent is available, override TBN using it preferentially.
-        if (hasVertexTangent) {
-            tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
-        }
-
-        // [KO] glTF 표준(OpenGL 방식, Y+)을 따르며, getNormalFromNormalMap 내부에서 적절히 처리되도록 strength를 양수로 전달합니다.
+        let tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
         N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale );
     }
     #redgpu_endIf
@@ -365,7 +349,7 @@ fn main(inputData:InputData) -> OutputFragment {
         metallicParameter = metallicRoughnessSample.b * metallicParameter;
         roughnessParameter = metallicRoughnessSample.g * roughnessParameter;
     #redgpu_endIf
-    roughnessParameter = max(roughnessParameter, 0.04);
+    roughnessParameter = max(roughnessParameter, 0.045);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
 
     // [KO] 클리어코트 처리 [EN] Clearcoat processing
@@ -391,10 +375,7 @@ fn main(inputData:InputData) -> OutputFragment {
                 let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, targetUv).rgb;
 
                 // [KO] 클리어코트 TBN은 상단 메인 노멀 로직과 동일하게 기하 법선(baseNormal)을 기준으로 구축합니다.
-                var clearcoatTBN = getTBNFromCotangent(baseNormal, input_vertexPosition, select(1.0 - targetUv, targetUv, backFaceYn));
-                if (hasVertexTangent) {
-                    clearcoatTBN = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
-                }
+                let clearcoatTBN = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
 
                 // [KO] 텍스처로부터 얻은 노멀은 아직 이면 처리가 되지 않은 상태이므로 수동으로 반전합니다.
                 let texturedNormal = getNormalFromNormalMap(clearcoatNormalSamplerColor, clearcoatTBN, u_KHR_clearcoatNormalScale);
@@ -485,21 +466,10 @@ fn main(inputData:InputData) -> OutputFragment {
     var anisotropicB: vec3<f32>= vec3<f32>(1.0);
     #redgpu_if useKHR_materials_anisotropy
     {
-       var T: vec3<f32>;
-       var B: vec3<f32>;
-
        // 1. 기본 TBN 기저 구축
-       var tbn: mat3x3<f32>;
-       if (u_useVertexTangent && length(input_vertexTangent.xyz) > 0.0) {
-           tbn = getTBNFromVertexTangent(N, input_vertexTangent);
-       } else {
-           // [KO] 탄젠트가 없는 경우 Normal을 기준으로 임의의 수직벡터로부터 직교 기저 형성
-           // [EN] If tangent is missing, construct orthonormal basis from arbitrary perpendicular vector based on normal
-           let anyT = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 1.0, 0.0), abs(N.x) > 0.9);
-           tbn = getTBN(N, anyT);
-       }
-       T = tbn[0];
-       B = tbn[1];
+       let tbn = getTBNFromVertexTangent(N, input_vertexTangent);
+       let T = tbn[0];
+       let B = tbn[1];
 
        var anisotropicDirection: vec2<f32> = vec2<f32>(1.0, 0.0);
        if(u_useKHR_anisotropyTexture){
@@ -589,7 +559,7 @@ fn main(inputData:InputData) -> OutputFragment {
             finalLightColor *= atmosphereTransmittance;
         }
 
-        totalDirectLighting += calcLight(
+        totalDirectLighting += calcPbrLight(
             finalLightColor,
             N, V, L, NdotV,
             roughnessParameter, metallicParameter, albedo,
@@ -635,11 +605,11 @@ fn main(inputData:InputData) -> OutputFragment {
          }
 
          // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출)
-         // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환 (calcLight가 내부적으로 INV_PI를 처리함)
+         // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환 (calcPbrLight가 내부적으로 INV_PI를 처리함)
          var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
 
-         // [KO] calcLight 함수 호출 (28개 인자) [EN] Call calcLight function (28 arguments)
-         totalDirectLighting += calcLight(
+         // [KO] calcPbrLight 함수 호출 (28개 인자) [EN] Call calcPbrLight function (28 arguments)
+         totalDirectLighting += calcPbrLight(
             finalLightColor,
             N, V, L, NdotV,
             roughnessParameter, metallicParameter, albedo,
@@ -887,8 +857,6 @@ fn main(inputData:InputData) -> OutputFragment {
         } else {
             surfaceColor += ambientContribution;
         }
-        #redgpu_else
-            surfaceColor += ambientContribution;
         #redgpu_endIf
 
 
@@ -926,13 +894,9 @@ fn main(inputData:InputData) -> OutputFragment {
     return output;
 }
 
-/**
- * [KO] 빛의 기여도를 계산하는 핵심 함수입니다. [EN] Core function to calculate light contribution.
- */
-/**
- * [KO] 빛의 기여도를 계산하는 핵심 함수입니다. [EN] Core function to calculate light contribution.
- */
-fn calcLight(
+// [KO] 물리 기반 조명 계산 함수 (Simplified PBR)
+// [EN] Physically-based lighting calculation function (Simplified PBR)
+fn calcPbrLight(
     lightColor:vec3<f32>,
     N:vec3<f32>, V:vec3<f32>, L:vec3<f32>,
     VdotN:f32,
