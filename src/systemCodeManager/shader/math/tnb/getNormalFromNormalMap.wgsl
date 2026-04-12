@@ -12,6 +12,10 @@ fn getNormalFromNormalMap(sampledNormalColor: vec3<f32>, tbn: mat3x3<f32>, stren
     // 1. Unpack XY: [0, 1] -> [-1, 1]
     var n: vec2<f32> = sampledNormalColor.xy * 2.0 - 1.0;
 
+    // [KO] WebGPU의 Top-Left UV(V+가 아래로 향함)와 표준 노멀 맵(Y+가 위로 향함) 사이의 방향성 불일치 해결을 위해 Y 기여도 반전
+    // [EN] Invert Y contribution to resolve the directional mismatch between WebGPU's Top-Left UV (V+ points down) and standard normal maps (Y+ points up)
+    n.y = -n.y;
+
     // 2. Apply Strength
     n *= strength;
 
