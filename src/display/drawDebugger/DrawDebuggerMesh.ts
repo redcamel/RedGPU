@@ -163,12 +163,13 @@ class DrawDebuggerMesh {
     }
 
     #createWireframeBoxGeometry(redGPUContext: RedGPUContext): Geometry {
-        const vertices = new Float32Array(24 * 8);
+        const vertices = new Float32Array(24 * 12); // 8 -> 12 (pos:3, normal:3, uv:2, tangent:4)
         const interleavedStruct = new VertexInterleavedStruct(
             {
                 vertexPosition: VertexInterleaveType.float32x3,
                 vertexNormal: VertexInterleaveType.float32x3,
                 texcoord: VertexInterleaveType.float32x2,
+                vertexTangent: VertexInterleaveType.float32x4,
             },
             `wireframeBoxStruct_${Math.random()}`
         );
@@ -280,6 +281,11 @@ class DrawDebuggerMesh {
             vertexData[offset++] = 1;
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;
+            // 탄젠트 (더미 데이터)
+            vertexData[offset++] = 1;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 1;
             // 끝점
             vertexData[offset++] = transformedVertices[end][0];
             vertexData[offset++] = transformedVertices[end][1];
@@ -289,6 +295,11 @@ class DrawDebuggerMesh {
             vertexData[offset++] = 1;
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;
+            // 탄젠트 (더미 데이터)
+            vertexData[offset++] = 1;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 1;
         });
         vertexBuffer.updateAllData(vertexData);
     }

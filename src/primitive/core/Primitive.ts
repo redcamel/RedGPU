@@ -22,7 +22,7 @@ class Primitive {
             vertexPosition: VertexInterleaveType.float32x3,
             vertexNormal: VertexInterleaveType.float32x3,
             texcoord: VertexInterleaveType.float32x2,
-            tangent: VertexInterleaveType.float32x4,
+            vertexTangent: VertexInterleaveType.float32x4,
         },
         `primitiveInterleaveStruct`
     );

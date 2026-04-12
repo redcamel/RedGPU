@@ -319,7 +319,7 @@ class PrimitiveUtils {
         const posOffset = struct.getAttributeOffset('vertexPosition');
         const normalOffset = struct.getAttributeOffset('vertexNormal');
         const uvOffset = struct.getAttributeOffset('texcoord');
-        const tangentOffset = struct.getAttributeOffset('tangent');
+        const tangentOffset = struct.getAttributeOffset('vertexTangent');
 
         calculateTangentsInterleaved(
             typedInterleaveData,
