@@ -37,7 +37,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     // 3. 조명 설정
     const directionalLight = new RedGPU.Light.DirectionalLight();
-    directionalLight.intensity = 2.0;
     scene.lightManager.addDirectionalLight(directionalLight);
 
     // 4. 오브젝트 생성

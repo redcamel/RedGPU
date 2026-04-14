@@ -73,8 +73,12 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
         setDebugButtons
     } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
 
+    const {
+        createPerspectiveCameraTest
+    } = await import("../../../exampleHelper/createExample/helperPanes/index.js?t=1770713934910");
+
     setDebugButtons(RedGPU, targetView.redGPUContext);
-    createFieldOfView(pane, targetView.rawCamera);
+    createPerspectiveCameraTest(pane, targetView.rawCamera);
 
     const f_sun = pane.addFolder({title: 'Sun Configuration (via Light)', expanded: true});
     f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
