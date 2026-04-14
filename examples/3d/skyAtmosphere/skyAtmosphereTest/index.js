@@ -17,7 +17,6 @@ RedGPU.init(
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = -15;
         controller.distance = 15;
-        controller.camera.useAutoExposure = false
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -79,7 +78,7 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     } = await import("../../../exampleHelper/createExample/helperPanes/index.js?t=1770713934910");
 
     setDebugButtons(RedGPU, targetView.redGPUContext);
-    createPerspectiveCameraTest(pane, targetView.rawCamera);
+    createPerspectiveCameraTest(pane, targetView);
 
     const f_sun = pane.addFolder({title: 'Sun Configuration (via Light)', expanded: true});
     f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
@@ -88,11 +87,9 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'sunSize'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'sunLimbDarkening'});
 
-    const f_camera = pane.addFolder({title: 'Camera Exposure', expanded: true});
-    f_camera.addBinding(targetView.toneMappingManager, 'exposureCompensation', {min: -10, max: 10, step: 0.1, label: 'exposureCompensation'});
-    f_camera.addBinding(targetView.rawCamera, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'});
-    f_camera.addBinding(targetView.rawCamera, 'shutterSpeed', {min: 1/4000, max: 1, step: 0.0001, label: 'Shutter Speed (s)'});
-    f_camera.addBinding(targetView.rawCamera, 'iso', {min: 50, max: 3200, step: 1, label: 'ISO'});
+    const f_camera_extra = pane.addFolder({title: 'ToneMapping & Exposure Extra', expanded: true});
+    f_camera_extra.addBinding(targetView.toneMappingManager, 'exposureCompensation', {min: -10, max: 10, step: 0.1, label: 'exposureCompensation'});
+    f_camera_extra.addBinding(targetView.toneMappingManager, 'targetLuminance', {min: 0.01, max: 1.0, step: 0.01, label: 'targetLuminance'});
 
     const f_planet = pane.addFolder({title: 'Planet', expanded: false});
     f_planet.addBinding(skyAtmosphere, 'groundRadius', {min: 1000, max: 10000, step: 1, label: 'groundRadius (km)'});

@@ -6,6 +6,7 @@ import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer
 import downsampleLogLuminanceCode from "./wgsl/downsampleLogLuminance.wgsl";
 import adaptationCode from "./wgsl/adaptation.wgsl";
 import ACamera from "../ACamera";
+import METERING_MODE from "../METERING_MODE";
 
 /**
  * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
@@ -30,6 +31,19 @@ class AutoExposure {
     #readBuffer: GPUBuffer;
     #isReading: boolean = false;
 
+    // [KO] 자동 노출 알고리즘 파라미터 (ToneMappingManager에서 이전됨)
+    // [EN] Auto-exposure algorithm parameters (Moved from ToneMappingManager)
+    #minEV100: number = 1.0;
+    #maxEV100: number = 20.0;
+    #adaptationSpeedUp: number = 3.0;
+    #adaptationSpeedDown: number = 1.0;
+    #lowPercentile: number = 0.8;
+    #highPercentile: number = 1.0;
+    #maxExposureMultiplier: number = 1.0;
+    #meteringMode: METERING_MODE = METERING_MODE.CENTER_WEIGHTED;
+    #targetLuminance: number = 0.18;
+    #exposureCompensation: number = 0.0;
+
     constructor(view: View3D) {
         this.#view = view;
         this.#redGPUContext = view.redGPUContext;
@@ -37,13 +51,113 @@ class AutoExposure {
         this.#initPipelines();
     }
 
+    /** [KO] 노출 보정(Exposure Compensation) 값을 반환합니다. [EN] Returns the exposure compensation value. */
+    get exposureCompensation(): number {
+        return this.#exposureCompensation;
+    }
+
+    /** [KO] 노출 보정(Exposure Compensation) 값을 설정합니다. [EN] Sets the exposure compensation value. */
+    set exposureCompensation(value: number) {
+        this.#exposureCompensation = value;
+    }
+
+    /** [KO] 목표 휘도를 반환합니다. [EN] Returns the target luminance. */
+    get targetLuminance(): number {
+        return this.#targetLuminance;
+    }
+
+    /** [KO] 목표 휘도를 설정합니다. [EN] Sets the target luminance. */
+    set targetLuminance(value: number) {
+        this.#targetLuminance = value;
+    }
+
+    /** [KO] 자동 노출 최소 EV100을 반환합니다. [EN] Returns the minimum EV100 for auto-exposure. */
+    get minEV100(): number {
+        return this.#minEV100;
+    }
+
+    /** [KO] 자동 노출 최소 EV100을 설정합니다. [EN] Sets the minimum EV100 for auto-exposure. */
+    set minEV100(value: number) {
+        this.#minEV100 = value;
+    }
+
+    /** [KO] 자동 노출 최대 EV100을 반환합니다. [EN] Returns the maximum EV100 for auto-exposure. */
+    get maxEV100(): number {
+        return this.#maxEV100;
+    }
+
+    /** [KO] 자동 노출 최대 EV100을 설정합니다. [EN] Sets the maximum EV100 for auto-exposure. */
+    set maxEV100(value: number) {
+        this.#maxEV100 = value;
+    }
+
+    /** [KO] 눈 적응 속도(밝아질 때)를 반환합니다. [EN] Returns the eye adaptation speed (brightening). */
+    get adaptationSpeedUp(): number {
+        return this.#adaptationSpeedUp;
+    }
+
+    /** [KO] 눈 적응 속도(밝아질 때)를 설정합니다. [EN] Sets the eye adaptation speed (brightening). */
+    set adaptationSpeedUp(value: number) {
+        this.#adaptationSpeedUp = value;
+    }
+
+    /** [KO] 눈 적응 속도(어두워질 때)를 반환합니다. [EN] Returns the eye adaptation speed (darkening). */
+    get adaptationSpeedDown(): number {
+        return this.#adaptationSpeedDown;
+    }
+
+    /** [KO] 눈 적응 속도(어두워질 때)를 설정합니다. [EN] Sets the eye adaptation speed (darkening). */
+    set adaptationSpeedDown(value: number) {
+        this.#adaptationSpeedDown = value;
+    }
+
+    /** [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 반환합니다. [EN] Returns the histogram analysis range (exclude bottom percentile). */
+    get lowPercentile(): number {
+        return this.#lowPercentile;
+    }
+
+    /** [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 설정합니다. [EN] Sets the histogram analysis range (exclude bottom percentile). */
+    set lowPercentile(value: number) {
+        this.#lowPercentile = value;
+    }
+
+    /** [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 반환합니다. [EN] Returns the histogram analysis range (exclude top percentile). */
+    get highPercentile(): number {
+        return this.#highPercentile;
+    }
+
+    /** [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 설정합니다. [EN] Sets the histogram analysis range (exclude top percentile). */
+    set highPercentile(value: number) {
+        this.#highPercentile = value;
+    }
+
+    /** [KO] 자동 노출의 최대 증폭 배율을 반환합니다. [EN] Returns the maximum exposure multiplier for auto-exposure. */
+    get maxExposureMultiplier(): number {
+        return this.#maxExposureMultiplier;
+    }
+
+    /** [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 16.0) [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 16.0) */
+    set maxExposureMultiplier(value: number) {
+        this.#maxExposureMultiplier = value;
+    }
+
+    /** [KO] 자동 노출의 측광 모드(Metering Mode)를 반환합니다. [EN] Returns the metering mode for auto-exposure. */
+    get meteringMode(): METERING_MODE {
+        return this.#meteringMode;
+    }
+
+    /** [KO] 자동 노출의 측광 모드(Metering Mode)를 설정합니다. [EN] Sets the metering mode for auto-exposure. */
+    set meteringMode(value: METERING_MODE) {
+        this.#meteringMode = value;
+    }
+
     /**
      * [KO] 현재 적응된 노출 배율(preExposure)을 반환합니다.
      * [EN] Returns the currently adapted exposure multiplier (preExposure).
      */
     get preExposure(): number {
-        const {toneMappingManager, rawCamera} = this.#view;
-        return this.#calculatePreExposure(rawCamera.ev100, toneMappingManager.targetLuminance, toneMappingManager.exposureCompensation);
+        const {rawCamera} = this.#view;
+        return this.#calculatePreExposure(rawCamera.ev100, this.#targetLuminance, this.#exposureCompensation);
     }
 
     /**
@@ -96,8 +210,8 @@ class AutoExposure {
             label: 'AutoExposure_ReadBuffer'
         });
 
-        // [KO] 통합 유니폼 데이터 구성 (총 16개 요소) [EN] Unified uniform data configuration (total 16 elements)
-        const uniformData = new Float32Array(16);
+        // [KO] 통합 유니폼 데이터 구성 (총 17개 요소) [EN] Unified uniform data configuration (total 17 elements)
+        const uniformData = new Float32Array(17);
         this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }
 
@@ -141,36 +255,37 @@ class AutoExposure {
     render(view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
         const {gpuDevice} = this.#redGPUContext;
         const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
-        const {rawCamera, toneMappingManager, renderViewStateData} = view;
+        const {rawCamera, renderViewStateData} = view;
         const {deltaTime} = renderViewStateData;
 
-        const ev100Range = toneMappingManager.maxEV100 - toneMappingManager.minEV100;
+        const ev100Range = this.#maxEV100 - this.#minEV100;
 
         // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
         // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
-        const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, toneMappingManager.targetLuminance, toneMappingManager.exposureCompensation);
+        const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#targetLuminance, this.#exposureCompensation);
 
-        // Update uniforms (총 16개 필드 순서 유지)
+        // Update uniforms (총 17개 필드로 확장)
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer, 
             0, 
             new Float32Array([
                 deltaTime, 
-                toneMappingManager.targetLuminance, 
-                toneMappingManager.adaptationSpeedUp, 
-                toneMappingManager.adaptationSpeedDown, 
-                toneMappingManager.exposureCompensation, 
-                toneMappingManager.minEV100, 
-                toneMappingManager.maxEV100,
+                this.#targetLuminance, 
+                this.#adaptationSpeedUp, 
+                this.#adaptationSpeedDown, 
+                this.#exposureCompensation, 
+                this.#minEV100, 
+                this.#maxEV100,
                 ACamera.CALIBRATION_CONSTANT,
                 ev100Range,
-                toneMappingManager.lowPercentile,
-                toneMappingManager.highPercentile,
+                this.#lowPercentile,
+                this.#highPercentile,
                 1.0 / ev100Range,
                 width,
                 height,
                 currentPreExposure,
-                toneMappingManager.maxExposureMultiplier
+                this.#maxExposureMultiplier,
+                this.#meteringMode
             ])
         );
         

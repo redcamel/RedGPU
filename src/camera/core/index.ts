@@ -6,9 +6,11 @@
 import ACamera from "./ACamera";
 import AController from "./AController";
 import AutoExposure from "./autoExposure/AutoExposure";
+import METERING_MODE from "./METERING_MODE";
 
 export {
     ACamera,
     AController,
-    AutoExposure
-}
+    AutoExposure,
+    METERING_MODE
+};

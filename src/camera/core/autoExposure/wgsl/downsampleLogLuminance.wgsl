@@ -19,7 +19,8 @@ struct AutoExposureUniforms {
     width: f32,
     height: f32,
     currentPreExposure: f32,
-    maxExposureMultiplier: f32
+    maxExposureMultiplier: f32,
+    meteringMode: f32
 };
 @group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;
 
@@ -45,6 +46,24 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         
         let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
         let binIndex = u32(normalizedEV100 * 63.0);
-        atomicAdd(&histogram[binIndex], 1u);
+
+        // [KO] 측광 가중치 계산 [EN] Calculate metering weight
+        var weight = 1.0;
+        let uv = vec2<f32>(f32(global_id.x) / uniforms.width, f32(global_id.y) / uniforms.height);
+        let dist = distance(uv, vec2<f32>(0.5, 0.5));
+
+        if (uniforms.meteringMode == 1.0) {
+            // [KO] 중앙 중점 측광 (Center-weighted) [EN] Center-weighted
+            weight = clamp(1.0 - dist * 1.0, 0.0, 1.0);
+            weight = weight * weight; // [KO] 부드러운 감쇄 [EN] Smooth falloff
+        } else if (uniforms.meteringMode == 2.0) {
+            // [KO] 스포트 측광 (Spot) [EN] Spot
+            weight = clamp(1.0 - dist * 4.0, 0.0, 1.0);
+            weight = weight * weight * weight * weight; // [KO] 중앙 집중 [EN] Highly concentrated
+        }
+
+        // [KO] 가중치를 반영하여 히스토그램에 누적 (0~255 스케일링)
+        // [EN] Accumulate into histogram with weight (scaled 0-255)
+        atomicAdd(&histogram[binIndex], u32(weight * 255.0));
     }
 }
