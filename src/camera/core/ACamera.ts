@@ -29,7 +29,7 @@ abstract class ACamera {
      * [KO] 셔터 속도 (초)
      * [EN] Shutter speed (seconds)
      */
-    #shutterSpeed: number = 1 / 125;
+    #shutterSpeed: number = 1 / 3200;
 
     /**
      * [KO] 센서 감도 (ISO)

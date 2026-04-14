@@ -355,10 +355,10 @@ class PostEffectManager {
         this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
 
         const {useAutoExposure} = this.#view.rawCamera;
-        if (!this.#prevUseAutoExposure && useAutoExposure) {
-            this.autoExposure.currentAdaptedEV100 = this.#view.rawCamera.ev100;
-        }
-        this.#prevUseAutoExposure = useAutoExposure;
+        // if (!this.#prevUseAutoExposure && useAutoExposure) {
+        //     this.autoExposure.currentAdaptedEV100 = this.#view.rawCamera.ev100;
+        // }
+        // this.#prevUseAutoExposure = useAutoExposure;
 
         let currentTextureView = {
             texture: this.#storageTexture,
