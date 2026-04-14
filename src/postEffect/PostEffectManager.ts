@@ -12,6 +12,7 @@ import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
 import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
 import SystemUniformUpdater from "../renderer/SystemUniformUpdater";
+import updateSystemUniformData from "../renderer/updateSystemUniformData";
 import AutoExposure from "./effects/autoExposure/AutoExposure";
 import ToneMappingManager from "../toneMapping/ToneMappingManager";
 
@@ -150,7 +151,7 @@ class PostEffectManager {
      */
     get autoExposure(): AutoExposure {
         if (!this.#autoExposure) {
-            this.#autoExposure = new AutoExposure(this.#view.redGPUContext);
+            this.#autoExposure = new AutoExposure(this.#view);
         }
         return this.#autoExposure;
     }
@@ -527,6 +528,12 @@ class PostEffectManager {
                 this.#uniformDataF32,
                 this.#uniformDataU32
             )
+            updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
+                {
+                    key: 'preExposure',
+                    value: this.autoExposure.preExposure
+                }
+            ]);
         }
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
     }

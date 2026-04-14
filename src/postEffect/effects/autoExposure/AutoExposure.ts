@@ -13,6 +13,7 @@ import ACamera from "../../../camera/core/ACamera";
  */
 class AutoExposure {
     readonly #redGPUContext: RedGPUContext;
+    readonly #view: View3D;
     #adaptedEV100Buffer: StorageBuffer;
     #histogramBuffer: StorageBuffer;
     
@@ -31,10 +32,20 @@ class AutoExposure {
     #readBuffer: GPUBuffer;
     #isReading: boolean = false;
 
-    constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+    constructor(view: View3D) {
+        this.#view = view;
+        this.#redGPUContext = view.redGPUContext;
         this.#initResources();
         this.#initPipelines();
+    }
+
+    /**
+     * [KO] 현재 적응된 노출 배율(preExposure)을 반환합니다.
+     * [EN] Returns the currently adapted exposure multiplier (preExposure).
+     */
+    get preExposure(): number {
+        const {toneMappingManager, rawCamera} = this.#view;
+        return AutoExposure.calculatePreExposure(rawCamera.ev100, toneMappingManager.targetLuminance, toneMappingManager.exposureCompensation);
     }
 
     /**
@@ -53,6 +64,20 @@ class AutoExposure {
         this.#currentAdaptedEV100 = value;
         const initialData = new Float32Array([value]);
         this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, initialData.buffer);
+    }
+
+    /**
+     * [KO] EV100 기반으로 물리적 노출 배율(preExposure)을 계산합니다. (UE5 표준 물리 노출 공식)
+     * [EN] Calculates physical exposure multiplier (preExposure) based on EV100. (UE5 standard physical exposure formula)
+     * @param ev100 - [KO] 물리적 노출 지수 [EN] Physical exposure value (EV100)
+     * @param targetLuminance - [KO] 목표 휘도 [EN] Target luminance
+     * @param exposureCompensation - [KO] 노출 보정 값 [EN] Exposure compensation value
+     * @returns [KO] 계산된 노출 배율 [EN] Calculated exposure multiplier
+     */
+    static calculatePreExposure(ev100: number, targetLuminance: number, exposureCompensation: number): number {
+        // [KO] UE5 표준 물리 노출 공식 적용: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+        // [EN] Apply UE5 standard physical exposure formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
+        return (100 * targetLuminance * Math.pow(2, exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
     }
 
     #initResources() {
@@ -127,11 +152,7 @@ class AutoExposure {
         
         // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
         // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
-        const currentPreExposure = (() => {
-            // [KO] UE5 표준 물리 노출 공식 적용: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-            // [EN] Apply UE5 standard physical exposure formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-            return (100 * toneMappingManager.targetLuminance * Math.pow(2, toneMappingManager.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, rawCamera.ev100));
-        })();
+        const currentPreExposure = AutoExposure.calculatePreExposure(rawCamera.ev100, toneMappingManager.targetLuminance, toneMappingManager.exposureCompensation);
 
         // Update uniforms (총 16개 필드 순서 유지)
         gpuDevice.queue.writeBuffer(

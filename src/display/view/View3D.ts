@@ -26,6 +26,7 @@ import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
 import ACamera from "../../camera/core/ACamera";
+import AutoExposure from "../../postEffect/effects/autoExposure/AutoExposure";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -163,7 +164,7 @@ class View3D extends AView {
     }
 
     #updateSystemUniform() {
-        const { inverseProjectionMatrix, noneJitterProjectionMatrix, projectionMatrix, rawCamera } = this;
+        const { inverseProjectionMatrix, noneJitterProjectionMatrix, projectionMatrix, rawCamera, toneMappingManager } = this;
         rawCamera.updateExposure(this);
 
         const {redGPUContext, systemUniform_Vertex_UniformBuffer} = this
@@ -206,12 +207,7 @@ class View3D extends AView {
                 {key: 'directionalLightViewMatrix', value: lightManager.getDirectionalLightViewMatrix(this)},
                 {
                     key: 'preExposure',
-                    value: (() => {
-                        const {rawCamera, toneMappingManager} = this;
-                        // [KO] UE5 표준 물리 노출 공식 적용: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-                        // [EN] Apply UE5 standard physical exposure formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-                        return (100 * toneMappingManager.targetLuminance * Math.pow(2, toneMappingManager.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, rawCamera.ev100));
-                    })()
+                    value: this.postEffectManager.autoExposure.preExposure
                 },
                 ]);
         }
