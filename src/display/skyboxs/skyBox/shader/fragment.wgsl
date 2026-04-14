@@ -69,6 +69,13 @@ fn main(inputData: InputData) -> OutputFragment {
         #redgpu_endIf
     }
 
+    // [KO] 강도 및 노출 보정 (머티리얼 강도 * 직사광 강도 * Pre-Exposure)
+    // [EN] Intensity and Exposure Correction (Material Intensity * Directional Light Intensity * Pre-Exposure)
+    var finalIntensity: f32 = 1.0;
+    if (systemUniforms.directionalLightCount > 0u) {
+        finalIntensity *= systemUniforms.directionalLights[0].intensity * systemUniforms.preExposure;
+    }
+
     var finalAlpha = sampleColor.a * uniforms.opacity;
 
     // [KO] 대기가 활성화된 경우 투과율을 알파에 반영 (우주는 대기 너머에 있음)
@@ -76,18 +83,19 @@ fn main(inputData: InputData) -> OutputFragment {
     if (systemUniforms.useSkyAtmosphere == 1u) {
         let u_atmo = systemUniforms.skyAtmosphere;
         let transmittance = getTransmittance(
-            transmittanceTexture, 
-            atmosphereSampler, 
-            u_atmo.cameraHeight, 
-            viewDir.y, 
+            transmittanceTexture,
+            atmosphereSampler,
+            u_atmo.cameraHeight,
+            viewDir.y,
             u_atmo.atmosphereHeight
         );
         // RGB 투과율의 평균을 사용하여 배경의 가시성 결정
         let T = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
         finalAlpha *= T;
+        finalIntensity = systemUniforms.preExposure;
     }
 
-    var outColor = vec4<f32>(sampleColor.rgb, finalAlpha);
+    var outColor = vec4<f32>(sampleColor.rgb * finalIntensity , finalAlpha);
     if (outColor.a == 0.0) {
         discard;
     }
