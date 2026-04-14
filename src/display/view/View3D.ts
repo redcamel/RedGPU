@@ -26,7 +26,7 @@ import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
 import ACamera from "../../camera/core/ACamera";
-import AutoExposure from "../../postEffect/effects/autoExposure/AutoExposure";
+import AutoExposure from "../../camera/core/autoExposure/AutoExposure";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;

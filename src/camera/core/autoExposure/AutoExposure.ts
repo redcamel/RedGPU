@@ -1,11 +1,11 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
-import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
+import {ASinglePassPostEffectResult} from "../../../postEffect/core/ASinglePassPostEffect";
 import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import downsampleLogLuminanceCode from "./wgsl/downsampleLogLuminance.wgsl";
 import adaptationCode from "./wgsl/adaptation.wgsl";
-import ACamera from "../../../camera/core/ACamera";
+import ACamera from "../ACamera";
 
 /**
  * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
@@ -23,10 +23,8 @@ class AutoExposure {
     #downsampleBindGroupLayout0: GPUBindGroupLayout;
     #downsampleBindGroupLayout1: GPUBindGroupLayout;
     #adaptationBindGroupLayout0: GPUBindGroupLayout;
-    
-    #uniformBuffer: UniformBuffer;
 
-    #prevTime: number = 0;
+    #uniformBuffer: UniformBuffer;
 
     #currentAdaptedEV100: number = 3.9;
     #readBuffer: GPUBuffer;
@@ -45,7 +43,7 @@ class AutoExposure {
      */
     get preExposure(): number {
         const {toneMappingManager, rawCamera} = this.#view;
-        return AutoExposure.calculatePreExposure(rawCamera.ev100, toneMappingManager.targetLuminance, toneMappingManager.exposureCompensation);
+        return this.#calculatePreExposure(rawCamera.ev100, toneMappingManager.targetLuminance, toneMappingManager.exposureCompensation);
     }
 
     /**
@@ -74,7 +72,7 @@ class AutoExposure {
      * @param exposureCompensation - [KO] 노출 보정 값 [EN] Exposure compensation value
      * @returns [KO] 계산된 노출 배율 [EN] Calculated exposure multiplier
      */
-    static calculatePreExposure(ev100: number, targetLuminance: number, exposureCompensation: number): number {
+    #calculatePreExposure(ev100: number, targetLuminance: number, exposureCompensation: number): number {
         // [KO] UE5 표준 물리 노출 공식 적용: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
         // [EN] Apply UE5 standard physical exposure formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
         return (100 * targetLuminance * Math.pow(2, exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
@@ -82,12 +80,12 @@ class AutoExposure {
 
     #initResources() {
         const {gpuDevice} = this.#redGPUContext;
-        
+
         // [KO] 초기 EV100 값 설정 (0.18 휘도에 해당하는 약 3.9 EV)
         // [EN] Set initial EV100 value (approx. 3.9 EV for 0.18 luminance)
         const initialData = new Float32Array([3.9]);
         this.#adaptedEV100Buffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
-        
+
         // [KO] 히스토그램 버퍼 (64 bins) [EN] Histogram buffer (64 bins)
         this.#histogramBuffer = new StorageBuffer(this.#redGPUContext, new Uint32Array(64).buffer, 'AutoExposure_HistogramBuffer');
 
@@ -97,7 +95,7 @@ class AutoExposure {
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
             label: 'AutoExposure_ReadBuffer'
         });
-        
+
         // [KO] 통합 유니폼 데이터 구성 (총 16개 요소) [EN] Unified uniform data configuration (total 16 elements)
         const uniformData = new Float32Array(16);
         this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
@@ -105,10 +103,10 @@ class AutoExposure {
 
     #initPipelines() {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
-        
+
         const downsampleModule = resourceManager.createGPUShaderModule('AutoExposure_Downsample', { code: downsampleLogLuminanceCode });
         const adaptationModule = resourceManager.createGPUShaderModule('AutoExposure_Adaptation', { code: adaptationCode });
-        
+
         this.#downsampleBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Downsample_BGL0', {
             entries: [{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} }]
         });
@@ -118,7 +116,7 @@ class AutoExposure {
                 { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }
             ]
         });
-        
+
         this.#adaptationBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Adaptation_BGL0', {
             entries: [
                 { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
@@ -126,13 +124,13 @@ class AutoExposure {
                 { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }
             ]
         });
-        
+
         this.#downsamplePipeline = gpuDevice.createComputePipeline({
             label: 'AutoExposure_Downsample_Pipeline',
             layout: gpuDevice.createPipelineLayout({ bindGroupLayouts: [this.#downsampleBindGroupLayout0, this.#downsampleBindGroupLayout1] }),
             compute: { module: downsampleModule, entryPoint: 'main' }
         });
-        
+
         this.#adaptationPipeline = gpuDevice.createComputePipeline({
             label: 'AutoExposure_Adaptation_Pipeline',
             layout: gpuDevice.createPipelineLayout({ bindGroupLayouts: [this.#adaptationBindGroupLayout0] }),
@@ -143,16 +141,14 @@ class AutoExposure {
     render(view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
         const {gpuDevice} = this.#redGPUContext;
         const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
-        const {rawCamera, toneMappingManager} = view;
-        const currentTime = performance.now();
-        const deltaTime = this.#prevTime === 0 ? 0.016 : (currentTime - this.#prevTime) / 1000;
-        this.#prevTime = currentTime;
-        
+        const {rawCamera, toneMappingManager, renderViewStateData} = view;
+        const {deltaTime} = renderViewStateData;
+
         const ev100Range = toneMappingManager.maxEV100 - toneMappingManager.minEV100;
-        
+
         // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
         // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
-        const currentPreExposure = AutoExposure.calculatePreExposure(rawCamera.ev100, toneMappingManager.targetLuminance, toneMappingManager.exposureCompensation);
+        const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, toneMappingManager.targetLuminance, toneMappingManager.exposureCompensation);
 
         // Update uniforms (총 16개 필드 순서 유지)
         gpuDevice.queue.writeBuffer(

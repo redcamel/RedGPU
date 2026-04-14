@@ -5,8 +5,10 @@
  */
 import ACamera from "./ACamera";
 import AController from "./AController";
+import AutoExposure from "./autoExposure/AutoExposure";
 
 export {
     ACamera,
-    AController
+    AController,
+    AutoExposure
 }

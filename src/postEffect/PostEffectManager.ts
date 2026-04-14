@@ -13,7 +13,7 @@ import SSR from "./effects/ssr/SSR";
 import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
 import SystemUniformUpdater from "../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/updateSystemUniformData";
-import AutoExposure from "./effects/autoExposure/AutoExposure";
+import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import ToneMappingManager from "../toneMapping/ToneMappingManager";
 
 /**
