@@ -22,7 +22,7 @@ RedGPU.init(
         
         // [KO] 자동 노출을 활성화하여 물리적 수치가 낮아도 화면에 잘 보이게 설정
         // [EN] Enable Auto Exposure to ensure visibility even with low physical values
-        view.postEffectManager.useAutoExposure = true;
+        controller.camera.useAutoExposure = true;
         
         redGPUContext.addView(view);
 
@@ -163,13 +163,13 @@ const renderTestPaneWithLightControl = async (redGPUContext, light, view) => {
         aperture: camera.aperture,
         shutterSpeed: 1 / camera.shutterSpeed,
         iso: camera.iso,
-        useAutoExposure: view.postEffectManager.useAutoExposure,
+        useAutoExposure: camera.useAutoExposure,
         ev100: camera.ev100,
         exposure: camera.exposure,
         autoExposureMultiplier: toneMappingManager.autoExposureMultiplier
     };
     const cameraFolder = pane.addFolder({title: 'Camera: Physical Settings', expanded: true});
-    cameraFolder.addBinding(cameraConfig, 'useAutoExposure', {label: 'Auto Exposure'}).on('change', (evt) => { view.postEffectManager.useAutoExposure = evt.value; });
+    cameraFolder.addBinding(cameraConfig, 'useAutoExposure', {label: 'Auto Exposure'}).on('change', (evt) => { camera.useAutoExposure = evt.value; });
     
     const lensFolder = cameraFolder.addFolder({title: 'Lens & Sensor', expanded: true});
     lensFolder.addBinding(cameraConfig, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'}).on('change', (evt) => { camera.aperture = evt.value; });

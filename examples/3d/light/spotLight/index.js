@@ -22,7 +22,7 @@ RedGPU.init(
         
         // [KO] 자동 노출 활성화 (UE5 방식)
         // [EN] Enable Auto Exposure (UE5 style)
-        view.postEffectManager.useAutoExposure = true;
+        controller.camera.useAutoExposure = true;
         
         redGPUContext.addView(view);
 
@@ -164,12 +164,12 @@ const renderTestPaneWithLightControl = async (redGPUContext, light, view) => {
         aperture: camera.aperture,
         shutterSpeed: 1 / camera.shutterSpeed,
         iso: camera.iso,
-        useAutoExposure: view.postEffectManager.useAutoExposure,
+        useAutoExposure: camera.useAutoExposure,
         ev100: camera.ev100,
         autoExposureMultiplier: toneMappingManager.autoExposureMultiplier
     };
     const cameraFolder = pane.addFolder({title: 'Camera: Physical Settings', expanded: true});
-    cameraFolder.addBinding(cameraConfig, 'useAutoExposure', {label: 'Auto Exposure'}).on('change', (evt) => { view.postEffectManager.useAutoExposure = evt.value; });
+    cameraFolder.addBinding(cameraConfig, 'useAutoExposure', {label: 'Auto Exposure'}).on('change', (evt) => { camera.useAutoExposure = evt.value; });
     
     const lensFolder = cameraFolder.addFolder({title: 'Lens & Sensor', expanded: false});
     lensFolder.addBinding(cameraConfig, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'}).on('change', (evt) => { camera.aperture = evt.value; });

@@ -164,6 +164,8 @@ class View3D extends AView {
 
     #updateSystemUniform() {
         const { inverseProjectionMatrix, noneJitterProjectionMatrix, projectionMatrix, rawCamera } = this;
+        rawCamera.updateExposure(this);
+
         const {redGPUContext, systemUniform_Vertex_UniformBuffer} = this
         const {gpuDevice} = redGPUContext
         const {lightManager, shadowManager} = this.scene
@@ -205,16 +207,10 @@ class View3D extends AView {
                 {
                     key: 'preExposure',
                     value: (() => {
-                        const {rawCamera, postEffectManager, toneMappingManager} = this;
-                        // [KO] 모드에 따라 EV100 선택 (자동 노출 시에는 적응된 EV100 사용)
-                        // [EN] Select EV100 based on mode (use adapted EV100 for auto exposure)
-                        const ev100 = postEffectManager.useAutoExposure
-                            ? postEffectManager.autoExposure.currentAdaptedEV100
-                            : rawCamera.ev100;
-
+                        const {rawCamera, toneMappingManager} = this;
                         // [KO] UE5 표준 물리 노출 공식 적용: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
                         // [EN] Apply UE5 standard physical exposure formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-                        return (100 * toneMappingManager.targetLuminance * Math.pow(2, toneMappingManager.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
+                        return (100 * toneMappingManager.targetLuminance * Math.pow(2, toneMappingManager.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, rawCamera.ev100));
                     })()
                 },
                 ]);

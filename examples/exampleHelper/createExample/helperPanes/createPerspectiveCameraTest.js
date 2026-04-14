@@ -17,10 +17,28 @@ const createPerspectiveCameraTest = (pane, camera, openYn = true) => {
 
     // 2. 물리적 노출 설정 (Physical Exposure)
     const exposureFolder = folder.addFolder({ title: 'Exposure', expanded: true });
-    exposureFolder.addBinding(camera, 'aperture', { label: 'Aperture (f-stop)', min: 1.0, max: 32.0, step: 0.1 });
-    exposureFolder.addBinding(camera, 'shutterSpeed', { label: 'Shutter Speed (s)', min: 0.00025, max: 1.0, step: 0.0001 });
-    exposureFolder.addBinding(camera, 'iso', { label: 'ISO', min: 50, max: 3200, step: 1 });
-    
+    const autoExposureBinding = exposureFolder.addBinding(camera, 'useAutoExposure', { label: 'Auto Exposure' });
+
+    let manualFolder = null;
+    const refreshManualSettings = (isAuto) => {
+        // 기존 폴더가 있다면 삭제
+        if (manualFolder) {
+            manualFolder.dispose();
+            manualFolder = null;
+        }
+
+        // 자동 노출이 꺼져 있을 때만(Manual 모드) 폴더 생성
+        if (!isAuto) {
+            manualFolder = exposureFolder.addFolder({ title: 'Manual Settings', expanded: true });
+            manualFolder.addBinding(camera, 'aperture', { min: 1.0, max: 32.0, step: 0.1 });
+            manualFolder.addBinding(camera, 'shutterSpeed', {  min: 0.00025, max: 1.0, step: 0.0001 });
+            manualFolder.addBinding(camera, 'iso', { min: 50, max: 3200, step: 1 });
+        }
+    };
+
+    autoExposureBinding.on('change', (evt) => refreshManualSettings(evt.value));
+    refreshManualSettings(camera.useAutoExposure);
+
     // 결과 EV100 표시 (Read-only)
     exposureFolder.addBinding(camera, 'ev100', { label: 'EV100', readonly: true, view: 'text', format: (v) => v.toFixed(2) });
 };

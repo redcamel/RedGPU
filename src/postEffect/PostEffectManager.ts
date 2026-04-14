@@ -123,7 +123,7 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
     #autoExposure: AutoExposure;
-    #useAutoExposure: boolean = true;
+    #prevUseAutoExposure: boolean = true;
 
     /**
      * [KO] PostEffectManager 인스턴스를 생성합니다.
@@ -138,30 +138,10 @@ class PostEffectManager {
         this.#init()
         // [KO] 초기 구동 시 카메라의 현재 EV100을 자동 노출 시스템에 동기화합니다.
         // [EN] Sync the camera's current EV100 to the auto exposure system during initial startup.
-        if (this.#useAutoExposure) {
+        if (this.#view.rawCamera.useAutoExposure) {
             this.autoExposure.currentAdaptedEV100 = this.#view.rawCamera.ev100;
         }
-    }
-
-    /**
-     * [KO] 자동 노출(Auto Exposure) 사용 여부를 반환합니다.
-     * [EN] Returns whether Auto Exposure is used.
-     */
-    get useAutoExposure(): boolean {
-        return this.#useAutoExposure;
-    }
-
-    /**
-     * [KO] 자동 노출(Auto Exposure) 사용 여부를 설정합니다.
-     * [EN] Sets whether Auto Exposure is used.
-     */
-    set useAutoExposure(value: boolean) {
-        this.#useAutoExposure = value;
-        if (value) {
-            // [KO] 자동 노출을 켤 때 카메라의 현재 EV100 값을 초기값으로 설정하여 급격한 변화를 방지합니다.
-            // [EN] Set the camera's current EV100 as the initial value when enabling auto exposure to prevent sudden changes.
-            this.autoExposure.currentAdaptedEV100 = this.#view.rawCamera.ev100;
-        }
+        this.#prevUseAutoExposure = this.#view.rawCamera.useAutoExposure;
     }
 
     /**
@@ -379,6 +359,12 @@ class PostEffectManager {
         this.#updateSystemUniforms()
         this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
 
+        const {useAutoExposure} = this.#view.rawCamera;
+        if (!this.#prevUseAutoExposure && useAutoExposure) {
+            this.autoExposure.currentAdaptedEV100 = this.#view.rawCamera.ev100;
+        }
+        this.#prevUseAutoExposure = useAutoExposure;
+
         let currentTextureView = {
             texture: this.#storageTexture,
             textureView: this.#sourceTextureView,
@@ -395,7 +381,7 @@ class PostEffectManager {
         }
 
         // Auto Exposure 처리 (HDR 공간에서 수행)
-        if (this.#useAutoExposure) {
+        if (useAutoExposure) {
             this.autoExposure.render(this.#view, currentTextureView);
         }
 
@@ -503,6 +489,7 @@ class PostEffectManager {
             redGPUContext,
             taa
         } = this.#view
+        rawCamera.updateExposure(this.#view);
         const {gpuDevice} = redGPUContext
         const {viewMatrix} = rawCamera
         const structInfo = this.#postEffectSystemUniformBufferStructInfo

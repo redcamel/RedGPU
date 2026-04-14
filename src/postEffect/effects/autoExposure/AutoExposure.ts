@@ -128,12 +128,9 @@ class AutoExposure {
         // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
         // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
         const currentPreExposure = (() => {
-            const ev100 = view.postEffectManager.useAutoExposure
-                ? this.currentAdaptedEV100
-                : rawCamera.ev100;
             // [KO] UE5 표준 물리 노출 공식 적용: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
             // [EN] Apply UE5 standard physical exposure formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-            return (100 * toneMappingManager.targetLuminance * Math.pow(2, toneMappingManager.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
+            return (100 * toneMappingManager.targetLuminance * Math.pow(2, toneMappingManager.exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, rawCamera.ev100));
         })();
 
         // Update uniforms (총 16개 필드 순서 유지)
