@@ -71,9 +71,9 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // [KO] 강도 및 노출 보정 (머티리얼 강도 * 직사광 강도 * Pre-Exposure)
     // [EN] Intensity and Exposure Correction (Material Intensity * Directional Light Intensity * Pre-Exposure)
-    var finalIntensity: f32 = 1.0;
+    var finalIntensity: f32 = systemUniforms.preExposure;
     if (systemUniforms.directionalLightCount > 0u) {
-        finalIntensity *= systemUniforms.directionalLights[0].intensity * systemUniforms.preExposure;
+        finalIntensity *= systemUniforms.directionalLights[0].intensity;
     }
 
     var finalAlpha = sampleColor.a * uniforms.opacity;

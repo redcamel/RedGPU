@@ -37,8 +37,8 @@ class AutoExposure {
     #maxEV100: number = 20.0;
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
-    #lowPercentile: number = 0.8;
-    #highPercentile: number = 1.0;
+    #lowPercentile: number = 0.1;
+    #highPercentile: number = 0.9;
     #maxExposureMultiplier: number = 1.0;
     #meteringMode: METERING_MODE = METERING_MODE.CENTER_WEIGHTED;
     #targetLuminance: number = 0.18;

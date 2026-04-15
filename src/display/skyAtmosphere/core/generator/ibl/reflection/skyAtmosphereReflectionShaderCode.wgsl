@@ -38,6 +38,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         totalRadiance += textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
         }
 
-        let radiance = totalRadiance / f32(SAMPLE_COUNT) * PI * 0.5;
+        let radiance = totalRadiance / f32(SAMPLE_COUNT) ;
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }
