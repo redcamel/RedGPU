@@ -9,6 +9,7 @@
 struct Uniforms {
     opacity: f32,
     blur: f32,
+    intensity: f32,
     transitionProgress: f32,
 };
 
@@ -69,11 +70,11 @@ fn main(inputData: InputData) -> OutputFragment {
         #redgpu_endIf
     }
 
-    // [KO] 강도 및 노출 보정 (머티리얼 강도 * 직사광 강도 * Pre-Exposure)
-    // [EN] Intensity and Exposure Correction (Material Intensity * Directional Light Intensity * Pre-Exposure)
-    var finalIntensity: f32 = systemUniforms.preExposure;
+    // [KO] 강도 및 노출 보정 (로컬 강도 * 직사광 강도 * INV_PI * Pre-Exposure)
+    // [EN] Intensity and Exposure Correction (Local Intensity * Directional Light Intensity * INV_PI * Pre-Exposure)
+    var finalIntensity: f32 = uniforms.intensity * systemUniforms.preExposure * INV_PI;
     if (systemUniforms.directionalLightCount > 0u) {
-        finalIntensity *= systemUniforms.directionalLights[0].intensity * INV_PI;
+        finalIntensity *= systemUniforms.directionalLights[0].intensity;
     }
 
     var finalAlpha = sampleColor.a * uniforms.opacity;

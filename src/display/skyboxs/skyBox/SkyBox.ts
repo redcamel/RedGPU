@@ -237,6 +237,29 @@ class SkyBox {
     }
 
     /**
+     * [KO] 스카이박스의 강도(물리적 휘도 배율)를 반환합니다.
+     * [EN] Returns the skybox intensity (Physical radiance multiplier).
+     */
+    get intensity(): number {
+        return this.#material.intensity;
+    }
+
+    /**
+     * [KO] 스카이박스의 강도(물리적 휘도 배율)를 설정합니다.
+     * [EN] Sets the skybox intensity (Physical radiance multiplier).
+     * @param value -
+     * [KO] 강도 값 (기본값: 1.0)
+     * [EN] Intensity value (Default: 1.0)
+     * @throws
+     * [KO] 값이 0보다 작은 경우 Error 발생
+     * [EN] Throws Error if value is less than 0
+     */
+    set intensity(value: number) {
+        validatePositiveNumberRange(value, 0)
+        this.#material.intensity = value;
+    }
+
+    /**
      * [KO] 현재 스카이박스 텍스처를 반환합니다.
      * [EN] Returns the current skybox texture.
      */

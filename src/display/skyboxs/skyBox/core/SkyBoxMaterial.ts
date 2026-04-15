@@ -24,6 +24,8 @@ interface SkyBoxMaterial {
     blur: number;
     /** [KO] 불투명도 [EN] Opacity */
     opacity: number;
+    /** [KO] 강도 (물리적 휘도 배율) [EN] Intensity (Physical radiance multiplier) */
+    intensity: number;
     /** [KO] 전환 진행률 [EN] Transition progress */
     transitionProgress: number;
 }
@@ -76,6 +78,7 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
     ['blur', 0],
     ['opacity', 1, 0, 1],
+    ['intensity', 1],
 ])
 DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
     ['transitionProgress', 0],
