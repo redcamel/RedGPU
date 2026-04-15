@@ -456,15 +456,6 @@ fn evaluateIBLRadianceCompensated(
     let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
     radiance += mieGlow;
 
-    // [KO] 태양 본체 대신 넓은 에너지 보정 로브 적용 (조도 계산용)
-    if (!isGround) {
-        let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunDir.y, atmosphereHeight);
-        let sunRad = (params.sunSize * 0.5) * DEG_TO_RAD;
-        let lobeHalfAngle = clamp(sunRad * 4.0, 0.1, 0.6); // [KO] 태양 에너지를 넓게 퍼트림
-        let sunLobe = getSpecularSunLobe(viewSunCos, lobeHalfAngle);
-        radiance += sunTrans * sunLobe;
-    }
-
     return radiance;
 }
 

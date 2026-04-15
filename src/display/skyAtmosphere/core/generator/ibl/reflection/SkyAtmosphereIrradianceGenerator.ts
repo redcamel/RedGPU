@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
-import reflectionShaderCode_wgsl from "./skyAtmosphereReflectionShaderCode.wgsl";
+import irradianceShaderCode_wgsl from "./skyAtmosphereIrradianceShaderCode.wgsl";
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
@@ -10,45 +10,31 @@ import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 import AtmosphereShaderLibrary from "../../../AtmosphereShaderLibrary";
 
-const REFLECTION_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_Generator', reflectionShaderCode_wgsl, AtmosphereShaderLibrary);
+const IRRADIANCE_SHADER_INFO = parseWGSL('SkyAtmosphere_Irradiance_Generator', irradianceShaderCode_wgsl, AtmosphereShaderLibrary);
 
 /**
- * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사 큐브맵을 생성하는 클래스입니다.
- * [EN] Class that generates a pre-filtered reflection cubemap based on real-time atmospheric scattering data.
+ * [KO] 실시간 대기 산란 데이터를 기반으로 조도용(Diffuse) 큐브맵을 생성하는 클래스입니다.
+ * [EN] Class that generates an irradiance (diffuse) cubemap based on real-time atmospheric scattering data.
  *
- * [KO] 대기 산란 데이터를 큐브맵으로 렌더링한 후 GGX 프리필터링을 통해 거칠기(Roughness)별 반사 데이터를 생성합니다.
- * [EN] Renders atmospheric scattering data to a cubemap, then generates reflection data by roughness through GGX pre-filtering.
- *
- * @example
- * ```typescript
- * const reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, sharedUniformBuffer, sampler);
- * await reflectionGenerator.render(transmittance, multiScat, skyView);
- * ```
  * @category SkyAtmosphere
  */
-class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
+class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	#sourceCubeTexture: GPUTexture;
 	#sourceCubeTextureView: GPUTextureView;
 	#prefilteredTexture: DirectCubeTexture;
-	#reflectionPipeline: GPUComputePipeline;
-	#reflectionBindGroup: GPUBindGroup;
+	#pipeline: GPUComputePipeline;
+	#bindGroup: GPUBindGroup;
 
 	/**
-	 * [KO] SkyAtmosphereReflectionGenerator 인스턴스를 초기화합니다.
-	 * [EN] Initializes a SkyAtmosphereReflectionGenerator instance.
+	 * [KO] SkyAtmosphereIrradianceGenerator 인스턴스를 초기화합니다.
+	 * [EN] Initializes a SkyAtmosphereIrradianceGenerator instance.
 	 *
-	 * @param redGPUContext -
-	 * [KO] RedGPU 컨텍스트
-	 * [EN] RedGPU context
-	 * @param sharedUniformBuffer -
-	 * [KO] 공유 유니폼 버퍼
-	 * [EN] Shared uniform buffer
-	 * @param sampler -
-	 * [KO] LUT 샘플링에 사용할 샘플러
-	 * [EN] Sampler to be used for LUT sampling
+	 * @param redGPUContext - RedGPU 컨텍스트
+	 * @param sharedUniformBuffer - 공유 유니폼 버퍼
+	 * @param sampler - LUT 샘플링에 사용할 샘플러
 	 */
 	constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-		super(redGPUContext, sharedUniformBuffer, sampler, 'Reflection_Gen', 256, 256, 6);
+		super(redGPUContext, sharedUniformBuffer, sampler, 'Irradiance_Gen', 256, 256, 6);
 		this.#init();
 	}
 
@@ -69,61 +55,41 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 	}
 
 	/**
-	 * [KO] 생성된 반사 큐브맵(프리필터링된 결과)을 반환합니다.
-	 * [EN] Returns the generated reflection cubemap (pre-filtered result).
+	 * [KO] 생성된 조도용 큐브맵을 반환합니다.
+	 * [EN] Returns the generated irradiance cubemap.
 	 */
 	get lutTexture(): DirectCubeTexture {
 		return this.#prefilteredTexture;
 	}
 
 	/**
-	 * [KO] 반사 큐브맵을 생성하고 프리필터링을 수행합니다.
-	 * [EN] Generates the reflection cubemap and performs pre-filtering.
+	 * [KO] 조도 큐브맵을 생성하고 프리필터링을 수행합니다.
+	 * [EN] Generates the irradiance cubemap and performs pre-filtering.
 	 *
-	 * @example
-	 * ```typescript
-	 * await reflectionGenerator.render(transmittance, multiScat, skyView);
-	 * ```
-	 * @param transmittance -
-	 * [KO] 투과율 LUT 텍스처
-	 * [EN] Transmittance LUT texture
-	 * @param multiScat -
-	 * [KO] 다중 산란 LUT 텍스처
-	 * [EN] Multi-Scattering LUT texture
-	 * @param skyView -
-	 * [KO] 스카이 뷰 LUT 텍스처
-	 * [EN] Sky-View LUT texture
+	 * @param transmittance - 투과율 LUT 텍스처
+	 * @param multiScat - 다중 산란 LUT 텍스처
+	 * @param skyView - 스카이 뷰 LUT 텍스처
 	 */
 	// @ts-ignore
 	async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
-		// [KO] 바인드 그룹이 없는 경우 초기화합니다.
-		// [EN] Initialize bind groups if they don't exist.
-		if (!this.#reflectionBindGroup) {
-			this.#reflectionBindGroup = this.#createReflectionBindGroup(transmittance, multiScat, skyView);
+		if (!this.#bindGroup) {
+			this.#bindGroup = this.#createBindGroup(transmittance, multiScat, skyView);
 		}
-
-		// [KO] 반사 패스 실행
-		// [EN] Execute reflection pass
-		await this.#processReflectionPass(this.#reflectionPipeline, this.#reflectionBindGroup, this.#prefilteredTexture);
+		await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture);
 	}
 
-	/**
-	 * [KO] 반사 렌더링을 위한 바인드 그룹을 생성합니다.
-	 * [EN] Creates a bind group for reflection rendering.
-	 */
-	#createReflectionBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
-		return this.createBindGroup(`SkyAtmosphere_Reflection_BindGroup_${createUUID()}`, this.#reflectionPipeline, [
+	#createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
+		return this.createBindGroup(`SkyAtmosphere_Irradiance_BindGroup_${createUUID()}`, this.#pipeline, [
 			{binding: 0, resource: this.#sourceCubeTextureView},
+			{binding: 1, resource: multiScat.gpuTextureView},
 			{binding: 2, resource: this.sampler.gpuSampler},
 			{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+			{binding: 4, resource: transmittance.gpuTextureView},
 			{binding: 5, resource: skyView.gpuTextureView}
 		]);
 	}
 
-	/**
-	 * [KO] 단일 반사 패스를 처리합니다.
-	 */
-	async #processReflectionPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
+	async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
 		const {resourceManager} = this.redGPUContext;
 		this.#computeRender(pipeline, bindGroup, [8, 8, 1]);
 		resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
@@ -141,7 +107,7 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 		const mipLevelCount = getMipLevelCount(this.width, this.height);
 
 		this.#sourceCubeTexture = gpuDevice.createTexture({
-			label: 'SkyAtmosphere_Reflection_Source_CubeTexture',
+			label: 'SkyAtmosphere_Irradiance_Source_CubeTexture',
 			size: [this.width, this.height, 6],
 			format: 'rgba16float',
 			usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
@@ -153,10 +119,8 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 			mipLevelCount: 1
 		});
 
-		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_LUTTexture_${createUUID()}`);
-
-		// Pipelines
-		this.#reflectionPipeline = this.createComputePipeline('Base', REFLECTION_SHADER_INFO.defaultSource);
+		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`);
+		this.#pipeline = this.createComputePipeline('Base', IRRADIANCE_SHADER_INFO.defaultSource);
 	}
 
 	#computeRender(
@@ -184,4 +148,4 @@ class SkyAtmosphereReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 	}
 }
 
-export default SkyAtmosphereReflectionGenerator;
+export default SkyAtmosphereIrradianceGenerator;

@@ -7,8 +7,8 @@ import TransmittanceGenerator from "./core/generator/transmittance/Transmittance
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import AerialPerspectiveGenerator from "./core/generator/aerialPerspective/AerialPerspectiveGenerator";
-import SkyAtmosphereReflectionGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionGenerator";
-import SkyAtmosphereReflectionEnergyCompensatedGenerator from "./core/generator/ibl/reflection/SkyAtmosphereReflectionEnergyCompensatedGenerator";
+import SkyAtmosphereSpecularGenerator from "./core/generator/ibl/reflection/SkyAtmosphereSpecularGenerator";
+import SkyAtmosphereIrradianceGenerator from "./core/generator/ibl/reflection/SkyAtmosphereIrradianceGenerator";
 import transmittanceShaderCode_wgsl from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import computeCode_wgsl from "./wgsl/computeCode.wgsl";
 import Sampler from "../../resources/sampler/Sampler";
@@ -55,8 +55,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #skyViewGenerator: SkyViewGenerator;
     #aerialPerspectiveGenerator: AerialPerspectiveGenerator;
     #irradianceLUT: DirectCubeTexture;
-    #reflectionGenerator: SkyAtmosphereReflectionGenerator;
-    #reflectionEnergyCompensatedGenerator: SkyAtmosphereReflectionEnergyCompensatedGenerator;
+    #specularGenerator: SkyAtmosphereSpecularGenerator;
+    #irradianceGenerator: SkyAtmosphereIrradianceGenerator;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
 
@@ -175,8 +175,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 label: 'SkyAtmosphere_Irradiance_LUT'
             })
         );
-        this.#reflectionGenerator = new SkyAtmosphereReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        this.#reflectionEnergyCompensatedGenerator = new SkyAtmosphereReflectionEnergyCompensatedGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#specularGenerator = new SkyAtmosphereSpecularGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#irradianceGenerator = new SkyAtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
 
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
             label: 'SkyAtmosphere_PE_BindGroupLayout_1',
@@ -412,9 +412,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         if (this.#dirtyIBL && !this.#isUpdatingIBL) {
             this.#isUpdatingIBL = true;
             (async () => {
-                await this.#reflectionGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-                await this.#reflectionEnergyCompensatedGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-                await this.redGPUContext.resourceManager.irradianceGenerator.render(this.#reflectionEnergyCompensatedGenerator.sourceCubeTexture, this.#irradianceLUT.gpuTexture);
+                await this.#specularGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+                await this.#irradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
+                await this.redGPUContext.resourceManager.irradianceGenerator.render(this.#irradianceGenerator.sourceCubeTexture, this.#irradianceLUT.gpuTexture);
                 this.#irradianceLUT.notifyUpdate();
                 this.#isUpdatingIBL = false;
             })();
@@ -651,7 +651,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [KO] 프리필터링된 대기 반사 큐브맵을 반환합니다.
      * [EN] Returns the pre-filtered atmospheric reflection cubemap.
      */
-    get skyAtmosphereReflectionLUT(): DirectCubeTexture { return this.#reflectionGenerator.prefilteredTexture; }
+    get skyAtmosphereReflectionLUT(): DirectCubeTexture { return this.#specularGenerator.prefilteredTexture; }
 
     /**
      * [KO] 대기 산란 전용 샘플러를 반환합니다.

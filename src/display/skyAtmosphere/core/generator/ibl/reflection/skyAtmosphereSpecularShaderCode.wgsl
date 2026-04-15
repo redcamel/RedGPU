@@ -36,8 +36,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // [KO] 태양 본체 및 직접적인 Mie Glow를 제외한 대기 산란 휘도만 평가 (Double Specular 방지)
         let skyUV = getSkyViewUV(viewDir, params.cameraHeight, params.groundRadius, params.atmosphereHeight);
         totalRadiance += textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
-        }
+    }
 
-        let radiance = totalRadiance / f32(SAMPLE_COUNT) ;
+    let radiance = totalRadiance / f32(SAMPLE_COUNT) ;
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
-import reflectionShaderCode_wgsl from "./skyAtmosphereReflectionEnergyCompensatedShaderCode.wgsl";
+import specularShaderCode_wgsl from "./skyAtmosphereSpecularShaderCode.wgsl";
 import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
@@ -10,31 +10,34 @@ import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
 import AtmosphereShaderLibrary from "../../../AtmosphereShaderLibrary";
 
-const REFLECTION_SHADER_INFO = parseWGSL('SkyAtmosphere_Reflection_EnergyCompensated_Generator', reflectionShaderCode_wgsl, AtmosphereShaderLibrary);
+const SPECULAR_SHADER_INFO = parseWGSL('SkyAtmosphere_Specular_Generator', specularShaderCode_wgsl, AtmosphereShaderLibrary);
 
 /**
- * [KO] 실시간 대기 산란 데이터를 기반으로 에너지 보정된 반사 큐브맵을 생성하는 클래스입니다. (조도용)
- * [EN] Class that generates an energy-compensated reflection cubemap based on real-time atmospheric scattering data. (For Irradiance)
+ * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사용(Specular) 큐브맵을 생성하는 클래스입니다.
+ * [EN] Class that generates a pre-filtered specular cubemap based on real-time atmospheric scattering data.
+ *
+ * [KO] 대기 산란 데이터를 큐브맵으로 렌더링한 후 GGX 프리필터링을 통해 거칠기(Roughness)별 반사 데이터를 생성합니다.
+ * [EN] Renders atmospheric scattering data to a cubemap, then generates reflection data by roughness through GGX pre-filtering.
  *
  * @category SkyAtmosphere
  */
-class SkyAtmosphereReflectionEnergyCompensatedGenerator extends ASkyAtmosphereLUTGenerator {
+class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 	#sourceCubeTexture: GPUTexture;
 	#sourceCubeTextureView: GPUTextureView;
 	#prefilteredTexture: DirectCubeTexture;
-	#reflectionPipeline: GPUComputePipeline;
-	#reflectionBindGroup: GPUBindGroup;
+	#pipeline: GPUComputePipeline;
+	#bindGroup: GPUBindGroup;
 
 	/**
-	 * [KO] SkyAtmosphereReflectionEnergyCompensatedGenerator 인스턴스를 초기화합니다.
-	 * [EN] Initializes a SkyAtmosphereReflectionEnergyCompensatedGenerator instance.
+	 * [KO] SkyAtmosphereSpecularGenerator 인스턴스를 초기화합니다.
+	 * [EN] Initializes a SkyAtmosphereSpecularGenerator instance.
 	 *
 	 * @param redGPUContext - RedGPU 컨텍스트
 	 * @param sharedUniformBuffer - 공유 유니폼 버퍼
 	 * @param sampler - LUT 샘플링에 사용할 샘플러
 	 */
 	constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-		super(redGPUContext, sharedUniformBuffer, sampler, 'Reflection_EnergyCompensated_Gen', 256, 256, 6);
+		super(redGPUContext, sharedUniformBuffer, sampler, 'Specular_Gen', 256, 256, 6);
 		this.#init();
 	}
 
@@ -55,8 +58,8 @@ class SkyAtmosphereReflectionEnergyCompensatedGenerator extends ASkyAtmosphereLU
 	}
 
 	/**
-	 * [KO] 생성된 반사 큐브맵(프리필터링된 결과)을 반환합니다.
-	 * [EN] Returns the generated reflection cubemap (pre-filtered result).
+	 * [KO] 생성된 반사용 큐브맵(프리필터링된 결과)을 반환합니다.
+	 * [EN] Returns the generated specular cubemap (pre-filtered result).
 	 */
 	get lutTexture(): DirectCubeTexture {
 		return this.#prefilteredTexture;
@@ -64,7 +67,7 @@ class SkyAtmosphereReflectionEnergyCompensatedGenerator extends ASkyAtmosphereLU
 
 	/**
 	 * [KO] 반사 큐브맵을 생성하고 프리필터링을 수행합니다.
-	 * [EN] Generates the reflection cubemap and performs pre-filtering.
+	 * [EN] Generates the specular cubemap and performs pre-filtering.
 	 *
 	 * @param transmittance - 투과율 LUT 텍스처
 	 * @param multiScat - 다중 산란 LUT 텍스처
@@ -72,24 +75,22 @@ class SkyAtmosphereReflectionEnergyCompensatedGenerator extends ASkyAtmosphereLU
 	 */
 	// @ts-ignore
 	async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
-		if (!this.#reflectionBindGroup) {
-			this.#reflectionBindGroup = this.#createReflectionBindGroup(transmittance, multiScat, skyView);
+		if (!this.#bindGroup) {
+			this.#bindGroup = this.#createBindGroup(transmittance, multiScat, skyView);
 		}
-		await this.#processReflectionPass(this.#reflectionPipeline, this.#reflectionBindGroup, this.#prefilteredTexture);
+		await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture);
 	}
 
-	#createReflectionBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
-		return this.createBindGroup(`SkyAtmosphere_Reflection_EnergyCompensated_BindGroup_${createUUID()}`, this.#reflectionPipeline, [
+	#createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
+		return this.createBindGroup(`SkyAtmosphere_Specular_BindGroup_${createUUID()}`, this.#pipeline, [
 			{binding: 0, resource: this.#sourceCubeTextureView},
-			{binding: 1, resource: multiScat.gpuTextureView},
 			{binding: 2, resource: this.sampler.gpuSampler},
 			{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-			{binding: 4, resource: transmittance.gpuTextureView},
 			{binding: 5, resource: skyView.gpuTextureView}
 		]);
 	}
 
-	async #processReflectionPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
+	async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
 		const {resourceManager} = this.redGPUContext;
 		this.#computeRender(pipeline, bindGroup, [8, 8, 1]);
 		resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
@@ -107,7 +108,7 @@ class SkyAtmosphereReflectionEnergyCompensatedGenerator extends ASkyAtmosphereLU
 		const mipLevelCount = getMipLevelCount(this.width, this.height);
 
 		this.#sourceCubeTexture = gpuDevice.createTexture({
-			label: 'SkyAtmosphere_Reflection_EnergyCompensated_Source_CubeTexture',
+			label: 'SkyAtmosphere_Specular_Source_CubeTexture',
 			size: [this.width, this.height, 6],
 			format: 'rgba16float',
 			usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
@@ -119,8 +120,8 @@ class SkyAtmosphereReflectionEnergyCompensatedGenerator extends ASkyAtmosphereLU
 			mipLevelCount: 1
 		});
 
-		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Reflection_EnergyCompensated_LUTTexture_${createUUID()}`);
-		this.#reflectionPipeline = this.createComputePipeline('Base', REFLECTION_SHADER_INFO.defaultSource);
+		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Specular_LUTTexture_${createUUID()}`);
+		this.#pipeline = this.createComputePipeline('Base', SPECULAR_SHADER_INFO.defaultSource);
 	}
 
 	#computeRender(
@@ -148,4 +149,4 @@ class SkyAtmosphereReflectionEnergyCompensatedGenerator extends ASkyAtmosphereLU
 	}
 }
 
-export default SkyAtmosphereReflectionEnergyCompensatedGenerator;
+export default SkyAtmosphereSpecularGenerator;
