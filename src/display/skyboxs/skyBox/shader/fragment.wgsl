@@ -73,7 +73,7 @@ fn main(inputData: InputData) -> OutputFragment {
     // [EN] Intensity and Exposure Correction (Material Intensity * Directional Light Intensity * Pre-Exposure)
     var finalIntensity: f32 = systemUniforms.preExposure;
     if (systemUniforms.directionalLightCount > 0u) {
-        finalIntensity *= systemUniforms.directionalLights[0].intensity;
+        finalIntensity *= systemUniforms.directionalLights[0].intensity * INV_PI;
     }
 
     var finalAlpha = sampleColor.a * uniforms.opacity;

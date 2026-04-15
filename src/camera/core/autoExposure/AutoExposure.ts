@@ -33,16 +33,17 @@ class AutoExposure {
 
     // [KO] 자동 노출 알고리즘 파라미터 (ToneMappingManager에서 이전됨)
     // [EN] Auto-exposure algorithm parameters (Moved from ToneMappingManager)
-    #minEV100: number = 1.0;
+    #minEV100: number = -1.0;
     #maxEV100: number = 20.0;
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
-    #lowPercentile: number = 0.1;
-    #highPercentile: number = 0.9;
-    #maxExposureMultiplier: number = 1.0;
+    #lowPercentile: number = 0.8;
+    #highPercentile: number = 0.983;
+    #maxExposureMultiplier: number = 16.0;
     #meteringMode: METERING_MODE = METERING_MODE.CENTER_WEIGHTED;
     #targetLuminance: number = 0.18;
-    #exposureCompensation: number = 0.0;
+    #exposureCompensation: number = 1.0;
+
 
     constructor(view: View3D) {
         this.#view = view;
@@ -200,8 +201,8 @@ class AutoExposure {
         const initialData = new Float32Array([3.9]);
         this.#adaptedEV100Buffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
 
-        // [KO] 히스토그램 버퍼 (64 bins) [EN] Histogram buffer (64 bins)
-        this.#histogramBuffer = new StorageBuffer(this.#redGPUContext, new Uint32Array(64).buffer, 'AutoExposure_HistogramBuffer');
+        // [KO] 히스토그램 버퍼 (256 bins) [EN] Histogram buffer (256 bins)
+        this.#histogramBuffer = new StorageBuffer(this.#redGPUContext, new Uint32Array(256).buffer, 'AutoExposure_HistogramBuffer');
 
         // Readback buffer
         this.#readBuffer = gpuDevice.createBuffer({

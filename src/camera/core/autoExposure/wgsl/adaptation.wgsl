@@ -18,17 +18,17 @@ struct AutoExposureUniforms {
     meteringMode: f32
 };
 
-@group(0) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 64>;
+@group(0) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 256>;
 @group(0) @binding(1) var<storage, read_write> adaptedEV100 : f32;
 @group(0) @binding(2) var<uniform> uniforms : AutoExposureUniforms;
 
 @compute @workgroup_size(1, 1, 1)
 fn main() {
-    var countBuffer: array<u32, 64>;
+    var countBuffer: array<u32, 256>;
     var totalPixels: u32 = 0u;
 
     // [KO] 히스토그램 데이터 읽기 및 초기화 [EN] Read and clear histogram data
-    for (var i = 0u; i < 64u; i = i + 1u) {
+    for (var i = 0u; i < 256u; i = i + 1u) {
         let val = atomicExchange(&histogram[i], 0u);
         countBuffer[i] = val;
         totalPixels += val;
@@ -44,12 +44,12 @@ fn main() {
     var weightedEV100Sum: f32 = 0.0;
     var totalValidPixels: f32 = 0.0;
 
-    for (var i = 0u; i < 64u; i = i + 1u) {
+    for (var i = 0u; i < 256u; i = i + 1u) {
         let nextCounter = pixelCounter + countBuffer[i];
         
         let validPixels = max(0.0, f32(min(nextCounter, maxPixel)) - f32(max(pixelCounter, minPixel)));
         if (validPixels > 0.0) {
-            let ev100 = uniforms.minEV100 + (f32(i) / 63.0) * uniforms.ev100Range;
+            let ev100 = uniforms.minEV100 + (f32(i) / 255.0) * uniforms.ev100Range;
             
             // [KO] 로그 공간(EV100)에서 직접 가중 평균 수행 (언리얼 방식의 Log-Luminance Average)
             // [EN] Perform weighted average directly in EV100 space (Unreal-style Log-Luminance Average)
