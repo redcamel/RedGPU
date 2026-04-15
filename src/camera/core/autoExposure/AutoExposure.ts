@@ -40,7 +40,7 @@ class AutoExposure {
     #lowPercentile: number = 0.8;
     #highPercentile: number = 0.983;
     #maxExposureMultiplier: number = 16.0;
-    #meteringMode: METERING_MODE = METERING_MODE.CENTER_WEIGHTED;
+    #meteringMode: METERING_MODE = METERING_MODE.AVERAGE;
     #targetLuminance: number = 0.18;
     #exposureCompensation: number = 1.0;
 
