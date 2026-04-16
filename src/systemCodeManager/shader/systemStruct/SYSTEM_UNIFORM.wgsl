@@ -19,6 +19,7 @@ struct SystemUniform {
 	  isView3D:u32,
 	  useSkyAtmosphere:u32,
 	  preExposure:f32,
+      skyboxIntensity:f32,
 	  //
 	  skyAtmosphere:SkyAtmosphere,
 	  shadow:Shadow,

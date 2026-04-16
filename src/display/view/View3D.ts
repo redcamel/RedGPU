@@ -209,6 +209,10 @@ class View3D extends AView {
                     key: 'preExposure',
                     value: this.postEffectManager.autoExposure.preExposure
                 },
+                {
+                    key: 'skyboxIntensity',
+                    value: this.skybox ? this.skybox.intensity / this.postEffectManager.autoExposure.preExposure : 0
+                },
                 ]);
         }
         lightManager.directionalLights.forEach((light: DirectionalLight) => {

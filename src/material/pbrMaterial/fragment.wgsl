@@ -667,8 +667,10 @@ fn main(inputData:InputData) -> OutputFragment {
         if (u_usePrefilterTexture) {
             iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
             var mipLevel = roughnessParameter * iblMipmapCount;
-            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb  / systemUniforms.preExposure;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb  / systemUniforms.preExposure;
+            // [KO] 스카이박스의 계산된 물리적 강도(skyboxIntensity)를 반영하여 IBL 샘플링 (배경과 조명 일치)
+            // [EN] Sample IBL reflecting the skybox's calculated physical intensity (matching background and lighting)
+            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * systemUniforms.skyboxIntensity;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * systemUniforms.skyboxIntensity;
         }
 
         // [KO] 대기 산란 필터링 및 조도 합성 (IBL 동기화)

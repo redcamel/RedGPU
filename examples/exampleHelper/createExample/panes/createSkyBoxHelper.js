@@ -23,7 +23,6 @@ const createSkyBoxHelper = (pane, view) => {
         min: 0,
         max: 10,
         step: 0.01,
-        label: 'Intensity Multiplier'
     }).on("change", (ev) => {
         if (view.skybox) view.skybox.intensity = ev.value;
     })
