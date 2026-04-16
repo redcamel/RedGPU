@@ -21,9 +21,9 @@ const createSkyBoxHelper = (pane, view) => {
     })
     skybox.addBinding(settings, 'intensity', {
         min: 0,
-        max: 200000,
-        step: 1,
-        label: 'Intensity (cd/m²)'
+        max: 10,
+        step: 0.01,
+        label: 'Intensity Multiplier'
     }).on("change", (ev) => {
         if (view.skybox) view.skybox.intensity = ev.value;
     })
