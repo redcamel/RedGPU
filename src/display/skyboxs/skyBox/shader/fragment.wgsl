@@ -70,12 +70,13 @@ fn main(inputData: InputData) -> OutputFragment {
         #redgpu_endIf
     }
 
-    // [KO] 강도 및 노출 보정 (로컬 강도 * 직사광 강도 * INV_PI * Pre-Exposure)
-    // [EN] Intensity and Exposure Correction (Local Intensity * Directional Light Intensity * INV_PI * Pre-Exposure)
-    var finalIntensity: f32 = uniforms.intensity * systemUniforms.preExposure * INV_PI;
-    if (systemUniforms.directionalLightCount > 0u) {
-        finalIntensity *= systemUniforms.directionalLights[0].intensity;
-    }
+    // [KO] 강도 및 노출 보정 (Luminance * Pre-Exposure)
+    // [EN] Intensity and Exposure Correction (Luminance * Pre-Exposure)
+    // [KO] 언리얼 엔진 5 표준에 따라, 스카이박스는 설정된 강도(Intensity)와 카메라 노출(Pre-Exposure)의 곱으로 결정됩니다.
+    // [KO] 임의의 하드코딩 배율 없이 물리적으로 정확한 휘도 값을 계산합니다.
+    // [EN] Following Unreal Engine 5 standards, SkyBox intensity is determined by the product of the set Intensity and Camera Exposure.
+    // [EN] Calculates physically accurate luminance values without any arbitrary hardcoded multipliers.
+    var finalIntensity: f32 = uniforms.intensity * systemUniforms.preExposure;
 
     var finalAlpha = sampleColor.a * uniforms.opacity;
 
@@ -93,7 +94,6 @@ fn main(inputData: InputData) -> OutputFragment {
         // RGB 투과율의 평균을 사용하여 배경의 가시성 결정
         let T = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
         finalAlpha *= T;
-        finalIntensity = systemUniforms.preExposure;
     }
 
     var outColor = vec4<f32>(sampleColor.rgb * finalIntensity , finalAlpha);

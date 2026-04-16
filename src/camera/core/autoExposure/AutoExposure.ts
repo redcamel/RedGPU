@@ -183,14 +183,16 @@ class AutoExposure {
      * [KO] EV100 기반으로 물리적 노출 배율(preExposure)을 계산합니다. (UE5 표준 물리 노출 공식)
      * [EN] Calculates physical exposure multiplier (preExposure) based on EV100. (UE5 standard physical exposure formula)
      * @param ev100 - [KO] 물리적 노출 지수 [EN] Physical exposure value (EV100)
-     * @param targetLuminance - [KO] 목표 휘도 [EN] Target luminance
+     * @param targetLuminance - [KO] 목표 휘도 (UE5에서는 기본적으로 1.2 계수로 대체됨) [EN] Target luminance (replaced by 1.2 factor in UE5)
      * @param exposureCompensation - [KO] 노출 보정 값 [EN] Exposure compensation value
      * @returns [KO] 계산된 노출 배율 [EN] Calculated exposure multiplier
      */
     #calculatePreExposure(ev100: number, targetLuminance: number, exposureCompensation: number): number {
-        // [KO] UE5 표준 물리 노출 공식 적용: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-        // [EN] Apply UE5 standard physical exposure formula: (100 * targetLuminance * 2^ExposureCompensation) / (K * 2^EV100)
-        return (100 * targetLuminance * Math.pow(2, exposureCompensation)) / (ACamera.CALIBRATION_CONSTANT * Math.pow(2, ev100));
+        // [KO] UE5 표준 물리 노출 공식 적용: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
+        // [EN] Apply UE5 standard physical exposure formula: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
+        // [KO] 여기서 1.2는 언리얼의 노출 보정 계수(K)이며, ACamera.CALIBRATION_CONSTANT와는 별개의 값입니다.
+        // [EN] Here, 1.2 is Unreal's exposure calibration factor, separate from ACamera.CALIBRATION_CONSTANT.
+        return Math.pow(2, exposureCompensation) / (1.2 * Math.pow(2, ev100));
     }
 
     #initResources() {
