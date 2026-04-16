@@ -41,10 +41,10 @@ abstract class ACamera {
      * [KO] 교정 상수 (Calibration Constant, K)
      * [EN] Calibration constant (K)
      * @description
-     * [KO] 언리얼 엔진 5 및 사진학적 표준 (18% Middle Gray 기준 K = 1.2)
-     * [EN] Unreal Engine 5 and photographic standard (K = 1.2 based on 18% Middle Gray)
+     * [KO] 언리얼 엔진 5 및 사진학적 표준 (ISO 2720 표준 기준 K = 12.5)
+     * [EN] Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
      */
-    static readonly CALIBRATION_CONSTANT: number = 1.2;
+    static readonly CALIBRATION_CONSTANT: number = 12.5;
 
     /**
      * [KO] 캐시된 EV100

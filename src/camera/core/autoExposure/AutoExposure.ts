@@ -27,7 +27,7 @@ class AutoExposure {
 
     #uniformBuffer: UniformBuffer;
 
-    #currentAdaptedEV100: number = 3.9;
+    #currentAdaptedEV100: number = 0.5260688;
     #readBuffer: GPUBuffer;
     #isReading: boolean = false;
 
@@ -42,7 +42,7 @@ class AutoExposure {
     #maxExposureMultiplier: number = 16.0;
     #meteringMode: METERING_MODE = METERING_MODE.AVERAGE;
     #targetLuminance: number = 0.18;
-    #exposureCompensation: number = 1.0;
+    #exposureCompensation: number = 0.0;
 
 
     constructor(view: View3D) {
@@ -196,9 +196,9 @@ class AutoExposure {
     #initResources() {
         const {gpuDevice} = this.#redGPUContext;
 
-        // [KO] 초기 EV100 값 설정 (0.18 휘도에 해당하는 약 3.9 EV)
-        // [EN] Set initial EV100 value (approx. 3.9 EV for 0.18 luminance)
-        const initialData = new Float32Array([3.9]);
+        // [KO] 초기 EV100 값 설정 (0.18 휘도에 해당하는 약 0.526 EV)
+        // [EN] Set initial EV100 value (approx. 0.526 EV for 0.18 luminance)
+        const initialData = new Float32Array([0.5260688]);
         this.#adaptedEV100Buffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
 
         // [KO] 히스토그램 버퍼 (256 bins) [EN] Histogram buffer (256 bins)
