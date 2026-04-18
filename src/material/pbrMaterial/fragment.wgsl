@@ -178,26 +178,26 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_KHR_clearcoatFactor = uniforms.KHR_clearcoatFactor;
     let u_KHR_clearcoatRoughnessFactor = uniforms.KHR_clearcoatRoughnessFactor;
     let u_KHR_clearcoatNormalScale = uniforms.KHR_clearcoatNormalScale;
-    let diffuseUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
-    let emissiveUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);
-    let occlusionUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.occlusionTexture_texCoord_index, uniforms.use_occlusionTexture_KHR_texture_transform, uniforms.occlusionTexture_KHR_texture_transform_offset, uniforms.occlusionTexture_KHR_texture_transform_rotation, uniforms.occlusionTexture_KHR_texture_transform_scale);
-    let metallicRoughnessUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.metallicRoughnessTexture_texCoord_index, uniforms.use_metallicRoughnessTexture_KHR_texture_transform, uniforms.metallicRoughnessTexture_KHR_texture_transform_offset, uniforms.metallicRoughnessTexture_KHR_texture_transform_rotation, uniforms.metallicRoughnessTexture_KHR_texture_transform_scale);
-    let normalUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.normalTexture_texCoord_index, uniforms.use_normalTexture_KHR_texture_transform, uniforms.normalTexture_KHR_texture_transform_offset, uniforms.normalTexture_KHR_texture_transform_rotation, uniforms.normalTexture_KHR_texture_transform_scale);
-    let KHR_clearcoatUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_clearcoatTexture_texCoord_index, uniforms.use_KHR_clearcoatTexture_KHR_texture_transform, uniforms.KHR_clearcoatTexture_KHR_texture_transform_offset, uniforms.KHR_clearcoatTexture_KHR_texture_transform_rotation, uniforms.KHR_clearcoatTexture_KHR_texture_transform_scale);
+    let diffuseUV = getTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
+    let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);
+    let occlusionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.occlusionTexture_texCoord_index, uniforms.use_occlusionTexture_KHR_texture_transform, uniforms.occlusionTexture_KHR_texture_transform_offset, uniforms.occlusionTexture_KHR_texture_transform_rotation, uniforms.occlusionTexture_KHR_texture_transform_scale);
+    let metallicRoughnessUV = getTextureTransformUV(input_uv, input_uv1, uniforms.metallicRoughnessTexture_texCoord_index, uniforms.use_metallicRoughnessTexture_KHR_texture_transform, uniforms.metallicRoughnessTexture_KHR_texture_transform_offset, uniforms.metallicRoughnessTexture_KHR_texture_transform_rotation, uniforms.metallicRoughnessTexture_KHR_texture_transform_scale);
+    let normalUV = getTextureTransformUV(input_uv, input_uv1, uniforms.normalTexture_texCoord_index, uniforms.use_normalTexture_KHR_texture_transform, uniforms.normalTexture_KHR_texture_transform_offset, uniforms.normalTexture_KHR_texture_transform_rotation, uniforms.normalTexture_KHR_texture_transform_scale);
+    let KHR_clearcoatUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_clearcoatTexture_texCoord_index, uniforms.use_KHR_clearcoatTexture_KHR_texture_transform, uniforms.KHR_clearcoatTexture_KHR_texture_transform_offset, uniforms.KHR_clearcoatTexture_KHR_texture_transform_rotation, uniforms.KHR_clearcoatTexture_KHR_texture_transform_scale);
     #redgpu_if useKHR_materials_clearcoat
-    let KHR_clearcoatNormalUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_clearcoatNormalTexture_texCoord_index, uniforms.use_KHR_clearcoatNormalTexture_KHR_texture_transform, uniforms.KHR_clearcoatNormalTexture_KHR_texture_transform_offset, uniforms.KHR_clearcoatNormalTexture_KHR_texture_transform_rotation, uniforms.KHR_clearcoatNormalTexture_KHR_texture_transform_scale);
+    let KHR_clearcoatNormalUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_clearcoatNormalTexture_texCoord_index, uniforms.use_KHR_clearcoatNormalTexture_KHR_texture_transform, uniforms.KHR_clearcoatNormalTexture_KHR_texture_transform_offset, uniforms.KHR_clearcoatNormalTexture_KHR_texture_transform_rotation, uniforms.KHR_clearcoatNormalTexture_KHR_texture_transform_scale);
     #redgpu_endIf
-    let KHR_clearcoatRoughnessUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_clearcoatRoughnessTexture_texCoord_index, uniforms.use_KHR_clearcoatRoughnessTexture_KHR_texture_transform, uniforms.KHR_clearcoatRoughnessTexture_KHR_texture_transform_offset, uniforms.KHR_clearcoatRoughnessTexture_KHR_texture_transform_rotation, uniforms.KHR_clearcoatRoughnessTexture_KHR_texture_transform_scale);
-    let KHR_sheenColorUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_sheenColorTexture_texCoord_index, uniforms.use_KHR_sheenColorTexture_KHR_texture_transform, uniforms.KHR_sheenColorTexture_KHR_texture_transform_offset, uniforms.KHR_sheenColorTexture_KHR_texture_transform_rotation, uniforms.KHR_sheenColorTexture_KHR_texture_transform_scale);
-    let KHR_sheenRoughnessUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_sheenRoughnessTexture_texCoord_index, uniforms.use_KHR_sheenRoughnessTexture_KHR_texture_transform, uniforms.KHR_sheenRoughnessTexture_KHR_texture_transform_offset, uniforms.KHR_sheenRoughnessTexture_KHR_texture_transform_rotation, uniforms.KHR_sheenRoughnessTexture_KHR_texture_transform_scale);
-    let KHR_specularTextureUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_specularTexture_texCoord_index, uniforms.use_KHR_specularTexture_KHR_texture_transform, uniforms.KHR_specularTexture_KHR_texture_transform_offset, uniforms.KHR_specularTexture_KHR_texture_transform_rotation, uniforms.KHR_specularTexture_KHR_texture_transform_scale);
-    let KHR_specularColorTextureUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_specularColorTexture_texCoord_index, uniforms.use_KHR_specularColorTexture_KHR_texture_transform, uniforms.KHR_specularColorTexture_KHR_texture_transform_offset, uniforms.KHR_specularColorTexture_KHR_texture_transform_rotation, uniforms.KHR_specularColorTexture_KHR_texture_transform_scale);
-    let KHR_iridescenceTextureUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_iridescenceTexture_texCoord_index, uniforms.use_KHR_iridescenceTexture_KHR_texture_transform, uniforms.KHR_iridescenceTexture_KHR_texture_transform_offset, uniforms.KHR_iridescenceTexture_KHR_texture_transform_rotation, uniforms.KHR_iridescenceTexture_KHR_texture_transform_scale);
-    let KHR_iridescenceThicknessTextureUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_iridescenceThicknessTexture_texCoord_index, uniforms.use_KHR_iridescenceThicknessTexture_KHR_texture_transform, uniforms.KHR_iridescenceThicknessTexture_KHR_texture_transform_offset, uniforms.KHR_iridescenceThicknessTexture_KHR_texture_transform_rotation, uniforms.KHR_iridescenceThicknessTexture_KHR_texture_transform_scale);
-    let KHR_transmissionUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_transmissionTexture_texCoord_index, uniforms.use_KHR_transmissionTexture_KHR_texture_transform, uniforms.KHR_transmissionTexture_KHR_texture_transform_offset, uniforms.KHR_transmissionTexture_KHR_texture_transform_rotation, uniforms.KHR_transmissionTexture_KHR_texture_transform_scale);
-    let KHR_diffuseTransmissionUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_scale);
-    let KHR_diffuseTransmissionColorUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionColorTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionColorTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_scale);
-    let KHR_anisotropyUV = getKHRTextureTransformUV(input_uv, input_uv1, uniforms.KHR_anisotropyTexture_texCoord_index, uniforms.use_KHR_anisotropyTexture_KHR_texture_transform, uniforms.KHR_anisotropyTexture_KHR_texture_transform_offset, uniforms.KHR_anisotropyTexture_KHR_texture_transform_rotation, uniforms.KHR_anisotropyTexture_KHR_texture_transform_scale);
+    let KHR_clearcoatRoughnessUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_clearcoatRoughnessTexture_texCoord_index, uniforms.use_KHR_clearcoatRoughnessTexture_KHR_texture_transform, uniforms.KHR_clearcoatRoughnessTexture_KHR_texture_transform_offset, uniforms.KHR_clearcoatRoughnessTexture_KHR_texture_transform_rotation, uniforms.KHR_clearcoatRoughnessTexture_KHR_texture_transform_scale);
+    let KHR_sheenColorUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_sheenColorTexture_texCoord_index, uniforms.use_KHR_sheenColorTexture_KHR_texture_transform, uniforms.KHR_sheenColorTexture_KHR_texture_transform_offset, uniforms.KHR_sheenColorTexture_KHR_texture_transform_rotation, uniforms.KHR_sheenColorTexture_KHR_texture_transform_scale);
+    let KHR_sheenRoughnessUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_sheenRoughnessTexture_texCoord_index, uniforms.use_KHR_sheenRoughnessTexture_KHR_texture_transform, uniforms.KHR_sheenRoughnessTexture_KHR_texture_transform_offset, uniforms.KHR_sheenRoughnessTexture_KHR_texture_transform_rotation, uniforms.KHR_sheenRoughnessTexture_KHR_texture_transform_scale);
+    let KHR_specularTextureUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_specularTexture_texCoord_index, uniforms.use_KHR_specularTexture_KHR_texture_transform, uniforms.KHR_specularTexture_KHR_texture_transform_offset, uniforms.KHR_specularTexture_KHR_texture_transform_rotation, uniforms.KHR_specularTexture_KHR_texture_transform_scale);
+    let KHR_specularColorTextureUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_specularColorTexture_texCoord_index, uniforms.use_KHR_specularColorTexture_KHR_texture_transform, uniforms.KHR_specularColorTexture_KHR_texture_transform_offset, uniforms.KHR_specularColorTexture_KHR_texture_transform_rotation, uniforms.KHR_specularColorTexture_KHR_texture_transform_scale);
+    let KHR_iridescenceTextureUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_iridescenceTexture_texCoord_index, uniforms.use_KHR_iridescenceTexture_KHR_texture_transform, uniforms.KHR_iridescenceTexture_KHR_texture_transform_offset, uniforms.KHR_iridescenceTexture_KHR_texture_transform_rotation, uniforms.KHR_iridescenceTexture_KHR_texture_transform_scale);
+    let KHR_iridescenceThicknessTextureUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_iridescenceThicknessTexture_texCoord_index, uniforms.use_KHR_iridescenceThicknessTexture_KHR_texture_transform, uniforms.KHR_iridescenceThicknessTexture_KHR_texture_transform_offset, uniforms.KHR_iridescenceThicknessTexture_KHR_texture_transform_rotation, uniforms.KHR_iridescenceThicknessTexture_KHR_texture_transform_scale);
+    let KHR_transmissionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_transmissionTexture_texCoord_index, uniforms.use_KHR_transmissionTexture_KHR_texture_transform, uniforms.KHR_transmissionTexture_KHR_texture_transform_offset, uniforms.KHR_transmissionTexture_KHR_texture_transform_rotation, uniforms.KHR_transmissionTexture_KHR_texture_transform_scale);
+    let KHR_diffuseTransmissionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_scale);
+    let KHR_diffuseTransmissionColorUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionColorTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionColorTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_scale);
+    let KHR_anisotropyUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_anisotropyTexture_texCoord_index, uniforms.use_KHR_anisotropyTexture_KHR_texture_transform, uniforms.KHR_anisotropyTexture_KHR_texture_transform_offset, uniforms.KHR_anisotropyTexture_KHR_texture_transform_rotation, uniforms.KHR_anisotropyTexture_KHR_texture_transform_scale);
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let baseNormal:vec3<f32> = normalize(input_vertexNormal.xyz);
     var N:vec3<f32> = baseNormal;
@@ -395,7 +395,7 @@ fn main(inputData:InputData) -> OutputFragment {
         }
     #redgpu_endIf
     let F0 = mix(F0_dielectric, F0_metal, metallicParameter);
-    var totalDirectLighting = calcPbrDirectLight(
+    var totalDirectLighting = getDirectPbrLighting(
         input_vertexPosition, inputData.position, visibility,
         N, V, NdotV,
         roughnessParameter, metallicParameter, albedo,
@@ -408,7 +408,7 @@ fn main(inputData:InputData) -> OutputFragment {
         clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
         u_useKHR_materials_iridescence, iridescenceParameter, u_KHR_iridescenceIor, iridescenceThickness
     );
-    let indirectLighting = calcPbrIndirectLight(
+    let indirectLighting = getIndirectPbrLighting(
         N, V, NdotV,
         albedo, &roughnessParameter, metallicParameter,
         F0, F0_dielectric, F0_metal,
@@ -445,7 +445,7 @@ fn main(inputData:InputData) -> OutputFragment {
 // =============================================================================
 // Texture & UV Helpers
 // =============================================================================
-fn getKHRTextureTransformUV(
+fn getTextureTransformUV(
     input_uv: vec2<f32>,
     input_uv1: vec2<f32>,
     texCoord_index: u32,
@@ -487,7 +487,7 @@ fn getDielectricF0(ior: f32) -> vec3<f32> {
     return vec3<f32>(f0_factor * f0_factor);
 }
 
-fn getDistributionGGX(NdotH: f32, roughness: f32) -> f32 {
+fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let alpha2 = alpha * alpha;
     let NdotH2 = NdotH * NdotH;
@@ -497,7 +497,7 @@ fn getDistributionGGX(NdotH: f32, roughness: f32) -> f32 {
     return nom / max(EPSILON, denomSquared * PI);
 }
 
-fn getDirectSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
+fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let alpha2 = alpha * alpha;
     let safeNdotV = max(NdotV, 1e-4);
@@ -507,7 +507,7 @@ fn getDirectSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     return 0.5 / max(GGXV + GGXL, EPSILON);
 }
 
-fn getDirectFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
+fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
     return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
@@ -527,8 +527,8 @@ fn getDirectSpecularBRDF(
     NdotV: f32,
     NdotL: f32
 ) -> vec3<f32> {
-    let D = getDistributionGGX(NdotH, roughness);
-    let V = getDirectSpecularVisibility(NdotV, NdotL, roughness);
+    let D = getSpecularNDF(NdotH, roughness);
+    let V = getSpecularVisibility(NdotV, NdotL, roughness);
     return D * V * F;
 }
 
@@ -554,7 +554,7 @@ fn getDirectSpecularBTDF(
     ior: f32
 ) -> vec3<f32> {
     let eta: f32 = 1.0 / ior;
-    let D_rough: f32 = getDistributionGGX(NdotH, roughness);
+    let D_rough: f32 = getSpecularNDF(NdotH, roughness);
     let t: f32 = clamp((ior - 1.0) * 100.0, 0.0, 1.0);
     let D: f32 = mix(1.0, D_rough, t);
     let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * abs(NdotL)) / VdotH));
@@ -714,7 +714,7 @@ fn getDirectClearcoatBRDF(
     let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
     let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-6);
     let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
-    let clearcoatF = getDirectFresnel(LdotH, vec3<f32>(0.04));
+    let clearcoatF = getFresnel(LdotH, vec3<f32>(0.04));
     let CLEARCOAT_BRDF = getDirectSpecularBRDF(clearcoatF, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL);
     return CLEARCOAT_BRDF * clearcoatNdotL;
 }
@@ -814,7 +814,7 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
 // =============================================================================
 // Main PBR Orchestration
 // =============================================================================
-fn calcPbrDirectLight(
+fn getDirectPbrLighting(
     input_vertexPosition: vec3<f32>,
     inputData_position: vec4<f32>,
     visibility: f32,
@@ -842,7 +842,7 @@ fn calcPbrDirectLight(
             let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
             finalLightColor *= atmosphereTransmittance;
         }
-        totalDirectLighting += calcPbrLight(
+        totalDirectLighting += getDirectPbrLight(
             finalLightColor,
             N, V, L, NdotV,
             roughnessParameter, metallicParameter, albedo,
@@ -878,7 +878,7 @@ fn calcPbrDirectLight(
                 finalAttenuation *= getLightAngleAttenuation(lightToVertex, u_clusterLightDirection, targetLight.innerCutoff, targetLight.outerCutoff);
             }
             var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
-            totalDirectLighting += calcPbrLight(
+            totalDirectLighting += getDirectPbrLight(
                 finalLightColor,
                 N, V, L, NdotV,
                 roughnessParameter, metallicParameter, albedo,
@@ -896,7 +896,7 @@ fn calcPbrDirectLight(
     return totalDirectLighting;
 }
 
-fn calcPbrIndirectLight(
+fn getIndirectPbrLighting(
     N: vec3<f32>, V: vec3<f32>, NdotV: f32,
     albedo: vec3<f32>, roughnessParameter: ptr<function, f32>, metallicParameter: f32,
     F0: vec3<f32>, F0_dielectric: vec3<f32>, F0_metal: vec3<f32>,
@@ -1016,7 +1016,7 @@ fn calcPbrIndirectLight(
         var indirectLighting = ambientContribution;
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
-            let transmissionFresnel = getDirectFresnel(NdotV, F0);
+            let transmissionFresnel = getFresnel(NdotV, F0);
             let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - transmissionFresnel);
             indirectLighting = mix(ambientContribution, transmissionRefraction * systemUniforms.preExposure, transmissionWeight);
         }
@@ -1025,7 +1025,7 @@ fn calcPbrIndirectLight(
     }
 }
 
-fn calcPbrLight(
+fn getDirectPbrLight(
     lightColor:vec3<f32>,
     N:vec3<f32>, V:vec3<f32>, L:vec3<f32>,
     VdotN:f32,
@@ -1055,7 +1055,7 @@ fn calcPbrLight(
         let F_irid_metal = getIridescentFresnel(1.0, iridescenceIor, metal_f0, iridescenceThickness, iridescenceFactor, VdotH);
         F = mix(F_irid_dielectric, F_irid_metal, metallicParameter);
     } else {
-        F = getDirectFresnel(VdotH, combined_f0);
+        F = getFresnel(VdotH, combined_f0);
     }
     if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
     var SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, VdotN, NdotL);
@@ -1103,7 +1103,7 @@ fn calcPbrLight(
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
             let CLEARCOAT_BRDF = getDirectClearcoatBRDF(L, V, H, clearcoatNormal, clearcoatRoughnessParameter, LdotH);
-            let coatF = getDirectFresnel(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
+            let coatF = getFresnel(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
             result = CLEARCOAT_BRDF + (vec3<f32>(1.0) - coatF) * result;
         }
     #redgpu_endIf
