@@ -15,6 +15,7 @@
 #redgpu_include math.direction.getReflectionVectorFromViewDirection
 #redgpu_include math.tnb.getTBNFromVertexTangent
 #redgpu_include math.tnb.getTBN
+#redgpu_include math.tnb.getNormalFromNormalMap
 
 fn getKHRTextureTransformUV(
     input_uv: vec2<f32>,
@@ -401,24 +402,6 @@ fn getFresnelCoat(NdotV: f32, ior: f32, weight: f32, base: vec3<f32>, layer: vec
     let f0: f32 = pow((1.0 - ior) / (1.0 + ior), 2.0);
     let fr: f32 = f0 + (1.0 - f0) * pow(clamp(1.0 - abs(NdotV), 0.0, 1.0), 5.0);
     return mix(base, layer, weight * fr);
-}
-
-fn getNormalFromNormalMap(sampledNormalColor: vec3<f32>, tbn: mat3x3<f32>, strength: f32) -> vec3<f32> {
-    // 1. Unpack XY: [0, 1] -> [-1, 1]
-    var n: vec2<f32> = sampledNormalColor.xy * 2.0 - 1.0;
-
-    // [KO] WebGPU의 Top-Left UV(V+가 아래로 향함)와 표준 노멀 맵(Y+가 위로 향함) 사이의 방향성 불일치 해결을 위해 Y 기여도 반전
-    // [EN] Invert Y contribution to resolve the directional mismatch between WebGPU's Top-Left UV (V+ points down) and standard normal maps (Y+ points up)
-    n.y = -n.y;
-
-    // 2. Apply Strength
-    n *= strength;
-
-    // 3. Z-Reconstruction: z = sqrt(1.0 - x^2 - y^2)
-    let z: f32 = sqrt(max(0.0, 1.0 - dot(n, n)));
-
-    // 4. Transform to World/View Space and Normalize
-    return normalize(tbn * vec3<f32>(n, z));
 }
 
 #redgpu_include skyAtmosphere.skyAtmosphereFn
