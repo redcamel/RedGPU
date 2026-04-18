@@ -15,23 +15,412 @@
 #redgpu_include math.direction.getReflectionVectorFromViewDirection
 #redgpu_include math.tnb.getTBNFromVertexTangent
 #redgpu_include math.tnb.getTBN
-#redgpu_include math.tnb.getNormalFromNormalMap;
-#redgpu_include KHR.KHR_texture_transform.getKHRTextureTransformUV;
-#redgpu_include KHR.KHR_materials_sheen.getSheenIBL;
-#redgpu_include KHR.KHR_materials_sheen.getSheenLambda;
-#redgpu_include KHR.KHR_materials_sheen.getSheenCharlieE;
-#redgpu_include KHR.KHR_materials_anisotropy.getAnisotropicSpecularBRDF;
-#redgpu_include lighting.getDiffuseBRDFDisney;
-#redgpu_include lighting.getFresnelSchlick
-#redgpu_include lighting.getConductorFresnel
-#redgpu_include lighting.getIridescentFresnel
-#redgpu_include lighting.getDistributionGGX
-#redgpu_include lighting.getSpecularVisibility
-#redgpu_include lighting.getSpecularBRDF
-#redgpu_include lighting.getSpecularBTDF
-#redgpu_include lighting.getDiffuseBTDF
-#redgpu_include lighting.getFresnelMix
-#redgpu_include lighting.getFresnelCoat
+
+fn getKHRTextureTransformUV(
+    input_uv: vec2<f32>,
+    input_uv1: vec2<f32>,
+    texCoord_index: u32,
+    use_transform: u32,
+    transform_offset: vec2<f32>,
+    transform_rotation: f32,
+    transform_scale: vec2<f32>
+) -> vec2<f32> {
+    // 1. UV 좌표 선택 (UV index selection)
+    var result_uv = select(input_uv, input_uv1, texCoord_index == 1u);
+
+    // 2. 변환 적용 (Apply transformation if enabled)
+    if (use_transform == 1u) {
+        // Translation Matrix
+        let translation = mat3x3<f32>(
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            transform_offset.x, transform_offset.y, 1.0
+        );
+
+        // Rotation Matrix
+        let cos_rot = cos(transform_rotation);
+        let sin_rot = sin(transform_rotation);
+        let rotation_matrix = mat3x3<f32>(
+            cos_rot, -sin_rot, 0.0,
+            sin_rot, cos_rot, 0.0,
+            0.0, 0.0, 1.0
+        );
+
+        // Scale Matrix
+        let scale_matrix = mat3x3<f32>(
+            transform_scale.x, 0.0, 0.0,
+            0.0, transform_scale.y, 0.0,
+            0.0, 0.0, 1.0
+        );
+
+        // glTF KHR_texture_transform 규격에 따른 TRS 행렬 합성
+        let result_matrix = translation * rotation_matrix * scale_matrix;
+        result_uv = (result_matrix * vec3<f32>(result_uv, 1.0)).xy;
+    }
+
+    return result_uv;
+}
+
+struct SheenIBLResult {
+    sheenIBLContribution: vec3<f32>,
+    sheenAlbedoScaling: f32
+}
+
+fn getSheenCharlieDFG(NdotV: f32, roughness: f32) -> f32 {
+    if (roughness < 0.01) {
+        return 0.0;
+    }
+
+    let r = clamp(roughness, 0.01, 1.0);
+    let grazingFactor = 1.0 - NdotV;
+    let roughnessExp = 1.0 / max(r, EPSILON);
+    let distribution = pow(grazingFactor, roughnessExp);
+    let intensity = pow(roughnessExp, 0.5);
+
+    return distribution * intensity * 0.5;
+}
+
+fn getSheenCharlieE(NdotV: f32, roughness: f32) -> f32 {
+    if (roughness < 0.01) {
+        return 0.0;
+    }
+
+    let r = clamp(roughness, 0.01, 1.0);
+    let grazingFactor = 1.0 - NdotV;
+    let roughnessExp = 1.0 / max(r, EPSILON);
+
+    return pow(grazingFactor, roughnessExp) * pow(r, 0.5);
+}
+
+fn getSheenIBL(
+    N: vec3<f32>,
+    V: vec3<f32>,
+    sheenColor: vec3<f32>,
+    maxSheenColor: f32,
+    sheenRoughness: f32,
+    iblMipmapCount: f32,
+    irradianceTexture: texture_cube<f32>,
+    textureSampler: sampler
+) -> SheenIBLResult {
+    let NdotV = clamp(dot(N, V), EPSILON, 1.0);
+    let R = getReflectionVectorFromViewDirection(V, N);
+
+    let mipLevel = sheenRoughness * iblMipmapCount;
+    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb  / systemUniforms.preExposure;
+
+    let sheenDFG = getSheenCharlieDFG(NdotV, sheenRoughness);
+    let contribution = sheenRadiance * sheenColor * sheenDFG;
+
+    let E = getSheenCharlieE(NdotV, sheenRoughness);
+    let albedoScaling = 1.0 - maxSheenColor * E;
+
+    return SheenIBLResult(contribution, albedoScaling);
+}
+
+fn getSheenLambda(cosTheta: f32, alpha: f32) -> f32 {
+    if (cosTheta <= 0.0) {
+        return 0.0;
+    }
+    
+    // [KO] Charlie Sheen 가시성 근사식 (Estevez and Kulla)
+    // [EN] Charlie Sheen visibility approximation (Estevez and Kulla)
+    if (cosTheta < 0.5) {
+        return exp(-1.01242 / alpha) * pow(cosTheta, 3.72201 + 0.10060 * alpha) / (alpha * (0.00327 - 0.04313 * alpha));
+    } else {
+        return exp(-0.39031 / alpha) * pow(cosTheta, 0.58707 + 0.04651 * alpha) / (alpha * (0.09028 + 0.03032 * alpha));
+    }
+}
+
+fn getAnisotropicVisibility(
+    NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, 
+    at: f32, ab: f32
+) -> f32 {
+   let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
+   let GGXL = NdotV * length(vec3<f32>(at * TdotL, ab * BdotL, NdotL));
+   let v = 0.5 / max(GGXV + GGXL, EPSILON);
+   return v;
+}
+
+fn getAnisotropicNDF(NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32) -> f32 {
+    let a2: f32 = at * ab;
+    let f: vec3<f32> = vec3<f32>(ab * TdotH, at * BdotH, a2 * NdotH);
+    let denominator: f32 = dot(f, f);
+    
+    // [KO] 수치적 안정성을 위해 INV_PI 적용 및 0 나누기 방어
+    // [EN] Applies INV_PI and prevents division by zero for numerical stability
+    let w2: f32 = a2 / max(denominator, EPSILON);
+    return a2 * w2 * w2 * INV_PI;
+}
+
+fn getAnisotropicSpecularBRDF(
+    f0: vec3<f32>, 
+    alphaRoughness: f32, 
+    VdotH: f32, 
+    NdotL: f32, 
+    NdotV: f32, 
+    NdotH: f32, 
+    BdotV: f32, 
+    TdotV: f32, 
+    TdotL: f32, 
+    BdotL: f32, 
+    TdotH: f32, 
+    BdotH: f32, 
+    anisotropy: f32
+) -> vec3<f32> {
+    // [KO] 이방성 파라미터를 기반으로 방향별 거칠기(alpha) 계산
+    // [EN] Calculates directional roughness (alpha) based on anisotropic parameters
+    var at = mix(alphaRoughness, 1.0, anisotropy * anisotropy);
+    var ab = alphaRoughness;
+    
+    var F: vec3<f32> = getFresnelSchlick(VdotH, f0);
+    var V: f32 = getAnisotropicVisibility(NdotL, NdotV, BdotV, TdotV, TdotL, BdotL, at, ab);
+    var D: f32 = getAnisotropicNDF(NdotH, TdotH, BdotH, at, ab);
+    
+    return F * (V * D);
+}
+
+fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+    if (NdotL <= 0.0) { return vec3<f32>(0.0); }
+
+    // Disney diffuse term
+    let energyBias = mix(0.0, 0.5, roughness);
+    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
+    let f0 = 1.0;
+    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
+    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+
+    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+}
+
+fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
+    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+fn getConductorFresnel(F0: vec3<f32>, bsdf: vec3<f32>, VdotH: f32) -> vec3<f32> {
+    let fresnel = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - abs(VdotH), 0.0, 1.0), 5.0);
+    return bsdf * fresnel;
+}
+
+fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
+                      iridescenceThickness: f32, iridescenceFactor: f32, cosTheta1: f32) -> vec3<f32> {
+    // 조기 반환
+    if (iridescenceThickness <= 0.0 || iridescenceFactor <= 0.0) {
+        return baseF0;
+    }
+
+    let cosTheta1Abs = abs(cosTheta1);
+    let safeIridescenceIOR = max(iridescenceIOR, 1.01);
+
+    // 스넬의 법칙
+    let sinTheta1 = sqrt(max(0.0, 1.0 - cosTheta1Abs * cosTheta1Abs));
+    let sinTheta2 = (outsideIOR / safeIridescenceIOR) * sinTheta1;
+
+    if (sinTheta2 >= 1.0) {
+        return baseF0 + iridescenceFactor * (vec3<f32>(1.0) - baseF0);
+    }
+
+    let cosTheta2 = sqrt(max(0.0, 1.0 - sinTheta2 * sinTheta2));
+
+    // 상수들 사전 계산
+    let wavelengths = vec3<f32>(650.0, 510.0, 475.0);
+    let opticalThickness = 2.0 * iridescenceThickness * safeIridescenceIOR * cosTheta2;
+    let phase = (PI2 * opticalThickness) / wavelengths;
+
+    // 삼각함수 (한 번만)
+    let cosPhase = cos(phase);
+    let sinPhase = sin(phase);
+
+    // 공통 계산값들
+    let outsideCos1 = outsideIOR * cosTheta1Abs;
+    let iridescenceCos2 = safeIridescenceIOR * cosTheta2;
+    let iridescenceCos1 = safeIridescenceIOR * cosTheta1Abs;
+    let outsideCos2 = outsideIOR * cosTheta2;
+
+    // 프레넬 계수 (스칼라)
+    let r12_s = (outsideCos1 - iridescenceCos2) / max(outsideCos1 + iridescenceCos2, EPSILON);
+    let r12_p = (iridescenceCos1 - outsideCos2) / max(iridescenceCos1 + outsideCos2, EPSILON);
+
+    // 기본 F0에서 굴절률 추출 (벡터화)
+    let sqrtF0 = sqrt(clamp(baseF0, vec3<f32>(0.01), vec3<f32>(0.99)));
+    let safeN3 = max((1.0 + sqrtF0) / max(1.0 - sqrtF0, vec3<f32>(EPSILON)), vec3<f32>(1.2));
+
+    // r23 계산 (벡터화)
+    let iridescenceCos2Vec = vec3<f32>(iridescenceCos2);
+    let cosTheta1AbsVec = vec3<f32>(cosTheta1Abs);
+    let iridescenceCos1Vec = vec3<f32>(iridescenceCos1);
+    let cosTheta2Vec = vec3<f32>(cosTheta2);
+
+    let r23_s = (iridescenceCos2Vec - safeN3 * cosTheta1AbsVec) /
+                max(iridescenceCos2Vec + safeN3 * cosTheta1AbsVec, vec3<f32>(EPSILON));
+    let r23_p = (safeN3 * cosTheta2Vec - iridescenceCos1Vec) /
+                max(safeN3 * cosTheta2Vec + iridescenceCos1Vec, vec3<f32>(EPSILON));
+
+    // 복소수 계산을 위한 공통 값들
+    let r12_sVec = vec3<f32>(r12_s);
+    let r12_pVec = vec3<f32>(r12_p);
+
+    // S-편광 복소수 계산
+    let numSReal = r12_sVec + r23_s * cosPhase;
+    let numSImag = r23_s * sinPhase;
+    let denSReal = vec3<f32>(1.0) + r12_sVec * r23_s * cosPhase;
+    let denSImag = r12_sVec * r23_s * sinPhase;
+
+    // P-편광 복소수 계산
+    let numPReal = r12_pVec + r23_p * cosPhase;
+    let numPImag = r23_p * sinPhase;
+    let denPReal = vec3<f32>(1.0) + r12_pVec * r23_p * cosPhase;
+    let denPImag = r12_pVec * r23_p * sinPhase;
+
+    // 복소수 나눗셈 인라인 계산 (S-편광)
+    let denSSquared = denSReal * denSReal + denSImag * denSImag;
+    let rsReal = (numSReal * denSReal + numSImag * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
+    let rsImag = (numSImag * denSReal - numSReal * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
+    let Rs = rsReal * rsReal + rsImag * rsImag;
+
+    // 복소수 나눗셈 인라인 계산 (P-편광)
+    let denPSquared = denPReal * denPReal + denPImag * denPImag;
+    let rpReal = (numPReal * denPReal + numPImag * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
+    let rpImag = (numPImag * denPReal - numPReal * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
+    let Rp = rpReal * rpReal + rpImag * rpImag;
+
+    // 전체 반사율
+    let reflectance = 0.5 * (Rs + Rp);
+
+    // 최종 결과
+    let clampedReflectance = clamp(reflectance, vec3<f32>(0.0), vec3<f32>(1.0));
+    return mix(baseF0, clampedReflectance, iridescenceFactor);
+}
+
+fn getDistributionGGX(NdotH: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+    let NdotH2 = NdotH * NdotH;
+
+    let nom = alpha2;
+    let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
+    let denomSquared = denom * denom;
+
+    return nom / max(EPSILON, denomSquared * PI);
+}
+
+fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+
+    // [KO] grazing angle에서의 수치적 발산을 방지하기 위해 최소값 제한
+    let safeNdotV = max(NdotV, 1e-4);
+    let safeNdotL = max(NdotL, 1e-4);
+
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
+
+    return 0.5 / max(GGXV + GGXL, EPSILON);
+}
+
+fn getSpecularBRDF(
+    F0: vec3<f32>,
+    roughness: f32,
+    NdotH: f32,
+    NdotV: f32,
+    NdotL: f32,
+    LdotH: f32
+) -> vec3<f32> {
+    // 1. Distribution (D)
+    let D = getDistributionGGX(NdotH, roughness);
+
+    // 2. Visibility (V) - Includes Geometry term and 1/(4*NoL*NoV)
+    // [KO] 기존 분리된 G와 분모 계산 방식에서 발생하는 수치적 아티팩트(십자 형태 음영 등)를 방지하기 위해 통합된 가시성 함수 사용
+    // [EN] Uses an integrated visibility function to prevent numerical artifacts (such as cross-shaped shading) that occur in the separate G and denominator calculation.
+    let V = getSpecularVisibility(NdotV, NdotL, roughness);
+
+    // 3. Fresnel (F)
+    let F = getFresnelSchlick(LdotH, F0);
+
+    return D * V * F;
+}
+
+fn getSpecularBTDF(
+    NdotV: f32,
+    NdotL: f32,
+    NdotH: f32,
+    VdotH: f32,
+    LdotH: f32,
+    roughness: f32,
+    F0: vec3<f32>,
+    ior: f32
+) -> vec3<f32> {
+    let eta: f32 = 1.0 / ior;
+
+    // 1. D (Distribution) 계산
+    let D_rough: f32 = getDistributionGGX(NdotH, roughness);
+    let t: f32 = clamp((ior - 1.0) * 100.0, 0.0, 1.0);
+    let D: f32 = mix(1.0, D_rough, t);
+
+    // 2. G (Geometric) 계산
+    let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * abs(NdotL)) / VdotH));
+
+    // 3. F (Fresnel) 계산
+    let F: vec3<f32> = getFresnelSchlick(VdotH, F0);
+
+    let denom = (eta * VdotH + LdotH) * (eta * VdotH + LdotH);
+
+    // 4. BTDF 공식 적용
+    // [KO] 분모에 abs(NdotL)을 추가하여 표준 PBR BTDF 공식을 따름 (렌더링 방정식의 NdotL과 상쇄됨)
+    // [EN] Adds abs(NdotL) to the denominator to follow the standard PBR BTDF formula (cancels with NdotL in the rendering equation).
+    let btdf: vec3<f32> =
+        (vec3<f32>(1.0) - F) *
+        abs(VdotH * LdotH) *
+        (eta * eta) *
+        D *
+        G /
+        (max(NdotV, EPSILON) * max(abs(NdotL), EPSILON) * max(denom, EPSILON));
+
+    return btdf;
+}
+
+fn getDiffuseBTDF(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
+    // 뒷면으로 들어오는 광선만 처리 (-dot(N,L)를 사용하여 음수만 양수로 변환하여 사용)
+    let cosTheta = max(-dot(N, L), 0.0);
+    return albedo * cosTheta * INV_PI;
+}
+
+fn getFresnelMix(
+    F0: vec3<f32>,
+    weight: f32,
+    base: vec3<f32>,
+    layer: vec3<f32>,
+    VdotH: f32
+) -> vec3<f32> {
+    var f0 = min(F0, vec3<f32>(1.0));
+    let fr = f0 + (vec3<f32>(1.0) - f0) * pow(clamp(1.0 - abs(VdotH), 0.0, 1.0), 5.0);
+    return (1.0 - weight * max(max(fr.x, fr.y), fr.z)) * base + weight * fr * layer;
+}
+
+fn getFresnelCoat(NdotV: f32, ior: f32, weight: f32, base: vec3<f32>, layer: vec3<f32>) -> vec3<f32> {
+    let f0: f32 = pow((1.0 - ior) / (1.0 + ior), 2.0);
+    let fr: f32 = f0 + (1.0 - f0) * pow(clamp(1.0 - abs(NdotV), 0.0, 1.0), 5.0);
+    return mix(base, layer, weight * fr);
+}
+
+fn getNormalFromNormalMap(sampledNormalColor: vec3<f32>, tbn: mat3x3<f32>, strength: f32) -> vec3<f32> {
+    // 1. Unpack XY: [0, 1] -> [-1, 1]
+    var n: vec2<f32> = sampledNormalColor.xy * 2.0 - 1.0;
+
+    // [KO] WebGPU의 Top-Left UV(V+가 아래로 향함)와 표준 노멀 맵(Y+가 위로 향함) 사이의 방향성 불일치 해결을 위해 Y 기여도 반전
+    // [EN] Invert Y contribution to resolve the directional mismatch between WebGPU's Top-Left UV (V+ points down) and standard normal maps (Y+ points up)
+    n.y = -n.y;
+
+    // 2. Apply Strength
+    n *= strength;
+
+    // 3. Z-Reconstruction: z = sqrt(1.0 - x^2 - y^2)
+    let z: f32 = sqrt(max(0.0, 1.0 - dot(n, n)));
+
+    // 4. Transform to World/View Space and Normalize
+    return normalize(tbn * vec3<f32>(n, z));
+}
+
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
 /**
@@ -293,7 +682,7 @@ fn main(inputData:InputData) -> OutputFragment {
     {
         var normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
         let tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
-        N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale );
+        N = getNormalFromNormalMap(vec3<f32>(normalSamplerColor.r, 1.0 - normalSamplerColor.g, normalSamplerColor.b), tbn, u_normalScale );
     }
     #redgpu_endIf
 
