@@ -93,7 +93,7 @@ fn getSheenCharlieE(NdotV: f32, roughness: f32) -> f32 {
     return pow(grazingFactor, roughnessExp) * pow(r, 0.5);
 }
 
-fn getSheenIndirect(
+fn getSheenBRDFIndirect(
     N: vec3<f32>,
     V: vec3<f32>,
     sheenColor: vec3<f32>,
@@ -119,7 +119,7 @@ fn getSheenIndirect(
 }
 
 // [KHR_materials_sheen] Direct
-fn getSheenDirect(NdotL: f32, NdotV: f32, NdotH: f32, sheenColor: vec3<f32>, sheenRoughness: f32) -> vec3<f32> {
+fn getSheenBRDFDirect(NdotL: f32, NdotV: f32, NdotH: f32, sheenColor: vec3<f32>, sheenRoughness: f32) -> vec3<f32> {
     let invAlpha = 1.0 / max(sheenRoughness, 0.000001);
     let cos2h = NdotH * NdotH;
     let sin2h = max(1.0 - cos2h, 0.0078125);
@@ -149,7 +149,7 @@ fn getAnisotropicNDF(NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32) -> f3
     return a2 * w2 * w2 * INV_PI;
 }
 
-fn getAnisotropicDirect(
+fn getAnisotropicBRDFDirect(
     f0: vec3<f32>, 
     alphaRoughness: f32, 
     VdotH: f32, 
@@ -178,8 +178,9 @@ fn getAnisotropicDirect(
 }
 
 // [KHR_materials_anisotropy] Indirect
-fn getAnisotropicIndirect(
+fn getAnisotropicBRDFIndirect(
     V: vec3<f32>, N: vec3<f32>,
+
     roughness: f32, anisotropy: f32,
     anisotropicT: vec3<f32>, anisotropicB: vec3<f32>
 ) -> vec4<f32> {
@@ -205,7 +206,7 @@ fn getAnisotropicIndirect(
     return vec4<f32>(R, max(weightedRoughness, 0.04));
 }
 
-fn getDiffuseDirect(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+fn getDiffuseBRDFDirect(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
 
     // Disney diffuse term
@@ -345,7 +346,7 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     return 0.5 / max(GGXV + GGXL, EPSILON);
 }
 
-fn getSpecularDirect(
+fn getSpecularBRDFDirect(
     F0: vec3<f32>,
     roughness: f32,
     NdotH: f32,
@@ -367,7 +368,7 @@ fn getSpecularDirect(
     return D * V * F;
 }
 
-fn getSpecularTransmissionDirect(
+fn getSpecularBTDFDirect(
     NdotV: f32,
     NdotL: f32,
     NdotH: f32,
@@ -406,7 +407,7 @@ fn getSpecularTransmissionDirect(
     return btdf;
 }
 
-fn getDiffuseTransmissionDirect(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
+fn getDiffuseBTDFDirect(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
     // 뒷면으로 들어오는 광선만 처리 (-dot(N,L)를 사용하여 음수만 양수로 변환하여 사용)
     let cosTheta = max(-dot(N, L), 0.0);
     return albedo * cosTheta * INV_PI;
@@ -984,7 +985,7 @@ fn main(inputData:InputData) -> OutputFragment {
 }
 
 // [KHR_materials_clearcoat] Direct
-fn getClearcoatDirect(
+fn getClearcoatBRDFDirect(
     L: vec3<f32>, V: vec3<f32>, H: vec3<f32>,
     clearcoatNormal: vec3<f32>,
     clearcoatRoughness: f32,
@@ -994,12 +995,12 @@ fn getClearcoatDirect(
     let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-6);
     let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
     let clearcoatF0 = vec3<f32>(0.04);
-    let CLEARCOAT_SPEC = getSpecularDirect(clearcoatF0, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
-    return CLEARCOAT_SPEC * clearcoatNdotL;
+    let CLEARCOAT_BRDF = getSpecularBRDFDirect(clearcoatF0, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
+    return CLEARCOAT_BRDF * clearcoatNdotL;
 }
 
 // [KHR_materials_clearcoat] Indirect
-fn getClearcoatIndirect(
+fn getClearcoatBRDFIndirect(
     V: vec3<f32>,
     clearcoatNormal: vec3<f32>,
     clearcoatRoughness: f32,
@@ -1162,7 +1163,7 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_anisotropy
         if (anisotropy > 0.0)
         {
-            let anisotropicResult = getAnisotropicIndirect(V, N, *roughnessParameter, anisotropy, anisotropicT, anisotropicB);
+            let anisotropicResult = getAnisotropicBRDFIndirect(V, N, *roughnessParameter, anisotropy, anisotropicT, anisotropicB);
             R = anisotropicResult.xyz;
             *roughnessParameter = anisotropicResult.w;
         }
@@ -1275,7 +1276,7 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_sheen
         {
             let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-            let sheenResult = getSheenIndirect(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
+            let sheenResult = getSheenBRDFIndirect(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
             sheenIBLContribution = sheenResult.sheenIBLContribution;
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         }
@@ -1297,7 +1298,7 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
                  let u_atmo = systemUniforms.skyAtmosphere;
-                 let clearcoatResult = getClearcoatIndirect(
+                 let clearcoatResult = getClearcoatBRDFIndirect(
                      V, clearcoatNormal, clearcoatRoughnessParameter, iblMipmapCount,
                      ibl_prefilterTexture, prefilterTextureSampler, ibl_brdfLUTTexture,
                      u_useSkyAtmosphere, u_atmo.sunIntensity, skyAtmosphere_prefilteredTexture, atmosphereSampler,
@@ -1372,7 +1373,7 @@ fn calcPbrLight(
     if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
 
     // [KO] 1. 스페큘러 반사(Specular Reflection) BRDF 계산
-    // [KO] getSpecularDirect 대신 D와 V(Visibility) 항만 따로 가져와서 이미 계산된 F와 결합
+    // [KO] getSpecularBRDFDirect 대신 D와 V(Visibility) 항만 따로 가져와서 이미 계산된 F와 결합
     let D = getDistributionGGX(NdotH, roughnessParameter);
     let Vis = getSpecularVisibility(VdotN, NdotL, roughnessParameter);
     var SPEC_BRDF = D * Vis * F;
@@ -1386,7 +1387,7 @@ fn calcPbrLight(
             var BdotH = dot(anisotropicB, H);
             var BdotV = dot(anisotropicB, V);
             // [KO] 이방성 BRDF 계산 시에도 통합된 F를 사용하여 중복 계산 방지
-            SPEC_BRDF = getAnisotropicDirect(vec3<f32>(1.0), roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy) * F;
+            SPEC_BRDF = getAnisotropicBRDFDirect(vec3<f32>(1.0), roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy) * F;
         #redgpu_endIf
     }
     
@@ -1394,15 +1395,15 @@ fn calcPbrLight(
     if (abs(ior - 1.0) < EPSILON) { SPEC_BRDF = vec3<f32>(0.0); }
 
     // [KO] 2. 하부 레이어(Diffuse + Specular Transmission) 계산
-    // [KO] getDiffuseDirect는 내부적으로 NdotL과 INV_PI를 포함함
-    let diffuse_reflection = getDiffuseDirect(NdotL, VdotN, LdotH, roughnessParameter, albedo);
+    // [KO] getDiffuseBRDFDirect는 내부적으로 NdotL과 INV_PI를 포함함
+    let diffuse_reflection = getDiffuseBRDFDirect(NdotL, VdotN, LdotH, roughnessParameter, albedo);
 
     // [KO] 확산 투과 (Thin-walled)
     var diffuse_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_diffuse_transmission
     if (u_useKHR_materials_diffuse_transmission) {
-        // [KO] getDiffuseTransmissionDirect 내부에서 이미 max(-NdotL, 0)가 곱해지므로 중복 곱셈 제거
-        diffuse_transmission = getDiffuseTransmissionDirect(N, L, diffuseTransmissionColor);
+        // [KO] getDiffuseBTDFDirect 내부에서 이미 max(-NdotL, 0)가 곱해지므로 중복 곱셈 제거
+        diffuse_transmission = getDiffuseBTDFDirect(N, L, diffuseTransmissionColor);
     }
     #redgpu_endIf
 
@@ -1411,7 +1412,7 @@ fn calcPbrLight(
     #redgpu_if useKHR_materials_transmission
     if (transmissionParameter > 0.0) {
         // [KO] 투과 시에도 박막 간섭이 적용된 (1-F) 에너지를 고려함
-        specular_transmission = getSpecularTransmissionDirect(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, combined_f0, ior) * max(-NdotL_origin, 0.0);
+        specular_transmission = getSpecularBTDFDirect(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, combined_f0, ior) * max(-NdotL_origin, 0.0);
         if (abs(ior - 1.0) < EPSILON) { specular_transmission = vec3<f32>(0.0); }
     }
     #redgpu_endIf
@@ -1439,7 +1440,7 @@ fn calcPbrLight(
     {
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
         if (sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001) {
-            let sheen_brdf = getSheenDirect(NdotL, VdotN, NdotH, sheenColor, sheenRoughnessParameter);
+            let sheen_brdf = getSheenBRDFDirect(NdotL, VdotN, NdotH, sheenColor, sheenRoughnessParameter);
             let sheen_albedo_scaling = 1.0 - maxSheenColor * getSheenCharlieE(VdotN, sheenRoughnessParameter);
             result = result * sheen_albedo_scaling + (sheen_brdf * NdotL);
         }
@@ -1449,9 +1450,9 @@ fn calcPbrLight(
     // [KO] 5. Clearcoat (코팅층) 합성
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
-            let CLEARCOAT_SPEC_LIGHT = getClearcoatDirect(L, V, H, clearcoatNormal, clearcoatRoughnessParameter, LdotH);
+            let CLEARCOAT_BRDF = getClearcoatBRDFDirect(L, V, H, clearcoatNormal, clearcoatRoughnessParameter, LdotH);
             let coatF = getFresnelDirect(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
-            result = CLEARCOAT_SPEC_LIGHT + (vec3<f32>(1.0) - coatF) * result;
+            result = CLEARCOAT_BRDF + (vec3<f32>(1.0) - coatF) * result;
         }
     #redgpu_endIf
 
