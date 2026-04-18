@@ -549,10 +549,9 @@ fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
     return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-fn getIndirectFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
-    let fresnelPower = 5.0 - 2.0 * roughness;
+fn getIndirectFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32, fresnelTerm: f32) -> vec3<f32> {
     let F90 = max(vec3<f32>(1.0 - roughness * 0.8), F0);
-    return F0 + (F90 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), fresnelPower);
+    return F0 + (F90 - F0) * fresnelTerm;
 }
 
 // =============================================================================
@@ -649,6 +648,7 @@ fn getSheenCharlieE(NdotV: f32, roughness: f32) -> f32 {
 fn getIndirectSheenBRDF(
     N: vec3<f32>,
     V: vec3<f32>,
+    R: vec3<f32>,
     sheenColor: vec3<f32>,
     maxSheenColor: f32,
     sheenRoughness: f32,
@@ -658,12 +658,19 @@ fn getIndirectSheenBRDF(
     invPreExposure: f32
 ) -> SheenIBLResult {
     let NdotV = clamp(dot(N, V), EPSILON, 1.0);
-    let R = getReflectionVectorFromViewDirection(V, N);
     let mipLevel = sheenRoughness * iblMipmapCount;
     let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb * invPreExposure;
-    let sheenDFG = getIndirectSheenDFG(NdotV, sheenRoughness);
+    
+    // Optimized Sheen DFG and Charlie E
+    let r = clamp(sheenRoughness, 0.01, 1.0);
+    let grazingFactor = 1.0 - NdotV;
+    let roughnessExp = 1.0 / r;
+    let sharedPow = pow(grazingFactor, roughnessExp);
+    
+    let sheenDFG = sharedPow * pow(roughnessExp, 0.5) * 0.5;
+    let E = sharedPow * pow(r, 0.5);
+    
     let contribution = sheenRadiance * sheenColor * sheenDFG;
-    let E = getSheenCharlieE(NdotV, sheenRoughness);
     let albedoScaling = getSheenAlbedoScaling(maxSheenColor, E);
     return SheenIBLResult(contribution, albedoScaling);
 }
@@ -789,7 +796,7 @@ fn getIndirectClearcoatBRDF(
         clearcoatRadiance = (clearcoatRadiance * ccTrans) + ccSkyScat;
     }
     let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
-    let coatF = getIndirectFresnel(clearcoatNdotV, vec3<f32>(0.04), clearcoatRoughness).x;
+    let coatF = getIndirectFresnel(clearcoatNdotV, vec3<f32>(0.04), clearcoatRoughness, pow(1.0 - clearcoatNdotV, 5.0 - 2.0 * clearcoatRoughness)).x;
     let clearcoatIBL_Weight = (0.04 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y);
     return vec4<f32>(clearcoatRadiance * clearcoatIBL_Weight, coatF);
 }
@@ -988,8 +995,12 @@ fn getIndirectPbrLighting(
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
         let energyCompensation = 1.0 + F0 * clamp(1.0 / max(envBRDF.x + envBRDF.y, 0.01) - 1.0, 0.0, 1.0);
         reflectedColor *= energyCompensation;
-        let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, *roughnessParameter);
-        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter);
+        
+        // Optimize Indirect Fresnel by pre-calculating shared pow() term
+        let fresnelPower = 5.0 - 2.0 * (*roughnessParameter);
+        let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
+        let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, *roughnessParameter, fresnelTerm);
+        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);        
         let horizonOcclusion = clamp(1.0 + dot(R, N), 0.0, 1.0);
         reflectedColor *= horizonOcclusion;
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
@@ -1027,7 +1038,7 @@ fn getIndirectPbrLighting(
         #redgpu_if useKHR_materials_sheen
         {
             let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-            let sheenResult = getIndirectSheenBRDF(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler, invPreExposure);
+            let sheenResult = getIndirectSheenBRDF(N, V, R, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler, invPreExposure);
             sheenIBLContribution = sheenResult.sheenIBLContribution;
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         }
