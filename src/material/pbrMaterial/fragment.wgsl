@@ -118,18 +118,14 @@ fn getSheenIBL(
     return SheenIBLResult(contribution, albedoScaling);
 }
 
-fn getSheenLambda(cosTheta: f32, alpha: f32) -> f32 {
-    if (cosTheta <= 0.0) {
-        return 0.0;
-    }
-    
-    // [KO] Charlie Sheen 가시성 근사식 (Estevez and Kulla)
-    // [EN] Charlie Sheen visibility approximation (Estevez and Kulla)
-    if (cosTheta < 0.5) {
-        return exp(-1.01242 / alpha) * pow(cosTheta, 3.72201 + 0.10060 * alpha) / (alpha * (0.00327 - 0.04313 * alpha));
-    } else {
-        return exp(-0.39031 / alpha) * pow(cosTheta, 0.58707 + 0.04651 * alpha) / (alpha * (0.09028 + 0.03032 * alpha));
-    }
+// [KHR_materials_sheen] Direct
+fn getSheenDirect(NdotL: f32, NdotV: f32, NdotH: f32, sheenColor: vec3<f32>, sheenRoughness: f32) -> vec3<f32> {
+    let invAlpha = 1.0 / max(sheenRoughness, 0.000001);
+    let cos2h = NdotH * NdotH;
+    let sin2h = max(1.0 - cos2h, 0.0078125);
+    let sheenDistribution = (2.0 + invAlpha) * pow(sin2h, invAlpha * 0.5) / (2.0 * PI);
+    let sheenVisibility = 1.0 / (4.0 * (NdotL + NdotV - NdotL * NdotV));
+    return sheenColor * sheenDistribution * sheenVisibility;
 }
 
 fn getAnisotropicVisibility(
@@ -178,6 +174,34 @@ fn getAnisotropicSpecularBRDF(
     var D: f32 = getAnisotropicNDF(NdotH, TdotH, BdotH, at, ab);
     
     return F * (V * D);
+}
+
+// [KHR_materials_anisotropy] Indirect
+fn getAnisotropicIBL(
+    V: vec3<f32>, N: vec3<f32>,
+    roughness: f32, anisotropy: f32,
+    anisotropicT: vec3<f32>, anisotropicB: vec3<f32>
+) -> vec4<f32> {
+    var bentNormal = cross(anisotropicB, V);
+    bentNormal = normalize(cross(bentNormal, anisotropicB));
+    let temp = 1.0 - anisotropy * (1.0 - roughness);
+    let tempSquared = temp * temp;
+    var a = tempSquared * tempSquared;
+    bentNormal = normalize(mix(bentNormal, N, a));
+    var reflectVec = getReflectionVectorFromViewDirection(V, bentNormal);
+    reflectVec = normalize(mix(reflectVec, bentNormal, roughness * roughness));
+    let roughnessT = roughness * (1.0 + anisotropy);
+    let roughnessB = roughness * (1.0 - anisotropy);
+    let TdotR = dot(anisotropicT, reflectVec);
+    let BdotR = dot(anisotropicB, reflectVec);
+    let TdotV = dot(anisotropicT, V);
+    let BdotV = dot(anisotropicB, V);
+    let R = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
+    let VdotT_abs = abs(TdotV);
+    let VdotB_abs = abs(BdotV);
+    let totalWeight = max(1e-6, VdotT_abs + VdotB_abs);
+    let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
+    return vec4<f32>(R, max(weightedRoughness, 0.04));
 }
 
 fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
@@ -975,6 +999,58 @@ fn main(inputData:InputData) -> OutputFragment {
     return output;
 }
 
+// [KHR_materials_clearcoat] Direct
+fn getClearcoatDirect(
+    L: vec3<f32>, V: vec3<f32>, H: vec3<f32>,
+    clearcoatNormal: vec3<f32>,
+    clearcoatRoughness: f32,
+    LdotH: f32
+) -> vec3<f32> {
+    let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
+    let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-6);
+    let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
+    let clearcoatF0 = vec3<f32>(0.04);
+    let CLEARCOAT_SPEC = getSpecularBRDF(clearcoatF0, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
+    return CLEARCOAT_SPEC * clearcoatNdotL;
+}
+
+// [KHR_materials_clearcoat] Indirect
+fn getClearcoatIndirect(
+    V: vec3<f32>,
+    clearcoatNormal: vec3<f32>,
+    clearcoatRoughness: f32,
+    iblMipmapCount: f32,
+    ibl_prefilterTexture: texture_cube<f32>,
+    prefilterTextureSampler: sampler,
+    ibl_brdfLUTTexture: texture_2d<f32>,
+    useSkyAtmosphere: bool,
+    sunIntensity: f32,
+    skyAtmosphere_prefilteredTexture: texture_cube<f32>,
+    atmosphereSampler: sampler,
+    cameraHeight: f32,
+    atmosphereHeight: f32,
+    transmittanceTexture: texture_2d<f32>
+) -> vec4<f32> {
+    let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
+    let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 1e-6);
+    let clearcoatMipLevel = clearcoatRoughness * iblMipmapCount;
+    var clearcoatRadiance = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb / systemUniforms.preExposure;
+
+    if (useSkyAtmosphere) {
+        let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, cameraHeight, clearcoatR.y, atmosphereHeight);
+        let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+        let atmoMipLevel = clearcoatRoughness * atmoMipCount;
+        let ccSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, clearcoatR, atmoMipLevel).rgb * sunIntensity;
+        clearcoatRadiance = (clearcoatRadiance * ccTrans) + ccSkyScat;
+    }
+
+    let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
+    let coatF = getFresnelSchlick(clearcoatNdotV, vec3<f32>(0.04)).x;
+    let clearcoatIBL_Weight = (0.04 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y);
+    let color = clearcoatRadiance * clearcoatIBL_Weight;
+    return vec4<f32>(color, coatF);
+}
+
 // [KO] 물리 기반 직접 조명 계산 함수 (PBR Direct)
 // [EN] Physically-based direct lighting calculation function (PBR Direct)
 fn calcPbrDirectLight(
@@ -1101,26 +1177,9 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_anisotropy
         if (anisotropy > 0.0)
         {
-            var bentNormal = cross(anisotropicB, V);
-            bentNormal = normalize(cross(bentNormal, anisotropicB));
-            let temp = 1.0 - anisotropy * (1.0 - (*roughnessParameter));
-            let tempSquared = temp * temp;
-            var a = tempSquared * tempSquared;
-            bentNormal = normalize(mix(bentNormal, N, a));
-            var reflectVec = getReflectionVectorFromViewDirection(V, bentNormal);
-            reflectVec = normalize(mix(reflectVec, bentNormal, (*roughnessParameter) * (*roughnessParameter)));
-            let roughnessT = (*roughnessParameter) * (1.0 + anisotropy);
-            let roughnessB = (*roughnessParameter) * (1.0 - anisotropy);
-            let TdotR = dot(anisotropicT, reflectVec);
-            let BdotR = dot(anisotropicB, reflectVec);
-            let TdotV = dot(anisotropicT, V);
-            let BdotV = dot(anisotropicB, V);
-            R = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
-            let VdotT_abs = abs(TdotV);
-            let VdotB_abs = abs(BdotV);
-            let totalWeight = max(1e-6, VdotT_abs + VdotB_abs);
-            let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
-            *roughnessParameter = max(weightedRoughness, 0.04);
+            let anisotropicResult = getAnisotropicIBL(V, N, *roughnessParameter, anisotropy, anisotropicT, anisotropicB);
+            R = anisotropicResult.xyz;
+            *roughnessParameter = anisotropicResult.w;
         }
         #redgpu_endIf
 
@@ -1256,25 +1315,15 @@ fn calcPbrIndirectLight(
         // [KO] ibl 클리어코트 계산 [EN] ibl clearcoat calculation
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
-                 let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
-                 let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 1e-6);
-                 let clearcoatMipLevel = clearcoatRoughnessParameter * iblMipmapCount;
-                 var clearcoatPrefilteredColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb  / systemUniforms.preExposure;
-
-                 if (u_useSkyAtmosphere) {
-                     let u_atmo = systemUniforms.skyAtmosphere;
-                     let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, clearcoatR.y, u_atmo.atmosphereHeight);
-                     let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
-                     let atmoMipLevel = clearcoatRoughnessParameter * atmoMipCount;
-                     let ccSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, clearcoatR, atmoMipLevel).rgb * u_atmo.sunIntensity;
-                     clearcoatPrefilteredColor = (clearcoatPrefilteredColor * ccTrans) + ccSkyScat;
-                 }
-
-                 let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
-                 let clearcoatF0 = vec3<f32>(0.04);
-                 let coatF = getFresnelSchlick(clearcoatNdotV, clearcoatF0) * clearcoatParameter;
-                 let clearcoatIBL_Weight = (clearcoatF0 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y);
-                 let clearcoatSpecularIBL = clearcoatPrefilteredColor * clearcoatIBL_Weight * clearcoatParameter * systemUniforms.preExposure;
+                 let u_atmo = systemUniforms.skyAtmosphere;
+                 let clearcoatResult = getClearcoatIndirect(
+                     V, clearcoatNormal, clearcoatRoughnessParameter, iblMipmapCount,
+                     ibl_prefilterTexture, prefilterTextureSampler, ibl_brdfLUTTexture,
+                     u_useSkyAtmosphere, u_atmo.sunIntensity, skyAtmosphere_prefilteredTexture, atmosphereSampler,
+                     u_atmo.cameraHeight, u_atmo.atmosphereHeight, transmittanceTexture
+                 );
+                 let clearcoatSpecularIBL = clearcoatResult.rgb * clearcoatParameter * systemUniforms.preExposure;
+                 let coatF = clearcoatResult.a * clearcoatParameter;
                  indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - coatF) * indirectLighting;
             }
         #redgpu_endIf
@@ -1409,24 +1458,8 @@ fn calcPbrLight(
     {
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
         if (sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001) {
-            let sheenRoughness = max(sheenRoughnessParameter, 0.000001);
-            
-            // [KO] Charlie Sheen 분포 항 (Distribution term)
-            // [EN] Charlie Sheen distribution term
-            let invAlpha = 1.0 / sheenRoughness;
-            let cos2h = NdotH * NdotH;
-            let sin2h = max(1.0 - cos2h, 0.0078125); // [KO] pow(sin2h, ...) 안정성을 위해 하한선 설정
-            let sheenDistribution = (2.0 + invAlpha) * pow(sin2h, invAlpha * 0.5) / (2.0 * PI);
-
-            // [KO] Neubelt 가시성 항 (Visibility term) - glTF 스펙 권장 모델
-            // [EN] Neubelt visibility term - Recommended by glTF spec
-            let sheen_visibility = 1.0 / (4.0 * (NdotL + VdotN - NdotL * VdotN));
-
-            // [KO] 에너지 보존을 위한 알베도 스케일링 [EN] Albedo scaling for energy conservation
-            let sheen_albedo_scaling = 1.0 - maxSheenColor * getSheenCharlieE(VdotN, sheenRoughness);
-
-            // [KO] Sheen은 베이스 레이어 위에 얹어짐 (NdotL은 조명 방정식의 일부로 결합)
-            let sheen_brdf = sheenColor * sheenDistribution * sheen_visibility;
+            let sheen_brdf = getSheenDirect(NdotL, VdotN, NdotH, sheenColor, sheenRoughnessParameter);
+            let sheen_albedo_scaling = 1.0 - maxSheenColor * getSheenCharlieE(VdotN, sheenRoughnessParameter);
             result = result * sheen_albedo_scaling + (sheen_brdf * NdotL);
         }
     }
@@ -1435,15 +1468,9 @@ fn calcPbrLight(
     // [KO] 5. Clearcoat (코팅층) 합성
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
-            let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
-            let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-6);
-            let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
-            let clearcoatF0 = vec3<f32>(0.04);
-            
-            let CLEARCOAT_SPEC = getSpecularBRDF(clearcoatF0, clearcoatRoughnessParameter, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
-            let coatF = getFresnelSchlick(clearcoatNdotV, clearcoatF0) * clearcoatParameter;
-            
-            result = (CLEARCOAT_SPEC * clearcoatNdotL) + (vec3<f32>(1.0) - coatF) * result;
+            let CLEARCOAT_SPEC_LIGHT = getClearcoatDirect(L, V, H, clearcoatNormal, clearcoatRoughnessParameter, LdotH);
+            let coatF = getFresnelSchlick(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
+            result = CLEARCOAT_SPEC_LIGHT + (vec3<f32>(1.0) - coatF) * result;
         }
     #redgpu_endIf
 
