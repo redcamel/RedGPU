@@ -17,290 +17,6 @@
 #redgpu_include math.tnb.getTBN
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include skyAtmosphere.skyAtmosphereFn
-fn getKHRTextureTransformUV(
-    input_uv: vec2<f32>,
-    input_uv1: vec2<f32>,
-    texCoord_index: u32,
-    use_transform: u32,
-    transform_offset: vec2<f32>,
-    transform_rotation: f32,
-    transform_scale: vec2<f32>
-) -> vec2<f32> {
-    var result_uv = select(input_uv, input_uv1, texCoord_index == 1u);
-    if (use_transform == 1u) {
-        let translation = mat3x3<f32>(
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            transform_offset.x, transform_offset.y, 1.0
-        );
-        let cos_rot = cos(transform_rotation);
-        let sin_rot = sin(transform_rotation);
-        let rotation_matrix = mat3x3<f32>(
-            cos_rot, -sin_rot, 0.0,
-            sin_rot, cos_rot, 0.0,
-            0.0, 0.0, 1.0
-        );
-        let scale_matrix = mat3x3<f32>(
-            transform_scale.x, 0.0, 0.0,
-            0.0, transform_scale.y, 0.0,
-            0.0, 0.0, 1.0
-        );
-        let result_matrix = translation * rotation_matrix * scale_matrix;
-        result_uv = (result_matrix * vec3<f32>(result_uv, 1.0)).xy;
-    }
-    return result_uv;
-}
-struct SheenIBLResult {
-    sheenIBLContribution: vec3<f32>,
-    sheenAlbedoScaling: f32
-}
-fn getSheenIndirectDFG(NdotV: f32, roughness: f32) -> f32 {
-    if (roughness < 0.01) {
-        return 0.0;
-    }
-    let r = clamp(roughness, 0.01, 1.0);
-    let grazingFactor = 1.0 - NdotV;
-    let roughnessExp = 1.0 / max(r, EPSILON);
-    let distribution = pow(grazingFactor, roughnessExp);
-    let intensity = pow(roughnessExp, 0.5);
-    return distribution * intensity * 0.5;
-}
-fn getSheenCharlieE(NdotV: f32, roughness: f32) -> f32 {
-    if (roughness < 0.01) {
-        return 0.0;
-    }
-    let r = clamp(roughness, 0.01, 1.0);
-    let grazingFactor = 1.0 - NdotV;
-    let roughnessExp = 1.0 / max(r, EPSILON);
-    return pow(grazingFactor, roughnessExp) * pow(r, 0.5);
-}
-fn getSheenBRDFIndirect(
-    N: vec3<f32>,
-    V: vec3<f32>,
-    sheenColor: vec3<f32>,
-    maxSheenColor: f32,
-    sheenRoughness: f32,
-    iblMipmapCount: f32,
-    irradianceTexture: texture_cube<f32>,
-    textureSampler: sampler
-) -> SheenIBLResult {
-    let NdotV = clamp(dot(N, V), EPSILON, 1.0);
-    let R = getReflectionVectorFromViewDirection(V, N);
-    let mipLevel = sheenRoughness * iblMipmapCount;
-    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb  / systemUniforms.preExposure;
-    let sheenDFG = getSheenIndirectDFG(NdotV, sheenRoughness);
-    let contribution = sheenRadiance * sheenColor * sheenDFG;
-    let E = getSheenCharlieE(NdotV, sheenRoughness);
-    let albedoScaling = 1.0 - maxSheenColor * E;
-    return SheenIBLResult(contribution, albedoScaling);
-}
-fn getSheenBRDFDirect(NdotL: f32, NdotV: f32, NdotH: f32, sheenColor: vec3<f32>, sheenRoughness: f32) -> vec3<f32> {
-    let invAlpha = 1.0 / max(sheenRoughness, 0.000001);
-    let cos2h = NdotH * NdotH;
-    let sin2h = max(1.0 - cos2h, 0.0078125);
-    let sheenDistribution = (2.0 + invAlpha) * pow(sin2h, invAlpha * 0.5) / (2.0 * PI);
-    let sheenVisibility = 1.0 / (4.0 * (NdotL + NdotV - NdotL * NdotV));
-    return sheenColor * sheenDistribution * sheenVisibility;
-}
-fn getAnisotropicVisibility(
-    NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, 
-    at: f32, ab: f32
-) -> f32 {
-   let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
-   let GGXL = NdotV * length(vec3<f32>(at * TdotL, ab * BdotL, NdotL));
-   let v = 0.5 / max(GGXV + GGXL, EPSILON);
-   return v;
-}
-fn getAnisotropicNDF(NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32) -> f32 {
-    let a2: f32 = at * ab;
-    let f: vec3<f32> = vec3<f32>(ab * TdotH, at * BdotH, a2 * NdotH);
-    let denominator: f32 = dot(f, f);
-    let w2: f32 = a2 / max(denominator, EPSILON);
-    return a2 * w2 * w2 * INV_PI;
-}
-fn getAnisotropicBRDFDirect(
-    f0: vec3<f32>, 
-    alphaRoughness: f32, 
-    VdotH: f32, 
-    NdotL: f32, 
-    NdotV: f32, 
-    NdotH: f32, 
-    BdotV: f32, 
-    TdotV: f32, 
-    TdotL: f32, 
-    BdotL: f32, 
-    TdotH: f32, 
-    BdotH: f32, 
-    anisotropy: f32
-) -> vec3<f32> {
-    var at = mix(alphaRoughness, 1.0, anisotropy * anisotropy);
-    var ab = alphaRoughness;
-    var F: vec3<f32> = getFresnelDirect(VdotH, f0);
-    var V: f32 = getAnisotropicVisibility(NdotL, NdotV, BdotV, TdotV, TdotL, BdotL, at, ab);
-    var D: f32 = getAnisotropicNDF(NdotH, TdotH, BdotH, at, ab);
-    return F * (V * D);
-}
-fn getAnisotropicBRDFIndirect(
-    V: vec3<f32>, N: vec3<f32>,
-    roughness: f32, anisotropy: f32,
-    anisotropicT: vec3<f32>, anisotropicB: vec3<f32>
-) -> vec4<f32> {
-    var bentNormal = cross(anisotropicB, V);
-    bentNormal = normalize(cross(bentNormal, anisotropicB));
-    let temp = 1.0 - anisotropy * (1.0 - roughness);
-    let tempSquared = temp * temp;
-    var a = tempSquared * tempSquared;
-    bentNormal = normalize(mix(bentNormal, N, a));
-    var reflectVec = getReflectionVectorFromViewDirection(V, bentNormal);
-    reflectVec = normalize(mix(reflectVec, bentNormal, roughness * roughness));
-    let roughnessT = roughness * (1.0 + anisotropy);
-    let roughnessB = roughness * (1.0 - anisotropy);
-    let TdotR = dot(anisotropicT, reflectVec);
-    let BdotR = dot(anisotropicB, reflectVec);
-    let TdotV = dot(anisotropicT, V);
-    let BdotV = dot(anisotropicB, V);
-    let R = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
-    let VdotT_abs = abs(TdotV);
-    let VdotB_abs = abs(BdotV);
-    let totalWeight = max(1e-6, VdotT_abs + VdotB_abs);
-    let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
-    return vec4<f32>(R, max(weightedRoughness, 0.04));
-}
-fn getDiffuseBRDFDirect(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
-    if (NdotL <= 0.0) { return vec3<f32>(0.0); }
-    let energyBias = mix(0.0, 0.5, roughness);
-    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
-    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
-    let f0 = 1.0;
-    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
-    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
-}
-fn getFresnelDirect(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
-    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
-}
-fn getFresnelIndirect(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
-    let fresnelPower = 5.0 - 2.0 * roughness;
-    let F90 = max(vec3<f32>(1.0 - roughness * 0.8), F0);
-    return F0 + (F90 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), fresnelPower);
-}
-fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
-                      iridescenceThickness: f32, iridescenceFactor: f32, cosTheta1: f32) -> vec3<f32> {
-    if (iridescenceThickness <= 0.0 || iridescenceFactor <= 0.0) {
-        return baseF0;
-    }
-    let cosTheta1Abs = abs(cosTheta1);
-    let safeIridescenceIOR = max(iridescenceIOR, 1.01);
-    let sinTheta1 = sqrt(max(0.0, 1.0 - cosTheta1Abs * cosTheta1Abs));
-    let sinTheta2 = (outsideIOR / safeIridescenceIOR) * sinTheta1;
-    if (sinTheta2 >= 1.0) {
-        return baseF0 + iridescenceFactor * (vec3<f32>(1.0) - baseF0);
-    }
-    let cosTheta2 = sqrt(max(0.0, 1.0 - sinTheta2 * sinTheta2));
-    let wavelengths = vec3<f32>(650.0, 510.0, 475.0);
-    let opticalThickness = 2.0 * iridescenceThickness * safeIridescenceIOR * cosTheta2;
-    let phase = (PI2 * opticalThickness) / wavelengths;
-    let cosPhase = cos(phase);
-    let sinPhase = sin(phase);
-    let outsideCos1 = outsideIOR * cosTheta1Abs;
-    let iridescenceCos2 = safeIridescenceIOR * cosTheta2;
-    let iridescenceCos1 = safeIridescenceIOR * cosTheta1Abs;
-    let outsideCos2 = outsideIOR * cosTheta2;
-    let r12_s = (outsideCos1 - iridescenceCos2) / max(outsideCos1 + iridescenceCos2, EPSILON);
-    let r12_p = (iridescenceCos1 - outsideCos2) / max(iridescenceCos1 + outsideCos2, EPSILON);
-    let sqrtF0 = sqrt(clamp(baseF0, vec3<f32>(0.01), vec3<f32>(0.99)));
-    let safeN3 = max((1.0 + sqrtF0) / max(1.0 - sqrtF0, vec3<f32>(EPSILON)), vec3<f32>(1.2));
-    let iridescenceCos2Vec = vec3<f32>(iridescenceCos2);
-    let cosTheta1AbsVec = vec3<f32>(cosTheta1Abs);
-    let iridescenceCos1Vec = vec3<f32>(iridescenceCos1);
-    let cosTheta2Vec = vec3<f32>(cosTheta2);
-    let r23_s = (iridescenceCos2Vec - safeN3 * cosTheta1AbsVec) /
-                max(iridescenceCos2Vec + safeN3 * cosTheta1AbsVec, vec3<f32>(EPSILON));
-    let r23_p = (safeN3 * cosTheta2Vec - iridescenceCos1Vec) /
-                max(safeN3 * cosTheta2Vec + iridescenceCos1Vec, vec3<f32>(EPSILON));
-    let r12_sVec = vec3<f32>(r12_s);
-    let r12_pVec = vec3<f32>(r12_p);
-    let numSReal = r12_sVec + r23_s * cosPhase;
-    let numSImag = r23_s * sinPhase;
-    let denSReal = vec3<f32>(1.0) + r12_sVec * r23_s * cosPhase;
-    let denSImag = r12_sVec * r23_s * sinPhase;
-    let numPReal = r12_pVec + r23_p * cosPhase;
-    let numPImag = r23_p * sinPhase;
-    let denPReal = vec3<f32>(1.0) + r12_pVec * r23_p * cosPhase;
-    let denPImag = r12_pVec * r23_p * sinPhase;
-    let denSSquared = denSReal * denSReal + denSImag * denSImag;
-    let rsReal = (numSReal * denSReal + numSImag * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
-    let rsImag = (numSImag * denSReal - numSReal * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
-    let Rs = rsReal * rsReal + rsImag * rsImag;
-    let denPSquared = denPReal * denPReal + denPImag * denPImag;
-    let rpReal = (numPReal * denPReal + numPImag * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
-    let rpImag = (numPImag * denPReal - numPReal * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
-    let Rp = rpReal * rpReal + rpImag * rpImag;
-    let reflectance = 0.5 * (Rs + Rp);
-    let clampedReflectance = clamp(reflectance, vec3<f32>(0.0), vec3<f32>(1.0));
-    return mix(baseF0, clampedReflectance, iridescenceFactor);
-}
-fn getDistributionGGX(NdotH: f32, roughness: f32) -> f32 {
-    let alpha = roughness * roughness;
-    let alpha2 = alpha * alpha;
-    let NdotH2 = NdotH * NdotH;
-    let nom = alpha2;
-    let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
-    let denomSquared = denom * denom;
-    return nom / max(EPSILON, denomSquared * PI);
-}
-fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
-    let alpha = roughness * roughness;
-    let alpha2 = alpha * alpha;
-    let safeNdotV = max(NdotV, 1e-4);
-    let safeNdotL = max(NdotL, 1e-4);
-    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
-    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
-    return 0.5 / max(GGXV + GGXL, EPSILON);
-}
-fn getSpecularBRDFDirect(
-    F0: vec3<f32>,
-    roughness: f32,
-    NdotH: f32,
-    NdotV: f32,
-    NdotL: f32,
-    LdotH: f32
-) -> vec3<f32> {
-    let D = getDistributionGGX(NdotH, roughness);
-    let V = getSpecularVisibility(NdotV, NdotL, roughness);
-    let F = getFresnelDirect(LdotH, F0);
-    return D * V * F;
-}
-fn getSpecularBTDFDirect(
-    NdotV: f32,
-    NdotL: f32,
-    NdotH: f32,
-    VdotH: f32,
-    LdotH: f32,
-    roughness: f32,
-    F0: vec3<f32>,
-    ior: f32
-) -> vec3<f32> {
-    let eta: f32 = 1.0 / ior;
-    let D_rough: f32 = getDistributionGGX(NdotH, roughness);
-    let t: f32 = clamp((ior - 1.0) * 100.0, 0.0, 1.0);
-    let D: f32 = mix(1.0, D_rough, t);
-    let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * abs(NdotL)) / VdotH));
-    let F: vec3<f32> = getFresnelDirect(VdotH, F0);
-    let denom = (eta * VdotH + LdotH) * (eta * VdotH + LdotH);
-    let btdf: vec3<f32> =
-        (vec3<f32>(1.0) - F) *
-        abs(VdotH * LdotH) *
-        (eta * eta) *
-        D *
-        G /
-        (max(NdotV, EPSILON) * max(abs(NdotL), EPSILON) * max(denom, EPSILON));
-    return btdf;
-}
-fn getDiffuseBTDFDirect(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
-    let cosTheta = max(-dot(N, L), 0.0);
-    return albedo * cosTheta * INV_PI;
-}
 
 struct Uniforms {
     useVertexColor: u32,
@@ -352,6 +68,7 @@ struct Uniforms {
     KHR_clearcoatNormalScale: f32,
     #redgpu_include KHR_texture_transform
 };
+
 @group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 #redgpu_if baseColorTexture
@@ -388,6 +105,7 @@ struct Uniforms {
 #redgpu_if useKHR_materials_iridescence
 @group(2) @binding(17) var packedKHR_iridescence: texture_2d<f32>;
 #redgpu_endIf
+
 struct InputData {
     @builtin(position) position : vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
@@ -405,6 +123,7 @@ struct InputData {
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
+
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
@@ -666,8 +385,7 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_endIf
     }
     #redgpu_endIf
-    let f0_factor = (ior - 1.0) / (ior + 1.0);
-    let F0_dielectric_base = vec3(f0_factor * f0_factor);
+    let F0_dielectric_base = getDielectricF0(ior);
     var F0_dielectric = F0_dielectric_base *  specularColor;
     var F0_metal = baseColor.rgb;
     #redgpu_if useKHR_materials_iridescence
@@ -723,7 +441,271 @@ fn main(inputData:InputData) -> OutputFragment {
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0 );
     return output;
 }
-fn getClearcoatBRDFDirect(
+
+// =============================================================================
+// Texture & UV Helpers
+// =============================================================================
+fn getKHRTextureTransformUV(
+    input_uv: vec2<f32>,
+    input_uv1: vec2<f32>,
+    texCoord_index: u32,
+    use_transform: u32,
+    transform_offset: vec2<f32>,
+    transform_rotation: f32,
+    transform_scale: vec2<f32>
+) -> vec2<f32> {
+    var result_uv = select(input_uv, input_uv1, texCoord_index == 1u);
+    if (use_transform == 1u) {
+        let translation = mat3x3<f32>(
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            transform_offset.x, transform_offset.y, 1.0
+        );
+        let cos_rot = cos(transform_rotation);
+        let sin_rot = sin(transform_rotation);
+        let rotation_matrix = mat3x3<f32>(
+            cos_rot, -sin_rot, 0.0,
+            sin_rot, cos_rot, 0.0,
+            0.0, 0.0, 1.0
+        );
+        let scale_matrix = mat3x3<f32>(
+            transform_scale.x, 0.0, 0.0,
+            0.0, transform_scale.y, 0.0,
+            0.0, 0.0, 1.0
+        );
+        let result_matrix = translation * rotation_matrix * scale_matrix;
+        result_uv = (result_matrix * vec3<f32>(result_uv, 1.0)).xy;
+    }
+    return result_uv;
+}
+
+// =============================================================================
+// Common Math & BRDF Utilities
+// =============================================================================
+fn getDielectricF0(ior: f32) -> vec3<f32> {
+    let f0_factor = (ior - 1.0) / (ior + 1.0);
+    return vec3<f32>(f0_factor * f0_factor);
+}
+
+fn getDistributionGGX(NdotH: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+    let NdotH2 = NdotH * NdotH;
+    let nom = alpha2;
+    let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
+    let denomSquared = denom * denom;
+    return nom / max(EPSILON, denomSquared * PI);
+}
+
+fn getDirectSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+    let safeNdotV = max(NdotV, 1e-4);
+    let safeNdotL = max(NdotL, 1e-4);
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
+    return 0.5 / max(GGXV + GGXL, EPSILON);
+}
+
+fn getDirectFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
+    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+fn getIndirectFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
+    let fresnelPower = 5.0 - 2.0 * roughness;
+    let F90 = max(vec3<f32>(1.0 - roughness * 0.8), F0);
+    return F0 + (F90 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), fresnelPower);
+}
+
+// =============================================================================
+// Core Lighting Functions (Diffuse, Specular, Transmission)
+// =============================================================================
+fn getDirectSpecularBRDF(
+    F: vec3<f32>,
+    roughness: f32,
+    NdotH: f32,
+    NdotV: f32,
+    NdotL: f32
+) -> vec3<f32> {
+    let D = getDistributionGGX(NdotH, roughness);
+    let V = getDirectSpecularVisibility(NdotV, NdotL, roughness);
+    return D * V * F;
+}
+
+fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+    if (NdotL <= 0.0) { return vec3<f32>(0.0); }
+    let energyBias = mix(0.0, 0.5, roughness);
+    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
+    let f0 = 1.0;
+    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
+    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+}
+
+fn getDirectSpecularBTDF(
+    NdotV: f32,
+    NdotL: f32,
+    NdotH: f32,
+    VdotH: f32,
+    LdotH: f32,
+    roughness: f32,
+    F: vec3<f32>,
+    ior: f32
+) -> vec3<f32> {
+    let eta: f32 = 1.0 / ior;
+    let D_rough: f32 = getDistributionGGX(NdotH, roughness);
+    let t: f32 = clamp((ior - 1.0) * 100.0, 0.0, 1.0);
+    let D: f32 = mix(1.0, D_rough, t);
+    let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * abs(NdotL)) / VdotH));
+    let denom = (eta * VdotH + LdotH) * (eta * VdotH + LdotH);
+    let btdf: vec3<f32> =
+        (vec3<f32>(1.0) - F) *
+        abs(VdotH * LdotH) *
+        (eta * eta) *
+        D *
+        G /
+        (max(NdotV, EPSILON) * max(abs(NdotL), EPSILON) * max(denom, EPSILON));
+    return btdf;
+}
+
+fn getDirectDiffuseBTDF(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
+    let cosTheta = max(-dot(N, L), 0.0);
+    return albedo * cosTheta * INV_PI;
+}
+
+// =============================================================================
+// KHR Extensions (Sheen, Anisotropy, Clearcoat, Iridescence)
+// =============================================================================
+struct SheenIBLResult {
+    sheenIBLContribution: vec3<f32>,
+    sheenAlbedoScaling: f32
+}
+
+fn getSheenAlbedoScaling(maxSheenColor: f32, sheenE: f32) -> f32 {
+    return 1.0 - maxSheenColor * sheenE;
+}
+
+fn getIndirectSheenDFG(NdotV: f32, roughness: f32) -> f32 {
+    if (roughness < 0.01) {
+        return 0.0;
+    }
+    let r = clamp(roughness, 0.01, 1.0);
+    let grazingFactor = 1.0 - NdotV;
+    let roughnessExp = 1.0 / max(r, EPSILON);
+    let distribution = pow(grazingFactor, roughnessExp);
+    let intensity = pow(roughnessExp, 0.5);
+    return distribution * intensity * 0.5;
+}
+
+fn getSheenCharlieE(NdotV: f32, roughness: f32) -> f32 {
+    if (roughness < 0.01) {
+        return 0.0;
+    }
+    let r = clamp(roughness, 0.01, 1.0);
+    let grazingFactor = 1.0 - NdotV;
+    let roughnessExp = 1.0 / max(r, EPSILON);
+    return pow(grazingFactor, roughnessExp) * pow(r, 0.5);
+}
+
+fn getIndirectSheenBRDF(
+    N: vec3<f32>,
+    V: vec3<f32>,
+    sheenColor: vec3<f32>,
+    maxSheenColor: f32,
+    sheenRoughness: f32,
+    iblMipmapCount: f32,
+    irradianceTexture: texture_cube<f32>,
+    textureSampler: sampler
+) -> SheenIBLResult {
+    let NdotV = clamp(dot(N, V), EPSILON, 1.0);
+    let R = getReflectionVectorFromViewDirection(V, N);
+    let mipLevel = sheenRoughness * iblMipmapCount;
+    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb  / systemUniforms.preExposure;
+    let sheenDFG = getIndirectSheenDFG(NdotV, sheenRoughness);
+    let contribution = sheenRadiance * sheenColor * sheenDFG;
+    let E = getSheenCharlieE(NdotV, sheenRoughness);
+    let albedoScaling = getSheenAlbedoScaling(maxSheenColor, E);
+    return SheenIBLResult(contribution, albedoScaling);
+}
+
+fn getDirectSheenBRDF(NdotL: f32, NdotV: f32, NdotH: f32, sheenColor: vec3<f32>, sheenRoughness: f32) -> vec3<f32> {
+    let invAlpha = 1.0 / max(sheenRoughness, 0.000001);
+    let cos2h = NdotH * NdotH;
+    let sin2h = max(1.0 - cos2h, 0.0078125);
+    let sheenDistribution = (2.0 + invAlpha) * pow(sin2h, invAlpha * 0.5) / (2.0 * PI);
+    let sheenVisibility = 1.0 / (4.0 * (NdotL + NdotV - NdotL * NdotV));
+    return sheenColor * sheenDistribution * sheenVisibility;
+}
+
+fn getDirectAnisotropicVisibility(
+    NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, 
+    at: f32, ab: f32
+) -> f32 {
+   let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
+   let GGXL = NdotV * length(vec3<f32>(at * TdotL, ab * BdotL, NdotL));
+   let v = 0.5 / max(GGXV + GGXL, EPSILON);
+   return v;
+}
+
+fn getDirectAnisotropicNDF(NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32) -> f32 {
+    let a2: f32 = at * ab;
+    let f: vec3<f32> = vec3<f32>(ab * TdotH, at * BdotH, a2 * NdotH);
+    let denominator: f32 = dot(f, f);
+    let w2: f32 = a2 / max(denominator, EPSILON);
+    return a2 * w2 * w2 * INV_PI;
+}
+
+fn getDirectAnisotropicBRDF(
+    F: vec3<f32>, 
+    alphaRoughness: f32, 
+    VdotH: f32, 
+    NdotL: f32, 
+    NdotV: f32, 
+    NdotH: f32, 
+    BdotV: f32, 
+    TdotV: f32, 
+    TdotL: f32, 
+    BdotL: f32, 
+    TdotH: f32, 
+    BdotH: f32, 
+    anisotropy: f32
+) -> vec3<f32> {
+    var at = mix(alphaRoughness, 1.0, anisotropy * anisotropy);
+    var ab = alphaRoughness;
+    var V: f32 = getDirectAnisotropicVisibility(NdotL, NdotV, BdotV, TdotV, TdotL, BdotL, at, ab);
+    var D: f32 = getDirectAnisotropicNDF(NdotH, TdotH, BdotH, at, ab);
+    return F * (V * D);
+}
+
+fn getIndirectAnisotropicBRDF(
+    V: vec3<f32>, N: vec3<f32>,
+    roughness: f32, anisotropy: f32,
+    anisotropicT: vec3<f32>, anisotropicB: vec3<f32>
+) -> vec4<f32> {
+    var bentNormal = cross(anisotropicB, V);
+    bentNormal = normalize(cross(bentNormal, anisotropicB));
+    let temp = 1.0 - anisotropy * (1.0 - roughness);
+    let tempSquared = temp * temp;
+    var a = tempSquared * tempSquared;
+    bentNormal = normalize(mix(bentNormal, N, a));
+    var reflectVec = getReflectionVectorFromViewDirection(V, bentNormal);
+    reflectVec = normalize(mix(reflectVec, bentNormal, roughness * roughness));
+    let roughnessT = roughness * (1.0 + anisotropy);
+    let roughnessB = roughness * (1.0 - anisotropy);
+    let TdotR = dot(anisotropicT, reflectVec);
+    let BdotR = dot(anisotropicB, reflectVec);
+    let TdotV = dot(anisotropicT, V);
+    let BdotV = dot(anisotropicB, V);
+    let R = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
+    let VdotT_abs = abs(TdotV);
+    let VdotB_abs = abs(BdotV);
+    let totalWeight = max(1e-6, VdotT_abs + VdotB_abs);
+    let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
+    return vec4<f32>(R, max(weightedRoughness, 0.04));
+}
+
+fn getDirectClearcoatBRDF(
     L: vec3<f32>, V: vec3<f32>, H: vec3<f32>,
     clearcoatNormal: vec3<f32>,
     clearcoatRoughness: f32,
@@ -732,11 +714,12 @@ fn getClearcoatBRDFDirect(
     let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
     let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-6);
     let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
-    let clearcoatF0 = vec3<f32>(0.04);
-    let CLEARCOAT_BRDF = getSpecularBRDFDirect(clearcoatF0, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
+    let clearcoatF = getDirectFresnel(LdotH, vec3<f32>(0.04));
+    let CLEARCOAT_BRDF = getDirectSpecularBRDF(clearcoatF, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL);
     return CLEARCOAT_BRDF * clearcoatNdotL;
 }
-fn getClearcoatBRDFIndirect(
+
+fn getIndirectClearcoatBRDF(
     V: vec3<f32>,
     clearcoatNormal: vec3<f32>,
     clearcoatRoughness: f32,
@@ -765,11 +748,72 @@ fn getClearcoatBRDFIndirect(
     }
     let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
     let clearcoatF0 = vec3<f32>(0.04);
-    let coatF = getFresnelIndirect(clearcoatNdotV, clearcoatF0, clearcoatRoughness).x;
+    let coatF = getIndirectFresnel(clearcoatNdotV, clearcoatF0, clearcoatRoughness).x;
     let clearcoatIBL_Weight = (0.04 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y);
     let color = clearcoatRadiance * clearcoatIBL_Weight;
     return vec4<f32>(color, coatF);
 }
+
+fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
+                      iridescenceThickness: f32, iridescenceFactor: f32, cosTheta1: f32) -> vec3<f32> {
+    if (iridescenceThickness <= 0.0 || iridescenceFactor <= 0.0) {
+        return baseF0;
+    }
+    let cosTheta1Abs = abs(cosTheta1);
+    let safeIridescenceIOR = max(iridescenceIOR, 1.01);
+    let sinTheta1 = sqrt(max(0.0, 1.0 - cosTheta1Abs * cosTheta1Abs));
+    let sinTheta2 = (outsideIOR / safeIridescenceIOR) * sinTheta1;
+    if (sinTheta2 >= 1.0) {
+        return baseF0 + iridescenceFactor * (vec3<f32>(1.0) - baseF0);
+    }
+    let cosTheta2 = sqrt(max(0.0, 1.0 - sinTheta2 * sinTheta2));
+    let wavelengths = vec3<f32>(650.0, 510.0, 475.0);
+    let opticalThickness = 2.0 * iridescenceThickness * safeIridescenceIOR * cosTheta2;
+    let phase = (PI2 * opticalThickness) / wavelengths;
+    let cosPhase = cos(phase);
+    let sinPhase = sin(phase);
+    let outsideCos1 = outsideIOR * cosTheta1Abs;
+    let iridescenceCos2 = safeIridescenceIOR * cosTheta2;
+    let iridescenceCos1 = safeIridescenceIOR * cosTheta1Abs;
+    let outsideCos2 = outsideIOR * cosTheta2;
+    let r12_s = (outsideCos1 - iridescenceCos2) / max(outsideCos1 + iridescenceCos2, EPSILON);
+    let r12_p = (iridescenceCos1 - outsideCos2) / max(iridescenceCos1 + outsideCos2, EPSILON);
+    let sqrtF0 = sqrt(clamp(baseF0, vec3<f32>(0.01), vec3<f32>(0.99)));
+    let safeN3 = max((1.0 + sqrtF0) / max(1.0 - sqrtF0, vec3<f32>(EPSILON)), vec3<f32>(1.2));
+    let iridescenceCos2Vec = vec3<f32>(iridescenceCos2);
+    let cosTheta1AbsVec = vec3<f32>(cosTheta1Abs);
+    let iridescenceCos1Vec = vec3<f32>(iridescenceCos1);
+    let cosTheta2Vec = vec3<f32>(cosTheta2);
+    let r23_s = (iridescenceCos2Vec - safeN3 * cosTheta1AbsVec) /
+                max(iridescenceCos2Vec + safeN3 * cosTheta1AbsVec, vec3<f32>(EPSILON));
+    let r23_p = (safeN3 * cosTheta2Vec - iridescenceCos1Vec) /
+                max(safeN3 * cosTheta2Vec + iridescenceCos1Vec, vec3<f32>(EPSILON));
+    let r12_sVec = vec3<f32>(r12_s);
+    let r12_pVec = vec3<f32>(r12_p);
+    let numSReal = r12_sVec + r23_s * cosPhase;
+    let numSImag = r23_s * sinPhase;
+    let denSReal = vec3<f32>(1.0) + r12_sVec * r23_s * cosPhase;
+    let denSImag = r12_sVec * r23_s * sinPhase;
+    let numPReal = r12_pVec + r23_p * cosPhase;
+    let numPImag = r23_p * sinPhase;
+    let denPReal = vec3<f32>(1.0) + r12_pVec * r23_p * cosPhase;
+    let denPImag = r12_pVec * r23_p * sinPhase;
+    let denSSquared = denSReal * denSReal + denSImag * denSImag;
+    let rsReal = (numSReal * denSReal + numSImag * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
+    let rsImag = (numSImag * denSReal - numSReal * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
+    let Rs = rsReal * rsReal + rsImag * rsImag;
+    let denPSquared = denPReal * denPReal + denPImag * denPImag;
+    let rpReal = (numPReal * denPReal + numPImag * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
+    let rpImag = (numPImag * denPReal - numPReal * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
+    let Rp = rpReal * rpReal + rpImag * rpImag;
+    let reflectance = 0.5 * (Rs + Rp);
+    let clampedReflectance = clamp(reflectance, vec3<f32>(0.0), vec3<f32>(1.0));
+    return mix(baseF0, clampedReflectance, iridescenceFactor);
+}
+
+// =============================================================================
+// Main PBR Orchestration
+// =============================================================================
 fn calcPbrDirectLight(
     input_vertexPosition: vec3<f32>,
     inputData_position: vec4<f32>,
@@ -851,6 +895,7 @@ fn calcPbrDirectLight(
     }
     return totalDirectLighting;
 }
+
 fn calcPbrIndirectLight(
     N: vec3<f32>, V: vec3<f32>, NdotV: f32,
     albedo: vec3<f32>, roughnessParameter: ptr<function, f32>, metallicParameter: f32,
@@ -871,7 +916,7 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_anisotropy
         if (anisotropy > 0.0)
         {
-            let anisotropicResult = getAnisotropicBRDFIndirect(V, N, *roughnessParameter, anisotropy, anisotropicT, anisotropicB);
+            let anisotropicResult = getIndirectAnisotropicBRDF(V, N, *roughnessParameter, anisotropy, anisotropicT, anisotropicB);
             R = anisotropicResult.xyz;
             *roughnessParameter = anisotropicResult.w;
         }
@@ -901,8 +946,8 @@ fn calcPbrIndirectLight(
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
         let energyCompensation = 1.0 + F0 * clamp(1.0 / max(envBRDF.x + envBRDF.y, 0.01) - 1.0, 0.0, 1.0);
         reflectedColor *= energyCompensation;
-        let FR_dielectric = getFresnelIndirect(NdotV_IBL, F0_dielectric, *roughnessParameter);
-        let FR_metal      = getFresnelIndirect(NdotV_IBL, F0_metal,      *roughnessParameter);
+        let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, *roughnessParameter);
+        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter);
         let horizonOcclusion = clamp(1.0 + dot(R, N), 0.0, 1.0);
         reflectedColor *= horizonOcclusion;
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
@@ -940,7 +985,7 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_sheen
         {
             let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-            let sheenResult = getSheenBRDFIndirect(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
+            let sheenResult = getIndirectSheenBRDF(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
             sheenIBLContribution = sheenResult.sheenIBLContribution;
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         }
@@ -954,7 +999,7 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
                  let u_atmo = systemUniforms.skyAtmosphere;
-                 let clearcoatResult = getClearcoatBRDFIndirect(
+                 let clearcoatResult = getIndirectClearcoatBRDF(
                      V, clearcoatNormal, clearcoatRoughnessParameter, iblMipmapCount,
                      ibl_prefilterTexture, prefilterTextureSampler, ibl_brdfLUTTexture,
                      u_useSkyAtmosphere, u_atmo.sunIntensity, skyAtmosphere_prefilteredTexture, atmosphereSampler,
@@ -971,7 +1016,7 @@ fn calcPbrIndirectLight(
         var indirectLighting = ambientContribution;
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
-            let transmissionFresnel = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - NdotV, 5.0);
+            let transmissionFresnel = getDirectFresnel(NdotV, F0);
             let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - transmissionFresnel);
             indirectLighting = mix(ambientContribution, transmissionRefraction * systemUniforms.preExposure, transmissionWeight);
         }
@@ -979,6 +1024,7 @@ fn calcPbrIndirectLight(
         return indirectLighting;
     }
 }
+
 fn calcPbrLight(
     lightColor:vec3<f32>,
     N:vec3<f32>, V:vec3<f32>, L:vec3<f32>,
@@ -1009,12 +1055,10 @@ fn calcPbrLight(
         let F_irid_metal = getIridescentFresnel(1.0, iridescenceIor, metal_f0, iridescenceThickness, iridescenceFactor, VdotH);
         F = mix(F_irid_dielectric, F_irid_metal, metallicParameter);
     } else {
-        F = getFresnelDirect(VdotH, combined_f0);
+        F = getDirectFresnel(VdotH, combined_f0);
     }
     if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
-    let D = getDistributionGGX(NdotH, roughnessParameter);
-    let Vis = getSpecularVisibility(VdotN, NdotL, roughnessParameter);
-    var SPEC_BRDF = D * Vis * F;
+    var SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, VdotN, NdotL);
     if (anisotropy > 0.0) {
         #redgpu_if useKHR_materials_anisotropy
             var TdotL = dot(anisotropicT, L);
@@ -1023,21 +1067,21 @@ fn calcPbrLight(
             var TdotH = dot(anisotropicT, H);
             var BdotH = dot(anisotropicB, H);
             var BdotV = dot(anisotropicB, V);
-            SPEC_BRDF = getAnisotropicBRDFDirect(vec3<f32>(1.0), roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy) * F;
+            SPEC_BRDF = getDirectAnisotropicBRDF(F, roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy);
         #redgpu_endIf
     }
     if (abs(ior - 1.0) < EPSILON) { SPEC_BRDF = vec3<f32>(0.0); }
-    let diffuse_reflection = getDiffuseBRDFDirect(NdotL, VdotN, LdotH, roughnessParameter, albedo);
+    let diffuse_reflection = getDirectDiffuseBRDF(NdotL, VdotN, LdotH, roughnessParameter, albedo);
     var diffuse_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_diffuse_transmission
     if (u_useKHR_materials_diffuse_transmission) {
-        diffuse_transmission = getDiffuseBTDFDirect(N, L, diffuseTransmissionColor);
+        diffuse_transmission = getDirectDiffuseBTDF(N, L, diffuseTransmissionColor);
     }
     #redgpu_endIf
     var specular_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
     if (transmissionParameter > 0.0) {
-        specular_transmission = getSpecularBTDFDirect(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, combined_f0, ior) * max(-NdotL_origin, 0.0);
+        specular_transmission = getDirectSpecularBTDF(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, F, ior) * max(-NdotL_origin, 0.0);
         if (abs(ior - 1.0) < EPSILON) { specular_transmission = vec3<f32>(0.0); }
     }
     #redgpu_endIf
@@ -1050,16 +1094,16 @@ fn calcPbrLight(
     {
         let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
         if (sheenRoughnessParameter > 0.0 && maxSheenColor > 0.001) {
-            let sheen_brdf = getSheenBRDFDirect(NdotL, VdotN, NdotH, sheenColor, sheenRoughnessParameter);
-            let sheen_albedo_scaling = 1.0 - maxSheenColor * getSheenCharlieE(VdotN, sheenRoughnessParameter);
+            let sheen_brdf = getDirectSheenBRDF(NdotL, VdotN, NdotH, sheenColor, sheenRoughnessParameter);
+            let sheen_albedo_scaling = getSheenAlbedoScaling(maxSheenColor, getSheenCharlieE(VdotN, sheenRoughnessParameter));
             result = result * sheen_albedo_scaling + (sheen_brdf * NdotL);
         }
     }
     #redgpu_endIf
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
-            let CLEARCOAT_BRDF = getClearcoatBRDFDirect(L, V, H, clearcoatNormal, clearcoatRoughnessParameter, LdotH);
-            let coatF = getFresnelDirect(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
+            let CLEARCOAT_BRDF = getDirectClearcoatBRDF(L, V, H, clearcoatNormal, clearcoatRoughnessParameter, LdotH);
+            let coatF = getDirectFresnel(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
             result = CLEARCOAT_BRDF + (vec3<f32>(1.0) - coatF) * result;
         }
     #redgpu_endIf
