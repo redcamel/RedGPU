@@ -9,12 +9,7 @@
 #redgpu_include lighting.getLightDistanceAttenuation;
 #redgpu_include lighting.getLightAngleAttenuation;
 
-// [KO] PBR 핵심 라이브러리 포함 [EN] Include core PBR libraries
-#redgpu_include lighting.getDiffuseBRDFDisney;
-#redgpu_include lighting.getFresnelSchlick
-#redgpu_include lighting.getDistributionGGX
-#redgpu_include lighting.getSpecularVisibility
-#redgpu_include lighting.getSpecularBRDF
+
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
 struct Uniforms {
@@ -83,6 +78,70 @@ struct InputData {
 #redgpu_include math.INV_PI
 #redgpu_include math.EPSILON
 #redgpu_include math.direction.getViewDirection
+
+fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+    if (NdotL <= 0.0) { return vec3<f32>(0.0); }
+
+    // Disney diffuse term
+    let energyBias = mix(0.0, 0.5, roughness);
+    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
+    let f0 = 1.0;
+    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
+    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+
+    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+}
+
+fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
+    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+fn getDistributionGGX(NdotH: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+    let NdotH2 = NdotH * NdotH;
+
+    let nom = alpha2;
+    let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
+    let denomSquared = denom * denom;
+
+    return nom / max(EPSILON, denomSquared * PI);
+}
+
+fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+
+    // [KO] grazing angle에서의 수치적 발산을 방지하기 위해 최소값 제한
+    let safeNdotV = max(NdotV, 1e-4);
+    let safeNdotL = max(NdotL, 1e-4);
+
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
+
+    return 0.5 / max(GGXV + GGXL, EPSILON);
+}
+
+fn getSpecularBRDF(
+    F0: vec3<f32>,
+    roughness: f32,
+    NdotH: f32,
+    NdotV: f32,
+    NdotL: f32,
+    LdotH: f32
+) -> vec3<f32> {
+    // 1. Distribution (D)
+    let D = getDistributionGGX(NdotH, roughness);
+
+    // 2. Visibility (V) - Includes Geometry term and 1/(4*NoL*NoV)
+    let V = getSpecularVisibility(NdotV, NdotL, roughness);
+
+    // 3. Fresnel (F)
+    let F = getFresnelSchlick(LdotH, F0);
+
+    return D * V * F;
+}
 
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
