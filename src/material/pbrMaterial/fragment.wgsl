@@ -67,7 +67,7 @@ struct SheenIBLResult {
     sheenAlbedoScaling: f32
 }
 
-fn getSheenCharlieDFG(NdotV: f32, roughness: f32) -> f32 {
+fn getSheenIndirectDFG(NdotV: f32, roughness: f32) -> f32 {
     if (roughness < 0.01) {
         return 0.0;
     }
@@ -93,7 +93,7 @@ fn getSheenCharlieE(NdotV: f32, roughness: f32) -> f32 {
     return pow(grazingFactor, roughnessExp) * pow(r, 0.5);
 }
 
-fn getSheenIBL(
+fn getSheenIndirect(
     N: vec3<f32>,
     V: vec3<f32>,
     sheenColor: vec3<f32>,
@@ -109,7 +109,7 @@ fn getSheenIBL(
     let mipLevel = sheenRoughness * iblMipmapCount;
     let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb  / systemUniforms.preExposure;
 
-    let sheenDFG = getSheenCharlieDFG(NdotV, sheenRoughness);
+    let sheenDFG = getSheenIndirectDFG(NdotV, sheenRoughness);
     let contribution = sheenRadiance * sheenColor * sheenDFG;
 
     let E = getSheenCharlieE(NdotV, sheenRoughness);
@@ -149,7 +149,7 @@ fn getAnisotropicNDF(NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32) -> f3
     return a2 * w2 * w2 * INV_PI;
 }
 
-fn getAnisotropicSpecularBRDF(
+fn getAnisotropicDirect(
     f0: vec3<f32>, 
     alphaRoughness: f32, 
     VdotH: f32, 
@@ -169,15 +169,16 @@ fn getAnisotropicSpecularBRDF(
     var at = mix(alphaRoughness, 1.0, anisotropy * anisotropy);
     var ab = alphaRoughness;
     
-    var F: vec3<f32> = getFresnelSchlick(VdotH, f0);
+    var F: vec3<f32> = getFresnelDirect(VdotH, f0);
     var V: f32 = getAnisotropicVisibility(NdotL, NdotV, BdotV, TdotV, TdotL, BdotL, at, ab);
+
     var D: f32 = getAnisotropicNDF(NdotH, TdotH, BdotH, at, ab);
     
     return F * (V * D);
 }
 
 // [KHR_materials_anisotropy] Indirect
-fn getAnisotropicIBL(
+fn getAnisotropicIndirect(
     V: vec3<f32>, N: vec3<f32>,
     roughness: f32, anisotropy: f32,
     anisotropicT: vec3<f32>, anisotropicB: vec3<f32>
@@ -204,7 +205,7 @@ fn getAnisotropicIBL(
     return vec4<f32>(R, max(weightedRoughness, 0.04));
 }
 
-fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+fn getDiffuseDirect(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
 
     // Disney diffuse term
@@ -218,19 +219,14 @@ fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
 }
 
-fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
+fn getFresnelDirect(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
     return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-fn getIndirectFresnelSchlick(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
+fn getFresnelIndirect(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
     let fresnelPower = 5.0 - 2.0 * roughness;
     let F90 = max(vec3<f32>(1.0 - roughness * 0.8), F0);
     return F0 + (F90 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), fresnelPower);
-}
-
-fn getConductorFresnel(F0: vec3<f32>, bsdf: vec3<f32>, VdotH: f32) -> vec3<f32> {
-    let fresnel = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - abs(VdotH), 0.0, 1.0), 5.0);
-    return bsdf * fresnel;
 }
 
 fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
@@ -349,7 +345,7 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     return 0.5 / max(GGXV + GGXL, EPSILON);
 }
 
-fn getSpecularBRDF(
+fn getSpecularDirect(
     F0: vec3<f32>,
     roughness: f32,
     NdotH: f32,
@@ -366,12 +362,12 @@ fn getSpecularBRDF(
     let V = getSpecularVisibility(NdotV, NdotL, roughness);
 
     // 3. Fresnel (F)
-    let F = getFresnelSchlick(LdotH, F0);
+    let F = getFresnelDirect(LdotH, F0);
 
     return D * V * F;
 }
 
-fn getSpecularBTDF(
+fn getSpecularTransmissionDirect(
     NdotV: f32,
     NdotL: f32,
     NdotH: f32,
@@ -392,7 +388,7 @@ fn getSpecularBTDF(
     let G: f32 = min(1.0, min((2.0 * NdotH * NdotV) / VdotH, (2.0 * NdotH * abs(NdotL)) / VdotH));
 
     // 3. F (Fresnel) 계산
-    let F: vec3<f32> = getFresnelSchlick(VdotH, F0);
+    let F: vec3<f32> = getFresnelDirect(VdotH, F0);
 
     let denom = (eta * VdotH + LdotH) * (eta * VdotH + LdotH);
 
@@ -410,28 +406,10 @@ fn getSpecularBTDF(
     return btdf;
 }
 
-fn getDiffuseBTDF(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
+fn getDiffuseTransmissionDirect(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f32> {
     // 뒷면으로 들어오는 광선만 처리 (-dot(N,L)를 사용하여 음수만 양수로 변환하여 사용)
     let cosTheta = max(-dot(N, L), 0.0);
     return albedo * cosTheta * INV_PI;
-}
-
-fn getFresnelMix(
-    F0: vec3<f32>,
-    weight: f32,
-    base: vec3<f32>,
-    layer: vec3<f32>,
-    VdotH: f32
-) -> vec3<f32> {
-    var f0 = min(F0, vec3<f32>(1.0));
-    let fr = f0 + (vec3<f32>(1.0) - f0) * pow(clamp(1.0 - abs(VdotH), 0.0, 1.0), 5.0);
-    return (1.0 - weight * max(max(fr.x, fr.y), fr.z)) * base + weight * fr * layer;
-}
-
-fn getFresnelCoat(NdotV: f32, ior: f32, weight: f32, base: vec3<f32>, layer: vec3<f32>) -> vec3<f32> {
-    let f0: f32 = pow((1.0 - ior) / (1.0 + ior), 2.0);
-    let fr: f32 = f0 + (1.0 - f0) * pow(clamp(1.0 - abs(NdotV), 0.0, 1.0), 5.0);
-    return mix(base, layer, weight * fr);
 }
 
 #redgpu_include skyAtmosphere.skyAtmosphereFn
@@ -1016,7 +994,7 @@ fn getClearcoatDirect(
     let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-6);
     let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
     let clearcoatF0 = vec3<f32>(0.04);
-    let CLEARCOAT_SPEC = getSpecularBRDF(clearcoatF0, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
+    let CLEARCOAT_SPEC = getSpecularDirect(clearcoatF0, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL, LdotH);
     return CLEARCOAT_SPEC * clearcoatNdotL;
 }
 
@@ -1052,7 +1030,7 @@ fn getClearcoatIndirect(
 
     let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
     let clearcoatF0 = vec3<f32>(0.04);
-    let coatF = getIndirectFresnelSchlick(clearcoatNdotV, clearcoatF0, clearcoatRoughness).x;
+    let coatF = getFresnelIndirect(clearcoatNdotV, clearcoatF0, clearcoatRoughness).x;
     let clearcoatIBL_Weight = (0.04 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y);
     let color = clearcoatRadiance * clearcoatIBL_Weight;
     return vec4<f32>(color, coatF);
@@ -1184,7 +1162,7 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_anisotropy
         if (anisotropy > 0.0)
         {
-            let anisotropicResult = getAnisotropicIBL(V, N, *roughnessParameter, anisotropy, anisotropicT, anisotropicB);
+            let anisotropicResult = getAnisotropicIndirect(V, N, *roughnessParameter, anisotropy, anisotropicT, anisotropicB);
             R = anisotropicResult.xyz;
             *roughnessParameter = anisotropicResult.w;
         }
@@ -1240,8 +1218,8 @@ fn calcPbrIndirectLight(
         reflectedColor *= energyCompensation;
 
         // [KO] 프레넬-거칠기 보정 (Fresnel-Roughness Correction)
-        let FR_dielectric = getIndirectFresnelSchlick(NdotV_IBL, F0_dielectric, *roughnessParameter);
-        let FR_metal      = getIndirectFresnelSchlick(NdotV_IBL, F0_metal,      *roughnessParameter);
+        let FR_dielectric = getFresnelIndirect(NdotV_IBL, F0_dielectric, *roughnessParameter);
+        let FR_metal      = getFresnelIndirect(NdotV_IBL, F0_metal,      *roughnessParameter);
 
         // [KO] 지평선 감쇄(Horizon Occlusion) 및 최종 반사광 보정
         let horizonOcclusion = clamp(1.0 + dot(R, N), 0.0, 1.0);
@@ -1297,7 +1275,7 @@ fn calcPbrIndirectLight(
         #redgpu_if useKHR_materials_sheen
         {
             let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-            let sheenResult = getSheenIBL(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
+            let sheenResult = getSheenIndirect(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
             sheenIBLContribution = sheenResult.sheenIBLContribution;
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         }
@@ -1387,14 +1365,14 @@ fn calcPbrLight(
         let F_irid_metal = getIridescentFresnel(1.0, iridescenceIor, metal_f0, iridescenceThickness, iridescenceFactor, VdotH);
         F = mix(F_irid_dielectric, F_irid_metal, metallicParameter);
     } else {
-        F = getFresnelSchlick(VdotH, combined_f0);
+        F = getFresnelDirect(VdotH, combined_f0);
     }
 
     // [KO] IOR이 1.0인 경우 프레넬 반사 제로화 (물리적 예외 처리)
     if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
 
     // [KO] 1. 스페큘러 반사(Specular Reflection) BRDF 계산
-    // [KO] getSpecularBRDF 대신 D와 V(Visibility) 항만 따로 가져와서 이미 계산된 F와 결합
+    // [KO] getSpecularDirect 대신 D와 V(Visibility) 항만 따로 가져와서 이미 계산된 F와 결합
     let D = getDistributionGGX(NdotH, roughnessParameter);
     let Vis = getSpecularVisibility(VdotN, NdotL, roughnessParameter);
     var SPEC_BRDF = D * Vis * F;
@@ -1408,7 +1386,7 @@ fn calcPbrLight(
             var BdotH = dot(anisotropicB, H);
             var BdotV = dot(anisotropicB, V);
             // [KO] 이방성 BRDF 계산 시에도 통합된 F를 사용하여 중복 계산 방지
-            SPEC_BRDF = getAnisotropicSpecularBRDF(vec3<f32>(1.0), roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy) * F;
+            SPEC_BRDF = getAnisotropicDirect(vec3<f32>(1.0), roughnessParameter * roughnessParameter, VdotH, NdotL, VdotN, NdotH, BdotV, TdotV, TdotL, BdotL, TdotH, BdotH, anisotropy) * F;
         #redgpu_endIf
     }
     
@@ -1416,15 +1394,15 @@ fn calcPbrLight(
     if (abs(ior - 1.0) < EPSILON) { SPEC_BRDF = vec3<f32>(0.0); }
 
     // [KO] 2. 하부 레이어(Diffuse + Specular Transmission) 계산
-    // [KO] getDiffuseBRDFDisney는 내부적으로 NdotL과 INV_PI를 포함함
-    let diffuse_reflection = getDiffuseBRDFDisney(NdotL, VdotN, LdotH, roughnessParameter, albedo);
+    // [KO] getDiffuseDirect는 내부적으로 NdotL과 INV_PI를 포함함
+    let diffuse_reflection = getDiffuseDirect(NdotL, VdotN, LdotH, roughnessParameter, albedo);
 
     // [KO] 확산 투과 (Thin-walled)
     var diffuse_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_diffuse_transmission
     if (u_useKHR_materials_diffuse_transmission) {
-        // [KO] getDiffuseBTDF 내부에서 이미 max(-NdotL, 0)가 곱해지므로 중복 곱셈 제거
-        diffuse_transmission = getDiffuseBTDF(N, L, diffuseTransmissionColor);
+        // [KO] getDiffuseTransmissionDirect 내부에서 이미 max(-NdotL, 0)가 곱해지므로 중복 곱셈 제거
+        diffuse_transmission = getDiffuseTransmissionDirect(N, L, diffuseTransmissionColor);
     }
     #redgpu_endIf
 
@@ -1433,7 +1411,7 @@ fn calcPbrLight(
     #redgpu_if useKHR_materials_transmission
     if (transmissionParameter > 0.0) {
         // [KO] 투과 시에도 박막 간섭이 적용된 (1-F) 에너지를 고려함
-        specular_transmission = getSpecularBTDF(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, combined_f0, ior) * max(-NdotL_origin, 0.0);
+        specular_transmission = getSpecularTransmissionDirect(VdotN, NdotL_origin, NdotH, VdotH, LdotH, roughnessParameter, combined_f0, ior) * max(-NdotL_origin, 0.0);
         if (abs(ior - 1.0) < EPSILON) { specular_transmission = vec3<f32>(0.0); }
     }
     #redgpu_endIf
@@ -1472,7 +1450,7 @@ fn calcPbrLight(
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
             let CLEARCOAT_SPEC_LIGHT = getClearcoatDirect(L, V, H, clearcoatNormal, clearcoatRoughnessParameter, LdotH);
-            let coatF = getFresnelSchlick(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
+            let coatF = getFresnelDirect(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
             result = CLEARCOAT_SPEC_LIGHT + (vec3<f32>(1.0) - coatF) * result;
         }
     #redgpu_endIf
