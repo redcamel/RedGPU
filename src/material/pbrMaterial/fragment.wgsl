@@ -16,6 +16,7 @@
 #redgpu_include math.tnb.getTBNFromVertexTangent
 #redgpu_include math.tnb.getTBN
 #redgpu_include math.tnb.getNormalFromNormalMap
+#redgpu_include skyAtmosphere.skyAtmosphereFn
 fn getKHRTextureTransformUV(
     input_uv: vec2<f32>,
     input_uv1: vec2<f32>,
@@ -300,7 +301,7 @@ fn getDiffuseBTDFDirect(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f
     let cosTheta = max(-dot(N, L), 0.0);
     return albedo * cosTheta * INV_PI;
 }
-#redgpu_include skyAtmosphere.skyAtmosphereFn
+
 struct Uniforms {
     useVertexColor: u32,
     useCutOff: u32,
