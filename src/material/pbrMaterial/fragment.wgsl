@@ -134,13 +134,16 @@ fn main(inputData:InputData) -> OutputFragment {
     let input_ndcPosition = inputData.position.xyz / inputData.position.w ;
     let input_uv = inputData.uv;
     let input_uv1 = inputData.uv1;
-    let u_ambientLight = systemUniforms.ambientLight;
-    let u_directionalLightCount = systemUniforms.directionalLightCount;
-    let u_directionalLights = systemUniforms.directionalLights;
-    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
-    let receiveShadowYn = inputData.receiveShadow != 0.0;
     let u_camera = systemUniforms.camera;
     let u_cameraPosition = u_camera.cameraPosition;
+    
+    // Cache common system values
+    let preExposure = systemUniforms.preExposure;
+    let invPreExposure = select(1.0 / preExposure, 0.0, preExposure <= 0.0);
+    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
+    let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
+
+    // Material Uniforms
     let u_opacity = uniforms.opacity;
     let u_cutOff = uniforms.cutOff;
     let u_useVertexColor = uniforms.useVertexColor == 1u;
@@ -178,6 +181,8 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_KHR_clearcoatFactor = uniforms.KHR_clearcoatFactor;
     let u_KHR_clearcoatRoughnessFactor = uniforms.KHR_clearcoatRoughnessFactor;
     let u_KHR_clearcoatNormalScale = uniforms.KHR_clearcoatNormalScale;
+
+    // UV Transforms
     let diffuseUV = getTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
     let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);
     let occlusionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.occlusionTexture_texCoord_index, uniforms.use_occlusionTexture_KHR_texture_transform, uniforms.occlusionTexture_KHR_texture_transform_offset, uniforms.occlusionTexture_KHR_texture_transform_rotation, uniforms.occlusionTexture_KHR_texture_transform_scale);
@@ -198,6 +203,8 @@ fn main(inputData:InputData) -> OutputFragment {
     let KHR_diffuseTransmissionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_scale);
     let KHR_diffuseTransmissionColorUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionColorTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionColorTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_scale);
     let KHR_anisotropyUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_anisotropyTexture_texCoord_index, uniforms.use_KHR_anisotropyTexture_KHR_texture_transform, uniforms.KHR_anisotropyTexture_KHR_texture_transform_offset, uniforms.KHR_anisotropyTexture_KHR_texture_transform_rotation, uniforms.KHR_anisotropyTexture_KHR_texture_transform_scale);
+    
+    // Core Vectors
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let baseNormal:vec3<f32> = normalize(input_vertexNormal.xyz);
     var N:vec3<f32> = baseNormal;
@@ -209,10 +216,28 @@ fn main(inputData:InputData) -> OutputFragment {
         }
     }
     #redgpu_endIf
+    
+    // Cache TBN if needed
+    let tbnNeeded = 
+        #redgpu_if normalTexture
+        true ||
+        #redgpu_endIf
+        #redgpu_if useKHR_materials_clearcoat
+        true ||
+        #redgpu_endIf
+        #redgpu_if useKHR_materials_anisotropy
+        true ||
+        #redgpu_endIf
+        false;
+        
+    var tbn: mat3x3<f32>;
+    if (tbnNeeded) {
+        tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
+    }
+
     #redgpu_if normalTexture
     {
         var normalSamplerColor = textureSample(normalTexture, normalTextureSampler, normalUV).rgb;
-        let tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
         N = getNormalFromNormalMap(vec3<f32>(normalSamplerColor.r, 1.0 - normalSamplerColor.g, normalSamplerColor.b), tbn, u_normalScale );
     }
     #redgpu_endIf
@@ -221,11 +246,14 @@ fn main(inputData:InputData) -> OutputFragment {
     }
     N = normalize(N);
     let NdotV = max(abs(dot(N, V)), 1e-6);
+
+    // Shadow
+    let receiveShadowYn = inputData.receiveShadow != 0.0;
     var visibility:f32 = 1.0;
     visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, inputData.shadowCoord);
     if(!receiveShadowYn){ visibility = 1.0; }
-    var finalColor:vec4<f32>;
-    var ior:f32 = u_KHR_materials_ior;
+
+    // Base Color & Alpha
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
@@ -234,13 +262,18 @@ fn main(inputData:InputData) -> OutputFragment {
        baseColor *= diffuseSampleColor;
        resultAlpha *= diffuseSampleColor.a;
     #redgpu_endIf
-    let albedo:vec3<f32> = baseColor.rgb ;
+    
     #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
         output.color = baseColor;
         return output;
     }
     #redgpu_endIf
+
+    let albedo:vec3<f32> = baseColor.rgb ;
+    var ior:f32 = u_KHR_materials_ior;
+
+    // PBR Parameters
     var occlusionParameter:f32 = 1.0;
     #redgpu_if useOcclusionTexture
         occlusionParameter = textureSample(packedORMTexture, packedTextureSampler, occlusionUV).r * u_occlusionStrength;
@@ -249,17 +282,19 @@ fn main(inputData:InputData) -> OutputFragment {
     var roughnessParameter: f32 = u_roughnessFactor;
     #redgpu_if useMetallicRoughnessTexture
         let metallicRoughnessSample = (textureSample(packedORMTexture, packedTextureSampler, metallicRoughnessUV));
-        metallicParameter = metallicRoughnessSample.b * metallicParameter;
-        roughnessParameter = metallicRoughnessSample.g * roughnessParameter;
+        metallicParameter *= metallicRoughnessSample.b;
+        roughnessParameter *= metallicRoughnessSample.g;
     #redgpu_endIf
     roughnessParameter = max(roughnessParameter, 0.045);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
+
+    // Clearcoat
     var clearcoatParameter = u_KHR_clearcoatFactor;
     var clearcoatRoughnessParameter = u_KHR_clearcoatRoughnessFactor ;
     var clearcoatNormal:vec3<f32> = select(baseNormal, -baseNormal, backFaceYn);
     #redgpu_if useKHR_materials_clearcoat
     {
-        if(clearcoatParameter != 0.0){
+        if(clearcoatParameter > 0.0){
             #redgpu_if useKHR_clearcoatTexture
                 let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
                 clearcoatParameter *= clearcoatSample.r;
@@ -270,10 +305,8 @@ fn main(inputData:InputData) -> OutputFragment {
             #redgpu_endIf
             #redgpu_if useKHR_clearcoatNormalTexture
             {
-                var targetUv = KHR_clearcoatNormalUV;
-                let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, targetUv).rgb;
-                let clearcoatTBN = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
-                let texturedNormal = getNormalFromNormalMap(clearcoatNormalSamplerColor, clearcoatTBN, u_KHR_clearcoatNormalScale);
+                let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV).rgb;
+                let texturedNormal = getNormalFromNormalMap(clearcoatNormalSamplerColor, tbn, u_KHR_clearcoatNormalScale);
                 clearcoatNormal = select(texturedNormal, -texturedNormal, backFaceYn);
             }
             #redgpu_endIf
@@ -281,96 +314,96 @@ fn main(inputData:InputData) -> OutputFragment {
         }
     }
     #redgpu_endIf
+
+    // Specular
     var specularParameter = u_KHR_specularFactor;
     var specularColor = u_KHR_specularColorFactor;
     #redgpu_if useKHR_materials_specular
         #redgpu_if KHR_specularColorTexture
-            let specularColorTextureSample = textureSample(KHR_specularColorTexture, KHR_specularColorTextureSampler, KHR_specularColorTextureUV);
-            specularColor *= specularColorTextureSample.rgb;
+            specularColor *= textureSample(KHR_specularColorTexture, KHR_specularColorTextureSampler, KHR_specularColorTextureUV).rgb;
         #redgpu_endIf
         #redgpu_if KHR_specularTexture
-            let specularTextureSample = textureSample(KHR_specularTexture, KHR_specularTextureSampler, KHR_specularTextureUV);
-            specularParameter *= specularTextureSample.a;
+            specularParameter *= textureSample(KHR_specularTexture, KHR_specularTextureSampler, KHR_specularTextureUV).a;
         #redgpu_endIf
     #redgpu_endIf
+
+    // Transmission & Volume
     var transmissionParameter: f32 = u_KHR_transmissionFactor;
     var thicknessParameter: f32 = u_KHR_thicknessFactor;
     #redgpu_if useKHR_materials_transmission
         #redgpu_if useKHR_transmissionTexture
-          let transmissionSample: vec4<f32> = textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_transmissionUV);
-          transmissionParameter *= transmissionSample.b;
+          transmissionParameter *= textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_transmissionUV).b;
         #redgpu_endIf
         #redgpu_if useKHR_thicknessTexture
-            let thicknessSample: vec4<f32> = textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_transmissionUV);
-            thicknessParameter *= thicknessSample.a;
+          thicknessParameter *= textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_transmissionUV).a;
         #redgpu_endIf
     #redgpu_endIf
+
     var diffuseTransmissionColor:vec3<f32> = u_KHR_diffuseTransmissionColorFactor;
     var diffuseTransmissionParameter : f32 = u_KHR_diffuseTransmissionFactor;
     #redgpu_if useKHR_materials_diffuse_transmission
         #redgpu_if useKHR_diffuseTransmissionTexture
-            let diffuseTransmissionTextureSample =  textureSample(packedKHR_diffuse_transmission, packedTextureSampler, KHR_diffuseTransmissionUV);
-            diffuseTransmissionParameter *= diffuseTransmissionTextureSample.a;
+            diffuseTransmissionParameter *= textureSample(packedKHR_diffuse_transmission, packedTextureSampler, KHR_diffuseTransmissionUV).a;
         #redgpu_endIf
         #redgpu_if useKHR_diffuseTransmissionColorTexture
-            let diffuseTransmissionColorTextureSample =  textureSample(packedKHR_diffuse_transmission, packedTextureSampler, KHR_diffuseTransmissionColorUV);
-            diffuseTransmissionColor *= diffuseTransmissionColorTextureSample.rgb;
+            diffuseTransmissionColor *= textureSample(packedKHR_diffuse_transmission, packedTextureSampler, KHR_diffuseTransmissionColorUV).rgb;
         #redgpu_endIf
     #redgpu_endIf
+
+    // Sheen
     var sheenColor = u_KHR_sheenColorFactor;
     var sheenRoughnessParameter = u_KHR_sheenRoughnessFactor;
     #redgpu_if useKHR_materials_sheen
         #redgpu_if useKHR_sheenColorTexture
-            let sheenColorSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenColorUV));
-            sheenColor *= sheenColorSample.rgb;
+            sheenColor *= textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenColorUV).rgb;
         #redgpu_endIf
         #redgpu_if useKHR_sheenRoughnessTexture
-            let sheenRoughnessSample = (textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenRoughnessUV));
-            sheenRoughnessParameter *= sheenRoughnessSample.a;
+            sheenRoughnessParameter *= textureSample(packedKHR_sheen, packedTextureSampler, KHR_sheenRoughnessUV).a;
         #redgpu_endIf
     #redgpu_endIf
+
+    // Iridescence
     var iridescenceParameter = u_KHR_iridescenceFactor;
     var iridescenceThickness = u_KHR_iridescenceThicknessMaximum;
     #redgpu_if useKHR_materials_iridescence
         #redgpu_if useKHR_iridescenceTexture
-            let iridescenceTextureSample: vec4<f32> = textureSample(packedKHR_iridescence, packedTextureSampler, KHR_iridescenceTextureUV);
-            iridescenceParameter *= iridescenceTextureSample.r;
+            iridescenceParameter *= textureSample(packedKHR_iridescence, packedTextureSampler, KHR_iridescenceTextureUV).r;
         #redgpu_endIf
         #redgpu_if useKHR_iridescenceThicknessTexture
-            let iridescenceThicknessTextureSample: vec4<f32> = textureSample(packedKHR_iridescence, packedTextureSampler, KHR_iridescenceThicknessTextureUV);
-            iridescenceThickness =  mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, iridescenceThicknessTextureSample.g);
+            iridescenceThickness = mix(u_KHR_iridescenceThicknessMinimum, u_KHR_iridescenceThicknessMaximum, textureSample(packedKHR_iridescence, packedTextureSampler, KHR_iridescenceThicknessTextureUV).g);
         #redgpu_endIf
     #redgpu_endIf
+
+    // Anisotropy
     var anisotropy: f32 = u_KHR_anisotropyStrength;
     var anisotropicT: vec3<f32> = vec3<f32>(1.0);
     var anisotropicB: vec3<f32>= vec3<f32>(1.0);
     #redgpu_if useKHR_materials_anisotropy
     {
-       let tbn = getTBNFromVertexTangent(N, input_vertexTangent);
        let T = tbn[0];
        let B = tbn[1];
        var anisotropicDirection: vec2<f32> = vec2<f32>(1.0, 0.0);
        if(u_useKHR_anisotropyTexture){
            let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
-           anisotropicDirection = anisotropyTex.rg * 2.0 - vec2<f32>(1.0, 1.0);
+           anisotropicDirection = anisotropyTex.rg * 2.0 - 1.0;
            anisotropy *= anisotropyTex.b;
        }
-       var cosR = cos(u_KHR_anisotropyRotation);
-       var sinR = sin(u_KHR_anisotropyRotation);
-       let rotationMtx: mat2x2<f32> = mat2x2<f32>(cosR, sinR, -sinR, cosR);
-       anisotropicDirection = rotationMtx * anisotropicDirection;
+       let cosR = cos(u_KHR_anisotropyRotation);
+       let sinR = sin(u_KHR_anisotropyRotation);
+       anisotropicDirection = mat2x2<f32>(cosR, sinR, -sinR, cosR) * anisotropicDirection;
        let anisotropicTBN = getTBN(N, T * anisotropicDirection.x + B * anisotropicDirection.y);
        anisotropicT = anisotropicTBN[0];
        anisotropicB = anisotropicTBN[1];
     }
     #redgpu_endIf
+
+    // Transmission Refraction (Indirect)
     var transmissionRefraction = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
     {
         transmissionRefraction = getTransmissionRefraction(u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor, ior, roughnessParameter, albedo, systemUniforms.projection.projectionViewMatrix, input_vertexPosition, input_ndcPosition, V, N, renderPath1ResultTexture, renderPath1ResultTextureSampler);
-        if (systemUniforms.preExposure > 0.0) {
-            transmissionRefraction /= systemUniforms.preExposure;
-        }
+        transmissionRefraction *= invPreExposure;
+        
         #redgpu_if useKHR_materials_volume
         if (u_useKHR_materials_volume) {
             let localNodeScale = inputData.localNodeScale_volumeScale[0];
@@ -379,23 +412,26 @@ fn main(inputData:InputData) -> OutputFragment {
             let safeAttenuationDistance = max(u_KHR_attenuationDistance, EPSILON);
             let attenuationCoefficient = -log(safeAttenuationColor) / safeAttenuationDistance;
             let pathLength = scaledThickness / max(NdotV, 0.04);
-            let volumeTransmittance = exp(-attenuationCoefficient * pathLength);
-            transmissionRefraction *= volumeTransmittance;
+            transmissionRefraction *= exp(-attenuationCoefficient * pathLength);
         }
         #redgpu_endIf
     }
     #redgpu_endIf
+
+    // Fresnel F0
     let F0_dielectric_base = getDielectricF0(ior);
-    var F0_dielectric = F0_dielectric_base *  specularColor;
-    var F0_metal = baseColor.rgb;
+    var F0_dielectric = F0_dielectric_base * specularColor;
+    var F0_metal = albedo;
     #redgpu_if useKHR_materials_iridescence
         if (iridescenceParameter > 0.0) {
             F0_dielectric = getIridescentFresnel(1.0, u_KHR_iridescenceIor, F0_dielectric, iridescenceThickness, iridescenceParameter, NdotV);
-            F0_metal = getIridescentFresnel(1.0, u_KHR_iridescenceIor, baseColor.rgb, iridescenceThickness, iridescenceParameter, NdotV);
+            F0_metal = getIridescentFresnel(1.0, u_KHR_iridescenceIor, albedo, iridescenceThickness, iridescenceParameter, NdotV);
         }
     #redgpu_endIf
     let F0 = mix(F0_dielectric, F0_metal, metallicParameter);
-    var totalDirectLighting = getDirectPbrLighting(
+
+    // Final Orchestration
+    let totalDirectLighting = getDirectPbrLighting(
         input_vertexPosition, inputData.position, visibility,
         N, V, NdotV,
         roughnessParameter, metallicParameter, albedo,
@@ -418,24 +454,26 @@ fn main(inputData:InputData) -> OutputFragment {
         u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
         sheenColor, sheenRoughnessParameter,
         anisotropy, anisotropicT, anisotropicB,
-        clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
+        clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
+        invPreExposure
     );
-    finalColor = vec4<f32>(totalDirectLighting + indirectLighting, resultAlpha);
+    
     var emissiveColor = u_emissiveFactor * u_emissiveStrength;
     #redgpu_if emissiveTexture
         emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
     #redgpu_endIf
-    finalColor = vec4<f32>(finalColor.rgb + emissiveColor, resultAlpha);
+    
+    let finalColor = vec4<f32>(totalDirectLighting + indirectLighting + emissiveColor, resultAlpha);
+
     #redgpu_if useCutOff
         if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
+    
     output.color = finalColor;
     {
         let smoothness = 1.0 - roughnessParameter;
         let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
-        let metallicWeight = metallicParameter * metallicParameter;
-        let baseReflection = 0.04 + 0.96 * metallicWeight;
-        let baseReflectionStrength = smoothnessCurved * baseReflection;
+        let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallicParameter * metallicParameter);
         output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     }
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0 );
@@ -616,12 +654,13 @@ fn getIndirectSheenBRDF(
     sheenRoughness: f32,
     iblMipmapCount: f32,
     irradianceTexture: texture_cube<f32>,
-    textureSampler: sampler
+    textureSampler: sampler,
+    invPreExposure: f32
 ) -> SheenIBLResult {
     let NdotV = clamp(dot(N, V), EPSILON, 1.0);
     let R = getReflectionVectorFromViewDirection(V, N);
     let mipLevel = sheenRoughness * iblMipmapCount;
-    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb  / systemUniforms.preExposure;
+    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb * invPreExposure;
     let sheenDFG = getIndirectSheenDFG(NdotV, sheenRoughness);
     let contribution = sheenRadiance * sheenColor * sheenDFG;
     let E = getSheenCharlieE(NdotV, sheenRoughness);
@@ -733,12 +772,15 @@ fn getIndirectClearcoatBRDF(
     atmosphereSampler: sampler,
     cameraHeight: f32,
     atmosphereHeight: f32,
-    transmittanceTexture: texture_2d<f32>
+    transmittanceTexture: texture_2d<f32>,
+    invPreExposure: f32,
+    mainR: vec3<f32>,
+    isMainNormal: bool
 ) -> vec4<f32> {
-    let clearcoatR = getReflectionVectorFromViewDirection(V, clearcoatNormal);
+    let clearcoatR = select(getReflectionVectorFromViewDirection(V, clearcoatNormal), mainR, isMainNormal);
     let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 1e-6);
     let clearcoatMipLevel = clearcoatRoughness * iblMipmapCount;
-    var clearcoatRadiance = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb / systemUniforms.preExposure;
+    var clearcoatRadiance = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb * invPreExposure;
     if (useSkyAtmosphere) {
         let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, cameraHeight, clearcoatR.y, atmosphereHeight);
         let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
@@ -747,11 +789,9 @@ fn getIndirectClearcoatBRDF(
         clearcoatRadiance = (clearcoatRadiance * ccTrans) + ccSkyScat;
     }
     let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
-    let clearcoatF0 = vec3<f32>(0.04);
-    let coatF = getIndirectFresnel(clearcoatNdotV, clearcoatF0, clearcoatRoughness).x;
+    let coatF = getIndirectFresnel(clearcoatNdotV, vec3<f32>(0.04), clearcoatRoughness).x;
     let clearcoatIBL_Weight = (0.04 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y);
-    let color = clearcoatRadiance * clearcoatIBL_Weight;
-    return vec4<f32>(color, coatF);
+    return vec4<f32>(clearcoatRadiance * clearcoatIBL_Weight, coatF);
 }
 
 fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
@@ -764,51 +804,51 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
     let sinTheta1 = sqrt(max(0.0, 1.0 - cosTheta1Abs * cosTheta1Abs));
     let sinTheta2 = (outsideIOR / safeIridescenceIOR) * sinTheta1;
     if (sinTheta2 >= 1.0) {
-        return baseF0 + iridescenceFactor * (vec3<f32>(1.0) - baseF0);
+        return baseF0 + iridescenceFactor * (1.0 - baseF0);
     }
-    let cosTheta2 = sqrt(max(0.0, 1.0 - sinTheta2 * sinTheta2));
-    let wavelengths = vec3<f32>(650.0, 510.0, 475.0);
+    let cosTheta2 = sqrt(1.0 - sinTheta2 * sinTheta2);
+    
+    // Physics constants
     let opticalThickness = 2.0 * iridescenceThickness * safeIridescenceIOR * cosTheta2;
-    let phase = (PI2 * opticalThickness) / wavelengths;
+    let phase = (PI2 * opticalThickness) * vec3<f32>(1.0/650.0, 1.0/510.0, 1.0/475.0);
     let cosPhase = cos(phase);
     let sinPhase = sin(phase);
+    
     let outsideCos1 = outsideIOR * cosTheta1Abs;
     let iridescenceCos2 = safeIridescenceIOR * cosTheta2;
     let iridescenceCos1 = safeIridescenceIOR * cosTheta1Abs;
     let outsideCos2 = outsideIOR * cosTheta2;
+    
     let r12_s = (outsideCos1 - iridescenceCos2) / max(outsideCos1 + iridescenceCos2, EPSILON);
     let r12_p = (iridescenceCos1 - outsideCos2) / max(iridescenceCos1 + outsideCos2, EPSILON);
+    
     let sqrtF0 = sqrt(clamp(baseF0, vec3<f32>(0.01), vec3<f32>(0.99)));
-    let safeN3 = max((1.0 + sqrtF0) / max(1.0 - sqrtF0, vec3<f32>(EPSILON)), vec3<f32>(1.2));
-    let iridescenceCos2Vec = vec3<f32>(iridescenceCos2);
-    let cosTheta1AbsVec = vec3<f32>(cosTheta1Abs);
-    let iridescenceCos1Vec = vec3<f32>(iridescenceCos1);
-    let cosTheta2Vec = vec3<f32>(cosTheta2);
-    let r23_s = (iridescenceCos2Vec - safeN3 * cosTheta1AbsVec) /
-                max(iridescenceCos2Vec + safeN3 * cosTheta1AbsVec, vec3<f32>(EPSILON));
-    let r23_p = (safeN3 * cosTheta2Vec - iridescenceCos1Vec) /
-                max(safeN3 * cosTheta2Vec + iridescenceCos1Vec, vec3<f32>(EPSILON));
-    let r12_sVec = vec3<f32>(r12_s);
-    let r12_pVec = vec3<f32>(r12_p);
-    let numSReal = r12_sVec + r23_s * cosPhase;
-    let numSImag = r23_s * sinPhase;
-    let denSReal = vec3<f32>(1.0) + r12_sVec * r23_s * cosPhase;
-    let denSImag = r12_sVec * r23_s * sinPhase;
-    let numPReal = r12_pVec + r23_p * cosPhase;
-    let numPImag = r23_p * sinPhase;
-    let denPReal = vec3<f32>(1.0) + r12_pVec * r23_p * cosPhase;
-    let denPImag = r12_pVec * r23_p * sinPhase;
+    let safeN3 = (1.0 + sqrtF0) / max(1.0 - sqrtF0, vec3<f32>(EPSILON));
+    
+    let r23_s = (iridescenceCos2 - safeN3 * cosTheta1Abs) / max(iridescenceCos2 + safeN3 * cosTheta1Abs, vec3<f32>(EPSILON));
+    let r23_p = (safeN3 * cosTheta2 - iridescenceCos1) / max(safeN3 * cosTheta2 + iridescenceCos1, vec3<f32>(EPSILON));
+    
+    let r12_s_vec = vec3<f32>(r12_s);
+    let r12_p_vec = vec3<f32>(r12_p);
+    
+    // S-polarization: (r12 + r23*e^-i phi) / (1 + r12*r23*e^-i phi)
+    let denSReal = 1.0 + r12_s_vec * r23_s * cosPhase;
+    let denSImag = -r12_s_vec * r23_s * sinPhase;
     let denSSquared = denSReal * denSReal + denSImag * denSImag;
-    let rsReal = (numSReal * denSReal + numSImag * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
-    let rsImag = (numSImag * denSReal - numSReal * denSImag) / max(denSSquared, vec3<f32>(EPSILON));
-    let Rs = rsReal * rsReal + rsImag * rsImag;
+    let numSReal = r12_s_vec + r23_s * cosPhase;
+    let numSImag = -r23_s * sinPhase;
+    let Rs = (numSReal * numSReal + numSImag * numSImag) / max(denSSquared, vec3<f32>(EPSILON));
+    
+    // P-polarization
+    let denPReal = 1.0 + r12_p_vec * r23_p * cosPhase;
+    let denPImag = -r12_p_vec * r23_p * sinPhase;
     let denPSquared = denPReal * denPReal + denPImag * denPImag;
-    let rpReal = (numPReal * denPReal + numPImag * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
-    let rpImag = (numPImag * denPReal - numPReal * denPImag) / max(denPSquared, vec3<f32>(EPSILON));
-    let Rp = rpReal * rpReal + rpImag * rpImag;
-    let reflectance = 0.5 * (Rs + Rp);
-    let clampedReflectance = clamp(reflectance, vec3<f32>(0.0), vec3<f32>(1.0));
-    return mix(baseF0, clampedReflectance, iridescenceFactor);
+    let numPReal = r12_p_vec + r23_p * cosPhase;
+    let numPImag = -r23_p * sinPhase;
+    let Rp = (numPReal * numPReal + numPImag * numPImag) / max(denPSquared, vec3<f32>(EPSILON));
+    
+    let reflectance = clamp(0.5 * (Rs + Rp), vec3<f32>(0.0), vec3<f32>(1.0));
+    return mix(baseF0, reflectance, iridescenceFactor);
 }
 
 // =============================================================================
@@ -905,11 +945,13 @@ fn getIndirectPbrLighting(
     transmissionParameter: f32, transmissionRefraction: vec3<f32>,
     u_useKHR_materials_diffuse_transmission: bool, diffuseTransmissionParameter: f32, diffuseTransmissionColor: vec3<f32>,
     sheenColor: vec3<f32>, sheenRoughnessParameter: f32,
-    anisotropy: f32, anisotropicT: vec3<f32>, anisotropicB: vec3<f32>,
-    clearcoatParameter: f32, clearcoatRoughnessParameter: f32, clearcoatNormal: vec3<f32>
+    anisotropy: f32, anisotropyT: vec3<f32>, anisotropicB: vec3<f32>,
+    clearcoatParameter: f32, clearcoatRoughnessParameter: f32, clearcoatNormal: vec3<f32>,
+    invPreExposure: f32
 ) -> vec3<f32> {
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
+    let preExposure = systemUniforms.preExposure;
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
         var R = getReflectionVectorFromViewDirection(V, N);
         let NdotV_IBL = max(abs(dot(N, V)), 1e-6);
@@ -962,7 +1004,7 @@ fn getIndirectPbrLighting(
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
                 let mipLevel = (*roughnessParameter) * iblMipmapCount;
-                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb  / systemUniforms.preExposure;
+                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb  * invPreExposure;
             }
             if (u_useSkyAtmosphere) {
                 let u_atmo = systemUniforms.skyAtmosphere;
@@ -985,7 +1027,7 @@ fn getIndirectPbrLighting(
         #redgpu_if useKHR_materials_sheen
         {
             let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-            let sheenResult = getIndirectSheenBRDF(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
+            let sheenResult = getIndirectSheenBRDF(N, V, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler, invPreExposure);
             sheenIBLContribution = sheenResult.sheenIBLContribution;
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         }
@@ -995,7 +1037,7 @@ fn getIndirectPbrLighting(
         let dielectricPart_IBL = ibl_specular_dielectric + ibl_diffuse_dielectric;
         let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
         let baseIndirect = mix(dielectricPart_IBL, metallicPart_IBL, metallicParameter);
-        var indirectLighting = (baseIndirect * sheenAlbedoScaling + sheenIBLContribution) * systemUniforms.preExposure;
+        var indirectLighting = (baseIndirect * sheenAlbedoScaling + sheenIBLContribution) * preExposure;
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
                  let u_atmo = systemUniforms.skyAtmosphere;
@@ -1003,22 +1045,23 @@ fn getIndirectPbrLighting(
                      V, clearcoatNormal, clearcoatRoughnessParameter, iblMipmapCount,
                      ibl_prefilterTexture, prefilterTextureSampler, ibl_brdfLUTTexture,
                      u_useSkyAtmosphere, u_atmo.sunIntensity, skyAtmosphere_prefilteredTexture, atmosphereSampler,
-                     u_atmo.cameraHeight, u_atmo.atmosphereHeight, transmittanceTexture
+                     u_atmo.cameraHeight, u_atmo.atmosphereHeight, transmittanceTexture,
+                     invPreExposure, R, all(clearcoatNormal == N)
                  );
-                 let clearcoatSpecularIBL = clearcoatResult.rgb * clearcoatParameter * systemUniforms.preExposure;
+                 let clearcoatSpecularIBL = clearcoatResult.rgb * clearcoatParameter * preExposure;
                  let coatF = clearcoatResult.a * clearcoatParameter;
                  indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - coatF) * indirectLighting;
             }
         #redgpu_endIf
         return indirectLighting;
     } else {
-        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * occlusionParameter * systemUniforms.preExposure * INV_PI;
+        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * occlusionParameter * preExposure * INV_PI;
         var indirectLighting = ambientContribution;
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
             let transmissionFresnel = getFresnel(NdotV, F0);
             let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - transmissionFresnel);
-            indirectLighting = mix(ambientContribution, transmissionRefraction * systemUniforms.preExposure, transmissionWeight);
+            indirectLighting = mix(ambientContribution, transmissionRefraction * preExposure, transmissionWeight);
         }
         #redgpu_endIf
         return indirectLighting;
