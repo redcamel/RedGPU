@@ -930,89 +930,20 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
     let F0 = mix(F0_dielectric, F0_metal, metallicParameter);
 
-    // [KO] 직접 조명 계산 - Directional Light (Lux-based) [EN] Direct lighting calculation - Directional Light (Lux-based)
-    var totalDirectLighting = vec3<f32>(0.0);
-    for (var i = 0u; i < u_directionalLightCount; i++) {
-        let lightIntensity = u_directionalLights[i].intensity;
-        let L = -normalize(u_directionalLights[i].direction);
-
-        // [KO] 통합 에너지 계산 (색상 * 강도 * 노출 * 가시성)
-        // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환 (getDiffuseBRDFDisney가 내부적으로 INV_PI를 처리함)
-        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
-
-        // [KO] 대기 산란이 활성화된 경우 태양광(첫 번째 직사광)에 대기 투과율 적용 (분광 감쇄)
-        if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
-            let u_atmo = systemUniforms.skyAtmosphere;
-            let surfaceHeightKm = max(0.0, input_vertexPosition.y / 1000.0);
-            let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
-            finalLightColor *= atmosphereTransmittance;
-        }
-
-        totalDirectLighting += calcPbrLight(
-            finalLightColor,
-            N, V, L, NdotV,
-            roughnessParameter, metallicParameter, albedo,
-            F0_dielectric_base, ior,
-            specularColor, specularParameter,
-            u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
-            transmissionParameter,
-            sheenColor, sheenRoughnessParameter,
-            anisotropy, anisotropicT, anisotropicB,
-            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
-            u_useKHR_materials_iridescence, iridescenceParameter, u_KHR_iridescenceIor, iridescenceThickness
-        );
-    }
-
-
-    // [KO] 직접 조명 계산 - Point/Spot Lights (Clustered) [EN] Direct lighting calculation - Point/Spot Lights (Clustered)
-    {
-        let clusterIndex = getClusterLightClusterIndex(inputData.position);
-        let lightOffset  = clusterLightGrid.cells[clusterIndex].offset;
-        let lightCount:u32   = clusterLightGrid.cells[clusterIndex].count;
-
-        for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-            let i = clusterLightGrid.indices[lightOffset + lightIndex];
-            let targetLight = clusterLightList.lights[i];
-            let u_clusterLightPosition = targetLight.position;
-            let u_clusterLightRadius = targetLight.radius;
-            let u_isSpotLight = targetLight.isSpotLight;
-
-         let lightDir = u_clusterLightPosition - input_vertexPosition;
-         let lightDistance = length(lightDir);
-
-         if (lightDistance > u_clusterLightRadius) { continue; }
-
-         let L = normalize(lightDir);
-         let attenuation = getLightDistanceAttenuation(lightDistance, u_clusterLightRadius);
-         var finalAttenuation = attenuation;
-
-         // [KO] 스포트라이트 처리 [EN] Spotlight processing
-         if (u_isSpotLight > 0.0) {
-             let u_clusterLightDirection = normalize(vec3<f32>(targetLight.directionX, targetLight.directionY, targetLight.directionZ));
-             let lightToVertex = normalize(-L);
-             finalAttenuation *= getLightAngleAttenuation(lightToVertex, u_clusterLightDirection, targetLight.innerCutoff, targetLight.outerCutoff);
-         }
-
-         // [KO] 통합 에너지 계산 (색상 * 강도 * 감쇄 * 노출)
-         // [KO] 물리적 조도(Lux)를 광휘(Radiance)로 변환 (calcPbrLight가 내부적으로 INV_PI를 처리함)
-         var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
-
-         // [KO] calcPbrLight 함수 호출 (28개 인자) [EN] Call calcPbrLight function (28 arguments)
-         totalDirectLighting += calcPbrLight(
-            finalLightColor,
-            N, V, L, NdotV,
-            roughnessParameter, metallicParameter, albedo,
-            F0_dielectric_base, ior,
-            specularColor, specularParameter,
-            u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
-            transmissionParameter,
-            sheenColor, sheenRoughnessParameter,
-            anisotropy, anisotropicT, anisotropicB,
-            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
-            u_useKHR_materials_iridescence, iridescenceParameter, u_KHR_iridescenceIor, iridescenceThickness
-        );
-        }
-    }
+    // [KO] 직접 조명 계산 [EN] Direct lighting calculation
+    var totalDirectLighting = calcPbrDirectLight(
+        input_vertexPosition, inputData.position, visibility,
+        N, V, NdotV,
+        roughnessParameter, metallicParameter, albedo,
+        F0_dielectric_base, ior,
+        specularColor, specularParameter,
+        u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
+        transmissionParameter,
+        sheenColor, sheenRoughnessParameter,
+        anisotropy, anisotropicT, anisotropicB,
+        clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
+        u_useKHR_materials_iridescence, iridescenceParameter, u_KHR_iridescenceIor, iridescenceThickness
+    );
 
     // [KO] 간접 조명 계산 [EN] Indirect lighting calculation
     let indirectLighting = calcPbrIndirectLight(
@@ -1059,6 +990,108 @@ fn main(inputData:InputData) -> OutputFragment {
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0 );
 
     return output;
+}
+
+// [KO] 물리 기반 직접 조명 계산 함수 (PBR Direct)
+// [EN] Physically-based direct lighting calculation function (PBR Direct)
+fn calcPbrDirectLight(
+    input_vertexPosition: vec3<f32>,
+    inputData_position: vec4<f32>,
+    visibility: f32,
+    N: vec3<f32>, V: vec3<f32>, NdotV: f32,
+    roughnessParameter: f32, metallicParameter: f32, albedo: vec3<f32>,
+    F0_dielectric_base: vec3<f32>, ior: f32,
+    specularColor: vec3<f32>, specularParameter: f32,
+    u_useKHR_materials_diffuse_transmission: bool, diffuseTransmissionParameter: f32, diffuseTransmissionColor: vec3<f32>,
+    transmissionParameter: f32,
+    sheenColor: vec3<f32>, sheenRoughnessParameter: f32,
+    anisotropy: f32, anisotropicT: vec3<f32>, anisotropicB: vec3<f32>,
+    clearcoatParameter: f32, clearcoatRoughnessParameter: f32, clearcoatNormal: vec3<f32>,
+    useIridescence: bool, iridescenceFactor: f32, iridescenceIor: f32, iridescenceThickness: f32
+) -> vec3<f32> {
+    var totalDirectLighting = vec3<f32>(0.0);
+    let u_directionalLightCount = systemUniforms.directionalLightCount;
+    let u_directionalLights = systemUniforms.directionalLights;
+
+    // [KO] 직접 조명 계산 - Directional Light (Lux-based)
+    for (var i = 0u; i < u_directionalLightCount; i++) {
+        let lightIntensity = u_directionalLights[i].intensity;
+        let L = -normalize(u_directionalLights[i].direction);
+
+        // [KO] 통합 에너지 계산 (색상 * 강도 * 노출 * 가시성)
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
+
+        // [KO] 대기 산란이 활성화된 경우 태양광에 대기 투과율 적용
+        if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let surfaceHeightKm = max(0.0, input_vertexPosition.y / 1000.0);
+            let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
+            finalLightColor *= atmosphereTransmittance;
+        }
+
+        totalDirectLighting += calcPbrLight(
+            finalLightColor,
+            N, V, L, NdotV,
+            roughnessParameter, metallicParameter, albedo,
+            F0_dielectric_base, ior,
+            specularColor, specularParameter,
+            u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
+            transmissionParameter,
+            sheenColor, sheenRoughnessParameter,
+            anisotropy, anisotropicT, anisotropicB,
+            clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
+            useIridescence, iridescenceFactor, iridescenceIor, iridescenceThickness
+        );
+    }
+
+    // [KO] 직접 조명 계산 - Point/Spot Lights (Clustered)
+    {
+        let clusterIndex = getClusterLightClusterIndex(inputData_position);
+        let lightOffset  = clusterLightGrid.cells[clusterIndex].offset;
+        let lightCount:u32   = clusterLightGrid.cells[clusterIndex].count;
+
+        for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
+            let i = clusterLightGrid.indices[lightOffset + lightIndex];
+            let targetLight = clusterLightList.lights[i];
+            let u_clusterLightPosition = targetLight.position;
+            let u_clusterLightRadius = targetLight.radius;
+            let u_isSpotLight = targetLight.isSpotLight;
+
+            let lightDir = u_clusterLightPosition - input_vertexPosition;
+            let lightDistance = length(lightDir);
+
+            if (lightDistance > u_clusterLightRadius) { continue; }
+
+            let L = normalize(lightDir);
+            let attenuation = getLightDistanceAttenuation(lightDistance, u_clusterLightRadius);
+            var finalAttenuation = attenuation;
+
+            // [KO] 스포트라이트 처리
+            if (u_isSpotLight > 0.0) {
+                let u_clusterLightDirection = normalize(vec3<f32>(targetLight.directionX, targetLight.directionY, targetLight.directionZ));
+                let lightToVertex = normalize(-L);
+                finalAttenuation *= getLightAngleAttenuation(lightToVertex, u_clusterLightDirection, targetLight.innerCutoff, targetLight.outerCutoff);
+            }
+
+            var finalLightColor = targetLight.color * targetLight.intensity * finalAttenuation * systemUniforms.preExposure;
+
+            totalDirectLighting += calcPbrLight(
+                finalLightColor,
+                N, V, L, NdotV,
+                roughnessParameter, metallicParameter, albedo,
+                F0_dielectric_base, ior,
+                specularColor, specularParameter,
+                u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
+                transmissionParameter,
+                sheenColor, sheenRoughnessParameter,
+                anisotropy, anisotropicT, anisotropicB,
+                clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
+                useIridescence, iridescenceFactor, iridescenceIor, iridescenceThickness
+            );
+        }
+    }
+
+    return totalDirectLighting;
 }
 
 // [KO] 물리 기반 간접 조명 계산 함수 (PBR Indirect/IBL)
