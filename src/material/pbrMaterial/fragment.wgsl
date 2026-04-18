@@ -222,6 +222,12 @@ fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
     return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+fn getIndirectFresnelSchlick(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
+    let fresnelPower = 5.0 - 2.0 * roughness;
+    let F90 = max(vec3<f32>(1.0 - roughness * 0.8), F0);
+    return F0 + (F90 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), fresnelPower);
+}
+
 fn getConductorFresnel(F0: vec3<f32>, bsdf: vec3<f32>, VdotH: f32) -> vec3<f32> {
     let fresnel = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - abs(VdotH), 0.0, 1.0), 5.0);
     return bsdf * fresnel;
@@ -1045,7 +1051,8 @@ fn getClearcoatIndirect(
     }
 
     let clearcoatEnvBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(clearcoatNdotV, clearcoatRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
-    let coatF = getFresnelSchlick(clearcoatNdotV, vec3<f32>(0.04)).x;
+    let clearcoatF0 = vec3<f32>(0.04);
+    let coatF = getIndirectFresnelSchlick(clearcoatNdotV, clearcoatF0, clearcoatRoughness).x;
     let clearcoatIBL_Weight = (0.04 * clearcoatEnvBRDF.x + clearcoatEnvBRDF.y);
     let color = clearcoatRadiance * clearcoatIBL_Weight;
     return vec4<f32>(color, coatF);
@@ -1233,12 +1240,8 @@ fn calcPbrIndirectLight(
         reflectedColor *= energyCompensation;
 
         // [KO] 프레넬-거칠기 보정 (Fresnel-Roughness Correction)
-        let fresnelPower = 5.0 - 2.0 * (*roughnessParameter);
-        let F90_dielectric = max(vec3<f32>(1.0 - (*roughnessParameter) * 0.8), F0_dielectric);
-        let F90_metal = max(vec3<f32>(1.0 - (*roughnessParameter) * 0.8), F0_metal);
-
-        let FR_dielectric = F0_dielectric + (F90_dielectric - F0_dielectric) * pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), fresnelPower);
-        let FR_metal = F0_metal + (F90_metal - F0_metal) * pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), fresnelPower);
+        let FR_dielectric = getIndirectFresnelSchlick(NdotV_IBL, F0_dielectric, *roughnessParameter);
+        let FR_metal      = getIndirectFresnelSchlick(NdotV_IBL, F0_metal,      *roughnessParameter);
 
         // [KO] 지평선 감쇄(Horizon Occlusion) 및 최종 반사광 보정
         let horizonOcclusion = clamp(1.0 + dot(R, N), 0.0, 1.0);
