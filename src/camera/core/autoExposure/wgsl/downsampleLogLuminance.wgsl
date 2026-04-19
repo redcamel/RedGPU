@@ -44,13 +44,19 @@ fn main(
         if (global_id.x % 2u == 0u && global_id.y % 2u == 0u) {
             let color = textureLoad(sourceTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0).rgb;
             
-            // [KO] 현재 적용된 노출을 나누어 원본 휘도(Raw Luminance)를 복원합니다.
-            // [EN] Recover the raw luminance by dividing by the currently applied exposure.
-            let lum = getLuminance(color) / max(uniforms.currentPreExposure, 0.0001);
+            // [KO] 색채 에너지를 보존하기 위해 단순 휘도(Luminance) 대신 각 채널의 최대값(Max Component)을 사용하여 밝기를 판단합니다.
+            // [EN] Use the maximum color component (Max Component) instead of simple luminance to judge brightness and preserve color energy.
+            // [KO] 이를 통해 순수 빨강, 순수 파랑 등 채도가 높은 색상이 "어둡다"고 오판되어 노출이 과하게 튀는 현상을 방지합니다.
+            // [EN] This prevents over-exposure when highly saturated colors like pure red or blue are misjudged as "dark".
+            let brightness = max(color.r, max(color.g, color.b));
+            let lum = brightness / max(uniforms.currentPreExposure, 0.0001);
 
-            // [KO] 유효한 휘도 범위인 경우 히스토그램 빈에 추가
-            // [EN] Add to histogram bin if within valid luminance range
-            if (lum > 0.0001) {
+            // [KO] 배경 제외: 휘도가 0.0001보다 작거나 Alpha가 0인 픽셀은 히스토그램에서 제외합니다.
+            // [EN] Exclude background: pixels with luminance less than 0.0001 or alpha 0 are excluded from the histogram.
+            // [KO] 이를 통해 빈 공간(Void)에 의해 전체 노출 평균이 왜곡되는 것을 방지합니다.
+            // [EN] This prevents the overall exposure average from being distorted by empty space (Void).
+            let texel = textureLoad(sourceTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0);
+            if (lum > 0.0001 && texel.a > 0.0) {
                 // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
                 // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
                 let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);

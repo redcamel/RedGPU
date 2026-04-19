@@ -68,8 +68,9 @@ fn main() {
 
     // [KO] 노출 배율 제한 적용 (너무 어두울 때 스페큘러가 타는 현상 방지)
     // [EN] Apply exposure multiplier limit (prevents specular blooming in very dark scenes)
-    // [KO] EV100 공식 역산을 통해 최대 노출 배율에 해당하는 최소 EV100 결정
-    let minPossibleEV100 = log2((100.0 * uniforms.targetLuminance * pow(2.0, uniforms.exposureCompensation)) / (uniforms.calibrationConstant * uniforms.maxExposureMultiplier));
+    // [KO] EV100 공식 역산을 통해 최대 노출 배율에 해당하는 최소 EV100 결정 (CPU측 preExposure 공식과 일치시킴)
+    // [EN] Determine minimum EV100 corresponding to the maximum exposure multiplier (consistent with CPU-side preExposure formula)
+    let minPossibleEV100 = uniforms.exposureCompensation - log2(1.2 * uniforms.maxExposureMultiplier);
     targetEV100 = max(targetEV100, minPossibleEV100);
 
     // [KO] 눈 적응 시뮬레이션 (EV100 공간에서 수행)

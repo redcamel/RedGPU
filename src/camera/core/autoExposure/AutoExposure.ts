@@ -33,13 +33,13 @@ class AutoExposure {
 
     // [KO] 자동 노출 알고리즘 파라미터 (ToneMappingManager에서 이전됨)
     // [EN] Auto-exposure algorithm parameters (Moved from ToneMappingManager)
-    #minEV100: number = -1.0;
+    #minEV100: number = 1.0;
     #maxEV100: number = 20.0;
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
     #lowPercentile: number = 0.8;
     #highPercentile: number = 0.983;
-    #maxExposureMultiplier: number = 16.0;
+    #maxExposureMultiplier: number = 4.0;
     #meteringMode: METERING_MODE = METERING_MODE.AVERAGE;
     #targetLuminance: number = 0.18;
     #exposureCompensation: number = 0.0;
