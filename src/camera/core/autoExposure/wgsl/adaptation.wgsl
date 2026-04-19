@@ -64,7 +64,11 @@ fn main() {
 
     // [KO] 목표 휘도 및 사용자의 노출 보정(Compensation)을 반영한 목표 EV100 결정
     // [EN] Determine target EV100 reflecting target luminance and user's exposure compensation
-    var targetEV100 = avgEV100 - log2(uniforms.targetLuminance / 0.18) - uniforms.exposureCompensation;
+    // [KO] UE5 표준 공식(1 / (1.2 * 2^EV100))에 따라, targetLuminance가 최종 결과물의 평균 휘도가 되도록 EV100을 계산합니다.
+    // [EN] According to the UE5 standard formula (1 / (1.2 * 2^EV100)), calculate EV100 so that targetLuminance becomes the average luminance of the final result.
+    // [KO] 기준점 계산: log2((1.2 * 100.0 * targetLuminance) / calibrationConstant)
+    // [EN] Reference point calculation: log2((1.2 * 100.0 * targetLuminance) / calibrationConstant)
+    var targetEV100 = avgEV100 - log2((120.0 * uniforms.targetLuminance) / uniforms.calibrationConstant) - uniforms.exposureCompensation;
 
     // [KO] 노출 배율 제한 적용 (너무 어두울 때 스페큘러가 타는 현상 방지)
     // [EN] Apply exposure multiplier limit (prevents specular blooming in very dark scenes)

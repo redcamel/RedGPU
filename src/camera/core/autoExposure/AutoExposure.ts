@@ -27,7 +27,7 @@ class AutoExposure {
 
     #uniformBuffer: UniformBuffer;
 
-    #currentAdaptedEV100: number = 0.5260688;
+    #currentAdaptedEV100: number = 1.0;
     #readBuffer: GPUBuffer;
     #isReading: boolean = false;
 
@@ -158,7 +158,7 @@ class AutoExposure {
      */
     get preExposure(): number {
         const {rawCamera} = this.#view;
-        return this.#calculatePreExposure(rawCamera.ev100, this.#targetLuminance, this.#exposureCompensation);
+        return this.#calculatePreExposure(rawCamera.ev100, this.#exposureCompensation);
     }
 
     /**
@@ -183,24 +183,23 @@ class AutoExposure {
      * [KO] EV100 기반으로 물리적 노출 배율(preExposure)을 계산합니다. (UE5 표준 물리 노출 공식)
      * [EN] Calculates physical exposure multiplier (preExposure) based on EV100. (UE5 standard physical exposure formula)
      * @param ev100 - [KO] 물리적 노출 지수 [EN] Physical exposure value (EV100)
-     * @param targetLuminance - [KO] 목표 휘도 (UE5에서는 기본적으로 1.2 계수로 대체됨) [EN] Target luminance (replaced by 1.2 factor in UE5)
      * @param exposureCompensation - [KO] 노출 보정 값 [EN] Exposure compensation value
      * @returns [KO] 계산된 노출 배율 [EN] Calculated exposure multiplier
      */
-    #calculatePreExposure(ev100: number, targetLuminance: number, exposureCompensation: number): number {
+    #calculatePreExposure(ev100: number, exposureCompensation: number): number {
         // [KO] UE5 표준 물리 노출 공식 적용: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
         // [EN] Apply UE5 standard physical exposure formula: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
-        // [KO] 여기서 1.2는 언리얼의 노출 보정 계수(K)이며, ACamera.CALIBRATION_CONSTANT와는 별개의 값입니다.
-        // [EN] Here, 1.2 is Unreal's exposure calibration factor, separate from ACamera.CALIBRATION_CONSTANT.
+        // [KO] 여기서 1.2는 언리얼의 노출 보정 계수(K)이며, ACamera.CALIBRATION_CONSTANT(12.5)와 조합되어 최종 휘도를 결정합니다.
+        // [EN] Here, 1.2 is Unreal's exposure calibration factor, used in combination with ACamera.CALIBRATION_CONSTANT (12.5) to determine final luminance.
         return Math.pow(2, exposureCompensation) / (1.2 * Math.pow(2, ev100));
     }
 
     #initResources() {
         const {gpuDevice} = this.#redGPUContext;
 
-        // [KO] 초기 EV100 값 설정 (0.18 휘도에 해당하는 약 0.526 EV)
-        // [EN] Set initial EV100 value (approx. 0.526 EV for 0.18 luminance)
-        const initialData = new Float32Array([0.5260688]);
+        // [KO] 초기 EV100 값 설정 (기본적으로 1.0으로 시작하거나 이전 프레임의 적응 값을 유지합니다)
+        // [EN] Set initial EV100 value (starts at 1.0 by default or maintains the adapted value from the previous frame)
+        const initialData = new Float32Array([1.0]);
         this.#adaptedEV100Buffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
 
         // [KO] 히스토그램 버퍼 (256 bins) [EN] Histogram buffer (256 bins)
@@ -265,7 +264,7 @@ class AutoExposure {
 
         // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
         // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
-        const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#targetLuminance, this.#exposureCompensation);
+        const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#exposureCompensation);
 
         // Update uniforms (총 17개 필드로 확장)
         gpuDevice.queue.writeBuffer(
