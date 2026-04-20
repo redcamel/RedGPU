@@ -136,7 +136,6 @@ class SkyBox {
      */
     #transitionElapsed: number = 0
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
-    #intensity: number = 1.0;
 
     /**
      * [KO] 새로운 SkyBox 인스턴스를 생성합니다.
@@ -238,29 +237,6 @@ class SkyBox {
     }
 
     /**
-     * [KO] 스카이박스의 강도 배율을 반환합니다.
-     * [EN] Returns the skybox intensity multiplier.
-     */
-    get intensity(): number {
-        return this.#intensity;
-    }
-
-    /**
-     * [KO] 스카이박스의 강도 배율을 설정합니다. (기본값: 1.0)
-     * [EN] Sets the skybox intensity multiplier. (Default: 1.0)
-     * @param value -
-     * [KO] 강도 배율 값
-     * [EN] Intensity multiplier value
-     * @throws
-     * [KO] 값이 0보다 작은 경우 Error 발생
-     * [EN] Throws Error if value is less than 0
-     */
-    set intensity(value: number) {
-        validatePositiveNumberRange(value, 0)
-        this.#intensity = value;
-    }
-
-    /**
      * [KO] 현재 스카이박스 텍스처를 반환합니다.
      * [EN] Returns the current skybox texture.
      */
@@ -334,9 +310,9 @@ class SkyBox {
     #autoIntensity(view: any): void {
         const {preExposure} = view.postEffectManager.autoExposure;
         if (preExposure > 0) {
-            // [KO] 현재 노출(preExposure)을 상쇄하고 사용자 강도 배율(intensity)을 반영하여 최종 재질 강도 설정
-            // [EN] Set final material intensity by offsetting current exposure (preExposure) and reflecting user intensity multiplier.
-            this.#material.intensity = this.#intensity / preExposure;
+            // [KO] 현재 노출(preExposure)을 상쇄하고 최종 재질 강도 설정
+            // [EN] Set final material intensity by offsetting current exposure (preExposure).
+            this.#material.intensity = 1.0 / preExposure;
         }
     }
 
