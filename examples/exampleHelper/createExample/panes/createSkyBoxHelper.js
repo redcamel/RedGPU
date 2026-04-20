@@ -3,7 +3,6 @@ const createSkyBoxHelper = (pane, view) => {
     const settings = {
         blur: 0,
         opacity: 1,
-        intensity: 1.0,
     };
     skybox.addBinding(settings, 'blur', {
         min: 0,
@@ -18,13 +17,6 @@ const createSkyBoxHelper = (pane, view) => {
         step: 0.01
     }).on("change", (ev) => {
         if (view.skybox) view.skybox.opacity = ev.value;
-    })
-    skybox.addBinding(settings, 'intensity', {
-        min: 0,
-        max: 10,
-        step: 0.01,
-    }).on("change", (ev) => {
-        if (view.skybox) view.skybox.intensity = ev.value;
     })
     // skybox.addBinding(view.toneMappingManager, 'exposure', {
     // 	min: 0,

@@ -299,24 +299,6 @@ class SkyBox {
     }
 
     /**
-     * [KO] 현재 뷰의 노출 상태에 맞춰 스카이박스 강도를 매 프레임 자동으로 최적화합니다.
-     * [EN] Automatically optimizes the skybox intensity every frame based on the current view's exposure state.
-     *
-     * [KO] 이 메서드는 현재 카메라 노출(`preExposure`)을 상쇄하여 스카이박스가 화면에서 일정한 밝기를 유지하도록 물리적 휘도 값을 계산합니다.
-     * [EN] This method offsets the current camera exposure (`preExposure`) to calculate a physical luminance value that maintains constant brightness for the skybox on screen.
-     *
-     * @param view - [KO] 대상 View3D 인스턴스 [EN] Target View3D instance
-     */
-    #autoIntensity(view: any): void {
-        const {preExposure} = view.postEffectManager.autoExposure;
-        if (preExposure > 0) {
-            // [KO] 현재 노출(preExposure)을 상쇄하고 최종 재질 강도 설정
-            // [EN] Set final material intensity by offsetting current exposure (preExposure).
-            this.#material.intensity = 1.0 / preExposure;
-        }
-    }
-
-    /**
      * [KO] 스카이박스를 렌더링합니다.
      * [EN] Renders the skybox.
      *
@@ -337,10 +319,6 @@ class SkyBox {
         const {triangleCount, indexCount, format} = indexBuffer
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
         
-        // [KO] 매 프레임 현재 뷰의 노출 상태에 맞춰 강도를 자동 보정하여 일정한 화면 밝기를 유지합니다.
-        // [EN] Automatically corrects the intensity every frame to match the view's exposure, maintaining constant screen brightness.
-        this.#autoIntensity(view);
-
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
         // keepLog(this.#dirtyPipeline , this.#material.dirtyPipeline)

@@ -976,8 +976,8 @@ fn getIndirectPbrLighting(
         if (u_usePrefilterTexture) {
             iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
             var mipLevel = (*roughnessParameter) * iblMipmapCount;
-            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * invPreExposure;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * invPreExposure;
+            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb;
         }
         if (u_useSkyAtmosphere) {
             let u_atmo = systemUniforms.skyAtmosphere;
