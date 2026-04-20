@@ -38,7 +38,7 @@ fn main(inputData: InputData) -> OutputFragment {
     if (finalColor.a == 0.0) {
         discard;
     }
-    output.color = finalColor;
+    output.color = vec4<f32>(finalColor.rgb * systemUniforms.preExposure, finalColor.a);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
     return output;
 }

@@ -139,7 +139,6 @@ fn main(inputData:InputData) -> OutputFragment {
     
     // Cache common system values
     let preExposure = systemUniforms.preExposure;
-    let invPreExposure = select(1.0 / preExposure, 0.0, preExposure <= 0.0);
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
 
@@ -402,7 +401,6 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useKHR_materials_transmission
     {
         transmissionRefraction = getTransmissionRefraction(u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor, ior, roughnessParameter, albedo, systemUniforms.projection.projectionViewMatrix, input_vertexPosition, input_ndcPosition, V, N, renderPath1ResultTexture, renderPath1ResultTextureSampler);
-        transmissionRefraction *= invPreExposure;
         
         #redgpu_if useKHR_materials_volume
         if (u_useKHR_materials_volume) {
@@ -454,8 +452,7 @@ fn main(inputData:InputData) -> OutputFragment {
         u_useKHR_materials_diffuse_transmission, diffuseTransmissionParameter, diffuseTransmissionColor,
         sheenColor, sheenRoughnessParameter,
         anisotropy, anisotropicT, anisotropicB,
-        clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal,
-        invPreExposure
+        clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
     );
     
     var emissiveColor = u_emissiveFactor * u_emissiveStrength;
@@ -654,12 +651,11 @@ fn getIndirectSheenBRDF(
     sheenRoughness: f32,
     iblMipmapCount: f32,
     irradianceTexture: texture_cube<f32>,
-    textureSampler: sampler,
-    invPreExposure: f32
+    textureSampler: sampler
 ) -> SheenIBLResult {
     let NdotV = clamp(dot(N, V), EPSILON, 1.0);
     let mipLevel = sheenRoughness * iblMipmapCount;
-    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb * invPreExposure;
+    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb * systemUniforms.preExposure;
     
     // Optimized Sheen DFG and Charlie E
     let r = clamp(sheenRoughness, 0.01, 1.0);
@@ -780,14 +776,13 @@ fn getIndirectClearcoatBRDF(
     cameraHeight: f32,
     atmosphereHeight: f32,
     transmittanceTexture: texture_2d<f32>,
-    invPreExposure: f32,
     mainR: vec3<f32>,
     isMainNormal: bool
 ) -> vec4<f32> {
     let clearcoatR = select(getReflectionVectorFromViewDirection(V, clearcoatNormal), mainR, isMainNormal);
     let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 1e-6);
     let clearcoatMipLevel = clearcoatRoughness * iblMipmapCount;
-    var clearcoatRadiance = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb * invPreExposure;
+    var clearcoatRadiance = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb * systemUniforms.preExposure;
     if (useSkyAtmosphere) {
         let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, cameraHeight, clearcoatR.y, atmosphereHeight);
         let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
@@ -953,8 +948,7 @@ fn getIndirectPbrLighting(
     u_useKHR_materials_diffuse_transmission: bool, diffuseTransmissionParameter: f32, diffuseTransmissionColor: vec3<f32>,
     sheenColor: vec3<f32>, sheenRoughnessParameter: f32,
     anisotropy: f32, anisotropyT: vec3<f32>, anisotropicB: vec3<f32>,
-    clearcoatParameter: f32, clearcoatRoughnessParameter: f32, clearcoatNormal: vec3<f32>,
-    invPreExposure: f32
+    clearcoatParameter: f32, clearcoatRoughnessParameter: f32, clearcoatNormal: vec3<f32>
 ) -> vec3<f32> {
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
@@ -976,8 +970,8 @@ fn getIndirectPbrLighting(
         if (u_usePrefilterTexture) {
             iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
             var mipLevel = (*roughnessParameter) * iblMipmapCount;
-            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb;
+            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * preExposure;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure;
         }
         if (u_useSkyAtmosphere) {
             let u_atmo = systemUniforms.skyAtmosphere;
@@ -986,10 +980,10 @@ fn getIndirectPbrLighting(
             let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
             let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
             let atmoMipLevel = (*roughnessParameter) * atmoMipCount;
-            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * u_atmo.sunIntensity;
+            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * u_atmo.sunIntensity * preExposure;
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * u_atmo.sunIntensity;
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * u_atmo.sunIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
@@ -1015,12 +1009,12 @@ fn getIndirectPbrLighting(
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
                 let mipLevel = (*roughnessParameter) * iblMipmapCount;
-                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb  * invPreExposure;
+                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb  * preExposure;
             }
             if (u_useSkyAtmosphere) {
                 let u_atmo = systemUniforms.skyAtmosphere;
                 let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * u_atmo.sunIntensity;
+                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * u_atmo.sunIntensity * preExposure;
                 backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
             }
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight);
@@ -1038,7 +1032,7 @@ fn getIndirectPbrLighting(
         #redgpu_if useKHR_materials_sheen
         {
             let maxSheenColor = max(sheenColor.x, max(sheenColor.y, sheenColor.z));
-            let sheenResult = getIndirectSheenBRDF(N, V, R, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler, invPreExposure);
+            let sheenResult = getIndirectSheenBRDF(N, V, R, sheenColor, maxSheenColor, sheenRoughnessParameter, iblMipmapCount, ibl_prefilterTexture, prefilterTextureSampler);
             sheenIBLContribution = sheenResult.sheenIBLContribution;
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         }
@@ -1048,7 +1042,7 @@ fn getIndirectPbrLighting(
         let dielectricPart_IBL = ibl_specular_dielectric + ibl_diffuse_dielectric;
         let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
         let baseIndirect = mix(dielectricPart_IBL, metallicPart_IBL, metallicParameter);
-        var indirectLighting = (baseIndirect * sheenAlbedoScaling + sheenIBLContribution) * preExposure;
+        var indirectLighting = (baseIndirect * sheenAlbedoScaling + sheenIBLContribution);
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
                  let u_atmo = systemUniforms.skyAtmosphere;
@@ -1057,9 +1051,9 @@ fn getIndirectPbrLighting(
                      ibl_prefilterTexture, prefilterTextureSampler, ibl_brdfLUTTexture,
                      u_useSkyAtmosphere, u_atmo.sunIntensity, skyAtmosphere_prefilteredTexture, atmosphereSampler,
                      u_atmo.cameraHeight, u_atmo.atmosphereHeight, transmittanceTexture,
-                     invPreExposure, R, all(clearcoatNormal == N)
+                     R, all(clearcoatNormal == N)
                  );
-                 let clearcoatSpecularIBL = clearcoatResult.rgb * clearcoatParameter * preExposure;
+                 let clearcoatSpecularIBL = clearcoatResult.rgb * clearcoatParameter;
                  let coatF = clearcoatResult.a * clearcoatParameter;
                  indirectLighting = clearcoatSpecularIBL + (vec3<f32>(1.0) - coatF) * indirectLighting;
             }
@@ -1072,7 +1066,7 @@ fn getIndirectPbrLighting(
         if (transmissionParameter > 0.0) {
             let transmissionFresnel = getFresnel(NdotV, F0);
             let transmissionWeight = transmissionParameter * (vec3<f32>(1.0) - transmissionFresnel);
-            indirectLighting = mix(ambientContribution, transmissionRefraction * preExposure, transmissionWeight);
+            indirectLighting = mix(ambientContribution, transmissionRefraction, transmissionWeight);
         }
         #redgpu_endIf
         return indirectLighting;

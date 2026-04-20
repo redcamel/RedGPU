@@ -57,7 +57,7 @@ fn main(inputData: InputData) -> OutputFragment {
       discard;
     }
 
-    output.color = finalColor;
+    output.color = vec4<f32>(finalColor.rgb * systemUniforms.preExposure, finalColor.a);
     output.gBufferMotionVector = vec4<f32>( 0.0, 0.0, 1.0, 1.0 );
     return output;
 };

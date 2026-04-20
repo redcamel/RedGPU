@@ -224,7 +224,10 @@ class AutoExposure {
         const adaptationModule = resourceManager.createGPUShaderModule('AutoExposure_Adaptation', { code: adaptationCode });
 
         this.#downsampleBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Downsample_BGL0', {
-            entries: [{ binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} }]
+            entries: [
+                { binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} },
+                { binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'depth' } }
+            ]
         });
         this.#downsampleBindGroupLayout1 = resourceManager.createBindGroupLayout('AutoExposure_Downsample_BGL1', {
             entries: [
@@ -296,7 +299,10 @@ class AutoExposure {
         // Pass 1: Generate Histogram
         const downsampleBindGroup0 = gpuDevice.createBindGroup({
             layout: this.#downsampleBindGroupLayout0,
-            entries: [{ binding: 0, resource: sourceTextureInfo.textureView }]
+            entries: [
+                { binding: 0, resource: sourceTextureInfo.textureView },
+                { binding: 1, resource: view.viewRenderTextureManager.depthTextureView }
+            ]
         });
         const downsampleBindGroup1 = gpuDevice.createBindGroup({
             layout: this.#downsampleBindGroupLayout1,
