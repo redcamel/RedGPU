@@ -264,7 +264,7 @@ fn main(inputData:InputData) -> OutputFragment {
     
     #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
-        output.color = baseColor;
+        output.color = vec4<f32>(baseColor.rgb * preExposure, baseColor.a);
         return output;
     }
     #redgpu_endIf
@@ -455,7 +455,7 @@ fn main(inputData:InputData) -> OutputFragment {
         clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
     );
     
-    var emissiveColor = u_emissiveFactor * u_emissiveStrength;
+    var emissiveColor = u_emissiveFactor * u_emissiveStrength * preExposure;
     #redgpu_if emissiveTexture
         emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
     #redgpu_endIf
