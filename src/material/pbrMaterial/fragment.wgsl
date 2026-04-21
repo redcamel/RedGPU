@@ -655,7 +655,7 @@ fn getIndirectSheenBRDF(
 ) -> SheenIBLResult {
     let NdotV = clamp(dot(N, V), EPSILON, 1.0);
     let mipLevel = sheenRoughness * iblMipmapCount;
-    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb * systemUniforms.preExposure;
+    let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb * systemUniforms.preExposure * systemUniforms.iblIntensity;
     
     // Optimized Sheen DFG and Charlie E
     let r = clamp(sheenRoughness, 0.01, 1.0);
@@ -782,7 +782,7 @@ fn getIndirectClearcoatBRDF(
     let clearcoatR = select(getReflectionVectorFromViewDirection(V, clearcoatNormal), mainR, isMainNormal);
     let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 1e-6);
     let clearcoatMipLevel = clearcoatRoughness * iblMipmapCount;
-    var clearcoatRadiance = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb * systemUniforms.preExposure;
+    var clearcoatRadiance = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb * systemUniforms.preExposure * systemUniforms.iblIntensity;
     if (useSkyAtmosphere) {
         let ccTrans = getTransmittance(transmittanceTexture, atmosphereSampler, cameraHeight, clearcoatR.y, atmosphereHeight);
         let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
@@ -970,8 +970,8 @@ fn getIndirectPbrLighting(
         if (u_usePrefilterTexture) {
             iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
             var mipLevel = (*roughnessParameter) * iblMipmapCount;
-            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * preExposure;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure;
+            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * preExposure * systemUniforms.iblIntensity;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
         }
         if (u_useSkyAtmosphere) {
             let u_atmo = systemUniforms.skyAtmosphere;
@@ -1009,7 +1009,7 @@ fn getIndirectPbrLighting(
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
                 let mipLevel = (*roughnessParameter) * iblMipmapCount;
-                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb  * preExposure;
+                backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb  * preExposure * systemUniforms.iblIntensity;
             }
             if (u_useSkyAtmosphere) {
                 let u_atmo = systemUniforms.skyAtmosphere;

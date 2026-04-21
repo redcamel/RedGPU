@@ -202,6 +202,7 @@ class View3D extends AView {
                 {key: 'usePrefilterTexture', value: this.ibl?.prefilterTexture?.gpuTexture ? 1 : 0},
                 {key: 'isView3D', value: this.constructor === View3D ? 1 : 0},
                 {key: 'directionalLightCount', value: lightManager.directionalLightCount},
+                {key: 'iblIntensity', value: this.ibl ? this.ibl.intensity : 1},
                 {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},
                 {key: 'directionalLightProjectionMatrix', value: lightManager.getDirectionalLightProjectionMatrix(this)},
                 {key: 'directionalLightViewMatrix', value: lightManager.getDirectionalLightViewMatrix(this)},

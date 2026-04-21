@@ -8,6 +8,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         hdrImage: hdrImages[0].path,
         useLight: false,
         useIBL: true,
+        iblIntensity: 1.0,
         ...option
     };
 
@@ -81,6 +82,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         }
 
         const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath);
+        ibl.intensity = settings.iblIntensity;
         view.ibl = ibl;
 
         if (view.skybox) {
@@ -107,10 +109,12 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         if (enabled) {
             createIBL(view, settings.hdrImage);
             hdrImageControl.disabled = false;
+            iblIntensityControl.disabled = false;
         } else {
             view.ibl = null;
             view.skybox = null;
             hdrImageControl.disabled = true;
+            iblIntensityControl.disabled = true;
         }
     };
 
@@ -135,6 +139,17 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         options: hdrImageOptions
     }).on('change', (ev) => {
         handleHDRImageChange(ev.value);
+    });
+
+    const iblIntensityControl = folder.addBinding(settings, 'iblIntensity', {
+        min: 0,
+        max: 5,
+        step: 0.1,
+        label: 'IBL Intensity'
+    }).on('change', (ev) => {
+        if (view.ibl) {
+            view.ibl.intensity = ev.value;
+        }
     });
 
     // 초기 경로 정보 설정 및 바인딩 생성

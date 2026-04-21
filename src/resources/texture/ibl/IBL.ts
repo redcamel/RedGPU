@@ -28,6 +28,7 @@ class IBL {
     #prefilterSize: number;
     #irradianceSize: number;
     #isInitializing: boolean = false;
+    #intensity: number = 1.0;
 
     /**
      * [KO] IBL 인스턴스를 생성합니다.
@@ -114,6 +115,15 @@ class IBL {
     /** [KO] IBL (Specular Prefilter) 텍스처를 반환합니다. [EN] Returns the IBL (Specular Prefilter) texture. */
     get prefilterTexture(): DirectCubeTexture {
         return this.#prefilterTexture;
+    }
+
+    /** [KO] IBL 강도 [EN] IBL intensity */
+    get intensity(): number {
+        return this.#intensity;
+    }
+
+    set intensity(value: number) {
+        this.#intensity = value;
     }
 
     /**
