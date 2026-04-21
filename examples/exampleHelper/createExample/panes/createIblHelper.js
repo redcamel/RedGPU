@@ -3,12 +3,14 @@ import createSkyBoxHelper from './createSkyBoxHelper.js?t=1770713934910';
 
 const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const folder = pane.addFolder({title: 'Lighting', expanded: true});
+    const iblFolder = folder.addFolder({title: 'IBL Settings', expanded: true});
 
     const settings = {
         hdrImage: hdrImages[0].path,
         useLight: false,
         useIBL: true,
         iblIntensity: 1.0,
+        skyBoxIntensity: 1.0,
         ...option
     };
 
@@ -57,7 +59,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         const rows = Math.max(1, Math.min(lineCount, 10)); // 최소 1줄, 최대 10줄
         const isMultiline = lineCount > 1;
 
-        sourceBinding = folder.addBinding(pathInfo, 'finalPath', {
+        sourceBinding = iblFolder.addBinding(pathInfo, 'finalPath', {
             readonly: true,
             label: 'source',
             multiline: isMultiline,
@@ -85,15 +87,6 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         ibl.intensity = settings.iblIntensity;
         view.ibl = ibl;
 
-        if (view.skybox) {
-            // [KO] 기존 스카이박스가 있으면 텍스처만 교체 (설정값 유지됨)
-            // [EN] If an existing skybox exists, only replace the texture (settings are preserved)
-            view.skybox.skyboxTexture = ibl.environmentTexture;
-        } else {
-            // [KO] 없으면 새로 생성
-            // [EN] If not, create a new one
-            view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
-        }
     };
 
     const handleLightToggle = (enabled) => {
@@ -108,13 +101,10 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const handleIBLToggle = (enabled) => {
         if (enabled) {
             createIBL(view, settings.hdrImage);
-            hdrImageControl.disabled = false;
-            iblIntensityControl.disabled = false;
+            iblFolder.disabled = false;
         } else {
             view.ibl = null;
-            view.skybox = null;
-            hdrImageControl.disabled = true;
-            iblIntensityControl.disabled = true;
+            iblFolder.disabled = true;
         }
     };
 
@@ -135,13 +125,13 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         handleIBLToggle(ev.value);
     });
 
-    const hdrImageControl = folder.addBinding(settings, 'hdrImage', {
+    const hdrImageControl = iblFolder.addBinding(settings, 'hdrImage', {
         options: hdrImageOptions
     }).on('change', (ev) => {
         handleHDRImageChange(ev.value);
     });
 
-    const iblIntensityControl = folder.addBinding(settings, 'iblIntensity', {
+    const iblIntensityControl = iblFolder.addBinding(settings, 'iblIntensity', {
         min: 0,
         max: 5,
         step: 0.1,
@@ -152,13 +142,24 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         }
     });
 
+    const skyBoxIntensityControl = iblFolder.addBinding(settings, 'skyBoxIntensity', {
+        min: 0,
+        max: 5,
+        step: 0.1,
+        label: 'SkyBox Intensity'
+    }).on('change', (ev) => {
+        if (view.skybox) {
+            view.skybox.intensity = ev.value;
+        }
+    });
+
     // 초기 경로 정보 설정 및 바인딩 생성
     updatePathInfo(hdrImages[0].path);
 
     if (settings.useIBL) createIBL(view, hdrImages[0].path);
     if (settings.useLight) handleLightToggle(settings.useLight);
 
-    createSkyBoxHelper(pane, view)
+    createSkyBoxHelper(pane, view, RedGPU)
 };
 
 export default createIblHelper;

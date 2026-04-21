@@ -212,6 +212,25 @@ class SkyBox {
         this.#material.blur = value;
     }
 
+    /**
+     * [KO] 스카이박스의 강도를 반환합니다.
+     * [EN] Returns the skybox intensity.
+     */
+    get intensity(): number {
+        return this.#material.intensity;
+    }
+
+    /**
+     * [KO] 스카이박스의 강도를 설정합니다.
+     * [EN] Sets the skybox intensity.
+     * @param value -
+     * [KO] 강도 값 (기본값: 1.0)
+     * [EN] Intensity value (Default: 1.0)
+     */
+    set intensity(value: number) {
+        this.#material.intensity = value;
+    }
+
 
     /**
      * [KO] 스카이박스의 불투명도를 반환합니다.

@@ -9,6 +9,7 @@
 struct Uniforms {
     opacity: f32,
     blur: f32,
+    intensity: f32,
     transitionProgress: f32,
 };
 
@@ -75,7 +76,7 @@ fn main(inputData: InputData) -> OutputFragment {
     // [KO] 임의의 하드코딩 배율 없이 물리적으로 정확한 휘도 값을 계산합니다.
     // [EN] Following Unreal Engine 5 standards, SkyBox intensity is determined by the product of the Camera Exposure.
     // [EN] Calculates physically accurate luminance values without any arbitrary hardcoded multipliers.
-    var finalIntensity: f32 = systemUniforms.preExposure;
+    var finalIntensity: f32 = systemUniforms.preExposure * uniforms.intensity;
 
     var finalAlpha = sampleColor.a * uniforms.opacity;
 
