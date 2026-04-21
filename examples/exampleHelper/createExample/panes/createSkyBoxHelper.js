@@ -3,6 +3,7 @@ import {hdrImages} from './index.js?t=1770713934910';
 const createSkyBoxHelper = (pane, view, RedGPU) => {
     const skyboxFolder = pane.addFolder({title: 'SkyBox', expanded: true});
     const settings = {
+        useSkyBox: true,
         skyboxImage: hdrImages[0].path,
         blur: 0,
         intensity: 1,
@@ -19,6 +20,7 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
 
     // 바인딩 변수
     let sourceBinding;
+    let settingsFolder;
 
     // 경로 정보 계산 및 업데이트
     const updatePathInfo = (src) => {
@@ -42,15 +44,18 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         const rows = Math.max(1, Math.min(lineCount, 10));
         const isMultiline = lineCount > 1;
 
-        sourceBinding = skyboxFolder.addBinding(pathInfo, 'finalPath', {
-            readonly: true,
-            label: 'source',
-            multiline: isMultiline,
-            rows: rows
-        });
+        if (settingsFolder) {
+            sourceBinding = settingsFolder.addBinding(pathInfo, 'finalPath', {
+                readonly: true,
+                label: 'source',
+                multiline: isMultiline,
+                rows: rows
+            });
+        }
     };
 
     const createSkyBox = (view, src) => {
+        if (!settings.useSkyBox) return;
         updatePathInfo(src);
 
         const pathSegments = window.location.pathname.split('/');
@@ -84,7 +89,27 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         view.skybox.opacity = settings.opacity;
     };
 
-    skyboxFolder.addBinding(settings, 'skyboxImage', {
+    const handleSkyBoxToggle = (enabled) => {
+        if (enabled) {
+            createSkyBox(view, settings.skyboxImage);
+            if (settingsFolder) settingsFolder.disabled = false;
+        } else {
+            view.skybox = null;
+            if (settingsFolder) settingsFolder.disabled = true;
+            if (sourceBinding) {
+                sourceBinding.dispose();
+                sourceBinding = null;
+            }
+        }
+    };
+
+    skyboxFolder.addBinding(settings, 'useSkyBox').on('change', (ev) => {
+        handleSkyBoxToggle(ev.value);
+    });
+
+    settingsFolder = skyboxFolder.addFolder({title: 'SkyBox Settings', expanded: true});
+
+    settingsFolder.addBinding(settings, 'skyboxImage', {
         options: hdrImages.reduce((acc, item) => {
             acc[item.name] = item.path;
             return acc;
@@ -94,26 +119,30 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         createSkyBox(view, ev.value);
     });
 
-    skyboxFolder.addBinding(settings, 'blur', {
+    settingsFolder.addBinding(settings, 'blur', {
         min: 0, max: 1, step: 0.01
     }).on("change", (ev) => {
         if (view.skybox) view.skybox.blur = ev.value;
     });
 
-    skyboxFolder.addBinding(settings, 'intensity', {
+    settingsFolder.addBinding(settings, 'intensity', {
         min: 0, max: 5, step: 0.01
     }).on("change", (ev) => {
         if (view.skybox) view.skybox.intensity = ev.value;
     });
 
-    skyboxFolder.addBinding(settings, 'opacity', {
+    settingsFolder.addBinding(settings, 'opacity', {
         min: 0, max: 1, step: 0.01
     }).on("change", (ev) => {
         if (view.skybox) view.skybox.opacity = ev.value;
     });
 
     // 초기 실행 및 생성
-    createSkyBox(view, settings.skyboxImage);
+    if (settings.useSkyBox) {
+        createSkyBox(view, settings.skyboxImage);
+    } else {
+        handleSkyBoxToggle(false);
+    }
 };
 
 export default createSkyBoxHelper;
