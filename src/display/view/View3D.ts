@@ -211,7 +211,7 @@ class View3D extends AView {
                             let activeNit = this.ibl.nit;
                             if ( lightManager.directionalLights.length > 0) {
                                 const sun = lightManager.directionalLights[0];
-                                activeNit = (sun.lux * sun.intensity) / Math.PI;
+                                activeNit = (sun.lux * sun.intensity * activeNit) / Math.PI;
                             }
                             // [KO] 이미지 분석 결과(inherentLuminance)를 반영하여 물리적 휘도를 정규화
                             // [EN] Normalize physical luminance by reflecting image analysis results (inherentLuminance)
