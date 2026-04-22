@@ -27,7 +27,7 @@ RedGPU.init(
         directionalLight.enableDebugger = true;
         directionalLight.elevation = 80;
         directionalLight.azimuth = 0;
-        directionalLight.intensity = 100000; // 물리적 단위 (Lux)
+        directionalLight.lux = 100000; // 물리적 단위 (Lux)
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 2. SkyAtmosphere 초기화 (자동으로 directionalLight를 태양 광원으로 사용)
@@ -84,7 +84,8 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     const f_sun = pane.addFolder({title: 'Sun Configuration (via Light)', expanded: true});
     f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001, label: 'Sun Elevation'});
     f_sun.addBinding(sunSource, 'azimuth', {min: -360, max: 360, step: 0.0001, label: 'Sun Azimuth'});
-    f_sun.addBinding(sunSource, 'intensity', {min: 0, max: 200000, step: 1, label: 'Sun Intensity (Lux)'});
+    f_sun.addBinding(sunSource, 'lux', {min: 0, max: 150000, step: 1, label: 'Sun Illuminance (Lux)'});
+    f_sun.addBinding(sunSource, 'intensity', {min: 0, max: 10, step: 0.01, label: 'Sun Intensity Scalar'});
     f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'Sun Visual Size'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 1, step: 0.01, label: 'Sun Limb Darkening'});
 

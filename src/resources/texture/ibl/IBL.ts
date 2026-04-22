@@ -28,7 +28,10 @@ class IBL {
     #prefilterSize: number;
     #irradianceSize: number;
     #isInitializing: boolean = false;
+    #isAnalyzing: boolean = false;
     #intensity: number = 1.0;
+    #nit: number = 1000;
+    #inherentLuminance: number = 1.0;
 
     /**
      * [KO] IBL 인스턴스를 생성합니다.
@@ -126,6 +129,20 @@ class IBL {
         this.#intensity = value;
     }
 
+    /** [KO] IBL 물리적 휘도 (Nit, cd/m^2) [EN] IBL physical luminance (Nit, cd/m^2) */
+    get nit(): number {
+        return this.#nit;
+    }
+
+    set nit(value: number) {
+        this.#nit = value;
+    }
+
+    /** [KO] IBL 이미지 자체의 평균 휘도 (분석 결과) [EN] Average luminance of the IBL image itself (Analysis result) */
+    get inherentLuminance(): number {
+        return this.#inherentLuminance;
+    }
+
     /**
      * [KO] 소스 텍스처 변경 시 호출되는 핸들러입니다.
      * [EN] Handler called when the source texture changes.
@@ -169,6 +186,15 @@ class IBL {
             // 3. Irradiance Map (Diffuse 주변광용)
             const irradiance = await irradianceGenerator.generate(this.#sourceCubeTexture, this.#irradianceSize);
             this.#irradianceTexture.gpuTexture = irradiance.gpuTexture;
+
+            // 4. 휘도 분석 (이미지 기반 물리적 보정을 위해)
+            // [EN] Luminance analysis (for image-based physical calibration)
+            if (!this.#isAnalyzing) {
+                this.#isAnalyzing = true;
+                const {iblLuminanceAnalyzer} = resourceManager;
+                this.#inherentLuminance = await iblLuminanceAnalyzer.analyze(this.#sourceCubeTexture);
+                this.#isAnalyzing = false;
+            }
         }
     }
 }

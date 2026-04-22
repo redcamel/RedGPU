@@ -351,7 +351,7 @@ class SystemUniformUpdater {
                     },
                     {
                         key: 'intensity',
-                        value: light.intensity,
+                        value: light.intensity * light.lux,
                     }
                 ]
             )

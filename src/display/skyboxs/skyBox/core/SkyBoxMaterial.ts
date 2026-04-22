@@ -22,8 +22,12 @@ interface SkyBoxMaterial {
     skyboxTextureSampler: Sampler;
     /** [KO] 블러 강도 [EN] Blur strength */
     blur: number;
-    /** [KO] 강도 [EN] Intensity */
+    /** [KO] 강도 배율 [EN] Intensity multiplier */
     intensity: number;
+    /** [KO] 물리적 휘도 (Nit, cd/m^2) [EN] Physical luminance (Nit, cd/m^2) */
+    nit: number;
+    /** [KO] 원본 이미지의 평균 휘도 [EN] Average luminance of the source image */
+    inherentLuminance: number;
     /** [KO] 불투명도 [EN] Opacity */
     opacity: number;
     /** [KO] 전환 진행률 [EN] Transition progress */
@@ -78,6 +82,8 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
     ['blur', 0],
     ['intensity', 1],
+    ['nit', 1000],
+    ['inherentLuminance', 1],
     ['opacity', 1, 0, 1],
 ])
 DefineForFragment.definePositiveNumber(SkyBoxMaterial, [

@@ -7,9 +7,11 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
 struct Uniforms {
-    opacity: f32,
     blur: f32,
     intensity: f32,
+    nit: f32,
+    inherentLuminance: f32,
+    opacity: f32,
     transitionProgress: f32,
 };
 
@@ -74,9 +76,11 @@ fn main(inputData: InputData) -> OutputFragment {
     // [EN] Intensity and Exposure Correction (Luminance * Pre-Exposure)
     // [KO] 언리얼 엔진 5 표준에 따라, 스카이박스는 카메라 노출(Pre-Exposure)의 곱으로 결정됩니다.
     // [KO] 임의의 하드코딩 배율 없이 물리적으로 정확한 휘도 값을 계산합니다.
+    // [KO] 분석된 이미지 휘도(inherentLuminance)로 나누어 물리적 보정을 정규화합니다.
     // [EN] Following Unreal Engine 5 standards, SkyBox intensity is determined by the product of the Camera Exposure.
     // [EN] Calculates physically accurate luminance values without any arbitrary hardcoded multipliers.
-    var finalIntensity: f32 = systemUniforms.preExposure * uniforms.intensity;
+    // [EN] Normalizes the physical calibration by dividing by the analyzed image luminance (inherentLuminance).
+    var finalIntensity: f32 = systemUniforms.preExposure * (uniforms.intensity * uniforms.nit / uniforms.inherentLuminance);
 
     var finalAlpha = sampleColor.a * uniforms.opacity;
 

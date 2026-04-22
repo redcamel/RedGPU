@@ -33,7 +33,7 @@ class AutoExposure {
 
     // [KO] 자동 노출 알고리즘 파라미터 (ToneMappingManager에서 이전됨)
     // [EN] Auto-exposure algorithm parameters (Moved from ToneMappingManager)
-    #minEV100: number = -10.0;
+    #minEV100: number = -5.0;
     #maxEV100: number = 20.0;
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
@@ -295,6 +295,9 @@ class AutoExposure {
         );
         
         const encoder = gpuDevice.createCommandEncoder({ label: 'AutoExposure_CommandEncoder' });
+        
+        // [KO] 히스토그램 버퍼 명시적 초기화 [EN] Explicitly clear histogram buffer
+        encoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
         
         // Pass 1: Generate Histogram
         const downsampleBindGroup0 = gpuDevice.createBindGroup({

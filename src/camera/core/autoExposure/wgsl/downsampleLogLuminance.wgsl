@@ -55,7 +55,7 @@ fn main(
             let texel = textureLoad(sourceTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0);
             let depth = textureLoad(depthTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0);
             
-            if (lum > 0.0001 && texel.a > 0.0 && depth < 1.0) {
+            if (lum > 0.0001 && texel.a > 0.0 ) {
                 // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
                 // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
                 let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
@@ -78,9 +78,9 @@ fn main(
                     weight = weight * weight * weight * weight; // [KO] 중앙 집중 [EN] Highly concentrated
                 }
 
-                // [KO] 가중치를 반영하여 로컬 히스토그램에 누적 (0~255 스케일링)
-                // [EN] Accumulate into local histogram with weight (scaled 0-255)
-                atomicAdd(&localHistogram[binIndex], u32(weight * 255.0));
+                // [KO] 가중치를 반영하여 로컬 히스토그램에 누적 (0~100 스케일링)
+                // [EN] Accumulate into local histogram with weight (scaled 0-100)
+                atomicAdd(&localHistogram[binIndex], u32(weight * 100.0));
             }
         }
     }

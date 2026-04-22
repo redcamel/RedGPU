@@ -198,11 +198,25 @@ class View3D extends AView {
             )
 
             updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-                {key: 'resolution', value: [this.pixelRectObject.width, this.pixelRectObject.height]},
+                {key: ' resolution', value: [this.pixelRectObject.width, this.pixelRectObject.height]},
                 {key: 'usePrefilterTexture', value: this.ibl?.prefilterTexture?.gpuTexture ? 1 : 0},
                 {key: 'isView3D', value: this.constructor === View3D ? 1 : 0},
                 {key: 'directionalLightCount', value: lightManager.directionalLightCount},
-                {key: 'iblIntensity', value: this.ibl ? this.ibl.intensity : 1},
+                {
+                    key: 'iblIntensity',
+                    value: (() => {
+                        if (this.ibl) {
+                            if (this.skybox?.usePhysicalCalibration && lightManager.directionalLights.length > 0) {
+                                const sun = lightManager.directionalLights[0];
+                                this.ibl.nit = (sun.lux * sun.intensity) / Math.PI;
+                            }
+                            // [KO] 이미지 분석 결과(inherentLuminance)를 반영하여 물리적 휘도(nit)를 정규화
+                            // [EN] Normalize physical luminance (nit) by reflecting image analysis results (inherentLuminance)
+                            return (this.ibl.nit / (this.ibl.inherentLuminance || 1.0)) * this.ibl.intensity;
+                        }
+                        return 1;
+                    })()
+                },
                 {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},
                 {key: 'directionalLightProjectionMatrix', value: lightManager.getDirectionalLightProjectionMatrix(this)},
                 {key: 'directionalLightViewMatrix', value: lightManager.getDirectionalLightViewMatrix(this)},

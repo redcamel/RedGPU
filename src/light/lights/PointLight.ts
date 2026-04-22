@@ -48,6 +48,8 @@ class PointLight extends ABaseLight {
      */
     #z: number = 0;
 
+    #lumen: number = 1000;
+
     /**
      * [KO] 새로운 PointLight 인스턴스를 생성합니다.
      * [EN] Creates a new PointLight instance.
@@ -55,11 +57,33 @@ class PointLight extends ABaseLight {
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffffff')
      * [EN] Color of the light (hex string, e.g., '#ffffff')
      * @param intensity -
-     * [KO] 광원의 세기 (기본값: 1,000 Lumen)
-     * [EN] Intensity of the light (default: 1,000 Lumen)
+     * [KO] 광원의 세기 배율 (기본값: 1)
+     * [EN] Intensity multiplier of the light (default: 1)
      */
-    constructor(color: string = '#fff', intensity: number = 1000) {
+    constructor(color: string = '#fff', intensity: number = 1) {
         super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
+    }
+
+    /**
+     * [KO] 광원의 광선속(Lumen, lm)을 반환합니다.
+     * [EN] Returns the luminous flux (Lumen, lm) of the light source.
+     * @returns
+     * [KO] 광선속 값
+     * [EN] Luminous flux value
+     */
+    get lumen(): number {
+        return this.#lumen;
+    }
+
+    /**
+     * [KO] 광원의 광선속(Lumen, lm)을 설정합니다.
+     * [EN] Sets the luminous flux (Lumen, lm) of the light source.
+     * @param value -
+     * [KO] 광선속 값 (예: 1,000)
+     * [EN] Luminous flux value (e.g., 1,000)
+     */
+    set lumen(value: number) {
+        this.#lumen = value;
     }
 
     /**

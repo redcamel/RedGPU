@@ -24,6 +24,8 @@ class DirectionalLight extends ABaseLight {
     #elevation: number = 35.264389682754654;
     #azimuth: number = 45;
 
+    #lux: number = 100000;
+
     /**
      * [KO] 새로운 DirectionalLight 인스턴스를 생성합니다.
      * [EN] Creates a new DirectionalLight instance.
@@ -34,12 +36,34 @@ class DirectionalLight extends ABaseLight {
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffcc00')
      * [EN] Color of the light (hex string, e.g., '#ffcc00')
      * @param intensity -
-     * [KO] 광원의 세기 (기본값: 100,000 Lux)
-     * [EN] Intensity of the light (default: 100,000 Lux)
+     * [KO] 광원의 세기 배율 (기본값: 1)
+     * [EN] Intensity multiplier of the light (default: 1)
      */
-    constructor(direction: [number, number, number] = [-1, -1, -1], color: string = '#fff', intensity: number = 100000) {
+    constructor(direction: [number, number, number] = [-1, -1, -1], color: string = '#fff', intensity: number = 1) {
         super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
         this.direction = direction;
+    }
+
+    /**
+     * [KO] 광원의 조도(Lux, lx)를 반환합니다.
+     * [EN] Returns the illuminance (Lux, lx) of the light source.
+     * @returns
+     * [KO] 조도 값
+     * [EN] Illuminance value
+     */
+    get lux(): number {
+        return this.#lux;
+    }
+
+    /**
+     * [KO] 광원의 조도(Lux, lx)를 설정합니다.
+     * [EN] Sets the illuminance (Lux, lx) of the light source.
+     * @param value -
+     * [KO] 조도 값 (예: 100,000)
+     * [EN] Illuminance value (e.g., 100,000)
+     */
+    set lux(value: number) {
+        this.#lux = value;
     }
 
     #updateDirectionFromSpherical() {

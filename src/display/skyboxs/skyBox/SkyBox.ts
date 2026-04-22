@@ -136,6 +136,8 @@ class SkyBox {
      */
     #transitionElapsed: number = 0
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
+    #isAnalyzing: boolean = false;
+    #prevAnalyzedTexture: GPUTexture | null = null;
 
     /**
      * [KO] 새로운 SkyBox 인스턴스를 생성합니다.
@@ -318,6 +320,40 @@ class SkyBox {
     }
 
     /**
+     * [KO] 스카이박스의 물리적 휘도(Nit, cd/m^2)를 반환합니다.
+     * [EN] Returns the physical luminance (Nit, cd/m^2) of the skybox.
+     */
+    get nit(): number {
+        return this.#material.nit;
+    }
+
+    /**
+     * [KO] 스카이박스의 물리적 휘도(Nit, cd/m^2)를 설정합니다.
+     * [EN] Sets the physical luminance (Nit, cd/m^2) of the skybox.
+     * @param value -
+     * [KO] 휘도 값 (기본값: 1000)
+     * [EN] Luminance value (Default: 1000)
+     */
+    set nit(value: number) {
+        this.#material.nit = value;
+    }
+
+    /** [KO] 스카이박스 원본 이미지의 평균 휘도를 반환합니다. [EN] Returns the average luminance of the source skybox image. */
+    get inherentLuminance(): number {
+        return this.#material.inherentLuminance;
+    }
+
+    /**
+     * [KO] 물리적 캘리브레이션 사용 여부입니다.
+     * [EN] Whether to use physical calibration.
+     *
+     * [KO] true인 경우, 씬의 첫 번째 직사광(DirectionalLight)의 Lux 정보를 기반으로 Nit 값을 자동 계산합니다. (Nit = Lux / PI)
+     * [EN] If true, automatically calculates the Nit value based on the Lux information of the first DirectionalLight in the scene. (Nit = Lux / PI)
+     */
+    usePhysicalCalibration: boolean = true;
+
+
+    /**
      * [KO] 스카이박스를 렌더링합니다.
      * [EN] Renders the skybox.
      *
@@ -336,8 +372,27 @@ class SkyBox {
         const {currentRenderPassEncoder, startTime, view} = renderViewStateData
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
-        const {gpuDevice, antialiasingManager} = this.#redGPUContext
+        const {gpuDevice, antialiasingManager, resourceManager} = this.#redGPUContext
         
+        // [KO] 텍스처 휘도 분석 (정규화를 위해)
+        // [EN] Texture luminance analysis (for normalization)
+        const currentTexture = this.#material.skyboxTexture.gpuTexture;
+        if (currentTexture && currentTexture !== this.#prevAnalyzedTexture && !this.#isAnalyzing) {
+            this.#isAnalyzing = true;
+            this.#prevAnalyzedTexture = currentTexture;
+            resourceManager.iblLuminanceAnalyzer.analyze(currentTexture).then(lum => {
+                this.#material.inherentLuminance = lum || 1.0;
+                this.#isAnalyzing = false;
+            });
+        }
+
+        if (this.usePhysicalCalibration) {
+            const directionalLights = view.scene.lightManager.directionalLights;
+            if (directionalLights.length > 0) {
+                this.nit = (directionalLights[0].lux * directionalLights[0].intensity) / Math.PI;
+            }
+        }
+
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
         // keepLog(this.#dirtyPipeline , this.#material.dirtyPipeline)
