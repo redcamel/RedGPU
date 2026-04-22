@@ -20,6 +20,7 @@ struct SystemUniform {
 	  useSkyAtmosphere:u32,
 	  preExposure:f32,
 	  iblIntensity:f32,
+	  emissiveIntensity:f32,
 	  //
 	  skyAtmosphere:SkyAtmosphere,
 	  shadow:Shadow,

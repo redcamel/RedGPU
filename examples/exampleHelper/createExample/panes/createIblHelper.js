@@ -7,6 +7,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const settings = {
         texture: hdrImages[0].path,
         useLight: false,
+        lux: 100000,
         useIBL: true,
         iblIntensity: 1.0,
         ...option
@@ -27,6 +28,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     // 바인딩 변수
     let sourceBinding;
     let iblFolder;
+    let lightIntensityBinding;
 
     // 경로 정보 계산 및 업데이트
     const updatePathInfo = (src) => {
@@ -91,10 +93,14 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const handleLightToggle = (enabled) => {
         if (enabled) {
             const directionalLight = new RedGPU.Light.DirectionalLight();
+            settings.lux = directionalLight.lux
             view.scene.lightManager.addDirectionalLight(directionalLight);
+            if (lightIntensityBinding) lightIntensityBinding.disabled = false;
         } else {
             view.scene.lightManager.removeAllLight();
+            if (lightIntensityBinding) lightIntensityBinding.disabled = true;
         }
+        pane.refresh();
     };
 
     const handleIBLToggle = (enabled) => {
@@ -120,6 +126,18 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     folder.addBinding(settings, 'useLight').on('change', (ev) => {
         handleLightToggle(ev.value);
     });
+
+    lightIntensityBinding = folder.addBinding(settings, 'lux', {
+        min: 0,
+        max: 100000,
+        step: 1,
+    }).on('change', (ev) => {
+        const lights = view.scene.lightManager.directionalLights;
+        if (lights.length > 0) {
+            lights[0].lux = ev.value;
+        }
+    });
+    lightIntensityBinding.disabled = !settings.useLight;
 
     folder.addBinding(settings, 'useIBL').on('change', (ev) => {
         handleIBLToggle(ev.value);

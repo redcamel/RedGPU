@@ -455,7 +455,7 @@ fn main(inputData:InputData) -> OutputFragment {
         clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
     );
     
-    var emissiveColor = u_emissiveFactor * u_emissiveStrength * preExposure;
+    var emissiveColor = u_emissiveFactor * u_emissiveStrength * preExposure * systemUniforms.emissiveIntensity;
     #redgpu_if emissiveTexture
         emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
     #redgpu_endIf
