@@ -211,13 +211,26 @@ class View3D extends AView {
                             let activeNit = this.ibl.nit;
                             if ( lightManager.directionalLights.length > 0) {
                                 const sun = lightManager.directionalLights[0];
-                                activeNit = (sun.lux * sun.intensity * activeNit) / Math.PI;
+                                activeNit = (sun.lux * sun.intensity * activeNit / Math.PI) / Math.PI;
                             }
                             // [KO] 이미지 분석 결과(inherentLuminance)를 반영하여 물리적 휘도를 정규화
                             // [EN] Normalize physical luminance by reflecting image analysis results (inherentLuminance)
                             return (activeNit / (this.ibl.inherentLuminance || 1.0)) * this.ibl.intensity;
                         }
                         return 1;
+                    })()
+                },
+                {
+                    key: 'emissiveIntensity',
+                    value: (() => {
+                        let activeIntensity = 1.0;
+                        if (lightManager.directionalLights.length > 0) {
+                            const sun = lightManager.directionalLights[0];
+                            // [KO] 태양광이 있을 경우 태양광의 조도를 휘도 스케일로 변환하여 Emissive의 기본 강도로 설정
+                            // [EN] If sun exists, convert sun's lux to luminance scale and set as base intensity for Emissive
+                            activeIntensity = (sun.lux * sun.intensity / Math.PI) / Math.PI;
+                        }
+                        return activeIntensity;
                     })()
                 },
                 {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},
