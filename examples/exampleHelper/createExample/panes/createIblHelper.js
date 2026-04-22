@@ -93,7 +93,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const handleLightToggle = (enabled) => {
         if (enabled) {
             const directionalLight = new RedGPU.Light.DirectionalLight();
-            settings.lux = directionalLight.lux
+            directionalLight.lux = settings.lux;
             view.scene.lightManager.addDirectionalLight(directionalLight);
             if (lightIntensityBinding) lightIntensityBinding.disabled = false;
         } else {
