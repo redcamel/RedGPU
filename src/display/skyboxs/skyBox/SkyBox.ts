@@ -138,6 +138,7 @@ class SkyBox {
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #isAnalyzing: boolean = false;
     #prevAnalyzedTexture: GPUTexture | null = null;
+    #nit: number = 1.0;
 
     /**
      * [KO] 새로운 SkyBox 인스턴스를 생성합니다.
@@ -324,18 +325,18 @@ class SkyBox {
      * [EN] Returns the physical luminance (Nit, cd/m^2) of the skybox.
      */
     get nit(): number {
-        return this.#material.nit;
+        return this.#nit;
     }
 
     /**
      * [KO] 스카이박스의 물리적 휘도(Nit, cd/m^2)를 설정합니다.
      * [EN] Sets the physical luminance (Nit, cd/m^2) of the skybox.
      * @param value -
-     * [KO] 휘도 값 (기본값: 1000)
-     * [EN] Luminance value (Default: 1000)
+     * [KO] 휘도 값 (기본값: 1.0)
+     * [EN] Luminance value (Default: 1.0)
      */
     set nit(value: number) {
-        this.#material.nit = value;
+        this.#nit = value;
     }
 
     /** [KO] 스카이박스 원본 이미지의 평균 휘도를 반환합니다. [EN] Returns the average luminance of the source skybox image. */
@@ -374,7 +375,10 @@ class SkyBox {
             this.#isAnalyzing = true;
             this.#prevAnalyzedTexture = currentTexture;
             resourceManager.iblLuminanceAnalyzer.analyze(currentTexture).then(lum => {
-                this.#material.inherentLuminance = lum || 1.0;
+                const analyzedLuminance = lum || 1.0;
+                this.#material.inherentLuminance = analyzedLuminance;
+                this.#material.nit = analyzedLuminance;
+                this.#nit = analyzedLuminance;
                 this.#isAnalyzing = false;
             });
         }
@@ -387,7 +391,7 @@ class SkyBox {
             } else {
                 // [KO] 직사광이 없는 경우 원래 설정된 nit 값으로 복구
                 // [EN] Restore originally set nit value when there is no directional light
-                this.#material.nit = this.nit;
+                this.#material.nit = this.#nit;
             }
         }
 

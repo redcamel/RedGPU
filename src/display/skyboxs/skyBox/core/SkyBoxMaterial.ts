@@ -82,7 +82,7 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
     ['blur', 0],
     ['intensity', 1],
-    ['nit', 1000],
+    ['nit', 1],
     ['inherentLuminance', 1],
     ['opacity', 1, 0, 1],
 ])

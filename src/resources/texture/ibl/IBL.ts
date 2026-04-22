@@ -30,7 +30,7 @@ class IBL {
     #isInitializing: boolean = false;
     #isAnalyzing: boolean = false;
     #intensity: number = 1.0;
-    #nit: number = 1000;
+    #nit: number = 1.0;
     #inherentLuminance: number = 1.0;
 
     /**
@@ -192,7 +192,9 @@ class IBL {
             if (!this.#isAnalyzing) {
                 this.#isAnalyzing = true;
                 const {iblLuminanceAnalyzer} = resourceManager;
-                this.#inherentLuminance = await iblLuminanceAnalyzer.analyze(this.#sourceCubeTexture);
+                const analyzedLuminance = await iblLuminanceAnalyzer.analyze(this.#sourceCubeTexture);
+                this.#inherentLuminance = analyzedLuminance;
+                this.#nit = analyzedLuminance;
                 this.#isAnalyzing = false;
             }
         }
