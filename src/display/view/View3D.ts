@@ -198,7 +198,7 @@ class View3D extends AView {
             )
 
             updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-                {key: ' resolution', value: [this.pixelRectObject.width, this.pixelRectObject.height]},
+                {key: 'resolution', value: [this.pixelRectObject.width, this.pixelRectObject.height]},
                 {key: 'usePrefilterTexture', value: this.ibl?.prefilterTexture?.gpuTexture ? 1 : 0},
                 {key: 'isView3D', value: this.constructor === View3D ? 1 : 0},
                 {key: 'directionalLightCount', value: lightManager.directionalLightCount},
@@ -206,13 +206,16 @@ class View3D extends AView {
                     key: 'iblIntensity',
                     value: (() => {
                         if (this.ibl) {
+                            // [KO] 직사광이 있고 물리적 보정이 활성화된 경우 보정된 Nit 계산, 아니면 IBL 자체의 nit 사용
+                            // [EN] Calculate calibrated Nit if directional light exists and physical calibration is enabled, otherwise use IBL's own nit
+                            let activeNit = this.ibl.nit;
                             if (this.skybox?.usePhysicalCalibration && lightManager.directionalLights.length > 0) {
                                 const sun = lightManager.directionalLights[0];
-                                this.ibl.nit = (sun.lux * sun.intensity) / Math.PI;
+                                activeNit = (sun.lux * sun.intensity) / Math.PI;
                             }
-                            // [KO] 이미지 분석 결과(inherentLuminance)를 반영하여 물리적 휘도(nit)를 정규화
-                            // [EN] Normalize physical luminance (nit) by reflecting image analysis results (inherentLuminance)
-                            return (this.ibl.nit / (this.ibl.inherentLuminance || 1.0)) * this.ibl.intensity;
+                            // [KO] 이미지 분석 결과(inherentLuminance)를 반영하여 물리적 휘도를 정규화
+                            // [EN] Normalize physical luminance by reflecting image analysis results (inherentLuminance)
+                            return (activeNit / (this.ibl.inherentLuminance || 1.0)) * this.ibl.intensity;
                         }
                         return 1;
                     })()

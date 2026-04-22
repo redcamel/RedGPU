@@ -389,7 +389,12 @@ class SkyBox {
         if (this.usePhysicalCalibration) {
             const directionalLights = view.scene.lightManager.directionalLights;
             if (directionalLights.length > 0) {
-                this.nit = (directionalLights[0].lux * directionalLights[0].intensity) / Math.PI;
+                const sun = directionalLights[0];
+                this.#material.nit = (sun.lux * sun.intensity) / Math.PI;
+            } else {
+                // [KO] 직사광이 없는 경우 원래 설정된 nit 값으로 복구
+                // [EN] Restore originally set nit value when there is no directional light
+                this.#material.nit = this.nit;
             }
         }
 
