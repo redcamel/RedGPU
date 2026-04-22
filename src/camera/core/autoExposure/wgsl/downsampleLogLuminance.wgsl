@@ -55,7 +55,8 @@ fn main(
             let texel = textureLoad(sourceTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0);
             let depth = textureLoad(depthTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0);
             
-            if (lum > 0.0001 && texel.a > 0.0 && depth < 1.0) {
+//            if (lum > 0.0001 && texel.a > 0.0 && depth < 1.0) {
+            if (lum > 0.0001 && texel.a > 0.0) {
                 // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
                 // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
                 let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
