@@ -93,7 +93,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         sunIntensity: 100000.0,
         sunSize: 0.533,
         sunLimbDarkening: 0.5,
-        cameraHeight: 0.001
+        cameraHeight: 0.001,
+        intensity: 1.0
     };
 
     #activeSunSource: DirectionalLight = null;
@@ -359,8 +360,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
                 this.#markDirty(false, true, true);
             }
 
-            if (Math.abs(this.#params.sunIntensity - source.intensity) > EPSILON) {
-                this.#params.sunIntensity = source.intensity;
+            const currentSunIntensity = source.lux * source.intensity;
+            if (Math.abs(this.#params.sunIntensity - currentSunIntensity) > EPSILON) {
+                this.#params.sunIntensity = currentSunIntensity;
                 this.#markDirty(false, false, true);
             }
         }
@@ -433,6 +435,15 @@ class SkyAtmosphere extends ASinglePassPostEffect {
      * [EN] Returns the atmospheric scattering parameter object.
      */
     get params() { return this.#params; }
+
+    /**
+     * [KO] 대기 산란의 전체 강도 배율입니다. (기본값: 1.0)
+     * [EN] Overall intensity multiplier for atmospheric scattering. (Default: 1.0)
+     */
+    get intensity(): number { return this.#params.intensity; }
+    set intensity(v: number) {
+        this.#setParam('intensity', v, false, false, true, (v) => validatePositiveNumberRange(v, 0, 100));
+    }
 
     /**
      * [KO] 공중 투시(Aerial Perspective) 효과가 적용될 거리 스케일 (km)입니다.

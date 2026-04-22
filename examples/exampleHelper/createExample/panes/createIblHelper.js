@@ -100,7 +100,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
             view.scene.lightManager.removeAllLight();
             if (lightIntensityBinding) lightIntensityBinding.disabled = true;
         }
-        pane.refresh();
+        lightIntensityBinding.refresh();
     };
 
     const handleIBLToggle = (enabled) => {
