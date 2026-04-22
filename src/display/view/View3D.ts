@@ -209,7 +209,7 @@ class View3D extends AView {
                             // [KO] 직사광이 있고 물리적 보정이 활성화된 경우 보정된 Nit 계산, 아니면 IBL 자체의 nit 사용
                             // [EN] Calculate calibrated Nit if directional light exists and physical calibration is enabled, otherwise use IBL's own nit
                             let activeNit = this.ibl.nit;
-                            if (this.skybox?.usePhysicalCalibration && lightManager.directionalLights.length > 0) {
+                            if ( lightManager.directionalLights.length > 0) {
                                 const sun = lightManager.directionalLights[0];
                                 activeNit = (sun.lux * sun.intensity) / Math.PI;
                             }

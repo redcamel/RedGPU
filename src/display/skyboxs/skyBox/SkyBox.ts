@@ -343,14 +343,7 @@ class SkyBox {
         return this.#material.inherentLuminance;
     }
 
-    /**
-     * [KO] 물리적 캘리브레이션 사용 여부입니다.
-     * [EN] Whether to use physical calibration.
-     *
-     * [KO] true인 경우, 씬의 첫 번째 직사광(DirectionalLight)의 Lux 정보를 기반으로 Nit 값을 자동 계산합니다. (Nit = Lux / PI)
-     * [EN] If true, automatically calculates the Nit value based on the Lux information of the first DirectionalLight in the scene. (Nit = Lux / PI)
-     */
-    usePhysicalCalibration: boolean = true;
+
 
 
     /**
@@ -386,7 +379,7 @@ class SkyBox {
             });
         }
 
-        if (this.usePhysicalCalibration) {
+       {
             const directionalLights = view.scene.lightManager.directionalLights;
             if (directionalLights.length > 0) {
                 const sun = directionalLights[0];
