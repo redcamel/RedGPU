@@ -1,7 +1,9 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 @group(0) @binding(0) var outputTexture: texture_storage_2d_array<rgba16float, write>;
+@group(0) @binding(1) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(2) var atmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
+@group(0) @binding(4) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(5) var skyViewTexture: texture_2d<f32>;
 
 #redgpu_include math.PI
@@ -33,11 +35,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
         }
 
-        // [KO] 태양 본체 및 직접적인 Mie Glow를 제외한 대기 산란 휘도만 평가 (Double Specular 방지)
-        let skyUV = getSkyViewUV(viewDir, params.cameraHeight, params.groundRadius, params.atmosphereHeight);
-        totalRadiance += textureSampleLevel(skyViewTexture, atmosphereSampler, skyUV, 0.0).rgb;
+        // [KO] 태양 본체(Sun Disk)를 제외한 Mie Glow 포함 대기 휘도를 평가합니다.
+        // [EN] Evaluate atmospheric radiance including Mie Glow but excluding the Sun Disk.
+        totalRadiance += evaluateIBLRadianceCompensated(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
     }
 
-    let radiance = totalRadiance / f32(SAMPLE_COUNT) ;
+    let radiance = totalRadiance / f32(SAMPLE_COUNT);
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }

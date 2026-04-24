@@ -69,9 +69,9 @@ fn main(input : VertexOutput) -> FragmentOutput {
         atmosphereRadiance += sunDisk;
     }
 
-    // [KO] 최종 노출 적용: 태양 강도, 강도 배율 및 시스템 Pre-Exposure를 곱해 최종 색상 결정
-    // [EN] Apply final exposure: Multiply by sun intensity, intensity multiplier, and system pre-exposure to determine the final color
-    let finalRadiance = atmosphereRadiance * uniforms.sunIntensity * uniforms.intensity * systemUniforms.preExposure;
+    // [KO] 최종 노출 적용: 태양 강도 및 시스템 Pre-Exposure를 곱해 최종 색상 결정
+    // [EN] Apply final exposure: Multiply by sun intensity and system pre-exposure to determine the final color
+    let finalRadiance = atmosphereRadiance * uniforms.sunIntensity * systemUniforms.preExposure;
 
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);

@@ -85,7 +85,6 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001, label: 'Sun Elevation'});
     f_sun.addBinding(sunSource, 'azimuth', {min: -360, max: 360, step: 0.0001, label: 'Sun Azimuth'});
     f_sun.addBinding(sunSource, 'lux', {min: 0, max: 150000, step: 1, label: 'Sun Illuminance (Lux)'});
-    f_sun.addBinding(sunSource, 'intensity', {min: 0, max: 10, step: 0.01, label: 'Sun Intensity Scalar'});
     f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'Sun Visual Size'});
     f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 1, step: 0.01, label: 'Sun Limb Darkening'});
 

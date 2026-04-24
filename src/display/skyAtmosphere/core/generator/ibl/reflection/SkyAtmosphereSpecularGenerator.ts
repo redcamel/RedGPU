@@ -84,8 +84,10 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 	#createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
 		return this.createBindGroup(`SkyAtmosphere_Specular_BindGroup_${createUUID()}`, this.#pipeline, [
 			{binding: 0, resource: this.#sourceCubeTextureView},
+			{binding: 1, resource: multiScat.gpuTextureView},
 			{binding: 2, resource: this.sampler.gpuSampler},
 			{binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+			{binding: 4, resource: transmittance.gpuTextureView},
 			{binding: 5, resource: skyView.gpuTextureView}
 		]);
 	}
