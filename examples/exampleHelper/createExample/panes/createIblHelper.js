@@ -1,193 +1,113 @@
 import {hdrImages} from './index.js?t=1770713934910';
 import createSkyBoxHelper from './createSkyBoxHelper.js?t=1770713934910';
 
+/**
+ * [KO] IBL 및 조명 예제 도우미 패널을 생성합니다.
+ * [EN] Creates a helper panel for IBL and Lighting examples.
+ */
 const createIblHelper = (pane, view, RedGPU, option = {}) => {
-    const folder = pane.addFolder({title: 'Lighting', expanded: true});
+    // 1. 초기 경로 계산
+    const pathSegments = window.location.pathname.split('/');
+    const examplesIndex = pathSegments.indexOf('examples');
+    const relativePrefix = '../'.repeat(Math.max(0, pathSegments.length - examplesIndex - 2));
 
     const settings = {
         texture: hdrImages[0].path,
         useLight: false,
         lux: 100000,
         useIBL: true,
-        iblIntensity: 1.0,
+        intensity: 1.0,
         nit: 20000,
         ...option
     };
 
-    // 경로 정보를 위한 상태 객체 - finalPath는 항상 문자열로 유지
-    const pathInfo = {
-        currentURL: window.location.href,
-        pathname: window.location.pathname,
-        pathSegments: window.location.pathname.split('/').join(' / '),
-        examplesIndex: window.location.pathname.split('/').indexOf('examples'),
-        currentDepth: 0,
-        relativePrefix: '',
-        originalSrc: '',
-        finalPath: '' // 항상 문자열
-    };
+    const pathInfo = { finalPath: '' };
+    let sourceBinding, iblFolder, lightIntensityBinding;
 
-    // 바인딩 변수
-    let sourceBinding;
-    let iblFolder;
-    let lightIntensityBinding;
+    // 2. IBL 생성 및 업데이트 함수
+    const updateIBL = (src) => {
+        if (!settings.useIBL) return;
 
-    // 경로 정보 계산 및 업데이트
-    const updatePathInfo = (src) => {
-        const pathSegments = window.location.pathname.split('/');
-        const examplesIndex = pathSegments.indexOf('examples');
-        const currentDepth = pathSegments.length - examplesIndex - 2;
-
-        pathInfo.examplesIndex = examplesIndex;
-        pathInfo.currentDepth = currentDepth;
-        pathInfo.relativePrefix = '../'.repeat(currentDepth);
-        pathInfo.originalSrc = Array.isArray(src) ? `[${src.length} files]` : src;
-
-        // finalPath를 항상 문자열로 변환
-        if (Array.isArray(src)) {
-            pathInfo.finalPath = src
-                .map(path => path)
-                .join('\n');
-        } else {
-            pathInfo.finalPath = src;
-        }
-
-        // 기존 바인딩 제거 후 새로운 바인딩 생성
-        if (sourceBinding) {
-            sourceBinding.dispose();
-        }
-
-        // 줄 수 계산
-        const lineCount = pathInfo.finalPath.split('\n').length;
-        const rows = Math.max(1, Math.min(lineCount, 10)); // 최소 1줄, 최대 10줄
-        const isMultiline = lineCount > 1;
-
+        // 소스 정보 텍스트 업데이트
+        pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
+        if (sourceBinding) sourceBinding.dispose();
+        const rows = Math.max(1, Math.min(pathInfo.finalPath.split('\n').length, 10));
         if (iblFolder) {
             sourceBinding = iblFolder.addBinding(pathInfo, 'finalPath', {
                 readonly: true,
                 label: 'source',
-                multiline: isMultiline,
+                multiline: rows > 1,
                 rows: rows
             });
         }
-    };
 
-    const createIBL = (view, src) => {
-        updatePathInfo(src);
-
-        const pathSegments = window.location.pathname.split('/');
-        const examplesIndex = pathSegments.indexOf('examples');
-        const currentDepth = pathSegments.length - examplesIndex - 2;
-
-        let relativePath;
-
-        if (Array.isArray(src)) {
-            relativePath = src.map(path => '../'.repeat(currentDepth) + path);
-        } else {
-            relativePath = '../'.repeat(currentDepth) + src;
-        }
-
-        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath);
-        ibl.intensity = settings.iblIntensity;
+        // 실제 리소스 생성
+        const resolve = (p) => relativePrefix + p;
+        const finalSrc = Array.isArray(src) ? src.map(resolve) : resolve(src);
+        
+        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, finalSrc);
+        ibl.intensity = settings.intensity;
         ibl.nit = settings.nit;
         view.ibl = ibl;
     };
 
-    const handleLightToggle = (enabled) => {
+    // 3. 라이트 핸들러
+    const syncLight = (enabled) => {
         if (enabled) {
             const directionalLight = new RedGPU.Light.DirectionalLight();
             directionalLight.lux = settings.lux;
             view.scene.lightManager.addDirectionalLight(directionalLight);
-            if (lightIntensityBinding) lightIntensityBinding.disabled = false;
         } else {
             view.scene.lightManager.removeAllLight();
-            if (lightIntensityBinding) lightIntensityBinding.disabled = true;
         }
-        lightIntensityBinding.refresh();
+        if (lightIntensityBinding) lightIntensityBinding.disabled = !enabled;
     };
 
-    const handleIBLToggle = (enabled) => {
-        if (enabled) {
-            createIBL(view, settings.texture);
-            if (iblFolder) iblFolder.disabled = false;
+    // 4. UI 구성
+    const lightingFolder = pane.addFolder({title: 'Lighting', expanded: true});
+
+    // 라이트 토글 및 조도 조절
+    lightingFolder.addBinding(settings, 'useLight').on('change', (ev) => syncLight(ev.value));
+    lightIntensityBinding = lightingFolder.addBinding(settings, 'lux', { min: 0, max: 100000, step: 1 })
+        .on('change', (ev) => {
+            const lights = view.scene.lightManager.directionalLights;
+            if (lights.length > 0) lights[0].lux = ev.value;
+        });
+
+    // IBL 토글
+    lightingFolder.addBinding(settings, 'useIBL').on('change', (ev) => {
+        if (ev.value) {
+            updateIBL(settings.texture);
+            iblFolder.disabled = false;
         } else {
             view.ibl = null;
-            if (iblFolder) iblFolder.disabled = true;
-        }
-    };
-
-    const handleHDRImageChange = (imagePath) => {
-        createIBL(view, imagePath);
-    };
-
-    const hdrImageOptions = hdrImages.reduce((acc, item) => {
-        acc[item.name] = item.path;
-        return acc;
-    }, {});
-
-    // 최상단에 useLight, useIBL 배치
-    folder.addBinding(settings, 'useLight').on('change', (ev) => {
-        handleLightToggle(ev.value);
-    });
-
-    lightIntensityBinding = folder.addBinding(settings, 'lux', {
-        min: 0,
-        max: 100000,
-        step: 1,
-    }).on('change', (ev) => {
-        const lights = view.scene.lightManager.directionalLights;
-        if (lights.length > 0) {
-            lights[0].lux = ev.value;
-        }
-    });
-    lightIntensityBinding.disabled = !settings.useLight;
-
-    folder.addBinding(settings, 'useIBL').on('change', (ev) => {
-        handleIBLToggle(ev.value);
-    });
-
-    // 그 다음 IBL Settings 폴더 생성
-    iblFolder = folder.addFolder({title: 'IBL Settings', expanded: true});
-
-    const hdrImageControl = iblFolder.addBinding(settings, 'texture', {
-        options: hdrImageOptions
-    }).on('change', (ev) => {
-        handleHDRImageChange(ev.value);
-    });
-
-    const iblIntensityControl = iblFolder.addBinding(settings, 'iblIntensity', {
-        min: 0,
-        max: 5,
-        step: 0.1,
-        label: 'IBL Intensity'
-    }).on('change', (ev) => {
-        if (view.ibl) {
-            view.ibl.intensity = ev.value;
+            iblFolder.disabled = true;
         }
     });
 
-    iblFolder.addBinding(settings, 'nit', {
-        min: 0,
-        max: 100000,
-        step: 10,
-    }).on("change", (ev) => {
-        if (view.ibl) view.ibl.nit = ev.value;
-    });
+    // IBL 상세 설정
+    iblFolder = lightingFolder.addFolder({title: 'IBL Settings', expanded: true});
+    
+    iblFolder.addBinding(settings, 'texture', {
+        options: hdrImages.reduce((acc, item) => ({ ...acc, [item.name]: item.path }), {}),
+    }).on('change', (ev) => updateIBL(ev.value));
+
+    iblFolder.addBinding(settings, 'intensity', { min: 0, max: 5, step: 0.1 })
+        .on('change', (ev) => { if (view.ibl) view.ibl.intensity = ev.value; });
+
+    iblFolder.addBinding(settings, 'nit', { min: 0, max: 100000, step: 10 })
+        .on('change', (ev) => { if (view.ibl) view.ibl.nit = ev.value; });
 
     iblFolder.addBinding({
         get inherentLum() { return view.ibl ? view.ibl.inherentLuminance : 0; }
-    }, 'inherentLum', {
-        readonly: true,
-        interval: 500
-    });
+    }, 'inherentLum', { readonly: true, interval: 500 });
 
+    // 5. 초기화 실행
+    syncLight(settings.useLight);
+    if (settings.useIBL) updateIBL(settings.texture);
+    else iblFolder.disabled = true;
 
-    // 초기 경로 정보 설정 및 바인딩 생성
-    updatePathInfo(hdrImages[0].path);
-
-    if (settings.useIBL) createIBL(view, hdrImages[0].path);
-    if (settings.useLight) handleLightToggle(settings.useLight);
-
-    createSkyBoxHelper(pane, view, RedGPU)
+    createSkyBoxHelper(pane, view, RedGPU);
 };
 
 export default createIblHelper;

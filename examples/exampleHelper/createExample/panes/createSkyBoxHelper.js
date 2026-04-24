@@ -1,7 +1,15 @@
 import {hdrImages} from './index.js?t=1770713934910';
 
+/**
+ * [KO] 스카이박스 예제 도우미 패널을 생성합니다.
+ * [EN] Creates a helper panel for SkyBox examples.
+ */
 const createSkyBoxHelper = (pane, view, RedGPU) => {
-    const skyboxFolder = pane.addFolder({title: 'SkyBox', expanded: true});
+    // 1. 상수 및 경로 초기 계산
+    const pathSegments = window.location.pathname.split('/');
+    const examplesIndex = pathSegments.indexOf('examples');
+    const relativePrefix = '../'.repeat(Math.max(0, pathSegments.length - examplesIndex - 2));
+
     const settings = {
         useSkyBox: true,
         skyboxImage: hdrImages[0].path,
@@ -11,154 +19,94 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         nit: 20000
     };
 
-    // 경로 정보를 위한 상태 객체
-    const pathInfo = {
-        currentDepth: 0,
-        relativePrefix: '',
-        originalSrc: '',
-        finalPath: ''
+    const pathInfo = { finalPath: '' };
+    let sourceBinding, settingsFolder;
+
+    // 2. 스카이박스 속성 동기화 함수
+    const syncSkyBoxProperties = () => {
+        const sb = view.skybox;
+        if (!sb) return;
+        Object.assign(sb, {
+            blur: settings.blur,
+            intensity: settings.intensity,
+            opacity: settings.opacity,
+            nit: settings.nit
+        });
     };
 
-    // 바인딩 변수
-    let sourceBinding;
-    let settingsFolder;
-
-    // 경로 정보 계산 및 업데이트
-    const updatePathInfo = (src) => {
-        const pathSegments = window.location.pathname.split('/');
-        const examplesIndex = pathSegments.indexOf('examples');
-        const currentDepth = pathSegments.length - examplesIndex - 2;
-
-        pathInfo.currentDepth = currentDepth;
-        pathInfo.relativePrefix = '../'.repeat(currentDepth);
-        pathInfo.originalSrc = Array.isArray(src) ? `[${src.length} files]` : src;
-
-        if (Array.isArray(src)) {
-            pathInfo.finalPath = src.join('\n');
-        } else {
-            pathInfo.finalPath = src;
-        }
-
-        if (sourceBinding) sourceBinding.dispose();
-
-        const lineCount = pathInfo.finalPath.split('\n').length;
-        const rows = Math.max(1, Math.min(lineCount, 10));
-        const isMultiline = lineCount > 1;
-
-        if (settingsFolder) {
-            sourceBinding = settingsFolder.addBinding(pathInfo, 'finalPath', {
-                readonly: true,
-                label: 'source',
-                multiline: isMultiline,
-                rows: rows
-            });
-        }
-    };
-
-    const createSkyBox = (view, src) => {
+    // 3. 스카이박스 생성 및 소스 정보 업데이트
+    const updateSkyBox = (src) => {
         if (!settings.useSkyBox) return;
-        updatePathInfo(src);
 
-        const pathSegments = window.location.pathname.split('/');
-        const examplesIndex = pathSegments.indexOf('examples');
-        const currentDepth = pathSegments.length - examplesIndex - 2;
+        // 소스 경로 텍스트 업데이트
+        pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
+        if (sourceBinding) sourceBinding.dispose();
+        const rows = Math.max(1, Math.min(pathInfo.finalPath.split('\n').length, 10));
+        sourceBinding = settingsFolder.addBinding(pathInfo, 'finalPath', {
+            readonly: true,
+            label: 'source',
+            multiline: rows > 1,
+            rows: rows
+        });
 
-        let relativePath;
-        if (Array.isArray(src)) {
-            relativePath = src.map(path => '../'.repeat(currentDepth) + path);
-        } else {
-            relativePath = '../'.repeat(currentDepth) + src;
-        }
+        // 텍스처 생성
+        const resolve = (p) => relativePrefix + p;
+        const finalSrc = Array.isArray(src) ? src.map(resolve) : resolve(src);
+        const isHDR = typeof src === 'string' && src.toLowerCase().endsWith('.hdr');
+        
+        const newTexture = isHDR 
+            ? new RedGPU.Resource.IBL(view.redGPUContext, finalSrc).environmentTexture 
+            : new RedGPU.Resource.CubeTexture(view.redGPUContext, finalSrc, true);
 
-        let newTexture;
-        if (typeof src === 'string' && src.toLowerCase().endsWith('.hdr')) {
-            const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath);
-            newTexture = ibl.environmentTexture;
-        } else {
-            newTexture = new RedGPU.Resource.CubeTexture(view.redGPUContext, relativePath, true);
-        }
+        if (view.skybox) view.skybox.skyboxTexture = newTexture;
+        else view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, newTexture);
 
-        if (view.skybox) {
-            view.skybox.skyboxTexture = newTexture;
-        } else {
-            view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, newTexture);
-        }
-
-        // 현재 설정값 적용
-        view.skybox.blur = settings.blur;
-        view.skybox.intensity = settings.intensity;
-        view.skybox.opacity = settings.opacity;
-        view.skybox.nit = settings.nit;
+        syncSkyBoxProperties();
     };
 
-    const handleSkyBoxToggle = (enabled) => {
-        if (enabled) {
-            createSkyBox(view, settings.skyboxImage);
-            if (settingsFolder) settingsFolder.disabled = false;
+    // 4. UI 구성
+    const skyboxFolder = pane.addFolder({title: 'SkyBox', expanded: true});
+    
+    skyboxFolder.addBinding(settings, 'useSkyBox').on('change', (ev) => {
+        if (ev.value) {
+            updateSkyBox(settings.skyboxImage);
+            settingsFolder.disabled = false;
         } else {
             view.skybox = null;
-            if (settingsFolder) settingsFolder.disabled = true;
-            if (sourceBinding) {
-                sourceBinding.dispose();
-                sourceBinding = null;
-            }
+            settingsFolder.disabled = true;
+            if (sourceBinding) { sourceBinding.dispose(); sourceBinding = null; }
         }
-    };
-
-    skyboxFolder.addBinding(settings, 'useSkyBox').on('change', (ev) => {
-        handleSkyBoxToggle(ev.value);
     });
 
     settingsFolder = skyboxFolder.addFolder({title: 'SkyBox Settings', expanded: true});
 
+    // 텍스처 선택
     settingsFolder.addBinding(settings, 'skyboxImage', {
-        options: hdrImages.reduce((acc, item) => {
-            acc[item.name] = item.path;
-            return acc;
-        }, {}),
+        options: hdrImages.reduce((acc, item) => ({ ...acc, [item.name]: item.path }), {}),
         label: 'texture'
-    }).on('change', (ev) => {
-        createSkyBox(view, ev.value);
+    }).on('change', (ev) => updateSkyBox(ev.value));
+
+    // 기본 슬라이더들 (blur, intensity, opacity)
+    ['blur', 'intensity', 'opacity'].forEach(key => {
+        settingsFolder.addBinding(settings, key, {
+            min: 0, 
+            max: key === 'intensity' ? 5 : 1, 
+            step: 0.01
+        }).on('change', () => { if (view.skybox) view.skybox[key] = settings[key]; });
     });
 
-    settingsFolder.addBinding(settings, 'blur', {
-        min: 0, max: 1, step: 0.01
-    }).on("change", (ev) => {
-        if (view.skybox) view.skybox.blur = ev.value;
-    });
+    // 물리 휘도 설정
+    settingsFolder.addBinding(settings, 'nit', { min: 0, max: 100000, step: 10 })
+        .on('change', () => { if (view.skybox) view.skybox.nit = settings.nit; });
 
-    settingsFolder.addBinding(settings, 'intensity', {
-        min: 0, max: 5, step: 0.01
-    }).on("change", (ev) => {
-        if (view.skybox) view.skybox.intensity = ev.value;
-    });
-
-    settingsFolder.addBinding(settings, 'opacity', {
-        min: 0, max: 1, step: 0.01
-    }).on("change", (ev) => {
-        if (view.skybox) view.skybox.opacity = ev.value;
-    });
-
-    settingsFolder.addBinding(settings, 'nit', {
-        min: 0, max: 100000, step: 10
-    }).on("change", (ev) => {
-        if (view.skybox) view.skybox.nit = ev.value;
-    });
-
+    // 분석 결과 (직접 바인딩)
     settingsFolder.addBinding({
         get inherentLum() { return view.skybox ? view.skybox.inherentLuminance : 0; }
-    }, 'inherentLum', {
-        readonly: true,
-        interval: 500
-    });
+    }, 'inherentLum', { readonly: true, interval: 500 });
 
-
-    // 초기 실행 및 생성
-    if (settings.useSkyBox) {
-        createSkyBox(view, settings.skyboxImage);
-    } else {
-        handleSkyBoxToggle(false);
-    }
+    // 5. 초기화 실행
+    if (settings.useSkyBox) updateSkyBox(settings.skyboxImage);
+    else settingsFolder.disabled = true;
 };
 
 export default createSkyBoxHelper;
