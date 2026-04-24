@@ -208,7 +208,16 @@ class View3D extends AView {
                 },
                 {
                     key: 'emissiveIntensity',
-                    value: this.ibl ? (this.ibl.nit / (this.ibl.inherentLuminance || 1.0)) : 1.0
+                    value: (() => {
+                        const iblNit = this.ibl ? (this.ibl.nit / (this.ibl.inherentLuminance || 1.0)) : 0;
+                        let sunNit = 0;
+                        if (lightManager.directionalLights.length > 0) {
+                            const sun = lightManager.directionalLights[0];
+                            sunNit = (sun.lux * sun.intensity) / Math.PI;
+                        }
+                        const totalRefNit = iblNit + sunNit;
+                        return totalRefNit || 1.0;
+                    })()
                 },
                 {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},
                 {key: 'directionalLightProjectionMatrix', value: lightManager.getDirectionalLightProjectionMatrix(this)},
