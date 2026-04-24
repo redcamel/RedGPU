@@ -8,6 +8,7 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         blur: 0,
         intensity: 1,
         opacity: 1,
+        nit: 20000
     };
 
     // 경로 정보를 위한 상태 객체
@@ -87,6 +88,7 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         view.skybox.blur = settings.blur;
         view.skybox.intensity = settings.intensity;
         view.skybox.opacity = settings.opacity;
+        view.skybox.nit = settings.nit;
     };
 
     const handleSkyBoxToggle = (enabled) => {
@@ -136,6 +138,20 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
     }).on("change", (ev) => {
         if (view.skybox) view.skybox.opacity = ev.value;
     });
+
+    settingsFolder.addBinding(settings, 'nit', {
+        min: 0, max: 100000, step: 10
+    }).on("change", (ev) => {
+        if (view.skybox) view.skybox.nit = ev.value;
+    });
+
+    settingsFolder.addBinding({
+        get inherentLum() { return view.skybox ? view.skybox.inherentLuminance : 0; }
+    }, 'inherentLum', {
+        readonly: true,
+        interval: 500
+    });
+
 
     // 초기 실행 및 생성
     if (settings.useSkyBox) {

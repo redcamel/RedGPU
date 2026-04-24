@@ -10,6 +10,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         lux: 100000,
         useIBL: true,
         iblIntensity: 1.0,
+        nit: 20000,
         ...option
     };
 
@@ -87,6 +88,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 
         const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath);
         ibl.intensity = settings.iblIntensity;
+        ibl.nit = settings.nit;
         view.ibl = ibl;
     };
 
@@ -162,6 +164,22 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
             view.ibl.intensity = ev.value;
         }
     });
+
+    iblFolder.addBinding(settings, 'nit', {
+        min: 0,
+        max: 100000,
+        step: 10,
+    }).on("change", (ev) => {
+        if (view.ibl) view.ibl.nit = ev.value;
+    });
+
+    iblFolder.addBinding({
+        get inherentLum() { return view.ibl ? view.ibl.inherentLuminance : 0; }
+    }, 'inherentLum', {
+        readonly: true,
+        interval: 500
+    });
+
 
     // 초기 경로 정보 설정 및 바인딩 생성
     updatePathInfo(hdrImages[0].path);
