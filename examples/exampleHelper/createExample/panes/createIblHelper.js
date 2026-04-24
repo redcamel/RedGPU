@@ -12,12 +12,11 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const relativePrefix = '../'.repeat(Math.max(0, pathSegments.length - examplesIndex - 2));
 
     const settings = {
-        texture: hdrImages[0].path,
+        texture: hdrImages[0].name, // 이름 기반 저장
         useLight: false,
         lux: 100000,
         useIBL: true,
         intensity: 1.0,
-        nit: 20000,
         ...option
     };
 
@@ -25,8 +24,13 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     let sourceBinding, iblFolder, lightIntensityBinding;
 
     // 2. IBL 생성 및 업데이트 함수
-    const updateIBL = (src) => {
+    const updateIBL = (name) => {
         if (!settings.useIBL) return;
+
+        // 이름으로 정보 찾기
+        const imageInfo = hdrImages.find(item => item.name === name);
+        if (!imageInfo) return;
+        const src = imageInfo.path;
 
         // 소스 정보 텍스트 업데이트
         pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
@@ -35,7 +39,6 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         if (iblFolder) {
             sourceBinding = iblFolder.addBinding(pathInfo, 'finalPath', {
                 readonly: true,
-                label: 'source',
                 multiline: rows > 1,
                 rows: rows
             });
@@ -44,11 +47,16 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         // 실제 리소스 생성
         const resolve = (p) => relativePrefix + p;
         const finalSrc = Array.isArray(src) ? src.map(resolve) : resolve(src);
+        const nit = imageInfo.nit || 20000;
         
-        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, finalSrc);
+        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, finalSrc, nit);
         ibl.intensity = settings.intensity;
-        ibl.nit = settings.nit;
         view.ibl = ibl;
+
+        // 물리 휘도 직접 적용
+        view.ibl.nit = nit;
+        
+        pane.refresh(); // UI 강제 갱신
     };
 
     // 3. 라이트 핸들러
@@ -89,14 +97,16 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     iblFolder = lightingFolder.addFolder({title: 'IBL Settings', expanded: true});
     
     iblFolder.addBinding(settings, 'texture', {
-        options: hdrImages.reduce((acc, item) => ({ ...acc, [item.name]: item.path }), {}),
+        options: hdrImages.reduce((acc, item) => ({ ...acc, [item.name]: item.name }), {}),
     }).on('change', (ev) => updateIBL(ev.value));
 
     iblFolder.addBinding(settings, 'intensity', { min: 0, max: 5, step: 0.1 })
         .on('change', (ev) => { if (view.ibl) view.ibl.intensity = ev.value; });
 
-    iblFolder.addBinding(settings, 'nit', { min: 0, max: 100000, step: 10 })
-        .on('change', (ev) => { if (view.ibl) view.ibl.nit = ev.value; });
+    iblFolder.addBinding({
+        get nit() { return view.ibl ? view.ibl.nit : 20000; },
+        set nit(v) { if (view.ibl) view.ibl.nit = v; }
+    }, 'nit', { min: 0, max: 100000, step: 10, interval: 500 });
 
     iblFolder.addBinding({
         get inherentLum() { return view.ibl ? view.ibl.inherentLuminance : 0; }

@@ -12,11 +12,10 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
 
     const settings = {
         useSkyBox: true,
-        skyboxImage: hdrImages[0].path,
+        skyboxImage: hdrImages[0].name, // 이름 기반 저장
         blur: 0,
         intensity: 1,
-        opacity: 1,
-        nit: 20000
+        opacity: 1
     };
 
     const pathInfo = { finalPath: '' };
@@ -29,14 +28,18 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         Object.assign(sb, {
             blur: settings.blur,
             intensity: settings.intensity,
-            opacity: settings.opacity,
-            nit: settings.nit
+            opacity: settings.opacity
         });
     };
 
     // 3. 스카이박스 생성 및 소스 정보 업데이트
-    const updateSkyBox = (src) => {
+    const updateSkyBox = (name) => {
         if (!settings.useSkyBox) return;
+
+        // 이름으로 정보 찾기
+        const imageInfo = hdrImages.find(item => item.name === name);
+        if (!imageInfo) return;
+        const src = imageInfo.path;
 
         // 소스 경로 텍스트 업데이트
         pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
@@ -44,7 +47,6 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         const rows = Math.max(1, Math.min(pathInfo.finalPath.split('\n').length, 10));
         sourceBinding = settingsFolder.addBinding(pathInfo, 'finalPath', {
             readonly: true,
-            label: 'source',
             multiline: rows > 1,
             rows: rows
         });
@@ -53,15 +55,20 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         const resolve = (p) => relativePrefix + p;
         const finalSrc = Array.isArray(src) ? src.map(resolve) : resolve(src);
         const isHDR = typeof src === 'string' && src.toLowerCase().endsWith('.hdr');
+        const nit = imageInfo.nit || 20000;
         
         const newTexture = isHDR 
-            ? new RedGPU.Resource.IBL(view.redGPUContext, finalSrc).environmentTexture 
+            ? new RedGPU.Resource.IBL(view.redGPUContext, finalSrc, nit).environmentTexture 
             : new RedGPU.Resource.CubeTexture(view.redGPUContext, finalSrc, true);
 
         if (view.skybox) view.skybox.skyboxTexture = newTexture;
         else view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, newTexture);
 
+        // 물리 휘도 직접 적용
+        view.skybox.nit = nit;
+
         syncSkyBoxProperties();
+        pane.refresh(); // UI 강제 갱신
     };
 
     // 4. UI 구성
@@ -80,13 +87,12 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
 
     settingsFolder = skyboxFolder.addFolder({title: 'SkyBox Settings', expanded: true});
 
-    // 텍스처 선택
+    // 텍스처 선택 (Value를 Name으로 사용)
     settingsFolder.addBinding(settings, 'skyboxImage', {
-        options: hdrImages.reduce((acc, item) => ({ ...acc, [item.name]: item.path }), {}),
-        label: 'texture'
+        options: hdrImages.reduce((acc, item) => ({ ...acc, [item.name]: item.name }), {}),
     }).on('change', (ev) => updateSkyBox(ev.value));
 
-    // 기본 슬라이더들 (blur, intensity, opacity)
+    // 기본 슬라이더들
     ['blur', 'intensity', 'opacity'].forEach(key => {
         settingsFolder.addBinding(settings, key, {
             min: 0, 
@@ -95,9 +101,11 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         }).on('change', () => { if (view.skybox) view.skybox[key] = settings[key]; });
     });
 
-    // 물리 휘도 설정
-    settingsFolder.addBinding(settings, 'nit', { min: 0, max: 100000, step: 10 })
-        .on('change', () => { if (view.skybox) view.skybox.nit = settings.nit; });
+    // 물리 휘도 설정 (직접 바인딩)
+    settingsFolder.addBinding({
+        get nit() { return view.skybox ? view.skybox.nit : 20000; },
+        set nit(v) { if (view.skybox) view.skybox.nit = v; }
+    }, 'nit', { min: 0, max: 100000, step: 10, interval: 500 });
 
     // 분석 결과 (직접 바인딩)
     settingsFolder.addBinding({
