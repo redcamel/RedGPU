@@ -204,34 +204,11 @@ class View3D extends AView {
                 {key: 'directionalLightCount', value: lightManager.directionalLightCount},
                 {
                     key: 'iblIntensity',
-                    value: (() => {
-                        if (this.ibl) {
-                            // [KO] 직사광이 있고 물리적 보정이 활성화된 경우 보정된 Nit 계산, 아니면 IBL 자체의 nit 사용
-                            // [EN] Calculate calibrated Nit if directional light exists and physical calibration is enabled, otherwise use IBL's own nit
-                            let activeNit = this.ibl.nit;
-                            if ( lightManager.directionalLights.length > 0) {
-                                const sun = lightManager.directionalLights[0];
-                                activeNit = (sun.lux * sun.intensity * activeNit / Math.PI) / Math.PI;
-                            }
-                            // [KO] 이미지 분석 결과(inherentLuminance)를 반영하여 물리적 휘도를 정규화
-                            // [EN] Normalize physical luminance by reflecting image analysis results (inherentLuminance)
-                            return (activeNit / (this.ibl.inherentLuminance || 1.0)) * this.ibl.intensity;
-                        }
-                        return 1;
-                    })()
+                    value: this.ibl ? (this.ibl.nit / (this.ibl.inherentLuminance || 1.0)) * this.ibl.intensity : 1.0
                 },
                 {
                     key: 'emissiveIntensity',
-                    value: (() => {
-                        let activeIntensity = 1.0;
-                        if (lightManager.directionalLights.length > 0) {
-                            const sun = lightManager.directionalLights[0];
-                            // [KO] 태양광이 있을 경우 태양광의 조도를 휘도 스케일로 변환하여 Emissive의 기본 강도로 설정
-                            // [EN] If sun exists, convert sun's lux to luminance scale and set as base intensity for Emissive
-                            activeIntensity = (sun.lux * sun.intensity / Math.PI) / Math.PI;
-                        }
-                        return activeIntensity;
-                    })()
+                    value: 1.0
                 },
                 {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},
                 {key: 'directionalLightProjectionMatrix', value: lightManager.getDirectionalLightProjectionMatrix(this)},
