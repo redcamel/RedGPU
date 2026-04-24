@@ -1,62 +1,78 @@
 import {hdrImages} from './index.js?t=1770713934910';
 import createSkyBoxHelper from './createSkyBoxHelper.js?t=1770713934910';
+import {resolveExamplePath} from './pathUtils.js?t=1770713934910';
 
 /**
  * [KO] IBL 및 조명 예제 도우미 패널을 생성합니다.
  * [EN] Creates a helper panel for IBL and Lighting examples.
  */
 const createIblHelper = (pane, view, RedGPU, option = {}) => {
-    // 1. 초기 경로 계산
-    const pathSegments = window.location.pathname.split('/');
-    const examplesIndex = pathSegments.indexOf('examples');
-    const relativePrefix = '../'.repeat(Math.max(0, pathSegments.length - examplesIndex - 2));
+    const lightingFolder = pane.addFolder({title: 'Lighting', expanded: true});
 
     const settings = {
         texture: hdrImages[0].name, // 이름 기반 저장
         useLight: false,
         lux: 100000,
         useIBL: true,
-        intensity: 1.0,
+        iblIntensity: 1.0,
         ...option
     };
 
     const pathInfo = { finalPath: '' };
     let sourceBinding, iblFolder, lightIntensityBinding;
 
+    // 1. 경로 정보 및 UI 텍스트 업데이트
+    const updatePathInfo = (src) => {
+        // finalPath를 항상 문자열로 변환
+        pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
+
+        if (sourceBinding) sourceBinding.dispose();
+        if (iblFolder) {
+            const lineCount = pathInfo.finalPath.split('\n').length;
+            const rows = Math.max(1, Math.min(lineCount, 10));
+            sourceBinding = iblFolder.addBinding(pathInfo, 'finalPath', {
+                readonly: true,
+                label: 'source',
+                multiline: lineCount > 1,
+                rows: rows
+            });
+        }
+    };
+
     // 2. IBL 생성 및 업데이트 함수
-    const updateIBL = (name) => {
+    const createIBL = (view, name) => {
         if (!settings.useIBL) return;
 
-        // 이름으로 정보 찾기
+        // 이름으로 정보 찾기 (안정성 확보)
         const imageInfo = hdrImages.find(item => item.name === name);
         if (!imageInfo) return;
         const src = imageInfo.path;
 
-        // 소스 정보 텍스트 업데이트
-        pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
-        if (sourceBinding) sourceBinding.dispose();
-        const rows = Math.max(1, Math.min(pathInfo.finalPath.split('\n').length, 10));
-        if (iblFolder) {
-            sourceBinding = iblFolder.addBinding(pathInfo, 'finalPath', {
-                readonly: true,
-                multiline: rows > 1,
-                rows: rows
-            });
-        }
+        updatePathInfo(src);
 
-        // 실제 리소스 생성
-        const resolve = (p) => relativePrefix + p;
-        const finalSrc = Array.isArray(src) ? src.map(resolve) : resolve(src);
+        // 경로 해결 (유틸리티 사용)
+        const relativePath = resolveExamplePath(src);
         const nit = imageInfo.nit || 20000;
-        
-        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, finalSrc, nit);
-        ibl.intensity = settings.intensity;
+
+        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath, nit);
+        ibl.intensity = settings.iblIntensity;
         view.ibl = ibl;
 
-        // 물리 휘도 직접 적용
+        // 인스턴스 교체 후 니트 동기화
         view.ibl.nit = nit;
-        
-        pane.refresh(); // UI 강제 갱신
+
+        // 스카이박스 동기화 처리
+        if (settings.syncSkyBox) {
+            if (view.skybox) {
+                view.skybox.skyboxTexture = ibl.environmentTexture;
+                view.skybox.nit = nit;
+            } else {
+                view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
+                view.skybox.nit = nit;
+            }
+        }
+
+        pane.refresh();
     };
 
     // 3. 라이트 핸들러
@@ -69,12 +85,10 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
             view.scene.lightManager.removeAllLight();
         }
         if (lightIntensityBinding) lightIntensityBinding.disabled = !enabled;
+        pane.refresh();
     };
 
     // 4. UI 구성
-    const lightingFolder = pane.addFolder({title: 'Lighting', expanded: true});
-
-    // 라이트 토글 및 조도 조절
     lightingFolder.addBinding(settings, 'useLight').on('change', (ev) => syncLight(ev.value));
     lightIntensityBinding = lightingFolder.addBinding(settings, 'lux', { min: 0, max: 100000, step: 1 })
         .on('change', (ev) => {
@@ -82,10 +96,9 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
             if (lights.length > 0) lights[0].lux = ev.value;
         });
 
-    // IBL 토글
     lightingFolder.addBinding(settings, 'useIBL').on('change', (ev) => {
         if (ev.value) {
-            updateIBL(settings.texture);
+            createIBL(view, settings.texture);
             iblFolder.disabled = false;
         } else {
             view.ibl = null;
@@ -93,14 +106,13 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         }
     });
 
-    // IBL 상세 설정
     iblFolder = lightingFolder.addFolder({title: 'IBL Settings', expanded: true});
-    
+
     iblFolder.addBinding(settings, 'texture', {
         options: hdrImages.reduce((acc, item) => ({ ...acc, [item.name]: item.name }), {}),
-    }).on('change', (ev) => updateIBL(ev.value));
+    }).on('change', (ev) => createIBL(view, ev.value));
 
-    iblFolder.addBinding(settings, 'intensity', { min: 0, max: 5, step: 0.1 })
+    iblFolder.addBinding(settings, 'iblIntensity', { min: 0, max: 5, step: 0.1 })
         .on('change', (ev) => { if (view.ibl) view.ibl.intensity = ev.value; });
 
     iblFolder.addBinding({
@@ -112,12 +124,14 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         get inherentLum() { return view.ibl ? view.ibl.inherentLuminance : 0; }
     }, 'inherentLum', { readonly: true, interval: 500 });
 
-    // 5. 초기화 실행
+    // 5. 초기 실행
     syncLight(settings.useLight);
-    if (settings.useIBL) updateIBL(settings.texture);
-    else iblFolder.disabled = true;
+    if(!settings.syncSkyBox) {
+        createSkyBoxHelper(pane, view, RedGPU);
+    }
 
-    createSkyBoxHelper(pane, view, RedGPU);
+    if (settings.useIBL) createIBL(view, settings.texture);
+    else iblFolder.disabled = true;
 };
 
 export default createIblHelper;

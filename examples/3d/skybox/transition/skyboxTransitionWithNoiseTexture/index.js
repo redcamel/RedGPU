@@ -109,7 +109,7 @@ const renderTestPane = async (targetView, redGPUContext) => {
     } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
 
     createFieldOfView(pane, targetView.camera);
-    createSkyBoxHelper(pane, targetView);
+    createSkyBoxHelper(pane, targetView, RedGPU);
 
     // 🚀 트랜지션 폴더
     const transitionFolder = pane.addFolder({

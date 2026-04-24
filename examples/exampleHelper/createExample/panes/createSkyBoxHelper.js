@@ -1,15 +1,11 @@
 import {hdrImages} from './index.js?t=1770713934910';
+import {resolveExamplePath} from './pathUtils.js?t=1770713934910';
 
 /**
  * [KO] 스카이박스 예제 도우미 패널을 생성합니다.
  * [EN] Creates a helper panel for SkyBox examples.
  */
 const createSkyBoxHelper = (pane, view, RedGPU) => {
-    // 1. 상수 및 경로 초기 계산
-    const pathSegments = window.location.pathname.split('/');
-    const examplesIndex = pathSegments.indexOf('examples');
-    const relativePrefix = '../'.repeat(Math.max(0, pathSegments.length - examplesIndex - 2));
-
     const settings = {
         useSkyBox: true,
         skyboxImage: hdrImages[0].name, // 이름 기반 저장
@@ -44,16 +40,18 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         // 소스 경로 텍스트 업데이트
         pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
         if (sourceBinding) sourceBinding.dispose();
-        const rows = Math.max(1, Math.min(pathInfo.finalPath.split('\n').length, 10));
+        
+        const lineCount = pathInfo.finalPath.split('\n').length;
+        const rows = Math.max(1, Math.min(lineCount, 10));
         sourceBinding = settingsFolder.addBinding(pathInfo, 'finalPath', {
             readonly: true,
-            multiline: rows > 1,
+            label: 'source',
+            multiline: lineCount > 1,
             rows: rows
         });
 
-        // 텍스처 생성
-        const resolve = (p) => relativePrefix + p;
-        const finalSrc = Array.isArray(src) ? src.map(resolve) : resolve(src);
+        // 경로 해결 (유틸리티 사용)
+        const finalSrc = resolveExamplePath(src);
         const isHDR = typeof src === 'string' && src.toLowerCase().endsWith('.hdr');
         const nit = imageInfo.nit || 20000;
         

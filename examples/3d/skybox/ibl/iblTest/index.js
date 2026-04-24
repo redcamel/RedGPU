@@ -11,23 +11,6 @@ import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-const hdrImages = [
-    {name: '2K - the sky is on fire', path: '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'},
-    {name: 'Cannon_Exterior', path: '../../../../assets/hdr/Cannon_Exterior.hdr'},
-    {name: 'field', path: '../../../../assets/hdr/field.hdr'},
-    {name: 'neutral.37290948', path: '../../../../assets/hdr/neutral.37290948.hdr'},
-    {name: 'pisa', path: '../../../../assets/hdr/pisa.hdr'},
-    {
-        name: '6 cube face asset', path: [
-            "../../../../assets/skybox/px.jpg",
-            "../../../../assets/skybox/nx.jpg",
-            "../../../../assets/skybox/py.jpg",
-            "../../../../assets/skybox/ny.jpg",
-            "../../../../assets/skybox/pz.jpg",
-            "../../../../assets/skybox/nz.jpg",
-        ]
-    },
-];
 
 RedGPU.init(
     canvas,
@@ -39,7 +22,6 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
         redGPUContext.addView(view);
-        createIBL(view, hdrImages[0].path);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext, () => {
@@ -150,23 +132,11 @@ const renderTestPane = async (targetView) => {
     const pane = new Pane();
     const {
         createFieldOfView,
-        createSkyBoxHelper,
+        createIblHelper,
         setDebugButtons
     } = await import( "../../../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
     setDebugButtons(RedGPU, targetView.redGPUContext);
     createFieldOfView(pane, targetView.camera)
-    createSkyBoxHelper(pane, targetView);
+    createIblHelper(pane, targetView, RedGPU,{syncSkyBox:true});
 
-    const settings = {
-        hdrImage: hdrImages[0].path
-    };
-
-    pane.addBinding(settings, 'hdrImage', {
-        options: hdrImages.reduce((acc, item) => {
-            acc[item.name] = item.path;
-            return acc;
-        }, {})
-    }).on("change", (ev) => {
-        createIBL(targetView, ev.value);
-    });
 };
