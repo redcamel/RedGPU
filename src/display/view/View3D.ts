@@ -208,7 +208,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'emissiveIntensity',
-                    value: 1.0
+                    value: this.ibl ? (this.ibl.nit / (this.ibl.inherentLuminance || 1.0)) : 1.0
                 },
                 {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},
                 {key: 'directionalLightProjectionMatrix', value: lightManager.getDirectionalLightProjectionMatrix(this)},

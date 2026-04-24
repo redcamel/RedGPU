@@ -57,19 +57,24 @@ class IBL {
      * @param irradianceSize -
      * [KO] Irradiance 큐브 크기 (기본값: 64)
      * [EN] Irradiance cube size (default: 64)
+     * @param nit -
+     * [KO] 물리적 휘도 (Nit, cd/m^2, 기본값: 20000)
+     * [EN] Physical luminance (Nit, cd/m^2, default: 20000)
      */
     constructor(
         redGPUContext: RedGPUContext,
         srcInfo: string | [string, string, string, string, string, string],
         environmentSize: number = 1024,
         prefilterSize: number = 512,
-        irradianceSize: number = 64
+        irradianceSize: number = 64,
+        nit: number = 20000
     ) {
         const cacheKeyPart = `${srcInfo}?key=${environmentSize}_${prefilterSize}_${irradianceSize}`;
         this.#prefilterSize = prefilterSize;
         this.#environmentSize = environmentSize;
         this.#irradianceSize = irradianceSize;
         this.#redGPUContext = redGPUContext;
+        this.#nit = nit;
 
         // 맵들을 담을 DirectCubeTexture 플레이스홀더 생성
         this.#environmentTexture = new DirectCubeTexture(redGPUContext, `IBL_ENV_${cacheKeyPart}`);
