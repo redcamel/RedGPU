@@ -386,7 +386,7 @@ fn main(inputData:InputData) -> OutputFragment {
     
     #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
-        output.color = vec4<f32>(baseColor.rgb * preExposure, baseColor.a);
+        output.color = vec4<f32>(baseColor.rgb, baseColor.a);
         return output;
     }
     #redgpu_endIf
@@ -406,7 +406,8 @@ fn main(inputData:InputData) -> OutputFragment {
         metallicParameter *= metallicRoughnessSample.b;
         roughnessParameter *= metallicRoughnessSample.g;
     #redgpu_endIf
-    roughnessParameter = max(roughnessParameter, 0.045);
+//    roughnessParameter = max(roughnessParameter, 0.045);
+    roughnessParameter = max(roughnessParameter, EPSILON);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
 
     // Clearcoat
