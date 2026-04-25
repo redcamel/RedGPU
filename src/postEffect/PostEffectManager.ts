@@ -375,10 +375,6 @@ class PostEffectManager {
             );
         }
 
-        // Auto Exposure 처리 (HDR 공간에서 수행)
-        if (useAutoExposure) {
-            this.autoExposure.render(this.#view, currentTextureView);
-        }
 
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(
@@ -388,6 +384,11 @@ class PostEffectManager {
                 currentTextureView,
             );
         });
+        // Auto Exposure 처리 (HDR 공간에서 수행)
+        if (useAutoExposure) {
+            this.autoExposure.render(this.#view, currentTextureView);
+        }
+
         {
             currentTextureView = this.#view.toneMappingManager.render(
                 width,
