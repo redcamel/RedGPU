@@ -138,7 +138,7 @@ class SkyBox {
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #isAnalyzing: boolean = false;
     #prevAnalyzedTexture: GPUTexture | null = null;
-    #nit: number = 20000.0;
+    #nit: number = 10000.0;
 
     /**
      * [KO] 새로운 SkyBox 인스턴스를 생성합니다.
@@ -156,13 +156,13 @@ class SkyBox {
      * [EN] Throws Error if redGPUContext is invalid
      *
      */
-    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | DirectCubeTexture) {
+    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | DirectCubeTexture,  nit: number = 10000) {
         validateRedGPUContext(redGPUContext)
         this.#redGPUContext = redGPUContext
         this.#geometry = new Box(redGPUContext)
         this.#skyboxTexture = cubeTexture
         this.#material = new SkyBoxMaterial(redGPUContext, this.#skyboxTexture)
-        this.#material.nit = this.#nit;
+        this.#material.nit = this.#nit = nit;
         this.#primitiveState = new PrimitiveState(this)
         this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
         this.#depthStencilState = new DepthStencilState(this)

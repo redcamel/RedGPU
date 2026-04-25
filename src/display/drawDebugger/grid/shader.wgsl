@@ -102,7 +102,7 @@ fn fragmentMain(inputData: VertexOutput) -> OutputFragment {
 
     // [KO] 3. 최종 색상 및 투명도 설정
     // [EN] 3. Set final color and alpha
-    output.color = vec4<f32>(finalColor * systemUniforms.preExposure, baseAlpha * distanceFade);
+    output.color = vec4<f32>(finalColor , baseAlpha * distanceFade);
 
     // [KO] 4. G-Buffer 모션 벡터 계산 및 출력
     // [EN] 4. Calculate and output G-Buffer motion vector

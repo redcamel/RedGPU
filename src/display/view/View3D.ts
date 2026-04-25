@@ -207,7 +207,7 @@ class View3D extends AView {
                     value: this.ibl ? (this.ibl.nit / (this.ibl.inherentLuminance || 1.0)) * this.ibl.intensity : 1.0
                 },
                 {
-                    key: 'emissiveIntensity',
+                    key: 'preExposure_emissive',
                     value: (() => {
                         const iblNit = this.ibl ? (this.ibl.nit / (this.ibl.inherentLuminance || 1.0)) : 0;
                         let sunNit = 0;
@@ -215,8 +215,9 @@ class View3D extends AView {
                             const sun = lightManager.directionalLights[0];
                             sunNit = (sun.lux * sun.intensity) / Math.PI;
                         }
+                        // const totalRefNit = iblNit + sunNit;
                         const totalRefNit = iblNit + sunNit;
-                        return totalRefNit || 1.0;
+                        return totalRefNit > 0 ? this.postEffectManager.autoExposure.preExposure * totalRefNit : 1.0;
                     })()
                 },
                 {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},

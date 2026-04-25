@@ -138,7 +138,7 @@ const renderTestPane = async (redGPUContext, targetView) => {
     setDebugButtons(RedGPU, redGPUContext);
     const pane = new Pane();
     const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
-    const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+    const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture,8000);
     targetView.ibl = ibl;
     targetView.skybox = skybox;
     const TEST_DATA = {

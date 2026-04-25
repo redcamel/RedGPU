@@ -288,11 +288,11 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // [KO] 에미시브 처리 [EN] Emissive processing
-    var emissiveColor = u_emissiveColor * u_emissiveStrength * systemUniforms.emissiveIntensity;
+    var emissiveColor = u_emissiveColor * u_emissiveStrength ;
     #redgpu_if emissiveTexture
-        emissiveColor = textureSample(emissiveTexture, emissiveTextureSampler, inputData.uv).rgb * u_emissiveStrength * systemUniforms.emissiveIntensity;
+        emissiveColor = textureSample(emissiveTexture, emissiveTextureSampler, inputData.uv).rgb * u_emissiveStrength;
     #redgpu_endIf
-    emissiveColor *= systemUniforms.preExposure;
+    emissiveColor *= systemUniforms.preExposure_emissive;
 
     // [KO] 최종 색상 (Pre-Exposure 적용)
     let finalColor = vec4<f32>((mixColor * systemUniforms.preExposure) + emissiveColor, resultAlpha);
