@@ -64,7 +64,6 @@ import srgbToLinearVec4_wgsl from './shader/color/srgbToLinearVec4.wgsl';
 import getLuminance_wgsl from './shader/color/getLuminance.wgsl';
 import getTintBlendMode_wgsl from './shader/color/getTintBlendMode.wgsl';
 import getLinearizeDepth_wgsl from './shader/depth/getLinearizeDepth.wgsl';
-import getTransmissionRefraction_wgsl from './shader/lighting/getTransmissionRefraction.wgsl';
 import getIsFinite_wgsl from './shader/math/getIsFinite.wgsl';
 
 /**
@@ -179,7 +178,6 @@ export namespace DepthLibrary {
 export namespace LightingLibrary {
     export const getLightDistanceAttenuation = getLightDistanceAttenuation_wgsl;
     export const getLightAngleAttenuation = getLightAngleAttenuation_wgsl;
-    export const getTransmissionRefraction = getTransmissionRefraction_wgsl;
 }
 
 /**
