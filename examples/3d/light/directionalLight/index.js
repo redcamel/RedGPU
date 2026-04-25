@@ -54,9 +54,9 @@ const createDirectionalLight = (scene) => {
 };
 
 const createStudioEnvironment = (redGPUContext, scene) => {
-    const studioMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#888');
-    studioMaterial.specularStrength = 0.2;
-    studioMaterial.shininess = 32;
+    const studioMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    studioMaterial.baseColorFactor = [0.5, 0.5, 0.5, 1.0];
+    studioMaterial.roughnessFactor = 0.5;
 
     // Floor
     const floorGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 100);
@@ -84,10 +84,10 @@ const createMaterialStudio = (redGPUContext, scene) => {
             const metallic = row === 1 ? 1.0 : 0.0;
             const roughness = col / (cols - 1);
             
-            const material = new RedGPU.Material.PhongMaterial(redGPUContext, metallic === 1.0 ? '#fff' : '#ff4444');
-            material.metallic = metallic;
-            material.roughness = roughness;
-            material.shininess = Math.pow(2, (1.0 - roughness) * 10 + 2);
+            const material = new RedGPU.Material.PBRMaterial(redGPUContext);
+            material.baseColorFactor = metallic === 1.0 ? [1.0, 1.0, 1.0, 1.0] : [1.0, 0.0, 0.0, 1.0];
+            material.metallicFactor = metallic;
+            material.roughnessFactor = roughness;
 
             const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
             const x = col * spacing - ((cols - 1) * spacing) / 2;
@@ -102,11 +102,13 @@ const createMaterialStudio = (redGPUContext, scene) => {
 const renderTestPaneWithLightControl = async (redGPUContext, light, view) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+    const {setDebugButtons, createIblHelper} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
     setDebugButtons(RedGPU, redGPUContext);
+    createIblHelper(pane, view, RedGPU);
 
     const camera = view.rawCamera;
     const toneMappingManager = view.toneMappingManager;
+    const autoExposure = view.postEffectManager.autoExposure;
 
     // 1. Light Folder
     const lightConfig = {
@@ -146,7 +148,7 @@ const renderTestPaneWithLightControl = async (redGPUContext, light, view) => {
         iso: camera.iso,
         useAutoExposure: camera.useAutoExposure,
         ev100: camera.ev100,
-        autoExposureMultiplier: toneMappingManager.autoExposureMultiplier
+        preExposure: autoExposure.preExposure
     };
     const cameraFolder = pane.addFolder({title: 'Camera: Physical Settings', expanded: true});
     cameraFolder.addBinding(cameraConfig, 'useAutoExposure', {label: 'Auto Exposure'}).on('change', (evt) => { camera.useAutoExposure = evt.value; });
@@ -158,12 +160,12 @@ const renderTestPaneWithLightControl = async (redGPUContext, light, view) => {
     
     const exposureMonitor = cameraFolder.addFolder({title: 'Exposure Status', expanded: true});
     exposureMonitor.addBinding(cameraConfig, 'ev100', {readonly: true, format: (v) => v.toFixed(2), label: 'EV100'});
-    exposureMonitor.addBinding(cameraConfig, 'autoExposureMultiplier', {readonly: true, format: (v) => v.toFixed(4), label: 'Exposure Mult'});
+    exposureMonitor.addBinding(cameraConfig, 'preExposure', {readonly: true, format: (v) => v.toFixed(4), label: 'Pre Exposure'});
 
     // 3. Post Process Folder
     const tmConfig = {
         mode: toneMappingManager.mode,
-        exposureOffset: toneMappingManager.exposure
+        exposureCompensation: autoExposure.exposureCompensation
     };
     const tmFolder = pane.addFolder({title: 'PostProcess: Color Grading', expanded: false});
     tmFolder.addBinding(tmConfig, 'mode', {
@@ -174,12 +176,12 @@ const renderTestPaneWithLightControl = async (redGPUContext, light, view) => {
             'Khronos PBR Neutral': RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL,
         }
     }).on('change', (evt) => { toneMappingManager.mode = evt.value; });
-    tmFolder.addBinding(tmConfig, 'exposureOffset', {min: 0, max: 10, step: 0.01, label: 'Exposure Compensation'});
+    tmFolder.addBinding(tmConfig, 'exposureCompensation', {min: -5, max: 5, step: 0.01, label: 'Exposure Compensation'}).on('change', (evt) => { autoExposure.exposureCompensation = evt.value; });
 
     // Monitoring Loop
     setInterval(() => {
         cameraConfig.ev100 = camera.ev100;
-        cameraConfig.autoExposureMultiplier = toneMappingManager.autoExposureMultiplier;
+        cameraConfig.preExposure = autoExposure.preExposure;
         pane.refresh();
     }, 100);
 };
