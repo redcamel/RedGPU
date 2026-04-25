@@ -725,26 +725,28 @@ fn getIndirectAnisotropicBRDF(
     roughness: f32, anisotropy: f32,
     anisotropicT: vec3<f32>, anisotropicB: vec3<f32>
 ) -> vec4<f32> {
-    var bentNormal = cross(anisotropicB, V);
-    bentNormal = normalize(cross(bentNormal, anisotropicB));
-    let temp = 1.0 - anisotropy * (1.0 - roughness);
-    let tempSquared = temp * temp;
-    var a = tempSquared * tempSquared;
-    bentNormal = normalize(mix(bentNormal, N, a));
-    var reflectVec = getReflectionVectorFromViewDirection(V, bentNormal);
-    reflectVec = normalize(mix(reflectVec, bentNormal, roughness * roughness));
-    let roughnessT = roughness * (1.0 + anisotropy);
-    let roughnessB = roughness * (1.0 - anisotropy);
-    let TdotR = dot(anisotropicT, reflectVec);
-    let BdotR = dot(anisotropicB, reflectVec);
-    let TdotV = dot(anisotropicT, V);
-    let BdotV = dot(anisotropicB, V);
-    let R = normalize(reflectVec - anisotropy * (TdotR * anisotropicT - BdotR * anisotropicB));
-    let VdotT_abs = abs(TdotV);
-    let VdotB_abs = abs(BdotV);
-    let totalWeight = max(1e-6, VdotT_abs + VdotB_abs);
-    let weightedRoughness = (roughnessT * VdotT_abs + roughnessB * VdotB_abs) / totalWeight;
-    return vec4<f32>(R, max(weightedRoughness, 0.04));
+    // [EN] Choose the grain direction based on the sign of anisotropy
+    let grainDir = select(anisotropicT, anisotropicB, anisotropy >= 0.0);
+    
+    // [EN] Calculate a bent normal to shift the reflection vector in the direction of the anisotropic stretch.
+    // [EN] This is a standard approximation for IBL anisotropy (Filament style).
+    let stretch = abs(anisotropy) * (1.0 - roughness);
+    
+    // [EN] Robust cross product to avoid zero vector when V aligns with grainDir
+    var T_perp_V = cross(grainDir, V);
+    if (dot(T_perp_V, T_perp_V) < EPSILON) {
+         T_perp_V = cross(grainDir, N);
+    }
+    
+    let anisotropicNormal = normalize(cross(T_perp_V, grainDir));
+    let bentNormal = normalize(mix(N, anisotropicNormal, stretch));
+    let R = reflect(-V, bentNormal);
+    
+    // [EN] For isotropic lookup, we use a roughness that approximates the anisotropic highlight spread.
+    // [EN] Anisotropy narrows the highlight in one direction, so we sharpen the effective roughness slightly.
+    let effectiveRoughness = roughness * (1.0 - abs(anisotropy) * (1.0 - roughness));
+    
+    return vec4<f32>(R, max(effectiveRoughness, 0.04));
 }
 
 fn getDirectClearcoatBRDF(
@@ -948,7 +950,7 @@ fn getIndirectPbrLighting(
     transmissionParameter: f32, transmissionRefraction: vec3<f32>,
     u_useKHR_materials_diffuse_transmission: bool, diffuseTransmissionParameter: f32, diffuseTransmissionColor: vec3<f32>,
     sheenColor: vec3<f32>, sheenRoughnessParameter: f32,
-    anisotropy: f32, anisotropyT: vec3<f32>, anisotropicB: vec3<f32>,
+    anisotropy: f32, anisotropicT: vec3<f32>, anisotropicB: vec3<f32>,
     clearcoatParameter: f32, clearcoatRoughnessParameter: f32, clearcoatNormal: vec3<f32>
 ) -> vec3<f32> {
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
@@ -957,12 +959,13 @@ fn getIndirectPbrLighting(
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
         var R = getReflectionVectorFromViewDirection(V, N);
         let NdotV_IBL = max(abs(dot(N, V)), 1e-6);
+        var iblRoughness = *roughnessParameter;
         #redgpu_if useKHR_materials_anisotropy
         if (anisotropy > 0.0)
         {
-            let anisotropicResult = getIndirectAnisotropicBRDF(V, N, *roughnessParameter, anisotropy, anisotropicT, anisotropicB);
+            let anisotropicResult = getIndirectAnisotropicBRDF(V, N, iblRoughness, anisotropy, anisotropicT, anisotropicB);
             R = anisotropicResult.xyz;
-            *roughnessParameter = anisotropicResult.w;
+            iblRoughness = anisotropicResult.w;
         }
         #redgpu_endIf
         var reflectedColor = vec3<f32>(0.0);
@@ -970,7 +973,7 @@ fn getIndirectPbrLighting(
         var iblMipmapCount: f32 = 0.0;
         if (u_usePrefilterTexture) {
             iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
-            var mipLevel = (*roughnessParameter) * iblMipmapCount;
+            var mipLevel = iblRoughness * iblMipmapCount;
             reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * preExposure * systemUniforms.iblIntensity;
             iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
         }
@@ -980,7 +983,7 @@ fn getIndirectPbrLighting(
             let atmH = u_atmo.atmosphereHeight;
             let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
             let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
-            let atmoMipLevel = (*roughnessParameter) * atmoMipCount;
+            let atmoMipLevel = iblRoughness * atmoMipCount;
             let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * u_atmo.sunIntensity * preExposure;
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
@@ -1009,7 +1012,7 @@ fn getIndirectPbrLighting(
         {
             var backScatteringColor = vec3<f32>(0.0);
             if (u_usePrefilterTexture) {
-                let mipLevel = (*roughnessParameter) * iblMipmapCount;
+                let mipLevel = iblRoughness * iblMipmapCount;
                 backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb  * preExposure * systemUniforms.iblIntensity;
             }
             if (u_useSkyAtmosphere) {
