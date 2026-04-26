@@ -35,20 +35,6 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 const BACKGROUND_SHADER_INFO = parseWGSL('SkyAtmosphere_Background_Vertex', backgroundVertexShaderCode_wgsl);
 const BACKGROUND_UNIFORM_STRUCT = BACKGROUND_SHADER_INFO.uniforms.vertexUniforms;
 
-/**
- * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 클래스입니다.
- * [EN] Physics-based Atmospheric Scattering class.
- *
- * [KO] 실시간 태양 위치 및 대기 조성 파라미터를 기반으로 하늘의 색상, 태양 본체 및 공중 투시(Aerial Perspective) 효과를 시뮬레이션합니다.
- * [EN] Simulates sky color, sun disk, and Aerial Perspective effects based on real-time sun position and atmospheric composition parameters.
- *
- * @example
- * ```typescript
- * const skyAtmosphere = new RedGPU.SkyAtmosphere(redGPUContext);
- * scene.skyAtmosphere = skyAtmosphere;
- * ```
- * @category SkyAtmosphere
- */
 class SkyAtmosphere extends ASinglePassPostEffect {
     #transmittanceGenerator: TransmittanceGenerator;
     #multiScatteringGenerator: MultiScatteringGenerator;
@@ -135,18 +121,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         if (ibl) this.#dirtyIBL = true;
     }
 
-    /**
-     * [KO] SkyAtmosphere 인스턴스를 생성합니다.
-     * [EN] Creates a SkyAtmosphere instance.
-     *
-     * @example
-     * ```typescript
-     * const skyAtmosphere = new RedGPU.SkyAtmosphere(redGPUContext);
-     * ```
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU context
-     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         const {gpuDevice} = redGPUContext;
@@ -263,18 +237,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         });
     }
 
-    /**
-     * [KO] 스카이 배경을 렌더링합니다.
-     * [EN] Renders the sky background.
-     *
-     * @example
-     * ```typescript
-     * skyAtmosphere.renderBackground(renderViewStateData);
-     * ```
-     * @param renderViewStateData -
-     * [KO] 렌더 뷰 상태 데이터
-     * [EN] Render view state data
-     */
     renderBackground(renderViewStateData: RenderViewStateData) {
         const {currentRenderPassEncoder, view} = renderViewStateData;
         const {gpuDevice, antialiasingManager} = this.redGPUContext;
@@ -429,61 +391,33 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#markDirty(lut, skyView, ibl);
     }
 
-    /**
-     * [KO] 대기 산란 파라미터 객체를 반환합니다.
-     * [EN] Returns the atmospheric scattering parameter object.
-     */
     get params() { return this.#params; }
 
-    /**
-     * [KO] 공중 투시(Aerial Perspective) 효과가 적용될 거리 스케일 (km)입니다.
-     * [EN] Distance scale (km) for Aerial Perspective effect.
-     */
     get aerialPerspectiveDistanceScale(): number { return this.#params.aerialPerspectiveDistanceScale; }
     set aerialPerspectiveDistanceScale(v: number) {
         this.#setParam('aerialPerspectiveDistanceScale', v, false, true, true, (v) => validatePositiveNumberRange(v, 1, 1000));
     }
 
-    /**
-     * [KO] 공중 투시(Aerial Perspective) 효과가 시작되는 최소 깊이 (km)입니다.
-     * [EN] Minimum depth (km) where Aerial Perspective effect starts.
-     */
     get aerialPerspectiveStartDepth(): number { return this.#params.aerialPerspectiveStartDepth; }
     set aerialPerspectiveStartDepth(v: number) {
         this.#setParam('aerialPerspectiveStartDepth', v, false, true, true, (v) => validatePositiveNumberRange(v, 0, 100));
     }
 
-    /**
-     * [KO] 태양이 지평선 아래로 내려갔을 때 대기가 어두워지는 것을 방지하는 최소 고도 각도 (도)입니다.
-     * [EN] Minimum elevation angle (degrees) to prevent the atmosphere from becoming too dark when the sun is below the horizon.
-     */
     get transmittanceMinLightElevationAngle(): number { return this.#params.transmittanceMinLightElevationAngle; }
     set transmittanceMinLightElevationAngle(v: number) {
         this.#setParam('transmittanceMinLightElevationAngle', v, true, true, true, (v) => validateNumberRange(v, -90, 90));
     }
 
-    /**
-     * [KO] 행성의 바닥 반지름 (km)입니다.
-     * [EN] Planet bottom radius (km).
-     */
     get groundRadius(): number { return this.#params.groundRadius; }
     set groundRadius(v: number) {
         this.#setParam('groundRadius', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
     }
 
-    /**
-     * [KO] 대기층의 유효 높이 (km)입니다.
-     * [EN] Effective height of the atmosphere (km).
-     */
     get atmosphereHeight(): number { return this.#params.atmosphereHeight; }
     set atmosphereHeight(v: number) {
         this.#setParam('atmosphereHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
     }
 
-    /**
-     * [KO] 미 산란(Mie Scattering) 계수 [R, G, B] 배열입니다.
-     * [EN] Mie Scattering coefficient [R, G, B] array.
-     */
     get mieScattering(): [number, number, number] {
         return [this.#params.mieScattering[0], this.#params.mieScattering[1], this.#params.mieScattering[2]];
     }
@@ -491,10 +425,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#setParam('mieScattering', [...v], true, false, true);
     }
 
-    /**
-     * [KO] 미 흡수(Mie Absorption) 계수 [R, G, B] 배열입니다.
-     * [EN] Mie Absorption coefficient [R, G, B] array.
-     */
     get mieAbsorption(): [number, number, number] {
         return [this.#params.mieAbsorption[0], this.#params.mieAbsorption[1], this.#params.mieAbsorption[2]];
     }
@@ -502,10 +432,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#setParam('mieAbsorption', [...v], true, false, true);
     }
 
-    /**
-     * [KO] 레일리 산란(Rayleigh Scattering) 계수 [R, G, B] 배열입니다.
-     * [EN] Rayleigh Scattering coefficient [R, G, B] array.
-     */
     get rayleighScattering(): [number, number, number] {
         return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]];
     }
@@ -513,37 +439,21 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#setParam('rayleighScattering', [...v], true, false, true);
     }
 
-    /**
-     * [KO] 레일리 산란의 고도 별 지수 분포(Scale Height, km)입니다.
-     * [EN] Rayleigh exponential distribution (Scale Height, km).
-     */
     get rayleighExponentialDistribution(): number { return this.#params.rayleighExponentialDistribution; }
     set rayleighExponentialDistribution(v: number) {
         this.#setParam('rayleighExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
     }
 
-    /**
-     * [KO] 미 산란의 고도 별 지수 분포(Scale Height, km)입니다.
-     * [EN] Mie exponential distribution (Scale Height, km).
-     */
     get mieExponentialDistribution(): number { return this.#params.mieExponentialDistribution; }
     set mieExponentialDistribution(v: number) {
         this.#setParam('mieExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
     }
 
-    /**
-     * [KO] 미 산란의 비등방성 계수 (g, 0 ~ 0.999)입니다.
-     * [EN] Anisotropy factor for Mie scattering (g, 0 to 0.999).
-     */
     get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
     set mieAnisotropy(v: number) {
         this.#setParam('mieAnisotropy', v, true, false, true, (v) => validateNumberRange(v, 0, 0.999));
     }
 
-    /**
-     * [KO] 지면의 반사율(Albedo) [R, G, B] 배열입니다.
-     * [EN] Ground Albedo [R, G, B] array.
-     */
     get groundAlbedo(): [number, number, number] {
         return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]];
     }
@@ -551,10 +461,6 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#setParam('groundAlbedo', [...v], true, false, true);
     }
 
-    /**
-     * [KO] 대기 중 흡수 물질(오존 등)의 흡수 계수 [R, G, B] 배열입니다.
-     * [EN] Absorption coefficient [R, G, B] array for atmospheric absorbers (e.g. Ozone).
-     */
     get absorptionCoefficient(): [number, number, number] {
         return [this.#params.absorptionCoefficient[0], this.#params.absorptionCoefficient[1], this.#params.absorptionCoefficient[2]];
     }
@@ -562,55 +468,31 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#setParam('absorptionCoefficient', [...v], true, false, true);
     }
 
-    /**
-     * [KO] 흡수층(Tent Distribution)의 중심 고도 (km)입니다.
-     * [EN] Center altitude (km) of the absorption tip (Tent Distribution).
-     */
     get absorptionTipAltitude(): number { return this.#params.absorptionTipAltitude; }
     set absorptionTipAltitude(v: number) {
         this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(0, 100));
     }
 
-    /**
-     * [KO] 흡수층의 두께 너비 (km)입니다.
-     * [EN] Thickness width (km) of the absorption tent.
-     */
     get absorptionTentWidth(): number { return this.#params.absorptionTentWidth; }
     set absorptionTentWidth(v: number) {
         this.#setParam('absorptionTentWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
     }
 
-    /**
-     * [KO] 다중 산란(Multi-Scattering) 에너지 보정 배율입니다.
-     * [EN] Multi-Scattering energy compensation factor.
-     */
     get multiScatteringFactor(): number { return this.#params.multiScatteringFactor; }
     set multiScatteringFactor(v: number) {
         this.#setParam('multiScatteringFactor', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
     }
 
-    /**
-     * [KO] 태양 본체의 각크기 (도)입니다.
-     * [EN] Angular size (degrees) of the sun disk.
-     */
     get sunSize(): number { return this.#params.sunSize; }
     set sunSize(v: number) {
         this.#setParam('sunSize', v, false, true, true, (v) => validatePositiveNumberRange(v, 0.01, 10.0));
     }
 
-    /**
-     * [KO] 태양의 주연 감광(Limb Darkening) 계수입니다.
-     * [EN] Sun's Limb Darkening coefficient.
-     */
     get sunLimbDarkening(): number { return this.#params.sunLimbDarkening; }
     set sunLimbDarkening(v: number) {
         this.#setParam('sunLimbDarkening', v, false, false, true, (v) => validateNumberRange(v, 0, 10.0));
     }
 
-    /**
-     * [KO] 대기 산란의 전체 휘도 및 색상 틴트 배율 [R, G, B] 배열입니다.
-     * [EN] Overall luminance and color tint factor [R, G, B] array for atmospheric scattering.
-     */
     get skyLuminanceFactor(): [number, number, number] {
         return [this.#params.skyLuminanceFactor[0], this.#params.skyLuminanceFactor[1], this.#params.skyLuminanceFactor[2]];
     }
@@ -618,46 +500,18 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#setParam('skyLuminanceFactor', [...v], true, false, true);
     }
 
-    /**
-     * [KO] 대기 투과율(Transmittance) LUT 텍스처를 반환합니다.
-     * [EN] Returns the atmospheric Transmittance LUT texture.
-     */
     get transmittanceLUT(): DirectTexture { return this.#transmittanceGenerator.lutTexture; }
 
-    /**
-     * [KO] 다중 산란(Multi-Scattering) LUT 텍스처를 반환합니다.
-     * [EN] Returns the atmospheric Multi-Scattering LUT texture.
-     */
     get multiScatLUT(): DirectTexture { return this.#multiScatteringGenerator.lutTexture; }
 
-    /**
-     * [KO] 스카이 뷰(Sky-View) LUT 텍스처를 반환합니다.
-     * [EN] Returns the atmospheric Sky-View LUT texture.
-     */
     get skyViewLUT(): DirectTexture { return this.#skyViewGenerator.lutTexture; }
 
-    /**
-     * [KO] 카메라 볼륨(AP) LUT 텍스처를 반환합니다.
-     * [EN] Returns the atmospheric Camera Volume (AP) LUT texture.
-     */
     get aerialPerspectiveLUT(): DirectCubeTexture { return this.#aerialPerspectiveGenerator.lutTexture; }
 
-    /**
-     * [KO] 대기 조도(Irradiance) LUT 텍스처를 반환합니다.
-     * [EN] Returns the atmospheric Irradiance LUT texture.
-     */
     get skyAtmosphereIrradianceLUT(): DirectCubeTexture { return this.#irradianceLUT; }
 
-    /**
-     * [KO] 프리필터링된 대기 반사 큐브맵을 반환합니다.
-     * [EN] Returns the pre-filtered atmospheric reflection cubemap.
-     */
     get skyAtmosphereReflectionLUT(): DirectCubeTexture { return this.#specularGenerator.prefilteredTexture; }
 
-    /**
-     * [KO] 대기 산란 전용 샘플러를 반환합니다.
-     * [EN] Returns the dedicated atmosphere sampler.
-     */
     get atmosphereSampler() { return this.#sampler; }
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {

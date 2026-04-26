@@ -12,15 +12,6 @@ import AtmosphereShaderLibrary from "../../../AtmosphereShaderLibrary";
 
 const SPECULAR_SHADER_INFO = parseWGSL('SkyAtmosphere_Specular_Generator', specularShaderCode_wgsl, AtmosphereShaderLibrary);
 
-/**
- * [KO] 실시간 대기 산란 데이터를 기반으로 프리필터링된 반사용(Specular) 큐브맵을 생성하는 클래스입니다.
- * [EN] Class that generates a pre-filtered specular cubemap based on real-time atmospheric scattering data.
- *
- * [KO] 대기 산란 데이터를 큐브맵으로 렌더링한 후 GGX 프리필터링을 통해 거칠기(Roughness)별 반사 데이터를 생성합니다.
- * [EN] Renders atmospheric scattering data to a cubemap, then generates reflection data by roughness through GGX pre-filtering.
- *
- * @category SkyAtmosphere
- */
 class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 	#sourceCubeTexture: GPUTexture;
 	#sourceCubeTextureView: GPUTextureView;
@@ -28,51 +19,23 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 	#pipeline: GPUComputePipeline;
 	#bindGroup: GPUBindGroup;
 
-	/**
-	 * [KO] SkyAtmosphereSpecularGenerator 인스턴스를 초기화합니다.
-	 * [EN] Initializes a SkyAtmosphereSpecularGenerator instance.
-	 *
-	 * @param redGPUContext - RedGPU 컨텍스트
-	 * @param sharedUniformBuffer - 공유 유니폼 버퍼
-	 * @param sampler - LUT 샘플링에 사용할 샘플러
-	 */
 	constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
 		super(redGPUContext, sharedUniformBuffer, sampler, 'Specular_Gen', 256, 256, 6);
 		this.#init();
 	}
 
-	/**
-	 * [KO] 렌더링 소스로 사용되는 원본 큐브맵 텍스처를 반환합니다.
-	 * [EN] Returns the source cubemap texture used for rendering.
-	 */
 	get sourceCubeTexture(): GPUTexture {
 		return this.#sourceCubeTexture;
 	}
 
-	/**
-	 * [KO] 프리필터링이 완료된 결과 큐브맵 텍스처를 반환합니다.
-	 * [EN] Returns the resulting pre-filtered cubemap texture.
-	 */
 	get prefilteredTexture(): DirectCubeTexture {
 		return this.#prefilteredTexture;
 	}
 
-	/**
-	 * [KO] 생성된 반사용 큐브맵(프리필터링된 결과)을 반환합니다.
-	 * [EN] Returns the generated specular cubemap (pre-filtered result).
-	 */
 	get lutTexture(): DirectCubeTexture {
 		return this.#prefilteredTexture;
 	}
 
-	/**
-	 * [KO] 반사 큐브맵을 생성하고 프리필터링을 수행합니다.
-	 * [EN] Generates the specular cubemap and performs pre-filtering.
-	 *
-	 * @param transmittance - 투과율 LUT 텍스처
-	 * @param multiScat - 다중 산란 LUT 텍스처
-	 * @param skyView - 스카이 뷰 LUT 텍스처
-	 */
 	// @ts-ignore
 	async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
 		if (!this.#bindGroup) {
@@ -151,4 +114,5 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 	}
 }
 
+Object.freeze(SkyAtmosphereSpecularGenerator);
 export default SkyAtmosphereSpecularGenerator;

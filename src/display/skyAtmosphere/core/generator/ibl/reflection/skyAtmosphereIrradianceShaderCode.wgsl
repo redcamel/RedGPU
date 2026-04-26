@@ -22,8 +22,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let face = global_id.z;
     
     var totalRadiance = vec3<f32>(0.0);
-    // [KO] 큐브맵 에일리어싱 억제를 위한 고정 샘플링 (안정성 우선)
-    // [EN] Fixed sampling for cubemap anti-aliasing (stability first)
     const SAMPLE_COUNT: u32 = 4u; 
 
     for (var i = 0u; i < SAMPLE_COUNT; i = i + 1u) {
@@ -37,7 +35,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
         }
 
-        // [KO] 에너지 보정된 대기 휘도를 평가합니다. (이제 skyAtmosphereFn에서 로브가 부드럽게 처리됨)
         totalRadiance += evaluateIBLRadianceCompensated(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
     }
 

@@ -10,66 +10,25 @@ import AtmosphereShaderLibrary from "../../AtmosphereShaderLibrary";
 
 const SHADER_INFO = parseWGSL('SkyAtmosphere_Transmittance_Generator', transmittanceShaderCode_wgsl, AtmosphereShaderLibrary);
 
-/**
- * [KO] 대기 투과율(Transmittance) LUT 생성을 담당하는 클래스입니다.
- * [EN] Class responsible for generating Atmospheric Transmittance LUT.
- *
- * [KO] 태양빛이 대기를 통과하며 감쇄되는 비율을 고도와 각도별로 사전 계산하여 저장합니다.
- * [EN] Pre-calculates and stores the ratio of sunlight attenuation as it passes through the atmosphere by altitude and angle.
- *
- * @example
- * ```typescript
- * const transmittanceGenerator = new TransmittanceGenerator(redGPUContext, sharedUniformBuffer, sampler);
- * transmittanceGenerator.render();
- * ```
- * @category SkyAtmosphere
- */
 class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;
     #bindGroup: GPUBindGroup;
     #pipeline: GPUComputePipeline;
 
-    /**
-     * [KO] TransmittanceGenerator 인스턴스를 초기화합니다.
-     * [EN] Initializes a TransmittanceGenerator instance.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU context
-     * @param sharedUniformBuffer -
-     * [KO] 공유 유니폼 버퍼
-     * [EN] Shared uniform buffer
-     * @param sampler -
-     * [KO] LUT 샘플링에 사용할 샘플러
-     * [EN] Sampler to be used for LUT sampling
-     */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
         super(redGPUContext, sharedUniformBuffer, sampler, 'Transmittance_Gen', 256, 64);
         this.#init();
     }
 
-    /**
-     * [KO] 생성된 투과율 LUT 텍스처를 반환합니다.
-     * [EN] Returns the generated Transmittance LUT texture.
-     */
     get lutTexture(): DirectTexture {
         return this.#lutTexture;
     }
 
-    /**
-     * [KO] 투과율 LUT를 렌더링(Compute)합니다.
-     * [EN] Renders (computes) the Transmittance LUT.
-     *
-     * @example
-     * ```typescript
-     * transmittanceGenerator.render();
-     * ```
-     */
     render(): void {
         if (!this.#bindGroup) {
             this.#bindGroup = this.createBindGroup('SkyAtmosphere_Transmittance_BindGroup', this.#pipeline, [
-                {binding: 0, resource: this.#lutTexture.gpuTextureView}, // transmittanceLUT
-                {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}} // params
+                {binding: 0, resource: this.#lutTexture.gpuTextureView}, 
+                {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}} 
             ]);
         }
         this.executeComputePass(this.#pipeline, this.#bindGroup);
@@ -81,4 +40,5 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 }
 
+Object.freeze(TransmittanceGenerator);
 export default TransmittanceGenerator;
