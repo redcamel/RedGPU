@@ -107,8 +107,8 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
 
     // 분석 결과 (직접 바인딩)
     settingsFolder.addBinding({
-        get baseLuminance() { return view.skybox ? view.skybox.baseLuminance : 0; }
-    }, 'baseLuminance', { readonly: true, interval: 500 });
+        get averageLuminance() { return view.skybox ? view.skybox.averageLuminance : 0; }
+    }, 'averageLuminance', { readonly: true, interval: 500 });
 
     // 5. 초기화 실행
     if (settings.useSkyBox) updateSkyBox(settings.skyboxImage);

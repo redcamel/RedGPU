@@ -115,8 +115,8 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     }, 'luminance', { min: 0, max: 100000, step: 10, interval: 500 });
 
     iblFolder.addBinding({
-        get baseLuminance() { return view.ibl ? view.ibl.baseLuminance : 0; }
-    }, 'baseLuminance', { readonly: true, interval: 500 });
+        get averageLuminance() { return view.ibl ? view.ibl.averageLuminance : 0; }
+    }, 'averageLuminance', { readonly: true, interval: 500 });
 
     // 5. 초기 실행
     syncLight(settings.useLight);

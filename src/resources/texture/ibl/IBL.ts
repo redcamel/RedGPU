@@ -23,7 +23,7 @@ class IBL {
     #isAnalyzing: boolean = false;
     #intensityMultiplier: number = 1.0;
     #luminance: number = 20000.0;
-    #baseLuminance: number = 1.0;
+    #averageLuminance: number = 1.0;
 
     /**
      * [KO] IBL 인스턴스를 생성합니다.
@@ -80,11 +80,13 @@ class IBL {
 
     /** [KO] 물리적 휘도 (단위: cd/m²) [EN] Physical luminance (Unit: cd/m²) */
     get luminance(): number { return this.#luminance; }
-    set luminance(value: number) { this.#luminance = value; }
+    set luminance(value: number) {
+        this.#luminance = value;
+    }
 
-    /** [KO] 원본 이미지의 기본 휘도 (정규화용) [EN] Base luminance of the source image (for normalization) */
-    get baseLuminance(): number { return this.#baseLuminance; }
-    set baseLuminance(value: number) { this.#baseLuminance = value; }
+    /** [KO] 분석된 텍스처의 평균 휘도 (정규화용) [EN] Average luminance of the source image (for normalization) */
+    get averageLuminance(): number { return this.#averageLuminance; }
+    set averageLuminance(value: number) { this.#averageLuminance = value; }
 
     #onSourceChanged = async (v?: HDRTexture | CubeTexture) => {
         v = v || this.#targetTexture;
@@ -119,7 +121,7 @@ class IBL {
             if (!this.#isAnalyzing) {
                 this.#isAnalyzing = true;
                 const analyzedLuminance = await resourceManager.iblLuminanceAnalyzer.analyze(this.#sourceCubeTexture);
-                this.#baseLuminance = analyzedLuminance || 1.0;
+                this.#averageLuminance = analyzedLuminance || 1.0;
                 this.#isAnalyzing = false;
             }
         }

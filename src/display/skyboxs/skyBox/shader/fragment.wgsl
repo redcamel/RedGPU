@@ -10,7 +10,7 @@ struct Uniforms {
     blur: f32,
     intensityMultiplier: f32,
     luminance: f32,
-    baseLuminance: f32,
+    averageLuminance: f32,
     opacity: f32,
     transitionProgress: f32,
 };
@@ -57,7 +57,7 @@ fn main(inputData: InputData) -> OutputFragment {
         #redgpu_endIf
     }
 
-    let finalIntensity = systemUniforms.preExposure * (uniforms.intensityMultiplier * uniforms.luminance / uniforms.baseLuminance);
+    let finalIntensity = systemUniforms.preExposure * (uniforms.intensityMultiplier * uniforms.luminance / uniforms.averageLuminance);
     var finalAlpha = sampleColor.a * uniforms.opacity;
 
     if (systemUniforms.useSkyAtmosphere == 1u) {

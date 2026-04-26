@@ -113,8 +113,8 @@ class SkyBox {
         this.#material.opacity = value;
     }
 
-    /** [KO] 원본 이미지의 기본 휘도 (정규화용) [EN] Base luminance of source image (for normalization) */
-    get baseLuminance(): number { return this.#material.baseLuminance; }
+    /** [KO] 분석된 텍스처의 평균 휘도 (정규화용) [EN] Average luminance of analyzed texture (for normalization) */
+    get averageLuminance(): number { return this.#material.averageLuminance; }
 
     /** [KO] 전환 대상 텍스처 [EN] Transition target texture */
     get transitionTexture(): CubeTexture | DirectCubeTexture { return this.#transitionTexture; }
@@ -143,7 +143,7 @@ class SkyBox {
             this.#isAnalyzing = true;
             this.#prevAnalyzedTexture = currentTexture;
             resourceManager.iblLuminanceAnalyzer.analyze(currentTexture).then(lum => {
-                this.#material.baseLuminance = lum || 1.0;
+                this.#material.averageLuminance = lum || 1.0;
                 this.#isAnalyzing = false;
             });
         }

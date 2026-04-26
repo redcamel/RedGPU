@@ -26,8 +26,8 @@ interface SkyBoxMaterial {
     intensityMultiplier: number;
     /** [KO] 물리적 휘도 (Nit) [EN] Physical luminance (Nit) */
     luminance: number;
-    /** [KO] 원본 이미지의 기본 휘도 [EN] Base luminance of the source image */
-    baseLuminance: number;
+    /** [KO] 분석된 텍스처의 평균 휘도 [EN] Average luminance of analyzed texture */
+    averageLuminance: number;
     /** [KO] 불투명도 [EN] Opacity */
     opacity: number;
     /** [KO] 전환 진행률 [EN] Transition progress */
@@ -59,7 +59,7 @@ DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
     ['blur', 0],
     ['intensityMultiplier', 1],
     ['luminance', 10000],
-    ['baseLuminance', 1],
+    ['averageLuminance', 1],
     ['opacity', 1, 0, 1],
     ['transitionProgress', 0],
 ])
