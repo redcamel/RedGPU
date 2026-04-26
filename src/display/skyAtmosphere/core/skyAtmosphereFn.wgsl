@@ -380,8 +380,11 @@ fn evaluateIBLRadiance(
 
     let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
     
-    let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
-    radiance += mieGlow;
+    let sunShadow = getPlanetShadowMask(camPos, sunDir, r, params);
+    if (!isGround && sunShadow > 0.0) {
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
+        radiance += mieGlow * sunShadow;
+    }
 
     return radiance;
 }
@@ -419,10 +422,12 @@ fn evaluateIBLRadianceCompensated(
 
     let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
 
-    let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
-    radiance += mieGlow;
-
-    radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, transToEdge, params);
+    let sunShadow = getPlanetShadowMask(camPos, sunDir, r, params);
+    if (!isGround && sunShadow > 0.0) {
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
+        radiance += mieGlow * sunShadow;
+        radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, transToEdge, params) * sunShadow;
+    }
 
     return radiance;
 }

@@ -45,12 +45,13 @@ fn main(input : VertexOutput) -> FragmentOutput {
         isGroundHit
     );
 
-    let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, transToEdge, 0.0);
-    atmosphereRadiance += mieGlow;
+    let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
+    if (!isGroundHit && sunShadow > 0.0) {
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, transToEdge, 0.0);
+        atmosphereRadiance += mieGlow * sunShadow;
 
-    if (!isGroundHit) {
         let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01, uniforms);
-        atmosphereRadiance += sunDisk;
+        atmosphereRadiance += sunDisk * sunShadow;
     }
 
     let finalRadiance = atmosphereRadiance * uniforms.sunIntensity * systemUniforms.preExposure;
