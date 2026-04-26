@@ -25,7 +25,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var finalColor = inputData.vertexColor;
     finalColor.a = finalColor.a * uniforms.opacity;
 
-    output.color = vec4<f32>(finalColor.rgb * systemUniforms.preExposure, finalColor.a);
+    output.color = vec4<f32>(finalColor.rgb, finalColor.a);
     output.gBufferNormal = vec4<f32>(0.0, 0.0, 0.0, 0.0);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
 
