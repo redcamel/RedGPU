@@ -381,21 +381,19 @@ class SystemUniformUpdater {
         uniformDataF32: Float32Array,
         uniformDataU32: Uint32Array
     ) {
-        if (ambientLight) {
-            updateSystemUniformData(
-                ambientLightMembers, uniformDataF32, uniformDataU32,
-                [
-                    {
-                        key: 'color',
-                        value: ambientLight.color.rgbNormalLinear,
-                    },
-                    {
-                        key: 'intensity',
-                        value: ambientLight.intensity,
-                    },
-                ]
-            )
-        }
+        updateSystemUniformData(
+            ambientLightMembers, uniformDataF32, uniformDataU32,
+            [
+                {
+                    key: 'color',
+                    value: ambientLight ? ambientLight.color.rgbNormalLinear : [0, 0, 0],
+                },
+                {
+                    key: 'intensity',
+                    value: ambientLight ? ambientLight.intensity * ambientLight.lux : 0,
+                },
+            ]
+        )
     }
 }
 
