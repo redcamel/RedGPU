@@ -20,23 +20,26 @@ interface SkyBoxMaterial {
     transitionAlphaTexture: ANoiseTexture | BitmapTexture;
     /** [KO] 스카이박스 텍스처 샘플러 [EN] Skybox texture sampler */
     skyboxTextureSampler: Sampler;
-    /** [KO] 블러 강도 [EN] Blur strength */
+    /** [KO] 블러 강도 (0.0 ~ 1.0) [EN] Blur strength (0.0 to 1.0) */
     blur: number;
-    /** [KO] 강도 배율 [EN] Intensity multiplier */
+    /** [KO] 강도 배율 (물리적 휘도에 곱해지는 추가 배율) [EN] Intensity multiplier (Additional scale multiplied by physical luminance) */
     intensity: number;
-    /** [KO] 물리적 휘도 (Nit, cd/m^2) [EN] Physical luminance (Nit, cd/m^2) */
+    /** [KO] 물리적 휘도 (단위: Nit, cd/m²) [EN] Physical luminance (Unit: Nit, cd/m²) */
     nit: number;
-    /** [KO] 원본 이미지의 평균 휘도 [EN] Average luminance of the source image */
+    /** [KO] 원본 이미지의 평균 휘도 (정규화용) [EN] Average luminance of the source image (for normalization) */
     inherentLuminance: number;
-    /** [KO] 불투명도 [EN] Opacity */
+    /** [KO] 불투명도 (0.0 ~ 1.0) [EN] Opacity (0.0 to 1.0) */
     opacity: number;
-    /** [KO] 전환 진행률 [EN] Transition progress */
+    /** [KO] 전환 진행률 (0.0 ~ 1.0) [EN] Transition progress (0.0 to 1.0) */
     transitionProgress: number;
 }
 
 /**
  * [KO] SkyBox 렌더링에 사용되는 전용 머티리얼 클래스입니다.
  * [EN] Material class exclusively used for SkyBox rendering.
+ *
+ * [KO] 물리적 기반 라이팅 모델을 지원하며, 카메라 노출 시스템과 연동되어 정확한 배경 밝기를 계산합니다.
+ * [EN] Supports physically based lighting models and works with the camera exposure system to calculate accurate background brightness.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템 내부적으로 사용되는 머티리얼 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -82,7 +85,7 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
     ['blur', 0],
     ['intensity', 1],
-    ['nit', 1],
+    ['nit', 10000],
     ['inherentLuminance', 1],
     ['opacity', 1, 0, 1],
 ])

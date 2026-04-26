@@ -150,23 +150,26 @@ class SkyBox {
      * @param cubeTexture -
      * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 직접 주입)
      * [EN] Cube texture to use for the skybox (Regular or Direct)
+     * @param nit -
+     * [KO] 스카이박스의 물리적 휘도 (단위: cd/m², 기본값: 10000)
+     * [EN] Physical luminance of the skybox (Unit: cd/m², Default: 10000)
      *
      * @throws
      * [KO] redGPUContext가 유효하지 않은 경우 Error 발생
      * [EN] Throws Error if redGPUContext is invalid
      *
      */
-    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | DirectCubeTexture,  nit: number = 10000) {
+    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | DirectCubeTexture, nit: number = 10000) {
         validateRedGPUContext(redGPUContext)
         this.#redGPUContext = redGPUContext
         this.#geometry = new Box(redGPUContext)
         this.#skyboxTexture = cubeTexture
         this.#material = new SkyBoxMaterial(redGPUContext, this.#skyboxTexture)
-        this.#material.nit = this.#nit = nit;
+        this.#nit = nit;
+        this.#material.nit = this.#nit;
         this.#primitiveState = new PrimitiveState(this)
         this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
         this.#depthStencilState = new DepthStencilState(this)
-        // this.#depthStencilState.depthWriteEnabled = false
     }
 
     /**
@@ -324,6 +327,9 @@ class SkyBox {
     /**
      * [KO] 스카이박스의 물리적 휘도(Nit, cd/m^2)를 반환합니다.
      * [EN] Returns the physical luminance (Nit, cd/m^2) of the skybox.
+     *
+     * [KO] 이 값은 카메라 노출(Exposure) 시스템과 연동되어 실제 배경의 밝기를 결정합니다.
+     * [EN] This value works with the camera exposure system to determine the actual background brightness.
      */
     get nit(): number {
         return this.#nit;
@@ -333,32 +339,29 @@ class SkyBox {
      * [KO] 스카이박스의 물리적 휘도(Nit, cd/m^2)를 설정합니다.
      * [EN] Sets the physical luminance (Nit, cd/m^2) of the skybox.
      * @param value -
-     * [KO] 휘도 값 (기본값: 1.0)
-     * [EN] Luminance value (Default: 1.0)
+     * [KO] 휘도 값 (기본값: 10000)
+     * [EN] Luminance value (Default: 10000)
      */
     set nit(value: number) {
         this.#nit = value;
+        this.#material.nit = value;
     }
 
-    /** [KO] 스카이박스 원본 이미지의 평균 휘도를 반환합니다. [EN] Returns the average luminance of the source skybox image. */
+    /**
+     * [KO] 스카이박스 원본 이미지의 평균 휘도를 반환합니다.
+     * [EN] Returns the average luminance of the source skybox image.
+     *
+     * [KO] 엔진은 이 값을 사용하여 입력 이미지의 밝기에 관계없이 `nit` 설정값이 물리적으로 정확하게 표현되도록 정규화합니다.
+     * [EN] The engine uses this value to normalize the physical accuracy of the `nit` setting regardless of the input image brightness.
+     */
     get inherentLuminance(): number {
         return this.#material.inherentLuminance;
     }
-
-
-
 
     /**
      * [KO] 스카이박스를 렌더링합니다.
      * [EN] Renders the skybox.
      *
-     * [KO] 이 메서드는 매 프레임마다 호출되어야 하며, MSAA 상태, 텍스처 전환 진행 상황 업데이트 및 실제 렌더링 명령 실행을 수행합니다.
-     * [EN] This method should be called every frame, performing MSAA state check, texture transition updates, and executing actual rendering commands.
-     *
-     * ### Example
-     * ```typescript
-     * skybox.render(renderViewState);
-     * ```
      * @param renderViewStateData -
      * [KO] 렌더링 상태 및 디버그 정보
      * [EN] Rendering state and debug info
@@ -367,22 +370,19 @@ class SkyBox {
         const {currentRenderPassEncoder, startTime, view} = renderViewStateData
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
-        const {gpuDevice, antialiasingManager, resourceManager} = this.#redGPUContext
+        const {gpuDevice, resourceManager} = this.#redGPUContext
         
-        // [KO] 텍스처 휘도 분석 (정규화를 위해)
-        // [EN] Texture luminance analysis (for normalization)
+        // [KO] 텍스처 휘도 분석 및 정규화 (최초 1회 또는 텍스처 변경 시)
+        // [EN] Texture luminance analysis and normalization (once initially or when texture changes)
         const currentTexture = this.#material.skyboxTexture.gpuTexture;
         if (currentTexture && currentTexture !== this.#prevAnalyzedTexture && !this.#isAnalyzing) {
             this.#isAnalyzing = true;
             this.#prevAnalyzedTexture = currentTexture;
             resourceManager.iblLuminanceAnalyzer.analyze(currentTexture).then(lum => {
-                const analyzedLuminance = lum || 1.0;
-                this.#material.inherentLuminance = analyzedLuminance;
+                this.#material.inherentLuminance = lum || 1.0;
                 this.#isAnalyzing = false;
             });
         }
-
-        this.#material.nit = this.#nit;
 
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
