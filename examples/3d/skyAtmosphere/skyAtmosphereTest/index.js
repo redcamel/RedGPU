@@ -56,8 +56,8 @@ function loadGLTF(view, url) {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
         const mesh = scene.addChild(v['resultMesh']);
-        mesh.setCastShadowRecursively(true)
-        mesh.setReceiveShadowRecursively(true)
+        // mesh.setCastShadowRecursively(true)
+        // mesh.setReceiveShadowRecursively(true)
         if (url.includes('Corset')) { mesh.setScale(40); mesh.z = 2; mesh.y = -2; }
         if (url.includes('ClearcoatWicker')) { mesh.setScale(3); mesh.x = -6; mesh.y = -1.5; }
         if (url.includes('TransmissionTest')) { mesh.setScale(5); }

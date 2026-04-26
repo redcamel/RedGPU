@@ -235,7 +235,9 @@ fn getSunDiskRadianceIBL(
     params: SkyAtmosphere
 ) -> vec3<f32> {
     let sunRad = (params.sunSize * 0.5) * DEG_TO_RAD;
-    let iblAlpha = sunRad * 2.0; 
+    // [KO] IBL용 태양 로브가 너무 날카로우면 적분 시 노이즈가 발생하므로, 최소 확산 범위를 확보합니다 (약 10도).
+    // [EN] If the sun lobe for IBL is too sharp, it causes noise during integration. Ensure a minimum diffusion range (approx. 10 degrees).
+    let iblAlpha = max(sunRad * 2.0, 0.175); 
     let cosAlpha = cos(iblAlpha);
     
     let radScale = 1.0 / (PI2 * (1.0 - cosAlpha));
@@ -244,7 +246,6 @@ fn getSunDiskRadianceIBL(
     let falloff = exp(-diff / max(1e-7, sigma_sq));
     if (falloff < 0.001) { return vec3<f32>(0.0); }
 
-    // [KO] 에너지를 깎는 소프트 클램핑 로직 제거 (HDR 보존)
     return (radScale * falloff) * skyTrans;
 }
 
@@ -257,13 +258,12 @@ fn getMieGlowAmountUnit(
     transToEdge: vec3<f32>,
     overrideHalo: f32 
 ) -> vec3<f32> {
-    // [KO] 언리얼 엔진 스타일의 하이브리드 글로우: (날카로운 위상 - LUT에 포함된 부드러운 위상)
-    // [EN] Unreal Engine style hybrid glow: (Sharp Phase - Smooth Phase included in LUT)
-    // [KO] LUT 생성 시 비등방성 계수는 보통 0.80으로 제한되므로, 그 이상의 날카로운 성분을 별도로 계산하여 합산함
     let actualAnisotropy = params.mieAnisotropy;
     let halo = select(actualAnisotropy, overrideHalo, overrideHalo > 0.0);
     
-    let sharpG = min(max(halo, 0.88), 0.98); 
+    // [KO] anisotropy 상한을 약간 낮추어(0.98 -> 0.94) 큐브맵에서의 픽셀 튐 현상을 완화합니다.
+    // [EN] Slightly lower the anisotropy upper bound (0.98 -> 0.94) to mitigate pixel sparking in the cubemap.
+    let sharpG = min(max(halo, 0.88), 0.94); 
     let stableG = min(actualAnisotropy, 0.80);
 
     let sharpPhase = phaseMie(viewSunCos, sharpG);
@@ -428,11 +428,11 @@ fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
 
 // [KO] 에너지 보정된 IBL용 대기 휘도를 평가합니다. (태양 본체 대신 넓은 로브 사용)
 fn evaluateIBLRadianceCompensated(
-    viewDir: vec3<f32>, 
-    params: SkyAtmosphere, 
-    transmittanceLUT: texture_2d<f32>, 
-    multiScatLUT: texture_2d<f32>, 
-    skyViewLUT: texture_2d<f32>, 
+    viewDir: vec3<f32>,
+    params: SkyAtmosphere,
+    transmittanceLUT: texture_2d<f32>,
+    multiScatLUT: texture_2d<f32>,
+    skyViewLUT: texture_2d<f32>,
     skyAtmosphereSampler: sampler
 ) -> vec3<f32> {
     let r = params.groundRadius;
@@ -442,23 +442,26 @@ fn evaluateIBLRadianceCompensated(
 
     let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
     let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
-    
+
     var radiance = skySample.rgb;
 
     let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-    
+
     let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, r);
     let isGround = r > 0.0 && tEarth > 0.0 && viewDir.y < -0.0001;
 
     let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
-    
+
     let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
     radiance += mieGlow;
 
+    // [KO] 태양 본체(Sun Disk)를 대신하여 에너지 보정된 넓은 로브를 추가합니다. (조도 및 스페큘러 보정용)
+    // [EN] Add an energy-compensated wide lobe instead of the sun disk. (For irradiance and specular compensation)
+    radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, transToEdge, params);
+
     return radiance;
 }
-
 fn getFrustumRayDirection(uv: vec2<f32>, invP: mat4x4<f32>, invV: mat4x4<f32>) -> vec3<f32> {
     let ndc = vec2<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0);
     let viewSpaceDir = normalize(vec3<f32>(ndc.x * invP[0][0], ndc.y * invP[1][1], -1.0));

@@ -22,11 +22,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let face = global_id.z;
     
     var totalRadiance = vec3<f32>(0.0);
-    const SAMPLE_COUNT: u32 = 8u; // [KO] 고품질 적분을 위한 샘플 수 (UE5 등급)
+    // [KO] 큐브맵 에일리어싱 억제를 위한 고정 샘플링 (안정성 우선)
+    // [EN] Fixed sampling for cubemap anti-aliasing (stability first)
+    const SAMPLE_COUNT: u32 = 4u; 
 
     for (var i = 0u; i < SAMPLE_COUNT; i = i + 1u) {
         let offset = getHammersley(i, SAMPLE_COUNT) - 0.5;
-        let uv = (vec2<f32>(global_id.xy) + 0.5 + offset) / size;
+        let uv = (vec2<f32>(global_id.xy) + 0.5 + offset * 0.8) / size;
         
         var viewDir = getCubeMapDirection(uv, face);
         viewDir = normalize(viewDir);
@@ -35,10 +37,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
         }
 
-        // [KO] 태양 본체 대신 에너지 보정된 대기 휘도를 평가합니다. (조도용)
+        // [KO] 에너지 보정된 대기 휘도를 평가합니다. (이제 skyAtmosphereFn에서 로브가 부드럽게 처리됨)
         totalRadiance += evaluateIBLRadianceCompensated(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
     }
 
-    let radiance = (totalRadiance / f32(SAMPLE_COUNT)) ;
+    let radiance = totalRadiance / f32(SAMPLE_COUNT);
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }
