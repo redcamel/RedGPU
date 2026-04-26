@@ -14,7 +14,7 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         useLight: false,
         lux: 100000,
         useIBL: true,
-        iblIntensity: 1.0,
+        intensityMultiplier: 1.0,
         ...option
     };
 
@@ -23,7 +23,6 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
 
     // 1. 경로 정보 및 UI 텍스트 업데이트
     const updatePathInfo = (src) => {
-        // finalPath를 항상 문자열로 변환
         pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
 
         if (sourceBinding) sourceBinding.dispose();
@@ -43,32 +42,27 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
     const createIBL = (view, name) => {
         if (!settings.useIBL) return;
 
-        // 이름으로 정보 찾기 (안정성 확보)
         const imageInfo = hdrImages.find(item => item.name === name);
         if (!imageInfo) return;
         const src = imageInfo.path;
 
         updatePathInfo(src);
 
-        // 경로 해결 (유틸리티 사용)
         const relativePath = resolveExamplePath(src);
-        const nit = imageInfo.nit || 20000;
+        const luminance = imageInfo.nit || 20000;
 
-        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath, nit);
-        ibl.intensity = settings.iblIntensity;
+        const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath, luminance);
+        ibl.intensityMultiplier = settings.intensityMultiplier;
         view.ibl = ibl;
-
-        // 인스턴스 교체 후 니트 동기화
-        view.ibl.nit = nit;
 
         // 스카이박스 동기화 처리
         if (settings.syncSkyBox) {
             if (view.skybox) {
-                view.skybox.skyboxTexture = ibl.environmentTexture;
-                view.skybox.nit = nit;
+                view.skybox.texture = ibl.environmentTexture;
+                view.skybox.luminance = luminance;
             } else {
                 view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
-                view.skybox.nit = nit;
+                view.skybox.luminance = luminance;
             }
         }
 
@@ -112,17 +106,17 @@ const createIblHelper = (pane, view, RedGPU, option = {}) => {
         options: hdrImages.reduce((acc, item) => ({ ...acc, [item.name]: item.name }), {}),
     }).on('change', (ev) => createIBL(view, ev.value));
 
-    iblFolder.addBinding(settings, 'iblIntensity', { min: 0, max: 5, step: 0.1 })
-        .on('change', (ev) => { if (view.ibl) view.ibl.intensity = ev.value; });
+    iblFolder.addBinding(settings, 'intensityMultiplier', { min: 0, max: 5, step: 0.1 })
+        .on('change', (ev) => { if (view.ibl) view.ibl.intensityMultiplier = ev.value; });
 
     iblFolder.addBinding({
-        get nit() { return view.ibl ? view.ibl.nit : 20000; },
-        set nit(v) { if (view.ibl) view.ibl.nit = v; }
-    }, 'nit', { min: 0, max: 100000, step: 10, interval: 500 });
+        get luminance() { return view.ibl ? view.ibl.luminance : 20000; },
+        set luminance(v) { if (view.ibl) view.ibl.luminance = v; }
+    }, 'luminance', { min: 0, max: 100000, step: 10, interval: 500 });
 
     iblFolder.addBinding({
-        get inherentLum() { return view.ibl ? view.ibl.inherentLuminance : 0; }
-    }, 'inherentLum', { readonly: true, interval: 500 });
+        get baseLuminance() { return view.ibl ? view.ibl.baseLuminance : 0; }
+    }, 'baseLuminance', { readonly: true, interval: 500 });
 
     // 5. 초기 실행
     syncLight(settings.useLight);

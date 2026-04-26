@@ -35,364 +35,128 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  * [KO] 3D 씬의 배경으로 사용되는 스카이박스 클래스입니다.
  * [EN] Skybox class used as the background for 3D scenes.
  *
- * [KO] 큐브 텍스처를 사용하여 360도 환경을 렌더링하며, 텍스처 간 부드러운 전환 효과와 블러, 노출, 투명도 조절 기능을 제공합니다.
- * [EN] Renders a 360-degree environment using cube textures, providing smooth transitions between textures, blur, exposure, and transparency control.
- *
- * [KO] 일반적인 6장 이미지 큐브맵(`CubeTexture`)과 직접 주입 방식의 큐브맵(`DirectCubeTexture`)을 모두 지원합니다.
- * [EN] Supports both regular 6-image cubemaps (`CubeTexture`) and direct-injected cubemaps (`DirectCubeTexture`).
- *
- * ::: info
- * [KO] HDR(.hdr) 파일을 사용하려는 경우, `RedGPU.Resource.IBL`을 통해 큐브맵으로 변환된 `environmentTexture`를 전달해야 합니다.
- * [EN] To use an HDR (.hdr) file, you must pass the `environmentTexture` converted to a cubemap via `RedGPU.Resource.IBL`.
- * :::
- *
- * ### Example
- * ```typescript
- * // 1. 일반 큐브 텍스처 사용 (Using regular CubeTexture)
- * const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
- *
- * // 2. HDR 파일을 IBL을 통해 사용 (Using HDR file via IBL)
- * const ibl = new RedGPU.Resource.IBL(redGPUContext, 'assets/env.hdr');
- * const skyboxHDR = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
- *
- * view.skybox = skybox;
- * ```
- *
- * <iframe src="/RedGPU/examples/3d/skybox/skybox/"></iframe>
- *
- * @see
- * [KO] 아래는 Skybox의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of Skybox.
- * @see [Skybox using HDRTexture](/RedGPU/examples/3d/skybox/skyboxWithHDRTexture/)
- * @see [Skybox using IBL](/RedGPU/examples/3d/skybox/skyboxWithIbl/)
- *
  * @category SkyBox
  */
 class SkyBox {
-    /**
-     * [KO] 모델 변환 행렬 (4x4 매트릭스)
-     * [EN] Model transformation matrix (4x4 matrix)
-     */
+    /** [KO] 모델 변환 행렬 [EN] Model transformation matrix */
     modelMatrix = mat4.create()
-    /**
-     * [KO] GPU 렌더링 정보 객체
-     * [EN] GPU rendering information object
-     */
+    /** [KO] GPU 렌더링 정보 객체 [EN] GPU rendering information object */
     gpuRenderInfo: VertexGPURenderInfo
-    /**
-     * [KO] 파이프라인 재생성이 필요한지 나타내는 플래그
-     * [EN] Flag indicating if pipeline regeneration is needed
-     */
+    
     #dirtyPipeline: boolean = true
     #renderBundle: GPURenderBundle
-    /**
-     * [KO] 스카이박스의 기하학적 형태 (박스)
-     * [EN] Geometric shape of the skybox (box)
-     */
     #geometry: Primitive
-    /**
-     * [KO] 스카이박스 머티리얼
-     * [EN] Skybox material
-     */
     #material: SkyBoxMaterial
-    /**
-     * [KO] RedGPU 컨텍스트 참조
-     * [EN] Reference to RedGPU context
-     */
     #redGPUContext: RedGPUContext
-    /**
-     * [KO] 프리미티브 렌더링 상태
-     * [EN] Primitive rendering state
-     */
     #primitiveState: PrimitiveState
-    /**
-     * [KO] 깊이 스텐실 상태
-     * [EN] Depth stencil state
-     */
     #depthStencilState: DepthStencilState
-    /**
-     * [KO] 현재 스카이박스 텍스처 (일반 또는 직접 주입)
-     * [EN] Current skybox texture (Regular or Direct)
-     */
-    #skyboxTexture: CubeTexture | DirectCubeTexture
-    /**
-     * [KO] 전환 대상 텍스처 (일반 또는 직접 주입)
-     * [EN] Transition target texture (Regular or Direct)
-     */
+    #texture: CubeTexture | DirectCubeTexture
     #transitionTexture: CubeTexture | DirectCubeTexture
-    /**
-     * [KO] 전환 시작 시간 (밀리초)
-     * [EN] Transition start time (ms)
-     */
     #transitionStartTime: number = 0
-    /**
-     * [KO] 전환 지속 시간 (밀리초)
-     * [EN] Transition duration (ms)
-     */
     #transitionDuration: number = 0
-    /**
-     * [KO] 전환 경과 시간 (밀리초)
-     * [EN] Transition elapsed time (ms)
-     */
     #transitionElapsed: number = 0
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #isAnalyzing: boolean = false;
     #prevAnalyzedTexture: GPUTexture | null = null;
-    #nit: number = 10000.0;
+    #luminance: number = 10000.0;
 
     /**
      * [KO] 새로운 SkyBox 인스턴스를 생성합니다.
      * [EN] Creates a new SkyBox instance.
      *
-     * @param redGPUContext -
-     * [KO] RedGPU 렌더링 컨텍스트
-     * [EN] RedGPU rendering context
-     * @param cubeTexture -
-     * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 직접 주입)
-     * [EN] Cube texture to use for the skybox (Regular or Direct)
-     * @param nit -
-     * [KO] 스카이박스의 물리적 휘도 (단위: cd/m², 기본값: 10000)
-     * [EN] Physical luminance of the skybox (Unit: cd/m², Default: 10000)
-     *
-     * @throws
-     * [KO] redGPUContext가 유효하지 않은 경우 Error 발생
-     * [EN] Throws Error if redGPUContext is invalid
-     *
+     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+     * @param texture - [KO] 사용할 큐브 텍스처 [EN] Cube texture to use
+     * @param luminance - [KO] 물리적 휘도 (Nit) [EN] Physical luminance (Nit)
      */
-    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | DirectCubeTexture, nit: number = 10000) {
+    constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture, luminance: number = 10000) {
         validateRedGPUContext(redGPUContext)
         this.#redGPUContext = redGPUContext
         this.#geometry = new Box(redGPUContext)
-        this.#skyboxTexture = cubeTexture
-        this.#material = new SkyBoxMaterial(redGPUContext, this.#skyboxTexture)
-        this.#nit = nit;
-        this.#material.nit = this.#nit;
+        this.#texture = texture
+        this.#material = new SkyBoxMaterial(redGPUContext, this.#texture)
+        this.luminance = this.#luminance = luminance;
         this.#primitiveState = new PrimitiveState(this)
         this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
         this.#depthStencilState = new DepthStencilState(this)
     }
 
-    /**
-     * [KO] 전환 지속 시간을 반환합니다. (ms)
-     * [EN] Returns the transition duration (in ms).
-     */
-    get transitionDuration(): number {
-        return this.#transitionDuration;
+    /** [KO] 스카이박스 텍스처 [EN] Skybox texture */
+    get texture(): CubeTexture | DirectCubeTexture { return this.#texture; }
+    set texture(texture: CubeTexture | DirectCubeTexture) {
+        if (!texture) consoleAndThrowError('SkyBox requires a valid CubeTexture | DirectCubeTexture');
+        this.#texture = texture;
+        this.#material.texture0 = texture;
     }
 
-    /**
-     * [KO] 전환 경과 시간을 반환합니다. (ms)
-     * [EN] Returns the transition elapsed time (in ms).
-     */
-    get transitionElapsed(): number {
-        return this.#transitionElapsed;
+    /** [KO] 물리적 휘도 (단위: cd/m²) [EN] Physical luminance (Unit: cd/m²) */
+    get luminance(): number { return this.#luminance; }
+    set luminance(value: number) {
+        this.#luminance = value;
+        this.#material.luminance = value;
     }
 
-    /**
-     * [KO] 현재 진행 중인 전환 진행률을 반환합니다. (0.0 ~ 1.0)
-     * [EN] Returns the progress of the transition currently in progress (0.0 to 1.0).
-     */
-    get transitionProgress(): number {
-        return this.#material.transitionProgress;
-    }
+    /** [KO] 아티스트 제어를 위한 강도 배율 [EN] Intensity multiplier for artist control */
+    get intensityMultiplier(): number { return this.#material.intensityMultiplier; }
+    set intensityMultiplier(value: number) { this.#material.intensityMultiplier = value; }
 
-    /**
-     * [KO] 스카이박스 블러 정도를 반환합니다.
-     * [EN] Returns the skybox blur amount.
-     */
-    get blur(): number {
-        return this.#material.blur;
-    }
-
-    /**
-     * [KO] 스카이박스 블러 정도를 설정합니다.
-     * [EN] Sets the skybox blur amount.
-     * @param value -
-     * [KO] 0.0에서 1.0 사이의 블러 값
-     * [EN] Blur value between 0.0 and 1.0
-     * @throws
-     * [KO] 값이 범위를 벗어나는 경우 Error 발생
-     * [EN] Throws Error if value is out of range
-     */
+    /** [KO] 스카이박스 블러 정도 (0.0 ~ 1.0) [EN] Skybox blur amount (0.0 to 1.0) */
+    get blur(): number { return this.#material.blur; }
     set blur(value: number) {
-        validatePositiveNumberRange(value, 0, 1)
+        validatePositiveNumberRange(value, 0, 1);
         this.#material.blur = value;
     }
 
-    /**
-     * [KO] 스카이박스의 강도를 반환합니다.
-     * [EN] Returns the skybox intensity.
-     */
-    get intensity(): number {
-        return this.#material.intensity;
-    }
-
-    /**
-     * [KO] 스카이박스의 강도를 설정합니다.
-     * [EN] Sets the skybox intensity.
-     * @param value -
-     * [KO] 강도 값 (기본값: 1.0)
-     * [EN] Intensity value (Default: 1.0)
-     */
-    set intensity(value: number) {
-        this.#material.intensity = value;
-    }
-
-
-    /**
-     * [KO] 스카이박스의 불투명도를 반환합니다.
-     * [EN] Returns the skybox opacity.
-     */
-    get opacity(): number {
-        return this.#material.opacity;
-    }
-
-    /**
-     * [KO] 스카이박스의 불투명도를 설정합니다.
-     * [EN] Sets the skybox opacity.
-     * @param value -
-     * [KO] 0.0에서 1.0 사이의 불투명도 값
-     * [EN] Opacity value between 0.0 and 1.0
-     * @throws
-     * [KO] 값이 범위를 벗어나는 경우 Error 발생
-     * [EN] Throws Error if value is out of range
-     */
+    /** [KO] 불투명도 (0.0 ~ 1.0) [EN] Opacity (0.0 to 1.0) */
+    get opacity(): number { return this.#material.opacity; }
     set opacity(value: number) {
-        validatePositiveNumberRange(value, 0, 1)
+        validatePositiveNumberRange(value, 0, 1);
         this.#material.opacity = value;
     }
 
-    /**
-     * [KO] 현재 스카이박스 텍스처를 반환합니다.
-     * [EN] Returns the current skybox texture.
-     */
-    get skyboxTexture(): CubeTexture | DirectCubeTexture {
-        return this.#skyboxTexture
-    }
+    /** [KO] 원본 이미지의 기본 휘도 (정규화용) [EN] Base luminance of source image (for normalization) */
+    get baseLuminance(): number { return this.#material.baseLuminance; }
 
-    /**
-     * [KO] 스카이박스 텍스처를 설정합니다.
-     * [EN] Sets the skybox texture.
-     * @param texture -
-     * [KO] 새로운 큐브 텍스처 (일반 또는 직접 주입)
-     * [EN] New cube texture (Regular or Direct)
-     * @throws
-     * [KO] 텍스처가 유효하지 않은 경우 Error 발생
-     * [EN] Throws Error if texture is invalid
-     */
-    set skyboxTexture(texture: CubeTexture | DirectCubeTexture) {
-        if (!texture) {
-            consoleAndThrowError('SkyBox requires a valid CubeTexture | DirectCubeTexture')
-        } else {
-            this.#skyboxTexture = texture
-            this.#material.skyboxTexture = texture
-        }
-    }
-
-    /**
-     * [KO] 전환 대상 텍스처를 반환합니다.
-     * [EN] Returns the transition target texture.
-     */
-    get transitionTexture(): CubeTexture | DirectCubeTexture {
-        return this.#transitionTexture
-    }
+    /** [KO] 전환 대상 텍스처 [EN] Transition target texture */
+    get transitionTexture(): CubeTexture | DirectCubeTexture { return this.#transitionTexture; }
 
     /**
      * [KO] 다른 텍스처로의 부드러운 전환을 시작합니다.
      * [EN] Starts a smooth transition to another texture.
-     *
-     * ### Example
-     * ```typescript
-     * // 1초 동안 새 텍스처로 전환
-     * skybox.transition(newTexture, 1000, noiseTexture);
-     * ```
-     * @param transitionTexture -
-     * [KO] 전환할 대상 큐브 텍스처 (일반 또는 직접 주입)
-     * [EN] Target cube texture to transition to (Regular or Direct)
-     * @param duration -
-     * [KO] 전환 지속 시간 (밀리초, 기본값: 300)
-     * [EN] Transition duration (ms, Default: 300)
-     * @param transitionAlphaTexture -
-     * [KO] 전환 효과에 사용할 알파 노이즈 텍스처
-     * [EN] Alpha noise texture to use for the transition effect
      */
-    transition(transitionTexture: CubeTexture | DirectCubeTexture, duration: number = 300, transitionAlphaTexture: ANoiseTexture) {
-        this.#transitionTexture = transitionTexture
-        this.#material.transitionTexture = transitionTexture
-        this.#transitionDuration = duration
-        this.#transitionStartTime = performance.now()
-        this.#material.transitionAlphaTexture = transitionAlphaTexture
+    transition(targetTexture: CubeTexture | DirectCubeTexture, duration: number = 300, mask: ANoiseTexture) {
+        this.#transitionTexture = targetTexture;
+        this.#material.transitionTexture = targetTexture;
+        this.#transitionDuration = duration;
+        this.#transitionStartTime = performance.now();
+        this.#material.transitionMask = mask;
     }
 
-    /**
-     * [KO] 스카이박스의 물리적 휘도(Nit, cd/m^2)를 반환합니다.
-     * [EN] Returns the physical luminance (Nit, cd/m^2) of the skybox.
-     *
-     * [KO] 이 값은 카메라 노출(Exposure) 시스템과 연동되어 실제 배경의 밝기를 결정합니다.
-     * [EN] This value works with the camera exposure system to determine the actual background brightness.
-     */
-    get nit(): number {
-        return this.#nit;
-    }
-
-    /**
-     * [KO] 스카이박스의 물리적 휘도(Nit, cd/m^2)를 설정합니다.
-     * [EN] Sets the physical luminance (Nit, cd/m^2) of the skybox.
-     * @param value -
-     * [KO] 휘도 값 (기본값: 10000)
-     * [EN] Luminance value (Default: 10000)
-     */
-    set nit(value: number) {
-        this.#nit = value;
-        this.#material.nit = value;
-    }
-
-    /**
-     * [KO] 스카이박스 원본 이미지의 평균 휘도를 반환합니다.
-     * [EN] Returns the average luminance of the source skybox image.
-     *
-     * [KO] 엔진은 이 값을 사용하여 입력 이미지의 밝기에 관계없이 `nit` 설정값이 물리적으로 정확하게 표현되도록 정규화합니다.
-     * [EN] The engine uses this value to normalize the physical accuracy of the `nit` setting regardless of the input image brightness.
-     */
-    get inherentLuminance(): number {
-        return this.#material.inherentLuminance;
-    }
-
-    /**
-     * [KO] 스카이박스를 렌더링합니다.
-     * [EN] Renders the skybox.
-     *
-     * @param renderViewStateData -
-     * [KO] 렌더링 상태 및 디버그 정보
-     * [EN] Rendering state and debug info
-     */
+    /** [KO] 스카이박스를 렌더링합니다. [EN] Renders the skybox. */
     render(renderViewStateData: RenderViewStateData) {
         const {currentRenderPassEncoder, startTime, view} = renderViewStateData
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
         const {gpuDevice, resourceManager} = this.#redGPUContext
         
-        // [KO] 텍스처 휘도 분석 및 정규화 (최초 1회 또는 텍스처 변경 시)
-        // [EN] Texture luminance analysis and normalization (once initially or when texture changes)
-        const currentTexture = this.#material.skyboxTexture.gpuTexture;
+        const currentTexture = this.#material.texture0.gpuTexture;
         if (currentTexture && currentTexture !== this.#prevAnalyzedTexture && !this.#isAnalyzing) {
             this.#isAnalyzing = true;
             this.#prevAnalyzedTexture = currentTexture;
             resourceManager.iblLuminanceAnalyzer.analyze(currentTexture).then(lum => {
-                this.#material.inherentLuminance = lum || 1.0;
+                this.#material.baseLuminance = lum || 1.0;
                 this.#isAnalyzing = false;
             });
         }
 
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
-        // keepLog(this.#dirtyPipeline , this.#material.dirtyPipeline)
+
         if (this.#transitionStartTime) {
             this.#transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
             if (this.#transitionElapsed > this.#transitionDuration) {
                 this.#transitionStartTime = 0
                 this.#material.transitionProgress = 0
-                this.skyboxTexture = this.#transitionTexture
+                this.texture = this.#transitionTexture
                 this.#material.transitionTexture = null
                 this.#dirtyPipeline = true
             } else {
@@ -400,6 +164,7 @@ class SkyBox {
                 this.#material.transitionProgress = value < 0 ? 0 : value > 1 ? 1 : value
             }
         }
+
         if (this.#dirtyPipeline || this.#material.dirtyPipeline || this.#prevSystemUniform_Vertex_UniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
             this.gpuRenderInfo.pipeline = this.#updatePipeline()
             this.#dirtyPipeline = false
@@ -416,104 +181,61 @@ class SkyBox {
                 bundleEncoder.setPipeline(pipeline)
                 bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
                 bundleEncoder.setVertexBuffer(0, this.#geometry.vertexBuffer.gpuBuffer)
-                bundleEncoder.setBindGroup(1, vertexUniformBindGroup); // 버텍스 유니폼 버퍼 1번 고정
+                bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
                 bundleEncoder.setBindGroup(2, this.#material.gpuRenderInfo.fragmentUniformBindGroup)
                 bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, format)
                 bundleEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
-                this.#renderBundle = bundleEncoder.finish({
-                    label: 'renderBundle skybox',
-                })
+                this.#renderBundle = bundleEncoder.finish({ label: 'renderBundle skybox' })
             }
         }
         currentRenderPassEncoder.executeBundles([this.#renderBundle])
-        //
+        
         renderViewStateData.num3DObjects++
         renderViewStateData.numDrawCalls++
         renderViewStateData.numTriangles += triangleCount
         renderViewStateData.numPoints += indexCount
     }
 
-    /**
-     * MSAA (Multi-Sample Anti-Aliasing) 상태 변경을 확인하고 파이프라인을 갱신합니다.
-     * @private
-     */
     #updateMSAAStatus() {
-        const {changedMSAA} = this.#redGPUContext.antialiasingManager
-        if (changedMSAA) {
-            this.#dirtyPipeline = true
-        }
+        if (this.#redGPUContext.antialiasingManager.changedMSAA) this.#dirtyPipeline = true;
     }
 
-    /**
-     * GPU 렌더링 정보를 초기화합니다.
-     *
-     * 바인드 그룹 레이아웃, 유니폼 버퍼, 바인드 그룹 등을 생성하고
-     * 모델 매트릭스를 설정합니다.
-     *
-     * @private
-     * @param redGPUContext - RedGPU 렌더링 컨텍스트
-     */
     #initGPURenderInfos(redGPUContext: RedGPUContext) {
-        const {resourceManager,} = this.#redGPUContext
+        const {resourceManager} = this.#redGPUContext
         const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
             'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
             getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
         )
-        // UniformBuffer
         const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
         const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKYBOX_VERTEX_UNIFORM_BUFFER', 'SKYBOX_VERTEX_UNIFORM_BUFFER')
-        // modelMatrix
         mat4.identity(this.modelMatrix);
         vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
-        // GPUBindGroupDescriptor
+        
         const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {
             layout: vertex_BindGroupLayout,
             label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
             entries: [{
                 binding: 0,
-                resource: {
-                    buffer: vertexUniformBuffer.gpuBuffer,
-                    offset: 0,
-                    size: vertexUniformBuffer.size
-                },
+                resource: { buffer: vertexUniformBuffer.gpuBuffer, offset: 0, size: vertexUniformBuffer.size },
             }]
         }
         const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
         this.gpuRenderInfo = new VertexGPURenderInfo(
-            null,
-            SHADER_INFO.shaderSourceVariant,
-            SHADER_INFO.conditionalBlocks,
-            UNIFORM_STRUCT,
-            vertex_BindGroupLayout,
-            vertexUniformBuffer,
-            vertexUniformBindGroup,
-            this.#updatePipeline(),
+            null, SHADER_INFO.shaderSourceVariant, SHADER_INFO.conditionalBlocks, UNIFORM_STRUCT,
+            vertex_BindGroupLayout, vertexUniformBuffer, vertexUniformBindGroup, this.#updatePipeline(),
         )
     }
 
-    /**
-     * 렌더링 파이프라인을 업데이트합니다.
-     *
-     * 버텍스 셰이더, 바인드 그룹 레이아웃, 파이프라인 레이아웃을 설정하고
-     * 현재 MSAA 설정을 반영한 새로운 렌더 파이프라인을 생성합니다.
-     *
-     * @private
-     * @returns 새로 생성된 GPU 렌더 파이프라인
-     */
     #updatePipeline(): GPURenderPipeline {
         const {resourceManager, gpuDevice, antialiasingManager} = this.#redGPUContext
-        // 셰이더 모듈 설명자를 생성합니다.
-        const vModuleDescriptor: GPUShaderModuleDescriptor = {code: vertexModuleSource}
         const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
-            VERTEX_SHADER_MODULE_NAME,
-            vModuleDescriptor
+            VERTEX_SHADER_MODULE_NAME, { code: vertexModuleSource }
         )
         const vertexState: GPUVertexState = {
             module: vertexShaderModule,
             entryPoint: 'main',
             buffers: this.#geometry.gpuRenderInfo.buffers
         }
-        // BindGroup 레이아웃을 가져온다
         const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
             'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
             getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
@@ -523,8 +245,9 @@ class SkyBox {
             vertex_BindGroupLayout,
             this.#material.gpuRenderInfo.fragmentBindGroupLayout
         ]
-        const pipelineLayoutDescriptor: GPUPipelineLayoutDescriptor = {bindGroupLayouts: bindGroupLayouts}
-        const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout('SKYBOX_PIPELINE_LAYOUT', pipelineLayoutDescriptor);
+        const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(
+            'SKYBOX_PIPELINE_LAYOUT', { bindGroupLayouts }
+        );
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: PIPELINE_DESCRIPTOR_LABEL,
             layout: pipelineLayout,
@@ -532,9 +255,7 @@ class SkyBox {
             fragment: this.#material.gpuRenderInfo.fragmentState,
             primitive: this.#primitiveState.state,
             depthStencil: this.#depthStencilState.state,
-            multisample: {
-                count: antialiasingManager.useMSAA ? 4 : 1,
-            },
+            multisample: { count: antialiasingManager.useMSAA ? 4 : 1 },
         }
         return gpuDevice.createRenderPipeline(pipelineDescriptor)
     }

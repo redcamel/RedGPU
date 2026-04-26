@@ -7,14 +7,6 @@ import HDRTexture from "../hdr/HDRTexture";
  * [KO] Image-Based Lighting (IBL)을 관리하는 클래스입니다.
  * [EN] Class that manages Image-Based Lighting (IBL).
  *
- * [KO] HDR 또는 큐브맵 이미지를 기반으로 주변광(Diffuse)과 반사광(Specular) 환경을 생성하여 사실적인 PBR 라이팅을 구현합니다.
- * [EN] Enables realistic PBR lighting by generating diffuse and specular environments based on HDR or cubemap images.
- *
- * ### Example
- * ```typescript
- * const ibl = new RedGPU.Resource.IBL(redGPUContext, 'path/to/environment.hdr');
- * view.ibl = ibl;
- * ```
  * @category IBL
  */
 class IBL {
@@ -29,42 +21,25 @@ class IBL {
     #irradianceSize: number;
     #isInitializing: boolean = false;
     #isAnalyzing: boolean = false;
-    #intensity: number = 1.0;
-    #nit: number = 20000.0;
-    #inherentLuminance: number = 1.0;
+    #intensityMultiplier: number = 1.0;
+    #luminance: number = 20000.0;
+    #baseLuminance: number = 1.0;
 
     /**
      * [KO] IBL 인스턴스를 생성합니다.
      * [EN] Creates an IBL instance.
      *
-     * ### Example
-     * ```typescript
-     * const ibl = new RedGPU.Resource.IBL(redGPUContext, 'path/to/environment.hdr', 1024, 512, 64);
-     * ```
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param srcInfo -
-     * [KO] 환경맵 소스 정보 (HDR URL 또는 6개 이미지 URL 배열)
-     * [EN] Environment map source information (HDR URL or array of 6 image URLs)
-     * @param nit -
-     * [KO] 물리적 휘도 (Nit, cd/m^2, 기본값: 20000)
-     * [EN] Physical luminance (Nit, cd/m^2, default: 20000)
-     * @param environmentSize -
-     * [KO] 환경맵 큐브 크기 (기본값: 1024)
-     * [EN] Environment map cube size (default: 1024)
-     * @param prefilterSize -
-     * [KO] Prefilter 큐브 크기 (기본값: 512)
-     * [EN] Prefilter cube size (default: 512)
-     * @param irradianceSize -
-     * [KO] Irradiance 큐브 크기 (기본값: 64)
-     * [EN] Irradiance cube size (default: 64)
+     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+     * @param srcInfo - [KO] 환경맵 소스 (HDR URL 또는 6개 이미지 URL 배열) [EN] Environment map source
+     * @param luminance - [KO] 물리적 휘도 (Nit, 기본값: 20000) [EN] Physical luminance (Nit, default: 20000)
+     * @param environmentSize - [KO] 환경맵 크기 [EN] Environment map size
+     * @param prefilterSize - [KO] Prefilter 크기 [EN] Prefilter size
+     * @param irradianceSize - [KO] Irradiance 크기 [EN] Irradiance size
      */
     constructor(
         redGPUContext: RedGPUContext,
         srcInfo: string | [string, string, string, string, string, string],
-        nit: number = 20000,
+        luminance: number = 20000,
         environmentSize: number = 1024,
         prefilterSize: number = 512,
         irradianceSize: number = 64
@@ -74,9 +49,8 @@ class IBL {
         this.#environmentSize = environmentSize;
         this.#irradianceSize = irradianceSize;
         this.#redGPUContext = redGPUContext;
-        this.#nit = nit;
+        this.#luminance = luminance;
 
-        // 맵들을 담을 DirectCubeTexture 플레이스홀더 생성
         this.#environmentTexture = new DirectCubeTexture(redGPUContext, `IBL_ENV_${cacheKeyPart}`);
         this.#prefilterTexture = new DirectCubeTexture(redGPUContext, `IBL_SPECULAR_${cacheKeyPart}`);
         this.#irradianceTexture = new DirectCubeTexture(redGPUContext, `IBL_IRRADIANCE_${cacheKeyPart}`);
@@ -87,72 +61,31 @@ class IBL {
         };
 
         if (typeof srcInfo === 'string') {
-            // 2D HDR 소스 로드 및 큐브 변환
             this.#targetTexture = new HDRTexture(redGPUContext, srcInfo, onLoad);
         } else {
-            // 6장 이미지 기반 큐브맵 로드
             this.#targetTexture = new CubeTexture(redGPUContext, srcInfo, true, onLoad);
         }
     }
 
-    /** [KO] 환경맵 큐브 크기 [EN] Environment map cube size */
-    get environmentSize(): number {
-        return this.#environmentSize;
-    }
+    get environmentSize(): number { return this.#environmentSize; }
+    get prefilterSize(): number { return this.#prefilterSize; }
+    get irradianceSize(): number { return this.#irradianceSize; }
+    get irradianceTexture(): DirectCubeTexture { return this.#irradianceTexture; }
+    get environmentTexture(): DirectCubeTexture { return this.#environmentTexture; }
+    get prefilterTexture(): DirectCubeTexture { return this.#prefilterTexture; }
 
-    /** [KO] Prefilter 큐브 크기 [EN] Prefilter cube size */
-    get prefilterSize(): number {
-        return this.#prefilterSize;
-    }
+    /** [KO] 아티스트 제어를 위한 강도 배율 [EN] Intensity multiplier for artist control */
+    get intensityMultiplier(): number { return this.#intensityMultiplier; }
+    set intensityMultiplier(value: number) { this.#intensityMultiplier = value; }
 
-    /** [KO] Irradiance 큐브 크기 [EN] Irradiance cube size */
-    get irradianceSize(): number {
-        return this.#irradianceSize;
-    }
+    /** [KO] 물리적 휘도 (단위: cd/m²) [EN] Physical luminance (Unit: cd/m²) */
+    get luminance(): number { return this.#luminance; }
+    set luminance(value: number) { this.#luminance = value; }
 
-    /** [KO] Irradiance 텍스처를 반환합니다. [EN] Returns the irradiance texture. */
-    get irradianceTexture(): DirectCubeTexture {
-        return this.#irradianceTexture;
-    }
+    /** [KO] 원본 이미지의 기본 휘도 (정규화용) [EN] Base luminance of the source image (for normalization) */
+    get baseLuminance(): number { return this.#baseLuminance; }
+    set baseLuminance(value: number) { this.#baseLuminance = value; }
 
-    /** [KO] 환경맵 텍스처를 반환합니다. [EN] Returns the environment texture. */
-    get environmentTexture(): DirectCubeTexture {
-        return this.#environmentTexture;
-    }
-
-    /** [KO] IBL (Specular Prefilter) 텍스처를 반환합니다. [EN] Returns the IBL (Specular Prefilter) texture. */
-    get prefilterTexture(): DirectCubeTexture {
-        return this.#prefilterTexture;
-    }
-
-    /** [KO] IBL 강도 [EN] IBL intensity */
-    get intensity(): number {
-        return this.#intensity;
-    }
-
-    set intensity(value: number) {
-        this.#intensity = value;
-    }
-
-    /** [KO] IBL 물리적 휘도 (Nit, cd/m^2) [EN] IBL physical luminance (Nit, cd/m^2) */
-    get nit(): number {
-        return this.#nit;
-    }
-
-    set nit(value: number) {
-        this.#nit = value;
-    }
-
-    /** [KO] IBL 이미지 자체의 평균 휘도 (분석 결과) [EN] Average luminance of the IBL image itself (Analysis result) */
-    get inherentLuminance(): number {
-        return this.#inherentLuminance;
-    }
-
-    /**
-     * [KO] 소스 텍스처 변경 시 호출되는 핸들러입니다.
-     * [EN] Handler called when the source texture changes.
-     * @param v - [KO] 소스 텍스처 [EN] Source texture
-     */
     #onSourceChanged = async (v?: HDRTexture | CubeTexture) => {
         v = v || this.#targetTexture;
         if (!v || !v.gpuTexture || this.#isInitializing) return;
@@ -172,34 +105,21 @@ class IBL {
         }
     };
 
-    /**
-     * [KO] 소스 큐브맵으로부터 IBL용 맵들을 생성합니다.
-     * [EN] Generates IBL maps from the source cubemap.
-     */
     async #initMaps() {
         const {resourceManager} = this.#redGPUContext;
         const {prefilterGenerator, irradianceGenerator} = resourceManager;
 
         if (this.#sourceCubeTexture) {
-            // 1. Environment Texture (배경용)
             this.#environmentTexture.gpuTexture = this.#sourceCubeTexture;
-
-            // 2. Prefilter Map (Specular 반사광용)
             const prefiltered = await prefilterGenerator.generate(this.#sourceCubeTexture, this.#prefilterSize);
             this.#prefilterTexture.gpuTexture = prefiltered.gpuTexture;
-
-            // 3. Irradiance Map (Diffuse 주변광용)
             const irradiance = await irradianceGenerator.generate(this.#sourceCubeTexture, this.#irradianceSize);
             this.#irradianceTexture.gpuTexture = irradiance.gpuTexture;
 
-            // 4. 휘도 분석 (이미지 기반 물리적 보정을 위해)
-            // [EN] Luminance analysis (for image-based physical calibration)
             if (!this.#isAnalyzing) {
                 this.#isAnalyzing = true;
-                const {iblLuminanceAnalyzer} = resourceManager;
-                const analyzedLuminance = await iblLuminanceAnalyzer.analyze(this.#sourceCubeTexture);
-                this.#inherentLuminance = analyzedLuminance;
-
+                const analyzedLuminance = await resourceManager.iblLuminanceAnalyzer.analyze(this.#sourceCubeTexture);
+                this.#baseLuminance = analyzedLuminance || 1.0;
                 this.#isAnalyzing = false;
             }
         }

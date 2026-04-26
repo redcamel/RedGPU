@@ -10,7 +10,7 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         useSkyBox: true,
         skyboxImage: hdrImages[0].name, // 이름 기반 저장
         blur: 0,
-        intensity: 1,
+        intensityMultiplier: 1,
         opacity: 1
     };
 
@@ -23,7 +23,7 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         if (!sb) return;
         Object.assign(sb, {
             blur: settings.blur,
-            intensity: settings.intensity,
+            intensityMultiplier: settings.intensityMultiplier,
             opacity: settings.opacity
         });
     };
@@ -53,17 +53,17 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
         // 경로 해결 (유틸리티 사용)
         const finalSrc = resolveExamplePath(src);
         const isHDR = typeof src === 'string' && src.toLowerCase().endsWith('.hdr');
-        const nit = imageInfo.nit || 20000;
+        const luminance = imageInfo.nit || 20000;
         
         const newTexture = isHDR 
-            ? new RedGPU.Resource.IBL(view.redGPUContext, finalSrc, nit).environmentTexture 
+            ? new RedGPU.Resource.IBL(view.redGPUContext, finalSrc, luminance).environmentTexture 
             : new RedGPU.Resource.CubeTexture(view.redGPUContext, finalSrc, true);
 
-        if (view.skybox) view.skybox.skyboxTexture = newTexture;
+        if (view.skybox) view.skybox.texture = newTexture;
         else view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, newTexture);
 
         // 물리 휘도 직접 적용
-        view.skybox.nit = nit;
+        view.skybox.luminance = luminance;
 
         syncSkyBoxProperties();
         pane.refresh(); // UI 강제 갱신
@@ -91,24 +91,24 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
     }).on('change', (ev) => updateSkyBox(ev.value));
 
     // 기본 슬라이더들
-    ['blur', 'intensity', 'opacity'].forEach(key => {
+    ['blur', 'intensityMultiplier', 'opacity'].forEach(key => {
         settingsFolder.addBinding(settings, key, {
             min: 0, 
-            max: key === 'intensity' ? 5 : 1, 
+            max: key === 'intensityMultiplier' ? 5 : 1, 
             step: 0.01
         }).on('change', () => { if (view.skybox) view.skybox[key] = settings[key]; });
     });
 
     // 물리 휘도 설정 (직접 바인딩)
     settingsFolder.addBinding({
-        get nit() { return view.skybox ? view.skybox.nit : 20000; },
-        set nit(v) { if (view.skybox) view.skybox.nit = v; }
-    }, 'nit', { min: 0, max: 100000, step: 10, interval: 500 });
+        get luminance() { return view.skybox ? view.skybox.luminance : 20000; },
+        set luminance(v) { if (view.skybox) view.skybox.luminance = v; }
+    }, 'luminance', { min: 0, max: 100000, step: 10, interval: 500 });
 
     // 분석 결과 (직접 바인딩)
     settingsFolder.addBinding({
-        get inherentLum() { return view.skybox ? view.skybox.inherentLuminance : 0; }
-    }, 'inherentLum', { readonly: true, interval: 500 });
+        get baseLuminance() { return view.skybox ? view.skybox.baseLuminance : 0; }
+    }, 'baseLuminance', { readonly: true, interval: 500 });
 
     // 5. 초기화 실행
     if (settings.useSkyBox) updateSkyBox(settings.skyboxImage);
