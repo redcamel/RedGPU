@@ -28,7 +28,7 @@ RedGPU.init(
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.color.setColorByRGB(255, 255, 220);
-        directionalLight.intensity = 0.7;
+        directionalLight.lux = 500
         directionalLight.direction = [-0.4, -1, -0.3];
         scene.lightManager.addDirectionalLight(directionalLight);
         directionalLight.enableDebugger = true;
@@ -36,6 +36,7 @@ RedGPU.init(
         const pointLight = new RedGPU.Light.PointLight();
         pointLight.color.setColorByRGB(255, 120, 120);
         pointLight.intensity = 1.3;
+        pointLight.lumen = 50000
         pointLight.radius = 6.0;
         pointLight.setPosition(-6, 4, 2);
         scene.lightManager.addPointLight(pointLight);
@@ -43,7 +44,7 @@ RedGPU.init(
 
         const spotLight = new RedGPU.Light.SpotLight();
         spotLight.color.setColorByRGB(120, 160, 255);
-        spotLight.intensity = 1.6;
+        spotLight.lumen = 50000
         spotLight.radius = 12.0;
         spotLight.setPosition(6, 5, 1);
         spotLight.direction = [-0.8, -0.7, -0.3];

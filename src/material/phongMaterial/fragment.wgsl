@@ -292,6 +292,7 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if emissiveTexture
         emissiveColor = textureSample(emissiveTexture, emissiveTextureSampler, inputData.uv).rgb * u_emissiveStrength;
     #redgpu_endIf
+    emissiveColor *=  systemUniforms.preExposure;
 
     // [KO] 최종 색상 (Pre-Exposure 적용)
     let finalColor = vec4<f32>((mixColor * systemUniforms.preExposure) + emissiveColor, resultAlpha);

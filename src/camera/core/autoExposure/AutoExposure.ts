@@ -33,7 +33,7 @@ class AutoExposure {
 
     // [KO] 자동 노출 알고리즘 파라미터 (ToneMappingManager에서 이전됨)
     // [EN] Auto-exposure algorithm parameters (Moved from ToneMappingManager)
-    #minEV100: number = -7.0;
+    #minEV100: number = 0.0;
     #maxEV100: number = 15.0;
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
@@ -212,8 +212,8 @@ class AutoExposure {
             label: 'AutoExposure_ReadBuffer'
         });
 
-        // [KO] 통합 유니폼 데이터 구성 (총 17개 요소) [EN] Unified uniform data configuration (total 17 elements)
-        const uniformData = new Float32Array(17);
+        // [KO] 통합 유니폼 데이터 구성 (총 18개 요소) [EN] Unified uniform data configuration (total 18 elements)
+        const uniformData = new Float32Array(18);
         this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }
 
