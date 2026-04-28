@@ -41,7 +41,7 @@ RedGPU.init(
         loadGLTF(view,  'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF-Binary/GlassHurricaneCandleHolder.glb');
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        redGPUContext.antialiasingManager.useMSAA = true;
+        // redGPUContext.antialiasingManager.useMSAA = true;
         renderer.start(redGPUContext);
 
         renderTestPane(view, skyAtmosphere, directionalLight);
@@ -127,25 +127,6 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     f_skylight.addButton({title: 'Force Update IBL'}).on('click', () => {
         skyLight.dirty = true;
     });
-
-    // -------------------------------------------------------------------------
-    // 4. Global Rendering & Post-Process
-    // -------------------------------------------------------------------------
-    const f_global = pane.addFolder({title: 'Global Rendering', expanded: false});
-    
-    // ToneMapping
-    const f_tonemapping = f_global.addFolder({title: 'ToneMapping', expanded: true});
-    f_tonemapping.addBinding(targetView.toneMappingManager, 'mode', {
-        options: {
-            LINEAR: RedGPU.ToneMapping.TONE_MAPPING_MODE.LINEAR,
-            KHRONOS_PBR_NEUTRAL: RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL,
-            ACES_FILMIC_NARKOWICZ: RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ,
-            ACES_FILMIC_HILL: RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL,
-        },
-        label: 'Mode'
-    });
-    f_tonemapping.addBinding(targetView.toneMappingManager, 'contrast', {min: 0, max: 2, step: 0.01, label: 'Contrast'});
-    f_tonemapping.addBinding(targetView.toneMappingManager, 'brightness', {min: -1, max: 1, step: 0.01, label: 'Brightness'});
 
     const state = {enabled: true};
     pane.addBinding(state, 'enabled', {label: 'Enable SkyAtmosphere'}).on('change', (v) => {
