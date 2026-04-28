@@ -14,9 +14,9 @@ struct FragmentOutput {
     @location(2) motionVector : vec4<f32>,
 };
 
-@group(2) @binding(0) var bg_transmittanceLUT : texture_2d<f32>;
-@group(2) @binding(1) var bg_skyViewLUT : texture_2d<f32>;
-@group(2) @binding(2) var bg_skyAtmosphereSampler : sampler;
+@group(1) @binding(0) var bg_transmittanceLUT : texture_2d<f32>;
+@group(1) @binding(1) var bg_skyViewLUT : texture_2d<f32>;
+@group(1) @binding(2) var bg_skyAtmosphereSampler : sampler;
 
 @fragment
 fn main(input : VertexOutput) -> FragmentOutput {
@@ -37,6 +37,12 @@ fn main(input : VertexOutput) -> FragmentOutput {
     
     var atmosphereRadiance = skySample.rgb;
 
+    // 수평선 부드럽게 처리 (Horizon Smoothing)
+    let horizonCos = -sqrt(max(0.0, 1.0 - pow(groundRadius / (groundRadius + viewHeight), 2.0)));
+    let viewDirCos = viewDir.y;
+    let horizonDistance = viewDirCos - horizonCos;
+    let horizonFade = clamp(horizonDistance * 100.0, 0.0, 1.0); // 수평선 근처에서 0~1 사이로 부드럽게 변화
+
     let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
     
     let transToEdge = select(
@@ -46,12 +52,21 @@ fn main(input : VertexOutput) -> FragmentOutput {
     );
 
     let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
-    if (!isGroundHit && sunShadow > 0.0) {
+    
+    // 지면 히트 시에도 대기 산란광을 자연스럽게 섞음
+    if (sunShadow > 0.0) {
         let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, transToEdge, 0.0);
-        atmosphereRadiance += mieGlow * sunShadow;
-
         let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01, uniforms);
-        atmosphereRadiance += sunDisk * sunShadow;
+        
+        let additionalRadiance = (mieGlow + sunDisk) * sunShadow;
+        // 지면일 경우 horizonFade를 이용하여 수평선 근처만 부드럽게 추가
+        atmosphereRadiance += select(additionalRadiance * horizonFade, additionalRadiance, !isGroundHit);
+    }
+
+    // 지면 색상과 대기광 합성 (여기서는 배경이므로 지면을 대기 산란광으로 덮어 부드럽게 처리)
+    if (isGroundHit) {
+        let groundColor = uniforms.groundAlbedo * 0.01; // 매우 어두운 기본 지면색
+        atmosphereRadiance = mix(atmosphereRadiance, groundColor, horizonFade * 0.5);
     }
 
     let finalRadiance = atmosphereRadiance * uniforms.sunIntensity * systemUniforms.preExposure;
