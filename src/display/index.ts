@@ -9,6 +9,7 @@
  */
 import Scene from "./scene/Scene";
 import SkyAtmosphere from "./skyAtmosphere/SkyAtmosphere";
+import SkyLight from "./skyAtmosphere/SkyLight";
 
 export * from "./skyboxs/skyBox";
 export * from './mesh'
@@ -22,5 +23,6 @@ export * from "./instancingMesh";
 
 export {
     Scene,
-    SkyAtmosphere
+    SkyAtmosphere,
+    SkyLight
 }

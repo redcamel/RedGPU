@@ -7,8 +7,6 @@ import TransmittanceGenerator from "./core/generator/transmittance/Transmittance
 import MultiScatteringGenerator from "./core/generator/multiScattering/MultiScatteringGenerator";
 import SkyViewGenerator from "./core/generator/skyView/SkyViewGenerator";
 import AerialPerspectiveGenerator from "./core/generator/aerialPerspective/AerialPerspectiveGenerator";
-import SkyAtmosphereSpecularGenerator from "./core/generator/ibl/reflection/SkyAtmosphereSpecularGenerator";
-import SkyAtmosphereIrradianceGenerator from "./core/generator/ibl/reflection/SkyAtmosphereIrradianceGenerator";
 import transmittanceShaderCode_wgsl from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import computeCode_wgsl from "./wgsl/computeCode.wgsl";
 import Sampler from "../../resources/sampler/Sampler";
@@ -27,7 +25,7 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import AtmosphereShaderLibrary from "./core/AtmosphereShaderLibrary";
 import DirectionalLight from "../../light/lights/DirectionalLight";
-import createUUID from "../../utils/uuid/createUUID";
+import SkyLight from "./SkyLight";
 
 const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl, AtmosphereShaderLibrary);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
@@ -40,11 +38,9 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #multiScatteringGenerator: MultiScatteringGenerator;
     #skyViewGenerator: SkyViewGenerator;
     #aerialPerspectiveGenerator: AerialPerspectiveGenerator;
-    #irradianceLUT: DirectCubeTexture;
-    #specularGenerator: SkyAtmosphereSpecularGenerator;
-    #irradianceGenerator: SkyAtmosphereIrradianceGenerator;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
+    #skyLight: SkyLight;
 
     #backgroundMesh: Box;
     #backgroundPipeline: GPURenderPipeline;
@@ -86,12 +82,10 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #prevSunSource: DirectionalLight = null;
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
-    #dirtyIBL: boolean = true;
     #dirtyUniformBuffer: boolean = true;
 
     #lastUpdateFrame: number = -1;
     #prevCameraMatrix: mat4 = mat4.create();
-    #isUpdatingIBL: boolean = false;
 
     #computeShaderMSAA: GPUShaderModule;
     #computeShaderNonMSAA: GPUShaderModule;
@@ -118,7 +112,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#dirtyUniformBuffer = true;
         if (lut) this.#dirtyLUT = true;
         if (skyView) this.#dirtySkyView = true;
-        if (ibl) this.#dirtyIBL = true;
+        if (ibl) this.#skyLight.dirty = true;
     }
 
     constructor(redGPUContext: RedGPUContext) {
@@ -139,18 +133,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#skyViewGenerator = new SkyViewGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#aerialPerspectiveGenerator = new AerialPerspectiveGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        this.#irradianceLUT = new DirectCubeTexture(redGPUContext, `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`,
-            this.redGPUContext.resourceManager.createManagedTexture({
-                size: [32, 32, 6],
-                format: 'rgba16float',
-                usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-                dimension: '2d',
-                mipLevelCount: 1,
-                label: 'SkyAtmosphere_Irradiance_LUT'
-            })
-        );
-        this.#specularGenerator = new SkyAtmosphereSpecularGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        this.#irradianceGenerator = new SkyAtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        
+        this.#skyLight = new SkyLight(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
 
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
             label: 'SkyAtmosphere_PE_BindGroupLayout_1',
@@ -363,7 +347,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
             this.#dirtyLUT = false;
             this.#dirtySkyView = true;
-            this.#dirtyIBL = true;
+            this.#skyLight.dirty = true;
         }
 
         if (this.#dirtySkyView) {
@@ -372,17 +356,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
             this.#dirtySkyView = false;
         }
 
-        if (this.#dirtyIBL && !this.#isUpdatingIBL) {
-            this.#isUpdatingIBL = true;
-            (async () => {
-                await this.#specularGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-                await this.#irradianceGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, this.#skyViewGenerator.lutTexture);
-                await this.redGPUContext.resourceManager.irradianceGenerator.render(this.#irradianceGenerator.sourceCubeTexture, this.#irradianceLUT.gpuTexture);
-                this.#irradianceLUT.notifyUpdate();
-                this.#isUpdatingIBL = false;
-            })();
-            this.#dirtyIBL = false;
-        }
+        this.#skyLight.update(this);
     }
 
     #setParam(key: string, value: any, lut: boolean, skyView: boolean, ibl: boolean, validator?: (v: any) => void): void {
@@ -508,9 +482,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
 
     get aerialPerspectiveLUT(): DirectCubeTexture { return this.#aerialPerspectiveGenerator.lutTexture; }
 
-    get skyAtmosphereIrradianceLUT(): DirectCubeTexture { return this.#irradianceLUT; }
+    get skyAtmosphereIrradianceLUT(): DirectCubeTexture { return this.#skyLight.irradianceLUT; }
 
-    get skyAtmosphereReflectionLUT(): DirectCubeTexture { return this.#specularGenerator.prefilteredTexture; }
+    get skyAtmosphereReflectionLUT(): DirectCubeTexture { return this.#skyLight.reflectionLUT; }
+
+    get skyLight(): SkyLight { return this.#skyLight; }
 
     get atmosphereSampler() { return this.#sampler; }
 
@@ -713,6 +689,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         return pipeline;
     }
 }
+
 
 Object.freeze(SkyAtmosphere);
 export default SkyAtmosphere;
