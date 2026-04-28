@@ -114,7 +114,7 @@ class ClusterLightManager {
                     this.#clusterLightsBufferData.set(
                         [
                             ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormalLinear, tLight.intensity * tLight.lumen, 0
+                            ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen, 0
                         ],
                         offset,
                     )
@@ -135,7 +135,7 @@ class ClusterLightManager {
                     this.#clusterLightsBufferData.set(
                         [
                             ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormalLinear, tLight.intensity * tLight.lumen, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
+                            ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
                         ],
                         offset,
                     )

@@ -181,7 +181,7 @@ class SkyAtmosphere {
                 this.#markDirty(false, true, true);
             }
 
-            const currentSunIntensity = source.lux * source.intensity;
+            const currentSunIntensity = source.lux * source.intensityMultiplier;
             if (Math.abs(this.#params.sunIntensity - currentSunIntensity) > EPSILON) {
                 this.#params.sunIntensity = currentSunIntensity;
                 this.#markDirty(false, false, true);

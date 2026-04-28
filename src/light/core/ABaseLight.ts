@@ -25,10 +25,10 @@ abstract class ABaseLight {
      */
     #color: ColorRGB;
     /**
-     * [KO] 광원의 세기(intensity)를 나타냅니다.
-     * [EN] Represents the intensity of the light.
+     * [KO] 광원의 세기 배율(intensityMultiplier)을 나타냅니다.
+     * [EN] Represents the intensity multiplier of the light.
      */
-    #intensity: number;
+    #intensityMultiplier: number;
     /**
      * [KO] 디버깅 시각화 기능의 활성화 여부입니다.
      * [EN] Whether the debugging visualization feature is enabled.
@@ -42,13 +42,13 @@ abstract class ABaseLight {
      * @param color -
      * [KO] 광원의 색상 (ColorRGB 객체)
      * [EN] Color of the light (ColorRGB object)
-     * @param intensity -
-     * [KO] 광원의 세기 (기본값: 1)
-     * [EN] Intensity of the light (default: 1)
+     * @param intensityMultiplier -
+     * [KO] 광원의 세기 배율 (기본값: 1)
+     * [EN] Intensity multiplier of the light (default: 1)
      */
-    constructor(color: ColorRGB, intensity: number = 1) {
+    constructor(color: ColorRGB, intensityMultiplier: number = 1) {
         this.#color = color;
-        this.#intensity = intensity;
+        this.#intensityMultiplier = intensityMultiplier;
     }
 
     /**
@@ -96,26 +96,26 @@ abstract class ABaseLight {
     }
 
     /**
-     * [KO] 광원의 세기를 반환합니다.
-     * [EN] Returns the intensity of the light.
+     * [KO] 광원의 세기 배율을 반환합니다.
+     * [EN] Returns the intensity multiplier of the light.
      * @returns
-     * [KO] 세기 값
-     * [EN] Intensity value
+     * [KO] 배율 값
+     * [EN] Multiplier value
      */
-    get intensity(): number {
-        return this.#intensity;
+    get intensityMultiplier(): number {
+        return this.#intensityMultiplier;
     }
 
     /**
-     * [KO] 광원의 세기를 설정합니다.
-     * [EN] Sets the intensity of the light.
+     * [KO] 광원의 세기 배율을 설정합니다.
+     * [EN] Sets the intensity multiplier of the light.
      * @param value -
      * [KO] 숫자 값 (예: 1.0)
      * [EN] Number value (e.g., 1.0)
      */
-    set intensity(value: number) {
+    set intensityMultiplier(value: number) {
         validatePositiveNumberRange(value, 0);
-        this.#intensity = value;
+        this.#intensityMultiplier = value;
     }
 }
 

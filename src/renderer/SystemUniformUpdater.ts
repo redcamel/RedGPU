@@ -351,7 +351,7 @@ class SystemUniformUpdater {
                     },
                     {
                         key: 'intensity',
-                        value: light.intensity * light.lux,
+                        value: light.intensityMultiplier * light.lux,
                     }
                 ]
             )
@@ -390,7 +390,7 @@ class SystemUniformUpdater {
                 },
                 {
                     key: 'intensity',
-                    value: ambientLight ? ambientLight.intensity * ambientLight.lux : 0,
+                    value: ambientLight ? ambientLight.intensityMultiplier * ambientLight.lux : 0,
                 },
             ]
         )
