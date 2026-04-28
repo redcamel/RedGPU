@@ -26,7 +26,6 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
         directionalLight.azimuth = 0;
-        directionalLight.lux = 100000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 2. SkyAtmosphere 초기화
