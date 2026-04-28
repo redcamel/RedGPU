@@ -21,68 +21,57 @@ let mappingH = max(0.0, uniforms.cameraHeight);
 let groundRadius = uniforms.groundRadius;
 let atmosphereHeight = uniforms.atmosphereHeight;
 
-var scattering: vec3<f32> = vec3<f32>(0.0);
-var transmittance: f32 = 1.0;
+// 1. 기초 대기 속성 결정 (산란광, 투과율, 장면 블렌딩 배수)
+var baseScattering: vec3<f32> = vec3<f32>(0.0);
+var atmosphereTrans: f32 = 1.0;
+var sceneBlendingTrans: f32 = 1.0;
 
 if (rawDepth >= 1.0) {
-    // [Infinite Distance - Background]
-    // 배경은 SkyAtmosphereBackground에 의해 기초 산란광이 이미 그려져 있습니다.
-    // 여기서는 추가적인 효과(Mie Glow, Sun Disk)를 위한 투과율 정보만 가져옵니다.
+    // [Background] 배경은 이미 산란광이 그려졌으므로 추가 산란은 0, 장면 투과율은 1.0(보존)
     let skyUV = getSkyViewUV(viewDir, mappingH, groundRadius, atmosphereHeight);
-    let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
-    
-    // 기초 산란광(skySample.rgb)은 이미 sceneColor에 포함되어 있으므로 scattering에는 더하지 않습니다.
-    transmittance = skySample.a;
+    atmosphereTrans = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0).a;
+    sceneBlendingTrans = 1.0; 
 } else {
-    // [Object Region - Aerial Perspective]
+    // [Object] Aerial Perspective 적용
     let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping) / 1000.0;
     let actualDist = depthKm * rayLengthRatio;
     let maxApDist = uniforms.aerialPerspectiveDistanceScale; 
     let apDist = clamp(actualDist - uniforms.aerialPerspectiveStartDepth, 0.0, maxApDist);
 
-    let apU = uv.x;
-    let apV = uv.y;
     let apW = clamp(sqrt(apDist / maxApDist), 0.0, 1.0);
+    var apSample = textureSampleLevel(aerialPerspectiveLUT, skyAtmosphereSampler, vec3<f32>(uv.x, uv.y, apW), 0.0);
 
-    var apSample = textureSampleLevel(aerialPerspectiveLUT, skyAtmosphereSampler, vec3<f32>(apU, apV, apW), 0.0);
-
-    // 근거리 보정 (Near Field Correction)
+    // 근거리 보정
     if (actualDist < NEAR_FIELD_CORRECTION_DIST) { 
         let d = getAtmosphereDensities(mappingH, uniforms);
-        let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, mappingH, sunDir.y, atmosphereHeight);
+        let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, mappingH, sunDir.y, atmosphereHeight);
         let scatR = uniforms.rayleighScattering * d.rhoR * uniforms.skyLuminanceFactor;
         let scatM = uniforms.mieScattering * d.rhoM * uniforms.skyLuminanceFactor;
         let phaseR = phaseRayleigh(viewSunCos);
         let phaseM = phaseMie(viewSunCos, uniforms.mieAnisotropy);
-        let localScat = (scatR * phaseR + vec3<f32>(scatM * phaseM)) * sunTrans;
+        let localScat = (scatR * phaseR + vec3<f32>(scatM * phaseM)) * sunT;
         let localExt = scatR + vec3<f32>((uniforms.mieScattering + uniforms.mieAbsorption) * d.rhoM * uniforms.skyLuminanceFactor) + uniforms.absorptionCoefficient * d.rhoO;
         let analyticalScat = localScat * actualDist;
         let analyticalTrans = exp(-localExt * actualDist);
         let analyticalA = (analyticalTrans.r + analyticalTrans.g + analyticalTrans.b) / 3.0;
-        let blend = smoothstep(0.0, NEAR_FIELD_CORRECTION_DIST, actualDist);
-        apSample = mix(vec4<f32>(analyticalScat, analyticalA), apSample, blend);
+        apSample = mix(vec4<f32>(analyticalScat, analyticalA), apSample, smoothstep(0.0, NEAR_FIELD_CORRECTION_DIST, actualDist));
     }
     
-    scattering = apSample.rgb;
-    transmittance = apSample.a;
+    baseScattering = apSample.rgb;
+    atmosphereTrans = apSample.a;
+    sceneBlendingTrans = apSample.a;
 }
 
-// Mie Glow 및 Sun Disk 처리
+// 2. 추가 시각 효과 계산 (Mie Glow, Sun Disk)
 let camPos = vec3<f32>(0.0, mappingH + groundRadius, 0.0);
 let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
-let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, skyAtmosphereSampler, vec3<f32>(transmittance), 0.0);
 
-var sunDisk = vec3<f32>(0.0);
-if (rawDepth >= 1.0 && sunShadow > 0.0) {
-    sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(transmittance), 0.01, uniforms);
-}
+// 대기 투과율을 적용한 Glow 및 Sun 계산
+let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, skyAtmosphereSampler, vec3<f32>(atmosphereTrans), 0.0);
+let sunDisk = select(vec3<f32>(0.0), getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(atmosphereTrans), 0.01, uniforms), rawDepth >= 1.0);
 
-// 최종 산란광 (Post-process specific effects)
-let postScattering = (scattering + (mieGlow + sunDisk) * sunShadow) * uniforms.sunIntensity * systemUniforms.preExposure;
-
-// 최종 색상 합성
-// 배경일 경우 sceneColor(기초 산란광 포함)에 postScattering(Glow, Sun)만 더해집니다.
-// 오브젝트일 경우 sceneColor를 감쇠시키고 scattering을 포함한 postScattering이 적용됩니다.
-let finalColor = sceneColor * saturate(transmittance) + postScattering;
+// 3. 최종 산란광 합산 및 장면 합성 (Unified Formula)
+let totalScattering = (baseScattering + (mieGlow + sunDisk) * sunShadow) * uniforms.sunIntensity * systemUniforms.preExposure;
+let finalColor = sceneColor * saturate(sceneBlendingTrans) + totalScattering;
 
 textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));

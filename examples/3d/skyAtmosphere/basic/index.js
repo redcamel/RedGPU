@@ -12,7 +12,7 @@ RedGPU.init(
 
         // 0. 직접광 (태양광) 추가
         const sunLight = new RedGPU.Light.DirectionalLight(redGPUContext, '#ffffff', 1);
-        sunLight.elevation = 5;
+        sunLight.elevation = 90;
         sunLight.azimuth = 0;
         scene.lightManager.addDirectionalLight(sunLight);
 
