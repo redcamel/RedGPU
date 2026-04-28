@@ -17,21 +17,15 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../resources/texture/DirectTexture";
 
-import backgroundVertexShaderCode_wgsl from "./wgsl/background_vertex.wgsl";
-import backgroundFragmentShaderCode_wgsl from "./wgsl/background_fragment.wgsl";
-import Box from "../../primitive/Box";
 import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
-import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import AtmosphereShaderLibrary from "./core/AtmosphereShaderLibrary";
 import DirectionalLight from "../../light/lights/DirectionalLight";
 import SkyLight from "./skyLight/SkyLight";
+import SkyAtmosphereBackground from "./skyAtmosphereBackground/SkyAtmosphereBackground";
 
 const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl, AtmosphereShaderLibrary);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
-
-const BACKGROUND_SHADER_INFO = parseWGSL('SkyAtmosphere_Background_Vertex', backgroundVertexShaderCode_wgsl);
-const BACKGROUND_UNIFORM_STRUCT = BACKGROUND_SHADER_INFO.uniforms.vertexUniforms;
 
 class SkyAtmosphere extends ASinglePassPostEffect {
     #transmittanceGenerator: TransmittanceGenerator;
@@ -42,16 +36,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     #sharedUniformBuffer: UniformBuffer;
     #skyLight: SkyLight;
 
-    #backgroundMesh: Box;
-    #backgroundPipeline: GPURenderPipeline;
-    #backgroundBindGroupLayout1: GPUBindGroupLayout;
-    #backgroundBindGroupLayout2: GPUBindGroupLayout;
-    #backgroundBindGroup1: GPUBindGroup;
-    #backgroundBindGroup2: GPUBindGroup;
-    #backgroundUniformBuffer: UniformBuffer;
-    #backgroundRenderBundle: GPURenderBundle;
-    #dirtyBackgroundPipeline: boolean = true;
-    #prevBackgroundSystemUniformBindGroup: GPUBindGroup;
+    #backgroundRenderer: SkyAtmosphereBackground;
 
     #params = {
         rayleighScattering: [0.005802, 0.013558, 0.033100],
@@ -135,6 +120,7 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         this.#aerialPerspectiveGenerator = new AerialPerspectiveGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         
         this.#skyLight = new SkyLight(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#backgroundRenderer = new SkyAtmosphereBackground(redGPUContext);
 
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
             label: 'SkyAtmosphere_PE_BindGroupLayout_1',
@@ -149,117 +135,17 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         });
 
         this.#initShaders();
-        this.#initBackgroundResources();
-    }
-
-    #initBackgroundResources() {
-        const {gpuDevice} = this.redGPUContext;
-        this.#backgroundMesh = new Box(this.redGPUContext);
-        this.#backgroundUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(BACKGROUND_UNIFORM_STRUCT.arrayBufferByteLength), 'SKY_ATMOSPHERE_BACKGROUND_VERTEX_UNIFORM_BUFFER');
-        this.#backgroundUniformBuffer.writeOnlyBuffer(BACKGROUND_UNIFORM_STRUCT.members.modelMatrix, mat4.create());
-
-        this.#backgroundBindGroupLayout1 = gpuDevice.createBindGroupLayout({
-            label: 'SKY_ATMOSPHERE_BACKGROUND_BGL_1',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}}
-            ]
-        });
-
-        this.#backgroundBindGroupLayout2 = gpuDevice.createBindGroupLayout({
-            label: 'SKY_ATMOSPHERE_BACKGROUND_BGL_2',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                {binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                {binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: {}}
-            ]
-        });
-
-        this.#backgroundBindGroup1 = gpuDevice.createBindGroup({
-            label: 'SKY_ATMOSPHERE_BACKGROUND_BG_1',
-            layout: this.#backgroundBindGroupLayout1,
-            entries: [
-                {binding: 0, resource: {buffer: this.#backgroundUniformBuffer.gpuBuffer}}
-            ]
-        });
-    }
-
-    #updateBackgroundPipeline(useMSAA: boolean) {
-        const {gpuDevice, resourceManager} = this.redGPUContext;
-        const vertexModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Vertex_ShaderModule', {code: backgroundVertexShaderCode_wgsl});
-        const fragmentModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Fragment_ShaderModule', {code: backgroundFragmentShaderCode_wgsl});
-
-        this.#backgroundPipeline = gpuDevice.createRenderPipeline({
-            label: 'SkyAtmosphere_Background_Pipeline',
-            layout: gpuDevice.createPipelineLayout({
-                bindGroupLayouts: [
-                    resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
-                    this.#backgroundBindGroupLayout1,
-                    this.#backgroundBindGroupLayout2
-                ]
-            }),
-            vertex: {
-                module: vertexModule,
-                entryPoint: 'main',
-                buffers: this.#backgroundMesh.gpuRenderInfo.buffers
-            },
-            fragment: {
-                module: fragmentModule,
-                entryPoint: 'main',
-                targets: [
-                    {format: 'rgba16float'},
-                    {format: navigator.gpu.getPreferredCanvasFormat()},
-                    {format: 'rgba16float'}
-                ]
-            },
-            primitive: {topology: 'triangle-list', cullMode: 'none'},
-            depthStencil: {
-                format: 'depth32float',
-                depthWriteEnabled: false,
-                depthCompare: 'less-equal'
-            },
-            multisample: {count: useMSAA ? 4 : 1}
-        });
     }
 
     renderBackground(renderViewStateData: RenderViewStateData) {
-        const {currentRenderPassEncoder, view} = renderViewStateData;
-        const {gpuDevice, antialiasingManager} = this.redGPUContext;
-        const {useMSAA} = antialiasingManager;
-
+        const {view} = renderViewStateData;
         this.#performUpdate(view);
-
-        if (this.#dirtyBackgroundPipeline || antialiasingManager.changedMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
-            this.#updateBackgroundPipeline(useMSAA);
-            this.#dirtyBackgroundPipeline = false;
-            this.#prevBackgroundSystemUniformBindGroup = view.systemUniform_Vertex_UniformBindGroup;
-
-            this.#backgroundBindGroup2 = gpuDevice.createBindGroup({
-                label: 'SKY_ATMOSPHERE_BACKGROUND_BG_2',
-                layout: this.#backgroundBindGroupLayout2,
-                entries: [
-                    {binding: 0, resource: this.#transmittanceGenerator.lutTexture.gpuTextureView},
-                    {binding: 1, resource: this.skyViewLUT.gpuTextureView},
-                    {binding: 2, resource: this.#sampler.gpuSampler}
-                ]
-            });
-
-            const bundleEncoder = gpuDevice.createRenderBundleEncoder({
-                ...view.basicRenderBundleEncoderDescriptor,
-                label: 'SKY_ATMOSPHERE_BACKGROUND_BUNDLE_ENCODER'
-            });
-
-            bundleEncoder.setPipeline(this.#backgroundPipeline);
-            bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-            bundleEncoder.setBindGroup(1, this.#backgroundBindGroup1);
-            bundleEncoder.setBindGroup(2, this.#backgroundBindGroup2);
-            bundleEncoder.setVertexBuffer(0, this.#backgroundMesh.vertexBuffer.gpuBuffer);
-            bundleEncoder.setIndexBuffer(this.#backgroundMesh.indexBuffer.gpuBuffer, this.#backgroundMesh.indexBuffer.format);
-            bundleEncoder.drawIndexed(this.#backgroundMesh.indexBuffer.indexCount);
-
-            this.#backgroundRenderBundle = bundleEncoder.finish({label: 'SKY_ATMOSPHERE_BACKGROUND_BUNDLE'});
-        }
-
-        currentRenderPassEncoder.executeBundles([this.#backgroundRenderBundle]);
+        this.#backgroundRenderer.render(
+            renderViewStateData,
+            this.#transmittanceGenerator.lutTexture,
+            this.skyViewLUT,
+            this.#sampler
+        );
     }
 
     #performUpdate(view: View3D) {
