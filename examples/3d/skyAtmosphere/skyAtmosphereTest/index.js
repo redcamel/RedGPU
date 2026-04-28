@@ -41,7 +41,6 @@ RedGPU.init(
         loadGLTF(view,  'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF-Binary/GlassHurricaneCandleHolder.glb');
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        // redGPUContext.antialiasingManager.useMSAA = true;
         renderer.start(redGPUContext);
 
         renderTestPane(view, skyAtmosphere, directionalLight);
@@ -74,60 +73,50 @@ const renderTestPane = async (targetView, skyAtmosphere, sunSource) => {
     // -------------------------------------------------------------------------
     // 1. Sun (Directional Light)
     // -------------------------------------------------------------------------
-    const f_sun = pane.addFolder({title: 'Sun (Direct Light Source)', expanded: true});
-    f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001, label: 'Elevation'});
-    f_sun.addBinding(sunSource, 'azimuth', {min: -360, max: 360, step: 0.0001, label: 'Azimuth'});
-    f_sun.addBinding(sunSource, 'lux', {min: 0, max: 150000, step: 1, label: 'Illuminance (Lux)'});
+    const f_sun = pane.addFolder({title: 'Sun (DirectionalLight)', expanded: true});
+    f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001});
+    f_sun.addBinding(sunSource, 'azimuth', {min: -360, max: 360, step: 0.0001});
+    f_sun.addBinding(sunSource, 'lux', {min: 0, max: 150000, step: 1});
 
     // -------------------------------------------------------------------------
-    // 2. SkyAtmosphere (Visuals & Simulation)
+    // 2. SkyAtmosphere
     // -------------------------------------------------------------------------
-    const f_atmo = pane.addFolder({title: 'SkyAtmosphere (Visuals)', expanded: true});
-    f_atmo.addBinding(skyAtmosphere, 'visualIntensity', {min: 0, max: 10, step: 0.01, label: 'Visual Intensity (Sky)'});
-    f_atmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'Sun Visual Size'});
-    f_atmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'Sun Limb Darkening'});
+    const f_atmo = pane.addFolder({title: 'SkyAtmosphere', expanded: true});
+    f_atmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01});
+    f_atmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01});
 
     // Scattering Details
-    const f_scattering = f_atmo.addFolder({title: 'Atmospheric Physics', expanded: false});
+    const f_scattering = f_atmo.addFolder({title: 'Scattering & Physics (Unified Control via Sun Lux)', expanded: false});
     
     // Rayleigh
     const f_rayleigh = f_scattering.addFolder({title: 'Rayleigh', expanded: true});
-    const rayleighState = { color: { r: skyAtmosphere.rayleighScattering[0], g: skyAtmosphere.rayleighScattering[1], b: skyAtmosphere.rayleighScattering[2] } };
-    f_rayleigh.addBinding(rayleighState, 'color', {color: {type: 'float'}, label: 'Scattering Coeff'}).on('change', (ev) => {
+    const rayleighState = { rayleighScattering: { r: skyAtmosphere.rayleighScattering[0], g: skyAtmosphere.rayleighScattering[1], b: skyAtmosphere.rayleighScattering[2] } };
+    f_rayleigh.addBinding(rayleighState, 'rayleighScattering', {color: {type: 'float'}}).on('change', (ev) => {
         skyAtmosphere.rayleighScattering = [ev.value.r, ev.value.g, ev.value.b];
     });
-    f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 20, step: 0.1, label: 'Scale Height (km)'});
+    f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 20, step: 0.1});
 
     // Mie
     const f_mie = f_scattering.addFolder({title: 'Mie', expanded: true});
-    const mieScatState = { color: { r: skyAtmosphere.mieScattering[0], g: skyAtmosphere.mieScattering[1], b: skyAtmosphere.mieScattering[2] } };
-    f_mie.addBinding(mieScatState, 'color', {color: {type: 'float'}, label: 'Scattering Coeff'}).on('change', (ev) => {
+    const mieScatState = { mieScattering: { r: skyAtmosphere.mieScattering[0], g: skyAtmosphere.mieScattering[1], b: skyAtmosphere.mieScattering[2] } };
+    f_mie.addBinding(mieScatState, 'mieScattering', {color: {type: 'float'}}).on('change', (ev) => {
         skyAtmosphere.mieScattering = [ev.value.r, ev.value.g, ev.value.b];
     });
-    f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Anisotropy (g)'});
-    f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 20, step: 0.1, label: 'Scale Height (km)'});
+    f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001});
+    f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 20, step: 0.1});
 
     // Planet
-    const f_planet = f_scattering.addFolder({title: 'Planet & Ground', expanded: true});
-    f_planet.addBinding(skyAtmosphere, 'groundRadius', {min: 1000, max: 10000, step: 1, label: 'Ground Radius (km)'});
-    f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1, label: 'Atmo Height (km)'});
-    const groundState = { albedo: { r: skyAtmosphere.groundAlbedo[0], g: skyAtmosphere.groundAlbedo[1], b: skyAtmosphere.groundAlbedo[2] } };
-    f_planet.addBinding(groundState, 'albedo', {color: {type: 'float'}, label: 'Ground Albedo'}).on('change', (ev) => {
+    const f_planet = f_scattering.addFolder({title: 'Planet', expanded: true});
+    f_planet.addBinding(skyAtmosphere, 'groundRadius', {min: 1000, max: 10000, step: 1});
+    f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1});
+    const groundState = { groundAlbedo: { r: skyAtmosphere.groundAlbedo[0], g: skyAtmosphere.groundAlbedo[1], b: skyAtmosphere.groundAlbedo[2] } };
+    f_planet.addBinding(groundState, 'groundAlbedo', {color: {type: 'float'}}).on('change', (ev) => {
         skyAtmosphere.groundAlbedo = [ev.value.r, ev.value.g, ev.value.b];
     });
 
     // -------------------------------------------------------------------------
-    // 3. SkyLight (Indirect/IBL Lighting)
+    // 3. SkyLight (IBL Management)
     // -------------------------------------------------------------------------
-    const skyLight = skyAtmosphere.skyLight;
-    const f_skylight = pane.addFolder({title: 'SkyLight (Indirect Light)', expanded: true});
-    f_skylight.addBinding(skyLight, 'intensityMultiplier', {min: 0, max: 10, step: 0.01, label: 'IBL Intensity Multiplier'});
-    f_skylight.addBinding(skyLight, 'luminance', {min: 0, max: 50000, step: 1, label: 'Base Luminance (Nit)'});
-    
-    f_skylight.addButton({title: 'Force Update IBL'}).on('click', () => {
-        skyLight.dirty = true;
-    });
-
     const state = {enabled: true};
     pane.addBinding(state, 'enabled', {label: 'Enable SkyAtmosphere'}).on('change', (v) => {
         targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
