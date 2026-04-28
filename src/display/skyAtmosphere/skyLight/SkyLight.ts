@@ -20,6 +20,18 @@ class SkyLight {
     #sharedUniformBuffer: UniformBuffer;
 
     /**
+     * [KO] IBL 광원의 밝기 배율 (아티스트 제어용)
+     * [EN] Intensity multiplier for IBL light source (for artist control)
+     */
+    intensityMultiplier: number = 1.0;
+
+    /**
+     * [KO] 주변광의 물리적 휘도 세기 (Nit)
+     * [EN] Physical luminance intensity of ambient light (Nit)
+     */
+    luminance: number = 10000.0;
+
+    /**
      * [KO] IBL 갱신 여부 (true일 경우 다음 프레임에 갱신 수행)
      * [EN] Whether IBL needs to be updated (if true, update is performed on the next frame)
      */

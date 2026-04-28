@@ -75,7 +75,8 @@ class SkyAtmosphere extends ASinglePassPostEffect {
         sunIntensity: 100000.0,
         sunSize: 0.533,
         sunLimbDarkening: 0.5,
-        cameraHeight: 0.001
+        cameraHeight: 0.001,
+        visualIntensity: 1.0
     };
 
     #activeSunSource: DirectionalLight = null;
@@ -487,6 +488,11 @@ class SkyAtmosphere extends ASinglePassPostEffect {
     get skyAtmosphereReflectionLUT(): DirectCubeTexture { return this.#skyLight.reflectionLUT; }
 
     get skyLight(): SkyLight { return this.#skyLight; }
+
+    get visualIntensity(): number { return this.#params.visualIntensity; }
+    set visualIntensity(v: number) {
+        this.#setParam('visualIntensity', v, false, false, false, (v) => validatePositiveNumberRange(v, 0));
+    }
 
     get atmosphereSampler() { return this.#sampler; }
 
