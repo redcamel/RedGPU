@@ -25,7 +25,7 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import AtmosphereShaderLibrary from "./core/AtmosphereShaderLibrary";
 import DirectionalLight from "../../light/lights/DirectionalLight";
-import SkyLight from "./SkyLight";
+import SkyLight from "./skyLight/SkyLight";
 
 const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl, AtmosphereShaderLibrary);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;

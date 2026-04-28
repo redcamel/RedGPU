@@ -12,19 +12,6 @@
 #redgpu_include math.INV_PI
 
 #redgpu_include math.hash.getHammersley
-#redgpu_include color.getLuminance
-
-fn getIBLAtmosphereRadiance(viewDir: vec3<f32>) -> vec3<f32> {
-    var radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
-
-    let maxIBLLuminance: f32 = 10000.0; 
-    let lum = getLuminance(radiance);
-    if (lum > maxIBLLuminance) {
-        radiance *= (maxIBLLuminance / lum);
-    }
-
-    return radiance;
-}
 
 @compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -35,11 +22,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let face = global_id.z;
     
     var totalRadiance = vec3<f32>(0.0);
-    const SAMPLE_COUNT: u32 = 8u;
+    const SAMPLE_COUNT: u32 = 4u; 
 
     for (var i = 0u; i < SAMPLE_COUNT; i = i + 1u) {
         let offset = getHammersley(i, SAMPLE_COUNT) - 0.5;
-        let uv = (vec2<f32>(global_id.xy) + 0.5 + offset) / size;
+        let uv = (vec2<f32>(global_id.xy) + 0.5 + offset * 0.8) / size;
         
         var viewDir = getCubeMapDirection(uv, face);
         viewDir = normalize(viewDir);
@@ -48,7 +35,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
         }
 
-        totalRadiance += getIBLAtmosphereRadiance(viewDir);
+        totalRadiance += evaluateIBLRadianceCompensated(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
     }
 
     let radiance = totalRadiance / f32(SAMPLE_COUNT);

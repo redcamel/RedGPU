@@ -1,18 +1,18 @@
-import RedGPUContext from "../../../../../../context/RedGPUContext";
-import Sampler from "../../../../../../resources/sampler/Sampler";
-import specularShaderCode_wgsl from "./skyAtmosphereSpecularShaderCode.wgsl";
-import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
-import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
-import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
-import DirectTexture from "../../../../../../resources/texture/DirectTexture";
-import createUUID from "../../../../../../utils/uuid/createUUID";
-import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
-import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
-import AtmosphereShaderLibrary from "../../../AtmosphereShaderLibrary";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import Sampler from "../../../../resources/sampler/Sampler";
+import specularShaderCode_wgsl from "./skyLightReflectionShaderCode.wgsl";
+import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
+import DirectTexture from "../../../../resources/texture/DirectTexture";
+import createUUID from "../../../../utils/uuid/createUUID";
+import ASkyAtmosphereLUTGenerator from "../../core/generator/ASkyAtmosphereLUTGenerator";
+import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
+import AtmosphereShaderLibrary from "../../core/AtmosphereShaderLibrary";
 
-const SPECULAR_SHADER_INFO = parseWGSL('SkyAtmosphere_Specular_Generator', specularShaderCode_wgsl, AtmosphereShaderLibrary);
+const SPECULAR_SHADER_INFO = parseWGSL('SkyLight_Reflection_Generator', specularShaderCode_wgsl, AtmosphereShaderLibrary);
 
-class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
+class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 	#sourceCubeTexture: GPUTexture;
 	#sourceCubeTextureView: GPUTextureView;
 	#prefilteredTexture: DirectCubeTexture;
@@ -20,7 +20,7 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 	#bindGroup: GPUBindGroup;
 
 	constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-		super(redGPUContext, sharedUniformBuffer, sampler, 'Specular_Gen', 256, 256, 6);
+		super(redGPUContext, sharedUniformBuffer, sampler, 'SkyLight_Reflection_Gen', 256, 256, 6);
 		this.#init();
 	}
 
@@ -45,7 +45,7 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 	}
 
 	#createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
-		return this.createBindGroup(`SkyAtmosphere_Specular_BindGroup_${createUUID()}`, this.#pipeline, [
+		return this.createBindGroup(`SkyLight_Reflection_BindGroup_${createUUID()}`, this.#pipeline, [
 			{binding: 0, resource: this.#sourceCubeTextureView},
 			{binding: 1, resource: multiScat.gpuTextureView},
 			{binding: 2, resource: this.sampler.gpuSampler},
@@ -73,7 +73,7 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 		const mipLevelCount = getMipLevelCount(this.width, this.height);
 
 		this.#sourceCubeTexture = gpuDevice.createTexture({
-			label: 'SkyAtmosphere_Specular_Source_CubeTexture',
+			label: 'SkyLight_Reflection_Source_CubeTexture',
 			size: [this.width, this.height, 6],
 			format: 'rgba16float',
 			usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
@@ -85,7 +85,7 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 			mipLevelCount: 1
 		});
 
-		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Specular_LUTTexture_${createUUID()}`);
+		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Reflection_LUTTexture_${createUUID()}`);
 		this.#pipeline = this.createComputePipeline('Base', SPECULAR_SHADER_INFO.defaultSource);
 	}
 
@@ -98,8 +98,8 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 		depth: number = this.depth
 	): void {
 		const {gpuDevice} = this.redGPUContext;
-		const commandEncoder = gpuDevice.createCommandEncoder({label: `SkyAtmosphere_${this.label}_CommandEncoder`});
-		const passEncoder = commandEncoder.beginComputePass({label: `SkyAtmosphere_${this.label}_ComputePass`});
+		const commandEncoder = gpuDevice.createCommandEncoder({label: `SkyLight_${this.label}_CommandEncoder`});
+		const passEncoder = commandEncoder.beginComputePass({label: `SkyLight_${this.label}_ComputePass`});
 
 		passEncoder.setPipeline(pipeline);
 		passEncoder.setBindGroup(0, bindGroup);
@@ -114,5 +114,5 @@ class SkyAtmosphereSpecularGenerator extends ASkyAtmosphereLUTGenerator {
 	}
 }
 
-Object.freeze(SkyAtmosphereSpecularGenerator);
-export default SkyAtmosphereSpecularGenerator;
+Object.freeze(SkyLightReflectionGenerator);
+export default SkyLightReflectionGenerator;

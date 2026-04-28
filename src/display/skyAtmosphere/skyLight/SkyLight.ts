@@ -1,11 +1,11 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import SkyAtmosphere from "./SkyAtmosphere";
-import SkyAtmosphereSpecularGenerator from "./core/generator/ibl/reflection/SkyAtmosphereSpecularGenerator";
-import SkyAtmosphereIrradianceGenerator from "./core/generator/ibl/reflection/SkyAtmosphereIrradianceGenerator";
-import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
-import createUUID from "../../utils/uuid/createUUID";
-import Sampler from "../../resources/sampler/Sampler";
-import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
+import RedGPUContext from "../../../context/RedGPUContext";
+import SkyAtmosphere from "../SkyAtmosphere";
+import SkyLightReflectionGenerator from "./core/SkyLightReflectionGenerator";
+import SkyLightIrradianceGenerator from "./core/SkyLightIrradianceGenerator";
+import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
+import createUUID from "../../../utils/uuid/createUUID";
+import Sampler from "../../../resources/sampler/Sampler";
+import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 
 /**
  * [KO] SkyLight 클래스는 SkyAtmosphere의 대기 산란 데이터를 기반으로 씬의 간접 조명(IBL)을 생성하고 관리합니다.
@@ -13,13 +13,17 @@ import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
  */
 class SkyLight {
     #redGPUContext: RedGPUContext;
-    #specularGenerator: SkyAtmosphereSpecularGenerator;
-    #irradianceGenerator: SkyAtmosphereIrradianceGenerator;
+    #reflectionGenerator: SkyLightReflectionGenerator;
+    #irradianceGenerator: SkyLightIrradianceGenerator;
     #irradianceLUT: DirectCubeTexture;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
 
-    #dirtyIBL: boolean = true;
+    /**
+     * [KO] IBL 갱신 여부 (true일 경우 다음 프레임에 갱신 수행)
+     * [EN] Whether IBL needs to be updated (if true, update is performed on the next frame)
+     */
+    dirty: boolean = true;
     #isUpdatingIBL: boolean = false;
 
     /**
@@ -42,16 +46,9 @@ class SkyLight {
                 label: 'SkyAtmosphere_Irradiance_LUT'
             })
         );
-        this.#specularGenerator = new SkyAtmosphereSpecularGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        this.#irradianceGenerator = new SkyAtmosphereIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#reflectionGenerator = new SkyLightReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#irradianceGenerator = new SkyLightIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
     }
-
-    /**
-     * [KO] IBL 갱신 여부 (true일 경우 다음 프레임에 갱신 수행)
-     * [EN] Whether IBL needs to be updated (if true, update is performed on the next frame)
-     */
-    get dirty(): boolean { return this.#dirtyIBL; }
-    set dirty(v: boolean) { this.#dirtyIBL = v; }
 
     /**
      * [KO] SkyAtmosphere의 상태를 기반으로 IBL 데이터를 업데이트합니다.
@@ -59,12 +56,12 @@ class SkyLight {
      * @param skyAtmosphere - [KO] 소스가 되는 SkyAtmosphere 인스턴스 [EN] Source SkyAtmosphere instance
      */
     async update(skyAtmosphere: SkyAtmosphere): Promise<void> {
-        if (this.#dirtyIBL && !this.#isUpdatingIBL) {
+        if (this.dirty && !this.#isUpdatingIBL) {
             this.#isUpdatingIBL = true;
             
             // [KO] 스펙큘러 및 디퓨즈 IBL 생성
             // [EN] Generate specular and diffuse IBL
-             this.#specularGenerator.render(
+             this.#reflectionGenerator.render(
                 skyAtmosphere.transmittanceLUT,
                 skyAtmosphere.multiScatLUT,
                 skyAtmosphere.skyViewLUT
@@ -84,7 +81,7 @@ class SkyLight {
             
             this.#irradianceLUT.notifyUpdate();
             this.#isUpdatingIBL = false;
-            this.#dirtyIBL = false;
+            this.dirty = false;
         }
     }
 
@@ -92,7 +89,7 @@ class SkyLight {
     get irradianceLUT(): DirectCubeTexture { return this.#irradianceLUT; }
 
     /** [KO] 간접 스펙큘러 조명용 Reflection LUT [EN] Reflection LUT for indirect specular lighting */
-    get reflectionLUT(): DirectCubeTexture { return this.#specularGenerator.prefilteredTexture; }
+    get reflectionLUT(): DirectCubeTexture { return this.#reflectionGenerator.prefilteredTexture; }
 }
 
 Object.freeze(SkyLight);

@@ -1,18 +1,18 @@
-import RedGPUContext from "../../../../../../context/RedGPUContext";
-import Sampler from "../../../../../../resources/sampler/Sampler";
-import irradianceShaderCode_wgsl from "./skyAtmosphereIrradianceShaderCode.wgsl";
-import parseWGSL from "../../../../../../resources/wgslParser/parseWGSL";
-import UniformBuffer from "../../../../../../resources/buffer/uniformBuffer/UniformBuffer";
-import DirectCubeTexture from "../../../../../../resources/texture/DirectCubeTexture";
-import DirectTexture from "../../../../../../resources/texture/DirectTexture";
-import createUUID from "../../../../../../utils/uuid/createUUID";
-import ASkyAtmosphereLUTGenerator from "../../ASkyAtmosphereLUTGenerator";
-import getMipLevelCount from "../../../../../../utils/texture/getMipLevelCount";
-import AtmosphereShaderLibrary from "../../../AtmosphereShaderLibrary";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import Sampler from "../../../../resources/sampler/Sampler";
+import irradianceShaderCode_wgsl from "./skyLightIrradianceShaderCode.wgsl";
+import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
+import DirectTexture from "../../../../resources/texture/DirectTexture";
+import createUUID from "../../../../utils/uuid/createUUID";
+import ASkyAtmosphereLUTGenerator from "../../core/generator/ASkyAtmosphereLUTGenerator";
+import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
+import AtmosphereShaderLibrary from "../../core/AtmosphereShaderLibrary";
 
-const IRRADIANCE_SHADER_INFO = parseWGSL('SkyAtmosphere_Irradiance_Generator', irradianceShaderCode_wgsl, AtmosphereShaderLibrary);
+const IRRADIANCE_SHADER_INFO = parseWGSL('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl, AtmosphereShaderLibrary);
 
-class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
+class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	#sourceCubeTexture: GPUTexture;
 	#sourceCubeTextureView: GPUTextureView;
 	#prefilteredTexture: DirectCubeTexture;
@@ -20,7 +20,7 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	#bindGroup: GPUBindGroup;
 
 	constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-		super(redGPUContext, sharedUniformBuffer, sampler, 'Irradiance_Gen', 256, 256, 6);
+		super(redGPUContext, sharedUniformBuffer, sampler, 'SkyLight_Irradiance_Gen', 256, 256, 6);
 		this.#init();
 	}
 
@@ -45,7 +45,7 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	}
 
 	#createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
-		return this.createBindGroup(`SkyAtmosphere_Irradiance_BindGroup_${createUUID()}`, this.#pipeline, [
+		return this.createBindGroup(`SkyLight_Irradiance_BindGroup_${createUUID()}`, this.#pipeline, [
 			{binding: 0, resource: this.#sourceCubeTextureView},
 			{binding: 1, resource: multiScat.gpuTextureView},
 			{binding: 2, resource: this.sampler.gpuSampler},
@@ -73,7 +73,7 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 		const mipLevelCount = getMipLevelCount(this.width, this.height);
 
 		this.#sourceCubeTexture = gpuDevice.createTexture({
-			label: 'SkyAtmosphere_Irradiance_Source_CubeTexture',
+			label: 'SkyLight_Irradiance_Source_CubeTexture',
 			size: [this.width, this.height, 6],
 			format: 'rgba16float',
 			usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
@@ -85,7 +85,7 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 			mipLevelCount: 1
 		});
 
-		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`);
+		this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Irradiance_LUTTexture_${createUUID()}`);
 		this.#pipeline = this.createComputePipeline('Base', IRRADIANCE_SHADER_INFO.defaultSource);
 	}
 
@@ -98,8 +98,8 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 		depth: number = this.depth
 	): void {
 		const {gpuDevice} = this.redGPUContext;
-		const commandEncoder = gpuDevice.createCommandEncoder({label: `SkyAtmosphere_${this.label}_CommandEncoder`});
-		const passEncoder = commandEncoder.beginComputePass({label: `SkyAtmosphere_${this.label}_ComputePass`});
+		const commandEncoder = gpuDevice.createCommandEncoder({label: `SkyLight_${this.label}_CommandEncoder`});
+		const passEncoder = commandEncoder.beginComputePass({label: `SkyLight_${this.label}_ComputePass`});
 
 		passEncoder.setPipeline(pipeline);
 		passEncoder.setBindGroup(0, bindGroup);
@@ -114,5 +114,5 @@ class SkyAtmosphereIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
 	}
 }
 
-Object.freeze(SkyAtmosphereIrradianceGenerator);
-export default SkyAtmosphereIrradianceGenerator;
+Object.freeze(SkyLightIrradianceGenerator);
+export default SkyLightIrradianceGenerator;

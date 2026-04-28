@@ -9,7 +9,7 @@
  */
 import Scene from "./scene/Scene";
 import SkyAtmosphere from "./skyAtmosphere/SkyAtmosphere";
-import SkyLight from "./skyAtmosphere/SkyLight";
+import SkyLight from "./skyAtmosphere/skyLight/SkyLight";
 
 export * from "./skyboxs/skyBox";
 export * from './mesh'
