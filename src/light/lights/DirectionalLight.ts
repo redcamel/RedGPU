@@ -35,13 +35,14 @@ class DirectionalLight extends ABaseLight {
      * @param color -
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffcc00')
      * [EN] Color of the light (hex string, e.g., '#ffcc00')
-     * @param intensity -
-     * [KO] 광원의 세기 배율 (기본값: 1)
-     * [EN] Intensity multiplier of the light (default: 1)
+     * @param lux -
+     * [KO] 광원의 조도 (Lux, lx, 기본값: 100,000)
+     * [EN] Illuminance of the light (Lux, lx, default: 100,000)
      */
-    constructor(direction: [number, number, number] = [-1, -1, -1], color: string = '#fff', intensity: number = 1) {
-        super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
+    constructor(direction: [number, number, number] = [-1, -1, -1], color: string = '#fff', lux: number = 100000) {
+        super(new ColorRGB(...convertHexToRgb(color, true)));
         this.direction = direction;
+        this.#lux = lux;
     }
 
     /**

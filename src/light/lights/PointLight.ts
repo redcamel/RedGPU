@@ -56,12 +56,13 @@ class PointLight extends ABaseLight {
      * @param color -
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffffff')
      * [EN] Color of the light (hex string, e.g., '#ffffff')
-     * @param intensity -
-     * [KO] 광원의 세기 배율 (기본값: 1)
-     * [EN] Intensity multiplier of the light (default: 1)
+     * @param lumen -
+     * [KO] 광원의 광선속 (Lumen, lm, 기본값: 1,000)
+     * [EN] Luminous flux of the light (Lumen, lm, default: 1,000)
      */
-    constructor(color: string = '#fff', intensity: number = 1) {
-        super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
+    constructor(color: string = '#fff', lumen: number = 1000) {
+        super(new ColorRGB(...convertHexToRgb(color, true)));
+        this.#lumen = lumen;
     }
 
     /**
