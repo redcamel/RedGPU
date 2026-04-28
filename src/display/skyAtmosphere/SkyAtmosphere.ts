@@ -123,6 +123,7 @@ class SkyAtmosphere {
         this.#backgroundRenderer.render(
             renderViewStateData,
             this.#transmittanceGenerator.lutTexture,
+            this.#multiScatteringGenerator.lutTexture,
             this.skyViewLUT,
             this.#sampler
         );

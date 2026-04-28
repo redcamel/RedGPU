@@ -15,8 +15,9 @@ struct FragmentOutput {
 };
 
 @group(1) @binding(0) var bg_transmittanceLUT : texture_2d<f32>;
-@group(1) @binding(1) var bg_skyViewLUT : texture_2d<f32>;
-@group(1) @binding(2) var bg_skyAtmosphereSampler : sampler;
+@group(1) @binding(1) var bg_multiScatLUT : texture_2d<f32>;
+@group(1) @binding(2) var bg_skyViewLUT : texture_2d<f32>;
+@group(1) @binding(3) var bg_skyAtmosphereSampler : sampler;
 
 @fragment
 fn main(input : VertexOutput) -> FragmentOutput {
@@ -25,51 +26,39 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let atmosphereHeight = uniforms.atmosphereHeight;
     
     let viewDir = normalize(input.vertexPosition.xyz);
-    let sunDir = normalize(uniforms.sunDirection);
     let viewHeight = max(0.0, uniforms.cameraHeight);
 
     let camPos = vec3<f32>(0.0, groundRadius + viewHeight, 0.0);
     let tEarth = getRaySphereIntersection(camPos, viewDir, groundRadius);
     let isGroundHit = groundRadius > 0.0 && tEarth > 0.0;
 
-    let skyUV = getSkyViewUV(viewDir, viewHeight, groundRadius, atmosphereHeight);
-    let skySample = textureSampleLevel(bg_skyViewLUT, bg_skyAtmosphereSampler, skyUV, 0.0);
-    
-    var atmosphereRadiance = skySample.rgb;
+    var baseRadiance: vec3<f32>;
 
-    // 수평선 부드럽게 처리 (Horizon Smoothing)
-    let horizonCos = -sqrt(max(0.0, 1.0 - pow(groundRadius / (groundRadius + viewHeight), 2.0)));
-    let viewDirCos = viewDir.y;
-    let horizonDistance = viewDirCos - horizonCos;
-    let horizonFade = clamp(horizonDistance * 100.0, 0.0, 1.0); // 수평선 근처에서 0~1 사이로 부드럽게 변화
-
-    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-    
-    let transToEdge = select(
-        getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), 
-        vec3<f32>(skySample.a), 
-        isGroundHit
-    );
-
-    let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
-    
-    // 지면 히트 시에도 대기 산란광을 자연스럽게 섞음
-    if (sunShadow > 0.0) {
-        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, transToEdge, 0.0);
-        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transToEdge, 0.01, uniforms);
-        
-        let additionalRadiance = (mieGlow + sunDisk) * sunShadow;
-        // 지면일 경우 horizonFade를 이용하여 수평선 근처만 부드럽게 추가
-        atmosphereRadiance += select(additionalRadiance * horizonFade, additionalRadiance, !isGroundHit);
-    }
-
-    // 지면 색상과 대기광 합성 (여기서는 배경이므로 지면을 대기 산란광으로 덮어 부드럽게 처리)
     if (isGroundHit) {
-        let groundColor = uniforms.groundAlbedo * 0.01; // 매우 어두운 기본 지면색
-        atmosphereRadiance = mix(atmosphereRadiance, groundColor, horizonFade * 0.5);
+        // [Ground Hit] 지면의 물리적 반사광 계산
+        let hitPoint = camPos + viewDir * tEarth;
+        let up = normalize(hitPoint);
+        let sunDir = normalize(uniforms.sunDirection);
+        let localCosSun = dot(up, sunDir);
+
+        // 직접광 투과율 (Direct Light Transmittance)
+        let sunT = getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, 0.0, localCosSun, atmosphereHeight);
+        
+        // 다중 산란 에너지 (Multi-Scattering Energy / Indirect Light)
+        let msUV = vec2<f32>(clamp(localCosSun * 0.5 + 0.5, 0.001, 0.999), 1.0); // 지면(h=0)은 UV.v = 1.0
+        let msEnergy = textureSampleLevel(bg_multiScatLUT, bg_skyAtmosphereSampler, msUV, 0.0).rgb;
+
+        // 지면 휘도 평가 (Direct + Indirect)
+        baseRadiance = evaluateGroundRadiance(localCosSun, sunT, msEnergy, uniforms.groundAlbedo);
+    } else {
+        // [Sky] SkyViewLUT에서 대기 산란 기초 광량 가져오기
+        let skyUV = getSkyViewUV(viewDir, viewHeight, groundRadius, atmosphereHeight);
+        let skySample = textureSampleLevel(bg_skyViewLUT, bg_skyAtmosphereSampler, skyUV, 0.0);
+        baseRadiance = skySample.rgb;
     }
 
-    let finalRadiance = atmosphereRadiance * uniforms.sunIntensity * systemUniforms.preExposure;
+    // 기초 광량에 태양 강도와 노출 적용
+    let finalRadiance = baseRadiance * uniforms.sunIntensity * systemUniforms.preExposure;
 
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);

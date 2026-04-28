@@ -25,9 +25,10 @@ class SkyAtmosphereBackground {
         this.#backgroundBindGroupLayout2 = gpuDevice.createBindGroupLayout({
             label: 'SKY_ATMOSPHERE_BACKGROUND_BGL_2',
             entries: [
-                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                {binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                {binding: 2, visibility: GPUShaderStage.FRAGMENT, sampler: {}}
+                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}}, // transmittance
+                {binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {}}, // multiScat
+                {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {}}, // skyView
+                {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {}}  // sampler
             ]
         });
     }
@@ -72,6 +73,7 @@ class SkyAtmosphereBackground {
     render(
         renderViewStateData: RenderViewStateData,
         transmittanceLUT: DirectTexture,
+        multiScatLUT: DirectTexture,
         skyViewLUT: DirectTexture,
         sampler: Sampler
     ) {
@@ -89,8 +91,9 @@ class SkyAtmosphereBackground {
                 layout: this.#backgroundBindGroupLayout2,
                 entries: [
                     {binding: 0, resource: transmittanceLUT.gpuTextureView},
-                    {binding: 1, resource: skyViewLUT.gpuTextureView},
-                    {binding: 2, resource: sampler.gpuSampler}
+                    {binding: 1, resource: multiScatLUT.gpuTextureView},
+                    {binding: 2, resource: skyViewLUT.gpuTextureView},
+                    {binding: 3, resource: sampler.gpuSampler}
                 ]
             });
 

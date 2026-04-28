@@ -181,8 +181,6 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
                 '    let uniforms = systemUniforms.skyAtmosphere;',
                 '    let viewHeight = uniforms.cameraHeight;',
-                '    let groundRadius = uniforms.groundRadius;',
-                '    let atmosphereHeight = uniforms.atmosphereHeight;',
                 skyAtmospherePostEffect_compute_wgsl,
                 '}'
             ].join('\n');
