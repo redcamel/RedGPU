@@ -366,7 +366,7 @@ fn main(inputData:InputData) -> OutputFragment {
         N = -N;
     }
     N = normalize(N);
-    let NdotV = max(abs(dot(N, V)), 1e-6);
+    let NdotV = max(abs(dot(N, V)), 0.04);
 
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != 0.0;
@@ -406,8 +406,7 @@ fn main(inputData:InputData) -> OutputFragment {
         metallicParameter *= metallicRoughnessSample.b;
         roughnessParameter *= metallicRoughnessSample.g;
     #redgpu_endIf
-//    roughnessParameter = max(roughnessParameter, 0.045);
-    roughnessParameter = max(roughnessParameter, EPSILON);
+    roughnessParameter = max(roughnessParameter, 0.04);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
 
     // Clearcoat
@@ -879,7 +878,7 @@ fn getDirectClearcoatBRDF(
     LdotH: f32
 ) -> vec3<f32> {
     let clearcoatNdotL = max(dot(clearcoatNormal, L), 0.0);
-    let clearcoatNdotV = max(dot(clearcoatNormal, V), 1e-6);
+    let clearcoatNdotV = max(dot(clearcoatNormal, V), 0.04);
     let clearcoatNdotH = max(dot(clearcoatNormal, H), 0.0);
     let clearcoatF = getFresnel(LdotH, vec3<f32>(0.04));
     let CLEARCOAT_BRDF = getDirectSpecularBRDF(clearcoatF, clearcoatRoughness, clearcoatNdotH, clearcoatNdotV, clearcoatNdotL);
@@ -905,7 +904,7 @@ fn getIndirectClearcoatBRDF(
     isMainNormal: bool
 ) -> vec4<f32> {
     let clearcoatR = select(getReflectionVectorFromViewDirection(V, clearcoatNormal), mainR, isMainNormal);
-    let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 1e-6);
+    let clearcoatNdotV = max(abs(dot(clearcoatNormal, V)), 0.04);
     let clearcoatMipLevel = clearcoatRoughness * iblMipmapCount;
     var clearcoatRadiance = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, clearcoatR, clearcoatMipLevel).rgb * systemUniforms.preExposure * systemUniforms.iblIntensity;
     if (useSkyAtmosphere) {
@@ -1082,7 +1081,7 @@ fn getIndirectPbrLighting(
     let preExposure = systemUniforms.preExposure;
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
         var R = getReflectionVectorFromViewDirection(V, N);
-        let NdotV_IBL = max(abs(dot(N, V)), 1e-6);
+        let NdotV_IBL = max(abs(dot(N, V)), 0.04);
         var iblRoughness = *roughnessParameter;
         #redgpu_if useKHR_materials_anisotropy
         if (anisotropy > 0.0)
@@ -1116,7 +1115,7 @@ fn getIndirectPbrLighting(
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
-        let energyCompensation = 1.0 + F0 * clamp(1.0 / max(envBRDF.x + envBRDF.y, 0.01) - 1.0, 0.0, 1.0);
+        let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
         reflectedColor *= energyCompensation;
         
         // Optimize Indirect Fresnel by pre-calculating shared pow() term
@@ -1124,12 +1123,19 @@ fn getIndirectPbrLighting(
         let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
         let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, *roughnessParameter, fresnelTerm);
         let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);        
-        let horizonOcclusion = clamp(1.0 + dot(R, N), 0.0, 1.0);
-        reflectedColor *= horizonOcclusion;
+        
+        // [EN] Horizon occlusion: smooths out the reflection as it goes below the horizon.
+        // [EN] Using Filament's recommended formula for smoother grazing angle transitions.
+        let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
+        reflectedColor *= horizonOcclusion * horizonOcclusion; 
+        
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
         let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
-        let specularOcclusion = saturate(dot(R, N) + occlusionParameter);
+        
+        // [EN] More robust specular occlusion to prevent light leaking/artifacts at grazing angles.
+        let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (*roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
+        
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
         let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * specularParameter);
         var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * diffuseWeight_IBL * INV_PI * occlusionParameter;
@@ -1281,7 +1287,7 @@ fn getDirectPbrLight(
     #redgpu_if useKHR_materials_clearcoat
         if(clearcoatParameter > 0.0){
             let CLEARCOAT_BRDF = getDirectClearcoatBRDF(L, V, H, clearcoatNormal, clearcoatRoughnessParameter, LdotH);
-            let coatF = getFresnel(max(dot(clearcoatNormal, V), 1e-6), vec3<f32>(0.04)).x * clearcoatParameter;
+            let coatF = getFresnel(max(dot(clearcoatNormal, V), 0.04), vec3<f32>(0.04)).x * clearcoatParameter;
             result = CLEARCOAT_BRDF + (vec3<f32>(1.0) - coatF) * result;
         }
     #redgpu_endIf
