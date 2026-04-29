@@ -18,7 +18,7 @@ import Fps from './cls/Fps'
  * ```typescript
  * // 일반적으로 Renderer 내부에서 자동으로 생성되고 사용됩니다.
  * // Usually automatically created and used inside the Renderer.
- * const debugRender = new RedGPU.Renderer.DebugRender(redGPUContext);
+ * const debugRender = new RedGPU.Renderer.DebugRender();
  * ```
  *
  * @category Renderer
@@ -131,13 +131,9 @@ class DebugRender {
     /**
      * [KO] DebugRender 인스턴스를 생성합니다.
      * [EN] Creates a DebugRender instance.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
      */
-    constructor(redGPUContext: RedGPUContext) {
-        this.fps = new Fps(redGPUContext)
+    constructor() {
+        this.fps = new Fps()
         this.debugTotalState = new DebugTotalState()
         this.debugRedGPUContext = new DebugRedGPUContext()
         this.debugViewList = new DebugViewList()

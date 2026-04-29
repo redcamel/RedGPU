@@ -5,10 +5,10 @@ import ADebugItem from "./core/ADebugItem";
 class DebugStatisticsDomService {
     dom: HTMLElement;
 
-    constructor(redGPUContext: RedGPUContext) {
+    constructor() {
         this.dom = document.createElement('div');
         this.dom.style.cssText = 'z-index: 1;position: sticky;top:0;background:#000;border-bottom:1px solid rgba(255,255,255,0.06);box-shadow:0 10px 10px rgba(0,0,0,0.5)'
-        this.#initializeStatisticsDisplay(redGPUContext);
+        this.#initializeStatisticsDisplay();
     }
 
     update(fps: string, avg: string, low1: string, low01: string, frameTime: string) {
@@ -16,7 +16,7 @@ class DebugStatisticsDomService {
         Object.entries(stats).forEach(([key, value]) => this.#updateElement(key, value));
     }
 
-    #initializeStatisticsDisplay(redGPUContext: RedGPUContext) {
+    #initializeStatisticsDisplay() {
         this.dom.innerHTML = `
         <div class="debug-group">
             <div class='debug-item'>
@@ -66,9 +66,9 @@ class Fps extends ADebugItem {
     #cachedLow01Fps: number = 0;
     // 초기화 대기 시간
     #initializationFrames: number = 60; // 첫 1초는 안정화 기간
-    constructor(redGPUContext: RedGPUContext) {
+    constructor() {
         super();
-        this.debugStatisticsDomService = new DebugStatisticsDomService(redGPUContext);
+        this.debugStatisticsDomService = new DebugStatisticsDomService();
     }
 
     update(debugRender: DebugRender, redGPUContext: RedGPUContext, time: number) {

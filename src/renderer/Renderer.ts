@@ -101,7 +101,7 @@ class Renderer {
      */
     renderFrame(redGPUContext: RedGPUContext, time: number) {
         if (!this.#finalRender) this.#finalRender = new FinalRender()
-        if (!this.#debugRender) this.#debugRender = new DebugRender(redGPUContext)
+        if (!this.#debugRender) this.#debugRender = new DebugRender()
 
 
         // 오브젝트 렌더시작
