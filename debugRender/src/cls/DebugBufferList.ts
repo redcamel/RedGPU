@@ -1,13 +1,13 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import ResourceStateIndexBuffer from "../../../resources/core/resourceManager/resourceState/ResourceStateIndexBuffer";
+import RedGPUContext from "../../../src/context/RedGPUContext";
+import ResourceStateIndexBuffer from "../../../src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer";
 import ResourceStateStorageBuffer
-    from "../../../resources/core/resourceManager/resourceState/ResourceStateStorageBuffer";
+    from "../../../src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer";
 import ResourceStateUniformBuffer
-    from "../../../resources/core/resourceManager/resourceState/ResourceStateUniformBuffer";
-import ResourceStateVertexBuffer from "../../../resources/core/resourceManager/resourceState/ResourceStateVertexBuffer";
-import formatBytes from "../../../utils/formatBytes";
+    from "../../../src/resources/core/resourceManager/resourceState/ResourceStateUniformBuffer";
+import ResourceStateVertexBuffer from "../../../src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer";
+import formatBytes from "../../../src/utils/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
-import DebugRender from "../DebugRender";
+import Index from "../index";
 
 //TODO - 디버거를 워커로 보내야하나
 class DebugStatisticsDomService {
@@ -44,7 +44,7 @@ class DebugStatisticsDomService {
         this.dom.querySelector('.onoff').innerHTML = this.openYn ? 'close' : 'open'
     }
 
-    update(debugRender: DebugRender, redGPUContext: RedGPUContext) {
+    update(debugRender: Index, redGPUContext: RedGPUContext) {
         const {resourceManager} = redGPUContext
         if (this.#bufferType === 'Buffer') {
             const targetState = resourceManager.resources.get('GPUBuffer')
@@ -229,7 +229,7 @@ class DebugBufferList {
         return this.debugStatisticsDomService.dom;
     }
 
-    update(debugRender: DebugRender, redGPUContext: RedGPUContext,) {
+    update(debugRender: Index, redGPUContext: RedGPUContext,) {
         this.debugStatisticsDomService.update(debugRender, redGPUContext);
     }
 }

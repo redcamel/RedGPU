@@ -1,4 +1,5 @@
 import * as RedGPU from "../../../dist/index.js?t=1770713934910";
+import RedGPUDebugger from "../../../debugRender/dist/index.js?t=1770713934910";
 
 /**
  * [KO] Hello World 3D 예제
@@ -22,14 +23,16 @@ RedGPU.init(
         view.grid = true;
         redGPUContext.addView(view);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
+        const debugRender = new RedGPUDebugger();
         const render = (time) => {
             // [KO] 매 프레임 실행될 로직
             // [EN] Logic to be executed every frame
+            debugRender.render(redGPUContext, time);
         };
         renderer.start(redGPUContext, render);
 
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext, view, debugRender);
     },
     (failReason) => {
         console.error('초기화 실패:', failReason);
@@ -45,14 +48,15 @@ RedGPU.init(
  * [EN] Renders the GUI for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.View3D} view
+ * @param {RedGPU.DebugRender} debugRender
  */
-const renderTestPane = async (redGPUContext, view) => {
+const renderTestPane = async (redGPUContext, view, debugRender) => {
     const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
     const {
         setRedGPUTest_pane,
         setDebugButtons
     } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
+    setDebugButtons(RedGPU, redGPUContext, debugRender)
     const pane = new Pane();
     setRedGPUTest_pane(pane, redGPUContext, true);
 };

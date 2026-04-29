@@ -1,14 +1,14 @@
-import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUContext from "../../../src/context/RedGPUContext";
 import ResourceStateBitmapTexture
-    from "../../../resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
+    from "../../../src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture
-    from "../../../resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
+    from "../../../src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture
-    from "../../../resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture";
-import PackedTexture from "../../../resources/texture/packedTexture/PackedTexture";
-import formatBytes from "../../../utils/formatBytes";
+    from "../../../src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture";
+import PackedTexture from "../../../src/resources/texture/packedTexture/PackedTexture";
+import formatBytes from "../../../src/utils/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
-import DebugRender from "../DebugRender";
+import Index from "../index";
 import ADebugItem from "./core/ADebugItem";
 import ADebugStatisticsDomService from "./core/ADebugStatisticsDomService";
 
@@ -21,7 +21,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
         this.init(`${createDebugTitle(`${debugCubeTextureMode}Texture Num : <span class="totalCount"></span> (<b class="targetVideoMemorySize"></b>)`)}`, false, true)
     }
 
-    update(debugRender: DebugRender, redGPUContext: RedGPUContext) {
+    update(debugRender: Index, redGPUContext: RedGPUContext) {
         if (this.#debugCubeTextureMode === 'Packed') {
             // PackedTexture 전용 처리
             this.#updatePackedTexture(debugRender, redGPUContext);
@@ -97,7 +97,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
         updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(videoMemorySize));
     }
 
-    #updatePackedTexture(debugRender: DebugRender, redGPUContext: RedGPUContext) {
+    #updatePackedTexture(debugRender: Index, redGPUContext: RedGPUContext) {
         // PackedTexture 캐시 정보 가져오기
         const cacheMap = PackedTexture.getCacheMap();
         // PackedTexture 데이터를 기존 시스템과 호환되는 형태로 변환

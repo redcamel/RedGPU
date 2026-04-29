@@ -7,7 +7,6 @@ import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import DrawBufferManager from "./core/DrawBufferManager";
-import DebugRender from "./debugRender/DebugRender";
 import FinalRender from "./finalRender/FinalRender";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
@@ -34,7 +33,6 @@ import renderShadowLayer from "./renderLayers/renderShadowLayer";
 class Renderer {
     #prevViewportSize: { width: number, height: number };
     #finalRender: FinalRender
-    #debugRender: DebugRender
     #gltfAnimationLooperManager: GltfAnimationLooperManager = new GltfAnimationLooperManager()
 
     constructor() {
@@ -64,7 +62,6 @@ class Renderer {
             render?.(time)
             redGPUContext.currentTime = time
             this.renderFrame(redGPUContext, time)
-            this.#debugRender.render(redGPUContext, time)
             redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render)
         }
         redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render)
@@ -101,7 +98,6 @@ class Renderer {
      */
     renderFrame(redGPUContext: RedGPUContext, time: number) {
         if (!this.#finalRender) this.#finalRender = new FinalRender()
-        if (!this.#debugRender) this.#debugRender = new DebugRender()
 
 
         // 오브젝트 렌더시작

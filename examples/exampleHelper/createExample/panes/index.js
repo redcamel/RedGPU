@@ -24,7 +24,7 @@ export function setSeparator(pane) {
     pane.addBlade({view: 'separator',});
 }
 
-const setDebugButtons = (RedGPU, redGPUContext) => {
+const setDebugButtons = (RedGPU, redGPUContext, debugRender) => {
     const check = () => {
         const container = document.querySelector('.navigation-bar');
         if (container) {
@@ -43,7 +43,7 @@ const setDebugButtons = (RedGPU, redGPUContext) => {
                 setAntialiasingSelect(redGPUContext, rightContainer)
                 setToneMappingSelect(RedGPU, redGPUContext, rightContainer)
                 setAO(redGPUContext, rightContainer)
-                setDebugButton(redGPUContext, rightContainer)
+                setDebugButton(redGPUContext, rightContainer, debugRender)
                 setAxis(redGPUContext, rightContainer)
                 setGrid(redGPUContext, rightContainer)
                 setSettingView(redGPUContext, rightContainer)
@@ -58,8 +58,9 @@ const setDebugButtons = (RedGPU, redGPUContext) => {
 
 }
 
-const setDebugButton = (redGPUContext, rightContainer) => {
-    let openYn = redGPUContext.useDebugPanel
+const setDebugButton = (redGPUContext, rightContainer, debugRender) => {
+    if (!debugRender) return
+    let openYn = debugRender.useDebugPanel
     const debugViewButton = document.createElement('div');
     debugViewButton.className = 'nav-button example-setting-button';
     debugViewButton.innerText = 'Debug Panel';
@@ -67,13 +68,13 @@ const setDebugButton = (redGPUContext, rightContainer) => {
     rightContainer.appendChild(debugViewButton);
     const check = () => {
 
-        redGPUContext.useDebugPanel = openYn;
+        debugRender.useDebugPanel = openYn;
         debugViewButton.children[0].style.opacity = openYn ? 1 : 0.25
 
     }
     if (debugViewButton && redGPUContext) {
         debugViewButton.addEventListener('click', async () => {
-            openYn = !redGPUContext.useDebugPanel
+            openYn = !debugRender.useDebugPanel
             check()
         });
     }

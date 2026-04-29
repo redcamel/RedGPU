@@ -102,11 +102,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     #backgroundColor: ColorRGBA = new ColorRGBA(0, 0, 0, 1)
     /**
-     * [KO] 디버그 패널 사용 여부
-     * [EN] Whether to use the debug panel
-     */
-    #useDebugPanel: boolean = false
-    /**
      * [KO] 키보드 입력 버퍼
      * [EN] Keyboard input buffer
      */
@@ -168,25 +163,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     get antialiasingManager(): AntialiasingManager {
         return this.#antialiasingManager;
-    }
-
-    /**
-     * [KO] 디버그 패널 사용 여부를 반환합니다.
-     * [EN] Returns whether the debug panel is used.
-     */
-    get useDebugPanel(): boolean {
-        return this.#useDebugPanel;
-    }
-
-    /**
-     * [KO] 디버그 패널 사용 여부를 설정합니다.
-     * [EN] Sets whether to use the debug panel.
-     * @param value -
-     * [KO] 사용 여부
-     * [EN] Usage status
-     */
-    set useDebugPanel(value: boolean) {
-        this.#useDebugPanel = value;
     }
 
     /**

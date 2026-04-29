@@ -1,5 +1,5 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import DebugRender from "../../DebugRender";
+import RedGPUContext from "../../../../src/context/RedGPUContext";
+import Index from "../../index";
 
 class ADebugItem {
     debugStatisticsDomService;
@@ -11,7 +11,7 @@ class ADebugItem {
         return this.debugStatisticsDomService.dom;
     }
 
-    update(debugRender: DebugRender, redGPUContext: RedGPUContext, time: number) {
+    update(debugRender: Index, redGPUContext: RedGPUContext, time: number) {
         this.debugStatisticsDomService.update(debugRender, redGPUContext);
     }
 }

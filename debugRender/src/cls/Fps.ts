@@ -1,5 +1,5 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import DebugRender from "../DebugRender";
+import RedGPUContext from "../../../src/context/RedGPUContext";
+import Index from "../index";
 import ADebugItem from "./core/ADebugItem";
 
 class DebugStatisticsDomService {
@@ -71,7 +71,7 @@ class Fps extends ADebugItem {
         this.debugStatisticsDomService = new DebugStatisticsDomService();
     }
 
-    update(debugRender: DebugRender, redGPUContext: RedGPUContext, time: number) {
+    update(debugRender: Index, redGPUContext: RedGPUContext, time: number) {
         // 첫 프레임 초기화
         if (this.#frameCount === 0) {
             this.#previousTimeStamp = time;
@@ -87,7 +87,7 @@ class Fps extends ADebugItem {
             const closeBtn = document.querySelector('.panel_close');
             if (closeBtn) {
                 closeBtn.addEventListener('click', () => {
-                    redGPUContext.useDebugPanel = false;
+                    debugRender.useDebugPanel = false;
                 });
                 this.#addedEvent = true;
             }

@@ -1,4 +1,4 @@
-import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUContext from "../../../src/context/RedGPUContext";
 import {
     createDebugTitle,
     getDebugFormatValue,
@@ -6,7 +6,7 @@ import {
     makeColorDebug,
     updateDebugItemValue
 } from "../core/debugFunc";
-import DebugRender from "../DebugRender";
+import Index from "../index";
 import ADebugItem from "./core/ADebugItem";
 import ADebugStatisticsDomService from "./core/ADebugStatisticsDomService";
 
@@ -25,7 +25,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
         this.#generateDebugItemsHtml();
     }
 
-    update(debugRender: DebugRender, redGPUContext: RedGPUContext) {
+    update(debugRender: Index, redGPUContext: RedGPUContext) {
         debugStats.forEach(stat => this.#updateDebugStat(redGPUContext, stat));
         this.#updateViewportSize(redGPUContext);
     }

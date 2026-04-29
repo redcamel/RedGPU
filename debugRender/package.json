@@ -1,0 +1,9 @@
+{
+  "name": "@redgpu/debug-render",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -wc"
+  }
+}

@@ -1,4 +1,4 @@
-import ColorRGBA from "../../../color/ColorRGBA";
+import ColorRGBA from "../../../src/color/ColorRGBA";
 
 const createDebugTitle = (title: string) => {
     return `<div>${title}</div>`
