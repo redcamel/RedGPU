@@ -16,7 +16,7 @@ export * from "./skyboxs/skyBox";
 export * from './mesh'
 export * from "./view";
 export * from "./group";
-export * from "./paticle";
+export * from "./particle";
 export * from "./sprites";
 export * from "./line";
 export * from "./textFields";
