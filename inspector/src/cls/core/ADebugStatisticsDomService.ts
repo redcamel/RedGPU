@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../src/context/RedGPUContext";
-import Index from "../../index";
+import RedGPUInspector from "../../index";
 
 class ADebugStatisticsDomService {
     dom: HTMLElement;
@@ -37,7 +37,7 @@ class ADebugStatisticsDomService {
         // })
     }
 
-    update(debugRender: Index, redGPUContext: RedGPUContext) {
+    update(debugRender: RedGPUInspector, redGPUContext: RedGPUContext) {
     }
 }
 

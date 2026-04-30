@@ -1,4 +1,4 @@
 declare module '*.wgsl' {
-    const shaderSource: 'string';
+    const shaderSource: string;
     export default shaderSource;
 }

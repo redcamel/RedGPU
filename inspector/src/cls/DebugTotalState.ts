@@ -1,6 +1,6 @@
 import formatBytes from "../../../src/utils/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
-import Index from "../index";
+import RedGPUInspector from "../index";
 import ADebugItem from "./core/ADebugItem";
 
 const debugStats = [
@@ -21,7 +21,7 @@ class DebugStatisticsDomService {
         this.#initializeStatisticsDisplay();
     }
 
-    update(debugRender: Index) {
+    update(debugRender: RedGPUInspector) {
         debugStats.forEach(stat => {
             const value = debugRender[stat]
             const formatValue = stat === 'totalUsedVideoMemory' ? `<b>${formatBytes(value)}</b>` : value;

@@ -24,7 +24,7 @@ export function setSeparator(pane) {
     pane.addBlade({view: 'separator',});
 }
 
-const setDebugButtons = (RedGPU, redGPUContext, debugRender) => {
+const setDebugButtons = (RedGPU, redGPUContext, inspector) => {
     const check = () => {
         const container = document.querySelector('.navigation-bar');
         if (container) {
@@ -43,7 +43,7 @@ const setDebugButtons = (RedGPU, redGPUContext, debugRender) => {
                 setAntialiasingSelect(redGPUContext, rightContainer)
                 setToneMappingSelect(RedGPU, redGPUContext, rightContainer)
                 setAO(redGPUContext, rightContainer)
-                setDebugButton(redGPUContext, rightContainer, debugRender)
+                setDebugButton(redGPUContext, rightContainer, inspector)
                 setAxis(redGPUContext, rightContainer)
                 setGrid(redGPUContext, rightContainer)
                 setSettingView(redGPUContext, rightContainer)
@@ -58,9 +58,9 @@ const setDebugButtons = (RedGPU, redGPUContext, debugRender) => {
 
 }
 
-const setDebugButton = (redGPUContext, rightContainer, debugRender) => {
-    if (!debugRender) return
-    let openYn = debugRender.useDebugPanel
+const setDebugButton = (redGPUContext, rightContainer, inspector) => {
+    if (!inspector) return
+    let openYn = inspector.useDebugPanel
     const debugViewButton = document.createElement('div');
     debugViewButton.className = 'nav-button example-setting-button';
     debugViewButton.innerText = 'Debug Panel';
@@ -68,13 +68,13 @@ const setDebugButton = (redGPUContext, rightContainer, debugRender) => {
     rightContainer.appendChild(debugViewButton);
     const check = () => {
 
-        debugRender.useDebugPanel = openYn;
+        inspector.useDebugPanel = openYn;
         debugViewButton.children[0].style.opacity = openYn ? 1 : 0.25
 
     }
     if (debugViewButton && redGPUContext) {
         debugViewButton.addEventListener('click', async () => {
-            openYn = !debugRender.useDebugPanel
+            openYn = !inspector.useDebugPanel
             check()
         });
     }

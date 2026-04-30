@@ -7,9 +7,9 @@ import ResourceStateUniformBuffer
 import ResourceStateVertexBuffer from "../../../src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer";
 import formatBytes from "../../../src/utils/formatBytes";
 import {createDebugTitle, updateDebugItemValue} from "../core/debugFunc";
-import Index from "../index";
+import RedGPUInspector from "../index";
 
-//TODO - 디버거를 워커로 보내야하나
+//TODO - ?�버거�? ?�커�?보내?�하??
 class DebugStatisticsDomService {
     dom: HTMLElement;
     readonly #bufferType: string
@@ -44,7 +44,7 @@ class DebugStatisticsDomService {
         this.dom.querySelector('.onoff').innerHTML = this.openYn ? 'close' : 'open'
     }
 
-    update(debugRender: Index, redGPUContext: RedGPUContext) {
+    update(debugRender: RedGPUInspector, redGPUContext: RedGPUContext) {
         const {resourceManager} = redGPUContext
         if (this.#bufferType === 'Buffer') {
             const targetState = resourceManager.resources.get('GPUBuffer')
@@ -82,7 +82,7 @@ class DebugStatisticsDomService {
     }
 
     #formatCacheKeyForDisplay(cacheKey: string): { host: string | null, filename: string } {
-        // Vertex_ 또는 Index_ 접두사 제거
+        // Vertex_ ?�는 Index_ ?�두???�거
         let processedKey = cacheKey;
         if (cacheKey.startsWith('Vertex_') || cacheKey.startsWith('Index_')) {
             processedKey = cacheKey.substring(cacheKey.indexOf('_') + 1);
@@ -95,7 +95,7 @@ class DebugStatisticsDomService {
                 filename: filename
             };
         } catch {
-            // URL이 아닌 경우
+            // URL???�닌 경우
             return {
                 host: null,
                 filename: processedKey
@@ -140,7 +140,7 @@ class DebugStatisticsDomService {
             } else {
                 initialUUIDs.delete(uuid);
             }
-            // GPUBuffer는 이름이 key 값이므로 직접 사용
+            // GPUBuffer???�름??key 값이므�?직접 ?�용
             const {host, filename} = this.#formatCacheKeyForDisplay(key);
             if (host) {
                 updateDebugItemValue(tDom, 'host', `${index} ${host}`);
@@ -151,7 +151,7 @@ class DebugStatisticsDomService {
             updateDebugItemValue(tDom, 'videoMemorySize', formatBytes(size));
             index++;
         });
-        // 더 이상 존재하지 않는 요소들 제거
+        // ???�상 존재?��? ?�는 ?�소???�거
         for (let uuid of initialUUIDs) {
             existingElements.get(uuid).remove();
         }
@@ -198,7 +198,7 @@ class DebugStatisticsDomService {
                 initialUUIDs.delete(uuid);
             }
             const {host, filename} = this.#formatCacheKeyForDisplay(name);
-            // 호스트가 있을 때만 호스트 정보 표시
+            // ?�스?��? ?�을 ?�만 ?�스???�보 ?�시
             if (host) {
                 updateDebugItemValue(tDom, 'host', `${index} ${host}`);
                 updateDebugItemValue(tDom, 'name', filename);
@@ -229,7 +229,7 @@ class DebugBufferList {
         return this.debugStatisticsDomService.dom;
     }
 
-    update(debugRender: Index, redGPUContext: RedGPUContext,) {
+    update(debugRender: RedGPUInspector, redGPUContext: RedGPUContext,) {
         this.debugStatisticsDomService.update(debugRender, redGPUContext);
     }
 }

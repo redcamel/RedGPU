@@ -6,7 +6,7 @@ import {
     makeColorDebug,
     updateDebugItemValue
 } from "../core/debugFunc";
-import Index from "../index";
+import RedGPUInspector from "../index";
 import ADebugItem from "./core/ADebugItem";
 import ADebugStatisticsDomService from "./core/ADebugStatisticsDomService";
 
@@ -25,7 +25,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
         this.#generateDebugItemsHtml();
     }
 
-    update(debugRender: Index, redGPUContext: RedGPUContext) {
+    update(debugRender: RedGPUInspector, redGPUContext: RedGPUContext) {
         debugStats.forEach(stat => this.#updateDebugStat(redGPUContext, stat));
         this.#updateViewportSize(redGPUContext);
     }

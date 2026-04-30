@@ -2,7 +2,7 @@ import RedGPUContext from "../../../src/context/RedGPUContext";
 import View3D from "../../../src/display/view/View3D";
 import formatBytes from "../../../src/utils/formatBytes";
 import {createDebugTitle, makeBooleanDebug, makeColorDebug, updateDebugItemValue} from "../core/debugFunc";
-import Index from "../index";
+import RedGPUInspector from "../index";
 import ADebugItem from "./core/ADebugItem";
 import ADebugStatisticsDomService from "./core/ADebugStatisticsDomService";
 
@@ -38,7 +38,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
         this.init(`${createDebugTitle(`ViewList`)}`, true)
     }
 
-    update(debugRender: Index, redGPUContext: RedGPUContext) {
+    update(debugRender: RedGPUInspector, redGPUContext: RedGPUContext) {
         const {viewList, numViews} = redGPUContext;
         if (this.#viewNum !== numViews) {
             this.#generateDebugSubItemsHtml(viewList);
@@ -87,7 +87,7 @@ class DebugStatisticsDomService extends ADebugStatisticsDomService {
         `;
     }
 
-    #updateDebugStat(view: View3D, index: number, stat: string, debugRender: Index) {
+    #updateDebugStat(view: View3D, index: number, stat: string, debugRender: RedGPUInspector) {
         const {renderViewStateData} = view;
         const totalKey = `total${stat.charAt(0).toUpperCase()}${stat.substring(1)}`;
         const value = renderViewStateData[stat];
