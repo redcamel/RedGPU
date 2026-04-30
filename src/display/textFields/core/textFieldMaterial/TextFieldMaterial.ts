@@ -40,7 +40,7 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
     constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string) {
         super(
             redGPUContext,
-            'TEXT_FILED_MATERIAL',
+            'TEXT_FIELD_MATERIAL',
             SHADER_INFO,
             2
         )

@@ -19,7 +19,7 @@ export * from "./group";
 export * from "./paticle";
 export * from "./sprites";
 export * from "./line";
-export * from "./textFileds";
+export * from "./textFields";
 export * from "./instancingMesh";
 
 export {
