@@ -712,10 +712,10 @@ class InstancingMesh extends Mesh {
         const isPbrMaterial = material instanceof PBRMaterial;
 
         const isPBR = label === 'PBR' && isPbrMaterial;
-        const isPBROnyFragment = label !== 'PBR' && isPbrMaterial;
+        const isPBROnlyFragment = label !== 'PBR' && isPbrMaterial;
 
         const input = isPBR ? vertexModuleSourceInputPbr : vertexModuleSourceInputBasic;
-        const output = isPBROnyFragment ? vertexModuleSourceOutputPbr :
+        const output = isPBROnlyFragment ? vertexModuleSourceOutputPbr :
             isPBR ? vertexModuleSourceOutputPbr :
                 vertexModuleSourceOutputBasic;
 

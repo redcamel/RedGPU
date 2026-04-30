@@ -36,7 +36,7 @@ abstract class ASinglePassPostEffect {
     // uniform 및 구조 정보
     #uniformBuffer: UniformBuffer
     #uniformsInfo
-    #systemUuniformsInfo
+    #systemUniformsInfo
     #storageInfo
     #name
     #SHADER_INFO_MSAA
@@ -156,8 +156,8 @@ abstract class ASinglePassPostEffect {
      * [KO] 시스템 유니폼 정보를 반환합니다.
      * [EN] Returns system uniform information.
      */
-    get systemUuniformsInfo() {
-        return this.#systemUuniformsInfo
+    get systemUniformsInfo() {
+        return this.#systemUniformsInfo
     }
 
     /**
@@ -257,7 +257,7 @@ abstract class ASinglePassPostEffect {
         const UNIFORM_STRUCT = this.#SHADER_INFO_MSAA.uniforms;
         this.#storageInfo = STORAGE_STRUCT
         this.#uniformsInfo = UNIFORM_STRUCT.uniforms
-        this.#systemUuniformsInfo = UNIFORM_STRUCT.systemUniforms
+        this.#systemUniformsInfo = UNIFORM_STRUCT.systemUniforms
         // UniformBuffer는 구조가 동일하므로 하나만 생성 (Non-MSAA 기준)
         if (this.#uniformsInfo) {
             const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength)
@@ -371,7 +371,7 @@ abstract class ASinglePassPostEffect {
     #createBindGroups(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
         const currentStorageInfo = this.storageInfo;
         const currentUniformsInfo = this.uniformsInfo
-        const currentSystemUniformsInfo = this.systemUuniformsInfo;
+        const currentSystemUniformsInfo = this.systemUniformsInfo;
         this.#computeBindGroupEntries0_swap0 = []
         this.#computeBindGroupEntries0_swap1 = []
         this.#computeBindGroupEntries1 = []

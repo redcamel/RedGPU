@@ -24,7 +24,7 @@ const EDGE = ([
     1, -4, 1, 0,
     0, 1, 0, 0
 ]);
-const EMBOSE = ([
+const EMBOSS = ([
     -2, -1, 0, 0,
     -1, 1, 1, 0,
     0, 1, 2, 0
@@ -34,8 +34,8 @@ const EMBOSE = ([
  * [KO] 컨볼루션(Convolution) 커널 기반 후처리 이펙트입니다.
  * [EN] Convolution kernel-based post-processing effect.
  *
- * [KO] 다양한 커널(NORMAL, SHARPEN, BLUR, EDGE, EMBOSE)로 이미지 효과를 줄 수 있습니다.
- * [EN] Various kernels (NORMAL, SHARPEN, BLUR, EDGE, EMBOSE) can be used to apply image effects.
+ * [KO] 다양한 커널(NORMAL, SHARPEN, BLUR, EDGE, EMBOSS)로 이미지 효과를 줄 수 있습니다.
+ * [EN] Various kernels (NORMAL, SHARPEN, BLUR, EDGE, EMBOSS) can be used to apply image effects.
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Convolution(redGPUContext);
@@ -68,10 +68,10 @@ class Convolution extends ASinglePassPostEffect {
      */
     static EDGE = EDGE
     /**
-     * [KO] EMBOSE 커널
-     * [EN] EMBOSE kernel
+     * [KO] EMBOSS 커널
+     * [EN] EMBOSS kernel
      */
-    static EMBOSE = EMBOSE
+    static EMBOSS = EMBOSS
     /**
      * [KO] 현재 적용 중인 커널
      * [EN] Currently applied kernel

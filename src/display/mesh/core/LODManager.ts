@@ -71,8 +71,8 @@ class LODManager {
      *
      * @param callback LOD 목록이 변경될 때마다 호출되는 콜백 함수
      */
-    constructor(ownner: any, callback: () => void) {
-        if (ownner.constructor.name === 'InstancingMesh') {
+    constructor(owner: any, callback: () => void) {
+        if (owner.constructor.name === 'InstancingMesh') {
             this.#isInstanceMode = true
         }
         this.#callback = callback;
@@ -181,9 +181,9 @@ class LODManager {
         const isPbrVertex = geometry.vertexBuffer.interleavedStruct.label === 'PBR';
         const isPbrMaterial = material instanceof PBRMaterial;
         const isPBR = isPbrVertex && isPbrMaterial;
-        const isPBROnyFragment = !isPbrVertex && isPbrMaterial;
-        const isPBROnyVertex = isPbrVertex && !isPbrMaterial;
-        return isPBR ? SOURCE_PBR : isPBROnyFragment ? SOURCE_ONLY_FRAGMENT_PBR : isPBROnyVertex ? SOURCE_ONLY_VERTEX_PBR : SOURCE_BASIC
+        const isPBROnlyFragment = !isPbrVertex && isPbrMaterial;
+        const isPBROnlyVertex = isPbrVertex && !isPbrMaterial;
+        return isPBR ? SOURCE_PBR : isPBROnlyFragment ? SOURCE_ONLY_FRAGMENT_PBR : isPBROnlyVertex ? SOURCE_ONLY_VERTEX_PBR : SOURCE_BASIC
     }
 }
 

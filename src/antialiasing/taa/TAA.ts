@@ -42,7 +42,7 @@ class TAA {
     #computePipeline: GPUComputePipeline
     #uniformBuffer: UniformBuffer
     #uniformsInfo: any
-    #systemUuniformsInfo: any
+    #systemUniformsInfo: any
     #storageInfo: any
     #name: string
     #SHADER_INFO_MSAA: any
@@ -307,7 +307,7 @@ class TAA {
         const UNIFORM_STRUCT = this.#SHADER_INFO_MSAA.uniforms;
         this.#storageInfo = STORAGE_STRUCT
         this.#uniformsInfo = UNIFORM_STRUCT.uniforms
-        this.#systemUuniformsInfo = UNIFORM_STRUCT.systemUniforms
+        this.#systemUniformsInfo = UNIFORM_STRUCT.systemUniforms
         if (this.#uniformsInfo) {
             const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength)
             this.#uniformBuffer = new UniformBuffer(
@@ -364,9 +364,9 @@ class TAA {
             binding: 0,
             resource: this.#currentFrameTextureView,
         });
-        if (this.#systemUuniformsInfo) {
+        if (this.#systemUniformsInfo) {
             computeBindGroupEntries1.push({
-                binding: this.#systemUuniformsInfo.binding,
+                binding: this.#systemUniformsInfo.binding,
                 resource: {
                     buffer: view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer,
                     offset: 0,
