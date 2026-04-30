@@ -123,7 +123,6 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
     #autoExposure: AutoExposure;
-    #prevUseAutoExposure: boolean = true;
 
     /**
      * [KO] PostEffectManager 인스턴스를 생성합니다.
@@ -354,10 +353,6 @@ class PostEffectManager {
         this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
 
         const {useAutoExposure} = this.#view.rawCamera;
-        // if (!this.#prevUseAutoExposure && useAutoExposure) {
-        //     this.autoExposure.currentAdaptedEV100 = this.#view.rawCamera.ev100;
-        // }
-        // this.#prevUseAutoExposure = useAutoExposure;
 
         let currentTextureView = {
             texture: this.#storageTexture,
