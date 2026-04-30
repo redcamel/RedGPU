@@ -10,7 +10,7 @@ import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
-import TAASharpen from "../antialiasing/taa/shapen/TAASharpen";
+import TAASharpen from "../antialiasing/taa/sharpen/TAASharpen";
 import SystemUniformUpdater from "../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/updateSystemUniformData";
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
