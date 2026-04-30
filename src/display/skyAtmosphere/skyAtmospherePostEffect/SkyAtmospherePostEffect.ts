@@ -13,7 +13,7 @@ import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect
  */
 class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     #skyAtmosphere: SkyAtmosphere;
-    
+
     #computeShaderMSAA: GPUShaderModule;
     #computeShaderNonMSAA: GPUShaderModule;
     #cachedBindGroupLayouts: Map<string, GPUBindGroupLayout> = new Map();
@@ -23,7 +23,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     #bindGroup0_swap0: GPUBindGroup;
     #bindGroup0_swap1: GPUBindGroup;
     #bindGroup1: GPUBindGroup;
-    
+
     #prevSourceView_swap0: GPUTextureView;
     #prevSourceView_swap1: GPUTextureView;
     #prevDepthView_swap0: GPUTextureView;
@@ -57,7 +57,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         const {gpuDevice, resourceManager, antialiasingManager} = this.redGPUContext;
-        
+
         const {useMSAA, msaaID} = antialiasingManager;
         const depthView = view.viewRenderTextureManager.depthTextureView;
         const peUniformBuffer = view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer;
@@ -96,7 +96,10 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                         {binding: 2, resource: skyAtmosphere.transmittanceLUT.gpuTextureView},
                         {binding: 3, resource: skyAtmosphere.multiScatLUT.gpuTextureView},
                         {binding: 4, resource: skyAtmosphere.skyViewLUT.gpuTextureView},
-                        {binding: 5, resource: skyAtmosphere.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})},
+                        {
+                            binding: 5,
+                            resource: skyAtmosphere.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})
+                        },
                         {binding: 6, resource: skyAtmosphere.atmosphereSampler.gpuSampler},
                         {binding: 7, resource: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTextureView}
                     ]
@@ -116,7 +119,10 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                         {binding: 2, resource: skyAtmosphere.transmittanceLUT.gpuTextureView},
                         {binding: 3, resource: skyAtmosphere.multiScatLUT.gpuTextureView},
                         {binding: 4, resource: skyAtmosphere.skyViewLUT.gpuTextureView},
-                        {binding: 5, resource: skyAtmosphere.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})},
+                        {
+                            binding: 5,
+                            resource: skyAtmosphere.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})
+                        },
                         {binding: 6, resource: skyAtmosphere.atmosphereSampler.gpuSampler},
                         {binding: 7, resource: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTextureView}
                     ]

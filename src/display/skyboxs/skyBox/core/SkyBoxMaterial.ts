@@ -63,9 +63,9 @@ DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
     ['opacity', 1, 0, 1],
     ['transitionProgress', 0],
 ])
-DefineForFragment.defineCubeTexture(SkyBoxMaterial, [ 'texture0', 'transitionTexture' ])
-DefineForFragment.defineTexture(SkyBoxMaterial, [ 'transitionMask' ])
-DefineForFragment.defineSampler(SkyBoxMaterial, [ 'sampler0' ])
+DefineForFragment.defineCubeTexture(SkyBoxMaterial, ['texture0', 'transitionTexture'])
+DefineForFragment.defineTexture(SkyBoxMaterial, ['transitionMask'])
+DefineForFragment.defineSampler(SkyBoxMaterial, ['sampler0'])
 
 Object.freeze(SkyBoxMaterial)
 export default SkyBoxMaterial

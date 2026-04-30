@@ -42,7 +42,7 @@ class Ground extends Primitive {
         heightSegments: number = 1,
         flipY: boolean = false
     ) {
-        const uniqueKey = Primitive.generateUniqueKey('GROUND', { width, height, widthSegments, heightSegments, flipY });
+        const uniqueKey = Primitive.generateUniqueKey('GROUND', {width, height, widthSegments, heightSegments, flipY});
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateGroundData(
             redGPUContext, width, height, widthSegments, heightSegments, flipY, uniqueKey
         ));

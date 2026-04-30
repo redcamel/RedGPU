@@ -8,36 +8,6 @@ import type View3D from "../../display/view/View3D";
  */
 abstract class ACamera {
     /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number;
-
-    /**
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    #name: string;
-
-    /**
-     * [KO] 조리개 (f-stop)
-     * [EN] Aperture (f-stop)
-     */
-    #aperture: number = 16.0;
-
-    /**
-     * [KO] 셔터 속도 (초)
-     * [EN] Shutter speed (seconds)
-     */
-    #shutterSpeed: number = 1 / 3200;
-
-    /**
-     * [KO] 센서 감도 (ISO)
-     * [EN] Sensor sensitivity (ISO)
-     */
-    #iso: number = 100;
-
-    /**
      * [KO] 교정 상수 (Calibration Constant, K)
      * [EN] Calibration constant (K)
      * @description
@@ -45,7 +15,31 @@ abstract class ACamera {
      * [EN] Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
      */
     static readonly CALIBRATION_CONSTANT: number = 12.5;
-
+    /**
+     * [KO] 인스턴스 고유 ID
+     * [EN] Instance unique ID
+     */
+    #instanceId: number;
+    /**
+     * [KO] 카메라 이름
+     * [EN] Camera name
+     */
+    #name: string;
+    /**
+     * [KO] 조리개 (f-stop)
+     * [EN] Aperture (f-stop)
+     */
+    #aperture: number = 16.0;
+    /**
+     * [KO] 셔터 속도 (초)
+     * [EN] Shutter speed (seconds)
+     */
+    #shutterSpeed: number = 1 / 3200;
+    /**
+     * [KO] 센서 감도 (ISO)
+     * [EN] Sensor sensitivity (ISO)
+     */
+    #iso: number = 100;
     /**
      * [KO] 캐시된 EV100
      * [EN] Cached EV100
@@ -78,30 +72,30 @@ abstract class ACamera {
      */
     set useAutoExposure(value: boolean) {
         if (this.#useAutoExposure === value) return;
-        
+
         if (this.#useAutoExposure && !value) {
             // [KO] ON -> OFF 전환 시: 시각적 연속성을 위해 셔터 속도를 재계산하고 표준 값으로 스냅합니다.
             // [EN] ON -> OFF transition: Recalculate shutter speed and snap to standard values for visual continuity.
-            
+
             // 1. ISO를 100으로 표준화 (Standardize ISO to 100)
             this.#iso = 100;
-            
+
             // 2. 현재 EV100을 유지하기 위한 셔터 속도 계산 (ISO 100 기준)
             let rawShutterSpeed = (this.#aperture * this.#aperture) / Math.pow(2, this.#ev100);
-            
+
             // 3. 표준 셔터 스피드 리스트 (1/3 스탑 단위)
             const standardSpeeds = [
-                1, 1/1.3, 1/1.6, 1/2, 1/2.5, 1/3.2, 1/4, 1/5, 1/6, 1/8, 1/10, 1/13, 1/15, 1/20, 1/25, 1/30, 1/40, 1/50, 1/60, 1/80, 1/100, 1/125, 1/160, 1/200, 1/250, 1/320, 1/400, 1/500, 1/640, 1/800, 1/1000, 1/1250, 1/1600, 1/2000, 1/2500, 1/3200, 1/4000, 1/5000, 1/6400, 1/8000
+                1, 1 / 1.3, 1 / 1.6, 1 / 2, 1 / 2.5, 1 / 3.2, 1 / 4, 1 / 5, 1 / 6, 1 / 8, 1 / 10, 1 / 13, 1 / 15, 1 / 20, 1 / 25, 1 / 30, 1 / 40, 1 / 50, 1 / 60, 1 / 80, 1 / 100, 1 / 125, 1 / 160, 1 / 200, 1 / 250, 1 / 320, 1 / 400, 1 / 500, 1 / 640, 1 / 800, 1 / 1000, 1 / 1250, 1 / 1600, 1 / 2000, 1 / 2500, 1 / 3200, 1 / 4000, 1 / 5000, 1 / 6400, 1 / 8000
             ];
-            
+
             // 가장 가까운 표준 값 찾기
-            this.#shutterSpeed = standardSpeeds.reduce((prev, curr) => 
+            this.#shutterSpeed = standardSpeeds.reduce((prev, curr) =>
                 Math.abs(curr - rawShutterSpeed) < Math.abs(prev - rawShutterSpeed) ? curr : prev
             );
-            
+
             this.#exposureDirty = true;
         }
-        
+
         this.#useAutoExposure = value;
     }
 

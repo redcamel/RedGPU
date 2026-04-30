@@ -46,7 +46,15 @@ class Sphere extends Primitive {
         thetaStart: number = 0,
         thetaLength: number = Math.PI
     ) {
-        const uniqueKey = Primitive.generateUniqueKey('SPHERE', { radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength });
+        const uniqueKey = Primitive.generateUniqueKey('SPHERE', {
+            radius,
+            widthSegments,
+            heightSegments,
+            phiStart,
+            phiLength,
+            thetaStart,
+            thetaLength
+        });
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateSphereData(
             redGPUContext, radius, widthSegments, heightSegments,
             phiStart, phiLength, thetaStart, thetaLength, uniqueKey

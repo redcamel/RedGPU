@@ -70,6 +70,20 @@ export default class VertexInterleavedStruct {
     }
 
     /**
+     * [KO] 특정 속성의 오프셋(float 단위 인덱스)을 반환합니다.
+     * [EN] Returns the offset (float unit index) of a specific attribute.
+     * @param attributeName - [KO] 속성 이름 [EN] Attribute name
+     * @returns [KO] float 단위 오프셋 [EN] Offset in float units
+     */
+    getAttributeOffset(attributeName: string): number {
+        const attribute = this.#attributes.find(attr => attr.attributeName === attributeName);
+        if (!attribute) {
+            consoleAndThrowError(`Attribute not found: ${attributeName}`);
+        }
+        return attribute.offset / 4;
+    }
+
+    /**
      * [KO] 속성 정의를 기반으로 #define을 초기화합니다.
      * [EN] Initializes #define based on attribute definitions.
      * @param attributes -
@@ -87,20 +101,6 @@ export default class VertexInterleavedStruct {
             }
         }
         this.#define = temp;
-    }
-
-    /**
-     * [KO] 특정 속성의 오프셋(float 단위 인덱스)을 반환합니다.
-     * [EN] Returns the offset (float unit index) of a specific attribute.
-     * @param attributeName - [KO] 속성 이름 [EN] Attribute name
-     * @returns [KO] float 단위 오프셋 [EN] Offset in float units
-     */
-    getAttributeOffset(attributeName: string): number {
-        const attribute = this.#attributes.find(attr => attr.attributeName === attributeName);
-        if (!attribute) {
-            consoleAndThrowError(`Attribute not found: ${attributeName}`);
-        }
-        return attribute.offset / 4;
     }
 
     /**

@@ -370,7 +370,7 @@ class InstancingMesh extends Mesh {
                 this.modelMatrix,
                 members.instanceGroupModelMatrix.uniformOffset / 4,
             );
-            
+
             // [KO] 그룹 노말 행렬 계산 및 업로드
             // [EN] Calculate and upload group normal matrix
             const groupNormalMatrix = mat4.create();

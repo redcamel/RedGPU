@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import backgroundVertexShaderCode_wgsl from "./wgsl/background_vertex.wgsl";
 import backgroundFragmentShaderCode_wgsl from "./wgsl/background_fragment.wgsl";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
@@ -10,11 +9,11 @@ import DirectTexture from "../../../resources/texture/DirectTexture";
 class SkyAtmosphereBackground {
     readonly #redGPUContext: RedGPUContext;
     readonly #backgroundBindGroupLayout2: GPUBindGroupLayout;
-    
+
     #backgroundBindGroup2: GPUBindGroup;
     #backgroundPipeline: GPURenderPipeline;
     #backgroundRenderBundle: GPURenderBundle;
-    
+
     #dirtyBackgroundPipeline: boolean = true;
     #prevBackgroundSystemUniformBindGroup: GPUBindGroup;
 
@@ -30,43 +29,6 @@ class SkyAtmosphereBackground {
                 {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {}}, // skyView
                 {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {}}  // sampler
             ]
-        });
-    }
-
-    #updateBackgroundPipeline(useMSAA: boolean) {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
-        const vertexModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Vertex_ShaderModule', {code: backgroundVertexShaderCode_wgsl});
-        const fragmentModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Fragment_ShaderModule', {code: backgroundFragmentShaderCode_wgsl});
-
-        this.#backgroundPipeline = gpuDevice.createRenderPipeline({
-            label: 'SkyAtmosphere_Background_Pipeline',
-            layout: gpuDevice.createPipelineLayout({
-                bindGroupLayouts: [
-                    resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
-                    this.#backgroundBindGroupLayout2
-                ]
-            }),
-            vertex: {
-                module: vertexModule,
-                entryPoint: 'main',
-                buffers: []
-            },
-            fragment: {
-                module: fragmentModule,
-                entryPoint: 'main',
-                targets: [
-                    {format: 'rgba16float'},
-                    {format: navigator.gpu.getPreferredCanvasFormat()},
-                    {format: 'rgba16float'}
-                ]
-            },
-            primitive: {topology: 'triangle-list', cullMode: 'none'},
-            depthStencil: {
-                format: 'depth32float',
-                depthWriteEnabled: false,
-                depthCompare: 'less-equal'
-            },
-            multisample: {count: useMSAA ? 4 : 1}
         });
     }
 
@@ -111,6 +73,43 @@ class SkyAtmosphereBackground {
         }
 
         currentRenderPassEncoder.executeBundles([this.#backgroundRenderBundle]);
+    }
+
+    #updateBackgroundPipeline(useMSAA: boolean) {
+        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const vertexModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Vertex_ShaderModule', {code: backgroundVertexShaderCode_wgsl});
+        const fragmentModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Fragment_ShaderModule', {code: backgroundFragmentShaderCode_wgsl});
+
+        this.#backgroundPipeline = gpuDevice.createRenderPipeline({
+            label: 'SkyAtmosphere_Background_Pipeline',
+            layout: gpuDevice.createPipelineLayout({
+                bindGroupLayouts: [
+                    resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
+                    this.#backgroundBindGroupLayout2
+                ]
+            }),
+            vertex: {
+                module: vertexModule,
+                entryPoint: 'main',
+                buffers: []
+            },
+            fragment: {
+                module: fragmentModule,
+                entryPoint: 'main',
+                targets: [
+                    {format: 'rgba16float'},
+                    {format: navigator.gpu.getPreferredCanvasFormat()},
+                    {format: 'rgba16float'}
+                ]
+            },
+            primitive: {topology: 'triangle-list', cullMode: 'none'},
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: false,
+                depthCompare: 'less-equal'
+            },
+            multisample: {count: useMSAA ? 4 : 1}
+        });
     }
 }
 

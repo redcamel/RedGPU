@@ -17,9 +17,9 @@ class AutoExposure {
     readonly #view: View3D;
     #adaptedEV100Buffer: StorageBuffer;
     #histogramBuffer: StorageBuffer;
-    
+
     #adaptationPipeline: GPUComputePipeline;
-    
+
     #cachedDownsampleBindGroupLayouts: Map<boolean, GPUBindGroupLayout> = new Map();
     #cachedDownsamplePipelines: Map<boolean, GPUComputePipeline> = new Map();
     #downsampleBindGroupLayout1: GPUBindGroupLayout;
@@ -179,6 +179,112 @@ class AutoExposure {
         this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, initialData.buffer);
     }
 
+    get adaptedLuminanceBuffer(): StorageBuffer {
+        return this.#adaptedEV100Buffer;
+    }
+
+    render(view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
+        const {gpuDevice, antialiasingManager} = this.#redGPUContext;
+        const {useMSAA} = antialiasingManager;
+        const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
+        const {rawCamera, renderViewStateData} = view;
+        const {deltaTime} = renderViewStateData;
+
+        const ev100Range = this.#maxEV100 - this.#minEV100;
+
+        // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
+        // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
+        const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#exposureCompensation);
+
+        // Update uniforms (총 17개 필드로 확장)
+        gpuDevice.queue.writeBuffer(
+            this.#uniformBuffer.gpuBuffer,
+            0,
+            new Float32Array([
+                deltaTime,
+                this.#targetLuminance,
+                this.#adaptationSpeedUp,
+                this.#adaptationSpeedDown,
+                this.#exposureCompensation,
+                this.#minEV100,
+                this.#maxEV100,
+                ACamera.CALIBRATION_CONSTANT,
+                ev100Range,
+                this.#lowPercentile,
+                this.#highPercentile,
+                1.0 / ev100Range,
+                width,
+                height,
+                currentPreExposure,
+                this.#maxExposureMultiplier,
+                this.#meteringMode
+            ])
+        );
+
+        const encoder = gpuDevice.createCommandEncoder({label: 'AutoExposure_CommandEncoder'});
+
+        // [KO] 히스토그램 버퍼 명시적 초기화 [EN] Explicitly clear histogram buffer
+        encoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
+
+        // Pass 1: Generate Histogram
+        const pipeline = this.#getDownsamplePipeline(useMSAA);
+        const downsampleBindGroup0 = gpuDevice.createBindGroup({
+            layout: this.#getDownsampleBindGroupLayout0(useMSAA),
+            entries: [
+                {binding: 0, resource: sourceTextureInfo.textureView},
+                {binding: 1, resource: view.viewRenderTextureManager.depthTextureView}
+            ]
+        });
+        const downsampleBindGroup1 = gpuDevice.createBindGroup({
+            layout: this.#downsampleBindGroupLayout1,
+            entries: [
+                {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
+                {binding: 1, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+            ]
+        });
+
+        const pass1 = encoder.beginComputePass();
+        pass1.setPipeline(pipeline);
+        pass1.setBindGroup(0, downsampleBindGroup0);
+        pass1.setBindGroup(1, downsampleBindGroup1);
+        pass1.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16), 1);
+        pass1.end();
+
+        // Pass 2: Average Histogram and Adapt
+        const adaptationBindGroup0 = gpuDevice.createBindGroup({
+            layout: this.#adaptationBindGroupLayout0,
+            entries: [
+                {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
+                {binding: 1, resource: {buffer: this.#adaptedEV100Buffer.gpuBuffer}},
+                {binding: 2, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+            ]
+        });
+
+        const pass2 = encoder.beginComputePass();
+        pass2.setPipeline(this.#adaptationPipeline);
+        pass2.setBindGroup(0, adaptationBindGroup0);
+        pass2.dispatchWorkgroups(1, 1, 1);
+        pass2.end();
+
+        // 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 및 비동기 읽기 시작
+        if (!this.#isReading) {
+            encoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
+
+            this.#isReading = true;
+            gpuDevice.queue.submit([encoder.finish()]);
+
+            this.#readBuffer.mapAsync(GPUMapMode.READ).then(() => {
+                const data = new Float32Array(this.#readBuffer.getMappedRange());
+                this.#currentAdaptedEV100 = data[0];
+                this.#readBuffer.unmap();
+                this.#isReading = false;
+            });
+        } else {
+            // 읽기 작업 중이면 컴퓨트 패스만 제출
+            gpuDevice.queue.submit([encoder.finish()]);
+        }
+    }
+
     /**
      * [KO] EV100 기반으로 물리적 노출 배율(preExposure)을 계산합니다. (UE5 표준 물리 노출 공식)
      * [EN] Calculates physical exposure multiplier (preExposure) based on EV100. (UE5 standard physical exposure formula)
@@ -220,27 +326,27 @@ class AutoExposure {
     #initPipelines() {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
 
-        const adaptationModule = resourceManager.createGPUShaderModule('AutoExposure_Adaptation', { code: adaptationCode });
+        const adaptationModule = resourceManager.createGPUShaderModule('AutoExposure_Adaptation', {code: adaptationCode});
 
         this.#downsampleBindGroupLayout1 = resourceManager.createBindGroupLayout('AutoExposure_Downsample_BGL1', {
             entries: [
-                { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
             ]
         });
 
         this.#adaptationBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Adaptation_BGL0', {
             entries: [
-                { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } }
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
             ]
         });
 
         this.#adaptationPipeline = gpuDevice.createComputePipeline({
             label: 'AutoExposure_Adaptation_Pipeline',
-            layout: gpuDevice.createPipelineLayout({ bindGroupLayouts: [this.#adaptationBindGroupLayout0] }),
-            compute: { module: adaptationModule, entryPoint: 'main' }
+            layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#adaptationBindGroupLayout0]}),
+            compute: {module: adaptationModule, entryPoint: 'main'}
         });
     }
 
@@ -248,17 +354,17 @@ class AutoExposure {
         if (this.#cachedDownsamplePipelines.has(useMSAA)) return this.#cachedDownsamplePipelines.get(useMSAA);
 
         const {gpuDevice, resourceManager} = this.#redGPUContext;
-        const shaderCode = useMSAA 
+        const shaderCode = useMSAA
             ? downsampleLogLuminanceCode.replace('texture_depth_2d', 'texture_depth_multisampled_2d')
             : downsampleLogLuminanceCode;
-        
-        const module = resourceManager.createGPUShaderModule(`AutoExposure_Downsample_${useMSAA ? 'MSAA' : 'NonMSAA'}`, { code: shaderCode });
+
+        const module = resourceManager.createGPUShaderModule(`AutoExposure_Downsample_${useMSAA ? 'MSAA' : 'NonMSAA'}`, {code: shaderCode});
         const layout = this.#getDownsampleBindGroupLayout0(useMSAA);
 
         const pipeline = gpuDevice.createComputePipeline({
             label: `AutoExposure_Downsample_Pipeline_${useMSAA ? 'MSAA' : 'NonMSAA'}`,
-            layout: gpuDevice.createPipelineLayout({ bindGroupLayouts: [layout, this.#downsampleBindGroupLayout1] }),
-            compute: { module, entryPoint: 'main' }
+            layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [layout, this.#downsampleBindGroupLayout1]}),
+            compute: {module, entryPoint: 'main'}
         });
 
         this.#cachedDownsamplePipelines.set(useMSAA, pipeline);
@@ -272,119 +378,13 @@ class AutoExposure {
         const layout = gpuDevice.createBindGroupLayout({
             label: `AutoExposure_Downsample_BGL0_${useMSAA ? 'MSAA' : 'NonMSAA'}`,
             entries: [
-                { binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {} },
-                { binding: 1, visibility: GPUShaderStage.COMPUTE, texture: { sampleType: 'depth', multisampled: useMSAA } }
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {}},
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'depth', multisampled: useMSAA}}
             ]
         });
 
         this.#cachedDownsampleBindGroupLayouts.set(useMSAA, layout);
         return layout;
-    }
-
-    render(view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
-        const {gpuDevice, antialiasingManager} = this.#redGPUContext;
-        const {useMSAA} = antialiasingManager;
-        const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
-        const {rawCamera, renderViewStateData} = view;
-        const {deltaTime} = renderViewStateData;
-
-        const ev100Range = this.#maxEV100 - this.#minEV100;
-
-        // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
-        // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
-        const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#exposureCompensation);
-
-        // Update uniforms (총 17개 필드로 확장)
-        gpuDevice.queue.writeBuffer(
-            this.#uniformBuffer.gpuBuffer, 
-            0, 
-            new Float32Array([
-                deltaTime, 
-                this.#targetLuminance, 
-                this.#adaptationSpeedUp, 
-                this.#adaptationSpeedDown, 
-                this.#exposureCompensation, 
-                this.#minEV100, 
-                this.#maxEV100,
-                ACamera.CALIBRATION_CONSTANT,
-                ev100Range,
-                this.#lowPercentile,
-                this.#highPercentile,
-                1.0 / ev100Range,
-                width,
-                height,
-                currentPreExposure,
-                this.#maxExposureMultiplier,
-                this.#meteringMode
-            ])
-        );
-        
-        const encoder = gpuDevice.createCommandEncoder({ label: 'AutoExposure_CommandEncoder' });
-        
-        // [KO] 히스토그램 버퍼 명시적 초기화 [EN] Explicitly clear histogram buffer
-        encoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
-        
-        // Pass 1: Generate Histogram
-        const pipeline = this.#getDownsamplePipeline(useMSAA);
-        const downsampleBindGroup0 = gpuDevice.createBindGroup({
-            layout: this.#getDownsampleBindGroupLayout0(useMSAA),
-            entries: [
-                { binding: 0, resource: sourceTextureInfo.textureView },
-                { binding: 1, resource: view.viewRenderTextureManager.depthTextureView }
-            ]
-        });
-        const downsampleBindGroup1 = gpuDevice.createBindGroup({
-            layout: this.#downsampleBindGroupLayout1,
-            entries: [
-                { binding: 0, resource: { buffer: this.#histogramBuffer.gpuBuffer } },
-                { binding: 1, resource: { buffer: this.#uniformBuffer.gpuBuffer } }
-            ]
-        });
-        
-        const pass1 = encoder.beginComputePass();
-        pass1.setPipeline(pipeline);
-        pass1.setBindGroup(0, downsampleBindGroup0);
-        pass1.setBindGroup(1, downsampleBindGroup1);
-        pass1.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16), 1);
-        pass1.end();
-        
-        // Pass 2: Average Histogram and Adapt
-        const adaptationBindGroup0 = gpuDevice.createBindGroup({
-            layout: this.#adaptationBindGroupLayout0,
-            entries: [
-                { binding: 0, resource: { buffer: this.#histogramBuffer.gpuBuffer } },
-                { binding: 1, resource: { buffer: this.#adaptedEV100Buffer.gpuBuffer } },
-                { binding: 2, resource: { buffer: this.#uniformBuffer.gpuBuffer } }
-            ]
-        });
-        
-        const pass2 = encoder.beginComputePass();
-        pass2.setPipeline(this.#adaptationPipeline);
-        pass2.setBindGroup(0, adaptationBindGroup0);
-        pass2.dispatchWorkgroups(1, 1, 1);
-        pass2.end();
-        
-        // 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 및 비동기 읽기 시작
-        if (!this.#isReading) {
-            encoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
-            
-            this.#isReading = true;
-            gpuDevice.queue.submit([encoder.finish()]);
-            
-            this.#readBuffer.mapAsync(GPUMapMode.READ).then(() => {
-                const data = new Float32Array(this.#readBuffer.getMappedRange());
-                this.#currentAdaptedEV100 = data[0];
-                this.#readBuffer.unmap();
-                this.#isReading = false;
-            });
-        } else {
-            // 읽기 작업 중이면 컴퓨트 패스만 제출
-            gpuDevice.queue.submit([encoder.finish()]);
-        }
-    }
-
-    get adaptedLuminanceBuffer(): StorageBuffer {
-        return this.#adaptedEV100Buffer;
     }
 }
 

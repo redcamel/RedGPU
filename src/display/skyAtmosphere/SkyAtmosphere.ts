@@ -77,13 +77,6 @@ class SkyAtmosphere {
     #lastUpdateFrame: number = -1;
     #prevCameraMatrix: mat4 = mat4.create();
 
-    #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
-        this.#dirtyUniformBuffer = true;
-        if (lut) this.#dirtyLUT = true;
-        if (skyView) this.#dirtySkyView = true;
-        if (ibl) this.#skyLight.dirty = true;
-    }
-
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
 
@@ -101,17 +94,209 @@ class SkyAtmosphere {
         this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#skyViewGenerator = new SkyViewGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#aerialPerspectiveGenerator = new AerialPerspectiveGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        
+
         this.#skyLight = new SkyLight(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#backgroundRenderer = new SkyAtmosphereBackground(redGPUContext);
         this.#postEffect = new SkyAtmospherePostEffect(redGPUContext, this);
     }
 
     /** [KO] RedGPU 컨텍스트 반환 [EN] Returns RedGPU Context */
-    get redGPUContext(): RedGPUContext { return this.#redGPUContext; }
+    get redGPUContext(): RedGPUContext {
+        return this.#redGPUContext;
+    }
 
     /** [KO] Post Effect 인스턴스 반환 [EN] Returns Post Effect instance */
-    get postEffect(): SkyAtmospherePostEffect { return this.#postEffect; }
+    get postEffect(): SkyAtmospherePostEffect {
+        return this.#postEffect;
+    }
+
+    get params() {
+        return this.#params;
+    }
+
+    get aerialPerspectiveDistanceScale(): number {
+        return this.#params.aerialPerspectiveDistanceScale;
+    }
+
+    set aerialPerspectiveDistanceScale(v: number) {
+        this.#setParam('aerialPerspectiveDistanceScale', v, false, true, true, (v) => validatePositiveNumberRange(v, 1, 1000));
+    }
+
+    get aerialPerspectiveStartDepth(): number {
+        return this.#params.aerialPerspectiveStartDepth;
+    }
+
+    set aerialPerspectiveStartDepth(v: number) {
+        this.#setParam('aerialPerspectiveStartDepth', v, false, true, true, (v) => validatePositiveNumberRange(v, 0, 100));
+    }
+
+    get transmittanceMinLightElevationAngle(): number {
+        return this.#params.transmittanceMinLightElevationAngle;
+    }
+
+    set transmittanceMinLightElevationAngle(v: number) {
+        this.#setParam('transmittanceMinLightElevationAngle', v, true, true, true, (v) => validateNumberRange(v, -90, 90));
+    }
+
+    get groundRadius(): number {
+        return this.#params.groundRadius;
+    }
+
+    set groundRadius(v: number) {
+        this.#setParam('groundRadius', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
+    }
+
+    get atmosphereHeight(): number {
+        return this.#params.atmosphereHeight;
+    }
+
+    set atmosphereHeight(v: number) {
+        this.#setParam('atmosphereHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
+    }
+
+    get mieScattering(): [number, number, number] {
+        return [this.#params.mieScattering[0], this.#params.mieScattering[1], this.#params.mieScattering[2]];
+    }
+
+    set mieScattering(v: [number, number, number]) {
+        this.#setParam('mieScattering', [...v], true, false, true);
+    }
+
+    get mieAbsorption(): [number, number, number] {
+        return [this.#params.mieAbsorption[0], this.#params.mieAbsorption[1], this.#params.mieAbsorption[2]];
+    }
+
+    set mieAbsorption(v: [number, number, number]) {
+        this.#setParam('mieAbsorption', [...v], true, false, true);
+    }
+
+    get rayleighScattering(): [number, number, number] {
+        return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]];
+    }
+
+    set rayleighScattering(v: [number, number, number]) {
+        this.#setParam('rayleighScattering', [...v], true, false, true);
+    }
+
+    get rayleighExponentialDistribution(): number {
+        return this.#params.rayleighExponentialDistribution;
+    }
+
+    set rayleighExponentialDistribution(v: number) {
+        this.#setParam('rayleighExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
+    }
+
+    get mieExponentialDistribution(): number {
+        return this.#params.mieExponentialDistribution;
+    }
+
+    set mieExponentialDistribution(v: number) {
+        this.#setParam('mieExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
+    }
+
+    get mieAnisotropy(): number {
+        return this.#params.mieAnisotropy;
+    }
+
+    set mieAnisotropy(v: number) {
+        this.#setParam('mieAnisotropy', v, true, false, true, (v) => validateNumberRange(v, 0, 0.999));
+    }
+
+    get groundAlbedo(): [number, number, number] {
+        return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]];
+    }
+
+    set groundAlbedo(v: [number, number, number]) {
+        this.#setParam('groundAlbedo', [...v], true, false, true);
+    }
+
+    get absorptionCoefficient(): [number, number, number] {
+        return [this.#params.absorptionCoefficient[0], this.#params.absorptionCoefficient[1], this.#params.absorptionCoefficient[2]];
+    }
+
+    set absorptionCoefficient(v: [number, number, number]) {
+        this.#setParam('absorptionCoefficient', [...v], true, false, true);
+    }
+
+    get absorptionTipAltitude(): number {
+        return this.#params.absorptionTipAltitude;
+    }
+
+    set absorptionTipAltitude(v: number) {
+        this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(0, 100));
+    }
+
+    get absorptionTentWidth(): number {
+        return this.#params.absorptionTentWidth;
+    }
+
+    set absorptionTentWidth(v: number) {
+        this.#setParam('absorptionTentWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
+    }
+
+    get multiScatteringFactor(): number {
+        return this.#params.multiScatteringFactor;
+    }
+
+    set multiScatteringFactor(v: number) {
+        this.#setParam('multiScatteringFactor', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
+    }
+
+    get sunSize(): number {
+        return this.#params.sunSize;
+    }
+
+    set sunSize(v: number) {
+        this.#setParam('sunSize', v, false, true, true, (v) => validatePositiveNumberRange(v, 0.01, 10.0));
+    }
+
+    get sunLimbDarkening(): number {
+        return this.#params.sunLimbDarkening;
+    }
+
+    set sunLimbDarkening(v: number) {
+        this.#setParam('sunLimbDarkening', v, false, false, true, (v) => validateNumberRange(v, 0, 10.0));
+    }
+
+    get skyLuminanceFactor(): [number, number, number] {
+        return [this.#params.skyLuminanceFactor[0], this.#params.skyLuminanceFactor[1], this.#params.skyLuminanceFactor[2]];
+    }
+
+    set skyLuminanceFactor(v: [number, number, number]) {
+        this.#setParam('skyLuminanceFactor', [...v], true, false, true);
+    }
+
+    get transmittanceLUT(): DirectTexture {
+        return this.#transmittanceGenerator.lutTexture;
+    }
+
+    get multiScatLUT(): DirectTexture {
+        return this.#multiScatteringGenerator.lutTexture;
+    }
+
+    get skyViewLUT(): DirectTexture {
+        return this.#skyViewGenerator.lutTexture;
+    }
+
+    get aerialPerspectiveLUT(): DirectCubeTexture {
+        return this.#aerialPerspectiveGenerator.lutTexture;
+    }
+
+    get skyAtmosphereIrradianceLUT(): DirectCubeTexture {
+        return this.#skyLight.irradianceLUT;
+    }
+
+    get skyAtmosphereReflectionLUT(): DirectCubeTexture {
+        return this.#skyLight.reflectionLUT;
+    }
+
+    get skyLight(): SkyLight {
+        return this.#skyLight;
+    }
+
+    get atmosphereSampler() {
+        return this.#sampler;
+    }
 
     /**
      * [KO] 배경 렌더링을 수행합니다. (무한 거리 배경 처리 전용)
@@ -136,6 +321,13 @@ class SkyAtmosphere {
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         this.#performUpdate(view);
         return this.#postEffect.render(view, width, height, sourceTextureInfo);
+    }
+
+    #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
+        this.#dirtyUniformBuffer = true;
+        if (lut) this.#dirtyLUT = true;
+        if (skyView) this.#dirtySkyView = true;
+        if (ibl) this.#skyLight.dirty = true;
     }
 
     #performUpdate(view: View3D) {
@@ -240,131 +432,6 @@ class SkyAtmosphere {
         (this.#params as any)[key] = value;
         this.#markDirty(lut, skyView, ibl);
     }
-
-    get params() { return this.#params; }
-
-    get aerialPerspectiveDistanceScale(): number { return this.#params.aerialPerspectiveDistanceScale; }
-    set aerialPerspectiveDistanceScale(v: number) {
-        this.#setParam('aerialPerspectiveDistanceScale', v, false, true, true, (v) => validatePositiveNumberRange(v, 1, 1000));
-    }
-
-    get aerialPerspectiveStartDepth(): number { return this.#params.aerialPerspectiveStartDepth; }
-    set aerialPerspectiveStartDepth(v: number) {
-        this.#setParam('aerialPerspectiveStartDepth', v, false, true, true, (v) => validatePositiveNumberRange(v, 0, 100));
-    }
-
-    get transmittanceMinLightElevationAngle(): number { return this.#params.transmittanceMinLightElevationAngle; }
-    set transmittanceMinLightElevationAngle(v: number) {
-        this.#setParam('transmittanceMinLightElevationAngle', v, true, true, true, (v) => validateNumberRange(v, -90, 90));
-    }
-
-    get groundRadius(): number { return this.#params.groundRadius; }
-    set groundRadius(v: number) {
-        this.#setParam('groundRadius', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
-    }
-
-    get atmosphereHeight(): number { return this.#params.atmosphereHeight; }
-    set atmosphereHeight(v: number) {
-        this.#setParam('atmosphereHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
-    }
-
-    get mieScattering(): [number, number, number] {
-        return [this.#params.mieScattering[0], this.#params.mieScattering[1], this.#params.mieScattering[2]];
-    }
-    set mieScattering(v: [number, number, number]) {
-        this.#setParam('mieScattering', [...v], true, false, true);
-    }
-
-    get mieAbsorption(): [number, number, number] {
-        return [this.#params.mieAbsorption[0], this.#params.mieAbsorption[1], this.#params.mieAbsorption[2]];
-    }
-    set mieAbsorption(v: [number, number, number]) {
-        this.#setParam('mieAbsorption', [...v], true, false, true);
-    }
-
-    get rayleighScattering(): [number, number, number] {
-        return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]];
-    }
-    set rayleighScattering(v: [number, number, number]) {
-        this.#setParam('rayleighScattering', [...v], true, false, true);
-    }
-
-    get rayleighExponentialDistribution(): number { return this.#params.rayleighExponentialDistribution; }
-    set rayleighExponentialDistribution(v: number) {
-        this.#setParam('rayleighExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
-    }
-
-    get mieExponentialDistribution(): number { return this.#params.mieExponentialDistribution; }
-    set mieExponentialDistribution(v: number) {
-        this.#setParam('mieExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
-    }
-
-    get mieAnisotropy(): number { return this.#params.mieAnisotropy; }
-    set mieAnisotropy(v: number) {
-        this.#setParam('mieAnisotropy', v, true, false, true, (v) => validateNumberRange(v, 0, 0.999));
-    }
-
-    get groundAlbedo(): [number, number, number] {
-        return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]];
-    }
-    set groundAlbedo(v: [number, number, number]) {
-        this.#setParam('groundAlbedo', [...v], true, false, true);
-    }
-
-    get absorptionCoefficient(): [number, number, number] {
-        return [this.#params.absorptionCoefficient[0], this.#params.absorptionCoefficient[1], this.#params.absorptionCoefficient[2]];
-    }
-    set absorptionCoefficient(v: [number, number, number]) {
-        this.#setParam('absorptionCoefficient', [...v], true, false, true);
-    }
-
-    get absorptionTipAltitude(): number { return this.#params.absorptionTipAltitude; }
-    set absorptionTipAltitude(v: number) {
-        this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(0, 100));
-    }
-
-    get absorptionTentWidth(): number { return this.#params.absorptionTentWidth; }
-    set absorptionTentWidth(v: number) {
-        this.#setParam('absorptionTentWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
-    }
-
-    get multiScatteringFactor(): number { return this.#params.multiScatteringFactor; }
-    set multiScatteringFactor(v: number) {
-        this.#setParam('multiScatteringFactor', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
-    }
-
-    get sunSize(): number { return this.#params.sunSize; }
-    set sunSize(v: number) {
-        this.#setParam('sunSize', v, false, true, true, (v) => validatePositiveNumberRange(v, 0.01, 10.0));
-    }
-
-    get sunLimbDarkening(): number { return this.#params.sunLimbDarkening; }
-    set sunLimbDarkening(v: number) {
-        this.#setParam('sunLimbDarkening', v, false, false, true, (v) => validateNumberRange(v, 0, 10.0));
-    }
-
-    get skyLuminanceFactor(): [number, number, number] {
-        return [this.#params.skyLuminanceFactor[0], this.#params.skyLuminanceFactor[1], this.#params.skyLuminanceFactor[2]];
-    }
-    set skyLuminanceFactor(v: [number, number, number]) {
-        this.#setParam('skyLuminanceFactor', [...v], true, false, true);
-    }
-
-    get transmittanceLUT(): DirectTexture { return this.#transmittanceGenerator.lutTexture; }
-
-    get multiScatLUT(): DirectTexture { return this.#multiScatteringGenerator.lutTexture; }
-
-    get skyViewLUT(): DirectTexture { return this.#skyViewGenerator.lutTexture; }
-
-    get aerialPerspectiveLUT(): DirectCubeTexture { return this.#aerialPerspectiveGenerator.lutTexture; }
-
-    get skyAtmosphereIrradianceLUT(): DirectCubeTexture { return this.#skyLight.irradianceLUT; }
-
-    get skyAtmosphereReflectionLUT(): DirectCubeTexture { return this.#skyLight.reflectionLUT; }
-
-    get skyLight(): SkyLight { return this.#skyLight; }
-
-    get atmosphereSampler() { return this.#sampler; }
 
     #updateSharedUniformBuffer(): void {
         const {members} = UNIFORM_STRUCT;

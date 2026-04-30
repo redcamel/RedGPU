@@ -12,18 +12,17 @@ import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer
  * [EN] The SkyLight class generates and manages indirect lighting (IBL) for the scene based on SkyAtmosphere's atmospheric scattering data.
  */
 class SkyLight {
+    /**
+     * [KO] IBL 갱신 여부 (true일 경우 다음 프레임에 갱신 수행)
+     * [EN] Whether IBL needs to be updated (if true, update is performed on the next frame)
+     */
+    dirty: boolean = true;
     #redGPUContext: RedGPUContext;
     #reflectionGenerator: SkyLightReflectionGenerator;
     #irradianceGenerator: SkyLightIrradianceGenerator;
     #irradianceLUT: DirectCubeTexture;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
-
-    /**
-     * [KO] IBL 갱신 여부 (true일 경우 다음 프레임에 갱신 수행)
-     * [EN] Whether IBL needs to be updated (if true, update is performed on the next frame)
-     */
-    dirty: boolean = true;
     #isUpdatingIBL: boolean = false;
 
     /**
@@ -50,6 +49,16 @@ class SkyLight {
         this.#irradianceGenerator = new SkyLightIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
     }
 
+    /** [KO] 간접 디퓨즈 조명용 Irradiance LUT [EN] Irradiance LUT for indirect diffuse lighting */
+    get irradianceLUT(): DirectCubeTexture {
+        return this.#irradianceLUT;
+    }
+
+    /** [KO] 간접 스펙큘러 조명용 Reflection LUT [EN] Reflection LUT for indirect specular lighting */
+    get reflectionLUT(): DirectCubeTexture {
+        return this.#reflectionGenerator.prefilteredTexture;
+    }
+
     /**
      * [KO] SkyAtmosphere의 상태를 기반으로 IBL 데이터를 업데이트합니다.
      * [EN] Updates IBL data based on the state of SkyAtmosphere.
@@ -58,38 +67,32 @@ class SkyLight {
     async update(skyAtmosphere: SkyAtmosphere): Promise<void> {
         if (this.dirty && !this.#isUpdatingIBL) {
             this.#isUpdatingIBL = true;
-            
+
             // [KO] 스펙큘러 및 디퓨즈 IBL 생성
             // [EN] Generate specular and diffuse IBL
-             this.#reflectionGenerator.render(
+            this.#reflectionGenerator.render(
                 skyAtmosphere.transmittanceLUT,
                 skyAtmosphere.multiScatLUT,
                 skyAtmosphere.skyViewLUT
             );
-             this.#irradianceGenerator.render(
+            this.#irradianceGenerator.render(
                 skyAtmosphere.transmittanceLUT,
                 skyAtmosphere.multiScatLUT,
                 skyAtmosphere.skyViewLUT
             );
-            
+
             // [KO] 최종 Irradiance LUT로 베이킹
             // [EN] Bake to final Irradiance LUT
-             this.#redGPUContext.resourceManager.irradianceGenerator.render(
+            this.#redGPUContext.resourceManager.irradianceGenerator.render(
                 this.#irradianceGenerator.sourceCubeTexture,
                 this.#irradianceLUT.gpuTexture
             );
-            
+
             this.#irradianceLUT.notifyUpdate();
             this.#isUpdatingIBL = false;
             this.dirty = false;
         }
     }
-
-    /** [KO] 간접 디퓨즈 조명용 Irradiance LUT [EN] Irradiance LUT for indirect diffuse lighting */
-    get irradianceLUT(): DirectCubeTexture { return this.#irradianceLUT; }
-
-    /** [KO] 간접 스펙큘러 조명용 Reflection LUT [EN] Reflection LUT for indirect specular lighting */
-    get reflectionLUT(): DirectCubeTexture { return this.#reflectionGenerator.prefilteredTexture; }
 }
 
 Object.freeze(SkyLight);

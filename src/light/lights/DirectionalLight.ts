@@ -67,6 +67,90 @@ class DirectionalLight extends ABaseLight {
         this.#lux = value;
     }
 
+    /**
+     * [KO] 광원의 고도(Elevation, 도)입니다.
+     * [EN] Elevation of the light source (degrees).
+     */
+    get elevation(): number {
+        return this.#elevation;
+    }
+
+    set elevation(value: number) {
+        this.#elevation = value;
+        this.#updateDirectionFromSpherical();
+    }
+
+    /**
+     * [KO] 광원의 방위각(Azimuth, 도)입니다.
+     * [EN] Azimuth of the light source (degrees).
+     */
+    get azimuth(): number {
+        return this.#azimuth;
+    }
+
+    set azimuth(value: number) {
+        this.#azimuth = value;
+        this.#updateDirectionFromSpherical();
+    }
+
+    /**
+     * [KO] 광원의 X 방향 벡터 값입니다.
+     * [EN] X direction vector value of the light.
+     */
+    get directionX(): number {
+        return this.#directionX;
+    }
+
+    set directionX(value: number) {
+        this.#directionX = value;
+        this.#updateSphericalFromDirection();
+    }
+
+    /**
+     * [KO] 광원의 Y 방향 벡터 값입니다.
+     * [EN] Y direction vector value of the light.
+     */
+    get directionY(): number {
+        return this.#directionY;
+    }
+
+    set directionY(value: number) {
+        this.#directionY = value;
+        this.#updateSphericalFromDirection();
+    }
+
+    /**
+     * [KO] 광원의 Z 방향 벡터 값입니다.
+     * [EN] Z direction vector value of the light.
+     */
+    get directionZ(): number {
+        return this.#directionZ;
+    }
+
+    set directionZ(value: number) {
+        this.#directionZ = value;
+        this.#updateSphericalFromDirection();
+    }
+
+    /**
+     * [KO] 광원의 전체 방향 벡터를 반환합니다.
+     * [EN] Returns the full direction vector of the light.
+     */
+    get direction(): [number, number, number] {
+        return [this.#directionX, this.#directionY, this.#directionZ];
+    }
+
+    /**
+     * [KO] 광원의 전체 방향 벡터를 설정합니다.
+     * [EN] Sets the full direction vector of the light.
+     */
+    set direction(value: [number, number, number]) {
+        this.#directionX = value[0];
+        this.#directionY = value[1];
+        this.#directionZ = value[2];
+        this.#updateSphericalFromDirection();
+    }
+
     #updateDirectionFromSpherical() {
         const el = this.#elevation * Math.PI / 180;
         const az = this.#azimuth * Math.PI / 180;
@@ -97,75 +181,6 @@ class DirectionalLight extends ABaseLight {
 
         this.#elevation = Math.asin(ny) * 180 / Math.PI;
         this.#azimuth = Math.atan2(nz, nx) * 180 / Math.PI;
-    }
-
-    /**
-     * [KO] 광원의 고도(Elevation, 도)입니다.
-     * [EN] Elevation of the light source (degrees).
-     */
-    get elevation(): number { return this.#elevation; }
-    set elevation(value: number) {
-        this.#elevation = value;
-        this.#updateDirectionFromSpherical();
-    }
-
-    /**
-     * [KO] 광원의 방위각(Azimuth, 도)입니다.
-     * [EN] Azimuth of the light source (degrees).
-     */
-    get azimuth(): number { return this.#azimuth; }
-    set azimuth(value: number) {
-        this.#azimuth = value;
-        this.#updateDirectionFromSpherical();
-    }
-
-    /**
-     * [KO] 광원의 X 방향 벡터 값입니다.
-     * [EN] X direction vector value of the light.
-     */
-    get directionX(): number { return this.#directionX; }
-    set directionX(value: number) {
-        this.#directionX = value;
-        this.#updateSphericalFromDirection();
-    }
-
-    /**
-     * [KO] 광원의 Y 방향 벡터 값입니다.
-     * [EN] Y direction vector value of the light.
-     */
-    get directionY(): number { return this.#directionY; }
-    set directionY(value: number) {
-        this.#directionY = value;
-        this.#updateSphericalFromDirection();
-    }
-
-    /**
-     * [KO] 광원의 Z 방향 벡터 값입니다.
-     * [EN] Z direction vector value of the light.
-     */
-    get directionZ(): number { return this.#directionZ; }
-    set directionZ(value: number) {
-        this.#directionZ = value;
-        this.#updateSphericalFromDirection();
-    }
-
-    /**
-     * [KO] 광원의 전체 방향 벡터를 반환합니다.
-     * [EN] Returns the full direction vector of the light.
-     */
-    get direction(): [number, number, number] {
-        return [this.#directionX, this.#directionY, this.#directionZ];
-    }
-
-    /**
-     * [KO] 광원의 전체 방향 벡터를 설정합니다.
-     * [EN] Sets the full direction vector of the light.
-     */
-    set direction(value: [number, number, number]) {
-        this.#directionX = value[0];
-        this.#directionY = value[1];
-        this.#directionZ = value[2];
-        this.#updateSphericalFromDirection();
     }
 }
 

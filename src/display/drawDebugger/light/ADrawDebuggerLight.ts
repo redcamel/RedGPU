@@ -41,64 +41,65 @@ abstract class ADrawDebuggerLight {
     get lightDebugMesh(): Mesh {
         return this.#lightDebugMesh;
     }
-updateVertexBuffer(lines: number[][][], vertexBuffer: VertexBuffer) {
-    const vertexData = vertexBuffer.data;
-    let offset = 0;
-    const maxLines = Math.min(lines.length, Math.floor(vertexData.length / 24)); // 16 -> 24 (각 점당 12개 float)
-    for (let i = 0; i < maxLines; i++) {
-        const [start, end] = lines[i];
-        // 시작점
-        vertexData[offset++] = start[0];
-        vertexData[offset++] = start[1];
-        vertexData[offset++] = start[2];
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 1;
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 0;
-        // 탄젠트 (더미 데이터)
-        vertexData[offset++] = 1;
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 1;
-        // 끝점
-        vertexData[offset++] = end[0];
-        vertexData[offset++] = end[1];
-        vertexData[offset++] = end[2];
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 1;
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 0;
-        // 탄젠트 (더미 데이터)
-        vertexData[offset++] = 1;
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 0;
-        vertexData[offset++] = 1;
+
+    updateVertexBuffer(lines: number[][][], vertexBuffer: VertexBuffer) {
+        const vertexData = vertexBuffer.data;
+        let offset = 0;
+        const maxLines = Math.min(lines.length, Math.floor(vertexData.length / 24)); // 16 -> 24 (각 점당 12개 float)
+        for (let i = 0; i < maxLines; i++) {
+            const [start, end] = lines[i];
+            // 시작점
+            vertexData[offset++] = start[0];
+            vertexData[offset++] = start[1];
+            vertexData[offset++] = start[2];
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 1;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 0;
+            // 탄젠트 (더미 데이터)
+            vertexData[offset++] = 1;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 1;
+            // 끝점
+            vertexData[offset++] = end[0];
+            vertexData[offset++] = end[1];
+            vertexData[offset++] = end[2];
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 1;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 0;
+            // 탄젠트 (더미 데이터)
+            vertexData[offset++] = 1;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 0;
+            vertexData[offset++] = 1;
+        }
+        vertexBuffer.updateAllData(vertexData);
     }
-    vertexBuffer.updateAllData(vertexData);
-}
 
-abstract render(renderViewStateData: RenderViewStateData): void;
+    abstract render(renderViewStateData: RenderViewStateData): void;
 
-private createLightDebugGeometry(redGPUContext: RedGPUContext, maxLines: number): Geometry {
-    const vertices = new Float32Array(maxLines * 2 * 12); // maxLines * 2개 점 * 12개 데이터 (pos:3, normal:3, uv:2, tangent:4)
-    const interleavedStruct = new VertexInterleavedStruct(
-        {
-            vertexPosition: VertexInterleaveType.float32x3,
-            vertexNormal: VertexInterleaveType.float32x3,
-            texcoord: VertexInterleaveType.float32x2,
-            vertexTangent: VertexInterleaveType.float32x4,
-        },
-        `lightDebugStruct_${Math.random()}`
-    );
-    const vertexBuffer = new VertexBuffer(
-        redGPUContext,
-        vertices,
-        interleavedStruct
-    );
-    return new Geometry(redGPUContext, vertexBuffer);
-}
+    private createLightDebugGeometry(redGPUContext: RedGPUContext, maxLines: number): Geometry {
+        const vertices = new Float32Array(maxLines * 2 * 12); // maxLines * 2개 점 * 12개 데이터 (pos:3, normal:3, uv:2, tangent:4)
+        const interleavedStruct = new VertexInterleavedStruct(
+            {
+                vertexPosition: VertexInterleaveType.float32x3,
+                vertexNormal: VertexInterleaveType.float32x3,
+                texcoord: VertexInterleaveType.float32x2,
+                vertexTangent: VertexInterleaveType.float32x4,
+            },
+            `lightDebugStruct_${Math.random()}`
+        );
+        const vertexBuffer = new VertexBuffer(
+            redGPUContext,
+            vertices,
+            interleavedStruct
+        );
+        return new Geometry(redGPUContext, vertexBuffer);
+    }
 }
 
 export default ADrawDebuggerLight;

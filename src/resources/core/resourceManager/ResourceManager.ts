@@ -1,9 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import {keepLog} from "../../../utils";
 import Sampler from "../../sampler/Sampler";
-import BitmapTexture from "../../texture/BitmapTexture";
-import DirectCubeTexture from "../../texture/DirectCubeTexture";
-import DirectTexture from "../../texture/DirectTexture";
 import {
     BRDFGenerator,
     EquirectangularToCubeGenerator,
@@ -14,7 +11,6 @@ import {
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
-import PackedTexture from "../../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../../wgslParser/core/preprocessWGSL";
 import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";

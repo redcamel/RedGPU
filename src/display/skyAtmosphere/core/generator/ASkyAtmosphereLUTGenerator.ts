@@ -29,36 +29,35 @@ abstract class ASkyAtmosphereLUTGenerator {
         this.#depth = depth;
     }
 
-    get redGPUContext(): RedGPUContext { return this.#redGPUContext; }
-    get sharedUniformBuffer(): UniformBuffer { return this.#sharedUniformBuffer; }
-    get sampler(): Sampler { return this.#sampler; }
+    get redGPUContext(): RedGPUContext {
+        return this.#redGPUContext;
+    }
 
-    get label(): string { return this.#label; }
-    get width(): number { return this.#width; }
-    get height(): number { return this.#height; }
-    get depth(): number { return this.#depth; }
+    get sharedUniformBuffer(): UniformBuffer {
+        return this.#sharedUniformBuffer;
+    }
+
+    get sampler(): Sampler {
+        return this.#sampler;
+    }
+
+    get label(): string {
+        return this.#label;
+    }
+
+    get width(): number {
+        return this.#width;
+    }
+
+    get height(): number {
+        return this.#height;
+    }
+
+    get depth(): number {
+        return this.#depth;
+    }
 
     abstract get lutTexture(): DirectTexture | DirectCubeTexture;
-
-    protected createComputePipeline(label: string, shaderCode: string): GPUComputePipeline {
-        const {gpuDevice} = this.#redGPUContext;
-        return gpuDevice.createComputePipeline({
-            label,
-            layout: 'auto',
-            compute: {
-                module: gpuDevice.createShaderModule({code: shaderCode}),
-                entryPoint: 'main'
-            }
-        });
-    }
-
-    protected createBindGroup(label: string, pipeline: GPUComputePipeline, entries: GPUBindGroupEntry[]): GPUBindGroup {
-        return this.#redGPUContext.gpuDevice.createBindGroup({
-            label,
-            layout: pipeline.getBindGroupLayout(0),
-            entries
-        });
-    }
 
     executeComputePass(
         pipeline: GPUComputePipeline,
@@ -90,6 +89,26 @@ abstract class ASkyAtmosphereLUTGenerator {
             dimension: is3D ? '3d' : '2d',
             format: format,
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+        });
+    }
+
+    protected createComputePipeline(label: string, shaderCode: string): GPUComputePipeline {
+        const {gpuDevice} = this.#redGPUContext;
+        return gpuDevice.createComputePipeline({
+            label,
+            layout: 'auto',
+            compute: {
+                module: gpuDevice.createShaderModule({code: shaderCode}),
+                entryPoint: 'main'
+            }
+        });
+    }
+
+    protected createBindGroup(label: string, pipeline: GPUComputePipeline, entries: GPUBindGroupEntry[]): GPUBindGroup {
+        return this.#redGPUContext.gpuDevice.createBindGroup({
+            label,
+            layout: pipeline.getBindGroupLayout(0),
+            entries
         });
     }
 }

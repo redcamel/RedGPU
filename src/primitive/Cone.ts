@@ -40,7 +40,15 @@ class Cone extends Primitive {
                 thetaStart: number = 0.0,
                 thetaLength: number = Math.PI * 2
     ) {
-        const uniqueKey = Primitive.generateUniqueKey('CONE', { radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength });
+        const uniqueKey = Primitive.generateUniqueKey('CONE', {
+            radius,
+            height,
+            radialSegments,
+            heightSegments,
+            capBottom,
+            thetaStart,
+            thetaLength
+        });
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateConeData(
             redGPUContext, radius, height, radialSegments, heightSegments, capBottom, thetaStart, thetaLength, uniqueKey
         ));

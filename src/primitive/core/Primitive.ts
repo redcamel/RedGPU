@@ -26,18 +26,6 @@ class Primitive {
         },
         `primitiveInterleaveStruct`
     );
-
-    static generateUniqueKey(name: string, params: Record<string, any>): string {
-        let uniqueKey = 'PRIMITIVE_' + name.toUpperCase();
-        for (const key in params) {
-            const value = params[key];
-            if (value !== undefined) {
-                uniqueKey += '_' + key.toUpperCase() + value;
-            }
-        }
-        return uniqueKey;
-    }
-
     #gpuRenderInfo: GeometryGPURenderInfo;
     #vertexBuffer: VertexBuffer;
     #indexBuffer: IndexBuffer;
@@ -60,12 +48,32 @@ class Primitive {
         return this.#INTERLEAVE_STRUCT;
     }
 
-    get gpuRenderInfo(): { buffers: GPUVertexBufferLayout[] } { return this.#gpuRenderInfo; }
-    get vertexBuffer(): VertexBuffer { return this.#vertexBuffer; }
-    get indexBuffer(): IndexBuffer { return this.#indexBuffer; }
+    get gpuRenderInfo(): { buffers: GPUVertexBufferLayout[] } {
+        return this.#gpuRenderInfo;
+    }
+
+    get vertexBuffer(): VertexBuffer {
+        return this.#vertexBuffer;
+    }
+
+    get indexBuffer(): IndexBuffer {
+        return this.#indexBuffer;
+    }
+
     get volume(): AABB {
         if (!this.#volume) this.#volume = calculateGeometryAABB(this.#vertexBuffer);
         return this.#volume;
+    }
+
+    static generateUniqueKey(name: string, params: Record<string, any>): string {
+        let uniqueKey = 'PRIMITIVE_' + name.toUpperCase();
+        for (const key in params) {
+            const value = params[key];
+            if (value !== undefined) {
+                uniqueKey += '_' + key.toUpperCase() + value;
+            }
+        }
+        return uniqueKey;
     }
 
     #setData(geometry: Geometry) {

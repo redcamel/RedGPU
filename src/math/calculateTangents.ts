@@ -34,9 +34,12 @@ export const calculateTangentsInterleaved = (
 
         const o1 = i1 * stride, o2 = i2 * stride, o3 = i3 * stride;
 
-        const v1x = interleaveData[o1 + posOffset], v1y = interleaveData[o1 + posOffset + 1], v1z = interleaveData[o1 + posOffset + 2];
-        const v2x = interleaveData[o2 + posOffset], v2y = interleaveData[o2 + posOffset + 1], v2z = interleaveData[o2 + posOffset + 2];
-        const v3x = interleaveData[o3 + posOffset], v3y = interleaveData[o3 + posOffset + 1], v3z = interleaveData[o3 + posOffset + 2];
+        const v1x = interleaveData[o1 + posOffset], v1y = interleaveData[o1 + posOffset + 1],
+            v1z = interleaveData[o1 + posOffset + 2];
+        const v2x = interleaveData[o2 + posOffset], v2y = interleaveData[o2 + posOffset + 1],
+            v2z = interleaveData[o2 + posOffset + 2];
+        const v3x = interleaveData[o3 + posOffset], v3y = interleaveData[o3 + posOffset + 1],
+            v3z = interleaveData[o3 + posOffset + 2];
 
         const w1x = interleaveData[o1 + uvOffset], w1y = interleaveData[o1 + uvOffset + 1];
         const w2x = interleaveData[o2 + uvOffset], w2y = interleaveData[o2 + uvOffset + 1];
@@ -60,18 +63,31 @@ export const calculateTangentsInterleaved = (
         const tdiry = (s1 * y2 - s2 * y1) * r;
         const tdirz = (s1 * z2 - s2 * z1) * r;
 
-        tan1[i1 * 3] += sdirx; tan1[i1 * 3 + 1] += sdiry; tan1[i1 * 3 + 2] += sdirz;
-        tan1[i2 * 3] += sdirx; tan1[i2 * 3 + 1] += sdiry; tan1[i2 * 3 + 2] += sdirz;
-        tan1[i3 * 3] += sdirx; tan1[i3 * 3 + 1] += sdiry; tan1[i3 * 3 + 2] += sdirz;
+        tan1[i1 * 3] += sdirx;
+        tan1[i1 * 3 + 1] += sdiry;
+        tan1[i1 * 3 + 2] += sdirz;
+        tan1[i2 * 3] += sdirx;
+        tan1[i2 * 3 + 1] += sdiry;
+        tan1[i2 * 3 + 2] += sdirz;
+        tan1[i3 * 3] += sdirx;
+        tan1[i3 * 3 + 1] += sdiry;
+        tan1[i3 * 3 + 2] += sdirz;
 
-        tan2[i1 * 3] += tdirx; tan2[i1 * 3 + 1] += tdiry; tan2[i1 * 3 + 2] += tdirz;
-        tan2[i2 * 3] += tdirx; tan2[i2 * 3 + 1] += tdiry; tan2[i2 * 3 + 2] += tdirz;
-        tan2[i3 * 3] += tdirx; tan2[i3 * 3 + 1] += tdiry; tan2[i3 * 3 + 2] += tdirz;
+        tan2[i1 * 3] += tdirx;
+        tan2[i1 * 3 + 1] += tdiry;
+        tan2[i1 * 3 + 2] += tdirz;
+        tan2[i2 * 3] += tdirx;
+        tan2[i2 * 3 + 1] += tdiry;
+        tan2[i2 * 3 + 2] += tdirz;
+        tan2[i3 * 3] += tdirx;
+        tan2[i3 * 3 + 1] += tdiry;
+        tan2[i3 * 3 + 2] += tdirz;
     }
 
     for (let i = 0; i < vertexCount; i++) {
         const o = i * stride;
-        const nx = interleaveData[o + normalOffset], ny = interleaveData[o + normalOffset + 1], nz = interleaveData[o + normalOffset + 2];
+        const nx = interleaveData[o + normalOffset], ny = interleaveData[o + normalOffset + 1],
+            nz = interleaveData[o + normalOffset + 2];
         const t1x = tan1[i * 3], t1y = tan1[i * 3 + 1], t1z = tan1[i * 3 + 2];
         const t2x = tan2[i * 3], t2y = tan2[i * 3 + 1], t2z = tan2[i * 3 + 2];
 
@@ -82,11 +98,15 @@ export const calculateTangentsInterleaved = (
         if (len < EPSILON) {
             const fallbackX = Math.abs(nx) < 0.9 ? 1 : 0, fallbackY = Math.abs(nx) < 0.9 ? 0 : 1;
             const fDot = nx * fallbackX + ny * fallbackY;
-            tx = fallbackX - nx * fDot; ty = fallbackY - ny * fDot; tz = -nz * fDot;
+            tx = fallbackX - nx * fDot;
+            ty = fallbackY - ny * fDot;
+            tz = -nz * fDot;
             len = Math.sqrt(tx * tx + ty * ty + tz * tz);
         }
 
-        tx /= len; ty /= len; tz /= len;
+        tx /= len;
+        ty /= len;
+        tz /= len;
         const crossX = ny * tz - nz * ty, crossY = nz * tx - nx * tz, crossZ = nx * ty - ny * tx;
         const w = (crossX * t2x + crossY * t2y + crossZ * t2z) < 0 ? 1 : -1;
 
@@ -121,9 +141,14 @@ const calculateTangents = (
     // [KO] 입력 데이터를 임시 인터리브 버퍼로 패킹
     for (let i = 0; i < vertexCount; i++) {
         const o = i * stride;
-        buffer[o] = vertices[i * 3]; buffer[o + 1] = vertices[i * 3 + 1]; buffer[o + 2] = vertices[i * 3 + 2];
-        buffer[o + 3] = normals[i * 3]; buffer[o + 4] = normals[i * 3 + 1]; buffer[o + 5] = normals[i * 3 + 2];
-        buffer[o + 6] = uvs[i * 2]; buffer[o + 7] = uvs[i * 2 + 1];
+        buffer[o] = vertices[i * 3];
+        buffer[o + 1] = vertices[i * 3 + 1];
+        buffer[o + 2] = vertices[i * 3 + 2];
+        buffer[o + 3] = normals[i * 3];
+        buffer[o + 4] = normals[i * 3 + 1];
+        buffer[o + 5] = normals[i * 3 + 2];
+        buffer[o + 6] = uvs[i * 2];
+        buffer[o + 7] = uvs[i * 2 + 1];
     }
 
     // [KO] 코어 엔진 호출
@@ -133,7 +158,10 @@ const calculateTangents = (
     const result = new Float32Array(vertexCount * 4);
     for (let i = 0; i < vertexCount; i++) {
         const o = i * stride, ro = i * 4;
-        result[ro] = buffer[o + 8]; result[ro + 1] = buffer[o + 9]; result[ro + 2] = buffer[o + 10]; result[ro + 3] = buffer[o + 11];
+        result[ro] = buffer[o + 8];
+        result[ro + 1] = buffer[o + 9];
+        result[ro + 2] = buffer[o + 10];
+        result[ro + 3] = buffer[o + 11];
     }
     return result;
 };

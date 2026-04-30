@@ -159,7 +159,7 @@ class SystemUniformUpdater {
     ) {
         const params = skyAtmosphere?.params;
         const skyAtmosphereMembers = systemMembers.skyAtmosphere.members;
-        
+
         // 1. 전역 플래그 업데이트
         updateSystemUniformData(
             systemMembers, uniformDataF32, uniformDataU32,

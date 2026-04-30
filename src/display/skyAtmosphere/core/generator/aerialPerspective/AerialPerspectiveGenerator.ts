@@ -13,7 +13,7 @@ import AtmosphereShaderLibrary from "../../AtmosphereShaderLibrary";
 const SHADER_INFO = parseWGSL('SkyAtmosphere_AerialPerspective_Generator', aerialPerspectiveShaderCode_wgsl, AtmosphereShaderLibrary);
 
 class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
-    #lutTexture: DirectCubeTexture; 
+    #lutTexture: DirectCubeTexture;
     #bindGroup: GPUBindGroup;
     #pipeline: GPUComputePipeline;
     #prevSystemBuffer: GPUBuffer;
@@ -38,16 +38,16 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
         if (!this.#bindGroup || this.#prevSystemBuffer !== systemBuffer) {
             this.#prevSystemBuffer = systemBuffer;
             this.#bindGroup = this.createBindGroup('SkyAtmosphere_AerialPerspective_BindGroup', this.#pipeline, [
-                {binding: 0, resource: {buffer: systemBuffer}}, 
-                {binding: 1, resource: this.#lutTexture.gpuTextureView}, 
-                {binding: 2, resource: multiScat.gpuTextureView}, 
-                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}, 
-                {binding: 4, resource: transmittance.gpuTextureView}, 
-                {binding: 13, resource: this.sampler.gpuSampler} 
+                {binding: 0, resource: {buffer: systemBuffer}},
+                {binding: 1, resource: this.#lutTexture.gpuTextureView},
+                {binding: 2, resource: multiScat.gpuTextureView},
+                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+                {binding: 4, resource: transmittance.gpuTextureView},
+                {binding: 13, resource: this.sampler.gpuSampler}
             ]);
         }
 
-        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 4]); 
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 4]);
     }
 
     #init(): void {

@@ -67,26 +67,56 @@ class IBL {
         }
     }
 
-    get environmentSize(): number { return this.#environmentSize; }
-    get prefilterSize(): number { return this.#prefilterSize; }
-    get irradianceSize(): number { return this.#irradianceSize; }
-    get irradianceTexture(): DirectCubeTexture { return this.#irradianceTexture; }
-    get environmentTexture(): DirectCubeTexture { return this.#environmentTexture; }
-    get prefilterTexture(): DirectCubeTexture { return this.#prefilterTexture; }
+    get environmentSize(): number {
+        return this.#environmentSize;
+    }
+
+    get prefilterSize(): number {
+        return this.#prefilterSize;
+    }
+
+    get irradianceSize(): number {
+        return this.#irradianceSize;
+    }
+
+    get irradianceTexture(): DirectCubeTexture {
+        return this.#irradianceTexture;
+    }
+
+    get environmentTexture(): DirectCubeTexture {
+        return this.#environmentTexture;
+    }
+
+    get prefilterTexture(): DirectCubeTexture {
+        return this.#prefilterTexture;
+    }
 
     /** [KO] 아티스트 제어를 위한 강도 배율 [EN] Intensity multiplier for artist control */
-    get intensityMultiplier(): number { return this.#intensityMultiplier; }
-    set intensityMultiplier(value: number) { this.#intensityMultiplier = value; }
+    get intensityMultiplier(): number {
+        return this.#intensityMultiplier;
+    }
+
+    set intensityMultiplier(value: number) {
+        this.#intensityMultiplier = value;
+    }
 
     /** [KO] 물리적 휘도 (단위: cd/m²) [EN] Physical luminance (Unit: cd/m²) */
-    get luminance(): number { return this.#luminance; }
+    get luminance(): number {
+        return this.#luminance;
+    }
+
     set luminance(value: number) {
         this.#luminance = value;
     }
 
     /** [KO] 분석된 텍스처의 평균 휘도 (정규화용) [EN] Average luminance of the source image (for normalization) */
-    get averageLuminance(): number { return this.#averageLuminance; }
-    set averageLuminance(value: number) { this.#averageLuminance = value; }
+    get averageLuminance(): number {
+        return this.#averageLuminance;
+    }
+
+    set averageLuminance(value: number) {
+        this.#averageLuminance = value;
+    }
 
     #onSourceChanged = async (v?: HDRTexture | CubeTexture) => {
         v = v || this.#targetTexture;

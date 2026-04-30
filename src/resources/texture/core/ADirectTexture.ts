@@ -21,14 +21,28 @@ abstract class ADirectTexture extends ManagementResourceBase {
     /** [KO] 뷰 디스크립터를 반환합니다. [EN] Returns the view descriptor. */
     abstract get viewDescriptor(): GPUTextureViewDescriptor;
 
-    get gpuTexture(): GPUTexture { return this.#gpuTexture; }
-    get gpuTextureView(): GPUTextureView { return this.#gpuTextureView; }
-    get videoMemorySize(): number { return this.#videoMemorySize; }
-    get format(): GPUTextureFormat { return this.#format; }
-    get mipLevelCount(): number { return this.#mipLevelCount; }
+    get gpuTexture(): GPUTexture {
+        return this.#gpuTexture;
+    }
 
     set gpuTexture(value: GPUTexture) {
         this.setGpuTexture(value);
+    }
+
+    get gpuTextureView(): GPUTextureView {
+        return this.#gpuTextureView;
+    }
+
+    get videoMemorySize(): number {
+        return this.#videoMemorySize;
+    }
+
+    get format(): GPUTextureFormat {
+        return this.#format;
+    }
+
+    get mipLevelCount(): number {
+        return this.#mipLevelCount;
     }
 
     /** [KO] 리소스를 파괴합니다. [EN] Destroys the resource. */
@@ -61,6 +75,7 @@ abstract class ADirectTexture extends ManagementResourceBase {
     }
 
     protected abstract registerResource(): void;
+
     protected abstract unregisterResource(): void;
 }
 

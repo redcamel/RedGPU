@@ -48,7 +48,18 @@ class Torus extends Primitive {
     ) {
         if (radialSegments < 3) throw new Error('radialSegments must be 3 or greater');
         if (tubularSegments < 3) throw new Error('tubularSegments must be 3 or greater');
-        const uniqueKey = Primitive.generateUniqueKey('TORUS', { radius, thickness, radialSegments, tubularSegments, thetaStart, thetaLength, capStart, capEnd, isRadialCapStart, isRadialCapEnd });
+        const uniqueKey = Primitive.generateUniqueKey('TORUS', {
+            radius,
+            thickness,
+            radialSegments,
+            tubularSegments,
+            thetaStart,
+            thetaLength,
+            capStart,
+            capEnd,
+            isRadialCapStart,
+            isRadialCapEnd
+        });
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateTorusData(
             redGPUContext, radius, thickness, radialSegments, tubularSegments,
             thetaStart, thetaLength, capStart, capEnd, isRadialCapStart, isRadialCapEnd, uniqueKey

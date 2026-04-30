@@ -24,7 +24,7 @@ class DirectCubeTexture extends ADirectTexture {
      */
     constructor(redGPUContext: RedGPUContext, cacheKey: string, gpuTexture?: GPUTexture) {
         super(redGPUContext, MANAGED_STATE_KEY, cacheKey);
-        
+
         const {table} = this.targetResourceManagedState;
         if (cacheKey) {
             const target: ResourceStateCubeTexture = table.get(cacheKey);
@@ -36,7 +36,7 @@ class DirectCubeTexture extends ADirectTexture {
         if (gpuTexture) {
             this.setGpuTexture(gpuTexture);
         }
-        
+
         this.registerResource();
     }
 

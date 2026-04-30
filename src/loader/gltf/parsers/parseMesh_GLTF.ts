@@ -159,7 +159,7 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
             if (tangents.length > 0) {
                 // tangents = calculateTangents(vertices, normalData, uvs, indices, tangents);
             } else {
-                tangents = Array.from(calculateTangents(vertices, normalData, uvs, indices)) ;
+                tangents = Array.from(calculateTangents(vertices, normalData, uvs, indices));
             }
             // tMaterial.useVertexTangent = true;
         }

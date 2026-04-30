@@ -36,7 +36,7 @@ class Plane extends Primitive {
         heightSegments: number = 1,
         flipY: boolean = false
     ) {
-        const uniqueKey = Primitive.generateUniqueKey('PLANE', { width, height, widthSegments, heightSegments, flipY });
+        const uniqueKey = Primitive.generateUniqueKey('PLANE', {width, height, widthSegments, heightSegments, flipY});
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generatePlaneEntryData(
             redGPUContext, width, height, widthSegments, heightSegments, flipY, uniqueKey
         ));

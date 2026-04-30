@@ -47,7 +47,19 @@ class Cylinder extends Primitive {
                 isRadialTop: boolean = false,
                 isRadialBottom: boolean = false
     ) {
-        const uniqueKey = Primitive.generateUniqueKey('CYLINDER', { radiusTop, radiusBottom, height, radialSegments, heightSegments, capTop, capBottom, thetaStart, thetaLength, isRadialTop, isRadialBottom });
+        const uniqueKey = Primitive.generateUniqueKey('CYLINDER', {
+            radiusTop,
+            radiusBottom,
+            height,
+            radialSegments,
+            heightSegments,
+            capTop,
+            capBottom,
+            thetaStart,
+            thetaLength,
+            isRadialTop,
+            isRadialBottom
+        });
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateCylinderData(
             redGPUContext, radiusTop, radiusBottom, height, radialSegments, heightSegments,
             capTop, capBottom, thetaStart, thetaLength, isRadialTop, isRadialBottom, uniqueKey

@@ -7,17 +7,17 @@ import vertexSourceOutput from "../../shader/meshVertex_output.wgsl";
 import vertexSource from "../../shader/meshVertex.wgsl";
 
 const SHADER_INFO_PBR = parseWGSL('MESH_PBR', [
-    vertexSourcePbrInput, vertexSourcePbrOutput, vertexSourcePbr, ].join("\n"));
+    vertexSourcePbrInput, vertexSourcePbrOutput, vertexSourcePbr,].join("\n"));
 
 const SHADER_INFO_BASIC = parseWGSL('MESH_BASIC', [
     vertexSourceInput, vertexSourceOutput, vertexSource
 ].join("\n"));
 
 const SHADER_INFO_ONLY_FRAGMENT_PBR = parseWGSL('MESH_ONLY_FRAGMENT_PBR', [
-    vertexSourceInput, vertexSourcePbrOutput, vertexSource, ].join("\n"));
+    vertexSourceInput, vertexSourcePbrOutput, vertexSource,].join("\n"));
 
 const SHADER_INFO_ONLY_VERTEX_PBR = parseWGSL('MESH_ONLY_VERTEX_PBR', [
-    vertexSourcePbrInput, vertexSourceOutput, vertexSource, ].join("\n"));
+    vertexSourcePbrInput, vertexSourceOutput, vertexSource,].join("\n"));
 const MESH_SHADER_INFO = {
     SHADER_INFO_PBR,
     SHADER_INFO_BASIC,

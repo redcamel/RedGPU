@@ -38,7 +38,14 @@ class Box extends Primitive {
         heightSegments: number = 1,
         depthSegments: number = 1
     ) {
-        const uniqueKey = Primitive.generateUniqueKey('BOX', { width, height, depth, widthSegments, heightSegments, depthSegments });
+        const uniqueKey = Primitive.generateUniqueKey('BOX', {
+            width,
+            height,
+            depth,
+            widthSegments,
+            heightSegments,
+            depthSegments
+        });
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateBoxData(redGPUContext, width, height, depth, widthSegments, heightSegments, depthSegments, uniqueKey));
     }
 }

@@ -25,8 +25,6 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
-import ACamera from "../../camera/core/ACamera";
-import AutoExposure from "../../camera/core/autoExposure/AutoExposure";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -75,17 +73,50 @@ class View3D extends AView {
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
     }
 
-    get clusterLightManager(): ClusterLightManager { return this.#clusterLightManager; }
-    get viewRenderTextureManager(): ViewRenderTextureManager { return this.#viewRenderTextureManager; }
-    get systemUniform_Vertex_StructInfo(): any { return this.#systemUniform_Vertex_StructInfo; }
-    get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup { return this.#systemUniform_Vertex_UniformBindGroup; }
-    get systemUniform_Vertex_UniformBuffer(): UniformBuffer { return this.#systemUniform_Vertex_UniformBuffer; }
-    get ibl(): IBL { return this.#ibl; }
-    set ibl(value: IBL) { this.#ibl = value; }
-    get postEffectManager(): PostEffectManager { return this.#postEffectManager; }
-    get toneMappingManager(): ToneMappingManager { return this.#toneMappingManager; }
-    get renderViewStateData(): RenderViewStateData { return this.#renderViewStateData; }
-    get skybox(): SkyBox { return this.#skybox; }
+    get clusterLightManager(): ClusterLightManager {
+        return this.#clusterLightManager;
+    }
+
+    get viewRenderTextureManager(): ViewRenderTextureManager {
+        return this.#viewRenderTextureManager;
+    }
+
+    get systemUniform_Vertex_StructInfo(): any {
+        return this.#systemUniform_Vertex_StructInfo;
+    }
+
+    get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup {
+        return this.#systemUniform_Vertex_UniformBindGroup;
+    }
+
+    get systemUniform_Vertex_UniformBuffer(): UniformBuffer {
+        return this.#systemUniform_Vertex_UniformBuffer;
+    }
+
+    get ibl(): IBL {
+        return this.#ibl;
+    }
+
+    set ibl(value: IBL) {
+        this.#ibl = value;
+    }
+
+    get postEffectManager(): PostEffectManager {
+        return this.#postEffectManager;
+    }
+
+    get toneMappingManager(): ToneMappingManager {
+        return this.#toneMappingManager;
+    }
+
+    get renderViewStateData(): RenderViewStateData {
+        return this.#renderViewStateData;
+    }
+
+    get skybox(): SkyBox {
+        return this.#skybox;
+    }
+
     set skybox(value: SkyBox) {
         const {resourceManager} = this.redGPUContext
         const prevTexture = this.#skybox?.texture
@@ -93,8 +124,14 @@ class View3D extends AView {
         if (prevTexture && prevTexture !== newTexture) this.#manageIBLResourceState(resourceManager, prevTexture.cacheKey, false);
         this.#skybox = value;
     }
-    get skyAtmosphere(): SkyAtmosphere { return this.#skyAtmosphere; }
-    set skyAtmosphere(value: SkyAtmosphere) { this.#skyAtmosphere = value; }
+
+    get skyAtmosphere(): SkyAtmosphere {
+        return this.#skyAtmosphere;
+    }
+
+    set skyAtmosphere(value: SkyAtmosphere) {
+        this.#skyAtmosphere = value;
+    }
 
     get basicRenderBundleEncoderDescriptor(): GPURenderBundleEncoderDescriptor {
         const {antialiasingManager} = this.redGPUContext
@@ -106,7 +143,9 @@ class View3D extends AView {
         }
     }
 
-    get noneJitterProjectionViewMatrix(): mat4 { return this.#noneJitterProjectionViewMatrix; }
+    get noneJitterProjectionViewMatrix(): mat4 {
+        return this.#noneJitterProjectionViewMatrix;
+    }
 
     update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
         const {scene, redGPUContext, ibl, skyAtmosphere} = this
@@ -119,11 +158,11 @@ class View3D extends AView {
         let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
         const index = this.redGPUContext.viewList.indexOf(this)
         const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`
-        
+
         if (index > -1) {
             let needResetBindGroup = true
             let prevInfo = this.#prevInfoList[key]
-            
+
             const skyAtmosphereReflectionLUT = skyAtmosphere?.skyAtmosphereReflectionLUT;
             const skyAtmosphereIrradianceLUT = skyAtmosphere?.skyAtmosphereIrradianceLUT;
 
@@ -144,7 +183,7 @@ class View3D extends AView {
             }
             if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView)
             else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
-            
+
             this.#prevInfoList[key] = {
                 ibl,
                 skyAtmosphere,
@@ -164,7 +203,13 @@ class View3D extends AView {
     }
 
     #updateSystemUniform() {
-        const { inverseProjectionMatrix, noneJitterProjectionMatrix, projectionMatrix, rawCamera, toneMappingManager } = this;
+        const {
+            inverseProjectionMatrix,
+            noneJitterProjectionMatrix,
+            projectionMatrix,
+            rawCamera,
+            toneMappingManager
+        } = this;
         rawCamera.updateExposure(this);
 
         const {redGPUContext, systemUniform_Vertex_UniformBuffer} = this
@@ -206,14 +251,20 @@ class View3D extends AView {
                     key: 'iblIntensity',
                     value: this.ibl ? (this.ibl.luminance / (this.ibl.averageLuminance || 1.0)) * this.ibl.intensityMultiplier : 1.0
                 },
-                {key: 'directionalLightProjectionViewMatrix', value: lightManager.getDirectionalLightProjectionViewMatrix(this)},
-                {key: 'directionalLightProjectionMatrix', value: lightManager.getDirectionalLightProjectionMatrix(this)},
+                {
+                    key: 'directionalLightProjectionViewMatrix',
+                    value: lightManager.getDirectionalLightProjectionViewMatrix(this)
+                },
+                {
+                    key: 'directionalLightProjectionMatrix',
+                    value: lightManager.getDirectionalLightProjectionMatrix(this)
+                },
                 {key: 'directionalLightViewMatrix', value: lightManager.getDirectionalLightViewMatrix(this)},
                 {
                     key: 'preExposure',
                     value: this.postEffectManager.autoExposure.preExposure
                 },
-                ]);
+            ]);
         }
         lightManager.directionalLights.forEach((light: DirectionalLight) => {
             if (light.enableDebugger) {
@@ -234,22 +285,64 @@ class View3D extends AView {
             layout: resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
             label: `SYSTEM_UNIFORM_bindGroup_${key}`,
             entries: [
-                {binding: 0, resource: {buffer: this.#systemUniform_Vertex_UniformBuffer.gpuBuffer, offset: 0, size: this.#systemUniform_Vertex_UniformBuffer.size}},
+                {
+                    binding: 0,
+                    resource: {
+                        buffer: this.#systemUniform_Vertex_UniformBuffer.gpuBuffer,
+                        offset: 0,
+                        size: this.#systemUniform_Vertex_UniformBuffer.size
+                    }
+                },
                 {binding: 1, resource: this.#shadowDepthSampler},
                 {binding: 2, resource: shadowDepthTextureView},
                 {binding: 3, resource: this.#basicSampler},
-                {binding: 5, resource: {buffer: this.#clusterLightManager.clusterLightsBuffer, offset: 0, size: this.#clusterLightManager.clusterLightsBuffer.size}},
-                {binding: 6, resource: {buffer: this.#clusterLightManager.passClustersLight.clusterLightsBuffer, offset: 0, size: this.#clusterLightManager.passClustersLight.clusterLightsBuffer.size}},
+                {
+                    binding: 5,
+                    resource: {
+                        buffer: this.#clusterLightManager.clusterLightsBuffer,
+                        offset: 0,
+                        size: this.#clusterLightManager.clusterLightsBuffer.size
+                    }
+                },
+                {
+                    binding: 6,
+                    resource: {
+                        buffer: this.#clusterLightManager.passClustersLight.clusterLightsBuffer,
+                        offset: 0,
+                        size: this.#clusterLightManager.passClustersLight.clusterLightsBuffer.size
+                    }
+                },
                 {binding: 7, resource: this.#basicSampler},
                 {binding: 8, resource: renderPath1ResultTextureView || resourceManager.emptyBitmapTextureView},
                 {binding: 9, resource: this.#basicPackedSampler},
-                {binding: 10, resource: resourceManager.getGPUResourceCubeTextureView(ibl_prefilterTexture, ibl_prefilterTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
-                {binding: 11, resource: resourceManager.getGPUResourceCubeTextureView(ibl_irradianceTexture, ibl_irradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
-                {binding: 12, resource: resourceManager.brdfGenerator.brdfLUTTexture?.createView() || resourceManager.emptyBitmapTextureView},
-                {binding: 13, resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereSampler.gpuSampler : this.#basicSampler},
-                {binding: 14, resource: this.skyAtmosphere ? this.skyAtmosphere.transmittanceLUT.gpuTextureView : resourceManager.emptyBitmapTextureView},
-                {binding: 15, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereIrradianceLUT, this.skyAtmosphere?.skyAtmosphereIrradianceLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
-                {binding: 16, resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereReflectionLUT, this.skyAtmosphere?.skyAtmosphereReflectionLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)},
+                {
+                    binding: 10,
+                    resource: resourceManager.getGPUResourceCubeTextureView(ibl_prefilterTexture, ibl_prefilterTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                },
+                {
+                    binding: 11,
+                    resource: resourceManager.getGPUResourceCubeTextureView(ibl_irradianceTexture, ibl_irradianceTexture?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                },
+                {
+                    binding: 12,
+                    resource: resourceManager.brdfGenerator.brdfLUTTexture?.createView() || resourceManager.emptyBitmapTextureView
+                },
+                {
+                    binding: 13,
+                    resource: this.skyAtmosphere ? this.skyAtmosphere.atmosphereSampler.gpuSampler : this.#basicSampler
+                },
+                {
+                    binding: 14,
+                    resource: this.skyAtmosphere ? this.skyAtmosphere.transmittanceLUT.gpuTextureView : resourceManager.emptyBitmapTextureView
+                },
+                {
+                    binding: 15,
+                    resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereIrradianceLUT, this.skyAtmosphere?.skyAtmosphereIrradianceLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                },
+                {
+                    binding: 16,
+                    resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereReflectionLUT, this.skyAtmosphere?.skyAtmosphereReflectionLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                },
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
@@ -275,9 +368,17 @@ class View3D extends AView {
     #init() {
         const systemUniform_Vertex_UniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
         this.#systemUniform_Vertex_UniformBuffer = new UniformBuffer(this.redGPUContext, systemUniform_Vertex_UniformData, 'SYSTEM_UNIFORM_BUFFER_VERTEX', 'SYSTEM_UNIFORM_BUFFER_VERTEX');
-        this.#shadowDepthSampler = new Sampler(this.redGPUContext, {addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE, addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE, addressModeW: GPU_ADDRESS_MODE.CLAMP_TO_EDGE, compare: GPU_COMPARE_FUNCTION.LESS_EQUAL}).gpuSampler
+        this.#shadowDepthSampler = new Sampler(this.redGPUContext, {
+            addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+            addressModeW: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+            compare: GPU_COMPARE_FUNCTION.LESS_EQUAL
+        }).gpuSampler
         this.#basicSampler = new Sampler(this.redGPUContext).gpuSampler
-        this.#basicPackedSampler = new Sampler(this.redGPUContext, {addressModeU: GPU_ADDRESS_MODE.REPEAT, addressModeV: GPU_ADDRESS_MODE.REPEAT}).gpuSampler
+        this.#basicPackedSampler = new Sampler(this.redGPUContext, {
+            addressModeU: GPU_ADDRESS_MODE.REPEAT,
+            addressModeV: GPU_ADDRESS_MODE.REPEAT
+        }).gpuSampler
     }
 }
 

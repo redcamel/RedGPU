@@ -16,7 +16,8 @@ import getBitHash3D_vec3_wgsl from './shader/math/hash/getBitHash3D_vec3.wgsl';
 import getRadicalInverseVanDerCorput_wgsl from './shader/math/hash/getRadicalInverseVanDerCorput.wgsl';
 import getHammersley_wgsl from './shader/math/hash/getHammersley.wgsl';
 import skyAtmosphereFn_wgsl from '../display/skyAtmosphere/core/skyAtmosphereFn.wgsl';
-import transmittanceShaderCode_wgsl from '../display/skyAtmosphere/core/generator/transmittance/transmittanceShaderCode.wgsl';
+import transmittanceShaderCode_wgsl
+    from '../display/skyAtmosphere/core/generator/transmittance/transmittanceShaderCode.wgsl';
 import meshEntryPointPickingVertex_wgsl from './shader/entryPoint/mesh/entryPointPickingVertex.wgsl';
 import meshEntryPointPickingFragment_wgsl from './shader/entryPoint/mesh/entryPointPickingFragment.wgsl';
 import meshEntryPointShadowVertex_wgsl from './shader/entryPoint/mesh/entryPointShadowVertex.wgsl';
@@ -35,7 +36,8 @@ import SkyAtmosphere_wgsl from './shader/systemStruct/SkyAtmosphere.wgsl';
 import meshVertexBasicUniform_wgsl from '../display/mesh/core/shader/meshVertexBasicUniform.wgsl';
 import POST_EFFECT_SYSTEM_UNIFORM_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM.wgsl';
 import SYSTEM_UNIFORM_wgsl from './shader/systemStruct/SYSTEM_UNIFORM.wgsl';
-import getReflectionVectorFromViewDirection_wgsl from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
+import getReflectionVectorFromViewDirection_wgsl
+    from './shader/math/direction/getReflectionVectorFromViewDirection.wgsl';
 import getViewDirection_wgsl from './shader/math/direction/getViewDirection.wgsl';
 import getRayDirection_wgsl from './shader/math/direction/getRayDirection.wgsl';
 import getNDCFromDepth_wgsl from './shader/math/reconstruct/getNDCFromDepth.wgsl';

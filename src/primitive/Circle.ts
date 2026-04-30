@@ -37,7 +37,13 @@ class Circle extends Primitive {
         thetaLength: number = Math.PI * 2,
         isRadial: boolean = false
     ) {
-        const uniqueKey = Primitive.generateUniqueKey('CIRCLE', { radius, radialSegments, thetaStart, thetaLength, isRadial });
+        const uniqueKey = Primitive.generateUniqueKey('CIRCLE', {
+            radius,
+            radialSegments,
+            thetaStart,
+            thetaLength,
+            isRadial
+        });
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateCircleEntryData(
             redGPUContext, radius, radialSegments, thetaStart, thetaLength, isRadial, uniqueKey
         ));

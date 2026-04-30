@@ -41,7 +41,15 @@ class Ring extends Primitive {
         thetaLength: number = Math.PI * 2,
         isRadial: boolean = false
     ) {
-        const uniqueKey = Primitive.generateUniqueKey('RING', { innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, isRadial });
+        const uniqueKey = Primitive.generateUniqueKey('RING', {
+            innerRadius,
+            outerRadius,
+            thetaSegments,
+            phiSegments,
+            thetaStart,
+            thetaLength,
+            isRadial
+        });
         super(redGPUContext, uniqueKey, () => PrimitiveUtils.generateRingEntryData(
             redGPUContext, innerRadius, outerRadius, thetaSegments, phiSegments, thetaStart, thetaLength, isRadial, uniqueKey
         ));

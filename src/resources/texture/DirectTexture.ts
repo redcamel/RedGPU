@@ -21,7 +21,7 @@ class DirectTexture extends ADirectTexture {
      */
     constructor(redGPUContext: RedGPUContext, cacheKey: string, gpuTexture?: GPUTexture) {
         super(redGPUContext, MANAGED_STATE_KEY, cacheKey);
-        
+
         const {table} = this.targetResourceManagedState;
         if (cacheKey) {
             const target: ResourceStateBitmapTexture = table.get(cacheKey);
@@ -33,7 +33,7 @@ class DirectTexture extends ADirectTexture {
         if (gpuTexture) {
             this.setGpuTexture(gpuTexture);
         }
-        
+
         this.registerResource();
     }
 
