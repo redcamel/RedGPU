@@ -161,12 +161,16 @@ class Renderer {
         const commandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
             label: 'ViewRender_MainCommandEncoder'
         })
+        const computeCommandEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
+            label: 'ViewRender_ComputeCommandEncoder'
+        })
         const renderPassDescriptor: GPURenderPassDescriptor = {
             label: `${view.name} Basic Render Pass`,
             colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
             depthStencilAttachment,
         }
         view.renderViewStateData.reset(commandEncoder, null, time)
+        view.renderViewStateData.computeCommandEncoder = computeCommandEncoder
         if (pixelRectObject.width && pixelRectObject.height) {
 
             {
@@ -221,6 +225,7 @@ class Renderer {
         }
         const skinCommandBuffer = this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData, commandEncoder);
         const viewCommandBuffers = [
+            computeCommandEncoder.finish(),
             commandEncoder.finish()
         ];
         if (skinCommandBuffer) viewCommandBuffers.push(skinCommandBuffer);

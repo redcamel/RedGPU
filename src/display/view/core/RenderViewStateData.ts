@@ -86,6 +86,9 @@ class RenderViewStateData {
     /** [KO] 현재 사용 중인 GPU 커맨드 인코더 [EN] Current GPU command encoder in use */
     commandEncoder: GPUCommandEncoder;
 
+    /** [KO] 현재 프레임에서 컴퓨트 연산을 위해 사용되는 GPU 커맨드 인코더 [EN] GPU command encoder used for compute operations in the current frame */
+    computeCommandEncoder: GPUCommandEncoder;
+
     /** [KO] 컬링을 위한 프러스텀 평면 배열 [EN] Frustum planes array for culling */
     frustumPlanes: number[][];
     /** [KO] 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 [EN] Previously used vertex GPU buffer for optimization */

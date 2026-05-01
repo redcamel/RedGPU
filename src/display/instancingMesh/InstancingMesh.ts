@@ -230,7 +230,7 @@ class InstancingMesh extends Mesh {
                 this.#updatePipelineState(renderViewStateData);
             }
             if (!shadowRender) {
-                this.#performGPUCulling(renderViewStateData);
+                this.#performGPUCulling(renderViewStateData, renderViewStateData.computeCommandEncoder);
             }
             this.#renderGeometry(renderViewStateData, shadowRender, currentRenderPassEncoder);
         }
@@ -528,7 +528,7 @@ class InstancingMesh extends Mesh {
         );
     }
 
-    #performGPUCulling(renderViewStateData: RenderViewStateData): void {
+    #performGPUCulling(renderViewStateData: RenderViewStateData, commandEncoderOverride?: GPUCommandEncoder): void {
         const {gpuDevice} = this.#redGPUContext;
         this.#updateCullingUniforms(renderViewStateData);
         const indexCount = this.geometry.indexBuffer
@@ -548,7 +548,7 @@ class InstancingMesh extends Mesh {
         });
 
         // Compute Pass 실행
-        const commandEncoder = renderViewStateData.commandEncoder || gpuDevice.createCommandEncoder({
+        const commandEncoder = commandEncoderOverride || renderViewStateData.commandEncoder || gpuDevice.createCommandEncoder({
             label: 'InstancingMesh_GPUCulling_CommandEncoder'
         });
         const computePass = commandEncoder.beginComputePass({
@@ -561,7 +561,7 @@ class InstancingMesh extends Mesh {
         computePass.dispatchWorkgroups(workgroupCount);
         computePass.end();
 
-        if (!renderViewStateData.commandEncoder) {
+        if (!commandEncoderOverride && !renderViewStateData.commandEncoder) {
             gpuDevice.queue.submit([commandEncoder.finish()]);
         }
     }
