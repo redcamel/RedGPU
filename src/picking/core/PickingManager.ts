@@ -156,6 +156,7 @@ class PickingManager {
 
     /** [KO] 픽셀 값을 읽어올 임시 버퍼 [EN] Temporary buffer to read pixel values */
     #readPixelBuffer: GPUBuffer;
+    #isReading: boolean = false;
 
     /**
      * [KO] 다음 렌더링 시 픽셀 읽기 작업을 준비합니다.
@@ -166,6 +167,8 @@ class PickingManager {
      */
     prepareRead(view: any, commandEncoder: GPUCommandEncoder) {
         if (!this.castingList.length) return;
+        if (this.#isReading) return; // [KO] 이미 읽기 작업 중이면 스킵 [EN] Skip if already reading
+
         const x = this.#mouseX;
         const y = this.#mouseY;
         const {pixelRectArray} = view;
@@ -199,18 +202,23 @@ class PickingManager {
      * [EN] Time
      */
     async checkEvents(view: any, time: number) {
-        if (this.castingList.length) {
+        if (this.castingList.length && !this.#isReading) {
             const {pixelRectArray} = view;
             const x = this.#mouseX;
             const y = this.#mouseY;
             if (x > 0 && x < pixelRectArray[2] && y > 0 && y < pixelRectArray[3] && this.#readPixelBuffer) {
                 const pickingTable = this.#createPickingTable();
-                const uint32Color = await this.#getUint32Color(this.#readPixelBuffer);
-                if (uint32Color) {
-                    this.#processClickEvent(uint32Color, x, y, time, pickingTable);
-                    this.#processEvent(uint32Color, x, y, time, pickingTable);
-                } else {
-                    this.#resetEvent();
+                this.#isReading = true;
+                try {
+                    const uint32Color = await this.#getUint32Color(this.#readPixelBuffer);
+                    if (uint32Color) {
+                        this.#processClickEvent(uint32Color, x, y, time, pickingTable);
+                        this.#processEvent(uint32Color, x, y, time, pickingTable);
+                    } else {
+                        this.#resetEvent();
+                    }
+                } finally {
+                    this.#isReading = false;
                 }
             }
             this.lastMouseEvent = null;
@@ -319,6 +327,7 @@ class PickingManager {
         const g = dataView.getUint8(indices[1]);
         const b = dataView.getUint8(indices[2]);
         const a = dataView.getUint8(indices[3]);
+        buffer.unmap();
         return ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;
     }
 
