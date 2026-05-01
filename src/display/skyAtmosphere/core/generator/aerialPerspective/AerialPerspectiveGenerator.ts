@@ -27,7 +27,7 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
         return this.#lutTexture;
     }
 
-    render(view: View3D, transmittance: DirectTexture, multiScat: DirectTexture): void {
+    render(view: View3D, transmittance: DirectTexture, multiScat: DirectTexture, commandEncoder?: GPUCommandEncoder): void {
         const systemBuffer = view.systemUniform_Vertex_UniformBuffer?.gpuBuffer;
 
         if (!systemBuffer) {
@@ -47,7 +47,7 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
             ]);
         }
 
-        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 4]);
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 4], commandEncoder);
     }
 
     #init(): void {

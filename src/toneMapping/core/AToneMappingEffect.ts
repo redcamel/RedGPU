@@ -53,8 +53,8 @@ class AToneMappingEffect extends ASinglePassPostEffect {
         this.updateUniform('brightness', this.#brightness);
     }
 
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-        return super.render(view, width, height, sourceTextureInfo);
+    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+        return super.render(commandEncoder, view, width, height, sourceTextureInfo);
     }
 }
 

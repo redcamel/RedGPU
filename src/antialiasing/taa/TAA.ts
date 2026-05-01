@@ -160,6 +160,9 @@ class TAA {
      * [KO] TAA 이펙트를 렌더링합니다.
      * [EN] Renders the TAA effect.
      *
+     * @param commandEncoder -
+     * [KO] 커맨드 인코더
+     * [EN] Command Encoder
      * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -176,7 +179,7 @@ class TAA {
      * [KO] 렌더링 결과 (텍스처 및 뷰)
      * [EN] Rendering result (texture and view)
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
 
         const sourceTextureView = sourceTextureInfo.textureView
         const sourceTexture = sourceTextureInfo.texture;
@@ -198,17 +201,13 @@ class TAA {
         if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
             this.#createFrameBufferBindGroups(view, [sourceTextureView], useMSAA, this.#redGPUContext, gpuDevice);
         }
-        this.#execute(gpuDevice, width, height);
+        this.#execute(commandEncoder, width, height);
         {
-            const commentEncode_compute = gpuDevice.createCommandEncoder({
-                label: 'TAA_CopyTexture_CommandEncoder_compute'
-            })
-            commentEncode_compute.copyTextureToTexture(
+            commandEncoder.copyTextureToTexture(
                 {texture: this.#currentFrameTexture},
                 {texture: this.#historyTexture},
                 [width, height, 1]
             );
-            gpuDevice.queue.submit([commentEncode_compute.finish()]);
         }
         if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
             console.log(`TAA Frame ${this.#frameIndex}: BuffersSwapped, JitterStrength=${this.#jitterStrength}`);
@@ -318,17 +317,15 @@ class TAA {
         }
     }
 
-    #execute(gpuDevice: GPUDevice, width: number, height: number) {
-        const commentEncode_compute = gpuDevice.createCommandEncoder({
-            label: 'TAA_Execute_CommandEncoder_compute'
+    #execute(commandEncoder: GPUCommandEncoder, width: number, height: number) {
+        const computePassEncoder = commandEncoder.beginComputePass({
+            label: 'TAA_Execute_ComputePass'
         })
-        const computePassEncoder = commentEncode_compute.beginComputePass()
         computePassEncoder.setPipeline(this.#computePipeline)
         computePassEncoder.setBindGroup(0, this.#frameBufferBindGroup0)
         computePassEncoder.setBindGroup(1, this.#frameBufferBindGroup1)
         computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#WORK_SIZE_X), Math.ceil(height / this.#WORK_SIZE_Y));
         computePassEncoder.end();
-        gpuDevice.queue.submit([commentEncode_compute.finish()]);
     }
 
     #createFrameBufferBindGroups(view: View3D, sourceTextureView: GPUTextureView[], useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {

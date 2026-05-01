@@ -41,6 +41,8 @@ class PrefilterGenerator {
         });
     }
 
+    #uniformBuffers: GPUBuffer[] = [];
+
     /**
      * [KO] 소스 큐브 텍스처로부터 프리필터링된 큐브맵을 생성하여 반환합니다.
      * [EN] Generates and returns a pre-filtered cubemap from the source cube texture.
@@ -59,11 +61,12 @@ class PrefilterGenerator {
      * @param destinationTexture -
      * [KO] 결과물을 저장할 대상 텍스처 (선택)
      * [EN] Target texture to store the result (optional)
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      * @returns
      * [KO] 생성된 또는 업데이트된 Prefilter DirectCubeTexture
      * [EN] Generated or updated Prefilter DirectCubeTexture
      */
-    async generate(sourceCubeTexture: GPUTexture, size: number = 512, destinationTexture?: GPUTexture | DirectCubeTexture): Promise<DirectCubeTexture> {
+    async generate(sourceCubeTexture: GPUTexture, size: number = 512, destinationTexture?: GPUTexture | DirectCubeTexture, commandEncoder?: GPUCommandEncoder): Promise<DirectCubeTexture> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
@@ -115,9 +118,8 @@ class PrefilterGenerator {
         }
 
         // 3. 밉맵 레벨별 연산 (6개 면 포함)
-        const commandEncoder = gpuDevice.createCommandEncoder({label: 'Prefilter_Generator_Command_Encoder'});
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: 'Prefilter_Generator_Command_Encoder'});
         const faceMatrices = this.#getCubeMapFaceMatrices();
-        const uniformBuffers: GPUBuffer[] = [];
 
         for (let mip = 0; mip < mipLevelCount; mip++) {
             const mipSize = Math.max(1, size >> mip);
@@ -127,12 +129,14 @@ class PrefilterGenerator {
             faceMatrices.forEach((m, i) => uniformData.set(m, i * 16));
             uniformData[16 * 6] = roughness;
 
-            const uniformBuffer = gpuDevice.createBuffer({
-                size: uniformData.byteLength,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            });
-            gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformData);
-            uniformBuffers.push(uniformBuffer);
+            if (!this.#uniformBuffers[mip]) {
+                this.#uniformBuffers[mip] = gpuDevice.createBuffer({
+                    size: uniformData.byteLength,
+                    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+                    label: `Prefilter_UniformBuffer_Mip${mip}`
+                });
+            }
+            gpuDevice.queue.writeBuffer(this.#uniformBuffers[mip], 0, uniformData);
 
             const bindGroup = gpuDevice.createBindGroup({
                 layout: this.#pipeline.getBindGroupLayout(0),
@@ -147,11 +151,11 @@ class PrefilterGenerator {
                             mipLevelCount: 1
                         })
                     },
-                    {binding: 3, resource: {buffer: uniformBuffer}}
+                    {binding: 3, resource: {buffer: this.#uniformBuffers[mip]}}
                 ]
             });
 
-            const computePass = commandEncoder.beginComputePass({
+            const computePass = internalEncoder.beginComputePass({
                 label: `Prefilter_mip_${mip}_compute_pass`
             });
             computePass.setPipeline(this.#pipeline);
@@ -160,11 +164,10 @@ class PrefilterGenerator {
             computePass.end();
         }
 
-        gpuDevice.queue.submit([commandEncoder.finish()]);
-        await gpuDevice.queue.onSubmittedWorkDone();
-
-        // 임시 버퍼 정리
-        uniformBuffers.forEach(buf => buf.destroy());
+        if (!commandEncoder) {
+            gpuDevice.queue.submit([internalEncoder.finish()]);
+            await gpuDevice.queue.onSubmittedWorkDone();
+        }
 
         if (destinationTexture instanceof DirectCubeTexture) {
             destinationTexture.notifyUpdate();

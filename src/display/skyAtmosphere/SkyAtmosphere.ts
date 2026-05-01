@@ -303,8 +303,6 @@ class SkyAtmosphere {
      * [EN] Performs background rendering. (Dedicated to infinite distance background processing)
      */
     renderBackground(renderViewStateData: RenderViewStateData) {
-        const {view} = renderViewStateData;
-        this.#performUpdate(view);
         this.#backgroundRenderer.render(
             renderViewStateData,
             this.#transmittanceGenerator.lutTexture,
@@ -318,9 +316,9 @@ class SkyAtmosphere {
      * [KO] 포스트 이펙트 렌더링을 수행합니다. (오브젝트 영역 대기 투과 처리 전용)
      * [EN] Performs post-effect rendering. (Dedicated to atmospheric transmittance on object regions)
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-        this.#performUpdate(view);
-        return this.#postEffect.render(view, width, height, sourceTextureInfo);
+    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+        this.update(view, commandEncoder);
+        return this.#postEffect.render(commandEncoder, view, width, height, sourceTextureInfo);
     }
 
     #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
@@ -330,13 +328,13 @@ class SkyAtmosphere {
         if (ibl) this.#skyLight.dirty = true;
     }
 
-    #performUpdate(view: View3D) {
+    update(view: View3D, commandEncoder?: GPUCommandEncoder) {
         const currentFrame = view.renderViewStateData.frameIndex;
         if (this.#lastUpdateFrame === currentFrame) return;
         this.#lastUpdateFrame = currentFrame;
 
         this.#updateSunInfo(view);
-        this.#updateLUTs(view);
+        this.#updateLUTs(view, commandEncoder);
     }
 
     #updateSunInfo(view: View3D): void {
@@ -381,7 +379,7 @@ class SkyAtmosphere {
         }
     }
 
-    #updateLUTs(view: View3D) {
+    #updateLUTs(view: View3D, commandEncoder?: GPUCommandEncoder) {
         const {rawCamera} = view;
         const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
         const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0));
@@ -411,20 +409,20 @@ class SkyAtmosphere {
         }
 
         if (this.#dirtyLUT) {
-            this.#transmittanceGenerator.render();
-            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
+            this.#transmittanceGenerator.render(commandEncoder);
+            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture, commandEncoder);
             this.#dirtyLUT = false;
             this.#dirtySkyView = true;
             this.#skyLight.dirty = true;
         }
 
         if (this.#dirtySkyView) {
-            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
-            this.#aerialPerspectiveGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, commandEncoder);
+            this.#aerialPerspectiveGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, commandEncoder);
             this.#dirtySkyView = false;
         }
 
-        this.#skyLight.update(this);
+        this.#skyLight.update(this, commandEncoder);
     }
 
     #setParam(key: string, value: any, lut: boolean, skyView: boolean, ibl: boolean, validator?: (v: any) => void): void {

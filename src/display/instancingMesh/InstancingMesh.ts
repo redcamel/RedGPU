@@ -548,15 +548,22 @@ class InstancingMesh extends Mesh {
         });
 
         // Compute Pass 실행
-        const commandEncoder = gpuDevice.createCommandEncoder();
-        const computePass = commandEncoder.beginComputePass();
+        const commandEncoder = renderViewStateData.commandEncoder || gpuDevice.createCommandEncoder({
+            label: 'InstancingMesh_GPUCulling_CommandEncoder'
+        });
+        const computePass = commandEncoder.beginComputePass({
+            label: 'InstancingMesh_GPUCulling_ComputePass'
+        });
         computePass.setPipeline(this.#cullingComputePipeline);
         computePass.setBindGroup(0, this.#cullingBindGroup);
         const workgroupSize = 64;
         const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize);
         computePass.dispatchWorkgroups(workgroupCount);
         computePass.end();
-        gpuDevice.queue.submit([commandEncoder.finish()]);
+
+        if (!renderViewStateData.commandEncoder) {
+            gpuDevice.queue.submit([commandEncoder.finish()]);
+        }
     }
 
     // ========== 파이프라인 설정 ==========

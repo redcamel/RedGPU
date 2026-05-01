@@ -55,7 +55,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
         this.#initShaders();
     }
 
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         const {gpuDevice, resourceManager, antialiasingManager} = this.redGPUContext;
 
         const {useMSAA, msaaID} = antialiasingManager;
@@ -143,15 +143,13 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             });
         }
 
-        const commandEncoder = gpuDevice.createCommandEncoder({label: 'SkyAtmospherePostEffect_Pass'});
-        const passEncoder = commandEncoder.beginComputePass();
+        const passEncoder = commandEncoder.beginComputePass({label: 'SkyAtmospherePostEffect_Pass'});
 
         passEncoder.setPipeline(pipeline);
         passEncoder.setBindGroup(0, currentBindGroup0);
         passEncoder.setBindGroup(1, this.#bindGroup1);
         passEncoder.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16));
         passEncoder.end();
-        gpuDevice.queue.submit([commandEncoder.finish()]);
 
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;

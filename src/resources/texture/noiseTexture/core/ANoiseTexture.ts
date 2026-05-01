@@ -154,29 +154,28 @@ abstract class ANoiseTexture extends ManagementResourceBase {
     }
 
     /** [KO] 개별 유니폼 파라미터를 업데이트합니다. [EN] Updates an individual uniform parameter. */
-    updateUniform(name: string, value: any) {
+    updateUniform(name: string, value: any, commandEncoder?: GPUCommandEncoder) {
         if (this.#uniformInfo.members[name]) {
             this.#uniformBuffer.writeOnlyBuffer(this.#uniformInfo.members[name], value);
             this.#currentEffect[name] = value
         }
-        this.#executeComputePass();
+        this.#executeComputePass(commandEncoder);
     }
 
     /** [KO] 여러 유니폼 파라미터를 일괄 업데이트합니다. [EN] Updates multiple uniform parameters at once. */
-    updateUniforms(uniforms: Record<string, any>) {
+    updateUniforms(uniforms: Record<string, any>, commandEncoder?: GPUCommandEncoder) {
         Object.entries(uniforms).forEach(([name, value]) => {
             if (this.#uniformInfo.members[name]) {
                 this.#uniformBuffer.writeOnlyBuffer(this.#uniformInfo.members[name], value);
                 this.#currentEffect[name] = value
             }
         });
-        this.#executeComputePass();
+        this.#executeComputePass(commandEncoder);
     }
 
     /** [KO] 지정된 시간으로 노이즈를 렌더링합니다. [EN] Renders noise at the specified time. */
-    render(time: number) {
-        this.updateUniform('time', time);
-        this.#executeComputePass();
+    render(time: number, commandEncoder?: GPUCommandEncoder) {
+        this.updateUniform('time', time, commandEncoder);
     }
 
     /** [KO] 리소스를 파괴합니다. [EN] Destroys the resource. */
@@ -260,10 +259,15 @@ abstract class ANoiseTexture extends ManagementResourceBase {
     }
 
     /** [KO] 컴퓨트 패스를 실행합니다. [EN] Executes the compute pass. */
-    #executeComputePass() {
+    #executeComputePass(commandEncoder?: GPUCommandEncoder) {
         if (!this.#textureComputeBindGroup) return
-        const commandEncoder = this.redGPUContext.gpuDevice.createCommandEncoder();
-        const computePassEncoder = commandEncoder.beginComputePass();
+        const {gpuDevice} = this.redGPUContext;
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
+            label: `NoiseTexture_${this.uuid}_CommandEncoder`
+        });
+        const computePassEncoder = internalEncoder.beginComputePass({
+            label: `NoiseTexture_${this.uuid}_ComputePass`
+        });
         computePassEncoder.setPipeline(this.#textureComputePipeline);
         computePassEncoder.setBindGroup(0, this.#textureComputeBindGroup);
         computePassEncoder.dispatchWorkgroups(
@@ -271,7 +275,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
             Math.ceil(this.#height / this.#COMPUTE_WORKGROUP_SIZE_Y)
         );
         computePassEncoder.end();
-        this.redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
+        if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
     }
 
     /** [KO] 컴퓨트 바인드 그룹 레이아웃을 생성합니다. [EN] Creates the compute bind group layout. */

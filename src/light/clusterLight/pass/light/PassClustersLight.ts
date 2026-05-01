@@ -56,14 +56,17 @@ class PassClustersLight {
     /**
      * [KO] 클러스터 조명을 계산하는 컴퓨트 패스를 실행합니다.
      * [EN] Executes the compute pass to calculate cluster lights.
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
-    render() {
+    render(commandEncoder?: GPUCommandEncoder) {
         const {gpuDevice} = this.#redGPUContext
         const systemUniformBindGroup: GPUBindGroup = this.#view.systemUniform_Vertex_UniformBindGroup;
         if (systemUniformBindGroup) {
-            const commandEncoder = gpuDevice.createCommandEncoder();
-            const passEncoder = commandEncoder.beginComputePass({
-                label: 'ClusterLight cluster'
+            const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
+                label: 'PassClustersLight_CommandEncoder'
+            });
+            const passEncoder = internalEncoder.beginComputePass({
+                label: 'PassClustersLight_ComputePass'
             });
             const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
             this.#redGPUContext.gpuDevice.queue.writeBuffer(this.clusterLightsBuffer, 0, emptyArray);
@@ -72,7 +75,7 @@ class PassClustersLight {
             passEncoder.setBindGroup(1, this.#clusterLightBindGroup);
             passEncoder.dispatchWorkgroups(DISPATCH_SIZE[0], DISPATCH_SIZE[1], DISPATCH_SIZE[2]);
             passEncoder.end();
-            gpuDevice.queue.submit([commandEncoder.finish()]);
+            if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
         }
     }
 

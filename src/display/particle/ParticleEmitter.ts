@@ -975,7 +975,7 @@ class ParticleEmitter extends Mesh {
      */
     render(renderViewStateData: RenderViewStateData) {
         if (!this.#simParamBuffer) this.#init()
-        this.#renderComputePass(renderViewStateData.timestamp)
+        this.#renderComputePass(renderViewStateData.timestamp, renderViewStateData.commandEncoder)
         super.render(renderViewStateData)
     }
 
@@ -1171,9 +1171,10 @@ class ParticleEmitter extends Mesh {
     /**
      * GPU 컴퓨트 파이프라인을 통해 파티클 시뮬레이션을 수행합니다.
      * @param time 현재 시간(ms)
+     * @param commandEncoder 커맨드 인코더
      * @private
      */
-    #renderComputePass(time: number) {
+    #renderComputePass(time: number, commandEncoder?: GPUCommandEncoder) {
         const worldPosition = this.localToWorld(this.x, this.y, this.z)
         this.#simParamData.set(
             [
@@ -1202,10 +1203,10 @@ class ParticleEmitter extends Mesh {
         const {gpuDevice} = this.redGPUContext
         gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
         //
-        const commandEncoder = gpuDevice.createCommandEncoder({
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
             label: 'PARTICLE_EMITTER_COMPUTE_COMMAND_ENCODER'
         });
-        const passEncoder = commandEncoder.beginComputePass(
+        const passEncoder = internalEncoder.beginComputePass(
             {
                 label: 'PARTICLE_EMITTER_COMPUTE_PASS',
             }
@@ -1214,8 +1215,7 @@ class ParticleEmitter extends Mesh {
         passEncoder.setBindGroup(0, this.#computeBindGroup);
         passEncoder.dispatchWorkgroups(Math.ceil(this.#particleNum / 256));
         passEncoder.end();
-        gpuDevice.queue.submit([commandEncoder.finish()]);
-        console.log('renderComputePass')
+        if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
     }
 }
 

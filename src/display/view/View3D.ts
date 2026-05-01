@@ -147,7 +147,7 @@ class View3D extends AView {
         return this.#noneJitterProjectionViewMatrix;
     }
 
-    update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
+    update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView, commandEncoder?: GPUCommandEncoder) {
         const {scene, redGPUContext, ibl, skyAtmosphere} = this
         const {shadowManager} = scene
         shadowManager.update(redGPUContext)
@@ -181,7 +181,7 @@ class View3D extends AView {
                     !this.#clusterLightManager.passClustersLight
                 )
             }
-            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView)
+            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView, commandEncoder)
             else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
 
             this.#prevInfoList[key] = {
@@ -198,7 +198,7 @@ class View3D extends AView {
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
         }
-        this.#clusterLightManager.updateClusterLights(calcPointLightCluster);
+        this.#clusterLightManager.updateClusterLights(calcPointLightCluster, commandEncoder);
         this.#updateSystemUniform();
     }
 
@@ -275,8 +275,8 @@ class View3D extends AView {
         gpuDevice.queue.writeBuffer(systemUniform_Vertex_UniformBuffer.gpuBuffer, 0, this.#uniformData);
     }
 
-    #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
-        this.#clusterLightManager.updateClusterLights(true)
+    #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView, commandEncoder?: GPUCommandEncoder) {
+        this.#clusterLightManager.updateClusterLights(true, commandEncoder)
         const ibl_prefilterTexture = ibl?.prefilterTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture
         const {redGPUContext} = this

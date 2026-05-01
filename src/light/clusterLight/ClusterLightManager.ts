@@ -81,9 +81,10 @@ class ClusterLightManager {
      * 포인트 라이트와 스팟 라이트 데이터를 계산하고 GPU 버퍼에 업로드합니다.
      *
      * @param calcClusterLight - 클러스터 라이트 계산 여부 (기본값: false)
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      * @private
      */
-    updateClusterLights(calcClusterLight: boolean = false) {
+    updateClusterLights(calcClusterLight: boolean = false, commandEncoder?: GPUCommandEncoder) {
         if (!calcClusterLight) return
         const {redGPUContext, scene, renderViewStateData, pixelRectArray} = this.#view
         const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== pixelRectArray[2] || this.#prevHeight !== pixelRectArray[3]
@@ -93,7 +94,7 @@ class ClusterLightManager {
         }
         if (this.#passClustersLight && dirtyPixelSize) {
             // console.log('passClusterLightBound 재계산')
-            this.#passClusterLightBound.render()
+            this.#passClusterLightBound.render(commandEncoder)
             this.#prevWidth = pixelRectArray[2]
             this.#prevHeight = pixelRectArray[3]
         }
@@ -150,7 +151,7 @@ class ClusterLightManager {
                 0,
             )
             this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource);
-            this.#passClustersLight.render()
+            this.#passClustersLight.render(commandEncoder)
         }
     }
 }

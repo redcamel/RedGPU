@@ -154,6 +154,39 @@ class PickingManager {
         }
     }
 
+    /** [KO] 픽셀 값을 읽어올 임시 버퍼 [EN] Temporary buffer to read pixel values */
+    #readPixelBuffer: GPUBuffer;
+
+    /**
+     * [KO] 다음 렌더링 시 픽셀 읽기 작업을 준비합니다.
+     * [EN] Prepares for a pixel read operation during the next render.
+     *
+     * @param view - View3D 인스턴스
+     * @param commandEncoder - 현재 프레임의 커맨드 인코더
+     */
+    prepareRead(view: any, commandEncoder: GPUCommandEncoder) {
+        if (!this.castingList.length) return;
+        const x = this.#mouseX;
+        const y = this.#mouseY;
+        const {pixelRectArray} = view;
+        if (x <= 0 || x >= pixelRectArray[2] || y <= 0 || y >= pixelRectArray[3]) {
+            return;
+        }
+
+        if (!this.#readPixelBuffer) {
+            this.#readPixelBuffer = this.#redGPUContext.gpuDevice.createBuffer({
+                size: 4,
+                usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+                label: 'PickingManager_ReadPixelBuffer'
+            });
+        }
+
+        const textureView = {texture: this.#pickingGPUTexture, origin: {x: Math.floor(x), y: Math.floor(y), z: 0}};
+        const bufferView = {buffer: this.#readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
+        const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
+        commandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
+    }
+
     /**
      * [KO] 이벤트를 확인하고 처리합니다.
      * [EN] Checks and processes events.
@@ -165,9 +198,23 @@ class PickingManager {
      * [KO] 시간
      * [EN] Time
      */
-    checkEvents(view: any, time: number) {
+    async checkEvents(view: any, time: number) {
         if (this.castingList.length) {
-            this.#readPixelArrayBuffer(view, time)
+            const {pixelRectArray} = view;
+            const x = this.#mouseX;
+            const y = this.#mouseY;
+            if (x > 0 && x < pixelRectArray[2] && y > 0 && y < pixelRectArray[3] && this.#readPixelBuffer) {
+                const pickingTable = this.#createPickingTable();
+                const uint32Color = await this.#getUint32Color(this.#readPixelBuffer);
+                if (uint32Color) {
+                    this.#processClickEvent(uint32Color, x, y, time, pickingTable);
+                    this.#processEvent(uint32Color, x, y, time, pickingTable);
+                } else {
+                    this.#resetEvent();
+                }
+            }
+            this.lastMouseEvent = null;
+            this.lastMouseClickEvent = null;
             this.resetCastingList()
         }
     }
@@ -189,49 +236,11 @@ class PickingManager {
         });
     }
 
-    #readPixelArrayBuffer = async (view: any, time: number, width = 1, height = 1) => {
-        const {gpuDevice} = view.redGPUContext;
-        const {pixelRectArray} = view;
-        const x = this.#mouseX;
-        const y = this.#mouseY;
-        if (x <= 0 || x >= pixelRectArray[2] || y <= 0 || y >= pixelRectArray[3]) {
-            return;
-        }
-        const pickingTable = this.#createPickingTable();
-        let readPixelBuffer: GPUBuffer = this.#createReadPixelBuffer(gpuDevice, width, height, x, y);
-        const uint32Color = await this.#getUint32Color(readPixelBuffer);
-        readPixelBuffer.destroy();
-        readPixelBuffer = null
-        if (uint32Color) {
-            this.#processClickEvent(uint32Color, x, y, time, pickingTable);
-            this.#processEvent(uint32Color, x, y, time, pickingTable);
-        } else {
-            this.#resetEvent();
-        }
-        this.lastMouseEvent = null;
-        this.lastMouseClickEvent = null;
-    };
     #createPickingTable = () =>
         this.#castingList.reduce((prev, curr) => {
             prev[curr.pickingId] = curr;
             return prev;
         }, {});
-    #createReadPixelBuffer = (gpuDevice: GPUDevice, width: number, height: number, x: number, y: number): GPUBuffer => {
-        const readPixelCommandEncoder = gpuDevice.createCommandEncoder({
-            label: 'PickingManager_ReadPixel_CommandEncoder'
-        });
-        const readPixelBuffer = gpuDevice.createBuffer({
-            size: 4,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-            label: 'readPixelBuffer'
-        });
-        const textureView = {texture: this.#pickingGPUTexture, origin: {x, y, z: 0}};
-        const bufferView = {buffer: readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
-        const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
-        readPixelCommandEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
-        gpuDevice.queue.submit([readPixelCommandEncoder.finish()]);
-        return readPixelBuffer;
-    };
 
     #createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent) {
         const isView2D = this.#view.rawCamera.constructor.name === 'Camera2D';

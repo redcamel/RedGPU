@@ -183,7 +183,15 @@ class AutoExposure {
         return this.#adaptedEV100Buffer;
     }
 
-    render(view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
+    /**
+     * [KO] 자동 노출 처리를 수행합니다. (커맨드 기록)
+     * [EN] Performs auto exposure processing. (Record commands)
+     *
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
+     * @param view - [KO] View3D 인스턴스 [EN] View3D instance
+     * @param sourceTextureInfo - [KO] 소스 텍스처 정보 [EN] Source texture information
+     */
+    render(commandEncoder: GPUCommandEncoder, view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext;
         const {useMSAA} = antialiasingManager;
         const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
@@ -192,11 +200,10 @@ class AutoExposure {
 
         const ev100Range = this.#maxEV100 - this.#minEV100;
 
-        // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산 (View3D와 동일한 공식 사용)
-        // [EN] Calculate the final exposure value applied to the current frame (using the same formula as View3D)
+        // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산
         const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#exposureCompensation);
 
-        // Update uniforms (총 17개 필드로 확장)
+        // Update uniforms
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer,
             0,
@@ -221,10 +228,8 @@ class AutoExposure {
             ])
         );
 
-        const encoder = gpuDevice.createCommandEncoder({label: 'AutoExposure_CommandEncoder'});
-
-        // [KO] 히스토그램 버퍼 명시적 초기화 [EN] Explicitly clear histogram buffer
-        encoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
+        // [KO] 히스토그램 버퍼 명시적 초기화
+        commandEncoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
 
         // Pass 1: Generate Histogram
         const pipeline = this.#getDownsamplePipeline(useMSAA);
@@ -243,7 +248,7 @@ class AutoExposure {
             ]
         });
 
-        const pass1 = encoder.beginComputePass();
+        const pass1 = commandEncoder.beginComputePass({label: 'AutoExposure_GenerateHistogram_Pass'});
         pass1.setPipeline(pipeline);
         pass1.setBindGroup(0, downsampleBindGroup0);
         pass1.setBindGroup(1, downsampleBindGroup1);
@@ -260,28 +265,34 @@ class AutoExposure {
             ]
         });
 
-        const pass2 = encoder.beginComputePass();
+        const pass2 = commandEncoder.beginComputePass({label: 'AutoExposure_Adaptation_Pass'});
         pass2.setPipeline(this.#adaptationPipeline);
         pass2.setBindGroup(0, adaptationBindGroup0);
         pass2.dispatchWorkgroups(1, 1, 1);
         pass2.end();
 
-        // 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 및 비동기 읽기 시작
+        // [KO] 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 명령 기록
+        // [EN] Record copy command only when not currently reading
         if (!this.#isReading) {
-            encoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
+            commandEncoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
+        }
+    }
 
+    /**
+     * [KO] GPU 작업 완료 후 데이터를 비동기적으로 읽어옵니다. (Renderer에서 호출)
+     * [EN] Asynchronously reads back data after GPU work completion. (Called by Renderer)
+     */
+    resolveReadback() {
+        if (!this.#isReading) {
             this.#isReading = true;
-            gpuDevice.queue.submit([encoder.finish()]);
-
             this.#readBuffer.mapAsync(GPUMapMode.READ).then(() => {
                 const data = new Float32Array(this.#readBuffer.getMappedRange());
                 this.#currentAdaptedEV100 = data[0];
                 this.#readBuffer.unmap();
                 this.#isReading = false;
+            }).catch(e => {
+                this.#isReading = false;
             });
-        } else {
-            // 읽기 작업 중이면 컴퓨트 패스만 제출
-            gpuDevice.queue.submit([encoder.finish()]);
         }
     }
 

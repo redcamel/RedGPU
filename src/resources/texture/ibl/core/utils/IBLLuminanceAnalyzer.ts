@@ -21,9 +21,10 @@ class IBLLuminanceAnalyzer {
      * [EN] Analyzes and returns the average luminance of a given cubemap texture.
      *
      * @param cubeTexture - [KO] 분석할 큐브맵 GPUTexture [EN] Cubemap GPUTexture to analyze
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      * @returns [KO] 분석된 평균 휘도 [EN] Analyzed average luminance
      */
-    async analyze(cubeTexture: GPUTexture): Promise<number> {
+    async analyze(cubeTexture: GPUTexture, commandEncoder?: GPUCommandEncoder): Promise<number> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
 
         if (!this.#shaderModule) {
@@ -65,8 +66,8 @@ class IBLLuminanceAnalyzer {
             ]
         });
 
-        const commandEncoder = gpuDevice.createCommandEncoder({label: 'IBL_Luminance_Analysis_Encoder'});
-        const computePass = commandEncoder.beginComputePass();
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: 'IBL_Luminance_Analysis_Encoder'});
+        const computePass = internalEncoder.beginComputePass();
         computePass.setPipeline(this.#pipeline);
         computePass.setBindGroup(0, bindGroup);
         // [KO] 128x128 그리드 분석을 위해 (8, 8) 워크그룹 디스패치 (16*8 = 128)
@@ -74,8 +75,11 @@ class IBLLuminanceAnalyzer {
         computePass.dispatchWorkgroups(8, 8, 1);
         computePass.end();
 
-        commandEncoder.copyBufferToBuffer(luminanceBuffer, 0, readBuffer, 0, 4);
-        gpuDevice.queue.submit([commandEncoder.finish()]);
+        internalEncoder.copyBufferToBuffer(luminanceBuffer, 0, readBuffer, 0, 4);
+
+        if (!commandEncoder) {
+            gpuDevice.queue.submit([internalEncoder.finish()]);
+        }
 
         await readBuffer.mapAsync(GPUMapMode.READ);
         const data = new Uint32Array(readBuffer.getMappedRange());

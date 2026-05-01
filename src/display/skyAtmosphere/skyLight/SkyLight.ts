@@ -63,8 +63,9 @@ class SkyLight {
      * [KO] SkyAtmosphere의 상태를 기반으로 IBL 데이터를 업데이트합니다.
      * [EN] Updates IBL data based on the state of SkyAtmosphere.
      * @param skyAtmosphere - [KO] 소스가 되는 SkyAtmosphere 인스턴스 [EN] Source SkyAtmosphere instance
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
-    async update(skyAtmosphere: SkyAtmosphere): Promise<void> {
+    async update(skyAtmosphere: SkyAtmosphere, commandEncoder?: GPUCommandEncoder): Promise<void> {
         if (this.dirty && !this.#isUpdatingIBL) {
             this.#isUpdatingIBL = true;
 
@@ -73,19 +74,22 @@ class SkyLight {
             this.#reflectionGenerator.render(
                 skyAtmosphere.transmittanceLUT,
                 skyAtmosphere.multiScatLUT,
-                skyAtmosphere.skyViewLUT
+                skyAtmosphere.skyViewLUT,
+                commandEncoder
             );
             this.#irradianceGenerator.render(
                 skyAtmosphere.transmittanceLUT,
                 skyAtmosphere.multiScatLUT,
-                skyAtmosphere.skyViewLUT
+                skyAtmosphere.skyViewLUT,
+                commandEncoder
             );
 
             // [KO] 최종 Irradiance LUT로 베이킹
             // [EN] Bake to final Irradiance LUT
             this.#redGPUContext.resourceManager.irradianceGenerator.render(
                 this.#irradianceGenerator.sourceCubeTexture,
-                this.#irradianceLUT.gpuTexture
+                this.#irradianceLUT.gpuTexture,
+                commandEncoder
             );
 
             this.#irradianceLUT.notifyUpdate();

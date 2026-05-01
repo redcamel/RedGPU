@@ -163,7 +163,7 @@ class MipmapGenerator {
     /**
      * 밉맵 생성 메서드
      */
-    generateMipmap(texture: GPUTexture, textureDescriptor: GPUTextureDescriptor, useCache: boolean = false) {
+    generateMipmap(texture: GPUTexture, textureDescriptor: GPUTextureDescriptor, useCache: boolean = false, commandEncoder?: GPUCommandEncoder) {
         // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {
             this.#clearTempCaches();
@@ -192,13 +192,15 @@ class MipmapGenerator {
             };
             mipTexture = resourceManager.createManagedTexture(mipTextureDescriptor);
         }
-        const commandEncoder = gpuDevice.createCommandEncoder({});
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
+            label: 'MipmapGenerator_CommandEncoder'
+        });
         for (let arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer) {
             let srcView: GPUTextureView = this.createTextureView(texture, 0, arrayLayer, useCache);
             let dstMipLevel = renderToSource ? 1 : 0;
             for (let i = 1; i < textureDescriptor.mipLevelCount; ++i) {
                 const dstView: GPUTextureView = this.createTextureView(mipTexture, dstMipLevel++, arrayLayer, useCache);
-                const passEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass({
+                const passEncoder: GPURenderPassEncoder = internalEncoder.beginRenderPass({
                     colorAttachments: [{
                         view: dstView,
                         clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
@@ -222,7 +224,7 @@ class MipmapGenerator {
                 depthOrArrayLayers: arrayLayerCount,
             };
             for (let i = 1; i < textureDescriptor.mipLevelCount; ++i) {
-                commandEncoder.copyTextureToTexture({
+                internalEncoder.copyTextureToTexture({
                     texture: mipTexture,
                     mipLevel: i - 1,
                 }, {
@@ -233,7 +235,7 @@ class MipmapGenerator {
                 mipLevelSize.height = Math.max(1, mipLevelSize.height >>> 1);
             }
         }
-        gpuDevice.queue.submit([commandEncoder.finish()]);
+        if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
         if (!renderToSource) {
             mipTexture.destroy();
         }

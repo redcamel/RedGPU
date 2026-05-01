@@ -383,6 +383,9 @@ class DOF extends AMultiPassPostEffect {
      * [KO] DOF 효과를 렌더링합니다.
      * [EN] Renders the DOF effect.
      *
+     * @param commandEncoder
+     * [KO] 커맨드 인코더
+     * [EN] Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -399,14 +402,14 @@ class DOF extends AMultiPassPostEffect {
      * [KO] 최종 DOF 처리 결과
      * [EN] Final DOF result
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
         // 1단계: CoC (Circle of Confusion) 계산
         const cocResult = this.#effect_coc.render(
-            view, width, height, sourceTextureInfo
+            commandEncoder, view, width, height, sourceTextureInfo
         );
         // 2단계: 통합된 DOF 블러 및 컴포지팅
         return this.#effect_unified.render(
-            view, width, height, sourceTextureInfo, cocResult
+            commandEncoder, view, width, height, sourceTextureInfo, cocResult
         );
     }
 }

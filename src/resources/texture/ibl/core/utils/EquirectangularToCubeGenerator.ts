@@ -37,6 +37,8 @@ class EquirectangularToCubeGenerator {
         });
     }
 
+    #uniformBuffer: GPUBuffer;
+
     /**
      * [KO] 2D Equirectangular 텍스처를 큐브맵으로 변환하여 반환합니다.
      * [EN] Converts a 2D Equirectangular texture to a cubemap and returns it.
@@ -52,11 +54,12 @@ class EquirectangularToCubeGenerator {
      * @param size -
      * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
      * [EN] Size of one side of the generated cubemap (default: 512)
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      * @returns
      * [KO] 생성된 DirectCubeTexture
      * [EN] Generated DirectCubeTexture
      */
-    async generate(sourceTexture: GPUTexture, size: number = 512): Promise<DirectCubeTexture> {
+    async generate(sourceTexture: GPUTexture, size: number = 512, commandEncoder?: GPUCommandEncoder): Promise<DirectCubeTexture> {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
@@ -92,17 +95,19 @@ class EquirectangularToCubeGenerator {
         }
 
         // 3. 6개 면 연산
-        const commandEncoder = gpuDevice.createCommandEncoder({label: 'EquirectangularToCube_Generator_Command_Encoder'});
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: 'EquirectangularToCube_Generator_Command_Encoder'});
         const faceMatrices = this.#getCubeMapFaceMatrices();
 
-        const uniformBuffer = gpuDevice.createBuffer({
-            size: 64 * 6,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            label: `EquirectangularToCube_face_matrices_uniform`
-        });
+        if (!this.#uniformBuffer) {
+            this.#uniformBuffer = gpuDevice.createBuffer({
+                size: 64 * 6,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+                label: `EquirectangularToCube_face_matrices_uniform`
+            });
+        }
         const combinedMatrices = new Float32Array(16 * 6);
         faceMatrices.forEach((m, i) => combinedMatrices.set(m, i * 16));
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, combinedMatrices);
+        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, combinedMatrices);
 
         const bindGroup = gpuDevice.createBindGroup({
             layout: this.#pipeline.getBindGroupLayout(0),
@@ -117,11 +122,11 @@ class EquirectangularToCubeGenerator {
                         mipLevelCount: 1
                     })
                 },
-                {binding: 3, resource: {buffer: uniformBuffer}}
+                {binding: 3, resource: {buffer: this.#uniformBuffer}}
             ]
         });
 
-        const computePass = commandEncoder.beginComputePass({
+        const computePass = internalEncoder.beginComputePass({
             label: 'EquirectangularToCube_Generator_Compute_Pass'
         });
         computePass.setPipeline(this.#pipeline);
@@ -129,15 +134,16 @@ class EquirectangularToCubeGenerator {
         computePass.dispatchWorkgroups(Math.ceil(size / 8), Math.ceil(size / 8), 6);
         computePass.end();
 
-        gpuDevice.queue.submit([commandEncoder.finish()]);
+        if (!commandEncoder) {
+            gpuDevice.queue.submit([internalEncoder.finish()]);
+        }
 
         // 밉맵 생성 (컴퓨트 쉐이더로 첫 레벨 작성 후 밉맵 생성)
-        resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc);
+        resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc, true, commandEncoder);
 
-        await gpuDevice.queue.onSubmittedWorkDone();
-
-        // 임시 버퍼 정리
-        uniformBuffer.destroy();
+        if (!commandEncoder) {
+            await gpuDevice.queue.onSubmittedWorkDone();
+        }
 
         return new DirectCubeTexture(this.#redGPUContext, `CubeMap_From_Equirect_${createUUID()}`, cubeGPUTexture);
     }

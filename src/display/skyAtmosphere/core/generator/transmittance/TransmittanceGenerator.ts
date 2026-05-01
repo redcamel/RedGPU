@@ -24,14 +24,14 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
         return this.#lutTexture;
     }
 
-    render(): void {
+    render(commandEncoder?: GPUCommandEncoder): void {
         if (!this.#bindGroup) {
             this.#bindGroup = this.createBindGroup('SkyAtmosphere_Transmittance_BindGroup', this.#pipeline, [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
                 {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
             ]);
         }
-        this.executeComputePass(this.#pipeline, this.#bindGroup);
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [16, 16, 1], commandEncoder);
     }
 
     #init(): void {

@@ -47,8 +47,9 @@ class BRDFGenerator {
     /**
      * [KO] BRDF LUT를 생성합니다.
      * [EN] Generates the BRDF LUT.
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
-    async #generateBRDFLUT() {
+    async #generateBRDFLUT(commandEncoder?: GPUCommandEncoder) {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         const size = 128;
         const format: GPUTextureFormat = 'rg16float';
@@ -87,11 +88,11 @@ class BRDFGenerator {
             });
         }
 
-        const commandEncoder = gpuDevice.createCommandEncoder({
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
             label: 'BRDF_GENERATOR_COMMAND_ENCODER'
         });
 
-        const passEncoder = commandEncoder.beginRenderPass({
+        const passEncoder = internalEncoder.beginRenderPass({
             label: 'BRDF_GENERATOR_RENDER_PASS',
             colorAttachments: [
                 {
@@ -107,8 +108,10 @@ class BRDFGenerator {
         passEncoder.draw(3);
         passEncoder.end();
 
-        gpuDevice.queue.submit([commandEncoder.finish()]);
-        await gpuDevice.queue.onSubmittedWorkDone();
+        if (!commandEncoder) {
+            gpuDevice.queue.submit([internalEncoder.finish()]);
+            await gpuDevice.queue.onSubmittedWorkDone();
+        }
     }
 }
 

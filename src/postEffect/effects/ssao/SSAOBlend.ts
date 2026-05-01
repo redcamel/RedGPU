@@ -50,8 +50,8 @@ class SSAOBlend extends ASinglePassPostEffect {
         )
     }
 
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, sourceTextureInfo1: ASinglePassPostEffectResult) {
-        return super.render(view, width, height, sourceTextureInfo, sourceTextureInfo1)
+    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, sourceTextureInfo1: ASinglePassPostEffectResult) {
+        return super.render(commandEncoder, view, width, height, sourceTextureInfo, sourceTextureInfo1)
     }
 }
 

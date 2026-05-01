@@ -55,16 +55,19 @@ class FinalRender {
      *
      * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
      * @param {GPURenderPassDescriptor[]} viewList_renderPassDescriptorList - The list of render passes to be rendered.
+     * @returns {GPUCommandBuffer} The command buffer for the final render pass.
      */
-    render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]) {
+    render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]): GPUCommandBuffer {
         const {sizeManager, gpuDevice, antialiasingManager} = redGPUContext
         const {changedMSAA, useMSAA} = antialiasingManager
         const {pixelRectObject: canvasPixelRectObject} = sizeManager
         const {width: canvasW, height: canvasH} = canvasPixelRectObject
-        if (canvasW === 0 || canvasH === 0) return
+        if (canvasW === 0 || canvasH === 0) return null
         //
         const finalRenderPassDesc: GPURenderPassDescriptor = this.#getFinalRenderPassDesc(redGPUContext)
-        const finalRenderCommandEnc: GPUCommandEncoder = gpuDevice.createCommandEncoder()
+        const finalRenderCommandEnc: GPUCommandEncoder = gpuDevice.createCommandEncoder({
+            label: 'FinalRender_CommandEncoder'
+        })
         const finalRenderPassEnc: GPURenderPassEncoder = finalRenderCommandEnc.beginRenderPass(finalRenderPassDesc)
         finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
         finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
@@ -80,7 +83,7 @@ class FinalRender {
             useMSAA
         )
         finalRenderPassEnc.end()
-        gpuDevice.queue.submit([finalRenderCommandEnc.finish()])
+        return finalRenderCommandEnc.finish()
     }
 
     #updateFinalViewBackgroundColor(view: View3D, index: number) {

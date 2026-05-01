@@ -19,18 +19,20 @@
  * @param sliceIndex -
  * [KO] 복사할 슬라이스 인덱스
  * [EN] Slice index to copy into
+ * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
  * @category Texture
  */
 function copyToTextureArray(
     gpuDevice: GPUDevice,
     sourceTexture: GPUTexture,
     targetArrayTexture: GPUTexture,
-    sliceIndex: number
+    sliceIndex: number,
+    commandEncoder?: GPUCommandEncoder
 ) {
-    const encoder = gpuDevice.createCommandEncoder({
+    const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
         label: 'COPY_TO_TEXTURE_ARRAY'
     });
-    encoder.copyTextureToTexture(
+    internalEncoder.copyTextureToTexture(
         {texture: sourceTexture},
         {
             texture: targetArrayTexture,
@@ -38,7 +40,7 @@ function copyToTextureArray(
         },
         [sourceTexture.width, sourceTexture.height, 1]
     );
-    gpuDevice.queue.submit([encoder.finish()]);
+    if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
 }
 
 export default copyToTextureArray;

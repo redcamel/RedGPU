@@ -62,11 +62,12 @@ abstract class ASkyAtmosphereLUTGenerator {
     executeComputePass(
         pipeline: GPUComputePipeline,
         bindGroup: GPUBindGroup,
-        workgroupSize: [number, number, number] = [16, 16, 1]
+        workgroupSize: [number, number, number] = [16, 16, 1],
+        commandEncoder?: GPUCommandEncoder
     ): void {
         const {gpuDevice} = this.#redGPUContext;
-        const commandEncoder = gpuDevice.createCommandEncoder({label: `SkyAtmosphere_${this.#label}_CommandEncoder`});
-        const passEncoder = commandEncoder.beginComputePass({label: `SkyAtmosphere_${this.#label}_ComputePass`});
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: `SkyAtmosphere_${this.#label}_CommandEncoder`});
+        const passEncoder = internalEncoder.beginComputePass({label: `SkyAtmosphere_${this.#label}_ComputePass`});
 
         passEncoder.setPipeline(pipeline);
         passEncoder.setBindGroup(0, bindGroup);
@@ -77,7 +78,9 @@ abstract class ASkyAtmosphereLUTGenerator {
         );
         passEncoder.end();
 
-        gpuDevice.queue.submit([commandEncoder.finish()]);
+        if (!commandEncoder) {
+            gpuDevice.queue.submit([internalEncoder.finish()]);
+        }
         this.lutTexture.notifyUpdate();
     }
 

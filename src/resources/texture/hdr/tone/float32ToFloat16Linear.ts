@@ -81,7 +81,8 @@ export interface Float16ConversionResult {
 export async function float32ToFloat16Linear(
     redGPUContext: RedGPUContext,
     float32Data: Float32Array,
-    options: Float16ConversionOptions
+    options: Float16ConversionOptions,
+    commandEncoder?: GPUCommandEncoder
 ): Promise<Float16ConversionResult> {
     const startTime = performance.now();
     const {gpuDevice} = redGPUContext;
@@ -117,7 +118,8 @@ export async function float32ToFloat16Linear(
             width,
             height,
             workgroupSize,
-            pixelCount
+            pixelCount,
+            commandEncoder
         );
 
         cleanupBuffers(buffers);
@@ -286,7 +288,8 @@ async function executeCompute(
     width: number,
     height: number,
     workgroupSize: [number, number],
-    pixelCount: number
+    pixelCount: number,
+    commandEncoder?: GPUCommandEncoder
 ): Promise<Uint16Array> {
     const workgroupsX = Math.ceil(width / workgroupSize[0]);
     const workgroupsY = Math.ceil(height / workgroupSize[1]);
@@ -295,16 +298,21 @@ async function executeCompute(
         throw new Error(`이미지 크기 초과: ${workgroupsX} × ${workgroupsY}`);
     }
 
-    const commandEncoder = gpuDevice.createCommandEncoder();
-    const computePass = commandEncoder.beginComputePass();
+    const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
+        label: 'float16_conversion_command_encoder'
+    });
+    const computePass = internalEncoder.beginComputePass();
 
     computePass.setPipeline(computePipeline);
     computePass.setBindGroup(0, bindGroup);
     computePass.dispatchWorkgroups(workgroupsX, workgroupsY);
     computePass.end();
 
-    commandEncoder.copyBufferToBuffer(outputBuffer, 0, readBuffer, 0, pixelCount * 8);
-    gpuDevice.queue.submit([commandEncoder.finish()]);
+    internalEncoder.copyBufferToBuffer(outputBuffer, 0, readBuffer, 0, pixelCount * 8);
+
+    if (!commandEncoder) {
+        gpuDevice.queue.submit([internalEncoder.finish()]);
+    }
 
     await readBuffer.mapAsync(GPUMapMode.READ);
     const packedData = new Uint32Array(readBuffer.getMappedRange());

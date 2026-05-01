@@ -273,6 +273,9 @@ abstract class ASinglePassPostEffect {
      * [KO] 이펙트를 실행합니다.
      * [EN] Executes the effect.
      *
+     * @param commandEncoder
+     * [KO] 커맨드 인코더
+     * [EN] Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -286,23 +289,24 @@ abstract class ASinglePassPostEffect {
      * [KO] 높이
      * [EN] Height
      */
-    execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
-        const commentEncode_compute = gpuDevice.createCommandEncoder({
-            label: 'ASinglePassPostEffect_Execute_CommandEncoder'
+    execute(commandEncoder: GPUCommandEncoder, view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
+        const computePassEncoder = commandEncoder.beginComputePass({
+            label: `ASinglePassPostEffect_${this.#name}_ComputePass`
         })
-        const computePassEncoder = commentEncode_compute.beginComputePass()
         computePassEncoder.setPipeline(this.#computePipeline)
         computePassEncoder.setBindGroup(0, view.renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0)
         computePassEncoder.setBindGroup(1, this.#computeBindGroup1)
         computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
         computePassEncoder.end();
-        gpuDevice.queue.submit([commentEncode_compute.finish()]);
     }
 
     /**
      * [KO] 이펙트를 렌더링합니다.
      * [EN] Renders the effect.
      *
+     * @param commandEncoder
+     * [KO] 커맨드 인코더
+     * [EN] Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -319,7 +323,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 렌더링 결과 (텍스처 및 뷰)
      * [EN] Rendering result (texture and view)
      */
-    render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
+    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
         const {useMSAA, msaaID} = antialiasingManager
         const dimensionsChanged = this.#createRenderTexture(view)
@@ -331,8 +335,8 @@ abstract class ASinglePassPostEffect {
         if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
             this.#createBindGroups(view, sourceTextureInfo, targetOutputView, useMSAA, redGPUContext, gpuDevice);
         }
-        this.update(performance.now())
-        this.execute(view, gpuDevice, width, height)
+
+        this.execute(commandEncoder, view, gpuDevice, width, height)
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
         return {
@@ -341,16 +345,7 @@ abstract class ASinglePassPostEffect {
         }
     }
 
-    /**
-     * [KO] 이펙트 상태를 업데이트합니다.
-     * [EN] Updates the effect state.
-     *
-     * @param deltaTime
-     * [KO] 델타 타임
-     * [EN] Delta time
-     */
-    update(deltaTime: number) {
-    }
+
 
     /**
      * [KO] 유니폼 값을 업데이트합니다.

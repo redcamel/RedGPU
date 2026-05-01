@@ -101,17 +101,29 @@ class Renderer {
 
 
         // 오브젝트 렌더시작
+        const commandBuffers: GPUCommandBuffer[] = []
         const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
         {
             let i = 0
             const len = redGPUContext.viewList.length
             for (i; i < len; i++) {
                 const targetView = redGPUContext.viewList[i];
-                viewList_renderPassDescriptorList.push(this.renderView(targetView, time));
+                const {renderPassDescriptor, commandBuffers: viewCommandBuffers} = this.renderView(targetView, time);
+                viewList_renderPassDescriptorList.push(renderPassDescriptor);
+                commandBuffers.push(...viewCommandBuffers);
             }
         }
-        this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList)
+        const finalRenderCommandBuffer = this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList);
+        if (finalRenderCommandBuffer) commandBuffers.push(finalRenderCommandBuffer);
+
+        redGPUContext.gpuDevice.queue.submit(commandBuffers);
+
         redGPUContext.antialiasingManager.changedMSAA = false
+        viewList_renderPassDescriptorList.forEach((v, index) => {
+            const targetView = redGPUContext.viewList[index];
+            targetView.pickingManager?.checkEvents(targetView, time);
+            targetView.postEffectManager.autoExposure.resolveReadback();
+        });
         console.log('/////////////////// end renderFrame ///////////////////')
     }
 
@@ -126,10 +138,13 @@ class Renderer {
      * [KO] 현재 시간 (ms)
      * [EN] Current time (ms)
      * @returns
-     * [KO] 생성된 렌더 패스 디스크립터
-     * [EN] Generated render pass descriptor
+     * [KO] 생성된 렌더 패스 디스크립터와 커맨드 버퍼 리스트
+     * [EN] Generated render pass descriptor and command buffer list
      */
-    renderView(view: View3D, time: number) {
+    renderView(view: View3D, time: number): {
+        renderPassDescriptor: GPURenderPassDescriptor,
+        commandBuffers: GPUCommandBuffer[]
+    } {
         const {
             redGPUContext,
             camera,
@@ -151,9 +166,8 @@ class Renderer {
             colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
             depthStencilAttachment,
         }
-        view.renderViewStateData.reset(null, time)
+        view.renderViewStateData.reset(commandEncoder, null, time)
         if (pixelRectObject.width && pixelRectObject.height) {
-
 
             {
                 const {scene} = view
@@ -186,25 +200,36 @@ class Renderer {
             }
 
             this.#updateJitter(view)
+
+            // [KO] 쉐도우 패스용 업데이트 및 렌더링 (커맨드 인코더 락 방지를 위해 패스 시작 전 업데이트)
+            // [EN] Update and render for shadow pass (Update before pass start to prevent encoder lock)
+            view.update(true, false, null, commandEncoder)
             this.#renderPassViewShadow(view, commandEncoder)
 
+            // [KO] 기본 패스용 업데이트 및 렌더링
+            // [EN] Update and render for basic pass
+            const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
+            view.update(false, true, renderPath1ResultTextureView, commandEncoder)
             this.#renderPassViewBasicLayer(view, commandEncoder, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, commandEncoder, renderPassDescriptor, depthStencilAttachment)
             this.#renderPassViewPickingLayer(view, commandEncoder)
+            pickingManager?.prepareRead(view, commandEncoder);
         }
         {
             //TODO 포스트이펙트를 실행을 완전히 안해도 될 조것 같은걸 체크해야함
-            renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
+            renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render(commandEncoder).textureView
         }
-        redGPUContext.gpuDevice.queue.submit(
-            [
-                commandEncoder.finish(),
-                this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData)
-            ]
-        )
+        const skinCommandBuffer = this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData, commandEncoder);
+        const viewCommandBuffers = [
+            commandEncoder.finish()
+        ];
+        if (skinCommandBuffer) viewCommandBuffers.push(skinCommandBuffer);
+
         view.renderViewStateData.viewRenderTime = (performance.now() - view.renderViewStateData.startTime);
-        pickingManager?.checkEvents(view, time);
-        return renderPassDescriptor
+        return {
+            renderPassDescriptor,
+            commandBuffers: viewCommandBuffers
+        }
     }
 
     #renderPassViewShadow(view: View3D, commandEncoder: GPUCommandEncoder) {
@@ -225,7 +250,7 @@ class Renderer {
         const viewShadowRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(shadowPassDescriptor)
         {
             this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
-            this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
+            this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, commandEncoder, true, false)
         }
         if (directionalShadowManager.castingList.length) {
             renderShadowLayer(view, viewShadowRenderPassEncoder)
@@ -236,11 +261,12 @@ class Renderer {
 
     #renderPassViewBasicLayer(view: View3D, commandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
         const {renderViewStateData, skybox, skyAtmosphere, grid, axis} = view
+        if (skyAtmosphere) skyAtmosphere.update(view, commandEncoder)
         const viewRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor)
         {
             const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
             this.#updateViewportAndScissor(view, viewRenderPassEncoder)
-            this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true, renderPath1ResultTextureView)
+            this.#updateViewSystemUniforms(view, viewRenderPassEncoder, commandEncoder, false, true, renderPath1ResultTextureView)
         }
         renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
         viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
@@ -293,6 +319,7 @@ class Renderer {
                     depthLoadOp: GPU_LOAD_OP.LOAD,
                 },
             });
+            this.#updateViewSystemUniforms(view, renderPassEncoder, commandEncoder, false, false)
             renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
             renderPassEncoder.end();
         }
@@ -323,7 +350,7 @@ class Renderer {
             const viewPickingRenderPassEncoder: GPURenderPassEncoder = commandEncoder.beginRenderPass(pickingPassDescriptor)
             {
                 this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder)
-                this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
+                this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, commandEncoder, false, false)
             }
             renderPickingLayer(view, viewPickingRenderPassEncoder)
             viewPickingRenderPassEncoder.end()
@@ -366,15 +393,16 @@ class Renderer {
         return result;
     }
 
-    #batchUpdateSkinMatrices(redGPUContext: RedGPUContext, renderViewStateData: RenderViewStateData) {
+    #batchUpdateSkinMatrices(redGPUContext: RedGPUContext, renderViewStateData: RenderViewStateData, commandEncoder?: GPUCommandEncoder) {
         const {animationList, skinList} = renderViewStateData;
         const skinListNum = skinList.length
         const animationListNum = animationList.length
+        if (!skinListNum && !animationListNum) return null;
         const {gpuDevice} = redGPUContext;
-        const commandEncoder = gpuDevice.createCommandEncoder({
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
             label: 'BatchUpdateSkinMatrices_CommandEncoder'
         });
-        const passEncoder = commandEncoder.beginComputePass();
+        const passEncoder = internalEncoder.beginComputePass();
         if (animationListNum) {
             this.#gltfAnimationLooperManager.render(
                 redGPUContext,
@@ -493,7 +521,7 @@ class Renderer {
             passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / skinInfo.WORK_SIZE));
         }
         passEncoder.end();
-        return commandEncoder.finish()
+        return commandEncoder ? null : internalEncoder.finish();
     }
 
     #createAttachmentsForView(view: View3D) {
@@ -571,12 +599,13 @@ class Renderer {
     #updateViewSystemUniforms(
         view: View3D,
         viewRenderPassEncoder: GPURenderPassEncoder,
+        commandEncoder: GPUCommandEncoder,
         shadowRender: boolean = false,
         calcPointLightCluster: boolean = true,
         renderPath1ResultTextureView: GPUTextureView = null
     ) {
-        //TODO - 업데이트 한번만 하도록 분리
-        view.update(shadowRender, calcPointLightCluster, renderPath1ResultTextureView)
+        // [KO] 바인드 그룹만 설정 (업데이트는 renderView 시작 시 이미 수행됨)
+        // [EN] Only set bind group (update already performed at start of renderView)
         viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
     }
 }
