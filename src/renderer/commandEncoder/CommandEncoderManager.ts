@@ -3,6 +3,32 @@ import { COMMAND_ENCODER_TYPE, CommandEncoderType } from "./COMMAND_ENCODER_TYPE
 import { keepLog } from "../../utils";
 
 /**
+ * [KO] 단계별 통계 상세 정보 인터페이스
+ * [EN] Detailed statistics per phase
+ */
+export interface CommandPhaseStats {
+    'Phase'?: CommandEncoderType;
+    'Command Buffers': number;
+    'Render Passes': {
+        count: number;
+        list: string[];
+    };
+    'Compute Passes': {
+        count: number;
+        list: string[];
+    };
+    'Raw Usages': number;
+}
+
+/**
+ * [KO] 일괄 제출 통계 정보 인터페이스
+ * [EN] Batch submission statistics
+ */
+export interface CommandBatchStats {
+    [key: string]: CommandPhaseStats;
+}
+
+/**
  * [KO] GPU 커맨드 인코더 및 패스의 생명주기를 지능적으로 관리하는 클래스입니다.
  * [EN] Class that intelligently manages the lifecycle of GPU command encoders and passes.
  * 
@@ -96,7 +122,7 @@ class CommandEncoderManager {
      * [KO] 특정 타입의 모든 인코더를 종료하고 즉시 서밋합니다.
      * [EN] Finishes all encoders for the specific type and submits them immediately.
      */
-    submit(type: CommandEncoderType): void {
+    submit(type: CommandEncoderType): CommandPhaseStats | null {
         if (this.#isPassActive[type]) {
             throw new Error(`[RedGPU] Cannot submit ${type} phase while a pass is still active.`);
         }
@@ -104,7 +130,7 @@ class CommandEncoderManager {
         const buffers = this.#finish(type);
         if (buffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(buffers);
-            const logData = {
+            const logData: CommandPhaseStats = {
                 'Phase': type,
                 'Command Buffers': buffers.length,
                 'Render Passes': {
@@ -119,16 +145,18 @@ class CommandEncoderManager {
             };
             keepLog(`🚀 [CommandEncoderManager] Submitted ${type} Phase`, logData);
             this.#resetStat(type);
+            return logData;
         }
+        return null;
     }
 
     /**
      * [KO] 모든 타입의 인코더를 한꺼번에 종료하고 단 한 번의 호출로 서밋합니다. (성능 최적화용)
      * [EN] Finishes encoders of all types and submits them in a single call. (For performance optimization)
      */
-    submitAll(): void {
+    submitAll(): CommandBatchStats | null {
         const allBuffers: GPUCommandBuffer[] = [];
-        const batchStats: Record<string, any> = {};
+        const batchStats: CommandBatchStats = {};
 
         // [KO] 실행 순서 보장: RESOURCE -> PRE_PROCESS -> MAIN -> POST_PROCESS
         // [EN] Ensure execution order: RESOURCE -> PRE_PROCESS -> MAIN -> POST_PROCESS
@@ -166,7 +194,9 @@ class CommandEncoderManager {
         if (allBuffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(allBuffers);
             keepLog(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} Command Buffer(s)`, batchStats);
+            return batchStats;
         }
+        return null;
     }
 
     /**
