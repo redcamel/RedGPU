@@ -70,9 +70,9 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [KO] 모든 패스를 순차적으로 렌더링합니다.
      * [EN] Renders all passes sequentially.
      *
-     * @param commandEncoder
-     * [KO] 커맨드 인코더
-     * [EN] Command Encoder
+     * @param postProcessEncoder
+     * [KO] 후처리 커맨드 인코더
+     * [EN] Post-process Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -89,12 +89,12 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [KO] 마지막 패스의 결과
      * [EN] Result of the last pass
      */
-    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         let targetOutputInfo: ASinglePassPostEffectResult
         this.#passList.forEach((effect: ASinglePassPostEffect, index) => {
             if (index) sourceTextureInfo = targetOutputInfo
             targetOutputInfo = effect.render(
-                commandEncoder, view, width, height, sourceTextureInfo
+                postProcessEncoder, view, width, height, sourceTextureInfo
             )
         })
         return targetOutputInfo

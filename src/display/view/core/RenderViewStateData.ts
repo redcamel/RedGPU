@@ -83,11 +83,14 @@ class RenderViewStateData {
     /** [KO] 현재 사용 중인 GPU 렌더 패스 인코더 [EN] Current GPU render pass encoder in use */
     currentRenderPassEncoder: GPURenderPassEncoder;
 
-    /** [KO] 현재 사용 중인 GPU 렌더 커맨드 인코더 [EN] Current GPU render command encoder in use */
-    renderCommandEncoder: GPUCommandEncoder;
+    /** [KO] 사전 컴퓨트 연산을 위한 GPU 커맨드 인코더 [EN] GPU command encoder for pre-compute operations */
+    preComputeEncoder: GPUCommandEncoder;
 
-    /** [KO] 현재 프레임에서 컴퓨트 연산을 위해 사용되는 GPU 커맨드 인코더 [EN] GPU command encoder used for compute operations in the current frame */
-    computeCommandEncoder: GPUCommandEncoder;
+    /** [KO] 메인 렌더링을 위한 GPU 커맨드 인코더 [EN] GPU command encoder for main rendering */
+    mainRenderEncoder: GPUCommandEncoder;
+
+    /** [KO] 후처리 연산을 위한 GPU 커맨드 인코더 [EN] GPU command encoder for post-process operations */
+    postProcessEncoder: GPUCommandEncoder;
 
     /** [KO] 컬링을 위한 프러스텀 평면 배열 [EN] Frustum planes array for culling */
     frustumPlanes: number[][];
@@ -189,7 +192,7 @@ class RenderViewStateData {
         this.time = time / 1000;
         this.deltaTime = (time - this.prevTimestamp) / 1000;
         this.sinTime = Math.sin(this.time);
-        this.renderCommandEncoder = commandEncoder;
+        this.mainRenderEncoder = commandEncoder;
         this.currentRenderPassEncoder = viewRenderPassEncoder;
         this.timestamp = time;
         this.prevVertexGpuBuffer = null;

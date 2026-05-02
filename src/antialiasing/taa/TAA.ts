@@ -179,8 +179,7 @@ class TAA {
      * [KO] 렌더링 결과 (텍스처 및 뷰)
      * [EN] Rendering result (texture and view)
      */
-    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-
+    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         const sourceTextureView = sourceTextureInfo.textureView
         const sourceTexture = sourceTextureInfo.texture;
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
@@ -201,9 +200,9 @@ class TAA {
         if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
             this.#createFrameBufferBindGroups(view, [sourceTextureView], useMSAA, this.#redGPUContext, gpuDevice);
         }
-        this.#execute(commandEncoder, width, height);
+        this.#execute(postProcessEncoder, width, height);
         {
-            commandEncoder.copyTextureToTexture(
+            postProcessEncoder.copyTextureToTexture(
                 {texture: this.#currentFrameTexture},
                 {texture: this.#historyTexture},
                 [width, height, 1]

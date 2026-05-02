@@ -65,10 +65,10 @@ class FinalRender {
         if (canvasW === 0 || canvasH === 0) return null
         //
         const finalRenderPassDesc: GPURenderPassDescriptor = this.#getFinalRenderPassDesc(redGPUContext)
-        const finalRenderCommandEnc: GPUCommandEncoder = gpuDevice.createCommandEncoder({
+        const mainRenderEncoder: GPUCommandEncoder = gpuDevice.createCommandEncoder({
             label: 'FinalRender_CommandEncoder'
         })
-        const finalRenderPassEnc: GPURenderPassEncoder = finalRenderCommandEnc.beginRenderPass(finalRenderPassDesc)
+        const finalRenderPassEnc: GPURenderPassEncoder = mainRenderEncoder.beginRenderPass(finalRenderPassDesc)
         finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
         finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
         //
@@ -83,7 +83,7 @@ class FinalRender {
             useMSAA
         )
         finalRenderPassEnc.end()
-        return finalRenderCommandEnc.finish()
+        return mainRenderEncoder.finish()
     }
 
     #updateFinalViewBackgroundColor(view: View3D, index: number) {

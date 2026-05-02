@@ -975,7 +975,7 @@ class ParticleEmitter extends Mesh {
      */
     render(renderViewStateData: RenderViewStateData) {
         if (!this.#simParamBuffer) this.#init()
-        this.#renderComputePass(renderViewStateData.timestamp, renderViewStateData.computeCommandEncoder)
+        this.#renderComputePass(renderViewStateData.timestamp, renderViewStateData.preComputeEncoder)
         super.render(renderViewStateData)
     }
 

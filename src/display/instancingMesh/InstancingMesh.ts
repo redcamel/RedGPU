@@ -230,10 +230,10 @@ class InstancingMesh extends Mesh {
                 this.#updatePipelineState(renderViewStateData);
             }
             if (!shadowRender) {
-                this.#performGPUCulling(renderViewStateData, renderViewStateData.computeCommandEncoder);
+                this.#performGPUCulling(renderViewStateData, renderViewStateData.preComputeEncoder);
             }
             this.#renderGeometry(renderViewStateData, shadowRender, currentRenderPassEncoder);
-        }
+            }
         if (this.castShadow) {
             castingList[castingList.length] = this;
         }
@@ -548,7 +548,7 @@ class InstancingMesh extends Mesh {
         });
 
         // Compute Pass 실행
-        const commandEncoder = commandEncoderOverride || renderViewStateData.renderCommandEncoder || gpuDevice.createCommandEncoder({
+        const commandEncoder = commandEncoderOverride || renderViewStateData.preComputeEncoder || gpuDevice.createCommandEncoder({
             label: 'InstancingMesh_GPUCulling_CommandEncoder'
         });
         const computePass = commandEncoder.beginComputePass({
@@ -561,7 +561,7 @@ class InstancingMesh extends Mesh {
         computePass.dispatchWorkgroups(workgroupCount);
         computePass.end();
 
-        if (!commandEncoderOverride && !renderViewStateData.renderCommandEncoder) {
+        if (!commandEncoderOverride && !renderViewStateData.preComputeEncoder) {
             gpuDevice.queue.submit([commandEncoder.finish()]);
         }
     }

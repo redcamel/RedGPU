@@ -55,7 +55,18 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
         this.#initShaders();
     }
 
-    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    /**
+     * [KO] 스카이 대기 포스트 이펙트를 렌더링합니다.
+     * [EN] Renders the sky atmosphere post effect.
+     *
+     * @param postProcessEncoder - [KO] 후처리 커맨드 인코더 [EN] Post-process command encoder
+     * @param view - [KO] 현재 뷰 [EN] Current view
+     * @param width - [KO] 너비 [EN] Width
+     * @param height - [KO] 높이 [EN] Height
+     * @param sourceTextureInfo - [KO] 소스 컬러 텍스처 [EN] Source color texture
+     * @returns [KO] 렌더링 결과 [EN] Render result
+     */
+    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         const {gpuDevice, resourceManager, antialiasingManager} = this.redGPUContext;
 
         const {useMSAA, msaaID} = antialiasingManager;
@@ -143,7 +154,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             });
         }
 
-        const passEncoder = commandEncoder.beginComputePass({label: 'SkyAtmospherePostEffect_Pass'});
+        const passEncoder = postProcessEncoder.beginComputePass({label: 'SkyAtmospherePostEffect_Pass'});
 
         passEncoder.setPipeline(pipeline);
         passEncoder.setBindGroup(0, currentBindGroup0);

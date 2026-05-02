@@ -316,9 +316,9 @@ class SkyAtmosphere {
      * [KO] 포스트 이펙트 렌더링을 수행합니다. (오브젝트 영역 대기 투과 처리 전용)
      * [EN] Performs post-effect rendering. (Dedicated to atmospheric transmittance on object regions)
      */
-    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-        this.update(view, commandEncoder);
-        return this.#postEffect.render(commandEncoder, view, width, height, sourceTextureInfo);
+    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+        this.update(view, postProcessEncoder);
+        return this.#postEffect.render(postProcessEncoder, view, width, height, sourceTextureInfo);
     }
 
     #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {

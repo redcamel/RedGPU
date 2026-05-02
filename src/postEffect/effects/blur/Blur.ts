@@ -56,9 +56,9 @@ class Blur extends AMultiPassPostEffect {
      * [KO] 내부적으로 Convolution 패스의 `render`를 호출합니다.
      * [EN] Internally calls `render` of the Convolution pass.
      *
-     * @param commandEncoder
-     * [KO] 커맨드 인코더
-     * [EN] Command Encoder
+     * @param postProcessEncoder
+     * [KO] 후처리 커맨드 인코더
+     * [EN] Post-process Command Encoder
      * @param view
      * [KO] 렌더링 대상 View3D 객체
      * [EN] Render target View3D object
@@ -76,14 +76,14 @@ class Blur extends AMultiPassPostEffect {
      * [EN] Blurred texture result
      */
     render(
-        commandEncoder: GPUCommandEncoder,
+        postProcessEncoder: GPUCommandEncoder,
         view: View3D,
         width: number,
         height: number,
         sourceTextureInfo: ASinglePassPostEffectResult
     ): ASinglePassPostEffectResult {
         return this.#effect_convolution.render(
-            commandEncoder, view, width, height, sourceTextureInfo
+            postProcessEncoder, view, width, height, sourceTextureInfo
         );
     }
 }

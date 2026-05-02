@@ -240,8 +240,8 @@ class DOFUnified extends ASinglePassPostEffect {
         this.updateUniform('farStrength', value)
     }
 
-    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, cocTextureInfo: ASinglePassPostEffectResult) {
-        return super.render(commandEncoder, view, width, height, sourceTextureInfo, cocTextureInfo);
+    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult, cocTextureInfo: ASinglePassPostEffectResult) {
+        return super.render(postProcessEncoder, view, width, height, sourceTextureInfo, cocTextureInfo);
     }
 }
 

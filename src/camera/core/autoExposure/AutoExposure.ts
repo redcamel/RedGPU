@@ -187,11 +187,11 @@ class AutoExposure {
      * [KO] 자동 노출 처리를 수행합니다. (커맨드 기록)
      * [EN] Performs auto exposure processing. (Record commands)
      *
-     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
+     * @param postProcessEncoder - [KO] 후처리 커맨드 인코더 [EN] Post-process command encoder
      * @param view - [KO] View3D 인스턴스 [EN] View3D instance
      * @param sourceTextureInfo - [KO] 소스 텍스처 정보 [EN] Source texture information
      */
-    render(commandEncoder: GPUCommandEncoder, view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(postProcessEncoder: GPUCommandEncoder, view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext;
         const {useMSAA} = antialiasingManager;
         const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
@@ -229,7 +229,7 @@ class AutoExposure {
         );
 
         // [KO] 히스토그램 버퍼 명시적 초기화
-        commandEncoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
+        postProcessEncoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
 
         // Pass 1: Generate Histogram
         const pipeline = this.#getDownsamplePipeline(useMSAA);
@@ -248,7 +248,7 @@ class AutoExposure {
             ]
         });
 
-        const pass1 = commandEncoder.beginComputePass({label: 'AutoExposure_GenerateHistogram_Pass'});
+        const pass1 = postProcessEncoder.beginComputePass({label: 'AutoExposure_GenerateHistogram_Pass'});
         pass1.setPipeline(pipeline);
         pass1.setBindGroup(0, downsampleBindGroup0);
         pass1.setBindGroup(1, downsampleBindGroup1);
@@ -265,7 +265,7 @@ class AutoExposure {
             ]
         });
 
-        const pass2 = commandEncoder.beginComputePass({label: 'AutoExposure_Adaptation_Pass'});
+        const pass2 = postProcessEncoder.beginComputePass({label: 'AutoExposure_Adaptation_Pass'});
         pass2.setPipeline(this.#adaptationPipeline);
         pass2.setBindGroup(0, adaptationBindGroup0);
         pass2.dispatchWorkgroups(1, 1, 1);
@@ -274,7 +274,7 @@ class AutoExposure {
         // [KO] 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 명령 기록
         // [EN] Record copy command only when not currently reading
         if (!this.#isReading) {
-            commandEncoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
+            postProcessEncoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
         }
     }
 

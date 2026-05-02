@@ -273,9 +273,9 @@ abstract class ASinglePassPostEffect {
      * [KO] 이펙트를 실행합니다.
      * [EN] Executes the effect.
      *
-     * @param commandEncoder
-     * [KO] 커맨드 인코더
-     * [EN] Command Encoder
+     * @param postProcessEncoder
+     * [KO] 후처리 커맨드 인코더
+     * [EN] Post-process Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -289,8 +289,8 @@ abstract class ASinglePassPostEffect {
      * [KO] 높이
      * [EN] Height
      */
-    execute(commandEncoder: GPUCommandEncoder, view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
-        const computePassEncoder = commandEncoder.beginComputePass({
+    execute(postProcessEncoder: GPUCommandEncoder, view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
+        const computePassEncoder = postProcessEncoder.beginComputePass({
             label: `ASinglePassPostEffect_${this.#name}_ComputePass`
         })
         computePassEncoder.setPipeline(this.#computePipeline)
@@ -304,9 +304,9 @@ abstract class ASinglePassPostEffect {
      * [KO] 이펙트를 렌더링합니다.
      * [EN] Renders the effect.
      *
-     * @param commandEncoder
-     * [KO] 커맨드 인코더
-     * [EN] Command Encoder
+     * @param postProcessEncoder
+     * [KO] 후처리 커맨드 인코더
+     * [EN] Post-process Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -323,7 +323,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 렌더링 결과 (텍스처 및 뷰)
      * [EN] Rendering result (texture and view)
      */
-    render(commandEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
+    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
         const {useMSAA, msaaID} = antialiasingManager
         const dimensionsChanged = this.#createRenderTexture(view)
@@ -336,7 +336,7 @@ abstract class ASinglePassPostEffect {
             this.#createBindGroups(view, sourceTextureInfo, targetOutputView, useMSAA, redGPUContext, gpuDevice);
         }
 
-        this.execute(commandEncoder, view, gpuDevice, width, height)
+        this.execute(postProcessEncoder, view, gpuDevice, width, height)
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
         return {
