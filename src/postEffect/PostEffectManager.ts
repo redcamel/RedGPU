@@ -665,7 +665,7 @@ class PostEffectManager {
     }
 
     #executeComputePass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, width: number, height: number) {
-        this.#view.redGPUContext.commandEncoderManager.addPostProcessPass('POST_EFFECT_TEXTURE_COPY_COMPUTE_PASS', (computePassEncoder) => {
+        this.#view.redGPUContext.commandEncoderManager.addPostProcessComputePass('POST_EFFECT_TEXTURE_COPY_COMPUTE_PASS', (computePassEncoder) => {
             computePassEncoder.setPipeline(pipeline);
             computePassEncoder.setBindGroup(0, bindGroup);
             computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#COMPUTE_WORKGROUP_SIZE_X), Math.ceil(height / this.#COMPUTE_WORKGROUP_SIZE_Y));

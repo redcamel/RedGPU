@@ -153,7 +153,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             });
         }
 
-        commandEncoderManager.addPostProcessPass('SkyAtmospherePostEffect_Pass', (passEncoder) => {
+        commandEncoderManager.addPostProcessComputePass('SkyAtmospherePostEffect_Pass', (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, currentBindGroup0);
             passEncoder.setBindGroup(1, this.#bindGroup1);

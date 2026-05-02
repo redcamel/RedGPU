@@ -249,7 +249,7 @@ class AutoExposure {
             ]
         });
 
-        commandEncoderManager.addPostProcessPass('AutoExposure_GenerateHistogram_Pass', (pass1) => {
+        commandEncoderManager.addPostProcessComputePass('AutoExposure_GenerateHistogram_Pass', (pass1) => {
             pass1.setPipeline(pipeline);
             pass1.setBindGroup(0, downsampleBindGroup0);
             pass1.setBindGroup(1, downsampleBindGroup1);
@@ -266,7 +266,7 @@ class AutoExposure {
             ]
         });
 
-        commandEncoderManager.addPostProcessPass('AutoExposure_Adaptation_Pass', (pass2) => {
+        commandEncoderManager.addPostProcessComputePass('AutoExposure_Adaptation_Pass', (pass2) => {
             pass2.setPipeline(this.#adaptationPipeline);
             pass2.setBindGroup(0, adaptationBindGroup0);
             pass2.dispatchWorkgroups(1, 1, 1);

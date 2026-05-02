@@ -287,7 +287,7 @@ abstract class ASinglePassPostEffect {
      * [EN] Height
      */
     execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
-        this.#redGPUContext.commandEncoderManager.addPostProcessPass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
+        this.#redGPUContext.commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
             computePassEncoder.setPipeline(this.#computePipeline)
             computePassEncoder.setBindGroup(0, view.renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0)
             computePassEncoder.setBindGroup(1, this.#computeBindGroup1)

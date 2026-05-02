@@ -253,7 +253,7 @@ class Renderer {
             },
         };
 
-        redGPUContext.commandEncoderManager.addMainPass(shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
+        redGPUContext.commandEncoderManager.addMainRenderPass(shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
             this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
             this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
 
@@ -271,7 +271,7 @@ class Renderer {
             skyAtmosphere.update(view)
         }
 
-        redGPUContext.commandEncoderManager.addMainPass(renderPassDescriptor, (viewRenderPassEncoder) => {
+        redGPUContext.commandEncoderManager.addMainRenderPass(renderPassDescriptor, (viewRenderPassEncoder) => {
             const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
             this.#updateViewportAndScissor(view, viewRenderPassEncoder)
             this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true, renderPath1ResultTextureView)
@@ -318,7 +318,7 @@ class Renderer {
             });
             mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, COMMAND_ENCODER_TYPE.MAIN)
 
-            commandEncoderManager.addMainPass({
+            commandEncoderManager.addMainRenderPass({
                 label: `${view.name} 2Path Render Pass`,
                 colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({
                     ...v,
@@ -358,7 +358,7 @@ class Renderer {
                 },
             };
 
-            redGPUContext.commandEncoderManager.addMainPass(pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
+            redGPUContext.commandEncoderManager.addMainRenderPass(pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
                 this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder)
                 this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
                 renderPickingLayer(view, viewPickingRenderPassEncoder)
@@ -409,7 +409,7 @@ class Renderer {
         if (!skinListNum && !animationListNum) return;
         const {gpuDevice, commandEncoderManager} = redGPUContext;
 
-        commandEncoderManager.addPreProcessPass('BatchUpdateSkinMatrices_ComputePass', (passEncoder) => {
+        commandEncoderManager.addPreProcessComputePass('BatchUpdateSkinMatrices_ComputePass', (passEncoder) => {
             if (animationListNum) {
                 this.#gltfAnimationLooperManager.render(
                     redGPUContext,

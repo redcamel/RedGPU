@@ -61,7 +61,7 @@ class PassClustersLight {
         const systemUniformBindGroup: GPUBindGroup = this.#view.systemUniform_Vertex_UniformBindGroup;
         if (systemUniformBindGroup) {
             const {commandEncoderManager} = this.#redGPUContext;
-            commandEncoderManager.addPreProcessPass('PassClustersLight_ComputePass', (computePass) => {
+            commandEncoderManager.addPreProcessComputePass('PassClustersLight_ComputePass', (computePass) => {
                 const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
                 this.#redGPUContext.gpuDevice.queue.writeBuffer(this.clusterLightsBuffer, 0, emptyArray);
                 computePass.setPipeline(this.#clusterLightPipeline);

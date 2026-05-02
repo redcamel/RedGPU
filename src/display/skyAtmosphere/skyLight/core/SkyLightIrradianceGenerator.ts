@@ -99,7 +99,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         depth: number = this.depth
     ): void {
         const {commandEncoderManager} = this.redGPUContext;
-        commandEncoderManager.addPreProcessPass(`SkyLight_${this.label}_ComputePass`, (passEncoder) => {
+        commandEncoderManager.addPreProcessComputePass(`SkyLight_${this.label}_ComputePass`, (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, bindGroup);
             passEncoder.dispatchWorkgroups(

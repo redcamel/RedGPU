@@ -1202,7 +1202,7 @@ class ParticleEmitter extends Mesh {
         const {commandEncoderManager} = this.redGPUContext
         this.redGPUContext.gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
         //
-        commandEncoderManager.addPreProcessPass('PARTICLE_EMITTER_COMPUTE_PASS', (computePass) => {
+        commandEncoderManager.addPreProcessComputePass('PARTICLE_EMITTER_COMPUTE_PASS', (computePass) => {
             computePass.setPipeline(this.#computePipeline);
             computePass.setBindGroup(0, this.#computeBindGroup);
             computePass.dispatchWorkgroups(Math.ceil(this.#particleNum / 256));

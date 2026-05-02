@@ -25,31 +25,59 @@ class CommandEncoderManager {
     }
 
     /**
-     * [KO] RESOURCE 단계의 패스를 추가합니다.
+     * [KO] RESOURCE 단계의 Render 패스를 추가합니다.
      */
-    addResourcePass(labelOrDescriptor: string | GPURenderPassDescriptor, callback: (pass: any) => void): void {
-        this.#addPass(COMMAND_ENCODER_TYPE.RESOURCE, labelOrDescriptor, callback);
+    addResourceRenderPass(descriptor: GPURenderPassDescriptor, callback: (pass: GPURenderPassEncoder) => void): void {
+        this.#addRenderPass(COMMAND_ENCODER_TYPE.RESOURCE, descriptor, callback);
     }
 
     /**
-     * [KO] PRE_PROCESS 단계의 패스를 추가합니다.
+     * [KO] RESOURCE 단계의 Compute 패스를 추가합니다.
      */
-    addPreProcessPass(labelOrDescriptor: string | GPURenderPassDescriptor, callback: (pass: any) => void): void {
-        this.#addPass(COMMAND_ENCODER_TYPE.PRE_PROCESS, labelOrDescriptor, callback);
+    addResourceComputePass(labelOrDescriptor: string | GPUComputePassDescriptor, callback: (pass: GPUComputePassEncoder) => void): void {
+        this.#addComputePass(COMMAND_ENCODER_TYPE.RESOURCE, labelOrDescriptor, callback);
     }
 
     /**
-     * [KO] MAIN 단계의 패스를 추가합니다.
+     * [KO] PRE_PROCESS 단계의 Render 패스를 추가합니다.
      */
-    addMainPass(labelOrDescriptor: string | GPURenderPassDescriptor, callback: (pass: any) => void): void {
-        this.#addPass(COMMAND_ENCODER_TYPE.MAIN, labelOrDescriptor, callback);
+    addPreProcessRenderPass(descriptor: GPURenderPassDescriptor, callback: (pass: GPURenderPassEncoder) => void): void {
+        this.#addRenderPass(COMMAND_ENCODER_TYPE.PRE_PROCESS, descriptor, callback);
     }
 
     /**
-     * [KO] POST_PROCESS 단계의 패스를 추가합니다.
+     * [KO] PRE_PROCESS 단계의 Compute 패스를 추가합니다.
      */
-    addPostProcessPass(labelOrDescriptor: string | GPURenderPassDescriptor, callback: (pass: any) => void): void {
-        this.#addPass(COMMAND_ENCODER_TYPE.POST_PROCESS, labelOrDescriptor, callback);
+    addPreProcessComputePass(labelOrDescriptor: string | GPUComputePassDescriptor, callback: (pass: GPUComputePassEncoder) => void): void {
+        this.#addComputePass(COMMAND_ENCODER_TYPE.PRE_PROCESS, labelOrDescriptor, callback);
+    }
+
+    /**
+     * [KO] MAIN 단계의 Render 패스를 추가합니다.
+     */
+    addMainRenderPass(descriptor: GPURenderPassDescriptor, callback: (pass: GPURenderPassEncoder) => void): void {
+        this.#addRenderPass(COMMAND_ENCODER_TYPE.MAIN, descriptor, callback);
+    }
+
+    /**
+     * [KO] MAIN 단계의 Compute 패스를 추가합니다.
+     */
+    addMainComputePass(labelOrDescriptor: string | GPUComputePassDescriptor, callback: (pass: GPUComputePassEncoder) => void): void {
+        this.#addComputePass(COMMAND_ENCODER_TYPE.MAIN, labelOrDescriptor, callback);
+    }
+
+    /**
+     * [KO] POST_PROCESS 단계의 Render 패스를 추가합니다.
+     */
+    addPostProcessRenderPass(descriptor: GPURenderPassDescriptor, callback: (pass: GPURenderPassEncoder) => void): void {
+        this.#addRenderPass(COMMAND_ENCODER_TYPE.POST_PROCESS, descriptor, callback);
+    }
+
+    /**
+     * [KO] POST_PROCESS 단계의 Compute 패스를 추가합니다.
+     */
+    addPostProcessComputePass(labelOrDescriptor: string | GPUComputePassDescriptor, callback: (pass: GPUComputePassEncoder) => void): void {
+        this.#addComputePass(COMMAND_ENCODER_TYPE.POST_PROCESS, labelOrDescriptor, callback);
     }
 
     /**
@@ -145,28 +173,40 @@ class CommandEncoderManager {
     }
 
     /**
-     * [KO] 패스를 추가하고 실행하는 내부 공통 메서드
+     * [KO] Render 패스를 추가하고 실행하는 내부 공통 메서드
      */
-    #addPass(
+    #addRenderPass(
         type: CommandEncoderType,
-        labelOrDescriptor: string | GPURenderPassDescriptor,
-        callback: (pass: any) => void
+        descriptor: GPURenderPassDescriptor,
+        callback: (pass: GPURenderPassEncoder) => void
     ): void {
         const encoder = this.#getEncoder(type);
-        
-        // [KO] 현재 인코더의 패스 활성화 상태 표시
         this.#isPassActive[type] = true;
-
         try {
-            if (typeof labelOrDescriptor === 'string') {
-                const pass = encoder.beginComputePass({ label: labelOrDescriptor });
-                callback(pass);
-                pass.end();
-            } else {
-                const pass = encoder.beginRenderPass(labelOrDescriptor);
-                callback(pass);
-                pass.end();
-            }
+            const pass = encoder.beginRenderPass(descriptor);
+            callback(pass);
+            pass.end();
+        } finally {
+            this.#isPassActive[type] = false;
+        }
+    }
+
+    /**
+     * [KO] Compute 패스를 추가하고 실행하는 내부 공통 메서드
+     */
+    #addComputePass(
+        type: CommandEncoderType,
+        labelOrDescriptor: string | GPUComputePassDescriptor,
+        callback: (pass: GPUComputePassEncoder) => void
+    ): void {
+        const encoder = this.#getEncoder(type);
+        this.#isPassActive[type] = true;
+        try {
+            const pass = typeof labelOrDescriptor === 'string'
+                ? encoder.beginComputePass({ label: labelOrDescriptor })
+                : encoder.beginComputePass(labelOrDescriptor);
+            callback(pass);
+            pass.end();
         } finally {
             this.#isPassActive[type] = false;
         }

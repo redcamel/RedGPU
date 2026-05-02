@@ -218,25 +218,25 @@ class MipmapGenerator {
                 }
                 
                 if (encoderType === COMMAND_ENCODER_TYPE.RESOURCE) {
-                    commandEncoderManager.addResourcePass(passDescriptor, (passEncoder) => {
+                    commandEncoderManager.addResourceRenderPass(passDescriptor, (passEncoder) => {
                         passEncoder.setPipeline(pipeline);
                         passEncoder.setBindGroup(0, bindGroup);
                         passEncoder.draw(3, 1, 0, 0);
                     });
                 } else if (encoderType === COMMAND_ENCODER_TYPE.PRE_PROCESS) {
-                    commandEncoderManager.addPreProcessPass(passDescriptor, (passEncoder) => {
+                    commandEncoderManager.addPreProcessRenderPass(passDescriptor, (passEncoder) => {
                         passEncoder.setPipeline(pipeline);
                         passEncoder.setBindGroup(0, bindGroup);
                         passEncoder.draw(3, 1, 0, 0);
                     });
                 } else if (encoderType === COMMAND_ENCODER_TYPE.MAIN) {
-                    commandEncoderManager.addMainPass(passDescriptor, (passEncoder) => {
+                    commandEncoderManager.addMainRenderPass(passDescriptor, (passEncoder) => {
                         passEncoder.setPipeline(pipeline);
                         passEncoder.setBindGroup(0, bindGroup);
                         passEncoder.draw(3, 1, 0, 0);
                     });
                 } else if (encoderType === COMMAND_ENCODER_TYPE.POST_PROCESS) {
-                    commandEncoderManager.addPostProcessPass(passDescriptor, (passEncoder) => {
+                    commandEncoderManager.addPostProcessRenderPass(passDescriptor, (passEncoder) => {
                         passEncoder.setPipeline(pipeline);
                         passEncoder.setBindGroup(0, bindGroup);
                         passEncoder.draw(3, 1, 0, 0);

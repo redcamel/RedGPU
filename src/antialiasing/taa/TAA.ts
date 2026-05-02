@@ -317,7 +317,7 @@ class TAA {
     }
 
     #execute(width: number, height: number) {
-        this.#redGPUContext.commandEncoderManager.addPostProcessPass('TAA_Execute_ComputePass', (computePassEncoder) => {
+        this.#redGPUContext.commandEncoderManager.addPostProcessComputePass('TAA_Execute_ComputePass', (computePassEncoder) => {
             computePassEncoder.setPipeline(this.#computePipeline)
             computePassEncoder.setBindGroup(0, this.#frameBufferBindGroup0)
             computePassEncoder.setBindGroup(1, this.#frameBufferBindGroup1)
