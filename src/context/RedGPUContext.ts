@@ -7,6 +7,7 @@ import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import RedGPUContextDetector from "./core/RedGPUContextDetector";
 import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
+import CommandEncoderManager from "../renderer/commandEncoder/CommandEncoderManager";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -96,6 +97,11 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Resource manager (GPU resource management)
      */
     readonly #resourceManager: ResourceManager
+    /**
+     * [KO] 커맨드 인코더 매니저 (GPU 커맨드 인코더 관리)
+     * [EN] Command encoder manager (GPU command encoder management)
+     */
+    readonly #commandEncoderManager: CommandEncoderManager
     /**
      * [KO] 배경색
      * [EN] Background color
