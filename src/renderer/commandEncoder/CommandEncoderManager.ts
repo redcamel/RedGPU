@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import { COMMAND_ENCODER_TYPE, CommandEncoderType } from "./COMMAND_ENCODER_TYPE";
+import { keepLog } from "../../utils";
 
 /**
  * [KO] GPU 커맨드 인코더 및 패스의 생명주기를 지능적으로 관리하는 클래스입니다.
@@ -99,17 +100,19 @@ class CommandEncoderManager {
         const buffers = this.#finish(type);
         if (buffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(buffers);
+            keepLog(`🚀 [CommandEncoderManager] Submitted ${buffers.length} command buffer(s) for ${type} phase.`);
         }
     }
 
     /**
      * [KO] 모든 인코더 초기화
+     * [EN] Reset all encoders
      */
     resetAll(): void {
-        this.#encoderMap.forEach((_, type) => {
-            this.#finish(type as CommandEncoderType);
-        });
         this.#encoderMap.clear();
+        Object.keys(this.#isPassActive).forEach(key => {
+            delete this.#isPassActive[key as CommandEncoderType];
+        });
     }
 
     /**
