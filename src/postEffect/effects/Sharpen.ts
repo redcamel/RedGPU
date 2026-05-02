@@ -45,9 +45,6 @@ class Sharpen extends AMultiPassPostEffect {
      * [KO] 샤픈 효과를 렌더링합니다.
      * [EN] Renders the sharpen effect.
      *
-     * @param postProcessEncoder
-     * [KO] 후처리 커맨드 인코더
-     * [EN] Post-process Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -64,9 +61,9 @@ class Sharpen extends AMultiPassPostEffect {
      * [KO] 샤픈 처리된 텍스처 결과
      * [EN] Sharpened texture result
      */
-    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
         return this.#effect_convolution.render(
-            postProcessEncoder, view, width, height, sourceTextureInfo
+            view, width, height, sourceTextureInfo
         )
     }
 }

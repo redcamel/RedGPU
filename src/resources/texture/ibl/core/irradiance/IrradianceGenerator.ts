@@ -57,12 +57,11 @@ class IrradianceGenerator {
      * @param size -
      * [KO] 생성될 Irradiance 맵의 크기 (기본값: 32)
      * [EN] Size of the generated Irradiance map (default: 32)
-     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      * @returns
      * [KO] 생성된 Irradiance DirectCubeTexture
      * [EN] Generated Irradiance DirectCubeTexture
      */
-    async generate(sourceCubeTexture: GPUTexture, size: number = 32, commandEncoder?: GPUCommandEncoder): Promise<DirectCubeTexture> {
+    async generate(sourceCubeTexture: GPUTexture, size: number = 32): Promise<DirectCubeTexture> {
         const {resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
 
@@ -76,7 +75,7 @@ class IrradianceGenerator {
             label: `Irradiance_Map_Texture_${createUUID()}`
         });
 
-        await this.render(sourceCubeTexture, irradianceGPUTexture, commandEncoder);
+        await this.render(sourceCubeTexture, irradianceGPUTexture);
 
         return new DirectCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
     }
@@ -93,10 +92,9 @@ class IrradianceGenerator {
      * @param targetTexture -
      * [KO] 대상 GPUTexture (2D Array, 6 layers)
      * [EN] Target GPUTexture (2D Array, 6 layers)
-     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
-    async render(sourceCubeTexture: GPUTexture, targetTexture: GPUTexture, commandEncoder?: GPUCommandEncoder): Promise<void> {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+    async render(sourceCubeTexture: GPUTexture, targetTexture: GPUTexture): Promise<void> {
+        const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
         const size = targetTexture.width;
 
         // 1. 파이프라인 생성 (지연 생성 및 캐싱)
@@ -119,7 +117,6 @@ class IrradianceGenerator {
         }
 
         // 2. 6개 면 연산
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: 'Irradiance_Generator_Command_Encoder'});
         const faceMatrices = this.#getCubeMapFaceMatrices();
 
         if (!this.#uniformBuffer) {
@@ -143,19 +140,11 @@ class IrradianceGenerator {
             ]
         });
 
-        const computePass = internalEncoder.beginComputePass({
-            label: `Irradiance_Generator_Compute_Pass`
+        commandEncoderManager.addPreComputePass('Irradiance_Generator_Compute_Pass', (computePass) => {
+            computePass.setPipeline(this.#pipeline);
+            computePass.setBindGroup(0, bindGroup);
+            computePass.dispatchWorkgroups(Math.ceil(size / 8), Math.ceil(size / 8), 6);
         });
-
-        computePass.setPipeline(this.#pipeline);
-        computePass.setBindGroup(0, bindGroup);
-        computePass.dispatchWorkgroups(Math.ceil(size / 8), Math.ceil(size / 8), 6);
-        computePass.end();
-
-        if (!commandEncoder) {
-            gpuDevice.queue.submit([internalEncoder.finish()]);
-            await gpuDevice.queue.onSubmittedWorkDone();
-        }
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {

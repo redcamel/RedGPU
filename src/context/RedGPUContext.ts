@@ -160,6 +160,10 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#initialize()
     }
 
+    get commandEncoderManager(): CommandEncoderManager {
+        return this.#commandEncoderManager;
+    }
+
     get boundingClientRect(): DOMRect {
         return this.#boundingClientRect
     }

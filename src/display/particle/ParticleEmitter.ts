@@ -975,7 +975,7 @@ class ParticleEmitter extends Mesh {
      */
     render(renderViewStateData: RenderViewStateData) {
         if (!this.#simParamBuffer) this.#init()
-        this.#renderComputePass(renderViewStateData.timestamp, renderViewStateData.preComputeEncoder)
+        this.#renderComputePass(renderViewStateData.timestamp)
         super.render(renderViewStateData)
     }
 
@@ -1171,10 +1171,9 @@ class ParticleEmitter extends Mesh {
     /**
      * GPU 컴퓨트 파이프라인을 통해 파티클 시뮬레이션을 수행합니다.
      * @param time 현재 시간(ms)
-     * @param commandEncoder 커맨드 인코더
      * @private
      */
-    #renderComputePass(time: number, commandEncoder?: GPUCommandEncoder) {
+    #renderComputePass(time: number) {
         const worldPosition = this.localToWorld(this.x, this.y, this.z)
         this.#simParamData.set(
             [
@@ -1200,22 +1199,14 @@ class ParticleEmitter extends Mesh {
             0
         );
         //
-        const {gpuDevice} = this.redGPUContext
-        gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
+        const {commandEncoderManager} = this.redGPUContext
+        this.redGPUContext.gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
         //
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
-            label: 'PARTICLE_EMITTER_COMPUTE_COMMAND_ENCODER'
+        commandEncoderManager.addPreComputePass('PARTICLE_EMITTER_COMPUTE_PASS', (computePass) => {
+            computePass.setPipeline(this.#computePipeline);
+            computePass.setBindGroup(0, this.#computeBindGroup);
+            computePass.dispatchWorkgroups(Math.ceil(this.#particleNum / 256));
         });
-        const passEncoder = internalEncoder.beginComputePass(
-            {
-                label: 'PARTICLE_EMITTER_COMPUTE_PASS',
-            }
-        );
-        passEncoder.setPipeline(this.#computePipeline);
-        passEncoder.setBindGroup(0, this.#computeBindGroup);
-        passEncoder.dispatchWorkgroups(Math.ceil(this.#particleNum / 256));
-        passEncoder.end();
-        if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
     }
 }
 

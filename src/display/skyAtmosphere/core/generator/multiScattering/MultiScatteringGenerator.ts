@@ -24,16 +24,16 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
         return this.#lutTexture;
     }
 
-    render(transmittanceLUT: DirectTexture, commandEncoder?: GPUCommandEncoder): void {
+    render(transmittance: DirectTexture): void {
         if (!this.#bindGroup) {
             this.#bindGroup = this.createBindGroup('SkyAtmosphere_MultiScattering_BindGroup', this.#pipeline, [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: transmittanceLUT.gpuTextureView},
-                {binding: 2, resource: this.sampler.gpuSampler},
-                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+                {binding: 1, resource: transmittance.gpuTextureView},
+                {binding: 2, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+                {binding: 3, resource: this.sampler.gpuSampler}
             ]);
         }
-        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1], commandEncoder);
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);
     }
 
     #init(): void {

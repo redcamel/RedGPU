@@ -52,10 +52,40 @@ class CommandEncoderManager {
     }
 
     /**
+     * [KO] 특정 타입의 인코더를 직접 사용합니다 (복사 명령 등).
+     * [EN] Directly uses an encoder of a specific type (e.g., for copy commands).
+     */
+    useEncoder(type: CommandEncoderType, callback: (encoder: GPUCommandEncoder) => void): void {
+        const encoder = this.#getEncoder(type);
+        callback(encoder);
+    }
+
+    /**
      * [KO] RESOURCE 단계의 인코더를 직접 사용합니다 (복사 명령 등).
      */
     useResourceEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
-        this.#useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, callback);
+        this.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, callback);
+    }
+
+    /**
+     * [KO] PRE_COMPUTE 단계의 인코더를 직접 사용합니다.
+     */
+    usePreComputeEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
+        this.useEncoder(COMMAND_ENCODER_TYPE.PRE_COMPUTE, callback);
+    }
+
+    /**
+     * [KO] MAIN 단계의 인코더를 직접 사용합니다.
+     */
+    useMainEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
+        this.useEncoder(COMMAND_ENCODER_TYPE.MAIN, callback);
+    }
+
+    /**
+     * [KO] POST_PROCESS 단계의 인코더를 직접 사용합니다.
+     */
+    usePostProcessEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
+        this.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, callback);
     }
 
     /**
@@ -103,14 +133,6 @@ class CommandEncoderManager {
         }
 
         return list[list.length - 1];
-    }
-
-    /**
-     * [KO] 인코더를 직접 사용하는 내부 메서드
-     */
-    #useEncoder(type: CommandEncoderType, callback: (encoder: GPUCommandEncoder) => void): void {
-        const encoder = this.#getEncoder(type);
-        callback(encoder);
     }
 
     /**

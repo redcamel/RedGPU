@@ -187,15 +187,13 @@ class AutoExposure {
      * [KO] 자동 노출 처리를 수행합니다. (커맨드 기록)
      * [EN] Performs auto exposure processing. (Record commands)
      *
-     * @param postProcessEncoder - [KO] 후처리 커맨드 인코더 [EN] Post-process command encoder
-     * @param view - [KO] View3D 인스턴스 [EN] View3D instance
      * @param sourceTextureInfo - [KO] 소스 텍스처 정보 [EN] Source texture information
      */
-    render(postProcessEncoder: GPUCommandEncoder, view: View3D, sourceTextureInfo: ASinglePassPostEffectResult) {
-        const {gpuDevice, antialiasingManager} = this.#redGPUContext;
+    render(sourceTextureInfo: ASinglePassPostEffectResult) {
+        const {gpuDevice, antialiasingManager, commandEncoderManager} = this.#redGPUContext;
         const {useMSAA} = antialiasingManager;
-        const {width, height} = view.viewRenderTextureManager.gBufferColorTexture;
-        const {rawCamera, renderViewStateData} = view;
+        const {width, height} = this.#view.viewRenderTextureManager.gBufferColorTexture;
+        const {rawCamera, renderViewStateData} = this.#view;
         const {deltaTime} = renderViewStateData;
 
         const ev100Range = this.#maxEV100 - this.#minEV100;
@@ -229,7 +227,9 @@ class AutoExposure {
         );
 
         // [KO] 히스토그램 버퍼 명시적 초기화
-        postProcessEncoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
+        commandEncoderManager.usePostProcessEncoder(encoder => {
+            encoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
+        });
 
         // Pass 1: Generate Histogram
         const pipeline = this.#getDownsamplePipeline(useMSAA);
@@ -237,7 +237,7 @@ class AutoExposure {
             layout: this.#getDownsampleBindGroupLayout0(useMSAA),
             entries: [
                 {binding: 0, resource: sourceTextureInfo.textureView},
-                {binding: 1, resource: view.viewRenderTextureManager.depthTextureView}
+                {binding: 1, resource: this.#view.viewRenderTextureManager.depthTextureView}
             ]
         });
         const downsampleBindGroup1 = gpuDevice.createBindGroup({
@@ -248,12 +248,12 @@ class AutoExposure {
             ]
         });
 
-        const pass1 = postProcessEncoder.beginComputePass({label: 'AutoExposure_GenerateHistogram_Pass'});
-        pass1.setPipeline(pipeline);
-        pass1.setBindGroup(0, downsampleBindGroup0);
-        pass1.setBindGroup(1, downsampleBindGroup1);
-        pass1.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16), 1);
-        pass1.end();
+        commandEncoderManager.addPostProcessPass('AutoExposure_GenerateHistogram_Pass', (pass1) => {
+            pass1.setPipeline(pipeline);
+            pass1.setBindGroup(0, downsampleBindGroup0);
+            pass1.setBindGroup(1, downsampleBindGroup1);
+            pass1.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16), 1);
+        });
 
         // Pass 2: Average Histogram and Adapt
         const adaptationBindGroup0 = gpuDevice.createBindGroup({
@@ -265,16 +265,18 @@ class AutoExposure {
             ]
         });
 
-        const pass2 = postProcessEncoder.beginComputePass({label: 'AutoExposure_Adaptation_Pass'});
-        pass2.setPipeline(this.#adaptationPipeline);
-        pass2.setBindGroup(0, adaptationBindGroup0);
-        pass2.dispatchWorkgroups(1, 1, 1);
-        pass2.end();
+        commandEncoderManager.addPostProcessPass('AutoExposure_Adaptation_Pass', (pass2) => {
+            pass2.setPipeline(this.#adaptationPipeline);
+            pass2.setBindGroup(0, adaptationBindGroup0);
+            pass2.dispatchWorkgroups(1, 1, 1);
+        });
 
         // [KO] 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 명령 기록
         // [EN] Record copy command only when not currently reading
         if (!this.#isReading) {
-            postProcessEncoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
+            commandEncoderManager.usePostProcessEncoder(encoder => {
+                encoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
+            });
         }
     }
 

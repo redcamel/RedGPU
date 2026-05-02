@@ -59,15 +59,14 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      * [KO] 스카이 대기 포스트 이펙트를 렌더링합니다.
      * [EN] Renders the sky atmosphere post effect.
      *
-     * @param postProcessEncoder - [KO] 후처리 커맨드 인코더 [EN] Post-process command encoder
      * @param view - [KO] 현재 뷰 [EN] Current view
      * @param width - [KO] 너비 [EN] Width
      * @param height - [KO] 높이 [EN] Height
      * @param sourceTextureInfo - [KO] 소스 컬러 텍스처 [EN] Source color texture
      * @returns [KO] 렌더링 결과 [EN] Render result
      */
-    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-        const {gpuDevice, resourceManager, antialiasingManager} = this.redGPUContext;
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+        const {gpuDevice, resourceManager, antialiasingManager, commandEncoderManager} = this.redGPUContext;
 
         const {useMSAA, msaaID} = antialiasingManager;
         const depthView = view.viewRenderTextureManager.depthTextureView;
@@ -154,13 +153,12 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             });
         }
 
-        const passEncoder = postProcessEncoder.beginComputePass({label: 'SkyAtmospherePostEffect_Pass'});
-
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, currentBindGroup0);
-        passEncoder.setBindGroup(1, this.#bindGroup1);
-        passEncoder.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16));
-        passEncoder.end();
+        commandEncoderManager.addPostProcessPass('SkyAtmospherePostEffect_Pass', (passEncoder) => {
+            passEncoder.setPipeline(pipeline);
+            passEncoder.setBindGroup(0, currentBindGroup0);
+            passEncoder.setBindGroup(1, this.#bindGroup1);
+            passEncoder.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16));
+        });
 
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;

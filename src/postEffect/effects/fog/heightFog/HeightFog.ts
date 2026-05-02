@@ -215,9 +215,6 @@ class HeightFog extends ASinglePassPostEffect {
      * [KO] 고도 안개 효과를 렌더링합니다.
      * [EN] Renders the height fog effect.
      *
-     * @param postProcessEncoder
-     * [KO] 후처리 커맨드 인코더
-     * [EN] Post-process Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -234,8 +231,8 @@ class HeightFog extends ASinglePassPostEffect {
      * [KO] 고도 안개 처리된 텍스처 결과
      * [EN] Height fog-processed texture result
      */
-    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
-        return super.render(postProcessEncoder, view, width, height, sourceTextureInfo);
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+        return super.render(view, width, height, sourceTextureInfo);
     }
 }
 

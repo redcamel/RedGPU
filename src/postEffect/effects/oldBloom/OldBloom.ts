@@ -99,10 +99,10 @@ class OldBloom extends AMultiPassPostEffect {
      * [KO] 올드 블룸 효과를 렌더링합니다. (Threshold -> GaussianBlur -> Blend)
      * [EN] Renders the old bloom effect. (Threshold -> GaussianBlur -> Blend)
      */
-    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
-        const thresholdResult = this.#effect_threshold.render(postProcessEncoder, view, width, height, sourceTextureInfo);
-        const blurResult = this.#effect_gaussianBlur.render(postProcessEncoder, view, width, height, thresholdResult);
-        return this.#effect_oldBloomBlend.render(postProcessEncoder, view, width, height, sourceTextureInfo, blurResult);
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+        const thresholdResult = this.#effect_threshold.render(view, width, height, sourceTextureInfo);
+        const blurResult = this.#effect_gaussianBlur.render(view, width, height, thresholdResult);
+        return this.#effect_oldBloomBlend.render(view, width, height, sourceTextureInfo, blurResult);
     }
 }
 

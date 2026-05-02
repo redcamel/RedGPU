@@ -163,9 +163,8 @@ class PickingManager {
      * [EN] Prepares for a pixel read operation during the next render.
      *
      * @param view - View3D 인스턴스
-     * @param mainRenderEncoder - 메인 렌더 커맨드 인코더
      */
-    prepareRead(view: any, mainRenderEncoder: GPUCommandEncoder) {
+    prepareRead(view: any) {
         if (!this.castingList.length) return;
         if (this.#isReading) return; // [KO] 이미 읽기 작업 중이면 스킵 [EN] Skip if already reading
 
@@ -184,10 +183,12 @@ class PickingManager {
             });
         }
 
-        const textureView = {texture: this.#pickingGPUTexture, origin: {x: Math.floor(x), y: Math.floor(y), z: 0}};
-        const bufferView = {buffer: this.#readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
-        const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
-        mainRenderEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
+        this.#redGPUContext.commandEncoderManager.useMainEncoder(mainRenderEncoder => {
+            const textureView = {texture: this.#pickingGPUTexture, origin: {x: Math.floor(x), y: Math.floor(y), z: 0}};
+            const bufferView = {buffer: this.#readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
+            const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
+            mainRenderEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
+        });
     }
 
     /**

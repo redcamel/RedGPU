@@ -37,11 +37,11 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     // @ts-ignore
-    async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture, commandEncoder?: GPUCommandEncoder): Promise<void> {
+    async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
         if (!this.#bindGroup) {
             this.#bindGroup = this.#createBindGroup(transmittance, multiScat, skyView);
         }
-        await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture, commandEncoder);
+        await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture);
     }
 
     #createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
@@ -55,17 +55,19 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         ]);
     }
 
-    async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture, commandEncoder?: GPUCommandEncoder): Promise<void> {
-        const {resourceManager} = this.redGPUContext;
-        this.#computeRender(pipeline, bindGroup, [8, 8, 1], undefined, undefined, undefined, commandEncoder);
-        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
-            size: [this.width, this.height, 6],
-            format: 'rgba16float',
-            usage: this.#sourceCubeTexture.usage,
-            mipLevelCount: getMipLevelCount(this.width, this.height),
-            dimension: '2d'
-        }, true, commandEncoder);
-        await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture, commandEncoder);
+    async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
+        const {resourceManager, commandEncoderManager} = this.redGPUContext;
+        this.#computeRender(pipeline, bindGroup, [8, 8, 1]);
+        commandEncoderManager.usePreComputeEncoder(encoder => {
+            resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
+                size: [this.width, this.height, 6],
+                format: 'rgba16float',
+                usage: this.#sourceCubeTexture.usage,
+                mipLevelCount: getMipLevelCount(this.width, this.height),
+                dimension: '2d'
+            }, true, encoder);
+        });
+        await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture);
     }
 
     #init(): void {
@@ -95,23 +97,18 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         workgroupSize: [number, number, number] = [16, 16, 1],
         width: number = this.width,
         height: number = this.height,
-        depth: number = this.depth,
-        commandEncoder?: GPUCommandEncoder
+        depth: number = this.depth
     ): void {
-        const {gpuDevice} = this.redGPUContext;
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: `SkyLight_${this.label}_CommandEncoder`});
-        const passEncoder = internalEncoder.beginComputePass({label: `SkyLight_${this.label}_ComputePass`});
-
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, bindGroup);
-        passEncoder.dispatchWorkgroups(
-            Math.ceil(width / workgroupSize[0]),
-            Math.ceil(height / workgroupSize[1]),
-            Math.ceil(depth / workgroupSize[2])
-        );
-        passEncoder.end();
-
-        if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
+        const {commandEncoderManager} = this.redGPUContext;
+        commandEncoderManager.addPreComputePass(`SkyLight_${this.label}_ComputePass`, (passEncoder) => {
+            passEncoder.setPipeline(pipeline);
+            passEncoder.setBindGroup(0, bindGroup);
+            passEncoder.dispatchWorkgroups(
+                Math.ceil(width / workgroupSize[0]),
+                Math.ceil(height / workgroupSize[1]),
+                Math.ceil(depth / workgroupSize[2])
+            );
+        });
     }
 }
 

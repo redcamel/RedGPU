@@ -316,9 +316,9 @@ class SkyAtmosphere {
      * [KO] 포스트 이펙트 렌더링을 수행합니다. (오브젝트 영역 대기 투과 처리 전용)
      * [EN] Performs post-effect rendering. (Dedicated to atmospheric transmittance on object regions)
      */
-    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-        this.update(view, postProcessEncoder);
-        return this.#postEffect.render(postProcessEncoder, view, width, height, sourceTextureInfo);
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+        this.update(view);
+        return this.#postEffect.render(view, width, height, sourceTextureInfo);
     }
 
     #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
@@ -328,13 +328,13 @@ class SkyAtmosphere {
         if (ibl) this.#skyLight.dirty = true;
     }
 
-    update(view: View3D, commandEncoder?: GPUCommandEncoder) {
+    update(view: View3D) {
         const currentFrame = view.renderViewStateData.frameIndex;
         if (this.#lastUpdateFrame === currentFrame) return;
         this.#lastUpdateFrame = currentFrame;
 
         this.#updateSunInfo(view);
-        this.#updateLUTs(view, commandEncoder);
+        this.#updateLUTs(view);
     }
 
     #updateSunInfo(view: View3D): void {
@@ -379,7 +379,7 @@ class SkyAtmosphere {
         }
     }
 
-    #updateLUTs(view: View3D, commandEncoder?: GPUCommandEncoder) {
+    #updateLUTs(view: View3D) {
         const {rawCamera} = view;
         const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
         const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0));
@@ -409,20 +409,20 @@ class SkyAtmosphere {
         }
 
         if (this.#dirtyLUT) {
-            this.#transmittanceGenerator.render(commandEncoder);
-            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture, commandEncoder);
+            this.#transmittanceGenerator.render();
+            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
             this.#dirtyLUT = false;
             this.#dirtySkyView = true;
             this.#skyLight.dirty = true;
         }
 
         if (this.#dirtySkyView) {
-            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, commandEncoder);
-            this.#aerialPerspectiveGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture, commandEncoder);
+            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#aerialPerspectiveGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#dirtySkyView = false;
         }
 
-        this.#skyLight.update(this, commandEncoder);
+        this.#skyLight.update(this);
     }
 
     #setParam(key: string, value: any, lut: boolean, skyView: boolean, ibl: boolean, validator?: (v: any) => void): void {

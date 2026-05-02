@@ -54,25 +54,18 @@ class PassClusterLightBound {
     /**
      * [KO] 클러스터 경계를 계산하는 컴퓨트 패스를 실행합니다.
      * [EN] Executes the compute pass to calculate cluster bounds.
-     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
-    render(commandEncoder?: GPUCommandEncoder) {
+    render() {
         const sysUniformBindGroup = this.#view.systemUniform_Vertex_UniformBindGroup;
         if (sysUniformBindGroup) {
-            const {gpuDevice} = this.#redGPUContext
-            const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
-                label: 'PassClusterLightBound_CommandEncoder'
+            const {commandEncoderManager} = this.#redGPUContext;
+            commandEncoderManager.addPreComputePass('PassClusterLightBound_ComputePass', (computePass) => {
+                const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
+                computePass.setPipeline(this.#clusterBoundPipeline);
+                computePass.setBindGroup(0, sysUniformBindGroup);
+                computePass.setBindGroup(1, this.#clusterBoundBindGroup);
+                computePass.dispatchWorkgroups(DISPATCH_SIZE[0], DISPATCH_SIZE[1], DISPATCH_SIZE[2]);
             });
-            const passEncoder = internalEncoder.beginComputePass({
-                label: 'PassClusterLightBound_ComputePass'
-            });
-            const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
-            passEncoder.setPipeline(this.#clusterBoundPipeline);
-            passEncoder.setBindGroup(0, sysUniformBindGroup);
-            passEncoder.setBindGroup(1, this.#clusterBoundBindGroup);
-            passEncoder.dispatchWorkgroups(DISPATCH_SIZE[0], DISPATCH_SIZE[1], DISPATCH_SIZE[2]);
-            passEncoder.end();
-            if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
         }
     }
 

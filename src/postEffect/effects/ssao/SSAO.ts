@@ -185,9 +185,6 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] SSAO 효과를 렌더링합니다.
      * [EN] Renders the SSAO effect.
      *
-     * @param postProcessEncoder
-     * [KO] 후처리 커맨드 인코더
-     * [EN] Post-process Command Encoder
      * @param view
      * [KO] View3D 인스턴스
      * [EN] View3D instance
@@ -204,16 +201,16 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] 렌더링 결과
      * [EN] Rendering result
      */
-    render(postProcessEncoder: GPUCommandEncoder, view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
         const aoResult = this.#effect_ao.render(
-            postProcessEncoder, view, width, height, sourceTextureInfo
+            view, width, height, sourceTextureInfo
         )
         if (this.useBlur) {
             const blurResult = this.#effect_blur.render(
-                postProcessEncoder, view, width, height, aoResult
+                view, width, height, aoResult
             )
             return this.#effect_blend.render(
-                postProcessEncoder, view, width, height, sourceTextureInfo, blurResult
+                view, width, height, sourceTextureInfo, blurResult
             )
         } else {
             return aoResult

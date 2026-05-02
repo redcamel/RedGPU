@@ -94,15 +94,14 @@ class ToneMappingManager {
     /**
      * [KO] 톤 매핑을 렌더링합니다.
      * [EN] Renders tone mapping.
-     * @param postProcessEncoder - [KO] 후처리 커맨드 인코더 [EN] Post-process command encoder
      * @param width - [KO] 너비 [EN] Width
      * @param height - [KO] 높이 [EN] Height
      * @param currentTextureView - [KO] 현재 텍스처 뷰 정보 [EN] Current texture view information
      * @returns [KO] 렌더링 결과 [EN] Rendering result
      */
-    render(postProcessEncoder: GPUCommandEncoder, width: number, height: number, currentTextureView: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(width: number, height: number, currentTextureView: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         const effect = this.toneMapping;
-        return effect ? effect.render(postProcessEncoder, this.#view, width, height, currentTextureView) : currentTextureView;
+        return effect ? effect.render(this.#view, width, height, currentTextureView) : currentTextureView;
     }
 
     /**

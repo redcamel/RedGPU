@@ -230,7 +230,7 @@ class InstancingMesh extends Mesh {
                 this.#updatePipelineState(renderViewStateData);
             }
             if (!shadowRender) {
-                this.#performGPUCulling(renderViewStateData, renderViewStateData.preComputeEncoder);
+                this.#performGPUCulling(renderViewStateData);
             }
             this.#renderGeometry(renderViewStateData, shadowRender, currentRenderPassEncoder);
             }
@@ -528,8 +528,8 @@ class InstancingMesh extends Mesh {
         );
     }
 
-    #performGPUCulling(renderViewStateData: RenderViewStateData, commandEncoderOverride?: GPUCommandEncoder): void {
-        const {gpuDevice} = this.#redGPUContext;
+    #performGPUCulling(renderViewStateData: RenderViewStateData): void {
+        const {gpuDevice, commandEncoderManager} = this.#redGPUContext;
         this.#updateCullingUniforms(renderViewStateData);
         const indexCount = this.geometry.indexBuffer
             ? this.geometry.indexBuffer.indexCount
@@ -548,22 +548,13 @@ class InstancingMesh extends Mesh {
         });
 
         // Compute Pass 실행
-        const commandEncoder = commandEncoderOverride || renderViewStateData.preComputeEncoder || gpuDevice.createCommandEncoder({
-            label: 'InstancingMesh_GPUCulling_CommandEncoder'
+        commandEncoderManager.addPreComputePass('InstancingMesh_GPUCulling_ComputePass', (computePass) => {
+            computePass.setPipeline(this.#cullingComputePipeline);
+            computePass.setBindGroup(0, this.#cullingBindGroup);
+            const workgroupSize = 64;
+            const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize);
+            computePass.dispatchWorkgroups(workgroupCount);
         });
-        const computePass = commandEncoder.beginComputePass({
-            label: 'InstancingMesh_GPUCulling_ComputePass'
-        });
-        computePass.setPipeline(this.#cullingComputePipeline);
-        computePass.setBindGroup(0, this.#cullingBindGroup);
-        const workgroupSize = 64;
-        const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize);
-        computePass.dispatchWorkgroups(workgroupCount);
-        computePass.end();
-
-        if (!commandEncoderOverride && !renderViewStateData.preComputeEncoder) {
-            gpuDevice.queue.submit([commandEncoder.finish()]);
-        }
     }
 
     // ========== 파이프라인 설정 ==========

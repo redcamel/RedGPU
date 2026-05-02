@@ -76,14 +76,13 @@ class Blur extends AMultiPassPostEffect {
      * [EN] Blurred texture result
      */
     render(
-        postProcessEncoder: GPUCommandEncoder,
         view: View3D,
         width: number,
         height: number,
         sourceTextureInfo: ASinglePassPostEffectResult
     ): ASinglePassPostEffectResult {
         return this.#effect_convolution.render(
-            postProcessEncoder, view, width, height, sourceTextureInfo
+            view, width, height, sourceTextureInfo
         );
     }
 }

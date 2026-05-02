@@ -24,17 +24,17 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
         return this.#lutTexture;
     }
 
-    render(transmittanceLUT: DirectTexture, multiScatLUT: DirectTexture, commandEncoder?: GPUCommandEncoder): void {
+    render(transmittance: DirectTexture, multiScat: DirectTexture): void {
         if (!this.#bindGroup) {
             this.#bindGroup = this.createBindGroup('SkyAtmosphere_SkyView_BindGroup', this.#pipeline, [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: transmittanceLUT.gpuTextureView},
-                {binding: 2, resource: multiScatLUT.gpuTextureView},
-                {binding: 3, resource: this.sampler.gpuSampler},
-                {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+                {binding: 1, resource: transmittance.gpuTextureView},
+                {binding: 2, resource: multiScat.gpuTextureView},
+                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
+                {binding: 4, resource: this.sampler.gpuSampler}
             ]);
         }
-        this.executeComputePass(this.#pipeline, this.#bindGroup, [16, 16, 1], commandEncoder);
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [16, 16, 1]);
     }
 
     #init(): void {

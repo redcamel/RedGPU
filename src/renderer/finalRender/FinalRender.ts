@@ -55,35 +55,30 @@ class FinalRender {
      *
      * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
      * @param {GPURenderPassDescriptor[]} viewList_renderPassDescriptorList - The list of render passes to be rendered.
-     * @returns {GPUCommandBuffer} The command buffer for the final render pass.
      */
-    render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]): GPUCommandBuffer {
-        const {sizeManager, gpuDevice, antialiasingManager} = redGPUContext
+    render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]): void {
+        const {sizeManager, antialiasingManager, commandEncoderManager} = redGPUContext
         const {changedMSAA, useMSAA} = antialiasingManager
         const {pixelRectObject: canvasPixelRectObject} = sizeManager
         const {width: canvasW, height: canvasH} = canvasPixelRectObject
-        if (canvasW === 0 || canvasH === 0) return null
+        if (canvasW === 0 || canvasH === 0) return
         //
         const finalRenderPassDesc: GPURenderPassDescriptor = this.#getFinalRenderPassDesc(redGPUContext)
-        const mainRenderEncoder: GPUCommandEncoder = gpuDevice.createCommandEncoder({
-            label: 'FinalRender_CommandEncoder'
+        commandEncoderManager.addMainPass(finalRenderPassDesc, (finalRenderPassEnc) => {
+            finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
+            finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
+            //
+            if (!this.#vertexBindGroupLayout || changedMSAA) this.#initGPUDetails(redGPUContext)
+            this.#renderViewList(
+                redGPUContext,
+                finalRenderPassEnc,
+                viewList_renderPassDescriptorList.map((v: GPURenderPassDescriptor) => {
+                    const temp = v.colorAttachments[0]
+                    return temp.postEffectView || temp.pickingView || temp.resolveTarget || temp.view
+                }), canvasW, canvasH,
+                useMSAA
+            )
         })
-        const finalRenderPassEnc: GPURenderPassEncoder = mainRenderEncoder.beginRenderPass(finalRenderPassDesc)
-        finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
-        finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
-        //
-        if (!this.#vertexBindGroupLayout || changedMSAA) this.#initGPUDetails(redGPUContext)
-        this.#renderViewList(
-            redGPUContext,
-            finalRenderPassEnc,
-            viewList_renderPassDescriptorList.map((v: GPURenderPassDescriptor) => {
-                const temp = v.colorAttachments[0]
-                return temp.postEffectView || temp.pickingView || temp.resolveTarget || temp.view
-            }), canvasW, canvasH,
-            useMSAA
-        )
-        finalRenderPassEnc.end()
-        return mainRenderEncoder.finish()
     }
 
     #updateFinalViewBackgroundColor(view: View3D, index: number) {

@@ -62,25 +62,18 @@ abstract class ASkyAtmosphereLUTGenerator {
     executeComputePass(
         pipeline: GPUComputePipeline,
         bindGroup: GPUBindGroup,
-        workgroupSize: [number, number, number] = [16, 16, 1],
-        commandEncoder?: GPUCommandEncoder
+        workgroupSize: [number, number, number] = [16, 16, 1]
     ): void {
-        const {gpuDevice} = this.#redGPUContext;
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: `SkyAtmosphere_${this.#label}_CommandEncoder`});
-        const passEncoder = internalEncoder.beginComputePass({label: `SkyAtmosphere_${this.#label}_ComputePass`});
-
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, bindGroup);
-        passEncoder.dispatchWorkgroups(
-            Math.ceil(this.#width / workgroupSize[0]),
-            Math.ceil(this.#height / workgroupSize[1]),
-            Math.ceil(this.#depth / workgroupSize[2])
-        );
-        passEncoder.end();
-
-        if (!commandEncoder) {
-            gpuDevice.queue.submit([internalEncoder.finish()]);
-        }
+        const {commandEncoderManager} = this.#redGPUContext;
+        commandEncoderManager.addPreComputePass(`SkyAtmosphere_${this.#label}_ComputePass`, (passEncoder) => {
+            passEncoder.setPipeline(pipeline);
+            passEncoder.setBindGroup(0, bindGroup);
+            passEncoder.dispatchWorkgroups(
+                Math.ceil(this.#width / workgroupSize[0]),
+                Math.ceil(this.#height / workgroupSize[1]),
+                Math.ceil(this.#depth / workgroupSize[2])
+            );
+        });
         this.lutTexture.notifyUpdate();
     }
 

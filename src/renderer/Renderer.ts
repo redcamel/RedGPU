@@ -8,6 +8,7 @@ import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnima
 import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import DrawBufferManager from "./core/DrawBufferManager";
 import FinalRender from "./finalRender/FinalRender";
+import {COMMAND_ENCODER_TYPE} from "./commandEncoder/COMMAND_ENCODER_TYPE";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
@@ -99,24 +100,40 @@ class Renderer {
     renderFrame(redGPUContext: RedGPUContext, time: number) {
         if (!this.#finalRender) this.#finalRender = new FinalRender()
 
+        const {commandEncoderManager} = redGPUContext;
+        commandEncoderManager.resetAll();
 
-        // 오브젝트 렌더시작
-        const commandBuffers: GPUCommandBuffer[] = []
         const viewList_renderPassDescriptorList: GPURenderPassDescriptor[] = []
         {
             let i = 0
             const len = redGPUContext.viewList.length
             for (i; i < len; i++) {
                 const targetView = redGPUContext.viewList[i];
-                const {renderPassDescriptor, commandBuffers: viewCommandBuffers} = this.renderView(targetView, time);
+                const {renderPassDescriptor} = this.renderView(targetView, time);
                 viewList_renderPassDescriptorList.push(renderPassDescriptor);
-                commandBuffers.push(...viewCommandBuffers);
             }
         }
-        const finalRenderCommandBuffer = this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList);
-        if (finalRenderCommandBuffer) commandBuffers.push(finalRenderCommandBuffer);
 
-        redGPUContext.gpuDevice.queue.submit(commandBuffers);
+        // [KO] 1단계: RESOURCE 제출 (텍스처 업로드, 버퍼 복사 등)
+        // [EN] Phase 1: RESOURCE submission (Texture uploads, buffer copies, etc.)
+        commandEncoderManager.submit(COMMAND_ENCODER_TYPE.RESOURCE);
+
+        // [KO] 2단계: PRE_COMPUTE 제출 (클러스터링, 스킨 연산 등)
+        // [EN] Phase 2: PRE_COMPUTE submission (Clustering, skinning, etc.)
+        commandEncoderManager.submit(COMMAND_ENCODER_TYPE.PRE_COMPUTE);
+
+        // [KO] 3단계: MAIN 제출 (쉐도우 패스, 메인 렌더링)
+        // [EN] Phase 3: MAIN submission (Shadow pass, main rendering)
+        commandEncoderManager.submit(COMMAND_ENCODER_TYPE.MAIN);
+
+        // [KO] 4단계: POST_PROCESS 제출 (후처리 효과)
+        // [EN] Phase 4: POST_PROCESS submission (Post-effect chains)
+        commandEncoderManager.submit(COMMAND_ENCODER_TYPE.POST_PROCESS);
+
+        // [KO] 5단계: 최종 렌더링 (화면 출력)
+        // [EN] Phase 5: Final rendering (Screen output)
+        this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList);
+        commandEncoderManager.submit(COMMAND_ENCODER_TYPE.MAIN);
 
         redGPUContext.antialiasingManager.changedMSAA = false
         viewList_renderPassDescriptorList.forEach((v, index) => {
@@ -124,7 +141,7 @@ class Renderer {
             targetView.pickingManager?.checkEvents(targetView, time);
             targetView.postEffectManager.autoExposure.resolveReadback();
         });
-        console.log('/////////////////// end renderFrame ///////////////////')
+        // console.log('/////////////////// end renderFrame ///////////////////')
     }
 
     /**
@@ -138,12 +155,11 @@ class Renderer {
      * [KO] 현재 시간 (ms)
      * [EN] Current time (ms)
      * @returns
-     * [KO] 생성된 렌더 패스 디스크립터와 커맨드 버퍼 리스트
-     * [EN] Generated render pass descriptor and command buffer list
+     * [KO] 생성된 렌더 패스 디스크립터
+     * [EN] Generated render pass descriptor
      */
     renderView(view: View3D, time: number): {
-        renderPassDescriptor: GPURenderPassDescriptor,
-        commandBuffers: GPUCommandBuffer[]
+        renderPassDescriptor: GPURenderPassDescriptor
     } {
         const {
             redGPUContext,
@@ -152,30 +168,23 @@ class Renderer {
             pixelRectObject,
             renderViewStateData
         } = view
+        const {commandEncoderManager} = redGPUContext;
         const {
             colorAttachment,
             depthStencilAttachment,
             gBufferNormalTextureAttachment,
             gBufferMotionVectorTextureAttachment
         } = this.#createAttachmentsForView(view)
-        const preComputeEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
-            label: 'ViewRender_PreComputeEncoder'
-        })
-        const mainRenderEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
-            label: 'ViewRender_MainRenderEncoder'
-        })
-        const postProcessEncoder: GPUCommandEncoder = redGPUContext.gpuDevice.createCommandEncoder({
-            label: 'ViewRender_PostProcessEncoder'
-        })
 
         const renderPassDescriptor: GPURenderPassDescriptor = {
             label: `${view.name} Basic Render Pass`,
             colorAttachments: [colorAttachment, gBufferNormalTextureAttachment, gBufferMotionVectorTextureAttachment],
             depthStencilAttachment,
         }
-        view.renderViewStateData.reset(mainRenderEncoder, null, time)
-        view.renderViewStateData.preComputeEncoder = preComputeEncoder
-        view.renderViewStateData.postProcessEncoder = postProcessEncoder
+
+        // [KO] 상태 초기화 (인코더 의존성 제거됨)
+        // [EN] Reset state (encoder dependency removed)
+        view.renderViewStateData.reset(time)
 
         if (pixelRectObject.width && pixelRectObject.height) {
 
@@ -211,42 +220,38 @@ class Renderer {
 
             this.#updateJitter(view)
 
-            // [KO] 쉐도우 패스용 업데이트 및 렌더링 (커맨드 인코더 락 방지를 위해 패스 시작 전 업데이트)
-            // [EN] Update and render for shadow pass (Update before pass start to prevent encoder lock)
-            view.update(true, false, null, preComputeEncoder)
-            this.#renderPassViewShadow(view, mainRenderEncoder)
+            // [KO] 쉐도우 패스용 업데이트 및 렌더링
+            // [EN] Update and render for shadow pass
+            view.update(true, false, null)
+            this.#renderPassViewShadow(view);
 
             // [KO] 기본 패스용 업데이트 및 렌더링
             // [EN] Update and render for basic pass
             const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
-            view.update(false, true, renderPath1ResultTextureView, preComputeEncoder)
-            this.#renderPassViewBasicLayer(view, mainRenderEncoder, renderPassDescriptor)
-            this.#renderPassView2PathLayer(view, mainRenderEncoder, renderPassDescriptor, depthStencilAttachment)
-            this.#renderPassViewPickingLayer(view, mainRenderEncoder)
-            pickingManager?.prepareRead(view, mainRenderEncoder);
+            view.update(false, true, renderPath1ResultTextureView)
+
+            this.#renderPassViewBasicLayer(view, renderPassDescriptor)
+            this.#renderPassView2PathLayer(view, renderPassDescriptor, depthStencilAttachment)
+            this.#renderPassViewPickingLayer(view)
+            pickingManager?.prepareRead(view);
         }
+
         {
             //TODO 포스트이펙트를 실행을 완전히 안해될 조것 같은걸 체크해야함
-            renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render(postProcessEncoder).textureView
+            renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
         }
-        const skinCommandBuffer = this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData, preComputeEncoder);
-        const viewCommandBuffers = [
-            preComputeEncoder.finish(),
-            mainRenderEncoder.finish(),
-            postProcessEncoder.finish()
-        ];
-        if (skinCommandBuffer) viewCommandBuffers.push(skinCommandBuffer);
+
+        this.#batchUpdateSkinMatrices(redGPUContext, renderViewStateData);
 
         view.renderViewStateData.viewRenderTime = (performance.now() - view.renderViewStateData.startTime);
         return {
-            renderPassDescriptor,
-            commandBuffers: viewCommandBuffers
+            renderPassDescriptor
         }
     }
 
-    #renderPassViewShadow(view: View3D, renderCommandEncoder: GPUCommandEncoder) {
+    #renderPassViewShadow(view: View3D) {
         //TODO - 이것도 ShadowManager가 책임지도록 변경
-        const {scene} = view
+        const {scene, redGPUContext} = view
         const {shadowManager} = scene
         const {directionalShadowManager} = shadowManager
         const shadowPassDescriptor: GPURenderPassDescriptor = {
@@ -259,68 +264,73 @@ class Renderer {
                 depthStoreOp: GPU_STORE_OP.STORE,
             },
         };
-        const viewShadowRenderPassEncoder: GPURenderPassEncoder = renderCommandEncoder.beginRenderPass(shadowPassDescriptor)
-        {
+
+        redGPUContext.commandEncoderManager.addMainPass(shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
             this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
-            this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, renderCommandEncoder, true, false)
-        }
-        if (directionalShadowManager.castingList.length) {
-            renderShadowLayer(view, viewShadowRenderPassEncoder)
-        }
-        viewShadowRenderPassEncoder.end()
+            this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
+
+            if (directionalShadowManager.castingList.length) {
+                renderShadowLayer(view, viewShadowRenderPassEncoder)
+            }
+        });
+
         directionalShadowManager.resetCastingList()
     }
 
-    #renderPassViewBasicLayer(view: View3D, renderCommandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor) {
-        const {renderViewStateData, skybox, skyAtmosphere, grid, axis} = view
-        if (skyAtmosphere) skyAtmosphere.update(view, renderViewStateData.preComputeEncoder)
-        const viewRenderPassEncoder: GPURenderPassEncoder = renderCommandEncoder.beginRenderPass(renderPassDescriptor)
-        {
+    #renderPassViewBasicLayer(view: View3D, renderPassDescriptor: GPURenderPassDescriptor) {
+        const {renderViewStateData, skybox, skyAtmosphere, grid, axis, redGPUContext} = view
+        if (skyAtmosphere) {
+            skyAtmosphere.update(view)
+        }
+
+        redGPUContext.commandEncoderManager.addMainPass(renderPassDescriptor, (viewRenderPassEncoder) => {
             const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
             this.#updateViewportAndScissor(view, viewRenderPassEncoder)
-            this.#updateViewSystemUniforms(view, viewRenderPassEncoder, renderCommandEncoder, false, true, renderPath1ResultTextureView)
-        }
-        renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
-        viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-        if (skybox) skybox.render(renderViewStateData)
-        if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
-        if (axis) axis.render(renderViewStateData)
-        renderBasicLayer(view, viewRenderPassEncoder)
-        if (grid) grid.render(renderViewStateData)
-        renderAlphaLayer(view, viewRenderPassEncoder)
-        viewRenderPassEncoder.end()
+            this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true, renderPath1ResultTextureView)
+
+            renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
+            viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+            if (skybox) skybox.render(renderViewStateData)
+            if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
+            if (axis) axis.render(renderViewStateData)
+            renderBasicLayer(view, viewRenderPassEncoder)
+            if (grid) grid.render(renderViewStateData)
+            renderAlphaLayer(view, viewRenderPassEncoder)
+        });
     }
 
-    #renderPassView2PathLayer(view: View3D, renderCommandEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
+    #renderPassView2PathLayer(view: View3D, renderPassDescriptor: GPURenderPassDescriptor, depthStencilAttachment: GPURenderPassDepthStencilAttachment) {
         const {redGPUContext, renderViewStateData} = view
-        const {antialiasingManager} = redGPUContext
+        const {antialiasingManager, commandEncoderManager} = redGPUContext
         const {useMSAA} = antialiasingManager
+
         if (view.renderViewStateData.bundleListRender2PathLayer.length) {
             const {mipmapGenerator} = redGPUContext.resourceManager
             let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
+
             // useMSAA 설정에 따라 소스 텍스처 선택
             let sourceTexture = useMSAA
                 ? view.viewRenderTextureManager.gBufferColorResolveTexture
                 : view.viewRenderTextureManager.gBufferColorTexture;
+
             if (!sourceTexture) {
                 if (useMSAA) {
                     console.error('MSAA가 활성화되어 있지만 gBufferColorResolveTexture가 정의되지 않았습니다');
                 } else {
                     console.error('gBufferColorTexture가 정의되지 않았습니다');
                 }
-                console.log('view.redGPUContext.useMSAA:', useMSAA);
-                console.log('viewRenderTextureManager:', view.viewRenderTextureManager);
             }
-            if (!renderPath1ResultTexture) {
-                console.error('renderPath1ResultTexture가 정의되지 않았습니다');
-            }
-            renderCommandEncoder.copyTextureToTexture(
-                {texture: sourceTexture,},
-                {texture: renderPath1ResultTexture,},
-                {width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1},
-            );
-            mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true)
-            const renderPassEncoder: GPURenderPassEncoder = renderCommandEncoder.beginRenderPass({
+
+            commandEncoderManager.useMainEncoder(encoder => {
+                encoder.copyTextureToTexture(
+                    {texture: sourceTexture,},
+                    {texture: renderPath1ResultTexture,},
+                    {width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1},
+                );
+                mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, encoder)
+            });
+
+            commandEncoderManager.addMainPass({
                 label: `${view.name} 2Path Render Pass`,
                 colorAttachments: [...renderPassDescriptor.colorAttachments].map(v => ({
                     ...v,
@@ -330,16 +340,16 @@ class Renderer {
                     ...depthStencilAttachment,
                     depthLoadOp: GPU_LOAD_OP.LOAD,
                 },
+            }, (renderPassEncoder) => {
+                this.#updateViewSystemUniforms(view, renderPassEncoder, false, false)
+                renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
             });
-            this.#updateViewSystemUniforms(view, renderPassEncoder, renderCommandEncoder, false, false)
-            renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
-            renderPassEncoder.end();
         }
     }
 
-    #renderPassViewPickingLayer(view: View3D, renderCommandEncoder: GPUCommandEncoder,) {
+    #renderPassViewPickingLayer(view: View3D) {
         //TODO - 이건  pickingManager가 권한을 가지도록 변경
-        const {pickingManager} = view
+        const {pickingManager, redGPUContext} = view
         if (pickingManager && pickingManager.castingList.length) {
             pickingManager.checkTexture(view)
             const pickingPassDescriptor: GPURenderPassDescriptor = {
@@ -359,13 +369,12 @@ class Renderer {
                     depthStoreOp: GPU_STORE_OP.STORE,
                 },
             };
-            const viewPickingRenderPassEncoder: GPURenderPassEncoder = renderCommandEncoder.beginRenderPass(pickingPassDescriptor)
-            {
+
+            redGPUContext.commandEncoderManager.addMainPass(pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
                 this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder)
-                this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, renderCommandEncoder, false, false)
-            }
-            renderPickingLayer(view, viewPickingRenderPassEncoder)
-            viewPickingRenderPassEncoder.end()
+                this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
+                renderPickingLayer(view, viewPickingRenderPassEncoder)
+            });
         }
     }
 
@@ -405,135 +414,132 @@ class Renderer {
         return result;
     }
 
-    #batchUpdateSkinMatrices(redGPUContext: RedGPUContext, renderViewStateData: RenderViewStateData, commandEncoder?: GPUCommandEncoder) {
+    #batchUpdateSkinMatrices(redGPUContext: RedGPUContext, renderViewStateData: RenderViewStateData) {
         const {animationList, skinList} = renderViewStateData;
         const skinListNum = skinList.length
         const animationListNum = animationList.length
-        if (!skinListNum && !animationListNum) return null;
-        const {gpuDevice} = redGPUContext;
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
-            label: 'BatchUpdateSkinMatrices_CommandEncoder'
-        });
-        const passEncoder = internalEncoder.beginComputePass();
-        if (animationListNum) {
-            this.#gltfAnimationLooperManager.render(
-                redGPUContext,
-                renderViewStateData.timestamp,
-                passEncoder,
-                animationList.flat()
-            )
-        }
-        for (let i = 0; i < skinListNum; i++) {
-            const mesh = skinList[i];
-            const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
-            // 사용된 조인트 인덱스 초기화
-            if (!skinInfo.usedJoints) {
-                skinInfo.usedJoints = skinInfo.getUsedJointIndices(mesh);
-            }
-            // 조인트 행렬 저장 버퍼 크기 확인 및 초기화
-            const neededSize = (1 + skinInfo.usedJoints.length) * 16;
-            if (!skinInfo.jointData || skinInfo.jointData.length !== neededSize) {
-                skinInfo.jointData = new Float32Array(neededSize);
-                skinInfo.computeShader = null
-            }
+        if (!skinListNum && !animationListNum) return;
+        const {gpuDevice, commandEncoderManager} = redGPUContext;
 
-            // 모델 행렬의 역행렬 계산
-            skinInfo.invertNodeGlobalTransform = skinInfo.invertNodeGlobalTransform || new Float32Array(mesh.modelMatrix.length);
-            // mat4.invert(skinInfo.invertNodeGlobalTransform, mesh.modelMatrix);
-            {
+        commandEncoderManager.addPreComputePass('BatchUpdateSkinMatrices_ComputePass', (passEncoder) => {
+            if (animationListNum) {
+                this.#gltfAnimationLooperManager.render(
+                    redGPUContext,
+                    renderViewStateData.timestamp,
+                    passEncoder,
+                    animationList.flat()
+                )
+            }
+            for (let i = 0; i < skinListNum; i++) {
+                const mesh = skinList[i];
+                const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
+                // 사용된 조인트 인덱스 초기화
+                if (!skinInfo.usedJoints) {
+                    skinInfo.usedJoints = skinInfo.getUsedJointIndices(mesh);
+                }
+                // 조인트 행렬 저장 버퍼 크기 확인 및 초기화
+                const neededSize = (1 + skinInfo.usedJoints.length) * 16;
+                if (!skinInfo.jointData || skinInfo.jointData.length !== neededSize) {
+                    skinInfo.jointData = new Float32Array(neededSize);
+                    skinInfo.computeShader = null
+                }
+
+                // 모델 행렬의 역행렬 계산
+                skinInfo.invertNodeGlobalTransform = skinInfo.invertNodeGlobalTransform || new Float32Array(mesh.modelMatrix.length);
+                // mat4.invert(skinInfo.invertNodeGlobalTransform, mesh.modelMatrix);
                 {
-                    const sourceMatrix = mesh.modelMatrix;
-                    const resultMatrix = skinInfo.invertNodeGlobalTransform;
-                    const m00 = sourceMatrix[0], m01 = sourceMatrix[1], m02 = sourceMatrix[2], m03 = sourceMatrix[3];
-                    const m10 = sourceMatrix[4], m11 = sourceMatrix[5], m12 = sourceMatrix[6], m13 = sourceMatrix[7];
-                    const m20 = sourceMatrix[8], m21 = sourceMatrix[9], m22 = sourceMatrix[10], m23 = sourceMatrix[11];
-                    const m30 = sourceMatrix[12], m31 = sourceMatrix[13], m32 = sourceMatrix[14],
-                        m33 = sourceMatrix[15];
-                    const c00 = m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31);
-                    const c01 = -(m10 * (m22 * m33 - m23 * m32) - m12 * (m20 * m33 - m23 * m30) + m13 * (m20 * m32 - m22 * m30));
-                    const c02 = m10 * (m21 * m33 - m23 * m31) - m11 * (m20 * m33 - m23 * m30) + m13 * (m20 * m31 - m21 * m30);
-                    const c03 = -(m10 * (m21 * m32 - m22 * m31) - m11 * (m20 * m32 - m22 * m30) + m12 * (m20 * m31 - m21 * m30));
-                    const c10 = -(m01 * (m22 * m33 - m23 * m32) - m02 * (m21 * m33 - m23 * m31) + m03 * (m21 * m32 - m22 * m31));
-                    const c11 = m00 * (m22 * m33 - m23 * m32) - m02 * (m20 * m33 - m23 * m30) + m03 * (m20 * m32 - m22 * m30);
-                    const c12 = -(m00 * (m21 * m33 - m23 * m31) - m01 * (m20 * m33 - m23 * m30) + m03 * (m20 * m31 - m21 * m30));
-                    const c13 = m00 * (m21 * m32 - m22 * m31) - m01 * (m20 * m32 - m22 * m30) + m02 * (m20 * m31 - m21 * m30);
-                    const c20 = m01 * (m12 * m33 - m13 * m32) - m02 * (m11 * m33 - m13 * m31) + m03 * (m11 * m32 - m12 * m31);
-                    const c21 = -(m00 * (m12 * m33 - m13 * m32) - m02 * (m10 * m33 - m13 * m30) + m03 * (m10 * m32 - m12 * m30));
-                    const c22 = m00 * (m11 * m33 - m13 * m31) - m01 * (m10 * m33 - m13 * m30) + m03 * (m10 * m31 - m11 * m30);
-                    const c23 = -(m00 * (m11 * m32 - m12 * m31) - m01 * (m10 * m32 - m12 * m30) + m02 * (m10 * m31 - m11 * m30));
-                    const c30 = -(m01 * (m12 * m23 - m13 * m22) - m02 * (m11 * m23 - m13 * m21) + m03 * (m11 * m22 - m12 * m21));
-                    const c31 = m00 * (m12 * m23 - m13 * m22) - m02 * (m10 * m23 - m13 * m20) + m03 * (m10 * m22 - m12 * m20);
-                    const c32 = -(m00 * (m11 * m23 - m13 * m21) - m01 * (m10 * m23 - m13 * m20) + m03 * (m10 * m21 - m11 * m20));
-                    const c33 = m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
-                    const determinant = m00 * c00 + m01 * c01 + m02 * c02 + m03 * c03;
-                    if (Math.abs(determinant) < 1e-10) {
-                        console.error('Matrix is not invertible (determinant is zero or near zero)');
-                        resultMatrix[0] = 1;
-                        resultMatrix[1] = 0;
-                        resultMatrix[2] = 0;
-                        resultMatrix[3] = 0;
-                        resultMatrix[4] = 0;
-                        resultMatrix[5] = 1;
-                        resultMatrix[6] = 0;
-                        resultMatrix[7] = 0;
-                        resultMatrix[8] = 0;
-                        resultMatrix[9] = 0;
-                        resultMatrix[10] = 1;
-                        resultMatrix[11] = 0;
-                        resultMatrix[12] = 0;
-                        resultMatrix[13] = 0;
-                        resultMatrix[14] = 0;
-                        resultMatrix[15] = 1;
-                    } else {
-                        const invDet = 1.0 / determinant;
-                        resultMatrix[0] = c00 * invDet;
-                        resultMatrix[1] = c10 * invDet;
-                        resultMatrix[2] = c20 * invDet;
-                        resultMatrix[3] = c30 * invDet;
-                        resultMatrix[4] = c01 * invDet;
-                        resultMatrix[5] = c11 * invDet;
-                        resultMatrix[6] = c21 * invDet;
-                        resultMatrix[7] = c31 * invDet;
-                        resultMatrix[8] = c02 * invDet;
-                        resultMatrix[9] = c12 * invDet;
-                        resultMatrix[10] = c22 * invDet;
-                        resultMatrix[11] = c32 * invDet;
-                        resultMatrix[12] = c03 * invDet;
-                        resultMatrix[13] = c13 * invDet;
-                        resultMatrix[14] = c23 * invDet;
-                        resultMatrix[15] = c33 * invDet;
+                    {
+                        const sourceMatrix = mesh.modelMatrix;
+                        const resultMatrix = skinInfo.invertNodeGlobalTransform;
+                        const m00 = sourceMatrix[0], m01 = sourceMatrix[1], m02 = sourceMatrix[2], m03 = sourceMatrix[3];
+                        const m10 = sourceMatrix[4], m11 = sourceMatrix[5], m12 = sourceMatrix[6], m13 = sourceMatrix[7];
+                        const m20 = sourceMatrix[8], m21 = sourceMatrix[9], m22 = sourceMatrix[10], m23 = sourceMatrix[11];
+                        const m30 = sourceMatrix[12], m31 = sourceMatrix[13], m32 = sourceMatrix[14],
+                            m33 = sourceMatrix[15];
+                        const c00 = m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31);
+                        const c01 = -(m10 * (m22 * m33 - m23 * m32) - m12 * (m20 * m33 - m23 * m30) + m13 * (m20 * m32 - m22 * m30));
+                        const c02 = m10 * (m21 * m33 - m23 * m31) - m11 * (m20 * m33 - m23 * m30) + m13 * (m20 * m31 - m21 * m30);
+                        const c03 = -(m10 * (m21 * m32 - m22 * m31) - m11 * (m20 * m32 - m22 * m30) + m12 * (m20 * m31 - m21 * m30));
+                        const c10 = -(m01 * (m22 * m33 - m23 * m32) - m02 * (m21 * m33 - m23 * m31) + m03 * (m21 * m32 - m22 * m31));
+                        const c11 = m00 * (m22 * m33 - m23 * m32) - m02 * (m20 * m33 - m23 * m30) + m03 * (m20 * m32 - m22 * m30);
+                        const c12 = -(m00 * (m21 * m33 - m23 * m31) - m01 * (m20 * m33 - m23 * m30) + m03 * (m20 * m31 - m21 * m30));
+                        const c13 = m00 * (m21 * m32 - m22 * m31) - m01 * (m20 * m32 - m22 * m30) + m02 * (m20 * m31 - m21 * m30);
+                        const c20 = m01 * (m12 * m33 - m13 * m32) - m02 * (m11 * m33 - m13 * m31) + m03 * (m11 * m32 - m12 * m31);
+                        const c21 = -(m00 * (m12 * m33 - m13 * m32) - m02 * (m10 * m33 - m13 * m30) + m03 * (m10 * m32 - m12 * m30));
+                        const c22 = m00 * (m11 * m33 - m13 * m31) - m01 * (m10 * m33 - m13 * m30) + m03 * (m10 * m31 - m11 * m30);
+                        const c23 = -(m00 * (m11 * m32 - m12 * m31) - m01 * (m10 * m32 - m12 * m30) + m02 * (m10 * m31 - m11 * m30));
+                        const c30 = -(m01 * (m12 * m23 - m13 * m22) - m02 * (m11 * m23 - m13 * m21) + m03 * (m11 * m22 - m12 * m21));
+                        const c31 = m00 * (m12 * m23 - m13 * m22) - m02 * (m10 * m23 - m13 * m20) + m03 * (m10 * m22 - m12 * m20);
+                        const c32 = -(m00 * (m11 * m23 - m13 * m21) - m01 * (m10 * m23 - m13 * m20) + m03 * (m10 * m21 - m11 * m20));
+                        const c33 = m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
+                        const determinant = m00 * c00 + m01 * c01 + m02 * c02 + m03 * c03;
+                        if (Math.abs(determinant) < 1e-10) {
+                            console.error('Matrix is not invertible (determinant is zero or near zero)');
+                            resultMatrix[0] = 1;
+                            resultMatrix[1] = 0;
+                            resultMatrix[2] = 0;
+                            resultMatrix[3] = 0;
+                            resultMatrix[4] = 0;
+                            resultMatrix[5] = 1;
+                            resultMatrix[6] = 0;
+                            resultMatrix[7] = 0;
+                            resultMatrix[8] = 0;
+                            resultMatrix[9] = 0;
+                            resultMatrix[10] = 1;
+                            resultMatrix[11] = 0;
+                            resultMatrix[12] = 0;
+                            resultMatrix[13] = 0;
+                            resultMatrix[14] = 0;
+                            resultMatrix[15] = 1;
+                        } else {
+                            const invDet = 1.0 / determinant;
+                            resultMatrix[0] = c00 * invDet;
+                            resultMatrix[1] = c10 * invDet;
+                            resultMatrix[2] = c20 * invDet;
+                            resultMatrix[3] = c30 * invDet;
+                            resultMatrix[4] = c01 * invDet;
+                            resultMatrix[5] = c11 * invDet;
+                            resultMatrix[6] = c21 * invDet;
+                            resultMatrix[7] = c31 * invDet;
+                            resultMatrix[8] = c02 * invDet;
+                            resultMatrix[9] = c12 * invDet;
+                            resultMatrix[10] = c22 * invDet;
+                            resultMatrix[11] = c32 * invDet;
+                            resultMatrix[12] = c03 * invDet;
+                            resultMatrix[13] = c13 * invDet;
+                            resultMatrix[14] = c23 * invDet;
+                            resultMatrix[15] = c33 * invDet;
+                        }
                     }
                 }
-            }
-            // Compute Shader 초기화 (최초 1회)
-            if (!skinInfo.computeShader) {
-                skinInfo.createCompute(
-                    redGPUContext,
-                    gpuDevice,
-                    mesh.geometry.vertexBuffer,
-                    mesh.animationInfo.weightBuffer,
-                    mesh.animationInfo.jointBuffer,
-                );
-            }
-
-            {
-                const usedJoints = skinInfo.usedJoints
-                let i = usedJoints.length;
-                const jointData = skinInfo.jointData;
-                while (i--) {
-                    jointData.set(skinInfo.joints[usedJoints[i]].modelMatrix, (i + 1) * 16);
+                // Compute Shader 초기화 (최초 1회)
+                if (!skinInfo.computeShader) {
+                    skinInfo.createCompute(
+                        redGPUContext,
+                        gpuDevice,
+                        mesh.geometry.vertexBuffer,
+                        mesh.animationInfo.weightBuffer,
+                        mesh.animationInfo.jointBuffer,
+                    );
                 }
-                jointData.set(skinInfo.invertNodeGlobalTransform, 0)
-                gpuDevice.queue.writeBuffer(skinInfo.uniformBuffer, 0, jointData as BufferSource)
-            }
 
-            // Compute Pass 설정 및 Dispatch
-            passEncoder.setPipeline(skinInfo.computePipeline);
-            passEncoder.setBindGroup(0, skinInfo.bindGroup);
-            passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / skinInfo.WORK_SIZE));
-        }
-        passEncoder.end();
-        return commandEncoder ? null : internalEncoder.finish();
+                {
+                    const usedJoints = skinInfo.usedJoints
+                    let i = usedJoints.length;
+                    const jointData = skinInfo.jointData;
+                    while (i--) {
+                        jointData.set(skinInfo.joints[usedJoints[i]].modelMatrix, (i + 1) * 16);
+                    }
+                    jointData.set(skinInfo.invertNodeGlobalTransform, 0)
+                    gpuDevice.queue.writeBuffer(skinInfo.uniformBuffer, 0, jointData as BufferSource)
+                }
+
+                // Compute Pass 설정 및 Dispatch
+                passEncoder.setPipeline(skinInfo.computePipeline);
+                passEncoder.setBindGroup(0, skinInfo.bindGroup);
+                passEncoder.dispatchWorkgroups(Math.ceil(mesh.geometry.vertexBuffer.vertexCount / skinInfo.WORK_SIZE));
+            }
+        });
     }
 
     #createAttachmentsForView(view: View3D) {
@@ -611,7 +617,6 @@ class Renderer {
     #updateViewSystemUniforms(
         view: View3D,
         viewRenderPassEncoder: GPURenderPassEncoder,
-        commandEncoder: GPUCommandEncoder,
         shadowRender: boolean = false,
         calcPointLightCluster: boolean = true,
         renderPath1ResultTextureView: GPUTextureView = null

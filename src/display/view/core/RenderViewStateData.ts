@@ -83,15 +83,6 @@ class RenderViewStateData {
     /** [KO] 현재 사용 중인 GPU 렌더 패스 인코더 [EN] Current GPU render pass encoder in use */
     currentRenderPassEncoder: GPURenderPassEncoder;
 
-    /** [KO] 사전 컴퓨트 연산을 위한 GPU 커맨드 인코더 [EN] GPU command encoder for pre-compute operations */
-    preComputeEncoder: GPUCommandEncoder;
-
-    /** [KO] 메인 렌더링을 위한 GPU 커맨드 인코더 [EN] GPU command encoder for main rendering */
-    mainRenderEncoder: GPUCommandEncoder;
-
-    /** [KO] 후처리 연산을 위한 GPU 커맨드 인코더 [EN] GPU command encoder for post-process operations */
-    postProcessEncoder: GPUCommandEncoder;
-
     /** [KO] 컬링을 위한 프러스텀 평면 배열 [EN] Frustum planes array for culling */
     frustumPlanes: number[][];
     /** [KO] 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 [EN] Previously used vertex GPU buffer for optimization */
@@ -149,14 +140,12 @@ class RenderViewStateData {
      * 현재 렌더링 패스를 위한 GPU 리소스를 설정합니다.
      * 또한 비디오 메모리 사용량을 계산하고 뷰 설정에 따라 컬링 매개변수를 구성합니다.
      *
-     * @param {GPUCommandEncoder} commandEncoder - 현재 프레임의 커맨드 인코더
-     * @param {GPURenderPassEncoder} viewRenderPassEncoder - 현재 프레임의 렌더 패스 인코더
      * @param {number} time - 프레임의 현재 타임스탬프
      *
      * @throws {Error} 잘못된 매개변수가 제공되거나 필수 뷰 속성이 없는 경우
      * @throws {Error} 텍스처 크기 계산이 실패한 경우
      */
-    reset(commandEncoder: GPUCommandEncoder, viewRenderPassEncoder: GPURenderPassEncoder, time: number) {
+    reset(time: number) {
         if (!time || !this.#view) {
             throw new Error('Invalid parameters provided');
         }
@@ -192,8 +181,6 @@ class RenderViewStateData {
         this.time = time / 1000;
         this.deltaTime = (time - this.prevTimestamp) / 1000;
         this.sinTime = Math.sin(this.time);
-        this.mainRenderEncoder = commandEncoder;
-        this.currentRenderPassEncoder = viewRenderPassEncoder;
         this.timestamp = time;
         this.prevVertexGpuBuffer = null;
         this.prevFragmentUniformBindGroup = null;

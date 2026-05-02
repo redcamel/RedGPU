@@ -337,14 +337,11 @@ class PostEffectManager {
      * [KO] 후처리 파이프라인을 렌더링합니다.
      * [EN] Renders the post-processing pipeline.
      *
-     * @param postProcessEncoder
-     * [KO] 후처리 커맨드 인코더
-     * [EN] Post-process Command Encoder
      * @returns
      * [KO] 렌더링 결과 텍스처 정보
      * [EN] Rendering result texture information
      */
-    render(postProcessEncoder: GPUCommandEncoder) {
+    render() {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
         const {antialiasingManager} = redGPUContext
         const {useMSAA, useFXAA, useTAA} = antialiasingManager;
@@ -353,7 +350,7 @@ class PostEffectManager {
         // 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
         const initialSourceView = useMSAA ? gBufferColorResolveTextureView : gBufferColorTextureView;
         this.#updateSystemUniforms()
-        this.#sourceTextureView = this.#renderToStorageTexture(postProcessEncoder, this.#view, initialSourceView);
+        this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
 
         const {useAutoExposure} = this.#view.rawCamera;
 
@@ -365,7 +362,6 @@ class PostEffectManager {
         // SkyAtmosphere 전용 처리 (톤 매핑 전 HDR 공간에서 실행)
         if (this.#view.skyAtmosphere) {
             currentTextureView = this.#view.skyAtmosphere.render(
-                postProcessEncoder,
                 this.#view,
                 width,
                 height,
@@ -376,7 +372,6 @@ class PostEffectManager {
 
         this.#postEffects.forEach(effect => {
             currentTextureView = effect.render(
-                postProcessEncoder,
                 this.#view,
                 width,
                 height,
@@ -385,12 +380,11 @@ class PostEffectManager {
         });
         // Auto Exposure 처리 (HDR 공간에서 수행)
         if (useAutoExposure) {
-            this.autoExposure.render(postProcessEncoder, this.#view, currentTextureView);
+            this.autoExposure.render(currentTextureView);
         }
 
         {
             currentTextureView = this.#view.toneMappingManager.render(
-                postProcessEncoder,
                 width,
                 height,
                 currentTextureView
@@ -400,7 +394,6 @@ class PostEffectManager {
 
         if (useFXAA) {
             currentTextureView = fxaa.render(
-                postProcessEncoder,
                 this.#view,
                 width,
                 height,
@@ -409,7 +402,6 @@ class PostEffectManager {
         }
         if (this.#useSSAO) {
             currentTextureView = this.ssao.render(
-                postProcessEncoder,
                 this.#view,
                 width,
                 height,
@@ -418,7 +410,6 @@ class PostEffectManager {
         }
         if (this.#useSSR) {
             currentTextureView = this.ssr.render(
-                postProcessEncoder,
                 this.#view,
                 width,
                 height,
@@ -429,7 +420,6 @@ class PostEffectManager {
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
                 currentTextureView = taa.render(
-                    postProcessEncoder,
                     this.#view,
                     width,
                     height,
@@ -439,7 +429,6 @@ class PostEffectManager {
                     this.#taaSharpenEffect = new TAASharpen(redGPUContext)
                 }
                 currentTextureView = this.#taaSharpenEffect.render(
-                    postProcessEncoder,
                     this.#view,
                     width,
                     height,
@@ -447,7 +436,6 @@ class PostEffectManager {
                 )
             } else {
                 currentTextureView = fxaa.render(
-                    postProcessEncoder,
                     this.#view,
                     width,
                     height,
@@ -566,7 +554,7 @@ class PostEffectManager {
         })
     }
 
-    #renderToStorageTexture(postProcessEncoder: GPUCommandEncoder, view: View3D, sourceTextureView: GPUTextureView) {
+    #renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
         const {redGPUContext, viewRenderTextureManager} = view;
         const {gBufferColorTexture} = viewRenderTextureManager;
         const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
@@ -593,7 +581,6 @@ class PostEffectManager {
         }
         this.#previousDimensions = {width, height};
         this.#executeComputePass(
-            postProcessEncoder,
             this.#textureComputePipeline,
             this.#textureComputeBindGroup,
             width, height
@@ -677,14 +664,12 @@ class PostEffectManager {
         });
     }
 
-    #executeComputePass(postProcessEncoder: GPUCommandEncoder, pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, width: number, height: number) {
-        const computePassEncoder = postProcessEncoder.beginComputePass({
-            label: 'POST_EFFECT_TEXTURE_COPY_COMPUTE_PASS'
+    #executeComputePass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, width: number, height: number) {
+        this.#view.redGPUContext.commandEncoderManager.addPostProcessPass('POST_EFFECT_TEXTURE_COPY_COMPUTE_PASS', (computePassEncoder) => {
+            computePassEncoder.setPipeline(pipeline);
+            computePassEncoder.setBindGroup(0, bindGroup);
+            computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#COMPUTE_WORKGROUP_SIZE_X), Math.ceil(height / this.#COMPUTE_WORKGROUP_SIZE_Y));
         });
-        computePassEncoder.setPipeline(pipeline);
-        computePassEncoder.setBindGroup(0, bindGroup);
-        computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#COMPUTE_WORKGROUP_SIZE_X), Math.ceil(height / this.#COMPUTE_WORKGROUP_SIZE_Y));
-        computePassEncoder.end();
     }
 }
 
