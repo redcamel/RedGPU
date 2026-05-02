@@ -32,10 +32,10 @@ class CommandEncoderManager {
     }
 
     /**
-     * [KO] PRE_COMPUTE 단계의 패스를 추가합니다.
+     * [KO] PRE_PROCESS 단계의 패스를 추가합니다.
      */
-    addPreComputePass(labelOrDescriptor: string | GPURenderPassDescriptor, callback: (pass: any) => void): void {
-        this.#addPass(COMMAND_ENCODER_TYPE.PRE_COMPUTE, labelOrDescriptor, callback);
+    addPreProcessPass(labelOrDescriptor: string | GPURenderPassDescriptor, callback: (pass: any) => void): void {
+        this.#addPass(COMMAND_ENCODER_TYPE.PRE_PROCESS, labelOrDescriptor, callback);
     }
 
     /**
@@ -62,27 +62,6 @@ class CommandEncoderManager {
     }
 
     /**
-     * [KO] PRE_COMPUTE 단계의 인코더를 직접 사용합니다.
-     */
-    usePreComputeEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
-        this.useEncoder(COMMAND_ENCODER_TYPE.PRE_COMPUTE, callback);
-    }
-
-    /**
-     * [KO] MAIN 단계의 인코더를 직접 사용합니다.
-     */
-    useMainEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
-        this.useEncoder(COMMAND_ENCODER_TYPE.MAIN, callback);
-    }
-
-    /**
-     * [KO] POST_PROCESS 단계의 인코더를 직접 사용합니다.
-     */
-    usePostProcessEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
-        this.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, callback);
-    }
-
-    /**
      * [KO] 특정 타입의 모든 인코더를 종료하고 즉시 서밋합니다.
      * [EN] Finishes all encoders for the specific type and submits them immediately.
      */
@@ -105,11 +84,11 @@ class CommandEncoderManager {
         const allBuffers: GPUCommandBuffer[] = [];
         const submittedTypes: string[] = [];
 
-        // [KO] 실행 순서 보장: RESOURCE -> PRE_COMPUTE -> MAIN -> POST_PROCESS
-        // [EN] Ensure execution order: RESOURCE -> PRE_COMPUTE -> MAIN -> POST_PROCESS
+        // [KO] 실행 순서 보장: RESOURCE -> PRE_PROCESS -> MAIN -> POST_PROCESS
+        // [EN] Ensure execution order: RESOURCE -> PRE_PROCESS -> MAIN -> POST_PROCESS
         const order = [
             COMMAND_ENCODER_TYPE.RESOURCE,
-            COMMAND_ENCODER_TYPE.PRE_COMPUTE,
+            COMMAND_ENCODER_TYPE.PRE_PROCESS,
             COMMAND_ENCODER_TYPE.MAIN,
             COMMAND_ENCODER_TYPE.POST_PROCESS
         ];

@@ -548,7 +548,7 @@ class InstancingMesh extends Mesh {
         });
 
         // Compute Pass 실행
-        commandEncoderManager.addPreComputePass('InstancingMesh_GPUCulling_ComputePass', (computePass) => {
+        commandEncoderManager.addPreProcessPass('InstancingMesh_GPUCulling_ComputePass', (computePass) => {
             computePass.setPipeline(this.#cullingComputePipeline);
             computePass.setBindGroup(0, this.#cullingBindGroup);
             const workgroupSize = 64;

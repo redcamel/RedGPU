@@ -65,7 +65,7 @@ abstract class ASkyAtmosphereLUTGenerator {
         workgroupSize: [number, number, number] = [16, 16, 1]
     ): void {
         const {commandEncoderManager} = this.#redGPUContext;
-        commandEncoderManager.addPreComputePass(`SkyAtmosphere_${this.#label}_ComputePass`, (passEncoder) => {
+        commandEncoderManager.addPreProcessPass(`SkyAtmosphere_${this.#label}_ComputePass`, (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, bindGroup);
             passEncoder.dispatchWorkgroups(

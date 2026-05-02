@@ -223,8 +223,8 @@ class MipmapGenerator {
                         passEncoder.setBindGroup(0, bindGroup);
                         passEncoder.draw(3, 1, 0, 0);
                     });
-                } else if (encoderType === COMMAND_ENCODER_TYPE.PRE_COMPUTE) {
-                    commandEncoderManager.addPreComputePass(passDescriptor, (passEncoder) => {
+                } else if (encoderType === COMMAND_ENCODER_TYPE.PRE_PROCESS) {
+                    commandEncoderManager.addPreProcessPass(passDescriptor, (passEncoder) => {
                         passEncoder.setPipeline(pipeline);
                         passEncoder.setBindGroup(0, bindGroup);
                         passEncoder.draw(3, 1, 0, 0);

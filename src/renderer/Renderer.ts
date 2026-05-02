@@ -111,7 +111,7 @@ class Renderer {
                 viewList_renderPassDescriptorList.push(renderPassDescriptor);
 
                 const {commandEncoderManager} = redGPUContext;
-                // [KO] 뷰별 1~4단계 일괄 제출 (RESOURCE, PRE_COMPUTE, MAIN, POST_PROCESS)
+                // [KO] 뷰별 1~4단계 일괄 제출 (RESOURCE, PRE_PROCESS, MAIN, POST_PROCESS)
                 // [EN] Batch submission of phases 1-4 per view
                 commandEncoderManager.submitAll();
             }
@@ -409,7 +409,7 @@ class Renderer {
         if (!skinListNum && !animationListNum) return;
         const {gpuDevice, commandEncoderManager} = redGPUContext;
 
-        commandEncoderManager.addPreComputePass('BatchUpdateSkinMatrices_ComputePass', (passEncoder) => {
+        commandEncoderManager.addPreProcessPass('BatchUpdateSkinMatrices_ComputePass', (passEncoder) => {
             if (animationListNum) {
                 this.#gltfAnimationLooperManager.render(
                     redGPUContext,

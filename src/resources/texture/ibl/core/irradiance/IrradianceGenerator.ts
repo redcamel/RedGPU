@@ -140,7 +140,7 @@ class IrradianceGenerator {
             ]
         });
 
-        commandEncoderManager.addPreComputePass('Irradiance_Generator_Compute_Pass', (computePass) => {
+        commandEncoderManager.addPreProcessPass('Irradiance_Generator_Compute_Pass', (computePass) => {
             computePass.setPipeline(this.#pipeline);
             computePass.setBindGroup(0, bindGroup);
             computePass.dispatchWorkgroups(Math.ceil(size / 8), Math.ceil(size / 8), 6);
