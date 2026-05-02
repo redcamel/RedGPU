@@ -19,6 +19,8 @@ class CommandEncoderManager {
     readonly #encoderMap: Map<CommandEncoderType, GPUCommandEncoder[]> = new Map();
     /** [KO] 타입별 현재 패스 활성화 여부 [EN] Whether a pass is currently active per type */
     readonly #isPassActive: Partial<Record<CommandEncoderType, boolean>> = {};
+    /** [KO] 타입별 통계 데이터 [EN] Statistics per type */
+    readonly #stats: Map<CommandEncoderType, { renderPasses: string[], computePasses: string[], rawUsages: number }> = new Map();
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -86,6 +88,7 @@ class CommandEncoderManager {
      */
     useEncoder(type: CommandEncoderType, callback: (encoder: GPUCommandEncoder) => void): void {
         const encoder = this.#getEncoder(type);
+        this.#incrementStat(type, 'rawUsages');
         callback(encoder);
     }
 
@@ -97,10 +100,25 @@ class CommandEncoderManager {
         if (this.#isPassActive[type]) {
             throw new Error(`[RedGPU] Cannot submit ${type} phase while a pass is still active.`);
         }
+        const stat = this.#stats.get(type) || {renderPasses: [], computePasses: [], rawUsages: 0};
         const buffers = this.#finish(type);
         if (buffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(buffers);
-            keepLog(`🚀 [CommandEncoderManager] Submitted ${buffers.length} command buffer(s) for ${type} phase.`);
+            const logData = {
+                'Phase': type,
+                'Command Buffers': buffers.length,
+                'Render Passes': {
+                    count: stat.renderPasses.length,
+                    list: stat.renderPasses
+                },
+                'Compute Passes': {
+                    count: stat.computePasses.length,
+                    list: stat.computePasses
+                },
+                'Raw Usages': stat.rawUsages
+            };
+            keepLog(`🚀 [CommandEncoderManager] Submitted ${type} Phase`, logData);
+            this.#resetStat(type);
         }
     }
 
@@ -110,7 +128,7 @@ class CommandEncoderManager {
      */
     submitAll(): void {
         const allBuffers: GPUCommandBuffer[] = [];
-        const submittedTypes: string[] = [];
+        const batchStats: Record<string, any> = {};
 
         // [KO] 실행 순서 보장: RESOURCE -> PRE_PROCESS -> MAIN -> POST_PROCESS
         // [EN] Ensure execution order: RESOURCE -> PRE_PROCESS -> MAIN -> POST_PROCESS
@@ -125,16 +143,29 @@ class CommandEncoderManager {
             if (this.#isPassActive[type]) {
                 throw new Error(`[RedGPU] Cannot submit ${type} phase while a pass is still active.`);
             }
+            const stat = this.#stats.get(type) || {renderPasses: [], computePasses: [], rawUsages: 0};
             const buffers = this.#finish(type);
             if (buffers.length > 0) {
                 allBuffers.push(...buffers);
-                submittedTypes.push(`${type}(${buffers.length})`);
+                batchStats[type] = {
+                    'Command Buffers': buffers.length,
+                    'Render Passes': {
+                        count: stat.renderPasses.length,
+                        list: stat.renderPasses
+                    },
+                    'Compute Passes': {
+                        count: stat.computePasses.length,
+                        list: stat.computePasses
+                    },
+                    'Raw Usages': stat.rawUsages
+                };
+                this.#resetStat(type);
             }
         });
 
         if (allBuffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(allBuffers);
-            keepLog(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} command buffer(s): [${submittedTypes.join(', ')}]`);
+            keepLog(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} Command Buffer(s)`, batchStats);
         }
     }
 
@@ -144,6 +175,7 @@ class CommandEncoderManager {
      */
     resetAll(): void {
         this.#encoderMap.clear();
+        this.#stats.clear();
         Object.keys(this.#isPassActive).forEach(key => {
             delete this.#isPassActive[key as CommandEncoderType];
         });
@@ -181,6 +213,7 @@ class CommandEncoderManager {
         callback: (pass: GPURenderPassEncoder) => void
     ): void {
         const encoder = this.#getEncoder(type);
+        this.#incrementStat(type, 'renderPasses', descriptor.label);
         this.#isPassActive[type] = true;
         try {
             const pass = encoder.beginRenderPass(descriptor);
@@ -200,6 +233,8 @@ class CommandEncoderManager {
         callback: (pass: GPUComputePassEncoder) => void
     ): void {
         const encoder = this.#getEncoder(type);
+        const label = typeof labelOrDescriptor === 'string' ? labelOrDescriptor : labelOrDescriptor.label;
+        this.#incrementStat(type, 'computePasses', label);
         this.#isPassActive[type] = true;
         try {
             const pass = typeof labelOrDescriptor === 'string'
@@ -210,6 +245,22 @@ class CommandEncoderManager {
         } finally {
             this.#isPassActive[type] = false;
         }
+    }
+
+    #incrementStat(type: CommandEncoderType, key: 'renderPasses' | 'computePasses' | 'rawUsages', label?: string) {
+        if (!this.#stats.has(type)) {
+            this.#stats.set(type, {renderPasses: [], computePasses: [], rawUsages: 0});
+        }
+        const stat = this.#stats.get(type)!;
+        if (key === 'rawUsages') {
+            stat.rawUsages++;
+        } else {
+            stat[key].push(label || 'unlabeled');
+        }
+    }
+
+    #resetStat(type: CommandEncoderType) {
+        this.#stats.set(type, {renderPasses: [], computePasses: [], rawUsages: 0});
     }
 
     /**
