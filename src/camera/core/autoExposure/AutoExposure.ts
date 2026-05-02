@@ -7,6 +7,7 @@ import downsampleLogLuminanceCode from "./wgsl/downsampleLogLuminance.wgsl";
 import adaptationCode from "./wgsl/adaptation.wgsl";
 import ACamera from "../ACamera";
 import METERING_MODE from "../METERING_MODE";
+import {COMMAND_ENCODER_TYPE} from "../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
@@ -227,7 +228,7 @@ class AutoExposure {
         );
 
         // [KO] 히스토그램 버퍼 명시적 초기화
-        commandEncoderManager.usePostProcessEncoder(encoder => {
+        commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
             encoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
         });
 
@@ -274,7 +275,7 @@ class AutoExposure {
         // [KO] 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 명령 기록
         // [EN] Record copy command only when not currently reading
         if (!this.#isReading) {
-            commandEncoderManager.usePostProcessEncoder(encoder => {
+            commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
                 encoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
             });
         }

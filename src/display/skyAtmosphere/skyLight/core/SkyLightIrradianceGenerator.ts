@@ -9,6 +9,7 @@ import createUUID from "../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../core/generator/ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import AtmosphereShaderLibrary from "../../core/AtmosphereShaderLibrary";
+import {COMMAND_ENCODER_TYPE} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 const IRRADIANCE_SHADER_INFO = parseWGSL('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl, AtmosphereShaderLibrary);
 
@@ -56,17 +57,15 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
-        const {resourceManager, commandEncoderManager} = this.redGPUContext;
+        const {resourceManager} = this.redGPUContext;
         this.#computeRender(pipeline, bindGroup, [8, 8, 1]);
-        commandEncoderManager.usePreComputeEncoder(encoder => {
-            resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
-                size: [this.width, this.height, 6],
-                format: 'rgba16float',
-                usage: this.#sourceCubeTexture.usage,
-                mipLevelCount: getMipLevelCount(this.width, this.height),
-                dimension: '2d'
-            }, true, encoder);
-        });
+        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
+            size: [this.width, this.height, 6],
+            format: 'rgba16float',
+            usage: this.#sourceCubeTexture.usage,
+            mipLevelCount: getMipLevelCount(this.width, this.height),
+            dimension: '2d'
+        }, true, COMMAND_ENCODER_TYPE.PRE_COMPUTE);
         await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture);
     }
 

@@ -62,13 +62,6 @@ class CommandEncoderManager {
     }
 
     /**
-     * [KO] RESOURCE 단계의 인코더를 직접 사용합니다 (복사 명령 등).
-     */
-    useResourceEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
-        this.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, callback);
-    }
-
-    /**
      * [KO] PRE_COMPUTE 단계의 인코더를 직접 사용합니다.
      */
     usePreComputeEncoder(callback: (encoder: GPUCommandEncoder) => void): void {
@@ -101,6 +94,40 @@ class CommandEncoderManager {
         if (buffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(buffers);
             keepLog(`🚀 [CommandEncoderManager] Submitted ${buffers.length} command buffer(s) for ${type} phase.`);
+        }
+    }
+
+    /**
+     * [KO] 모든 타입의 인코더를 한꺼번에 종료하고 단 한 번의 호출로 서밋합니다. (성능 최적화용)
+     * [EN] Finishes encoders of all types and submits them in a single call. (For performance optimization)
+     */
+    submitAll(): void {
+        const allBuffers: GPUCommandBuffer[] = [];
+        const submittedTypes: string[] = [];
+
+        // [KO] 실행 순서 보장: RESOURCE -> PRE_COMPUTE -> MAIN -> POST_PROCESS
+        // [EN] Ensure execution order: RESOURCE -> PRE_COMPUTE -> MAIN -> POST_PROCESS
+        const order = [
+            COMMAND_ENCODER_TYPE.RESOURCE,
+            COMMAND_ENCODER_TYPE.PRE_COMPUTE,
+            COMMAND_ENCODER_TYPE.MAIN,
+            COMMAND_ENCODER_TYPE.POST_PROCESS
+        ];
+
+        order.forEach(type => {
+            if (this.#isPassActive[type]) {
+                throw new Error(`[RedGPU] Cannot submit ${type} phase while a pass is still active.`);
+            }
+            const buffers = this.#finish(type);
+            if (buffers.length > 0) {
+                allBuffers.push(...buffers);
+                submittedTypes.push(`${type}(${buffers.length})`);
+            }
+        });
+
+        if (allBuffers.length > 0) {
+            this.#redGPUContext.gpuDevice.queue.submit(allBuffers);
+            keepLog(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} command buffer(s): [${submittedTypes.join(', ')}]`);
         }
     }
 

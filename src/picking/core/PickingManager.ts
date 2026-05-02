@@ -6,6 +6,7 @@ import PickingEvent from "./PickingEvent";
 import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
 import Raycaster3D from "../Raycaster3D";
 import Raycaster2D from "../Raycaster2D";
+import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
@@ -183,7 +184,7 @@ class PickingManager {
             });
         }
 
-        this.#redGPUContext.commandEncoderManager.useMainEncoder(mainRenderEncoder => {
+        this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, mainRenderEncoder => {
             const textureView = {texture: this.#pickingGPUTexture, origin: {x: Math.floor(x), y: Math.floor(y), z: 0}};
             const bufferView = {buffer: this.#readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
             const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
@@ -338,6 +339,7 @@ class PickingManager {
         }
     };
 }
+
 
 Object.freeze(PickingManager)
 export default PickingManager

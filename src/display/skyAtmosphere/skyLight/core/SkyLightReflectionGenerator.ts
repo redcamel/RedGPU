@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import Sampler from "../../../../resources/sampler/Sampler";
+import {COMMAND_ENCODER_TYPE} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 import specularShaderCode_wgsl from "./skyLightReflectionShaderCode.wgsl";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -56,17 +57,15 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
-        const {resourceManager, commandEncoderManager} = this.redGPUContext;
+        const {resourceManager} = this.redGPUContext;
         this.#computeRender(pipeline, bindGroup, [8, 8, 1]);
-        commandEncoderManager.usePreComputeEncoder(encoder => {
-            resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
-                size: [this.width, this.height, 6],
-                format: 'rgba16float',
-                usage: this.#sourceCubeTexture.usage,
-                mipLevelCount: getMipLevelCount(this.width, this.height),
-                dimension: '2d'
-            }, true, encoder);
-        });
+        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
+            size: [this.width, this.height, 6],
+            format: 'rgba16float',
+            usage: this.#sourceCubeTexture.usage,
+            mipLevelCount: getMipLevelCount(this.width, this.height),
+            dimension: '2d'
+        }, true, COMMAND_ENCODER_TYPE.PRE_COMPUTE);
         await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture);
     }
 

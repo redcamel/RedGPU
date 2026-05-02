@@ -257,7 +257,7 @@ class PackedTexture {
         this.#updateBindGroup(textures);
         this.#executeRenderPass(packedTexture, commandEncoder);
         if (textureDescriptor.mipLevelCount > 1) {
-            this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor, true, commandEncoder);
+            this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor, true, );
         } else {
             this.#gpuTexture = packedTexture;
         }

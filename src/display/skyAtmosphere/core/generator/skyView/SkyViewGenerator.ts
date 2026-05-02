@@ -30,8 +30,8 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
                 {binding: 1, resource: transmittance.gpuTextureView},
                 {binding: 2, resource: multiScat.gpuTextureView},
-                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-                {binding: 4, resource: this.sampler.gpuSampler}
+                {binding: 3, resource: this.sampler.gpuSampler},
+                {binding: 4, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
             ]);
         }
         this.executeComputePass(this.#pipeline, this.#bindGroup, [16, 16, 1]);

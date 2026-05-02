@@ -106,29 +106,16 @@ class Renderer {
             let i = 0
             const len = redGPUContext.viewList.length
             for (i; i < len; i++) {
-                const {commandEncoderManager} = redGPUContext;
                 const targetView = redGPUContext.viewList[i];
                 const {renderPassDescriptor} = this.renderView(targetView, time);
                 viewList_renderPassDescriptorList.push(renderPassDescriptor);
-                // [KO] 1단계: RESOURCE 제출 (텍스처 업로드, 버퍼 복사 등)
-                // [EN] Phase 1: RESOURCE submission (Texture uploads, buffer copies, etc.)
-                commandEncoderManager.submit(COMMAND_ENCODER_TYPE.RESOURCE);
 
-                // [KO] 2단계: PRE_COMPUTE 제출 (클러스터링, 스킨 연산 등)
-                // [EN] Phase 2: PRE_COMPUTE submission (Clustering, skinning, etc.)
-                commandEncoderManager.submit(COMMAND_ENCODER_TYPE.PRE_COMPUTE);
-
-                // [KO] 3단계: MAIN 제출 (쉐도우 패스, 메인 렌더링)
-                // [EN] Phase 3: MAIN submission (Shadow pass, main rendering)
-                commandEncoderManager.submit(COMMAND_ENCODER_TYPE.MAIN);
-
-                // [KO] 4단계: POST_PROCESS 제출 (후처리 효과)
-                // [EN] Phase 4: POST_PROCESS submission (Post-effect chains)
-                commandEncoderManager.submit(COMMAND_ENCODER_TYPE.POST_PROCESS);
+                const {commandEncoderManager} = redGPUContext;
+                // [KO] 뷰별 1~4단계 일괄 제출 (RESOURCE, PRE_COMPUTE, MAIN, POST_PROCESS)
+                // [EN] Batch submission of phases 1-4 per view
+                commandEncoderManager.submitAll();
             }
         }
-
-
 
         const {commandEncoderManager} = redGPUContext;
         // [KO] 5단계: 최종 렌더링 (화면 출력)
@@ -322,14 +309,14 @@ class Renderer {
                 }
             }
 
-            commandEncoderManager.useMainEncoder(encoder => {
+            commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
                 encoder.copyTextureToTexture(
                     {texture: sourceTexture,},
                     {texture: renderPath1ResultTexture,},
                     {width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1},
                 );
-                mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, encoder)
             });
+            mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, COMMAND_ENCODER_TYPE.MAIN)
 
             commandEncoderManager.addMainPass({
                 label: `${view.name} 2Path Render Pass`,

@@ -11,6 +11,7 @@ import {ASinglePassPostEffectResult} from "../../postEffect/core/ASinglePassPost
 import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
@@ -199,7 +200,7 @@ class TAA {
         }
         this.#execute(width, height);
         {
-            commandEncoderManager.usePostProcessEncoder(encoder => {
+            commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
                 encoder.copyTextureToTexture(
                     {texture: this.#currentFrameTexture},
                     {texture: this.#historyTexture},

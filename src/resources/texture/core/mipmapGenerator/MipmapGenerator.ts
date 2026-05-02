@@ -3,6 +3,7 @@ import GPU_LOAD_OP from "../../../../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../../../../gpuConst/GPU_STORE_OP";
 import Sampler from "../../../sampler/Sampler";
 import shaderSource from "./shader.wgsl";
+import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 class MipmapGenerator {
     readonly #redGPUContext: RedGPUContext
@@ -163,12 +164,17 @@ class MipmapGenerator {
     /**
      * 밉맵 생성 메서드
      */
-    generateMipmap(texture: GPUTexture, textureDescriptor: GPUTextureDescriptor, useCache: boolean = false, commandEncoder?: GPUCommandEncoder) {
+    generateMipmap(
+        texture: GPUTexture,
+        textureDescriptor: GPUTextureDescriptor,
+        useCache: boolean = false,
+        encoderType: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
+    ) {
         // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {
             this.#clearTempCaches();
         }
-        const {gpuDevice, resourceManager} = this.#redGPUContext
+        const {resourceManager, commandEncoderManager} = this.#redGPUContext
         const pipeline: GPURenderPipeline = this.getMipmapPipeline(textureDescriptor.format);
         if (textureDescriptor.dimension == '3d' || textureDescriptor.dimension == '1d') {
             throw new Error('Generating mipmaps for non-2d textures is currently unsupported!');
@@ -192,53 +198,80 @@ class MipmapGenerator {
             };
             mipTexture = resourceManager.createManagedTexture(mipTextureDescriptor);
         }
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
-            label: 'MipmapGenerator_CommandEncoder'
-        });
+
         for (let arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer) {
             let srcView: GPUTextureView = this.createTextureView(texture, 0, arrayLayer, useCache);
             let dstMipLevel = renderToSource ? 1 : 0;
             for (let i = 1; i < textureDescriptor.mipLevelCount; ++i) {
                 const dstView: GPUTextureView = this.createTextureView(mipTexture, dstMipLevel++, arrayLayer, useCache);
-                const passEncoder: GPURenderPassEncoder = internalEncoder.beginRenderPass({
+                // 현재 srcView에 맞는 바인드 그룹 생성 (textureView가 변경되므로 매번 새로운 바인드 그룹이 필요)
+                const bindGroup: GPUBindGroup = this.createBindGroup(texture, srcView, useCache);
+
+                const passDescriptor: GPURenderPassDescriptor = {
+                    label: `MipmapGenerator_Pass_Level_${i}_Layer_${arrayLayer}`,
                     colorAttachments: [{
                         view: dstView,
                         clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
                         loadOp: GPU_LOAD_OP.CLEAR,
                         storeOp: GPU_STORE_OP.STORE
                     }],
-                });
-                // 현재 srcView에 맞는 바인드 그룹 생성 (textureView가 변경되므로 매번 새로운 바인드 그룹이 필요)
-                const bindGroup: GPUBindGroup = this.createBindGroup(texture, srcView, useCache);
-                passEncoder.setPipeline(pipeline);
-                passEncoder.setBindGroup(0, bindGroup);
-                passEncoder.draw(3, 1, 0, 0);
-                passEncoder.end();
+                }
+                
+                if (encoderType === COMMAND_ENCODER_TYPE.RESOURCE) {
+                    commandEncoderManager.addResourcePass(passDescriptor, (passEncoder) => {
+                        passEncoder.setPipeline(pipeline);
+                        passEncoder.setBindGroup(0, bindGroup);
+                        passEncoder.draw(3, 1, 0, 0);
+                    });
+                } else if (encoderType === COMMAND_ENCODER_TYPE.PRE_COMPUTE) {
+                    commandEncoderManager.addPreComputePass(passDescriptor, (passEncoder) => {
+                        passEncoder.setPipeline(pipeline);
+                        passEncoder.setBindGroup(0, bindGroup);
+                        passEncoder.draw(3, 1, 0, 0);
+                    });
+                } else if (encoderType === COMMAND_ENCODER_TYPE.MAIN) {
+                    commandEncoderManager.addMainPass(passDescriptor, (passEncoder) => {
+                        passEncoder.setPipeline(pipeline);
+                        passEncoder.setBindGroup(0, bindGroup);
+                        passEncoder.draw(3, 1, 0, 0);
+                    });
+                } else if (encoderType === COMMAND_ENCODER_TYPE.POST_PROCESS) {
+                    commandEncoderManager.addPostProcessPass(passDescriptor, (passEncoder) => {
+                        passEncoder.setPipeline(pipeline);
+                        passEncoder.setBindGroup(0, bindGroup);
+                        passEncoder.draw(3, 1, 0, 0);
+                    });
+                }
+                
                 srcView = dstView;
             }
         }
         if (!renderToSource) {
-            const mipLevelSize = {
-                width: Math.max(1, W >>> 1),
-                height: Math.max(1, H >>> 1),
-                depthOrArrayLayers: arrayLayerCount,
-            };
-            for (let i = 1; i < textureDescriptor.mipLevelCount; ++i) {
-                internalEncoder.copyTextureToTexture({
-                    texture: mipTexture,
-                    mipLevel: i - 1,
-                }, {
-                    texture: texture,
-                    mipLevel: i,
-                }, mipLevelSize);
-                mipLevelSize.width = Math.max(1, mipLevelSize.width >>> 1);
-                mipLevelSize.height = Math.max(1, mipLevelSize.height >>> 1);
-            }
+            commandEncoderManager.useEncoder(encoderType, encoder => {
+                const mipLevelSize = {
+                    width: Math.max(1, W >>> 1),
+                    height: Math.max(1, H >>> 1),
+                    depthOrArrayLayers: arrayLayerCount,
+                };
+                for (let i = 1; i < textureDescriptor.mipLevelCount; ++i) {
+                    encoder.copyTextureToTexture({
+                        texture: mipTexture,
+                        mipLevel: i - 1,
+                    }, {
+                        texture: texture,
+                        mipLevel: i,
+                    }, mipLevelSize);
+                    mipLevelSize.width = Math.max(1, mipLevelSize.width >>> 1);
+                    mipLevelSize.height = Math.max(1, mipLevelSize.height >>> 1);
+                }
+            });
         }
-        if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
-        if (!renderToSource) {
-            mipTexture.destroy();
-        }
+
+        // TODO mipTexture.destroy() 호출 시점 문제 (비동기 서밋 이후에 해야 함)
+        // if (!renderToSource) {
+        //     mipTexture.destroy();
+        // }
+        
         // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {
             this.#clearTempCaches();

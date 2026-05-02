@@ -29,8 +29,8 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
             this.#bindGroup = this.createBindGroup('SkyAtmosphere_MultiScattering_BindGroup', this.#pipeline, [
                 {binding: 0, resource: this.#lutTexture.gpuTextureView},
                 {binding: 1, resource: transmittance.gpuTextureView},
-                {binding: 2, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
-                {binding: 3, resource: this.sampler.gpuSampler}
+                {binding: 2, resource: this.sampler.gpuSampler},
+                {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
             ]);
         }
         this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);

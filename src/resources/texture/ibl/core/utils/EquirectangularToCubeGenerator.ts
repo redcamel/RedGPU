@@ -139,7 +139,7 @@ class EquirectangularToCubeGenerator {
         }
 
         // 밉맵 생성 (컴퓨트 쉐이더로 첫 레벨 작성 후 밉맵 생성)
-        resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc, true, commandEncoder);
+        resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc, true, );
 
         if (!commandEncoder) {
             await gpuDevice.queue.onSubmittedWorkDone();
