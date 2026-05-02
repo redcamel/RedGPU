@@ -54,13 +54,12 @@ class EquirectangularToCubeGenerator {
      * @param size -
      * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
      * [EN] Size of one side of the generated cubemap (default: 512)
-     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      * @returns
      * [KO] 생성된 DirectCubeTexture
      * [EN] Generated DirectCubeTexture
      */
-    async generate(sourceTexture: GPUTexture, size: number = 512, commandEncoder?: GPUCommandEncoder): Promise<DirectCubeTexture> {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+    async generate(sourceTexture: GPUTexture, size: number = 512): Promise<DirectCubeTexture> {
+        const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
 
@@ -95,7 +94,6 @@ class EquirectangularToCubeGenerator {
         }
 
         // 3. 6개 면 연산
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: 'EquirectangularToCube_Generator_Command_Encoder'});
         const faceMatrices = this.#getCubeMapFaceMatrices();
 
         if (!this.#uniformBuffer) {
@@ -126,24 +124,16 @@ class EquirectangularToCubeGenerator {
             ]
         });
 
-        const computePass = internalEncoder.beginComputePass({
+        commandEncoderManager.addResourceComputePass({
             label: 'EquirectangularToCube_Generator_Compute_Pass'
+        }, (computePass) => {
+            computePass.setPipeline(this.#pipeline);
+            computePass.setBindGroup(0, bindGroup);
+            computePass.dispatchWorkgroups(Math.ceil(size / 8), Math.ceil(size / 8), 6);
         });
-        computePass.setPipeline(this.#pipeline);
-        computePass.setBindGroup(0, bindGroup);
-        computePass.dispatchWorkgroups(Math.ceil(size / 8), Math.ceil(size / 8), 6);
-        computePass.end();
-
-        if (!commandEncoder) {
-            gpuDevice.queue.submit([internalEncoder.finish()]);
-        }
 
         // 밉맵 생성 (컴퓨트 쉐이더로 첫 레벨 작성 후 밉맵 생성)
-        resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc, true, );
-
-        if (!commandEncoder) {
-            await gpuDevice.queue.onSubmittedWorkDone();
-        }
+        resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc, true);
 
         return new DirectCubeTexture(this.#redGPUContext, `CubeMap_From_Equirect_${createUUID()}`, cubeGPUTexture);
     }

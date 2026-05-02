@@ -153,7 +153,9 @@ class PrefilterGenerator {
                 ]
             });
 
-            commandEncoderManager.addPreProcessComputePass(`Prefilter_mip_${mip}_compute_pass`, (computePass) => {
+            commandEncoderManager.addResourceComputePass({
+                label: `Prefilter_mip_${mip}_compute_pass`
+            }, (computePass) => {
                 computePass.setPipeline(this.#pipeline);
                 computePass.setBindGroup(0, bindGroup);
                 computePass.dispatchWorkgroups(Math.ceil(mipSize / 8), Math.ceil(mipSize / 8), 6);

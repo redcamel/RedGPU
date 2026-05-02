@@ -87,17 +87,15 @@ class DownSampleCubeMapGenerator {
      * @param sourceCubemap - [KO] 소스 큐브맵 텍스처 [EN] Source cubemap texture
      * @param targetSize - [KO] 타겟 크기 [EN] Target size
      * @param format - [KO] 텍스처 포맷 [EN] Texture format
-     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      * @returns [KO] 다운샘플링된 큐브맵 [EN] Downsampled cubemap
      */
     async downsampleCubemap(
         sourceCubemap: GPUTexture,
         targetSize: number = 256,
-        format: GPUTextureFormat = 'rgba16float',
-        commandEncoder?: GPUCommandEncoder
+        format: GPUTextureFormat = 'rgba16float'
     ): Promise<GPUTexture> {
         try {
-            if (!commandEncoder) this.#clearTempCaches();
+            this.#clearTempCaches();
             this.#initCubemapDownsampler();
             const {resourceManager} = this.#redGPUContext;
             if (!sourceCubemap) throw new Error('Invalid source cubemap texture');
@@ -118,10 +116,10 @@ class DownSampleCubeMapGenerator {
             for (let mipLevel = 0; mipLevel < targetMipLevels; mipLevel++) {
                 const currentTargetSize = Math.max(1, targetSize >> mipLevel);
                 const sourceMipLevel = this.#calculateSourceMipLevel(sourceCubemap.width, targetSize, mipLevel, sourceMipLevels);
-                await this.#downsampleCubemapMipLevel(sourceCubemap, targetCubemap, sourceMipLevel, mipLevel, currentTargetSize, format, commandEncoder);
+                this.#downsampleCubemapMipLevel(sourceCubemap, targetCubemap, sourceMipLevel, mipLevel, currentTargetSize, format);
             }
 
-            if (!commandEncoder) this.#clearTempCaches();
+            this.#clearTempCaches();
             return targetCubemap;
         } catch (error) {
             console.error('큐브맵 다운샘플링 실패:', error);
@@ -137,16 +135,15 @@ class DownSampleCubeMapGenerator {
         return Math.min(sourceMipLevel, sourceMipLevels - 1);
     }
 
-    async #downsampleCubemapMipLevel(
+    #downsampleCubemapMipLevel(
         sourceCubemap: GPUTexture,
         targetCubemap: GPUTexture,
         sourceMipLevel: number,
         targetMipLevel: number,
         targetSize: number,
-        format: GPUTextureFormat,
-        commandEncoder?: GPUCommandEncoder
-    ): Promise<void> {
-        const {gpuDevice} = this.#redGPUContext;
+        format: GPUTextureFormat
+    ): void {
+        const {gpuDevice, commandEncoderManager} = this.#redGPUContext;
         const computePipeline = this.#getCubemapComputePipeline(format);
         const bindGroupLayout = this.#cubemapBindGroupLayouts.get(format)!;
 
@@ -165,18 +162,14 @@ class DownSampleCubeMapGenerator {
 
         this.#updateCubemapUniforms(uniformBuffer, sourceMipLevel, targetMipLevel, targetSize);
 
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({label: `DOWN_SAMPLE_CUBE_GENERATOR_MIP${targetMipLevel}`});
-        const passEncoder = internalEncoder.beginComputePass({label: `DOWN_SAMPLE_CUBE_GENERATOR_PASS_MIP${targetMipLevel}`});
-        passEncoder.setPipeline(computePipeline);
-        passEncoder.setBindGroup(0, bindGroup);
-        const dispatchSize = Math.ceil(targetSize / 8);
-        passEncoder.dispatchWorkgroups(dispatchSize, dispatchSize, 6);
-        passEncoder.end();
-
-        if (!commandEncoder) {
-            gpuDevice.queue.submit([internalEncoder.finish()]);
-            await gpuDevice.queue.onSubmittedWorkDone();
-        }
+        commandEncoderManager.addResourceComputePass({
+            label: `DOWN_SAMPLE_CUBE_GENERATOR_PASS_MIP${targetMipLevel}`
+        }, (passEncoder) => {
+            passEncoder.setPipeline(computePipeline);
+            passEncoder.setBindGroup(0, bindGroup);
+            const dispatchSize = Math.ceil(targetSize / 8);
+            passEncoder.dispatchWorkgroups(dispatchSize, dispatchSize, 6);
+        });
     }
 
     #updateCubemapUniforms(uniformBuffer: GPUBuffer, sourceMipLevel: number, targetMipLevel: number, targetSize: number) {

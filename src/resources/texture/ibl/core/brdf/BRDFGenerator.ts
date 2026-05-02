@@ -47,10 +47,9 @@ class BRDFGenerator {
     /**
      * [KO] BRDF LUT를 생성합니다.
      * [EN] Generates the BRDF LUT.
-     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
-    async #generateBRDFLUT(commandEncoder?: GPUCommandEncoder) {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+    #generateBRDFLUT() {
+        const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
         const size = 128;
         const format: GPUTextureFormat = 'rg16float';
 
@@ -88,30 +87,23 @@ class BRDFGenerator {
             });
         }
 
-        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
-            label: 'BRDF_GENERATOR_COMMAND_ENCODER'
-        });
-
-        const passEncoder = internalEncoder.beginRenderPass({
-            label: 'BRDF_GENERATOR_RENDER_PASS',
-            colorAttachments: [
-                {
-                    view: this.#brdfLUTTexture.createView(),
-                    loadOp: 'clear',
-                    clearValue: {r: 0, g: 0, b: 0, a: 1},
-                    storeOp: 'store'
-                }
-            ]
-        });
-
-        passEncoder.setPipeline(this.#pipeline);
-        passEncoder.draw(3);
-        passEncoder.end();
-
-        if (!commandEncoder) {
-            gpuDevice.queue.submit([internalEncoder.finish()]);
-            await gpuDevice.queue.onSubmittedWorkDone();
-        }
+        commandEncoderManager.addResourceRenderPass(
+            {
+                label: 'BRDF_GENERATOR_RENDER_PASS',
+                colorAttachments: [
+                    {
+                        view: this.#brdfLUTTexture.createView(),
+                        loadOp: 'clear',
+                        clearValue: {r: 0, g: 0, b: 0, a: 1},
+                        storeOp: 'store'
+                    }
+                ]
+            },
+            (passEncoder) => {
+                passEncoder.setPipeline(this.#pipeline);
+                passEncoder.draw(3);
+            }
+        );
     }
 }
 
