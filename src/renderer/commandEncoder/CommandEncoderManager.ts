@@ -131,15 +131,15 @@ class CommandEncoderManager {
      * [KO] 즉시 실행 Render 패스를 사용합니다. 호출 즉시 패스가 종료되고 서밋됩니다.
      * [EN] Uses an immediate Render pass. The pass is finished and submitted immediately upon call.
      */
-    immediateRenderPass(
+    async immediateRenderPass(
         descriptor: GPURenderPassDescriptor,
         executor: (pass: GPURenderPassEncoder) => void,
         afterExecutor?: (encoder: GPUCommandEncoder) => void
-    ): void {
+    ): Promise<void> {
         const label = descriptor.label || 'RedGPU_Immediate_Render_Encoder';
-        this.#submitImmediate(label, (encoder) => {
+        await this.#submitImmediate(label, (encoder) => {
             const pass = encoder.beginRenderPass(descriptor);
-            executor(pass);
+            executor(pass)
             pass.end();
             if (afterExecutor) afterExecutor(encoder);
         }, 'Immediate Submitted Render Pass');
@@ -149,14 +149,14 @@ class CommandEncoderManager {
      * [KO] 즉시 실행 Compute 패스를 사용합니다. 호출 즉시 패스가 종료되고 서밋됩니다.
      * [EN] Uses an immediate Compute pass. The pass is finished and submitted immediately upon call.
      */
-    immediateComputePass(
+    async immediateComputePass(
         labelOrDescriptor: ComputePassDescriptorInput,
         executor: (pass: GPUComputePassEncoder) => void,
         afterExecutor?: (encoder: GPUCommandEncoder) => void
-    ): void {
+    ): Promise<void> {
         const descriptor = this.#checkDescriptor(labelOrDescriptor);
         const label = descriptor.label || 'RedGPU_Immediate_Compute_Encoder';
-        this.#submitImmediate(label, (encoder) => {
+        await this.#submitImmediate(label, (encoder) => {
             const pass = encoder.beginComputePass(descriptor);
             executor(pass);
             pass.end();
@@ -164,11 +164,12 @@ class CommandEncoderManager {
         }, 'Immediate Submitted Compute Pass');
     }
 
-    #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): void {
+    async #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): Promise<void> {
         const encoder = this.#redGPUContext.gpuDevice.createCommandEncoder({label});
         executor(encoder);
         const buffer = encoder.finish();
         this.#redGPUContext.gpuDevice.queue.submit([buffer]);
+        await this.#redGPUContext.gpuDevice.queue.onSubmittedWorkDone();
         keepLog(`🚀 [CommandEncoderManager] ${logTag}`, {label});
     }
 
