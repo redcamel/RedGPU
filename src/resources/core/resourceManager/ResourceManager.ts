@@ -4,7 +4,6 @@ import Sampler from "../../sampler/Sampler";
 import {
     BRDFGenerator,
     EquirectangularToCubeGenerator,
-    IBLLuminanceAnalyzer,
     IrradianceGenerator,
     PrefilterGenerator
 } from "../../texture/ibl/core";
@@ -83,7 +82,6 @@ class ResourceManager {
     readonly #irradianceGenerator: IrradianceGenerator
     readonly #prefilterGenerator: PrefilterGenerator
     readonly #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
-    readonly #iblLuminanceAnalyzer: IBLLuminanceAnalyzer
     #basicSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
@@ -106,7 +104,6 @@ class ResourceManager {
         this.#irradianceGenerator = new IrradianceGenerator(redGPUContext)
         this.#prefilterGenerator = new PrefilterGenerator(redGPUContext)
         this.#equirectangularToCubeGenerator = new EquirectangularToCubeGenerator(redGPUContext)
-        this.#iblLuminanceAnalyzer = new IBLLuminanceAnalyzer(redGPUContext)
         this.#initPresets()
     }
 
@@ -164,14 +161,6 @@ class ResourceManager {
      */
     get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator {
         return this.#equirectangularToCubeGenerator;
-    }
-
-    /**
-     * [KO] IBL 휘도 분석기를 반환합니다.
-     * [EN] Returns the IBL luminance analyzer.
-     */
-    get iblLuminanceAnalyzer(): IBLLuminanceAnalyzer {
-        return this.#iblLuminanceAnalyzer;
     }
 
     /**
@@ -820,7 +809,8 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
         }
         // 새 값의 메모리 추가
         if (value && (value as any)) {
-            this.#videoMemory += (value as any)[videoMemoryKey];
+            const size = (value as any)[videoMemoryKey];
+            if (typeof size === 'number') this.#videoMemory += size;
         }
         const result = super.set(key, value);
         return result;
@@ -833,7 +823,7 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
                 (value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
                     : (value && 'size' in (value as any)) ? 'size'
                         : undefined;
-            if (value && value[videoMemoryKey]) {
+            if (value && typeof value[videoMemoryKey] === 'number') {
                 this.#videoMemory -= value[videoMemoryKey];
             }
         }

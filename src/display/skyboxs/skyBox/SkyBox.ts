@@ -56,8 +56,6 @@ class SkyBox {
     #transitionDuration: number = 0
     #transitionElapsed: number = 0
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
-    #isAnalyzing: boolean = false;
-    #prevAnalyzedTexture: GPUTexture | null = null;
     #luminance: number = 10000.0;
 
     /**
@@ -130,11 +128,6 @@ class SkyBox {
         this.#material.opacity = value;
     }
 
-    /** [KO] 분석된 텍스처의 평균 휘도 (정규화용) [EN] Average luminance of analyzed texture (for normalization) */
-    get averageLuminance(): number {
-        return this.#material.averageLuminance;
-    }
-
     /** [KO] 전환 대상 텍스처 [EN] Transition target texture */
     get transitionTexture(): CubeTexture | DirectCubeTexture {
         return this.#transitionTexture;
@@ -157,17 +150,7 @@ class SkyBox {
         const {currentRenderPassEncoder, startTime, view} = renderViewStateData
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
-        const {gpuDevice, resourceManager} = this.#redGPUContext
-
-        const currentTexture = this.#material.texture0.gpuTexture;
-        if (currentTexture && currentTexture !== this.#prevAnalyzedTexture && !this.#isAnalyzing) {
-            this.#isAnalyzing = true;
-            this.#prevAnalyzedTexture = currentTexture;
-            resourceManager.iblLuminanceAnalyzer.analyze(currentTexture).then(lum => {
-                this.#material.averageLuminance = lum || 1.0;
-                this.#isAnalyzing = false;
-            });
-        }
+        const {gpuDevice} = this.#redGPUContext
 
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)

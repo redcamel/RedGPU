@@ -20,10 +20,8 @@ class IBL {
     #prefilterSize: number;
     #irradianceSize: number;
     #isInitializing: boolean = false;
-    #isAnalyzing: boolean = false;
     #intensityMultiplier: number = 1.0;
     #luminance: number = 20000.0;
-    #averageLuminance: number = 1.0;
 
     /**
      * [KO] IBL 인스턴스를 생성합니다.
@@ -109,15 +107,6 @@ class IBL {
         this.#luminance = value;
     }
 
-    /** [KO] 분석된 텍스처의 평균 휘도 (정규화용) [EN] Average luminance of the source image (for normalization) */
-    get averageLuminance(): number {
-        return this.#averageLuminance;
-    }
-
-    set averageLuminance(value: number) {
-        this.#averageLuminance = value;
-    }
-
     #onSourceChanged = async (v?: HDRTexture | CubeTexture) => {
         v = v || this.#targetTexture;
         if (!v || !v.gpuTexture || this.#isInitializing) return;
@@ -147,13 +136,6 @@ class IBL {
             this.#prefilterTexture.gpuTexture = prefiltered.gpuTexture;
             const irradiance = await irradianceGenerator.generate(this.#sourceCubeTexture, this.#irradianceSize);
             this.#irradianceTexture.gpuTexture = irradiance.gpuTexture;
-
-            if (!this.#isAnalyzing) {
-                this.#isAnalyzing = true;
-                const analyzedLuminance = await resourceManager.iblLuminanceAnalyzer.analyze(this.#sourceCubeTexture);
-                this.#averageLuminance = analyzedLuminance || 1.0;
-                this.#isAnalyzing = false;
-            }
         }
     }
 }

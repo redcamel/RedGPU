@@ -249,7 +249,7 @@ class View3D extends AView {
                 {key: 'directionalLightCount', value: lightManager.directionalLightCount},
                 {
                     key: 'iblIntensity',
-                    value: this.ibl ? (this.ibl.luminance / (this.ibl.averageLuminance || 1.0)) * this.ibl.intensityMultiplier : 1.0
+                    value: this.ibl ? this.ibl.luminance * this.ibl.intensityMultiplier : 1.0
                 },
                 {
                     key: 'directionalLightProjectionViewMatrix',

@@ -57,7 +57,7 @@ fn main(inputData: InputData) -> OutputFragment {
         #redgpu_endIf
     }
 
-    let finalIntensity = systemUniforms.preExposure * (uniforms.intensityMultiplier * uniforms.luminance / uniforms.averageLuminance);
+    let finalIntensity = systemUniforms.preExposure * (uniforms.intensityMultiplier * uniforms.luminance);
     var finalAlpha = sampleColor.a * uniforms.opacity;
 
     if (systemUniforms.useSkyAtmosphere == 1u) {
