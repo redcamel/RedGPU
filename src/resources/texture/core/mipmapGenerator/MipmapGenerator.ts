@@ -169,7 +169,7 @@ class MipmapGenerator {
         textureDescriptor: GPUTextureDescriptor,
         useCache: boolean = false,
         encoderType: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
-    ) {
+    ):GPUTexture {
         // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {
             this.#clearTempCaches();
