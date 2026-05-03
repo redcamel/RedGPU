@@ -1,6 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
-import {keepLog} from "../../utils";
 
 /**
  * [KO] 단계별 통계 상세 정보 인터페이스
@@ -164,13 +163,24 @@ class CommandEncoderManager {
         }, 'Immediate Submitted Compute Pass');
     }
 
+    /**
+     * [KO] 즉시 실행 인코더를 사용합니다. 호출 즉시 서밋되고 완료를 기다립니다.
+     * [EN] Uses an immediate encoder. It is submitted immediately and awaits completion.
+     */
+    async immediateSubmit(
+        label: string,
+        executor: (encoder: GPUCommandEncoder) => void
+    ): Promise<void> {
+        await this.#submitImmediate(label, executor, 'Immediate Submitted Commands');
+    }
+
     async #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): Promise<void> {
         const encoder = this.#redGPUContext.gpuDevice.createCommandEncoder({label});
         executor(encoder);
         const buffer = encoder.finish();
         this.#redGPUContext.gpuDevice.queue.submit([buffer]);
         await this.#redGPUContext.gpuDevice.queue.onSubmittedWorkDone();
-        keepLog(`🚀 [CommandEncoderManager] ${logTag}`, {label});
+        console.log(`🚀 [CommandEncoderManager] ${logTag}`, {label});
     }
 
     /**
@@ -185,7 +195,7 @@ class CommandEncoderManager {
         if (buffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(buffers);
             const logData = this.#createPhaseStats(type, buffers.length);
-            keepLog(`🚀 [CommandEncoderManager] Submitted ${type} Phase`, logData);
+            console.log(`🚀 [CommandEncoderManager] Submitted ${type} Phase`, logData);
             this.#resetStat(type);
             return logData;
         }
@@ -223,7 +233,7 @@ class CommandEncoderManager {
 
         if (allBuffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(allBuffers);
-            keepLog(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} Command Buffer(s)`, batchStats);
+            console.log(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} Command Buffer(s)`, batchStats);
             return batchStats;
         }
         return null;
