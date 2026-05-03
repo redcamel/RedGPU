@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import { COMMAND_ENCODER_TYPE, CommandEncoderType } from "./COMMAND_ENCODER_TYPE";
-import { keepLog } from "../../utils";
+import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
+import {keepLog} from "../../utils";
 
 /**
  * [KO] 단계별 통계 상세 정보 인터페이스
@@ -19,7 +19,6 @@ export interface CommandPhaseStats {
     };
     'Raw Usages': number;
 }
-
 /**
  * [KO] 일괄 제출 통계 정보 인터페이스
  * [EN] Batch submission statistics
@@ -29,14 +28,20 @@ export interface CommandBatchStats {
 }
 
 /**
+ * [KO] Compute 패스 디스크립터 입력을 위한 타입 (레이블 문자열 또는 전체 디스크립터 객체)
+ * [EN] Type for compute pass descriptor input (label string or full descriptor object)
+ */
+export type ComputePassDescriptorInput = string | GPUComputePassDescriptor;
+
+/**
  * [KO] GPU 커맨드 인코더 및 패스의 생명주기를 지능적으로 관리하는 클래스입니다.
  * [EN] Class that intelligently manages the lifecycle of GPU command encoders and passes.
- * 
- * [KO] 기본적으로 단계별로 하나의 인코더를 공유하여 효율을 높이지만, 
+ *
+ * [KO] 기본적으로 단계별로 하나의 인코더를 공유하여 효율을 높이지만,
  *      패스가 열려있는 상태에서 중첩 호출이 발생하면 자동으로 새로운 인코더를 생성하여 안전성을 보장합니다.
- * [EN] Basically increases efficiency by sharing one encoder per phase, 
+ * [EN] Basically increases efficiency by sharing one encoder per phase,
  *      but automatically creates a new encoder when nested calls occur while a pass is open to ensure safety.
- * 
+ *
  * @category Renderer
  */
 class CommandEncoderManager {
@@ -46,7 +51,11 @@ class CommandEncoderManager {
     /** [KO] 타입별 현재 패스 활성화 여부 [EN] Whether a pass is currently active per type */
     readonly #isPassActive: Partial<Record<CommandEncoderType, boolean>> = {};
     /** [KO] 타입별 통계 데이터 [EN] Statistics per type */
-    readonly #stats: Map<CommandEncoderType, { renderPasses: string[], computePasses: string[], rawUsages: number }> = new Map();
+    readonly #stats: Map<CommandEncoderType, {
+        renderPasses: string[],
+        computePasses: string[],
+        rawUsages: number
+    }> = new Map();
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -55,67 +64,67 @@ class CommandEncoderManager {
     /**
      * [KO] RESOURCE 단계의 Render 패스를 추가합니다.
      */
-    addResourceRenderPass(descriptor: GPURenderPassDescriptor, callback: (pass: GPURenderPassEncoder) => void): void {
-        this.#addRenderPass(COMMAND_ENCODER_TYPE.RESOURCE, descriptor, callback);
+    addResourceRenderPass(descriptor: GPURenderPassDescriptor, executor: (pass: GPURenderPassEncoder) => void): void {
+        this.#addRenderPass(COMMAND_ENCODER_TYPE.RESOURCE, descriptor, executor);
     }
 
     /**
      * [KO] RESOURCE 단계의 Compute 패스를 추가합니다.
      */
-    addResourceComputePass(labelOrDescriptor: string | GPUComputePassDescriptor, callback: (pass: GPUComputePassEncoder) => void): void {
-        this.#addComputePass(COMMAND_ENCODER_TYPE.RESOURCE, labelOrDescriptor, callback);
+    addResourceComputePass(labelOrDescriptor: ComputePassDescriptorInput, executor: (pass: GPUComputePassEncoder) => void): void {
+        this.#addComputePass(COMMAND_ENCODER_TYPE.RESOURCE, labelOrDescriptor, executor);
     }
 
     /**
      * [KO] PRE_PROCESS 단계의 Render 패스를 추가합니다.
      */
-    addPreProcessRenderPass(descriptor: GPURenderPassDescriptor, callback: (pass: GPURenderPassEncoder) => void): void {
-        this.#addRenderPass(COMMAND_ENCODER_TYPE.PRE_PROCESS, descriptor, callback);
+    addPreProcessRenderPass(descriptor: GPURenderPassDescriptor, executor: (pass: GPURenderPassEncoder) => void): void {
+        this.#addRenderPass(COMMAND_ENCODER_TYPE.PRE_PROCESS, descriptor, executor);
     }
 
     /**
      * [KO] PRE_PROCESS 단계의 Compute 패스를 추가합니다.
      */
-    addPreProcessComputePass(labelOrDescriptor: string | GPUComputePassDescriptor, callback: (pass: GPUComputePassEncoder) => void): void {
-        this.#addComputePass(COMMAND_ENCODER_TYPE.PRE_PROCESS, labelOrDescriptor, callback);
+    addPreProcessComputePass(labelOrDescriptor: ComputePassDescriptorInput, executor: (pass: GPUComputePassEncoder) => void): void {
+        this.#addComputePass(COMMAND_ENCODER_TYPE.PRE_PROCESS, labelOrDescriptor, executor);
     }
 
     /**
      * [KO] MAIN 단계의 Render 패스를 추가합니다.
      */
-    addMainRenderPass(descriptor: GPURenderPassDescriptor, callback: (pass: GPURenderPassEncoder) => void): void {
-        this.#addRenderPass(COMMAND_ENCODER_TYPE.MAIN, descriptor, callback);
+    addMainRenderPass(descriptor: GPURenderPassDescriptor, executor: (pass: GPURenderPassEncoder) => void): void {
+        this.#addRenderPass(COMMAND_ENCODER_TYPE.MAIN, descriptor, executor);
     }
 
     /**
      * [KO] MAIN 단계의 Compute 패스를 추가합니다.
      */
-    addMainComputePass(labelOrDescriptor: string | GPUComputePassDescriptor, callback: (pass: GPUComputePassEncoder) => void): void {
-        this.#addComputePass(COMMAND_ENCODER_TYPE.MAIN, labelOrDescriptor, callback);
+    addMainComputePass(labelOrDescriptor: ComputePassDescriptorInput, executor: (pass: GPUComputePassEncoder) => void): void {
+        this.#addComputePass(COMMAND_ENCODER_TYPE.MAIN, labelOrDescriptor, executor);
     }
 
     /**
      * [KO] POST_PROCESS 단계의 Render 패스를 추가합니다.
      */
-    addPostProcessRenderPass(descriptor: GPURenderPassDescriptor, callback: (pass: GPURenderPassEncoder) => void): void {
-        this.#addRenderPass(COMMAND_ENCODER_TYPE.POST_PROCESS, descriptor, callback);
+    addPostProcessRenderPass(descriptor: GPURenderPassDescriptor, executor: (pass: GPURenderPassEncoder) => void): void {
+        this.#addRenderPass(COMMAND_ENCODER_TYPE.POST_PROCESS, descriptor, executor);
     }
 
     /**
      * [KO] POST_PROCESS 단계의 Compute 패스를 추가합니다.
      */
-    addPostProcessComputePass(labelOrDescriptor: string | GPUComputePassDescriptor, callback: (pass: GPUComputePassEncoder) => void): void {
-        this.#addComputePass(COMMAND_ENCODER_TYPE.POST_PROCESS, labelOrDescriptor, callback);
+    addPostProcessComputePass(labelOrDescriptor: ComputePassDescriptorInput, executor: (pass: GPUComputePassEncoder) => void): void {
+        this.#addComputePass(COMMAND_ENCODER_TYPE.POST_PROCESS, labelOrDescriptor, executor);
     }
 
     /**
      * [KO] 특정 타입의 인코더를 직접 사용합니다 (복사 명령 등).
      * [EN] Directly uses an encoder of a specific type (e.g., for copy commands).
      */
-    useEncoder(type: CommandEncoderType, callback: (encoder: GPUCommandEncoder) => void): void {
+    useEncoder(type: CommandEncoderType, executor: (encoder: GPUCommandEncoder) => void): void {
         const encoder = this.#getEncoder(type);
         this.#incrementStat(type, 'rawUsages');
-        callback(encoder);
+        executor(encoder);
     }
 
     /**
@@ -126,23 +135,10 @@ class CommandEncoderManager {
         if (this.#isPassActive[type]) {
             throw new Error(`[RedGPU] Cannot submit ${type} phase while a pass is still active.`);
         }
-        const stat = this.#stats.get(type) || {renderPasses: [], computePasses: [], rawUsages: 0};
         const buffers = this.#finish(type);
         if (buffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(buffers);
-            const logData: CommandPhaseStats = {
-                'Phase': type,
-                'Command Buffers': buffers.length,
-                'Render Passes': {
-                    count: stat.renderPasses.length,
-                    list: stat.renderPasses
-                },
-                'Compute Passes': {
-                    count: stat.computePasses.length,
-                    list: stat.computePasses
-                },
-                'Raw Usages': stat.rawUsages
-            };
+            const logData = this.#createPhaseStats(type, buffers.length);
             keepLog(`🚀 [CommandEncoderManager] Submitted ${type} Phase`, logData);
             this.#resetStat(type);
             return logData;
@@ -171,22 +167,10 @@ class CommandEncoderManager {
             if (this.#isPassActive[type]) {
                 throw new Error(`[RedGPU] Cannot submit ${type} phase while a pass is still active.`);
             }
-            const stat = this.#stats.get(type) || {renderPasses: [], computePasses: [], rawUsages: 0};
             const buffers = this.#finish(type);
             if (buffers.length > 0) {
                 allBuffers.push(...buffers);
-                batchStats[type] = {
-                    'Command Buffers': buffers.length,
-                    'Render Passes': {
-                        count: stat.renderPasses.length,
-                        list: stat.renderPasses
-                    },
-                    'Compute Passes': {
-                        count: stat.computePasses.length,
-                        list: stat.computePasses
-                    },
-                    'Raw Usages': stat.rawUsages
-                };
+                batchStats[type] = this.#createPhaseStats(type, buffers.length);
                 this.#resetStat(type);
             }
         });
@@ -220,7 +204,7 @@ class CommandEncoderManager {
         }
 
         const list = this.#encoderMap.get(type)!;
-        
+
         // [KO] 리스트가 비어있거나, 마지막 인코더가 이미 패스를 기록 중이면 새 인코더 생성
         // [EN] Create a new encoder if the list is empty or the last encoder is already recording a pass
         if (list.length === 0 || this.#isPassActive[type]) {
@@ -240,14 +224,14 @@ class CommandEncoderManager {
     #addRenderPass(
         type: CommandEncoderType,
         descriptor: GPURenderPassDescriptor,
-        callback: (pass: GPURenderPassEncoder) => void
+        executor: (pass: GPURenderPassEncoder) => void
     ): void {
         const encoder = this.#getEncoder(type);
         this.#incrementStat(type, 'renderPasses', descriptor.label);
         this.#isPassActive[type] = true;
         try {
             const pass = encoder.beginRenderPass(descriptor);
-            callback(pass);
+            executor(pass);
             pass.end();
         } finally {
             this.#isPassActive[type] = false;
@@ -259,22 +243,41 @@ class CommandEncoderManager {
      */
     #addComputePass(
         type: CommandEncoderType,
-        labelOrDescriptor: string | GPUComputePassDescriptor,
-        callback: (pass: GPUComputePassEncoder) => void
+        labelOrDescriptor: ComputePassDescriptorInput,
+        executor: (pass: GPUComputePassEncoder) => void
     ): void {
         const encoder = this.#getEncoder(type);
-        const label = typeof labelOrDescriptor === 'string' ? labelOrDescriptor : labelOrDescriptor.label;
-        this.#incrementStat(type, 'computePasses', label);
+        const descriptor = this.#checkDescriptor(labelOrDescriptor);
+        this.#incrementStat(type, 'computePasses', descriptor.label);
         this.#isPassActive[type] = true;
         try {
-            const pass = typeof labelOrDescriptor === 'string'
-                ? encoder.beginComputePass({ label: labelOrDescriptor })
-                : encoder.beginComputePass(labelOrDescriptor);
-            callback(pass);
+            const pass = encoder.beginComputePass(descriptor)
+            executor(pass);
             pass.end();
         } finally {
             this.#isPassActive[type] = false;
         }
+    }
+
+    #checkDescriptor = (labelOrDescriptor: ComputePassDescriptorInput): GPUComputePassDescriptor => {
+        return typeof labelOrDescriptor === 'string' ? {label: labelOrDescriptor} : labelOrDescriptor
+    }
+
+    #createPhaseStats(type: CommandEncoderType, buffersLength: number): CommandPhaseStats {
+        const stat = this.#stats.get(type) || {renderPasses: [], computePasses: [], rawUsages: 0};
+        return {
+            'Phase': type,
+            'Command Buffers': buffersLength,
+            'Render Passes': {
+                count: stat.renderPasses.length,
+                list: stat.renderPasses
+            },
+            'Compute Passes': {
+                count: stat.computePasses.length,
+                list: stat.computePasses
+            },
+            'Raw Usages': stat.rawUsages
+        };
     }
 
     #incrementStat(type: CommandEncoderType, key: 'renderPasses' | 'computePasses' | 'rawUsages', label?: string) {
@@ -300,7 +303,7 @@ class CommandEncoderManager {
         const list = this.#encoderMap.get(type);
         if (list && list.length > 0) {
             const buffers = list.map(encoder => encoder.finish());
-            this.#encoderMap.set(type, []); 
+            this.#encoderMap.set(type, []);
             delete this.#isPassActive[type];
             return buffers;
         }
