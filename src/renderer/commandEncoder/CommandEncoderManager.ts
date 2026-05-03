@@ -128,6 +128,51 @@ class CommandEncoderManager {
     }
 
     /**
+     * [KO] 즉시 실행 Render 패스를 사용합니다. 호출 즉시 패스가 종료되고 서밋됩니다.
+     * [EN] Uses an immediate Render pass. The pass is finished and submitted immediately upon call.
+     */
+    immediateRenderPass(
+        descriptor: GPURenderPassDescriptor,
+        executor: (pass: GPURenderPassEncoder) => void,
+        afterExecutor?: (encoder: GPUCommandEncoder) => void
+    ): void {
+        const label = descriptor.label || 'RedGPU_Immediate_Render_Encoder';
+        this.#submitImmediate(label, (encoder) => {
+            const pass = encoder.beginRenderPass(descriptor);
+            executor(pass);
+            pass.end();
+            if (afterExecutor) afterExecutor(encoder);
+        }, 'Immediate Submitted Render Pass');
+    }
+
+    /**
+     * [KO] 즉시 실행 Compute 패스를 사용합니다. 호출 즉시 패스가 종료되고 서밋됩니다.
+     * [EN] Uses an immediate Compute pass. The pass is finished and submitted immediately upon call.
+     */
+    immediateComputePass(
+        labelOrDescriptor: ComputePassDescriptorInput,
+        executor: (pass: GPUComputePassEncoder) => void,
+        afterExecutor?: (encoder: GPUCommandEncoder) => void
+    ): void {
+        const descriptor = this.#checkDescriptor(labelOrDescriptor);
+        const label = descriptor.label || 'RedGPU_Immediate_Compute_Encoder';
+        this.#submitImmediate(label, (encoder) => {
+            const pass = encoder.beginComputePass(descriptor);
+            executor(pass);
+            pass.end();
+            if (afterExecutor) afterExecutor(encoder);
+        }, 'Immediate Submitted Compute Pass');
+    }
+
+    #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): void {
+        const encoder = this.#redGPUContext.gpuDevice.createCommandEncoder({label});
+        executor(encoder);
+        const buffer = encoder.finish();
+        this.#redGPUContext.gpuDevice.queue.submit([buffer]);
+        keepLog(`🚀 [CommandEncoderManager] ${logTag}`, {label});
+    }
+
+    /**
      * [KO] 특정 타입의 모든 인코더를 종료하고 즉시 서밋합니다.
      * [EN] Finishes all encoders for the specific type and submits them immediately.
      */

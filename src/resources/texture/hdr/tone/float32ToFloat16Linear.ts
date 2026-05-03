@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import {keepLog} from "../../../../utils";
 
 /**
  * [KO] Float16 변환 옵션 인터페이스입니다.
@@ -82,7 +83,6 @@ export async function float32ToFloat16Linear(
     redGPUContext: RedGPUContext,
     float32Data: Float32Array,
     options: Float16ConversionOptions,
-    commandEncoder?: GPUCommandEncoder
 ): Promise<Float16ConversionResult> {
     const startTime = performance.now();
     const {gpuDevice} = redGPUContext;
@@ -110,7 +110,7 @@ export async function float32ToFloat16Linear(
         );
 
         const result = await executeCompute(
-            gpuDevice,
+            redGPUContext,
             computePipeline,
             bindGroup,
             buffers.outputBuffer,
@@ -119,7 +119,6 @@ export async function float32ToFloat16Linear(
             height,
             workgroupSize,
             pixelCount,
-            commandEncoder
         );
 
         cleanupBuffers(buffers);
@@ -280,7 +279,7 @@ function createPipelineAndBindGroup(
 }
 
 async function executeCompute(
-    gpuDevice: GPUDevice,
+    redGPUContext: RedGPUContext,
     computePipeline: GPUComputePipeline,
     bindGroup: GPUBindGroup,
     outputBuffer: GPUBuffer,
@@ -289,30 +288,26 @@ async function executeCompute(
     height: number,
     workgroupSize: [number, number],
     pixelCount: number,
-    commandEncoder?: GPUCommandEncoder
 ): Promise<Uint16Array> {
     const workgroupsX = Math.ceil(width / workgroupSize[0]);
     const workgroupsY = Math.ceil(height / workgroupSize[1]);
-
     if (workgroupsX > 65535 || workgroupsY > 65535) {
         throw new Error(`이미지 크기 초과: ${workgroupsX} × ${workgroupsY}`);
     }
 
-    const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
-        label: 'float16_conversion_command_encoder'
-    });
-    const computePass = internalEncoder.beginComputePass();
+    redGPUContext.commandEncoderManager.immediateComputePass(
+        'float16_conversion_command_encoder',
+        (computePass: GPUComputePassEncoder) => {
+            computePass.setPipeline(computePipeline);
+            computePass.setBindGroup(0, bindGroup);
+            computePass.dispatchWorkgroups(workgroupsX, workgroupsY);
+        },
+        (commandEncoder: GPUCommandEncoder) => {
+            keepLog('어냐', commandEncoder)
+            commandEncoder.copyBufferToBuffer(outputBuffer, 0, readBuffer, 0, pixelCount * 8);
+        }
+    );
 
-    computePass.setPipeline(computePipeline);
-    computePass.setBindGroup(0, bindGroup);
-    computePass.dispatchWorkgroups(workgroupsX, workgroupsY);
-    computePass.end();
-
-    internalEncoder.copyBufferToBuffer(outputBuffer, 0, readBuffer, 0, pixelCount * 8);
-
-    if (!commandEncoder) {
-        gpuDevice.queue.submit([internalEncoder.finish()]);
-    }
 
     await readBuffer.mapAsync(GPUMapMode.READ);
     const packedData = new Uint32Array(readBuffer.getMappedRange());
