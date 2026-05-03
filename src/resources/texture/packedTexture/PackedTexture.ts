@@ -98,15 +98,13 @@ class PackedTexture {
      * @param componentMapping -
      * [KO] 컴포넌트 매핑 정보 (선택)
      * [EN] Component mapping info (optional)
-     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
-    async packing(
+    packing(
         textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
         width: number,
         height: number,
         label?: string,
-        componentMapping?: ComponentMapping,
-        commandEncoder?: GPUCommandEncoder
+        componentMapping?: ComponentMapping
     ) {
         const mapping = {
             r: 'r',
@@ -125,7 +123,7 @@ class PackedTexture {
         if (currEntry) {
             return;
         }
-        await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey, commandEncoder);
+        this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
     }
 
     /** [KO] 인스턴스를 파괴하고 캐시를 관리합니다. [EN] Destroys the instance and manages the cache. */
@@ -227,14 +225,13 @@ class PackedTexture {
     }
 
     /** [KO] 패킹 텍스처를 실제로 생성합니다. [EN] Actually creates the packed texture. */
-    async #createPackedTexture(
+    #createPackedTexture(
         textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
         width: number,
         height: number,
         label: string | undefined,
         mapping: any,
-        mappingKey: string,
-        commandEncoder?: GPUCommandEncoder
+        mappingKey: string
     ) {
         const textureDescriptor: GPUTextureDescriptor = {
             size: [width, height, 1],
@@ -255,9 +252,9 @@ class PackedTexture {
         ]);
         this.#gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
         this.#updateBindGroup(textures);
-        this.#executeRenderPass(packedTexture, commandEncoder);
+        this.#executeRenderPass(packedTexture);
         if (textureDescriptor.mipLevelCount > 1) {
-            this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor, true, );
+            this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor, true,);
         } else {
             this.#gpuTexture = packedTexture;
         }
@@ -271,12 +268,10 @@ class PackedTexture {
     }
 
     /** [KO] 렌더 패스를 실행하여 패킹을 수행합니다. [EN] Executes the render pass to perform packing. */
-    #executeRenderPass(packedTexture: GPUTexture, commandEncoder?: GPUCommandEncoder) {
-        const {resourceManager} = this.#redGPUContext;
-        const internalEncoder = commandEncoder || this.#gpuDevice.createCommandEncoder({
-            label: 'PackedTexture_CommandEncoder'
-        });
-        const passEncoder = internalEncoder.beginRenderPass({
+    #executeRenderPass(packedTexture: GPUTexture) {
+        const {resourceManager, commandEncoderManager} = this.#redGPUContext;
+        commandEncoderManager.addResourceRenderPass({
+            label: 'PackedTexture_RenderPass',
             colorAttachments: [
                 {
                     view: resourceManager.getGPUResourceBitmapTextureView(packedTexture, {
@@ -290,12 +285,11 @@ class PackedTexture {
                     clearValue: [0, 0, 0, 0],
                 },
             ],
+        }, (passEncoder) => {
+            passEncoder.setPipeline(globalPipeline);
+            passEncoder.setBindGroup(0, this.#bindGroup);
+            passEncoder.draw(6, 1, 0, 0);
         });
-        passEncoder.setPipeline(globalPipeline);
-        passEncoder.setBindGroup(0, this.#bindGroup);
-        passEncoder.draw(6, 1, 0, 0);
-        passEncoder.end();
-        if (!commandEncoder) this.#gpuDevice.queue.submit([internalEncoder.finish()]);
     }
 
     /** [KO] 패킹용 파이프라인을 생성합니다. [EN] Creates a pipeline for packing. */
