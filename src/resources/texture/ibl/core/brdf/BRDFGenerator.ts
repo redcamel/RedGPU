@@ -48,7 +48,7 @@ class BRDFGenerator {
      * [KO] BRDF LUT를 생성합니다.
      * [EN] Generates the BRDF LUT.
      */
-    async #generateBRDFLUT() {
+    #generateBRDFLUT() {
         const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
         const size = 128;
         const format: GPUTextureFormat = 'rg16float';
@@ -87,7 +87,7 @@ class BRDFGenerator {
             });
         }
 
-        await commandEncoderManager.immediateRenderPass(
+        commandEncoderManager.addResourceRenderPass(
             {
                 label: 'BRDF_GENERATOR_RENDER_PASS',
                 colorAttachments: [
