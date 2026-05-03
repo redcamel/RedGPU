@@ -101,14 +101,9 @@ const createSkyBoxHelper = (pane, view, RedGPU) => {
 
     // 물리 휘도 설정 (직접 바인딩)
     settingsFolder.addBinding({
-        get luminance() { return view.skybox ? view.skybox.luminance : 20000; },
-        set luminance(v) { if (view.skybox) view.skybox.luminance = v; }
-    }, 'luminance', { min: 0, max: 100000, step: 10, interval: 500 });
-
-    // 분석 결과 (직접 바인딩)
-    settingsFolder.addBinding({
-        get averageLuminance() { return view.skybox ? view.skybox.averageLuminance : 0; }
-    }, 'averageLuminance', { readonly: true, interval: 500 });
+        get luminance() { return view.skybox ? view.skybox.luminance : 0; },
+        set luminance(v) { if (view.skybox) view.skybox.luminance = v; },
+    }, 'luminance', { min: 0, max: 100000, step: 100 });
 
     // 5. 초기화 실행
     if (settings.useSkyBox) updateSkyBox(settings.skyboxImage);

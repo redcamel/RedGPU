@@ -207,11 +207,11 @@ const setToneMappingSelect = (RedGPU, redGPUContext, rightContainer) => {
     container.appendChild(toneSelect);
 }
 const hdrImages = [
-    {name: 'Cannon_Exterior', path: 'assets/hdr/Cannon_Exterior.hdr', nit: 10000},
-    {name: '2K - the sky is on fire', path: 'assets/hdr/2k/the_sky_is_on_fire_2k.hdr', nit: 8000},
-    {name: 'field', path: 'assets/hdr/field.hdr', nit: 8000},
+    {name: 'Cannon_Exterior', path: 'assets/hdr/Cannon_Exterior.hdr', nit: 25000},
+    {name: '2K - the sky is on fire', path: 'assets/hdr/2k/the_sky_is_on_fire_2k.hdr', nit: 20000},
+    {name: 'field', path: 'assets/hdr/field.hdr', nit: 30000},
     {name: 'neutral.37290948', path: 'assets/hdr/neutral.37290948.hdr', nit: 20000},
-    {name: 'pisa', path: 'assets/hdr/pisa.hdr', nit: 2000},
+    {name: 'pisa', path: 'assets/hdr/pisa.hdr', nit: 25000},
     {
         name: '6 cube face asset', path: [
             "assets/skybox/px.jpg",
