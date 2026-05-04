@@ -73,7 +73,7 @@ class PrefilterGenerator {
         sourceCubeTexture: GPUTexture,
         size: number = 512,
         destinationTexture?: GPUTexture | DirectCubeTexture,
-        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.PRE_PROCESS
+        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): Promise<DirectCubeTexture> {
         const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';

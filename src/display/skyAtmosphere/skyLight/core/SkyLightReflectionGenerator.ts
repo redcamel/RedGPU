@@ -65,8 +65,8 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
             usage: this.#sourceCubeTexture.usage,
             mipLevelCount: getMipLevelCount(this.width, this.height),
             dimension: '2d'
-        }, true, COMMAND_ENCODER_TYPE.PRE_PROCESS);
-        await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture);
+        }, true, COMMAND_ENCODER_TYPE.RESOURCE);
+        await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture, COMMAND_ENCODER_TYPE.RESOURCE);
     }
 
     #init(): void {
@@ -99,7 +99,7 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         depth: number = this.depth
     ): void {
         const {commandEncoderManager} = this.redGPUContext;
-        commandEncoderManager.addPreProcessComputePass(`SkyLight_${this.label}_ComputePass`, (passEncoder) => {
+        commandEncoderManager.addResourceComputePass(`SkyLight_${this.label}_ComputePass`, (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, bindGroup);
             passEncoder.dispatchWorkgroups(

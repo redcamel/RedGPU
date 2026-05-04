@@ -68,7 +68,7 @@ class IrradianceGenerator {
     async generate(
         sourceCubeTexture: GPUTexture,
         size: number = 32,
-        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.PRE_PROCESS
+        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): Promise<DirectCubeTexture> {
         const {resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
@@ -101,13 +101,13 @@ class IrradianceGenerator {
      * [KO] 대상 GPUTexture (2D Array, 6 layers)
      * [EN] Target GPUTexture (2D Array, 6 layers)
      * @param phase -
-     * [KO] 커맨드 인코더 단계 (기본값: PRE_PROCESS)
-     * [EN] Command encoder phase (default: PRE_PROCESS)
+     * [KO] 커맨드 인코더 단계 (기본값: RESOURCE)
+     * [EN] Command encoder phase (default: RESOURCE)
      */
     async render(
         sourceCubeTexture: GPUTexture,
         targetTexture: GPUTexture,
-        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.PRE_PROCESS
+        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): Promise<void> {
         const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
         const size = targetTexture.width;

@@ -3,6 +3,7 @@ import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuf
 import Sampler from "../../../../resources/sampler/Sampler";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
+import {COMMAND_ENCODER_TYPE} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 abstract class ASkyAtmosphereLUTGenerator {
     #redGPUContext: RedGPUContext;
@@ -65,7 +66,7 @@ abstract class ASkyAtmosphereLUTGenerator {
         workgroupSize: [number, number, number] = [16, 16, 1]
     ): void {
         const {commandEncoderManager} = this.#redGPUContext;
-        commandEncoderManager.addPreProcessComputePass(`SkyAtmosphere_${this.#label}_ComputePass`, (passEncoder) => {
+        commandEncoderManager.addResourceComputePass(`SkyAtmosphere_${this.#label}_ComputePass`, (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, bindGroup);
             passEncoder.dispatchWorkgroups(
