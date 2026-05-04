@@ -6,6 +6,7 @@ import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
 import DirectCubeTexture from "../../../DirectCubeTexture";
 import prefilterShaderCode from "./prefilterShaderCode.wgsl";
+import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] Prefilter 맵을 생성하는 클래스입니다.
@@ -61,11 +62,19 @@ class PrefilterGenerator {
      * @param destinationTexture -
      * [KO] 결과물을 저장할 대상 텍스처 (선택)
      * [EN] Target texture to store the result (optional)
+     * @param phase -
+     * [KO] 커맨드 인코더 단계 (기본값: PRE_PROCESS)
+     * [EN] Command encoder phase (default: PRE_PROCESS)
      * @returns
      * [KO] 생성된 또는 업데이트된 Prefilter DirectCubeTexture
      * [EN] Generated or updated Prefilter DirectCubeTexture
      */
-    async generate(sourceCubeTexture: GPUTexture, size: number = 512, destinationTexture?: GPUTexture | DirectCubeTexture): Promise<DirectCubeTexture> {
+    async generate(
+        sourceCubeTexture: GPUTexture,
+        size: number = 512,
+        destinationTexture?: GPUTexture | DirectCubeTexture,
+        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.PRE_PROCESS
+    ): Promise<DirectCubeTexture> {
         const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
@@ -153,13 +162,22 @@ class PrefilterGenerator {
                 ]
             });
 
-            commandEncoderManager.addResourceComputePass({
-                label: `Prefilter_mip_${mip}_compute_pass`
-            }, (computePass) => {
+            const computePassLabel = `Prefilter_mip_${mip}_compute_pass`;
+            const computePassExecutor = (computePass: GPUComputePassEncoder) => {
                 computePass.setPipeline(this.#pipeline);
                 computePass.setBindGroup(0, bindGroup);
                 computePass.dispatchWorkgroups(Math.ceil(mipSize / 8), Math.ceil(mipSize / 8), 6);
-            });
+            };
+
+            if (phase === COMMAND_ENCODER_TYPE.RESOURCE) {
+                commandEncoderManager.addResourceComputePass(computePassLabel, computePassExecutor);
+            } else if (phase === COMMAND_ENCODER_TYPE.PRE_PROCESS) {
+                commandEncoderManager.addPreProcessComputePass(computePassLabel, computePassExecutor);
+            } else if (phase === COMMAND_ENCODER_TYPE.MAIN) {
+                commandEncoderManager.addMainComputePass(computePassLabel, computePassExecutor);
+            } else {
+                commandEncoderManager.addPostProcessComputePass(computePassLabel, computePassExecutor);
+            }
         }
 
         if (destinationTexture instanceof DirectCubeTexture) {

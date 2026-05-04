@@ -6,6 +6,7 @@ import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
 import DirectCubeTexture from "../../../DirectCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl";
+import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] Irradiance 맵을 생성하는 클래스입니다.
@@ -57,11 +58,18 @@ class IrradianceGenerator {
      * @param size -
      * [KO] 생성될 Irradiance 맵의 크기 (기본값: 32)
      * [EN] Size of the generated Irradiance map (default: 32)
+     * @param phase -
+     * [KO] 커맨드 인코더 단계 (기본값: PRE_PROCESS)
+     * [EN] Command encoder phase (default: PRE_PROCESS)
      * @returns
      * [KO] 생성된 Irradiance DirectCubeTexture
      * [EN] Generated Irradiance DirectCubeTexture
      */
-    async generate(sourceCubeTexture: GPUTexture, size: number = 32): Promise<DirectCubeTexture> {
+    async generate(
+        sourceCubeTexture: GPUTexture,
+        size: number = 32,
+        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.PRE_PROCESS
+    ): Promise<DirectCubeTexture> {
         const {resourceManager} = this.#redGPUContext;
         const format: GPUTextureFormat = 'rgba16float';
 
@@ -75,7 +83,7 @@ class IrradianceGenerator {
             label: `Irradiance_Map_Texture_${createUUID()}`
         });
 
-        await this.render(sourceCubeTexture, irradianceGPUTexture);
+        await this.render(sourceCubeTexture, irradianceGPUTexture, phase);
 
         return new DirectCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
     }
@@ -92,8 +100,15 @@ class IrradianceGenerator {
      * @param targetTexture -
      * [KO] 대상 GPUTexture (2D Array, 6 layers)
      * [EN] Target GPUTexture (2D Array, 6 layers)
+     * @param phase -
+     * [KO] 커맨드 인코더 단계 (기본값: PRE_PROCESS)
+     * [EN] Command encoder phase (default: PRE_PROCESS)
      */
-    async render(sourceCubeTexture: GPUTexture, targetTexture: GPUTexture): Promise<void> {
+    async render(
+        sourceCubeTexture: GPUTexture,
+        targetTexture: GPUTexture,
+        phase: CommandEncoderType = COMMAND_ENCODER_TYPE.PRE_PROCESS
+    ): Promise<void> {
         const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
         const size = targetTexture.width;
 
@@ -140,13 +155,22 @@ class IrradianceGenerator {
             ]
         });
 
-        commandEncoderManager.addResourceComputePass({
-            label: 'Irradiance_Generator_Compute_Pass'
-        }, (computePass) => {
+        const computePassLabel = 'Irradiance_Generator_Compute_Pass';
+        const computePassExecutor = (computePass: GPUComputePassEncoder) => {
             computePass.setPipeline(this.#pipeline);
             computePass.setBindGroup(0, bindGroup);
             computePass.dispatchWorkgroups(Math.ceil(size / 8), Math.ceil(size / 8), 6);
-        });
+        };
+
+        if (phase === COMMAND_ENCODER_TYPE.RESOURCE) {
+            commandEncoderManager.addResourceComputePass(computePassLabel, computePassExecutor);
+        } else if (phase === COMMAND_ENCODER_TYPE.PRE_PROCESS) {
+            commandEncoderManager.addPreProcessComputePass(computePassLabel, computePassExecutor);
+        } else if (phase === COMMAND_ENCODER_TYPE.MAIN) {
+            commandEncoderManager.addMainComputePass(computePassLabel, computePassExecutor);
+        } else {
+            commandEncoderManager.addPostProcessComputePass(computePassLabel, computePassExecutor);
+        }
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {
