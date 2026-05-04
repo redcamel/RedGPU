@@ -194,7 +194,6 @@ class Renderer {
                         }
                     }
                 }
-
                 // @ts-ignore
                 camera.update?.(view, redGPUContext.currentTime)
             }

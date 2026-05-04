@@ -115,10 +115,10 @@ class RenderViewStateData {
 
     /** [KO] 씬이 2D 모드인지 여부 [EN] Whether the scene is in 2D mode */
     isScene2DMode: boolean = false;
-    needResetRenderLayer: boolean = false;
+
     /** [KO] 연결된 View3D 인스턴스 (private) [EN] Connected View3D instance (private) */
     readonly #view: View3D;
-    #prev_msaaID
+
 
     /**
      * 새로운 RenderViewStateData 인스턴스를 생성합니다.
@@ -185,37 +185,11 @@ class RenderViewStateData {
         this.prevFragmentUniformBindGroup = null;
         this.dirtyVertexUniformFromMaterial = {};
         //
-        // keepLog('this.needResetRenderLayer', this.needResetRenderLayer)
-        // if (this.needResetRenderLayer || this.#view.redGPUContext.antialiasingManager.msaaID !== this.#prev_msaaID) {
         this.bundleListAlphaLayer.length = 0;
         this.bundleListTransparentLayer.length = 0;
         this.bundleListParticleLayer.length = 0;
         this.bundleListRender2PathLayer.length = 0;
         this.bundleListBasicList.length = 0;
-        // 	requestAnimationFrame(()=>{
-        // 		const {children} = this.#view.scene
-        // 		let i = children.length
-        // 		while (i--) {
-        // 			const mesh = children[i]
-        // 			const {renderBundle, material} = mesh
-        // 			if (material.use2PathRender) {
-        // 				this.bundleListRender2PathLayer[this.bundleListRender2PathLayer.length] = renderBundle
-        // 			} else if (mesh.meshType === MESH_TYPE.PARTICLE) {
-        // 				this.bundleListParticleLayer[this.bundleListParticleLayer.length] = renderBundle
-        // 			} else if (material.transparent) {
-        // 				this.bundleListTransparentLayer[this.bundleListTransparentLayer.length] = renderBundle
-        // 				// @ts-ignore
-        // 				renderBundle.mesh = this
-        // 			} else if (material.alphaBlend === 2 || material.opacity < 1 || !mesh.depthStencilState.depthWriteEnabled) {
-        // 				this.bundleListAlphaLayer[this.bundleListAlphaLayer.length] = renderBundle
-        // 			} else {
-        // 				this.bundleListBasicList[this.bundleListBasicList.length] = renderBundle
-        // 			}
-        // 		}
-        // 	})
-        // }
-        this.needResetRenderLayer = false
-        this.#prev_msaaID = this.#view.redGPUContext.antialiasingManager.msaaID
         //
         this.skinList.length = 0;
         this.animationList.length = 0;
