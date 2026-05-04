@@ -10,6 +10,8 @@ import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODE
 import GPU_LOAD_OP from "../../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../../gpuConst/GPU_STORE_OP";
 import View3D from "../../display/view/View3D";
+import updateViewportAndScissor from "../../renderer/helperFunc/updateViewportAndScissor";
+import renderPickingLayer from "../../renderer/renderLayers/renderPickingLayer";
 
 /**
  * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
@@ -120,26 +122,33 @@ class PickingManager {
         return this.#pickingPassDescriptor;
     }
 
-    prepareRender(view: View3D) {
-
-        this.#checkTexture(view)
-        this.#pickingPassDescriptor = {
-            label: `${view.name} Picking Render Pass`,
-            colorAttachments: [
-                {
-                    view: this.pickingGPUTextureView,
-                    clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
-                    loadOp: GPU_LOAD_OP.CLEAR,
-                    storeOp: GPU_STORE_OP.STORE
-                }
-            ],
-            depthStencilAttachment: {
-                view: this.pickingDepthGPUTextureView,
-                depthClearValue: 1.0,
-                depthLoadOp: GPU_LOAD_OP.CLEAR,
-                depthStoreOp: GPU_STORE_OP.STORE,
-            },
-        };
+    render(view: View3D) {
+        if (this && this.castingList.length) {
+            const {redGPUContext} = view
+            this.#checkTexture(view)
+            this.#pickingPassDescriptor = {
+                label: `${view.name} Picking Render Pass`,
+                colorAttachments: [
+                    {
+                        view: this.pickingGPUTextureView,
+                        clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
+                        loadOp: GPU_LOAD_OP.CLEAR,
+                        storeOp: GPU_STORE_OP.STORE
+                    }
+                ],
+                depthStencilAttachment: {
+                    view: this.pickingDepthGPUTextureView,
+                    depthClearValue: 1.0,
+                    depthLoadOp: GPU_LOAD_OP.CLEAR,
+                    depthStoreOp: GPU_STORE_OP.STORE,
+                },
+            };
+            redGPUContext.commandEncoderManager.addMainRenderPass(this.pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
+                updateViewportAndScissor(view, viewPickingRenderPassEncoder)
+                renderPickingLayer(view, viewPickingRenderPassEncoder)
+            });
+        }
+        this.#prepareRead(view);
     }
 
     /**
@@ -194,7 +203,7 @@ class PickingManager {
      *
      * @param view - View3D 인스턴스
      */
-    prepareRead(view: any) {
+    #prepareRead(view: any) {
         if (!this.castingList.length) return;
         if (this.#isReading) return; // [KO] 이미 읽기 작업 중이면 스킵 [EN] Skip if already reading
 

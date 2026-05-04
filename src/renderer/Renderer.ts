@@ -1,20 +1,18 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
-import RenderViewStateData from "../display/view/core/RenderViewStateData";
 import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
-import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
 import DrawBufferManager from "./core/DrawBufferManager";
 import FinalRender from "./finalRender/FinalRender";
 import {COMMAND_ENCODER_TYPE} from "./commandEncoder/COMMAND_ENCODER_TYPE";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
-import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
 import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinning";
 import updateJitter from "./helperFunc/updateJitter";
+import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 
 /**
  * [KO] RedGPU의 핵심 렌더러 클래스입니다.
@@ -212,8 +210,7 @@ class Renderer {
 
             this.#renderPassViewBasicLayer(view, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, renderPassDescriptor, depthStencilAttachment)
-            this.#renderPassViewPickingLayer(view)
-            pickingManager?.prepareRead(view);
+            pickingManager?.render(view)
         }
 
         {
@@ -228,25 +225,15 @@ class Renderer {
         }
     }
 
+
     #renderPassViewShadow(view: View3D) {
         //TODO - 이것도 ShadowManager가 책임지도록 변경
         const {scene, redGPUContext} = view
         const {shadowManager} = scene
         const {directionalShadowManager} = shadowManager
-        const shadowPassDescriptor: GPURenderPassDescriptor = {
-            label: `${view.name} Shadow Render Pass`,
-            colorAttachments: [],
-            depthStencilAttachment: {
-                view: directionalShadowManager.shadowDepthTextureView,
-                depthClearValue: 1.0,
-                depthLoadOp: GPU_LOAD_OP.CLEAR,
-                depthStoreOp: GPU_STORE_OP.STORE,
-            },
-        };
-
-        redGPUContext.commandEncoderManager.addMainRenderPass(shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
-            this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
-
+        shadowManager.prepareRender(view)
+        redGPUContext.commandEncoderManager.addMainRenderPass(shadowManager.shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
+            updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
             if (directionalShadowManager.castingList.length) {
                 renderShadowLayer(view, viewShadowRenderPassEncoder)
             }
@@ -261,7 +248,7 @@ class Renderer {
             skyAtmosphere.update(view)
         }
         redGPUContext.commandEncoderManager.addMainRenderPass(renderPassDescriptor, (viewRenderPassEncoder) => {
-            this.#updateViewportAndScissor(view, viewRenderPassEncoder)
+            updateViewportAndScissor(view, viewRenderPassEncoder)
 
             renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
             if (skybox) skybox.render(renderViewStateData)
@@ -315,19 +302,8 @@ class Renderer {
                     depthLoadOp: GPU_LOAD_OP.LOAD,
                 },
             }, (renderPassEncoder) => {
-                this.#updateViewportAndScissor(view, renderPassEncoder)
+                updateViewportAndScissor(view, renderPassEncoder)
                 renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
-            });
-        }
-    }
-
-    #renderPassViewPickingLayer(view: View3D) {
-        const {pickingManager, redGPUContext} = view
-        if (pickingManager && pickingManager.castingList.length) {
-            pickingManager.prepareRender(view)
-            redGPUContext.commandEncoderManager.addMainRenderPass(pickingManager.pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
-                this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder)
-                renderPickingLayer(view, viewPickingRenderPassEncoder)
             });
         }
     }
@@ -380,25 +356,6 @@ class Renderer {
         };
     }
 
-    #updateViewportAndScissor(
-        view: View3D,
-        viewRenderPassEncoder: GPURenderPassEncoder,
-        shadowRender: boolean = false,
-    ) {
-        const {scene, pixelRectObject} = view
-        const {shadowManager} = scene
-        const {directionalShadowManager} = shadowManager
-        if (shadowRender) {
-            const width = directionalShadowManager.shadowDepthTextureSize
-            const height = directionalShadowManager.shadowDepthTextureSize
-            viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
-            viewRenderPassEncoder.setScissorRect(0, 0, width, height);
-        } else {
-            const {width, height} = pixelRectObject
-            viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
-            viewRenderPassEncoder.setScissorRect(0, 0, width, height);
-        }
-    }
 }
 
 let temp3 = mat4.create()
