@@ -34,7 +34,6 @@ import updateJitter from "./helperFunc/updateJitter";
  * @category Renderer
  */
 class Renderer {
-    #prevViewportSize: { width: number, height: number };
     #finalRender: FinalRender
     #gltfAnimationLooperManager: GltfAnimationLooperManager = new GltfAnimationLooperManager()
 
@@ -316,6 +315,7 @@ class Renderer {
                     depthLoadOp: GPU_LOAD_OP.LOAD,
                 },
             }, (renderPassEncoder) => {
+                this.#updateViewportAndScissor(view, renderPassEncoder)
                 renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
             });
         }
@@ -389,19 +389,14 @@ class Renderer {
         const {shadowManager} = scene
         const {directionalShadowManager} = shadowManager
         if (shadowRender) {
-            // pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
             const width = directionalShadowManager.shadowDepthTextureSize
             const height = directionalShadowManager.shadowDepthTextureSize
             viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
             viewRenderPassEncoder.setScissorRect(0, 0, width, height);
         } else {
-            // pixelRectObject 해당하는 크기로 뷰포트를 만들고짜른다.
             const {width, height} = pixelRectObject
-            if (!this.#prevViewportSize || this.#prevViewportSize.width !== width || this.#prevViewportSize.height !== height) {
-                viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
-                viewRenderPassEncoder.setScissorRect(0, 0, width, height);
-                this.#prevViewportSize = {width, height};
-            }
+            viewRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
+            viewRenderPassEncoder.setScissorRect(0, 0, width, height);
         }
     }
 }
