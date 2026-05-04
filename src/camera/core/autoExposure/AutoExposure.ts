@@ -8,6 +8,7 @@ import adaptationCode from "./wgsl/adaptation.wgsl";
 import ACamera from "../ACamera";
 import METERING_MODE from "../METERING_MODE";
 import {COMMAND_ENCODER_TYPE} from "../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import copyGPUBuffer from "../../../utils/copyGPUBuffer";
 
 /**
  * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
@@ -276,7 +277,7 @@ class AutoExposure {
         // [EN] Record copy command only when not currently reading
         if (!this.#isReading) {
             commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
-                encoder.copyBufferToBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, this.#readBuffer, 0, 4);
+                copyGPUBuffer(encoder, this.#adaptedEV100Buffer.gpuBuffer, this.#readBuffer);
             });
         }
     }

@@ -15,19 +15,12 @@ redUnit.testGroup(
 				finish: () => ({})
 			};
 
-			const mockDevice = {
-				createCommandEncoder: () => mockCommandEncoder,
-				queue: {
-					submit: () => { submitCalled = true; }
-				}
-			};
-
 			const mockBufferSrc = { size: 100 };
 			const mockBufferDst = { size: 100 };
 
-			RedGPU.Util.copyGPUBuffer(mockDevice, mockBufferSrc, mockBufferDst);
+			RedGPU.Util.copyGPUBuffer(mockCommandEncoder, mockBufferSrc, mockBufferDst);
 
-			run(copyBufferToBufferCalled && submitCalled);
+			run(copyBufferToBufferCalled);
 		}, true);
 	}
 );

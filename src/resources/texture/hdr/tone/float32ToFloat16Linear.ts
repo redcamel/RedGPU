@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import {keepLog} from "../../../../utils";
+import copyGPUBuffer from "../../../../utils/copyGPUBuffer";
 
 /**
  * [KO] Float16 변환 옵션 인터페이스입니다.
@@ -303,8 +303,7 @@ async function executeCompute(
             computePass.dispatchWorkgroups(workgroupsX, workgroupsY);
         },
         (commandEncoder: GPUCommandEncoder) => {
-            keepLog('어냐', commandEncoder)
-            commandEncoder.copyBufferToBuffer(outputBuffer, 0, readBuffer, 0, pixelCount * 8);
+            copyGPUBuffer(commandEncoder, outputBuffer, readBuffer);
         }
     );
 

@@ -6,6 +6,7 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";
 import MESH_TYPE from "../MESH_TYPE";
+import { COMMAND_ENCODER_TYPE } from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import PARTICLE_EASE from "./PARTICLE_EASE";
 import computeModuleSource from "./shader/compute.wgsl";
@@ -1094,19 +1095,22 @@ class ParticleEmitter extends Mesh {
             initialParticleInfoScale,
             initialParticleInfoAlpha,
         ]
-        dataList.forEach((v, index) => {
-            const t0 = redGPUContext.gpuDevice.createBuffer({
-                size: v.byteLength,
-                usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE
-            });
-            redGPUContext.gpuDevice.queue.writeBuffer(t0, 0, v);
-            this.#particleBuffers.push(t0)
-            if (prevBuffer?.length) {
-                copyGPUBuffer(redGPUContext.gpuDevice, prevBuffer[index], t0)
-            }
-        })
+        const {commandEncoderManager, gpuDevice} = redGPUContext;
+        commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
+            dataList.forEach((v, index) => {
+                const t0 = gpuDevice.createBuffer({
+                    size: v.byteLength,
+                    usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE
+                });
+                gpuDevice.queue.writeBuffer(t0, 0, v);
+                this.#particleBuffers.push(t0)
+                if (prevBuffer?.length) {
+                    copyGPUBuffer(encoder, prevBuffer[index], t0)
+                }
+            })
+        });
         if (prevBuffer) {
-            prevBuffer.forEach(v => v.destroy())
+            prevBuffer.forEach(v => commandEncoderManager.addDeferredDestroy(COMMAND_ENCODER_TYPE.RESOURCE, v));
         }
         //
         let computeSource = computeModuleSource;

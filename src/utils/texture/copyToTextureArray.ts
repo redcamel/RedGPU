@@ -4,12 +4,10 @@
  *
  * * ### Example
  * ```typescript
- * RedGPU.Util.copyToTextureArray(device, sourceTex, targetArrayTex, 0);
+ * RedGPU.Util.copyToTextureArray(commandEncoder, sourceTex, targetArrayTex, 0);
  * ```
  *
- * @param gpuDevice -
- * [KO] 복사 작업에 사용할 GPU 디바이스
- * [EN] GPU device to use for the copy operation
+ * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
  * @param sourceTexture -
  * [KO] 복사할 소스 텍스처
  * [EN] Source texture to copy from
@@ -19,20 +17,15 @@
  * @param sliceIndex -
  * [KO] 복사할 슬라이스 인덱스
  * [EN] Slice index to copy into
- * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
  * @category Texture
  */
 function copyToTextureArray(
-    gpuDevice: GPUDevice,
+    commandEncoder: GPUCommandEncoder,
     sourceTexture: GPUTexture,
     targetArrayTexture: GPUTexture,
     sliceIndex: number,
-    commandEncoder?: GPUCommandEncoder
 ) {
-    const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
-        label: 'COPY_TO_TEXTURE_ARRAY'
-    });
-    internalEncoder.copyTextureToTexture(
+    commandEncoder.copyTextureToTexture(
         {texture: sourceTexture},
         {
             texture: targetArrayTexture,
@@ -40,7 +33,6 @@ function copyToTextureArray(
         },
         [sourceTexture.width, sourceTexture.height, 1]
     );
-    if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
 }
 
 export default copyToTextureArray;
