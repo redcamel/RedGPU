@@ -1,7 +1,7 @@
-import RedGPUContext from "../context/RedGPUContext";
-import RenderViewStateData from "../display/view/core/RenderViewStateData";
-import ParsedSkinInfo_GLTF from "../loader/gltf/cls/ParsedSkinInfo_GLTF";
-import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
+import RedGPUContext from "../../context/RedGPUContext";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
+import ParsedSkinInfo_GLTF from "../../loader/gltf/cls/ParsedSkinInfo_GLTF";
+import GltfAnimationLooperManager from "../../loader/gltf/animationLooper/GltfAnimationLooperManager";
 
 const processAnimationsAndSkinning = (
     redGPUContext: RedGPUContext,

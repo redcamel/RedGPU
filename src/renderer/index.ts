@@ -1,5 +1,5 @@
 import Renderer from "./Renderer";
-import SystemUniformUpdater from "./SystemUniformUpdater";
+import SystemUniformUpdater from "./helperFunc/SystemUniformUpdater";
 
 export {
     Renderer,

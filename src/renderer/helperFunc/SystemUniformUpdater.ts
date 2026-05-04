@@ -1,11 +1,11 @@
 import {mat4} from "gl-matrix";
-import Camera2D from "../camera/camera/Camera2D";
-import PerspectiveCamera from "../camera/camera/PerspectiveCamera";
-import OrthographicCamera from "../camera/camera/OrthographicCamera";
+import Camera2D from "../../camera/camera/Camera2D";
+import PerspectiveCamera from "../../camera/camera/PerspectiveCamera";
+import OrthographicCamera from "../../camera/camera/OrthographicCamera";
 import updateSystemUniformData from "./updateSystemUniformData";
-import DirectionalLight from "../light/lights/DirectionalLight";
-import AmbientLight from "../light/lights/AmbientLight";
-import RenderViewStateData from "../display/view/core/RenderViewStateData";
+import DirectionalLight from "../../light/lights/DirectionalLight";
+import AmbientLight from "../../light/lights/AmbientLight";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 
 let temp3 = mat4.create()
 

@@ -22,8 +22,8 @@ import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
-import SystemUniformUpdater from "../../renderer/SystemUniformUpdater";
-import updateSystemUniformData from "../../renderer/updateSystemUniformData";
+import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
+import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)

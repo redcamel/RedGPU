@@ -13,7 +13,8 @@ import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import renderPickingLayer from "./renderLayers/renderPickingLayer";
 import renderShadowLayer from "./renderLayers/renderShadowLayer";
-import processAnimationsAndSkinning from "./processAnimationsAndSkinning";
+import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinning";
+import updateJitter from "./helperFunc/updateJitter";
 
 /**
  * [KO] RedGPU의 핵심 렌더러 클래스입니다.
@@ -198,7 +199,7 @@ class Renderer {
                 camera.update?.(view, redGPUContext.currentTime)
             }
 
-            this.#updateJitter(view)
+            updateJitter(view)
 
             // [KO] 쉐도우 패스용 업데이트 및 렌더링
             // [EN] Update and render for shadow pass
@@ -221,7 +222,7 @@ class Renderer {
             renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
         }
 
-        processAnimationsAndSkinning(redGPUContext, renderViewStateData,this.#gltfAnimationLooperManager);
+        processAnimationsAndSkinning(redGPUContext, renderViewStateData, this.#gltfAnimationLooperManager);
 
         view.renderViewStateData.viewRenderCPURecordingTime = (performance.now() - view.renderViewStateData.viewRenderStartTime);
         return {
@@ -356,42 +357,6 @@ class Renderer {
                 renderPickingLayer(view, viewPickingRenderPassEncoder)
             });
         }
-    }
-
-    #updateJitter(view: View3D) {
-        const {taa} = view;
-        const frameIndex = taa.frameIndex || 0;
-        const jitterScale = taa.jitterStrength; // 보통 1.0 권장
-        const sampleCount = 16;
-        const currentSample = frameIndex % sampleCount;
-
-        // Halton 시퀀스 (0~1 범위)
-        const haltonX = this.#haltonSequence(currentSample + 1, 2);
-        const haltonY = this.#haltonSequence(currentSample + 1, 3);
-
-        // 1. 디바이스 픽셀 비율 가져오기
-        const dpr = window.devicePixelRatio || 1;
-        // const dpr =  1;
-
-        // 2. 물리적 픽셀 기준의 오프셋 계산
-        // (halton - 0.5)는 [-0.5, 0.5] 범위.
-        // 이를 dpr로 나누어 논리적 좌표계에서의 '물리적 반 픽셀' 범위를 잡습니다.
-        const jitterX = ((haltonX - 0.5) / dpr) * jitterScale;
-        const jitterY = ((haltonY - 0.5) / dpr) * jitterScale;
-
-        view.setJitterOffset(jitterX, jitterY);
-    }
-
-    #haltonSequence(index: number, base: number): number {
-        let result = 0;
-        let f = 1;
-        let i = index;
-        while (i > 0) {
-            f = f / base;
-            result = result + f * (i % base);
-            i = Math.floor(i / base);
-        }
-        return result;
     }
 
 
