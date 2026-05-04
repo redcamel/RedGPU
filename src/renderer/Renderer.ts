@@ -108,7 +108,7 @@ class Renderer {
             const len = redGPUContext.viewList.length
             for (i; i < len; i++) {
                 const targetView = redGPUContext.viewList[i];
-                const {renderPassDescriptor} = this.renderView(targetView, time);
+                const {renderPassDescriptor} = this.renderView(targetView);
                 viewList_renderPassDescriptorList.push(renderPassDescriptor);
 
                 const {commandEncoderManager} = redGPUContext;
@@ -140,14 +140,11 @@ class Renderer {
      * @param view -
      * [KO] 렌더링할 View3D 인스턴스
      * [EN] View3D instance to render
-     * @param time -
-     * [KO] 현재 시간 (ms)
-     * [EN] Current time (ms)
      * @returns
      * [KO] 생성된 렌더 패스 디스크립터
      * [EN] Generated render pass descriptor
      */
-    renderView(view: View3D, time: number): {
+    renderView(view: View3D): {
         renderPassDescriptor: GPURenderPassDescriptor
     } {
         const {
@@ -157,7 +154,6 @@ class Renderer {
             pixelRectObject,
             renderViewStateData
         } = view
-        const {commandEncoderManager} = redGPUContext;
         const {
             colorAttachment,
             depthStencilAttachment,
@@ -173,7 +169,7 @@ class Renderer {
 
         // [KO] 상태 초기화 (인코더 의존성 제거됨)
         // [EN] Reset state (encoder dependency removed)
-        view.renderViewStateData.reset(time)
+        view.renderViewStateData.reset()
 
         if (pixelRectObject.width && pixelRectObject.height) {
 
@@ -187,13 +183,12 @@ class Renderer {
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
             {
-                const {timestamp, prevTimestamp} = renderViewStateData;
-                const elapsed = timestamp - prevTimestamp;
+                const {elapsed} = renderViewStateData;
 
                 const fpsInterval = 1000 / 60
                 if (elapsed >= fpsInterval) { // 60FPS 기준 간격 (약 16.67ms)
                     // 경과 시간에서 오차를 보정하며 마지막 프레임 시간 업데이트
-                    renderViewStateData.prevTimestamp = timestamp - (elapsed % fpsInterval);
+                    renderViewStateData.prevTimestamp = renderViewStateData.timestamp - (elapsed % fpsInterval);
 
 
                     const {scene} = view
@@ -204,7 +199,7 @@ class Renderer {
                 }
 
                 // @ts-ignore
-                camera.update?.(view, time)
+                camera.update?.(view, redGPUContext.currentTime)
             }
 
             this.#updateJitter(view)
@@ -232,7 +227,7 @@ class Renderer {
 
         processAnimationsAndSkinning(redGPUContext, renderViewStateData,this.#gltfAnimationLooperManager);
 
-        view.renderViewStateData.viewRenderTime = (performance.now() - view.renderViewStateData.startTime);
+        view.renderViewStateData.viewRenderCPURecordingTime = (performance.now() - view.renderViewStateData.viewRenderStartTime);
         return {
             renderPassDescriptor
         }

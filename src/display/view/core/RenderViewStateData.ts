@@ -58,13 +58,15 @@ class RenderViewStateData {
 
     // Time related
     /** [KO] 렌더링 시작을 표시하는 성능 타임스탬프 (ms) [EN] Performance timestamp marking the start of rendering (ms) */
-    startTime: number;
+    viewRenderStartTime: number;
     /** [KO] 렌더링 프레임의 현재 타임스탬프 (ms) [EN] Current timestamp of the rendering frame (ms) */
     timestamp: number;
     /** [KO] 이전 프레임의 타임스탬프 (ms) [EN] Timestamp of the previous frame (ms) */
     prevTimestamp: number = 0;
-    /** [KO] 뷰 렌더링에 소요된 시간 (밀리초) [EN] Time taken for view rendering (ms) */
-    viewRenderTime: number;
+    /** [KO] 이전 프레임으로부터 경과된 시간 (ms) [EN] Elapsed time since the previous frame (ms) */
+    elapsed: number = 0;
+    /** [KO] 뷰 렌더링 준비에 소요된 시간 (밀리초) [EN] Time taken for view render preparation (ms) */
+    viewRenderCPURecordingTime: number;
     /** [KO] 현재 프레임 인덱스 (누적 렌더링 횟수) [EN] Current frame index (accumulated rendering count) */
     frameIndex: number = 0;
     /** [KO] 현재 프레임의 절대 시간 (초) [EN] Absolute time of the current frame (seconds) */
@@ -140,13 +142,11 @@ class RenderViewStateData {
      * 현재 렌더링 패스를 위한 GPU 리소스를 설정합니다.
      * 또한 비디오 메모리 사용량을 계산하고 뷰 설정에 따라 컬링 매개변수를 구성합니다.
      *
-     * @param {number} time - 프레임의 현재 타임스탬프
-     *
      * @throws {Error} 잘못된 매개변수가 제공되거나 필수 뷰 속성이 없는 경우
      * @throws {Error} 텍스처 크기 계산이 실패한 경우
      */
-    reset(time: number) {
-        if (!time || !this.#view) {
+    reset() {
+        if (!this.#view) {
             throw new Error('Invalid parameters provided');
         }
         const view = this.#view;
@@ -176,12 +176,7 @@ class RenderViewStateData {
         this.numDirtyPipelines = 0;
         this.numTriangles = 0;
         this.numPoints = 0;
-        this.viewRenderTime = 0;
-        this.frameIndex++;
-        this.time = time / 1000;
-        this.deltaTime = (time - this.prevTimestamp) / 1000;
-        this.sinTime = Math.sin(this.time);
-        this.timestamp = time;
+        this.#calcTimeInfo();
         this.prevVertexGpuBuffer = null;
         this.prevFragmentUniformBindGroup = null;
         this.dirtyVertexUniformFromMaterial = {};
@@ -221,7 +216,6 @@ class RenderViewStateData {
         this.skinList.length = 0;
         this.animationList.length = 0;
         //
-        this.startTime = performance.now();
         this.isScene2DMode = view.camera instanceof Camera2D;
         this.viewIndex = view.redGPUContext.getViewIndex(view);
         this.swapBufferIndex = this.swapBufferIndex ? 0 : 1
@@ -241,6 +235,23 @@ class RenderViewStateData {
             throw new Error('Could not calculate texture size: ' + e.message);
         }
         this.frustumPlanes = useFrustumCulling ? frustumPlanes : null;
+    }
+
+    /**
+     * [KO] 시간 관련 정보(frameIndex, elapsed, time, deltaTime, sinTime, timestamp)를 계산하고 업데이트합니다.
+     * [EN] Calculates and updates time-related information (frameIndex, elapsed, time, deltaTime, sinTime, timestamp).
+     * @private
+     */
+    #calcTimeInfo() {
+        const now = performance.now();
+        this.viewRenderCPURecordingTime = 0;
+        this.frameIndex++;
+        this.elapsed = now - this.prevTimestamp;
+        this.time = now / 1000;
+        this.deltaTime = this.elapsed / 1000;
+        this.sinTime = Math.sin(this.time);
+        this.timestamp = now;
+        this.viewRenderStartTime = now;
     }
 }
 

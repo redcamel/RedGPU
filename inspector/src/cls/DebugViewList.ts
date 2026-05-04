@@ -8,7 +8,7 @@ import ADebugStatisticsDomService from "./core/ADebugStatisticsDomService";
 
 const debugStats = [
     "usedVideoMemory",
-    "viewRenderTime",
+    "viewRenderCPURecordingTime",
     "num3DGroups",
     "num3DObjects",
     "numInstances",
@@ -17,7 +17,7 @@ const debugStats = [
     "numPoints"
 ];
 const debugStatsUnit = {
-    viewRenderTime: 'ms',
+    viewRenderCPURecordingTime: 'ms',
 }
 const debugStatsTitle = {
     // usedVideoMemory: 'view Texture videoMemorySize',

@@ -147,7 +147,7 @@ class SkyBox {
 
     /** [KO] 스카이박스를 렌더링합니다. [EN] Renders the skybox. */
     render(renderViewStateData: RenderViewStateData) {
-        const {currentRenderPassEncoder, startTime, view} = renderViewStateData
+        const {currentRenderPassEncoder, viewRenderStartTime, view} = renderViewStateData
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
         const {gpuDevice} = this.#redGPUContext
@@ -156,7 +156,7 @@ class SkyBox {
         if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
 
         if (this.#transitionStartTime) {
-            this.#transitionElapsed = Math.max(startTime - this.#transitionStartTime, 0)
+            this.#transitionElapsed = Math.max(viewRenderStartTime - this.#transitionStartTime, 0)
             if (this.#transitionElapsed > this.#transitionDuration) {
                 this.#transitionStartTime = 0
                 this.#material.transitionProgress = 0
