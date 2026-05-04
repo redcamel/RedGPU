@@ -9,7 +9,6 @@ import FinalRender from "./finalRender/FinalRender";
 import {COMMAND_ENCODER_TYPE} from "./commandEncoder/COMMAND_ENCODER_TYPE";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
-import renderShadowLayer from "./renderLayers/renderShadowLayer";
 import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinning";
 import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
@@ -170,12 +169,9 @@ class Renderer {
         view.renderViewStateData.reset()
 
         if (pixelRectObject.width && pixelRectObject.height) {
-
-            {
-                const {scene} = view
-                const {shadowManager} = scene
-                shadowManager.update(redGPUContext)
-            }
+            const {scene} = view
+            const {shadowManager} = scene
+            shadowManager.update(redGPUContext)
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
@@ -201,8 +197,7 @@ class Renderer {
             // [KO] 쉐도우 패스용 업데이트 및 렌더링
             // [EN] Update and render for shadow pass
             view.update(true, false, null)
-            this.#renderPassViewShadow(view);
-
+            shadowManager.render(view)
             // [KO] 기본 패스용 업데이트 및 렌더링
             // [EN] Update and render for basic pass
             const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
@@ -210,7 +205,7 @@ class Renderer {
 
             this.#renderPassViewBasicLayer(view, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, renderPassDescriptor, depthStencilAttachment)
-            pickingManager?.render(view)
+            pickingManager.render(view)
         }
 
         {
@@ -223,23 +218,6 @@ class Renderer {
         return {
             renderPassDescriptor
         }
-    }
-
-
-    #renderPassViewShadow(view: View3D) {
-        //TODO - 이것도 ShadowManager가 책임지도록 변경
-        const {scene, redGPUContext} = view
-        const {shadowManager} = scene
-        const {directionalShadowManager} = shadowManager
-        shadowManager.prepareRender(view)
-        redGPUContext.commandEncoderManager.addMainRenderPass(shadowManager.shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
-            updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
-            if (directionalShadowManager.castingList.length) {
-                renderShadowLayer(view, viewShadowRenderPassEncoder)
-            }
-        });
-
-        directionalShadowManager.resetCastingList()
     }
 
     #renderPassViewBasicLayer(view: View3D, renderPassDescriptor: GPURenderPassDescriptor) {

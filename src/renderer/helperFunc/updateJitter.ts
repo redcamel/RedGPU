@@ -1,5 +1,6 @@
 import View3D from "../../display/view/View3D";
-const haltonSequence = (index: number, base: number): number=> {
+
+const haltonSequence = (index: number, base: number): number => {
     let result = 0;
     let f = 1;
     let i = index;
@@ -10,7 +11,7 @@ const haltonSequence = (index: number, base: number): number=> {
     }
     return result;
 }
-const updateJitter = (view: View3D)=>{
+const updateJitter = (view: View3D) => {
     const {taa} = view;
     const frameIndex = taa.frameIndex || 0;
     const jitterScale = taa.jitterStrength; // 보통 1.0 권장

@@ -175,6 +175,43 @@ class PickingManager {
     }
 
     /**
+     * [KO] 이벤트를 확인하고 처리합니다.
+     * [EN] Checks and processes events.
+     *
+     * @param view -
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @param time -
+     * [KO] 시간
+     * [EN] Time
+     */
+    async checkEvents(view: any, time: number) {
+        if (this.castingList.length && !this.#isReading) {
+            const {pixelRectArray} = view;
+            const x = this.#mouseX;
+            const y = this.#mouseY;
+            if (x > 0 && x < pixelRectArray[2] && y > 0 && y < pixelRectArray[3] && this.#readPixelBuffer) {
+                const pickingTable = this.#createPickingTable();
+                this.#isReading = true;
+                try {
+                    const uint32Color = await this.#getUint32Color(this.#readPixelBuffer);
+                    if (uint32Color) {
+                        this.#processClickEvent(uint32Color, x, y, time, pickingTable);
+                        this.#processEvent(uint32Color, x, y, time, pickingTable);
+                    } else {
+                        this.#resetEvent();
+                    }
+                } finally {
+                    this.#isReading = false;
+                }
+            }
+            this.lastMouseEvent = null;
+            this.lastMouseClickEvent = null;
+            this.resetCastingList()
+        }
+    }
+
+    /**
      * [KO] 텍스처 크기를 확인하고 필요시 재생성합니다.
      * [EN] Checks the texture size and recreates it if necessary.
      *
@@ -228,43 +265,6 @@ class PickingManager {
             const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
             mainRenderEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
         });
-    }
-
-    /**
-     * [KO] 이벤트를 확인하고 처리합니다.
-     * [EN] Checks and processes events.
-     *
-     * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
-     * @param time -
-     * [KO] 시간
-     * [EN] Time
-     */
-    async checkEvents(view: any, time: number) {
-        if (this.castingList.length && !this.#isReading) {
-            const {pixelRectArray} = view;
-            const x = this.#mouseX;
-            const y = this.#mouseY;
-            if (x > 0 && x < pixelRectArray[2] && y > 0 && y < pixelRectArray[3] && this.#readPixelBuffer) {
-                const pickingTable = this.#createPickingTable();
-                this.#isReading = true;
-                try {
-                    const uint32Color = await this.#getUint32Color(this.#readPixelBuffer);
-                    if (uint32Color) {
-                        this.#processClickEvent(uint32Color, x, y, time, pickingTable);
-                        this.#processEvent(uint32Color, x, y, time, pickingTable);
-                    } else {
-                        this.#resetEvent();
-                    }
-                } finally {
-                    this.#isReading = false;
-                }
-            }
-            this.lastMouseEvent = null;
-            this.lastMouseClickEvent = null;
-            this.resetCastingList()
-        }
     }
 
     #calcVideoMemory() {
