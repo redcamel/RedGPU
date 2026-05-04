@@ -218,7 +218,6 @@ class Renderer {
         }
 
         {
-            //TODO 포스트이펙트를 실행을 완전히 안해될 조것 같은걸 체크해야함
             renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
         }
 
@@ -329,29 +328,10 @@ class Renderer {
     }
 
     #renderPassViewPickingLayer(view: View3D) {
-        //TODO - 이건  pickingManager가 권한을 가지도록 변경
         const {pickingManager, redGPUContext} = view
         if (pickingManager && pickingManager.castingList.length) {
-            pickingManager.checkTexture(view)
-            const pickingPassDescriptor: GPURenderPassDescriptor = {
-                label: `${view.name} Picking Render Pass`,
-                colorAttachments: [
-                    {
-                        view: pickingManager.pickingGPUTextureView,
-                        clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
-                        loadOp: GPU_LOAD_OP.CLEAR,
-                        storeOp: GPU_STORE_OP.STORE
-                    }
-                ],
-                depthStencilAttachment: {
-                    view: pickingManager.pickingDepthGPUTextureView,
-                    depthClearValue: 1.0,
-                    depthLoadOp: GPU_LOAD_OP.CLEAR,
-                    depthStoreOp: GPU_STORE_OP.STORE,
-                },
-            };
-
-            redGPUContext.commandEncoderManager.addMainRenderPass(pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
+            pickingManager.prepareRender(view)
+            redGPUContext.commandEncoderManager.addMainRenderPass(pickingManager.pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
                 this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder)
                 this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
                 renderPickingLayer(view, viewPickingRenderPassEncoder)

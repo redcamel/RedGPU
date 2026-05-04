@@ -7,6 +7,9 @@ import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
 import Raycaster3D from "../Raycaster3D";
 import Raycaster2D from "../Raycaster2D";
 import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import GPU_LOAD_OP from "../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../gpuConst/GPU_STORE_OP";
+import View3D from "../../display/view/View3D";
 
 /**
  * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
@@ -47,6 +50,7 @@ class PickingManager {
     /** [KO] 픽셀 값을 읽어올 임시 버퍼 [EN] Temporary buffer to read pixel values */
     #readPixelBuffer: GPUBuffer;
     #isReading: boolean = false;
+    #pickingPassDescriptor: GPURenderPassDescriptor
 
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
@@ -112,6 +116,32 @@ class PickingManager {
         return this.#pickingDepthGPUTextureView;
     }
 
+    get pickingPassDescriptor(): GPURenderPassDescriptor {
+        return this.#pickingPassDescriptor;
+    }
+
+    prepareRender(view: View3D) {
+
+        this.#checkTexture(view)
+        this.#pickingPassDescriptor = {
+            label: `${view.name} Picking Render Pass`,
+            colorAttachments: [
+                {
+                    view: this.pickingGPUTextureView,
+                    clearValue: {r: 0.0, g: 0.0, b: 0.0, a: 0.0},
+                    loadOp: GPU_LOAD_OP.CLEAR,
+                    storeOp: GPU_STORE_OP.STORE
+                }
+            ],
+            depthStencilAttachment: {
+                view: this.pickingDepthGPUTextureView,
+                depthClearValue: 1.0,
+                depthLoadOp: GPU_LOAD_OP.CLEAR,
+                depthStoreOp: GPU_STORE_OP.STORE,
+            },
+        };
+    }
+
     /**
      * [KO] 캐스팅 리스트를 초기화합니다.
      * [EN] Resets the casting list.
@@ -143,7 +173,7 @@ class PickingManager {
      * [KO] View3D 인스턴스
      * [EN] View3D instance
      */
-    checkTexture(view: any) {
+    #checkTexture(view: any) {
         const {redGPUContext} = view
         const {resourceManager} = redGPUContext
         this.#view = view
