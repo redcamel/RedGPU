@@ -247,7 +247,6 @@ class Renderer {
 
         redGPUContext.commandEncoderManager.addMainRenderPass(shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
             this.#updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
-            this.#updateViewSystemUniforms(view, viewShadowRenderPassEncoder, true, false)
 
             if (directionalShadowManager.castingList.length) {
                 renderShadowLayer(view, viewShadowRenderPassEncoder)
@@ -262,14 +261,10 @@ class Renderer {
         if (skyAtmosphere) {
             skyAtmosphere.update(view)
         }
-
         redGPUContext.commandEncoderManager.addMainRenderPass(renderPassDescriptor, (viewRenderPassEncoder) => {
-            const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
             this.#updateViewportAndScissor(view, viewRenderPassEncoder)
-            this.#updateViewSystemUniforms(view, viewRenderPassEncoder, false, true, renderPath1ResultTextureView)
 
             renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
-            viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
             if (skybox) skybox.render(renderViewStateData)
             if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
             if (axis) axis.render(renderViewStateData)
@@ -321,7 +316,6 @@ class Renderer {
                     depthLoadOp: GPU_LOAD_OP.LOAD,
                 },
             }, (renderPassEncoder) => {
-                this.#updateViewSystemUniforms(view, renderPassEncoder, false, false)
                 renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
             });
         }
@@ -333,7 +327,6 @@ class Renderer {
             pickingManager.prepareRender(view)
             redGPUContext.commandEncoderManager.addMainRenderPass(pickingManager.pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
                 this.#updateViewportAndScissor(view, viewPickingRenderPassEncoder)
-                this.#updateViewSystemUniforms(view, viewPickingRenderPassEncoder, false, false)
                 renderPickingLayer(view, viewPickingRenderPassEncoder)
             });
         }
@@ -410,18 +403,6 @@ class Renderer {
                 this.#prevViewportSize = {width, height};
             }
         }
-    }
-
-    #updateViewSystemUniforms(
-        view: View3D,
-        viewRenderPassEncoder: GPURenderPassEncoder,
-        shadowRender: boolean = false,
-        calcPointLightCluster: boolean = true,
-        renderPath1ResultTextureView: GPUTextureView = null
-    ) {
-        // [KO] 바인드 그룹만 설정 (업데이트는 renderView 시작 시 이미 수행됨)
-        // [EN] Only set bind group (update already performed at start of renderView)
-        viewRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
     }
 }
 
