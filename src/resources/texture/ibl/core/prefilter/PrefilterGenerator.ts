@@ -22,6 +22,7 @@ class PrefilterGenerator {
     #sampler: Sampler;
     #pipeline: GPUComputePipeline;
     #shaderModule: GPUShaderModule;
+    #uniformBuffers: GPUBuffer[] = [];
 
     /**
      * [KO] PrefilterGenerator 인스턴스를 생성합니다.
@@ -41,8 +42,6 @@ class PrefilterGenerator {
             addressModeW: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
         });
     }
-
-    #uniformBuffers: GPUBuffer[] = [];
 
     /**
      * [KO] 소스 큐브 텍스처로부터 프리필터링된 큐브맵을 생성하여 반환합니다.

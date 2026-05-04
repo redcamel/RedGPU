@@ -3,10 +3,10 @@
  * [EN] Constant object defining the types of GPU command encoders.
  */
 export const COMMAND_ENCODER_TYPE = {
-	RESOURCE: 'RESOURCE',
-	PRE_PROCESS: 'PRE_PROCESS',
-	MAIN: 'MAIN',
-	POST_PROCESS: 'POST_PROCESS',
+    RESOURCE: 'RESOURCE',
+    PRE_PROCESS: 'PRE_PROCESS',
+    MAIN: 'MAIN',
+    POST_PROCESS: 'POST_PROCESS',
 } as const;
 
 /**

@@ -439,9 +439,12 @@ class Renderer {
                     {
                         const sourceMatrix = mesh.modelMatrix;
                         const resultMatrix = skinInfo.invertNodeGlobalTransform;
-                        const m00 = sourceMatrix[0], m01 = sourceMatrix[1], m02 = sourceMatrix[2], m03 = sourceMatrix[3];
-                        const m10 = sourceMatrix[4], m11 = sourceMatrix[5], m12 = sourceMatrix[6], m13 = sourceMatrix[7];
-                        const m20 = sourceMatrix[8], m21 = sourceMatrix[9], m22 = sourceMatrix[10], m23 = sourceMatrix[11];
+                        const m00 = sourceMatrix[0], m01 = sourceMatrix[1], m02 = sourceMatrix[2],
+                            m03 = sourceMatrix[3];
+                        const m10 = sourceMatrix[4], m11 = sourceMatrix[5], m12 = sourceMatrix[6],
+                            m13 = sourceMatrix[7];
+                        const m20 = sourceMatrix[8], m21 = sourceMatrix[9], m22 = sourceMatrix[10],
+                            m23 = sourceMatrix[11];
                         const m30 = sourceMatrix[12], m31 = sourceMatrix[13], m32 = sourceMatrix[14],
                             m33 = sourceMatrix[15];
                         const c00 = m11 * (m22 * m33 - m23 * m32) - m12 * (m21 * m33 - m23 * m31) + m13 * (m21 * m32 - m22 * m31);

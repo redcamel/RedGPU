@@ -44,6 +44,9 @@ class PickingManager {
     #videoMemorySize: number = 0
     #raycaster3D: Raycaster3D = new Raycaster3D();
     #raycaster2D: Raycaster2D = new Raycaster2D();
+    /** [KO] 픽셀 값을 읽어올 임시 버퍼 [EN] Temporary buffer to read pixel values */
+    #readPixelBuffer: GPUBuffer;
+    #isReading: boolean = false;
 
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
@@ -154,10 +157,6 @@ class PickingManager {
             this.#calcVideoMemory()
         }
     }
-
-    /** [KO] 픽셀 값을 읽어올 임시 버퍼 [EN] Temporary buffer to read pixel values */
-    #readPixelBuffer: GPUBuffer;
-    #isReading: boolean = false;
 
     /**
      * [KO] 다음 렌더링 시 픽셀 읽기 작업을 준비합니다.

@@ -321,13 +321,6 @@ class SkyAtmosphere {
         return this.#postEffect.render(view, width, height, sourceTextureInfo);
     }
 
-    #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
-        this.#dirtyUniformBuffer = true;
-        if (lut) this.#dirtyLUT = true;
-        if (skyView) this.#dirtySkyView = true;
-        if (ibl) this.#skyLight.dirty = true;
-    }
-
     update(view: View3D) {
         const currentFrame = view.renderViewStateData.frameIndex;
         if (this.#lastUpdateFrame === currentFrame) return;
@@ -335,6 +328,13 @@ class SkyAtmosphere {
 
         this.#updateSunInfo(view);
         this.#updateLUTs(view);
+    }
+
+    #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
+        this.#dirtyUniformBuffer = true;
+        if (lut) this.#dirtyLUT = true;
+        if (skyView) this.#dirtySkyView = true;
+        if (ibl) this.#skyLight.dirty = true;
     }
 
     #updateSunInfo(view: View3D): void {

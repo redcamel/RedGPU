@@ -22,6 +22,7 @@ class IrradianceGenerator {
     #sampler: Sampler;
     #pipeline: GPUComputePipeline;
     #shaderModule: GPUShaderModule;
+    #uniformBuffer: GPUBuffer;
 
     /**
      * [KO] IrradianceGenerator 인스턴스를 생성합니다.
@@ -87,8 +88,6 @@ class IrradianceGenerator {
 
         return new DirectCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
     }
-
-    #uniformBuffer: GPUBuffer;
 
     /**
      * [KO] 소스 큐브 텍스처로부터 Irradiance를 계산하여 대상 GPUTexture에 렌더링합니다.

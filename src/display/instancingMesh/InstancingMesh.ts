@@ -233,7 +233,7 @@ class InstancingMesh extends Mesh {
                 this.#performGPUCulling(renderViewStateData);
             }
             this.#renderGeometry(renderViewStateData, shadowRender, currentRenderPassEncoder);
-            }
+        }
         if (this.castShadow) {
             castingList[castingList.length] = this;
         }

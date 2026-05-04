@@ -18,6 +18,7 @@ class EquirectangularToCubeGenerator {
     #shaderModule: GPUShaderModule;
     #pipeline: GPUComputePipeline;
     #sampler: Sampler;
+    #uniformBuffer: GPUBuffer;
 
     /**
      * [KO] EquirectangularToCubeGenerator 인스턴스를 생성합니다.
@@ -36,8 +37,6 @@ class EquirectangularToCubeGenerator {
             addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
         });
     }
-
-    #uniformBuffer: GPUBuffer;
 
     /**
      * [KO] 2D Equirectangular 텍스처를 큐브맵으로 변환하여 반환합니다.

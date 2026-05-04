@@ -128,6 +128,17 @@ class DownSampleCubeMapGenerator {
         }
     }
 
+    /** [KO] 모든 리소스를 해제합니다. [EN] Clears all resources. */
+    destroy() {
+        this.#clearTempCaches();
+        this.#cubemapUniformBuffers.forEach(b => b.destroy());
+        this.#cubemapUniformBuffers = [];
+        this.#cubemapComputePipelines.clear();
+        this.#cubemapBindGroupLayouts.clear();
+        this.#cubemapShaderModule = null;
+        this.#cubemapSampler = null;
+    }
+
     #calculateSourceMipLevel(sourceSize: number, targetSize: number, targetMipLevel: number, sourceMipLevels: number): number {
         const currentTargetSize = Math.max(1, targetSize >> targetMipLevel);
         const scaleFactor = sourceSize / currentTargetSize;
@@ -193,7 +204,11 @@ class DownSampleCubeMapGenerator {
             const bindGroupLayout = resourceManager.createBindGroupLayout(`DOWN_SAMPLE_CUBE_GENERATOR_BGL_${format}`, {
                 entries: [
                     {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {viewDimension: 'cube'}},
-                    {binding: 1, visibility: GPUShaderStage.COMPUTE, storageTexture: {format, viewDimension: '2d-array'}},
+                    {
+                        binding: 1,
+                        visibility: GPUShaderStage.COMPUTE,
+                        storageTexture: {format, viewDimension: '2d-array'}
+                    },
                     {binding: 2, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
                     {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
                 ]
@@ -212,17 +227,6 @@ class DownSampleCubeMapGenerator {
     #clearTempCaches() {
         this.#tempViewCache.clear();
         this.#tempBindGroupCache.clear();
-    }
-
-    /** [KO] 모든 리소스를 해제합니다. [EN] Clears all resources. */
-    destroy() {
-        this.#clearTempCaches();
-        this.#cubemapUniformBuffers.forEach(b => b.destroy());
-        this.#cubemapUniformBuffers = [];
-        this.#cubemapComputePipelines.clear();
-        this.#cubemapBindGroupLayouts.clear();
-        this.#cubemapShaderModule = null;
-        this.#cubemapSampler = null;
     }
 }
 

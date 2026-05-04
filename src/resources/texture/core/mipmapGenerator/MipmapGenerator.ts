@@ -169,7 +169,7 @@ class MipmapGenerator {
         textureDescriptor: GPUTextureDescriptor,
         useCache: boolean = false,
         encoderType: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
-    ):GPUTexture {
+    ): GPUTexture {
         // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {
             this.#clearTempCaches();
@@ -216,7 +216,7 @@ class MipmapGenerator {
                         storeOp: GPU_STORE_OP.STORE
                     }],
                 }
-                
+
                 if (encoderType === COMMAND_ENCODER_TYPE.RESOURCE) {
                     commandEncoderManager.addResourceRenderPass(passDescriptor, (passEncoder) => {
                         passEncoder.setPipeline(pipeline);
@@ -242,7 +242,7 @@ class MipmapGenerator {
                         passEncoder.draw(3, 1, 0, 0);
                     });
                 }
-                
+
                 srcView = dstView;
             }
         }
@@ -271,7 +271,7 @@ class MipmapGenerator {
         // if (!renderToSource) {
         //     mipTexture.destroy();
         // }
-        
+
         // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {
             this.#clearTempCaches();

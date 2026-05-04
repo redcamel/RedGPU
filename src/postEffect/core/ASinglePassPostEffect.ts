@@ -338,7 +338,6 @@ abstract class ASinglePassPostEffect {
     }
 
 
-
     /**
      * [KO] 유니폼 값을 업데이트합니다.
      * [EN] Updates a uniform value.

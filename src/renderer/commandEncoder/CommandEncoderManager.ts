@@ -18,6 +18,7 @@ export interface CommandPhaseStats {
     };
     'Raw Usages': number;
 }
+
 /**
  * [KO] 일괄 제출 통계 정보 인터페이스
  * [EN] Batch submission statistics
@@ -187,15 +188,6 @@ class CommandEncoderManager {
         await this.#submitImmediate(label, executor, 'Immediate Submitted Commands');
     }
 
-    async #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): Promise<void> {
-        const encoder = this.#redGPUContext.gpuDevice.createCommandEncoder({label});
-        executor(encoder);
-        const buffer = encoder.finish();
-        this.#redGPUContext.gpuDevice.queue.submit([buffer]);
-        await this.#redGPUContext.gpuDevice.queue.onSubmittedWorkDone();
-        console.log(`🚀 [CommandEncoderManager] ${logTag}`, {label});
-    }
-
     /**
      * [KO] 특정 타입의 모든 인코더를 종료하고 즉시 서밋합니다.
      * [EN] Finishes all encoders for the specific type and submits them immediately.
@@ -270,6 +262,15 @@ class CommandEncoderManager {
         Object.keys(this.#isPassActive).forEach(key => {
             delete this.#isPassActive[key as CommandEncoderType];
         });
+    }
+
+    async #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): Promise<void> {
+        const encoder = this.#redGPUContext.gpuDevice.createCommandEncoder({label});
+        executor(encoder);
+        const buffer = encoder.finish();
+        this.#redGPUContext.gpuDevice.queue.submit([buffer]);
+        await this.#redGPUContext.gpuDevice.queue.onSubmittedWorkDone();
+        console.log(`🚀 [CommandEncoderManager] ${logTag}`, {label});
     }
 
     /**
