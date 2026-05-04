@@ -183,18 +183,15 @@ class Renderer {
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
             {
-                const {elapsed} = renderViewStateData;
-
-                const fpsInterval = 1000 / 60
-                if (elapsed >= fpsInterval) { // 60FPS 기준 간격 (약 16.67ms)
-                    // 경과 시간에서 오차를 보정하며 마지막 프레임 시간 업데이트
-                    renderViewStateData.prevTimestamp = renderViewStateData.timestamp - (elapsed % fpsInterval);
-
-
+                if (renderViewStateData.numFixedSteps > 0) {
                     const {scene} = view
                     if (scene.physicsEngine) {
-                        // 물리 시뮬레이션 진행 (초 단위 deltaTime 전달)
-                        scene.physicsEngine.step(fpsInterval / 1000);
+                        // [KO] 고정 타임스텝 수만큼 물리 시뮬레이션 반복 (제 속도 유지)
+                        // [EN] Repeat physics simulation for the number of fixed steps (maintain real-time speed)
+                        let i = renderViewStateData.numFixedSteps;
+                        while (i--) {
+                            scene.physicsEngine.step(renderViewStateData.fixedStepDeltaTime);
+                        }
                     }
                 }
 

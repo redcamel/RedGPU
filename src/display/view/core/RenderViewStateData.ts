@@ -75,6 +75,10 @@ class RenderViewStateData {
     deltaTime: number = 0;
     /** [KO] sin(time)의 계산된 값 [EN] Calculated value of sin(time) */
     sinTime: number = 0;
+    /** [KO] 물리 엔진 등에 사용될 고정 타임스텝 업데이트가 필요한 횟수 [EN] Number of fixed timestep updates needed for physics engine etc. */
+    numFixedSteps: number = 0;
+    /** [KO] 고정 타임스텝의 간격 (초) [EN] Fixed timestep interval (seconds) */
+    fixedStepDeltaTime: number = 1 / 60;
 
     /** [KO] 현재 뷰포트 크기 및 위치 정보 [EN] Current viewport size and position information */
     viewportSize: ViewportSize;
@@ -246,7 +250,25 @@ class RenderViewStateData {
         const now = performance.now();
         this.viewRenderCPURecordingTime = 0;
         this.frameIndex++;
-        this.elapsed = now - this.prevTimestamp;
+
+        // [KO] 이전 물리 업데이트 시점으로부터의 누적 경과 시간 계산
+        // [EN] Calculate accumulated elapsed time since the last physics update point
+        const physicsElapsed = now - this.prevTimestamp;
+        const fpsInterval = 1000 / 60; // 60FPS (~16.67ms)
+
+        // [KO] 이번 프레임에 실행해야 할 고정 스텝 수 계산 (최대 10회 제한으로 폭주 방지)
+        // [EN] Calculate number of fixed steps to run this frame (capped at 10 to prevent spiral of death)
+        this.numFixedSteps = Math.min(Math.floor(physicsElapsed / fpsInterval), 10);
+
+        if (this.numFixedSteps > 0) {
+            // [KO] 실행할 스텝만큼만 시간 축적기(prevTimestamp) 전진
+            // [EN] Advance the time accumulator (prevTimestamp) only by the steps to be processed
+            this.prevTimestamp += this.numFixedSteps * fpsInterval;
+        }
+
+        // [KO] 시각적 애니메이션 등에 사용할 실제 프레임 간 경과 시간 계산
+        // [EN] Calculate actual frame-to-frame elapsed time for visual animations etc.
+        this.elapsed = now - this.timestamp;
         this.time = now / 1000;
         this.deltaTime = this.elapsed / 1000;
         this.sinTime = Math.sin(this.time);
