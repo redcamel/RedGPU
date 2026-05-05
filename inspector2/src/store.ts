@@ -20,10 +20,11 @@ export interface InspectorState {
   totalNumTriangles: number;
   totalNumPoints: number;
   totalUsedVideoMemory: number;
-  // 액션
+  currentTab: string;
   setStats: (stats: Partial<InspectorState>) => void;
   setUseDebugPanel: (value: boolean) => void;
   setRedGPUContext: (value: RedGPUContext) => void;
+  setCurrentTab: (tab: string) => void;
 }
 
 export const useInspectorStore = create<InspectorState>((set) => ({
@@ -42,7 +43,9 @@ export const useInspectorStore = create<InspectorState>((set) => ({
   totalNumTriangles: 0,
   totalNumPoints: 0,
   totalUsedVideoMemory: 0,
+  currentTab: 'STATE',
   setStats: (stats) => set((state) => ({ ...state, ...stats })),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),
   setRedGPUContext: (value) => set({ redGPUContext: value }),
+  setCurrentTab: (tab) => set({ currentTab: tab }),
 }));

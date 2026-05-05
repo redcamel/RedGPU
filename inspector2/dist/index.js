@@ -7179,9 +7179,11 @@ const useInspectorStore = create((set) => ({
   totalNumTriangles: 0,
   totalNumPoints: 0,
   totalUsedVideoMemory: 0,
+  currentTab: "STATE",
   setStats: (stats) => set((state) => ({ ...state, ...stats })),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),
-  setRedGPUContext: (value) => set({ redGPUContext: value })
+  setRedGPUContext: (value) => set({ redGPUContext: value }),
+  setCurrentTab: (tab) => set({ currentTab: tab })
 }));
 class FPSMeter {
   constructor() {
@@ -7239,31 +7241,53 @@ class FPSMeter {
   }
 }
 const FPS = () => {
-  const { fps, avgFps, low1Fps, low01Fps, frameTime } = useInspectorStore();
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: currentFpsBoxStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: fpsValueStyle, children: [
-        fps,
-        " FPS"
+  const { fps, avgFps, low1Fps, low01Fps, frameTime, currentTab, setCurrentTab } = useInspectorStore();
+  const tabs = [
+    { id: "STATE", label: "State" },
+    { id: "CONTEXT", label: "RedGPUContext" },
+    { id: "VIEWS", label: "ViewList" },
+    { id: "RESOURCES", label: "Resources" }
+  ];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: currentFpsBoxStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: fpsValueStyle, children: [
+          fps,
+          " FPS"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: frameTimeValueStyle, children: frameTime })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: frameTimeValueStyle, children: frameTime })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: extraStatsBoxStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: avgFpsStyle, children: [
-        "Avg: ",
-        avgFps
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low1FpsStyle, children: [
-        "1%: ",
-        low1Fps
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low01FpsStyle, children: [
-        "0.1%: ",
-        low01Fps
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: extraStatsBoxStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: avgFpsStyle, children: [
+          "Avg: ",
+          avgFps
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low1FpsStyle, children: [
+          "1%: ",
+          low1Fps
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low01FpsStyle, children: [
+          "0.1%: ",
+          low01Fps
+        ] })
       ] })
-    ] })
-  ] }) });
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabContainerStyle, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        onClick: () => setCurrentTab(tab.id),
+        style: {
+          ...tabItemStyle,
+          borderBottom: currentTab === tab.id ? "2px solid #fdb48d" : "2px solid transparent",
+          color: currentTab === tab.id ? "#fdb48d" : "#888",
+          backgroundColor: currentTab === tab.id ? "rgba(253, 180, 141, 0.1)" : "transparent"
+        },
+        children: tab.label
+      },
+      tab.id
+    )) })
+  ] });
 };
 const containerStyle$1 = {
   borderBottom: "1px solid rgba(255,255,255,0.1)"
@@ -7275,6 +7299,21 @@ const statsContainerStyle = {
   justifyContent: "flex-end",
   gap: "12px",
   background: "#000"
+};
+const tabContainerStyle = {
+  display: "flex",
+  background: "#111",
+  borderTop: "1px solid rgba(255,255,255,0.05)"
+};
+const tabItemStyle = {
+  padding: "8px 4px",
+  fontSize: "10px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  flex: 1,
+  textAlign: "center",
+  whiteSpace: "nowrap"
 };
 const currentFpsBoxStyle = {
   display: "flex",
@@ -7387,30 +7426,57 @@ const gridStyle = {
 const App = () => {
   const useDebugPanel = useInspectorStore((state) => state.useDebugPanel);
   const setUseDebugPanel = useInspectorStore((state) => state.setUseDebugPanel);
+  const currentTab = useInspectorStore((state) => state.currentTab);
   if (!useDebugPanel) return null;
+  const renderTabContent = () => {
+    switch (currentTab) {
+      case "STATE":
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(TotalState, {});
+      case "CONTEXT":
+        return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "RedGPUContext Inspector (Coming Soon)" });
+      case "VIEWS":
+        return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "ViewList Inspector (Coming Soon)" });
+      case "RESOURCES":
+        return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "Resources Inspector (Coming Soon)" });
+      default:
+        return null;
+    }
+  };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: panelStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleLabelStyle, children: "Performance Monitor" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setUseDebugPanel(false), style: closeBtnStyle, children: "CLOSE" })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(FPS, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(TotalState, {})
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentContainerStyle, children: renderTabContent() })
   ] });
+};
+const placeholderStyle = {
+  padding: "20px",
+  textAlign: "center",
+  color: "#666",
+  fontSize: "12px",
+  fontStyle: "italic"
+};
+const contentContainerStyle = {
+  flex: 1,
+  overflowY: "auto"
 };
 const panelStyle = {
   position: "fixed",
-  left: "320px",
+  left: "340px",
   top: 0,
-  width: "330px",
-  maxHeight: "100%",
+  width: "400px",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
   backgroundColor: "rgba(0, 0, 0, 0.9)",
   color: "white",
   fontFamily: "monospace",
   zIndex: 1e4,
   boxShadow: "0 0 20px rgba(0,0,0,0.5)",
   borderTopRightRadius: "8px",
-  overflowY: "auto",
-  overflowX: "hidden"
+  overflow: "hidden"
 };
 const headerStyle = {
   padding: "10px 12px",

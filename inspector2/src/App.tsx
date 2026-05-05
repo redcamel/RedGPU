@@ -6,8 +6,24 @@ import TotalState from './components/TotalState';
 const App = () => {
     const useDebugPanel = useInspectorStore(state => state.useDebugPanel);
     const setUseDebugPanel = useInspectorStore(state => state.setUseDebugPanel);
+    const currentTab = useInspectorStore(state => state.currentTab);
 
     if (!useDebugPanel) return null;
+
+    const renderTabContent = () => {
+        switch (currentTab) {
+            case 'STATE':
+                return <TotalState />;
+            case 'CONTEXT':
+                return <div style={placeholderStyle}>RedGPUContext Inspector (Coming Soon)</div>;
+            case 'VIEWS':
+                return <div style={placeholderStyle}>ViewList Inspector (Coming Soon)</div>;
+            case 'RESOURCES':
+                return <div style={placeholderStyle}>Resources Inspector (Coming Soon)</div>;
+            default:
+                return null;
+        }
+    };
 
     return (
         <div style={panelStyle}>
@@ -16,25 +32,41 @@ const App = () => {
                 <button onClick={() => setUseDebugPanel(false)} style={closeBtnStyle}>CLOSE</button>
             </div>
             <FPS />
-            <TotalState />
+            <div style={contentContainerStyle}>
+                {renderTabContent()}
+            </div>
         </div>
     );
 };
 
+const placeholderStyle: React.CSSProperties = {
+    padding: '20px',
+    textAlign: 'center',
+    color: '#666',
+    fontSize: '12px',
+    fontStyle: 'italic'
+};
+
+const contentContainerStyle: React.CSSProperties = {
+    flex: 1,
+    overflowY: 'auto'
+};
+
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    left: '320px',
+    left: '340px',
     top: 0,
-    width: '330px',
-    maxHeight: '100%',
+    width: '400px',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
     backgroundColor: 'rgba(0, 0, 0, 0.9)',
     color: 'white',
     fontFamily: 'monospace',
     zIndex: 10000,
     boxShadow: '0 0 20px rgba(0,0,0,0.5)',
     borderTopRightRadius: '8px',
-    overflowY: 'auto',
-    overflowX: 'hidden'
+    overflow: 'hidden'
 };
 
 const headerStyle: React.CSSProperties = {
