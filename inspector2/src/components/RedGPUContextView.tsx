@@ -1,9 +1,10 @@
 import React from 'react';
-import { useInspectorStore } from '../store';
+import {useInspectorStore} from '../store';
 import Section from "./commonUI/Section";
 import StatItem from "./commonUI/StatItem";
 import StatRGBAItem from "./commonUI/StatRGBAItem";
 import StatBoolItem from "./commonUI/StatBoolItem";
+import ToneMappingView from "./ToneMappingView";
 
 
 /**
@@ -23,47 +24,45 @@ const RedGPUContextView = () => {
 
     return (
         <div style={containerStyle}>
-            <Section title="Adapter Info">
-                <StatItem label="Vendor" value={adapterInfo.vendor} />
-                <StatItem label="Architecture" value={adapterInfo.architecture} />
-                <StatItem label="Device" value={adapterInfo.device} />
-                <StatItem label="Description" value={adapterInfo.description} />
-                <StatBoolItem label="Fallback" value={detector.isFallbackAdapter} trueLabel="Yes" falseLabel="No" />
-            </Section>
 
             <Section title="RedGPUContext Info">
-                <StatItem label="Width" value={width} />
-                <StatItem label="Height" value={height} />
-                <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`} color="#fdb48d" />
-                <StatItem label="Canvas size" value={`${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}`} />
-                <StatItem label="Device Pixel Ratio" value={window.devicePixelRatio} />
-                <StatItem label="renderScale" value={redGPUContext.renderScale} />
-                <StatItem label="Alpha Mode" value={redGPUContext.alphaMode} />
-                <StatRGBAItem label="backgroundColor" value={backgroundColor.rgba} />
+                <StatItem label="Width" value={width}/>
+                <StatItem label="Height" value={height}/>
+                <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`} color="#fdb48d"/>
+                <StatItem label="Canvas size" value={`${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}`}/>
+                <StatItem label="Device Pixel Ratio" value={window.devicePixelRatio}/>
+                <StatItem label="renderScale" value={redGPUContext.renderScale}/>
+                <StatItem label="Alpha Mode" value={redGPUContext.alphaMode}/>
+                <StatRGBAItem label="backgroundColor" value={backgroundColor.rgba}/>
             </Section>
 
             <Section title="Antialiasing">
-                <StatBoolItem label="useMSAA" value={antialiasingManager.useMSAA} />
-                <StatBoolItem label="useFXAA" value={antialiasingManager.useFXAA} />
-                <StatBoolItem label="useTAA" value={antialiasingManager.useTAA} />
+                <StatBoolItem label="useMSAA" value={antialiasingManager.useMSAA}/>
+                <StatBoolItem label="useFXAA" value={antialiasingManager.useFXAA}/>
+                <StatBoolItem label="useTAA" value={antialiasingManager.useTAA}/>
             </Section>
-
+            <ToneMappingView />
             <Section title="Environment">
-                <StatItem label="devicePixelRatio" value={devicePixelRatio} />
-                <StatBoolItem label="Mobile" value={detector.isMobile} trueLabel="Yes" falseLabel="No" />
+                <StatItem label="devicePixelRatio" value={devicePixelRatio}/>
+                <StatBoolItem label="Mobile" value={detector.isMobile} trueLabel="Yes" falseLabel="No"/>
                 <div style={userAgentStyle}>
                     <div style={labelStyle}>User Agent</div>
                     <div style={userAgentValueStyle}>{detector.userAgent}</div>
                 </div>
+            </Section>
+            <Section title="Adapter Info">
+                <StatItem label="Vendor" value={adapterInfo.vendor}/>
+                <StatItem label="Architecture" value={adapterInfo.architecture}/>
+                <StatItem label="Device" value={adapterInfo.device}/>
+                <StatItem label="Description" value={adapterInfo.description}/>
+                <StatBoolItem label="Fallback" value={detector.isFallbackAdapter} trueLabel="Yes" falseLabel="No"/>
             </Section>
         </div>
     );
 };
 
 // Styles
-const containerStyle: React.CSSProperties = {
-    padding: '12px'
-};
+const containerStyle: React.CSSProperties = {};
 
 const labelStyle: React.CSSProperties = {
     color: '#888'

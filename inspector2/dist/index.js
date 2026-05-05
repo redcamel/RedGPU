@@ -7486,6 +7486,16 @@ const statItemStyle = {
   fontFamily: THEME.fontFamily,
   alignItems: "center"
 };
+const ToneMappingView = () => {
+  const { redGPUContext } = useInspectorStore();
+  if (!redGPUContext) return null;
+  const { viewList } = redGPUContext;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: viewList.map((view, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: `ToneMapping`, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Mode", value: view.toneMappingManager.mode }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Contrast", value: view.toneMappingManager.contrast.toFixed(2) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Brightness", value: view.toneMappingManager.brightness.toFixed(2) })
+  ] }, index)) });
+};
 const RedGPUContextView = () => {
   const redGPUContext = useInspectorStore((state) => state.redGPUContext);
   const pixelRectArray = useInspectorStore((state) => state.pixelRectArray);
@@ -7495,13 +7505,6 @@ const RedGPUContextView = () => {
   const { detector, htmlCanvas, width, height, backgroundColor, antialiasingManager } = redGPUContext;
   const adapterInfo = detector.adapterInfo;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Adapter Info", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Vendor", value: adapterInfo.vendor }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Architecture", value: adapterInfo.architecture }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Device", value: adapterInfo.device }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Description", value: adapterInfo.description }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Fallback", value: detector.isFallbackAdapter, trueLabel: "Yes", falseLabel: "No" })
-    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "RedGPUContext Info", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Width", value: width }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Height", value: height }),
@@ -7517,6 +7520,7 @@ const RedGPUContextView = () => {
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFXAA", value: antialiasingManager.useFXAA }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useTAA", value: antialiasingManager.useTAA })
     ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(ToneMappingView, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Environment", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "devicePixelRatio", value: devicePixelRatio }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Mobile", value: detector.isMobile, trueLabel: "Yes", falseLabel: "No" }),
@@ -7524,12 +7528,17 @@ const RedGPUContextView = () => {
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: labelStyle, children: "User Agent" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: userAgentValueStyle, children: detector.userAgent })
       ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Adapter Info", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Vendor", value: adapterInfo.vendor }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Architecture", value: adapterInfo.architecture }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Device", value: adapterInfo.device }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Description", value: adapterInfo.description }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Fallback", value: detector.isFallbackAdapter, trueLabel: "Yes", falseLabel: "No" })
     ] })
   ] });
 };
-const containerStyle$1 = {
-  padding: "12px"
-};
+const containerStyle$1 = {};
 const labelStyle = {
   color: "#888"
 };

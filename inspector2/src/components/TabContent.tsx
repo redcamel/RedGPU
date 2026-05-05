@@ -5,6 +5,7 @@ import RedGPUContextView from './RedGPUContextView';
 import CommandBatchStatsView from './CommandBatchStatsView';
 import ResourcesView from "./ResourcesView";
 import ViewListView from "./ViewListView";
+import ToneMappingView from "./ToneMappingView";
 
 /**
  * [KO] 현재 선택된 탭에 해당하는 컨텐츠를 렌더링하는 컴포넌트입니다.
@@ -22,7 +23,12 @@ const TabContent = () => {
                 </Container>
             );
         case 'CONTEXT':
-            return <Container><RedGPUContextView /></Container>;
+            return (
+                <Container>
+                    <RedGPUContextView />
+
+                </Container>
+            );
         case 'VIEWS':
             return <Container><ViewListView /></Container>;
         case 'RESOURCES':
