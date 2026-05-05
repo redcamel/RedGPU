@@ -1,5 +1,6 @@
 import Camera2D from "../../../camera/camera/Camera2D";
 import View3D from "../View3D";
+import {CommandBatchStats, CommandPhaseStats} from "../../../renderer/commandEncoder/CommandEncoderManager";
 
 /**
  * 뷰포트의 크기와 위치를 나타냅니다.
@@ -115,7 +116,7 @@ class RenderViewStateData {
 
     /** [KO] 씬이 2D 모드인지 여부 [EN] Whether the scene is in 2D mode */
     isScene2DMode: boolean = false;
-
+    commandBatchStats: CommandBatchStats = null
     /** [KO] 연결된 View3D 인스턴스 (private) [EN] Connected View3D instance (private) */
     readonly #view: View3D;
 

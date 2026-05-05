@@ -231,12 +231,12 @@ class CommandEncoderManager {
                 throw new Error(`[RedGPU] Cannot submit ${type} phase while a pass is still active.`);
             }
             const buffers = this.#finish(type);
-            if (buffers.length > 0) {
+            // if (buffers.length > 0) {
                 allBuffers.push(...buffers);
                 submittedTypes.push(type);
                 batchStats[type] = this.#createPhaseStats(type, buffers.length);
                 this.#resetStat(type);
-            }
+            // }
         });
 
         if (allBuffers.length > 0) {
