@@ -7813,7 +7813,7 @@ const TabContent = () => {
 };
 const Container = ({ children, style }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "12px", ...style }, children });
 const placeholderStyle = {
-  padding: "20px",
+  padding: "12px 16px",
   textAlign: "center",
   color: "#666",
   fontSize: "12px",

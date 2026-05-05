@@ -34,7 +34,7 @@ const Container = ({ children,style }: { children: React.ReactNode,style?:React.
     <div style={{ padding: '12px',...style }}>{children}</div>
 );
 const placeholderStyle: React.CSSProperties = {
-    padding: '20px',
+    padding: '12px 16px',
     textAlign: 'center',
     color: '#666',
     fontSize: '12px',
