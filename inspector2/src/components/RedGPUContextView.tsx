@@ -17,7 +17,7 @@ const RedGPUContextView = () => {
         return <div style={placeholderStyle}>RedGPUContext not initialized</div>;
     }
 
-    const {detector,htmlCanvas,width,height,backgroundColor} = redGPUContext;
+    const {detector, htmlCanvas, width, height, backgroundColor, antialiasingManager} = redGPUContext;
     const adapterInfo = detector.adapterInfo;
 
     return (
@@ -38,6 +38,12 @@ const RedGPUContextView = () => {
                 <StatItem label="Display" value={`${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}`} />
                 <StatItem label="Device Pixel Ratio" value={window.devicePixelRatio} />
                 <StatRGBAItem label="backgroundColor" value={backgroundColor.rgba} />
+            </Section>
+
+            <Section title="Antialiasing">
+                <StatItem label="useMSAA" value={antialiasingManager.useMSAA ? 'True' : 'False'} color={antialiasingManager.useMSAA ? '#0f0' : '#888'} />
+                <StatItem label="useFXAA" value={antialiasingManager.useFXAA ? 'True' : 'False'} color={antialiasingManager.useFXAA ? '#0f0' : '#888'} />
+                <StatItem label="useTAA" value={antialiasingManager.useTAA ? 'True' : 'False'} color={antialiasingManager.useTAA ? '#0f0' : '#888'} />
             </Section>
 
             <Section title="Environment">

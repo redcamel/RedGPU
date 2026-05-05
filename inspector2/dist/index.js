@@ -7439,7 +7439,7 @@ const RedGPUContextView = () => {
   if (!redGPUContext) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "RedGPUContext not initialized" });
   }
-  const { detector, htmlCanvas, width, height, backgroundColor } = redGPUContext;
+  const { detector, htmlCanvas, width, height, backgroundColor, antialiasingManager } = redGPUContext;
   const adapterInfo = detector.adapterInfo;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Adapter Info", children: [
@@ -7457,6 +7457,11 @@ const RedGPUContextView = () => {
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Display", value: `${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}` }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Device Pixel Ratio", value: window.devicePixelRatio }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "backgroundColor", value: backgroundColor.rgba })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Antialiasing", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "useMSAA", value: antialiasingManager.useMSAA ? "True" : "False", color: antialiasingManager.useMSAA ? "#0f0" : "#888" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "useFXAA", value: antialiasingManager.useFXAA ? "True" : "False", color: antialiasingManager.useFXAA ? "#0f0" : "#888" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "useTAA", value: antialiasingManager.useTAA ? "True" : "False", color: antialiasingManager.useTAA ? "#0f0" : "#888" })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Environment", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "devicePixelRatio", value: devicePixelRatio }),
