@@ -8,6 +8,8 @@ import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";
 import AController from "@redgpu/src/camera/core/AController";
 
+import Divider from "./commonUI/Divider";
+
 /**
  * [KO] 엔진의 모든 뷰(View3D)의 상태를 표시하는 컴포넌트입니다.
  * [EN] Component that displays the state of all views (View3D) in the engine.
@@ -67,17 +69,17 @@ const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: num
             <StatItem label="numTriangles" value={numTriangles}/>
             <StatItem label="numPoints" value={numPoints}/>
 
-            <div style={dividerStyle}/>
+            <Divider />
 
             <StatBoolItem label="useFrustumCulling" value={useFrustumCulling}/>
             <StatBoolItem label="useDistanceCulling" value={useDistanceCulling}/>
-            <div style={dividerStyle}/>
+            <Divider />
 
 
             <StatItem label="x, y" value={`${formatNumber(x)}, ${formatNumber(y)}`}/>
             <StatItem label="width, height" value={`${width}, ${height}`}/>
             <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`}/>
-            <div style={dividerStyle}/>
+            <Divider />
             <Section title={'scene'}>
                 <StatItem label="name" value={scene.name}/>
                 <StatBoolItem label="useBackgroundColor" value={useBackgroundColor}/>
@@ -87,7 +89,7 @@ const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: num
 
             {camera && (camera instanceof AController || camera.constructor.name.includes('Controller') || ('camera' in camera && (camera as any).camera !== camera)) && (
                 <>
-                    <div style={dividerStyle}/>
+                    <Divider />
                     <Section title={'controller'}>
                         <StatItem label="name" value={camera.name}/>
                         {camera['distance'] !== undefined &&
@@ -131,13 +133,13 @@ const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: num
                     <StatItem label="left/right"
                               value={`${formatNumber(rawCamera['left'])}, ${formatNumber(rawCamera['right'])}`}/>
                 )}
-                <div style={dividerStyle}/>
+                <Divider />
                 <StatBoolItem label="useAutoExposure" value={rawCamera.useAutoExposure}/>
                 <StatItem label="ev100" value={formatNumber(rawCamera.ev100)}/>
 
                 {rawCamera.useAutoExposure && postEffectManager && (
                     <>
-                        <div style={dividerStyle}/>
+                        <Divider />
                         <Section title={'autoExposure'}>
                             <StatItem label="minEV100" value={formatNumber(postEffectManager.autoExposure.minEV100)}/>
                             <StatItem label="maxEV100" value={formatNumber(postEffectManager.autoExposure.maxEV100)}/>
@@ -192,12 +194,6 @@ const formatNumber = (val: any) => {
 const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column'
-};
-
-const dividerStyle: React.CSSProperties = {
-    height: '1px',
-    background: 'rgba(255, 255, 255, 0.1)',
-    margin: '8px 0'
 };
 
 const placeholderStyle: React.CSSProperties = {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useInspectorStore } from '../store';
+import Divider from "./commonUI/Divider";
 
 /**
  * [KO] FPS 및 프레임 타임 통계를 계산하는 클래스입니다.
@@ -94,7 +95,7 @@ const FPS = () => {
                     <div style={frameTimeValueStyle}>{frameTime}</div>
                 </div>
                 
-                <div style={dividerStyle} />
+                <Divider vertical={true} />
                 
                 <div style={extraStatsBoxStyle}>
                     <div style={avgFpsStyle}>Avg: {avgFps}</div>
@@ -136,12 +137,6 @@ const fpsValueStyle: React.CSSProperties = {
 const frameTimeValueStyle: React.CSSProperties = {
     color: '#888',
     fontSize: '11px'
-};
-
-const dividerStyle: React.CSSProperties = {
-    width: '1px',
-    height: '36px',
-    background: 'rgba(255,255,255,0.15)'
 };
 
 const extraStatsBoxStyle: React.CSSProperties = {

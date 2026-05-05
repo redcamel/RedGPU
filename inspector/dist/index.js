@@ -7214,6 +7214,48 @@ const useInspectorStore = create$1((set) => ({
   setRedGPUContext: (value) => set({ redGPUContext: value }),
   setCurrentTab: (tab) => set({ currentTab: tab })
 }));
+const THEME = {
+  fontFamily: "",
+  fontSize: {
+    title: "13px",
+    content: "12px",
+    small: "11px"
+  },
+  colors: {
+    primary: "#fdb48d",
+    label: "#888",
+    value: "#ccc",
+    background: "#111",
+    border: "rgba(255,255,255,0.1)",
+    activeBg: "rgba(253, 180, 141, 0.1)"
+  }
+};
+const COMMON_STYLES = {
+  label: {
+    color: THEME.colors.label
+  },
+  value: {
+    color: THEME.colors.value,
+    textAlign: "right",
+    wordBreak: "break-all",
+    marginLeft: "10px"
+  }
+};
+const Divider = ({ vertical, style }) => {
+  const combinedStyle = vertical ? { ...defaultVerticalStyle, ...style } : { ...defaultHorizontalStyle, ...style };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: combinedStyle });
+};
+const defaultHorizontalStyle = {
+  height: "1px",
+  background: THEME.colors.border,
+  margin: "8px 0"
+};
+const defaultVerticalStyle = {
+  width: "1px",
+  height: "36px",
+  background: THEME.colors.border,
+  margin: "0"
+};
 class FPSMeter {
   constructor() {
     __publicField(this, "previousTimeStamp", 0);
@@ -7279,7 +7321,7 @@ const FPS = () => {
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: frameTimeValueStyle, children: frameTime })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle$1 }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, { vertical: true }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: extraStatsBoxStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: avgFpsStyle, children: [
         "Avg: ",
@@ -7322,11 +7364,6 @@ const frameTimeValueStyle = {
   color: "#888",
   fontSize: "11px"
 };
-const dividerStyle$1 = {
-  width: "1px",
-  height: "36px",
-  background: "rgba(255,255,255,0.15)"
-};
 const extraStatsBoxStyle = {
   display: "flex",
   flexDirection: "column",
@@ -7359,33 +7396,6 @@ const formatBytes = (bytes, decimals = 2) => {
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k2));
   return parseFloat((bytes / Math.pow(k2, i)).toFixed(dm)) + " " + sizes[i];
-};
-const THEME = {
-  fontFamily: "",
-  fontSize: {
-    title: "13px",
-    content: "12px",
-    small: "11px"
-  },
-  colors: {
-    primary: "#fdb48d",
-    label: "#888",
-    value: "#ccc",
-    background: "#111",
-    border: "rgba(255,255,255,0.1)",
-    activeBg: "rgba(253, 180, 141, 0.1)"
-  }
-};
-const COMMON_STYLES = {
-  label: {
-    color: THEME.colors.label
-  },
-  value: {
-    color: THEME.colors.value,
-    textAlign: "right",
-    wordBreak: "break-all",
-    marginLeft: "10px"
-  }
 };
 const Section = ({ title, children }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: title }),
@@ -9134,21 +9144,21 @@ const ViewSection = ({ view, lastUpdateTime }) => {
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numDrawCalls", value: numDrawCalls }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numTriangles", value: numTriangles }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numPoints", value: numPoints }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFrustumCulling", value: useFrustumCulling }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useDistanceCulling", value: useDistanceCulling }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "x, y", value: `${formatNumber(x2)}, ${formatNumber(y2)}` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "width, height", value: `${width}, ${height}` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]` }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "scene", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: scene.name }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useBackgroundColor", value: useBackgroundColor }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "backgroundColor", value: backgroundColor.rgba })
     ] }),
     camera && (camera instanceof AController || camera.constructor.name.includes("Controller") || "camera" in camera && camera.camera !== camera) && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
       /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "controller", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: camera.name }),
         camera["distance"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "distance", value: formatNumber(camera["distance"]) }),
@@ -9205,11 +9215,11 @@ const ViewSection = ({ view, lastUpdateTime }) => {
           value: `${formatNumber(rawCamera["left"])}, ${formatNumber(rawCamera["right"])}`
         }
       ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useAutoExposure", value: rawCamera.useAutoExposure }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "ev100", value: formatNumber(rawCamera.ev100) }),
       rawCamera.useAutoExposure && postEffectManager && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
         /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "autoExposure", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "minEV100", value: formatNumber(postEffectManager.autoExposure.minEV100) }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "maxEV100", value: formatNumber(postEffectManager.autoExposure.maxEV100) }),
@@ -9301,11 +9311,6 @@ const formatNumber = (val) => {
 const containerStyle = {
   display: "flex",
   flexDirection: "column"
-};
-const dividerStyle = {
-  height: "1px",
-  background: "rgba(255, 255, 255, 0.1)",
-  margin: "8px 0"
 };
 const placeholderStyle = {
   padding: "20px",
