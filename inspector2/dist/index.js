@@ -7856,13 +7856,14 @@ const ViewSection = ({ view, lastUpdateTime }) => {
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFrustumCulling", value: useFrustumCulling }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useDistanceCulling", value: useDistanceCulling }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "scene.useBackgroundColor", value: useBackgroundColor }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "scene.backgroundColor", value: backgroundColor.rgba }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "x, y", value: `${formatNumber(x2)}, ${formatNumber(y2)}` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "width, height", value: `${width}, ${height}` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "camera.name", value: rawCamera.name }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "scene.useBackgroundColor", value: useBackgroundColor }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "scene.backgroundColor", value: backgroundColor.rgba }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "scene.name", value: scene.name })
   ] });
 };

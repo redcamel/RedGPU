@@ -1,5 +1,5 @@
 import React from 'react';
-import { useInspectorStore } from '../store';
+import {useInspectorStore} from '../store';
 import Section from "./commonUI/Section";
 import StatItem from "./commonUI/StatItem";
 import StatRGBAItem from "./commonUI/StatRGBAItem";
@@ -12,65 +12,66 @@ import View3D from "@redgpu/src/display/view/View3D";
  * [EN] Component that displays the state of all views (View3D) in the engine.
  */
 const ViewListView = () => {
-    const { redGPUContext, lastUpdateTime } = useInspectorStore();
+    const {redGPUContext, lastUpdateTime} = useInspectorStore();
 
     if (!redGPUContext) {
         return <div style={placeholderStyle}>RedGPUContext not initialized</div>;
     }
 
-    const { viewList } = redGPUContext;
+    const {viewList} = redGPUContext;
 
     return (
         <div style={containerStyle}>
             {viewList.map((view: View3D, index: number) => (
-                <ViewSection key={index} view={view} lastUpdateTime={lastUpdateTime} />
+                <ViewSection key={index} view={view} lastUpdateTime={lastUpdateTime}/>
             ))}
         </div>
     );
 };
 
-const ViewSection = ({ view, lastUpdateTime }: { view: View3D, lastUpdateTime: number }) => {
-    const { name, renderViewStateData, rawCamera, scene, useFrustumCulling, useDistanceCulling } = view;
-    const { 
-        usedVideoMemory, 
-        viewRenderCPURecordingTime, 
-        num3DGroups, 
-        num3DObjects, 
-        numInstances, 
-        numDrawCalls, 
-        numTriangles, 
+const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: number }) => {
+    const {name, renderViewStateData, rawCamera, scene, useFrustumCulling, useDistanceCulling} = view;
+    const {
+        usedVideoMemory,
+        viewRenderCPURecordingTime,
+        num3DGroups,
+        num3DObjects,
+        numInstances,
+        numDrawCalls,
+        numTriangles,
         numPoints,
         viewportSize
     } = renderViewStateData;
 
-    const { x, y, width, height, pixelRectArray } = viewportSize;
-    const { backgroundColor, useBackgroundColor } = scene;
+    const {x, y, width, height, pixelRectArray} = viewportSize;
+    const {backgroundColor, useBackgroundColor} = scene;
 
     return (
         <Section title={name}>
-            <StatItem label="usedVideoMemory" value={formatBytes(usedVideoMemory)} color="#fdb48d" isBold={true} />
-            <StatItem label="viewRenderCPURecordingTime" value={`${viewRenderCPURecordingTime.toFixed(2)}ms`} />
-            <StatItem label="num3DGroups" value={num3DGroups} />
-            <StatItem label="num3DObjects" value={num3DObjects} />
-            <StatItem label="numInstances" value={numInstances} />
-            <StatItem label="numDrawCalls" value={numDrawCalls} />
-            <StatItem label="numTriangles" value={numTriangles} />
-            <StatItem label="numPoints" value={numPoints} />
+            <StatItem label="usedVideoMemory" value={formatBytes(usedVideoMemory)} color="#fdb48d" isBold={true}/>
+            <StatItem label="viewRenderCPURecordingTime" value={`${viewRenderCPURecordingTime.toFixed(2)}ms`}/>
+            <StatItem label="num3DGroups" value={num3DGroups}/>
+            <StatItem label="num3DObjects" value={num3DObjects}/>
+            <StatItem label="numInstances" value={numInstances}/>
+            <StatItem label="numDrawCalls" value={numDrawCalls}/>
+            <StatItem label="numTriangles" value={numTriangles}/>
+            <StatItem label="numPoints" value={numPoints}/>
 
-            <div style={dividerStyle} />
+            <div style={dividerStyle}/>
 
-            <StatBoolItem label="useFrustumCulling" value={useFrustumCulling} />
-            <StatBoolItem label="useDistanceCulling" value={useDistanceCulling} />
-            <StatBoolItem label="scene.useBackgroundColor" value={useBackgroundColor} />
-            <StatRGBAItem label="scene.backgroundColor" value={backgroundColor.rgba} />
+            <StatBoolItem label="useFrustumCulling" value={useFrustumCulling}/>
+            <StatBoolItem label="useDistanceCulling" value={useDistanceCulling}/>
 
-            <div style={dividerStyle} />
 
-            <StatItem label="x, y" value={`${formatNumber(x)}, ${formatNumber(y)}`} />
-            <StatItem label="width, height" value={`${width}, ${height}`} />
-            <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`} />
-            <StatItem label="camera.name" value={rawCamera.name} />
-            <StatItem label="scene.name" value={scene.name} />
+            <StatItem label="x, y" value={`${formatNumber(x)}, ${formatNumber(y)}`}/>
+            <StatItem label="width, height" value={`${width}, ${height}`}/>
+            <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`}/>
+            <div style={dividerStyle}/>
+            <StatItem label="camera.name" value={rawCamera.name}/>
+            <div style={dividerStyle}/>
+            <StatBoolItem label="scene.useBackgroundColor" value={useBackgroundColor}/>
+            <StatRGBAItem label="scene.backgroundColor" value={backgroundColor.rgba}/>
+            <StatItem label="scene.name" value={scene.name}/>
         </Section>
     );
 };
