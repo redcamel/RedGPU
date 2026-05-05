@@ -4,6 +4,7 @@ import TotalState from './TotalState';
 import RedGPUContextView from './RedGPUContextView';
 import CommandBatchStatsView from './CommandBatchStatsView';
 import ResourcesView from "./ResourcesView";
+import ViewListView from "./ViewListView";
 
 /**
  * [KO] 현재 선택된 탭에 해당하는 컨텐츠를 렌더링하는 컴포넌트입니다.
@@ -23,7 +24,7 @@ const TabContent = () => {
         case 'CONTEXT':
             return <Container><RedGPUContextView /></Container>;
         case 'VIEWS':
-            return <Container style={placeholderStyle}>ViewList Inspector (Coming Soon)</Container>;
+            return <Container><ViewListView /></Container>;
         case 'RESOURCES':
             return <Container><ResourcesView /></Container>;
         default:

@@ -3,6 +3,7 @@ import { useInspectorStore } from '../store';
 import Section from "./commonUI/Section";
 import StatItem from "./commonUI/StatItem";
 import StatRGBAItem from "./commonUI/StatRGBAItem";
+import StatBoolItem from "./commonUI/StatBoolItem";
 
 
 /**
@@ -27,7 +28,7 @@ const RedGPUContextView = () => {
                 <StatItem label="Architecture" value={adapterInfo.architecture} />
                 <StatItem label="Device" value={adapterInfo.device} />
                 <StatItem label="Description" value={adapterInfo.description} />
-                <StatItem label="Fallback" value={detector.isFallbackAdapter ? 'Yes' : 'No'} />
+                <StatBoolItem label="Fallback" value={detector.isFallbackAdapter} trueLabel="Yes" falseLabel="No" />
             </Section>
 
             <Section title="RedGPUContext Info">
@@ -42,14 +43,14 @@ const RedGPUContextView = () => {
             </Section>
 
             <Section title="Antialiasing">
-                <StatItem label="useMSAA" value={antialiasingManager.useMSAA ? 'True' : 'False'} color={antialiasingManager.useMSAA ? '#0f0' : '#888'} />
-                <StatItem label="useFXAA" value={antialiasingManager.useFXAA ? 'True' : 'False'} color={antialiasingManager.useFXAA ? '#0f0' : '#888'} />
-                <StatItem label="useTAA" value={antialiasingManager.useTAA ? 'True' : 'False'} color={antialiasingManager.useTAA ? '#0f0' : '#888'} />
+                <StatBoolItem label="useMSAA" value={antialiasingManager.useMSAA} />
+                <StatBoolItem label="useFXAA" value={antialiasingManager.useFXAA} />
+                <StatBoolItem label="useTAA" value={antialiasingManager.useTAA} />
             </Section>
 
             <Section title="Environment">
                 <StatItem label="devicePixelRatio" value={devicePixelRatio} />
-                <StatItem label="Mobile" value={detector.isMobile ? 'Yes' : 'No'} />
+                <StatBoolItem label="Mobile" value={detector.isMobile} trueLabel="Yes" falseLabel="No" />
                 <div style={userAgentStyle}>
                     <div style={labelStyle}>User Agent</div>
                     <div style={userAgentValueStyle}>{detector.userAgent}</div>
