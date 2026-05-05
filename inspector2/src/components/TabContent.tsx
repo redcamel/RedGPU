@@ -3,6 +3,7 @@ import { useInspectorStore } from '../store';
 import TotalState from './TotalState';
 import RedGPUContextView from './RedGPUContextView';
 import CommandBatchStatsView from './CommandBatchStatsView';
+import ResourcesView from "./ResourcesView";
 
 /**
  * [KO] 현재 선택된 탭에 해당하는 컨텐츠를 렌더링하는 컴포넌트입니다.
@@ -24,7 +25,7 @@ const TabContent = () => {
         case 'VIEWS':
             return <Container style={placeholderStyle}>ViewList Inspector (Coming Soon)</Container>;
         case 'RESOURCES':
-            return <Container style={placeholderStyle}>Resources Inspector (Coming Soon)</Container>;
+            return <Container><ResourcesView /></Container>;
         default:
             return null;
     }

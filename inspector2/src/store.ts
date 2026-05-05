@@ -2,6 +2,11 @@ import {create} from 'zustand';
 import RedGPUContext from "../../src/context/RedGPUContext";
 import { CommandBatchStats } from "../../src/renderer/commandEncoder/CommandEncoderManager";
 
+export interface ResourceStatusSummary {
+  count: number;
+  videoMemory: number;
+}
+
 export interface InspectorState {
   useDebugPanel: boolean;
   redGPUContext: RedGPUContext | null;
@@ -23,6 +28,17 @@ export interface InspectorState {
   totalUsedVideoMemory: number;
   pixelRectArray: [number, number, number, number];
   commandBatchStats: CommandBatchStats | null;
+  // 리소스 통계
+  resourceStats: {
+    bitmapTexture: ResourceStatusSummary;
+    cubeTexture: ResourceStatusSummary;
+    hdrTexture: ResourceStatusSummary;
+    uniformBuffer: ResourceStatusSummary;
+    vertexBuffer: ResourceStatusSummary;
+    indexBuffer: ResourceStatusSummary;
+    storageBuffer: ResourceStatusSummary;
+    gpuBuffer: ResourceStatusSummary;
+  };
   currentTab: string;
   setStats: (stats: Partial<InspectorState>) => void;
   setUseDebugPanel: (value: boolean) => void;
@@ -48,6 +64,16 @@ export const useInspectorStore = create<InspectorState>((set) => ({
   totalUsedVideoMemory: 0,
   pixelRectArray: [0, 0, 0, 0],
   commandBatchStats: null,
+  resourceStats: {
+    bitmapTexture: { count: 0, videoMemory: 0 },
+    cubeTexture: { count: 0, videoMemory: 0 },
+    hdrTexture: { count: 0, videoMemory: 0 },
+    uniformBuffer: { count: 0, videoMemory: 0 },
+    vertexBuffer: { count: 0, videoMemory: 0 },
+    indexBuffer: { count: 0, videoMemory: 0 },
+    storageBuffer: { count: 0, videoMemory: 0 },
+    gpuBuffer: { count: 0, videoMemory: 0 }
+  },
   currentTab: 'STATE',
   setStats: (stats) => set((state) => ({ ...state, ...stats })),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),

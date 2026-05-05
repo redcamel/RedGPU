@@ -55,19 +55,33 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
     // [KO] 리소스 매니저의 공유 리소스 메모리 합산
     // [EN] Sum up shared resource memory of the resource manager
     const rm = redGPUContext.resourceManager;
-    totalUsedVideoMemory += rm.managedBitmapTextureState.videoMemory;
-    totalUsedVideoMemory += rm.managedCubeTextureState.videoMemory;
-    totalUsedVideoMemory += rm.managedHDRTextureState.videoMemory;
-    totalUsedVideoMemory += rm.managedUniformBufferState.videoMemory;
-    totalUsedVideoMemory += rm.managedVertexBufferState.videoMemory;
-    totalUsedVideoMemory += rm.managedIndexBufferState.videoMemory;
-    totalUsedVideoMemory += rm.managedStorageBufferState.videoMemory;
+    
+    const resourceStats = {
+        bitmapTexture: { count: rm.managedBitmapTextureState.table.size, videoMemory: rm.managedBitmapTextureState.videoMemory },
+        cubeTexture: { count: rm.managedCubeTextureState.table.size, videoMemory: rm.managedCubeTextureState.videoMemory },
+        hdrTexture: { count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory },
+        uniformBuffer: { count: rm.managedUniformBufferState.table.size, videoMemory: rm.managedUniformBufferState.videoMemory },
+        vertexBuffer: { count: rm.managedVertexBufferState.table.size, videoMemory: rm.managedVertexBufferState.videoMemory },
+        indexBuffer: { count: rm.managedIndexBufferState.table.size, videoMemory: rm.managedIndexBufferState.videoMemory },
+        storageBuffer: { count: rm.managedStorageBufferState.table.size, videoMemory: rm.managedStorageBufferState.videoMemory },
+        gpuBuffer: { count: 0, videoMemory: 0 }
+    };
+
+    totalUsedVideoMemory += resourceStats.bitmapTexture.videoMemory;
+    totalUsedVideoMemory += resourceStats.cubeTexture.videoMemory;
+    totalUsedVideoMemory += resourceStats.hdrTexture.videoMemory;
+    totalUsedVideoMemory += resourceStats.uniformBuffer.videoMemory;
+    totalUsedVideoMemory += resourceStats.vertexBuffer.videoMemory;
+    totalUsedVideoMemory += resourceStats.indexBuffer.videoMemory;
+    totalUsedVideoMemory += resourceStats.storageBuffer.videoMemory;
 
     // [KO] GPUBuffer 전용 메모리 트래킹 맵 합산
     // [EN] Sum up memory tracking map dedicated to GPUBuffer
     const gpuBufferMap = rm.resources.get('GPUBuffer') as any;
-    if (gpuBufferMap && gpuBufferMap.videoMemory) {
-        totalUsedVideoMemory += gpuBufferMap.videoMemory;
+    if (gpuBufferMap) {
+        resourceStats.gpuBuffer.count = gpuBufferMap.size;
+        resourceStats.gpuBuffer.videoMemory = gpuBufferMap.videoMemory || 0;
+        totalUsedVideoMemory += resourceStats.gpuBuffer.videoMemory;
     }
 
     return {
@@ -80,6 +94,7 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
         totalNumPoints,
         totalUsedVideoMemory,
         pixelRectArray: [...redGPUContext.sizeManager.pixelRectArray],
-        commandBatchStats: aggregatedBatchStats
+        commandBatchStats: aggregatedBatchStats,
+        resourceStats
     };
 };

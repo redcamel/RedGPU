@@ -7181,6 +7181,16 @@ const useInspectorStore = create((set) => ({
   totalUsedVideoMemory: 0,
   pixelRectArray: [0, 0, 0, 0],
   commandBatchStats: null,
+  resourceStats: {
+    bitmapTexture: { count: 0, videoMemory: 0 },
+    cubeTexture: { count: 0, videoMemory: 0 },
+    hdrTexture: { count: 0, videoMemory: 0 },
+    uniformBuffer: { count: 0, videoMemory: 0 },
+    vertexBuffer: { count: 0, videoMemory: 0 },
+    indexBuffer: { count: 0, videoMemory: 0 },
+    storageBuffer: { count: 0, videoMemory: 0 },
+    gpuBuffer: { count: 0, videoMemory: 0 }
+  },
   currentTab: "STATE",
   setStats: (stats) => set((state) => ({ ...state, ...stats })),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),
@@ -7526,6 +7536,48 @@ const listItemStyle = {
   textOverflow: "ellipsis",
   whiteSpace: "nowrap"
 };
+const ResourceSummary = ({ label, stats }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: summaryContainerStyle, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: summaryLabelStyle, children: label }),
+  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: summaryValuesStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Count", value: stats.count }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Memory", value: formatBytes(stats.videoMemory), color: "#fdb48d", isBold: true })
+  ] })
+] });
+const ResourcesView = () => {
+  const { resourceStats } = useInspectorStore();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Texture Resources", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceSummary, { label: "Bitmap Textures", stats: resourceStats.bitmapTexture }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceSummary, { label: "Cube Textures", stats: resourceStats.cubeTexture }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceSummary, { label: "HDR Textures", stats: resourceStats.hdrTexture })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Buffer Resources", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceSummary, { label: "Uniform Buffers", stats: resourceStats.uniformBuffer }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceSummary, { label: "Vertex Buffers", stats: resourceStats.vertexBuffer }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceSummary, { label: "Index Buffers", stats: resourceStats.indexBuffer }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceSummary, { label: "Storage Buffers", stats: resourceStats.storageBuffer }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceSummary, { label: "Raw GPU Buffers", stats: resourceStats.gpuBuffer })
+    ] })
+  ] });
+};
+const summaryContainerStyle = {
+  padding: "8px",
+  background: "rgba(255,255,255,0.03)",
+  borderRadius: "4px"
+};
+const summaryLabelStyle = {
+  fontSize: "11px",
+  fontWeight: "bold",
+  color: "#aaa",
+  marginBottom: "6px",
+  textTransform: "uppercase",
+  letterSpacing: "0.05em"
+};
+const summaryValuesStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "2px"
+};
 const TabContent = () => {
   const currentTab = useInspectorStore((state) => state.currentTab);
   switch (currentTab) {
@@ -7539,7 +7591,7 @@ const TabContent = () => {
     case "VIEWS":
       return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { style: placeholderStyle, children: "ViewList Inspector (Coming Soon)" });
     case "RESOURCES":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { style: placeholderStyle, children: "Resources Inspector (Coming Soon)" });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ResourcesView, {}) });
     default:
       return null;
   }
@@ -7698,16 +7750,28 @@ const collectStats = (redGPUContext, time) => {
     }
   }
   const rm = redGPUContext.resourceManager;
-  totalUsedVideoMemory += rm.managedBitmapTextureState.videoMemory;
-  totalUsedVideoMemory += rm.managedCubeTextureState.videoMemory;
-  totalUsedVideoMemory += rm.managedHDRTextureState.videoMemory;
-  totalUsedVideoMemory += rm.managedUniformBufferState.videoMemory;
-  totalUsedVideoMemory += rm.managedVertexBufferState.videoMemory;
-  totalUsedVideoMemory += rm.managedIndexBufferState.videoMemory;
-  totalUsedVideoMemory += rm.managedStorageBufferState.videoMemory;
+  const resourceStats = {
+    bitmapTexture: { count: rm.managedBitmapTextureState.table.size, videoMemory: rm.managedBitmapTextureState.videoMemory },
+    cubeTexture: { count: rm.managedCubeTextureState.table.size, videoMemory: rm.managedCubeTextureState.videoMemory },
+    hdrTexture: { count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory },
+    uniformBuffer: { count: rm.managedUniformBufferState.table.size, videoMemory: rm.managedUniformBufferState.videoMemory },
+    vertexBuffer: { count: rm.managedVertexBufferState.table.size, videoMemory: rm.managedVertexBufferState.videoMemory },
+    indexBuffer: { count: rm.managedIndexBufferState.table.size, videoMemory: rm.managedIndexBufferState.videoMemory },
+    storageBuffer: { count: rm.managedStorageBufferState.table.size, videoMemory: rm.managedStorageBufferState.videoMemory },
+    gpuBuffer: { count: 0, videoMemory: 0 }
+  };
+  totalUsedVideoMemory += resourceStats.bitmapTexture.videoMemory;
+  totalUsedVideoMemory += resourceStats.cubeTexture.videoMemory;
+  totalUsedVideoMemory += resourceStats.hdrTexture.videoMemory;
+  totalUsedVideoMemory += resourceStats.uniformBuffer.videoMemory;
+  totalUsedVideoMemory += resourceStats.vertexBuffer.videoMemory;
+  totalUsedVideoMemory += resourceStats.indexBuffer.videoMemory;
+  totalUsedVideoMemory += resourceStats.storageBuffer.videoMemory;
   const gpuBufferMap = rm.resources.get("GPUBuffer");
-  if (gpuBufferMap && gpuBufferMap.videoMemory) {
-    totalUsedVideoMemory += gpuBufferMap.videoMemory;
+  if (gpuBufferMap) {
+    resourceStats.gpuBuffer.count = gpuBufferMap.size;
+    resourceStats.gpuBuffer.videoMemory = gpuBufferMap.videoMemory || 0;
+    totalUsedVideoMemory += resourceStats.gpuBuffer.videoMemory;
   }
   return {
     lastUpdateTime: time,
@@ -7719,7 +7783,8 @@ const collectStats = (redGPUContext, time) => {
     totalNumPoints,
     totalUsedVideoMemory,
     pixelRectArray: [...redGPUContext.sizeManager.pixelRectArray],
-    commandBatchStats: aggregatedBatchStats
+    commandBatchStats: aggregatedBatchStats,
+    resourceStats
   };
 };
 class RedGPUInspector2 {
