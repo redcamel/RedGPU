@@ -7856,15 +7856,37 @@ const ViewSection = ({ view, lastUpdateTime }) => {
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFrustumCulling", value: useFrustumCulling }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useDistanceCulling", value: useDistanceCulling }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "x, y", value: `${formatNumber(x2)}, ${formatNumber(y2)}` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "width, height", value: `${width}, ${height}` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "camera.name", value: rawCamera.name }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "scene.useBackgroundColor", value: useBackgroundColor }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "scene.backgroundColor", value: backgroundColor.rgba }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "scene.name", value: scene.name })
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "rawCamera", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.name", value: rawCamera.name }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "rawCamera.position",
+          value: `${formatNumber(rawCamera.x)}, ${formatNumber(rawCamera.y)}, ${formatNumber(rawCamera.z || 0)}`
+        }
+      ),
+      rawCamera["rotationX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "rawCamera.rotation",
+          value: `${formatNumber(rawCamera["rotationX"])}, ${formatNumber(rawCamera["rotationY"])}, ${formatNumber(rawCamera["rotationZ"])}`
+        }
+      ),
+      rawCamera["fieldOfView"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.fieldOfView", value: formatNumber(rawCamera["fieldOfView"]) }),
+      rawCamera["zoom"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.zoom", value: formatNumber(rawCamera["zoom"]) }),
+      rawCamera["nearClipping"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.nearClipping", value: formatNumber(rawCamera["nearClipping"]) }),
+      rawCamera["farClipping"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.farClipping", value: formatNumber(rawCamera["farClipping"]) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "scene", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "scene.name", value: scene.name }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "scene.useBackgroundColor", value: useBackgroundColor }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "scene.backgroundColor", value: backgroundColor.rgba })
+    ] })
   ] });
 };
 const formatNumber = (val) => {

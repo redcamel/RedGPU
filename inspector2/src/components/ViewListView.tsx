@@ -61,17 +61,34 @@ const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: num
 
             <StatBoolItem label="useFrustumCulling" value={useFrustumCulling}/>
             <StatBoolItem label="useDistanceCulling" value={useDistanceCulling}/>
-
+            <div style={dividerStyle}/>
 
             <StatItem label="x, y" value={`${formatNumber(x)}, ${formatNumber(y)}`}/>
             <StatItem label="width, height" value={`${width}, ${height}`}/>
             <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`}/>
             <div style={dividerStyle}/>
-            <StatItem label="camera.name" value={rawCamera.name}/>
-            <div style={dividerStyle}/>
-            <StatBoolItem label="scene.useBackgroundColor" value={useBackgroundColor}/>
-            <StatRGBAItem label="scene.backgroundColor" value={backgroundColor.rgba}/>
-            <StatItem label="scene.name" value={scene.name}/>
+            <Section title={'rawCamera'}>
+                <StatItem label="rawCamera.name" value={rawCamera.name}/>
+                <StatItem label="rawCamera.position"
+                          value={`${formatNumber(rawCamera.x)}, ${formatNumber(rawCamera.y)}, ${formatNumber(rawCamera.z || 0)}`}/>
+                {rawCamera['rotationX'] !== undefined && (
+                    <StatItem label="rawCamera.rotation"
+                              value={`${formatNumber(rawCamera['rotationX'])}, ${formatNumber(rawCamera['rotationY'])}, ${formatNumber(rawCamera['rotationZ'])}`}/>
+                )}
+                {rawCamera['fieldOfView'] !== undefined &&
+                    <StatItem label="rawCamera.fieldOfView" value={formatNumber(rawCamera['fieldOfView'])}/>}
+                {rawCamera['zoom'] !== undefined &&
+                    <StatItem label="rawCamera.zoom" value={formatNumber(rawCamera['zoom'])}/>}
+                {rawCamera['nearClipping'] !== undefined &&
+                    <StatItem label="rawCamera.nearClipping" value={formatNumber(rawCamera['nearClipping'])}/>}
+                {rawCamera['farClipping'] !== undefined &&
+                    <StatItem label="rawCamera.farClipping" value={formatNumber(rawCamera['farClipping'])}/>}
+            </Section>
+            <Section title={'scene'}>
+                <StatItem label="scene.name" value={scene.name}/>
+                <StatBoolItem label="scene.useBackgroundColor" value={useBackgroundColor}/>
+                <StatRGBAItem label="scene.backgroundColor" value={backgroundColor.rgba}/>
+            </Section>
         </Section>
     );
 };
