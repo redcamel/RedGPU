@@ -84,14 +84,7 @@ export class FPSMeter {
  * [EN] Component that displays FPS and frame time statistics.
  */
 const FPS = () => {
-    const { fps, avgFps, low1Fps, low01Fps, frameTime, currentTab, setCurrentTab } = useInspectorStore();
-
-    const tabs = [
-        { id: 'STATE', label: 'State' },
-        { id: 'CONTEXT', label: 'RedGPUContext' },
-        { id: 'VIEWS', label: 'ViewList' },
-        { id: 'RESOURCES', label: 'Resources' }
-    ];
+    const { fps, avgFps, low1Fps, low01Fps, frameTime } = useInspectorStore();
 
     return (
         <div style={containerStyle}>
@@ -109,23 +102,6 @@ const FPS = () => {
                     <div style={low01FpsStyle}>0.1%: {low01Fps}</div>
                 </div>
             </div>
-
-            <div style={tabContainerStyle}>
-                {tabs.map(tab => (
-                    <div 
-                        key={tab.id}
-                        onClick={() => setCurrentTab(tab.id)}
-                        style={{
-                            ...tabItemStyle,
-                            borderBottom: currentTab === tab.id ? '2px solid #fdb48d' : '2px solid transparent',
-                            color: currentTab === tab.id ? '#fdb48d' : '#888',
-                            backgroundColor: currentTab === tab.id ? 'rgba(253, 180, 141, 0.1)' : 'transparent'
-                        }}
-                    >
-                        {tab.label}
-                    </div>
-                ))}
-            </div>
         </div>
     );
 };
@@ -142,23 +118,6 @@ const statsContainerStyle: React.CSSProperties = {
     justifyContent: 'flex-end',
     gap: '12px',
     background: '#000'
-};
-
-const tabContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    background: '#111',
-    borderTop: '1px solid rgba(255,255,255,0.05)'
-};
-
-const tabItemStyle: React.CSSProperties = {
-    padding: '8px 4px',
-    fontSize: '10px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    flex: 1,
-    textAlign: 'center',
-    whiteSpace: 'nowrap'
 };
 
 const currentFpsBoxStyle: React.CSSProperties = {

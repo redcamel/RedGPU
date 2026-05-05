@@ -7,10 +7,10 @@ import { collectStats } from './utils/collectStats';
 import { FPSMeter } from './components/FPS';
 
 /**
- * RedGPUInspector (React Version)
+ * RedGPUInspector2 (React Version)
  * 엔진과 리액트 UI 사이의 브릿지 역할을 수행합니다.
  */
-class RedGPUInspector {
+class RedGPUInspector2 {
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
     private rafId: number | null = null;
@@ -18,7 +18,13 @@ class RedGPUInspector {
     private fpsMeter: FPSMeter = new FPSMeter();
 
 
-    constructor() {
+    constructor(redGPUContext: RedGPUContext) {
+        this.redGPUContext = redGPUContext;
+        
+        // [KO] 스토어에 redGPUContext 저장
+        // [EN] Store redGPUContext in the store
+        useInspectorStore.getState().setRedGPUContext(redGPUContext);
+
         // [KO] Zustand 스토어 상태 변화 구독 (패널 활성화/비활성화 감지)
         // [EN] Subscribe to Zustand store state changes (Detect panel activation/deactivation)
         useInspectorStore.subscribe((state) => {
@@ -43,8 +49,7 @@ class RedGPUInspector {
     /**
      * 엔진의 렌더 루프에서 호출됩니다.
      */
-    render(redGPUContext: RedGPUContext, time: number) {
-        this.redGPUContext = redGPUContext;
+    render() {
         if (this.useDebugPanel) {
             this.ensureMounted();
             this.startLoop();
@@ -119,4 +124,4 @@ class RedGPUInspector {
     }
 }
 
-export default RedGPUInspector;
+export default RedGPUInspector2;

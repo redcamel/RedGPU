@@ -26,7 +26,7 @@ RedGPU.init(
 
         const renderer = new RedGPU.Renderer();
         const inspector = new RedGPUInspector();
-        const inspector2 = new RedGPUInspector2();
+        const inspector2 = new RedGPUInspector2(redGPUContext);
         const render = (time) => {
             // [KO] 매 프레임 실행될 로직
             // [EN] Logic to be executed every frame
