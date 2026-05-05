@@ -34,7 +34,7 @@ const App = () => {
 
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    left: '340px',
+    left: 0,
     top: 0,
     width: '400px',
     height: '100%',
