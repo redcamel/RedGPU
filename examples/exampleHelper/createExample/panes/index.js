@@ -12,7 +12,7 @@ import setRedGPUTest_pane from "./setRedGPUTest_pane.js?t=1770713934910";
 import setSingleViewTest from "./view/setSingleViewTest.js?t=1770713934910";
 import setViewListTest from "./view/setViewListTest.js?t=1770713934910";
 import setViewListTest_Pane from "./view/setViewListTest.js?t=1770713934910";
-
+import RedGPUInspector from "../../../../inspector/dist/index.js?t=1770713934910";
 /**
  * Sets a separator in the given pane.
  *
@@ -24,7 +24,7 @@ export function setSeparator(pane) {
     pane.addBlade({view: 'separator',});
 }
 
-const setDebugButtons = (RedGPU, redGPUContext, inspector) => {
+const setDebugButtons = (RedGPU, redGPUContext) => {
     const check = () => {
         const container = document.querySelector('.navigation-bar');
         if (container) {
@@ -43,7 +43,7 @@ const setDebugButtons = (RedGPU, redGPUContext, inspector) => {
                 setAntialiasingSelect(redGPUContext, rightContainer)
                 setToneMappingSelect(RedGPU, redGPUContext, rightContainer)
                 setAO(redGPUContext, rightContainer)
-                setDebugButton(redGPUContext, rightContainer, inspector)
+                setDebugButton(redGPUContext, rightContainer, new RedGPUInspector(redGPUContext))
                 setAxis(redGPUContext, rightContainer)
                 setGrid(redGPUContext, rightContainer)
                 setSettingView(redGPUContext, rightContainer)

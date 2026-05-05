@@ -7,10 +7,10 @@ import { collectStats } from './utils/collectStats';
 import { FPSMeter } from './components/FPS';
 
 /**
- * RedGPUInspector2 (React Version)
+ * RedGPUInspector (React Version)
  * 엔진과 리액트 UI 사이의 브릿지 역할을 수행합니다.
  */
-class RedGPUInspector2 {
+class RedGPUInspector {
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
     private rafId: number | null = null;
@@ -124,4 +124,4 @@ class RedGPUInspector2 {
     }
 }
 
-export default RedGPUInspector2;
+export default RedGPUInspector;
