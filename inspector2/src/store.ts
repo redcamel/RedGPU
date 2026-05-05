@@ -20,6 +20,7 @@ export interface InspectorState {
   totalNumTriangles: number;
   totalNumPoints: number;
   totalUsedVideoMemory: number;
+  pixelRectArray: [number, number, number, number];
   currentTab: string;
   setStats: (stats: Partial<InspectorState>) => void;
   setUseDebugPanel: (value: boolean) => void;
@@ -43,6 +44,7 @@ export const useInspectorStore = create<InspectorState>((set) => ({
   totalNumTriangles: 0,
   totalNumPoints: 0,
   totalUsedVideoMemory: 0,
+  pixelRectArray: [0, 0, 0, 0],
   currentTab: 'STATE',
   setStats: (stats) => set((state) => ({ ...state, ...stats })),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),

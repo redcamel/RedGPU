@@ -1,14 +1,22 @@
 import React from 'react';
 import { useInspectorStore } from './store';
 import FPS from './components/FPS';
-import Tabs from './components/Tabs';
+
 import TabContent from './components/TabContent';
+import Tabs, {TabItem} from "./components/commonUI/Tabs";
 
 const App = () => {
     const useDebugPanel = useInspectorStore(state => state.useDebugPanel);
     const setUseDebugPanel = useInspectorStore(state => state.setUseDebugPanel);
 
     if (!useDebugPanel) return null;
+
+    const tabs: TabItem[] = [
+        { id: 'STATE', label: 'State' },
+        { id: 'CONTEXT', label: 'RedGPUContext' },
+        { id: 'VIEWS', label: 'ViewList' },
+        { id: 'RESOURCES', label: 'Resources' }
+    ];
 
     return (
         <div style={panelStyle}>
@@ -17,7 +25,7 @@ const App = () => {
                 <button onClick={() => setUseDebugPanel(false)} style={closeBtnStyle}>CLOSE</button>
             </div>
             <FPS />
-            <Tabs>
+            <Tabs tabs={tabs}>
                 <TabContent />
             </Tabs>
         </div>

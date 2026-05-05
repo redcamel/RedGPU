@@ -1,5 +1,9 @@
 import React from 'react';
 import { useInspectorStore } from '../store';
+import Section from "./commonUI/Section";
+import StatItem from "./commonUI/StatItem";
+import StatRGBAItem from "./commonUI/StatRGBAItem";
+
 
 /**
  * [KO] RedGPUContext의 상세 정보를 표시하는 컴포넌트입니다.
@@ -7,14 +11,14 @@ import { useInspectorStore } from '../store';
  */
 const RedGPUContextView = () => {
     const redGPUContext = useInspectorStore(state => state.redGPUContext);
+    const pixelRectArray = useInspectorStore(state => state.pixelRectArray);
 
     if (!redGPUContext) {
         return <div style={placeholderStyle}>RedGPUContext not initialized</div>;
     }
 
-    const detector = redGPUContext.detector;
+    const {detector,htmlCanvas,width,height,backgroundColor} = redGPUContext;
     const adapterInfo = detector.adapterInfo;
-    const canvas = redGPUContext.htmlCanvas;
 
     return (
         <div style={containerStyle}>
@@ -26,14 +30,18 @@ const RedGPUContextView = () => {
                 <StatItem label="Fallback" value={detector.isFallbackAdapter ? 'Yes' : 'No'} />
             </Section>
 
-            <Section title="Canvas Info">
-                <StatItem label="Width" value={canvas.width} />
-                <StatItem label="Height" value={canvas.height} />
+            <Section title="RedGPUContext Info">
+                <StatItem label="Width" value={width} />
+                <StatItem label="Height" value={height} />
+                <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`} color="#fdb48d" />
                 <StatItem label="Alpha Mode" value={redGPUContext.alphaMode} />
-                <StatItem label="Display" value={`${canvas.clientWidth} x ${canvas.clientHeight}`} />
+                <StatItem label="Display" value={`${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}`} />
+                <StatItem label="Device Pixel Ratio" value={window.devicePixelRatio} />
+                <StatRGBAItem label="backgroundColor" value={backgroundColor.rgba} />
             </Section>
 
             <Section title="Environment">
+                <StatItem label="devicePixelRatio" value={devicePixelRatio} />
                 <StatItem label="Mobile" value={detector.isMobile ? 'Yes' : 'No'} />
                 <div style={userAgentStyle}>
                     <div style={labelStyle}>User Agent</div>
@@ -44,54 +52,13 @@ const RedGPUContextView = () => {
     );
 };
 
-const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
-    <div style={sectionStyle}>
-        <div style={sectionTitleStyle}>{title}</div>
-        {children}
-    </div>
-);
-
-const StatItem = ({ label, value, color = '#ccc' }: { label: string, value: any, color?: string }) => (
-    <div style={itemStyle}>
-        <span style={labelStyle}>{label}</span>
-        <span style={{ ...valueStyle, color }}>{value || 'N/A'}</span>
-    </div>
-);
-
 // Styles
 const containerStyle: React.CSSProperties = {
     padding: '12px'
 };
 
-const sectionStyle: React.CSSProperties = {
-    marginBottom: '16px'
-};
-
-const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: '#fdb48d',
-    marginBottom: '8px',
-    fontWeight: 'bold',
-    borderBottom: '1px solid rgba(253, 180, 141, 0.2)',
-    paddingBottom: '4px'
-};
-
-const itemStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '4px',
-    fontSize: '11px'
-};
-
 const labelStyle: React.CSSProperties = {
     color: '#888'
-};
-
-const valueStyle: React.CSSProperties = {
-    color: '#ccc',
-    textAlign: 'right',
-    wordBreak: 'break-all',
-    marginLeft: '10px'
 };
 
 const userAgentStyle: React.CSSProperties = {

@@ -7179,6 +7179,7 @@ const useInspectorStore = create((set) => ({
   totalNumTriangles: 0,
   totalNumPoints: 0,
   totalUsedVideoMemory: 0,
+  pixelRectArray: [0, 0, 0, 0],
   currentTab: "STATE",
   setStats: (stats) => set((state) => ({ ...state, ...stats })),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),
@@ -7313,59 +7314,6 @@ const low1FpsStyle = {
 const low01FpsStyle = {
   color: "#f50"
 };
-const Tabs = ({ children }) => {
-  const { currentTab, setCurrentTab } = useInspectorStore();
-  const tabs = [
-    { id: "STATE", label: "State" },
-    { id: "CONTEXT", label: "RedGPUContext" },
-    { id: "VIEWS", label: "ViewList" },
-    { id: "RESOURCES", label: "Resources" }
-  ];
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$2, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabBarStyle, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "div",
-      {
-        onClick: () => setCurrentTab(tab.id),
-        style: {
-          ...tabItemStyle,
-          borderBottom: currentTab === tab.id ? "2px solid #fdb48d" : "2px solid transparent",
-          color: currentTab === tab.id ? "#fdb48d" : "#888",
-          backgroundColor: currentTab === tab.id ? "rgba(253, 180, 141, 0.1)" : "transparent"
-        },
-        children: tab.label
-      },
-      tab.id
-    )) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentAreaStyle, children })
-  ] });
-};
-const containerStyle$2 = {
-  display: "flex",
-  flexDirection: "column",
-  flex: 1,
-  overflow: "hidden"
-};
-const tabBarStyle = {
-  display: "flex",
-  background: "#111",
-  borderTop: "1px solid rgba(255,255,255,0.05)",
-  borderBottom: "1px solid rgba(255,255,255,0.1)"
-};
-const tabItemStyle = {
-  padding: "8px 4px",
-  fontSize: "10px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "all 0.2s",
-  flex: 1,
-  textAlign: "center",
-  whiteSpace: "nowrap"
-};
-const contentAreaStyle = {
-  flex: 1,
-  overflowY: "auto",
-  background: "rgba(0,0,0,0.2)"
-};
 const consoleAndThrowError = (...arg) => {
   const msg = Array.prototype.slice.call(arg).join(" ");
   console.log("//////////////////////////////////////////////////////////");
@@ -7384,6 +7332,64 @@ const formatBytes = (bytes, decimals = 2) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k2));
   return parseFloat((bytes / Math.pow(k2, i)).toFixed(dm)) + " " + sizes[i];
 };
+const THEME = {
+  fontFamily: "",
+  fontSize: {
+    title: "13px",
+    content: "12px",
+    small: "11px"
+  },
+  colors: {
+    primary: "#fdb48d",
+    label: "#888",
+    value: "#ccc",
+    background: "#111",
+    border: "rgba(255,255,255,0.1)",
+    activeBg: "rgba(253, 180, 141, 0.1)"
+  }
+};
+const COMMON_STYLES = {
+  label: {
+    color: THEME.colors.label
+  },
+  value: {
+    color: THEME.colors.value,
+    textAlign: "right",
+    wordBreak: "break-all",
+    marginLeft: "10px"
+  }
+};
+const Section = ({ title, children }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: title }),
+  children
+] });
+const sectionStyle = {
+  marginBottom: "16px"
+};
+const sectionTitleStyle = {
+  fontSize: THEME.fontSize.title,
+  color: THEME.colors.primary,
+  marginBottom: "8px",
+  fontWeight: "bold",
+  borderBottom: `1px solid ${THEME.colors.primary}33`,
+  paddingBottom: "4px",
+  fontFamily: THEME.fontFamily
+};
+const StatItem = ({ label, value, color = THEME.colors.value, isBold = false }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$1, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+    ...COMMON_STYLES.value,
+    color,
+    fontWeight: isBold ? "bold" : "normal"
+  }, children: value !== void 0 && value !== null ? value : "N/A" })
+] });
+const statItemStyle$1 = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginBottom: "4px",
+  fontSize: THEME.fontSize.content,
+  fontFamily: THEME.fontFamily
+};
 const TotalState = () => {
   const {
     totalNum3DGroups,
@@ -7394,59 +7400,47 @@ const TotalState = () => {
     totalNumPoints,
     totalUsedVideoMemory
   } = useInspectorStore();
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleStyle, children: "Total State" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: gridStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem$1, { label: "Groups", value: totalNum3DGroups }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem$1, { label: "Objects", value: totalNum3DObjects }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem$1, { label: "Instances", value: totalNumInstances }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem$1, { label: "Draw Calls", value: totalNumDrawCalls, color: "#fdb48d" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem$1, { label: "Triangles", value: totalNumTriangles.toLocaleString() }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem$1, { label: "Points", value: totalNumPoints.toLocaleString() }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem$1, { label: "Video Memory", value: formatBytes(totalUsedVideoMemory), color: "#fdb48d", isBold: true })
-    ] })
-  ] });
-};
-const StatItem$1 = ({ label, value, color = "#ccc", isBold = false }) => {
-  const itemStyle2 = {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "4px"
-  };
-  const labelStyle2 = {
-    color: "#888"
-  };
-  const valueStyle2 = {
-    color,
-    fontWeight: isBold ? "bold" : "normal"
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: itemStyle2, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle2, children: label }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueStyle2, children: value })
-  ] });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Total State", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Groups", value: totalNum3DGroups }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Objects", value: totalNum3DObjects }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Instances", value: totalNumInstances }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Draw Calls", value: totalNumDrawCalls, color: "#fdb48d", isBold: true }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Triangles", value: totalNumTriangles.toLocaleString() }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Points", value: totalNumPoints.toLocaleString() }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Video Memory", value: formatBytes(totalUsedVideoMemory), color: "#fdb48d", isBold: true })
+  ] }) });
 };
 const containerStyle$1 = {
-  padding: "12px",
-  borderBottom: "1px solid rgba(255,255,255,0.1)"
+  padding: "12px"
 };
-const titleStyle = {
-  fontSize: "13px",
-  color: "#fdb48d",
-  marginBottom: "10px",
-  fontWeight: "bold"
+const StatRGBAItem = ({ label, value }) => {
+  const [r2, g, b] = value;
+  const compColor = `rgb(${255 - r2}, ${255 - g}, ${255 - b})`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+      ...COMMON_STYLES.value,
+      backgroundColor: `rgba(${value.join(", ")})`,
+      color: compColor,
+      padding: "2px 4px"
+    }, children: value.join(", ") })
+  ] });
 };
-const gridStyle = {
+const statItemStyle = {
   display: "flex",
-  flexDirection: "column"
+  justifyContent: "space-between",
+  marginBottom: "4px",
+  fontSize: THEME.fontSize.content,
+  fontFamily: THEME.fontFamily
 };
 const RedGPUContextView = () => {
   const redGPUContext = useInspectorStore((state) => state.redGPUContext);
+  const pixelRectArray = useInspectorStore((state) => state.pixelRectArray);
   if (!redGPUContext) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "RedGPUContext not initialized" });
   }
-  const detector = redGPUContext.detector;
+  const { detector, htmlCanvas, width, height, backgroundColor } = redGPUContext;
   const adapterInfo = detector.adapterInfo;
-  const canvas = redGPUContext.htmlCanvas;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Adapter Info", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Vendor", value: adapterInfo.vendor }),
@@ -7455,13 +7449,17 @@ const RedGPUContextView = () => {
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Description", value: adapterInfo.description }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Fallback", value: detector.isFallbackAdapter ? "Yes" : "No" })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Canvas Info", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Width", value: canvas.width }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Height", value: canvas.height }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "RedGPUContext Info", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Width", value: width }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Height", value: height }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]`, color: "#fdb48d" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Alpha Mode", value: redGPUContext.alphaMode }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Display", value: `${canvas.clientWidth} x ${canvas.clientHeight}` })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Display", value: `${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Device Pixel Ratio", value: window.devicePixelRatio }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "backgroundColor", value: backgroundColor.rgba })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Environment", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "devicePixelRatio", value: devicePixelRatio }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Mobile", value: detector.isMobile ? "Yes" : "No" }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: userAgentStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: labelStyle, children: "User Agent" }),
@@ -7470,42 +7468,11 @@ const RedGPUContextView = () => {
     ] })
   ] });
 };
-const Section = ({ title, children }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
-  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: title }),
-  children
-] });
-const StatItem = ({ label, value, color = "#ccc" }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: itemStyle, children: [
-  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: label }),
-  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueStyle, color }, children: value || "N/A" })
-] });
 const containerStyle = {
   padding: "12px"
 };
-const sectionStyle = {
-  marginBottom: "16px"
-};
-const sectionTitleStyle = {
-  fontSize: "12px",
-  color: "#fdb48d",
-  marginBottom: "8px",
-  fontWeight: "bold",
-  borderBottom: "1px solid rgba(253, 180, 141, 0.2)",
-  paddingBottom: "4px"
-};
-const itemStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginBottom: "4px",
-  fontSize: "11px"
-};
 const labelStyle = {
   color: "#888"
-};
-const valueStyle = {
-  color: "#ccc",
-  textAlign: "right",
-  wordBreak: "break-all",
-  marginLeft: "10px"
 };
 const userAgentStyle = {
   marginTop: "8px",
@@ -7546,17 +7513,71 @@ const placeholderStyle = {
   fontSize: "12px",
   fontStyle: "italic"
 };
+const Tabs = ({ tabs, children }) => {
+  const { currentTab, setCurrentTab } = useInspectorStore();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: tabsContainerStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabBarStyle, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        onClick: () => setCurrentTab(tab.id),
+        style: {
+          ...tabItemStyle,
+          borderBottom: currentTab === tab.id ? `2px solid ${THEME.colors.primary}` : "2px solid transparent",
+          color: currentTab === tab.id ? THEME.colors.primary : THEME.colors.label,
+          backgroundColor: currentTab === tab.id ? THEME.colors.activeBg : "transparent"
+        },
+        children: tab.label
+      },
+      tab.id
+    )) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentAreaStyle, children })
+  ] });
+};
+const tabsContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  flex: 1,
+  overflow: "hidden"
+};
+const tabBarStyle = {
+  display: "flex",
+  background: THEME.colors.background,
+  borderTop: `1px solid ${THEME.colors.border}`,
+  borderBottom: `1px solid ${THEME.colors.border}`
+};
+const tabItemStyle = {
+  padding: "8px 4px",
+  fontSize: THEME.fontSize.small,
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  flex: 1,
+  textAlign: "center",
+  whiteSpace: "nowrap",
+  fontFamily: THEME.fontFamily
+};
+const contentAreaStyle = {
+  flex: 1,
+  overflowY: "auto",
+  background: "rgba(0,0,0,0.2)"
+};
 const App = () => {
   const useDebugPanel = useInspectorStore((state) => state.useDebugPanel);
   const setUseDebugPanel = useInspectorStore((state) => state.setUseDebugPanel);
   if (!useDebugPanel) return null;
+  const tabs = [
+    { id: "STATE", label: "State" },
+    { id: "CONTEXT", label: "RedGPUContext" },
+    { id: "VIEWS", label: "ViewList" },
+    { id: "RESOURCES", label: "Resources" }
+  ];
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: panelStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleLabelStyle, children: "Performance Monitor" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setUseDebugPanel(false), style: closeBtnStyle, children: "CLOSE" })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(FPS, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(TabContent, {}) })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { tabs, children: /* @__PURE__ */ jsxRuntimeExports.jsx(TabContent, {}) })
   ] });
 };
 const panelStyle = {
@@ -7636,7 +7657,8 @@ const collectStats = (redGPUContext, time) => {
     totalNumDrawCalls,
     totalNumTriangles,
     totalNumPoints,
-    totalUsedVideoMemory
+    totalUsedVideoMemory,
+    pixelRectArray: [...redGPUContext.sizeManager.pixelRectArray]
   };
 };
 class RedGPUInspector2 {

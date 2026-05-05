@@ -53,6 +53,7 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
         totalNumDrawCalls,
         totalNumTriangles,
         totalNumPoints,
-        totalUsedVideoMemory
+        totalUsedVideoMemory,
+        pixelRectArray: [...redGPUContext.sizeManager.pixelRectArray]
     };
 };

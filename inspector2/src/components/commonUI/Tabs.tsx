@@ -1,26 +1,20 @@
 import React from 'react';
-import { useInspectorStore } from '../store';
+import { useInspectorStore } from '../../store';
+import { THEME } from './Theme';
 
-interface TabsProps {
-    children: React.ReactNode;
+export interface TabItem {
+    id: string;
+    label: string;
 }
 
 /**
  * [KO] 인스펙터의 탭 메뉴와 컨텐츠 영역을 포함하는 컨테이너 컴포넌트입니다.
- * [EN] Container component that includes the inspector's tab menu and content area.
  */
-const Tabs: React.FC<TabsProps> = ({ children }) => {
+ const Tabs: React.FC<{ tabs: TabItem[], children: React.ReactNode }> = ({ tabs, children }) => {
     const { currentTab, setCurrentTab } = useInspectorStore();
 
-    const tabs = [
-        { id: 'STATE', label: 'State' },
-        { id: 'CONTEXT', label: 'RedGPUContext' },
-        { id: 'VIEWS', label: 'ViewList' },
-        { id: 'RESOURCES', label: 'Resources' }
-    ];
-
     return (
-        <div style={containerStyle}>
+        <div style={tabsContainerStyle}>
             <div style={tabBarStyle}>
                 {tabs.map(tab => (
                     <div 
@@ -28,9 +22,9 @@ const Tabs: React.FC<TabsProps> = ({ children }) => {
                         onClick={() => setCurrentTab(tab.id)}
                         style={{
                             ...tabItemStyle,
-                            borderBottom: currentTab === tab.id ? '2px solid #fdb48d' : '2px solid transparent',
-                            color: currentTab === tab.id ? '#fdb48d' : '#888',
-                            backgroundColor: currentTab === tab.id ? 'rgba(253, 180, 141, 0.1)' : 'transparent'
+                            borderBottom: currentTab === tab.id ? `2px solid ${THEME.colors.primary}` : '2px solid transparent',
+                            color: currentTab === tab.id ? THEME.colors.primary : THEME.colors.label,
+                            backgroundColor: currentTab === tab.id ? THEME.colors.activeBg : 'transparent'
                         }}
                     >
                         {tab.label}
@@ -44,8 +38,7 @@ const Tabs: React.FC<TabsProps> = ({ children }) => {
     );
 };
 
-// Styles
-const containerStyle: React.CSSProperties = {
+const tabsContainerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     flex: 1,
@@ -54,20 +47,21 @@ const containerStyle: React.CSSProperties = {
 
 const tabBarStyle: React.CSSProperties = {
     display: 'flex',
-    background: '#111',
-    borderTop: '1px solid rgba(255,255,255,0.05)',
-    borderBottom: '1px solid rgba(255,255,255,0.1)'
+    background: THEME.colors.background,
+    borderTop: `1px solid ${THEME.colors.border}`,
+    borderBottom: `1px solid ${THEME.colors.border}`
 };
 
 const tabItemStyle: React.CSSProperties = {
     padding: '8px 4px',
-    fontSize: '10px',
+    fontSize: THEME.fontSize.small,
     fontWeight: 'bold',
     cursor: 'pointer',
     transition: 'all 0.2s',
     flex: 1,
     textAlign: 'center',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    fontFamily: THEME.fontFamily
 };
 
 const contentAreaStyle: React.CSSProperties = {
@@ -75,5 +69,4 @@ const contentAreaStyle: React.CSSProperties = {
     overflowY: 'auto',
     background: 'rgba(0,0,0,0.2)'
 };
-
 export default Tabs;

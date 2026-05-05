@@ -1,7 +1,13 @@
 import React from 'react';
 import { useInspectorStore } from '../store';
 import formatBytes from '@redgpu/src/utils/formatBytes';
+import Section from "./commonUI/Section";
+import StatItem from "./commonUI/StatItem";
 
+/**
+ * [KO] 엔진의 전반적인 상태 통계를 표시하는 컴포넌트입니다.
+ * [EN] Component that displays overall engine state statistics.
+ */
 const TotalState = () => {
     const {
         totalNum3DGroups,
@@ -15,60 +21,22 @@ const TotalState = () => {
 
     return (
         <div style={containerStyle}>
-            <div style={titleStyle}>Total State</div>
-            <div style={gridStyle}>
+            <Section title="Total State">
                 <StatItem label="Groups" value={totalNum3DGroups} />
                 <StatItem label="Objects" value={totalNum3DObjects} />
                 <StatItem label="Instances" value={totalNumInstances} />
-                <StatItem label="Draw Calls" value={totalNumDrawCalls} color="#fdb48d" />
+                <StatItem label="Draw Calls" value={totalNumDrawCalls} color="#fdb48d" isBold />
                 <StatItem label="Triangles" value={totalNumTriangles.toLocaleString()} />
                 <StatItem label="Points" value={totalNumPoints.toLocaleString()} />
                 <StatItem label="Video Memory" value={formatBytes(totalUsedVideoMemory)} color="#fdb48d" isBold />
-            </div>
-        </div>
-    );
-};
-
-const StatItem = ({ label, value, color = '#ccc', isBold = false }: { label: string, value: any, color?: string, isBold?: boolean }) => {
-    const itemStyle: React.CSSProperties = {
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginBottom: '4px'
-    };
-
-    const labelStyle: React.CSSProperties = {
-        color: '#888'
-    };
-
-    const valueStyle: React.CSSProperties = {
-        color,
-        fontWeight: isBold ? 'bold' : 'normal'
-    };
-
-    return (
-        <div style={itemStyle}>
-            <span style={labelStyle}>{label}</span>
-            <span style={valueStyle}>{value}</span>
+            </Section>
         </div>
     );
 };
 
 // Styles
 const containerStyle: React.CSSProperties = {
-    padding: '12px',
-    borderBottom: '1px solid rgba(255,255,255,0.1)'
-};
-
-const titleStyle: React.CSSProperties = {
-    fontSize: '13px',
-    color: '#fdb48d',
-    marginBottom: '10px',
-    fontWeight: 'bold'
-};
-
-const gridStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column'
+    padding: '12px'
 };
 
 export default TotalState;
