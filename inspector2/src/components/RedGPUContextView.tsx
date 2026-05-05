@@ -34,9 +34,10 @@ const RedGPUContextView = () => {
                 <StatItem label="Width" value={width} />
                 <StatItem label="Height" value={height} />
                 <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`} color="#fdb48d" />
-                <StatItem label="Alpha Mode" value={redGPUContext.alphaMode} />
-                <StatItem label="Display" value={`${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}`} />
+                <StatItem label="Canvas size" value={`${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}`} />
                 <StatItem label="Device Pixel Ratio" value={window.devicePixelRatio} />
+                <StatItem label="renderScale" value={redGPUContext.renderScale} />
+                <StatItem label="Alpha Mode" value={redGPUContext.alphaMode} />
                 <StatRGBAItem label="backgroundColor" value={backgroundColor.rgba} />
             </Section>
 

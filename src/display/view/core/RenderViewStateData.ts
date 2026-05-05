@@ -116,7 +116,7 @@ class RenderViewStateData {
 
     /** [KO] 씬이 2D 모드인지 여부 [EN] Whether the scene is in 2D mode */
     isScene2DMode: boolean = false;
-    commandBatchStats: CommandBatchStats = null
+    commandBatchStats: CommandBatchStats | null = null;
     /** [KO] 연결된 View3D 인스턴스 (private) [EN] Connected View3D instance (private) */
     readonly #view: View3D;
 

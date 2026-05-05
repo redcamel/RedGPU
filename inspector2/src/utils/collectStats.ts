@@ -1,6 +1,8 @@
 import RedGPUContext from "../../../src/context/RedGPUContext";
 import { InspectorState } from "../store";
 import { CommandBatchStats } from "../../../src/renderer/commandEncoder/CommandEncoderManager";
+import View3D from "../../../src/display/view/View3D";
+import RenderViewStateData from "../../../src/display/view/core/RenderViewStateData";
 
 /**
  * [KO] 엔진의 실시간 통계를 수집하여 반환합니다.
@@ -18,8 +20,8 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
 
     // [KO] 모든 뷰의 통계 합산
     // [EN] Sum up statistics of all views
-    for (const view of redGPUContext.viewList) {
-        const state = view.renderViewStateData;
+    for (const view of redGPUContext.viewList as View3D[]) {
+        const state: RenderViewStateData = view.renderViewStateData;
         totalNum3DGroups += state.num3DGroups;
         totalNum3DObjects += state.num3DObjects;
         totalNumInstances += state.numInstances;
