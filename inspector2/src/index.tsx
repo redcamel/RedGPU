@@ -3,6 +3,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {useInspectorStore} from './store';
 import App from './App';
+import { collectStats } from './utils/collectStats';
+import { FPSMeter } from './components/FPS';
 
 /**
  * RedGPUInspector (React Version)
@@ -11,8 +13,23 @@ import App from './App';
 class RedGPUInspector {
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
+    private rafId: number | null = null;
+    private redGPUContext: RedGPUContext | null = null;
+    private fpsMeter: FPSMeter = new FPSMeter();
+
 
     constructor() {
+        // [KO] Zustand 스토어 상태 변화 구독 (패널 활성화/비활성화 감지)
+        // [EN] Subscribe to Zustand store state changes (Detect panel activation/deactivation)
+        useInspectorStore.subscribe((state) => {
+            if (state.useDebugPanel) {
+                this.ensureMounted();
+                this.startLoop();
+            } else {
+                this.stopLoop();
+                this.unmount();
+            }
+        });
     }
 
     get useDebugPanel(): boolean {
@@ -27,12 +44,53 @@ class RedGPUInspector {
      * 엔진의 렌더 루프에서 호출됩니다.
      */
     render(redGPUContext: RedGPUContext, time: number) {
+        this.redGPUContext = redGPUContext;
         if (this.useDebugPanel) {
             this.ensureMounted();
-        } else {
-            this.unmount();
+            this.startLoop();
         }
     }
+
+    private startLoop() {
+        if (this.rafId) return;
+        const loop = (time: number) => {
+            // [KO] 패널이 비활성화된 경우 루프 중단
+            // [EN] Stop the loop if the panel is deactivated
+            if (!this.useDebugPanel) {
+                this.stopLoop();
+                return;
+            }
+
+            this.updateStats(time);
+            this.rafId = requestAnimationFrame(loop);
+        };
+        this.rafId = requestAnimationFrame(loop);
+    }
+
+    private stopLoop() {
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+    }
+
+    private updateStats(time: number) {
+        if (!this.redGPUContext) return;
+        
+        // [KO] 엔진 통계 수집
+        // [EN] Collect engine statistics
+        const stats = collectStats(this.redGPUContext, time);
+        
+        // [KO] FPS 통계 계산
+        // [EN] Calculate FPS statistics
+        const fpsStats = this.fpsMeter.update(time);
+        
+        useInspectorStore.getState().setStats({
+            ...stats,
+            ...(fpsStats || {})
+        });
+    }
+
 
     private ensureMounted() {
         if (!this.domRoot) {

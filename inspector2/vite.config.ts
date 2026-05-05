@@ -8,6 +8,11 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@redgpu/src': path.resolve(__dirname, '../src')
+    }
+  },
   define: {
     // 브라우저 환경에서 리액트 프로덕션 빌드로 동작하도록 고정하여 용량 최적화
     'process.env.NODE_ENV': JSON.stringify('production')

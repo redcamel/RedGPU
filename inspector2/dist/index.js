@@ -7165,31 +7165,252 @@ const createImpl = (createState) => {
 const create = (createState) => createState ? createImpl(createState) : createImpl;
 const useInspectorStore = create((set) => ({
   useDebugPanel: false,
-  setUseDebugPanel: (value) => set({ useDebugPanel: value })
+  redGPUContext: null,
+  lastUpdateTime: 0,
+  fps: 0,
+  avgFps: 0,
+  low1Fps: 0,
+  low01Fps: 0,
+  frameTime: "0ms",
+  totalNum3DGroups: 0,
+  totalNum3DObjects: 0,
+  totalNumInstances: 0,
+  totalNumDrawCalls: 0,
+  totalNumTriangles: 0,
+  totalNumPoints: 0,
+  totalUsedVideoMemory: 0,
+  setStats: (stats) => set((state) => ({ ...state, ...stats })),
+  setUseDebugPanel: (value) => set({ useDebugPanel: value }),
+  setRedGPUContext: (value) => set({ redGPUContext: value })
 }));
+class FPSMeter {
+  constructor() {
+    __publicField(this, "previousTimeStamp", 0);
+    __publicField(this, "frameCount", 0);
+    __publicField(this, "frameTimesRaw", []);
+    __publicField(this, "recentFrameTimes", []);
+    __publicField(this, "maxFrameTimeBuffer", 1200);
+    __publicField(this, "recentFrameTimeWindow", 10);
+    __publicField(this, "initializationFrames", 60);
+  }
+  /**
+   * [KO] 새로운 타임스탬프를 기반으로 통계를 업데이트합니다.
+   * [EN] Updates statistics based on a new timestamp.
+   */
+  update(currentTime) {
+    if (currentTime === 0) return null;
+    if (this.frameCount === 0) {
+      this.previousTimeStamp = currentTime;
+      this.frameCount++;
+      return null;
+    }
+    const deltaTime = currentTime - this.previousTimeStamp;
+    this.previousTimeStamp = currentTime;
+    this.frameCount++;
+    const safeFrameTime = Math.min(Math.max(deltaTime, 0.1), 1e3);
+    if (this.frameCount > this.initializationFrames) {
+      this.frameTimesRaw.push(safeFrameTime);
+      if (this.frameTimesRaw.length > this.maxFrameTimeBuffer) this.frameTimesRaw.shift();
+    }
+    this.recentFrameTimes.push(safeFrameTime);
+    if (this.recentFrameTimes.length > this.recentFrameTimeWindow) this.recentFrameTimes.shift();
+    const avgRecent = this.recentFrameTimes.reduce((a, b) => a + b, 0) / this.recentFrameTimes.length;
+    const fps = Math.round(1e3 / avgRecent);
+    let stats = {
+      fps,
+      avgFps: 0,
+      low1Fps: 0,
+      low01Fps: 0,
+      frameTime: `${safeFrameTime.toFixed(2)}ms`
+    };
+    if (this.frameTimesRaw.length >= 100) {
+      const sorted = [...this.frameTimesRaw].sort((a, b) => b - a);
+      const total = sorted.length;
+      const avgTotal = this.frameTimesRaw.reduce((a, b) => a + b, 0) / total;
+      stats.avgFps = Math.round(1e3 / avgTotal);
+      const low1Count = Math.max(1, Math.ceil(total * 0.01));
+      const low1Avg = sorted.slice(0, low1Count).reduce((a, b) => a + b, 0) / low1Count;
+      stats.low1Fps = Math.round(1e3 / low1Avg);
+      const low01Count = Math.max(1, Math.ceil(total * 1e-3));
+      const low01Avg = sorted.slice(0, low01Count).reduce((a, b) => a + b, 0) / low01Count;
+      stats.low01Fps = Math.round(1e3 / low01Avg);
+    }
+    return stats;
+  }
+}
+const FPS = () => {
+  const { fps, avgFps, low1Fps, low01Fps, frameTime } = useInspectorStore();
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: currentFpsBoxStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: fpsValueStyle, children: [
+        fps,
+        " FPS"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: frameTimeValueStyle, children: frameTime })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: extraStatsBoxStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: avgFpsStyle, children: [
+        "Avg: ",
+        avgFps
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low1FpsStyle, children: [
+        "1%: ",
+        low1Fps
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low01FpsStyle, children: [
+        "0.1%: ",
+        low01Fps
+      ] })
+    ] })
+  ] }) });
+};
+const containerStyle$1 = {
+  borderBottom: "1px solid rgba(255,255,255,0.1)"
+};
+const statsContainerStyle = {
+  padding: "12px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  gap: "12px",
+  background: "#000"
+};
+const currentFpsBoxStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  gap: "2px"
+};
+const fpsValueStyle = {
+  color: "#0f0",
+  fontSize: "18px",
+  fontWeight: "bold"
+};
+const frameTimeValueStyle = {
+  color: "#888",
+  fontSize: "11px"
+};
+const dividerStyle = {
+  width: "1px",
+  height: "36px",
+  background: "rgba(255,255,255,0.15)"
+};
+const extraStatsBoxStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  fontSize: "11px"
+};
+const avgFpsStyle = {
+  color: "#4af"
+};
+const low1FpsStyle = {
+  color: "#fa0"
+};
+const low01FpsStyle = {
+  color: "#f50"
+};
+const consoleAndThrowError = (...arg) => {
+  const msg = Array.prototype.slice.call(arg).join(" ");
+  console.log("//////////////////////////////////////////////////////////");
+  console.log(msg);
+  throw new Error(msg);
+};
+const formatBytes = (bytes, decimals = 2) => {
+  if (typeof bytes !== "number" || bytes < 0 || Number.isNaN(bytes) || !Number.isInteger(bytes)) {
+    consoleAndThrowError("Invalid input: 'bytes' must be a uint");
+  }
+  if (bytes === 0)
+    return "0 Bytes";
+  const k2 = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k2));
+  return parseFloat((bytes / Math.pow(k2, i)).toFixed(dm)) + " " + sizes[i];
+};
+const TotalState = () => {
+  const {
+    totalNum3DGroups,
+    totalNum3DObjects,
+    totalNumInstances,
+    totalNumDrawCalls,
+    totalNumTriangles,
+    totalNumPoints,
+    totalUsedVideoMemory
+  } = useInspectorStore();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleStyle, children: "Total State" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: gridStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Groups", value: totalNum3DGroups }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Objects", value: totalNum3DObjects }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Instances", value: totalNumInstances }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Draw Calls", value: totalNumDrawCalls, color: "#fdb48d" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Triangles", value: totalNumTriangles.toLocaleString() }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Points", value: totalNumPoints.toLocaleString() }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Video Memory", value: formatBytes(totalUsedVideoMemory), color: "#fdb48d", isBold: true })
+    ] })
+  ] });
+};
+const StatItem = ({ label, value, color = "#ccc", isBold = false }) => {
+  const itemStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "4px"
+  };
+  const labelStyle = {
+    color: "#888"
+  };
+  const valueStyle = {
+    color,
+    fontWeight: isBold ? "bold" : "normal"
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: itemStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueStyle, children: value })
+  ] });
+};
+const containerStyle = {
+  padding: "12px",
+  borderBottom: "1px solid rgba(255,255,255,0.1)"
+};
+const titleStyle = {
+  fontSize: "13px",
+  color: "#fdb48d",
+  marginBottom: "10px",
+  fontWeight: "bold"
+};
+const gridStyle = {
+  display: "flex",
+  flexDirection: "column"
+};
 const App = () => {
-  const { useDebugPanel, setUseDebugPanel } = useInspectorStore();
+  const useDebugPanel = useInspectorStore((state) => state.useDebugPanel);
+  const setUseDebugPanel = useInspectorStore((state) => state.setUseDebugPanel);
   if (!useDebugPanel) return null;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: panelStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "14px", fontWeight: "bold", color: "#fdb48d" }, children: "RedGPU Inspector 2.0" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleLabelStyle, children: "Performance Monitor" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setUseDebugPanel(false), style: closeBtnStyle, children: "CLOSE" })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "10px", fontSize: "12px" }, children: "인스펙터가 정상적으로 로드되었습니다." })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(FPS, {}),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(TotalState, {})
   ] });
 };
 const panelStyle = {
   position: "fixed",
-  left: 0,
+  left: "320px",
   top: 0,
-  width: "300px",
+  width: "330px",
+  maxHeight: "100%",
   backgroundColor: "rgba(0, 0, 0, 0.9)",
   color: "white",
   fontFamily: "monospace",
   zIndex: 1e4,
   boxShadow: "0 0 20px rgba(0,0,0,0.5)",
   borderTopRightRadius: "8px",
-  overflow: "hidden"
+  overflowY: "auto",
+  overflowX: "hidden"
 };
 const headerStyle = {
   padding: "10px 12px",
@@ -7198,6 +7419,11 @@ const headerStyle = {
   alignItems: "center",
   background: "rgba(255, 255, 255, 0.05)",
   borderBottom: "1px solid rgba(255, 255, 255, 0.1)"
+};
+const titleLabelStyle = {
+  fontSize: "14px",
+  fontWeight: "bold",
+  color: "#fdb48d"
 };
 const closeBtnStyle = {
   backgroundColor: "#c00",
@@ -7209,10 +7435,63 @@ const closeBtnStyle = {
   fontWeight: "bold",
   borderRadius: "4px"
 };
+const collectStats = (redGPUContext, time) => {
+  let totalNum3DGroups = 0;
+  let totalNum3DObjects = 0;
+  let totalNumInstances = 0;
+  let totalNumDrawCalls = 0;
+  let totalNumTriangles = 0;
+  let totalNumPoints = 0;
+  let totalUsedVideoMemory = 0;
+  for (const view of redGPUContext.viewList) {
+    const state = view.renderViewStateData;
+    totalNum3DGroups += state.num3DGroups;
+    totalNum3DObjects += state.num3DObjects;
+    totalNumInstances += state.numInstances;
+    totalNumDrawCalls += state.numDrawCalls;
+    totalNumTriangles += state.numTriangles;
+    totalNumPoints += state.numPoints;
+    totalUsedVideoMemory += state.usedVideoMemory;
+  }
+  const rm = redGPUContext.resourceManager;
+  totalUsedVideoMemory += rm.managedBitmapTextureState.videoMemory;
+  totalUsedVideoMemory += rm.managedCubeTextureState.videoMemory;
+  totalUsedVideoMemory += rm.managedHDRTextureState.videoMemory;
+  totalUsedVideoMemory += rm.managedUniformBufferState.videoMemory;
+  totalUsedVideoMemory += rm.managedVertexBufferState.videoMemory;
+  totalUsedVideoMemory += rm.managedIndexBufferState.videoMemory;
+  totalUsedVideoMemory += rm.managedStorageBufferState.videoMemory;
+  const gpuBufferMap = rm.resources.get("GPUBuffer");
+  if (gpuBufferMap && gpuBufferMap.videoMemory) {
+    totalUsedVideoMemory += gpuBufferMap.videoMemory;
+  }
+  return {
+    lastUpdateTime: time,
+    totalNum3DGroups,
+    totalNum3DObjects,
+    totalNumInstances,
+    totalNumDrawCalls,
+    totalNumTriangles,
+    totalNumPoints,
+    totalUsedVideoMemory
+  };
+};
 class RedGPUInspector {
   constructor() {
     __publicField(this, "root", null);
     __publicField(this, "domRoot", null);
+    __publicField(this, "rafId", null);
+    __publicField(this, "redGPUContext", null);
+    __publicField(this, "fpsMeter", new FPSMeter());
+    useInspectorStore.subscribe((state) => {
+      if (state.useDebugPanel) {
+        this.ensureMounted();
+        this.startLoop();
+      } else {
+        this.stopLoop();
+        this.unmount();
+      }
+    });
   }
   get useDebugPanel() {
     return useInspectorStore.getState().useDebugPanel;
@@ -7224,11 +7503,38 @@ class RedGPUInspector {
    * 엔진의 렌더 루프에서 호출됩니다.
    */
   render(redGPUContext, time) {
+    this.redGPUContext = redGPUContext;
     if (this.useDebugPanel) {
       this.ensureMounted();
-    } else {
-      this.unmount();
+      this.startLoop();
     }
+  }
+  startLoop() {
+    if (this.rafId) return;
+    const loop = (time) => {
+      if (!this.useDebugPanel) {
+        this.stopLoop();
+        return;
+      }
+      this.updateStats(time);
+      this.rafId = requestAnimationFrame(loop);
+    };
+    this.rafId = requestAnimationFrame(loop);
+  }
+  stopLoop() {
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+  }
+  updateStats(time) {
+    if (!this.redGPUContext) return;
+    const stats = collectStats(this.redGPUContext, time);
+    const fpsStats = this.fpsMeter.update(time);
+    useInspectorStore.getState().setStats({
+      ...stats,
+      ...fpsStats || {}
+    });
   }
   ensureMounted() {
     if (!this.domRoot) {

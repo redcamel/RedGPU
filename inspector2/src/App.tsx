@@ -1,36 +1,40 @@
 import React from 'react';
-import {useInspectorStore} from './store';
+import { useInspectorStore } from './store';
+import FPS from './components/FPS';
+import TotalState from './components/TotalState';
 
 const App = () => {
-    const {useDebugPanel, setUseDebugPanel} = useInspectorStore();
+    const useDebugPanel = useInspectorStore(state => state.useDebugPanel);
+    const setUseDebugPanel = useInspectorStore(state => state.setUseDebugPanel);
 
     if (!useDebugPanel) return null;
 
     return (
         <div style={panelStyle}>
             <div style={headerStyle}>
-                <div style={{fontSize: '14px', fontWeight: 'bold', color: '#fdb48d'}}>RedGPU Inspector 2.0</div>
+                <div style={titleLabelStyle}>Performance Monitor</div>
                 <button onClick={() => setUseDebugPanel(false)} style={closeBtnStyle}>CLOSE</button>
             </div>
-            <div style={{padding: '10px', fontSize: '12px'}}>
-                인스펙터가 정상적으로 로드되었습니다.
-            </div>
+            <FPS />
+            <TotalState />
         </div>
     );
 };
 
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    left: 0,
+    left: '320px',
     top: 0,
-    width: '300px',
+    width: '330px',
+    maxHeight: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.9)',
     color: 'white',
     fontFamily: 'monospace',
     zIndex: 10000,
     boxShadow: '0 0 20px rgba(0,0,0,0.5)',
     borderTopRightRadius: '8px',
-    overflow: 'hidden'
+    overflowY: 'auto',
+    overflowX: 'hidden'
 };
 
 const headerStyle: React.CSSProperties = {
@@ -40,6 +44,12 @@ const headerStyle: React.CSSProperties = {
     alignItems: 'center',
     background: 'rgba(255, 255, 255, 0.05)',
     borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+};
+
+const titleLabelStyle: React.CSSProperties = {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    color: '#fdb48d'
 };
 
 const closeBtnStyle: React.CSSProperties = {
