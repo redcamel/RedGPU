@@ -1,6 +1,23 @@
 var __defProp = Object.defineProperty;
+var __typeError = (msg) => {
+  throw TypeError(msg);
+};
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
+var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
+var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
+var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
+var __privateWrapper = (obj, member, setter, getter) => ({
+  set _(value) {
+    __privateSet(obj, member, value, setter);
+  },
+  get _() {
+    return __privateGet(obj, member, getter);
+  }
+});
+var _instanceId, _name, _aperture, _shutterSpeed, _iso, _ev100, _useAutoExposure, _exposureDirty, _up, _viewMatrix, _x, _z, _y, _rotationX, _rotationY, _rotationZ, _fieldOfView, _nearClipping, _farClipping, _globalKeyboardActiveView, _globalKeyboardActiveController, _instanceId2, _name2, _redGPUContext, _camera, _initInfo, _lastUpdateTime, _currentDeltaTime, _currentFrameViews, _keyboardProcessedThisFrame, _hoveredView, _isDragging, _eventTypeKeys, _dragStartX, _dragStartY, _pinchStartDistance, _isMultiTouch, _getTouchDistance, _AController_instances, initListener_fn, _HD_hover, _HD_down, _HD_Move, _HD_touchPinch, _HD_up, _HD_wheel;
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -7133,8 +7150,8 @@ const __vite_import_meta_env__ = {};
 const { useDebugValue } = React$2;
 const { useSyncExternalStoreWithSelector } = useSyncExternalStoreExports;
 let didWarnAboutEqualityFn = false;
-const identity = (arg) => arg;
-function useStore(api, selector = identity, equalityFn) {
+const identity$1 = (arg) => arg;
+function useStore(api, selector = identity$1, equalityFn) {
   if ((__vite_import_meta_env__ ? "production" : void 0) !== "production" && equalityFn && !didWarnAboutEqualityFn) {
     console.warn(
       "[DEPRECATED] Use `createWithEqualityFn` instead of `create` or use `useStoreWithEqualityFn` instead of `useStore`. They can be imported from 'zustand/traditional'. https://github.com/pmndrs/zustand/discussions/1937"
@@ -7162,8 +7179,8 @@ const createImpl = (createState) => {
   Object.assign(useBoundStore, api);
   return useBoundStore;
 };
-const create = (createState) => createState ? createImpl(createState) : createImpl;
-const useInspectorStore = create((set) => ({
+const create$1 = (createState) => createState ? createImpl(createState) : createImpl;
+const useInspectorStore = create$1((set) => ({
   useDebugPanel: false,
   redGPUContext: null,
   lastUpdateTime: 0,
@@ -7821,6 +7838,1252 @@ const noItemStyle = {
   color: "#666",
   fontStyle: "italic"
 };
+class InstanceIdGenerator {
+  /**
+   * [KO] 다음 고유 인스턴스 ID를 반환합니다.
+   * [EN] Returns the next unique instance ID.
+   *
+   * @param type -
+   * [KO] ID를 생성할 타입
+   * [EN] Type to generate ID for
+   * @returns
+   * [KO] 고유 인스턴스 ID
+   * [EN] Unique instance ID
+   */
+  static getNextId(type) {
+    let currentId = this.idMaps.get(type) || 0;
+    this.idMaps.set(type, currentId + 1);
+    return currentId;
+  }
+}
+/**
+ * [KO] 타입별 현재 ID 맵
+ * [EN] Current ID map per type
+ */
+__publicField(InstanceIdGenerator, "idMaps", /* @__PURE__ */ new Map());
+Object.freeze(InstanceIdGenerator);
+var EPSILON = 1e-6;
+var ARRAY_TYPE = typeof Float32Array !== "undefined" ? Float32Array : Array;
+function create() {
+  var out = new ARRAY_TYPE(16);
+  if (ARRAY_TYPE != Float32Array) {
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+    out[4] = 0;
+    out[6] = 0;
+    out[7] = 0;
+    out[8] = 0;
+    out[9] = 0;
+    out[11] = 0;
+    out[12] = 0;
+    out[13] = 0;
+    out[14] = 0;
+  }
+  out[0] = 1;
+  out[5] = 1;
+  out[10] = 1;
+  out[15] = 1;
+  return out;
+}
+function identity(out) {
+  out[0] = 1;
+  out[1] = 0;
+  out[2] = 0;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = 1;
+  out[6] = 0;
+  out[7] = 0;
+  out[8] = 0;
+  out[9] = 0;
+  out[10] = 1;
+  out[11] = 0;
+  out[12] = 0;
+  out[13] = 0;
+  out[14] = 0;
+  out[15] = 1;
+  return out;
+}
+function lookAt(out, eye, center, up) {
+  var x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
+  var eyex = eye[0];
+  var eyey = eye[1];
+  var eyez = eye[2];
+  var upx = up[0];
+  var upy = up[1];
+  var upz = up[2];
+  var centerx = center[0];
+  var centery = center[1];
+  var centerz = center[2];
+  if (Math.abs(eyex - centerx) < EPSILON && Math.abs(eyey - centery) < EPSILON && Math.abs(eyez - centerz) < EPSILON) {
+    return identity(out);
+  }
+  z0 = eyex - centerx;
+  z1 = eyey - centery;
+  z2 = eyez - centerz;
+  len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
+  z0 *= len;
+  z1 *= len;
+  z2 *= len;
+  x0 = upy * z2 - upz * z1;
+  x1 = upz * z0 - upx * z2;
+  x2 = upx * z1 - upy * z0;
+  len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+  if (!len) {
+    x0 = 0;
+    x1 = 0;
+    x2 = 0;
+  } else {
+    len = 1 / len;
+    x0 *= len;
+    x1 *= len;
+    x2 *= len;
+  }
+  y0 = z1 * x2 - z2 * x1;
+  y1 = z2 * x0 - z0 * x2;
+  y2 = z0 * x1 - z1 * x0;
+  len = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
+  if (!len) {
+    y0 = 0;
+    y1 = 0;
+    y2 = 0;
+  } else {
+    len = 1 / len;
+    y0 *= len;
+    y1 *= len;
+    y2 *= len;
+  }
+  out[0] = x0;
+  out[1] = y0;
+  out[2] = z0;
+  out[3] = 0;
+  out[4] = x1;
+  out[5] = y1;
+  out[6] = z1;
+  out[7] = 0;
+  out[8] = x2;
+  out[9] = y2;
+  out[10] = z2;
+  out[11] = 0;
+  out[12] = -(x0 * eyex + x1 * eyey + x2 * eyez);
+  out[13] = -(y0 * eyex + y1 * eyey + y2 * eyez);
+  out[14] = -(z0 * eyex + z1 * eyey + z2 * eyez);
+  out[15] = 1;
+  return out;
+}
+const validateNumber = (value) => {
+  if (typeof value !== "number") {
+    consoleAndThrowError("Only numbers allowed.");
+    return false;
+  }
+  return true;
+};
+class ACamera {
+  constructor() {
+    /**
+     * [KO] 인스턴스 고유 ID
+     * [EN] Instance unique ID
+     */
+    __privateAdd(this, _instanceId);
+    /**
+     * [KO] 카메라 이름
+     * [EN] Camera name
+     */
+    __privateAdd(this, _name);
+    /**
+     * [KO] 조리개 (f-stop)
+     * [EN] Aperture (f-stop)
+     */
+    __privateAdd(this, _aperture, 16);
+    /**
+     * [KO] 셔터 속도 (초)
+     * [EN] Shutter speed (seconds)
+     */
+    __privateAdd(this, _shutterSpeed, 1 / 3200);
+    /**
+     * [KO] 센서 감도 (ISO)
+     * [EN] Sensor sensitivity (ISO)
+     */
+    __privateAdd(this, _iso, 100);
+    /**
+     * [KO] 캐시된 EV100
+     * [EN] Cached EV100
+     */
+    __privateAdd(this, _ev100, 0);
+    /**
+     * [KO] 자동 노출 사용 여부
+     * [EN] Whether to use auto exposure
+     */
+    __privateAdd(this, _useAutoExposure, true);
+    /**
+     * [KO] 노출 값이 다시 계산되어야 하는지 여부
+     * [EN] Whether the exposure needs to be recalculated
+     */
+    __privateAdd(this, _exposureDirty, true);
+  }
+  /**
+   * [KO] 자동 노출 사용 여부를 반환합니다.
+   * [EN] Returns whether to use auto exposure.
+   */
+  get useAutoExposure() {
+    return __privateGet(this, _useAutoExposure);
+  }
+  /**
+   * [KO] 자동 노출 사용 여부를 설정합니다.
+   * [EN] Sets whether to use auto exposure.
+   */
+  set useAutoExposure(value) {
+    if (__privateGet(this, _useAutoExposure) === value)
+      return;
+    if (__privateGet(this, _useAutoExposure) && !value) {
+      __privateSet(this, _iso, 100);
+      let rawShutterSpeed = __privateGet(this, _aperture) * __privateGet(this, _aperture) / Math.pow(2, __privateGet(this, _ev100));
+      const standardSpeeds = [
+        1,
+        1 / 1.3,
+        1 / 1.6,
+        1 / 2,
+        1 / 2.5,
+        1 / 3.2,
+        1 / 4,
+        1 / 5,
+        1 / 6,
+        1 / 8,
+        1 / 10,
+        1 / 13,
+        1 / 15,
+        1 / 20,
+        1 / 25,
+        1 / 30,
+        1 / 40,
+        1 / 50,
+        1 / 60,
+        1 / 80,
+        1 / 100,
+        1 / 125,
+        1 / 160,
+        1 / 200,
+        1 / 250,
+        1 / 320,
+        1 / 400,
+        1 / 500,
+        1 / 640,
+        1 / 800,
+        1 / 1e3,
+        1 / 1250,
+        1 / 1600,
+        1 / 2e3,
+        1 / 2500,
+        1 / 3200,
+        1 / 4e3,
+        1 / 5e3,
+        1 / 6400,
+        1 / 8e3
+      ];
+      __privateSet(this, _shutterSpeed, standardSpeeds.reduce((prev, curr) => Math.abs(curr - rawShutterSpeed) < Math.abs(prev - rawShutterSpeed) ? curr : prev));
+      __privateSet(this, _exposureDirty, true);
+    }
+    __privateSet(this, _useAutoExposure, value);
+  }
+  /**
+   * [KO] 물리적 노출 지수(EV100)를 반환합니다.
+   * [EN] Returns the physical exposure value (EV100).
+   */
+  get ev100() {
+    if (__privateGet(this, _exposureDirty))
+      this.updateExposure();
+    return __privateGet(this, _ev100);
+  }
+  /**
+   * [KO] 조리개(f-stop) 값을 반환합니다.
+   * [EN] Returns the aperture (f-stop) value.
+   */
+  get aperture() {
+    return __privateGet(this, _aperture);
+  }
+  /**
+   * [KO] 조리개(f-stop) 값을 설정합니다.
+   * [EN] Sets the aperture (f-stop) value.
+   */
+  set aperture(value) {
+    validateNumber(value);
+    if (__privateGet(this, _aperture) === value)
+      return;
+    __privateSet(this, _aperture, value);
+    __privateSet(this, _exposureDirty, true);
+  }
+  /**
+   * [KO] 셔터 속도(초 단위)를 반환합니다.
+   * [EN] Returns the shutter speed (in seconds).
+   */
+  get shutterSpeed() {
+    return __privateGet(this, _shutterSpeed);
+  }
+  /**
+   * [KO] 셔터 속도(초 단위)를 설정합니다.
+   * [EN] Sets the shutter speed (in seconds).
+   */
+  set shutterSpeed(value) {
+    validateNumber(value);
+    if (__privateGet(this, _shutterSpeed) === value)
+      return;
+    __privateSet(this, _shutterSpeed, value);
+    __privateSet(this, _exposureDirty, true);
+  }
+  /**
+   * [KO] 센서 감도(ISO)를 반환합니다.
+   * [EN] Returns the sensor sensitivity (ISO).
+   */
+  get iso() {
+    return __privateGet(this, _iso);
+  }
+  /**
+   * [KO] 센서 감도(ISO)를 설정합니다.
+   * [EN] Sets the sensor sensitivity (ISO).
+   */
+  set iso(value) {
+    validateNumber(value);
+    if (__privateGet(this, _iso) === value)
+      return;
+    __privateSet(this, _iso, value);
+    __privateSet(this, _exposureDirty, true);
+  }
+  /**
+   * [KO] 카메라 이름을 반환합니다.
+   * [EN] Returns the camera name.
+   */
+  get name() {
+    if (!__privateGet(this, _instanceId))
+      __privateSet(this, _instanceId, InstanceIdGenerator.getNextId(this.constructor));
+    return __privateGet(this, _name) || `${this.constructor.name} Instance ${__privateGet(this, _instanceId)}`;
+  }
+  /**
+   * [KO] 카메라 이름을 설정합니다.
+   * [EN] Sets the camera name.
+   */
+  set name(value) {
+    __privateSet(this, _name, value);
+  }
+  /**
+   * [KO] 노출 값을 업데이트합니다.
+   * [EN] Updates the exposure value.
+   * @param view [KO] View3D 인스턴스 (선택 사항) [EN] View3D instance (optional)
+   */
+  updateExposure(view) {
+    if (view && __privateGet(this, _useAutoExposure)) {
+      __privateSet(this, _ev100, view.postEffectManager.autoExposure.currentAdaptedEV100);
+    } else {
+      __privateSet(this, _ev100, Math.log2(__privateGet(this, _aperture) * __privateGet(this, _aperture) / __privateGet(this, _shutterSpeed) * (100 / __privateGet(this, _iso))));
+    }
+    __privateSet(this, _exposureDirty, false);
+  }
+}
+_instanceId = new WeakMap();
+_name = new WeakMap();
+_aperture = new WeakMap();
+_shutterSpeed = new WeakMap();
+_iso = new WeakMap();
+_ev100 = new WeakMap();
+_useAutoExposure = new WeakMap();
+_exposureDirty = new WeakMap();
+/**
+ * [KO] 교정 상수 (Calibration Constant, K)
+ * [EN] Calibration constant (K)
+ * @description
+ * [KO] 언리얼 엔진 5 및 사진학적 표준 (ISO 2720 표준 기준 K = 12.5)
+ * [EN] Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
+ */
+__publicField(ACamera, "CALIBRATION_CONSTANT", 12.5);
+class PerspectiveCamera extends ACamera {
+  /**
+   * [KO] PerspectiveCamera 인스턴스를 생성합니다.
+   * [EN] Creates an instance of PerspectiveCamera.
+   *
+   * ### Example
+   * ```typescript
+   * const camera = new RedGPU.PerspectiveCamera();
+   * ```
+   */
+  constructor() {
+    super();
+    /**
+     * [KO] up 벡터 (기본값 [0, 1, 0])
+     * [EN] Up vector (default [0, 1, 0])
+     */
+    __privateAdd(this, _up, new Float32Array([0, 1, 0]));
+    /**
+     * [KO] 모델 행렬(mat4)
+     * [EN] Model matrix (mat4)
+     */
+    __privateAdd(this, _viewMatrix, create());
+    /**
+     * [KO] X 좌표
+     * [EN] X coordinate
+     */
+    __privateAdd(this, _x, 0);
+    /**
+     * [KO] Z 좌표
+     * [EN] Z coordinate
+     */
+    __privateAdd(this, _z, 0);
+    /**
+     * [KO] Y 좌표
+     * [EN] Y coordinate
+     */
+    __privateAdd(this, _y, 0);
+    /**
+     * [KO] X축 회전(라디안)
+     * [EN] Rotation X (radians)
+     */
+    __privateAdd(this, _rotationX, 0);
+    /**
+     * [KO] Y축 회전(라디안)
+     * [EN] Rotation Y (radians)
+     */
+    __privateAdd(this, _rotationY, 0);
+    /**
+     * [KO] Z축 회전(라디안)
+     * [EN] Rotation Z (radians)
+     */
+    __privateAdd(this, _rotationZ, 0);
+    /**
+     * [KO] 시야각(FOV, 도)
+     * [EN] Field of view (degrees)
+     */
+    __privateAdd(this, _fieldOfView, 60);
+    /**
+     * [KO] 근평면(near)
+     * [EN] Near clipping plane
+     */
+    __privateAdd(this, _nearClipping, 0.01);
+    /**
+     * [KO] 원평면(far)
+     * [EN] Far clipping plane
+     */
+    __privateAdd(this, _farClipping, 1e5);
+  }
+  /**
+   * [KO] X축 회전값을 반환합니다. (라디안)
+   * [EN] Returns the X rotation value. (radians)
+   *
+   * @returns
+   * [KO] X축 회전값
+   * [EN] X rotation value
+   */
+  get rotationX() {
+    return __privateGet(this, _rotationX);
+  }
+  /**
+   * [KO] X축 회전값을 설정합니다. (라디안)
+   * [EN] Sets the X rotation value. (radians)
+   *
+   * @param value -
+   * [KO] 설정할 회전값
+   * [EN] Rotation value to set
+   */
+  set rotationX(value) {
+    __privateSet(this, _rotationX, value);
+  }
+  /**
+   * [KO] Y축 회전값을 반환합니다. (라디안)
+   * [EN] Returns the Y rotation value. (radians)
+   *
+   * @returns
+   * [KO] Y축 회전값
+   * [EN] Y rotation value
+   */
+  get rotationY() {
+    return __privateGet(this, _rotationY);
+  }
+  /**
+   * [KO] Y축 회전값을 설정합니다. (라디안)
+   * [EN] Sets the X rotation value. (radians)
+   *
+   * @param value -
+   * [KO] 설정할 회전값
+   * [EN] Rotation value to set
+   */
+  set rotationY(value) {
+    __privateSet(this, _rotationY, value);
+  }
+  /**
+   * [KO] Z축 회전값을 반환합니다. (라디안)
+   * [EN] Returns the Z rotation value. (radians)
+   *
+   * @returns
+   * [KO] Z축 회전값
+   * [EN] Z rotation value
+   */
+  get rotationZ() {
+    return __privateGet(this, _rotationZ);
+  }
+  /**
+   * [KO] Z축 회전값을 설정합니다. (라디안)
+   * [EN] Sets the X rotation value. (radians)
+   *
+   * @param value -
+   * [KO] 설정할 회전값
+   * [EN] Rotation value to set
+   */
+  set rotationZ(value) {
+    __privateSet(this, _rotationZ, value);
+  }
+  /**
+   * [KO] 시야각(FOV)을 반환합니다. (도)
+   * [EN] Returns the field of view. (degrees)
+   *
+   * @returns
+   * [KO] 시야각
+   * [EN] Field of view
+   */
+  get fieldOfView() {
+    return __privateGet(this, _fieldOfView);
+  }
+  /**
+   * [KO] 시야각(FOV)을 설정합니다. (도)
+   * [EN] Sets the field of view. (degrees)
+   *
+   * @param value -
+   * [KO] 설정할 시야각
+   * [EN] Field of view to set
+   */
+  set fieldOfView(value) {
+    validateNumber(value);
+    __privateSet(this, _fieldOfView, value);
+  }
+  /**
+   * [KO] 근평면(near) 거리를 반환합니다.
+   * [EN] Returns the near clipping distance.
+   *
+   * @returns
+   * [KO] 근평면 거리
+   * [EN] Near clipping distance
+   */
+  get nearClipping() {
+    return __privateGet(this, _nearClipping);
+  }
+  /**
+   * [KO] 근평면(near) 거리를 설정합니다.
+   * [EN] Sets the near clipping distance.
+   *
+   * @param value -
+   * [KO] 설정할 근평면 거리
+   * [EN] Near clipping distance to set
+   */
+  set nearClipping(value) {
+    validateNumber(value);
+    __privateSet(this, _nearClipping, value);
+  }
+  /**
+   * [KO] 원평면(far) 거리를 반환합니다.
+   * [EN] Returns the far clipping distance.
+   *
+   * @returns
+   * [KO] 원평면 거리
+   * [EN] Far clipping distance
+   */
+  get farClipping() {
+    return __privateGet(this, _farClipping);
+  }
+  /**
+   * [KO] 원평면(far) 거리를 설정합니다.
+   * [EN] Sets the far clipping distance.
+   *
+   * @param value -
+   * [KO] 설정할 원평면 거리
+   * [EN] Far clipping distance to set
+   */
+  set farClipping(value) {
+    validateNumber(value);
+    __privateSet(this, _farClipping, value);
+  }
+  /**
+   * [KO] 모델 행렬을 반환합니다.
+   * [EN] Returns the model matrix.
+   *
+   * @returns
+   * [KO] 모델 행렬
+   * [EN] Model matrix
+   */
+  get viewMatrix() {
+    return __privateGet(this, _viewMatrix);
+  }
+  /**
+   * [KO] X 좌표를 반환합니다.
+   * [EN] Returns the X coordinate.
+   *
+   * @returns
+   * [KO] X 좌표
+   * [EN] X coordinate
+   */
+  get x() {
+    return __privateGet(this, _x);
+  }
+  /**
+   * [KO] X 좌표를 설정합니다.
+   * [EN] Sets the X coordinate.
+   *
+   * @param value -
+   * [KO] 설정할 X 좌표
+   * [EN] X coordinate to set
+   */
+  set x(value) {
+    __privateSet(this, _x, value);
+    __privateGet(this, _viewMatrix)[12] = value;
+  }
+  /**
+   * [KO] Y 좌표를 반환합니다.
+   * [EN] Returns the Y coordinate.
+   *
+   * @returns
+   * [KO] Y 좌표
+   * [EN] Y coordinate
+   */
+  get y() {
+    return __privateGet(this, _y);
+  }
+  /**
+   * [KO] Y 좌표를 설정합니다.
+   * [EN] Sets the Y coordinate.
+   *
+   * @param value -
+   * [KO] 설정할 Y 좌표
+   * [EN] Y coordinate to set
+   */
+  set y(value) {
+    __privateSet(this, _y, value);
+    __privateGet(this, _viewMatrix)[13] = value;
+  }
+  /**
+   * [KO] Z 좌표를 반환합니다.
+   * [EN] Returns the Z coordinate.
+   *
+   * @returns
+   * [KO] Z 좌표
+   * [EN] Z coordinate
+   */
+  get z() {
+    return __privateGet(this, _z);
+  }
+  /**
+   * [KO] Z 좌표를 설정합니다.
+   * [EN] Sets the Z coordinate.
+   *
+   * @param value -
+   * [KO] 설정할 Z 좌표
+   * [EN] Z coordinate to set
+   */
+  set z(value) {
+    __privateSet(this, _z, value);
+    __privateGet(this, _viewMatrix)[14] = value;
+  }
+  /**
+   * [KO] 카메라 위치 (x, y, z)를 반환합니다.
+   * [EN] Returns the camera position (x, y, z).
+   *
+   * @returns
+   * [KO] [x, y, z] 좌표 배열
+   * [EN] [x, y, z] coordinate array
+   */
+  get position() {
+    return [__privateGet(this, _x), __privateGet(this, _y), __privateGet(this, _z)];
+  }
+  /**
+   * [KO] 카메라 위치를 설정합니다.
+   * [EN] Sets the camera position.
+   *
+   * ### Example
+   * ```typescript
+   * camera.setPosition(10, 5, 20);
+   * camera.setPosition([10, 5, 20]);
+   * ```
+   *
+   * @param x -
+   * [KO] X 좌표 또는 [x, y, z] 배열
+   * [EN] X coordinate or [x, y, z] array
+   * @param y -
+   * [KO] Y 좌표 (x가 배열인 경우 무시됨)
+   * [EN] Y coordinate (ignored if x is an array)
+   * @param z -
+   * [KO] Z 좌표 (x가 배열인 경우 무시됨)
+   * [EN] Z coordinate (ignored if x is an array)
+   */
+  setPosition(x2, y2, z2) {
+    if (Array.isArray(x2)) {
+      [__privateWrapper(this, _x)._, __privateWrapper(this, _y)._, __privateWrapper(this, _z)._] = x2;
+    } else {
+      __privateSet(this, _x, x2);
+      __privateSet(this, _y, y2);
+      __privateSet(this, _z, z2);
+    }
+    [__privateGet(this, _viewMatrix)[12], __privateGet(this, _viewMatrix)[13], __privateGet(this, _viewMatrix)[14]] = [__privateGet(this, _x), __privateGet(this, _y), __privateGet(this, _z)];
+  }
+  /**
+   * [KO] 카메라가 특정 좌표를 바라보도록 회전시킵니다.
+   * [EN] Rotates the camera to look at a specific coordinate.
+   *
+   * ### Example
+   * ```typescript
+   * camera.lookAt(0, 0, 0);
+   * ```
+   *
+   * @param x -
+   * [KO] 바라볼 대상의 X 좌표
+   * [EN] Target X coordinate to look at
+   * @param y -
+   * [KO] 바라볼 대상의 Y 좌표
+   * [EN] Target Y coordinate to look at
+   * @param z -
+   * [KO] 바라볼 대상의 Z 좌표
+   * [EN] Target Z coordinate to look at
+   */
+  lookAt(x2, y2, z2) {
+    const eye = [__privateGet(this, _x), __privateGet(this, _y), __privateGet(this, _z)];
+    const target = [x2, y2, z2];
+    const up = [__privateGet(this, _up)[0], __privateGet(this, _up)[1], __privateGet(this, _up)[2]];
+    const dir = [target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]];
+    const len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+    dir[0] /= len;
+    dir[1] /= len;
+    dir[2] /= len;
+    const cross = [
+      dir[1] * up[2] - dir[2] * up[1],
+      dir[2] * up[0] - dir[0] * up[2],
+      dir[0] * up[1] - dir[1] * up[0]
+    ];
+    const crossLen = Math.sqrt(cross[0] * cross[0] + cross[1] * cross[1] + cross[2] * cross[2]);
+    if (crossLen < 1e-4) {
+      up[2] = dir[1] > 0 ? 1 : -1;
+      up[0] = 0;
+      up[1] = 0;
+    }
+    lookAt(__privateGet(this, _viewMatrix), eye, target, up);
+  }
+}
+_up = new WeakMap();
+_viewMatrix = new WeakMap();
+_x = new WeakMap();
+_z = new WeakMap();
+_y = new WeakMap();
+_rotationX = new WeakMap();
+_rotationY = new WeakMap();
+_rotationZ = new WeakMap();
+_fieldOfView = new WeakMap();
+_nearClipping = new WeakMap();
+_farClipping = new WeakMap();
+const _AController = class _AController {
+  /**
+   * [KO] AController 인스턴스를 생성합니다.
+   * [EN] Creates an instance of AController.
+   *
+   * @param redGPUContext -
+   * [KO] RedGPU 컨텍스트
+   * [EN] RedGPU Context
+   * @param initInfo -
+   * [KO] 컨트롤러 초기화 정보
+   * [EN] Controller initialization info
+   */
+  constructor(redGPUContext, initInfo) {
+    __privateAdd(this, _AController_instances);
+    // ==================== 인스턴스 정보 ====================
+    __privateAdd(this, _instanceId2);
+    __privateAdd(this, _name2);
+    __privateAdd(this, _redGPUContext);
+    __privateAdd(this, _camera);
+    __privateAdd(this, _initInfo);
+    // ==================== 프레임 관리 ====================
+    __privateAdd(this, _lastUpdateTime, -1);
+    __privateAdd(this, _currentDeltaTime, 0);
+    __privateAdd(this, _currentFrameViews, /* @__PURE__ */ new Set());
+    __privateAdd(this, _keyboardProcessedThisFrame, false);
+    // ==================== View 상태 ====================
+    __privateAdd(this, _hoveredView, null);
+    __privateAdd(this, _isDragging, false);
+    // ==================== 입력 이벤트 관련 ====================
+    __privateAdd(this, _eventTypeKeys);
+    __privateAdd(this, _dragStartX, 0);
+    __privateAdd(this, _dragStartY, 0);
+    __privateAdd(this, _pinchStartDistance, 0);
+    __privateAdd(this, _isMultiTouch, false);
+    /**
+     * [KO] 캔버스 상의 이벤트 좌표를 가져옵니다.
+     * [EN] Gets the event coordinates on the canvas.
+     *
+     * @param e -
+     * [KO] 마우스, 터치 또는 휠 이벤트
+     * [EN] Mouse, touch, or wheel event
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU context
+     * @returns
+     * [KO] {x, y} 좌표 객체
+     * [EN] {x, y} coordinate object
+     * @internal
+     */
+    __publicField(this, "getCanvasEventPoint", (e, redGPUContext) => {
+      redGPUContext.htmlCanvas;
+      const isMobile = redGPUContext.detector.isMobile;
+      const rect = redGPUContext.boundingClientRect;
+      const tX_key = "clientX";
+      const tY_key = "clientY";
+      let clientX;
+      let clientY;
+      if (isMobile) {
+        const touch = e instanceof WheelEvent ? e : e.changedTouches[0];
+        clientX = touch[tX_key];
+        clientY = touch[tY_key];
+      } else {
+        const mouseEvent = e;
+        clientX = mouseEvent[tX_key];
+        clientY = mouseEvent[tY_key];
+      }
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    });
+    /**
+     * [KO] 입력 이벤트가 발생한 View를 찾습니다.
+     * [EN] Finds the View where the input event occurred.
+     *
+     * @param e -
+     * [KO] 마우스 또는 터치 이벤트
+     * [EN] Mouse or touch event
+     * @returns
+     * [KO] 해당 View 또는 null
+     * [EN] Corresponding View or null
+     * @internal
+     */
+    __publicField(this, "findTargetViewByInputEvent", (e) => {
+      const redGPUContext = __privateGet(this, _redGPUContext);
+      redGPUContext.detector.isMobile;
+      const { x: x2, y: y2 } = this.getCanvasEventPoint(e, redGPUContext);
+      const scale = window.devicePixelRatio * redGPUContext.renderScale;
+      const tX = x2 * scale;
+      const tY = y2 * scale;
+      let targetView = null;
+      for (const view of this.redGPUContext.viewList) {
+        const tViewRect = view.pixelRectObject;
+        if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width && tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
+          targetView = view;
+        }
+      }
+      return targetView;
+    });
+    // ==================== Private Helpers ====================
+    /**
+     * [KO] 두 터치 점 사이의 거리를 계산합니다.
+     * [EN] Calculates the distance between two touch points.
+     *
+     * @param touches -
+     * [KO] 터치 리스트
+     * [EN] Touch list
+     * @returns
+     * [KO] 거리 값
+     * [EN] Distance value
+     * @internal
+     */
+    __privateAdd(this, _getTouchDistance, (touches) => {
+      if (touches.length < 2)
+        return 0;
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    });
+    __privateAdd(this, _HD_hover, (e) => {
+      if (__privateGet(_AController, _globalKeyboardActiveView) || __privateGet(this, _isDragging))
+        return;
+      __privateSet(this, _hoveredView, this.findTargetViewByInputEvent(e));
+    });
+    __privateAdd(this, _HD_down, (e) => {
+      const targetView = this.findTargetViewByInputEvent(e);
+      if (!targetView)
+        return;
+      if (!__privateGet(_AController, _globalKeyboardActiveView) && !__privateGet(this, _isDragging)) {
+        __privateSet(this, _hoveredView, targetView);
+      }
+      const { redGPUContext } = this;
+      const { moveKey, upKey } = __privateGet(this, _eventTypeKeys);
+      const { x: x2, y: y2 } = this.getCanvasEventPoint(e, redGPUContext);
+      __privateSet(this, _dragStartX, x2);
+      __privateSet(this, _dragStartY, y2);
+      if (e instanceof TouchEvent) {
+        if (e.touches.length >= 2) {
+          __privateSet(this, _isMultiTouch, true);
+          __privateSet(this, _pinchStartDistance, __privateGet(this, _getTouchDistance).call(this, e.touches));
+        } else {
+          __privateSet(this, _isMultiTouch, false);
+          __privateSet(this, _pinchStartDistance, 0);
+        }
+      }
+      if (__privateGet(this, _currentFrameViews).has(targetView)) {
+        __privateSet(this, _isDragging, true);
+        __privateSet(_AController, _globalKeyboardActiveView, targetView);
+        redGPUContext.htmlCanvas.addEventListener(moveKey, __privateGet(this, _HD_Move));
+        window.addEventListener(upKey, __privateGet(this, _HD_up));
+      }
+    });
+    __privateAdd(this, _HD_Move, (e) => {
+      var _a, _b;
+      if (e instanceof TouchEvent && e.touches.length >= 2) {
+        __privateSet(this, _isMultiTouch, true);
+        return;
+      }
+      __privateSet(this, _isMultiTouch, false);
+      const { x: x2, y: y2 } = this.getCanvasEventPoint(e, __privateGet(this, _redGPUContext));
+      const deltaX = x2 - __privateGet(this, _dragStartX);
+      const deltaY = y2 - __privateGet(this, _dragStartY);
+      __privateSet(this, _dragStartX, x2);
+      __privateSet(this, _dragStartY, y2);
+      (_b = (_a = __privateGet(this, _initInfo)).HD_Move) == null ? void 0 : _b.call(_a, deltaX, deltaY);
+    });
+    __privateAdd(this, _HD_touchPinch, (e) => {
+      var _a, _b;
+      if (e.touches.length < 2 || !__privateGet(this, _initInfo).HD_TouchPinch)
+        return;
+      if (!__privateGet(this, _isMultiTouch))
+        return;
+      e.preventDefault();
+      const currentDistance = __privateGet(this, _getTouchDistance).call(this, e.touches);
+      if (__privateGet(this, _pinchStartDistance) === 0) {
+        __privateSet(this, _pinchStartDistance, currentDistance);
+        return;
+      }
+      const targetView = this.findTargetViewByInputEvent(e);
+      if (targetView.rawCamera !== __privateGet(this, _camera))
+        return;
+      const deltaScale = currentDistance / __privateGet(this, _pinchStartDistance);
+      (_b = (_a = __privateGet(this, _initInfo)).HD_TouchPinch) == null ? void 0 : _b.call(_a, deltaScale);
+      __privateSet(this, _pinchStartDistance, currentDistance);
+    });
+    __privateAdd(this, _HD_up, () => {
+      const { htmlCanvas } = __privateGet(this, _redGPUContext);
+      const { moveKey, upKey } = __privateGet(this, _eventTypeKeys);
+      __privateSet(this, _isMultiTouch, false);
+      __privateSet(this, _pinchStartDistance, 0);
+      __privateSet(this, _isDragging, false);
+      htmlCanvas.removeEventListener(moveKey, __privateGet(this, _HD_Move));
+      window.removeEventListener(upKey, __privateGet(this, _HD_up));
+    });
+    __privateAdd(this, _HD_wheel, (e) => {
+      var _a, _b;
+      const targetView = this.findTargetViewByInputEvent(e);
+      if (!targetView)
+        return;
+      if (targetView.rawCamera !== __privateGet(this, _camera))
+        return;
+      e.stopPropagation();
+      e.preventDefault();
+      (_b = (_a = __privateGet(this, _initInfo)).HD_Wheel) == null ? void 0 : _b.call(_a, e);
+    });
+    __privateSet(this, _redGPUContext, redGPUContext);
+    __privateSet(this, _initInfo, initInfo || {});
+    __privateSet(this, _camera, initInfo.camera || new PerspectiveCamera());
+    const isMobile = __privateGet(this, _redGPUContext).detector.isMobile;
+    __privateSet(this, _eventTypeKeys, {
+      moveKey: isMobile ? "touchmove" : "mousemove",
+      upKey: isMobile ? "touchend" : "mouseup",
+      downKey: isMobile ? "touchstart" : "mousedown"
+    });
+    __privateMethod(this, _AController_instances, initListener_fn).call(this);
+  }
+  // ==================== Public Getters/Setters ====================
+  /**
+   * [KO] 컨트롤러의 이름을 반환합니다.
+   * [EN] Returns the name of the controller.
+   *
+   * @returns
+   * [KO] 컨트롤러 이름
+   * [EN] Controller name
+   */
+  get name() {
+    if (!__privateGet(this, _instanceId2))
+      __privateSet(this, _instanceId2, InstanceIdGenerator.getNextId(this.constructor));
+    return __privateGet(this, _name2) || `${this.constructor.name} Instance ${__privateGet(this, _instanceId2)}`;
+  }
+  /**
+   * [KO] 컨트롤러의 이름을 설정합니다.
+   * [EN] Sets the name of the controller.
+   *
+   * @param value -
+   * [KO] 설정할 이름
+   * [EN] Name to set
+   */
+  set name(value) {
+    __privateSet(this, _name2, value);
+  }
+  /**
+   * [KO] RedGPU 컨텍스트를 반환합니다.
+   * [EN] Returns the RedGPU context.
+   *
+   * @returns
+   * [KO] RedGPU 컨텍스트
+   * [EN] RedGPU context
+   */
+  get redGPUContext() {
+    return __privateGet(this, _redGPUContext);
+  }
+  /**
+   * [KO] 이 컨트롤러가 제어하는 카메라를 반환합니다.
+   * [EN] Returns the camera controlled by this controller.
+   *
+   * @returns
+   * [KO] 제어 중인 카메라 (PerspectiveCamera 또는 OrthographicCamera)
+   * [EN] Controlled camera (PerspectiveCamera or OrthographicCamera)
+   */
+  get camera() {
+    return __privateGet(this, _camera);
+  }
+  /**
+   * [KO] 카메라의 현재 월드 X 좌표를 가져옵니다.
+   * [EN] Gets the camera's current world X coordinate.
+   *
+   * @returns
+   * [KO] X 좌표
+   * [EN] X coordinate
+   */
+  get x() {
+    return this.camera.x;
+  }
+  /**
+   * [KO] 카메라의 현재 월드 Y 좌표를 가져옵니다.
+   * [EN] Gets the camera's current world Y coordinate.
+   *
+   * @returns
+   * [KO] Y 좌표
+   * [EN] Y coordinate
+   */
+  get y() {
+    return this.camera.y;
+  }
+  /**
+   * [KO] 카메라의 현재 월드 Z 좌표를 가져옵니다.
+   * [EN] Gets the camera's current world Z coordinate.
+   *
+   * @returns
+   * [KO] Z 좌표
+   * [EN] Z coordinate
+   */
+  get z() {
+    return this.camera.z;
+  }
+  // ==================== Protected - 파생 클래스 전용 ====================
+  /**
+   * [KO] 현재 마우스가 호버링 중인 View를 반환합니다.
+   * [EN] Returns the View currently being hovered by the mouse.
+   *
+   * @returns
+   * [KO] 호버링 중인 View 또는 null
+   * [EN] Hovered View or null
+   * @internal
+   */
+  get hoveredView() {
+    return __privateGet(this, _hoveredView);
+  }
+  /**
+   * [KO] 키보드 입력이 활성화된 View를 반환합니다.
+   * [EN] Returns the View with active keyboard input.
+   *
+   * @returns
+   * [KO] 키보드 활성 View 또는 null
+   * [EN] Keyboard active View or null
+   * @internal
+   */
+  get keyboardActiveView() {
+    return __privateGet(_AController, _globalKeyboardActiveView);
+  }
+  /**
+   * [KO] 키보드 입력이 활성화된 View를 설정합니다.
+   * [EN] Sets the View with active keyboard input.
+   *
+   * @param value -
+   * [KO] 설정할 View 또는 null
+   * [EN] View to set or null
+   * @internal
+   */
+  set keyboardActiveView(value) {
+    __privateSet(_AController, _globalKeyboardActiveView, value);
+    if (value === null) {
+      __privateSet(_AController, _globalKeyboardActiveController, null);
+    } else {
+      __privateSet(_AController, _globalKeyboardActiveController, this);
+    }
+  }
+  /**
+   * [KO] 현재 컨트롤러가 키보드 입력을 처리 중인지 여부를 반환합니다.
+   * [EN] Returns whether the current controller is processing keyboard input.
+   *
+   * @returns
+   * [KO] 키보드 활성 컨트롤러 여부
+   * [EN] Whether it is the keyboard active controller
+   * @internal
+   */
+  get isKeyboardActiveController() {
+    return __privateGet(_AController, _globalKeyboardActiveController) === this;
+  }
+  /**
+   * [KO] 이번 프레임에서 키보드 입력이 이미 처리되었는지 여부를 반환합니다.
+   * [EN] Returns whether keyboard input has already been processed in this frame.
+   *
+   * @returns
+   * [KO] 처리 여부
+   * [EN] Processing status
+   * @internal
+   */
+  get keyboardProcessedThisFrame() {
+    return __privateGet(this, _keyboardProcessedThisFrame);
+  }
+  /**
+   * [KO] 이번 프레임에서 키보드 입력이 처리되었는지 여부를 설정합니다.
+   * [EN] Sets whether keyboard input has been processed in this frame.
+   *
+   * @param value -
+   * [KO] 설정할 처리 여부
+   * [EN] Processing status to set
+   * @internal
+   */
+  set keyboardProcessedThisFrame(value) {
+    __privateSet(this, _keyboardProcessedThisFrame, value);
+  }
+  /**
+   * [KO] 컨트롤러를 제거하고 이벤트 리스너를 해제합니다.
+   * [EN] Destroys the controller and removes event listeners.
+   */
+  destroy() {
+    const { moveKey, upKey, downKey } = __privateGet(this, _eventTypeKeys);
+    const { htmlCanvas } = this.redGPUContext;
+    htmlCanvas.removeEventListener(downKey, __privateGet(this, _HD_down));
+    htmlCanvas.removeEventListener(moveKey, __privateGet(this, _HD_hover));
+    htmlCanvas.removeEventListener(moveKey, __privateGet(this, _HD_Move));
+    window.removeEventListener(upKey, __privateGet(this, _HD_up));
+    if (__privateGet(this, _initInfo).HD_Wheel) {
+      htmlCanvas.removeEventListener("wheel", __privateGet(this, _HD_wheel));
+    }
+  }
+  // ==================== Update ====================
+  /**
+   * [KO] 컨트롤러 상태를 업데이트합니다. 파생 클래스에서 구현해야 합니다.
+   * [EN] Updates the controller state. Must be implemented in derived classes.
+   *
+   * @param view -
+   * [KO] 현재 View
+   * [EN] Current View
+   * @param time -
+   * [KO] 현재 시간 (ms)
+   * [EN] Current time (ms)
+   * @param updateAnimation -
+   * [KO] 애니메이션 업데이트 콜백 (deltaTime 전달)
+   * [EN] Animation update callback (receives deltaTime)
+   */
+  update(view, time, updateAnimation) {
+    if (__privateGet(this, _lastUpdateTime) !== time) {
+      __privateSet(this, _currentDeltaTime, __privateGet(this, _lastUpdateTime) === -1 ? 0 : (time - __privateGet(this, _lastUpdateTime)) / 1e3);
+      __privateSet(this, _lastUpdateTime, time);
+      __privateGet(this, _currentFrameViews).clear();
+      __privateSet(this, _keyboardProcessedThisFrame, false);
+    }
+    if (__privateGet(this, _currentFrameViews).has(view))
+      return;
+    __privateGet(this, _currentFrameViews).add(view);
+    if (__privateGet(this, _initInfo).useKeyboard && this.keyboardActiveView && this.keyboardActiveView !== view)
+      return;
+    updateAnimation == null ? void 0 : updateAnimation(__privateGet(this, _currentDeltaTime));
+  }
+  /**
+   * [KO] 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
+   * [EN] Checks for keyboard input and sets the active View.
+   *
+   * @param view -
+   * [KO] 현재 View
+   * [EN] Current View
+   * @param keyNameMapper -
+   * [KO] 키 매핑 객체
+   * [EN] Key mapping object
+   * @returns
+   * [KO] 키보드 입력 처리가 가능하면 true, 아니면 false
+   * [EN] True if keyboard input processing is possible, otherwise false
+   */
+  checkKeyboardInput(view, keyNameMapper) {
+    if (this.keyboardProcessedThisFrame)
+      return false;
+    const { keyboardKeyBuffer } = view.redGPUContext;
+    let hasAnyKeyInput = false;
+    for (const key in keyNameMapper) {
+      if (keyboardKeyBuffer[keyNameMapper[key]]) {
+        hasAnyKeyInput = true;
+        break;
+      }
+    }
+    if (!hasAnyKeyInput) {
+      this.keyboardActiveView = null;
+      return false;
+    }
+    if (!this.keyboardActiveView) {
+      if (this.hoveredView === view) {
+        this.keyboardActiveView = view;
+      } else {
+        return false;
+      }
+    }
+    if (this.keyboardActiveView !== view)
+      return false;
+    this.keyboardProcessedThisFrame = true;
+    return true;
+  }
+};
+_globalKeyboardActiveView = new WeakMap();
+_globalKeyboardActiveController = new WeakMap();
+_instanceId2 = new WeakMap();
+_name2 = new WeakMap();
+_redGPUContext = new WeakMap();
+_camera = new WeakMap();
+_initInfo = new WeakMap();
+_lastUpdateTime = new WeakMap();
+_currentDeltaTime = new WeakMap();
+_currentFrameViews = new WeakMap();
+_keyboardProcessedThisFrame = new WeakMap();
+_hoveredView = new WeakMap();
+_isDragging = new WeakMap();
+_eventTypeKeys = new WeakMap();
+_dragStartX = new WeakMap();
+_dragStartY = new WeakMap();
+_pinchStartDistance = new WeakMap();
+_isMultiTouch = new WeakMap();
+_getTouchDistance = new WeakMap();
+_AController_instances = new WeakSet();
+// ==================== 마우스/터치 이벤트 핸들러 ====================
+initListener_fn = function() {
+  const { redGPUContext } = this;
+  const { htmlCanvas } = redGPUContext;
+  const { downKey, moveKey } = __privateGet(this, _eventTypeKeys);
+  htmlCanvas.addEventListener(downKey, __privateGet(this, _HD_down));
+  htmlCanvas.addEventListener(moveKey, __privateGet(this, _HD_hover));
+  if (__privateGet(this, _initInfo).HD_Wheel) {
+    htmlCanvas.addEventListener("wheel", __privateGet(this, _HD_wheel), { passive: false });
+  }
+  if (__privateGet(this, _initInfo).HD_TouchPinch) {
+    htmlCanvas.addEventListener("touchmove", __privateGet(this, _HD_touchPinch), { passive: false });
+  }
+};
+_HD_hover = new WeakMap();
+_HD_down = new WeakMap();
+_HD_Move = new WeakMap();
+_HD_touchPinch = new WeakMap();
+_HD_up = new WeakMap();
+_HD_wheel = new WeakMap();
+// ==================== Static - 전역 상태 ====================
+/**
+ * [KO] 전역 키보드 활성 View - 모든 컨트롤러 인스턴스에서 공유
+ * [EN] Global keyboard active View - Shared across all controller instances
+ */
+__privateAdd(_AController, _globalKeyboardActiveView, null);
+/**
+ * [KO] 전역 키보드 활성 컨트롤러 - 어떤 컨트롤러가 키보드를 사용 중인지 추적
+ * [EN] Global keyboard active controller - Tracks which controller is using the keyboard
+ */
+__privateAdd(_AController, _globalKeyboardActiveController, null);
+let AController = _AController;
 const ViewListView = () => {
   const { redGPUContext, lastUpdateTime } = useInspectorStore();
   if (!redGPUContext) {
@@ -7830,7 +9093,16 @@ const ViewListView = () => {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle, children: viewList.map((view, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view, lastUpdateTime }, index)) });
 };
 const ViewSection = ({ view, lastUpdateTime }) => {
-  const { name, renderViewStateData, rawCamera, scene, useFrustumCulling, useDistanceCulling } = view;
+  const {
+    name,
+    renderViewStateData,
+    rawCamera,
+    scene,
+    useFrustumCulling,
+    useDistanceCulling,
+    camera,
+    postEffectManager
+  } = view;
   const {
     usedVideoMemory,
     viewRenderCPURecordingTime,
@@ -7861,31 +9133,146 @@ const ViewSection = ({ view, lastUpdateTime }) => {
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "width, height", value: `${width}, ${height}` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]` }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "scene", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: scene.name }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useBackgroundColor", value: useBackgroundColor }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "backgroundColor", value: backgroundColor.rgba })
+    ] }),
+    camera && (camera instanceof AController || camera.constructor.name.includes("Controller") || "camera" in camera && camera.camera !== camera) && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "controller", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: camera.name }),
+        camera["distance"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "distance", value: formatNumber(camera["distance"]) }),
+        camera["pan"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pan", value: formatNumber(camera["pan"]) }),
+        camera["tilt"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "tilt", value: formatNumber(camera["tilt"]) }),
+        camera["zoom"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "zoom", value: formatNumber(camera["zoom"]) }),
+        camera["centerX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          StatItem,
+          {
+            label: "center",
+            value: `${formatNumber(camera["centerX"])}, ${formatNumber(camera["centerY"])}, ${formatNumber(camera["centerZ"])}`
+          }
+        ),
+        camera["targetX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          StatItem,
+          {
+            label: "target",
+            value: `${formatNumber(camera["targetX"])}, ${formatNumber(camera["targetY"] || 0)}, ${formatNumber(camera["targetZ"])}`
+          }
+        )
+      ] })
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "rawCamera", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.name", value: rawCamera.name }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: rawCamera.name }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         StatItem,
         {
-          label: "rawCamera.position",
+          label: "position",
           value: `${formatNumber(rawCamera.x)}, ${formatNumber(rawCamera.y)}, ${formatNumber(rawCamera.z || 0)}`
         }
       ),
       rawCamera["rotationX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
         StatItem,
         {
-          label: "rawCamera.rotation",
+          label: "rotation",
           value: `${formatNumber(rawCamera["rotationX"])}, ${formatNumber(rawCamera["rotationY"])}, ${formatNumber(rawCamera["rotationZ"])}`
         }
       ),
-      rawCamera["fieldOfView"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.fieldOfView", value: formatNumber(rawCamera["fieldOfView"]) }),
-      rawCamera["zoom"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.zoom", value: formatNumber(rawCamera["zoom"]) }),
-      rawCamera["nearClipping"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.nearClipping", value: formatNumber(rawCamera["nearClipping"]) }),
-      rawCamera["farClipping"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "rawCamera.farClipping", value: formatNumber(rawCamera["farClipping"]) })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "scene", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "scene.name", value: scene.name }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "scene.useBackgroundColor", value: useBackgroundColor }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "scene.backgroundColor", value: backgroundColor.rgba })
+      rawCamera["fieldOfView"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "fieldOfView", value: formatNumber(rawCamera["fieldOfView"]) }),
+      rawCamera["zoom"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "zoom", value: formatNumber(rawCamera["zoom"]) }),
+      rawCamera["nearClipping"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "nearClipping", value: formatNumber(rawCamera["nearClipping"]) }),
+      rawCamera["farClipping"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "farClipping", value: formatNumber(rawCamera["farClipping"]) }),
+      rawCamera["top"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "top/bottom",
+          value: `${formatNumber(rawCamera["top"])}, ${formatNumber(rawCamera["bottom"])}`
+        }
+      ),
+      rawCamera["left"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "left/right",
+          value: `${formatNumber(rawCamera["left"])}, ${formatNumber(rawCamera["right"])}`
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useAutoExposure", value: rawCamera.useAutoExposure }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "ev100", value: formatNumber(rawCamera.ev100) }),
+      rawCamera.useAutoExposure && postEffectManager && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dividerStyle }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "autoExposure", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "minEV100", value: formatNumber(postEffectManager.autoExposure.minEV100) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "maxEV100", value: formatNumber(postEffectManager.autoExposure.maxEV100) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            StatItem,
+            {
+              label: "speedUp",
+              value: formatNumber(postEffectManager.autoExposure.adaptationSpeedUp)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            StatItem,
+            {
+              label: "speedDown",
+              value: formatNumber(postEffectManager.autoExposure.adaptationSpeedDown)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            StatItem,
+            {
+              label: "lowPercentile",
+              value: formatNumber(postEffectManager.autoExposure.lowPercentile)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            StatItem,
+            {
+              label: "highPercentile",
+              value: formatNumber(postEffectManager.autoExposure.highPercentile)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            StatItem,
+            {
+              label: "maxMultiplier",
+              value: formatNumber(postEffectManager.autoExposure.maxExposureMultiplier)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            StatItem,
+            {
+              label: "meteringMode",
+              value: ["AVERAGE", "CENTER_WEIGHTED", "SPOT"][postEffectManager.autoExposure.meteringMode] || postEffectManager.autoExposure.meteringMode
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            StatItem,
+            {
+              label: "targetLuminance",
+              value: formatNumber(postEffectManager.autoExposure.targetLuminance)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            StatItem,
+            {
+              label: "compensation",
+              value: formatNumber(postEffectManager.autoExposure.exposureCompensation)
+            }
+          )
+        ] })
+      ] }),
+      !rawCamera.useAutoExposure && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "aperture", value: `f/${formatNumber(rawCamera.aperture)}` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          StatItem,
+          {
+            label: "shutterSpeed",
+            value: rawCamera.shutterSpeed >= 1 ? `${formatNumber(rawCamera.shutterSpeed)}s` : `1/${Math.round(1 / rawCamera.shutterSpeed)}s`
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "iso", value: rawCamera.iso })
+      ] })
     ] })
   ] });
 };

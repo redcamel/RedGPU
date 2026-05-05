@@ -6,6 +6,7 @@ import StatRGBAItem from "./commonUI/StatRGBAItem";
 import StatBoolItem from "./commonUI/StatBoolItem";
 import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";
+import AController from "@redgpu/src/camera/core/AController";
 
 /**
  * [KO] 엔진의 모든 뷰(View3D)의 상태를 표시하는 컴포넌트입니다.
@@ -30,7 +31,16 @@ const ViewListView = () => {
 };
 
 const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: number }) => {
-    const {name, renderViewStateData, rawCamera, scene, useFrustumCulling, useDistanceCulling} = view;
+    const {
+        name,
+        renderViewStateData,
+        rawCamera,
+        scene,
+        useFrustumCulling,
+        useDistanceCulling,
+        camera,
+        postEffectManager
+    } = view;
     const {
         usedVideoMemory,
         viewRenderCPURecordingTime,
@@ -63,32 +73,103 @@ const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: num
             <StatBoolItem label="useDistanceCulling" value={useDistanceCulling}/>
             <div style={dividerStyle}/>
 
+
             <StatItem label="x, y" value={`${formatNumber(x)}, ${formatNumber(y)}`}/>
             <StatItem label="width, height" value={`${width}, ${height}`}/>
             <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`}/>
             <div style={dividerStyle}/>
+            <Section title={'scene'}>
+                <StatItem label="name" value={scene.name}/>
+                <StatBoolItem label="useBackgroundColor" value={useBackgroundColor}/>
+                <StatRGBAItem label="backgroundColor" value={backgroundColor.rgba}/>
+            </Section>
+
+
+            {camera && (camera instanceof AController || camera.constructor.name.includes('Controller') || ('camera' in camera && (camera as any).camera !== camera)) && (
+                <>
+                    <div style={dividerStyle}/>
+                    <Section title={'controller'}>
+                        <StatItem label="name" value={camera.name}/>
+                        {camera['distance'] !== undefined &&
+                            <StatItem label="distance" value={formatNumber(camera['distance'])}/>}
+                        {camera['pan'] !== undefined && <StatItem label="pan" value={formatNumber(camera['pan'])}/>}
+                        {camera['tilt'] !== undefined && <StatItem label="tilt" value={formatNumber(camera['tilt'])}/>}
+                        {camera['zoom'] !== undefined && <StatItem label="zoom" value={formatNumber(camera['zoom'])}/>}
+                        {camera['centerX'] !== undefined && (
+                            <StatItem label="center"
+                                      value={`${formatNumber(camera['centerX'])}, ${formatNumber(camera['centerY'])}, ${formatNumber(camera['centerZ'])}`}/>
+                        )}
+                        {camera['targetX'] !== undefined && (
+                            <StatItem label="target"
+                                      value={`${formatNumber(camera['targetX'])}, ${formatNumber(camera['targetY'] || 0)}, ${formatNumber(camera['targetZ'])}`}/>
+                        )}
+                    </Section>
+                </>
+            )}
+
             <Section title={'rawCamera'}>
-                <StatItem label="rawCamera.name" value={rawCamera.name}/>
-                <StatItem label="rawCamera.position"
+                <StatItem label="name" value={rawCamera.name}/>
+                <StatItem label="position"
                           value={`${formatNumber(rawCamera.x)}, ${formatNumber(rawCamera.y)}, ${formatNumber(rawCamera.z || 0)}`}/>
                 {rawCamera['rotationX'] !== undefined && (
-                    <StatItem label="rawCamera.rotation"
+                    <StatItem label="rotation"
                               value={`${formatNumber(rawCamera['rotationX'])}, ${formatNumber(rawCamera['rotationY'])}, ${formatNumber(rawCamera['rotationZ'])}`}/>
                 )}
                 {rawCamera['fieldOfView'] !== undefined &&
-                    <StatItem label="rawCamera.fieldOfView" value={formatNumber(rawCamera['fieldOfView'])}/>}
+                    <StatItem label="fieldOfView" value={formatNumber(rawCamera['fieldOfView'])}/>}
                 {rawCamera['zoom'] !== undefined &&
-                    <StatItem label="rawCamera.zoom" value={formatNumber(rawCamera['zoom'])}/>}
+                    <StatItem label="zoom" value={formatNumber(rawCamera['zoom'])}/>}
                 {rawCamera['nearClipping'] !== undefined &&
-                    <StatItem label="rawCamera.nearClipping" value={formatNumber(rawCamera['nearClipping'])}/>}
+                    <StatItem label="nearClipping" value={formatNumber(rawCamera['nearClipping'])}/>}
                 {rawCamera['farClipping'] !== undefined &&
-                    <StatItem label="rawCamera.farClipping" value={formatNumber(rawCamera['farClipping'])}/>}
+                    <StatItem label="farClipping" value={formatNumber(rawCamera['farClipping'])}/>}
+                {rawCamera['top'] !== undefined && (
+                    <StatItem label="top/bottom"
+                              value={`${formatNumber(rawCamera['top'])}, ${formatNumber(rawCamera['bottom'])}`}/>
+                )}
+                {rawCamera['left'] !== undefined && (
+                    <StatItem label="left/right"
+                              value={`${formatNumber(rawCamera['left'])}, ${formatNumber(rawCamera['right'])}`}/>
+                )}
+                <div style={dividerStyle}/>
+                <StatBoolItem label="useAutoExposure" value={rawCamera.useAutoExposure}/>
+                <StatItem label="ev100" value={formatNumber(rawCamera.ev100)}/>
+
+                {rawCamera.useAutoExposure && postEffectManager && (
+                    <>
+                        <div style={dividerStyle}/>
+                        <Section title={'autoExposure'}>
+                            <StatItem label="minEV100" value={formatNumber(postEffectManager.autoExposure.minEV100)}/>
+                            <StatItem label="maxEV100" value={formatNumber(postEffectManager.autoExposure.maxEV100)}/>
+                            <StatItem label="speedUp"
+                                      value={formatNumber(postEffectManager.autoExposure.adaptationSpeedUp)}/>
+                            <StatItem label="speedDown"
+                                      value={formatNumber(postEffectManager.autoExposure.adaptationSpeedDown)}/>
+                            <StatItem label="lowPercentile"
+                                      value={formatNumber(postEffectManager.autoExposure.lowPercentile)}/>
+                            <StatItem label="highPercentile"
+                                      value={formatNumber(postEffectManager.autoExposure.highPercentile)}/>
+                            <StatItem label="maxMultiplier"
+                                      value={formatNumber(postEffectManager.autoExposure.maxExposureMultiplier)}/>
+                            <StatItem label="meteringMode"
+                                      value={['AVERAGE', 'CENTER_WEIGHTED', 'SPOT'][postEffectManager.autoExposure.meteringMode] || postEffectManager.autoExposure.meteringMode}/>
+                            <StatItem label="targetLuminance"
+                                      value={formatNumber(postEffectManager.autoExposure.targetLuminance)}/>
+                            <StatItem label="compensation"
+                                      value={formatNumber(postEffectManager.autoExposure.exposureCompensation)}/>
+                        </Section>
+                    </>
+                )}
+                {!rawCamera.useAutoExposure && (
+                    <>
+                        <StatItem label="aperture" value={`f/${formatNumber(rawCamera.aperture)}`}/>
+                        <StatItem label="shutterSpeed"
+                                  value={rawCamera.shutterSpeed >= 1 ? `${formatNumber(rawCamera.shutterSpeed)}s` : `1/${Math.round(1 / rawCamera.shutterSpeed)}s`}/>
+                        <StatItem label="iso" value={rawCamera.iso}/>
+                    </>
+                )}
             </Section>
-            <Section title={'scene'}>
-                <StatItem label="scene.name" value={scene.name}/>
-                <StatBoolItem label="scene.useBackgroundColor" value={useBackgroundColor}/>
-                <StatRGBAItem label="scene.backgroundColor" value={backgroundColor.rgba}/>
-            </Section>
+
         </Section>
     );
 };
