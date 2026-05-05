@@ -1,5 +1,5 @@
 import React from 'react';
-import { useInspectorStore } from '../store';
+import {useInspectorStore} from '../store';
 import Divider from "./commonUI/Divider";
 
 /**
@@ -11,7 +11,7 @@ export class FPSMeter {
     private frameCount: number = 0;
     private frameTimesRaw: number[] = [];
     private recentFrameTimes: number[] = [];
-    
+
     private readonly maxFrameTimeBuffer = 1200;
     private readonly recentFrameTimeWindow = 10;
     private readonly initializationFrames = 60;
@@ -63,7 +63,7 @@ export class FPSMeter {
         if (this.frameTimesRaw.length >= 100) {
             const sorted = [...this.frameTimesRaw].sort((a, b) => b - a);
             const total = sorted.length;
-            
+
             const avgTotal = this.frameTimesRaw.reduce((a, b) => a + b, 0) / total;
             stats.avgFps = Math.round(1000 / avgTotal);
 
@@ -85,7 +85,7 @@ export class FPSMeter {
  * [EN] Component that displays FPS and frame time statistics.
  */
 const FPS = () => {
-    const { fps, avgFps, low1Fps, low01Fps, frameTime } = useInspectorStore();
+    const {fps, avgFps, low1Fps, low01Fps, frameTime} = useInspectorStore();
 
     return (
         <div style={containerStyle}>
@@ -94,9 +94,9 @@ const FPS = () => {
                     <div style={fpsValueStyle}>{fps} FPS</div>
                     <div style={frameTimeValueStyle}>{frameTime}</div>
                 </div>
-                
-                <Divider vertical={true} />
-                
+
+                <Divider vertical={true}/>
+
                 <div style={extraStatsBoxStyle}>
                     <div style={avgFpsStyle}>Avg: {avgFps}</div>
                     <div style={low1FpsStyle}>1%: {low1Fps}</div>

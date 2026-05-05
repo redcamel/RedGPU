@@ -1,10 +1,10 @@
 import React from 'react';
-import { THEME } from './Theme';
+import {THEME} from './Theme';
 
 /**
  * [KO] 인스펙터 내의 그룹화된 섹션을 표시하는 컴포넌트입니다.
  */
-const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
+const Section = ({title, children}: { title: string, children: React.ReactNode }) => (
     <div style={sectionStyle}>
         <div style={sectionTitleStyle}>{title}</div>
         {children}

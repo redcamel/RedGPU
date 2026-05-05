@@ -1,25 +1,25 @@
 import React from 'react';
-import { THEME, COMMON_STYLES } from './Theme';
+import {COMMON_STYLES, THEME} from './Theme';
 
 /**
  * [KO] 불린(boolean) 값을 배경색이 있는 뱃지 형태로 표시하는 컴포넌트입니다.
  * [EN] Component that displays a boolean value as a badge with a background color.
  */
-const StatBoolItem = ({ 
-    label, 
-    value, 
-    trueLabel = 'TRUE', 
-    falseLabel = 'FALSE' 
-}: { 
-    label: string, 
-    value: boolean, 
-    trueLabel?: string, 
-    falseLabel?: string 
+const StatBoolItem = ({
+                          label,
+                          value,
+                          trueLabel = 'TRUE',
+                          falseLabel = 'FALSE'
+                      }: {
+    label: string,
+    value: boolean,
+    trueLabel?: string,
+    falseLabel?: string
 }) => {
     return (
         <div style={statItemStyle}>
             <span style={COMMON_STYLES.label}>{label}</span>
-            <span style={{ 
+            <span style={{
                 ...COMMON_STYLES.value,
                 backgroundColor: value ? '#008000' : '#cc0000',
                 color: 'white',

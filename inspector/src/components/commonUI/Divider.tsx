@@ -1,16 +1,16 @@
 import React from 'react';
-import { THEME } from './Theme';
+import {THEME} from './Theme';
 
 /**
  * [KO] 섹션 내의 항목들을 구분하는 선 컴포넌트입니다.
  * [EN] A divider component that separates items within a section.
  */
-const Divider = ({ vertical, style }: { vertical?: boolean, style?: React.CSSProperties }) => {
-    const combinedStyle: React.CSSProperties = vertical 
-        ? { ...defaultVerticalStyle, ...style }
-        : { ...defaultHorizontalStyle, ...style };
-        
-    return <div style={combinedStyle} />;
+const Divider = ({vertical, style}: { vertical?: boolean, style?: React.CSSProperties }) => {
+    const combinedStyle: React.CSSProperties = vertical
+        ? {...defaultVerticalStyle, ...style}
+        : {...defaultHorizontalStyle, ...style};
+
+    return <div style={combinedStyle}/>;
 };
 
 const defaultHorizontalStyle: React.CSSProperties = {

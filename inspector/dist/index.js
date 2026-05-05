@@ -7677,7 +7677,14 @@ const ResourceDetailList = ({ type, redGPUContext }) => {
       const gpuTex = tex == null ? void 0 : tex.gpuTexture;
       return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, title: item.cacheKey, children: item.src || item.cacheKey || "Unknown Source" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "span",
+            {
+              style: detailNameStyle,
+              title: item.cacheKey,
+              children: item.src || item.cacheKey || "Unknown Source"
+            }
+          ),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailInfoStyle, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
               "UUID: ",
@@ -9485,13 +9492,31 @@ const collectStats = (redGPUContext, time) => {
   }
   const rm = redGPUContext.resourceManager;
   const resourceStats = {
-    bitmapTexture: { count: rm.managedBitmapTextureState.table.size, videoMemory: rm.managedBitmapTextureState.videoMemory },
-    cubeTexture: { count: rm.managedCubeTextureState.table.size, videoMemory: rm.managedCubeTextureState.videoMemory },
+    bitmapTexture: {
+      count: rm.managedBitmapTextureState.table.size,
+      videoMemory: rm.managedBitmapTextureState.videoMemory
+    },
+    cubeTexture: {
+      count: rm.managedCubeTextureState.table.size,
+      videoMemory: rm.managedCubeTextureState.videoMemory
+    },
     hdrTexture: { count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory },
-    uniformBuffer: { count: rm.managedUniformBufferState.table.size, videoMemory: rm.managedUniformBufferState.videoMemory },
-    vertexBuffer: { count: rm.managedVertexBufferState.table.size, videoMemory: rm.managedVertexBufferState.videoMemory },
-    indexBuffer: { count: rm.managedIndexBufferState.table.size, videoMemory: rm.managedIndexBufferState.videoMemory },
-    storageBuffer: { count: rm.managedStorageBufferState.table.size, videoMemory: rm.managedStorageBufferState.videoMemory },
+    uniformBuffer: {
+      count: rm.managedUniformBufferState.table.size,
+      videoMemory: rm.managedUniformBufferState.videoMemory
+    },
+    vertexBuffer: {
+      count: rm.managedVertexBufferState.table.size,
+      videoMemory: rm.managedVertexBufferState.videoMemory
+    },
+    indexBuffer: {
+      count: rm.managedIndexBufferState.table.size,
+      videoMemory: rm.managedIndexBufferState.videoMemory
+    },
+    storageBuffer: {
+      count: rm.managedStorageBufferState.table.size,
+      videoMemory: rm.managedStorageBufferState.videoMemory
+    },
     gpuBuffer: { count: 0, videoMemory: 0 }
   };
   totalUsedVideoMemory += resourceStats.bitmapTexture.videoMemory;

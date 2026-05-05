@@ -1,5 +1,5 @@
 import React from 'react';
-import { useInspectorStore } from './store';
+import {useInspectorStore} from './store';
 import FPS from './components/FPS';
 
 import TabContent from './components/TabContent';
@@ -12,10 +12,10 @@ const App = () => {
     if (!useDebugPanel) return null;
 
     const tabs: TabItem[] = [
-        { id: 'STATE', label: 'State' },
-        { id: 'CONTEXT', label: 'RedGPUContext' },
-        { id: 'VIEWS', label: 'ViewList' },
-        { id: 'RESOURCES', label: 'Resources' }
+        {id: 'STATE', label: 'State'},
+        {id: 'CONTEXT', label: 'RedGPUContext'},
+        {id: 'VIEWS', label: 'ViewList'},
+        {id: 'RESOURCES', label: 'Resources'}
     ];
 
     return (
@@ -24,9 +24,9 @@ const App = () => {
                 <div style={titleLabelStyle}>Performance Monitor</div>
                 <button onClick={() => setUseDebugPanel(false)} style={closeBtnStyle}>CLOSE</button>
             </div>
-            <FPS />
+            <FPS/>
             <Tabs tabs={tabs}>
-                <TabContent />
+                <TabContent/>
             </Tabs>
         </div>
     );

@@ -1,6 +1,6 @@
 import React from 'react';
-import { useInspectorStore } from '../../store';
-import { THEME } from './Theme';
+import {useInspectorStore} from '../../store';
+import {THEME} from './Theme';
 
 export interface TabItem {
     id: string;
@@ -10,14 +10,14 @@ export interface TabItem {
 /**
  * [KO] 인스펙터의 탭 메뉴와 컨텐츠 영역을 포함하는 컨테이너 컴포넌트입니다.
  */
- const Tabs: React.FC<{ tabs: TabItem[], children: React.ReactNode }> = ({ tabs, children }) => {
-    const { currentTab, setCurrentTab } = useInspectorStore();
+const Tabs: React.FC<{ tabs: TabItem[], children: React.ReactNode }> = ({tabs, children}) => {
+    const {currentTab, setCurrentTab} = useInspectorStore();
 
     return (
         <div style={tabsContainerStyle}>
             <div style={tabBarStyle}>
                 {tabs.map(tab => (
-                    <div 
+                    <div
                         key={tab.id}
                         onClick={() => setCurrentTab(tab.id)}
                         style={{

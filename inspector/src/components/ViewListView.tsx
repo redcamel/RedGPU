@@ -69,17 +69,17 @@ const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: num
             <StatItem label="numTriangles" value={numTriangles}/>
             <StatItem label="numPoints" value={numPoints}/>
 
-            <Divider />
+            <Divider/>
 
             <StatBoolItem label="useFrustumCulling" value={useFrustumCulling}/>
             <StatBoolItem label="useDistanceCulling" value={useDistanceCulling}/>
-            <Divider />
+            <Divider/>
 
 
             <StatItem label="x, y" value={`${formatNumber(x)}, ${formatNumber(y)}`}/>
             <StatItem label="width, height" value={`${width}, ${height}`}/>
             <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`}/>
-            <Divider />
+            <Divider/>
             <Section title={'scene'}>
                 <StatItem label="name" value={scene.name}/>
                 <StatBoolItem label="useBackgroundColor" value={useBackgroundColor}/>
@@ -89,7 +89,7 @@ const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: num
 
             {camera && (camera instanceof AController || camera.constructor.name.includes('Controller') || ('camera' in camera && (camera as any).camera !== camera)) && (
                 <>
-                    <Divider />
+                    <Divider/>
                     <Section title={'controller'}>
                         <StatItem label="name" value={camera.name}/>
                         {camera['distance'] !== undefined &&
@@ -133,13 +133,13 @@ const ViewSection = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: num
                     <StatItem label="left/right"
                               value={`${formatNumber(rawCamera['left'])}, ${formatNumber(rawCamera['right'])}`}/>
                 )}
-                <Divider />
+                <Divider/>
                 <StatBoolItem label="useAutoExposure" value={rawCamera.useAutoExposure}/>
                 <StatItem label="ev100" value={formatNumber(rawCamera.ev100)}/>
 
                 {rawCamera.useAutoExposure && postEffectManager && (
                     <>
-                        <Divider />
+                        <Divider/>
                         <Section title={'autoExposure'}>
                             <StatItem label="minEV100" value={formatNumber(postEffectManager.autoExposure.minEV100)}/>
                             <StatItem label="maxEV100" value={formatNumber(postEffectManager.autoExposure.maxEV100)}/>

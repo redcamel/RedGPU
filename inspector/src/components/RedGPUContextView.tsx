@@ -41,7 +41,7 @@ const RedGPUContextView = () => {
                 <StatBoolItem label="useFXAA" value={antialiasingManager.useFXAA}/>
                 <StatBoolItem label="useTAA" value={antialiasingManager.useTAA}/>
             </Section>
-            <ToneMappingView />
+            <ToneMappingView/>
             <Section title="Environment">
                 <StatItem label="devicePixelRatio" value={devicePixelRatio}/>
                 <StatBoolItem label="Mobile" value={detector.isMobile} trueLabel="Yes" falseLabel="No"/>

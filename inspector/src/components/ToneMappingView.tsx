@@ -1,5 +1,5 @@
 import React from 'react';
-import { useInspectorStore } from '../store';
+import {useInspectorStore} from '../store';
 import Section from "./commonUI/Section";
 import StatItem from "./commonUI/StatItem";
 import View3D from "@redgpu/src/display/view/View3D";
@@ -9,19 +9,19 @@ import View3D from "@redgpu/src/display/view/View3D";
  * [EN] Component that displays tone mapping settings for each view.
  */
 const ToneMappingView = () => {
-    const { redGPUContext } = useInspectorStore();
+    const {redGPUContext} = useInspectorStore();
 
     if (!redGPUContext) return null;
 
-    const { viewList } = redGPUContext;
+    const {viewList} = redGPUContext;
 
     return (
         <>
             {viewList.map((view: View3D, index: number) => (
                 <Section key={index} title={`ToneMapping`}>
-                    <StatItem label="Mode" value={view.toneMappingManager.mode} />
-                    <StatItem label="Contrast" value={view.toneMappingManager.contrast.toFixed(2)} />
-                    <StatItem label="Brightness" value={view.toneMappingManager.brightness.toFixed(2)} />
+                    <StatItem label="Mode" value={view.toneMappingManager.mode}/>
+                    <StatItem label="Contrast" value={view.toneMappingManager.contrast.toFixed(2)}/>
+                    <StatItem label="Brightness" value={view.toneMappingManager.brightness.toFixed(2)}/>
                 </Section>
             ))}
         </>

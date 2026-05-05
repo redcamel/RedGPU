@@ -1,5 +1,5 @@
 import React from 'react';
-import { useInspectorStore } from '../store';
+import {useInspectorStore} from '../store';
 import Section from './commonUI/Section';
 import StatItem from './commonUI/StatItem';
 
@@ -18,8 +18,8 @@ const CommandBatchStatsView = () => {
         <>
             {Object.entries(commandBatchStats).map(([phase, stats]) => (
                 <Section key={phase} title={`Command Batch: ${phase}`}>
-                    <StatItem label="Command Buffers" value={stats['Command Buffers']} />
-                    <StatItem label="Render Passes" value={stats['Render Passes'].count} />
+                    <StatItem label="Command Buffers" value={stats['Command Buffers']}/>
+                    <StatItem label="Render Passes" value={stats['Render Passes'].count}/>
                     {stats['Render Passes'].list.length > 0 && (
                         <div style={listStyle}>
                             {stats['Render Passes'].list.map((name, i) => (
@@ -27,7 +27,7 @@ const CommandBatchStatsView = () => {
                             ))}
                         </div>
                     )}
-                    <StatItem label="Compute Passes" value={stats['Compute Passes'].count} />
+                    <StatItem label="Compute Passes" value={stats['Compute Passes'].count}/>
                     {stats['Compute Passes'].list.length > 0 && (
                         <div style={listStyle}>
                             {stats['Compute Passes'].list.map((name, i) => (
@@ -35,7 +35,7 @@ const CommandBatchStatsView = () => {
                             ))}
                         </div>
                     )}
-                    <StatItem label="Raw Usages" value={stats['Raw Usages']} />
+                    <StatItem label="Raw Usages" value={stats['Raw Usages']}/>
                 </Section>
             ))}
         </>

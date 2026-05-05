@@ -1,5 +1,5 @@
 import React from 'react';
-import { useInspectorStore } from '../store';
+import {useInspectorStore} from '../store';
 import formatBytes from '@redgpu/src/utils/formatBytes';
 import Section from "./commonUI/Section";
 import StatItem from "./commonUI/StatItem";
@@ -20,15 +20,15 @@ const TotalState = () => {
     } = useInspectorStore();
 
     return (
-            <Section title="Total State">
-                <StatItem label="Groups" value={totalNum3DGroups} />
-                <StatItem label="Objects" value={totalNum3DObjects} />
-                <StatItem label="Instances" value={totalNumInstances} />
-                <StatItem label="Draw Calls" value={totalNumDrawCalls} color="#fdb48d" isBold />
-                <StatItem label="Triangles" value={totalNumTriangles.toLocaleString()} />
-                <StatItem label="Points" value={totalNumPoints.toLocaleString()} />
-                <StatItem label="Video Memory" value={formatBytes(totalUsedVideoMemory)} color="#fdb48d" isBold />
-            </Section>
+        <Section title="Total State">
+            <StatItem label="Groups" value={totalNum3DGroups}/>
+            <StatItem label="Objects" value={totalNum3DObjects}/>
+            <StatItem label="Instances" value={totalNumInstances}/>
+            <StatItem label="Draw Calls" value={totalNumDrawCalls} color="#fdb48d" isBold/>
+            <StatItem label="Triangles" value={totalNumTriangles.toLocaleString()}/>
+            <StatItem label="Points" value={totalNumPoints.toLocaleString()}/>
+            <StatItem label="Video Memory" value={formatBytes(totalUsedVideoMemory)} color="#fdb48d" isBold/>
+        </Section>
     );
 };
 

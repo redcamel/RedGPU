@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useInspectorStore, ResourceStatusSummary } from '../store';
+import React, {useState} from 'react';
+import {ResourceStatusSummary, useInspectorStore} from '../store';
 import Section from './commonUI/Section';
 import StatItem from './commonUI/StatItem';
 import formatBytes from '@redgpu/src/utils/formatBytes';
@@ -8,18 +8,18 @@ import RedGPUContext from '@redgpu/src/context/RedGPUContext';
 /**
  * [KO] 리소스 유형별 요약 정보를 표시하는 컴포넌트입니다.
  */
-const ResourceSummary = ({ 
-    label, 
-    stats, 
-    isExpanded, 
-    onToggle 
-}: { 
-    label: string, 
-    stats: ResourceStatusSummary, 
-    isExpanded: boolean, 
-    onToggle: () => void 
+const ResourceSummary = ({
+                             label,
+                             stats,
+                             isExpanded,
+                             onToggle
+                         }: {
+    label: string,
+    stats: ResourceStatusSummary,
+    isExpanded: boolean,
+    onToggle: () => void
 }) => (
-    <div 
+    <div
         style={{
             ...summaryContainerStyle,
             cursor: 'pointer',
@@ -30,13 +30,13 @@ const ResourceSummary = ({
     >
         <div style={summaryLabelStyle}>
             {label}
-            <span style={{ float: 'right', opacity: 0.5, fontSize: '10px' }}>
+            <span style={{float: 'right', opacity: 0.5, fontSize: '10px'}}>
                 {isExpanded ? '▲' : '▼'}
             </span>
         </div>
         <div style={summaryValuesStyle}>
-            <StatItem label="Count" value={stats.count} />
-            <StatItem label="Memory" value={formatBytes(stats.videoMemory)} color="#fdb48d" isBold />
+            <StatItem label="Count" value={stats.count}/>
+            <StatItem label="Memory" value={formatBytes(stats.videoMemory)} color="#fdb48d" isBold/>
         </div>
     </div>
 );
@@ -44,19 +44,36 @@ const ResourceSummary = ({
 /**
  * [KO] 리소스 상세 목록을 표시하는 컴포넌트입니다.
  */
-const ResourceDetailList = ({ type, redGPUContext }: { type: string, redGPUContext: RedGPUContext }) => {
+const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext: RedGPUContext }) => {
     const rm = redGPUContext.resourceManager;
     let items: any[] = [];
     let isTexture = false;
 
     switch (type) {
-        case 'bitmapTexture': items = Array.from(rm.managedBitmapTextureState.table.values()); isTexture = true; break;
-        case 'cubeTexture': items = Array.from(rm.managedCubeTextureState.table.values()); isTexture = true; break;
-        case 'hdrTexture': items = Array.from(rm.managedHDRTextureState.table.values()); isTexture = true; break;
-        case 'uniformBuffer': items = Array.from(rm.managedUniformBufferState.table.values()); break;
-        case 'vertexBuffer': items = Array.from(rm.managedVertexBufferState.table.values()); break;
-        case 'indexBuffer': items = Array.from(rm.managedIndexBufferState.table.values()); break;
-        case 'storageBuffer': items = Array.from(rm.managedStorageBufferState.table.values()); break;
+        case 'bitmapTexture':
+            items = Array.from(rm.managedBitmapTextureState.table.values());
+            isTexture = true;
+            break;
+        case 'cubeTexture':
+            items = Array.from(rm.managedCubeTextureState.table.values());
+            isTexture = true;
+            break;
+        case 'hdrTexture':
+            items = Array.from(rm.managedHDRTextureState.table.values());
+            isTexture = true;
+            break;
+        case 'uniformBuffer':
+            items = Array.from(rm.managedUniformBufferState.table.values());
+            break;
+        case 'vertexBuffer':
+            items = Array.from(rm.managedVertexBufferState.table.values());
+            break;
+        case 'indexBuffer':
+            items = Array.from(rm.managedIndexBufferState.table.values());
+            break;
+        case 'storageBuffer':
+            items = Array.from(rm.managedStorageBufferState.table.values());
+            break;
         case 'gpuBuffer': {
             const gpuBufferMap = rm.resources.get('GPUBuffer') as Map<string, GPUBuffer>;
             items = Array.from(gpuBufferMap.entries()).map(([key, buffer]) => ({
@@ -83,7 +100,8 @@ const ResourceDetailList = ({ type, redGPUContext }: { type: string, redGPUConte
                         <div key={item.uuid || idx} style={detailItemStyle}>
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
-                                    <span style={detailNameStyle} title={item.cacheKey}>{item.src || item.cacheKey || 'Unknown Source'}</span>
+                                    <span style={detailNameStyle}
+                                          title={item.cacheKey}>{item.src || item.cacheKey || 'Unknown Source'}</span>
                                     <div style={detailInfoStyle}>
                                         <span>UUID: {item.uuid}</span>
                                         {gpuTex && (
@@ -99,7 +117,7 @@ const ResourceDetailList = ({ type, redGPUContext }: { type: string, redGPUConte
                         </div>
                     );
                 } else if (item.isRaw) {
-                     return (
+                    return (
                         <div key={item.uuid || idx} style={detailItemStyle}>
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
@@ -143,29 +161,29 @@ const ResourceDetailList = ({ type, redGPUContext }: { type: string, redGPUConte
  * [EN] Component that displays the status of resources managed by the engine.
  */
 const ResourcesView = () => {
-    const { resourceStats, redGPUContext } = useInspectorStore();
+    const {resourceStats, redGPUContext} = useInspectorStore();
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
     const toggleExpanded = (key: string) => {
-        setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
+        setExpanded(prev => ({...prev, [key]: !prev[key]}));
     };
 
     const renderResource = (key: string, label: string, stats: ResourceStatusSummary) => (
         <React.Fragment key={key}>
-            <ResourceSummary 
-                label={label} 
-                stats={stats} 
-                isExpanded={!!expanded[key]} 
-                onToggle={() => toggleExpanded(key)} 
+            <ResourceSummary
+                label={label}
+                stats={stats}
+                isExpanded={!!expanded[key]}
+                onToggle={() => toggleExpanded(key)}
             />
             {expanded[key] && redGPUContext && (
-                <ResourceDetailList type={key} redGPUContext={redGPUContext} />
+                <ResourceDetailList type={key} redGPUContext={redGPUContext}/>
             )}
         </React.Fragment>
     );
 
     return (
-        <div style={{ paddingBottom: '20px' }}>
+        <div style={{paddingBottom: '20px'}}>
             <Section title="Texture Resources">
                 {renderResource('bitmapTexture', 'Bitmap Textures', resourceStats.bitmapTexture)}
                 {renderResource('cubeTexture', 'Cube Textures', resourceStats.cubeTexture)}

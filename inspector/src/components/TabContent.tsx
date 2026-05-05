@@ -1,11 +1,10 @@
 import React from 'react';
-import { useInspectorStore } from '../store';
+import {useInspectorStore} from '../store';
 import TotalState from './TotalState';
 import RedGPUContextView from './RedGPUContextView';
 import CommandBatchStatsView from './CommandBatchStatsView';
 import ResourcesView from "./ResourcesView";
 import ViewListView from "./ViewListView";
-import ToneMappingView from "./ToneMappingView";
 
 /**
  * [KO] 현재 선택된 탭에 해당하는 컨텐츠를 렌더링하는 컴포넌트입니다.
@@ -18,27 +17,27 @@ const TabContent = () => {
         case 'STATE':
             return (
                 <Container>
-                    <TotalState />
-                    <CommandBatchStatsView />
+                    <TotalState/>
+                    <CommandBatchStatsView/>
                 </Container>
             );
         case 'CONTEXT':
             return (
                 <Container>
-                    <RedGPUContextView />
+                    <RedGPUContextView/>
 
                 </Container>
             );
         case 'VIEWS':
-            return <Container><ViewListView /></Container>;
+            return <Container><ViewListView/></Container>;
         case 'RESOURCES':
-            return <Container><ResourcesView /></Container>;
+            return <Container><ResourcesView/></Container>;
         default:
             return null;
     }
 };
-const Container = ({ children,style }: { children: React.ReactNode,style?:React.CSSProperties }) => (
-    <div style={{ padding: '12px',...style }}>{children}</div>
+const Container = ({children, style}: { children: React.ReactNode, style?: React.CSSProperties }) => (
+    <div style={{padding: '12px', ...style}}>{children}</div>
 );
 
 

@@ -3,8 +3,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {useInspectorStore} from './store';
 import App from './App';
-import { collectStats } from './utils/collectStats';
-import { FPSMeter } from './components/FPS';
+import {collectStats} from './utils/collectStats';
+import {FPSMeter} from './components/FPS';
 
 /**
  * RedGPUInspector (React Version)
@@ -20,7 +20,7 @@ class RedGPUInspector {
 
     constructor(redGPUContext: RedGPUContext) {
         this.redGPUContext = redGPUContext;
-        
+
         // [KO] 스토어에 redGPUContext 저장
         // [EN] Store redGPUContext in the store
         useInspectorStore.getState().setRedGPUContext(redGPUContext);
@@ -81,15 +81,15 @@ class RedGPUInspector {
 
     private updateStats(time: number) {
         if (!this.redGPUContext) return;
-        
+
         // [KO] 엔진 통계 수집
         // [EN] Collect engine statistics
         const stats = collectStats(this.redGPUContext, time);
-        
+
         // [KO] FPS 통계 계산
         // [EN] Calculate FPS statistics
         const fpsStats = this.fpsMeter.update(time);
-        
+
         useInspectorStore.getState().setStats({
             ...stats,
             ...(fpsStats || {})

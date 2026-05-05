@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../src/context/RedGPUContext";
-import { InspectorState } from "../store";
-import { CommandBatchStats } from "../../../src/renderer/commandEncoder/CommandEncoderManager";
+import {InspectorState} from "../store";
+import {CommandBatchStats} from "../../../src/renderer/commandEncoder/CommandEncoderManager";
 import View3D from "../../../src/display/view/View3D";
 import RenderViewStateData from "../../../src/display/view/core/RenderViewStateData";
 
@@ -38,8 +38,8 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
                 if (!aggregatedBatchStats[phase]) {
                     aggregatedBatchStats[phase] = {
                         'Command Buffers': 0,
-                        'Render Passes': { count: 0, list: [] },
-                        'Compute Passes': { count: 0, list: [] },
+                        'Render Passes': {count: 0, list: []},
+                        'Compute Passes': {count: 0, list: []},
                         'Raw Usages': 0
                     };
                 }
@@ -57,16 +57,34 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
     // [KO] 리소스 매니저의 공유 리소스 메모리 합산
     // [EN] Sum up shared resource memory of the resource manager
     const rm = redGPUContext.resourceManager;
-    
+
     const resourceStats = {
-        bitmapTexture: { count: rm.managedBitmapTextureState.table.size, videoMemory: rm.managedBitmapTextureState.videoMemory },
-        cubeTexture: { count: rm.managedCubeTextureState.table.size, videoMemory: rm.managedCubeTextureState.videoMemory },
-        hdrTexture: { count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory },
-        uniformBuffer: { count: rm.managedUniformBufferState.table.size, videoMemory: rm.managedUniformBufferState.videoMemory },
-        vertexBuffer: { count: rm.managedVertexBufferState.table.size, videoMemory: rm.managedVertexBufferState.videoMemory },
-        indexBuffer: { count: rm.managedIndexBufferState.table.size, videoMemory: rm.managedIndexBufferState.videoMemory },
-        storageBuffer: { count: rm.managedStorageBufferState.table.size, videoMemory: rm.managedStorageBufferState.videoMemory },
-        gpuBuffer: { count: 0, videoMemory: 0 }
+        bitmapTexture: {
+            count: rm.managedBitmapTextureState.table.size,
+            videoMemory: rm.managedBitmapTextureState.videoMemory
+        },
+        cubeTexture: {
+            count: rm.managedCubeTextureState.table.size,
+            videoMemory: rm.managedCubeTextureState.videoMemory
+        },
+        hdrTexture: {count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory},
+        uniformBuffer: {
+            count: rm.managedUniformBufferState.table.size,
+            videoMemory: rm.managedUniformBufferState.videoMemory
+        },
+        vertexBuffer: {
+            count: rm.managedVertexBufferState.table.size,
+            videoMemory: rm.managedVertexBufferState.videoMemory
+        },
+        indexBuffer: {
+            count: rm.managedIndexBufferState.table.size,
+            videoMemory: rm.managedIndexBufferState.videoMemory
+        },
+        storageBuffer: {
+            count: rm.managedStorageBufferState.table.size,
+            videoMemory: rm.managedStorageBufferState.videoMemory
+        },
+        gpuBuffer: {count: 0, videoMemory: 0}
     };
 
     totalUsedVideoMemory += resourceStats.bitmapTexture.videoMemory;
