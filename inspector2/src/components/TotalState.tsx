@@ -20,7 +20,6 @@ const TotalState = () => {
     } = useInspectorStore();
 
     return (
-        <div style={containerStyle}>
             <Section title="Total State">
                 <StatItem label="Groups" value={totalNum3DGroups} />
                 <StatItem label="Objects" value={totalNum3DObjects} />
@@ -30,13 +29,10 @@ const TotalState = () => {
                 <StatItem label="Points" value={totalNumPoints.toLocaleString()} />
                 <StatItem label="Video Memory" value={formatBytes(totalUsedVideoMemory)} color="#fdb48d" isBold />
             </Section>
-        </div>
     );
 };
 
 // Styles
-const containerStyle: React.CSSProperties = {
-    padding: '12px'
-};
+
 
 export default TotalState;

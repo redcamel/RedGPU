@@ -1,5 +1,6 @@
 import {create} from 'zustand';
 import RedGPUContext from "../../src/context/RedGPUContext";
+import { CommandBatchStats } from "../../src/renderer/commandEncoder/CommandEncoderManager";
 
 export interface InspectorState {
   useDebugPanel: boolean;
@@ -21,6 +22,7 @@ export interface InspectorState {
   totalNumPoints: number;
   totalUsedVideoMemory: number;
   pixelRectArray: [number, number, number, number];
+  commandBatchStats: CommandBatchStats | null;
   currentTab: string;
   setStats: (stats: Partial<InspectorState>) => void;
   setUseDebugPanel: (value: boolean) => void;
@@ -45,6 +47,7 @@ export const useInspectorStore = create<InspectorState>((set) => ({
   totalNumPoints: 0,
   totalUsedVideoMemory: 0,
   pixelRectArray: [0, 0, 0, 0],
+  commandBatchStats: null,
   currentTab: 'STATE',
   setStats: (stats) => set((state) => ({ ...state, ...stats })),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),

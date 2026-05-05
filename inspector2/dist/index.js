@@ -7180,6 +7180,7 @@ const useInspectorStore = create((set) => ({
   totalNumPoints: 0,
   totalUsedVideoMemory: 0,
   pixelRectArray: [0, 0, 0, 0],
+  commandBatchStats: null,
   currentTab: "STATE",
   setStats: (stats) => set((state) => ({ ...state, ...stats })),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),
@@ -7400,7 +7401,7 @@ const TotalState = () => {
     totalNumPoints,
     totalUsedVideoMemory
   } = useInspectorStore();
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Total State", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Total State", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Groups", value: totalNum3DGroups }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Objects", value: totalNum3DObjects }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Instances", value: totalNumInstances }),
@@ -7408,10 +7409,7 @@ const TotalState = () => {
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Triangles", value: totalNumTriangles.toLocaleString() }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Points", value: totalNumPoints.toLocaleString() }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Video Memory", value: formatBytes(totalUsedVideoMemory), color: "#fdb48d", isBold: true })
-  ] }) });
-};
-const containerStyle$1 = {
-  padding: "12px"
+  ] });
 };
 const StatRGBAItem = ({ label, value }) => {
   const [r2, g, b] = value;
@@ -7441,7 +7439,7 @@ const RedGPUContextView = () => {
   }
   const { detector, htmlCanvas, width, height, backgroundColor, antialiasingManager } = redGPUContext;
   const adapterInfo = detector.adapterInfo;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Adapter Info", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Vendor", value: adapterInfo.vendor }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Architecture", value: adapterInfo.architecture }),
@@ -7473,7 +7471,7 @@ const RedGPUContextView = () => {
     ] })
   ] });
 };
-const containerStyle = {
+const containerStyle$1 = {
   padding: "12px"
 };
 const labelStyle = {
@@ -7496,21 +7494,57 @@ const placeholderStyle$1 = {
   fontSize: "12px",
   fontStyle: "italic"
 };
+const CommandBatchStatsView = () => {
+  const commandBatchStats = useInspectorStore((state) => state.commandBatchStats);
+  if (!commandBatchStats || Object.keys(commandBatchStats).length === 0) {
+    return null;
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: Object.entries(commandBatchStats).map(([phase, stats]) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: `Command Batch: ${phase}`, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Command Buffers", value: stats["Command Buffers"] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Render Passes", value: stats["Render Passes"].count }),
+    stats["Render Passes"].list.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: listStyle, children: stats["Render Passes"].list.map((name, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: listItemStyle, children: [
+      "- ",
+      name
+    ] }, i)) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Compute Passes", value: stats["Compute Passes"].count }),
+    stats["Compute Passes"].list.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: listStyle, children: stats["Compute Passes"].list.map((name, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: listItemStyle, children: [
+      "- ",
+      name
+    ] }, i)) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Raw Usages", value: stats["Raw Usages"] })
+  ] }, phase)) });
+};
+const listStyle = {
+  paddingLeft: "12px",
+  marginBottom: "8px",
+  fontSize: "11px",
+  lineHeight: "1.4",
+  color: "#666"
+};
+const listItemStyle = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap"
+};
 const TabContent = () => {
   const currentTab = useInspectorStore((state) => state.currentTab);
   switch (currentTab) {
     case "STATE":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(TotalState, {});
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(Container, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(TotalState, {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CommandBatchStatsView, {})
+      ] });
     case "CONTEXT":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(RedGPUContextView, {});
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(RedGPUContextView, {}) });
     case "VIEWS":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "ViewList Inspector (Coming Soon)" });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { style: placeholderStyle, children: "ViewList Inspector (Coming Soon)" });
     case "RESOURCES":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "Resources Inspector (Coming Soon)" });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { style: placeholderStyle, children: "Resources Inspector (Coming Soon)" });
     default:
       return null;
   }
 };
+const Container = ({ children, style }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "12px", ...style }, children });
 const placeholderStyle = {
   padding: "20px",
   textAlign: "center",
@@ -7632,6 +7666,7 @@ const collectStats = (redGPUContext, time) => {
   let totalNumTriangles = 0;
   let totalNumPoints = 0;
   let totalUsedVideoMemory = 0;
+  const aggregatedBatchStats = {};
   for (const view of redGPUContext.viewList) {
     const state = view.renderViewStateData;
     totalNum3DGroups += state.num3DGroups;
@@ -7641,6 +7676,26 @@ const collectStats = (redGPUContext, time) => {
     totalNumTriangles += state.numTriangles;
     totalNumPoints += state.numPoints;
     totalUsedVideoMemory += state.usedVideoMemory;
+    if (state.commandBatchStats) {
+      for (const phase in state.commandBatchStats) {
+        const phaseStats = state.commandBatchStats[phase];
+        if (!aggregatedBatchStats[phase]) {
+          aggregatedBatchStats[phase] = {
+            "Command Buffers": 0,
+            "Render Passes": { count: 0, list: [] },
+            "Compute Passes": { count: 0, list: [] },
+            "Raw Usages": 0
+          };
+        }
+        const agg = aggregatedBatchStats[phase];
+        agg["Command Buffers"] += phaseStats["Command Buffers"];
+        agg["Render Passes"].count += phaseStats["Render Passes"].count;
+        agg["Render Passes"].list = [.../* @__PURE__ */ new Set([...agg["Render Passes"].list, ...phaseStats["Render Passes"].list])];
+        agg["Compute Passes"].count += phaseStats["Compute Passes"].count;
+        agg["Compute Passes"].list = [.../* @__PURE__ */ new Set([...agg["Compute Passes"].list, ...phaseStats["Compute Passes"].list])];
+        agg["Raw Usages"] += phaseStats["Raw Usages"];
+      }
+    }
   }
   const rm = redGPUContext.resourceManager;
   totalUsedVideoMemory += rm.managedBitmapTextureState.videoMemory;
@@ -7663,7 +7718,8 @@ const collectStats = (redGPUContext, time) => {
     totalNumTriangles,
     totalNumPoints,
     totalUsedVideoMemory,
-    pixelRectArray: [...redGPUContext.sizeManager.pixelRectArray]
+    pixelRectArray: [...redGPUContext.sizeManager.pixelRectArray],
+    commandBatchStats: aggregatedBatchStats
   };
 };
 class RedGPUInspector2 {
