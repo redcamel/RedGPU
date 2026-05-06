@@ -131,6 +131,7 @@ class VertexBuffer extends ABaseBuffer {
      * [EN] Returns the number of triangles.
      */
     get triangleCount(): number {
+        //TODO - 이거 틀린거 아닌가?
         return this.#triangleCount;
     }
 
