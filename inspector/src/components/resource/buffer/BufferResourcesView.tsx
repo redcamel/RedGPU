@@ -113,7 +113,7 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: { type: string, redG
                         >
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
-                                    <span style={detailNameStyle}>{item.label || buf?.name || 'Unnamed'}</span>
+                                    <span style={detailNameStyle}>{item.label || buf?.label || buf?.name || 'Unnamed'}</span>
                                     <div style={detailInfoStyle}>
                                         <span>UUID: {item.uuid}</span>
                                     </div>

@@ -22,6 +22,9 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
     readonly #uniformBufferDescriptor: GPUBufferDescriptor
     readonly #size: number
 
+    get label(){
+        return this.#uniformBufferDescriptor.label
+    }
     /**
      * [KO] AUniformBaseBuffer 인스턴스를 초기화합니다.
      * [EN] Initializes an AUniformBaseBuffer instance.

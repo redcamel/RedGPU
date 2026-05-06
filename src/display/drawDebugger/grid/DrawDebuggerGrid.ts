@@ -274,7 +274,7 @@ class DrawDebuggerGrid {
             let uniformBuffer = cachedBufferState[uniqueKey];
             if (!uniformBuffer) {
                 const uniformData = new ArrayBuffer(FRAGMENT_UNIFORM_STRUCT.arrayBufferByteLength);
-                uniformBuffer = new UniformBuffer(redGPUContext, uniformData);
+                uniformBuffer = new UniformBuffer(redGPUContext, uniformData,uniqueKey,uniqueKey);
                 cachedBufferState[uniqueKey] = uniformBuffer;
             }
             this.#uniformBuffer = uniformBuffer;

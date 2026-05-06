@@ -8408,7 +8408,7 @@ const BufferDetailModal = ({ item, type, onClose }) => {
     };
     fetchBufferData();
   }, [redGPUContext, gpuBuffer, buf == null ? void 0 : buf.data]);
-  const label = isRaw ? item.label : item.label || (buf == null ? void 0 : buf.name) || "Unnamed Buffer";
+  const label = isRaw ? item.label : item.label || "Unnamed Buffer";
   const uuid = item.uuid;
   const size = isRaw ? item.size : (buf == null ? void 0 : buf.size) || 0;
   const usage = isRaw ? item.usage : buf == null ? void 0 : buf.usage;
@@ -9344,7 +9344,7 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
           onClick: () => onPreview(item, type),
           children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: item.label || (buf == null ? void 0 : buf.name) || "Unnamed" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: item.label || (buf == null ? void 0 : buf.label) || (buf == null ? void 0 : buf.name) || "Unnamed" }),
               /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                 "UUID: ",
                 item.uuid
