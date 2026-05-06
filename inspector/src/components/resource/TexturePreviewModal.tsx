@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import formatBytes from '@redgpu/src/utils/formatBytes';
+import {formatNumber} from '../../utils/format';
 import {useInspectorStore} from '../../store';
 import {readGPUTextureToCanvas} from '../../utils/textureReadback';
 
@@ -157,11 +158,11 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                 <div style={footerStyle}>
                     <div style={infoRowStyle}>
                         <span>Format: <b style={{color: '#fdb48d'}}>{gpuTex?.format}</b></span>
-                        <span>Size: <b style={{color: '#eee'}}>{gpuTex?.width}x{gpuTex?.height}</b></span>
+                        <span>Size: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.width, 0)}x{formatNumber(gpuTex?.height, 0)}</b></span>
                     </div>
                     <div style={infoRowStyle}>
                         <span>Dimension: <b style={{color: '#eee'}}>{gpuTex?.dimension}</b></span>
-                        <span>Layers: <b style={{color: '#eee'}}>{gpuTex?.depthOrArrayLayers}</b></span>
+                        <span>Layers: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.depthOrArrayLayers, 0)}</b></span>
                     </div>
                     <div style={infoRowStyle}>
                         <span>Memory: <b style={{color: '#fdb48d'}}>{formatBytes(tex?.videoMemorySize || 0)}</b></span>

@@ -3,6 +3,7 @@ import {ResourceStatusSummary, useInspectorStore} from '../../store';
 import Section from '../common/Section';
 import StatItem from '../common/StatItem';
 import formatBytes from '@redgpu/src/utils/formatBytes';
+import {formatNumber} from '../../utils/format';
 import RedGPUContext from '@redgpu/src/context/RedGPUContext';
 import TexturePreviewModal from './TexturePreviewModal';
 import BufferDetailModal from './BufferDetailModal';
@@ -37,7 +38,7 @@ const ResourceSummary = ({
             </span>
         </div>
         <div style={summaryValuesStyle}>
-            <StatItem label="Count" value={stats.count}/>
+            <StatItem label="Count" value={formatNumber(stats.count, 0)}/>
             <StatItem label="Memory" value={formatBytes(stats.videoMemory)} color="#fdb48d" isBold/>
         </div>
     </div>
@@ -180,14 +181,14 @@ const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, re
                                 </div>
                                 <div style={detailRightContainerStyle}>
                                     <div style={{display:'flex', gap:'4px', alignItems:'center', marginBottom: '2px'}}>
-                                        <span style={{...useNumStyle, fontWeight: 'bold'}}>Use: {item.useNum}</span>
+                                        <span style={{...useNumStyle, fontWeight: 'bold'}}>Use: {formatNumber(item.useNum, 0)}</span>
                                         <span style={detailMemoryStyle}>{formatBytes(tex?.videoMemorySize || 0)}</span>
                                     </div>
                                     {gpuTex && (
                                         <div style={{...detailInfoStyle, flexDirection: 'column', alignItems: 'flex-end', gap: '0', opacity: 0.9}}>
                                             <b style={{color: '#fdb48d'}}>{gpuTex.format}</b>
-                                            <span style={{color: '#eee', fontWeight: 'bold'}}>{gpuTex.width}x{gpuTex.height}</span>
-                                            <span style={{fontWeight: 'bold'}}>Mip: {gpuTex.mipLevelCount}</span>
+                                            <span style={{color: '#eee', fontWeight: 'bold'}}>{formatNumber(gpuTex.width, 0)}x{formatNumber(gpuTex.height, 0)}</span>
+                                            <span style={{fontWeight: 'bold'}}>Mip: {formatNumber(gpuTex.mipLevelCount, 0)}</span>
                                         </div>
                                     )}
                                 </div>
@@ -247,7 +248,7 @@ const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, re
                                     )}
                                 </div>
                                 <div style={detailRightContainerStyle}>
-                                    <span style={useNumStyle}>Use: {item.useNum}</span>
+                                    <span style={useNumStyle}>Use: {formatNumber(item.useNum, 0)}</span>
                                     <span style={detailMemoryStyle}>{formatBytes(buf?.size || 0)}</span>
                                 </div>
                             </div>

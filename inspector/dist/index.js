@@ -7767,6 +7767,27 @@ const noItemStyle$1 = {
   color: "#666",
   fontStyle: "italic"
 };
+const formatNumber = (val, decimals = 2) => {
+  if (val === void 0 || val === null) return "";
+  const str = String(val);
+  if (str.includes("%")) {
+    const num2 = parseFloat(str);
+    return isNaN(num2) ? str : `${num2.toLocaleString(void 0, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}%`;
+  }
+  if (str.includes("px")) {
+    const num2 = parseFloat(str);
+    return isNaN(num2) ? str : `${num2.toLocaleString(void 0, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}px`;
+  }
+  const num = parseFloat(str);
+  if (isNaN(num)) return str;
+  if (Number.isInteger(num)) {
+    return num.toLocaleString();
+  }
+  return num.toLocaleString(void 0, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+};
 async function readGPUTextureToCanvas(device, gpuTexture, canvas, layer = 0) {
   const width = gpuTexture.width;
   const height = gpuTexture.height;
@@ -7999,9 +8020,9 @@ const TexturePreviewModal = ({ item, onClose }) => {
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Size: ",
             /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { style: { color: "#eee" }, children: [
-              gpuTex == null ? void 0 : gpuTex.width,
+              formatNumber(gpuTex == null ? void 0 : gpuTex.width, 0),
               "x",
-              gpuTex == null ? void 0 : gpuTex.height
+              formatNumber(gpuTex == null ? void 0 : gpuTex.height, 0)
             ] })
           ] })
         ] }),
@@ -8012,7 +8033,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Layers: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex == null ? void 0 : gpuTex.depthOrArrayLayers })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatNumber(gpuTex == null ? void 0 : gpuTex.depthOrArrayLayers, 0) })
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle$1, children: [
@@ -8324,9 +8345,9 @@ const BufferDetailModal = ({ item, type, onClose }) => {
             /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "UUID", value: uuid }),
             /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Size", value: formatBytes(size), highlight: true }),
             /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Usage", value: formatBufferUsage$1(usage) }),
-            vertexCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Vertex Count", value: vertexCount }),
-            stride !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Stride", value: `${stride} elements` }),
-            triangleCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Triangle Count", value: triangleCount })
+            vertexCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Vertex Count", value: formatNumber(vertexCount, 0) }),
+            stride !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Stride", value: `${formatNumber(stride, 0)} elements` }),
+            triangleCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Triangle Count", value: formatNumber(triangleCount, 0) })
           ] })
         ] }),
         type === "vertexBuffer" && interleavedStruct && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
@@ -8337,11 +8358,17 @@ const BufferDetailModal = ({ item, type, onClose }) => {
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "10px", fontSize: "9px", color: "#888" }, children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                   "Loc: ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: attr.shaderLocation })
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "b",
+                    {
+                      style: { color: "#eee" },
+                      children: formatNumber(attr.shaderLocation, 0)
+                    }
+                  )
                 ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                   "Offset: ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: attr.offset })
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatNumber(attr.offset, 0) })
                 ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                   "Format: ",
@@ -8352,14 +8379,19 @@ const BufferDetailModal = ({ item, type, onClose }) => {
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginTop: "4px", fontSize: "9px", color: "#666", textAlign: "right" }, children: [
               "Total Array Stride: ",
               /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
-                interleavedStruct.arrayStride,
+                formatNumber(interleavedStruct.arrayStride, 0),
                 " bytes"
               ] })
             ] })
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...sectionTitleStyle, display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+            ...sectionTitleStyle,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Buffer Data View" }),
             availableTabs.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabContainerStyle, children: availableTabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
               TabButton,
@@ -8390,7 +8422,11 @@ const BufferDetailModal = ({ item, type, onClose }) => {
           "Video Memory: ",
           /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: formatBytes(size) })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { opacity: 0.5 }, children: "Top 210 elements shown" })
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { opacity: 0.5 }, children: [
+          "Top ",
+          formatNumber(210, 0),
+          " elements shown"
+        ] })
       ] }) })
     ] })
   ] });
@@ -8434,14 +8470,25 @@ const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) =>
           padding: "6px 8px",
           alignItems: "flex-start"
         }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...triangleLabelStyle, color: "#10b981", minWidth: "35px", marginTop: "14px" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+            ...triangleLabelStyle,
+            color: "#10b981",
+            minWidth: "35px",
+            marginTop: "14px"
+          }, children: [
             "V",
-            groupIdx
+            formatNumber(groupIdx, 0)
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "12px", flex: 1, flexWrap: "wrap" }, children: attrInfo ? attrInfo.map((info) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: attrBlockStyle, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: attrBlockLabelStyle, children: info.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "6px" }, children: group.slice(info.offset, info.offset + info.count).map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "55px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueLabelStyle, fontSize: "10px" }, children: v2.toFixed(4) }) }, i)) })
-          ] }, info.name)) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "60px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueLabelStyle, fontSize: "10px" }, children: v2.toFixed(4) }) }, i)) }) })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "6px" }, children: group.slice(info.offset, info.offset + info.count).map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "55px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+              ...valueLabelStyle,
+              fontSize: "10px"
+            }, children: formatNumber(v2) }) }, i)) })
+          ] }, info.name)) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "60px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+            ...valueLabelStyle,
+            fontSize: "10px"
+          }, children: formatNumber(v2) }) }, i)) }) })
         ] }, groupIdx)) }),
         f32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
           "... and ",
@@ -8452,8 +8499,8 @@ const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) =>
     }
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataGridStyle, children: [
       items.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataItemStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: i }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: v2.toFixed(4) })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: formatNumber(i, 0) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: formatNumber(v2) })
       ] }, i)),
       f32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
         "... and ",
@@ -8470,29 +8517,35 @@ const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) =>
       for (let i = 0; i < items.length; i += 3) {
         groups.push(items.slice(i, i + 3));
       }
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "10px", width: "100%", overflowX: "hidden" }, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
-          gap: "4px",
-          width: "100%"
-        }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
-          ...triangleGroupStyle,
-          background: groupIdx % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.07)",
-          marginBottom: 0
-        }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: triangleLabelStyle, children: [
-            "T",
-            groupIdx
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "4px", flex: 1, justifyContent: "space-around" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: triangleItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: v2 }) }, i)) })
-        ] }, groupIdx)) }),
-        u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
-          "... and ",
-          u32.length - limit,
-          " more"
-        ] })
-      ] });
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          style: { display: "flex", flexDirection: "column", gap: "10px", width: "100%", overflowX: "hidden" },
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+              gap: "4px",
+              width: "100%"
+            }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+              ...triangleGroupStyle,
+              background: groupIdx % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.07)",
+              marginBottom: 0
+            }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: triangleLabelStyle, children: [
+                "T",
+                formatNumber(groupIdx, 0)
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "4px", flex: 1, justifyContent: "space-around" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: triangleItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: formatNumber(v2, 0) }) }, i)) })
+            ] }, groupIdx)) }),
+            u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+              "... and ",
+              u32.length - limit,
+              " more"
+            ] })
+          ]
+        }
+      );
     }
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataGridStyle, children: [
       items.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataItemStyle, children: [
@@ -8524,14 +8577,14 @@ const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) =>
       }, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: wordOffsetStyle, children: [
           "+",
-          i * 4
+          formatNumber(i * 4, 0)
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: wordValueStyle, children: f32View[i].toFixed(4) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...wordValueStyle, color: "#aaa" }, children: u32View[i] })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: wordValueStyle, children: formatNumber(f32View[i]) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...wordValueStyle, color: "#aaa" }, children: formatNumber(u32View[i], 0) })
       ] }, i)),
       f32View.length > wordLimit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
         "... and ",
-        f32View.length - wordLimit,
+        formatNumber(f32View.length - wordLimit, 0),
         " words more"
       ] })
     ] });
@@ -8600,7 +8653,6 @@ const statusBadgeStyle = {
   padding: "2px 6px",
   borderRadius: "10px",
   fontWeight: "bold",
-  textTransform: "uppercase",
   letterSpacing: "0.05em"
 };
 const closeButtonStyle = {
@@ -8632,7 +8684,6 @@ const sectionTitleStyle = {
   fontSize: "12px",
   color: "#fdb48d",
   fontWeight: "bold",
-  textTransform: "uppercase",
   borderBottom: "1px solid rgba(253, 180, 141, 0.2)",
   paddingBottom: "4px"
 };
@@ -8783,7 +8834,6 @@ const attrBlockStyle = {
 const attrBlockLabelStyle = {
   fontSize: "8px",
   color: "#888",
-  textTransform: "uppercase",
   letterSpacing: "0.05em",
   borderBottom: "1px solid rgba(255,255,255,0.05)",
   paddingBottom: "2px",
@@ -8795,7 +8845,6 @@ const wordHeaderStyle = {
   fontSize: "9px",
   color: "#555",
   fontWeight: "bold",
-  textTransform: "uppercase",
   borderBottom: "1px solid rgba(255,255,255,0.05)",
   marginBottom: "4px"
 };
@@ -8838,7 +8887,7 @@ const ResourceSummary = ({
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { float: "right", opacity: 0.5, fontSize: "10px" }, children: isExpanded ? "▲" : "▼" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: summaryValuesStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Count", value: stats.count }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Count", value: formatNumber(stats.count, 0) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Memory", value: formatBytes(stats.videoMemory), color: "#fdb48d", isBold: true })
       ] })
     ]
@@ -8973,20 +9022,20 @@ const ResourceDetailList = ({ type, redGPUContext, onPreview }) => {
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "4px", alignItems: "center", marginBottom: "2px" }, children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { ...useNumStyle, fontWeight: "bold" }, children: [
                   "Use: ",
-                  item.useNum
+                  formatNumber(item.useNum, 0)
                 ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
               ] }),
               gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, flexDirection: "column", alignItems: "flex-end", gap: "0", opacity: 0.9 }, children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: gpuTex.format }),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { color: "#eee", fontWeight: "bold" }, children: [
-                  gpuTex.width,
+                  formatNumber(gpuTex.width, 0),
                   "x",
-                  gpuTex.height
+                  formatNumber(gpuTex.height, 0)
                 ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontWeight: "bold" }, children: [
                   "Mip: ",
-                  gpuTex.mipLevelCount
+                  formatNumber(gpuTex.mipLevelCount, 0)
                 ] })
               ] })
             ] })
@@ -9045,7 +9094,7 @@ const ResourceDetailList = ({ type, redGPUContext, onPreview }) => {
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle, children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle, children: [
                 "Use: ",
-                item.useNum
+                formatNumber(item.useNum, 0)
               ] }),
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((buf == null ? void 0 : buf.size) || 0) })
             ] })
@@ -10528,19 +10577,6 @@ __privateAdd(_AController, _globalKeyboardActiveView, null);
  */
 __privateAdd(_AController, _globalKeyboardActiveController, null);
 let AController = _AController;
-const formatNumber = (val) => {
-  const str = String(val);
-  if (str.includes("%")) {
-    const num2 = parseFloat(str);
-    return isNaN(num2) ? str : `${num2.toFixed(2)}%`;
-  }
-  if (str.includes("px")) {
-    const num2 = parseFloat(str);
-    return isNaN(num2) ? str : `${num2.toFixed(2)}px`;
-  }
-  const num = parseFloat(str);
-  return isNaN(num) ? str : num.toFixed(2);
-};
 const ViewStateTab = ({ view, lastUpdateTime }) => {
   const {
     renderViewStateData,
