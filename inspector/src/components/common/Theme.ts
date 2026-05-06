@@ -30,5 +30,20 @@ export const COMMON_STYLES = {
         textAlign: 'right',
         wordBreak: 'break-all',
         marginLeft: '10px'
+    } as React.CSSProperties,
+    toggleButton: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '14px',
+        height: '14px',
+        border: `1px solid ${THEME.colors.primary}`,
+        borderRadius: '3px',
+        fontSize: '12px',
+        fontWeight: 'bold',
+        color: THEME.colors.primary,
+        lineHeight: '14px',
+        background: 'rgba(0,0,0,0.3)',
+        flexShrink: 0
     } as React.CSSProperties
 };

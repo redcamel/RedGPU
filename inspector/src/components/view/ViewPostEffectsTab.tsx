@@ -3,21 +3,21 @@ import {useInspectorStore} from '../../store';
 import Section from "../common/Section";
 import StatItem from "../common/StatItem";
 import StatBoolItem from "../common/StatBoolItem";
-import Divider from "../common/Divider";
 import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";
 import PropertyInspector from "../common/PropertyInspector";
-
+import {COMMON_STYLES} from "../common/Theme";
 
 /**
  * [KO] 뷰의 후처리 효과 설정을 표시하는 탭 컴포넌트입니다.
+ * [EN] Tab component that displays the post-processing effect settings of a view.
  */
 const ViewPostEffectsTab = ({view}: { view: View3D }) => {
     const {redGPUContext} = useInspectorStore();
     const {postEffectManager, rawCamera} = view;
 
     if (!postEffectManager) {
-        return <div style={{fontSize: '11px', color: '#666', fontStyle: 'italic'}}>PostEffectManager not available</div>;
+        return <div style={placeholderStyle}>PostEffectManager not available</div>;
     }
 
     const {antialiasingManager} = redGPUContext;
@@ -42,32 +42,49 @@ const ViewPostEffectsTab = ({view}: { view: View3D }) => {
                     <CollapsibleEffect key={i} effect={effect}/>
                 ))}
                 {postEffectManager.effectList.length === 0 && (
-                    <div style={{fontSize: '11px', color: '#666', fontStyle: 'italic'}}>No custom effects added.</div>
+                    <div style={placeholderStyle}>No custom effects added.</div>
                 )}
             </Section>
         </>
     );
 };
 
+/**
+ * [KO] 개별 효과를 접고 펼칠 수 있는 컴포넌트입니다.
+ * [EN] Component that can expand and collapse individual effects.
+ */
 const CollapsibleEffect = ({effect}: { effect: any }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <div style={{marginBottom: '8px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px'}}>
+        <div style={effectContainerStyle}>
             <div
                 onClick={() => setIsExpanded(!isExpanded)}
                 style={effectHeaderStyle}
             >
-                <span style={toggleButtonStyle}>{isExpanded ? '-' : '+'}</span>
-                <span style={{fontWeight: 'bold', color: '#ddd'}}>{effect.constructor.name || 'Unknown Effect'}</span>
+                <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
+                <span style={effectNameStyle}>{effect.constructor.name || 'Unknown Effect'}</span>
             </div>
             {isExpanded && (
-                <div style={{padding: '8px', borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                <div style={effectContentStyle}>
                     <PropertyInspector target={effect}/>
                 </div>
             )}
         </div>
     );
+};
+
+// Styles
+const placeholderStyle: React.CSSProperties = {
+    fontSize: '11px',
+    color: '#666',
+    fontStyle: 'italic'
+};
+
+const effectContainerStyle: React.CSSProperties = {
+    marginBottom: '8px',
+    background: 'rgba(255,255,255,0.02)',
+    borderRadius: '4px'
 };
 
 const effectHeaderStyle: React.CSSProperties = {
@@ -80,20 +97,14 @@ const effectHeaderStyle: React.CSSProperties = {
     fontSize: '12px'
 };
 
-const toggleButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '14px',
-    height: '14px',
-    border: '1px solid #fdb48d',
-    borderRadius: '3px',
-    fontSize: '12px',
+const effectNameStyle: React.CSSProperties = {
     fontWeight: 'bold',
-    color: '#fdb48d',
-    lineHeight: '14px',
-    background: 'rgba(0,0,0,0.3)',
-    flexShrink: 0
+    color: '#ddd'
+};
+
+const effectContentStyle: React.CSSProperties = {
+    padding: '8px',
+    borderTop: '1px solid rgba(255,255,255,0.05)'
 };
 
 export default ViewPostEffectsTab;

@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import StatItem from "./StatItem";
 import StatBoolItem from "./StatBoolItem";
 import {formatNumber} from "../../utils/format";
-import {THEME} from "./Theme";
+import {COMMON_STYLES, THEME} from "./Theme";
 
 /**
  * [KO] 객체의 공개 프로퍼티를 재귀적으로 표시하는 컴포넌트입니다.
@@ -103,8 +103,14 @@ const PropertyInspector = ({target, depth = 0}: { target: any, depth?: number })
 
 /**
  * [KO] 하위 객체나 배열을 접고 펼칠 수 있는 컴포넌트입니다.
+ * [EN] Component that can expand and collapse sub-objects or arrays.
  */
-const CollapsibleObject = ({label, value, depth, typeLabel}: { label: string, value: any, depth: number, typeLabel: string }) => {
+const CollapsibleObject = ({label, value, depth, typeLabel}: {
+    label: string,
+    value: any,
+    depth: number,
+    typeLabel: string
+}) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
@@ -113,8 +119,8 @@ const CollapsibleObject = ({label, value, depth, typeLabel}: { label: string, va
                 onClick={() => setIsExpanded(!isExpanded)}
                 style={headerStyle}
             >
-                <span style={toggleButtonStyle}>{isExpanded ? '-' : '+'}</span>
-                <span style={labelStyle}>{label}</span>
+                <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
+                <span style={COMMON_STYLES.label}>{label}</span>
                 <span style={typeHintStyle}>({typeLabel === 'Array' ? `Array(${value.length})` : 'object'})</span>
             </div>
             {isExpanded && (
@@ -135,26 +141,6 @@ const headerStyle: React.CSSProperties = {
     fontSize: '11px',
     padding: '2px 0',
     userSelect: 'none'
-};
-
-const toggleButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '14px',
-    height: '14px',
-    border: `1px solid ${THEME.colors.primary}`,
-    borderRadius: '3px',
-    fontSize: '12px',
-    fontWeight: 'bold',
-    color: THEME.colors.primary,
-    lineHeight: '14px',
-    background: 'rgba(0,0,0,0.3)',
-    flexShrink: 0
-};
-
-const labelStyle: React.CSSProperties = {
-    color: '#888'
 };
 
 const typeHintStyle: React.CSSProperties = {

@@ -11,6 +11,7 @@ import {formatNumber} from "../../utils/format";
 
 /**
  * [KO] 뷰의 렌더링 상태 및 기본 설정을 표시하는 탭 컴포넌트입니다.
+ * [EN] Tab component that displays the rendering state and basic settings of a view.
  */
 const ViewStateTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: number }) => {
     const {

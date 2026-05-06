@@ -1,10 +1,13 @@
 import React from 'react';
 import {useInspectorStore} from './store';
 import FPS from './components/monitor/FPS';
-
 import TabContent from './components/TabContent';
 import Tabs, {TabItem} from "./components/common/Tabs";
 
+/**
+ * [KO] 인스펙터의 메인 애플리케이션 컴포넌트입니다.
+ * [EN] Main application component of the inspector.
+ */
 const App = () => {
     const useDebugPanel = useInspectorStore(state => state.useDebugPanel);
     const setUseDebugPanel = useInspectorStore(state => state.setUseDebugPanel);
@@ -34,6 +37,7 @@ const App = () => {
     );
 };
 
+// Styles
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
     left: 0,

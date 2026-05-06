@@ -7214,7 +7214,7 @@ const useInspectorStore = create$1((set) => ({
   setRedGPUContext: (value) => set({ redGPUContext: value }),
   setCurrentTab: (tab) => set({ currentTab: tab })
 }));
-const THEME$1 = {
+const THEME = {
   fontFamily: "",
   fontSize: {
     title: "13px",
@@ -7232,13 +7232,28 @@ const THEME$1 = {
 };
 const COMMON_STYLES = {
   label: {
-    color: THEME$1.colors.label
+    color: THEME.colors.label
   },
   value: {
-    color: THEME$1.colors.value,
+    color: THEME.colors.value,
     textAlign: "right",
     wordBreak: "break-all",
     marginLeft: "10px"
+  },
+  toggleButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "14px",
+    height: "14px",
+    border: `1px solid ${THEME.colors.primary}`,
+    borderRadius: "3px",
+    fontSize: "12px",
+    fontWeight: "bold",
+    color: THEME.colors.primary,
+    lineHeight: "14px",
+    background: "rgba(0,0,0,0.3)",
+    flexShrink: 0
   }
 };
 const Divider = ({ vertical, style }) => {
@@ -7247,13 +7262,13 @@ const Divider = ({ vertical, style }) => {
 };
 const defaultHorizontalStyle = {
   height: "1px",
-  background: THEME$1.colors.border,
+  background: THEME.colors.border,
   margin: "8px 0"
 };
 const defaultVerticalStyle = {
   width: "1px",
   height: "36px",
-  background: THEME$1.colors.border,
+  background: THEME.colors.border,
   margin: "0"
 };
 class FPSMeter {
@@ -7313,7 +7328,7 @@ class FPSMeter {
 }
 const FPS = () => {
   const { fps, avgFps, low1Fps, low01Fps, frameTime } = useInspectorStore();
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle$2, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle$3, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: currentFpsBoxStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: fpsValueStyle, children: [
         fps,
@@ -7338,7 +7353,7 @@ const FPS = () => {
     ] })
   ] }) });
 };
-const containerStyle$2 = {
+const containerStyle$3 = {
   borderBottom: "1px solid rgba(255,255,255,0.1)"
 };
 const statsContainerStyle = {
@@ -7405,15 +7420,15 @@ const sectionStyle = {
   marginBottom: "16px"
 };
 const sectionTitleStyle = {
-  fontSize: THEME$1.fontSize.title,
-  color: THEME$1.colors.primary,
+  fontSize: THEME.fontSize.title,
+  color: THEME.colors.primary,
   marginBottom: "8px",
   fontWeight: "bold",
-  borderBottom: `1px solid ${THEME$1.colors.primary}33`,
+  borderBottom: `1px solid ${THEME.colors.primary}33`,
   paddingBottom: "4px",
-  fontFamily: THEME$1.fontFamily
+  fontFamily: THEME.fontFamily
 };
-const StatItem = ({ label, value, color = THEME$1.colors.value, isBold = false }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$2, children: [
+const StatItem = ({ label, value, color = THEME.colors.value, isBold = false }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$2, children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
   /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
     ...COMMON_STYLES.value,
@@ -7425,8 +7440,8 @@ const statItemStyle$2 = {
   display: "flex",
   justifyContent: "space-between",
   marginBottom: "4px",
-  fontSize: THEME$1.fontSize.content,
-  fontFamily: THEME$1.fontFamily
+  fontSize: THEME.fontSize.content,
+  fontFamily: THEME.fontFamily
 };
 const TotalState = () => {
   const {
@@ -7465,8 +7480,8 @@ const statItemStyle$1 = {
   display: "flex",
   justifyContent: "space-between",
   marginBottom: "4px",
-  fontSize: THEME$1.fontSize.content,
-  fontFamily: THEME$1.fontFamily
+  fontSize: THEME.fontSize.content,
+  fontFamily: THEME.fontFamily
 };
 const StatBoolItem = ({
   label,
@@ -7492,8 +7507,8 @@ const statItemStyle = {
   display: "flex",
   justifyContent: "space-between",
   marginBottom: "4px",
-  fontSize: THEME$1.fontSize.content,
-  fontFamily: THEME$1.fontFamily,
+  fontSize: THEME.fontSize.content,
+  fontFamily: THEME.fontFamily,
   alignItems: "center"
 };
 const ToneMappingView = () => {
@@ -7510,11 +7525,11 @@ const RedGPUContextView = () => {
   const redGPUContext = useInspectorStore((state) => state.redGPUContext);
   const pixelRectArray = useInspectorStore((state) => state.pixelRectArray);
   if (!redGPUContext) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "RedGPUContext not initialized" });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$2, children: "RedGPUContext not initialized" });
   }
   const { detector, htmlCanvas, width, height, backgroundColor, antialiasingManager } = redGPUContext;
   const adapterInfo = detector.adapterInfo;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$2, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "RedGPUContext Info", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Width", value: width }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Height", value: height }),
@@ -7548,7 +7563,7 @@ const RedGPUContextView = () => {
     ] })
   ] });
 };
-const containerStyle$1 = {};
+const containerStyle$2 = {};
 const labelStyle$1 = {
   color: "#888"
 };
@@ -7562,7 +7577,7 @@ const userAgentValueStyle = {
   lineHeight: "1.4",
   wordBreak: "break-all"
 };
-const placeholderStyle$1 = {
+const placeholderStyle$2 = {
   padding: "20px",
   textAlign: "center",
   color: "#666",
@@ -7883,9 +7898,9 @@ const TabBar = ({ tabs, activeTab, onTabChange, isSticky = true, style }) => {
       onClick: () => onTabChange(tab.id),
       style: {
         ...tabItemStyle,
-        borderBottom: activeTab === tab.id ? `2px solid ${THEME$1.colors.primary}` : "2px solid transparent",
-        color: activeTab === tab.id ? THEME$1.colors.primary : THEME$1.colors.label,
-        backgroundColor: activeTab === tab.id ? THEME$1.colors.activeBg : "transparent"
+        borderBottom: activeTab === tab.id ? `2px solid ${THEME.colors.primary}` : "2px solid transparent",
+        color: activeTab === tab.id ? THEME.colors.primary : THEME.colors.label,
+        backgroundColor: activeTab === tab.id ? THEME.colors.activeBg : "transparent"
       },
       children: tab.label
     },
@@ -7899,7 +7914,7 @@ const Tabs = ({ tabs, activeTab, onTabChange, children, scrollable = true }) => 
   }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(TabBar, { tabs, activeTab, onTabChange }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
-      ...contentAreaStyle,
+      ...contentAreaStyle$1,
       overflowY: scrollable ? "auto" : "visible"
     }, children })
   ] });
@@ -7911,25 +7926,25 @@ const tabsContainerStyle = {
 };
 const tabBarStyle = {
   display: "flex",
-  background: THEME$1.colors.background,
-  borderTop: `1px solid ${THEME$1.colors.border}`,
-  borderBottom: `1px solid ${THEME$1.colors.border}`,
+  background: THEME.colors.background,
+  borderTop: `1px solid ${THEME.colors.border}`,
+  borderBottom: `1px solid ${THEME.colors.border}`,
   position: "sticky",
   top: 0,
   zIndex: 10
 };
 const tabItemStyle = {
   padding: "8px 4px",
-  fontSize: THEME$1.fontSize.small,
+  fontSize: THEME.fontSize.small,
   fontWeight: "bold",
   cursor: "pointer",
   transition: "all 0.2s",
   flex: 1,
   textAlign: "center",
   whiteSpace: "nowrap",
-  fontFamily: THEME$1.fontFamily
+  fontFamily: THEME.fontFamily
 };
-const contentAreaStyle = {
+const contentAreaStyle$1 = {
   flex: 1,
   overflowY: "auto",
   background: "rgba(0,0,0,0.2)"
@@ -9401,8 +9416,8 @@ const CollapsibleObject = ({ label, value, depth, typeLabel }) => {
         onClick: () => setIsExpanded(!isExpanded),
         style: headerStyle$1,
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: toggleButtonStyle$1, children: isExpanded ? "-" : "+" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: label }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: typeHintStyle, children: [
             "(",
             typeLabel === "Array" ? `Array(${value.length})` : "object",
@@ -9423,24 +9438,6 @@ const headerStyle$1 = {
   padding: "2px 0",
   userSelect: "none"
 };
-const toggleButtonStyle$1 = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "14px",
-  height: "14px",
-  border: `1px solid ${THEME$1.colors.primary}`,
-  borderRadius: "3px",
-  fontSize: "12px",
-  fontWeight: "bold",
-  color: THEME$1.colors.primary,
-  lineHeight: "14px",
-  background: "rgba(0,0,0,0.3)",
-  flexShrink: 0
-};
-const labelStyle = {
-  color: "#888"
-};
 const typeHintStyle = {
   color: "#555",
   fontSize: "10px",
@@ -9455,7 +9452,7 @@ const ViewPostEffectsTab = ({ view }) => {
   const { redGPUContext } = useInspectorStore();
   const { postEffectManager, rawCamera } = view;
   if (!postEffectManager) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "11px", color: "#666", fontStyle: "italic" }, children: "PostEffectManager not available" });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "PostEffectManager not available" });
   }
   const { antialiasingManager } = redGPUContext;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
@@ -9470,26 +9467,36 @@ const ViewPostEffectsTab = ({ view }) => {
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: `Custom Effects (${postEffectManager.effectList.length})`, children: [
       postEffectManager.effectList.map((effect, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleEffect, { effect }, i)),
-      postEffectManager.effectList.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "11px", color: "#666", fontStyle: "italic" }, children: "No custom effects added." })
+      postEffectManager.effectList.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "No custom effects added." })
     ] })
   ] });
 };
 const CollapsibleEffect = ({ effect }) => {
   const [isExpanded, setIsExpanded] = reactExports.useState(false);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "8px", background: "rgba(255,255,255,0.02)", borderRadius: "4px" }, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: effectContainerStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "div",
       {
         onClick: () => setIsExpanded(!isExpanded),
         style: effectHeaderStyle,
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: toggleButtonStyle, children: isExpanded ? "-" : "+" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontWeight: "bold", color: "#ddd" }, children: effect.constructor.name || "Unknown Effect" })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: effectNameStyle, children: effect.constructor.name || "Unknown Effect" })
         ]
       }
     ),
-    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "8px", borderTop: "1px solid rgba(255,255,255,0.05)" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyInspector, { target: effect }) })
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: effectContentStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyInspector, { target: effect }) })
   ] });
+};
+const placeholderStyle$1 = {
+  fontSize: "11px",
+  color: "#666",
+  fontStyle: "italic"
+};
+const effectContainerStyle = {
+  marginBottom: "8px",
+  background: "rgba(255,255,255,0.02)",
+  borderRadius: "4px"
 };
 const effectHeaderStyle = {
   display: "flex",
@@ -9500,20 +9507,13 @@ const effectHeaderStyle = {
   userSelect: "none",
   fontSize: "12px"
 };
-const toggleButtonStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "14px",
-  height: "14px",
-  border: "1px solid #fdb48d",
-  borderRadius: "3px",
-  fontSize: "12px",
+const effectNameStyle = {
   fontWeight: "bold",
-  color: "#fdb48d",
-  lineHeight: "14px",
-  background: "rgba(0,0,0,0.3)",
-  flexShrink: 0
+  color: "#ddd"
+};
+const effectContentStyle = {
+  padding: "8px",
+  borderTop: "1px solid rgba(255,255,255,0.05)"
 };
 const ViewListView = () => {
   const { redGPUContext, lastUpdateTime } = useInspectorStore();
@@ -9533,7 +9533,7 @@ const ViewListView = () => {
     { id: "COMMANDS", label: "Commands" },
     { id: "POSTEFFECTS", label: "PostEffects" }
   ];
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: stickyHeaderStyle, children: [
       viewList.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
         TabBar,
@@ -9555,14 +9555,14 @@ const ViewListView = () => {
         }
       )
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "12px" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentAreaStyle, children: [
       activeDetailTab === "STATE" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewStateTab, { view: activeView, lastUpdateTime }),
       activeDetailTab === "COMMANDS" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewCommandsTab, { view: activeView }),
       activeDetailTab === "POSTEFFECTS" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewPostEffectsTab, { view: activeView })
     ] })
   ] });
 };
-const containerStyle = {
+const containerStyle$1 = {
   display: "flex",
   flexDirection: "column"
 };
@@ -9571,6 +9571,9 @@ const stickyHeaderStyle = {
   top: 0,
   zIndex: 100,
   background: "#111"
+};
+const contentAreaStyle = {
+  padding: "12px"
 };
 const placeholderStyle = {
   padding: "20px",
@@ -9597,7 +9600,10 @@ const TabContent = () => {
       return null;
   }
 };
-const Container = ({ children, style }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "12px", ...style }, children });
+const Container = ({ children, style }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...containerStyle, ...style }, children });
+const containerStyle = {
+  padding: "12px"
+};
 const App = () => {
   const useDebugPanel = useInspectorStore((state) => state.useDebugPanel);
   const setUseDebugPanel = useInspectorStore((state) => state.setUseDebugPanel);

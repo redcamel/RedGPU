@@ -53,7 +53,7 @@ const ViewListView = () => {
                 />
             </div>
 
-            <div style={{padding: '12px'}}>
+            <div style={contentAreaStyle}>
                 {activeDetailTab === 'STATE' && <ViewStateTab view={activeView} lastUpdateTime={lastUpdateTime}/>}
                 {activeDetailTab === 'COMMANDS' && <ViewCommandsTab view={activeView}/>}
                 {activeDetailTab === 'POSTEFFECTS' && <ViewPostEffectsTab view={activeView}/>}
@@ -73,6 +73,10 @@ const stickyHeaderStyle: React.CSSProperties = {
     top: 0,
     zIndex: 100,
     background: '#111'
+};
+
+const contentAreaStyle: React.CSSProperties = {
+    padding: '12px'
 };
 
 const placeholderStyle: React.CSSProperties = {

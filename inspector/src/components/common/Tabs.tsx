@@ -8,6 +8,7 @@ export interface TabItem {
 
 /**
  * [KO] 탭 메뉴 바만 렌더링하는 컴포넌트입니다.
+ * [EN] Component that renders only the tab menu bar.
  */
 export const TabBar: React.FC<{
     tabs: TabItem[],
@@ -43,6 +44,7 @@ export const TabBar: React.FC<{
 
 /**
  * [KO] 인스펙터의 탭 메뉴와 컨텐츠 영역을 포함하는 컨테이너 컴포넌트입니다.
+ * [EN] Container component that includes the inspector's tab menu and content area.
  */
 const Tabs: React.FC<{
     tabs: TabItem[],
@@ -68,6 +70,7 @@ const Tabs: React.FC<{
     );
 };
 
+// Styles
 const tabsContainerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
@@ -101,4 +104,5 @@ const contentAreaStyle: React.CSSProperties = {
     overflowY: 'auto',
     background: 'rgba(0,0,0,0.2)'
 };
+
 export default Tabs;

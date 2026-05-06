@@ -25,20 +25,32 @@ const TabContent = () => {
             return (
                 <Container>
                     <RedGPUContextView/>
-
                 </Container>
             );
         case 'VIEWS':
             return <ViewListView/>;
         case 'RESOURCES':
-            return <Container><ResourcesView/></Container>;
+            return (
+                <Container>
+                    <ResourcesView/>
+                </Container>
+            );
         default:
             return null;
     }
 };
+
+/**
+ * [KO] 탭 컨텐츠를 감싸는 컨테이너 컴포넌트입니다.
+ * [EN] Container component that wraps tab content.
+ */
 const Container = ({children, style}: { children: React.ReactNode, style?: React.CSSProperties }) => (
-    <div style={{padding: '12px', ...style}}>{children}</div>
+    <div style={{...containerStyle, ...style}}>{children}</div>
 );
 
+// Styles
+const containerStyle: React.CSSProperties = {
+    padding: '12px'
+};
 
 export default TabContent;
