@@ -1,5 +1,7 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import formatBytes from '@redgpu/src/utils/formatBytes';
+import {useInspectorStore} from '../../store';
+import {readGPUBufferToCPU} from '../../utils/bufferReadback';
 
 /**
  * [KO] 버퍼 사용처 플래그를 읽기 쉬운 문자열로 변환합니다.
@@ -19,14 +21,20 @@ const formatBufferUsage = (usage: number): string => {
     return labels.join(', ');
 };
 
-type DataTab = 'dataViewF32' | 'dataViewU32';
+type DataTab = 'dataViewF32' | 'dataViewU32' | 'data';
 
 /**
  * [KO] 버퍼 리소스의 상세 정보를 표시하는 모달 컴포넌트입니다.
  */
 const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onClose: () => void }) => {
+    const {redGPUContext} = useInspectorStore();
+    const [liveData, setLiveData] = useState<ArrayBuffer | null>(null);
+    const [isLive, setIsLive] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
     const buf = item.buffer || item;
     const isRaw = item.isRaw;
+    const gpuBuffer = buf?.gpuBuffer as GPUBuffer;
 
     // Determine available tabs based on type
     const availableTabs: DataTab[] = [];
@@ -35,10 +43,36 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
     } else if (type === 'vertexBuffer') {
         availableTabs.push('dataViewF32');
     } else {
-        availableTabs.push('dataViewF32', 'dataViewU32');
+        availableTabs.push('data', 'dataViewF32', 'dataViewU32');
     }
 
     const [activeTab, setActiveTab] = useState<DataTab>(availableTabs[0]);
+
+    useEffect(() => {
+        const fetchBufferData = async () => {
+            if (redGPUContext && gpuBuffer) {
+                const canRead = !!(gpuBuffer.usage & GPUBufferUsage.COPY_SRC);
+                if (canRead) {
+                    const data = await readGPUBufferToCPU(redGPUContext.gpuDevice, gpuBuffer);
+                    if (data) {
+                        setLiveData(data);
+                        setIsLive(true);
+                        setIsLoading(false);
+                        return;
+                    }
+                }
+            }
+            
+            const localData = buf?.data instanceof ArrayBuffer ? buf.data : (buf?.data?.buffer instanceof ArrayBuffer ? buf.data.buffer : null);
+            if (localData) {
+                setLiveData(localData.slice(0)); 
+            }
+            setIsLive(false);
+            setIsLoading(false);
+        };
+
+        fetchBufferData();
+    }, [redGPUContext, gpuBuffer, buf?.data]);
     
     const label = isRaw ? item.label : (item.label || buf?.name || 'Unnamed Buffer');
     const uuid = item.uuid;
@@ -48,10 +82,10 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
     const vertexCount = buf?.vertexCount;
     const stride = buf?.stride;
     const triangleCount = buf?.triangleCount;
+    const interleavedStruct = buf?.interleavedStruct;
 
-    // AUniformBaseBuffer getters or fallbacks
-    const dataViewF32 = buf?.dataViewF32 || (buf?.data instanceof Float32Array ? buf.data : (buf?.data instanceof ArrayBuffer ? new Float32Array(buf.data) : null));
-    const dataViewU32 = buf?.dataViewU32 || (buf?.data instanceof Uint32Array ? buf.data : (buf?.data instanceof ArrayBuffer ? new Uint32Array(buf.data) : null));
+    const dataViewF32 = liveData ? new Float32Array(liveData) : null;
+    const dataViewU32 = liveData ? new Uint32Array(liveData) : null;
 
     return (
         <div style={overlayStyle} onClick={onClose}>
@@ -63,7 +97,15 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
             <div style={modalStyle} onClick={e => e.stopPropagation()}>
                 <div style={headerStyle}>
                     <div style={{display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1}}>
-                        <span style={titleStyle}>{label}</span>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                            <span style={titleStyle}>{label}</span>
+                            <div style={{
+                                ...statusBadgeStyle,
+                                background: isLive ? '#10b981' : '#666'
+                            }}>
+                                {isLive ? 'LIVE GPU' : 'LOCAL CACHE'}
+                            </div>
+                        </div>
                         <span style={typeStyle}>{type.toUpperCase()}</span>
                     </div>
                     <button style={closeButtonStyle} onClick={onClose}>×</button>
@@ -77,10 +119,31 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
                             <PropertyItem label="Size" value={formatBytes(size)} highlight />
                             <PropertyItem label="Usage" value={formatBufferUsage(usage)} />
                             {vertexCount !== undefined && <PropertyItem label="Vertex Count" value={vertexCount} />}
-                            {stride !== undefined && <PropertyItem label="Stride" value={`${stride} bytes`} />}
+                            {stride !== undefined && <PropertyItem label="Stride" value={`${stride} elements`} />}
                             {triangleCount !== undefined && <PropertyItem label="Triangle Count" value={triangleCount} />}
                         </div>
                     </div>
+
+                    {type === 'vertexBuffer' && interleavedStruct && (
+                        <div style={sectionStyle}>
+                            <div style={sectionTitleStyle}>Interleaved Structure</div>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
+                                {interleavedStruct.attributes.map((attr: any, i: number) => (
+                                    <div key={i} style={structRowStyle}>
+                                        <span style={structNameStyle}>{attr.attributeName}</span>
+                                        <div style={{display: 'flex', gap: '10px', fontSize: '9px', color: '#888'}}>
+                                            <span>Loc: <b style={{color: '#eee'}}>{attr.shaderLocation}</b></span>
+                                            <span>Offset: <b style={{color: '#eee'}}>{attr.offset}</b></span>
+                                            <span>Format: <b style={{color: '#fdb48d'}}>{attr.format}</b></span>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div style={{marginTop: '4px', fontSize: '9px', color: '#666', textAlign: 'right'}}>
+                                    Total Array Stride: <b>{interleavedStruct.arrayStride} bytes</b>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div style={sectionStyle}>
                         <div style={{...sectionTitleStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -90,7 +153,7 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
                                     {availableTabs.map(tab => (
                                         <TabButton 
                                             key={tab}
-                                            label={tab} 
+                                            label={tab === 'data' ? 'data (Raw)' : tab} 
                                             active={activeTab === tab} 
                                             onClick={() => setActiveTab(tab)} 
                                         />
@@ -99,7 +162,19 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
                             )}
                         </div>
                         <div style={dataViewerStyle}>
-                            <DataContent type={type} tab={activeTab} f32={dataViewF32} u32={dataViewU32} />
+                            {isLoading ? (
+                                <div style={noDataStyle}>Loading data from GPU...</div>
+                            ) : (
+                                <DataContent 
+                                    type={type} 
+                                    tab={activeTab} 
+                                    f32={dataViewF32} 
+                                    u32={dataViewU32} 
+                                    raw={liveData}
+                                    stride={stride} 
+                                    interleavedStruct={interleavedStruct}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -129,12 +204,70 @@ const TabButton = ({label, active, onClick}: {label: string, active: boolean, on
     </button>
 );
 
-const DataContent = ({type, tab, f32, u32}: {type: string, tab: DataTab, f32: any, u32: any}) => {
-    const limit = 210; // Multiple of 3
+const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {type: string, tab: DataTab, f32: any, u32: any, raw: any, stride?: number, interleavedStruct?: any}) => {
+    const limit = 300; 
     
     if (tab === 'dataViewF32') {
         if (!f32) return <div style={noDataStyle}>dataViewF32 not available</div>;
         const items = Array.from(f32.subarray(0, limit)) as number[];
+
+        if (type === 'vertexBuffer' && stride) {
+            const attrInfo = interleavedStruct ? interleavedStruct.attributes.map((attr: any, idx: number, arr: any[]) => {
+                const nextOffset = arr[idx + 1] ? arr[idx + 1].offset : interleavedStruct.arrayStride;
+                return {
+                    name: attr.attributeName.replace('vertex', ''),
+                    count: (nextOffset - attr.offset) / 4,
+                    offset: attr.offset / 4
+                };
+            }) : null;
+
+            const groups = [];
+            for (let i = 0; i < items.length; i += stride) {
+                groups.push(items.slice(i, i + stride));
+            }
+
+            return (
+                <div style={{display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', overflowX: 'hidden'}}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2px', width: '100%' }}>
+                        {groups.map((group, groupIdx) => (
+                            <div key={groupIdx} style={{
+                                ...triangleGroupStyle, 
+                                background: groupIdx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.07)',
+                                marginBottom: 0, 
+                                padding: '6px 8px',
+                                alignItems: 'flex-start'
+                            }}>
+                                <div style={{...triangleLabelStyle, color: '#10b981', minWidth: '35px', marginTop: '14px'}}>V{groupIdx}</div>
+                                <div style={{display: 'flex', gap: '12px', flex: 1, flexWrap: 'wrap'}}>
+                                    {attrInfo ? attrInfo.map((info: any) => (
+                                        <div key={info.name} style={attrBlockStyle}>
+                                            <div style={attrBlockLabelStyle}>{info.name}</div>
+                                            <div style={{display: 'flex', gap: '6px'}}>
+                                                {group.slice(info.offset, info.offset + info.count).map((v: number, i: number) => (
+                                                    <div key={i} style={{minWidth: '55px', textAlign: 'right'}}>
+                                                        <span style={{...valueLabelStyle, fontSize: '10px'}}>{v.toFixed(4)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+                                            {group.map((v, i) => (
+                                                <div key={i} style={{minWidth: '60px', textAlign: 'right'}}>
+                                                    <span style={{...valueLabelStyle, fontSize: '10px'}}>{v.toFixed(4)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {f32.length > limit && <div style={moreStyle}>... and {f32.length - limit} more</div>}
+                </div>
+            );
+        }
+
         return (
             <div style={dataGridStyle}>
                 {items.map((v, i) => (
@@ -152,7 +285,6 @@ const DataContent = ({type, tab, f32, u32}: {type: string, tab: DataTab, f32: an
         if (!u32) return <div style={noDataStyle}>dataViewU32 not available</div>;
         const items = Array.from(u32.subarray(0, limit)) as number[];
 
-        // Specialized view for IndexBuffer: Group by 3 (Triangles)
         if (type === 'indexBuffer') {
             const groups = [];
             for (let i = 0; i < items.length; i += 3) {
@@ -168,7 +300,11 @@ const DataContent = ({type, tab, f32, u32}: {type: string, tab: DataTab, f32: an
                         width: '100%'
                     }}>
                         {groups.map((group, groupIdx) => (
-                            <div key={groupIdx} style={{...triangleGroupStyle, marginBottom: 0}}>
+                            <div key={groupIdx} style={{
+                                ...triangleGroupStyle, 
+                                background: groupIdx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.07)',
+                                marginBottom: 0
+                            }}>
                                 <div style={triangleLabelStyle}>T{groupIdx}</div>
                                 <div style={{display: 'flex', gap: '4px', flex: 1, justifyContent: 'space-around'}}>
                                     {group.map((v, i) => (
@@ -194,6 +330,35 @@ const DataContent = ({type, tab, f32, u32}: {type: string, tab: DataTab, f32: an
                     </div>
                 ))}
                 {u32.length > limit && <div style={moreStyle}>... and {u32.length - limit} more</div>}
+            </div>
+        );
+    }
+
+    if (tab === 'data') {
+        if (!raw) return <div style={noDataStyle}>ArrayBuffer not available</div>;
+        const f32View = new Float32Array(raw);
+        const u32View = new Uint32Array(raw);
+        const wordLimit = 100; 
+        const count = Math.min(f32View.length, wordLimit);
+        
+        return (
+            <div style={{display: 'flex', flexDirection: 'column', gap: '2px', width: '100%'}}>
+                <div style={wordHeaderStyle}>
+                    <span style={{width: '50px'}}>Offset</span>
+                    <span style={{flex: 1}}>Float32</span>
+                    <span style={{flex: 1}}>Uint32</span>
+                </div>
+                {Array.from({length: count}).map((_, i) => (
+                    <div key={i} style={{
+                        ...wordRowStyle,
+                        background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.06)'
+                    }}>
+                        <span style={wordOffsetStyle}>+{i * 4}</span>
+                        <span style={wordValueStyle}>{f32View[i].toFixed(4)}</span>
+                        <span style={{...wordValueStyle, color: '#aaa'}}>{u32View[i]}</span>
+                    </div>
+                ))}
+                {f32View.length > wordLimit && <div style={moreStyle}>... and {f32View.length - wordLimit} words more</div>}
             </div>
         );
     }
@@ -263,6 +428,16 @@ const typeStyle: React.CSSProperties = {
     color: '#777',
     fontWeight: 'bold',
     letterSpacing: '0.1em'
+};
+
+const statusBadgeStyle: React.CSSProperties = {
+    fontSize: '8px',
+    color: '#000',
+    padding: '2px 6px',
+    borderRadius: '10px',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em'
 };
 
 const closeButtonStyle: React.CSSProperties = {
@@ -439,6 +614,74 @@ const triangleLabelStyle: React.CSSProperties = {
 const triangleItemStyle: React.CSSProperties = {
     minWidth: '30px',
     textAlign: 'center'
+};
+
+const structRowStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'rgba(255,255,255,0.02)',
+    padding: '6px 10px',
+    borderRadius: '4px',
+    border: '1px solid rgba(255,255,255,0.05)'
+};
+
+const structNameStyle: React.CSSProperties = {
+    fontSize: '11px',
+    fontWeight: 'bold',
+    color: '#ddd'
+};
+
+const attrBlockStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    background: 'rgba(255,255,255,0.03)',
+    padding: '4px 6px',
+    borderRadius: '4px',
+    border: '1px solid rgba(255,255,255,0.05)'
+};
+
+const attrBlockLabelStyle: React.CSSProperties = {
+    fontSize: '8px',
+    color: '#888',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    borderBottom: '1px solid rgba(255,255,255,0.05)',
+    paddingBottom: '2px',
+    marginBottom: '2px'
+};
+
+const wordHeaderStyle: React.CSSProperties = {
+    display: 'flex',
+    padding: '4px 10px',
+    fontSize: '9px',
+    color: '#555',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    borderBottom: '1px solid rgba(255,255,255,0.05)',
+    marginBottom: '4px'
+};
+
+const wordRowStyle: React.CSSProperties = {
+    display: 'flex',
+    padding: '4px 10px',
+    borderRadius: '2px',
+    gap: '10px',
+    fontFamily: 'monospace',
+    alignItems: 'center'
+};
+
+const wordOffsetStyle: React.CSSProperties = {
+    width: '50px',
+    fontSize: '9px',
+    color: '#666'
+};
+
+const wordValueStyle: React.CSSProperties = {
+    flex: 1,
+    fontSize: '11px',
+    color: '#10b981'
 };
 
 export default BufferDetailModal;

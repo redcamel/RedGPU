@@ -8212,6 +8212,26 @@ if (typeof document !== "undefined") {
     `;
   document.head.appendChild(style);
 }
+async function readGPUBufferToCPU(device, gpuBuffer) {
+  try {
+    const size = gpuBuffer.size;
+    const stagingBuffer = device.createBuffer({
+      size,
+      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+    });
+    const commandEncoder = device.createCommandEncoder();
+    commandEncoder.copyBufferToBuffer(gpuBuffer, 0, stagingBuffer, 0, size);
+    device.queue.submit([commandEncoder.finish()]);
+    await stagingBuffer.mapAsync(GPUMapMode.READ);
+    const copy = stagingBuffer.getMappedRange().slice(0);
+    stagingBuffer.unmap();
+    stagingBuffer.destroy();
+    return copy;
+  } catch (e) {
+    console.error("Failed to read GPU buffer:", e);
+    return null;
+  }
+}
 const formatBufferUsage$1 = (usage) => {
   const labels = [];
   if (usage & 1) labels.push("MAP_READ");
@@ -8227,17 +8247,46 @@ const formatBufferUsage$1 = (usage) => {
   return labels.join(", ");
 };
 const BufferDetailModal = ({ item, type, onClose }) => {
+  const { redGPUContext } = useInspectorStore();
+  const [liveData, setLiveData] = reactExports.useState(null);
+  const [isLive, setIsLive] = reactExports.useState(false);
+  const [isLoading, setIsLoading] = reactExports.useState(true);
   const buf = item.buffer || item;
   const isRaw = item.isRaw;
+  const gpuBuffer = buf == null ? void 0 : buf.gpuBuffer;
   const availableTabs = [];
   if (type === "indexBuffer") {
     availableTabs.push("dataViewU32");
   } else if (type === "vertexBuffer") {
     availableTabs.push("dataViewF32");
   } else {
-    availableTabs.push("dataViewF32", "dataViewU32");
+    availableTabs.push("data", "dataViewF32", "dataViewU32");
   }
   const [activeTab, setActiveTab] = reactExports.useState(availableTabs[0]);
+  reactExports.useEffect(() => {
+    const fetchBufferData = async () => {
+      var _a;
+      if (redGPUContext && gpuBuffer) {
+        const canRead = !!(gpuBuffer.usage & GPUBufferUsage.COPY_SRC);
+        if (canRead) {
+          const data = await readGPUBufferToCPU(redGPUContext.gpuDevice, gpuBuffer);
+          if (data) {
+            setLiveData(data);
+            setIsLive(true);
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
+      const localData = (buf == null ? void 0 : buf.data) instanceof ArrayBuffer ? buf.data : ((_a = buf == null ? void 0 : buf.data) == null ? void 0 : _a.buffer) instanceof ArrayBuffer ? buf.data.buffer : null;
+      if (localData) {
+        setLiveData(localData.slice(0));
+      }
+      setIsLive(false);
+      setIsLoading(false);
+    };
+    fetchBufferData();
+  }, [redGPUContext, gpuBuffer, buf == null ? void 0 : buf.data]);
   const label = isRaw ? item.label : item.label || (buf == null ? void 0 : buf.name) || "Unnamed Buffer";
   const uuid = item.uuid;
   const size = isRaw ? item.size : (buf == null ? void 0 : buf.size) || 0;
@@ -8245,8 +8294,9 @@ const BufferDetailModal = ({ item, type, onClose }) => {
   const vertexCount = buf == null ? void 0 : buf.vertexCount;
   const stride = buf == null ? void 0 : buf.stride;
   const triangleCount = buf == null ? void 0 : buf.triangleCount;
-  const dataViewF32 = (buf == null ? void 0 : buf.dataViewF32) || ((buf == null ? void 0 : buf.data) instanceof Float32Array ? buf.data : (buf == null ? void 0 : buf.data) instanceof ArrayBuffer ? new Float32Array(buf.data) : null);
-  const dataViewU32 = (buf == null ? void 0 : buf.dataViewU32) || ((buf == null ? void 0 : buf.data) instanceof Uint32Array ? buf.data : (buf == null ? void 0 : buf.data) instanceof ArrayBuffer ? new Uint32Array(buf.data) : null);
+  const interleavedStruct = buf == null ? void 0 : buf.interleavedStruct;
+  const dataViewF32 = liveData ? new Float32Array(liveData) : null;
+  const dataViewU32 = liveData ? new Uint32Array(liveData) : null;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: overlayStyle, onClick: onClose, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
                 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -8256,7 +8306,13 @@ const BufferDetailModal = ({ item, type, onClose }) => {
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle, onClick: (e) => e.stopPropagation(), children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$2, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle, children: label }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: "8px" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle, children: label }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              ...statusBadgeStyle,
+              background: isLive ? "#10b981" : "#666"
+            }, children: isLive ? "LIVE GPU" : "LOCAL CACHE" })
+          ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: typeStyle, children: type.toUpperCase() })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle, onClick: onClose, children: "×" })
@@ -8269,8 +8325,37 @@ const BufferDetailModal = ({ item, type, onClose }) => {
             /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Size", value: formatBytes(size), highlight: true }),
             /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Usage", value: formatBufferUsage$1(usage) }),
             vertexCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Vertex Count", value: vertexCount }),
-            stride !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Stride", value: `${stride} bytes` }),
+            stride !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Stride", value: `${stride} elements` }),
             triangleCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Triangle Count", value: triangleCount })
+          ] })
+        ] }),
+        type === "vertexBuffer" && interleavedStruct && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Interleaved Structure" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "4px" }, children: [
+            interleavedStruct.attributes.map((attr, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: structRowStyle, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: structNameStyle, children: attr.attributeName }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "10px", fontSize: "9px", color: "#888" }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Loc: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: attr.shaderLocation })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Offset: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: attr.offset })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Format: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: attr.format })
+                ] })
+              ] })
+            ] }, i)),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginTop: "4px", fontSize: "9px", color: "#666", textAlign: "right" }, children: [
+              "Total Array Stride: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+                interleavedStruct.arrayStride,
+                " bytes"
+              ] })
+            ] })
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
@@ -8279,14 +8364,25 @@ const BufferDetailModal = ({ item, type, onClose }) => {
             availableTabs.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabContainerStyle, children: availableTabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
               TabButton,
               {
-                label: tab,
+                label: tab === "data" ? "data (Raw)" : tab,
                 active: activeTab === tab,
                 onClick: () => setActiveTab(tab)
               },
               tab
             )) })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dataViewerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DataContent, { type, tab: activeTab, f32: dataViewF32, u32: dataViewU32 }) })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dataViewerStyle, children: isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "Loading data from GPU..." }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+            DataContent,
+            {
+              type,
+              tab: activeTab,
+              f32: dataViewF32,
+              u32: dataViewU32,
+              raw: liveData,
+              stride,
+              interleavedStruct
+            }
+          ) })
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: footerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
@@ -8312,11 +8408,48 @@ const TabButton = ({ label, active, onClick }) => /* @__PURE__ */ jsxRuntimeExpo
     children: label
   }
 );
-const DataContent = ({ type, tab, f32, u32 }) => {
-  const limit = 210;
+const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) => {
+  const limit = 300;
   if (tab === "dataViewF32") {
     if (!f32) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "dataViewF32 not available" });
     const items = Array.from(f32.subarray(0, limit));
+    if (type === "vertexBuffer" && stride) {
+      const attrInfo = interleavedStruct ? interleavedStruct.attributes.map((attr, idx, arr) => {
+        const nextOffset = arr[idx + 1] ? arr[idx + 1].offset : interleavedStruct.arrayStride;
+        return {
+          name: attr.attributeName.replace("vertex", ""),
+          count: (nextOffset - attr.offset) / 4,
+          offset: attr.offset / 4
+        };
+      }) : null;
+      const groups = [];
+      for (let i = 0; i < items.length; i += stride) {
+        groups.push(items.slice(i, i + stride));
+      }
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "6px", width: "100%", overflowX: "hidden" }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "grid", gridTemplateColumns: "1fr", gap: "2px", width: "100%" }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+          ...triangleGroupStyle,
+          background: groupIdx % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.07)",
+          marginBottom: 0,
+          padding: "6px 8px",
+          alignItems: "flex-start"
+        }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...triangleLabelStyle, color: "#10b981", minWidth: "35px", marginTop: "14px" }, children: [
+            "V",
+            groupIdx
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "12px", flex: 1, flexWrap: "wrap" }, children: attrInfo ? attrInfo.map((info) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: attrBlockStyle, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: attrBlockLabelStyle, children: info.name }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "6px" }, children: group.slice(info.offset, info.offset + info.count).map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "55px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueLabelStyle, fontSize: "10px" }, children: v2.toFixed(4) }) }, i)) })
+          ] }, info.name)) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "60px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueLabelStyle, fontSize: "10px" }, children: v2.toFixed(4) }) }, i)) }) })
+        ] }, groupIdx)) }),
+        f32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+          "... and ",
+          f32.length - limit,
+          " more"
+        ] })
+      ] });
+    }
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataGridStyle, children: [
       items.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataItemStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: i }),
@@ -8343,7 +8476,11 @@ const DataContent = ({ type, tab, f32, u32 }) => {
           gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
           gap: "4px",
           width: "100%"
-        }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...triangleGroupStyle, marginBottom: 0 }, children: [
+        }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+          ...triangleGroupStyle,
+          background: groupIdx % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.07)",
+          marginBottom: 0
+        }, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: triangleLabelStyle, children: [
             "T",
             groupIdx
@@ -8366,6 +8503,36 @@ const DataContent = ({ type, tab, f32, u32 }) => {
         "... and ",
         u32.length - limit,
         " more"
+      ] })
+    ] });
+  }
+  if (tab === "data") {
+    if (!raw) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "ArrayBuffer not available" });
+    const f32View = new Float32Array(raw);
+    const u32View = new Uint32Array(raw);
+    const wordLimit = 100;
+    const count = Math.min(f32View.length, wordLimit);
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "2px", width: "100%" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: wordHeaderStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { width: "50px" }, children: "Offset" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { flex: 1 }, children: "Float32" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { flex: 1 }, children: "Uint32" })
+      ] }),
+      Array.from({ length: count }).map((_, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+        ...wordRowStyle,
+        background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.06)"
+      }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: wordOffsetStyle, children: [
+          "+",
+          i * 4
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: wordValueStyle, children: f32View[i].toFixed(4) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...wordValueStyle, color: "#aaa" }, children: u32View[i] })
+      ] }, i)),
+      f32View.length > wordLimit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+        "... and ",
+        f32View.length - wordLimit,
+        " words more"
       ] })
     ] });
   }
@@ -8426,6 +8593,15 @@ const typeStyle = {
   color: "#777",
   fontWeight: "bold",
   letterSpacing: "0.1em"
+};
+const statusBadgeStyle = {
+  fontSize: "8px",
+  color: "#000",
+  padding: "2px 6px",
+  borderRadius: "10px",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  letterSpacing: "0.05em"
 };
 const closeButtonStyle = {
   background: "none",
@@ -8580,6 +8756,66 @@ const triangleLabelStyle = {
 const triangleItemStyle = {
   minWidth: "30px",
   textAlign: "center"
+};
+const structRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  background: "rgba(255,255,255,0.02)",
+  padding: "6px 10px",
+  borderRadius: "4px",
+  border: "1px solid rgba(255,255,255,0.05)"
+};
+const structNameStyle = {
+  fontSize: "11px",
+  fontWeight: "bold",
+  color: "#ddd"
+};
+const attrBlockStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "2px",
+  background: "rgba(255,255,255,0.03)",
+  padding: "4px 6px",
+  borderRadius: "4px",
+  border: "1px solid rgba(255,255,255,0.05)"
+};
+const attrBlockLabelStyle = {
+  fontSize: "8px",
+  color: "#888",
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  borderBottom: "1px solid rgba(255,255,255,0.05)",
+  paddingBottom: "2px",
+  marginBottom: "2px"
+};
+const wordHeaderStyle = {
+  display: "flex",
+  padding: "4px 10px",
+  fontSize: "9px",
+  color: "#555",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  borderBottom: "1px solid rgba(255,255,255,0.05)",
+  marginBottom: "4px"
+};
+const wordRowStyle = {
+  display: "flex",
+  padding: "4px 10px",
+  borderRadius: "2px",
+  gap: "10px",
+  fontFamily: "monospace",
+  alignItems: "center"
+};
+const wordOffsetStyle = {
+  width: "50px",
+  fontSize: "9px",
+  color: "#666"
+};
+const wordValueStyle = {
+  flex: 1,
+  fontSize: "11px",
+  color: "#10b981"
 };
 const ResourceSummary = ({
   label,
