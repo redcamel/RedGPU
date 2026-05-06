@@ -6,10 +6,11 @@ export async function readGPUTextureToCanvas(
     device: GPUDevice,
     gpuTexture: GPUTexture,
     canvas: HTMLCanvasElement,
-    layer: number = 0
+    layer: number = 0,
+    mipLevel: number = 0
 ): Promise<void> {
-    const width = gpuTexture.width;
-    const height = gpuTexture.height;
+    const width = Math.max(1, gpuTexture.width >> mipLevel);
+    const height = Math.max(1, gpuTexture.height >> mipLevel);
     const format = gpuTexture.format;
 
     // 1. Calculate buffer size and row alignment
@@ -30,6 +31,7 @@ export async function readGPUTextureToCanvas(
         {
             texture: gpuTexture,
             origin: [0, 0, layer],
+            mipLevel: mipLevel
         },
         {
             buffer: stagingBuffer,

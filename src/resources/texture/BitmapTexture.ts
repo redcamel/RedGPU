@@ -231,7 +231,7 @@ class BitmapTexture extends ManagementResourceBase {
         const textureDescriptor: GPUTextureDescriptor = {
             size: [W, H],
             format: this.#format,
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC,
             label: this.#src
         };
         if (this.#useMipmap) {

@@ -260,7 +260,7 @@ class CubeTexture extends ManagementResourceBase {
             const textureDescriptor: GPUTextureDescriptor = {
                 size: [W, H, depthOrArrayLayers],
                 format: this.#format,
-                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC,
                 label: `cubeTexture_${this.#srcList?.toString() || this.uuid}`
             };
             if (this.#useMipmap) {

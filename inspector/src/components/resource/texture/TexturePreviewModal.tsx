@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import formatBytes from '@redgpu/src/utils/formatBytes';
-import {formatNumber} from '../../../utils/format';
+import {formatNumber, formatTextureUsage} from '../../../utils/format';
 import {useInspectorStore} from '../../../store';
 import {readGPUTextureToCanvas} from '../../../utils/textureReadback';
 
@@ -10,6 +10,7 @@ import {readGPUTextureToCanvas} from '../../../utils/textureReadback';
 const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }) => {
     const {redGPUContext} = useInspectorStore();
     const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+    const [activeMipLevel, setActiveMipLevel] = useState(0);
     const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
 
     const isTexture = !!item.texture;
@@ -22,8 +23,13 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
     const originalPath = item.src || (item.srcList ? item.srcList[0] + '...' : item.cacheKey);
 
     const isCube = gpuTex?.dimension === '2d' && gpuTex?.depthOrArrayLayers === 6;
-    const isHDR = item.src?.toLowerCase().endsWith('.hdr') || gpuTex?.format === 'rgba16float';
+    const isHDR = item.src?.toLowerCase().endsWith('.hdr') || (item.srcList && item.srcList[0]?.toLowerCase().endsWith('.hdr')) || gpuTex?.format === 'rgba16float';
     const hasSrcList = item.srcList && Array.isArray(item.srcList);
+    
+    // Mipmap support logic
+    const showMipTabs = gpuTex?.mipLevelCount > 1;
+    const useCanvasForCube = isCube && (!hasSrcList || isHDR || activeMipLevel > 0);
+    const useCanvasForSingle = !isCube && (!item.src || isHDR || activeMipLevel > 0);
 
     useEffect(() => {
         if (!redGPUContext || !gpuTex) return;
@@ -31,19 +37,19 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
 
         const updatePreviews = async () => {
             try {
-                if (isCube && !hasSrcList) {
+                if (useCanvasForCube) {
                     for (let i = 0; i < 6; i++) {
                         if (!isMounted) return;
                         const canvas = canvasRefs.current[i];
                         if (canvas) {
-                            await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, i);
+                            await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, i, activeMipLevel);
                         }
                     }
-                } else if ((!item.src || isHDR) && !hasSrcList) {
+                } else if (useCanvasForSingle) {
                     if (!isMounted) return;
                     const canvas = canvasRefs.current[0];
                     if (canvas) {
-                        await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, 0);
+                        await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, 0, activeMipLevel);
                     }
                 }
             } catch (e) {
@@ -53,7 +59,7 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
 
         updatePreviews();
         return () => { isMounted = false; };
-    }, [gpuTex, redGPUContext, item.src, hasSrcList, isCube, isHDR]);
+    }, [gpuTex, redGPUContext, item.src, item.srcList, hasSrcList, isCube, isHDR, useCanvasForCube, useCanvasForSingle, activeMipLevel]);
 
     const handleCopy = (text: string, label: string) => {
         navigator.clipboard.writeText(text);
@@ -81,17 +87,48 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
             `}</style>
             <div style={modalStyle} onClick={e => e.stopPropagation()}>
                 <div style={headerStyle}>
-                    <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <div style={{display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0}}>
                         <span style={titleStyle}>{fileName || 'Texture Preview'}</span>
                         <span style={pathStyle}>{originalPath}</span>
                     </div>
                     <button style={closeButtonStyle} onClick={onClose}>×</button>
                 </div>
+
+                {showMipTabs && (
+                    <div style={mipTabContainerStyle}>
+                        <span style={{fontSize: '9px', color: '#666', fontWeight: 'bold', marginRight: '8px'}}>MIP LEVEL:</span>
+                        <div style={{display: 'flex', gap: '4px', overflowX: 'auto', flex: 1, paddingBottom: '4px'}}>
+                            {Array.from({length: gpuTex.mipLevelCount}).map((_, i) => {
+                                const mipW = Math.max(1, gpuTex.width >> i);
+                                const mipH = Math.max(1, gpuTex.height >> i);
+                                return (
+                                    <button 
+                                        key={i} 
+                                        onClick={() => setActiveMipLevel(i)}
+                                        style={{
+                                            ...mipTabButtonStyle,
+                                            background: activeMipLevel === i ? '#fdb48d' : 'rgba(255,255,255,0.05)',
+                                            color: activeMipLevel === i ? '#000' : '#888',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            minWidth: '60px'
+                                        }}
+                                    >
+                                        <span style={{fontSize: '9px'}}>Level {i}</span>
+                                        <span style={{fontSize: '8px', opacity: 0.8}}>{formatNumber(mipW, 0)}x{formatNumber(mipH, 0)}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 <div style={contentStyle}>
-                    {item.src && !isHDR && <img src={item.src} style={previewImageStyle} alt="preview" />}
+                    {item.src && !isHDR && !isCube && activeMipLevel === 0 && <img src={item.src} style={previewImageStyle} alt="preview" />}
 
                     {isCube && (
-                        <div style={cubePreviewGridStyle}>
+                        <div style={{...cubePreviewGridStyle, position: 'relative'}}>
                             {gridPositions.map((pos, i) => {
                                 const faceIdx = cubeFaceIndices[i];
                                 return (
@@ -103,7 +140,7 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                                         border: '1px solid rgba(255,255,255,0.1)'
                                     }}>
                                         <div style={faceLabelStyle}>{cubeFaceLabels[faceIdx]}</div>
-                                        {hasSrcList ? (
+                                        {hasSrcList && !isHDR && activeMipLevel === 0 ? (
                                             <img src={item.srcList[faceIdx]} style={cubePreviewImageStyle} title={cubeFaceLabels[faceIdx]} />
                                         ) : (
                                             <canvas 
@@ -126,7 +163,7 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                         </div>
                     )}
 
-                    {((!item.src && !isCube) || isHDR) && (
+                    {useCanvasForSingle && (
                         <div style={{...previewImageStyle, position: 'relative'} as any}>
                             {isHDR && (
                                 <div style={hdrBadgeStyle}>
@@ -160,9 +197,18 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                         <span>Size: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.width, 0)}x{formatNumber(gpuTex?.height, 0)}</b></span>
                     </div>
                     <div style={infoRowStyle}>
-                        <span>Dimension: <b style={{color: '#eee'}}>{gpuTex?.dimension}</b></span>
-                        <span>Layers: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.depthOrArrayLayers, 0)}</b></span>
+                        <div style={{display: 'flex', gap: '12px'}}>
+                            <span>Dim: <b style={{color: '#eee'}}>{gpuTex?.dimension}</b></span>
+                            <span>Layers: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.depthOrArrayLayers, 0)}</b></span>
+                            <span>Mipmaps: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.mipLevelCount, 0)}</b></span>
+                            <span>Samples: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.sampleCount, 0)}</b></span>
+                        </div>
                     </div>
+                    {gpuTex?.usage !== undefined && (
+                        <div style={{...infoRowStyle, fontSize: '10px', opacity: 0.8}}>
+                            <span>Usage: <b style={{color: '#eee'}}>{formatTextureUsage(gpuTex.usage)}</b></span>
+                        </div>
+                    )}
                     <div style={infoRowStyle}>
                         <span>Memory: <b style={{color: '#fdb48d'}}>{formatBytes(tex?.videoMemorySize || 0)}</b></span>
                         <span>UUID: <small style={{opacity: 0.5}}>{item.uuid}</small></span>
@@ -208,21 +254,28 @@ const headerStyle: React.CSSProperties = {
     borderBottom: '1px solid rgba(255,255,255,0.1)',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start'
+    alignItems: 'flex-start',
+    gap: '12px'
 };
 
 const titleStyle: React.CSSProperties = {
     fontSize: '15px',
     fontWeight: 'bold',
     color: '#eee',
-    marginBottom: '4px'
+    marginBottom: '4px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
 };
 
 const pathStyle: React.CSSProperties = {
     fontSize: '10px',
     color: '#777',
     wordBreak: 'break-all',
-    maxWidth: '400px'
+    display: 'block',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
 };
 
 const closeButtonStyle: React.CSSProperties = {
@@ -233,7 +286,8 @@ const closeButtonStyle: React.CSSProperties = {
     cursor: 'pointer',
     padding: '0 4px',
     lineHeight: '1',
-    marginTop: '-4px'
+    marginTop: '-4px',
+    flexShrink: 0
 };
 
 const contentStyle: React.CSSProperties = {
@@ -301,7 +355,6 @@ const faceCopyButtonStyle: React.CSSProperties = {
     justifyContent: 'center',
     opacity: 0,
     transition: 'opacity 0.2s',
-    // We'll use a CSS rule for hover on parent
 };
 
 const footerStyle: React.CSSProperties = {
@@ -358,6 +411,26 @@ const toastStyle: React.CSSProperties = {
     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
     zIndex: 100,
     animation: 'slideUp 0.3s ease-out'
+};
+
+const mipTabContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    padding: '8px 16px',
+    background: 'rgba(0,0,0,0.2)',
+    borderBottom: '1px solid rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    gap: '4px'
+};
+
+const mipTabButtonStyle: React.CSSProperties = {
+    border: 'none',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    flexShrink: 0
 };
 
 // Add hover effect for copy button via global style

@@ -7823,9 +7823,9 @@ const formatBufferUsage$1 = (usage) => {
   if (usage & 512) labels.push("QUERY_RESOLVE");
   return labels.join(", ");
 };
-async function readGPUTextureToCanvas(device, gpuTexture, canvas, layer = 0) {
-  const width = gpuTexture.width;
-  const height = gpuTexture.height;
+async function readGPUTextureToCanvas(device, gpuTexture, canvas, layer = 0, mipLevel = 0) {
+  const width = Math.max(1, gpuTexture.width >> mipLevel);
+  const height = Math.max(1, gpuTexture.height >> mipLevel);
   const format = gpuTexture.format;
   const bytesPerPixel = getBytesPerPixel(format);
   const unpaddedBytesPerRow = width * bytesPerPixel;
@@ -7839,7 +7839,8 @@ async function readGPUTextureToCanvas(device, gpuTexture, canvas, layer = 0) {
   commandEncoder.copyTextureToBuffer(
     {
       texture: gpuTexture,
-      origin: [0, 0, layer]
+      origin: [0, 0, layer],
+      mipLevel
     },
     {
       buffer: stagingBuffer,
@@ -7920,9 +7921,10 @@ function decodeFloat16(binary) {
   return sign * Math.pow(2, exponent - 15) * (1 + fraction / 1024);
 }
 const TexturePreviewModal = ({ item, onClose }) => {
-  var _a, _b;
+  var _a, _b, _c;
   const { redGPUContext } = useInspectorStore();
   const [copyFeedback, setCopyFeedback] = reactExports.useState(null);
+  const [activeMipLevel, setActiveMipLevel] = reactExports.useState(0);
   const canvasRefs = reactExports.useRef([]);
   const isTexture = !!item.texture;
   if (!isTexture) return null;
@@ -7932,26 +7934,29 @@ const TexturePreviewModal = ({ item, onClose }) => {
   const fileName = isBlob ? "BLOB" : item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
   const originalPath = item.src || (item.srcList ? item.srcList[0] + "..." : item.cacheKey);
   const isCube = (gpuTex == null ? void 0 : gpuTex.dimension) === "2d" && (gpuTex == null ? void 0 : gpuTex.depthOrArrayLayers) === 6;
-  const isHDR = ((_b = item.src) == null ? void 0 : _b.toLowerCase().endsWith(".hdr")) || (gpuTex == null ? void 0 : gpuTex.format) === "rgba16float";
+  const isHDR = ((_b = item.src) == null ? void 0 : _b.toLowerCase().endsWith(".hdr")) || item.srcList && ((_c = item.srcList[0]) == null ? void 0 : _c.toLowerCase().endsWith(".hdr")) || (gpuTex == null ? void 0 : gpuTex.format) === "rgba16float";
   const hasSrcList = item.srcList && Array.isArray(item.srcList);
+  const showMipTabs = (gpuTex == null ? void 0 : gpuTex.mipLevelCount) > 1;
+  const useCanvasForCube = isCube && (!hasSrcList || isHDR || activeMipLevel > 0);
+  const useCanvasForSingle = !isCube && (!item.src || isHDR || activeMipLevel > 0);
   reactExports.useEffect(() => {
     if (!redGPUContext || !gpuTex) return;
     let isMounted = true;
     const updatePreviews = async () => {
       try {
-        if (isCube && !hasSrcList) {
+        if (useCanvasForCube) {
           for (let i = 0; i < 6; i++) {
             if (!isMounted) return;
             const canvas = canvasRefs.current[i];
             if (canvas) {
-              await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, i);
+              await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, i, activeMipLevel);
             }
           }
-        } else if ((!item.src || isHDR) && !hasSrcList) {
+        } else if (useCanvasForSingle) {
           if (!isMounted) return;
           const canvas = canvasRefs.current[0];
           if (canvas) {
-            await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, 0);
+            await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, 0, activeMipLevel);
           }
         }
       } catch (e) {
@@ -7962,7 +7967,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
     return () => {
       isMounted = false;
     };
-  }, [gpuTex, redGPUContext, item.src, hasSrcList, isCube, isHDR]);
+  }, [gpuTex, redGPUContext, item.src, item.srcList, hasSrcList, isCube, isHDR, useCanvasForCube, useCanvasForSingle, activeMipLevel]);
   const handleCopy = (text, label) => {
     navigator.clipboard.writeText(text);
     setCopyFeedback(`Copied ${label} path!`);
@@ -7992,15 +7997,49 @@ const TexturePreviewModal = ({ item, onClose }) => {
             ` }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle$1, onClick: (e) => e.stopPropagation(), children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$3, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column" }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle$1, children: fileName || "Texture Preview" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: pathStyle$1, children: originalPath })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle$1, onClick: onClose, children: "×" })
       ] }),
+      showMipTabs && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: mipTabContainerStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "9px", color: "#666", fontWeight: "bold", marginRight: "8px" }, children: "MIP LEVEL:" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "4px", overflowX: "auto", flex: 1, paddingBottom: "4px" }, children: Array.from({ length: gpuTex.mipLevelCount }).map((_, i) => {
+          const mipW = Math.max(1, gpuTex.width >> i);
+          const mipH = Math.max(1, gpuTex.height >> i);
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              onClick: () => setActiveMipLevel(i),
+              style: {
+                ...mipTabButtonStyle,
+                background: activeMipLevel === i ? "#fdb48d" : "rgba(255,255,255,0.05)",
+                color: activeMipLevel === i ? "#000" : "#888",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                minWidth: "60px"
+              },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontSize: "9px" }, children: [
+                  "Level ",
+                  i
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontSize: "8px", opacity: 0.8 }, children: [
+                  formatNumber(mipW, 0),
+                  "x",
+                  formatNumber(mipH, 0)
+                ] })
+              ]
+            },
+            i
+          );
+        }) })
+      ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$1, children: [
-        item.src && !isHDR && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.src, style: previewImageStyle, alt: "preview" }),
-        isCube && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: cubePreviewGridStyle, children: gridPositions.map((pos, i) => {
+        item.src && !isHDR && !isCube && activeMipLevel === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.src, style: previewImageStyle, alt: "preview" }),
+        isCube && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...cubePreviewGridStyle, position: "relative" }, children: gridPositions.map((pos, i) => {
           const faceIdx = cubeFaceIndices[i];
           return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
             gridColumn: pos.col,
@@ -8010,7 +8049,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
             border: "1px solid rgba(255,255,255,0.1)"
           }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: faceLabelStyle, children: cubeFaceLabels[faceIdx] }),
-            hasSrcList ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.srcList[faceIdx], style: cubePreviewImageStyle, title: cubeFaceLabels[faceIdx] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+            hasSrcList && !isHDR && activeMipLevel === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.srcList[faceIdx], style: cubePreviewImageStyle, title: cubeFaceLabels[faceIdx] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
               "canvas",
               {
                 ref: (el2) => canvasRefs.current[faceIdx] = el2,
@@ -8028,7 +8067,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
             )
           ] }, i);
         }) }),
-        (!item.src && !isCube || isHDR) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...previewImageStyle, position: "relative" }, children: [
+        useCanvasForSingle && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...previewImageStyle, position: "relative" }, children: [
           isHDR && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: hdrBadgeStyle, children: "HDR DATA VIEW (Reference only)" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "canvas",
@@ -8061,16 +8100,28 @@ const TexturePreviewModal = ({ item, onClose }) => {
             ] })
           ] })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle$1, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: infoRowStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "12px" }, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "Dimension: ",
+            "Dim: ",
             /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex == null ? void 0 : gpuTex.dimension })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Layers: ",
             /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatNumber(gpuTex == null ? void 0 : gpuTex.depthOrArrayLayers, 0) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Mipmaps: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatNumber(gpuTex == null ? void 0 : gpuTex.mipLevelCount, 0) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Samples: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatNumber(gpuTex == null ? void 0 : gpuTex.sampleCount, 0) })
           ] })
-        ] }),
+        ] }) }),
+        (gpuTex == null ? void 0 : gpuTex.usage) !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...infoRowStyle$1, fontSize: "10px", opacity: 0.8 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Usage: ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
+        ] }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle$1, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Memory: ",
@@ -8118,19 +8169,26 @@ const headerStyle$3 = {
   borderBottom: "1px solid rgba(255,255,255,0.1)",
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "flex-start"
+  alignItems: "flex-start",
+  gap: "12px"
 };
 const titleStyle$1 = {
   fontSize: "15px",
   fontWeight: "bold",
   color: "#eee",
-  marginBottom: "4px"
+  marginBottom: "4px",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis"
 };
 const pathStyle$1 = {
   fontSize: "10px",
   color: "#777",
   wordBreak: "break-all",
-  maxWidth: "400px"
+  display: "block",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis"
 };
 const closeButtonStyle$1 = {
   background: "none",
@@ -8140,7 +8198,8 @@ const closeButtonStyle$1 = {
   cursor: "pointer",
   padding: "0 4px",
   lineHeight: "1",
-  marginTop: "-4px"
+  marginTop: "-4px",
+  flexShrink: 0
 };
 const contentStyle$1 = {
   padding: "20px",
@@ -8202,7 +8261,6 @@ const faceCopyButtonStyle = {
   justifyContent: "center",
   opacity: 0,
   transition: "opacity 0.2s"
-  // We'll use a CSS rule for hover on parent
 };
 const footerStyle$1 = {
   padding: "16px",
@@ -8254,6 +8312,24 @@ const toastStyle = {
   boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
   zIndex: 100,
   animation: "slideUp 0.3s ease-out"
+};
+const mipTabContainerStyle = {
+  display: "flex",
+  padding: "8px 16px",
+  background: "rgba(0,0,0,0.2)",
+  borderBottom: "1px solid rgba(255,255,255,0.05)",
+  alignItems: "center",
+  gap: "4px"
+};
+const mipTabButtonStyle = {
+  border: "none",
+  padding: "2px 8px",
+  borderRadius: "4px",
+  fontSize: "10px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  flexShrink: 0
 };
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
