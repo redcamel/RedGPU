@@ -7495,7 +7495,8 @@ const FPS = () => {
     isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: graphColumnStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(MiniGraph, { data: fpsHistory, height: 20, color: "#0f0", label: "FPS", valueDisplay: `${fps} FPS` }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(MiniGraph, { data: drawCallHistory, height: 20, color: "#4af", label: "Draws", valueDisplay: totalNumDrawCalls.toString() }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(MiniGraph, { data: memoryHistory, height: 20, color: "#fdb48d", label: "VRAM", valueDisplay: formatBytes(totalUsedVideoMemory) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx(MiniGraph, { data: memoryHistory, height: 20, color: "#fdb48d", label: "VRAM", valueDisplay: formatBytes(totalUsedVideoMemory) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "TODO - bundleCall" })
     ] })
   ] });
 };

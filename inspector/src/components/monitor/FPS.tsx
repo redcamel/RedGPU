@@ -122,6 +122,7 @@ const FPS = () => {
                     <MiniGraph data={fpsHistory} height={20} color="#0f0" label="FPS" valueDisplay={`${fps} FPS`}/>
                     <MiniGraph data={drawCallHistory} height={20} color="#4af" label="Draws" valueDisplay={totalNumDrawCalls.toString()}/>
                     <MiniGraph data={memoryHistory} height={20} color="#fdb48d" label="VRAM" valueDisplay={formatBytes(totalUsedVideoMemory)}/>
+                   <div>TODO - bundleCall</div>
                 </div>
             )}
         </div>
