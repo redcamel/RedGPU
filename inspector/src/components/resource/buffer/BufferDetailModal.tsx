@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import formatBytes from '@redgpu/src/utils/formatBytes';
-import {formatNumber, formatBufferUsage} from '../../../utils/format';
+import {formatBufferUsage, formatNumber} from '../../../utils/format';
 import {useInspectorStore} from '../../../store';
 import {readGPUBufferToCPU} from '../../../utils/bufferReadback';
 
@@ -97,18 +97,21 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
                     </div>
                     <button style={closeButtonStyle} onClick={onClose}>×</button>
                 </div>
-                
+
                 <div style={contentStyle}>
                     <div style={sectionStyle}>
                         <div style={sectionTitleStyle}>Properties</div>
                         <div style={propertyGridStyle}>
-                            <PropertyItem label="UUID" value={uuid} />
-                            <PropertyItem label="Size" value={formatBytes(size)} highlight />
-                            <PropertyItem label="Data Object" value={dataObjectType} />
-                            <PropertyItem label="Usage" value={formatBufferUsage(usage)} />
-                            {vertexCount !== undefined && <PropertyItem label="Vertex Count" value={formatNumber(vertexCount, 0)} />}
-                            {stride !== undefined && <PropertyItem label="Stride" value={`${formatNumber(stride, 0)} elements`} />}
-                            {triangleCount !== undefined && <PropertyItem label="Triangle Count" value={formatNumber(triangleCount, 0)} />}
+                            <PropertyItem label="UUID" value={uuid}/>
+                            <PropertyItem label="Size" value={formatBytes(size)} highlight/>
+                            <PropertyItem label="Data Object" value={dataObjectType}/>
+                            <PropertyItem label="Usage" value={formatBufferUsage(usage)}/>
+                            {vertexCount !== undefined &&
+                                <PropertyItem label="Vertex Count" value={formatNumber(vertexCount, 0)}/>}
+                            {stride !== undefined &&
+                                <PropertyItem label="Stride" value={`${formatNumber(stride, 0)} elements`}/>}
+                            {triangleCount !== undefined &&
+                                <PropertyItem label="Triangle Count" value={formatNumber(triangleCount, 0)}/>}
                         </div>
                     </div>
 
@@ -120,7 +123,8 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
                                     <div key={i} style={structRowStyle}>
                                         <span style={structNameStyle}>{attr.attributeName}</span>
                                         <div style={{display: 'flex', gap: '10px', fontSize: '9px', color: '#888'}}>
-                                            <span>Loc: <b style={{color: '#eee'}}>{formatNumber(attr.shaderLocation, 0)}</b></span>
+                                            <span>Loc: <b
+                                                style={{color: '#eee'}}>{formatNumber(attr.shaderLocation, 0)}</b></span>
                                             <span>Offset: <b style={{color: '#eee'}}>{formatNumber(attr.offset, 0)}</b></span>
                                             <span>Format: <b style={{color: '#fdb48d'}}>{attr.format}</b></span>
                                         </div>
@@ -134,16 +138,21 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
                     )}
 
                     <div style={sectionStyle}>
-                        <div style={{...sectionTitleStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <div style={{
+                            ...sectionTitleStyle,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
                             <span>Buffer Data View</span>
                             {availableTabs.length > 1 && (
                                 <div style={tabContainerStyle}>
                                     {availableTabs.map(tab => (
-                                        <TabButton 
+                                        <TabButton
                                             key={tab}
-                                            label={tab === 'data' ? 'data (Raw)' : tab} 
-                                            active={activeTab === tab} 
-                                            onClick={() => setActiveTab(tab)} 
+                                            label={tab === 'data' ? 'data (Raw)' : tab}
+                                            active={activeTab === tab}
+                                            onClick={() => setActiveTab(tab)}
                                         />
                                     ))}
                                 </div>
@@ -153,13 +162,13 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
                             {isLoading ? (
                                 <div style={noDataStyle}>Loading data from GPU...</div>
                             ) : (
-                                <DataContent 
-                                    type={type} 
-                                    tab={activeTab} 
-                                    f32={dataViewF32} 
-                                    u32={dataViewU32} 
+                                <DataContent
+                                    type={type}
+                                    tab={activeTab}
+                                    f32={dataViewF32}
+                                    u32={dataViewU32}
                                     raw={liveData}
-                                    stride={stride} 
+                                    stride={stride}
                                     interleavedStruct={interleavedStruct}
                                 />
                             )}
@@ -178,8 +187,8 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
     );
 };
 
-const TabButton = ({label, active, onClick}: {label: string, active: boolean, onClick: () => void}) => (
-    <button 
+const TabButton = ({label, active, onClick}: { label: string, active: boolean, onClick: () => void }) => (
+    <button
         style={{
             ...tabButtonStyle,
             background: active ? '#fdb48d' : 'transparent',
@@ -192,9 +201,17 @@ const TabButton = ({label, active, onClick}: {label: string, active: boolean, on
     </button>
 );
 
-const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {type: string, tab: DataTab, f32: any, u32: any, raw: any, stride?: number, interleavedStruct?: any}) => {
-    const limit = 300; 
-    
+const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {
+    type: string,
+    tab: DataTab,
+    f32: any,
+    u32: any,
+    raw: any,
+    stride?: number,
+    interleavedStruct?: any
+}) => {
+    const limit = 300;
+
     if (tab === 'dataViewF32') {
         if (!f32) return <div style={noDataStyle}>dataViewF32 not available</div>;
         const items = Array.from(f32.subarray(0, limit)) as number[];
@@ -216,16 +233,21 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
 
             return (
                 <div style={{display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', overflowX: 'hidden'}}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2px', width: '100%' }}>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '2px', width: '100%'}}>
                         {groups.map((group, groupIdx) => (
                             <div key={groupIdx} style={{
-                                ...triangleGroupStyle, 
+                                ...triangleGroupStyle,
                                 background: groupIdx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.07)',
-                                marginBottom: 0, 
+                                marginBottom: 0,
                                 padding: '6px 8px',
                                 alignItems: 'flex-start'
                             }}>
-                                <div style={{...triangleLabelStyle, color: '#10b981', minWidth: '35px', marginTop: '14px'}}>V{formatNumber(groupIdx, 0)}</div>
+                                <div style={{
+                                    ...triangleLabelStyle,
+                                    color: '#10b981',
+                                    minWidth: '35px',
+                                    marginTop: '14px'
+                                }}>V{formatNumber(groupIdx, 0)}</div>
                                 <div style={{display: 'flex', gap: '12px', flex: 1, flexWrap: 'wrap'}}>
                                     {attrInfo ? attrInfo.map((info: any) => (
                                         <div key={info.name} style={attrBlockStyle}>
@@ -233,7 +255,10 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
                                             <div style={{display: 'flex', gap: '6px'}}>
                                                 {group.slice(info.offset, info.offset + info.count).map((v: number, i: number) => (
                                                     <div key={i} style={{minWidth: '55px', textAlign: 'right'}}>
-                                                        <span style={{...valueLabelStyle, fontSize: '10px'}}>{formatNumber(v)}</span>
+                                                        <span style={{
+                                                            ...valueLabelStyle,
+                                                            fontSize: '10px'
+                                                        }}>{formatNumber(v)}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -242,7 +267,10 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
                                         <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
                                             {group.map((v, i) => (
                                                 <div key={i} style={{minWidth: '60px', textAlign: 'right'}}>
-                                                    <span style={{...valueLabelStyle, fontSize: '10px'}}>{formatNumber(v)}</span>
+                                                    <span style={{
+                                                        ...valueLabelStyle,
+                                                        fontSize: '10px'
+                                                    }}>{formatNumber(v)}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -251,7 +279,8 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
                             </div>
                         ))}
                     </div>
-                    {f32.length > limit && <div style={moreStyle}>... and {formatNumber(f32.length - limit, 0)} more</div>}
+                    {f32.length > limit &&
+                        <div style={moreStyle}>... and {formatNumber(f32.length - limit, 0)} more</div>}
                 </div>
             );
         }
@@ -280,7 +309,8 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
             }
 
             return (
-                <div style={{display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', overflowX: 'hidden'}}>
+                <div
+                    style={{display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', overflowX: 'hidden'}}>
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
@@ -289,7 +319,7 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
                     }}>
                         {groups.map((group, groupIdx) => (
                             <div key={groupIdx} style={{
-                                ...triangleGroupStyle, 
+                                ...triangleGroupStyle,
                                 background: groupIdx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.07)',
                                 marginBottom: 0
                             }}>
@@ -304,7 +334,8 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
                             </div>
                         ))}
                     </div>
-                    {u32.length > limit && <div style={moreStyle}>... and {formatNumber(u32.length - limit, 0)} more</div>}
+                    {u32.length > limit &&
+                        <div style={moreStyle}>... and {formatNumber(u32.length - limit, 0)} more</div>}
                 </div>
             );
         }
@@ -326,9 +357,9 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
         if (!raw) return <div style={noDataStyle}>ArrayBuffer not available</div>;
         const f32View = new Float32Array(raw);
         const u32View = new Uint32Array(raw);
-        const wordLimit = 100; 
+        const wordLimit = 100;
         const count = Math.min(f32View.length, wordLimit);
-        
+
         return (
             <div style={{display: 'flex', flexDirection: 'column', gap: '2px', width: '100%'}}>
                 <div style={wordHeaderStyle}>
@@ -346,7 +377,8 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
                         <span style={{...wordValueStyle, color: '#aaa'}}>{formatNumber(u32View[i], 0)}</span>
                     </div>
                 ))}
-                {f32View.length > wordLimit && <div style={moreStyle}>... and {formatNumber(f32View.length - wordLimit, 0)} words more</div>}
+                {f32View.length > wordLimit &&
+                    <div style={moreStyle}>... and {formatNumber(f32View.length - wordLimit, 0)} words more</div>}
             </div>
         );
     }
@@ -354,7 +386,7 @@ const DataContent = ({type, tab, f32, u32, raw, stride, interleavedStruct}: {typ
     return null;
 };
 
-const PropertyItem = ({label, value, highlight}: {label: string, value: any, highlight?: boolean}) => (
+const PropertyItem = ({label, value, highlight}: { label: string, value: any, highlight?: boolean }) => (
     <div style={propertyItemStyle}>
         <span style={propertyLabelStyle}>{label}</span>
         <span style={{...propertyValueStyle, color: highlight ? '#fdb48d' : '#eee'}}>{value}</span>
@@ -486,7 +518,15 @@ const propertyValueStyle: React.CSSProperties = {
 };
 
 const dataViewerStyle: React.CSSProperties = {
-    background: '#000', borderRadius: '4px', padding: '12px', minHeight: '200px', maxHeight: '400px', overflowY: 'auto', overflowX: 'hidden', border: '1px solid rgba(255,255,255,0.05)', width: '100%'
+    background: '#000',
+    borderRadius: '4px',
+    padding: '12px',
+    minHeight: '200px',
+    maxHeight: '400px',
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    border: '1px solid rgba(255,255,255,0.05)',
+    width: '100%'
 };
 
 const tabContainerStyle: React.CSSProperties = {
@@ -494,7 +534,13 @@ const tabContainerStyle: React.CSSProperties = {
 };
 
 const tabButtonStyle: React.CSSProperties = {
-    border: 'none', padding: '2px 8px', borderRadius: '3px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
+    border: 'none',
+    padding: '2px 8px',
+    borderRadius: '3px',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
 };
 
 const dataGridStyle: React.CSSProperties = {
@@ -502,7 +548,13 @@ const dataGridStyle: React.CSSProperties = {
 };
 
 const dataItemStyle: React.CSSProperties = {
-    display: 'flex', flexDirection: 'column', minWidth: '70px', background: 'rgba(255,255,255,0.02)', padding: '4px', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.05)'
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: '70px',
+    background: 'rgba(255,255,255,0.02)',
+    padding: '4px',
+    borderRadius: '2px',
+    border: '1px solid rgba(255,255,255,0.05)'
 };
 
 const indexLabelStyle: React.CSSProperties = {
@@ -522,7 +574,11 @@ const moreStyle: React.CSSProperties = {
 };
 
 const footerStyle: React.CSSProperties = {
-    padding: '16px', background: 'rgba(255,255,255,0.03)', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '11px', color: '#666'
+    padding: '16px',
+    background: 'rgba(255,255,255,0.03)',
+    borderTop: '1px solid rgba(255,255,255,0.1)',
+    fontSize: '11px',
+    color: '#666'
 };
 
 const infoRowStyle: React.CSSProperties = {
@@ -530,7 +586,14 @@ const infoRowStyle: React.CSSProperties = {
 };
 
 const triangleGroupStyle: React.CSSProperties = {
-    display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.03)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '2px'
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    background: 'rgba(255,255,255,0.03)',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    border: '1px solid rgba(255,255,255,0.05)',
+    marginBottom: '2px'
 };
 
 const triangleLabelStyle: React.CSSProperties = {
@@ -542,7 +605,13 @@ const triangleItemStyle: React.CSSProperties = {
 };
 
 const structRowStyle: React.CSSProperties = {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '6px 10px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)'
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    background: 'rgba(255,255,255,0.02)',
+    padding: '6px 10px',
+    borderRadius: '4px',
+    border: '1px solid rgba(255,255,255,0.05)'
 };
 
 const structNameStyle: React.CSSProperties = {
@@ -550,19 +619,42 @@ const structNameStyle: React.CSSProperties = {
 };
 
 const attrBlockStyle: React.CSSProperties = {
-    display: 'flex', flexDirection: 'column', gap: '2px', background: 'rgba(255,255,255,0.03)', padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)'
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    background: 'rgba(255,255,255,0.03)',
+    padding: '4px 6px',
+    borderRadius: '4px',
+    border: '1px solid rgba(255,255,255,0.05)'
 };
 
 const attrBlockLabelStyle: React.CSSProperties = {
-    fontSize: '8px', color: '#888', letterSpacing: '0.05em', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '2px', marginBottom: '2px'
+    fontSize: '8px',
+    color: '#888',
+    letterSpacing: '0.05em',
+    borderBottom: '1px solid rgba(255,255,255,0.05)',
+    paddingBottom: '2px',
+    marginBottom: '2px'
 };
 
 const wordHeaderStyle: React.CSSProperties = {
-    display: 'flex', padding: '4px 10px', fontSize: '9px', color: '#555', fontWeight: 'bold', textTransform: 'uppercase', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '4px'
+    display: 'flex',
+    padding: '4px 10px',
+    fontSize: '9px',
+    color: '#555',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    borderBottom: '1px solid rgba(255,255,255,0.05)',
+    marginBottom: '4px'
 };
 
 const wordRowStyle: React.CSSProperties = {
-    display: 'flex', padding: '4px 10px', borderRadius: '2px', gap: '10px', fontFamily: 'monospace', alignItems: 'center'
+    display: 'flex',
+    padding: '4px 10px',
+    borderRadius: '2px',
+    gap: '10px',
+    fontFamily: 'monospace',
+    alignItems: 'center'
 };
 
 const wordOffsetStyle: React.CSSProperties = {

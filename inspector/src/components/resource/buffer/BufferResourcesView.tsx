@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useInspectorStore} from '../../../store';
 import Section from '../../common/Section';
 import formatBytes from '@redgpu/src/utils/formatBytes';
-import {formatNumber, formatBufferUsage} from '../../../utils/format';
+import {formatBufferUsage, formatNumber} from '../../../utils/format';
 import RedGPUContext from '@redgpu/src/context/RedGPUContext';
 import {ResourceSummary} from '../common/ResourceSummary';
 
@@ -28,7 +28,7 @@ const BufferResourcesView = ({onPreview}: { onPreview: (item: any, type: string)
                 onToggle={() => toggleExpanded(type)}
             />
             {expanded[type] && (
-                <BufferDetailList type={type} redGPUContext={redGPUContext} onPreview={onPreview} />
+                <BufferDetailList type={type} redGPUContext={redGPUContext} onPreview={onPreview}/>
             )}
         </React.Fragment>
     );
@@ -44,15 +44,27 @@ const BufferResourcesView = ({onPreview}: { onPreview: (item: any, type: string)
     );
 };
 
-const BufferDetailList = ({type, redGPUContext, onPreview}: { type: string, redGPUContext: RedGPUContext, onPreview: (item: any, type: string) => void }) => {
+const BufferDetailList = ({type, redGPUContext, onPreview}: {
+    type: string,
+    redGPUContext: RedGPUContext,
+    onPreview: (item: any, type: string) => void
+}) => {
     const rm = redGPUContext.resourceManager;
     let items: any[] = [];
 
     switch (type) {
-        case 'uniformBuffer': items = Array.from(rm.managedUniformBufferState.table.values()); break;
-        case 'vertexBuffer': items = Array.from(rm.managedVertexBufferState.table.values()); break;
-        case 'indexBuffer': items = Array.from(rm.managedIndexBufferState.table.values()); break;
-        case 'storageBuffer': items = Array.from(rm.managedStorageBufferState.table.values()); break;
+        case 'uniformBuffer':
+            items = Array.from(rm.managedUniformBufferState.table.values());
+            break;
+        case 'vertexBuffer':
+            items = Array.from(rm.managedVertexBufferState.table.values());
+            break;
+        case 'indexBuffer':
+            items = Array.from(rm.managedIndexBufferState.table.values());
+            break;
+        case 'storageBuffer':
+            items = Array.from(rm.managedStorageBufferState.table.values());
+            break;
         case 'gpuBuffer': {
             const gpuBufferMap = rm.resources.get('GPUBuffer') as Map<string, GPUBuffer>;
             items = Array.from(gpuBufferMap.entries()).map(([key, buffer]) => ({
@@ -74,8 +86,8 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: { type: string, redG
             {items.map((item, idx) => {
                 if (item.isRaw) {
                     return (
-                        <div 
-                            key={item.uuid || idx} 
+                        <div
+                            key={item.uuid || idx}
                             style={{...detailItemStyle, cursor: 'pointer'}}
                             onClick={() => onPreview(item, type)}
                         >
@@ -100,8 +112,8 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: { type: string, redG
                 } else {
                     const buf = item.buffer;
                     return (
-                        <div 
-                            key={item.uuid || idx} 
+                        <div
+                            key={item.uuid || idx}
                             style={{
                                 ...detailItemStyle,
                                 borderLeft: type === 'uniformBuffer' ? '2px solid #a0aec0' : 'none',
@@ -113,13 +125,15 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: { type: string, redG
                         >
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
-                                    <span style={detailNameStyle}>{item.label || buf?.label || buf?.name || 'Unnamed'}</span>
+                                    <span
+                                        style={detailNameStyle}>{item.label || buf?.label || buf?.name || 'Unnamed'}</span>
                                     <div style={detailInfoStyle}>
                                         <span>UUID: {item.uuid}</span>
                                     </div>
                                     {buf?.usage !== undefined && (
                                         <div style={{...detailInfoStyle, marginTop: '2px', opacity: 0.7}}>
-                                            <span>Usage: <b style={{color: '#eee'}}>{formatBufferUsage(buf.usage)}</b></span>
+                                            <span>Usage: <b
+                                                style={{color: '#eee'}}>{formatBufferUsage(buf.usage)}</b></span>
                                         </div>
                                     )}
                                 </div>
@@ -193,7 +207,14 @@ const detailMemoryStyle: React.CSSProperties = {
 };
 
 const useNumStyle: React.CSSProperties = {
-    fontSize: '10px', opacity: 0.8, color: '#fdb48d', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '3px', whiteSpace: 'nowrap', fontWeight: 'bold'
+    fontSize: '10px',
+    opacity: 0.8,
+    color: '#fdb48d',
+    background: 'rgba(255,255,255,0.1)',
+    padding: '2px 6px',
+    borderRadius: '3px',
+    whiteSpace: 'nowrap',
+    fontWeight: 'bold'
 };
 
 const noItemStyle: React.CSSProperties = {

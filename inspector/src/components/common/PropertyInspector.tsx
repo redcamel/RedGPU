@@ -1,8 +1,8 @@
-import React, {useState, memo, useMemo} from 'react';
+import React, {memo, useMemo, useState} from 'react';
 import StatItem from "./StatItem";
 import StatBoolItem from "./StatBoolItem";
 import {formatNumber} from "../../utils/format";
-import {COMMON_STYLES, THEME} from "./Theme";
+import {COMMON_STYLES} from "./Theme";
 
 /**
  * [KO] 객체의 공개 프로퍼티를 재귀적으로 표시하는 컴포넌트입니다.
@@ -80,7 +80,8 @@ const PropertyInspector = memo(({target, depth = 0}: { target: any, depth?: numb
 
                 if (Array.isArray(value)) {
                     if (value.length > 0 && typeof value[0] !== 'object') {
-                        return <StatItem key={key} label={key} value={`[${value.map(v => typeof v === 'number' ? formatNumber(v) : v).join(', ')}]`}/>;
+                        return <StatItem key={key} label={key}
+                                         value={`[${value.map(v => typeof v === 'number' ? formatNumber(v) : v).join(', ')}]`}/>;
                     }
                     return <CollapsibleObject key={key} label={key} value={value} depth={depth} typeLabel="Array"/>;
                 }

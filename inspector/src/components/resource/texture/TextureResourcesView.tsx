@@ -28,7 +28,7 @@ const TextureResourcesView = ({onPreview}: { onPreview: (item: any, type: string
                 onToggle={() => toggleExpanded(type)}
             />
             {expanded[type] && (
-                <TextureDetailList type={type} redGPUContext={redGPUContext} onPreview={onPreview} />
+                <TextureDetailList type={type} redGPUContext={redGPUContext} onPreview={onPreview}/>
             )}
         </React.Fragment>
     );
@@ -42,14 +42,24 @@ const TextureResourcesView = ({onPreview}: { onPreview: (item: any, type: string
     );
 };
 
-const TextureDetailList = ({type, redGPUContext, onPreview}: { type: string, redGPUContext: RedGPUContext, onPreview: (item: any, type: string) => void }) => {
+const TextureDetailList = ({type, redGPUContext, onPreview}: {
+    type: string,
+    redGPUContext: RedGPUContext,
+    onPreview: (item: any, type: string) => void
+}) => {
     const rm = redGPUContext.resourceManager;
     let items: any[] = [];
 
     switch (type) {
-        case 'bitmapTexture': items = Array.from(rm.managedBitmapTextureState.table.values()); break;
-        case 'cubeTexture': items = Array.from(rm.managedCubeTextureState.table.values()); break;
-        case 'hdrTexture': items = Array.from(rm.managedHDRTextureState.table.values()); break;
+        case 'bitmapTexture':
+            items = Array.from(rm.managedBitmapTextureState.table.values());
+            break;
+        case 'cubeTexture':
+            items = Array.from(rm.managedCubeTextureState.table.values());
+            break;
+        case 'hdrTexture':
+            items = Array.from(rm.managedHDRTextureState.table.values());
+            break;
     }
 
     if (items.length === 0) return <div style={noItemStyle}>No textures found.</div>;
@@ -80,27 +90,39 @@ const TextureDetailList = ({type, redGPUContext, onPreview}: { type: string, red
                                     <>
                                         <div style={{...detailInfoStyle, gap: '8px', marginTop: '2px', opacity: 0.9}}>
                                             <span>Dim: <b style={{color: '#eee'}}>{gpuTex.dimension}</b></span>
-                                            <span>Layers: <b style={{color: '#eee'}}>{formatNumber(gpuTex.depthOrArrayLayers, 0)}</b></span>
+                                            <span>Layers: <b
+                                                style={{color: '#eee'}}>{formatNumber(gpuTex.depthOrArrayLayers, 0)}</b></span>
                                             <span>Samples: <b style={{color: '#eee'}}>{gpuTex.sampleCount}</b></span>
                                         </div>
                                         {(gpuTex as any).usage !== undefined && (
                                             <div style={{...detailInfoStyle, marginTop: '2px', opacity: 0.7}}>
-                                                <span>Usage: <b style={{color: '#eee'}}>{formatTextureUsage((gpuTex as any).usage)}</b></span>
+                                                <span>Usage: <b
+                                                    style={{color: '#eee'}}>{formatTextureUsage((gpuTex as any).usage)}</b></span>
                                             </div>
                                         )}
                                     </>
                                 )}
                             </div>
                             <div style={detailRightContainerStyle}>
-                                <div style={{display:'flex', gap:'4px', alignItems:'center', marginBottom: '2px'}}>
+                                <div style={{display: 'flex', gap: '4px', alignItems: 'center', marginBottom: '2px'}}>
                                     <span style={useNumStyle}>Use: {formatNumber(item.useNum, 0)}</span>
                                     <span style={detailMemoryStyle}>{formatBytes(tex?.videoMemorySize || 0)}</span>
                                 </div>
                                 {gpuTex && (
-                                    <div style={{...detailInfoStyle, flexDirection: 'column', alignItems: 'flex-end', gap: '0', opacity: 0.9}}>
+                                    <div style={{
+                                        ...detailInfoStyle,
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-end',
+                                        gap: '0',
+                                        opacity: 0.9
+                                    }}>
                                         <b style={{color: '#fdb48d'}}>{gpuTex.format}</b>
-                                        <span style={{color: '#eee', fontWeight: 'bold'}}>{formatNumber(gpuTex.width, 0)}x{formatNumber(gpuTex.height, 0)}</span>
-                                        <span style={{fontWeight: 'bold'}}>Mip: {formatNumber(gpuTex.mipLevelCount, 0)}</span>
+                                        <span style={{
+                                            color: '#eee',
+                                            fontWeight: 'bold'
+                                        }}>{formatNumber(gpuTex.width, 0)}x{formatNumber(gpuTex.height, 0)}</span>
+                                        <span
+                                            style={{fontWeight: 'bold'}}>Mip: {formatNumber(gpuTex.mipLevelCount, 0)}</span>
                                     </div>
                                 )}
                             </div>

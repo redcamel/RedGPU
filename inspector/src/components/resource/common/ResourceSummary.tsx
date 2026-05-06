@@ -8,11 +8,11 @@ import {formatNumber} from '../../../utils/format';
  * [KO] 리소스 유형별 요약 정보를 표시하는 컴포넌트입니다.
  */
 export const ResourceSummary = ({
-                             label,
-                             stats,
-                             isExpanded,
-                             onToggle
-                         }: {
+                                    label,
+                                    stats,
+                                    isExpanded,
+                                    onToggle
+                                }: {
     label: string,
     stats: ResourceStatusSummary,
     isExpanded: boolean,

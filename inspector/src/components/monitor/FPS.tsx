@@ -1,4 +1,4 @@
-import React, {useState, memo} from 'react';
+import React, {memo, useState} from 'react';
 import {useInspectorStore} from '../../store';
 import MiniGraph from "../common/MiniGraph";
 import formatBytes from "@redgpu/src/utils/formatBytes";
@@ -92,11 +92,11 @@ const FPS = memo(() => {
     const low1Fps = useInspectorStore(state => state.low1Fps);
     const low01Fps = useInspectorStore(state => state.low01Fps);
     const frameTime = useInspectorStore(state => state.frameTime);
-    
+
     const fpsHistory = useInspectorStore(state => state.fpsHistory);
     const drawCallHistory = useInspectorStore(state => state.drawCallHistory);
     const memoryHistory = useInspectorStore(state => state.memoryHistory);
-    
+
     const totalNumDrawCalls = useInspectorStore(state => state.totalNumDrawCalls);
     const totalUsedVideoMemory = useInspectorStore(state => state.totalUsedVideoMemory);
 
@@ -127,9 +127,11 @@ const FPS = memo(() => {
             {isExpanded && (
                 <div style={graphColumnStyle}>
                     <MiniGraph data={fpsHistory} height={20} color="#0f0" label="FPS" valueDisplay={`${fps} FPS`}/>
-                    <MiniGraph data={drawCallHistory} height={20} color="#4af" label="Draws" valueDisplay={totalNumDrawCalls.toString()}/>
-                    <MiniGraph data={memoryHistory} height={20} color="#fdb48d" label="VRAM" valueDisplay={formatBytes(totalUsedVideoMemory)}/>
-                   <div>TODO - bundleCall</div>
+                    <MiniGraph data={drawCallHistory} height={20} color="#4af" label="Draws"
+                               valueDisplay={totalNumDrawCalls.toString()}/>
+                    <MiniGraph data={memoryHistory} height={20} color="#fdb48d" label="VRAM"
+                               valueDisplay={formatBytes(totalUsedVideoMemory)}/>
+                    <div>TODO - bundleCall</div>
                 </div>
             )}
         </div>

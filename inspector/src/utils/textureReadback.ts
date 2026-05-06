@@ -55,7 +55,7 @@ export async function readGPUTextureToCanvas(
         if (!ctx) return;
 
         const imageData = ctx.createImageData(width, height);
-        
+
         // Process based on format
         if (format === 'rgba8unorm' || format === 'rgba8unorm-srgb') {
             for (let y = 0; y < height; y++) {

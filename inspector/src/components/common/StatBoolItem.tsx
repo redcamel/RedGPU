@@ -6,11 +6,11 @@ import {COMMON_STYLES, THEME} from './Theme';
  * [EN] Component that displays a boolean value as a badge with a background color.
  */
 const StatBoolItem = memo(({
-                          label,
-                          value,
-                          trueLabel = 'TRUE',
-                          falseLabel = 'FALSE'
-                      }: {
+                               label,
+                               value,
+                               trueLabel = 'TRUE',
+                               falseLabel = 'FALSE'
+                           }: {
     label: string,
     value: boolean,
     trueLabel?: string,

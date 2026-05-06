@@ -8,7 +8,7 @@ export async function readGPUBufferToCPU(
 ): Promise<ArrayBuffer | null> {
     try {
         const size = gpuBuffer.size;
-        
+
         // 1. Create a staging buffer with MAP_READ and COPY_DST usage
         const stagingBuffer = device.createBuffer({
             size,
@@ -18,20 +18,20 @@ export async function readGPUBufferToCPU(
         // 2. Encode copy command
         const commandEncoder = device.createCommandEncoder();
         commandEncoder.copyBufferToBuffer(gpuBuffer, 0, stagingBuffer, 0, size);
-        
+
         // 3. Submit and wait for completion
         device.queue.submit([commandEncoder.finish()]);
 
         // 4. Map the staging buffer
         await stagingBuffer.mapAsync(GPUMapMode.READ);
-        
+
         // 5. Get a copy of the data
         const copy = stagingBuffer.getMappedRange().slice(0);
-        
+
         // 6. Cleanup
         stagingBuffer.unmap();
         stagingBuffer.destroy();
-        
+
         return copy;
     } catch (e) {
         console.error('Failed to read GPU buffer:', e);

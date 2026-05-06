@@ -25,7 +25,7 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
     const isCube = gpuTex?.dimension === '2d' && gpuTex?.depthOrArrayLayers === 6;
     const isHDR = item.src?.toLowerCase().endsWith('.hdr') || (item.srcList && item.srcList[0]?.toLowerCase().endsWith('.hdr')) || gpuTex?.format === 'rgba16float';
     const hasSrcList = item.srcList && Array.isArray(item.srcList);
-    
+
     // Mipmap support logic
     const showMipTabs = gpuTex?.mipLevelCount > 1;
     const useCanvasForCube = isCube && (!hasSrcList || isHDR || activeMipLevel > 0);
@@ -58,7 +58,9 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
         };
 
         updatePreviews();
-        return () => { isMounted = false; };
+        return () => {
+            isMounted = false;
+        };
     }, [gpuTex, redGPUContext, item.src, item.srcList, hasSrcList, isCube, isHDR, useCanvasForCube, useCanvasForSingle, activeMipLevel]);
 
     const handleCopy = (text: string, label: string) => {
@@ -102,8 +104,8 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                                 const mipW = Math.max(1, gpuTex.width >> i);
                                 const mipH = Math.max(1, gpuTex.height >> i);
                                 return (
-                                    <button 
-                                        key={i} 
+                                    <button
+                                        key={i}
                                         onClick={() => setActiveMipLevel(i)}
                                         style={{
                                             ...mipTabButtonStyle,
@@ -116,7 +118,10 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                                         }}
                                     >
                                         <span style={{fontSize: '9px'}}>Level {i}</span>
-                                        <span style={{fontSize: '8px', opacity: 0.8}}>{formatNumber(mipW, 0)}x{formatNumber(mipH, 0)}</span>
+                                        <span style={{
+                                            fontSize: '8px',
+                                            opacity: 0.8
+                                        }}>{formatNumber(mipW, 0)}x{formatNumber(mipH, 0)}</span>
                                     </button>
                                 );
                             })}
@@ -125,7 +130,8 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                 )}
 
                 <div style={contentStyle}>
-                    {item.src && !isHDR && !isCube && activeMipLevel === 0 && <img src={item.src} style={previewImageStyle} alt="preview" />}
+                    {item.src && !isHDR && !isCube && activeMipLevel === 0 &&
+                        <img src={item.src} style={previewImageStyle} alt="preview"/>}
 
                     {isCube && (
                         <div style={{...cubePreviewGridStyle, position: 'relative'}}>
@@ -133,24 +139,25 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                                 const faceIdx = cubeFaceIndices[i];
                                 return (
                                     <div key={i} style={{
-                                        gridColumn: pos.col, 
-                                        gridRow: pos.row, 
+                                        gridColumn: pos.col,
+                                        gridRow: pos.row,
                                         position: 'relative',
                                         overflow: 'hidden',
                                         border: '1px solid rgba(255,255,255,0.1)'
                                     }}>
                                         <div style={faceLabelStyle}>{cubeFaceLabels[faceIdx]}</div>
                                         {hasSrcList && !isHDR && activeMipLevel === 0 ? (
-                                            <img src={item.srcList[faceIdx]} style={cubePreviewImageStyle} title={cubeFaceLabels[faceIdx]} />
+                                            <img src={item.srcList[faceIdx]} style={cubePreviewImageStyle}
+                                                 title={cubeFaceLabels[faceIdx]}/>
                                         ) : (
-                                            <canvas 
-                                                ref={el => canvasRefs.current[faceIdx] = el} 
-                                                style={cubePreviewImageStyle} 
+                                            <canvas
+                                                ref={el => canvasRefs.current[faceIdx] = el}
+                                                style={cubePreviewImageStyle}
                                             />
                                         )}
                                         {hasSrcList && (
-                                            <button 
-                                                style={faceCopyButtonStyle} 
+                                            <button
+                                                style={faceCopyButtonStyle}
                                                 onClick={() => handleCopy(item.srcList[faceIdx], cubeFaceLabels[faceIdx])}
                                                 title="Copy path"
                                             >
@@ -170,17 +177,20 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                                     HDR DATA VIEW (Reference only)
                                 </div>
                             )}
-                            <canvas 
-                                ref={el => canvasRefs.current[0] = el} 
-                                style={{maxWidth: '100%', maxHeight: '500px', display: 'block'}} 
+                            <canvas
+                                ref={el => canvasRefs.current[0] = el}
+                                style={{maxWidth: '100%', maxHeight: '500px', display: 'block'}}
                             />
                             {!redGPUContext && (
                                 <div style={noPreviewStyle}>
-                                     <div style={{textAlign: 'center'}}>
-                                         <div style={{fontSize: '40px', marginBottom: '10px'}}>🖼️</div>
-                                         No direct image preview available.<br/>
-                                         <span style={{opacity: 0.5, fontSize: '10px'}}>(Generated or Direct Texture)</span>
-                                     </div>
+                                    <div style={{textAlign: 'center'}}>
+                                        <div style={{fontSize: '40px', marginBottom: '10px'}}>🖼️</div>
+                                        No direct image preview available.<br/>
+                                        <span style={{
+                                            opacity: 0.5,
+                                            fontSize: '10px'
+                                        }}>(Generated or Direct Texture)</span>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -194,13 +204,16 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                 <div style={footerStyle}>
                     <div style={infoRowStyle}>
                         <span>Format: <b style={{color: '#fdb48d'}}>{gpuTex?.format}</b></span>
-                        <span>Size: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.width, 0)}x{formatNumber(gpuTex?.height, 0)}</b></span>
+                        <span>Size: <b
+                            style={{color: '#eee'}}>{formatNumber(gpuTex?.width, 0)}x{formatNumber(gpuTex?.height, 0)}</b></span>
                     </div>
                     <div style={infoRowStyle}>
                         <div style={{display: 'flex', gap: '12px'}}>
                             <span>Dim: <b style={{color: '#eee'}}>{gpuTex?.dimension}</b></span>
-                            <span>Layers: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.depthOrArrayLayers, 0)}</b></span>
-                            <span>Mipmaps: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.mipLevelCount, 0)}</b></span>
+                            <span>Layers: <b
+                                style={{color: '#eee'}}>{formatNumber(gpuTex?.depthOrArrayLayers, 0)}</b></span>
+                            <span>Mipmaps: <b
+                                style={{color: '#eee'}}>{formatNumber(gpuTex?.mipLevelCount, 0)}</b></span>
                             <span>Samples: <b style={{color: '#eee'}}>{formatNumber(gpuTex?.sampleCount, 0)}</b></span>
                         </div>
                     </div>

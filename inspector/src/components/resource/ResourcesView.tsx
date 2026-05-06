@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import {useInspectorStore} from '../../store';
 import TexturePreviewModal from './texture/TexturePreviewModal';
 import BufferDetailModal from './buffer/BufferDetailModal';
 import {TabBar, TabItem} from '../common/Tabs';
@@ -12,7 +11,7 @@ import BufferResourcesView from './buffer/BufferResourcesView';
  */
 const ResourcesView = () => {
     const [activeSubTab, setActiveSubTab] = useState('TEXTURES');
-    const [previewData, setPreviewData] = useState<{item: any, type: string} | null>(null);
+    const [previewData, setPreviewData] = useState<{ item: any, type: string } | null>(null);
 
     const handlePreview = (item: any, type: string) => {
         setPreviewData({item, type});
@@ -28,21 +27,21 @@ const ResourcesView = () => {
     return (
         <div style={{display: 'flex', flexDirection: 'column'}}>
             <div style={stickyHeaderStyle}>
-                <TabBar 
-                    tabs={subTabs} 
-                    activeTab={activeSubTab} 
-                    onTabChange={setActiveSubTab} 
+                <TabBar
+                    tabs={subTabs}
+                    activeTab={activeSubTab}
+                    onTabChange={setActiveSubTab}
                     isSticky={false}
                 />
             </div>
-            
+
             <div style={{padding: '12px 0'}}>
                 {activeSubTab === 'TEXTURES' && (
-                    <TextureResourcesView onPreview={handlePreview} />
+                    <TextureResourcesView onPreview={handlePreview}/>
                 )}
 
                 {activeSubTab === 'BUFFERS' && (
-                    <BufferResourcesView onPreview={handlePreview} />
+                    <BufferResourcesView onPreview={handlePreview}/>
                 )}
             </div>
 
