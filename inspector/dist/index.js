@@ -7838,10 +7838,12 @@ const ResourceDetailList = ({ type, redGPUContext }) => {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noItemStyle, children: "No resources found." });
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle, children: items.map((item, idx) => {
+    var _a;
     if (isTexture) {
       const tex = item.texture;
       const gpuTex = tex == null ? void 0 : tex.gpuTexture;
-      const fileName = item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
+      const isBlob = item.src && item.src.startsWith("blob:") || item.srcList && ((_a = item.srcList[0]) == null ? void 0 : _a.startsWith("blob:"));
+      const fileName = isBlob ? "BLOB" : item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
       const originalPath = item.src || (item.srcList ? item.srcList[0] + "..." : item.cacheKey);
       return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
         ...detailItemStyle,

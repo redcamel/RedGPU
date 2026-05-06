@@ -96,7 +96,8 @@ const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext
                 if (isTexture) {
                     const tex = item.texture;
                     const gpuTex = tex?.gpuTexture;
-                    const fileName = item.src ? item.src.split('/').pop() : (item.srcList ? item.srcList[0].split('/').pop() : null);
+                    const isBlob = (item.src && item.src.startsWith('blob:')) || (item.srcList && item.srcList[0]?.startsWith('blob:'));
+                    const fileName = isBlob ? 'BLOB' : (item.src ? item.src.split('/').pop() : (item.srcList ? item.srcList[0].split('/').pop() : null));
                     const originalPath = item.src || (item.srcList ? item.srcList[0] + '...' : item.cacheKey);
 
                     return (
