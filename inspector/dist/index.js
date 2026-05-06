@@ -9110,8 +9110,11 @@ __privateAdd(_AController, _globalKeyboardActiveView, null);
  */
 __privateAdd(_AController, _globalKeyboardActiveController, null);
 let AController = _AController;
-const Tabs = ({ tabs, activeTab, onTabChange, children }) => {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: tabsContainerStyle, children: [
+const Tabs = ({ tabs, activeTab, onTabChange, children, scrollable = true }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+    ...tabsContainerStyle,
+    overflow: scrollable ? "hidden" : "visible"
+  }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabBarStyle, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
       "div",
       {
@@ -9126,20 +9129,25 @@ const Tabs = ({ tabs, activeTab, onTabChange, children }) => {
       },
       tab.id
     )) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentAreaStyle, children })
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      ...contentAreaStyle,
+      overflowY: scrollable ? "auto" : "visible"
+    }, children })
   ] });
 };
 const tabsContainerStyle = {
   display: "flex",
   flexDirection: "column",
-  flex: 1,
-  overflow: "hidden"
+  flex: 1
 };
 const tabBarStyle = {
   display: "flex",
   background: THEME.colors.background,
   borderTop: `1px solid ${THEME.colors.border}`,
-  borderBottom: `1px solid ${THEME.colors.border}`
+  borderBottom: `1px solid ${THEME.colors.border}`,
+  position: "sticky",
+  top: 0,
+  zIndex: 10
 };
 const tabItemStyle = {
   padding: "8px 4px",
@@ -9170,9 +9178,9 @@ const ViewListView = () => {
       label: view.name || `View ${index}`
     }));
     const activeView = viewList[parseInt(activeViewTab)] || viewList[0];
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { tabs, activeTab: activeViewTab, onTabChange: setActiveViewTab, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "12px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view: activeView, lastUpdateTime }) }) }) });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { tabs, activeTab: activeViewTab, onTabChange: setActiveViewTab, scrollable: false, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "12px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view: activeView, lastUpdateTime }) }) }) });
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle, children: viewList.map((view, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view, lastUpdateTime }, index)) });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...containerStyle, padding: "12px" }, children: viewList.map((view, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view, lastUpdateTime }, index)) });
 };
 const ViewSection = ({ view, lastUpdateTime }) => {
   const {
@@ -9393,7 +9401,7 @@ const TabContent = () => {
     case "CONTEXT":
       return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(RedGPUContextView, {}) });
     case "VIEWS":
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ViewListView, {}) });
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ViewListView, {});
     case "RESOURCES":
       return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ResourcesView, {}) });
     default:

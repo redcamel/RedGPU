@@ -13,11 +13,15 @@ const Tabs: React.FC<{
     tabs: TabItem[],
     activeTab: string,
     onTabChange: (id: string) => void,
-    children: React.ReactNode
-}> = ({tabs, activeTab, onTabChange, children}) => {
+    children: React.ReactNode,
+    scrollable?: boolean
+}> = ({tabs, activeTab, onTabChange, children, scrollable = true}) => {
 
     return (
-        <div style={tabsContainerStyle}>
+        <div style={{
+            ...tabsContainerStyle,
+            overflow: scrollable ? 'hidden' : 'visible'
+        }}>
             <div style={tabBarStyle}>
                 {tabs.map(tab => (
                     <div
@@ -34,7 +38,10 @@ const Tabs: React.FC<{
                     </div>
                 ))}
             </div>
-            <div style={contentAreaStyle}>
+            <div style={{
+                ...contentAreaStyle,
+                overflowY: scrollable ? 'auto' : 'visible'
+            }}>
                 {children}
             </div>
         </div>
@@ -44,15 +51,17 @@ const Tabs: React.FC<{
 const tabsContainerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
-    flex: 1,
-    overflow: 'hidden'
+    flex: 1
 };
 
 const tabBarStyle: React.CSSProperties = {
     display: 'flex',
     background: THEME.colors.background,
     borderTop: `1px solid ${THEME.colors.border}`,
-    borderBottom: `1px solid ${THEME.colors.border}`
+    borderBottom: `1px solid ${THEME.colors.border}`,
+    position: 'sticky',
+    top: 0,
+    zIndex: 10
 };
 
 const tabItemStyle: React.CSSProperties = {

@@ -1,7 +1,7 @@
 import React from 'react';
-import {useInspectorStore} from '../store';
-import Section from './commonUI/Section';
-import StatItem from './commonUI/StatItem';
+import {useInspectorStore} from '../../store';
+import Section from '../common/Section';
+import StatItem from '../common/StatItem';
 
 /**
  * [KO] GPU 커맨드 배치 통계를 표시하는 컴포넌트입니다.

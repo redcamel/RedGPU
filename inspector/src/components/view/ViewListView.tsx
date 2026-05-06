@@ -1,15 +1,15 @@
 import React, {useState} from 'react';
-import {useInspectorStore} from '../store';
-import Section from "./commonUI/Section";
-import StatItem from "./commonUI/StatItem";
-import StatRGBAItem from "./commonUI/StatRGBAItem";
-import StatBoolItem from "./commonUI/StatBoolItem";
+import {useInspectorStore} from '../../store';
+import Section from "../common/Section";
+import StatItem from "../common/StatItem";
+import StatRGBAItem from "../common/StatRGBAItem";
+import StatBoolItem from "../common/StatBoolItem";
 import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";
 import AController from "@redgpu/src/camera/core/AController";
 
-import Divider from "./commonUI/Divider";
-import Tabs, {TabItem} from "./commonUI/Tabs";
+import Divider from "../common/Divider";
+import Tabs, {TabItem} from "../common/Tabs";
 
 /**
  * [KO] 엔진의 모든 뷰(View3D)의 상태를 표시하는 컴포넌트입니다.
@@ -35,7 +35,7 @@ const ViewListView = () => {
 
         return (
             <div style={containerStyle}>
-                <Tabs tabs={tabs} activeTab={activeViewTab} onTabChange={setActiveViewTab}>
+                <Tabs tabs={tabs} activeTab={activeViewTab} onTabChange={setActiveViewTab} scrollable={false}>
                     <div style={{padding: '12px'}}>
                         <ViewSection view={activeView} lastUpdateTime={lastUpdateTime}/>
                     </div>
@@ -45,7 +45,7 @@ const ViewListView = () => {
     }
 
     return (
-        <div style={containerStyle}>
+        <div style={{...containerStyle, padding: '12px'}}>
             {viewList.map((view: View3D, index: number) => (
                 <ViewSection key={index} view={view} lastUpdateTime={lastUpdateTime}/>
             ))}

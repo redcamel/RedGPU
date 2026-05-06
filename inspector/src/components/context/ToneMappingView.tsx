@@ -1,7 +1,7 @@
 import React from 'react';
-import {useInspectorStore} from '../store';
-import Section from "./commonUI/Section";
-import StatItem from "./commonUI/StatItem";
+import {useInspectorStore} from '../../store';
+import Section from "../common/Section";
+import StatItem from "../common/StatItem";
 import View3D from "@redgpu/src/display/view/View3D";
 
 /**

@@ -1,6 +1,6 @@
 import React from 'react';
-import {useInspectorStore} from '../store';
-import Divider from "./commonUI/Divider";
+import {useInspectorStore} from '../../store';
+import Divider from "../common/Divider";
 
 /**
  * [KO] FPS 및 프레임 타임 통계를 계산하는 클래스입니다.

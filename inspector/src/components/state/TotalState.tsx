@@ -1,8 +1,8 @@
 import React from 'react';
-import {useInspectorStore} from '../store';
+import {useInspectorStore} from '../../store';
 import formatBytes from '@redgpu/src/utils/formatBytes';
-import Section from "./commonUI/Section";
-import StatItem from "./commonUI/StatItem";
+import Section from "../common/Section";
+import StatItem from "../common/StatItem";
 
 /**
  * [KO] 엔진의 전반적인 상태 통계를 표시하는 컴포넌트입니다.

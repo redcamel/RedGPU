@@ -1,10 +1,10 @@
 import React from 'react';
 import {useInspectorStore} from '../store';
-import TotalState from './TotalState';
-import RedGPUContextView from './RedGPUContextView';
-import CommandBatchStatsView from './CommandBatchStatsView';
-import ResourcesView from "./ResourcesView";
-import ViewListView from "./ViewListView";
+import TotalState from './state/TotalState';
+import RedGPUContextView from './context/RedGPUContextView';
+import CommandBatchStatsView from './state/CommandBatchStatsView';
+import ResourcesView from "./resource/ResourcesView";
+import ViewListView from "./view/ViewListView";
 
 /**
  * [KO] 현재 선택된 탭에 해당하는 컨텐츠를 렌더링하는 컴포넌트입니다.
@@ -29,7 +29,7 @@ const TabContent = () => {
                 </Container>
             );
         case 'VIEWS':
-            return <Container><ViewListView/></Container>;
+            return <ViewListView/>;
         case 'RESOURCES':
             return <Container><ResourcesView/></Container>;
         default:

@@ -1,9 +1,9 @@
 import React from 'react';
-import {useInspectorStore} from '../store';
-import Section from "./commonUI/Section";
-import StatItem from "./commonUI/StatItem";
-import StatRGBAItem from "./commonUI/StatRGBAItem";
-import StatBoolItem from "./commonUI/StatBoolItem";
+import {useInspectorStore} from '../../store';
+import Section from "../common/Section";
+import StatItem from "../common/StatItem";
+import StatRGBAItem from "../common/StatRGBAItem";
+import StatBoolItem from "../common/StatBoolItem";
 import ToneMappingView from "./ToneMappingView";
 
 

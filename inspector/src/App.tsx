@@ -1,9 +1,9 @@
 import React from 'react';
 import {useInspectorStore} from './store';
-import FPS from './components/FPS';
+import FPS from './components/monitor/FPS';
 
 import TabContent from './components/TabContent';
-import Tabs, {TabItem} from "./components/commonUI/Tabs";
+import Tabs, {TabItem} from "./components/common/Tabs";
 
 const App = () => {
     const useDebugPanel = useInspectorStore(state => state.useDebugPanel);

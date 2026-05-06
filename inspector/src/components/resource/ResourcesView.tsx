@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import {ResourceStatusSummary, useInspectorStore} from '../store';
-import Section from './commonUI/Section';
-import StatItem from './commonUI/StatItem';
+import {ResourceStatusSummary, useInspectorStore} from '../../store';
+import Section from '../common/Section';
+import StatItem from '../common/StatItem';
 import formatBytes from '@redgpu/src/utils/formatBytes';
 import RedGPUContext from '@redgpu/src/context/RedGPUContext';
 
