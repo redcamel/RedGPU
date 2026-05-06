@@ -4,6 +4,7 @@ import Section from '../common/Section';
 import StatItem from '../common/StatItem';
 import formatBytes from '@redgpu/src/utils/formatBytes';
 import RedGPUContext from '@redgpu/src/context/RedGPUContext';
+import TexturePreviewModal from './TexturePreviewModal';
 
 /**
  * [KO] 리소스 유형별 요약 정보를 표시하는 컴포넌트입니다.
@@ -57,7 +58,7 @@ const formatTextureUsage = (usage: number): string => {
 /**
  * [KO] 리소스 상세 목록을 표시하는 컴포넌트입니다.
  */
-const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext: RedGPUContext }) => {
+const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, redGPUContext: RedGPUContext, onPreview: (item: any) => void }) => {
     const rm = redGPUContext.resourceManager;
     let items: any[] = [];
     let isTexture = false;
@@ -114,13 +115,18 @@ const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext
                     const originalPath = item.src || (item.srcList ? item.srcList[0] + '...' : item.cacheKey);
 
                     return (
-                        <div key={item.uuid || idx} style={{
-                            ...detailItemStyle,
-                            borderLeft: '2px solid #fdb48d',
-                            background: 'rgba(255,255,255,0.04)',
-                            marginBottom: '6px',
-                            padding: '10px'
-                        }}>
+                        <div
+                            key={item.uuid || idx}
+                            style={{
+                                ...detailItemStyle,
+                                borderLeft: '2px solid #fdb48d',
+                                background: 'rgba(255,255,255,0.04)',
+                                marginBottom: '6px',
+                                padding: '10px',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => onPreview(item)}
+                        >
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
                                     {fileName && <span style={detailNameStyle}>{fileName}</span>}
@@ -215,6 +221,7 @@ const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext
 const ResourcesView = () => {
     const {resourceStats, redGPUContext} = useInspectorStore();
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    const [previewItem, setPreviewItem] = useState<any>(null);
 
     const toggleExpanded = (key: string) => {
         setExpanded(prev => ({...prev, [key]: !prev[key]}));
@@ -229,7 +236,7 @@ const ResourcesView = () => {
                 onToggle={() => toggleExpanded(key)}
             />
             {expanded[key] && redGPUContext && (
-                <ResourceDetailList type={key} redGPUContext={redGPUContext}/>
+                <ResourceDetailList type={key} redGPUContext={redGPUContext} onPreview={setPreviewItem} />
             )}
         </React.Fragment>
     );
@@ -249,6 +256,13 @@ const ResourcesView = () => {
                 {renderResource('storageBuffer', 'Storage Buffers', resourceStats.storageBuffer)}
                 {renderResource('gpuBuffer', 'Raw GPU Buffers', resourceStats.gpuBuffer)}
             </Section>
+
+            {previewItem && (
+                <TexturePreviewModal
+                    item={previewItem}
+                    onClose={() => setPreviewItem(null)}
+                />
+            )}
         </div>
     );
 };

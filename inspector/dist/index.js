@@ -7324,7 +7324,7 @@ const MiniGraph = ({
     ctx.fill();
   }, [data, color]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "12px" }, children: [
-    (label || valueDisplay) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$2, children: [
+    (label || valueDisplay) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$3, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: label }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueStyle, color }, children: valueDisplay })
     ] }),
@@ -7356,7 +7356,7 @@ const hexToRgba = (hex, alpha) => {
   }
   return `rgba(${r2}, ${g}, ${b}, ${alpha})`;
 };
-const headerStyle$2 = {
+const headerStyle$3 = {
   display: "flex",
   justifyContent: "space-between",
   fontSize: "10px",
@@ -7767,6 +7767,201 @@ const noItemStyle$1 = {
   color: "#666",
   fontStyle: "italic"
 };
+const TexturePreviewModal = ({ item, onClose }) => {
+  var _a;
+  const isTexture = !!item.texture;
+  if (!isTexture) return null;
+  const tex = item.texture;
+  const gpuTex = tex == null ? void 0 : tex.gpuTexture;
+  const isBlob = item.src && item.src.startsWith("blob:") || item.srcList && ((_a = item.srcList[0]) == null ? void 0 : _a.startsWith("blob:"));
+  const fileName = isBlob ? "BLOB" : item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
+  const originalPath = item.src || (item.srcList ? item.srcList[0] + "..." : item.cacheKey);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: overlayStyle, onClick: onClose, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleUp {
+                    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+            ` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle, onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$2, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle, children: fileName || "Texture Preview" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: pathStyle, children: originalPath })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle, onClick: onClose, children: "×" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle, children: [
+        item.src && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.src, style: previewImageStyle, alt: "preview" }),
+        item.srcList && Array.isArray(item.srcList) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: cubePreviewGridStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "2", gridRow: "1" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.srcList[2], style: cubePreviewImageStyle, title: "Top" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1", gridRow: "2" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.srcList[1], style: cubePreviewImageStyle, title: "Left" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "2", gridRow: "2" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.srcList[4], style: cubePreviewImageStyle, title: "Front" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "3", gridRow: "2" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.srcList[0], style: cubePreviewImageStyle, title: "Right" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "2", gridRow: "3" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.srcList[3], style: cubePreviewImageStyle, title: "Bottom" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "2", gridRow: "4" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.srcList[5], style: cubePreviewImageStyle, title: "Back" }) })
+        ] }),
+        !item.src && !item.srcList && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noPreviewStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { textAlign: "center" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "40px", marginBottom: "10px" }, children: "🖼️" }),
+          "No direct image preview available.",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { opacity: 0.5, fontSize: "10px" }, children: "(Generated or Direct Texture)" })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Format: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: gpuTex == null ? void 0 : gpuTex.format })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Size: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { style: { color: "#eee" }, children: [
+              gpuTex == null ? void 0 : gpuTex.width,
+              "x",
+              gpuTex == null ? void 0 : gpuTex.height
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Dimension: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex == null ? void 0 : gpuTex.dimension })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Layers: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex == null ? void 0 : gpuTex.depthOrArrayLayers })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Memory: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "UUID: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("small", { style: { opacity: 0.5 }, children: item.uuid })
+          ] })
+        ] })
+      ] })
+    ] })
+  ] });
+};
+const overlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  background: "rgba(0,0,0,0.7)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1e4,
+  backdropFilter: "blur(8px)",
+  animation: "fadeIn 0.2s ease-out"
+};
+const modalStyle = {
+  background: "rgba(26, 26, 26, 0.95)",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.15)",
+  width: "90%",
+  maxWidth: "500px",
+  maxHeight: "90%",
+  display: "flex",
+  flexDirection: "column",
+  boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
+  overflow: "hidden",
+  animation: "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+};
+const headerStyle$2 = {
+  padding: "16px",
+  background: "rgba(255,255,255,0.03)",
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start"
+};
+const titleStyle = {
+  fontSize: "15px",
+  fontWeight: "bold",
+  color: "#eee",
+  marginBottom: "4px"
+};
+const pathStyle = {
+  fontSize: "10px",
+  color: "#777",
+  wordBreak: "break-all",
+  maxWidth: "400px"
+};
+const closeButtonStyle = {
+  background: "none",
+  border: "none",
+  color: "#888",
+  fontSize: "28px",
+  cursor: "pointer",
+  padding: "0 4px",
+  lineHeight: "1",
+  marginTop: "-4px"
+};
+const contentStyle = {
+  padding: "20px",
+  overflow: "auto",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  background: "#0a0a0a",
+  minHeight: "300px"
+};
+const previewImageStyle = {
+  maxWidth: "100%",
+  maxHeight: "500px",
+  objectFit: "contain",
+  boxShadow: "0 0 30px rgba(0,0,0,0.8)",
+  border: "1px solid rgba(255,255,255,0.1)"
+};
+const cubePreviewGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gridTemplateRows: "repeat(4, 1fr)",
+  gap: "2px",
+  width: "300px",
+  background: "rgba(255,255,255,0.05)",
+  padding: "2px"
+};
+const cubePreviewImageStyle = {
+  width: "100%",
+  aspectRatio: "1",
+  objectFit: "cover",
+  display: "block"
+};
+const footerStyle = {
+  padding: "16px",
+  background: "rgba(255,255,255,0.03)",
+  borderTop: "1px solid rgba(255,255,255,0.1)",
+  fontSize: "12px",
+  color: "#999",
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px"
+};
+const infoRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center"
+};
+const noPreviewStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  color: "#555",
+  fontSize: "13px",
+  height: "100%"
+};
 const ResourceSummary = ({
   label,
   stats,
@@ -7803,7 +7998,7 @@ const formatTextureUsage = (usage) => {
   if (usage & 16) labels.push("ATTACHMENT");
   return labels.join(", ");
 };
-const ResourceDetailList = ({ type, redGPUContext }) => {
+const ResourceDetailList = ({ type, redGPUContext, onPreview }) => {
   const rm = redGPUContext.resourceManager;
   let items = [];
   let isTexture = false;
@@ -7854,72 +8049,81 @@ const ResourceDetailList = ({ type, redGPUContext }) => {
       const isBlob = item.src && item.src.startsWith("blob:") || item.srcList && ((_a = item.srcList[0]) == null ? void 0 : _a.startsWith("blob:"));
       const fileName = isBlob ? "BLOB" : item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
       const originalPath = item.src || (item.srcList ? item.srcList[0] + "..." : item.cacheKey);
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
-        ...detailItemStyle,
-        borderLeft: "2px solid #fdb48d",
-        background: "rgba(255,255,255,0.04)",
-        marginBottom: "6px",
-        padding: "10px"
-      }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-          fileName && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: fileName }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
-            ...detailInfoStyle,
-            fontSize: fileName ? "9px" : "10px",
-            color: fileName ? "#888" : "#ddd",
-            display: "block",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            marginBottom: "4px"
-          }, title: originalPath, children: originalPath }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "UUID: ",
-            item.uuid
-          ] }) }),
-          gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-                "Dim: ",
-                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.dimension })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-                "Layers: ",
-                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.depthOrArrayLayers })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-                "Samples: ",
-                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          style: {
+            ...detailItemStyle,
+            borderLeft: "2px solid #fdb48d",
+            background: "rgba(255,255,255,0.04)",
+            marginBottom: "6px",
+            padding: "10px",
+            cursor: "pointer"
+          },
+          onClick: () => onPreview(item),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
+              fileName && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: fileName }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+                ...detailInfoStyle,
+                fontSize: fileName ? "9px" : "10px",
+                color: fileName ? "#888" : "#ddd",
+                display: "block",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                marginBottom: "4px"
+              }, title: originalPath, children: originalPath }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "UUID: ",
+                item.uuid
+              ] }) }),
+              gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                    "Dim: ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.dimension })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                    "Layers: ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.depthOrArrayLayers })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                    "Samples: ",
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
+                  ] })
+                ] }),
+                gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Usage: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
+                ] }) })
               ] })
             ] }),
-            gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-              "Usage: ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
-            ] }) })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "4px", alignItems: "center", marginBottom: "2px" }, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { ...useNumStyle, fontWeight: "bold" }, children: [
-              "Use: ",
-              item.useNum
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
-          ] }),
-          gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, flexDirection: "column", alignItems: "flex-end", gap: "0", opacity: 0.9 }, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: gpuTex.format }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { color: "#eee", fontWeight: "bold" }, children: [
-              gpuTex.width,
-              "x",
-              gpuTex.height
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontWeight: "bold" }, children: [
-              "Mip: ",
-              gpuTex.mipLevelCount
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "4px", alignItems: "center", marginBottom: "2px" }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { ...useNumStyle, fontWeight: "bold" }, children: [
+                  "Use: ",
+                  item.useNum
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
+              ] }),
+              gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, flexDirection: "column", alignItems: "flex-end", gap: "0", opacity: 0.9 }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: gpuTex.format }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { color: "#eee", fontWeight: "bold" }, children: [
+                  gpuTex.width,
+                  "x",
+                  gpuTex.height
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontWeight: "bold" }, children: [
+                  "Mip: ",
+                  gpuTex.mipLevelCount
+                ] })
+              ] })
             ] })
           ] })
-        ] })
-      ] }) }, item.uuid || idx);
+        },
+        item.uuid || idx
+      );
     } else if (item.isRaw) {
       return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
@@ -7955,6 +8159,7 @@ const ResourceDetailList = ({ type, redGPUContext }) => {
 const ResourcesView = () => {
   const { resourceStats, redGPUContext } = useInspectorStore();
   const [expanded, setExpanded] = reactExports.useState({});
+  const [previewItem, setPreviewItem] = reactExports.useState(null);
   const toggleExpanded = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -7968,7 +8173,7 @@ const ResourcesView = () => {
         onToggle: () => toggleExpanded(key)
       }
     ),
-    expanded[key] && redGPUContext && /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceDetailList, { type: key, redGPUContext })
+    expanded[key] && redGPUContext && /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceDetailList, { type: key, redGPUContext, onPreview: setPreviewItem })
   ] }, key);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { paddingBottom: "20px" }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Texture Resources", children: [
@@ -7982,7 +8187,14 @@ const ResourcesView = () => {
       renderResource("indexBuffer", "Index Buffers", resourceStats.indexBuffer),
       renderResource("storageBuffer", "Storage Buffers", resourceStats.storageBuffer),
       renderResource("gpuBuffer", "Raw GPU Buffers", resourceStats.gpuBuffer)
-    ] })
+    ] }),
+    previewItem && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      TexturePreviewModal,
+      {
+        item: previewItem,
+        onClose: () => setPreviewItem(null)
+      }
+    )
   ] });
 };
 const summaryContainerStyle = {
