@@ -100,7 +100,13 @@ const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext
                     const originalPath = item.src || (item.srcList ? item.srcList[0] + '...' : item.cacheKey);
 
                     return (
-                        <div key={item.uuid || idx} style={detailItemStyle}>
+                        <div key={item.uuid || idx} style={{
+                            ...detailItemStyle,
+                            borderLeft: '2px solid #fdb48d',
+                            background: 'rgba(255,255,255,0.04)',
+                            marginBottom: '6px',
+                            padding: '10px'
+                        }}>
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
                                     {fileName && <span style={detailNameStyle}>{fileName}</span>}
@@ -111,7 +117,8 @@ const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext
                                         display: 'block',
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap'
+                                        whiteSpace: 'nowrap',
+                                        marginBottom: '4px'
                                     }} title={originalPath}>{originalPath}</span>
                                     <div style={detailInfoStyle}>
                                         <span>UUID: {item.uuid}</span>
@@ -286,32 +293,36 @@ const detailNameStyle: React.CSSProperties = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    fontWeight: '500'
+    fontWeight: '600',
+    fontSize: '12px',
+    marginBottom: '2px'
 };
 
 const detailRightContainerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-end',
-    gap: '2px',
-    minWidth: '70px',
+    gap: '4px',
+    minWidth: '90px',
     flexShrink: 0
 };
 
 const detailMemoryStyle: React.CSSProperties = {
     color: '#fdb48d',
     fontWeight: 'bold',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    fontSize: '12px'
 };
 
 const useNumStyle: React.CSSProperties = {
-    fontSize: '9px',
-    opacity: 0.7,
+    fontSize: '10px',
+    opacity: 0.8,
     color: '#fdb48d',
     background: 'rgba(255,255,255,0.1)',
-    padding: '1px 4px',
+    padding: '2px 6px',
     borderRadius: '3px',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    fontWeight: 'bold'
 };
 
 const detailInfoStyle: React.CSSProperties = {

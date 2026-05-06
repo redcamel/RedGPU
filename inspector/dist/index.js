@@ -7843,7 +7843,13 @@ const ResourceDetailList = ({ type, redGPUContext }) => {
       const gpuTex = tex == null ? void 0 : tex.gpuTexture;
       const fileName = item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
       const originalPath = item.src || (item.srcList ? item.srcList[0] + "..." : item.cacheKey);
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
+      return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+        ...detailItemStyle,
+        borderLeft: "2px solid #fdb48d",
+        background: "rgba(255,255,255,0.04)",
+        marginBottom: "6px",
+        padding: "10px"
+      }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
           fileName && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: fileName }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
@@ -7853,7 +7859,8 @@ const ResourceDetailList = ({ type, redGPUContext }) => {
             display: "block",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            whiteSpace: "nowrap"
+            whiteSpace: "nowrap",
+            marginBottom: "4px"
           }, title: originalPath, children: originalPath }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "UUID: ",
@@ -8016,29 +8023,33 @@ const detailNameStyle = {
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
-  fontWeight: "500"
+  fontWeight: "600",
+  fontSize: "12px",
+  marginBottom: "2px"
 };
 const detailRightContainerStyle = {
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-end",
-  gap: "2px",
-  minWidth: "70px",
+  gap: "4px",
+  minWidth: "90px",
   flexShrink: 0
 };
 const detailMemoryStyle = {
   color: "#fdb48d",
   fontWeight: "bold",
-  whiteSpace: "nowrap"
+  whiteSpace: "nowrap",
+  fontSize: "12px"
 };
 const useNumStyle = {
-  fontSize: "9px",
-  opacity: 0.7,
+  fontSize: "10px",
+  opacity: 0.8,
   color: "#fdb48d",
   background: "rgba(255,255,255,0.1)",
-  padding: "1px 4px",
+  padding: "2px 6px",
   borderRadius: "3px",
-  whiteSpace: "nowrap"
+  whiteSpace: "nowrap",
+  fontWeight: "bold"
 };
 const detailInfoStyle = {
   display: "flex",
