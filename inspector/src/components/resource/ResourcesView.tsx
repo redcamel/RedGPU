@@ -42,6 +42,19 @@ const ResourceSummary = ({
 );
 
 /**
+ * [KO] 텍스처 사용처 플래그를 읽기 쉬운 문자열로 변환합니다.
+ */
+const formatTextureUsage = (usage: number): string => {
+    const labels: string[] = [];
+    if (usage & 0x01) labels.push('COPY_SRC');
+    if (usage & 0x02) labels.push('COPY_DST');
+    if (usage & 0x04) labels.push('TEXTURE');
+    if (usage & 0x08) labels.push('STORAGE');
+    if (usage & 0x10) labels.push('ATTACHMENT');
+    return labels.join(', ');
+};
+
+/**
  * [KO] 리소스 상세 목록을 표시하는 컴포넌트입니다.
  */
 const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext: RedGPUContext }) => {
@@ -125,11 +138,18 @@ const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext
                                         <span>UUID: {item.uuid}</span>
                                     </div>
                                     {gpuTex && (
-                                        <div style={{...detailInfoStyle, gap: '8px', marginTop: '2px', opacity: 0.9}}>
-                                            <span>Dim: <b style={{color: '#eee'}}>{gpuTex.dimension}</b></span>
-                                            <span>Layers: <b style={{color: '#eee'}}>{gpuTex.depthOrArrayLayers}</b></span>
-                                            <span>Samples: <b style={{color: '#eee'}}>{gpuTex.sampleCount}</b></span>
-                                        </div>
+                                        <>
+                                            <div style={{...detailInfoStyle, gap: '8px', marginTop: '2px', opacity: 0.9}}>
+                                                <span>Dim: <b style={{color: '#eee'}}>{gpuTex.dimension}</b></span>
+                                                <span>Layers: <b style={{color: '#eee'}}>{gpuTex.depthOrArrayLayers}</b></span>
+                                                <span>Samples: <b style={{color: '#eee'}}>{gpuTex.sampleCount}</b></span>
+                                            </div>
+                                            {(gpuTex as any).usage !== undefined && (
+                                                <div style={{...detailInfoStyle, marginTop: '2px', opacity: 0.7}}>
+                                                    <span>Usage: <b style={{color: '#eee'}}>{formatTextureUsage((gpuTex as any).usage)}</b></span>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                                 <div style={detailRightContainerStyle}>

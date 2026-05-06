@@ -7794,6 +7794,15 @@ const ResourceSummary = ({
     ]
   }
 );
+const formatTextureUsage = (usage) => {
+  const labels = [];
+  if (usage & 1) labels.push("COPY_SRC");
+  if (usage & 2) labels.push("COPY_DST");
+  if (usage & 4) labels.push("TEXTURE");
+  if (usage & 8) labels.push("STORAGE");
+  if (usage & 16) labels.push("ATTACHMENT");
+  return labels.join(", ");
+};
 const ResourceDetailList = ({ type, redGPUContext }) => {
   const rm = redGPUContext.resourceManager;
   let items = [];
@@ -7868,19 +7877,25 @@ const ResourceDetailList = ({ type, redGPUContext }) => {
             "UUID: ",
             item.uuid
           ] }) }),
-          gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-              "Dim: ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.dimension })
+          gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Dim: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.dimension })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Layers: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.depthOrArrayLayers })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Samples: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
+              ] })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-              "Layers: ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.depthOrArrayLayers })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-              "Samples: ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
-            ] })
+            gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Usage: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
+            ] }) })
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle, children: [
