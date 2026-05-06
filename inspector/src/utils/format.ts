@@ -31,3 +31,34 @@ export const formatNumber = (val: any, decimals: number = 2): string => {
         maximumFractionDigits: decimals
     });
 };
+
+/**
+ * [KO] 텍스처 사용처 플래그를 읽기 쉬운 문자열로 변환합니다.
+ */
+export const formatTextureUsage = (usage: number): string => {
+    const labels: string[] = [];
+    if (usage & 0x01) labels.push('COPY_SRC');
+    if (usage & 0x02) labels.push('COPY_DST');
+    if (usage & 0x04) labels.push('TEXTURE');
+    if (usage & 0x08) labels.push('STORAGE');
+    if (usage & 0x10) labels.push('ATTACHMENT');
+    return labels.join(', ');
+};
+
+/**
+ * [KO] 버퍼 사용처 플래그를 읽기 쉬운 문자열로 변환합니다.
+ */
+export const formatBufferUsage = (usage: number): string => {
+    const labels: string[] = [];
+    if (usage & 0x01) labels.push('MAP_READ');
+    if (usage & 0x02) labels.push('MAP_WRITE');
+    if (usage & 0x04) labels.push('COPY_SRC');
+    if (usage & 0x08) labels.push('COPY_DST');
+    if (usage & 0x10) labels.push('INDEX');
+    if (usage & 0x20) labels.push('VERTEX');
+    if (usage & 0x40) labels.push('UNIFORM');
+    if (usage & 0x80) labels.push('STORAGE');
+    if (usage & 0x100) labels.push('INDIRECT');
+    if (usage & 0x200) labels.push('QUERY_RESOLVE');
+    return labels.join(', ');
+};

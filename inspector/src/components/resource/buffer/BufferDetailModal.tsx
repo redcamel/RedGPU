@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import formatBytes from '@redgpu/src/utils/formatBytes';
-import {formatNumber} from '../../utils/format';
-import {useInspectorStore} from '../../store';
-import {readGPUBufferToCPU} from '../../utils/bufferReadback';
+import {formatNumber} from '../../../utils/format';
+import {useInspectorStore} from '../../../store';
+import {readGPUBufferToCPU} from '../../../utils/bufferReadback';
 
 /**
  * [KO] 버퍼 사용처 플래그를 읽기 쉬운 문자열로 변환합니다.

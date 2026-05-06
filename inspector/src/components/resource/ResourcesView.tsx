@@ -1,313 +1,50 @@
 import React, {useState} from 'react';
-import {ResourceStatusSummary, useInspectorStore} from '../../store';
-import Section from '../common/Section';
-import StatItem from '../common/StatItem';
-import formatBytes from '@redgpu/src/utils/formatBytes';
-import {formatNumber} from '../../utils/format';
-import RedGPUContext from '@redgpu/src/context/RedGPUContext';
-import TexturePreviewModal from './TexturePreviewModal';
-import BufferDetailModal from './BufferDetailModal';
+import {useInspectorStore} from '../../store';
+import TexturePreviewModal from './texture/TexturePreviewModal';
+import BufferDetailModal from './buffer/BufferDetailModal';
+import {TabBar, TabItem} from '../common/Tabs';
+import TextureResourcesView from './texture/TextureResourcesView';
+import BufferResourcesView from './buffer/BufferResourcesView';
 
 /**
- * [KO] 리소스 유형별 요약 정보를 표시하는 컴포넌트입니다.
- */
-const ResourceSummary = ({
-                             label,
-                             stats,
-                             isExpanded,
-                             onToggle
-                         }: {
-    label: string,
-    stats: ResourceStatusSummary,
-    isExpanded: boolean,
-    onToggle: () => void
-}) => (
-    <div
-        style={{
-            ...summaryContainerStyle,
-            cursor: 'pointer',
-            borderLeft: isExpanded ? '2px solid #fdb48d' : '2px solid transparent',
-            background: isExpanded ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.03)',
-        }}
-        onClick={onToggle}
-    >
-        <div style={summaryLabelStyle}>
-            {label}
-            <span style={{float: 'right', opacity: 0.5, fontSize: '10px'}}>
-                {isExpanded ? '▲' : '▼'}
-            </span>
-        </div>
-        <div style={summaryValuesStyle}>
-            <StatItem label="Count" value={formatNumber(stats.count, 0)}/>
-            <StatItem label="Memory" value={formatBytes(stats.videoMemory)} color="#fdb48d" isBold/>
-        </div>
-    </div>
-);
-
-/**
- * [KO] 텍스처 사용처 플래그를 읽기 쉬운 문자열로 변환합니다.
- */
-const formatTextureUsage = (usage: number): string => {
-    const labels: string[] = [];
-    if (usage & 0x01) labels.push('COPY_SRC');
-    if (usage & 0x02) labels.push('COPY_DST');
-    if (usage & 0x04) labels.push('TEXTURE');
-    if (usage & 0x08) labels.push('STORAGE');
-    if (usage & 0x10) labels.push('ATTACHMENT');
-    return labels.join(', ');
-};
-
-/**
- * [KO] 버퍼 사용처 플래그를 읽기 쉬운 문자열로 변환합니다.
- */
-const formatBufferUsage = (usage: number): string => {
-    const labels: string[] = [];
-    if (usage & 0x01) labels.push('MAP_READ');
-    if (usage & 0x02) labels.push('MAP_WRITE');
-    if (usage & 0x04) labels.push('COPY_SRC');
-    if (usage & 0x08) labels.push('COPY_DST');
-    if (usage & 0x10) labels.push('INDEX');
-    if (usage & 0x20) labels.push('VERTEX');
-    if (usage & 0x40) labels.push('UNIFORM');
-    if (usage & 0x80) labels.push('STORAGE');
-    if (usage & 0x100) labels.push('INDIRECT');
-    if (usage & 0x200) labels.push('QUERY_RESOLVE');
-    return labels.join(', ');
-};
-
-/**
- * [KO] 리소스 상세 목록을 표시하는 컴포넌트입니다.
- */
-const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, redGPUContext: RedGPUContext, onPreview: (item: any, type: string) => void }) => {
-    const rm = redGPUContext.resourceManager;
-    let items: any[] = [];
-    let isTexture = false;
-
-    switch (type) {
-        case 'bitmapTexture':
-            items = Array.from(rm.managedBitmapTextureState.table.values());
-            isTexture = true;
-            break;
-        case 'cubeTexture':
-            items = Array.from(rm.managedCubeTextureState.table.values());
-            isTexture = true;
-            break;
-        case 'hdrTexture':
-            items = Array.from(rm.managedHDRTextureState.table.values());
-            isTexture = true;
-            break;
-        case 'uniformBuffer':
-            items = Array.from(rm.managedUniformBufferState.table.values());
-            break;
-        case 'vertexBuffer':
-            items = Array.from(rm.managedVertexBufferState.table.values());
-            break;
-        case 'indexBuffer':
-            items = Array.from(rm.managedIndexBufferState.table.values());
-            break;
-        case 'storageBuffer':
-            items = Array.from(rm.managedStorageBufferState.table.values());
-            break;
-        case 'gpuBuffer': {
-            const gpuBufferMap = rm.resources.get('GPUBuffer') as Map<string, GPUBuffer>;
-            items = Array.from(gpuBufferMap.entries()).map(([key, buffer]) => ({
-                uuid: key,
-                label: buffer.label || key,
-                size: buffer.size,
-                usage: (buffer as any).usage,
-                isRaw: true
-            }));
-            break;
-        }
-    }
-
-    if (items.length === 0) {
-        return <div style={noItemStyle}>No resources found.</div>;
-    }
-
-    return (
-        <div style={detailListStyle}>
-            {items.map((item, idx) => {
-                if (isTexture) {
-                    const tex = item.texture;
-                    const gpuTex = tex?.gpuTexture;
-                    const isBlob = (item.src && item.src.startsWith('blob:')) || (item.srcList && item.srcList[0]?.startsWith('blob:'));
-                    const fileName = isBlob ? 'BLOB' : (item.src ? item.src.split('/').pop() : (item.srcList ? item.srcList[0].split('/').pop() : null));
-                    const originalPath = item.src || (item.srcList ? item.srcList[0] + '...' : item.cacheKey);
-
-                    return (
-                        <div
-                            key={item.uuid || idx}
-                            style={{
-                                ...detailItemStyle,
-                                borderLeft: '2px solid #fdb48d',
-                                background: 'rgba(255,255,255,0.04)',
-                                marginBottom: '6px',
-                                padding: '10px',
-                                cursor: 'pointer'
-                            }}
-                            onClick={() => onPreview(item, type)}
-                        >
-                            <div style={detailHeaderStyle}>
-                                <div style={detailLeftContainerStyle}>
-                                    {fileName && <span style={detailNameStyle}>{fileName}</span>}
-                                    <span style={{
-                                        ...detailInfoStyle,
-                                        fontSize: fileName ? '9px' : '10px',
-                                        color: fileName ? '#888' : '#ddd',
-                                        display: 'block',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
-                                        marginBottom: '4px'
-                                    }} title={originalPath}>{originalPath}</span>
-                                    <div style={detailInfoStyle}>
-                                        <span>UUID: {item.uuid}</span>
-                                    </div>
-                                    {gpuTex && (
-                                        <>
-                                            <div style={{...detailInfoStyle, gap: '8px', marginTop: '2px', opacity: 0.9}}>
-                                                <span>Dim: <b style={{color: '#eee'}}>{gpuTex.dimension}</b></span>
-                                                <span>Layers: <b style={{color: '#eee'}}>{gpuTex.depthOrArrayLayers}</b></span>
-                                                <span>Samples: <b style={{color: '#eee'}}>{gpuTex.sampleCount}</b></span>
-                                            </div>
-                                            {(gpuTex as any).usage !== undefined && (
-                                                <div style={{...detailInfoStyle, marginTop: '2px', opacity: 0.7}}>
-                                                    <span>Usage: <b style={{color: '#eee'}}>{formatTextureUsage((gpuTex as any).usage)}</b></span>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                                <div style={detailRightContainerStyle}>
-                                    <div style={{display:'flex', gap:'4px', alignItems:'center', marginBottom: '2px'}}>
-                                        <span style={{...useNumStyle, fontWeight: 'bold'}}>Use: {formatNumber(item.useNum, 0)}</span>
-                                        <span style={detailMemoryStyle}>{formatBytes(tex?.videoMemorySize || 0)}</span>
-                                    </div>
-                                    {gpuTex && (
-                                        <div style={{...detailInfoStyle, flexDirection: 'column', alignItems: 'flex-end', gap: '0', opacity: 0.9}}>
-                                            <b style={{color: '#fdb48d'}}>{gpuTex.format}</b>
-                                            <span style={{color: '#eee', fontWeight: 'bold'}}>{formatNumber(gpuTex.width, 0)}x{formatNumber(gpuTex.height, 0)}</span>
-                                            <span style={{fontWeight: 'bold'}}>Mip: {formatNumber(gpuTex.mipLevelCount, 0)}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                } else if (item.isRaw) {
-                    return (
-                        <div 
-                            key={item.uuid || idx} 
-                            style={{...detailItemStyle, cursor: 'pointer'}}
-                            onClick={() => onPreview(item, type)}
-                        >
-                            <div style={detailHeaderStyle}>
-                                <div style={detailLeftContainerStyle}>
-                                    <span style={detailNameStyle}>{item.label}</span>
-                                    <div style={detailInfoStyle}>
-                                        <span>UUID: {item.uuid}</span>
-                                    </div>
-                                    {item.usage !== undefined && (
-                                        <div style={{...detailInfoStyle, marginTop: '2px', opacity: 0.7}}>
-                                            <span>Usage: <b style={{color: '#eee'}}>{formatBufferUsage(item.usage)}</b></span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div style={detailRightContainerStyle}>
-                                    <span style={detailMemoryStyle}>{formatBytes(item.size)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                } else {
-                    const buf = item.buffer;
-
-                    return (
-                        <div 
-                            key={item.uuid || idx} 
-                            style={{
-                                ...detailItemStyle,
-                                borderLeft: type === 'uniformBuffer' ? '2px solid #a0aec0' : 'none',
-                                background: type === 'uniformBuffer' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.02)',
-                                marginBottom: type === 'uniformBuffer' ? '4px' : '2px',
-                                cursor: 'pointer'
-                            }}
-                            onClick={() => onPreview(item, type)}
-                        >
-                            <div style={detailHeaderStyle}>
-                                <div style={detailLeftContainerStyle}>
-                                    <span style={detailNameStyle}>{item.label || buf?.name || 'Unnamed'}</span>
-                                    <div style={detailInfoStyle}>
-                                        <span>UUID: {item.uuid}</span>
-                                    </div>
-                                    {buf?.usage !== undefined && (
-                                        <div style={{...detailInfoStyle, marginTop: '2px', opacity: 0.7}}>
-                                            <span>Usage: <b style={{color: '#eee'}}>{formatBufferUsage(buf.usage)}</b></span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div style={detailRightContainerStyle}>
-                                    <span style={useNumStyle}>Use: {formatNumber(item.useNum, 0)}</span>
-                                    <span style={detailMemoryStyle}>{formatBytes(buf?.size || 0)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                }
-            })}
-        </div>
-    );
-};
-
-/**
- * [KO] 엔진에서 관리하는 리소스 현황을 표시하는 컴포넌트입니다.
- * [EN] Component that displays the status of resources managed by the engine.
+ * [KO] 엔진에서 관리하는 리소스 현황을 표시하는 메인 컴포넌트입니다.
+ * [EN] Main component that displays the status of resources managed by the engine.
  */
 const ResourcesView = () => {
-    const {resourceStats, redGPUContext} = useInspectorStore();
-    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    const [activeSubTab, setActiveSubTab] = useState('TEXTURES');
     const [previewData, setPreviewData] = useState<{item: any, type: string} | null>(null);
-
-    const toggleExpanded = (key: string) => {
-        setExpanded(prev => ({...prev, [key]: !prev[key]}));
-    };
 
     const handlePreview = (item: any, type: string) => {
         setPreviewData({item, type});
     };
 
-    const renderResource = (key: string, label: string, stats: ResourceStatusSummary) => (
-        <React.Fragment key={key}>
-            <ResourceSummary
-                label={label}
-                stats={stats}
-                isExpanded={!!expanded[key]}
-                onToggle={() => toggleExpanded(key)}
-            />
-            {expanded[key] && redGPUContext && (
-                <ResourceDetailList type={key} redGPUContext={redGPUContext} onPreview={handlePreview} />
-            )}
-        </React.Fragment>
-    );
+    const subTabs: TabItem[] = [
+        {id: 'TEXTURES', label: 'Textures'},
+        {id: 'BUFFERS', label: 'Buffers'}
+    ];
 
     const isTextureType = previewData && ['bitmapTexture', 'cubeTexture', 'hdrTexture'].includes(previewData.type);
 
     return (
-        <div style={{paddingBottom: '20px'}}>
-            <Section title="Texture Resources">
-                {renderResource('bitmapTexture', 'Bitmap Textures', resourceStats.bitmapTexture)}
-                {renderResource('cubeTexture', 'Cube Textures', resourceStats.cubeTexture)}
-                {renderResource('hdrTexture', 'HDR Textures', resourceStats.hdrTexture)}
-            </Section>
+        <div style={{display: 'flex', flexDirection: 'column'}}>
+            <div style={stickyHeaderStyle}>
+                <TabBar 
+                    tabs={subTabs} 
+                    activeTab={activeSubTab} 
+                    onTabChange={setActiveSubTab} 
+                    isSticky={false}
+                />
+            </div>
+            
+            <div style={{padding: '12px 0'}}>
+                {activeSubTab === 'TEXTURES' && (
+                    <TextureResourcesView onPreview={handlePreview} />
+                )}
 
-            <Section title="Buffer Resources">
-                {renderResource('uniformBuffer', 'Uniform Buffers', resourceStats.uniformBuffer)}
-                {renderResource('vertexBuffer', 'Vertex Buffers', resourceStats.vertexBuffer)}
-                {renderResource('indexBuffer', 'Index Buffers', resourceStats.indexBuffer)}
-                {renderResource('storageBuffer', 'Storage Buffers', resourceStats.storageBuffer)}
-                {renderResource('gpuBuffer', 'Raw GPU Buffers', resourceStats.gpuBuffer)}
-            </Section>
+                {activeSubTab === 'BUFFERS' && (
+                    <BufferResourcesView onPreview={handlePreview} />
+                )}
+            </div>
 
             {previewData && isTextureType && (
                 <TexturePreviewModal
@@ -327,111 +64,12 @@ const ResourcesView = () => {
     );
 };
 
-const summaryContainerStyle: React.CSSProperties = {
-    padding: '8px',
-    background: 'rgba(255,255,255,0.03)',
-    borderRadius: '4px',
-    marginBottom: '2px',
-    transition: 'all 0.1s'
-};
-
-const summaryLabelStyle: React.CSSProperties = {
-    fontSize: '11px',
-    fontWeight: 'bold',
-    color: '#aaa',
-    marginBottom: '6px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-};
-
-const summaryValuesStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px'
-};
-
-const detailListStyle: React.CSSProperties = {
-    padding: '4px 0 4px 8px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    borderLeft: '1px solid rgba(255,255,255,0.1)',
-    margin: '0 0 8px 8px'
-};
-
-const detailItemStyle: React.CSSProperties = {
-    fontSize: '10px',
-    color: '#888',
-    background: 'rgba(255,255,255,0.02)',
-    padding: '6px 8px',
-    borderRadius: '2px',
-    lineHeight: '1.4',
-};
-
-const detailHeaderStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: '8px'
-};
-
-const detailLeftContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
-    flex: 1,
-    minWidth: 0 // ellipsis 작동을 위함
-};
-
-const detailNameStyle: React.CSSProperties = {
-    color: '#ddd',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    fontWeight: '600',
-    fontSize: '12px',
-    marginBottom: '2px'
-};
-
-const detailRightContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: '4px',
-    minWidth: '90px',
-    flexShrink: 0
-};
-
-const detailMemoryStyle: React.CSSProperties = {
-    color: '#fdb48d',
-    fontWeight: 'bold',
-    whiteSpace: 'nowrap',
-    fontSize: '12px'
-};
-
-const useNumStyle: React.CSSProperties = {
-    fontSize: '10px',
-    opacity: 0.8,
-    color: '#fdb48d',
-    background: 'rgba(255,255,255,0.1)',
-    padding: '2px 6px',
-    borderRadius: '3px',
-    whiteSpace: 'nowrap',
-    fontWeight: 'bold'
-};
-
-const detailInfoStyle: React.CSSProperties = {
-    display: 'flex',
-    gap: '12px',
-    opacity: 0.6,
-    fontSize: '9px'
-};
-
-const noItemStyle: React.CSSProperties = {
-    padding: '8px 16px',
-    fontSize: '10px',
-    color: '#666',
-    fontStyle: 'italic'
+const stickyHeaderStyle: React.CSSProperties = {
+    position: 'sticky',
+    top: -12, // Offset container padding
+    zIndex: 10,
+    background: '#111',
+    margin: '0 -12px', // Pull out to cover container padding
 };
 
 export default ResourcesView;

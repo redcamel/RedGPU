@@ -1,8 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import formatBytes from '@redgpu/src/utils/formatBytes';
-import {formatNumber} from '../../utils/format';
-import {useInspectorStore} from '../../store';
-import {readGPUTextureToCanvas} from '../../utils/textureReadback';
+import {formatNumber} from '../../../utils/format';
+import {useInspectorStore} from '../../../store';
+import {readGPUTextureToCanvas} from '../../../utils/textureReadback';
 
 /**
  * [KO] 텍스처 리소스의 미리보기를 표시하는 모달 컴포넌트입니다.
