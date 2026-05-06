@@ -7841,37 +7841,59 @@ const ResourceDetailList = ({ type, redGPUContext }) => {
     if (isTexture) {
       const tex = item.texture;
       const gpuTex = tex == null ? void 0 : tex.gpuTexture;
+      const fileName = item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
+      const originalPath = item.src || (item.srcList ? item.srcList[0] + "..." : item.cacheKey);
       return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "span",
-            {
-              style: detailNameStyle,
-              title: item.cacheKey,
-              children: item.src || item.cacheKey || "Unknown Source"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailInfoStyle, children: [
+          fileName && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: fileName }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+            ...detailInfoStyle,
+            fontSize: fileName ? "9px" : "10px",
+            color: fileName ? "#888" : "#ddd",
+            display: "block",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
+          }, title: originalPath, children: originalPath }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "UUID: ",
+            item.uuid
+          ] }) }),
+          gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-              "UUID: ",
-              item.uuid
+              "Dim: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.dimension })
             ] }),
-            gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-              gpuTex.width,
-              "x",
-              gpuTex.height,
-              " (Mip: ",
-              gpuTex.mipLevelCount,
-              ")"
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Layers: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.depthOrArrayLayers })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Samples: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
             ] })
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle, children: [
-            "Use: ",
-            item.useNum
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "4px", alignItems: "center", marginBottom: "2px" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { ...useNumStyle, fontWeight: "bold" }, children: [
+              "Use: ",
+              item.useNum
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
+          gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, flexDirection: "column", alignItems: "flex-end", gap: "0", opacity: 0.9 }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: gpuTex.format }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { color: "#eee", fontWeight: "bold" }, children: [
+              gpuTex.width,
+              "x",
+              gpuTex.height
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontWeight: "bold" }, children: [
+              "Mip: ",
+              gpuTex.mipLevelCount
+            ] })
+          ] })
         ] })
       ] }) }, item.uuid || idx);
     } else if (item.isRaw) {

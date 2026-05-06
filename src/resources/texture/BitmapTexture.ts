@@ -6,6 +6,7 @@ import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture
 import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
+import {keepLog} from "../../utils";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 type SrcInfo = string | { src: string, cacheKey: string }
@@ -239,6 +240,7 @@ class BitmapTexture extends ManagementResourceBase {
             textureDescriptor.usage |= GPUTextureUsage.RENDER_ATTACHMENT;
         }
         const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, [this.#imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
+        keepLog(newGPUTexture)
         this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize
         if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)

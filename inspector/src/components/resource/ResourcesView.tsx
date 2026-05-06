@@ -96,22 +96,46 @@ const ResourceDetailList = ({type, redGPUContext}: { type: string, redGPUContext
                 if (isTexture) {
                     const tex = item.texture;
                     const gpuTex = tex?.gpuTexture;
+                    const fileName = item.src ? item.src.split('/').pop() : (item.srcList ? item.srcList[0].split('/').pop() : null);
+                    const originalPath = item.src || (item.srcList ? item.srcList[0] + '...' : item.cacheKey);
+
                     return (
                         <div key={item.uuid || idx} style={detailItemStyle}>
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
-                                    <span style={detailNameStyle}
-                                          title={item.cacheKey}>{item.src || item.cacheKey || 'Unknown Source'}</span>
+                                    {fileName && <span style={detailNameStyle}>{fileName}</span>}
+                                    <span style={{
+                                        ...detailInfoStyle,
+                                        fontSize: fileName ? '9px' : '10px',
+                                        color: fileName ? '#888' : '#ddd',
+                                        display: 'block',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                    }} title={originalPath}>{originalPath}</span>
                                     <div style={detailInfoStyle}>
                                         <span>UUID: {item.uuid}</span>
-                                        {gpuTex && (
-                                            <span>{gpuTex.width}x{gpuTex.height} (Mip: {gpuTex.mipLevelCount})</span>
-                                        )}
                                     </div>
+                                    {gpuTex && (
+                                        <div style={{...detailInfoStyle, gap: '8px', marginTop: '2px', opacity: 0.9}}>
+                                            <span>Dim: <b style={{color: '#eee'}}>{gpuTex.dimension}</b></span>
+                                            <span>Layers: <b style={{color: '#eee'}}>{gpuTex.depthOrArrayLayers}</b></span>
+                                            <span>Samples: <b style={{color: '#eee'}}>{gpuTex.sampleCount}</b></span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={detailRightContainerStyle}>
-                                    <span style={useNumStyle}>Use: {item.useNum}</span>
-                                    <span style={detailMemoryStyle}>{formatBytes(tex?.videoMemorySize || 0)}</span>
+                                    <div style={{display:'flex', gap:'4px', alignItems:'center', marginBottom: '2px'}}>
+                                        <span style={{...useNumStyle, fontWeight: 'bold'}}>Use: {item.useNum}</span>
+                                        <span style={detailMemoryStyle}>{formatBytes(tex?.videoMemorySize || 0)}</span>
+                                    </div>
+                                    {gpuTex && (
+                                        <div style={{...detailInfoStyle, flexDirection: 'column', alignItems: 'flex-end', gap: '0', opacity: 0.9}}>
+                                            <b style={{color: '#fdb48d'}}>{gpuTex.format}</b>
+                                            <span style={{color: '#eee', fontWeight: 'bold'}}>{gpuTex.width}x{gpuTex.height}</span>
+                                            <span style={{fontWeight: 'bold'}}>Mip: {gpuTex.mipLevelCount}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
