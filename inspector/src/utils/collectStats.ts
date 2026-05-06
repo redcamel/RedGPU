@@ -1,8 +1,8 @@
-import RedGPUContext from "../../../src/context/RedGPUContext";
+import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import {InspectorState} from "../store";
-import {CommandBatchStats} from "../../../src/renderer/commandEncoder/CommandEncoderManager";
-import View3D from "../../../src/display/view/View3D";
-import RenderViewStateData from "../../../src/display/view/core/RenderViewStateData";
+import {CommandBatchStats} from "@redgpu/src/renderer/commandEncoder/CommandEncoderManager";
+import View3D from "@redgpu/src/display/view/View3D";
+import RenderViewStateData from "@redgpu/src/display/view/core/RenderViewStateData";
 
 /**
  * [KO] 엔진의 실시간 통계를 수집하여 반환합니다.

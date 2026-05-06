@@ -1,10 +1,10 @@
-import RedGPUContext from "../../src/context/RedGPUContext";
+import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import {useInspectorStore} from './store';
 import App from './App';
 import {collectStats} from './utils/collectStats';
-import {FPSMeter} from './components/FPS';
+import {FPSMeter} from './components/monitor/FPS';
 
 /**
  * RedGPUInspector (React Version)

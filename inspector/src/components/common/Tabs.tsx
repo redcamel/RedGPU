@@ -7,6 +7,41 @@ export interface TabItem {
 }
 
 /**
+ * [KO] 탭 메뉴 바만 렌더링하는 컴포넌트입니다.
+ */
+export const TabBar: React.FC<{
+    tabs: TabItem[],
+    activeTab: string,
+    onTabChange: (id: string) => void,
+    isSticky?: boolean,
+    style?: React.CSSProperties
+}> = ({tabs, activeTab, onTabChange, isSticky = true, style}) => {
+    return (
+        <div style={{
+            ...tabBarStyle,
+            position: isSticky ? 'sticky' : 'relative',
+            top: isSticky ? 0 : 'auto',
+            ...style
+        }}>
+            {tabs.map(tab => (
+                <div
+                    key={tab.id}
+                    onClick={() => onTabChange(tab.id)}
+                    style={{
+                        ...tabItemStyle,
+                        borderBottom: activeTab === tab.id ? `2px solid ${THEME.colors.primary}` : '2px solid transparent',
+                        color: activeTab === tab.id ? THEME.colors.primary : THEME.colors.label,
+                        backgroundColor: activeTab === tab.id ? THEME.colors.activeBg : 'transparent'
+                    }}
+                >
+                    {tab.label}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+/**
  * [KO] 인스펙터의 탭 메뉴와 컨텐츠 영역을 포함하는 컨테이너 컴포넌트입니다.
  */
 const Tabs: React.FC<{
@@ -22,22 +57,7 @@ const Tabs: React.FC<{
             ...tabsContainerStyle,
             overflow: scrollable ? 'hidden' : 'visible'
         }}>
-            <div style={tabBarStyle}>
-                {tabs.map(tab => (
-                    <div
-                        key={tab.id}
-                        onClick={() => onTabChange(tab.id)}
-                        style={{
-                            ...tabItemStyle,
-                            borderBottom: activeTab === tab.id ? `2px solid ${THEME.colors.primary}` : '2px solid transparent',
-                            color: activeTab === tab.id ? THEME.colors.primary : THEME.colors.label,
-                            backgroundColor: activeTab === tab.id ? THEME.colors.activeBg : 'transparent'
-                        }}
-                    >
-                        {tab.label}
-                    </div>
-                ))}
-            </div>
+            <TabBar tabs={tabs} activeTab={activeTab} onTabChange={onTabChange}/>
             <div style={{
                 ...contentAreaStyle,
                 overflowY: scrollable ? 'auto' : 'visible'

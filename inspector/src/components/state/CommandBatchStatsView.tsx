@@ -2,16 +2,18 @@ import React from 'react';
 import {useInspectorStore} from '../../store';
 import Section from '../common/Section';
 import StatItem from '../common/StatItem';
+import {CommandBatchStats} from "@redgpu/src/renderer/commandEncoder/CommandEncoderManager";
 
 /**
  * [KO] GPU 커맨드 배치 통계를 표시하는 컴포넌트입니다.
  * [EN] Component that displays GPU command batch statistics.
  */
-const CommandBatchStatsView = () => {
-    const commandBatchStats = useInspectorStore(state => state.commandBatchStats);
+const CommandBatchStatsView = ({statsProp}: { statsProp?: CommandBatchStats | null }) => {
+    const storeStats = useInspectorStore(state => state.commandBatchStats);
+    const commandBatchStats = statsProp !== undefined ? statsProp : storeStats;
 
     if (!commandBatchStats || Object.keys(commandBatchStats).length === 0) {
-        return null;
+        return <div style={noItemStyle}>No command batch stats available.</div>;
     }
 
     return (
@@ -53,6 +55,13 @@ const listItemStyle: React.CSSProperties = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap'
+};
+
+const noItemStyle: React.CSSProperties = {
+    padding: '8px 16px',
+    fontSize: '10px',
+    color: '#666',
+    fontStyle: 'italic'
 };
 
 export default CommandBatchStatsView;

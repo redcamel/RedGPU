@@ -7034,9 +7034,9 @@ var React$1 = reactExports;
 function is$1(x2, y2) {
   return x2 === y2 && (0 !== x2 || 1 / x2 === 1 / y2) || x2 !== x2 && y2 !== y2;
 }
-var objectIs$1 = "function" === typeof Object.is ? Object.is : is$1, useState = React$1.useState, useEffect$1 = React$1.useEffect, useLayoutEffect = React$1.useLayoutEffect, useDebugValue$2 = React$1.useDebugValue;
+var objectIs$1 = "function" === typeof Object.is ? Object.is : is$1, useState$1 = React$1.useState, useEffect$1 = React$1.useEffect, useLayoutEffect = React$1.useLayoutEffect, useDebugValue$2 = React$1.useDebugValue;
 function useSyncExternalStore$2(subscribe, getSnapshot) {
-  var value = getSnapshot(), _useState = useState({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
+  var value = getSnapshot(), _useState = useState$1({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
   useLayoutEffect(
     function() {
       inst.value = value;
@@ -7214,7 +7214,7 @@ const useInspectorStore = create$1((set) => ({
   setRedGPUContext: (value) => set({ redGPUContext: value }),
   setCurrentTab: (tab) => set({ currentTab: tab })
 }));
-const THEME = {
+const THEME$1 = {
   fontFamily: "",
   fontSize: {
     title: "13px",
@@ -7232,10 +7232,10 @@ const THEME = {
 };
 const COMMON_STYLES = {
   label: {
-    color: THEME.colors.label
+    color: THEME$1.colors.label
   },
   value: {
-    color: THEME.colors.value,
+    color: THEME$1.colors.value,
     textAlign: "right",
     wordBreak: "break-all",
     marginLeft: "10px"
@@ -7247,13 +7247,13 @@ const Divider = ({ vertical, style }) => {
 };
 const defaultHorizontalStyle = {
   height: "1px",
-  background: THEME.colors.border,
+  background: THEME$1.colors.border,
   margin: "8px 0"
 };
 const defaultVerticalStyle = {
   width: "1px",
   height: "36px",
-  background: THEME.colors.border,
+  background: THEME$1.colors.border,
   margin: "0"
 };
 class FPSMeter {
@@ -7405,15 +7405,15 @@ const sectionStyle = {
   marginBottom: "16px"
 };
 const sectionTitleStyle = {
-  fontSize: THEME.fontSize.title,
-  color: THEME.colors.primary,
+  fontSize: THEME$1.fontSize.title,
+  color: THEME$1.colors.primary,
   marginBottom: "8px",
   fontWeight: "bold",
-  borderBottom: `1px solid ${THEME.colors.primary}33`,
+  borderBottom: `1px solid ${THEME$1.colors.primary}33`,
   paddingBottom: "4px",
-  fontFamily: THEME.fontFamily
+  fontFamily: THEME$1.fontFamily
 };
-const StatItem = ({ label, value, color = THEME.colors.value, isBold = false }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$2, children: [
+const StatItem = ({ label, value, color = THEME$1.colors.value, isBold = false }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$2, children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
   /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
     ...COMMON_STYLES.value,
@@ -7425,8 +7425,8 @@ const statItemStyle$2 = {
   display: "flex",
   justifyContent: "space-between",
   marginBottom: "4px",
-  fontSize: THEME.fontSize.content,
-  fontFamily: THEME.fontFamily
+  fontSize: THEME$1.fontSize.content,
+  fontFamily: THEME$1.fontFamily
 };
 const TotalState = () => {
   const {
@@ -7465,8 +7465,8 @@ const statItemStyle$1 = {
   display: "flex",
   justifyContent: "space-between",
   marginBottom: "4px",
-  fontSize: THEME.fontSize.content,
-  fontFamily: THEME.fontFamily
+  fontSize: THEME$1.fontSize.content,
+  fontFamily: THEME$1.fontFamily
 };
 const StatBoolItem = ({
   label,
@@ -7492,8 +7492,8 @@ const statItemStyle = {
   display: "flex",
   justifyContent: "space-between",
   marginBottom: "4px",
-  fontSize: THEME.fontSize.content,
-  fontFamily: THEME.fontFamily,
+  fontSize: THEME$1.fontSize.content,
+  fontFamily: THEME$1.fontFamily,
   alignItems: "center"
 };
 const ToneMappingView = () => {
@@ -7535,7 +7535,7 @@ const RedGPUContextView = () => {
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "devicePixelRatio", value: devicePixelRatio }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Mobile", value: detector.isMobile, trueLabel: "Yes", falseLabel: "No" }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: userAgentStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: labelStyle, children: "User Agent" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: labelStyle$1, children: "User Agent" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: userAgentValueStyle, children: detector.userAgent })
       ] })
     ] }),
@@ -7549,7 +7549,7 @@ const RedGPUContextView = () => {
   ] });
 };
 const containerStyle$1 = {};
-const labelStyle = {
+const labelStyle$1 = {
   color: "#888"
 };
 const userAgentStyle = {
@@ -7569,10 +7569,11 @@ const placeholderStyle$1 = {
   fontSize: "12px",
   fontStyle: "italic"
 };
-const CommandBatchStatsView = () => {
-  const commandBatchStats = useInspectorStore((state) => state.commandBatchStats);
+const CommandBatchStatsView = ({ statsProp }) => {
+  const storeStats = useInspectorStore((state) => state.commandBatchStats);
+  const commandBatchStats = statsProp !== void 0 ? statsProp : storeStats;
   if (!commandBatchStats || Object.keys(commandBatchStats).length === 0) {
-    return null;
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noItemStyle$1, children: "No command batch stats available." });
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: Object.entries(commandBatchStats).map(([phase, stats]) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: `Command Batch: ${phase}`, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Command Buffers", value: stats["Command Buffers"] }),
@@ -7600,6 +7601,12 @@ const listItemStyle = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap"
+};
+const noItemStyle$1 = {
+  padding: "8px 16px",
+  fontSize: "10px",
+  color: "#666",
+  fontStyle: "italic"
 };
 const ResourceSummary = ({
   label,
@@ -7863,6 +7870,69 @@ const noItemStyle = {
   fontSize: "10px",
   color: "#666",
   fontStyle: "italic"
+};
+const TabBar = ({ tabs, activeTab, onTabChange, isSticky = true, style }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+    ...tabBarStyle,
+    position: isSticky ? "sticky" : "relative",
+    top: isSticky ? 0 : "auto",
+    ...style
+  }, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      onClick: () => onTabChange(tab.id),
+      style: {
+        ...tabItemStyle,
+        borderBottom: activeTab === tab.id ? `2px solid ${THEME$1.colors.primary}` : "2px solid transparent",
+        color: activeTab === tab.id ? THEME$1.colors.primary : THEME$1.colors.label,
+        backgroundColor: activeTab === tab.id ? THEME$1.colors.activeBg : "transparent"
+      },
+      children: tab.label
+    },
+    tab.id
+  )) });
+};
+const Tabs = ({ tabs, activeTab, onTabChange, children, scrollable = true }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+    ...tabsContainerStyle,
+    overflow: scrollable ? "hidden" : "visible"
+  }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(TabBar, { tabs, activeTab, onTabChange }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      ...contentAreaStyle,
+      overflowY: scrollable ? "auto" : "visible"
+    }, children })
+  ] });
+};
+const tabsContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  flex: 1
+};
+const tabBarStyle = {
+  display: "flex",
+  background: THEME$1.colors.background,
+  borderTop: `1px solid ${THEME$1.colors.border}`,
+  borderBottom: `1px solid ${THEME$1.colors.border}`,
+  position: "sticky",
+  top: 0,
+  zIndex: 10
+};
+const tabItemStyle = {
+  padding: "8px 4px",
+  fontSize: THEME$1.fontSize.small,
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  flex: 1,
+  textAlign: "center",
+  whiteSpace: "nowrap",
+  fontFamily: THEME$1.fontFamily
+};
+const contentAreaStyle = {
+  flex: 1,
+  overflowY: "auto",
+  background: "rgba(0,0,0,0.2)"
 };
 class InstanceIdGenerator {
   /**
@@ -9110,88 +9180,27 @@ __privateAdd(_AController, _globalKeyboardActiveView, null);
  */
 __privateAdd(_AController, _globalKeyboardActiveController, null);
 let AController = _AController;
-const Tabs = ({ tabs, activeTab, onTabChange, children, scrollable = true }) => {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
-    ...tabsContainerStyle,
-    overflow: scrollable ? "hidden" : "visible"
-  }, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabBarStyle, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "div",
-      {
-        onClick: () => onTabChange(tab.id),
-        style: {
-          ...tabItemStyle,
-          borderBottom: activeTab === tab.id ? `2px solid ${THEME.colors.primary}` : "2px solid transparent",
-          color: activeTab === tab.id ? THEME.colors.primary : THEME.colors.label,
-          backgroundColor: activeTab === tab.id ? THEME.colors.activeBg : "transparent"
-        },
-        children: tab.label
-      },
-      tab.id
-    )) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
-      ...contentAreaStyle,
-      overflowY: scrollable ? "auto" : "visible"
-    }, children })
-  ] });
-};
-const tabsContainerStyle = {
-  display: "flex",
-  flexDirection: "column",
-  flex: 1
-};
-const tabBarStyle = {
-  display: "flex",
-  background: THEME.colors.background,
-  borderTop: `1px solid ${THEME.colors.border}`,
-  borderBottom: `1px solid ${THEME.colors.border}`,
-  position: "sticky",
-  top: 0,
-  zIndex: 10
-};
-const tabItemStyle = {
-  padding: "8px 4px",
-  fontSize: THEME.fontSize.small,
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "all 0.2s",
-  flex: 1,
-  textAlign: "center",
-  whiteSpace: "nowrap",
-  fontFamily: THEME.fontFamily
-};
-const contentAreaStyle = {
-  flex: 1,
-  overflowY: "auto",
-  background: "rgba(0,0,0,0.2)"
-};
-const ViewListView = () => {
-  const { redGPUContext, lastUpdateTime } = useInspectorStore();
-  const [activeViewTab, setActiveViewTab] = reactExports.useState("0");
-  if (!redGPUContext) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "RedGPUContext not initialized" });
+const formatNumber = (val) => {
+  const str = String(val);
+  if (str.includes("%")) {
+    const num2 = parseFloat(str);
+    return isNaN(num2) ? str : `${num2.toFixed(2)}%`;
   }
-  const { viewList } = redGPUContext;
-  if (viewList.length > 1) {
-    const tabs = viewList.map((view, index) => ({
-      id: index.toString(),
-      label: view.name || `View ${index}`
-    }));
-    const activeView = viewList[parseInt(activeViewTab)] || viewList[0];
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { tabs, activeTab: activeViewTab, onTabChange: setActiveViewTab, scrollable: false, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "12px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view: activeView, lastUpdateTime }) }) }) });
+  if (str.includes("px")) {
+    const num2 = parseFloat(str);
+    return isNaN(num2) ? str : `${num2.toFixed(2)}px`;
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...containerStyle, padding: "12px" }, children: viewList.map((view, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view, lastUpdateTime }, index)) });
+  const num = parseFloat(str);
+  return isNaN(num) ? str : num.toFixed(2);
 };
-const ViewSection = ({ view, lastUpdateTime }) => {
+const ViewStateTab = ({ view, lastUpdateTime }) => {
   const {
-    name,
     renderViewStateData,
     rawCamera,
     scene,
     useFrustumCulling,
     useDistanceCulling,
-    camera,
-    postEffectManager
+    camera
   } = view;
   const {
     usedVideoMemory,
@@ -9206,53 +9215,53 @@ const ViewSection = ({ view, lastUpdateTime }) => {
   } = renderViewStateData;
   const { x: x2, y: y2, width, height, pixelRectArray } = viewportSize;
   const { backgroundColor, useBackgroundColor } = scene;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: name, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "usedVideoMemory", value: formatBytes(usedVideoMemory), color: "#fdb48d", isBold: true }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "viewRenderCPURecordingTime", value: `${viewRenderCPURecordingTime.toFixed(2)}ms` }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "num3DGroups", value: num3DGroups }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "num3DObjects", value: num3DObjects }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numInstances", value: numInstances }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numDrawCalls", value: numDrawCalls }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numTriangles", value: numTriangles }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numPoints", value: numPoints }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFrustumCulling", value: useFrustumCulling }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useDistanceCulling", value: useDistanceCulling }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "x, y", value: `${formatNumber(x2)}, ${formatNumber(y2)}` }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "width, height", value: `${width}, ${height}` }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]` }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "scene", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Rendering Statistics", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "usedVideoMemory", value: formatBytes(usedVideoMemory), color: "#fdb48d", isBold: true }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "viewRenderCPURecordingTime", value: `${viewRenderCPURecordingTime.toFixed(2)}ms` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "num3DGroups", value: num3DGroups }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "num3DObjects", value: num3DObjects }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numInstances", value: numInstances }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numDrawCalls", value: numDrawCalls }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numTriangles", value: numTriangles }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numPoints", value: numPoints })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Culling Settings", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFrustumCulling", value: useFrustumCulling }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useDistanceCulling", value: useDistanceCulling })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Viewport", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "x, y", value: `${formatNumber(x2)}, ${formatNumber(y2)}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "width, height", value: `${width}, ${height}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]` })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Scene", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: scene.name }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useBackgroundColor", value: useBackgroundColor }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "backgroundColor", value: backgroundColor.rgba })
     ] }),
-    camera && (camera instanceof AController || camera.constructor.name.includes("Controller") || "camera" in camera && camera.camera !== camera) && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "controller", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: camera.name }),
-        camera["distance"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "distance", value: formatNumber(camera["distance"]) }),
-        camera["pan"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pan", value: formatNumber(camera["pan"]) }),
-        camera["tilt"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "tilt", value: formatNumber(camera["tilt"]) }),
-        camera["zoom"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "zoom", value: formatNumber(camera["zoom"]) }),
-        camera["centerX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
-          StatItem,
-          {
-            label: "center",
-            value: `${formatNumber(camera["centerX"])}, ${formatNumber(camera["centerY"])}, ${formatNumber(camera["centerZ"])}`
-          }
-        ),
-        camera["targetX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
-          StatItem,
-          {
-            label: "target",
-            value: `${formatNumber(camera["targetX"])}, ${formatNumber(camera["targetY"] || 0)}, ${formatNumber(camera["targetZ"])}`
-          }
-        )
-      ] })
+    camera && (camera instanceof AController || camera.constructor.name.includes("Controller") || "camera" in camera && camera.camera !== camera) && /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Controller", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: camera.name }),
+      camera["distance"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "distance", value: formatNumber(camera["distance"]) }),
+      camera["pan"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pan", value: formatNumber(camera["pan"]) }),
+      camera["tilt"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "tilt", value: formatNumber(camera["tilt"]) }),
+      camera["zoom"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "zoom", value: formatNumber(camera["zoom"]) }),
+      camera["centerX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "center",
+          value: `${formatNumber(camera["centerX"])}, ${formatNumber(camera["centerY"])}, ${formatNumber(camera["centerZ"])}`
+        }
+      ),
+      camera["targetX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "target",
+          value: `${formatNumber(camera["targetX"])}, ${formatNumber(camera["targetY"] || 0)}, ${formatNumber(camera["targetZ"])}`
+        }
+      )
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "rawCamera", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Raw Camera", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "name", value: rawCamera.name }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         StatItem,
@@ -9289,69 +9298,6 @@ const ViewSection = ({ view, lastUpdateTime }) => {
       /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useAutoExposure", value: rawCamera.useAutoExposure }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "ev100", value: formatNumber(rawCamera.ev100) }),
-      rawCamera.useAutoExposure && postEffectManager && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "autoExposure", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "minEV100", value: formatNumber(postEffectManager.autoExposure.minEV100) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "maxEV100", value: formatNumber(postEffectManager.autoExposure.maxEV100) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            StatItem,
-            {
-              label: "speedUp",
-              value: formatNumber(postEffectManager.autoExposure.adaptationSpeedUp)
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            StatItem,
-            {
-              label: "speedDown",
-              value: formatNumber(postEffectManager.autoExposure.adaptationSpeedDown)
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            StatItem,
-            {
-              label: "lowPercentile",
-              value: formatNumber(postEffectManager.autoExposure.lowPercentile)
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            StatItem,
-            {
-              label: "highPercentile",
-              value: formatNumber(postEffectManager.autoExposure.highPercentile)
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            StatItem,
-            {
-              label: "maxMultiplier",
-              value: formatNumber(postEffectManager.autoExposure.maxExposureMultiplier)
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            StatItem,
-            {
-              label: "meteringMode",
-              value: ["AVERAGE", "CENTER_WEIGHTED", "SPOT"][postEffectManager.autoExposure.meteringMode] || postEffectManager.autoExposure.meteringMode
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            StatItem,
-            {
-              label: "targetLuminance",
-              value: formatNumber(postEffectManager.autoExposure.targetLuminance)
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            StatItem,
-            {
-              label: "compensation",
-              value: formatNumber(postEffectManager.autoExposure.exposureCompensation)
-            }
-          )
-        ] })
-      ] }),
       !rawCamera.useAutoExposure && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "aperture", value: `f/${formatNumber(rawCamera.aperture)}` }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -9366,22 +9312,265 @@ const ViewSection = ({ view, lastUpdateTime }) => {
     ] })
   ] });
 };
-const formatNumber = (val) => {
-  const str = String(val);
-  if (str.includes("%")) {
-    const num2 = parseFloat(str);
-    return isNaN(num2) ? str : `${num2.toFixed(2)}%`;
+const ViewCommandsTab = ({ view }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(CommandBatchStatsView, { statsProp: view.renderViewStateData.commandBatchStats });
+};
+const PropertyInspector = ({ target, depth = 0 }) => {
+  if (depth > 3 || !target) return null;
+  const allKeys = /* @__PURE__ */ new Set();
+  Object.getOwnPropertyNames(target).forEach((k2) => allKeys.add(k2));
+  let proto = Object.getPrototypeOf(target);
+  while (proto && proto !== Object.prototype) {
+    Object.getOwnPropertyNames(proto).forEach((k2) => {
+      const descriptor = Object.getOwnPropertyDescriptor(proto, k2);
+      if (descriptor && (descriptor.get || typeof descriptor.value !== "function")) {
+        allKeys.add(k2);
+      }
+    });
+    proto = Object.getPrototypeOf(proto);
   }
-  if (str.includes("px")) {
-    const num2 = parseFloat(str);
-    return isNaN(num2) ? str : `${num2.toFixed(2)}px`;
+  const filteredKeys = Array.from(allKeys).filter((key) => {
+    if (key.startsWith("#") || key.startsWith("_")) return false;
+    const blackList = [
+      "constructor",
+      "prototype",
+      "length",
+      "name",
+      "view",
+      "redGPUContext",
+      "passList",
+      "passListLength",
+      "passIndex",
+      "videoMemorySize",
+      "outputTextureView",
+      "shaderInfo",
+      "storageInfo",
+      "uniformsInfo",
+      "systemUniformsInfo",
+      "uniformBuffer"
+    ];
+    if (blackList.includes(key)) return false;
+    try {
+      if (typeof target[key] === "function") return false;
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }).sort();
+  if (filteredKeys.length === 0) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "10px", color: "#666", paddingLeft: "8px" }, children: "No inspectable properties." });
   }
-  const num = parseFloat(str);
-  return isNaN(num) ? str : num.toFixed(2);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { paddingLeft: depth > 0 ? "12px" : "0" }, children: filteredKeys.map((key) => {
+    let value;
+    try {
+      value = target[key];
+    } catch (e) {
+      return null;
+    }
+    const type = typeof value;
+    if (value === null || value === void 0) {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: key, value: "null" }, key);
+    }
+    if (type === "number") {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: key, value: formatNumber(value) }, key);
+    }
+    if (type === "boolean") {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: key, value }, key);
+    }
+    if (type === "string") {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: key, value }, key);
+    }
+    if (Array.isArray(value)) {
+      if (value.length > 0 && typeof value[0] !== "object") {
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: key, value: `[${value.map((v2) => typeof v2 === "number" ? formatNumber(v2) : v2).join(", ")}]` }, key);
+      }
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleObject, { label: key, value, depth, typeLabel: "Array" }, key);
+    }
+    if (type === "object") {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleObject, { label: key, value, depth, typeLabel: "Object" }, key);
+    }
+    return null;
+  }) });
+};
+const CollapsibleObject = ({ label, value, depth, typeLabel }) => {
+  const [isExpanded, setIsExpanded] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "4px" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        onClick: () => setIsExpanded(!isExpanded),
+        style: headerStyle$1,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: toggleButtonStyle$1, children: isExpanded ? "-" : "+" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: label }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: typeHintStyle, children: [
+            "(",
+            typeLabel === "Array" ? `Array(${value.length})` : "object",
+            ")"
+          ] })
+        ]
+      }
+    ),
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentWrapperStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyInspector, { target: value, depth: depth + 1 }) })
+  ] });
+};
+const headerStyle$1 = {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  cursor: "pointer",
+  fontSize: "11px",
+  padding: "2px 0",
+  userSelect: "none"
+};
+const toggleButtonStyle$1 = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "14px",
+  height: "14px",
+  border: `1px solid ${THEME$1.colors.primary}`,
+  borderRadius: "3px",
+  fontSize: "12px",
+  fontWeight: "bold",
+  color: THEME$1.colors.primary,
+  lineHeight: "14px",
+  background: "rgba(0,0,0,0.3)",
+  flexShrink: 0
+};
+const labelStyle = {
+  color: "#888"
+};
+const typeHintStyle = {
+  color: "#555",
+  fontSize: "10px",
+  fontStyle: "italic"
+};
+const contentWrapperStyle = {
+  borderLeft: "1px solid rgba(255,255,255,0.1)",
+  marginLeft: "5px",
+  marginTop: "2px"
+};
+const ViewPostEffectsTab = ({ view }) => {
+  const { redGPUContext } = useInspectorStore();
+  const { postEffectManager, rawCamera } = view;
+  if (!postEffectManager) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "11px", color: "#666", fontStyle: "italic" }, children: "PostEffectManager not available" });
+  }
+  const { antialiasingManager } = redGPUContext;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: "General", children: /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "videoMemorySize", value: formatBytes(postEffectManager.videoMemorySize) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Built-in Effects", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFXAA", value: antialiasingManager.useFXAA }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useTAA", value: antialiasingManager.useTAA }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useSSAO", value: postEffectManager.useSSAO }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useSSR", value: postEffectManager.useSSR }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Auto Exposure", value: rawCamera.useAutoExposure }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Sky Atmosphere", value: !!view.skyAtmosphere })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: `Custom Effects (${postEffectManager.effectList.length})`, children: [
+      postEffectManager.effectList.map((effect, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleEffect, { effect }, i)),
+      postEffectManager.effectList.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "11px", color: "#666", fontStyle: "italic" }, children: "No custom effects added." })
+    ] })
+  ] });
+};
+const CollapsibleEffect = ({ effect }) => {
+  const [isExpanded, setIsExpanded] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "8px", background: "rgba(255,255,255,0.02)", borderRadius: "4px" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        onClick: () => setIsExpanded(!isExpanded),
+        style: effectHeaderStyle,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: toggleButtonStyle, children: isExpanded ? "-" : "+" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontWeight: "bold", color: "#ddd" }, children: effect.constructor.name || "Unknown Effect" })
+        ]
+      }
+    ),
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "8px", borderTop: "1px solid rgba(255,255,255,0.05)" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyInspector, { target: effect }) })
+  ] });
+};
+const effectHeaderStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  padding: "6px 8px",
+  cursor: "pointer",
+  userSelect: "none",
+  fontSize: "12px"
+};
+const toggleButtonStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "14px",
+  height: "14px",
+  border: "1px solid #fdb48d",
+  borderRadius: "3px",
+  fontSize: "12px",
+  fontWeight: "bold",
+  color: "#fdb48d",
+  lineHeight: "14px",
+  background: "rgba(0,0,0,0.3)",
+  flexShrink: 0
+};
+const ViewListView = () => {
+  const { redGPUContext, lastUpdateTime } = useInspectorStore();
+  const [activeViewIndex, setActiveViewIndex] = reactExports.useState("0");
+  const [activeDetailTab, setActiveDetailTab] = reactExports.useState("STATE");
+  if (!redGPUContext) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "RedGPUContext not initialized" });
+  }
+  const { viewList } = redGPUContext;
+  const activeView = viewList[parseInt(activeViewIndex)] || viewList[0];
+  const viewTabs = viewList.map((view, index) => ({
+    id: index.toString(),
+    label: view.name || `View ${index}`
+  }));
+  const detailTabs = [
+    { id: "STATE", label: "State" },
+    { id: "COMMANDS", label: "Commands" },
+    { id: "POSTEFFECTS", label: "PostEffects" }
+  ];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: stickyHeaderStyle, children: [
+      viewList.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        TabBar,
+        {
+          tabs: viewTabs,
+          activeTab: activeViewIndex,
+          onTabChange: setActiveViewIndex,
+          isSticky: false
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        TabBar,
+        {
+          tabs: detailTabs,
+          activeTab: activeDetailTab,
+          onTabChange: setActiveDetailTab,
+          isSticky: false,
+          style: { borderTop: "none" }
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "12px" }, children: [
+      activeDetailTab === "STATE" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewStateTab, { view: activeView, lastUpdateTime }),
+      activeDetailTab === "COMMANDS" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewCommandsTab, { view: activeView }),
+      activeDetailTab === "POSTEFFECTS" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewPostEffectsTab, { view: activeView })
+    ] })
+  ] });
 };
 const containerStyle = {
   display: "flex",
   flexDirection: "column"
+};
+const stickyHeaderStyle = {
+  position: "sticky",
+  top: 0,
+  zIndex: 100,
+  background: "#111"
 };
 const placeholderStyle = {
   padding: "20px",

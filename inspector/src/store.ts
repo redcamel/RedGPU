@@ -1,6 +1,6 @@
 import {create} from 'zustand';
-import RedGPUContext from "../../src/context/RedGPUContext";
-import {CommandBatchStats} from "../../src/renderer/commandEncoder/CommandEncoderManager";
+import RedGPUContext from "@redgpu/src/context/RedGPUContext";
+import {CommandBatchStats} from "@redgpu/src/renderer/commandEncoder/CommandEncoderManager";
 
 export interface ResourceStatusSummary {
     count: number;
