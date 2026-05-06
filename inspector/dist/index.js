@@ -7324,7 +7324,7 @@ const MiniGraph = ({
     ctx.fill();
   }, [data, color]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "12px" }, children: [
-    (label || valueDisplay) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$3, children: [
+    (label || valueDisplay) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$4, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: label }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueStyle, color }, children: valueDisplay })
     ] }),
@@ -7356,7 +7356,7 @@ const hexToRgba = (hex, alpha) => {
   }
   return `rgba(${r2}, ${g}, ${b}, ${alpha})`;
 };
-const headerStyle$3 = {
+const headerStyle$4 = {
   display: "flex",
   justifyContent: "space-between",
   fontSize: "10px",
@@ -7556,14 +7556,14 @@ const low1FpsStyle = {
 const low01FpsStyle = {
   color: "#f50"
 };
-const Section = ({ title, children }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
-  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: title }),
+const Section = ({ title, children }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle$1, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle$1, children: title }),
   children
 ] });
-const sectionStyle = {
+const sectionStyle$1 = {
   marginBottom: "16px"
 };
-const sectionTitleStyle = {
+const sectionTitleStyle$1 = {
   fontSize: THEME.fontSize.title,
   color: THEME.colors.primary,
   marginBottom: "8px",
@@ -7928,21 +7928,21 @@ const TexturePreviewModal = ({ item, onClose }) => {
     { col: 2, row: 4 }
     // Back (idx 5)
   ];
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: overlayStyle, onClick: onClose, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: overlayStyle$1, onClick: onClose, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
                 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
                 @keyframes scaleUp { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
                 @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
             ` }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle, onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$2, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle$1, onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$3, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column" }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle, children: fileName || "Texture Preview" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle$1, children: fileName || "Texture Preview" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: pathStyle, children: originalPath })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle, onClick: onClose, children: "×" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle$1, onClick: onClose, children: "×" })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$1, children: [
         item.src && !isHDR && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.src, style: previewImageStyle, alt: "preview" }),
         isCube && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: cubePreviewGridStyle, children: gridPositions.map((pos, i) => {
           const faceIdx = cubeFaceIndices[i];
@@ -7990,8 +7990,8 @@ const TexturePreviewModal = ({ item, onClose }) => {
         ] })
       ] }),
       copyFeedback && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toastStyle, children: copyFeedback }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerStyle$1, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle$1, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Format: ",
             /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: gpuTex == null ? void 0 : gpuTex.format })
@@ -8005,7 +8005,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
             ] })
           ] })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle$1, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Dimension: ",
             /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex == null ? void 0 : gpuTex.dimension })
@@ -8015,7 +8015,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
             /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex == null ? void 0 : gpuTex.depthOrArrayLayers })
           ] })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle$1, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Memory: ",
             /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
@@ -8029,7 +8029,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
     ] })
   ] });
 };
-const overlayStyle = {
+const overlayStyle$1 = {
   position: "fixed",
   top: 0,
   left: 0,
@@ -8043,7 +8043,7 @@ const overlayStyle = {
   backdropFilter: "blur(8px)",
   animation: "fadeIn 0.2s ease-out"
 };
-const modalStyle = {
+const modalStyle$1 = {
   background: "rgba(26, 26, 26, 0.95)",
   borderRadius: "12px",
   border: "1px solid rgba(255,255,255,0.15)",
@@ -8056,7 +8056,7 @@ const modalStyle = {
   overflow: "hidden",
   animation: "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
 };
-const headerStyle$2 = {
+const headerStyle$3 = {
   padding: "16px",
   background: "rgba(255,255,255,0.03)",
   borderBottom: "1px solid rgba(255,255,255,0.1)",
@@ -8064,7 +8064,7 @@ const headerStyle$2 = {
   justifyContent: "space-between",
   alignItems: "flex-start"
 };
-const titleStyle = {
+const titleStyle$1 = {
   fontSize: "15px",
   fontWeight: "bold",
   color: "#eee",
@@ -8076,7 +8076,7 @@ const pathStyle = {
   wordBreak: "break-all",
   maxWidth: "400px"
 };
-const closeButtonStyle = {
+const closeButtonStyle$1 = {
   background: "none",
   border: "none",
   color: "#888",
@@ -8086,7 +8086,7 @@ const closeButtonStyle = {
   lineHeight: "1",
   marginTop: "-4px"
 };
-const contentStyle = {
+const contentStyle$1 = {
   padding: "20px",
   overflow: "auto",
   display: "flex",
@@ -8148,7 +8148,7 @@ const faceCopyButtonStyle = {
   transition: "opacity 0.2s"
   // We'll use a CSS rule for hover on parent
 };
-const footerStyle = {
+const footerStyle$1 = {
   padding: "16px",
   background: "rgba(255,255,255,0.03)",
   borderTop: "1px solid rgba(255,255,255,0.1)",
@@ -8158,7 +8158,7 @@ const footerStyle = {
   flexDirection: "column",
   gap: "8px"
 };
-const infoRowStyle = {
+const infoRowStyle$1 = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center"
@@ -8212,6 +8212,375 @@ if (typeof document !== "undefined") {
     `;
   document.head.appendChild(style);
 }
+const formatBufferUsage$1 = (usage) => {
+  const labels = [];
+  if (usage & 1) labels.push("MAP_READ");
+  if (usage & 2) labels.push("MAP_WRITE");
+  if (usage & 4) labels.push("COPY_SRC");
+  if (usage & 8) labels.push("COPY_DST");
+  if (usage & 16) labels.push("INDEX");
+  if (usage & 32) labels.push("VERTEX");
+  if (usage & 64) labels.push("UNIFORM");
+  if (usage & 128) labels.push("STORAGE");
+  if (usage & 256) labels.push("INDIRECT");
+  if (usage & 512) labels.push("QUERY_RESOLVE");
+  return labels.join(", ");
+};
+const BufferDetailModal = ({ item, type, onClose }) => {
+  const buf = item.buffer || item;
+  const isRaw = item.isRaw;
+  const availableTabs = [];
+  if (type === "indexBuffer") {
+    availableTabs.push("dataViewU32");
+  } else if (type === "vertexBuffer") {
+    availableTabs.push("dataViewF32");
+  } else {
+    availableTabs.push("dataViewF32", "dataViewU32");
+  }
+  const [activeTab, setActiveTab] = reactExports.useState(availableTabs[0]);
+  const label = isRaw ? item.label : item.label || (buf == null ? void 0 : buf.name) || "Unnamed Buffer";
+  const uuid = item.uuid;
+  const size = isRaw ? item.size : (buf == null ? void 0 : buf.size) || 0;
+  const usage = isRaw ? item.usage : buf == null ? void 0 : buf.usage;
+  const vertexCount = buf == null ? void 0 : buf.vertexCount;
+  const stride = buf == null ? void 0 : buf.stride;
+  const triangleCount = buf == null ? void 0 : buf.triangleCount;
+  const dataViewF32 = (buf == null ? void 0 : buf.dataViewF32) || ((buf == null ? void 0 : buf.data) instanceof Float32Array ? buf.data : (buf == null ? void 0 : buf.data) instanceof ArrayBuffer ? new Float32Array(buf.data) : null);
+  const dataViewU32 = (buf == null ? void 0 : buf.dataViewU32) || ((buf == null ? void 0 : buf.data) instanceof Uint32Array ? buf.data : (buf == null ? void 0 : buf.data) instanceof ArrayBuffer ? new Uint32Array(buf.data) : null);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: overlayStyle, onClick: onClose, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes scaleUp { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+                * { box-sizing: border-box; }
+            ` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle, onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$2, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle, children: label }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: typeStyle, children: type.toUpperCase() })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle, onClick: onClose, children: "×" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Properties" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: propertyGridStyle, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "UUID", value: uuid }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Size", value: formatBytes(size), highlight: true }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Usage", value: formatBufferUsage$1(usage) }),
+            vertexCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Vertex Count", value: vertexCount }),
+            stride !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Stride", value: `${stride} bytes` }),
+            triangleCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Triangle Count", value: triangleCount })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...sectionTitleStyle, display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Buffer Data View" }),
+            availableTabs.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabContainerStyle, children: availableTabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+              TabButton,
+              {
+                label: tab,
+                active: activeTab === tab,
+                onClick: () => setActiveTab(tab)
+              },
+              tab
+            )) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dataViewerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(DataContent, { type, tab: activeTab, f32: dataViewF32, u32: dataViewU32 }) })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: footerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Video Memory: ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: formatBytes(size) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { opacity: 0.5 }, children: "Top 210 elements shown" })
+      ] }) })
+    ] })
+  ] });
+};
+const TabButton = ({ label, active, onClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+  "button",
+  {
+    style: {
+      ...tabButtonStyle,
+      background: active ? "#fdb48d" : "transparent",
+      color: active ? "#000" : "#888",
+      fontSize: "9px"
+    },
+    onClick,
+    children: label
+  }
+);
+const DataContent = ({ type, tab, f32, u32 }) => {
+  const limit = 210;
+  if (tab === "dataViewF32") {
+    if (!f32) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "dataViewF32 not available" });
+    const items = Array.from(f32.subarray(0, limit));
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataGridStyle, children: [
+      items.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataItemStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: i }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: v2.toFixed(4) })
+      ] }, i)),
+      f32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+        "... and ",
+        f32.length - limit,
+        " more"
+      ] })
+    ] });
+  }
+  if (tab === "dataViewU32") {
+    if (!u32) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "dataViewU32 not available" });
+    const items = Array.from(u32.subarray(0, limit));
+    if (type === "indexBuffer") {
+      const groups = [];
+      for (let i = 0; i < items.length; i += 3) {
+        groups.push(items.slice(i, i + 3));
+      }
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "10px", width: "100%", overflowX: "hidden" }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+          gap: "4px",
+          width: "100%"
+        }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...triangleGroupStyle, marginBottom: 0 }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: triangleLabelStyle, children: [
+            "T",
+            groupIdx
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "4px", flex: 1, justifyContent: "space-around" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: triangleItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: v2 }) }, i)) })
+        ] }, groupIdx)) }),
+        u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+          "... and ",
+          u32.length - limit,
+          " more"
+        ] })
+      ] });
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataGridStyle, children: [
+      items.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataItemStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: i }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: v2 })
+      ] }, i)),
+      u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+        "... and ",
+        u32.length - limit,
+        " more"
+      ] })
+    ] });
+  }
+  return null;
+};
+const PropertyItem = ({ label, value, highlight }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: propertyItemStyle, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: propertyLabelStyle, children: label }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...propertyValueStyle, color: highlight ? "#fdb48d" : "#eee" }, children: value })
+] });
+const overlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  background: "rgba(0,0,0,0.7)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1e4,
+  backdropFilter: "blur(8px)",
+  animation: "fadeIn 0.2s ease-out"
+};
+const modalStyle = {
+  background: "rgba(26, 26, 26, 0.95)",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.15)",
+  width: "90%",
+  maxWidth: "600px",
+  maxHeight: "90%",
+  display: "flex",
+  flexDirection: "column",
+  boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
+  overflow: "hidden",
+  animation: "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
+};
+const headerStyle$2 = {
+  padding: "16px",
+  background: "rgba(255,255,255,0.03)",
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: "12px"
+};
+const titleStyle = {
+  fontSize: "16px",
+  fontWeight: "bold",
+  color: "#eee",
+  marginBottom: "4px",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  display: "block"
+};
+const typeStyle = {
+  fontSize: "10px",
+  color: "#777",
+  fontWeight: "bold",
+  letterSpacing: "0.1em"
+};
+const closeButtonStyle = {
+  background: "none",
+  border: "none",
+  color: "#888",
+  fontSize: "28px",
+  cursor: "pointer",
+  padding: "0 4px",
+  lineHeight: "1",
+  marginTop: "-4px",
+  flexShrink: 0
+};
+const contentStyle = {
+  padding: "20px",
+  overflowY: "auto",
+  overflowX: "hidden",
+  display: "flex",
+  flexDirection: "column",
+  gap: "24px"
+};
+const sectionStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "12px",
+  width: "100%"
+};
+const sectionTitleStyle = {
+  fontSize: "12px",
+  color: "#fdb48d",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  borderBottom: "1px solid rgba(253, 180, 141, 0.2)",
+  paddingBottom: "4px"
+};
+const propertyGridStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px"
+};
+const propertyItemStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  fontSize: "11px",
+  gap: "20px"
+};
+const propertyLabelStyle = {
+  color: "#888",
+  flexShrink: 0
+};
+const propertyValueStyle = {
+  color: "#eee",
+  textAlign: "right",
+  wordBreak: "break-all"
+};
+const dataViewerStyle = {
+  background: "#000",
+  borderRadius: "4px",
+  padding: "12px",
+  minHeight: "200px",
+  maxHeight: "400px",
+  overflowY: "auto",
+  overflowX: "hidden",
+  border: "1px solid rgba(255,255,255,0.05)",
+  width: "100%"
+};
+const tabContainerStyle = {
+  display: "flex",
+  gap: "4px",
+  background: "rgba(255,255,255,0.05)",
+  padding: "2px",
+  borderRadius: "4px"
+};
+const tabButtonStyle = {
+  border: "none",
+  padding: "2px 8px",
+  borderRadius: "3px",
+  fontSize: "10px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s"
+};
+const dataGridStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "4px 8px",
+  fontFamily: "monospace",
+  width: "100%"
+};
+const dataItemStyle = {
+  display: "flex",
+  flexDirection: "column",
+  minWidth: "70px",
+  background: "rgba(255,255,255,0.02)",
+  padding: "4px",
+  borderRadius: "2px",
+  border: "1px solid rgba(255,255,255,0.05)"
+};
+const indexLabelStyle = {
+  fontSize: "8px",
+  color: "#555",
+  marginBottom: "2px"
+};
+const valueLabelStyle = {
+  fontSize: "11px",
+  color: "#10b981"
+};
+const noDataStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "150px",
+  color: "#444",
+  fontSize: "12px"
+};
+const moreStyle = {
+  width: "100%",
+  textAlign: "center",
+  padding: "10px",
+  color: "#444",
+  fontSize: "10px",
+  fontStyle: "italic"
+};
+const footerStyle = {
+  padding: "16px",
+  background: "rgba(255,255,255,0.03)",
+  borderTop: "1px solid rgba(255,255,255,0.1)",
+  fontSize: "11px",
+  color: "#666"
+};
+const infoRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center"
+};
+const triangleGroupStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  background: "rgba(255,255,255,0.03)",
+  padding: "4px 8px",
+  borderRadius: "4px",
+  border: "1px solid rgba(255,255,255,0.05)",
+  marginBottom: "2px"
+};
+const triangleLabelStyle = {
+  fontSize: "9px",
+  color: "#fdb48d",
+  fontWeight: "bold",
+  minWidth: "24px",
+  opacity: 0.7
+};
+const triangleItemStyle = {
+  minWidth: "30px",
+  textAlign: "center"
+};
 const ResourceSummary = ({
   label,
   stats,
@@ -8246,6 +8615,20 @@ const formatTextureUsage = (usage) => {
   if (usage & 4) labels.push("TEXTURE");
   if (usage & 8) labels.push("STORAGE");
   if (usage & 16) labels.push("ATTACHMENT");
+  return labels.join(", ");
+};
+const formatBufferUsage = (usage) => {
+  const labels = [];
+  if (usage & 1) labels.push("MAP_READ");
+  if (usage & 2) labels.push("MAP_WRITE");
+  if (usage & 4) labels.push("COPY_SRC");
+  if (usage & 8) labels.push("COPY_DST");
+  if (usage & 16) labels.push("INDEX");
+  if (usage & 32) labels.push("VERTEX");
+  if (usage & 64) labels.push("UNIFORM");
+  if (usage & 128) labels.push("STORAGE");
+  if (usage & 256) labels.push("INDIRECT");
+  if (usage & 512) labels.push("QUERY_RESOLVE");
   return labels.join(", ");
 };
 const ResourceDetailList = ({ type, redGPUContext, onPreview }) => {
@@ -8283,6 +8666,7 @@ const ResourceDetailList = ({ type, redGPUContext, onPreview }) => {
         uuid: key,
         label: buffer.label || key,
         size: buffer.size,
+        usage: buffer.usage,
         isRaw: true
       }));
       break;
@@ -8310,7 +8694,7 @@ const ResourceDetailList = ({ type, redGPUContext, onPreview }) => {
             padding: "10px",
             cursor: "pointer"
           },
-          onClick: () => onPreview(item),
+          onClick: () => onPreview(item, type),
           children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
               fileName && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: fileName }),
@@ -8375,43 +8759,76 @@ const ResourceDetailList = ({ type, redGPUContext, onPreview }) => {
         item.uuid || idx
       );
     } else if (item.isRaw) {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: item.label }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "UUID: ",
-            item.uuid
-          ] }) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes(item.size) }) })
-      ] }) }, item.uuid || idx);
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          style: { ...detailItemStyle, cursor: "pointer" },
+          onClick: () => onPreview(item, type),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: item.label }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "UUID: ",
+                item.uuid
+              ] }) }),
+              item.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Usage: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatBufferUsage(item.usage) })
+              ] }) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes(item.size) }) })
+          ] })
+        },
+        item.uuid || idx
+      );
     } else {
       const buf = item.buffer;
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: item.label || (buf == null ? void 0 : buf.name) || "Unnamed" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "UUID: ",
-            item.uuid
-          ] }) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle, children: [
-            "Use: ",
-            item.useNum
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((buf == null ? void 0 : buf.size) || 0) })
-        ] })
-      ] }) }, item.uuid || idx);
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          style: {
+            ...detailItemStyle,
+            borderLeft: type === "uniformBuffer" ? "2px solid #a0aec0" : "none",
+            background: type === "uniformBuffer" ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.02)",
+            marginBottom: type === "uniformBuffer" ? "4px" : "2px",
+            cursor: "pointer"
+          },
+          onClick: () => onPreview(item, type),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: item.label || (buf == null ? void 0 : buf.name) || "Unnamed" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "UUID: ",
+                item.uuid
+              ] }) }),
+              (buf == null ? void 0 : buf.usage) !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Usage: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatBufferUsage(buf.usage) })
+              ] }) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle, children: [
+                "Use: ",
+                item.useNum
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((buf == null ? void 0 : buf.size) || 0) })
+            ] })
+          ] })
+        },
+        item.uuid || idx
+      );
     }
   }) });
 };
 const ResourcesView = () => {
   const { resourceStats, redGPUContext } = useInspectorStore();
   const [expanded, setExpanded] = reactExports.useState({});
-  const [previewItem, setPreviewItem] = reactExports.useState(null);
+  const [previewData, setPreviewData] = reactExports.useState(null);
   const toggleExpanded = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+  const handlePreview = (item, type) => {
+    setPreviewData({ item, type });
   };
   const renderResource = (key, label, stats) => /* @__PURE__ */ jsxRuntimeExports.jsxs(React$2.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -8423,8 +8840,9 @@ const ResourcesView = () => {
         onToggle: () => toggleExpanded(key)
       }
     ),
-    expanded[key] && redGPUContext && /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceDetailList, { type: key, redGPUContext, onPreview: setPreviewItem })
+    expanded[key] && redGPUContext && /* @__PURE__ */ jsxRuntimeExports.jsx(ResourceDetailList, { type: key, redGPUContext, onPreview: handlePreview })
   ] }, key);
+  const isTextureType = previewData && ["bitmapTexture", "cubeTexture", "hdrTexture"].includes(previewData.type);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { paddingBottom: "20px" }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Texture Resources", children: [
       renderResource("bitmapTexture", "Bitmap Textures", resourceStats.bitmapTexture),
@@ -8438,11 +8856,19 @@ const ResourcesView = () => {
       renderResource("storageBuffer", "Storage Buffers", resourceStats.storageBuffer),
       renderResource("gpuBuffer", "Raw GPU Buffers", resourceStats.gpuBuffer)
     ] }),
-    previewItem && /* @__PURE__ */ jsxRuntimeExports.jsx(
+    previewData && isTextureType && /* @__PURE__ */ jsxRuntimeExports.jsx(
       TexturePreviewModal,
       {
-        item: previewItem,
-        onClose: () => setPreviewItem(null)
+        item: previewData.item,
+        onClose: () => setPreviewData(null)
+      }
+    ),
+    previewData && !isTextureType && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      BufferDetailModal,
+      {
+        item: previewData.item,
+        type: previewData.type,
+        onClose: () => setPreviewData(null)
       }
     )
   ] });

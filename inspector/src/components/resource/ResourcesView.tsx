@@ -5,6 +5,7 @@ import StatItem from '../common/StatItem';
 import formatBytes from '@redgpu/src/utils/formatBytes';
 import RedGPUContext from '@redgpu/src/context/RedGPUContext';
 import TexturePreviewModal from './TexturePreviewModal';
+import BufferDetailModal from './BufferDetailModal';
 
 /**
  * [KO] 리소스 유형별 요약 정보를 표시하는 컴포넌트입니다.
@@ -56,9 +57,27 @@ const formatTextureUsage = (usage: number): string => {
 };
 
 /**
+ * [KO] 버퍼 사용처 플래그를 읽기 쉬운 문자열로 변환합니다.
+ */
+const formatBufferUsage = (usage: number): string => {
+    const labels: string[] = [];
+    if (usage & 0x01) labels.push('MAP_READ');
+    if (usage & 0x02) labels.push('MAP_WRITE');
+    if (usage & 0x04) labels.push('COPY_SRC');
+    if (usage & 0x08) labels.push('COPY_DST');
+    if (usage & 0x10) labels.push('INDEX');
+    if (usage & 0x20) labels.push('VERTEX');
+    if (usage & 0x40) labels.push('UNIFORM');
+    if (usage & 0x80) labels.push('STORAGE');
+    if (usage & 0x100) labels.push('INDIRECT');
+    if (usage & 0x200) labels.push('QUERY_RESOLVE');
+    return labels.join(', ');
+};
+
+/**
  * [KO] 리소스 상세 목록을 표시하는 컴포넌트입니다.
  */
-const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, redGPUContext: RedGPUContext, onPreview: (item: any) => void }) => {
+const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, redGPUContext: RedGPUContext, onPreview: (item: any, type: string) => void }) => {
     const rm = redGPUContext.resourceManager;
     let items: any[] = [];
     let isTexture = false;
@@ -94,6 +113,7 @@ const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, re
                 uuid: key,
                 label: buffer.label || key,
                 size: buffer.size,
+                usage: (buffer as any).usage,
                 isRaw: true
             }));
             break;
@@ -125,7 +145,7 @@ const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, re
                                 padding: '10px',
                                 cursor: 'pointer'
                             }}
-                            onClick={() => onPreview(item)}
+                            onClick={() => onPreview(item, type)}
                         >
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
@@ -176,13 +196,22 @@ const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, re
                     );
                 } else if (item.isRaw) {
                     return (
-                        <div key={item.uuid || idx} style={detailItemStyle}>
+                        <div 
+                            key={item.uuid || idx} 
+                            style={{...detailItemStyle, cursor: 'pointer'}}
+                            onClick={() => onPreview(item, type)}
+                        >
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
                                     <span style={detailNameStyle}>{item.label}</span>
                                     <div style={detailInfoStyle}>
                                         <span>UUID: {item.uuid}</span>
                                     </div>
+                                    {item.usage !== undefined && (
+                                        <div style={{...detailInfoStyle, marginTop: '2px', opacity: 0.7}}>
+                                            <span>Usage: <b style={{color: '#eee'}}>{formatBufferUsage(item.usage)}</b></span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={detailRightContainerStyle}>
                                     <span style={detailMemoryStyle}>{formatBytes(item.size)}</span>
@@ -192,14 +221,30 @@ const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, re
                     );
                 } else {
                     const buf = item.buffer;
+
                     return (
-                        <div key={item.uuid || idx} style={detailItemStyle}>
+                        <div 
+                            key={item.uuid || idx} 
+                            style={{
+                                ...detailItemStyle,
+                                borderLeft: type === 'uniformBuffer' ? '2px solid #a0aec0' : 'none',
+                                background: type === 'uniformBuffer' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.02)',
+                                marginBottom: type === 'uniformBuffer' ? '4px' : '2px',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => onPreview(item, type)}
+                        >
                             <div style={detailHeaderStyle}>
                                 <div style={detailLeftContainerStyle}>
                                     <span style={detailNameStyle}>{item.label || buf?.name || 'Unnamed'}</span>
                                     <div style={detailInfoStyle}>
                                         <span>UUID: {item.uuid}</span>
                                     </div>
+                                    {buf?.usage !== undefined && (
+                                        <div style={{...detailInfoStyle, marginTop: '2px', opacity: 0.7}}>
+                                            <span>Usage: <b style={{color: '#eee'}}>{formatBufferUsage(buf.usage)}</b></span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div style={detailRightContainerStyle}>
                                     <span style={useNumStyle}>Use: {item.useNum}</span>
@@ -221,10 +266,14 @@ const ResourceDetailList = ({type, redGPUContext, onPreview}: { type: string, re
 const ResourcesView = () => {
     const {resourceStats, redGPUContext} = useInspectorStore();
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-    const [previewItem, setPreviewItem] = useState<any>(null);
+    const [previewData, setPreviewData] = useState<{item: any, type: string} | null>(null);
 
     const toggleExpanded = (key: string) => {
         setExpanded(prev => ({...prev, [key]: !prev[key]}));
+    };
+
+    const handlePreview = (item: any, type: string) => {
+        setPreviewData({item, type});
     };
 
     const renderResource = (key: string, label: string, stats: ResourceStatusSummary) => (
@@ -236,10 +285,12 @@ const ResourcesView = () => {
                 onToggle={() => toggleExpanded(key)}
             />
             {expanded[key] && redGPUContext && (
-                <ResourceDetailList type={key} redGPUContext={redGPUContext} onPreview={setPreviewItem} />
+                <ResourceDetailList type={key} redGPUContext={redGPUContext} onPreview={handlePreview} />
             )}
         </React.Fragment>
     );
+
+    const isTextureType = previewData && ['bitmapTexture', 'cubeTexture', 'hdrTexture'].includes(previewData.type);
 
     return (
         <div style={{paddingBottom: '20px'}}>
@@ -257,10 +308,18 @@ const ResourcesView = () => {
                 {renderResource('gpuBuffer', 'Raw GPU Buffers', resourceStats.gpuBuffer)}
             </Section>
 
-            {previewItem && (
+            {previewData && isTextureType && (
                 <TexturePreviewModal
-                    item={previewItem}
-                    onClose={() => setPreviewItem(null)}
+                    item={previewData.item}
+                    onClose={() => setPreviewData(null)}
+                />
+            )}
+
+            {previewData && !isTextureType && (
+                <BufferDetailModal
+                    item={previewData.item}
+                    type={previewData.type}
+                    onClose={() => setPreviewData(null)}
                 />
             )}
         </div>
