@@ -60,7 +60,7 @@ const BufferDetailModal = ({item, type, onClose}: { item: any, type: string, onC
         fetchBufferData();
     }, [redGPUContext, gpuBuffer, buf?.data]);
 
-    const label = isRaw ? item.label : (item.label || 'Unnamed Buffer');
+    const label = isRaw ? item.label : (item.label || buf?.label || buf?.name || 'Unnamed Buffer');
     const uuid = item.uuid;
     const size = isRaw ? item.size : (buf?.size || 0);
     const usage = isRaw ? item.usage : buf?.usage;
