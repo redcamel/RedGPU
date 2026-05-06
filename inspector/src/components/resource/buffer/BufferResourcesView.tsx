@@ -60,7 +60,8 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: { type: string, redG
                 label: buffer.label || key,
                 size: buffer.size,
                 usage: (buffer as any).usage,
-                isRaw: true
+                isRaw: true,
+                gpuBuffer: buffer // Pass the instance for readback
             }));
             break;
         }

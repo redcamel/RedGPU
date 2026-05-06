@@ -56,7 +56,6 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
     }, [gpuTex, redGPUContext, item.src, hasSrcList, isCube, isHDR]);
 
     const handleCopy = (text: string, label: string) => {
-// ... (omitting for context, will provide full replacement below)
         navigator.clipboard.writeText(text);
         setCopyFeedback(`Copied ${label} path!`);
         setTimeout(() => setCopyFeedback(null), 2000);

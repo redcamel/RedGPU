@@ -8288,21 +8288,8 @@ async function readGPUBufferToCPU(device, gpuBuffer) {
     return null;
   }
 }
-const formatBufferUsage = (usage) => {
-  const labels = [];
-  if (usage & 1) labels.push("MAP_READ");
-  if (usage & 2) labels.push("MAP_WRITE");
-  if (usage & 4) labels.push("COPY_SRC");
-  if (usage & 8) labels.push("COPY_DST");
-  if (usage & 16) labels.push("INDEX");
-  if (usage & 32) labels.push("VERTEX");
-  if (usage & 64) labels.push("UNIFORM");
-  if (usage & 128) labels.push("STORAGE");
-  if (usage & 256) labels.push("INDIRECT");
-  if (usage & 512) labels.push("QUERY_RESOLVE");
-  return labels.join(", ");
-};
 const BufferDetailModal = ({ item, type, onClose }) => {
+  var _a;
   const { redGPUContext } = useInspectorStore();
   const [liveData, setLiveData] = reactExports.useState(null);
   const [isLive, setIsLive] = reactExports.useState(false);
@@ -8315,13 +8302,15 @@ const BufferDetailModal = ({ item, type, onClose }) => {
     availableTabs.push("dataViewU32");
   } else if (type === "vertexBuffer") {
     availableTabs.push("dataViewF32");
+  } else if (type === "uniformBuffer" || type === "storageBuffer" || type === "gpuBuffer") {
+    availableTabs.push("data");
   } else {
     availableTabs.push("data", "dataViewF32", "dataViewU32");
   }
   const [activeTab, setActiveTab] = reactExports.useState(availableTabs[0]);
   reactExports.useEffect(() => {
     const fetchBufferData = async () => {
-      var _a;
+      var _a2;
       if (redGPUContext && gpuBuffer) {
         const canRead = !!(gpuBuffer.usage & GPUBufferUsage.COPY_SRC);
         if (canRead) {
@@ -8334,7 +8323,7 @@ const BufferDetailModal = ({ item, type, onClose }) => {
           }
         }
       }
-      const localData = (buf == null ? void 0 : buf.data) instanceof ArrayBuffer ? buf.data : ((_a = buf == null ? void 0 : buf.data) == null ? void 0 : _a.buffer) instanceof ArrayBuffer ? buf.data.buffer : null;
+      const localData = (buf == null ? void 0 : buf.data) instanceof ArrayBuffer ? buf.data : ((_a2 = buf == null ? void 0 : buf.data) == null ? void 0 : _a2.buffer) instanceof ArrayBuffer ? buf.data.buffer : null;
       if (localData) {
         setLiveData(localData.slice(0));
       }
@@ -8351,6 +8340,7 @@ const BufferDetailModal = ({ item, type, onClose }) => {
   const stride = buf == null ? void 0 : buf.stride;
   const triangleCount = buf == null ? void 0 : buf.triangleCount;
   const interleavedStruct = buf == null ? void 0 : buf.interleavedStruct;
+  const dataObjectType = isRaw ? "GPUBuffer" : ((_a = buf == null ? void 0 : buf.data) == null ? void 0 : _a.constructor.name) || "Unknown";
   const dataViewF32 = liveData ? new Float32Array(liveData) : null;
   const dataViewU32 = liveData ? new Uint32Array(liveData) : null;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: overlayStyle, onClick: onClose, children: [
@@ -8379,7 +8369,8 @@ const BufferDetailModal = ({ item, type, onClose }) => {
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: propertyGridStyle, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "UUID", value: uuid }),
             /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Size", value: formatBytes(size), highlight: true }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Usage", value: formatBufferUsage(usage) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Data Object", value: dataObjectType }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Usage", value: formatBufferUsage$1(usage) }),
             vertexCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Vertex Count", value: formatNumber(vertexCount, 0) }),
             stride !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Stride", value: `${formatNumber(stride, 0)} elements` }),
             triangleCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Triangle Count", value: formatNumber(triangleCount, 0) })
@@ -8393,13 +8384,7 @@ const BufferDetailModal = ({ item, type, onClose }) => {
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "10px", fontSize: "9px", color: "#888" }, children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                   "Loc: ",
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    "b",
-                    {
-                      style: { color: "#eee" },
-                      children: formatNumber(attr.shaderLocation, 0)
-                    }
-                  )
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatNumber(attr.shaderLocation, 0) })
                 ] }),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                   "Offset: ",
@@ -8421,12 +8406,7 @@ const BufferDetailModal = ({ item, type, onClose }) => {
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
-            ...sectionTitleStyle,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...sectionTitleStyle, display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Buffer Data View" }),
             availableTabs.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabContainerStyle, children: availableTabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
               TabButton,
@@ -8505,29 +8485,18 @@ const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) =>
           padding: "6px 8px",
           alignItems: "flex-start"
         }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
-            ...triangleLabelStyle,
-            color: "#10b981",
-            minWidth: "35px",
-            marginTop: "14px"
-          }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...triangleLabelStyle, color: "#10b981", minWidth: "35px", marginTop: "14px" }, children: [
             "V",
             formatNumber(groupIdx, 0)
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "12px", flex: 1, flexWrap: "wrap" }, children: attrInfo ? attrInfo.map((info) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: attrBlockStyle, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: attrBlockLabelStyle, children: info.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "6px" }, children: group.slice(info.offset, info.offset + info.count).map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "55px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
-              ...valueLabelStyle,
-              fontSize: "10px"
-            }, children: formatNumber(v2) }) }, i)) })
-          ] }, info.name)) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "60px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
-            ...valueLabelStyle,
-            fontSize: "10px"
-          }, children: formatNumber(v2) }) }, i)) }) })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "6px" }, children: group.slice(info.offset, info.offset + info.count).map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "55px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueLabelStyle, fontSize: "10px" }, children: formatNumber(v2) }) }, i)) })
+          ] }, info.name)) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "60px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueLabelStyle, fontSize: "10px" }, children: formatNumber(v2) }) }, i)) }) })
         ] }, groupIdx)) }),
         f32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
           "... and ",
-          f32.length - limit,
+          formatNumber(f32.length - limit, 0),
           " more"
         ] })
       ] });
@@ -8539,7 +8508,7 @@ const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) =>
       ] }, i)),
       f32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
         "... and ",
-        f32.length - limit,
+        formatNumber(f32.length - limit, 0),
         " more"
       ] })
     ] });
@@ -8552,44 +8521,38 @@ const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) =>
       for (let i = 0; i < items.length; i += 3) {
         groups.push(items.slice(i, i + 3));
       }
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "div",
-        {
-          style: { display: "flex", flexDirection: "column", gap: "10px", width: "100%", overflowX: "hidden" },
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
-              gap: "4px",
-              width: "100%"
-            }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
-              ...triangleGroupStyle,
-              background: groupIdx % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.07)",
-              marginBottom: 0
-            }, children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: triangleLabelStyle, children: [
-                "T",
-                formatNumber(groupIdx, 0)
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "4px", flex: 1, justifyContent: "space-around" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: triangleItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: formatNumber(v2, 0) }) }, i)) })
-            ] }, groupIdx)) }),
-            u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
-              "... and ",
-              u32.length - limit,
-              " more"
-            ] })
-          ]
-        }
-      );
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "10px", width: "100%", overflowX: "hidden" }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+          gap: "4px",
+          width: "100%"
+        }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+          ...triangleGroupStyle,
+          background: groupIdx % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.07)",
+          marginBottom: 0
+        }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: triangleLabelStyle, children: [
+            "T",
+            formatNumber(groupIdx, 0)
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "4px", flex: 1, justifyContent: "space-around" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: triangleItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: formatNumber(v2, 0) }) }, i)) })
+        ] }, groupIdx)) }),
+        u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+          "... and ",
+          formatNumber(u32.length - limit, 0),
+          " more"
+        ] })
+      ] });
     }
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataGridStyle, children: [
       items.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataItemStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: i }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: v2 })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: formatNumber(i, 0) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: formatNumber(v2, 0) })
       ] }, i)),
       u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
         "... and ",
-        u32.length - limit,
+        formatNumber(u32.length - limit, 0),
         " more"
       ] })
     ] });
@@ -8688,6 +8651,7 @@ const statusBadgeStyle = {
   padding: "2px 6px",
   borderRadius: "10px",
   fontWeight: "bold",
+  textTransform: "uppercase",
   letterSpacing: "0.05em"
 };
 const closeButtonStyle = {
@@ -8719,6 +8683,7 @@ const sectionTitleStyle = {
   fontSize: "12px",
   color: "#fdb48d",
   fontWeight: "bold",
+  textTransform: "uppercase",
   borderBottom: "1px solid rgba(253, 180, 141, 0.2)",
   paddingBottom: "4px"
 };
@@ -8880,6 +8845,7 @@ const wordHeaderStyle = {
   fontSize: "9px",
   color: "#555",
   fontWeight: "bold",
+  textTransform: "uppercase",
   borderBottom: "1px solid rgba(255,255,255,0.05)",
   marginBottom: "4px"
 };
@@ -9255,7 +9221,9 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
         label: buffer.label || key,
         size: buffer.size,
         usage: buffer.usage,
-        isRaw: true
+        isRaw: true,
+        gpuBuffer: buffer
+        // Pass the instance for readback
       }));
       break;
     }
