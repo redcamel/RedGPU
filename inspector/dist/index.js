@@ -7209,7 +7209,25 @@ const useInspectorStore = create$1((set) => ({
     gpuBuffer: { count: 0, videoMemory: 0 }
   },
   currentTab: "STATE",
-  setStats: (stats) => set((state) => ({ ...state, ...stats })),
+  fpsHistory: [],
+  memoryHistory: [],
+  drawCallHistory: [],
+  setStats: (stats) => set((state) => {
+    const nextState = { ...state, ...stats };
+    if (stats.fps !== void 0) {
+      const nextFpsHistory = [...state.fpsHistory, stats.fps].slice(-100);
+      nextState.fpsHistory = nextFpsHistory;
+    }
+    if (stats.totalUsedVideoMemory !== void 0) {
+      const nextMemHistory = [...state.memoryHistory, stats.totalUsedVideoMemory].slice(-100);
+      nextState.memoryHistory = nextMemHistory;
+    }
+    if (stats.totalNumDrawCalls !== void 0) {
+      const nextDrawHistory = [...state.drawCallHistory, stats.totalNumDrawCalls].slice(-100);
+      nextState.drawCallHistory = nextDrawHistory;
+    }
+    return nextState;
+  }),
   setUseDebugPanel: (value) => set({ useDebugPanel: value }),
   setRedGPUContext: (value) => set({ redGPUContext: value }),
   setCurrentTab: (tab) => set({ currentTab: tab })
@@ -7256,20 +7274,119 @@ const COMMON_STYLES = {
     flexShrink: 0
   }
 };
-const Divider = ({ vertical, style }) => {
-  const combinedStyle = vertical ? { ...defaultVerticalStyle, ...style } : { ...defaultHorizontalStyle, ...style };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: combinedStyle });
+const MiniGraph = ({
+  data,
+  width = "100%",
+  height = 40,
+  color = THEME.colors.primary,
+  label,
+  valueDisplay
+}) => {
+  const canvasRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    const w2 = rect.width;
+    const h = rect.height;
+    ctx.clearRect(0, 0, w2, h);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.fillRect(0, 0, w2, h);
+    if (data.length < 2) return;
+    const max = Math.max(...data) * 1.1 || 1;
+    const min = Math.min(...data) * 0.9 || 0;
+    const range = max - min;
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = "round";
+    const step = w2 / (data.length - 1);
+    data.forEach((val, i) => {
+      const x2 = i * step;
+      const y2 = h - (val - min) / range * h;
+      if (i === 0) ctx.moveTo(x2, y2);
+      else ctx.lineTo(x2, y2);
+    });
+    ctx.stroke();
+    ctx.lineTo(w2, h);
+    ctx.lineTo(0, h);
+    const gradient = ctx.createLinearGradient(0, 0, 0, h);
+    const rgbaColor = color.startsWith("#") ? hexToRgba(color, 0.3) : color;
+    gradient.addColorStop(0, rgbaColor);
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }, [data, color]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "12px" }, children: [
+    (label || valueDisplay) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$2, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: label }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueStyle, color }, children: valueDisplay })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "canvas",
+      {
+        ref: canvasRef,
+        style: {
+          width,
+          height,
+          display: "block",
+          borderRadius: "2px",
+          border: "1px solid rgba(255,255,255,0.1)"
+        }
+      }
+    )
+  ] });
 };
-const defaultHorizontalStyle = {
-  height: "1px",
-  background: THEME.colors.border,
-  margin: "8px 0"
+const hexToRgba = (hex, alpha) => {
+  let r2 = 0, g = 0, b = 0;
+  if (hex.length === 4) {
+    r2 = parseInt(hex[1] + hex[1], 16);
+    g = parseInt(hex[2] + hex[2], 16);
+    b = parseInt(hex[3] + hex[3], 16);
+  } else if (hex.length === 7) {
+    r2 = parseInt(hex.substring(1, 3), 16);
+    g = parseInt(hex.substring(3, 5), 16);
+    b = parseInt(hex.substring(5, 7), 16);
+  }
+  return `rgba(${r2}, ${g}, ${b}, ${alpha})`;
 };
-const defaultVerticalStyle = {
-  width: "1px",
-  height: "36px",
-  background: THEME.colors.border,
-  margin: "0"
+const headerStyle$2 = {
+  display: "flex",
+  justifyContent: "space-between",
+  fontSize: "10px",
+  marginBottom: "4px",
+  fontFamily: 'monospace, "Courier New", courier',
+  fontVariantNumeric: "tabular-nums"
+};
+const labelStyle = {
+  color: "#888"
+};
+const valueStyle = {
+  fontWeight: "bold"
+};
+const consoleAndThrowError = (...arg) => {
+  const msg = Array.prototype.slice.call(arg).join(" ");
+  console.log("//////////////////////////////////////////////////////////");
+  console.log(msg);
+  throw new Error(msg);
+};
+const formatBytes = (bytes, decimals = 2) => {
+  if (typeof bytes !== "number" || bytes < 0 || Number.isNaN(bytes) || !Number.isInteger(bytes)) {
+    consoleAndThrowError("Invalid input: 'bytes' must be a uint");
+  }
+  if (bytes === 0)
+    return "0 Bytes";
+  const k2 = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k2));
+  return parseFloat((bytes / Math.pow(k2, i)).toFixed(dm)) + " " + sizes[i];
 };
 class FPSMeter {
   constructor() {
@@ -7327,90 +7444,116 @@ class FPSMeter {
   }
 }
 const FPS = () => {
-  const { fps, avgFps, low1Fps, low01Fps, frameTime } = useInspectorStore();
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle$3, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: currentFpsBoxStyle, children: [
+  const {
+    fps,
+    avgFps,
+    low1Fps,
+    low01Fps,
+    frameTime,
+    fpsHistory,
+    drawCallHistory,
+    memoryHistory,
+    totalNumDrawCalls,
+    totalUsedVideoMemory
+  } = useInspectorStore();
+  const [isExpanded, setIsExpanded] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$3, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          onClick: () => setIsExpanded(!isExpanded),
+          style: toggleWrapperStyle,
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" })
+        }
+      ),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: fpsValueStyle, children: [
         fps,
         " FPS"
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: frameTimeValueStyle, children: frameTime })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, { vertical: true }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: extraStatsBoxStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: frameTimeValueStyle, children: [
+        "(",
+        frameTime,
+        ")"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { flex: 1 } }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: avgFpsStyle, children: [
         "Avg: ",
         avgFps
       ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: miniDividerStyle }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low1FpsStyle, children: [
         "1%: ",
         low1Fps
       ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: miniDividerStyle }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low01FpsStyle, children: [
         "0.1%: ",
         low01Fps
       ] })
+    ] }),
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: graphColumnStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(MiniGraph, { data: fpsHistory, height: 20, color: "#0f0", label: "FPS", valueDisplay: `${fps} FPS` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(MiniGraph, { data: drawCallHistory, height: 20, color: "#4af", label: "Draws", valueDisplay: totalNumDrawCalls.toString() }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(MiniGraph, { data: memoryHistory, height: 20, color: "#fdb48d", label: "VRAM", valueDisplay: formatBytes(totalUsedVideoMemory) })
     ] })
-  ] }) });
+  ] });
 };
 const containerStyle$3 = {
-  borderBottom: "1px solid rgba(255,255,255,0.1)"
-};
-const statsContainerStyle = {
-  padding: "12px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  gap: "12px",
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
   background: "#000"
 };
-const currentFpsBoxStyle = {
+const statsContainerStyle = {
+  padding: "8px 12px",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  fontSize: "11px",
+  justifyContent: "flex-start",
+  flexWrap: "wrap",
+  fontFamily: 'monospace, "Courier New", courier',
+  fontVariantNumeric: "tabular-nums"
+};
+const toggleWrapperStyle = {
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  paddingRight: "4px"
+};
+const graphColumnStyle = {
   display: "flex",
   flexDirection: "column",
-  alignItems: "flex-end",
-  gap: "2px"
+  padding: "0 12px 8px 12px",
+  gap: "4px"
+};
+const miniDividerStyle = {
+  width: "1px",
+  height: "10px",
+  background: "rgba(255,255,255,0.2)",
+  margin: "0 2px"
 };
 const fpsValueStyle = {
   color: "#0f0",
-  fontSize: "18px",
-  fontWeight: "bold"
+  fontWeight: "bold",
+  fontSize: "12px",
+  textAlign: "left"
 };
 const frameTimeValueStyle = {
   color: "#888",
-  fontSize: "11px"
-};
-const extraStatsBoxStyle = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-end",
-  fontSize: "11px"
+  fontSize: "10px",
+  minWidth: "65px",
+  textAlign: "left"
 };
 const avgFpsStyle = {
-  color: "#4af"
+  color: "#4af",
+  minWidth: "50px"
 };
 const low1FpsStyle = {
-  color: "#fa0"
+  color: "#fa0",
+  minWidth: "45px"
 };
 const low01FpsStyle = {
   color: "#f50"
-};
-const consoleAndThrowError = (...arg) => {
-  const msg = Array.prototype.slice.call(arg).join(" ");
-  console.log("//////////////////////////////////////////////////////////");
-  console.log(msg);
-  throw new Error(msg);
-};
-const formatBytes = (bytes, decimals = 2) => {
-  if (typeof bytes !== "number" || bytes < 0 || Number.isNaN(bytes) || !Number.isInteger(bytes)) {
-    consoleAndThrowError("Invalid input: 'bytes' must be a uint");
-  }
-  if (bytes === 0)
-    return "0 Bytes";
-  const k2 = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k2));
-  return parseFloat((bytes / Math.pow(k2, i)).toFixed(dm)) + " " + sizes[i];
 };
 const Section = ({ title, children }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: title }),
@@ -7948,6 +8091,21 @@ const contentAreaStyle$1 = {
   flex: 1,
   overflowY: "auto",
   background: "rgba(0,0,0,0.2)"
+};
+const Divider = ({ vertical, style }) => {
+  const combinedStyle = vertical ? { ...defaultVerticalStyle, ...style } : { ...defaultHorizontalStyle, ...style };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: combinedStyle });
+};
+const defaultHorizontalStyle = {
+  height: "1px",
+  background: THEME.colors.border,
+  margin: "8px 0"
+};
+const defaultVerticalStyle = {
+  width: "1px",
+  height: "36px",
+  background: THEME.colors.border,
+  margin: "0"
 };
 class InstanceIdGenerator {
   /**

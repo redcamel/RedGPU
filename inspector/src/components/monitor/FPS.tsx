@@ -1,6 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useInspectorStore} from '../../store';
-import Divider from "../common/Divider";
+import MiniGraph from "../common/MiniGraph";
+import formatBytes from "@redgpu/src/utils/formatBytes";
+import {COMMON_STYLES} from "../common/Theme";
 
 /**
  * [KO] FPS 및 프레임 타임 통계를 계산하는 클래스입니다.
@@ -85,77 +87,112 @@ export class FPSMeter {
  * [EN] Component that displays FPS and frame time statistics.
  */
 const FPS = () => {
-    const {fps, avgFps, low1Fps, low01Fps, frameTime} = useInspectorStore();
+    const {
+        fps, avgFps, low1Fps, low01Fps, frameTime,
+        fpsHistory, drawCallHistory, memoryHistory,
+        totalNumDrawCalls, totalUsedVideoMemory
+    } = useInspectorStore();
+
+    const [isExpanded, setIsExpanded] = useState(false);
 
     return (
         <div style={containerStyle}>
             <div style={statsContainerStyle}>
-                <div style={currentFpsBoxStyle}>
-                    <div style={fpsValueStyle}>{fps} FPS</div>
-                    <div style={frameTimeValueStyle}>{frameTime}</div>
+                <div
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    style={toggleWrapperStyle}
+                >
+                    <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
                 </div>
 
-                <Divider vertical={true}/>
+                <div style={fpsValueStyle}>{fps} FPS</div>
+                <div style={frameTimeValueStyle}>({frameTime})</div>
 
-                <div style={extraStatsBoxStyle}>
-                    <div style={avgFpsStyle}>Avg: {avgFps}</div>
-                    <div style={low1FpsStyle}>1%: {low1Fps}</div>
-                    <div style={low01FpsStyle}>0.1%: {low01Fps}</div>
-                </div>
+                <div style={{flex: 1}}/>
+
+                <div style={avgFpsStyle}>Avg: {avgFps}</div>
+                <div style={miniDividerStyle}/>
+                <div style={low1FpsStyle}>1%: {low1Fps}</div>
+                <div style={miniDividerStyle}/>
+                <div style={low01FpsStyle}>0.1%: {low01Fps}</div>
             </div>
+
+            {isExpanded && (
+                <div style={graphColumnStyle}>
+                    <MiniGraph data={fpsHistory} height={20} color="#0f0" label="FPS" valueDisplay={`${fps} FPS`}/>
+                    <MiniGraph data={drawCallHistory} height={20} color="#4af" label="Draws" valueDisplay={totalNumDrawCalls.toString()}/>
+                    <MiniGraph data={memoryHistory} height={20} color="#fdb48d" label="VRAM" valueDisplay={formatBytes(totalUsedVideoMemory)}/>
+                </div>
+            )}
         </div>
     );
 };
 
 // Styles
 const containerStyle: React.CSSProperties = {
-    borderBottom: '1px solid rgba(255,255,255,0.1)'
-};
-
-const statsContainerStyle: React.CSSProperties = {
-    padding: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: '12px',
+    borderBottom: '1px solid rgba(255,255,255,0.1)',
     background: '#000'
 };
 
-const currentFpsBoxStyle: React.CSSProperties = {
+const statsContainerStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '11px',
+    justifyContent: 'flex-start',
+    flexWrap: 'wrap',
+    fontFamily: 'monospace, "Courier New", courier',
+    fontVariantNumeric: 'tabular-nums'
+};
+
+const toggleWrapperStyle: React.CSSProperties = {
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    paddingRight: '4px'
+};
+
+const graphColumnStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: '2px'
+    padding: '0 12px 8px 12px',
+    gap: '4px'
+};
+
+const miniDividerStyle: React.CSSProperties = {
+    width: '1px',
+    height: '10px',
+    background: 'rgba(255,255,255,0.2)',
+    margin: '0 2px'
 };
 
 const fpsValueStyle: React.CSSProperties = {
     color: '#0f0',
-    fontSize: '18px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontSize: '12px',
+    textAlign: 'left'
 };
 
 const frameTimeValueStyle: React.CSSProperties = {
     color: '#888',
-    fontSize: '11px'
-};
-
-const extraStatsBoxStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    fontSize: '11px'
+    fontSize: '10px',
+    minWidth: '65px',
+    textAlign: 'left'
 };
 
 const avgFpsStyle: React.CSSProperties = {
-    color: '#4af'
+    color: '#4af',
+    minWidth: '50px'
 };
 
 const low1FpsStyle: React.CSSProperties = {
-    color: '#fa0'
+    color: '#fa0',
+    minWidth: '45px'
 };
 
 const low01FpsStyle: React.CSSProperties = {
-    color: '#f50'
+    color: '#f50',
 };
 
 export default FPS;

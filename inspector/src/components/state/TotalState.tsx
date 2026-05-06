@@ -16,7 +16,7 @@ const TotalState = () => {
         totalNumDrawCalls,
         totalNumTriangles,
         totalNumPoints,
-        totalUsedVideoMemory
+        totalUsedVideoMemory,
     } = useInspectorStore();
 
     return (
@@ -31,8 +31,5 @@ const TotalState = () => {
         </Section>
     );
 };
-
-// Styles
-
 
 export default TotalState;

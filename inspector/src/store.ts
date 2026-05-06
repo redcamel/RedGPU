@@ -40,6 +40,10 @@ export interface InspectorState {
         gpuBuffer: ResourceStatusSummary;
     };
     currentTab: string;
+    // 히스토리 데이터 (최근 100개 데이터 포인트)
+    fpsHistory: number[];
+    memoryHistory: number[];
+    drawCallHistory: number[];
     setStats: (stats: Partial<InspectorState>) => void;
     setUseDebugPanel: (value: boolean) => void;
     setRedGPUContext: (value: RedGPUContext) => void;
@@ -75,7 +79,32 @@ export const useInspectorStore = create<InspectorState>((set) => ({
         gpuBuffer: {count: 0, videoMemory: 0}
     },
     currentTab: 'STATE',
-    setStats: (stats) => set((state) => ({...state, ...stats})),
+    fpsHistory: [],
+    memoryHistory: [],
+    drawCallHistory: [],
+    setStats: (stats) => set((state) => {
+        const nextState = {...state, ...stats};
+
+        // FPS 히스토리 업데이트
+        if (stats.fps !== undefined) {
+            const nextFpsHistory = [...state.fpsHistory, stats.fps].slice(-100);
+            nextState.fpsHistory = nextFpsHistory;
+        }
+
+        // 메모리 히스토리 업데이트
+        if (stats.totalUsedVideoMemory !== undefined) {
+            const nextMemHistory = [...state.memoryHistory, stats.totalUsedVideoMemory].slice(-100);
+            nextState.memoryHistory = nextMemHistory;
+        }
+
+        // 드로우 콜 히스토리 업데이트
+        if (stats.totalNumDrawCalls !== undefined) {
+            const nextDrawHistory = [...state.drawCallHistory, stats.totalNumDrawCalls].slice(-100);
+            nextState.drawCallHistory = nextDrawHistory;
+        }
+
+        return nextState;
+    }),
     setUseDebugPanel: (value) => set({useDebugPanel: value}),
     setRedGPUContext: (value) => set({redGPUContext: value}),
     setCurrentTab: (tab) => set({currentTab: tab}),
