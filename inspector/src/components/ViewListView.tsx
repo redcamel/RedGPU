@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useInspectorStore} from '../store';
 import Section from "./commonUI/Section";
 import StatItem from "./commonUI/StatItem";
@@ -9,6 +9,7 @@ import View3D from "@redgpu/src/display/view/View3D";
 import AController from "@redgpu/src/camera/core/AController";
 
 import Divider from "./commonUI/Divider";
+import Tabs, {TabItem} from "./commonUI/Tabs";
 
 /**
  * [KO] 엔진의 모든 뷰(View3D)의 상태를 표시하는 컴포넌트입니다.
@@ -16,12 +17,32 @@ import Divider from "./commonUI/Divider";
  */
 const ViewListView = () => {
     const {redGPUContext, lastUpdateTime} = useInspectorStore();
+    const [activeViewTab, setActiveViewTab] = useState('0');
 
     if (!redGPUContext) {
         return <div style={placeholderStyle}>RedGPUContext not initialized</div>;
     }
 
     const {viewList} = redGPUContext;
+
+    if (viewList.length > 1) {
+        const tabs: TabItem[] = viewList.map((view: View3D, index: number) => ({
+            id: index.toString(),
+            label: view.name || `View ${index}`
+        }));
+
+        const activeView = viewList[parseInt(activeViewTab)] || viewList[0];
+
+        return (
+            <div style={containerStyle}>
+                <Tabs tabs={tabs} activeTab={activeViewTab} onTabChange={setActiveViewTab}>
+                    <div style={{padding: '12px'}}>
+                        <ViewSection view={activeView} lastUpdateTime={lastUpdateTime}/>
+                    </div>
+                </Tabs>
+            </div>
+        );
+    }
 
     return (
         <div style={containerStyle}>

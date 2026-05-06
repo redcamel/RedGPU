@@ -9110,12 +9110,68 @@ __privateAdd(_AController, _globalKeyboardActiveView, null);
  */
 __privateAdd(_AController, _globalKeyboardActiveController, null);
 let AController = _AController;
+const Tabs = ({ tabs, activeTab, onTabChange, children }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: tabsContainerStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabBarStyle, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        onClick: () => onTabChange(tab.id),
+        style: {
+          ...tabItemStyle,
+          borderBottom: activeTab === tab.id ? `2px solid ${THEME.colors.primary}` : "2px solid transparent",
+          color: activeTab === tab.id ? THEME.colors.primary : THEME.colors.label,
+          backgroundColor: activeTab === tab.id ? THEME.colors.activeBg : "transparent"
+        },
+        children: tab.label
+      },
+      tab.id
+    )) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentAreaStyle, children })
+  ] });
+};
+const tabsContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  flex: 1,
+  overflow: "hidden"
+};
+const tabBarStyle = {
+  display: "flex",
+  background: THEME.colors.background,
+  borderTop: `1px solid ${THEME.colors.border}`,
+  borderBottom: `1px solid ${THEME.colors.border}`
+};
+const tabItemStyle = {
+  padding: "8px 4px",
+  fontSize: THEME.fontSize.small,
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  flex: 1,
+  textAlign: "center",
+  whiteSpace: "nowrap",
+  fontFamily: THEME.fontFamily
+};
+const contentAreaStyle = {
+  flex: 1,
+  overflowY: "auto",
+  background: "rgba(0,0,0,0.2)"
+};
 const ViewListView = () => {
   const { redGPUContext, lastUpdateTime } = useInspectorStore();
+  const [activeViewTab, setActiveViewTab] = reactExports.useState("0");
   if (!redGPUContext) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "RedGPUContext not initialized" });
   }
   const { viewList } = redGPUContext;
+  if (viewList.length > 1) {
+    const tabs = viewList.map((view, index) => ({
+      id: index.toString(),
+      label: view.name || `View ${index}`
+    }));
+    const activeView = viewList[parseInt(activeViewTab)] || viewList[0];
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { tabs, activeTab: activeViewTab, onTabChange: setActiveViewTab, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "12px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view: activeView, lastUpdateTime }) }) }) });
+  }
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: containerStyle, children: viewList.map((view, index) => /* @__PURE__ */ jsxRuntimeExports.jsx(ViewSection, { view, lastUpdateTime }, index)) });
 };
 const ViewSection = ({ view, lastUpdateTime }) => {
@@ -9345,57 +9401,10 @@ const TabContent = () => {
   }
 };
 const Container = ({ children, style }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "12px", ...style }, children });
-const Tabs = ({ tabs, children }) => {
-  const { currentTab, setCurrentTab } = useInspectorStore();
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: tabsContainerStyle, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabBarStyle, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "div",
-      {
-        onClick: () => setCurrentTab(tab.id),
-        style: {
-          ...tabItemStyle,
-          borderBottom: currentTab === tab.id ? `2px solid ${THEME.colors.primary}` : "2px solid transparent",
-          color: currentTab === tab.id ? THEME.colors.primary : THEME.colors.label,
-          backgroundColor: currentTab === tab.id ? THEME.colors.activeBg : "transparent"
-        },
-        children: tab.label
-      },
-      tab.id
-    )) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentAreaStyle, children })
-  ] });
-};
-const tabsContainerStyle = {
-  display: "flex",
-  flexDirection: "column",
-  flex: 1,
-  overflow: "hidden"
-};
-const tabBarStyle = {
-  display: "flex",
-  background: THEME.colors.background,
-  borderTop: `1px solid ${THEME.colors.border}`,
-  borderBottom: `1px solid ${THEME.colors.border}`
-};
-const tabItemStyle = {
-  padding: "8px 4px",
-  fontSize: THEME.fontSize.small,
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "all 0.2s",
-  flex: 1,
-  textAlign: "center",
-  whiteSpace: "nowrap",
-  fontFamily: THEME.fontFamily
-};
-const contentAreaStyle = {
-  flex: 1,
-  overflowY: "auto",
-  background: "rgba(0,0,0,0.2)"
-};
 const App = () => {
   const useDebugPanel = useInspectorStore((state) => state.useDebugPanel);
   const setUseDebugPanel = useInspectorStore((state) => state.setUseDebugPanel);
+  const { currentTab, setCurrentTab } = useInspectorStore();
   if (!useDebugPanel) return null;
   const tabs = [
     { id: "STATE", label: "State" },
@@ -9409,7 +9418,7 @@ const App = () => {
       /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setUseDebugPanel(false), style: closeBtnStyle, children: "CLOSE" })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(FPS, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { tabs, children: /* @__PURE__ */ jsxRuntimeExports.jsx(TabContent, {}) })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { tabs, activeTab: currentTab, onTabChange: setCurrentTab, children: /* @__PURE__ */ jsxRuntimeExports.jsx(TabContent, {}) })
   ] });
 };
 const panelStyle = {

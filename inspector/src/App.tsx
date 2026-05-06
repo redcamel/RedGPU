@@ -9,6 +9,8 @@ const App = () => {
     const useDebugPanel = useInspectorStore(state => state.useDebugPanel);
     const setUseDebugPanel = useInspectorStore(state => state.setUseDebugPanel);
 
+    const {currentTab, setCurrentTab} = useInspectorStore();
+
     if (!useDebugPanel) return null;
 
     const tabs: TabItem[] = [
@@ -25,7 +27,7 @@ const App = () => {
                 <button onClick={() => setUseDebugPanel(false)} style={closeBtnStyle}>CLOSE</button>
             </div>
             <FPS/>
-            <Tabs tabs={tabs}>
+            <Tabs tabs={tabs} activeTab={currentTab} onTabChange={setCurrentTab}>
                 <TabContent/>
             </Tabs>
         </div>
