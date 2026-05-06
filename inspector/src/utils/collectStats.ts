@@ -6,7 +6,6 @@ import RenderViewStateData from "@redgpu/src/display/view/core/RenderViewStateDa
 
 /**
  * [KO] 엔진의 실시간 통계를 수집하여 반환합니다.
- * [EN] Collects and returns real-time engine statistics.
  */
 export const collectStats = (redGPUContext: RedGPUContext, time: number): Partial<InspectorState> => {
     let totalNum3DGroups = 0;
@@ -18,9 +17,12 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
     let totalUsedVideoMemory = 0;
     const aggregatedBatchStats: CommandBatchStats = {};
 
-    // [KO] 모든 뷰의 통계 합산
-    // [EN] Sum up statistics of all views
-    for (const view of redGPUContext.viewList as View3D[]) {
+    const viewList = redGPUContext.viewList as View3D[];
+    const viewListLen = viewList.length;
+
+    // [KO] 모든 뷰의 통계 합산 (for 루프 최적화)
+    for (let i = 0; i < viewListLen; i++) {
+        const view = viewList[i];
         const state: RenderViewStateData = view.renderViewStateData;
         totalNum3DGroups += state.num3DGroups;
         totalNum3DObjects += state.num3DObjects;
@@ -30,8 +32,6 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
         totalNumPoints += state.numPoints;
         totalUsedVideoMemory += state.usedVideoMemory;
 
-        // [KO] 커맨드 배치 통계 합산
-        // [EN] Aggregate command batch statistics
         if (state.commandBatchStats) {
             for (const phase in state.commandBatchStats) {
                 const phaseStats = state.commandBatchStats[phase];
@@ -46,45 +46,36 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
                 const agg = aggregatedBatchStats[phase];
                 agg['Command Buffers'] += phaseStats['Command Buffers'];
                 agg['Render Passes'].count += phaseStats['Render Passes'].count;
-                agg['Render Passes'].list = [...new Set([...agg['Render Passes'].list, ...phaseStats['Render Passes'].list])];
+                
+                // List merging optimization: avoid unnecessary Set objects and spreads
+                const renderList = phaseStats['Render Passes'].list;
+                const aggRenderList = agg['Render Passes'].list;
+                for (let j = 0; j < renderList.length; j++) {
+                    if (aggRenderList.indexOf(renderList[j]) === -1) aggRenderList.push(renderList[j]);
+                }
+
                 agg['Compute Passes'].count += phaseStats['Compute Passes'].count;
-                agg['Compute Passes'].list = [...new Set([...agg['Compute Passes'].list, ...phaseStats['Compute Passes'].list])];
+                const computeList = phaseStats['Compute Passes'].list;
+                const aggComputeList = agg['Compute Passes'].list;
+                for (let j = 0; j < computeList.length; j++) {
+                    if (aggComputeList.indexOf(computeList[j]) === -1) aggComputeList.push(computeList[j]);
+                }
+
                 agg['Raw Usages'] += phaseStats['Raw Usages'];
             }
         }
     }
 
-    // [KO] 리소스 매니저의 공유 리소스 메모리 합산
-    // [EN] Sum up shared resource memory of the resource manager
     const rm = redGPUContext.resourceManager;
-
     const resourceStats = {
-        bitmapTexture: {
-            count: rm.managedBitmapTextureState.table.size,
-            videoMemory: rm.managedBitmapTextureState.videoMemory
-        },
-        cubeTexture: {
-            count: rm.managedCubeTextureState.table.size,
-            videoMemory: rm.managedCubeTextureState.videoMemory
-        },
-        hdrTexture: {count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory},
-        uniformBuffer: {
-            count: rm.managedUniformBufferState.table.size,
-            videoMemory: rm.managedUniformBufferState.videoMemory
-        },
-        vertexBuffer: {
-            count: rm.managedVertexBufferState.table.size,
-            videoMemory: rm.managedVertexBufferState.videoMemory
-        },
-        indexBuffer: {
-            count: rm.managedIndexBufferState.table.size,
-            videoMemory: rm.managedIndexBufferState.videoMemory
-        },
-        storageBuffer: {
-            count: rm.managedStorageBufferState.table.size,
-            videoMemory: rm.managedStorageBufferState.videoMemory
-        },
-        gpuBuffer: {count: 0, videoMemory: 0}
+        bitmapTexture: { count: rm.managedBitmapTextureState.table.size, videoMemory: rm.managedBitmapTextureState.videoMemory },
+        cubeTexture: { count: rm.managedCubeTextureState.table.size, videoMemory: rm.managedCubeTextureState.videoMemory },
+        hdrTexture: { count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory },
+        uniformBuffer: { count: rm.managedUniformBufferState.table.size, videoMemory: rm.managedUniformBufferState.videoMemory },
+        vertexBuffer: { count: rm.managedVertexBufferState.table.size, videoMemory: rm.managedVertexBufferState.videoMemory },
+        indexBuffer: { count: rm.managedIndexBufferState.table.size, videoMemory: rm.managedIndexBufferState.videoMemory },
+        storageBuffer: { count: rm.managedStorageBufferState.table.size, videoMemory: rm.managedStorageBufferState.videoMemory },
+        gpuBuffer: { count: 0, videoMemory: 0 }
     };
 
     totalUsedVideoMemory += resourceStats.bitmapTexture.videoMemory;
@@ -95,8 +86,6 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
     totalUsedVideoMemory += resourceStats.indexBuffer.videoMemory;
     totalUsedVideoMemory += resourceStats.storageBuffer.videoMemory;
 
-    // [KO] GPUBuffer 전용 메모리 트래킹 맵 합산
-    // [EN] Sum up memory tracking map dedicated to GPUBuffer
     const gpuBufferMap = rm.resources.get('GPUBuffer') as any;
     if (gpuBufferMap) {
         resourceStats.gpuBuffer.count = gpuBufferMap.size;
@@ -113,7 +102,7 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
         totalNumTriangles,
         totalNumPoints,
         totalUsedVideoMemory,
-        pixelRectArray: [...redGPUContext.sizeManager.pixelRectArray],
+        pixelRectArray: redGPUContext.sizeManager.pixelRectArray, // Use reference if possible
         commandBatchStats: aggregatedBatchStats,
         resourceStats
     };

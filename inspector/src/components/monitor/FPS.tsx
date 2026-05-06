@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, memo} from 'react';
 import {useInspectorStore} from '../../store';
 import MiniGraph from "../common/MiniGraph";
 import formatBytes from "@redgpu/src/utils/formatBytes";
@@ -84,14 +84,21 @@ export class FPSMeter {
 
 /**
  * [KO] FPS 및 프레임 타임 통계를 표시하는 컴포넌트입니다.
- * [EN] Component that displays FPS and frame time statistics.
  */
-const FPS = () => {
-    const {
-        fps, avgFps, low1Fps, low01Fps, frameTime,
-        fpsHistory, drawCallHistory, memoryHistory,
-        totalNumDrawCalls, totalUsedVideoMemory
-    } = useInspectorStore();
+const FPS = memo(() => {
+    // [KO] 특정 필드만 선택하여 구독함으로써 불필요한 리렌더링 방지
+    const fps = useInspectorStore(state => state.fps);
+    const avgFps = useInspectorStore(state => state.avgFps);
+    const low1Fps = useInspectorStore(state => state.low1Fps);
+    const low01Fps = useInspectorStore(state => state.low01Fps);
+    const frameTime = useInspectorStore(state => state.frameTime);
+    
+    const fpsHistory = useInspectorStore(state => state.fpsHistory);
+    const drawCallHistory = useInspectorStore(state => state.drawCallHistory);
+    const memoryHistory = useInspectorStore(state => state.memoryHistory);
+    
+    const totalNumDrawCalls = useInspectorStore(state => state.totalNumDrawCalls);
+    const totalUsedVideoMemory = useInspectorStore(state => state.totalUsedVideoMemory);
 
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -127,7 +134,7 @@ const FPS = () => {
             )}
         </div>
     );
-};
+});
 
 // Styles
 const containerStyle: React.CSSProperties = {

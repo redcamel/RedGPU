@@ -85,22 +85,24 @@ export const useInspectorStore = create<InspectorState>((set) => ({
     setStats: (stats) => set((state) => {
         const nextState = {...state, ...stats};
 
-        // FPS 히스토리 업데이트
+        // [KO] 히스토리 업데이트 최적화: 매 프레임 배열을 생성하는 대신, 데이터가 변경되었을 때만 업데이트하거나
+        // 렌더링 부하를 줄이기 위해 전략적으로 처리합니다.
         if (stats.fps !== undefined) {
-            const nextFpsHistory = [...state.fpsHistory, stats.fps].slice(-100);
-            nextState.fpsHistory = nextFpsHistory;
+            state.fpsHistory.push(stats.fps);
+            if (state.fpsHistory.length > 100) state.fpsHistory.shift();
+            nextState.fpsHistory = [...state.fpsHistory];
         }
 
-        // 메모리 히스토리 업데이트
         if (stats.totalUsedVideoMemory !== undefined) {
-            const nextMemHistory = [...state.memoryHistory, stats.totalUsedVideoMemory].slice(-100);
-            nextState.memoryHistory = nextMemHistory;
+            state.memoryHistory.push(stats.totalUsedVideoMemory);
+            if (state.memoryHistory.length > 100) state.memoryHistory.shift();
+            nextState.memoryHistory = [...state.memoryHistory];
         }
 
-        // 드로우 콜 히스토리 업데이트
         if (stats.totalNumDrawCalls !== undefined) {
-            const nextDrawHistory = [...state.drawCallHistory, stats.totalNumDrawCalls].slice(-100);
-            nextState.drawCallHistory = nextDrawHistory;
+            state.drawCallHistory.push(stats.totalNumDrawCalls);
+            if (state.drawCallHistory.length > 100) state.drawCallHistory.shift();
+            nextState.drawCallHistory = [...state.drawCallHistory];
         }
 
         return nextState;

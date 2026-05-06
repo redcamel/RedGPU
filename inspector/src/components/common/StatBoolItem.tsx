@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {memo} from 'react';
 import {COMMON_STYLES, THEME} from './Theme';
 
 /**
  * [KO] 불린(boolean) 값을 배경색이 있는 뱃지 형태로 표시하는 컴포넌트입니다.
  * [EN] Component that displays a boolean value as a badge with a background color.
  */
-const StatBoolItem = ({
+const StatBoolItem = memo(({
                           label,
                           value,
                           trueLabel = 'TRUE',
@@ -33,7 +33,7 @@ const StatBoolItem = ({
             </span>
         </div>
     );
-};
+});
 
 const statItemStyle: React.CSSProperties = {
     display: 'flex',

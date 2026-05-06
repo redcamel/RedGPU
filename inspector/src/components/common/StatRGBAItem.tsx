@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {memo} from 'react';
 import {COMMON_STYLES, THEME} from './Theme';
 
 /**
  * [KO] RGBA 색상 값을 배경색과 보색 텍스트로 표시하는 컴포넌트입니다.
  */
-const StatRGBAItem = ({label, value}: { label: string, value: number[] }) => {
+const StatRGBAItem = memo(({label, value}: { label: string, value: number[] }) => {
     const [r, g, b] = value;
     const compColor = `rgb(${255 - r}, ${255 - g}, ${255 - b})`;
 
@@ -21,7 +21,7 @@ const StatRGBAItem = ({label, value}: { label: string, value: number[] }) => {
             </span>
         </div>
     );
-};
+});
 
 const statItemStyle: React.CSSProperties = {
     display: 'flex',

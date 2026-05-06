@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, memo, useMemo} from 'react';
 import StatItem from "./StatItem";
 import StatBoolItem from "./StatBoolItem";
 import {formatNumber} from "../../utils/format";
@@ -6,51 +6,45 @@ import {COMMON_STYLES, THEME} from "./Theme";
 
 /**
  * [KO] 객체의 공개 프로퍼티를 재귀적으로 표시하는 컴포넌트입니다.
- * [EN] Component that recursively displays public properties of an object.
  */
-const PropertyInspector = ({target, depth = 0}: { target: any, depth?: number }) => {
+const PropertyInspector = memo(({target, depth = 0}: { target: any, depth?: number }) => {
     if (depth > 3 || !target) return null;
 
-    // 1. 프로토타입 체인을 포함하여 검사 가능한 모든 키 수집
-    const allKeys = new Set<string>();
+    // 1. 프로토타입 체인을 포함하여 검사 가능한 모든 키 수집 및 필터링 (useMemo로 최적화)
+    const filteredKeys = useMemo(() => {
+        const allKeys = new Set<string>();
 
-    // 객체 자체의 프로퍼티 (필드 등)
-    Object.getOwnPropertyNames(target).forEach(k => allKeys.add(k));
+        // 객체 자체의 프로퍼티
+        Object.getOwnPropertyNames(target).forEach(k => allKeys.add(k));
 
-    // 프로토타입 체인의 프로퍼티 (Getter 등)
-    let proto = Object.getPrototypeOf(target);
-    while (proto && proto !== Object.prototype) {
-        Object.getOwnPropertyNames(proto).forEach(k => {
-            const descriptor = Object.getOwnPropertyDescriptor(proto, k);
-            // Getter이거나 데이터 프로퍼티이면서 함수가 아닌 경우 포함
-            if (descriptor && (descriptor.get || typeof descriptor.value !== 'function')) {
-                allKeys.add(k);
-            }
-        });
-        proto = Object.getPrototypeOf(proto);
-    }
+        // 프로토타입 체인의 프로퍼티 (Getter 등)
+        let proto = Object.getPrototypeOf(target);
+        while (proto && proto !== Object.prototype) {
+            Object.getOwnPropertyNames(proto).forEach(k => {
+                const descriptor = Object.getOwnPropertyDescriptor(proto, k);
+                if (descriptor && (descriptor.get || typeof descriptor.value !== 'function')) {
+                    allKeys.add(k);
+                }
+            });
+            proto = Object.getPrototypeOf(proto);
+        }
 
-    // 2. 필터링 및 정렬
-    const filteredKeys = Array.from(allKeys).filter(key => {
-        // 시스템 내부 변수 및 상속된 일반 메서드 제외
-        if (key.startsWith('#') || key.startsWith('_')) return false;
-
-        // 제외할 블랙리스트 (시스템성 프로퍼티)
         const blackList = [
             'constructor', 'prototype', 'length', 'name', 'view', 'redGPUContext',
             'passList', 'passListLength', 'passIndex', 'videoMemorySize', 'outputTextureView', 'shaderInfo', 'storageInfo', 'uniformsInfo', 'systemUniformsInfo', 'uniformBuffer'
         ];
-        if (blackList.includes(key)) return false;
 
-        // 현재 값의 타입을 확인하여 함수인 경우(메서드) 제외
-        try {
-            if (typeof target[key] === 'function') return false;
-        } catch (e) {
-            return false;
-        }
-
-        return true;
-    }).sort();
+        return Array.from(allKeys).filter(key => {
+            if (key.startsWith('#') || key.startsWith('_')) return false;
+            if (blackList.includes(key)) return false;
+            try {
+                if (typeof target[key] === 'function') return false;
+            } catch (e) {
+                return false;
+            }
+            return true;
+        }).sort();
+    }, [target]);
 
     if (filteredKeys.length === 0) {
         return <div style={{fontSize: '10px', color: '#666', paddingLeft: '8px'}}>No inspectable properties.</div>;
@@ -99,7 +93,7 @@ const PropertyInspector = ({target, depth = 0}: { target: any, depth?: number })
             })}
         </div>
     );
-};
+});
 
 /**
  * [KO] 하위 객체나 배열을 접고 펼칠 수 있는 컴포넌트입니다.

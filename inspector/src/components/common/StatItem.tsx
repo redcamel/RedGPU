@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {memo} from 'react';
 import {COMMON_STYLES, THEME} from './Theme';
 
 /**
  * [KO] 라벨과 값을 쌍으로 표시하는 통계 항목 컴포넌트입니다.
  */
-const StatItem = ({label, value, color = THEME.colors.value, isBold = false}: {
+const StatItem = memo(({label, value, color = THEME.colors.value, isBold = false}: {
     label: string,
     value: any,
     color?: string,
@@ -20,7 +20,7 @@ const StatItem = ({label, value, color = THEME.colors.value, isBold = false}: {
             {value !== undefined && value !== null ? value : 'N/A'}
         </span>
     </div>
-);
+));
 
 const statItemStyle: React.CSSProperties = {
     display: 'flex',

@@ -82,12 +82,8 @@ class RedGPUInspector {
     private updateStats(time: number) {
         if (!this.redGPUContext) return;
 
-        // [KO] 엔진 통계 수집
-        // [EN] Collect engine statistics
+        // [KO] 모든 통계 데이터를 매 프레임(60FPS) 수집하여 그래프와 수치를 부드럽게 업데이트
         const stats = collectStats(this.redGPUContext, time);
-
-        // [KO] FPS 통계 계산
-        // [EN] Calculate FPS statistics
         const fpsStats = this.fpsMeter.update(time);
 
         useInspectorStore.getState().setStats({

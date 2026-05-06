@@ -7215,16 +7215,19 @@ const useInspectorStore = create$1((set) => ({
   setStats: (stats) => set((state) => {
     const nextState = { ...state, ...stats };
     if (stats.fps !== void 0) {
-      const nextFpsHistory = [...state.fpsHistory, stats.fps].slice(-100);
-      nextState.fpsHistory = nextFpsHistory;
+      state.fpsHistory.push(stats.fps);
+      if (state.fpsHistory.length > 100) state.fpsHistory.shift();
+      nextState.fpsHistory = [...state.fpsHistory];
     }
     if (stats.totalUsedVideoMemory !== void 0) {
-      const nextMemHistory = [...state.memoryHistory, stats.totalUsedVideoMemory].slice(-100);
-      nextState.memoryHistory = nextMemHistory;
+      state.memoryHistory.push(stats.totalUsedVideoMemory);
+      if (state.memoryHistory.length > 100) state.memoryHistory.shift();
+      nextState.memoryHistory = [...state.memoryHistory];
     }
     if (stats.totalNumDrawCalls !== void 0) {
-      const nextDrawHistory = [...state.drawCallHistory, stats.totalNumDrawCalls].slice(-100);
-      nextState.drawCallHistory = nextDrawHistory;
+      state.drawCallHistory.push(stats.totalNumDrawCalls);
+      if (state.drawCallHistory.length > 100) state.drawCallHistory.shift();
+      nextState.drawCallHistory = [...state.drawCallHistory];
     }
     return nextState;
   }),
@@ -7274,7 +7277,7 @@ const COMMON_STYLES = {
     flexShrink: 0
   }
 };
-const MiniGraph = ({
+const MiniGraph = reactExports.memo(({
   data,
   width = "100%",
   height = 40,
@@ -7286,38 +7289,46 @@ const MiniGraph = ({
   reactExports.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
     const w2 = rect.width;
     const h = rect.height;
-    ctx.clearRect(0, 0, w2, h);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    if (canvas.width !== w2 * dpr || canvas.height !== h * dpr) {
+      canvas.width = w2 * dpr;
+      canvas.height = h * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    ctx.fillStyle = "#050505";
     ctx.fillRect(0, 0, w2, h);
     if (data.length < 2) return;
-    const max = Math.max(...data) * 1.1 || 1;
-    const min = Math.min(...data) * 0.9 || 0;
+    const dataLen = data.length;
+    let max = -Infinity;
+    let min = Infinity;
+    for (let i = 0; i < dataLen; i++) {
+      if (data[i] > max) max = data[i];
+      if (data[i] < min) min = data[i];
+    }
+    max = max * 1.1 || 1;
+    min = min * 0.9 || 0;
     const range = max - min;
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
-    const step = w2 / (data.length - 1);
-    data.forEach((val, i) => {
+    const step = w2 / (dataLen - 1);
+    for (let i = 0; i < dataLen; i++) {
       const x2 = i * step;
-      const y2 = h - (val - min) / range * h;
+      const y2 = h - (data[i] - min) / range * h;
       if (i === 0) ctx.moveTo(x2, y2);
       else ctx.lineTo(x2, y2);
-    });
+    }
     ctx.stroke();
     ctx.lineTo(w2, h);
     ctx.lineTo(0, h);
     const gradient = ctx.createLinearGradient(0, 0, 0, h);
-    const rgbaColor = color.startsWith("#") ? hexToRgba(color, 0.3) : color;
+    const rgbaColor = color.startsWith("#") ? hexToRgba(color, 0.2) : color;
     gradient.addColorStop(0, rgbaColor);
     gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = gradient;
@@ -7342,8 +7353,11 @@ const MiniGraph = ({
       }
     )
   ] });
-};
+});
+const hexCache = {};
 const hexToRgba = (hex, alpha) => {
+  const key = hex + alpha;
+  if (hexCache[key]) return hexCache[key];
   let r2 = 0, g = 0, b = 0;
   if (hex.length === 4) {
     r2 = parseInt(hex[1] + hex[1], 16);
@@ -7354,7 +7368,9 @@ const hexToRgba = (hex, alpha) => {
     g = parseInt(hex.substring(3, 5), 16);
     b = parseInt(hex.substring(5, 7), 16);
   }
-  return `rgba(${r2}, ${g}, ${b}, ${alpha})`;
+  const result = `rgba(${r2}, ${g}, ${b}, ${alpha})`;
+  hexCache[key] = result;
+  return result;
 };
 const headerStyle$4 = {
   display: "flex",
@@ -7443,19 +7459,17 @@ class FPSMeter {
     return stats;
   }
 }
-const FPS = () => {
-  const {
-    fps,
-    avgFps,
-    low1Fps,
-    low01Fps,
-    frameTime,
-    fpsHistory,
-    drawCallHistory,
-    memoryHistory,
-    totalNumDrawCalls,
-    totalUsedVideoMemory
-  } = useInspectorStore();
+const FPS = reactExports.memo(() => {
+  const fps = useInspectorStore((state) => state.fps);
+  const avgFps = useInspectorStore((state) => state.avgFps);
+  const low1Fps = useInspectorStore((state) => state.low1Fps);
+  const low01Fps = useInspectorStore((state) => state.low01Fps);
+  const frameTime = useInspectorStore((state) => state.frameTime);
+  const fpsHistory = useInspectorStore((state) => state.fpsHistory);
+  const drawCallHistory = useInspectorStore((state) => state.drawCallHistory);
+  const memoryHistory = useInspectorStore((state) => state.memoryHistory);
+  const totalNumDrawCalls = useInspectorStore((state) => state.totalNumDrawCalls);
+  const totalUsedVideoMemory = useInspectorStore((state) => state.totalUsedVideoMemory);
   const [isExpanded, setIsExpanded] = reactExports.useState(false);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$3, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
@@ -7499,7 +7513,7 @@ const FPS = () => {
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "TODO - bundleCall" })
     ] })
   ] });
-};
+});
 const containerStyle$3 = {
   borderBottom: "1px solid rgba(255,255,255,0.1)",
   background: "#000"
@@ -7556,10 +7570,10 @@ const low1FpsStyle = {
 const low01FpsStyle = {
   color: "#f50"
 };
-const Section = ({ title, children }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle$1, children: [
+const Section = reactExports.memo(({ title, children }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle$1, children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle$1, children: title }),
   children
-] });
+] }));
 const sectionStyle$1 = {
   marginBottom: "16px"
 };
@@ -7572,14 +7586,14 @@ const sectionTitleStyle$1 = {
   paddingBottom: "4px",
   fontFamily: THEME.fontFamily
 };
-const StatItem = ({ label, value, color = THEME.colors.value, isBold = false }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$2, children: [
+const StatItem = reactExports.memo(({ label, value, color = THEME.colors.value, isBold = false }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$2, children: [
   /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
   /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
     ...COMMON_STYLES.value,
     color,
     fontWeight: isBold ? "bold" : "normal"
   }, children: value !== void 0 && value !== null ? value : "N/A" })
-] });
+] }));
 const statItemStyle$2 = {
   display: "flex",
   justifyContent: "space-between",
@@ -7587,16 +7601,14 @@ const statItemStyle$2 = {
   fontSize: THEME.fontSize.content,
   fontFamily: THEME.fontFamily
 };
-const TotalState = () => {
-  const {
-    totalNum3DGroups,
-    totalNum3DObjects,
-    totalNumInstances,
-    totalNumDrawCalls,
-    totalNumTriangles,
-    totalNumPoints,
-    totalUsedVideoMemory
-  } = useInspectorStore();
+const TotalState = reactExports.memo(() => {
+  const totalNum3DGroups = useInspectorStore((state) => state.totalNum3DGroups);
+  const totalNum3DObjects = useInspectorStore((state) => state.totalNum3DObjects);
+  const totalNumInstances = useInspectorStore((state) => state.totalNumInstances);
+  const totalNumDrawCalls = useInspectorStore((state) => state.totalNumDrawCalls);
+  const totalNumTriangles = useInspectorStore((state) => state.totalNumTriangles);
+  const totalNumPoints = useInspectorStore((state) => state.totalNumPoints);
+  const totalUsedVideoMemory = useInspectorStore((state) => state.totalUsedVideoMemory);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Total State", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Groups", value: totalNum3DGroups }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Objects", value: totalNum3DObjects }),
@@ -7606,8 +7618,8 @@ const TotalState = () => {
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Points", value: totalNumPoints.toLocaleString() }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Video Memory", value: formatBytes(totalUsedVideoMemory), color: "#fdb48d", isBold: true })
   ] });
-};
-const StatRGBAItem = ({ label, value }) => {
+});
+const StatRGBAItem = reactExports.memo(({ label, value }) => {
   const [r2, g, b] = value;
   const compColor = `rgb(${255 - r2}, ${255 - g}, ${255 - b})`;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$1, children: [
@@ -7619,7 +7631,7 @@ const StatRGBAItem = ({ label, value }) => {
       padding: "2px 4px"
     }, children: value.join(", ") })
   ] });
-};
+});
 const statItemStyle$1 = {
   display: "flex",
   justifyContent: "space-between",
@@ -7627,7 +7639,7 @@ const statItemStyle$1 = {
   fontSize: THEME.fontSize.content,
   fontFamily: THEME.fontFamily
 };
-const StatBoolItem = ({
+const StatBoolItem = reactExports.memo(({
   label,
   value,
   trueLabel = "TRUE",
@@ -7646,7 +7658,7 @@ const StatBoolItem = ({
       lineHeight: 1
     }, children: value ? trueLabel : falseLabel })
   ] });
-};
+});
 const statItemStyle = {
   display: "flex",
   justifyContent: "space-between",
@@ -10699,22 +10711,21 @@ const ViewStateTab = ({ view, lastUpdateTime }) => {
 const ViewCommandsTab = ({ view }) => {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(CommandBatchStatsView, { statsProp: view.renderViewStateData.commandBatchStats });
 };
-const PropertyInspector = ({ target, depth = 0 }) => {
+const PropertyInspector = reactExports.memo(({ target, depth = 0 }) => {
   if (depth > 3 || !target) return null;
-  const allKeys = /* @__PURE__ */ new Set();
-  Object.getOwnPropertyNames(target).forEach((k2) => allKeys.add(k2));
-  let proto = Object.getPrototypeOf(target);
-  while (proto && proto !== Object.prototype) {
-    Object.getOwnPropertyNames(proto).forEach((k2) => {
-      const descriptor = Object.getOwnPropertyDescriptor(proto, k2);
-      if (descriptor && (descriptor.get || typeof descriptor.value !== "function")) {
-        allKeys.add(k2);
-      }
-    });
-    proto = Object.getPrototypeOf(proto);
-  }
-  const filteredKeys = Array.from(allKeys).filter((key) => {
-    if (key.startsWith("#") || key.startsWith("_")) return false;
+  const filteredKeys = reactExports.useMemo(() => {
+    const allKeys = /* @__PURE__ */ new Set();
+    Object.getOwnPropertyNames(target).forEach((k2) => allKeys.add(k2));
+    let proto = Object.getPrototypeOf(target);
+    while (proto && proto !== Object.prototype) {
+      Object.getOwnPropertyNames(proto).forEach((k2) => {
+        const descriptor = Object.getOwnPropertyDescriptor(proto, k2);
+        if (descriptor && (descriptor.get || typeof descriptor.value !== "function")) {
+          allKeys.add(k2);
+        }
+      });
+      proto = Object.getPrototypeOf(proto);
+    }
     const blackList = [
       "constructor",
       "prototype",
@@ -10733,14 +10744,17 @@ const PropertyInspector = ({ target, depth = 0 }) => {
       "systemUniformsInfo",
       "uniformBuffer"
     ];
-    if (blackList.includes(key)) return false;
-    try {
-      if (typeof target[key] === "function") return false;
-    } catch (e) {
-      return false;
-    }
-    return true;
-  }).sort();
+    return Array.from(allKeys).filter((key) => {
+      if (key.startsWith("#") || key.startsWith("_")) return false;
+      if (blackList.includes(key)) return false;
+      try {
+        if (typeof target[key] === "function") return false;
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }).sort();
+  }, [target]);
   if (filteredKeys.length === 0) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "10px", color: "#666", paddingLeft: "8px" }, children: "No inspectable properties." });
   }
@@ -10775,7 +10789,7 @@ const PropertyInspector = ({ target, depth = 0 }) => {
     }
     return null;
   }) });
-};
+});
 const CollapsibleObject = ({ label, value, depth, typeLabel }) => {
   const [isExpanded, setIsExpanded] = reactExports.useState(false);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "4px" }, children: [
@@ -10951,7 +10965,7 @@ const placeholderStyle = {
   fontSize: "12px",
   fontStyle: "italic"
 };
-const TabContent = () => {
+const TabContent = reactExports.memo(() => {
   const currentTab = useInspectorStore((state) => state.currentTab);
   switch (currentTab) {
     case "STATE":
@@ -10968,7 +10982,7 @@ const TabContent = () => {
     default:
       return null;
   }
-};
+});
 const Container = ({ children, style }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...containerStyle, ...style }, children });
 const containerStyle = {
   padding: "12px"
@@ -11041,7 +11055,10 @@ const collectStats = (redGPUContext, time) => {
   let totalNumPoints = 0;
   let totalUsedVideoMemory = 0;
   const aggregatedBatchStats = {};
-  for (const view of redGPUContext.viewList) {
+  const viewList = redGPUContext.viewList;
+  const viewListLen = viewList.length;
+  for (let i = 0; i < viewListLen; i++) {
+    const view = viewList[i];
     const state = view.renderViewStateData;
     totalNum3DGroups += state.num3DGroups;
     totalNum3DObjects += state.num3DObjects;
@@ -11064,40 +11081,30 @@ const collectStats = (redGPUContext, time) => {
         const agg = aggregatedBatchStats[phase];
         agg["Command Buffers"] += phaseStats["Command Buffers"];
         agg["Render Passes"].count += phaseStats["Render Passes"].count;
-        agg["Render Passes"].list = [.../* @__PURE__ */ new Set([...agg["Render Passes"].list, ...phaseStats["Render Passes"].list])];
+        const renderList = phaseStats["Render Passes"].list;
+        const aggRenderList = agg["Render Passes"].list;
+        for (let j = 0; j < renderList.length; j++) {
+          if (aggRenderList.indexOf(renderList[j]) === -1) aggRenderList.push(renderList[j]);
+        }
         agg["Compute Passes"].count += phaseStats["Compute Passes"].count;
-        agg["Compute Passes"].list = [.../* @__PURE__ */ new Set([...agg["Compute Passes"].list, ...phaseStats["Compute Passes"].list])];
+        const computeList = phaseStats["Compute Passes"].list;
+        const aggComputeList = agg["Compute Passes"].list;
+        for (let j = 0; j < computeList.length; j++) {
+          if (aggComputeList.indexOf(computeList[j]) === -1) aggComputeList.push(computeList[j]);
+        }
         agg["Raw Usages"] += phaseStats["Raw Usages"];
       }
     }
   }
   const rm = redGPUContext.resourceManager;
   const resourceStats = {
-    bitmapTexture: {
-      count: rm.managedBitmapTextureState.table.size,
-      videoMemory: rm.managedBitmapTextureState.videoMemory
-    },
-    cubeTexture: {
-      count: rm.managedCubeTextureState.table.size,
-      videoMemory: rm.managedCubeTextureState.videoMemory
-    },
+    bitmapTexture: { count: rm.managedBitmapTextureState.table.size, videoMemory: rm.managedBitmapTextureState.videoMemory },
+    cubeTexture: { count: rm.managedCubeTextureState.table.size, videoMemory: rm.managedCubeTextureState.videoMemory },
     hdrTexture: { count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory },
-    uniformBuffer: {
-      count: rm.managedUniformBufferState.table.size,
-      videoMemory: rm.managedUniformBufferState.videoMemory
-    },
-    vertexBuffer: {
-      count: rm.managedVertexBufferState.table.size,
-      videoMemory: rm.managedVertexBufferState.videoMemory
-    },
-    indexBuffer: {
-      count: rm.managedIndexBufferState.table.size,
-      videoMemory: rm.managedIndexBufferState.videoMemory
-    },
-    storageBuffer: {
-      count: rm.managedStorageBufferState.table.size,
-      videoMemory: rm.managedStorageBufferState.videoMemory
-    },
+    uniformBuffer: { count: rm.managedUniformBufferState.table.size, videoMemory: rm.managedUniformBufferState.videoMemory },
+    vertexBuffer: { count: rm.managedVertexBufferState.table.size, videoMemory: rm.managedVertexBufferState.videoMemory },
+    indexBuffer: { count: rm.managedIndexBufferState.table.size, videoMemory: rm.managedIndexBufferState.videoMemory },
+    storageBuffer: { count: rm.managedStorageBufferState.table.size, videoMemory: rm.managedStorageBufferState.videoMemory },
     gpuBuffer: { count: 0, videoMemory: 0 }
   };
   totalUsedVideoMemory += resourceStats.bitmapTexture.videoMemory;
@@ -11122,7 +11129,8 @@ const collectStats = (redGPUContext, time) => {
     totalNumTriangles,
     totalNumPoints,
     totalUsedVideoMemory,
-    pixelRectArray: [...redGPUContext.sizeManager.pixelRectArray],
+    pixelRectArray: redGPUContext.sizeManager.pixelRectArray,
+    // Use reference if possible
     commandBatchStats: aggregatedBatchStats,
     resourceStats
   };
