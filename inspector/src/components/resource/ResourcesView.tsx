@@ -4,13 +4,14 @@ import BufferDetailModal from './buffer/BufferDetailModal';
 import {TabBar, TabItem} from '../common/Tabs';
 import TextureResourcesView from './texture/TextureResourcesView';
 import BufferResourcesView from './buffer/BufferResourcesView';
+import GBufferResourcesView from './gbuffer/GBufferResourcesView';
 
 /**
  * [KO] 엔진에서 관리하는 리소스 현황을 표시하는 메인 컴포넌트입니다.
  * [EN] Main component that displays the status of resources managed by the engine.
  */
 const ResourcesView = () => {
-    const [activeSubTab, setActiveSubTab] = useState('TEXTURES');
+    const [activeSubTab, setActiveSubTab] = useState('GBUFFER');
     const [previewData, setPreviewData] = useState<{ item: any, type: string } | null>(null);
 
     const handlePreview = (item: any, type: string) => {
@@ -18,6 +19,7 @@ const ResourcesView = () => {
     };
 
     const subTabs: TabItem[] = [
+        {id: 'GBUFFER', label: 'G-Buffer'},
         {id: 'TEXTURES', label: 'Textures'},
         {id: 'BUFFERS', label: 'Buffers'}
     ];
@@ -36,6 +38,10 @@ const ResourcesView = () => {
             </div>
 
             <div style={{padding: '12px 0'}}>
+                {activeSubTab === 'GBUFFER' && (
+                    <GBufferResourcesView onPreview={handlePreview}/>
+                )}
+
                 {activeSubTab === 'TEXTURES' && (
                     <TextureResourcesView onPreview={handlePreview}/>
                 )}

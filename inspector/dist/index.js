@@ -7477,7 +7477,7 @@ const FPS = reactExports.memo(() => {
         "div",
         {
           onClick: () => setIsExpanded(!isExpanded),
-          style: toggleWrapperStyle,
+          style: toggleWrapperStyle$1,
           children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" })
         }
       ),
@@ -7547,7 +7547,7 @@ const statsContainerStyle = {
   fontFamily: 'monospace, "Courier New", courier',
   fontVariantNumeric: "tabular-nums"
 };
-const toggleWrapperStyle = {
+const toggleWrapperStyle$1 = {
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
@@ -8102,7 +8102,6 @@ const TexturePreviewModal = ({ item, onClose }) => {
           ] }, i);
         }) }),
         useCanvasForSingle && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...previewImageStyle, position: "relative" }, children: [
-          isHDR && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: hdrBadgeStyle, children: "HDR DATA VIEW (Reference only)" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "canvas",
             {
@@ -8339,19 +8338,6 @@ const noPreviewStyle = {
   color: "#555",
   fontSize: "13px",
   height: "100%"
-};
-const hdrBadgeStyle = {
-  position: "absolute",
-  top: "10px",
-  right: "10px",
-  background: "#fdb48d",
-  color: "#000",
-  padding: "4px 8px",
-  borderRadius: "4px",
-  fontSize: "10px",
-  fontWeight: "bold",
-  zIndex: 10,
-  boxShadow: "0 2px 8px rgba(0,0,0,0.5)"
 };
 const toastStyle = {
   position: "absolute",
@@ -9176,7 +9162,7 @@ const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
       break;
   }
   if (items.length === 0) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noItemStyle$1, children: "No textures found." });
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle$1, children: items.map((item, idx) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle$2, children: items.map((item, idx) => {
     var _a;
     const tex = item.texture;
     const gpuTex = tex == null ? void 0 : tex.gpuTexture;
@@ -9186,18 +9172,18 @@ const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       "div",
       {
-        style: textureItemStyle,
+        style: textureItemStyle$1,
         onClick: () => onPreview(item, type),
-        children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle$1, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle$1, children: [
-            fileName && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle$1, children: fileName }),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle$2, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle$2, children: [
+            fileName && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle$2, children: fileName }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: pathStyle, title: originalPath, children: originalPath }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle$2, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
               "UUID: ",
               item.uuid
             ] }) }),
             gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle$1, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle$2, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                   "Dim: ",
                   /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.dimension })
@@ -9217,7 +9203,7 @@ const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
                   /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
                 ] })
               ] }),
-              gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle$1, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle$2, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                 "Usage: ",
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
                   "b",
@@ -9238,7 +9224,7 @@ const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$1, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
             ] }),
             gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
-              ...detailInfoStyle$1,
+              ...detailInfoStyle$2,
               flexDirection: "column",
               alignItems: "flex-end",
               gap: "0",
@@ -9271,7 +9257,7 @@ const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
     );
   }) });
 };
-const detailListStyle$1 = {
+const detailListStyle$2 = {
   padding: "4px 0 4px 8px",
   display: "flex",
   flexDirection: "column",
@@ -9279,7 +9265,7 @@ const detailListStyle$1 = {
   borderLeft: "1px solid rgba(255,255,255,0.1)",
   margin: "0 0 8px 8px"
 };
-const textureItemStyle = {
+const textureItemStyle$1 = {
   fontSize: "10px",
   color: "#888",
   background: "rgba(255,255,255,0.04)",
@@ -9290,20 +9276,20 @@ const textureItemStyle = {
   marginBottom: "6px",
   cursor: "pointer"
 };
-const detailHeaderStyle$1 = {
+const detailHeaderStyle$2 = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "flex-start",
   gap: "8px"
 };
-const detailLeftContainerStyle$1 = {
+const detailLeftContainerStyle$2 = {
   display: "flex",
   flexDirection: "column",
   gap: "2px",
   flex: 1,
   minWidth: 0
 };
-const detailNameStyle$1 = {
+const detailNameStyle$2 = {
   color: "#ddd",
   whiteSpace: "nowrap",
   overflow: "hidden",
@@ -9321,7 +9307,7 @@ const pathStyle = {
   whiteSpace: "nowrap",
   marginBottom: "4px"
 };
-const detailInfoStyle$1 = {
+const detailInfoStyle$2 = {
   display: "flex",
   gap: "12px",
   opacity: 0.6,
@@ -9415,21 +9401,21 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
     }
   }
   if (items.length === 0) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noItemStyle, children: "No buffers found." });
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle, children: items.map((item, idx) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle$1, children: items.map((item, idx) => {
     if (item.isRaw) {
       return /* @__PURE__ */ jsxRuntimeExports.jsx(
         "div",
         {
           style: { ...detailItemStyle, cursor: "pointer" },
           onClick: () => onPreview(item, type),
-          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: item.label }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle$1, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle$1, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle$1, children: item.label }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                 "UUID: ",
                 item.uuid
               ] }) }),
-              item.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              item.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle$1, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                 "Usage: ",
                 /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatBufferUsage(item.usage) })
               ] }) })
@@ -9452,20 +9438,20 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
             cursor: "pointer"
           },
           onClick: () => onPreview(item, type),
-          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle$1, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle$1, children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(
                 "span",
                 {
-                  style: detailNameStyle,
+                  style: detailNameStyle$1,
                   children: item.label || (buf == null ? void 0 : buf.label) || (buf == null ? void 0 : buf.name) || "Unnamed"
                 }
               ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                 "UUID: ",
                 item.uuid
               ] }) }),
-              (buf == null ? void 0 : buf.usage) !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              (buf == null ? void 0 : buf.usage) !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle$1, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
                 "Usage: ",
                 /* @__PURE__ */ jsxRuntimeExports.jsx(
                   "b",
@@ -9490,7 +9476,7 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
     }
   }) });
 };
-const detailListStyle = {
+const detailListStyle$1 = {
   padding: "4px 0 4px 8px",
   display: "flex",
   flexDirection: "column",
@@ -9506,20 +9492,20 @@ const detailItemStyle = {
   borderRadius: "2px",
   lineHeight: "1.4"
 };
-const detailHeaderStyle = {
+const detailHeaderStyle$1 = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "flex-start",
   gap: "8px"
 };
-const detailLeftContainerStyle = {
+const detailLeftContainerStyle$1 = {
   display: "flex",
   flexDirection: "column",
   gap: "2px",
   flex: 1,
   minWidth: 0
 };
-const detailNameStyle = {
+const detailNameStyle$1 = {
   color: "#ddd",
   whiteSpace: "nowrap",
   overflow: "hidden",
@@ -9528,7 +9514,7 @@ const detailNameStyle = {
   fontSize: "12px",
   marginBottom: "2px"
 };
-const detailInfoStyle = {
+const detailInfoStyle$1 = {
   display: "flex",
   gap: "12px",
   opacity: 0.6,
@@ -9564,13 +9550,159 @@ const noItemStyle = {
   color: "#666",
   fontStyle: "italic"
 };
+const GBufferResourcesView = ({ onPreview }) => {
+  const { redGPUContext } = useInspectorStore();
+  const [expanded, setExpanded] = reactExports.useState({});
+  if (!redGPUContext) return null;
+  const toggleExpanded = (key) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+  const views = redGPUContext.viewList;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: "G-Buffer Resources", children: views.map((view, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ViewGBufferList,
+    {
+      view,
+      isExpanded: !!expanded[view.uuid],
+      onToggle: () => toggleExpanded(view.uuid),
+      onPreview
+    },
+    view.uuid || idx
+  )) });
+};
+const ViewGBufferList = ({ view, isExpanded, onToggle, onPreview }) => {
+  const gBuffers = view.viewRenderTextureManager.gBuffers;
+  const items = Array.from(gBuffers.entries());
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "12px" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        style: viewHeaderStyle,
+        onClick: onToggle,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toggleWrapperStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "View: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: view.name || "Unnamed View" }),
+            " (",
+            view.uuid,
+            ")"
+          ] })
+        ]
+      }
+    ),
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle, children: items.map(([key, info]) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      GBufferItem,
+      {
+        name: key,
+        info,
+        onPreview
+      },
+      key
+    )) })
+  ] });
+};
+const GBufferItem = ({ name, info, onPreview }) => {
+  const gpuTex = info.texture;
+  if (!gpuTex) return null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      style: textureItemStyle,
+      onClick: () => onPreview({ texture: { gpuTexture: gpuTex }, label: name }, "bitmapTexture"),
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailHeaderStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: name }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Format: ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.format })
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Dim: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { style: { color: "#eee" }, children: [
+              gpuTex.width,
+              "x",
+              gpuTex.height
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Samples: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Mips: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.mipLevelCount })
+          ] })
+        ] }),
+        gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Usage: ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
+        ] }) })
+      ] }) })
+    }
+  );
+};
+const viewHeaderStyle = {
+  padding: "8px 12px",
+  background: "#222",
+  cursor: "pointer",
+  fontSize: "13px",
+  display: "flex",
+  alignItems: "center",
+  borderLeft: "2px solid #444"
+};
+const toggleWrapperStyle = {
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  paddingRight: "8px"
+};
+const detailListStyle = {
+  padding: "4px 0 4px 12px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
+  borderLeft: "1px solid #333",
+  marginLeft: "6px"
+};
+const textureItemStyle = {
+  padding: "8px 12px",
+  background: "#1a1a1a",
+  cursor: "pointer",
+  fontSize: "12px",
+  transition: "background 0.2s",
+  borderBottom: "1px solid #222"
+};
+const detailHeaderStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start"
+};
+const detailLeftContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  flex: 1,
+  minWidth: 0
+};
+const detailNameStyle = {
+  color: "#00ccff",
+  fontWeight: "bold",
+  marginBottom: "2px",
+  fontSize: "13px"
+};
+const detailInfoStyle = {
+  display: "flex",
+  fontSize: "11px",
+  color: "#aaa",
+  gap: "12px"
+};
 const ResourcesView = () => {
-  const [activeSubTab, setActiveSubTab] = reactExports.useState("TEXTURES");
+  const [activeSubTab, setActiveSubTab] = reactExports.useState("GBUFFER");
   const [previewData, setPreviewData] = reactExports.useState(null);
   const handlePreview = (item, type) => {
     setPreviewData({ item, type });
   };
   const subTabs = [
+    { id: "GBUFFER", label: "G-Buffer" },
     { id: "TEXTURES", label: "Textures" },
     { id: "BUFFERS", label: "Buffers" }
   ];
@@ -9586,6 +9718,7 @@ const ResourcesView = () => {
       }
     ) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "12px 0" }, children: [
+      activeSubTab === "GBUFFER" && /* @__PURE__ */ jsxRuntimeExports.jsx(GBufferResourcesView, { onPreview: handlePreview }),
       activeSubTab === "TEXTURES" && /* @__PURE__ */ jsxRuntimeExports.jsx(TextureResourcesView, { onPreview: handlePreview }),
       activeSubTab === "BUFFERS" && /* @__PURE__ */ jsxRuntimeExports.jsx(BufferResourcesView, { onPreview: handlePreview })
     ] }),

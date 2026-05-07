@@ -172,11 +172,7 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
 
                     {useCanvasForSingle && (
                         <div style={{...previewImageStyle, position: 'relative'} as any}>
-                            {isHDR && (
-                                <div style={hdrBadgeStyle}>
-                                    HDR DATA VIEW (Reference only)
-                                </div>
-                            )}
+
                             <canvas
                                 ref={el => canvasRefs.current[0] = el}
                                 style={{maxWidth: '100%', maxHeight: '500px', display: 'block'}}
