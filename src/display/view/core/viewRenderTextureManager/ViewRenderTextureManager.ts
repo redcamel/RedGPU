@@ -22,13 +22,20 @@ const BASIC_USAGE = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_
 /**
  * G-Buffer 타입별 포맷 및 사용 용도 정의
  */
-const GBUFFER_FORMATS: Record<GBUFFER_TYPE, { format?: GPUTextureFormat, usage: GPUTextureUsageFlags }> = {
-    [GBUFFER_TYPE.COLOR]: {format: 'rgba16float', usage: BASIC_USAGE},
-    [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rgba16float', usage: BASIC_USAGE},
-    [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE}, // navigator.gpu.getPreferredCanvasFormat() 사용
+const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
+    format?: GPUTextureFormat,
+    usage: GPUTextureUsageFlags,
+    withResolve: boolean,
+    useMipmap: boolean
+}> = {
+    [GBUFFER_TYPE.COLOR]: {format: 'rgba16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
+    [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rgba16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
+    [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE, withResolve: true, useMipmap: false}, // navigator.gpu.getPreferredCanvasFormat() 사용
     [GBUFFER_TYPE.RENDER_PATH1_RESULT]: {
         format: 'rgba16float',
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+        withResolve: false,
+        useMipmap: true
     }
 };
 
@@ -166,6 +173,23 @@ class ViewRenderTextureManager {
         this.#update();
         return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH0)?.textureView : this.#gBuffers.get(DEPTH1)?.textureView;
     }
+
+    /**
+     * 렌더 패스1 결과 텍스처 뷰를 반환합니다.
+     * @returns {GPUTextureView}
+     */
+    get renderPath1ResultTextureView(): GPUTextureView {
+        return this.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);
+    }
+
+    /**
+     * 렌더 패스1 결과 텍스처를 반환합니다.
+     * @returns {GPUTexture}
+     */
+    get renderPath1ResultTexture(): GPUTexture {
+        return this.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_RESULT);
+    }
+
     /* ----------------------------------------
      * G-Buffer 공통 접근 메서드
      * ---------------------------------------- */
@@ -301,15 +325,9 @@ class ViewRenderTextureManager {
         keepLog(`새 텍스처 생성 중: ${type}`)
 
         let format = GBUFFER_FORMATS[type]?.format || navigator.gpu.getPreferredCanvasFormat();
-        let usage = GBUFFER_FORMATS[type].usage;
-        let mipLevelCount = 1;
-        let withResolve = true;
+        let {usage, withResolve, useMipmap} = GBUFFER_FORMATS[type];
+        let mipLevelCount = useMipmap ? getMipLevelCount(this.#targetTextureSize.width, this.#targetTextureSize.height) : 1;
 
-        if (type === GBUFFER_TYPE.RENDER_PATH1_RESULT) {
-            usage |= GPUTextureUsage.COPY_DST; // COPY_DST 추가
-            mipLevelCount = getMipLevelCount(this.#targetTextureSize.width, this.#targetTextureSize.height);
-            withResolve = false; // RenderPath 결과는 보통 직접 MSAA를 갖지 않고 resolve된 데이터를 받음
-        }
         this.#destroyGBuffer(type)
         this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, format, usage, withResolve, mipLevelCount))
     }
