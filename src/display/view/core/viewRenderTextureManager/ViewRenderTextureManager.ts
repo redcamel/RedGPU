@@ -6,9 +6,9 @@ import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import View3D from "../../View3D";
 import GBUFFER_TYPE from "../GBUFFER_TYPE";
 
-type DepthType = 'depthTexture1' | 'depthTexture2';
-const DEPTH_TYPE1: DepthType = 'depthTexture1'
-const DEPTH_TYPE2: DepthType = 'depthTexture2'
+type DepthType = 'depthTexture0' | 'depthTexture1';
+const DEPTH0: DepthType = 'depthTexture0'
+const DEPTH1: DepthType = 'depthTexture1'
 /**
  * G-Buffer 타입별 포맷 정의
  */
@@ -131,7 +131,8 @@ class ViewRenderTextureManager {
 
             // 1. 기존 리소스 일괄 정리 (선택 사항이나 명시적 관리를 위해 유지)
             // 2. 새로운 리소스 일괄 생성
-            this.#createDepthTexture();
+            this.#createDepthTexture(DEPTH0);
+            this.#createDepthTexture(DEPTH1);
             this.#createRender2PathTexture('rgba16float');
 
             // G-Buffer 일괄 생성 (for...in 루프로 최적화)
@@ -166,7 +167,7 @@ class ViewRenderTextureManager {
      */
     get depthTexture(): GPUTexture {
         this.#update();
-        return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH_TYPE2)?.texture : this.#gBuffers.get(DEPTH_TYPE1)?.texture;
+        return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH1)?.texture : this.#gBuffers.get(DEPTH0)?.texture;
     }
 
     /**
@@ -175,12 +176,12 @@ class ViewRenderTextureManager {
      */
     get depthTextureView(): GPUTextureView {
         this.#update();
-        return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH_TYPE2)?.textureView : this.#gBuffers.get(DEPTH_TYPE1)?.textureView;
+        return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH1)?.textureView : this.#gBuffers.get(DEPTH0)?.textureView;
     }
 
     get prevDepthTextureView(): GPUTextureView {
         this.#update();
-        return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH_TYPE1)?.textureView : this.#gBuffers.get(DEPTH_TYPE2)?.textureView;
+        return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH0)?.textureView : this.#gBuffers.get(DEPTH1)?.textureView;
     }
 
     /**
@@ -303,7 +304,6 @@ class ViewRenderTextureManager {
         }
 
         const format = GBUFFER_FORMATS[type] || navigator.gpu.getPreferredCanvasFormat();
-
         // 메인 텍스처 생성
         const newTexture = resourceManager.createManagedTexture({
             size: this.#targetTextureSize,
@@ -333,50 +333,32 @@ class ViewRenderTextureManager {
      * 깊이 텍스처를 생성하거나 재생성합니다.
      * @private
      */
-    #createDepthTexture(): void {
-
+    #createDepthTexture(type:DepthType): void {
         const {antialiasingManager, resourceManager} = this.#redGPUContext
         const {useMSAA} = antialiasingManager
         const {name} = this.#view
         // 기존 텍스처 정리
-        this.#destroyGBuffer(DEPTH_TYPE1)
-        this.#destroyGBuffer(DEPTH_TYPE2)
+        this.#destroyGBuffer(type)
 
-        const newInfo1 = {
+        const newInfo = {
             texture: null,
             textureView: null,
             resolveTexture: null,
             resolveTextureView: null,
         }
-        const newInfo2 = {
-            texture: null,
-            textureView: null,
-            resolveTexture: null,
-            resolveTextureView: null,
-        }
+
         // 새로운 깊이 텍스처 생성
         const newTexture = resourceManager.createManagedTexture({
             size: this.#targetTextureSize,
             sampleCount: useMSAA ? 4 : 1,
-            label: `${name}_depth0_${this.#targetTextureSizeString}`,
+            label: `${name}_${type}_${this.#targetTextureSizeString}`,
             format: 'depth32float',
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
         })
-        newInfo1.texture = newTexture;
-        newInfo1.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
-        {
-            const newTexture = resourceManager.createManagedTexture({
-                size: this.#targetTextureSize,
-                sampleCount: useMSAA ? 4 : 1,
-                label: `${name}_depth1_${this.#targetTextureSizeString}`,
-                format: 'depth32float',
-                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
-            })
-            newInfo2.texture = newTexture;
-            newInfo2.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
-        }
-        this.#gBuffers.set(DEPTH_TYPE1, newInfo1)
-        this.#gBuffers.set(DEPTH_TYPE2, newInfo2)
+        newInfo.texture = newTexture;
+        newInfo.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+
+        this.#gBuffers.set(type, newInfo)
     }
 
     /**
