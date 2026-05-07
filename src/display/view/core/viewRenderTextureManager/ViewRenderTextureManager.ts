@@ -166,25 +166,6 @@ class ViewRenderTextureManager {
         this.#update();
         return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH0)?.textureView : this.#gBuffers.get(DEPTH1)?.textureView;
     }
-
-    /**
-     * 렌더 패스1 결과 텍스처 뷰를 반환합니다.
-     * @returns {GPUTextureView}
-     */
-    get renderPath1ResultTextureView(): GPUTextureView {
-        this.#update();
-        return this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.textureView;
-    }
-
-    /**
-     * 렌더 패스1 결과 텍스처를 반환합니다.
-     * @returns {GPUTexture}
-     */
-    get renderPath1ResultTexture(): GPUTexture {
-        this.#update();
-        return this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.texture;
-    }
-
     /* ----------------------------------------
      * G-Buffer 공통 접근 메서드
      * ---------------------------------------- */

@@ -202,7 +202,7 @@ class Renderer {
             shadowManager.render(view)
             // [KO] 기본 패스용 업데이트 및 렌더링
             // [EN] Update and render for basic pass
-            const renderPath1ResultTextureView = view.viewRenderTextureManager.renderPath1ResultTextureView
+            const renderPath1ResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);
             view.update(false, true, renderPath1ResultTextureView)
 
             this.#renderPassViewBasicLayer(view, renderPassDescriptor)
@@ -247,7 +247,7 @@ class Renderer {
 
         if (view.renderViewStateData.bundleListRender2PathLayer.length) {
             const {mipmapGenerator} = redGPUContext.resourceManager
-            let renderPath1ResultTexture = view.viewRenderTextureManager.renderPath1ResultTexture
+            let renderPath1ResultTexture = view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_RESULT);
 
             // useMSAA 설정에 따라 소스 텍스처 선택
             let sourceTexture = useMSAA
