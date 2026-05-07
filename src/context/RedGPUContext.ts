@@ -156,7 +156,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#detector = new RedGPUContextDetector(this)
         this.#resourceManager = new ResourceManager(this)
         this.#commandEncoderManager = new CommandEncoderManager(this)
-        this.#antialiasingManager = new AntialiasingManager(this)
+        this.#antialiasingManager = new AntialiasingManager()
         this.#initialize()
     }
 
