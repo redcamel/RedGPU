@@ -69,18 +69,11 @@ class ViewRenderTextureManager {
      */
     #gBuffers: Map<string, GBufferInfo> = new Map()
     /**
-     * G-Buffer별 MSAA 사용 상태 캐시 (재생성 판단용)
-     * @private
-     * @type {{ [key: string]: boolean }}
-     */
-    #gBuffersMSAAState: { [key: string]: boolean } = {}
-    /**
      * 마지막으로 업데이트된 MSAA 고유 ID
      * @private
      * @type {string}
      */
     #lastUpdateMSAAID: string
-    #prevTime: number
     #targetTextureSize: GPUExtent3DDict
     #targetTextureSizeString: string
 
@@ -106,7 +99,6 @@ class ViewRenderTextureManager {
         const {antialiasingManager} = this.#redGPUContext;
         const {msaaID} = antialiasingManager;
         const {pixelRectObject} = this.#view;
-        const {width, height} = pixelRectObject;
         this.#targetTextureSize = {
             width: Math.max(pixelRectObject.width, 1),
             height: Math.max(pixelRectObject.height, 1),
@@ -115,7 +107,7 @@ class ViewRenderTextureManager {
         this.#targetTextureSizeString = `${this.#targetTextureSize.width}x${this.#targetTextureSize.height}`
         // 하나라도 변경되었는지 확인
         const renderPath1ResultTexture = this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.texture
-        const changedSize = renderPath1ResultTexture?.width !== width || renderPath1ResultTexture?.height !== height;
+        const changedSize = renderPath1ResultTexture?.width !== this.#targetTextureSize.width || renderPath1ResultTexture?.height !== this.#targetTextureSize.height;
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
 
         if (changedSize || dirtyMSAA || !renderPath1ResultTexture) {
