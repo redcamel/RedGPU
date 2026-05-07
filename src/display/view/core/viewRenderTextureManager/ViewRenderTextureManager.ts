@@ -249,7 +249,7 @@ class ViewRenderTextureManager {
         }, 0)
     }
 
-    #destroyGBuffer(type: GBUFFER_TYPE | GBUFFER_INNER_TYPE, delayTextureDestroy: boolean = false) {
+    #destroyGBuffer(type: GBUFFER_TYPE | GBUFFER_INNER_TYPE) {
         const targetInfo = this.#gBuffers.get(type)
         if (targetInfo) {
             const {texture, resolveTexture} = targetInfo;
@@ -260,15 +260,8 @@ class ViewRenderTextureManager {
             targetInfo.resolveTextureView = null
             //
             this.#gBuffers.delete(type)
-            if (delayTextureDestroy) {
-                requestAnimationFrame(() => {
-                    texture?.destroy()
-                    resolveTexture?.destroy()
-                })
-            } else {
-                texture?.destroy()
-                resolveTexture?.destroy()
-            }
+            texture?.destroy()
+            resolveTexture?.destroy()
         }
     }
 
@@ -335,12 +328,9 @@ class ViewRenderTextureManager {
             usage |= GPUTextureUsage.COPY_DST; // COPY_DST 추가
             mipLevelCount = getMipLevelCount(this.#targetTextureSize.width, this.#targetTextureSize.height);
             withResolve = false; // RenderPath 결과는 보통 직접 MSAA를 갖지 않고 resolve된 데이터를 받음
-            this.#destroyGBuffer(type, true)
-            this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, format, usage, withResolve, mipLevelCount))
-        } else {
-            this.#destroyGBuffer(type)
-            this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, format, usage, withResolve, mipLevelCount))
         }
+        this.#destroyGBuffer(type)
+        this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, format, usage, withResolve, mipLevelCount))
     }
 
     /**
