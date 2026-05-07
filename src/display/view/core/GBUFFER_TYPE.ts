@@ -4,7 +4,8 @@
  const GBUFFER_TYPE = {
     COLOR: 'gBufferColor',
     NORMAL: 'gBufferNormal',
-    MOTION_VECTOR: 'gBufferMotionVector'
+    MOTION_VECTOR: 'gBufferMotionVector',
+    RENDER_PATH1_RESULT: 'renderPath1ResultTexture'
 } as const;
 
 type GBUFFER_TYPE = typeof GBUFFER_TYPE[keyof typeof GBUFFER_TYPE];

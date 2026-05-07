@@ -10,14 +10,26 @@ const DEPTH0: GBUFFER_INNER_TYPE = 'depthTexture0'
 const DEPTH1: GBUFFER_INNER_TYPE = 'depthTexture1'
 
 type GBUFFER_INNER_TYPE = 'depthTexture0' | 'depthTexture1';
-
+type GBufferInfo = {
+    texture: GPUTexture,
+    textureView: GPUTextureView,
+    textureDescriptor: GPUTextureDescriptor,
+    resolveTexture?: GPUTexture,
+    resolveTextureView?: GPUTextureView,
+    resolveTextureDescriptor?: GPUTextureDescriptor,
+}
+const BASIC_USAGE = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 /**
- * G-Buffer 타입별 포맷 정의
+ * G-Buffer 타입별 포맷 및 사용 용도 정의
  */
-const GBUFFER_FORMATS: Record<GBUFFER_TYPE, GPUTextureFormat> = {
-    [GBUFFER_TYPE.COLOR]: 'rgba16float',
-    [GBUFFER_TYPE.MOTION_VECTOR]: 'rgba16float',
-    [GBUFFER_TYPE.NORMAL]: undefined // navigator.gpu.getPreferredCanvasFormat() 사용
+const GBUFFER_FORMATS: Record<GBUFFER_TYPE, { format?: GPUTextureFormat, usage: GPUTextureUsageFlags }> = {
+    [GBUFFER_TYPE.COLOR]: {format: 'rgba16float', usage: BASIC_USAGE},
+    [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rgba16float', usage: BASIC_USAGE},
+    [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE}, // navigator.gpu.getPreferredCanvasFormat() 사용
+    [GBUFFER_TYPE.RENDER_PATH1_RESULT]: {
+        format: 'rgba16float',
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+    }
 };
 
 /**
@@ -32,25 +44,6 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, GPUTextureFormat> = {
  * @category Core
  */
 class ViewRenderTextureManager {
-    /**
-     * 렌더 패스 1 결과 텍스처
-     * @private
-     * @type {GPUTexture}
-     */
-    #renderPath1ResultTexture: GPUTexture
-    /**
-     * 렌더 패스 1 결과 텍스처 뷰
-     * @private
-     * @type {GPUTextureView}
-     */
-    #renderPath1ResultTextureView: GPUTextureView
-    /**
-     * 렌더 패스 1 결과 텍스처 디스크립터(생성 시점 정보)
-     * @private
-     * @type {GPUTextureDescriptor}
-     */
-    #renderPath1ResultTextureDescriptor: GPUTextureDescriptor
-
     /**
      * 관리 중인 텍스처들의 총 비디오 메모리 사용량(바이트)
      * @private
@@ -72,14 +65,9 @@ class ViewRenderTextureManager {
     /**
      * G-Buffer 맵: key -> { texture, textureView, resolveTexture, resolveTextureView }
      * @private
-     * @type {Map<string, {texture: GPUTexture, textureView: GPUTextureView, resolveTexture: GPUTexture, resolveTextureView: GPUTextureView}>}
+     * @type {Map<string, GBufferInfo>}
      */
-    #gBuffers: Map<string, {
-        texture: GPUTexture,
-        textureView: GPUTextureView,
-        resolveTexture: GPUTexture,
-        resolveTextureView: GPUTextureView,
-    }> = new Map()
+    #gBuffers: Map<string, GBufferInfo> = new Map()
     /**
      * G-Buffer별 MSAA 사용 상태 캐시 (재생성 판단용)
      * @private
@@ -126,17 +114,17 @@ class ViewRenderTextureManager {
         }
         this.#targetTextureSizeString = `${this.#targetTextureSize.width}x${this.#targetTextureSize.height}`
         // 하나라도 변경되었는지 확인
-        const changedSize = this.#renderPath1ResultTexture?.width !== width || this.#renderPath1ResultTexture?.height !== height;
+        const renderPath1ResultTexture = this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.texture
+        const changedSize = renderPath1ResultTexture?.width !== width || renderPath1ResultTexture?.height !== height;
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
 
-        if (changedSize || dirtyMSAA || !this.#renderPath1ResultTexture) {
+        if (changedSize || dirtyMSAA || !renderPath1ResultTexture) {
             this.#lastUpdateMSAAID = msaaID;
 
             // 1. 기존 리소스 일괄 정리 (선택 사항이나 명시적 관리를 위해 유지)
             // 2. 새로운 리소스 일괄 생성
             this.#createDepthTexture(DEPTH0);
             this.#createDepthTexture(DEPTH1);
-            this.#createRender2PathTexture('rgba16float');
 
             // G-Buffer 일괄 생성 (for...in 루프로 최적화)
             for (const key in GBUFFER_TYPE) {
@@ -161,7 +149,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTextureDescriptor}
      */
     get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
-        return this.#renderPath1ResultTextureDescriptor;
+        return this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.textureDescriptor;
     }
 
     /**
@@ -193,7 +181,7 @@ class ViewRenderTextureManager {
      */
     get renderPath1ResultTextureView(): GPUTextureView {
         this.#update();
-        return this.#renderPath1ResultTextureView;
+        return this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.textureView;
     }
 
     /**
@@ -202,7 +190,7 @@ class ViewRenderTextureManager {
      */
     get renderPath1ResultTexture(): GPUTexture {
         this.#update();
-        return this.#renderPath1ResultTexture;
+        return this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.texture;
     }
 
     /* ----------------------------------------
@@ -256,9 +244,7 @@ class ViewRenderTextureManager {
      * @private
      */
     #checkVideoMemorySize() {
-        const textures = [
-            this.#renderPath1ResultTexture,
-        ].filter(Boolean);
+        const textures = []
         // 모든 G-Buffer 텍스처 추가
         this.#gBuffers.forEach(info => {
             if (info.texture) textures.push(info.texture);
@@ -271,52 +257,69 @@ class ViewRenderTextureManager {
         }, 0)
     }
 
-    #destroyGBuffer(type: GBUFFER_TYPE | GBUFFER_INNER_TYPE) {
+    #destroyGBuffer(type: GBUFFER_TYPE | GBUFFER_INNER_TYPE, delayTextureDestroy: boolean = false) {
         const targetInfo = this.#gBuffers.get(type)
         if (targetInfo) {
-            targetInfo?.texture?.destroy()
+            const {texture, resolveTexture} = targetInfo;
             targetInfo.texture = null
             targetInfo.textureView = null
             //
-            targetInfo.resolveTexture?.destroy()
             targetInfo.resolveTexture = null
             targetInfo.resolveTextureView = null
             //
             this.#gBuffers.delete(type)
+            if (delayTextureDestroy) {
+                requestAnimationFrame(() => {
+                    texture?.destroy()
+                    resolveTexture?.destroy()
+                })
+            } else {
+                texture?.destroy()
+                resolveTexture?.destroy()
+            }
         }
     }
 
-    #createGBufferTextureAndTextureView(type: GBUFFER_TYPE | GBUFFER_INNER_TYPE, format: GPUTextureFormat, usage?: GPUTextureUsageFlags, withResolve: boolean = false) {
+    #createGBufferTextureAndTextureView(
+        type: GBUFFER_TYPE | GBUFFER_INNER_TYPE,
+        format: GPUTextureFormat,
+        usage?: GPUTextureUsageFlags,
+        withResolve: boolean = false,
+        mipLevelCount: number = 1
+    ): GBufferInfo {
         const {antialiasingManager, resourceManager} = this.#redGPUContext
         const {useMSAA} = antialiasingManager
-        const newInfo = {
-            texture: null,
-            textureView: null,
-            resolveTexture: null,
-            resolveTextureView: null,
+        const newInfo: GBufferInfo = {
+            texture: null as any,
+            textureView: null as any,
+            textureDescriptor: null as any
         }
 
         const {name} = this.#view
-        const newTexture = resourceManager.createManagedTexture({
+        const textureDescriptor = {
             size: this.#targetTextureSize,
-            sampleCount: useMSAA ? 4 : 1,
+            sampleCount: useMSAA && mipLevelCount === 1 ? 4 : 1, // 밉맵을 쓸 때는 보통 MSAA를 쓰지 않거나 resolve된 타겟을 씁니다.
             label: `${name}_${type}_texture_${this.#targetTextureSizeString}`,
             format: format,
-            usage
-        })
-
+            usage,
+            mipLevelCount,
+        }
+        const newTexture = resourceManager.createManagedTexture(textureDescriptor)
+        newInfo.textureDescriptor = textureDescriptor
         newInfo.texture = newTexture;
         newInfo.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
 
         // MSAA 사용 시 Resolve 텍스처 생성
         if (withResolve && useMSAA) {
-            const newResolveTexture = resourceManager.createManagedTexture({
+            const resolveTextureDescriptor = {
                 size: this.#targetTextureSize,
                 sampleCount: 1,
                 label: `${name}_${type}_resolveTexture_${this.#targetTextureSizeString}`,
                 format: format,
-                usage
-            })
+                usage,
+            }
+            const newResolveTexture = resourceManager.createManagedTexture(resolveTextureDescriptor)
+            newInfo.resolveTextureDescriptor = resolveTextureDescriptor
             newInfo.resolveTexture = newResolveTexture
             newInfo.resolveTextureView = resourceManager.getGPUResourceBitmapTextureView(newResolveTexture)
         }
@@ -330,10 +333,22 @@ class ViewRenderTextureManager {
      */
     #createGBuffer(type: GBUFFER_TYPE) {
         keepLog(`새 텍스처 생성 중: ${type}`)
-        this.#destroyGBuffer(type)
-        const format = GBUFFER_FORMATS[type] || navigator.gpu.getPreferredCanvasFormat();
-        const usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
-        this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type,  format, usage, true))
+
+        let format = GBUFFER_FORMATS[type]?.format || navigator.gpu.getPreferredCanvasFormat();
+        let usage = GBUFFER_FORMATS[type].usage;
+        let mipLevelCount = 1;
+        let withResolve = true;
+
+        if (type === GBUFFER_TYPE.RENDER_PATH1_RESULT) {
+            usage |= GPUTextureUsage.COPY_DST; // COPY_DST 추가
+            mipLevelCount = getMipLevelCount(this.#targetTextureSize.width, this.#targetTextureSize.height);
+            withResolve = false; // RenderPath 결과는 보통 직접 MSAA를 갖지 않고 resolve된 데이터를 받음
+            this.#destroyGBuffer(type, true)
+            this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, format, usage, withResolve, mipLevelCount))
+        } else {
+            this.#destroyGBuffer(type)
+            this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, format, usage, withResolve, mipLevelCount))
+        }
     }
 
     /**
@@ -344,38 +359,7 @@ class ViewRenderTextureManager {
         this.#destroyGBuffer(type)
         keepLog(`새 텍스처 생성 중: ${type}`)
         const usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
-        this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type,  'depth32float', usage, false))
-    }
-
-    /**
-     * 렌더 패스(또는 후처리) 결과를 담을 렌더 패스1 결과 텍스처를 생성하거나 재생성합니다.
-     * @private
-     */
-    #createRender2PathTexture(format: GPUTextureFormat) {
-        const {resourceManager} = this.#redGPUContext
-        const currentTexture = this.#renderPath1ResultTexture
-        const {pixelRectObject, name} = this.#view
-        const {width: pixelRectObjectW, height: pixelRectObjectH} = pixelRectObject
-
-        // 기존 텍스처 정리
-        if (currentTexture) {
-            this.#renderPath1ResultTexture = null
-            this.#renderPath1ResultTextureView = null
-        }
-        // 텍스처 디스크립터 생성
-        this.#renderPath1ResultTextureDescriptor = {
-            size: this.#targetTextureSize,
-            format: format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
-            mipLevelCount: getMipLevelCount(pixelRectObjectW, pixelRectObjectH),
-            label: `${name}_renderPath1ResultTexture_${this.#targetTextureSizeString}`
-        }
-        // 텍스처 및 텍스처 뷰 생성
-        this.#renderPath1ResultTexture = resourceManager.createManagedTexture(this.#renderPath1ResultTextureDescriptor);
-        this.#renderPath1ResultTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#renderPath1ResultTexture)
-        requestAnimationFrame(() => {
-            currentTexture?.destroy()
-        })
+        this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, 'depth32float', usage, false))
     }
 
 
