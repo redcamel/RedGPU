@@ -20,11 +20,10 @@ import RedGPUContext from "../context/RedGPUContext";
  * @category Core
  */
 class AntialiasingManager {
-    #msaaID: string
+    #msaaID: string = createUUID()
     #useMSAA: boolean = true
     #useFXAA: boolean = false
     #useTAA: boolean = false
-    #changedMSAA: boolean = true
 
 
     /**
@@ -112,7 +111,6 @@ class AntialiasingManager {
         this.#clearAll();
         this.#msaaID = createUUID();
         this.#useMSAA = value;
-        this.#changedMSAA = true;
     }
 
     /**
@@ -149,32 +147,6 @@ class AntialiasingManager {
         if (this.#useFXAA === value) return;
         this.#clearAll();
         this.#useFXAA = value;
-    }
-
-    /**
-     * [KO] MSAA 설정 변경 여부를 반환합니다.
-     * [EN] Returns whether the MSAA setting has changed.
-     *
-     * @returns
-     * [KO] MSAA 변경 여부
-     * [EN] Whether MSAA has changed
-     * @internal
-     */
-    get changedMSAA(): boolean {
-        return this.#changedMSAA;
-    }
-
-    /**
-     * [KO] MSAA 설정 변경 여부를 설정합니다.
-     * [EN] Sets whether the MSAA setting has changed.
-     *
-     * @param value -
-     * [KO] MSAA 변경 여부
-     * [EN] Whether MSAA has changed
-     * @internal
-     */
-    set changedMSAA(value: boolean) {
-        this.#changedMSAA = value;
     }
 
     /**

@@ -71,6 +71,8 @@ class InstancingMesh extends Mesh {
      */
     dirtyInstanceNum: boolean = true;
 
+    #lastUpdateMSAAID: string;
+
     // ========== 기본 설정 ==========
     readonly #redGPUContext: RedGPUContext;
     /**
@@ -219,8 +221,9 @@ class InstancingMesh extends Mesh {
         const redGPUContext = this.#redGPUContext;
         if (this.geometry) {
             const {antialiasingManager} = redGPUContext;
-            if (antialiasingManager.changedMSAA) {
+            if (this.#lastUpdateMSAAID !== antialiasingManager.msaaID) {
                 this.dirtyPipeline = true;
+                this.#lastUpdateMSAAID = antialiasingManager.msaaID;
             }
             if (!this.gpuRenderInfo) {
                 this.#initGPURenderInfos(redGPUContext);

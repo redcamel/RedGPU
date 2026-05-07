@@ -124,7 +124,6 @@ class Renderer {
         this.#finalRender.render(redGPUContext, viewList_renderPassDescriptorList);
         commandEncoderManager.submit(COMMAND_ENCODER_TYPE.MAIN);
 
-        redGPUContext.antialiasingManager.changedMSAA = false
         viewList_renderPassDescriptorList.forEach((v, index) => {
             const targetView = redGPUContext.viewList[index];
             targetView.pickingManager?.checkEvents(targetView, time);

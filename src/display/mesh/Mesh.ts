@@ -106,6 +106,9 @@ class Mesh extends MeshBase {
      * [EN] Function to create custom vertex shader module
      */
     createCustomMeshVertexShaderModule?: () => GPUShaderModule;
+
+    #lastUpdateMSAAID: string;
+
     /**
      * [KO] 인스턴스 고유 ID
      * [EN] Instance unique ID
@@ -1398,9 +1401,10 @@ class Mesh extends MeshBase {
         // keepLog(this.gpuRenderInfo?.vertexStructInfo)
         if (currentGeometry) {
             renderViewStateData.num3DObjects++
-            if (antialiasingManager.changedMSAA) {
+            if (this.#lastUpdateMSAAID !== antialiasingManager.msaaID) {
                 currentDirtyPipeline = true
                 this.dirtyLOD = true
+                this.#lastUpdateMSAAID = antialiasingManager.msaaID
             }
             if (!this.gpuRenderInfo) this.initGPURenderInfos()
             const currentUseDisplacementTexture = !!displacementTexture
