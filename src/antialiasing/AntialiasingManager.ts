@@ -20,7 +20,6 @@ import RedGPUContext from "../context/RedGPUContext";
  * @category Core
  */
 class AntialiasingManager {
-    #redGPUContext: RedGPUContext;
     #msaaID: string
     #useMSAA: boolean = true
     #useFXAA: boolean = false
@@ -31,13 +30,9 @@ class AntialiasingManager {
     /**
      * [KO] AntialiasingManager 생성자입니다.
      * [EN] AntialiasingManager constructor.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+
      */
-    constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+    constructor() {
         // setter를 통해 초기 상태를 설정하여 로직 일관성 유지
         if (window.devicePixelRatio > 1.0) {
             this.useTAA = true;
