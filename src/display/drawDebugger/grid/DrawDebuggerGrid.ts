@@ -49,6 +49,7 @@ class DrawDebuggerGrid {
     #bundleEncoder: GPURenderBundleEncoder
     #renderBundle: GPURenderBundle
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
+    #lastUpdateMSAAID: string
 
     constructor(redGPUContext: RedGPUContext) {
         validateRedGPUContext(redGPUContext)
@@ -165,16 +166,18 @@ class DrawDebuggerGrid {
         const {view, currentRenderPassEncoder} = renderViewStateData
         const {redGPUContext} = view
         const {gpuDevice, antialiasingManager} = redGPUContext
-        const {useMSAA, changedMSAA} = antialiasingManager
+        const {useMSAA, msaaID} = antialiasingManager
         const position = vec3.create()
         vec3.set(position, view.rawCamera.x, view.rawCamera.y, view.rawCamera.z)
         renderViewStateData.num3DObjects++
         renderViewStateData.numDrawCalls++
+        const changedMSAA = this.#lastUpdateMSAAID !== msaaID
         const changedSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup !== this.#prevSystemUniform_Vertex_UniformBindGroup
         if (this.#pipeline) {
             const lineCount = (this.#size + 1) * 2; // 세로 + 가로 라인 수
             const indexCount = lineCount * 2; // 각 라인마다 2개 인덱스
             if (!this.#bundleEncoder || changedMSAA || changedSystemBindGroup) {
+                this.#lastUpdateMSAAID = msaaID
                 // keepLog('렌더번들갱신', this.name, useMSAA,changedMSAA)
                 this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
                     ...view.basicRenderBundleEncoderDescriptor,
