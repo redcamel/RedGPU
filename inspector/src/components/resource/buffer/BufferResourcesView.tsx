@@ -19,6 +19,12 @@ const BufferResourcesView = ({onPreview}: { onPreview: (item: any, type: string)
 
     if (!redGPUContext) return null;
 
+    const totalMemory = (resourceStats.uniformBuffer?.videoMemory || 0) +
+        (resourceStats.vertexBuffer?.videoMemory || 0) +
+        (resourceStats.indexBuffer?.videoMemory || 0) +
+        (resourceStats.storageBuffer?.videoMemory || 0) +
+        (resourceStats.gpuBuffer?.videoMemory || 0);
+
     const renderBufferSection = (type: string, label: string, stats: any) => (
         <React.Fragment key={type}>
             <ResourceSummary
@@ -34,7 +40,12 @@ const BufferResourcesView = ({onPreview}: { onPreview: (item: any, type: string)
     );
 
     return (
-        <Section title="Buffer Resources">
+        <Section title={
+            <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+                <span>Buffer Resources</span>
+                <span style={{fontSize: '11px', color: '#fdb48d'}}>{formatBytes(totalMemory)}</span>
+            </div>
+        }>
             {renderBufferSection('uniformBuffer', 'Uniform Buffers', resourceStats.uniformBuffer)}
             {renderBufferSection('vertexBuffer', 'Vertex Buffers', resourceStats.vertexBuffer)}
             {renderBufferSection('indexBuffer', 'Index Buffers', resourceStats.indexBuffer)}

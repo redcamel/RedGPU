@@ -9146,12 +9146,14 @@ const summaryValuesStyle = {
   gap: "2px"
 };
 const TextureResourcesView = ({ onPreview }) => {
+  var _a, _b, _c;
   const { resourceStats, redGPUContext } = useInspectorStore();
   const [expanded, setExpanded] = reactExports.useState({});
   const toggleExpanded = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
   if (!redGPUContext) return null;
+  const totalMemory = (((_a = resourceStats.bitmapTexture) == null ? void 0 : _a.videoMemory) || 0) + (((_b = resourceStats.cubeTexture) == null ? void 0 : _b.videoMemory) || 0) + (((_c = resourceStats.hdrTexture) == null ? void 0 : _c.videoMemory) || 0);
   const renderTextureSection = (type, label, stats) => /* @__PURE__ */ jsxRuntimeExports.jsxs(React$2.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       ResourceSummary,
@@ -9164,7 +9166,10 @@ const TextureResourcesView = ({ onPreview }) => {
     ),
     expanded[type] && /* @__PURE__ */ jsxRuntimeExports.jsx(TextureDetailList, { type, redGPUContext, onPreview })
   ] }, type);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Texture Resources", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Texture Resources" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", color: "#fdb48d" }, children: formatBytes(totalMemory) })
+  ] }), children: [
     renderTextureSection("bitmapTexture", "Bitmap Textures", resourceStats.bitmapTexture),
     renderTextureSection("cubeTexture", "Cube Textures", resourceStats.cubeTexture),
     renderTextureSection("hdrTexture", "HDR Textures", resourceStats.hdrTexture)
@@ -9367,12 +9372,14 @@ const noItemStyle$1 = {
   fontStyle: "italic"
 };
 const BufferResourcesView = ({ onPreview }) => {
+  var _a, _b, _c, _d, _e;
   const { resourceStats, redGPUContext } = useInspectorStore();
   const [expanded, setExpanded] = reactExports.useState({});
   const toggleExpanded = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
   if (!redGPUContext) return null;
+  const totalMemory = (((_a = resourceStats.uniformBuffer) == null ? void 0 : _a.videoMemory) || 0) + (((_b = resourceStats.vertexBuffer) == null ? void 0 : _b.videoMemory) || 0) + (((_c = resourceStats.indexBuffer) == null ? void 0 : _c.videoMemory) || 0) + (((_d = resourceStats.storageBuffer) == null ? void 0 : _d.videoMemory) || 0) + (((_e = resourceStats.gpuBuffer) == null ? void 0 : _e.videoMemory) || 0);
   const renderBufferSection = (type, label, stats) => /* @__PURE__ */ jsxRuntimeExports.jsxs(React$2.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       ResourceSummary,
@@ -9385,7 +9392,10 @@ const BufferResourcesView = ({ onPreview }) => {
     ),
     expanded[type] && /* @__PURE__ */ jsxRuntimeExports.jsx(BufferDetailList, { type, redGPUContext, onPreview })
   ] }, type);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Buffer Resources", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Buffer Resources" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", color: "#fdb48d" }, children: formatBytes(totalMemory) })
+  ] }), children: [
     renderBufferSection("uniformBuffer", "Uniform Buffers", resourceStats.uniformBuffer),
     renderBufferSection("vertexBuffer", "Vertex Buffers", resourceStats.vertexBuffer),
     renderBufferSection("indexBuffer", "Index Buffers", resourceStats.indexBuffer),

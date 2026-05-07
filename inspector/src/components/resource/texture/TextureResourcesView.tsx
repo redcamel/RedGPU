@@ -19,6 +19,10 @@ const TextureResourcesView = ({onPreview}: { onPreview: (item: any, type: string
 
     if (!redGPUContext) return null;
 
+    const totalMemory = (resourceStats.bitmapTexture?.videoMemory || 0) +
+        (resourceStats.cubeTexture?.videoMemory || 0) +
+        (resourceStats.hdrTexture?.videoMemory || 0);
+
     const renderTextureSection = (type: string, label: string, stats: any) => (
         <React.Fragment key={type}>
             <ResourceSummary
@@ -34,7 +38,12 @@ const TextureResourcesView = ({onPreview}: { onPreview: (item: any, type: string
     );
 
     return (
-        <Section title="Texture Resources">
+        <Section title={
+            <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+                <span>Texture Resources</span>
+                <span style={{fontSize: '11px', color: '#fdb48d'}}>{formatBytes(totalMemory)}</span>
+            </div>
+        }>
             {renderTextureSection('bitmapTexture', 'Bitmap Textures', resourceStats.bitmapTexture)}
             {renderTextureSection('cubeTexture', 'Cube Textures', resourceStats.cubeTexture)}
             {renderTextureSection('hdrTexture', 'HDR Textures', resourceStats.hdrTexture)}
