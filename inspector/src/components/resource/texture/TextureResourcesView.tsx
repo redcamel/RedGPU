@@ -143,26 +143,27 @@ const TextureDetailList = ({type, redGPUContext, onPreview}: {
     );
 };
 
-// Styles (adapted from ResourcesView)
+// Styles (unified with G-Buffer Resources)
 const detailListStyle: React.CSSProperties = {
-    padding: '4px 0 4px 8px',
+    padding: '4px 0 4px 12px',
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
-    borderLeft: '1px solid rgba(255,255,255,0.1)',
-    margin: '0 0 8px 8px'
+    borderLeft: '1px solid #333',
+    marginLeft: '6px',
+    marginBottom: '8px'
 };
 
 const textureItemStyle: React.CSSProperties = {
-    fontSize: '10px',
+    fontSize: '11px',
     color: '#888',
-    background: 'rgba(255,255,255,0.04)',
-    padding: '10px',
+    background: '#1a1a1a',
+    padding: '8px 12px',
     borderRadius: '2px',
     lineHeight: '1.4',
-    borderLeft: '2px solid #fdb48d',
-    marginBottom: '6px',
-    cursor: 'pointer'
+    borderBottom: '1px solid #222',
+    cursor: 'pointer',
+    transition: 'background 0.2s'
 };
 
 const detailHeaderStyle: React.CSSProperties = {

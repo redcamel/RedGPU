@@ -7335,8 +7335,8 @@ const MiniGraph = reactExports.memo(({
     ctx.fill();
   }, [data, color]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "12px" }, children: [
-    (label || valueDisplay) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$4, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle$1, children: label }),
+    (label || valueDisplay) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$5, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle$2, children: label }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueStyle, color }, children: valueDisplay })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -7372,7 +7372,7 @@ const hexToRgba = (hex, alpha) => {
   hexCache[key] = result;
   return result;
 };
-const headerStyle$4 = {
+const headerStyle$5 = {
   display: "flex",
   justifyContent: "space-between",
   fontSize: "10px",
@@ -7380,7 +7380,7 @@ const headerStyle$4 = {
   fontFamily: 'monospace, "Courier New", courier',
   fontVariantNumeric: "tabular-nums"
 };
-const labelStyle$1 = {
+const labelStyle$2 = {
   color: "#888"
 };
 const valueStyle = {
@@ -7477,7 +7477,7 @@ const FPS = reactExports.memo(() => {
         "div",
         {
           onClick: () => setIsExpanded(!isExpanded),
-          style: toggleWrapperStyle$1,
+          style: toggleWrapperStyle$2,
           children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" })
         }
       ),
@@ -7547,7 +7547,7 @@ const statsContainerStyle = {
   fontFamily: 'monospace, "Courier New", courier',
   fontVariantNumeric: "tabular-nums"
 };
-const toggleWrapperStyle$1 = {
+const toggleWrapperStyle$2 = {
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
@@ -7724,7 +7724,7 @@ const RedGPUContextView = () => {
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "devicePixelRatio", value: devicePixelRatio }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Mobile", value: detector.isMobile, trueLabel: "Yes", falseLabel: "No" }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: userAgentStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: labelStyle, children: "User Agent" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: labelStyle$1, children: "User Agent" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: userAgentValueStyle, children: detector.userAgent })
       ] })
     ] }),
@@ -7738,7 +7738,7 @@ const RedGPUContextView = () => {
   ] });
 };
 const containerStyle$2 = {};
-const labelStyle = {
+const labelStyle$1 = {
   color: "#888"
 };
 const userAgentStyle = {
@@ -8043,7 +8043,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
                 @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
             ` }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle$1, onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$3, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$4, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle$1, children: fileName || "Texture Preview" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: pathStyle$1, children: originalPath })
@@ -8240,7 +8240,7 @@ const modalStyle$1 = {
   overflow: "hidden",
   animation: "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
 };
-const headerStyle$3 = {
+const headerStyle$4 = {
   padding: "16px",
   background: "rgba(255,255,255,0.03)",
   borderBottom: "1px solid rgba(255,255,255,0.1)",
@@ -8490,7 +8490,7 @@ const BufferDetailModal = ({ item, type, onClose }) => {
                 * { box-sizing: border-box; }
             ` }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle, onClick: (e) => e.stopPropagation(), children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$2, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$3, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: "8px" }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle, children: label }),
@@ -8788,7 +8788,7 @@ const modalStyle = {
   overflow: "hidden",
   animation: "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
 };
-const headerStyle$2 = {
+const headerStyle$3 = {
   padding: "16px",
   background: "rgba(255,255,255,0.03)",
   borderBottom: "1px solid rgba(255,255,255,0.1)",
@@ -9103,47 +9103,62 @@ const ResourceSummary = ({
   stats,
   isExpanded,
   onToggle
-}) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+}) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { marginBottom: "4px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
   "div",
   {
-    style: {
-      ...summaryContainerStyle,
-      cursor: "pointer",
-      borderLeft: isExpanded ? "2px solid #fdb48d" : "2px solid transparent",
-      background: isExpanded ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.03)"
-    },
+    style: headerStyle$2,
     onClick: onToggle,
     children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: summaryLabelStyle, children: [
-        label,
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { float: "right", opacity: 0.5, fontSize: "10px" }, children: isExpanded ? "▲" : "▼" })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: summaryValuesStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Count", value: formatNumber(stats.count, 0) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Memory", value: formatBytes(stats.videoMemory), color: "#fdb48d", isBold: true })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toggleWrapperStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: labelWrapperStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: labelStyle, children: [
+          label,
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("small", { style: countStyle, children: [
+            "(",
+            formatNumber(stats.count, 0),
+            ")"
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: memoryStyle, children: formatBytes(stats.videoMemory) })
       ] })
     ]
   }
-);
-const summaryContainerStyle = {
-  padding: "8px",
-  background: "rgba(255,255,255,0.03)",
-  borderRadius: "4px",
-  marginBottom: "2px",
-  transition: "all 0.1s"
-};
-const summaryLabelStyle = {
-  fontSize: "11px",
-  fontWeight: "bold",
-  color: "#aaa",
-  marginBottom: "6px",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em"
-};
-const summaryValuesStyle = {
+) });
+const headerStyle$2 = {
+  padding: "8px 12px",
+  background: "#222",
+  cursor: "pointer",
+  fontSize: "13px",
   display: "flex",
-  flexDirection: "column",
-  gap: "2px"
+  alignItems: "center",
+  borderLeft: `2px solid ${THEME.colors.primary}`,
+  transition: "background 0.2s"
+};
+const toggleWrapperStyle$1 = {
+  display: "flex",
+  alignItems: "center",
+  paddingRight: "8px"
+};
+const labelWrapperStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  flex: 1,
+  alignItems: "center"
+};
+const labelStyle = {
+  fontWeight: "bold",
+  color: "#eee"
+};
+const countStyle = {
+  color: "#888",
+  fontWeight: "normal",
+  marginLeft: "4px"
+};
+const memoryStyle = {
+  fontSize: "11px",
+  color: THEME.colors.primary,
+  fontWeight: "bold"
 };
 const TextureResourcesView = ({ onPreview }) => {
   var _a, _b, _c;
@@ -9286,23 +9301,24 @@ const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
   }) });
 };
 const detailListStyle$2 = {
-  padding: "4px 0 4px 8px",
+  padding: "4px 0 4px 12px",
   display: "flex",
   flexDirection: "column",
   gap: "4px",
-  borderLeft: "1px solid rgba(255,255,255,0.1)",
-  margin: "0 0 8px 8px"
+  borderLeft: "1px solid #333",
+  marginLeft: "6px",
+  marginBottom: "8px"
 };
 const textureItemStyle$1 = {
-  fontSize: "10px",
+  fontSize: "11px",
   color: "#888",
-  background: "rgba(255,255,255,0.04)",
-  padding: "10px",
+  background: "#1a1a1a",
+  padding: "8px 12px",
   borderRadius: "2px",
   lineHeight: "1.4",
-  borderLeft: "2px solid #fdb48d",
-  marginBottom: "6px",
-  cursor: "pointer"
+  borderBottom: "1px solid #222",
+  cursor: "pointer",
+  transition: "background 0.2s"
 };
 const detailHeaderStyle$2 = {
   display: "flex",
@@ -9510,20 +9526,22 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
   }) });
 };
 const detailListStyle$1 = {
-  padding: "4px 0 4px 8px",
+  padding: "4px 0 4px 12px",
   display: "flex",
   flexDirection: "column",
   gap: "4px",
-  borderLeft: "1px solid rgba(255,255,255,0.1)",
-  margin: "0 0 8px 8px"
+  borderLeft: "1px solid #333",
+  marginLeft: "6px",
+  marginBottom: "8px"
 };
 const detailItemStyle = {
-  fontSize: "10px",
+  fontSize: "11px",
   color: "#888",
-  background: "rgba(255,255,255,0.02)",
-  padding: "6px 8px",
+  background: "#1a1a1a",
+  padding: "8px 12px",
   borderRadius: "2px",
-  lineHeight: "1.4"
+  lineHeight: "1.4",
+  borderBottom: "1px solid #222"
 };
 const detailHeaderStyle$1 = {
   display: "flex",

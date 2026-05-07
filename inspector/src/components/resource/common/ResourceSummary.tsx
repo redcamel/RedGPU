@@ -1,8 +1,8 @@
 import React from 'react';
 import {ResourceStatusSummary} from '../../../store';
-import StatItem from '../../common/StatItem';
 import formatBytes from '@redgpu/src/utils/formatBytes';
 import {formatNumber} from '../../../utils/format';
+import {COMMON_STYLES, THEME} from "../../common/Theme";
 
 /**
  * [KO] 리소스 유형별 요약 정보를 표시하는 컴포넌트입니다.
@@ -18,47 +18,59 @@ export const ResourceSummary = ({
     isExpanded: boolean,
     onToggle: () => void
 }) => (
-    <div
-        style={{
-            ...summaryContainerStyle,
-            cursor: 'pointer',
-            borderLeft: isExpanded ? '2px solid #fdb48d' : '2px solid transparent',
-            background: isExpanded ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.03)',
-        }}
-        onClick={onToggle}
-    >
-        <div style={summaryLabelStyle}>
-            {label}
-            <span style={{float: 'right', opacity: 0.5, fontSize: '10px'}}>
-                {isExpanded ? '▲' : '▼'}
-            </span>
-        </div>
-        <div style={summaryValuesStyle}>
-            <StatItem label="Count" value={formatNumber(stats.count, 0)}/>
-            <StatItem label="Memory" value={formatBytes(stats.videoMemory)} color="#fdb48d" isBold/>
+    <div style={{marginBottom: '4px'}}>
+        <div
+            style={headerStyle}
+            onClick={onToggle}
+        >
+            <div style={toggleWrapperStyle}>
+                <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
+            </div>
+            <div style={labelWrapperStyle}>
+                <span style={labelStyle}>{label} <small style={countStyle}>({formatNumber(stats.count, 0)})</small></span>
+                <span style={memoryStyle}>{formatBytes(stats.videoMemory)}</span>
+            </div>
         </div>
     </div>
 );
 
-const summaryContainerStyle: React.CSSProperties = {
-    padding: '8px',
-    background: 'rgba(255,255,255,0.03)',
-    borderRadius: '4px',
-    marginBottom: '2px',
-    transition: 'all 0.1s'
-};
-
-const summaryLabelStyle: React.CSSProperties = {
-    fontSize: '11px',
-    fontWeight: 'bold',
-    color: '#aaa',
-    marginBottom: '6px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em'
-};
-
-const summaryValuesStyle: React.CSSProperties = {
+const headerStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    background: '#222',
+    cursor: 'pointer',
+    fontSize: '13px',
     display: 'flex',
-    flexDirection: 'column',
-    gap: '2px'
+    alignItems: 'center',
+    borderLeft: `2px solid ${THEME.colors.primary}`,
+    transition: 'background 0.2s',
+};
+
+const toggleWrapperStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    paddingRight: '8px'
+};
+
+const labelWrapperStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    flex: 1,
+    alignItems: 'center'
+};
+
+const labelStyle: React.CSSProperties = {
+    fontWeight: 'bold',
+    color: '#eee'
+};
+
+const countStyle: React.CSSProperties = {
+    color: '#888',
+    fontWeight: 'normal',
+    marginLeft: '4px'
+};
+
+const memoryStyle: React.CSSProperties = {
+    fontSize: '11px',
+    color: THEME.colors.primary,
+    fontWeight: 'bold'
 };
