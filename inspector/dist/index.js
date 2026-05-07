@@ -9238,13 +9238,13 @@ const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
               ] }) })
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle$1, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle$2, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "4px", alignItems: "center", marginBottom: "2px" }, children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle$1, children: [
                 "Use: ",
                 formatNumber(item.useNum, 0)
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$1, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$2, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
             ] }),
             gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
               ...detailInfoStyle$2,
@@ -9336,7 +9336,7 @@ const detailInfoStyle$2 = {
   opacity: 0.6,
   fontSize: "9px"
 };
-const detailRightContainerStyle$1 = {
+const detailRightContainerStyle$2 = {
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-end",
@@ -9354,7 +9354,7 @@ const useNumStyle$1 = {
   whiteSpace: "nowrap",
   fontWeight: "bold"
 };
-const detailMemoryStyle$1 = {
+const detailMemoryStyle$2 = {
   color: "#fdb48d",
   fontWeight: "bold",
   whiteSpace: "nowrap",
@@ -9443,7 +9443,7 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
                 /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatBufferUsage(item.usage) })
               ] }) })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes(item.size) }) })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$1, children: formatBytes(item.size) }) })
           ] })
         },
         item.uuid || idx
@@ -9485,12 +9485,12 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
                 )
               ] }) })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle$1, children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle, children: [
                 "Use: ",
                 formatNumber(item.useNum, 0)
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes((buf == null ? void 0 : buf.size) || 0) })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$1, children: formatBytes((buf == null ? void 0 : buf.size) || 0) })
             ] })
           ] })
         },
@@ -9543,7 +9543,7 @@ const detailInfoStyle$1 = {
   opacity: 0.6,
   fontSize: "9px"
 };
-const detailRightContainerStyle = {
+const detailRightContainerStyle$1 = {
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-end",
@@ -9551,7 +9551,7 @@ const detailRightContainerStyle = {
   minWidth: "90px",
   flexShrink: 0
 };
-const detailMemoryStyle = {
+const detailMemoryStyle$1 = {
   color: "#fdb48d",
   fontWeight: "bold",
   whiteSpace: "nowrap",
@@ -9573,6 +9573,68 @@ const noItemStyle = {
   color: "#666",
   fontStyle: "italic"
 };
+function calculateTextureByteSize(texture) {
+  const descriptor = {
+    size: [texture.width, texture.height, texture.depthOrArrayLayers],
+    format: texture.format,
+    sampleCount: texture.sampleCount,
+    usage: texture.usage
+  };
+  const bytesPerTexel = getTextureFormatByteSize(descriptor.format);
+  const texelCount = descriptor.size[0] * descriptor.size[1] * (descriptor.size[2] || 1);
+  const sampleCount = descriptor.sampleCount ? descriptor.sampleCount : 1;
+  return bytesPerTexel * texelCount * sampleCount;
+}
+function getTextureFormatByteSize(format) {
+  switch (format) {
+    case "r8unorm":
+    case "r8snorm":
+    case "r8uint":
+    case "r8sint":
+      return 1;
+    case "r16uint":
+    case "r16sint":
+    case "r16float":
+    case "rg8unorm":
+    case "rg8snorm":
+    case "rg8uint":
+    case "rg8sint":
+      return 2;
+    case "r32uint":
+    case "r32sint":
+    case "r32float":
+    case "rg16uint":
+    case "rg16sint":
+    case "rg16float":
+    case "rgba8unorm":
+    case "rgba8unorm-srgb":
+    case "rgba8snorm":
+    case "rgba8uint":
+    case "rgba8sint":
+    case "bgra8unorm":
+    case "bgra8unorm-srgb":
+      return 4;
+    case "rg32uint":
+    case "rg32sint":
+    case "rg32float":
+    case "rgba16uint":
+    case "rgba16sint":
+    case "rgba16float":
+      return 8;
+    case "rgba32uint":
+    case "rgba32sint":
+    case "rgba32float":
+      return 16;
+    case "depth16unorm":
+      return 2;
+    case "depth24plus":
+      return 4;
+    case "depth32float":
+      return 4;
+    default:
+      throw new Error(`Unrecognized texture format: ${format}`);
+  }
+}
 const GBufferResourcesView = ({ onPreview }) => {
   const { redGPUContext } = useInspectorStore();
   const [expanded, setExpanded] = reactExports.useState({});
@@ -9581,7 +9643,14 @@ const GBufferResourcesView = ({ onPreview }) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
   const views = redGPUContext.viewList;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: "G-Buffer Resources", children: views.map((view, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+  const totalMemory = views.reduce((acc, view) => {
+    var _a;
+    return acc + (((_a = view.viewRenderTextureManager) == null ? void 0 : _a.videoMemorySize) || 0);
+  }, 0);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "G-Buffer Resources" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", color: THEME.colors.primary }, children: formatBytes(totalMemory) })
+  ] }), children: views.map((view, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
     ViewGBufferList,
     {
       view,
@@ -9593,8 +9662,10 @@ const GBufferResourcesView = ({ onPreview }) => {
   )) });
 };
 const ViewGBufferList = ({ view, isExpanded, onToggle, onPreview }) => {
-  const gBuffers = view.viewRenderTextureManager.gBuffers;
+  const vrm = view.viewRenderTextureManager;
+  const gBuffers = vrm.gBuffers;
   const items = Array.from(gBuffers.entries());
+  const viewMemory = vrm.videoMemorySize;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "12px" }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "div",
@@ -9603,12 +9674,15 @@ const ViewGBufferList = ({ view, isExpanded, onToggle, onPreview }) => {
         onClick: onToggle,
         children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toggleWrapperStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "View: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: view.name || "Unnamed View" }),
-            " (",
-            view.uuid,
-            ")"
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", flex: 1, alignItems: "center" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "View: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: view.name || "Unnamed View" }),
+              " (",
+              view.uuid,
+              ")"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", opacity: 0.8, color: THEME.colors.primary }, children: formatBytes(viewMemory) })
           ] })
         ]
       }
@@ -9629,45 +9703,52 @@ const GBufferItem = ({ name, info, onPreview }) => {
   if (!gpuTex) return null;
   const isMSAA = gpuTex.sampleCount > 1;
   const previewTex = isMSAA && info.resolveTexture ? info.resolveTexture : gpuTex;
+  let itemMemory = calculateTextureByteSize(gpuTex);
+  if (info.resolveTexture) {
+    itemMemory += calculateTextureByteSize(info.resolveTexture);
+  }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "div",
     {
       style: textureItemStyle,
       onClick: () => onPreview({ texture: { gpuTexture: previewTex }, label: name }, "bitmapTexture"),
-      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailHeaderStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: detailNameStyle, children: [
-          name,
-          " ",
-          isMSAA ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: msaaBadgeStyle, children: "MSAA" }) : null
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-          "Format: ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.format })
-        ] }) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "Dim: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { style: { color: "#eee" }, children: [
-              gpuTex.width,
-              "x",
-              gpuTex.height
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: detailNameStyle, children: [
+            name,
+            " ",
+            isMSAA ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: msaaBadgeStyle, children: "MSAA" }) : null
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Format: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.format })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Dim: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { style: { color: "#eee" }, children: [
+                gpuTex.width,
+                "x",
+                gpuTex.height
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Samples: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: isMSAA ? THEME.colors.primary : "#eee" }, children: gpuTex.sampleCount })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Mips: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.mipLevelCount })
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "Samples: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: isMSAA ? THEME.colors.primary : "#eee" }, children: gpuTex.sampleCount })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            "Mips: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.mipLevelCount })
-          ] })
+          gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Usage: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
+          ] }) }),
+          isMSAA && !info.resolveTexture && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "4px", color: "#f44336", fontSize: "10px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "⚠️ Multisampled texture without resolve target cannot be previewed." }) })
         ] }),
-        gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-          "Usage: ",
-          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
-        ] }) }),
-        isMSAA && !info.resolveTexture && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "4px", color: "#f44336", fontSize: "10px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "⚠️ Multisampled texture without resolve target cannot be previewed." }) })
-      ] }) })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes(itemMemory) }) })
+      ] })
     }
   );
 };
@@ -9734,6 +9815,17 @@ const detailInfoStyle = {
   color: "#aaa",
   gap: "12px"
 };
+const detailRightContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  paddingLeft: "12px"
+};
+const detailMemoryStyle = {
+  color: THEME.colors.primary,
+  fontWeight: "bold",
+  fontSize: "11px"
+};
 const ResourcesView = () => {
   const [activeSubTab, setActiveSubTab] = reactExports.useState("GBUFFER");
   const [previewData, setPreviewData] = reactExports.useState(null);
@@ -9780,12 +9872,10 @@ const ResourcesView = () => {
 };
 const stickyHeaderStyle$1 = {
   position: "sticky",
-  top: -12,
+  top: 0,
   // Offset container padding
   zIndex: 10,
-  background: "#111",
-  margin: "0 -12px"
-  // Pull out to cover container padding
+  background: "#111"
 };
 const Divider = ({ vertical, style }) => {
   const combinedStyle = vertical ? { ...defaultVerticalStyle, ...style } : { ...defaultHorizontalStyle, ...style };

@@ -71,10 +71,9 @@ const ResourcesView = () => {
 
 const stickyHeaderStyle: React.CSSProperties = {
     position: 'sticky',
-    top: -12, // Offset container padding
+    top: 0, // Offset container padding
     zIndex: 10,
     background: '#111',
-    margin: '0 -12px', // Pull out to cover container padding
 };
 
 export default ResourcesView;
