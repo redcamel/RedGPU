@@ -7851,6 +7851,7 @@ async function readGPUTextureToCanvas(device, gpuTexture, canvas, layer = 0, mip
   const width = Math.max(1, gpuTexture.width >> mipLevel);
   const height = Math.max(1, gpuTexture.height >> mipLevel);
   const format = gpuTexture.format;
+  const isDepth = format.startsWith("depth");
   const bytesPerPixel = getBytesPerPixel(format);
   const unpaddedBytesPerRow = width * bytesPerPixel;
   const paddedBytesPerRow = Math.ceil(unpaddedBytesPerRow / 256) * 256;
@@ -7864,7 +7865,8 @@ async function readGPUTextureToCanvas(device, gpuTexture, canvas, layer = 0, mip
     {
       texture: gpuTexture,
       origin: [0, 0, layer],
-      mipLevel
+      mipLevel,
+      aspect: isDepth ? "depth-only" : "all"
     },
     {
       buffer: stagingBuffer,
@@ -7901,13 +7903,32 @@ async function readGPUTextureToCanvas(device, gpuTexture, canvas, layer = 0, mip
       }
     } else if (format === "rgba16float") {
       const float16Data = new Uint16Array(arrayBuffer);
+      const gamma = 1 / 2.2;
       for (let y2 = 0; y2 < height; y2++) {
         for (let x2 = 0; x2 < width; x2++) {
           const srcIdx = y2 * (paddedBytesPerRow / 2) + x2 * 4;
           const dstIdx = (y2 * width + x2) * 4;
-          imageData.data[dstIdx] = Math.min(255, decodeFloat16(float16Data[srcIdx]) * 255);
-          imageData.data[dstIdx + 1] = Math.min(255, decodeFloat16(float16Data[srcIdx + 1]) * 255);
-          imageData.data[dstIdx + 2] = Math.min(255, decodeFloat16(float16Data[srcIdx + 2]) * 255);
+          const r2 = decodeFloat16(float16Data[srcIdx]);
+          const g = decodeFloat16(float16Data[srcIdx + 1]);
+          const b = decodeFloat16(float16Data[srcIdx + 2]);
+          const a = decodeFloat16(float16Data[srcIdx + 3]);
+          imageData.data[dstIdx] = Math.max(0, Math.min(255, Math.pow(r2, gamma) * 255));
+          imageData.data[dstIdx + 1] = Math.max(0, Math.min(255, Math.pow(g, gamma) * 255));
+          imageData.data[dstIdx + 2] = Math.max(0, Math.min(255, Math.pow(b, gamma) * 255));
+          imageData.data[dstIdx + 3] = Math.max(0, Math.min(255, a * 255));
+        }
+      }
+    } else if (format === "depth32float") {
+      const float32Data = new Float32Array(arrayBuffer);
+      for (let y2 = 0; y2 < height; y2++) {
+        for (let x2 = 0; x2 < width; x2++) {
+          const srcIdx = y2 * (paddedBytesPerRow / 4) + x2;
+          const dstIdx = (y2 * width + x2) * 4;
+          const depth = float32Data[srcIdx];
+          const val = Math.max(0, Math.min(255, depth * 255));
+          imageData.data[dstIdx] = val;
+          imageData.data[dstIdx + 1] = val;
+          imageData.data[dstIdx + 2] = val;
           imageData.data[dstIdx + 3] = 255;
         }
       }
@@ -7932,6 +7953,8 @@ function getBytesPerPixel(format) {
       return 4;
     case "rgba16float":
       return 8;
+    case "depth32float":
+      return 4;
     default:
       return 4;
   }
@@ -9604,13 +9627,19 @@ const ViewGBufferList = ({ view, isExpanded, onToggle, onPreview }) => {
 const GBufferItem = ({ name, info, onPreview }) => {
   const gpuTex = info.texture;
   if (!gpuTex) return null;
+  const isMSAA = gpuTex.sampleCount > 1;
+  const previewTex = isMSAA && info.resolveTexture ? info.resolveTexture : gpuTex;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "div",
     {
       style: textureItemStyle,
-      onClick: () => onPreview({ texture: { gpuTexture: gpuTex }, label: name }, "bitmapTexture"),
+      onClick: () => onPreview({ texture: { gpuTexture: previewTex }, label: name }, "bitmapTexture"),
       children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailHeaderStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle, children: name }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: detailNameStyle, children: [
+          name,
+          " ",
+          isMSAA ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: msaaBadgeStyle, children: "MSAA" }) : null
+        ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
           "Format: ",
           /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.format })
@@ -9626,7 +9655,7 @@ const GBufferItem = ({ name, info, onPreview }) => {
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Samples: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: isMSAA ? THEME.colors.primary : "#eee" }, children: gpuTex.sampleCount })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
             "Mips: ",
@@ -9636,10 +9665,20 @@ const GBufferItem = ({ name, info, onPreview }) => {
         gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
           "Usage: ",
           /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
-        ] }) })
+        ] }) }),
+        isMSAA && !info.resolveTexture && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "4px", color: "#f44336", fontSize: "10px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "⚠️ Multisampled texture without resolve target cannot be previewed." }) })
       ] }) })
     }
   );
+};
+const msaaBadgeStyle = {
+  background: THEME.colors.primary,
+  color: "#000",
+  fontSize: "9px",
+  padding: "1px 4px",
+  borderRadius: "3px",
+  marginLeft: "6px",
+  verticalAlign: "middle"
 };
 const viewHeaderStyle = {
   padding: "8px 12px",
@@ -9648,7 +9687,7 @@ const viewHeaderStyle = {
   fontSize: "13px",
   display: "flex",
   alignItems: "center",
-  borderLeft: "2px solid #444"
+  borderLeft: `2px solid ${THEME.colors.primary}`
 };
 const toggleWrapperStyle = {
   cursor: "pointer",
@@ -9684,7 +9723,7 @@ const detailLeftContainerStyle = {
   minWidth: 0
 };
 const detailNameStyle = {
-  color: "#00ccff",
+  color: THEME.colors.accent,
   fontWeight: "bold",
   marginBottom: "2px",
   fontSize: "13px"

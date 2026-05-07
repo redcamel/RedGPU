@@ -12,6 +12,7 @@ export async function readGPUTextureToCanvas(
     const width = Math.max(1, gpuTexture.width >> mipLevel);
     const height = Math.max(1, gpuTexture.height >> mipLevel);
     const format = gpuTexture.format;
+    const isDepth = format.startsWith('depth');
 
     // 1. Calculate buffer size and row alignment
     const bytesPerPixel = getBytesPerPixel(format);
@@ -31,7 +32,8 @@ export async function readGPUTextureToCanvas(
         {
             texture: gpuTexture,
             origin: [0, 0, layer],
-            mipLevel: mipLevel
+            mipLevel: mipLevel,
+            aspect: isDepth ? 'depth-only' : 'all'
         },
         {
             buffer: stagingBuffer,
@@ -76,14 +78,40 @@ export async function readGPUTextureToCanvas(
             }
         } else if (format === 'rgba16float') {
             const float16Data = new Uint16Array(arrayBuffer);
+            const gamma = 1 / 2.2;
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
                     const srcIdx = (y * (paddedBytesPerRow / 2)) + x * 4;
                     const dstIdx = (y * width + x) * 4;
-                    // Simple float16 to float32 (0-1 range clamp)
-                    imageData.data[dstIdx] = Math.min(255, decodeFloat16(float16Data[srcIdx]) * 255);
-                    imageData.data[dstIdx + 1] = Math.min(255, decodeFloat16(float16Data[srcIdx + 1]) * 255);
-                    imageData.data[dstIdx + 2] = Math.min(255, decodeFloat16(float16Data[srcIdx + 2]) * 255);
+
+                    // Read linear float16 values
+                    const r = decodeFloat16(float16Data[srcIdx]);
+                    const g = decodeFloat16(float16Data[srcIdx + 1]);
+                    const b = decodeFloat16(float16Data[srcIdx + 2]);
+                    const a = decodeFloat16(float16Data[srcIdx + 3]);
+
+                    // Apply gamma correction (approx linear to sRGB)
+                    // and clamp to 0-255 range
+                    imageData.data[dstIdx] = Math.max(0, Math.min(255, Math.pow(r, gamma) * 255));
+                    imageData.data[dstIdx + 1] = Math.max(0, Math.min(255, Math.pow(g, gamma) * 255));
+                    imageData.data[dstIdx + 2] = Math.max(0, Math.min(255, Math.pow(b, gamma) * 255));
+                    imageData.data[dstIdx + 3] = Math.max(0, Math.min(255, a * 255));
+                }
+            }
+        } else if (format === 'depth32float') {
+            const float32Data = new Float32Array(arrayBuffer);
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const srcIdx = (y * (paddedBytesPerRow / 4)) + x;
+                    const dstIdx = (y * width + x) * 4;
+                    const depth = float32Data[srcIdx];
+                    // Depth is usually 0-1. 
+                    // To make it more visible, we can invert it or just show it as is.
+                    // Usually 1.0 is far (background), 0.0 is near.
+                    const val = Math.max(0, Math.min(255, depth * 255));
+                    imageData.data[dstIdx] = val;
+                    imageData.data[dstIdx + 1] = val;
+                    imageData.data[dstIdx + 2] = val;
                     imageData.data[dstIdx + 3] = 255;
                 }
             }
@@ -111,6 +139,8 @@ function getBytesPerPixel(format: GPUTextureFormat): number {
             return 4;
         case 'rgba16float':
             return 8;
+        case 'depth32float':
+            return 4;
         default:
             return 4;
     }
