@@ -57,6 +57,7 @@ class SkyBox {
     #transitionElapsed: number = 0
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #luminance: number = 10000.0;
+    #lastUpdateMSAAID: string
 
     /**
      * [KO] 새로운 SkyBox 인스턴스를 생성합니다.
@@ -201,7 +202,11 @@ class SkyBox {
     }
 
     #updateMSAAStatus() {
-        if (this.#redGPUContext.antialiasingManager.changedMSAA) this.#dirtyPipeline = true;
+        const {msaaID} = this.#redGPUContext.antialiasingManager;
+        if (this.#lastUpdateMSAAID !== msaaID) {
+            this.#dirtyPipeline = true;
+            this.#lastUpdateMSAAID = msaaID;
+        }
     }
 
     #initGPURenderInfos(redGPUContext: RedGPUContext) {
