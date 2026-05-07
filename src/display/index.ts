@@ -22,6 +22,8 @@ export * from "./line";
 export * from "./textFields";
 export * from "./instancingMesh";
 
+export * from "./view/core/GBUFFER_TYPE";
+
 export {
     Scene,
     SkyAtmosphere,

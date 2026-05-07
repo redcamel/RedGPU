@@ -4,6 +4,16 @@ import {keepLog} from "../../../utils";
 import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
 import View3D from "../View3D";
+import {GBUFFER_TYPE} from "./GBUFFER_TYPE";
+
+/**
+ * G-Buffer 타입별 포맷 정의
+ */
+const GBUFFER_FORMATS: Record<GBUFFER_TYPE, GPUTextureFormat> = {
+    [GBUFFER_TYPE.COLOR]: 'rgba16float',
+    [GBUFFER_TYPE.MOTION_VECTOR]: 'rgba16float',
+    [GBUFFER_TYPE.NORMAL]: undefined // navigator.gpu.getPreferredCanvasFormat() 사용
+};
 
 /**
  * [KO] View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하는 매니저 클래스입니다.
@@ -155,32 +165,74 @@ class ViewRenderTextureManager {
     }
 
     /* ----------------------------------------
-     * G-Buffer 관련 getters (컬러/노멀/모션 등)
-     * 각 getter는 필요 시 #createGBuffer를 호출하여 생성 보장
+     * G-Buffer 공통 접근 메서드
      * ---------------------------------------- */
     /**
-     * G-Buffer color 텍스처 반환 (미리 생성되지 않았으면 undefined)
+     * 지정된 타입의 G-Buffer 텍스처를 반환합니다.
+     * @param {GBUFFER_TYPE} type - G-Buffer 타입 (GBUFFER_TYPE 상수 사용)
+     * @returns {GPUTexture}
+     */
+    getGBufferTexture(type: GBUFFER_TYPE): GPUTexture {
+        this.getGBufferTextureView(type); // 생성 보장
+        return this.#gBuffers.get(type)?.texture;
+    }
+
+    /**
+     * 지정된 타입의 G-Buffer resolve 텍스처를 반환합니다.
+     * @param {GBUFFER_TYPE} type - G-Buffer 타입 (GBUFFER_TYPE 상수 사용)
+     * @returns {GPUTexture}
+     */
+    getGBufferResolveTexture(type: GBUFFER_TYPE): GPUTexture {
+        this.getGBufferResolveTextureView(type); // 생성 보장
+        return this.#gBuffers.get(type)?.resolveTexture;
+    }
+
+    /**
+     * 지정된 타입의 G-Buffer 텍스처 뷰를 반환합니다. 내부적으로 텍스처 생성을 보장합니다.
+     * @param {GBUFFER_TYPE} type - G-Buffer 타입 (GBUFFER_TYPE 상수 사용)
+     * @returns {GPUTextureView}
+     */
+    getGBufferTextureView(type: GBUFFER_TYPE): GPUTextureView {
+        this.#createGBuffer(type);
+        return this.#gBuffers.get(type)?.textureView;
+    }
+
+    /**
+     * 지정된 타입의 G-Buffer resolve 텍스처 뷰를 반환합니다. 내부적으로 텍스처 생성을 보장합니다.
+     * @param {GBUFFER_TYPE} type - G-Buffer 타입 (GBUFFER_TYPE 상수 사용)
+     * @returns {GPUTextureView}
+     */
+    getGBufferResolveTextureView(type: GBUFFER_TYPE): GPUTextureView {
+        this.#createGBuffer(type);
+        return this.#gBuffers.get(type)?.resolveTextureView;
+    }
+
+    /* ----------------------------------------
+     * G-Buffer 관련 getters (컬러/노멀/모션 등)
+     * 하위 호환성을 위해 유지하며 내부적으로 통합 메서드를 호출합니다.
+     * ---------------------------------------- */
+    /**
+     * G-Buffer color 텍스처 반환
      * @returns {GPUTexture}
      */
     get gBufferColorTexture(): GPUTexture {
-        return this.#gBuffers.get('gBufferColor')?.texture
+        return this.getGBufferTexture(GBUFFER_TYPE.COLOR)
     }
 
     /**
-     * G-Buffer color resolve 텍스처 반환 (MSAA 사용 시 resolve 대상)
+     * G-Buffer color resolve 텍스처 반환
      * @returns {GPUTexture}
      */
     get gBufferColorResolveTexture(): GPUTexture {
-        return this.#gBuffers.get('gBufferColor')?.resolveTexture
+        return this.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
     }
 
     /**
-     * G-Buffer color 텍스처 뷰 반환. 내부에서 생성 보장.
+     * G-Buffer color 텍스처 뷰 반환.
      * @returns {GPUTextureView}
      */
     get gBufferColorTextureView(): GPUTextureView {
-        this.#createGBuffer('gBufferColor', 'rgba16float');
-        return this.#gBuffers.get('gBufferColor')?.textureView
+        return this.getGBufferTextureView(GBUFFER_TYPE.COLOR)
     }
 
     /**
@@ -188,7 +240,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTextureView}
      */
     get gBufferColorResolveTextureView(): GPUTextureView {
-        return this.#gBuffers.get('gBufferColor')?.resolveTextureView
+        return this.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR)
     }
 
     /**
@@ -196,7 +248,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTexture}
      */
     get gBufferNormalTexture(): GPUTexture {
-        return this.#gBuffers.get('gBufferNormal')?.texture
+        return this.getGBufferTexture(GBUFFER_TYPE.NORMAL)
     }
 
     /**
@@ -204,16 +256,15 @@ class ViewRenderTextureManager {
      * @returns {GPUTexture}
      */
     get gBufferNormalResolveTexture(): GPUTexture {
-        return this.#gBuffers.get('gBufferNormal')?.resolveTexture
+        return this.getGBufferResolveTexture(GBUFFER_TYPE.NORMAL)
     }
 
     /**
-     * G-Buffer normal 텍스처 뷰 반환. 내부에서 생성 보장.
+     * G-Buffer normal 텍스처 뷰 반환.
      * @returns {GPUTextureView}
      */
     get gBufferNormalTextureView(): GPUTextureView {
-        this.#createGBuffer('gBufferNormal');
-        return this.#gBuffers.get('gBufferNormal')?.textureView
+        return this.getGBufferTextureView(GBUFFER_TYPE.NORMAL)
     }
 
     /**
@@ -221,7 +272,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTextureView}
      */
     get gBufferNormalResolveTextureView(): GPUTextureView {
-        return this.#gBuffers.get('gBufferNormal')?.resolveTextureView
+        return this.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
     }
 
     /**
@@ -229,7 +280,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTexture}
      */
     get gBufferMotionVectorTexture(): GPUTexture {
-        return this.#gBuffers.get('gBufferMotionVector')?.texture
+        return this.getGBufferTexture(GBUFFER_TYPE.MOTION_VECTOR)
     }
 
     /**
@@ -237,16 +288,15 @@ class ViewRenderTextureManager {
      * @returns {GPUTexture}
      */
     get gBufferMotionVectorResolveTexture(): GPUTexture {
-        return this.#gBuffers.get('gBufferMotionVector')?.resolveTexture
+        return this.getGBufferResolveTexture(GBUFFER_TYPE.MOTION_VECTOR)
     }
 
     /**
-     * G-Buffer 모션 벡터 텍스처 뷰 반환. 내부에서 생성 보장.
+     * G-Buffer 모션 벡터 텍스처 뷰 반환.
      * @returns {GPUTextureView}
      */
     get gBufferMotionVectorTextureView(): GPUTextureView {
-        this.#createGBuffer('gBufferMotionVector', 'rgba16float');
-        return this.#gBuffers.get('gBufferMotionVector')?.textureView
+        return this.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR)
     }
 
     /**
@@ -254,7 +304,7 @@ class ViewRenderTextureManager {
      * @returns {GPUTextureView}
      */
     get gBufferMotionVectorResolveTextureView(): GPUTextureView {
-        return this.#gBuffers.get('gBufferMotionVector')?.resolveTextureView
+        return this.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR)
     }
 
     /* ----------------------------------------
@@ -266,13 +316,15 @@ class ViewRenderTextureManager {
      */
     #checkVideoMemorySize() {
         const textures = [
-            this.#gBuffers.get('gBufferColor')?.texture,
-            this.#gBuffers.get('gBufferColor')?.resolveTexture,
             this.#depthTexture,
             this.#renderPath1ResultTexture,
-            this.#gBuffers.get('gBufferNormal')?.texture,
-            this.#gBuffers.get('gBufferNormal')?.resolveTexture,
         ].filter(Boolean);
+        // 모든 G-Buffer 텍스처 추가
+        this.#gBuffers.forEach(info => {
+            if (info.texture) textures.push(info.texture);
+            if (info.resolveTexture) textures.push(info.resolveTexture);
+        });
+
         this.#videoMemorySize = textures.reduce((total, texture) => {
             const videoMemory = calculateTextureByteSize(texture)
             return total + videoMemory
@@ -282,7 +334,6 @@ class ViewRenderTextureManager {
     /**
      * 지정된 G-Buffer 타입의 텍스처를 생성하거나 필요 시 재생성합니다.
      * - 타입 예: 'gBufferColor', 'gBufferNormal', 'gBufferMotionVector'
-     * - format을 전달하면 해당 포맷으로 생성합니다 (예: 'rgba16float').
      *
      * 생성 기준:
      *  - 기존 텍스처가 없을 때
@@ -290,10 +341,9 @@ class ViewRenderTextureManager {
      *  - MSAA 사용 여부가 변경되었을 때
      *
      * @private
-     * @param {string} type - G-Buffer 식별자
-     * @param {GPUTextureFormat} [format] - (선택) 텍스처 포맷
+     * @param {GBUFFER_TYPE} type - G-Buffer 식별자
      */
-    #createGBuffer(type: string, format?: GPUTextureFormat) {
+    #createGBuffer(type: GBUFFER_TYPE) {
         const {antialiasingManager, resourceManager} = this.#redGPUContext
         const {useMSAA} = antialiasingManager
         const targetInfo = this.#gBuffers.get(type)
@@ -323,6 +373,9 @@ class ViewRenderTextureManager {
                 resolveTexture: null,
                 resolveTextureView: null,
             }
+
+            const format = GBUFFER_FORMATS[type] || navigator.gpu.getPreferredCanvasFormat();
+
             // 메인 텍스처 생성
             const newTexture = resourceManager.createManagedTexture({
                 size: [
@@ -332,7 +385,7 @@ class ViewRenderTextureManager {
                 ],
                 sampleCount: useMSAA ? 4 : 1,
                 label: `${name}_${type}_texture_${pixelRectObjectW}x${pixelRectObjectH}`,
-                format: format || navigator.gpu.getPreferredCanvasFormat(),
+                format: format,
                 usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
             })
             newInfo.texture = newTexture;
@@ -347,7 +400,7 @@ class ViewRenderTextureManager {
                     },
                     sampleCount: 1,
                     label: `${name}_${type}_resolveTexture_${pixelRectObjectW}x${pixelRectObjectH}`,
-                    format: format || navigator.gpu.getPreferredCanvasFormat(),
+                    format: format,
                     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
                 })
                 newInfo.resolveTexture = newResolveTexture
