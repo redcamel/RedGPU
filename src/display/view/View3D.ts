@@ -20,7 +20,7 @@ import SkyBox from "../skyboxs/skyBox/SkyBox";
 import SkyAtmosphere from "../skyAtmosphere/SkyAtmosphere";
 import AView from "./core/AView";
 import RenderViewStateData from "./core/RenderViewStateData";
-import ViewRenderTextureManager from "./core/ViewRenderTextureManager";
+import ViewRenderTextureManager from "./core/viewRenderTextureManager/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
