@@ -125,6 +125,7 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
     #autoExposure: AutoExposure;
+    #lastUpdateMSAAID: string
 
     /**
      * [KO] PostEffectManager 인스턴스를 생성합니다.
@@ -562,9 +563,10 @@ class PostEffectManager {
         const {redGPUContext, viewRenderTextureManager} = view;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
-        const {useMSAA, changedMSAA} = antialiasingManager;
+        const {msaaID} = antialiasingManager;
         const {width, height} = gBufferColorTexture;
         const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
+        const changedMSAA = this.#lastUpdateMSAAID !== msaaID;
         // 크기가 변경되면 텍스처 재생성
         if (dimensionsChanged) {
             if (this.#storageTexture) {
@@ -576,6 +578,7 @@ class PostEffectManager {
         }
         // 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
         if (dimensionsChanged || changedMSAA) {
+            this.#lastUpdateMSAAID = msaaID;
             this.#textureComputeBindGroup = this.#createTextureBindGroup(
                 redGPUContext,
                 this.#textureComputeBindGroupLayout,
