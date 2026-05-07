@@ -38,8 +38,8 @@ class VertexBuffer extends ABaseBuffer {
      */
     #interleavedStruct: VertexInterleavedStruct
     /**
-     * [KO] 삼각형 개수입니다.
-     * [EN] Number of triangles.
+     * [KO] 삼각형 개수입니다. (인덱스 버퍼를 사용하지 않는 경우를 가정한 값)
+     * [EN] Number of triangles. (Assumed value when not using an index buffer)
      */
     #triangleCount: number = 0
 
@@ -131,7 +131,6 @@ class VertexBuffer extends ABaseBuffer {
      * [EN] Returns the number of triangles.
      */
     get triangleCount(): number {
-        //TODO - 이거 틀린거 아닌가?
         return this.#triangleCount;
     }
 
@@ -175,7 +174,7 @@ class VertexBuffer extends ABaseBuffer {
         };
         this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
         this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
-        this.#triangleCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride;
+        this.#triangleCount = (this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride) / 3;
         gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL] as BufferSource);
     }
 
