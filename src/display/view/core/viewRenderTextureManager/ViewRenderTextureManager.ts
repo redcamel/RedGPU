@@ -135,6 +135,10 @@ class ViewRenderTextureManager {
         }
     }
 
+    get gBuffers(): Map<string, GBufferInfo> {
+        return this.#gBuffers;
+    }
+
     /**
      * 현재 계산된 비디오 메모리 사용량(바이트)을 반환합니다.
      * @returns {number}
@@ -339,7 +343,7 @@ class ViewRenderTextureManager {
     #createDepthTexture(type: GBUFFER_INNER_TYPE): void {
         this.#destroyGBuffer(type)
         keepLog(`새 텍스처 생성 중: ${type}`)
-        const usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+        const usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
         this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, 'depth32float', usage, false))
     }
 
