@@ -9,6 +9,9 @@ import ACamera from "../ACamera";
 import METERING_MODE from "../METERING_MODE";
 import {COMMAND_ENCODER_TYPE} from "../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 import copyGPUBuffer from "../../../utils/copyGPUBuffer";
+import GBUFFER_TYPE from "../../../display/view/core/GBUFFER_TYPE";
+
+
 
 /**
  * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
@@ -194,7 +197,7 @@ class AutoExposure {
     render(sourceTextureInfo: ASinglePassPostEffectResult) {
         const {gpuDevice, antialiasingManager, commandEncoderManager} = this.#redGPUContext;
         const {useMSAA} = antialiasingManager;
-        const {width, height} = this.#view.viewRenderTextureManager.gBufferColorTexture;
+        const {width, height} = this.#view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {rawCamera, renderViewStateData} = this.#view;
         const {deltaTime} = renderViewStateData;
 

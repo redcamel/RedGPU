@@ -12,6 +12,8 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import GBUFFER_TYPE from "../../display/view/core/GBUFFER_TYPE";
+
 
 /**
  * [KO] TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
@@ -345,7 +347,9 @@ class TAA {
             resource: view.viewRenderTextureManager.prevDepthTextureView,
         });
         // 모션벡터 텍스처 추가
-        const motionVectorTextureView = useMSAA ? view.viewRenderTextureManager.gBufferMotionVectorResolveTextureView : view.viewRenderTextureManager.gBufferMotionVectorTextureView;
+        const motionVectorTextureView = useMSAA 
+            ? view.viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR) 
+            : view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR);
         computeBindGroupEntries0.push({
             binding: 2,
             resource: motionVectorTextureView,
@@ -439,7 +443,7 @@ class TAA {
 
     #createRenderTexture(view: View3D): boolean {
         const {redGPUContext, viewRenderTextureManager, name} = view
-        const {gBufferColorTexture} = viewRenderTextureManager
+        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {resourceManager} = redGPUContext
         const {width, height} = gBufferColorTexture
         const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height ||

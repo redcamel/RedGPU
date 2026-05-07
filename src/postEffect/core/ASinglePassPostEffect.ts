@@ -5,6 +5,9 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
+import GBUFFER_TYPE from "../../display/view/core/GBUFFER_TYPE";
+
+
 
 export type ASinglePassPostEffectResult = {
     texture: GPUTexture
@@ -397,11 +400,12 @@ abstract class ASinglePassPostEffect {
             if (name === "gBufferNormalTexture") {
                 this.#computeBindGroupEntries0_swap0.push({
                     binding: binding,
-                    resource: view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.gBufferNormalResolveTextureView : view.viewRenderTextureManager.gBufferNormalTextureView
+                    resource:
+                        view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL) : view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL)
                 })
                 this.#computeBindGroupEntries0_swap1.push({
                     binding: binding,
-                    resource: view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.gBufferNormalResolveTextureView : view.viewRenderTextureManager.gBufferNormalTextureView
+                    resource: view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL) : view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL)
                 })
             }
         });
@@ -486,7 +490,7 @@ abstract class ASinglePassPostEffect {
 
     #createRenderTexture(view: View3D): boolean {
         const {redGPUContext, viewRenderTextureManager, name} = view
-        const {gBufferColorTexture} = viewRenderTextureManager
+        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {resourceManager} = redGPUContext
         const {width, height} = gBufferColorTexture
         const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || !this.#outputTexture;

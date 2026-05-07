@@ -12,8 +12,8 @@ import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinning";
 import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
-import {keepLog} from "../utils";
-import {CommandBatchStats} from "./commandEncoder/CommandEncoderManager";
+import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
+
 
 /**
  * [KO] RedGPU의 핵심 렌더러 클래스입니다.
@@ -252,14 +252,14 @@ class Renderer {
 
             // useMSAA 설정에 따라 소스 텍스처 선택
             let sourceTexture = useMSAA
-                ? view.viewRenderTextureManager.gBufferColorResolveTexture
-                : view.viewRenderTextureManager.gBufferColorTexture;
+                ? view.viewRenderTextureManager.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
+                : view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
 
             if (!sourceTexture) {
                 if (useMSAA) {
-                    console.error('MSAA가 활성화되어 있지만 gBufferColorResolveTexture가 정의되지 않았습니다');
+                    console.error('MSAA가 활성화되어 있지만 G-Buffer Color Resolve 텍스처가 정의되지 않았습니다');
                 } else {
-                    console.error('gBufferColorTexture가 정의되지 않았습니다');
+                    console.error('G-Buffer Color 텍스처가 정의되지 않았습니다');
                 }
             }
 
@@ -291,15 +291,16 @@ class Renderer {
 
 
     #createAttachmentsForView(view: View3D) {
-        const {scene, redGPUContext, viewRenderTextureManager} = view
-        const {
-            depthTextureView,
-            gBufferColorTextureView, gBufferColorResolveTextureView,
-            gBufferNormalTextureView, gBufferNormalResolveTextureView,
-            gBufferMotionVectorTextureView, gBufferMotionVectorResolveTextureView,
-        } = viewRenderTextureManager
+        const {redGPUContext, viewRenderTextureManager} = view
         const {antialiasingManager} = redGPUContext
         const {useMSAA} = antialiasingManager
+
+        const depthTextureView = viewRenderTextureManager.depthTextureView;
+
+        const gBufferColorTextureView = viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR);
+        const gBufferNormalTextureView = viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
+        const gBufferMotionVectorTextureView = viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR);
+
         const colorAttachment: GPURenderPassColorAttachment = {
             view: gBufferColorTextureView,
             clearValue: {r: 0, g: 0, b: 0, a: 0},
@@ -325,9 +326,9 @@ class Renderer {
             storeOp: GPU_STORE_OP.STORE
         }
         if (useMSAA) {
-            colorAttachment.resolveTarget = gBufferColorResolveTextureView
-            gBufferNormalTextureAttachment.resolveTarget = gBufferNormalResolveTextureView
-            gBufferMotionVectorTextureAttachment.resolveTarget = gBufferMotionVectorResolveTextureView
+            colorAttachment.resolveTarget = viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR);
+            gBufferNormalTextureAttachment.resolveTarget = viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL);
+            gBufferMotionVectorTextureAttachment.resolveTarget = viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR);
         }
         return {
             colorAttachment,

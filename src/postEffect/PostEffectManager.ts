@@ -14,6 +14,8 @@ import TAASharpen from "../antialiasing/taa/sharpen/TAASharpen";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
+import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
+
 
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
@@ -345,10 +347,12 @@ class PostEffectManager {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
         const {antialiasingManager} = redGPUContext
         const {useMSAA, useFXAA, useTAA} = antialiasingManager;
-        const {gBufferColorTextureView, gBufferColorResolveTextureView, gBufferColorTexture} = viewRenderTextureManager;
+        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {width, height} = gBufferColorTexture;
         // 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
-        const initialSourceView = useMSAA ? gBufferColorResolveTextureView : gBufferColorTextureView;
+        const initialSourceView = useMSAA 
+            ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR) 
+            : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR);
         this.#updateSystemUniforms()
         this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
 
@@ -556,7 +560,7 @@ class PostEffectManager {
 
     #renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
         const {redGPUContext, viewRenderTextureManager} = view;
-        const {gBufferColorTexture} = viewRenderTextureManager;
+        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
         const {useMSAA, changedMSAA} = antialiasingManager;
         const {width, height} = gBufferColorTexture;

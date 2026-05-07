@@ -4,7 +4,9 @@ import {keepLog} from "../../../utils";
 import calculateTextureByteSize from "../../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
 import View3D from "../View3D";
-import {GBUFFER_TYPE} from "./GBUFFER_TYPE";
+import GBUFFER_TYPE from "./GBUFFER_TYPE";
+
+
 
 /**
  * G-Buffer 타입별 포맷 정의
@@ -205,106 +207,6 @@ class ViewRenderTextureManager {
     getGBufferResolveTextureView(type: GBUFFER_TYPE): GPUTextureView {
         this.#createGBuffer(type);
         return this.#gBuffers.get(type)?.resolveTextureView;
-    }
-
-    /* ----------------------------------------
-     * G-Buffer 관련 getters (컬러/노멀/모션 등)
-     * 하위 호환성을 위해 유지하며 내부적으로 통합 메서드를 호출합니다.
-     * ---------------------------------------- */
-    /**
-     * G-Buffer color 텍스처 반환
-     * @returns {GPUTexture}
-     */
-    get gBufferColorTexture(): GPUTexture {
-        return this.getGBufferTexture(GBUFFER_TYPE.COLOR)
-    }
-
-    /**
-     * G-Buffer color resolve 텍스처 반환
-     * @returns {GPUTexture}
-     */
-    get gBufferColorResolveTexture(): GPUTexture {
-        return this.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
-    }
-
-    /**
-     * G-Buffer color 텍스처 뷰 반환.
-     * @returns {GPUTextureView}
-     */
-    get gBufferColorTextureView(): GPUTextureView {
-        return this.getGBufferTextureView(GBUFFER_TYPE.COLOR)
-    }
-
-    /**
-     * G-Buffer color resolve 텍스처 뷰 반환.
-     * @returns {GPUTextureView}
-     */
-    get gBufferColorResolveTextureView(): GPUTextureView {
-        return this.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR)
-    }
-
-    /**
-     * G-Buffer normal 텍스처 반환
-     * @returns {GPUTexture}
-     */
-    get gBufferNormalTexture(): GPUTexture {
-        return this.getGBufferTexture(GBUFFER_TYPE.NORMAL)
-    }
-
-    /**
-     * G-Buffer normal resolve 텍스처 반환
-     * @returns {GPUTexture}
-     */
-    get gBufferNormalResolveTexture(): GPUTexture {
-        return this.getGBufferResolveTexture(GBUFFER_TYPE.NORMAL)
-    }
-
-    /**
-     * G-Buffer normal 텍스처 뷰 반환.
-     * @returns {GPUTextureView}
-     */
-    get gBufferNormalTextureView(): GPUTextureView {
-        return this.getGBufferTextureView(GBUFFER_TYPE.NORMAL)
-    }
-
-    /**
-     * G-Buffer normal resolve 텍스처 뷰 반환.
-     * @returns {GPUTextureView}
-     */
-    get gBufferNormalResolveTextureView(): GPUTextureView {
-        return this.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
-    }
-
-    /**
-     * G-Buffer 모션 벡터 텍스처 반환
-     * @returns {GPUTexture}
-     */
-    get gBufferMotionVectorTexture(): GPUTexture {
-        return this.getGBufferTexture(GBUFFER_TYPE.MOTION_VECTOR)
-    }
-
-    /**
-     * G-Buffer 모션 벡터 resolve 텍스처 반환
-     * @returns {GPUTexture}
-     */
-    get gBufferMotionVectorResolveTexture(): GPUTexture {
-        return this.getGBufferResolveTexture(GBUFFER_TYPE.MOTION_VECTOR)
-    }
-
-    /**
-     * G-Buffer 모션 벡터 텍스처 뷰 반환.
-     * @returns {GPUTextureView}
-     */
-    get gBufferMotionVectorTextureView(): GPUTextureView {
-        return this.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR)
-    }
-
-    /**
-     * G-Buffer 모션 벡터 resolve 텍스처 뷰 반환.
-     * @returns {GPUTextureView}
-     */
-    get gBufferMotionVectorResolveTextureView(): GPUTextureView {
-        return this.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR)
     }
 
     /* ----------------------------------------

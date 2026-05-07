@@ -1,6 +1,8 @@
 import Camera2D from "../../../camera/camera/Camera2D";
 import View3D from "../View3D";
 import {CommandBatchStats, CommandPhaseStats} from "../../../renderer/commandEncoder/CommandEncoderManager";
+import GBUFFER_TYPE from "./GBUFFER_TYPE";
+
 
 /**
  * 뷰포트의 크기와 위치를 나타냅니다.
@@ -163,10 +165,8 @@ class RenderViewStateData {
             pickingManager,
             viewRenderTextureManager
         } = view;
-        const {
-            gBufferColorTexture,
-            depthTexture,
-        } = view.viewRenderTextureManager;
+        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
+        const depthTexture = viewRenderTextureManager.depthTexture;
         const {shadowManager} = scene;
         if (!gBufferColorTexture || !depthTexture) {
             throw new Error('Invalid view properties');
