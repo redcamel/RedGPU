@@ -6,9 +6,11 @@ import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import View3D from "../../View3D";
 import GBUFFER_TYPE from "../GBUFFER_TYPE";
 
-type DepthType = 'depthTexture0' | 'depthTexture1';
-const DEPTH0: DepthType = 'depthTexture0'
-const DEPTH1: DepthType = 'depthTexture1'
+const DEPTH0: GBUFFER_INNER_TYPE = 'depthTexture0'
+const DEPTH1: GBUFFER_INNER_TYPE = 'depthTexture1'
+
+type GBUFFER_INNER_TYPE = 'depthTexture0' | 'depthTexture1';
+
 /**
  * G-Buffer 타입별 포맷 정의
  */
@@ -91,8 +93,9 @@ class ViewRenderTextureManager {
      */
     #lastUpdateMSAAID: string
     #prevTime: number
-    #targetTextureSize:GPUExtent3DDict
-    #targetTextureSizeString:string
+    #targetTextureSize: GPUExtent3DDict
+    #targetTextureSizeString: string
+
     /**
      * 생성자
      * @param {View3D} view - 이 매니저가 관리할 View3D 인스턴스
@@ -268,7 +271,7 @@ class ViewRenderTextureManager {
         }, 0)
     }
 
-    #destroyGBuffer(type: GBUFFER_TYPE | DepthType) {
+    #destroyGBuffer(type: GBUFFER_TYPE | GBUFFER_INNER_TYPE) {
         const targetInfo = this.#gBuffers.get(type)
         if (targetInfo) {
             targetInfo?.texture?.destroy()
@@ -283,82 +286,65 @@ class ViewRenderTextureManager {
         }
     }
 
+    #createGBufferTextureAndTextureView(type: GBUFFER_TYPE | GBUFFER_INNER_TYPE, format: GPUTextureFormat, usage?: GPUTextureUsageFlags, withResolve: boolean = false) {
+        const {antialiasingManager, resourceManager} = this.#redGPUContext
+        const {useMSAA} = antialiasingManager
+        const newInfo = {
+            texture: null,
+            textureView: null,
+            resolveTexture: null,
+            resolveTextureView: null,
+        }
+
+        const {name} = this.#view
+        const newTexture = resourceManager.createManagedTexture({
+            size: this.#targetTextureSize,
+            sampleCount: useMSAA ? 4 : 1,
+            label: `${name}_${type}_texture_${this.#targetTextureSizeString}`,
+            format: format,
+            usage
+        })
+
+        newInfo.texture = newTexture;
+        newInfo.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
+
+        // MSAA 사용 시 Resolve 텍스처 생성
+        if (withResolve && useMSAA) {
+            const newResolveTexture = resourceManager.createManagedTexture({
+                size: this.#targetTextureSize,
+                sampleCount: 1,
+                label: `${name}_${type}_resolveTexture_${this.#targetTextureSizeString}`,
+                format: format,
+                usage
+            })
+            newInfo.resolveTexture = newResolveTexture
+            newInfo.resolveTextureView = resourceManager.getGPUResourceBitmapTextureView(newResolveTexture)
+        }
+        return newInfo
+    }
+
     /**
      * 지정된 G-Buffer 타입의 텍스처를 생성하거나 재생성합니다.
      * @private
      * @param {GBUFFER_TYPE} type - G-Buffer 식별자
      */
     #createGBuffer(type: GBUFFER_TYPE) {
-        const {antialiasingManager, resourceManager} = this.#redGPUContext
-        const {useMSAA} = antialiasingManager
-        const {name} = this.#view
-
         keepLog(`새 텍스처 생성 중: ${type}`)
         this.#destroyGBuffer(type)
-        // 새로운 텍스처 정보 객체 생성
-        const newInfo = {
-            texture: null,
-            textureView: null,
-            resolveTexture: null,
-            resolveTextureView: null,
-        }
-
         const format = GBUFFER_FORMATS[type] || navigator.gpu.getPreferredCanvasFormat();
-        // 메인 텍스처 생성
-        const newTexture = resourceManager.createManagedTexture({
-            size: this.#targetTextureSize,
-            sampleCount: useMSAA ? 4 : 1,
-            label: `${name}_${type}_texture_${this.#targetTextureSizeString}`,
-            format: format,
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
-        })
-        newInfo.texture = newTexture;
-        newInfo.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
-        // MSAA 사용 시 Resolve 텍스처 생성
-        if (useMSAA) {
-            const newResolveTexture = resourceManager.createManagedTexture({
-                size: this.#targetTextureSize,
-                sampleCount: 1,
-                label: `${name}_${type}_resolveTexture_${this.#targetTextureSizeString}`,
-                format: format,
-                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
-            })
-            newInfo.resolveTexture = newResolveTexture
-            newInfo.resolveTextureView = resourceManager.getGPUResourceBitmapTextureView(newResolveTexture)
-        }
-        this.#gBuffers.set(type, newInfo)
+        const usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+        this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type,  format, usage, true))
     }
 
     /**
      * 깊이 텍스처를 생성하거나 재생성합니다.
      * @private
      */
-    #createDepthTexture(type:DepthType): void {
-        const {antialiasingManager, resourceManager} = this.#redGPUContext
-        const {useMSAA} = antialiasingManager
-        const {name} = this.#view
-        // 기존 텍스처 정리
+    #createDepthTexture(type: GBUFFER_INNER_TYPE): void {
         this.#destroyGBuffer(type)
-
-        const newInfo = {
-            texture: null,
-            textureView: null,
-            resolveTexture: null,
-            resolveTextureView: null,
-        }
-
-        // 새로운 깊이 텍스처 생성
-        const newTexture = resourceManager.createManagedTexture({
-            size: this.#targetTextureSize,
-            sampleCount: useMSAA ? 4 : 1,
-            label: `${name}_${type}_${this.#targetTextureSizeString}`,
-            format: 'depth32float',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
-        })
-        newInfo.texture = newTexture;
-        newInfo.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
-
-        this.#gBuffers.set(type, newInfo)
+        keepLog(`새 텍스처 생성 중: ${type}`)
+        const usage = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
+        this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type,  'depth32float', usage, false))
     }
 
     /**
