@@ -64,13 +64,13 @@ class FinalRender {
         const {width: canvasW, height: canvasH} = canvasPixelRectObject
         if (canvasW === 0 || canvasH === 0) return
         //
-        const changedMSAA = this.#lastUpdateMSAAID !== msaaID
+        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
         const finalRenderPassDesc: GPURenderPassDescriptor = this.#getFinalRenderPassDesc(redGPUContext)
         commandEncoderManager.addMainRenderPass(finalRenderPassDesc, (finalRenderPassEnc) => {
             finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
             finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
             //
-            if (!this.#vertexBindGroupLayout || changedMSAA) this.#initGPUDetails(redGPUContext)
+            if (!this.#vertexBindGroupLayout || dirtyMSAA) this.#initGPUDetails(redGPUContext)
             this.#renderViewList(
                 redGPUContext,
                 finalRenderPassEnc,
@@ -79,7 +79,7 @@ class FinalRender {
                     return temp.postEffectView || temp.pickingView || temp.resolveTarget || temp.view
                 }), canvasW, canvasH,
                 useMSAA,
-                changedMSAA
+                dirtyMSAA
             )
         })
         this.#lastUpdateMSAAID = msaaID
@@ -125,7 +125,7 @@ class FinalRender {
         resultTextureViews: GPUTextureView[],
         canvasW: number, canvasH: number,
         useMSAA: boolean,
-        changedMSAA: boolean
+        dirtyMSAA: boolean
     ) {
         const {gpuDevice} = redGPUContext
         resultTextureViews.forEach((gpuTextureView, index) => {
@@ -149,7 +149,7 @@ class FinalRender {
             )
             //
             const needNewBindGroup =
-                changedMSAA
+                dirtyMSAA
                 || !this.#viewSizes[index]
                 || this.#viewSizes[index].width !== viewW
                 || this.#viewSizes[index].height !== viewH
@@ -183,7 +183,7 @@ class FinalRender {
                 this.#viewGpuTextureViews[index] = gpuTextureView
             }
             this.#updateFinalViewBackgroundColor(targetView, index)
-            finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext, changedMSAA))
+            finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext, dirtyMSAA))
             finalRenderPassEnc.setBindGroup(0, vertexUniformBindGroup);
             finalRenderPassEnc.setBindGroup(1, this.#fragmentUniformBindGroups[index])
             finalRenderPassEnc.draw(6, 1, 0, 0);
@@ -258,8 +258,8 @@ class FinalRender {
         }
     }
 
-    #getPipeline(redGPUContext: RedGPUContext, changedMSAA: boolean) {
-        if (!this.#pipeline || changedMSAA) {
+    #getPipeline(redGPUContext: RedGPUContext, dirtyMSAA: boolean) {
+        if (!this.#pipeline || dirtyMSAA) {
             const {gpuDevice} = redGPUContext
             const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout({
                 label: "FINAL_RENDER_PIPELINE_LAYOUT",

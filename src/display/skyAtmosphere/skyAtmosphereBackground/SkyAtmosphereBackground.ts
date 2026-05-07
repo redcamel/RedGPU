@@ -44,8 +44,8 @@ class SkyAtmosphereBackground {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext;
         const {useMSAA, msaaID} = antialiasingManager;
 
-        const changedMSAA = this.#lastUpdateMSAAID !== msaaID;
-        if (this.#dirtyBackgroundPipeline || changedMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
+        if (this.#dirtyBackgroundPipeline || dirtyMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
             this.#lastUpdateMSAAID = msaaID;
             this.#updateBackgroundPipeline(useMSAA);
             this.#dirtyBackgroundPipeline = false;

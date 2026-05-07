@@ -130,9 +130,9 @@ class ViewRenderTextureManager {
 
         // 하나라도 변경되었는지 확인
         const changedSize = this.#renderPath1ResultTexture?.width !== width || this.#renderPath1ResultTexture?.height !== height;
-        const changedMSAA = this.#lastUpdateMSAAID !== msaaID;
+        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
 
-        if (changedSize || changedMSAA || !this.#renderPath1ResultTexture) {
+        if (changedSize || dirtyMSAA || !this.#renderPath1ResultTexture) {
             this.#lastUpdateMSAAID = msaaID;
             
             // 1. 기존 리소스 일괄 정리 (선택 사항이나 명시적 관리를 위해 유지)

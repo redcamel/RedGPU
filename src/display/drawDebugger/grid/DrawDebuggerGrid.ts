@@ -171,14 +171,14 @@ class DrawDebuggerGrid {
         vec3.set(position, view.rawCamera.x, view.rawCamera.y, view.rawCamera.z)
         renderViewStateData.num3DObjects++
         renderViewStateData.numDrawCalls++
-        const changedMSAA = this.#lastUpdateMSAAID !== msaaID
+        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
         const changedSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup !== this.#prevSystemUniform_Vertex_UniformBindGroup
         if (this.#pipeline) {
             const lineCount = (this.#size + 1) * 2; // 세로 + 가로 라인 수
             const indexCount = lineCount * 2; // 각 라인마다 2개 인덱스
-            if (!this.#bundleEncoder || changedMSAA || changedSystemBindGroup) {
+            if (!this.#bundleEncoder || dirtyMSAA || changedSystemBindGroup) {
                 this.#lastUpdateMSAAID = msaaID
-                // keepLog('렌더번들갱신', this.name, useMSAA,changedMSAA)
+                // keepLog('렌더번들갱신', this.name, useMSAA,dirtyMSAA)
                 this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
                     ...view.basicRenderBundleEncoderDescriptor,
                     label: this.name

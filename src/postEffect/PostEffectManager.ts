@@ -566,7 +566,7 @@ class PostEffectManager {
         const {msaaID} = antialiasingManager;
         const {width, height} = gBufferColorTexture;
         const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
-        const changedMSAA = this.#lastUpdateMSAAID !== msaaID;
+        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
         // 크기가 변경되면 텍스처 재생성
         if (dimensionsChanged) {
             if (this.#storageTexture) {
@@ -577,7 +577,7 @@ class PostEffectManager {
             this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
         }
         // 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
-        if (dimensionsChanged || changedMSAA) {
+        if (dimensionsChanged || dirtyMSAA) {
             this.#lastUpdateMSAAID = msaaID;
             this.#textureComputeBindGroup = this.#createTextureBindGroup(
                 redGPUContext,
