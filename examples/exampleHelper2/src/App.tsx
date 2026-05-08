@@ -5,6 +5,8 @@ import TopBar from './components/TopBar';
 import Description from './components/Description';
 import SourceModal from './components/SourceModal';
 import debugIcon from './assets/icons/debug.svg';
+import axisIcon from './assets/icons/axis.svg';
+import gridIcon from './assets/icons/grid.svg';
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -25,6 +27,31 @@ const App = () => {
                         window.redGPUInspector = new RedGPUInspector(redGPUContext);
                     }
 
+                    // AXIS Toggle
+                    addTopBarRightAction({
+                        id: 'axis-toggle',
+                        label: 'AXIS',
+                        icon: axisIcon,
+                        onClick: () => {
+                            redGPUContext.viewList.forEach((view: any) => {
+                                if ('axis' in view) view.axis = !view.axis;
+                            });
+                        }
+                    });
+
+                    // GRID Toggle
+                    addTopBarRightAction({
+                        id: 'grid-toggle',
+                        label: 'GRID',
+                        icon: gridIcon,
+                        onClick: () => {
+                            redGPUContext.viewList.forEach((view: any) => {
+                                if ('grid' in view) view.grid = !view.grid;
+                            });
+                        }
+                    });
+
+                    // DEBUG Toggle
                     addTopBarRightAction({
                         id: 'debug-toggle',
                         label: 'DEBUG',
