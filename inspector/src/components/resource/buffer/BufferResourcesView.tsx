@@ -5,6 +5,7 @@ import formatBytes from '@redgpu/src/utils/formatBytes';
 import {formatBufferUsage, formatNumber} from '../../../utils/format';
 import RedGPUContext from '@redgpu/src/context/RedGPUContext';
 import {ResourceSummary} from '../common/ResourceSummary';
+import {THEME} from "../../common/Theme";
 
 /**
  * [KO] 버퍼 리소스 목록을 표시하는 컴포넌트입니다.
@@ -43,7 +44,7 @@ const BufferResourcesView = ({onPreview}: { onPreview: (item: any, type: string)
         <Section title={
             <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
                 <span>Buffer Resources</span>
-                <span style={{fontSize: '11px', color: '#fdb48d'}}>{formatBytes(totalMemory)}</span>
+                <span style={{fontSize: '11px', color: THEME.colors.primary}}>{formatBytes(totalMemory)}</span>
             </div>
         }>
             {renderBufferSection('uniformBuffer', 'Uniform Buffers', resourceStats.uniformBuffer)}
@@ -78,14 +79,16 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: {
             break;
         case 'gpuBuffer': {
             const gpuBufferMap = rm.resources.get('GPUBuffer') as Map<string, GPUBuffer>;
-            items = Array.from(gpuBufferMap.entries()).map(([key, buffer]) => ({
-                uuid: key,
-                label: buffer.label || key,
-                size: buffer.size,
-                usage: (buffer as any).usage,
-                isRaw: true,
-                gpuBuffer: buffer // Pass the instance for readback
-            }));
+            if (gpuBufferMap) {
+                items = Array.from(gpuBufferMap.entries()).map(([key, buffer]) => ({
+                    uuid: key,
+                    label: buffer.label || key,
+                    size: buffer.size,
+                    usage: (buffer as any).usage,
+                    isRaw: true,
+                    gpuBuffer: buffer // Pass the instance for readback
+                }));
+            }
             break;
         }
     }
@@ -99,7 +102,7 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: {
                     return (
                         <div
                             key={item.uuid || idx}
-                            style={{...detailItemStyle, cursor: 'pointer'}}
+                            style={detailItemStyle}
                             onClick={() => onPreview(item, type)}
                         >
                             <div style={detailHeaderStyle}>
@@ -127,9 +130,7 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: {
                             key={item.uuid || idx}
                             style={{
                                 ...detailItemStyle,
-                                borderLeft: type === 'uniformBuffer' ? '2px solid #a0aec0' : 'none',
-                                background: type === 'uniformBuffer' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.02)',
-                                marginBottom: type === 'uniformBuffer' ? '4px' : '2px',
+                                borderLeft: type === 'uniformBuffer' ? `2px solid ${THEME.colors.primary}` : 'none',
                                 cursor: 'pointer'
                             }}
                             onClick={() => onPreview(item, type)}
@@ -149,8 +150,15 @@ const BufferDetailList = ({type, redGPUContext, onPreview}: {
                                     )}
                                 </div>
                                 <div style={detailRightContainerStyle}>
-                                    <span style={useNumStyle}>Use: {formatNumber(item.useNum, 0)}</span>
-                                    <span style={detailMemoryStyle}>{formatBytes(buf?.size || 0)}</span>
+                                    <div style={{
+                                        display: 'flex',
+                                        gap: '4px',
+                                        alignItems: 'center',
+                                        marginBottom: '2px'
+                                    }}>
+                                        <span style={useNumStyle}>Use: {formatNumber(item.useNum, 0)}</span>
+                                        <span style={detailMemoryStyle}>{formatBytes(buf?.size || 0)}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -216,13 +224,13 @@ const detailRightContainerStyle: React.CSSProperties = {
 };
 
 const detailMemoryStyle: React.CSSProperties = {
-    color: '#fdb48d', fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '12px'
+    color: THEME.colors.primary, fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '12px'
 };
 
 const useNumStyle: React.CSSProperties = {
     fontSize: '10px',
     opacity: 0.8,
-    color: '#fdb48d',
+    color: THEME.colors.primary,
     background: 'rgba(255,255,255,0.1)',
     padding: '2px 6px',
     borderRadius: '3px',

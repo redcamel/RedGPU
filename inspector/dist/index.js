@@ -9114,11 +9114,17 @@ const ResourceSummary = ({
         /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: labelStyle, children: [
           label,
           " ",
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("small", { style: countStyle, children: [
-            "(",
-            formatNumber(stats.count, 0),
-            ")"
-          ] })
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "small",
+            {
+              style: countStyle,
+              children: [
+                "(",
+                formatNumber(stats.count, 0),
+                ")"
+              ]
+            }
+          )
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: memoryStyle, children: formatBytes(stats.videoMemory) })
       ] })
@@ -9206,12 +9212,12 @@ const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
   }
   if (items.length === 0) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noItemStyle$1, children: "No textures found." });
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle$2, children: items.map((item, idx) => {
-    var _a;
+    var _a, _b, _c, _d;
     const tex = item.texture;
     const gpuTex = tex == null ? void 0 : tex.gpuTexture;
     const isBlob = item.src && item.src.startsWith("blob:") || item.srcList && ((_a = item.srcList[0]) == null ? void 0 : _a.startsWith("blob:"));
-    const fileName = isBlob ? "BLOB" : item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
-    const originalPath = item.src || (item.srcList ? item.srcList[0] + "..." : item.cacheKey);
+    const fileName = isBlob ? "BLOB" : item.src ? item.src.split("/").pop() : ((_c = (_b = item.srcList) == null ? void 0 : _b[0]) == null ? void 0 : _c.split("/").pop()) || null;
+    const originalPath = item.src || (((_d = item.srcList) == null ? void 0 : _d[0]) ? item.srcList[0] + "..." : item.cacheKey);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       "div",
       {
@@ -9410,7 +9416,7 @@ const BufferResourcesView = ({ onPreview }) => {
   ] }, type);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Buffer Resources" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", color: "#fdb48d" }, children: formatBytes(totalMemory) })
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", color: THEME.colors.primary }, children: formatBytes(totalMemory) })
   ] }), children: [
     renderBufferSection("uniformBuffer", "Uniform Buffers", resourceStats.uniformBuffer),
     renderBufferSection("vertexBuffer", "Vertex Buffers", resourceStats.vertexBuffer),
@@ -9437,15 +9443,17 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
       break;
     case "gpuBuffer": {
       const gpuBufferMap = rm.resources.get("GPUBuffer");
-      items = Array.from(gpuBufferMap.entries()).map(([key, buffer]) => ({
-        uuid: key,
-        label: buffer.label || key,
-        size: buffer.size,
-        usage: buffer.usage,
-        isRaw: true,
-        gpuBuffer: buffer
-        // Pass the instance for readback
-      }));
+      if (gpuBufferMap) {
+        items = Array.from(gpuBufferMap.entries()).map(([key, buffer]) => ({
+          uuid: key,
+          label: buffer.label || key,
+          size: buffer.size,
+          usage: buffer.usage,
+          isRaw: true,
+          gpuBuffer: buffer
+          // Pass the instance for readback
+        }));
+      }
       break;
     }
   }
@@ -9455,7 +9463,7 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
       return /* @__PURE__ */ jsxRuntimeExports.jsx(
         "div",
         {
-          style: { ...detailItemStyle, cursor: "pointer" },
+          style: detailItemStyle,
           onClick: () => onPreview(item, type),
           children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle$1, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle$1, children: [
@@ -9481,9 +9489,7 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
         {
           style: {
             ...detailItemStyle,
-            borderLeft: type === "uniformBuffer" ? "2px solid #a0aec0" : "none",
-            background: type === "uniformBuffer" ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.02)",
-            marginBottom: type === "uniformBuffer" ? "4px" : "2px",
+            borderLeft: type === "uniformBuffer" ? `2px solid ${THEME.colors.primary}` : "none",
             cursor: "pointer"
           },
           onClick: () => onPreview(item, type),
@@ -9511,13 +9517,18 @@ const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
                 )
               ] }) })
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle$1, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+              display: "flex",
+              gap: "4px",
+              alignItems: "center",
+              marginBottom: "2px"
+            }, children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle, children: [
                 "Use: ",
                 formatNumber(item.useNum, 0)
               ] }),
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$1, children: formatBytes((buf == null ? void 0 : buf.size) || 0) })
-            ] })
+            ] }) })
           ] })
         },
         item.uuid || idx
@@ -9580,7 +9591,7 @@ const detailRightContainerStyle$1 = {
   flexShrink: 0
 };
 const detailMemoryStyle$1 = {
-  color: "#fdb48d",
+  color: THEME.colors.primary,
   fontWeight: "bold",
   whiteSpace: "nowrap",
   fontSize: "12px"
@@ -9588,7 +9599,7 @@ const detailMemoryStyle$1 = {
 const useNumStyle = {
   fontSize: "10px",
   opacity: 0.8,
-  color: "#fdb48d",
+  color: THEME.colors.primary,
   background: "rgba(255,255,255,0.1)",
   padding: "2px 6px",
   borderRadius: "3px",
@@ -9682,11 +9693,11 @@ const GBufferResourcesView = ({ onPreview }) => {
     ViewGBufferList,
     {
       view,
-      isExpanded: !!expanded[view.uuid],
-      onToggle: () => toggleExpanded(view.uuid),
+      isExpanded: !!expanded[idx.toString()],
+      onToggle: () => toggleExpanded(idx.toString()),
       onPreview
     },
-    view.uuid || idx
+    idx
   )) });
 };
 const ViewGBufferList = ({ view, isExpanded, onToggle, onPreview }) => {
@@ -9706,11 +9717,24 @@ const ViewGBufferList = ({ view, isExpanded, onToggle, onPreview }) => {
             /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
               "View: ",
               /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: view.name || "Unnamed View" }),
-              " (",
-              view.uuid,
-              ")"
+              " ",
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "small",
+                {
+                  style: { color: "#888" },
+                  children: [
+                    "(",
+                    items.length,
+                    ")"
+                  ]
+                }
+              )
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", opacity: 0.8, color: THEME.colors.primary }, children: formatBytes(viewMemory) })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+              fontSize: "11px",
+              opacity: 0.8,
+              color: THEME.colors.primary
+            }, children: formatBytes(viewMemory) })
           ] })
         ]
       }
@@ -9762,7 +9786,13 @@ const GBufferItem = ({ name, info, onPreview }) => {
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
               "Samples: ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: isMSAA ? THEME.colors.primary : "#eee" }, children: gpuTex.sampleCount })
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "b",
+                {
+                  style: { color: isMSAA ? THEME.colors.primary : "#eee" },
+                  children: gpuTex.sampleCount
+                }
+              )
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
               "Mips: ",
@@ -9832,7 +9862,7 @@ const detailLeftContainerStyle = {
   minWidth: 0
 };
 const detailNameStyle = {
-  color: THEME.colors.accent,
+  color: THEME.colors.primary,
   fontWeight: "bold",
   marginBottom: "2px",
   fontSize: "13px"

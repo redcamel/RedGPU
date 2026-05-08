@@ -79,8 +79,8 @@ const TextureDetailList = ({type, redGPUContext, onPreview}: {
                 const tex = item.texture;
                 const gpuTex = tex?.gpuTexture;
                 const isBlob = (item.src && item.src.startsWith('blob:')) || (item.srcList && item.srcList[0]?.startsWith('blob:'));
-                const fileName = isBlob ? 'BLOB' : (item.src ? item.src.split('/').pop() : (item.srcList ? item.srcList[0].split('/').pop() : null));
-                const originalPath = item.src || (item.srcList ? item.srcList[0] + '...' : item.cacheKey);
+                const fileName = isBlob ? 'BLOB' : (item.src ? item.src.split('/').pop() : (item.srcList?.[0]?.split('/').pop() || null));
+                const originalPath = item.src || (item.srcList?.[0] ? item.srcList[0] + '...' : item.cacheKey);
 
                 return (
                     <div

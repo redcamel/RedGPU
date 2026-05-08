@@ -27,7 +27,8 @@ export const ResourceSummary = ({
                 <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
             </div>
             <div style={labelWrapperStyle}>
-                <span style={labelStyle}>{label} <small style={countStyle}>({formatNumber(stats.count, 0)})</small></span>
+                <span style={labelStyle}>{label} <small
+                    style={countStyle}>({formatNumber(stats.count, 0)})</small></span>
                 <span style={memoryStyle}>{formatBytes(stats.videoMemory)}</span>
             </div>
         </div>
