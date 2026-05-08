@@ -2,7 +2,7 @@ import React, {memo, useState} from 'react';
 import {useInspectorStore} from '../../store';
 import MiniGraph from "../common/MiniGraph";
 import formatBytes from "@redgpu/src/utils/formatBytes";
-import {COMMON_STYLES} from "../common/Theme";
+import ToggleButton from "../common/ToggleButton";
 
 /**
  * [KO] FPS 및 프레임 타임 통계를 계산하는 클래스입니다.
@@ -105,12 +105,11 @@ const FPS = memo(() => {
     return (
         <div style={containerStyle}>
             <div style={statsContainerStyle}>
-                <div
+                <ToggleButton
+                    isExpanded={isExpanded}
                     onClick={() => setIsExpanded(!isExpanded)}
-                    style={toggleWrapperStyle}
-                >
-                    <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
-                </div>
+                    style={{paddingRight: '4px'}}
+                />
 
                 <div style={fpsValueStyle}>{fps} FPS</div>
                 <div style={frameTimeValueStyle}>({frameTime})</div>

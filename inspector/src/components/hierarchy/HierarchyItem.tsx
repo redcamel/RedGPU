@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {HierarchyNode} from '../../store';
-import {COMMON_STYLES, THEME} from '../common/Theme';
+import {THEME} from '../common/Theme';
+import ToggleButton from '../common/ToggleButton';
 
 /**
  * [KO] 계층 구조의 개별 항목을 렌더링하는 컴포넌트입니다.
@@ -12,15 +13,12 @@ const HierarchyItem = ({node, depth = 0}: { node: HierarchyNode, depth?: number 
     return (
         <div style={{marginLeft: depth > 0 ? '12px' : '0'}}>
             <div style={itemHeaderStyle}>
-                <div 
+                <ToggleButton
+                    isExpanded={isExpanded}
                     onClick={() => hasChildren && setIsExpanded(!isExpanded)}
-                    style={{
-                        ...toggleWrapperStyle,
-                        visibility: hasChildren ? 'visible' : 'hidden'
-                    }}
-                >
-                    <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
-                </div>
+                    visible={hasChildren}
+                    style={{marginRight: '6px'}}
+                />
                 <div style={contentStyle}>
                     <span style={nameStyle}>{node.name}</span>
                     <span style={typeStyle}>{node.type}</span>
@@ -29,7 +27,7 @@ const HierarchyItem = ({node, depth = 0}: { node: HierarchyNode, depth?: number 
             {isExpanded && hasChildren && (
                 <div style={childrenContainerStyle}>
                     {node.children.map(child => (
-                        <HierarchyItem key={child.id} node={child} depth={depth + 1} />
+                        <HierarchyItem key={child.id} node={child} depth={depth + 1}/>
                     ))}
                 </div>
             )}

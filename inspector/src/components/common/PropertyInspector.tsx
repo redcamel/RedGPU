@@ -3,6 +3,7 @@ import StatItem from "./StatItem";
 import StatBoolItem from "./StatBoolItem";
 import {formatNumber} from "../../utils/format";
 import {COMMON_STYLES} from "./Theme";
+import ToggleButton from "./ToggleButton";
 
 /**
  * [KO] 객체의 공개 프로퍼티를 재귀적으로 표시하는 컴포넌트입니다.
@@ -114,7 +115,7 @@ const CollapsibleObject = ({label, value, depth, typeLabel}: {
                 onClick={() => setIsExpanded(!isExpanded)}
                 style={headerStyle}
             >
-                <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
+                <ToggleButton isExpanded={isExpanded} style={{marginRight: '6px'}}/>
                 <span style={COMMON_STYLES.label}>{label}</span>
                 <span style={typeHintStyle}>({typeLabel === 'Array' ? `Array(${value.length})` : 'object'})</span>
             </div>

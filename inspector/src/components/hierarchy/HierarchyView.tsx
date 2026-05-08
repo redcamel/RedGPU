@@ -22,17 +22,17 @@ const HierarchyView = () => {
         <div style={containerStyle}>
             {viewNames.length > 1 && (
                 <div style={tabWrapperStyle}>
-                    <TabBar 
-                        tabs={tabs} 
-                        activeTab={activeView || viewNames[0]} 
-                        onTabChange={setActiveView} 
+                    <TabBar
+                        tabs={tabs}
+                        activeTab={activeView || viewNames[0]}
+                        onTabChange={setActiveView}
                         isSticky={false}
                     />
                 </div>
             )}
             <div style={contentStyle}>
                 <Section title="Scene Tree">
-                    <HierarchyItem node={hierarchy[activeView || viewNames[0]]} />
+                    <HierarchyItem node={hierarchy[activeView || viewNames[0]]}/>
                 </Section>
             </div>
         </div>

@@ -2,7 +2,8 @@ import React from 'react';
 import {ResourceStatusSummary} from '../../../store';
 import formatBytes from '@redgpu/src/utils/formatBytes';
 import {formatNumber} from '../../../utils/format';
-import {COMMON_STYLES, THEME} from "../../common/Theme";
+import {THEME} from "../../common/Theme";
+import ToggleButton from "../../common/ToggleButton";
 
 /**
  * [KO] 리소스 유형별 요약 정보를 표시하는 컴포넌트입니다.
@@ -23,9 +24,10 @@ export const ResourceSummary = ({
             style={headerStyle}
             onClick={onToggle}
         >
-            <div style={toggleWrapperStyle}>
-                <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
-            </div>
+            <ToggleButton
+                isExpanded={isExpanded}
+                style={{paddingRight: '8px'}}
+            />
             <div style={labelWrapperStyle}>
                 <span style={labelStyle}>{label} <small
                     style={countStyle}>({formatNumber(stats.count, 0)})</small></span>

@@ -6,7 +6,7 @@ import StatBoolItem from "../common/StatBoolItem";
 import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";
 import PropertyInspector from "../common/PropertyInspector";
-import {COMMON_STYLES} from "../common/Theme";
+import ToggleButton from "../common/ToggleButton";
 
 /**
  * [KO] 뷰의 후처리 효과 설정을 표시하는 탭 컴포넌트입니다.
@@ -62,7 +62,7 @@ const CollapsibleEffect = ({effect}: { effect: any }) => {
                 onClick={() => setIsExpanded(!isExpanded)}
                 style={effectHeaderStyle}
             >
-                <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
+                <ToggleButton isExpanded={isExpanded} style={{marginRight: '8px'}}/>
                 <span style={effectNameStyle}>{effect.constructor.name || 'Unknown Effect'}</span>
             </div>
             {isExpanded && (

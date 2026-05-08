@@ -4,8 +4,9 @@ import Section from '../../common/Section';
 import {formatTextureUsage} from '../../../utils/format';
 import formatBytes from '@redgpu/src/utils/formatBytes';
 import View3D from '@redgpu/src/display/view/View3D';
-import {COMMON_STYLES, THEME} from "../../common/Theme";
+import {THEME} from "../../common/Theme";
 import calculateTextureByteSize from "@redgpu/src/utils/texture/calculateTextureByteSize";
+import ToggleButton from "../../common/ToggleButton";
 
 /**
  * [KO] G-Buffer 리소스 목록을 표시하는 컴포넌트입니다.
@@ -61,9 +62,10 @@ const ViewGBufferList = ({view, isExpanded, onToggle, onPreview}: {
                 style={viewHeaderStyle}
                 onClick={onToggle}
             >
-                <div style={toggleWrapperStyle}>
-                    <span style={COMMON_STYLES.toggleButton}>{isExpanded ? '-' : '+'}</span>
-                </div>
+                <ToggleButton
+                    isExpanded={isExpanded}
+                    style={{paddingRight: '8px'}}
+                />
                 <div style={{display: 'flex', justifyContent: 'space-between', flex: 1, alignItems: 'center'}}>
                     <span>View: <b>{view.name || 'Unnamed View'}</b> <small
                         style={{color: '#888'}}>({items.length})</small></span>
