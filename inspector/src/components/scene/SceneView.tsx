@@ -11,7 +11,7 @@ import View3D from "@redgpu/src/display/view/View3D";
  * [EN] Component that displays integrated Scene information and hierarchy.
  */
 const SceneView = () => {
-    const {hierarchy, redGPUContext} = useInspectorStore();
+    const {hierarchy, redGPUContext, lastUpdateTime} = useInspectorStore();
     const viewNames = Object.keys(hierarchy);
     const [activeViewName, setActiveViewName] = useState(viewNames[0] || '');
 

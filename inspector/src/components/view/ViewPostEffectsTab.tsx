@@ -14,7 +14,7 @@ import ToneMappingView from "./ToneMappingView";
  * [KO] 뷰의 후처리 효과 설정을 표시하는 탭 컴포넌트입니다.
  * [EN] Tab component that displays the post-processing effect settings of a view.
  */
-const ViewPostEffectsTab = ({view}: { view: View3D }) => {
+const ViewPostEffectsTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: number }) => {
     const {redGPUContext} = useInspectorStore();
     const {postEffectManager, rawCamera} = view;
 

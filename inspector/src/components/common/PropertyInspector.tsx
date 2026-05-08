@@ -4,11 +4,15 @@ import StatBoolItem from "./StatBoolItem";
 import {formatNumber} from "../../utils/format";
 import {COMMON_STYLES} from "./Theme";
 import ToggleButton from "./ToggleButton";
+import {useInspectorStore} from "../../store";
 
 /**
  * [KO] 객체의 공개 프로퍼티를 재귀적으로 표시하는 컴포넌트입니다.
  */
 const PropertyInspector = memo(({target, depth = 0}: { target: any, depth?: number }) => {
+    // [KO] 매 프레임 업데이트를 강제하기 위해 lastUpdateTime 구독
+    useInspectorStore(state => state.lastUpdateTime);
+
     if (depth > 3 || !target) return null;
 
     // 1. 프로토타입 체인을 포함하여 검사 가능한 모든 키 수집 및 필터링 (useMemo로 최적화)

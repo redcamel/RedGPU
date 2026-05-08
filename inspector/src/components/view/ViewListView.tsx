@@ -56,7 +56,7 @@ const ViewListView = () => {
             <div style={contentAreaStyle}>
                 {activeDetailTab === 'STATE' && <ViewStateTab view={activeView} lastUpdateTime={lastUpdateTime}/>}
                 {activeDetailTab === 'COMMANDS' && <ViewCommandsTab view={activeView}/>}
-                {activeDetailTab === 'POSTEFFECTS' && <ViewPostEffectsTab view={activeView}/>}
+                {activeDetailTab === 'POSTEFFECTS' && <ViewPostEffectsTab view={activeView} lastUpdateTime={lastUpdateTime}/>}
             </div>
         </div>
     );
