@@ -13,8 +13,7 @@ const SceneInfoView = ({scene}: { scene: Scene }) => {
     const {name, useBackgroundColor, backgroundColor} = scene;
 
     return (
-        <Section title={'Scene'}>
-            <StatItem label="name" value={name}/>
+        <Section title={'Scene'} subTitle={name}>
             <StatBoolItem label="useBackgroundColor" value={useBackgroundColor}/>
             <StatRGBAItem label="backgroundColor" value={backgroundColor.rgba}/>
         </Section>

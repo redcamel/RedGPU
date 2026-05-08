@@ -63,12 +63,12 @@ const ViewStateTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: nu
             </Section>
 
             <SceneInfoView scene={scene}/>
-            <ToneMappingView view={view} />
+            <Section title="ToneMapping">
+                <ToneMappingView view={view} showLabel={false}/>
+            </Section>
 
             {camera && (camera instanceof AController || camera.constructor.name.includes('Controller') || ('camera' in camera && (camera as any).camera !== camera)) && (
-
-                <Section title={'Controller'}>
-                    <StatItem label="name" value={camera.name}/>
+                <Section title={'Controller'} subTitle={camera.name}>
                     {camera['distance'] !== undefined &&
                         <StatItem label="distance" value={formatNumber(camera['distance'])}/>}
                     {camera['pan'] !== undefined && <StatItem label="pan" value={formatNumber(camera['pan'])}/>}
@@ -85,8 +85,7 @@ const ViewStateTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: nu
                 </Section>
             )}
 
-            <Section title={'Raw Camera'}>
-                <StatItem label="name" value={rawCamera.name}/>
+            <Section title={'Raw Camera'} subTitle={rawCamera.name}>
                 <StatItem label="position"
                           value={`${formatNumber(rawCamera.x)}, ${formatNumber(rawCamera.y)}, ${formatNumber(rawCamera.z || 0)}`}/>
                 {rawCamera['rotationX'] !== undefined && (
