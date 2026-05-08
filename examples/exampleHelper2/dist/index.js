@@ -7162,8 +7162,8 @@ const createImpl = (createState) => {
   Object.assign(useBoundStore, api);
   return useBoundStore;
 };
-const create = (createState) => createImpl;
-const useExampleHelperStore = create()((set) => ({
+const create = (createState) => createState ? createImpl(createState) : createImpl;
+const useExampleHelperStore = create((set) => ({
   redGPUContext: null,
   currentExample: null,
   language: typeof navigator !== "undefined" && navigator.language.startsWith("ko") ? "ko" : "en",
