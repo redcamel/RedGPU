@@ -2,12 +2,14 @@ import React from 'react';
 import Section from "../common/Section";
 import StatItem from "../common/StatItem";
 import StatBoolItem from "../common/StatBoolItem";
+import StatRGBAItem from "../common/StatRGBAItem";
 import Divider from "../common/Divider";
 import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";
 import AController from "@redgpu/src/camera/core/AController";
 import {formatNumber} from "../../utils/format";
 import SceneInfoView from "../scene/SceneInfoView";
+import ToneMappingView from "./ToneMappingView";
 
 /**
  * [KO] 뷰의 렌더링 상태 및 기본 설정을 표시하는 탭 컴포넌트입니다.
@@ -62,6 +64,7 @@ const ViewStateTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: nu
 
             <SceneInfoView scene={scene}/>
 
+            <ToneMappingView view={view}/>
 
             {camera && (camera instanceof AController || camera.constructor.name.includes('Controller') || ('camera' in camera && (camera as any).camera !== camera)) && (
                 <Section title={'Controller'}>

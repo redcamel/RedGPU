@@ -4,7 +4,6 @@ import Section from "../common/Section";
 import StatItem from "../common/StatItem";
 import StatRGBAItem from "../common/StatRGBAItem";
 import StatBoolItem from "../common/StatBoolItem";
-import ToneMappingView from "./ToneMappingView";
 
 
 /**
@@ -41,7 +40,6 @@ const RedGPUContextView = () => {
                 <StatBoolItem label="useFXAA" value={antialiasingManager.useFXAA}/>
                 <StatBoolItem label="useTAA" value={antialiasingManager.useTAA}/>
             </Section>
-            <ToneMappingView/>
             <Section title="Environment">
                 <StatItem label="devicePixelRatio" value={devicePixelRatio}/>
                 <StatBoolItem label="Mobile" value={detector.isMobile} trueLabel="Yes" falseLabel="No"/>
