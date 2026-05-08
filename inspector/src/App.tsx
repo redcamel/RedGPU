@@ -19,7 +19,8 @@ const App = () => {
     const tabs: TabItem[] = [
         {id: 'STATE', label: 'State'},
         {id: 'CONTEXT', label: 'RedGPUContext'},
-        {id: 'VIEWS', label: 'ViewList'},
+        {id: 'VIEWS', label: 'View'},
+        {id: 'HIERARCHY', label: 'Scene'},
         {id: 'RESOURCES', label: 'Resources'}
     ];
 

@@ -1,8 +1,22 @@
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
-import {InspectorState} from "../store";
+import {HierarchyNode, InspectorState} from "../store";
 import {CommandBatchStats} from "@redgpu/src/renderer/commandEncoder/CommandEncoderManager";
 import View3D from "@redgpu/src/display/view/View3D";
 import RenderViewStateData from "@redgpu/src/display/view/core/RenderViewStateData";
+import {Object3DContainer} from "@redgpu/src/display/mesh/core";
+
+/**
+ * [KO] Object3DContainer의 계층 구조를 재귀적으로 탐색하여 HierarchyNode로 변환합니다.
+ */
+const getHierarchy = (container: Object3DContainer): HierarchyNode => {
+    const children = (container as any).children || [];
+    return {
+        id: (container as any).uuid || (container as any).instanceId || Math.random().toString(),
+        name: (container as any).name || container.constructor.name,
+        type: container.constructor.name,
+        children: children.map((child: any) => getHierarchy(child))
+    };
+};
 
 /**
  * [KO] 엔진의 실시간 통계를 수집하여 반환합니다.
@@ -16,6 +30,7 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
     let totalNumPoints = 0;
     let totalUsedVideoMemory = 0;
     const aggregatedBatchStats: CommandBatchStats = {};
+    const hierarchy: Record<string, HierarchyNode> = {};
 
     const viewList = redGPUContext.viewList as View3D[];
     const viewListLen = viewList.length;
@@ -31,6 +46,11 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
         totalNumTriangles += state.numTriangles;
         totalNumPoints += state.numPoints;
         totalUsedVideoMemory += state.usedVideoMemory;
+
+        // 계층 구조 수집
+        if (view.scene) {
+            hierarchy[view.name || `View ${i}`] = getHierarchy(view.scene);
+        }
 
         if (state.commandBatchStats) {
             for (const phase in state.commandBatchStats) {
@@ -122,6 +142,7 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
         totalUsedVideoMemory,
         pixelRectArray: redGPUContext.sizeManager.pixelRectArray, // Use reference if possible
         commandBatchStats: aggregatedBatchStats,
+        hierarchy,
         resourceStats
     };
 };

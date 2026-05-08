@@ -7198,6 +7198,7 @@ const useInspectorStore = create$1((set) => ({
   totalUsedVideoMemory: 0,
   pixelRectArray: [0, 0, 0, 0],
   commandBatchStats: null,
+  hierarchy: {},
   resourceStats: {
     bitmapTexture: { count: 0, videoMemory: 0 },
     cubeTexture: { count: 0, videoMemory: 0 },
@@ -7471,13 +7472,13 @@ const FPS = reactExports.memo(() => {
   const totalNumDrawCalls = useInspectorStore((state) => state.totalNumDrawCalls);
   const totalUsedVideoMemory = useInspectorStore((state) => state.totalUsedVideoMemory);
   const [isExpanded, setIsExpanded] = reactExports.useState(false);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$3, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$4, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "div",
         {
           onClick: () => setIsExpanded(!isExpanded),
-          style: toggleWrapperStyle$2,
+          style: toggleWrapperStyle$3,
           children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" })
         }
       ),
@@ -7532,7 +7533,7 @@ const FPS = reactExports.memo(() => {
     ] })
   ] });
 });
-const containerStyle$3 = {
+const containerStyle$4 = {
   borderBottom: "1px solid rgba(255,255,255,0.1)",
   background: "#000"
 };
@@ -7547,7 +7548,7 @@ const statsContainerStyle = {
   fontFamily: 'monospace, "Courier New", courier',
   fontVariantNumeric: "tabular-nums"
 };
-const toggleWrapperStyle$2 = {
+const toggleWrapperStyle$3 = {
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
@@ -7699,11 +7700,11 @@ const RedGPUContextView = () => {
   const redGPUContext = useInspectorStore((state) => state.redGPUContext);
   const pixelRectArray = useInspectorStore((state) => state.pixelRectArray);
   if (!redGPUContext) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$2, children: "RedGPUContext not initialized" });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$3, children: "RedGPUContext not initialized" });
   }
   const { detector, htmlCanvas, width, height, backgroundColor, antialiasingManager } = redGPUContext;
   const adapterInfo = detector.adapterInfo;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$2, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$3, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "RedGPUContext Info", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Width", value: width }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Height", value: height }),
@@ -7737,7 +7738,7 @@ const RedGPUContextView = () => {
     ] })
   ] });
 };
-const containerStyle$2 = {};
+const containerStyle$3 = {};
 const labelStyle$1 = {
   color: "#888"
 };
@@ -7751,7 +7752,7 @@ const userAgentValueStyle = {
   lineHeight: "1.4",
   wordBreak: "break-all"
 };
-const placeholderStyle$2 = {
+const placeholderStyle$3 = {
   padding: "20px",
   textAlign: "center",
   color: "#666",
@@ -8087,7 +8088,7 @@ const TexturePreviewModal = ({ item, onClose }) => {
           );
         }) })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$1, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$3, children: [
         item.src && !isHDR && !isCube && activeMipLevel === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.src, style: previewImageStyle, alt: "preview" }),
         isCube && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...cubePreviewGridStyle, position: "relative" }, children: gridPositions.map((pos, i) => {
           const faceIdx = cubeFaceIndices[i];
@@ -8278,7 +8279,7 @@ const closeButtonStyle$1 = {
   marginTop: "-4px",
   flexShrink: 0
 };
-const contentStyle$1 = {
+const contentStyle$3 = {
   padding: "20px",
   overflow: "auto",
   display: "flex",
@@ -8499,11 +8500,11 @@ const BufferDetailModal = ({ item, type, onClose }) => {
               background: isLive ? "#10b981" : "#666"
             }, children: isLive ? "LIVE GPU" : "LOCAL CACHE" })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: typeStyle, children: type.toUpperCase() })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: typeStyle$1, children: type.toUpperCase() })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle, onClick: onClose, children: "×" })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$2, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Properties" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: propertyGridStyle, children: [
@@ -8807,7 +8808,7 @@ const titleStyle = {
   textOverflow: "ellipsis",
   display: "block"
 };
-const typeStyle = {
+const typeStyle$1 = {
   fontSize: "10px",
   color: "#777",
   fontWeight: "bold",
@@ -8833,7 +8834,7 @@ const closeButtonStyle = {
   marginTop: "-4px",
   flexShrink: 0
 };
-const contentStyle = {
+const contentStyle$2 = {
   padding: "20px",
   overflowY: "auto",
   overflowX: "hidden",
@@ -9109,7 +9110,7 @@ const ResourceSummary = ({
     style: headerStyle$2,
     onClick: onToggle,
     children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toggleWrapperStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toggleWrapperStyle$2, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: labelWrapperStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: labelStyle, children: [
           label,
@@ -9141,7 +9142,7 @@ const headerStyle$2 = {
   borderLeft: `2px solid ${THEME.colors.primary}`,
   transition: "background 0.2s"
 };
-const toggleWrapperStyle$1 = {
+const toggleWrapperStyle$2 = {
   display: "flex",
   alignItems: "center",
   paddingRight: "8px"
@@ -9712,7 +9713,7 @@ const ViewGBufferList = ({ view, isExpanded, onToggle, onPreview }) => {
         style: viewHeaderStyle,
         onClick: onToggle,
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toggleWrapperStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toggleWrapperStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" }) }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", flex: 1, alignItems: "center" }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
               "View: ",
@@ -9828,7 +9829,7 @@ const viewHeaderStyle = {
   alignItems: "center",
   borderLeft: `2px solid ${THEME.colors.primary}`
 };
-const toggleWrapperStyle = {
+const toggleWrapperStyle$1 = {
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
@@ -11449,7 +11450,7 @@ const ViewPostEffectsTab = ({ view }) => {
   const { redGPUContext } = useInspectorStore();
   const { postEffectManager, rawCamera } = view;
   if (!postEffectManager) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "PostEffectManager not available" });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$2, children: "PostEffectManager not available" });
   }
   const { antialiasingManager } = redGPUContext;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
@@ -11464,7 +11465,7 @@ const ViewPostEffectsTab = ({ view }) => {
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: `Custom Effects (${postEffectManager.effectList.length})`, children: [
       postEffectManager.effectList.map((effect, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleEffect, { effect }, i)),
-      postEffectManager.effectList.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "No custom effects added." })
+      postEffectManager.effectList.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$2, children: "No custom effects added." })
     ] })
   ] });
 };
@@ -11485,7 +11486,7 @@ const CollapsibleEffect = ({ effect }) => {
     isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: effectContentStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyInspector, { target: effect }) })
   ] });
 };
-const placeholderStyle$1 = {
+const placeholderStyle$2 = {
   fontSize: "11px",
   color: "#666",
   fontStyle: "italic"
@@ -11517,7 +11518,7 @@ const ViewListView = () => {
   const [activeViewIndex, setActiveViewIndex] = reactExports.useState("0");
   const [activeDetailTab, setActiveDetailTab] = reactExports.useState("STATE");
   if (!redGPUContext) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "RedGPUContext not initialized" });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "RedGPUContext not initialized" });
   }
   const { viewList } = redGPUContext;
   const activeView = viewList[parseInt(activeViewIndex)] || viewList[0];
@@ -11530,7 +11531,7 @@ const ViewListView = () => {
     { id: "COMMANDS", label: "Commands" },
     { id: "POSTEFFECTS", label: "PostEffects" }
   ];
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$2, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: stickyHeaderStyle, children: [
       viewList.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
         TabBar,
@@ -11559,7 +11560,7 @@ const ViewListView = () => {
     ] })
   ] });
 };
-const containerStyle$1 = {
+const containerStyle$2 = {
   display: "flex",
   flexDirection: "column"
 };
@@ -11571,6 +11572,106 @@ const stickyHeaderStyle = {
 };
 const contentAreaStyle = {
   padding: "12px"
+};
+const placeholderStyle$1 = {
+  padding: "20px",
+  textAlign: "center",
+  color: "#666",
+  fontSize: "12px",
+  fontStyle: "italic"
+};
+const HierarchyItem = ({ node, depth = 0 }) => {
+  const [isExpanded, setIsExpanded] = reactExports.useState(depth < 2);
+  const hasChildren = node.children && node.children.length > 0;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginLeft: depth > 0 ? "12px" : "0" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: itemHeaderStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          onClick: () => hasChildren && setIsExpanded(!isExpanded),
+          style: {
+            ...toggleWrapperStyle,
+            visibility: hasChildren ? "visible" : "hidden"
+          },
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" })
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$1, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: nameStyle, children: node.name }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: typeStyle, children: node.type })
+      ] })
+    ] }),
+    isExpanded && hasChildren && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: childrenContainerStyle, children: node.children.map((child) => /* @__PURE__ */ jsxRuntimeExports.jsx(HierarchyItem, { node: child, depth: depth + 1 }, child.id)) })
+  ] });
+};
+const itemHeaderStyle = {
+  display: "flex",
+  alignItems: "center",
+  padding: "4px 0",
+  cursor: "default",
+  fontSize: "12px",
+  fontFamily: THEME.fontFamily
+};
+const toggleWrapperStyle = {
+  cursor: "pointer",
+  marginRight: "6px",
+  display: "flex",
+  alignItems: "center"
+};
+const contentStyle$1 = {
+  display: "flex",
+  alignItems: "baseline",
+  gap: "8px",
+  flex: 1,
+  minWidth: 0
+};
+const nameStyle = {
+  color: "#eee",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis"
+};
+const typeStyle = {
+  color: "#666",
+  fontSize: "10px",
+  fontStyle: "italic"
+};
+const childrenContainerStyle = {
+  borderLeft: "1px solid rgba(255, 255, 255, 0.1)",
+  marginLeft: "6px"
+};
+const HierarchyView = () => {
+  const hierarchy = useInspectorStore((state) => state.hierarchy);
+  const viewNames = Object.keys(hierarchy);
+  const [activeView, setActiveView] = reactExports.useState(viewNames[0] || "");
+  if (viewNames.length === 0) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "No scene hierarchy available." });
+  }
+  const tabs = viewNames.map((name) => ({ id: name, label: name }));
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
+    viewNames.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabWrapperStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      TabBar,
+      {
+        tabs,
+        activeTab: activeView || viewNames[0],
+        onTabChange: setActiveView,
+        isSticky: false
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: "Scene Tree", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HierarchyItem, { node: hierarchy[activeView || viewNames[0]] }) }) })
+  ] });
+};
+const containerStyle$1 = {
+  display: "flex",
+  flexDirection: "column"
+};
+const tabWrapperStyle = {
+  marginBottom: "12px",
+  background: "rgba(255,255,255,0.03)"
+};
+const contentStyle = {
+  padding: "0"
 };
 const placeholderStyle = {
   padding: "20px",
@@ -11587,6 +11688,8 @@ const TabContent = reactExports.memo(() => {
         /* @__PURE__ */ jsxRuntimeExports.jsx(TotalState, {}),
         /* @__PURE__ */ jsxRuntimeExports.jsx(CommandBatchStatsView, {})
       ] });
+    case "HIERARCHY":
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(HierarchyView, {}) });
     case "CONTEXT":
       return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(RedGPUContextView, {}) });
     case "VIEWS":
@@ -11609,7 +11712,8 @@ const App = () => {
   const tabs = [
     { id: "STATE", label: "State" },
     { id: "CONTEXT", label: "RedGPUContext" },
-    { id: "VIEWS", label: "ViewList" },
+    { id: "VIEWS", label: "View" },
+    { id: "HIERARCHY", label: "Scene" },
     { id: "RESOURCES", label: "Resources" }
   ];
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: panelStyle, children: [
@@ -11660,6 +11764,15 @@ const closeBtnStyle = {
   fontWeight: "bold",
   borderRadius: "4px"
 };
+const getHierarchy = (container) => {
+  const children = container.children || [];
+  return {
+    id: container.uuid || container.instanceId || Math.random().toString(),
+    name: container.name || container.constructor.name,
+    type: container.constructor.name,
+    children: children.map((child) => getHierarchy(child))
+  };
+};
 const collectStats = (redGPUContext, time) => {
   let totalNum3DGroups = 0;
   let totalNum3DObjects = 0;
@@ -11669,6 +11782,7 @@ const collectStats = (redGPUContext, time) => {
   let totalNumPoints = 0;
   let totalUsedVideoMemory = 0;
   const aggregatedBatchStats = {};
+  const hierarchy = {};
   const viewList = redGPUContext.viewList;
   const viewListLen = viewList.length;
   for (let i = 0; i < viewListLen; i++) {
@@ -11681,6 +11795,9 @@ const collectStats = (redGPUContext, time) => {
     totalNumTriangles += state.numTriangles;
     totalNumPoints += state.numPoints;
     totalUsedVideoMemory += state.usedVideoMemory;
+    if (view.scene) {
+      hierarchy[view.name || `View ${i}`] = getHierarchy(view.scene);
+    }
     if (state.commandBatchStats) {
       for (const phase in state.commandBatchStats) {
         const phaseStats = state.commandBatchStats[phase];
@@ -11764,6 +11881,7 @@ const collectStats = (redGPUContext, time) => {
     pixelRectArray: redGPUContext.sizeManager.pixelRectArray,
     // Use reference if possible
     commandBatchStats: aggregatedBatchStats,
+    hierarchy,
     resourceStats
   };
 };

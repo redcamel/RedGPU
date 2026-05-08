@@ -7,6 +7,13 @@ export interface ResourceStatusSummary {
     videoMemory: number;
 }
 
+export interface HierarchyNode {
+    id: string;
+    name: string;
+    type: string;
+    children: HierarchyNode[];
+}
+
 export interface InspectorState {
     useDebugPanel: boolean;
     redGPUContext: RedGPUContext | null;
@@ -28,6 +35,8 @@ export interface InspectorState {
     totalUsedVideoMemory: number;
     pixelRectArray: [number, number, number, number];
     commandBatchStats: CommandBatchStats | null;
+    // 계층 구조 데이터
+    hierarchy: Record<string, HierarchyNode>;
     // 리소스 통계
     resourceStats: {
         bitmapTexture: ResourceStatusSummary;
@@ -68,6 +77,7 @@ export const useInspectorStore = create<InspectorState>((set) => ({
     totalUsedVideoMemory: 0,
     pixelRectArray: [0, 0, 0, 0],
     commandBatchStats: null,
+    hierarchy: {},
     resourceStats: {
         bitmapTexture: {count: 0, videoMemory: 0},
         cubeTexture: {count: 0, videoMemory: 0},
