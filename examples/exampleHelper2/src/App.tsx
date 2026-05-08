@@ -1,33 +1,50 @@
 import React from 'react';
-import { useExampleHelperStore } from './store';
+import { useExampleHelperStore, ExampleHelperState } from './store';
 import Footer from './components/Footer';
+import TopBar from './components/TopBar';
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
  * [EN] Main application component of the example helper.
  */
 const App = () => {
-    const redGPUContext = useExampleHelperStore(state => state.redGPUContext);
+    const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
+    const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
 
     return (
         <>
+            <TopBar />
+            
             <div style={panelStyle}>
                 <div style={headerStyle}>
                     <div style={titleLabelStyle}>RedGPU Example Helper</div>
                 </div>
                 <div style={contentStyle}>
+                    {currentExample && (
+                        <div style={exampleInfoBoxStyle}>
+                            <div style={sectionTitleStyle}>Description</div>
+                            <div 
+                                style={descriptionStyle}
+                                dangerouslySetInnerHTML={{ __html: currentExample.description?.ko || currentExample.description?.en || '' }} 
+                            />
+                        </div>
+                    )}
+
                     {redGPUContext ? (
-                        <div>
-                            <div style={{color: '#fdb48d', fontWeight: 'bold'}}>Context Status</div>
-                            <div style={{marginTop: '8px', color: '#ccc', fontSize: '11px'}}>
-                                <div>Canvas: {redGPUContext.width} x {redGPUContext.height}</div>
-                                <div>DPR: {window.devicePixelRatio}</div>
-                                <div>GPU: {redGPUContext.gpuDevice.label || 'WebGPU Device'}</div>
+                        <div style={contextInfoBoxStyle}>
+                            <div style={sectionTitleStyle}>Context Status</div>
+                            <div style={{color: '#ccc', fontSize: '11px', lineHeight: '1.6'}}>
+                                <div>Canvas: <b style={{color: '#fff'}}>{redGPUContext.width} x {redGPUContext.height}</b></div>
+                                <div>DPR: <b style={{color: '#fff'}}>{window.devicePixelRatio}</b></div>
+                                <div>GPU: <b style={{color: '#fff'}}>{redGPUContext.gpuDevice.label || 'WebGPU Device'}</b></div>
                             </div>
                         </div>
                     ) : (
-                        <div>Waiting for Context...</div>
+                        <div style={{color: '#666', fontSize: '11px', fontStyle: 'italic'}}>Waiting for Context...</div>
                     )}
+                    <div>
+                        {JSON.stringify(currentExample)}
+                    </div>
                 </div>
             </div>
 
@@ -41,22 +58,21 @@ const panelStyle: React.CSSProperties = {
     position: 'fixed',
     right: 0,
     top: '52px',
-    width: '300px',
-    bottom: '50px', // Footer height
+    width: '320px',
+    bottom: '50px',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: 'rgba(17, 17, 18, 0.9)',
+    backgroundColor: 'rgba(17, 17, 18, 0.95)',
     color: 'white',
     fontFamily: 'monospace',
     zIndex: 10001,
-    boxShadow: '-5px 0 15px rgba(0,0,0,0.3)',
+    boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
     borderLeft: '1px solid rgba(255,255,255,0.05)',
-    overflow: 'hidden',
-    transition: 'right 0.3s ease'
+    overflow: 'hidden'
 };
 
 const headerStyle: React.CSSProperties = {
-    padding: '12px',
+    padding: '12px 16px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -65,17 +81,49 @@ const headerStyle: React.CSSProperties = {
 };
 
 const titleLabelStyle: React.CSSProperties = {
-    fontSize: '13px',
+    fontSize: '11px',
     fontWeight: 'bold',
-    color: '#fdb48d',
-    letterSpacing: '0.05em'
+    color: '#888',
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em'
 };
 
 const contentStyle: React.CSSProperties = {
-    padding: '16px',
+    padding: '20px',
     fontSize: '12px',
     flex: 1,
-    overflowY: 'auto'
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px'
+};
+
+const exampleInfoBoxStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
+};
+
+const contextInfoBoxStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    paddingTop: '20px',
+    borderTop: '1px solid rgba(255,255,255,0.05)'
+};
+
+const sectionTitleStyle: React.CSSProperties = {
+    fontSize: '12px',
+    color: '#fdb48d',
+    fontWeight: 'bold',
+    marginBottom: '4px'
+};
+
+const descriptionStyle: React.CSSProperties = {
+    color: '#aaa',
+    fontSize: '11px',
+    lineHeight: '1.6',
+    wordBreak: 'break-all'
 };
 
 export default App;
