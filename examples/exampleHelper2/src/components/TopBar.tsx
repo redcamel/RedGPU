@@ -8,22 +8,46 @@ import homeIcon from '../assets/icons/home.svg';
  */
 const TopBar = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
+    const topBarRightActions = useExampleHelperStore((state: ExampleHelperState) => state.topBarRightActions);
 
     return (
         <header style={containerStyle}>
             <div style={navBarStyle}>
-                <a href="../../index.html" style={homeButtonStyle}>
-                    <img
-                        src={homeIcon}
-                        style={homeIconStyle}
-                        alt="HOME"
-                    />
-                </a>
-                <div style={titleBoxStyle}>
-                    <span style={titleLabelStyle}>TITLE</span>
-                    <span style={titleValueStyle}>
-                      {currentExample ? currentExample.name : 'empty example name'}
-                    </span>
+                <div style={leftSectionStyle}>
+                    <a href="../../index.html" style={homeButtonStyle}>
+                        <img
+                            src={homeIcon}
+                            style={homeIconStyle}
+                            alt="HOME"
+                        />
+                    </a>
+                    <div style={titleBoxStyle}>
+                        <span style={titleLabelStyle}>TITLE</span>
+                        <span style={titleValueStyle}>
+                          {currentExample ? currentExample.name : 'empty example name'}
+                        </span>
+                    </div>
+                </div>
+
+                <div style={rightSectionStyle}>
+                    {topBarRightActions.map((action) => (
+                        <button
+                            key={action.id}
+                            style={{
+                                ...actionButtonStyle,
+                                width: action.icon ? '52px' : 'auto',
+                                padding: action.icon ? '0' : '0 20px'
+                            }}
+                            onClick={action.onClick}
+                            title={action.label}
+                        >
+                            {action.icon ? (
+                                <img src={action.icon} style={actionIconStyle} alt={action.label} />
+                            ) : (
+                                action.label
+                            )}
+                        </button>
+                    ))}
                 </div>
             </div>
         </header>
@@ -50,8 +74,20 @@ const navBarStyle: React.CSSProperties = {
     height: '100%',
     width: '100%',
     alignItems: 'stretch',
-    gap: '1px',
+    justifyContent: 'space-between',
     backgroundColor: 'rgba(255, 255, 255, 0.05)' // For the 1px gap line effect
+};
+
+const leftSectionStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'stretch',
+    gap: '1px'
+};
+
+const rightSectionStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'stretch',
+    gap: '1px'
 };
 
 const homeButtonStyle: React.CSSProperties = {
@@ -93,6 +129,27 @@ const titleValueStyle: React.CSSProperties = {
     fontSize: '11px',
     color: '#ccc',
     fontWeight: 'bold'
+};
+
+const actionButtonStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0 20px',
+    height: '100%',
+    backgroundColor: '#111112',
+    color: '#fdb48d',
+    border: 'none',
+    fontSize: '11px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s, color 0.2s',
+    letterSpacing: '0.05em'
+};
+
+const actionIconStyle: React.CSSProperties = {
+    width: '18px',
+    height: '18px'
 };
 
 export default TopBar;

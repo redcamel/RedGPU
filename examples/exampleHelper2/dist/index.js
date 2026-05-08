@@ -7168,10 +7168,19 @@ const useExampleHelperStore = create((set) => ({
   currentExample: null,
   language: typeof navigator !== "undefined" && navigator.language.startsWith("ko") ? "ko" : "en",
   showSourceModal: false,
+  topBarRightActions: [],
   setRedGPUContext: (value) => set({ redGPUContext: value }),
   setCurrentExample: (value) => set({ currentExample: value }),
   setLanguage: (value) => set({ language: value }),
-  setShowSourceModal: (value) => set({ showSourceModal: value })
+  setShowSourceModal: (value) => set({ showSourceModal: value }),
+  addTopBarRightAction: (action) => set((state) => {
+    const filtered = state.topBarRightActions.filter((a) => a.id !== action.id);
+    return { topBarRightActions: [...filtered, action] };
+  }),
+  removeTopBarRightAction: (id2) => set((state) => ({
+    topBarRightActions: state.topBarRightActions.filter((a) => a.id !== id2)
+  })),
+  clearTopBarRightActions: () => set({ topBarRightActions: [] })
 }));
 const githubIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MzMwNDE5NjAwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MzMwNDE5NjEwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDozMzA0MTk1RTBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDozMzA0MTk1RjBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Ppk8MxEAAAy3SURBVHja5Ft7VJRl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";
 const Footer = () => {
@@ -7246,19 +7255,36 @@ const iconLinkStyle = {
 const homeIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23fff'%3e%3cpath%20d='M341.8%2072.6C329.5%2061.2%20310.5%2061.2%20298.3%2072.6L74.3%20280.6C64.7%20289.6%2061.5%20303.5%2066.3%20315.7C71.1%20327.9%2082.8%20336%2096%20336L112%20336L112%20512C112%20547.3%20140.7%20576%20176%20576L464%20576C499.3%20576%20528%20547.3%20528%20512L528%20336L544%20336C557.2%20336%20569%20327.9%20573.8%20315.7C578.6%20303.5%20575.4%20289.5%20565.8%20280.6L341.8%2072.6zM304%20384L336%20384C362.5%20384%20384%20405.5%20384%20432L384%20528L256%20528L256%20432C256%20405.5%20277.5%20384%20304%20384z'/%3e%3c/svg%3e";
 const TopBar = () => {
   const currentExample = useExampleHelperStore((state) => state.currentExample);
+  const topBarRightActions = useExampleHelperStore((state) => state.topBarRightActions);
   return /* @__PURE__ */ jsxRuntimeExports.jsx("header", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: navBarStyle, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "../../index.html", style: homeButtonStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "img",
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: leftSectionStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "../../index.html", style: homeButtonStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "img",
+        {
+          src: homeIcon,
+          style: homeIconStyle,
+          alt: "HOME"
+        }
+      ) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: titleBoxStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleLabelStyle$1, children: "TITLE" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleValueStyle, children: currentExample ? currentExample.name : "empty example name" })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: rightSectionStyle, children: topBarRightActions.map((action) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
       {
-        src: homeIcon,
-        style: homeIconStyle,
-        alt: "HOME"
-      }
-    ) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: titleBoxStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleLabelStyle$1, children: "TITLE" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleValueStyle, children: currentExample ? currentExample.name : "empty example name" })
-    ] })
+        style: {
+          ...actionButtonStyle,
+          width: action.icon ? "52px" : "auto",
+          padding: action.icon ? "0" : "0 20px"
+        },
+        onClick: action.onClick,
+        title: action.label,
+        children: action.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: action.icon, style: actionIconStyle, alt: action.label }) : action.label
+      },
+      action.id
+    )) })
   ] }) });
 };
 const containerStyle$1 = {
@@ -7279,9 +7305,19 @@ const navBarStyle = {
   height: "100%",
   width: "100%",
   alignItems: "stretch",
-  gap: "1px",
+  justifyContent: "space-between",
   backgroundColor: "rgba(255, 255, 255, 0.05)"
   // For the 1px gap line effect
+};
+const leftSectionStyle = {
+  display: "flex",
+  alignItems: "stretch",
+  gap: "1px"
+};
+const rightSectionStyle = {
+  display: "flex",
+  alignItems: "stretch",
+  gap: "1px"
 };
 const homeButtonStyle = {
   display: "flex",
@@ -7318,6 +7354,25 @@ const titleValueStyle = {
   fontSize: "11px",
   color: "#ccc",
   fontWeight: "bold"
+};
+const actionButtonStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "0 20px",
+  height: "100%",
+  backgroundColor: "#111112",
+  color: "#fdb48d",
+  border: "none",
+  fontSize: "11px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "background-color 0.2s, color 0.2s",
+  letterSpacing: "0.05em"
+};
+const actionIconStyle = {
+  width: "18px",
+  height: "18px"
 };
 const Description = () => {
   const currentExample = useExampleHelperStore((state) => state.currentExample);
@@ -7533,8 +7588,35 @@ const codeStyle = {
   textShadow: "none",
   color: "#ccc"
 };
+const debugIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3cpath%20d='M224%20160C224%20107%20267%2064%20320%2064C373%2064%20416%20107%20416%20160L416%20163.6C416%20179.3%20403.3%20192%20387.6%20192L252.5%20192C236.8%20192%20224.1%20179.3%20224.1%20163.6L224.1%20160zM569.6%20172.8C580.2%20186.9%20577.3%20207%20563.2%20217.6L465.4%20290.9C470.7%20299.8%20474.7%20309.6%20477.2%20320L576%20320C593.7%20320%20608%20334.3%20608%20352C608%20369.7%20593.7%20384%20576%20384L480%20384L480%20416C480%20418.6%20479.9%20421.3%20479.8%20423.9L563.2%20486.4C577.3%20497%20580.2%20517.1%20569.6%20531.2C559%20545.3%20538.9%20548.2%20524.8%20537.6L461.7%20490.3C438.5%20534.5%20395.2%20566.5%20344%20574.2L344%20344C344%20330.7%20333.3%20320%20320%20320C306.7%20320%20296%20330.7%20296%20344L296%20574.2C244.8%20566.5%20201.5%20534.5%20178.3%20490.3L115.2%20537.6C101.1%20548.2%2081%20545.3%2070.4%20531.2C59.8%20517.1%2062.7%20497%2076.8%20486.4L160.2%20423.9C160.1%20421.3%20160%20418.7%20160%20416L160%20384L64%20384C46.3%20384%2032%20369.7%2032%20352C32%20334.3%2046.3%20320%2064%20320L162.8%20320C165.3%20309.6%20169.3%20299.8%20174.6%20290.9L76.8%20217.6C62.7%20207%2059.8%20186.9%2070.4%20172.8C81%20158.7%20101.1%20155.8%20115.2%20166.4L224%20248C236.3%20242.9%20249.8%20240%20264%20240L376%20240C390.2%20240%20403.7%20242.8%20416%20248L524.8%20166.4C538.9%20155.8%20559%20158.7%20569.6%20172.8z'/%3e%3c/svg%3e";
 const App = () => {
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
+  const addTopBarRightAction = useExampleHelperStore((state) => state.addTopBarRightAction);
+  reactExports.useEffect(() => {
+    if (redGPUContext) {
+      const initInspector = async () => {
+        try {
+          const { default: RedGPUInspector } = await import("./index-BoxDaw-S.js");
+          if (!window.redGPUInspector) {
+            window.redGPUInspector = new RedGPUInspector(redGPUContext);
+          }
+          addTopBarRightAction({
+            id: "debug-toggle",
+            label: "DEBUG",
+            icon: debugIcon,
+            onClick: () => {
+              if (window.redGPUInspector) {
+                window.redGPUInspector.useDebugPanel = !window.redGPUInspector.useDebugPanel;
+              }
+            }
+          });
+        } catch (e) {
+          console.error("Failed to load Inspector:", e);
+        }
+      };
+      initInspector();
+    }
+  }, [redGPUContext, addTopBarRightAction]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(TopBar, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Description, {}),

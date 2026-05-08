@@ -50,7 +50,7 @@ const panelStyle: React.CSSProperties = {
     backgroundColor: 'rgba(0, 0, 0, 0.9)',
     color: 'white',
     fontFamily: 'monospace',
-    zIndex: 10000,
+    zIndex: 100000,
     boxShadow: '0 0 20px rgba(0,0,0,0.5)',
     borderTopRightRadius: '8px',
     overflow: 'hidden'

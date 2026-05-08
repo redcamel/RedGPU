@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from './store';
 import Footer from './components/Footer';
 import TopBar from './components/TopBar';
 import Description from './components/Description';
 import SourceModal from './components/SourceModal';
+import debugIcon from './assets/icons/debug.svg';
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -11,6 +12,36 @@ import SourceModal from './components/SourceModal';
  */
 const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
+    const addTopBarRightAction = useExampleHelperStore((state: ExampleHelperState) => state.addTopBarRightAction);
+
+    // Inspector Initialization & Debug Button
+    useEffect(() => {
+        if (redGPUContext) {
+            const initInspector = async () => {
+                try {
+                    // @ts-ignore
+                    const { default: RedGPUInspector } = await import('../../../inspector/dist/index.js');
+                    if (!window.redGPUInspector) {
+                        window.redGPUInspector = new RedGPUInspector(redGPUContext);
+                    }
+
+                    addTopBarRightAction({
+                        id: 'debug-toggle',
+                        label: 'DEBUG',
+                        icon: debugIcon,
+                        onClick: () => {
+                            if (window.redGPUInspector) {
+                                window.redGPUInspector.useDebugPanel = !window.redGPUInspector.useDebugPanel;
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error('Failed to load Inspector:', e);
+                }
+            };
+            initInspector();
+        }
+    }, [redGPUContext, addTopBarRightAction]);
 
     return (
         <>
