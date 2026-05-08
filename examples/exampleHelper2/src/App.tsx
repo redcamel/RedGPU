@@ -2,6 +2,7 @@ import React from 'react';
 import { useExampleHelperStore, ExampleHelperState } from './store';
 import Footer from './components/Footer';
 import TopBar from './components/TopBar';
+import Description from './components/Description';
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -9,27 +10,17 @@ import TopBar from './components/TopBar';
  */
 const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
-    const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
 
     return (
         <>
             <TopBar />
+            <Description />
             
             <div style={panelStyle}>
                 <div style={headerStyle}>
                     <div style={titleLabelStyle}>RedGPU Example Helper</div>
                 </div>
                 <div style={contentStyle}>
-                    {currentExample && (
-                        <div style={exampleInfoBoxStyle}>
-                            <div style={sectionTitleStyle}>Description</div>
-                            <div 
-                                style={descriptionStyle}
-                                dangerouslySetInnerHTML={{ __html: currentExample.description?.ko || currentExample.description?.en || '' }} 
-                            />
-                        </div>
-                    )}
-
                     {redGPUContext ? (
                         <div style={contextInfoBoxStyle}>
                             <div style={sectionTitleStyle}>Context Status</div>
@@ -42,9 +33,6 @@ const App = () => {
                     ) : (
                         <div style={{color: '#666', fontSize: '11px', fontStyle: 'italic'}}>Waiting for Context...</div>
                     )}
-                    <div>
-                        {JSON.stringify(currentExample)}
-                    </div>
                 </div>
             </div>
 
@@ -57,7 +45,7 @@ const App = () => {
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
     right: 0,
-    top: '52px',
+    top: '352px',
     width: '320px',
     bottom: '50px',
     display: 'flex',

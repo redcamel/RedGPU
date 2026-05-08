@@ -8,8 +8,10 @@ import { ExampleItem } from './types/example';
 export interface ExampleHelperState {
     redGPUContext: RedGPUContext | null;
     currentExample: ExampleItem | null;
+    language: 'ko' | 'en';
     setRedGPUContext: (value: RedGPUContext) => void;
     setCurrentExample: (value: ExampleItem | null) => void;
+    setLanguage: (value: 'ko' | 'en') => void;
 }
 
 /**
@@ -18,6 +20,8 @@ export interface ExampleHelperState {
 export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     redGPUContext: null,
     currentExample: null,
+    language: navigator.language.startsWith('ko') ? 'ko' : 'en',
     setRedGPUContext: (value) => set({redGPUContext: value}),
     setCurrentExample: (value) => set({currentExample: value}),
+    setLanguage: (value) => set({language: value}),
 }));

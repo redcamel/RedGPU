@@ -7166,8 +7166,10 @@ const create = (createState) => createState ? createImpl(createState) : createIm
 const useExampleHelperStore = create((set) => ({
   redGPUContext: null,
   currentExample: null,
+  language: navigator.language.startsWith("ko") ? "ko" : "en",
   setRedGPUContext: (value) => set({ redGPUContext: value }),
-  setCurrentExample: (value) => set({ currentExample: value })
+  setCurrentExample: (value) => set({ currentExample: value }),
+  setLanguage: (value) => set({ language: value })
 }));
 const Footer = () => {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: footerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerLeftStyle, children: [
@@ -7207,7 +7209,7 @@ const iconLinkStyle = {
 };
 const TopBar = () => {
   const currentExample = useExampleHelperStore((state) => state.currentExample);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("header", { style: containerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: navBarStyle, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("header", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: navBarStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "../../index.html", style: homeButtonStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
       "img",
       {
@@ -7222,7 +7224,7 @@ const TopBar = () => {
     ] })
   ] }) });
 };
-const containerStyle = {
+const containerStyle$1 = {
   position: "fixed",
   top: 0,
   left: 0,
@@ -7280,48 +7282,96 @@ const titleValueStyle = {
   color: "#ccc",
   fontWeight: "bold"
 };
+const Description = () => {
+  const { currentExample, language, setLanguage } = useExampleHelperStore();
+  if (!currentExample || !currentExample.description) {
+    return null;
+  }
+  const description = currentExample.description[language] || currentExample.description["en"] || "";
+  if (!description) return null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { dangerouslySetInnerHTML: { __html: description } }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        style: toggleButtonStyle,
+        onClick: () => setLanguage(language === "ko" ? "en" : "ko"),
+        children: language === "ko" ? "ENGLISH" : "한국어"
+      }
+    )
+  ] });
+};
+const containerStyle = {
+  position: "fixed",
+  top: "52px",
+  left: 0,
+  right: 0,
+  backgroundColor: "transparent",
+  padding: "12px 20px",
+  zIndex: 10002,
+  display: "flex",
+  flexDirection: "column",
+  // 수직 배치로 변경
+  alignItems: "flex-start",
+  // 왼쪽 정렬
+  justifyContent: "flex-start",
+  gap: "10px",
+  // 글과 버튼 사이 간격 축소
+  pointerEvents: "none"
+};
+const contentStyle$1 = {
+  fontSize: "12px",
+  color: "#eee",
+  lineHeight: "1.6",
+  maxWidth: "800px",
+  wordBreak: "keep-all",
+  textShadow: "1px 1px 2px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)",
+  pointerEvents: "auto"
+};
+const toggleButtonStyle = {
+  backgroundColor: "rgba(255, 255, 255, 0.1)",
+  // 배경 투명도 조정
+  color: "#ccc",
+  border: "1px solid rgba(255, 255, 255, 0.2)",
+  padding: "3px 10px",
+  fontSize: "9px",
+  // 버튼 크기 살짝 축소
+  fontWeight: "bold",
+  cursor: "pointer",
+  borderRadius: "4px",
+  flexShrink: 0,
+  transition: "all 0.2s",
+  pointerEvents: "auto",
+  backdropFilter: "blur(4px)"
+};
 const App = () => {
-  var _a, _b;
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
-  const currentExample = useExampleHelperStore((state) => state.currentExample);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(TopBar, {}),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Description, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: panelStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: headerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleLabelStyle, children: "RedGPU Example Helper" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle, children: [
-        currentExample && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: exampleInfoBoxStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Description" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              style: descriptionStyle,
-              dangerouslySetInnerHTML: { __html: ((_a = currentExample.description) == null ? void 0 : _a.ko) || ((_b = currentExample.description) == null ? void 0 : _b.en) || "" }
-            }
-          )
-        ] }),
-        redGPUContext ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contextInfoBoxStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Context Status" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { color: "#ccc", fontSize: "11px", lineHeight: "1.6" }, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              "Canvas: ",
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { style: { color: "#fff" }, children: [
-                redGPUContext.width,
-                " x ",
-                redGPUContext.height
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              "DPR: ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fff" }, children: window.devicePixelRatio })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-              "GPU: ",
-              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fff" }, children: redGPUContext.gpuDevice.label || "WebGPU Device" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle, children: redGPUContext ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contextInfoBoxStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Context Status" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { color: "#ccc", fontSize: "11px", lineHeight: "1.6" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            "Canvas: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { style: { color: "#fff" }, children: [
+              redGPUContext.width,
+              " x ",
+              redGPUContext.height
             ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            "DPR: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fff" }, children: window.devicePixelRatio })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            "GPU: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fff" }, children: redGPUContext.gpuDevice.label || "WebGPU Device" })
           ] })
-        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "#666", fontSize: "11px", fontStyle: "italic" }, children: "Waiting for Context..." }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: JSON.stringify(currentExample) })
-      ] })
+        ] })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "#666", fontSize: "11px", fontStyle: "italic" }, children: "Waiting for Context..." }) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Footer, {})
   ] });
@@ -7329,7 +7379,7 @@ const App = () => {
 const panelStyle = {
   position: "fixed",
   right: 0,
-  top: "52px",
+  top: "352px",
   width: "320px",
   bottom: "50px",
   display: "flex",
@@ -7366,11 +7416,6 @@ const contentStyle = {
   flexDirection: "column",
   gap: "24px"
 };
-const exampleInfoBoxStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "8px"
-};
 const contextInfoBoxStyle = {
   display: "flex",
   flexDirection: "column",
@@ -7383,12 +7428,6 @@ const sectionTitleStyle = {
   color: "#fdb48d",
   fontWeight: "bold",
   marginBottom: "4px"
-};
-const descriptionStyle = {
-  color: "#aaa",
-  fontSize: "11px",
-  lineHeight: "1.6",
-  wordBreak: "break-all"
 };
 const ExampleList = [
   {
