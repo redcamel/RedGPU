@@ -11,7 +11,7 @@ const StatItem = memo(({label, value, color = THEME.colors.value, isBold = false
     isBold?: boolean
 }) => {
     const isZero = value === 0 || value === '0';
-    
+
     return (
         <div style={{...statItemStyle, opacity: isZero ? 0.3 : 1}}>
             <span style={COMMON_STYLES.label}>{label}</span>

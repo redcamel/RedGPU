@@ -1,5 +1,4 @@
 import React from 'react';
-import Section from "../common/Section";
 import StatItem from "../common/StatItem";
 import View3D from "@redgpu/src/display/view/View3D";
 
@@ -14,7 +13,13 @@ const ToneMappingView = ({view, showLabel = true}: { view: View3D, showLabel?: b
     return (
         <>
             {showLabel && (
-                <div style={{fontSize: '10px', color: '#666', fontWeight: 'bold', marginBottom: '4px', marginTop: '4px'}}>
+                <div style={{
+                    fontSize: '10px',
+                    color: '#666',
+                    fontWeight: 'bold',
+                    marginBottom: '4px',
+                    marginTop: '4px'
+                }}>
                     TONE MAPPING
                 </div>
             )}

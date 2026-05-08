@@ -1,6 +1,5 @@
 import React from 'react';
 import Section from "../common/Section";
-import StatItem from "../common/StatItem";
 import StatBoolItem from "../common/StatBoolItem";
 import StatRGBAItem from "../common/StatRGBAItem";
 import Scene from "@redgpu/src/display/scene/Scene";

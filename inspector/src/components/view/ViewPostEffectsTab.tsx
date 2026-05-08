@@ -37,8 +37,8 @@ const ViewPostEffectsTab = ({view}: { view: View3D }) => {
                 <StatBoolItem label="useSSR" value={postEffectManager.useSSR}/>
                 <StatBoolItem label="Auto Exposure" value={rawCamera.useAutoExposure}/>
                 <StatBoolItem label="Sky Atmosphere" value={!!view.skyAtmosphere}/>
-                <Divider />
-                <ToneMappingView view={view} />
+                <Divider/>
+                <ToneMappingView view={view}/>
             </Section>
 
             <Section title={`Custom Effects (${postEffectManager.effectList.length})`}>

@@ -2,7 +2,6 @@ import React from 'react';
 import Section from "../common/Section";
 import StatItem from "../common/StatItem";
 import StatBoolItem from "../common/StatBoolItem";
-import StatRGBAItem from "../common/StatRGBAItem";
 import Divider from "../common/Divider";
 import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";

@@ -5,8 +5,8 @@ import React from 'react';
 export const THEME = {
     fontFamily: '',
     fontSize: {
-        title: '13px',
-        content: '12px',
+        title: '12px',
+        content: '11px',
         small: '11px'
     },
     colors: {
