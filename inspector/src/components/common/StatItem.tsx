@@ -9,18 +9,22 @@ const StatItem = memo(({label, value, color = THEME.colors.value, isBold = false
     value: any,
     color?: string,
     isBold?: boolean
-}) => (
-    <div style={statItemStyle}>
-        <span style={COMMON_STYLES.label}>{label}</span>
-        <span style={{
-            ...COMMON_STYLES.value,
-            color,
-            fontWeight: isBold ? 'bold' : 'normal'
-        }}>
-            {value !== undefined && value !== null ? value : 'N/A'}
-        </span>
-    </div>
-));
+}) => {
+    const isZero = value === 0 || value === '0';
+    
+    return (
+        <div style={{...statItemStyle, opacity: isZero ? 0.3 : 1}}>
+            <span style={COMMON_STYLES.label}>{label}</span>
+            <span style={{
+                ...COMMON_STYLES.value,
+                color,
+                fontWeight: isBold ? 'bold' : 'normal'
+            }}>
+                {value !== undefined && value !== null ? value : 'N/A'}
+            </span>
+        </div>
+    );
+});
 
 const statItemStyle: React.CSSProperties = {
     display: 'flex',

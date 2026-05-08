@@ -18,9 +18,15 @@ const CommandBatchStatsView = ({statsProp}: { statsProp?: CommandBatchStats | nu
 
     return (
         <>
-            {Object.entries(commandBatchStats).map(([phase, stats]) => (
-                <Section key={phase} title={`Command Batch: ${phase}`}>
-                    <StatItem label="Command Buffers" value={stats['Command Buffers']}/>
+            {Object.entries(commandBatchStats).map(([phase, stats]) => {
+                const totalPasses = stats['Render Passes'].count + stats['Compute Passes'].count;
+                return (
+                    <Section 
+                        key={phase} 
+                        title={`Batch: ${phase}`}
+                        subTitle={`${stats['Command Buffers']} Buffers, ${totalPasses} Passes`}
+                    >
+                        <StatItem label="Command Buffers" value={stats['Command Buffers']}/>
                     <StatItem label="Render Passes" value={stats['Render Passes'].count}/>
                     {stats['Render Passes'].list.length > 0 && (
                         <div style={listStyle}>
@@ -39,7 +45,7 @@ const CommandBatchStatsView = ({statsProp}: { statsProp?: CommandBatchStats | nu
                     )}
                     <StatItem label="Raw Usages" value={stats['Raw Usages']}/>
                 </Section>
-            ))}
+            )})}
         </>
     );
 };
