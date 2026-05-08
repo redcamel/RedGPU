@@ -2,12 +2,12 @@ import React from 'react';
 import Section from "../common/Section";
 import StatItem from "../common/StatItem";
 import StatBoolItem from "../common/StatBoolItem";
-import StatRGBAItem from "../common/StatRGBAItem";
 import Divider from "../common/Divider";
 import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";
 import AController from "@redgpu/src/camera/core/AController";
 import {formatNumber} from "../../utils/format";
+import SceneInfoView from "../scene/SceneInfoView";
 
 /**
  * [KO] 뷰의 렌더링 상태 및 기본 설정을 표시하는 탭 컴포넌트입니다.
@@ -35,7 +35,6 @@ const ViewStateTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: nu
     } = renderViewStateData;
 
     const {x, y, width, height, pixelRectArray} = viewportSize;
-    const {backgroundColor, useBackgroundColor} = scene;
 
     return (
         <>
@@ -61,11 +60,7 @@ const ViewStateTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: nu
                 <StatItem label="pixelRectArray" value={`[${pixelRectArray.join(', ')}]`}/>
             </Section>
 
-            <Section title={'Scene'}>
-                <StatItem label="name" value={scene.name}/>
-                <StatBoolItem label="useBackgroundColor" value={useBackgroundColor}/>
-                <StatRGBAItem label="backgroundColor" value={backgroundColor.rgba}/>
-            </Section>
+            <SceneInfoView scene={scene}/>
 
 
             {camera && (camera instanceof AController || camera.constructor.name.includes('Controller') || ('camera' in camera && (camera as any).camera !== camera)) && (

@@ -5,7 +5,7 @@ import RedGPUContextView from './context/RedGPUContextView';
 import CommandBatchStatsView from './state/CommandBatchStatsView';
 import ResourcesView from "./resource/ResourcesView";
 import ViewListView from "./view/ViewListView";
-import HierarchyView from "./hierarchy/HierarchyView";
+import SceneView from "./scene/SceneView";
 
 /**
  * [KO] 현재 선택된 탭에 해당하는 컨텐츠를 렌더링하는 컴포넌트입니다.
@@ -23,9 +23,7 @@ const TabContent = memo(() => {
             );
         case 'HIERARCHY':
             return (
-                <Container>
-                    <HierarchyView/>
-                </Container>
+                <SceneView/>
             );
         case 'CONTEXT':
             return (
