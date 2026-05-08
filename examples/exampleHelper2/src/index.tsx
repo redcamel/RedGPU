@@ -1,6 +1,8 @@
+import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { useExampleHelperStore } from './store';
 
 /**
  * RedGPUExampleHelper
@@ -9,7 +11,8 @@ class RedGPUExampleHelper {
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
 
-    constructor() {
+    constructor(redGPUContext: RedGPUContext) {
+        useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
         this.init();
     }
 
