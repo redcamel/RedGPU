@@ -12,11 +12,12 @@ const ToneMappingView = ({view}: { view: View3D }) => {
     if (!toneMappingManager) return null;
 
     return (
-        <Section title={`ToneMapping`}>
+        <>
+            <div style={{fontSize: '10px', color: '#666', fontWeight: 'bold', marginBottom: '4px', marginTop: '4px'}}>TONE MAPPING</div>
             <StatItem label="Mode" value={toneMappingManager.mode}/>
             <StatItem label="Contrast" value={toneMappingManager.contrast.toFixed(2)}/>
             <StatItem label="Brightness" value={toneMappingManager.brightness.toFixed(2)}/>
-        </Section>
+        </>
     );
 };
 

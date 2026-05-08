@@ -63,10 +63,10 @@ const ViewStateTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: nu
             </Section>
 
             <SceneInfoView scene={scene}/>
-
-            <ToneMappingView view={view}/>
+            <ToneMappingView view={view} />
 
             {camera && (camera instanceof AController || camera.constructor.name.includes('Controller') || ('camera' in camera && (camera as any).camera !== camera)) && (
+
                 <Section title={'Controller'}>
                     <StatItem label="name" value={camera.name}/>
                     {camera['distance'] !== undefined &&

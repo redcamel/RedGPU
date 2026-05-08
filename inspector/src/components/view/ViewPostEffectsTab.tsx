@@ -7,6 +7,8 @@ import formatBytes from "@redgpu/src/utils/formatBytes";
 import View3D from "@redgpu/src/display/view/View3D";
 import PropertyInspector from "../common/PropertyInspector";
 import ToggleButton from "../common/ToggleButton";
+import Divider from "../common/Divider";
+import ToneMappingView from "./ToneMappingView";
 
 /**
  * [KO] 뷰의 후처리 효과 설정을 표시하는 탭 컴포넌트입니다.
@@ -35,6 +37,8 @@ const ViewPostEffectsTab = ({view}: { view: View3D }) => {
                 <StatBoolItem label="useSSR" value={postEffectManager.useSSR}/>
                 <StatBoolItem label="Auto Exposure" value={rawCamera.useAutoExposure}/>
                 <StatBoolItem label="Sky Atmosphere" value={!!view.skyAtmosphere}/>
+                <Divider />
+                <ToneMappingView view={view} />
             </Section>
 
             <Section title={`Custom Effects (${postEffectManager.effectList.length})`}>
