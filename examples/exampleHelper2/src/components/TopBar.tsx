@@ -1,5 +1,6 @@
 import React from 'react';
-import { useExampleHelperStore, ExampleHelperState } from '../store';
+import {ExampleHelperState, useExampleHelperStore} from '../store';
+import homeIcon from '../assets/icons/home.svg';
 
 /**
  * [KO] 예제 헬퍼의 상단 네비게이션 바 컴포넌트입니다.
@@ -13,7 +14,7 @@ const TopBar = () => {
             <div style={navBarStyle}>
                 <a href="../../index.html" style={homeButtonStyle}>
                     <img
-                        src="https://redcamel.github.io/RedGPU/examples/assets/icons/home.svg"
+                        src={homeIcon}
                         style={homeIconStyle}
                         alt="HOME"
                     />

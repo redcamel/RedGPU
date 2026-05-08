@@ -1,8 +1,9 @@
 import React from 'react';
-import { useExampleHelperStore, ExampleHelperState } from './store';
+import {ExampleHelperState, useExampleHelperStore} from './store';
 import Footer from './components/Footer';
 import TopBar from './components/TopBar';
 import Description from './components/Description';
+import SourceModal from './components/SourceModal';
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -13,9 +14,9 @@ const App = () => {
 
     return (
         <>
-            <TopBar />
-            <Description />
-            
+            <TopBar/>
+            <Description/>
+
             <div style={panelStyle}>
                 <div style={headerStyle}>
                     <div style={titleLabelStyle}>RedGPU Example Helper</div>
@@ -25,9 +26,11 @@ const App = () => {
                         <div style={contextInfoBoxStyle}>
                             <div style={sectionTitleStyle}>Context Status</div>
                             <div style={{color: '#ccc', fontSize: '11px', lineHeight: '1.6'}}>
-                                <div>Canvas: <b style={{color: '#fff'}}>{redGPUContext.width} x {redGPUContext.height}</b></div>
+                                <div>Canvas: <b
+                                    style={{color: '#fff'}}>{redGPUContext.width} x {redGPUContext.height}</b></div>
                                 <div>DPR: <b style={{color: '#fff'}}>{window.devicePixelRatio}</b></div>
-                                <div>GPU: <b style={{color: '#fff'}}>{redGPUContext.gpuDevice.label || 'WebGPU Device'}</b></div>
+                                <div>GPU: <b
+                                    style={{color: '#fff'}}>{redGPUContext.gpuDevice.label || 'WebGPU Device'}</b></div>
                             </div>
                         </div>
                     ) : (
@@ -36,7 +39,8 @@ const App = () => {
                 </div>
             </div>
 
-            <Footer />
+            <Footer/>
+            <SourceModal/>
         </>
     );
 };

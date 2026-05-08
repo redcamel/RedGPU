@@ -1,5 +1,5 @@
-import { ExampleList } from '../data/exampleList';
-import { ExampleItem } from '../types/example';
+import {ExampleList} from '../data/exampleList';
+import {ExampleItem} from '../types/example';
 
 /**
  * [KO] 현재 URL 경로를 기반으로 예제 리스트에서 해당 예제 정보를 찾습니다.

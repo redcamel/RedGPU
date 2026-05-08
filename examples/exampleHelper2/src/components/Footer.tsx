@@ -1,17 +1,30 @@
 import React from 'react';
+import {ExampleHelperState, useExampleHelperStore} from '../store';
+import githubIcon from '../assets/github.png';
 
 /**
  * [KO] 예제 헬퍼의 하단 푸터 컴포넌트입니다.
  * [EN] Bottom footer component of the example helper.
  */
 const Footer = () => {
+    const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
+
     return (
         <div style={footerStyle}>
             <div style={footerLeftStyle}>
-                <span style={{color: '#b19898', fontSize: '11px'}}>This project is maintained by <b style={{color: '#fdb48d'}}>RedCamel</b></span>
+                <span style={{color: '#b19898', fontSize: '11px'}}>This project is maintained by <b
+                    style={{color: '#fdb48d'}}>RedCamel</b></span>
                 <a href="https://github.com/redcamel/RedGPU" target="_blank" rel="noreferrer" style={iconLinkStyle}>
-                    <img src="https://redcamel.github.io/RedGPU/examples/assets/github.png" width="16" height="16" alt="GitHub" />
+                    <img src={githubIcon} width="16" height="16" alt="GitHub"/>
                 </a>
+            </div>
+            <div style={footerRightStyle}>
+                <button
+                    style={sourceButtonStyle}
+                    onClick={() => setShowSourceModal(true)}
+                >
+                    SOURCE
+                </button>
             </div>
         </div>
     );
@@ -39,6 +52,24 @@ const footerLeftStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px'
+};
+
+const footerRightStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center'
+};
+
+const sourceButtonStyle: React.CSSProperties = {
+    backgroundColor: '#333',
+    color: '#fff',
+    border: 'none',
+    padding: '6px 16px',
+    fontSize: '11px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    borderRadius: '4px',
+    transition: 'background-color 0.2s',
+    letterSpacing: '0.05em'
 };
 
 const iconLinkStyle: React.CSSProperties = {

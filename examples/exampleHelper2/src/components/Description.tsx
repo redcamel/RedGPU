@@ -1,12 +1,14 @@
 import React from 'react';
-import { useExampleHelperStore, ExampleHelperState } from '../store';
+import {ExampleHelperState, useExampleHelperStore} from '../store';
 
 /**
  * [KO] 예제 설명을 표시하는 컴포넌트입니다. 언어 토글 버튼을 통해 한국어/영어 설명을 전환할 수 있습니다.
  * [EN] Component that displays example descriptions. Switch between KO/EN descriptions via language toggle button.
  */
 const Description = () => {
-    const { currentExample, language, setLanguage } = useExampleHelperStore();
+    const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
+    const language = useExampleHelperStore((state: ExampleHelperState) => state.language);
+    const setLanguage = useExampleHelperStore((state: ExampleHelperState) => state.setLanguage);
 
     if (!currentExample || !currentExample.description) {
         return null;
@@ -18,7 +20,7 @@ const Description = () => {
     return (
         <div style={containerStyle}>
             <div style={contentStyle}>
-                <span dangerouslySetInnerHTML={{ __html: description }} />
+                <span dangerouslySetInnerHTML={{__html: description}}/>
             </div>
             <button
                 style={toggleButtonStyle}
