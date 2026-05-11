@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
-import {Pane, FolderApi} from 'tweakpane';
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
+import {addColorAlphaInputs, parseSize} from "../../utils/guiUtils";
 
 /**
  * [KO] RedGPUContext 관련 설정을 tweakpane에 추가하는 컴포넌트입니다.
@@ -20,19 +20,8 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
 
         // Background Color
         if (redGPUContext.backgroundColor) {
-            const bg = redGPUContext.backgroundColor;
-            const colorProxy = {
-                get backgroundColor() {
-                    return bg.hex;
-                },
-                set backgroundColor(v: string) {
-                    bg.setColorByHEX(v);
-                }
-            };
-            contextFolder.addInput(colorProxy, 'backgroundColor', {label: 'BG Color'});
-            contextFolder.addInput(bg, 'a', {min: 0, max: 1, step: 0.01, label: 'BG Alpha'});
+            addColorAlphaInputs(contextFolder, redGPUContext.backgroundColor);
         }
-
 
         // Alpha Mode
         contextFolder.addInput(redGPUContext, 'alphaMode', {
@@ -43,13 +32,6 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         });
 
         // Size Management
-        const parseSize = (value: string | number) => {
-            if (typeof value === 'number') return { value, unit: 'number' };
-            if (value.endsWith('%')) return { value: parseFloat(value), unit: '%' };
-            if (value.endsWith('px')) return { value: parseFloat(value), unit: 'px' };
-            return { value: parseFloat(value), unit: 'px' };
-        };
-
         const initialWidth = parseSize(redGPUContext.width);
         const initialHeight = parseSize(redGPUContext.height);
 

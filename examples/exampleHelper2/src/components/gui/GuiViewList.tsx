@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
-import {Pane} from 'tweakpane';
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
+import {addColorAlphaInputs, parseSize} from "../../utils/guiUtils";
 
 /**
  * [KO] RedGPUContext의 viewList 설정을 tweakpane에 추가하는 컴포넌트입니다.
@@ -39,14 +39,6 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
             debugFolder.addInput(debugProxy, 'axis', {label: 'Show Axis'});
 
             // Size & Position
-            const parseSize = (value: string | number) => {
-                if (typeof value === 'number') return { value, unit: 'number' };
-                const strValue = String(value);
-                if (strValue.endsWith('%')) return { value: parseFloat(strValue), unit: '%' };
-                if (strValue.endsWith('px')) return { value: parseFloat(strValue), unit: 'px' };
-                return { value: parseFloat(strValue), unit: 'px' };
-            };
-
             const SIZE_DATA = {
                 width: parseSize(view.width).value,
                 widthUnit: parseSize(view.width).unit,
@@ -82,7 +74,6 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                 }).on('change', () => updateDim(k));
             });
 
-            // Scene Folder
             if (view.scene) {
                 const scene = view.scene;
                 const sceneFolder = container.addFolder({title: `Scene: ${scene.name || 'Untitled'}`});
@@ -90,17 +81,7 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                 sceneFolder.addInput(scene, 'useBackgroundColor');
                 
                 if (scene.backgroundColor) {
-                    const bg = scene.backgroundColor;
-                    const colorProxy = {
-                        get backgroundColor() {
-                            return bg.hex;
-                        },
-                        set backgroundColor(v: string) {
-                            bg.setColorByHEX(v);
-                        }
-                    };
-                    sceneFolder.addInput(colorProxy, 'backgroundColor', {label: 'BG Color'});
-                    sceneFolder.addInput(bg, 'a', {min: 0, max: 1, step: 0.01, label: 'BG Alpha'});
+                    addColorAlphaInputs(sceneFolder, scene.backgroundColor);
                 }
             }
         };
