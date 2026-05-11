@@ -33,7 +33,7 @@
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "gl-matrix": "^3.4.3",
-    "mermaid": "^11.12.2",
+    "mermaid": "^11.15.0",
     "postcss": "^8.5.6",
     "rollup": "^4.44.1",
     "rollup-plugin-postcss": "^4.0.2",
