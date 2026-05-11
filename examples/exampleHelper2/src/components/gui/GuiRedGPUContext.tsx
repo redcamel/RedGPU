@@ -29,8 +29,8 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
                     bg.setColorByHEX(v);
                 }
             };
-            contextFolder.addColor(colorProxy, 'backgroundColor').listen();
-            contextFolder.add(bg, 'a', 0, 1, 0.01).listen();
+            contextFolder.addColor(colorProxy, 'backgroundColor').name('BG Color').listen();
+            contextFolder.add(bg, 'a', 0, 1, 0.01).name('BG Alpha').listen();
         }
 
 
