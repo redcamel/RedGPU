@@ -3,6 +3,7 @@ import {ExampleHelperState, useExampleHelperStore} from '../store';
 import homeIcon from '../assets/icons/home.svg';
 import IconButton from './basic/IconButton';
 import SelectBox from './basic/SelectBox';
+import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
 
 /**
  * [KO] 예제 헬퍼의 상단 네비게이션 바 컴포넌트입니다.
@@ -14,14 +15,22 @@ const ExampleHeader = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
 
     const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
+    const [toneMapping, setToneMapping] = useState<string>(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
 
     useEffect(() => {
         if (redGPUContext) {
-            const manager = redGPUContext.antialiasingManager;
-            if (manager.useMSAA) setAntialiasing('useMSAA');
-            else if (manager.useFXAA) setAntialiasing('useFXAA');
-            else if (manager.useTAA) setAntialiasing('useTAA');
+            const aaManager = redGPUContext.antialiasingManager;
+            if (aaManager.useMSAA) setAntialiasing('useMSAA');
+            else if (aaManager.useFXAA) setAntialiasing('useFXAA');
+            else if (aaManager.useTAA) setAntialiasing('useTAA');
             else setAntialiasing('NONE');
+
+            if (redGPUContext.viewList.length > 0) {
+                const firstView = redGPUContext.viewList[0];
+                if (firstView.toneMappingManager) {
+                    setToneMapping(firstView.toneMappingManager.mode);
+                }
+            }
         }
     }, [redGPUContext]);
 
@@ -38,12 +47,28 @@ const ExampleHeader = () => {
         }
     };
 
-    const options = [
+    const handleToneMappingChange = (value: string) => {
+        setToneMapping(value);
+        if (redGPUContext) {
+            redGPUContext.viewList.forEach((view: any) => {
+                if (view.toneMappingManager) {
+                    view.toneMappingManager.mode = value as TONE_MAPPING_MODE;
+                }
+            });
+        }
+    };
+
+    const aaOptions = [
         { value: 'NONE', label: 'NONE' },
         { value: 'useMSAA', label: 'MSAA' },
         { value: 'useFXAA', label: 'FXAA' },
         { value: 'useTAA', label: 'TAA' },
     ];
+
+    const tmOptions = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => ({
+        value,
+        label: key.replace(/_/g, ' ')
+    }));
 
     return (
         <header style={containerStyle}>
@@ -66,9 +91,16 @@ const ExampleHeader = () => {
 
                 <div style={rightSectionStyle}>
                     <SelectBox
+                        label="TONE MAPPING"
+                        value={toneMapping}
+                        options={tmOptions}
+                        onChange={handleToneMappingChange}
+                    />
+
+                    <SelectBox
                         label="ANTIALIASING"
                         value={antialiasing}
-                        options={options}
+                        options={aaOptions}
                         onChange={handleAntialiasingChange}
                     />
 

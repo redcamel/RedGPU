@@ -7414,18 +7414,48 @@ const optionItemStyle = {
   cursor: "pointer",
   transition: "background-color 0.1s, color 0.1s"
 };
+const TONE_MAPPING_MODE = {
+  /**
+   * [KO] 선형 톤 매핑
+   * [EN] Linear tone mapping
+   */
+  LINEAR: "linear",
+  /**
+   * [KO] Khronos PBR Neutral 톤 매핑
+   * [EN] Khronos PBR Neutral tone mapping
+   */
+  KHRONOS_PBR_NEUTRAL: "khronosPBRNeutral",
+  /**
+   * [KO] ACES Filmic (Hill 근사) 톤 매핑
+   * [EN] ACES Filmic (Hill approximation) tone mapping
+   */
+  ACES_FILMIC_HILL: "ACESFilmicHill",
+  /**
+   * [KO] ACES Filmic (Narkowicz 근사) 톤 매핑
+   * [EN] ACES Filmic (Narkowicz approximation) tone mapping
+   */
+  ACES_FILMIC_NARKOWICZ: "ACESFilmicNarkowicz"
+};
+Object.freeze(TONE_MAPPING_MODE);
 const ExampleHeader = () => {
   const currentExample = useExampleHelperStore((state) => state.currentExample);
   const topBarRightActions = useExampleHelperStore((state) => state.topBarRightActions);
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
   const [antialiasing, setAntialiasing] = reactExports.useState("useMSAA");
+  const [toneMapping, setToneMapping] = reactExports.useState(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
   reactExports.useEffect(() => {
     if (redGPUContext) {
-      const manager = redGPUContext.antialiasingManager;
-      if (manager.useMSAA) setAntialiasing("useMSAA");
-      else if (manager.useFXAA) setAntialiasing("useFXAA");
-      else if (manager.useTAA) setAntialiasing("useTAA");
+      const aaManager = redGPUContext.antialiasingManager;
+      if (aaManager.useMSAA) setAntialiasing("useMSAA");
+      else if (aaManager.useFXAA) setAntialiasing("useFXAA");
+      else if (aaManager.useTAA) setAntialiasing("useTAA");
       else setAntialiasing("NONE");
+      if (redGPUContext.viewList.length > 0) {
+        const firstView = redGPUContext.viewList[0];
+        if (firstView.toneMappingManager) {
+          setToneMapping(firstView.toneMappingManager.mode);
+        }
+      }
     }
   }, [redGPUContext]);
   const handleAntialiasingChange = (value) => {
@@ -7440,12 +7470,26 @@ const ExampleHeader = () => {
       else if (value === "useTAA") manager.useTAA = true;
     }
   };
-  const options = [
+  const handleToneMappingChange = (value) => {
+    setToneMapping(value);
+    if (redGPUContext) {
+      redGPUContext.viewList.forEach((view) => {
+        if (view.toneMappingManager) {
+          view.toneMappingManager.mode = value;
+        }
+      });
+    }
+  };
+  const aaOptions = [
     { value: "NONE", label: "NONE" },
     { value: "useMSAA", label: "MSAA" },
     { value: "useFXAA", label: "FXAA" },
     { value: "useTAA", label: "TAA" }
   ];
+  const tmOptions = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => ({
+    value,
+    label: key.replace(/_/g, " ")
+  }));
   return /* @__PURE__ */ jsxRuntimeExports.jsx("header", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: navBarStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: leftSectionStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "../../index.html", style: homeButtonStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -7465,9 +7509,18 @@ const ExampleHeader = () => {
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         SelectBox,
         {
+          label: "TONE MAPPING",
+          value: toneMapping,
+          options: tmOptions,
+          onChange: handleToneMappingChange
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        SelectBox,
+        {
           label: "ANTIALIASING",
           value: antialiasing,
-          options,
+          options: aaOptions,
           onChange: handleAntialiasingChange
         }
       ),
