@@ -7424,14 +7424,14 @@ const RenderingSettingsGroup = () => {
 const LabelButton = ({ label, isActive = true, onClick, title, style }) => {
   const [isHovered, setIsHovered] = reactExports.useState(false);
   const themeColor = "#fdb48d";
-  const mutedColor = "#666";
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "button",
     {
       style: {
-        ...baseButtonStyle,
+        ...baseButtonStyle$2,
         backgroundColor: isHovered ? "#1a1a1c" : "#111112",
-        color: isActive ? themeColor : mutedColor,
+        color: themeColor,
+        opacity: isActive ? 1 : 0.5,
         ...style
       },
       onClick,
@@ -7442,7 +7442,7 @@ const LabelButton = ({ label, isActive = true, onClick, title, style }) => {
     }
   );
 };
-const baseButtonStyle = {
+const baseButtonStyle$2 = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -7453,7 +7453,7 @@ const baseButtonStyle = {
   fontSize: "11px",
   fontWeight: "bold",
   cursor: "pointer",
-  transition: "background-color 0.2s, color 0.2s",
+  transition: "background-color 0.2s, opacity 0.2s",
   letterSpacing: "0.05em",
   flexShrink: 0
 };
@@ -7596,19 +7596,19 @@ const iconStyle$1 = {
 };
 const IconToggleButton = ({ icon, label, isActive, onClick, title }) => {
   const [isHovered, setIsHovered] = reactExports.useState(false);
-  const themeColor = "#fdb48d";
-  const mutedColor = "#666";
+  const themeColor = "#fff";
   const idleBgColor = "#111112";
   const hoverBgColor = "#1a1a1c";
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "button",
     {
       style: {
-        ...baseButtonStyle$2,
+        ...baseButtonStyle,
         width: icon ? "52px" : "auto",
         padding: icon ? "0" : "0 20px",
         backgroundColor: isHovered ? hoverBgColor : idleBgColor,
-        color: isActive ? themeColor : mutedColor
+        color: themeColor,
+        opacity: isActive ? 1 : 0.25
       },
       onClick,
       title: title || label,
@@ -7618,17 +7618,14 @@ const IconToggleButton = ({ icon, label, isActive, onClick, title }) => {
         "img",
         {
           src: icon,
-          style: {
-            ...iconStyle,
-            filter: isActive ? "none" : "grayscale(1)"
-          },
+          style: iconStyle,
           alt: label
         }
       ) : label
     }
   );
 };
-const baseButtonStyle$2 = {
+const baseButtonStyle = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -7638,7 +7635,7 @@ const baseButtonStyle$2 = {
   fontSize: "11px",
   fontWeight: "bold",
   cursor: "pointer",
-  transition: "background-color 0.2s, color 0.2s",
+  transition: "background-color 0.2s, opacity 0.2s",
   letterSpacing: "0.05em",
   flexShrink: 0,
   boxSizing: "border-box"
@@ -7721,7 +7718,7 @@ const containerStyle$1 = {
   left: 0,
   right: 0,
   height: "52px",
-  backgroundColor: "#202020",
+  backgroundColor: "#1a1a1a",
   borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
   zIndex: 10003,
   display: "flex",
@@ -7982,8 +7979,8 @@ const codeStyle = {
   color: "#ccc"
 };
 const debugIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3cpath%20d='M224%20160C224%20107%20267%2064%20320%2064C373%2064%20416%20107%20416%20160L416%20163.6C416%20179.3%20403.3%20192%20387.6%20192L252.5%20192C236.8%20192%20224.1%20179.3%20224.1%20163.6L224.1%20160zM569.6%20172.8C580.2%20186.9%20577.3%20207%20563.2%20217.6L465.4%20290.9C470.7%20299.8%20474.7%20309.6%20477.2%20320L576%20320C593.7%20320%20608%20334.3%20608%20352C608%20369.7%20593.7%20384%20576%20384L480%20384L480%20416C480%20418.6%20479.9%20421.3%20479.8%20423.9L563.2%20486.4C577.3%20497%20580.2%20517.1%20569.6%20531.2C559%20545.3%20538.9%20548.2%20524.8%20537.6L461.7%20490.3C438.5%20534.5%20395.2%20566.5%20344%20574.2L344%20344C344%20330.7%20333.3%20320%20320%20320C306.7%20320%20296%20330.7%20296%20344L296%20574.2C244.8%20566.5%20201.5%20534.5%20178.3%20490.3L115.2%20537.6C101.1%20548.2%2081%20545.3%2070.4%20531.2C59.8%20517.1%2062.7%20497%2076.8%20486.4L160.2%20423.9C160.1%20421.3%20160%20418.7%20160%20416L160%20384L64%20384C46.3%20384%2032%20369.7%2032%20352C32%20334.3%2046.3%20320%2064%20320L162.8%20320C165.3%20309.6%20169.3%20299.8%20174.6%20290.9L76.8%20217.6C62.7%20207%2059.8%20186.9%2070.4%20172.8C81%20158.7%20101.1%20155.8%20115.2%20166.4L224%20248C236.3%20242.9%20249.8%20240%20264%20240L376%20240C390.2%20240%20403.7%20242.8%20416%20248L524.8%20166.4C538.9%20155.8%20559%20158.7%20569.6%20172.8z'/%3e%3c/svg%3e";
-const axisIcon = "data:image/svg+xml,%3csvg%20fill='%23fdb48d'%20viewBox='0%200%2014%2014'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M6.995%201.802L6.258%203.981c.154.087.328.145.509.173v3.361l-.979.565v1.082L2.922%2010.818c-.118-.155-.256-.276-.408-.366L1%2012.198l2.255-.452c-.002-.177-.038-.356-.105-.528l2.827-1.632%201.021.589%201.021-.589%202.827%201.632c-.066.171-.102.351-.105.528L13%2012.192l-1.518-1.728c-.152.09-.29.211-.405.354l-2.869-1.656v-1.082l-.979-.565V4.154c.181-.028.355-.087.509-.173L6.995%201.802z'/%3e%3c/svg%3e";
-const gridIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23fdb48d'%3e%3c!--%20외곽%20테두리%20--%3e%3cpath%20d='M160%2096C124.7%2096%2096%20124.7%2096%20160v320c0%2035.3%2028.7%2064%2064%2064h320c35.3%200%2064-28.7%2064-64V160c0-35.3-28.7-64-64-64H160zm0%2032h320c17.7%200%2032%2014.3%2032%2032v320c0%2017.7-14.3%2032-32%2032H160c-17.7%200-32-14.3-32-32V160c0-17.7%2014.3-32%2032-32z'/%3e%3c!--%20세로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='240'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='316'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='392'%20y='128'%20width='8'%20height='384'/%3e%3c!--%20가로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='128'%20y='240'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='316'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='392'%20width='384'%20height='8'/%3e%3c/svg%3e";
+const axisIcon = "data:image/svg+xml,%3csvg%20fill='%23ccc'%20viewBox='0%200%2014%2014'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M6.995%201.802L6.258%203.981c.154.087.328.145.509.173v3.361l-.979.565v1.082L2.922%2010.818c-.118-.155-.256-.276-.408-.366L1%2012.198l2.255-.452c-.002-.177-.038-.356-.105-.528l2.827-1.632%201.021.589%201.021-.589%202.827%201.632c-.066.171-.102.351-.105.528L13%2012.192l-1.518-1.728c-.152.09-.29.211-.405.354l-2.869-1.656v-1.082l-.979-.565V4.154c.181-.028.355-.087.509-.173L6.995%201.802z'/%3e%3c/svg%3e";
+const gridIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3c!--%20외곽%20테두리%20--%3e%3cpath%20d='M160%2096C124.7%2096%2096%20124.7%2096%20160v320c0%2035.3%2028.7%2064%2064%2064h320c35.3%200%2064-28.7%2064-64V160c0-35.3-28.7-64-64-64H160zm0%2032h320c17.7%200%2032%2014.3%2032%2032v320c0%2017.7-14.3%2032-32%2032H160c-17.7%200-32-14.3-32-32V160c0-17.7%2014.3-32%2032-32z'/%3e%3c!--%20세로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='240'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='316'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='392'%20y='128'%20width='8'%20height='384'/%3e%3c!--%20가로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='128'%20y='240'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='316'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='392'%20width='384'%20height='8'/%3e%3c/svg%3e";
 const App = () => {
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
   const addTopBarRightAction = useExampleHelperStore((state) => state.addTopBarRightAction);

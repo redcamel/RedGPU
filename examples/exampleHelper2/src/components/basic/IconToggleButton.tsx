@@ -15,8 +15,7 @@ interface IconToggleButtonProps {
 const IconToggleButton: React.FC<IconToggleButtonProps> = ({ icon, label, isActive, onClick, title }) => {
     const [isHovered, setIsHovered] = useState(false);
 
-    const themeColor = '#fdb48d';
-    const mutedColor = '#666';
+    const themeColor = '#fff';
 
     const idleBgColor = '#111112';
     const hoverBgColor = '#1a1a1c';
@@ -28,7 +27,8 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({ icon, label, isActi
                 width: icon ? '52px' : 'auto',
                 padding: icon ? '0' : '0 20px',
                 backgroundColor: isHovered ? hoverBgColor : idleBgColor,
-                color: isActive ? themeColor : mutedColor,
+                color: themeColor,
+                opacity: isActive ? 1 : 0.25
             }}
             onClick={onClick}
             title={title || label}
@@ -38,10 +38,7 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({ icon, label, isActi
             {icon ? (
                 <img 
                     src={icon} 
-                    style={{
-                        ...iconStyle,
-                        filter: isActive ? 'none' : 'grayscale(1)'
-                    }} 
+                    style={iconStyle} 
                     alt={label} 
                 />
             ) : (
@@ -61,7 +58,7 @@ const baseButtonStyle: React.CSSProperties = {
     fontSize: '11px',
     fontWeight: 'bold',
     cursor: 'pointer',
-    transition: 'background-color 0.2s, color 0.2s',
+    transition: 'background-color 0.2s, opacity 0.2s',
     letterSpacing: '0.05em',
     flexShrink: 0,
     boxSizing: 'border-box'

@@ -15,14 +15,14 @@ const LabelButton: React.FC<LabelButtonProps> = ({ label, isActive = true, onCli
     const [isHovered, setIsHovered] = useState(false);
 
     const themeColor = '#fdb48d';
-    const mutedColor = '#666';
 
     return (
         <button
             style={{
                 ...baseButtonStyle,
                 backgroundColor: isHovered ? '#1a1a1c' : '#111112',
-                color: isActive ? themeColor : mutedColor,
+                color: themeColor,
+                opacity: isActive ? 1 : 0.5,
                 ...style
             }}
             onClick={onClick}
@@ -46,7 +46,7 @@ const baseButtonStyle: React.CSSProperties = {
     fontSize: '11px',
     fontWeight: 'bold',
     cursor: 'pointer',
-    transition: 'background-color 0.2s, color 0.2s',
+    transition: 'background-color 0.2s, opacity 0.2s',
     letterSpacing: '0.05em',
     flexShrink: 0
 };
