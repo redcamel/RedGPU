@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Primitives 예제
@@ -11,45 +12,56 @@ import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
  * [EN] Each primitive is rendered in three topologies: TRIANGLE_LIST (surface), LINE_LIST (wireframe), and POINT_LIST (points).
  */
 
+// [KO] 캔버스 생성 및 문서에 추가
+// [EN] Create canvas and append to document
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+// [KO] RedGPU 초기화
+// [EN] Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // [KO] 카메라 컨트롤러 설정. 거리를 20으로 설정하여 모든 객체가 보이도록 합니다.
-        // [EN] Set up the camera controller. Set the distance to 20 so that all objects are visible.
+        // [KO] 카메라 컨트롤러 생성 (OrbitController)
+        // [EN] Create camera controller (OrbitController)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 20;
         controller.tilt = 0;
         controller.speedDistance = 0.3;
 
-        // [KO] 씬 및 뷰 생성
-        // [EN] Create scene and view
+        // [KO] 씬 생성
+        // [EN] Create scene
         const scene = new RedGPU.Display.Scene();
+
+        // [KO] 뷰 생성 (3D)
+        // [EN] Create view (3D)
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
+        // [KO] 컨텍스트에 뷰 추가
+        // [EN] Add view to context
         redGPUContext.addView(view);
 
         // [KO] 프리미티브 생성 함수 호출
         // [EN] Call primitive creation function
         createPrimitive(redGPUContext, scene);
 
-        // [KO] 렌더러 생성 및 시작
-        // [EN] Create and start renderer
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create renderer and start loop
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
-            // [KO] 매 프레임 실행될 로직
-            // [EN] Logic per frame
+            // [KO] 매 프레임 실행될 로직 작성
+            // [EN] Write logic to be executed every frame
         };
         renderer.start(redGPUContext, render);
 
-        // [KO] 테스트 패널 생성
-        // [EN] Create test pane
+        // [KO] 테스트용 GUI 렌더링
+        // [EN] Render GUI for testing
         renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error('Initialization failed:', failReason);
-
+        // [KO] 초기화 실패 시 에러 처리
+        // [EN] Error handling on initialization failure
+        console.error('초기화 실패:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
@@ -64,8 +76,8 @@ RedGPU.init(
  * @param {RedGPU.Display.Scene} scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
  */
 const createPrimitive = (redGPUContext, scene) => {
-    // [KO] 렌더링 모드별 머티리얼 정의
-    // [EN] Define materials for each rendering mode
+    // [KO] 렌더링 모드별 머티리얼 정의 (비트맵, 컬러, 와이어프레임)
+    // [EN] Define materials for each rendering mode (Bitmap, Color, Wireframe)
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
         new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
@@ -73,14 +85,16 @@ const createPrimitive = (redGPUContext, scene) => {
     const wireframeMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00');
     const pointMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff');
 
+    // [KO] 배치 관련 변수 설정
+    // [EN] Set placement related variables
     const gap = 3.5;
     const centerX = 0;
     const startY = 3.5;
     const wireframeY = 0;
     const pointY = -3.5;
 
-    // [KO] 생성할 프리미티브 목록 정의
-    // [EN] Define list of primitives to be created
+    // [KO] 생성할 프리미티브 목록 및 생성 인자 정의
+    // [EN] Define list of primitives and their constructor arguments
     const primitives = [
         {constructor: RedGPU.Primitive.Box, args: [redGPUContext, 1, 1, 1, 2, 2, 2]},
         {constructor: RedGPU.Primitive.RoundedBox, args: [redGPUContext, 1, 1, 1, 1, 1, 1, 0.25, 8]},
@@ -106,16 +120,25 @@ const createPrimitive = (redGPUContext, scene) => {
      */
     const createRow = (material, yPos, topology = null) => {
         primitives.forEach((primitive, index) => {
+            // [KO] 프리미티브 지오메트리 생성
+            // [EN] Create primitive geometry
             const geometry = new primitive.constructor(...primitive.args);
+
+            // [KO] 메쉬 생성 및 머티리얼 적용
+            // [EN] Create mesh and apply material
             const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
+            // [KO] 토폴로지 설정 (있는 경우)
+            // [EN] Set topology (if provided)
             if (topology) mesh.primitiveState.topology = topology;
 
+            // [KO] 위치 계산 및 설정
+            // [EN] Calculate and set position
             mesh.setPosition(centerX - gap * (primitives.length - 1) / 2 + index * gap, yPos, 0);
             scene.addChild(mesh);
 
-            // [KO] 프리미티브 이름 라벨 생성 (첫 번째 행 상단)
-            // [EN] Create primitive name label (on top of the first row)
+            // [KO] 프리미티브 이름 라벨 생성 (첫 번째 행 상단에만 표시)
+            // [EN] Create primitive name label (displayed only on top of the first row)
             if (yPos === startY) {
                 const primitiveName = new RedGPU.Display.TextField3D(redGPUContext);
                 primitiveName.setPosition(centerX - gap * (primitives.length - 1) / 2 + index * gap, startY + 2.2, 0);
@@ -138,21 +161,20 @@ const createPrimitive = (redGPUContext, scene) => {
         scene.addChild(topologyName);
     };
 
-    createRow(material, startY);
+    // [KO] 각 토폴로지별로 행 생성
+    // [EN] Create rows for each topology
+    createRow(material, startY); // TRIANGLE_LIST
     createRow(wireframeMaterial, wireframeY, RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST);
     createRow(pointMaterial, pointY, RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST);
 };
 
 /**
- * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
- * [EN] Initializes the Tweakpane GUI for testing.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
  */
 const renderTestPane = async (redGPUContext) => {
-   const {
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-
+    // [KO] RedGPUExampleHelper를 사용하여 기본 디버그 UI 생성
+    // [EN] Create basic debug UI using RedGPUExampleHelper
+    new RedGPUExampleHelper(redGPUContext);
 };
