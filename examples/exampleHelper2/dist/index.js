@@ -7183,118 +7183,11 @@ const useExampleHelperStore = create((set) => ({
   clearTopBarRightActions: () => set({ topBarRightActions: [] })
 }));
 const githubIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MzMwNDE5NjAwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MzMwNDE5NjEwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDozMzA0MTk1RTBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDozMzA0MTk1RjBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Ppk8MxEAAAy3SURBVHja5Ft7VJRl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";
-const Footer = () => {
-  const setShowSourceModal = useExampleHelperStore((state) => state.setShowSourceModal);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerStyle, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerLeftStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { color: "#b19898", fontSize: "11px" }, children: [
-        "This project is maintained by ",
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "b",
-          {
-            style: { color: "#fdb48d" },
-            children: "RedCamel"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "https://github.com/redcamel/RedGPU", target: "_blank", rel: "noreferrer", style: iconLinkStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: githubIcon, width: "16", height: "16", alt: "GitHub" }) })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: footerRightStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "button",
-      {
-        style: sourceButtonStyle,
-        onClick: () => setShowSourceModal(true),
-        children: "SOURCE"
-      }
-    ) })
-  ] });
-};
-const footerStyle = {
-  position: "fixed",
-  bottom: 0,
-  left: 0,
-  right: 0,
-  height: "50px",
-  backgroundColor: "#111112",
-  borderTop: "1px solid #333",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "0 20px",
-  zIndex: 10002,
-  fontSize: "12px",
-  color: "#b19898"
-};
-const footerLeftStyle = {
-  display: "flex",
-  alignItems: "center",
-  gap: "12px"
-};
-const footerRightStyle = {
-  display: "flex",
-  alignItems: "center"
-};
-const sourceButtonStyle = {
-  backgroundColor: "#333",
-  color: "#fff",
-  border: "none",
-  padding: "6px 16px",
-  fontSize: "11px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  borderRadius: "4px",
-  transition: "background-color 0.2s",
-  letterSpacing: "0.05em"
-};
-const iconLinkStyle = {
-  display: "flex",
-  alignItems: "center",
-  opacity: 0.7,
-  transition: "opacity 0.2s"
-};
-const homeIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23fff'%3e%3cpath%20d='M341.8%2072.6C329.5%2061.2%20310.5%2061.2%20298.3%2072.6L74.3%20280.6C64.7%20289.6%2061.5%20303.5%2066.3%20315.7C71.1%20327.9%2082.8%20336%2096%20336L112%20336L112%20512C112%20547.3%20140.7%20576%20176%20576L464%20576C499.3%20576%20528%20547.3%20528%20512L528%20336L544%20336C557.2%20336%20569%20327.9%20573.8%20315.7C578.6%20303.5%20575.4%20289.5%20565.8%20280.6L341.8%2072.6zM304%20384L336%20384C362.5%20384%20384%20405.5%20384%20432L384%20528L256%20528L256%20432C256%20405.5%20277.5%20384%20304%20384z'/%3e%3c/svg%3e";
-const IconButton = ({ action }) => {
-  const [isHovered, setIsHovered] = reactExports.useState(false);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "button",
-    {
-      style: {
-        ...actionButtonStyle,
-        width: action.icon ? "52px" : "auto",
-        padding: action.icon ? "0" : "0 20px",
-        backgroundColor: isHovered ? "#1a1a1c" : "#111112"
-      },
-      onClick: action.onClick,
-      title: action.label,
-      onMouseEnter: () => setIsHovered(true),
-      onMouseLeave: () => setIsHovered(false),
-      children: action.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: action.icon, style: actionIconStyle, alt: action.label }) : action.label
-    }
-  );
-};
-const actionButtonStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "0 20px",
-  height: "100%",
-  backgroundColor: "#111112",
-  color: "#fdb48d",
-  border: "none",
-  fontSize: "11px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "background-color 0.2s, color 0.2s",
-  letterSpacing: "0.05em"
-};
-const actionIconStyle = {
-  width: "18px",
-  height: "18px"
-};
 const SelectBox = ({ label, value, options, onChange }) => {
   var _a;
   const [isHovered, setIsHovered] = reactExports.useState(false);
   const [isOpen, setIsOpen] = reactExports.useState(false);
+  const [openDirection, setOpenDirection] = reactExports.useState("down");
   const [hoveredOption, setHoveredOption] = reactExports.useState(null);
   const dropdownRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
@@ -7306,6 +7199,18 @@ const SelectBox = ({ label, value, options, onChange }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  const toggleDropdown = () => {
+    if (!isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      if (rect.bottom > viewportHeight / 2) {
+        setOpenDirection("up");
+      } else {
+        setOpenDirection("down");
+      }
+    }
+    setIsOpen(!isOpen);
+  };
   const currentLabel = ((_a = options.find((opt) => opt.value === value)) == null ? void 0 : _a.label) || value;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
@@ -7317,17 +7222,24 @@ const SelectBox = ({ label, value, options, onChange }) => {
       },
       onMouseEnter: () => setIsHovered(true),
       onMouseLeave: () => setIsHovered(false),
-      onClick: () => setIsOpen(!isOpen),
+      onClick: toggleDropdown,
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleLabelStyle$2, children: label }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: customSelectTriggerStyle, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: currentValueStyle, children: currentLabel }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
             ...arrowIconStyle,
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)"
+            transform: isOpen ? openDirection === "up" ? "rotate(0deg)" : "rotate(180deg)" : openDirection === "up" ? "rotate(180deg)" : "rotate(0deg)"
           } })
         ] }),
-        isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: optionsListStyle, children: options.map((option) => {
+        isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          ...optionsListStyle,
+          top: openDirection === "down" ? "100%" : "auto",
+          bottom: openDirection === "up" ? "100%" : "auto",
+          borderTop: openDirection === "down" ? "1px solid rgba(255, 255, 255, 0.05)" : "none",
+          borderBottom: openDirection === "up" ? "1px solid rgba(255, 255, 255, 0.05)" : "none",
+          boxShadow: openDirection === "down" ? "0 10px 20px rgba(0,0,0,0.5)" : "0 -10px 20px rgba(0,0,0,0.5)"
+        }, children: options.map((option) => {
           const isSelected = value === option.value;
           const isItemHovered = hoveredOption === option.value;
           return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -7437,7 +7349,201 @@ const TONE_MAPPING_MODE = {
   ACES_FILMIC_NARKOWICZ: "ACESFilmicNarkowicz"
 };
 Object.freeze(TONE_MAPPING_MODE);
+const Footer = () => {
+  var _a;
+  const setShowSourceModal = useExampleHelperStore((state) => state.setShowSourceModal);
+  const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
+  const [antialiasing, setAntialiasing] = reactExports.useState("useMSAA");
+  const [toneMapping, setToneMapping] = reactExports.useState(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
+  reactExports.useEffect(() => {
+    if (redGPUContext) {
+      const aaManager = redGPUContext.antialiasingManager;
+      if (aaManager.useMSAA) setAntialiasing("useMSAA");
+      else if (aaManager.useFXAA) setAntialiasing("useFXAA");
+      else if (aaManager.useTAA) setAntialiasing("useTAA");
+      else setAntialiasing("NONE");
+      if (redGPUContext.viewList.length > 0) {
+        const firstView = redGPUContext.viewList[0];
+        if (firstView.toneMappingManager) {
+          setToneMapping(firstView.toneMappingManager.mode);
+        }
+      }
+    }
+  }, [redGPUContext]);
+  const handleAntialiasingChange = (value) => {
+    setAntialiasing(value);
+    if (redGPUContext) {
+      const manager = redGPUContext.antialiasingManager;
+      manager.useMSAA = false;
+      manager.useFXAA = false;
+      manager.useTAA = false;
+      if (value === "useMSAA") manager.useMSAA = true;
+      else if (value === "useFXAA") manager.useFXAA = true;
+      else if (value === "useTAA") manager.useTAA = true;
+    }
+  };
+  const handleToneMappingChange = (value) => {
+    setToneMapping(value);
+    if (redGPUContext) {
+      redGPUContext.viewList.forEach((view) => {
+        if (view.toneMappingManager) {
+          view.toneMappingManager.mode = value;
+        }
+      });
+    }
+  };
+  const aaOptions = [
+    { value: "NONE", label: "NONE" },
+    { value: "useMSAA", label: "MSAA" },
+    { value: "useFXAA", label: "FXAA" },
+    { value: "useTAA", label: "TAA" }
+  ];
+  const tmOptions = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => ({
+    value,
+    label: key.replace(/_/g, " ")
+  }));
+  const isMobile = (_a = redGPUContext == null ? void 0 : redGPUContext.detector) == null ? void 0 : _a.isMobile;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerContainerStyle, children: [
+    isMobile && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: mobileSelectContainerStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        SelectBox,
+        {
+          label: "TONE MAPPING",
+          value: toneMapping,
+          options: tmOptions,
+          onChange: handleToneMappingChange
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        SelectBox,
+        {
+          label: "ANTIALIASING",
+          value: antialiasing,
+          options: aaOptions,
+          onChange: handleAntialiasingChange
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerLeftStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { color: "#b19898", fontSize: "11px" }, children: [
+          "This project is maintained by ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "b",
+            {
+              style: { color: "#fdb48d" },
+              children: "RedCamel"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "https://github.com/redcamel/RedGPU", target: "_blank", rel: "noreferrer", style: iconLinkStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: githubIcon, width: "16", height: "16", alt: "GitHub" }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: footerRightStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          style: sourceButtonStyle,
+          onClick: () => setShowSourceModal(true),
+          children: "SOURCE"
+        }
+      ) })
+    ] })
+  ] });
+};
+const footerContainerStyle = {
+  position: "fixed",
+  bottom: 0,
+  left: 0,
+  right: 0,
+  zIndex: 10002,
+  display: "flex",
+  flexDirection: "column"
+};
+const mobileSelectContainerStyle = {
+  display: "flex",
+  height: "52px",
+  backgroundColor: "#111112",
+  borderTop: "1px solid #333",
+  gap: "1px"
+};
+const footerStyle = {
+  height: "50px",
+  backgroundColor: "#111112",
+  borderTop: "1px solid #333",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "0 20px",
+  fontSize: "12px",
+  color: "#b19898"
+};
+const footerLeftStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px"
+};
+const footerRightStyle = {
+  display: "flex",
+  alignItems: "center"
+};
+const sourceButtonStyle = {
+  backgroundColor: "#333",
+  color: "#fff",
+  border: "none",
+  padding: "6px 16px",
+  fontSize: "11px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  borderRadius: "4px",
+  transition: "background-color 0.2s",
+  letterSpacing: "0.05em"
+};
+const iconLinkStyle = {
+  display: "flex",
+  alignItems: "center",
+  opacity: 0.7,
+  transition: "opacity 0.2s"
+};
+const homeIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23fff'%3e%3cpath%20d='M341.8%2072.6C329.5%2061.2%20310.5%2061.2%20298.3%2072.6L74.3%20280.6C64.7%20289.6%2061.5%20303.5%2066.3%20315.7C71.1%20327.9%2082.8%20336%2096%20336L112%20336L112%20512C112%20547.3%20140.7%20576%20176%20576L464%20576C499.3%20576%20528%20547.3%20528%20512L528%20336L544%20336C557.2%20336%20569%20327.9%20573.8%20315.7C578.6%20303.5%20575.4%20289.5%20565.8%20280.6L341.8%2072.6zM304%20384L336%20384C362.5%20384%20384%20405.5%20384%20432L384%20528L256%20528L256%20432C256%20405.5%20277.5%20384%20304%20384z'/%3e%3c/svg%3e";
+const IconButton = ({ action }) => {
+  const [isHovered, setIsHovered] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      style: {
+        ...actionButtonStyle,
+        width: action.icon ? "52px" : "auto",
+        padding: action.icon ? "0" : "0 20px",
+        backgroundColor: isHovered ? "#1a1a1c" : "#111112"
+      },
+      onClick: action.onClick,
+      title: action.label,
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+      children: action.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: action.icon, style: actionIconStyle, alt: action.label }) : action.label
+    }
+  );
+};
+const actionButtonStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "0 20px",
+  height: "100%",
+  backgroundColor: "#111112",
+  color: "#fdb48d",
+  border: "none",
+  fontSize: "11px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "background-color 0.2s, color 0.2s",
+  letterSpacing: "0.05em"
+};
+const actionIconStyle = {
+  width: "18px",
+  height: "18px"
+};
 const ExampleHeader = () => {
+  var _a;
   const currentExample = useExampleHelperStore((state) => state.currentExample);
   const topBarRightActions = useExampleHelperStore((state) => state.topBarRightActions);
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
@@ -7490,6 +7596,7 @@ const ExampleHeader = () => {
     value,
     label: key.replace(/_/g, " ")
   }));
+  const isMobile = (_a = redGPUContext == null ? void 0 : redGPUContext.detector) == null ? void 0 : _a.isMobile;
   return /* @__PURE__ */ jsxRuntimeExports.jsx("header", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: navBarStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: leftSectionStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "../../index.html", style: homeButtonStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -7506,24 +7613,26 @@ const ExampleHeader = () => {
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: rightSectionStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        SelectBox,
-        {
-          label: "TONE MAPPING",
-          value: toneMapping,
-          options: tmOptions,
-          onChange: handleToneMappingChange
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        SelectBox,
-        {
-          label: "ANTIALIASING",
-          value: antialiasing,
-          options: aaOptions,
-          onChange: handleAntialiasingChange
-        }
-      ),
+      !isMobile && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SelectBox,
+          {
+            label: "TONE MAPPING",
+            value: toneMapping,
+            options: tmOptions,
+            onChange: handleToneMappingChange
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SelectBox,
+          {
+            label: "ANTIALIASING",
+            value: antialiasing,
+            options: aaOptions,
+            onChange: handleAntialiasingChange
+          }
+        )
+      ] }),
       topBarRightActions.map((action) => /* @__PURE__ */ jsxRuntimeExports.jsx(IconButton, { action }, action.id))
     ] })
   ] }) });

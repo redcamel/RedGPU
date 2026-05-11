@@ -70,6 +70,8 @@ const ExampleHeader = () => {
         label: key.replace(/_/g, ' ')
     }));
 
+    const isMobile = redGPUContext?.detector?.isMobile;
+
     return (
         <header style={containerStyle}>
             <div style={navBarStyle}>
@@ -90,19 +92,23 @@ const ExampleHeader = () => {
                 </div>
 
                 <div style={rightSectionStyle}>
-                    <SelectBox
-                        label="TONE MAPPING"
-                        value={toneMapping}
-                        options={tmOptions}
-                        onChange={handleToneMappingChange}
-                    />
+                    {!isMobile && (
+                        <>
+                            <SelectBox
+                                label="TONE MAPPING"
+                                value={toneMapping}
+                                options={tmOptions}
+                                onChange={handleToneMappingChange}
+                            />
 
-                    <SelectBox
-                        label="ANTIALIASING"
-                        value={antialiasing}
-                        options={aaOptions}
-                        onChange={handleAntialiasingChange}
-                    />
+                            <SelectBox
+                                label="ANTIALIASING"
+                                value={antialiasing}
+                                options={aaOptions}
+                                onChange={handleAntialiasingChange}
+                            />
+                        </>
+                    )}
 
                     {topBarRightActions.map((action) => (
                         <IconButton key={action.id} action={action} />

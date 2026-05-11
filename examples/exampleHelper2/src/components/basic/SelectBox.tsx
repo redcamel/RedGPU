@@ -16,6 +16,7 @@ interface SelectBoxProps {
 const SelectBox: React.FC<SelectBoxProps> = ({ label, value, options, onChange }) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [openDirection, setOpenDirection] = useState<'up' | 'down'>('down');
     const [hoveredOption, setHoveredOption] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +30,20 @@ const SelectBox: React.FC<SelectBoxProps> = ({ label, value, options, onChange }
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const toggleDropdown = () => {
+        if (!isOpen && dropdownRef.current) {
+            const rect = dropdownRef.current.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            // 화면 하단에 가까우면 위로 열기 (If close to the bottom of the screen, open upwards)
+            if (rect.bottom > viewportHeight / 2) {
+                setOpenDirection('up');
+            } else {
+                setOpenDirection('down');
+            }
+        }
+        setIsOpen(!isOpen);
+    };
+
     const currentLabel = options.find(opt => opt.value === value)?.label || value;
 
     return (
@@ -40,19 +55,30 @@ const SelectBox: React.FC<SelectBoxProps> = ({ label, value, options, onChange }
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={toggleDropdown}
         >
             <span style={titleLabelStyle}>{label}</span>
             <div style={customSelectTriggerStyle}>
                 <span style={currentValueStyle}>{currentLabel}</span>
                 <div style={{
                     ...arrowIconStyle,
-                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+                    transform: isOpen 
+                        ? (openDirection === 'up' ? 'rotate(0deg)' : 'rotate(180deg)') 
+                        : (openDirection === 'up' ? 'rotate(180deg)' : 'rotate(0deg)')
                 }} />
             </div>
 
             {isOpen && (
-                <div style={optionsListStyle}>
+                <div style={{
+                    ...optionsListStyle,
+                    top: openDirection === 'down' ? '100%' : 'auto',
+                    bottom: openDirection === 'up' ? '100%' : 'auto',
+                    borderTop: openDirection === 'down' ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+                    borderBottom: openDirection === 'up' ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+                    boxShadow: openDirection === 'down' 
+                        ? '0 10px 20px rgba(0,0,0,0.5)' 
+                        : '0 -10px 20px rgba(0,0,0,0.5)',
+                }}>
                     {options.map(option => {
                         const isSelected = value === option.value;
                         const isItemHovered = hoveredOption === option.value;
