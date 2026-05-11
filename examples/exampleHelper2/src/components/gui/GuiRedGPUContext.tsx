@@ -16,25 +16,25 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         const contextFolder = gui.addFolder({title: 'RedGPUContext'});
 
         // Render Scale
-        contextFolder.addInput(redGPUContext, 'renderScale', {min: 0.01, max: 1, step: 0.01});
+        contextFolder.addBinding(redGPUContext, 'renderScale', {min: 0.01, max: 1, step: 0.01});
 
-        contextFolder.addSeparator();
+        contextFolder.addBlade({view: 'separator'});
 
         // Background Color
         if (redGPUContext.backgroundColor) {
             addColorAlphaInputs(contextFolder, redGPUContext.backgroundColor);
-            contextFolder.addSeparator();
+            contextFolder.addBlade({view: 'separator'});
         }
 
         // Alpha Mode
-        contextFolder.addInput(redGPUContext, 'alphaMode', {
+        contextFolder.addBinding(redGPUContext, 'alphaMode', {
             options: {
                 opaque: 'opaque',
                 premultiplied: 'premultiplied'
             }
         });
 
-        contextFolder.addSeparator();
+        contextFolder.addBlade({view: 'separator'});
 
         // Size Management
         const initialWidth = parseSize(redGPUContext.width);
@@ -52,14 +52,14 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         const updateWidth = () => {
             redGPUContext.width = SIZE_DATA.widthUnit === 'number' ? SIZE_DATA.width : `${SIZE_DATA.width}${SIZE_DATA.widthUnit}`;
         };
-        const widthController = sizeFolder.addInput(SIZE_DATA, 'width', {
+        const widthController = sizeFolder.addBinding(SIZE_DATA, 'width', {
             min: 0, 
             max: initialWidth.unit === '%' ? 200 : 4096, 
             step: 0.01
         });
         widthController.on('change', updateWidth);
 
-        sizeFolder.addInput(SIZE_DATA, 'widthUnit', {
+        sizeFolder.addBinding(SIZE_DATA, 'widthUnit', {
             options: { '%': '%', 'px': 'px', 'number': 'number' }
         }).on('change', (ev) => {
             // Tweakpane 3.x doesn't support dynamic max change easily on input, 
@@ -70,14 +70,14 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         const updateHeight = () => {
             redGPUContext.height = SIZE_DATA.heightUnit === 'number' ? SIZE_DATA.height : `${SIZE_DATA.height}${SIZE_DATA.heightUnit}`;
         };
-        const heightController = sizeFolder.addInput(SIZE_DATA, 'height', {
+        const heightController = sizeFolder.addBinding(SIZE_DATA, 'height', {
             min: 0, 
             max: initialHeight.unit === '%' ? 200 : 4096, 
             step: 0.01
         });
         heightController.on('change', updateHeight);
 
-        sizeFolder.addInput(SIZE_DATA, 'heightUnit', {
+        sizeFolder.addBinding(SIZE_DATA, 'heightUnit', {
             options: { '%': '%', 'px': 'px', 'number': 'number' }
         }).on('change', () => {
             updateHeight();
@@ -91,7 +91,7 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
             setSizeFolder.addButton({title: label}).on('click', () => redGPUContext.setSize(w, h));
         });
 
-        contextFolder.addSeparator();
+        contextFolder.addBlade({view: 'separator'});
 
         // Rect Info (Folder)
         const rectFolder = contextFolder.addFolder({title: 'Rect Info', expanded: true});
@@ -99,7 +99,7 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         const DPR_DATA = {
             get dpr() { return window.devicePixelRatio; }
         };
-        rectFolder.addMonitor(DPR_DATA, 'dpr', {label: 'DPR', interval: 500});
+        rectFolder.addBinding(DPR_DATA, 'dpr', {readonly: true, label: 'DPR', interval: 500});
 
         const RECT_DATA = {
             get screen() {
@@ -112,17 +112,19 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
             }
         };
 
-        rectFolder.addMonitor(RECT_DATA, 'screen', {
+        rectFolder.addBinding(RECT_DATA, 'screen', {
+            readonly: true,
             label: 'Screen Rect',
             multiline: true,
-            lineCount: 2,
+            rows: 2,
             interval: 32
         });
 
-        rectFolder.addMonitor(RECT_DATA, 'pixel', {
+        rectFolder.addBinding(RECT_DATA, 'pixel', {
+            readonly: true,
             label: 'Pixel Rect',
             multiline: true,
-            lineCount: 2,
+            rows: 2,
             interval: 32
         });
 

@@ -26,7 +26,7 @@ export const addColorAlphaInputs = (container: any, colorObject: any, labelPrefi
 
     // [KO] 6자리 HEX 컬러 픽커 추가
     // [EN] Add 6-digit HEX color picker
-    container.addInput(colorProxy, 'color', {
+    container.addBinding(colorProxy, 'color', {
         label: `${labelPrefix} Color`,
         picker: 'inline',
         expanded: true,
@@ -35,7 +35,7 @@ export const addColorAlphaInputs = (container: any, colorObject: any, labelPrefi
     // [KO] 알파 슬라이더 별도 추가 (6자리 HEX 유지를 위해 분리)
     // [EN] Add separate Alpha slider (separated to maintain 6-digit HEX)
     if (hasAlpha) {
-        container.addInput(colorObject, 'a', {
+        container.addBinding(colorObject, 'a', {
             min: 0, 
             max: 1, 
             step: 0.01, 

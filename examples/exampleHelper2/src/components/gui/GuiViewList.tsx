@@ -23,11 +23,11 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
 
         const addViewControls = (view: any, container: any) => {
             // View Properties
-            container.addInput(view, 'useFrustumCulling');
-            container.addInput(view, 'useDistanceCulling');
-            container.addInput(view, 'distanceCulling', {min: 0, max: 1000, step: 1});
+            container.addBinding(view, 'useFrustumCulling');
+            container.addBinding(view, 'useDistanceCulling');
+            container.addBinding(view, 'distanceCulling', {min: 0, max: 1000, step: 1});
 
-            container.addSeparator();
+            container.addBlade({view: 'separator'});
 
             // Grid & Axis
             const debugFolder = container.addFolder({title: 'Debug Helpers'});
@@ -37,10 +37,10 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                 get axis() { return !!view.axis; },
                 set axis(v: boolean) { view.axis = v; }
             };
-            debugFolder.addInput(debugProxy, 'grid', {label: 'Show Grid'});
-            debugFolder.addInput(debugProxy, 'axis', {label: 'Show Axis'});
+            debugFolder.addBinding(debugProxy, 'grid', {label: 'Show Grid'});
+            debugFolder.addBinding(debugProxy, 'axis', {label: 'Show Axis'});
 
-            container.addSeparator();
+            container.addBlade({view: 'separator'});
 
             // Size & Position
             const SIZE_DATA = {
@@ -66,13 +66,13 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
             (['width', 'height', 'x', 'y'] as const).forEach((key) => {
                 const k = key;
                 const unitKey = `${k}Unit` as keyof typeof SIZE_DATA;
-                sizeFolder.addInput(SIZE_DATA, k, {
+                sizeFolder.addBinding(SIZE_DATA, k, {
                     min: 0, 
                     max: SIZE_DATA[unitKey] === '%' ? 200 : 4096, 
                     step: 0.01
                 }).on('change', () => updateDim(k));
 
-                sizeFolder.addInput(SIZE_DATA, unitKey, {
+                sizeFolder.addBinding(SIZE_DATA, unitKey, {
                     label: `${k} Unit`,
                     options: { '%': '%', 'px': 'px', 'number': 'number' }
                 }).on('change', () => updateDim(k));
