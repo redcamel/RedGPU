@@ -7326,98 +7326,6 @@ const optionItemStyle = {
   cursor: "pointer",
   transition: "background-color 0.1s, color 0.1s"
 };
-const IconToggleButton = ({ icon, label, isActive, onClick, title }) => {
-  const [isHovered, setIsHovered] = reactExports.useState(false);
-  const themeColor = "#fdb48d";
-  const mutedColor = "#666";
-  const activeBgColor = "#1c1c1e";
-  const activeHoverBgColor = "#252527";
-  const activeTextColor = themeColor;
-  const normalBgColor = "#111112";
-  const normalHoverBgColor = "#1a1a1c";
-  const normalTextColor = mutedColor;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "button",
-    {
-      style: {
-        ...baseButtonStyle$2,
-        width: icon ? "52px" : "auto",
-        padding: icon ? "0" : "0 20px",
-        backgroundColor: isActive ? isHovered ? activeHoverBgColor : activeBgColor : isHovered ? normalHoverBgColor : normalBgColor,
-        color: isActive ? activeTextColor : normalTextColor
-      },
-      onClick,
-      title: title || label,
-      onMouseEnter: () => setIsHovered(true),
-      onMouseLeave: () => setIsHovered(false),
-      children: icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "img",
-        {
-          src: icon,
-          style: {
-            ...iconStyle,
-            filter: isActive ? "none" : "grayscale(1)"
-          },
-          alt: label
-        }
-      ) : label
-    }
-  );
-};
-const baseButtonStyle$2 = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  height: "100%",
-  backgroundColor: "#111112",
-  color: "#fdb48d",
-  border: "none",
-  fontSize: "11px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "background-color 0.2s, color 0.2s",
-  letterSpacing: "0.05em",
-  flexShrink: 0,
-  boxSizing: "border-box"
-};
-const iconStyle = {
-  width: "24px",
-  height: "24px"
-};
-const LabelButton = ({ label, onClick, title, style }) => {
-  const [isHovered, setIsHovered] = reactExports.useState(false);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "button",
-    {
-      style: {
-        ...baseButtonStyle,
-        backgroundColor: isHovered ? "#1a1a1c" : "#111112",
-        ...style
-      },
-      onClick,
-      title: title || label,
-      onMouseEnter: () => setIsHovered(true),
-      onMouseLeave: () => setIsHovered(false),
-      children: label
-    }
-  );
-};
-const baseButtonStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  height: "100%",
-  padding: "0 20px",
-  backgroundColor: "#111112",
-  color: "#fdb48d",
-  border: "none",
-  fontSize: "11px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "background-color 0.2s, color 0.2s",
-  letterSpacing: "0.05em",
-  flexShrink: 0
-};
 const TONE_MAPPING_MODE = {
   /**
    * [KO] 선형 톤 매핑
@@ -7441,13 +7349,10 @@ const TONE_MAPPING_MODE = {
   ACES_FILMIC_NARKOWICZ: "ACESFilmicNarkowicz"
 };
 Object.freeze(TONE_MAPPING_MODE);
-const Footer = () => {
-  var _a;
-  const setShowSourceModal = useExampleHelperStore((state) => state.setShowSourceModal);
+const RenderingSettingsGroup = () => {
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
   const [antialiasing, setAntialiasing] = reactExports.useState("useMSAA");
   const [toneMapping, setToneMapping] = reactExports.useState(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
-  const [ssao, setSSAO] = reactExports.useState(false);
   reactExports.useEffect(() => {
     if (redGPUContext) {
       const aaManager = redGPUContext.antialiasingManager;
@@ -7459,9 +7364,6 @@ const Footer = () => {
         const firstView = redGPUContext.viewList[0];
         if (firstView.toneMappingManager) {
           setToneMapping(firstView.toneMappingManager.mode);
-        }
-        if (firstView.postEffectManager) {
-          setSSAO(firstView.postEffectManager.useSSAO);
         }
       }
     }
@@ -7488,17 +7390,6 @@ const Footer = () => {
       });
     }
   };
-  const handleSSAOChange = () => {
-    const nextValue = !ssao;
-    setSSAO(nextValue);
-    if (redGPUContext) {
-      redGPUContext.viewList.forEach((view) => {
-        if (view.postEffectManager) {
-          view.postEffectManager.useSSAO = nextValue;
-        }
-      });
-    }
-  };
   const aaOptions = [
     { value: "NONE", label: "NONE" },
     { value: "useMSAA", label: "MSAA" },
@@ -7509,36 +7400,82 @@ const Footer = () => {
     value,
     label: key.replace(/_/g, " ")
   }));
-  const isMobile = (_a = redGPUContext == null ? void 0 : redGPUContext.detector) == null ? void 0 : _a.isMobile;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SelectBox,
+      {
+        label: "TONE MAPPING",
+        value: toneMapping,
+        options: tmOptions,
+        onChange: handleToneMappingChange
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SelectBox,
+      {
+        label: "ANTIALIASING",
+        value: antialiasing,
+        options: aaOptions,
+        onChange: handleAntialiasingChange
+      }
+    )
+  ] });
+};
+const LabelButton = ({ label, isActive = true, onClick, title, style }) => {
+  const [isHovered, setIsHovered] = reactExports.useState(false);
+  const themeColor = "#fdb48d";
+  const mutedColor = "#666";
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      style: {
+        ...baseButtonStyle,
+        backgroundColor: isHovered ? "#1a1a1c" : "#111112",
+        color: isActive ? themeColor : mutedColor,
+        ...style
+      },
+      onClick,
+      title: title || label,
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+      children: label
+    }
+  );
+};
+const baseButtonStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100%",
+  padding: "0 20px",
+  backgroundColor: "#111112",
+  border: "none",
+  fontSize: "11px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "background-color 0.2s, color 0.2s",
+  letterSpacing: "0.05em",
+  flexShrink: 0
+};
+const useMediaQuery = (width) => {
+  const [targetReached, setTargetReached] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    const updateTarget = (e) => {
+      if (e.matches) setTargetReached(true);
+      else setTargetReached(false);
+    };
+    const media = window.matchMedia(`(max-width: ${width}px)`);
+    media.addEventListener("change", updateTarget);
+    if (media.matches) setTargetReached(true);
+    return () => media.removeEventListener("change", updateTarget);
+  }, [width]);
+  return targetReached;
+};
+const Footer = () => {
+  const setShowSourceModal = useExampleHelperStore((state) => state.setShowSourceModal);
+  const isNarrow = useMediaQuery(768);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerContainerStyle, children: [
-    isMobile && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: mobileSelectContainerStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        IconToggleButton,
-        {
-          label: "SSAO",
-          onClick: handleSSAOChange,
-          isActive: ssao
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        SelectBox,
-        {
-          label: "TONE MAPPING",
-          value: toneMapping,
-          options: tmOptions,
-          onChange: handleToneMappingChange
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        SelectBox,
-        {
-          label: "ANTIALIASING",
-          value: antialiasing,
-          options: aaOptions,
-          onChange: handleAntialiasingChange
-        }
-      )
-    ] }),
+    isNarrow && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: mobileSelectContainerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(RenderingSettingsGroup, {}) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerLeftStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { color: "#b19898", fontSize: "11px" }, children: [
@@ -7576,7 +7513,7 @@ const footerContainerStyle = {
 const mobileSelectContainerStyle = {
   display: "flex",
   height: "52px",
-  backgroundColor: "#111112",
+  backgroundColor: "#1e1e1e",
   borderTop: "1px solid #333",
   gap: "1px"
 };
@@ -7657,54 +7594,75 @@ const iconStyle$1 = {
   width: "18px",
   height: "18px"
 };
+const IconToggleButton = ({ icon, label, isActive, onClick, title }) => {
+  const [isHovered, setIsHovered] = reactExports.useState(false);
+  const themeColor = "#fdb48d";
+  const mutedColor = "#666";
+  const idleBgColor = "#111112";
+  const hoverBgColor = "#1a1a1c";
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      style: {
+        ...baseButtonStyle$2,
+        width: icon ? "52px" : "auto",
+        padding: icon ? "0" : "0 20px",
+        backgroundColor: isHovered ? hoverBgColor : idleBgColor,
+        color: isActive ? themeColor : mutedColor
+      },
+      onClick,
+      title: title || label,
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+      children: icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "img",
+        {
+          src: icon,
+          style: {
+            ...iconStyle,
+            filter: isActive ? "none" : "grayscale(1)"
+          },
+          alt: label
+        }
+      ) : label
+    }
+  );
+};
+const baseButtonStyle$2 = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100%",
+  backgroundColor: "#111112",
+  border: "none",
+  fontSize: "11px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "background-color 0.2s, color 0.2s",
+  letterSpacing: "0.05em",
+  flexShrink: 0,
+  boxSizing: "border-box"
+};
+const iconStyle = {
+  width: "24px",
+  height: "24px"
+};
 const ExampleHeader = () => {
-  var _a;
   const currentExample = useExampleHelperStore((state) => state.currentExample);
   const topBarRightActions = useExampleHelperStore((state) => state.topBarRightActions);
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
-  const [antialiasing, setAntialiasing] = reactExports.useState("useMSAA");
-  const [toneMapping, setToneMapping] = reactExports.useState(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
   const [ssao, setSSAO] = reactExports.useState(false);
+  const isNarrow = useMediaQuery(768);
   reactExports.useEffect(() => {
     if (redGPUContext) {
-      const aaManager = redGPUContext.antialiasingManager;
-      if (aaManager.useMSAA) setAntialiasing("useMSAA");
-      else if (aaManager.useFXAA) setAntialiasing("useFXAA");
-      else if (aaManager.useTAA) setAntialiasing("useTAA");
-      else setAntialiasing("NONE");
       if (redGPUContext.viewList.length > 0) {
         const firstView = redGPUContext.viewList[0];
-        if (firstView.toneMappingManager) {
-          setToneMapping(firstView.toneMappingManager.mode);
-        }
         if (firstView.postEffectManager) {
           setSSAO(firstView.postEffectManager.useSSAO);
         }
       }
     }
   }, [redGPUContext]);
-  const handleAntialiasingChange = (value) => {
-    setAntialiasing(value);
-    if (redGPUContext) {
-      const manager = redGPUContext.antialiasingManager;
-      manager.useMSAA = false;
-      manager.useFXAA = false;
-      manager.useTAA = false;
-      if (value === "useMSAA") manager.useMSAA = true;
-      else if (value === "useFXAA") manager.useFXAA = true;
-      else if (value === "useTAA") manager.useTAA = true;
-    }
-  };
-  const handleToneMappingChange = (value) => {
-    setToneMapping(value);
-    if (redGPUContext) {
-      redGPUContext.viewList.forEach((view) => {
-        if (view.toneMappingManager) {
-          view.toneMappingManager.mode = value;
-        }
-      });
-    }
-  };
   const handleSSAOChange = () => {
     const nextValue = !ssao;
     setSSAO(nextValue);
@@ -7716,17 +7674,6 @@ const ExampleHeader = () => {
       });
     }
   };
-  const aaOptions = [
-    { value: "NONE", label: "NONE" },
-    { value: "useMSAA", label: "MSAA" },
-    { value: "useFXAA", label: "FXAA" },
-    { value: "useTAA", label: "TAA" }
-  ];
-  const tmOptions = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => ({
-    value,
-    label: key.replace(/_/g, " ")
-  }));
-  const isMobile = (_a = redGPUContext == null ? void 0 : redGPUContext.detector) == null ? void 0 : _a.isMobile;
   return /* @__PURE__ */ jsxRuntimeExports.jsx("header", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: navBarStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: leftSectionStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -7746,34 +7693,17 @@ const ExampleHeader = () => {
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: rightSectionStyle, children: [
-      !isMobile && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      !isNarrow && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
-          SelectBox,
+          IconToggleButton,
           {
-            label: "TONE MAPPING",
-            value: toneMapping,
-            options: tmOptions,
-            onChange: handleToneMappingChange
+            label: "SSAO",
+            onClick: handleSSAOChange,
+            isActive: ssao
           }
         ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          SelectBox,
-          {
-            label: "ANTIALIASING",
-            value: antialiasing,
-            options: aaOptions,
-            onChange: handleAntialiasingChange
-          }
-        )
+        /* @__PURE__ */ jsxRuntimeExports.jsx(RenderingSettingsGroup, {})
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        IconToggleButton,
-        {
-          label: "SSAO",
-          onClick: handleSSAOChange,
-          isActive: ssao
-        }
-      ),
       topBarRightActions.map((action) => /* @__PURE__ */ jsxRuntimeExports.jsx(
         IconToggleButton,
         {

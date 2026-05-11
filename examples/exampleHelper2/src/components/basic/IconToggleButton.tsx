@@ -18,13 +18,8 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({ icon, label, isActi
     const themeColor = '#fdb48d';
     const mutedColor = '#666';
 
-    const activeBgColor = '#1c1c1e';
-    const activeHoverBgColor = '#252527';
-    const activeTextColor = themeColor;
-
-    const normalBgColor = '#111112';
-    const normalHoverBgColor = '#1a1a1c';
-    const normalTextColor = mutedColor;
+    const idleBgColor = '#111112';
+    const hoverBgColor = '#1a1a1c';
 
     return (
         <button
@@ -32,10 +27,8 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({ icon, label, isActi
                 ...baseButtonStyle,
                 width: icon ? '52px' : 'auto',
                 padding: icon ? '0' : '0 20px',
-                backgroundColor: isActive 
-                    ? (isHovered ? activeHoverBgColor : activeBgColor) 
-                    : (isHovered ? normalHoverBgColor : normalBgColor),
-                color: isActive ? activeTextColor : normalTextColor,
+                backgroundColor: isHovered ? hoverBgColor : idleBgColor,
+                color: isActive ? themeColor : mutedColor,
             }}
             onClick={onClick}
             title={title || label}
@@ -64,7 +57,6 @@ const baseButtonStyle: React.CSSProperties = {
     justifyContent: 'center',
     height: '100%',
     backgroundColor: '#111112',
-    color: '#fdb48d',
     border: 'none',
     fontSize: '11px',
     fontWeight: 'bold',

@@ -1,10 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../store';
 import githubIcon from '../assets/github.png';
-import SelectBox from './basic/SelectBox';
-import IconToggleButton from './basic/IconToggleButton';
+import RenderingSettingsGroup from './RenderingSettingsGroup';
 import LabelButton from './basic/LabelButton';
-import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
+import {useMediaQuery} from '../utils/useMediaQuery';
 
 /**
  * [KO] 예제 헬퍼의 하단 푸터 컴포넌트입니다.
@@ -12,105 +11,13 @@ import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
  */
 const Footer = () => {
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
-    const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
-
-    const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
-    const [toneMapping, setToneMapping] = useState<string>(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
-    const [ssao, setSSAO] = useState<boolean>(false);
-
-    useEffect(() => {
-        if (redGPUContext) {
-            const aaManager = redGPUContext.antialiasingManager;
-            if (aaManager.useMSAA) setAntialiasing('useMSAA');
-            else if (aaManager.useFXAA) setAntialiasing('useFXAA');
-            else if (aaManager.useTAA) setAntialiasing('useTAA');
-            else setAntialiasing('NONE');
-
-            if (redGPUContext.viewList.length > 0) {
-                const firstView = redGPUContext.viewList[0];
-                if (firstView.toneMappingManager) {
-                    setToneMapping(firstView.toneMappingManager.mode);
-                }
-                if (firstView.postEffectManager) {
-                    setSSAO(firstView.postEffectManager.useSSAO);
-                }
-            }
-        }
-    }, [redGPUContext]);
-
-    const handleAntialiasingChange = (value: string) => {
-        setAntialiasing(value);
-        if (redGPUContext) {
-            const manager = redGPUContext.antialiasingManager;
-            manager.useMSAA = false;
-            manager.useFXAA = false;
-            manager.useTAA = false;
-            if (value === 'useMSAA') manager.useMSAA = true;
-            else if (value === 'useFXAA') manager.useFXAA = true;
-            else if (value === 'useTAA') manager.useTAA = true;
-        }
-    };
-
-    const handleToneMappingChange = (value: string) => {
-        setToneMapping(value);
-        if (redGPUContext) {
-            redGPUContext.viewList.forEach((view: any) => {
-                if (view.toneMappingManager) {
-                    view.toneMappingManager.mode = value as TONE_MAPPING_MODE;
-                }
-            });
-        }
-    };
-
-    const handleSSAOChange = () => {
-        const nextValue = !ssao;
-        setSSAO(nextValue);
-        if (redGPUContext) {
-            redGPUContext.viewList.forEach((view: any) => {
-                if (view.postEffectManager) {
-                    view.postEffectManager.useSSAO = nextValue;
-                }
-            });
-        }
-    };
-
-    const aaOptions = [
-        { value: 'NONE', label: 'NONE' },
-        { value: 'useMSAA', label: 'MSAA' },
-        { value: 'useFXAA', label: 'FXAA' },
-        { value: 'useTAA', label: 'TAA' },
-    ];
-
-    const tmOptions = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => ({
-        value,
-        label: key.replace(/_/g, ' ')
-    }));
-
-    const isMobile = redGPUContext?.detector?.isMobile;
+    const isNarrow = useMediaQuery(768);
 
     return (
         <div style={footerContainerStyle}>
-            {isMobile && (
+            {isNarrow && (
                 <div style={mobileSelectContainerStyle}>
-                    <IconToggleButton
-                        label="SSAO"
-                        onClick={handleSSAOChange}
-                        isActive={ssao}
-                    />
-
-                    <SelectBox
-                        label="TONE MAPPING"
-                        value={toneMapping}
-                        options={tmOptions}
-                        onChange={handleToneMappingChange}
-                    />
-
-                    <SelectBox
-                        label="ANTIALIASING"
-                        value={antialiasing}
-                        options={aaOptions}
-                        onChange={handleAntialiasingChange}
-                    />
+                    <RenderingSettingsGroup />
                 </div>
             )}
             <div style={footerStyle}>
@@ -147,7 +54,7 @@ const footerContainerStyle: React.CSSProperties = {
 const mobileSelectContainerStyle: React.CSSProperties = {
     display: 'flex',
     height: '52px',
-    backgroundColor: '#111112',
+    backgroundColor: '#1e1e1e',
     borderTop: '1px solid #333',
     gap: '1px'
 };

@@ -3,8 +3,8 @@ import {ExampleHelperState, useExampleHelperStore} from '../store';
 import homeIcon from '../assets/icons/home.svg';
 import IconButton from './basic/IconButton';
 import IconToggleButton from './basic/IconToggleButton';
-import SelectBox from './basic/SelectBox';
-import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
+import RenderingSettingsGroup from './RenderingSettingsGroup';
+import {useMediaQuery} from '../utils/useMediaQuery';
 
 /**
  * [KO] 예제 헬퍼의 상단 네비게이션 바 컴포넌트입니다.
@@ -15,53 +15,20 @@ const ExampleHeader = () => {
     const topBarRightActions = useExampleHelperStore((state: ExampleHelperState) => state.topBarRightActions);
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
 
-    const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
-    const [toneMapping, setToneMapping] = useState<string>(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
     const [ssao, setSSAO] = useState<boolean>(false);
+
+    const isNarrow = useMediaQuery(768);
 
     useEffect(() => {
         if (redGPUContext) {
-            const aaManager = redGPUContext.antialiasingManager;
-            if (aaManager.useMSAA) setAntialiasing('useMSAA');
-            else if (aaManager.useFXAA) setAntialiasing('useFXAA');
-            else if (aaManager.useTAA) setAntialiasing('useTAA');
-            else setAntialiasing('NONE');
-
             if (redGPUContext.viewList.length > 0) {
                 const firstView = redGPUContext.viewList[0];
-                if (firstView.toneMappingManager) {
-                    setToneMapping(firstView.toneMappingManager.mode);
-                }
                 if (firstView.postEffectManager) {
                     setSSAO(firstView.postEffectManager.useSSAO);
                 }
             }
         }
     }, [redGPUContext]);
-
-    const handleAntialiasingChange = (value: string) => {
-        setAntialiasing(value);
-        if (redGPUContext) {
-            const manager = redGPUContext.antialiasingManager;
-            manager.useMSAA = false;
-            manager.useFXAA = false;
-            manager.useTAA = false;
-            if (value === 'useMSAA') manager.useMSAA = true;
-            else if (value === 'useFXAA') manager.useFXAA = true;
-            else if (value === 'useTAA') manager.useTAA = true;
-        }
-    };
-
-    const handleToneMappingChange = (value: string) => {
-        setToneMapping(value);
-        if (redGPUContext) {
-            redGPUContext.viewList.forEach((view: any) => {
-                if (view.toneMappingManager) {
-                    view.toneMappingManager.mode = value as TONE_MAPPING_MODE;
-                }
-            });
-        }
-    };
 
     const handleSSAOChange = () => {
         const nextValue = !ssao;
@@ -74,20 +41,6 @@ const ExampleHeader = () => {
             });
         }
     };
-
-    const aaOptions = [
-        { value: 'NONE', label: 'NONE' },
-        { value: 'useMSAA', label: 'MSAA' },
-        { value: 'useFXAA', label: 'FXAA' },
-        { value: 'useTAA', label: 'TAA' },
-    ];
-
-    const tmOptions = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => ({
-        value,
-        label: key.replace(/_/g, ' ')
-    }));
-
-    const isMobile = redGPUContext?.detector?.isMobile;
 
     return (
         <header style={containerStyle}>
@@ -108,30 +61,18 @@ const ExampleHeader = () => {
                 </div>
 
                 <div style={rightSectionStyle}>
-                    {!isMobile && (
+                    {!isNarrow && (
                         <>
-
-
-                            <SelectBox
-                                label="TONE MAPPING"
-                                value={toneMapping}
-                                options={tmOptions}
-                                onChange={handleToneMappingChange}
+                            <IconToggleButton
+                                label="SSAO"
+                                onClick={handleSSAOChange}
+                                isActive={ssao}
                             />
 
-                            <SelectBox
-                                label="ANTIALIASING"
-                                value={antialiasing}
-                                options={aaOptions}
-                                onChange={handleAntialiasingChange}
-                            />
+                            <RenderingSettingsGroup />
                         </>
                     )}
-                    <IconToggleButton
-                        label="SSAO"
-                        onClick={handleSSAOChange}
-                        isActive={ssao}
-                    />
+
                     {topBarRightActions.map((action) => (
                         <IconToggleButton
                             key={action.id}
@@ -181,19 +122,6 @@ const rightSectionStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'stretch',
     gap: '1px'
-};
-
-const homeButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '52px',
-    height: '100%',
-    backgroundColor: '#111112',
-    color: 'white',
-    textDecoration: 'none',
-    transition: 'background-color 0.2s',
-    flexShrink: 0
 };
 
 const homeIconStyle: React.CSSProperties = {
