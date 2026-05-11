@@ -49,7 +49,7 @@ const ExampleHeader = () => {
                     <IconButton
                         icon={homeIcon}
                         label="HOME"
-                        onClick={() => { window.location.href = '../../index.html' }}
+                        onClick={() => { window.location.href = '/RedGPU/examples/index.html' }}
                         title="HOME"
                     />
                     <div style={titleBoxStyle}>

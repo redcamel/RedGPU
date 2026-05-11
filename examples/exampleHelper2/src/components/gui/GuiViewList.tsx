@@ -14,32 +14,26 @@ interface GuiViewListProps {
 const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
     useEffect(() => {
         const views = redGPUContext.viewList;
-        const rootFolder = gui.addFolder({title: 'ViewList'});
-
         if (views.length === 0) return;
 
-        // Use Tab for multiple views
-        const tab = (rootFolder as any).addTab({
-            pages: views.map((view: any, index: number) => ({
-                title: view.name?.replace(/Instance/g, '') || `View ${index}`
-            }))
-        });
+        const title = views.length === 1 
+            ? (views[0].name?.replace(/Instance/g, '') || 'View 0')
+            : 'ViewList';
+        const rootFolder = gui.addFolder({title});
 
-        views.forEach((view: any, index: number) => {
-            const page = tab.pages[index];
-
+        const addViewControls = (view: any, container: any) => {
             // View Properties
-            page.addInput(view, 'useFrustumCulling');
-            page.addInput(view, 'useDistanceCulling');
-            page.addInput(view, 'distanceCulling', {min: 0, max: 1000, step: 1});
+            container.addInput(view, 'useFrustumCulling');
+            container.addInput(view, 'useDistanceCulling');
+            container.addInput(view, 'distanceCulling', {min: 0, max: 1000, step: 1});
 
             // Grid & Axis
-            const debugFolder = page.addFolder({title: 'Debug Helpers'});
+            const debugFolder = container.addFolder({title: 'Debug Helpers'});
             const debugProxy = {
                 get grid() { return !!view.grid; },
-                set grid(v) { view.grid = v; },
+                set grid(v: boolean) { view.grid = v; },
                 get axis() { return !!view.axis; },
-                set axis(v) { view.axis = v; }
+                set axis(v: boolean) { view.axis = v; }
             };
             debugFolder.addInput(debugProxy, 'grid', {label: 'Show Grid'});
             debugFolder.addInput(debugProxy, 'axis', {label: 'Show Axis'});
@@ -64,7 +58,7 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                 yUnit: parseSize(view.y).unit,
             };
 
-            const sizeFolder = page.addFolder({title: 'Size & Position'});
+            const sizeFolder = container.addFolder({title: 'Size & Position'});
             
             const updateDim = (key: 'width' | 'height' | 'x' | 'y') => {
                 const unitKey = `${key}Unit` as keyof typeof SIZE_DATA;
@@ -73,8 +67,8 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                 (view as any)[key] = unit === 'number' ? value : `${value}${unit}`;
             };
 
-            ['width', 'height', 'x', 'y'].forEach((key) => {
-                const k = key as 'width' | 'height' | 'x' | 'y';
+            (['width', 'height', 'x', 'y'] as const).forEach((key) => {
+                const k = key;
                 const unitKey = `${k}Unit` as keyof typeof SIZE_DATA;
                 sizeFolder.addInput(SIZE_DATA, k, {
                     min: 0, 
@@ -91,7 +85,7 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
             // Scene Folder
             if (view.scene) {
                 const scene = view.scene;
-                const sceneFolder = page.addFolder({title: `Scene: ${scene.name || 'Untitled'}`});
+                const sceneFolder = container.addFolder({title: `Scene: ${scene.name || 'Untitled'}`});
                 
                 sceneFolder.addInput(scene, 'useBackgroundColor');
                 
@@ -109,7 +103,22 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                     sceneFolder.addInput(bg, 'a', {min: 0, max: 1, step: 0.01, label: 'BG Alpha'});
                 }
             }
-        });
+        };
+
+        if (views.length === 1) {
+            addViewControls(views[0], rootFolder);
+        } else {
+            // Use Tab for multiple views
+            const tab = (rootFolder as any).addTab({
+                pages: views.map((view: any, index: number) => ({
+                    title: view.name?.replace(/Instance/g, '') || `View ${index}`
+                }))
+            });
+
+            views.forEach((view: any, index: number) => {
+                addViewControls(view, tab.pages[index]);
+            });
+        }
 
         return () => {
             rootFolder.dispose();
