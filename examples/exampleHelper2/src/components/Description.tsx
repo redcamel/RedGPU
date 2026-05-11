@@ -9,6 +9,7 @@ const Description = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
     const language = useExampleHelperStore((state: ExampleHelperState) => state.language);
     const setLanguage = useExampleHelperStore((state: ExampleHelperState) => state.setLanguage);
+    const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
 
     if (!currentExample || !currentExample.description) {
         return null;
@@ -18,7 +19,7 @@ const Description = () => {
     if (!description) return null;
 
     return (
-        <div style={containerStyle}>
+        <div style={{...containerStyle, right: showSettingsPanel ? '320px' : 0}}>
             <div style={contentStyle}>
                 <span dangerouslySetInnerHTML={{__html: description}}/>
             </div>

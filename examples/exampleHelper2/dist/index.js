@@ -7783,12 +7783,13 @@ const Description = () => {
   const currentExample = useExampleHelperStore((state) => state.currentExample);
   const language = useExampleHelperStore((state) => state.language);
   const setLanguage = useExampleHelperStore((state) => state.setLanguage);
+  const showSettingsPanel = useExampleHelperStore((state) => state.showSettingsPanel);
   if (!currentExample || !currentExample.description) {
     return null;
   }
   const description = currentExample.description[language] || currentExample.description["en"] || "";
   if (!description) return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...containerStyle, right: showSettingsPanel ? "320px" : 0 }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle$2, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { dangerouslySetInnerHTML: { __html: description } }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       "button",
@@ -9895,7 +9896,7 @@ const panelStyle = {
   backgroundColor: "rgba(17, 17, 18, 0.95)",
   color: "white",
   fontFamily: "monospace",
-  zIndex: 10001,
+  zIndex: 10002,
   boxShadow: "-10px 0 30px rgba(0,0,0,0.5)",
   borderLeft: "1px solid rgba(255,255,255,0.05)",
   overflow: "hidden"

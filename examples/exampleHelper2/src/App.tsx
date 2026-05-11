@@ -148,7 +148,7 @@ const panelStyle: React.CSSProperties = {
     backgroundColor: 'rgba(17, 17, 18, 0.95)',
     color: 'white',
     fontFamily: 'monospace',
-    zIndex: 10001,
+    zIndex: 10002,
     boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
     borderLeft: '1px solid rgba(255,255,255,0.05)',
     overflow: 'hidden'
