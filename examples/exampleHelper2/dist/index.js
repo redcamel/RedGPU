@@ -9716,25 +9716,17 @@ const GuiRedGPUContext = ({ gui, redGPUContext }) => {
     const contextFolder = gui.addFolder("RedGPUContext");
     contextFolder.add(redGPUContext, "renderScale", 0.01, 1, 0.01).name("Render Scale");
     if (redGPUContext.backgroundColor) {
+      const bg2 = redGPUContext.backgroundColor;
       const colorProxy = {
         get color() {
-          const c = redGPUContext.backgroundColor;
-          return [c.r * 255, c.g * 255, c.b * 255];
+          return bg2.hex;
         },
         set color(v2) {
-          redGPUContext.backgroundColor.r = v2[0] / 255;
-          redGPUContext.backgroundColor.g = v2[1] / 255;
-          redGPUContext.backgroundColor.b = v2[2] / 255;
-        },
-        get alpha() {
-          return redGPUContext.backgroundColor.a;
-        },
-        set alpha(v2) {
-          redGPUContext.backgroundColor.a = v2;
+          bg2.setColorByHEX(v2);
         }
       };
-      contextFolder.addColor(colorProxy, "color").name("BG Color");
-      contextFolder.add(colorProxy, "alpha", 0, 1, 0.01).name("BG Alpha");
+      contextFolder.addColor(colorProxy, "color").name("BG Color").listen();
+      contextFolder.add(bg2, "a", 0, 1, 0.01).name("BG Alpha").listen();
     }
     contextFolder.add(redGPUContext, "alphaMode", ["opaque", "premultiplied"]).name("Alpha Mode");
     const parseSize = (value) => {
@@ -9775,34 +9767,6 @@ const GuiRedGPUContext = ({ gui, redGPUContext }) => {
       const btnObj = { [label]: () => redGPUContext.setSize(w2, h) };
       setSizeFolder.add(btnObj, label);
     });
-    const debugFolder = contextFolder.addFolder("Debug").close();
-    const DEBUG_DATA = {
-      renderScale: "",
-      width: "",
-      height: "",
-      pixelRectArray: "",
-      pixelRectObject: "",
-      parentDomRect: ""
-    };
-    const debugControllers = [
-      debugFolder.add(DEBUG_DATA, "renderScale").name("renderScale").disable(),
-      debugFolder.add(DEBUG_DATA, "width").name("width").disable(),
-      debugFolder.add(DEBUG_DATA, "height").name("height").disable(),
-      debugFolder.add(DEBUG_DATA, "pixelRectArray").name("pixelRectArray").disable(),
-      debugFolder.add(DEBUG_DATA, "pixelRectObject").name("pixelRectObject").disable(),
-      debugFolder.add(DEBUG_DATA, "parentDomRect").name("parentDomRect").disable()
-    ];
-    const updateDebug = () => {
-      DEBUG_DATA.renderScale = String(redGPUContext.renderScale);
-      DEBUG_DATA.width = String(redGPUContext.width);
-      DEBUG_DATA.height = String(redGPUContext.height);
-      DEBUG_DATA.pixelRectArray = `[${redGPUContext.sizeManager.pixelRectArray.join(", ")}]`;
-      DEBUG_DATA.pixelRectObject = JSON.stringify(redGPUContext.pixelRectObject);
-      DEBUG_DATA.parentDomRect = JSON.stringify(redGPUContext.sizeManager.parentDomRect);
-      debugControllers.forEach((c) => c.updateDisplay());
-    };
-    gui.onChange(updateDebug);
-    updateDebug();
     return () => {
       contextFolder.destroy();
     };
