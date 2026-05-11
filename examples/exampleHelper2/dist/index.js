@@ -7431,14 +7431,16 @@ const LabelButton = ({ label, isActive = true, onClick, title, style }) => {
         ...baseButtonStyle$2,
         backgroundColor: isHovered ? "#1a1a1c" : "#111112",
         color: themeColor,
-        opacity: isActive ? 1 : 0.5,
         ...style
       },
       onClick,
       title: title || label,
       onMouseEnter: () => setIsHovered(true),
       onMouseLeave: () => setIsHovered(false),
-      children: label
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+        opacity: isActive ? 1 : 0.4,
+        transition: "opacity 0.2s"
+      }, children: label })
     }
   );
 };
@@ -7607,21 +7609,28 @@ const IconToggleButton = ({ icon, label, isActive, onClick, title }) => {
         width: icon ? "52px" : "auto",
         padding: icon ? "0" : "0 20px",
         backgroundColor: isHovered ? hoverBgColor : idleBgColor,
-        color: themeColor,
-        opacity: isActive ? 1 : 0.25
+        color: themeColor
       },
       onClick,
       title: title || label,
       onMouseEnter: () => setIsHovered(true),
       onMouseLeave: () => setIsHovered(false),
-      children: icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+        opacity: isActive ? 1 : 0.2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+        transition: "opacity 0.2s"
+      }, children: icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
         "img",
         {
           src: icon,
           style: iconStyle,
           alt: label
         }
-      ) : label
+      ) : label })
     }
   );
 };
@@ -7718,7 +7727,7 @@ const containerStyle$1 = {
   left: 0,
   right: 0,
   height: "52px",
-  backgroundColor: "#1a1a1a",
+  backgroundColor: "#111112",
   borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
   zIndex: 10003,
   display: "flex",

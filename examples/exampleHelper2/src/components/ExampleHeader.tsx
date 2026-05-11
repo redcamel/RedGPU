@@ -95,7 +95,7 @@ const containerStyle: React.CSSProperties = {
     left: 0,
     right: 0,
     height: '52px',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#111112',
     borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
     zIndex: 10003,
     display: 'flex',

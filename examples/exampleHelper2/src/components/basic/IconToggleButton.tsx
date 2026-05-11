@@ -28,22 +28,31 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({ icon, label, isActi
                 padding: icon ? '0' : '0 20px',
                 backgroundColor: isHovered ? hoverBgColor : idleBgColor,
                 color: themeColor,
-                opacity: isActive ? 1 : 0.25
             }}
             onClick={onClick}
             title={title || label}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {icon ? (
-                <img 
-                    src={icon} 
-                    style={iconStyle} 
-                    alt={label} 
-                />
-            ) : (
-                label
-            )}
+            <div style={{
+                opacity: isActive ? 1 : 0.2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+                transition: 'opacity 0.2s'
+            }}>
+                {icon ? (
+                    <img
+                        src={icon}
+                        style={iconStyle}
+                        alt={label}
+                    />
+                ) : (
+                    label
+                )}
+            </div>
         </button>
     );
 };

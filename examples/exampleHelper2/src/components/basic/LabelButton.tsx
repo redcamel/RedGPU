@@ -22,7 +22,6 @@ const LabelButton: React.FC<LabelButtonProps> = ({ label, isActive = true, onCli
                 ...baseButtonStyle,
                 backgroundColor: isHovered ? '#1a1a1c' : '#111112',
                 color: themeColor,
-                opacity: isActive ? 1 : 0.5,
                 ...style
             }}
             onClick={onClick}
@@ -30,7 +29,12 @@ const LabelButton: React.FC<LabelButtonProps> = ({ label, isActive = true, onCli
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {label}
+            <span style={{
+                opacity: isActive ? 1 : 0.4,
+                transition: 'opacity 0.2s'
+            }}>
+                {label}
+            </span>
         </button>
     );
 };
