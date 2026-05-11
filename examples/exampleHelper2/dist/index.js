@@ -7168,11 +7168,14 @@ const useExampleHelperStore = create((set) => ({
   currentExample: null,
   language: typeof navigator !== "undefined" && navigator.language.startsWith("ko") ? "ko" : "en",
   showSourceModal: false,
+  showSettingsPanel: false,
   topBarRightActions: [],
+  guiCallback: null,
   setRedGPUContext: (value) => set({ redGPUContext: value }),
   setCurrentExample: (value) => set({ currentExample: value }),
   setLanguage: (value) => set({ language: value }),
   setShowSourceModal: (value) => set({ showSourceModal: value }),
+  setShowSettingsPanel: (value) => set({ showSettingsPanel: value }),
   addTopBarRightAction: (action) => set((state) => {
     const filtered = state.topBarRightActions.filter((a) => a.id !== action.id);
     return { topBarRightActions: [...filtered, action] };
@@ -7180,7 +7183,10 @@ const useExampleHelperStore = create((set) => ({
   removeTopBarRightAction: (id2) => set((state) => ({
     topBarRightActions: state.topBarRightActions.filter((a) => a.id !== id2)
   })),
-  clearTopBarRightActions: () => set({ topBarRightActions: [] })
+  clearTopBarRightActions: () => set({ topBarRightActions: [] }),
+  setGuiCallback: (callback) => {
+    set({ guiCallback: callback, showSettingsPanel: !!callback });
+  }
 }));
 const githubIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MzMwNDE5NjAwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MzMwNDE5NjEwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDozMzA0MTk1RTBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDozMzA0MTk1RjBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Ppk8MxEAAAy3SURBVHja5Ft7VJRl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";
 const SelectBox = ({ label, value, options, onChange }) => {
@@ -7990,9 +7996,1801 @@ const codeStyle = {
 const debugIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3cpath%20d='M224%20160C224%20107%20267%2064%20320%2064C373%2064%20416%20107%20416%20160L416%20163.6C416%20179.3%20403.3%20192%20387.6%20192L252.5%20192C236.8%20192%20224.1%20179.3%20224.1%20163.6L224.1%20160zM569.6%20172.8C580.2%20186.9%20577.3%20207%20563.2%20217.6L465.4%20290.9C470.7%20299.8%20474.7%20309.6%20477.2%20320L576%20320C593.7%20320%20608%20334.3%20608%20352C608%20369.7%20593.7%20384%20576%20384L480%20384L480%20416C480%20418.6%20479.9%20421.3%20479.8%20423.9L563.2%20486.4C577.3%20497%20580.2%20517.1%20569.6%20531.2C559%20545.3%20538.9%20548.2%20524.8%20537.6L461.7%20490.3C438.5%20534.5%20395.2%20566.5%20344%20574.2L344%20344C344%20330.7%20333.3%20320%20320%20320C306.7%20320%20296%20330.7%20296%20344L296%20574.2C244.8%20566.5%20201.5%20534.5%20178.3%20490.3L115.2%20537.6C101.1%20548.2%2081%20545.3%2070.4%20531.2C59.8%20517.1%2062.7%20497%2076.8%20486.4L160.2%20423.9C160.1%20421.3%20160%20418.7%20160%20416L160%20384L64%20384C46.3%20384%2032%20369.7%2032%20352C32%20334.3%2046.3%20320%2064%20320L162.8%20320C165.3%20309.6%20169.3%20299.8%20174.6%20290.9L76.8%20217.6C62.7%20207%2059.8%20186.9%2070.4%20172.8C81%20158.7%20101.1%20155.8%20115.2%20166.4L224%20248C236.3%20242.9%20249.8%20240%20264%20240L376%20240C390.2%20240%20403.7%20242.8%20416%20248L524.8%20166.4C538.9%20155.8%20559%20158.7%20569.6%20172.8z'/%3e%3c/svg%3e";
 const axisIcon = "data:image/svg+xml,%3csvg%20fill='%23ccc'%20viewBox='0%200%2014%2014'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M6.995%201.802L6.258%203.981c.154.087.328.145.509.173v3.361l-.979.565v1.082L2.922%2010.818c-.118-.155-.256-.276-.408-.366L1%2012.198l2.255-.452c-.002-.177-.038-.356-.105-.528l2.827-1.632%201.021.589%201.021-.589%202.827%201.632c-.066.171-.102.351-.105.528L13%2012.192l-1.518-1.728c-.152.09-.29.211-.405.354l-2.869-1.656v-1.082l-.979-.565V4.154c.181-.028.355-.087.509-.173L6.995%201.802z'/%3e%3c/svg%3e";
 const gridIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3c!--%20외곽%20테두리%20--%3e%3cpath%20d='M160%2096C124.7%2096%2096%20124.7%2096%20160v320c0%2035.3%2028.7%2064%2064%2064h320c35.3%200%2064-28.7%2064-64V160c0-35.3-28.7-64-64-64H160zm0%2032h320c17.7%200%2032%2014.3%2032%2032v320c0%2017.7-14.3%2032-32%2032H160c-17.7%200-32-14.3-32-32V160c0-17.7%2014.3-32%2032-32z'/%3e%3c!--%20세로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='240'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='316'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='392'%20y='128'%20width='8'%20height='384'/%3e%3c!--%20가로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='128'%20y='240'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='316'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='392'%20width='384'%20height='8'/%3e%3c/svg%3e";
+const settingIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='%23ccc'%20viewBox='0%200%20640%20640'%3e%3c!--!Font%20Awesome%20Free%207.0.1%20by%20@fontawesome%20-%20https://fontawesome.com%20License%20-%20https://fontawesome.com/license/free%20Copyright%202025%20Fonticons,%20Inc.--%3e%3cpath%20d='M415.9%20274.5C428.1%20271.2%20440.9%20277%20446.4%20288.3L465%20325.9C475.3%20327.3%20485.4%20330.1%20494.9%20334L529.9%20310.7C540.4%20303.7%20554.3%20305.1%20563.2%20314L582.4%20333.2C591.3%20342.1%20592.7%20356.1%20585.7%20366.5L562.4%20401.4C564.3%20406.1%20566%20411%20567.4%20416.1C568.8%20421.2%20569.7%20426.2%20570.4%20431.3L608.1%20449.9C619.4%20455.5%20625.2%20468.3%20621.9%20480.4L614.9%20506.6C611.6%20518.7%20600.3%20526.9%20587.7%20526.1L545.7%20523.4C539.4%20531.5%20532.1%20539%20523.8%20545.4L526.5%20587.3C527.3%20599.9%20519.1%20611.3%20507%20614.5L480.8%20621.5C468.6%20624.8%20455.9%20619%20450.3%20607.7L431.7%20570.1C421.4%20568.7%20411.3%20565.9%20401.8%20562L366.8%20585.3C356.3%20592.3%20342.4%20590.9%20333.5%20582L314.3%20562.8C305.4%20553.9%20304%20540%20311%20529.5L334.3%20494.5C332.4%20489.8%20330.7%20484.9%20329.3%20479.8C327.9%20474.7%20327%20469.6%20326.3%20464.6L288.6%20446C277.3%20440.4%20271.6%20427.6%20274.8%20415.5L281.8%20389.3C285.1%20377.2%20296.4%20369%20309%20369.8L350.9%20372.5C357.2%20364.4%20364.5%20356.9%20372.8%20350.5L370.1%20308.7C369.3%20296.1%20377.5%20284.7%20389.6%20281.5L415.8%20274.5zM448.4%20404C424.1%20404%20404.4%20423.7%20404.5%20448.1C404.5%20472.4%20424.2%20492%20448.5%20492C472.8%20492%20492.5%20472.3%20492.5%20448C492.4%20423.6%20472.7%20404%20448.4%20404zM224.9%2018.5L251.1%2025.5C263.2%2028.8%20271.4%2040.2%20270.6%2052.7L267.9%2094.5C276.2%20100.9%20283.5%20108.3%20289.8%20116.5L331.8%20113.8C344.3%20113%20355.7%20121.2%20359%20133.3L366%20159.5C369.2%20171.6%20363.5%20184.4%20352.2%20190L314.5%20208.6C313.8%20213.7%20312.8%20218.8%20311.5%20223.8C310.2%20228.8%20308.4%20233.8%20306.5%20238.5L329.8%20273.5C336.8%20284%20335.4%20297.9%20326.5%20306.8L307.3%20326C298.4%20334.9%20284.5%20336.3%20274%20329.3L239%20306C229.5%20309.9%20219.4%20312.7%20209.1%20314.1L190.5%20351.7C184.9%20363%20172.1%20368.7%20160%20365.5L133.8%20358.5C121.6%20355.2%20113.5%20343.8%20114.3%20331.3L117%20289.4C108.7%20283%20101.4%20275.6%2095.1%20267.4L53.1%20270.1C40.6%20270.9%2029.2%20262.7%2025.9%20250.6L18.9%20224.4C15.7%20212.3%2021.4%20199.5%2032.7%20193.9L70.4%20175.3C71.1%20170.2%2072.1%20165.2%2073.4%20160.1C74.8%20155%2076.4%20150.1%2078.4%20145.4L55.1%20110.5C48.1%20100%2049.5%2086.1%2058.4%2077.2L77.6%2058C86.5%2049.1%20100.4%2047.7%20110.9%2054.7L145.9%2078C155.4%2074.1%20165.5%2071.3%20175.8%2069.9L194.4%2032.3C200%2021%20212.7%2015.3%20224.9%2018.5zM192.4%20148C168.1%20148%20148.4%20167.7%20148.4%20192C148.4%20216.3%20168.1%20236%20192.4%20236C216.7%20236%20236.4%20216.3%20236.4%20192C236.4%20167.7%20216.7%20148%20192.4%20148z'/%3e%3c/svg%3e";
+/**
+ * lil-gui
+ * https://lil-gui.georgealways.com
+ * @version 0.21.0
+ * @author George Michael Brower
+ * @license MIT
+ */
+class Controller {
+  constructor(parent, object, property, className, elementType = "div") {
+    this.parent = parent;
+    this.object = object;
+    this.property = property;
+    this._disabled = false;
+    this._hidden = false;
+    this.initialValue = this.getValue();
+    this.domElement = document.createElement(elementType);
+    this.domElement.classList.add("lil-controller");
+    this.domElement.classList.add(className);
+    this.$name = document.createElement("div");
+    this.$name.classList.add("lil-name");
+    Controller.nextNameID = Controller.nextNameID || 0;
+    this.$name.id = `lil-gui-name-${++Controller.nextNameID}`;
+    this.$widget = document.createElement("div");
+    this.$widget.classList.add("lil-widget");
+    this.$disable = this.$widget;
+    this.domElement.appendChild(this.$name);
+    this.domElement.appendChild(this.$widget);
+    this.domElement.addEventListener("keydown", (e) => e.stopPropagation());
+    this.domElement.addEventListener("keyup", (e) => e.stopPropagation());
+    this.parent.children.push(this);
+    this.parent.controllers.push(this);
+    this.parent.$children.appendChild(this.domElement);
+    this._listenCallback = this._listenCallback.bind(this);
+    this.name(property);
+  }
+  /**
+   * Sets the name of the controller and its label in the GUI.
+   * @param {string} name
+   * @returns {this}
+   */
+  name(name) {
+    this._name = name;
+    this.$name.textContent = name;
+    return this;
+  }
+  /**
+   * Pass a function to be called whenever the value is modified by this controller.
+   * The function receives the new value as its first parameter. The value of `this` will be the
+   * controller.
+   *
+   * For function controllers, the `onChange` callback will be fired on click, after the function
+   * executes.
+   * @param {Function} callback
+   * @returns {this}
+   * @example
+   * const controller = gui.add( object, 'property' );
+   *
+   * controller.onChange( function( v ) {
+   * 	console.log( 'The value is now ' + v );
+   * 	console.assert( this === controller );
+   * } );
+   */
+  onChange(callback) {
+    this._onChange = callback;
+    return this;
+  }
+  /**
+   * Calls the onChange methods of this controller and its parent GUI.
+   * @protected
+   */
+  _callOnChange() {
+    this.parent._callOnChange(this);
+    if (this._onChange !== void 0) {
+      this._onChange.call(this, this.getValue());
+    }
+    this._changed = true;
+  }
+  /**
+   * Pass a function to be called after this controller has been modified and loses focus.
+   * @param {Function} callback
+   * @returns {this}
+   * @example
+   * const controller = gui.add( object, 'property' );
+   *
+   * controller.onFinishChange( function( v ) {
+   * 	console.log( 'Changes complete: ' + v );
+   * 	console.assert( this === controller );
+   * } );
+   */
+  onFinishChange(callback) {
+    this._onFinishChange = callback;
+    return this;
+  }
+  /**
+   * Should be called by Controller when its widgets lose focus.
+   * @protected
+   */
+  _callOnFinishChange() {
+    if (this._changed) {
+      this.parent._callOnFinishChange(this);
+      if (this._onFinishChange !== void 0) {
+        this._onFinishChange.call(this, this.getValue());
+      }
+    }
+    this._changed = false;
+  }
+  /**
+   * Sets the controller back to its initial value.
+   * @returns {this}
+   */
+  reset() {
+    this.setValue(this.initialValue);
+    this._callOnFinishChange();
+    return this;
+  }
+  /**
+   * Enables this controller.
+   * @param {boolean} enabled
+   * @returns {this}
+   * @example
+   * controller.enable();
+   * controller.enable( false ); // disable
+   * controller.enable( controller._disabled ); // toggle
+   */
+  enable(enabled = true) {
+    return this.disable(!enabled);
+  }
+  /**
+   * Disables this controller.
+   * @param {boolean} disabled
+   * @returns {this}
+   * @example
+   * controller.disable();
+   * controller.disable( false ); // enable
+   * controller.disable( !controller._disabled ); // toggle
+   */
+  disable(disabled = true) {
+    if (disabled === this._disabled) return this;
+    this._disabled = disabled;
+    this.domElement.classList.toggle("lil-disabled", disabled);
+    this.$disable.toggleAttribute("disabled", disabled);
+    return this;
+  }
+  /**
+   * Shows the Controller after it's been hidden.
+   * @param {boolean} show
+   * @returns {this}
+   * @example
+   * controller.show();
+   * controller.show( false ); // hide
+   * controller.show( controller._hidden ); // toggle
+   */
+  show(show = true) {
+    this._hidden = !show;
+    this.domElement.style.display = this._hidden ? "none" : "";
+    return this;
+  }
+  /**
+   * Hides the Controller.
+   * @returns {this}
+   */
+  hide() {
+    return this.show(false);
+  }
+  /**
+   * Changes this controller into a dropdown of options.
+   *
+   * Calling this method on an option controller will simply update the options. However, if this
+   * controller was not already an option controller, old references to this controller are
+   * destroyed, and a new controller is added to the end of the GUI.
+   * @example
+   * // safe usage
+   *
+   * gui.add( obj, 'prop1' ).options( [ 'a', 'b', 'c' ] );
+   * gui.add( obj, 'prop2' ).options( { Big: 10, Small: 1 } );
+   * gui.add( obj, 'prop3' );
+   *
+   * // danger
+   *
+   * const ctrl1 = gui.add( obj, 'prop1' );
+   * gui.add( obj, 'prop2' );
+   *
+   * // calling options out of order adds a new controller to the end...
+   * const ctrl2 = ctrl1.options( [ 'a', 'b', 'c' ] );
+   *
+   * // ...and ctrl1 now references a controller that doesn't exist
+   * assert( ctrl2 !== ctrl1 )
+   * @param {object|Array} options
+   * @returns {Controller}
+   */
+  options(options) {
+    const controller = this.parent.add(this.object, this.property, options);
+    controller.name(this._name);
+    this.destroy();
+    return controller;
+  }
+  /**
+   * Sets the minimum value. Only works on number controllers.
+   * @param {number} min
+   * @returns {this}
+   */
+  min(min) {
+    return this;
+  }
+  /**
+   * Sets the maximum value. Only works on number controllers.
+   * @param {number} max
+   * @returns {this}
+   */
+  max(max) {
+    return this;
+  }
+  /**
+   * Values set by this controller will be rounded to multiples of `step`. Only works on number
+   * controllers.
+   * @param {number} step
+   * @returns {this}
+   */
+  step(step) {
+    return this;
+  }
+  /**
+   * Rounds the displayed value to a fixed number of decimals, without affecting the actual value
+   * like `step()`. Only works on number controllers.
+   * @example
+   * gui.add( object, 'property' ).listen().decimals( 4 );
+   * @param {number} decimals
+   * @returns {this}
+   */
+  decimals(decimals) {
+    return this;
+  }
+  /**
+   * Calls `updateDisplay()` every animation frame. Pass `false` to stop listening.
+   * @param {boolean} listen
+   * @returns {this}
+   */
+  listen(listen = true) {
+    this._listening = listen;
+    if (this._listenCallbackID !== void 0) {
+      cancelAnimationFrame(this._listenCallbackID);
+      this._listenCallbackID = void 0;
+    }
+    if (this._listening) {
+      this._listenCallback();
+    }
+    return this;
+  }
+  _listenCallback() {
+    this._listenCallbackID = requestAnimationFrame(this._listenCallback);
+    const curValue = this.save();
+    if (curValue !== this._listenPrevValue) {
+      this.updateDisplay();
+    }
+    this._listenPrevValue = curValue;
+  }
+  /**
+   * Returns `object[ property ]`.
+   * @returns {any}
+   */
+  getValue() {
+    return this.object[this.property];
+  }
+  /**
+   * Sets the value of `object[ property ]`, invokes any `onChange` handlers and updates the display.
+   * @param {any} value
+   * @returns {this}
+   */
+  setValue(value) {
+    if (this.getValue() !== value) {
+      this.object[this.property] = value;
+      this._callOnChange();
+      this.updateDisplay();
+    }
+    return this;
+  }
+  /**
+   * Updates the display to keep it in sync with the current value. Useful for updating your
+   * controllers when their values have been modified outside of the GUI.
+   * @returns {this}
+   */
+  updateDisplay() {
+    return this;
+  }
+  load(value) {
+    this.setValue(value);
+    this._callOnFinishChange();
+    return this;
+  }
+  save() {
+    return this.getValue();
+  }
+  /**
+   * Destroys this controller and removes it from the parent GUI.
+   */
+  destroy() {
+    this.listen(false);
+    this.parent.children.splice(this.parent.children.indexOf(this), 1);
+    this.parent.controllers.splice(this.parent.controllers.indexOf(this), 1);
+    this.parent.$children.removeChild(this.domElement);
+  }
+}
+class BooleanController extends Controller {
+  constructor(parent, object, property) {
+    super(parent, object, property, "lil-boolean", "label");
+    this.$input = document.createElement("input");
+    this.$input.setAttribute("type", "checkbox");
+    this.$input.setAttribute("aria-labelledby", this.$name.id);
+    this.$widget.appendChild(this.$input);
+    this.$input.addEventListener("change", () => {
+      this.setValue(this.$input.checked);
+      this._callOnFinishChange();
+    });
+    this.$disable = this.$input;
+    this.updateDisplay();
+  }
+  updateDisplay() {
+    this.$input.checked = this.getValue();
+    return this;
+  }
+}
+function normalizeColorString(string) {
+  let match, result;
+  if (match = string.match(/(#|0x)?([a-f0-9]{6})/i)) {
+    result = match[2];
+  } else if (match = string.match(/rgb\(\s*(\d*)\s*,\s*(\d*)\s*,\s*(\d*)\s*\)/)) {
+    result = parseInt(match[1]).toString(16).padStart(2, 0) + parseInt(match[2]).toString(16).padStart(2, 0) + parseInt(match[3]).toString(16).padStart(2, 0);
+  } else if (match = string.match(/^#?([a-f0-9])([a-f0-9])([a-f0-9])$/i)) {
+    result = match[1] + match[1] + match[2] + match[2] + match[3] + match[3];
+  }
+  if (result) {
+    return "#" + result;
+  }
+  return false;
+}
+const STRING = {
+  isPrimitive: true,
+  match: (v2) => typeof v2 === "string",
+  fromHexString: normalizeColorString,
+  toHexString: normalizeColorString
+};
+const INT = {
+  isPrimitive: true,
+  match: (v2) => typeof v2 === "number",
+  fromHexString: (string) => parseInt(string.substring(1), 16),
+  toHexString: (value) => "#" + value.toString(16).padStart(6, 0)
+};
+const ARRAY = {
+  isPrimitive: false,
+  match: (v2) => Array.isArray(v2) || ArrayBuffer.isView(v2),
+  fromHexString(string, target, rgbScale = 1) {
+    const int = INT.fromHexString(string);
+    target[0] = (int >> 16 & 255) / 255 * rgbScale;
+    target[1] = (int >> 8 & 255) / 255 * rgbScale;
+    target[2] = (int & 255) / 255 * rgbScale;
+  },
+  toHexString([r2, g, b], rgbScale = 1) {
+    rgbScale = 255 / rgbScale;
+    const int = r2 * rgbScale << 16 ^ g * rgbScale << 8 ^ b * rgbScale << 0;
+    return INT.toHexString(int);
+  }
+};
+const OBJECT = {
+  isPrimitive: false,
+  match: (v2) => Object(v2) === v2,
+  fromHexString(string, target, rgbScale = 1) {
+    const int = INT.fromHexString(string);
+    target.r = (int >> 16 & 255) / 255 * rgbScale;
+    target.g = (int >> 8 & 255) / 255 * rgbScale;
+    target.b = (int & 255) / 255 * rgbScale;
+  },
+  toHexString({ r: r2, g, b }, rgbScale = 1) {
+    rgbScale = 255 / rgbScale;
+    const int = r2 * rgbScale << 16 ^ g * rgbScale << 8 ^ b * rgbScale << 0;
+    return INT.toHexString(int);
+  }
+};
+const FORMATS = [STRING, INT, ARRAY, OBJECT];
+function getColorFormat(value) {
+  return FORMATS.find((format) => format.match(value));
+}
+class ColorController extends Controller {
+  constructor(parent, object, property, rgbScale) {
+    super(parent, object, property, "lil-color");
+    this.$input = document.createElement("input");
+    this.$input.setAttribute("type", "color");
+    this.$input.setAttribute("tabindex", -1);
+    this.$input.setAttribute("aria-labelledby", this.$name.id);
+    this.$text = document.createElement("input");
+    this.$text.setAttribute("type", "text");
+    this.$text.setAttribute("spellcheck", "false");
+    this.$text.setAttribute("aria-labelledby", this.$name.id);
+    this.$display = document.createElement("div");
+    this.$display.classList.add("lil-display");
+    this.$display.appendChild(this.$input);
+    this.$widget.appendChild(this.$display);
+    this.$widget.appendChild(this.$text);
+    this._format = getColorFormat(this.initialValue);
+    this._rgbScale = rgbScale;
+    this._initialValueHexString = this.save();
+    this._textFocused = false;
+    this.$input.addEventListener("input", () => {
+      this._setValueFromHexString(this.$input.value);
+    });
+    this.$input.addEventListener("blur", () => {
+      this._callOnFinishChange();
+    });
+    this.$text.addEventListener("input", () => {
+      const tryParse = normalizeColorString(this.$text.value);
+      if (tryParse) {
+        this._setValueFromHexString(tryParse);
+      }
+    });
+    this.$text.addEventListener("focus", () => {
+      this._textFocused = true;
+      this.$text.select();
+    });
+    this.$text.addEventListener("blur", () => {
+      this._textFocused = false;
+      this.updateDisplay();
+      this._callOnFinishChange();
+    });
+    this.$disable = this.$text;
+    this.updateDisplay();
+  }
+  reset() {
+    this._setValueFromHexString(this._initialValueHexString);
+    return this;
+  }
+  _setValueFromHexString(value) {
+    if (this._format.isPrimitive) {
+      const newValue = this._format.fromHexString(value);
+      this.setValue(newValue);
+    } else {
+      this._format.fromHexString(value, this.getValue(), this._rgbScale);
+      this._callOnChange();
+      this.updateDisplay();
+    }
+  }
+  save() {
+    return this._format.toHexString(this.getValue(), this._rgbScale);
+  }
+  load(value) {
+    this._setValueFromHexString(value);
+    this._callOnFinishChange();
+    return this;
+  }
+  updateDisplay() {
+    this.$input.value = this._format.toHexString(this.getValue(), this._rgbScale);
+    if (!this._textFocused) {
+      this.$text.value = this.$input.value.substring(1);
+    }
+    this.$display.style.backgroundColor = this.$input.value;
+    return this;
+  }
+}
+class FunctionController extends Controller {
+  constructor(parent, object, property) {
+    super(parent, object, property, "lil-function");
+    this.$button = document.createElement("button");
+    this.$button.appendChild(this.$name);
+    this.$widget.appendChild(this.$button);
+    this.$button.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.getValue().call(this.object);
+      this._callOnChange();
+    });
+    this.$button.addEventListener("touchstart", () => {
+    }, { passive: true });
+    this.$disable = this.$button;
+  }
+}
+class NumberController extends Controller {
+  constructor(parent, object, property, min, max, step) {
+    super(parent, object, property, "lil-number");
+    this._initInput();
+    this.min(min);
+    this.max(max);
+    const stepExplicit = step !== void 0;
+    this.step(stepExplicit ? step : this._getImplicitStep(), stepExplicit);
+    this.updateDisplay();
+  }
+  decimals(decimals) {
+    this._decimals = decimals;
+    this.updateDisplay();
+    return this;
+  }
+  min(min) {
+    this._min = min;
+    this._onUpdateMinMax();
+    return this;
+  }
+  max(max) {
+    this._max = max;
+    this._onUpdateMinMax();
+    return this;
+  }
+  step(step, explicit = true) {
+    this._step = step;
+    this._stepExplicit = explicit;
+    return this;
+  }
+  updateDisplay() {
+    const value = this.getValue();
+    if (this._hasSlider) {
+      let percent = (value - this._min) / (this._max - this._min);
+      percent = Math.max(0, Math.min(percent, 1));
+      this.$fill.style.width = percent * 100 + "%";
+    }
+    if (!this._inputFocused) {
+      this.$input.value = this._decimals === void 0 ? value : value.toFixed(this._decimals);
+    }
+    return this;
+  }
+  _initInput() {
+    this.$input = document.createElement("input");
+    this.$input.setAttribute("type", "text");
+    this.$input.setAttribute("aria-labelledby", this.$name.id);
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouch) {
+      this.$input.setAttribute("type", "number");
+      this.$input.setAttribute("step", "any");
+    }
+    this.$widget.appendChild(this.$input);
+    this.$disable = this.$input;
+    const onInput = () => {
+      let value = parseFloat(this.$input.value);
+      if (isNaN(value)) return;
+      if (this._stepExplicit) {
+        value = this._snap(value);
+      }
+      this.setValue(this._clamp(value));
+    };
+    const increment = (delta) => {
+      const value = parseFloat(this.$input.value);
+      if (isNaN(value)) return;
+      this._snapClampSetValue(value + delta);
+      this.$input.value = this.getValue();
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Enter") {
+        this.$input.blur();
+      }
+      if (e.code === "ArrowUp") {
+        e.preventDefault();
+        increment(this._step * this._arrowKeyMultiplier(e));
+      }
+      if (e.code === "ArrowDown") {
+        e.preventDefault();
+        increment(this._step * this._arrowKeyMultiplier(e) * -1);
+      }
+    };
+    const onWheel = (e) => {
+      if (this._inputFocused) {
+        e.preventDefault();
+        increment(this._step * this._normalizeMouseWheel(e));
+      }
+    };
+    let testingForVerticalDrag = false, initClientX, initClientY, prevClientY, initValue, dragDelta;
+    const DRAG_THRESH = 5;
+    const onMouseDown = (e) => {
+      initClientX = e.clientX;
+      initClientY = prevClientY = e.clientY;
+      testingForVerticalDrag = true;
+      initValue = this.getValue();
+      dragDelta = 0;
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+    };
+    const onMouseMove = (e) => {
+      if (testingForVerticalDrag) {
+        const dx = e.clientX - initClientX;
+        const dy = e.clientY - initClientY;
+        if (Math.abs(dy) > DRAG_THRESH) {
+          e.preventDefault();
+          this.$input.blur();
+          testingForVerticalDrag = false;
+          this._setDraggingStyle(true, "vertical");
+        } else if (Math.abs(dx) > DRAG_THRESH) {
+          onMouseUp();
+        }
+      }
+      if (!testingForVerticalDrag) {
+        const dy = e.clientY - prevClientY;
+        dragDelta -= dy * this._step * this._arrowKeyMultiplier(e);
+        if (initValue + dragDelta > this._max) {
+          dragDelta = this._max - initValue;
+        } else if (initValue + dragDelta < this._min) {
+          dragDelta = this._min - initValue;
+        }
+        this._snapClampSetValue(initValue + dragDelta);
+      }
+      prevClientY = e.clientY;
+    };
+    const onMouseUp = () => {
+      this._setDraggingStyle(false, "vertical");
+      this._callOnFinishChange();
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    const onFocus = () => {
+      this._inputFocused = true;
+    };
+    const onBlur = () => {
+      this._inputFocused = false;
+      this.updateDisplay();
+      this._callOnFinishChange();
+    };
+    this.$input.addEventListener("input", onInput);
+    this.$input.addEventListener("keydown", onKeyDown);
+    this.$input.addEventListener("wheel", onWheel, { passive: false });
+    this.$input.addEventListener("mousedown", onMouseDown);
+    this.$input.addEventListener("focus", onFocus);
+    this.$input.addEventListener("blur", onBlur);
+  }
+  _initSlider() {
+    this._hasSlider = true;
+    this.$slider = document.createElement("div");
+    this.$slider.classList.add("lil-slider");
+    this.$fill = document.createElement("div");
+    this.$fill.classList.add("lil-fill");
+    this.$slider.appendChild(this.$fill);
+    this.$widget.insertBefore(this.$slider, this.$input);
+    this.domElement.classList.add("lil-has-slider");
+    const map = (v2, a, b, c, d) => {
+      return (v2 - a) / (b - a) * (d - c) + c;
+    };
+    const setValueFromX = (clientX) => {
+      const rect = this.$slider.getBoundingClientRect();
+      let value = map(clientX, rect.left, rect.right, this._min, this._max);
+      this._snapClampSetValue(value);
+    };
+    const mouseDown = (e) => {
+      this._setDraggingStyle(true);
+      setValueFromX(e.clientX);
+      window.addEventListener("mousemove", mouseMove);
+      window.addEventListener("mouseup", mouseUp);
+    };
+    const mouseMove = (e) => {
+      setValueFromX(e.clientX);
+    };
+    const mouseUp = () => {
+      this._callOnFinishChange();
+      this._setDraggingStyle(false);
+      window.removeEventListener("mousemove", mouseMove);
+      window.removeEventListener("mouseup", mouseUp);
+    };
+    let testingForScroll = false, prevClientX, prevClientY;
+    const beginTouchDrag = (e) => {
+      e.preventDefault();
+      this._setDraggingStyle(true);
+      setValueFromX(e.touches[0].clientX);
+      testingForScroll = false;
+    };
+    const onTouchStart = (e) => {
+      if (e.touches.length > 1) return;
+      if (this._hasScrollBar) {
+        prevClientX = e.touches[0].clientX;
+        prevClientY = e.touches[0].clientY;
+        testingForScroll = true;
+      } else {
+        beginTouchDrag(e);
+      }
+      window.addEventListener("touchmove", onTouchMove, { passive: false });
+      window.addEventListener("touchend", onTouchEnd);
+    };
+    const onTouchMove = (e) => {
+      if (testingForScroll) {
+        const dx = e.touches[0].clientX - prevClientX;
+        const dy = e.touches[0].clientY - prevClientY;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          beginTouchDrag(e);
+        } else {
+          window.removeEventListener("touchmove", onTouchMove);
+          window.removeEventListener("touchend", onTouchEnd);
+        }
+      } else {
+        e.preventDefault();
+        setValueFromX(e.touches[0].clientX);
+      }
+    };
+    const onTouchEnd = () => {
+      this._callOnFinishChange();
+      this._setDraggingStyle(false);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+    const callOnFinishChange = this._callOnFinishChange.bind(this);
+    const WHEEL_DEBOUNCE_TIME = 400;
+    let wheelFinishChangeTimeout;
+    const onWheel = (e) => {
+      const isVertical = Math.abs(e.deltaX) < Math.abs(e.deltaY);
+      if (isVertical && this._hasScrollBar) return;
+      e.preventDefault();
+      const delta = this._normalizeMouseWheel(e) * this._step;
+      this._snapClampSetValue(this.getValue() + delta);
+      this.$input.value = this.getValue();
+      clearTimeout(wheelFinishChangeTimeout);
+      wheelFinishChangeTimeout = setTimeout(callOnFinishChange, WHEEL_DEBOUNCE_TIME);
+    };
+    this.$slider.addEventListener("mousedown", mouseDown);
+    this.$slider.addEventListener("touchstart", onTouchStart, { passive: false });
+    this.$slider.addEventListener("wheel", onWheel, { passive: false });
+  }
+  _setDraggingStyle(active, axis = "horizontal") {
+    if (this.$slider) {
+      this.$slider.classList.toggle("lil-active", active);
+    }
+    document.body.classList.toggle("lil-dragging", active);
+    document.body.classList.toggle(`lil-${axis}`, active);
+  }
+  _getImplicitStep() {
+    if (this._hasMin && this._hasMax) {
+      return (this._max - this._min) / 1e3;
+    }
+    return 0.1;
+  }
+  _onUpdateMinMax() {
+    if (!this._hasSlider && this._hasMin && this._hasMax) {
+      if (!this._stepExplicit) {
+        this.step(this._getImplicitStep(), false);
+      }
+      this._initSlider();
+      this.updateDisplay();
+    }
+  }
+  _normalizeMouseWheel(e) {
+    let { deltaX, deltaY } = e;
+    if (Math.floor(e.deltaY) !== e.deltaY && e.wheelDelta) {
+      deltaX = 0;
+      deltaY = -e.wheelDelta / 120;
+      deltaY *= this._stepExplicit ? 1 : 10;
+    }
+    const wheel = deltaX + -deltaY;
+    return wheel;
+  }
+  _arrowKeyMultiplier(e) {
+    let mult = this._stepExplicit ? 1 : 10;
+    if (e.shiftKey) {
+      mult *= 10;
+    } else if (e.altKey) {
+      mult /= 10;
+    }
+    return mult;
+  }
+  _snap(value) {
+    let offset = 0;
+    if (this._hasMin) {
+      offset = this._min;
+    } else if (this._hasMax) {
+      offset = this._max;
+    }
+    value -= offset;
+    value = Math.round(value / this._step) * this._step;
+    value += offset;
+    value = parseFloat(value.toPrecision(15));
+    return value;
+  }
+  _clamp(value) {
+    if (value < this._min) value = this._min;
+    if (value > this._max) value = this._max;
+    return value;
+  }
+  _snapClampSetValue(value) {
+    this.setValue(this._clamp(this._snap(value)));
+  }
+  get _hasScrollBar() {
+    const root = this.parent.root.$children;
+    return root.scrollHeight > root.clientHeight;
+  }
+  get _hasMin() {
+    return this._min !== void 0;
+  }
+  get _hasMax() {
+    return this._max !== void 0;
+  }
+}
+class OptionController extends Controller {
+  constructor(parent, object, property, options) {
+    super(parent, object, property, "lil-option");
+    this.$select = document.createElement("select");
+    this.$select.setAttribute("aria-labelledby", this.$name.id);
+    this.$display = document.createElement("div");
+    this.$display.classList.add("lil-display");
+    this.$select.addEventListener("change", () => {
+      this.setValue(this._values[this.$select.selectedIndex]);
+      this._callOnFinishChange();
+    });
+    this.$select.addEventListener("focus", () => {
+      this.$display.classList.add("lil-focus");
+    });
+    this.$select.addEventListener("blur", () => {
+      this.$display.classList.remove("lil-focus");
+    });
+    this.$widget.appendChild(this.$select);
+    this.$widget.appendChild(this.$display);
+    this.$disable = this.$select;
+    this.options(options);
+  }
+  options(options) {
+    this._values = Array.isArray(options) ? options : Object.values(options);
+    this._names = Array.isArray(options) ? options : Object.keys(options);
+    this.$select.replaceChildren();
+    this._names.forEach((name) => {
+      const $option = document.createElement("option");
+      $option.textContent = name;
+      this.$select.appendChild($option);
+    });
+    this.updateDisplay();
+    return this;
+  }
+  updateDisplay() {
+    const value = this.getValue();
+    const index = this._values.indexOf(value);
+    this.$select.selectedIndex = index;
+    this.$display.textContent = index === -1 ? value : this._names[index];
+    return this;
+  }
+}
+class StringController extends Controller {
+  constructor(parent, object, property) {
+    super(parent, object, property, "lil-string");
+    this.$input = document.createElement("input");
+    this.$input.setAttribute("type", "text");
+    this.$input.setAttribute("spellcheck", "false");
+    this.$input.setAttribute("aria-labelledby", this.$name.id);
+    this.$input.addEventListener("input", () => {
+      this.setValue(this.$input.value);
+    });
+    this.$input.addEventListener("keydown", (e) => {
+      if (e.code === "Enter") {
+        this.$input.blur();
+      }
+    });
+    this.$input.addEventListener("blur", () => {
+      this._callOnFinishChange();
+    });
+    this.$widget.appendChild(this.$input);
+    this.$disable = this.$input;
+    this.updateDisplay();
+  }
+  updateDisplay() {
+    this.$input.value = this.getValue();
+    return this;
+  }
+}
+var stylesheet = `.lil-gui {
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  line-height: 1;
+  font-weight: normal;
+  font-style: normal;
+  text-align: left;
+  color: var(--text-color);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  --background-color: #1f1f1f;
+  --text-color: #ebebeb;
+  --title-background-color: #111111;
+  --title-text-color: #ebebeb;
+  --widget-color: #424242;
+  --hover-color: #4f4f4f;
+  --focus-color: #595959;
+  --number-color: #2cc9ff;
+  --string-color: #a2db3c;
+  --font-size: 11px;
+  --input-font-size: 11px;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-family-mono: Menlo, Monaco, Consolas, "Droid Sans Mono", monospace;
+  --padding: 4px;
+  --spacing: 4px;
+  --widget-height: 20px;
+  --title-height: calc(var(--widget-height) + var(--spacing) * 1.25);
+  --name-width: 45%;
+  --slider-knob-width: 2px;
+  --slider-input-width: 27%;
+  --color-input-width: 27%;
+  --slider-input-min-width: 45px;
+  --color-input-min-width: 45px;
+  --folder-indent: 7px;
+  --widget-padding: 0 0 0 3px;
+  --widget-border-radius: 2px;
+  --checkbox-size: calc(0.75 * var(--widget-height));
+  --scrollbar-width: 5px;
+}
+.lil-gui, .lil-gui * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+.lil-gui.lil-root {
+  width: var(--width, 245px);
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+}
+.lil-gui.lil-root > .lil-title {
+  background: var(--title-background-color);
+  color: var(--title-text-color);
+}
+.lil-gui.lil-root > .lil-children {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.lil-gui.lil-root > .lil-children::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+  background: var(--background-color);
+}
+.lil-gui.lil-root > .lil-children::-webkit-scrollbar-thumb {
+  border-radius: var(--scrollbar-width);
+  background: var(--focus-color);
+}
+@media (pointer: coarse) {
+  .lil-gui.lil-allow-touch-styles, .lil-gui.lil-allow-touch-styles .lil-gui {
+    --widget-height: 28px;
+    --padding: 6px;
+    --spacing: 6px;
+    --font-size: 13px;
+    --input-font-size: 16px;
+    --folder-indent: 10px;
+    --scrollbar-width: 7px;
+    --slider-input-min-width: 50px;
+    --color-input-min-width: 65px;
+  }
+}
+.lil-gui.lil-force-touch-styles, .lil-gui.lil-force-touch-styles .lil-gui {
+  --widget-height: 28px;
+  --padding: 6px;
+  --spacing: 6px;
+  --font-size: 13px;
+  --input-font-size: 16px;
+  --folder-indent: 10px;
+  --scrollbar-width: 7px;
+  --slider-input-min-width: 50px;
+  --color-input-min-width: 65px;
+}
+.lil-gui.lil-auto-place, .lil-gui.autoPlace {
+  max-height: 100%;
+  position: fixed;
+  top: 0;
+  right: 15px;
+  z-index: 1001;
+}
+
+.lil-controller {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--padding);
+  margin: var(--spacing) 0;
+}
+.lil-controller.lil-disabled {
+  opacity: 0.5;
+}
+.lil-controller.lil-disabled, .lil-controller.lil-disabled * {
+  pointer-events: none !important;
+}
+.lil-controller > .lil-name {
+  min-width: var(--name-width);
+  flex-shrink: 0;
+  white-space: pre;
+  padding-right: var(--spacing);
+  line-height: var(--widget-height);
+}
+.lil-controller .lil-widget {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--widget-height);
+}
+.lil-controller.lil-string input {
+  color: var(--string-color);
+}
+.lil-controller.lil-boolean {
+  cursor: pointer;
+}
+.lil-controller.lil-color .lil-display {
+  width: 100%;
+  height: var(--widget-height);
+  border-radius: var(--widget-border-radius);
+  position: relative;
+}
+@media (hover: hover) {
+  .lil-controller.lil-color .lil-display:hover:before {
+    content: " ";
+    display: block;
+    position: absolute;
+    border-radius: var(--widget-border-radius);
+    border: 1px solid #fff9;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+}
+.lil-controller.lil-color input[type=color] {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.lil-controller.lil-color input[type=text] {
+  margin-left: var(--spacing);
+  font-family: var(--font-family-mono);
+  min-width: var(--color-input-min-width);
+  width: var(--color-input-width);
+  flex-shrink: 0;
+}
+.lil-controller.lil-option select {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  max-width: 100%;
+}
+.lil-controller.lil-option .lil-display {
+  position: relative;
+  pointer-events: none;
+  border-radius: var(--widget-border-radius);
+  height: var(--widget-height);
+  line-height: var(--widget-height);
+  max-width: 100%;
+  overflow: hidden;
+  word-break: break-all;
+  padding-left: 0.55em;
+  padding-right: 1.75em;
+  background: var(--widget-color);
+}
+@media (hover: hover) {
+  .lil-controller.lil-option .lil-display.lil-focus {
+    background: var(--focus-color);
+  }
+}
+.lil-controller.lil-option .lil-display.lil-active {
+  background: var(--focus-color);
+}
+.lil-controller.lil-option .lil-display:after {
+  font-family: "lil-gui";
+  content: "↕";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  padding-right: 0.375em;
+}
+.lil-controller.lil-option .lil-widget,
+.lil-controller.lil-option select {
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .lil-controller.lil-option .lil-widget:hover .lil-display {
+    background: var(--hover-color);
+  }
+}
+.lil-controller.lil-number input {
+  color: var(--number-color);
+}
+.lil-controller.lil-number.lil-has-slider input {
+  margin-left: var(--spacing);
+  width: var(--slider-input-width);
+  min-width: var(--slider-input-min-width);
+  flex-shrink: 0;
+}
+.lil-controller.lil-number .lil-slider {
+  width: 100%;
+  height: var(--widget-height);
+  background: var(--widget-color);
+  border-radius: var(--widget-border-radius);
+  padding-right: var(--slider-knob-width);
+  overflow: hidden;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+@media (hover: hover) {
+  .lil-controller.lil-number .lil-slider:hover {
+    background: var(--hover-color);
+  }
+}
+.lil-controller.lil-number .lil-slider.lil-active {
+  background: var(--focus-color);
+}
+.lil-controller.lil-number .lil-slider.lil-active .lil-fill {
+  opacity: 0.95;
+}
+.lil-controller.lil-number .lil-fill {
+  height: 100%;
+  border-right: var(--slider-knob-width) solid var(--number-color);
+  box-sizing: content-box;
+}
+
+.lil-dragging .lil-gui {
+  --hover-color: var(--widget-color);
+}
+.lil-dragging * {
+  cursor: ew-resize !important;
+}
+.lil-dragging.lil-vertical * {
+  cursor: ns-resize !important;
+}
+
+.lil-gui .lil-title {
+  height: var(--title-height);
+  font-weight: 600;
+  padding: 0 var(--padding);
+  width: 100%;
+  text-align: left;
+  background: none;
+  text-decoration-skip: objects;
+}
+.lil-gui .lil-title:before {
+  font-family: "lil-gui";
+  content: "▾";
+  padding-right: 2px;
+  display: inline-block;
+}
+.lil-gui .lil-title:active {
+  background: var(--title-background-color);
+  opacity: 0.75;
+}
+@media (hover: hover) {
+  body:not(.lil-dragging) .lil-gui .lil-title:hover {
+    background: var(--title-background-color);
+    opacity: 0.85;
+  }
+  .lil-gui .lil-title:focus {
+    text-decoration: underline var(--focus-color);
+  }
+}
+.lil-gui.lil-root > .lil-title:focus {
+  text-decoration: none !important;
+}
+.lil-gui.lil-closed > .lil-title:before {
+  content: "▸";
+}
+.lil-gui.lil-closed > .lil-children {
+  transform: translateY(-7px);
+  opacity: 0;
+}
+.lil-gui.lil-closed:not(.lil-transition) > .lil-children {
+  display: none;
+}
+.lil-gui.lil-transition > .lil-children {
+  transition-duration: 300ms;
+  transition-property: height, opacity, transform;
+  transition-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+  overflow: hidden;
+  pointer-events: none;
+}
+.lil-gui .lil-children:empty:before {
+  content: "Empty";
+  padding: 0 var(--padding);
+  margin: var(--spacing) 0;
+  display: block;
+  height: var(--widget-height);
+  font-style: italic;
+  line-height: var(--widget-height);
+  opacity: 0.5;
+}
+.lil-gui.lil-root > .lil-children > .lil-gui > .lil-title {
+  border: 0 solid var(--widget-color);
+  border-width: 1px 0;
+  transition: border-color 300ms;
+}
+.lil-gui.lil-root > .lil-children > .lil-gui.lil-closed > .lil-title {
+  border-bottom-color: transparent;
+}
+.lil-gui + .lil-controller {
+  border-top: 1px solid var(--widget-color);
+  margin-top: 0;
+  padding-top: var(--spacing);
+}
+.lil-gui .lil-gui .lil-gui > .lil-title {
+  border: none;
+}
+.lil-gui .lil-gui .lil-gui > .lil-children {
+  border: none;
+  margin-left: var(--folder-indent);
+  border-left: 2px solid var(--widget-color);
+}
+.lil-gui .lil-gui .lil-controller {
+  border: none;
+}
+
+.lil-gui label, .lil-gui input, .lil-gui button {
+  -webkit-tap-highlight-color: transparent;
+}
+.lil-gui input {
+  border: 0;
+  outline: none;
+  font-family: var(--font-family);
+  font-size: var(--input-font-size);
+  border-radius: var(--widget-border-radius);
+  height: var(--widget-height);
+  background: var(--widget-color);
+  color: var(--text-color);
+  width: 100%;
+}
+@media (hover: hover) {
+  .lil-gui input:hover {
+    background: var(--hover-color);
+  }
+  .lil-gui input:active {
+    background: var(--focus-color);
+  }
+}
+.lil-gui input:disabled {
+  opacity: 1;
+}
+.lil-gui input[type=text],
+.lil-gui input[type=number] {
+  padding: var(--widget-padding);
+  -moz-appearance: textfield;
+}
+.lil-gui input[type=text]:focus,
+.lil-gui input[type=number]:focus {
+  background: var(--focus-color);
+}
+.lil-gui input[type=checkbox] {
+  appearance: none;
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  border-radius: var(--widget-border-radius);
+  text-align: center;
+  cursor: pointer;
+}
+.lil-gui input[type=checkbox]:checked:before {
+  font-family: "lil-gui";
+  content: "✓";
+  font-size: var(--checkbox-size);
+  line-height: var(--checkbox-size);
+}
+@media (hover: hover) {
+  .lil-gui input[type=checkbox]:focus {
+    box-shadow: inset 0 0 0 1px var(--focus-color);
+  }
+}
+.lil-gui button {
+  outline: none;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  color: var(--text-color);
+  width: 100%;
+  border: none;
+}
+.lil-gui .lil-controller button {
+  height: var(--widget-height);
+  text-transform: none;
+  background: var(--widget-color);
+  border-radius: var(--widget-border-radius);
+}
+@media (hover: hover) {
+  .lil-gui .lil-controller button:hover {
+    background: var(--hover-color);
+  }
+  .lil-gui .lil-controller button:focus {
+    box-shadow: inset 0 0 0 1px var(--focus-color);
+  }
+}
+.lil-gui .lil-controller button:active {
+  background: var(--focus-color);
+}
+
+@font-face {
+  font-family: "lil-gui";
+  src: url("data:application/font-woff2;charset=utf-8;base64,d09GMgABAAAAAALkAAsAAAAABtQAAAKVAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHFQGYACDMgqBBIEbATYCJAMUCwwABCAFhAoHgQQbHAbIDiUFEYVARAAAYQTVWNmz9MxhEgodq49wYRUFKE8GWNiUBxI2LBRaVnc51U83Gmhs0Q7JXWMiz5eteLwrKwuxHO8VFxUX9UpZBs6pa5ABRwHA+t3UxUnH20EvVknRerzQgX6xC/GH6ZUvTcAjAv122dF28OTqCXrPuyaDER30YBA1xnkVutDDo4oCi71Ca7rrV9xS8dZHbPHefsuwIyCpmT7j+MnjAH5X3984UZoFFuJ0yiZ4XEJFxjagEBeqs+e1iyK8Xf/nOuwF+vVK0ur765+vf7txotUi0m3N0m/84RGSrBCNrh8Ee5GjODjF4gnWP+dJrH/Lk9k4oT6d+gr6g/wssA2j64JJGP6cmx554vUZnpZfn6ZfX2bMwPPrlANsB86/DiHjhl0OP+c87+gaJo/gY084s3HoYL/ZkWHTRfBXvvoHnnkHvngKun4KBE/ede7tvq3/vQOxDXB1/fdNz6XbPdcr0Vhpojj9dG+owuSKFsslCi1tgEjirjXdwMiov2EioadxmqTHUCIwo8NgQaeIasAi0fTYSPTbSmwbMOFduyh9wvBrESGY0MtgRjtgQR8Q1bRPohn2UoCRZf9wyYANMXFeJTysqAe0I4mrherOekFdKMrYvJjLvOIUM9SuwYB5DVZUwwVjJJOaUnZCmcEkIZZrKqNvRGRMvmFZsmhP4VMKCSXBhSqUBxgMS7h0cZvEd71AWkEhGWaeMFcNnpqyJkyXgYL7PQ1MoSq0wDAkRtJIijkZSmqYTiSImfLiSWXIZwhRh3Rug2X0kk1Dgj+Iu43u5p98ghopcpSo0Uyc8SnjlYX59WUeaMoDqmVD2TOWD9a4pCRAzf2ECgwGcrHjPOWY9bNxq/OL3I/QjwEAAAA=") format("woff2");
+}`;
+function _injectStyles(cssContent) {
+  const injected = document.createElement("style");
+  injected.innerHTML = cssContent;
+  const before = document.querySelector("head link[rel=stylesheet], head style");
+  if (before) {
+    document.head.insertBefore(injected, before);
+  } else {
+    document.head.appendChild(injected);
+  }
+}
+let stylesInjected = false;
+class GUI {
+  /**
+   * Creates a panel that holds controllers.
+   * @example
+   * new GUI();
+   * new GUI( { container: document.getElementById( 'custom' ) } );
+   *
+   * @param {object} [options]
+   * @param {boolean} [options.autoPlace=true]
+   * Adds the GUI to `document.body` and fixes it to the top right of the page.
+   *
+   * @param {Node} [options.container]
+   * Adds the GUI to this DOM element. Overrides `autoPlace`.
+   *
+   * @param {number} [options.width=245]
+   * Width of the GUI in pixels, usually set when name labels become too long. Note that you can make
+   * name labels wider in CSS with `.lil‑gui { ‑‑name‑width: 55% }`.
+   *
+   * @param {string} [options.title=Controls]
+   * Name to display in the title bar.
+   *
+   * @param {boolean} [options.closeFolders=false]
+   * Pass `true` to close all folders in this GUI by default.
+   *
+   * @param {boolean} [options.injectStyles=true]
+   * Injects the default stylesheet into the page if this is the first GUI.
+   * Pass `false` to use your own stylesheet.
+   *
+   * @param {number} [options.touchStyles=true]
+   * Makes controllers larger on touch devices. Pass `false` to disable touch styles.
+   *
+   * @param {GUI} [options.parent]
+   * Adds this GUI as a child in another GUI. Usually this is done for you by `addFolder()`.
+   */
+  constructor({
+    parent,
+    autoPlace = parent === void 0,
+    container,
+    width,
+    title = "Controls",
+    closeFolders = false,
+    injectStyles = true,
+    touchStyles = true
+  } = {}) {
+    this.parent = parent;
+    this.root = parent ? parent.root : this;
+    this.children = [];
+    this.controllers = [];
+    this.folders = [];
+    this._closed = false;
+    this._hidden = false;
+    this.domElement = document.createElement("div");
+    this.domElement.classList.add("lil-gui");
+    this.$title = document.createElement("button");
+    this.$title.classList.add("lil-title");
+    this.$title.setAttribute("aria-expanded", true);
+    this.$title.addEventListener("click", () => this.openAnimated(this._closed));
+    this.$title.addEventListener("touchstart", () => {
+    }, { passive: true });
+    this.$children = document.createElement("div");
+    this.$children.classList.add("lil-children");
+    this.domElement.appendChild(this.$title);
+    this.domElement.appendChild(this.$children);
+    this.title(title);
+    if (this.parent) {
+      this.parent.children.push(this);
+      this.parent.folders.push(this);
+      this.parent.$children.appendChild(this.domElement);
+      return;
+    }
+    this.domElement.classList.add("lil-root");
+    if (touchStyles) {
+      this.domElement.classList.add("lil-allow-touch-styles");
+    }
+    if (!stylesInjected && injectStyles) {
+      _injectStyles(stylesheet);
+      stylesInjected = true;
+    }
+    if (container) {
+      container.appendChild(this.domElement);
+    } else if (autoPlace) {
+      this.domElement.classList.add("lil-auto-place", "autoPlace");
+      document.body.appendChild(this.domElement);
+    }
+    if (width) {
+      this.domElement.style.setProperty("--width", width + "px");
+    }
+    this._closeFolders = closeFolders;
+  }
+  /**
+   * Adds a controller to the GUI, inferring controller type using the `typeof` operator.
+   * @example
+   * gui.add( object, 'property' );
+   * gui.add( object, 'number', 0, 100, 1 );
+   * gui.add( object, 'options', [ 1, 2, 3 ] );
+   *
+   * @param {object} object The object the controller will modify.
+   * @param {string} property Name of the property to control.
+   * @param {number|object|Array} [$1] Minimum value for number controllers, or the set of
+   * selectable values for a dropdown.
+   * @param {number} [max] Maximum value for number controllers.
+   * @param {number} [step] Step value for number controllers.
+   * @returns {Controller}
+   */
+  add(object, property, $1, max, step) {
+    if (Object($1) === $1) {
+      return new OptionController(this, object, property, $1);
+    }
+    const initialValue = object[property];
+    switch (typeof initialValue) {
+      case "number":
+        return new NumberController(this, object, property, $1, max, step);
+      case "boolean":
+        return new BooleanController(this, object, property);
+      case "string":
+        return new StringController(this, object, property);
+      case "function":
+        return new FunctionController(this, object, property);
+    }
+    console.error(`gui.add failed
+	property:`, property, `
+	object:`, object, `
+	value:`, initialValue);
+  }
+  /**
+   * Adds a color controller to the GUI.
+   * @example
+   * params = {
+   * 	cssColor: '#ff00ff',
+   * 	rgbColor: { r: 0, g: 0.2, b: 0.4 },
+   * 	customRange: [ 0, 127, 255 ],
+   * };
+   *
+   * gui.addColor( params, 'cssColor' );
+   * gui.addColor( params, 'rgbColor' );
+   * gui.addColor( params, 'customRange', 255 );
+   *
+   * @param {object} object The object the controller will modify.
+   * @param {string} property Name of the property to control.
+   * @param {number} rgbScale Maximum value for a color channel when using an RGB color. You may
+   * need to set this to 255 if your colors are too bright.
+   * @returns {Controller}
+   */
+  addColor(object, property, rgbScale = 1) {
+    return new ColorController(this, object, property, rgbScale);
+  }
+  /**
+   * Adds a folder to the GUI, which is just another GUI. This method returns
+   * the nested GUI so you can add controllers to it.
+   * @example
+   * const folder = gui.addFolder( 'Position' );
+   * folder.add( position, 'x' );
+   * folder.add( position, 'y' );
+   * folder.add( position, 'z' );
+   *
+   * @param {string} title Name to display in the folder's title bar.
+   * @returns {GUI}
+   */
+  addFolder(title) {
+    const folder = new GUI({ parent: this, title });
+    if (this.root._closeFolders) folder.close();
+    return folder;
+  }
+  /**
+   * Recalls values that were saved with `gui.save()`.
+   * @param {object} obj
+   * @param {boolean} recursive Pass false to exclude folders descending from this GUI.
+   * @returns {this}
+   */
+  load(obj, recursive = true) {
+    if (obj.controllers) {
+      this.controllers.forEach((c) => {
+        if (c instanceof FunctionController) return;
+        if (c._name in obj.controllers) {
+          c.load(obj.controllers[c._name]);
+        }
+      });
+    }
+    if (recursive && obj.folders) {
+      this.folders.forEach((f2) => {
+        if (f2._title in obj.folders) {
+          f2.load(obj.folders[f2._title]);
+        }
+      });
+    }
+    return this;
+  }
+  /**
+   * Returns an object mapping controller names to values. The object can be passed to `gui.load()` to
+   * recall these values.
+   * @example
+   * {
+   * 	controllers: {
+   * 		prop1: 1,
+   * 		prop2: 'value',
+   * 		...
+   * 	},
+   * 	folders: {
+   * 		folderName1: { controllers, folders },
+   * 		folderName2: { controllers, folders }
+   * 		...
+   * 	}
+   * }
+   *
+   * @param {boolean} recursive Pass false to exclude folders descending from this GUI.
+   * @returns {object}
+   */
+  save(recursive = true) {
+    const obj = {
+      controllers: {},
+      folders: {}
+    };
+    this.controllers.forEach((c) => {
+      if (c instanceof FunctionController) return;
+      if (c._name in obj.controllers) {
+        throw new Error(`Cannot save GUI with duplicate property "${c._name}"`);
+      }
+      obj.controllers[c._name] = c.save();
+    });
+    if (recursive) {
+      this.folders.forEach((f2) => {
+        if (f2._title in obj.folders) {
+          throw new Error(`Cannot save GUI with duplicate folder "${f2._title}"`);
+        }
+        obj.folders[f2._title] = f2.save();
+      });
+    }
+    return obj;
+  }
+  /**
+   * Opens a GUI or folder. GUI and folders are open by default.
+   * @param {boolean} open Pass false to close.
+   * @returns {this}
+   * @example
+   * gui.open(); // open
+   * gui.open( false ); // close
+   * gui.open( gui._closed ); // toggle
+   */
+  open(open = true) {
+    this._setClosed(!open);
+    this.$title.setAttribute("aria-expanded", !this._closed);
+    this.domElement.classList.toggle("lil-closed", this._closed);
+    return this;
+  }
+  /**
+   * Closes the GUI.
+   * @returns {this}
+   */
+  close() {
+    return this.open(false);
+  }
+  _setClosed(closed) {
+    if (this._closed === closed) return;
+    this._closed = closed;
+    this._callOnOpenClose(this);
+  }
+  /**
+   * Shows the GUI after it's been hidden.
+   * @param {boolean} show
+   * @returns {this}
+   * @example
+   * gui.show();
+   * gui.show( false ); // hide
+   * gui.show( gui._hidden ); // toggle
+   */
+  show(show = true) {
+    this._hidden = !show;
+    this.domElement.style.display = this._hidden ? "none" : "";
+    return this;
+  }
+  /**
+   * Hides the GUI.
+   * @returns {this}
+   */
+  hide() {
+    return this.show(false);
+  }
+  openAnimated(open = true) {
+    this._setClosed(!open);
+    this.$title.setAttribute("aria-expanded", !this._closed);
+    requestAnimationFrame(() => {
+      const initialHeight = this.$children.clientHeight;
+      this.$children.style.height = initialHeight + "px";
+      this.domElement.classList.add("lil-transition");
+      const onTransitionEnd = (e) => {
+        if (e.target !== this.$children) return;
+        this.$children.style.height = "";
+        this.domElement.classList.remove("lil-transition");
+        this.$children.removeEventListener("transitionend", onTransitionEnd);
+      };
+      this.$children.addEventListener("transitionend", onTransitionEnd);
+      const targetHeight = !open ? 0 : this.$children.scrollHeight;
+      this.domElement.classList.toggle("lil-closed", !open);
+      requestAnimationFrame(() => {
+        this.$children.style.height = targetHeight + "px";
+      });
+    });
+    return this;
+  }
+  /**
+   * Change the title of this GUI.
+   * @param {string} title
+   * @returns {this}
+   */
+  title(title) {
+    this._title = title;
+    this.$title.textContent = title;
+    return this;
+  }
+  /**
+   * Resets all controllers to their initial values.
+   * @param {boolean} recursive Pass false to exclude folders descending from this GUI.
+   * @returns {this}
+   */
+  reset(recursive = true) {
+    const controllers = recursive ? this.controllersRecursive() : this.controllers;
+    controllers.forEach((c) => c.reset());
+    return this;
+  }
+  /**
+   * Pass a function to be called whenever a controller in this GUI changes.
+   * @param {function({object:object, property:string, value:any, controller:Controller})} callback
+   * @returns {this}
+   * @example
+   * gui.onChange( event => {
+   * 	event.object     // object that was modified
+   * 	event.property   // string, name of property
+   * 	event.value      // new value of controller
+   * 	event.controller // controller that was modified
+   * } );
+   */
+  onChange(callback) {
+    this._onChange = callback;
+    return this;
+  }
+  _callOnChange(controller) {
+    if (this.parent) {
+      this.parent._callOnChange(controller);
+    }
+    if (this._onChange !== void 0) {
+      this._onChange.call(this, {
+        object: controller.object,
+        property: controller.property,
+        value: controller.getValue(),
+        controller
+      });
+    }
+  }
+  /**
+   * Pass a function to be called whenever a controller in this GUI has finished changing.
+   * @param {function({object:object, property:string, value:any, controller:Controller})} callback
+   * @returns {this}
+   * @example
+   * gui.onFinishChange( event => {
+   * 	event.object     // object that was modified
+   * 	event.property   // string, name of property
+   * 	event.value      // new value of controller
+   * 	event.controller // controller that was modified
+   * } );
+   */
+  onFinishChange(callback) {
+    this._onFinishChange = callback;
+    return this;
+  }
+  _callOnFinishChange(controller) {
+    if (this.parent) {
+      this.parent._callOnFinishChange(controller);
+    }
+    if (this._onFinishChange !== void 0) {
+      this._onFinishChange.call(this, {
+        object: controller.object,
+        property: controller.property,
+        value: controller.getValue(),
+        controller
+      });
+    }
+  }
+  /**
+   * Pass a function to be called when this GUI or its descendants are opened or closed.
+   * @param {function(GUI)} callback
+   * @returns {this}
+   * @example
+   * gui.onOpenClose( changedGUI => {
+   * 	console.log( changedGUI._closed );
+   * } );
+   */
+  onOpenClose(callback) {
+    this._onOpenClose = callback;
+    return this;
+  }
+  _callOnOpenClose(changedGUI) {
+    if (this.parent) {
+      this.parent._callOnOpenClose(changedGUI);
+    }
+    if (this._onOpenClose !== void 0) {
+      this._onOpenClose.call(this, changedGUI);
+    }
+  }
+  /**
+   * Destroys all DOM elements and event listeners associated with this GUI.
+   */
+  destroy() {
+    if (this.parent) {
+      this.parent.children.splice(this.parent.children.indexOf(this), 1);
+      this.parent.folders.splice(this.parent.folders.indexOf(this), 1);
+    }
+    if (this.domElement.parentElement) {
+      this.domElement.parentElement.removeChild(this.domElement);
+    }
+    Array.from(this.children).forEach((c) => c.destroy());
+  }
+  /**
+   * Returns an array of controllers contained by this GUI and its descendents.
+   * @returns {Controller[]}
+   */
+  controllersRecursive() {
+    let controllers = Array.from(this.controllers);
+    this.folders.forEach((f2) => {
+      controllers = controllers.concat(f2.controllersRecursive());
+    });
+    return controllers;
+  }
+  /**
+   * Returns an array of folders contained by this GUI and its descendents.
+   * @returns {GUI[]}
+   */
+  foldersRecursive() {
+    let folders = Array.from(this.folders);
+    this.folders.forEach((f2) => {
+      folders = folders.concat(f2.foldersRecursive());
+    });
+    return folders;
+  }
+}
+const GuiPanel = () => {
+  const guiCallback = useExampleHelperStore((state) => state.guiCallback);
+  const guiContainerRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    if (guiContainerRef.current && guiCallback) {
+      const gui = new GUI({
+        container: guiContainerRef.current,
+        title: "Parameters"
+      });
+      guiCallback(gui);
+      return () => {
+        gui.destroy();
+      };
+    }
+  }, [guiCallback]);
+  if (!guiCallback) return null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: guiContainerRef, style: guiContainerStyle }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { dangerouslySetInnerHTML: { __html: lilGuiCustomStyle$1 } })
+  ] });
+};
+const guiContainerStyle = {
+  width: "100%",
+  display: "flex",
+  flexDirection: "column"
+};
+const lilGuiCustomStyle$1 = `
+    .lil-gui {
+        --background-color: transparent;
+        --text-color: #eee;
+        --title-background-color: rgba(255, 255, 255, 0.05);
+        --title-text-color: #fdb48d;
+        --widget-color: rgba(255, 255, 255, 0.1);
+        --hover-color: rgba(255, 255, 255, 0.15);
+        --focus-color: rgba(255, 255, 255, 0.2);
+        --number-color: #00e5ff;
+        --string-color: #89ff00;
+        --font-size: 11px;
+        --input-font-size: 11px;
+        --font-family: 'monospace';
+        --padding: 4px;
+        --spacing: 4px;
+        --widget-height: 24px;
+        --name-width: 40%;
+        --slider-knob-width: 2px;
+        --checkbox-size: 14px;
+        
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .lil-gui.root {
+        width: 100% !important;
+    }
+    .lil-gui .title {
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 8px 12px !important;
+    }
+    .lil-gui .controller {
+        padding: 4px 0 !important;
+        margin-left: 0 !important;
+        border-left: none !important;
+    }
+    .lil-gui .controller .name {
+        color: #888 !important;
+    }
+    .lil-gui .controller input {
+        background: rgba(0,0,0,0.3) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 2px !important;
+    }
+`;
 const App = () => {
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
   const addTopBarRightAction = useExampleHelperStore((state) => state.addTopBarRightAction);
+  const guiCallback = useExampleHelperStore((state) => state.guiCallback);
+  const showSettingsPanel = useExampleHelperStore((state) => state.showSettingsPanel);
+  const setShowSettingsPanel = useExampleHelperStore((state) => state.setShowSettingsPanel);
   const [axisActive, setAxisActive] = reactExports.useState(false);
   const [gridActive, setGridActive] = reactExports.useState(false);
   const [debugActive, setDebugActive] = reactExports.useState(false);
@@ -8063,47 +9861,23 @@ const App = () => {
           setDebugActive(nextValue);
         }
       });
+      if (guiCallback) {
+        addTopBarRightAction({
+          id: "setting-toggle",
+          label: "SETTING",
+          icon: settingIcon,
+          isActive: showSettingsPanel,
+          onClick: () => {
+            setShowSettingsPanel(!showSettingsPanel);
+          }
+        });
+      }
     }
-  }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive]);
+  }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiCallback, showSettingsPanel, setShowSettingsPanel]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(ExampleHeader, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Description, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: panelStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: headerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleLabelStyle, children: "RedGPU Example Helper" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle, children: redGPUContext ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contextInfoBoxStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Context Status" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { color: "#ccc", fontSize: "11px", lineHeight: "1.6" }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            "Canvas: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              "b",
-              {
-                style: { color: "#fff" },
-                children: [
-                  redGPUContext.width,
-                  " x ",
-                  redGPUContext.height
-                ]
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            "DPR: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fff" }, children: window.devicePixelRatio })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            "GPU: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "b",
-              {
-                style: { color: "#fff" },
-                children: redGPUContext.gpuDevice.label || "WebGPU Device"
-              }
-            )
-          ] })
-        ] })
-      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "#666", fontSize: "11px", fontStyle: "italic" }, children: "Waiting for Context..." }) })
-    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...panelStyle, display: showSettingsPanel ? "flex" : "none" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(GuiPanel, {}) }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Footer, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(SourceModal, {})
   ] });
@@ -8124,42 +9898,13 @@ const panelStyle = {
   borderLeft: "1px solid rgba(255,255,255,0.05)",
   overflow: "hidden"
 };
-const headerStyle = {
-  padding: "12px 16px",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  background: "rgba(255, 255, 255, 0.03)",
-  borderBottom: "1px solid rgba(255, 255, 255, 0.05)"
-};
-const titleLabelStyle = {
-  fontSize: "11px",
-  fontWeight: "bold",
-  color: "#888",
-  textTransform: "uppercase",
-  letterSpacing: "0.1em"
-};
 const contentStyle = {
-  padding: "20px",
   fontSize: "12px",
   flex: 1,
   overflowY: "auto",
   display: "flex",
   flexDirection: "column",
   gap: "24px"
-};
-const contextInfoBoxStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "8px",
-  paddingTop: "20px",
-  borderTop: "1px solid rgba(255,255,255,0.05)"
-};
-const sectionTitleStyle = {
-  fontSize: "12px",
-  color: "#fdb48d",
-  fontWeight: "bold",
-  marginBottom: "4px"
 };
 const ExampleList = [
   {
@@ -10821,10 +12566,13 @@ const findCurrentExample = (pathname) => {
   return search(ExampleList);
 };
 class RedGPUExampleHelper {
-  constructor(redGPUContext) {
+  constructor(redGPUContext, guiCallback) {
     __publicField(this, "root", null);
     __publicField(this, "domRoot", null);
     useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
+    if (guiCallback) {
+      useExampleHelperStore.getState().setGuiCallback(guiCallback);
+    }
     const currentExample = findCurrentExample(window.location.pathname);
     useExampleHelperStore.getState().setCurrentExample(currentExample);
     this.init();

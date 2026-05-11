@@ -21,14 +21,18 @@ export interface ExampleHelperState {
     currentExample: ExampleItem | null;
     language: 'ko' | 'en';
     showSourceModal: boolean;
+    showSettingsPanel: boolean;
     topBarRightActions: TopBarAction[];
+    guiCallback: ((gui: any) => void) | null;
     setRedGPUContext: (value: RedGPUContext | null) => void;
     setCurrentExample: (value: ExampleItem | null) => void;
     setLanguage: (value: 'ko' | 'en') => void;
     setShowSourceModal: (value: boolean) => void;
+    setShowSettingsPanel: (value: boolean) => void;
     addTopBarRightAction: (action: TopBarAction) => void;
     removeTopBarRightAction: (id: string) => void;
     clearTopBarRightActions: () => void;
+    setGuiCallback: (callback: ((gui: any) => void) | null) => void;
 }
 
 /**
@@ -39,11 +43,14 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     currentExample: null,
     language: (typeof navigator !== 'undefined' && navigator.language.startsWith('ko')) ? 'ko' : 'en',
     showSourceModal: false,
+    showSettingsPanel: false,
     topBarRightActions: [],
+    guiCallback: null,
     setRedGPUContext: (value: RedGPUContext | null) => set({ redGPUContext: value }),
     setCurrentExample: (value: ExampleItem | null) => set({ currentExample: value }),
     setLanguage: (value: 'ko' | 'en') => set({ language: value }),
     setShowSourceModal: (value: boolean) => set({ showSourceModal: value }),
+    setShowSettingsPanel: (value: boolean) => set({ showSettingsPanel: value }),
     addTopBarRightAction: (action) => set((state) => {
         const filtered = state.topBarRightActions.filter(a => a.id !== action.id);
         return { topBarRightActions: [...filtered, action] };
@@ -52,4 +59,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
         topBarRightActions: state.topBarRightActions.filter(a => a.id !== id)
     })),
     clearTopBarRightActions: () => set({ topBarRightActions: [] }),
+    setGuiCallback: (callback: ((gui: any) => void) | null) => {
+        set({ guiCallback: callback, showSettingsPanel: !!callback });
+    },
 }));

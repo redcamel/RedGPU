@@ -7,6 +7,8 @@ import SourceModal from './components/basic/SourceModal';
 import debugIcon from './assets/icons/debug.svg';
 import axisIcon from './assets/icons/axis.svg';
 import gridIcon from './assets/icons/grid.svg';
+import settingIcon from './assets/icons/gears-solid-full.svg';
+import GuiPanel from './components/GuiPanel';
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -15,6 +17,9 @@ import gridIcon from './assets/icons/grid.svg';
 const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const addTopBarRightAction = useExampleHelperStore((state: ExampleHelperState) => state.addTopBarRightAction);
+    const guiCallback = useExampleHelperStore((state: ExampleHelperState) => state.guiCallback);
+    const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
+    const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
 
     const [axisActive, setAxisActive] = useState(false);
     const [gridActive, setGridActive] = useState(false);
@@ -98,33 +103,31 @@ const App = () => {
                     setDebugActive(nextValue);
                 }
             });
+
+            // SETTING Toggle
+            if (guiCallback) {
+                addTopBarRightAction({
+                    id: 'setting-toggle',
+                    label: 'SETTING',
+                    icon: settingIcon,
+                    isActive: showSettingsPanel,
+                    onClick: () => {
+                        setShowSettingsPanel(!showSettingsPanel);
+                    }
+                });
+            }
         }
-    }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive]);
+    }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiCallback, showSettingsPanel, setShowSettingsPanel]);
 
     return (
         <>
             <ExampleHeader/>
             <Description/>
 
-            <div style={panelStyle}>
-                <div style={headerStyle}>
-                    <div style={titleLabelStyle}>RedGPU Example Helper</div>
-                </div>
+            <div style={{ ...panelStyle, display: showSettingsPanel ? 'flex' : 'none' }}>
+
                 <div style={contentStyle}>
-                    {redGPUContext ? (
-                        <div style={contextInfoBoxStyle}>
-                            <div style={sectionTitleStyle}>Context Status</div>
-                            <div style={{color: '#ccc', fontSize: '11px', lineHeight: '1.6'}}>
-                                <div>Canvas: <b
-                                    style={{color: '#fff'}}>{redGPUContext.width} x {redGPUContext.height}</b></div>
-                                <div>DPR: <b style={{color: '#fff'}}>{window.devicePixelRatio}</b></div>
-                                <div>GPU: <b
-                                    style={{color: '#fff'}}>{redGPUContext.gpuDevice.label || 'WebGPU Device'}</b></div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div style={{color: '#666', fontSize: '11px', fontStyle: 'italic'}}>Waiting for Context...</div>
-                    )}
+                    <GuiPanel />
                 </div>
             </div>
 
@@ -152,59 +155,13 @@ const panelStyle: React.CSSProperties = {
     overflow: 'hidden'
 };
 
-const headerStyle: React.CSSProperties = {
-    padding: '12px 16px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    background: 'rgba(255, 255, 255, 0.03)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
-};
-
-const titleLabelStyle: React.CSSProperties = {
-    fontSize: '11px',
-    fontWeight: 'bold',
-    color: '#888',
-    textTransform: 'uppercase',
-    letterSpacing: '0.1em'
-};
-
 const contentStyle: React.CSSProperties = {
-    padding: '20px',
     fontSize: '12px',
     flex: 1,
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
     gap: '24px'
-};
-
-const exampleInfoBoxStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px'
-};
-
-const contextInfoBoxStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    paddingTop: '20px',
-    borderTop: '1px solid rgba(255,255,255,0.05)'
-};
-
-const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '12px',
-    color: '#fdb48d',
-    fontWeight: 'bold',
-    marginBottom: '4px'
-};
-
-const descriptionStyle: React.CSSProperties = {
-    color: '#aaa',
-    fontSize: '11px',
-    lineHeight: '1.6',
-    wordBreak: 'break-all'
 };
 
 export default App;

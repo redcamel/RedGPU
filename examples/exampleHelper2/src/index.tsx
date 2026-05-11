@@ -12,8 +12,11 @@ class RedGPUExampleHelper {
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
 
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, guiCallback?: (gui: any) => void) {
         useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
+        if (guiCallback) {
+            useExampleHelperStore.getState().setGuiCallback(guiCallback);
+        }
 
         // 현재 예제 정보 설정
         const currentExample = findCurrentExample(window.location.pathname);
