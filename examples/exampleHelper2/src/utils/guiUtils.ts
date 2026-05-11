@@ -12,6 +12,9 @@
  */
 export const addColorAlphaInputs = (container: any, colorObject: any, labelPrefix: string = 'BG') => {
     const hasAlpha = 'a' in colorObject;
+    
+    // [KO] 6자리 HEX 문자열을 위한 프록시 객체 (상단 텍스트 필드에 6자리만 표기됨)
+    // [EN] Proxy object for 6-digit HEX string (only 6 digits displayed in top text field)
     const colorProxy = {
         get color() {
             return colorObject.hex;
@@ -21,12 +24,16 @@ export const addColorAlphaInputs = (container: any, colorObject: any, labelPrefi
         }
     };
 
+    // [KO] 6자리 HEX 컬러 픽커 추가
+    // [EN] Add 6-digit HEX color picker
     container.addInput(colorProxy, 'color', {
         label: `${labelPrefix} Color`,
         picker: 'inline',
         expanded: true,
     });
     
+    // [KO] 알파 슬라이더 별도 추가 (6자리 HEX 유지를 위해 분리)
+    // [EN] Add separate Alpha slider (separated to maintain 6-digit HEX)
     if (hasAlpha) {
         container.addInput(colorObject, 'a', {
             min: 0, 

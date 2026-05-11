@@ -27,6 +27,8 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
             container.addInput(view, 'useDistanceCulling');
             container.addInput(view, 'distanceCulling', {min: 0, max: 1000, step: 1});
 
+            container.addSeparator();
+
             // Grid & Axis
             const debugFolder = container.addFolder({title: 'Debug Helpers'});
             const debugProxy = {
@@ -37,6 +39,8 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
             };
             debugFolder.addInput(debugProxy, 'grid', {label: 'Show Grid'});
             debugFolder.addInput(debugProxy, 'axis', {label: 'Show Axis'});
+
+            container.addSeparator();
 
             // Size & Position
             const SIZE_DATA = {
@@ -75,6 +79,7 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
             });
 
             if (view.scene) {
+                container.addSeparator();
                 const scene = view.scene;
                 const sceneFolder = container.addFolder({title: `Scene: ${scene.name || 'Untitled'}`});
                 

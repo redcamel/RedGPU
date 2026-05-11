@@ -18,9 +18,12 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         // Render Scale
         contextFolder.addInput(redGPUContext, 'renderScale', {min: 0.01, max: 1, step: 0.01});
 
+        contextFolder.addSeparator();
+
         // Background Color
         if (redGPUContext.backgroundColor) {
             addColorAlphaInputs(contextFolder, redGPUContext.backgroundColor);
+            contextFolder.addSeparator();
         }
 
         // Alpha Mode
@@ -30,6 +33,8 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
                 premultiplied: 'premultiplied'
             }
         });
+
+        contextFolder.addSeparator();
 
         // Size Management
         const initialWidth = parseSize(redGPUContext.width);
@@ -85,6 +90,8 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
             const label = `setSize(${w}, ${h})`;
             setSizeFolder.addButton({title: label}).on('click', () => redGPUContext.setSize(w, h));
         });
+
+        contextFolder.addSeparator();
 
         // Rect Info (Folder)
         const rectFolder = contextFolder.addFolder({title: 'Rect Info', expanded: true});
