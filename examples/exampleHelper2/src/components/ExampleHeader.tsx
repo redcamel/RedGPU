@@ -1,14 +1,49 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../store';
 import homeIcon from '../assets/icons/home.svg';
+import IconButton from './basic/IconButton';
+import SelectBox from './basic/SelectBox';
 
 /**
  * [KO] 예제 헬퍼의 상단 네비게이션 바 컴포넌트입니다.
  * [EN] Top navigation bar component of the example helper.
  */
-const TopBar = () => {
+const ExampleHeader = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
     const topBarRightActions = useExampleHelperStore((state: ExampleHelperState) => state.topBarRightActions);
+    const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
+
+    const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
+
+    useEffect(() => {
+        if (redGPUContext) {
+            const manager = redGPUContext.antialiasingManager;
+            if (manager.useMSAA) setAntialiasing('useMSAA');
+            else if (manager.useFXAA) setAntialiasing('useFXAA');
+            else if (manager.useTAA) setAntialiasing('useTAA');
+            else setAntialiasing('NONE');
+        }
+    }, [redGPUContext]);
+
+    const handleAntialiasingChange = (value: string) => {
+        setAntialiasing(value);
+        if (redGPUContext) {
+            const manager = redGPUContext.antialiasingManager;
+            manager.useMSAA = false;
+            manager.useFXAA = false;
+            manager.useTAA = false;
+            if (value === 'useMSAA') manager.useMSAA = true;
+            else if (value === 'useFXAA') manager.useFXAA = true;
+            else if (value === 'useTAA') manager.useTAA = true;
+        }
+    };
+
+    const options = [
+        { value: 'NONE', label: 'NONE' },
+        { value: 'useMSAA', label: 'MSAA' },
+        { value: 'useFXAA', label: 'FXAA' },
+        { value: 'useTAA', label: 'TAA' },
+    ];
 
     return (
         <header style={containerStyle}>
@@ -30,23 +65,15 @@ const TopBar = () => {
                 </div>
 
                 <div style={rightSectionStyle}>
+                    <SelectBox
+                        label="ANTIALIASING"
+                        value={antialiasing}
+                        options={options}
+                        onChange={handleAntialiasingChange}
+                    />
+
                     {topBarRightActions.map((action) => (
-                        <button
-                            key={action.id}
-                            style={{
-                                ...actionButtonStyle,
-                                width: action.icon ? '52px' : 'auto',
-                                padding: action.icon ? '0' : '0 20px'
-                            }}
-                            onClick={action.onClick}
-                            title={action.label}
-                        >
-                            {action.icon ? (
-                                <img src={action.icon} style={actionIconStyle} alt={action.label} />
-                            ) : (
-                                action.label
-                            )}
-                        </button>
+                        <IconButton key={action.id} action={action} />
                     ))}
                 </div>
             </div>
@@ -131,25 +158,4 @@ const titleValueStyle: React.CSSProperties = {
     fontWeight: 'bold'
 };
 
-const actionButtonStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0 20px',
-    height: '100%',
-    backgroundColor: '#111112',
-    color: '#fdb48d',
-    border: 'none',
-    fontSize: '11px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s, color 0.2s',
-    letterSpacing: '0.05em'
-};
-
-const actionIconStyle: React.CSSProperties = {
-    width: '18px',
-    height: '18px'
-};
-
-export default TopBar;
+export default ExampleHeader;

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../store';
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
 
 /**
  * [KO] 예제 소스 코드를 보여주는 모달 컴포넌트입니다. Prism.js를 사용하여 하이라이팅을 적용합니다.

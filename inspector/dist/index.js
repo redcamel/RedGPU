@@ -1,6 +1,23 @@
 var __defProp = Object.defineProperty;
+var __typeError = (msg) => {
+  throw TypeError(msg);
+};
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
+var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
+var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
+var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
+var __privateWrapper = (obj, member, setter, getter) => ({
+  set _(value) {
+    __privateSet(obj, member, value, setter);
+  },
+  get _() {
+    return __privateGet(obj, member, getter);
+  }
+});
+var _instanceId, _name, _aperture, _shutterSpeed, _iso, _ev100, _useAutoExposure, _exposureDirty, _up, _viewMatrix, _x, _z, _y, _rotationX, _rotationY, _rotationZ, _fieldOfView, _nearClipping, _farClipping, _globalKeyboardActiveView, _globalKeyboardActiveController, _instanceId2, _name2, _redGPUContext, _camera, _initInfo, _lastUpdateTime, _currentDeltaTime, _currentFrameViews, _keyboardProcessedThisFrame, _hoveredView, _isDragging, _eventTypeKeys, _dragStartX, _dragStartY, _pinchStartDistance, _isMultiTouch, _getTouchDistance, _AController_instances, initListener_fn, _HD_hover, _HD_down, _HD_Move, _HD_touchPinch, _HD_up, _HD_wheel;
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -7133,8 +7150,8 @@ const __vite_import_meta_env__ = {};
 const { useDebugValue } = React$2;
 const { useSyncExternalStoreWithSelector } = useSyncExternalStoreExports;
 let didWarnAboutEqualityFn = false;
-const identity = (arg) => arg;
-function useStore(api, selector = identity, equalityFn) {
+const identity$1 = (arg) => arg;
+function useStore(api, selector = identity$1, equalityFn) {
   if ((__vite_import_meta_env__ ? "production" : void 0) !== "production" && equalityFn && !didWarnAboutEqualityFn) {
     console.warn(
       "[DEPRECATED] Use `createWithEqualityFn` instead of `create` or use `useStoreWithEqualityFn` instead of `useStore`. They can be imported from 'zustand/traditional'. https://github.com/pmndrs/zustand/discussions/1937"
@@ -7162,3417 +7179,4868 @@ const createImpl = (createState) => {
   Object.assign(useBoundStore, api);
   return useBoundStore;
 };
-const create = (createState) => createState ? createImpl(createState) : createImpl;
-const useExampleHelperStore = create((set) => ({
+const create$1 = (createState) => createState ? createImpl(createState) : createImpl;
+const useInspectorStore = create$1((set) => ({
+  useDebugPanel: false,
   redGPUContext: null,
-  currentExample: null,
-  language: typeof navigator !== "undefined" && navigator.language.startsWith("ko") ? "ko" : "en",
-  showSourceModal: false,
-  topBarRightActions: [],
-  setRedGPUContext: (value) => set({ redGPUContext: value }),
-  setCurrentExample: (value) => set({ currentExample: value }),
-  setLanguage: (value) => set({ language: value }),
-  setShowSourceModal: (value) => set({ showSourceModal: value }),
-  addTopBarRightAction: (action) => set((state) => {
-    const filtered = state.topBarRightActions.filter((a) => a.id !== action.id);
-    return { topBarRightActions: [...filtered, action] };
+  lastUpdateTime: 0,
+  fps: 0,
+  avgFps: 0,
+  low1Fps: 0,
+  low01Fps: 0,
+  frameTime: "0ms",
+  totalNum3DGroups: 0,
+  totalNum3DObjects: 0,
+  totalNumInstances: 0,
+  totalNumDrawCalls: 0,
+  totalNumTriangles: 0,
+  totalNumPoints: 0,
+  totalUsedVideoMemory: 0,
+  pixelRectArray: [0, 0, 0, 0],
+  commandBatchStats: null,
+  hierarchy: {},
+  resourceStats: {
+    bitmapTexture: { count: 0, videoMemory: 0 },
+    cubeTexture: { count: 0, videoMemory: 0 },
+    hdrTexture: { count: 0, videoMemory: 0 },
+    uniformBuffer: { count: 0, videoMemory: 0 },
+    vertexBuffer: { count: 0, videoMemory: 0 },
+    indexBuffer: { count: 0, videoMemory: 0 },
+    storageBuffer: { count: 0, videoMemory: 0 },
+    gpuBuffer: { count: 0, videoMemory: 0 }
+  },
+  currentTab: "STATE",
+  fpsHistory: [],
+  memoryHistory: [],
+  drawCallHistory: [],
+  setStats: (stats) => set((state) => {
+    const nextState = { ...state, ...stats };
+    if (stats.fps !== void 0) {
+      state.fpsHistory.push(stats.fps);
+      if (state.fpsHistory.length > 100) state.fpsHistory.shift();
+      nextState.fpsHistory = [...state.fpsHistory];
+    }
+    if (stats.totalUsedVideoMemory !== void 0) {
+      state.memoryHistory.push(stats.totalUsedVideoMemory);
+      if (state.memoryHistory.length > 100) state.memoryHistory.shift();
+      nextState.memoryHistory = [...state.memoryHistory];
+    }
+    if (stats.totalNumDrawCalls !== void 0) {
+      state.drawCallHistory.push(stats.totalNumDrawCalls);
+      if (state.drawCallHistory.length > 100) state.drawCallHistory.shift();
+      nextState.drawCallHistory = [...state.drawCallHistory];
+    }
+    return nextState;
   }),
-  removeTopBarRightAction: (id2) => set((state) => ({
-    topBarRightActions: state.topBarRightActions.filter((a) => a.id !== id2)
-  })),
-  clearTopBarRightActions: () => set({ topBarRightActions: [] })
+  setUseDebugPanel: (value) => set({ useDebugPanel: value }),
+  setRedGPUContext: (value) => set({ redGPUContext: value }),
+  setCurrentTab: (tab) => set({ currentTab: tab })
 }));
-const githubIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MzMwNDE5NjAwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MzMwNDE5NjEwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDozMzA0MTk1RTBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDozMzA0MTk1RjBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Ppk8MxEAAAy3SURBVHja5Ft7VJRlGn/mGxjuNwMcBUa5DCgGApZlnvKyx9xzMFetNFE7btaWZpm2Zp6t/ttTq9l9t07HrFMnLe/Xs2yyFrUnQ7AAE0XxAoqA3GEGcGZw9ve8MJ6RYOZlAP327HvOJzh88837/N7n+T2/53nf0djtdvp/HprBfqCiKDQ8MpL8/f2p02Yji9WaZLNaZ3R2dqbgb8m4JUGj0ehxEV88eBG6F6IMP8uuX79ehnuPeut0uV5eXpVaPNPc3k51dXWEv6kTgICAABo5YgRZLBbqaGvLhMFZGkWZAUMiHIb2d3QDw4Ds12q1X/j4+BR6eXtTVXU1tQMQVQDAhhsMBjK3tkaYzeZVMHgZLr2nRrsaAOIEgP3Az8/vM7+AAMvly5cHDIRmIK5uNBqpzWSKMJlMr3l7e7PhfrcibgFEJYDY6Ovr+yHCxFJx6ZLHoeERABERERQWGkr1dXXLYfTrcM+Q20FgMLoU14qQ0NAjDQ0N1NjUNPQAxI4eTVarNbbNbP5Kp9NNVAOT22w25ocVGq3WxGExJACwyyePGUM1NTWz8d/Pb9equ/IG/JgXFBxccv7CBZJN74rMTUhFNG7sWKqsrHwNQOxTm/HdC5QE4i1oamz8vTEhQcxZZmjd3QByo/i4OG1VVdXf4WZrh4LdBy2nazTeWJz5ptbW8hF6fXFLa6tbclTcuf245GSqqa5+H8Yv/x8Rdzpkhs+bmpqy4mJjBxYCGWlpdOH8+deRbpa7ECq3zVJXn48Q+LSutjYzIT7eMxK899576XRJyTKs/Obe3J5dC7lYTIDVHw8AJR17A2B86ujoYOtJ5+Mj5DTcXnhrLwC147orkInx/Hl5AESqs1iS8UEFMMivN+PZ2H989BGF33EHlZaWUu5331Fubi6BKwhKTXDHYA6kXqH69Ho9TZkyhaZMnUpJyEqNyP/Ln3lG/K03ELBIpZjrXdbOTlM1JLRbAHgFke4Cy8vLC2BIUm+TaW9roynTptG+/ftvev0SFNm2rVvp0y1bqKKiggIDA8WkHN7Cq8c/+f/sOZou5ur6HT/5Xl5NnoNjVfleKE2KgdxeunQpZS1aJKS385g3dy79OydHFGC9DXjoZ5GRkX88e+6c+Pyb7O1586RJk6jw55//Ao2f1OdqwBAOkZ4jJiaGXlq3jpY8/ji98/bbAojm5mYKCgqikSNHUlR0tPg5fPhwCoWSRHiJ9127do1AWnS1poauXLlCLGauXr0q3su1xopnn6UXVq+mqKioPsP1X9nZfbOiTrcUz/s6Pj4++8yZM30DEB4eTlWVlQl4wxqXuROrw+7X1xiBqvBvGzbQrIceotOnTtHdEyfSaIQVGy0z2PCLEDP5+flkTEwULu9qjMFceE5u5vy+zWIZh8WwtCI99grA+NRUyjt6dFNgUJDOFfPyh3E94G7cf//94urvCAkJofHIQHzJjHDMhcPGEUp9AJCAemElNM1bhUVFv02DbBBQT/H185stpbxUJIhk5wJiXgvS9GOAfwNAIkpbxMlr7tIYI8xEwtWXWkZDY6OYkzuVCi/Qt7S0LI0GF90EAGKe2tra9DB+rswH8oedPHlSNQCUYC492d0FCCs5pToWWgDAjY1LFRVZAEIr8xBG+lhenmoAyOO5SCpSGJ7cWF8/gdt3NwAYFhbGqWiJTKHDeZlT0/IVK1QDAM8FxC3tBdAjS0K7eUBhV0D1ZPD28pKiXBYlz69aRTMefFA1AEyfPp1Wr1lDZrNZNgxms5bhbKZhQtDY7VnwgC97k5I9FJVQYbk//EDBwcGqKgF5YaY+8ABdgH5gTnNXRGHhR0EeVyisyvDmGe6M58FFyKLFi1VnPA+W3YuXLOkqlCQ4DPdNHzZsGCn+KFwQE2kysc/5c9asWaptBGRmZlIo+EymQwy+mOCHgk6xQIezSpKpxuLi4ighIUG1AMSh9uf6n+cqwQMp1+AtSntHhwHuHyhTh8fGxpLXIJe5gzmY1GKxSDxXiTAwdMJTFNT9epn4Z7cKj4xUfT8sEpJeJgQAQASnTaWtvT1QBoCuZpu36gEQHiohitjrkfm0SqfNFiLb6XW0vtQ8xBwl7GGbbVZroGKXaI073oBCQvUAcK0vu6DQAzoFCtBkl3MZqq2tVT0A3EmSCWm2mTdWFV9f32YZ0uAmJ7erBmtffigGi6ArlZVSnWnY3InFb1YgGxvsEgBwiqkCABXl5aoFgJuylZIAYNQq3Hj1Dwi4gHzYKRMC3KvLO3ZMtQDkY27cXJUJAaTAC0IJchxw71xWaBw6cEC1ABw8eJBkU7rYL0AZoHCPH4ZJAcCbIbz58euvv6rO+FOnTtF3334rNmUkF7PQDNuVGrBmUHDwERkiZHS55n7rzTdVB8BbmzaJNC2bAQDUkfr6elJ4Kys8PDxXRj/z4G7Q7t27adfOnaoxfu/evbRj+3ZREkt2hBpQ2ZbwsTuFDUd9fwIKqkJWEDHLrlm9uqsXd5tHQX4+rV61SsxJVgBB/Wb7+Pp2ilqAX+C2MuJ7p+xWN3dcWHFlLVxI33zzzW0zPufwYVr42GOC+d11gZzdX+fj83UTMprgAv6HH2A0Gq/W19U945xDGVHW1hz3vH/HPOH4Owsjs8lEexAObSCTlNTUPjcnB3tw7G7YsIFeXrdOzI2JT3bxoP9r9Xr90xfLy+3sAdrulMCNjmqIiJlAMsa5sMiYMEFsTvIGJN9XDiHk2B5z7Mcx+x5EeuS+HLfYuNU0FOPs2bO0ZfNm+vOLL9KB/fvF5mp/t+Fh0/t3REQcZsEkFvlGHY1aPywkZDaIYZ/joYzuo/Pn0ydbtnS5Dzxg165dtP7ll8W5XWfkxRFZSFHeYE3PyKD7Jk+mjPR00aXhTVG+ZHM0exqvciNC8/y5c/TLL7/Qjz/+SEWFheJ1TseyLt+D/NrBd3FNLS3Vjp2tm1hj5syZ9ENubjFuSnG8xtqfW+AbN26k0d1nbnhCjz78MDVhgt49JsJewuHC5MqTZC9ZsGABvfPee9KrxWA+v3IlbQezMxiOnRxecXe7wK4GQvWDMcnJzx1zUrM3ARCB1QsLDc0EygedJ8v5NR4ruQOrn5TUdWxg75499PjixQQp3Sf7MgjMCzlHjojdp/4MPtLyu2nTRFgNxrEbzKUZqW9cY3NzpfO+5k0+WQu3jjYYDmEF9zi/zt1gntDTTz11Y/Nhzty5lAUA2E37Guw9jzzySL+NFw3OuDjhOYNVfVqs1vXhkZGVPTd1f+NPfDojNTX1Pyh9/6RzCjR2v3OIRxYbkxHfPPiczunTp6moqEjEtyPGmRfYbRmsV1591SMAHMpz544dpIU3DmQzHtx03GAwLC8qLrb3zBba3ggIbt2KELiMN851jjn+/UxpKS3MyhKuzaDMmTNHHIHhUpRDheOX7+NsMA88wcdlPE2PGgDw1bZt4pmyBNob8WF+D3ZYLLVNvRym7hNYPpbyc37+ZoCxzDnG2ch3QWhPIhx6EAyVlZVRK/7OgIwaPZqcDyJ4MthdJ0+aJDKOJzzAq41wXoSw3tpXAefSs6ZPm6bL++mnf8Kg6c4MPTIqinJycmi4Xj+kgodXbNI993gMQJvZ/Nexd975iivJ7tKvcr//3pKWnv4HxPIxZy4ov3iRlj3xhJiYittjH8YlJLzCB61c8oybpgHlFxSY4M6z4OLHHEdTuSLkvsBDmZl06NAhkq0kb6Hxn8A7nztZUuJ2k0SKXFkTpI0fHwgC3A0PuLGT7NiJTUtLE8ovMTGRQqD4+NtifCqzpqaG1r70kuCEWxEC3TH/RsyoUes5O8nsEfbrCxMT775bBxA24feVjgl1f2gXU/NX4brB4dd4m6oI5ONpbdAfAOCt7VjtF2IMho+LT5yQ/g6RdG7hB/6Ul2eJjY9/DmntUQgUk6NiZG3OZwb4mAqHB1+O/9+Kw3QAuxT1/T0g54/5DGB/vkDV7+R6/Phxum637wTBGDnWEP+dbjooQ2Y4Qq3Zcu3a+qioqHSrzXbihAe9So/UxWWUksXFxdXGxMQnoQxTkSX23EoihLtbAP67vv7+cYj3N06VlrYz33ikNgcwCc4QhNKyZHx6+jy4/H0Ii6NMPA65OVBQ+DmOZzh+h+FfBAQGGhOMxhdaWlsbIG+lT4cN6eBjZxkZGTQmMTElMjx8g5eiVKGasyM+7Z4Ofi/EmB3PKsYz1xrj4/UpKSkeZ5VbMpit+VtbXMllZ2enwIg1sGUfrpOSdttwFeD6Eu/NwjMMC+bPF6dTBtILGHAa9LSa40qQdQIqTNFLiI6OTgkLC9NxVYlicwJua0YKLeO6H6V1LarRCv4GCjiGCgsLRRtssL8x7jz+K8AAM6+xeLYfBvMAAAAASUVORK5CYII=";
-const Footer = () => {
-  const setShowSourceModal = useExampleHelperStore((state) => state.setShowSourceModal);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerStyle, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerLeftStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { color: "#b19898", fontSize: "11px" }, children: [
-        "This project is maintained by ",
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "b",
-          {
-            style: { color: "#fdb48d" },
-            children: "RedCamel"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "https://github.com/redcamel/RedGPU", target: "_blank", rel: "noreferrer", style: iconLinkStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: githubIcon, width: "16", height: "16", alt: "GitHub" }) })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: footerRightStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "button",
-      {
-        style: sourceButtonStyle,
-        onClick: () => setShowSourceModal(true),
-        children: "SOURCE"
-      }
-    ) })
-  ] });
+const THEME = {
+  fontFamily: "",
+  fontSize: {
+    title: "12px",
+    content: "11px",
+    small: "11px"
+  },
+  colors: {
+    primary: "#fdb48d",
+    label: "#888",
+    value: "#ccc",
+    background: "#111",
+    border: "rgba(255,255,255,0.1)",
+    activeBg: "rgba(253, 180, 141, 0.1)"
+  }
 };
-const footerStyle = {
-  position: "fixed",
-  bottom: 0,
-  left: 0,
-  right: 0,
-  height: "50px",
-  backgroundColor: "#111112",
-  borderTop: "1px solid #333",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "0 20px",
-  zIndex: 10002,
-  fontSize: "12px",
-  color: "#b19898"
+const COMMON_STYLES = {
+  label: {
+    color: THEME.colors.label
+  },
+  value: {
+    color: THEME.colors.value,
+    textAlign: "right",
+    wordBreak: "break-all",
+    marginLeft: "10px"
+  },
+  toggleButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "14px",
+    height: "14px",
+    border: `1px solid ${THEME.colors.primary}`,
+    borderRadius: "3px",
+    fontSize: "12px",
+    fontWeight: "bold",
+    color: THEME.colors.primary,
+    lineHeight: "14px",
+    background: "rgba(0,0,0,0.3)",
+    flexShrink: 0
+  }
 };
-const footerLeftStyle = {
-  display: "flex",
-  alignItems: "center",
-  gap: "12px"
-};
-const footerRightStyle = {
-  display: "flex",
-  alignItems: "center"
-};
-const sourceButtonStyle = {
-  backgroundColor: "#333",
-  color: "#fff",
-  border: "none",
-  padding: "6px 16px",
-  fontSize: "11px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  borderRadius: "4px",
-  transition: "background-color 0.2s",
-  letterSpacing: "0.05em"
-};
-const iconLinkStyle = {
-  display: "flex",
-  alignItems: "center",
-  opacity: 0.7,
-  transition: "opacity 0.2s"
-};
-const homeIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23fff'%3e%3cpath%20d='M341.8%2072.6C329.5%2061.2%20310.5%2061.2%20298.3%2072.6L74.3%20280.6C64.7%20289.6%2061.5%20303.5%2066.3%20315.7C71.1%20327.9%2082.8%20336%2096%20336L112%20336L112%20512C112%20547.3%20140.7%20576%20176%20576L464%20576C499.3%20576%20528%20547.3%20528%20512L528%20336L544%20336C557.2%20336%20569%20327.9%20573.8%20315.7C578.6%20303.5%20575.4%20289.5%20565.8%20280.6L341.8%2072.6zM304%20384L336%20384C362.5%20384%20384%20405.5%20384%20432L384%20528L256%20528L256%20432C256%20405.5%20277.5%20384%20304%20384z'/%3e%3c/svg%3e";
-const IconButton = ({ action }) => {
-  const [isHovered, setIsHovered] = reactExports.useState(false);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "button",
-    {
-      style: {
-        ...actionButtonStyle,
-        width: action.icon ? "52px" : "auto",
-        padding: action.icon ? "0" : "0 20px",
-        backgroundColor: isHovered ? "#1a1a1c" : "#111112"
-      },
-      onClick: action.onClick,
-      title: action.label,
-      onMouseEnter: () => setIsHovered(true),
-      onMouseLeave: () => setIsHovered(false),
-      children: action.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: action.icon, style: actionIconStyle, alt: action.label }) : action.label
-    }
-  );
-};
-const actionButtonStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "0 20px",
-  height: "100%",
-  backgroundColor: "#111112",
-  color: "#fdb48d",
-  border: "none",
-  fontSize: "11px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "background-color 0.2s, color 0.2s",
-  letterSpacing: "0.05em"
-};
-const actionIconStyle = {
-  width: "18px",
-  height: "18px"
-};
-const SelectBox = ({ label, value, options, onChange }) => {
-  var _a;
-  const [isHovered, setIsHovered] = reactExports.useState(false);
-  const [isOpen, setIsOpen] = reactExports.useState(false);
-  const [hoveredOption, setHoveredOption] = reactExports.useState(null);
-  const dropdownRef = reactExports.useRef(null);
+const MiniGraph = reactExports.memo(({
+  data,
+  width = "100%",
+  height = 40,
+  color = THEME.colors.primary,
+  label,
+  valueDisplay
+}) => {
+  const canvasRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-  const currentLabel = ((_a = options.find((opt) => opt.value === value)) == null ? void 0 : _a.label) || value;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "div",
-    {
-      ref: dropdownRef,
-      style: {
-        ...selectBoxStyle,
-        backgroundColor: isHovered || isOpen ? "#1a1a1c" : "#111112"
-      },
-      onMouseEnter: () => setIsHovered(true),
-      onMouseLeave: () => setIsHovered(false),
-      onClick: () => setIsOpen(!isOpen),
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleLabelStyle$2, children: label }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: customSelectTriggerStyle, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: currentValueStyle, children: currentLabel }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
-            ...arrowIconStyle,
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)"
-          } })
-        ] }),
-        isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: optionsListStyle, children: options.map((option) => {
-          const isSelected = value === option.value;
-          const isItemHovered = hoveredOption === option.value;
-          return /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              style: {
-                ...optionItemStyle,
-                backgroundColor: isSelected ? "#2a2a2c" : isItemHovered ? "#252527" : "transparent",
-                color: isSelected || isItemHovered ? "#fff" : "#fdb48d"
-              },
-              onMouseEnter: () => setHoveredOption(option.value),
-              onMouseLeave: () => setHoveredOption(null),
-              onClick: (e) => {
-                e.stopPropagation();
-                onChange(option.value);
-                setIsOpen(false);
-              },
-              children: option.label
-            },
-            option.value
-          );
-        }) })
-      ]
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    const w2 = rect.width;
+    const h = rect.height;
+    if (canvas.width !== w2 * dpr || canvas.height !== h * dpr) {
+      canvas.width = w2 * dpr;
+      canvas.height = h * dpr;
+      ctx.scale(dpr, dpr);
     }
-  );
+    ctx.fillStyle = "#050505";
+    ctx.fillRect(0, 0, w2, h);
+    if (data.length < 2) return;
+    const dataLen = data.length;
+    let max = -Infinity;
+    let min = Infinity;
+    for (let i = 0; i < dataLen; i++) {
+      if (data[i] > max) max = data[i];
+      if (data[i] < min) min = data[i];
+    }
+    max = max * 1.1 || 1;
+    min = min * 0.9 || 0;
+    const range = max - min;
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = "round";
+    const step = w2 / (dataLen - 1);
+    for (let i = 0; i < dataLen; i++) {
+      const x2 = i * step;
+      const y2 = h - (data[i] - min) / range * h;
+      if (i === 0) ctx.moveTo(x2, y2);
+      else ctx.lineTo(x2, y2);
+    }
+    ctx.stroke();
+    ctx.lineTo(w2, h);
+    ctx.lineTo(0, h);
+    const gradient = ctx.createLinearGradient(0, 0, 0, h);
+    const rgbaColor = color.startsWith("#") ? hexToRgba(color, 0.2) : color;
+    gradient.addColorStop(0, rgbaColor);
+    gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }, [data, color]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "12px" }, children: [
+    (label || valueDisplay) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$5, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle$2, children: label }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...valueStyle, color }, children: valueDisplay })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "canvas",
+      {
+        ref: canvasRef,
+        style: {
+          width,
+          height,
+          display: "block",
+          borderRadius: "2px",
+          border: "1px solid rgba(255,255,255,0.1)"
+        }
+      }
+    )
+  ] });
+});
+const hexCache = {};
+const hexToRgba = (hex, alpha) => {
+  const key = hex + alpha;
+  if (hexCache[key]) return hexCache[key];
+  let r2 = 0, g = 0, b = 0;
+  if (hex.length === 4) {
+    r2 = parseInt(hex[1] + hex[1], 16);
+    g = parseInt(hex[2] + hex[2], 16);
+    b = parseInt(hex[3] + hex[3], 16);
+  } else if (hex.length === 7) {
+    r2 = parseInt(hex.substring(1, 3), 16);
+    g = parseInt(hex.substring(3, 5), 16);
+    b = parseInt(hex.substring(5, 7), 16);
+  }
+  const result = `rgba(${r2}, ${g}, ${b}, ${alpha})`;
+  hexCache[key] = result;
+  return result;
 };
-const selectBoxStyle = {
-  position: "relative",
+const headerStyle$5 = {
   display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  padding: "0 16px",
-  backgroundColor: "#111112",
-  minWidth: "110px",
-  flexShrink: 0,
-  cursor: "pointer",
-  transition: "background-color 0.2s",
-  userSelect: "none"
-};
-const titleLabelStyle$2 = {
-  fontSize: "9px",
-  color: "#666",
-  fontWeight: "bold",
-  marginBottom: "2px"
-};
-const customSelectTriggerStyle = {
-  display: "flex",
-  alignItems: "center",
   justifyContent: "space-between",
-  width: "100%"
+  fontSize: "10px",
+  marginBottom: "4px",
+  fontFamily: 'monospace, "Courier New", courier',
+  fontVariantNumeric: "tabular-nums"
 };
-const currentValueStyle = {
-  fontSize: "11px",
-  color: "#fdb48d",
+const labelStyle$2 = {
+  color: "#888"
+};
+const valueStyle = {
   fontWeight: "bold"
 };
-const arrowIconStyle = {
-  width: "10px",
-  height: "10px",
-  marginLeft: "8px",
-  backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23fdb48d%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")`,
-  backgroundRepeat: "no-repeat",
-  backgroundPosition: "center",
-  backgroundSize: "contain",
-  transition: "transform 0.2s ease-in-out"
+const consoleAndThrowError = (...arg) => {
+  const msg = Array.prototype.slice.call(arg).join(" ");
+  console.log("//////////////////////////////////////////////////////////");
+  console.log(msg);
+  throw new Error(msg);
 };
-const optionsListStyle = {
-  position: "absolute",
-  top: "100%",
-  left: 0,
-  right: 0,
-  backgroundColor: "#1a1a1c",
-  borderTop: "1px solid rgba(255, 255, 255, 0.05)",
-  boxShadow: "0 10px 20px rgba(0,0,0,0.5)",
-  zIndex: 10004,
-  display: "flex",
-  flexDirection: "column",
-  padding: "4px 0"
+const formatBytes = (bytes, decimals = 2) => {
+  if (typeof bytes !== "number" || bytes < 0 || Number.isNaN(bytes) || !Number.isInteger(bytes)) {
+    consoleAndThrowError("Invalid input: 'bytes' must be a uint");
+  }
+  if (bytes === 0)
+    return "0 Bytes";
+  const k2 = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k2));
+  return parseFloat((bytes / Math.pow(k2, i)).toFixed(dm)) + " " + sizes[i];
 };
-const optionItemStyle = {
-  padding: "10px 16px",
-  fontSize: "11px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "background-color 0.1s, color 0.1s"
-};
-const ExampleHeader = () => {
-  const currentExample = useExampleHelperStore((state) => state.currentExample);
-  const topBarRightActions = useExampleHelperStore((state) => state.topBarRightActions);
-  const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
-  const [antialiasing, setAntialiasing] = reactExports.useState("useMSAA");
-  reactExports.useEffect(() => {
-    if (redGPUContext) {
-      const manager = redGPUContext.antialiasingManager;
-      if (manager.useMSAA) setAntialiasing("useMSAA");
-      else if (manager.useFXAA) setAntialiasing("useFXAA");
-      else if (manager.useTAA) setAntialiasing("useTAA");
-      else setAntialiasing("NONE");
+const ToggleButton = ({
+  isExpanded,
+  onClick,
+  visible = true,
+  style
+}) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      onClick,
+      style: {
+        cursor: onClick ? "pointer" : "default",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        visibility: visible ? "visible" : "hidden",
+        flexShrink: 0,
+        ...style
+      },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.toggleButton, children: isExpanded ? "-" : "+" })
     }
-  }, [redGPUContext]);
-  const handleAntialiasingChange = (value) => {
-    setAntialiasing(value);
-    if (redGPUContext) {
-      const manager = redGPUContext.antialiasingManager;
-      manager.useMSAA = false;
-      manager.useFXAA = false;
-      manager.useTAA = false;
-      if (value === "useMSAA") manager.useMSAA = true;
-      else if (value === "useFXAA") manager.useFXAA = true;
-      else if (value === "useTAA") manager.useTAA = true;
+  );
+};
+class FPSMeter {
+  constructor() {
+    __publicField(this, "previousTimeStamp", 0);
+    __publicField(this, "frameCount", 0);
+    __publicField(this, "frameTimesRaw", []);
+    __publicField(this, "recentFrameTimes", []);
+    __publicField(this, "maxFrameTimeBuffer", 1200);
+    __publicField(this, "recentFrameTimeWindow", 10);
+    __publicField(this, "initializationFrames", 60);
+  }
+  /**
+   * [KO] 새로운 타임스탬프를 기반으로 통계를 업데이트합니다.
+   * [EN] Updates statistics based on a new timestamp.
+   */
+  update(currentTime) {
+    if (currentTime === 0) return null;
+    if (this.frameCount === 0) {
+      this.previousTimeStamp = currentTime;
+      this.frameCount++;
+      return null;
     }
-  };
-  const options = [
-    { value: "NONE", label: "NONE" },
-    { value: "useMSAA", label: "MSAA" },
-    { value: "useFXAA", label: "FXAA" },
-    { value: "useTAA", label: "TAA" }
-  ];
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("header", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: navBarStyle, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: leftSectionStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "../../index.html", style: homeButtonStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "img",
-        {
-          src: homeIcon,
-          style: homeIconStyle,
-          alt: "HOME"
-        }
-      ) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: titleBoxStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleLabelStyle$1, children: "TITLE" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleValueStyle, children: currentExample ? currentExample.name : "empty example name" })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: rightSectionStyle, children: [
+    const deltaTime = currentTime - this.previousTimeStamp;
+    this.previousTimeStamp = currentTime;
+    this.frameCount++;
+    const safeFrameTime = Math.min(Math.max(deltaTime, 0.1), 1e3);
+    if (this.frameCount > this.initializationFrames) {
+      this.frameTimesRaw.push(safeFrameTime);
+      if (this.frameTimesRaw.length > this.maxFrameTimeBuffer) this.frameTimesRaw.shift();
+    }
+    this.recentFrameTimes.push(safeFrameTime);
+    if (this.recentFrameTimes.length > this.recentFrameTimeWindow) this.recentFrameTimes.shift();
+    const avgRecent = this.recentFrameTimes.reduce((a, b) => a + b, 0) / this.recentFrameTimes.length;
+    const fps = Math.round(1e3 / avgRecent);
+    let stats = {
+      fps,
+      avgFps: 0,
+      low1Fps: 0,
+      low01Fps: 0,
+      frameTime: `${safeFrameTime.toFixed(2)}ms`
+    };
+    if (this.frameTimesRaw.length >= 100) {
+      const sorted = [...this.frameTimesRaw].sort((a, b) => b - a);
+      const total = sorted.length;
+      const avgTotal = this.frameTimesRaw.reduce((a, b) => a + b, 0) / total;
+      stats.avgFps = Math.round(1e3 / avgTotal);
+      const low1Count = Math.max(1, Math.ceil(total * 0.01));
+      const low1Avg = sorted.slice(0, low1Count).reduce((a, b) => a + b, 0) / low1Count;
+      stats.low1Fps = Math.round(1e3 / low1Avg);
+      const low01Count = Math.max(1, Math.ceil(total * 1e-3));
+      const low01Avg = sorted.slice(0, low01Count).reduce((a, b) => a + b, 0) / low01Count;
+      stats.low01Fps = Math.round(1e3 / low01Avg);
+    }
+    return stats;
+  }
+}
+const FPS = reactExports.memo(() => {
+  const fps = useInspectorStore((state) => state.fps);
+  const avgFps = useInspectorStore((state) => state.avgFps);
+  const low1Fps = useInspectorStore((state) => state.low1Fps);
+  const low01Fps = useInspectorStore((state) => state.low01Fps);
+  const frameTime = useInspectorStore((state) => state.frameTime);
+  const fpsHistory = useInspectorStore((state) => state.fpsHistory);
+  const drawCallHistory = useInspectorStore((state) => state.drawCallHistory);
+  const memoryHistory = useInspectorStore((state) => state.memoryHistory);
+  const totalNumDrawCalls = useInspectorStore((state) => state.totalNumDrawCalls);
+  const totalUsedVideoMemory = useInspectorStore((state) => state.totalUsedVideoMemory);
+  const [isExpanded, setIsExpanded] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$4, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statsContainerStyle, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
-        SelectBox,
+        ToggleButton,
         {
-          label: "ANTIALIASING",
-          value: antialiasing,
-          options,
-          onChange: handleAntialiasingChange
+          isExpanded,
+          onClick: () => setIsExpanded(!isExpanded),
+          style: { paddingRight: "4px" }
         }
       ),
-      topBarRightActions.map((action) => /* @__PURE__ */ jsxRuntimeExports.jsx(IconButton, { action }, action.id))
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: fpsValueStyle, children: [
+        fps,
+        " FPS"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: frameTimeValueStyle, children: [
+        "(",
+        frameTime,
+        ")"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { flex: 1 } }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: avgFpsStyle, children: [
+        "Avg: ",
+        avgFps
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: miniDividerStyle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low1FpsStyle, children: [
+        "1%: ",
+        low1Fps
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: miniDividerStyle }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: low01FpsStyle, children: [
+        "0.1%: ",
+        low01Fps
+      ] })
+    ] }),
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: graphColumnStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(MiniGraph, { data: fpsHistory, height: 20, color: "#0f0", label: "FPS", valueDisplay: `${fps} FPS` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        MiniGraph,
+        {
+          data: drawCallHistory,
+          height: 20,
+          color: "#4af",
+          label: "Draws",
+          valueDisplay: totalNumDrawCalls.toString()
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        MiniGraph,
+        {
+          data: memoryHistory,
+          height: 20,
+          color: "#fdb48d",
+          label: "VRAM",
+          valueDisplay: formatBytes(totalUsedVideoMemory)
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "TODO - bundleCall" })
     ] })
-  ] }) });
+  ] });
+});
+const containerStyle$4 = {
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  background: "#000"
 };
-const containerStyle$1 = {
+const statsContainerStyle = {
+  padding: "8px 12px",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  fontSize: "11px",
+  justifyContent: "flex-start",
+  flexWrap: "wrap",
+  fontFamily: 'monospace, "Courier New", courier',
+  fontVariantNumeric: "tabular-nums"
+};
+const graphColumnStyle = {
+  display: "flex",
+  flexDirection: "column",
+  padding: "0 12px 8px 12px",
+  gap: "4px"
+};
+const miniDividerStyle = {
+  width: "1px",
+  height: "10px",
+  background: "rgba(255,255,255,0.2)",
+  margin: "0 2px"
+};
+const fpsValueStyle = {
+  color: "#0f0",
+  fontWeight: "bold",
+  fontSize: "12px",
+  textAlign: "left"
+};
+const frameTimeValueStyle = {
+  color: "#888",
+  fontSize: "10px",
+  minWidth: "65px",
+  textAlign: "left"
+};
+const avgFpsStyle = {
+  color: "#4af",
+  minWidth: "50px"
+};
+const low1FpsStyle = {
+  color: "#fa0",
+  minWidth: "45px"
+};
+const low01FpsStyle = {
+  color: "#f50"
+};
+const Section = reactExports.memo(({ title, subTitle, children, isExpanded, onToggle }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle$1, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      style: { ...sectionTitleContainerStyle, cursor: onToggle ? "pointer" : "default" },
+      onClick: onToggle,
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1 }, children: [
+          onToggle && /* @__PURE__ */ jsxRuntimeExports.jsx(ToggleButton, { isExpanded: !!isExpanded }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle$1, children: title })
+        ] }),
+        subTitle && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionSubTitleStyle, children: subTitle })
+      ]
+    }
+  ),
+  (!onToggle || isExpanded) && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentAreaStyle$2, children })
+] }));
+const sectionStyle$1 = {
+  marginBottom: "16px"
+};
+const sectionTitleContainerStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  borderBottom: `1px solid ${THEME.colors.primary}33`,
+  marginBottom: "8px",
+  paddingBottom: "4px",
+  userSelect: "none"
+};
+const sectionTitleStyle$1 = {
+  fontSize: THEME.fontSize.title,
+  color: THEME.colors.primary,
+  fontWeight: "bold",
+  fontFamily: THEME.fontFamily,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis"
+};
+const sectionSubTitleStyle = {
+  fontSize: "11px",
+  color: "#888",
+  fontStyle: "italic",
+  fontWeight: "normal",
+  marginLeft: "8px",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  flexShrink: 0
+};
+const contentAreaStyle$2 = {
+  padding: "0 2px"
+};
+const StatItem = reactExports.memo(({ label, value, color = THEME.colors.value, isBold = false }) => {
+  const isZero = value === 0 || value === "0";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...statItemStyle$2, opacity: isZero ? 0.3 : 1 }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+      ...COMMON_STYLES.value,
+      color,
+      fontWeight: isBold ? "bold" : "normal"
+    }, children: value !== void 0 && value !== null ? value : "N/A" })
+  ] });
+});
+const statItemStyle$2 = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginBottom: "4px",
+  fontSize: THEME.fontSize.content,
+  fontFamily: THEME.fontFamily
+};
+const TotalState = reactExports.memo(() => {
+  const totalNum3DGroups = useInspectorStore((state) => state.totalNum3DGroups);
+  const totalNum3DObjects = useInspectorStore((state) => state.totalNum3DObjects);
+  const totalNumInstances = useInspectorStore((state) => state.totalNumInstances);
+  const totalNumDrawCalls = useInspectorStore((state) => state.totalNumDrawCalls);
+  const totalNumTriangles = useInspectorStore((state) => state.totalNumTriangles);
+  const totalNumPoints = useInspectorStore((state) => state.totalNumPoints);
+  const totalUsedVideoMemory = useInspectorStore((state) => state.totalUsedVideoMemory);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Total State", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Groups", value: totalNum3DGroups }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Objects", value: totalNum3DObjects }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Instances", value: totalNumInstances }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Draw Calls", value: totalNumDrawCalls, color: "#fdb48d", isBold: true }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Triangles", value: totalNumTriangles.toLocaleString() }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Points", value: totalNumPoints.toLocaleString() }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Video Memory", value: formatBytes(totalUsedVideoMemory), color: "#fdb48d", isBold: true })
+  ] });
+});
+const StatRGBAItem = reactExports.memo(({ label, value }) => {
+  const [r2, g, b] = value;
+  const compColor = `rgb(${255 - r2}, ${255 - g}, ${255 - b})`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle$1, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+      ...COMMON_STYLES.value,
+      backgroundColor: `rgba(${value.join(", ")})`,
+      color: compColor,
+      padding: "2px 4px"
+    }, children: value.join(", ") })
+  ] });
+});
+const statItemStyle$1 = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginBottom: "4px",
+  fontSize: THEME.fontSize.content,
+  fontFamily: THEME.fontFamily
+};
+const StatBoolItem = reactExports.memo(({
+  label,
+  value,
+  trueLabel = "TRUE",
+  falseLabel = "FALSE"
+}) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: statItemStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+      ...COMMON_STYLES.value,
+      backgroundColor: value ? "#008000" : "#cc0000",
+      color: "white",
+      padding: "2px 4px",
+      borderRadius: "4px",
+      fontSize: "10px",
+      fontWeight: "bold",
+      lineHeight: 1
+    }, children: value ? trueLabel : falseLabel })
+  ] });
+});
+const statItemStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginBottom: "4px",
+  fontSize: THEME.fontSize.content,
+  fontFamily: THEME.fontFamily,
+  alignItems: "center"
+};
+const RedGPUContextView = () => {
+  const redGPUContext = useInspectorStore((state) => state.redGPUContext);
+  const pixelRectArray = useInspectorStore((state) => state.pixelRectArray);
+  if (!redGPUContext) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$3, children: "RedGPUContext not initialized" });
+  }
+  const { detector, htmlCanvas, width, height, backgroundColor, antialiasingManager } = redGPUContext;
+  const adapterInfo = detector.adapterInfo;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$3, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "RedGPUContext Info", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Width", value: width }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Height", value: height }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]`, color: "#fdb48d" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Canvas size", value: `${htmlCanvas.clientWidth} x ${htmlCanvas.clientHeight}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Device Pixel Ratio", value: window.devicePixelRatio }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "renderScale", value: redGPUContext.renderScale }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Alpha Mode", value: redGPUContext.alphaMode }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "backgroundColor", value: backgroundColor.rgba })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Antialiasing", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useMSAA", value: antialiasingManager.useMSAA }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFXAA", value: antialiasingManager.useFXAA }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useTAA", value: antialiasingManager.useTAA })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Environment", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "devicePixelRatio", value: devicePixelRatio }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Mobile", value: detector.isMobile, trueLabel: "Yes", falseLabel: "No" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: userAgentStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: labelStyle$1, children: "User Agent" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: userAgentValueStyle, children: detector.userAgent })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Adapter Info", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Vendor", value: adapterInfo.vendor }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Architecture", value: adapterInfo.architecture }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Device", value: adapterInfo.device }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Description", value: adapterInfo.description }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Fallback", value: detector.isFallbackAdapter, trueLabel: "Yes", falseLabel: "No" })
+    ] })
+  ] });
+};
+const containerStyle$3 = {};
+const labelStyle$1 = {
+  color: "#888"
+};
+const userAgentStyle = {
+  marginTop: "8px",
+  fontSize: "11px"
+};
+const userAgentValueStyle = {
+  color: "#666",
+  marginTop: "4px",
+  lineHeight: "1.4",
+  wordBreak: "break-all"
+};
+const placeholderStyle$3 = {
+  padding: "20px",
+  textAlign: "center",
+  color: "#666",
+  fontSize: "12px",
+  fontStyle: "italic"
+};
+const CommandBatchStatsView = ({ statsProp }) => {
+  const storeStats = useInspectorStore((state) => state.commandBatchStats);
+  const commandBatchStats = statsProp !== void 0 ? statsProp : storeStats;
+  const [expanded, setExpanded] = reactExports.useState({});
+  const toggleExpanded = (phase) => {
+    setExpanded((prev) => ({ ...prev, [phase]: prev[phase] === false }));
+  };
+  if (!commandBatchStats || Object.keys(commandBatchStats).length === 0) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noItemStyle$2, children: "No command batch stats available." });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: Object.entries(commandBatchStats).map(([phase, stats]) => {
+    const totalPasses = stats["Render Passes"].count + stats["Compute Passes"].count;
+    const isExpanded = expanded[phase] !== false;
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      Section,
+      {
+        title: `Batch: ${phase}`,
+        subTitle: `${stats["Command Buffers"]} Buffers, ${totalPasses} Passes`,
+        isExpanded,
+        onToggle: () => toggleExpanded(phase),
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Command Buffers", value: stats["Command Buffers"] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Render Passes", value: stats["Render Passes"].count }),
+          stats["Render Passes"].list.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: listStyle, children: stats["Render Passes"].list.map((name, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: listItemStyle, children: [
+            "- ",
+            name
+          ] }, i)) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Compute Passes", value: stats["Compute Passes"].count }),
+          stats["Compute Passes"].list.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: listStyle, children: stats["Compute Passes"].list.map((name, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: listItemStyle, children: [
+            "- ",
+            name
+          ] }, i)) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Raw Usages", value: stats["Raw Usages"] })
+        ]
+      },
+      phase
+    );
+  }) });
+};
+const listStyle = {
+  paddingLeft: "12px",
+  marginBottom: "8px",
+  fontSize: "11px",
+  lineHeight: "1.4",
+  color: "#666"
+};
+const listItemStyle = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap"
+};
+const noItemStyle$2 = {
+  padding: "8px 16px",
+  fontSize: "10px",
+  color: "#666",
+  fontStyle: "italic"
+};
+const formatNumber = (val, decimals = 2) => {
+  if (val === void 0 || val === null) return "";
+  const str = String(val);
+  if (str.includes("%")) {
+    const num2 = parseFloat(str);
+    return isNaN(num2) ? str : `${num2.toLocaleString(void 0, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    })}%`;
+  }
+  if (str.includes("px")) {
+    const num2 = parseFloat(str);
+    return isNaN(num2) ? str : `${num2.toLocaleString(void 0, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    })}px`;
+  }
+  const num = parseFloat(str);
+  if (isNaN(num)) return str;
+  if (Number.isInteger(num)) {
+    return num.toLocaleString();
+  }
+  return num.toLocaleString(void 0, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+};
+const formatTextureUsage = (usage) => {
+  const labels = [];
+  if (usage & 1) labels.push("COPY_SRC");
+  if (usage & 2) labels.push("COPY_DST");
+  if (usage & 4) labels.push("TEXTURE");
+  if (usage & 8) labels.push("STORAGE");
+  if (usage & 16) labels.push("ATTACHMENT");
+  return labels.join(", ");
+};
+const formatBufferUsage = (usage) => {
+  const labels = [];
+  if (usage & 1) labels.push("MAP_READ");
+  if (usage & 2) labels.push("MAP_WRITE");
+  if (usage & 4) labels.push("COPY_SRC");
+  if (usage & 8) labels.push("COPY_DST");
+  if (usage & 16) labels.push("INDEX");
+  if (usage & 32) labels.push("VERTEX");
+  if (usage & 64) labels.push("UNIFORM");
+  if (usage & 128) labels.push("STORAGE");
+  if (usage & 256) labels.push("INDIRECT");
+  if (usage & 512) labels.push("QUERY_RESOLVE");
+  return labels.join(", ");
+};
+async function readGPUTextureToCanvas(device, gpuTexture, canvas, layer = 0, mipLevel = 0) {
+  const width = Math.max(1, gpuTexture.width >> mipLevel);
+  const height = Math.max(1, gpuTexture.height >> mipLevel);
+  const format = gpuTexture.format;
+  const isDepth = format.startsWith("depth");
+  const bytesPerPixel = getBytesPerPixel(format);
+  const unpaddedBytesPerRow = width * bytesPerPixel;
+  const paddedBytesPerRow = Math.ceil(unpaddedBytesPerRow / 256) * 256;
+  const bufferSize = paddedBytesPerRow * height;
+  const stagingBuffer = device.createBuffer({
+    size: bufferSize,
+    usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+  });
+  const commandEncoder = device.createCommandEncoder();
+  commandEncoder.copyTextureToBuffer(
+    {
+      texture: gpuTexture,
+      origin: [0, 0, layer],
+      mipLevel,
+      aspect: isDepth ? "depth-only" : "all"
+    },
+    {
+      buffer: stagingBuffer,
+      bytesPerRow: paddedBytesPerRow
+    },
+    [width, height]
+  );
+  device.queue.submit([commandEncoder.finish()]);
+  try {
+    await stagingBuffer.mapAsync(GPUMapMode.READ);
+    const arrayBuffer = stagingBuffer.getMappedRange();
+    const data = new Uint8Array(arrayBuffer);
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const imageData = ctx.createImageData(width, height);
+    if (format === "rgba8unorm" || format === "rgba8unorm-srgb") {
+      for (let y2 = 0; y2 < height; y2++) {
+        const srcOffset = y2 * paddedBytesPerRow;
+        const dstOffset = y2 * width * 4;
+        imageData.data.set(data.subarray(srcOffset, srcOffset + width * 4), dstOffset);
+      }
+    } else if (format === "bgra8unorm" || format === "bgra8unorm-srgb") {
+      for (let y2 = 0; y2 < height; y2++) {
+        for (let x2 = 0; x2 < width; x2++) {
+          const srcIdx = y2 * paddedBytesPerRow + x2 * 4;
+          const dstIdx = (y2 * width + x2) * 4;
+          imageData.data[dstIdx] = data[srcIdx + 2];
+          imageData.data[dstIdx + 1] = data[srcIdx + 1];
+          imageData.data[dstIdx + 2] = data[srcIdx];
+          imageData.data[dstIdx + 3] = data[srcIdx + 3];
+        }
+      }
+    } else if (format === "rgba16float") {
+      const float16Data = new Uint16Array(arrayBuffer);
+      const gamma = 1 / 2.2;
+      for (let y2 = 0; y2 < height; y2++) {
+        for (let x2 = 0; x2 < width; x2++) {
+          const srcIdx = y2 * (paddedBytesPerRow / 2) + x2 * 4;
+          const dstIdx = (y2 * width + x2) * 4;
+          const r2 = decodeFloat16(float16Data[srcIdx]);
+          const g = decodeFloat16(float16Data[srcIdx + 1]);
+          const b = decodeFloat16(float16Data[srcIdx + 2]);
+          const a = decodeFloat16(float16Data[srcIdx + 3]);
+          imageData.data[dstIdx] = Math.max(0, Math.min(255, Math.pow(r2, gamma) * 255));
+          imageData.data[dstIdx + 1] = Math.max(0, Math.min(255, Math.pow(g, gamma) * 255));
+          imageData.data[dstIdx + 2] = Math.max(0, Math.min(255, Math.pow(b, gamma) * 255));
+          imageData.data[dstIdx + 3] = Math.max(0, Math.min(255, a * 255));
+        }
+      }
+    } else if (format === "depth32float") {
+      const float32Data = new Float32Array(arrayBuffer);
+      for (let y2 = 0; y2 < height; y2++) {
+        for (let x2 = 0; x2 < width; x2++) {
+          const srcIdx = y2 * (paddedBytesPerRow / 4) + x2;
+          const dstIdx = (y2 * width + x2) * 4;
+          const depth = float32Data[srcIdx];
+          const val = Math.max(0, Math.min(255, depth * 255));
+          imageData.data[dstIdx] = val;
+          imageData.data[dstIdx + 1] = val;
+          imageData.data[dstIdx + 2] = val;
+          imageData.data[dstIdx + 3] = 255;
+        }
+      }
+    } else {
+      ctx.fillStyle = "#333";
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = "#fff";
+      ctx.fillText(`Unsupported format: ${format}`, 10, 20);
+    }
+    ctx.putImageData(imageData, 0, 0);
+  } finally {
+    stagingBuffer.unmap();
+    stagingBuffer.destroy();
+  }
+}
+function getBytesPerPixel(format) {
+  switch (format) {
+    case "rgba8unorm":
+    case "rgba8unorm-srgb":
+    case "bgra8unorm":
+    case "bgra8unorm-srgb":
+      return 4;
+    case "rgba16float":
+      return 8;
+    case "depth32float":
+      return 4;
+    default:
+      return 4;
+  }
+}
+function decodeFloat16(binary) {
+  const exponent = (binary & 31744) >> 10;
+  const fraction = binary & 1023;
+  const sign = binary & 32768 ? -1 : 1;
+  if (exponent === 0) return sign * Math.pow(2, -14) * (fraction / 1024);
+  if (exponent === 31) return fraction ? NaN : sign * Infinity;
+  return sign * Math.pow(2, exponent - 15) * (1 + fraction / 1024);
+}
+const TexturePreviewModal = ({ item, onClose }) => {
+  var _a, _b, _c;
+  const { redGPUContext } = useInspectorStore();
+  const [copyFeedback, setCopyFeedback] = reactExports.useState(null);
+  const [activeMipLevel, setActiveMipLevel] = reactExports.useState(0);
+  const canvasRefs = reactExports.useRef([]);
+  const isTexture = !!item.texture;
+  if (!isTexture) return null;
+  const tex = item.texture;
+  const gpuTex = tex == null ? void 0 : tex.gpuTexture;
+  const isBlob = item.src && item.src.startsWith("blob:") || item.srcList && ((_a = item.srcList[0]) == null ? void 0 : _a.startsWith("blob:"));
+  const fileName = isBlob ? "BLOB" : item.src ? item.src.split("/").pop() : item.srcList ? item.srcList[0].split("/").pop() : null;
+  const originalPath = item.src || (item.srcList ? item.srcList[0] + "..." : item.cacheKey);
+  const isCube = (gpuTex == null ? void 0 : gpuTex.dimension) === "2d" && (gpuTex == null ? void 0 : gpuTex.depthOrArrayLayers) === 6;
+  const isHDR = ((_b = item.src) == null ? void 0 : _b.toLowerCase().endsWith(".hdr")) || item.srcList && ((_c = item.srcList[0]) == null ? void 0 : _c.toLowerCase().endsWith(".hdr")) || (gpuTex == null ? void 0 : gpuTex.format) === "rgba16float";
+  const hasSrcList = item.srcList && Array.isArray(item.srcList);
+  const showMipTabs = (gpuTex == null ? void 0 : gpuTex.mipLevelCount) > 1;
+  const useCanvasForCube = isCube && (!hasSrcList || isHDR || activeMipLevel > 0);
+  const useCanvasForSingle = !isCube && (!item.src || isHDR || activeMipLevel > 0);
+  reactExports.useEffect(() => {
+    if (!redGPUContext || !gpuTex) return;
+    let isMounted = true;
+    const updatePreviews = async () => {
+      try {
+        if (useCanvasForCube) {
+          for (let i = 0; i < 6; i++) {
+            if (!isMounted) return;
+            const canvas = canvasRefs.current[i];
+            if (canvas) {
+              await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, i, activeMipLevel);
+            }
+          }
+        } else if (useCanvasForSingle) {
+          if (!isMounted) return;
+          const canvas = canvasRefs.current[0];
+          if (canvas) {
+            await readGPUTextureToCanvas(redGPUContext.gpuDevice, gpuTex, canvas, 0, activeMipLevel);
+          }
+        }
+      } catch (e) {
+        if (isMounted) console.error("Failed to read GPU texture:", e);
+      }
+    };
+    updatePreviews();
+    return () => {
+      isMounted = false;
+    };
+  }, [gpuTex, redGPUContext, item.src, item.srcList, hasSrcList, isCube, isHDR, useCanvasForCube, useCanvasForSingle, activeMipLevel]);
+  const handleCopy = (text, label) => {
+    navigator.clipboard.writeText(text);
+    setCopyFeedback(`Copied ${label} path!`);
+    setTimeout(() => setCopyFeedback(null), 2e3);
+  };
+  const cubeFaceLabels = ["Right (+X)", "Left (-X)", "Top (+Y)", "Bottom (-Y)", "Front (+Z)", "Back (-Z)"];
+  const cubeFaceIndices = [2, 1, 4, 0, 3, 5];
+  const gridPositions = [
+    { col: 2, row: 1 },
+    // Top (idx 2)
+    { col: 1, row: 2 },
+    // Left (idx 1)
+    { col: 2, row: 2 },
+    // Front (idx 4)
+    { col: 3, row: 2 },
+    // Right (idx 0)
+    { col: 2, row: 3 },
+    // Bottom (idx 3)
+    { col: 2, row: 4 }
+    // Back (idx 5)
+  ];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: overlayStyle$1, onClick: onClose, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes scaleUp { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+                @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+            ` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle$1, onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$4, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle$1, children: fileName || "Texture Preview" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: pathStyle$1, children: originalPath })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle$1, onClick: onClose, children: "×" })
+      ] }),
+      showMipTabs && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: mipTabContainerStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "9px", color: "#666", fontWeight: "bold", marginRight: "8px" }, children: "MIP LEVEL:" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "4px", overflowX: "auto", flex: 1, paddingBottom: "4px" }, children: Array.from({ length: gpuTex.mipLevelCount }).map((_, i) => {
+          const mipW = Math.max(1, gpuTex.width >> i);
+          const mipH = Math.max(1, gpuTex.height >> i);
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              onClick: () => setActiveMipLevel(i),
+              style: {
+                ...mipTabButtonStyle,
+                background: activeMipLevel === i ? "#fdb48d" : "rgba(255,255,255,0.05)",
+                color: activeMipLevel === i ? "#000" : "#888",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                minWidth: "60px"
+              },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontSize: "9px" }, children: [
+                  "Level ",
+                  i
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: {
+                  fontSize: "8px",
+                  opacity: 0.8
+                }, children: [
+                  formatNumber(mipW, 0),
+                  "x",
+                  formatNumber(mipH, 0)
+                ] })
+              ]
+            },
+            i
+          );
+        }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$3, children: [
+        item.src && !isHDR && !isCube && activeMipLevel === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: item.src, style: previewImageStyle, alt: "preview" }),
+        isCube && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...cubePreviewGridStyle, position: "relative" }, children: gridPositions.map((pos, i) => {
+          const faceIdx = cubeFaceIndices[i];
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+            gridColumn: pos.col,
+            gridRow: pos.row,
+            position: "relative",
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,0.1)"
+          }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: faceLabelStyle, children: cubeFaceLabels[faceIdx] }),
+            hasSrcList && !isHDR && activeMipLevel === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "img",
+              {
+                src: item.srcList[faceIdx],
+                style: cubePreviewImageStyle,
+                title: cubeFaceLabels[faceIdx]
+              }
+            ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "canvas",
+              {
+                ref: (el2) => canvasRefs.current[faceIdx] = el2,
+                style: cubePreviewImageStyle
+              }
+            ),
+            hasSrcList && /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                style: faceCopyButtonStyle,
+                onClick: () => handleCopy(item.srcList[faceIdx], cubeFaceLabels[faceIdx]),
+                title: "Copy path",
+                children: "📋"
+              }
+            )
+          ] }, i);
+        }) }),
+        useCanvasForSingle && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...previewImageStyle, position: "relative" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "canvas",
+            {
+              ref: (el2) => canvasRefs.current[0] = el2,
+              style: { maxWidth: "100%", maxHeight: "500px", display: "block" }
+            }
+          ),
+          !redGPUContext && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noPreviewStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { textAlign: "center" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "40px", marginBottom: "10px" }, children: "🖼️" }),
+            "No direct image preview available.",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+              opacity: 0.5,
+              fontSize: "10px"
+            }, children: "(Generated or Direct Texture)" })
+          ] }) })
+        ] })
+      ] }),
+      copyFeedback && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: toastStyle, children: copyFeedback }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerStyle$1, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle$1, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Format: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: gpuTex == null ? void 0 : gpuTex.format })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Size: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "b",
+              {
+                style: { color: "#eee" },
+                children: [
+                  formatNumber(gpuTex == null ? void 0 : gpuTex.width, 0),
+                  "x",
+                  formatNumber(gpuTex == null ? void 0 : gpuTex.height, 0)
+                ]
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: infoRowStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "12px" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Dim: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex == null ? void 0 : gpuTex.dimension })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Layers: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "b",
+              {
+                style: { color: "#eee" },
+                children: formatNumber(gpuTex == null ? void 0 : gpuTex.depthOrArrayLayers, 0)
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Mipmaps: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "b",
+              {
+                style: { color: "#eee" },
+                children: formatNumber(gpuTex == null ? void 0 : gpuTex.mipLevelCount, 0)
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Samples: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatNumber(gpuTex == null ? void 0 : gpuTex.sampleCount, 0) })
+          ] })
+        ] }) }),
+        (gpuTex == null ? void 0 : gpuTex.usage) !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...infoRowStyle$1, fontSize: "10px", opacity: 0.8 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Usage: ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle$1, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Memory: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "UUID: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("small", { style: { opacity: 0.5 }, children: item.uuid })
+          ] })
+        ] })
+      ] })
+    ] })
+  ] });
+};
+const overlayStyle$1 = {
   position: "fixed",
   top: 0,
   left: 0,
   right: 0,
-  height: "52px",
-  backgroundColor: "#202020",
-  borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
-  zIndex: 10003,
+  bottom: 0,
+  background: "rgba(0,0,0,0.7)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1e4,
+  backdropFilter: "blur(8px)",
+  animation: "fadeIn 0.2s ease-out"
+};
+const modalStyle$1 = {
+  background: "rgba(26, 26, 26, 0.95)",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.15)",
+  width: "90%",
+  maxWidth: "600px",
+  maxHeight: "90%",
   display: "flex",
   flexDirection: "column",
-  wordBreak: "keep-all"
+  boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
+  overflow: "hidden",
+  animation: "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
 };
-const navBarStyle = {
+const headerStyle$4 = {
+  padding: "16px",
+  background: "rgba(255,255,255,0.03)",
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
   display: "flex",
-  height: "100%",
-  width: "100%",
-  alignItems: "stretch",
   justifyContent: "space-between",
-  backgroundColor: "rgba(255, 255, 255, 0.05)"
-  // For the 1px gap line effect
+  alignItems: "flex-start",
+  gap: "12px"
 };
-const leftSectionStyle = {
+const titleStyle$1 = {
+  fontSize: "15px",
+  fontWeight: "bold",
+  color: "#eee",
+  marginBottom: "4px",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis"
+};
+const pathStyle$1 = {
+  fontSize: "10px",
+  color: "#777",
+  wordBreak: "break-all",
+  display: "block",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis"
+};
+const closeButtonStyle$1 = {
+  background: "none",
+  border: "none",
+  color: "#888",
+  fontSize: "28px",
+  cursor: "pointer",
+  padding: "0 4px",
+  lineHeight: "1",
+  marginTop: "-4px",
+  flexShrink: 0
+};
+const contentStyle$3 = {
+  padding: "20px",
+  overflow: "auto",
   display: "flex",
-  alignItems: "stretch",
-  gap: "1px"
+  justifyContent: "center",
+  alignItems: "center",
+  background: "#0a0a0a",
+  minHeight: "350px"
 };
-const rightSectionStyle = {
-  display: "flex",
-  alignItems: "stretch",
-  gap: "1px"
+const previewImageStyle = {
+  maxWidth: "100%",
+  maxHeight: "500px",
+  objectFit: "contain",
+  boxShadow: "0 0 30px rgba(0,0,0,0.8)",
+  border: "1px solid rgba(255,255,255,0.1)"
 };
-const homeButtonStyle = {
+const cubePreviewGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gridTemplateRows: "repeat(4, 1fr)",
+  gap: "4px",
+  width: "400px",
+  background: "rgba(255,255,255,0.02)",
+  padding: "4px",
+  borderRadius: "4px"
+};
+const cubePreviewImageStyle = {
+  width: "100%",
+  aspectRatio: "1",
+  objectFit: "cover",
+  display: "block"
+};
+const faceLabelStyle = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  background: "rgba(0,0,0,0.6)",
+  color: "#fff",
+  fontSize: "8px",
+  padding: "2px 4px",
+  zIndex: 1,
+  pointerEvents: "none",
+  textTransform: "uppercase"
+};
+const faceCopyButtonStyle = {
+  position: "absolute",
+  bottom: "2px",
+  right: "2px",
+  background: "rgba(0,0,0,0.5)",
+  border: "none",
+  color: "#fff",
+  fontSize: "10px",
+  cursor: "pointer",
+  padding: "4px",
+  borderRadius: "4px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: "52px",
-  height: "100%",
-  backgroundColor: "#111112",
-  color: "white",
-  textDecoration: "none",
-  transition: "background-color 0.2s",
-  flexShrink: 0
+  opacity: 0,
+  transition: "opacity 0.2s"
 };
-const homeIconStyle = {
-  width: "18px",
-  height: "18px"
-};
-const titleBoxStyle = {
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  padding: "0 16px",
-  backgroundColor: "#111112",
-  minWidth: "120px",
-  flexShrink: 0
-};
-const titleLabelStyle$1 = {
-  fontSize: "9px",
-  color: "#666",
-  fontWeight: "bold",
-  marginBottom: "2px"
-};
-const titleValueStyle = {
-  fontSize: "11px",
-  color: "#ccc",
-  fontWeight: "bold"
-};
-const Description = () => {
-  const currentExample = useExampleHelperStore((state) => state.currentExample);
-  const language = useExampleHelperStore((state) => state.language);
-  const setLanguage = useExampleHelperStore((state) => state.setLanguage);
-  if (!currentExample || !currentExample.description) {
-    return null;
-  }
-  const description = currentExample.description[language] || currentExample.description["en"] || "";
-  if (!description) return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle$2, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { dangerouslySetInnerHTML: { __html: description } }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "button",
-      {
-        style: toggleButtonStyle,
-        onClick: () => setLanguage(language === "ko" ? "en" : "ko"),
-        children: language === "ko" ? "ENGLISH" : "한국어"
-      }
-    )
-  ] });
-};
-const containerStyle = {
-  position: "fixed",
-  top: "52px",
-  left: 0,
-  right: 0,
-  backgroundColor: "transparent",
-  padding: "12px 20px",
-  zIndex: 10002,
-  display: "flex",
-  flexDirection: "column",
-  // 수직 배치로 변경
-  alignItems: "flex-start",
-  // 왼쪽 정렬
-  justifyContent: "flex-start",
-  gap: "10px",
-  // 글과 버튼 사이 간격 축소
-  pointerEvents: "none"
-};
-const contentStyle$2 = {
+const footerStyle$1 = {
+  padding: "16px",
+  background: "rgba(255,255,255,0.03)",
+  borderTop: "1px solid rgba(255,255,255,0.1)",
   fontSize: "12px",
-  color: "#eee",
-  lineHeight: "1.6",
-  maxWidth: "800px",
-  wordBreak: "keep-all",
-  textShadow: "1px 1px 2px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)",
-  pointerEvents: "auto"
+  color: "#999",
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px"
 };
-const toggleButtonStyle = {
-  backgroundColor: "rgba(255, 255, 255, 0.1)",
-  // 배경 투명도 조정
-  color: "#ccc",
-  border: "1px solid rgba(255, 255, 255, 0.2)",
-  padding: "3px 10px",
-  fontSize: "9px",
-  // 버튼 크기 살짝 축소
+const infoRowStyle$1 = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center"
+};
+const noPreviewStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  color: "#555",
+  fontSize: "13px",
+  height: "100%"
+};
+const toastStyle = {
+  position: "absolute",
+  bottom: "80px",
+  left: "50%",
+  transform: "translateX(-50%)",
+  background: "#fdb48d",
+  color: "#000",
+  padding: "8px 16px",
+  borderRadius: "20px",
+  fontSize: "12px",
+  fontWeight: "bold",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+  zIndex: 100,
+  animation: "slideUp 0.3s ease-out"
+};
+const mipTabContainerStyle = {
+  display: "flex",
+  padding: "8px 16px",
+  background: "rgba(0,0,0,0.2)",
+  borderBottom: "1px solid rgba(255,255,255,0.05)",
+  alignItems: "center",
+  gap: "4px"
+};
+const mipTabButtonStyle = {
+  border: "none",
+  padding: "2px 8px",
+  borderRadius: "4px",
+  fontSize: "10px",
   fontWeight: "bold",
   cursor: "pointer",
-  borderRadius: "4px",
-  flexShrink: 0,
   transition: "all 0.2s",
-  pointerEvents: "auto",
-  backdropFilter: "blur(4px)"
+  flexShrink: 0
 };
-const SourceModal = () => {
-  const showSourceModal = useExampleHelperStore((state) => state.showSourceModal);
-  const setShowSourceModal = useExampleHelperStore((state) => state.setShowSourceModal);
-  const currentExample = useExampleHelperStore((state) => state.currentExample);
-  const [sourceCode, setSourceCode] = reactExports.useState("");
-  const [loading, setLoading] = reactExports.useState(false);
-  const codeRef = reactExports.useRef(null);
-  const PRISM_JS = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js";
-  const PRISM_CSS = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css";
-  const loadPrism = () => {
-    return new Promise((resolve) => {
-      const prismWindow = window;
-      if (prismWindow.Prism) {
-        resolve();
-        return;
-      }
-      if (!document.querySelector(`link[href="${PRISM_CSS}"]`)) {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = PRISM_CSS;
-        document.head.appendChild(link);
-      }
-      if (!document.querySelector(`script[src="${PRISM_JS}"]`)) {
-        const script = document.createElement("script");
-        script.src = PRISM_JS;
-        script.onload = () => resolve();
-        document.head.appendChild(script);
-      } else {
-        const checkPrism = setInterval(() => {
-          if (prismWindow.Prism) {
-            clearInterval(checkPrism);
-            resolve();
-          }
-        }, 100);
-      }
-    });
-  };
-  reactExports.useEffect(() => {
-    if (showSourceModal) {
-      setLoading(true);
-      fetch("./index.js").then((response) => {
-        if (!response.ok) throw new Error("Failed to load source code");
-        return response.text();
-      }).then(async (text) => {
-        setSourceCode(text);
-        setLoading(false);
-        await loadPrism();
-        if (codeRef.current) {
-          window.Prism.highlightElement(codeRef.current);
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.textContent = `
+        div[style*="position: relative"]:hover button[title="Copy path"] {
+            opacity: 1 !important;
         }
-      }).catch((err) => {
-        console.error(err);
-        setSourceCode("// Failed to load source code.");
-        setLoading(false);
-      });
-    }
-  }, [showSourceModal]);
+        button[title="Copy path"]:hover {
+            background: #fdb48d !important;
+            color: #000 !important;
+        }
+    `;
+  document.head.appendChild(style);
+}
+async function readGPUBufferToCPU(device, gpuBuffer) {
+  try {
+    const size = gpuBuffer.size;
+    const stagingBuffer = device.createBuffer({
+      size,
+      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+    });
+    const commandEncoder = device.createCommandEncoder();
+    commandEncoder.copyBufferToBuffer(gpuBuffer, 0, stagingBuffer, 0, size);
+    device.queue.submit([commandEncoder.finish()]);
+    await stagingBuffer.mapAsync(GPUMapMode.READ);
+    const copy = stagingBuffer.getMappedRange().slice(0);
+    stagingBuffer.unmap();
+    stagingBuffer.destroy();
+    return copy;
+  } catch (e) {
+    console.error("Failed to read GPU buffer:", e);
+    return null;
+  }
+}
+const BufferDetailModal = ({ item, type, onClose }) => {
+  var _a;
+  const { redGPUContext } = useInspectorStore();
+  const [liveData, setLiveData] = reactExports.useState(null);
+  const [isLive, setIsLive] = reactExports.useState(false);
+  const [isLoading, setIsLoading] = reactExports.useState(true);
+  const buf = item.buffer || item;
+  const isRaw = item.isRaw;
+  const gpuBuffer = buf == null ? void 0 : buf.gpuBuffer;
+  const availableTabs = [];
+  if (type === "indexBuffer") {
+    availableTabs.push("dataViewU32");
+  } else if (type === "vertexBuffer") {
+    availableTabs.push("dataViewF32");
+  } else if (type === "uniformBuffer" || type === "storageBuffer" || type === "gpuBuffer") {
+    availableTabs.push("data");
+  } else {
+    availableTabs.push("data", "dataViewF32", "dataViewU32");
+  }
+  const [activeTab, setActiveTab] = reactExports.useState(availableTabs[0]);
   reactExports.useEffect(() => {
-    if (showSourceModal && !loading && sourceCode && window.Prism && codeRef.current) {
-      window.Prism.highlightElement(codeRef.current);
-    }
-  }, [sourceCode, loading, showSourceModal]);
-  if (!showSourceModal) return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: overlayStyle, onClick: () => setShowSourceModal(false), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle, onClick: (e) => e.stopPropagation(), children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$1, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: titleStyle, children: [
-        "SOURCE CODE : ",
-        currentExample == null ? void 0 : currentExample.name
+    const fetchBufferData = async () => {
+      var _a2;
+      if (redGPUContext && gpuBuffer) {
+        const canRead = !!(gpuBuffer.usage & GPUBufferUsage.COPY_SRC);
+        if (canRead) {
+          const data = await readGPUBufferToCPU(redGPUContext.gpuDevice, gpuBuffer);
+          if (data) {
+            setLiveData(data);
+            setIsLive(true);
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
+      const localData = (buf == null ? void 0 : buf.data) instanceof ArrayBuffer ? buf.data : ((_a2 = buf == null ? void 0 : buf.data) == null ? void 0 : _a2.buffer) instanceof ArrayBuffer ? buf.data.buffer : null;
+      if (localData) {
+        setLiveData(localData.slice(0));
+      }
+      setIsLive(false);
+      setIsLoading(false);
+    };
+    fetchBufferData();
+  }, [redGPUContext, gpuBuffer, buf == null ? void 0 : buf.data]);
+  const label = isRaw ? item.label : item.label || (buf == null ? void 0 : buf.label) || (buf == null ? void 0 : buf.name) || "Unnamed Buffer";
+  const uuid = item.uuid;
+  const size = isRaw ? item.size : (buf == null ? void 0 : buf.size) || 0;
+  const usage = isRaw ? item.usage : buf == null ? void 0 : buf.usage;
+  const vertexCount = buf == null ? void 0 : buf.vertexCount;
+  const stride = buf == null ? void 0 : buf.stride;
+  const triangleCount = buf == null ? void 0 : buf.triangleCount;
+  const interleavedStruct = buf == null ? void 0 : buf.interleavedStruct;
+  const dataObjectType = isRaw ? "GPUBuffer" : ((_a = buf == null ? void 0 : buf.data) == null ? void 0 : _a.constructor.name) || "Unknown";
+  const dataViewF32 = liveData ? new Float32Array(liveData) : null;
+  const dataViewU32 = liveData ? new Uint32Array(liveData) : null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: overlayStyle, onClick: onClose, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes scaleUp { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+                * { box-sizing: border-box; }
+            ` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: modalStyle, onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle$3, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: "8px" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleStyle, children: label }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              ...statusBadgeStyle,
+              background: isLive ? "#10b981" : "#666"
+            }, children: isLive ? "LIVE GPU" : "LOCAL CACHE" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: typeStyle$1, children: type.toUpperCase() })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle, onClick: onClose, children: "×" })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { style: closeButtonStyle, onClick: () => setShowSourceModal(false), children: "CLOSE" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle$1, children: loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: loadingStyle, children: "Loading source code..." }) : /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { style: preStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("code", { ref: codeRef, className: "language-javascript", style: codeStyle, children: sourceCode }) }) })
-  ] }) });
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$2, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Properties" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: propertyGridStyle, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "UUID", value: uuid }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Size", value: formatBytes(size), highlight: true }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Data Object", value: dataObjectType }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Usage", value: formatBufferUsage(usage) }),
+            vertexCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Vertex Count", value: formatNumber(vertexCount, 0) }),
+            stride !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Stride", value: `${formatNumber(stride, 0)} elements` }),
+            triangleCount !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyItem, { label: "Triangle Count", value: formatNumber(triangleCount, 0) })
+          ] })
+        ] }),
+        type === "vertexBuffer" && interleavedStruct && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Interleaved Structure" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "4px" }, children: [
+            interleavedStruct.attributes.map((attr, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: structRowStyle, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: structNameStyle, children: attr.attributeName }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "10px", fontSize: "9px", color: "#888" }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Loc: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "b",
+                    {
+                      style: { color: "#eee" },
+                      children: formatNumber(attr.shaderLocation, 0)
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Offset: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatNumber(attr.offset, 0) })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Format: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: attr.format })
+                ] })
+              ] })
+            ] }, i)),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginTop: "4px", fontSize: "9px", color: "#666", textAlign: "right" }, children: [
+              "Total Array Stride: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { children: [
+                formatNumber(interleavedStruct.arrayStride, 0),
+                " bytes"
+              ] })
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: sectionStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+            ...sectionTitleStyle,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Buffer Data View" }),
+            availableTabs.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabContainerStyle, children: availableTabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+              TabButton,
+              {
+                label: tab === "data" ? "data (Raw)" : tab,
+                active: activeTab === tab,
+                onClick: () => setActiveTab(tab)
+              },
+              tab
+            )) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: dataViewerStyle, children: isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "Loading data from GPU..." }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+            DataContent,
+            {
+              type,
+              tab: activeTab,
+              f32: dataViewF32,
+              u32: dataViewU32,
+              raw: liveData,
+              stride,
+              interleavedStruct
+            }
+          ) })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: footerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: infoRowStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Video Memory: ",
+          /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: formatBytes(size) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { opacity: 0.5 }, children: [
+          "Top ",
+          formatNumber(210, 0),
+          " elements shown"
+        ] })
+      ] }) })
+    ] })
+  ] });
 };
+const TabButton = ({ label, active, onClick }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+  "button",
+  {
+    style: {
+      ...tabButtonStyle,
+      background: active ? "#fdb48d" : "transparent",
+      color: active ? "#000" : "#888",
+      fontSize: "9px"
+    },
+    onClick,
+    children: label
+  }
+);
+const DataContent = ({ type, tab, f32, u32, raw, stride, interleavedStruct }) => {
+  const limit = 300;
+  if (tab === "dataViewF32") {
+    if (!f32) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "dataViewF32 not available" });
+    const items = Array.from(f32.subarray(0, limit));
+    if (type === "vertexBuffer" && stride) {
+      const attrInfo = interleavedStruct ? interleavedStruct.attributes.map((attr, idx, arr) => {
+        const nextOffset = arr[idx + 1] ? arr[idx + 1].offset : interleavedStruct.arrayStride;
+        return {
+          name: attr.attributeName.replace("vertex", ""),
+          count: (nextOffset - attr.offset) / 4,
+          offset: attr.offset / 4
+        };
+      }) : null;
+      const groups = [];
+      for (let i = 0; i < items.length; i += stride) {
+        groups.push(items.slice(i, i + stride));
+      }
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "6px", width: "100%", overflowX: "hidden" }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "grid", gridTemplateColumns: "1fr", gap: "2px", width: "100%" }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+          ...triangleGroupStyle,
+          background: groupIdx % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.07)",
+          marginBottom: 0,
+          padding: "6px 8px",
+          alignItems: "flex-start"
+        }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+            ...triangleLabelStyle,
+            color: "#10b981",
+            minWidth: "35px",
+            marginTop: "14px"
+          }, children: [
+            "V",
+            formatNumber(groupIdx, 0)
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "12px", flex: 1, flexWrap: "wrap" }, children: attrInfo ? attrInfo.map((info) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: attrBlockStyle, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: attrBlockLabelStyle, children: info.name }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "6px" }, children: group.slice(info.offset, info.offset + info.count).map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "55px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+              ...valueLabelStyle,
+              fontSize: "10px"
+            }, children: formatNumber(v2) }) }, i)) })
+          ] }, info.name)) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { minWidth: "60px", textAlign: "right" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+            ...valueLabelStyle,
+            fontSize: "10px"
+          }, children: formatNumber(v2) }) }, i)) }) })
+        ] }, groupIdx)) }),
+        f32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+          "... and ",
+          formatNumber(f32.length - limit, 0),
+          " more"
+        ] })
+      ] });
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataGridStyle, children: [
+      items.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataItemStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: formatNumber(i, 0) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: formatNumber(v2) })
+      ] }, i)),
+      f32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+        "... and ",
+        formatNumber(f32.length - limit, 0),
+        " more"
+      ] })
+    ] });
+  }
+  if (tab === "dataViewU32") {
+    if (!u32) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "dataViewU32 not available" });
+    const items = Array.from(u32.subarray(0, limit));
+    if (type === "indexBuffer") {
+      const groups = [];
+      for (let i = 0; i < items.length; i += 3) {
+        groups.push(items.slice(i, i + 3));
+      }
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          style: { display: "flex", flexDirection: "column", gap: "10px", width: "100%", overflowX: "hidden" },
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))",
+              gap: "4px",
+              width: "100%"
+            }, children: groups.map((group, groupIdx) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+              ...triangleGroupStyle,
+              background: groupIdx % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.07)",
+              marginBottom: 0
+            }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: triangleLabelStyle, children: [
+                "T",
+                formatNumber(groupIdx, 0)
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "4px", flex: 1, justifyContent: "space-around" }, children: group.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: triangleItemStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: formatNumber(v2, 0) }) }, i)) })
+            ] }, groupIdx)) }),
+            u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+              "... and ",
+              formatNumber(u32.length - limit, 0),
+              " more"
+            ] })
+          ]
+        }
+      );
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataGridStyle, children: [
+      items.map((v2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: dataItemStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: indexLabelStyle, children: formatNumber(i, 0) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: valueLabelStyle, children: formatNumber(v2, 0) })
+      ] }, i)),
+      u32.length > limit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+        "... and ",
+        formatNumber(u32.length - limit, 0),
+        " more"
+      ] })
+    ] });
+  }
+  if (tab === "data") {
+    if (!raw) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noDataStyle, children: "ArrayBuffer not available" });
+    const f32View = new Float32Array(raw);
+    const u32View = new Uint32Array(raw);
+    const wordLimit = 100;
+    const count = Math.min(f32View.length, wordLimit);
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: "2px", width: "100%" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: wordHeaderStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { width: "50px" }, children: "Offset" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { flex: 1 }, children: "Float32" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { flex: 1 }, children: "Uint32" })
+      ] }),
+      Array.from({ length: count }).map((_, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+        ...wordRowStyle,
+        background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.06)"
+      }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: wordOffsetStyle, children: [
+          "+",
+          formatNumber(i * 4, 0)
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: wordValueStyle, children: formatNumber(f32View[i]) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...wordValueStyle, color: "#aaa" }, children: formatNumber(u32View[i], 0) })
+      ] }, i)),
+      f32View.length > wordLimit && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: moreStyle, children: [
+        "... and ",
+        formatNumber(f32View.length - wordLimit, 0),
+        " words more"
+      ] })
+    ] });
+  }
+  return null;
+};
+const PropertyItem = ({ label, value, highlight }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: propertyItemStyle, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: propertyLabelStyle, children: label }),
+  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { ...propertyValueStyle, color: highlight ? "#fdb48d" : "#eee" }, children: value })
+] });
 const overlayStyle = {
   position: "fixed",
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: "rgba(0, 0, 0, 0.85)",
-  zIndex: 2e4,
+  background: "rgba(0,0,0,0.7)",
   display: "flex",
-  alignItems: "center",
   justifyContent: "center",
-  padding: "40px",
-  backdropFilter: "blur(10px)"
+  alignItems: "center",
+  zIndex: 1e4,
+  backdropFilter: "blur(8px)",
+  animation: "fadeIn 0.2s ease-out"
 };
 const modalStyle = {
-  width: "100%",
-  maxWidth: "1200px",
-  height: "100%",
-  backgroundColor: "#111112",
-  border: "1px solid #333",
-  borderRadius: "8px",
+  background: "rgba(26, 26, 26, 0.95)",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.15)",
+  width: "90%",
+  maxWidth: "600px",
+  maxHeight: "90%",
   display: "flex",
   flexDirection: "column",
+  boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
   overflow: "hidden",
-  boxShadow: "0 20px 50px rgba(0,0,0,0.5)"
+  animation: "scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
 };
-const headerStyle$1 = {
-  padding: "16px 24px",
-  borderBottom: "1px solid #333",
+const headerStyle$3 = {
+  padding: "16px",
+  background: "rgba(255,255,255,0.03)",
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "center",
-  backgroundColor: "#1a1a1b"
+  alignItems: "flex-start",
+  gap: "12px"
 };
 const titleStyle = {
-  fontSize: "13px",
+  fontSize: "16px",
   fontWeight: "bold",
-  color: "#fdb48d",
+  color: "#eee",
+  marginBottom: "4px",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  display: "block"
+};
+const typeStyle$1 = {
+  fontSize: "10px",
+  color: "#777",
+  fontWeight: "bold",
+  letterSpacing: "0.1em"
+};
+const statusBadgeStyle = {
+  fontSize: "8px",
+  color: "#000",
+  padding: "2px 6px",
+  borderRadius: "10px",
+  fontWeight: "bold",
+  textTransform: "uppercase",
   letterSpacing: "0.05em"
 };
 const closeButtonStyle = {
-  backgroundColor: "#333",
-  color: "#ccc",
+  background: "none",
   border: "none",
-  padding: "6px 16px",
-  fontSize: "11px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  borderRadius: "4px",
-  transition: "all 0.2s"
-};
-const contentStyle$1 = {
-  flex: 1,
-  overflow: "auto",
-  backgroundColor: "#000"
-};
-const loadingStyle = {
-  height: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "#666",
-  fontSize: "13px"
-};
-const preStyle = {
-  margin: 0,
-  padding: "20px",
-  backgroundColor: "transparent"
-};
-const codeStyle = {
-  fontSize: "13px",
-  lineHeight: "1.6",
-  fontFamily: 'Consolas, "Courier New", monospace',
-  textShadow: "none",
-  color: "#ccc"
-};
-const debugIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3cpath%20d='M224%20160C224%20107%20267%2064%20320%2064C373%2064%20416%20107%20416%20160L416%20163.6C416%20179.3%20403.3%20192%20387.6%20192L252.5%20192C236.8%20192%20224.1%20179.3%20224.1%20163.6L224.1%20160zM569.6%20172.8C580.2%20186.9%20577.3%20207%20563.2%20217.6L465.4%20290.9C470.7%20299.8%20474.7%20309.6%20477.2%20320L576%20320C593.7%20320%20608%20334.3%20608%20352C608%20369.7%20593.7%20384%20576%20384L480%20384L480%20416C480%20418.6%20479.9%20421.3%20479.8%20423.9L563.2%20486.4C577.3%20497%20580.2%20517.1%20569.6%20531.2C559%20545.3%20538.9%20548.2%20524.8%20537.6L461.7%20490.3C438.5%20534.5%20395.2%20566.5%20344%20574.2L344%20344C344%20330.7%20333.3%20320%20320%20320C306.7%20320%20296%20330.7%20296%20344L296%20574.2C244.8%20566.5%20201.5%20534.5%20178.3%20490.3L115.2%20537.6C101.1%20548.2%2081%20545.3%2070.4%20531.2C59.8%20517.1%2062.7%20497%2076.8%20486.4L160.2%20423.9C160.1%20421.3%20160%20418.7%20160%20416L160%20384L64%20384C46.3%20384%2032%20369.7%2032%20352C32%20334.3%2046.3%20320%2064%20320L162.8%20320C165.3%20309.6%20169.3%20299.8%20174.6%20290.9L76.8%20217.6C62.7%20207%2059.8%20186.9%2070.4%20172.8C81%20158.7%20101.1%20155.8%20115.2%20166.4L224%20248C236.3%20242.9%20249.8%20240%20264%20240L376%20240C390.2%20240%20403.7%20242.8%20416%20248L524.8%20166.4C538.9%20155.8%20559%20158.7%20569.6%20172.8z'/%3e%3c/svg%3e";
-const axisIcon = "data:image/svg+xml,%3csvg%20fill='%23ccc'%20viewBox='0%200%2014%2014'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M6.995%201.802L6.258%203.981c.154.087.328.145.509.173v3.361l-.979.565v1.082L2.922%2010.818c-.118-.155-.256-.276-.408-.366L1%2012.198l2.255-.452c-.002-.177-.038-.356-.105-.528l2.827-1.632%201.021.589%201.021-.589%202.827%201.632c-.066.171-.102.351-.105.528L13%2012.192l-1.518-1.728c-.152.09-.29.211-.405.354l-2.869-1.656v-1.082l-.979-.565V4.154c.181-.028.355-.087.509-.173L6.995%201.802z'/%3e%3c/svg%3e";
-const gridIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3c!--%20외곽%20테두리%20--%3e%3cpath%20d='M160%2096C124.7%2096%2096%20124.7%2096%20160v320c0%2035.3%2028.7%2064%2064%2064h320c35.3%200%2064-28.7%2064-64V160c0-35.3-28.7-64-64-64H160zm0%2032h320c17.7%200%2032%2014.3%2032%2032v320c0%2017.7-14.3%2032-32%2032H160c-17.7%200-32-14.3-32-32V160c0-17.7%2014.3-32%2032-32z'/%3e%3c!--%20세로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='240'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='316'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='392'%20y='128'%20width='8'%20height='384'/%3e%3c!--%20가로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='128'%20y='240'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='316'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='392'%20width='384'%20height='8'/%3e%3c/svg%3e";
-const App = () => {
-  const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
-  const addTopBarRightAction = useExampleHelperStore((state) => state.addTopBarRightAction);
-  reactExports.useEffect(() => {
-    if (redGPUContext) {
-      const initInspector = async () => {
-        try {
-          const { default: RedGPUInspector } = await import("./index-Bcs_PMTN.js");
-          if (!window.redGPUInspector) {
-            window.redGPUInspector = new RedGPUInspector(redGPUContext);
-          }
-          addTopBarRightAction({
-            id: "axis-toggle",
-            label: "AXIS",
-            icon: axisIcon,
-            onClick: () => {
-              redGPUContext.viewList.forEach((view) => {
-                if ("axis" in view) view.axis = !view.axis;
-              });
-            }
-          });
-          addTopBarRightAction({
-            id: "grid-toggle",
-            label: "GRID",
-            icon: gridIcon,
-            onClick: () => {
-              redGPUContext.viewList.forEach((view) => {
-                if ("grid" in view) view.grid = !view.grid;
-              });
-            }
-          });
-          addTopBarRightAction({
-            id: "debug-toggle",
-            label: "DEBUG",
-            icon: debugIcon,
-            onClick: () => {
-              if (window.redGPUInspector) {
-                window.redGPUInspector.useDebugPanel = !window.redGPUInspector.useDebugPanel;
-              }
-            }
-          });
-        } catch (e) {
-          console.error("Failed to load Inspector:", e);
-        }
-      };
-      initInspector();
-    }
-  }, [redGPUContext, addTopBarRightAction]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(ExampleHeader, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Description, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: panelStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: headerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleLabelStyle, children: "RedGPU Example Helper" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentStyle, children: redGPUContext ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contextInfoBoxStyle, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: sectionTitleStyle, children: "Context Status" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { color: "#ccc", fontSize: "11px", lineHeight: "1.6" }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            "Canvas: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              "b",
-              {
-                style: { color: "#fff" },
-                children: [
-                  redGPUContext.width,
-                  " x ",
-                  redGPUContext.height
-                ]
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            "DPR: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fff" }, children: window.devicePixelRatio })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-            "GPU: ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "b",
-              {
-                style: { color: "#fff" },
-                children: redGPUContext.gpuDevice.label || "WebGPU Device"
-              }
-            )
-          ] })
-        ] })
-      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "#666", fontSize: "11px", fontStyle: "italic" }, children: "Waiting for Context..." }) })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Footer, {}),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(SourceModal, {})
-  ] });
-};
-const panelStyle = {
-  position: "fixed",
-  right: 0,
-  top: "352px",
-  width: "320px",
-  bottom: "50px",
-  display: "flex",
-  flexDirection: "column",
-  backgroundColor: "rgba(17, 17, 18, 0.95)",
-  color: "white",
-  fontFamily: "monospace",
-  zIndex: 10001,
-  boxShadow: "-10px 0 30px rgba(0,0,0,0.5)",
-  borderLeft: "1px solid rgba(255,255,255,0.05)",
-  overflow: "hidden"
-};
-const headerStyle = {
-  padding: "12px 16px",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  background: "rgba(255, 255, 255, 0.03)",
-  borderBottom: "1px solid rgba(255, 255, 255, 0.05)"
-};
-const titleLabelStyle = {
-  fontSize: "11px",
-  fontWeight: "bold",
   color: "#888",
-  textTransform: "uppercase",
-  letterSpacing: "0.1em"
+  fontSize: "28px",
+  cursor: "pointer",
+  padding: "0 4px",
+  lineHeight: "1",
+  marginTop: "-4px",
+  flexShrink: 0
 };
-const contentStyle = {
+const contentStyle$2 = {
   padding: "20px",
-  fontSize: "12px",
-  flex: 1,
   overflowY: "auto",
+  overflowX: "hidden",
   display: "flex",
   flexDirection: "column",
   gap: "24px"
 };
-const contextInfoBoxStyle = {
+const sectionStyle = {
   display: "flex",
   flexDirection: "column",
-  gap: "8px",
-  paddingTop: "20px",
-  borderTop: "1px solid rgba(255,255,255,0.05)"
+  gap: "12px",
+  width: "100%"
 };
 const sectionTitleStyle = {
   fontSize: "12px",
   color: "#fdb48d",
   fontWeight: "bold",
+  textTransform: "uppercase",
+  borderBottom: "1px solid rgba(253, 180, 141, 0.2)",
+  paddingBottom: "4px"
+};
+const propertyGridStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px"
+};
+const propertyItemStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  fontSize: "11px",
+  gap: "20px"
+};
+const propertyLabelStyle = {
+  color: "#888",
+  flexShrink: 0
+};
+const propertyValueStyle = {
+  color: "#eee",
+  textAlign: "right",
+  wordBreak: "break-all"
+};
+const dataViewerStyle = {
+  background: "#000",
+  borderRadius: "4px",
+  padding: "12px",
+  minHeight: "200px",
+  maxHeight: "400px",
+  overflowY: "auto",
+  overflowX: "hidden",
+  border: "1px solid rgba(255,255,255,0.05)",
+  width: "100%"
+};
+const tabContainerStyle = {
+  display: "flex",
+  gap: "4px",
+  background: "rgba(255,255,255,0.05)",
+  padding: "2px",
+  borderRadius: "4px"
+};
+const tabButtonStyle = {
+  border: "none",
+  padding: "2px 8px",
+  borderRadius: "3px",
+  fontSize: "10px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s"
+};
+const dataGridStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "4px 8px",
+  fontFamily: "monospace",
+  width: "100%"
+};
+const dataItemStyle = {
+  display: "flex",
+  flexDirection: "column",
+  minWidth: "70px",
+  background: "rgba(255,255,255,0.02)",
+  padding: "4px",
+  borderRadius: "2px",
+  border: "1px solid rgba(255,255,255,0.05)"
+};
+const indexLabelStyle = {
+  fontSize: "8px",
+  color: "#555",
+  marginBottom: "2px"
+};
+const valueLabelStyle = {
+  fontSize: "11px",
+  color: "#10b981"
+};
+const noDataStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "150px",
+  color: "#444",
+  fontSize: "12px"
+};
+const moreStyle = {
+  width: "100%",
+  textAlign: "center",
+  padding: "10px",
+  color: "#444",
+  fontSize: "10px",
+  fontStyle: "italic"
+};
+const footerStyle = {
+  padding: "16px",
+  background: "rgba(255,255,255,0.03)",
+  borderTop: "1px solid rgba(255,255,255,0.1)",
+  fontSize: "11px",
+  color: "#666"
+};
+const infoRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center"
+};
+const triangleGroupStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  background: "rgba(255,255,255,0.03)",
+  padding: "4px 8px",
+  borderRadius: "4px",
+  border: "1px solid rgba(255,255,255,0.05)",
+  marginBottom: "2px"
+};
+const triangleLabelStyle = {
+  fontSize: "9px",
+  color: "#fdb48d",
+  fontWeight: "bold",
+  minWidth: "24px",
+  opacity: 0.7
+};
+const triangleItemStyle = {
+  minWidth: "30px",
+  textAlign: "center"
+};
+const structRowStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  background: "rgba(255,255,255,0.02)",
+  padding: "6px 10px",
+  borderRadius: "4px",
+  border: "1px solid rgba(255,255,255,0.05)"
+};
+const structNameStyle = {
+  fontSize: "11px",
+  fontWeight: "bold",
+  color: "#ddd"
+};
+const attrBlockStyle = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "2px",
+  background: "rgba(255,255,255,0.03)",
+  padding: "4px 6px",
+  borderRadius: "4px",
+  border: "1px solid rgba(255,255,255,0.05)"
+};
+const attrBlockLabelStyle = {
+  fontSize: "8px",
+  color: "#888",
+  letterSpacing: "0.05em",
+  borderBottom: "1px solid rgba(255,255,255,0.05)",
+  paddingBottom: "2px",
+  marginBottom: "2px"
+};
+const wordHeaderStyle = {
+  display: "flex",
+  padding: "4px 10px",
+  fontSize: "9px",
+  color: "#555",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  borderBottom: "1px solid rgba(255,255,255,0.05)",
   marginBottom: "4px"
 };
-const ExampleList = [
+const wordRowStyle = {
+  display: "flex",
+  padding: "4px 10px",
+  borderRadius: "2px",
+  gap: "10px",
+  fontFamily: "monospace",
+  alignItems: "center"
+};
+const wordOffsetStyle = {
+  width: "50px",
+  fontSize: "9px",
+  color: "#666"
+};
+const wordValueStyle = {
+  flex: 1,
+  fontSize: "11px",
+  color: "#10b981"
+};
+const TabBar = ({ tabs, activeTab, onTabChange, isSticky = true, style }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+    ...tabBarStyle,
+    position: isSticky ? "sticky" : "relative",
+    top: isSticky ? 0 : "auto",
+    ...style
+  }, children: tabs.map((tab) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      onClick: () => onTabChange(tab.id),
+      style: {
+        ...tabItemStyle,
+        borderBottom: activeTab === tab.id ? `2px solid ${THEME.colors.primary}` : "2px solid transparent",
+        color: activeTab === tab.id ? THEME.colors.primary : THEME.colors.label,
+        backgroundColor: activeTab === tab.id ? THEME.colors.activeBg : "transparent"
+      },
+      children: tab.label
+    },
+    tab.id
+  )) });
+};
+const Tabs = ({ tabs, activeTab, onTabChange, children, scrollable = true }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+    ...tabsContainerStyle,
+    overflow: scrollable ? "hidden" : "visible"
+  }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(TabBar, { tabs, activeTab, onTabChange }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      ...contentAreaStyle$1,
+      overflowY: scrollable ? "auto" : "visible"
+    }, children })
+  ] });
+};
+const tabsContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  flex: 1
+};
+const tabBarStyle = {
+  display: "flex",
+  background: THEME.colors.background,
+  borderTop: `1px solid ${THEME.colors.border}`,
+  borderBottom: `1px solid ${THEME.colors.border}`,
+  position: "sticky",
+  top: 0,
+  zIndex: 10
+};
+const tabItemStyle = {
+  padding: "8px 4px",
+  fontSize: THEME.fontSize.small,
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+  flex: 1,
+  textAlign: "center",
+  whiteSpace: "nowrap",
+  fontFamily: THEME.fontFamily
+};
+const contentAreaStyle$1 = {
+  flex: 1,
+  overflowY: "auto",
+  background: "rgba(0,0,0,0.2)"
+};
+const ResourceSummary = ({
+  label,
+  stats,
+  isExpanded,
+  onToggle
+}) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { marginBottom: "4px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+  "div",
   {
-    name: "3D",
-    list: [
-      {
-        name: "Hello RedGPU",
-        path: "3d/helloWorld",
-        description: {
-          ko: `RedGPU의 기본 초기화 방법을 보여주는 샘플입니다. 초기화 성공 시 제공되는 RedGPUContext 객체의 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-          en: `This example is a sample of the basic initialization of RedGPU. 
-                It also provides a live test of the basic options provided to the RedGPUContext object provided upon successful initialization.`
+    style: headerStyle$2,
+    onClick: onToggle,
+    children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ToggleButton,
+        {
+          isExpanded,
+          style: { paddingRight: "8px" }
         }
-      },
-      {
-        name: "Hello RedGPU",
-        path: "3d/helloWorld2",
-        description: {
-          ko: `RedGPU의 기본 초기화 방법을 보여주는 샘플입니다. 초기화 성공 시 제공되는 RedGPUContext 객체의 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-          en: `This example is a sample of the basic initialization of RedGPU. 
-                It also provides a live test of the basic options provided to the RedGPUContext object provided upon successful initialization.`
-        }
-      },
-      {
-        name: "View3D",
-        list: [
-          {
-            name: "Single View3D",
-            path: "3d/view/singleView",
-            description: {
-              ko: `RedGPU의 View 객체에 대한 샘플입니다. View 객체에 제공되는 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-              en: `This example is a sample for a View object in RedGPU.
-                It provides real-time testing of the basic options provided to a View object.`
-            }
-          },
-          {
-            name: "Multi View3D",
-            path: "3d/view/multiView",
-            description: {
-              ko: `RedGPU의 멀티 뷰 기능을 보여주는 샘플입니다.<br/> RedGPUContext는 여러 개의 View를 소유하고 관리할 수 있습니다.`,
-              en: `This example is a sample of RedGPU's Multi View.<br/> RedGPUContext can own and manage multiple MultiViews.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Scene",
-        list: [
-          {
-            name: "Scene",
-            path: "3d/scene",
-            description: {
-              ko: `RedGPU의 Scene 객체에 대한 샘플입니다.<br/> Scene 객체에 제공되는 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-              en: `This example is a sample of a Scene object in RedGPU.<br/> It provides real-time testing of the basic options provided to the Scene object.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Camera Controller",
-        list: [
-          {
-            name: "FreeController",
-            path: "3d/controller/freeController",
-            description: {
-              ko: `FreeController는 키보드(WASD/QERTFG)와 마우스/터치 입력을 사용하여 1인칭 카메라 제어를 제공합니다.<br/>3D 공간에서의 자유로운 이동, 회전 제어, 속도/가속도 조절 및 키 바인딩 설정 기능을 포함합니다.`,
-              en: `FreeController provides first-person camera control with keyboard (WASD/QERTFG) and mouse/touch input.<br/>Features include free movement in 3D space, rotation control, customizable speed/acceleration, and key binding configuration.`
-            }
-          },
-          {
-            name: "OrbitController",
-            path: "3d/controller/orbitController",
-            description: {
-              ko: `OrbitController는 중심점을 기준으로 회전하는 궤도형 카메라 제어를 제공합니다.<br/>마우스 드래그 회전, 휠 줌, 터치 핀치 줌, 중심점 위치 사용자 정의, 거리 제어 및 팬/틸트 제한 기능을 포함합니다.`,
-              en: `OrbitController provides orbital camera control that rotates around a center point.<br/>Features include mouse drag rotation, wheel zoom, touch pinch zoom, customizable center position, distance control, and pan/tilt limits.`
-            }
-          },
-          {
-            name: "FollowController",
-            path: "3d/controller/followController",
-            description: {
-              ko: `FollowController는 타겟 메쉬를 따라다니는 3인칭 카메라 제어를 제공합니다.<br/> 부드러운 카메라 추적, 거리 및 높이 조절, 팬/틸트 제어, 타겟 회전 추적 및 휠/핀치 줌 기능을 포함합니다.<br/>3인칭 게임 및 객체 추적 시나리오에 적합합니다.`,
-              en: `FollowController provides third-person camera control that follows a target mesh.<br/> Features include smooth camera following, customizable distance and height, pan/tilt control, target rotation tracking, and wheel/pinch zoom.<br/>Perfect for third-person games and object tracking scenarios.`
-            }
-          },
-          {
-            name: "IsometricController",
-            path: "3d/controller/isometricController",
-            description: {
-              ko: `IsometricController는 아이소메트릭 뷰를 위한 고정 각도 직교 투영 카메라 제어를 제공합니다.<br/>타겟 메쉬 추적, 키보드(WASD) 및 마우스 이동, 휠/핀치 줌 제어, 카메라 각도 및 뷰 높이 사용자 정의 기능을 포함합니다.<br/>아이소메트릭 게임, 전략 게임 및 건축 시각화에 이상적입니다.`,
-              en: `IsometricController provides fixed-angle orthographic camera control for isometric views.<br/>Features include target mesh tracking, keyboard (WASD) and mouse movement, wheel/pinch zoom control, and customizable camera angle and view height.<br/>Ideal for isometric games, strategy games, and architectural visualization.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Primitive",
-        list: [
-          {
-            name: "Primitives",
-            path: "3d/primitive/primitives",
-            description: {
-              ko: `RedGPU가 지원하는 기본적인 프리미티브 지오메트리들의 샘플입니다.`,
-              en: `Samples of basic primitive geometries supported by RedGPU.`
-            }
-          },
-          {
-            name: "Box",
-            path: "3d/primitive/box",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Box 프리미티브에 대한 샘플입니다. Box 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Box Primitives supported by RedGPU. Provides real-time testing of Box configuration options.`
-            }
-          },
-          {
-            name: "RoundedBox",
-            path: "3d/primitive/roundedBox",
-            description: {
-              ko: `모서리가 둥근 박스 프리미티브에 대한 샘플입니다. 반지름(radius) 및 분할 수 설정을 통해 부드러운 모서리를 가진 박스를 생성하고 테스트할 수 있습니다.`,
-              en: `Samples for the RoundedBox Primitive. You can create and test boxes with smooth corners by configuring radius and segment settings.`
-            }
-          },
-          {
-            name: "Circle",
-            path: "3d/primitive/circle",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Circle 프리미티브에 대한 샘플입니다. Circle 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Circle Primitives supported by RedGPU. Provides real-time testing of Circle configuration options.`
-            }
-          },
-          {
-            name: "Cone",
-            path: "3d/primitive/cone",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Cone 프리미티브에 대한 샘플입니다. Cone 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Cone Primitives supported by RedGPU. Provides real-time testing of Cone configuration options.`
-            }
-          },
-          {
-            name: "Cylinder",
-            path: "3d/primitive/cylinder",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Cylinder 프리미티브에 대한 샘플입니다. Cylinder 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Cylinder Primitives supported by RedGPU. Provides real-time testing of Cylinder configuration options.`
-            }
-          },
-          {
-            name: "Plane",
-            path: "3d/primitive/plane",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Plane 프리미티브에 대한 샘플입니다. Plane 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Plane Primitives supported by RedGPU. Provides real-time testing of Plane configuration options.`
-            }
-          },
-          {
-            name: "Ground",
-            path: "3d/primitive/ground",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Ground 프리미티브에 대한 샘플입니다. Ground 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Ground Primitives supported by RedGPU. Provides real-time testing of Ground configuration options.`
-            }
-          },
-          {
-            name: "Sphere",
-            path: "3d/primitive/sphere",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Sphere 프리미티브에 대한 샘플입니다. Sphere 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Sphere Primitives supported by RedGPU. Provides real-time testing of Sphere configuration options.`
-            }
-          },
-          {
-            name: "Capsule",
-            path: "3d/primitive/capsule",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Capsule 프리미티브에 대한 샘플입니다. Capsule 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Capsule Primitives supported by RedGPU. Provides real-time testing of Capsule configuration options.`
-            }
-          },
-          {
-            name: "Torus",
-            path: "3d/primitive/torus",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Torus 프리미티브에 대한 샘플입니다. Torus 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Torus Primitives supported by RedGPU. Provides real-time testing of Torus configuration options.`
-            }
-          },
-          {
-            name: "TorusKnot",
-            path: "3d/primitive/torusKnot",
-            description: {
-              ko: `RedGPU가 지원하는 기본 TorusKnot 프리미티브에 대한 샘플입니다. TorusKnot 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic TorusKnot Primitives supported by RedGPU. Provides real-time testing of TorusKnot configuration options.`
-            }
-          },
-          {
-            name: "Ring",
-            path: "3d/primitive/ring",
-            description: {
-              ko: `RedGPU가 지원하는 기본 Ring 프리미티브에 대한 샘플입니다. Ring 설정 옵션을 실시간으로 테스트할 수 있습니다.`,
-              en: `Samples for the basic Ring Primitives supported by RedGPU. Provides real-time testing of Ring configuration options.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Mesh",
-        list: [
-          {
-            name: "Basic Mesh",
-            path: "3d/mesh/basicMesh",
-            description: {
-              ko: `이 코드는 기본 메쉬를 생성하고 위치, 크기, 회전, 재질 등 주요 속성을 실시간으로 조작하는 방법을 보여주는 샘플입니다. <br/>RedGPU를 사용하여 Box 메쉬를 생성하고 속성과 재질을 조정하는 방법을 보여줍니다.`,
-              en: `this code is a sample that shows how to create a basic mesh and how to manipulate its main properties (position, scale, rotation, material, etc.) in real time. <br/>This example shows how to create a Box mesh using RedGPU and how to adjust its properties and material.`
-            }
-          },
-          {
-            name: "Hierarchy Mesh",
-            path: "3d/mesh/hierarchy",
-            description: {
-              ko: `RedGPU를 사용하여 부모-자식 메쉬 계층 구조를 생성하고, 위치, 회전 및 스케일을 조작하는 예제입니다.`,
-              en: `An example of creating a parent-child mesh hierarchy using RedGPU, and manipulating its position, rotation, and scale.`
-            }
-          },
-          {
-            name: "Pivot Mesh",
-            path: "3d/mesh/pivot",
-            description: {
-              ko: `RedGPU를 사용하여 부모 및 자식 메쉬를 생성하고 피벗 설정을 통해 회전 중심을 변경하는 방법을 보여주는 실습 예제입니다.`,
-              en: `A hands-on example that demonstrates how to create parent and child meshes using RedGPU and change the center of rotation via pivot settings.`
-            }
-          },
-          {
-            name: "Child Methods",
-            path: "3d/mesh/childMethod",
-            description: {
-              ko: `RedGPU를 사용한 자식 노드 관리 예제로, 자식 추가, 삭제, 인덱스 변경, 교체 및 자식 색상 무작위화 등을 통해 노드를 동적으로 제어하는 방법을 보여줍니다.`,
-              en: `An example of child node management using RedGPU, showing how to dynamically control nodes by adding, deleting, changing index, replacing, and randomizing color of children.`
-            }
-          },
-          {
-            name: "lookAt Methods",
-            path: "3d/mesh/lookAt",
-            description: {
-              ko: `객체가 특정 지점이나 다른 객체를 바라보도록 하는 lookAt 메서드의 사용법을 보여주는 예제입니다.`,
-              en: `An example demonstrating the usage of the lookAt method to make an object face a specific point or another object.`
-            }
-          },
-          {
-            name: "BoundingBox",
-            list: [
-              {
-                name: "BoundingBox",
-                path: "3d/mesh/boundBox/meshBoundBox",
-                description: {
-                  ko: `메쉬의 바운딩 박스(AABB)를 시각화하고 확인하는 예제입니다.`,
-                  en: `An example of visualizing and checking the bounding box (AABB) of a mesh.`
-                }
-              },
-              {
-                name: "AABB - intersects",
-                path: "3d/mesh/boundBox/meshAABBIntersects",
-                description: {
-                  ko: `AABB(Axis-Aligned Bounding Box) 간의 교차 검사 기능을 테스트하는 예제입니다.`,
-                  en: `An example testing the intersection check function between AABBs (Axis-Aligned Bounding Boxes).`
-                }
-              },
-              {
-                name: "OBB - intersects",
-                path: "3d/mesh/boundBox/meshOBBIntersects",
-                description: {
-                  ko: `OBB(Oriented Bounding Box) 간의 교차 검사 기능을 테스트하는 예제입니다.`,
-                  en: `An example testing the intersection check function between OBBs (Oriented Bounding Boxes).`
-                }
-              }
-            ]
-          }
-        ]
-      },
-      {
-        name: "Coordinate Transformation",
-        list: [
-          {
-            name: "worldToLocal / localToWorld",
-            path: "3d/coordinateTransformation/worldToLocal",
-            description: {
-              ko: `월드 좌표와 로컬 좌표 간의 변환을 테스트하는 예제입니다.`,
-              en: `An example testing the transformation between world coordinates and local coordinates.`
-            }
-          },
-          {
-            name: "screenToWorld",
-            path: "3d/coordinateTransformation/screenToWorld",
-            description: {
-              ko: `화면(스크린) 좌표를 월드 좌표로 변환하는 방법을 보여주는 예제입니다.`,
-              en: `An example showing how to convert screen coordinates to world coordinates.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Material",
-        list: [
-          {
-            name: "ColorMaterial",
-            path: "3d/material/colorMaterial",
-            description: {
-              ko: `RedGPU ColorMaterial의 기본 색상 조작 및 색상 설정을 위한 편의 메서드들에 대한 실시간 샘플을 제공합니다.`,
-              en: `Provides real-time samples of the basic color manipulations of RedGPU's ColorMaterial and convenience methods for setting colors.`
-            }
-          },
-          {
-            name: "BitmapMaterial",
-            path: "3d/material/bitmapMaterial",
-            description: {
-              ko: `RedGPU의 BitmapMaterial 샘플로, 다양한 텍스처 포맷(PNG, JPG, WEBP, SVG)을 적용하여 텍스처 변경을 실시간으로 테스트할 수 있습니다.`,
-              en: `RedGPU's BitmapMaterial sample allows you to test texture changes in real time by applying various texture formats (PNG, JPG, WEBP, SVG).`
-            }
-          },
-          {
-            name: "PhongMaterial",
-            path: "3d/material/phongMaterial",
-            description: {
-              ko: `RedGPU를 사용하여 PhongMaterial의 기본 속성을 조작하고 다양한 텍스처 조합을 실험하는 방법을 보여주는 샘플 예제입니다.`,
-              en: `A sample example that demonstrates how to manipulate the basic properties of PhongMaterial using RedGPU and experiment with different texture combinations.`
-            }
-          },
-          {
-            name: "PhongMaterial Texture Combination",
-            path: "3d/material/phongMaterialTextures",
-            description: {
-              ko: `RedGPU를 사용하여 PhongMaterial의 다양한 텍스처 조합과 효과를 시각적으로 보여주는 샘플 예제입니다.`,
-              en: `A sample example that visually demonstrates different texture combinations and effects of PhongMaterial using RedGPU.`
-            }
-          },
-          {
-            name: "UV Transform",
-            path: "3d/material/uvTransform",
-            description: {
-              ko: `재질의 텍스처 오프셋과 스케일을 조절하여 흐르는 효과나 타일링을 구현하는 방법을 테스트합니다.`,
-              en: `Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.`
-            }
-          },
-          {
-            name: "Material Opacity",
-            path: "3d/material/opacity",
-            description: {
-              ko: `재질의 불투명도(Opacity)를 조절하여 반투명 효과를 테스트하는 예제입니다.`,
-              en: `An example testing the translucency effect by adjusting the opacity of the material.`
-            }
-          },
-          {
-            name: "Fragment Variant Test",
-            path: "3d/material/fragmentVariantTest",
-            description: {
-              ko: `쉐이더의 프래그먼트 변형을 테스트하는 예제입니다.`,
-              en: `An example testing fragment variants of shaders.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Texture & Sampler",
-        list: [
-          {
-            name: "BitmapTexture & Sampler",
-            path: "3d/texture/bitmapTextureSampler",
-            description: {
-              ko: `텍스처 샘플러 옵션과 밉맵 지원을 시연하는 샘플입니다.`,
-              en: `A sample that demonstrates texture sampler options and mipmap support.`
-            }
-          },
-          {
-            name: "Sampler Combination",
-            path: "3d/texture/samplerCombination",
-            description: {
-              ko: `텍스처 샘플러의 다양한 조합을 한눈에 보여주는 예제입니다.`,
-              en: `Here's an example showing the different combinations of texture samplers at a glance.`
-            }
-          },
-          {
-            name: "Sampler SamplerAddressMode",
-            path: "3d/texture/samplerAddressMode",
-            description: {
-              ko: `텍스처 샘플러의 AddressMode 옵션 조합을 보여주는 예제입니다.`,
-              en: `An example showing combinations of AddressMode options for a texture sampler.`
-            }
-          },
-          {
-            name: "MaxAnisotropy",
-            path: "3d/texture/maxAnisotropy",
-            description: {
-              ko: `텍스처의 비등방성 필터링(Anisotropy) 옵션을 보여주는 예제입니다.`,
-              en: `example showing the Anisotropy option for a texture.`
-            }
-          }
-        ]
-      },
-      {
-        name: "SkyBox & IBL",
-        list: [
-          {
-            name: "SkyBox",
-            list: [
-              {
-                name: "Skybox using 6 assets",
-                path: "3d/skybox/skybox",
-                description: {
-                  ko: `6개의 이미지를 사용하여 스카이박스를 구성하는 예제입니다.`,
-                  en: `An example of constructing a skybox using 6 images.`
-                }
-              },
-              {
-                name: "Skybox transition",
-                list: [
-                  {
-                    name: "Basic transition",
-                    path: "3d/skybox/transition/skyboxTransition",
-                    description: {
-                      ko: `스카이박스 간의 부드러운 전환 효과를 보여주는 예제입니다.`,
-                      en: `An example showing smooth transition effects between skyboxes.`
-                    }
-                  },
-                  {
-                    name: "transitionAlphaTexture - with NoiseTexture",
-                    path: "3d/skybox/transition/skyboxTransitionWithNoiseTexture",
-                    description: {
-                      ko: `노이즈 텍스처와 알파 텍스처를 사용하여 스카이박스 전환 효과를 연출하는 예제입니다.`,
-                      en: `An example creating skybox transition effects using noise textures and alpha textures.`
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            name: "IBL",
-            list: [
-              {
-                name: "Skybox using IBL",
-                path: "3d/skybox/ibl/skyboxWithIbl",
-                description: {
-                  ko: `IBL(Image Based Lighting)을 사용하여 스카이박스를 생성하는 방법을 보여줍니다.`,
-                  en: `Demonstrates how to create a skybox using IBL (Image Based Lighting).`
-                }
-              },
-              {
-                name: "IBL Test",
-                path: "3d/skybox/ibl/iblTest",
-                description: {
-                  ko: `이미지 기반 조명(IBL)을 테스트하는 예제입니다.`,
-                  en: `An example testing Image-Based Lighting (IBL).`
-                }
-              },
-              {
-                name: "Custom IBL Texture Size",
-                path: "3d/skybox/ibl/iblTextureSize",
-                description: {
-                  ko: `IBL 텍스처의 크기를 사용자 정의하는 예제입니다.`,
-                  en: `An example of customizing the size of the IBL texture.`
-                }
-              },
-              {
-                name: "BRDF LUT Test (Dev Only)",
-                path: "3d/skybox/ibl/brdfLutTest",
-                description: {
-                  ko: `새로운 IBL 시스템의 기초인 BRDF LUT 생성을 테스트합니다. (개발 확인용)`,
-                  en: `Tests BRDF LUT generation, the foundation of the new IBL system. (For development verification)`
-                }
-              },
-              {
-                name: "Irradiance Test (Dev Only)",
-                path: "3d/skybox/ibl/irradianceTest",
-                description: {
-                  ko: `분리된 IrradianceGenerator를 사용하여 환경맵으로부터 Irradiance 맵을 생성하고 테스트합니다. (개발 확인용)`,
-                  en: `Generates and tests an Irradiance map from an environment map using the separated IrradianceGenerator. (For development verification)`
-                }
-              }
-            ]
-          },
-          {
-            name: "FrustumCulling",
-            list: [
-              {
-                name: "FrustumCulling",
-                path: "3d/frustumCulling/frustumCulling",
-                description: {
-                  ko: `카메라 시야 밖의 객체를 렌더링에서 제외하는 절두체 컬링(Frustum Culling) 기능을 시연합니다.`,
-                  en: `Demonstrates Frustum Culling, which excludes objects outside the camera view from rendering.`
-                }
-              },
-              {
-                name: "DistanceCulling",
-                path: "3d/frustumCulling/distanceCulling",
-                description: {
-                  ko: `카메라와의 거리에 따라 객체를 렌더링에서 제외하는 거리 컬링 기능을 시연합니다.`,
-                  en: `Demonstrates Distance Culling, which excludes objects from rendering based on their distance from the camera.`
-                }
-              }
-            ]
-          },
-          {
-            name: "SkyAtmosphere",
-            list: [
-              {
-                name: "SkyAtmosphere Basic",
-                path: "3d/skyAtmosphere/basic",
-                description: {
-                  ko: `물리 기반 대기 산란(Atmospheric Scattering)을 시뮬레이션하는 SkyAtmosphere의 기본 사용법을 보여줍니다.`,
-                  en: `Shows the basic usage of SkyAtmosphere, which simulates physics-based atmospheric scattering.`
-                }
-              },
-              {
-                name: "SkyAtmosphere with glTF",
-                path: "3d/skyAtmosphere/gltf",
-                description: {
-                  ko: `SkyAtmosphere 시스템과 대량의 glTF 모델(PBR) 간의 물리적 조명 동기화 및 공중 투시 효과를 보여줍니다.`,
-                  en: `Shows physical lighting synchronization and aerial perspective effects between the SkyAtmosphere system and a large number of glTF models (PBR).`
-                }
-              },
-              {
-                name: "SkyAtmosphere Test",
-                path: "3d/skyAtmosphere/skyAtmosphereTest",
-                description: {
-                  ko: `SkyAtmosphere 시스템과 PBR 재질의 실시간 동기화를 테스트하는 예제입니다.`,
-                  en: `Example testing real-time synchronization between SkyAtmosphere system and PBR materials.`
-                }
-              },
-              {
-                name: "SkyAtmosphere Generator (LUT)",
-                path: "3d/skyAtmosphere/generator",
-                description: {
-                  ko: `SkyAtmosphere 시스템 내부에서 실시간으로 생성되는 LUT(Look-Up Table) 텍스처들을 Sprite3D를 통해 시각화합니다.`,
-                  en: `Visualizes LUT (Look-Up Table) textures generated in real-time within the SkyAtmosphere system using Sprite3D.`
-                }
-              }
-            ]
-          }
-        ]
-      },
-      {
-        name: "DrawDebugger",
-        list: [
-          {
-            name: "DrawDebugger",
-            path: "3d/drawDebugger/basic",
-            description: {
-              ko: `렌더링 정보를 디버깅하기 위한 도구를 시연하는 예제입니다.`,
-              en: `An example demonstrating tools for debugging rendering information.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Transparent Sort",
-        list: [
-          {
-            name: "Transparent Sort",
-            path: "3d/transparentSort",
-            description: {
-              ko: `메쉬의 재질에 \`transparent\` 옵션을 적용하여 반투명 객체가 렌더링되는 순서를 확인하는 예제입니다. \`transparent\`를 사용하여 올바른 렌더링 결과를 확인할 수 있습니다.`,
-              en: ` example of how to apply the \`transparent\` option to the mesh's material to see the order in which translucent objects are rendered. You can use \`transparent\` to see the correct rendering results.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Noise Texture",
-        experimental: true,
-        list: [
-          {
-            name: "SimplexTexture",
-            experimental: true,
-            list: [
-              {
-                experimental: true,
-                name: "SimplexTexture",
-                path: "3d/noiseTexture/simplex/basic/",
-                description: {
-                  ko: `심플렉스 노이즈 텍스처를 생성하고 적용하는 기본 예제입니다.`,
-                  en: `Basic example of generating and applying Simplex Noise Texture.`
-                }
-              },
-              {
-                experimental: true,
-                name: "Custom SimplexTexture - Fire",
-                path: "3d/noiseTexture/simplex/fire/",
-                description: {
-                  ko: `심플렉스 노이즈를 활용하여 불꽃 효과를 연출하는 커스텀 텍스처 예제입니다.`,
-                  en: `Custom texture example creating a fire effect using Simplex Noise.`
-                }
-              },
-              {
-                experimental: true,
-                name: "Custom SimplexTexture - Displacement",
-                path: "3d/noiseTexture/simplex/displacement/",
-                description: {
-                  ko: `심플렉스 노이즈를 활용하여 변위(Displacement) 효과를 주는 예제입니다.`,
-                  en: `Example applying displacement effects using Simplex Noise.`
-                }
-              }
-            ]
-          },
-          {
-            name: "VoronoiTexture",
-            experimental: true,
-            list: [
-              {
-                experimental: true,
-                name: "VoronoiTexture",
-                path: "3d/noiseTexture/voronoi/basic",
-                description: {
-                  ko: `보로노이 노이즈 텍스처를 생성하고 적용하는 예제입니다.`,
-                  en: `Example of generating and applying Voronoi Noise Texture.`
-                }
-              }
-            ]
-          }
-        ]
-      },
-      {
-        name: "Sprite3D & SpriteSheet3D",
-        list: [
-          {
-            name: "Sprite3D",
-            path: "3d/sprite/sprite3D",
-            description: {
-              ko: `Sprite3D 객체의 사용법을 보여주는 예제입니다.`,
-              en: `example of a Sprite3D object.`
-            }
-          },
-          {
-            name: "Sprite3D Comparison (World vs Pixel)",
-            path: "3d/sprite/sprite3DCompare",
-            description: {
-              ko: `Sprite3D의 월드 단위 크기(worldSize)와 고정 픽셀 크기(pixelSize) 설정을 비교 시연하는 예제입니다.`,
-              en: `A comparison example demonstrating Sprite3D's world unit size (worldSize) and fixed pixel size (pixelSize) settings.`
-            }
-          },
-          {
-            name: "SpriteSheet3D",
-            path: "3d/sprite/spriteSheet3D",
-            description: {
-              ko: `SpriteSheet3D 객체의 사용법을 보여주는 예제입니다.`,
-              en: `example of a SpriteSheet3D object.`
-            }
-          },
-          {
-            name: "SpriteSheet3D Comparison (World vs Pixel)",
-            path: "3d/sprite/spriteSheet3DCompare",
-            description: {
-              ko: `SpriteSheet3D의 월드 단위 크기(worldSize)와 고정 픽셀 크기(pixelSize) 설정을 비교 시연하는 예제입니다.`,
-              en: `A comparison example demonstrating SpriteSheet3D's world unit size (worldSize) and fixed pixel size (pixelSize) settings.`
-            }
-          }
-        ]
-      },
-      {
-        name: "TextField3D",
-        list: [
-          {
-            name: "TextField3D",
-            path: "3d/textField/textField3D",
-            description: {
-              ko: `TextField3D 객체의 사용법을 보여주는 예제입니다.`,
-              en: `example of a TextField3D object.`
-            }
-          },
-          {
-            name: "TextField3D Comparison (World vs Pixel)",
-            path: "3d/textField/textField3DCompare",
-            description: {
-              ko: `TextField3D의 월드 단위 크기(worldSize)와 고정 픽셀 크기(usePixelSize) 설정을 비교 시연하는 예제입니다.`,
-              en: `A comparison example demonstrating TextField3D's world unit size (worldSize) and fixed pixel size (usePixelSize) settings.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Light",
-        list: [
-          {
-            name: "DirectionalLight",
-            path: "3d/light/directionalLight",
-            description: {
-              ko: `태양광과 같은 직사광(Directional Light)을 시연하는 예제입니다.`,
-              en: `An example demonstrating Directional Light, simulating sunlight.`
-            }
-          },
-          {
-            name: "PointLight",
-            path: "3d/light/pointLight",
-            description: {
-              ko: `한 지점에서 모든 방향으로 빛을 방출하는 점광원(Point Light)을 시연하는 예제입니다.`,
-              en: `An example demonstrating Point Light, emitting light in all directions from a point.`
-            }
-          },
-          {
-            name: "PointLight with glTF",
-            path: "3d/light/pointLightWithGltf",
-            description: {
-              ko: `현대적인 감쇄(Attenuation) 수식이 적용된 Point Light와 glTF PBR 모델의 상호작용 예제입니다.`,
-              en: `An example of interaction between Point Light with modern attenuation formula and glTF PBR model.`
-            }
-          },
-          {
-            name: "SpotLight",
-            path: "3d/light/spotLight",
-            description: {
-              ko: `특정 방향으로 원뿔형 빛을 방출하는 스포트라이트(Spot Light)를 시연하는 예제입니다.`,
-              en: `An example demonstrating Spot Light, cone-shaped light in a specific direction.`
-            }
-          },
-          {
-            name: "SpotLight with glTF",
-            path: "3d/light/spotLightWithGltf",
-            description: {
-              ko: `현대적인 원뿔 감쇄(Angle Attenuation) 수식이 적용된 Spot Light와 glTF PBR 모델의 상호작용 예제입니다.`,
-              en: `An example of interaction between Spot Light with modern angle attenuation formula and glTF PBR model.`
-            }
-          },
-          {
-            name: "PointLight Performance(cluster)",
-            path: "3d/light/pointLightPerformance",
-            description: {
-              ko: `PointLight는 클러스터 타일 렌더링을 지원합니다. 1024개의 포인트 라이트를 지원합니다.`,
-              en: `PointLight supports clustered tile rendering. Supports 1024 point lights.`
-            }
-          },
-          {
-            name: "SpotLight Performance(cluster)",
-            path: "3d/light/spotLightPerformance",
-            description: {
-              ko: `SpotLight의 대량 렌더링 성능(클러스터링)을 테스트하는 예제입니다.`,
-              en: `An example testing the mass rendering performance (clustering) of SpotLights.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Group3D",
-        list: [
-          {
-            name: "Basic Group3D",
-            path: "3d/group3D/basic",
-            description: {
-              ko: `3D 객체들을 그룹화할 수 있는 Group3D 객체의 예제입니다.`,
-              en: `Here's an example of a Group3D object that can group 3D objects.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Tint",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "Tint",
-            path: "3d/tint/basic",
-            description: {
-              ko: `재질 기반 틴트를 지원합니다. 틴트 사용, tintBlendMode 설정 및 색상 사용 예제입니다.`,
-              en: `Supports material-based tint. Examples of using tint, setting tintBlendMode, and color.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Line3D",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "Linear Type",
-            path: "3d/line3D/linear",
-            description: {
-              ko: `직선 형태의 라인을 그리는 예제입니다.`,
-              en: `An example of drawing linear lines.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Bezier Type",
-            path: "3d/line3D/bezier",
-            description: {
-              ko: `베지에 곡선 형태의 라인을 그리는 예제입니다.`,
-              en: `An example of drawing Bezier curve lines.`
-            }
-          },
-          {
-            experimental: true,
-            name: "CatmullRom Type",
-            path: "3d/line3D/catmullRom",
-            description: {
-              ko: `캣멀-롬 스플라인 형태의 라인을 그리는 예제입니다.`,
-              en: `An example of drawing Catmull-Rom spline lines.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Interaction",
-        list: [
-          {
-            name: "MouseEvent",
-            list: [
-              {
-                name: "Mesh",
-                path: "3d/interaction/mouseEvent/mesh",
-                description: {
-                  ko: `Mesh에 마우스 이벤트를 설정하는 예제입니다.`,
-                  en: `Here's an example of setting up mouse events on a Mesh.`
-                }
-              },
-              {
-                name: "Sprite3D",
-                path: "3d/interaction/mouseEvent/sprite3D",
-                description: {
-                  ko: `Sprite3D에 마우스 이벤트를 설정하는 예제입니다.`,
-                  en: `Here's an example of setting up mouse events on a Sprite3D.`
-                }
-              },
-              {
-                name: "SpriteSheet3D",
-                path: "3d/interaction/mouseEvent/spriteSheet3D",
-                description: {
-                  ko: `SpriteSheet3D에 마우스 이벤트를 설정하는 예제입니다.`,
-                  en: `Here's an example of setting up mouse events on a SpriteSheet3D.`
-                }
-              },
-              {
-                name: "TextField3D",
-                path: "3d/interaction/mouseEvent/textField3D",
-                description: {
-                  ko: `TextField3D에 마우스 이벤트를 설정하는 예제입니다.`,
-                  en: `Here's an example of setting up mouse events on a TextField3D.`
-                }
-              },
-              {
-                name: "Raycasting (Precision Picking)",
-                path: "3d/interaction/mouseEvent/raycasting",
-                description: {
-                  ko: `이 예제는 복잡한 지오메트리(TorusKnot)에 대한 고정밀 레이캐스팅을 보여줍니다.<br/>버텍스 버퍼를 분석하여 정확한 교차 지점, 면 인덱스 및 로컬 좌표를 CPU에서 계산합니다.`,
-                  en: `This example demonstrates high-precision raycasting on complex geometry (TorusKnot).<br/>It calculates the exact intersection point, face index, and local coordinates on the CPU by analyzing vertex buffers.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KeyboardEvent",
-            list: [
-              {
-                name: "Keyboard Interaction",
-                path: "3d/interaction/keyboardEvent",
-                description: {
-                  ko: `keyboardKeyBuffer를 사용하여 매 프레임 키보드 상태를 체크하고 객체를 제어하는 기초적인 방법을 보여줍니다.`,
-                  en: `Shows basic way to check keyboard state every frame and control an object using keyboardKeyBuffer.`
-                }
-              }
-            ]
-          }
-        ]
-      },
-      {
-        name: "Shadow",
-        list: [
-          {
-            name: "DirectionalLight Shadow",
-            path: "3d/shadow/directionalShadow",
-            description: {
-              ko: `DirectionalLight에 의한 그림자 효과를 시연하는 예제입니다.`,
-              en: `An example demonstrating shadow effects caused by DirectionalLight.`
-            }
-          },
-          {
-            name: "DirectionalLight Shadow - GLTF",
-            path: "3d/shadow/gltfDirectionalShadow",
-            description: {
-              ko: `GLTF 모델에 대한 DirectionalLight 그림자 효과를 시연하는 예제입니다.`,
-              en: `An example demonstrating DirectionalLight shadow effects on a GLTF model.`
-            }
-          }
-        ]
-      },
-      {
-        name: "InstancedMesh",
-        list: [
-          {
-            name: "InstancedMesh Simple",
-            path: "3d/instancedMesh/simple",
-            description: {
-              ko: `이 데모는 간단한 Plane을 사용한 인스턴스 성능 테스트를 보여줍니다. WebGPU의 최소 안전 메모리인 128MB 버퍼(100만 인스턴스)를 최대한 활용합니다.`,
-              en: `This demo demonstrates instance performance testing using a simple Plane. This demo maximizes the WebGPU's minimum safe memory of 128 MB buffer (1 million instances).`
-            }
-          },
-          {
-            name: "InstancedMesh Sphere",
-            path: "3d/instancedMesh/sphere",
-            description: {
-              ko: `이 데모는 Sphere를 사용한 인스턴스 성능 테스트를 보여줍니다. WebGPU의 최소 안전 메모리인 128MB 버퍼(100만 인스턴스)를 최대한 활용합니다.`,
-              en: `This demo demonstrates instance performance testing using Sphere. This demo maximizes the WebGPU's minimum safe memory of 128 MB buffer (1 million instances).`
-            }
-          }
-        ]
-      },
-      {
-        name: "LOD",
-        list: [
-          {
-            name: "InstanceMesh GPU LOD",
-            path: "3d/lod/InstanceMeshGPULOD",
-            description: {
-              ko: `이 데모는 인스턴스 메쉬에 대한 GPU LOD 성능 테스트를 보여줍니다. WebGPU의 최소 안전 메모리인 128MB 버퍼(100만 인스턴스)를 최대한 활용합니다.`,
-              en: `This demo demonstrates GPU LOD performance testing for instanced meshes. It fully utilizes WebGPU's minimum safe memory of 128MB buffer (1 million instances).`
-            }
-          },
-          {
-            name: "Mesh CPU LOD",
-            path: "3d/lod/MeshCPULOD",
-            description: {
-              ko: `이 데모는 메쉬에 대한 CPU LOD 성능 테스트를 보여줍니다.`,
-              en: `This demo demonstrates CPU LOD performance testing for meshes.`
-            }
-          },
-          {
-            name: "Multi Material GPU LOD",
-            path: "3d/lod/InstanceMeshGPULOD_material",
-            description: {
-              ko: `이 데모는 GPU LOD에서 다양한 재질을 활용하는 테스트를 보여줍니다.`,
-              en: `This demo demonstrates testing utilizing different materials in GPU LOD.`
-            }
-          },
-          {
-            name: "Multi Material CPU LOD",
-            path: "3d/lod/MeshCPULOD_material",
-            description: {
-              ko: `이 데모는 CPU LOD에서 다양한 재질을 활용하는 테스트를 보여줍니다.`,
-              en: `This demo demonstrates testing utilizing different materials in CPU LOD.`
-            }
-          }
-        ]
-      },
-      {
-        name: "ParticleSystem",
-        list: [
-          {
-            name: "Particle",
-            path: "3d/particle/basic",
-            description: {
-              ko: `기본적인 파티클 시스템을 시연하는 예제입니다.`,
-              en: `An example demonstrating a basic particle system.`
-            }
-          },
-          {
-            name: "Multi Particle Performance",
-            path: "3d/particle/performance",
-            description: {
-              ko: `다수의 파티클 시스템을 동시에 렌더링하여 성능을 테스트하는 예제입니다.`,
-              en: `An example testing performance by rendering multiple particle systems simultaneously.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Indirect Draw Test",
-        list: [
-          {
-            name: "drawIndexedIndirect Test",
-            path: "3d/indirectDrawTest",
-            description: {
-              ko: `drawIndexedIndirect 기능을 테스트하는 예제입니다.`,
-              en: `An example testing the drawIndexedIndirect function.`
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    name: "GLTF",
-    list: [
-      {
-        name: "Basic",
-        list: [
-          {
-            name: "TextureEncodingTest",
-            path: "gltf/basic/textureEncodingTest",
-            description: {
-              ko: `텍스처가 올바른 전달 함수(Transfer Function)로 샘플링되는지 테스트합니다. Base Color와 Emissive가 sRGB에서 올바르게 디코딩되는지 확인합니다.`,
-              en: `Tests that textures are sampled with the correct transfer functions. Verifies base color and emissive textures are decoded from sRGB.`
-            }
-          },
-          {
-            name: "TextureLinear InterpolationTest",
-            path: "gltf/basic/textureLinearInterpolationTest",
-            description: {
-              ko: `sRGB 디코딩 후 선형 값에 대해 텍스처 선형 보간이 올바르게 수행되는지 테스트합니다.`,
-              en: `Tests that linear texture interpolation is correctly performed on linear values (after sRGB decoding).`
-            }
-          },
-          {
-            name: "VertexColorTest",
-            path: "gltf/basic/vertexColorTest",
-            description: {
-              ko: `뷰어가 정점 색상(COLORS_0 속성)을 올바르게 지원하는지 테스트합니다.`,
-              en: `Tests proper support for vertex colors (COLORS_0 attribute) in the viewer.`
-            }
-          },
-          {
-            name: "BoxVertexColors",
-            path: "gltf/basic/boxVertexColors",
-            description: {
-              ko: `각 면에 정점 색상이 적용된 간단한 박스 모델입니다.`,
-              en: `A simple box model with vertex colors applied to each face.`
-            }
-          },
-          {
-            name: "OrientationTest",
-            path: "gltf/basic/orientationTest",
-            description: {
-              ko: `노드의 회전 및 방향(Quaternion) 처리가 올바른지 테스트합니다.`,
-              en: `Tests the correctness of node rotation and orientation (Quaternion) handling.`
-            }
-          },
-          {
-            name: "TextureCoordinateTest",
-            path: "gltf/basic/textureCoordinateTest",
-            description: {
-              ko: `XYZ 위치(3D 공간 좌표)와 UV 위치(2D 텍스처 좌표) 간의 관계를 보여줍니다.`,
-              en: `Demonstrates the relationship between XYZ positions and UV texture coordinates.`
-            }
-          },
-          {
-            name: "AlphaBlendModeTest",
-            path: "gltf/basic/alphaBlendModeTest",
-            description: {
-              ko: `다양한 알파 모드(OPAQUE, BLEND, MASK)가 올바르게 렌더링되는지 테스트합니다.`,
-              en: `Tests the various alpha modes (OPAQUE, BLEND, MASK) to verify correct rendering.`
-            }
-          },
-          {
-            name: "TextureSettingsTest",
-            path: "gltf/basic/textureSettingsTest",
-            description: {
-              ko: `텍스처 샘플링 설정(Wrap 모드, 필터링)을 테스트합니다.`,
-              en: `Tests texture sampling settings (Wrap modes, Filtering).`
-            }
-          },
-          {
-            name: "MultiUVTest",
-            path: "gltf/basic/multiUVTest",
-            description: {
-              ko: `다중 텍스처 좌표 속성(예: 색상용 TEXCOORD_0, 기타 요소용 TEXCOORD_1)의 사용을 시연합니다.`,
-              en: `Demonstrates the usage of multiple texture coordinate attributes (e.g., TEXCOORD_0 for color, TEXCOORD_1 for other elements).`
-            }
-          },
-          {
-            name: "MetalRoughSpheres",
-            path: "gltf/basic/metalRoughSpheres",
-            description: {
-              ko: `다양한 금속성(Metallic)과 거칠기(Roughness) 값을 가진 구체들을 통해 PBR 렌더링을 테스트합니다.`,
-              en: `Tests PBR rendering via spheres with varying Metallic and Roughness values.`
-            }
-          },
-          {
-            name: "MetalRoughSpheresNoTextures",
-            path: "gltf/basic/metalRoughSpheresNoTextures",
-            description: {
-              ko: `텍스처 없이 재질의 요소(Factor) 값만으로 금속성과 거칠기를 표현하는 테스트입니다.`,
-              en: `Tests representing metallic and roughness using only material factor values without textures.`
-            }
-          },
-          {
-            name: "WaterBottle",
-            path: "gltf/basic/waterBottle",
-            description: {
-              ko: `Normal, Occlusion, Emissive 맵을 사용하는 기본적인 금속/거칠기(Metal/Roughness) PBR 물병 모델입니다.`,
-              en: `A basic Metal/Roughness PBR water bottle model using Normal, Occlusion, and Emissive maps.`
-            }
-          },
-          {
-            name: "NormalTangentTest",
-            path: "gltf/basic/normalTangentTest",
-            description: {
-              ko: `노멀 맵핑과 탄젠트 공간 계산의 정확성을 테스트합니다.`,
-              en: `Tests the accuracy of normal mapping and tangent space calculations.`
-            }
-          },
-          {
-            name: "NormalTangentMirrorTest",
-            path: "gltf/basic/normalTangentMirrorTest",
-            description: {
-              ko: `미러링된 텍스처 좌표에서의 노멀 맵핑 처리를 테스트합니다.`,
-              en: `Tests normal mapping handling with mirrored texture coordinates.`
-            }
-          },
-          {
-            name: "NegativeScaleTest",
-            path: "gltf/basic/negativeScaleTest",
-            description: {
-              ko: `음수 스케일(반전)이 적용된 노드의 렌더링을 테스트합니다.`,
-              en: `Tests rendering of nodes with negative scale (inversion) applied.`
-            }
-          },
-          {
-            name: "EnvironmentTest",
-            path: "gltf/basic/environmentTest",
-            description: {
-              ko: `금속 표면에서의 환경 맵 반사 효과를 테스트합니다.`,
-              en: `Tests environment map reflection effects on metallic surfaces.`
-            }
-          },
-          {
-            name: "Generate normal vector test",
-            path: "gltf/basic/generateNormalTest",
-            description: {
-              ko: `모델에 노멀 정보가 없을 때 자동으로 노멀 벡터를 생성하는 기능을 테스트합니다.`,
-              en: `Tests the automatic generation of normal vectors when the model lacks normal information.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Basic Compare",
-        list: [
-          {
-            name: "CompareBaseColor",
-            path: "gltf/basic/compareBaseColor",
-            description: {
-              ko: `기본 색상(Base Color) 렌더링 결과를 비교합니다.`,
-              en: `Compares Base Color rendering results.`
-            }
-          },
-          {
-            name: "CompareAlphaCoverage",
-            path: "gltf/basic/compareAlphaCoverage",
-            description: {
-              ko: `알파 커버리지(Alpha Coverage) 렌더링 결과를 비교합니다.`,
-              en: `Compares Alpha Coverage rendering results.`
-            }
-          },
-          {
-            name: "CompareMetallic",
-            path: "gltf/basic/compareMetallic",
-            description: {
-              ko: `금속성(Metallic) 렌더링 결과를 비교합니다.`,
-              en: `Compares Metallic rendering results.`
-            }
-          },
-          {
-            name: "CompareNormal",
-            path: "gltf/basic/compareNormal",
-            description: {
-              ko: `노멀 맵(Normal Map) 렌더링 결과를 비교합니다.`,
-              en: `Compares Normal Map rendering results.`
-            }
-          },
-          {
-            name: "CompareRoughness",
-            path: "gltf/basic/compareRoughness",
-            description: {
-              ko: `거칠기(Roughness) 렌더링 결과를 비교합니다.`,
-              en: `Compares Roughness rendering results.`
-            }
-          },
-          {
-            name: "CompareAmbientOcclusion",
-            path: "gltf/basic/compareAmbientOcclusion",
-            description: {
-              ko: `앰비언트 오클루전(AO) 렌더링 결과를 비교합니다.`,
-              en: `Compares Ambient Occlusion (AO) rendering results.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Animation",
-        list: [
-          {
-            name: "Basic Animations",
-            path: "gltf/animation/basicAnimations",
-            description: {
-              ko: `노드의 이동, 회전, 크기 조절 애니메이션을 보여주는 기본 예제입니다.`,
-              en: `Basic example showing node translation, rotation, and scaling animations.`
-            }
-          },
-          {
-            name: "SimpleSkin",
-            path: "gltf/animation/simpleSkin",
-            description: {
-              ko: `가장 기본적인 형태의 스키닝(Skinning) 애니메이션 예제입니다.`,
-              en: `The most basic example of skinning animation.`
-            }
-          },
-          {
-            name: "SimpleMorph",
-            path: "gltf/animation/simpleMorph",
-            description: {
-              ko: `간단한 모프 타겟(Morph Target) 애니메이션 예제입니다.`,
-              en: `Simple Morph Target animation example.`
-            }
-          },
-          {
-            name: "RiggedSimple",
-            path: "gltf/animation/riggedSimple",
-            description: {
-              ko: `간단하게 리깅된 원통형 메쉬를 통해 스키닝 동작을 확인합니다.`,
-              en: `Verifies skinning behavior via a simply rigged cylindrical mesh.`
-            }
-          },
-          {
-            name: "RiggedFigure",
-            path: "gltf/animation/riggedFigure",
-            description: {
-              ko: `리깅된 인간형 캐릭터 모델의 애니메이션을 테스트합니다.`,
-              en: `Tests animation of a rigged humanoid character model.`
-            }
-          },
-          {
-            name: "InterpolationTest",
-            path: "gltf/animation/interpolationTest",
-            description: {
-              ko: `애니메이션 보간 모드(Step, Linear, Cubic Spline)의 차이를 보여줍니다.`,
-              en: `Demonstrates the differences between animation interpolation modes (Step, Linear, Cubic Spline).`
-            }
-          },
-          {
-            name: "CesiumMan & MilkTruck",
-            path: "gltf/animation/cesiumMan",
-            description: {
-              ko: `스키닝된 CesiumMan과 애니메이션이 적용된 우유 트럭 모델입니다.`,
-              en: `Skinned CesiumMan and animated Milk Truck models.`
-            }
-          },
-          {
-            name: "BrainStem",
-            path: "gltf/animation/brainStem",
-            description: {
-              ko: `복잡한 계층 구조와 스키닝을 가진 BrainStem 모델 애니메이션입니다.`,
-              en: `BrainStem model animation with complex hierarchy and skinning.`
-            }
-          },
-          {
-            name: "MorphStressTest",
-            path: "gltf/animation/morphStressTest",
-            description: {
-              ko: `다수의 활성 정점 속성(최대 18개)을 사용하여 모프 타겟 구현을 스트레스 테스트합니다.`,
-              en: `Stress-tests morph target implementations with a high number of active vertex attributes (up to 18).`
-            }
-          },
-          {
-            name: "RecursiveSkeletons",
-            path: "gltf/animation/recursiveSkeletons",
-            description: {
-              ko: `복잡한 스키닝 케이스(다른 스킨으로 메쉬 재사용, 단일 스켈레톤에 다중 스킨 바인딩)를 테스트합니다.`,
-              en: `Tests complex skinning cases: reusing meshes with different skins and binding multiple skins to a single skeleton.`
-            }
-          },
-          {
-            name: "Animation Performance Test",
-            list: [
-              {
-                name: "Medium load Skinning",
-                path: "gltf/animation/performance/mediumLoadSkinning",
-                description: {
-                  ko: `19개의 관절과 57개의 애니메이션 채널을 가진 다수의 모델을 계산하는 성능 데모입니다.`,
-                  en: `This is a performance demo that computes a large number of models with 19 joints and 57 animation channels.`
-                }
-              },
-              {
-                name: "High vertex load Skinning",
-                path: "gltf/animation/performance/highVertexLoadSkinning",
-                description: {
-                  ko: `많은 정점과 관절을 가진 모델에 대한 스키닝 성능을 측정하는 테스트를 수행합니다. 각 장치의 성능 한계를 확인하기 위해 FPS와 GPU/CPU 사용량을 모니터링합니다.`,
-                  en: `perform tests to measure skinning performance for models with many vertices and joints. We monitor FPS and GPU/CPU utilization to determine performance limits for each device.`
-                }
-              },
-              {
-                name: "Morph target load Test",
-                path: "gltf/animation/performance/highMorphTarget",
-                description: {
-                  ko: `수백 개의 MorphStressTest 모델을 인스턴스화하여 모프 스트레스 테스트를 수행합니다.
-실시간 모프 타겟 스키닝 성능을 극한까지 벤치마킹합니다. 세 가지 애니메이션 중 가장 무거운 모프 타겟 애니메이션의 성능을 테스트합니다.
-각 장치의 성능 한계를 확인하세요.`,
-                  en: `Perform morph stress tests by instantiating hundreds of MorphStressTest models.
-Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation.
-Check performance limits on each device.`
-                }
-              }
-            ]
-          }
-        ]
-      },
-      {
-        name: "3D Models",
-        list: [
-          {
-            name: "corset",
-            path: "gltf/models/corset",
-            description: {
-              ko: `복잡한 형상과 텍스처를 가진 고해상도 코르셋 모델입니다.`,
-              en: `High-resolution Corset model with complex geometry and textures.`
-            }
-          },
-          {
-            name: "Helmets",
-            path: "gltf/models/helmets",
-            description: {
-              ko: `손상된 헬멧(Damaged Helmet) 등 고품질 PBR 텍스처를 보여주는 모델들입니다.`,
-              en: `Models showcasing high-quality PBR textures, such as the Damaged Helmet.`
-            }
-          },
-          {
-            name: "Sponza",
-            path: "gltf/models/sponza",
-            description: {
-              ko: `조명 테스트에 널리 사용되는 건물 내부 모델입니다. 현대적인 PBR 파이프라인을 위해 고해상도 지오메트리로 리메이크되었습니다.`,
-              en: `Building interior commonly used for testing lighting. Remade for modern PBR pipelines with high-resolution geometry.`
-            }
-          },
-          {
-            name: "Tokyo",
-            path: "gltf/models/tokyo",
-            description: {
-              ko: `수많은 드로우 콜과 대규모 씬 렌더링을 테스트하는 도쿄 도시 모델입니다.`,
-              en: `Tokyo city model testing large-scale scene rendering and numerous draw calls.`
-            }
-          },
-          {
-            name: "texcooredNTest",
-            path: "gltf/models/texcooredNTest",
-            description: {
-              ko: `다중 텍스처 좌표 채널의 동작을 확인하는 테스트 모델입니다.`,
-              en: `Test model verifying the behavior of multiple texture coordinate channels.`
-            }
-          },
-          {
-            name: "ABeautifulGame",
-            path: "gltf/models/aBeautifulGame",
-            extensionList: ["KHR_materials_transmission", "KHR_materials_volume"],
-            description: {
-              ko: `투과(Transmission)와 볼륨(Volume) 효과를 시연하는 체스 세트입니다.`,
-              en: `A chess set demonstrating transmission and volume.`
-            }
-          }
-        ]
-      },
-      {
-        name: "GLTF Extensions",
-        list: [
-          {
-            name: "KHR_materials_anisotropy",
-            list: [
-              {
-                name: "CompareAnisotropy",
-                path: "gltf/gltfExtensions/anisotropy/compareAnisotropy",
-                extensionList: ["KHR_materials_anisotropy"],
-                description: {
-                  ko: `비등방성(Anisotropy)이 있는 렌더링과 없는 렌더링을 비교합니다.`,
-                  en: `Compares rendering with and without anisotropy.`
-                }
-              },
-              {
-                name: "AnisotropyDiscTest",
-                path: "gltf/gltfExtensions/anisotropy/anisotropyDiscTest",
-                extensionList: ["KHR_materials_anisotropy"],
-                description: {
-                  ko: `원판 형태의 비등방성 하이라이트 회전을 테스트합니다.`,
-                  en: `Tests anisotropic highlight rotation on a disc shape.`
-                }
-              },
-              {
-                name: "AnisotropyRotationTest",
-                path: "gltf/gltfExtensions/anisotropy/anisotropyRotationTest",
-                extensionList: ["KHR_materials_anisotropy"],
-                description: {
-                  ko: `비등방성 방향 회전에 따른 렌더링 변화를 테스트합니다.`,
-                  en: `Tests rendering changes based on anisotropy direction rotation.`
-                }
-              },
-              {
-                name: "AnisotropyStrengthTest",
-                path: "gltf/gltfExtensions/anisotropy/anisotropyStrengthTest",
-                extensionList: ["KHR_materials_anisotropy"],
-                description: {
-                  ko: `비등방성 강도(Strength)에 따른 하이라이트 변화를 테스트합니다.`,
-                  en: `Tests highlight changes based on anisotropy strength.`
-                }
-              },
-              {
-                name: "AnisotropyBarnLamp",
-                path: "gltf/gltfExtensions/anisotropy/anisotropyBarnLamp",
-                extensionList: ["KHR_materials_anisotropy"],
-                description: {
-                  ko: `비등방성(Anisotropic) 재질 속성을 보여주는 헛간 램프 모델입니다.`,
-                  en: `A barn lamp model showcasing anisotropic material properties.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_iridescence",
-            list: [
-              {
-                name: "CompareIridescence",
-                path: "gltf/gltfExtensions/iridescence/compareIridescence",
-                extensionList: ["KHR_materials_iridescence"],
-                description: {
-                  ko: `무지개빛(Iridescence) 박막 간섭 효과를 비교합니다.`,
-                  en: `Compares Iridescence thin-film interference effects.`
-                }
-              },
-              {
-                name: "IridescenceDielectricSpheres",
-                path: "gltf/gltfExtensions/iridescence/iridescenceDielectricSpheres",
-                extensionList: ["KHR_materials_iridescence", "KHR_materials_transmission", "KHR_materials_volume"],
-                description: {
-                  ko: `비금속(유전체) 재질에서 KHR_materials_iridescence 확장을 테스트합니다.`,
-                  en: `Tests the KHR_materials_iridescence extension on non-metallic (dielectric) materials.`
-                }
-              },
-              {
-                name: "IridescenceMetallicSpheres",
-                path: "gltf/gltfExtensions/iridescence/iridescenceMetallicSpheres",
-                extensionList: ["KHR_materials_iridescence"],
-                description: {
-                  ko: `금속 구체에 적용된 무지개빛 효과를 테스트합니다.`,
-                  en: `Tests iridescence effects applied to metallic spheres.`
-                }
-              },
-              {
-                name: "IridescenceSuzanne",
-                path: "gltf/gltfExtensions/iridescence/iridescenceSuzanne",
-                extensionList: ["KHR_materials_iridescence"],
-                description: {
-                  ko: `Suzanne 모델에 적용된 무지개빛 쉐이더 테스트입니다.`,
-                  en: `Iridescence shader test applied to the Suzanne model.`
-                }
-              },
-              {
-                name: "IridescenceLamp",
-                path: "gltf/gltfExtensions/iridescence/iridescenceLamp",
-                extensionList: ["KHR_materials_iridescence", "KHR_materials_transmission", "KHR_materials_volume"],
-                description: {
-                  ko: `투과 및 볼륨 효과와 함께 KHR_materials_iridescence를 보여주는 Wayfair 램프 모델입니다.`,
-                  en: `A Wayfair lamp model showcasing transmission, volume, and KHR_materials_iridescence.`
-                }
-              },
-              {
-                name: "SunglassesKhronos",
-                path: "gltf/gltfExtensions/iridescence/sunglassesKhronos",
-                extensionList: ["KHR_materials_iridescence", "KHR_materials_transmission"],
-                description: {
-                  ko: `렌즈에 얇은 막 무지개빛 효과가 적용된 선글라스 모델입니다.`,
-                  en: `Sunglasses model with thin-film iridescence effects applied to the lenses.`
-                }
-              },
-              {
-                name: "IridescentDishWithOlives",
-                path: "gltf/gltfExtensions/iridescence/iridescentDishWithOlives",
-                extensionList: ["KHR_materials_iridescence", "KHR_materials_transmission", "KHR_materials_volume", "KHR_materials_ior", "KHR_materials_specular"],
-                description: {
-                  ko: `투과, 볼륨, IOR 및 스펙큘러 속성을 보여주는 접시 모델입니다.`,
-                  en: `A dish demonstrating transmission, volume, IOR, and specular properties.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_clearcoat",
-            list: [
-              {
-                name: "CompareClearcoat",
-                path: "gltf/gltfExtensions/clearcoat/compareClearcoat",
-                extensionList: ["KHR_materials_clearcoat"],
-                description: {
-                  ko: `클리어코트(Clearcoat) 재질 렌더링 결과를 비교합니다.`,
-                  en: `Compares Clearcoat material rendering results.`
-                }
-              },
-              {
-                name: "ClearCoatTest",
-                path: "gltf/gltfExtensions/clearcoat/clearCoatTest",
-                extensionList: ["KHR_materials_clearcoat"],
-                description: {
-                  ko: `다양한 거칠기와 클리어코트 강도를 테스트합니다.`,
-                  en: `Tests various roughness and clearcoat strengths.`
-                }
-              },
-              {
-                name: "ClearcoatWicker",
-                path: "gltf/gltfExtensions/clearcoat/clearcoatWicker",
-                extensionList: ["KHR_materials_clearcoat"],
-                description: {
-                  ko: `직물 표면 위에 코팅된 클리어코트 효과를 보여주는 위커 모델입니다.`,
-                  en: `Wicker model showing clearcoat effect coated over a woven surface.`
-                }
-              },
-              {
-                name: "ClearCoatCarPaint",
-                path: "gltf/gltfExtensions/clearcoat/clearCoatCarPaint",
-                extensionList: ["KHR_materials_clearcoat"],
-                description: {
-                  ko: `자동차 페인트와 같은 다중 레이어 재질 표현을 테스트합니다.`,
-                  en: `Tests multi-layer material representation like car paint.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_dispersion",
-            list: [
-              {
-                name: "CompareDispersion",
-                path: "gltf/gltfExtensions/dispersion/compareDispersion",
-                extensionList: ["KHR_materials_dispersion", "KHR_materials_transmission"],
-                description: {
-                  ko: `빛의 분산(Dispersion) 효과를 비교합니다.`,
-                  en: `Compares light dispersion effects.`
-                }
-              },
-              {
-                name: "DispersionTest",
-                path: "gltf/gltfExtensions/dispersion/dispersionTest",
-                extensionList: ["KHR_materials_dispersion", "KHR_materials_transmission"],
-                description: {
-                  ko: `프리즘과 같은 빛의 분산 현상을 테스트합니다.`,
-                  en: `Tests light dispersion phenomena like a prism.`
-                }
-              },
-              {
-                name: "DragonDispersion",
-                path: "gltf/gltfExtensions/dispersion/dragonDispersion",
-                extensionList: ["KHR_materials_dispersion", "KHR_materials_transmission", "KHR_materials_volume"],
-                description: {
-                  ko: `용 모델에 적용된 보석 같은 분산 효과를 보여줍니다.`,
-                  en: `Shows gem-like dispersion effects applied to a Dragon model.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_emissive_strength",
-            list: [
-              {
-                name: "CompareEmissiveStrength",
-                path: "gltf/gltfExtensions/emissiveStrength/compareEmissiveStrength",
-                extensionList: ["KHR_materials_emissive_strength"],
-                description: {
-                  ko: `발광(Emissive) 강도 증폭 효과를 비교합니다.`,
-                  en: `Compares Emissive Strength amplification effects.`
-                }
-              },
-              {
-                name: "EmissiveStrengthTest",
-                path: "gltf/gltfExtensions/emissiveStrength/emissiveStrengthTest",
-                extensionList: ["KHR_materials_emissive_strength"],
-                description: {
-                  ko: `1.0을 초과하는 고강도 발광 표현을 테스트합니다.`,
-                  en: `Tests high-intensity emissive representation exceeding 1.0.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_sheen",
-            list: [
-              {
-                name: "CompareSheen",
-                path: "gltf/gltfExtensions/sheen/compareSheen",
-                extensionList: ["KHR_materials_sheen"],
-                description: {
-                  ko: `직물 등의 미세한 반사광(Sheen) 효과를 비교합니다.`,
-                  en: `Compares Sheen effects seen on fabrics etc.`
-                }
-              },
-              {
-                name: "SheenTestGrid",
-                path: "gltf/gltfExtensions/sheen/sheenTestGrid",
-                extensionList: ["KHR_materials_sheen"],
-                description: {
-                  ko: `Sheen 색상과 거칠기에 따른 변화를 그리드로 테스트합니다.`,
-                  en: `Tests changes based on Sheen color and roughness in a grid.`
-                }
-              },
-              {
-                name: "SheenCloth",
-                path: "gltf/gltfExtensions/sheen/sheenCloth",
-                extensionList: ["KHR_materials_sheen"],
-                description: {
-                  ko: `Sheen 효과를 보여주는 직물 예제입니다.`,
-                  en: `A fabric example showcasing sheen.`
-                }
-              },
-              {
-                name: "SheenChair",
-                path: "gltf/gltfExtensions/sheen/sheenChair",
-                extensionList: ["KHR_materials_sheen", "KHR_materials_variants"],
-                description: {
-                  ko: `재질 변형(Variant)과 Sheen 효과를 보여주는 의자 모델입니다.`,
-                  en: `A chair model demonstrating material variants and sheen.`
-                }
-              },
-              {
-                name: "GlamVelvetSofa",
-                path: "gltf/gltfExtensions/sheen/glamVelvetSofa",
-                extensionList: ["KHR_materials_sheen", "KHR_materials_specular", "KHR_materials_variants"],
-                description: {
-                  ko: `고급 벨벳 소파의 질감을 표현하는 Sheen 모델입니다.`,
-                  en: `Sheen model expressing the texture of a luxury velvet sofa.`
-                }
-              },
-              {
-                name: "ChairDamaskPurplegold",
-                path: "gltf/gltfExtensions/sheen/chairDamaskPurplegold",
-                extensionList: ["KHR_materials_sheen"],
-                description: {
-                  ko: `다마스크 패턴 의자의 직물 느낌을 표현합니다.`,
-                  en: `Expresses the fabric feel of a damask pattern chair.`
-                }
-              },
-              {
-                name: "SheenWoodLeatherSofa",
-                path: "gltf/gltfExtensions/sheen/sheenWoodLeatherSofa",
-                extensionList: ["KHR_materials_sheen"],
-                description: {
-                  ko: `가죽과 나무 재질이 혼합된 소파에서의 Sheen 효과입니다.`,
-                  en: `Sheen effect on a sofa combining leather and wood materials.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_specular",
-            list: [
-              {
-                name: "CompareSpecular",
-                path: "gltf/gltfExtensions/specular/compareSpecular",
-                extensionList: ["KHR_materials_specular"],
-                description: {
-                  ko: `스펙큘러(Specular) 반사 강도 및 색상 제어를 비교합니다.`,
-                  en: `Compares Specular reflection strength and color control.`
-                }
-              },
-              {
-                name: "SpecularTest",
-                path: "gltf/gltfExtensions/specular/specularTest",
-                extensionList: ["KHR_materials_specular"],
-                description: {
-                  ko: `유전체 재질의 스펙큘러 하이라이트 조절을 테스트합니다.`,
-                  en: `Tests specular highlight adjustments on dielectric materials.`
-                }
-              },
-              {
-                name: "SpecularSilkPouf",
-                path: "gltf/gltfExtensions/specular/specularSilkPouf",
-                extensionList: ["KHR_materials_specular"],
-                description: {
-                  ko: `스펙큘러 속성을 보여주는 실크 푸프 모델입니다.`,
-                  en: `A silk pouf model demonstrating specular properties.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_unlit",
-            list: [
-              {
-                name: "UnlitTest",
-                path: "gltf/gltfExtensions/unlit/unlitTest",
-                extensionList: ["KHR_materials_unlit"],
-                description: {
-                  ko: `조명의 영향을 받지 않는 Unlit(무광) 재질을 테스트합니다.`,
-                  en: `Tests Unlit materials not affected by lighting.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_texture_transform",
-            list: [
-              {
-                name: "TextureTransformTest",
-                path: "gltf/gltfExtensions/textureTransform/textureTransformTest",
-                extensionList: ["KHR_texture_transform"],
-                description: {
-                  ko: `KHR_texture_transform 확장의 사용법(스케일, 회전, 이동)을 시연합니다.`,
-                  en: `Demonstrates the usage of the KHR_texture_transform extension (scaling, rotation, translation).`
-                }
-              },
-              {
-                name: "TextureTransformMultiTest",
-                path: "gltf/gltfExtensions/textureTransform/textureTransformMultiTest",
-                extensionList: ["KHR_texture_transform"],
-                description: {
-                  ko: `여러 텍스처에 서로 다른 변환을 적용하는 테스트입니다.`,
-                  en: `Tests applying different transforms to multiple textures.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_diffuseTransmission",
-            list: [
-              {
-                name: "DiffuseTransmissionTest",
-                path: "gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTest",
-                extensionList: ["KHR_materials_diffuseTransmission"],
-                description: {
-                  ko: `반투명한 물체의 확산 투과(Diffuse Transmission) 효과를 테스트합니다.`,
-                  en: `Tests Diffuse Transmission effects on translucent objects.`
-                }
-              },
-              {
-                name: "DiffuseTransmissionTeacup",
-                path: "gltf/gltfExtensions/diffuseTransmission/diffuseTransmissionTeacup",
-                extensionList: ["KHR_materials_diffuseTransmission"],
-                description: {
-                  ko: `얇은 찻잔을 통과하는 빛의 확산을 보여줍니다.`,
-                  en: `Shows light diffusion passing through a thin teacup.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_transmission",
-            list: [
-              {
-                name: "CompareTransmission",
-                path: "gltf/gltfExtensions/transmission/compareTransmission",
-                extensionList: ["KHR_materials_transmission"],
-                description: {
-                  ko: `투명한 물체의 투과(Transmission) 렌더링을 비교합니다.`,
-                  en: `Compares Transmission rendering of transparent objects.`
-                }
-              },
-              {
-                name: "TransmissionTest",
-                path: "gltf/gltfExtensions/transmission/transmissionTest",
-                extensionList: ["KHR_materials_transmission", "KHR_materials_ior"],
-                description: {
-                  ko: `다양한 투과율과 거칠기에 따른 굴절 효과를 테스트합니다.`,
-                  en: `Tests refraction effects based on various transmission rates and roughness.`
-                }
-              },
-              {
-                name: "TransmissionRoughnessTest",
-                path: "gltf/gltfExtensions/transmission/transmissionRoughnessTest",
-                extensionList: ["KHR_materials_transmission"],
-                description: {
-                  ko: `거친 표면을 가진 투명 재질의 흐림 효과를 테스트합니다.`,
-                  en: `Tests blurring effects on transparent materials with rough surfaces.`
-                }
-              },
-              {
-                name: "StainedGlassLamp",
-                path: "gltf/gltfExtensions/transmission/stainedGlassLamp",
-                extensionList: ["KHR_materials_transmission"],
-                description: {
-                  ko: `스테인드글라스 램프를 통해 색상이 있는 투과광을 보여줍니다.`,
-                  en: `Shows colored transmitted light through a stained glass lamp.`
-                }
-              },
-              {
-                name: "ChronographWatch",
-                path: "gltf/gltfExtensions/transmission/chronographWatch",
-                extensionList: ["KHR_materials_transmission", "KHR_materials_variants"],
-                description: {
-                  ko: `시계 유리의 투명도와 내부 디테일을 보여주는 고품질 모델입니다.`,
-                  en: `High-quality model showing watch glass transparency and internal details.`
-                }
-              },
-              {
-                name: "MosquitoInAmber",
-                path: "gltf/gltfExtensions/transmission/mosquitoInAmber",
-                extensionList: ["KHR_materials_transmission", "KHR_materials_volume", "KHR_materials_ior"],
-                description: {
-                  ko: `호박(Amber) 속에 갇힌 모기를 통해 투과, 굴절률(IOR), 볼륨 속성을 시연합니다.`,
-                  en: `A mosquito encased in amber, demonstrating the use of transmission, IOR, and volume properties.`
-                }
-              },
-              {
-                name: "CommercialRefrigerator",
-                path: "gltf/gltfExtensions/transmission/commercialRefrigerator",
-                extensionList: ["KHR_materials_transmission"],
-                description: {
-                  ko: `유리 문을 가진 상업용 냉장고 모델입니다.`,
-                  en: `Commercial refrigerator model with glass doors.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KHR_materials_volume",
-            list: [
-              {
-                name: "CompareIor",
-                path: "gltf/gltfExtensions/volume/compareIor",
-                extensionList: ["KHR_materials_ior"],
-                description: {
-                  ko: `굴절률(IOR)에 따른 빛의 굴절 차이를 비교합니다.`,
-                  en: `Compares light refraction differences based on Index of Refraction (IOR).`
-                }
-              },
-              {
-                name: "IORTestGrid",
-                path: "gltf/gltfExtensions/volume/IORTestGrid",
-                extensionList: ["KHR_materials_ior"],
-                description: {
-                  ko: `다양한 IOR 값에 따른 굴절 변화를 그리드로 테스트합니다.`,
-                  en: `Tests refraction changes based on various IOR values in a grid.`
-                }
-              },
-              {
-                name: "CompareVolume",
-                path: "gltf/gltfExtensions/volume/compareVolume",
-                extensionList: ["KHR_materials_volume"],
-                description: {
-                  ko: `볼륨(Volume) 흡수 및 산란 효과를 비교합니다.`,
-                  en: `Compares Volume absorption and scattering effects.`
-                }
-              },
-              {
-                name: "TransmissionThinwallTestGrid",
-                path: "gltf/gltfExtensions/volume/transmissionThinwallTestGrid",
-                extensionList: ["KHR_materials_transmission", "KHR_materials_volume"],
-                description: {
-                  ko: `얇은 벽(Thin-walled) 옵션 활성화 여부에 따른 투과 차이를 테스트합니다.`,
-                  en: `Tests transmission differences based on Thin-walled option activation.`
-                }
-              },
-              {
-                name: "AttenuationTest",
-                path: "gltf/gltfExtensions/volume/attenuationTest",
-                extensionList: ["KHR_materials_volume"],
-                description: {
-                  ko: `빛이 매질을 통과할 때의 감쇠(Attenuation) 거리와 색상을 테스트합니다.`,
-                  en: `Tests attenuation distance and color as light passes through a medium.`
-                }
-              },
-              {
-                name: "GlassVaseFlowers",
-                path: "gltf/gltfExtensions/volume/glassVaseFlowers",
-                extensionList: ["KHR_materials_transmission", "KHR_materials_volume", "KHR_materials_ior"],
-                description: {
-                  ko: `유리 꽃병과 물의 볼륨 효과를 보여주는 모델입니다.`,
-                  en: `Model showing volume effects of a glass vase and water.`
-                }
-              },
-              {
-                name: "GlassBrokenWindow",
-                path: "gltf/gltfExtensions/volume/glassBrokenWindow",
-                extensionList: ["KHR_materials_transmission", "KHR_materials_volume", "KHR_materials_ior"],
-                description: {
-                  ko: `깨진 유리창의 두께감과 굴절을 표현합니다.`,
-                  en: `Expresses the thickness and refraction of a broken window.`
-                }
-              },
-              {
-                name: "GlassHurricaneCandleHolder",
-                path: "gltf/gltfExtensions/volume/glassHurricaneCandleHolder",
-                extensionList: ["KHR_materials_transmission", "KHR_materials_volume", "KHR_materials_ior"],
-                description: {
-                  ko: `복잡한 유리 형태의 굴절과 반사를 보여주는 캔들 홀더입니다.`,
-                  en: `Candle holder showing refraction and reflection of complex glass shapes.`
-                }
-              },
-              {
-                name: "DragonAttenuation",
-                path: "gltf/gltfExtensions/volume/dragonAttenuation",
-                extensionList: ["KHR_materials_transmission", "KHR_materials_volume"],
-                description: {
-                  ko: `KHR_materials_transmission과 KHR_materials_volume을 사용하여 색유리와 같은 객체를 표현합니다.`,
-                  en: `Showcases KHR_materials_transmission and KHR_materials_volume, creating an object that resembles colored glass.`
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    name: "PostEffect",
-    list: [
-      {
-        name: "Convolution",
-        path: "postEffect/convolution",
-        description: {
-          ko: `컨볼루션 필터 효과를 시연하는 예제입니다.`,
-          en: `An example demonstrating convolution filter effects.`
-        }
-      },
-      {
-        name: "FilmGrain",
-        path: "postEffect/filmGrain",
-        description: {
-          ko: `필름 그레인 효과를 시연하는 예제입니다.`,
-          en: `An example demonstrating film grain effects.`
-        }
-      },
-      {
-        name: "OldBloom",
-        path: "postEffect/oldBloom",
-        description: {
-          ko: `고전적인 블룸 효과를 시연하는 예제입니다.`,
-          en: `An example demonstrating classic bloom effects.`
-        }
-      },
-      {
-        name: "Sharpen",
-        path: "postEffect/sharpen",
-        description: {
-          ko: `선명도(Sharpen) 효과를 시연하는 예제입니다.`,
-          en: `An example demonstrating sharpen effects.`
-        }
-      },
-      {
-        name: "Adjustments",
-        list: [
-          {
-            name: "Grayscale",
-            path: "postEffect/adjustments/grayscale",
-            description: {
-              ko: `그레이스케일 색상 보정 효과 예제입니다.`,
-              en: `Example of Grayscale color adjustment effect.`
-            }
-          },
-          {
-            name: "Invert",
-            path: "postEffect/adjustments/invert",
-            description: {
-              ko: `색상 반전 효과 예제입니다.`,
-              en: `Example of Invert color adjustment effect.`
-            }
-          },
-          {
-            name: "ColorBalance",
-            path: "postEffect/adjustments/colorBalance",
-            description: {
-              ko: `컬러 밸런스 색상 보정 효과 예제입니다.`,
-              en: `Example of Color Balance color adjustment effect.`
-            }
-          },
-          {
-            name: "ColorTemperatureTint",
-            path: "postEffect/adjustments/colorTemperatureTint",
-            description: {
-              ko: `색온도 및 틴트 색상 보정 효과 예제입니다.`,
-              en: `Example of Color Temperature & Tint color adjustment effect.`
-            }
-          },
-          {
-            name: "BrightnessContrast",
-            path: "postEffect/adjustments/brightnessContrast",
-            description: {
-              ko: `밝기 및 대비 색상 보정 효과 예제입니다.`,
-              en: `Example of Brightness & Contrast color adjustment effect.`
-            }
-          },
-          {
-            name: "HueSaturation",
-            path: "postEffect/adjustments/hueSaturation",
-            description: {
-              ko: `색조 및 채도 색상 보정 효과 예제입니다.`,
-              en: `Example of Hue & Saturation color adjustment effect.`
-            }
-          },
-          {
-            name: "Threshold",
-            path: "postEffect/adjustments/threshold",
-            description: {
-              ko: `임계값(Threshold) 색상 보정 효과 예제입니다.`,
-              en: `Example of Threshold color adjustment effect.`
-            }
-          },
-          {
-            name: "Vibrance",
-            path: "postEffect/adjustments/vibrance",
-            description: {
-              ko: `활기(Vibrance) 색상 보정 효과 예제입니다.`,
-              en: `Example of Vibrance color adjustment effect.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Blur",
-        list: [
-          {
-            name: "Blur",
-            path: "postEffect/blur/blur",
-            description: {
-              ko: `기본 블러 효과 예제입니다.`,
-              en: `Example of Basic Blur effect.`
-            }
-          },
-          {
-            name: "BlurX",
-            path: "postEffect/blur/blurX",
-            description: {
-              ko: `가로 방향 블러 효과 예제입니다.`,
-              en: `Example of Horizontal Blur effect.`
-            }
-          },
-          {
-            name: "BlurY",
-            path: "postEffect/blur/blurY",
-            description: {
-              ko: `세로 방향 블러 효과 예제입니다.`,
-              en: `Example of Vertical Blur effect.`
-            }
-          },
-          {
-            name: "DirectionalBlur",
-            path: "postEffect/blur/directionalBlur",
-            description: {
-              ko: `방향성 블러 효과 예제입니다.`,
-              en: `Example of Directional Blur effect.`
-            }
-          },
-          {
-            name: "GaussianBlur",
-            path: "postEffect/blur/gaussianBlur",
-            description: {
-              ko: `가우시안 블러 효과 예제입니다.`,
-              en: `Example of Gaussian Blur effect.`
-            }
-          },
-          {
-            name: "RadialBlur",
-            path: "postEffect/blur/radialBlur",
-            description: {
-              ko: `방사형 블러 효과 예제입니다.`,
-              en: `Example of Radial Blur effect.`
-            }
-          },
-          {
-            name: "ZoomBlur",
-            path: "postEffect/blur/zoomBlur",
-            description: {
-              ko: `줌 블러 효과 예제입니다.`,
-              en: `Example of Zoom Blur effect.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Lens",
-        list: [
-          {
-            name: "LensDistortion",
-            path: "postEffect/lens/lensDistortion",
-            description: {
-              ko: `렌즈 왜곡 효과 예제입니다.`,
-              en: `Example of Lens Distortion effect.`
-            }
-          },
-          {
-            name: "ChromaticAberration",
-            path: "postEffect/lens/chromaticAberration",
-            description: {
-              ko: `색수차 효과 예제입니다.`,
-              en: `Example of Chromatic Aberration effect.`
-            }
-          },
-          {
-            name: "DepthOfField",
-            path: "postEffect/lens/dof",
-            description: {
-              ko: `피사계 심도(DoF) 효과 예제입니다.`,
-              en: `Example of Depth of Field effect.`
-            }
-          },
-          {
-            name: "Vignetting",
-            path: "postEffect/lens/vignetting",
-            description: {
-              ko: `비네팅 효과 예제입니다.`,
-              en: `Example of Vignetting effect.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Fog",
-        list: [
-          {
-            name: "Fog",
-            path: "postEffect/fog/fog",
-            description: {
-              ko: `안개 효과를 시연하는 예제입니다.`,
-              en: `An example demonstrating fog effects.`
-            }
-          },
-          {
-            name: "HeightFog",
-            path: "postEffect/fog/heightFog",
-            description: {
-              ko: `높이 기반 안개 효과를 시연하는 예제입니다.`,
-              en: `An example demonstrating height-based fog effects.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Screen Space Reflection",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "SSR",
-            path: "postEffect/ssr",
-            description: {
-              ko: `화면 공간 반사(SSR) 효과를 시연하는 예제입니다.`,
-              en: `An example demonstrating Screen Space Reflection (SSR) effects.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Screen Space Ambient Occlusion",
-        list: [
-          {
-            name: "SSAO",
-            path: "postEffect/ssao",
-            description: {
-              ko: `화면 공간 앰비언트 오클루전(SSAO) 효과를 시연하는 예제입니다.`,
-              en: `An example demonstrating Screen Space Ambient Occlusion (SSAO) effects.`
-            }
-          }
-        ]
-      }
-    ]
-  },
-  {
-    name: "2D",
-    list: [
-      {
-        name: "Hello RedGPU - 2D Mode",
-        path: "2d/helloWorld2D",
-        description: {
-          ko: `RedGPU의 2D 모드 초기화 샘플입니다.`,
-          en: `Sample of RedGPU's 2D mode initialization.`
-        }
-      },
-      {
-        name: "View2D",
-        list: [
-          {
-            name: "Multi View (2D + 2D)",
-            path: "2d/view/multiView",
-            description: {
-              ko: `여러 개의 2D View를 사용하는 멀티 뷰 예제입니다.`,
-              en: `Multi-view example using multiple 2D Views.`
-            }
-          },
-          {
-            name: "Multi View (3D + 2D)",
-            path: "2d/view/multiViewWith3D",
-            description: {
-              ko: `3D View와 2D View를 함께 사용하는 복합 멀티 뷰 예제입니다.`,
-              en: `Complex multi-view example using both 3D View and 2D View.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Sprite2D",
-        list: [
-          {
-            name: "Basic Sprite2D",
-            path: "2d/sprite2D/basic",
-            description: {
-              ko: `기본적인 Sprite2D 객체 사용법을 보여주는 예제입니다.`,
-              en: `An example showing basic usage of Sprite2D object.`
-            }
-          },
-          {
-            name: "Hierarchy Sprite2D",
-            path: "2d/sprite2D/hierarchy",
-            description: {
-              ko: `2D 공간에서 Sprite2D의 계층 구조를 구성하는 예제입니다.`,
-              en: `An example constructing a hierarchy of Sprite2D in 2D space.`
-            }
-          },
-          {
-            name: "Pivot Sprite2D",
-            path: "2d/sprite2D/pivot",
-            description: {
-              ko: `Sprite2D의 피벗(중심점)을 변경하여 회전 및 위치를 제어하는 예제입니다.`,
-              en: `An example controlling rotation and position by changing the pivot of Sprite2D.`
-            }
-          },
-          {
-            name: "Child Methods",
-            path: "2d/sprite2D/childMethod",
-            description: {
-              ko: `2D 객체의 자식 노드를 관리하는 다양한 메서드를 시연하는 예제입니다.`,
-              en: `An example demonstrating various methods for managing child nodes of 2D objects.`
-            }
-          }
-        ]
-      },
-      {
-        name: "SpriteSheet2D",
-        list: [
-          {
-            name: "Basic SpriteSheet2D",
-            path: "2d/spriteSheet2D/basic",
-            description: {
-              ko: `스프라이트 시트 애니메이션을 재생하는 기본적인 SpriteSheet2D 예제입니다.`,
-              en: `Basic SpriteSheet2D example playing sprite sheet animation.`
-            }
-          }
-        ]
-      },
-      {
-        name: "TextField2D",
-        list: [
-          {
-            name: "Basic TextField2D",
-            path: "2d/textField2D/basic",
-            description: {
-              ko: `2D 텍스트를 렌더링하는 TextField2D 객체의 기본 사용법 예제입니다.`,
-              en: `Basic usage example of TextField2D object for rendering 2D text.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Group2D",
-        list: [
-          {
-            name: "Basic Group2D",
-            path: "2d/group2D/basic",
-            description: {
-              ko: `2D 객체들을 그룹화하여 관리하는 Group2D 예제입니다.`,
-              en: `Group2D example managing 2D objects by grouping them.`
-            }
-          }
-        ]
-      },
-      {
-        name: "2D Object Opacity",
-        list: [
-          {
-            name: "2D Object Opacity",
-            path: "2d/opacity/basic",
-            description: {
-              ko: `2D 객체의 투명도(Opacity)를 조절하는 예제입니다.`,
-              en: `An example adjusting the opacity of 2D objects.`
-            }
-          }
-        ]
-      },
-      {
-        name: "2D Object BlendMode",
-        list: [
-          {
-            name: "BlendMode",
-            path: "2d/blendMode/basic",
-            description: {
-              ko: `2D 객체의 다양한 블렌딩 모드를 테스트하는 예제입니다.`,
-              en: `An example testing various blending modes of 2D objects.`
-            }
-          }
-        ]
-      },
-      {
-        name: "2D Tint",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "Tint Basic",
-            path: "2d/tint/basic",
-            description: {
-              ko: `2D 객체에 색상을 입히는 기본 틴트 예제입니다.`,
-              en: `Basic tint example applying color to 2D objects.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Tint Objects",
-            path: "2d/tint/2dObjectTint",
-            description: {
-              ko: `다양한 2D 객체에 틴트를 적용하는 예제입니다.`,
-              en: `An example applying tint to various 2D objects.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Interaction",
-        list: [
-          {
-            name: "MouseEvent",
-            list: [
-              {
-                name: "Sprite2D",
-                path: "2d/interaction/mouseEvent/sprite2D",
-                description: {
-                  ko: `Sprite2D에 대한 마우스 이벤트를 처리하는 예제입니다.`,
-                  en: `An example handling mouse events on Sprite2D.`
-                }
-              },
-              {
-                name: "SpriteSheet2D",
-                path: "2d/interaction/mouseEvent/spriteSheet2D",
-                description: {
-                  ko: `SpriteSheet2D에 대한 마우스 이벤트를 처리하는 예제입니다.`,
-                  en: `An example handling mouse events on SpriteSheet2D.`
-                }
-              },
-              {
-                name: "TextField2D",
-                path: "2d/interaction/mouseEvent/textField2D",
-                description: {
-                  ko: `TextField2D에 대한 마우스 이벤트를 처리하는 예제입니다.`,
-                  en: `An example handling mouse events on TextField2D.`
-                }
-              }
-            ]
-          },
-          {
-            name: "KeyboardEvent",
-            list: [
-              {
-                name: "Keyboard Interaction",
-                path: "2d/interaction/keyboardEvent",
-                description: {
-                  ko: `keyboardKeyBuffer를 사용하여 2D 환경에서 객체를 제어하는 방법을 보여줍니다.`,
-                  en: `Demonstrates how to control an object in a 2D environment using keyboardKeyBuffer.`
-                }
-              }
-            ]
-          }
-        ]
-      }
-      // {
-      //     name: 'Line2D',
-      //     list: [
-      //         {
-      //             name: 'Linear Type',
-      //             path: '2d/line2D/linear',
-      //             description: {
-      //                 ko: ``, 
-      //                 en: ``
-      //             },
-      //         },
-      //         {
-      //             name: 'TODO - Bezier Type',
-      //             // path: '2d/line2D/bezier',
-      //             description: {
-      //                 ko: ``, 
-      //                 en: ``
-      //             },
-      //         },
-      //         {
-      //             name: 'TODO - CatmullRom Type',
-      //             // path: '2d/line2D/catmullRom',
-      //             description: {
-      //                 ko: ``, 
-      //                 en: ``
-      //             },
-      //         },
-      //     ]
-      // },
-      // {
-      // 	name: '2D CompositeMode',
-      // 	list: [
-      // 		{
-      // 			name: 'CompositeMode',
-      // 			path: '2d/compositeMode/basic',
-      // 			description: {
-      // 				ko: ``, 
-      // 				en: ``
-      // 			},
-      // 		},
-      // 	]
-      // },
-    ]
-  },
-  {
-    name: "Physics",
-    experimental: true,
-    list: [
-      {
-        name: "Fundamentals",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "Basic Physics",
-            path: "physics/basic",
-            description: {
-              ko: `Rapier 물리 엔진을 사용한 기본적인 물리 시뮬레이션 예제입니다.`,
-              en: `Basic physics simulation example using the Rapier physics engine.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Shapes & Materials",
-            path: "physics/shapes",
-            description: {
-              ko: `다양한 충돌체 형상(Box, Sphere, Cylinder, Capsule)과 탄성/마찰 설정을 테스트합니다.`,
-              en: `Tests various collider shapes (Box, Sphere, Cylinder, Capsule) and restitution/friction settings.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Kinematic Interaction",
-            path: "physics/kinematic",
-            description: {
-              ko: `코드에 의해 제어되는 키네마틱 객체가 동적 객체들과 상호작용하는 모습을 보여줍니다.`,
-              en: `Demonstrates how kinematic objects controlled by code interact with dynamic objects.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Mesh Collider",
-            path: "physics/meshCollider",
-            description: {
-              ko: `커스텀 기하구조를 물리 충돌체로 변환하는 방법을 테스트합니다.`,
-              en: `Tests how to convert custom geometries into physics engine colliders.`
-            }
-          },
-          {
-            experimental: true,
-            name: "HeightField",
-            path: "physics/heightField",
-            description: {
-              ko: `높이맵 데이터를 사용하여 지형과 같은 복잡한 표면의 물리 충돌을 구현하는 방법을 테스트합니다.`,
-              en: `Tests how to implement physics collisions for complex surfaces like terrain using heightmap data.`
-            }
-          },
-          {
-            experimental: true,
-            name: "GLTF Physics",
-            path: "physics/gltfPhysics",
-            description: {
-              ko: `로드된 GLTF 모델의 복잡한 계층 구조와 메쉬 데이터를 분석하여 자동으로 물리 충돌체를 생성하는 방법을 테스트합니다.`,
-              en: `Tests how to automatically generate physics colliders by analyzing the complex hierarchy and mesh data of a loaded GLTF model.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Interaction & Events",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "Raycasting Interaction",
-            path: "physics/raycast",
-            description: {
-              ko: `마우스 클릭 지점에서 광선을 쏘아 물리 객체를 검출하고, 힘을 가해 밀어내는 등의 상호작용을 구현합니다.`,
-              en: `Casts rays from mouse click positions to detect physics objects and implements interactions like pushing them with force.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Collision Events",
-            path: "physics/collisionEvents",
-            description: {
-              ko: `물체 간의 충돌 이벤트를 감지하여 실시간으로 색상을 변경하는 등 물리 연동 로직을 테스트합니다.`,
-              en: `Tests physics integration logic by detecting collision events between objects and changing colors in real-time.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Triggers & Sensors",
-            path: "physics/triggers",
-            description: {
-              ko: `물체와 물리적인 충돌은 발생하지 않으나 영역 진입을 감지하는 센서(Trigger) 기능을 테스트합니다.`,
-              en: `Tests the sensor (Trigger) function that detects area entry without physical collision.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Collision Filtering",
-            path: "physics/collisionFiltering",
-            description: {
-              ko: `Bitmask 기반의 충돌 그룹 설정을 통해 특정 객체들끼리만 선택적으로 충돌하도록 제어하는 고급 물리 기술을 구현합니다.`,
-              en: `Implements advanced physics techniques to selectively control collisions between specific objects through Bitmask-based collision group settings.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Joints & Constraints",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "Basic Joints",
-            path: "physics/joints",
-            description: {
-              ko: `물체들을 서로 연결하는 관절(Joint) 기능을 사용하여 체인이나 진자 운동과 같은 복잡한 물리 구조를 구현합니다.`,
-              en: `Implements complex physical structures like chains or pendulums using joints to connect objects together.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Revolute Joints & Motors",
-            path: "physics/revoluteJoint",
-            description: {
-              ko: `특정 축을 기준으로 회전하는 관절(Revolute Joint)과 모터 기능을 사용하여 풍차나 선풍기와 같은 회전 장치를 구현합니다.`,
-              en: `Implements rotating devices like windmills or fans using revolute joints that rotate around a specific axis and motor functions.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Prismatic Joints & Sliders",
-            path: "physics/prismaticJoint",
-            description: {
-              ko: `직선 방향으로만 왕복 이동이 가능한 프리즈매틱 관절(Prismatic Joint)을 사용하여 승강기나 슬라이더 장치를 구현합니다.`,
-              en: `Implements elevators or slider devices using prismatic joints that allow reciprocal movement only in a straight line.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Spring Joint",
-            path: "physics/springJoint",
-            description: {
-              ko: `스프링 조인트를 사용하여 탄성 있는 연결을 구현하는 방법을 테스트합니다.`,
-              en: `Tests how to implement elastic connections using spring joints.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Soft Body",
-            path: "physics/softBody",
-            description: {
-              ko: `다수의 노드를 스프링으로 연결하여 젤리와 같은 소프트 바디 효과를 구현합니다.`,
-              en: `Implements a jelly-like soft body effect by connecting multiple nodes with springs.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Compound Shapes",
-            path: "physics/compound",
-            description: {
-              ko: `여러 개의 지오메트리를 결합하여 하나의 복잡한 물리 객체를 만드는 복합 형상 기능을 테스트합니다.`,
-              en: `Tests the compound shape function that combines multiple geometries to create a single complex physics object.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Simulation & Systems",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "Surface Velocity (Conveyor)",
-            path: "physics/surfaceVelocity",
-            description: {
-              ko: `컨베이어 벨트와 같이 표면이 움직이는 물체를 시뮬레이션합니다. 물체가 닿았을 때 특정 방향으로 힘을 가하여 이동시킵니다.`,
-              en: `Simulates objects with moving surfaces like conveyor belts. Applies force to move objects in a specific direction when they make contact.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Buoyancy Basics",
-            path: "physics/buoyancy",
-            description: {
-              ko: `물속에서 물체가 떠오르는 부력과 유체 저항을 시뮬레이션합니다. 잠긴 깊이에 따라 상향 힘을 조절합니다.`,
-              en: `Simulates buoyancy and fluid resistance for objects in water. Adjusts upward force based on submerged depth.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Ragdoll System",
-            path: "physics/ragdoll",
-            description: {
-              ko: `인간형 캐릭터의 뼈대를 관절(Joint)로 연결하여, 중력에 의해 자연스럽게 쓰러지는 래그돌 물리 효과를 시뮬레이션합니다.`,
-              en: `Simulates ragdoll physics where a humanoid skeleton is connected with joints and falls naturally under gravity.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Character Controller",
-            path: "physics/characterController",
-            description: {
-              ko: `지면을 걷고 계단을 오르는 1인칭/3인칭 캐릭터 이동의 기초를 구현합니다.`,
-              en: `Implements the basics of 1st/3rd person character movement walking on the ground and climbing stairs.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Advanced Character Controller",
-            path: "physics/advancedCharacterController",
-            description: {
-              ko: `관성 이동, 공중 제어, 이중 점프 등 게임적인 조작감이 가미된 고급 캐릭터 컨트롤러를 구현합니다.`,
-              en: `Implements an advanced character controller with game-like controls such as inertial movement, air control, and double jumping.`
-            }
-          }
-        ]
-      },
-      {
-        name: "Performance & Stress Test",
-        experimental: true,
-        list: [
-          {
-            experimental: true,
-            name: "Galton Board",
-            path: "physics/galton",
-            description: {
-              ko: `수많은 구슬이 핀 사이를 떨어지며 통계적 분포를 형성하는 과정을 시뮬레이션합니다.`,
-              en: `Simulates the process where numerous balls fall between pins and form a statistical distribution.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Physics Bowling",
-            path: "physics/bowling",
-            description: {
-              ko: `고속으로 이동하는 볼과 핀 사이의 충돌 및 연쇄 반응을 테스트합니다. CCD(Continuous Collision Detection) 기술이 적용되었습니다.`,
-              en: `Tests collisions and chain reactions between a fast-moving ball and pins. CCD (Continuous Collision Detection) technology is applied.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Impulse Explosion",
-            path: "physics/explosion",
-            description: {
-              ko: `폭발 지점으로부터 주변 객체들에 충격량을 가하여 날려버리는 물리 효과를 구현합니다.`,
-              en: `Implements physics effects where impulse is applied from an explosion point to blow away surrounding objects.`
-            }
-          },
-          {
-            experimental: true,
-            name: "Ultimate Stress Test",
-            path: "physics/stressTest",
-            description: {
-              ko: `수천 개의 물리 객체를 동시에 시뮬레이션하여 엔진의 한계 성능을 테스트합니다. 휴면(Sleep) 모드 활성화를 통한 최적화 효과를 확인합니다.`,
-              en: `Tests the engine's performance limits by simulating thousands of physics objects simultaneously. Demonstrates optimization through Sleep mode.`
-            }
-          }
-        ]
-      }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: labelWrapperStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: labelStyle, children: [
+          label,
+          " ",
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "small",
+            {
+              style: countStyle,
+              children: [
+                "(",
+                formatNumber(stats.count, 0),
+                ")"
+              ]
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: memoryStyle, children: formatBytes(stats.videoMemory) })
+      ] })
     ]
   }
-];
-Object.freeze(ExampleList);
-const findCurrentExample = (pathname) => {
-  const normalizedPath = pathname.replace(/\/$/, "").replace(/\/index\.html$/, "").replace(/.*\/examples\//, "");
-  const search = (list) => {
-    for (const item of list) {
-      if (item.path === normalizedPath) return item;
-      if (item.list) {
-        const found = search(item.list);
-        if (found) return found;
+) });
+const headerStyle$2 = {
+  padding: "8px 12px",
+  background: "#222",
+  cursor: "pointer",
+  fontSize: "13px",
+  display: "flex",
+  alignItems: "center",
+  borderLeft: `2px solid ${THEME.colors.primary}`,
+  transition: "background 0.2s"
+};
+const labelWrapperStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  flex: 1,
+  alignItems: "center"
+};
+const labelStyle = {
+  fontWeight: "bold",
+  color: "#eee"
+};
+const countStyle = {
+  color: "#888",
+  fontWeight: "normal",
+  marginLeft: "4px"
+};
+const memoryStyle = {
+  fontSize: "11px",
+  color: THEME.colors.primary,
+  fontWeight: "bold"
+};
+const TextureResourcesView = ({ onPreview }) => {
+  var _a, _b, _c;
+  const { resourceStats, redGPUContext } = useInspectorStore();
+  const [expanded, setExpanded] = reactExports.useState({});
+  const toggleExpanded = (key) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+  if (!redGPUContext) return null;
+  const totalMemory = (((_a = resourceStats.bitmapTexture) == null ? void 0 : _a.videoMemory) || 0) + (((_b = resourceStats.cubeTexture) == null ? void 0 : _b.videoMemory) || 0) + (((_c = resourceStats.hdrTexture) == null ? void 0 : _c.videoMemory) || 0);
+  const renderTextureSection = (type, label, stats) => /* @__PURE__ */ jsxRuntimeExports.jsxs(React$2.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ResourceSummary,
+      {
+        label,
+        stats,
+        isExpanded: !!expanded[type],
+        onToggle: () => toggleExpanded(type)
+      }
+    ),
+    expanded[type] && /* @__PURE__ */ jsxRuntimeExports.jsx(TextureDetailList, { type, redGPUContext, onPreview })
+  ] }, type);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Texture Resources" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", color: "#fdb48d" }, children: formatBytes(totalMemory) })
+  ] }), children: [
+    renderTextureSection("bitmapTexture", "Bitmap Textures", resourceStats.bitmapTexture),
+    renderTextureSection("cubeTexture", "Cube Textures", resourceStats.cubeTexture),
+    renderTextureSection("hdrTexture", "HDR Textures", resourceStats.hdrTexture)
+  ] });
+};
+const TextureDetailList = ({ type, redGPUContext, onPreview }) => {
+  const rm = redGPUContext.resourceManager;
+  let items = [];
+  switch (type) {
+    case "bitmapTexture":
+      items = Array.from(rm.managedBitmapTextureState.table.values());
+      break;
+    case "cubeTexture":
+      items = Array.from(rm.managedCubeTextureState.table.values());
+      break;
+    case "hdrTexture":
+      items = Array.from(rm.managedHDRTextureState.table.values());
+      break;
+  }
+  if (items.length === 0) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noItemStyle$1, children: "No textures found." });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle$2, children: items.map((item, idx) => {
+    var _a, _b, _c, _d;
+    const tex = item.texture;
+    const gpuTex = tex == null ? void 0 : tex.gpuTexture;
+    const isBlob = item.src && item.src.startsWith("blob:") || item.srcList && ((_a = item.srcList[0]) == null ? void 0 : _a.startsWith("blob:"));
+    const fileName = isBlob ? "BLOB" : item.src ? item.src.split("/").pop() : ((_c = (_b = item.srcList) == null ? void 0 : _b[0]) == null ? void 0 : _c.split("/").pop()) || null;
+    const originalPath = item.src || (((_d = item.srcList) == null ? void 0 : _d[0]) ? item.srcList[0] + "..." : item.cacheKey);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        style: textureItemStyle$1,
+        onClick: () => onPreview(item, type),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle$2, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle$2, children: [
+            fileName && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle$2, children: fileName }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: pathStyle, title: originalPath, children: originalPath }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle$2, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "UUID: ",
+              item.uuid
+            ] }) }),
+            gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle$2, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Dim: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.dimension })
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Layers: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "b",
+                    {
+                      style: { color: "#eee" },
+                      children: formatNumber(gpuTex.depthOrArrayLayers, 0)
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                  "Samples: ",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.sampleCount })
+                ] })
+              ] }),
+              gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle$2, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Usage: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "b",
+                  {
+                    style: { color: "#eee" },
+                    children: formatTextureUsage(gpuTex.usage)
+                  }
+                )
+              ] }) })
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailRightContainerStyle$2, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "4px", alignItems: "center", marginBottom: "2px" }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle$1, children: [
+                "Use: ",
+                formatNumber(item.useNum, 0)
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$2, children: formatBytes((tex == null ? void 0 : tex.videoMemorySize) || 0) })
+            ] }),
+            gpuTex && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+              ...detailInfoStyle$2,
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: "0",
+              opacity: 0.9
+            }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#fdb48d" }, children: gpuTex.format }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: {
+                color: "#eee",
+                fontWeight: "bold"
+              }, children: [
+                formatNumber(gpuTex.width, 0),
+                "x",
+                formatNumber(gpuTex.height, 0)
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "span",
+                {
+                  style: { fontWeight: "bold" },
+                  children: [
+                    "Mip: ",
+                    formatNumber(gpuTex.mipLevelCount, 0)
+                  ]
+                }
+              )
+            ] })
+          ] })
+        ] })
+      },
+      item.uuid || idx
+    );
+  }) });
+};
+const detailListStyle$2 = {
+  padding: "4px 0 4px 12px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
+  borderLeft: "1px solid #333",
+  marginLeft: "6px",
+  marginBottom: "8px"
+};
+const textureItemStyle$1 = {
+  fontSize: "11px",
+  color: "#888",
+  background: "#1a1a1a",
+  padding: "8px 12px",
+  borderRadius: "2px",
+  lineHeight: "1.4",
+  borderBottom: "1px solid #222",
+  cursor: "pointer",
+  transition: "background 0.2s"
+};
+const detailHeaderStyle$2 = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: "8px"
+};
+const detailLeftContainerStyle$2 = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "2px",
+  flex: 1,
+  minWidth: 0
+};
+const detailNameStyle$2 = {
+  color: "#ddd",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  fontWeight: "600",
+  fontSize: "12px",
+  marginBottom: "2px"
+};
+const pathStyle = {
+  fontSize: "9px",
+  color: "#888",
+  display: "block",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  marginBottom: "4px"
+};
+const detailInfoStyle$2 = {
+  display: "flex",
+  gap: "12px",
+  opacity: 0.6,
+  fontSize: "9px"
+};
+const detailRightContainerStyle$2 = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  gap: "4px",
+  minWidth: "90px",
+  flexShrink: 0
+};
+const useNumStyle$1 = {
+  fontSize: "10px",
+  opacity: 0.8,
+  color: "#fdb48d",
+  background: "rgba(255,255,255,0.1)",
+  padding: "2px 6px",
+  borderRadius: "3px",
+  whiteSpace: "nowrap",
+  fontWeight: "bold"
+};
+const detailMemoryStyle$2 = {
+  color: "#fdb48d",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+  fontSize: "12px"
+};
+const noItemStyle$1 = {
+  padding: "8px 16px",
+  fontSize: "10px",
+  color: "#666",
+  fontStyle: "italic"
+};
+const BufferResourcesView = ({ onPreview }) => {
+  var _a, _b, _c, _d, _e;
+  const { resourceStats, redGPUContext } = useInspectorStore();
+  const [expanded, setExpanded] = reactExports.useState({});
+  const toggleExpanded = (key) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+  if (!redGPUContext) return null;
+  const totalMemory = (((_a = resourceStats.uniformBuffer) == null ? void 0 : _a.videoMemory) || 0) + (((_b = resourceStats.vertexBuffer) == null ? void 0 : _b.videoMemory) || 0) + (((_c = resourceStats.indexBuffer) == null ? void 0 : _c.videoMemory) || 0) + (((_d = resourceStats.storageBuffer) == null ? void 0 : _d.videoMemory) || 0) + (((_e = resourceStats.gpuBuffer) == null ? void 0 : _e.videoMemory) || 0);
+  const renderBufferSection = (type, label, stats) => /* @__PURE__ */ jsxRuntimeExports.jsxs(React$2.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ResourceSummary,
+      {
+        label,
+        stats,
+        isExpanded: !!expanded[type],
+        onToggle: () => toggleExpanded(type)
+      }
+    ),
+    expanded[type] && /* @__PURE__ */ jsxRuntimeExports.jsx(BufferDetailList, { type, redGPUContext, onPreview })
+  ] }, type);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Buffer Resources" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", color: THEME.colors.primary }, children: formatBytes(totalMemory) })
+  ] }), children: [
+    renderBufferSection("uniformBuffer", "Uniform Buffers", resourceStats.uniformBuffer),
+    renderBufferSection("vertexBuffer", "Vertex Buffers", resourceStats.vertexBuffer),
+    renderBufferSection("indexBuffer", "Index Buffers", resourceStats.indexBuffer),
+    renderBufferSection("storageBuffer", "Storage Buffers", resourceStats.storageBuffer),
+    renderBufferSection("gpuBuffer", "Raw GPU Buffers", resourceStats.gpuBuffer)
+  ] });
+};
+const BufferDetailList = ({ type, redGPUContext, onPreview }) => {
+  const rm = redGPUContext.resourceManager;
+  let items = [];
+  switch (type) {
+    case "uniformBuffer":
+      items = Array.from(rm.managedUniformBufferState.table.values());
+      break;
+    case "vertexBuffer":
+      items = Array.from(rm.managedVertexBufferState.table.values());
+      break;
+    case "indexBuffer":
+      items = Array.from(rm.managedIndexBufferState.table.values());
+      break;
+    case "storageBuffer":
+      items = Array.from(rm.managedStorageBufferState.table.values());
+      break;
+    case "gpuBuffer": {
+      const gpuBufferMap = rm.resources.get("GPUBuffer");
+      if (gpuBufferMap) {
+        items = Array.from(gpuBufferMap.entries()).map(([key, buffer]) => ({
+          uuid: key,
+          label: buffer.label || key,
+          size: buffer.size,
+          usage: buffer.usage,
+          isRaw: true,
+          gpuBuffer: buffer
+          // Pass the instance for readback
+        }));
+      }
+      break;
+    }
+  }
+  if (items.length === 0) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: noItemStyle, children: "No buffers found." });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle$1, children: items.map((item, idx) => {
+    if (item.isRaw) {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          style: detailItemStyle,
+          onClick: () => onPreview(item, type),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle$1, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle$1, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailNameStyle$1, children: item.label }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "UUID: ",
+                item.uuid
+              ] }) }),
+              item.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle$1, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Usage: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatBufferUsage(item.usage) })
+              ] }) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$1, children: formatBytes(item.size) }) })
+          ] })
+        },
+        item.uuid || idx
+      );
+    } else {
+      const buf = item.buffer;
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          style: {
+            ...detailItemStyle,
+            borderLeft: type === "uniformBuffer" ? `2px solid ${THEME.colors.primary}` : "none",
+            cursor: "pointer"
+          },
+          onClick: () => onPreview(item, type),
+          children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle$1, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle$1, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "span",
+                {
+                  style: detailNameStyle$1,
+                  children: item.label || (buf == null ? void 0 : buf.label) || (buf == null ? void 0 : buf.name) || "Unnamed"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "UUID: ",
+                item.uuid
+              ] }) }),
+              (buf == null ? void 0 : buf.usage) !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle$1, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+                "Usage: ",
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "b",
+                  {
+                    style: { color: "#eee" },
+                    children: formatBufferUsage(buf.usage)
+                  }
+                )
+              ] }) })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+              display: "flex",
+              gap: "4px",
+              alignItems: "center",
+              marginBottom: "2px"
+            }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: useNumStyle, children: [
+                "Use: ",
+                formatNumber(item.useNum, 0)
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle$1, children: formatBytes((buf == null ? void 0 : buf.size) || 0) })
+            ] }) })
+          ] })
+        },
+        item.uuid || idx
+      );
+    }
+  }) });
+};
+const detailListStyle$1 = {
+  padding: "4px 0 4px 12px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
+  borderLeft: "1px solid #333",
+  marginLeft: "6px",
+  marginBottom: "8px"
+};
+const detailItemStyle = {
+  fontSize: "11px",
+  color: "#888",
+  background: "#1a1a1a",
+  padding: "8px 12px",
+  borderRadius: "2px",
+  lineHeight: "1.4",
+  borderBottom: "1px solid #222"
+};
+const detailHeaderStyle$1 = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: "8px"
+};
+const detailLeftContainerStyle$1 = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "2px",
+  flex: 1,
+  minWidth: 0
+};
+const detailNameStyle$1 = {
+  color: "#ddd",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  fontWeight: "600",
+  fontSize: "12px",
+  marginBottom: "2px"
+};
+const detailInfoStyle$1 = {
+  display: "flex",
+  gap: "12px",
+  opacity: 0.6,
+  fontSize: "9px"
+};
+const detailRightContainerStyle$1 = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  gap: "4px",
+  minWidth: "90px",
+  flexShrink: 0
+};
+const detailMemoryStyle$1 = {
+  color: THEME.colors.primary,
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+  fontSize: "12px"
+};
+const useNumStyle = {
+  fontSize: "10px",
+  opacity: 0.8,
+  color: THEME.colors.primary,
+  background: "rgba(255,255,255,0.1)",
+  padding: "2px 6px",
+  borderRadius: "3px",
+  whiteSpace: "nowrap",
+  fontWeight: "bold"
+};
+const noItemStyle = {
+  padding: "8px 16px",
+  fontSize: "10px",
+  color: "#666",
+  fontStyle: "italic"
+};
+function calculateTextureByteSize(texture) {
+  const descriptor = {
+    size: [texture.width, texture.height, texture.depthOrArrayLayers],
+    format: texture.format,
+    sampleCount: texture.sampleCount,
+    usage: texture.usage
+  };
+  const bytesPerTexel = getTextureFormatByteSize(descriptor.format);
+  const texelCount = descriptor.size[0] * descriptor.size[1] * (descriptor.size[2] || 1);
+  const sampleCount = descriptor.sampleCount ? descriptor.sampleCount : 1;
+  return bytesPerTexel * texelCount * sampleCount;
+}
+function getTextureFormatByteSize(format) {
+  switch (format) {
+    case "r8unorm":
+    case "r8snorm":
+    case "r8uint":
+    case "r8sint":
+      return 1;
+    case "r16uint":
+    case "r16sint":
+    case "r16float":
+    case "rg8unorm":
+    case "rg8snorm":
+    case "rg8uint":
+    case "rg8sint":
+      return 2;
+    case "r32uint":
+    case "r32sint":
+    case "r32float":
+    case "rg16uint":
+    case "rg16sint":
+    case "rg16float":
+    case "rgba8unorm":
+    case "rgba8unorm-srgb":
+    case "rgba8snorm":
+    case "rgba8uint":
+    case "rgba8sint":
+    case "bgra8unorm":
+    case "bgra8unorm-srgb":
+      return 4;
+    case "rg32uint":
+    case "rg32sint":
+    case "rg32float":
+    case "rgba16uint":
+    case "rgba16sint":
+    case "rgba16float":
+      return 8;
+    case "rgba32uint":
+    case "rgba32sint":
+    case "rgba32float":
+      return 16;
+    case "depth16unorm":
+      return 2;
+    case "depth24plus":
+      return 4;
+    case "depth32float":
+      return 4;
+    default:
+      throw new Error(`Unrecognized texture format: ${format}`);
+  }
+}
+const GBufferResourcesView = ({ onPreview }) => {
+  const { redGPUContext } = useInspectorStore();
+  const [expanded, setExpanded] = reactExports.useState({});
+  if (!redGPUContext) return null;
+  const toggleExpanded = (key) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+  const views = redGPUContext.viewList;
+  const totalMemory = views.reduce((acc, view) => {
+    var _a;
+    return acc + (((_a = view.viewRenderTextureManager) == null ? void 0 : _a.videoMemorySize) || 0);
+  }, 0);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "G-Buffer Resources" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "11px", color: THEME.colors.primary }, children: formatBytes(totalMemory) })
+  ] }), children: views.map((view, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+    ViewGBufferList,
+    {
+      view,
+      isExpanded: !!expanded[idx.toString()],
+      onToggle: () => toggleExpanded(idx.toString()),
+      onPreview
+    },
+    idx
+  )) });
+};
+const ViewGBufferList = ({ view, isExpanded, onToggle, onPreview }) => {
+  const vrm = view.viewRenderTextureManager;
+  const gBuffers = vrm.gBuffers;
+  const items = Array.from(gBuffers.entries());
+  const viewMemory = vrm.videoMemorySize;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "12px" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        style: viewHeaderStyle,
+        onClick: onToggle,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            ToggleButton,
+            {
+              isExpanded,
+              style: { paddingRight: "8px" }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", flex: 1, alignItems: "center" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "View: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { children: view.name || "Unnamed View" }),
+              " ",
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "small",
+                {
+                  style: { color: "#888" },
+                  children: [
+                    "(",
+                    items.length,
+                    ")"
+                  ]
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+              fontSize: "11px",
+              opacity: 0.8,
+              color: THEME.colors.primary
+            }, children: formatBytes(viewMemory) })
+          ] })
+        ]
+      }
+    ),
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailListStyle, children: items.map(([key, info]) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      GBufferItem,
+      {
+        name: key,
+        info,
+        onPreview
+      },
+      key
+    )) })
+  ] });
+};
+const GBufferItem = ({ name, info, onPreview }) => {
+  const gpuTex = info.texture;
+  if (!gpuTex) return null;
+  const isMSAA = gpuTex.sampleCount > 1;
+  const previewTex = isMSAA && info.resolveTexture ? info.resolveTexture : gpuTex;
+  let itemMemory = calculateTextureByteSize(gpuTex);
+  if (info.resolveTexture) {
+    itemMemory += calculateTextureByteSize(info.resolveTexture);
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      style: textureItemStyle,
+      onClick: () => onPreview({ texture: { gpuTexture: previewTex }, label: name }, "bitmapTexture"),
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailHeaderStyle, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: detailLeftContainerStyle, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: detailNameStyle, children: [
+            name,
+            " ",
+            isMSAA ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: msaaBadgeStyle, children: "MSAA" }) : null
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailInfoStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Format: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.format })
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { ...detailInfoStyle, gap: "8px", marginTop: "2px", opacity: 0.9 }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Dim: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("b", { style: { color: "#eee" }, children: [
+                gpuTex.width,
+                "x",
+                gpuTex.height
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Samples: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "b",
+                {
+                  style: { color: isMSAA ? THEME.colors.primary : "#eee" },
+                  children: gpuTex.sampleCount
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              "Mips: ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: gpuTex.mipLevelCount })
+            ] })
+          ] }),
+          gpuTex.usage !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "2px", opacity: 0.7 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "Usage: ",
+            /* @__PURE__ */ jsxRuntimeExports.jsx("b", { style: { color: "#eee" }, children: formatTextureUsage(gpuTex.usage) })
+          ] }) }),
+          isMSAA && !info.resolveTexture && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...detailInfoStyle, marginTop: "4px", color: "#f44336", fontSize: "10px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "⚠️ Multisampled texture without resolve target cannot be previewed." }) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: detailRightContainerStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: detailMemoryStyle, children: formatBytes(itemMemory) }) })
+      ] })
+    }
+  );
+};
+const msaaBadgeStyle = {
+  background: THEME.colors.primary,
+  color: "#000",
+  fontSize: "9px",
+  padding: "1px 4px",
+  borderRadius: "3px",
+  marginLeft: "6px",
+  verticalAlign: "middle"
+};
+const viewHeaderStyle = {
+  padding: "8px 12px",
+  background: "#222",
+  cursor: "pointer",
+  fontSize: "13px",
+  display: "flex",
+  alignItems: "center",
+  borderLeft: `2px solid ${THEME.colors.primary}`
+};
+const detailListStyle = {
+  padding: "4px 0 4px 12px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
+  borderLeft: "1px solid #333",
+  marginLeft: "6px"
+};
+const textureItemStyle = {
+  padding: "8px 12px",
+  background: "#1a1a1a",
+  cursor: "pointer",
+  fontSize: "12px",
+  transition: "background 0.2s",
+  borderBottom: "1px solid #222"
+};
+const detailHeaderStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start"
+};
+const detailLeftContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  flex: 1,
+  minWidth: 0
+};
+const detailNameStyle = {
+  color: THEME.colors.primary,
+  fontWeight: "bold",
+  marginBottom: "2px",
+  fontSize: "13px"
+};
+const detailInfoStyle = {
+  display: "flex",
+  fontSize: "11px",
+  color: "#aaa",
+  gap: "12px"
+};
+const detailRightContainerStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  paddingLeft: "12px"
+};
+const detailMemoryStyle = {
+  color: THEME.colors.primary,
+  fontWeight: "bold",
+  fontSize: "11px"
+};
+const ResourcesView = () => {
+  const [activeSubTab, setActiveSubTab] = reactExports.useState("GBUFFER");
+  const [previewData, setPreviewData] = reactExports.useState(null);
+  const handlePreview = (item, type) => {
+    setPreviewData({ item, type });
+  };
+  const subTabs = [
+    { id: "GBUFFER", label: "G-Buffer" },
+    { id: "TEXTURES", label: "Textures" },
+    { id: "BUFFERS", label: "Buffers" }
+  ];
+  const isTextureType = previewData && ["bitmapTexture", "cubeTexture", "hdrTexture"].includes(previewData.type);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: stickyHeaderStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      TabBar,
+      {
+        tabs: subTabs,
+        activeTab: activeSubTab,
+        onTabChange: setActiveSubTab,
+        isSticky: false
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "12px 0" }, children: [
+      activeSubTab === "GBUFFER" && /* @__PURE__ */ jsxRuntimeExports.jsx(GBufferResourcesView, { onPreview: handlePreview }),
+      activeSubTab === "TEXTURES" && /* @__PURE__ */ jsxRuntimeExports.jsx(TextureResourcesView, { onPreview: handlePreview }),
+      activeSubTab === "BUFFERS" && /* @__PURE__ */ jsxRuntimeExports.jsx(BufferResourcesView, { onPreview: handlePreview })
+    ] }),
+    previewData && isTextureType && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      TexturePreviewModal,
+      {
+        item: previewData.item,
+        onClose: () => setPreviewData(null)
+      }
+    ),
+    previewData && !isTextureType && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      BufferDetailModal,
+      {
+        item: previewData.item,
+        type: previewData.type,
+        onClose: () => setPreviewData(null)
+      }
+    )
+  ] });
+};
+const stickyHeaderStyle$1 = {
+  position: "sticky",
+  top: 0,
+  // Offset container padding
+  zIndex: 10,
+  background: "#111"
+};
+const Divider = ({ vertical, style }) => {
+  const combinedStyle = vertical ? { ...defaultVerticalStyle, ...style } : { ...defaultHorizontalStyle, ...style };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: combinedStyle });
+};
+const defaultHorizontalStyle = {
+  height: "1px",
+  background: THEME.colors.border,
+  margin: "8px 0"
+};
+const defaultVerticalStyle = {
+  width: "1px",
+  height: "36px",
+  background: THEME.colors.border,
+  margin: "0"
+};
+class InstanceIdGenerator {
+  /**
+   * [KO] 다음 고유 인스턴스 ID를 반환합니다.
+   * [EN] Returns the next unique instance ID.
+   *
+   * @param type -
+   * [KO] ID를 생성할 타입
+   * [EN] Type to generate ID for
+   * @returns
+   * [KO] 고유 인스턴스 ID
+   * [EN] Unique instance ID
+   */
+  static getNextId(type) {
+    let currentId = this.idMaps.get(type) || 0;
+    this.idMaps.set(type, currentId + 1);
+    return currentId;
+  }
+}
+/**
+ * [KO] 타입별 현재 ID 맵
+ * [EN] Current ID map per type
+ */
+__publicField(InstanceIdGenerator, "idMaps", /* @__PURE__ */ new Map());
+Object.freeze(InstanceIdGenerator);
+var EPSILON = 1e-6;
+var ARRAY_TYPE = typeof Float32Array !== "undefined" ? Float32Array : Array;
+function create() {
+  var out = new ARRAY_TYPE(16);
+  if (ARRAY_TYPE != Float32Array) {
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+    out[4] = 0;
+    out[6] = 0;
+    out[7] = 0;
+    out[8] = 0;
+    out[9] = 0;
+    out[11] = 0;
+    out[12] = 0;
+    out[13] = 0;
+    out[14] = 0;
+  }
+  out[0] = 1;
+  out[5] = 1;
+  out[10] = 1;
+  out[15] = 1;
+  return out;
+}
+function identity(out) {
+  out[0] = 1;
+  out[1] = 0;
+  out[2] = 0;
+  out[3] = 0;
+  out[4] = 0;
+  out[5] = 1;
+  out[6] = 0;
+  out[7] = 0;
+  out[8] = 0;
+  out[9] = 0;
+  out[10] = 1;
+  out[11] = 0;
+  out[12] = 0;
+  out[13] = 0;
+  out[14] = 0;
+  out[15] = 1;
+  return out;
+}
+function lookAt(out, eye, center, up) {
+  var x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
+  var eyex = eye[0];
+  var eyey = eye[1];
+  var eyez = eye[2];
+  var upx = up[0];
+  var upy = up[1];
+  var upz = up[2];
+  var centerx = center[0];
+  var centery = center[1];
+  var centerz = center[2];
+  if (Math.abs(eyex - centerx) < EPSILON && Math.abs(eyey - centery) < EPSILON && Math.abs(eyez - centerz) < EPSILON) {
+    return identity(out);
+  }
+  z0 = eyex - centerx;
+  z1 = eyey - centery;
+  z2 = eyez - centerz;
+  len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
+  z0 *= len;
+  z1 *= len;
+  z2 *= len;
+  x0 = upy * z2 - upz * z1;
+  x1 = upz * z0 - upx * z2;
+  x2 = upx * z1 - upy * z0;
+  len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+  if (!len) {
+    x0 = 0;
+    x1 = 0;
+    x2 = 0;
+  } else {
+    len = 1 / len;
+    x0 *= len;
+    x1 *= len;
+    x2 *= len;
+  }
+  y0 = z1 * x2 - z2 * x1;
+  y1 = z2 * x0 - z0 * x2;
+  y2 = z0 * x1 - z1 * x0;
+  len = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
+  if (!len) {
+    y0 = 0;
+    y1 = 0;
+    y2 = 0;
+  } else {
+    len = 1 / len;
+    y0 *= len;
+    y1 *= len;
+    y2 *= len;
+  }
+  out[0] = x0;
+  out[1] = y0;
+  out[2] = z0;
+  out[3] = 0;
+  out[4] = x1;
+  out[5] = y1;
+  out[6] = z1;
+  out[7] = 0;
+  out[8] = x2;
+  out[9] = y2;
+  out[10] = z2;
+  out[11] = 0;
+  out[12] = -(x0 * eyex + x1 * eyey + x2 * eyez);
+  out[13] = -(y0 * eyex + y1 * eyey + y2 * eyez);
+  out[14] = -(z0 * eyex + z1 * eyey + z2 * eyez);
+  out[15] = 1;
+  return out;
+}
+const validateNumber = (value) => {
+  if (typeof value !== "number") {
+    consoleAndThrowError("Only numbers allowed.");
+    return false;
+  }
+  return true;
+};
+class ACamera {
+  constructor() {
+    /**
+     * [KO] 인스턴스 고유 ID
+     * [EN] Instance unique ID
+     */
+    __privateAdd(this, _instanceId);
+    /**
+     * [KO] 카메라 이름
+     * [EN] Camera name
+     */
+    __privateAdd(this, _name);
+    /**
+     * [KO] 조리개 (f-stop)
+     * [EN] Aperture (f-stop)
+     */
+    __privateAdd(this, _aperture, 16);
+    /**
+     * [KO] 셔터 속도 (초)
+     * [EN] Shutter speed (seconds)
+     */
+    __privateAdd(this, _shutterSpeed, 1 / 3200);
+    /**
+     * [KO] 센서 감도 (ISO)
+     * [EN] Sensor sensitivity (ISO)
+     */
+    __privateAdd(this, _iso, 100);
+    /**
+     * [KO] 캐시된 EV100
+     * [EN] Cached EV100
+     */
+    __privateAdd(this, _ev100, 0);
+    /**
+     * [KO] 자동 노출 사용 여부
+     * [EN] Whether to use auto exposure
+     */
+    __privateAdd(this, _useAutoExposure, true);
+    /**
+     * [KO] 노출 값이 다시 계산되어야 하는지 여부
+     * [EN] Whether the exposure needs to be recalculated
+     */
+    __privateAdd(this, _exposureDirty, true);
+  }
+  /**
+   * [KO] 자동 노출 사용 여부를 반환합니다.
+   * [EN] Returns whether to use auto exposure.
+   */
+  get useAutoExposure() {
+    return __privateGet(this, _useAutoExposure);
+  }
+  /**
+   * [KO] 자동 노출 사용 여부를 설정합니다.
+   * [EN] Sets whether to use auto exposure.
+   */
+  set useAutoExposure(value) {
+    if (__privateGet(this, _useAutoExposure) === value)
+      return;
+    if (__privateGet(this, _useAutoExposure) && !value) {
+      __privateSet(this, _iso, 100);
+      let rawShutterSpeed = __privateGet(this, _aperture) * __privateGet(this, _aperture) / Math.pow(2, __privateGet(this, _ev100));
+      const standardSpeeds = [
+        1,
+        1 / 1.3,
+        1 / 1.6,
+        1 / 2,
+        1 / 2.5,
+        1 / 3.2,
+        1 / 4,
+        1 / 5,
+        1 / 6,
+        1 / 8,
+        1 / 10,
+        1 / 13,
+        1 / 15,
+        1 / 20,
+        1 / 25,
+        1 / 30,
+        1 / 40,
+        1 / 50,
+        1 / 60,
+        1 / 80,
+        1 / 100,
+        1 / 125,
+        1 / 160,
+        1 / 200,
+        1 / 250,
+        1 / 320,
+        1 / 400,
+        1 / 500,
+        1 / 640,
+        1 / 800,
+        1 / 1e3,
+        1 / 1250,
+        1 / 1600,
+        1 / 2e3,
+        1 / 2500,
+        1 / 3200,
+        1 / 4e3,
+        1 / 5e3,
+        1 / 6400,
+        1 / 8e3
+      ];
+      __privateSet(this, _shutterSpeed, standardSpeeds.reduce((prev, curr) => Math.abs(curr - rawShutterSpeed) < Math.abs(prev - rawShutterSpeed) ? curr : prev));
+      __privateSet(this, _exposureDirty, true);
+    }
+    __privateSet(this, _useAutoExposure, value);
+  }
+  /**
+   * [KO] 물리적 노출 지수(EV100)를 반환합니다.
+   * [EN] Returns the physical exposure value (EV100).
+   */
+  get ev100() {
+    if (__privateGet(this, _exposureDirty))
+      this.updateExposure();
+    return __privateGet(this, _ev100);
+  }
+  /**
+   * [KO] 조리개(f-stop) 값을 반환합니다.
+   * [EN] Returns the aperture (f-stop) value.
+   */
+  get aperture() {
+    return __privateGet(this, _aperture);
+  }
+  /**
+   * [KO] 조리개(f-stop) 값을 설정합니다.
+   * [EN] Sets the aperture (f-stop) value.
+   */
+  set aperture(value) {
+    validateNumber(value);
+    if (__privateGet(this, _aperture) === value)
+      return;
+    __privateSet(this, _aperture, value);
+    __privateSet(this, _exposureDirty, true);
+  }
+  /**
+   * [KO] 셔터 속도(초 단위)를 반환합니다.
+   * [EN] Returns the shutter speed (in seconds).
+   */
+  get shutterSpeed() {
+    return __privateGet(this, _shutterSpeed);
+  }
+  /**
+   * [KO] 셔터 속도(초 단위)를 설정합니다.
+   * [EN] Sets the shutter speed (in seconds).
+   */
+  set shutterSpeed(value) {
+    validateNumber(value);
+    if (__privateGet(this, _shutterSpeed) === value)
+      return;
+    __privateSet(this, _shutterSpeed, value);
+    __privateSet(this, _exposureDirty, true);
+  }
+  /**
+   * [KO] 센서 감도(ISO)를 반환합니다.
+   * [EN] Returns the sensor sensitivity (ISO).
+   */
+  get iso() {
+    return __privateGet(this, _iso);
+  }
+  /**
+   * [KO] 센서 감도(ISO)를 설정합니다.
+   * [EN] Sets the sensor sensitivity (ISO).
+   */
+  set iso(value) {
+    validateNumber(value);
+    if (__privateGet(this, _iso) === value)
+      return;
+    __privateSet(this, _iso, value);
+    __privateSet(this, _exposureDirty, true);
+  }
+  /**
+   * [KO] 카메라 이름을 반환합니다.
+   * [EN] Returns the camera name.
+   */
+  get name() {
+    if (!__privateGet(this, _instanceId))
+      __privateSet(this, _instanceId, InstanceIdGenerator.getNextId(this.constructor));
+    return __privateGet(this, _name) || `${this.constructor.name} Instance ${__privateGet(this, _instanceId)}`;
+  }
+  /**
+   * [KO] 카메라 이름을 설정합니다.
+   * [EN] Sets the camera name.
+   */
+  set name(value) {
+    __privateSet(this, _name, value);
+  }
+  /**
+   * [KO] 노출 값을 업데이트합니다.
+   * [EN] Updates the exposure value.
+   * @param view [KO] View3D 인스턴스 (선택 사항) [EN] View3D instance (optional)
+   */
+  updateExposure(view) {
+    if (view && __privateGet(this, _useAutoExposure)) {
+      __privateSet(this, _ev100, view.postEffectManager.autoExposure.currentAdaptedEV100);
+    } else {
+      __privateSet(this, _ev100, Math.log2(__privateGet(this, _aperture) * __privateGet(this, _aperture) / __privateGet(this, _shutterSpeed) * (100 / __privateGet(this, _iso))));
+    }
+    __privateSet(this, _exposureDirty, false);
+  }
+}
+_instanceId = new WeakMap();
+_name = new WeakMap();
+_aperture = new WeakMap();
+_shutterSpeed = new WeakMap();
+_iso = new WeakMap();
+_ev100 = new WeakMap();
+_useAutoExposure = new WeakMap();
+_exposureDirty = new WeakMap();
+/**
+ * [KO] 교정 상수 (Calibration Constant, K)
+ * [EN] Calibration constant (K)
+ * @description
+ * [KO] 언리얼 엔진 5 및 사진학적 표준 (ISO 2720 표준 기준 K = 12.5)
+ * [EN] Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
+ */
+__publicField(ACamera, "CALIBRATION_CONSTANT", 12.5);
+class PerspectiveCamera extends ACamera {
+  /**
+   * [KO] PerspectiveCamera 인스턴스를 생성합니다.
+   * [EN] Creates an instance of PerspectiveCamera.
+   *
+   * ### Example
+   * ```typescript
+   * const camera = new RedGPU.PerspectiveCamera();
+   * ```
+   */
+  constructor() {
+    super();
+    /**
+     * [KO] up 벡터 (기본값 [0, 1, 0])
+     * [EN] Up vector (default [0, 1, 0])
+     */
+    __privateAdd(this, _up, new Float32Array([0, 1, 0]));
+    /**
+     * [KO] 모델 행렬(mat4)
+     * [EN] Model matrix (mat4)
+     */
+    __privateAdd(this, _viewMatrix, create());
+    /**
+     * [KO] X 좌표
+     * [EN] X coordinate
+     */
+    __privateAdd(this, _x, 0);
+    /**
+     * [KO] Z 좌표
+     * [EN] Z coordinate
+     */
+    __privateAdd(this, _z, 0);
+    /**
+     * [KO] Y 좌표
+     * [EN] Y coordinate
+     */
+    __privateAdd(this, _y, 0);
+    /**
+     * [KO] X축 회전(라디안)
+     * [EN] Rotation X (radians)
+     */
+    __privateAdd(this, _rotationX, 0);
+    /**
+     * [KO] Y축 회전(라디안)
+     * [EN] Rotation Y (radians)
+     */
+    __privateAdd(this, _rotationY, 0);
+    /**
+     * [KO] Z축 회전(라디안)
+     * [EN] Rotation Z (radians)
+     */
+    __privateAdd(this, _rotationZ, 0);
+    /**
+     * [KO] 시야각(FOV, 도)
+     * [EN] Field of view (degrees)
+     */
+    __privateAdd(this, _fieldOfView, 60);
+    /**
+     * [KO] 근평면(near)
+     * [EN] Near clipping plane
+     */
+    __privateAdd(this, _nearClipping, 0.01);
+    /**
+     * [KO] 원평면(far)
+     * [EN] Far clipping plane
+     */
+    __privateAdd(this, _farClipping, 1e5);
+  }
+  /**
+   * [KO] X축 회전값을 반환합니다. (라디안)
+   * [EN] Returns the X rotation value. (radians)
+   *
+   * @returns
+   * [KO] X축 회전값
+   * [EN] X rotation value
+   */
+  get rotationX() {
+    return __privateGet(this, _rotationX);
+  }
+  /**
+   * [KO] X축 회전값을 설정합니다. (라디안)
+   * [EN] Sets the X rotation value. (radians)
+   *
+   * @param value -
+   * [KO] 설정할 회전값
+   * [EN] Rotation value to set
+   */
+  set rotationX(value) {
+    __privateSet(this, _rotationX, value);
+  }
+  /**
+   * [KO] Y축 회전값을 반환합니다. (라디안)
+   * [EN] Returns the Y rotation value. (radians)
+   *
+   * @returns
+   * [KO] Y축 회전값
+   * [EN] Y rotation value
+   */
+  get rotationY() {
+    return __privateGet(this, _rotationY);
+  }
+  /**
+   * [KO] Y축 회전값을 설정합니다. (라디안)
+   * [EN] Sets the X rotation value. (radians)
+   *
+   * @param value -
+   * [KO] 설정할 회전값
+   * [EN] Rotation value to set
+   */
+  set rotationY(value) {
+    __privateSet(this, _rotationY, value);
+  }
+  /**
+   * [KO] Z축 회전값을 반환합니다. (라디안)
+   * [EN] Returns the Z rotation value. (radians)
+   *
+   * @returns
+   * [KO] Z축 회전값
+   * [EN] Z rotation value
+   */
+  get rotationZ() {
+    return __privateGet(this, _rotationZ);
+  }
+  /**
+   * [KO] Z축 회전값을 설정합니다. (라디안)
+   * [EN] Sets the X rotation value. (radians)
+   *
+   * @param value -
+   * [KO] 설정할 회전값
+   * [EN] Rotation value to set
+   */
+  set rotationZ(value) {
+    __privateSet(this, _rotationZ, value);
+  }
+  /**
+   * [KO] 시야각(FOV)을 반환합니다. (도)
+   * [EN] Returns the field of view. (degrees)
+   *
+   * @returns
+   * [KO] 시야각
+   * [EN] Field of view
+   */
+  get fieldOfView() {
+    return __privateGet(this, _fieldOfView);
+  }
+  /**
+   * [KO] 시야각(FOV)을 설정합니다. (도)
+   * [EN] Sets the field of view. (degrees)
+   *
+   * @param value -
+   * [KO] 설정할 시야각
+   * [EN] Field of view to set
+   */
+  set fieldOfView(value) {
+    validateNumber(value);
+    __privateSet(this, _fieldOfView, value);
+  }
+  /**
+   * [KO] 근평면(near) 거리를 반환합니다.
+   * [EN] Returns the near clipping distance.
+   *
+   * @returns
+   * [KO] 근평면 거리
+   * [EN] Near clipping distance
+   */
+  get nearClipping() {
+    return __privateGet(this, _nearClipping);
+  }
+  /**
+   * [KO] 근평면(near) 거리를 설정합니다.
+   * [EN] Sets the near clipping distance.
+   *
+   * @param value -
+   * [KO] 설정할 근평면 거리
+   * [EN] Near clipping distance to set
+   */
+  set nearClipping(value) {
+    validateNumber(value);
+    __privateSet(this, _nearClipping, value);
+  }
+  /**
+   * [KO] 원평면(far) 거리를 반환합니다.
+   * [EN] Returns the far clipping distance.
+   *
+   * @returns
+   * [KO] 원평면 거리
+   * [EN] Far clipping distance
+   */
+  get farClipping() {
+    return __privateGet(this, _farClipping);
+  }
+  /**
+   * [KO] 원평면(far) 거리를 설정합니다.
+   * [EN] Sets the far clipping distance.
+   *
+   * @param value -
+   * [KO] 설정할 원평면 거리
+   * [EN] Far clipping distance to set
+   */
+  set farClipping(value) {
+    validateNumber(value);
+    __privateSet(this, _farClipping, value);
+  }
+  /**
+   * [KO] 모델 행렬을 반환합니다.
+   * [EN] Returns the model matrix.
+   *
+   * @returns
+   * [KO] 모델 행렬
+   * [EN] Model matrix
+   */
+  get viewMatrix() {
+    return __privateGet(this, _viewMatrix);
+  }
+  /**
+   * [KO] X 좌표를 반환합니다.
+   * [EN] Returns the X coordinate.
+   *
+   * @returns
+   * [KO] X 좌표
+   * [EN] X coordinate
+   */
+  get x() {
+    return __privateGet(this, _x);
+  }
+  /**
+   * [KO] X 좌표를 설정합니다.
+   * [EN] Sets the X coordinate.
+   *
+   * @param value -
+   * [KO] 설정할 X 좌표
+   * [EN] X coordinate to set
+   */
+  set x(value) {
+    __privateSet(this, _x, value);
+    __privateGet(this, _viewMatrix)[12] = value;
+  }
+  /**
+   * [KO] Y 좌표를 반환합니다.
+   * [EN] Returns the Y coordinate.
+   *
+   * @returns
+   * [KO] Y 좌표
+   * [EN] Y coordinate
+   */
+  get y() {
+    return __privateGet(this, _y);
+  }
+  /**
+   * [KO] Y 좌표를 설정합니다.
+   * [EN] Sets the Y coordinate.
+   *
+   * @param value -
+   * [KO] 설정할 Y 좌표
+   * [EN] Y coordinate to set
+   */
+  set y(value) {
+    __privateSet(this, _y, value);
+    __privateGet(this, _viewMatrix)[13] = value;
+  }
+  /**
+   * [KO] Z 좌표를 반환합니다.
+   * [EN] Returns the Z coordinate.
+   *
+   * @returns
+   * [KO] Z 좌표
+   * [EN] Z coordinate
+   */
+  get z() {
+    return __privateGet(this, _z);
+  }
+  /**
+   * [KO] Z 좌표를 설정합니다.
+   * [EN] Sets the Z coordinate.
+   *
+   * @param value -
+   * [KO] 설정할 Z 좌표
+   * [EN] Z coordinate to set
+   */
+  set z(value) {
+    __privateSet(this, _z, value);
+    __privateGet(this, _viewMatrix)[14] = value;
+  }
+  /**
+   * [KO] 카메라 위치 (x, y, z)를 반환합니다.
+   * [EN] Returns the camera position (x, y, z).
+   *
+   * @returns
+   * [KO] [x, y, z] 좌표 배열
+   * [EN] [x, y, z] coordinate array
+   */
+  get position() {
+    return [__privateGet(this, _x), __privateGet(this, _y), __privateGet(this, _z)];
+  }
+  /**
+   * [KO] 카메라 위치를 설정합니다.
+   * [EN] Sets the camera position.
+   *
+   * ### Example
+   * ```typescript
+   * camera.setPosition(10, 5, 20);
+   * camera.setPosition([10, 5, 20]);
+   * ```
+   *
+   * @param x -
+   * [KO] X 좌표 또는 [x, y, z] 배열
+   * [EN] X coordinate or [x, y, z] array
+   * @param y -
+   * [KO] Y 좌표 (x가 배열인 경우 무시됨)
+   * [EN] Y coordinate (ignored if x is an array)
+   * @param z -
+   * [KO] Z 좌표 (x가 배열인 경우 무시됨)
+   * [EN] Z coordinate (ignored if x is an array)
+   */
+  setPosition(x2, y2, z2) {
+    if (Array.isArray(x2)) {
+      [__privateWrapper(this, _x)._, __privateWrapper(this, _y)._, __privateWrapper(this, _z)._] = x2;
+    } else {
+      __privateSet(this, _x, x2);
+      __privateSet(this, _y, y2);
+      __privateSet(this, _z, z2);
+    }
+    [__privateGet(this, _viewMatrix)[12], __privateGet(this, _viewMatrix)[13], __privateGet(this, _viewMatrix)[14]] = [__privateGet(this, _x), __privateGet(this, _y), __privateGet(this, _z)];
+  }
+  /**
+   * [KO] 카메라가 특정 좌표를 바라보도록 회전시킵니다.
+   * [EN] Rotates the camera to look at a specific coordinate.
+   *
+   * ### Example
+   * ```typescript
+   * camera.lookAt(0, 0, 0);
+   * ```
+   *
+   * @param x -
+   * [KO] 바라볼 대상의 X 좌표
+   * [EN] Target X coordinate to look at
+   * @param y -
+   * [KO] 바라볼 대상의 Y 좌표
+   * [EN] Target Y coordinate to look at
+   * @param z -
+   * [KO] 바라볼 대상의 Z 좌표
+   * [EN] Target Z coordinate to look at
+   */
+  lookAt(x2, y2, z2) {
+    const eye = [__privateGet(this, _x), __privateGet(this, _y), __privateGet(this, _z)];
+    const target = [x2, y2, z2];
+    const up = [__privateGet(this, _up)[0], __privateGet(this, _up)[1], __privateGet(this, _up)[2]];
+    const dir = [target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]];
+    const len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+    dir[0] /= len;
+    dir[1] /= len;
+    dir[2] /= len;
+    const cross = [
+      dir[1] * up[2] - dir[2] * up[1],
+      dir[2] * up[0] - dir[0] * up[2],
+      dir[0] * up[1] - dir[1] * up[0]
+    ];
+    const crossLen = Math.sqrt(cross[0] * cross[0] + cross[1] * cross[1] + cross[2] * cross[2]);
+    if (crossLen < 1e-4) {
+      up[2] = dir[1] > 0 ? 1 : -1;
+      up[0] = 0;
+      up[1] = 0;
+    }
+    lookAt(__privateGet(this, _viewMatrix), eye, target, up);
+  }
+}
+_up = new WeakMap();
+_viewMatrix = new WeakMap();
+_x = new WeakMap();
+_z = new WeakMap();
+_y = new WeakMap();
+_rotationX = new WeakMap();
+_rotationY = new WeakMap();
+_rotationZ = new WeakMap();
+_fieldOfView = new WeakMap();
+_nearClipping = new WeakMap();
+_farClipping = new WeakMap();
+const _AController = class _AController {
+  /**
+   * [KO] AController 인스턴스를 생성합니다.
+   * [EN] Creates an instance of AController.
+   *
+   * @param redGPUContext -
+   * [KO] RedGPU 컨텍스트
+   * [EN] RedGPU Context
+   * @param initInfo -
+   * [KO] 컨트롤러 초기화 정보
+   * [EN] Controller initialization info
+   */
+  constructor(redGPUContext, initInfo) {
+    __privateAdd(this, _AController_instances);
+    // ==================== 인스턴스 정보 ====================
+    __privateAdd(this, _instanceId2);
+    __privateAdd(this, _name2);
+    __privateAdd(this, _redGPUContext);
+    __privateAdd(this, _camera);
+    __privateAdd(this, _initInfo);
+    // ==================== 프레임 관리 ====================
+    __privateAdd(this, _lastUpdateTime, -1);
+    __privateAdd(this, _currentDeltaTime, 0);
+    __privateAdd(this, _currentFrameViews, /* @__PURE__ */ new Set());
+    __privateAdd(this, _keyboardProcessedThisFrame, false);
+    // ==================== View 상태 ====================
+    __privateAdd(this, _hoveredView, null);
+    __privateAdd(this, _isDragging, false);
+    // ==================== 입력 이벤트 관련 ====================
+    __privateAdd(this, _eventTypeKeys);
+    __privateAdd(this, _dragStartX, 0);
+    __privateAdd(this, _dragStartY, 0);
+    __privateAdd(this, _pinchStartDistance, 0);
+    __privateAdd(this, _isMultiTouch, false);
+    /**
+     * [KO] 캔버스 상의 이벤트 좌표를 가져옵니다.
+     * [EN] Gets the event coordinates on the canvas.
+     *
+     * @param e -
+     * [KO] 마우스, 터치 또는 휠 이벤트
+     * [EN] Mouse, touch, or wheel event
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU context
+     * @returns
+     * [KO] {x, y} 좌표 객체
+     * [EN] {x, y} coordinate object
+     * @internal
+     */
+    __publicField(this, "getCanvasEventPoint", (e, redGPUContext) => {
+      redGPUContext.htmlCanvas;
+      const isMobile = redGPUContext.detector.isMobile;
+      const rect = redGPUContext.boundingClientRect;
+      const tX_key = "clientX";
+      const tY_key = "clientY";
+      let clientX;
+      let clientY;
+      if (isMobile) {
+        const touch = e instanceof WheelEvent ? e : e.changedTouches[0];
+        clientX = touch[tX_key];
+        clientY = touch[tY_key];
+      } else {
+        const mouseEvent = e;
+        clientX = mouseEvent[tX_key];
+        clientY = mouseEvent[tY_key];
+      }
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    });
+    /**
+     * [KO] 입력 이벤트가 발생한 View를 찾습니다.
+     * [EN] Finds the View where the input event occurred.
+     *
+     * @param e -
+     * [KO] 마우스 또는 터치 이벤트
+     * [EN] Mouse or touch event
+     * @returns
+     * [KO] 해당 View 또는 null
+     * [EN] Corresponding View or null
+     * @internal
+     */
+    __publicField(this, "findTargetViewByInputEvent", (e) => {
+      const redGPUContext = __privateGet(this, _redGPUContext);
+      redGPUContext.detector.isMobile;
+      const { x: x2, y: y2 } = this.getCanvasEventPoint(e, redGPUContext);
+      const scale = window.devicePixelRatio * redGPUContext.renderScale;
+      const tX = x2 * scale;
+      const tY = y2 * scale;
+      let targetView = null;
+      for (const view of this.redGPUContext.viewList) {
+        const tViewRect = view.pixelRectObject;
+        if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width && tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
+          targetView = view;
+        }
+      }
+      return targetView;
+    });
+    // ==================== Private Helpers ====================
+    /**
+     * [KO] 두 터치 점 사이의 거리를 계산합니다.
+     * [EN] Calculates the distance between two touch points.
+     *
+     * @param touches -
+     * [KO] 터치 리스트
+     * [EN] Touch list
+     * @returns
+     * [KO] 거리 값
+     * [EN] Distance value
+     * @internal
+     */
+    __privateAdd(this, _getTouchDistance, (touches) => {
+      if (touches.length < 2)
+        return 0;
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    });
+    __privateAdd(this, _HD_hover, (e) => {
+      if (__privateGet(_AController, _globalKeyboardActiveView) || __privateGet(this, _isDragging))
+        return;
+      __privateSet(this, _hoveredView, this.findTargetViewByInputEvent(e));
+    });
+    __privateAdd(this, _HD_down, (e) => {
+      const targetView = this.findTargetViewByInputEvent(e);
+      if (!targetView)
+        return;
+      if (!__privateGet(_AController, _globalKeyboardActiveView) && !__privateGet(this, _isDragging)) {
+        __privateSet(this, _hoveredView, targetView);
+      }
+      const { redGPUContext } = this;
+      const { moveKey, upKey } = __privateGet(this, _eventTypeKeys);
+      const { x: x2, y: y2 } = this.getCanvasEventPoint(e, redGPUContext);
+      __privateSet(this, _dragStartX, x2);
+      __privateSet(this, _dragStartY, y2);
+      if (e instanceof TouchEvent) {
+        if (e.touches.length >= 2) {
+          __privateSet(this, _isMultiTouch, true);
+          __privateSet(this, _pinchStartDistance, __privateGet(this, _getTouchDistance).call(this, e.touches));
+        } else {
+          __privateSet(this, _isMultiTouch, false);
+          __privateSet(this, _pinchStartDistance, 0);
+        }
+      }
+      if (__privateGet(this, _currentFrameViews).has(targetView)) {
+        __privateSet(this, _isDragging, true);
+        __privateSet(_AController, _globalKeyboardActiveView, targetView);
+        redGPUContext.htmlCanvas.addEventListener(moveKey, __privateGet(this, _HD_Move));
+        window.addEventListener(upKey, __privateGet(this, _HD_up));
+      }
+    });
+    __privateAdd(this, _HD_Move, (e) => {
+      var _a, _b;
+      if (e instanceof TouchEvent && e.touches.length >= 2) {
+        __privateSet(this, _isMultiTouch, true);
+        return;
+      }
+      __privateSet(this, _isMultiTouch, false);
+      const { x: x2, y: y2 } = this.getCanvasEventPoint(e, __privateGet(this, _redGPUContext));
+      const deltaX = x2 - __privateGet(this, _dragStartX);
+      const deltaY = y2 - __privateGet(this, _dragStartY);
+      __privateSet(this, _dragStartX, x2);
+      __privateSet(this, _dragStartY, y2);
+      (_b = (_a = __privateGet(this, _initInfo)).HD_Move) == null ? void 0 : _b.call(_a, deltaX, deltaY);
+    });
+    __privateAdd(this, _HD_touchPinch, (e) => {
+      var _a, _b;
+      if (e.touches.length < 2 || !__privateGet(this, _initInfo).HD_TouchPinch)
+        return;
+      if (!__privateGet(this, _isMultiTouch))
+        return;
+      e.preventDefault();
+      const currentDistance = __privateGet(this, _getTouchDistance).call(this, e.touches);
+      if (__privateGet(this, _pinchStartDistance) === 0) {
+        __privateSet(this, _pinchStartDistance, currentDistance);
+        return;
+      }
+      const targetView = this.findTargetViewByInputEvent(e);
+      if (targetView.rawCamera !== __privateGet(this, _camera))
+        return;
+      const deltaScale = currentDistance / __privateGet(this, _pinchStartDistance);
+      (_b = (_a = __privateGet(this, _initInfo)).HD_TouchPinch) == null ? void 0 : _b.call(_a, deltaScale);
+      __privateSet(this, _pinchStartDistance, currentDistance);
+    });
+    __privateAdd(this, _HD_up, () => {
+      const { htmlCanvas } = __privateGet(this, _redGPUContext);
+      const { moveKey, upKey } = __privateGet(this, _eventTypeKeys);
+      __privateSet(this, _isMultiTouch, false);
+      __privateSet(this, _pinchStartDistance, 0);
+      __privateSet(this, _isDragging, false);
+      htmlCanvas.removeEventListener(moveKey, __privateGet(this, _HD_Move));
+      window.removeEventListener(upKey, __privateGet(this, _HD_up));
+    });
+    __privateAdd(this, _HD_wheel, (e) => {
+      var _a, _b;
+      const targetView = this.findTargetViewByInputEvent(e);
+      if (!targetView)
+        return;
+      if (targetView.rawCamera !== __privateGet(this, _camera))
+        return;
+      e.stopPropagation();
+      e.preventDefault();
+      (_b = (_a = __privateGet(this, _initInfo)).HD_Wheel) == null ? void 0 : _b.call(_a, e);
+    });
+    __privateSet(this, _redGPUContext, redGPUContext);
+    __privateSet(this, _initInfo, initInfo || {});
+    __privateSet(this, _camera, initInfo.camera || new PerspectiveCamera());
+    const isMobile = __privateGet(this, _redGPUContext).detector.isMobile;
+    __privateSet(this, _eventTypeKeys, {
+      moveKey: isMobile ? "touchmove" : "mousemove",
+      upKey: isMobile ? "touchend" : "mouseup",
+      downKey: isMobile ? "touchstart" : "mousedown"
+    });
+    __privateMethod(this, _AController_instances, initListener_fn).call(this);
+  }
+  // ==================== Public Getters/Setters ====================
+  /**
+   * [KO] 컨트롤러의 이름을 반환합니다.
+   * [EN] Returns the name of the controller.
+   *
+   * @returns
+   * [KO] 컨트롤러 이름
+   * [EN] Controller name
+   */
+  get name() {
+    if (!__privateGet(this, _instanceId2))
+      __privateSet(this, _instanceId2, InstanceIdGenerator.getNextId(this.constructor));
+    return __privateGet(this, _name2) || `${this.constructor.name} Instance ${__privateGet(this, _instanceId2)}`;
+  }
+  /**
+   * [KO] 컨트롤러의 이름을 설정합니다.
+   * [EN] Sets the name of the controller.
+   *
+   * @param value -
+   * [KO] 설정할 이름
+   * [EN] Name to set
+   */
+  set name(value) {
+    __privateSet(this, _name2, value);
+  }
+  /**
+   * [KO] RedGPU 컨텍스트를 반환합니다.
+   * [EN] Returns the RedGPU context.
+   *
+   * @returns
+   * [KO] RedGPU 컨텍스트
+   * [EN] RedGPU context
+   */
+  get redGPUContext() {
+    return __privateGet(this, _redGPUContext);
+  }
+  /**
+   * [KO] 이 컨트롤러가 제어하는 카메라를 반환합니다.
+   * [EN] Returns the camera controlled by this controller.
+   *
+   * @returns
+   * [KO] 제어 중인 카메라 (PerspectiveCamera 또는 OrthographicCamera)
+   * [EN] Controlled camera (PerspectiveCamera or OrthographicCamera)
+   */
+  get camera() {
+    return __privateGet(this, _camera);
+  }
+  /**
+   * [KO] 카메라의 현재 월드 X 좌표를 가져옵니다.
+   * [EN] Gets the camera's current world X coordinate.
+   *
+   * @returns
+   * [KO] X 좌표
+   * [EN] X coordinate
+   */
+  get x() {
+    return this.camera.x;
+  }
+  /**
+   * [KO] 카메라의 현재 월드 Y 좌표를 가져옵니다.
+   * [EN] Gets the camera's current world Y coordinate.
+   *
+   * @returns
+   * [KO] Y 좌표
+   * [EN] Y coordinate
+   */
+  get y() {
+    return this.camera.y;
+  }
+  /**
+   * [KO] 카메라의 현재 월드 Z 좌표를 가져옵니다.
+   * [EN] Gets the camera's current world Z coordinate.
+   *
+   * @returns
+   * [KO] Z 좌표
+   * [EN] Z coordinate
+   */
+  get z() {
+    return this.camera.z;
+  }
+  // ==================== Protected - 파생 클래스 전용 ====================
+  /**
+   * [KO] 현재 마우스가 호버링 중인 View를 반환합니다.
+   * [EN] Returns the View currently being hovered by the mouse.
+   *
+   * @returns
+   * [KO] 호버링 중인 View 또는 null
+   * [EN] Hovered View or null
+   * @internal
+   */
+  get hoveredView() {
+    return __privateGet(this, _hoveredView);
+  }
+  /**
+   * [KO] 키보드 입력이 활성화된 View를 반환합니다.
+   * [EN] Returns the View with active keyboard input.
+   *
+   * @returns
+   * [KO] 키보드 활성 View 또는 null
+   * [EN] Keyboard active View or null
+   * @internal
+   */
+  get keyboardActiveView() {
+    return __privateGet(_AController, _globalKeyboardActiveView);
+  }
+  /**
+   * [KO] 키보드 입력이 활성화된 View를 설정합니다.
+   * [EN] Sets the View with active keyboard input.
+   *
+   * @param value -
+   * [KO] 설정할 View 또는 null
+   * [EN] View to set or null
+   * @internal
+   */
+  set keyboardActiveView(value) {
+    __privateSet(_AController, _globalKeyboardActiveView, value);
+    if (value === null) {
+      __privateSet(_AController, _globalKeyboardActiveController, null);
+    } else {
+      __privateSet(_AController, _globalKeyboardActiveController, this);
+    }
+  }
+  /**
+   * [KO] 현재 컨트롤러가 키보드 입력을 처리 중인지 여부를 반환합니다.
+   * [EN] Returns whether the current controller is processing keyboard input.
+   *
+   * @returns
+   * [KO] 키보드 활성 컨트롤러 여부
+   * [EN] Whether it is the keyboard active controller
+   * @internal
+   */
+  get isKeyboardActiveController() {
+    return __privateGet(_AController, _globalKeyboardActiveController) === this;
+  }
+  /**
+   * [KO] 이번 프레임에서 키보드 입력이 이미 처리되었는지 여부를 반환합니다.
+   * [EN] Returns whether keyboard input has already been processed in this frame.
+   *
+   * @returns
+   * [KO] 처리 여부
+   * [EN] Processing status
+   * @internal
+   */
+  get keyboardProcessedThisFrame() {
+    return __privateGet(this, _keyboardProcessedThisFrame);
+  }
+  /**
+   * [KO] 이번 프레임에서 키보드 입력이 처리되었는지 여부를 설정합니다.
+   * [EN] Sets whether keyboard input has been processed in this frame.
+   *
+   * @param value -
+   * [KO] 설정할 처리 여부
+   * [EN] Processing status to set
+   * @internal
+   */
+  set keyboardProcessedThisFrame(value) {
+    __privateSet(this, _keyboardProcessedThisFrame, value);
+  }
+  /**
+   * [KO] 컨트롤러를 제거하고 이벤트 리스너를 해제합니다.
+   * [EN] Destroys the controller and removes event listeners.
+   */
+  destroy() {
+    const { moveKey, upKey, downKey } = __privateGet(this, _eventTypeKeys);
+    const { htmlCanvas } = this.redGPUContext;
+    htmlCanvas.removeEventListener(downKey, __privateGet(this, _HD_down));
+    htmlCanvas.removeEventListener(moveKey, __privateGet(this, _HD_hover));
+    htmlCanvas.removeEventListener(moveKey, __privateGet(this, _HD_Move));
+    window.removeEventListener(upKey, __privateGet(this, _HD_up));
+    if (__privateGet(this, _initInfo).HD_Wheel) {
+      htmlCanvas.removeEventListener("wheel", __privateGet(this, _HD_wheel));
+    }
+  }
+  // ==================== Update ====================
+  /**
+   * [KO] 컨트롤러 상태를 업데이트합니다. 파생 클래스에서 구현해야 합니다.
+   * [EN] Updates the controller state. Must be implemented in derived classes.
+   *
+   * @param view -
+   * [KO] 현재 View
+   * [EN] Current View
+   * @param time -
+   * [KO] 현재 시간 (ms)
+   * [EN] Current time (ms)
+   * @param updateAnimation -
+   * [KO] 애니메이션 업데이트 콜백 (deltaTime 전달)
+   * [EN] Animation update callback (receives deltaTime)
+   */
+  update(view, time, updateAnimation) {
+    if (__privateGet(this, _lastUpdateTime) !== time) {
+      __privateSet(this, _currentDeltaTime, __privateGet(this, _lastUpdateTime) === -1 ? 0 : (time - __privateGet(this, _lastUpdateTime)) / 1e3);
+      __privateSet(this, _lastUpdateTime, time);
+      __privateGet(this, _currentFrameViews).clear();
+      __privateSet(this, _keyboardProcessedThisFrame, false);
+    }
+    if (__privateGet(this, _currentFrameViews).has(view))
+      return;
+    __privateGet(this, _currentFrameViews).add(view);
+    if (__privateGet(this, _initInfo).useKeyboard && this.keyboardActiveView && this.keyboardActiveView !== view)
+      return;
+    updateAnimation == null ? void 0 : updateAnimation(__privateGet(this, _currentDeltaTime));
+  }
+  /**
+   * [KO] 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
+   * [EN] Checks for keyboard input and sets the active View.
+   *
+   * @param view -
+   * [KO] 현재 View
+   * [EN] Current View
+   * @param keyNameMapper -
+   * [KO] 키 매핑 객체
+   * [EN] Key mapping object
+   * @returns
+   * [KO] 키보드 입력 처리가 가능하면 true, 아니면 false
+   * [EN] True if keyboard input processing is possible, otherwise false
+   */
+  checkKeyboardInput(view, keyNameMapper) {
+    if (this.keyboardProcessedThisFrame)
+      return false;
+    const { keyboardKeyBuffer } = view.redGPUContext;
+    let hasAnyKeyInput = false;
+    for (const key in keyNameMapper) {
+      if (keyboardKeyBuffer[keyNameMapper[key]]) {
+        hasAnyKeyInput = true;
+        break;
       }
     }
-    return null;
-  };
-  return search(ExampleList);
+    if (!hasAnyKeyInput) {
+      this.keyboardActiveView = null;
+      return false;
+    }
+    if (!this.keyboardActiveView) {
+      if (this.hoveredView === view) {
+        this.keyboardActiveView = view;
+      } else {
+        return false;
+      }
+    }
+    if (this.keyboardActiveView !== view)
+      return false;
+    this.keyboardProcessedThisFrame = true;
+    return true;
+  }
 };
-class RedGPUExampleHelper {
+_globalKeyboardActiveView = new WeakMap();
+_globalKeyboardActiveController = new WeakMap();
+_instanceId2 = new WeakMap();
+_name2 = new WeakMap();
+_redGPUContext = new WeakMap();
+_camera = new WeakMap();
+_initInfo = new WeakMap();
+_lastUpdateTime = new WeakMap();
+_currentDeltaTime = new WeakMap();
+_currentFrameViews = new WeakMap();
+_keyboardProcessedThisFrame = new WeakMap();
+_hoveredView = new WeakMap();
+_isDragging = new WeakMap();
+_eventTypeKeys = new WeakMap();
+_dragStartX = new WeakMap();
+_dragStartY = new WeakMap();
+_pinchStartDistance = new WeakMap();
+_isMultiTouch = new WeakMap();
+_getTouchDistance = new WeakMap();
+_AController_instances = new WeakSet();
+// ==================== 마우스/터치 이벤트 핸들러 ====================
+initListener_fn = function() {
+  const { redGPUContext } = this;
+  const { htmlCanvas } = redGPUContext;
+  const { downKey, moveKey } = __privateGet(this, _eventTypeKeys);
+  htmlCanvas.addEventListener(downKey, __privateGet(this, _HD_down));
+  htmlCanvas.addEventListener(moveKey, __privateGet(this, _HD_hover));
+  if (__privateGet(this, _initInfo).HD_Wheel) {
+    htmlCanvas.addEventListener("wheel", __privateGet(this, _HD_wheel), { passive: false });
+  }
+  if (__privateGet(this, _initInfo).HD_TouchPinch) {
+    htmlCanvas.addEventListener("touchmove", __privateGet(this, _HD_touchPinch), { passive: false });
+  }
+};
+_HD_hover = new WeakMap();
+_HD_down = new WeakMap();
+_HD_Move = new WeakMap();
+_HD_touchPinch = new WeakMap();
+_HD_up = new WeakMap();
+_HD_wheel = new WeakMap();
+// ==================== Static - 전역 상태 ====================
+/**
+ * [KO] 전역 키보드 활성 View - 모든 컨트롤러 인스턴스에서 공유
+ * [EN] Global keyboard active View - Shared across all controller instances
+ */
+__privateAdd(_AController, _globalKeyboardActiveView, null);
+/**
+ * [KO] 전역 키보드 활성 컨트롤러 - 어떤 컨트롤러가 키보드를 사용 중인지 추적
+ * [EN] Global keyboard active controller - Tracks which controller is using the keyboard
+ */
+__privateAdd(_AController, _globalKeyboardActiveController, null);
+let AController = _AController;
+const SceneInfoView = ({ scene }) => {
+  const { name, useBackgroundColor, backgroundColor } = scene;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Scene", subTitle: name, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useBackgroundColor", value: useBackgroundColor }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatRGBAItem, { label: "backgroundColor", value: backgroundColor.rgba })
+  ] });
+};
+const ToneMappingView = ({ view, showLabel = true }) => {
+  const { toneMappingManager } = view;
+  if (!toneMappingManager) return null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    showLabel && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      fontSize: "10px",
+      color: "#666",
+      fontWeight: "bold",
+      marginBottom: "4px",
+      marginTop: "4px"
+    }, children: "TONE MAPPING" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Mode", value: toneMappingManager.mode }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Contrast", value: toneMappingManager.contrast.toFixed(2) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "Brightness", value: toneMappingManager.brightness.toFixed(2) })
+  ] });
+};
+const ViewStateTab = ({ view, lastUpdateTime }) => {
+  const {
+    renderViewStateData,
+    rawCamera,
+    scene,
+    useFrustumCulling,
+    useDistanceCulling,
+    camera
+  } = view;
+  const {
+    usedVideoMemory,
+    viewRenderCPURecordingTime,
+    num3DGroups,
+    num3DObjects,
+    numInstances,
+    numDrawCalls,
+    numTriangles,
+    numPoints,
+    viewportSize
+  } = renderViewStateData;
+  const { x: x2, y: y2, width, height, pixelRectArray } = viewportSize;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Rendering Statistics", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "usedVideoMemory", value: formatBytes(usedVideoMemory), color: "#fdb48d", isBold: true }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "viewRenderCPURecordingTime", value: `${viewRenderCPURecordingTime.toFixed(2)}ms` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "num3DGroups", value: num3DGroups }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "num3DObjects", value: num3DObjects }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numInstances", value: numInstances }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numDrawCalls", value: numDrawCalls }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numTriangles", value: numTriangles }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "numPoints", value: numPoints })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Culling Settings", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFrustumCulling", value: useFrustumCulling }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useDistanceCulling", value: useDistanceCulling })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Viewport", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "x, y", value: `${formatNumber(x2)}, ${formatNumber(y2)}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "width, height", value: `${width}, ${height}` }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pixelRectArray", value: `[${pixelRectArray.join(", ")}]` })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(SceneInfoView, { scene }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: "ToneMapping", children: /* @__PURE__ */ jsxRuntimeExports.jsx(ToneMappingView, { view, showLabel: false }) }),
+    camera && (camera instanceof AController || camera.constructor.name.includes("Controller") || "camera" in camera && camera.camera !== camera) && /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Controller", subTitle: camera.name, children: [
+      camera["distance"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "distance", value: formatNumber(camera["distance"]) }),
+      camera["pan"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "pan", value: formatNumber(camera["pan"]) }),
+      camera["tilt"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "tilt", value: formatNumber(camera["tilt"]) }),
+      camera["zoom"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "zoom", value: formatNumber(camera["zoom"]) }),
+      camera["centerX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "center",
+          value: `${formatNumber(camera["centerX"])}, ${formatNumber(camera["centerY"])}, ${formatNumber(camera["centerZ"])}`
+        }
+      ),
+      camera["targetX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "target",
+          value: `${formatNumber(camera["targetX"])}, ${formatNumber(camera["targetY"] || 0)}, ${formatNumber(camera["targetZ"])}`
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Raw Camera", subTitle: rawCamera.name, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "position",
+          value: `${formatNumber(rawCamera.x)}, ${formatNumber(rawCamera.y)}, ${formatNumber(rawCamera.z || 0)}`
+        }
+      ),
+      rawCamera["rotationX"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "rotation",
+          value: `${formatNumber(rawCamera["rotationX"])}, ${formatNumber(rawCamera["rotationY"])}, ${formatNumber(rawCamera["rotationZ"])}`
+        }
+      ),
+      rawCamera["fieldOfView"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "fieldOfView", value: formatNumber(rawCamera["fieldOfView"]) }),
+      rawCamera["zoom"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "zoom", value: formatNumber(rawCamera["zoom"]) }),
+      rawCamera["nearClipping"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "nearClipping", value: formatNumber(rawCamera["nearClipping"]) }),
+      rawCamera["farClipping"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "farClipping", value: formatNumber(rawCamera["farClipping"]) }),
+      rawCamera["top"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "top/bottom",
+          value: `${formatNumber(rawCamera["top"])}, ${formatNumber(rawCamera["bottom"])}`
+        }
+      ),
+      rawCamera["left"] !== void 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        StatItem,
+        {
+          label: "left/right",
+          value: `${formatNumber(rawCamera["left"])}, ${formatNumber(rawCamera["right"])}`
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useAutoExposure", value: rawCamera.useAutoExposure }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "ev100", value: formatNumber(rawCamera.ev100) }),
+      !rawCamera.useAutoExposure && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "aperture", value: `f/${formatNumber(rawCamera.aperture)}` }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          StatItem,
+          {
+            label: "shutterSpeed",
+            value: rawCamera.shutterSpeed >= 1 ? `${formatNumber(rawCamera.shutterSpeed)}s` : `1/${Math.round(1 / rawCamera.shutterSpeed)}s`
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "iso", value: rawCamera.iso })
+      ] })
+    ] })
+  ] });
+};
+const ViewCommandsTab = ({ view }) => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(CommandBatchStatsView, { statsProp: view.renderViewStateData.commandBatchStats });
+};
+const PropertyInspector = reactExports.memo(({ target, depth = 0 }) => {
+  useInspectorStore((state) => state.lastUpdateTime);
+  if (depth > 3 || !target) return null;
+  const filteredKeys = reactExports.useMemo(() => {
+    const allKeys = /* @__PURE__ */ new Set();
+    Object.getOwnPropertyNames(target).forEach((k2) => allKeys.add(k2));
+    let proto = Object.getPrototypeOf(target);
+    while (proto && proto !== Object.prototype) {
+      Object.getOwnPropertyNames(proto).forEach((k2) => {
+        const descriptor = Object.getOwnPropertyDescriptor(proto, k2);
+        if (descriptor && (descriptor.get || typeof descriptor.value !== "function")) {
+          allKeys.add(k2);
+        }
+      });
+      proto = Object.getPrototypeOf(proto);
+    }
+    const blackList = [
+      "constructor",
+      "prototype",
+      "length",
+      "name",
+      "view",
+      "redGPUContext",
+      "passList",
+      "passListLength",
+      "passIndex",
+      "videoMemorySize",
+      "outputTextureView",
+      "shaderInfo",
+      "storageInfo",
+      "uniformsInfo",
+      "systemUniformsInfo",
+      "uniformBuffer"
+    ];
+    return Array.from(allKeys).filter((key) => {
+      if (key.startsWith("#") || key.startsWith("_")) return false;
+      if (blackList.includes(key)) return false;
+      try {
+        if (typeof target[key] === "function") return false;
+      } catch (e) {
+        return false;
+      }
+      return true;
+    }).sort();
+  }, [target]);
+  if (filteredKeys.length === 0) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "10px", color: "#666", paddingLeft: "8px" }, children: "No inspectable properties." });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { paddingLeft: depth > 0 ? "12px" : "0" }, children: filteredKeys.map((key) => {
+    let value;
+    try {
+      value = target[key];
+    } catch (e) {
+      return null;
+    }
+    const type = typeof value;
+    if (value === null || value === void 0) {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: key, value: "null" }, key);
+    }
+    if (type === "number") {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: key, value: formatNumber(value) }, key);
+    }
+    if (type === "boolean") {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: key, value }, key);
+    }
+    if (type === "string") {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: key, value }, key);
+    }
+    if (Array.isArray(value)) {
+      if (value.length > 0 && typeof value[0] !== "object") {
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(
+          StatItem,
+          {
+            label: key,
+            value: `[${value.map((v2) => typeof v2 === "number" ? formatNumber(v2) : v2).join(", ")}]`
+          },
+          key
+        );
+      }
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleObject, { label: key, value, depth, typeLabel: "Array" }, key);
+    }
+    if (type === "object") {
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleObject, { label: key, value, depth, typeLabel: "Object" }, key);
+    }
+    return null;
+  }) });
+});
+const CollapsibleObject = ({ label, value, depth, typeLabel }) => {
+  const [isExpanded, setIsExpanded] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "4px" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        onClick: () => setIsExpanded(!isExpanded),
+        style: headerStyle$1,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ToggleButton, { isExpanded, style: { marginRight: "6px" } }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: COMMON_STYLES.label, children: label }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: typeHintStyle, children: [
+            "(",
+            typeLabel === "Array" ? `Array(${value.length})` : "object",
+            ")"
+          ] })
+        ]
+      }
+    ),
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: contentWrapperStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyInspector, { target: value, depth: depth + 1 }) })
+  ] });
+};
+const headerStyle$1 = {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  cursor: "pointer",
+  fontSize: "11px",
+  padding: "2px 0",
+  userSelect: "none"
+};
+const typeHintStyle = {
+  color: "#555",
+  fontSize: "10px",
+  fontStyle: "italic"
+};
+const contentWrapperStyle = {
+  borderLeft: "1px solid rgba(255,255,255,0.1)",
+  marginLeft: "5px",
+  marginTop: "2px"
+};
+const ViewPostEffectsTab = ({ view, lastUpdateTime }) => {
+  const { redGPUContext } = useInspectorStore();
+  const { postEffectManager, rawCamera } = view;
+  if (!postEffectManager) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$2, children: "PostEffectManager not available" });
+  }
+  const { antialiasingManager } = redGPUContext;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: "General", children: /* @__PURE__ */ jsxRuntimeExports.jsx(StatItem, { label: "videoMemorySize", value: formatBytes(postEffectManager.videoMemorySize) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: "Built-in Effects", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useFXAA", value: antialiasingManager.useFXAA }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useTAA", value: antialiasingManager.useTAA }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useSSAO", value: postEffectManager.useSSAO }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "useSSR", value: postEffectManager.useSSR }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Auto Exposure", value: rawCamera.useAutoExposure }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBoolItem, { label: "Sky Atmosphere", value: !!view.skyAtmosphere }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Divider, {}),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ToneMappingView, { view })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(Section, { title: `Custom Effects (${postEffectManager.effectList.length})`, children: [
+      postEffectManager.effectList.map((effect, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(CollapsibleEffect, { effect }, i)),
+      postEffectManager.effectList.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$2, children: "No custom effects added." })
+    ] })
+  ] });
+};
+const CollapsibleEffect = ({ effect }) => {
+  const [isExpanded, setIsExpanded] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: effectContainerStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        onClick: () => setIsExpanded(!isExpanded),
+        style: effectHeaderStyle,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ToggleButton, { isExpanded, style: { marginRight: "8px" } }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: effectNameStyle, children: effect.constructor.name || "Unknown Effect" })
+        ]
+      }
+    ),
+    isExpanded && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: effectContentStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(PropertyInspector, { target: effect }) })
+  ] });
+};
+const placeholderStyle$2 = {
+  fontSize: "11px",
+  color: "#666",
+  fontStyle: "italic"
+};
+const effectContainerStyle = {
+  marginBottom: "8px",
+  background: "rgba(255,255,255,0.02)",
+  borderRadius: "4px"
+};
+const effectHeaderStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  padding: "6px 8px",
+  cursor: "pointer",
+  userSelect: "none",
+  fontSize: "12px"
+};
+const effectNameStyle = {
+  fontWeight: "bold",
+  color: "#ddd"
+};
+const effectContentStyle = {
+  padding: "8px",
+  borderTop: "1px solid rgba(255,255,255,0.05)"
+};
+const ViewListView = () => {
+  const { redGPUContext, lastUpdateTime } = useInspectorStore();
+  const [activeViewIndex, setActiveViewIndex] = reactExports.useState("0");
+  const [activeDetailTab, setActiveDetailTab] = reactExports.useState("STATE");
+  if (!redGPUContext) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle$1, children: "RedGPUContext not initialized" });
+  }
+  const { viewList } = redGPUContext;
+  const activeView = viewList[parseInt(activeViewIndex)] || viewList[0];
+  const viewTabs = viewList.map((view, index) => ({
+    id: index.toString(),
+    label: view.name || `View ${index}`
+  }));
+  const detailTabs = [
+    { id: "STATE", label: "State" },
+    { id: "COMMANDS", label: "Commands" },
+    { id: "POSTEFFECTS", label: "PostEffects" }
+  ];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$2, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: stickyHeaderStyle, children: [
+      viewList.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        TabBar,
+        {
+          tabs: viewTabs,
+          activeTab: activeViewIndex,
+          onTabChange: setActiveViewIndex,
+          isSticky: false
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        TabBar,
+        {
+          tabs: detailTabs,
+          activeTab: activeDetailTab,
+          onTabChange: setActiveDetailTab,
+          isSticky: false,
+          style: { borderTop: "none" }
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentAreaStyle, children: [
+      activeDetailTab === "STATE" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewStateTab, { view: activeView, lastUpdateTime }),
+      activeDetailTab === "COMMANDS" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewCommandsTab, { view: activeView }),
+      activeDetailTab === "POSTEFFECTS" && /* @__PURE__ */ jsxRuntimeExports.jsx(ViewPostEffectsTab, { view: activeView, lastUpdateTime })
+    ] })
+  ] });
+};
+const containerStyle$2 = {
+  display: "flex",
+  flexDirection: "column"
+};
+const stickyHeaderStyle = {
+  position: "sticky",
+  top: 0,
+  zIndex: 100,
+  background: "#111"
+};
+const contentAreaStyle = {
+  padding: "12px"
+};
+const placeholderStyle$1 = {
+  padding: "20px",
+  textAlign: "center",
+  color: "#666",
+  fontSize: "12px",
+  fontStyle: "italic"
+};
+const HierarchyItem = ({ node, depth = 0 }) => {
+  const [isExpanded, setIsExpanded] = reactExports.useState(depth < 2);
+  const hasChildren = node.children && node.children.length > 0;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginLeft: depth > 0 ? "12px" : "0" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: itemHeaderStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ToggleButton,
+        {
+          isExpanded,
+          onClick: () => hasChildren && setIsExpanded(!isExpanded),
+          visible: hasChildren,
+          style: { marginRight: "6px" }
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle$1, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: nameStyle, children: node.name }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: typeStyle, children: node.type })
+      ] })
+    ] }),
+    isExpanded && hasChildren && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: childrenContainerStyle, children: node.children.map((child) => /* @__PURE__ */ jsxRuntimeExports.jsx(HierarchyItem, { node: child, depth: depth + 1 }, child.id)) })
+  ] });
+};
+const itemHeaderStyle = {
+  display: "flex",
+  alignItems: "center",
+  padding: "4px 0",
+  cursor: "default",
+  fontSize: "12px",
+  fontFamily: THEME.fontFamily
+};
+const contentStyle$1 = {
+  display: "flex",
+  alignItems: "baseline",
+  gap: "8px",
+  flex: 1,
+  minWidth: 0
+};
+const nameStyle = {
+  color: "#eee",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis"
+};
+const typeStyle = {
+  color: "#666",
+  fontSize: "10px",
+  fontStyle: "italic"
+};
+const childrenContainerStyle = {
+  borderLeft: "1px solid rgba(255, 255, 255, 0.1)",
+  marginLeft: "6px"
+};
+const SceneView = () => {
+  const { hierarchy, redGPUContext, lastUpdateTime } = useInspectorStore();
+  const viewNames = Object.keys(hierarchy);
+  const [activeViewName, setActiveViewName] = reactExports.useState(viewNames[0] || "");
+  if (viewNames.length === 0 || !redGPUContext) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: placeholderStyle, children: "No scene data available." });
+  }
+  const tabs = viewNames.map((name) => ({ id: name, label: name }));
+  const activeViewInstance = redGPUContext.viewList.find((v2, idx) => {
+    const name = v2.name || `View ${idx}`;
+    return name === (activeViewName || viewNames[0]);
+  });
+  const activeHierarchy = hierarchy[activeViewName || viewNames[0]];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: containerStyle$1, children: [
+    viewNames.length > 1 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: tabWrapperStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      TabBar,
+      {
+        tabs,
+        activeTab: activeViewName || viewNames[0],
+        onTabChange: setActiveViewName,
+        isSticky: false
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: contentStyle, children: [
+      (activeViewInstance == null ? void 0 : activeViewInstance.scene) && /* @__PURE__ */ jsxRuntimeExports.jsx(SceneInfoView, { scene: activeViewInstance.scene }),
+      activeHierarchy && /* @__PURE__ */ jsxRuntimeExports.jsx(Section, { title: "Scene Tree", children: /* @__PURE__ */ jsxRuntimeExports.jsx(HierarchyItem, { node: activeHierarchy }) })
+    ] })
+  ] });
+};
+const containerStyle$1 = {
+  display: "flex",
+  flexDirection: "column"
+};
+const tabWrapperStyle = {
+  background: "rgba(255,255,255,0.03)"
+};
+const contentStyle = {
+  padding: "12px"
+};
+const placeholderStyle = {
+  padding: "20px",
+  textAlign: "center",
+  color: "#666",
+  fontSize: "12px",
+  fontStyle: "italic"
+};
+const TabContent = reactExports.memo(() => {
+  const currentTab = useInspectorStore((state) => state.currentTab);
+  switch (currentTab) {
+    case "STATE":
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(Container, { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(TotalState, {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CommandBatchStatsView, {})
+      ] });
+    case "HIERARCHY":
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(SceneView, {});
+    case "CONTEXT":
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(RedGPUContextView, {}) });
+    case "VIEWS":
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(ViewListView, {});
+    case "RESOURCES":
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(Container, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ResourcesView, {}) });
+    default:
+      return null;
+  }
+});
+const Container = ({ children, style }) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { ...containerStyle, ...style }, children });
+const containerStyle = {
+  padding: "12px"
+};
+const App = () => {
+  const useDebugPanel = useInspectorStore((state) => state.useDebugPanel);
+  const setUseDebugPanel = useInspectorStore((state) => state.setUseDebugPanel);
+  const { currentTab, setCurrentTab } = useInspectorStore();
+  if (!useDebugPanel) return null;
+  const tabs = [
+    { id: "STATE", label: "State" },
+    { id: "CONTEXT", label: "RedGPUContext" },
+    { id: "VIEWS", label: "View" },
+    { id: "HIERARCHY", label: "Scene" },
+    { id: "RESOURCES", label: "Resources" }
+  ];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: panelStyle, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: headerStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: titleLabelStyle, children: "Performance Monitor" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setUseDebugPanel(false), style: closeBtnStyle, children: "CLOSE" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(FPS, {}),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Tabs, { tabs, activeTab: currentTab, onTabChange: setCurrentTab, children: /* @__PURE__ */ jsxRuntimeExports.jsx(TabContent, {}) })
+  ] });
+};
+const panelStyle = {
+  position: "fixed",
+  left: 0,
+  top: 0,
+  width: "400px",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  backgroundColor: "rgba(0, 0, 0, 0.9)",
+  color: "white",
+  fontFamily: "monospace",
+  zIndex: 1e5,
+  boxShadow: "0 0 20px rgba(0,0,0,0.5)",
+  borderTopRightRadius: "8px",
+  overflow: "hidden"
+};
+const headerStyle = {
+  padding: "10px 12px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  background: "rgba(255, 255, 255, 0.05)",
+  borderBottom: "1px solid rgba(255, 255, 255, 0.1)"
+};
+const titleLabelStyle = {
+  fontSize: "14px",
+  fontWeight: "bold",
+  color: "#fdb48d"
+};
+const closeBtnStyle = {
+  backgroundColor: "#c00",
+  color: "white",
+  border: "none",
+  padding: "4px 8px",
+  cursor: "pointer",
+  fontSize: "10px",
+  fontWeight: "bold",
+  borderRadius: "4px"
+};
+const getHierarchy = (container) => {
+  const children = container.children || [];
+  return {
+    id: container.uuid || container.instanceId || Math.random().toString(),
+    name: container.name || container.constructor.name,
+    type: container.constructor.name,
+    children: children.map((child) => getHierarchy(child))
+  };
+};
+const collectStats = (redGPUContext, time) => {
+  let totalNum3DGroups = 0;
+  let totalNum3DObjects = 0;
+  let totalNumInstances = 0;
+  let totalNumDrawCalls = 0;
+  let totalNumTriangles = 0;
+  let totalNumPoints = 0;
+  let totalUsedVideoMemory = 0;
+  const aggregatedBatchStats = {};
+  const hierarchy = {};
+  const viewList = redGPUContext.viewList;
+  const viewListLen = viewList.length;
+  for (let i = 0; i < viewListLen; i++) {
+    const view = viewList[i];
+    const state = view.renderViewStateData;
+    totalNum3DGroups += state.num3DGroups;
+    totalNum3DObjects += state.num3DObjects;
+    totalNumInstances += state.numInstances;
+    totalNumDrawCalls += state.numDrawCalls;
+    totalNumTriangles += state.numTriangles;
+    totalNumPoints += state.numPoints;
+    totalUsedVideoMemory += state.usedVideoMemory;
+    if (view.scene) {
+      hierarchy[view.name || `View ${i}`] = getHierarchy(view.scene);
+    }
+    if (state.commandBatchStats) {
+      for (const phase in state.commandBatchStats) {
+        const phaseStats = state.commandBatchStats[phase];
+        if (!aggregatedBatchStats[phase]) {
+          aggregatedBatchStats[phase] = {
+            "Command Buffers": 0,
+            "Render Passes": { count: 0, list: [] },
+            "Compute Passes": { count: 0, list: [] },
+            "Raw Usages": 0
+          };
+        }
+        const agg = aggregatedBatchStats[phase];
+        agg["Command Buffers"] += phaseStats["Command Buffers"];
+        agg["Render Passes"].count += phaseStats["Render Passes"].count;
+        const renderList = phaseStats["Render Passes"].list;
+        const aggRenderList = agg["Render Passes"].list;
+        for (let j = 0; j < renderList.length; j++) {
+          if (aggRenderList.indexOf(renderList[j]) === -1) aggRenderList.push(renderList[j]);
+        }
+        agg["Compute Passes"].count += phaseStats["Compute Passes"].count;
+        const computeList = phaseStats["Compute Passes"].list;
+        const aggComputeList = agg["Compute Passes"].list;
+        for (let j = 0; j < computeList.length; j++) {
+          if (aggComputeList.indexOf(computeList[j]) === -1) aggComputeList.push(computeList[j]);
+        }
+        agg["Raw Usages"] += phaseStats["Raw Usages"];
+      }
+    }
+  }
+  const rm = redGPUContext.resourceManager;
+  const resourceStats = {
+    bitmapTexture: {
+      count: rm.managedBitmapTextureState.table.size,
+      videoMemory: rm.managedBitmapTextureState.videoMemory
+    },
+    cubeTexture: {
+      count: rm.managedCubeTextureState.table.size,
+      videoMemory: rm.managedCubeTextureState.videoMemory
+    },
+    hdrTexture: { count: rm.managedHDRTextureState.table.size, videoMemory: rm.managedHDRTextureState.videoMemory },
+    uniformBuffer: {
+      count: rm.managedUniformBufferState.table.size,
+      videoMemory: rm.managedUniformBufferState.videoMemory
+    },
+    vertexBuffer: {
+      count: rm.managedVertexBufferState.table.size,
+      videoMemory: rm.managedVertexBufferState.videoMemory
+    },
+    indexBuffer: {
+      count: rm.managedIndexBufferState.table.size,
+      videoMemory: rm.managedIndexBufferState.videoMemory
+    },
+    storageBuffer: {
+      count: rm.managedStorageBufferState.table.size,
+      videoMemory: rm.managedStorageBufferState.videoMemory
+    },
+    gpuBuffer: { count: 0, videoMemory: 0 }
+  };
+  totalUsedVideoMemory += resourceStats.bitmapTexture.videoMemory;
+  totalUsedVideoMemory += resourceStats.cubeTexture.videoMemory;
+  totalUsedVideoMemory += resourceStats.hdrTexture.videoMemory;
+  totalUsedVideoMemory += resourceStats.uniformBuffer.videoMemory;
+  totalUsedVideoMemory += resourceStats.vertexBuffer.videoMemory;
+  totalUsedVideoMemory += resourceStats.indexBuffer.videoMemory;
+  totalUsedVideoMemory += resourceStats.storageBuffer.videoMemory;
+  const gpuBufferMap = rm.resources.get("GPUBuffer");
+  if (gpuBufferMap) {
+    resourceStats.gpuBuffer.count = gpuBufferMap.size;
+    resourceStats.gpuBuffer.videoMemory = gpuBufferMap.videoMemory || 0;
+    totalUsedVideoMemory += resourceStats.gpuBuffer.videoMemory;
+  }
+  return {
+    lastUpdateTime: time,
+    totalNum3DGroups,
+    totalNum3DObjects,
+    totalNumInstances,
+    totalNumDrawCalls,
+    totalNumTriangles,
+    totalNumPoints,
+    totalUsedVideoMemory,
+    pixelRectArray: redGPUContext.sizeManager.pixelRectArray,
+    // Use reference if possible
+    commandBatchStats: aggregatedBatchStats,
+    hierarchy,
+    resourceStats
+  };
+};
+class RedGPUInspector {
   constructor(redGPUContext) {
     __publicField(this, "root", null);
     __publicField(this, "domRoot", null);
-    useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
-    const currentExample = findCurrentExample(window.location.pathname);
-    useExampleHelperStore.getState().setCurrentExample(currentExample);
-    this.init();
+    __publicField(this, "rafId", null);
+    __publicField(this, "redGPUContext", null);
+    __publicField(this, "fpsMeter", new FPSMeter());
+    this.redGPUContext = redGPUContext;
+    useInspectorStore.getState().setRedGPUContext(redGPUContext);
+    useInspectorStore.subscribe((state) => {
+      if (state.useDebugPanel) {
+        this.ensureMounted();
+        this.startLoop();
+      } else {
+        this.stopLoop();
+        this.unmount();
+      }
+    });
   }
-  destroy() {
+  get useDebugPanel() {
+    return useInspectorStore.getState().useDebugPanel;
+  }
+  set useDebugPanel(value) {
+    useInspectorStore.getState().setUseDebugPanel(value);
+  }
+  /**
+   * 엔진의 렌더 루프에서 호출됩니다.
+   */
+  render() {
+    if (this.useDebugPanel) {
+      this.ensureMounted();
+      this.startLoop();
+    }
+  }
+  startLoop() {
+    if (this.rafId) return;
+    const loop = (time) => {
+      if (!this.useDebugPanel) {
+        this.stopLoop();
+        return;
+      }
+      this.updateStats(time);
+      this.rafId = requestAnimationFrame(loop);
+    };
+    this.rafId = requestAnimationFrame(loop);
+  }
+  stopLoop() {
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+  }
+  updateStats(time) {
+    if (!this.redGPUContext) return;
+    const stats = collectStats(this.redGPUContext, time);
+    const fpsStats = this.fpsMeter.update(time);
+    useInspectorStore.getState().setStats({
+      ...stats,
+      ...fpsStats || {}
+    });
+  }
+  ensureMounted() {
+    if (!this.domRoot) {
+      this.domRoot = document.createElement("div");
+      this.domRoot.className = "RedGPUDebugPanel-React";
+      document.body.appendChild(this.domRoot);
+      this.root = client.createRoot(this.domRoot);
+      this.root.render(
+        /* @__PURE__ */ jsxRuntimeExports.jsx(React$2.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(App, {}) })
+      );
+    }
+  }
+  unmount() {
     if (this.root) {
       this.root.unmount();
       this.root = null;
@@ -10582,18 +12050,7 @@ class RedGPUExampleHelper {
       this.domRoot = null;
     }
   }
-  init() {
-    if (!this.domRoot) {
-      this.domRoot = document.createElement("div");
-      this.domRoot.className = "RedGPUExampleHelper";
-      document.body.appendChild(this.domRoot);
-      this.root = client.createRoot(this.domRoot);
-      this.root.render(
-        /* @__PURE__ */ jsxRuntimeExports.jsx(React$2.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(App, {}) })
-      );
-    }
-  }
 }
 export {
-  RedGPUExampleHelper as default
+  RedGPUInspector as default
 };

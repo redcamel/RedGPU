@@ -1,9 +1,9 @@
 import React, {useEffect} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from './store';
 import Footer from './components/Footer';
-import TopBar from './components/TopBar';
+import ExampleHeader from './components/ExampleHeader';
 import Description from './components/Description';
-import SourceModal from './components/SourceModal';
+import SourceModal from './components/basic/SourceModal';
 import debugIcon from './assets/icons/debug.svg';
 import axisIcon from './assets/icons/axis.svg';
 import gridIcon from './assets/icons/grid.svg';
@@ -72,7 +72,7 @@ const App = () => {
 
     return (
         <>
-            <TopBar/>
+            <ExampleHeader/>
             <Description/>
 
             <div style={panelStyle}>
