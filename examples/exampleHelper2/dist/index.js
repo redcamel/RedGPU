@@ -9885,9 +9885,11 @@ const App = () => {
 const panelStyle = {
   position: "fixed",
   right: 0,
-  top: "352px",
+  top: "53px",
+  // 상단 헤더(52px) 바로 아래 위치
   width: "320px",
-  bottom: "50px",
+  maxHeight: "calc(100vh - 103px)",
+  // 전체(100vh) - 헤더(52px) - 푸터(50px)
   display: "flex",
   flexDirection: "column",
   backgroundColor: "rgba(17, 17, 18, 0.95)",

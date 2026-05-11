@@ -43,7 +43,7 @@ const App = () => {
             const initInspector = async () => {
                 try {
                     // @ts-ignore
-                    const { default: RedGPUInspector } = await import('../../../inspector/dist/index.js');
+                    const {default: RedGPUInspector} = await import('../../../inspector/dist/index.js');
                     if (!window.redGPUInspector) {
                         window.redGPUInspector = new RedGPUInspector(redGPUContext);
                         setDebugActive(window.redGPUInspector.useDebugPanel);
@@ -124,10 +124,9 @@ const App = () => {
             <ExampleHeader/>
             <Description/>
 
-            <div style={{ ...panelStyle, display: showSettingsPanel ? 'flex' : 'none' }}>
-
+            <div style={{...panelStyle, display: showSettingsPanel ? 'flex' : 'none'}}>
                 <div style={contentStyle}>
-                    <GuiPanel />
+                    <GuiPanel/>
                 </div>
             </div>
 
@@ -141,9 +140,9 @@ const App = () => {
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
     right: 0,
-    top: '352px',
+    top: '53px', // 상단 헤더(52px) 바로 아래 위치
     width: '320px',
-    bottom: '50px',
+    maxHeight: 'calc(100vh - 103px)', // 전체(100vh) - 헤더(52px) - 푸터(50px)
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: 'rgba(17, 17, 18, 0.95)',
