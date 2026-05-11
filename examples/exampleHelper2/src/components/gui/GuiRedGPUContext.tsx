@@ -86,38 +86,38 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
             setSizeFolder.addButton({title: label}).on('click', () => redGPUContext.setSize(w, h));
         });
 
-        // Rect Info (Read-only)
-        const rectFolder = contextFolder.addFolder({title: 'Rect Info'});
+        // Rect Info (Folder)
+        const rectFolder = contextFolder.addFolder({title: 'Rect Info', expanded: true});
 
         const DPR_DATA = {
-            get devicePixelRatio() { return window.devicePixelRatio; }
+            get dpr() { return window.devicePixelRatio; }
         };
-        rectFolder.addMonitor(DPR_DATA, 'devicePixelRatio', {label: 'DPR'});
+        rectFolder.addMonitor(DPR_DATA, 'dpr', {label: 'DPR', interval: 500});
 
-        const screenFolder = rectFolder.addFolder({title: 'Screen Rect'});
-        const SCREEN_DATA = {
-            get x() { return +redGPUContext.screenRectObject.x.toFixed(2); },
-            get y() { return +redGPUContext.screenRectObject.y.toFixed(2); },
-            get width() { return +redGPUContext.screenRectObject.width.toFixed(2); },
-            get height() { return +redGPUContext.screenRectObject.height.toFixed(2); }
+        const RECT_DATA = {
+            get screen() {
+                const s = redGPUContext.screenRectObject;
+                return `x: ${s.x.toFixed(2)}, y: ${s.y.toFixed(2)}\nw: ${s.width.toFixed(2)}, h: ${s.height.toFixed(2)}`;
+            },
+            get pixel() {
+                const p = redGPUContext.pixelRectObject;
+                return `x: ${p.x}, y: ${p.y}\nw: ${p.width}, h: ${p.height}`;
+            }
         };
-        screenFolder.addMonitor(SCREEN_DATA, 'x');
-        screenFolder.addMonitor(SCREEN_DATA, 'y');
-        screenFolder.addMonitor(SCREEN_DATA, 'width');
-        screenFolder.addMonitor(SCREEN_DATA, 'height');
 
-        const pixelFolder = rectFolder.addFolder({title: 'Pixel Rect'});
-        const PIXEL_DATA = {
-            get x() { return redGPUContext.pixelRectObject.x; },
-            get y() { return redGPUContext.pixelRectObject.y; },
-            get width() { return redGPUContext.pixelRectObject.width; },
-            get height() { return redGPUContext.pixelRectObject.height; }
-        };
-        pixelFolder.addMonitor(PIXEL_DATA, 'x');
-        pixelFolder.addMonitor(PIXEL_DATA, 'y');
-        pixelFolder.addMonitor(PIXEL_DATA, 'width');
-        pixelFolder.addMonitor(PIXEL_DATA, 'height');
+        rectFolder.addMonitor(RECT_DATA, 'screen', {
+            label: 'Screen Rect',
+            multiline: true,
+            lineCount: 2,
+            interval: 32
+        });
 
+        rectFolder.addMonitor(RECT_DATA, 'pixel', {
+            label: 'Pixel Rect',
+            multiline: true,
+            lineCount: 2,
+            interval: 32
+        });
 
         return () => {
             contextFolder.dispose();
