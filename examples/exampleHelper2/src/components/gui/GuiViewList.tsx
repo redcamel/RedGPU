@@ -77,18 +77,6 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                     options: { '%': '%', 'px': 'px', 'number': 'number' }
                 }).on('change', () => updateDim(k));
             });
-
-            if (view.scene) {
-                container.addSeparator();
-                const scene = view.scene;
-                const sceneFolder = container.addFolder({title: `Scene: ${scene.name || 'Untitled'}`});
-                
-                sceneFolder.addInput(scene, 'useBackgroundColor');
-                
-                if (scene.backgroundColor) {
-                    addColorAlphaInputs(sceneFolder, scene.backgroundColor);
-                }
-            }
         };
 
         if (views.length === 1) {

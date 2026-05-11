@@ -19,6 +19,7 @@ export interface TopBarAction {
 export interface GuiConfig {
     redGPUContext?: boolean;
     viewList?: boolean;
+    scene?: boolean;
     guiCallback?: (gui: any) => void;
 }
 

@@ -64,6 +64,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        redGPUContext: true
+        viewList: true,
+        scene: true
     });
 };
