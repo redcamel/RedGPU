@@ -56,7 +56,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // GUI Initialization
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('초기화 실패:', failReason);
@@ -65,7 +65,7 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
-const renderTestPane = async (redGPUContext, view) => {
+const renderTestPane = async (redGPUContext) => {
     const helper = new RedGPUExampleHelper(redGPUContext,{
         viewList:true
     });

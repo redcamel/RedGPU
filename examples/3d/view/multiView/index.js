@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
-
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 /**
  * [KO] Multi View 예제
  * [EN] Multi View example
@@ -95,18 +95,8 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
 const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setViewListTest,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
-    setViewListTest(pane, redGPUContext.viewList, true);
+    const helper = new RedGPUExampleHelper(redGPUContext,{
+        viewList:true
+    });
 };
