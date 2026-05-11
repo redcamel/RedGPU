@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../store';
 import homeIcon from '../assets/icons/home.svg';
 import IconButton from './basic/IconButton';
+import IconToggleButton from './basic/IconToggleButton';
 import SelectBox from './basic/SelectBox';
 import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
 
@@ -16,6 +17,7 @@ const ExampleHeader = () => {
 
     const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
     const [toneMapping, setToneMapping] = useState<string>(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
+    const [ssao, setSSAO] = useState<boolean>(false);
 
     useEffect(() => {
         if (redGPUContext) {
@@ -29,6 +31,9 @@ const ExampleHeader = () => {
                 const firstView = redGPUContext.viewList[0];
                 if (firstView.toneMappingManager) {
                     setToneMapping(firstView.toneMappingManager.mode);
+                }
+                if (firstView.postEffectManager) {
+                    setSSAO(firstView.postEffectManager.useSSAO);
                 }
             }
         }
@@ -58,6 +63,18 @@ const ExampleHeader = () => {
         }
     };
 
+    const handleSSAOChange = () => {
+        const nextValue = !ssao;
+        setSSAO(nextValue);
+        if (redGPUContext) {
+            redGPUContext.viewList.forEach((view: any) => {
+                if (view.postEffectManager) {
+                    view.postEffectManager.useSSAO = nextValue;
+                }
+            });
+        }
+    };
+
     const aaOptions = [
         { value: 'NONE', label: 'NONE' },
         { value: 'useMSAA', label: 'MSAA' },
@@ -76,13 +93,12 @@ const ExampleHeader = () => {
         <header style={containerStyle}>
             <div style={navBarStyle}>
                 <div style={leftSectionStyle}>
-                    <a href="../../index.html" style={homeButtonStyle}>
-                        <img
-                            src={homeIcon}
-                            style={homeIconStyle}
-                            alt="HOME"
-                        />
-                    </a>
+                    <IconButton
+                        icon={homeIcon}
+                        label="HOME"
+                        onClick={() => { window.location.href = '../../index.html' }}
+                        title="HOME"
+                    />
                     <div style={titleBoxStyle}>
                         <span style={titleLabelStyle}>TITLE</span>
                         <span style={titleValueStyle}>
@@ -94,6 +110,8 @@ const ExampleHeader = () => {
                 <div style={rightSectionStyle}>
                     {!isMobile && (
                         <>
+
+
                             <SelectBox
                                 label="TONE MAPPING"
                                 value={toneMapping}
@@ -109,9 +127,19 @@ const ExampleHeader = () => {
                             />
                         </>
                     )}
-
+                    <IconToggleButton
+                        label="SSAO"
+                        onClick={handleSSAOChange}
+                        isActive={ssao}
+                    />
                     {topBarRightActions.map((action) => (
-                        <IconButton key={action.id} action={action} />
+                        <IconToggleButton
+                            key={action.id}
+                            icon={action.icon}
+                            label={action.label}
+                            onClick={action.onClick}
+                            isActive={!!action.isActive}
+                        />
                     ))}
                 </div>
             </div>

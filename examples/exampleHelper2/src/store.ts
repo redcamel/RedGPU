@@ -9,6 +9,7 @@ export interface TopBarAction {
     id: string;
     label: string;
     icon?: string;
+    isActive?: boolean;
     onClick: () => void;
 }
 

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from './store';
 import Footer from './components/Footer';
 import ExampleHeader from './components/ExampleHeader';
@@ -16,6 +16,22 @@ const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const addTopBarRightAction = useExampleHelperStore((state: ExampleHelperState) => state.addTopBarRightAction);
 
+    const [axisActive, setAxisActive] = useState(false);
+    const [gridActive, setGridActive] = useState(false);
+    const [debugActive, setDebugActive] = useState(false);
+
+    // Sync state with last view
+    useEffect(() => {
+        if (redGPUContext && redGPUContext.viewList.length > 0) {
+            const lastView = redGPUContext.viewList[redGPUContext.viewList.length - 1];
+            setAxisActive(!!lastView.axis);
+            setGridActive(!!lastView.grid);
+            if (window.redGPUInspector) {
+                setDebugActive(window.redGPUInspector.useDebugPanel);
+            }
+        }
+    }, [redGPUContext]);
+
     // Inspector Initialization & Debug Button
     useEffect(() => {
         if (redGPUContext) {
@@ -25,50 +41,65 @@ const App = () => {
                     const { default: RedGPUInspector } = await import('../../../inspector/dist/index.js');
                     if (!window.redGPUInspector) {
                         window.redGPUInspector = new RedGPUInspector(redGPUContext);
+                        setDebugActive(window.redGPUInspector.useDebugPanel);
                     }
-
-                    // AXIS Toggle
-                    addTopBarRightAction({
-                        id: 'axis-toggle',
-                        label: 'AXIS',
-                        icon: axisIcon,
-                        onClick: () => {
-                            redGPUContext.viewList.forEach((view: any) => {
-                                if ('axis' in view) view.axis = !view.axis;
-                            });
-                        }
-                    });
-
-                    // GRID Toggle
-                    addTopBarRightAction({
-                        id: 'grid-toggle',
-                        label: 'GRID',
-                        icon: gridIcon,
-                        onClick: () => {
-                            redGPUContext.viewList.forEach((view: any) => {
-                                if ('grid' in view) view.grid = !view.grid;
-                            });
-                        }
-                    });
-
-                    // DEBUG Toggle
-                    addTopBarRightAction({
-                        id: 'debug-toggle',
-                        label: 'DEBUG',
-                        icon: debugIcon,
-                        onClick: () => {
-                            if (window.redGPUInspector) {
-                                window.redGPUInspector.useDebugPanel = !window.redGPUInspector.useDebugPanel;
-                            }
-                        }
-                    });
                 } catch (e) {
                     console.error('Failed to load Inspector:', e);
                 }
             };
             initInspector();
         }
-    }, [redGPUContext, addTopBarRightAction]);
+    }, [redGPUContext]);
+
+    // Register Dynamic Buttons
+    useEffect(() => {
+        if (redGPUContext) {
+            // AXIS Toggle
+            addTopBarRightAction({
+                id: 'axis-toggle',
+                label: 'AXIS',
+                icon: axisIcon,
+                isActive: axisActive,
+                onClick: () => {
+                    const nextValue = !axisActive;
+                    redGPUContext.viewList.forEach((view: any) => {
+                        if ('axis' in view) view.axis = nextValue;
+                    });
+                    setAxisActive(nextValue);
+                }
+            });
+
+            // GRID Toggle
+            addTopBarRightAction({
+                id: 'grid-toggle',
+                label: 'GRID',
+                icon: gridIcon,
+                isActive: gridActive,
+                onClick: () => {
+                    const nextValue = !gridActive;
+                    redGPUContext.viewList.forEach((view: any) => {
+                        if ('grid' in view) view.grid = nextValue;
+                    });
+                    setGridActive(nextValue);
+                }
+            });
+
+            // DEBUG Toggle
+            addTopBarRightAction({
+                id: 'debug-toggle',
+                label: 'DEBUG',
+                icon: debugIcon,
+                isActive: debugActive,
+                onClick: () => {
+                    const nextValue = !debugActive;
+                    if (window.redGPUInspector) {
+                        window.redGPUInspector.useDebugPanel = nextValue;
+                    }
+                    setDebugActive(nextValue);
+                }
+            });
+        }
+    }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive]);
 
     return (
         <>

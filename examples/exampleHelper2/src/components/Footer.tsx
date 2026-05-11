@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../store';
 import githubIcon from '../assets/github.png';
 import SelectBox from './basic/SelectBox';
+import IconToggleButton from './basic/IconToggleButton';
+import LabelButton from './basic/LabelButton';
 import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
 
 /**
@@ -14,6 +16,7 @@ const Footer = () => {
 
     const [antialiasing, setAntialiasing] = useState<string>('useMSAA');
     const [toneMapping, setToneMapping] = useState<string>(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
+    const [ssao, setSSAO] = useState<boolean>(false);
 
     useEffect(() => {
         if (redGPUContext) {
@@ -27,6 +30,9 @@ const Footer = () => {
                 const firstView = redGPUContext.viewList[0];
                 if (firstView.toneMappingManager) {
                     setToneMapping(firstView.toneMappingManager.mode);
+                }
+                if (firstView.postEffectManager) {
+                    setSSAO(firstView.postEffectManager.useSSAO);
                 }
             }
         }
@@ -56,6 +62,18 @@ const Footer = () => {
         }
     };
 
+    const handleSSAOChange = () => {
+        const nextValue = !ssao;
+        setSSAO(nextValue);
+        if (redGPUContext) {
+            redGPUContext.viewList.forEach((view: any) => {
+                if (view.postEffectManager) {
+                    view.postEffectManager.useSSAO = nextValue;
+                }
+            });
+        }
+    };
+
     const aaOptions = [
         { value: 'NONE', label: 'NONE' },
         { value: 'useMSAA', label: 'MSAA' },
@@ -74,6 +92,12 @@ const Footer = () => {
         <div style={footerContainerStyle}>
             {isMobile && (
                 <div style={mobileSelectContainerStyle}>
+                    <IconToggleButton
+                        label="SSAO"
+                        onClick={handleSSAOChange}
+                        isActive={ssao}
+                    />
+
                     <SelectBox
                         label="TONE MAPPING"
                         value={toneMapping}
@@ -98,12 +122,11 @@ const Footer = () => {
                     </a>
                 </div>
                 <div style={footerRightStyle}>
-                    <button
-                        style={sourceButtonStyle}
+                    <LabelButton
+                        label="SOURCE"
                         onClick={() => setShowSourceModal(true)}
-                    >
-                        SOURCE
-                    </button>
+                        style={sourceButtonStyle}
+                    />
                 </div>
             </div>
         </div>

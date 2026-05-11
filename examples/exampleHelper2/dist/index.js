@@ -7017,9 +7017,9 @@ var React$1 = reactExports;
 function is$1(x2, y2) {
   return x2 === y2 && (0 !== x2 || 1 / x2 === 1 / y2) || x2 !== x2 && y2 !== y2;
 }
-var objectIs$1 = "function" === typeof Object.is ? Object.is : is$1, useState = React$1.useState, useEffect$1 = React$1.useEffect, useLayoutEffect = React$1.useLayoutEffect, useDebugValue$2 = React$1.useDebugValue;
+var objectIs$1 = "function" === typeof Object.is ? Object.is : is$1, useState$1 = React$1.useState, useEffect$1 = React$1.useEffect, useLayoutEffect = React$1.useLayoutEffect, useDebugValue$2 = React$1.useDebugValue;
 function useSyncExternalStore$2(subscribe, getSnapshot) {
-  var value = getSnapshot(), _useState = useState({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
+  var value = getSnapshot(), _useState = useState$1({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
   useLayoutEffect(
     function() {
       inst.value = value;
@@ -7326,6 +7326,98 @@ const optionItemStyle = {
   cursor: "pointer",
   transition: "background-color 0.1s, color 0.1s"
 };
+const IconToggleButton = ({ icon, label, isActive, onClick, title }) => {
+  const [isHovered, setIsHovered] = reactExports.useState(false);
+  const themeColor = "#fdb48d";
+  const mutedColor = "#666";
+  const activeBgColor = "#1c1c1e";
+  const activeHoverBgColor = "#252527";
+  const activeTextColor = themeColor;
+  const normalBgColor = "#111112";
+  const normalHoverBgColor = "#1a1a1c";
+  const normalTextColor = mutedColor;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      style: {
+        ...baseButtonStyle$2,
+        width: icon ? "52px" : "auto",
+        padding: icon ? "0" : "0 20px",
+        backgroundColor: isActive ? isHovered ? activeHoverBgColor : activeBgColor : isHovered ? normalHoverBgColor : normalBgColor,
+        color: isActive ? activeTextColor : normalTextColor
+      },
+      onClick,
+      title: title || label,
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+      children: icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "img",
+        {
+          src: icon,
+          style: {
+            ...iconStyle,
+            filter: isActive ? "none" : "grayscale(1)"
+          },
+          alt: label
+        }
+      ) : label
+    }
+  );
+};
+const baseButtonStyle$2 = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100%",
+  backgroundColor: "#111112",
+  color: "#fdb48d",
+  border: "none",
+  fontSize: "11px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "background-color 0.2s, color 0.2s",
+  letterSpacing: "0.05em",
+  flexShrink: 0,
+  boxSizing: "border-box"
+};
+const iconStyle = {
+  width: "24px",
+  height: "24px"
+};
+const LabelButton = ({ label, onClick, title, style }) => {
+  const [isHovered, setIsHovered] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      style: {
+        ...baseButtonStyle,
+        backgroundColor: isHovered ? "#1a1a1c" : "#111112",
+        ...style
+      },
+      onClick,
+      title: title || label,
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+      children: label
+    }
+  );
+};
+const baseButtonStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100%",
+  padding: "0 20px",
+  backgroundColor: "#111112",
+  color: "#fdb48d",
+  border: "none",
+  fontSize: "11px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "background-color 0.2s, color 0.2s",
+  letterSpacing: "0.05em",
+  flexShrink: 0
+};
 const TONE_MAPPING_MODE = {
   /**
    * [KO] 선형 톤 매핑
@@ -7355,6 +7447,7 @@ const Footer = () => {
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
   const [antialiasing, setAntialiasing] = reactExports.useState("useMSAA");
   const [toneMapping, setToneMapping] = reactExports.useState(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
+  const [ssao, setSSAO] = reactExports.useState(false);
   reactExports.useEffect(() => {
     if (redGPUContext) {
       const aaManager = redGPUContext.antialiasingManager;
@@ -7366,6 +7459,9 @@ const Footer = () => {
         const firstView = redGPUContext.viewList[0];
         if (firstView.toneMappingManager) {
           setToneMapping(firstView.toneMappingManager.mode);
+        }
+        if (firstView.postEffectManager) {
+          setSSAO(firstView.postEffectManager.useSSAO);
         }
       }
     }
@@ -7392,6 +7488,17 @@ const Footer = () => {
       });
     }
   };
+  const handleSSAOChange = () => {
+    const nextValue = !ssao;
+    setSSAO(nextValue);
+    if (redGPUContext) {
+      redGPUContext.viewList.forEach((view) => {
+        if (view.postEffectManager) {
+          view.postEffectManager.useSSAO = nextValue;
+        }
+      });
+    }
+  };
   const aaOptions = [
     { value: "NONE", label: "NONE" },
     { value: "useMSAA", label: "MSAA" },
@@ -7405,6 +7512,14 @@ const Footer = () => {
   const isMobile = (_a = redGPUContext == null ? void 0 : redGPUContext.detector) == null ? void 0 : _a.isMobile;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: footerContainerStyle, children: [
     isMobile && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: mobileSelectContainerStyle, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        IconToggleButton,
+        {
+          label: "SSAO",
+          onClick: handleSSAOChange,
+          isActive: ssao
+        }
+      ),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         SelectBox,
         {
@@ -7439,11 +7554,11 @@ const Footer = () => {
         /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "https://github.com/redcamel/RedGPU", target: "_blank", rel: "noreferrer", style: iconLinkStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: githubIcon, width: "16", height: "16", alt: "GitHub" }) })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: footerRightStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "button",
+        LabelButton,
         {
-          style: sourceButtonStyle,
+          label: "SOURCE",
           onClick: () => setShowSourceModal(true),
-          children: "SOURCE"
+          style: sourceButtonStyle
         }
       ) })
     ] })
@@ -7504,30 +7619,28 @@ const iconLinkStyle = {
   transition: "opacity 0.2s"
 };
 const homeIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23fff'%3e%3cpath%20d='M341.8%2072.6C329.5%2061.2%20310.5%2061.2%20298.3%2072.6L74.3%20280.6C64.7%20289.6%2061.5%20303.5%2066.3%20315.7C71.1%20327.9%2082.8%20336%2096%20336L112%20336L112%20512C112%20547.3%20140.7%20576%20176%20576L464%20576C499.3%20576%20528%20547.3%20528%20512L528%20336L544%20336C557.2%20336%20569%20327.9%20573.8%20315.7C578.6%20303.5%20575.4%20289.5%20565.8%20280.6L341.8%2072.6zM304%20384L336%20384C362.5%20384%20384%20405.5%20384%20432L384%20528L256%20528L256%20432C256%20405.5%20277.5%20384%20304%20384z'/%3e%3c/svg%3e";
-const IconButton = ({ action }) => {
+const IconButton = ({ icon, label, onClick, title }) => {
   const [isHovered, setIsHovered] = reactExports.useState(false);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "button",
     {
       style: {
-        ...actionButtonStyle,
-        width: action.icon ? "52px" : "auto",
-        padding: action.icon ? "0" : "0 20px",
+        ...baseButtonStyle$1,
+        width: "52px",
         backgroundColor: isHovered ? "#1a1a1c" : "#111112"
       },
-      onClick: action.onClick,
-      title: action.label,
+      onClick,
+      title: title || label,
       onMouseEnter: () => setIsHovered(true),
       onMouseLeave: () => setIsHovered(false),
-      children: action.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: action.icon, style: actionIconStyle, alt: action.label }) : action.label
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: icon, style: iconStyle$1, alt: label })
     }
   );
 };
-const actionButtonStyle = {
+const baseButtonStyle$1 = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  padding: "0 20px",
   height: "100%",
   backgroundColor: "#111112",
   color: "#fdb48d",
@@ -7536,9 +7649,11 @@ const actionButtonStyle = {
   fontWeight: "bold",
   cursor: "pointer",
   transition: "background-color 0.2s, color 0.2s",
-  letterSpacing: "0.05em"
+  letterSpacing: "0.05em",
+  padding: 0,
+  flexShrink: 0
 };
-const actionIconStyle = {
+const iconStyle$1 = {
   width: "18px",
   height: "18px"
 };
@@ -7549,6 +7664,7 @@ const ExampleHeader = () => {
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
   const [antialiasing, setAntialiasing] = reactExports.useState("useMSAA");
   const [toneMapping, setToneMapping] = reactExports.useState(TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
+  const [ssao, setSSAO] = reactExports.useState(false);
   reactExports.useEffect(() => {
     if (redGPUContext) {
       const aaManager = redGPUContext.antialiasingManager;
@@ -7560,6 +7676,9 @@ const ExampleHeader = () => {
         const firstView = redGPUContext.viewList[0];
         if (firstView.toneMappingManager) {
           setToneMapping(firstView.toneMappingManager.mode);
+        }
+        if (firstView.postEffectManager) {
+          setSSAO(firstView.postEffectManager.useSSAO);
         }
       }
     }
@@ -7586,6 +7705,17 @@ const ExampleHeader = () => {
       });
     }
   };
+  const handleSSAOChange = () => {
+    const nextValue = !ssao;
+    setSSAO(nextValue);
+    if (redGPUContext) {
+      redGPUContext.viewList.forEach((view) => {
+        if (view.postEffectManager) {
+          view.postEffectManager.useSSAO = nextValue;
+        }
+      });
+    }
+  };
   const aaOptions = [
     { value: "NONE", label: "NONE" },
     { value: "useMSAA", label: "MSAA" },
@@ -7599,14 +7729,17 @@ const ExampleHeader = () => {
   const isMobile = (_a = redGPUContext == null ? void 0 : redGPUContext.detector) == null ? void 0 : _a.isMobile;
   return /* @__PURE__ */ jsxRuntimeExports.jsx("header", { style: containerStyle$1, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: navBarStyle, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: leftSectionStyle, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "../../index.html", style: homeButtonStyle, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "img",
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        IconButton,
         {
-          src: homeIcon,
-          style: homeIconStyle,
-          alt: "HOME"
+          icon: homeIcon,
+          label: "HOME",
+          onClick: () => {
+            window.location.href = "../../index.html";
+          },
+          title: "HOME"
         }
-      ) }),
+      ),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: titleBoxStyle, children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleLabelStyle$1, children: "TITLE" }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: titleValueStyle, children: currentExample ? currentExample.name : "empty example name" })
@@ -7633,7 +7766,24 @@ const ExampleHeader = () => {
           }
         )
       ] }),
-      topBarRightActions.map((action) => /* @__PURE__ */ jsxRuntimeExports.jsx(IconButton, { action }, action.id))
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        IconToggleButton,
+        {
+          label: "SSAO",
+          onClick: handleSSAOChange,
+          isActive: ssao
+        }
+      ),
+      topBarRightActions.map((action) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        IconToggleButton,
+        {
+          icon: action.icon,
+          label: action.label,
+          onClick: action.onClick,
+          isActive: !!action.isActive
+        },
+        action.id
+      ))
     ] })
   ] }) });
 };
@@ -7668,22 +7818,6 @@ const rightSectionStyle = {
   display: "flex",
   alignItems: "stretch",
   gap: "1px"
-};
-const homeButtonStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "52px",
-  height: "100%",
-  backgroundColor: "#111112",
-  color: "white",
-  textDecoration: "none",
-  transition: "background-color 0.2s",
-  flexShrink: 0
-};
-const homeIconStyle = {
-  width: "18px",
-  height: "18px"
 };
 const titleBoxStyle = {
   display: "flex",
@@ -7920,11 +8054,24 @@ const codeStyle = {
   color: "#ccc"
 };
 const debugIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3cpath%20d='M224%20160C224%20107%20267%2064%20320%2064C373%2064%20416%20107%20416%20160L416%20163.6C416%20179.3%20403.3%20192%20387.6%20192L252.5%20192C236.8%20192%20224.1%20179.3%20224.1%20163.6L224.1%20160zM569.6%20172.8C580.2%20186.9%20577.3%20207%20563.2%20217.6L465.4%20290.9C470.7%20299.8%20474.7%20309.6%20477.2%20320L576%20320C593.7%20320%20608%20334.3%20608%20352C608%20369.7%20593.7%20384%20576%20384L480%20384L480%20416C480%20418.6%20479.9%20421.3%20479.8%20423.9L563.2%20486.4C577.3%20497%20580.2%20517.1%20569.6%20531.2C559%20545.3%20538.9%20548.2%20524.8%20537.6L461.7%20490.3C438.5%20534.5%20395.2%20566.5%20344%20574.2L344%20344C344%20330.7%20333.3%20320%20320%20320C306.7%20320%20296%20330.7%20296%20344L296%20574.2C244.8%20566.5%20201.5%20534.5%20178.3%20490.3L115.2%20537.6C101.1%20548.2%2081%20545.3%2070.4%20531.2C59.8%20517.1%2062.7%20497%2076.8%20486.4L160.2%20423.9C160.1%20421.3%20160%20418.7%20160%20416L160%20384L64%20384C46.3%20384%2032%20369.7%2032%20352C32%20334.3%2046.3%20320%2064%20320L162.8%20320C165.3%20309.6%20169.3%20299.8%20174.6%20290.9L76.8%20217.6C62.7%20207%2059.8%20186.9%2070.4%20172.8C81%20158.7%20101.1%20155.8%20115.2%20166.4L224%20248C236.3%20242.9%20249.8%20240%20264%20240L376%20240C390.2%20240%20403.7%20242.8%20416%20248L524.8%20166.4C538.9%20155.8%20559%20158.7%20569.6%20172.8z'/%3e%3c/svg%3e";
-const axisIcon = "data:image/svg+xml,%3csvg%20fill='%23ccc'%20viewBox='0%200%2014%2014'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M6.995%201.802L6.258%203.981c.154.087.328.145.509.173v3.361l-.979.565v1.082L2.922%2010.818c-.118-.155-.256-.276-.408-.366L1%2012.198l2.255-.452c-.002-.177-.038-.356-.105-.528l2.827-1.632%201.021.589%201.021-.589%202.827%201.632c-.066.171-.102.351-.105.528L13%2012.192l-1.518-1.728c-.152.09-.29.211-.405.354l-2.869-1.656v-1.082l-.979-.565V4.154c.181-.028.355-.087.509-.173L6.995%201.802z'/%3e%3c/svg%3e";
-const gridIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23ccc'%3e%3c!--%20외곽%20테두리%20--%3e%3cpath%20d='M160%2096C124.7%2096%2096%20124.7%2096%20160v320c0%2035.3%2028.7%2064%2064%2064h320c35.3%200%2064-28.7%2064-64V160c0-35.3-28.7-64-64-64H160zm0%2032h320c17.7%200%2032%2014.3%2032%2032v320c0%2017.7-14.3%2032-32%2032H160c-17.7%200-32-14.3-32-32V160c0-17.7%2014.3-32%2032-32z'/%3e%3c!--%20세로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='240'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='316'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='392'%20y='128'%20width='8'%20height='384'/%3e%3c!--%20가로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='128'%20y='240'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='316'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='392'%20width='384'%20height='8'/%3e%3c/svg%3e";
+const axisIcon = "data:image/svg+xml,%3csvg%20fill='%23fdb48d'%20viewBox='0%200%2014%2014'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M6.995%201.802L6.258%203.981c.154.087.328.145.509.173v3.361l-.979.565v1.082L2.922%2010.818c-.118-.155-.256-.276-.408-.366L1%2012.198l2.255-.452c-.002-.177-.038-.356-.105-.528l2.827-1.632%201.021.589%201.021-.589%202.827%201.632c-.066.171-.102.351-.105.528L13%2012.192l-1.518-1.728c-.152.09-.29.211-.405.354l-2.869-1.656v-1.082l-.979-.565V4.154c.181-.028.355-.087.509-.173L6.995%201.802z'/%3e%3c/svg%3e";
+const gridIcon = "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20640%20640'%20fill='%23fdb48d'%3e%3c!--%20외곽%20테두리%20--%3e%3cpath%20d='M160%2096C124.7%2096%2096%20124.7%2096%20160v320c0%2035.3%2028.7%2064%2064%2064h320c35.3%200%2064-28.7%2064-64V160c0-35.3-28.7-64-64-64H160zm0%2032h320c17.7%200%2032%2014.3%2032%2032v320c0%2017.7-14.3%2032-32%2032H160c-17.7%200-32-14.3-32-32V160c0-17.7%2014.3-32%2032-32z'/%3e%3c!--%20세로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='240'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='316'%20y='128'%20width='8'%20height='384'/%3e%3crect%20x='392'%20y='128'%20width='8'%20height='384'/%3e%3c!--%20가로%20그리드%20선들%20(3줄)%20--%3e%3crect%20x='128'%20y='240'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='316'%20width='384'%20height='8'/%3e%3crect%20x='128'%20y='392'%20width='384'%20height='8'/%3e%3c/svg%3e";
 const App = () => {
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
   const addTopBarRightAction = useExampleHelperStore((state) => state.addTopBarRightAction);
+  const [axisActive, setAxisActive] = reactExports.useState(false);
+  const [gridActive, setGridActive] = reactExports.useState(false);
+  const [debugActive, setDebugActive] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    if (redGPUContext && redGPUContext.viewList.length > 0) {
+      const lastView = redGPUContext.viewList[redGPUContext.viewList.length - 1];
+      setAxisActive(!!lastView.axis);
+      setGridActive(!!lastView.grid);
+      if (window.redGPUInspector) {
+        setDebugActive(window.redGPUInspector.useDebugPanel);
+      }
+    }
+  }, [redGPUContext]);
   reactExports.useEffect(() => {
     if (redGPUContext) {
       const initInspector = async () => {
@@ -7932,44 +8079,58 @@ const App = () => {
           const { default: RedGPUInspector } = await import("./index-Bcs_PMTN.js");
           if (!window.redGPUInspector) {
             window.redGPUInspector = new RedGPUInspector(redGPUContext);
+            setDebugActive(window.redGPUInspector.useDebugPanel);
           }
-          addTopBarRightAction({
-            id: "axis-toggle",
-            label: "AXIS",
-            icon: axisIcon,
-            onClick: () => {
-              redGPUContext.viewList.forEach((view) => {
-                if ("axis" in view) view.axis = !view.axis;
-              });
-            }
-          });
-          addTopBarRightAction({
-            id: "grid-toggle",
-            label: "GRID",
-            icon: gridIcon,
-            onClick: () => {
-              redGPUContext.viewList.forEach((view) => {
-                if ("grid" in view) view.grid = !view.grid;
-              });
-            }
-          });
-          addTopBarRightAction({
-            id: "debug-toggle",
-            label: "DEBUG",
-            icon: debugIcon,
-            onClick: () => {
-              if (window.redGPUInspector) {
-                window.redGPUInspector.useDebugPanel = !window.redGPUInspector.useDebugPanel;
-              }
-            }
-          });
         } catch (e) {
           console.error("Failed to load Inspector:", e);
         }
       };
       initInspector();
     }
-  }, [redGPUContext, addTopBarRightAction]);
+  }, [redGPUContext]);
+  reactExports.useEffect(() => {
+    if (redGPUContext) {
+      addTopBarRightAction({
+        id: "axis-toggle",
+        label: "AXIS",
+        icon: axisIcon,
+        isActive: axisActive,
+        onClick: () => {
+          const nextValue = !axisActive;
+          redGPUContext.viewList.forEach((view) => {
+            if ("axis" in view) view.axis = nextValue;
+          });
+          setAxisActive(nextValue);
+        }
+      });
+      addTopBarRightAction({
+        id: "grid-toggle",
+        label: "GRID",
+        icon: gridIcon,
+        isActive: gridActive,
+        onClick: () => {
+          const nextValue = !gridActive;
+          redGPUContext.viewList.forEach((view) => {
+            if ("grid" in view) view.grid = nextValue;
+          });
+          setGridActive(nextValue);
+        }
+      });
+      addTopBarRightAction({
+        id: "debug-toggle",
+        label: "DEBUG",
+        icon: debugIcon,
+        isActive: debugActive,
+        onClick: () => {
+          const nextValue = !debugActive;
+          if (window.redGPUInspector) {
+            window.redGPUInspector.useDebugPanel = nextValue;
+          }
+          setDebugActive(nextValue);
+        }
+      });
+    }
+  }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(ExampleHeader, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Description, {}),
