@@ -9,6 +9,7 @@ import axisIcon from './assets/icons/axis.svg';
 import gridIcon from './assets/icons/grid.svg';
 import settingIcon from './assets/icons/gears-solid-full.svg';
 import GuiPanel from './components/gui/GuiPanel';
+import {useMediaQuery} from './utils/useMediaQuery';
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -24,6 +25,8 @@ const App = () => {
     const [axisActive, setAxisActive] = useState(false);
     const [gridActive, setGridActive] = useState(false);
     const [debugActive, setDebugActive] = useState(false);
+
+    const isNarrow = useMediaQuery(768);
 
     // Sync state with last view
     useEffect(() => {
@@ -119,12 +122,18 @@ const App = () => {
         }
     }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiConfig, showSettingsPanel, setShowSettingsPanel]);
 
+    const dynamicPanelStyle = {
+        ...panelStyle,
+        maxHeight: isNarrow ? 'calc(100vh - 155px)' : 'calc(100vh - 103px)',
+        display: showSettingsPanel ? 'flex' : 'none'
+    };
+
     return (
         <>
             <ExampleHeader/>
             <Description/>
 
-            <div style={{...panelStyle, display: showSettingsPanel ? 'flex' : 'none'}}>
+            <div style={dynamicPanelStyle}>
                 <div style={contentStyle}>
                     <GuiPanel/>
                 </div>

@@ -84,6 +84,38 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
             setSizeFolder.add(btnObj, label);
         });
 
+        // Rect Info (Read-only)
+        const rectFolder = contextFolder.addFolder('Rect Info');
+
+        const DPR_DATA = {
+            get devicePixelRatio() { return window.devicePixelRatio; }
+        };
+        rectFolder.add(DPR_DATA, 'devicePixelRatio').name('devicePixelRatio').listen().disable();
+
+        const screenFolder = rectFolder.addFolder('Screen Rect');
+        const SCREEN_DATA = {
+            get x() { return +redGPUContext.screenRectObject.x.toFixed(2); },
+            get y() { return +redGPUContext.screenRectObject.y.toFixed(2); },
+            get width() { return +redGPUContext.screenRectObject.width.toFixed(2); },
+            get height() { return +redGPUContext.screenRectObject.height.toFixed(2); }
+        };
+        screenFolder.add(SCREEN_DATA, 'x').name('x').listen().disable();
+        screenFolder.add(SCREEN_DATA, 'y').name('y').listen().disable();
+        screenFolder.add(SCREEN_DATA, 'width').name('width').listen().disable();
+        screenFolder.add(SCREEN_DATA, 'height').name('height').listen().disable();
+
+        const pixelFolder = rectFolder.addFolder('Pixel Rect');
+        const PIXEL_DATA = {
+            get x() { return redGPUContext.pixelRectObject.x; },
+            get y() { return redGPUContext.pixelRectObject.y; },
+            get width() { return redGPUContext.pixelRectObject.width; },
+            get height() { return redGPUContext.pixelRectObject.height; }
+        };
+        pixelFolder.add(PIXEL_DATA, 'x').name('x').listen().disable();
+        pixelFolder.add(PIXEL_DATA, 'y').name('y').listen().disable();
+        pixelFolder.add(PIXEL_DATA, 'width').name('width').listen().disable();
+        pixelFolder.add(PIXEL_DATA, 'height').name('height').listen().disable();
+
 
         return () => {
             contextFolder.destroy();
