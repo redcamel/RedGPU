@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Circle Primitive 예제
@@ -8,133 +9,185 @@ import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
  * [EN] Demonstrates how to create a Circle primitive and control all its properties in real-time.
  */
 
+// [KO] 캔버스 생성 및 문서에 추가
+// [EN] Create canvas and append to document
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+// [KO] RedGPU 초기화
+// [EN] Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // [KO] 카메라 컨트롤러 생성 (OrbitController)
+        // [EN] Create camera controller (OrbitController)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 10;
         controller.tilt = -45;
         controller.speedDistance = 0.3;
 
+        // [KO] 씬 및 뷰 생성
+        // [EN] Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
+        // [KO] 컨텍스트에 뷰 추가
+        // [EN] Add view to context
         redGPUContext.addView(view);
 
         createPrimitive(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        renderer.start(redGPUContext);
+        // [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create renderer and start loop
+        const renderer = new RedGPU.Renderer();
+        const render = (time) => {
+            // [KO] 매 프레임 실행될 로직 작성
+            // [EN] Write logic to be executed every frame
+        };
+        renderer.start(redGPUContext, render);
 
+        // [KO] 테스트용 GUI 렌더링
+        // [EN] Render GUI for testing
         renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error("Initialization failed:", failReason);
+        // [KO] 초기화 실패 시 에러 처리
+        // [EN] Error handling on initialization failure
+        console.error('초기화 실패:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
 
+/**
+ * [KO] Circle 메시 4종(Line / Triangle Grid / Triangle Radial / Point)과 타이틀 텍스트를 씬에 추가합니다.
+ * [EN] Adds 4 Circle meshes (Line / Triangle Grid / Triangle Radial / Point) and a title text to the scene.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ */
 const createPrimitive = (redGPUContext, scene) => {
-    const materials = {
-        solid: new RedGPU.Material.BitmapMaterial(
-            redGPUContext,
-            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
-        ),
-        radialTest: new RedGPU.Material.BitmapMaterial(
-            redGPUContext,
-            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')
-        ),
-        wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
-        point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
+    // [KO] 재질 생성 (BitmapMaterial 2종, ColorMaterial 2종)
+    // [EN] Create materials (2x BitmapMaterial, 2x ColorMaterial)
+    const MAT = {
+        grid:    new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')),
+        radial:  new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')),
+        line:    new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
+        point:   new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    const gap = 3.5;
-    const items = [
-        {material: materials.wireframe, position: [-gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST, label: 'Line List<br/>(Planar Mode)', isRadial: false},
-        {material: materials.solid, position: [-gap * 0.5, 0, 0], label: 'Triangle List<br/>(Planar Mode)', isRadial: false},
-        {material: materials.radialTest, position: [gap * 0.5, 0, 0], label: 'Triangle List<br/>(Radial Mode)', isRadial: true},
-        {material: materials.point, position: [gap * 1.5, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'Point List<br/>(Planar Mode)', isRadial: false},
+    // [KO] 공유 Circle 지오메트리 (radius=1, radialSegments=64)
+    // [EN] Shared Circle geometry (radius=1, radialSegments=64)
+    const circleGeometry = new RedGPU.Primitive.Circle(redGPUContext, 1, 64, 0, Math.PI * 2, false);
+
+    // [KO] 표시할 메시 목록 (좌→우 순서)
+    // [EN] Mesh list to display (left to right)
+    const GAP = 3.5;
+    const MESH_ITEMS = [
+        {material: MAT.line,    x: -GAP * 1.5, topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST,  label: 'Line List<br/>(Planar)'},
+        {material: MAT.grid,    x: -GAP * 0.5,                                                     label: 'Triangle List<br/>(Grid)', isRadial: false},
+        {material: MAT.radial,  x:  GAP * 0.5,                                                     label: 'Triangle List<br/>(Radial)', isRadial: true},
+        {material: MAT.point,   x:  GAP * 1.5, topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'Point List'},
     ];
 
-    items.forEach(({material, position, topology, label: labelText, isRadial}) => {
-        const circleGeometry = new RedGPU.Primitive.Circle(redGPUContext, 1, 64, 0, Math.PI * 2, isRadial);
+    // [KO] 메시 및 라벨 생성
+    // [EN] Create meshes and labels
+    MESH_ITEMS.forEach(({material, x, topology, label, isRadial}) => {
         const mesh = new RedGPU.Display.Mesh(redGPUContext, circleGeometry, material);
-        if (!mesh.userData) mesh.userData = {}; // userData 초기화
-        mesh.userData.isRadial = isRadial; // 지오메트리 업데이트를 위해 저장
+        if (!mesh.userData) mesh.userData = {};
+        mesh.userData.isRadial = isRadial || false;
         if (topology) mesh.primitiveState.topology = topology;
-        mesh.setPosition(...position);
+        mesh.setPosition(x, 0, 0);
         scene.addChild(mesh);
 
-        const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.setPosition(position[0], 2.0, position[2]);
-        label.text = labelText;
-        label.color = '#ffffff';
-        label.fontSize = 32;
-        label.worldSize = labelText.includes('<br/>') ? 1.0 : 0.5;
-        scene.addChild(label);
+        const text = new RedGPU.Display.TextField3D(redGPUContext);
+        text.setPosition(x, 2.0, 0);
+        text.text      = label;
+        text.color     = '#ffffff';
+        text.fontSize  = 32;
+        text.worldSize = label.includes('<br/>') ? 1.0 : 0.5;
+        scene.addChild(text);
     });
 
-    const titleText = new RedGPU.Display.TextField3D(redGPUContext);
-    titleText.setPosition(0, -2.3, 0);
-    titleText.text = 'Customizable Circle Primitive';
-    titleText.color = '#ffffff';
-    titleText.fontSize = 96;
-    titleText.fontWeight = 500;
-    titleText.worldSize = 1.3;
-    scene.addChild(titleText);
+    // [KO] 타이틀 텍스트
+    // [EN] Title text
+    const title = new RedGPU.Display.TextField3D(redGPUContext);
+    title.setPosition(0, -2.3, 0);
+    title.text       = 'Customizable Circle Primitive';
+    title.color      = '#ffffff';
+    title.fontSize   = 96;
+    title.fontWeight = 500;
+    title.worldSize  = 1.3;
+    scene.addChild(title);
 };
 
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
-
+/**
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
+const renderTestPane = (redGPUContext) => {
+    // [KO] GUI와 동기화되는 설정값
+    // [EN] Config values synced with GUI
     const config = {
         radius: 1,
         radialSegments: 64,
         thetaStart: 0,
         thetaLength: Math.PI * 2,
-        cullMode: RedGPU.GPU_CULL_MODE.BACK
+        cullMode: RedGPU.GPU_CULL_MODE.BACK,
     };
 
+    // [KO] 씬의 Mesh(TextField3D 제외) 목록을 반환하는 헬퍼
+    // [EN] Helper that returns Mesh list from scene (excluding TextField3D)
+    const getMeshes = () =>
+        redGPUContext.viewList[0].scene.children.filter(
+            obj => obj instanceof RedGPU.Display.Mesh && !(obj instanceof RedGPU.Display.TextField3D)
+        );
+
+    // [KO] 설정값으로 Circle 지오메트리를 재생성하여 모든 메시에 적용
+    // [EN] Rebuild Circle geometry from config and apply to all meshes
     const updateGeometry = () => {
-        const meshList = redGPUContext.viewList[0].scene.children;
-        meshList.forEach((mesh) => {
-            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.geometry = new RedGPU.Primitive.Circle(
-                    redGPUContext,
-                    config.radius, config.radialSegments, config.thetaStart, config.thetaLength, mesh.userData.isRadial
-                );
-            }
+        const newGeometry = new RedGPU.Primitive.Circle(
+            redGPUContext,
+            config.radius, config.radialSegments,
+            config.thetaStart, config.thetaLength
+        );
+        getMeshes().forEach(mesh => {
+            const isRadial = mesh.userData && mesh.userData.isRadial ? mesh.userData.isRadial : false;
+            mesh.geometry = new RedGPU.Primitive.Circle(
+                redGPUContext,
+                config.radius, config.radialSegments,
+                config.thetaStart, config.thetaLength, isRadial
+            );
         });
     };
 
-    const updateMaterial = () => {
-        const meshList = redGPUContext.viewList[0].scene.children;
-        meshList.forEach((mesh) => {
-            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.primitiveState.cullMode = config.cullMode;
-            }
-        });
+    // [KO] cullMode 변경을 모든 메시에 적용
+    // [EN] Apply cullMode change to all meshes
+    const updateCullMode = () => {
+        getMeshes().forEach(mesh => mesh.primitiveState.cullMode = config.cullMode);
     };
 
-    const geometryFolder = pane.addFolder({title: 'Geometry Properties', expanded: true});
-    geometryFolder.addBinding(config, 'radius', {min: 0, max: 5, step: 0.1}).on('change', updateGeometry);
-    geometryFolder.addBinding(config, 'radialSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
-    geometryFolder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
-    geometryFolder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // [KO] 지오메트리 속성
+            // [EN] Geometry properties
+            const geoFolder = pane.addFolder({title: 'Geometry', expanded: true});
+            geoFolder.addBinding(config, 'radius', {min: 0, max: 5, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'radialSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
 
-    const materialFolder = pane.addFolder({title: 'Material State', expanded: true});
-    materialFolder.addBinding(config, 'cullMode', {
-        options: {
-            NONE: RedGPU.GPU_CULL_MODE.NONE,
-            BACK: RedGPU.GPU_CULL_MODE.BACK,
-            FRONT: RedGPU.GPU_CULL_MODE.FRONT
+            // [KO] 프리미티브 상태 (Face Culling)
+            // [EN] Primitive state (Face Culling)
+            const matFolder = pane.addFolder({title: 'CullMode', expanded: true});
+            matFolder.addBinding(config, 'cullMode', {
+                options: {
+                    NONE:  RedGPU.GPU_CULL_MODE.NONE,
+                    BACK:  RedGPU.GPU_CULL_MODE.BACK,
+                    FRONT: RedGPU.GPU_CULL_MODE.FRONT,
+                }
+            }).on('change', updateCullMode);
         }
-    }).on('change', updateMaterial);
+    });
 };

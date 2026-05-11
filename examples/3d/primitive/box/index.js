@@ -171,7 +171,7 @@ const renderTestPane = (redGPUContext) => {
 
             // [KO] 메시 상태 (Face Culling)
             // [EN] Mesh state (Face Culling)
-            const matFolder = pane.addFolder({title: 'Mesh', expanded: true});
+            const matFolder = pane.addFolder({title: 'CullMode', expanded: true});
             matFolder.addBinding(config, 'cullMode', {
                 options: {
                     NONE:  RedGPU.GPU_CULL_MODE.NONE,
