@@ -141,7 +141,7 @@ const panelStyle: React.CSSProperties = {
     position: 'fixed',
     right: 0,
     top: '53px', // 상단 헤더(52px) 바로 아래 위치
-    width: '320px',
+
     maxHeight: 'calc(100vh - 103px)', // 전체(100vh) - 헤더(52px) - 푸터(50px)
     display: 'flex',
     flexDirection: 'column',

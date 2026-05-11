@@ -16,26 +16,26 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         const contextFolder = gui.addFolder('RedGPUContext');
 
         // Render Scale
-        contextFolder.add(redGPUContext, 'renderScale', 0.01, 1, 0.01).name('Render Scale');
+        contextFolder.add(redGPUContext, 'renderScale', 0.01, 1, 0.01);
 
         // Background Color
         if (redGPUContext.backgroundColor) {
             const bg = redGPUContext.backgroundColor;
             const colorProxy = {
-                get color() {
+                get backgroundColor() {
                     return bg.hex;
                 },
-                set color(v: string) {
+                set backgroundColor(v: string) {
                     bg.setColorByHEX(v);
                 }
             };
-            contextFolder.addColor(colorProxy, 'color').name('BG Color').listen();
-            contextFolder.add(bg, 'a', 0, 1, 0.01).name('BG Alpha').listen();
+            contextFolder.addColor(colorProxy, 'backgroundColor').listen();
+            contextFolder.add(bg, 'a', 0, 1, 0.01).listen();
         }
 
 
         // Alpha Mode
-        contextFolder.add(redGPUContext, 'alphaMode', ['opaque', 'premultiplied']).name('Alpha Mode');
+        contextFolder.add(redGPUContext, 'alphaMode', ['opaque', 'premultiplied']);
 
         // Size Management
         const parseSize = (value: string | number) => {
@@ -60,8 +60,8 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         const updateWidth = () => {
             redGPUContext.width = SIZE_DATA.widthUnit === 'number' ? SIZE_DATA.width : `${SIZE_DATA.width}${SIZE_DATA.widthUnit}`;
         };
-        const widthController = sizeFolder.add(SIZE_DATA, 'width', 0, initialWidth.unit === '%' ? 200 : 4096, 0.01).name('Width').onChange(updateWidth);
-        sizeFolder.add(SIZE_DATA, 'widthUnit', ['%', 'px', 'number']).name('Width Unit').onChange((unit: string) => {
+        const widthController = sizeFolder.add(SIZE_DATA, 'width', 0, initialWidth.unit === '%' ? 200 : 4096, 0.01).onChange(updateWidth);
+        sizeFolder.add(SIZE_DATA, 'widthUnit', ['%', 'px', 'number']).onChange((unit: string) => {
             widthController.max(unit === '%' ? 200 : 4096);
             updateWidth();
         });
@@ -69,8 +69,8 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         const updateHeight = () => {
             redGPUContext.height = SIZE_DATA.heightUnit === 'number' ? SIZE_DATA.height : `${SIZE_DATA.height}${SIZE_DATA.heightUnit}`;
         };
-        const heightController = sizeFolder.add(SIZE_DATA, 'height', 0, initialHeight.unit === '%' ? 200 : 4096, 0.01).name('Height').onChange(updateHeight);
-        sizeFolder.add(SIZE_DATA, 'heightUnit', ['%', 'px', 'number']).name('Height Unit').onChange((unit: string) => {
+        const heightController = sizeFolder.add(SIZE_DATA, 'height', 0, initialHeight.unit === '%' ? 200 : 4096, 0.01).onChange(updateHeight);
+        sizeFolder.add(SIZE_DATA, 'heightUnit', ['%', 'px', 'number']).onChange((unit: string) => {
             heightController.max(unit === '%' ? 200 : 4096);
             updateHeight();
         });

@@ -72,12 +72,12 @@ const lilGuiCustomStyle = `
         --slider-knob-width: 2px;
         --checkbox-size: 14px;
         
-        width: 100% !important;
+        width: 280px !important;
         box-shadow: none !important;
         border: none !important;
     }
     .lil-gui.root {
-        width: 100% !important;
+        width: 280px !important;
     }
     .lil-gui.root > .title {
         display: none !important;
