@@ -59,6 +59,16 @@ const guiContainerStyle: React.CSSProperties = {
 
 const tweakpaneCustomStyle = `
     
+    .tp-dfwv {
+        width: 100% !important;
+        position: static !important;
+    }
+    /* Label alignment across folders */
+    .tp-lblv_l {
+        width: 110px !important;
+        min-width: 110px !important;
+        padding-right: 4px !important;
+    }
 `;
 
 export default GuiPanel;
