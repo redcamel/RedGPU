@@ -7693,17 +7693,15 @@ const ExampleHeader = () => {
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: rightSectionStyle, children: [
-      !isNarrow && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          IconToggleButton,
-          {
-            label: "SSAO",
-            onClick: handleSSAOChange,
-            isActive: ssao
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(RenderingSettingsGroup, {})
-      ] }),
+      !isNarrow && /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(RenderingSettingsGroup, {}) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        IconToggleButton,
+        {
+          label: "SSAO",
+          onClick: handleSSAOChange,
+          isActive: ssao
+        }
+      ),
       topBarRightActions.map((action) => /* @__PURE__ */ jsxRuntimeExports.jsx(
         IconToggleButton,
         {

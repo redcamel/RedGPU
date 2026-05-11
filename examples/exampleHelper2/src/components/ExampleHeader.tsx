@@ -63,16 +63,16 @@ const ExampleHeader = () => {
                 <div style={rightSectionStyle}>
                     {!isNarrow && (
                         <>
-                            <IconToggleButton
-                                label="SSAO"
-                                onClick={handleSSAOChange}
-                                isActive={ssao}
-                            />
+
 
                             <RenderingSettingsGroup />
                         </>
                     )}
-
+                    <IconToggleButton
+                        label="SSAO"
+                        onClick={handleSSAOChange}
+                        isActive={ssao}
+                    />
                     {topBarRightActions.map((action) => (
                         <IconToggleButton
                             key={action.id}
