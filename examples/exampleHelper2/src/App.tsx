@@ -8,7 +8,7 @@ import debugIcon from './assets/icons/debug.svg';
 import axisIcon from './assets/icons/axis.svg';
 import gridIcon from './assets/icons/grid.svg';
 import settingIcon from './assets/icons/gears-solid-full.svg';
-import GuiPanel from './components/GuiPanel';
+import GuiPanel from './components/gui/GuiPanel';
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -145,7 +145,7 @@ const panelStyle: React.CSSProperties = {
     maxHeight: 'calc(100vh - 103px)', // 전체(100vh) - 헤더(52px) - 푸터(50px)
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: 'rgba(17, 17, 18, 0.95)',
+    backgroundColor: 'rgba(17, 17, 18, 1)',
     color: 'white',
     fontFamily: 'monospace',
     zIndex: 10002,

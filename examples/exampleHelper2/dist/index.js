@@ -7170,7 +7170,7 @@ const useExampleHelperStore = create((set) => ({
   showSourceModal: false,
   showSettingsPanel: false,
   topBarRightActions: [],
-  guiCallback: null,
+  guiConfig: null,
   setRedGPUContext: (value) => set({ redGPUContext: value }),
   setCurrentExample: (value) => set({ currentExample: value }),
   setLanguage: (value) => set({ language: value }),
@@ -7184,8 +7184,8 @@ const useExampleHelperStore = create((set) => ({
     topBarRightActions: state.topBarRightActions.filter((a) => a.id !== id2)
   })),
   clearTopBarRightActions: () => set({ topBarRightActions: [] }),
-  setGuiCallback: (callback) => {
-    set({ guiCallback: callback, showSettingsPanel: !!callback });
+  setGuiConfig: (config) => {
+    set({ guiConfig: config, showSettingsPanel: !!config });
   }
 }));
 const githubIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIFdpbmRvd3MiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MzMwNDE5NjAwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MzMwNDE5NjEwQThDMTFFOTkyMEJDMkUzNTRGNjE5NjAiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDozMzA0MTk1RTBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDozMzA0MTk1RjBBOEMxMUU5OTIwQkMyRTM1NEY2MTk2MCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Ppk8MxEAAAy3SURBVHja5Ft7VJRl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";
@@ -9711,25 +9711,129 @@ class GUI {
     return folders;
   }
 }
-const GuiPanel = () => {
-  const guiCallback = useExampleHelperStore((state) => state.guiCallback);
-  const guiContainerRef = reactExports.useRef(null);
+const GuiRedGPUContext = ({ gui, redGPUContext }) => {
   reactExports.useEffect(() => {
-    if (guiContainerRef.current && guiCallback) {
+    const contextFolder = gui.addFolder("RedGPUContext");
+    contextFolder.add(redGPUContext, "renderScale", 0.01, 1, 0.01).name("Render Scale");
+    if (redGPUContext.backgroundColor) {
+      const colorProxy = {
+        get color() {
+          const c = redGPUContext.backgroundColor;
+          return [c.r * 255, c.g * 255, c.b * 255];
+        },
+        set color(v2) {
+          redGPUContext.backgroundColor.r = v2[0] / 255;
+          redGPUContext.backgroundColor.g = v2[1] / 255;
+          redGPUContext.backgroundColor.b = v2[2] / 255;
+        },
+        get alpha() {
+          return redGPUContext.backgroundColor.a;
+        },
+        set alpha(v2) {
+          redGPUContext.backgroundColor.a = v2;
+        }
+      };
+      contextFolder.addColor(colorProxy, "color").name("BG Color");
+      contextFolder.add(colorProxy, "alpha", 0, 1, 0.01).name("BG Alpha");
+    }
+    contextFolder.add(redGPUContext, "alphaMode", ["opaque", "premultiplied"]).name("Alpha Mode");
+    const parseSize = (value) => {
+      if (typeof value === "number") return { value, unit: "number" };
+      if (value.endsWith("%")) return { value: parseFloat(value), unit: "%" };
+      if (value.endsWith("px")) return { value: parseFloat(value), unit: "px" };
+      return { value: parseFloat(value), unit: "px" };
+    };
+    const initialWidth = parseSize(redGPUContext.width);
+    const initialHeight = parseSize(redGPUContext.height);
+    const SIZE_DATA = {
+      width: initialWidth.value,
+      widthUnit: initialWidth.unit,
+      height: initialHeight.value,
+      heightUnit: initialHeight.unit
+    };
+    const sizeFolder = contextFolder.addFolder("Size");
+    const updateWidth = () => {
+      redGPUContext.width = SIZE_DATA.widthUnit === "number" ? SIZE_DATA.width : `${SIZE_DATA.width}${SIZE_DATA.widthUnit}`;
+    };
+    const widthController = sizeFolder.add(SIZE_DATA, "width", 0, initialWidth.unit === "%" ? 200 : 4096, 0.01).name("Width").onChange(updateWidth);
+    sizeFolder.add(SIZE_DATA, "widthUnit", ["%", "px", "number"]).name("Width Unit").onChange((unit) => {
+      widthController.max(unit === "%" ? 200 : 4096);
+      updateWidth();
+    });
+    const updateHeight = () => {
+      redGPUContext.height = SIZE_DATA.heightUnit === "number" ? SIZE_DATA.height : `${SIZE_DATA.height}${SIZE_DATA.heightUnit}`;
+    };
+    const heightController = sizeFolder.add(SIZE_DATA, "height", 0, initialHeight.unit === "%" ? 200 : 4096, 0.01).name("Height").onChange(updateHeight);
+    sizeFolder.add(SIZE_DATA, "heightUnit", ["%", "px", "number"]).name("Height Unit").onChange((unit) => {
+      heightController.max(unit === "%" ? 200 : 4096);
+      updateHeight();
+    });
+    const setSizeFolder = contextFolder.addFolder("setSize method test").close();
+    const TEST_SET_SIZE_DATA = [["300", "300"], ["600", "300"], ["50%", "300"], ["300", "50%"], ["100%", "100%"]];
+    TEST_SET_SIZE_DATA.forEach(([w2, h]) => {
+      const label = `setSize(${w2}, ${h})`;
+      const btnObj = { [label]: () => redGPUContext.setSize(w2, h) };
+      setSizeFolder.add(btnObj, label);
+    });
+    const debugFolder = contextFolder.addFolder("Debug").close();
+    const DEBUG_DATA = {
+      renderScale: "",
+      width: "",
+      height: "",
+      pixelRectArray: "",
+      pixelRectObject: "",
+      parentDomRect: ""
+    };
+    const debugControllers = [
+      debugFolder.add(DEBUG_DATA, "renderScale").name("renderScale").disable(),
+      debugFolder.add(DEBUG_DATA, "width").name("width").disable(),
+      debugFolder.add(DEBUG_DATA, "height").name("height").disable(),
+      debugFolder.add(DEBUG_DATA, "pixelRectArray").name("pixelRectArray").disable(),
+      debugFolder.add(DEBUG_DATA, "pixelRectObject").name("pixelRectObject").disable(),
+      debugFolder.add(DEBUG_DATA, "parentDomRect").name("parentDomRect").disable()
+    ];
+    const updateDebug = () => {
+      DEBUG_DATA.renderScale = String(redGPUContext.renderScale);
+      DEBUG_DATA.width = String(redGPUContext.width);
+      DEBUG_DATA.height = String(redGPUContext.height);
+      DEBUG_DATA.pixelRectArray = `[${redGPUContext.sizeManager.pixelRectArray.join(", ")}]`;
+      DEBUG_DATA.pixelRectObject = JSON.stringify(redGPUContext.pixelRectObject);
+      DEBUG_DATA.parentDomRect = JSON.stringify(redGPUContext.sizeManager.parentDomRect);
+      debugControllers.forEach((c) => c.updateDisplay());
+    };
+    gui.onChange(updateDebug);
+    updateDebug();
+    return () => {
+      contextFolder.destroy();
+    };
+  }, [gui, redGPUContext]);
+  return null;
+};
+const GuiPanel = () => {
+  const guiConfig = useExampleHelperStore((state) => state.guiConfig);
+  const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
+  const guiContainerRef = reactExports.useRef(null);
+  const [guiInstance, setGuiInstance] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    if (guiContainerRef.current && guiConfig) {
       const gui = new GUI({
-        container: guiContainerRef.current,
-        title: "Parameters"
+        container: guiContainerRef.current
       });
-      guiCallback(gui);
+      setGuiInstance(gui);
+      if (guiConfig.guiCallback) {
+        guiConfig.guiCallback(gui);
+      }
       return () => {
         gui.destroy();
+        setGuiInstance(null);
       };
     }
-  }, [guiCallback]);
-  if (!guiCallback) return null;
+  }, [guiConfig]);
+  if (!guiConfig) return null;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: guiContainerRef, style: guiContainerStyle }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { dangerouslySetInnerHTML: { __html: lilGuiCustomStyle$1 } })
+    guiInstance && guiConfig.redGPUContext && redGPUContext && /* @__PURE__ */ jsxRuntimeExports.jsx(GuiRedGPUContext, { gui: guiInstance, redGPUContext }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { dangerouslySetInnerHTML: { __html: lilGuiCustomStyle } })
   ] });
 };
 const guiContainerStyle = {
@@ -9737,7 +9841,7 @@ const guiContainerStyle = {
   display: "flex",
   flexDirection: "column"
 };
-const lilGuiCustomStyle$1 = `
+const lilGuiCustomStyle = `
     .lil-gui {
         --background-color: transparent;
         --text-color: #eee;
@@ -9765,6 +9869,9 @@ const lilGuiCustomStyle$1 = `
     .lil-gui.root {
         width: 100% !important;
     }
+    .lil-gui.root > .title {
+        display: none !important;
+    }
     .lil-gui .title {
         font-weight: bold;
         text-transform: uppercase;
@@ -9789,7 +9896,7 @@ const lilGuiCustomStyle$1 = `
 const App = () => {
   const redGPUContext = useExampleHelperStore((state) => state.redGPUContext);
   const addTopBarRightAction = useExampleHelperStore((state) => state.addTopBarRightAction);
-  const guiCallback = useExampleHelperStore((state) => state.guiCallback);
+  const guiConfig = useExampleHelperStore((state) => state.guiConfig);
   const showSettingsPanel = useExampleHelperStore((state) => state.showSettingsPanel);
   const setShowSettingsPanel = useExampleHelperStore((state) => state.setShowSettingsPanel);
   const [axisActive, setAxisActive] = reactExports.useState(false);
@@ -9862,7 +9969,7 @@ const App = () => {
           setDebugActive(nextValue);
         }
       });
-      if (guiCallback) {
+      if (guiConfig) {
         addTopBarRightAction({
           id: "setting-toggle",
           label: "SETTING",
@@ -9874,7 +9981,7 @@ const App = () => {
         });
       }
     }
-  }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiCallback, showSettingsPanel, setShowSettingsPanel]);
+  }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiConfig, showSettingsPanel, setShowSettingsPanel]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(ExampleHeader, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Description, {}),
@@ -9893,7 +10000,7 @@ const panelStyle = {
   // 전체(100vh) - 헤더(52px) - 푸터(50px)
   display: "flex",
   flexDirection: "column",
-  backgroundColor: "rgba(17, 17, 18, 0.95)",
+  backgroundColor: "rgba(17, 17, 18, 1)",
   color: "white",
   fontFamily: "monospace",
   zIndex: 10002,
@@ -12574,7 +12681,13 @@ class RedGPUExampleHelper {
     __publicField(this, "domRoot", null);
     useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
     if (guiCallback) {
-      useExampleHelperStore.getState().setGuiCallback(guiCallback);
+      if (typeof guiCallback === "function") {
+        useExampleHelperStore.getState().setGuiConfig({
+          guiCallback
+        });
+      } else {
+        useExampleHelperStore.getState().setGuiConfig(guiCallback);
+      }
     }
     const currentExample = findCurrentExample(window.location.pathname);
     useExampleHelperStore.getState().setCurrentExample(currentExample);

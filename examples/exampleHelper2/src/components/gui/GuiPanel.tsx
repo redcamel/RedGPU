@@ -1,6 +1,7 @@
-import React, {useEffect, useRef} from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../store';
+import React, {useEffect, useRef, useState} from 'react';
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
 import GUI from 'lil-gui';
+import GuiRedGPUContext from './GuiRedGPUContext';
 
 /**
  * [KO] lil-gui를 렌더링하고 관리하는 컴포넌트입니다.
@@ -9,45 +10,15 @@ const GuiPanel: React.FC = () => {
     const guiConfig = useExampleHelperStore((state: ExampleHelperState) => state.guiConfig);
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const guiContainerRef = useRef<HTMLDivElement>(null);
+    const [guiInstance, setGuiInstance] = useState<GUI | null>(null);
 
     // lil-gui Initialization
     useEffect(() => {
         if (guiContainerRef.current && guiConfig) {
             const gui = new GUI({
                 container: guiContainerRef.current,
-
             });
-
-            // [KO] RedGPU Context 관련 기본 설정 추가 (옵션)
-            if (guiConfig.redGPUContext && redGPUContext) {
-                const contextFolder = gui.addFolder('RedGPUContext');
-                
-                // Render Scale
-                contextFolder.add(redGPUContext, 'renderScale', 0.1, 2.0, 0.01).name('Render Scale');
-
-                // Background Color
-                if (redGPUContext.backgroundColor) {
-                    const colorProxy = {
-                        get color() {
-                            const c = redGPUContext.backgroundColor;
-                            return [c.r * 255, c.g * 255, c.b * 255];
-                        },
-                        set color(v: number[]) {
-                            redGPUContext.backgroundColor.r = v[0] / 255;
-                            redGPUContext.backgroundColor.g = v[1] / 255;
-                            redGPUContext.backgroundColor.b = v[2] / 255;
-                        },
-                        get alpha() {
-                            return redGPUContext.backgroundColor.a;
-                        },
-                        set alpha(v: number) {
-                            redGPUContext.backgroundColor.a = v;
-                        }
-                    };
-                    contextFolder.addColor(colorProxy, 'color').name('BG Color');
-                    contextFolder.add(colorProxy, 'alpha', 0, 1, 0.01).name('BG Alpha');
-                }
-            }
+            setGuiInstance(gui);
 
             // [KO] 외부에서 정의한 커스텀 GUI 추가
             if (guiConfig.guiCallback) {
@@ -56,15 +27,19 @@ const GuiPanel: React.FC = () => {
 
             return () => {
                 gui.destroy();
+                setGuiInstance(null);
             };
         }
-    }, [guiConfig, redGPUContext]);
+    }, [guiConfig]);
 
     if (!guiConfig) return null;
 
     return (
         <>
             <div ref={guiContainerRef} style={guiContainerStyle} />
+            {guiInstance && guiConfig.redGPUContext && redGPUContext && (
+                <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext} />
+            )}
             <style dangerouslySetInnerHTML={{ __html: lilGuiCustomStyle }} />
         </>
     );
