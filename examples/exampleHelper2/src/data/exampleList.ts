@@ -16,16 +16,6 @@ export const ExampleList: ExampleListType = [
                 },
             },
             {
-                name: 'Hello RedGPU',
-                path: '3d/helloWorld2',
-                description: {
-                    ko: `RedGPU의 기본 초기화 방법을 보여주는 샘플입니다. 초기화 성공 시 제공되는 RedGPUContext 객체의 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-                    en: `This example is a sample of the basic initialization of RedGPU. 
-                It also provides a live test of the basic options provided to the RedGPUContext object provided upon successful initialization.`
-
-                },
-            },
-            {
                 name: 'View3D',
                 list: [
                     {

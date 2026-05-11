@@ -124,7 +124,7 @@ const App = () => {
 
     const dynamicPanelStyle = {
         ...panelStyle,
-        maxHeight: isNarrow ? 'calc(100vh - 155px)' : 'calc(100vh - 103px)',
+        maxHeight: isNarrow ? 'calc(100vh - 160px)' : 'calc(100vh - 103px)',
         display: showSettingsPanel ? 'flex' : 'none'
     };
 
@@ -148,10 +148,8 @@ const App = () => {
 // Styles
 const panelStyle: React.CSSProperties = {
     position: 'fixed',
-    right: 0,
-    top: '53px', // 상단 헤더(52px) 바로 아래 위치
-
-    maxHeight: 'calc(100vh - 103px)', // 전체(100vh) - 헤더(52px) - 푸터(50px)
+    right: '6px',
+    top: '60px',
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: 'rgba(17, 17, 18, 1)',
@@ -160,7 +158,7 @@ const panelStyle: React.CSSProperties = {
     zIndex: 10002,
     boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
     borderLeft: '1px solid rgba(255,255,255,0.05)',
-    overflow: 'hidden'
+    overflow: 'hidden',
 };
 
 const contentStyle: React.CSSProperties = {

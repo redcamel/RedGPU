@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Single View 예제
@@ -47,14 +48,15 @@ RedGPU.init(
 
         addMeshesToScene(scene, 1000);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             // [KO] 매 프레임 로직
             // [EN] Logic per frame
         };
         renderer.start(redGPUContext, render);
 
-        renderTestPane(redGPUContext);
+        // GUI Initialization
+        renderTestPane(redGPUContext, view);
     },
     (failReason) => {
         console.error('초기화 실패:', failReason);
@@ -63,19 +65,8 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
-
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setViewListTest,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
-    setViewListTest(pane, redGPUContext.viewList, true);
+const renderTestPane = async (redGPUContext, view) => {
+    const helper = new RedGPUExampleHelper(redGPUContext,{
+        viewList:true
+    });
 };

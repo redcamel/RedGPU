@@ -1,32 +1,35 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
-import GUI from 'lil-gui';
+import {Pane} from 'tweakpane';
+import * as EssentialsPlugin from '@tweakpane/plugin-essentials';
 import GuiRedGPUContext from './GuiRedGPUContext';
+import GuiViewList from './GuiViewList';
 
 /**
- * [KO] lil-gui를 렌더링하고 관리하는 컴포넌트입니다.
+ * [KO] Tweakpane을 렌더링하고 관리하는 컴포넌트입니다.
  */
 const GuiPanel: React.FC = () => {
     const guiConfig = useExampleHelperStore((state: ExampleHelperState) => state.guiConfig);
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const guiContainerRef = useRef<HTMLDivElement>(null);
-    const [guiInstance, setGuiInstance] = useState<GUI | null>(null);
+    const [guiInstance, setGuiInstance] = useState<Pane | null>(null);
 
-    // lil-gui Initialization
+    // Tweakpane Initialization
     useEffect(() => {
         if (guiContainerRef.current && guiConfig) {
-            const gui = new GUI({
+            const pane = new Pane({
                 container: guiContainerRef.current,
             });
-            setGuiInstance(gui);
+            pane.registerPlugin(EssentialsPlugin);
+            setGuiInstance(pane);
 
             // [KO] 외부에서 정의한 커스텀 GUI 추가
             if (guiConfig.guiCallback) {
-                guiConfig.guiCallback(gui);
+                guiConfig.guiCallback(pane);
             }
 
             return () => {
-                gui.destroy();
+                pane.dispose();
                 setGuiInstance(null);
             };
         }
@@ -40,7 +43,10 @@ const GuiPanel: React.FC = () => {
             {guiInstance && guiConfig.redGPUContext && redGPUContext && (
                 <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext} />
             )}
-            <style dangerouslySetInnerHTML={{ __html: lilGuiCustomStyle }} />
+            {guiInstance && guiConfig.viewList && redGPUContext && (
+                <GuiViewList gui={guiInstance} redGPUContext={redGPUContext} />
+            )}
+            <style dangerouslySetInnerHTML={{ __html: tweakpaneCustomStyle }} />
         </>
     );
 };
@@ -51,8 +57,8 @@ const guiContainerStyle: React.CSSProperties = {
     flexDirection: 'column',
 };
 
-const lilGuiCustomStyle = `
-   
+const tweakpaneCustomStyle = `
+    
 `;
 
 export default GuiPanel;
