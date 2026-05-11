@@ -17,7 +17,7 @@ import GuiPanel from './components/GuiPanel';
 const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const addTopBarRightAction = useExampleHelperStore((state: ExampleHelperState) => state.addTopBarRightAction);
-    const guiCallback = useExampleHelperStore((state: ExampleHelperState) => state.guiCallback);
+    const guiConfig = useExampleHelperStore((state: ExampleHelperState) => state.guiConfig);
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
 
@@ -105,7 +105,7 @@ const App = () => {
             });
 
             // SETTING Toggle
-            if (guiCallback) {
+            if (guiConfig) {
                 addTopBarRightAction({
                     id: 'setting-toggle',
                     label: 'SETTING',
@@ -117,7 +117,7 @@ const App = () => {
                 });
             }
         }
-    }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiCallback, showSettingsPanel, setShowSettingsPanel]);
+    }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiConfig, showSettingsPanel, setShowSettingsPanel]);
 
     return (
         <>

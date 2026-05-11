@@ -2,7 +2,7 @@ import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import {useExampleHelperStore} from './store';
+import {GuiConfig, useExampleHelperStore} from './store';
 import {findCurrentExample} from './utils/exampleFinder';
 
 /**
@@ -12,10 +12,16 @@ class RedGPUExampleHelper {
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
 
-    constructor(redGPUContext: RedGPUContext, guiCallback?: (gui: any) => void) {
+    constructor(redGPUContext: RedGPUContext, guiCallback?: GuiConfig | ((gui: any) => void)) {
         useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
         if (guiCallback) {
-            useExampleHelperStore.getState().setGuiCallback(guiCallback);
+            if (typeof guiCallback === 'function') {
+                useExampleHelperStore.getState().setGuiConfig({
+                    guiCallback: guiCallback
+                });
+            } else {
+                useExampleHelperStore.getState().setGuiConfig(guiCallback);
+            }
         }
 
         // 현재 예제 정보 설정

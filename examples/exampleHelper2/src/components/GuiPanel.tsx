@@ -6,24 +6,61 @@ import GUI from 'lil-gui';
  * [KO] lil-gui를 렌더링하고 관리하는 컴포넌트입니다.
  */
 const GuiPanel: React.FC = () => {
-    const guiCallback = useExampleHelperStore((state: ExampleHelperState) => state.guiCallback);
+    const guiConfig = useExampleHelperStore((state: ExampleHelperState) => state.guiConfig);
+    const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const guiContainerRef = useRef<HTMLDivElement>(null);
 
     // lil-gui Initialization
     useEffect(() => {
-        if (guiContainerRef.current && guiCallback) {
+        if (guiContainerRef.current && guiConfig) {
             const gui = new GUI({
                 container: guiContainerRef.current,
-                title: 'Parameters'
+
             });
-            guiCallback(gui);
+
+            // [KO] RedGPU Context 관련 기본 설정 추가 (옵션)
+            if (guiConfig.redGPUContext && redGPUContext) {
+                const contextFolder = gui.addFolder('RedGPUContext');
+                
+                // Render Scale
+                contextFolder.add(redGPUContext, 'renderScale', 0.1, 2.0, 0.01).name('Render Scale');
+
+                // Background Color
+                if (redGPUContext.backgroundColor) {
+                    const colorProxy = {
+                        get color() {
+                            const c = redGPUContext.backgroundColor;
+                            return [c.r * 255, c.g * 255, c.b * 255];
+                        },
+                        set color(v: number[]) {
+                            redGPUContext.backgroundColor.r = v[0] / 255;
+                            redGPUContext.backgroundColor.g = v[1] / 255;
+                            redGPUContext.backgroundColor.b = v[2] / 255;
+                        },
+                        get alpha() {
+                            return redGPUContext.backgroundColor.a;
+                        },
+                        set alpha(v: number) {
+                            redGPUContext.backgroundColor.a = v;
+                        }
+                    };
+                    contextFolder.addColor(colorProxy, 'color').name('BG Color');
+                    contextFolder.add(colorProxy, 'alpha', 0, 1, 0.01).name('BG Alpha');
+                }
+            }
+
+            // [KO] 외부에서 정의한 커스텀 GUI 추가
+            if (guiConfig.guiCallback) {
+                guiConfig.guiCallback(gui);
+            }
+
             return () => {
                 gui.destroy();
             };
         }
-    }, [guiCallback]);
+    }, [guiConfig, redGPUContext]);
 
-    if (!guiCallback) return null;
+    if (!guiConfig) return null;
 
     return (
         <>
@@ -66,6 +103,9 @@ const lilGuiCustomStyle = `
     }
     .lil-gui.root {
         width: 100% !important;
+    }
+    .lil-gui.root > .title {
+        display: none !important;
     }
     .lil-gui .title {
         font-weight: bold;

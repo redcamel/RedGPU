@@ -14,6 +14,14 @@ export interface TopBarAction {
 }
 
 /**
+ * [KO] GUI 설정 정의 인터페이스
+ */
+export interface GuiConfig {
+    redGPUContext?: boolean;
+    guiCallback?: (gui: any) => void;
+}
+
+/**
  * [KO] ExampleHelper2의 상태 정의 인터페이스
  */
 export interface ExampleHelperState {
@@ -23,7 +31,7 @@ export interface ExampleHelperState {
     showSourceModal: boolean;
     showSettingsPanel: boolean;
     topBarRightActions: TopBarAction[];
-    guiCallback: ((gui: any) => void) | null;
+    guiConfig: GuiConfig | null;
     setRedGPUContext: (value: RedGPUContext | null) => void;
     setCurrentExample: (value: ExampleItem | null) => void;
     setLanguage: (value: 'ko' | 'en') => void;
@@ -32,7 +40,7 @@ export interface ExampleHelperState {
     addTopBarRightAction: (action: TopBarAction) => void;
     removeTopBarRightAction: (id: string) => void;
     clearTopBarRightActions: () => void;
-    setGuiCallback: (callback: ((gui: any) => void) | null) => void;
+    setGuiConfig: (config: GuiConfig | null) => void;
 }
 
 /**
@@ -45,7 +53,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     showSourceModal: false,
     showSettingsPanel: false,
     topBarRightActions: [],
-    guiCallback: null,
+    guiConfig: null,
     setRedGPUContext: (value: RedGPUContext | null) => set({ redGPUContext: value }),
     setCurrentExample: (value: ExampleItem | null) => set({ currentExample: value }),
     setLanguage: (value: 'ko' | 'en') => set({ language: value }),
@@ -59,7 +67,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
         topBarRightActions: state.topBarRightActions.filter(a => a.id !== id)
     })),
     clearTopBarRightActions: () => set({ topBarRightActions: [] }),
-    setGuiCallback: (callback: ((gui: any) => void) | null) => {
-        set({ guiCallback: callback, showSettingsPanel: !!callback });
+    setGuiConfig: (config: GuiConfig | null) => {
+        set({ guiConfig: config, showSettingsPanel: !!config });
     },
 }));
