@@ -10,15 +10,15 @@
   "dependencies": {},
   "devDependencies": {
     "@tweakpane/plugin-essentials": "^0.2.1",
-    "@types/node": "^20.14.10",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "tweakpane": "^4.0.5",
-    "typescript": "^5.5.4",
-    "vite": "^8.0.3",
-    "zustand": "^4.5.4"
+    "typescript": "^6.0.3",
+    "vite": "^8.0.12",
+    "zustand": "^5.0.13"
   }
 }
