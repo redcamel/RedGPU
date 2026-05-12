@@ -8,7 +8,7 @@ import debugIcon from './assets/icons/debug.svg';
 import axisIcon from './assets/icons/axis.svg';
 import gridIcon from './assets/icons/grid.svg';
 import settingIcon from './assets/icons/gears-solid-full.svg';
-import GuiPanel from './components/gui/GuiPanel';
+const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
 import {useMediaQuery} from './utils/useMediaQuery';
 
 /**
@@ -142,7 +142,9 @@ const App = () => {
 
             <div style={dynamicPanelStyle}>
                 <div style={contentStyle}>
-                    <GuiPanel/>
+                    <React.Suspense fallback={null}>
+                        {showSettingsPanel && <LazyGuiPanel/>}
+                    </React.Suspense>
                 </div>
             </div>
 
