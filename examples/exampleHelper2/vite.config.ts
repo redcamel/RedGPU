@@ -30,10 +30,27 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM',
           zustand: 'zustand'
-        }
+        },
+        plugins: [
+          {
+            name: 'strip-pure-comments',
+            renderChunk(code) {
+              return {
+                code: code.replace(/\/\*\s*@__PURE__\s*\*\//g, ''),
+                map: null
+              };
+            }
+          }
+        ]
       }
     },
     minify: 'terser',
+    terserOptions: {
+      format: {
+        comments: false,
+        max_line_len: 0
+      }
+    },
     sourcemap: false,
     emptyOutDir: true
   }
