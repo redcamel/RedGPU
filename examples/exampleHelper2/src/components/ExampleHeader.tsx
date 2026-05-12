@@ -100,7 +100,7 @@ const navBarStyle: React.CSSProperties = {
     width: '100%',
     alignItems: 'stretch',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)' // For the 1px gap line effect
+    backgroundColor: '#222' // For the 1px gap line effect
 };
 
 const leftSectionStyle: React.CSSProperties = {

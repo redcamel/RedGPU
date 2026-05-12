@@ -32,10 +32,11 @@ const Title = () => {
 
     return <>
         <div style={isNarrow ? narrowTitleBoxStyle : titleBoxStyle}>
-            <div style={{display: 'flex', alignItems: 'stretch', height: '100%', gap: '1px', backgroundColor: 'rgba(255,255,255,0.05)', justifyContent: isNarrow ? 'center' : 'flex-start'}}>
+            <div style={{display: 'flex', alignItems: 'stretch', height: '100%', gap: '1px', backgroundColor: '#222', justifyContent: isNarrow ? 'center' : 'flex-start'}}>
                 <button
                     style={{
                         ...(prevExample ? buttonStyle : disabledButtonStyle),
+                        width: isNarrow ? '46px' : '52px',
                         backgroundColor: isPrevHovered && prevExample ? '#1a1a1c' : '#111112'
                     }}
                     onClick={() => prevExample && navigate(prevExample.path!)}
@@ -57,6 +58,7 @@ const Title = () => {
                 <button
                     style={{
                         ...(nextExample ? buttonStyle : disabledButtonStyle),
+                        width: isNarrow ? '46px' : '52px',
                         backgroundColor: isNextHovered && nextExample ? '#1a1a1c' : '#111112'
                     }}
                     onClick={() => nextExample && navigate(nextExample.path!)}
