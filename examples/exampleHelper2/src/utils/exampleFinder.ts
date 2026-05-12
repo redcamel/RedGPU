@@ -25,3 +25,19 @@ export const findCurrentExample = (pathname: string): ExampleItem | null => {
 
     return search(ExampleList);
 };
+
+/**
+ * [KO] 예제 리스트를 평면화하여 모든 리프 노드(path가 있는 항목)를 반환합니다.
+ * [EN] Flattens the example list and returns all leaf nodes (items with a path).
+ */
+export const getFlatExampleList = (): ExampleItem[] => {
+    const flatList: ExampleItem[] = [];
+    const traverse = (list: ExampleItem[]) => {
+        for (const item of list) {
+            if (item.path) flatList.push(item);
+            if (item.list) traverse(item.list);
+        }
+    };
+    traverse(ExampleList);
+    return flatList;
+};
