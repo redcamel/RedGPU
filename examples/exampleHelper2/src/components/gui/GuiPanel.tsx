@@ -48,7 +48,7 @@ const GuiPanel: React.FC = () => {
                 <GuiViewList gui={guiInstance} redGPUContext={redGPUContext}/>
             )}
             {guiInstance && guiConfig.scene && redGPUContext && (
-                <GuiScene gui={guiInstance} redGPUContext={redGPUContext}/>
+                <GuiScene gui={guiInstance} scene={redGPUContext.viewList[0]?.scene}/>
             )}
             <style dangerouslySetInnerHTML={{__html: tweakpaneCustomStyle}}/>
         </>

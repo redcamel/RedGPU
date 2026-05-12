@@ -24,12 +24,12 @@ RedGPU.init(
         // [EN] Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        
+
         // [KO] 디버그 헬퍼 활성화 (축 및 그리드)
         // [EN] Enable debug helpers (axis and grid)
         view.axis = true;
         view.grid = true;
-        
+
         // [KO] 컨텍스트에 뷰 추가
         // [EN] Add view to context
         redGPUContext.addView(view);
@@ -64,7 +64,6 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        viewList: true,
-        scene: true
+        redGPUContext: true
     });
 };

@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import {parseSize} from "../../utils/guiUtils";
+import {addSceneControls} from "./GuiScene";
 
 /**
  * [KO] RedGPUContext의 viewList 설정을 tweakpane에 추가하는 컴포넌트입니다.
@@ -85,6 +86,16 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                     options: {'%': '%', 'px': 'px', 'number': 'number'}
                 }).on('change', () => updateDim(k));
             });
+
+            // [KO] View에 소속된 Scene 설정 추가 (가장 마지막에 위치)
+            if (view.scene) {
+                container.addBlade({view: 'separator'});
+                const sceneFolder = container.addFolder({
+                    title: view.scene.name || 'Scene',
+                    expanded: true
+                });
+                addSceneControls(view.scene, sceneFolder);
+            }
         };
 
         if (views.length === 1) {

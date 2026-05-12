@@ -1,44 +1,39 @@
 import React, {useEffect} from 'react';
-import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import {addColorAlphaInputs} from "../../utils/guiUtils";
 
 /**
- * [KO] RedGPUContext의 viewList에 포함된 Scene 설정을 tweakpane에 추가하는 컴포넌트입니다.
- * [EN] A component that adds Scene settings from RedGPUContext's viewList to tweakpane.
+ * [KO] Scene 설정을 tweakpane에 추가하는 헬퍼 함수입니다.
+ * [EN] A helper function that adds Scene settings to tweakpane.
+ */
+export const addSceneControls = (scene: any, container: any) => {
+    container.addBinding(scene, 'useBackgroundColor');
+
+    if (scene.backgroundColor) {
+        addColorAlphaInputs(container, scene.backgroundColor);
+    }
+};
+
+/**
+ * [KO] 단일 Scene 설정을 tweakpane에 추가하는 컴포넌트입니다.
+ * [EN] A component that adds a single Scene settings to tweakpane.
  */
 interface GuiSceneProps {
     gui: any;
-    redGPUContext: RedGPUContext;
+    scene: any;
 }
 
-const GuiScene: React.FC<GuiSceneProps> = ({gui, redGPUContext}) => {
+const GuiScene: React.FC<GuiSceneProps> = ({gui, scene}) => {
     useEffect(() => {
-        const views = redGPUContext.viewList;
-        const scenes = views.map((v: any) => v.scene).filter((s: any, i: number, arr: any[]) => s && arr.indexOf(s) === i);
+        if (!scene) return;
 
-        if (scenes.length === 0) return;
-
-        const sceneFolders: any[] = [];
-
-        const addSceneControls = (scene: any, container: any) => {
-            container.addBinding(scene, 'useBackgroundColor');
-
-            if (scene.backgroundColor) {
-                addColorAlphaInputs(container, scene.backgroundColor);
-            }
-        };
-
-        scenes.forEach((scene: any, index: number) => {
-            const title = scene.name || (scenes.length === 1 ? 'Scene' : `Scene ${index}`);
-            const sceneFolder = gui.addFolder({title});
-            addSceneControls(scene, sceneFolder);
-            sceneFolders.push(sceneFolder);
-        });
+        const title = scene.name || 'Scene';
+        const sceneFolder = gui.addFolder({title});
+        addSceneControls(scene, sceneFolder);
 
         return () => {
-            sceneFolders.forEach(folder => folder.dispose());
+            sceneFolder.dispose();
         };
-    }, [gui, redGPUContext]);
+    }, [gui, scene]);
 
     return null;
 };

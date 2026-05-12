@@ -59,7 +59,7 @@ const Title = () => {
                             backgroundColor: isPrevHovered ? '#1a1a1c' : '#111112'
                         }}
                         onClick={() => navigate(prevExample.path!)}
-                        title={`Previous: ${prevExample.name}`}
+                        title={`Previous Example : ${prevExample.name}`}
                         onMouseEnter={() => setIsPrevHovered(true)}
                         onMouseLeave={() => setIsPrevHovered(false)}
                     >
@@ -82,7 +82,7 @@ const Title = () => {
                             backgroundColor: isNextHovered ? '#1a1a1c' : '#111112'
                         }}
                         onClick={() => navigate(nextExample.path!)}
-                        title={`Next: ${nextExample.name}`}
+                        title={`Next Example : ${nextExample.name}`}
                         onMouseEnter={() => setIsNextHovered(true)}
                         onMouseLeave={() => setIsNextHovered(false)}
                     >
