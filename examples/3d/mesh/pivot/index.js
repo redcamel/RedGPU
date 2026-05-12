@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Mesh Pivot 예제
@@ -19,6 +20,7 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
         view.grid = true;
         redGPUContext.addView(view);
 
@@ -39,7 +41,7 @@ RedGPU.init(
             childSpeedZ: 1.0,
         };
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
             if (animationConfig.parentAnimationOn) {
                 parentMesh.rotationX += animationConfig.parentSpeedX;
@@ -130,28 +132,27 @@ const createPivotMesh = (redGPUContext, targetMesh) => {
 };
 
 /**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Mesh} parentMesh
  * @param {RedGPU.Display.Mesh} childMesh
  * @param {object} animationConfig
  */
 const renderTestPane = async (redGPUContext, parentMesh, childMesh, animationConfig) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const parentFolder = pane.addFolder({title: "Parent Mesh", expanded: true});
+            parentFolder.addBinding(animationConfig, "parentAnimationOn", {label: "Parent Animation"});
+            parentFolder.addBinding(parentMesh, "pivotX", {min: -2, max: 2, step: 0.1, label: "Pivot X"});
+            parentFolder.addBinding(parentMesh, "pivotY", {min: -2, max: 2, step: 0.1, label: "Pivot Y"});
+            parentFolder.addBinding(parentMesh, "pivotZ", {min: -2, max: 2, step: 0.1, label: "Pivot Z"});
 
-    const parentFolder = pane.addFolder({title: "Parent Mesh", expanded: true});
-    parentFolder.addBinding(animationConfig, "parentAnimationOn", {label: "Parent Animation"});
-    parentFolder.addBinding(parentMesh, "pivotX", {min: -2, max: 2, step: 0.1, label: "Pivot X"});
-    parentFolder.addBinding(parentMesh, "pivotY", {min: -2, max: 2, step: 0.1, label: "Pivot Y"});
-    parentFolder.addBinding(parentMesh, "pivotZ", {min: -2, max: 2, step: 0.1, label: "Pivot Z"});
-
-    const childFolder = pane.addFolder({title: "Child Mesh", expanded: true});
-    childFolder.addBinding(animationConfig, "childAnimationOn", {label: "Child Animation"});
-    childFolder.addBinding(childMesh, "pivotX", {min: -2, max: 2, step: 0.1, label: "Pivot X"});
-    childFolder.addBinding(childMesh, "pivotY", {min: -2, max: 2, step: 0.1, label: "Pivot Y"});
-    childFolder.addBinding(childMesh, "pivotZ", {min: -2, max: 2, step: 0.1, label: "Pivot Z"});
+            const childFolder = pane.addFolder({title: "Child Mesh", expanded: true});
+            childFolder.addBinding(animationConfig, "childAnimationOn", {label: "Child Animation"});
+            childFolder.addBinding(childMesh, "pivotX", {min: -2, max: 2, step: 0.1, label: "Pivot X"});
+            childFolder.addBinding(childMesh, "pivotY", {min: -2, max: 2, step: 0.1, label: "Pivot Y"});
+            childFolder.addBinding(childMesh, "pivotZ", {min: -2, max: 2, step: 0.1, label: "Pivot Z"});
+        }
+    });
 };

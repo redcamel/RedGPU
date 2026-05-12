@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Mesh AABB Intersects 예제
@@ -20,12 +21,13 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
         view.grid = true;
         redGPUContext.addView(view);
 
         const {mesh1, mesh2, intersectionLabel} = createIntersectionTest(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             mesh2.rotationX += 0.3;
             mesh2.rotationY += 0.3;
@@ -35,7 +37,7 @@ RedGPU.init(
             checkAABBIntersection(mesh1, mesh2, intersectionLabel);
         };
         renderer.start(redGPUContext, render);
-        renderTestPane(redGPUContext, view);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -44,12 +46,11 @@ RedGPU.init(
 );
 
 /**
- * [KO] 테스트용 Tweakpane 버튼을 설정합니다.
- * [EN] Sets up Tweakpane buttons for testing.
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
  */
-const renderTestPane = async (redGPUContext, view) => {
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+const renderTestPane = async (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };
 
 /**

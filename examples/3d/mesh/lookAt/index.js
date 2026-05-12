@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Mesh LookAt 예제
@@ -19,12 +20,13 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
         view.grid = true;
         redGPUContext.addView(view);
 
         createSampleMesh(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const targetPosition = [0, 0, 0];
         const targetObject = new RedGPU.Display.Mesh(
             redGPUContext,
@@ -54,13 +56,17 @@ RedGPU.init(
 );
 
 /**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // [KO] 필요한 경우 여기에 추가 컨트롤을 구현할 수 있습니다.
+            // [EN] Additional controls can be implemented here if needed.
+        }
+    });
 };
 
 /**

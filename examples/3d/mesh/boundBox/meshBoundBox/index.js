@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Mesh Bounding Box 예제
@@ -20,6 +21,7 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
         view.grid = true;
         redGPUContext.addView(view);
 
@@ -31,7 +33,7 @@ RedGPU.init(
         // [EN] Single bounding box tests - Placed in back
         createBoundingTestRow(redGPUContext, scene, -4);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
             scene.children.forEach(child => {
                 if (child instanceof RedGPU.Display.Mesh && !(child instanceof RedGPU.Display.TextField3D)) {
@@ -58,12 +60,11 @@ RedGPU.init(
 );
 
 /**
- * [KO] 테스트 패널 버튼을 설정합니다.
- * [EN] Sets up test pane buttons.
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
  */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+    new RedGPUExampleHelper(redGPUContext);
 };
 
 /**

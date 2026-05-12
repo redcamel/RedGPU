@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Mesh Hierarchy 예제
@@ -20,14 +21,14 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
         view.grid = true;
-        view.axis = true;
         redGPUContext.addView(view);
 
         const parentMesh = createParentMesh(redGPUContext, scene);
         const childMesh = createChildMesh(redGPUContext, parentMesh);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
             // 매 프레임 로직
         };
@@ -83,19 +84,13 @@ const createChildMesh = (redGPUContext, parentMesh) => {
 };
 
 /**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Mesh} parentMesh
  * @param {RedGPU.Display.Mesh} childMesh
  */
 const renderTestPane = async (redGPUContext, parentMesh, childMesh) => {
-
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
-
     const parentConfig = {
         x: parentMesh.x,
         y: parentMesh.y,
@@ -150,9 +145,13 @@ const renderTestPane = async (redGPUContext, parentMesh, childMesh) => {
         });
     };
 
-    const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
-    createMeshControls(parentFolder, parentConfig, parentMesh);
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
+            createMeshControls(parentFolder, parentConfig, parentMesh);
 
-    const childFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
-    createMeshControls(childFolder, childConfig, childMesh);
+            const childFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
+            createMeshControls(childFolder, childConfig, childMesh);
+        }
+    });
 };
