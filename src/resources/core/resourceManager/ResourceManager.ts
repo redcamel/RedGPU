@@ -335,7 +335,7 @@ class ResourceManager {
     createManagedTexture(desc: GPUTextureDescriptor): GPUTexture {
         const texture = this.gpuDevice.createTexture(desc);
         const originalDestroy = texture.destroy.bind(texture);
-        texture.destroy = () => {
+        texture.destroy = ():undefined => {
             this.#clearTextureCache(texture, desc);
             originalDestroy();
         };

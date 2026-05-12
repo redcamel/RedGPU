@@ -34,7 +34,18 @@ export default defineConfig({
           'react-dom': 'ReactDOM',
           zustand: 'zustand'
         }
-      }
+      },
+      plugins: [
+        {
+          name: 'strip-pure-comments',
+          renderChunk(code) {
+            return {
+              code: code.replace(/\/\*\s*@__PURE__\s*\*\//g, ''),
+              map: null
+            };
+          }
+        }
+      ]
     },
     // 최적화: 코드 압축 및 소스맵 제거
     minify: 'terser',
