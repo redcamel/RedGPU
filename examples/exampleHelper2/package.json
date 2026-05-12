@@ -7,19 +7,18 @@
     "build": "tsc && vite build",
     "watch": "vite build --watch"
   },
-  "dependencies": {
-    "tweakpane": "^4.0.5",
-    "@tweakpane/plugin-essentials": "^0.2.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "zustand": "^4.5.4"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@tweakpane/plugin-essentials": "^0.2.1",
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tweakpane": "^4.0.5",
     "typescript": "^5.5.4",
-    "vite": "^8.0.3"
+    "vite": "^8.0.3",
+    "zustand": "^4.5.4"
   }
 }
