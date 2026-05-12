@@ -5,13 +5,13 @@ import IconButton from './basic/IconButton';
 import IconToggleButton from './basic/IconToggleButton';
 import RenderingSettingsGroup from './RenderingSettingsGroup';
 import {useMediaQuery} from '../utils/useMediaQuery';
+import Title from "./Title";
 
 /**
  * [KO] 예제 헬퍼의 상단 네비게이션 바 컴포넌트입니다.
  * [EN] Top navigation bar component of the example helper.
  */
 const ExampleHeader = () => {
-    const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
     const topBarRightActions = useExampleHelperStore((state: ExampleHelperState) => state.topBarRightActions);
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
 
@@ -52,19 +52,12 @@ const ExampleHeader = () => {
                         onClick={() => { window.location.href = '/RedGPU/examples/index.html' }}
                         title="HOME"
                     />
-                    <div style={titleBoxStyle}>
-                        <span style={titleLabelStyle}>TITLE</span>
-                        <span style={titleValueStyle}>
-                          {currentExample ? currentExample.name : 'empty example name'}
-                        </span>
-                    </div>
+                    {!isNarrow && <Title/>}
                 </div>
 
                 <div style={rightSectionStyle}>
                     {!isNarrow && (
                         <>
-
-
                             <RenderingSettingsGroup />
                         </>
                     )}
@@ -124,32 +117,5 @@ const rightSectionStyle: React.CSSProperties = {
     gap: '1px'
 };
 
-const homeIconStyle: React.CSSProperties = {
-    width: '18px',
-    height: '18px'
-};
-
-const titleBoxStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    padding: '0 16px',
-    backgroundColor: '#111112',
-    minWidth: '120px',
-    flexShrink: 0
-};
-
-const titleLabelStyle: React.CSSProperties = {
-    fontSize: '9px',
-    color: '#666',
-    fontWeight: 'bold',
-    marginBottom: '2px'
-};
-
-const titleValueStyle: React.CSSProperties = {
-    fontSize: '11px',
-    color: '#ccc',
-    fontWeight: 'bold'
-};
 
 export default ExampleHeader;

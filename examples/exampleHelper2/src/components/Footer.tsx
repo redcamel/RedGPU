@@ -4,6 +4,7 @@ import githubIcon from '../assets/github.png';
 import RenderingSettingsGroup from './RenderingSettingsGroup';
 import LabelButton from './basic/LabelButton';
 import {useMediaQuery} from '../utils/useMediaQuery';
+import Title from "./Title";
 
 /**
  * [KO] 예제 헬퍼의 하단 푸터 컴포넌트입니다.
@@ -15,6 +16,7 @@ const Footer = () => {
 
     return (
         <div style={footerContainerStyle}>
+            {isNarrow && <div style={titleContainerStyle}><Title/></div>}
             {isNarrow && (
                 <div style={mobileSelectContainerStyle}>
                     <RenderingSettingsGroup />
@@ -41,6 +43,14 @@ const Footer = () => {
 };
 
 // Styles
+const titleContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    width:'fit-content',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    height: '46px',
+
+}
 const footerContainerStyle: React.CSSProperties = {
     position: 'fixed',
     bottom: 0,
