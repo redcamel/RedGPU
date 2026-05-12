@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Fragment Variant Test 예제
@@ -22,7 +23,6 @@ const texturePaths = {
 };
 
 let shaderVariantGenerator = null;
-
 let variantDisplay = null;
 
 // ===== Display Functions =====
@@ -44,7 +44,7 @@ function createVariantDisplay() {
 		padding: 12px 12px 16px;
 		overflow-x:hidden;
 		font-size: 16px;
-		border: 1px solid #rgba(255,255,255,0.16);
+		border: 1px solid rgba(255,255,255,0.16);
 		z-index: 1000;
 		pointer-events: none;
 	`;
@@ -77,37 +77,32 @@ function updateVariantDisplay(variant) {
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // Camera controller setup
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 10;
         controller.speedDistance = 0.5;
 
-        // Scene setup
         const scene = new RedGPU.Display.Scene();
         scene.useBackgroundColor = true;
         scene.backgroundColor.setColorByHEX('#2a2a2a');
 
-        // View setup
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        
+        view.grid = true;
         redGPUContext.addView(view);
 
-        // Lighting setup
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.intensity = 1.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // Mesh creation
         const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32);
         const material = new RedGPU.Material.PhongMaterial(redGPUContext);
         const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
         mesh.primitiveState.cullMode = "none";
         scene.addChild(mesh);
 
-        // UI rendering
         renderUI(redGPUContext, mesh);
 
-        // Start renderer
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
     },
@@ -122,7 +117,6 @@ function extractShaderVariantInfo(mesh) {
         const fragmentInfo = mesh.material.gpuRenderInfo;
         if (fragmentInfo && fragmentInfo.fragmentShaderSourceVariant) {
             shaderVariantGenerator = fragmentInfo.fragmentShaderSourceVariant;
-
         }
     } catch (error) {
         console.warn('Failed to extract shader variant information:', error);
@@ -140,14 +134,6 @@ const createTextures = (redGPUContext) => {
 
 // ===== UI Rendering =====
 const renderUI = async (redGPUContext, mesh) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const {
-        setSeparator,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-
-    const pane = new Pane({title: "Phong Shader Variants"});
     const material = mesh.material;
     const textures = createTextures(redGPUContext);
 
@@ -155,125 +141,112 @@ const renderUI = async (redGPUContext, mesh) => {
     variantDisplay = createVariantDisplay();
     extractShaderVariantInfo(mesh);
 
-    // Parameter object
-    const params = {
-        shaderVariants: {
-            currentVariant: 'none',
-            cachedVariants: 0,
-        },
-        textureVariants: {
-            useDiffuse: !!material.diffuseTexture,
-            useAlpha: !!material.alphaTexture,
-            useAO: !!material.aoTexture,
-            useSpecular: !!material.specularTexture,
-            useNormal: !!material.normalTexture,
-            useEmissive: !!material.emissiveTexture,
-        },
-        display: {
-            showVariantOverlay: variantDisplay?.style.display !== 'none'
-        }
-    };
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // Parameter object
+            const params = {
+                shaderVariants: {
+                    currentVariant: 'none',
+                    cachedVariants: 0,
+                },
+                textureVariants: {
+                    useDiffuse: !!material.diffuseTexture,
+                    useAlpha: !!material.alphaTexture,
+                    useAO: !!material.aoTexture,
+                    useSpecular: !!material.specularTexture,
+                    useNormal: !!material.normalTexture,
+                    useEmissive: !!material.emissiveTexture,
+                },
+                display: {
+                    showVariantOverlay: true
+                }
+            };
 
-    // ===== UI Folder Creation =====
+            // ===== UI Folder Creation =====
 
-    // Variant information folder
-    const variantFolder = pane.addFolder({title: "📊 Variant Information", expanded: true});
+            const variantFolder = pane.addFolder({title: "📊 Variant Information", expanded: true});
+            variantFolder.addBinding(params.shaderVariants, 'cachedVariants', {
+                readonly: true,
+                label: 'Cached Variants'
+            });
+            variantFolder.addBinding(params.shaderVariants, 'currentVariant', {
+                readonly: true,
+                label: 'Current Variant'
+            });
 
-    variantFolder.addBinding(params.shaderVariants, 'cachedVariants', {
-        readonly: true,
-        label: 'Cached Variants'
-    });
+            variantFolder.addBinding(params.display, 'showVariantOverlay', {
+                label: 'Show Overlay Display'
+            }).on('change', (ev) => {
+                if (variantDisplay) {
+                    variantDisplay.style.display = ev.value ? 'flex' : 'none';
+                }
+            });
 
-    variantFolder.addBinding(params.shaderVariants, 'currentVariant', {
-        readonly: true,
-        label: 'Current Variant'
-    });
+            const textureFolder = pane.addFolder({title: "🖼️ Texture Variants", expanded: true});
+            Object.keys(params.textureVariants).forEach((key) => {
+                const label = key.replace('use', '').replace(/([A-Z])/g, ' $1').trim();
+                textureFolder.addBinding(params.textureVariants, key, {
+                    label: label
+                }).on("change", (ev) => {
+                    const textureType = key.replace("use", "").toLowerCase();
+                    material[`${textureType}Texture`] = ev.value ? textures[textureType] : null;
+                    updateVariantInfo();
+                });
+            });
 
-    // Overlay display toggle
-    variantFolder.addBinding(params.display, 'showVariantOverlay', {
-        label: 'Show Overlay Display'
-    }).on('change', (ev) => {
-        if (variantDisplay) {
-            variantDisplay.style.display = ev.value ? 'block' : 'none';
-            localStorage.setItem('variantDisplayVisible', ev.value);
-        }
-    });
+            const utilityFolder = pane.addFolder({title: "🛠️ Utilities"});
+            utilityFolder.addButton({title: "🧹 Clear All Textures"}).on('click', () => {
+                Object.keys(params.textureVariants).forEach(key => {
+                    params.textureVariants[key] = false;
+                    const textureType = key.replace("use", "").toLowerCase();
+                    material[`${textureType}Texture`] = null;
+                });
+                updateVariantInfo();
+                pane.refresh();
+            });
 
-    setSeparator(pane);
-
-    // Texture variants folder
-    const textureFolder = pane.addFolder({title: "🖼️ Texture Variants", expanded: true});
-
-    Object.keys(params.textureVariants).forEach((key) => {
-        const label = key.replace('use', '').replace(/([A-Z])/g, ' $1').trim();
-        textureFolder.addBinding(params.textureVariants, key, {
-            label: label
-        }).on("change", (ev) => {
-            const textureType = key.replace("use", "").toLowerCase();
-            material[`${textureType}Texture`] = ev.value ? textures[textureType] : null;
-            updateVariantInfo();
-        });
-    });
-
-    setSeparator(pane);
-
-    // Utility folder
-    const utilityFolder = pane.addFolder({title: "🛠️ Utilities"});
-
-    // Clear all textures button
-    utilityFolder.addButton({title: "🧹 Clear All Textures"}).on('click', () => {
-        Object.keys(params.textureVariants).forEach(key => {
-            params.textureVariants[key] = false;
-            const textureType = key.replace("use", "").toLowerCase();
-            material[`${textureType}Texture`] = null;
-        });
-        updateVariantInfo();
-        pane.refresh();
-    });
-
-    const HD_AllTexture = () => {
-        Object.keys(params.textureVariants).forEach(key => {
-            const textureType = key.replace("use", "").toLowerCase();
-            if (textures[textureType]) {
-                params.textureVariants[key] = true;
-                material[`${textureType}Texture`] = textures[textureType];
+            const applyAllTextures = () => {
+                Object.keys(params.textureVariants).forEach(key => {
+                    const textureType = key.replace("use", "").toLowerCase();
+                    if (textures[textureType]) {
+                        params.textureVariants[key] = true;
+                        material[`${textureType}Texture`] = textures[textureType];
+                    }
+                });
+                updateVariantInfo();
+                pane.refresh();
             }
-        });
-        updateVariantInfo();
-        pane.refresh();
-    }
-    utilityFolder.addButton({title: "🎨 Apply All Textures"}).on('click', HD_AllTexture);
-    HD_AllTexture()
+            utilityFolder.addButton({title: "🎨 Apply All Textures"}).on('click', applyAllTextures);
 
-    // ===== Core Functions =====
-
-    function getCurrentVariant() {
-        try {
-            const shaderModuleLabel = material.gpuRenderInfo.fragmentShaderModule.label;
-            if (shaderModuleLabel) {
-                const labelParts = shaderModuleLabel.split('_');
-                const variantKey = labelParts[labelParts.length - 1];
-                return variantKey || 'none';
+            // Core Functions inside guiCallback scope
+            function getCurrentVariant() {
+                try {
+                    const shaderModuleLabel = material.gpuRenderInfo.fragmentShaderModule.label;
+                    if (shaderModuleLabel) {
+                        const labelParts = shaderModuleLabel.split('_');
+                        const variantKey = labelParts[labelParts.length - 1];
+                        return variantKey || 'none';
+                    }
+                } catch (error) {
+                    console.warn('Failed to extract variant key from shader module label:', error);
+                }
+                return 'none';
             }
-        } catch (error) {
-            console.warn('Failed to extract variant key from shader module label:', error);
+
+            function updateVariantInfo() {
+                const currentVariant = getCurrentVariant();
+                params.shaderVariants.currentVariant = currentVariant;
+
+                if (shaderVariantGenerator) {
+                    params.shaderVariants.cachedVariants = shaderVariantGenerator.getCachedVariants().length;
+                }
+
+                updateVariantDisplay(currentVariant);
+                pane.refresh();
+            }
+
+            // Initial execution
+            applyAllTextures();
         }
-        return 'none';
-    }
-
-    function updateVariantInfo() {
-        const currentVariant = getCurrentVariant();
-        params.shaderVariants.currentVariant = currentVariant;
-
-        if (shaderVariantGenerator) {
-            params.shaderVariants.cachedVariants = shaderVariantGenerator.getCachedVariants().length;
-            console.log(shaderVariantGenerator.getCachedVariants())
-        }
-
-        updateVariantDisplay(currentVariant);
-        pane.refresh();
-    }
-
-    // Initial update execution
-    updateVariantInfo();
+    });
 };

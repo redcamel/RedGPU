@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Max Anisotropy 예제
@@ -28,7 +29,7 @@ RedGPU.init(
 
         renderTestPane(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
     },
@@ -47,45 +48,44 @@ RedGPU.init(
  * @param {RedGPU.Display.Scene} scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const {
-        setSeparator,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const maxAnisotropyValues = [1, 8, 16];
-    const spacing = 105;
-    const yOffset = 55;
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const maxAnisotropyValues = [1, 8, 16];
+            const spacing = 105;
+            const yOffset = 55;
 
-    for (let i = 0; i < maxAnisotropyValues.length; i++) {
-        const anisotropy = maxAnisotropyValues[i];
-        const x = -((maxAnisotropyValues.length - 1) * spacing) / 2 + spacing * i;
+            for (let i = 0; i < maxAnisotropyValues.length; i++) {
+                const anisotropy = maxAnisotropyValues[i];
+                const x = -((maxAnisotropyValues.length - 1) * spacing) / 2 + spacing * i;
 
-        const createMesh = (texturePath, yPosition) => {
-            const geometry = new RedGPU.Primitive.Plane(redGPUContext, 100, 100, 32, 32, 2);
-            const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, texturePath);
-            const material = new RedGPU.Material.BitmapMaterial(redGPUContext);
-            material.diffuseTexture = texture;
-            material.diffuseTextureSampler.maxAnisotropy = anisotropy;
+                const createMesh = (texturePath, yPosition) => {
+                    const geometry = new RedGPU.Primitive.Plane(redGPUContext, 100, 100, 32, 32, 2);
+                    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, texturePath);
+                    const material = new RedGPU.Material.BitmapMaterial(redGPUContext);
+                    material.diffuseTexture = texture;
+                    material.diffuseTextureSampler.maxAnisotropy = anisotropy;
 
-            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-            mesh.primitiveState.cullMode = 'none';
-            mesh.setPosition(x, yPosition, 0);
-            scene.addChild(mesh);
+                    const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+                    mesh.primitiveState.cullMode = 'none';
+                    mesh.setPosition(x, yPosition, 0);
+                    scene.addChild(mesh);
 
-            return mesh;
-        };
+                    return mesh;
+                };
 
-        createMesh("../../../assets/maxAnisotropy/maxAnisotropy.jpg", yOffset);
+                createMesh("../../../assets/maxAnisotropy/maxAnisotropy.jpg", yOffset);
 
-        const bottomMesh = createMesh("../../../assets/UV_Grid_Sm.jpg", -yOffset);
+                const bottomMesh = createMesh("../../../assets/UV_Grid_Sm.jpg", -yOffset);
 
-        const textLabel = new RedGPU.Display.TextField3D(redGPUContext);
-        textLabel.text = `maxAnisotropy: ${anisotropy}`;
-        textLabel.useBillboardPerspective = false;
-        textLabel.useBillboard = true;
-        textLabel.worldSize = 4
-        textLabel.depthStencilState.depthCompare = 'always';
-        textLabel.setPosition(bottomMesh.x, 0, bottomMesh.z);
-        scene.addChild(textLabel);
-    }
+                const textLabel = new RedGPU.Display.TextField3D(redGPUContext);
+                textLabel.text = `maxAnisotropy: ${anisotropy}`;
+                textLabel.useBillboardPerspective = false;
+                textLabel.useBillboard = true;
+                textLabel.worldSize = 4
+                textLabel.depthStencilState.depthCompare = 'always';
+                textLabel.setPosition(bottomMesh.x, 0, bottomMesh.z);
+                scene.addChild(textLabel);
+            }
+        }
+    });
 };

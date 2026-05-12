@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Phong Material Textures 예제
@@ -21,6 +22,8 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        
+
         redGPUContext.addView(view);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -52,7 +55,7 @@ RedGPU.init(
 
         createMeshesFromLines(redGPUContext, scene, lines, spacingX, spacingY, textures);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
         renderTestPane(redGPUContext);
@@ -68,11 +71,11 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
-    const {
-        setSeparator,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // No specific controls for this example, helper will add standard debug buttons
+        }
+    });
 }
 
 /**
@@ -138,7 +141,6 @@ const createMeshesFromLines = (redGPUContext, scene, lines, spacingX, spacingY, 
             const label = new RedGPU.Display.TextField3D(redGPUContext);
             label.text = `${base.toLowerCase().includes('color') ? `<span style="color:${material[base].hex}">${material[base].hex}</span>` : base} + ${textureType}`;
             label.color = '#ffffff';
-            // label.fontSize = 26;
             label.worldSize = 0.9
             label.setPosition(0, -2, 0);
             label.useBillboard = true;

@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Color Material 예제
@@ -20,11 +21,13 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        
+        view.grid = true;
         redGPUContext.addView(view);
 
         const mesh = createSampleMesh(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
 
@@ -61,82 +64,75 @@ const createSampleMesh = (redGPUContext, scene) => {
  * @param {RedGPU.Display.Mesh} mesh
  */
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setSeparator,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const params = {
+                color: {r: 255, g: 0, b: 0},
+            };
 
-    const params = {
-        color: {r: 255, g: 0, b: 0},
-    };
+            const refresh = () => {
+                params.color.r = mesh.material.color.r;
+                params.color.g = mesh.material.color.g;
+                params.color.b = mesh.material.color.b;
+                pane.refresh();
+            };
 
-    const refresh = () => {
-        params.color.r = mesh.material.color.r;
-        params.color.g = mesh.material.color.g;
-        params.color.b = mesh.material.color.b;
-        pane.refresh();
-    };
-
-    pane.addBinding(params, 'color', {
-        picker: 'inline',
-        view: 'color',
-        expanded: true,
-    }).on('change', (ev) => {
-        const r = Math.floor(ev.value.r);
-        const g = Math.floor(ev.value.g);
-        const b = Math.floor(ev.value.b);
-        mesh.material.color.setColorByRGB(r, g, b);
-        refresh();
-    });
-
-    setSeparator(pane);
-
-    ['r', 'g', 'b'].forEach(key => {
-        pane.addBinding(params.color, key, {min: 0, max: 255, step: 1})
-            .on('change', (e) => {
-                mesh.material.color[key] = e.value;
-                refresh();
-            });
-    });
-
-    pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
-        .on('change', (e) => {
-            mesh.material.opacity = e.value;
-        });
-
-    setSeparator(pane);
-
-    {
-        const r = 0, g = 128, b = 255;
-        pane.addButton({title: `setColorByRGB(${r}, ${g}, ${b})`})
-            .on('click', () => {
+            pane.addBinding(params, 'color', {
+                picker: 'inline',
+                view: 'color',
+                expanded: true,
+            }).on('change', (ev) => {
+                const r = Math.floor(ev.value.r);
+                const g = Math.floor(ev.value.g);
+                const b = Math.floor(ev.value.b);
                 mesh.material.color.setColorByRGB(r, g, b);
                 refresh();
             });
-    }
 
-    {
-        const hexColor = '#ff00ff';
-        pane.addButton({title: `setColorByHEX(${hexColor})`})
-            .on('click', () => {
-                mesh.material.color.setColorByHEX(hexColor);
-                refresh();
+            ['r', 'g', 'b'].forEach(key => {
+                pane.addBinding(params.color, key, {min: 0, max: 255, step: 1})
+                    .on('change', (e) => {
+                        mesh.material.color[key] = e.value;
+                        refresh();
+                    });
             });
-    }
 
-    {
-        const rgbString = 'rgb(34, 139, 34)';
-        pane.addButton({title: `setColorByRGBString(${rgbString})`})
-            .on('click', () => {
-                mesh.material.color.setColorByRGBString(rgbString);
-                const [r, g, b] = mesh.material.color.rgb;
-                params.color.r = r;
-                params.color.g = g;
-                params.color.b = b;
-                pane.refresh();
-            });
-    }
+            pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
+                .on('change', (e) => {
+                    mesh.material.opacity = e.value;
+                });
+
+            const buttonFolder = pane.addFolder({title: 'Color Methods'});
+            {
+                const r = 0, g = 128, b = 255;
+                buttonFolder.addButton({title: `setColorByRGB(${r}, ${g}, ${b})`})
+                    .on('click', () => {
+                        mesh.material.color.setColorByRGB(r, g, b);
+                        refresh();
+                    });
+            }
+
+            {
+                const hexColor = '#ff00ff';
+                buttonFolder.addButton({title: `setColorByHEX(${hexColor})`})
+                    .on('click', () => {
+                        mesh.material.color.setColorByHEX(hexColor);
+                        refresh();
+                    });
+            }
+
+            {
+                const rgbString = 'rgb(34, 139, 34)';
+                buttonFolder.addButton({title: `setColorByRGBString(${rgbString})`})
+                    .on('click', () => {
+                        mesh.material.color.setColorByRGBString(rgbString);
+                        const [r, g, b] = mesh.material.color.rgb;
+                        params.color.r = r;
+                        params.color.g = g;
+                        params.color.b = b;
+                        pane.refresh();
+                    });
+            }
+        }
+    });
 };

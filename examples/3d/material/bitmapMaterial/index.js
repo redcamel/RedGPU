@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Bitmap Material 예제
@@ -23,11 +24,13 @@ RedGPU.init(
         scene.backgroundColor.setColorByHEX('#5259c3');
 
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        
+        view.grid = true;
         redGPUContext.addView(view);
 
         const mesh = createSampleMesh(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
 
@@ -67,33 +70,27 @@ const createSampleMesh = (redGPUContext, scene) => {
  * @param {RedGPU.Display.Mesh} mesh
  */
 const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setSeparator,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
+                .on('change', (e) => {
+                    mesh.material.opacity = e.value;
+                });
 
-    pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
-        .on('change', (e) => {
-            mesh.material.opacity = e.value;
-        });
+            const textures = [
+                {name: 'set diffuseTexture : png', path: '../../../assets/imageFormat/webgpu.png'},
+                {name: 'set diffuseTexture : jpg', path: '../../../assets/imageFormat/webgpu.jpg'},
+                {name: 'set diffuseTexture : webp', path: '../../../assets/imageFormat/webgpu.webp'},
+                {name: 'set diffuseTexture : svg', path: '../../../assets/imageFormat/webgpu.svg'},
+            ];
 
-    const textures = [
-        {name: 'set diffuseTexture : png', path: '../../../assets/imageFormat/webgpu.png'},
-        {name: 'set diffuseTexture : jpg', path: '../../../assets/imageFormat/webgpu.jpg'},
-        {name: 'set diffuseTexture : webp', path: '../../../assets/imageFormat/webgpu.webp'},
-        {name: 'set diffuseTexture : svg', path: '../../../assets/imageFormat/webgpu.svg'},
-    ];
-
-    pane.addFolder({title: 'Textures'});
-    textures.forEach(({name, path}) => {
-        pane.addButton({title: name}).on('click', () => {
-            mesh.material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, path);
-            console.log(`Texture applied: ${path}`);
-        });
+            const folder = pane.addFolder({title: 'Textures'});
+            textures.forEach(({name, path}) => {
+                folder.addButton({title: name}).on('click', () => {
+                    mesh.material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, path);
+                    console.log(`Texture applied: ${path}`);
+                });
+            });
+        }
     });
-
-    setSeparator(pane);
 };

@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] UV Transform 예제
@@ -20,7 +21,8 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = false;
+
+        view.grid = true;
         redGPUContext.addView(view);
 
         // Lights
@@ -73,8 +75,8 @@ RedGPU.init(
             'Cone': new RedGPU.Primitive.Cone(redGPUContext, 1, 1, 32, 1, true, 0, Math.PI * 2, true)
         };
 
-        const trioGapX = 2.6; // Wider gap within a pair to prevent overlap
-        const itemGapX = 7.0; // Wider gap between items
+        const trioGapX = 2.6;
+        const itemGapX = 7.0;
         const rowGapY = 3.5;
 
         rows.forEach((primitives, rowIndex) => {
@@ -85,23 +87,19 @@ RedGPU.init(
                 const x = startX + index * itemGapX;
                 const isRadialSupported = !!radialGeos[item.name];
 
-                // Name Label
                 const nameLabel = new RedGPU.Display.TextField3D(redGPUContext);
                 nameLabel.text = item.name; nameLabel.worldSize = 0.7; nameLabel.color = '#ffffff';
                 nameLabel.setPosition(x, y + 1.2, 0);
                 scene.addChild(nameLabel);
 
-                // Planar Mesh (Left)
                 const planarMesh = new RedGPU.Display.Mesh(redGPUContext, item.geo, materialTop);
                 planarMesh.setPosition(x - trioGapX / 2, y, 0);
                 scene.addChild(planarMesh);
 
-                // Radial or Plain Mesh (Right)
                 const radialMesh = new RedGPU.Display.Mesh(redGPUContext, radialGeos[item.name] || item.geo, materialBottom);
                 radialMesh.setPosition(x + trioGapX / 2, y, 0);
                 scene.addChild(radialMesh);
 
-                // Mode Labels (Only shown if Radial is supported)
                 if (isRadialSupported) {
                     const planarLabel = new RedGPU.Display.TextField3D(redGPUContext);
                     planarLabel.text = 'Planar'; planarLabel.worldSize = 0.5; planarLabel.color = '#aaaaaa';
@@ -135,28 +133,29 @@ RedGPU.init(
 );
 
 async function renderTestPane(redGPUContext, testTarget) {
-    const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
     const { materialTop, materialBottom, scrollInfo } = testTarget;
 
-    const folderScroll = pane.addFolder({ title: 'Auto Scroll Control' });
-    folderScroll.addBinding(scrollInfo, 'autoScroll', { label: 'Use Auto Scroll' });
-    folderScroll.addBinding(scrollInfo, 'speedU', { min: -0.01, max: 0.01, step: 0.0001, label: 'Speed U' });
-    folderScroll.addBinding(scrollInfo, 'speedV', { min: -0.01, max: 0.01, step: 0.0001, label: 'Speed V' });
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const folderScroll = pane.addFolder({ title: 'Auto Scroll Control' });
+            folderScroll.addBinding(scrollInfo, 'autoScroll', { label: 'Use Auto Scroll' });
+            folderScroll.addBinding(scrollInfo, 'speedU', { min: -0.01, max: 0.01, step: 0.0001, label: 'Speed U' });
+            folderScroll.addBinding(scrollInfo, 'speedV', { min: -0.01, max: 0.01, step: 0.0001, label: 'Speed V' });
 
-    const folderManual = pane.addFolder({ title: 'Manual UV Transform' });
-    folderManual.addBinding(scrollInfo, 'offsetU', { min: -2, max: 2, step: 0.0001, label: 'Offset U' }).on('change', (ev) => { if (!scrollInfo.autoScroll) { materialTop.textureOffset = [ev.value, materialTop.textureOffset[1]]; materialBottom.textureOffset = [ev.value, materialBottom.textureOffset[1]]; } });
-    folderManual.addBinding(scrollInfo, 'offsetV', { min: -2, max: 2, step: 0.0001, label: 'Offset V' }).on('change', (ev) => { if (!scrollInfo.autoScroll) { materialTop.textureOffset = [materialTop.textureOffset[0], ev.value]; materialBottom.textureOffset = [materialBottom.textureOffset[0], ev.value]; } });
-    folderManual.addBinding(scrollInfo, 'scaleU', { min: 0.1, max: 10, step: 0.0001, label: 'Scale U' }).on('change', (ev) => { materialTop.textureScale = [ev.value, materialTop.textureScale[1]]; materialBottom.textureScale = [ev.value, materialBottom.textureScale[1]]; });
-    folderManual.addBinding(scrollInfo, 'scaleV', { min: 0.1, max: 10, step: 0.0001, label: 'Scale V' }).on('change', (ev) => { materialTop.textureScale = [materialTop.textureScale[0], ev.value]; materialBottom.textureScale = [materialBottom.textureScale[0], ev.value]; });
+            const folderManual = pane.addFolder({ title: 'Manual UV Transform' });
+            folderManual.addBinding(scrollInfo, 'offsetU', { min: -2, max: 2, step: 0.0001, label: 'Offset U' }).on('change', (ev) => { if (!scrollInfo.autoScroll) { materialTop.textureOffset = [ev.value, materialTop.textureOffset[1]]; materialBottom.textureOffset = [ev.value, materialBottom.textureOffset[1]]; } });
+            folderManual.addBinding(scrollInfo, 'offsetV', { min: -2, max: 2, step: 0.0001, label: 'Offset V' }).on('change', (ev) => { if (!scrollInfo.autoScroll) { materialTop.textureOffset = [materialTop.textureOffset[0], ev.value]; materialBottom.textureOffset = [materialBottom.textureOffset[0], ev.value]; } });
+            folderManual.addBinding(scrollInfo, 'scaleU', { min: 0.1, max: 10, step: 0.0001, label: 'Scale U' }).on('change', (ev) => { materialTop.textureScale = [ev.value, materialTop.textureScale[1]]; materialBottom.textureScale = [ev.value, materialBottom.textureScale[1]]; });
+            folderManual.addBinding(scrollInfo, 'scaleV', { min: 0.1, max: 10, step: 0.0001, label: 'Scale V' }).on('change', (ev) => { materialTop.textureScale = [materialTop.textureScale[0], ev.value]; materialBottom.textureScale = [materialBottom.textureScale[0], ev.value]; });
 
-    pane.addButton({ title: 'Reset Transform' }).on('click', () => {
-        scrollInfo.offsetU = 0; scrollInfo.offsetV = 0; scrollInfo.scaleU = 1; scrollInfo.scaleV = 1;
-        materialTop.textureOffset = [0, 0]; materialBottom.textureOffset = [0, 0];
-        materialTop.textureScale = [1, 1]; materialBottom.textureScale = [1, 1];
-        pane.refresh();
+            pane.addButton({ title: 'Reset Transform' }).on('click', () => {
+                scrollInfo.offsetU = 0; scrollInfo.offsetV = 0; scrollInfo.scaleU = 1; scrollInfo.scaleV = 1;
+                materialTop.textureOffset = [0, 0]; materialBottom.textureOffset = [0, 0];
+                materialTop.textureScale = [1, 1]; materialBottom.textureScale = [1, 1];
+                pane.refresh();
+            });
+
+            setInterval(() => { if (scrollInfo.autoScroll) pane.refresh(); }, 100);
+        }
     });
-    setInterval(() => { if (scrollInfo.autoScroll) pane.refresh(); }, 100);
 }
