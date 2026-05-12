@@ -12,7 +12,7 @@ interface IconToggleButtonProps {
 /**
  * [KO] 상태(Active/Inactive)를 가지는 토글 버튼 컴포넌트입니다.
  */
-const IconToggleButton: React.FC<IconToggleButtonProps> = ({ icon, label, isActive, onClick, title }) => {
+const IconToggleButton: React.FC<IconToggleButtonProps> = ({icon, label, isActive, onClick, title}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const themeColor = '#fff';
@@ -22,7 +22,7 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({ icon, label, isActi
     const renderIcon = () => {
         if (!icon) return label;
         if (typeof icon === 'string') {
-            return <img src={icon} style={iconStyle} alt={label} />;
+            return <img src={icon} style={iconStyle} alt={label}/>;
         }
         return icon;
     };

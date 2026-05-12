@@ -6,8 +6,8 @@ import {ExampleItem} from '../types/example';
  */
 export const findCurrentExample = async (pathname: string): Promise<ExampleItem | null> => {
     // @ts-ignore
-    const { ExampleList } = await import('../data/exampleList');
-    
+    const {ExampleList} = await import('../data/exampleList');
+
     // Normalize pathname (remove leading/trailing slashes and 'index.html')
     const normalizedPath = pathname
         .replace(/\/$/, '')
@@ -34,7 +34,7 @@ export const findCurrentExample = async (pathname: string): Promise<ExampleItem 
  */
 export const getFlatExampleList = async (): Promise<ExampleItem[]> => {
     // @ts-ignore
-    const { ExampleList } = await import('../data/exampleList');
+    const {ExampleList} = await import('../data/exampleList');
 
     const flatList: ExampleItem[] = [];
     const traverse = (list: ExampleItem[]) => {

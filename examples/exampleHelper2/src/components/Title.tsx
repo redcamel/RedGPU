@@ -43,7 +43,14 @@ const Title = () => {
 
     return <>
         <div style={isNarrow ? narrowTitleBoxStyle : titleBoxStyle}>
-            <div style={{display: 'flex', alignItems: 'stretch', height: '100%', gap: '1px', backgroundColor: '#222', justifyContent: isNarrow ? 'center' : 'flex-start'}}>
+            <div style={{
+                display: 'flex',
+                alignItems: 'stretch',
+                height: '100%',
+                gap: '1px',
+                backgroundColor: '#222',
+                justifyContent: isNarrow ? 'center' : 'flex-start'
+            }}>
                 {prevExample && (
                     <button
                         style={{
@@ -56,7 +63,7 @@ const Title = () => {
                         onMouseEnter={() => setIsPrevHovered(true)}
                         onMouseLeave={() => setIsPrevHovered(false)}
                     >
-                        <ChevronLeft color="#fdb48d" />
+                        <ChevronLeft color="#fdb48d"/>
                     </button>
                 )}
 
@@ -79,15 +86,15 @@ const Title = () => {
                         onMouseEnter={() => setIsNextHovered(true)}
                         onMouseLeave={() => setIsNextHovered(false)}
                     >
-                        <ChevronRight color="#fdb48d" />
+                        <ChevronRight color="#fdb48d"/>
                     </button>
                 )}
             </div>
         </div>
     </>
-    }
+}
 
-    const narrowTitleBoxStyle: React.CSSProperties = {
+const narrowTitleBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -95,8 +102,8 @@ const Title = () => {
     backgroundColor: '#111112',
     width: '100%',
     flexShrink: 0
-    };
-    const titleBoxStyle: React.CSSProperties = {
+};
+const titleBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -104,9 +111,9 @@ const Title = () => {
     minWidth: '200px',
     flexShrink: 0,
     alignItems: 'stretch'
-    };
+};
 
-    const contentBoxStyle: React.CSSProperties = {
+const contentBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -114,25 +121,25 @@ const Title = () => {
     flexGrow: 1,
     minWidth: '100px',
     textAlign: 'center'
-    };
+};
 
-    const titleLabelStyle: React.CSSProperties = {
+const titleLabelStyle: React.CSSProperties = {
     fontSize: '9px',
     color: '#666',
     fontWeight: 'bold',
     marginBottom: '2px',
-    };
+};
 
-    const titleValueStyle: React.CSSProperties = {
+const titleValueStyle: React.CSSProperties = {
     fontSize: '11px',
     color: '#ccc',
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis'
-    };
+};
 
-    const buttonStyle: React.CSSProperties = {
+const buttonStyle: React.CSSProperties = {
     backgroundColor: '#111112',
     color: '#fdb48d',
     border: 'none',
@@ -145,6 +152,6 @@ const Title = () => {
     justifyContent: 'center',
     transition: 'background-color 0.2s',
     padding: 0
-    };
+};
 
-    export default Title
+export default Title

@@ -12,7 +12,7 @@
  */
 export const addColorAlphaInputs = (container: any, colorObject: any, labelPrefix: string = 'BG') => {
     const hasAlpha = 'a' in colorObject;
-    
+
     // [KO] 6자리 HEX 문자열을 위한 프록시 객체 (상단 텍스트 필드에 6자리만 표기됨)
     // [EN] Proxy object for 6-digit HEX string (only 6 digits displayed in top text field)
     const colorProxy = {
@@ -31,14 +31,14 @@ export const addColorAlphaInputs = (container: any, colorObject: any, labelPrefi
         picker: 'inline',
         expanded: true,
     });
-    
+
     // [KO] 알파 슬라이더 별도 추가 (6자리 HEX 유지를 위해 분리)
     // [EN] Add separate Alpha slider (separated to maintain 6-digit HEX)
     if (hasAlpha) {
         container.addBinding(colorObject, 'a', {
-            min: 0, 
-            max: 1, 
-            step: 0.01, 
+            min: 0,
+            max: 1,
+            step: 0.01,
             label: `${labelPrefix} Alpha`
         });
     }
@@ -50,9 +50,9 @@ export const addColorAlphaInputs = (container: any, colorObject: any, labelPrefi
  * @param value
  */
 export const parseSize = (value: string | number) => {
-    if (typeof value === 'number') return { value, unit: 'number' };
+    if (typeof value === 'number') return {value, unit: 'number'};
     const strValue = String(value);
-    if (strValue.endsWith('%')) return { value: parseFloat(strValue), unit: '%' };
-    if (strValue.endsWith('px')) return { value: parseFloat(strValue), unit: 'px' };
-    return { value: parseFloat(strValue), unit: 'px' };
+    if (strValue.endsWith('%')) return {value: parseFloat(strValue), unit: '%'};
+    if (strValue.endsWith('px')) return {value: parseFloat(strValue), unit: 'px'};
+    return {value: parseFloat(strValue), unit: 'px'};
 };

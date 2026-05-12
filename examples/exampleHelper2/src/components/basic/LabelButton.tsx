@@ -11,7 +11,7 @@ interface LabelButtonProps {
 /**
  * [KO] 텍스트 라벨 전용 버튼 컴포넌트입니다.
  */
-const LabelButton: React.FC<LabelButtonProps> = ({ label, isActive = true, onClick, title, style }) => {
+const LabelButton: React.FC<LabelButtonProps> = ({label, isActive = true, onClick, title, style}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const themeColor = '#fdb48d';

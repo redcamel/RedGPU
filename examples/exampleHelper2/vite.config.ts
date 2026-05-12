@@ -24,7 +24,7 @@ export default defineConfig({
       formats: ['es']
     },
     rollupOptions: {
-      external: [],
+      external: ['react', 'react-dom', 'zustand'],
       output: {
         globals: {
           react: 'React',
@@ -45,6 +45,7 @@ export default defineConfig({
       }
     },
     minify: 'terser',
+    assetsInlineLimit: 0,
     terserOptions: {
       format: {
         comments: false,

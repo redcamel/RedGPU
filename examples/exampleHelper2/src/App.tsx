@@ -5,8 +5,9 @@ import ExampleHeader from './components/ExampleHeader';
 import Description from './components/Description';
 import SourceModal from './components/basic/SourceModal';
 import {AxisIcon, DebugIcon, GridIcon, SettingIcon} from './components/Icons';
-const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
 import {useMediaQuery} from './utils/useMediaQuery';
+
+const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -49,7 +50,8 @@ const App = () => {
         if (redGPUContext) {
             const initInspector = async () => {
                 try {
-                    const inspectorPath = new URL('../../../inspector/dist/index.js', import.meta.url).href;
+                    const RELATIVE_PATH = '../../../inspector/dist/index.js';
+                    const inspectorPath = new URL(RELATIVE_PATH, import.meta.url).href;
                     // @ts-ignore
                     const {default: RedGPUInspector} = await import(/* @vite-ignore */ inspectorPath);
                     if (!window.redGPUInspector) {
@@ -71,7 +73,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'axis-toggle',
                 label: 'AXIS',
-                icon: (<AxisIcon color="#ccc" size={18} />),
+                icon: (<AxisIcon color="#ccc" size={18}/>),
                 isActive: axisActive,
                 onClick: () => {
                     const nextValue = !axisActive;
@@ -86,7 +88,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'grid-toggle',
                 label: 'GRID',
-                icon: (<GridIcon color="#ccc" size={24} />),
+                icon: (<GridIcon color="#ccc" size={24}/>),
                 isActive: gridActive,
                 onClick: () => {
                     const nextValue = !gridActive;
@@ -101,7 +103,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'debug-toggle',
                 label: 'DEBUG',
-                icon: (<DebugIcon color="#ccc" size={24} />),
+                icon: (<DebugIcon color="#ccc" size={24}/>),
                 isActive: debugActive,
                 onClick: () => {
                     const nextValue = !debugActive;
@@ -117,7 +119,7 @@ const App = () => {
                 addTopBarRightAction({
                     id: 'setting-toggle',
                     label: 'SETTING',
-                    icon: (<SettingIcon color="#ccc" size={24} />),
+                    icon: (<SettingIcon color="#ccc" size={24}/>),
                     isActive: showSettingsPanel,
                     onClick: () => {
                         setShowSettingsPanel(!showSettingsPanel);

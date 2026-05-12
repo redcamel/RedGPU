@@ -45,9 +45,11 @@ const ExampleHeader = () => {
             <div style={navBarStyle}>
                 <div style={leftSectionStyle}>
                     <IconButton
-                        icon={<HomeIcon color="#fff" size={24} />}
+                        icon={<HomeIcon color="#fff" size={24}/>}
                         label="HOME"
-                        onClick={() => { window.location.href = '/RedGPU/examples/index.html' }}
+                        onClick={() => {
+                            window.location.href = '/RedGPU/examples/index.html'
+                        }}
                         title="HOME"
                     />
                     {!isNarrow && <Title/>}
@@ -56,7 +58,7 @@ const ExampleHeader = () => {
                 <div style={rightSectionStyle}>
                     {!isNarrow && (
                         <>
-                            <RenderingSettingsGroup />
+                            <RenderingSettingsGroup/>
                         </>
                     )}
                     <IconToggleButton

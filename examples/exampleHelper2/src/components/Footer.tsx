@@ -12,14 +12,15 @@ const Footer = () => {
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
 
-    const githubIcon = new URL('./assets/github.png', import.meta.url).href;
+    const RELATIVE_PATH = './assets/github.png';
+    const githubIcon = new URL(RELATIVE_PATH, import.meta.url).href;
 
     return (
         <div style={footerContainerStyle}>
             {isNarrow && <div style={titleContainerStyle}><Title/></div>}
             {isNarrow && (
                 <div style={mobileSelectContainerStyle}>
-                    <RenderingSettingsGroup />
+                    <RenderingSettingsGroup/>
                 </div>
             )}
             <div style={footerStyle}>

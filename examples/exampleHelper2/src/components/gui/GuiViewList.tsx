@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
-import {addColorAlphaInputs, parseSize} from "../../utils/guiUtils";
+import {parseSize} from "../../utils/guiUtils";
 
 /**
  * [KO] RedGPUContext의 viewList 설정을 tweakpane에 추가하는 컴포넌트입니다.
@@ -16,7 +16,7 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
         const views = redGPUContext.viewList;
         if (views.length === 0) return;
 
-        const title = views.length === 1 
+        const title = views.length === 1
             ? (views[0].name?.replace(/Instance/g, '') || 'View 0')
             : 'ViewList';
         const rootFolder = gui.addFolder({title});
@@ -32,10 +32,18 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
             // Grid & Axis
             const debugFolder = container.addFolder({title: 'Debug Helpers'});
             const debugProxy = {
-                get grid() { return !!view.grid; },
-                set grid(v: boolean) { view.grid = v; },
-                get axis() { return !!view.axis; },
-                set axis(v: boolean) { view.axis = v; }
+                get grid() {
+                    return !!view.grid;
+                },
+                set grid(v: boolean) {
+                    view.grid = v;
+                },
+                get axis() {
+                    return !!view.axis;
+                },
+                set axis(v: boolean) {
+                    view.axis = v;
+                }
             };
             debugFolder.addBinding(debugProxy, 'grid', {label: 'Show Grid'});
             debugFolder.addBinding(debugProxy, 'axis', {label: 'Show Axis'});
@@ -55,7 +63,7 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
             };
 
             const sizeFolder = container.addFolder({title: 'Size & Position'});
-            
+
             const updateDim = (key: 'width' | 'height' | 'x' | 'y') => {
                 const unitKey = `${key}Unit` as keyof typeof SIZE_DATA;
                 const value = SIZE_DATA[key];
@@ -67,14 +75,14 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
                 const k = key;
                 const unitKey = `${k}Unit` as keyof typeof SIZE_DATA;
                 sizeFolder.addBinding(SIZE_DATA, k, {
-                    min: 0, 
-                    max: SIZE_DATA[unitKey] === '%' ? 200 : 4096, 
+                    min: 0,
+                    max: SIZE_DATA[unitKey] === '%' ? 200 : 4096,
                     step: 0.01
                 }).on('change', () => updateDim(k));
 
                 sizeFolder.addBinding(SIZE_DATA, unitKey, {
                     label: `${k} Unit`,
-                    options: { '%': '%', 'px': 'px', 'number': 'number' }
+                    options: {'%': '%', 'px': 'px', 'number': 'number'}
                 }).on('change', () => updateDim(k));
             });
         };

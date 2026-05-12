@@ -40,17 +40,17 @@ const GuiPanel: React.FC = () => {
 
     return (
         <>
-            <div ref={guiContainerRef} style={guiContainerStyle} />
+            <div ref={guiContainerRef} style={guiContainerStyle}/>
             {guiInstance && guiConfig.redGPUContext && redGPUContext && (
-                <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext} />
+                <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext}/>
             )}
             {guiInstance && guiConfig.viewList && redGPUContext && (
-                <GuiViewList gui={guiInstance} redGPUContext={redGPUContext} />
+                <GuiViewList gui={guiInstance} redGPUContext={redGPUContext}/>
             )}
             {guiInstance && guiConfig.scene && redGPUContext && (
-                <GuiScene gui={guiInstance} redGPUContext={redGPUContext} />
+                <GuiScene gui={guiInstance} redGPUContext={redGPUContext}/>
             )}
-            <style dangerouslySetInnerHTML={{ __html: tweakpaneCustomStyle }} />
+            <style dangerouslySetInnerHTML={{__html: tweakpaneCustomStyle}}/>
         </>
     );
 };

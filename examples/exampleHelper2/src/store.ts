@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import React from 'react';
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
-import { ExampleItem } from './types/example';
+import {ExampleItem} from './types/example';
 
 /**
  * [KO] TopBar의 우측 액션 버튼 정의 인터페이스
@@ -60,21 +60,21 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     topBarRightActions: [],
     guiConfig: null,
     isNarrow: false,
-    setRedGPUContext: (value: RedGPUContext | null) => set({ redGPUContext: value }),
-    setCurrentExample: (value: ExampleItem | null) => set({ currentExample: value }),
-    setLanguage: (value: 'ko' | 'en') => set({ language: value }),
-    setShowSourceModal: (value: boolean) => set({ showSourceModal: value }),
-    setShowSettingsPanel: (value: boolean) => set({ showSettingsPanel: value }),
+    setRedGPUContext: (value: RedGPUContext | null) => set({redGPUContext: value}),
+    setCurrentExample: (value: ExampleItem | null) => set({currentExample: value}),
+    setLanguage: (value: 'ko' | 'en') => set({language: value}),
+    setShowSourceModal: (value: boolean) => set({showSourceModal: value}),
+    setShowSettingsPanel: (value: boolean) => set({showSettingsPanel: value}),
     addTopBarRightAction: (action) => set((state) => {
         const filtered = state.topBarRightActions.filter(a => a.id !== action.id);
-        return { topBarRightActions: [...filtered, action] };
+        return {topBarRightActions: [...filtered, action]};
     }),
     removeTopBarRightAction: (id) => set((state) => ({
         topBarRightActions: state.topBarRightActions.filter(a => a.id !== id)
     })),
-    clearTopBarRightActions: () => set({ topBarRightActions: [] }),
+    clearTopBarRightActions: () => set({topBarRightActions: []}),
     setGuiConfig: (config: GuiConfig | null) => {
-        set({ guiConfig: config, showSettingsPanel: !!config });
+        set({guiConfig: config, showSettingsPanel: !!config});
     },
-    setIsNarrow: (value: boolean) => set({ isNarrow: value }),
+    setIsNarrow: (value: boolean) => set({isNarrow: value}),
 }));

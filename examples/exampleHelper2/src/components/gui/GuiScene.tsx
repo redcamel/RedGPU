@@ -15,14 +15,14 @@ const GuiScene: React.FC<GuiSceneProps> = ({gui, redGPUContext}) => {
     useEffect(() => {
         const views = redGPUContext.viewList;
         const scenes = views.map((v: any) => v.scene).filter((s: any, i: number, arr: any[]) => s && arr.indexOf(s) === i);
-        
+
         if (scenes.length === 0) return;
 
         const sceneFolders: any[] = [];
 
         const addSceneControls = (scene: any, container: any) => {
             container.addBinding(scene, 'useBackgroundColor');
-            
+
             if (scene.backgroundColor) {
                 addColorAlphaInputs(container, scene.backgroundColor);
             }

@@ -48,19 +48,19 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         };
 
         const sizeFolder = contextFolder.addFolder({title: 'Size'});
-        
+
         const updateWidth = () => {
             redGPUContext.width = SIZE_DATA.widthUnit === 'number' ? SIZE_DATA.width : `${SIZE_DATA.width}${SIZE_DATA.widthUnit}`;
         };
         const widthController = sizeFolder.addBinding(SIZE_DATA, 'width', {
-            min: 0, 
-            max: initialWidth.unit === '%' ? 200 : 4096, 
+            min: 0,
+            max: initialWidth.unit === '%' ? 200 : 4096,
             step: 0.01
         });
         widthController.on('change', updateWidth);
 
         sizeFolder.addBinding(SIZE_DATA, 'widthUnit', {
-            options: { '%': '%', 'px': 'px', 'number': 'number' }
+            options: {'%': '%', 'px': 'px', 'number': 'number'}
         }).on('change', (ev) => {
             // Tweakpane 3.x doesn't support dynamic max change easily on input, 
             // but we can at least update the value.
@@ -71,14 +71,14 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
             redGPUContext.height = SIZE_DATA.heightUnit === 'number' ? SIZE_DATA.height : `${SIZE_DATA.height}${SIZE_DATA.heightUnit}`;
         };
         const heightController = sizeFolder.addBinding(SIZE_DATA, 'height', {
-            min: 0, 
-            max: initialHeight.unit === '%' ? 200 : 4096, 
+            min: 0,
+            max: initialHeight.unit === '%' ? 200 : 4096,
             step: 0.01
         });
         heightController.on('change', updateHeight);
 
         sizeFolder.addBinding(SIZE_DATA, 'heightUnit', {
-            options: { '%': '%', 'px': 'px', 'number': 'number' }
+            options: {'%': '%', 'px': 'px', 'number': 'number'}
         }).on('change', () => {
             updateHeight();
         });
@@ -97,7 +97,9 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
         const rectFolder = contextFolder.addFolder({title: 'Rect Info', expanded: true});
 
         const DPR_DATA = {
-            get dpr() { return window.devicePixelRatio; }
+            get dpr() {
+                return window.devicePixelRatio;
+            }
         };
         rectFolder.addBinding(DPR_DATA, 'dpr', {readonly: true, label: 'DPR', interval: 500});
 

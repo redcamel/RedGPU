@@ -54,10 +54,10 @@ const RenderingSettingsGroup: React.FC = () => {
     };
 
     const aaOptions = [
-        { value: 'NONE', label: 'NONE' },
-        { value: 'useMSAA', label: 'MSAA' },
-        { value: 'useFXAA', label: 'FXAA' },
-        { value: 'useTAA', label: 'TAA' },
+        {value: 'NONE', label: 'NONE'},
+        {value: 'useMSAA', label: 'MSAA'},
+        {value: 'useFXAA', label: 'FXAA'},
+        {value: 'useTAA', label: 'TAA'},
     ];
 
     const tmOptions = Object.entries(TONE_MAPPING_MODE).map(([key, value]) => ({

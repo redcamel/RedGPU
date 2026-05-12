@@ -10,12 +10,12 @@ interface IconButtonProps {
 /**
  * [KO] 아이콘 전용 버튼 컴포넌트입니다.
  */
-const IconButton: React.FC<IconButtonProps> = ({ icon, label, onClick, title }) => {
+const IconButton: React.FC<IconButtonProps> = ({icon, label, onClick, title}) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const renderIcon = () => {
         if (typeof icon === 'string') {
-            return <img src={icon} style={iconStyle} alt={label} />;
+            return <img src={icon} style={iconStyle} alt={label}/>;
         }
         return icon;
     };

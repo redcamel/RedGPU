@@ -13,7 +13,7 @@ interface SelectBoxProps {
 /**
  * [KO] 커스텀 스타일이 적용된 선택 박스 컴포넌트입니다.
  */
-const SelectBox: React.FC<SelectBoxProps> = ({ label, value, options, onChange }) => {
+const SelectBox: React.FC<SelectBoxProps> = ({label, value, options, onChange}) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [openDirection, setOpenDirection] = useState<'up' | 'down'>('down');
@@ -62,10 +62,10 @@ const SelectBox: React.FC<SelectBoxProps> = ({ label, value, options, onChange }
                 <span style={currentValueStyle}>{currentLabel}</span>
                 <div style={{
                     ...arrowIconStyle,
-                    transform: isOpen 
-                        ? (openDirection === 'up' ? 'rotate(0deg)' : 'rotate(180deg)') 
+                    transform: isOpen
+                        ? (openDirection === 'up' ? 'rotate(0deg)' : 'rotate(180deg)')
                         : (openDirection === 'up' ? 'rotate(180deg)' : 'rotate(0deg)')
-                }} />
+                }}/>
             </div>
 
             {isOpen && (
@@ -75,8 +75,8 @@ const SelectBox: React.FC<SelectBoxProps> = ({ label, value, options, onChange }
                     bottom: openDirection === 'up' ? '100%' : 'auto',
                     borderTop: openDirection === 'down' ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
                     borderBottom: openDirection === 'up' ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
-                    boxShadow: openDirection === 'down' 
-                        ? '0 10px 20px rgba(0,0,0,0.5)' 
+                    boxShadow: openDirection === 'down'
+                        ? '0 10px 20px rgba(0,0,0,0.5)'
                         : '0 -10px 20px rgba(0,0,0,0.5)',
                 }}>
                     {options.map(option => {
