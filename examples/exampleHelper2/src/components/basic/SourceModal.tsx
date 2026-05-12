@@ -1,12 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {usePrismLoader} from '../../hooks/usePrismLoader';
 
 /**
  * [KO] 예제 소스 코드를 보여주는 모달 컴포넌트입니다. Prism.js를 사용하여 하이라이팅을 적용합니다.
  * [EN] Modal component that shows the example source code. Applies highlighting using Prism.js.
  */
 const SourceModal = () => {
-    // [KO] 상태 선택 시 Selector 패턴 사용 (TS2339 오류 방지)
     const showSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.showSourceModal);
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
@@ -15,45 +15,8 @@ const SourceModal = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const codeRef = useRef<HTMLElement>(null);
 
-    // [KO] Prism.js 에셋 경로
-    const PRISM_JS = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js';
-    const PRISM_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
-
-    /**
-     * [KO] Prism.js와 CSS를 동적으로 로드합니다.
-     */
-    const loadPrism = () => {
-        return new Promise<void>((resolve) => {
-            const prismWindow = window as any;
-            if (prismWindow.Prism) {
-                resolve();
-                return;
-            }
-
-            // CSS 로드
-            if (!document.querySelector(`link[href="${PRISM_CSS}"]`)) {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = PRISM_CSS;
-                document.head.appendChild(link);
-            }
-
-            // JS 로드
-            if (!document.querySelector(`script[src="${PRISM_JS}"]`)) {
-                const script = document.createElement('script');
-                script.src = PRISM_JS;
-                script.onload = () => resolve();
-                document.head.appendChild(script);
-            } else {
-                const checkPrism = setInterval(() => {
-                    if (prismWindow.Prism) {
-                        clearInterval(checkPrism);
-                        resolve();
-                    }
-                }, 100);
-            }
-        });
-    };
+    // [KO] Prism.js 로더 사용
+    const {loadPrism} = usePrismLoader();
 
     useEffect(() => {
         if (showSourceModal) {
@@ -61,8 +24,6 @@ const SourceModal = () => {
 
             // [KO] 현재 예제 헬퍼는 예제 페이지(index.html)에서 실행되므로 
             // 현재 경로의 index.js를 직접 불러오면 됩니다.
-            // [EN] Since the example helper runs in the example page (index.html),
-            // we can directly fetch index.js in the current path.
             fetch('./index.js')
                 .then(response => {
                     if (!response.ok) throw new Error('Failed to load source code');
@@ -83,7 +44,7 @@ const SourceModal = () => {
                     setLoading(false);
                 });
         }
-    }, [showSourceModal]);
+    }, [showSourceModal, loadPrism]);
 
     // [KO] 모달이 열린 상태에서 코드가 준비되면 하이라이팅 적용
     useEffect(() => {

@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {ExampleHelperState, useExampleHelperStore} from './store';
 import Footer from './components/Footer';
 import ExampleHeader from './components/ExampleHeader';
 import Description from './components/Description';
 import SourceModal from './components/basic/SourceModal';
-import {AxisIcon, DebugIcon, GridIcon, SettingIcon} from './components/Icons';
-import {useMediaQuery} from './utils/useMediaQuery';
+import {useViewportSync} from './hooks/useViewportSync';
+import {useInspectorInit} from './hooks/useInspectorInit';
+import {useTopBarActions} from './hooks/useTopBarActions';
 
 const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
 
@@ -15,119 +16,16 @@ const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
  */
 const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
-    const addTopBarRightAction = useExampleHelperStore((state: ExampleHelperState) => state.addTopBarRightAction);
-    const guiConfig = useExampleHelperStore((state: ExampleHelperState) => state.guiConfig);
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
-    const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
-    const setIsNarrow = useExampleHelperStore((state: ExampleHelperState) => state.setIsNarrow);
 
-    const [axisActive, setAxisActive] = useState(false);
-    const [gridActive, setGridActive] = useState(false);
-    const [debugActive, setDebugActive] = useState(false);
+    // [KO] 뷰포트 상태 동기화
+    const isNarrow = useViewportSync();
 
-    const isNarrow = useMediaQuery(768);
+    // [KO] 상단 바 액션 및 인스펙터 상태 관리
+    const {setDebugActive} = useTopBarActions();
 
-    // [KO] isNarrow를 전역 상태에 동기화
-    // [EN] Sync isNarrow to global state
-    useEffect(() => {
-        setIsNarrow(isNarrow);
-    }, [isNarrow, setIsNarrow]);
-
-    // Sync state with last view
-    useEffect(() => {
-        if (redGPUContext && redGPUContext.viewList.length > 0) {
-            const lastView = redGPUContext.viewList[redGPUContext.viewList.length - 1];
-            setAxisActive(!!lastView.axis);
-            setGridActive(!!lastView.grid);
-            if (window.redGPUInspector) {
-                setDebugActive(window.redGPUInspector.useDebugPanel);
-            }
-        }
-    }, [redGPUContext]);
-
-    // Inspector Initialization & Debug Button
-    useEffect(() => {
-        if (redGPUContext) {
-            const initInspector = async () => {
-                try {
-                    const RELATIVE_PATH = '../../../inspector/dist/index.js';
-                    const inspectorPath = new URL(RELATIVE_PATH, import.meta.url).href;
-                    // @ts-ignore
-                    const {default: RedGPUInspector} = await import(/* @vite-ignore */ inspectorPath);
-                    if (!window.redGPUInspector) {
-                        window.redGPUInspector = new RedGPUInspector(redGPUContext);
-                        setDebugActive(window.redGPUInspector.useDebugPanel);
-                    }
-                } catch (e) {
-                    console.error('Failed to load Inspector:', e);
-                }
-            };
-            initInspector();
-        }
-    }, [redGPUContext]);
-
-    // Register Dynamic Buttons
-    useEffect(() => {
-        if (redGPUContext) {
-            // AXIS Toggle
-            addTopBarRightAction({
-                id: 'axis-toggle',
-                label: 'AXIS',
-                icon: (<AxisIcon color="#ccc" size={18}/>),
-                isActive: axisActive,
-                onClick: () => {
-                    const nextValue = !axisActive;
-                    redGPUContext.viewList.forEach((view: any) => {
-                        if ('axis' in view) view.axis = nextValue;
-                    });
-                    setAxisActive(nextValue);
-                }
-            });
-
-            // GRID Toggle
-            addTopBarRightAction({
-                id: 'grid-toggle',
-                label: 'GRID',
-                icon: (<GridIcon color="#ccc" size={24}/>),
-                isActive: gridActive,
-                onClick: () => {
-                    const nextValue = !gridActive;
-                    redGPUContext.viewList.forEach((view: any) => {
-                        if ('grid' in view) view.grid = nextValue;
-                    });
-                    setGridActive(nextValue);
-                }
-            });
-
-            // DEBUG Toggle
-            addTopBarRightAction({
-                id: 'debug-toggle',
-                label: 'DEBUG',
-                icon: (<DebugIcon color="#ccc" size={24}/>),
-                isActive: debugActive,
-                onClick: () => {
-                    const nextValue = !debugActive;
-                    if (window.redGPUInspector) {
-                        window.redGPUInspector.useDebugPanel = nextValue;
-                    }
-                    setDebugActive(nextValue);
-                }
-            });
-
-            // SETTING Toggle
-            if (guiConfig) {
-                addTopBarRightAction({
-                    id: 'setting-toggle',
-                    label: 'SETTING',
-                    icon: (<SettingIcon color="#ccc" size={24}/>),
-                    isActive: showSettingsPanel,
-                    onClick: () => {
-                        setShowSettingsPanel(!showSettingsPanel);
-                    }
-                });
-            }
-        }
-    }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiConfig, showSettingsPanel, setShowSettingsPanel]);
+    // [KO] 인스펙터 초기화
+    useInspectorInit(redGPUContext, setDebugActive);
 
     const dynamicPanelStyle = {
         ...panelStyle,
@@ -164,7 +62,6 @@ const panelStyle: React.CSSProperties = {
     color: 'white',
     fontFamily: 'monospace',
     zIndex: 10002,
-    // boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
     borderLeft: '1px solid rgba(255,255,255,0.05)',
     overflow: 'hidden',
 };
