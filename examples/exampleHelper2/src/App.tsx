@@ -49,8 +49,9 @@ const App = () => {
         if (redGPUContext) {
             const initInspector = async () => {
                 try {
+                    const inspectorPath = new URL('../../../inspector/dist/index.js', import.meta.url).href;
                     // @ts-ignore
-                    const {default: RedGPUInspector} = await import('../../../inspector/dist/index.js');
+                    const {default: RedGPUInspector} = await import(/* @vite-ignore */ inspectorPath);
                     if (!window.redGPUInspector) {
                         window.redGPUInspector = new RedGPUInspector(redGPUContext);
                         setDebugActive(window.redGPUInspector.useDebugPanel);
