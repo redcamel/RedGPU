@@ -48,9 +48,6 @@ const renderTestPane = async (view) => {
     } = await import( "../../../../exampleHelper/createExample/panes/index.js" );
 
     new RedGPUExampleHelper(view.redGPUContext, {
-        redGPUContext: true,
-        viewList: true,
-        scene: true,
         guiCallback: (pane) => {
             createIblHelper(pane, view, RedGPU, {syncSkyBox: true});
         }

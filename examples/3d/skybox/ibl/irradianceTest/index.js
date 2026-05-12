@@ -1,14 +1,32 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
 
+/**
+ * [KO] Irradiance 맵 테스트 예제
+ * [EN] Irradiance Map Test Example
+ */
+
+// [KO] 캔버스 생성 및 문서에 추가
+// [EN] Create canvas and append to document
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+// [KO] RedGPU 초기화
+// [EN] Initialize RedGPU
 RedGPU.init(
     canvas,
     async (redGPUContext) => {
-        const scene = new RedGPU.Display.Scene();
+        // [KO] 카메라 컨트롤러 생성 (OrbitController)
+        // [EN] Create camera controller (OrbitController)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+
+        // [KO] 씬 및 뷰 생성
+        // [EN] Create scene and view
+        const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+
+        // [KO] 컨텍스트에 뷰 추가
+        // [EN] Add view to context
         redGPUContext.addView(view);
 
         // [KO] HDR 텍스처 로드 (현재 버전은 순수 2D 리소스로 로드됨)
@@ -44,17 +62,30 @@ RedGPU.init(
         previewMesh.pixelSize = 300;
         scene.addChild(previewMesh);
 
+        // [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create renderer and start loop
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
-        renderTestPane(redGPUContext, scene, hdrTexture);
+        // [KO] 테스트용 GUI 렌더링
+        // [EN] Render GUI for testing
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error(failReason);
+        // [KO] 초기화 실패 시 에러 처리
+        // [EN] Error handling on initialization failure
+        console.error('초기화 실패:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-const renderTestPane = async (redGPUContext, scene, hdrTexture) => {
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+/**
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
+const renderTestPane = async (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };
