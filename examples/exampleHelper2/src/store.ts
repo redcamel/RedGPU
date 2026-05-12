@@ -1,4 +1,5 @@
 import {create} from 'zustand';
+import React from 'react';
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import { ExampleItem } from './types/example';
 
@@ -8,7 +9,7 @@ import { ExampleItem } from './types/example';
 export interface TopBarAction {
     id: string;
     label: string;
-    icon?: string;
+    icon?: React.ReactNode;
     isActive?: boolean;
     onClick: () => void;
 }

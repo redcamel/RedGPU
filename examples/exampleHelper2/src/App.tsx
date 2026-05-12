@@ -70,7 +70,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'axis-toggle',
                 label: 'AXIS',
-                icon: <AxisIcon color="#ccc" size={18} />,
+                icon: (<AxisIcon color="#ccc" size={18} />),
                 isActive: axisActive,
                 onClick: () => {
                     const nextValue = !axisActive;
@@ -85,7 +85,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'grid-toggle',
                 label: 'GRID',
-                icon: <GridIcon color="#ccc" size={24} />,
+                icon: (<GridIcon color="#ccc" size={24} />),
                 isActive: gridActive,
                 onClick: () => {
                     const nextValue = !gridActive;
@@ -100,7 +100,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'debug-toggle',
                 label: 'DEBUG',
-                icon: <DebugIcon color="#ccc" size={24} />,
+                icon: (<DebugIcon color="#ccc" size={24} />),
                 isActive: debugActive,
                 onClick: () => {
                     const nextValue = !debugActive;
@@ -116,7 +116,7 @@ const App = () => {
                 addTopBarRightAction({
                     id: 'setting-toggle',
                     label: 'SETTING',
-                    icon: <SettingIcon color="#ccc" size={24} />,
+                    icon: (<SettingIcon color="#ccc" size={24} />),
                     isActive: showSettingsPanel,
                     onClick: () => {
                         setShowSettingsPanel(!showSettingsPanel);
