@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Skybox With IBL 예제
@@ -22,7 +23,7 @@ RedGPU.init(
 
         redGPUContext.addView(view);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
 
@@ -42,14 +43,16 @@ RedGPU.init(
  * @param {RedGPU.Display.View3D} view
  */
 const renderTestPane = async (view) => {
-    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910" );
-    const pane = new Pane();
     const {
-        createFieldOfView,
         createIblHelper,
-        setDebugButtons
-    } = await import( "../../../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
-    setDebugButtons(RedGPU, view.redGPUContext);
-    createFieldOfView(pane, view.camera);
-    createIblHelper(pane, view, RedGPU);
+    } = await import( "../../../../exampleHelper/createExample/panes/index.js" );
+
+    new RedGPUExampleHelper(view.redGPUContext, {
+        redGPUContext: true,
+        viewList: true,
+        scene: true,
+        guiCallback: (pane) => {
+            createIblHelper(pane, view, RedGPU, {syncSkyBox: true});
+        }
+    });
 };
