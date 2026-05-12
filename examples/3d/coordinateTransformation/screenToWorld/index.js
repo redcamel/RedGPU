@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Screen To World 예제
@@ -29,13 +30,13 @@ RedGPU.init(
         // 라이팅 설정
         setupLighting(scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             updateInfoDisplay(demo);
         };
 
         renderer.start(redGPUContext, render);
-        renderTestPane(redGPUContext)
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -49,8 +50,12 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // [KO] 필요한 경우 여기에 추가 컨트롤을 구현할 수 있습니다.
+            // [EN] Additional controls can be implemented here if needed.
+        }
+    });
 };
 
 /**
@@ -142,7 +147,7 @@ function createInfoDisplay() {
     const infoDisplay = document.createElement('div');
     Object.assign(infoDisplay.style, {
         position: 'absolute',
-        top: '16px',
+        top: '68px',
         right: '16px',
         color: '#333',
         fontSize: '12px',
