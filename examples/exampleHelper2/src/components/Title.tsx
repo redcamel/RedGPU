@@ -60,7 +60,7 @@ const Title = () => {
                 )}
 
                 <div style={{...contentBoxStyle, textAlign: isNarrow ? 'center' : 'left'}}>
-                    {!isNarrow && <span style={titleLabelStyle}>TITLE</span>}
+                    {!isNarrow && <span style={titleLabelStyle}>Example</span>}
                     <span style={titleValueStyle}>
                         {currentExample ? currentExample.name : 'empty example name'}
                     </span>
