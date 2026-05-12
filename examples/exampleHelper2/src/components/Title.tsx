@@ -2,6 +2,7 @@ import React, {useEffect, useMemo, useState} from "react";
 import {ExampleHelperState, useExampleHelperStore} from "../store";
 import {getFlatExampleList} from "../utils/exampleFinder";
 import {ExampleItem} from "../types/example";
+import {ChevronLeft, ChevronRight} from "./Icons";
 
 const Title = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
@@ -85,18 +86,6 @@ const Title = () => {
         </div>
     </>
     }
-
-    const ChevronLeft = ({color}: { color: string }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="15 18 9 12 15 6"></polyline>
-    </svg>
-    );
-
-    const ChevronRight = ({color}: { color: string }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="9 18 15 12 9 6"></polyline>
-    </svg>
-    );
 
     const narrowTitleBoxStyle: React.CSSProperties = {
     display: 'flex',

@@ -4,10 +4,7 @@ import Footer from './components/Footer';
 import ExampleHeader from './components/ExampleHeader';
 import Description from './components/Description';
 import SourceModal from './components/basic/SourceModal';
-import debugIcon from './assets/icons/debug.svg';
-import axisIcon from './assets/icons/axis.svg';
-import gridIcon from './assets/icons/grid.svg';
-import settingIcon from './assets/icons/gears-solid-full.svg';
+import {AxisIcon, DebugIcon, GridIcon, SettingIcon} from './components/Icons';
 const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
 import {useMediaQuery} from './utils/useMediaQuery';
 
@@ -73,7 +70,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'axis-toggle',
                 label: 'AXIS',
-                icon: axisIcon,
+                icon: <AxisIcon color="#ccc" size={18} />,
                 isActive: axisActive,
                 onClick: () => {
                     const nextValue = !axisActive;
@@ -88,7 +85,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'grid-toggle',
                 label: 'GRID',
-                icon: gridIcon,
+                icon: <GridIcon color="#ccc" size={24} />,
                 isActive: gridActive,
                 onClick: () => {
                     const nextValue = !gridActive;
@@ -103,7 +100,7 @@ const App = () => {
             addTopBarRightAction({
                 id: 'debug-toggle',
                 label: 'DEBUG',
-                icon: debugIcon,
+                icon: <DebugIcon color="#ccc" size={24} />,
                 isActive: debugActive,
                 onClick: () => {
                     const nextValue = !debugActive;
@@ -119,7 +116,7 @@ const App = () => {
                 addTopBarRightAction({
                     id: 'setting-toggle',
                     label: 'SETTING',
-                    icon: settingIcon,
+                    icon: <SettingIcon color="#ccc" size={24} />,
                     isActive: showSettingsPanel,
                     onClick: () => {
                         setShowSettingsPanel(!showSettingsPanel);

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../store';
-import homeIcon from '../assets/icons/home.svg';
+import {HomeIcon} from './Icons';
 import IconButton from './basic/IconButton';
 import IconToggleButton from './basic/IconToggleButton';
 import RenderingSettingsGroup from './RenderingSettingsGroup';
@@ -45,7 +45,7 @@ const ExampleHeader = () => {
             <div style={navBarStyle}>
                 <div style={leftSectionStyle}>
                     <IconButton
-                        icon={homeIcon}
+                        icon={<HomeIcon color="#fff" size={24} />}
                         label="HOME"
                         onClick={() => { window.location.href = '/RedGPU/examples/index.html' }}
                         title="HOME"

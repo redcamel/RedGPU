@@ -1,6 +1,5 @@
 import React from 'react';
 import {ExampleHelperState, useExampleHelperStore} from '../store';
-import githubIcon from '../assets/github.png';
 import RenderingSettingsGroup from './RenderingSettingsGroup';
 import LabelButton from './basic/LabelButton';
 import Title from "./Title";
@@ -12,6 +11,8 @@ import Title from "./Title";
 const Footer = () => {
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
+
+    const githubIcon = new URL('./assets/github.png', import.meta.url).href;
 
     return (
         <div style={footerContainerStyle}>
