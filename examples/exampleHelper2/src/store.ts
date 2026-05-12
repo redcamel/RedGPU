@@ -34,6 +34,7 @@ export interface ExampleHelperState {
     showSettingsPanel: boolean;
     topBarRightActions: TopBarAction[];
     guiConfig: GuiConfig | null;
+    isNarrow: boolean;
     setRedGPUContext: (value: RedGPUContext | null) => void;
     setCurrentExample: (value: ExampleItem | null) => void;
     setLanguage: (value: 'ko' | 'en') => void;
@@ -43,6 +44,7 @@ export interface ExampleHelperState {
     removeTopBarRightAction: (id: string) => void;
     clearTopBarRightActions: () => void;
     setGuiConfig: (config: GuiConfig | null) => void;
+    setIsNarrow: (value: boolean) => void;
 }
 
 /**
@@ -56,6 +58,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     showSettingsPanel: false,
     topBarRightActions: [],
     guiConfig: null,
+    isNarrow: false,
     setRedGPUContext: (value: RedGPUContext | null) => set({ redGPUContext: value }),
     setCurrentExample: (value: ExampleItem | null) => set({ currentExample: value }),
     setLanguage: (value: 'ko' | 'en') => set({ language: value }),
@@ -72,4 +75,5 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     setGuiConfig: (config: GuiConfig | null) => {
         set({ guiConfig: config, showSettingsPanel: !!config });
     },
+    setIsNarrow: (value: boolean) => set({ isNarrow: value }),
 }));

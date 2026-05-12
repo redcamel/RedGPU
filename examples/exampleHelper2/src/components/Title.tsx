@@ -4,10 +4,11 @@ import {ExampleHelperState, useExampleHelperStore} from "../store";
 
 const Title = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
+    const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
 
     return <>
-        <div style={titleBoxStyle}>
-            <span style={titleLabelStyle}>TITLE</span>
+        <div style={isNarrow ? narrowTitleBoxStyle : titleBoxStyle}>
+            {!isNarrow && <span style={titleLabelStyle}>TITLE</span>}
             <span style={titleValueStyle}>
                           {currentExample ? currentExample.name : 'empty example name'}
                         </span>
@@ -15,6 +16,15 @@ const Title = () => {
     </>
 }
 
+const narrowTitleBoxStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#111112',
+    width: '100%',
+    flexShrink: 0
+};
 const titleBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',

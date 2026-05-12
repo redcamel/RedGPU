@@ -4,7 +4,6 @@ import homeIcon from '../assets/icons/home.svg';
 import IconButton from './basic/IconButton';
 import IconToggleButton from './basic/IconToggleButton';
 import RenderingSettingsGroup from './RenderingSettingsGroup';
-import {useMediaQuery} from '../utils/useMediaQuery';
 import Title from "./Title";
 
 /**
@@ -14,10 +13,9 @@ import Title from "./Title";
 const ExampleHeader = () => {
     const topBarRightActions = useExampleHelperStore((state: ExampleHelperState) => state.topBarRightActions);
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
+    const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
 
     const [ssao, setSSAO] = useState<boolean>(false);
-
-    const isNarrow = useMediaQuery(768);
 
     useEffect(() => {
         if (redGPUContext) {

@@ -21,12 +21,19 @@ const App = () => {
     const guiConfig = useExampleHelperStore((state: ExampleHelperState) => state.guiConfig);
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
+    const setIsNarrow = useExampleHelperStore((state: ExampleHelperState) => state.setIsNarrow);
 
     const [axisActive, setAxisActive] = useState(false);
     const [gridActive, setGridActive] = useState(false);
     const [debugActive, setDebugActive] = useState(false);
 
     const isNarrow = useMediaQuery(768);
+
+    // [KO] isNarrow를 전역 상태에 동기화
+    // [EN] Sync isNarrow to global state
+    useEffect(() => {
+        setIsNarrow(isNarrow);
+    }, [isNarrow, setIsNarrow]);
 
     // Sync state with last view
     useEffect(() => {

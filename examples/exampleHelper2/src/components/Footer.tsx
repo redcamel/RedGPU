@@ -3,7 +3,6 @@ import {ExampleHelperState, useExampleHelperStore} from '../store';
 import githubIcon from '../assets/github.png';
 import RenderingSettingsGroup from './RenderingSettingsGroup';
 import LabelButton from './basic/LabelButton';
-import {useMediaQuery} from '../utils/useMediaQuery';
 import Title from "./Title";
 
 /**
@@ -12,7 +11,7 @@ import Title from "./Title";
  */
 const Footer = () => {
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
-    const isNarrow = useMediaQuery(768);
+    const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
 
     return (
         <div style={footerContainerStyle}>
@@ -45,7 +44,6 @@ const Footer = () => {
 // Styles
 const titleContainerStyle: React.CSSProperties = {
     display: 'flex',
-    width:'fit-content',
     alignItems: 'stretch',
     justifyContent: 'center',
     height: '46px',
