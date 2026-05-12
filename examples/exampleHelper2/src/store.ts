@@ -21,7 +21,6 @@ export interface GuiConfig {
     redGPUContext?: boolean;
     viewList?: boolean;
     scene?: boolean;
-    skybox?: boolean;
     guiCallback?: (gui: any) => void;
 }
 
