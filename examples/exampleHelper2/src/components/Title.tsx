@@ -1,14 +1,24 @@
-import React, {useMemo} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {ExampleHelperState, useExampleHelperStore} from "../store";
 import {getFlatExampleList} from "../utils/exampleFinder";
+import {ExampleItem} from "../types/example";
 
 const Title = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
 
-    const flatList = useMemo(() => getFlatExampleList(), []);
+    const [flatList, setFlatList] = useState<ExampleItem[]>([]);
+
+    useEffect(() => {
+        const loadList = async () => {
+            const list = await getFlatExampleList();
+            setFlatList(list);
+        };
+        loadList();
+    }, []);
+
     const currentIndex = useMemo(() => {
-        if (!currentExample) return -1;
+        if (!currentExample || flatList.length === 0) return -1;
         return flatList.findIndex(item => item.path === currentExample.path);
     }, [currentExample, flatList]);
 
@@ -33,20 +43,21 @@ const Title = () => {
     return <>
         <div style={isNarrow ? narrowTitleBoxStyle : titleBoxStyle}>
             <div style={{display: 'flex', alignItems: 'stretch', height: '100%', gap: '1px', backgroundColor: '#222', justifyContent: isNarrow ? 'center' : 'flex-start'}}>
-                <button
-                    style={{
-                        ...(prevExample ? buttonStyle : disabledButtonStyle),
-                        width: isNarrow ? '46px' : '52px',
-                        backgroundColor: isPrevHovered && prevExample ? '#1a1a1c' : '#111112'
-                    }}
-                    onClick={() => prevExample && navigate(prevExample.path!)}
-                    disabled={!prevExample}
-                    title={prevExample ? `Previous: ${prevExample.name}` : 'No previous example'}
-                    onMouseEnter={() => setIsPrevHovered(true)}
-                    onMouseLeave={() => setIsPrevHovered(false)}
-                >
-                    <ChevronLeft color={prevExample ? '#fdb48d' : '#333'} />
-                </button>
+                {prevExample && (
+                    <button
+                        style={{
+                            ...buttonStyle,
+                            width: isNarrow ? '46px' : '52px',
+                            backgroundColor: isPrevHovered ? '#1a1a1c' : '#111112'
+                        }}
+                        onClick={() => navigate(prevExample.path!)}
+                        title={`Previous: ${prevExample.name}`}
+                        onMouseEnter={() => setIsPrevHovered(true)}
+                        onMouseLeave={() => setIsPrevHovered(false)}
+                    >
+                        <ChevronLeft color="#fdb48d" />
+                    </button>
+                )}
 
                 <div style={{...contentBoxStyle, textAlign: isNarrow ? 'center' : 'left'}}>
                     {!isNarrow && <span style={titleLabelStyle}>TITLE</span>}
@@ -55,38 +66,39 @@ const Title = () => {
                     </span>
                 </div>
 
-                <button
-                    style={{
-                        ...(nextExample ? buttonStyle : disabledButtonStyle),
-                        width: isNarrow ? '46px' : '52px',
-                        backgroundColor: isNextHovered && nextExample ? '#1a1a1c' : '#111112'
-                    }}
-                    onClick={() => nextExample && navigate(nextExample.path!)}
-                    disabled={!nextExample}
-                    title={nextExample ? `Next: ${nextExample.name}` : 'No next example'}
-                    onMouseEnter={() => setIsNextHovered(true)}
-                    onMouseLeave={() => setIsNextHovered(false)}
-                >
-                    <ChevronRight color={nextExample ? '#fdb48d' : '#333'} />
-                </button>
+                {nextExample && (
+                    <button
+                        style={{
+                            ...buttonStyle,
+                            width: isNarrow ? '46px' : '52px',
+                            backgroundColor: isNextHovered ? '#1a1a1c' : '#111112'
+                        }}
+                        onClick={() => navigate(nextExample.path!)}
+                        title={`Next: ${nextExample.name}`}
+                        onMouseEnter={() => setIsNextHovered(true)}
+                        onMouseLeave={() => setIsNextHovered(false)}
+                    >
+                        <ChevronRight color="#fdb48d" />
+                    </button>
+                )}
             </div>
         </div>
     </>
-}
+    }
 
-const ChevronLeft = ({color}: { color: string }) => (
+    const ChevronLeft = ({color}: { color: string }) => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
     </svg>
-);
+    );
 
-const ChevronRight = ({color}: { color: string }) => (
+    const ChevronRight = ({color}: { color: string }) => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="9 18 15 12 9 6"></polyline>
     </svg>
-);
+    );
 
-const narrowTitleBoxStyle: React.CSSProperties = {
+    const narrowTitleBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -94,8 +106,8 @@ const narrowTitleBoxStyle: React.CSSProperties = {
     backgroundColor: '#111112',
     width: '100%',
     flexShrink: 0
-};
-const titleBoxStyle: React.CSSProperties = {
+    };
+    const titleBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -103,9 +115,9 @@ const titleBoxStyle: React.CSSProperties = {
     minWidth: '200px',
     flexShrink: 0,
     alignItems: 'stretch'
-};
+    };
 
-const contentBoxStyle: React.CSSProperties = {
+    const contentBoxStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -113,25 +125,25 @@ const contentBoxStyle: React.CSSProperties = {
     flexGrow: 1,
     minWidth: '100px',
     textAlign: 'center'
-};
+    };
 
-const titleLabelStyle: React.CSSProperties = {
+    const titleLabelStyle: React.CSSProperties = {
     fontSize: '9px',
     color: '#666',
     fontWeight: 'bold',
     marginBottom: '2px',
-};
+    };
 
-const titleValueStyle: React.CSSProperties = {
+    const titleValueStyle: React.CSSProperties = {
     fontSize: '11px',
     color: '#ccc',
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis'
-};
+    };
 
-const buttonStyle: React.CSSProperties = {
+    const buttonStyle: React.CSSProperties = {
     backgroundColor: '#111112',
     color: '#fdb48d',
     border: 'none',
@@ -144,12 +156,6 @@ const buttonStyle: React.CSSProperties = {
     justifyContent: 'center',
     transition: 'background-color 0.2s',
     padding: 0
-};
+    };
 
-const disabledButtonStyle: React.CSSProperties = {
-    ...buttonStyle,
-    color: '#333',
-    cursor: 'not-allowed'
-};
-
-export default Title
+    export default Title

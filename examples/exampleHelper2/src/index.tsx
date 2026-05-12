@@ -24,10 +24,6 @@ class RedGPUExampleHelper {
             }
         }
 
-        // 현재 예제 정보 설정
-        const currentExample = findCurrentExample(window.location.pathname);
-        useExampleHelperStore.getState().setCurrentExample(currentExample);
-
         this.init();
     }
 
@@ -42,7 +38,11 @@ class RedGPUExampleHelper {
         }
     }
 
-    private init() {
+    private async init() {
+        // 현재 예제 정보 설정
+        const currentExample = await findCurrentExample(window.location.pathname);
+        useExampleHelperStore.getState().setCurrentExample(currentExample);
+
         if (!this.domRoot) {
             this.domRoot = document.createElement('div');
             this.domRoot.className = 'RedGPUExampleHelper';
