@@ -45,6 +45,25 @@ export const addColorAlphaInputs = (container: any, colorObject: any, labelPrefi
 };
 
 /**
+ * [KO] 현재 예제 위치를 기준으로 상대 경로 접두사(../../ 등)를 반환합니다.
+ */
+export const getRelativePrefix = () => {
+    const pathSegments = window.location.pathname.split('/');
+    const examplesIndex = pathSegments.indexOf('examples');
+    const currentDepth = Math.max(0, pathSegments.length - examplesIndex - 2);
+    return '../'.repeat(currentDepth);
+};
+
+/**
+ * [KO] 현재 예제 위치를 기준으로 주어진 소스 경로(들)를 해결합니다.
+ */
+export const resolveExamplePath = (src: string | string[]) => {
+    const prefix = getRelativePrefix();
+    const resolve = (p: string) => prefix + p;
+    return Array.isArray(src) ? src.map(resolve) : resolve(src);
+};
+
+/**
  * [KO] 문자열 또는 숫자 형식의 사이즈를 값과 단위로 분리합니다.
  * [EN] Separates size in string or number format into value and unit.
  * @param value

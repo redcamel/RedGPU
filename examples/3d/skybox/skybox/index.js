@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Skybox 예제
@@ -19,15 +20,17 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-
         redGPUContext.addView(view);
-        view.skybox = createSkybox(redGPUContext);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // [KO] 스카이박스 생성
+        const skybox = createSkybox(redGPUContext);
+        view.skybox = skybox;
+
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
 
-        renderTestPane(view);
+        renderTestPane(redGPUContext, view);
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
@@ -56,25 +59,29 @@ const createSkybox = (redGPUContext) => {
     createImagePreview(skyboxImagePaths);
 
     const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
-    return new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
+    return new RedGPU.Display.SkyBox(redGPUContext, cubeTexture, 10000);
 };
 
 /**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.Display.View3D} targetView
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.View3D} view
  */
-const renderTestPane = async (targetView) => {
-    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910" );
-    const pane = new Pane();
-    const {
-        createFieldOfView,
-        createSkyBoxHelper,
-        setDebugButtons
-    } = await import( "../../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
-    setDebugButtons(RedGPU, targetView.redGPUContext);
-    createFieldOfView(pane, targetView.camera)
-    createSkyBoxHelper(pane, targetView, RedGPU)
+const renderTestPane = async (redGPUContext, view) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const skybox = view.skybox;
+            if (!skybox) return;
+
+            const folder = pane.addFolder({title: 'SkyBox Control', expanded: true});
+
+            folder.addBinding(skybox, 'blur', {min: 0, max: 1, step: 0.01});
+            folder.addBinding(skybox, 'intensityMultiplier', {min: 0, max: 5, step: 0.1});
+            folder.addBinding(skybox, 'opacity', {min: 0, max: 1, step: 0.01});
+            folder.addBinding(skybox, 'luminance', {min: 0, max: 100000, step: 100});
+        }
+    });
 };
 
 /**
@@ -85,18 +92,29 @@ const renderTestPane = async (targetView) => {
 const createImagePreview = (imagePaths) => {
     const container = document.createElement("div");
 
+    const updatePosition = () => {
+        const isNarrow = window.innerWidth <= 768;
+        container.style.bottom = isNarrow ? "150px" : "60px";
+    };
+
     Object.assign(container.style, {
-        position: "absolute",
-        left: "10px",
-        top: "100px",
-        zIndex: "1000",
+        position: "fixed",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: "10001",
         display: "flex",
-        flexDirection: "column",
-        backgroundColor: "rgba(0, 0, 0, 0.16)",
+        flexDirection: "row",
+        backgroundColor: "rgba(0, 0, 0, 0.3)",
         gap: "8px",
-        padding: "4px",
-        borderRadius: "8px"
+        padding: "8px",
+        borderRadius: "8px",
+        pointerEvents: "none",
+        alignItems: "center",
+        transition: "bottom 0.2s ease-in-out"
     });
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
 
     document.body.appendChild(container);
 
@@ -106,9 +124,10 @@ const createImagePreview = (imagePaths) => {
         img.alt = path;
 
         Object.assign(img.style, {
-            maxWidth: "100px",
-            maxHeight: "100px",
-            borderRadius: "8px"
+            maxWidth: "60px",
+            maxHeight: "60px",
+            borderRadius: "4px",
+            border: "1px solid rgba(255, 255, 255, 0.2)"
         });
 
         container.appendChild(img);

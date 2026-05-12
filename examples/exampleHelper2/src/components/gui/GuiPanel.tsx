@@ -5,6 +5,7 @@ import * as EssentialsPlugin from '@tweakpane/plugin-essentials';
 import GuiRedGPUContext from './GuiRedGPUContext';
 import GuiViewList from './GuiViewList';
 import GuiScene from './GuiScene';
+import GuiSkybox from './GuiSkybox';
 
 /**
  * [KO] Tweakpane을 렌더링하고 관리하는 컴포넌트입니다.
@@ -44,12 +45,16 @@ const GuiPanel: React.FC = () => {
             {guiInstance && guiConfig.redGPUContext && redGPUContext && (
                 <GuiRedGPUContext gui={guiInstance} redGPUContext={redGPUContext}/>
             )}
+            {guiInstance && guiConfig.skybox && redGPUContext && (
+                <GuiSkybox gui={guiInstance} redGPUContext={redGPUContext} view={redGPUContext.viewList[0]}/>
+            )}
             {guiInstance && guiConfig.viewList && redGPUContext && (
                 <GuiViewList gui={guiInstance} redGPUContext={redGPUContext}/>
             )}
             {guiInstance && guiConfig.scene && redGPUContext && (
                 <GuiScene gui={guiInstance} scene={redGPUContext.viewList[0]?.scene}/>
             )}
+
             <style dangerouslySetInnerHTML={{__html: tweakpaneCustomStyle}}/>
         </>
     );
