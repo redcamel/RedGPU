@@ -38,6 +38,12 @@ export default defineConfig({
     },
     // 최적화: 코드 압축 및 소스맵 제거
     minify: 'terser',
+    terserOptions: {
+      format: {
+        comments: false,
+        max_line_len: 0
+      }
+    },
     sourcemap: false,
     emptyOutDir: true
   }

@@ -151,7 +151,7 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                                                  title={cubeFaceLabels[faceIdx]}/>
                                         ) : (
                                             <canvas
-                                                ref={el => canvasRefs.current[faceIdx] = el}
+                                                ref={el => { canvasRefs.current[faceIdx] = el; }}
                                                 style={cubePreviewImageStyle}
                                             />
                                         )}
@@ -174,7 +174,7 @@ const TexturePreviewModal = ({item, onClose}: { item: any, onClose: () => void }
                         <div style={{...previewImageStyle, position: 'relative'} as any}>
 
                             <canvas
-                                ref={el => canvasRefs.current[0] = el}
+                                ref={el => { canvasRefs.current[0] = el; }}
                                 style={{maxWidth: '100%', maxHeight: '500px', display: 'block'}}
                             />
                             {!redGPUContext && (
