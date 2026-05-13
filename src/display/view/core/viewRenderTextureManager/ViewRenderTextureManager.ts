@@ -269,8 +269,16 @@ class ViewRenderTextureManager {
             targetInfo.resolveTextureView = null
             //
             this.#gBuffers.delete(type)
-            texture?.destroy()
-            resolveTexture?.destroy()
+            if(type === GBUFFER_TYPE.RENDER_PATH1_RESULT){
+               requestAnimationFrame(()=>{
+                   texture?.destroy()
+                   resolveTexture?.destroy()
+               })
+            }else{
+                texture?.destroy()
+                resolveTexture?.destroy()
+            }
+
         }
     }
 
