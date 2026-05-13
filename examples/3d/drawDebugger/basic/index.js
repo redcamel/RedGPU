@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Draw Debugger 예제
@@ -28,15 +29,13 @@ RedGPU.init(
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.color.setColorByRGB(255, 255, 220);
-        directionalLight.lux = 500
         directionalLight.direction = [-0.4, -1, -0.3];
         scene.lightManager.addDirectionalLight(directionalLight);
         directionalLight.enableDebugger = true;
 
         const pointLight = new RedGPU.Light.PointLight();
         pointLight.color.setColorByRGB(255, 120, 120);
-        pointLight.intensity = 1.3;
-        pointLight.lumen = 50000
+        pointLight.lumen = 50000;
         pointLight.radius = 6.0;
         pointLight.setPosition(-6, 4, 2);
         scene.lightManager.addPointLight(pointLight);
@@ -44,7 +43,7 @@ RedGPU.init(
 
         const spotLight = new RedGPU.Light.SpotLight();
         spotLight.color.setColorByRGB(120, 160, 255);
-        spotLight.lumen = 50000
+        spotLight.lumen = 50000;
         spotLight.radius = 12.0;
         spotLight.setPosition(6, 5, 1);
         spotLight.direction = [-0.8, -0.7, -0.3];
@@ -101,7 +100,7 @@ RedGPU.init(
         groundPlane.rotationX = -Math.PI / 2;
         scene.addChild(groundPlane);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             rotatingBox.rotationX += 0.02;
             rotatingBox.rotationY += 0.015;
@@ -134,58 +133,47 @@ RedGPU.init(
  * @param {RedGPU.Display.View3D} targetView
  */
 const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
     const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
-    const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture,8000);
+    const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 8000);
     targetView.ibl = ibl;
     targetView.skybox = skybox;
+
     const TEST_DATA = {
-        grid: !!targetView.grid,
-        axis: !!targetView.axis,
         volumeType: 'OBB'
-    }
-    pane.addBinding(TEST_DATA, 'grid').on('change', (ev) => {
-        targetView.grid = ev.value;
-    });
-    pane.addBinding(TEST_DATA, 'axis').on('change', (ev) => {
-        targetView.axis = ev.value;
-    });
+    };
 
-    pane.addBinding(TEST_DATA, 'volumeType', {
-        label: 'Mesh Volume Type',
-        options: {
-            'OBB': 'OBB',
-            'AABB': 'AABB',
-            'BOTH': 'BOTH'
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            pane.addBinding(TEST_DATA, 'volumeType', {
+                label: 'Mesh Volume Type',
+                options: {
+                    'OBB': 'OBB',
+                    'AABB': 'AABB',
+                    'BOTH': 'BOTH'
+                }
+            }).on('change', (evt) => {
+                // 헬퍼 함수: 재귀적으로 모든 메시의 디버그 모드 업데이트
+                const updateDebugMode = (object, mode) => {
+                    // 현재 객체가 메시이고 디버거가 활성화된 경우
+                    if (object.drawDebugger && object.enableDebugger) {
+                        object.drawDebugger.debugMode = mode;
+                    }
+
+                    // 자식 객체들도 재귀적으로 처리
+                    if (object.children && Array.isArray(object.children)) {
+                        object.children.forEach(child => updateDebugMode(child, mode));
+                    }
+                };
+
+                // 씬의 모든 자식 객체에 적용
+                updateDebugMode(targetView.scene, evt.value);
+            });
+
+            setDirectionalLightPanel(pane, targetView)
+            setPointLightPanel(pane, targetView)
+            setSpotLightPanel(pane, targetView)
         }
-    }).on('change', (evt) => {
-        console.log('Volume type changed to:', evt.value);
-
-        // 헬퍼 함수: 재귀적으로 모든 메시의 디버그 모드 업데이트
-        const updateDebugMode = (object, mode) => {
-            // 현재 객체가 메시이고 디버거가 활성화된 경우
-            if (object.drawDebugger && object.enableDebugger) {
-                object.drawDebugger.debugMode = mode;
-                console.log(`✅ Updated ${object.name || 'Unnamed'} to ${mode}`);
-            }
-
-            // 자식 객체들도 재귀적으로 처리
-            if (object.children && Array.isArray(object.children)) {
-                object.children.forEach(child => updateDebugMode(child, mode));
-            }
-        };
-
-        // 씬의 모든 자식 객체에 적용
-        updateDebugMode(targetView.scene, evt.value);
     });
-
-    setDirectionalLightPanel(pane, targetView)
-    setPointLightPanel(pane, targetView)
-    setSpotLightPanel(pane, targetView)
-
 };
 
 const setSpotLightPanel = (pane, targetView) => {
@@ -199,7 +187,7 @@ const setSpotLightPanel = (pane, targetView) => {
     const positionFolder = lightFolder.addFolder({title: 'Position', expanded: true});
     ['X', 'Y', 'Z'].forEach((axis) => {
         positionFolder.addBinding(light, axis.toLowerCase(), {
-            min: -15, max: 15, step: 0.1  // 범위를 늘려서 더 자유롭게 배치 가능
+            min: -15, max: 15, step: 0.1
         });
     });
 
@@ -216,8 +204,8 @@ const setSpotLightPanel = (pane, targetView) => {
         min: 0.1, max: 20, step: 0.1
     });
 
-    lightFolder.addBinding(light, 'intensity', {
-        min: 0, max: 2, step: 0.01
+    lightFolder.addBinding(light, 'lumen', {
+        min: 0, max: 100000, step: 100
     });
 
     // Cutoff Angles (SpotLight 특화)
@@ -252,7 +240,7 @@ const setPointLightPanel = (pane, targetView) => {
 
     ['X', 'Y', 'Z'].forEach((axis) => {
         lightFolder.addBinding(light, axis.toLowerCase(), {
-            min: -15, max: 15, step: 0.01  // 범위를 늘려서 더 자유롭게 배치 가능
+            min: -15, max: 15, step: 0.01
         });
     });
 
@@ -260,8 +248,8 @@ const setPointLightPanel = (pane, targetView) => {
         min: 0.1, max: 20, step: 0.01
     });
 
-    lightFolder.addBinding(light, 'intensity', {
-        min: 0, max: 2, step: 0.01
+    lightFolder.addBinding(light, 'lumen', {
+        min: 0, max: 100000, step: 100
     });
 
     lightFolder.addBinding(lightConfig, "color", {
@@ -291,8 +279,8 @@ const setDirectionalLightPanel = (pane, targetView) => {
         });
     });
 
-    lightFolder.addBinding(light, 'intensity', {
-        min: 0, max: 2, step: 0.01
+    lightFolder.addBinding(light, 'lux', {
+        min: 0, max: 100000, step: 100
     });
 
     lightFolder.addBinding(lightConfig, "color", {picker: "inline", view: "color", expanded: true})
