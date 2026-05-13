@@ -23,6 +23,7 @@ export interface GuiConfig {
     viewList?: boolean;
     scene?: boolean;
     ibl?: boolean;
+    skybox?: boolean;
     guiCallback?: (gui: any) => void;
 }
 

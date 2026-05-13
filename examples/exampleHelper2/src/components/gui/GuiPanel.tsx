@@ -6,6 +6,7 @@ import GuiRedGPUContext from './GuiRedGPUContext';
 import GuiViewList from './GuiViewList';
 import GuiScene from './GuiScene';
 import GuiIBLHelper from "./GuiIBLHelper";
+import GuiSkyBoxHelper from "./GuiSkyBoxHelper";
 
 /**
  * [KO] Tweakpane을 렌더링하고 관리하는 컴포넌트입니다.
@@ -53,6 +54,9 @@ const GuiPanel: React.FC = () => {
             )}
             {guiInstance && guiConfig.ibl && redGPUContext && redGPUContext.viewList[0] && (
                 <GuiIBLHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>
+            )}
+            {guiInstance && guiConfig.skybox && redGPUContext && redGPUContext.viewList[0] && (
+                <GuiSkyBoxHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>
             )}
 
             <style dangerouslySetInnerHTML={{__html: tweakpaneCustomStyle}}/>

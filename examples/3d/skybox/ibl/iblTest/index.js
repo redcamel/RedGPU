@@ -108,6 +108,7 @@ function loadModel(view, config) {
 function renderTestPane(view) {
     new RedGPUExampleHelper(view.redGPUContext, {
         RedGPU,
-        ibl: true
+        ibl: true,
+        skybox: true
     });
 }

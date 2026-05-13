@@ -32,7 +32,8 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
         let sourceBinding: any;
 
         const updatePathInfo = (src: string | string[]) => {
-            pathInfo.finalPath = Array.isArray(src) ? src.join('\n') : src;
+            const getFileName = (path: string) => path.split('/').pop() || path;
+            pathInfo.finalPath = Array.isArray(src) ? src.map(getFileName).join('\n') : getFileName(src);
             if (sourceBinding) sourceBinding.refresh();
         };
 
