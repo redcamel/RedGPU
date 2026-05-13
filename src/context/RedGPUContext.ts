@@ -8,6 +8,7 @@ import RedGPUContextDetector from "./core/RedGPUContextDetector";
 import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../renderer/commandEncoder/CommandEncoderManager";
+import RedGPUContextObserver from "./core/RedGPUContextObserver";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -121,6 +122,12 @@ class RedGPUContext extends RedGPUContextViewContainer {
     #boundingClientRect: DOMRect
 
     /**
+     * [KO] 캔버스 환경 변화 감지 옵저버
+     * [EN] Canvas environment change detector observer
+     */
+    #observer: RedGPUContextObserver
+
+    /**
      * [KO] RedGPUContext 생성자
      * [EN] RedGPUContext constructor
      * @param htmlCanvas -
@@ -166,6 +173,14 @@ class RedGPUContext extends RedGPUContextViewContainer {
 
     get boundingClientRect(): DOMRect {
         return this.#boundingClientRect
+    }
+
+    /**
+     * [KO] BoundingClientRect 정보를 갱신합니다. (내부용)
+     * [EN] Updates the BoundingClientRect information. (Internal use)
+     */
+    #updateBoundingClientRect() {
+        this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
     }
 
     /**
@@ -384,6 +399,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Destroys the GPU device and releases resources.
      */
     destroy() {
+        this.#observer?.stop()
         this.#gpuDevice.destroy()
     }
 
@@ -407,12 +423,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     #initialize() {
         this.#configure()
+        this.#updateBoundingClientRect();
         this.sizeManager.setSize('100%', '100%')
-        window?.addEventListener('resize', () => {
-            this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
-            this.sizeManager.setSize()
-        });
-        this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
+        this.#observer = new RedGPUContextObserver(this, () => this.#updateBoundingClientRect())
         const eventList = this.detector.isMobile ?
             [
                 'click',
@@ -476,16 +489,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
             window?.addEventListener('keyup', HD_keyUp);
             window?.addEventListener('keydown', HD_keyDown);
         }
-        const resizeObserver = new ResizeObserver(entries => {
-            // for (const entry of entries) {
-            // 	if (entry.target != canvas) { continue; }
-            // 	canvas.width = entry.devicePixelContentBoxSize[0].inlineSize;
-            // 	canvas.height = entry.devicePixelContentBoxSize[0].blockSize;
-            // }
-            // this.sizeManager.setSize()
-            console.log('entries', entries)
-        });
-        resizeObserver.observe(this.#htmlCanvas);
     }
 
     /**
