@@ -5,6 +5,7 @@ import calculateTextureByteSize from "../../../../utils/texture/calculateTexture
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import View3D from "../../View3D";
 import GBUFFER_TYPE from "../GBUFFER_TYPE";
+import {COMMAND_ENCODER_TYPE} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 const DEPTH0: GBUFFER_INNER_TYPE = 'depthTexture0'
 const DEPTH1: GBUFFER_INNER_TYPE = 'depthTexture1'
@@ -269,16 +270,10 @@ class ViewRenderTextureManager {
             targetInfo.resolveTextureView = null
             //
             this.#gBuffers.delete(type)
-            if(type === GBUFFER_TYPE.RENDER_PATH1_RESULT){
-               requestAnimationFrame(()=>{
-                   texture?.destroy()
-                   resolveTexture?.destroy()
-               })
-            }else{
-                texture?.destroy()
-                resolveTexture?.destroy()
-            }
 
+            const {commandEncoderManager} = this.#redGPUContext;
+            if (texture) commandEncoderManager.addDeferredDestroy(COMMAND_ENCODER_TYPE.POST_PROCESS, texture);
+            if (resolveTexture) commandEncoderManager.addDeferredDestroy(COMMAND_ENCODER_TYPE.POST_PROCESS, resolveTexture);
         }
     }
 
