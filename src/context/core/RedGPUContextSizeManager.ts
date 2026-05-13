@@ -261,7 +261,7 @@ class RedGPUContextSizeManager {
         height: number
     }, key: string, value: string) {
         if (value.includes('%')) {
-            return Math.floor(rect[key] * (+value.replace('%', '')) / 100)
+            return Math.round(rect[key] * (+value.replace('%', '')) / 100)
         } else {
             return +value.replace('px', '')
         }
