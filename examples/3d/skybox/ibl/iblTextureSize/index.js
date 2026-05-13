@@ -1,9 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
-
-// 1. Create and append a canvas
-// 1. 캔버스를 생성하고 문서에 추가
-const canvas = document.createElement('canvas');
-document.querySelector('#example-container').appendChild(canvas);
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../../examples/exampleHelper2/dist/index.js";
 
 /**
  * [KO] IBL Texture Size 예제
@@ -12,6 +8,12 @@ document.querySelector('#example-container').appendChild(canvas);
  * [KO] IBL 텍스처 크기에 따른 렌더링 품질 차이를 비교합니다.
  * [EN] Compares rendering quality based on IBL texture size.
  */
+
+// 1. Create and append a canvas
+// 1. 캔버스를 생성하고 문서에 추가
+const canvas = document.createElement('canvas');
+const container = document.querySelector('#example-container');
+container.appendChild(canvas);
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
@@ -36,9 +38,7 @@ RedGPU.init(
         // 뷰 생성 및 설정
         // ============================================
 
-        // 일반 뷰 생성
-
-        // 일반 뷰 생성
+        // 일반 뷰 생성 (Top/Left)
         const viewBasic = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -47,7 +47,7 @@ RedGPU.init(
         viewBasic.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewBasic);
 
-        // 이펙트 뷰 생성
+        // 커스텀 뷰 생성 (Bottom/Right, 저해상도 IBL)
         const viewCustom = new RedGPU.Display.View3D(redGPUContext, scene2, controller);
         const ibl_adjustSize = new RedGPU.Resource.IBL(
             redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
@@ -61,54 +61,48 @@ RedGPU.init(
         // 씬 설정
         // ============================================
 
-        // 조명 추가
-        const directionalLight = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(directionalLight);
-        scene2.lightManager.addDirectionalLight(directionalLight);
+        // 조명 추가 (각 씬에 별도 추가 - 공유 문제 방지)
+        const light1 = new RedGPU.Light.DirectionalLight();
+        const light2 = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(light1);
+        scene2.lightManager.addDirectionalLight(light2);
 
         // 3D 모델 로드
-        loadGLTF(
-            redGPUContext,
-            scene,
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareMetallic/glTF-Binary/CompareMetallic.glb'
-        );
-        loadGLTF(
-            redGPUContext,
-            scene2,
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareMetallic/glTF-Binary/CompareMetallic.glb'
-        );
+        const modelUrl = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CompareMetallic/glTF-Binary/CompareMetallic.glb';
+        loadGLTF(redGPUContext, scene, modelUrl);
+        loadGLTF(redGPUContext, scene2, modelUrl);
 
         // ============================================
         // 레이아웃 설정
         // ============================================
 
-        if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
-            viewBasic.setSize('100%', '50%');
-            viewBasic.setPosition(0, 0);         // 상단
-            viewCustom.setSize('100%', '50%');
-            viewCustom.setPosition(0, '50%');     // 하단
-        } else {
-            // 데스크톱: 좌우 분할
-            viewBasic.setSize('50%', '100%');
-            viewBasic.setPosition(0, 0);         // 좌측
-            viewCustom.setSize('50%', '100%');
-            viewCustom.setPosition('50%', 0);     // 우측
-        }
+        const updateLayout = () => {
+            if (redGPUContext.detector.isMobile) {
+                // 모바일: 위아래 분할
+                viewBasic.setSize('100%', '50%');
+                viewBasic.setPosition(0, 0);         // 상단 (Basic)
+                viewCustom.setSize('100%', '50%');
+                viewCustom.setPosition(0, '50%');     // 하단 (Custom)
+            } else {
+                // 데스크톱: 좌우 분할
+                viewBasic.setSize('50%', '100%');
+                viewBasic.setPosition(0, 0);         // 좌측 (Basic)
+                viewCustom.setSize('50%', '100%');
+                viewCustom.setPosition('50%', 0);     // 우측 (Custom)
+            }
+        };
+        updateLayout();
+        window.addEventListener('resize', updateLayout);
 
         // ============================================
         // 렌더링 시작
         // ============================================
 
-        // 렌더러 생성 및 시작
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-            // 추가 렌더링 로직이 필요하면 여기에 작성
-        };
-        renderer.start(redGPUContext, render);
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext);
 
         // 컨트롤 패널 생성
-        renderTestPane(redGPUContext, viewCustom);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -121,18 +115,13 @@ RedGPU.init(
 /**
  * [KO] GLTF 모델을 로드합니다.
  * [EN] Loads a GLTF model.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {string} url
  */
 function loadGLTF(redGPUContext, scene, url) {
-
-    let mesh
     new RedGPU.GLTFLoader(
         redGPUContext,
         url,
         (v) => {
-            mesh = scene.addChild(v['resultMesh'])
+            scene.addChild(v['resultMesh'])
         }
     )
 }
@@ -140,13 +129,11 @@ function loadGLTF(redGPUContext, scene, url) {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
  */
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770713934910');
+const renderTestPane = async (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
+
+    const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
+    // normalTitle(Basic)이 좌/상, title(Custom)이 우/하
     createPostEffectLabel('Custom IBL Texture Size 16 * 16', redGPUContext.detector.isMobile, 'Basic IBL Texture Size 512 * 512')
-    const {setDebugButtons} = await import( "../../../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
-    setDebugButtons(RedGPU, redGPUContext);
 };
