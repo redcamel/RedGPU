@@ -55,31 +55,25 @@ RedGPU.init(
  * @param {RedGPU.Display.View3D} view
  */
 const renderTestPane = async (view) => {
-
     new RedGPUExampleHelper(view.redGPUContext, {
+        RedGPU,
+        ibl: true,
         guiCallback: (pane) => {
             const skybox = view.skybox;
             const ibl = view.ibl;
             if (!skybox || !ibl) return;
 
-            const folder = pane.addFolder({title: 'SkyBox Control', expanded: true});
+            const folder = pane.addFolder({title: 'SkyBox Control (Custom)', expanded: true});
 
             folder.addBinding(skybox, 'blur', {min: 0, max: 1, step: 0.01});
             folder.addBinding(skybox, 'opacity', {min: 0, max: 1, step: 0.01});
 
-            // [KO] intensityMultiplier 동기화
-            // [EN] Sync intensityMultiplier
+            // [KO] IBL과 스카이박스 개별 속성 동기화 테스트
             folder.addBinding(skybox, 'intensityMultiplier', {min: 0, max: 5, step: 0.1})
-                .on('change', (ev) => {
-                    ibl.intensityMultiplier = ev.value;
-                });
+                .on('change', (ev) => { ibl.intensityMultiplier = ev.value; });
 
-            // [KO] luminance 동기화
-            // [EN] Sync luminance
             folder.addBinding(skybox, 'luminance', {min: 0, max: 100000, step: 100})
-                .on('change', (ev) => {
-                    ibl.luminance = ev.value;
-                });
+                .on('change', (ev) => { ibl.luminance = ev.value; });
         }
     });
 };

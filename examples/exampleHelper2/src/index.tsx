@@ -20,6 +20,9 @@ class RedGPUExampleHelper {
                     guiCallback: guiCallback
                 });
             } else {
+                if (guiCallback.RedGPU) {
+                    useExampleHelperStore.getState().setRedGPU(guiCallback.RedGPU);
+                }
                 useExampleHelperStore.getState().setGuiConfig(guiCallback);
             }
         }

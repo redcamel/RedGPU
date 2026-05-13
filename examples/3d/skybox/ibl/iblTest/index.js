@@ -105,12 +105,9 @@ function loadModel(view, config) {
  * [EN] Renders the GUI for testing.
  * @param {RedGPU.Display.View3D} view
  */
-async function renderTestPane(view) {
-    const {createIblHelper} = await import("../../../../exampleHelper/createExample/panes/index.js");
-
+function renderTestPane(view) {
     new RedGPUExampleHelper(view.redGPUContext, {
-        guiCallback: (pane) => {
-            createIblHelper(pane, view, RedGPU, {syncSkyBox: true});
-        }
+        RedGPU,
+        ibl: true
     });
 }

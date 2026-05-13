@@ -18,9 +18,11 @@ export interface TopBarAction {
  * [KO] GUI 설정 정의 인터페이스
  */
 export interface GuiConfig {
+    RedGPU?: any;
     redGPUContext?: boolean;
     viewList?: boolean;
     scene?: boolean;
+    ibl?: boolean;
     guiCallback?: (gui: any) => void;
 }
 
@@ -28,6 +30,7 @@ export interface GuiConfig {
  * [KO] ExampleHelper2의 상태 정의 인터페이스
  */
 export interface ExampleHelperState {
+    RedGPU: any;
     redGPUContext: RedGPUContext | null;
     currentExample: ExampleItem | null;
     language: 'ko' | 'en';
@@ -36,6 +39,7 @@ export interface ExampleHelperState {
     topBarRightActions: TopBarAction[];
     guiConfig: GuiConfig | null;
     isNarrow: boolean;
+    setRedGPU: (value: any) => void;
     setRedGPUContext: (value: RedGPUContext | null) => void;
     setCurrentExample: (value: ExampleItem | null) => void;
     setLanguage: (value: 'ko' | 'en') => void;
@@ -52,6 +56,7 @@ export interface ExampleHelperState {
  * [KO] ExampleHelper2의 전역 상태 스토어
  */
 export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
+    RedGPU: null,
     redGPUContext: null,
     currentExample: null,
     language: (typeof navigator !== 'undefined' && navigator.language.startsWith('ko')) ? 'ko' : 'en',
@@ -60,6 +65,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     topBarRightActions: [],
     guiConfig: null,
     isNarrow: false,
+    setRedGPU: (value: any) => set({RedGPU: value}),
     setRedGPUContext: (value: RedGPUContext | null) => set({redGPUContext: value}),
     setCurrentExample: (value: ExampleItem | null) => set({currentExample: value}),
     setLanguage: (value: 'ko' | 'en') => set({language: value}),
