@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Distance Culling 예제
@@ -27,7 +28,7 @@ RedGPU.init(
 
         const meshes = createTestMeshes(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
         };
         renderer.start(redGPUContext, render);
@@ -94,69 +95,60 @@ const createTestMeshes = (redGPUContext, scene) => {
  * @param {RedGPU.Display.View3D} view
  */
 const renderTestPane = async (redGPUContext, meshes, view) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {setDebugButtons} = await import( "../../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
-    setDebugButtons(RedGPU, redGPUContext);
     const config = {
-        cameraDistance: view.camera.distance,
         enableDistanceCulling: view.useDistanceCulling,
         cullingDistance: view.distanceCulling,
         showBoundingBoxes: false,
         drawCalls: meshes.length,
     };
 
-    const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
-    cameraFolder.addBinding(config, 'cameraDistance', {min: 10, max: 150, step: 1}).on('change', (evt) => {
-        view.camera.distance = evt.value;
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+
+
+            const cullingFolder = pane.addFolder({title: 'Distance Culling', expanded: true});
+            cullingFolder.addBinding(config, 'enableDistanceCulling').on('change', (evt) => {
+                view.useDistanceCulling = evt.value;
+            });
+            cullingFolder.addBinding(config, 'cullingDistance', {min: 5, max: 200, step: 1}).on('change', (evt) => {
+                view.distanceCulling = evt.value;
+            });
+            cullingFolder.addBinding(config, 'showBoundingBoxes').on('change', (evt) => {
+                meshes.forEach(mesh => {
+                    mesh.enableDebugger = evt.value;
+                });
+            });
+
+            const statsFolder = pane.addFolder({title: 'Statistics', expanded: true});
+            const drawCallsBinding = statsFolder.addBinding(config, 'drawCalls', {readonly: true});
+
+            const updateStats = () => {
+                config.drawCalls = view.renderViewStateData.numDrawCalls;
+                drawCallsBinding.refresh();
+                requestAnimationFrame(updateStats);
+            };
+            updateStats();
+
+            const utilsFolder = pane.addFolder({title: 'Utils', expanded: true});
+            utilsFolder.addButton({title: 'Reset Camera'}).on('click', () => {
+                view.camera.distance = 50;
+                view.camera.tilt = 0;
+                view.camera.pan = 0;
+                config.cameraDistance = 50;
+                pane.refresh();
+            });
+
+            utilsFolder.addButton({title: 'Move Close'}).on('click', () => {
+                view.camera.distance = 20;
+                config.cameraDistance = 20;
+                pane.refresh();
+            });
+
+            utilsFolder.addButton({title: 'Move Far'}).on('click', () => {
+                view.camera.distance = 100;
+                config.cameraDistance = 100;
+                pane.refresh();
+            });
+        }
     });
-
-    const cullingFolder = pane.addFolder({title: 'Distance Culling', expanded: true});
-    cullingFolder.addBinding(config, 'enableDistanceCulling').on('change', (evt) => {
-        view.useDistanceCulling = evt.value;
-    });
-    cullingFolder.addBinding(config, 'cullingDistance', {min: 5, max: 200, step: 1}).on('change', (evt) => {
-        view.distanceCulling = evt.value;
-    });
-    cullingFolder.addBinding(config, 'showBoundingBoxes').on('change', (evt) => {
-        meshes.forEach(mesh => {
-            mesh.enableDebugger = evt.value;
-        });
-    });
-
-    const statsFolder = pane.addFolder({title: 'Statistics', expanded: true});
-    const drawCallsBinding = statsFolder.addBinding(config, 'drawCalls', {readonly: true});
-
-    const updateStats = () => {
-        config.drawCalls = view.renderViewStateData.numDrawCalls;
-
-        drawCallsBinding.refresh();
-
-        requestAnimationFrame(updateStats);
-    };
-
-    updateStats();
-
-    const utilsFolder = pane.addFolder({title: 'Utils', expanded: true});
-
-    utilsFolder.addButton({title: 'Reset Camera'}).on('click', () => {
-        view.camera.distance = 50;
-        view.camera.tilt = 0;
-        view.camera.pan = 0;
-        config.cameraDistance = 50;
-        pane.refresh();
-    });
-
-    utilsFolder.addButton({title: 'Move Close'}).on('click', () => {
-        view.camera.distance = 20;
-        config.cameraDistance = 20;
-        pane.refresh();
-    });
-
-    utilsFolder.addButton({title: 'Move Far'}).on('click', () => {
-        view.camera.distance = 100;
-        config.cameraDistance = 100;
-        pane.refresh();
-    });
-
 };
