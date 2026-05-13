@@ -1,9 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
-
-// 1. Create and append a canvas
-// 1. 캔버스를 생성하고 문서에 추가
-const canvas = document.createElement('canvas');
-document.querySelector('#example-container').appendChild(canvas);
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../examples/exampleHelper2/dist/index.js";
 
 /**
  * [KO] Brightness & Contrast 예제
@@ -12,6 +8,14 @@ document.querySelector('#example-container').appendChild(canvas);
  * [KO] 포스트 이펙트를 사용하여 화면의 밝기와 대비를 조절하는 방법을 보여줍니다.
  * [EN] Demonstrates how to adjust screen brightness and contrast using post effects.
  */
+
+// 1. Create and append a container and canvas
+// 1. 컨테이너와 캔버스를 생성하고 문서에 추가
+const container = document.createElement('div');
+document.body.appendChild(container);
+
+const canvas = document.createElement('canvas');
+container.appendChild(canvas);
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
@@ -36,17 +40,19 @@ RedGPU.init(
         // ============================================
 
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        // 일반 뷰 생성
+        
+        // 일반 뷰 생성 (Top/Left)
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // 이펙트 뷰 생성
+        // 이펙트 뷰 생성 (Bottom/Right)
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.BrightnessContrast(redGPUContext));
+        const effect = new RedGPU.PostEffect.BrightnessContrast(redGPUContext);
+        viewEffect.postEffectManager.addEffect(effect);
         redGPUContext.addView(viewEffect);
 
         // ============================================
@@ -64,33 +70,32 @@ RedGPU.init(
         // 레이아웃 설정
         // ============================================
 
-        if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
-            viewNormal.setSize('100%', '50%');
-            viewNormal.setPosition(0, 0);         // 상단
-            viewEffect.setSize('100%', '50%');
-            viewEffect.setPosition(0, '50%');     // 하단
-        } else {
-            // 데스크톱: 좌우 분할
-            viewNormal.setSize('50%', '100%');
-            viewNormal.setPosition(0, 0);         // 좌측
-            viewEffect.setSize('50%', '100%');
-            viewEffect.setPosition('50%', 0);     // 우측
-        }
+        const updateLayout = () => {
+            const isNarrow = window.innerWidth <= 768;
+            if (isNarrow) {
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('100%', '50%');
+                viewEffect.setPosition(0, '50%');
+            } else {
+                viewNormal.setSize('50%', '100%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('50%', '100%');
+                viewEffect.setPosition('50%', 0);
+            }
+        };
+        updateLayout();
+        window.addEventListener('resize', updateLayout);
 
         // ============================================
         // 렌더링 시작
         // ============================================
 
-        // 렌더러 생성 및 시작
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-            // 추가 렌더링 로직이 필요하면 여기에 작성
-        };
-        renderer.start(redGPUContext, render);
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext);
 
         // 컨트롤 패널 생성
-        renderTestPane(redGPUContext, viewEffect);
+        renderTestPane(redGPUContext, viewEffect, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -100,64 +105,55 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {string} url
- */
 function loadGLTF(redGPUContext, scene, url) {
-
-    let mesh
     new RedGPU.GLTFLoader(
         redGPUContext,
         url,
         (v) => {
-            mesh = scene.addChild(v['resultMesh'])
+            scene.addChild(v['resultMesh'])
         }
     )
 }
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770713934910');
-    createPostEffectLabel('BrightnessContrast', redGPUContext.detector.isMobile)
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
+const renderTestPane = async (redGPUContext, targetView, container) => {
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+    
+    new RedGPUExampleHelper(redGPUContext, {
+        compareLabel: {
+            title: 'PostEffect Applied',
+            normalTitle: 'Original',
+            targetContainer: container
+        }
+    });
 
+    const pane = new Pane();
+    const effect = targetView.postEffectManager.getEffectAt(0);
     const TEST_STATE = {
         BrightnessContrast: true,
-        brightness: targetView.postEffectManager.getEffectAt(0).brightness,
-        contrast: targetView.postEffectManager.getEffectAt(0).contrast,
+        brightness: effect.brightness,
+        contrast: effect.contrast,
     }
     const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    // BrightnessContrast 토글
+    
     folder.addBinding(TEST_STATE, 'BrightnessContrast').on('change', (v) => {
         if (v.value) {
-            const effect = new RedGPU.PostEffect.BrightnessContrast(redGPUContext);
-            effect.brightness = TEST_STATE.brightness;
-            effect.contrast = TEST_STATE.contrast;
-            targetView.postEffectManager.addEffect(effect);
+            const newEffect = new RedGPU.PostEffect.BrightnessContrast(redGPUContext);
+            newEffect.brightness = TEST_STATE.brightness;
+            newEffect.contrast = TEST_STATE.contrast;
+            targetView.postEffectManager.addEffect(newEffect);
         } else {
             targetView.postEffectManager.removeAllEffect();
         }
-
-        // 조정바 활성화/비활성화
         brightnessControl.disabled = !v.value;
         contrastControl.disabled = !v.value;
     });
+
     const brightnessControl = folder.addBinding(TEST_STATE, 'brightness', {min: -150, max: 150}).on('change', (v) => {
-        targetView.postEffectManager.getEffectAt(0).brightness = v.value
+        const currentEffect = targetView.postEffectManager.getEffectAt(0);
+        if (currentEffect) currentEffect.brightness = v.value
     })
     const contrastControl = folder.addBinding(TEST_STATE, 'contrast', {min: -50, max: 100}).on('change', (v) => {
-        targetView.postEffectManager.getEffectAt(0).contrast = v.value
+        const currentEffect = targetView.postEffectManager.getEffectAt(0);
+        if (currentEffect) currentEffect.contrast = v.value
     })
 };
