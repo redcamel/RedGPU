@@ -17,7 +17,7 @@ export interface TopBarAction {
 /**
  * [KO] GUI 설정 정의 인터페이스
  */
-export interface LabelConfig {
+export interface CompareLabelConfig {
     title: string;
     normalTitle?: string;
 }
@@ -29,7 +29,7 @@ export interface GuiConfig {
     scene?: boolean;
     ibl?: boolean;
     skybox?: boolean;
-    label?: LabelConfig;
+    compareLabel?: CompareLabelConfig;
     guiCallback?: (gui: any) => void;
 }
 

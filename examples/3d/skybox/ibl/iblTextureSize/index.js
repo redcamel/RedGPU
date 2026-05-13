@@ -132,7 +132,7 @@ function loadGLTF(redGPUContext, scene, url) {
  */
 const renderTestPane = async (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        label: {
+        compareLabel: {
             title: 'Custom IBL Texture Size 16 * 16',
             normalTitle: 'Basic IBL Texture Size 512 * 512'
         }
