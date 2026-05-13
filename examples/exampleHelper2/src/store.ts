@@ -20,6 +20,7 @@ export interface TopBarAction {
 export interface CompareLabelConfig {
     title: string;
     normalTitle?: string;
+    targetContainer?: HTMLElement;
 }
 
 export interface GuiConfig {
@@ -71,7 +72,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     showSettingsPanel: false,
     topBarRightActions: [],
     guiConfig: null,
-    isNarrow: false,
+    isNarrow: typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
     setRedGPU: (value: any) => set({RedGPU: value}),
     setRedGPUContext: (value: RedGPUContext | null) => set({redGPUContext: value}),
     setCurrentExample: (value: ExampleItem | null) => set({currentExample: value}),

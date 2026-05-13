@@ -9,10 +9,14 @@ import RedGPUExampleHelper from "../../../../../examples/exampleHelper2/dist/ind
  * [EN] Compares rendering quality based on IBL texture size.
  */
 
-// 1. Create and append a canvas
-// 1. 캔버스를 생성하고 문서에 추가
+// 1. Create and append a container and canvas
+// 1. 컨테이너와 캔버스를 생성하고 문서에 추가
+const container = document.createElement('div');
+document.body.appendChild(container);
+
 const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
+
+container.appendChild(canvas);
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
@@ -102,7 +106,7 @@ RedGPU.init(
         renderer.start(redGPUContext);
 
         // 컨트롤 패널 생성
-        renderTestPane(redGPUContext);
+        renderTestPane(redGPUContext, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -130,11 +134,12 @@ function loadGLTF(redGPUContext, scene, url) {
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
  */
-const renderTestPane = async (redGPUContext) => {
+const renderTestPane = async (redGPUContext, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'Custom IBL Texture Size 16 * 16',
-            normalTitle: 'Basic IBL Texture Size 512 * 512'
+            normalTitle: 'Basic IBL Texture Size 512 * 512',
+            targetContainer: container
         }
     });
 };
