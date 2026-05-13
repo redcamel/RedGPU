@@ -29,6 +29,7 @@ RedGPU.init(
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.color.setColorByRGB(255, 255, 220);
+        directionalLight.lux = 1000;
         directionalLight.direction = [-0.4, -1, -0.3];
         scene.lightManager.addDirectionalLight(directionalLight);
         directionalLight.enableDebugger = true;
@@ -205,7 +206,7 @@ const setSpotLightPanel = (pane, targetView) => {
     });
 
     lightFolder.addBinding(light, 'lumen', {
-        min: 0, max: 100000, step: 100
+        min: 0, max: 1000000, step: 100
     });
 
     // Cutoff Angles (SpotLight 특화)
@@ -249,7 +250,7 @@ const setPointLightPanel = (pane, targetView) => {
     });
 
     lightFolder.addBinding(light, 'lumen', {
-        min: 0, max: 100000, step: 100
+        min: 0, max: 1000000, step: 100
     });
 
     lightFolder.addBinding(lightConfig, "color", {
