@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] IBL Test 예제
@@ -8,32 +9,60 @@ import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
  * [EN] Example testing Image Based Lighting (IBL) using HDR images.
  */
 
+/* [KO] 로드할 모델 리스트 및 설정 [EN] List of models to load and their settings */
+const MODEL_LIST = [
+    {
+        url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf'
+    },
+    {
+        url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF-Binary/TransmissionTest.glb',
+        scale: 5
+    },
+    {
+        url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF-Binary/GlassHurricaneCandleHolder.glb',
+        scale: 10,
+        position: [4, -1.5, 0.5]
+    },
+    {
+        url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb',
+        scale: 20,
+        position: [7, 0, 0]
+    },
+    {
+        url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF-Binary/ClearcoatWicker.glb',
+        scale: 3,
+        position: [-6, -1.5, 0]
+    },
+    {
+        url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF-Binary/Corset.glb',
+        scale: 40,
+        position: [0, -2, 2]
+    }
+];
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
-
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // [KO] 카메라 컨트롤러 설정 [EN] Setup camera controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
 
+        // [KO] 씬 및 뷰 생성 [EN] Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-
         redGPUContext.addView(view);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        renderer.start(redGPUContext, () => {
-        });
+        // [KO] 렌더러 시작 [EN] Start renderer
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, () => {});
 
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf');
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF-Binary/TransmissionTest.glb');
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF-Binary/GlassHurricaneCandleHolder.glb');
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb');
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF-Binary/ClearcoatWicker.glb');
-        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF-Binary/Corset.glb');
+        // [KO] 모델 로드 실행 [EN] Execute model loading
+        MODEL_LIST.forEach(config => loadModel(view, config));
 
+        // [KO] 테스트용 GUI 렌더링 [EN] Render GUI for testing
         renderTestPane(view);
     },
     (failReason) => {
@@ -45,98 +74,43 @@ RedGPU.init(
 );
 
 /**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
+ * [KO] 모델을 로드하고 설정을 적용합니다.
+ * [EN] Loads a model and applies its settings.
  * @param {RedGPU.Display.View3D} view
- * @param {string} url
+ * @param {object} config
  */
-function loadGLTF(view, url) {
+function loadModel(view, config) {
     const {redGPUContext, scene} = view;
 
-    let mesh;
     new RedGPU.GLTFLoader(
         redGPUContext,
-        url,
+        config.url,
         (v) => {
-            mesh = scene.addChild(v['resultMesh']);
+            const mesh = scene.addChild(v.resultMesh);
 
-            // 모델별 스케일 및 위치 설정
-            if (url.includes('Corset')) {
-                mesh.setScale(40);
-                mesh.z = 2;
-                mesh.y = -2;
-            }
-            if (url.includes('ClearcoatWicker')) {
-                mesh.setScale(3);
-                mesh.x = -6;
-                mesh.y = -1.5;
-            }
-            if (url.includes('TransmissionTest')) {
-                mesh.setScale(5);
-            }
-            if (url.includes('MosquitoInAmber')) {
-                mesh.setScale(20);
-                mesh.x = 7;
-            }
-            if (url.includes('SheenChair')) {
-                mesh.setScale(10);
-            }
-            if (url.includes('CommercialRefrigerator')) {
-                mesh.setScale(10);
-            }
-            if (url.includes('GlassHurricaneCandleHolder')) {
-                mesh.setScale(10);
-                mesh.x = 4;
-                mesh.y = -1.5;
-                mesh.z = 0.5;
-            }
-            if (url.includes('DragonAttenuation')) {
-                mesh.z = 2;
-            }
-            if (url.includes('SpecularTest')) {
-                mesh.setScale(10);
-                mesh.z = 2;
+            // [KO] 설정값 적용 [EN] Apply settings
+            if (config.scale) mesh.setScale(config.scale);
+            if (config.position) {
+                const [x, y, z] = config.position;
+                mesh.x = x;
+                mesh.y = y;
+                mesh.z = z;
             }
         }
     );
 }
 
 /**
- * [KO] IBL을 생성하고 스카이박스를 설정합니다.
- * [EN] Creates IBL and sets the skybox.
- * @param {RedGPU.Display.View3D} view
- * @param {string|string[]} src
- */
-const createIBL = (view, src) => {
-    const ibl = new RedGPU.Resource.IBL(view.redGPUContext, src);
-    view.ibl = ibl;
-    
-    if (view.skybox) {
-        // [KO] 기존 스카이박스가 있으면 텍스처만 교체 (설정값 유지됨)
-        // [EN] If an existing skybox exists, only replace the texture (settings are preserved)
-        view.skybox.skyboxTexture = ibl.environmentTexture;
-    } else {
-        // [KO] 없으면 새로 생성
-        // [EN] If not, create a new one
-        view.skybox = new RedGPU.Display.SkyBox(view.redGPUContext, ibl.environmentTexture);
-    }
-};
-
-/**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.Display.View3D} targetView
+ * @param {RedGPU.Display.View3D} view
  */
-const renderTestPane = async (targetView) => {
-    const {Pane} = await import( "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910" );
-    const pane = new Pane();
-    const {
-        createFieldOfView,
-        createIblHelper,
-        setDebugButtons
-    } = await import( "../../../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
-    setDebugButtons(RedGPU, targetView.redGPUContext);
-    createFieldOfView(pane, targetView.camera)
-    createIblHelper(pane, targetView, RedGPU,{syncSkyBox:true});
+async function renderTestPane(view) {
+    const {createIblHelper} = await import("../../../../exampleHelper/createExample/panes/index.js");
 
-};
+    new RedGPUExampleHelper(view.redGPUContext, {
+        guiCallback: (pane) => {
+            createIblHelper(pane, view, RedGPU, {syncSkyBox: true});
+        }
+    });
+}
