@@ -17,6 +17,11 @@ export interface TopBarAction {
 /**
  * [KO] GUI 설정 정의 인터페이스
  */
+export interface LabelConfig {
+    title: string;
+    normalTitle?: string;
+}
+
 export interface GuiConfig {
     RedGPU?: any;
     redGPUContext?: boolean;
@@ -24,6 +29,7 @@ export interface GuiConfig {
     scene?: boolean;
     ibl?: boolean;
     skybox?: boolean;
+    label?: LabelConfig;
     guiCallback?: (gui: any) => void;
 }
 
@@ -81,7 +87,15 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     })),
     clearTopBarRightActions: () => set({topBarRightActions: []}),
     setGuiConfig: (config: GuiConfig | null) => {
-        set({guiConfig: config, showSettingsPanel: !!config});
+        const hasPanels = !!(
+            config?.redGPUContext ||
+            config?.viewList ||
+            config?.scene ||
+            config?.ibl ||
+            config?.skybox ||
+            config?.guiCallback
+        );
+        set({guiConfig: config, showSettingsPanel: hasPanels});
     },
     setIsNarrow: (value: boolean) => set({isNarrow: value}),
 }));

@@ -12,8 +12,7 @@ import RedGPUExampleHelper from "../../../../../examples/exampleHelper2/dist/ind
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
-const container = document.querySelector('#example-container');
-container.appendChild(canvas);
+document.body.appendChild(canvas);
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
@@ -61,7 +60,7 @@ RedGPU.init(
         // 씬 설정
         // ============================================
 
-        // 조명 추가 (각 씬에 별도 추가 - 공유 문제 방지)
+        // 조명 추가 (각 씬에 별도 추가)
         const light1 = new RedGPU.Light.DirectionalLight();
         const light2 = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(light1);
@@ -77,14 +76,15 @@ RedGPU.init(
         // ============================================
 
         const updateLayout = () => {
-            if (redGPUContext.detector.isMobile) {
-                // 모바일: 위아래 분할
+            const isNarrow = window.innerWidth <= 768; // Helper의 기준과 동일하게 설정
+            if (isNarrow) {
+                // 세로형 분할
                 viewBasic.setSize('100%', '50%');
                 viewBasic.setPosition(0, 0);         // 상단 (Basic)
                 viewCustom.setSize('100%', '50%');
                 viewCustom.setPosition(0, '50%');     // 하단 (Custom)
             } else {
-                // 데스크톱: 좌우 분할
+                // 가로형 분할
                 viewBasic.setSize('50%', '100%');
                 viewBasic.setPosition(0, 0);         // 좌측 (Basic)
                 viewCustom.setSize('50%', '100%');
@@ -131,9 +131,10 @@ function loadGLTF(redGPUContext, scene, url) {
  * [EN] Renders the GUI for testing.
  */
 const renderTestPane = async (redGPUContext) => {
-    new RedGPUExampleHelper(redGPUContext);
-
-    const {createPostEffectLabel} = await import('../../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js');
-    // normalTitle(Basic)이 좌/상, title(Custom)이 우/하
-    createPostEffectLabel('Custom IBL Texture Size 16 * 16', redGPUContext.detector.isMobile, 'Basic IBL Texture Size 512 * 512')
+    new RedGPUExampleHelper(redGPUContext, {
+        label: {
+            title: 'Custom IBL Texture Size 16 * 16',
+            normalTitle: 'Basic IBL Texture Size 512 * 512'
+        }
+    });
 };

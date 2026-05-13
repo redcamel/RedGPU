@@ -78,7 +78,16 @@ export const useTopBarActions = () => {
             });
 
             // SETTING Toggle
-            if (guiConfig) {
+            const hasPanels = !!(
+                guiConfig?.redGPUContext ||
+                guiConfig?.viewList ||
+                guiConfig?.scene ||
+                guiConfig?.ibl ||
+                guiConfig?.skybox ||
+                guiConfig?.guiCallback
+            );
+
+            if (hasPanels) {
                 addTopBarRightAction({
                     id: 'setting-toggle',
                     label: 'SETTING',

@@ -7,6 +7,7 @@ import SourceModal from './components/basic/SourceModal';
 import {useViewportSync} from './hooks/useViewportSync';
 import {useInspectorInit} from './hooks/useInspectorInit';
 import {useTopBarActions} from './hooks/useTopBarActions';
+import GuiLabelHelper from "./components/gui/GuiLabelHelper";
 
 const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
 
@@ -45,6 +46,8 @@ const App = () => {
                     </React.Suspense>
                 </div>
             </div>
+
+            <GuiLabelHelper/>
 
             <Footer/>
             <SourceModal/>
