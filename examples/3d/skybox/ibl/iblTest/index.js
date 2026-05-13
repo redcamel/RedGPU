@@ -63,7 +63,7 @@ RedGPU.init(
         MODEL_LIST.forEach(config => loadModel(view, config));
 
         // [KO] 테스트용 GUI 렌더링 [EN] Render GUI for testing
-        renderTestPane(view);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
@@ -105,8 +105,8 @@ function loadModel(view, config) {
  * [EN] Renders the GUI for testing.
  * @param {RedGPU.Display.View3D} view
  */
-function renderTestPane(view) {
-    new RedGPUExampleHelper(view.redGPUContext, {
+function renderTestPane(redGPUContext) {
+    new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         ibl: true,
         skybox: true

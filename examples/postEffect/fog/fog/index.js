@@ -1,7 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
-
-const canvas = document.createElement('canvas');
-document.querySelector('#example-container').appendChild(canvas);
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Fog 예제
@@ -10,6 +8,9 @@ document.querySelector('#example-container').appendChild(canvas);
  * [KO] 포스트 이펙트를 사용하여 화면에 안개(Fog) 효과를 적용하는 방법을 보여줍니다.
  * [EN] Demonstrates how to apply fog effects to the screen using post effects.
  */
+
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
@@ -21,7 +22,8 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true
+        view.grid = true;
+
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -43,11 +45,11 @@ RedGPU.init(
         createTestScene(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
 
-        createControlPanel(redGPUContext, view, fogEffect);
+        // [KO] RedGPUExampleHelper 초기화
+        // [EN] Initialize RedGPUExampleHelper
+        renderTestPane(redGPUContext, fogEffect);
     },
     (failReason) => {
         console.error('초기화 실패:', failReason);
@@ -57,6 +59,148 @@ RedGPU.init(
         document.body.appendChild(errorDiv);
     }
 );
+
+/**
+ * [KO] RedGPUExampleHelper 초기화
+ * [EN] Initialize RedGPUExampleHelper
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.PostEffect.Fog} fogEffect
+ */
+function renderTestPane(redGPUContext, fogEffect) {
+    const view = redGPUContext.viewList[0];
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU,
+        ibl: true,
+        skybox: true,
+        guiCallback: (pane) => {
+            const fogFolder = pane.addFolder({title: '🌫️ Fog Test'});
+            const PARAMS = {
+                enabled: true,
+                fogType: 'Exponential',
+                density: fogEffect.density,
+                nearDistance: fogEffect.nearDistance,
+                farDistance: fogEffect.farDistance,
+                fogColor: {r: 200, g: 210, b: 255}
+            };
+
+            // 기본 컨트롤
+            fogFolder.addBinding(PARAMS, 'enabled', {
+                label: 'Enable Fog'
+            }).on('change', (ev) => {
+                if (ev.value) {
+                    view.postEffectManager.addEffect(fogEffect);
+                } else {
+                    view.postEffectManager.removeAllEffect();
+                }
+            });
+
+            fogFolder.addBinding(PARAMS, 'fogType', {
+                label: 'Fog Type',
+                options: {
+                    'Exponential': 'Exponential',
+                    'Exponential Squared': 'ExponentialSquared',
+                }
+            }).on('change', (ev) => {
+                switch (ev.value) {
+                    case 'Exponential':
+                        fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL;
+                        break;
+                    case 'ExponentialSquared':
+                        fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED;
+                        break;
+                }
+            });
+
+            fogFolder.addBinding(PARAMS, 'density', {
+                label: 'Density',
+                min: 0.001,
+                max: 1,
+                step: 0.001
+            }).on('change', (ev) => {
+                fogEffect.density = ev.value;
+            });
+
+            fogFolder.addBinding(PARAMS, 'nearDistance', {
+                label: 'Near Distance',
+                min: 0,
+                max: 30,
+                step: 0.1
+            }).on('change', (ev) => {
+                fogEffect.nearDistance = ev.value;
+                if (PARAMS.farDistance <= ev.value) {
+                    PARAMS.farDistance = ev.value + 1;
+                    fogEffect.farDistance = PARAMS.farDistance;
+                    pane.refresh();
+                }
+            });
+
+            fogFolder.addBinding(PARAMS, 'farDistance', {
+                label: 'Far Distance',
+                min: 1,
+                max: 100,
+                step: 0.1
+            }).on('change', (ev) => {
+                PARAMS.farDistance = Math.max(ev.value, PARAMS.nearDistance + 1);
+                fogEffect.farDistance = PARAMS.farDistance;
+            });
+
+            fogFolder.addBinding(PARAMS, 'fogColor', {
+                label: 'Fog Color'
+            }).on('change', (ev) => {
+                fogEffect.fogColor.setColorByRGB(Math.floor(ev.value.r), Math.floor(ev.value.g), Math.floor(ev.value.b));
+            });
+
+            fogFolder.addBlade({view: 'separator'});
+
+            // 프리셋 폴더
+            const presetFolder = fogFolder.addFolder({
+                title: '🎯 Presets',
+                expanded: true
+            });
+
+            const applyPreset = (type, density, near, far, color) => {
+                PARAMS.fogType = type;
+                PARAMS.density = density;
+                PARAMS.nearDistance = near;
+                PARAMS.farDistance = far;
+                PARAMS.fogColor = color;
+
+                switch (type) {
+                    case 'Exponential':
+                        fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL;
+                        break;
+                    case 'ExponentialSquared':
+                        fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED;
+                        break;
+                }
+
+                fogEffect.density = density;
+                fogEffect.nearDistance = near;
+                fogEffect.farDistance = far;
+                fogEffect.fogColor.setColorByRGB(color.r, color.g, color.b);
+
+                pane.refresh();
+            };
+
+            presetFolder.addButton({title: '💨 Light Mist'}).on('click', () => {
+                applyPreset('Exponential', 0.05, 8, 50, {r: 230, g: 235, b: 255});
+            });
+
+            presetFolder.addButton({title: '🌫️ Medium Fog'}).on('click', () => {
+                applyPreset('Exponential', 0.15, 5, 35, {r: 200, g: 210, b: 230});
+            });
+
+            presetFolder.addButton({title: '☁️ Dense Fog'}).on('click', () => {
+                applyPreset('ExponentialSquared', 0.25, 3, 25, {r: 180, g: 180, b: 200});
+            });
+
+            presetFolder.addButton({title: '🌊 Ocean Mist'}).on('click', () => {
+                applyPreset('Exponential', 0.08, 10, 60, {r: 180, g: 200, b: 255});
+            });
+        }
+    });
+}
+
 
 /**
  * [KO] 테스트 씬을 생성합니다.
@@ -137,144 +281,4 @@ function createTestScene(redGPUContext, scene) {
     groundMesh.alpha = 0.3;
 
     scene.addChild(groundMesh);
-}
-
-/**
- * [KO] 테스트용 GUI를 생성합니다.
- * [EN] Creates a test GUI.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} view
- * @param {RedGPU.PostEffect.Fog} fogEffect
- */
-async function createControlPanel(redGPUContext, view, fogEffect) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-
-    const pane = new Pane({title: '🌫️ Fog Test'});
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const PARAMS = {
-        enabled: true,
-        fogType: 'Exponential',
-        density: fogEffect.density,
-        nearDistance: fogEffect.nearDistance,
-        farDistance: fogEffect.farDistance,
-        fogColor: {r: 200, g: 210, b: 255}
-    };
-
-    // 기본 컨트롤
-    pane.addBinding(PARAMS, 'enabled', {
-        label: 'Enable Fog'
-    }).on('change', (ev) => {
-        if (ev.value) {
-            view.postEffectManager.addEffect(fogEffect);
-        } else {
-            view.postEffectManager.removeAllEffect();
-        }
-    });
-
-    pane.addBinding(PARAMS, 'fogType', {
-        label: 'Fog Type',
-        options: {
-            'Exponential': 'Exponential',
-            'Exponential Squared': 'ExponentialSquared',
-        }
-    }).on('change', (ev) => {
-        switch (ev.value) {
-            case 'Exponential':
-                fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL;
-                break;
-            case 'ExponentialSquared':
-                fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED;
-                break;
-        }
-    });
-
-    pane.addBinding(PARAMS, 'density', {
-        label: 'Density',
-        min: 0.001,
-        max: 1,
-        step: 0.001
-    }).on('change', (ev) => {
-        fogEffect.density = ev.value;
-    });
-
-    pane.addBinding(PARAMS, 'nearDistance', {
-        label: 'Near Distance',
-        min: 0,
-        max: 30,
-        step: 0.1
-    }).on('change', (ev) => {
-        fogEffect.nearDistance = ev.value;
-        if (PARAMS.farDistance <= ev.value) {
-            PARAMS.farDistance = ev.value + 1;
-            fogEffect.farDistance = PARAMS.farDistance;
-            pane.refresh();
-        }
-    });
-
-    pane.addBinding(PARAMS, 'farDistance', {
-        label: 'Far Distance',
-        min: 1,
-        max: 100,
-        step: 0.1
-    }).on('change', (ev) => {
-        PARAMS.farDistance = Math.max(ev.value, PARAMS.nearDistance + 1);
-        fogEffect.farDistance = PARAMS.farDistance;
-    });
-
-    pane.addBinding(PARAMS, 'fogColor', {
-        label: 'Fog Color'
-    }).on('change', (ev) => {
-        fogEffect.fogColor.setColorByRGB(Math.floor(ev.value.r), Math.floor(ev.value.g), Math.floor(ev.value.b));
-    });
-
-    pane.addBlade({view: 'separator'});
-
-    // 프리셋 폴더
-    const presetFolder = pane.addFolder({
-        title: '🎯 Presets',
-        expanded: true
-    });
-
-    presetFolder.addButton({title: '💨 Light Mist'}).on('click', () => {
-        applyPreset('Exponential', 0.05, 8, 50, {r: 230, g: 235, b: 255});
-    });
-
-    presetFolder.addButton({title: '🌫️ Medium Fog'}).on('click', () => {
-        applyPreset('Exponential', 0.15, 5, 35, {r: 200, g: 210, b: 230});
-    });
-
-    presetFolder.addButton({title: '☁️ Dense Fog'}).on('click', () => {
-        applyPreset('ExponentialSquared', 0.25, 3, 25, {r: 180, g: 180, b: 200});
-    });
-
-    presetFolder.addButton({title: '🌊 Ocean Mist'}).on('click', () => {
-        applyPreset('Exponential', 0.08, 10, 60, {r: 180, g: 200, b: 255});
-    });
-
-    function applyPreset(type, density, near, far, color) {
-        PARAMS.fogType = type;
-        PARAMS.density = density;
-        PARAMS.nearDistance = near;
-        PARAMS.farDistance = far;
-        PARAMS.fogColor = color;
-
-        switch (type) {
-            case 'Exponential':
-                fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL;
-                break;
-            case 'ExponentialSquared':
-                fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED;
-                break;
-
-        }
-
-        fogEffect.density = density;
-        fogEffect.nearDistance = near;
-        fogEffect.farDistance = far;
-        fogEffect.fogColor.setColorByRGB(color.r, color.g, color.b);
-
-        pane.refresh();
-    }
-
 }
