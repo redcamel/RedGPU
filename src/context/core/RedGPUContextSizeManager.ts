@@ -78,6 +78,8 @@ class RedGPUContextSizeManager {
         this.#redGPUContext = redGPUContext
         this.#htmlCanvas = redGPUContext.htmlCanvas
         this.#htmlCanvas.style.boxSizing = 'border-box'
+        // this.#htmlCanvas.style.display = 'block'
+        this.#htmlCanvas.style.verticalAlign = 'top'
         this.#width = width
         this.#height = height
     }
@@ -164,11 +166,28 @@ class RedGPUContextSizeManager {
     }
 
     /**
-     * [KO] 캔버스의 부모 DOM 요소의 크기 정보를 반환합니다.
-     * [EN] Returns the dimension information of the canvas's parent DOM element.
+     * [KO] 캔버스의 부모 DOM 요소의 크기 정보를 반환합니다. 부모의 크기가 0인 경우 window 크기를 폴백으로 사용합니다.
+     * [EN] Returns the dimension information of the canvas's parent DOM element. If the parent size is 0, window size is used as a fallback.
      */
-    get parentDomRect(): DOMRect {
-        return (this.#htmlCanvas.parentNode || document.body)['getBoundingClientRect']()
+    get parentDomRect(): ParentRect {
+        const parent = (this.#htmlCanvas.parentElement || document.body);
+        const rect = parent.getBoundingClientRect();
+        const isBody = parent === document.body;
+
+        let width = rect.width;
+        let height = rect.height;
+
+        // [KO] 부모가 body이거나 크기가 0인 경우 window 크기를 참조합니다.
+        // [EN] Reference window size if parent is body or size is 0.
+        if (isBody || width === 0) width = window.innerWidth;
+        if (isBody || height === 0) height = window.innerHeight;
+
+        return {
+            x: rect.x,
+            y: rect.y,
+            width,
+            height
+        }
     }
 
     get screenRectObject(): IRedGPURectObject {
@@ -282,19 +301,23 @@ class RedGPUContextSizeManager {
         RedGPUContextSizeManager.validateSizeValue(h)
         this.#width = w;
         this.#height = h;
-        const tW = RedGPUContextSizeManager.getPixelDimension(this.parentDomRect, 'width', w)
-        const tH = RedGPUContextSizeManager.getPixelDimension(this.parentDomRect, 'height', h)
+
+        const parentRect = this.parentDomRect;
+        const tW = RedGPUContextSizeManager.getPixelDimension(parentRect, 'width', w)
+        const tH = RedGPUContextSizeManager.getPixelDimension(parentRect, 'height', h)
+
+        // [KO] 이전 크기와 동일하다면 업데이트를 중단하여 무한 루프를 방지합니다.
+        // [EN] Prevent infinite loop by stopping update if size is the same as before.
+        if (
+            this.#pixelRectArray[2] === Math.max(1, Math.floor(tW * this.#renderScale * window.devicePixelRatio)) &&
+            this.#pixelRectArray[3] === Math.max(1, Math.floor(tH * this.#renderScale * window.devicePixelRatio)) &&
+            this.#htmlCanvas.style.width === `${tW}px` &&
+            this.#htmlCanvas.style.height === `${tH}px`
+        ) return;
+
         this.#changeCanvasStyles(tW, tH);
         this.#updatePixelRect(tW, tH)
         this.#updateViewsSize()
-        // console.log(this.parentDomRect)
-        console.log(
-            `${this.constructor.name}.setSize - input : ${w},${h} | output : ${tW}, ${tH}`,
-            {
-                width: this.#width,
-                height: this.#height,
-                pixelRectArray: this.#pixelRectArray
-            });
     }
 
     /**

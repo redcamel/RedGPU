@@ -60,6 +60,10 @@ export default class RedGPUContextObserver {
         });
         this.#intersectionObserver.observe(this.#htmlCanvas);
 
+        // [KO] 즉각적인 반응성을 위해 윈도우 리사이즈 및 스크롤 이벤트도 함께 사용합니다.
+        // [EN] For immediate responsiveness, window resize and scroll events are also used.
+        window.addEventListener('resize', () => this.#handleLayoutChange());
+
         this.#updateObservers();
     }
 
