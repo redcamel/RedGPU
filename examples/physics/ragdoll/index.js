@@ -32,8 +32,6 @@ RedGPU.init(
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
 
-		scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
-		scene.lightManager.ambientLight.intensity = 0.5;
 		scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 		// [KO] 1. 바닥 생성 (시인성을 위해 밝은 회색 적용)

@@ -33,10 +33,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정: 씬에 입체감을 주기 위한 환경광과 직사광 추가
 		// [EN] Lighting setup: Add ambient and directional light for depth in the scene
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
-
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		directionalLight.x = 10;
 		directionalLight.y = 20;

@@ -38,10 +38,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정: 환경광과 방향광
 		// [EN] Lighting setup: Ambient and Directional lights
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
-
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 

@@ -24,10 +24,6 @@ RedGPU.init(
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
 
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
-
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 

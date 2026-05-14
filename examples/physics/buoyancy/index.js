@@ -38,8 +38,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정
 		// [EN] Lighting setup
-		scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
-		scene.lightManager.ambientLight.intensity = 0.5;
 		scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 		const waterLevel = 0;

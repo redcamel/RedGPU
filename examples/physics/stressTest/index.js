@@ -36,8 +36,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정: 입체감을 강조하기 위해 방향광 추가
 		// [EN] Lighting setup: Add directional light to emphasize depth and dimensionality
-		scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
-		scene.lightManager.ambientLight.intensity = 0.5;
 		scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 		// [KO] 1. 대형 바닥 생성: 구체들이 넓게 퍼질 수 있도록 100m x 100m 스케일 적용
