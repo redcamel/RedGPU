@@ -29,7 +29,11 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
     let totalNumTriangles = 0;
     let totalNumPoints = 0;
     let totalUsedVideoMemory = 0;
-    const aggregatedBatchStats: CommandBatchStats = {};
+    let totalDeferredDestroyCount = 0;
+    const aggregatedBatchStats: CommandBatchStats = {
+        phases: {},
+        deferredDestroyCount: 0
+    };
     const hierarchy: Record<string, HierarchyNode> = {};
 
     const viewList = redGPUContext.viewList as View3D[];
@@ -53,17 +57,18 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
         }
 
         if (state.commandBatchStats) {
-            for (const phase in state.commandBatchStats) {
-                const phaseStats = state.commandBatchStats[phase];
-                if (!aggregatedBatchStats[phase]) {
-                    aggregatedBatchStats[phase] = {
+            totalDeferredDestroyCount += state.commandBatchStats.deferredDestroyCount;
+            for (const phase in state.commandBatchStats.phases) {
+                const phaseStats = state.commandBatchStats.phases[phase];
+                if (!aggregatedBatchStats.phases[phase]) {
+                    aggregatedBatchStats.phases[phase] = {
                         'Command Buffers': 0,
                         'Render Passes': {count: 0, list: []},
                         'Compute Passes': {count: 0, list: []},
                         'Raw Usages': 0
                     };
                 }
-                const agg = aggregatedBatchStats[phase];
+                const agg = aggregatedBatchStats.phases[phase];
                 agg['Command Buffers'] += phaseStats['Command Buffers'];
                 agg['Render Passes'].count += phaseStats['Render Passes'].count;
 
@@ -85,6 +90,7 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
             }
         }
     }
+    aggregatedBatchStats.deferredDestroyCount = totalDeferredDestroyCount;
 
     const rm = redGPUContext.resourceManager;
     const resourceStats = {

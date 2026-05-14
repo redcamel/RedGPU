@@ -18,13 +18,16 @@ const CommandBatchStatsView = ({statsProp}: { statsProp?: CommandBatchStats | nu
         setExpanded(prev => ({...prev, [phase]: prev[phase] === false}));
     };
 
-    if (!commandBatchStats || Object.keys(commandBatchStats).length === 0) {
+    if (!commandBatchStats || (Object.keys(commandBatchStats.phases).length === 0 && commandBatchStats.deferredDestroyCount === 0)) {
         return <div style={noItemStyle}>No command batch stats available.</div>;
     }
 
     return (
         <>
-            {Object.entries(commandBatchStats).map(([phase, stats]) => {
+            <Section title="Global Batch Stats" isExpanded={true}>
+                <StatItem label="Deferred Destroys" value={commandBatchStats.deferredDestroyCount}/>
+            </Section>
+            {Object.entries(commandBatchStats.phases).map(([phase, stats]) => {
                 const totalPasses = stats['Render Passes'].count + stats['Compute Passes'].count;
                 // [KO] 기본값을 true(펼침)로 설정하기 위해 명시적으로 false인 경우만 체크
                 const isExpanded = expanded[phase] !== false;
