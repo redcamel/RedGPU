@@ -52,7 +52,9 @@ abstract class ADirectTexture extends ManagementResourceBase {
         this.notifyUpdate(true);
         this.unregisterResource();
         this.cacheKey = null;
-        if (temp) temp.destroy();
+        if (temp) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp);
+        }
     }
 
     /** [KO] GPUTexture 객체를 설정하고 내부 상태를 동기화합니다. [EN] Sets the GPUTexture object and synchronizes internal state. */

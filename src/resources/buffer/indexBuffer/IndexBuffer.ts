@@ -129,10 +129,7 @@ class IndexBuffer extends ABaseBuffer {
         }
         if (this[GPU_BUFFER_SYMBOL]) {
             this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
-            let temp = this[GPU_BUFFER_SYMBOL]
-            requestAnimationFrame(() => {
-                temp.destroy();
-            })
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this[GPU_BUFFER_SYMBOL]);
             this[GPU_BUFFER_SYMBOL] = null;
         }
         this[GPU_BUFFER_DATA_SYMBOL] = data;

@@ -267,10 +267,9 @@ class MipmapGenerator {
             });
         }
 
-        // TODO mipTexture.destroy() 호출 시점 문제 (비동기 서밋 이후에 해야 함)
-        // if (!renderToSource) {
-        //     mipTexture.destroy();
-        // }
+        if (!renderToSource) {
+            this.#redGPUContext.commandEncoderManager.addDeferredDestroy(mipTexture);
+        }
 
         // useCache가 false일 때만 temp 캐시 클리어
         if (!useCache) {

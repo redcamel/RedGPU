@@ -161,7 +161,9 @@ class BitmapTexture extends ManagementResourceBase {
         this.#unregisterResource()
         this.cacheKey = null
         this.#src = null
-        if (temp) temp.destroy()
+        if (temp) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
+        }
     }
 
     /**
@@ -221,7 +223,7 @@ class BitmapTexture extends ManagementResourceBase {
         const {gpuDevice, resourceManager} = this.redGPUContext
         const {mipmapGenerator} = resourceManager
         if (this.#gpuTexture) {
-            this.#gpuTexture.destroy()
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuTexture)
             this.#gpuTexture = null
         }
         this.targetResourceManagedState.videoMemory -= this.#videoMemorySize

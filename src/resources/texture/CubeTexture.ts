@@ -158,7 +158,9 @@ class CubeTexture extends ManagementResourceBase {
         this.#unregisterResource()
         this.#srcList = null
         this.cacheKey = null
-        if (temp) temp.destroy()
+        if (temp) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
+        }
     }
 
     /**
@@ -180,7 +182,7 @@ class CubeTexture extends ManagementResourceBase {
         useMipmap: boolean = true
     ): void {
         if (this.#gpuTexture) {
-            this.#gpuTexture.destroy();
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuTexture);
             this.targetResourceManagedState.videoMemory -= this.#videoMemorySize;
         }
         this.#gpuTexture = gpuTexture;
@@ -248,7 +250,7 @@ class CubeTexture extends ManagementResourceBase {
         const {gpuDevice, resourceManager} = this.redGPUContext
         const {mipmapGenerator} = resourceManager
         if (this.#gpuTexture) {
-            this.#gpuTexture.destroy()
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuTexture)
             this.#gpuTexture = null
         }
         this.#mipLevelCount = 1;

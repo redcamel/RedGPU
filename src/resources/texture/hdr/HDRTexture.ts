@@ -134,7 +134,9 @@ class HDRTexture extends ManagementResourceBase {
         this.#unregisterResource()
         this.#src = null
         this.cacheKey = null
-        if (temp) temp.destroy()
+        if (temp) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
+        }
     }
 
     #getCacheKey(srcInfo?: SrcInfo): string {
@@ -206,8 +208,7 @@ class HDRTexture extends ManagementResourceBase {
         this.#setGpuTexture(newGPUTexture);
 
         if (oldTexture) {
-            await gpuDevice.queue.onSubmittedWorkDone();
-            oldTexture.destroy();
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(oldTexture);
         }
     }
 

@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
+import {keepLog} from "../../utils";
 
 /**
  * [KO] 단계별 통계 상세 정보 인터페이스
@@ -56,22 +57,19 @@ class CommandEncoderManager {
         computePasses: string[],
         rawUsages: number
     }> = new Map();
-    /** [KO] 타입별 지연 파괴될 리소스 리스트 [EN] List of resources to be destroyed lazily per type */
-    readonly #deferredDestroyMap: Map<CommandEncoderType, { destroy(): void }[]> = new Map();
+    /** [KO] 지연 파괴될 리소스 리스트 [EN] List of resources to be destroyed lazily */
+    readonly #deferredDestroyList: { destroy(): void }[] = [];
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
     }
 
     /**
-     * [KO] 특정 단계의 커맨드 제출 후 파괴할 리소스를 등록합니다.
-     * [EN] Registers a resource to be destroyed after the commands for a specific phase are submitted.
+     * [KO] 모든 커맨드 제출 후 안전한 시점에 파괴할 리소스를 등록합니다.
+     * [EN] Registers a resource to be destroyed at a safe time after all commands are submitted.
      */
-    addDeferredDestroy(type: CommandEncoderType, resource: { destroy(): void }): void {
-        if (!this.#deferredDestroyMap.has(type)) {
-            this.#deferredDestroyMap.set(type, []);
-        }
-        this.#deferredDestroyMap.get(type)!.push(resource);
+    addDeferredDestroy(resource: { destroy(): void }): void {
+        this.#deferredDestroyList.push(resource);
     }
 
     /**
@@ -199,12 +197,13 @@ class CommandEncoderManager {
         const buffers = this.#finish(type);
         if (buffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(buffers);
-            this.#processDeferredDestroy(type);
             const logData = this.#createPhaseStats(type, buffers.length);
             console.log(`🚀 [CommandEncoderManager] Submitted ${type} Phase`, logData);
             this.#resetStat(type);
+            this.#processDeferredDestroys();
             return logData;
         }
+        this.#processDeferredDestroys();
         return null;
     }
 
@@ -225,27 +224,41 @@ class CommandEncoderManager {
             COMMAND_ENCODER_TYPE.POST_PROCESS
         ] as const;
 
-        const submittedTypes: CommandEncoderType[] = [];
         order.forEach(type => {
             if (this.#isPassActive[type]) {
                 throw new Error(`[RedGPU] Cannot submit ${type} phase while a pass is still active.`);
             }
             const buffers = this.#finish(type);
-            // if (buffers.length > 0) {
-                allBuffers.push(...buffers);
-                submittedTypes.push(type);
-                batchStats[type] = this.#createPhaseStats(type, buffers.length);
-                this.#resetStat(type);
-            // }
+            allBuffers.push(...buffers);
+            batchStats[type] = this.#createPhaseStats(type, buffers.length);
+            this.#resetStat(type);
         });
 
         if (allBuffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(allBuffers);
-            submittedTypes.forEach(type => this.#processDeferredDestroy(type));
             console.log(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} Command Buffer(s)`, batchStats);
+            this.#processDeferredDestroys();
             return batchStats;
         }
+        this.#processDeferredDestroys();
         return null;
+    }
+
+    /**
+     * [KO] 등록된 모든 지연 파괴 리소스를 파괴합니다.
+     * [EN] Destroys all registered deferred destroy resources.
+     */
+    #processDeferredDestroys(): void {
+        const len = this.#deferredDestroyList.length;
+        if (len > 0) {
+            let i = 0;
+            for (i; i < len; i++) {
+                keepLog(this.#deferredDestroyList[i])
+                this.#deferredDestroyList[i].destroy();
+            }
+            this.#deferredDestroyList.length = 0;
+            // console.log(`🗑️ [CommandEncoderManager] Destroyed ${len} deferred resource(s)`);
+        }
     }
 
     /**
@@ -255,10 +268,7 @@ class CommandEncoderManager {
     resetAll(): void {
         this.#encoderMap.clear();
         this.#stats.clear();
-        this.#deferredDestroyMap.forEach((list) => {
-            list.forEach(resource => resource.destroy());
-        });
-        this.#deferredDestroyMap.clear();
+        this.#processDeferredDestroys();
         Object.keys(this.#isPassActive).forEach(key => {
             delete this.#isPassActive[key as CommandEncoderType];
         });
@@ -372,14 +382,6 @@ class CommandEncoderManager {
 
     #resetStat(type: CommandEncoderType) {
         this.#stats.set(type, {renderPasses: [], computePasses: [], rawUsages: 0});
-    }
-
-    #processDeferredDestroy(type: CommandEncoderType): void {
-        const list = this.#deferredDestroyMap.get(type);
-        if (list) {
-            list.forEach(resource => resource.destroy());
-            list.length = 0;
-        }
     }
 
     /**

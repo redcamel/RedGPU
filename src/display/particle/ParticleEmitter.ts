@@ -1110,7 +1110,7 @@ class ParticleEmitter extends Mesh {
             })
         });
         if (prevBuffer) {
-            prevBuffer.forEach(v => commandEncoderManager.addDeferredDestroy(COMMAND_ENCODER_TYPE.RESOURCE, v));
+            prevBuffer.forEach(v => commandEncoderManager.addDeferredDestroy( v));
         }
         //
         let computeSource = computeModuleSource;

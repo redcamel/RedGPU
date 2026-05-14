@@ -272,8 +272,8 @@ class ViewRenderTextureManager {
             this.#gBuffers.delete(type)
 
             const {commandEncoderManager} = this.#redGPUContext;
-            if (texture) commandEncoderManager.addDeferredDestroy(COMMAND_ENCODER_TYPE.POST_PROCESS, texture);
-            if (resolveTexture) commandEncoderManager.addDeferredDestroy(COMMAND_ENCODER_TYPE.POST_PROCESS, resolveTexture);
+            if (texture) commandEncoderManager.addDeferredDestroy( texture);
+            if (resolveTexture) commandEncoderManager.addDeferredDestroy( resolveTexture);
         }
     }
 

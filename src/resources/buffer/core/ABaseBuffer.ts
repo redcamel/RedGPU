@@ -95,7 +95,7 @@ abstract class ABaseBuffer extends ManagementResourceBase {
             this[GPU_BUFFER_SYMBOL] = null
             this.notifyUpdate(true)
             this.redGPUContext.resourceManager.unregisterManagementResource(this)
-            if (temp) temp.destroy()
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
         }
     }
 }
