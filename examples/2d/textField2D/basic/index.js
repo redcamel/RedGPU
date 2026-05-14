@@ -13,14 +13,14 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(canvas, (redGPUContext) => {
-    const controller = new RedGPU.Camera.Camera2D();
+    
 
     const scene = new RedGPU.Display.Scene();
     scene.backgroundColor.r = 255;
     scene.backgroundColor.g = 0;
     scene.backgroundColor.b = 0;
     scene.useBackgroundColor = true;
-    const view = new RedGPU.Display.View2D(redGPUContext, scene, controller);
+    const view = new RedGPU.Display.View2D(redGPUContext, scene);
     redGPUContext.addView(view);
 
     const spriteCount = 10;
