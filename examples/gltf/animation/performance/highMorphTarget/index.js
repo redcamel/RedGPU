@@ -1,7 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
-import {
-    loadingProgressInfoHandler
-} from '../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770713934910'
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] High Morph Target Performance 예제
@@ -112,41 +110,40 @@ function loadGLTF(view, url) {
             // 새 메시가 추가될 때마다 전체 격자 재배치
             redistributeGrid(scene);
 
-            pane?.refresh()
+            helper?.updateGui();
         },
-        (e) => first ? loadingProgressInfoHandler(e) : null
+        (e) => first ? RedGPUExampleHelper.loadingProgressInfoHandler(e) : null
     );
 }
 
-let pane
+let helper;
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.View3D} targetView
  */
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setDebugButtons,
-        createIblHelper
-    } = await import('../../../../exampleHelper/createExample/panes/index.js?t=1770713934910');
-    setDebugButtons(RedGPU, redGPUContext);
-    pane = new Pane();
-    createIblHelper(pane, targetView, RedGPU);
-    const moreNum = redGPUContext.detector.isMobile ? 5 : 10
-    pane.addButton({
-        title: `Add ${moreNum} BreakDance`,
-    }).on('click', () => {
-        let i = moreNum
-        while (i--) {
-            loadGLTF(targetView, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MorphStressTest/glTF/MorphStressTest.gltf');
-        }
-    })
+const renderTestPane = (redGPUContext, targetView) => {
+    helper = new RedGPUExampleHelper(redGPUContext, {
+        RedGPU: RedGPU,
+        ibl: true,
+        skybox: true,
+        guiCallback: (pane) => {
+            const moreNum = redGPUContext.detector.isMobile ? 5 : 10
+            pane.addButton({
+                title: `Add ${moreNum} BreakDance`,
+            }).on('click', () => {
+                let i = moreNum
+                while (i--) {
+                    loadGLTF(targetView, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MorphStressTest/glTF/MorphStressTest.gltf');
+                }
+            })
 
-    pane.addBinding(targetView.scene.children, 'length', {
-        disabled: true,
-        label: `Count BreakDance`,
-        step: 1
-    })
+            pane.addBinding(targetView.scene.children, 'length', {
+                disabled: true,
+                label: `Count BreakDance`,
+                step: 1
+            })
+        }
+    });
 };

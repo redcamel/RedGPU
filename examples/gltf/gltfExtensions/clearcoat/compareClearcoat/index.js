@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
 
 /**
  * [KO] Compare Clearcoat 예제
@@ -49,7 +50,7 @@ function loadGLTF(view, url) {
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
         const mesh = result.resultMesh
         scene.addChild(mesh)
-        view.camera.fitMeshToScreenCenter(mesh, view)
+        RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
     });
 }
 
@@ -59,13 +60,10 @@ function loadGLTF(view, url) {
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.View3D} targetView
  */
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        createIblHelper,
-        setDebugButtons
-    } = await import('../../../../exampleHelper/createExample/panes/index.js?t=1770713934910');
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    createIblHelper(pane, targetView, RedGPU);
+const renderTestPane = (redGPUContext, targetView) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU: RedGPU,
+        ibl: true,
+        skybox: true,
+    });
 };
