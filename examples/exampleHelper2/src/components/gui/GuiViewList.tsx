@@ -23,34 +23,35 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
         const rootFolder = gui.addFolder({title});
 
         const addViewControls = (view: any, container: any) => {
-            // View Properties
-            container.addBinding(view, 'useFrustumCulling');
-            container.addBinding(view, 'useDistanceCulling');
-            container.addBinding(view, 'distanceCulling', {min: 0, max: 1000, step: 1});
+            const isView3D = view.constructor.name === 'View3D';
+            if (isView3D) {
+                // View Properties
+                container.addBinding(view, 'useFrustumCulling');
+                container.addBinding(view, 'useDistanceCulling');
+                container.addBinding(view, 'distanceCulling', {min: 0, max: 1000, step: 1});
+                container.addBlade({view: 'separator'});
 
-            container.addBlade({view: 'separator'});
+                // Grid & Axis
+                const debugFolder = container.addFolder({title: 'Debug Helpers'});
+                const debugProxy = {
+                    get grid() {
+                        return !!view.grid;
+                    },
+                    set grid(v: boolean) {
+                        view.grid = v;
+                    },
+                    get axis() {
+                        return !!view.axis;
+                    },
+                    set axis(v: boolean) {
+                        view.axis = v;
+                    }
+                };
+                debugFolder.addBinding(debugProxy, 'grid', {label: 'Show Grid'});
+                debugFolder.addBinding(debugProxy, 'axis', {label: 'Show Axis'});
 
-            // Grid & Axis
-            const debugFolder = container.addFolder({title: 'Debug Helpers'});
-            const debugProxy = {
-                get grid() {
-                    return !!view.grid;
-                },
-                set grid(v: boolean) {
-                    view.grid = v;
-                },
-                get axis() {
-                    return !!view.axis;
-                },
-                set axis(v: boolean) {
-                    view.axis = v;
-                }
-            };
-            debugFolder.addBinding(debugProxy, 'grid', {label: 'Show Grid'});
-            debugFolder.addBinding(debugProxy, 'axis', {label: 'Show Axis'});
-
-            container.addBlade({view: 'separator'});
-
+                container.addBlade({view: 'separator'});
+            }
             // Size & Position
             const SIZE_DATA = {
                 width: parseSize(view.width).value,
