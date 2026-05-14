@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -34,8 +35,6 @@ RedGPU.init(
 		const physicsEngine = new RapierPhysics();
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
-
-		const RAPIER = physicsEngine.RAPIER;
 
 		// [KO] 조명 설정
 		// [EN] Lighting setup
@@ -145,31 +144,31 @@ RedGPU.init(
  * @param {function} updateGravityY
  */
 const renderTestPane = async (redGPUContext, physicsEngine, createBox, resetScene, updateGravityY) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			const folder = pane.addFolder({ title: 'Physics Settings' });
+			const params = {
+				gravityY: -9.81,
+				addBox: () => {
+					const y = params.gravityY < 0 ? 8 : -8;
+					createBox(
+						Math.random() * 4 - 2,
+						y,
+						Math.random() * 4 - 2,
+						`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
+					);
+				}
+			};
 
-	const params = {
-		gravityY: -9.81,
-		addBox: () => {
-			const y = params.gravityY < 0 ? 8 : -8;
-			createBox(
-				Math.random() * 4 - 2,
-				y,
-				Math.random() * 4 - 2,
-				`#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
-			);
+			folder.addBinding(params, 'gravityY', {
+				min: -30,
+				max: 30
+			}).on('change', (ev) => {
+				physicsEngine.gravity = { x: 0, y: ev.value, z: 0 };
+				updateGravityY(ev.value);
+			});
+			folder.addButton({ title: 'Add Box' }).on('click', () => params.addBox());
+			folder.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 		}
-	};
-
-	pane.addBinding(params, 'gravityY', {
-		min: -30,
-		max: 30
-	}).on('change', (ev) => {
-		physicsEngine.gravity = { x: 0, y: ev.value, z: 0 };
-		updateGravityY(ev.value);
 	});
-	pane.addButton({ title: 'Add Box' }).on('click', () => params.addBox());
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 };

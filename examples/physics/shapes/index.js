@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -179,53 +180,54 @@ RedGPU.init(
  * @param {function} createPhysicalObject
  */
 const renderTestPane = async (redGPUContext, resetScene, createPhysicalObject) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	const params = {
-		type: 'sphere',
-		color: '#ffffff',
-		restitution: 0.6,
-		friction: 0.4
-	};
+	
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			const params = {
+				type: 'sphere',
+				color: '#ffffff',
+				restitution: 0.6,
+				friction: 0.4
+			};
 
-	const folder = pane.addFolder({ title: 'Spawn Object' });
-	folder.addBinding(params, 'type', {
-		options: {
-			Box: 'box',
-			Sphere: 'sphere',
-			Cylinder: 'cylinder',
-			Capsule: 'capsule'
+			const folder = pane.addFolder({ title: 'Spawn Object' });
+			folder.addBinding(params, 'type', {
+				options: {
+					Box: 'box',
+					Sphere: 'sphere',
+					Cylinder: 'cylinder',
+					Capsule: 'capsule'
+				}
+			});
+			folder.addBinding(params, 'color');
+			folder.addButton({ title: 'Spawn' }).on('click', () => {
+				createPhysicalObject(
+					params.type,
+					-18 + (Math.random() * 4),
+					20,
+					(Math.random() * 10) - 5,
+					params.color,
+					params.restitution,
+					params.friction
+				);
+			});
+
+			pane.addButton({ title: 'Spawn Random' }).on('click', () => {
+				const types = ['box', 'sphere', 'cylinder', 'capsule'];
+				const randomType = types[Math.floor(Math.random() * types.length)];
+				const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+				createPhysicalObject(
+					randomType,
+					-18 + (Math.random() * 4),
+					20,
+					(Math.random() * 10) - 5,
+					randomColor,
+					params.restitution,
+					params.friction
+				);
+			});
+
+			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 		}
 	});
-	folder.addBinding(params, 'color');
-	folder.addButton({ title: 'Spawn' }).on('click', () => {
-		createPhysicalObject(
-			params.type,
-			-18 + (Math.random() * 4),
-			20,
-			(Math.random() * 10) - 5,
-			params.color,
-			params.restitution,
-			params.friction
-		);
-	});
-
-	pane.addButton({ title: 'Spawn Random' }).on('click', () => {
-		const types = ['box', 'sphere', 'cylinder', 'capsule'];
-		const randomType = types[Math.floor(Math.random() * types.length)];
-		const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-		createPhysicalObject(
-			randomType,
-			-18 + (Math.random() * 4),
-			20,
-			(Math.random() * 10) - 5,
-			randomColor,
-			params.restitution,
-			params.friction
-		);
-	});
-
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 };

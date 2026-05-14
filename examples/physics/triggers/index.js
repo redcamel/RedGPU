@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -189,33 +190,32 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, scene, triggerMesh, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	
-	const params = {
-		showSensor: !!triggerMesh.parent
-	};
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			const params = {
+				showSensor: !!triggerMesh.parent
+			};
 
-	// [KO] 센서 영역 가시성 제어 (addChild/removeChild 사용)
-	// [EN] Control sensor area visibility (using addChild/removeChild)
-	pane.addBinding(params, 'showSensor', {
-		label: 'Show Sensor Mesh'
-	}).on('change', (ev) => {
-		if (ev.value) {
-			scene.addChild(triggerMesh);
-		} else {
-			scene.removeChild(triggerMesh);
+			// [KO] 센서 영역 가시성 제어 (addChild/removeChild 사용)
+			// [EN] Control sensor area visibility (using addChild/removeChild)
+			pane.addBinding(params, 'showSensor', {
+				label: 'Show Sensor Mesh'
+			}).on('change', (ev) => {
+				if (ev.value) {
+					scene.addChild(triggerMesh);
+				} else {
+					scene.removeChild(triggerMesh);
+				}
+			});
+
+			pane.addBlade({
+				view: 'text',
+				label: 'Info',
+				value: 'Green box is a Sensor!',
+				parse: (v) => v,
+				readonly: true
+			});
+			pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
 		}
 	});
-
-	pane.addBlade({
-		view: 'text',
-		label: 'Info',
-		value: 'Green box is a Sensor!',
-		parse: (v) => v,
-		readonly: true
-	});
-	pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
 };

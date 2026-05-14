@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -139,7 +140,7 @@ RedGPU.init(
 				friction: 0.1,
 				linearDamping: 0.1
 			});
-			const ballInfo = { mesh: ball, body };
+			const ballInfo = { mesh: ballMesh, body };
 			activeBalls.push(ballInfo);
 
 			setTimeout(() => {
@@ -180,27 +181,28 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, intervalId, createBall, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	const params = {
-		spawnRate: 100,
-		pause: false
-	};
 	
-	pane.addBinding(params, 'spawnRate', {
-		min: 50,
-		max: 1000
-	}).on('change', (ev) => {
-		clearInterval(intervalId);
-		if (!params.pause) intervalId = setInterval(createBall, ev.value);
-	});
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			const params = {
+				spawnRate: 100,
+				pause: false
+			};
+			
+			pane.addBinding(params, 'spawnRate', {
+				min: 50,
+				max: 1000
+			}).on('change', (ev) => {
+				clearInterval(intervalId);
+				if (!params.pause) intervalId = setInterval(createBall, ev.value);
+			});
 
-	pane.addBinding(params, 'pause').on('change', (ev) => {
-		if (ev.value) clearInterval(intervalId);
-		else intervalId = setInterval(createBall, params.spawnRate);
-	});
+			pane.addBinding(params, 'pause').on('change', (ev) => {
+				if (ev.value) clearInterval(intervalId);
+				else intervalId = setInterval(createBall, params.spawnRate);
+			});
 
-	pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
+			pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
+		}
+	});
 };

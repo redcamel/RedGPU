@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -194,19 +195,18 @@ RedGPU.init(
  * @param {function} resetGame
  */
 const renderTestPane = async (redGPUContext, throwBall, resetGame) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			const params = {
+				power: 180, // [KO] 늘어난 거리에 맞춰 기본 파워 상향 [EN] Increased default power for the longer distance
+				aim: 0.0
+			};
 
-	const params = {
-		power: 180, // [KO] 늘어난 거리에 맞춰 기본 파워 상향 [EN] Increased default power for the longer distance
-		aim: 0.0
-	};
+			pane.addBinding(params, 'power', { min: 100, max: 500 });
+			pane.addBinding(params, 'aim', { min: -1.0, max: 1.0 });
 
-	pane.addBinding(params, 'power', { min: 100, max: 500 });
-	pane.addBinding(params, 'aim', { min: -1.0, max: 1.0 });
-	
-	pane.addButton({ title: 'THROW BALL!' }).on('click', () => throwBall(params.power, params.aim));
-	pane.addButton({ title: 'Reset Game' }).on('click', () => resetGame());
+			pane.addButton({ title: 'THROW BALL!' }).on('click', () => throwBall(params.power, params.aim));
+			pane.addButton({ title: 'Reset Game' }).on('click', () => resetGame());
+		}
+	});
 };

@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -215,24 +216,23 @@ RedGPU.init(
  * @param {object} joint
  * @param {function} resetScene
  */
-const renderTestPane = async (redGPUContext, joint, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	
-	const params = {
-		motorVelocity: 3.0
-	};
+const renderTestPane = (redGPUContext, joint, resetScene) => {
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			const params = {
+				motorVelocity: 3.0
+			};
 
-	pane.addBinding(params, 'motorVelocity', {
-		min: -15,
-		max: 15
-	}).on('change', (ev) => {
-		// [KO] 실시간으로 모터 속도 변경 (최대 힘은 500 유지)
-		// [EN] Change motor velocity in real-time (Maintain max force at 500)
-		joint.configureMotorVelocity(ev.value, 500.0);
+			pane.addBinding(params, 'motorVelocity', {
+				min: -15,
+				max: 15
+			}).on('change', (ev) => {
+				// [KO] 실시간으로 모터 속도 변경 (최대 힘은 500 유지)
+				// [EN] Change motor velocity in real-time (Maintain max force at 500)
+				joint.configureMotorVelocity(ev.value, 500.0);
+			});
+
+			pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
+		}
 	});
-
-	pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
 };

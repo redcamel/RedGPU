@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -228,24 +229,23 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, createObject, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	
-	pane.addBlade({
-		view: 'text',
-		label: 'Density Info',
-		value: 'Cyan: Floats / Red: Heavy Sink',
-		parse: (v) => v,
-		readonly: true
-	});
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			pane.addBlade({
+				view: 'text',
+				label: 'Density Info',
+				value: 'Cyan: Floats / Red: Heavy Sink',
+				parse: (v) => v,
+				readonly: true
+			});
 
-	pane.addButton({ title: 'Drop Heavy Object' }).on('click', () => {
-		createObject();
-	});
+			pane.addButton({ title: 'Drop Heavy Object' }).on('click', () => {
+				createObject();
+			});
 
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => {
-		resetScene();
+			pane.addButton({ title: 'Reset Scene' }).on('click', () => {
+				resetScene();
+			});
+		}
 	});
 };

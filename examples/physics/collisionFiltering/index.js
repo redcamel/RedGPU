@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -128,7 +129,7 @@ RedGPU.init(
 			const bitmask = (membership << 16) | filter;
 			body.nativeCollider.setCollisionGroups(bitmask);
 
-			const ballInfo = { mesh: ball, body };
+			const ballInfo = { mesh, body };
 			activeBalls.push(ballInfo);
 			setTimeout(() => {
 				const idx = activeBalls.indexOf(ballInfo);
@@ -170,16 +171,17 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	pane.addBlade({
-		view: 'text',
-		label: 'Guide',
-		value: 'Colors filter their own floors!',
-		parse: (v) => v,
-		readonly: true
+	
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			pane.addBlade({
+				view: 'text',
+				label: 'Guide',
+				value: 'Colors filter their own floors!',
+				parse: (v) => v,
+				readonly: true
+			});
+			pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
+		}
 	});
-	pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
 };

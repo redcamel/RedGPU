@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -259,14 +260,12 @@ RedGPU.init(
  * @param {function} windBlast
  * @param {function} resetScene
  */
-const renderTestPane = async (redGPUContext, clothMesh, spawnObject, windBlast, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-
-
-	pane.addButton({ title: 'Drop Object' }).on('click', () => spawnObject());
-	pane.addButton({ title: 'Wind Blast!' }).on('click', () => windBlast());
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+const renderTestPane = (redGPUContext, clothMesh, spawnObject, windBlast, resetScene) => {
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			pane.addButton({ title: 'Drop Object' }).on('click', () => spawnObject());
+			pane.addButton({ title: 'Wind Blast!' }).on('click', () => windBlast());
+			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+		}
+	});
 };

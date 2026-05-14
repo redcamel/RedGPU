@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
+import * as RedGPU from "../../../dist/index.js";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -219,25 +220,25 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, platformBody, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
 	
-	const params = {
-		liftPower: 150
-	};
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			const params = {
+				liftPower: 150
+			};
 
-	pane.addBinding(params, 'liftPower', {
-		min: 50,
-		max: 500
+			pane.addBinding(params, 'liftPower', {
+				min: 50,
+				max: 500
+			});
+
+			pane.addButton({ title: 'LIFT UP!' }).on('click', () => {
+				// [KO] 플랫폼에 위쪽 방향으로 충격량(Impulse) 가하기
+				// [EN] Apply impulse to the platform in the upward direction
+				platformBody.applyImpulse({ x: 0, y: params.liftPower, z: 0 });
+			});
+
+			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+		}
 	});
-
-	pane.addButton({ title: 'LIFT UP!' }).on('click', () => {
-		// [KO] 플랫폼에 위쪽 방향으로 충격량(Impulse) 가하기
-		// [EN] Apply impulse to the platform in the upward direction
-		platformBody.applyImpulse({ x: 0, y: params.liftPower, z: 0 });
-	});
-
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 };
