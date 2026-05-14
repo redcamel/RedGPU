@@ -8,6 +8,7 @@ import {useViewportSync} from './hooks/useViewportSync';
 import {useInspectorInit} from './hooks/useInspectorInit';
 import {useTopBarActions} from './hooks/useTopBarActions';
 import GuiCompareLabelHelper from "./components/gui/GuiCompareLabelHelper";
+import LoadingUI from './components/LoadingUI';
 
 const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
 
@@ -51,6 +52,7 @@ const App = () => {
 
             <Footer/>
             <SourceModal/>
+            <LoadingUI/>
         </>
     );
 };

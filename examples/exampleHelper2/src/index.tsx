@@ -9,6 +9,10 @@ import {findCurrentExample} from './utils/exampleFinder';
  * RedGPUExampleHelper
  */
 class RedGPUExampleHelper {
+    static loadingProgressInfoHandler = (info: any) => {
+        useExampleHelperStore.getState().updateLoadingState(info);
+    };
+
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
 

@@ -3,6 +3,13 @@ import React from 'react';
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import {ExampleItem} from './types/example';
 
+export interface LoadingInfo {
+    url?: string;
+    model?: { loaded: number; total: number };
+    buffers?: { loaded: number; total: number };
+    textures?: { loaded: number; total: number };
+}
+
 /**
  * [KO] TopBar의 우측 액션 버튼 정의 인터페이스
  */
@@ -47,6 +54,7 @@ export interface ExampleHelperState {
     topBarRightActions: TopBarAction[];
     guiConfig: GuiConfig | null;
     isNarrow: boolean;
+    loadingStates: Record<string, LoadingInfo>;
     setRedGPU: (value: any) => void;
     setRedGPUContext: (value: RedGPUContext | null) => void;
     setCurrentExample: (value: ExampleItem | null) => void;
@@ -58,6 +66,8 @@ export interface ExampleHelperState {
     clearTopBarRightActions: () => void;
     setGuiConfig: (config: GuiConfig | null) => void;
     setIsNarrow: (value: boolean) => void;
+    updateLoadingState: (info: LoadingInfo) => void;
+    clearLoadingStates: () => void;
 }
 
 /**
@@ -73,6 +83,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
     topBarRightActions: [],
     guiConfig: null,
     isNarrow: typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
+    loadingStates: {},
     setRedGPU: (value: any) => set({RedGPU: value}),
     setRedGPUContext: (value: RedGPUContext | null) => set({redGPUContext: value}),
     setCurrentExample: (value: ExampleItem | null) => set({currentExample: value}),
@@ -99,4 +110,9 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
         set({guiConfig: config, showSettingsPanel: hasPanels});
     },
     setIsNarrow: (value: boolean) => set({isNarrow: value}),
+    updateLoadingState: (info: LoadingInfo) => set((state) => {
+        const key = info.url || 'default';
+        return { loadingStates: { ...state.loadingStates, [key]: info } };
+    }),
+    clearLoadingStates: () => set({ loadingStates: {} })
 }));
