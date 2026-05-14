@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -139,29 +140,28 @@ RedGPU.init(
  * @param {Object} activeKeysState
  */
 const renderTestPane = async (redGPUContext, activeKeysState) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            pane.addBlade({
+                view: 'text',
+                label: 'Movement',
+                value: 'WASD / Arrows',
+                parse: (v) => v,
+                readonly: true
+            });
+            pane.addBlade({
+                view: 'text',
+                label: 'Action',
+                value: 'Space: Lift, Q/E: Rotate',
+                parse: (v) => v,
+                readonly: true
+            });
 
-    pane.addBlade({
-        view: 'text',
-        label: 'Movement',
-        value: 'WASD / Arrows',
-        parse: (v) => v,
-        readonly: true
-    });
-    pane.addBlade({
-        view: 'text',
-        label: 'Action',
-        value: 'Space: Lift, Q/E: Rotate',
-        parse: (v) => v,
-        readonly: true
-    });
-
-    const activeKeysFolder = pane.addFolder({title: 'Active Keys'});
-    activeKeysFolder.addBinding(activeKeysState, 'value', {
-        label: 'Pressed',
-        readonly: true
+            const activeKeysFolder = pane.addFolder({title: 'Active Keys'});
+            activeKeysFolder.addBinding(activeKeysState, 'value', {
+                label: 'Pressed',
+                readonly: true
+            });
+        }
     });
 };

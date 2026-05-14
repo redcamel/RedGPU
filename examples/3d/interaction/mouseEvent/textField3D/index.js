@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] TextField3D Mouse Event 예제
@@ -165,82 +166,73 @@ function getRandomHexValue() {
  * @param {RedGPU.Display.Scene} scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
+            const controls = {
+                useBillboard: child.useBillboard,
+                usePixelSize: child.usePixelSize,
+                fontSize: child.fontSize,
+                worldSize: child.worldSize,
+            };
 
-    const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
-    const controls = {
-        useBillboard: child.useBillboard,
-        usePixelSize: child.usePixelSize,
-        fontSize: child.fontSize,
-        worldSize: child.worldSize,
-    };
+            const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
 
-    const TextField3DFolder = pane.addFolder({title: 'TextField3D', expanded: true});
+            const useBillboardBinding = TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.TextField3D) child.useBillboard = evt.value;
+                });
+                updateControlsState();
+            });
 
-    const useBillboardBinding = TextField3DFolder.addBinding(controls, 'useBillboard').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.useBillboard = evt.value;
-        });
-        updateControlsState();
-    });
+            const usePixelSizeBinding = TextField3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.TextField3D) child.usePixelSize = evt.value;
+                });
+                updateControlsState();
+            });
 
-    const usePixelSizeBinding = TextField3DFolder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.usePixelSize = evt.value;
-        });
-        updateControlsState();
-    });
+            const fontSizeBinding = TextField3DFolder.addBinding(controls, 'fontSize', {
+                min: 12,
+                max: 128,
+                step: 1
+            }).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.TextField3D) child.fontSize = evt.value;
+                });
+            });
 
-    const fontSizeBinding = TextField3DFolder.addBinding(controls, 'fontSize', {
-        min: 12,
-        max: 128,
-        step: 1
-    }).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.fontSize = evt.value;
-        });
-    });
+            const worldSizeBinding = TextField3DFolder.addBinding(controls, 'worldSize', {
+                min: 0.01,
+                max: 5,
+                step: 0.01
+            }).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.TextField3D) child.worldSize = evt.value;
+                });
+            });
 
-    const worldSizeBinding = TextField3DFolder.addBinding(controls, 'worldSize', {
-        min: 0.01,
-        max: 5,
-        step: 0.01
-    }).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField3D) child.worldSize = evt.value;
-        });
-    });
+            const updateControlsState = () => {
+                const {useBillboard, usePixelSize} = controls;
 
-    const updateControlsState = () => {
-        const {useBillboard, usePixelSize} = controls;
+                if (!useBillboard) {
+                    usePixelSizeBinding.disabled = true;
+                    fontSizeBinding.disabled = true;
+                    worldSizeBinding.disabled = false;
+                } else {
+                    usePixelSizeBinding.disabled = false;
 
-        if (!useBillboard) {
-            usePixelSizeBinding.element.style.opacity = 0.25;
-            usePixelSizeBinding.element.style.pointerEvents = 'none';
-            fontSizeBinding.element.style.opacity = 0.25;
-            fontSizeBinding.element.style.pointerEvents = 'none';
-            worldSizeBinding.element.style.opacity = 1;
-            worldSizeBinding.element.style.pointerEvents = 'painted';
-        } else {
-            usePixelSizeBinding.element.style.opacity = 1;
-            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+                    if (usePixelSize) {
+                        fontSizeBinding.disabled = false;
+                        worldSizeBinding.disabled = true;
+                    } else {
+                        fontSizeBinding.disabled = true;
+                        worldSizeBinding.disabled = false;
+                    }
+                }
+            };
 
-            if (usePixelSize) {
-                fontSizeBinding.element.style.opacity = 1;
-                fontSizeBinding.element.style.pointerEvents = 'painted';
-                worldSizeBinding.element.style.opacity = 0.25;
-                worldSizeBinding.element.style.pointerEvents = 'none';
-            } else {
-                fontSizeBinding.element.style.opacity = 0.25;
-                fontSizeBinding.element.style.pointerEvents = 'none';
-                worldSizeBinding.element.style.opacity = 1;
-                worldSizeBinding.element.style.pointerEvents = 'painted';
-            }
+            updateControlsState();
         }
-    };
-
-    updateControlsState();
+    });
 };

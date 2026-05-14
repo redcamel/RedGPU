@@ -6,7 +6,8 @@
  * [EN] Demonstrates the difference between World Size (worldSize) and fixed Pixel Size (pixelSize) modes.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -37,8 +38,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     // 2. [KO] 기준점: 일반 3D 메쉬 (중앙) - 비교를 위한 표준 객체
     const refBox = new RedGPU.Display.Mesh(
-        redGPUContext, 
-        new RedGPU.Primitive.Box(redGPUContext), 
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff')
     );
     refBox.setScale(2, 2, 2);
@@ -55,14 +56,14 @@ RedGPU.init(canvas, (redGPUContext) => {
     // [KO] 설명 레이블 추가
     const createLabel = (text, subText, x, y, color) => {
         const group = new RedGPU.Display.Group3D();
-        
+
         const label = new RedGPU.Display.TextField3D(redGPUContext, text);
         label.color = '#ffffff';
         label.fontSize = 24;
         label.background = color;
         label.padding = 10;
         label.useBillboard = true;
-        
+
         const subLabel = new RedGPU.Display.TextField3D(redGPUContext, subText);
         subLabel.y = -1.2;
         subLabel.color = '#cccccc';
@@ -89,37 +90,29 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 
 const renderTestPane = async (redGPUContext, worldSprite, pixelSprite) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // World Mode Control
+            const fWorld = pane.addFolder({title: 'World Size Mode (Left)', expanded: true});
+            fWorld.addBinding(worldSprite, 'worldSize', {min: 0.1, max: 10, step: 0.1, label: 'Size (Units)'});
+            fWorld.addBinding(worldSprite, 'useBillboard');
 
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
+            // Pixel Mode Control
+            const fPixel = pane.addFolder({title: 'Pixel Size Mode (Right)', expanded: true});
+            fPixel.addBinding(pixelSprite, 'pixelSize', {min: 16, max: 512, step: 1, label: 'Size (Pixels)'});
+            fPixel.addBinding(pixelSprite, 'useBillboard');
 
-    // World Mode Control
-    const fWorld = pane.addFolder({title: 'World Size Mode (Left)', expanded: true});
-    fWorld.addBinding(worldSprite, 'worldSize', {min: 0.1, max: 10, step: 0.1, label: 'Size (Units)'});
-    fWorld.addBinding(worldSprite, 'useBillboard');
-
-    // Pixel Mode Control
-    const fPixel = pane.addFolder({title: 'Pixel Size Mode (Right)', expanded: true});
-    fPixel.addBinding(pixelSprite, 'pixelSize', {min: 16, max: 512, step: 1, label: 'Size (Pixels)'});
-    fPixel.addBinding(pixelSprite, 'useBillboard');
-
-    // Instruction for User (Single Textarea-style Guide)
-    const fInfo = pane.addFolder({title: 'Usage Guide', expanded: true});
-    const guide = {
-        content: '• Zoom: Mouse Wheel / Pinch\n• World Mode: Size by distance\n(Like 3D objects)\n• Pixel Mode: Fixed pixel size\n(Like UI/Labels)'
-    };
-    fInfo.addBinding(guide, 'content', {
-        readonly: true,
-        label: null,
-        multiline: true,
-        rows: 6
+            // Instruction for User (Single Textarea-style Guide)
+            const fInfo = pane.addFolder({title: 'Usage Guide', expanded: true});
+            const guide = {
+                content: '• Zoom: Mouse Wheel / Pinch\n• World Mode: Size by distance\n(Like 3D objects)\n• Pixel Mode: Fixed pixel size\n(Like UI/Labels)'
+            };
+            fInfo.addBinding(guide, 'content', {
+                readonly: true,
+                label: null,
+                multiline: true,
+                rows: 6
+            });
+        }
     });
-
-    const refresh = () => {
-        pane.refresh();
-        requestAnimationFrame(refresh);
-    };
-    refresh();
 };

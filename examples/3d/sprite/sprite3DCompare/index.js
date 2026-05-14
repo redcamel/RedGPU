@@ -6,7 +6,8 @@
  * [EN] Demonstrates the difference between World Size (worldSize) and fixed Pixel Size (pixelSize) modes.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -33,8 +34,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     // 2. [KO] 기준점: 일반 3D 메쉬 (중앙)
     const refBox = new RedGPU.Display.Mesh(
-        redGPUContext, 
-        new RedGPU.Primitive.Box(redGPUContext), 
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext),
         new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff')
     );
     refBox.setScale(2, 2, 2);
@@ -61,8 +62,10 @@ RedGPU.init(canvas, (redGPUContext) => {
         subLabel.color = '#cccccc';
         subLabel.fontSize = 16;
         subLabel.useBillboard = true;
-        group.x = x; group.y = y;
-        group.addChild(label); group.addChild(subLabel);
+        group.x = x;
+        group.y = y;
+        group.addChild(label);
+        group.addChild(subLabel);
         scene.addChild(group);
     };
 
@@ -79,28 +82,26 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 
 const renderTestPane = async (redGPUContext, spriteWorld, spritePixel) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const fWorld = pane.addFolder({title: 'World Size Mode (Left)', expanded: true});
+            fWorld.addBinding(spriteWorld, 'worldSize', {min: 0.1, max: 10, step: 0.1, label: 'Size (Units)'});
+            fWorld.addBinding(spriteWorld, 'useBillboard');
 
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
+            const fPixel = pane.addFolder({title: 'Pixel Size Mode (Right)', expanded: true});
+            fPixel.addBinding(spritePixel, 'pixelSize', {min: 16, max: 512, step: 1, label: 'Size (Pixels)'});
+            fPixel.addBinding(spritePixel, 'useBillboard');
 
-    const fWorld = pane.addFolder({title: 'World Size Mode (Left)', expanded: true});
-    fWorld.addBinding(spriteWorld, 'worldSize', {min: 0.1, max: 10, step: 0.1, label: 'Size (Units)'});
-    fWorld.addBinding(spriteWorld, 'useBillboard');
-
-    const fPixel = pane.addFolder({title: 'Pixel Size Mode (Right)', expanded: true});
-    fPixel.addBinding(spritePixel, 'pixelSize', {min: 16, max: 512, step: 1, label: 'Size (Pixels)'});
-    fPixel.addBinding(spritePixel, 'useBillboard');
-
-    const fInfo = pane.addFolder({title: 'Usage Guide', expanded: true});
-    const guide = {
-        content: '• Zoom: Mouse Wheel / Pinch\n\n• World Mode: Size by distance\n(Like 3D objects)\n\n• Pixel Mode: Fixed pixel size\n(Like UI/Labels)'
-    };
-    fInfo.addBinding(guide, 'content', {
-        readonly: true, label: null, multiline: true, rows: 6
+            const fInfo = pane.addFolder({title: 'Usage Guide', expanded: true});
+            const guide = {
+                content: '• Zoom: Mouse Wheel / Pinch\n\n• World Mode: Size by distance\n(Like 3D objects)\n\n• Pixel Mode: Fixed pixel size\n(Like UI/Labels)'
+            };
+            fInfo.addBinding(guide, 'content', {
+                readonly: true,
+                label: null,
+                multiline: true,
+                rows: 6
+            });
+        }
     });
-
-    const refresh = () => { pane.refresh(); requestAnimationFrame(refresh); };
-    refresh();
 };

@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Sprite3D Mouse Event 예제
@@ -65,10 +66,10 @@ Face Index: ${e.faceIndex}
 UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
         };
 
-        const { updateLayout } = createSampleSprite3D(redGPUContext, scene, infoBox, updateInfo);
+        const {updateLayout} = createSampleSprite3D(redGPUContext, scene, infoBox, updateInfo);
 
         redGPUContext.onResize = (resizeEvent) => {
-            const { width, height } = resizeEvent.pixelRectObject;
+            const {width, height} = resizeEvent.pixelRectObject;
             const aspect = width / height;
             const isMobile = redGPUContext.detector.isMobile;
             const baseDistance = isMobile ? 7.5 : 9.5;
@@ -118,7 +119,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
         sprite3D.worldSize = 1.0;
         sprite3D.pixelSize = 64
         scene.addChild(sprite3D);
-        
+
         sprite3D.addListener(eventName, (e) => {
             updateInfo(eventName, e);
             TweenMax.to(material.tint, 0.5, {
@@ -157,7 +158,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
     };
 
     updateLayout();
-    return { sprites, updateLayout };
+    return {sprites, updateLayout};
 };
 
 /**
@@ -167,73 +168,65 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
  * @param {RedGPU.Display.Scene} scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const { setDebugButtons } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const folder = pane.addFolder({ title: 'Sprite3D', expanded: true });
-    
-    const child = scene.children.find(c => c instanceof RedGPU.Display.Sprite3D);
-    const controls = {
-        useBillboard: child.useBillboard,
-        usePixelSize: child.usePixelSize,
-        pixelSize: child.pixelSize,
-        worldSize: child.worldSize,
-    };
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
 
-    const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.Sprite3D) child.useBillboard = evt.value;
-        });
-        updateControlsState();
-    });
+            const child = scene.children.find(c => c instanceof RedGPU.Display.Sprite3D);
+            const controls = {
+                useBillboard: child.useBillboard,
+                usePixelSize: child.usePixelSize,
+                pixelSize: child.pixelSize,
+                worldSize: child.worldSize,
+            };
 
-    const usePixelSizeBinding = folder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.Sprite3D) child.usePixelSize = evt.value;
-        });
-        updateControlsState();
-    });
+            const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.Sprite3D) child.useBillboard = evt.value;
+                });
+                updateControlsState();
+            });
 
-    const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 0, max: 256, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.Sprite3D) child.pixelSize = evt.value;
-        });
-    });
+            const usePixelSizeBinding = folder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.Sprite3D) child.usePixelSize = evt.value;
+                });
+                updateControlsState();
+            });
 
-    const worldSizeBinding = folder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.Sprite3D) child.worldSize = evt.value;
-        });
-    });
+            const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 0, max: 256, step: 1}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.Sprite3D) child.pixelSize = evt.value;
+                });
+            });
 
-    const updateControlsState = () => {
-        const {useBillboard, usePixelSize} = controls;
+            const worldSizeBinding = folder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.Sprite3D) child.worldSize = evt.value;
+                });
+            });
 
-        if (!useBillboard) {
-            usePixelSizeBinding.element.style.opacity = 0.25;
-            usePixelSizeBinding.element.style.pointerEvents = 'none';
-            pixelSizeBinding.element.style.opacity = 0.25;
-            pixelSizeBinding.element.style.pointerEvents = 'none';
-            worldSizeBinding.element.style.opacity = 1;
-            worldSizeBinding.element.style.pointerEvents = 'painted';
-        } else {
-            usePixelSizeBinding.element.style.opacity = 1;
-            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+            const updateControlsState = () => {
+                const {useBillboard, usePixelSize} = controls;
 
-            if (usePixelSize) {
-                pixelSizeBinding.element.style.opacity = 1;
-                pixelSizeBinding.element.style.pointerEvents = 'painted';
-                worldSizeBinding.element.style.opacity = 0.25;
-                worldSizeBinding.element.style.pointerEvents = 'none';
-            } else {
-                pixelSizeBinding.element.style.opacity = 0.25;
-                pixelSizeBinding.element.style.pointerEvents = 'none';
-                worldSizeBinding.element.style.opacity = 1;
-                worldSizeBinding.element.style.pointerEvents = 'painted';
-            }
+                if (!useBillboard) {
+                    usePixelSizeBinding.disabled = true;
+                    pixelSizeBinding.disabled = true;
+                    worldSizeBinding.disabled = false;
+                } else {
+                    usePixelSizeBinding.disabled = false;
+
+                    if (usePixelSize) {
+                        pixelSizeBinding.disabled = false;
+                        worldSizeBinding.disabled = true;
+                    } else {
+                        pixelSizeBinding.disabled = true;
+                        worldSizeBinding.disabled = false;
+                    }
+                }
+            };
+
+            updateControlsState();
         }
-    };
-
-    updateControlsState();
+    });
 };

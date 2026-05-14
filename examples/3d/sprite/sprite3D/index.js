@@ -6,7 +6,8 @@
  * [EN] Demonstrates the usage of Sprite3D in 3D space, including features like billboard and pixel size modes.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -107,59 +108,48 @@ RedGPU.init(
  * [EN] Scene containing the sprites to control
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setDebugButtons,
-        setSeparator
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
 
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
+            const target = scene.children[0];
+            const updateAll = (key, value) => {
+                scene.children.forEach(c => {
+                    if (c instanceof RedGPU.Display.Sprite3D) {
+                        c[key] = value;
+                    }
+                });
+            };
 
-    const target = scene.children[0];
-    const updateAll = (key, value) => {
-        scene.children.forEach(c => {
-            if (c instanceof RedGPU.Display.Sprite3D) {
+            // [KO] 빌보드 및 크기 설정
+            // [EN] Billboard & Size Settings
+            folder.addBinding(target, 'useBillboard').on('change', (evt) => {
+                updateAll('useBillboard', evt.value);
+                updateUI();
+            });
+            const usePixelSize = folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
+                updateAll('usePixelSize', evt.value);
+                updateUI();
+            });
+            const pixelSize = folder.addBinding(target, 'pixelSize', {min: 0, max: 1024, step: 1}).on('change', (evt) => {
+                updateAll('pixelSize', evt.value);
+            });
+            const worldSize = folder.addBinding(target, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
+                updateAll('worldSize', evt.value);
+            });
 
-                c[key] = value;
-            }
-        });
-    };
+            // [KO] UI 활성화 상태 업데이트
+            // [EN] Update UI activation state
+            const updateUI = () => {
+                const isBillboard = target.useBillboard;
+                const isPixel = target.usePixelSize;
 
-    // [KO] 빌보드 및 크기 설정
-    // [EN] Billboard & Size Settings
-    folder.addBinding(target, 'useBillboard').on('change', (evt) => {
-        updateAll('useBillboard', evt.value);
-        updateUI();
+                usePixelSize.disabled = !isBillboard;
+                pixelSize.disabled = !isBillboard || !isPixel;
+                worldSize.disabled = isBillboard && isPixel;
+            };
+
+            updateUI();
+        }
     });
-    const usePixelSize = folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
-        updateAll('usePixelSize', evt.value);
-        updateUI();
-    });
-    const pixelSize = folder.addBinding(target, 'pixelSize', {min: 0, max: 1024, step: 1}).on('change', (evt) => {
-        updateAll('pixelSize', evt.value);
-    });
-    const worldSize = folder.addBinding(target, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
-        updateAll('worldSize', evt.value);
-    });
-
-    // [KO] UI 활성화 상태 업데이트
-    // [EN] Update UI activation state
-    const updateUI = () => {
-        const isBillboard = target.useBillboard;
-        const isPixel = target.usePixelSize;
-
-        usePixelSize.disabled = !isBillboard;
-        pixelSize.disabled = !isBillboard || !isPixel;
-        worldSize.disabled = isBillboard && isPixel;
-    };
-
-    const refresh = () => {
-        pane.refresh();
-        requestAnimationFrame(refresh);
-    };
-
-    refresh();
-    updateUI();
 };

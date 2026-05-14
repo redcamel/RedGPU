@@ -6,7 +6,8 @@
  * [EN] Demonstrates the usage of TextField3D in 3D space, including features like billboard and styling.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -84,85 +85,77 @@ RedGPU.init(canvas, (redGPUContext) => {
  * [EN] Scene containing the text fields to control
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setDebugButtons, setSeparator} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const folder = pane.addFolder({title: 'TextField3D', expanded: true});
 
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    const folder = pane.addFolder({title: 'TextField3D', expanded: true});
+            const target = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
+            const updateAll = (key, value) => {
+                scene.children.forEach(c => {
+                    if (c instanceof RedGPU.Display.TextField3D) c[key] = value;
+                });
+            };
 
-    const target = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
-    const updateAll = (key, value) => {
-        scene.children.forEach(c => {
-            if (c instanceof RedGPU.Display.TextField3D) c[key] = value;
-        });
-    };
+            const OPTIONS = {
+                fontFamily: ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'],
+                fontWeight: ['normal', 'bold', 'bolder', 'lighter'],
+                fontStyle: ['normal', 'italic', 'oblique'],
+                wordBreak: ['normal', 'break-all', 'keep-all', 'break-word'],
+                verticalAlign: ['baseline', 'top', 'middle', 'bottom', 'text-top', 'text-bottom'],
+                textAlign: ['left', 'right', 'center', 'justify'],
+                background: ['transparent', '#000', '#fff', '#f00', '#0f0', '#00f'],
+                color: ['#fff', '#000', '#f00', '#0f0', '#00f'],
+                boxSizing: ['content-box', 'border-box'],
+            };
 
-    const OPTIONS = {
-        fontFamily: ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'],
-        fontWeight: ['normal', 'bold', 'bolder', 'lighter'],
-        fontStyle: ['normal', 'italic', 'oblique'],
-        wordBreak: ['normal', 'break-all', 'keep-all', 'break-word'],
-        verticalAlign: ['baseline', 'top', 'middle', 'bottom', 'text-top', 'text-bottom'],
-        textAlign: ['left', 'right', 'center', 'justify'],
-        background: ['transparent', '#000', '#fff', '#f00', '#0f0', '#00f'],
-        color: ['#fff', '#000', '#f00', '#0f0', '#00f'],
-        boxSizing: ['content-box', 'border-box'],
-    };
+            // [KO] 빌보드 및 크기 설정
+            // [EN] Billboard & Size Settings
+            folder.addBinding(target, 'useBillboard').on('change', (evt) => {
+                updateAll('useBillboard', evt.value);
+                updateUI();
+            });
+            const usePixelSize = folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
+                updateAll('usePixelSize', evt.value);
+                updateUI();
+            });
+            const worldSize = folder.addBinding(target, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
+                updateAll('worldSize', evt.value);
+            });
 
-    // [KO] 빌보드 및 크기 설정
-    // [EN] Billboard & Size Settings
-    folder.addBinding(target, 'useBillboard').on('change', (evt) => {
-        updateAll('useBillboard', evt.value);
-        updateUI();
+            folder.addBlade({view: 'separator'});
+
+            // [KO] 스타일 설정
+            // [EN] Style Settings
+            const styleFolder = folder.addFolder({title: 'Styles', expanded: true});
+
+            styleFolder.addBinding(target, 'fontSize', {min: 0, max: 128, step: 1}).on('change', (evt) => {
+                updateAll('fontSize', evt.value);
+            });
+            styleFolder.addBinding(target, 'padding', {min: 0, max: 32, step: 1}).on('change', (evt) => {
+                updateAll('padding', evt.value);
+            });
+
+            Object.keys(OPTIONS).forEach((key) => {
+                styleFolder.addBinding(target, key, {
+                    options: OPTIONS[key].reduce((obj, value) => {
+                        obj[value] = value;
+                        return obj;
+                    }, {}),
+                }).on('change', (evt) => {
+                    updateAll(key, evt.value);
+                });
+            });
+
+            // [KO] UI 활성화 상태 업데이트
+            // [EN] Update UI activation state
+            const updateUI = () => {
+                const isBillboard = target.useBillboard;
+
+                usePixelSize.disabled = !isBillboard;
+                worldSize.disabled = isBillboard && target.usePixelSize;
+            };
+
+            updateUI();
+        }
     });
-    const usePixelSize = folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
-        updateAll('usePixelSize', evt.value);
-        updateUI();
-    });
-    const worldSize = folder.addBinding(target, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
-        updateAll('worldSize', evt.value);
-    });
-
-    setSeparator(folder);
-
-    // [KO] 스타일 설정
-    // [EN] Style Settings
-    const styleFolder = folder.addFolder({title: 'Styles', expanded: true});
-    
-    styleFolder.addBinding(target, 'fontSize', {min: 0, max: 128, step: 1}).on('change', (evt) => {
-        updateAll('fontSize', evt.value);
-    });
-    styleFolder.addBinding(target, 'padding', {min: 0, max: 32, step: 1}).on('change', (evt) => {
-        updateAll('padding', evt.value);
-    });
-
-    Object.keys(OPTIONS).forEach((key) => {
-        styleFolder.addBinding(target, key, {
-            options: OPTIONS[key].reduce((obj, value) => {
-                obj[value] = value;
-                return obj;
-            }, {}),
-        }).on('change', (evt) => {
-            updateAll(key, evt.value);
-        });
-    });
-
-    // [KO] UI 활성화 상태 업데이트
-    // [EN] Update UI activation state
-    const updateUI = () => {
-        const isBillboard = target.useBillboard;
-        const isPixel = target.usePixelSize;
-
-        usePixelSize.disabled = !isBillboard;
-        worldSize.disabled = isBillboard && isPixel;
-    };
-
-    const refresh = () => {
-        pane.refresh();
-        requestAnimationFrame(refresh);
-    };
-
-    refresh();
-    updateUI();
 };
