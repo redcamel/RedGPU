@@ -24,13 +24,7 @@ export default defineConfig({
       formats: ['es']
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'zustand'],
       output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM',
-          zustand: 'zustand'
-        },
         plugins: [
           {
             name: 'strip-pure-comments',

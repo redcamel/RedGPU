@@ -68,7 +68,20 @@ const Title = () => {
                 )}
 
                 <div style={{...contentBoxStyle, textAlign: isNarrow ? 'center' : 'left'}}>
-                    {!isNarrow && <span style={titleLabelStyle}>Example</span>}
+                    {(!isNarrow || currentExample?.experimental) && (
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: isNarrow ? 'center' : 'flex-start',
+                            gap: '6px',
+                            marginBottom: '2px'
+                        }}>
+                            {!isNarrow && <span style={{...titleLabelStyle, marginBottom: 0}}>Example</span>}
+                            {currentExample?.experimental && (
+                                <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
+                            )}
+                        </div>
+                    )}
                     <span style={titleValueStyle}>
                         {currentExample ? currentExample.name : 'empty example name'}
                     </span>
@@ -128,6 +141,17 @@ const titleLabelStyle: React.CSSProperties = {
     color: '#666',
     fontWeight: 'bold',
     marginBottom: '2px',
+};
+
+const experimentalBadgeStyle: React.CSSProperties = {
+    fontSize: '8px',
+    backgroundColor: '#ff4d4d',
+    color: '#fff',
+    padding: '4px 5px',
+    borderRadius: '4px',
+    fontWeight: 'bold',
+    lineHeight: '1',
+    display: 'inline-block'
 };
 
 const titleValueStyle: React.CSSProperties = {
