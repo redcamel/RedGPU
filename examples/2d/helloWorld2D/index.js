@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Hello World 2D 예제
@@ -99,11 +100,8 @@ RedGPU.init(
  * [EN] Renders the GUI for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setRedGPUTest_pane} = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    const {setDebugButtons} = await import('../../exampleHelper/createExample/panes/index.js?t=1770713934910');
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    setRedGPUTest_pane(pane, redGPUContext, true);
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        redGPUContext: true
+    });
 };

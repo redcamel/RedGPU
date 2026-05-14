@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] TextField2D Basic 예제
@@ -71,122 +72,115 @@ RedGPU.init(canvas, (redGPUContext) => {
  * @param {RedGPU.Display.Scene} scene
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (scene, redGPUContext) => {
-    const {
-        setDebugButtons,
-        setSeparator
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
+const renderTestPane = (scene, redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const controls = {};
 
-    const controls = {};
+            const BASE_STYLES = {
+                padding: 0,
+                background: 'transparent',
+                color: '#fff',
+                fontFamily: 'Arial',
+                fontSize: 16,
+                fontWeight: 'normal',
+                fontStyle: 'normal',
+                letterSpacing: 0,
+                wordBreak: 'break-all',
+                verticalAlign: 'middle',
+                textAlign: 'center',
+                borderRadius: '10px',
+                lineHeight: 1.4,
+                border: '',
+                boxShadow: 'none',
+                boxSizing: 'border-box',
+                filter: '',
+            };
 
-    const BASE_STYLES = {
-        padding: 0,
-        background: 'transparent',
-        color: '#fff',
-        fontFamily: 'Arial',
-        fontSize: 16,
-        fontWeight: 'normal',
-        fontStyle: 'normal',
-        letterSpacing: 0,
-        wordBreak: 'break-all',
-        verticalAlign: 'middle',
-        textAlign: 'center',
-        borderRadius: '10px',
-        lineHeight: 1.4,
-        border: '',
-        boxShadow: 'none',
-        boxSizing: 'border-box',
-        filter: '',
-    };
+            const OPTIONS = {
+                fontFamily: ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'],
+                fontWeight: ['normal', 'bold', 'bolder', 'lighter'],
+                fontStyle: ['normal', 'italic', 'oblique'],
+                wordBreak: ['normal', 'break-all', 'keep-all', 'break-word'],
+                verticalAlign: ['baseline', 'top', 'middle', 'bottom', 'text-top', 'text-bottom'],
+                textAlign: ['left', 'right', 'center', 'justify'],
+                background: ['transparent', '#000', '#fff', '#f00', '#0f0', '#00f'],
+                color: ['#fff', '#000', '#f00', '#0f0', '#00f'],
+                boxSizing: ['content-box', 'border-box'],
+            };
 
-    const OPTIONS = {
-        fontFamily: ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'],
-        fontWeight: ['normal', 'bold', 'bolder', 'lighter'],
-        fontStyle: ['normal', 'italic', 'oblique'],
-        wordBreak: ['normal', 'break-all', 'keep-all', 'break-word'],
-        verticalAlign: ['baseline', 'top', 'middle', 'bottom', 'text-top', 'text-bottom'],
-        textAlign: ['left', 'right', 'center', 'justify'],
-        background: ['transparent', '#000', '#fff', '#f00', '#0f0', '#00f'],
-        color: ['#fff', '#000', '#f00', '#0f0', '#00f'],
-        boxSizing: ['content-box', 'border-box'],
-    };
+            const updateTestData = () => {
+                const child = scene.children[0];
 
-    const updateTestData = () => {
-        const child = scene.children[0];
+                controls.scaleX = child.scaleX;
+                controls.scaleY = child.scaleY;
+                controls.scaleZ = child.scaleZ;
+                controls.rotation = child.rotation;
+                controls.useSmoothing = child.useSmoothing;
 
-        controls.scaleX = child.scaleX;
-        controls.scaleY = child.scaleY;
-        controls.scaleZ = child.scaleZ;
-        controls.rotation = child.rotation;
-        controls.useSmoothing = child.useSmoothing;
+                Object.keys(BASE_STYLES).forEach((key) => {
+                    controls[key] = child[key];
+                });
 
-        pane.refresh();
+                pane.refresh();
+            };
 
-        Object.keys(BASE_STYLES).forEach((key) => {
-            controls[key] = child[key];
-        });
+            updateTestData();
 
-        pane.refresh();
-    };
-
-    updateTestData();
-    console.log(controls);
-    updateTestData();
-
-    const textField2DFolder = pane.addFolder({title: 'TextField2D', expanded: true});
-    textField2DFolder.addBinding(controls, 'useSmoothing').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.useSmoothing = evt.value;
-        });
-    });
-    setSeparator(pane);
-
-    const scaleFolder = pane.addFolder({title: 'Scale', expanded: true});
-
-    scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.scaleX = evt.value;
-        });
-    });
-    scaleFolder.addBinding(controls, 'rotation', {min: 0, max: 360, step: 0.1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.rotation = evt.value;
-        });
-    });
-    scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.scaleY = evt.value;
-        });
-    });
-
-    const styleFolder = pane.addFolder({title: 'Styles', expanded: true});
-
-    styleFolder.addBinding(controls, 'fontSize', {min: 12, max: 50, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.fontSize = evt.value;
-        });
-    });
-    styleFolder.addBinding(controls, 'padding', {min: 0, max: 32, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.padding = evt.value;
-        });
-    });
-
-    Object.keys(OPTIONS).forEach((key) => {
-        styleFolder.addBinding(controls, key, {
-            options: OPTIONS[key].reduce((obj, value) => {
-                obj[value] = value;
-                return obj;
-            }, {}),
-        }).on('change', (evt) => {
-            scene.children.forEach((child) => {
-                child[key] = evt.value;
+            const textField2DFolder = pane.addFolder({title: 'TextField2D', expanded: true});
+            textField2DFolder.addBinding(controls, 'useSmoothing').on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    child.useSmoothing = evt.value;
+                });
             });
-        });
-    });
 
-    setSeparator(pane);
+            pane.addBlade({view: 'separator'});
+
+            const scaleFolder = pane.addFolder({title: 'Scale', expanded: true});
+
+            scaleFolder.addBinding(controls, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    child.scaleX = evt.value;
+                });
+            });
+            scaleFolder.addBinding(controls, 'rotation', {min: 0, max: 360, step: 0.1}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    child.rotation = evt.value;
+                });
+            });
+            scaleFolder.addBinding(controls, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    child.scaleY = evt.value;
+                });
+            });
+
+            const styleFolder = pane.addFolder({title: 'Styles', expanded: true});
+
+            styleFolder.addBinding(controls, 'fontSize', {min: 12, max: 50, step: 1}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    child.fontSize = evt.value;
+                });
+            });
+            styleFolder.addBinding(controls, 'padding', {min: 0, max: 32, step: 1}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    child.padding = evt.value;
+                });
+            });
+
+            Object.keys(OPTIONS).forEach((key) => {
+                styleFolder.addBinding(controls, key, {
+                    options: OPTIONS[key].reduce((obj, value) => {
+                        obj[value] = value;
+                        return obj;
+                    }, {}),
+                }).on('change', (evt) => {
+                    scene.children.forEach((child) => {
+                        child[key] = evt.value;
+                    });
+                });
+            });
+
+            updateTestData();
+        }
+    });
 };

@@ -1,5 +1,6 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Line2D (Linear) 예제
@@ -62,7 +63,7 @@ RedGPU.init(
         renderer.start(redGPUContext);
 
         // 디버그 패널 설정
-        setupDebugPanel(redGPUContext, groups, updateCenterLines, () => pointsPerLine, value => pointsPerLine = value);
+        renderTestPane(redGPUContext, groups, updateCenterLines, () => pointsPerLine, value => pointsPerLine = value);
     },
     (failReason) => {
         console.error("RedGPU 초기화 실패:", failReason);
@@ -129,56 +130,57 @@ function getRainbowColor(t) {
 }
 
 /* 6. 디버그 UI 패널 */
-async function setupDebugPanel(redGPUContext, groups, updateLinesCallback, getPointsPerLine, setPointsPerLine) {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane();
+function renderTestPane(redGPUContext, groups, updateLinesCallback, getPointsPerLine, setPointsPerLine) {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const debugOptions = {
+                showDebugPoints: false,
+                pointsPerLine: getPointsPerLine(),
+            };
+            let debugPoints = [];
 
-    const debugOptions = {
-        showDebugPoints: false,
-        pointsPerLine: getPointsPerLine(),
-    };
-    let debugPoints = [];
+            // 디버그 포인트 재생성 함수
+            const recreateDebugPoints = () => {
+                // 기존 디버그 포인트 제거
+                debugPoints.forEach(point => point.parent.removeChild(point));
+                debugPoints = []; // 초기화
 
-    // 디버그 포인트 재생성 함수
-    const recreateDebugPoints = () => {
-        // 기존 디버그 포인트 제거
-        debugPoints.forEach(point => point.parent.removeChild(point));
-        debugPoints = []; // 초기화
+                // 새 디버그 포인트 생성
+                groups.forEach(group => {
+                    const line = group.children.find(child => child instanceof RedGPU.Display.Line2D);
+                    if (!line) return;
 
-        // 새 디버그 포인트 생성
-        groups.forEach(group => {
-            const line = group.children.find(child => child instanceof RedGPU.Display.Line2D);
-            if (!line) return;
+                    const debugMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, "#ff0");
+                    line.originalPoints.forEach((point) => {
+                        const debugPoint = new RedGPU.Display.Sprite2D(redGPUContext, debugMaterial);
+                        debugPoint.setSize(5, 5);
+                        debugPoint.setPosition(...point.linePoint.position);
+                        debugPoint.setScale(debugOptions.showDebugPoints ? 1 : 0); // 표시 여부
+                        group.addChild(debugPoint);
+                        debugPoints.push(debugPoint);
+                    });
+                });
+            };
 
-            const debugMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, "#ff0");
-            line.originalPoints.forEach((point) => {
-                const debugPoint = new RedGPU.Display.Sprite2D(redGPUContext, debugMaterial);
-                debugPoint.setSize(5, 5);
-                debugPoint.setPosition(...point.linePoint.position);
-                debugPoint.setScale(debugOptions.showDebugPoints ? 1 : 0); // 표시 여부
-                group.addChild(debugPoint);
-                debugPoints.push(debugPoint);
+            // 디버그 옵션: 포인트 표시 토글
+            pane.addBinding(debugOptions, "showDebugPoints", {label: "Show Debug Points"}).on("change", () => {
+                debugPoints.forEach(point => point.setScale(debugOptions.showDebugPoints ? 1 : 0));
             });
-        });
-    };
 
-    // 디버그 옵션: 포인트 표시 토글
-    pane.addBinding(debugOptions, "showDebugPoints", {label: "Show Debug Points"}).on("change", () => {
-        debugPoints.forEach(point => point.setScale(debugOptions.showDebugPoints ? 1 : 0));
+            // 디버그 옵션: 포인트 갯수 조정
+            pane.addBinding(debugOptions, "pointsPerLine", {
+                label: "Points Per Line",
+                min: 5,
+                max: 50,
+                step: 1
+            }).on('change', (ev) => {
+                setPointsPerLine(ev.value); // 포인트 갯수 반영
+                updateLinesCallback(); // 라인 업데이트
+                recreateDebugPoints(); // 디버그 포인트 재생성
+            });
+
+            // 초기 디버그 포인트 생성
+            recreateDebugPoints();
+        }
     });
-
-    // 디버그 옵션: 포인트 갯수 조정
-    pane.addBinding(debugOptions, "pointsPerLine", {
-        label: "Points Per Line",
-        min: 5,
-        max: 50,
-        step: 1
-    }).on("change", (ev) => {
-        setPointsPerLine(ev.value); // 포인트 갯수 반영
-        updateLinesCallback(); // 라인 업데이트
-        recreateDebugPoints(); // 디버그 포인트 재생성
-    });
-
-    // 초기 디버그 포인트 생성
-    recreateDebugPoints();
 }

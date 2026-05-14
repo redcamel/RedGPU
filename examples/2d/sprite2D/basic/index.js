@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Sprite2D Basic 예제
@@ -62,75 +63,70 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Sprite2D} sprite2D
  */
-const renderTestPane = async (redGPUContext, sprite2D) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setDebugButtons,
-        setRedGPUTest_pane
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    setRedGPUTest_pane(pane, redGPUContext, false);
+const renderTestPane = (redGPUContext, sprite2D) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const config = {
+                material: 'Bitmap',
+            };
 
-    const config = {
-        material: 'Bitmap',
-    };
+            pane.addBinding(config, 'material', {
+                options: {
+                    Color: 'Color',
+                    Bitmap: 'Bitmap'
+                }
+            }).on('change', (evt) => {
+                if (evt.value === 'Color') {
+                    sprite2D.material = new RedGPU.Material.ColorMaterial(redGPUContext)
+                } else {
+                    sprite2D.material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'))
+                }
+            });
 
-    pane.addBinding(config, 'material', {
-        options: {
-            Color: 'Color',
-            Bitmap: 'Bitmap'
+            const positionFolder = pane.addFolder({title: 'Position', expanded: true});
+            positionFolder.addBinding(sprite2D, 'x', {
+                min: 0,
+                max: redGPUContext.screenRectObject.width,
+                step: 0.1
+            }).on('change', (evt) => {
+                sprite2D.x = evt.value;
+            });
+            positionFolder.addBinding(sprite2D, 'y', {
+                min: 0,
+                max: redGPUContext.screenRectObject.height,
+                step: 0.1
+            }).on('change', (evt) => {
+                sprite2D.y = evt.value;
+            });
+
+            const scaleFolder = pane.addFolder({title: 'Scale', expanded: true});
+            scaleFolder.addBinding(sprite2D, 'scaleX', {min: 0, max: 5, step: 0.1}).on('change', (evt) => {
+                sprite2D.scaleX = evt.value;
+            });
+            scaleFolder.addBinding(sprite2D, 'scaleY', {min: 0, max: 5, step: 0.1}).on('change', (evt) => {
+                sprite2D.scaleY = evt.value;
+            });
+
+            const widthHeightFolder = pane.addFolder({title: 'Width & Height', expanded: true});
+            widthHeightFolder.addBinding(sprite2D, 'width', {
+                min: 0,
+                max: sprite2D.width * 2,
+                step: 0.1
+            }).on('change', (evt) => {
+                sprite2D.width = evt.value;
+            });
+            widthHeightFolder.addBinding(sprite2D, 'height', {
+                min: 0,
+                max: sprite2D.height * 2,
+                step: 0.1
+            }).on('change', (evt) => {
+                sprite2D.height = evt.value;
+            });
+
+            const rotationFolder = pane.addFolder({title: 'Rotation', expanded: true});
+            rotationFolder.addBinding(sprite2D, 'rotation', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
+                sprite2D.rotation = evt.value
+            });
         }
-    }).on('change', (evt) => {
-        if (evt.value === 'Color') {
-            sprite2D.material = new RedGPU.Material.ColorMaterial(redGPUContext)
-        } else {
-            sprite2D.material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'))
-        }
-    });
-
-    const positionFolder = pane.addFolder({title: 'Position', expanded: true});
-    positionFolder.addBinding(sprite2D, 'x', {
-        min: 0,
-        max: redGPUContext.screenRectObject.width,
-        step: 0.1
-    }).on('change', (evt) => {
-        sprite2D.x = evt.value;
-    });
-    positionFolder.addBinding(sprite2D, 'y', {
-        min: 0,
-        max: redGPUContext.screenRectObject.height,
-        step: 0.1
-    }).on('change', (evt) => {
-        sprite2D.y = evt.value;
-    });
-
-    const scaleFolder = pane.addFolder({title: 'Scale', expanded: true});
-    scaleFolder.addBinding(sprite2D, 'scaleX', {min: 0, max: 5, step: 0.1}).on('change', (evt) => {
-        sprite2D.scaleX = evt.value;
-    });
-    scaleFolder.addBinding(sprite2D, 'scaleY', {min: 0, max: 5, step: 0.1}).on('change', (evt) => {
-        sprite2D.scaleY = evt.value;
-    });
-
-    const widthHeightFolder = pane.addFolder({title: 'Width & Height', expanded: true});
-    widthHeightFolder.addBinding(sprite2D, 'width', {
-        min: 0,
-        max: sprite2D.width * 2,
-        step: 0.1
-    }).on('change', (evt) => {
-        sprite2D.width = evt.value;
-    });
-    widthHeightFolder.addBinding(sprite2D, 'height', {
-        min: 0,
-        max: sprite2D.height * 2,
-        step: 0.1
-    }).on('change', (evt) => {
-        sprite2D.height = evt.value;
-    });
-
-    const rotationFolder = pane.addFolder({title: 'Rotation', expanded: true});
-    rotationFolder.addBinding(sprite2D, 'rotation', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
-        sprite2D.rotation = evt.value
     });
 };

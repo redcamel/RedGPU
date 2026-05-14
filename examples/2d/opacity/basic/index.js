@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Opacity 예제
@@ -147,82 +148,79 @@ const createChildTextField2D = (redGPUContext, parent) => {
  * @param {RedGPU.Display.Sprite2D} parent
  * @param {Array<RedGPU.Display.DisplayObject2D>} children
  */
-const renderTestPane = async (redGPUContext, parent, children) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const maxW = redGPUContext.screenRectObject.width;
-    const maxH = redGPUContext.screenRectObject.height;
+const renderTestPane = (redGPUContext, parent, children) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const parentConfig = {
+                x: parent.x,
+                y: parent.y,
+                width: parent.width,
+                height: parent.height,
+                rotation: parent.rotation,
+                scaleX: parent.scaleX,
+                scaleY: parent.scaleY,
+                opacity: parent.opacity,
+            };
 
-    const parentConfig = {
-        x: parent.x,
-        y: parent.y,
-        width: parent.width,
-        height: parent.height,
-        rotation: parent.rotation,
-        scaleX: parent.scaleX,
-        scaleY: parent.scaleY,
-        opacity: parent.opacity,
-    };
+            const parentFolder = pane.addFolder({title: 'Parent Sprite2D', expanded: true});
+            parentFolder.addBinding(parentConfig, 'opacity', {
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on('change', (evt) => {
+                parent.opacity = evt.value;
 
-    const parentFolder = pane.addFolder({title: 'Parent Sprite2D', expanded: true});
-    parentFolder.addBinding(parentConfig, 'opacity', {
-        min: 0,
-        max: 1,
-        step: 0.01
-    }).on('change', (evt) => {
-        parent.opacity = evt.value;
+                const parentTitle = parent.children.find(child => child instanceof RedGPU.Display.TextField2D);
+                if (parentTitle) {
+                    parentTitle.text = `Opacity ${parent.opacity.toFixed(2)}<br/>combinedOpacity ${parent.getCombinedOpacity().toFixed(2)}`;
+                }
 
-        const parentTitle = parent.children.find(child => child instanceof RedGPU.Display.TextField2D);
-        if (parentTitle) {
-            parentTitle.text = `Opacity ${parent.opacity.toFixed(2)}<br/>combinedOpacity ${parent.getCombinedOpacity().toFixed(2)}`;
+                children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.TextField2D) {
+                        child.text = `TextField2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
+                    } else {
+                        const childTitle = child.children?.find(
+                            (child) => child instanceof RedGPU.Display.TextField2D
+                        );
+                        if (childTitle) {
+                            childTitle.text = `Sprite2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
+                        }
+                    }
+                });
+            });
+
+            children.forEach((child, index) => {
+                const childConfig = {
+                    x: child.x,
+                    y: child.y,
+                    width: child.width,
+                    height: child.height,
+                    rotation: child.rotation,
+                    scaleX: child.scaleX,
+                    scaleY: child.scaleY,
+                    opacity: child.opacity,
+                };
+
+                const childFolder = pane.addFolder({title: `Child ${child.constructor.name}`, expanded: true});
+                childFolder.addBinding(childConfig, 'opacity', {
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                }).on('change', (evt) => {
+                    child.opacity = evt.value;
+
+                    if (child instanceof RedGPU.Display.TextField2D) {
+                        child.text = `TextField2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
+                    } else {
+                        const childTitle = child.children?.find(
+                            (child) => child instanceof RedGPU.Display.TextField2D
+                        );
+                        if (childTitle) {
+                            childTitle.text = `Sprite2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
+                        }
+                    }
+                });
+            });
         }
-
-        children.forEach((child) => {
-            if (child instanceof RedGPU.Display.TextField2D) {
-                child.text = `TextField2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
-            } else {
-                const childTitle = child.children?.find(
-                    (child) => child instanceof RedGPU.Display.TextField2D
-                );
-                if (childTitle) {
-                    childTitle.text = `Sprite2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
-                }
-            }
-        });
-    });
-
-    children.forEach((child, index) => {
-        const childConfig = {
-            x: child.x,
-            y: child.y,
-            width: child.width,
-            height: child.height,
-            rotation: child.rotation,
-            scaleX: child.scaleX,
-            scaleY: child.scaleY,
-            opacity: child.opacity,
-        };
-
-        const childFolder = pane.addFolder({title: `Child ${child.constructor.name}`, expanded: true});
-        childFolder.addBinding(childConfig, 'opacity', {
-            min: 0,
-            max: 1,
-            step: 0.01,
-        }).on('change', (evt) => {
-            child.opacity = evt.value;
-
-            if (child instanceof RedGPU.Display.TextField2D) {
-                child.text = `TextField2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
-            } else {
-                const childTitle = child.children?.find(
-                    (child) => child instanceof RedGPU.Display.TextField2D
-                );
-                if (childTitle) {
-                    childTitle.text = `Sprite2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
-                }
-            }
-        });
     });
 };

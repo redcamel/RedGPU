@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Sprite2D Child Method 예제
@@ -56,7 +57,7 @@ RedGPU.init(
         };
         renderer.start(redGPUContext, render);
 
-        createPaneUI(redGPUContext, scene);
+        renderTestPane(redGPUContext, scene);
     }
 );
 
@@ -78,90 +79,87 @@ const createInitialObjects = (redGPUContext, scene) => {
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Scene} scene
  */
-const createPaneUI = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {
-        setDebugButtons,
-        setRedGPUTest_pane
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    pane.addButton({title: 'Add Child'}).on('click', () => {
-        addChildObject(redGPUContext, scene);
-    });
+const renderTestPane = (redGPUContext, scene) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            pane.addButton({title: 'Add Child'}).on('click', () => {
+                addChildObject(redGPUContext, scene);
+            });
 
-    pane.addButton({title: 'Add Child at Index 2'}).on('click', () => {
-        const color = '#fff';
-        const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, new RedGPU.Material.ColorMaterial(redGPUContext, color));
-        sprite2D.width = 25;
-        sprite2D.height = 25;
+            pane.addButton({title: 'Add Child at Index 2'}).on('click', () => {
+                const color = '#fff';
+                const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, new RedGPU.Material.ColorMaterial(redGPUContext, color));
+                sprite2D.width = 25;
+                sprite2D.height = 25;
 
-        const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
+                const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
 
-        textField2D.fontSize = 16;
-        textField2D.text = `Inserted Child`;
-        textField2D.color = color;
-        textField2D.x = 0;
-        textField2D.y = 30;
-        sprite2D.addChild(textField2D);
-        scene.addChildAt(sprite2D, 2);
-        console.log('Added a new child at index 2');
-    });
+                textField2D.fontSize = 16;
+                textField2D.text = `Inserted Child`;
+                textField2D.color = color;
+                textField2D.x = 0;
+                textField2D.y = 30;
+                sprite2D.addChild(textField2D);
+                scene.addChildAt(sprite2D, 2);
+                console.log('Added a new child at index 2');
+            });
 
-    pane.addButton({title: 'Get Child at Index 1'}).on('click', () => {
-        const child = scene.getChildAt(1);
-        const color = getRandomHexColor();
-        child.material.color.setColorByHEX(color);
-        child.getChildAt(0).color = color;
-        console.log('Child at index 1:', child ? child.text : 'No child found');
-    });
+            pane.addButton({title: 'Get Child at Index 1'}).on('click', () => {
+                const child = scene.getChildAt(1);
+                const color = getRandomHexColor();
+                child.material.color.setColorByHEX(color);
+                child.getChildAt(0).color = color;
+                console.log('Child at index 1:', child ? child.text : 'No child found');
+            });
 
-    pane.addButton({title: 'Get Index of Child 0'}).on('click', () => {
-        const firstChild = scene.getChildAt(0);
-        if (firstChild) {
-            const index = scene.getChildIndex(firstChild);
-            const color = getRandomHexColor();
-            scene.getChildAt(index).material.color.setColorByHEX(color);
-            scene.getChildAt(index).getChildAt(0).color = color;
-            console.log(`Index of first child: ${index}`);
+            pane.addButton({title: 'Get Index of Child 0'}).on('click', () => {
+                const firstChild = scene.getChildAt(0);
+                if (firstChild) {
+                    const index = scene.getChildIndex(firstChild);
+                    const color = getRandomHexColor();
+                    scene.getChildAt(index).material.color.setColorByHEX(color);
+                    scene.getChildAt(index).getChildAt(0).color = color;
+                    console.log(`Index of first child: ${index}`);
+                }
+            });
+
+            pane.addButton({title: 'Set Index of Child 0 to 4'}).on('click', () => {
+                if (scene.numChildren > 4) {
+                    const firstChild = scene.getChildAt(0);
+                    if (firstChild) {
+                        scene.setChildIndex(firstChild, 4);
+                        console.log('Moved child 0 to index 4');
+                    }
+                }
+            });
+
+            pane.addButton({title: 'Swap Children at 0 and 1'}).on('click', () => {
+                scene.swapChildrenAt(0, 1);
+                console.log('Swapped children at indices 0 and 1');
+            });
+
+            pane.addButton({title: 'Swap First & Last Child'}).on('click', () => {
+                const numChildren = scene.numChildren;
+                if (numChildren > 1) {
+                    const firstChild = scene.getChildAt(0);
+                    const lastChild = scene.getChildAt(numChildren - 1);
+                    if (firstChild && lastChild) {
+                        scene.swapChildren(firstChild, lastChild);
+                        console.log('Swapped first and last child');
+                    }
+                }
+            });
+
+            pane.addButton({title: 'Remove Child at Index 1'}).on('click', () => {
+                scene.removeChildAt(1);
+                console.log('Removed child at index 1');
+            });
+
+            pane.addButton({title: 'Remove All Children'}).on('click', () => {
+                scene.removeAllChildren();
+                console.log('All children removed');
+            });
         }
-    });
-
-    pane.addButton({title: 'Set Index of Child 0 to 4'}).on('click', () => {
-        if (scene.numChildren > 4) {
-            const firstChild = scene.getChildAt(0);
-            if (firstChild) {
-                scene.setChildIndex(firstChild, 4);
-                console.log('Moved child 0 to index 4');
-            }
-        }
-    });
-
-    pane.addButton({title: 'Swap Children at 0 and 1'}).on('click', () => {
-        scene.swapChildrenAt(0, 1);
-        console.log('Swapped children at indices 0 and 1');
-    });
-
-    pane.addButton({title: 'Swap First & Last Child'}).on('click', () => {
-        const numChildren = scene.numChildren;
-        if (numChildren > 1) {
-            const firstChild = scene.getChildAt(0);
-            const lastChild = scene.getChildAt(numChildren - 1);
-            if (firstChild && lastChild) {
-                scene.swapChildren(firstChild, lastChild);
-                console.log('Swapped first and last child');
-            }
-        }
-    });
-
-    pane.addButton({title: 'Remove Child at Index 1'}).on('click', () => {
-        scene.removeChildAt(1);
-        console.log('Removed child at index 1');
-    });
-
-    pane.addButton({title: 'Remove All Children'}).on('click', () => {
-        scene.removeAllChildren();
-        console.log('All children removed');
     });
 };
 

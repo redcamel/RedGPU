@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -75,40 +76,40 @@ RedGPU.init(
 	(failReason) => { console.error(failReason); }
 );
 
-const renderTestPane = async (redGPUContext, keyboardKeyBuffer) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	pane.addBlade({
-		view: 'text',
-		label: 'Movement',
-		value: 'WASD / Arrows',
-		parse: (v) => v,
-		readonly: true
-	});
-	pane.addBlade({
-		view: 'text',
-		label: 'Action',
-		value: 'Q/E: Rotate, +/-: Scale',
-		parse: (v) => v,
-		readonly: true
-	});
+const renderTestPane = (redGPUContext, keyboardKeyBuffer) => {
+	new RedGPUExampleHelper(redGPUContext, {
+		guiCallback: (pane) => {
+			pane.addBlade({
+				view: 'text',
+				label: 'Movement',
+				value: 'WASD / Arrows',
+				parse: (v) => v,
+				readonly: true
+			});
+			pane.addBlade({
+				view: 'text',
+				label: 'Action',
+				value: 'Q/E: Rotate, +/-: Scale',
+				parse: (v) => v,
+				readonly: true
+			});
 
-	const activeKeysFolder = pane.addFolder({ title: 'Active Keys' });
-	const activeKeysMonitor = activeKeysFolder.addBlade({
-		view: 'text',
-		label: 'Pressed',
-		value: '',
-		parse: (v) => v,
-		readonly: true
-	});
+			const activeKeysFolder = pane.addFolder({ title: 'Active Keys' });
+			const activeKeysMonitor = activeKeysFolder.addBlade({
+				view: 'text',
+				label: 'Pressed',
+				value: '',
+				parse: (v) => v,
+				readonly: true
+			});
 
-	setInterval(() => {
-		const activeKeys = Object.entries(keyboardKeyBuffer)
-			.filter(([key, pressed]) => pressed)
-			.map(([key]) => key === ' ' ? 'Space' : key)
-			.join(', ');
-		activeKeysMonitor.value = activeKeys || 'None';
-	}, 100);
+			setInterval(() => {
+				const activeKeys = Object.entries(keyboardKeyBuffer)
+					.filter(([key, pressed]) => pressed)
+					.map(([key]) => key === ' ' ? 'Space' : key)
+					.join(', ');
+				activeKeysMonitor.value = activeKeys || 'None';
+			}, 100);
+		}
+	});
 };

@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] SpriteSheet2D Basic 예제
@@ -68,119 +69,130 @@ RedGPU.init(canvas, (redGPUContext) => {
  * @param {RedGPU.Display.Scene} scene
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (scene, redGPUContext) => {
-    const {
-        setDebugButtons,
-        setSeparator
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
+const renderTestPane = (scene, redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const controls = {
+                testSpriteSheetInfo: 0,
+                loop: true,
+                frameRate: 24,
+                state: '',
+                currentIndex: 0,
+                totalFrame: 0,
+                segmentW: 0,
+                segmentH: 0,
+                scaleX: 1,
+                scaleY: 1,
+                width: 0,
+                height: 0
+            };
 
-    const controls = {
-        testSpriteSheetInfo: 0
-    };
+            const updateTestData = () => {
+                const child = scene.children[0];
+                controls.loop = child.loop;
+                controls.frameRate = child.frameRate;
+                controls.state = child.state;
+                controls.currentIndex = child.currentIndex || 0;
+                controls.totalFrame = child.totalFrame || 0;
+                controls.segmentW = child.segmentW || 0;
+                controls.segmentH = child.segmentH || 0;
+                controls.scaleX = child.scaleX;
+                controls.scaleY = child.scaleY;
+                controls.width = child.width;
+                controls.height = child.height;
+                pane.refresh();
+            };
 
-    const updateTestData = () => {
-        const child = scene.children[0];
-        controls.loop = child.loop;
-        controls.frameRate = child.frameRate;
-        controls.state = child.state;
-        controls.currentIndex = child.currentIndex || 0;
-        controls.totalFrame = child.totalFrame || 0;
-        controls.segmentW = child.segmentW || 0;
-        controls.segmentH = child.segmentH || 0;
-        controls.scaleX = child.scaleX;
-        controls.scaleY = child.scaleY;
-        controls.width = child.width;
-        controls.height = child.height;
-        pane.refresh();
-    };
-    updateTestData();
+            const spriteSheetInfos = [
+                new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24),
+                new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/walk.png', 8, 1, 8, 0, true, 24),
+                new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/jump.png', 8, 1, 8, 0, true, 24),
+                new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/attack.png', 6, 1, 6, 0, true, 24)
+            ];
 
-    const spriteSheetInfos = [
-        new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24),
-        new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/walk.png', 8, 1, 8, 0, true, 24),
-        new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/jump.png', 8, 1, 8, 0, true, 24),
-        new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/actionTest/attack.png', 6, 1, 6, 0, true, 24)
-    ];
+            const spriteSheet3DFolder = pane.addFolder({title: 'SpriteSheet2D', expanded: true});
 
-    const spriteSheet3DFolder = pane.addFolder({title: 'SpriteSheet2D', expanded: true});
+            spriteSheet3DFolder.addBinding(controls, 'loop').on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    child.loop = evt.value;
+                    child.play();
+                });
+            });
 
-    spriteSheet3DFolder.addBinding(controls, 'loop').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.loop = evt.value;
-            child.play();
-        });
+            spriteSheet3DFolder.addBinding(controls, 'frameRate', {min: 0, max: 60, step: 1}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    child.frameRate = evt.value;
+                });
+            });
+
+            const spriteSelectorOptions = spriteSheetInfos.map((_, index) => ({
+                text: `SpriteSheet ${index + 1}`, value: index,
+            }));
+
+            spriteSheet3DFolder.addBinding(controls, 'testSpriteSheetInfo', {
+                options: spriteSelectorOptions,
+            }).on('change', (evt) => {
+                const selectedSpriteSheetInfo = spriteSheetInfos[evt.value];
+                scene.children.forEach((child) => {
+                    child.spriteSheetInfo = selectedSpriteSheetInfo;
+                });
+                updateTestData();
+            });
+
+            pane.addBlade({view: 'separator'});
+
+            const playControlsFolder = pane.addFolder({title: 'Play Controls', expanded: true});
+
+            playControlsFolder.addButton({title: 'Play'}).on('click', () => {
+                scene.children.forEach((child) => child.play());
+            });
+
+            playControlsFolder.addButton({title: 'Pause'}).on('click', () => {
+                scene.children.forEach((child) => child.pause());
+            });
+
+            playControlsFolder.addButton({title: 'Stop'}).on('click', () => {
+                scene.children.forEach((child) => child.stop());
+            });
+
+            pane.addBlade({view: 'separator'});
+
+            const scaleFolder = pane.addFolder({title: 'Scale Controls', expanded: true});
+
+            scaleFolder.addBinding(controls, 'scaleX', {min: 0, max: 1, step: 0.1}).on('change', () => {
+                scene.children.forEach((child) => {
+                    child.scaleX = controls.scaleX;
+                });
+            });
+
+            scaleFolder.addBinding(controls, 'scaleY', {min: 0, max: 1, step: 0.1}).on('change', () => {
+                scene.children.forEach((child) => {
+                    child.scaleY = controls.scaleY;
+                });
+            });
+
+            const monitoringFolder = pane.addFolder({title: 'Monitoring', expanded: true});
+
+            monitoringFolder.addBinding(controls, 'state', {readonly: true});
+            monitoringFolder.addBinding(controls, 'currentIndex', {readonly: true});
+            monitoringFolder.addBinding(controls, 'totalFrame', {readonly: true});
+            monitoringFolder.addBinding(controls, 'segmentW', {readonly: true});
+            monitoringFolder.addBinding(controls, 'segmentH', {readonly: true});
+
+            const refreshMonitoringControls = () => {
+                const child = scene.children[0];
+                if (child) {
+                    controls.currentIndex = child.currentIndex;
+                    controls.totalFrame = child.totalFrame;
+                    controls.segmentW = child.segmentW;
+                    controls.segmentH = child.segmentH;
+                    controls.state = child.state;
+                }
+                requestAnimationFrame(refreshMonitoringControls);
+            };
+            requestAnimationFrame(refreshMonitoringControls);
+
+            updateTestData();
+        }
     });
-
-    spriteSheet3DFolder.addBinding(controls, 'frameRate', {min: 0, max: 60, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            child.frameRate = evt.value;
-        });
-    });
-
-    const spriteSelectorOptions = spriteSheetInfos.map((_, index) => ({
-        text: `SpriteSheet ${index + 1}`, value: index,
-    }));
-
-    spriteSheet3DFolder.addBinding(controls, 'testSpriteSheetInfo', {
-        options: spriteSelectorOptions,
-    }).on('change', (evt) => {
-        const selectedSpriteSheetInfo = spriteSheetInfos[evt.value];
-        scene.children.forEach((child) => {
-            child.spriteSheetInfo = selectedSpriteSheetInfo;
-        });
-        updateTestData();
-    });
-    setSeparator(pane);
-
-    const playControlsFolder = pane.addFolder({title: 'Play Controls', expanded: true});
-
-    playControlsFolder.addButton({title: 'Play'}).on('click', () => {
-        scene.children.forEach((child) => child.play());
-    });
-
-    playControlsFolder.addButton({title: 'Pause'}).on('click', () => {
-        scene.children.forEach((child) => child.pause());
-    });
-
-    playControlsFolder.addButton({title: 'Stop'}).on('click', () => {
-        scene.children.forEach((child) => child.stop());
-    });
-
-    setSeparator(pane);
-
-    const scaleFolder = pane.addFolder({title: 'Scale Controls', expanded: true});
-
-    scaleFolder.addBinding(controls, 'scaleX', {min: 0, max: 1, step: 0.1}).on('change', () => {
-        scene.children.forEach((child) => {
-            child.scaleX = controls.scaleX;
-        });
-    });
-
-    scaleFolder.addBinding(controls, 'scaleY', {min: 0, max: 1, step: 0.1}).on('change', () => {
-        scene.children.forEach((child) => {
-            child.scaleY = controls.scaleY;
-        });
-    });
-
-    const monitoringFolder = pane.addFolder({title: 'Monitoring', expanded: true});
-
-    monitoringFolder.addBinding(controls, 'state', {readonly: true});
-    monitoringFolder.addBinding(controls, 'currentIndex', {readonly: true});
-    monitoringFolder.addBinding(controls, 'totalFrame', {readonly: true});
-    monitoringFolder.addBinding(controls, 'segmentW', {readonly: true});
-    monitoringFolder.addBinding(controls, 'segmentH', {readonly: true});
-
-    const refreshMonitoringControls = () => {
-        const child = scene.children[0];
-        controls.currentIndex = child.currentIndex;
-        controls.totalFrame = child.totalFrame;
-        controls.segmentW = child.segmentW;
-        controls.segmentH = child.segmentH;
-        controls.state = child.state;
-        requestAnimationFrame(refreshMonitoringControls);
-    };
-    requestAnimationFrame(refreshMonitoringControls);
 };

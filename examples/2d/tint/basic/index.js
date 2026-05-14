@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Tint Basic 예제
@@ -74,83 +75,78 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Sprite2D} sprite
  */
-const renderTestPane = async (redGPUContext, sprite) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const folder = pane.addFolder({title: 'Material Tint Test'});
-    const targetTint = sprite.material.tint;
-    const tintSettings = {
-        tintR: targetTint.r,
-        tintG: targetTint.g,
-        tintB: targetTint.b,
-        tintA: targetTint.a,
-        tint: {r: targetTint.r, g: targetTint.g, b: targetTint.b, a: targetTint.a},
-        useTint: sprite.material.useTint,
-        tintBlendMode: RedGPU.Material.TINT_BLEND_MODE[sprite.material.tintBlendMode],
-    };
+const renderTestPane = (redGPUContext, sprite) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const folder = pane.addFolder({title: 'Material Tint Test'});
+            const targetTint = sprite.material.tint;
+            const tintSettings = {
+                tintR: targetTint.r,
+                tintG: targetTint.g,
+                tintB: targetTint.b,
+                tintA: targetTint.a,
+                tint: {r: targetTint.r, g: targetTint.g, b: targetTint.b, a: targetTint.a},
+                useTint: sprite.material.useTint,
+                tintBlendMode: RedGPU.Material.TINT_BLEND_MODE[sprite.material.tintBlendMode],
+            };
 
-    const refresh = () => {
-        tintSettings.tintR = targetTint.r;
-        tintSettings.tintG = targetTint.g;
-        tintSettings.tintB = targetTint.b;
-        tintSettings.tintA = targetTint.a;
-        tintSettings.tint.r = targetTint.r;
-        tintSettings.tint.g = targetTint.g;
-        tintSettings.tint.b = targetTint.b;
-        tintSettings.tint.a = targetTint.a;
-        pane.refresh();
-    };
+            const refresh = () => {
+                tintSettings.tintR = targetTint.r;
+                tintSettings.tintG = targetTint.g;
+                tintSettings.tintB = targetTint.b;
+                tintSettings.tintA = targetTint.a;
+                tintSettings.tint.r = targetTint.r;
+                tintSettings.tint.g = targetTint.g;
+                tintSettings.tint.b = targetTint.b;
+                tintSettings.tint.a = targetTint.a;
+                pane.refresh();
+            };
 
-    folder.addBinding(tintSettings, 'useTint', {label: 'Use Tint'}).on('change', (ev) => {
-        sprite.material.useTint = ev.value;
-    });
+            folder.addBinding(tintSettings, 'useTint', {label: 'Use Tint'}).on('change', (ev) => {
+                sprite.material.useTint = ev.value;
+            });
 
-    folder.addBinding(tintSettings, 'tintBlendMode', {
-        label: 'tintBlendMode',
-        options: RedGPU.Material.TINT_BLEND_MODE,
-    }).on('change', (ev) => {
-        const selectedKey = Object.keys(RedGPU.Material.TINT_BLEND_MODE).find(
-            (key) => RedGPU.Material.TINT_BLEND_MODE[key] === ev.value
-        );
-        console.log(`Selected Tint Mode: ${selectedKey}`);
+            folder.addBinding(tintSettings, 'tintBlendMode', {
+                label: 'tintBlendMode',
+                options: RedGPU.Material.TINT_BLEND_MODE,
+            }).on('change', (ev) => {
+                sprite.material.tintBlendMode = ev.value;
+                refresh();
+            });
 
-        sprite.material.tintBlendMode = ev.value;
-        refresh();
-    });
-
-    folder.addBinding(tintSettings, 'tintR', {label: 'Tint R', min: 0, max: 255, step: 1}).on('change', (ev) => {
-        sprite.material.tint.r = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, 'tintG', {label: 'Tint G', min: 0, max: 255, step: 1}).on('change', (ev) => {
-        sprite.material.tint.g = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, 'tintB', {label: 'Tint B', min: 0, max: 255, step: 1}).on('change', (ev) => {
-        sprite.material.tint.b = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, 'tintA', {
-        label: 'Tint A (Alpha)',
-        min: 0,
-        max: 1,
-        step: 0.01
-    }).on('change', (ev) => {
-        sprite.material.tint.a = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, 'tint', {
-        picker: 'inline',
-        view: 'color',
-        expanded: true,
-    }).on('change', (ev) => {
-        const r = Math.floor(ev.value.r);
-        const g = Math.floor(ev.value.g);
-        const b = Math.floor(ev.value.b);
-        const a = ev.value.a;
-        sprite.material.tint.setColorByRGBA(r, g, b, a);
-        refresh();
+            folder.addBinding(tintSettings, 'tintR', {label: 'Tint R', min: 0, max: 255, step: 1}).on('change', (ev) => {
+                sprite.material.tint.r = ev.value;
+                refresh();
+            });
+            folder.addBinding(tintSettings, 'tintG', {label: 'Tint G', min: 0, max: 255, step: 1}).on('change', (ev) => {
+                sprite.material.tint.g = ev.value;
+                refresh();
+            });
+            folder.addBinding(tintSettings, 'tintB', {label: 'Tint B', min: 0, max: 255, step: 1}).on('change', (ev) => {
+                sprite.material.tint.b = ev.value;
+                refresh();
+            });
+            folder.addBinding(tintSettings, 'tintA', {
+                label: 'Tint A (Alpha)',
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on('change', (ev) => {
+                sprite.material.tint.a = ev.value;
+                refresh();
+            });
+            folder.addBinding(tintSettings, 'tint', {
+                picker: 'inline',
+                view: 'color',
+                expanded: true,
+            }).on('change', (ev) => {
+                const r = Math.floor(ev.value.r);
+                const g = Math.floor(ev.value.g);
+                const b = Math.floor(ev.value.b);
+                const a = ev.value.a;
+                sprite.material.tint.setColorByRGBA(r, g, b, a);
+                refresh();
+            });
+        }
     });
 };
