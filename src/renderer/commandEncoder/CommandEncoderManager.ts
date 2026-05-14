@@ -25,7 +25,8 @@ export interface CommandPhaseStats {
  * [EN] Batch submission statistics
  */
 export interface CommandBatchStats {
-    [key: string]: CommandPhaseStats;
+    phases: Record<string, CommandPhaseStats>;
+    deferredDestroyCount: number;
 }
 
 /**
@@ -213,7 +214,7 @@ class CommandEncoderManager {
      */
     submitAll(): CommandBatchStats | null {
         const allBuffers: GPUCommandBuffer[] = [];
-        const batchStats: CommandBatchStats = {};
+        const phases: Record<string, CommandPhaseStats> = {};
 
         // [KO] 실행 순서 보장: RESOURCE -> PRE_PROCESS -> MAIN -> POST_PROCESS
         // [EN] Ensure execution order: RESOURCE -> PRE_PROCESS -> MAIN -> POST_PROCESS
@@ -230,17 +231,21 @@ class CommandEncoderManager {
             }
             const buffers = this.#finish(type);
             allBuffers.push(...buffers);
-            batchStats[type] = this.#createPhaseStats(type, buffers.length);
+            phases[type] = this.#createPhaseStats(type, buffers.length);
             this.#resetStat(type);
         });
 
         if (allBuffers.length > 0) {
             this.#redGPUContext.gpuDevice.queue.submit(allBuffers);
+            const deferredDestroyCount = this.#processDeferredDestroys();
+            const batchStats: CommandBatchStats = {phases, deferredDestroyCount};
             console.log(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} Command Buffer(s)`, batchStats);
-            this.#processDeferredDestroys();
             return batchStats;
         }
-        this.#processDeferredDestroys();
+        const deferredDestroyCount = this.#processDeferredDestroys();
+        if (deferredDestroyCount > 0) {
+            return {phases, deferredDestroyCount};
+        }
         return null;
     }
 
@@ -248,7 +253,7 @@ class CommandEncoderManager {
      * [KO] 등록된 모든 지연 파괴 리소스를 파괴합니다.
      * [EN] Destroys all registered deferred destroy resources.
      */
-    #processDeferredDestroys(): void {
+    #processDeferredDestroys(): number {
         const len = this.#deferredDestroyList.length;
         if (len > 0) {
             let i = 0;
@@ -259,6 +264,7 @@ class CommandEncoderManager {
             this.#deferredDestroyList.length = 0;
             // console.log(`🗑️ [CommandEncoderManager] Destroyed ${len} deferred resource(s)`);
         }
+        return len;
     }
 
     /**
