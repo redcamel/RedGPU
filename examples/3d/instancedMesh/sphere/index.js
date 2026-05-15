@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 // 1. Create and append a canvas
 const canvas = document.createElement('canvas');
@@ -48,7 +49,7 @@ RedGPU.init(
 
         createTest(redGPUContext, scene, material);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             // Logic for every frame goes here
             // 매 프레임마다 실행될 로직 추가
@@ -83,11 +84,6 @@ RedGPU.init(
  * @param {RedGPU.Material.PhongMaterial} material
  */
 async function createTest(redGPUContext, scene, material) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-
     const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize();
     const instanceCount = redGPUContext.detector.isMobile ? 20000 : 200000;
     const mesh = new RedGPU.Display.InstancingMesh(
@@ -125,11 +121,14 @@ async function createTest(redGPUContext, scene, material) {
 
     initializeInstances();
 
-    const pane = new Pane();
-    pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
-        .on('change', initializeInstances);
-    pane.addBinding({maxInstanceCount: maxInstanceCount}, 'maxInstanceCount', {
-        readonly: true,
-        format: (v) => `${Math.floor(v).toLocaleString()}`
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
+                .on('change', initializeInstances);
+            pane.addBinding({maxInstanceCount: maxInstanceCount}, 'maxInstanceCount', {
+                readonly: true,
+                format: (v) => `${Math.floor(v).toLocaleString()}`
+            });
+        }
     });
 }
