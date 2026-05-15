@@ -28,7 +28,12 @@ const GuiPanel: React.FC = () => {
 
             // [KO] 외부에서 정의한 커스텀 GUI 추가
             if (guiConfig.guiCallback) {
-                guiConfig.guiCallback(pane);
+                try {
+                    guiConfig.guiCallback(pane);
+                }catch (e) {
+                    console.error('Error in custom GUI callback:', e);
+                }
+
             }
 
             return () => {
