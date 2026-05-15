@@ -16,7 +16,8 @@ export const findCurrentExample = async (pathname: string): Promise<ExampleItem 
 
     const search = (list: ExampleItem[]): ExampleItem | null => {
         for (const item of list) {
-            if (item.path === normalizedPath) return item;
+            const itemPath = item.path ? item.path.replace(/\/$/, '') : undefined;
+            if (itemPath === normalizedPath) return item;
             if (item.list) {
                 const found = search(item.list);
                 if (found) return found;

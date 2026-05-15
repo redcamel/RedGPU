@@ -591,7 +591,7 @@ export const ExampleList: ExampleListType = [
                             {
                                 experimental: true,
                                 name: 'SimplexTexture',
-                                path: '3d/noiseTexture/simplex/basic/',
+                                path: '3d/noiseTexture/simplex/basic',
                                 description: {
                                     ko: `심플렉스 노이즈 텍스처를 생성하고 적용하는 기본 예제입니다.`,
                                     en: `Basic example of generating and applying Simplex Noise Texture.`
@@ -600,7 +600,7 @@ export const ExampleList: ExampleListType = [
                             {
                                 experimental: true,
                                 name: 'Custom SimplexTexture - Fire',
-                                path: '3d/noiseTexture/simplex/fire/',
+                                path: '3d/noiseTexture/simplex/fire',
                                 description: {
                                     ko: `심플렉스 노이즈를 활용하여 불꽃 효과를 연출하는 커스텀 텍스처 예제입니다.`,
                                     en: `Custom texture example creating a fire effect using Simplex Noise.`
@@ -609,7 +609,7 @@ export const ExampleList: ExampleListType = [
                             {
                                 experimental: true,
                                 name: 'Custom SimplexTexture - Displacement',
-                                path: '3d/noiseTexture/simplex/displacement/',
+                                path: '3d/noiseTexture/simplex/displacement',
                                 description: {
                                     ko: `심플렉스 노이즈를 활용하여 변위(Displacement) 효과를 주는 예제입니다.`,
                                     en: `Example applying displacement effects using Simplex Noise.`
