@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js";
+import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Transparent Sort 예제
@@ -129,18 +130,18 @@ const getRandomHexValue = () => {
  * [EN] Renders the GUI for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import(
-        "https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910"
-        );
-    const {setDebugButtons} = await import( "../../exampleHelper/createExample/panes/index.js?t=1770713934910" );
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    const params = {
-        transparent: true,
-    };
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const params = {
+                transparent: true,
+            };
 
-    pane.addBinding(params, 'transparent').on("change", (ev) => {
-        redGPUContext.viewList[0].scene.children.forEach(v => v.material.transparent = ev.value);
+            pane.addBinding(params, 'transparent').on("change", (ev) => {
+                redGPUContext.viewList[0].scene.children.forEach(v => {
+                    if (v.material) v.material.transparent = ev.value;
+                });
+            });
+        }
     });
 };
