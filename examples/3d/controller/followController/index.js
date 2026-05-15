@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Follow Controller 예제
@@ -114,168 +115,163 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Camera.FollowController} controller
  */
-const renderTestPane = async (redGPUContext, controller) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+const renderTestPane = (redGPUContext, controller) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // FollowController 설정
+            const followFolder = pane.addFolder({
+                title: 'Follow Controller',
+                expanded: true,
+            });
 
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
+            // 거리 및 높이
+            followFolder.addBinding(controller, 'distance', {
+                min: 1,
+                max: 50,
+                step: 0.5,
+            });
+            followFolder.addBinding(controller, 'distanceInterpolation', {
+                min: 0.01,
+                max: 1,
+                step: 0.01,
+            });
 
-    // FollowController 설정
-    const followFolder = pane.addFolder({
-        title: 'Follow Controller',
-        expanded: true,
-    });
+            followFolder.addBinding(controller, 'height', {
+                min: -10,
+                max: 20,
+                step: 0.5,
+            });
+            followFolder.addBinding(controller, 'heightInterpolation', {
+                min: 0.01,
+                max: 1,
+                step: 0.01,
+            });
+            followFolder.addBinding(controller, 'interpolation', {
+                min: 0.01,
+                max: 1,
+                step: 0.01,
+            });
 
-    // 거리 및 높이
-    followFolder.addBinding(controller, 'distance', {
-        min: 1,
-        max: 50,
-        step: 0.5,
-    });
-    followFolder.addBinding(controller, 'distanceInterpolation', {
-        min: 0.01,
-        max: 1,
-        step: 0.01,
-    });
+            // 회전 각도
+            const rotationFolder = pane.addFolder({
+                title: 'Camera Rotation',
+                expanded: true,
+            });
 
-    followFolder.addBinding(controller, 'height', {
-        min: -10,
-        max: 20,
-        step: 0.5,
-    });
-    followFolder.addBinding(controller, 'heightInterpolation', {
-        min: 0.01,
-        max: 1,
-        step: 0.01,
-    });
-    followFolder.addBinding(controller, 'interpolation', {
-        min: 0.01,
-        max: 1,
-        step: 0.01,
-    });
+            rotationFolder.addBinding(controller, 'pan', {
+                min: -180,
+                max: 180,
+                step: 1,
+            });
+            rotationFolder.addBinding(controller, 'panInterpolation', {
+                min: 0.01,
+                max: 1,
+                step: 0.01,
+            });
 
-    // 회전 각도
-    const rotationFolder = pane.addFolder({
-        title: 'Camera Rotation',
-        expanded: true,
-    });
+            rotationFolder.addBinding(controller, 'tilt', {
+                min: -89,
+                max: 89,
+                step: 1,
+            });
+            rotationFolder.addBinding(controller, 'tiltInterpolation', {
+                min: 0.01,
+                max: 1,
+                step: 0.01,
+            });
 
-    rotationFolder.addBinding(controller, 'pan', {
-        min: -180,
-        max: 180,
-        step: 1,
-    });
-    rotationFolder.addBinding(controller, 'panInterpolation', {
-        min: 0.01,
-        max: 1,
-        step: 0.01,
-    });
+            rotationFolder.addBinding(controller, 'followTargetRotation', {
+                label: 'Follow Target Rotation',
+            });
 
-    rotationFolder.addBinding(controller, 'tilt', {
-        min: -89,
-        max: 89,
-        step: 1,
-    });
-    rotationFolder.addBinding(controller, 'tiltInterpolation', {
-        min: 0.01,
-        max: 1,
-        step: 0.01,
-    });
+            // 타겟 오프셋
+            const offsetFolder = pane.addFolder({
+                title: 'Target Look At Offset',
+                expanded: true,
+            });
 
-    rotationFolder.addBinding(controller, 'followTargetRotation', {
-        label: 'Follow Target Rotation',
+            offsetFolder.addBinding(controller, 'targetOffsetX', {
+                label: 'Offset X',
+                min: -5,
+                max: 5,
+                step: 0.1,
+            });
+
+            offsetFolder.addBinding(controller, 'targetOffsetY', {
+                label: 'Offset Y',
+                min: -5,
+                max: 5,
+                step: 0.1,
+            });
+
+            offsetFolder.addBinding(controller, 'targetOffsetZ', {
+                label: 'Offset Z',
+                min: -5,
+                max: 5,
+                step: 0.1,
+            });
+
+            offsetFolder.addButton({
+                title: 'Reset Offset',
+            }).on('click', () => {
+                controller.setTargetOffset(0, 0, 0);
+                pane.refresh();
+            });
+
+            // 프리셋 버튼
+            const presetFolder = pane.addFolder({
+                title: 'Presets',
+            });
+
+            presetFolder.addButton({
+                title: 'Reset All Delays',
+            }).on('click', () => {
+                controller.interpolation = 0.02;
+                controller.distanceInterpolation = 0.02;
+                controller.heightInterpolation = 0.02;
+                controller.panInterpolation = 0.02;
+                controller.tiltInterpolation = 0.02;
+                pane.refresh();
+            });
+
+            presetFolder.addButton({
+                title: 'Behind View',
+            }).on('click', () => {
+                controller.distance = 15;
+                controller.height = 5;
+                controller.pan = 0;
+                controller.tilt = 20;
+                controller.setTargetOffset(0, 0, 0);
+                pane.refresh();
+            });
+
+            presetFolder.addButton({
+                title: 'Top View',
+            }).on('click', () => {
+                controller.distance = 20;
+                controller.height = 20;
+                controller.pan = 0;
+                controller.tilt = 60;
+                controller.setTargetOffset(0, 0, 0);
+                pane.refresh();
+            });
+
+            presetFolder.addButton({
+                title: 'Side View',
+            }).on('click', () => {
+                controller.distance = 15;
+                controller.height = 5;
+                controller.pan = 90;
+                controller.tilt = 10;
+                controller.setTargetOffset(0, 0, 0);
+                pane.refresh();
+            });
+
+            const update = () => {
+                pane.refresh()
+                requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
     });
-
-    // 타겟 오프셋
-    const offsetFolder = pane.addFolder({
-        title: 'Target Look At Offset',
-        expanded: true,
-    });
-
-    offsetFolder.addBinding(controller, 'targetOffsetX', {
-        label: 'Offset X',
-        min: -5,
-        max: 5,
-        step: 0.1,
-    });
-
-    offsetFolder.addBinding(controller, 'targetOffsetY', {
-        label: 'Offset Y',
-        min: -5,
-        max: 5,
-        step: 0.1,
-    });
-
-    offsetFolder.addBinding(controller, 'targetOffsetZ', {
-        label: 'Offset Z',
-        min: -5,
-        max: 5,
-        step: 0.1,
-    });
-
-    offsetFolder.addButton({
-        title: 'Reset Offset',
-    }).on('click', () => {
-        controller.setTargetOffset(0, 0, 0);
-        pane.refresh();
-    });
-
-    // 프리셋 버튼
-    const presetFolder = pane.addFolder({
-        title: 'Presets',
-    });
-
-    presetFolder.addButton({
-        title: 'Reset All Delays',
-    }).on('click', () => {
-        controller.interpolation = 0.02;
-        controller.distanceInterpolation = 0.02;
-        controller.heightInterpolation = 0.02;
-        controller.panInterpolation = 0.02;
-        controller.tiltInterpolation = 0.02;
-        pane.refresh();
-    });
-
-    presetFolder.addButton({
-        title: 'Behind View',
-    }).on('click', () => {
-        controller.distance = 15;
-        controller.height = 5;
-        controller.pan = 0;
-        controller.tilt = 20;
-        controller.setTargetOffset(0, 0, 0);
-        pane.refresh();
-    });
-
-    presetFolder.addButton({
-        title: 'Top View',
-    }).on('click', () => {
-        controller.distance = 20;
-        controller.height = 20;
-        controller.pan = 0;
-        controller.tilt = 60;
-        controller.setTargetOffset(0, 0, 0);
-        pane.refresh();
-    });
-
-    presetFolder.addButton({
-        title: 'Side View',
-    }).on('click', () => {
-        controller.distance = 15;
-        controller.height = 5;
-        controller.pan = 90;
-        controller.tilt = 10;
-        controller.setTargetOffset(0, 0, 0);
-        pane.refresh();
-    });
-
-    const update = () => {
-        pane.refresh()
-        requestAnimationFrame(update);
-    }
-    requestAnimationFrame(update);
-
 };

@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Isometric Controller 예제
@@ -82,195 +83,192 @@ RedGPU.init(
  * @param {RedGPU.Camera.IsometricController} controller
  * @param {RedGPU.Display.Mesh} targetMesh
  */
-const renderTestPane = async (redGPUContext, controller, targetMesh) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+const renderTestPane = (redGPUContext, controller) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            {
+                // 두 번째 컨트롤러 및 뷰 설정
+                const controller2 = new RedGPU.Camera.IsometricController(redGPUContext);
+                const view1 = redGPUContext.viewList[0];
+                const view2 = new RedGPU.Display.View3D(redGPUContext, view1.scene, controller2);
+                view2.axis = true;
+                view2.grid = true;
+                // 뷰 레이아웃 설정 유틸리티
+                const ViewLayoutManager = {
+                    setSingleView: (view) => {
+                        view.setSize('100%', '100%');
+                        view.setPosition(0, 0);
+                    },
+                    setSplitView: (view1, view2, isMobile) => {
+                        if (isMobile) {
+                            view1.setSize('100%', '50%');
+                            view1.setPosition(0, 0);
+                            view2.setSize('100%', '50%');
+                            view2.setPosition(0, '50%');
+                        } else {
+                            view1.setSize('50%', '100%');
+                            view1.setPosition(0, 0);
+                            view2.setSize('50%', '100%');
+                            view2.setPosition('50%', 0);
+                        }
+                    }
+                };
 
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    {
-        // 두 번째 컨트롤러 및 뷰 설정
-        const controller2 = new RedGPU.Camera.IsometricController(redGPUContext);
-        const view1 = redGPUContext.viewList[0];
-        const view2 = new RedGPU.Display.View3D(redGPUContext, view1.scene, controller2);
-        view2.axis = true;
-        view2.grid = true;
-        // 뷰 레이아웃 설정 유틸리티
-        const ViewLayoutManager = {
-            setSingleView: (view) => {
-                view.setSize('100%', '100%');
-                view.setPosition(0, 0);
-            },
-            setSplitView: (view1, view2, isMobile) => {
-                if (isMobile) {
-                    view1.setSize('100%', '50%');
-                    view1.setPosition(0, 0);
-                    view2.setSize('100%', '50%');
-                    view2.setPosition(0, '50%');
-                } else {
-                    view1.setSize('50%', '100%');
-                    view1.setPosition(0, 0);
-                    view2.setSize('50%', '100%');
-                    view2.setPosition('50%', 0);
-                }
+                // 컨트롤러 동기화 유틸리티
+                const syncControllers = (source, target) => {
+                    ['zoom', 'viewHeight'].forEach(prop => target[prop] = source[prop]);
+                };
+
+                // 테스트 모드 핸들러 맵
+                const testModeHandlers = {
+                    singleView: (controlsFolders) => {
+                        ViewLayoutManager.setSingleView(view1);
+                        controlsFolders.forEach(controlsFolder => controlsFolder.hidden = false);
+                    },
+                    multiViewSharedControl: (controlsFolders) => {
+                        ViewLayoutManager.setSplitView(view1, view2, redGPUContext.detector.isMobile);
+                        redGPUContext.addView(view2);
+                        view2.camera = controller;
+                        controlsFolders.forEach(controlsFolder => controlsFolder.hidden = false);
+                    },
+                    multiViewIndependentControl: (controlsFolders) => {
+                        ViewLayoutManager.setSplitView(view1, view2, redGPUContext.detector.isMobile);
+                        redGPUContext.addView(view2);
+                        view2.camera = controller2;
+                        syncControllers(controller, controller2);
+                        controlsFolders.forEach(controlsFolder => controlsFolder.hidden = true);
+                    }
+                };
+
+                // 테스트 모드 폴더 설정
+                const folder = pane.addFolder({title: 'Test Mode'});
+                const testModes = {testMode: 'singleView'};
+                folder.addBinding(testModes, 'testMode', {
+                    label: 'Test Mode',
+                    options: {
+                        singleView: 'singleView',
+                        multiViewSharedControl: 'multiViewSharedControl',
+                        multiViewIndependentControl: 'multiViewIndependentControl'
+                    }
+                }).on('change', (ev) => {
+                    redGPUContext.removeAllViews();
+                    redGPUContext.addView(view1);
+                    view1.camera = controller;
+                    testModeHandlers[ev.value]([cameraFolder, zoomFolder, viewFolder, targetFolder]);
+                });
             }
-        };
 
-        // 컨트롤러 동기화 유틸리티
-        const syncControllers = (source, target) => {
-            ['zoom', 'viewHeight'].forEach(prop => target[prop] = source[prop]);
-        };
+            // 카메라 설정 폴더
+            const cameraFolder = pane.addFolder({
+                title: 'Movement Settings',
+            });
+            cameraFolder.addBinding(controller, 'moveSpeed', {
+                min: 1,
+                max: 200,
+                step: 1
+            });
 
-        // 테스트 모드 핸들러 맵
-        const testModeHandlers = {
-            singleView: (controlsFolders) => {
-                ViewLayoutManager.setSingleView(view1);
-                controlsFolders.forEach(controlsFolder => controlsFolder.hidden = false);
-            },
-            multiViewSharedControl: (controlsFolders) => {
-                ViewLayoutManager.setSplitView(view1, view2, redGPUContext.detector.isMobile);
-                redGPUContext.addView(view2);
-                view2.camera = controller;
-                controlsFolders.forEach(controlsFolder => controlsFolder.hidden = false);
-            },
-            multiViewIndependentControl: (controlsFolders) => {
-                ViewLayoutManager.setSplitView(view1, view2, redGPUContext.detector.isMobile);
-                redGPUContext.addView(view2);
-                view2.camera = controller2;
-                syncControllers(controller, controller2);
-                controlsFolders.forEach(controlsFolder => controlsFolder.hidden = true);
+            cameraFolder.addBinding(controller, 'moveSpeedInterpolation', {
+                min: 0.0001,
+                max: 1,
+                step: 0.0001
+            });
+            cameraFolder.addBinding(controller, 'mouseMoveSpeed', {
+                min: 0.1,
+                max: 10,
+                step: 0.1
+            });
+            cameraFolder.addBinding(controller, 'mouseMoveSpeedInterpolation', {
+                min: 0.0001,
+                max: 1,
+                step: 0.0001
+            });
+
+            // 줌 설정 폴더
+            const zoomFolder = pane.addFolder({
+                title: 'Zoom Settings',
+            });
+
+            zoomFolder.addBinding(controller, 'zoom', {
+                min: 0.1,
+                max: 10,
+                step: 0.1,
+            });
+
+            zoomFolder.addBinding(controller, 'zoomInterpolation', {
+                min: 0.0001,
+                max: 1,
+                step: 0.0001,
+            });
+
+            zoomFolder.addBinding(controller, 'speedZoom', {
+                min: 0.01,
+                max: 1.0,
+                step: 0.01,
+            });
+
+            zoomFolder.addBinding(controller, 'minZoom', {
+                min: 0.1,
+                max: 2,
+                step: 0.1,
+            });
+
+            zoomFolder.addBinding(controller, 'maxZoom', {
+                min: 1,
+                max: 20,
+                step: 0.1,
+            });
+
+            // 뷰 설정 폴더
+            const viewFolder = pane.addFolder({
+                title: 'View Settings',
+            });
+
+            viewFolder.addBinding(controller, 'viewHeight', {
+                min: 1,
+                max: 500,
+                step: 1,
+            });
+
+            viewFolder.addBinding(controller, 'viewHeightInterpolation', {
+                min: 0.0001,
+                max: 1,
+                step: 0.0001,
+            });
+
+            // 타겟 위치 폴더
+            const targetFolder = pane.addFolder({
+                title: 'Target Position',
+            });
+
+            targetFolder.addBinding(controller, 'targetX', {
+                readonly: true,
+            })
+
+            targetFolder.addBinding(controller, 'targetY', {
+                readonly: true,
+            })
+
+            targetFolder.addBinding(controller, 'targetZ', {
+                readonly: true,
+            })
+            const moveFolder = pane.addFolder({
+                title: 'Movement Keys',
+            });
+            const keyBindings = controller.keyNameMapper;
+
+            for (const key in keyBindings) {
+                moveFolder.addBinding(keyBindings, key, {
+                    label: key,
+                }).on('change', (ev) => {
+                    controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
+                });
             }
-        };
-
-        // 테스트 모드 폴더 설정
-        const folder = pane.addFolder({title: 'Test Mode'});
-        const testModes = {testMode: 'singleView'};
-        folder.addBinding(testModes, 'testMode', {
-            label: 'Test Mode',
-            options: {
-                singleView: 'singleView',
-                multiViewSharedControl: 'multiViewSharedControl',
-                multiViewIndependentControl: 'multiViewIndependentControl'
+            const update = () => {
+                pane.refresh()
+                requestAnimationFrame(update);
             }
-        }).on('change', (ev) => {
-            redGPUContext.removeAllViews();
-            redGPUContext.addView(view1);
-            view1.camera = controller;
-            testModeHandlers[ev.value]([cameraFolder, zoomFolder, viewFolder, targetFolder]);
-        });
-    }
-
-    // 카메라 설정 폴더
-    const cameraFolder = pane.addFolder({
-        title: 'Movement Settings',
+            requestAnimationFrame(update);
+        }
     });
-    cameraFolder.addBinding(controller, 'moveSpeed', {
-        min: 1,
-        max: 200,
-        step: 1
-    });
-
-    cameraFolder.addBinding(controller, 'moveSpeedInterpolation', {
-        min: 0.0001,
-        max: 1,
-        step: 0.0001
-    });
-    cameraFolder.addBinding(controller, 'mouseMoveSpeed', {
-        min: 0.1,
-        max: 10,
-        step: 0.1
-    });
-    cameraFolder.addBinding(controller, 'mouseMoveSpeedInterpolation', {
-        min: 0.0001,
-        max: 1,
-        step: 0.0001
-    });
-
-    // 줌 설정 폴더
-    const zoomFolder = pane.addFolder({
-        title: 'Zoom Settings',
-    });
-
-    zoomFolder.addBinding(controller, 'zoom', {
-        min: 0.1,
-        max: 10,
-        step: 0.1,
-    });
-
-    zoomFolder.addBinding(controller, 'zoomInterpolation', {
-        min: 0.0001,
-        max: 1,
-        step: 0.0001,
-    });
-
-    zoomFolder.addBinding(controller, 'speedZoom', {
-        min: 0.01,
-        max: 1.0,
-        step: 0.01,
-    });
-
-    zoomFolder.addBinding(controller, 'minZoom', {
-        min: 0.1,
-        max: 2,
-        step: 0.1,
-    });
-
-    zoomFolder.addBinding(controller, 'maxZoom', {
-        min: 1,
-        max: 20,
-        step: 0.1,
-    });
-
-    // 뷰 설정 폴더
-    const viewFolder = pane.addFolder({
-        title: 'View Settings',
-    });
-
-    viewFolder.addBinding(controller, 'viewHeight', {
-        min: 1,
-        max: 500,
-        step: 1,
-    });
-
-    viewFolder.addBinding(controller, 'viewHeightInterpolation', {
-        min: 0.0001,
-        max: 1,
-        step: 0.0001,
-    });
-
-    // 타겟 위치 폴더
-    const targetFolder = pane.addFolder({
-        title: 'Target Position',
-    });
-
-    targetFolder.addBinding(controller, 'targetX', {
-        readonly: true,
-    })
-
-    targetFolder.addBinding(controller, 'targetY', {
-        readonly: true,
-    })
-
-    targetFolder.addBinding(controller, 'targetZ', {
-        readonly: true,
-    })
-    const moveFolder = pane.addFolder({
-        title: 'Movement Keys',
-    });
-    const keyBindings = controller.keyNameMapper;
-
-    for (const key in keyBindings) {
-        moveFolder.addBinding(keyBindings, key, {
-            label: key,
-        }).on('change', (ev) => {
-            controller[`set${key.charAt(0).toUpperCase()}${key.substr(1)}`](ev.value);
-        });
-    }
-    const update = () => {
-        pane.refresh()
-        requestAnimationFrame(update);
-    }
-    requestAnimationFrame(update);
 };
