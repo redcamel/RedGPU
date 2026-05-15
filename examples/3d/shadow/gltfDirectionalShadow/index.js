@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] GLTF Directional Shadow 예제
@@ -24,11 +25,14 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         addGround(redGPUContext, scene);
         loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -1, 1);
         loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 1, 0);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
             redGPUContext.viewList.forEach(view => {
                 const {scene} = view;
@@ -41,7 +45,23 @@ RedGPU.init(
             });
         });
 
-        renderTestPane(redGPUContext, view);
+        new RedGPUExampleHelper(redGPUContext, {
+            RedGPU: RedGPU,
+            ibl: true,
+            skybox: true,
+            guiCallback: (pane) => {
+                const {shadowManager} = scene;
+                const {directionalShadowManager} = shadowManager;
+
+                pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
+                    min: 128,
+                    max: 2048,
+                    step: 1
+                }).on("change", (ev) => {
+                    directionalShadowManager.shadowDepthTextureSize = ev.value;
+                });
+            }
+        });
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
@@ -90,31 +110,4 @@ const addGround = (redGPUContext, scene) => {
     ground.setScale(200);
     ground.receiveShadow = true;
     scene.addChild(ground);
-};
-
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
- */
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const {createIblHelper} = await import('../../../exampleHelper/createExample/panes/index.js?t=1770713934910');
-
-    const pane = new Pane();
-    const {shadowManager} = targetView.scene;
-    const {directionalShadowManager} = shadowManager;
-
-    pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
-        min: 128,
-        max: 2048,
-        step: 1
-    }).on("change", (ev) => {
-        directionalShadowManager.shadowDepthTextureSize = ev.value;
-    });
-    createIblHelper(pane, targetView, RedGPU, {useLight: true});
-
 };

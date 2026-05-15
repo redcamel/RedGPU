@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Directional Shadow 예제
@@ -30,7 +31,7 @@ RedGPU.init(
 
         addRandomMeshes(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
             redGPUContext.viewList.forEach(view => {
                 const {scene} = view;
@@ -44,6 +45,21 @@ RedGPU.init(
                     testObj.rotationZ += 1.5;
                 }
             });
+        });
+
+        new RedGPUExampleHelper(redGPUContext, {
+            guiCallback: (pane) => {
+                const {shadowManager} = scene;
+                const {directionalShadowManager} = shadowManager;
+
+                pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
+                    min: 128,
+                    max: 2048,
+                    step: 1
+                }).on("change", (ev) => {
+                    directionalShadowManager.shadowDepthTextureSize = ev.value;
+                });
+            }
         });
     },
     (failReason) => {
@@ -89,7 +105,7 @@ const addRandomMeshes = (redGPUContext, scene) => {
         new RedGPU.Primitive.Torus(redGPUContext, ` 1.5, 0.5, 16, 32`),
         new RedGPU.Primitive.TorusKnot(redGPUContext, 0.5, 0.2, 128, 64, 2, 3)
     ];
-//tt
+
     const ground = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Ground(redGPUContext), new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000'));
     ground.setScale(200);
     ground.receiveShadow = true;
@@ -114,8 +130,6 @@ const addRandomMeshes = (redGPUContext, scene) => {
 
         scene.addChild(mesh);
     }
-
-    renderTestPane(redGPUContext, scene);
 };
 
 /**
@@ -126,27 +140,4 @@ const addRandomMeshes = (redGPUContext, scene) => {
 const getRandomHexValue = () => {
     const randomColor = Math.floor(Math.random() * 0xffffff);
     return `#${randomColor.toString(16).padStart(6, "0")}`;
-};
-
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- */
-const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    const {shadowManager} = scene;
-    const {directionalShadowManager} = shadowManager;
-
-    pane.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
-        min: 128,
-        max: 2048,
-        step: 1
-    }).on("change", (ev) => {
-        directionalShadowManager.shadowDepthTextureSize = ev.value;
-    });
 };
