@@ -63,7 +63,6 @@ let helper;
  */
 const renderTestPane = (redGPUContext, targetView) => {
     helper = new RedGPUExampleHelper(redGPUContext, {
-        RedGPU,
         guiCallback: (gui) => {
             pane = gui;
             const moreNum = redGPUContext.detector.isMobile ? 10 : 50;
