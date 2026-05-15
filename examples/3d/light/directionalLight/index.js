@@ -100,7 +100,6 @@ const renderTestPaneWithLightControl = (redGPUContext, light, view) => {
     new RedGPUExampleHelper(redGPUContext, {
         ibl: true,
         guiCallback: (pane) => {
-            const camera = view.rawCamera;
             const autoExposure = view.postEffectManager.autoExposure;
 
             // 1. Light Folder
