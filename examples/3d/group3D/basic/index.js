@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Group3D Basic 예제
@@ -107,185 +108,185 @@ const createChildMesh = (redGPUContext, parent) => {
  * @param {RedGPU.Display.Mesh} parent
  * @param {RedGPU.Display.Mesh} child
  */
-const renderTestPane = async (redGPUContext, rootGroup, parent, child) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const rootConfig = {
-        x: rootGroup.x,
-        y: rootGroup.y,
-        z: rootGroup.z,
-        rotationX: rootGroup.rotationX,
-        rotationY: rootGroup.rotationY,
-        rotationZ: rootGroup.rotationZ,
-        scaleX: rootGroup.scaleX,
-        scaleY: rootGroup.scaleY,
-        scaleZ: rootGroup.scaleZ,
-    };
+const renderTestPane = (redGPUContext, rootGroup, parent, child) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const rootConfig = {
+                x: rootGroup.x,
+                y: rootGroup.y,
+                z: rootGroup.z,
+                rotationX: rootGroup.rotationX,
+                rotationY: rootGroup.rotationY,
+                rotationZ: rootGroup.rotationZ,
+                scaleX: rootGroup.scaleX,
+                scaleY: rootGroup.scaleY,
+                scaleZ: rootGroup.scaleZ,
+            };
 
-    const parentConfig = {
-        x: parent.x,
-        y: parent.y,
-        z: parent.z,
-        scaleX: parent.scaleX,
-        scaleY: parent.scaleY,
-        scaleZ: parent.scaleZ,
-        rotationX: parent.rotationX,
-        rotationY: parent.rotationY,
-        rotationZ: parent.rotationZ,
-    };
+            const parentConfig = {
+                x: parent.x,
+                y: parent.y,
+                z: parent.z,
+                scaleX: parent.scaleX,
+                scaleY: parent.scaleY,
+                scaleZ: parent.scaleZ,
+                rotationX: parent.rotationX,
+                rotationY: parent.rotationY,
+                rotationZ: parent.rotationZ,
+            };
 
-    const childConfig = {
-        x: child.x,
-        y: child.y,
-        z: child.z,
-        scaleX: child.scaleX,
-        scaleY: child.scaleY,
-        scaleZ: child.scaleZ,
-        rotationX: child.rotationX,
-        rotationY: child.rotationY,
-        rotationZ: child.rotationZ,
-    };
+            const childConfig = {
+                x: child.x,
+                y: child.y,
+                z: child.z,
+                scaleX: child.scaleX,
+                scaleY: child.scaleY,
+                scaleZ: child.scaleZ,
+                rotationX: child.rotationX,
+                rotationY: child.rotationY,
+                rotationZ: child.rotationZ,
+            };
 
-    const rootFolder = pane.addFolder({title: 'Root Group3D', expanded: true});
-    rootFolder.addBinding(rootConfig, 'x', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (rootGroup.x = evt.value));
-    rootFolder.addBinding(rootConfig, 'y', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (rootGroup.y = evt.value));
-    rootFolder.addBinding(rootConfig, 'z', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (rootGroup.z = evt.value));
-    rootFolder.addBinding(rootConfig, 'rotationX', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (rootGroup.rotationX = evt.value));
-    rootFolder.addBinding(rootConfig, 'rotationY', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (rootGroup.rotationY = evt.value));
-    rootFolder.addBinding(rootConfig, 'rotationZ', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (rootGroup.rotationZ = evt.value));
-    rootFolder.addBinding(rootConfig, 'scaleX', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (rootGroup.scaleX = evt.value));
-    rootFolder.addBinding(rootConfig, 'scaleY', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (rootGroup.scaleY = evt.value));
-    rootFolder.addBinding(rootConfig, 'scaleZ', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (rootGroup.scaleZ = evt.value));
+            const rootFolder = pane.addFolder({title: 'Root Group3D', expanded: true});
+            rootFolder.addBinding(rootConfig, 'x', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (rootGroup.x = evt.value));
+            rootFolder.addBinding(rootConfig, 'y', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (rootGroup.y = evt.value));
+            rootFolder.addBinding(rootConfig, 'z', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (rootGroup.z = evt.value));
+            rootFolder.addBinding(rootConfig, 'rotationX', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (rootGroup.rotationX = evt.value));
+            rootFolder.addBinding(rootConfig, 'rotationY', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (rootGroup.rotationY = evt.value));
+            rootFolder.addBinding(rootConfig, 'rotationZ', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (rootGroup.rotationZ = evt.value));
+            rootFolder.addBinding(rootConfig, 'scaleX', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (rootGroup.scaleX = evt.value));
+            rootFolder.addBinding(rootConfig, 'scaleY', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (rootGroup.scaleY = evt.value));
+            rootFolder.addBinding(rootConfig, 'scaleZ', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (rootGroup.scaleZ = evt.value));
 
-    const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
-    parentFolder.addBinding(parentConfig, 'x', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (parent.x = evt.value));
-    parentFolder.addBinding(parentConfig, 'y', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (parent.y = evt.value));
-    parentFolder.addBinding(parentConfig, 'z', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (parent.z = evt.value));
-    parentFolder.addBinding(parentConfig, 'rotationX', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (parent.rotationX = evt.value));
-    parentFolder.addBinding(parentConfig, 'rotationY', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (parent.rotationY = evt.value));
-    parentFolder.addBinding(parentConfig, 'rotationZ', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (parent.rotationZ = evt.value));
-    parentFolder.addBinding(parentConfig, 'scaleX', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (parent.scaleX = evt.value));
-    parentFolder.addBinding(parentConfig, 'scaleY', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (parent.scaleY = evt.value));
-    parentFolder.addBinding(parentConfig, 'scaleZ', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (parent.scaleZ = evt.value));
+            const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
+            parentFolder.addBinding(parentConfig, 'x', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (parent.x = evt.value));
+            parentFolder.addBinding(parentConfig, 'y', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (parent.y = evt.value));
+            parentFolder.addBinding(parentConfig, 'z', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (parent.z = evt.value));
+            parentFolder.addBinding(parentConfig, 'rotationX', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (parent.rotationX = evt.value));
+            parentFolder.addBinding(parentConfig, 'rotationY', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (parent.rotationY = evt.value));
+            parentFolder.addBinding(parentConfig, 'rotationZ', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (parent.rotationZ = evt.value));
+            parentFolder.addBinding(parentConfig, 'scaleX', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (parent.scaleX = evt.value));
+            parentFolder.addBinding(parentConfig, 'scaleY', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (parent.scaleY = evt.value));
+            parentFolder.addBinding(parentConfig, 'scaleZ', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (parent.scaleZ = evt.value));
 
-    const childFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
-    childFolder.addBinding(childConfig, 'x', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (child.x = evt.value));
-    childFolder.addBinding(childConfig, 'y', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (child.y = evt.value));
-    childFolder.addBinding(childConfig, 'z', {
-        min: -2,
-        max: 2,
-        step: 0.1
-    }).on('change', (evt) => (child.z = evt.value));
-    childFolder.addBinding(childConfig, 'rotationX', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (child.rotationX = evt.value));
-    childFolder.addBinding(childConfig, 'rotationY', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (child.rotationY = evt.value));
-    childFolder.addBinding(childConfig, 'rotationZ', {
-        min: 0,
-        max: 360,
-        step: 0.01
-    }).on('change', (evt) => (child.rotationZ = evt.value));
-    childFolder.addBinding(childConfig, 'scaleX', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (child.scaleX = evt.value));
-    childFolder.addBinding(childConfig, 'scaleY', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (child.scaleY = evt.value));
-    childFolder.addBinding(childConfig, 'scaleZ', {
-        min: 0,
-        max: 5,
-        step: 0.1
-    }).on('change', (evt) => (child.scaleZ = evt.value));
+            const childFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
+            childFolder.addBinding(childConfig, 'x', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (child.x = evt.value));
+            childFolder.addBinding(childConfig, 'y', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (child.y = evt.value));
+            childFolder.addBinding(childConfig, 'z', {
+                min: -2,
+                max: 2,
+                step: 0.1
+            }).on('change', (evt) => (child.z = evt.value));
+            childFolder.addBinding(childConfig, 'rotationX', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (child.rotationX = evt.value));
+            childFolder.addBinding(childConfig, 'rotationY', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (child.rotationY = evt.value));
+            childFolder.addBinding(childConfig, 'rotationZ', {
+                min: 0,
+                max: 360,
+                step: 0.01
+            }).on('change', (evt) => (child.rotationZ = evt.value));
+            childFolder.addBinding(childConfig, 'scaleX', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (child.scaleX = evt.value));
+            childFolder.addBinding(childConfig, 'scaleY', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (child.scaleY = evt.value));
+            childFolder.addBinding(childConfig, 'scaleZ', {
+                min: 0,
+                max: 5,
+                step: 0.1
+            }).on('change', (evt) => (child.scaleZ = evt.value));
+        }
+    });
 };

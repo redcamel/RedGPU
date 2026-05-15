@@ -1,5 +1,6 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Line3D (Bezier) 예제
@@ -142,136 +143,136 @@ function rainbowHex(t) {
     return RedGPU.Color.convertRgbToHex(r, g, b); // RGB를 HEX 형식으로 변환
 }
 
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    // **** UI 동작 대상이 되는 Line3D 오브젝트 및 디버그 마커 모음 ****
-    const debugOptions = {
-        showDebugPoints: false, // 디버그 포인트 표시 여부
-        tolerance: redGPUContext.viewList[0].scene.children[0].tolerance,       // Bezier 곡선의 허용 오차 조정
-        distance: redGPUContext.viewList[0].scene.children[0].distance       // 곡선의 디테일 조정
-    };
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // **** UI 동작 대상이 되는 Line3D 오브젝트 및 디버그 마커 모음 ****
+            const debugOptions = {
+                showDebugPoints: false, // 디버그 포인트 표시 여부
+                tolerance: redGPUContext.viewList[0].scene.children[0].tolerance,       // Bezier 곡선의 허용 오차 조정
+                distance: redGPUContext.viewList[0].scene.children[0].distance       // 곡선의 디테일 조정
+            };
 
-    // **** `debugPointMarkers` 리스트 정의 (Line3D 오브젝트와 매핑) ****
-    const lineObjects = [];
-    redGPUContext.viewList[0].scene.children.forEach((child) => {
-        lineObjects.push(child);
-    });
-    // **** 디버그 포인트 생성 및 추가 ****
-    const debugPoints = []
-    const debugGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.2) // Sphere 형태
-    const debugGeometryInOut = new RedGPU.Primitive.Box(redGPUContext, 0.1, 0.1, 0.1) // Sphere 형태
-    const debugMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, "#FF5733") // 강조 색상
-    const debugMaterialIn = new RedGPU.Material.ColorMaterial(redGPUContext, "#FF5733") // 강조 색상
-    const debugMaterialOut = new RedGPU.Material.ColorMaterial(redGPUContext, "#3399ff") // 강조 색상
-    lineObjects.forEach((line3D) => {
-        line3D.originalPoints.forEach((point) => {
-            if (point instanceof RedGPU.Display.TextField3D) return; // 레이블은 제외
+            // **** `debugPointMarkers` 리스트 정의 (Line3D 오브젝트와 매핑) ****
+            const lineObjects = [];
+            redGPUContext.viewList[0].scene.children.forEach((child) => {
+                lineObjects.push(child);
+            });
+            // **** 디버그 포인트 생성 및 추가 ****
+            const debugPoints = []
+            const debugGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 0.2) // Sphere 형태
+            const debugGeometryInOut = new RedGPU.Primitive.Box(redGPUContext, 0.1, 0.1, 0.1) // Sphere 형태
+            const debugMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, "#FF5733") // 강조 색상
+            const debugMaterialIn = new RedGPU.Material.ColorMaterial(redGPUContext, "#FF5733") // 강조 색상
+            const debugMaterialOut = new RedGPU.Material.ColorMaterial(redGPUContext, "#3399ff") // 강조 색상
+            lineObjects.forEach((line3D) => {
+                line3D.originalPoints.forEach((point) => {
+                    if (point instanceof RedGPU.Display.TextField3D) return; // 레이블은 제외
 
-            // 디버그 포인트 구체 생성
-            const debugMesh = new RedGPU.Display.Mesh(
-                redGPUContext,
-                debugGeometry,
-                debugMaterial
-            );
+                    // 디버그 포인트 구체 생성
+                    const debugMesh = new RedGPU.Display.Mesh(
+                        redGPUContext,
+                        debugGeometry,
+                        debugMaterial
+                    );
 
-            // 구체 위치 할당
-            debugMesh.setPosition(...point.linePoint.position);
-            debugMesh.setScale(0);
-            // Line3D에 디버그 포인트 추가
-            line3D.addChild(debugMesh);
-            debugPoints.push(debugMesh); // 디버그 포인트 배열에 추가
+                    // 구체 위치 할당
+                    debugMesh.setPosition(...point.linePoint.position);
+                    debugMesh.setScale(0);
+                    // Line3D에 디버그 포인트 추가
+                    line3D.addChild(debugMesh);
+                    debugPoints.push(debugMesh); // 디버그 포인트 배열에 추가
 
-            {
-                // 디버그 포인트 구체 생성
-                const debugMeshIn = new RedGPU.Display.Mesh(
-                    redGPUContext,
-                    debugGeometryInOut,
-                    debugMaterialIn
-                );
+                    {
+                        // 디버그 포인트 구체 생성
+                        const debugMeshIn = new RedGPU.Display.Mesh(
+                            redGPUContext,
+                            debugGeometryInOut,
+                            debugMaterialIn
+                        );
 
-                // 구체 위치 할당
-                debugMeshIn.setPosition(...point.inLinePoint.position);
-                debugMeshIn.setScale(0);
-                // Line3D에 디버그 포인트 추가
-                line3D.addChild(debugMeshIn);
-                debugPoints.push(debugMeshIn); // 디버그 포인트 배열에 추가
+                        // 구체 위치 할당
+                        debugMeshIn.setPosition(...point.inLinePoint.position);
+                        debugMeshIn.setScale(0);
+                        // Line3D에 디버그 포인트 추가
+                        line3D.addChild(debugMeshIn);
+                        debugPoints.push(debugMeshIn); // 디버그 포인트 배열에 추가
 
-                const subLine = new RedGPU.Display.Line3D(
-                    redGPUContext,
-                    RedGPU.Display.LINE_TYPE.LINEAR,
-                    '#888'
-                );
+                        const subLine = new RedGPU.Display.Line3D(
+                            redGPUContext,
+                            RedGPU.Display.LINE_TYPE.LINEAR,
+                            '#888'
+                        );
 
-                subLine.addPoint(...point.linePoint.position)
-                subLine.addPoint(...point.inLinePoint.position)
-                line3D.addChild(subLine);
-                debugPoints.push(subLine); // 디버그 포인트 배열에 추가
+                        subLine.addPoint(...point.linePoint.position)
+                        subLine.addPoint(...point.inLinePoint.position)
+                        line3D.addChild(subLine);
+                        debugPoints.push(subLine); // 디버그 포인트 배열에 추가
+                    }
+
+                    {
+                        // 디버그 포인트 구체 생성
+                        const debugMeshOut = new RedGPU.Display.Mesh(
+                            redGPUContext,
+                            debugGeometryInOut,
+                            debugMaterialOut
+                        );
+
+                        // 구체 위치 할당
+                        debugMeshOut.setPosition(...point.outLinePoint.position);
+                        debugMeshOut.setScale(0);
+                        // Line3D에 디버그 포인트 추가
+                        line3D.addChild(debugMeshOut);
+                        debugPoints.push(debugMeshOut); // 디버그 포인트 배열에 추가
+
+                        const subLine = new RedGPU.Display.Line3D(
+                            redGPUContext,
+                            RedGPU.Display.LINE_TYPE.LINEAR,
+                            '#888'
+                        );
+
+                        subLine.addPoint(...point.linePoint.position)
+                        subLine.addPoint(...point.outLinePoint.position)
+                        line3D.addChild(subLine);
+                        debugPoints.push(subLine); // 디버그 포인트 배열에 추가
+                    }
+                });
+            });
+            // **** Line3D 디버그 포인트 토글 옵션 ****
+            const debugFolder = pane.addFolder({title: "Debug Options"});
+            debugFolder.addBinding(debugOptions, "showDebugPoints", {label: "Show Debug Points"})
+                .on("change", (ev) => {
+                    updateDebugVisible()
+                });
+
+            // **** Line3D 설정 옵션 (tension, tolerance, distance) ****
+            const parameterFolder = pane.addFolder({title: "Line Parameters"});
+
+            parameterFolder.addBinding(debugOptions, "tolerance", {min: 0.0, max: 1, step: 0.001, label: "Tolerance"})
+                .on("change", (ev) => {
+                    lineObjects.forEach((line3D) => {
+                        line3D.tolerance = ev.value; // tolerance 업데이트
+                    });
+                });
+
+            parameterFolder.addBinding(debugOptions, "distance", {min: 0.0, max: 1, step: 0.001, label: "Distance"})
+                .on("change", (ev) => {
+                    lineObjects.forEach((line3D) => {
+                        line3D.distance = ev.value; // distance 업데이트
+                    });
+                });
+            //
+            const updateDebugVisible = () => {
+                // 초기 상태에 따라 디버그 포인트 표시
+                lineObjects.forEach((line3D) => {
+                    debugPoints.forEach((debugPoint) => {
+                        if (!(debugPoint instanceof RedGPU.Display.TextField3D)) { // 구체 디버그 포인트
+                            debugPoint.setScale(debugOptions.showDebugPoints ? 1 : 0); // 초기 상태 정의
+                        }
+                    });
+                });
             }
-
-            {
-                // 디버그 포인트 구체 생성
-                const debugMeshOut = new RedGPU.Display.Mesh(
-                    redGPUContext,
-                    debugGeometryInOut,
-                    debugMaterialOut
-                );
-
-                // 구체 위치 할당
-                debugMeshOut.setPosition(...point.outLinePoint.position);
-                debugMeshOut.setScale(0);
-                // Line3D에 디버그 포인트 추가
-                line3D.addChild(debugMeshOut);
-                debugPoints.push(debugMeshOut); // 디버그 포인트 배열에 추가
-
-                const subLine = new RedGPU.Display.Line3D(
-                    redGPUContext,
-                    RedGPU.Display.LINE_TYPE.LINEAR,
-                    '#888'
-                );
-
-                subLine.addPoint(...point.linePoint.position)
-                subLine.addPoint(...point.outLinePoint.position)
-                line3D.addChild(subLine);
-                debugPoints.push(subLine); // 디버그 포인트 배열에 추가
-            }
-        });
-    });
-    // **** Line3D 디버그 포인트 토글 옵션 ****
-    const debugFolder = pane.addFolder({title: "Debug Options"});
-    debugFolder.addBinding(debugOptions, "showDebugPoints", {label: "Show Debug Points"})
-        .on("change", (ev) => {
             updateDebugVisible()
-        });
-
-    // **** Line3D 설정 옵션 (tension, tolerance, distance) ****
-    const parameterFolder = pane.addFolder({title: "Line Parameters"});
-
-    parameterFolder.addBinding(debugOptions, "tolerance", {min: 0.0, max: 1, step: 0.001, label: "Tolerance"})
-        .on("change", (ev) => {
-            lineObjects.forEach((line3D) => {
-                line3D.tolerance = ev.value; // tolerance 업데이트
-            });
-        });
-
-    parameterFolder.addBinding(debugOptions, "distance", {min: 0.0, max: 1, step: 0.001, label: "Distance"})
-        .on("change", (ev) => {
-            lineObjects.forEach((line3D) => {
-                line3D.distance = ev.value; // distance 업데이트
-            });
-        });
-    //
-    const updateDebugVisible = () => {
-        // 초기 상태에 따라 디버그 포인트 표시
-        lineObjects.forEach((line3D) => {
-            debugPoints.forEach((debugPoint) => {
-                if (!(debugPoint instanceof RedGPU.Display.TextField3D)) { // 구체 디버그 포인트
-                    debugPoint.setScale(debugOptions.showDebugPoints ? 1 : 0); // 초기 상태 정의
-                }
-            });
-        });
-    }
-    updateDebugVisible()
+        }
+    });
 };

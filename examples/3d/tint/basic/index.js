@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Tint Basic (3D) 예제
@@ -69,87 +70,86 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Mesh} mesh
  */
-const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    // Tint 테스트 추가
-    const folder = pane.addFolder({title: "Material Tint Test"});
-    const targetTint = mesh.material.tint;
-    const tintSettings = {
-        tintR: targetTint.r,
-        tintG: targetTint.g,
-        tintB: targetTint.b,
-        tintA: targetTint.a,
-        tint: {r: targetTint.r, g: targetTint.g, b: targetTint.b, a: targetTint.a},
-        useTint: mesh.material.useTint,
-        tintBlendMode: RedGPU.Material.TINT_BLEND_MODE[mesh.material.tintBlendMode] // Default TINT_BLEND_MODE index
-    };
+const renderTestPane = (redGPUContext, mesh) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // Tint 테스트 추가
+            const folder = pane.addFolder({title: "Material Tint Test"});
+            const targetTint = mesh.material.tint;
+            const tintSettings = {
+                tintR: targetTint.r,
+                tintG: targetTint.g,
+                tintB: targetTint.b,
+                tintA: targetTint.a,
+                tint: {r: targetTint.r, g: targetTint.g, b: targetTint.b, a: targetTint.a},
+                useTint: mesh.material.useTint,
+                tintBlendMode: RedGPU.Material.TINT_BLEND_MODE[mesh.material.tintBlendMode] // Default TINT_BLEND_MODE index
+            };
 
-    const refresh = () => {
-        tintSettings.tintR = targetTint.r;
-        tintSettings.tintG = targetTint.g;
-        tintSettings.tintB = targetTint.b;
-        tintSettings.tintA = targetTint.a;
-        tintSettings.tint.r = targetTint.r;
-        tintSettings.tint.g = targetTint.g;
-        tintSettings.tint.b = targetTint.b;
-        tintSettings.tint.a = targetTint.a;
-        pane.refresh();
-    };
+            const refresh = () => {
+                tintSettings.tintR = targetTint.r;
+                tintSettings.tintG = targetTint.g;
+                tintSettings.tintB = targetTint.b;
+                tintSettings.tintA = targetTint.a;
+                tintSettings.tint.r = targetTint.r;
+                tintSettings.tint.g = targetTint.g;
+                tintSettings.tint.b = targetTint.b;
+                tintSettings.tint.a = targetTint.a;
+                pane.refresh();
+            };
 
-    // useTint 토글
-    folder.addBinding(tintSettings, "useTint", {label: "Use Tint"}).on("change", (ev) => {
-        mesh.material.useTint = ev.value; // 사용 여부 반영
-    });
-    folder.addBinding(tintSettings, 'tintBlendMode', {
-        label: 'tintBlendMode',
-        options: RedGPU.Material.TINT_BLEND_MODE,
-    }).on('change', (ev) => {
-        // Find the key that corresponds to the selected value
-        const selectedKey = Object.keys(RedGPU.Material.TINT_BLEND_MODE).find(
-            (key) => RedGPU.Material.TINT_BLEND_MODE[key] === ev.value
-        );
-        console.log(`Selected Tint Mode: ${selectedKey}`); // Log the key name
+            // useTint 토글
+            folder.addBinding(tintSettings, "useTint", {label: "Use Tint"}).on("change", (ev) => {
+                mesh.material.useTint = ev.value; // 사용 여부 반영
+            });
+            folder.addBinding(tintSettings, 'tintBlendMode', {
+                label: 'tintBlendMode',
+                options: RedGPU.Material.TINT_BLEND_MODE,
+            }).on('change', (ev) => {
+                // Find the key that corresponds to the selected value
+                const selectedKey = Object.keys(RedGPU.Material.TINT_BLEND_MODE).find(
+                    (key) => RedGPU.Material.TINT_BLEND_MODE[key] === ev.value
+                );
+                console.log(`Selected Tint Mode: ${selectedKey}`); // Log the key name
 
-        // Apply the value to the material
-        mesh.material.tintBlendMode = ev.value; // TINT_BLEND_MODE 값 반영
-        refresh();
+                // Apply the value to the material
+                mesh.material.tintBlendMode = ev.value; // TINT_BLEND_MODE 값 반영
+                refresh();
+            });
+            // Tint 컬러 슬라이더 구성
+            folder.addBinding(tintSettings, "tintR", {label: "Tint R", min: 0, max: 255, step: 1}).on("change", (ev) => {
+                mesh.material.tint.r = ev.value;
+                refresh();
+            });
+            folder.addBinding(tintSettings, "tintG", {label: "Tint G", min: 0, max: 255, step: 1}).on("change", (ev) => {
+                mesh.material.tint.g = ev.value;
+                refresh();
+            });
+            folder.addBinding(tintSettings, "tintB", {label: "Tint B", min: 0, max: 255, step: 1}).on("change", (ev) => {
+                mesh.material.tint.b = ev.value;
+                refresh();
+            });
+            folder.addBinding(tintSettings, "tintA", {
+                label: "Tint A (Alpha)",
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on("change", (ev) => {
+                mesh.material.tint.a = ev.value;
+                refresh();
+            });
+            folder.addBinding(tintSettings, "tint", {
+                picker: "inline",
+                view: "color",
+                expanded: true
+            }).on("change", (ev) => {
+                const r = Math.floor(ev.value.r);
+                const g = Math.floor(ev.value.g);
+                const b = Math.floor(ev.value.b);
+                const a = ev.value.a;
+                mesh.material.tint.setColorByRGBA(r, g, b, a);
+                refresh();
+            });
+        }
     });
-    // Tint 컬러 슬라이더 구성
-    folder.addBinding(tintSettings, "tintR", {label: "Tint R", min: 0, max: 255, step: 1}).on("change", (ev) => {
-        mesh.material.tint.r = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, "tintG", {label: "Tint G", min: 0, max: 255, step: 1}).on("change", (ev) => {
-        mesh.material.tint.g = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, "tintB", {label: "Tint B", min: 0, max: 255, step: 1}).on("change", (ev) => {
-        mesh.material.tint.b = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, "tintA", {
-        label: "Tint A (Alpha)",
-        min: 0,
-        max: 1,
-        step: 0.01
-    }).on("change", (ev) => {
-        mesh.material.tint.a = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, "tint", {
-        picker: "inline",
-        view: "color",
-        expanded: true
-    }).on("change", (ev) => {
-        const r = Math.floor(ev.value.r);
-        const g = Math.floor(ev.value.g);
-        const b = Math.floor(ev.value.b);
-        const a = ev.value.a;
-        mesh.material.tint.setColorByRGBA(r, g, b, a);
-        refresh();
-    });
-
 };

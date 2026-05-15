@@ -1,5 +1,6 @@
 // RedGPU 사용을 위한 모듈 임포트
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Line3D (Linear) 예제
@@ -121,62 +122,61 @@ function rainbowHex(t) {
     return RedGPU.Color.convertRgbToHex(r, g, b); // RGB를 HEX 형식으로 변환
 }
 
-const renderTestPane = async (redGPUContext, view) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    // 옵션 초기화
-    const debugOptions = {
-        showDebugPoints: false // 디버그 포인트 표시 여부
-    };
-    // RedGPU 뷰에서 Line3D 객체들 참조
-    const lineObjects = [];
-    redGPUContext.viewList[0].scene.children.forEach((child) => {
-        if (child instanceof RedGPU.Display.Line3D) {
-            lineObjects.push(child); // Line3D 객체를 추출
-        }
-    });
-    // **** 디버그 포인트 생성 및 추가 ****
-    const debugPoints = []
-    const debugGeometry = new RedGPU.Primitive.Box(redGPUContext, 0.05, 0.05, 0.05) // Sphere 형태
-    const debugMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, "#FF5733") // 강조 색상
-    lineObjects.forEach((line3D) => {
-        line3D.originalPoints.forEach((point) => {
-            if (point instanceof RedGPU.Display.TextField3D) return; // 레이블은 제외
-
-            // 디버그 포인트 구체 생성
-            const debugMesh = new RedGPU.Display.Mesh(
-                redGPUContext,
-                debugGeometry,
-                debugMaterial
-            );
-
-            // 구체 위치 할당
-            debugMesh.setPosition(...point.linePoint.position);
-            debugMesh.setScale(0);
-            // Line3D에 디버그 포인트 추가
-            line3D.addChild(debugMesh);
-            debugPoints.push(debugMesh); // 디버그 포인트 배열에 추가
-        });
-    });
-
-    // **** 디버그 포인트 토글 옵션 추가 ****
-    pane.addFolder({title: "Debug Options"}).addBinding(debugOptions, "showDebugPoints", {label: "Show Debug Points"})
-        .on("change", (ev) => {
-            updateDebugVisible()
-        });
-
-    const updateDebugVisible = () => {
-        // 초기 상태에 따라 디버그 포인트 표시
-        lineObjects.forEach((line3D) => {
-            debugPoints.forEach((debugPoint) => {
-                if (!(debugPoint instanceof RedGPU.Display.TextField3D)) { // 구체 디버그 포인트
-                    debugPoint.setScale(debugOptions.showDebugPoints ? 1 : 0); // 초기 상태 정의
+const renderTestPane = (redGPUContext, view) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            // 옵션 초기화
+            const debugOptions = {
+                showDebugPoints: false // 디버그 포인트 표시 여부
+            };
+            // RedGPU 뷰에서 Line3D 객체들 참조
+            const lineObjects = [];
+            redGPUContext.viewList[0].scene.children.forEach((child) => {
+                if (child instanceof RedGPU.Display.Line3D) {
+                    lineObjects.push(child); // Line3D 객체를 추출
                 }
             });
-        });
-    }
-    updateDebugVisible()
+            // **** 디버그 포인트 생성 및 추가 ****
+            const debugPoints = []
+            const debugGeometry = new RedGPU.Primitive.Box(redGPUContext, 0.05, 0.05, 0.05) // Sphere 형태
+            const debugMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, "#FF5733") // 강조 색상
+            lineObjects.forEach((line3D) => {
+                line3D.originalPoints.forEach((point) => {
+                    if (point instanceof RedGPU.Display.TextField3D) return; // 레이블은 제외
 
+                    // 디버그 포인트 구체 생성
+                    const debugMesh = new RedGPU.Display.Mesh(
+                        redGPUContext,
+                        debugGeometry,
+                        debugMaterial
+                    );
+
+                    // 구체 위치 할당
+                    debugMesh.setPosition(...point.linePoint.position);
+                    debugMesh.setScale(0);
+                    // Line3D에 디버그 포인트 추가
+                    line3D.addChild(debugMesh);
+                    debugPoints.push(debugMesh); // 디버그 포인트 배열에 추가
+                });
+            });
+
+            // **** 디버그 포인트 토글 옵션 추가 ****
+            pane.addFolder({title: "Debug Options"}).addBinding(debugOptions, "showDebugPoints", {label: "Show Debug Points"})
+                .on("change", (ev) => {
+                    updateDebugVisible()
+                });
+
+            const updateDebugVisible = () => {
+                // 초기 상태에 따라 디버그 포인트 표시
+                lineObjects.forEach((line3D) => {
+                    debugPoints.forEach((debugPoint) => {
+                        if (!(debugPoint instanceof RedGPU.Display.TextField3D)) { // 구체 디버그 포인트
+                            debugPoint.setScale(debugOptions.showDebugPoints ? 1 : 0); // 초기 상태 정의
+                        }
+                    });
+                });
+            }
+            updateDebugVisible()
+        }
+    });
 };
