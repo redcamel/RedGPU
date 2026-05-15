@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Point Light Performance 예제
@@ -22,7 +23,6 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         const light = new RedGPU.Light.DirectionalLight();
-        light.intensity = 0.1;
         scene.lightManager.addDirectionalLight(light);
 
         const {lights, initialPositions} = createPointLights(scene, 500);
@@ -49,9 +49,8 @@ RedGPU.init(
  * [EN] Renders the GUI for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };
 
 /**

@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Spot Light Lighting Studio 예제 (UE5 스타일)
@@ -105,101 +106,55 @@ const createMaterialStudio = (redGPUContext, scene) => {
     }
 };
 
-const renderTestPaneWithLightControl = async (redGPUContext, light, view) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+const renderTestPaneWithLightControl = (redGPUContext, light, view) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        guiCallback: (pane) => {
+            const camera = view.rawCamera;
 
-    const camera = view.rawCamera;
-    const toneMappingManager = view.toneMappingManager;
+            // 1. Light Folder (UE5 Style)
+            const lightConfig = {
+                lumen: light.lumen,
+                radius: light.radius,
+                innerCutoff: light.innerCutoff,
+                outerCutoff: light.outerCutoff,
+                color: {r: light.color.r, g: light.color.g, b: light.color.b},
+                x: light.x,
+                y: light.y,
+                z: light.z,
+                directionX: light.directionX,
+                directionY: light.directionY,
+                directionZ: light.directionZ,
+            };
 
-    // 1. Light Folder (UE5 Style)
-    const lightConfig = {
-        intensity: light.intensity,
-        radius: light.radius,
-        innerCutoff: light.innerCutoff,
-        outerCutoff: light.outerCutoff,
-        color: {r: light.color.r, g: light.color.g, b: light.color.b},
-        x: light.x,
-        y: light.y,
-        z: light.z,
-        directionX: light.directionX,
-        directionY: light.directionY,
-        directionZ: light.directionZ,
-    };
+            const lightFolder = pane.addFolder({title: 'Light: Spot Light', expanded: true});
+            
+            const lightPropFolder = lightFolder.addFolder({title: 'Lumen & Color', expanded: true});
+            lightPropFolder.addBinding(lightConfig, 'lumen', {
+                label: 'Lumen',
+                min: 0, 
+                max: 50000, 
+                step: 10
+            }).on('change', (evt) => { light.lumen = evt.value; });
+            
+            lightPropFolder.addBinding(lightConfig, 'color', {picker: 'inline', view: 'color'}).on('change', (evt) => {
+                const {r, g, b} = evt.value;
+                light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
+            });
 
-    const lightFolder = pane.addFolder({title: 'Light: Spot Light', expanded: true});
-    
-    const lightPropFolder = lightFolder.addFolder({title: 'Intensity & Color', expanded: true});
-    lightPropFolder.addBinding(lightConfig, 'intensity', {
-        label: 'Intensity (Lumen)',
-        min: 0, 
-        max: 50000, 
-        step: 10
-    }).on('change', (evt) => { light.intensity = evt.value; });
-    
-    lightPropFolder.addBinding(lightConfig, 'color', {picker: 'inline', view: 'color'}).on('change', (evt) => {
-        const {r, g, b} = evt.value;
-        light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
-    });
+            const lightShapeFolder = lightFolder.addFolder({title: 'Beam Shape', expanded: true});
+            lightShapeFolder.addBinding(lightConfig, 'innerCutoff', {min: 0, max: 89, step: 0.1, label: 'Inner Cone'}).on('change', (evt) => { light.innerCutoff = evt.value; });
+            lightShapeFolder.addBinding(lightConfig, 'outerCutoff', {min: 0, max: 89, step: 0.1, label: 'Outer Cone'}).on('change', (evt) => { light.outerCutoff = evt.value; });
+            lightShapeFolder.addBinding(lightConfig, 'radius', {min: 0, max: 100, step: 1, label: 'Attenuation Radius'}).on('change', (evt) => { light.radius = evt.value; });
 
-    const lightShapeFolder = lightFolder.addFolder({title: 'Beam Shape', expanded: true});
-    lightShapeFolder.addBinding(lightConfig, 'innerCutoff', {min: 0, max: 89, step: 0.1, label: 'Inner Cone'}).on('change', (evt) => { light.innerCutoff = evt.value; });
-    lightShapeFolder.addBinding(lightConfig, 'outerCutoff', {min: 0, max: 89, step: 0.1, label: 'Outer Cone'}).on('change', (evt) => { light.outerCutoff = evt.value; });
-    lightShapeFolder.addBinding(lightConfig, 'radius', {min: 0, max: 100, step: 1, label: 'Attenuation Radius'}).on('change', (evt) => { light.radius = evt.value; });
-
-    const lightPosFolder = lightFolder.addFolder({title: 'Transform & Direction', expanded: false});
-    lightPosFolder.addBinding(lightConfig, 'x', {min: -30, max: 30, step: 0.1}).on('change', (evt) => { light.x = evt.value; });
-    lightPosFolder.addBinding(lightConfig, 'y', {min: -10, max: 30, step: 0.1}).on('change', (evt) => { light.y = evt.value; });
-    lightPosFolder.addBinding(lightConfig, 'z', {min: -30, max: 30, step: 0.1}).on('change', (evt) => { light.z = evt.value; });
-    lightPosFolder.addBinding(lightConfig, 'directionX', {min: -1, max: 1, step: 0.01, label: 'Dir X'}).on('change', (evt) => { light.directionX = evt.value; });
-    lightPosFolder.addBinding(lightConfig, 'directionY', {min: -1, max: 1, step: 0.01, label: 'Dir Y'}).on('change', (evt) => { light.directionY = evt.value; });
-    lightPosFolder.addBinding(lightConfig, 'directionZ', {min: -1, max: 1, step: 0.01, label: 'Dir Z'}).on('change', (evt) => { light.directionZ = evt.value; });
-    
-    lightFolder.addBinding(light, 'enableDebugger', {label: 'Show Debugger'});
-
-    // 2. Camera Folder
-    const cameraConfig = {
-        aperture: camera.aperture,
-        shutterSpeed: 1 / camera.shutterSpeed,
-        iso: camera.iso,
-        useAutoExposure: camera.useAutoExposure,
-        ev100: camera.ev100,
-        autoExposureMultiplier: toneMappingManager.autoExposureMultiplier
-    };
-    const cameraFolder = pane.addFolder({title: 'Camera: Physical Settings', expanded: true});
-    cameraFolder.addBinding(cameraConfig, 'useAutoExposure', {label: 'Auto Exposure'}).on('change', (evt) => { camera.useAutoExposure = evt.value; });
-    
-    const lensFolder = cameraFolder.addFolder({title: 'Lens & Sensor', expanded: false});
-    lensFolder.addBinding(cameraConfig, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture (f-stop)'}).on('change', (evt) => { camera.aperture = evt.value; });
-    lensFolder.addBinding(cameraConfig, 'shutterSpeed', {min: 1, max: 4000, step: 1, label: 'Shutter Speed (1/s)'}).on('change', (evt) => { camera.shutterSpeed = 1 / evt.value; });
-    lensFolder.addBinding(cameraConfig, 'iso', {min: 100, max: 6400, step: 100, label: 'ISO (Sensitivity)'}).on('change', (evt) => { camera.iso = evt.value; });
-    
-    const exposureMonitor = cameraFolder.addFolder({title: 'Exposure Status', expanded: true});
-    exposureMonitor.addBinding(cameraConfig, 'ev100', {readonly: true, format: (v) => v.toFixed(2), label: 'EV100'});
-    exposureMonitor.addBinding(cameraConfig, 'autoExposureMultiplier', {readonly: true, format: (v) => v.toFixed(4), label: 'Exposure Mult'});
-
-    // 3. Post Process Folder
-    const tmConfig = {
-        mode: toneMappingManager.mode,
-        exposureOffset: toneMappingManager.exposure
-    };
-    const tmFolder = pane.addFolder({title: 'PostProcess: Color Grading', expanded: false});
-    tmFolder.addBinding(tmConfig, 'mode', {
-        label: 'Tone Curve',
-        options: {
-            Linear: RedGPU.ToneMapping.TONE_MAPPING_MODE.LINEAR,
-            'ACES Filmic (UE5 Style)': RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL,
-            'Khronos PBR Neutral': RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL,
+            const lightPosFolder = lightFolder.addFolder({title: 'Transform & Direction', expanded: false});
+            lightPosFolder.addBinding(lightConfig, 'x', {min: -30, max: 30, step: 0.1}).on('change', (evt) => { light.x = evt.value; });
+            lightPosFolder.addBinding(lightConfig, 'y', {min: -10, max: 30, step: 0.1}).on('change', (evt) => { light.y = evt.value; });
+            lightPosFolder.addBinding(lightConfig, 'z', {min: -30, max: 30, step: 0.1}).on('change', (evt) => { light.z = evt.value; });
+            lightPosFolder.addBinding(lightConfig, 'directionX', {min: -1, max: 1, step: 0.01, label: 'Dir X'}).on('change', (evt) => { light.directionX = evt.value; });
+            lightPosFolder.addBinding(lightConfig, 'directionY', {min: -1, max: 1, step: 0.01, label: 'Dir Y'}).on('change', (evt) => { light.directionY = evt.value; });
+            lightPosFolder.addBinding(lightConfig, 'directionZ', {min: -1, max: 1, step: 0.01, label: 'Dir Z'}).on('change', (evt) => { light.directionZ = evt.value; });
+            
+            lightFolder.addBinding(light, 'enableDebugger', {label: 'Show Debugger'});
         }
-    }).on('change', (evt) => { toneMappingManager.mode = evt.value; });
-    tmFolder.addBinding(tmConfig, 'exposureOffset', {min: 0, max: 10, step: 0.01, label: 'Exposure Compensation'});
-
-    // Monitoring Loop
-    setInterval(() => {
-        cameraConfig.ev100 = camera.ev100;
-        cameraConfig.autoExposureMultiplier = toneMappingManager.autoExposureMultiplier;
-        pane.refresh();
-    }, 100);
+    });
 };

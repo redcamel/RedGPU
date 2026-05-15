@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 /**
  * [KO] Spot Light Performance 예제
@@ -55,9 +56,8 @@ RedGPU.init(
  * [EN] Renders the GUI for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };
 
 /**
@@ -88,7 +88,7 @@ const createSkybox = (redGPUContext) => {
  * @returns {Array<{light: RedGPU.Light.SpotLight, originalPos: object, rotationSpeed: number, orbitRadius: number}>}
  */
 const createSpotLight = (scene) => {
-    const intensity = 2;
+    const intensity = 2; // lumen
     const gridSize = 32;
     const spacing = 4;
     const height = 3;
@@ -97,7 +97,6 @@ const createSpotLight = (scene) => {
     for (let row = 0; row < gridSize; row++) {
         for (let col = 0; col < gridSize; col++) {
             const light = new RedGPU.Light.SpotLight('#fff', intensity);
-            light.intensity = intensity;
 
             const x = col * spacing - ((gridSize - 1) * spacing) / 2;
             const z = row * spacing - ((gridSize - 1) * spacing) / 2;
