@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
@@ -68,24 +69,21 @@ RedGPU.init(
             }
         }
 
-        const renderer = new RedGPU.Renderer(redGPUContext)
+        const renderer = new RedGPU.Renderer()
 
-        let test = 0
         const render = (time) => {
             directionalLightTest.direction[0] = Math.sin(time / 1500)
             directionalLightTest.direction[1] = -1
             directionalLightTest.direction[2] = Math.cos(time / 1500)
-            redGPUContext.viewList.forEach(view => {
-
-            })
-            //
+            
             testParticleWrap.x += Math.sin(time / 500)
             testParticleWrap.y += Math.cos(time / 500)
             testParticleWrap.z += Math.sin(time / 500)
 
         }
         renderer.start(redGPUContext, render)
-        renderTestPane(redGPUContext)
+        
+        new RedGPUExampleHelper(redGPUContext);
     },
     (failReason) => {
         // Handle initialization failure
@@ -95,14 +93,3 @@ RedGPU.init(
         document.body.appendChild(errorMessage);
     }
 );
-
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- */
-const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-
-};
