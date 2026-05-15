@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -82,7 +83,7 @@ RedGPU.init(
                         helmet.y = mesh.y;
                         helmet.scaleX = helmet.scaleY = helmet.scaleZ = 150;
                         scene.addChild(helmet);
-                    });
+                    }, RedGPUExampleHelper.loadingProgressInfoHandler);
                 } else if (i === 2) {
                     mesh.material = spherePhongMat;
                     mesh.z = STEP_X;
@@ -155,86 +156,71 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer(redGPUContext);
         renderer.start(redGPUContext);
 
-        // renderTestPane(view, skyAtmosphere, sunLight);
+        renderTestPane(view, skyAtmosphere, sunLight);
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
     }
 );
 
-const renderTestPane = async (targetView, skyAtmosphere, sunLight) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane({title: 'SkyAtmosphere Configuration', expanded: true});
+const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
+    new RedGPUExampleHelper(targetView.redGPUContext, {
+        guiCallback: (pane) => {
+            // 1. Sun Configuration
+            const f_sun = pane.addFolder({title: 'Sun', expanded: true});
+            f_sun.addBinding(sunLight, 'elevation', {min: -90, max: 90, step: 0.1, label: 'Elevation'});
+            f_sun.addBinding(sunLight, 'azimuth', {min: -360, max: 360, step: 0.1, label: 'Azimuth'});
+            f_sun.addBinding(sunLight, 'lux', {min: 0, max: 200000, step: 100, label: 'Lux'});
+            f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'Sun Size'});
+            f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'Limb Darkening'});
 
-    const {
-        createFieldOfView,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+            // 3. Planet Properties
+            const f_planet = pane.addFolder({title: 'Planet', expanded: false});
+            f_planet.addBinding(skyAtmosphere, 'groundRadius', {min: 1000, max: 10000, step: 1, label: 'Radius (km)'});
+            f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1, label: 'Atmo Height (km)'});
+            f_planet.addBinding(skyAtmosphere, 'cameraHeight', {readonly: true, interval: 100, label: 'Cam Height (km)'});
+            
+            const groundProxy = {
+                get albedo() { return {r: skyAtmosphere.groundAlbedo[0], g: skyAtmosphere.groundAlbedo[1], b: skyAtmosphere.groundAlbedo[2]}; },
+                set albedo(v) { skyAtmosphere.groundAlbedo = [v.r, v.g, v.b]; }
+            };
+            f_planet.addBinding(groundProxy, 'albedo', {color: {type: 'float'}, label: 'Ground Albedo'});
 
-    setDebugButtons(RedGPU, targetView.redGPUContext);
-    createFieldOfView(pane, targetView.rawCamera);
+            // 4. Rayleigh Scattering
+            const f_rayleigh = pane.addFolder({title: 'Rayleigh', expanded: false});
+            const rayleighProxy = {
+                get scattering() { return {r: skyAtmosphere.rayleighScattering[0], g: skyAtmosphere.rayleighScattering[1], b: skyAtmosphere.rayleighScattering[2]}; },
+                set scattering(v) { skyAtmosphere.rayleighScattering = [v.r, v.g, v.b]; }
+            };
+            f_rayleigh.addBinding(rayleighProxy, 'scattering', {color: {type: 'float'}, label: 'Scattering'});
+            f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 50, step: 0.1, label: 'Exp Dist (km)'});
 
-    // 1. Sun Configuration
-    const f_sun = pane.addFolder({title: 'Sun', expanded: true});
-    f_sun.addBinding(sunLight, 'elevation', {min: -90, max: 90, step: 0.1, label: 'Elevation'});
-    f_sun.addBinding(sunLight, 'azimuth', {min: -360, max: 360, step: 0.1, label: 'Azimuth'});
-    f_sun.addBinding(sunLight, 'intensity', {min: 0, max: 200000, step: 100, label: 'Intensity (Lux)'});
-    f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'Sun Size'});
-    f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'Limb Darkening'});
+            // 5. Mie Scattering
+            const f_mie = pane.addFolder({title: 'Mie', expanded: false});
+            const mieScatProxy = {
+                get value() { return {r: skyAtmosphere.mieScattering[0], g: skyAtmosphere.mieScattering[1], b: skyAtmosphere.mieScattering[2]}; },
+                set value(v) { skyAtmosphere.mieScattering = [v.r, v.g, v.b]; }
+            };
+            const mieAbsProxy = {
+                get value() { return {r: skyAtmosphere.mieAbsorption[0], g: skyAtmosphere.mieAbsorption[1], b: skyAtmosphere.mieAbsorption[2]}; },
+                set value(v) { skyAtmosphere.mieAbsorption = [v.r, v.g, v.b]; }
+            };
+            f_mie.addBinding(mieScatProxy, 'value', {color: {type: 'float'}, label: 'Scattering'});
+            f_mie.addBinding(mieAbsProxy, 'value', {color: {type: 'float'}, label: 'Absorption'});
+            f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Anisotropy (g)'});
+            f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 50, step: 0.1, label: 'Exp Dist (km)'});
 
-    // 2. Camera & Exposure
-    const f_camera = pane.addFolder({title: 'Camera & Exposure', expanded: false});
-    f_camera.addBinding(targetView.postEffectManager.autoExposure, 'exposureCompensation', {min: -10, max: 10, step: 0.1, label: 'Exposure Bias'});
-    f_camera.addBinding(targetView.rawCamera, 'aperture', {min: 1.0, max: 32.0, step: 0.1, label: 'Aperture'});
-    f_camera.addBinding(targetView.rawCamera, 'shutterSpeed', {min: 1/8000, max: 1, step: 0.0001, label: 'Shutter (s)'});
-    f_camera.addBinding(targetView.rawCamera, 'iso', {min: 50, max: 3200, step: 1, label: 'ISO'});
-    f_camera.addBinding(targetView.toneMappingManager, 'exposure', {min: 0, max: 5, step: 0.01, label: 'TM Exposure'});
+            // 6. Artistic Controls
+            const f_artistic = pane.addFolder({title: 'Artistic', expanded: true});
+            f_artistic.addBinding(skyAtmosphere, 'skyLuminanceFactor', {min: 0, max: 20, step: 0.1, label: 'Sky Luminance'});
+            f_artistic.addBinding(skyAtmosphere, 'multiScatteringFactor', {min: 0, max: 10, step: 0.1, label: 'Multi Scat'});
+            f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'AP Scale (km)'});
 
-    // 3. Planet Properties
-    const f_planet = pane.addFolder({title: 'Planet', expanded: false});
-    f_planet.addBinding(skyAtmosphere, 'groundRadius', {min: 1000, max: 10000, step: 1, label: 'Radius (km)'});
-    f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1, label: 'Atmo Height (km)'});
-    f_planet.addBinding(skyAtmosphere, 'cameraHeight', {readonly: true, interval: 100, label: 'Cam Height (km)'});
-    
-    const groundProxy = {
-        get albedo() { return {r: skyAtmosphere.groundAlbedo[0], g: skyAtmosphere.groundAlbedo[1], b: skyAtmosphere.groundAlbedo[2]}; },
-        set albedo(v) { skyAtmosphere.groundAlbedo = [v.r, v.g, v.b]; }
-    };
-    f_planet.addBinding(groundProxy, 'albedo', {color: {type: 'float'}, label: 'Ground Albedo'});
-
-    // 4. Rayleigh Scattering
-    const f_rayleigh = pane.addFolder({title: 'Rayleigh', expanded: false});
-    const rayleighProxy = {
-        get scattering() { return {r: skyAtmosphere.rayleighScattering[0], g: skyAtmosphere.rayleighScattering[1], b: skyAtmosphere.rayleighScattering[2]}; },
-        set scattering(v) { skyAtmosphere.rayleighScattering = [v.r, v.g, v.b]; }
-    };
-    f_rayleigh.addBinding(rayleighProxy, 'scattering', {color: {type: 'float'}, label: 'Scattering'});
-    f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 50, step: 0.1, label: 'Exp Dist (km)'});
-
-    // 5. Mie Scattering
-    const f_mie = pane.addFolder({title: 'Mie', expanded: false});
-    const mieScatProxy = {
-        get value() { return {r: skyAtmosphere.mieScattering[0], g: skyAtmosphere.mieScattering[1], b: skyAtmosphere.mieScattering[2]}; },
-        set value(v) { skyAtmosphere.mieScattering = [v.r, v.g, v.b]; }
-    };
-    const mieAbsProxy = {
-        get value() { return {r: skyAtmosphere.mieAbsorption[0], g: skyAtmosphere.mieAbsorption[1], b: skyAtmosphere.mieAbsorption[2]}; },
-        set value(v) { skyAtmosphere.mieAbsorption = [v.r, v.g, v.b]; }
-    };
-    f_mie.addBinding(mieScatProxy, 'value', {color: {type: 'float'}, label: 'Scattering'});
-    f_mie.addBinding(mieAbsProxy, 'value', {color: {type: 'float'}, label: 'Absorption'});
-    f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'Anisotropy (g)'});
-    f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 50, step: 0.1, label: 'Exp Dist (km)'});
-
-    // 6. Artistic Controls
-    const f_artistic = pane.addFolder({title: 'Artistic', expanded: true});
-    f_artistic.addBinding(skyAtmosphere, 'skyLuminanceFactor', {min: 0, max: 20, step: 0.1, label: 'Sky Luminance'});
-    f_artistic.addBinding(skyAtmosphere, 'multiScatteringFactor', {min: 0, max: 10, step: 0.1, label: 'Multi Scat'});
-    f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'AP Scale (km)'});
-
-    // Enable/Disable
-    const state = {enabled: true};
-    pane.addBinding(state, 'enabled', {label: 'Atmosphere Enabled'}).on('change', (v) => {
-        targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
+            // Enable/Disable
+            const state = {enabled: true};
+            pane.addBinding(state, 'enabled', {label: 'Atmosphere Enabled'}).on('change', (v) => {
+                targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
+            });
+        }
     });
 };
