@@ -17,18 +17,29 @@ export const useAppInitialization = () => {
     useEffect(() => {
         const baseTitle = 'RedGPU Examples';
         const metaDesc = document.querySelector('meta[name="description"]');
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+        const twitterDesc = document.querySelector('meta[property="twitter:description"]');
         
+        let titleText = '';
+        let descText = '';
+
         if (searchQuery) {
-            document.title = `${baseTitle} - Search: ${searchQuery}`;
-            if (metaDesc) {
-                metaDesc.setAttribute('content', `Search results for "${searchQuery}" in RedGPU WebGPU examples.`);
-            }
+            titleText = `${baseTitle} - Search: ${searchQuery}`;
+            descText = `Search results for "${searchQuery}" in RedGPU WebGPU examples.`;
         } else {
-            document.title = `${baseTitle} - ${activeTab}`;
-            if (metaDesc) {
-                metaDesc.setAttribute('content', `Explore ${activeTab} examples in RedGPU - High-performance WebGPU library.`);
-            }
+            titleText = `${baseTitle} - ${activeTab}`;
+            descText = `Explore ${activeTab} examples in RedGPU - High-performance WebGPU library.`;
         }
+
+        document.title = titleText;
+        if (metaDesc) metaDesc.setAttribute('content', descText);
+        if (ogTitle) ogTitle.setAttribute('content', titleText);
+        if (ogDesc) ogDesc.setAttribute('content', descText);
+        if (twitterTitle) twitterTitle.setAttribute('content', titleText);
+        if (twitterDesc) twitterDesc.setAttribute('content', descText);
+
     }, [activeTab, searchQuery]);
 
     useEffect(() => {
