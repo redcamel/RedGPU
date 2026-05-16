@@ -7,24 +7,30 @@ const MainContent: React.FC = () => {
     const activeTab = useExamplesStore(state => state.activeTab);
     const sidebarOpen = useExamplesStore(state => state.sidebarOpen);
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
+    const isNarrow = useExamplesStore(state => state.isNarrow);
 
     return (
         <main style={mainStyle}>
-            <div style={topBar}>
-                <button 
-                    onClick={() => setSidebarOpen(!sidebarOpen)} 
-                    style={toggleSidebarButton}
-                    title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
-                >
-                    {sidebarOpen ? '◀' : '▶'}
-                </button>
-                <div style={pathStyle}>
+            <div style={{...topBar, padding: isNarrow ? '0 10px' : '0 20px'}}>
+                {!isNarrow && (
+                    <button 
+                        onClick={() => setSidebarOpen(!sidebarOpen)} 
+                        style={toggleSidebarButton}
+                        title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
+                    >
+                        {sidebarOpen ? '◀' : '▶'}
+                    </button>
+                )}
+                <div style={{...pathStyle, fontSize: isNarrow ? '12px' : '13px'}}>
                     <span style={{opacity: 0.5}}>Examples /</span> {activeTab}
                 </div>
                 <ViewControls />
             </div>
             
-            <div style={scrollArea}>
+            <div style={{
+                ...scrollArea, 
+                padding: isNarrow ? '20px 15px 100px 15px' : '40px 40px 100px 40px'
+            }}>
                 <ExampleGrid />
             </div>
         </main>

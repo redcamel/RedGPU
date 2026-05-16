@@ -9,10 +9,23 @@ import './styles/common.css';
 
 const ExamplesApp: React.FC = () => {
     const restoreState = useExamplesStore(state => state.restoreState);
+    const setIsNarrow = useExamplesStore(state => state.setIsNarrow);
+    const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
 
     useEffect(() => {
         restoreState();
-    }, [restoreState]);
+
+        const handleResize = () => {
+            const narrow = window.innerWidth <= 768;
+            setIsNarrow(narrow);
+            if (narrow) setSidebarOpen(false);
+        };
+
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initial check
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, [restoreState, setIsNarrow, setSidebarOpen]);
 
     return (
         <div className="examples-app">

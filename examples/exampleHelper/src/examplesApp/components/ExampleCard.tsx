@@ -9,6 +9,7 @@ interface ExampleCardProps {
 const ExampleCard: React.FC<ExampleCardProps> = ({item}) => {
     const language = useExamplesStore(state => state.language);
     const viewMode = useExamplesStore(state => state.viewMode);
+    const isNarrow = useExamplesStore(state => state.isNarrow);
     const [hovered, setHovered] = useState(false);
 
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
@@ -23,15 +24,15 @@ const ExampleCard: React.FC<ExampleCardProps> = ({item}) => {
     if (viewMode === 'list') {
         return (
             <div 
-                style={listCardStyle(hovered)}
+                style={listCardStyle(hovered, isNarrow)}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
                 onClick={handleClick}
             >
                 <img src={thumbUrl} style={listThumbStyle} alt="" loading="lazy" />
                 <div style={listContentStyle}>
-                    <div style={titleStyle}>{item.name}</div>
-                    <div style={listDescStyle} dangerouslySetInnerHTML={{__html: description}} />
+                    <div style={{...titleStyle, fontSize: isNarrow ? '12px' : '14px'}}>{item.name}</div>
+                    {!isNarrow && <div style={listDescStyle} dangerouslySetInnerHTML={{__html: description}} />}
                 </div>
                 {item.experimental && <span style={experimentalBadgeStyle}>EXP</span>}
             </div>
@@ -40,39 +41,41 @@ const ExampleCard: React.FC<ExampleCardProps> = ({item}) => {
 
     return (
         <div 
-            style={cardStyle(hovered)}
+            style={cardStyle(hovered, isNarrow)}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             onClick={handleClick}
         >
             <div style={thumbWrapperStyle}>
                 <img src={thumbUrl} style={thumbStyle(hovered)} alt={item.name} loading="lazy" />
-                <div style={overlayStyle(hovered)}>
-                    <div style={viewButtonStyle}>VIEW EXAMPLE</div>
-                </div>
+                {!isNarrow && (
+                    <div style={overlayStyle(hovered)}>
+                        <div style={viewButtonStyle}>VIEW EXAMPLE</div>
+                    </div>
+                )}
             </div>
-            <div style={contentStyle}>
+            <div style={{...contentStyle, padding: isNarrow ? '12px' : '16px'}}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
-                    <div style={titleStyle}>{item.name}</div>
-                    {item.experimental && <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>}
+                    <div style={{...titleStyle, fontSize: isNarrow ? '13px' : '14px'}}>{item.name}</div>
+                    {item.experimental && <span style={{...experimentalBadgeStyle, fontSize: '8px'}}>EXP</span>}
                 </div>
-                <div style={descStyle} dangerouslySetInnerHTML={{__html: description}} />
+                <div style={{...descStyle, fontSize: isNarrow ? '11px' : '12px'}} dangerouslySetInnerHTML={{__html: description}} />
             </div>
         </div>
     );
 };
 
 // Grid Card Styles
-const cardStyle = (hovered: boolean): React.CSSProperties => ({
+const cardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => ({
     backgroundColor: '#111112',
     border: `1px solid ${hovered ? '#444' : '#222'}`,
     borderRadius: '8px',
     overflow: 'hidden',
     cursor: 'pointer',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    transform: hovered ? 'translateY(-5px)' : 'none',
+    transform: (!isNarrow && hovered) ? 'translateY(-5px)' : 'none',
     boxShadow: hovered ? '0 10px 30px rgba(0,0,0,0.5)' : 'none',
-    maxWidth: '400px', // [KO] 너무 늘어나는 것 방지 [EN] Prevent excessive stretching
+    maxWidth: isNarrow ? 'none' : '400px', // [KO] 모바일에서는 너비 제한 해제 [EN] Remove max-width on mobile
 });
 
 const thumbWrapperStyle: React.CSSProperties = {
@@ -147,15 +150,15 @@ const experimentalBadgeStyle: React.CSSProperties = {
 };
 
 // List Card Styles
-const listCardStyle = (hovered: boolean): React.CSSProperties => ({
+const listCardStyle = (hovered: boolean, isNarrow: boolean): React.CSSProperties => ({
     display: 'flex',
     alignItems: 'center',
-    padding: '10px 15px',
+    padding: isNarrow ? '8px 10px' : '10px 15px',
     backgroundColor: hovered ? '#1a1a1c' : 'transparent',
     borderBottom: '1px solid #222',
     cursor: 'pointer',
     transition: 'background-color 0.2s',
-    gap: '15px',
+    gap: isNarrow ? '10px' : '15px',
 });
 
 const listThumbStyle: React.CSSProperties = {
@@ -182,3 +185,4 @@ const listDescStyle: React.CSSProperties = {
 };
 
 export default ExampleCard;
+

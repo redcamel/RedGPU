@@ -6,25 +6,41 @@ import IconButton from '../../common/components/basic/IconButton';
 const Header: React.FC = () => {
     const searchQuery = useExamplesStore(state => state.searchQuery);
     const setSearchQuery = useExamplesStore(state => state.setSearchQuery);
+    const isNarrow = useExamplesStore(state => state.isNarrow);
 
     const openLink = (url: string) => window.open(url, '_blank');
 
     return (
-        <header style={headerStyle}>
+        <header style={{...headerStyle, padding: isNarrow ? '0 10px' : '0 20px'}}>
             <div style={leftSection}>
-                <div style={logoContainer}>
-                    <span style={titleStyle}>RedGPU <span style={subTitle}>Examples</span></span>
+                <div style={{
+                    ...logoContainer, 
+                    flexDirection: isNarrow ? 'column' : 'row',
+                    alignItems: isNarrow ? 'flex-start' : 'center',
+                    gap: isNarrow ? '0' : '12px'
+                }}>
+                    <span style={{...titleStyle, fontSize: isNarrow ? '14px' : '18px', lineHeight: '1.2'}}>
+                        RedGPU
+                    </span>
+                    <span style={{
+                        ...subTitle, 
+                        fontSize: isNarrow ? '9px' : '18px', 
+                        marginTop: isNarrow ? '-2px' : '0',
+                        opacity: isNarrow ? 0.7 : 1
+                    }}>
+                        Examples
+                    </span>
                 </div>
             </div>
 
-            <div style={centerSection}>
+            <div style={{...centerSection, padding: isNarrow ? '0 10px' : '0 20px'}}>
                 <div style={searchContainer}>
                     <input
                         type="text"
-                        placeholder="Search examples..."
+                        placeholder={isNarrow ? "Search..." : "Search examples..."}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        style={searchInputStyle}
+                        style={{...searchInputStyle, height: isNarrow ? '32px' : '36px'}}
                     />
                     {searchQuery && (
                         <button onClick={() => setSearchQuery('')} style={clearButtonStyle}>×</button>
@@ -34,14 +50,16 @@ const Header: React.FC = () => {
 
             <div style={rightSection}>
                 <IconButton
-                    icon={<OutLinkIcon color="#fff" size={18} />}
+                    icon={<OutLinkIcon color="#fff" size={isNarrow ? 14 : 18} />}
                     label="GITHUB"
                     onClick={() => openLink('https://github.com/redcamel/RedGPU')}
                     title="GitHub Repository"
                 />
-                <button style={manualButtonStyle} onClick={() => openLink('/RedGPU/manual/')}>
-                    MANUAL
-                </button>
+                {!isNarrow && (
+                    <button style={manualButtonStyle} onClick={() => openLink('/RedGPU/manual/')}>
+                        MANUAL
+                    </button>
+                )}
             </div>
         </header>
     );

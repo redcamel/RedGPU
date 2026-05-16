@@ -10,6 +10,7 @@ export interface ExamplesState {
     language: Language;
     sidebarOpen: boolean;
     scrollPosition: number;
+    isNarrow: boolean; // [KO] 모바일/협소 화면 여부 [EN] Narrow viewport flag
 
     setActiveTab: (tab: string) => void;
     setSearchQuery: (query: string) => void;
@@ -17,6 +18,7 @@ export interface ExamplesState {
     setLanguage: (lang: Language) => void;
     setSidebarOpen: (open: boolean) => void;
     setScrollPosition: (pos: number) => void;
+    setIsNarrow: (isNarrow: boolean) => void;
     
     // [KO] 세션 스토리지에서 상태 복원
     // [EN] Restore state from session storage
@@ -33,8 +35,9 @@ export const useExamplesStore = create<ExamplesState>((set, get) => ({
     searchQuery: '',
     viewMode: 'grid',
     language: (typeof navigator !== 'undefined' && navigator.language.startsWith('ko')) ? 'ko' : 'en',
-    sidebarOpen: true,
+    sidebarOpen: typeof window !== 'undefined' ? window.innerWidth > 1024 : true,
     scrollPosition: 0,
+    isNarrow: typeof window !== 'undefined' ? window.innerWidth <= 768 : false,
 
     setActiveTab: (activeTab) => {
         set({activeTab});
@@ -54,6 +57,7 @@ export const useExamplesStore = create<ExamplesState>((set, get) => ({
     },
     setSidebarOpen: (sidebarOpen) => set({sidebarOpen}),
     setScrollPosition: (scrollPosition) => set({scrollPosition}),
+    setIsNarrow: (isNarrow) => set({isNarrow}),
 
     saveState: () => {
         const {activeTab, searchQuery, viewMode, language} = get();

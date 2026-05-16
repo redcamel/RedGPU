@@ -10,31 +10,31 @@ interface ExampleSectionProps {
 
 const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0}) => {
     const viewMode = useExamplesStore(state => state.viewMode);
+    const isNarrow = useExamplesStore(state => state.isNarrow);
 
     if (item.list) {
         const leafItems = item.list.filter(subItem => !subItem.list);
         const groupItems = item.list.filter(subItem => !!subItem.list);
         
+        const responsiveSectionStyle: React.CSSProperties = {
+            marginBottom: depth === 0 ? (isNarrow ? '60px' : '80px') : '40px',
+            marginLeft: depth > 0 ? (isNarrow ? (depth === 1 ? '12px' : '8px') : (depth === 1 ? '24px' : '16px')) : '0',
+            borderLeft: depth > 0 ? '1px solid #222' : 'none',
+            paddingLeft: depth > 0 ? (isNarrow ? '16px' : '24px') : '0',
+        };
+
         return (
-            <section 
-                style={{
-                    marginBottom: depth === 0 ? '80px' : '40px',
-                    marginLeft: depth > 0 ? (depth === 1 ? '24px' : '16px') : '0',
-                    borderLeft: depth > 0 ? '1px solid #222' : 'none',
-                    paddingLeft: depth > 0 ? '24px' : '0',
-                }} 
-                className="fade-in"
-            >
+            <section style={responsiveSectionStyle} className="fade-in">
                 {depth === 0 ? (
-                    <h2 style={sectionTitleStyle}>{item.name}</h2>
+                    <h2 style={{...sectionTitleStyle, fontSize: isNarrow ? '22px' : '28px'}}>{item.name}</h2>
                 ) : depth === 1 ? (
-                    <h3 style={subSectionTitleStyle}>{item.name}</h3>
+                    <h3 style={{...subSectionTitleStyle, fontSize: isNarrow ? '16px' : '18px'}}>{item.name}</h3>
                 ) : (
-                    <h4 style={subSubSectionTitleStyle}>{item.name}</h4>
+                    <h4 style={{...subSubSectionTitleStyle, fontSize: isNarrow ? '11px' : '13px'}}>{item.name}</h4>
                 )}
                 
                 {leafItems.length > 0 && (
-                    <div style={gridStyle(viewMode)}>
+                    <div style={gridStyle(viewMode, isNarrow)}>
                         {leafItems.map((subItem, idx) => (
                             <ExampleSection key={subItem.name + idx} item={subItem} depth={depth + 1} />
                         ))}
@@ -92,14 +92,14 @@ const stackStyle: React.CSSProperties = {
     marginBottom: '20px',
 };
 
-const gridStyle = (mode: string): React.CSSProperties => {
+const gridStyle = (mode: string, isNarrow: boolean): React.CSSProperties => {
     const isGrid = mode === 'grid';
     return {
         display: 'grid',
         gridTemplateColumns: isGrid 
-            ? 'repeat(auto-fill, minmax(280px, 1fr))' 
+            ? `repeat(auto-fill, minmax(${isNarrow ? '240px' : '280px'}, 1fr))` 
             : '1fr',
-        gap: '24px',
+        gap: isNarrow ? '16px' : '24px',
         marginBottom: '20px',
     };
 };
