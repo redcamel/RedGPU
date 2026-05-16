@@ -6,9 +6,22 @@ import {useExamplesStore} from '../store/useExamplesStore';
  * [EN] Hook that manages application initialization and viewport resize events.
  */
 export const useAppInitialization = () => {
+    const activeTab = useExamplesStore(state => state.activeTab);
+    const searchQuery = useExamplesStore(state => state.searchQuery);
     const restoreState = useExamplesStore(state => state.restoreState);
     const setIsNarrow = useExamplesStore(state => state.setIsNarrow);
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
+
+    // [KO] SEO: 활성 탭이나 검색어에 따라 문서 제목 업데이트
+    // [EN] SEO: Update document title based on active tab or search query
+    useEffect(() => {
+        const baseTitle = 'RedGPU Examples';
+        if (searchQuery) {
+            document.title = `${baseTitle} - Search: ${searchQuery}`;
+        } else {
+            document.title = `${baseTitle} - ${activeTab}`;
+        }
+    }, [activeTab, searchQuery]);
 
     useEffect(() => {
         // [KO] 세션 스토리지/URL에서 상태 복원

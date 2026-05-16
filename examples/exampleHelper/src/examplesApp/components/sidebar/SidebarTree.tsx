@@ -1,5 +1,5 @@
 import React from 'react';
-import {ExampleItem} from '../../types/example';
+import {ExampleItem} from '../../../types/example';
 
 interface SidebarTreeProps {
     items: ExampleItem[];
@@ -7,10 +7,6 @@ interface SidebarTreeProps {
 }
 
 const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
-    const navigateToExample = (path: string) => {
-        window.location.href = `/RedGPU/examples/${path}/index.html`;
-    };
-
     return (
         <>
             {items.map((item, idx) => {
@@ -23,17 +19,20 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                         </div>
                     );
                 }
+                const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
                 return (
-                    <div
+                    <a
                         key={key}
+                        href={href}
                         style={{
                             ...itemStyle,
                             marginLeft: depth * 12,
+                            textDecoration: 'none',
+                            display: 'block'
                         }}
-                        onClick={() => item.path && navigateToExample(item.path)}
                     >
                         {item.name}
-                    </div>
+                    </a>
                 );
             })}
         </>

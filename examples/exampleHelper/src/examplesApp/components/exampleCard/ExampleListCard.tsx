@@ -16,13 +16,14 @@ export const ExampleListCard: React.FC<CardProps> = ({
 }) => {
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
+    const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
 
     return (
-        <div 
-            style={listCardStyle(hovered, isNarrow)}
+        <a 
+            href={href}
+            style={{...listCardStyle(hovered, isNarrow), textDecoration: 'none', display: 'flex'}}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            onClick={onClick}
         >
             <img src={thumbUrl} style={listThumbStyle} alt="" loading="lazy" />
             <div style={listContentStyle}>
@@ -30,7 +31,7 @@ export const ExampleListCard: React.FC<CardProps> = ({
                 {!isNarrow && <div style={listDescStyle} dangerouslySetInnerHTML={{__html: description}} />}
             </div>
             {item.experimental && <span style={experimentalBadgeStyle}>EXP</span>}
-        </div>
+        </a>
     );
 };
 

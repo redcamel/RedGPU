@@ -16,13 +16,18 @@ export const ExampleGridCard: React.FC<CardProps> = ({
 }) => {
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
+    const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
 
     return (
-        <div 
-            style={cardStyle(hovered, isNarrow)}
+        <a 
+            href={href}
+            style={{...cardStyle(hovered, isNarrow), textDecoration: 'none', display: 'block'}}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            onClick={onClick}
+            onClick={(e) => {
+                // [KO] 기본 이동은 허용하되, 필요한 경우 추가 로직 수행 (현재는 그냥 이동)
+                // [EN] Allow default navigation, perform additional logic if needed (currently just navigating)
+            }}
         >
             <div style={thumbWrapperStyle}>
                 <img src={thumbUrl} style={thumbStyle(hovered)} alt={item.name} loading="lazy" />
@@ -39,7 +44,7 @@ export const ExampleGridCard: React.FC<CardProps> = ({
                 </div>
                 <div style={{...descStyle, fontSize: isNarrow ? '11px' : '12px'}} dangerouslySetInnerHTML={{__html: description}} />
             </div>
-        </div>
+        </a>
     );
 };
 
