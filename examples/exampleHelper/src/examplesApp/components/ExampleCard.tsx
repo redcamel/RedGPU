@@ -72,6 +72,7 @@ const cardStyle = (hovered: boolean): React.CSSProperties => ({
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     transform: hovered ? 'translateY(-5px)' : 'none',
     boxShadow: hovered ? '0 10px 30px rgba(0,0,0,0.5)' : 'none',
+    maxWidth: '400px', // [KO] 너무 늘어나는 것 방지 [EN] Prevent excessive stretching
 });
 
 const thumbWrapperStyle: React.CSSProperties = {
