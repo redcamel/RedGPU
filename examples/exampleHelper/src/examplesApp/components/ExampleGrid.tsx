@@ -1,16 +1,44 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import ExampleSection from './ExampleSection';
 import {useFilteredExamples} from '../hooks/useFilteredExamples';
 
 const ExampleGrid: React.FC = () => {
     const {filteredItems, resultCount, searchQuery} = useFilteredExamples();
 
+    // [KO] SEO: 검색 결과가 없을 때 noindex 메타 태그 추가
+    // [EN] SEO: Add noindex meta tag when search results are empty
+    useEffect(() => {
+        const head = document.head;
+        const existingTag = document.querySelector('meta[name="robots"]');
+        
+        if (searchQuery && filteredItems.length === 0) {
+            if (!existingTag) {
+                const meta = document.createElement('meta');
+                meta.name = 'robots';
+                meta.content = 'noindex, nofollow';
+                head.appendChild(meta);
+            }
+        } else {
+            if (existingTag) {
+                head.removeChild(existingTag);
+            }
+        }
+
+        // Cleanup on unmount
+        return () => {
+            const tagToRemove = document.querySelector('meta[name="robots"]');
+            if (tagToRemove) {
+                head.removeChild(tagToRemove);
+            }
+        };
+    }, [searchQuery, filteredItems.length]);
+
     if (filteredItems.length === 0) {
         return (
             <div style={emptyStateStyle}>
                 <div style={{fontSize: '48px', marginBottom: '20px'}}>🔍</div>
                 <h3>{searchQuery ? `No results for "${searchQuery}"` : 'No examples found'}</h3>
-                <p style={{color: '#666'}}>Try searching for something else.</p>
+                <p style={{color: '#666'}}>Try searching for something else or check other categories.</p>
             </div>
         );
     }

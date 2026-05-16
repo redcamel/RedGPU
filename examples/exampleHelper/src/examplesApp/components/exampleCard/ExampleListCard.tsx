@@ -17,10 +17,11 @@ export const ExampleListCard: React.FC<CardProps> = ({
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
     
-    // [KO] SEO: HTML 태그를 제거한 순수 텍스트 추출
-    // [EN] SEO: Extract plain text without HTML tags
+    // [KO] SEO: HTML 태그를 제거한 순수 텍스트 추출 및 언어별 alt 텍스트 적용
+    // [EN] SEO: Extract plain text without HTML tags and apply localized alt text
     const plainDescription = description.replace(/<[^>]*>?/gm, '').trim();
-    const imageAlt = `${item.name} - RedGPU WebGPU Example`;
+    const altSuffix = language === 'ko' ? 'RedGPU WebGPU 예제' : 'RedGPU WebGPU Example';
+    const imageAlt = `${item.name} - ${altSuffix}`;
     const imageTitle = plainDescription || item.name;
     
     const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
