@@ -18,6 +18,7 @@ const MainContent: React.FC = () => {
                         onClick={() => setSidebarOpen(!sidebarOpen)} 
                         style={toggleSidebarButton}
                         title={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
+                        aria-label={sidebarOpen ? "Hide Sidebar" : "Show Sidebar"}
                     >
                         {sidebarOpen ? '◀' : '▶'}
                     </button>

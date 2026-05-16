@@ -11,12 +11,20 @@ const SearchInput: React.FC = () => {
             <input
                 type="text"
                 placeholder={isNarrow ? "Search..." : "Search examples..."}
+                aria-label="Search examples"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{...searchInputStyle, height: isNarrow ? '32px' : '36px'}}
             />
             {searchQuery && (
-                <button onClick={() => setSearchQuery('')} style={clearButtonStyle}>×</button>
+                <button 
+                    onClick={() => setSearchQuery('')} 
+                    style={clearButtonStyle}
+                    aria-label="Clear search"
+                    title="Clear search"
+                >
+                    ×
+                </button>
             )}
         </div>
     );

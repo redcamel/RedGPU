@@ -29,6 +29,7 @@ const IconButton: React.FC<IconButtonProps> = ({icon, label, onClick, title}) =>
             }}
             onClick={onClick}
             title={title || label}
+            aria-label={title || label}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >

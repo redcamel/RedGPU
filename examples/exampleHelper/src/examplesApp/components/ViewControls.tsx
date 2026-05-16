@@ -14,6 +14,8 @@ const ViewControls: React.FC = () => {
                     style={buttonStyle(viewMode === 'grid')}
                     onClick={() => setViewMode('grid')}
                     title="Grid View"
+                    aria-label="Grid View"
+                    aria-pressed={viewMode === 'grid'}
                 >
                     ▤
                 </button>
@@ -21,6 +23,8 @@ const ViewControls: React.FC = () => {
                     style={buttonStyle(viewMode === 'list')}
                     onClick={() => setViewMode('list')}
                     title="List View"
+                    aria-label="List View"
+                    aria-pressed={viewMode === 'list'}
                 >
                     ☰
                 </button>
@@ -31,6 +35,7 @@ const ViewControls: React.FC = () => {
             <button 
                 style={{...buttonStyle(true), fontSize: '10px', width: 'auto', padding: '0 10px'}}
                 onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
+                aria-label={`Switch to ${language === 'ko' ? 'English' : 'Korean'}`}
             >
                 {language === 'ko' ? 'KOREAN' : 'ENGLISH'}
             </button>

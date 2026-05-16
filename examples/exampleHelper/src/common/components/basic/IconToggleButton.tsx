@@ -38,6 +38,8 @@ const IconToggleButton: React.FC<IconToggleButtonProps> = ({icon, label, isActiv
             }}
             onClick={onClick}
             title={title || label}
+            aria-label={title || label}
+            aria-pressed={isActive}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
