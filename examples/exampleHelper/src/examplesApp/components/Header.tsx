@@ -19,12 +19,12 @@ const Header: React.FC = () => {
                     alignItems: isNarrow ? 'flex-start' : 'center',
                     gap: isNarrow ? '0' : '12px'
                 }}>
-                    <span style={{...titleStyle, fontSize: isNarrow ? '14px' : '18px', lineHeight: '1.2'}}>
+                    <span style={{...titleStyle, fontSize: isNarrow ? '12px' : '18px', lineHeight: '1.2'}}>
                         RedGPU
                     </span>
                     <span style={{
                         ...subTitle, 
-                        fontSize: isNarrow ? '9px' : '18px', 
+                        fontSize: isNarrow ? '12px' : '18px',
                         marginTop: isNarrow ? '-2px' : '0',
                         opacity: isNarrow ? 0.7 : 1
                     }}>

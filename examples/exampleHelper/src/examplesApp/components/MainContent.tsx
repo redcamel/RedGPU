@@ -8,11 +8,12 @@ const MainContent: React.FC = () => {
     const sidebarOpen = useExamplesStore(state => state.sidebarOpen);
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
     const isNarrow = useExamplesStore(state => state.isNarrow);
+    const searchQuery = useExamplesStore(state => state.searchQuery);
 
     return (
         <main style={mainStyle}>
             <div style={{...topBar, padding: isNarrow ? '0 10px' : '0 20px'}}>
-                {!isNarrow && (
+                {!isNarrow && !searchQuery && (
                     <button 
                         onClick={() => setSidebarOpen(!sidebarOpen)} 
                         style={toggleSidebarButton}
@@ -22,7 +23,13 @@ const MainContent: React.FC = () => {
                     </button>
                 )}
                 <div style={{...pathStyle, fontSize: isNarrow ? '12px' : '13px'}}>
-                    <span style={{opacity: 0.5}}>Examples /</span> {activeTab}
+                    {searchQuery ? (
+                        <span>Global Search</span>
+                    ) : (
+                        <>
+                            <span style={{opacity: 0.5}}>Examples /</span> {activeTab}
+                        </>
+                    )}
                 </div>
                 <ViewControls />
             </div>

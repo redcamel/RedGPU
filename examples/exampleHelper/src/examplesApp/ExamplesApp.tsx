@@ -11,6 +11,7 @@ const ExamplesApp: React.FC = () => {
     const restoreState = useExamplesStore(state => state.restoreState);
     const setIsNarrow = useExamplesStore(state => state.setIsNarrow);
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
+    const searchQuery = useExamplesStore(state => state.searchQuery);
 
     useEffect(() => {
         restoreState();
@@ -30,7 +31,7 @@ const ExamplesApp: React.FC = () => {
     return (
         <div className="examples-app">
             <Header />
-            <CategoryNav />
+            {!searchQuery && <CategoryNav />}
             <div className="layout-wrapper">
                 <Sidebar />
                 <MainContent />
