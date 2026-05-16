@@ -1,10 +1,12 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import ExampleSection from './ExampleSection';
 import {useFilteredExamples} from '../hooks/useFilteredExamples';
 import {ExampleItem} from '../../types/example';
 
 const ExampleGrid: React.FC = () => {
     const {filteredItems, resultCount, searchQuery} = useFilteredExamples();
+    const lcpCounter = useRef<number>(0);
+    lcpCounter.current = 0; // [KO] 렌더링마다 초기화하여 상위 아이템들만 LCP 최적화 [EN] Reset on every render to optimize LCP for top items
 
     // [KO] SEO: 검색 결과가 없을 때 noindex 메타 태그 추가
     // [EN] SEO: Add noindex meta tag when search results are empty
@@ -112,7 +114,7 @@ const ExampleGrid: React.FC = () => {
                 </div>
             )}
             {filteredItems.map((item, idx) => (
-                <ExampleSection key={item.name + idx} item={item} />
+                <ExampleSection key={item.name + idx} item={item} lcpCounter={lcpCounter} />
             ))}
         </div>
     );

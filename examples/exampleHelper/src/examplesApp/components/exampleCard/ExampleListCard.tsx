@@ -6,13 +6,14 @@ interface CardProps {
     language: 'ko' | 'en';
     hovered: boolean;
     isNarrow: boolean;
+    isLCP: boolean;
     onClick: () => void;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
 }
 
 export const ExampleListCard: React.FC<CardProps> = ({
-    item, language, hovered, isNarrow, onClick, onMouseEnter, onMouseLeave
+    item, language, hovered, isNarrow, isLCP, onClick, onMouseEnter, onMouseLeave
 }) => {
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
@@ -36,7 +37,14 @@ export const ExampleListCard: React.FC<CardProps> = ({
                 // [KO] 기본 이동은 허용하되, 필요한 경우 추가 로직 수행
             }}
         >
-            <img src={thumbUrl} style={listThumbStyle} alt={imageAlt} title={imageTitle} loading="lazy" />
+            <img 
+                src={thumbUrl} 
+                style={listThumbStyle} 
+                alt={imageAlt} 
+                title={imageTitle} 
+                loading={isLCP ? "eager" : "lazy"} 
+                {...(isLCP ? { fetchPriority: "high" } : {})}
+            />
             <div style={listContentStyle}>
                 <div style={{...titleStyle, fontSize: isNarrow ? '12px' : '14px'}}>{item.name}</div>
                 {!isNarrow && <div style={listDescStyle} dangerouslySetInnerHTML={{__html: description}} />}

@@ -6,13 +6,14 @@ interface CardProps {
     language: 'ko' | 'en';
     hovered: boolean;
     isNarrow: boolean;
+    isLCP: boolean;
     onClick: () => void;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
 }
 
 export const ExampleGridCard: React.FC<CardProps> = ({
-    item, language, hovered, isNarrow, onClick, onMouseEnter, onMouseLeave
+    item, language, hovered, isNarrow, isLCP, onClick, onMouseEnter, onMouseLeave
 }) => {
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
@@ -38,7 +39,14 @@ export const ExampleGridCard: React.FC<CardProps> = ({
             }}
         >
             <div style={thumbWrapperStyle}>
-                <img src={thumbUrl} style={thumbStyle(hovered)} alt={imageAlt} title={imageTitle} loading="lazy" />
+                <img 
+                    src={thumbUrl} 
+                    style={thumbStyle(hovered)} 
+                    alt={imageAlt} 
+                    title={imageTitle} 
+                    loading={isLCP ? "eager" : "lazy"} 
+                    {...(isLCP ? { fetchPriority: "high" } : {})}
+                />
                 {!isNarrow && (
                     <div style={overlayStyle(hovered)}>
                         <div style={viewButtonStyle}>VIEW EXAMPLE</div>

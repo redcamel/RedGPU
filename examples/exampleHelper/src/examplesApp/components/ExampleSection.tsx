@@ -7,9 +7,10 @@ import {splitSectionItems} from '../utils/sectionHelpers';
 interface ExampleSectionProps {
     item: ExampleItem;
     depth?: number;
+    lcpCounter?: React.MutableRefObject<number>;
 }
 
-const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0}) => {
+const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0, lcpCounter}) => {
     const viewMode = useExamplesStore(state => state.viewMode);
     const isNarrow = useExamplesStore(state => state.isNarrow);
 
@@ -36,7 +37,7 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0}) => {
                 {leafItems.length > 0 && (
                     <div style={gridStyle(viewMode, isNarrow)}>
                         {leafItems.map((subItem, idx) => (
-                            <ExampleSection key={subItem.name + idx} item={subItem} depth={depth + 1} />
+                            <ExampleSection key={subItem.name + idx} item={subItem} depth={depth + 1} lcpCounter={lcpCounter} />
                         ))}
                     </div>
                 )}
@@ -44,7 +45,7 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0}) => {
                 {groupItems.length > 0 && (
                     <div style={stackStyle}>
                         {groupItems.map((subItem, idx) => (
-                            <ExampleSection key={subItem.name + idx} item={subItem} depth={depth + 1} />
+                            <ExampleSection key={subItem.name + idx} item={subItem} depth={depth + 1} lcpCounter={lcpCounter} />
                         ))}
                     </div>
                 )}
@@ -52,7 +53,7 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0}) => {
         );
     }
 
-    return <ExampleCard item={item} />;
+    return <ExampleCard item={item} lcpCounter={lcpCounter} />;
 };
 
 const sectionTitleStyle: React.CSSProperties = {
