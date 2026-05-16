@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import Footer from "./components/Footer.tsx";
 
 /**
  * [KO] 예제 리스트를 위한 메인 진입점 클래스입니다.
@@ -37,6 +38,7 @@ class RedGPUExamples {
                         <h1>RedGPU Examples List</h1>
                         <p>This is a placeholder for the new examples list application.</p>
                     </div>
+                    <Footer useSourceModal={false}/>
                 </React.StrictMode>
             );
         }

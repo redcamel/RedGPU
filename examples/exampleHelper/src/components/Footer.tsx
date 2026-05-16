@@ -8,7 +8,7 @@ import Title from "./Title";
  * [KO] 예제 헬퍼의 하단 푸터 컴포넌트입니다.
  * [EN] Bottom footer component of the example helper.
  */
-const Footer = () => {
+const Footer = ({useSourceModal = true}: { useSourceModal?: boolean }) => {
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
 
@@ -31,13 +31,15 @@ const Footer = () => {
                         <img src={githubIcon} width="16" height="16" alt="GitHub"/>
                     </a>
                 </div>
-                <div style={footerRightStyle}>
+                {
+                    useSourceModal && <div style={footerRightStyle}>
                     <LabelButton
                         label="SOURCE"
                         onClick={() => setShowSourceModal(true)}
                         style={sourceButtonStyle}
                     />
                 </div>
+                }
             </div>
         </div>
     );
