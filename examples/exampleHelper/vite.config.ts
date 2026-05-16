@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import { fileURLToPath } from 'url';
 import * as path from 'path';
 
@@ -7,7 +8,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(), 
+    cssInjectedByJsPlugin({
+      injectCodeFunction: function injectCodeCustomRunTimeFunction(cssCode) {
+        try {
+          if (typeof document != 'undefined') {
+            var elementStyle = document.createElement('style');
+            elementStyle.appendChild(document.createTextNode(cssCode));
+            document.head.appendChild(elementStyle);
+          }
+        } catch (e) {
+          console.error('vite-plugin-css-injected-by-js', e);
+        }
+      },
+      jsAssetsFilterFunction: function customJsAssetsfilterFunction(outputChunk) {
+        // Inject into both entry files
+        return outputChunk.fileName == 'index.js' || outputChunk.fileName == 'examples.js';
+      }
+    })
+  ],
   resolve: {
     alias: {
       '@redgpu/src': path.resolve(__dirname, '../../src')

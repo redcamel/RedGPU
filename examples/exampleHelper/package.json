@@ -7,7 +7,6 @@
     "build": "tsc && vite build",
     "watch": "vite build --watch"
   },
-  "dependencies": {},
   "devDependencies": {
     "@tweakpane/plugin-essentials": "^0.2.1",
     "@types/node": "^25.7.0",
@@ -19,6 +18,7 @@
     "tweakpane": "^4.0.5",
     "typescript": "^6.0.3",
     "vite": "^8.0.12",
+    "vite-plugin-css-injected-by-js": "^5.0.1",
     "zustand": "^5.0.13"
   }
 }
