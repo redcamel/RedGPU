@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import ExampleSection from './ExampleSection';
 import {useFilteredExamples} from '../hooks/useFilteredExamples';
+import {ExampleItem} from '../../types/example';
 
 const ExampleGrid: React.FC = () => {
     const {filteredItems, resultCount, searchQuery} = useFilteredExamples();
@@ -32,6 +33,61 @@ const ExampleGrid: React.FC = () => {
             }
         };
     }, [searchQuery, filteredItems.length]);
+
+    // [KO] SEO: 구조화 데이터(JSON-LD) 생성 및 주입
+    // [EN] SEO: Generate and inject Structured Data (JSON-LD)
+    useEffect(() => {
+        const head = document.head;
+        let jsonLdScript = document.querySelector('script[id="redgpu-json-ld"]');
+        
+        if (!jsonLdScript) {
+            jsonLdScript = document.createElement('script');
+            jsonLdScript.setAttribute('type', 'application/ld+json');
+            jsonLdScript.setAttribute('id', 'redgpu-json-ld');
+            head.appendChild(jsonLdScript);
+        }
+
+        const buildItemList = (items: ExampleItem[]) => {
+            let position = 1;
+            const elements: any[] = [];
+            
+            const traverse = (list: ExampleItem[]) => {
+                list.forEach(item => {
+                    if (item.path) {
+                        elements.push({
+                            "@type": "ListItem",
+                            "position": position++,
+                            "name": item.name,
+                            "url": `${window.location.origin}/RedGPU/examples/${item.path}/index.html`
+                        });
+                    }
+                    if (item.list) {
+                        traverse(item.list);
+                    }
+                });
+            };
+            
+            traverse(items);
+            return elements;
+        };
+
+        const schemaData = {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "itemListElement": buildItemList(filteredItems)
+        };
+
+        jsonLdScript.textContent = JSON.stringify(schemaData);
+
+        return () => {
+            // [KO] 컴포넌트 언마운트 시 스크립트 태그 삭제
+            // [EN] Clean up JSON-LD script on component unmount
+            const scriptToRemove = document.querySelector('script[id="redgpu-json-ld"]');
+            if (scriptToRemove) {
+                head.removeChild(scriptToRemove);
+            }
+        };
+    }, [filteredItems]);
 
     if (filteredItems.length === 0) {
         return (
