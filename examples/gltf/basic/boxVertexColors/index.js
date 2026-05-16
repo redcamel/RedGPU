@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
-import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778920968741";
+import * as RedGPU from "../../../../dist/index.js?t=1778920968741";
 /**
  * [KO] Box Vertex Colors 예제
  * [EN] Box Vertex Colors example

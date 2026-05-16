@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../dist/index.js?t=1778920968741";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778920968741";
 
 /**
  * [KO] Depth of Field (DOF) 예제
@@ -82,7 +82,7 @@ function setupDOFScene(redGPUContext, scene) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js');
+    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778920968741');
     
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {

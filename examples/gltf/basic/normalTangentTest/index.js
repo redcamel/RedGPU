@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
-import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778920968741";
+import * as RedGPU from "../../../../dist/index.js?t=1778920968741";
 /**
  * [KO] Normal Tangent Test 예제
  * [EN] Normal Tangent Test example

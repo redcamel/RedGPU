@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../dist/index.js?t=1778920968741";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778920968741";
 
 /**
  * [KO] Point Light & glTF 상호작용 예제
