@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Directional Light Lighting Studio 예제 (UE5 스타일)

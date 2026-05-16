@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] SkyAtmosphere Generator LUT 텍스처 시각화 예제

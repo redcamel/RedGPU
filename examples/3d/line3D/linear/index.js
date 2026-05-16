@@ -1,6 +1,6 @@
 // RedGPU 사용을 위한 모듈 임포트
 import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Line3D (Linear) 예제
