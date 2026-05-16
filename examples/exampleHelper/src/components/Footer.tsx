@@ -17,8 +17,8 @@ const Footer = ({useSourceModal = true}: { useSourceModal?: boolean }) => {
 
     return (
         <div style={footerContainerStyle}>
-            {isNarrow && <div style={titleContainerStyle}><Title/></div>}
-            {isNarrow && (
+            {useSourceModal && isNarrow && <div style={titleContainerStyle}><Title/></div>}
+            {useSourceModal && isNarrow && (
                 <div style={mobileSelectContainerStyle}>
                     <RenderingSettingsGroup/>
                 </div>
