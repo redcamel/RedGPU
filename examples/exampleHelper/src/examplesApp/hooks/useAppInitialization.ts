@@ -16,10 +16,18 @@ export const useAppInitialization = () => {
     // [EN] SEO: Update document title based on active tab or search query
     useEffect(() => {
         const baseTitle = 'RedGPU Examples';
+        const metaDesc = document.querySelector('meta[name="description"]');
+        
         if (searchQuery) {
             document.title = `${baseTitle} - Search: ${searchQuery}`;
+            if (metaDesc) {
+                metaDesc.setAttribute('content', `Search results for "${searchQuery}" in RedGPU WebGPU examples.`);
+            }
         } else {
             document.title = `${baseTitle} - ${activeTab}`;
+            if (metaDesc) {
+                metaDesc.setAttribute('content', `Explore ${activeTab} examples in RedGPU - High-performance WebGPU library.`);
+            }
         }
     }, [activeTab, searchQuery]);
 

@@ -10,7 +10,7 @@ const ExampleGrid: React.FC = () => {
             <div style={emptyStateStyle}>
                 <div style={{fontSize: '48px', marginBottom: '20px'}}>🔍</div>
                 <h3>{searchQuery ? `No results for "${searchQuery}"` : 'No examples found'}</h3>
-                <p style={{color: '#666'}}>Try searching for something else or check other categories.</p>
+                <p style={{color: '#666'}}>Try searching for something else.</p>
             </div>
         );
     }

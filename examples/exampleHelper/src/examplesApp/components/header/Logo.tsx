@@ -12,9 +12,9 @@ const Logo: React.FC = () => {
                 alignItems: isNarrow ? 'flex-start' : 'center',
                 gap: isNarrow ? '0' : '12px'
             }}>
-                <span style={{...titleStyle, fontSize: isNarrow ? '14px' : '18px', lineHeight: '1.2'}}>
+                <h1 style={{...titleStyle, fontSize: isNarrow ? '14px' : '18px', lineHeight: '1.2', margin: 0}}>
                     RedGPU
-                </span>
+                </h1>
                 <span style={{
                     ...subTitleStyle, 
                     fontSize: isNarrow ? '12px' : '18px',
