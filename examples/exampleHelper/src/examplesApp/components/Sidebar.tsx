@@ -5,11 +5,10 @@ import {ExampleItem} from '../../types/example';
 
 const Sidebar: React.FC = () => {
     const activeTab = useExamplesStore(state => state.activeTab);
-    const setActiveTab = useExamplesStore(state => state.setActiveTab);
     const sidebarOpen = useExamplesStore(state => state.sidebarOpen);
 
     const categories = ExampleList.map(cat => cat.name);
-
+    // ... rest of tree rendering logic unchanged ...
     const renderTree = (items: ExampleItem[], depth: number = 0) => {
         return items.map((item, idx) => {
             if (item.list) {
@@ -47,22 +46,6 @@ const Sidebar: React.FC = () => {
             width: sidebarOpen ? '280px' : '0',
             opacity: sidebarOpen ? 1 : 0,
         }}>
-            <div style={tabContainerStyle}>
-                {categories.map(cat => (
-                    <button
-                        key={cat}
-                        style={{
-                            ...tabButtonStyle,
-                            color: activeTab === cat ? '#fdb48d' : '#888',
-                            borderBottom: activeTab === cat ? '2px solid #fdb48d' : 'none',
-                        }}
-                        onClick={() => setActiveTab(cat)}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
-
             <div style={treeContainerStyle}>
                 {currentCategory?.list && renderTree(currentCategory.list)}
             </div>
@@ -75,38 +58,17 @@ const sidebarStyle: React.CSSProperties = {
     borderRight: '1px solid #333',
     display: 'flex',
     flexDirection: 'column',
-    transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s',
+    transition: 'width(0.3s cubic-bezier(0.4, 0, 0.2, 1)), opacity 0.2s',
     overflow: 'hidden',
     flexShrink: 0,
     height: '100%',
-    minHeight: 0, // [KO] 부모 높이 안에서만 줄어들도록 강제 [EN] Force shrink within parent height
-};
-
-const tabContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    overflowX: 'auto',
-    backgroundColor: '#111112',
-    borderBottom: '1px solid #222',
-    flexShrink: 0, // [KO] 탭 영역 높이 고정 [EN] Fix tab area height
-};
-
-const tabButtonStyle: React.CSSProperties = {
-    flex: 1,
-    minWidth: '70px',
-    height: '40px',
-    backgroundColor: 'transparent',
-    border: 'none',
-    fontSize: '11px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'color 0.2s',
-    flexShrink: 0,
+    minHeight: 0,
 };
 
 const treeContainerStyle: React.CSSProperties = {
     flex: 1,
     overflowY: 'auto',
-    padding: '20px 15px 100px 15px', // [KO] 하단 푸터에 가려지지 않게 여백 추가 [EN] Add padding to avoid overlap with footer
+    padding: '20px 15px 100px 15px',
     minHeight: 0,
 };
 
