@@ -1,16 +1,18 @@
 import React from 'react';
-import {ExampleHelperState, useExampleHelperStore} from './store';
-import Footer from './components/Footer';
+import {ExampleHelperState, useExampleHelperStore} from '../store';
+import Footer from '../common/components/Footer';
 import ExampleHeader from './components/ExampleHeader';
 import Description from './components/Description';
-import SourceModal from './components/basic/SourceModal';
+import SourceModal from './components/SourceModal';
 import {useViewportSync} from './hooks/useViewportSync';
 import {useInspectorInit} from './hooks/useInspectorInit';
 import {useTopBarActions} from './hooks/useTopBarActions';
-import GuiCompareLabelHelper from "./components/gui/GuiCompareLabelHelper";
+import GuiCompareLabelHelper from "./gui/GuiCompareLabelHelper";
 import LoadingUI from './components/LoadingUI';
+import RenderingSettingsGroup from './components/RenderingSettingsGroup';
+import Title from './components/Title';
 
-const LazyGuiPanel = React.lazy(() => import('./components/gui/GuiPanel'));
+const LazyGuiPanel = React.lazy(() => import('./gui/GuiPanel'));
 
 /**
  * [KO] 예제 헬퍼의 메인 애플리케이션 컴포넌트입니다.
@@ -50,7 +52,10 @@ const App = () => {
 
             <GuiCompareLabelHelper/>
 
-            <Footer/>
+            <Footer 
+                narrowTitle={<Title />}
+                narrowSettings={<RenderingSettingsGroup />}
+            />
             <SourceModal/>
             <LoadingUI/>
         </>

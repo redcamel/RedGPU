@@ -1,8 +1,8 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {ExampleHelperState, useExampleHelperStore} from "../store";
-import {getFlatExampleList} from "../utils/exampleFinder";
-import {ExampleItem} from "../types/example";
-import {ChevronLeft, ChevronRight} from "./Icons";
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {getFlatExampleList} from "../../utils/exampleFinder";
+import {ExampleItem} from "../../types/example";
+import {ChevronLeft, ChevronRight} from '../../common/components/Icons';
 
 const Title = () => {
     const currentExample = useExampleHelperStore((state: ExampleHelperState) => state.currentExample);

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useLayoutEffect, useState} from 'react';
-import {useExampleHelperStore} from "../../store";
+import {useExampleHelperStore} from '../../store';
 
 // [KO] 레이아웃 상수 정의
 // [EN] Define layout constants

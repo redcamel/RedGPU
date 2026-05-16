@@ -2,9 +2,9 @@ import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import {GuiConfig, useExampleHelperStore} from './store';
-import {findCurrentExample} from './utils/exampleFinder';
-import View3D from "../../../src/display/view/View3D.ts";
+import {GuiConfig, useExampleHelperStore} from '../store';
+import {findCurrentExample} from '../utils/exampleFinder';
+import View3D from "@redgpu/src/display/view/View3D.ts";
 import updateObject3DMatrix from "@redgpu/src/math/updateObject3DMatrix";
 import {OrbitController} from "@redgpu/src/camera";
 

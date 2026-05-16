@@ -19,8 +19,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: path.resolve(__dirname, 'src/index.tsx'),
-        examples: path.resolve(__dirname, 'src/examples.tsx')
+        index: path.resolve(__dirname, 'src/viewerApp/index.tsx'),
+        examples: path.resolve(__dirname, 'src/examplesApp/examples.tsx')
       },
       name: 'RedGPUExampleHelper',
       fileName: (format, entryName) => `${entryName}.js`,

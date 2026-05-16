@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../store';
-import {HomeIcon} from './Icons';
-import IconButton from './basic/IconButton';
-import IconToggleButton from './basic/IconToggleButton';
-import RenderingSettingsGroup from './RenderingSettingsGroup';
-import Title from "./Title";
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {HomeIcon} from '../../common/components/Icons';
+import IconButton from '../../common/components/basic/IconButton';
+import IconToggleButton from '../../common/components/basic/IconToggleButton';
+import RenderingSettingsGroup from '../../viewerApp/components/RenderingSettingsGroup';
+import Title from '../../viewerApp/components/Title';
 
 /**
  * [KO] 예제 헬퍼의 상단 네비게이션 바 컴포넌트입니다.

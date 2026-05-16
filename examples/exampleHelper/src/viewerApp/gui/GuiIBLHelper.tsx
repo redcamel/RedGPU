@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {hdrImages} from "../../data/hdrList";
 import {resolveExamplePath} from "../../utils/guiUtils";
-import {ExampleHelperState, useExampleHelperStore} from "../../store";
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
 
 /**
  * [KO] IBL 및 조명 설정을 위한 Tweakpane GUI 헬퍼 컴포넌트입니다.

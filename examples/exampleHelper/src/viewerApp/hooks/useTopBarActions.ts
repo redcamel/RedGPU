@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../store';
-import {AxisIcon, DebugIcon, GridIcon, SettingIcon} from '../components/Icons';
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {AxisIcon, DebugIcon, GridIcon, SettingIcon} from '../../common/components/Icons';
 
 /**
  * [KO] 상단 바의 액션 버튼들을 관리하고 상태를 동기화하는 훅입니다.

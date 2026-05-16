@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Footer from "./components/Footer.tsx";
+import Footer from "../common/components/Footer";
 
 /**
  * [KO] 예제 리스트를 위한 메인 진입점 클래스입니다.

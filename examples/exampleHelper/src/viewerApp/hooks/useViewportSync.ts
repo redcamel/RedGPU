@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../store';
-import {useMediaQuery} from '../utils/useMediaQuery';
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import {useMediaQuery} from '../../utils/useMediaQuery';
 
 /**
  * [KO] 뷰포트 크기를 감시하고 전역 상태(isNarrow)를 동기화하는 훅입니다.

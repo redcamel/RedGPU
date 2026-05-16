@@ -1,14 +1,18 @@
 import React from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../store';
-import RenderingSettingsGroup from './RenderingSettingsGroup';
-import LabelButton from './basic/LabelButton';
-import Title from "./Title";
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import LabelButton from '../../common/components/basic/LabelButton';
 
 /**
  * [KO] 예제 헬퍼의 하단 푸터 컴포넌트입니다.
  * [EN] Bottom footer component of the example helper.
  */
-const Footer = ({useSourceModal = true}: { useSourceModal?: boolean }) => {
+interface FooterProps {
+    useSourceModal?: boolean;
+    narrowTitle?: React.ReactNode;
+    narrowSettings?: React.ReactNode;
+}
+
+const Footer = ({useSourceModal = true, narrowTitle, narrowSettings}: FooterProps) => {
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
 
@@ -17,10 +21,10 @@ const Footer = ({useSourceModal = true}: { useSourceModal?: boolean }) => {
 
     return (
         <div style={footerContainerStyle}>
-            {useSourceModal && isNarrow && <div style={titleContainerStyle}><Title/></div>}
-            {useSourceModal && isNarrow && (
+            {useSourceModal && isNarrow && narrowTitle && <div style={titleContainerStyle}>{narrowTitle}</div>}
+            {useSourceModal && isNarrow && narrowSettings && (
                 <div style={mobileSelectContainerStyle}>
-                    <RenderingSettingsGroup/>
+                    {narrowSettings}
                 </div>
             )}
             <div style={footerStyle}>

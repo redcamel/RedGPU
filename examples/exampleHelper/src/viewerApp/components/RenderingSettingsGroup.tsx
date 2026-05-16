@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../store';
-import SelectBox from './basic/SelectBox';
+import {ExampleHelperState, useExampleHelperStore} from '../../store';
+import SelectBox from '../../common/components/basic/SelectBox';
 import TONE_MAPPING_MODE from "@redgpu/src/toneMapping/TONE_MAPPING_MODE";
 
 /**
