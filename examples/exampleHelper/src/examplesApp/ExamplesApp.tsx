@@ -10,6 +10,7 @@ import './styles/common.css';
 
 const ExamplesApp: React.FC = () => {
     const searchQuery = useExamplesStore(state => state.searchQuery);
+    const isNarrow = useExamplesStore(state => state.isNarrow);
 
     // [KO] 앱 초기화 및 전역 이벤트 관리 훅
     // [EN] Hook for app initialization and global event management
@@ -23,7 +24,7 @@ const ExamplesApp: React.FC = () => {
                 <Sidebar />
                 <MainContent />
             </div>
-            <Footer useSourceModal={false} />
+            <Footer useSourceModal={false} isNarrow={isNarrow} />
         </div>
     );
 };

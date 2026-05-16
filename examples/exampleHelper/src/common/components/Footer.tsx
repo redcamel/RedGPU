@@ -10,12 +10,11 @@ interface FooterProps {
     useSourceModal?: boolean;
     narrowTitle?: React.ReactNode;
     narrowSettings?: React.ReactNode;
+    isNarrow?: boolean; // [KO] 외부에서 주입받도록 변경 [EN] Injected from outside
+    onShowSource?: () => void; // [KO] 외부에서 콜백으로 주입 [EN] Injected as callback
 }
 
-const Footer = ({useSourceModal = true, narrowTitle, narrowSettings}: FooterProps) => {
-    const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
-    const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
-
+const Footer = ({useSourceModal = true, narrowTitle, narrowSettings, isNarrow = false, onShowSource}: FooterProps) => {
     const RELATIVE_PATH = './assets/github.png';
     const githubIcon = new URL(RELATIVE_PATH, import.meta.url).href;
 
@@ -39,7 +38,7 @@ const Footer = ({useSourceModal = true, narrowTitle, narrowSettings}: FooterProp
                     useSourceModal && <div style={footerRightStyle}>
                     <LabelButton
                         label="SOURCE"
-                        onClick={() => setShowSourceModal(true)}
+                        onClick={() => onShowSource?.()}
                         style={sourceButtonStyle}
                     />
                 </div>

@@ -21,9 +21,11 @@ const LazyGuiPanel = React.lazy(() => import('./gui/GuiPanel'));
 const App = () => {
     const redGPUContext = useExampleHelperStore((state: ExampleHelperState) => state.redGPUContext);
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
+    const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
+    const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
 
     // [KO] 뷰포트 상태 동기화
-    const isNarrow = useViewportSync();
+    useViewportSync();
 
     // [KO] 상단 바 액션 및 인스펙터 상태 관리
     const {setDebugActive} = useTopBarActions();
@@ -55,6 +57,8 @@ const App = () => {
             <Footer 
                 narrowTitle={<Title />}
                 narrowSettings={<RenderingSettingsGroup />}
+                isNarrow={isNarrow}
+                onShowSource={() => setShowSourceModal(true)}
             />
             <SourceModal/>
             <LoadingUI/>
