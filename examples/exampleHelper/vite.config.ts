@@ -18,9 +18,12 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.tsx'),
+      entry: {
+        index: path.resolve(__dirname, 'src/index.tsx'),
+        examples: path.resolve(__dirname, 'src/examples.tsx')
+      },
       name: 'RedGPUExampleHelper',
-      fileName: () => `index.js`,
+      fileName: (format, entryName) => `${entryName}.js`,
       formats: ['es']
     },
     rollupOptions: {

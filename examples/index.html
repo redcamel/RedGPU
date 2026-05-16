@@ -6,13 +6,22 @@
     <meta content="0" http-equiv="Expires">
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="exampleHelper_old/exampleList/index.css" rel="stylesheet"/>
-    <script src="./index.js?t=1770713934910" type="module"></script>
-    <script src="exampleHelper_old/exampleList/createExampleList.js?t=1770713934910" type="module"></script>
     <title>RedGPU Examples</title>
     <link href="https://redcamel.github.io/RedGPU/examples/" rel="canonical">
-
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
+<script type="module">
+    import RedGPUExamples from './exampleHelper/dist/examples.js';
+    new RedGPUExamples();
+</script>
 </body>
 </html>
