@@ -2,6 +2,7 @@ import React from 'react';
 import {ExampleItem} from '../../types/example';
 import ExampleCard from './ExampleCard';
 import {useExamplesStore} from '../store/useExamplesStore';
+import {splitSectionItems} from '../utils/sectionHelpers';
 
 interface ExampleSectionProps {
     item: ExampleItem;
@@ -13,8 +14,7 @@ const ExampleSection: React.FC<ExampleSectionProps> = ({item, depth = 0}) => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
 
     if (item.list) {
-        const leafItems = item.list.filter(subItem => !subItem.list);
-        const groupItems = item.list.filter(subItem => !!subItem.list);
+        const {leafItems, groupItems} = splitSectionItems(item.list);
         
         const responsiveSectionStyle: React.CSSProperties = {
             marginBottom: depth === 0 ? (isNarrow ? '60px' : '80px') : '40px',
