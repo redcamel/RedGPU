@@ -16,6 +16,13 @@ export const ExampleGridCard: React.FC<CardProps> = ({
 }) => {
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
+    
+    // [KO] SEO: HTML 태그를 제거한 순수 텍스트 추출
+    // [EN] SEO: Extract plain text without HTML tags
+    const plainDescription = description.replace(/<[^>]*>?/gm, '').trim();
+    const imageAlt = `${item.name} - RedGPU WebGPU Example`;
+    const imageTitle = plainDescription || item.name;
+    
     const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
 
     return (
@@ -30,7 +37,7 @@ export const ExampleGridCard: React.FC<CardProps> = ({
             }}
         >
             <div style={thumbWrapperStyle}>
-                <img src={thumbUrl} style={thumbStyle(hovered)} alt={item.name} loading="lazy" />
+                <img src={thumbUrl} style={thumbStyle(hovered)} alt={imageAlt} title={imageTitle} loading="lazy" />
                 {!isNarrow && (
                     <div style={overlayStyle(hovered)}>
                         <div style={viewButtonStyle}>VIEW EXAMPLE</div>

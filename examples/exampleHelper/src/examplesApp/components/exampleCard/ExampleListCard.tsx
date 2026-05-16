@@ -16,6 +16,13 @@ export const ExampleListCard: React.FC<CardProps> = ({
 }) => {
     const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
+    
+    // [KO] SEO: HTML 태그를 제거한 순수 텍스트 추출
+    // [EN] SEO: Extract plain text without HTML tags
+    const plainDescription = description.replace(/<[^>]*>?/gm, '').trim();
+    const imageAlt = `${item.name} - RedGPU WebGPU Example`;
+    const imageTitle = plainDescription || item.name;
+    
     const href = item.path ? `/RedGPU/examples/${item.path}/index.html` : '#';
 
     return (
@@ -24,8 +31,11 @@ export const ExampleListCard: React.FC<CardProps> = ({
             style={{...listCardStyle(hovered, isNarrow), textDecoration: 'none', display: 'flex'}}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
+            onClick={(e) => {
+                // [KO] 기본 이동은 허용하되, 필요한 경우 추가 로직 수행
+            }}
         >
-            <img src={thumbUrl} style={listThumbStyle} alt="" loading="lazy" />
+            <img src={thumbUrl} style={listThumbStyle} alt={imageAlt} title={imageTitle} loading="lazy" />
             <div style={listContentStyle}>
                 <div style={{...titleStyle, fontSize: isNarrow ? '12px' : '14px'}}>{item.name}</div>
                 {!isNarrow && <div style={listDescStyle} dangerouslySetInnerHTML={{__html: description}} />}
