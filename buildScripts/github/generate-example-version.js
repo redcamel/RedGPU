@@ -2,8 +2,8 @@
  * [KO] 예제 파일들의 버전 관리를 위한 스크립트입니다.
  * [EN] Script for version management of example files.
  *
- * [KO] examples 폴더 내의 HTML 파일에 title과 description을 삽입하고, JS 및 CSS 참조 경로에 타임스탬프 쿼리 파라미터를 추가합니다.
- * [EN] Inserts title and description into HTML files within the examples folder and adds timestamp query parameters to JS and CSS reference paths.
+ * [KO] examples 폴더 내의 HTML 파일에 title과 description, keywords를 삽입하고, JS 및 CSS 참조 경로에 타임스탬프 쿼리 파라미터를 추가합니다.
+ * [EN] Inserts title, description, and keywords into HTML files within the examples folder and adds timestamp query parameters to JS and CSS reference paths.
  *
  * @category Utility
  */
@@ -116,6 +116,11 @@ try {
                     .replace(/"/g, '&quot;')
                     .trim();
 
+                // Generate keywords
+                const baseKeywords = ['RedGPU', 'WebGPU', 'Graphics', '3D', '2D', 'JavaScript', 'TypeScript', 'Computer Graphics'];
+                const specificKeywords = relPath.split('/').filter(v => v && !['3d', '2d'].includes(v.toLowerCase()));
+                const keywords = [...new Set([...baseKeywords, ...specificKeywords, title])].join(', ');
+
                 // Remove ALL existing meta tags, title, canonical link, stylesheet links, and script tags pointing to index.js
                 content = content.replace(/<meta[\s\S]*?>/gi, '');
                 content = content.replace(/<title>[\s\S]*?<\/title>/gi, '');
@@ -134,6 +139,7 @@ try {
                     '    <meta charset="UTF-8">',
                     '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
                     `    <meta name="description" content="${description}">`,
+                    `    <meta name="keywords" content="${keywords}">`,
                     `    <link rel="canonical" href="${canonicalUrl}">`,
                     `    <link rel="stylesheet" href="${cssRelPath}?t=${timestamp}">`,
                     `    <script src="index.js?t=${timestamp}" type="module"></script>`
