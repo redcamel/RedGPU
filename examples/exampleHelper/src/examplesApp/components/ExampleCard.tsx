@@ -11,7 +11,7 @@ const ExampleCard: React.FC<ExampleCardProps> = ({item}) => {
     const viewMode = useExamplesStore(state => state.viewMode);
     const [hovered, setHovered] = useState(false);
 
-    const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.png` : '';
+    const thumbUrl = item.path ? `/RedGPU/examples/${item.path}/thumb.webp` : '';
     const description = item.description ? (item.description[language] || item.description['en']) : '';
 
     const handleClick = () => {
@@ -28,7 +28,7 @@ const ExampleCard: React.FC<ExampleCardProps> = ({item}) => {
                 onMouseLeave={() => setHovered(false)}
                 onClick={handleClick}
             >
-                <img src={thumbUrl} style={listThumbStyle} alt="" />
+                <img src={thumbUrl} style={listThumbStyle} alt="" loading="lazy" />
                 <div style={listContentStyle}>
                     <div style={titleStyle}>{item.name}</div>
                     <div style={listDescStyle} dangerouslySetInnerHTML={{__html: description}} />
@@ -46,7 +46,7 @@ const ExampleCard: React.FC<ExampleCardProps> = ({item}) => {
             onClick={handleClick}
         >
             <div style={thumbWrapperStyle}>
-                <img src={thumbUrl} style={thumbStyle(hovered)} alt={item.name} />
+                <img src={thumbUrl} style={thumbStyle(hovered)} alt={item.name} loading="lazy" />
                 <div style={overlayStyle(hovered)}>
                     <div style={viewButtonStyle}>VIEW EXAMPLE</div>
                 </div>
