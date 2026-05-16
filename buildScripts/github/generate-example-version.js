@@ -2,8 +2,8 @@
  * [KO] 예제 파일들의 버전 관리를 위한 스크립트입니다.
  * [EN] Script for version management of example files.
  *
- * [KO] examples 폴더 내의 HTML 파일에 SEO, 소셜 메타 태그, Preload 설정을 삽입하고 자산 경로에 타임스탬프를 추가합니다.
- * [EN] Inserts SEO, social meta tags, and preload hints into HTML files within the examples folder, and adds timestamps to asset paths.
+ * [KO] examples 폴더 내의 HTML 파일에 SEO, 소셜 메타 태그, JSON-LD, H1 태그를 삽입하고 자산 경로에 타임스탬프를 추가합니다.
+ * [EN] Inserts SEO, social meta tags, JSON-LD, H1 tags into HTML files within the examples folder, and adds timestamps to asset paths.
  *
  * @category Utility
  */
@@ -103,7 +103,7 @@ try {
             }
 
             if (title) {
-                description = description
+                const cleanDescription = description
                     .replace(/<[^>]*>?/gm, ' ')
                     .replace(/\s+/g, ' ')
                     .replace(/"/g, '&quot;')
@@ -118,22 +118,40 @@ try {
                     socialImage = baseUrl + relPath + '/thumb.webp';
                 }
 
-                // Cleanup existing tags and comments
+                const cssPath = path.join(targetFolder, 'assets/css/example.css');
+                const cssRelPath = path.relative(dirPath, cssPath).replace(/\\/g, '/');
+                const canonicalUrl = baseUrl + fileRelPath;
+
+                // Cleanup existing SEO elements
                 content = content.replace(/<meta[\s\S]*?>/gi, '');
                 content = content.replace(/<title>[\s\S]*?<\/title>/gi, '');
                 content = content.replace(/<link\s+[^>]*rel="(canonical|stylesheet|preload|modulepreload)"[\s\S]*?>/gi, '');
                 content = content.replace(/<script\s+[^>]*src="index\.js[^>]*><\/script>/gi, '');
+                content = content.replace(/<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/gi, '');
                 content = content.replace(/<!--[\s\S]*?-->/gi, '');
+                content = content.replace(/<h1>[\s\S]*?<\/h1>/gi, '');
 
-                const cssPath = path.join(targetFolder, 'assets/css/example.css');
-                const cssRelPath = path.relative(dirPath, cssPath).replace(/\\/g, '/');
-                const canonicalUrl = baseUrl + fileRelPath;
+                // 1. Generate JSON-LD
+                const jsonLd = {
+                    "@context": "https://schema.org",
+                    "@type": "SoftwareApplication",
+                    "name": title,
+                    "applicationCategory": "DeveloperApplication",
+                    "operatingSystem": "Web",
+                    "description": cleanDescription,
+                    "url": canonicalUrl,
+                    "screenshot": socialImage,
+                    "author": {
+                        "@type": "Person",
+                        "name": "redcamel"
+                    }
+                };
 
                 const standardTags = [
                     `    <title>${title}</title>`,
                     '    <meta charset="UTF-8">',
                     '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
-                    `    <meta name="description" content="${description}">`,
+                    `    <meta name="description" content="${cleanDescription}">`,
                     `    <meta name="keywords" content="${keywords}">`,
                     `    <link rel="canonical" href="${canonicalUrl}">`,
                     '',
@@ -141,15 +159,18 @@ try {
                     '    <meta property="og:type" content="website">',
                     `    <meta property="og:url" content="${canonicalUrl}">`,
                     `    <meta property="og:title" content="${title}">`,
-                    `    <meta property="og:description" content="${description}">`,
+                    `    <meta property="og:description" content="${cleanDescription}">`,
                     `    <meta property="og:image" content="${socialImage}">`,
                     '',
                     '    <!-- Twitter -->',
                     '    <meta property="twitter:card" content="summary_large_image">',
                     `    <meta property="twitter:url" content="${canonicalUrl}">`,
                     `    <meta property="twitter:title" content="${title}">`,
-                    `    <meta property="twitter:description" content="${description}">`,
+                    `    <meta property="twitter:description" content="${cleanDescription}">`,
                     `    <meta property="twitter:image" content="${socialImage}">`,
+                    '',
+                    '    <!-- Structured Data -->',
+                    `    <script type="application/ld+json">${JSON.stringify(jsonLd, null, 2)}</script>`,
                     '',
                     '    <!-- Assets Preload -->',
                     `    <link rel="preload" href="${cssRelPath}?t=${timestamp}" as="style">`,
@@ -160,10 +181,16 @@ try {
                     `    <script src="index.js?t=${timestamp}" type="module"></script>`
                 ].join('\n');
 
+                // Update Head
                 content = content.replace(/<head>/i, `<head>\n${standardTags}`);
                 content = content.replace(/(<head>[\s\S]*?<\/head>)/i, (match, head) => {
                     return head.replace(/\n\s*\n\s*\n/g, '\n\n').replace(/\n\s*\n$/g, '\n');
                 });
+
+                // 2. Update Body (Add H1)
+                // Remove redundant spaces and hidden H1
+                const h1Tag = `<h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">${title}</h1>`;
+                content = content.replace(/<body[^>]*>/i, (match) => `${match}\n${h1Tag}`);
             }
         }
 
@@ -180,7 +207,7 @@ try {
         }
     });
 
-    console.log(`\n✨ Success! Meta tags, Preload hints, and references updated with t=${timestamp}`);
+    console.log(`\n✨ Success! All meta tags, JSON-LD, H1, and references updated with t=${timestamp}`);
 } catch (error) {
     console.error('❌ Error:', error.message);
 }
