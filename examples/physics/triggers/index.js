@@ -1,6 +1,6 @@
 import * as RedGPU from "../../../dist/index.js";
 import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js";
-import RedGPUExampleHelper from "../../exampleHelper2/dist/index.js";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
