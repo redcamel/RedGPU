@@ -1,5 +1,5 @@
 import * as RedGPU from "../../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Medium Load Skinning 예제

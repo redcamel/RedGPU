@@ -1,4 +1,4 @@
-import RedGPUExampleHelper from "../../../exampleHelper2/dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 import * as RedGPU from "../../../../dist/index.js";
 /**
  * [KO] Multi UV Test 예제

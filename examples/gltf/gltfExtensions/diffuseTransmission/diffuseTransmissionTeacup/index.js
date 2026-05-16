@@ -1,4 +1,4 @@
-import RedGPUExampleHelper from "../../../../exampleHelper2/dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 import * as RedGPU from "../../../../../dist/index.js";
 /**
  * [KO] Diffuse Transmission Teacup 예제
