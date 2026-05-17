@@ -14,10 +14,13 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
 
     return `
         ${uniformStruct}
+        
         ${sourceTextures}
-        ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
+        
+        ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}        
         @group(1) @binding(1) var basicSampler : sampler;
         ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}
+        
         ${effect.useDepthTexture ? `@group(2) @binding(0) var depthTexture : ${depthTextureType};` : ''}
         ${effect.useGBufferNormalTexture ? `@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;` : ''}
         ${effect.useMotionVectorTexture ? `@group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;` : ''}
