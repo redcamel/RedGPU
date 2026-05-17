@@ -72,6 +72,7 @@ abstract class ASinglePassPostEffect {
     #WORK_SIZE_Z: number = 1
     #useDepthTexture: boolean = false
     #useGBufferNormalTexture: boolean = false
+    #useMotionVectorTexture: boolean = false
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
     #previousSourceTextureReferences: ASinglePassPostEffectResult[] = [];
@@ -98,6 +99,22 @@ abstract class ASinglePassPostEffect {
             if (workSize.y !== undefined) this.#WORK_SIZE_Y = workSize.y;
             if (workSize.z !== undefined) this.#WORK_SIZE_Z = workSize.z;
         }
+    }
+
+    /**
+     * [KO] Motion Vector 텍스처 사용 여부를 반환합니다.
+     * [EN] Returns whether Motion Vector texture is used.
+     */
+    get useMotionVectorTexture(): boolean {
+        return this.#useMotionVectorTexture;
+    }
+
+    /**
+     * [KO] Motion Vector 텍스처 사용 여부를 설정합니다.
+     * [EN] Sets whether Motion Vector texture is used.
+     */
+    set useMotionVectorTexture(value: boolean) {
+        this.#useMotionVectorTexture = value;
     }
 
     /**
@@ -384,7 +401,7 @@ abstract class ASinglePassPostEffect {
      * [EN] Configures the list of bind group entries.
      */
     #updateBindGroupEntries(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView) {
-        const {storage, textures} = this.shaderInfo;
+        const {storage, textures, samplers} = this.shaderInfo;
         const {viewRenderTextureManager, postEffectManager} = view;
 
         // Group 0: 소스 텍스처들 (Storage 리소스 중 outputTexture가 아닌 것들)
@@ -397,22 +414,15 @@ abstract class ASinglePassPostEffect {
             }
         }
 
-        // Group 2: G-Buffer 리소스 (Depth, G-Buffer Normal 등)
-        textures.forEach(({name, binding}) => {
-            if (name === "depthTexture") {
-                this.#gbufferBindGroupEntries_swap0.push({binding, resource: viewRenderTextureManager.depthTextureView});
-                this.#gbufferBindGroupEntries_swap1.push({binding, resource: viewRenderTextureManager.prevDepthTextureView});
-            } else if (name === "gBufferNormalTexture") {
-                const normalView = this.#redGPUContext.antialiasingManager.useMSAA
-                    ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
-                    : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
-                this.#gbufferBindGroupEntries_swap0.push({binding, resource: normalView});
-                this.#gbufferBindGroupEntries_swap1.push({binding, resource: normalView});
-            }
-        });
-
-        // Group 3: 출력 텍스처
-        this.#outputBindGroupEntries.push({binding: 0, resource: targetOutputView});
+        // Group 1: 샘플러들 (binding 0)
+        if (samplers) {
+            samplers.forEach(({name, binding, group}) => {
+                if (group === 1 && name === 'basicSampler') {
+                    const resource = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+                    this.#computeBindGroupEntries1.push({binding, resource});
+                }
+            });
+        }
 
         // 시스템 유니폼 버퍼 (binding 1)
         if (this.systemUniformsInfo) {
@@ -437,6 +447,29 @@ abstract class ASinglePassPostEffect {
                 },
             });
         }
+
+        // Group 2: G-Buffer 리소스 (Depth, G-Buffer Normal 등)
+        textures.forEach(({name, binding}) => {
+            if (name === "depthTexture") {
+                this.#gbufferBindGroupEntries_swap0.push({binding, resource: viewRenderTextureManager.depthTextureView});
+                this.#gbufferBindGroupEntries_swap1.push({binding, resource: viewRenderTextureManager.prevDepthTextureView});
+            } else if (name === "gBufferNormalTexture") {
+                const normalView = this.#redGPUContext.antialiasingManager.useMSAA
+                    ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
+                    : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
+                this.#gbufferBindGroupEntries_swap0.push({binding, resource: normalView});
+                this.#gbufferBindGroupEntries_swap1.push({binding, resource: normalView});
+            } else if (name === "motionVectorTexture") {
+                const motionVectorView = this.#redGPUContext.antialiasingManager.useMSAA
+                    ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR)
+                    : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR);
+                this.#gbufferBindGroupEntries_swap0.push({binding, resource: motionVectorView});
+                this.#gbufferBindGroupEntries_swap1.push({binding, resource: motionVectorView});
+            }
+        });
+
+        // Group 3: 출력 텍스처
+        this.#outputBindGroupEntries.push({binding: 0, resource: targetOutputView});
     }
 
     /**

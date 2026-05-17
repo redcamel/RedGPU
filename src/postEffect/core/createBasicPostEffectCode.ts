@@ -3,37 +3,35 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
 const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false, sourceTextureNames: string | string[] = 'sourceTexture') => {
-    const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
+    const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect;
     const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
 
     let sourceTextures = '';
     const names = Array.isArray(sourceTextureNames) ? sourceTextureNames : [sourceTextureNames];
     names.forEach((name, i) => {
-        sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_storage_2d<rgba16float,read>;\n`;
+        sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_storage_2d<rgba16float, read>;\n`;
     });
 
     return `
-
-			${uniformStruct}
-      ${sourceTextures}
-
-      ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
-      ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}
-
-      ${effect.useDepthTexture ? `@group(2) @binding(0) var depthTexture : ${depthTextureType}` : ''};
-      ${effect.useGBufferNormalTexture ? `@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>` : ''};
-      
-      @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
-      
-      @compute @workgroup_size(${WORK_SIZE_X},${WORK_SIZE_Y},${WORK_SIZE_Z})
-      
-      fn main ( 
-        @builtin(global_invocation_id) global_id : vec3<u32>,
-      ){
+        ${uniformStruct}
+        ${sourceTextures}
+        ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
+        @group(1) @binding(1) var basicSampler : sampler;
+        ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}
+        ${effect.useDepthTexture ? `@group(2) @binding(0) var depthTexture : ${depthTextureType};` : ''}
+        ${effect.useGBufferNormalTexture ? `@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;` : ''}
+        ${effect.useMotionVectorTexture ? `@group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;` : ''}
+        
+        @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
+        
+        @compute @workgroup_size(${WORK_SIZE_X}, ${WORK_SIZE_Y}, ${WORK_SIZE_Z})
+        fn main(
+          @builtin(global_invocation_id) global_id : vec3<u32>,
+        ) {
           ${code}
-      }
-  `
-}
+        }
+  `;
+};
 
 /**
  * [KO] 기본 후처리 이펙트 WGSL 코드를 생성하는 헬퍼 함수입니다.
