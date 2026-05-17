@@ -73,6 +73,7 @@ abstract class ASinglePassPostEffect {
     #useDepthTexture: boolean = false
     #useGBufferNormalTexture: boolean = false
     #useMotionVectorTexture: boolean = false
+    #usePrevDepthTexture: boolean = false
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
     #previousSourceTextureReferences: ASinglePassPostEffectResult[] = [];
@@ -99,6 +100,22 @@ abstract class ASinglePassPostEffect {
             if (workSize.y !== undefined) this.#WORK_SIZE_Y = workSize.y;
             if (workSize.z !== undefined) this.#WORK_SIZE_Z = workSize.z;
         }
+    }
+
+    /**
+     * [KO] 이전 프레임 깊이(Prev Depth) 텍스처 사용 여부를 반환합니다.
+     * [EN] Returns whether previous depth texture is used.
+     */
+    get usePrevDepthTexture(): boolean {
+        return this.#usePrevDepthTexture;
+    }
+
+    /**
+     * [KO] 이전 프레임 깊이(Prev Depth) 텍스처 사용 여부를 설정합니다.
+     * [EN] Sets whether previous depth texture is used.
+     */
+    set usePrevDepthTexture(value: boolean) {
+        this.#usePrevDepthTexture = value;
     }
 
     /**
@@ -465,6 +482,10 @@ abstract class ASinglePassPostEffect {
                     : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR);
                 this.#gbufferBindGroupEntries_swap0.push({binding, resource: motionVectorView});
                 this.#gbufferBindGroupEntries_swap1.push({binding, resource: motionVectorView});
+            } else if (name === "prevDepthTexture") {
+                const prevDepthView = viewRenderTextureManager.prevDepthTextureView;
+                this.#gbufferBindGroupEntries_swap0.push({binding, resource: prevDepthView});
+                this.#gbufferBindGroupEntries_swap1.push({binding, resource: prevDepthView});
             }
         });
 

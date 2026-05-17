@@ -24,6 +24,7 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
         ${effect.useDepthTexture ? `@group(2) @binding(0) var depthTexture : ${depthTextureType};` : ''}
         ${effect.useGBufferNormalTexture ? `@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;` : ''}
         ${effect.useMotionVectorTexture ? `@group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;` : ''}
+        ${effect.usePrevDepthTexture ? `@group(2) @binding(3) var prevDepthTexture : texture_depth_2d;` : ''}
         
         @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
         
