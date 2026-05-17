@@ -67,10 +67,18 @@ abstract class ASinglePassPostEffect {
      * @param redGPUContext
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
+     * @param workSize
+     * [KO] 워크그룹 사이즈 (선택, 기본값: 16, 16, 1)
+     * [EN] Workgroup size (optional, default: 16, 16, 1)
      */
-    constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext
-        this.#antialiasingManager = redGPUContext.antialiasingManager
+    constructor(redGPUContext: RedGPUContext, workSize?: { x?: number, y?: number, z?: number }) {
+        this.#redGPUContext = redGPUContext;
+        this.#antialiasingManager = redGPUContext.antialiasingManager;
+        if (workSize) {
+            if (workSize.x !== undefined) this.#WORK_SIZE_X = workSize.x;
+            if (workSize.y !== undefined) this.#WORK_SIZE_Y = workSize.y;
+            if (workSize.z !== undefined) this.#WORK_SIZE_Z = workSize.z;
+        }
     }
 
     /**
@@ -171,10 +179,6 @@ abstract class ASinglePassPostEffect {
         return this.#WORK_SIZE_X;
     }
 
-    set WORK_SIZE_X(value: number) {
-        this.#WORK_SIZE_X = value;
-    }
-
     /**
      * [KO] Workgroup Size Y
      * [EN] Workgroup Size Y
@@ -183,20 +187,12 @@ abstract class ASinglePassPostEffect {
         return this.#WORK_SIZE_Y;
     }
 
-    set WORK_SIZE_Y(value: number) {
-        this.#WORK_SIZE_Y = value;
-    }
-
     /**
      * [KO] Workgroup Size Z
      * [EN] Workgroup Size Z
      */
     get WORK_SIZE_Z(): number {
         return this.#WORK_SIZE_Z;
-    }
-
-    set WORK_SIZE_Z(value: number) {
-        this.#WORK_SIZE_Z = value;
     }
 
     /**
@@ -230,70 +226,44 @@ abstract class ASinglePassPostEffect {
      * @param computeCodes
      * [KO] MSAA 및 Non-MSAA용 컴퓨트 셰이더 코드
      * [EN] Compute shader codes for MSAA and Non-MSAA
-     * @param bindGroupLayout
-     * [KO] 바인드 그룹 레이아웃 (선택)
-     * [EN] Bind group layout (optional)
      */
     init(redGPUContext: RedGPUContext, name: string, computeCodes: {
         msaa: string,
         nonMsaa: string
-    }, bindGroupLayout?: GPUBindGroupLayout) {
-        this.#name = name
-        const {resourceManager,} = redGPUContext
-        // MSAA 셰이더 생성
-        this.#computeShaderMSAA = resourceManager.createGPUShaderModule(
-            `${name}_MSAA`,
-            {code: computeCodes.msaa}
-        )
-        // Non-MSAA 셰이더 생성
-        this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(
-            `${name}_NonMSAA`,
-            {code: computeCodes.nonMsaa}
-        )
-        // SHADER_INFO 파싱
-        this.#SHADER_INFO_MSAA = parseWGSL(`${name}_MSAA`, computeCodes.msaa)
-        this.#SHADER_INFO_NON_MSAA = parseWGSL(`${name}_NonMSAA`, computeCodes.nonMsaa)
-        // MSAA 정보 저장
-        const STORAGE_STRUCT = this.#SHADER_INFO_MSAA.storage;
-        const UNIFORM_STRUCT = this.#SHADER_INFO_MSAA.uniforms;
-        this.#storageInfo = STORAGE_STRUCT
-        this.#uniformsInfo = UNIFORM_STRUCT.uniforms
-        this.#systemUniformsInfo = UNIFORM_STRUCT.systemUniforms
-        // UniformBuffer는 구조가 동일하므로 하나만 생성 (Non-MSAA 기준)
+    }) {
+        this.#name = name;
+        const {resourceManager} = redGPUContext;
+
+        // 셰이더 모듈 생성
+        this.#computeShaderMSAA = resourceManager.createGPUShaderModule(`${name}_MSAA`, {code: computeCodes.msaa});
+        this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${name}_NonMSAA`, {code: computeCodes.nonMsaa});
+
+        // 셰이더 정보 파싱
+        this.#SHADER_INFO_MSAA = parseWGSL(`${name}_MSAA`, computeCodes.msaa);
+        this.#SHADER_INFO_NON_MSAA = parseWGSL(`${name}_NonMSAA`, computeCodes.nonMsaa);
+
+        const {storage, uniforms} = this.#SHADER_INFO_MSAA;
+        this.#storageInfo = storage;
+        this.#uniformsInfo = uniforms.uniforms;
+        this.#systemUniformsInfo = uniforms.systemUniforms;
+
+        // 유니폼 버퍼 초기화
         if (this.#uniformsInfo) {
-            const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength)
-            this.#uniformBuffer = new UniformBuffer(
-                redGPUContext,
-                uniformData,
-                `${this.constructor.name}_UniformBuffer`,
-            )
+            const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength);
+            this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, `${this.constructor.name}_UniformBuffer`);
         }
     }
 
-    /**
-     * [KO] 이펙트를 실행합니다.
-     * [EN] Executes the effect.
-     *
-     * @param view
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
-     * @param gpuDevice
-     * [KO] GPU 디바이스
-     * [EN] GPU Device
-     * @param width
-     * [KO] 너비
-     * [EN] Width
-     * @param height
-     * [KO] 높이
-     * [EN] Height
-     */
-    execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
-        this.#redGPUContext.commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
-            computePassEncoder.setPipeline(this.#computePipeline)
-            computePassEncoder.setBindGroup(0, view.renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0)
-            computePassEncoder.setBindGroup(1, this.#computeBindGroup1)
+    #execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
+        const {commandEncoderManager} = this.#redGPUContext;
+        const {renderViewStateData} = view;
+
+        commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
+            computePassEncoder.setPipeline(this.#computePipeline);
+            computePassEncoder.setBindGroup(0, renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0);
+            computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
             computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
-        })
+        });
     }
 
     /**
@@ -317,37 +287,37 @@ abstract class ASinglePassPostEffect {
      * [EN] Rendering result (texture and view)
      */
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
-        const {gpuDevice, antialiasingManager} = this.#redGPUContext
-        const {useMSAA, msaaID} = antialiasingManager
+        const {gpuDevice, antialiasingManager, resourceManager} = this.#redGPUContext;
+        const {useMSAA, msaaID} = antialiasingManager;
 
-        // 텍스처 풀에서 할당받음
+        // 텍스처 풀에서 출력 텍스처 할당
         const prevOutputTexture = this.#outputTexture;
         this.#outputTexture = view.postEffectManager.texturePool.alloc(width, height, 'rgba16float');
-        this.#outputTextureView = this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
+        this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
 
+        // 변경 감지
         const outputTextureChanged = prevOutputTexture !== this.#outputTexture;
         const dimensionsChanged = this.#prevInfo?.width !== width || this.#prevInfo?.height !== height;
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
-        // 소스 텍스처 변경 감지 - 첫 번째 요소만 사용
         const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureInfo);
-        const targetOutputView = this.#outputTextureView
-        const {redGPUContext} = view
+
         if (dimensionsChanged || msaaChanged || sourceTextureChanged || outputTextureChanged) {
-            this.#createBindGroups(view, sourceTextureInfo, targetOutputView, useMSAA, redGPUContext, gpuDevice);
+            this.#createBindGroups(view, sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
         }
 
-        this.execute(view, gpuDevice, width, height)
+        this.#execute(view, gpuDevice, width, height);
+
+        // 상태 업데이트
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
         this.#prevInfo = {width, height};
-        this.#calcVideoMemory()
+        this.#calcVideoMemory();
 
         return {
             texture: this.#outputTexture,
-            textureView: targetOutputView
-        }
+            textureView: this.#outputTextureView
+        };
     }
-
 
     /**
      * [KO] 유니폼 값을 업데이트합니다.
@@ -361,76 +331,69 @@ abstract class ASinglePassPostEffect {
      * [EN] Uniform value
      */
     updateUniform(key: string, value: number | number[] | boolean) {
-        this.uniformBuffer.writeOnlyBuffer(this.uniformsInfo
-            .members[key], value)
+        const memberInfo = this.uniformsInfo?.members[key];
+        if (memberInfo) {
+            this.uniformBuffer.writeOnlyBuffer(memberInfo, value);
+        }
     }
 
-    #createBindGroups(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
-        const currentStorageInfo = this.storageInfo;
-        const currentUniformsInfo = this.uniformsInfo
-        const currentSystemUniformsInfo = this.systemUniformsInfo;
-        this.#computeBindGroupEntries0_swap0 = []
-        this.#computeBindGroupEntries0_swap1 = []
-        this.#computeBindGroupEntries1 = []
-        // Group 0: source textures (outputTexture 제외)
-        for (const k in currentStorageInfo) {
-            const info = currentStorageInfo[k]
-            const {binding, name} = info
+    #createBindGroups(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
+        this.#computeBindGroupEntries0_swap0 = [];
+        this.#computeBindGroupEntries0_swap1 = [];
+        this.#computeBindGroupEntries1 = [];
+
+        this.#updateBindGroupEntries(view, sourceTextureInfoList, targetOutputView);
+        this.#updateLayoutsAndPipeline(useMSAA, gpuDevice);
+
+        // 소스 텍스처 참조 저장
+        this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
+    }
+
+    #updateBindGroupEntries(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView) {
+        const {storage, textures} = this.shaderInfo;
+        const {viewRenderTextureManager, postEffectManager} = view;
+
+        // Group 0: 소스 텍스처들
+        for (const k in storage) {
+            const {binding, name} = storage[k];
             if (name !== 'outputTexture') {
-                this.#computeBindGroupEntries0_swap0.push({
-                    binding: binding,
-                    resource: sourceTextureInfoList[binding].textureView,
-                });
-                this.#computeBindGroupEntries0_swap1.push({
-                    binding: binding,
-                    resource: sourceTextureInfoList[binding].textureView,
-                });
+                const resource = sourceTextureInfoList[binding].textureView;
+                this.#computeBindGroupEntries0_swap0.push({binding, resource});
+                this.#computeBindGroupEntries0_swap1.push({binding, resource});
             }
         }
-        // Group 1: output texture
-        this.#computeBindGroupEntries1.push({
-            binding: 0,
-            resource: targetOutputView,
-        });
-        // Group 0에 추가 리소스들 (depth, sampler, uniform)
-        this.shaderInfo.textures.forEach(texture => {
-            const {name, binding} = texture
+
+        // Group 0: 추가 리소스 (Depth, Normal)
+        textures.forEach(({name, binding}) => {
             if (name === "depthTexture") {
-                this.#computeBindGroupEntries0_swap0.push({
-                    binding: binding,
-                    resource: view.viewRenderTextureManager.depthTextureView
-                })
-                this.#computeBindGroupEntries0_swap1.push({
-                    binding: binding,
-                    resource: view.viewRenderTextureManager.prevDepthTextureView
-                })
-            }
-            if (name === "gBufferNormalTexture") {
-                this.#computeBindGroupEntries0_swap0.push({
-                    binding: binding,
-                    resource:
-                        view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL) : view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL)
-                })
-                this.#computeBindGroupEntries0_swap1.push({
-                    binding: binding,
-                    resource: view.redGPUContext.antialiasingManager.useMSAA ? view.viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL) : view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL)
-                })
+                this.#computeBindGroupEntries0_swap0.push({binding, resource: viewRenderTextureManager.depthTextureView});
+                this.#computeBindGroupEntries0_swap1.push({binding, resource: viewRenderTextureManager.prevDepthTextureView});
+            } else if (name === "gBufferNormalTexture") {
+                const normalView = this.#redGPUContext.antialiasingManager.useMSAA
+                    ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
+                    : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
+                this.#computeBindGroupEntries0_swap0.push({binding, resource: normalView});
+                this.#computeBindGroupEntries0_swap1.push({binding, resource: normalView});
             }
         });
-        // uniform buffer는 마지막에 추가
-        if (currentSystemUniformsInfo) {
+
+        // Group 1: 출력 텍스처 및 유니폼 버퍼
+        this.#computeBindGroupEntries1.push({binding: 0, resource: targetOutputView});
+
+        if (this.systemUniformsInfo) {
             this.#computeBindGroupEntries1.push({
-                binding: currentSystemUniformsInfo.binding,
+                binding: this.systemUniformsInfo.binding,
                 resource: {
-                    buffer: view.postEffectManager.postEffectSystemUniformBuffer.gpuBuffer,
+                    buffer: postEffectManager.postEffectSystemUniformBuffer.gpuBuffer,
                     offset: 0,
-                    size: view.postEffectManager.postEffectSystemUniformBuffer.size
+                    size: postEffectManager.postEffectSystemUniformBuffer.size
                 }
             });
         }
-        if (this.#uniformBuffer && currentUniformsInfo) {
+
+        if (this.#uniformBuffer && this.uniformsInfo) {
             this.#computeBindGroupEntries1.push({
-                binding: currentUniformsInfo.binding,
+                binding: this.uniformsInfo.binding,
                 resource: {
                     buffer: this.#uniformBuffer.gpuBuffer,
                     offset: 0,
@@ -438,60 +401,56 @@ abstract class ASinglePassPostEffect {
                 },
             });
         }
+    }
+
+    #updateLayoutsAndPipeline(useMSAA: boolean, gpuDevice: GPUDevice) {
+        const {resourceManager} = this.#redGPUContext;
         const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
         const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
-        this.#computeBindGroupLayout0 = redGPUContext.resourceManager.getGPUBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`) ||
-            redGPUContext.resourceManager.createBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`,
-                getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0, useMSAA)
-            );
-        this.#computeBindGroupLayout1 = redGPUContext.resourceManager.getGPUBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`) ||
-            redGPUContext.resourceManager.createBindGroupLayout(`${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`,
-                getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA)
-            );
-        this.#computeBindGroup0List_swap0 =
-            gpuDevice.createBindGroup({
-                label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
-                layout: this.#computeBindGroupLayout0,
-                entries: this.#computeBindGroupEntries0_swap0
-            })
-        this.#computeBindGroup0List_swap1 = gpuDevice.createBindGroup({
+
+        const layout0Name = `${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`;
+        const layout1Name = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
+
+        this.#computeBindGroupLayout0 = resourceManager.getGPUBindGroupLayout(layout0Name) ||
+            resourceManager.createBindGroupLayout(layout0Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0, useMSAA));
+
+        this.#computeBindGroupLayout1 = resourceManager.getGPUBindGroupLayout(layout1Name) ||
+            resourceManager.createBindGroupLayout(layout1Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA));
+
+        this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
             label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
             layout: this.#computeBindGroupLayout0,
+            entries: this.#computeBindGroupEntries0_swap0
+        });
+
+        this.#computeBindGroup0List_swap1 = gpuDevice.createBindGroup({
+            label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP1`,
+            layout: this.#computeBindGroupLayout0,
             entries: this.#computeBindGroupEntries0_swap1
-        })
+        });
+
         this.#computeBindGroup1 = gpuDevice.createBindGroup({
             label: `${this.#name}_BIND_GROUP_1_USE_MSAA_${useMSAA}`,
             layout: this.#computeBindGroupLayout1,
             entries: this.#computeBindGroupEntries1
         });
+
         this.#computePipeline = gpuDevice.createComputePipeline({
             label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
             layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout0, this.#computeBindGroupLayout1]}),
-            compute: {module: currentShader, entryPoint: 'main',}
+            compute: {module: currentShader, entryPoint: 'main'}
         });
-        // 소스 텍스처 참조 저장
-        this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
     }
 
     #calcVideoMemory() {
-        this.#videoMemorySize = 0;
-        // [KO] 텍스처는 이제 풀에서 관리되므로 중복 계산을 피하기 위해 여기서 제외합니다.
-        // [EN] Since textures are now managed by the pool, they are excluded here to avoid double counting.
-        if (this.#uniformBuffer) {
-            this.#videoMemorySize += this.#uniformBuffer.size;
-        }
+        this.#videoMemorySize = this.#uniformBuffer ? this.#uniformBuffer.size : 0;
     }
 
     #detectSourceTextureChange(sourceTextureInfoList: ASinglePassPostEffectResult[]): boolean {
         if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureInfoList.length) {
             return true;
         }
-        for (let i = 0; i < sourceTextureInfoList.length; i++) {
-            if (this.#previousSourceTextureReferences[i].textureView !== sourceTextureInfoList[i].textureView) {
-                return true;
-            }
-        }
-        return false;
+        return sourceTextureInfoList.some((info, i) => info.textureView !== this.#previousSourceTextureReferences[i].textureView);
     }
 
     #saveCurrentSourceTextureReferences(sourceTextureInfoList: ASinglePassPostEffectResult[]) {

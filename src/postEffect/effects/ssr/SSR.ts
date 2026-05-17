@@ -74,10 +74,7 @@ class SSR extends ASinglePassPostEffect {
      * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.WORK_SIZE_X = 8;
-        this.WORK_SIZE_Y = 8;
-        this.WORK_SIZE_Z = 1;
+        super(redGPUContext, {x: 8, y: 8, z: 1});
         this.useDepthTexture = true;
         this.useGBufferNormalTexture = true;
         this.init(
