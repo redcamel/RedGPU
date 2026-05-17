@@ -88,11 +88,18 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
         let targetOutputInfo: ASinglePassPostEffectResult
+        const pool = view.postEffectManager.texturePool;
         this.#passList.forEach((effect: ASinglePassPostEffect, index) => {
+            const prevTemp = targetOutputInfo;
             if (index) sourceTextureInfo = targetOutputInfo
             targetOutputInfo = effect.render(
                 view, width, height, sourceTextureInfo
             )
+            // [KO] 이전 패스의 결과물(임시 텍스처)은 다음 패스에서 사용된 후 즉시 풀에 반납합니다.
+            // [EN] The result of the previous pass (temporary texture) is immediately released to the pool after being used in the next pass.
+            if (prevTemp) {
+                pool.release(prevTemp.texture);
+            }
         })
         return targetOutputInfo
     }

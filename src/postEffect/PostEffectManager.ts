@@ -15,6 +15,8 @@ import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
+import PostEffectTexturePool from "./PostEffectTexturePool";
+import {keepLog} from "../utils";
 
 
 /**
@@ -46,6 +48,11 @@ class PostEffectManager {
      * [EN] List of registered post-processing effects
      */
     #postEffects: Array<ASinglePassPostEffect | AMultiPassPostEffect> = []
+    /**
+     * [KO] 텍스처 풀
+     * [EN] Texture pool
+     */
+    #texturePool: PostEffectTexturePool
     /**
      * [KO] 내부 스토리지 텍스처
      * [EN] Internal storage texture
@@ -137,7 +144,16 @@ class PostEffectManager {
      */
     constructor(view: View3D) {
         this.#view = view;
+        this.#texturePool = new PostEffectTexturePool(this.#view.redGPUContext);
         this.#init()
+    }
+
+    /**
+     * [KO] 텍스처 풀 인스턴스를 반환합니다.
+     * [EN] Returns the texture pool instance.
+     */
+    get texturePool(): PostEffectTexturePool {
+        return this.#texturePool;
     }
 
     /**
@@ -351,8 +367,8 @@ class PostEffectManager {
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {width, height} = gBufferColorTexture;
         // 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
-        const initialSourceView = useMSAA 
-            ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR) 
+        const initialSourceView = useMSAA
+            ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR)
             : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR);
         this.#updateSystemUniforms()
         this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
@@ -449,6 +465,10 @@ class PostEffectManager {
             }
         }
 
+        // 프레임 렌더링 종료 후 사용된 텍스처 일괄 회수
+        this.#texturePool.releaseAll();
+
+        keepLog(this.#texturePool)
         return currentTextureView;
     }
 
@@ -460,6 +480,9 @@ class PostEffectManager {
         this.#postEffects.forEach(effect => {
             effect.clear()
         })
+        if (this.#texturePool) {
+            this.#texturePool.clear();
+        }
     }
 
     #checkSSAO() {
@@ -569,6 +592,7 @@ class PostEffectManager {
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
         // 크기가 변경되면 텍스처 재생성
         if (dimensionsChanged) {
+            this.#texturePool.clear();
             if (this.#storageTexture) {
                 this.#storageTexture.destroy();
                 this.#storageTexture = null;

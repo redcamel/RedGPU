@@ -202,6 +202,7 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Rendering result
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+        const pool = view.postEffectManager.texturePool;
         const aoResult = this.#effect_ao.render(
             view, width, height, sourceTextureInfo
         )
@@ -209,9 +210,16 @@ class SSAO extends AMultiPassPostEffect {
             const blurResult = this.#effect_blur.render(
                 view, width, height, aoResult
             )
-            return this.#effect_blend.render(
+            // aoResult는 blur에서 사용된 후 더 이상 필요 없음
+            pool.release(aoResult.texture);
+
+            const blendResult = this.#effect_blend.render(
                 view, width, height, sourceTextureInfo, blurResult
             )
+            // blurResult는 blend에서 사용된 후 더 이상 필요 없음
+            pool.release(blurResult.texture);
+
+            return blendResult;
         } else {
             return aoResult
         }

@@ -212,11 +212,9 @@ abstract class ASinglePassPostEffect {
      * [EN] Clears the effect.
      */
     clear() {
-        if (this.#outputTexture) {
-            this.#outputTexture.destroy();
-            this.#outputTexture = null;
-            this.#outputTextureView = null;
-        }
+        // 텍스처 풀을 사용하므로 여기서 직접 destroy 하지 않음 (필요 시 풀에서 처리)
+        this.#outputTexture = null;
+        this.#outputTextureView = null;
     }
 
     /**
@@ -321,19 +319,29 @@ abstract class ASinglePassPostEffect {
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
         const {gpuDevice, antialiasingManager} = this.#redGPUContext
         const {useMSAA, msaaID} = antialiasingManager
-        const dimensionsChanged = this.#createRenderTexture(view)
+
+        // 텍스처 풀에서 할당받음
+        const prevOutputTexture = this.#outputTexture;
+        this.#outputTexture = view.postEffectManager.texturePool.alloc(width, height, 'rgba16float');
+        this.#outputTextureView = this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
+
+        const outputTextureChanged = prevOutputTexture !== this.#outputTexture;
+        const dimensionsChanged = this.#prevInfo?.width !== width || this.#prevInfo?.height !== height;
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
         // 소스 텍스처 변경 감지 - 첫 번째 요소만 사용
         const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureInfo);
-        const targetOutputView = this.outputTextureView
+        const targetOutputView = this.#outputTextureView
         const {redGPUContext} = view
-        if (dimensionsChanged || msaaChanged || sourceTextureChanged) {
+        if (dimensionsChanged || msaaChanged || sourceTextureChanged || outputTextureChanged) {
             this.#createBindGroups(view, sourceTextureInfo, targetOutputView, useMSAA, redGPUContext, gpuDevice);
         }
 
         this.execute(view, gpuDevice, width, height)
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
+        this.#prevInfo = {width, height};
+        this.#calcVideoMemory()
+
         return {
             texture: this.#outputTexture,
             textureView: targetOutputView
@@ -486,35 +494,6 @@ abstract class ASinglePassPostEffect {
 
     #saveCurrentSourceTextureReferences(sourceTextureInfoList: ASinglePassPostEffectResult[]) {
         this.#previousSourceTextureReferences = [...sourceTextureInfoList];
-    }
-
-    #createRenderTexture(view: View3D): boolean {
-        const {redGPUContext, viewRenderTextureManager, name} = view
-        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {resourceManager} = redGPUContext
-        const {width, height} = gBufferColorTexture
-        const needChange = width !== this.#prevInfo?.width || height !== this.#prevInfo?.height || !this.#outputTexture;
-        if (needChange) {
-            // 기존 텍스처 정리
-            this.clear();
-            // 새 텍스처 생성
-            this.#outputTexture = resourceManager.createManagedTexture({
-                size: {
-                    width,
-                    height,
-                },
-                format: 'rgba16float',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
-                label: `${name}_${this.#name}_${width}x${height}}`
-            });
-            this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
-        }
-        this.#prevInfo = {
-            width,
-            height,
-        }
-        this.#calcVideoMemory()
-        return needChange
     }
 }
 

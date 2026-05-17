@@ -400,14 +400,19 @@ class DOF extends AMultiPassPostEffect {
      * [EN] Final DOF result
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+        const pool = view.postEffectManager.texturePool;
         // 1단계: CoC (Circle of Confusion) 계산
         const cocResult = this.#effect_coc.render(
             view, width, height, sourceTextureInfo
         );
         // 2단계: 통합된 DOF 블러 및 컴포지팅
-        return this.#effect_unified.render(
+        const result = this.#effect_unified.render(
             view, width, height, sourceTextureInfo, cocResult
         );
+        // cocResult는 unified에서 사용된 후 더 이상 필요 없음
+        pool.release(cocResult.texture);
+
+        return result;
     }
 }
 
