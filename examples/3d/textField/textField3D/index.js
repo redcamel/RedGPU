@@ -6,8 +6,8 @@
  * [EN] Demonstrates the usage of TextField3D in 3D space, including features like billboard and styling.
  * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1778920968741";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778920968741";
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);

@@ -18,7 +18,7 @@ html, body {
     height: 100dvh; /* [KO] 최신 브라우저 동적 뷰포트 지원 [EN] Support dynamic viewport for modern browsers */
     background-color: #000;
     color: #fff;
-    font-family: 'Inter', 'Arial', sans-serif;
+    font-family:'Arial', sans-serif;
     overflow: hidden;
 }
 
