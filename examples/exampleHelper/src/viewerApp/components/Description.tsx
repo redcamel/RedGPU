@@ -10,7 +10,7 @@ const Description = () => {
     const language = useExampleHelperStore((state: ExampleHelperState) => state.language);
     const setLanguage = useExampleHelperStore((state: ExampleHelperState) => state.setLanguage);
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
-
+    const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
     if (!currentExample || !currentExample.description) {
         return null;
     }
@@ -19,7 +19,7 @@ const Description = () => {
     if (!description) return null;
 
     return (
-        <div style={{...containerStyle, right: showSettingsPanel ? '320px' : 0}}>
+        <div style={{...containerStyle, right: showSettingsPanel && !isNarrow? '320px' : 0}}>
             <div style={contentStyle}>
                 <span dangerouslySetInnerHTML={{__html: description}}/>
             </div>
