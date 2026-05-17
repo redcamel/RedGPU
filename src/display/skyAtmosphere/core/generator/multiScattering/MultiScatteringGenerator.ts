@@ -6,9 +6,8 @@ import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/Uniform
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
-import AtmosphereShaderLibrary from "../../AtmosphereShaderLibrary";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_MultiScattering_Generator', multiScatteringShaderCode_wgsl, AtmosphereShaderLibrary);
+const SHADER_INFO = parseWGSL('SkyAtmosphere_MultiScattering_Generator', multiScatteringShaderCode_wgsl);
 
 class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;

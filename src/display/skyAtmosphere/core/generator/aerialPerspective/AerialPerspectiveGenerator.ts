@@ -8,9 +8,8 @@ import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import View3D from "../../../../view/View3D";
-import AtmosphereShaderLibrary from "../../AtmosphereShaderLibrary";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_AerialPerspective_Generator', aerialPerspectiveShaderCode_wgsl, AtmosphereShaderLibrary);
+const SHADER_INFO = parseWGSL('SkyAtmosphere_AerialPerspective_Generator', aerialPerspectiveShaderCode_wgsl);
 
 class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectCubeTexture;

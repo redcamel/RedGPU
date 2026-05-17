@@ -6,9 +6,8 @@ import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/Uniform
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
-import AtmosphereShaderLibrary from "../../AtmosphereShaderLibrary";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_Transmittance_Generator', transmittanceShaderCode_wgsl, AtmosphereShaderLibrary);
+const SHADER_INFO = parseWGSL('SkyAtmosphere_Transmittance_Generator', transmittanceShaderCode_wgsl);
 
 class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;

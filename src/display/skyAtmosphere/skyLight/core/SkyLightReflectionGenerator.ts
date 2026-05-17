@@ -9,9 +9,8 @@ import DirectTexture from "../../../../resources/texture/DirectTexture";
 import createUUID from "../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../core/generator/ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
-import AtmosphereShaderLibrary from "../../core/AtmosphereShaderLibrary";
 
-const SPECULAR_SHADER_INFO = parseWGSL('SkyLight_Reflection_Generator', specularShaderCode_wgsl, AtmosphereShaderLibrary);
+const SPECULAR_SHADER_INFO = parseWGSL('SkyLight_Reflection_Generator', specularShaderCode_wgsl);
 
 class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;

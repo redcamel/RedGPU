@@ -8,10 +8,9 @@ import DirectTexture from "../../../../resources/texture/DirectTexture";
 import createUUID from "../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../core/generator/ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
-import AtmosphereShaderLibrary from "../../core/AtmosphereShaderLibrary";
 import {COMMAND_ENCODER_TYPE} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
-const IRRADIANCE_SHADER_INFO = parseWGSL('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl, AtmosphereShaderLibrary);
+const IRRADIANCE_SHADER_INFO = parseWGSL('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl);
 
 class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;

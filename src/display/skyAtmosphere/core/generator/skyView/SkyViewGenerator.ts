@@ -6,9 +6,8 @@ import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
-import AtmosphereShaderLibrary from "../../AtmosphereShaderLibrary";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_SkyView_Generator', skyViewShaderCode_wgsl, AtmosphereShaderLibrary);
+const SHADER_INFO = parseWGSL('SkyAtmosphere_SkyView_Generator', skyViewShaderCode_wgsl);
 
 class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     #lutTexture: DirectTexture;
