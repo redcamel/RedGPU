@@ -38,17 +38,19 @@ abstract class ASinglePassPostEffect {
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
     #computeBindGroupLayout1: GPUBindGroupLayout
-    #computeBindGroupLayout2: GPUBindGroupLayout
+    #gbufferBindGroupLayout: GPUBindGroupLayout
     #outputBindGroupLayout: GPUBindGroupLayout
     #computeBindGroup0List_swap0: GPUBindGroup
     #computeBindGroup0List_swap1: GPUBindGroup
     #computeBindGroup1: GPUBindGroup
-    #computeBindGroup2: GPUBindGroup
+    #gbufferBindGroup_swap0: GPUBindGroup
+    #gbufferBindGroup_swap1: GPUBindGroup
     #outputBindGroup: GPUBindGroup
     #computeBindGroupEntries0_swap0: GPUBindGroupEntry[]
     #computeBindGroupEntries0_swap1: GPUBindGroupEntry[]
     #computeBindGroupEntries1: GPUBindGroupEntry[]
-    #computeBindGroupEntries2: GPUBindGroupEntry[]
+    #gbufferBindGroupEntries_swap0: GPUBindGroupEntry[]
+    #gbufferBindGroupEntries_swap1: GPUBindGroupEntry[]
     #outputBindGroupEntries: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
 
@@ -280,6 +282,7 @@ abstract class ASinglePassPostEffect {
             computePassEncoder.setPipeline(this.#computePipeline);
             computePassEncoder.setBindGroup(0, renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0);
             computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
+            computePassEncoder.setBindGroup(2, renderViewStateData.swapBufferIndex ? this.#gbufferBindGroup_swap1 : this.#gbufferBindGroup_swap0);
             computePassEncoder.setBindGroup(3, this.#outputBindGroup);
             computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
         });
@@ -365,7 +368,8 @@ abstract class ASinglePassPostEffect {
         this.#computeBindGroupEntries0_swap0 = [];
         this.#computeBindGroupEntries0_swap1 = [];
         this.#computeBindGroupEntries1 = [];
-        this.#computeBindGroupEntries2 = [];
+        this.#gbufferBindGroupEntries_swap0 = [];
+        this.#gbufferBindGroupEntries_swap1 = [];
         this.#outputBindGroupEntries = [];
 
         this.#updateBindGroupEntries(view, sourceTextureInfoList, targetOutputView);
@@ -393,17 +397,17 @@ abstract class ASinglePassPostEffect {
             }
         }
 
-        // Group 0: 추가 텍스처 리소스 (Depth, G-Buffer Normal 등)
+        // Group 2: G-Buffer 리소스 (Depth, G-Buffer Normal 등)
         textures.forEach(({name, binding}) => {
             if (name === "depthTexture") {
-                this.#computeBindGroupEntries0_swap0.push({binding, resource: viewRenderTextureManager.depthTextureView});
-                this.#computeBindGroupEntries0_swap1.push({binding, resource: viewRenderTextureManager.prevDepthTextureView});
+                this.#gbufferBindGroupEntries_swap0.push({binding, resource: viewRenderTextureManager.depthTextureView});
+                this.#gbufferBindGroupEntries_swap1.push({binding, resource: viewRenderTextureManager.prevDepthTextureView});
             } else if (name === "gBufferNormalTexture") {
                 const normalView = this.#redGPUContext.antialiasingManager.useMSAA
                     ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
                     : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
-                this.#computeBindGroupEntries0_swap0.push({binding, resource: normalView});
-                this.#computeBindGroupEntries0_swap1.push({binding, resource: normalView});
+                this.#gbufferBindGroupEntries_swap0.push({binding, resource: normalView});
+                this.#gbufferBindGroupEntries_swap1.push({binding, resource: normalView});
             }
         });
 
@@ -456,7 +460,7 @@ abstract class ASinglePassPostEffect {
         this.#computeBindGroupLayout1 = resourceManager.getGPUBindGroupLayout(layout1Name) ||
             resourceManager.createBindGroupLayout(layout1Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA));
 
-        this.#computeBindGroupLayout2 = resourceManager.getGPUBindGroupLayout(layout2Name) ||
+        this.#gbufferBindGroupLayout = resourceManager.getGPUBindGroupLayout(layout2Name) ||
             resourceManager.createBindGroupLayout(layout2Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 2, useMSAA));
 
         this.#outputBindGroupLayout = resourceManager.getGPUBindGroupLayout(layout3Name) ||
@@ -481,10 +485,16 @@ abstract class ASinglePassPostEffect {
             entries: this.#computeBindGroupEntries1
         });
 
-        this.#computeBindGroup2 = gpuDevice.createBindGroup({
-            label: `${this.#name}_BIND_GROUP_2_USE_MSAA_${useMSAA}`,
-            layout: this.#computeBindGroupLayout2,
-            entries: this.#computeBindGroupEntries2
+        this.#gbufferBindGroup_swap0 = gpuDevice.createBindGroup({
+            label: `${this.#name}_BIND_GROUP_2_USE_MSAA_${useMSAA}_SWAP0`,
+            layout: this.#gbufferBindGroupLayout,
+            entries: this.#gbufferBindGroupEntries_swap0
+        });
+
+        this.#gbufferBindGroup_swap1 = gpuDevice.createBindGroup({
+            label: `${this.#name}_BIND_GROUP_2_USE_MSAA_${useMSAA}_SWAP1`,
+            layout: this.#gbufferBindGroupLayout,
+            entries: this.#gbufferBindGroupEntries_swap1
         });
 
         this.#outputBindGroup = gpuDevice.createBindGroup({
@@ -500,7 +510,7 @@ abstract class ASinglePassPostEffect {
                 bindGroupLayouts: [
                     this.#computeBindGroupLayout0,
                     this.#computeBindGroupLayout1,
-                    this.#computeBindGroupLayout2,
+                    this.#gbufferBindGroupLayout,
                     this.#outputBindGroupLayout
                 ]
             }),

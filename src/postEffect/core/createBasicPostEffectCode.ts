@@ -9,12 +9,17 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
 
 			${uniformStruct}
       @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float,read>;
-      ${effect.useDepthTexture ? `@group(0) @binding(1) var depthTexture : ${depthTextureType}` : ''};
-      ${effect.useGBufferNormalTexture ? `@group(0) @binding(${effect.useDepthTexture ? 2 : 1}) var gBufferNormalTexture : texture_2d<f32>` : ''};
+
       ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
       ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}
+
+      ${effect.useDepthTexture ? `@group(2) @binding(0) var depthTexture : ${depthTextureType}` : ''};
+      ${effect.useGBufferNormalTexture ? `@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>` : ''};
+      
       @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
+      
       @compute @workgroup_size(${WORK_SIZE_X},${WORK_SIZE_Y},${WORK_SIZE_Z})
+      
       fn main ( 
         @builtin(global_invocation_id) global_id : vec3<u32>,
       ){

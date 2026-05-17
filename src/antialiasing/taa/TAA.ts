@@ -42,7 +42,7 @@ class TAA {
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
     #computeBindGroupLayout1: GPUBindGroupLayout
-    #computeBindGroupLayout2: GPUBindGroupLayout
+    #gbufferBindGroupLayout: GPUBindGroupLayout
     #outputBindGroupLayout: GPUBindGroupLayout
     #computePipeline: GPUComputePipeline
     #uniformBuffer: UniformBuffer
@@ -64,7 +64,7 @@ class TAA {
     #historyTextureView: GPUTextureView
     #frameBufferBindGroup0: GPUBindGroup
     #frameBufferBindGroup1: GPUBindGroup
-    #frameBufferBindGroup2: GPUBindGroup
+    #gbufferBindGroup: GPUBindGroup
     #outputBindGroup: GPUBindGroup
     #WORK_SIZE_X = 8
     #WORK_SIZE_Y = 8
@@ -270,10 +270,10 @@ class TAA {
 				
 				@group(0) @binding(0) var sourceTexture : texture_2d<f32>;
 				@group(0) @binding(1) var historyTexture : texture_2d<f32>;
-				@group(0) @binding(2) var motionVectorTexture : texture_2d<f32>;
+				@group(2) @binding(0) var motionVectorTexture : texture_2d<f32>;
 				@group(0) @binding(3) var taaTextureSampler : sampler;
-				@group(0) @binding(4) var depthTexture : texture_depth_2d;
-				@group(0) @binding(5) var historyDepthTexture : texture_depth_2d;
+				@group(2) @binding(1) var depthTexture : texture_depth_2d;
+				@group(2) @binding(2) var historyDepthTexture : texture_depth_2d;
 				
 				@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
 				${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
@@ -327,6 +327,7 @@ class TAA {
             computePassEncoder.setPipeline(this.#computePipeline)
             computePassEncoder.setBindGroup(0, this.#frameBufferBindGroup0)
             computePassEncoder.setBindGroup(1, this.#frameBufferBindGroup1)
+            computePassEncoder.setBindGroup(2, this.#gbufferBindGroup)
             computePassEncoder.setBindGroup(3, this.#outputBindGroup)
             computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#WORK_SIZE_X), Math.ceil(height / this.#WORK_SIZE_Y));
         });
@@ -335,6 +336,7 @@ class TAA {
     #createFrameBufferBindGroups(view: View3D, sourceTextureView: GPUTextureView[], useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
         const computeBindGroupEntries0: GPUBindGroupEntry[] = []
         const computeBindGroupEntries1: GPUBindGroupEntry[] = []
+        const computeBindGroupEntries2: GPUBindGroupEntry[] = []
         const outputBindGroupEntries: GPUBindGroupEntry[] = []
         computeBindGroupEntries0.push({
             binding: 0,
@@ -344,20 +346,20 @@ class TAA {
             binding: 1,
             resource: this.#historyTextureView,
         });
-        computeBindGroupEntries0.push({
-            binding: 4,
+        computeBindGroupEntries2.push({
+            binding: 1,
             resource: view.viewRenderTextureManager.depthTextureView,
         });
-        computeBindGroupEntries0.push({
-            binding: 5,
+        computeBindGroupEntries2.push({
+            binding: 2,
             resource: view.viewRenderTextureManager.prevDepthTextureView,
         });
         // 모션벡터 텍스처 추가
         const motionVectorTextureView = useMSAA 
             ? view.viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR) 
             : view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR);
-        computeBindGroupEntries0.push({
-            binding: 2,
+        computeBindGroupEntries2.push({
+            binding: 0,
             resource: motionVectorTextureView,
         });
         computeBindGroupEntries0.push({
@@ -388,7 +390,7 @@ class TAA {
                 },
             });
         }
-        this.#createBindGroups(computeBindGroupEntries0, computeBindGroupEntries1, [], outputBindGroupEntries, useMSAA, redGPUContext, gpuDevice);
+        this.#createBindGroups(computeBindGroupEntries0, computeBindGroupEntries1, computeBindGroupEntries2, outputBindGroupEntries, useMSAA, redGPUContext, gpuDevice);
         this.#createComputePipeline(useMSAA, redGPUContext, gpuDevice);
     }
 
@@ -428,7 +430,7 @@ class TAA {
         }
         this.#computeBindGroupLayout0 = this.#cachedBindGroupLayouts.get(layoutKey0)!;
         this.#computeBindGroupLayout1 = this.#cachedBindGroupLayouts.get(layoutKey1)!;
-        this.#computeBindGroupLayout2 = this.#cachedBindGroupLayouts.get(layoutKey2)!;
+        this.#gbufferBindGroupLayout = this.#cachedBindGroupLayouts.get(layoutKey2)!;
         this.#outputBindGroupLayout = this.#cachedBindGroupLayouts.get(layoutKey3)!;
 
         this.#frameBufferBindGroup0 = gpuDevice.createBindGroup({
@@ -441,9 +443,9 @@ class TAA {
             layout: this.#computeBindGroupLayout1,
             entries: entries1
         });
-        this.#frameBufferBindGroup2 = gpuDevice.createBindGroup({
+        this.#gbufferBindGroup = gpuDevice.createBindGroup({
             label: `${this.#name}_FRAME_BIND_GROUP_2_USE_MSAA_${useMSAA}`,
-            layout: this.#computeBindGroupLayout2,
+            layout: this.#gbufferBindGroupLayout,
             entries: entries2
         });
         this.#outputBindGroup = gpuDevice.createBindGroup({
@@ -463,7 +465,7 @@ class TAA {
                     bindGroupLayouts: [
                         this.#computeBindGroupLayout0,
                         this.#computeBindGroupLayout1,
-                        this.#computeBindGroupLayout2,
+                        this.#gbufferBindGroupLayout,
                         this.#outputBindGroupLayout
                     ]
                 });

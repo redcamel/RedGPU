@@ -20,12 +20,11 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     #cachedComputePipelines: Map<string, GPUComputePipeline> = new Map();
 
     #bindGroupLayout1: GPUBindGroupLayout;
-    #bindGroupLayout2: GPUBindGroupLayout;
     #outputBindGroupLayout: GPUBindGroupLayout;
     #bindGroup0_swap0: GPUBindGroup;
     #bindGroup0_swap1: GPUBindGroup;
     #bindGroup1: GPUBindGroup;
-    #bindGroup2: GPUBindGroup;
+    #gbufferBindGroup: GPUBindGroup;
     #outputBindGroup: GPUBindGroup;
 
     #prevSourceView_swap0: GPUTextureView;
@@ -49,10 +48,6 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             entries: [
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
             ]
-        });
-        this.#bindGroupLayout2 = gpuDevice.createBindGroupLayout({
-            label: 'SkyAtmospherePostEffect_BindGroupLayout_2',
-            entries: []
         });
         this.#outputBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'SkyAtmospherePostEffect_BindGroupLayout_3',
@@ -115,7 +110,6 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                     layout: this.#getBindGroupLayout0(useMSAA),
                     entries: [
                         {binding: 0, resource: sourceTextureInfo.textureView},
-                        {binding: 1, resource: depthView},
                         {binding: 2, resource: skyAtmosphere.transmittanceLUT.gpuTextureView},
                         {binding: 3, resource: skyAtmosphere.multiScatLUT.gpuTextureView},
                         {binding: 4, resource: skyAtmosphere.skyViewLUT.gpuTextureView},
@@ -138,7 +132,6 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                     layout: this.#getBindGroupLayout0(useMSAA),
                     entries: [
                         {binding: 0, resource: sourceTextureInfo.textureView},
-                        {binding: 1, resource: depthView},
                         {binding: 2, resource: skyAtmosphere.transmittanceLUT.gpuTextureView},
                         {binding: 3, resource: skyAtmosphere.multiScatLUT.gpuTextureView},
                         {binding: 4, resource: skyAtmosphere.skyViewLUT.gpuTextureView},
@@ -154,7 +147,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             currentBindGroup0 = this.#bindGroup0_swap1;
         }
 
-        if (!this.#bindGroup1 || dimensionsChanged || peUniformBufferChanged) {
+        if (!this.#bindGroup1 || dimensionsChanged || peUniformBufferChanged || msaaChanged || this.#prevDepthView_swap0 !== depthView) {
             this.#prevPEUniformBuffer = peUniformBuffer;
             this.#bindGroup1 = gpuDevice.createBindGroup({
                 label: 'SkyAtmospherePostEffect_BG_1',
@@ -163,10 +156,12 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                     {binding: 1, resource: {buffer: peUniformBuffer}}
                 ]
             });
-            this.#bindGroup2 = gpuDevice.createBindGroup({
+            this.#gbufferBindGroup = gpuDevice.createBindGroup({
                 label: 'SkyAtmospherePostEffect_BG_2',
-                layout: this.#bindGroupLayout2,
-                entries: []
+                layout: this.#getGbufferBindGroupLayout(useMSAA),
+                entries: [
+                    {binding: 0, resource: depthView}
+                ]
             });
             this.#outputBindGroup = gpuDevice.createBindGroup({
                 label: 'SkyAtmospherePostEffect_BG_3',
@@ -181,7 +176,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, currentBindGroup0);
             passEncoder.setBindGroup(1, this.#bindGroup1);
-            passEncoder.setBindGroup(2, this.#bindGroup2);
+            passEncoder.setBindGroup(2, this.#gbufferBindGroup);
             passEncoder.setBindGroup(3, this.#outputBindGroup);
             passEncoder.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16));
         });
@@ -199,13 +194,14 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 '#redgpu_include depth.getLinearizeDepth',
                 '#redgpu_include skyAtmosphere.skyAtmosphereFn',
                 '@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
-                `@group(0) @binding(1) var depthTexture : ${useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d'};`,
                 '@group(0) @binding(2) var transmittanceLUT : texture_2d<f32>;',
                 '@group(0) @binding(3) var multiScatLUT : texture_2d<f32>;',
                 '@group(0) @binding(4) var skyViewLUT : texture_2d<f32>;',
                 '@group(0) @binding(5) var aerialPerspectiveLUT : texture_3d<f32>;',
                 '@group(0) @binding(6) var skyAtmosphereSampler : sampler;',
                 '@group(0) @binding(7) var skyAtmosphereIrradianceLUT : texture_cube<f32>;',
+                '',
+                `@group(2) @binding(0) var depthTexture : ${useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d'};`,
                 '',
                 '@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM,
@@ -239,13 +235,26 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             label: `SkyAtmospherePostEffect_${key}`,
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'depth', multisampled: useMSAA}},
                 {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {}},
                 {binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {}},
                 {binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {}},
                 {binding: 5, visibility: GPUShaderStage.COMPUTE, texture: {viewDimension: '3d'}},
                 {binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {}},
                 {binding: 7, visibility: GPUShaderStage.COMPUTE, texture: {viewDimension: 'cube'}}
+            ]
+        });
+        this.#cachedBindGroupLayouts.set(key, bgl);
+        return bgl;
+    }
+
+    #getGbufferBindGroupLayout(useMSAA: boolean): GPUBindGroupLayout {
+        const key = `BGL2_MSAA_${useMSAA}`;
+        if (this.#cachedBindGroupLayouts.has(key)) return this.#cachedBindGroupLayouts.get(key);
+
+        const bgl = this.redGPUContext.gpuDevice.createBindGroupLayout({
+            label: `SkyAtmospherePostEffect_${key}`,
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'depth', multisampled: useMSAA}}
             ]
         });
         this.#cachedBindGroupLayouts.set(key, bgl);
@@ -263,7 +272,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 bindGroupLayouts: [
                     this.#getBindGroupLayout0(useMSAA),
                     this.#bindGroupLayout1,
-                    this.#bindGroupLayout2,
+                    this.#getGbufferBindGroupLayout(useMSAA),
                     this.#outputBindGroupLayout
                 ]
             }),
