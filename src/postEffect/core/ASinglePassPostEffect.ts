@@ -475,8 +475,10 @@ abstract class ASinglePassPostEffect {
 
     #calcVideoMemory() {
         this.#videoMemorySize = 0;
-        if (this.#outputTexture) {
-            this.#videoMemorySize = calculateTextureByteSize(this.#outputTexture);
+        // [KO] 텍스처는 이제 풀에서 관리되므로 중복 계산을 피하기 위해 여기서 제외합니다.
+        // [EN] Since textures are now managed by the pool, they are excluded here to avoid double counting.
+        if (this.#uniformBuffer) {
+            this.#videoMemorySize += this.#uniformBuffer.size;
         }
     }
 

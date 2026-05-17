@@ -1,4 +1,5 @@
 import RedGPUContext from "../context/RedGPUContext";
+import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 
 /**
  * [KO] 후처리용 텍스처 풀링 클래스입니다.
@@ -11,6 +12,7 @@ class PostEffectTexturePool {
     #redGPUContext: RedGPUContext;
     #pool: Map<string, GPUTexture[]> = new Map();
     #activeTextures: Set<GPUTexture> = new Set();
+    #videoMemorySize: number = 0;
 
     /**
      * [KO] PostEffectTexturePool 인스턴스를 생성합니다.
@@ -19,6 +21,14 @@ class PostEffectTexturePool {
      */
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
+    }
+
+    /**
+     * [KO] 풀 내의 전체 비디오 메모리 사용량(bytes)을 반환합니다.
+     * [EN] Returns the total video memory usage (bytes) in the pool.
+     */
+    get videoMemorySize(): number {
+        return this.#videoMemorySize;
     }
 
     /**
@@ -41,12 +51,15 @@ class PostEffectTexturePool {
         if (list.length > 0) {
             texture = list.pop()!;
         } else {
+            // [KO] 신규 생성 시에만 메모리 사이즈를 가산합니다.
+            // [EN] Add to memory size only when a new texture is created.
             texture = this.#redGPUContext.resourceManager.createManagedTexture({
                 size: {width, height},
                 format,
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
                 label: `PostEffectTexturePool_${key}`
             });
+            this.#videoMemorySize += calculateTextureByteSize(texture);
         }
         this.#activeTextures.add(texture);
         return texture;
@@ -97,6 +110,7 @@ class PostEffectTexturePool {
             list.forEach(texture => texture.destroy());
         });
         this.#pool.clear();
+        this.#videoMemorySize = 0; // [KO] 모든 자원이 파기되었으므로 0으로 리셋 [EN] Reset to 0 as all resources are destroyed.
     }
 }
 

@@ -575,8 +575,13 @@ class PostEffectManager {
 
     #calcVideoMemory() {
         const texture = this.#storageTexture
-        if (!texture) return 0;
-        this.#videoMemorySize = calculateTextureByteSize(texture)
+        this.#videoMemorySize = texture ? calculateTextureByteSize(texture) : 0;
+        // 텍스처 풀의 전체 메모리 합산 (활성 + 유휴 텍스처 모두 포함)
+        if (this.#texturePool) {
+            this.#videoMemorySize += this.#texturePool.videoMemorySize;
+        }
+        // 개별 이펙트들이 풀링되지 않는 별도의 자원(버퍼 등)을 가지고 있을 경우를 위해 호출 유지
+        // 단, ASinglePassPostEffect의 videoMemorySize가 풀 텍스처를 중복 계산하지 않도록 주의 필요
         this.#postEffects.forEach(effect => {
             this.#videoMemorySize += effect.videoMemorySize
         })
