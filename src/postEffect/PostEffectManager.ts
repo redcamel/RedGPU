@@ -2,9 +2,7 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
-import Sampler from "../resources/sampler/Sampler";
 import parseWGSL from "../resources/wgslParser/parseWGSL";
-import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
@@ -17,6 +15,7 @@ import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./PostEffectTexturePool";
 import {keepLog} from "../utils";
+import {COMMAND_ENCODER_TYPE} from "../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 
 /**
@@ -69,41 +68,6 @@ class PostEffectManager {
      */
     #storageTextureView: GPUTextureView
     /**
-     * [KO] Compute 워크그룹 X 크기
-     * [EN] Compute Workgroup Size X
-     */
-    #COMPUTE_WORKGROUP_SIZE_X = 16
-    /**
-     * [KO] Compute 워크그룹 Y 크기
-     * [EN] Compute Workgroup Size Y
-     */
-    #COMPUTE_WORKGROUP_SIZE_Y = 4
-    /**
-     * [KO] Compute 워크그룹 Z 크기
-     * [EN] Compute Workgroup Size Z
-     */
-    #COMPUTE_WORKGROUP_SIZE_Z = 1
-    /**
-     * [KO] Compute 셰이더 모듈
-     * [EN] Compute shader module
-     */
-    #textureComputeShaderModule: GPUShaderModule
-    /**
-     * [KO] Compute 바인드 그룹
-     * [EN] Compute bind group
-     */
-    #textureComputeBindGroup: GPUBindGroup
-    /**
-     * [KO] Compute 바인드 그룹 레이아웃
-     * [EN] Compute bind group layout
-     */
-    #textureComputeBindGroupLayout: GPUBindGroupLayout
-    /**
-     * [KO] Compute 파이프라인
-     * [EN] Compute pipeline
-     */
-    #textureComputePipeline: GPUComputePipeline
-    /**
      * [KO] 이전 프레임 텍스처 크기
      * [EN] Texture size of the previous frame
      */
@@ -132,7 +96,6 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
     #autoExposure: AutoExposure;
-    #lastUpdateMSAAID: string
 
     /**
      * [KO] PostEffectManager 인스턴스를 생성합니다.
@@ -366,12 +329,14 @@ class PostEffectManager {
         const {useMSAA, useFXAA, useTAA} = antialiasingManager;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {width, height} = gBufferColorTexture;
+
         // 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
-        const initialSourceView = useMSAA
-            ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR)
-            : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR);
+        const initialSourceTexture = useMSAA
+            ? viewRenderTextureManager.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
+            : viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
+
         this.#updateSystemUniforms()
-        this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceView);
+        this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceTexture);
 
         const {useAutoExposure} = this.#view.rawCamera;
 
@@ -558,13 +523,6 @@ class PostEffectManager {
 
     #init() {
         const {redGPUContext} = this.#view;
-        const {gpuDevice, resourceManager} = redGPUContext;
-        const textureComputeShader = this.#getTextureComputeShader();
-        this.#textureComputeShaderModule = resourceManager.createGPUShaderModule('POST_EFFECT_TEXTURE_COPY_COMPUTE_SHADER', {
-            code: textureComputeShader,
-        });
-        this.#textureComputeBindGroupLayout = this.#createTextureBindGroupLayout(redGPUContext);
-        this.#textureComputePipeline = this.#createTextureComputePipeline(gpuDevice, this.#textureComputeShaderModule, this.#textureComputeBindGroupLayout)
         const SHADER_INFO = parseWGSL('POST_EFFECT_SYSTEM_UNIFORM', ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM)
         const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
         const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
@@ -588,11 +546,10 @@ class PostEffectManager {
         })
     }
 
-    #renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
+    #renderToStorageTexture(view: View3D, sourceTexture: GPUTexture) {
         const {redGPUContext, viewRenderTextureManager} = view;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {antialiasingManager, resourceManager} = redGPUContext;
-        const {msaaID} = antialiasingManager;
+        const {resourceManager} = redGPUContext;
         const {width, height} = gBufferColorTexture;
 
         const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
@@ -601,105 +558,21 @@ class PostEffectManager {
             this.#previousDimensions = {width, height};
         }
 
-        const previousTexture = this.#storageTexture;
         this.#storageTexture = this.#texturePool.alloc(width, height, 'rgba16float');
         this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
 
-        const textureChanged = previousTexture !== this.#storageTexture;
-        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
-
-        // 크기 변경, 텍스처 인스턴스 변경 또는 MSAA 변경 시 BindGroup 재생성
-        if (dimensionsChanged || textureChanged || dirtyMSAA) {
-            this.#lastUpdateMSAAID = msaaID;
-            this.#textureComputeBindGroup = this.#createTextureBindGroup(
-                redGPUContext,
-                this.#textureComputeBindGroupLayout,
-                sourceTextureView,
-                this.#storageTextureView
+        // [KO] Compute Shader 대신 copyTextureToTexture를 사용하여 성능 최적화
+        // [EN] Performance optimization by using copyTextureToTexture instead of Compute Shader
+        redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
+            encoder.copyTextureToTexture(
+                {texture: sourceTexture},
+                {texture: this.#storageTexture},
+                [width, height]
             );
-        }
+        });
 
-        this.#executeComputePass(
-            this.#textureComputePipeline,
-            this.#textureComputeBindGroup,
-            width, height
-        );
+
         return this.#storageTextureView;
-    }
-
-    #getTextureComputeShader() {
-        return `
-	
-      @group(0) @binding(0) var sourceTextureSampler: sampler;
-      @group(0) @binding(1) var sourceTexture : texture_2d<f32>;
-      @group(0) @binding(2) var outputTexture : texture_storage_2d<rgba16float, write>;
- 
-      @compute @workgroup_size(${this.#COMPUTE_WORKGROUP_SIZE_X},${this.#COMPUTE_WORKGROUP_SIZE_Y},${this.#COMPUTE_WORKGROUP_SIZE_Z})
-      fn main (
-        @builtin(global_invocation_id) global_id : vec3<u32>,
-      ){
-          let index = vec2<u32>(global_id.xy );
-          let dimensions: vec2<u32> = textureDimensions(sourceTexture);
-          let dimW = f32(dimensions.x);
-          let dimH = f32(dimensions.y);
-          let uv = 	vec2<f32>((f32(index.x)+0.5)/dimW,(f32(index.y)+0.5)/dimH);
-          var color:vec4<f32> = textureSampleLevel(
-            sourceTexture,
-            sourceTextureSampler,
-            uv,
-            0
-          );
-          
-          textureStore(outputTexture, index, color );
-      };
-    `;
-    }
-
-    #createTextureBindGroupLayout(redGPUContext: RedGPUContext) {
-        return redGPUContext.resourceManager.createBindGroupLayout(`${this.#view.name}_POST_EFFECT_TEXTURE_COPY_BIND_GROUP_LAYOUT`, {
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering',}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba16float'}},
-            ]
-        });
-    }
-
-    #createTextureBindGroup(redGPUContext: RedGPUContext, bindGroupLayout: GPUBindGroupLayout, sourceTextureView: GPUTextureView, storageTextureView: GPUTextureView) {
-        const timestamp = Date.now();
-        return redGPUContext.gpuDevice.createBindGroup({
-            label: `${this.#view.name}_POST_EFFECT_TEXTURE_COPY_BIND_GROUP_${timestamp}`,
-            layout: bindGroupLayout,
-            entries: [
-                {binding: 0, resource: new Sampler(redGPUContext).gpuSampler},
-                {binding: 1, resource: sourceTextureView},
-                {binding: 2, resource: storageTextureView},
-            ]
-        });
-    }
-
-    #createTextureComputePipeline(gpuDevice: GPUDevice, shaderModule: GPUShaderModule, bindGroupLayout: GPUBindGroupLayout) {
-        return gpuDevice.createComputePipeline({
-            label: 'POST_EFFECT_TEXTURE_COPY_COMPUTE_PIPELINE',
-            layout: gpuDevice.createPipelineLayout({
-                label: 'POST_EFFECT_TEXTURE_COPY_PIPELINE_LAYOUT',
-                bindGroupLayouts: [
-                    bindGroupLayout,
-                ]
-            }),
-            compute: {
-                module: shaderModule,
-                entryPoint: 'main',
-            }
-        });
-    }
-
-    #executeComputePass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, width: number, height: number) {
-        this.#view.redGPUContext.commandEncoderManager.addPostProcessComputePass('POST_EFFECT_TEXTURE_COPY_COMPUTE_PASS', (computePassEncoder) => {
-            computePassEncoder.setPipeline(pipeline);
-            computePassEncoder.setBindGroup(0, bindGroup);
-            computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#COMPUTE_WORKGROUP_SIZE_X), Math.ceil(height / this.#COMPUTE_WORKGROUP_SIZE_Y));
-        });
     }
 }
 

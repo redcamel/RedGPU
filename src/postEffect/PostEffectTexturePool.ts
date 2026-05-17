@@ -56,7 +56,7 @@ class PostEffectTexturePool {
             texture = this.#redGPUContext.resourceManager.createManagedTexture({
                 size: {width, height},
                 format,
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
                 label: `PostEffectTexturePool_${key}`
             });
             this.#videoMemorySize += calculateTextureByteSize(texture);
