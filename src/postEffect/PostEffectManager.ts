@@ -452,7 +452,7 @@ class PostEffectManager {
         // 프레임 렌더링 종료 후 사용된 텍스처 일괄 회수
         this.#texturePool.releaseAll();
 
-        keepLog(this.#view.name, this.#texturePool)
+        // keepLog(this.#view.name, this.#texturePool)
         return currentTextureView;
     }
 
