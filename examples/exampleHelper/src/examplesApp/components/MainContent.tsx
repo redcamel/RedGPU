@@ -50,7 +50,7 @@ const mainStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    backgroundColor: '#000',
+    // backgroundColor: '#000',
 };
 
 const topBar: React.CSSProperties = {

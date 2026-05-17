@@ -42,7 +42,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: #000;
+            background: transparent;
             color: #fff;
             overflow: hidden;
         }
@@ -75,19 +75,6 @@
             const scene = new RedGPU.Display.Scene();
             const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
 
-            const directionalLightTest = new RedGPU.Light.DirectionalLight()
-            directionalLightTest.color.r = 255
-            directionalLightTest.color.g = 255
-            directionalLightTest.color.b = 255
-            directionalLightTest.intensity = 1
-
-            scene.lightManager.addDirectionalLight(directionalLightTest)
-
-            const tEffect = new RedGPU.PostEffect.HueSaturation(redGPUContext);
-            const tEffect2 = new RedGPU.PostEffect.ZoomBlur(redGPUContext);
-            tEffect2.amount = 0
-            view.postEffectManager.addEffect(tEffect)
-            view.postEffectManager.addEffect(tEffect2)
             redGPUContext.addView(view);
 
             const ibl = new RedGPU.Resource.IBL(redGPUContext, './assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
@@ -115,11 +102,7 @@
             const modelURL = redGPUContext.detector.isMobile ? 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' : 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb'
             loadGLTF(modelURL);
 
-            // loadGLTF('./assets/gltf/busterDrone/busterDrone.gltf');
             const render = (time) => {
-                directionalLightTest.direction[0] = Math.sin(time / 1500)
-                directionalLightTest.direction[1] = -1
-                directionalLightTest.direction[2] = Math.cos(time / 1500)
                 if (model) {
                     model.rotationY += 0.5
                 }
@@ -130,13 +113,7 @@
 
             }
             renderer.start(redGPUContext, render)
-        },
-        failReason => {
-            console.log('실패', failReason)
-            const t0 = document.createElement('div')
-            document.body.appendChild(t0)
-            t0.innerHTML = failReason
-        },
+        }
     )
 </script>
 </body>

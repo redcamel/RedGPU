@@ -12,6 +12,7 @@ const Sidebar: React.FC = () => {
     return (
         <aside style={{
             ...sidebarStyle,
+            borderRight: sidebarOpen ? '1px solid #333' : '0',
             width: sidebarOpen ? '280px' : '0',
             opacity: sidebarOpen ? 1 : 0,
         }}>
