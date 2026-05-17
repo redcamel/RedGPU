@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
+import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
@@ -21,36 +22,11 @@ class OldBloomBlend extends ASinglePassPostEffect {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
 
-        const shaderSource = {
-            msaa: `
-                @group(0) @binding(0) var sourceTexture0 : texture_storage_2d<rgba16float, read>;
-                @group(0) @binding(1) var sourceTexture1 : texture_storage_2d<rgba16float, read>;
-                @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
-                @group(1) @binding(1) var<uniform> uniforms: Uniforms;
-                
-                ${uniformStructCode}
-                
-                @compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})
-                fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
-                    ${computeCode}
-                }
-            `,
-            nonMsaa: `
-                @group(0) @binding(0) var sourceTexture0 : texture_storage_2d<rgba16float, read>;
-                @group(0) @binding(1) var sourceTexture1 : texture_storage_2d<rgba16float, read>;
-                @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
-                @group(1) @binding(1) var<uniform> uniforms: Uniforms;
-                
-                ${uniformStructCode}
-                
-                @compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})
-                fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
-                    ${computeCode}
-                }
-            `
-        };
-
-        this.init(redGPUContext, 'POST_EFFECT_OLD_BLOOM_BLEND', shaderSource);
+        this.init(
+            redGPUContext,
+            'POST_EFFECT_OLD_BLOOM_BLEND',
+            createBasicPostEffectCode(this, computeCode, uniformStructCode, 2)
+        );
         this.exposure = this.#exposure;
         this.bloomStrength = this.#bloomStrength;
     }

@@ -2,13 +2,22 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
-const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false,) => {
+const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false, numSourceTextures: number = 1) => {
     const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect
     const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
+
+    let sourceTextures = '';
+    if (numSourceTextures === 1) {
+        sourceTextures = `@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float,read>;`;
+    } else {
+        for (let i = 0; i < numSourceTextures; i++) {
+            sourceTextures += `@group(0) @binding(${i}) var sourceTexture${i} : texture_storage_2d<rgba16float,read>;\n`;
+        }
+    }
     return `
 
 			${uniformStruct}
-      @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float,read>;
+      ${sourceTextures}
 
       ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
       ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}
@@ -47,6 +56,9 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
  * @param uniformStruct
  * [KO] 유니폼 구조 WGSL 코드 (선택)
  * [EN] Uniform structure WGSL code (optional)
+ * @param numSourceTextures
+ * [KO] 사용할 소스 텍스처 개수 (기본값: 1)
+ * [EN] Number of source textures to use (default: 1)
  * @returns
  * [KO] { msaa: string, nonMsaa: string } - MSAA/Non-MSAA용 WGSL 코드
  * [EN] { msaa: string, nonMsaa: string } - WGSL code for MSAA/Non-MSAA
@@ -57,10 +69,10 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
  * // shader.msaa, shader.nonMsaa 사용
  * ```
  */
-const createBasicPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '') => {
+const createBasicPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', numSourceTextures: number = 1) => {
     return {
-        msaa: createCode(effect, code, uniformStruct, true),
-        nonMsaa: createCode(effect, code, uniformStruct, false)
+        msaa: createCode(effect, code, uniformStruct, true, numSourceTextures),
+        nonMsaa: createCode(effect, code, uniformStruct, false, numSourceTextures)
     }
 }
 Object.freeze(createBasicPostEffectCode)
