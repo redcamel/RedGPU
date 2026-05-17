@@ -4,13 +4,22 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import GBUFFER_TYPE from "../../display/view/core/GBUFFER_TYPE";
 
-
-
+/**
+ * [KO] 단일 패스 후처리 이펙트 결과 인터페이스입니다.
+ * [EN] Result interface for a single-pass post-processing effect.
+ */
 export type ASinglePassPostEffectResult = {
+    /**
+     * [KO] 결과 텍스처
+     * [EN] Result texture
+     */
     texture: GPUTexture
+    /**
+     * [KO] 결과 텍스처 뷰
+     * [EN] Result texture view
+     */
     textureView: GPUTextureView
 }
 
@@ -18,13 +27,13 @@ export type ASinglePassPostEffectResult = {
  * [KO] 단일 패스 후처리 이펙트 추상 클래스입니다.
  * [EN] Abstract class for single-pass post-processing effects.
  *
- * [KO] 한 번의 Compute 패스로 동작하는 후처리 이펙트의 기반 클래스입니다.
+ * [KO] 한 번의 컴퓨트(Compute) 패스로 동작하는 후처리 이펙트의 기반 클래스입니다.
  * [EN] Base class for post-processing effects that operate in a single compute pass.
  *
  * @category Core
  */
 abstract class ASinglePassPostEffect {
-    // compute 셰이더 및 파이프라인 관련
+    // 컴퓨트 셰이더 및 파이프라인 관련 리소스
     #computeShaderMSAA: GPUShaderModule
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
@@ -36,40 +45,42 @@ abstract class ASinglePassPostEffect {
     #computeBindGroupEntries0_swap1: GPUBindGroupEntry[]
     #computeBindGroupEntries1: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
-    // uniform 및 구조 정보
+
+    // 유니폼 및 셰이더 구조 정보
     #uniformBuffer: UniformBuffer
     #uniformsInfo
     #systemUniformsInfo
     #storageInfo
-    #name
+    #name: string
     #SHADER_INFO_MSAA
     #SHADER_INFO_NON_MSAA
-    #prevInfo
-    // 출력 텍스처
+    #prevInfo: { width: number, height: number }
+
+    // 출력 텍스처 및 설정
     #outputTexture: GPUTexture
     #outputTextureView: GPUTextureView
-    #WORK_SIZE_X = 16
-    #WORK_SIZE_Y = 16
-    #WORK_SIZE_Z = 1
+    #WORK_SIZE_X: number = 16
+    #WORK_SIZE_Y: number = 16
+    #WORK_SIZE_Z: number = 1
     #useDepthTexture: boolean = false
     #useGBufferNormalTexture: boolean = false
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
     #previousSourceTextureReferences: ASinglePassPostEffectResult[] = [];
     #videoMemorySize: number = 0
-    #prevMSAA: Boolean
+    #prevMSAA: boolean
     #prevMSAAID: string
 
     /**
      * [KO] ASinglePassPostEffect 인스턴스를 생성합니다.
      * [EN] Creates an ASinglePassPostEffect instance.
      *
-     * @param redGPUContext
+     * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
-     * @param workSize
-     * [KO] 워크그룹 사이즈 (선택, 기본값: 16, 16, 1)
-     * [EN] Workgroup size (optional, default: 16, 16, 1)
+     * @param workSize -
+     * [KO] 워크그룹 사이즈 설정 (선택, 기본값: {x: 16, y: 16, z: 1})
+     * [EN] Workgroup size configuration (optional, default: {x: 16, y: 16, z: 1})
      */
     constructor(redGPUContext: RedGPUContext, workSize?: { x?: number, y?: number, z?: number }) {
         this.#redGPUContext = redGPUContext;
@@ -98,15 +109,15 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 비디오 메모리 사용량을 반환합니다.
-     * [EN] Returns the video memory usage.
+     * [KO] 비디오 메모리 사용량(Bytes)을 반환합니다.
+     * [EN] Returns the video memory usage in bytes.
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize
     }
 
     /**
-     * [KO] 깊이 텍스처 사용 여부를 반환합니다.
+     * [KO] 깊이(Depth) 텍스처 사용 여부를 반환합니다.
      * [EN] Returns whether depth texture is used.
      */
     get useDepthTexture(): boolean {
@@ -114,7 +125,7 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 깊이 텍스처 사용 여부를 설정합니다.
+     * [KO] 깊이(Depth) 텍스처 사용 여부를 설정합니다.
      * [EN] Sets whether depth texture is used.
      */
     set useDepthTexture(value: boolean) {
@@ -130,102 +141,99 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 스토리지 정보를 반환합니다.
-     * [EN] Returns storage information.
+     * [KO] 셰이더의 스토리지 구조 정보를 반환합니다.
+     * [EN] Returns storage info from the shader.
      */
     get storageInfo() {
         return this.#storageInfo
     }
 
     /**
-     * [KO] 셰이더 정보를 반환합니다. (MSAA 상태에 따라 다름)
-     * [EN] Returns shader information. (Depends on MSAA state)
+     * [KO] 현재 MSAA 상태에 따른 셰이더 정보를 반환합니다.
+     * [EN] Returns shader information based on the current MSAA state.
      */
     get shaderInfo() {
-        // keepLog(this)
-        const useMSAA = this.#antialiasingManager.useMSAA;
-        return useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
+        return this.#antialiasingManager.useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
     }
 
     /**
-     * [KO] 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the uniform buffer.
+     * [KO] 이펙트 전용 유니폼 버퍼를 반환합니다.
+     * [EN] Returns the effect-specific uniform buffer.
      */
     get uniformBuffer(): UniformBuffer {
         return this.#uniformBuffer;
     }
 
     /**
-     * [KO] 유니폼 정보를 반환합니다.
-     * [EN] Returns uniform information.
+     * [KO] 이펙트 전용 유니폼 구조 정보를 반환합니다.
+     * [EN] Returns the effect-specific uniform struct information.
      */
     get uniformsInfo() {
         return this.#uniformsInfo
     }
 
     /**
-     * [KO] 시스템 유니폼 정보를 반환합니다.
-     * [EN] Returns system uniform information.
+     * [KO] 시스템 공용 유니폼 구조 정보를 반환합니다.
+     * [EN] Returns the system common uniform struct information.
      */
     get systemUniformsInfo() {
         return this.#systemUniformsInfo
     }
 
     /**
-     * [KO] Workgroup Size X
-     * [EN] Workgroup Size X
+     * [KO] 워크그룹 사이즈 X를 반환합니다.
+     * [EN] Returns the workgroup size X.
      */
     get WORK_SIZE_X(): number {
         return this.#WORK_SIZE_X;
     }
 
     /**
-     * [KO] Workgroup Size Y
-     * [EN] Workgroup Size Y
+     * [KO] 워크그룹 사이즈 Y를 반환합니다.
+     * [EN] Returns the workgroup size Y.
      */
     get WORK_SIZE_Y(): number {
         return this.#WORK_SIZE_Y;
     }
 
     /**
-     * [KO] Workgroup Size Z
-     * [EN] Workgroup Size Z
+     * [KO] 워크그룹 사이즈 Z를 반환합니다.
+     * [EN] Returns the workgroup size Z.
      */
     get WORK_SIZE_Z(): number {
         return this.#WORK_SIZE_Z;
     }
 
     /**
-     * [KO] 출력 텍스처 뷰를 반환합니다.
-     * [EN] Returns the output texture view.
+     * [KO] 현재 할당된 출력 텍스처 뷰를 반환합니다.
+     * [EN] Returns the currently allocated output texture view.
      */
     get outputTextureView(): GPUTextureView {
         return this.#outputTextureView;
     }
 
     /**
-     * [KO] 이펙트를 초기화(해제)합니다.
-     * [EN] Clears the effect.
+     * [KO] 이펙트에서 사용 중인 리소스를 해제합니다.
+     * [EN] Clears the resources used by the effect.
      */
     clear() {
-        // 텍스처 풀을 사용하므로 여기서 직접 destroy 하지 않음 (필요 시 풀에서 처리)
         this.#outputTexture = null;
         this.#outputTextureView = null;
     }
 
     /**
-     * [KO] 이펙트를 초기화합니다.
-     * [EN] Initializes the effect.
+     * [KO] 이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
+     * [EN] Initializes the effect. Creates compute shaders and uniform buffers.
      *
-     * @param redGPUContext
+     * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
-     * @param name
+     * @param name -
      * [KO] 이펙트 이름
      * [EN] Effect name
-     * @param computeCodes
-     * [KO] MSAA 및 Non-MSAA용 컴퓨트 셰이더 코드
-     * [EN] Compute shader codes for MSAA and Non-MSAA
+     * @param computeCodes -
+     * [KO] MSAA 및 Non-MSAA용 컴퓨트 셰이더 소스 코드
+     * [EN] Compute shader source codes for MSAA and Non-MSAA
      */
     init(redGPUContext: RedGPUContext, name: string, computeCodes: {
         msaa: string,
@@ -238,7 +246,7 @@ abstract class ASinglePassPostEffect {
         this.#computeShaderMSAA = resourceManager.createGPUShaderModule(`${name}_MSAA`, {code: computeCodes.msaa});
         this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${name}_NonMSAA`, {code: computeCodes.nonMsaa});
 
-        // 셰이더 정보 파싱
+        // 셰이더 정보 파싱 (WGSL 분석)
         this.#SHADER_INFO_MSAA = parseWGSL(`${name}_MSAA`, computeCodes.msaa);
         this.#SHADER_INFO_NON_MSAA = parseWGSL(`${name}_NonMSAA`, computeCodes.nonMsaa);
 
@@ -254,6 +262,10 @@ abstract class ASinglePassPostEffect {
         }
     }
 
+    /**
+     * [KO] 실제 컴퓨트 패스를 커맨드 인코더에 추가합니다.
+     * [EN] Adds the actual compute pass to the command encoder.
+     */
     #execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
         const {commandEncoderManager} = this.#redGPUContext;
         const {renderViewStateData} = view;
@@ -267,21 +279,21 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 이펙트를 렌더링합니다.
-     * [EN] Renders the effect.
+     * [KO] 이펙트를 렌더링하고 결과를 반환합니다. 필요한 경우 바인드 그룹을 갱신합니다.
+     * [EN] Renders the effect and returns the result. Updates bind groups if necessary.
      *
-     * @param view
+     * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
-     * @param width
-     * [KO] 너비
-     * [EN] Width
-     * @param height
-     * [KO] 높이
-     * [EN] Height
-     * @param sourceTextureInfo
-     * [KO] 소스 텍스처 정보 리스트
-     * [EN] Source texture info list
+     * @param width -
+     * [KO] 렌더링 너비
+     * [EN] Rendering width
+     * @param height -
+     * [KO] 렌더링 높이
+     * [EN] Rendering height
+     * @param sourceTextureInfo -
+     * [KO] 입력으로 사용될 소스 텍스처 정보 리스트
+     * [EN] List of source texture information to be used as input
      * @returns
      * [KO] 렌더링 결과 (텍스처 및 뷰)
      * [EN] Rendering result (texture and view)
@@ -295,7 +307,7 @@ abstract class ASinglePassPostEffect {
         this.#outputTexture = view.postEffectManager.texturePool.alloc(width, height, 'rgba16float');
         this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
 
-        // 변경 감지
+        // 변경 감지 (재바인딩 필요성 확인)
         const outputTextureChanged = prevOutputTexture !== this.#outputTexture;
         const dimensionsChanged = this.#prevInfo?.width !== width || this.#prevInfo?.height !== height;
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
@@ -305,9 +317,10 @@ abstract class ASinglePassPostEffect {
             this.#createBindGroups(view, sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
         }
 
+        // 컴퓨트 패스 실행
         this.#execute(view, gpuDevice, width, height);
 
-        // 상태 업데이트
+        // 이전 상태 저장
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
         this.#prevInfo = {width, height};
@@ -320,15 +333,15 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 유니폼 값을 업데이트합니다.
-     * [EN] Updates a uniform value.
+     * [KO] 특정 유니폼 값을 업데이트합니다.
+     * [EN] Updates a specific uniform value.
      *
-     * @param key
-     * [KO] 유니폼 키
-     * [EN] Uniform key
-     * @param value
-     * [KO] 유니폼 값
-     * [EN] Uniform value
+     * @param key -
+     * [KO] 유니폼 키 이름
+     * [EN] Uniform key name
+     * @param value -
+     * [KO] 설정할 값
+     * [EN] Value to set
      */
     updateUniform(key: string, value: number | number[] | boolean) {
         const memberInfo = this.uniformsInfo?.members[key];
@@ -337,6 +350,10 @@ abstract class ASinglePassPostEffect {
         }
     }
 
+    /**
+     * [KO] 바인드 그룹 및 파이프라인을 생성하거나 갱신합니다.
+     * [EN] Creates or updates bind groups and the pipeline.
+     */
     #createBindGroups(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
         this.#computeBindGroupEntries0_swap0 = [];
         this.#computeBindGroupEntries0_swap1 = [];
@@ -345,15 +362,19 @@ abstract class ASinglePassPostEffect {
         this.#updateBindGroupEntries(view, sourceTextureInfoList, targetOutputView);
         this.#updateLayoutsAndPipeline(useMSAA, gpuDevice);
 
-        // 소스 텍스처 참조 저장
+        // 현재 소스 텍스처 참조 저장
         this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
     }
 
+    /**
+     * [KO] 바인드 그룹 엔트리 리스트를 구성합니다.
+     * [EN] Configures the list of bind group entries.
+     */
     #updateBindGroupEntries(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView) {
         const {storage, textures} = this.shaderInfo;
         const {viewRenderTextureManager, postEffectManager} = view;
 
-        // Group 0: 소스 텍스처들
+        // Group 0: 소스 텍스처들 (Storage 리소스 중 outputTexture가 아닌 것들)
         for (const k in storage) {
             const {binding, name} = storage[k];
             if (name !== 'outputTexture') {
@@ -363,7 +384,7 @@ abstract class ASinglePassPostEffect {
             }
         }
 
-        // Group 0: 추가 리소스 (Depth, Normal)
+        // Group 0: 추가 텍스처 리소스 (Depth, G-Buffer Normal 등)
         textures.forEach(({name, binding}) => {
             if (name === "depthTexture") {
                 this.#computeBindGroupEntries0_swap0.push({binding, resource: viewRenderTextureManager.depthTextureView});
@@ -377,9 +398,10 @@ abstract class ASinglePassPostEffect {
             }
         });
 
-        // Group 1: 출력 텍스처 및 유니폼 버퍼
+        // Group 1: 출력 텍스처 및 유니폼 버퍼들
         this.#computeBindGroupEntries1.push({binding: 0, resource: targetOutputView});
 
+        // 시스템 유니폼 버퍼 (binding 1)
         if (this.systemUniformsInfo) {
             this.#computeBindGroupEntries1.push({
                 binding: this.systemUniformsInfo.binding,
@@ -391,6 +413,7 @@ abstract class ASinglePassPostEffect {
             });
         }
 
+        // 이펙트 개별 유니폼 버퍼 (binding 2)
         if (this.#uniformBuffer && this.uniformsInfo) {
             this.#computeBindGroupEntries1.push({
                 binding: this.uniformsInfo.binding,
@@ -403,6 +426,10 @@ abstract class ASinglePassPostEffect {
         }
     }
 
+    /**
+     * [KO] 바인드 그룹 레이아웃 및 컴퓨트 파이프라인을 생성합니다.
+     * [EN] Creates bind group layouts and the compute pipeline.
+     */
     #updateLayoutsAndPipeline(useMSAA: boolean, gpuDevice: GPUDevice) {
         const {resourceManager} = this.#redGPUContext;
         const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
@@ -411,12 +438,14 @@ abstract class ASinglePassPostEffect {
         const layout0Name = `${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`;
         const layout1Name = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
 
+        // 레이아웃 캐싱 및 생성
         this.#computeBindGroupLayout0 = resourceManager.getGPUBindGroupLayout(layout0Name) ||
             resourceManager.createBindGroupLayout(layout0Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0, useMSAA));
 
         this.#computeBindGroupLayout1 = resourceManager.getGPUBindGroupLayout(layout1Name) ||
             resourceManager.createBindGroupLayout(layout1Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA));
 
+        // 바인드 그룹 생성 (더블 버퍼링 지원)
         this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
             label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
             layout: this.#computeBindGroupLayout0,
@@ -435,6 +464,7 @@ abstract class ASinglePassPostEffect {
             entries: this.#computeBindGroupEntries1
         });
 
+        // 파이프라인 생성
         this.#computePipeline = gpuDevice.createComputePipeline({
             label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
             layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout0, this.#computeBindGroupLayout1]}),
@@ -442,10 +472,18 @@ abstract class ASinglePassPostEffect {
         });
     }
 
+    /**
+     * [KO] 비디오 메모리 사용량을 계산합니다. (유니폼 버퍼 크기 기준)
+     * [EN] Calculates video memory usage based on uniform buffer size.
+     */
     #calcVideoMemory() {
         this.#videoMemorySize = this.#uniformBuffer ? this.#uniformBuffer.size : 0;
     }
 
+    /**
+     * [KO] 입력 소스 텍스처들의 변경 여부를 감지합니다.
+     * [EN] Detects changes in the input source textures.
+     */
     #detectSourceTextureChange(sourceTextureInfoList: ASinglePassPostEffectResult[]): boolean {
         if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureInfoList.length) {
             return true;
@@ -453,6 +491,10 @@ abstract class ASinglePassPostEffect {
         return sourceTextureInfoList.some((info, i) => info.textureView !== this.#previousSourceTextureReferences[i].textureView);
     }
 
+    /**
+     * [KO] 현재 소스 텍스처들의 참조를 저장합니다.
+     * [EN] Saves the references of the current source textures.
+     */
     #saveCurrentSourceTextureReferences(sourceTextureInfoList: ASinglePassPostEffectResult[]) {
         this.#previousSourceTextureReferences = [...sourceTextureInfoList];
     }
