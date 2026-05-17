@@ -3,7 +3,7 @@ import View3D from "../../../../display/view/View3D";
 import AMultiPassPostEffect from "../../../core/AMultiPassPostEffect";
 import {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
 import DOFCoC from "./DOFCoC/DOFCoC";
-import DOFUnified from "./DOFUnified";
+import DOFUnified from "./DOFUnified/DOFUnified";
 
 /**
  * [KO] 피사계 심도(DOF, Depth of Field) 후처리 이펙트입니다.

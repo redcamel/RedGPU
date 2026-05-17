@@ -4,7 +4,7 @@ import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
 import GaussianBlur from "../blur/GaussianBlur";
 import SSAO_AO from "./ssao_ao/SSAO_AO";
-import SSAOBlend from "./SSAOBlend";
+import SSAOBlend from "./ssao_blend/SSAOBlend";
 
 /**
  * [KO] SSAO(Screen Space Ambient Occlusion) 후처리 이펙트입니다.
