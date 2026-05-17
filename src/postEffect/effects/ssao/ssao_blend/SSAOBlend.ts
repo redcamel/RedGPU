@@ -15,7 +15,7 @@ class SSAOBlend extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_SSAO_BLEND',
-            createBasicPostEffectCode(this, computeCode, '', 2)
+            createBasicPostEffectCode(this, computeCode, '', ['sourceTexture0','sourceTexture1'])
         )
     }
 
