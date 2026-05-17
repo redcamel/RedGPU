@@ -423,13 +423,26 @@ abstract class ASinglePassPostEffect {
 
         // Group 0: 소스 텍스처들 (Storage 리소스 중 outputTexture가 아닌 것들)
         for (const k in storage) {
-            const {binding, name} = storage[k];
-            if (name !== 'outputTexture') {
-                const resource = sourceTextureInfoList[binding].textureView;
-                this.#computeBindGroupEntries0_swap0.push({binding, resource});
-                this.#computeBindGroupEntries0_swap1.push({binding, resource});
+            const {binding, name, group} = storage[k];
+            if (group === 0 && name !== 'outputTexture') {
+                const resource = sourceTextureInfoList[binding]?.textureView;
+                if (resource) {
+                    this.#computeBindGroupEntries0_swap0.push({binding, resource});
+                    this.#computeBindGroupEntries0_swap1.push({binding, resource});
+                }
             }
         }
+
+        // Group 0: 소스 텍스처들 (일반 Texture 리소스)
+        textures.forEach(({name, binding, group}) => {
+            if (group === 0) {
+                const resource = sourceTextureInfoList[binding]?.textureView;
+                if (resource) {
+                    this.#computeBindGroupEntries0_swap0.push({binding, resource});
+                    this.#computeBindGroupEntries0_swap1.push({binding, resource});
+                }
+            }
+        });
 
         // Group 1: 샘플러들 (binding 0)
         if (samplers) {

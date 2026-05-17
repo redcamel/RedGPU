@@ -2,14 +2,18 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
-const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false, sourceTextureNames: string | string[] = 'sourceTexture') => {
+const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false, sourceTextureNames: string | string[] = 'sourceTexture', useSampledTexture: boolean = false) => {
     const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect;
     const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
 
     let sourceTextures = '';
     const names = Array.isArray(sourceTextureNames) ? sourceTextureNames : [sourceTextureNames];
     names.forEach((name, i) => {
-        sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_storage_2d<rgba16float, read>;\n`;
+        if (useSampledTexture) {
+            sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_2d<f32>;\n`;
+        } else {
+            sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_storage_2d<rgba16float, read>;\n`;
+        }
     });
 
     return `
@@ -59,6 +63,9 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
  * @param sourceTextureNames
  * [KO] 사용할 소스 텍스처 이름 또는 이름 리스트 (기본값: 'sourceTexture')
  * [EN] Source texture name or list of names to use (default: 'sourceTexture')
+ * @param useSampledTexture
+ * [KO] 소스 텍스처를 샘플링 가능한 타입(texture_2d)으로 사용할지 여부 (기본값: false, texture_storage_2d 사용)
+ * [EN] Whether to use source textures as sampleable types (texture_2d) (default: false, uses texture_storage_2d)
  * @returns
  * [KO] { msaa: string, nonMsaa: string } - MSAA/Non-MSAA용 WGSL 코드
  * [EN] { msaa: string, nonMsaa: string } - WGSL code for MSAA/Non-MSAA
@@ -69,10 +76,10 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
  * // shader.msaa, shader.nonMsaa 사용
  * ```
  */
-const createBasicPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', sourceTextureNames: string | string[] = 'sourceTexture') => {
+const createBasicPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', sourceTextureNames: string | string[] = 'sourceTexture', useSampledTexture: boolean = false) => {
     return {
-        msaa: createCode(effect, code, uniformStruct, true, sourceTextureNames),
-        nonMsaa: createCode(effect, code, uniformStruct, false, sourceTextureNames)
+        msaa: createCode(effect, code, uniformStruct, true, sourceTextureNames, useSampledTexture),
+        nonMsaa: createCode(effect, code, uniformStruct, false, sourceTextureNames, useSampledTexture)
     }
 }
 Object.freeze(createBasicPostEffectCode)

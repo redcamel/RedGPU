@@ -11,7 +11,7 @@
     let currentUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset * yFlipVec2) / screenSize;
     let stats = calculate_neighborhood_stats_ycocg(pixelCoord, screenSizeU);
 
-    let currentRGBA = textureSampleLevel(sourceTexture, taaTextureSampler, currentUV, 0.0);
+    let currentRGBA = textureSampleLevel(sourceTexture, basicSampler, currentUV, 0.0);
     let currentRGB = currentRGBA.rgb;
     let currentAlpha = currentRGBA.a;
     let currentYCoCg = rgbToYCoCg(currentRGB);
@@ -47,8 +47,8 @@
         finalRGB = currentRGB;
         finalAlpha = currentAlpha;
     } else {
-        let prevDepth = fetch_depth_bilinear(historyDepthTexture, historyUV, screenSize);
-        let historyData = sample_texture_catmull_rom_antiflicker(historyTexture, taaTextureSampler, historyUV, screenSize);
+        let prevDepth = fetch_depth_bilinear(prevDepthTexture, historyUV, screenSize);
+        let historyData = sample_texture_catmull_rom_antiflicker(historyTexture, basicSampler, historyUV, screenSize);
 
         let motionLen = length(velocity * screenSize);
         let motionSoft = smoothstep(0.0, 1.0, motionLen);
