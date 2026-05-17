@@ -20,9 +20,13 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     #cachedComputePipelines: Map<string, GPUComputePipeline> = new Map();
 
     #bindGroupLayout1: GPUBindGroupLayout;
+    #bindGroupLayout2: GPUBindGroupLayout;
+    #outputBindGroupLayout: GPUBindGroupLayout;
     #bindGroup0_swap0: GPUBindGroup;
     #bindGroup0_swap1: GPUBindGroup;
     #bindGroup1: GPUBindGroup;
+    #bindGroup2: GPUBindGroup;
+    #outputBindGroup: GPUBindGroup;
 
     #prevSourceView_swap0: GPUTextureView;
     #prevSourceView_swap1: GPUTextureView;
@@ -43,12 +47,21 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
         this.#bindGroupLayout1 = gpuDevice.createBindGroupLayout({
             label: 'SkyAtmospherePostEffect_BindGroupLayout_1',
             entries: [
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
+            ]
+        });
+        this.#bindGroupLayout2 = gpuDevice.createBindGroupLayout({
+            label: 'SkyAtmospherePostEffect_BindGroupLayout_2',
+            entries: []
+        });
+        this.#outputBindGroupLayout = gpuDevice.createBindGroupLayout({
+            label: 'SkyAtmospherePostEffect_BindGroupLayout_3',
+            entries: [
                 {
                     binding: 0,
                     visibility: GPUShaderStage.COMPUTE,
                     storageTexture: {format: 'rgba16float', access: 'write-only'}
-                },
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
+                }
             ]
         });
 
@@ -147,8 +160,19 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 label: 'SkyAtmospherePostEffect_BG_1',
                 layout: this.#bindGroupLayout1,
                 entries: [
-                    {binding: 0, resource: this.#outputTextureView},
                     {binding: 1, resource: {buffer: peUniformBuffer}}
+                ]
+            });
+            this.#bindGroup2 = gpuDevice.createBindGroup({
+                label: 'SkyAtmospherePostEffect_BG_2',
+                layout: this.#bindGroupLayout2,
+                entries: []
+            });
+            this.#outputBindGroup = gpuDevice.createBindGroup({
+                label: 'SkyAtmospherePostEffect_BG_3',
+                layout: this.#outputBindGroupLayout,
+                entries: [
+                    {binding: 0, resource: this.#outputTextureView}
                 ]
             });
         }
@@ -157,6 +181,8 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, currentBindGroup0);
             passEncoder.setBindGroup(1, this.#bindGroup1);
+            passEncoder.setBindGroup(2, this.#bindGroup2);
+            passEncoder.setBindGroup(3, this.#outputBindGroup);
             passEncoder.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16));
         });
 
@@ -181,7 +207,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 '@group(0) @binding(6) var skyAtmosphereSampler : sampler;',
                 '@group(0) @binding(7) var skyAtmosphereIrradianceLUT : texture_cube<f32>;',
                 '',
-                '@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
+                '@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM,
                 '',
                 'fn fetchDepth(pos: vec2<u32>) -> f32 {',
@@ -234,7 +260,12 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
         const pipeline = gpuDevice.createComputePipeline({
             label: `SkyAtmospherePostEffect_${key}`,
             layout: gpuDevice.createPipelineLayout({
-                bindGroupLayouts: [this.#getBindGroupLayout0(useMSAA), this.#bindGroupLayout1]
+                bindGroupLayouts: [
+                    this.#getBindGroupLayout0(useMSAA),
+                    this.#bindGroupLayout1,
+                    this.#bindGroupLayout2,
+                    this.#outputBindGroupLayout
+                ]
             }),
             compute: {
                 module: useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA,

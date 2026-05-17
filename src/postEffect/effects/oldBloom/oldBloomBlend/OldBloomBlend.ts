@@ -25,7 +25,7 @@ class OldBloomBlend extends ASinglePassPostEffect {
             msaa: `
                 @group(0) @binding(0) var sourceTexture0 : texture_storage_2d<rgba16float, read>;
                 @group(0) @binding(1) var sourceTexture1 : texture_storage_2d<rgba16float, read>;
-                @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
+                @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
                 @group(1) @binding(1) var<uniform> uniforms: Uniforms;
                 
                 ${uniformStructCode}
@@ -38,7 +38,7 @@ class OldBloomBlend extends ASinglePassPostEffect {
             nonMsaa: `
                 @group(0) @binding(0) var sourceTexture0 : texture_storage_2d<rgba16float, read>;
                 @group(0) @binding(1) var sourceTexture1 : texture_storage_2d<rgba16float, read>;
-                @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
+                @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
                 @group(1) @binding(1) var<uniform> uniforms: Uniforms;
                 
                 ${uniformStructCode}

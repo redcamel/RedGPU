@@ -42,6 +42,8 @@ class TAA {
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
     #computeBindGroupLayout1: GPUBindGroupLayout
+    #computeBindGroupLayout2: GPUBindGroupLayout
+    #outputBindGroupLayout: GPUBindGroupLayout
     #computePipeline: GPUComputePipeline
     #uniformBuffer: UniformBuffer
     #uniformsInfo: any
@@ -62,6 +64,8 @@ class TAA {
     #historyTextureView: GPUTextureView
     #frameBufferBindGroup0: GPUBindGroup
     #frameBufferBindGroup1: GPUBindGroup
+    #frameBufferBindGroup2: GPUBindGroup
+    #outputBindGroup: GPUBindGroup
     #WORK_SIZE_X = 8
     #WORK_SIZE_Y = 8
     #WORK_SIZE_Z = 1
@@ -271,7 +275,7 @@ class TAA {
 				@group(0) @binding(4) var depthTexture : texture_depth_2d;
 				@group(0) @binding(5) var historyDepthTexture : texture_depth_2d;
 				
-				@group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
+				@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
 				${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
 				@group(1) @binding(2) var<uniform> uniforms: Uniforms;
 				
@@ -323,6 +327,7 @@ class TAA {
             computePassEncoder.setPipeline(this.#computePipeline)
             computePassEncoder.setBindGroup(0, this.#frameBufferBindGroup0)
             computePassEncoder.setBindGroup(1, this.#frameBufferBindGroup1)
+            computePassEncoder.setBindGroup(3, this.#outputBindGroup)
             computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.#WORK_SIZE_X), Math.ceil(height / this.#WORK_SIZE_Y));
         });
     }
@@ -330,6 +335,7 @@ class TAA {
     #createFrameBufferBindGroups(view: View3D, sourceTextureView: GPUTextureView[], useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
         const computeBindGroupEntries0: GPUBindGroupEntry[] = []
         const computeBindGroupEntries1: GPUBindGroupEntry[] = []
+        const outputBindGroupEntries: GPUBindGroupEntry[] = []
         computeBindGroupEntries0.push({
             binding: 0,
             resource: sourceTextureView[0],
@@ -358,7 +364,7 @@ class TAA {
             binding: 3,
             resource: view.redGPUContext.resourceManager.basicSampler.gpuSampler,
         });
-        computeBindGroupEntries1.push({
+        outputBindGroupEntries.push({
             binding: 0,
             resource: this.#currentFrameTextureView,
         });
@@ -382,14 +388,16 @@ class TAA {
                 },
             });
         }
-        this.#createBindGroups(computeBindGroupEntries0, computeBindGroupEntries1, useMSAA, redGPUContext, gpuDevice);
+        this.#createBindGroups(computeBindGroupEntries0, computeBindGroupEntries1, [], outputBindGroupEntries, useMSAA, redGPUContext, gpuDevice);
         this.#createComputePipeline(useMSAA, redGPUContext, gpuDevice);
     }
 
-    #createBindGroups(entries0: GPUBindGroupEntry[], entries1: GPUBindGroupEntry[], useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
+    #createBindGroups(entries0: GPUBindGroupEntry[], entries1: GPUBindGroupEntry[], entries2: GPUBindGroupEntry[], outputBindGroupEntries: GPUBindGroupEntry[], useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
         const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
         const layoutKey0 = `${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`;
         const layoutKey1 = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
+        const layoutKey2 = `${this.#name}_BIND_GROUP_LAYOUT_2_USE_MSAA_${useMSAA}`;
+        const layoutKey3 = `${this.#name}_BIND_GROUP_LAYOUT_3_USE_MSAA_${useMSAA}`;
         if (!this.#cachedBindGroupLayouts.has(layoutKey0)) {
             const layout0 = redGPUContext.resourceManager.getGPUBindGroupLayout(layoutKey0) ||
                 redGPUContext.resourceManager.createBindGroupLayout(layoutKey0,
@@ -404,8 +412,25 @@ class TAA {
                 );
             this.#cachedBindGroupLayouts.set(layoutKey1, layout1);
         }
+        if (!this.#cachedBindGroupLayouts.has(layoutKey2)) {
+            const layout2 = redGPUContext.resourceManager.getGPUBindGroupLayout(layoutKey2) ||
+                redGPUContext.resourceManager.createBindGroupLayout(layoutKey2,
+                    getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 2, useMSAA)
+                );
+            this.#cachedBindGroupLayouts.set(layoutKey2, layout2);
+        }
+        if (!this.#cachedBindGroupLayouts.has(layoutKey3)) {
+            const layout3 = redGPUContext.resourceManager.getGPUBindGroupLayout(layoutKey3) ||
+                redGPUContext.resourceManager.createBindGroupLayout(layoutKey3,
+                    getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 3, useMSAA)
+                );
+            this.#cachedBindGroupLayouts.set(layoutKey3, layout3);
+        }
         this.#computeBindGroupLayout0 = this.#cachedBindGroupLayouts.get(layoutKey0)!;
         this.#computeBindGroupLayout1 = this.#cachedBindGroupLayouts.get(layoutKey1)!;
+        this.#computeBindGroupLayout2 = this.#cachedBindGroupLayouts.get(layoutKey2)!;
+        this.#outputBindGroupLayout = this.#cachedBindGroupLayouts.get(layoutKey3)!;
+
         this.#frameBufferBindGroup0 = gpuDevice.createBindGroup({
             label: `${this.#name}_FRAME_BIND_GROUP_0_USE_MSAA_${useMSAA}`,
             layout: this.#computeBindGroupLayout0,
@@ -416,6 +441,16 @@ class TAA {
             layout: this.#computeBindGroupLayout1,
             entries: entries1
         });
+        this.#frameBufferBindGroup2 = gpuDevice.createBindGroup({
+            label: `${this.#name}_FRAME_BIND_GROUP_2_USE_MSAA_${useMSAA}`,
+            layout: this.#computeBindGroupLayout2,
+            entries: entries2
+        });
+        this.#outputBindGroup = gpuDevice.createBindGroup({
+            label: `${this.#name}_FRAME_BIND_GROUP_3_USE_MSAA_${useMSAA}`,
+            layout: this.#outputBindGroupLayout,
+            entries: outputBindGroupEntries
+        });
     }
 
     #createComputePipeline(useMSAA: boolean, redGPUContext: RedGPUContext, gpuDevice: GPUDevice) {
@@ -425,7 +460,12 @@ class TAA {
             if (!this.#cachedPipelineLayouts.has(pipelineLayoutKey)) {
                 const pipelineLayout = gpuDevice.createPipelineLayout({
                     label: `${this.#name}_PIPELINE_LAYOUT_USE_MSAA_${useMSAA}`,
-                    bindGroupLayouts: [this.#computeBindGroupLayout0, this.#computeBindGroupLayout1]
+                    bindGroupLayouts: [
+                        this.#computeBindGroupLayout0,
+                        this.#computeBindGroupLayout1,
+                        this.#computeBindGroupLayout2,
+                        this.#outputBindGroupLayout
+                    ]
                 });
                 this.#cachedPipelineLayouts.set(pipelineLayoutKey, pipelineLayout);
             }

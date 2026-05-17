@@ -28,7 +28,7 @@ class DOFUnified extends ASinglePassPostEffect {
             
             @group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float,read>;
             @group(0) @binding(1) var cocTexture : texture_storage_2d<rgba16float,read>;
-            @group(1) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
+            @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
             @group(1) @binding(1) var<uniform> uniforms: Uniforms;
             
             /* CoC 디코딩 함수 */

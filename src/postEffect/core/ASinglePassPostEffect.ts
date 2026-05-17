@@ -38,12 +38,18 @@ abstract class ASinglePassPostEffect {
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
     #computeBindGroupLayout1: GPUBindGroupLayout
+    #computeBindGroupLayout2: GPUBindGroupLayout
+    #outputBindGroupLayout: GPUBindGroupLayout
     #computeBindGroup0List_swap0: GPUBindGroup
     #computeBindGroup0List_swap1: GPUBindGroup
     #computeBindGroup1: GPUBindGroup
+    #computeBindGroup2: GPUBindGroup
+    #outputBindGroup: GPUBindGroup
     #computeBindGroupEntries0_swap0: GPUBindGroupEntry[]
     #computeBindGroupEntries0_swap1: GPUBindGroupEntry[]
     #computeBindGroupEntries1: GPUBindGroupEntry[]
+    #computeBindGroupEntries2: GPUBindGroupEntry[]
+    #outputBindGroupEntries: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
 
     // 유니폼 및 셰이더 구조 정보
@@ -274,6 +280,7 @@ abstract class ASinglePassPostEffect {
             computePassEncoder.setPipeline(this.#computePipeline);
             computePassEncoder.setBindGroup(0, renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0);
             computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
+            computePassEncoder.setBindGroup(3, this.#outputBindGroup);
             computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
         });
     }
@@ -358,6 +365,8 @@ abstract class ASinglePassPostEffect {
         this.#computeBindGroupEntries0_swap0 = [];
         this.#computeBindGroupEntries0_swap1 = [];
         this.#computeBindGroupEntries1 = [];
+        this.#computeBindGroupEntries2 = [];
+        this.#outputBindGroupEntries = [];
 
         this.#updateBindGroupEntries(view, sourceTextureInfoList, targetOutputView);
         this.#updateLayoutsAndPipeline(useMSAA, gpuDevice);
@@ -398,8 +407,8 @@ abstract class ASinglePassPostEffect {
             }
         });
 
-        // Group 1: 출력 텍스처 및 유니폼 버퍼들
-        this.#computeBindGroupEntries1.push({binding: 0, resource: targetOutputView});
+        // Group 3: 출력 텍스처
+        this.#outputBindGroupEntries.push({binding: 0, resource: targetOutputView});
 
         // 시스템 유니폼 버퍼 (binding 1)
         if (this.systemUniformsInfo) {
@@ -437,6 +446,8 @@ abstract class ASinglePassPostEffect {
 
         const layout0Name = `${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`;
         const layout1Name = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
+        const layout2Name = `${this.#name}_BIND_GROUP_LAYOUT_2_USE_MSAA_${useMSAA}`;
+        const layout3Name = `${this.#name}_BIND_GROUP_LAYOUT_3_USE_MSAA_${useMSAA}`;
 
         // 레이아웃 캐싱 및 생성
         this.#computeBindGroupLayout0 = resourceManager.getGPUBindGroupLayout(layout0Name) ||
@@ -444,6 +455,12 @@ abstract class ASinglePassPostEffect {
 
         this.#computeBindGroupLayout1 = resourceManager.getGPUBindGroupLayout(layout1Name) ||
             resourceManager.createBindGroupLayout(layout1Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA));
+
+        this.#computeBindGroupLayout2 = resourceManager.getGPUBindGroupLayout(layout2Name) ||
+            resourceManager.createBindGroupLayout(layout2Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 2, useMSAA));
+
+        this.#outputBindGroupLayout = resourceManager.getGPUBindGroupLayout(layout3Name) ||
+            resourceManager.createBindGroupLayout(layout3Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 3, useMSAA));
 
         // 바인드 그룹 생성 (더블 버퍼링 지원)
         this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
@@ -464,10 +481,29 @@ abstract class ASinglePassPostEffect {
             entries: this.#computeBindGroupEntries1
         });
 
+        this.#computeBindGroup2 = gpuDevice.createBindGroup({
+            label: `${this.#name}_BIND_GROUP_2_USE_MSAA_${useMSAA}`,
+            layout: this.#computeBindGroupLayout2,
+            entries: this.#computeBindGroupEntries2
+        });
+
+        this.#outputBindGroup = gpuDevice.createBindGroup({
+            label: `${this.#name}_BIND_GROUP_3_USE_MSAA_${useMSAA}`,
+            layout: this.#outputBindGroupLayout,
+            entries: this.#outputBindGroupEntries
+        });
+
         // 파이프라인 생성
         this.#computePipeline = gpuDevice.createComputePipeline({
             label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
-            layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout0, this.#computeBindGroupLayout1]}),
+            layout: gpuDevice.createPipelineLayout({
+                bindGroupLayouts: [
+                    this.#computeBindGroupLayout0,
+                    this.#computeBindGroupLayout1,
+                    this.#computeBindGroupLayout2,
+                    this.#outputBindGroupLayout
+                ]
+            }),
             compute: {module: currentShader, entryPoint: 'main'}
         });
     }
