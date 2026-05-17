@@ -468,7 +468,7 @@ class PostEffectManager {
         // 프레임 렌더링 종료 후 사용된 텍스처 일괄 회수
         this.#texturePool.releaseAll();
 
-        keepLog(this.#texturePool)
+        keepLog(this.#view.name, this.#texturePool)
         return currentTextureView;
     }
 
@@ -483,6 +483,8 @@ class PostEffectManager {
         if (this.#texturePool) {
             this.#texturePool.clear();
         }
+        this.#storageTexture = null;
+        this.#storageTextureView = null;
     }
 
     #checkSSAO() {
@@ -574,14 +576,13 @@ class PostEffectManager {
     }
 
     #calcVideoMemory() {
-        const texture = this.#storageTexture
-        this.#videoMemorySize = texture ? calculateTextureByteSize(texture) : 0;
+        this.#videoMemorySize = 0;
         // 텍스처 풀의 전체 메모리 합산 (활성 + 유휴 텍스처 모두 포함)
         if (this.#texturePool) {
             this.#videoMemorySize += this.#texturePool.videoMemorySize;
         }
         // 개별 이펙트들이 풀링되지 않는 별도의 자원(버퍼 등)을 가지고 있을 경우를 위해 호출 유지
-        // 단, ASinglePassPostEffect의 videoMemorySize가 풀 텍스처를 중복 계산하지 않도록 주의 필요
+        // ASinglePassPostEffect의 videoMemorySize는 이미 풀 텍스처를 중복 계산하지 않음
         this.#postEffects.forEach(effect => {
             this.#videoMemorySize += effect.videoMemorySize
         })
@@ -590,23 +591,25 @@ class PostEffectManager {
     #renderToStorageTexture(view: View3D, sourceTextureView: GPUTextureView) {
         const {redGPUContext, viewRenderTextureManager} = view;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
+        const {antialiasingManager, resourceManager} = redGPUContext;
         const {msaaID} = antialiasingManager;
         const {width, height} = gBufferColorTexture;
+
         const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
-        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
-        // 크기가 변경되면 텍스처 재생성
         if (dimensionsChanged) {
             this.#texturePool.clear();
-            if (this.#storageTexture) {
-                this.#storageTexture.destroy();
-                this.#storageTexture = null;
-            }
-            this.#storageTexture = this.#createStorageTexture(gpuDevice, width, height);
-            this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
+            this.#previousDimensions = {width, height};
         }
-        // 크기 변경 또는 MSAA 변경 시 BindGroup 재생성
-        if (dimensionsChanged || dirtyMSAA) {
+
+        const previousTexture = this.#storageTexture;
+        this.#storageTexture = this.#texturePool.alloc(width, height, 'rgba16float');
+        this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
+
+        const textureChanged = previousTexture !== this.#storageTexture;
+        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
+
+        // 크기 변경, 텍스처 인스턴스 변경 또는 MSAA 변경 시 BindGroup 재생성
+        if (dimensionsChanged || textureChanged || dirtyMSAA) {
             this.#lastUpdateMSAAID = msaaID;
             this.#textureComputeBindGroup = this.#createTextureBindGroup(
                 redGPUContext,
@@ -615,7 +618,7 @@ class PostEffectManager {
                 this.#storageTextureView
             );
         }
-        this.#previousDimensions = {width, height};
+
         this.#executeComputePass(
             this.#textureComputePipeline,
             this.#textureComputeBindGroup,
@@ -659,15 +662,6 @@ class PostEffectManager {
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}},
                 {binding: 2, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba16float'}},
             ]
-        });
-    }
-
-    #createStorageTexture(gpuDevice: GPUDevice, width: number, height: number) {
-        return this.#view.redGPUContext.resourceManager.createManagedTexture({
-            size: {width: width, height: height,},
-            format: 'rgba16float',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
-            label: `${this.#view.name}_POST_EFFECT_STORAGE_TEXTURE_${width}x${height}`,
         });
     }
 
