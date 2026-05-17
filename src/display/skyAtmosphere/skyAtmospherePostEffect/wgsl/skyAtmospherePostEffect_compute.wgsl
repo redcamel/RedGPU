@@ -29,7 +29,7 @@ var sceneBlendingTrans: f32 = 1.0;
 if (rawDepth >= 1.0) {
     // [Background] 배경은 이미 산란광이 그려졌으므로 추가 산란은 0, 장면 투과율은 1.0(보존)
     let skyUV = getSkyViewUV(viewDir, mappingH, groundRadius, atmosphereHeight);
-    atmosphereTrans = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0).a;
+    atmosphereTrans = textureSampleLevel(skyViewLUT, basicSampler, skyUV, 0.0).a;
     sceneBlendingTrans = 1.0; 
 } else {
     // [Object] Aerial Perspective 적용
@@ -39,12 +39,12 @@ if (rawDepth >= 1.0) {
     let apDist = clamp(actualDist - uniforms.aerialPerspectiveStartDepth, 0.0, maxApDist);
 
     let apW = clamp(sqrt(apDist / maxApDist), 0.0, 1.0);
-    var apSample = textureSampleLevel(aerialPerspectiveLUT, skyAtmosphereSampler, vec3<f32>(uv.x, uv.y, apW), 0.0);
+    var apSample = textureSampleLevel(aerialPerspectiveLUT, basicSampler, vec3<f32>(uv.x, uv.y, apW), 0.0);
 
     // 근거리 보정
     if (actualDist < NEAR_FIELD_CORRECTION_DIST) { 
         let d = getAtmosphereDensities(mappingH, uniforms);
-        let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, mappingH, sunDir.y, atmosphereHeight);
+        let sunT = getTransmittance(transmittanceLUT, basicSampler, mappingH, sunDir.y, atmosphereHeight);
         let scatR = uniforms.rayleighScattering * d.rhoR * uniforms.skyLuminanceFactor;
         let scatM = uniforms.mieScattering * d.rhoM * uniforms.skyLuminanceFactor;
         let phaseR = phaseRayleigh(viewSunCos);
@@ -67,7 +67,7 @@ let camPos = vec3<f32>(0.0, mappingH + groundRadius, 0.0);
 let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
 
 // 대기 투과율을 적용한 Glow 및 Sun 계산
-let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, skyAtmosphereSampler, vec3<f32>(atmosphereTrans), 0.0);
+let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, vec3<f32>(atmosphereTrans), 0.0);
 let sunDisk = select(vec3<f32>(0.0), getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(atmosphereTrans), 0.01, uniforms), rawDepth >= 1.0);
 
 // 3. 최종 산란광 합산 및 장면 합성 (Unified Formula)
