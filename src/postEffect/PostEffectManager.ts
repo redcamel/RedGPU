@@ -276,10 +276,6 @@ class PostEffectManager {
         this.#postEffects.push(v)
     }
 
-    // addEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-    //     //TODO
-    // }
-
     /**
      * [KO] 특정 인덱스의 이펙트를 반환합니다.
      * [EN] Returns the effect at a specific index.
@@ -295,13 +291,36 @@ class PostEffectManager {
         return this.#postEffects[index]
     }
 
-    // removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-    //     //TODO
-    // }
-    //
-    // removeEffectAt(v: ASinglePassPostEffect | AMultiPassPostEffect) {
-    //     //TODO
-    // }
+    /**
+     * [KO] 특정 이펙트를 제거합니다.
+     * [EN] Removes a specific effect.
+     *
+     * @param v -
+     * [KO] 제거할 이펙트
+     * [EN] Effect to remove
+     */
+    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect) {
+        const index = this.#postEffects.indexOf(v);
+        if (index > -1) {
+            v.clear();
+            this.#postEffects.splice(index, 1);
+        }
+    }
+
+    /**
+     * [KO] 특정 인덱스의 이펙트를 제거합니다.
+     * [EN] Removes the effect at a specific index.
+     *
+     * @param index -
+     * [KO] 인덱스
+     * [EN] Index
+     */
+    removeEffectAt(index: number) {
+        if (this.#postEffects[index]) {
+            this.#postEffects[index].clear();
+            this.#postEffects.splice(index, 1);
+        }
+    }
 
     /**
      * [KO] 모든 이펙트를 제거합니다.
@@ -471,53 +490,51 @@ class PostEffectManager {
             noneJitterProjectionMatrix,
             rawCamera,
             redGPUContext,
-            taa
-        } = this.#view
+            taa,
+            renderViewStateData,
+            skyAtmosphere
+        } = this.#view;
+        const {gpuDevice, antialiasingManager} = redGPUContext;
+        const {viewMatrix} = rawCamera;
+        const {gpuBuffer} = this.#postEffectSystemUniformBuffer;
+        const {members} = this.#postEffectSystemUniformBufferStructInfo;
+        const {camera, time, projection} = members;
+
         rawCamera.updateExposure(this.#view);
-        const {gpuDevice} = redGPUContext
-        const {viewMatrix} = rawCamera
-        const structInfo = this.#postEffectSystemUniformBufferStructInfo
-        const gpuBuffer = this.#postEffectSystemUniformBuffer.gpuBuffer;
 
         const projectionViewMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
         const noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix);
-        {
-            const {members} = structInfo;
-            const cameraMembers = members.camera.members;
-            SystemUniformUpdater.updateCamera(rawCamera, cameraMembers, this.#uniformDataF32, this.#uniformDataU32)
-            SystemUniformUpdater.updateTime(
-                this.#view.renderViewStateData,
-                members.time.members,
-                this.#uniformDataF32,
-                this.#uniformDataU32
-            )
-            SystemUniformUpdater.updateProjection(
-                {
-                    projectionMatrix,
-                    projectionViewMatrix,
-                    noneJitterProjectionMatrix,
-                    noneJitterProjectionViewMatrix,
-                    inverseProjectionMatrix,
-                    inverseProjectionViewMatrix: mat4.invert(temp3, projectionViewMatrix),
-                    prevNoneJitterProjectionViewMatrix: redGPUContext.antialiasingManager.useTAA ? taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix
-                },
-                members.projection.members,
-                this.#uniformDataF32,
-                this.#uniformDataU32
-            )
-            SystemUniformUpdater.updateSkyAtmosphere(
-                this.#view.skyAtmosphere,
-                members,
-                this.#uniformDataF32,
-                this.#uniformDataU32
-            )
-            updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-                {
-                    key: 'preExposure',
-                    value: this.autoExposure.preExposure
-                }
-            ]);
-        }
+
+        // Update Camera
+        SystemUniformUpdater.updateCamera(rawCamera, camera.members, this.#uniformDataF32, this.#uniformDataU32);
+
+        // Update Time
+        SystemUniformUpdater.updateTime(renderViewStateData, time.members, this.#uniformDataF32, this.#uniformDataU32);
+
+        // Update Projection
+        SystemUniformUpdater.updateProjection(
+            {
+                projectionMatrix,
+                projectionViewMatrix,
+                noneJitterProjectionMatrix,
+                noneJitterProjectionViewMatrix,
+                inverseProjectionMatrix,
+                inverseProjectionViewMatrix: mat4.invert(temp3, projectionViewMatrix),
+                prevNoneJitterProjectionViewMatrix: antialiasingManager.useTAA ? taa.prevNoneJitterProjectionViewMatrix : noneJitterProjectionViewMatrix
+            },
+            projection.members,
+            this.#uniformDataF32,
+            this.#uniformDataU32
+        );
+
+        // Update SkyAtmosphere
+        SystemUniformUpdater.updateSkyAtmosphere(skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32);
+
+        // Update Exposure
+        updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
+            {key: 'preExposure', value: this.autoExposure.preExposure}
+        ]);
+
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);
     }
 
@@ -561,8 +578,7 @@ class PostEffectManager {
         this.#storageTexture = this.#texturePool.alloc(width, height, 'rgba16float');
         this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
 
-        // [KO] Compute Shader 대신 copyTextureToTexture를 사용하여 성능 최적화
-        // [EN] Performance optimization by using copyTextureToTexture instead of Compute Shader
+
         redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
             encoder.copyTextureToTexture(
                 {texture: sourceTexture},
