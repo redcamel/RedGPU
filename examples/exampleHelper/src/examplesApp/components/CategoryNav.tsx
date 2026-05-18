@@ -32,8 +32,11 @@ const CategoryNav: React.FC = () => {
                     maxWidth: '1600px',
                     margin: '0',
                 }}>
-                    {categories.map(cat => {
+                    {ExampleList.map(category => {
+                        const cat = category.name;
                         const isActive = activeTab === cat;
+                        const isExperimental = category.experimental;
+                        
                         return (
                             <button
                                 key={cat}
@@ -46,10 +49,14 @@ const CategoryNav: React.FC = () => {
                                     borderRight: '1px solid #222',
                                     borderTop: isActive ? '2px solid #fdb48d' : '2px solid transparent',
                                     whiteSpace: 'nowrap',
+                                    gap: '6px'
                                 }}
                                 onClick={() => setActiveTab(cat)}
                             >
                                 {cat}
+                                {isExperimental && (
+                                    <span style={experimentalBadgeStyle}>EXP</span>
+                                )}
                             </button>
                         );
                     })}
@@ -86,6 +93,17 @@ const tabButtonStyle: React.CSSProperties = {
     justifyContent: 'center',
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
+};
+
+const experimentalBadgeStyle: React.CSSProperties = {
+    fontSize: '8px',
+    backgroundColor: '#ff4d4d',
+    color: '#fff',
+    padding: '2px 4px',
+    borderRadius: '4px',
+    fontWeight: 'bold',
+    lineHeight: '1',
+    display: 'inline-block'
 };
 
 export default CategoryNav;

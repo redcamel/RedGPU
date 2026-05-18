@@ -14,7 +14,12 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                 if (item.list) {
                     return (
                         <div key={key} style={{marginLeft: depth * 12}}>
-                            <div style={groupTitleStyle}>{item.name}</div>
+                            <div style={{...groupTitleStyle, display: 'flex', alignItems: 'center'}}>
+                                {item.name}
+                                {item.experimental && depth === 0 && (
+                                    <span style={experimentalBadgeStyle}>EXPERIMENTAL</span>
+                                )}
+                            </div>
                             <SidebarTree items={item.list} depth={depth + 1} />
                         </div>
                     );
@@ -28,10 +33,11 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                             ...itemStyle,
                             marginLeft: depth * 12,
                             textDecoration: 'none',
-                            display: 'block'
                         }}
                     >
-                        {item.name}
+                        <span style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                             {item.name}
+                        </span>
                     </a>
                 );
             })}
@@ -58,6 +64,21 @@ const itemStyle: React.CSSProperties = {
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    display: 'flex',
+    alignItems: 'center',
+};
+
+const experimentalBadgeStyle: React.CSSProperties = {
+    fontSize: '8px',
+    backgroundColor: '#ff4d4d',
+    color: '#fff',
+    padding: '3px 4px',
+    borderRadius: '4px',
+    fontWeight: 'bold',
+    lineHeight: '1',
+    display: 'inline-block',
+    marginLeft: '6px',
+    flexShrink: 0
 };
 
 export default SidebarTree;
