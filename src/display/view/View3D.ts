@@ -25,6 +25,7 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
 import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
+import lightManager from "../../light/LightManager";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -149,7 +150,7 @@ class View3D extends AView {
 
     update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
         const {scene, redGPUContext, ibl, skyAtmosphere} = this
-        const {shadowManager} = scene
+        const {shadowManager,lightManager} = scene
         shadowManager.update(redGPUContext)
         const {directionalShadowManager} = shadowManager
 
@@ -198,7 +199,9 @@ class View3D extends AView {
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
         }
-        this.#clusterLightManager.updateClusterLights(calcPointLightCluster);
+        if(lightManager.pointLightCount || lightManager.spotLightCount){
+            this.#clusterLightManager.updateClusterLights(calcPointLightCluster);
+        }
         this.#updateSystemUniform();
     }
 

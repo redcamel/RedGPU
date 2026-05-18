@@ -22,6 +22,7 @@ class ShadowManager {
     }
 
     render(view: View3D) {
+        if(this.#directionalShadowManager.castingList.length === 0) return
         const {redGPUContext} = view
 
         this.#shadowPassDescriptor = {
