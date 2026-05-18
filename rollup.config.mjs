@@ -5,7 +5,20 @@ import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import {createFilter} from '@rollup/pluginutils';
 import postcss from 'rollup-plugin-postcss'
-
+const terserOptions = {
+	format: {
+		comments: false,
+	},
+	mangle: {
+		properties: false,
+		keep_classnames: true,
+		keep_fnames: true,
+	},
+	compress: {
+		dead_code: true,
+		if_return: true
+	},
+}
 export default [
 	{
 		input: './src/index.ts',
@@ -34,21 +47,8 @@ export default [
 					tsconfig: 'tsconfig.json'
 				}
 			),
-			terser({
-				format: {
-					comments: false,
-				},
-				mangle: {
-					properties: false,
-					keep_classnames: true,
-					keep_fnames: true,
-				},
-				compress: {
-					dead_code: true,
-					if_return: true
-				},
-			}),
-			removeSpacesAndTabs()
+			terser(terserOptions),
+			// removeSpacesAndTabs()
 		]
 	},
 	{
@@ -66,11 +66,8 @@ export default [
 				declaration: false,
 				declarationDir: null
 			}),
-			terser({
-				format: { comments: false },
-				mangle: { keep_classnames: true, keep_fnames: true },
-			}),
-			removeSpacesAndTabs()
+			terser(terserOptions),
+			// removeSpacesAndTabs()
 		]
 	}
 ]
