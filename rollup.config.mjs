@@ -103,6 +103,9 @@ function stringWgsl() {
 					.replace(/\s+/g, ' ')
 					// 연산자 및 기호 주변 공백 제거
 					.replace(/\s*(&&|\|\||[=+\-*/<>:;,{}()[\]])\s*/g, '$1')
+
+					// 소수점 앞의 불필요한 0 제거 (예: 0.05 -> .05)
+					.replace(/\b0\.0/g, '.0')
 					.trim();
 				newCode = JSON.stringify(newCode)
 				return {
