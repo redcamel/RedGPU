@@ -173,7 +173,7 @@ class Renderer {
         if (pixelRectObject.width && pixelRectObject.height) {
             const {scene} = view
             const {shadowManager} = scene
-            shadowManager.update(redGPUContext)
+
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
