@@ -20,7 +20,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             return [
                 '#redgpu_include depth.getLinearizeDepth',
                 '#redgpu_include skyAtmosphere.skyAtmosphereFn',
-                '@group(0) @binding(0) var sourceTexture : texture_2d<f32>;',
+                '@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float, read>;',
                 '@group(0) @binding(1) var transmittanceLUT : texture_2d<f32>;',
                 '@group(0) @binding(2) var multiScatLUT : texture_2d<f32>;',
                 '@group(0) @binding(3) var skyViewLUT : texture_2d<f32>;',
