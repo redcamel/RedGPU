@@ -2,7 +2,6 @@ import {mat4} from "gl-matrix";
 import Camera2D from "../../../camera/camera/Camera2D";
 import OrthographicCamera from "../../../camera/camera/OrthographicCamera";
 import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
-import IsometricController from "../../../camera/controller/IsometricController";
 import AController from "../../../camera/core/AController";
 import RedGPUContextSizeManager, {RedResizeEvent} from "../../../context/core/RedGPUContextSizeManager";
 import RedGPUContext from "../../../context/RedGPUContext";
@@ -323,7 +322,7 @@ class ViewTransform {
         const {antialiasingManager} = redGPUContext
         this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
         // TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
-        const needJitter = this.constructor.name === 'View3D' && !(this.camera instanceof IsometricController) && antialiasingManager.useTAA
+        const needJitter = this.constructor.name === 'View3D' && (this.camera.constructor.name !=='IsometricController' ) && antialiasingManager.useTAA
 
         if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {

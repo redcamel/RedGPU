@@ -1,7 +1,6 @@
 import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import {OrthographicCamera} from "../../camera";
-import IsometricController from "../../camera/controller/IsometricController";
 import RedGPUContext from "../../context/RedGPUContext";
 import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
@@ -1311,7 +1310,7 @@ class Mesh extends MeshBase {
             const {rawCamera} = view
             const combinedAABB = this.boundingAABB;
 
-            const isIsometricController = rawCamera instanceof IsometricController;
+            const isIsometricController = rawCamera.constructor.name === 'IsometricController';
 
             if (isIsometricController) {
                 // ==================== AABB 정보 추출 ====================
