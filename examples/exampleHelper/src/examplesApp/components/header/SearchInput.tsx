@@ -55,7 +55,7 @@ const clearButtonStyle: React.CSSProperties = {
     transform: 'translateY(-50%)',
     background: 'none',
     border: 'none',
-    color: '#666',
+    color: '#999',
     fontSize: '18px',
     cursor: 'pointer',
 };

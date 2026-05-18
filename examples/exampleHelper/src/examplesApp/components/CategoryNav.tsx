@@ -43,10 +43,10 @@ const CategoryNav: React.FC = () => {
                                 style={{
                                     ...tabButtonStyle,
                                     padding: isNarrow ? '0 16px' : '0 32px',
-                                    color: isActive ? '#fdb48d' : '#888',
+                                    color: isActive ? '#fdb48d' : '#aaa',
                                     backgroundColor: isActive ? '#1a1a1c' : '#0a0a0b',
-                                    borderBottom: isActive ? '1px solid #1a1a1c' : '1px solid #222',
-                                    borderRight: '1px solid #222',
+                                    borderBottom: isActive ? '1px solid #1a1a1c' : '1px solid #333',
+                                    borderRight: '1px solid #333',
                                     borderTop: isActive ? '2px solid #fdb48d' : '2px solid transparent',
                                     whiteSpace: 'nowrap',
                                     gap: '6px'
@@ -71,7 +71,7 @@ const navStyle: React.CSSProperties = {
     height: '44px',
     flexShrink: 0,
     zIndex: 90,
-    borderBottom: '1px solid #222',
+    borderBottom: '1px solid #333',
     overflow: 'hidden',
 };
 

@@ -47,7 +47,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
 
 const groupTitleStyle: React.CSSProperties = {
     fontSize: '10px',
-    color: '#555',
+    color: '#8a8a8a',
     fontWeight: 'bold',
     textTransform: 'uppercase',
     marginTop: '15px',
@@ -57,7 +57,7 @@ const groupTitleStyle: React.CSSProperties = {
 
 const itemStyle: React.CSSProperties = {
     fontSize: '12px',
-    color: '#ccc',
+    color: '#e0e0e0',
     padding: '6px 0',
     cursor: 'pointer',
     transition: 'color 0.2s',

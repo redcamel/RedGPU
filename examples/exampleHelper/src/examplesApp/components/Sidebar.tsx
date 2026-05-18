@@ -12,7 +12,7 @@ const Sidebar: React.FC = () => {
     return (
         <aside style={{
             ...sidebarStyle,
-            borderRight: sidebarOpen ? '1px solid #333' : '0',
+            borderRight: sidebarOpen ? '1px solid #444' : '0',
             width: sidebarOpen ? '280px' : '0',
             opacity: sidebarOpen ? 1 : 0,
         }}>
@@ -25,7 +25,7 @@ const Sidebar: React.FC = () => {
 
 const sidebarStyle: React.CSSProperties = {
     backgroundColor: '#0a0a0b',
-    borderRight: '1px solid #333',
+    borderRight: '1px solid #444',
     display: 'flex',
     flexDirection: 'column',
     transition: 'width(0.3s cubic-bezier(0.4, 0, 0.2, 1)), opacity 0.2s',

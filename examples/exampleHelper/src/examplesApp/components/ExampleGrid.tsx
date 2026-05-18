@@ -2,9 +2,14 @@ import React, {useEffect, useRef} from 'react';
 import ExampleSection from './ExampleSection';
 import {useFilteredExamples} from '../hooks/useFilteredExamples';
 import {ExampleItem} from '../../types/example';
+import {splitSectionItems} from '../utils/sectionHelpers';
+import {useExamplesStore} from '../store/useExamplesStore';
 
 const ExampleGrid: React.FC = () => {
     const {filteredItems, resultCount, searchQuery} = useFilteredExamples();
+    const viewMode = useExamplesStore(state => state.viewMode);
+    const isNarrow = useExamplesStore(state => state.isNarrow);
+    
     const lcpCounter = useRef<number>(0);
     lcpCounter.current = 0; // [KO] 렌더링마다 초기화하여 상위 아이템들만 LCP 최적화 [EN] Reset on every render to optimize LCP for top items
 
@@ -101,6 +106,8 @@ const ExampleGrid: React.FC = () => {
         );
     }
 
+    const {leafItems, groupItems} = splitSectionItems(filteredItems);
+
     return (
         <div className="example-grid-container">
             {searchQuery && (
@@ -113,11 +120,43 @@ const ExampleGrid: React.FC = () => {
                     </div>
                 </div>
             )}
-            {filteredItems.map((item, idx) => (
-                <ExampleSection key={item.name + idx} item={item} lcpCounter={lcpCounter} />
-            ))}
+            
+            {leafItems.length > 0 && (
+                <div style={gridStyle(viewMode, isNarrow)}>
+                    {leafItems.map((item, idx) => (
+                        <ExampleSection key={item.name + idx} item={item} lcpCounter={lcpCounter} />
+                    ))}
+                </div>
+            )}
+
+            {groupItems.length > 0 && (
+                <div style={stackStyle}>
+                    {groupItems.map((item, idx) => (
+                        <ExampleSection key={item.name + idx} item={item} lcpCounter={lcpCounter} />
+                    ))}
+                </div>
+            )}
         </div>
     );
+};
+
+const gridStyle = (mode: string, isNarrow: boolean): React.CSSProperties => {
+    const isGrid = mode === 'grid';
+    return {
+        display: 'grid',
+        gridTemplateColumns: isGrid 
+            ? `repeat(auto-fill, minmax(${isNarrow ? '240px' : '280px'}, 1fr))` 
+            : '1fr',
+        gap: isNarrow ? '16px' : '24px',
+        marginBottom: '40px',
+    };
+};
+
+const stackStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '32px',
+    marginBottom: '20px',
 };
 
 const searchHeaderStyle: React.CSSProperties = {

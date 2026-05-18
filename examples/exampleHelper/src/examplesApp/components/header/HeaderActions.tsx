@@ -34,7 +34,7 @@ const rightSection: React.CSSProperties = {
 const manualButtonStyle: React.CSSProperties = {
     backgroundColor: 'transparent',
     border: 'none',
-    color: '#ccc',
+    color: '#e0e0e0',
     fontSize: '11px',
     fontWeight: 'bold',
     cursor: 'pointer',
