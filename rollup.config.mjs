@@ -113,6 +113,8 @@ function stringWgsl() {
 					.replace(/\n\s*\n/g, '\n')
 					// 연속된 공백을 하나로 치환
 					.replace(/[ \t]+/g, ' ')
+					// 연산자 및 기호 주변 공백 제거
+					.replace(/\s*([=+\-*/<>:;,{}()[\]])\s*/g, '$1');
 				newCode = JSON.stringify(newCode)
 				return {
 					code: `export default ${newCode};`,
