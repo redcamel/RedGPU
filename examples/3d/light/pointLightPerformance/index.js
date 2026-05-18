@@ -23,7 +23,7 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         const light = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(light);
+        // scene.lightManager.addDirectionalLight(light);
 
         const {lights, initialPositions} = createPointLights(scene, 500);
         createSphereMeshes(redGPUContext, scene, 500);

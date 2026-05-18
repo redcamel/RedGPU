@@ -80,11 +80,9 @@ class ClusterLightManager {
      * 클러스터 라이트를 업데이트합니다.
      * 포인트 라이트와 스팟 라이트 데이터를 계산하고 GPU 버퍼에 업로드합니다.
      *
-     * @param calcClusterLight - 클러스터 라이트 계산 여부 (기본값: false)
      * @private
      */
-    updateClusterLights(calcClusterLight: boolean = false) {
-        if (!calcClusterLight) return
+    updateClusterLights() {
         const {redGPUContext, scene, renderViewStateData, pixelRectArray} = this.#view
         const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== pixelRectArray[2] || this.#prevHeight !== pixelRectArray[3]
         // const dirtyPixelSize = true;

@@ -151,7 +151,8 @@ class Renderer {
             camera,
             pickingManager,
             pixelRectObject,
-            renderViewStateData
+            renderViewStateData,
+            scene
         } = view
         const {
             colorAttachment,
@@ -172,8 +173,10 @@ class Renderer {
 
         if (pixelRectObject.width && pixelRectObject.height) {
             const {scene} = view
-            const {shadowManager} = scene
-
+            const {lightManager,shadowManager} = scene
+            if(lightManager.pointLightCount || lightManager.spotLightCount){
+                view.clusterLightManager.updateClusterLights();
+            }
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
@@ -200,6 +203,7 @@ class Renderer {
             // [EN] Update and render for shadow pass
             view.update(true, false, null)
             shadowManager.render(view)
+
             // [KO] 기본 패스용 업데이트 및 렌더링
             // [EN] Update and render for basic pass
             const renderPath1ResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);

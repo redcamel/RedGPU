@@ -199,9 +199,7 @@ class View3D extends AView {
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
         }
-        if(lightManager.pointLightCount || lightManager.spotLightCount){
-            this.#clusterLightManager.updateClusterLights(calcPointLightCluster);
-        }
+
         this.#updateSystemUniform();
     }
 
@@ -279,7 +277,7 @@ class View3D extends AView {
     }
 
     #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
-        this.#clusterLightManager.updateClusterLights(true)
+        this.#clusterLightManager.updateClusterLights()
         const ibl_prefilterTexture = ibl?.prefilterTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture
         const {redGPUContext} = this
