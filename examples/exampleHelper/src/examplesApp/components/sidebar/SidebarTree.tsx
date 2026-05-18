@@ -9,6 +9,15 @@ interface SidebarTreeProps {
 const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
     return (
         <>
+            {depth === 0 && (
+                <style>
+                    {`
+                    .sidebar-item:hover {
+                        color: #fdb48d !important;
+                    }
+                    `}
+                </style>
+            )}
             {items.map((item, idx) => {
                 const key = `${item.name}-${idx}`;
                 if (item.list) {
@@ -29,6 +38,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({items, depth = 0}) => {
                     <a
                         key={key}
                         href={href}
+                        className="sidebar-item"
                         style={{
                             ...itemStyle,
                             marginLeft: depth * 12,
