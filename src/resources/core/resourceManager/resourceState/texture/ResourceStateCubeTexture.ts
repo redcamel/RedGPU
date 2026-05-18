@@ -10,7 +10,7 @@ class ResourceStateCubeTexture {
 
     constructor(cubeTexture: CubeTexture | DirectCubeTexture) {
         this.texture = cubeTexture
-        this.srcList = cubeTexture instanceof CubeTexture ? cubeTexture.srcList : undefined
+        this.srcList = cubeTexture.constructor.name === 'CubeTexture' ? (cubeTexture as CubeTexture).srcList : undefined
         this.cacheKey = cubeTexture.cacheKey
         this.useNum = 0
         this.uuid = cubeTexture.uuid
