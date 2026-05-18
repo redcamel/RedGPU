@@ -2,14 +2,41 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
 
-const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', useMSAA: boolean = false, sourceTextureNames: string | string[] = 'sourceTexture', useSampledTexture: boolean = false) => {
+/**
+ * [KO] 후처리 소스 텍스처 설정 인터페이스
+ * [EN] Post-effect source texture configuration interface
+ */
+export type PostEffectSourceTexture = {
+    /** [KO] 텍스처 이름 [EN] Texture name */
+    name: string;
+    /** [KO] 샘플링 가능한 타입(texture_2d)으로 사용할지 여부 [EN] Whether to use as a sampleable type (texture_2d) */
+    isSampled?: boolean;
+}
+
+const createCode = (
+    effect: ASinglePassPostEffect,
+    code: string,
+    uniformStruct: string = '',
+    useMSAA: boolean = false,
+    sourceTextureConfigs: string | (string | PostEffectSourceTexture)[] = 'sourceTexture'
+) => {
     const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect;
     const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
 
     let sourceTextures = '';
-    const names = Array.isArray(sourceTextureNames) ? sourceTextureNames : [sourceTextureNames];
-    names.forEach((name, i) => {
-        if (useSampledTexture) {
+    const items = Array.isArray(sourceTextureConfigs) ? sourceTextureConfigs : [sourceTextureConfigs];
+    items.forEach((item, i) => {
+        let name: string;
+        let isSampled: boolean = false;
+
+        if (typeof item === 'string') {
+            name = item;
+        } else {
+            name = item.name;
+            if (item.isSampled !== undefined) isSampled = item.isSampled;
+        }
+
+        if (isSampled) {
             sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_2d<f32>;\n`;
         } else {
             sourceTextures += `@group(0) @binding(${i}) var ${name} : texture_storage_2d<rgba16float, read>;\n`;
@@ -17,28 +44,28 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
     });
 
     return `
-        ${uniformStruct}
-        
-        ${sourceTextures}
-        
-        @group(1) @binding(0) var<uniform> uniforms: Uniforms;
-        
-        ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
-        @group(2) @binding(5) var basicSampler : sampler;
-        
-        @group(2) @binding(0) var depthTexture : ${depthTextureType};
-        @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
-        @group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;
-        @group(2) @binding(3) var prevDepthTexture : texture_depth_2d;
-        
-        @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
-        
-        @compute @workgroup_size(${WORK_SIZE_X}, ${WORK_SIZE_Y}, ${WORK_SIZE_Z})
-        fn main(
-          @builtin(global_invocation_id) global_id : vec3<u32>,
-        ) {
-          ${code}
-        }
+${uniformStruct}
+
+${sourceTextures}
+
+@group(1) @binding(0) var<uniform> uniforms: Uniforms;
+
+${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
+@group(2) @binding(5) var basicSampler : sampler;
+
+@group(2) @binding(0) var depthTexture : ${depthTextureType};
+@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
+@group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;
+@group(2) @binding(3) var prevDepthTexture : texture_depth_2d;
+
+@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
+
+@compute @workgroup_size(${WORK_SIZE_X}, ${WORK_SIZE_Y}, ${WORK_SIZE_Z})
+fn main(
+  @builtin(global_invocation_id) global_id : vec3<u32>,
+) {
+  ${code}
+}
   `;
 };
 
@@ -61,26 +88,22 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
  * @param uniformStruct
  * [KO] 유니폼 구조 WGSL 코드 (선택)
  * [EN] Uniform structure WGSL code (optional)
- * @param sourceTextureNames
- * [KO] 사용할 소스 텍스처 이름 또는 이름 리스트 (기본값: 'sourceTexture')
- * [EN] Source texture name or list of names to use (default: 'sourceTexture')
- * @param useSampledTexture
- * [KO] 소스 텍스처를 샘플링 가능한 타입(texture_2d)으로 사용할지 여부 (기본값: false, texture_storage_2d 사용)
- * [EN] Whether to use source textures as sampleable types (texture_2d) (default: false, uses texture_storage_2d)
+ * @param sourceTextureConfigs
+ * [KO] 사용할 소스 텍스처 이름 또는 설정 리스트 (기본값: 'sourceTexture')
+ * [EN] Source texture name or configuration list to use (default: 'sourceTexture')
  * @returns
  * [KO] { msaa: string, nonMsaa: string } - MSAA/Non-MSAA용 WGSL 코드
  * [EN] { msaa: string, nonMsaa: string } - WGSL code for MSAA/Non-MSAA
- *
- * * ### Example
- * ```typescript
- * const shader = createBasicPostEffectCode(effect, '...main code...', 'struct Uniforms {...};');
- * // shader.msaa, shader.nonMsaa 사용
- * ```
  */
-const createBasicPostEffectCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: string = '', sourceTextureNames: string | string[] = 'sourceTexture', useSampledTexture: boolean = false) => {
+const createBasicPostEffectCode = (
+    effect: ASinglePassPostEffect,
+    code: string,
+    uniformStruct: string = '',
+    sourceTextureConfigs: string | (string | PostEffectSourceTexture)[] = 'sourceTexture'
+) => {
     return {
-        msaa: createCode(effect, code, uniformStruct, true, sourceTextureNames, useSampledTexture),
-        nonMsaa: createCode(effect, code, uniformStruct, false, sourceTextureNames, useSampledTexture)
+        msaa: createCode(effect, code, uniformStruct, true, sourceTextureConfigs),
+        nonMsaa: createCode(effect, code, uniformStruct, false, sourceTextureConfigs)
     }
 }
 Object.freeze(createBasicPostEffectCode)

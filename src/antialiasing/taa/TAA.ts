@@ -48,8 +48,10 @@ class TAA extends ASinglePassPostEffect {
                 this,
                 computeCode,
                 uniformStructCode,
-                ['sourceTexture', 'historyTexture'],
-                true // useSampledTexture
+                [
+                    {name: 'sourceTexture', isSampled: true},
+                    {name: 'historyTexture', isSampled: true}
+                ]
             )
         );
         this.jitterStrength = this.#jitterStrength;
