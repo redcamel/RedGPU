@@ -38,19 +38,14 @@ abstract class ASinglePassPostEffect {
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
     #computeBindGroupLayout1: GPUBindGroupLayout
-    #gbufferBindGroupLayout: GPUBindGroupLayout
     #outputBindGroupLayout: GPUBindGroupLayout
     #computeBindGroup0List_swap0: GPUBindGroup
     #computeBindGroup0List_swap1: GPUBindGroup
     #computeBindGroup1: GPUBindGroup
-    #gbufferBindGroup_swap0: GPUBindGroup
-    #gbufferBindGroup_swap1: GPUBindGroup
     #outputBindGroup: GPUBindGroup
     #computeBindGroupEntries0_swap0: GPUBindGroupEntry[]
     #computeBindGroupEntries0_swap1: GPUBindGroupEntry[]
     #computeBindGroupEntries1: GPUBindGroupEntry[]
-    #gbufferBindGroupEntries_swap0: GPUBindGroupEntry[]
-    #gbufferBindGroupEntries_swap1: GPUBindGroupEntry[]
     #outputBindGroupEntries: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
 
@@ -70,10 +65,6 @@ abstract class ASinglePassPostEffect {
     #WORK_SIZE_X: number = 16
     #WORK_SIZE_Y: number = 16
     #WORK_SIZE_Z: number = 1
-    #useDepthTexture: boolean = false
-    #useGBufferNormalTexture: boolean = false
-    #useMotionVectorTexture: boolean = false
-    #usePrevDepthTexture: boolean = false
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
     #previousSourceTextureReferences: ASinglePassPostEffectResult[] = [];
@@ -103,75 +94,11 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 이전 프레임 깊이(Prev Depth) 텍스처 사용 여부를 반환합니다.
-     * [EN] Returns whether previous depth texture is used.
-     */
-    get usePrevDepthTexture(): boolean {
-        return this.#usePrevDepthTexture;
-    }
-
-    /**
-     * [KO] 이전 프레임 깊이(Prev Depth) 텍스처 사용 여부를 설정합니다.
-     * [EN] Sets whether previous depth texture is used.
-     */
-    set usePrevDepthTexture(value: boolean) {
-        this.#usePrevDepthTexture = value;
-    }
-
-    /**
-     * [KO] Motion Vector 텍스처 사용 여부를 반환합니다.
-     * [EN] Returns whether Motion Vector texture is used.
-     */
-    get useMotionVectorTexture(): boolean {
-        return this.#useMotionVectorTexture;
-    }
-
-    /**
-     * [KO] Motion Vector 텍스처 사용 여부를 설정합니다.
-     * [EN] Sets whether Motion Vector texture is used.
-     */
-    set useMotionVectorTexture(value: boolean) {
-        this.#useMotionVectorTexture = value;
-    }
-
-    /**
-     * [KO] G-Buffer Normal 텍스처 사용 여부를 반환합니다.
-     * [EN] Returns whether G-Buffer Normal texture is used.
-     */
-    get useGBufferNormalTexture(): boolean {
-        return this.#useGBufferNormalTexture;
-    }
-
-    /**
-     * [KO] G-Buffer Normal 텍스처 사용 여부를 설정합니다.
-     * [EN] Sets whether G-Buffer Normal texture is used.
-     */
-    set useGBufferNormalTexture(value: boolean) {
-        this.#useGBufferNormalTexture = value;
-    }
-
-    /**
      * [KO] 비디오 메모리 사용량(Bytes)을 반환합니다.
      * [EN] Returns the video memory usage in bytes.
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize
-    }
-
-    /**
-     * [KO] 깊이(Depth) 텍스처 사용 여부를 반환합니다.
-     * [EN] Returns whether depth texture is used.
-     */
-    get useDepthTexture(): boolean {
-        return this.#useDepthTexture;
-    }
-
-    /**
-     * [KO] 깊이(Depth) 텍스처 사용 여부를 설정합니다.
-     * [EN] Sets whether depth texture is used.
-     */
-    set useDepthTexture(value: boolean) {
-        this.#useDepthTexture = value;
     }
 
     /**
@@ -308,7 +235,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 실제 컴퓨트 패스를 커맨드 인코더에 추가합니다.
      * [EN] Adds the actual compute pass to the command encoder.
      */
-    #execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number) {
+    #execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number, gbufferBindGroup: GPUBindGroup) {
         const {commandEncoderManager} = this.#redGPUContext;
         const {renderViewStateData} = view;
 
@@ -316,7 +243,7 @@ abstract class ASinglePassPostEffect {
             computePassEncoder.setPipeline(this.#computePipeline);
             computePassEncoder.setBindGroup(0, renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0);
             computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
-            computePassEncoder.setBindGroup(2, renderViewStateData.swapBufferIndex ? this.#gbufferBindGroup_swap1 : this.#gbufferBindGroup_swap0);
+            computePassEncoder.setBindGroup(2, gbufferBindGroup);
             computePassEncoder.setBindGroup(3, this.#outputBindGroup);
             computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
         });
@@ -362,7 +289,7 @@ abstract class ASinglePassPostEffect {
         }
 
         // 컴퓨트 패스 실행
-        this.#execute(view, gpuDevice, width, height);
+        this.#execute(view, gpuDevice, width, height, view.postEffectManager.gbufferBindGroup);
 
         // 이전 상태 저장
         this.#prevMSAA = useMSAA;
@@ -402,12 +329,10 @@ abstract class ASinglePassPostEffect {
         this.#computeBindGroupEntries0_swap0 = [];
         this.#computeBindGroupEntries0_swap1 = [];
         this.#computeBindGroupEntries1 = [];
-        this.#gbufferBindGroupEntries_swap0 = [];
-        this.#gbufferBindGroupEntries_swap1 = [];
         this.#outputBindGroupEntries = [];
 
         this.#updateBindGroupEntries(view, sourceTextureInfoList, targetOutputView);
-        this.#updateLayoutsAndPipeline(useMSAA, gpuDevice);
+        this.#updateLayoutsAndPipeline(view, useMSAA, gpuDevice);
 
         // 현재 소스 텍스처 참조 저장
         this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
@@ -419,7 +344,7 @@ abstract class ASinglePassPostEffect {
      */
     #updateBindGroupEntries(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView) {
         const {storage, textures, samplers} = this.shaderInfo;
-        const {viewRenderTextureManager, postEffectManager} = view;
+        const {postEffectManager} = view;
 
         // Group 0: 소스 텍스처들 (Storage 리소스 중 outputTexture가 아닌 것들)
         for (const k in storage) {
@@ -444,32 +369,10 @@ abstract class ASinglePassPostEffect {
             }
         });
 
-        // Group 1: 샘플러들 (binding 0)
-        if (samplers) {
-            samplers.forEach(({name, binding, group}) => {
-                if (group === 1 && name === 'basicSampler') {
-                    const resource = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-                    this.#computeBindGroupEntries1.push({binding, resource});
-                }
-            });
-        }
-
-        // 시스템 유니폼 버퍼 (binding 1)
-        if (this.systemUniformsInfo) {
-            this.#computeBindGroupEntries1.push({
-                binding: this.systemUniformsInfo.binding,
-                resource: {
-                    buffer: postEffectManager.postEffectSystemUniformBuffer.gpuBuffer,
-                    offset: 0,
-                    size: postEffectManager.postEffectSystemUniformBuffer.size
-                }
-            });
-        }
-
-        // 이펙트 개별 유니폼 버퍼 (binding 2)
+        // Group 1: 이펙트 개별 유니폼 버퍼 (binding 0)
         if (this.#uniformBuffer && this.uniformsInfo) {
             this.#computeBindGroupEntries1.push({
-                binding: this.uniformsInfo.binding,
+                binding: 0,
                 resource: {
                     buffer: this.#uniformBuffer.gpuBuffer,
                     offset: 0,
@@ -477,30 +380,6 @@ abstract class ASinglePassPostEffect {
                 },
             });
         }
-
-        // Group 2: G-Buffer 리소스 (Depth, G-Buffer Normal 등)
-        textures.forEach(({name, binding}) => {
-            if (name === "depthTexture") {
-                this.#gbufferBindGroupEntries_swap0.push({binding, resource: viewRenderTextureManager.depthTextureView});
-                this.#gbufferBindGroupEntries_swap1.push({binding, resource: viewRenderTextureManager.prevDepthTextureView});
-            } else if (name === "gBufferNormalTexture") {
-                const normalView = this.#redGPUContext.antialiasingManager.useMSAA
-                    ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
-                    : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
-                this.#gbufferBindGroupEntries_swap0.push({binding, resource: normalView});
-                this.#gbufferBindGroupEntries_swap1.push({binding, resource: normalView});
-            } else if (name === "motionVectorTexture") {
-                const motionVectorView = this.#redGPUContext.antialiasingManager.useMSAA
-                    ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR)
-                    : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR);
-                this.#gbufferBindGroupEntries_swap0.push({binding, resource: motionVectorView});
-                this.#gbufferBindGroupEntries_swap1.push({binding, resource: motionVectorView});
-            } else if (name === "prevDepthTexture") {
-                const prevDepthView = viewRenderTextureManager.prevDepthTextureView;
-                this.#gbufferBindGroupEntries_swap0.push({binding, resource: prevDepthView});
-                this.#gbufferBindGroupEntries_swap1.push({binding, resource: prevDepthView});
-            }
-        });
 
         // Group 3: 출력 텍스처
         this.#outputBindGroupEntries.push({binding: 0, resource: targetOutputView});
@@ -510,14 +389,13 @@ abstract class ASinglePassPostEffect {
      * [KO] 바인드 그룹 레이아웃 및 컴퓨트 파이프라인을 생성합니다.
      * [EN] Creates bind group layouts and the compute pipeline.
      */
-    #updateLayoutsAndPipeline(useMSAA: boolean, gpuDevice: GPUDevice) {
+    #updateLayoutsAndPipeline(view: View3D, useMSAA: boolean, gpuDevice: GPUDevice) {
         const {resourceManager} = this.#redGPUContext;
         const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
         const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
 
         const layout0Name = `${this.#name}_BIND_GROUP_LAYOUT_0_USE_MSAA_${useMSAA}`;
         const layout1Name = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
-        const layout2Name = `${this.#name}_BIND_GROUP_LAYOUT_2_USE_MSAA_${useMSAA}`;
         const layout3Name = `${this.#name}_BIND_GROUP_LAYOUT_3_USE_MSAA_${useMSAA}`;
 
         // 레이아웃 캐싱 및 생성
@@ -526,9 +404,6 @@ abstract class ASinglePassPostEffect {
 
         this.#computeBindGroupLayout1 = resourceManager.getGPUBindGroupLayout(layout1Name) ||
             resourceManager.createBindGroupLayout(layout1Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 1, useMSAA));
-
-        this.#gbufferBindGroupLayout = resourceManager.getGPUBindGroupLayout(layout2Name) ||
-            resourceManager.createBindGroupLayout(layout2Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 2, useMSAA));
 
         this.#outputBindGroupLayout = resourceManager.getGPUBindGroupLayout(layout3Name) ||
             resourceManager.createBindGroupLayout(layout3Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 3, useMSAA));
@@ -552,18 +427,6 @@ abstract class ASinglePassPostEffect {
             entries: this.#computeBindGroupEntries1
         });
 
-        this.#gbufferBindGroup_swap0 = gpuDevice.createBindGroup({
-            label: `${this.#name}_BIND_GROUP_2_USE_MSAA_${useMSAA}_SWAP0`,
-            layout: this.#gbufferBindGroupLayout,
-            entries: this.#gbufferBindGroupEntries_swap0
-        });
-
-        this.#gbufferBindGroup_swap1 = gpuDevice.createBindGroup({
-            label: `${this.#name}_BIND_GROUP_2_USE_MSAA_${useMSAA}_SWAP1`,
-            layout: this.#gbufferBindGroupLayout,
-            entries: this.#gbufferBindGroupEntries_swap1
-        });
-
         this.#outputBindGroup = gpuDevice.createBindGroup({
             label: `${this.#name}_BIND_GROUP_3_USE_MSAA_${useMSAA}`,
             layout: this.#outputBindGroupLayout,
@@ -577,7 +440,7 @@ abstract class ASinglePassPostEffect {
                 bindGroupLayouts: [
                     this.#computeBindGroupLayout0,
                     this.#computeBindGroupLayout1,
-                    this.#gbufferBindGroupLayout,
+                    view.postEffectManager.gbufferBindGroupLayout,
                     this.#outputBindGroupLayout
                 ]
             }),

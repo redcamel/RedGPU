@@ -15,7 +15,6 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     constructor(redGPUContext: RedGPUContext, skyAtmosphere: SkyAtmosphere) {
         super(redGPUContext);
         this.#skyAtmosphere = skyAtmosphere;
-        this.useDepthTexture = true;
 
         const createCode = (useMSAA: boolean) => {
             return [
@@ -29,9 +28,12 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 '@group(0) @binding(5) var skyAtmosphereIrradianceLUT : texture_cube<f32>;',
                 '',
                 ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM,
-                '@group(1) @binding(1) var basicSampler : sampler;',
+                '@group(2) @binding(5) var basicSampler : sampler;',
                 '',
                 `@group(2) @binding(0) var depthTexture : ${useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d'};`,
+                '@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;',
+                '@group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;',
+                '@group(2) @binding(3) var prevDepthTexture : texture_depth_2d;',
                 '',
                 '@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 '',

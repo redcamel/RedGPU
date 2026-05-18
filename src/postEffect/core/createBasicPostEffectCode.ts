@@ -21,14 +21,15 @@ const createCode = (effect: ASinglePassPostEffect, code: string, uniformStruct: 
         
         ${sourceTextures}
         
-        ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}        
-        @group(1) @binding(1) var basicSampler : sampler;
-        ${uniformStruct ? '@group(1) @binding(2) var<uniform> uniforms: Uniforms;' : ''}
+        @group(1) @binding(0) var<uniform> uniforms: Uniforms;
         
-        ${effect.useDepthTexture ? `@group(2) @binding(0) var depthTexture : ${depthTextureType};` : ''}
-        ${effect.useGBufferNormalTexture ? `@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;` : ''}
-        ${effect.useMotionVectorTexture ? `@group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;` : ''}
-        ${effect.usePrevDepthTexture ? `@group(2) @binding(3) var prevDepthTexture : texture_depth_2d;` : ''}
+        ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
+        @group(2) @binding(5) var basicSampler : sampler;
+        
+        @group(2) @binding(0) var depthTexture : ${depthTextureType};
+        @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
+        @group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;
+        @group(2) @binding(3) var prevDepthTexture : texture_depth_2d;
         
         @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
         

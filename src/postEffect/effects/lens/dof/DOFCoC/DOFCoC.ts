@@ -19,7 +19,6 @@ class DOFCoC extends ASinglePassPostEffect {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.useDepthTexture = true
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_COC',

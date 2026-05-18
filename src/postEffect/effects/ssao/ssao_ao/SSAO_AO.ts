@@ -25,8 +25,6 @@ class SSAO_AO extends ASinglePassPostEffect {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.useDepthTexture = true;
-        this.useGBufferNormalTexture = true;
 
         this.init(
             redGPUContext,

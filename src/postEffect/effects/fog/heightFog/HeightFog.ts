@@ -85,7 +85,6 @@ class HeightFog extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.useDepthTexture = true;
         this.init(
             redGPUContext,
             'POST_EFFECT_HEIGHT_FOG',

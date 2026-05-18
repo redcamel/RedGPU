@@ -40,9 +40,6 @@ class TAA extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {x: 8, y: 8, z: 1});
-        this.useDepthTexture = true;
-        this.useMotionVectorTexture = true;
-        this.usePrevDepthTexture = true;
 
         this.init(
             redGPUContext,

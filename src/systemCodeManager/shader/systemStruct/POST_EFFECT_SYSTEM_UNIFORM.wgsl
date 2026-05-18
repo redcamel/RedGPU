@@ -12,4 +12,4 @@ struct SystemUniform {
     skyAtmosphere:SkyAtmosphere,
 };
 
-@group(1) @binding(0) var<uniform> systemUniforms: SystemUniform;
+@group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
