@@ -48,7 +48,7 @@ ${uniformStruct}
 
 ${sourceTextures}
 
-@group(1) @binding(0) var<uniform> uniforms: Uniforms;
+${uniformStruct ? '@group(1) @binding(0) var<uniform> uniforms: Uniforms;' : ''}
 
 ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
 @group(2) @binding(5) var basicSampler : sampler;

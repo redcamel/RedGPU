@@ -492,6 +492,24 @@ class PostEffectManager {
                 currentTextureView,
             );
         });
+
+        if (this.#useSSAO) {
+            currentTextureView = this.ssao.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView
+            );
+        }
+        if (this.#useSSR) {
+            currentTextureView = this.ssr.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView
+            );
+        }
+
         // Auto Exposure 처리 (HDR 공간에서 수행)
         if (useAutoExposure) {
             this.autoExposure.render(currentTextureView);
@@ -508,22 +526,6 @@ class PostEffectManager {
 
         if (useFXAA) {
             currentTextureView = fxaa.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            );
-        }
-        if (this.#useSSAO) {
-            currentTextureView = this.ssao.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            );
-        }
-        if (this.#useSSR) {
-            currentTextureView = this.ssr.render(
                 this.#view,
                 width,
                 height,
