@@ -48,7 +48,7 @@ export default [
 				}
 			),
 			terser(terserOptions),
-			// removeSpacesAndTabs()
+			removeSpacesAndTabs()
 		]
 	},
 	{
@@ -67,29 +67,26 @@ export default [
 				declarationDir: null
 			}),
 			terser(terserOptions),
-			// removeSpacesAndTabs()
+			removeSpacesAndTabs()
 		]
 	}
 ]
 
 function removeSpacesAndTabs() {
 	return {
-		generateBundle(_, bundle) {
-			for (const filename in bundle) {
-				const file = bundle[filename];
-				if (file.type === 'chunk') {
-					file.code = file.code
-						.replace(/(\\t){2,}/g, '\t')
-						.replace(/(\s?)=(\s?)/g, '=')
-						.replace(/(\s?):(\s?)/g, ':')
-						.replace(/(\s?);(\s?)/g, ';')
-						.replace(/(\s?),(\s?)/g, ',')
-						.replace(/(\s?)\/(\s?)/g, '/')
-						.replace(/\s{1,}/g, ' ')
-						.replace(/\\n /g, ' ')
-					;
-				}
-			}
+		name: 'remove-spaces-and-tabs',
+		renderChunk(code) {
+			return code.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, (match) => {
+
+				let content = match.substring(1, match.length - 1);
+				content.replace(/\/\*[\s\S]*?\*\//g, '')
+					.replace(/\/\/.*?(\\n|\\r|$)/g, '$1')
+					.replace(/\\r\\n|\\n|\\r|\\t/g, ' ')
+					.replace(/\s+/g, ' ')
+					.replace(/\s*(&&|\|\||[=+\-*/<>:;,{}()[\]])\s*/g, '$1')
+					.trim();
+				return match;
+			});
 		}
 	};
 }
@@ -105,7 +102,7 @@ function stringWgsl() {
 					// 모든 종류의 공백(개행 포함)을 하나의 공백으로 치환
 					.replace(/\s+/g, ' ')
 					// 연산자 및 기호 주변 공백 제거
-					.replace(/\s*([=+\-*/<>:;,{}()[\]])\s*/g, '$1')
+					.replace(/\s*(&&|\|\||[=+\-*/<>:;,{}()[\]])\s*/g, '$1')
 					.trim();
 				newCode = JSON.stringify(newCode)
 				return {
