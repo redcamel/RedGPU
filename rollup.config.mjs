@@ -103,18 +103,13 @@ function stringWgsl() {
 		transform(code, id) {
 			if (filter(id)) {
 				let newCode = code
-					// 블록 주석 제거 (/* */)
-					.replace(/\/\*[\s\S]*?\*\//g, '')
-					// 라인 주석 제거 (//)
-					.replace(/\/\/.*/g, '')
-					// 캐리지 리턴 제거
-					.replace(/\r/g, '')
-					// 연속된 개행문자를 하나로 치환
-					.replace(/\n\s*\n/g, '\n')
-					// 연속된 공백을 하나로 치환
-					.replace(/[ \t]+/g, ' ')
+					// 주석 제거 (블록 및 라인)
+					.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+					// 모든 종류의 공백(개행 포함)을 하나의 공백으로 치환
+					.replace(/\s+/g, ' ')
 					// 연산자 및 기호 주변 공백 제거
-					.replace(/\s*([=+\-*/<>:;,{}()[\]])\s*/g, '$1');
+					.replace(/\s*([=+\-*/<>:;,{}()[\]])\s*/g, '$1')
+					.trim();
 				newCode = JSON.stringify(newCode)
 				return {
 					code: `export default ${newCode};`,
