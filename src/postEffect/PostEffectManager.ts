@@ -371,7 +371,11 @@ class PostEffectManager {
             }, // depthTexture
             {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}}, // gBufferNormalTexture
             {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {}}, // motionVectorTexture
-            {binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'depth'}}, // prevDepthTexture
+            {
+                binding: 3,
+                visibility: GPUShaderStage.COMPUTE,
+                texture: {sampleType: 'depth', multisampled: useMSAA}
+            }, // prevDepthTexture
             {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}, // systemUniforms
             {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {}} // basicSampler
         ];

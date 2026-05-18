@@ -47,7 +47,7 @@
         finalRGB = currentRGB;
         finalAlpha = currentAlpha;
     } else {
-        let prevDepth = fetch_depth_bilinear(prevDepthTexture, historyUV, screenSize);
+        let prevDepth = fetch_depth_bilinear(historyUV, screenSize);
         let historyData = sample_texture_catmull_rom_antiflicker(historyTexture, basicSampler, historyUV, screenSize);
 
         let motionLen = length(velocity * screenSize);

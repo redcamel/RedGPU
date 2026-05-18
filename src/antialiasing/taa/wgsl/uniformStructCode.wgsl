@@ -38,16 +38,16 @@ fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     return 1.0 - clamp((depthDiff - 0.1) / 0.4, 0.0, 1.0);
 }
 
-fn fetch_depth_bilinear(tex: texture_depth_2d, uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
+fn fetch_depth_bilinear(uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
     let samplePos = uv * screenSize - 0.5;
     let f = fract(samplePos);
     let base = vec2<i32>(floor(samplePos));
-    let size = vec2<i32>(textureDimensions(tex));
+    let size = vec2<i32>(textureDimensions(prevDepthTexture));
 
-    let d00 = textureLoad(tex, clamp(base + vec2<i32>(0, 0), vec2<i32>(0), size - 1), 0);
-    let d10 = textureLoad(tex, clamp(base + vec2<i32>(1, 0), vec2<i32>(0), size - 1), 0);
-    let d01 = textureLoad(tex, clamp(base + vec2<i32>(0, 1), vec2<i32>(0), size - 1), 0);
-    let d11 = textureLoad(tex, clamp(base + vec2<i32>(1, 1), vec2<i32>(0), size - 1), 0);
+    let d00 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(0, 0), vec2<i32>(0), size - 1), 0);
+    let d10 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(1, 0), vec2<i32>(0), size - 1), 0);
+    let d01 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(0, 1), vec2<i32>(0), size - 1), 0);
+    let d11 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(1, 1), vec2<i32>(0), size - 1), 0);
 
     return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
 }

@@ -56,7 +56,7 @@ ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
 @group(2) @binding(0) var depthTexture : ${depthTextureType};
 @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
 @group(2) @binding(2) var motionVectorTexture : texture_2d<f32>;
-@group(2) @binding(3) var prevDepthTexture : texture_depth_2d;
+@group(2) @binding(3) var prevDepthTexture : ${depthTextureType};
 
 @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
 
