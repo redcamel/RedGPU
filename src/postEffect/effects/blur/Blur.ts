@@ -1,8 +1,9 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
-import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../core/types";
 import Convolution from "../convolution/Convolution";
+
 
 /**
  * [KO] 2D 블러(Blur) 후처리 효과를 제공하는 클래스입니다.
@@ -79,8 +80,8 @@ class Blur extends AMultiPassPostEffect {
         view: View3D,
         width: number,
         height: number,
-        sourceTextureInfo: ASinglePassPostEffectResult
-    ): ASinglePassPostEffectResult {
+        sourceTextureInfo: IPostEffectResult
+    ): IPostEffectResult {
         return this.#effect_convolution.render(
             view, width, height, sourceTextureInfo
         );

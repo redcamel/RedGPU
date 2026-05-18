@@ -4,24 +4,7 @@ import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import GBUFFER_TYPE from "../../display/view/core/GBUFFER_TYPE";
-
-/**
- * [KO] 단일 패스 후처리 이펙트 결과 인터페이스입니다.
- * [EN] Result interface for a single-pass post-processing effect.
- */
-export type ASinglePassPostEffectResult = {
-    /**
-     * [KO] 결과 텍스처
-     * [EN] Result texture
-     */
-    texture: GPUTexture
-    /**
-     * [KO] 결과 텍스처 뷰
-     * [EN] Result texture view
-     */
-    textureView: GPUTextureView
-}
+import {IPostEffectResult} from "./types";
 
 /**
  * [KO] 단일 패스 후처리 이펙트 추상 클래스입니다.
@@ -67,7 +50,7 @@ abstract class ASinglePassPostEffect {
     #WORK_SIZE_Z: number = 1
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
-    #previousSourceTextureReferences: ASinglePassPostEffectResult[] = [];
+    #previousSourceTextureReferences: IPostEffectResult[] = [];
     #videoMemorySize: number = 0
     #prevMSAA: boolean
     #prevMSAAID: string
@@ -232,24 +215,6 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 실제 컴퓨트 패스를 커맨드 인코더에 추가합니다.
-     * [EN] Adds the actual compute pass to the command encoder.
-     */
-    #execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number, gbufferBindGroup: GPUBindGroup) {
-        const {commandEncoderManager} = this.#redGPUContext;
-        const {renderViewStateData} = view;
-
-        commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
-            computePassEncoder.setPipeline(this.#computePipeline);
-            computePassEncoder.setBindGroup(0, renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0);
-            computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
-            computePassEncoder.setBindGroup(2, gbufferBindGroup);
-            computePassEncoder.setBindGroup(3, this.#outputBindGroup);
-            computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
-        });
-    }
-
-    /**
      * [KO] 이펙트를 렌더링하고 결과를 반환합니다. 필요한 경우 바인드 그룹을 갱신합니다.
      * [EN] Renders the effect and returns the result. Updates bind groups if necessary.
      *
@@ -269,7 +234,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 렌더링 결과 (텍스처 및 뷰)
      * [EN] Rendering result (texture and view)
      */
-    render(view: View3D, width: number, height: number, ...sourceTextureInfo: ASinglePassPostEffectResult[]): ASinglePassPostEffectResult {
+    render(view: View3D, width: number, height: number, ...sourceTextureInfo: IPostEffectResult[]): IPostEffectResult {
         const {gpuDevice, antialiasingManager, resourceManager} = this.#redGPUContext;
         const {useMSAA, msaaID} = antialiasingManager;
 
@@ -322,10 +287,28 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
+     * [KO] 실제 컴퓨트 패스를 커맨드 인코더에 추가합니다.
+     * [EN] Adds the actual compute pass to the command encoder.
+     */
+    #execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number, gbufferBindGroup: GPUBindGroup) {
+        const {commandEncoderManager} = this.#redGPUContext;
+        const {renderViewStateData} = view;
+
+        commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
+            computePassEncoder.setPipeline(this.#computePipeline);
+            computePassEncoder.setBindGroup(0, renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0);
+            computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
+            computePassEncoder.setBindGroup(2, gbufferBindGroup);
+            computePassEncoder.setBindGroup(3, this.#outputBindGroup);
+            computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
+        });
+    }
+
+    /**
      * [KO] 바인드 그룹 및 파이프라인을 생성하거나 갱신합니다.
      * [EN] Creates or updates bind groups and the pipeline.
      */
-    #createBindGroups(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
+    #createBindGroups(view: View3D, sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
         this.#computeBindGroupEntries0_swap0 = [];
         this.#computeBindGroupEntries0_swap1 = [];
         this.#computeBindGroupEntries1 = [];
@@ -342,7 +325,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 바인드 그룹 엔트리 리스트를 구성합니다.
      * [EN] Configures the list of bind group entries.
      */
-    #updateBindGroupEntries(view: View3D, sourceTextureInfoList: ASinglePassPostEffectResult[], targetOutputView: GPUTextureView) {
+    #updateBindGroupEntries(view: View3D, sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView) {
         const {storage, textures, samplers} = this.shaderInfo;
         const {postEffectManager} = view;
 
@@ -460,7 +443,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 입력 소스 텍스처들의 변경 여부를 감지합니다.
      * [EN] Detects changes in the input source textures.
      */
-    #detectSourceTextureChange(sourceTextureInfoList: ASinglePassPostEffectResult[]): boolean {
+    #detectSourceTextureChange(sourceTextureInfoList: IPostEffectResult[]): boolean {
         if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureInfoList.length) {
             return true;
         }
@@ -471,7 +454,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 현재 소스 텍스처들의 참조를 저장합니다.
      * [EN] Saves the references of the current source textures.
      */
-    #saveCurrentSourceTextureReferences(sourceTextureInfoList: ASinglePassPostEffectResult[]) {
+    #saveCurrentSourceTextureReferences(sourceTextureInfoList: IPostEffectResult[]) {
         this.#previousSourceTextureReferences = [...sourceTextureInfoList];
     }
 }

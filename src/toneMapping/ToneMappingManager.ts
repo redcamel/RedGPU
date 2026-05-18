@@ -6,7 +6,7 @@ import ToneLinear from "./linearToneMapping/ToneLinear";
 import ToneKhronosPBRNeutral from "./khronosPbrNeutral/ToneKhronosPBRNeutral";
 import ToneACESFilmicNarkowicz from "./ACESFilmicNarkowicz/ToneACESFilmicNarkowicz";
 import ToneACESFilmicHill from "./ACESFilmicHill/ToneACESFilmicHill";
-import {ASinglePassPostEffectResult} from "../postEffect/core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../postEffect/core/types";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateNumberRange from "../runtimeChecker/validateFunc/validateNumberRange";
 
@@ -99,7 +99,7 @@ class ToneMappingManager {
      * @param currentTextureView - [KO] 현재 텍스처 뷰 정보 [EN] Current texture view information
      * @returns [KO] 렌더링 결과 [EN] Rendering result
      */
-    render(width: number, height: number, currentTextureView: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(width: number, height: number, currentTextureView: IPostEffectResult): IPostEffectResult {
         const effect = this.toneMapping;
         return effect ? effect.render(this.#view, width, height, currentTextureView) : currentTextureView;
     }

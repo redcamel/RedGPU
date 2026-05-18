@@ -342,93 +342,6 @@ class PostEffectManager {
         this.#postEffects.length = 0
     }
 
-
-    #initGBufferLayouts() {
-        const {gpuDevice} = this.#view.redGPUContext;
-
-        const getEntries = (useMSAA: boolean): GPUBindGroupLayoutEntry[] => [
-            {
-                binding: 0,
-                visibility: GPUShaderStage.COMPUTE,
-                texture: {sampleType: 'depth', multisampled: useMSAA}
-            }, // depthTexture
-            {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}}, // gBufferNormalTexture
-            {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {}}, // motionVectorTexture
-            {
-                binding: 3,
-                visibility: GPUShaderStage.COMPUTE,
-                texture: {sampleType: 'depth', multisampled: useMSAA}
-            }, // prevDepthTexture
-            {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}, // systemUniforms
-            {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {}} // basicSampler
-        ];
-
-        this.#gbufferBindGroupLayoutMSAA = gpuDevice.createBindGroupLayout({
-            label: 'PostEffect_Shared_GBuffer_BGL_MSAA',
-            entries: getEntries(true)
-        });
-        this.#gbufferBindGroupLayoutNonMSAA = gpuDevice.createBindGroupLayout({
-            label: 'PostEffect_Shared_GBuffer_BGL_NonMSAA',
-            entries: getEntries(false)
-        });
-    }
-
-    #updateGbufferBindGroup() {
-        const {viewRenderTextureManager, redGPUContext} = this.#view;
-        const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
-        const {useMSAA, msaaID} = antialiasingManager;
-
-        const depthView0 = viewRenderTextureManager.depthTextureView;
-        const depthView1 = viewRenderTextureManager.prevDepthTextureView;
-
-        const msaaChanged = this.#prevMSAAID_for_gbuffer !== msaaID;
-        const depthChanged = this.#prevDepthView0 !== depthView0 || this.#prevDepthView1 !== depthView1;
-
-        if (msaaChanged || depthChanged) {
-            const normalView = useMSAA
-                ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
-                : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
-
-            const motionVectorView = useMSAA
-                ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR)
-                : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR);
-
-            const basicSampler = resourceManager.basicSampler.gpuSampler;
-            const systemUniformBuffer = {
-                buffer: this.#postEffectSystemUniformBuffer.gpuBuffer,
-                offset: 0,
-                size: this.#postEffectSystemUniformBuffer.size
-            };
-
-            const getEntries = (currentDepth: GPUTextureView, prevDepth: GPUTextureView) => [
-                {binding: 0, resource: currentDepth},
-                {binding: 1, resource: normalView},
-                {binding: 2, resource: motionVectorView},
-                {binding: 3, resource: prevDepth},
-                {binding: 4, resource: systemUniformBuffer},
-                {binding: 5, resource: basicSampler}
-            ];
-
-            const layout = useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
-
-            this.#gbufferBindGroup_swap0 = gpuDevice.createBindGroup({
-                label: 'PostEffect_Shared_GBuffer_BG_Swap0',
-                layout,
-                entries: getEntries(depthView0, depthView1)
-            });
-
-            this.#gbufferBindGroup_swap1 = gpuDevice.createBindGroup({
-                label: 'PostEffect_Shared_GBuffer_BG_Swap1',
-                layout,
-                entries: getEntries(depthView1, depthView0)
-            });
-
-            this.#prevMSAAID_for_gbuffer = msaaID;
-            this.#prevDepthView0 = depthView0;
-            this.#prevDepthView1 = depthView1;
-        }
-    }
-
     /**
      * [KO] 후처리 파이프라인을 렌더링합니다.
      * [EN] Renders the post-processing pipeline.
@@ -453,7 +366,7 @@ class PostEffectManager {
         this.#updateGbufferBindGroup();
         const {useAutoExposure} = this.#view.rawCamera;
 
-        let currentTextureView =this.#renderToStorageTexture(this.#view, initialSourceTexture);
+        let currentTextureView = this.#renderToStorageTexture(this.#view, initialSourceTexture);
 
         // SkyAtmosphere 전용 처리 (톤 매핑 전 HDR 공간에서 실행)
         if (this.#view.skyAtmosphere) {
@@ -559,6 +472,92 @@ class PostEffectManager {
         })
         if (this.#texturePool) {
             this.#texturePool.clear();
+        }
+    }
+
+    #initGBufferLayouts() {
+        const {gpuDevice} = this.#view.redGPUContext;
+
+        const getEntries = (useMSAA: boolean): GPUBindGroupLayoutEntry[] => [
+            {
+                binding: 0,
+                visibility: GPUShaderStage.COMPUTE,
+                texture: {sampleType: 'depth', multisampled: useMSAA}
+            }, // depthTexture
+            {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {}}, // gBufferNormalTexture
+            {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {}}, // motionVectorTexture
+            {
+                binding: 3,
+                visibility: GPUShaderStage.COMPUTE,
+                texture: {sampleType: 'depth', multisampled: useMSAA}
+            }, // prevDepthTexture
+            {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}, // systemUniforms
+            {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {}} // basicSampler
+        ];
+
+        this.#gbufferBindGroupLayoutMSAA = gpuDevice.createBindGroupLayout({
+            label: 'PostEffect_Shared_GBuffer_BGL_MSAA',
+            entries: getEntries(true)
+        });
+        this.#gbufferBindGroupLayoutNonMSAA = gpuDevice.createBindGroupLayout({
+            label: 'PostEffect_Shared_GBuffer_BGL_NonMSAA',
+            entries: getEntries(false)
+        });
+    }
+
+    #updateGbufferBindGroup() {
+        const {viewRenderTextureManager, redGPUContext} = this.#view;
+        const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
+        const {useMSAA, msaaID} = antialiasingManager;
+
+        const depthView0 = viewRenderTextureManager.depthTextureView;
+        const depthView1 = viewRenderTextureManager.prevDepthTextureView;
+
+        const msaaChanged = this.#prevMSAAID_for_gbuffer !== msaaID;
+        const depthChanged = this.#prevDepthView0 !== depthView0 || this.#prevDepthView1 !== depthView1;
+
+        if (msaaChanged || depthChanged) {
+            const normalView = useMSAA
+                ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
+                : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
+
+            const motionVectorView = useMSAA
+                ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.MOTION_VECTOR)
+                : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.MOTION_VECTOR);
+
+            const basicSampler = resourceManager.basicSampler.gpuSampler;
+            const systemUniformBuffer = {
+                buffer: this.#postEffectSystemUniformBuffer.gpuBuffer,
+                offset: 0,
+                size: this.#postEffectSystemUniformBuffer.size
+            };
+
+            const getEntries = (currentDepth: GPUTextureView, prevDepth: GPUTextureView) => [
+                {binding: 0, resource: currentDepth},
+                {binding: 1, resource: normalView},
+                {binding: 2, resource: motionVectorView},
+                {binding: 3, resource: prevDepth},
+                {binding: 4, resource: systemUniformBuffer},
+                {binding: 5, resource: basicSampler}
+            ];
+
+            const layout = useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
+
+            this.#gbufferBindGroup_swap0 = gpuDevice.createBindGroup({
+                label: 'PostEffect_Shared_GBuffer_BG_Swap0',
+                layout,
+                entries: getEntries(depthView0, depthView1)
+            });
+
+            this.#gbufferBindGroup_swap1 = gpuDevice.createBindGroup({
+                label: 'PostEffect_Shared_GBuffer_BG_Swap1',
+                layout,
+                entries: getEntries(depthView1, depthView0)
+            });
+
+            this.#prevMSAAID_for_gbuffer = msaaID;
+            this.#prevDepthView0 = depthView0;
+            this.#prevDepthView1 = depthView1;
         }
     }
 
@@ -671,7 +670,7 @@ class PostEffectManager {
 
         return {
             texture: initialSourceTexture,
-            textureView: antialiasingManager.useMSAA ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR) :  viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR)
+            textureView: antialiasingManager.useMSAA ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR) : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR)
         };
     }
 }

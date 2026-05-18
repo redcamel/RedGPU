@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../postEffect/core/ASinglePassPostEffect";
+import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../postEffect/core/types";
 import View3D from "../../display/view/View3D";
 
 /**
@@ -53,7 +54,7 @@ class AToneMappingEffect extends ASinglePassPostEffect {
         this.updateUniform('brightness', this.#brightness);
     }
 
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         return super.render(view, width, height, sourceTextureInfo);
     }
 }

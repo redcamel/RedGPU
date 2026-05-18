@@ -61,7 +61,7 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_COLOR_TEMPERATURE_TINT',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         this.strength = this.#strength
         this.tint = this.#tint
         this.temperature = this.#temperature

@@ -65,7 +65,7 @@ class RadialBlur extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_RADIAL_BLUR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         this.amount = this.#amount
         this.sampleCount = this.#sampleCount
     }

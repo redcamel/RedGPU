@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
-import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../core/types";
 import GaussianBlur from "../blur/GaussianBlur";
 import SSAO_AO from "./ssao_ao/SSAO_AO";
 import SSAOBlend from "./ssao_blend/SSAOBlend";
@@ -201,7 +201,7 @@ class SSAO extends AMultiPassPostEffect {
      * [KO] 렌더링 결과
      * [EN] Rendering result
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;
         const aoResult = this.#effect_ao.render(
             view, width, height, sourceTextureInfo

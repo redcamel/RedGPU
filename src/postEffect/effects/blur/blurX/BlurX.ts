@@ -41,7 +41,7 @@ class BlurX extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_BLUR_X',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         this.size = this.#size
     }
 

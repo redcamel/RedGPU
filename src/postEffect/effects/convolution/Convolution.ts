@@ -93,7 +93,7 @@ class Convolution extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_CONVOLUTION',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         this.kernel = this.#kernel
     }
 

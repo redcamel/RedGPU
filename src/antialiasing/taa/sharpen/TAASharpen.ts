@@ -48,7 +48,7 @@ class TAASharpen extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_TAA_SHARPEN',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         // 기본값 적용
         this.sharpness = 0.5;
     }

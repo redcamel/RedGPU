@@ -29,12 +29,11 @@ class Grayscale extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        const uniformStructCode = ''
         this.init(
             redGPUContext,
             'POST_EFFECT_GRAYSCALE',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+            createBasicPostEffectCode(this, computeCode)
+        );
     }
 }
 

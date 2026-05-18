@@ -20,7 +20,7 @@ import DirectionalLight from "../../light/lights/DirectionalLight";
 import SkyLight from "./skyLight/SkyLight";
 import SkyAtmosphereBackground from "./skyAtmosphereBackground/SkyAtmosphereBackground";
 import SkyAtmospherePostEffect from "./skyAtmospherePostEffect/SkyAtmospherePostEffect";
-import {ASinglePassPostEffectResult} from "../../postEffect/core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../postEffect/core/types";
 
 const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
@@ -315,7 +315,7 @@ class SkyAtmosphere {
      * [KO] 포스트 이펙트 렌더링을 수행합니다. (오브젝트 영역 대기 투과 처리 전용)
      * [EN] Performs post-effect rendering. (Dedicated to atmospheric transmittance on object regions)
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         this.update(view);
         return this.#postEffect.render(view, width, height, sourceTextureInfo);
     }

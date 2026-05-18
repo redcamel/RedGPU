@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
-import {ASinglePassPostEffectResult} from "../../core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../core/types";
 import Threshold from "../adjustments/threshold/Threshold";
 import GaussianBlur from "../blur/GaussianBlur";
 import OldBloomBlend from "./oldBloomBlend/OldBloomBlend";
@@ -99,7 +99,7 @@ class OldBloom extends AMultiPassPostEffect {
      * [KO] 올드 블룸 효과를 렌더링합니다. (Threshold -> GaussianBlur -> Blend)
      * [EN] Renders the old bloom effect. (Threshold -> GaussianBlur -> Blend)
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;
         const thresholdResult = this.#effect_threshold.render(view, width, height, sourceTextureInfo);
         const blurResult = this.#effect_gaussianBlur.render(view, width, height, thresholdResult);

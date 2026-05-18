@@ -102,7 +102,7 @@ class ColorBalance extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_COLOR_BALANCE',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
     }
 
     /**

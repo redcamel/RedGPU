@@ -50,7 +50,7 @@ class HueSaturation extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_HUE_SATURATION',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
     }
 
     /**

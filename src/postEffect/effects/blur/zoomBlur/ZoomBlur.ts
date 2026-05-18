@@ -58,7 +58,7 @@ class ZoomBlur extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_ZOOM_BLUR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         this.amount = this.#amount
     }
 

@@ -52,7 +52,7 @@ class Vignetting extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_VIGNETTING',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode),
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         )
         this.smoothness = this.#smoothness
         this.size = this.#size

@@ -50,7 +50,7 @@ class Vibrance extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_VIBRANCE',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
     }
 
     /**

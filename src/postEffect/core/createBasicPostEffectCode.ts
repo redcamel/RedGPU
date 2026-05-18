@@ -1,24 +1,13 @@
 import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
-
 import ASinglePassPostEffect from "./ASinglePassPostEffect";
-
-/**
- * [KO] 후처리 소스 텍스처 설정 인터페이스
- * [EN] Post-effect source texture configuration interface
- */
-export type PostEffectSourceTexture = {
-    /** [KO] 텍스처 이름 [EN] Texture name */
-    name: string;
-    /** [KO] 샘플링 가능한 타입(texture_2d)으로 사용할지 여부 [EN] Whether to use as a sampleable type (texture_2d) */
-    isSampled?: boolean;
-}
+import {IPostEffectSourceConfig} from "./types";
 
 const createCode = (
     effect: ASinglePassPostEffect,
     code: string,
     uniformStruct: string = '',
     useMSAA: boolean = false,
-    sourceTextureConfigs: string | (string | PostEffectSourceTexture)[] = 'sourceTexture'
+    sourceTextureConfigs: string | (string | IPostEffectSourceConfig)[] = 'sourceTexture'
 ) => {
     const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect;
     const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
@@ -99,7 +88,7 @@ const createBasicPostEffectCode = (
     effect: ASinglePassPostEffect,
     code: string,
     uniformStruct: string = '',
-    sourceTextureConfigs: string | (string | PostEffectSourceTexture)[] = 'sourceTexture'
+    sourceTextureConfigs: string | (string | IPostEffectSourceConfig)[] = 'sourceTexture'
 ) => {
     return {
         msaa: createCode(effect, code, uniformStruct, true, sourceTextureConfigs),

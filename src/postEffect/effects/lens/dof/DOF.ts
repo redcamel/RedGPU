@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import AMultiPassPostEffect from "../../../core/AMultiPassPostEffect";
-import {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../../core/types";
 import DOFCoC from "./DOFCoC/DOFCoC";
 import DOFUnified from "./DOFUnified/DOFUnified";
 
@@ -399,7 +399,7 @@ class DOF extends AMultiPassPostEffect {
      * [KO] 최종 DOF 처리 결과
      * [EN] Final DOF result
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;
         // 1단계: CoC (Circle of Confusion) 계산
         const cocResult = this.#effect_coc.render(

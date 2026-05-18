@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
-import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../postEffect/core/ASinglePassPostEffect";
+import ASinglePassPostEffect from "../../../postEffect/core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../../postEffect/core/types";
 import SkyAtmosphere from "../SkyAtmosphere";
 import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect_compute.wgsl";
@@ -72,9 +73,9 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      * @param sourceTextureInfo - [KO] 소스 컬러 텍스처 [EN] Source color texture
      * @returns [KO] 렌더링 결과 [EN] Render result
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const skyAtmosphere = this.#skyAtmosphere;
-        
+
         return super.render(view, width, height,
             sourceTextureInfo, // 0
             {texture: null, textureView: skyAtmosphere.transmittanceLUT.gpuTextureView}, // 1

@@ -47,7 +47,7 @@ class BrightnessContrast extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_BRIGHTNESS_CONTRAST',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
     }
 
     /**

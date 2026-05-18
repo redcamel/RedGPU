@@ -43,7 +43,7 @@ class Threshold extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_THRESHOLD',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         this.threshold = this.#threshold
     }
 

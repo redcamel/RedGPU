@@ -41,7 +41,7 @@ class BlurY extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_BLUR_Y',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         this.size = this.#size
     }
 

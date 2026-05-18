@@ -1,7 +1,8 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../postEffect/core/ASinglePassPostEffect";
+import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../postEffect/core/types";
 import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
@@ -86,12 +87,12 @@ class TAA extends ASinglePassPostEffect {
      * [KO] TAA 이펙트를 렌더링합니다.
      * [EN] Renders the TAA effect.
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const {redGPUContext} = this;
         const {commandEncoderManager} = redGPUContext;
-        
+
         this.#frameIndex++;
-        
+
         // 유니폼 업데이트
         this.updateUniform('frameIndex', this.#frameIndex);
         this.updateUniform('currJitterOffset', view.jitterOffset);
@@ -103,7 +104,7 @@ class TAA extends ASinglePassPostEffect {
         this.#updateHistoryTexture(width, height);
 
         // 부모 렌더 호출 (Pool 사용)
-        const historyInfo: ASinglePassPostEffectResult = {
+        const historyInfo: IPostEffectResult = {
             texture: this.#historyTexture,
             textureView: this.#historyTextureView
         };
@@ -139,7 +140,7 @@ class TAA extends ASinglePassPostEffect {
     #updateHistoryTexture(width: number, height: number) {
         if (this.#prevInfo?.width !== width || this.#prevInfo?.height !== height || !this.#historyTexture) {
             if (this.#historyTexture) this.#historyTexture.destroy();
-            
+
             const {resourceManager} = this.redGPUContext;
             this.#historyTexture = resourceManager.createManagedTexture({
                 size: {width, height},
@@ -152,7 +153,7 @@ class TAA extends ASinglePassPostEffect {
                 format: 'rgba16float',
                 label: `TAA_HistoryTextureView`
             });
-            
+
             this.#prevInfo = {width, height};
             this.#calcTAAVideoMemory();
         }

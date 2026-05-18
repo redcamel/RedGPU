@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
-import {ASinglePassPostEffectResult} from "../../../postEffect/core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../../postEffect/core/types";
 import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import downsampleLogLuminanceCode from "./wgsl/downsampleLogLuminance.wgsl";
@@ -10,7 +10,6 @@ import METERING_MODE from "../METERING_MODE";
 import {COMMAND_ENCODER_TYPE} from "../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 import copyGPUBuffer from "../../../utils/copyGPUBuffer";
 import GBUFFER_TYPE from "../../../display/view/core/GBUFFER_TYPE";
-
 
 
 /**
@@ -194,7 +193,7 @@ class AutoExposure {
      *
      * @param sourceTextureInfo - [KO] 소스 텍스처 정보 [EN] Source texture information
      */
-    render(sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(sourceTextureInfo: IPostEffectResult) {
         const {gpuDevice, antialiasingManager, commandEncoderManager} = this.#redGPUContext;
         const {useMSAA} = antialiasingManager;
         const {width, height} = this.#view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);

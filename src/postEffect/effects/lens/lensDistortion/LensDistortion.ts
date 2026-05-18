@@ -64,7 +64,7 @@ class LensDistortion extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_LENS_DISTORTION',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode),
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         )
         this.barrelStrength = this.#barrelStrength
         this.pincushionStrength = this.#pincushionStrength

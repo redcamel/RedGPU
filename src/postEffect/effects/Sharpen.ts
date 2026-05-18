@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import AMultiPassPostEffect from "../core/AMultiPassPostEffect";
-import {ASinglePassPostEffectResult} from "../core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../core/types";
 import Convolution from "./convolution/Convolution";
 
 /**
@@ -61,7 +61,7 @@ class Sharpen extends AMultiPassPostEffect {
      * [KO] 샤픈 처리된 텍스처 결과
      * [EN] Sharpened texture result
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         return this.#effect_convolution.render(
             view, width, height, sourceTextureInfo
         )

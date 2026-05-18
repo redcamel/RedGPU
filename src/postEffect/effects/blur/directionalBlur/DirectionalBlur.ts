@@ -51,7 +51,7 @@ class DirectionalBlur extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_DIRECTIONAL_BLUR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
+        );
         this.amount = this.#amount
         this.angle = this.#angle
     }

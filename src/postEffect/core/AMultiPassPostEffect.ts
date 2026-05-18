@@ -1,6 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "./ASinglePassPostEffect";
+import ASinglePassPostEffect from "./ASinglePassPostEffect";
+import {IPostEffectResult} from "./types";
 
 /**
  * [KO] 다중 패스 후처리 이펙트 추상 클래스입니다.
@@ -85,8 +86,8 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [KO] 최종 패스의 렌더링 결과
      * [EN] Rendering result of the final pass
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult): ASinglePassPostEffectResult {
-        let targetOutputInfo: ASinglePassPostEffectResult;
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        let targetOutputInfo: IPostEffectResult;
         const pool = view.postEffectManager.texturePool;
 
         this.#passList.forEach((effect: ASinglePassPostEffect, index) => {

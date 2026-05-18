@@ -2,8 +2,9 @@ import ColorRGB from "../../../../color/ColorRGB";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
-import ASinglePassPostEffect, {ASinglePassPostEffectResult} from "../../../core/ASinglePassPostEffect";
+import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
+import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 
@@ -198,7 +199,7 @@ class Fog extends ASinglePassPostEffect {
      * [KO] 안개 처리된 텍스처 결과
      * [EN] Fog-processed texture result
      */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: ASinglePassPostEffectResult) {
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         return super.render(view, width, height, sourceTextureInfo);
     }
 }
