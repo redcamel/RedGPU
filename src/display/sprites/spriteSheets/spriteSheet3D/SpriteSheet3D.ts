@@ -100,7 +100,7 @@ class SpriteSheet3D extends ASpriteSheet {
                         // [EN] Sync physical segment resolution to default pixelSize
                         this.pixelSize = this.#pixelSize ? this.#pixelSize : tH;
                         this.#updateRatios();
-                        keepLog('오냐 ', this.pixelSize)
+                        // keepLog('오냐 ', this.pixelSize)
                         this.dirtyTransform = true
                     }
                 }
