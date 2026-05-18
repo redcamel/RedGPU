@@ -1,5 +1,4 @@
 import {mat4} from "gl-matrix";
-import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../resources/wgslParser/parseWGSL";
@@ -14,8 +13,6 @@ import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformD
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./PostEffectTexturePool";
-import {keepLog} from "../utils";
-import {COMMAND_ENCODER_TYPE} from "../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 
 /**
@@ -52,21 +49,7 @@ class PostEffectManager {
      * [EN] Texture pool
      */
     #texturePool: PostEffectTexturePool
-    /**
-     * [KO] 내부 스토리지 텍스처
-     * [EN] Internal storage texture
-     */
-    #storageTexture: GPUTexture
-    /**
-     * [KO] 소스 텍스처 뷰
-     * [EN] Source texture view
-     */
-    #sourceTextureView: GPUTextureView
-    /**
-     * [KO] 스토리지 텍스처 뷰
-     * [EN] Storage texture view
-     */
-    #storageTextureView: GPUTextureView
+
     /**
      * [KO] 이전 프레임 텍스처 크기
      * [EN] Texture size of the previous frame
@@ -468,14 +451,9 @@ class PostEffectManager {
 
         this.#updateSystemUniforms();
         this.#updateGbufferBindGroup();
-        this.#sourceTextureView = this.#renderToStorageTexture(this.#view, initialSourceTexture);
-
         const {useAutoExposure} = this.#view.rawCamera;
 
-        let currentTextureView = {
-            texture: this.#storageTexture,
-            textureView: this.#sourceTextureView,
-        };
+        let currentTextureView =this.#renderToStorageTexture(this.#view, initialSourceTexture);
 
         // SkyAtmosphere 전용 처리 (톤 매핑 전 HDR 공간에서 실행)
         if (this.#view.skyAtmosphere) {
@@ -582,8 +560,6 @@ class PostEffectManager {
         if (this.#texturePool) {
             this.#texturePool.clear();
         }
-        this.#storageTexture = null;
-        this.#storageTextureView = null;
     }
 
     #checkSSAO() {
@@ -681,7 +657,7 @@ class PostEffectManager {
     #renderToStorageTexture(view: View3D, sourceTexture: GPUTexture) {
         const {redGPUContext, viewRenderTextureManager} = view;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {resourceManager} = redGPUContext;
+        const {antialiasingManager} = redGPUContext;
         const {width, height} = gBufferColorTexture;
 
         const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
@@ -689,21 +665,14 @@ class PostEffectManager {
             this.#texturePool.clear();
             this.#previousDimensions = {width, height};
         }
+        const initialSourceTexture = antialiasingManager.useMSAA
+            ? viewRenderTextureManager.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
+            : viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
 
-        this.#storageTexture = this.#texturePool.alloc(width, height, 'rgba16float');
-        this.#storageTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#storageTexture);
-
-
-        redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
-            encoder.copyTextureToTexture(
-                {texture: sourceTexture},
-                {texture: this.#storageTexture},
-                [width, height]
-            );
-        });
-
-
-        return this.#storageTextureView;
+        return {
+            texture: initialSourceTexture,
+            textureView: antialiasingManager.useMSAA ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR) :  viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR)
+        };
     }
 }
 

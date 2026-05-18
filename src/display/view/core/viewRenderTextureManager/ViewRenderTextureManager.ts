@@ -29,7 +29,7 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
     withResolve: boolean,
     useMipmap: boolean
 }> = {
-    [GBUFFER_TYPE.COLOR]: {format: 'rgba16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
+    [GBUFFER_TYPE.COLOR]: {format: 'rgba16float', usage: BASIC_USAGE | GPUTextureUsage.STORAGE_BINDING, withResolve: true, useMipmap: false},
     [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rgba16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
     [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE, withResolve: true, useMipmap: false}, // navigator.gpu.getPreferredCanvasFormat() 사용
     [GBUFFER_TYPE.RENDER_PATH1_RESULT]: {
@@ -293,12 +293,13 @@ class ViewRenderTextureManager {
         }
 
         const {name} = this.#view
+        const sampleCount = useMSAA && mipLevelCount === 1 ? 4 : 1;
         const textureDescriptor = {
             size: this.#targetTextureSize,
-            sampleCount: useMSAA && mipLevelCount === 1 ? 4 : 1, // 밉맵을 쓸 때는 보통 MSAA를 쓰지 않거나 resolve된 타겟을 씁니다.
+            sampleCount, // 밉맵을 쓸 때는 보통 MSAA를 쓰지 않거나 resolve된 타겟을 씁니다.
             label: `${name}_${type}_texture_${this.#targetTextureSizeString}`,
             format: format,
-            usage,
+            usage: sampleCount > 1 ? (usage & ~GPUTextureUsage.STORAGE_BINDING) : usage,
             mipLevelCount,
         }
         const newTexture = resourceManager.createManagedTexture(textureDescriptor)
