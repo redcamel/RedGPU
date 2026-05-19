@@ -14,7 +14,6 @@ import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
 import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
-import definePositiveNumber from "../../defineProperty/funcs/definePositiveNumber";
 
 interface ABaseMaterial {
     /**

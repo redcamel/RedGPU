@@ -27,6 +27,16 @@ export default class RedGPUContextObserver {
     }
 
     /**
+     * [KO] 모든 옵저버 중지
+     * [EN] Stop all observers
+     */
+    stop() {
+        this.#mutationObserver?.disconnect();
+        this.#resizeObserver?.disconnect();
+        this.#intersectionObserver?.disconnect();
+    }
+
+    /**
      * [KO] 옵저버 초기화
      * [EN] Initialize observers
      */
@@ -98,15 +108,5 @@ export default class RedGPUContextObserver {
         // [EN] Update RedGPUContext's boundingClientRect and call setSize
         this.#updateCallback();
         this.#redGPUContext.sizeManager.setSize();
-    }
-
-    /**
-     * [KO] 모든 옵저버 중지
-     * [EN] Stop all observers
-     */
-    stop() {
-        this.#mutationObserver?.disconnect();
-        this.#resizeObserver?.disconnect();
-        this.#intersectionObserver?.disconnect();
     }
 }

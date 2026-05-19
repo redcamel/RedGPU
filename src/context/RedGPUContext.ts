@@ -176,14 +176,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
     }
 
     /**
-     * [KO] BoundingClientRect 정보를 갱신합니다. (내부용)
-     * [EN] Updates the BoundingClientRect information. (Internal use)
-     */
-    #updateBoundingClientRect() {
-        this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
-    }
-
-    /**
      * [KO] 안티앨리어싱 매니저를 반환합니다.
      * [EN] Returns the antialiasing manager.
      */
@@ -415,6 +407,14 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     setSize(w: string | number = this.width, h: string | number = this.height) {
         this.sizeManager.setSize(w, h)
+    }
+
+    /**
+     * [KO] BoundingClientRect 정보를 갱신합니다. (내부용)
+     * [EN] Updates the BoundingClientRect information. (Internal use)
+     */
+    #updateBoundingClientRect() {
+        this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
     }
 
     /**

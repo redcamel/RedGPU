@@ -8,7 +8,7 @@ import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
  * @param target - [KO] 유니폼 정보를 추출할 대상 인스턴스 [EN] Target instance to extract uniform information from
 
  */
-const updateTargetUniform = (target: any,propertyKey:string,newValue:any) => {
+const updateTargetUniform = (target: any, propertyKey: string, newValue: any) => {
     let targetUniformInfo;
     let targetUniformBuffer;
     const {gpuRenderInfo} = target

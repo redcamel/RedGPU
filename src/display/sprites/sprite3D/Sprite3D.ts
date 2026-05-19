@@ -240,7 +240,7 @@ DefineUniformProperty.definePositiveNumber(Sprite3D, [
     ['_renderRatioX', 1],
     ['_renderRatioY', 1],
 ])
-DefineUniformProperty.defineBoolean(Sprite3D,[
+DefineUniformProperty.defineBoolean(Sprite3D, [
     ['useBillboard', true],
 ])
 Object.freeze(Sprite3D)

@@ -22,9 +22,6 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
     readonly #uniformBufferDescriptor: GPUBufferDescriptor
     readonly #size: number
 
-    get label(){
-        return this.#uniformBufferDescriptor.label
-    }
     /**
      * [KO] AUniformBaseBuffer 인스턴스를 초기화합니다.
      * [EN] Initializes an AUniformBaseBuffer instance.
@@ -67,6 +64,10 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
         this[GPU_BUFFER_DATA_SYMBOL] = data;
         this[GPU_BUFFER_DATA_SYMBOL_F32] = new Float32Array(data);
         this[GPU_BUFFER_DATA_SYMBOL_U32] = new Uint32Array(data);
+    }
+
+    get label() {
+        return this.#uniformBufferDescriptor.label
     }
 
     /**

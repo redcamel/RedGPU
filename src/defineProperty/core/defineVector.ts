@@ -11,7 +11,7 @@ import updateTargetUniform from "./updateTargetUniform";
 function createSetter(propertyKey: string, symbol: symbol) {
     return function (newValue: any) {
         this[symbol] = newValue;
-        updateTargetUniform(this,propertyKey,newValue);
+        updateTargetUniform(this, propertyKey, newValue);
     }
 }
 

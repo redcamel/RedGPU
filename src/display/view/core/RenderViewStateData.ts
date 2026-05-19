@@ -1,6 +1,6 @@
 import Camera2D from "../../../camera/camera/Camera2D";
 import View3D from "../View3D";
-import {CommandBatchStats, CommandPhaseStats} from "../../../renderer/commandEncoder/CommandEncoderManager";
+import {CommandBatchStats} from "../../../renderer/commandEncoder/CommandEncoderManager";
 import GBUFFER_TYPE from "./GBUFFER_TYPE";
 
 

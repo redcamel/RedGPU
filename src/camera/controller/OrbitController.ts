@@ -1,8 +1,6 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
-import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
-import updateObject3DMatrix from "../../math/updateObject3DMatrix";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
 
@@ -460,7 +458,6 @@ class OrbitController extends AController {
             this.#updateAnimation(deltaTime);
         });
     }
-
 
 
     /**

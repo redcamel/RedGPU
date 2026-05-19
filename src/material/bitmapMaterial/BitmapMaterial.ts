@@ -77,6 +77,7 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
         this.initGPURenderInfos()
     }
 }
+
 DefineUniformProperty.defineSampler(BitmapMaterial, [
     'diffuseTextureSampler'
 ])

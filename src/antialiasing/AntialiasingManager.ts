@@ -1,5 +1,4 @@
 import createUUID from "../utils/uuid/createUUID";
-import RedGPUContext from "../context/RedGPUContext";
 
 /**
  * [KO] 안티앨리어싱(Anti-aliasing) 설정을 관리하는 클래스입니다.

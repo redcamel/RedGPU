@@ -250,6 +250,19 @@ class CommandEncoderManager {
     }
 
     /**
+     * [KO] 모든 인코더 초기화
+     * [EN] Reset all encoders
+     */
+    resetAll(): void {
+        this.#encoderMap.clear();
+        this.#stats.clear();
+        this.#processDeferredDestroys();
+        Object.keys(this.#isPassActive).forEach(key => {
+            delete this.#isPassActive[key as CommandEncoderType];
+        });
+    }
+
+    /**
      * [KO] 등록된 모든 지연 파괴 리소스를 파괴합니다.
      * [EN] Destroys all registered deferred destroy resources.
      */
@@ -265,19 +278,6 @@ class CommandEncoderManager {
             // console.log(`🗑️ [CommandEncoderManager] Destroyed ${len} deferred resource(s)`);
         }
         return len;
-    }
-
-    /**
-     * [KO] 모든 인코더 초기화
-     * [EN] Reset all encoders
-     */
-    resetAll(): void {
-        this.#encoderMap.clear();
-        this.#stats.clear();
-        this.#processDeferredDestroys();
-        Object.keys(this.#isPassActive).forEach(key => {
-            delete this.#isPassActive[key as CommandEncoderType];
-        });
     }
 
     async #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): Promise<void> {

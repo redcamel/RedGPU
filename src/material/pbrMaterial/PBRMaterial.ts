@@ -7,7 +7,6 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
 import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
-import definePositiveNumber from "../../defineProperty/funcs/definePositiveNumber";
 
 const EXTENSION_LIST = [
     {

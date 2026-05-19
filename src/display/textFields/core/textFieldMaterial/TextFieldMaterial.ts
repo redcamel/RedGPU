@@ -51,6 +51,7 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
         this.initGPURenderInfos()
     }
 }
+
 DefineUniformProperty.defineSampler(TextFieldMaterial, [
     'diffuseTextureSampler'
 ])

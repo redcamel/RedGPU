@@ -28,10 +28,9 @@ function createSetter(
         }
 
 
-
         this[symbol] = newValue;
 
-        updateTargetUniform(this,propertyKey,newValue)
+        updateTargetUniform(this, propertyKey, newValue)
     };
 }
 

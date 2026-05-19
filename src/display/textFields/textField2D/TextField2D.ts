@@ -6,7 +6,6 @@ import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
-import {keepLog} from "../../../utils";
 import {mixInMesh2D} from "../../mesh/core";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField2DVertex.wgsl";

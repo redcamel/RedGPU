@@ -257,7 +257,7 @@ DefineUniformProperty.definePositiveNumber(TextField3D, [
     ['_renderRatioX', 1],
     ['_renderRatioY', 1],
 ])
-DefineUniformProperty.defineBoolean(TextField3D,[
+DefineUniformProperty.defineBoolean(TextField3D, [
     ['useBillboard', true],
 ])
 Object.freeze(TextField3D);

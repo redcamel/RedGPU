@@ -266,7 +266,6 @@ export namespace ShaderLibrary {
     /** [KO] 시스템 공통 구조체 라이브러리입니다. [EN] Common shader structure library for system. */
     export import systemStruct = SystemStructLibrary;
     /** [KO] glTF KHR 확장 관련 공통 셰이더 함수 라이브러리입니다. [EN] Common shader function library for glTF KHR extensions. */
-
     export import displacement = DisplacementLibrary;
 }
 

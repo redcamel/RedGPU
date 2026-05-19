@@ -295,7 +295,7 @@ DefineUniformProperty.definePositiveNumber(SpriteSheet3D, [
     ['_renderRatioX', 1],
     ['_renderRatioY', 1],
 ])
-DefineUniformProperty.defineBoolean(SpriteSheet3D,[
+DefineUniformProperty.defineBoolean(SpriteSheet3D, [
     ['useBillboard', true],
 ])
 /**

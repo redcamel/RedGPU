@@ -6,7 +6,6 @@ import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture
 import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
-import {keepLog} from "../../utils";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 type SrcInfo = string | { src: string, cacheKey: string }

@@ -173,8 +173,8 @@ class Renderer {
 
         if (pixelRectObject.width && pixelRectObject.height) {
             const {scene} = view
-            const {lightManager,shadowManager} = scene
-            if(lightManager.pointLightCount || lightManager.spotLightCount){
+            const {lightManager, shadowManager} = scene
+            if (lightManager.pointLightCount || lightManager.spotLightCount) {
                 view.clusterLightManager.updateClusterLights();
             }
             {
