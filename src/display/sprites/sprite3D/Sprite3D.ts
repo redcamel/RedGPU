@@ -9,6 +9,7 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/sprite3DVertex.wgsl";
+import DefineProperty from "../../../defineProperty/DefineProperty";
 
 /** Sprite3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_3D'
@@ -236,7 +237,7 @@ class Sprite3D extends Mesh {
 /**
  * Sprite3D 클래스에 렌더링 비율 속성들을 정의합니다.
  */
-DefineForVertex.definePositiveNumber(Sprite3D, [
+DefineProperty.definePositiveNumber(Sprite3D, [
     ['_renderRatioX', 1],
     ['_renderRatioY', 1],
 ])

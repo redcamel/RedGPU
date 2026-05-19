@@ -7,6 +7,7 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
 import DefineProperty from "../../defineProperty/DefineProperty";
+import definePositiveNumber from "../../defineProperty/funcs/definePositiveNumber";
 
 const EXTENSION_LIST = [
     {
@@ -976,16 +977,18 @@ class PBRMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineForFragment.defineByPreset(PBRMaterial, [
-    DefineForFragment.PRESET_POSITIVE_NUMBER.EMISSIVE_STRENGTH,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.NORMAL_SCALE,
-]);
+DefineProperty.definePositiveNumber(PBRMaterial,
+    [
+        'emissiveStrength',
+        'normalScale'
+    ]
+)
 const defineTexture = (textureList: string[], useSampler: boolean) => {
     textureList?.forEach(key => {
         DefineForFragment.defineBoolean(PBRMaterial, [
             `use${key.charAt(0).toUpperCase()}${key.substring(1)}`
         ])
-        DefineForFragment.definePositiveNumber(PBRMaterial, [
+        DefineProperty.definePositiveNumber(PBRMaterial, [
             [`${key}_KHR_texture_transform_rotation`, 0],
         ]);
         DefineForFragment.defineBoolean(PBRMaterial, [
@@ -1017,7 +1020,7 @@ const extensionDefine = (defineList) => {
         if (extensionName) DefineForFragment.defineBoolean(PBRMaterial, [`use${extensionName}`])
         defineTexture(textureList, !useSampler)
         positiveNumberList?.forEach(v => {
-            DefineForFragment.definePositiveNumber(PBRMaterial, [
+            DefineProperty.definePositiveNumber(PBRMaterial, [
                 v
             ])
         })
@@ -1034,7 +1037,7 @@ const extensionDefine = (defineList) => {
     })
 }
 extensionDefine(EXTENSION_LIST)
-DefineForFragment.definePositiveNumber(PBRMaterial, [
+DefineProperty.definePositiveNumber(PBRMaterial, [
     ['cutOff', 0],
     ['KHR_materials_ior', 1.5],
     ['KHR_dispersion', 0],

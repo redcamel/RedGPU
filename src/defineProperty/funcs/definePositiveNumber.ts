@@ -86,7 +86,7 @@ function definePositiveNumberRange_func(
  * DefineProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
  * ```
  */
-const definePositiveNumberRange = (target: any, keys: string | (string | IPositiveNumberRange | [string, number?, number?, number?])[]) => applyProperties(target, keys, definePositiveNumberRange_func);
+const definePositiveNumber = (target: any, keys: string | (string | IPositiveNumberRange | [string, number?, number?, number?])[]) => applyProperties(target, keys, definePositiveNumberRange_func);
 
-Object.freeze(definePositiveNumberRange);
-export default definePositiveNumberRange;
+Object.freeze(definePositiveNumber);
+export default definePositiveNumber;

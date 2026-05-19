@@ -230,42 +230,50 @@ class PhongMaterial extends AUVTransformBaseMaterial {
         this.dirtyPipeline = true
     }
 }
-DefineProperty.defineSampler(PhongMaterial, [
-    'alphaTextureSampler',
-    'aoTextureSampler',
-    'diffuseTextureSampler',
-    'emissiveTextureSampler',
-    'environmentTextureSampler',
-    'normalTextureSampler',
-    'specularTextureSampler'
-])
+
+DefineProperty.defineSampler(
+    PhongMaterial,
+    [
+        'alphaTextureSampler',
+        'aoTextureSampler',
+        'diffuseTextureSampler',
+        'emissiveTextureSampler',
+        'environmentTextureSampler',
+        'normalTextureSampler',
+        'specularTextureSampler'
+    ])
+DefineProperty.definePositiveNumber(
+    PhongMaterial,
+    [
+        'aoStrength',
+        'specularStrength',
+        'emissiveStrength',
+        'shininess',
+        'normalScale'
+    ]
+)
 DefineForFragment.defineByPreset(PhongMaterial, [
     DefineForFragment.PRESET_COLOR_RGB.COLOR,
     //
     DefineForFragment.PRESET_TEXTURE.ALPHA_TEXTURE,
     //
     DefineForFragment.PRESET_TEXTURE.AO_TEXTURE,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.AO_STRENGTH,
     //
     DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
     //
     DefineForFragment.PRESET_TEXTURE.EMISSIVE_TEXTURE,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.EMISSIVE_STRENGTH,
     [DefineForFragment.PRESET_COLOR_RGB.EMISSIVE_COLOR, '#000000'],
     //
     DefineForFragment.PRESET_TEXTURE.NORMAL_TEXTURE,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.NORMAL_SCALE,
     //
     DefineForFragment.PRESET_TEXTURE.SPECULAR_TEXTURE,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.SPECULAR_STRENGTH,
     [DefineForFragment.PRESET_COLOR_RGB.SPECULAR_COLOR, '#ffffff'],
     //
-    [DefineForFragment.PRESET_POSITIVE_NUMBER.SHININESS, 32],
 ])
 DefineForFragment.defineBoolean(PhongMaterial, [
     ['useSSR', false]
 ])
-DefineForFragment.definePositiveNumber(PhongMaterial, [
+DefineProperty.definePositiveNumber(PhongMaterial, [
     ['metallic', 0, 0, 1],
     ['roughness', 0, 0, 1]
 ])

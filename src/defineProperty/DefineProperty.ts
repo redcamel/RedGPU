@@ -1,4 +1,4 @@
-import definePositiveNumberRange, {IPositiveNumberRange} from "./funcs/definePositiveNumberRange";
+import definePositiveNumber, {IPositiveNumberRange} from "./funcs/definePositiveNumber";
 import defineSampler from "./funcs/defineSampler";
 import defineVector2, {IDefineVec2} from "./funcs/defineVector2";
 import defineVector3, {IDefineVec3} from "./funcs/defineVector3";
@@ -17,7 +17,7 @@ export {IDefineVec2, IDefineVec3, IDefineVec4, IPositiveNumberRange};
  */
 const DefineProperty = {
     defineSampler,
-    definePositiveNumberRange,
+    definePositiveNumber,
     defineVector2,
     defineVector3,
     defineVector4,

@@ -3,8 +3,6 @@ import defineBoolean from "./funcs/defineBoolean";
 import defineColorRGB from "./funcs/defineColorRGB";
 import defineColorRGBA from "./funcs/defineColorRGBA";
 import defineCubeTexture from "./funcs/defineCubeTexture";
-import definePositiveNumberRange from "./funcs/definePositiveNumberRange";
-import defineSampler from "../funcs/defineSampler";
 import defineTexture from "./funcs/defineTexture";
 import defineTexture3D from "./funcs/defineTexture3D";
 import defineUintRange from "./funcs/defineUintRange";
@@ -22,18 +20,8 @@ function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) 
     return defineVector(propertyKey, initValue)
 }
 
-function defineProperty_PositiveNumberRange(propertyKey: string, initValue: number = 1, min?: number, max?: number) {
-    return definePositiveNumberRange(propertyKey, initValue, true, min, max)
-}
-
 const PRESET_BOOLEAN = {};
-const PRESET_POSITIVE_NUMBER = {
-    AO_STRENGTH: 'aoStrength',
-    SPECULAR_STRENGTH: 'specularStrength',
-    EMISSIVE_STRENGTH: 'emissiveStrength',
-    SHININESS: 'shininess',
-    NORMAL_SCALE: 'normalScale',
-};
+
 const PRESET_UINT = {};
 const PRESET_CUBE_TEXTURE = {
     ENVIRONMENT_TEXTURE: 'environmentTexture',
@@ -72,7 +60,6 @@ const DefineForFragment = {
     ...createDefineByPreset(
         {
             defineBoolean: [defineBoolean, PRESET_BOOLEAN],
-            definePositiveNumber: [defineProperty_PositiveNumberRange, PRESET_POSITIVE_NUMBER],
             defineUint: [defineUintRange, PRESET_UINT],
             defineVec2: [defineProperty_vec2, PRESET_VEC2],
             defineVec3: [defineProperty_vec3, PRESET_VEC3],
@@ -85,7 +72,6 @@ const DefineForFragment = {
     ),
     //
     defineBoolean: defineProperties(defineBoolean),
-    definePositiveNumber: defineProperties(defineProperty_PositiveNumberRange),
     defineUint: defineProperties(defineUintRange),
     defineVec2: defineProperties(defineProperty_vec2),
     defineVec3: defineProperties(defineProperty_vec3),
@@ -97,7 +83,6 @@ const DefineForFragment = {
     defineCubeTexture: defineProperties(defineCubeTexture),
     //
     PRESET_BOOLEAN,
-    PRESET_POSITIVE_NUMBER,
     PRESET_UINT,
     PRESET_TEXTURE,
     PRESET_CUBE_TEXTURE,

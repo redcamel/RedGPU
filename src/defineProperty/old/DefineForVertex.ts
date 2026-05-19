@@ -1,6 +1,5 @@
 import {createDefineByPreset, defineProperties} from "./core/createDefineByPreset";
 import defineBoolean from "./funcs/defineBoolean";
-import definePositiveNumberRange from "./funcs/definePositiveNumberRange";
 import defineUintRange from "./funcs/defineUintRange";
 import defineVector from "./funcs/defineVector";
 
@@ -10,10 +9,6 @@ function defineProperty_boolean(propertyKey: string, initValue: boolean = false)
 
 function defineProperty_uintRange(propertyKey: string, initValue: number = 0, min?: number, max?: number) {
     return defineUintRange(propertyKey, initValue, false, min, max)
-}
-
-function defineProperty_PositiveNumberRange(propertyKey: string, initValue: number = 1, min?: number, max?: number) {
-    return definePositiveNumberRange(propertyKey, initValue, false, min, max)
 }
 
 function defineProperty_vec4(propertyKey: string, initValue: number[] = [0, 0, 0, 0]) {
@@ -32,7 +27,6 @@ const PRESET_BOOLEAN = {
     USE_BILLBOARD: 'useBillboard',
     RECEIVE_SHADOW: 'receiveShadow',
 };
-const PRESET_POSITIVE_NUMBER = {};
 const PRESET_UINT = {};
 const PRESET_SAMPLER = {};
 const PRESET_CUBE_TEXTURE = {};
@@ -60,19 +54,16 @@ const DefineForVertex = {
         {
             defineBoolean: [defineProperty_boolean, PRESET_BOOLEAN],
             defineUint: [defineProperty_uintRange, PRESET_UINT],
-            definePositiveNumber: [defineProperty_PositiveNumberRange, PRESET_POSITIVE_NUMBER],
         }
     ),
     //
     defineBoolean: defineProperties(defineProperty_boolean),
     defineUint: defineProperties(defineProperty_uintRange),
-    definePositiveNumber: defineProperties(defineProperty_PositiveNumberRange),
     defineVec4: defineProperties(defineProperty_vec4),
     defineVec3: defineProperties(defineProperty_vec3),
     defineVec2: defineProperties(defineProperty_vec2),
     //
     PRESET_BOOLEAN,
-    PRESET_POSITIVE_NUMBER,
     PRESET_UINT,
     PRESET_SAMPLER,
     PRESET_TEXTURE,

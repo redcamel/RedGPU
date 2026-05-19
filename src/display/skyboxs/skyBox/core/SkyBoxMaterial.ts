@@ -9,6 +9,7 @@ import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANois
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
 import DefineProperty from "../../../../defineProperty/DefineProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/definePositiveNumber";
 
 const SHADER_INFO = parseWGSL('SKYBOX_MATERIAL', fragmentModuleSource)
 
@@ -56,7 +57,7 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
+DefineProperty.definePositiveNumber(SkyBoxMaterial, [
     ['blur', 0],
     ['intensityMultiplier', 1],
     ['luminance', 10000],
