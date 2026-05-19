@@ -1,7 +1,7 @@
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import applyProperties from "../core/applyProperties";
 import updateTargetUniform from "../core/updateTargetUniform";
-import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
+import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
 export interface IUintRange {
     key: string;

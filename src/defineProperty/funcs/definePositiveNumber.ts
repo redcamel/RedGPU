@@ -1,7 +1,7 @@
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import applyProperties from "../core/applyProperties";
 import updateTargetUniform from "../core/updateTargetUniform";
-import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
+import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
 export interface IPositiveNumberRange {
     key: string;

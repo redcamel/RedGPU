@@ -1,6 +1,6 @@
 import Sampler from "../../resources/sampler/Sampler";
 import applyProperties from "../core/applyProperties";
-import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
+import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
 function defineSampler_func(propertyKey: string) {
     const symbol = Symbol(propertyKey)

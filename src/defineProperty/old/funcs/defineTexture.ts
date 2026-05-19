@@ -1,5 +1,5 @@
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import defineProperty_SETTING from "./defineProperty_SETTING";
+import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 
 function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) {
     const useKey = `use${propertyKey.charAt(0).toUpperCase()}${propertyKey.substring(1)}`

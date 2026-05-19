@@ -1,7 +1,7 @@
 import ColorRGBA from "../../../color/ColorRGBA";
 import isHexColor from "../../../runtimeChecker/isFunc/isHexColor";
 import convertHexToRgb from "../../../color/convertHexToRgb";
-import defineProperty_SETTING from "./defineProperty_SETTING";
+import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 
 function defineColorRGBA(propertyKey: string, initValue: string = '#fff', forFragment: boolean = true) {
     const symbol = Symbol(propertyKey);

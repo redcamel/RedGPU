@@ -1,4 +1,4 @@
-import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
+import defineProperty_SETTING from "./defineProperty_SETTING";
 import updateTargetUniform from "./updateTargetUniform";
 
 /**
