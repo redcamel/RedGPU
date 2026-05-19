@@ -6,6 +6,7 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
+import DefineProperty from "../../defineProperty/DefineProperty";
 
 const SHADER_INFO = parseWGSL('PHONG_MATERIAL', fragmentModuleSource)
 
@@ -229,31 +230,33 @@ class PhongMaterial extends AUVTransformBaseMaterial {
         this.dirtyPipeline = true
     }
 }
-
+DefineProperty.defineSampler(PhongMaterial, [
+    'alphaTextureSampler',
+    'aoTextureSampler',
+    'diffuseTextureSampler',
+    'emissiveTextureSampler',
+    'environmentTextureSampler',
+    'normalTextureSampler',
+    'specularTextureSampler'
+])
 DefineForFragment.defineByPreset(PhongMaterial, [
     DefineForFragment.PRESET_COLOR_RGB.COLOR,
     //
     DefineForFragment.PRESET_TEXTURE.ALPHA_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.ALPHA_TEXTURE_SAMPLER,
     //
     DefineForFragment.PRESET_TEXTURE.AO_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.AO_TEXTURE_SAMPLER,
     DefineForFragment.PRESET_POSITIVE_NUMBER.AO_STRENGTH,
     //
     DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
     //
     DefineForFragment.PRESET_TEXTURE.EMISSIVE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.EMISSIVE_TEXTURE_SAMPLER,
     DefineForFragment.PRESET_POSITIVE_NUMBER.EMISSIVE_STRENGTH,
     [DefineForFragment.PRESET_COLOR_RGB.EMISSIVE_COLOR, '#000000'],
     //
     DefineForFragment.PRESET_TEXTURE.NORMAL_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.NORMAL_TEXTURE_SAMPLER,
     DefineForFragment.PRESET_POSITIVE_NUMBER.NORMAL_SCALE,
     //
     DefineForFragment.PRESET_TEXTURE.SPECULAR_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.SPECULAR_TEXTURE_SAMPLER,
     DefineForFragment.PRESET_POSITIVE_NUMBER.SPECULAR_STRENGTH,
     [DefineForFragment.PRESET_COLOR_RGB.SPECULAR_COLOR, '#ffffff'],
     //

@@ -6,6 +6,7 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
+import DefineProperty from "../../defineProperty/DefineProperty";
 
 const EXTENSION_LIST = [
     {
@@ -1003,7 +1004,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
             key
         ])
         if (useSampler) {
-            DefineForFragment.defineSampler(PBRMaterial, [
+            DefineProperty.defineSampler(PBRMaterial, [
                 `${key}Sampler`,
             ])
         }

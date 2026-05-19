@@ -8,5 +8,6 @@
  */
 import DefineForFragment from "./DefineForFragment";
 import DefineForVertex from "./DefineForVertex";
+import DefineProperty from "./DefineProperty";
 
-export {DefineForFragment, DefineForVertex};
+export {DefineProperty,DefineForFragment, DefineForVertex};

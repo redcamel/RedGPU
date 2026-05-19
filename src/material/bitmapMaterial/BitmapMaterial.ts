@@ -5,6 +5,7 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
+import DefineProperty from "../../defineProperty/DefineProperty";
 
 const SHADER_INFO = parseWGSL('BITMAP_MATERIAL', fragmentModuleSource)
 
@@ -76,10 +77,11 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
         this.initGPURenderInfos()
     }
 }
-
+DefineProperty.defineSampler(BitmapMaterial, [
+    'diffuseTextureSampler'
+])
 DefineForFragment.defineByPreset(BitmapMaterial, [
     DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
 ])
 
 Object.freeze(BitmapMaterial)

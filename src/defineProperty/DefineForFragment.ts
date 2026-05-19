@@ -36,15 +36,6 @@ const PRESET_POSITIVE_NUMBER = {
     NORMAL_SCALE: 'normalScale',
 };
 const PRESET_UINT = {};
-const PRESET_SAMPLER = {
-    ALPHA_TEXTURE_SAMPLER: 'alphaTextureSampler',
-    AO_TEXTURE_SAMPLER: 'aoTextureSampler',
-    DIFFUSE_TEXTURE_SAMPLER: 'diffuseTextureSampler',
-    EMISSIVE_TEXTURE_SAMPLER: 'emissiveTextureSampler',
-    ENVIRONMENT_TEXTURE_SAMPLER: 'environmentTextureSampler',
-    NORMAL_TEXTURE_SAMPLER: 'normalTextureSampler',
-    SPECULAR_TEXTURE_SAMPLER: 'specularTextureSampler',
-};
 const PRESET_CUBE_TEXTURE = {
     ENVIRONMENT_TEXTURE: 'environmentTexture',
 };
@@ -88,7 +79,6 @@ const DefineForFragment = {
             defineVec3: [defineProperty_vec3, PRESET_VEC3],
             defineVec4: [defineProperty_vec4, PRESET_VEC4],
             defineColorRGB: [defineColorRGB, PRESET_COLOR_RGB],
-            defineSampler: [defineSampler, PRESET_SAMPLER],
             defineTexture: [defineTexture, PRESET_TEXTURE],
             defineTexture3D: [defineTexture3D, {}],
             defineCubeTexture: [defineCubeTexture, PRESET_CUBE_TEXTURE],
@@ -103,7 +93,6 @@ const DefineForFragment = {
     defineVec4: defineProperties(defineProperty_vec4),
     defineColorRGB: defineProperties(defineColorRGB),
     defineColorRGBA: defineProperties(defineColorRGBA),
-    defineSampler: defineProperties(defineSampler),
     defineTexture: defineProperties(defineTexture),
     defineTexture3D: defineProperties(defineTexture3D),
     defineCubeTexture: defineProperties(defineCubeTexture),
@@ -111,7 +100,6 @@ const DefineForFragment = {
     PRESET_BOOLEAN,
     PRESET_POSITIVE_NUMBER,
     PRESET_UINT,
-    PRESET_SAMPLER,
     PRESET_TEXTURE,
     PRESET_CUBE_TEXTURE,
     PRESET_VEC2,

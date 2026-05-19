@@ -8,6 +8,7 @@ import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
+import DefineProperty from "../../../../defineProperty/DefineProperty";
 
 const SHADER_INFO = parseWGSL('SKYBOX_MATERIAL', fragmentModuleSource)
 
@@ -64,7 +65,7 @@ DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
 ])
 DefineForFragment.defineCubeTexture(SkyBoxMaterial, ['texture0', 'transitionTexture'])
 DefineForFragment.defineTexture(SkyBoxMaterial, ['transitionMask'])
-DefineForFragment.defineSampler(SkyBoxMaterial, ['sampler0'])
+DefineProperty.defineSampler(SkyBoxMaterial, ['sampler0'])
 
 Object.freeze(SkyBoxMaterial)
 export default SkyBoxMaterial
