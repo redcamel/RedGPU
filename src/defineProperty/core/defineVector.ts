@@ -1,5 +1,5 @@
-import getTargetInfos from "./getTargetInfos";
 import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
+import getTargetInfos from "./getTargetInfos";
 
 /**
  * [KO] 유니폼 버퍼에 데이터를 쓰는 세터(Setter) 함수를 생성합니다.

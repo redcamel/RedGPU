@@ -2,12 +2,6 @@ import Sampler from "../../resources/sampler/Sampler";
 import applyProperties from "../core/applyProperties";
 import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
 
-/**
- * [KO] 개별 샘플러 속성에 대한 속성 기술자(Property Descriptor)를 생성합니다.
- * [EN] Creates a property descriptor for an individual sampler property.
- *
- * @param propertyKey - [KO] 속성 키 이름 [EN] Property key name
- */
 function defineSampler_func(propertyKey: string) {
     const symbol = Symbol(propertyKey)
     return {
@@ -32,7 +26,9 @@ function defineSampler_func(propertyKey: string) {
  *
  * @example
  * ```typescript
+ * // 단일 키 정의
  * DefineProperty.defineSampler(MyMaterial, 'diffuseSampler');
+ * // 배열을 이용한 다중 키 정의
  * DefineProperty.defineSampler(MyMaterial, ['sampler0', 'sampler1']);
  * ```
  */

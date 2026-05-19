@@ -60,7 +60,6 @@ DefineForFragment.definePositiveNumber(SkyBoxMaterial, [
     ['blur', 0],
     ['intensityMultiplier', 1],
     ['luminance', 10000],
-    ['opacity', 1, 0, 1],
     ['transitionProgress', 0],
 ])
 DefineForFragment.defineCubeTexture(SkyBoxMaterial, ['texture0', 'transitionTexture'])

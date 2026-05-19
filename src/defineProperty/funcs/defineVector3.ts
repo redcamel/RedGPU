@@ -1,21 +1,11 @@
 import applyProperties from "../core/applyProperties";
 import defineVector from "../core/defineVector";
 
-/**
- * [KO] Vector3 정의를 위한 설정 인터페이스.
- * [EN] Configuration interface for Vector3 definition.
- */
 export interface IDefineVec3 {
-    /** [KO] 속성 키 이름 [EN] Property key name */
     key: string,
-    /** [KO] 초기값 [EN] Initial value */
     value: [number, number, number]
 }
 
-/**
- * [KO] 개별 Vector3 속성에 대한 속성 기술자(Property Descriptor)를 생성합니다.
- * [EN] Creates a property descriptor for an individual Vector3 property.
- */
 function defineVector3_func(propertyKey: string | IDefineVec3, initValue: [number, number, number] = [0, 0, 0]) {
     if (typeof propertyKey === 'object') {
         return defineVector(propertyKey.key, propertyKey.value);
@@ -32,7 +22,7 @@ function defineVector3_func(propertyKey: string | IDefineVec3, initValue: [numbe
  *
  * @example
  * ```typescript
- * // 단일 키 정의 (기본값 [0, 0, 0])
+ * // 단일 키 정의
  * DefineProperty.defineVector3(MyMaterial, 'myVec3');
  * // 배열을 이용한 다중 키 정의
  * DefineProperty.defineVector3(MyMaterial, [['vec0', [1, 0, 0]], ['vec1', [0, 1, 0]]]);

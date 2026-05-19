@@ -13,6 +13,8 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
+import DefineProperty from "../../defineProperty/DefineProperty";
+import definePositiveNumberRange from "../../defineProperty/funcs/definePositiveNumberRange";
 
 interface ABaseMaterial {
     /**
@@ -558,8 +560,8 @@ abstract class ABaseMaterial extends ResourceBase {
 }
 
 const pattern = /^use\w+Texture$/;
-DefineForFragment.defineByPreset(ABaseMaterial, [
-    DefineForFragment.PRESET_POSITIVE_NUMBER.OPACITY,
+DefineProperty.definePositiveNumberRange(ABaseMaterial, [
+    {key: 'opacity', value: 1, max: 1}
 ])
 DefineForFragment.defineBoolean(ABaseMaterial, [
     ['useTint', false]

@@ -31,7 +31,6 @@ const PRESET_POSITIVE_NUMBER = {
     AO_STRENGTH: 'aoStrength',
     SPECULAR_STRENGTH: 'specularStrength',
     EMISSIVE_STRENGTH: 'emissiveStrength',
-    OPACITY: 'opacity',
     SHININESS: 'shininess',
     NORMAL_SCALE: 'normalScale',
 };
