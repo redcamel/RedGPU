@@ -1,5 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForVertex from "../../defineProperty/DefineForVertex";
+import DefineForVertex from "../../defineProperty/old/DefineForVertex";
 import BitmapMaterial from "../../material/bitmapMaterial/BitmapMaterial";
 import Plane from "../../primitive/Plane";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";

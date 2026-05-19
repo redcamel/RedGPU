@@ -1,4 +1,4 @@
-import BitmapTexture from "../../resources/texture/BitmapTexture";
+import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) {

@@ -1,4 +1,4 @@
-import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
+import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function createSetter(

@@ -1,4 +1,4 @@
-import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function createSetter(

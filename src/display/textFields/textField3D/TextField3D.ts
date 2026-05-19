@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import DefineForVertex from "../../../defineProperty/DefineForVertex";
+import DefineForVertex from "../../../defineProperty/old/DefineForVertex";
 import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";

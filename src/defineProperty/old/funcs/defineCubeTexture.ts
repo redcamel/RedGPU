@@ -1,4 +1,4 @@
-import CubeTexture from "../../resources/texture/CubeTexture";
+import CubeTexture from "../../../resources/texture/CubeTexture";
 import defineProperty_SETTING from "./defineProperty_SETTING";
 
 function createSetter(propertyKey: string, symbol: symbol, isFragment: boolean) {

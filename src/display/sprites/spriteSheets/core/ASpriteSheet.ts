@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import DefineForVertex from "../../../../defineProperty/DefineForVertex";
+import DefineForVertex from "../../../../defineProperty/old/DefineForVertex";
 import Geometry from "../../../../geometry/Geometry";
 import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import BitmapMaterial from "../../../../material/bitmapMaterial/BitmapMaterial";

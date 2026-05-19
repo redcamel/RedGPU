@@ -2,7 +2,7 @@ import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import {OrthographicCamera} from "../../camera";
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForVertex from "../../defineProperty/DefineForVertex";
+import DefineForVertex from "../../defineProperty/old/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
 import {ABaseMaterial} from "../../material/core";
 import Primitive from "../../primitive/core/Primitive";

@@ -6,8 +6,8 @@
  * [EN] Provides various types of uniform properties and preset configurations used in Vertex and Fragment stages.
  * @packageDocumentation
  */
-import DefineForFragment from "./DefineForFragment";
-import DefineForVertex from "./DefineForVertex";
+import DefineForFragment from "./old/DefineForFragment";
+import DefineForVertex from "./old/DefineForVertex";
 import DefineProperty from "./DefineProperty";
 
 export {DefineProperty,DefineForFragment, DefineForVertex};

@@ -1,6 +1,6 @@
 import ColorRGB from "../../color/ColorRGB";
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../defineProperty/DefineForFragment";
+import DefineForFragment from "../../defineProperty/old/DefineForFragment";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABaseMaterial from "../core/ABaseMaterial";
 import fragmentModuleSource from './fragment.wgsl'
