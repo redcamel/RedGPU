@@ -1,6 +1,7 @@
 import defineBoolean, {IBoolean} from "./funcs/defineBoolean";
 import defineColorRGB, {IColorRGB} from "./funcs/defineColorRGB";
 import defineColorRGBA, {IColorRGBA} from "./funcs/defineColorRGBA";
+import defineNumber, {INumberRange} from "./funcs/defineNumber";
 import definePositiveNumber, {IPositiveNumberRange} from "./funcs/definePositiveNumber";
 import defineSampler from "./funcs/defineSampler";
 import defineUint, {IUintRange} from "./funcs/defineUint";
@@ -15,6 +16,7 @@ export {
     IDefineVec2,
     IDefineVec3,
     IDefineVec4,
+    INumberRange,
     IPositiveNumberRange,
     IUintRange
 };
@@ -32,6 +34,7 @@ const DefineUniformProperty = {
     defineBoolean,
     defineColorRGB,
     defineColorRGBA,
+    defineNumber,
     defineSampler,
     definePositiveNumber,
     defineUint,

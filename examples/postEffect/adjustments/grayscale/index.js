@@ -77,23 +77,41 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        guiCallback: (pane) => {
+            const effect = targetView.postEffectManager.getEffectAt(0);
+            const TEST_STATE = {
+                Grayscale: true,
+                amount: effect.amount,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+            folder.addBinding(TEST_STATE, 'Grayscale').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.Grayscale(redGPUContext);
+                    newEffect.amount = TEST_STATE.amount;
+                    targetView.postEffectManager.addEffect(newEffect)
+                } else {
+                    targetView.postEffectManager.removeAllEffect()
+                }
+                amountControl.disabled = !v.value;
+            })
+
+            const amountControl = folder.addBinding(TEST_STATE, 'amount', {
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.amount = v.value
+            })
         }
     });
 
-    const pane = new Pane();
-    const TEST_STATE = {
-        Grayscale: true,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    folder.addBinding(TEST_STATE, 'Grayscale').on('change', (v) => {
-        if (v.value) targetView.postEffectManager.addEffect(new RedGPU.PostEffect.Grayscale(redGPUContext))
-        else targetView.postEffectManager.removeAllEffect()
-    })
+
 };

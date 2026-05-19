@@ -78,61 +78,61 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        guiCallback:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                ColorBalance: true,
+                shadowCyanRed: effect.shadowCyanRed,
+                shadowMagentaGreen: effect.shadowMagentaGreen,
+                shadowYellowBlue: effect.shadowYellowBlue,
+                midtoneCyanRed: effect.midtoneCyanRed,
+                midtoneMagentaGreen: effect.midtoneMagentaGreen,
+                midtoneYellowBlue: effect.midtoneYellowBlue,
+                highlightCyanRed: effect.highlightCyanRed,
+                highlightMagentaGreen: effect.highlightMagentaGreen,
+                highlightYellowBlue: effect.highlightYellowBlue,
+                preserveLuminosity: effect.preserveLuminosity,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'ColorBalance').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.ColorBalance(redGPUContext);
+                    Object.assign(newEffect, TEST_STATE);
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                controls.forEach(c => c.disabled = !v.value);
+            });
+
+            const controls = [];
+            const fields = [
+                'shadowCyanRed', 'shadowMagentaGreen', 'shadowYellowBlue',
+                'midtoneCyanRed', 'midtoneMagentaGreen', 'midtoneYellowBlue',
+                'highlightCyanRed', 'highlightMagentaGreen', 'highlightYellowBlue'
+            ];
+
+            fields.forEach(field => {
+                controls.push(folder.addBinding(TEST_STATE, field, {min: -100, max: 100}).on('change', (v) => {
+                    const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                    if (currentEffect) currentEffect[field] = v.value;
+                }));
+            });
+
+            controls.push(folder.addBinding(TEST_STATE, 'preserveLuminosity').on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.preserveLuminosity = v.value;
+            }));
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
-
-    const TEST_STATE = {
-        ColorBalance: true,
-        shadowCyanRed: effect.shadowCyanRed,
-        shadowMagentaGreen: effect.shadowMagentaGreen,
-        shadowYellowBlue: effect.shadowYellowBlue,
-        midtoneCyanRed: effect.midtoneCyanRed,
-        midtoneMagentaGreen: effect.midtoneMagentaGreen,
-        midtoneYellowBlue: effect.midtoneYellowBlue,
-        highlightCyanRed: effect.highlightCyanRed,
-        highlightMagentaGreen: effect.highlightMagentaGreen,
-        highlightYellowBlue: effect.highlightYellowBlue,
-        preserveLuminosity: effect.preserveLuminosity,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'ColorBalance').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.ColorBalance(redGPUContext);
-            Object.assign(newEffect, TEST_STATE);
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        controls.forEach(c => c.disabled = !v.value);
-    });
-
-    const controls = [];
-    const fields = [
-        'shadowCyanRed', 'shadowMagentaGreen', 'shadowYellowBlue',
-        'midtoneCyanRed', 'midtoneMagentaGreen', 'midtoneYellowBlue',
-        'highlightCyanRed', 'highlightMagentaGreen', 'highlightYellowBlue'
-    ];
-
-    fields.forEach(field => {
-        controls.push(folder.addBinding(TEST_STATE, field, {min: -100, max: 100}).on('change', (v) => {
-            const currentEffect = targetView.postEffectManager.getEffectAt(0);
-            if (currentEffect) currentEffect[field] = v.value;
-        }));
-    });
-
-    controls.push(folder.addBinding(TEST_STATE, 'preserveLuminosity').on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.preserveLuminosity = v.value;
-    }));
 };
