@@ -563,7 +563,7 @@ const pattern = /^use\w+Texture$/;
 DefineProperty.definePositiveNumber(ABaseMaterial, [
     {key: 'opacity', value: 1, max: 1}
 ])
-DefineForFragment.defineBoolean(ABaseMaterial, [
+DefineProperty.defineBoolean(ABaseMaterial, [
     ['useTint', false]
 ])
 DefineForFragment.defineColorRGBA(ABaseMaterial, [

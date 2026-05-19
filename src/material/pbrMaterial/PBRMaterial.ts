@@ -985,13 +985,13 @@ DefineProperty.definePositiveNumber(PBRMaterial,
 )
 const defineTexture = (textureList: string[], useSampler: boolean) => {
     textureList?.forEach(key => {
-        DefineForFragment.defineBoolean(PBRMaterial, [
+        DefineProperty.defineBoolean(PBRMaterial, [
             `use${key.charAt(0).toUpperCase()}${key.substring(1)}`
         ])
         DefineProperty.definePositiveNumber(PBRMaterial, [
             [`${key}_KHR_texture_transform_rotation`, 0],
         ]);
-        DefineForFragment.defineBoolean(PBRMaterial, [
+        DefineProperty.defineBoolean(PBRMaterial, [
             `use_${key}_KHR_texture_transform`,
         ])
         DefineForFragment.defineVec2(PBRMaterial, [
@@ -1017,7 +1017,7 @@ const extensionDefine = (defineList) => {
     defineList.forEach(v => {
         const {extensionName, textureList, useSampler} = v;
         const {positiveNumberList, vec3List, vec4List} = v;
-        if (extensionName) DefineForFragment.defineBoolean(PBRMaterial, [`use${extensionName}`])
+        if (extensionName) DefineProperty.defineBoolean(PBRMaterial, [`use${extensionName}`])
         defineTexture(textureList, !useSampler)
         positiveNumberList?.forEach(v => {
             DefineProperty.definePositiveNumber(PBRMaterial, [
@@ -1045,7 +1045,7 @@ DefineProperty.definePositiveNumber(PBRMaterial, [
 DefineProperty.defineUint(PBRMaterial, [
     'alphaBlend',
 ])
-DefineForFragment.defineBoolean(PBRMaterial, [
+DefineProperty.defineBoolean(PBRMaterial, [
     'doubleSided',
     'useCutOff',
     'useVertexColor',

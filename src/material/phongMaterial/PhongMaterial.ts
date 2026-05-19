@@ -270,7 +270,7 @@ DefineForFragment.defineByPreset(PhongMaterial, [
     [DefineForFragment.PRESET_COLOR_RGB.SPECULAR_COLOR, '#ffffff'],
     //
 ])
-DefineForFragment.defineBoolean(PhongMaterial, [
+DefineProperty.defineBoolean(PhongMaterial, [
     ['useSSR', false]
 ])
 DefineProperty.definePositiveNumber(PhongMaterial, [
