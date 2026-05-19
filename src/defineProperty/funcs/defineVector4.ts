@@ -23,11 +23,11 @@ function defineVector4_func(propertyKey: string | IDefineVec4, initValue: [numbe
  * @example
  * ```typescript
  * // 단일 키 정의
- * DefineProperty.defineVector4(MyMaterial, 'myVec4');
+ * DefineUniformProperty.defineVector4(MyMaterial, 'myVec4');
  * // 배열을 이용한 다중 키 정의
- * DefineProperty.defineVector4(MyMaterial, [['vec0', [1, 0, 0, 1]], ['vec1', [0, 1, 0, 1]]]);
+ * DefineUniformProperty.defineVector4(MyMaterial, [['vec0', [1, 0, 0, 1]], ['vec1', [0, 1, 0, 1]]]);
  * // IDefineVec4 인터페이스 사용
- * DefineProperty.defineVector4(MyMaterial, [{ key: 'vec0', value: [1, 0, 0, 1] }]);
+ * DefineUniformProperty.defineVector4(MyMaterial, [{ key: 'vec0', value: [1, 0, 0, 1] }]);
  * ```
  */
 const defineVector4 = (target: any, keys: string | (string | IDefineVec4 | [string, [number, number, number, number]])[]) => applyProperties(target, keys, defineVector4_func);

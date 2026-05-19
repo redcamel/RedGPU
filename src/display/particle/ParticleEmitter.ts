@@ -10,7 +10,7 @@ import RenderViewStateData from "../view/core/RenderViewStateData";
 import PARTICLE_EASE from "./PARTICLE_EASE";
 import computeModuleSource from "./shader/compute.wgsl";
 import vertexModuleSource from "./shader/particleVertex.wgsl";
-import DefineProperty from "../../defineProperty/DefineProperty";
+import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_PARTICLE_EMITTER'
 const SHADER_INFO = parseWGSL('PARTICLE_EMITTER_VERTEX', vertexModuleSource);
@@ -1217,7 +1217,7 @@ Object.defineProperty(ParticleEmitter.prototype, 'meshType', {
     value: MESH_TYPE.PARTICLE,
     writable: false
 });
-DefineProperty.defineBoolean(ParticleEmitter,[
+DefineUniformProperty.defineBoolean(ParticleEmitter,[
     ['useBillboard',true],
 ])
 //

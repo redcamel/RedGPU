@@ -27,9 +27,9 @@ function defineSampler_func(propertyKey: string) {
  * @example
  * ```typescript
  * // 단일 키 정의
- * DefineProperty.defineSampler(MyMaterial, 'diffuseSampler');
+ * DefineUniformProperty.defineSampler(MyMaterial, 'diffuseSampler');
  * // 배열을 이용한 다중 키 정의
- * DefineProperty.defineSampler(MyMaterial, ['sampler0', 'sampler1']);
+ * DefineUniformProperty.defineSampler(MyMaterial, ['sampler0', 'sampler1']);
  * ```
  */
 const defineSampler = (target: any, keys: string | string[]) => applyProperties(target, keys, defineSampler_func);

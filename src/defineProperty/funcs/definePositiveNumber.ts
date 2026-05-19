@@ -74,11 +74,11 @@ function definePositiveNumberRange_func(
  * @example
  * ```typescript
  * // 단일 키 정의
- * DefineProperty.definePositiveNumber(MyMaterial, 'opacity');
+ * DefineUniformProperty.definePositiveNumber(MyMaterial, 'opacity');
  * // 초기값 및 범위와 함께 정의 (배열 방식)
- * DefineProperty.definePositiveNumber(MyMaterial, [['shininess', 30, 0, 100]]);
+ * DefineUniformProperty.definePositiveNumber(MyMaterial, [['shininess', 30, 0, 100]]);
  * // 설정 객체 방식 (IPositiveNumberRange)
- * DefineProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
+ * DefineUniformProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
  * ```
  */
 const definePositiveNumber = (target: any, keys: string | (string | IPositiveNumberRange | [string, number?, number?, number?])[]) => applyProperties(target, keys, definePositiveNumberRange_func);

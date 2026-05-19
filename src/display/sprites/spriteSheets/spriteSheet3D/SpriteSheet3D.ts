@@ -9,7 +9,7 @@ import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
-import DefineProperty from "../../../../defineProperty/DefineProperty";
+import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 
 /** SpriteSheet3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
@@ -291,11 +291,11 @@ class SpriteSheet3D extends ASpriteSheet {
 /**
  * SpriteSheet3D 클래스에 렌더링 비율 속성들을 정의합니다.
  */
-DefineProperty.definePositiveNumber(SpriteSheet3D, [
+DefineUniformProperty.definePositiveNumber(SpriteSheet3D, [
     ['_renderRatioX', 1],
     ['_renderRatioY', 1],
 ])
-DefineProperty.defineBoolean(SpriteSheet3D,[
+DefineUniformProperty.defineBoolean(SpriteSheet3D,[
     ['useBillboard', true],
 ])
 /**

@@ -8,7 +8,7 @@ import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
-import DefineProperty from "../../../../defineProperty/DefineProperty";
+import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 import definePositiveNumber from "../../../../defineProperty/funcs/definePositiveNumber";
 
 const SHADER_INFO = parseWGSL('SKYBOX_MATERIAL', fragmentModuleSource)
@@ -57,7 +57,7 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineProperty.definePositiveNumber(SkyBoxMaterial, [
+DefineUniformProperty.definePositiveNumber(SkyBoxMaterial, [
     ['blur', 0],
     ['intensityMultiplier', 1],
     ['luminance', 10000],
@@ -65,7 +65,7 @@ DefineProperty.definePositiveNumber(SkyBoxMaterial, [
 ])
 DefineForFragment.defineCubeTexture(SkyBoxMaterial, ['texture0', 'transitionTexture'])
 DefineForFragment.defineTexture(SkyBoxMaterial, ['transitionMask'])
-DefineProperty.defineSampler(SkyBoxMaterial, ['sampler0'])
+DefineUniformProperty.defineSampler(SkyBoxMaterial, ['sampler0'])
 
 Object.freeze(SkyBoxMaterial)
 export default SkyBoxMaterial

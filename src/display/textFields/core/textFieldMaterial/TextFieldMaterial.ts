@@ -5,7 +5,7 @@ import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
-import DefineProperty from "../../../../defineProperty/DefineProperty";
+import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 
 const SHADER_INFO = parseWGSL('TEXTFIELD_MATERIAL', fragmentModuleSource)
 
@@ -51,7 +51,7 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
         this.initGPURenderInfos()
     }
 }
-DefineProperty.defineSampler(TextFieldMaterial, [
+DefineUniformProperty.defineSampler(TextFieldMaterial, [
     'diffuseTextureSampler'
 ])
 /**

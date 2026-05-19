@@ -6,7 +6,7 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
-import DefineProperty from "../../defineProperty/DefineProperty";
+import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
 import definePositiveNumber from "../../defineProperty/funcs/definePositiveNumber";
 
 const EXTENSION_LIST = [
@@ -977,7 +977,7 @@ class PBRMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineProperty.definePositiveNumber(PBRMaterial,
+DefineUniformProperty.definePositiveNumber(PBRMaterial,
     [
         'emissiveStrength',
         'normalScale'
@@ -985,13 +985,13 @@ DefineProperty.definePositiveNumber(PBRMaterial,
 )
 const defineTexture = (textureList: string[], useSampler: boolean) => {
     textureList?.forEach(key => {
-        DefineProperty.defineBoolean(PBRMaterial, [
+        DefineUniformProperty.defineBoolean(PBRMaterial, [
             `use${key.charAt(0).toUpperCase()}${key.substring(1)}`
         ])
-        DefineProperty.definePositiveNumber(PBRMaterial, [
+        DefineUniformProperty.definePositiveNumber(PBRMaterial, [
             [`${key}_KHR_texture_transform_rotation`, 0],
         ]);
-        DefineProperty.defineBoolean(PBRMaterial, [
+        DefineUniformProperty.defineBoolean(PBRMaterial, [
             `use_${key}_KHR_texture_transform`,
         ])
         DefineForFragment.defineVec2(PBRMaterial, [
@@ -999,7 +999,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
             [`${key}_KHR_texture_transform_scale`, [1, 1]],
         ])
         //
-        DefineProperty.defineUint(PBRMaterial, [
+        DefineUniformProperty.defineUint(PBRMaterial, [
             `${key}_texCoord_index`,
         ])
         //
@@ -1007,7 +1007,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
             key
         ])
         if (useSampler) {
-            DefineProperty.defineSampler(PBRMaterial, [
+            DefineUniformProperty.defineSampler(PBRMaterial, [
                 `${key}Sampler`,
             ])
         }
@@ -1017,10 +1017,10 @@ const extensionDefine = (defineList) => {
     defineList.forEach(v => {
         const {extensionName, textureList, useSampler} = v;
         const {positiveNumberList, vec3List, vec4List} = v;
-        if (extensionName) DefineProperty.defineBoolean(PBRMaterial, [`use${extensionName}`])
+        if (extensionName) DefineUniformProperty.defineBoolean(PBRMaterial, [`use${extensionName}`])
         defineTexture(textureList, !useSampler)
         positiveNumberList?.forEach(v => {
-            DefineProperty.definePositiveNumber(PBRMaterial, [
+            DefineUniformProperty.definePositiveNumber(PBRMaterial, [
                 v
             ])
         })
@@ -1037,15 +1037,15 @@ const extensionDefine = (defineList) => {
     })
 }
 extensionDefine(EXTENSION_LIST)
-DefineProperty.definePositiveNumber(PBRMaterial, [
+DefineUniformProperty.definePositiveNumber(PBRMaterial, [
     ['cutOff', 0],
     ['KHR_materials_ior', 1.5],
     ['KHR_dispersion', 0],
 ]);
-DefineProperty.defineUint(PBRMaterial, [
+DefineUniformProperty.defineUint(PBRMaterial, [
     'alphaBlend',
 ])
-DefineProperty.defineBoolean(PBRMaterial, [
+DefineUniformProperty.defineBoolean(PBRMaterial, [
     'doubleSided',
     'useCutOff',
     'useVertexColor',

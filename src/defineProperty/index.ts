@@ -7,6 +7,6 @@
  * @packageDocumentation
  */
 import DefineForFragment from "./old/DefineForFragment";
-import DefineProperty from "./DefineProperty";
+import DefineUniformProperty from "./DefineUniformProperty";
 
-export {DefineProperty, DefineForFragment};
+export {DefineUniformProperty, DefineForFragment};

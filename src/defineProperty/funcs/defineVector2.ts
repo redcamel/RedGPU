@@ -23,13 +23,13 @@ function defineVector2_func(propertyKey: string | IDefineVec2, initValue: [numbe
  * @example
  * ```typescript
  * // 단일 키 정의
- * DefineProperty.defineVector2(MyMaterial, 'myVec2');
+ * DefineUniformProperty.defineVector2(MyMaterial, 'myVec2');
  * // 배열을 이용한 다중 키 정의
- * DefineProperty.defineVector2(MyMaterial, ['vec0', 'vec1']);
+ * DefineUniformProperty.defineVector2(MyMaterial, ['vec0', 'vec1']);
  * // 초기값과 함께 정의
- * DefineProperty.defineVector2(MyMaterial, [['vec0', [1, 0]], ['vec1', [0, 1]]]);
+ * DefineUniformProperty.defineVector2(MyMaterial, [['vec0', [1, 0]], ['vec1', [0, 1]]]);
  * // IDefineVec2 인터페이스 사용
- * DefineProperty.defineVector2(MyMaterial, [{ key: 'vec0', value: [1, 0] }]);
+ * DefineUniformProperty.defineVector2(MyMaterial, [{ key: 'vec0', value: [1, 0] }]);
  * ```
  */
 const defineVector2 = (target: any, keys: string | (string | IDefineVec2 | [string, [number, number]])[]) => applyProperties(target, keys, defineVector2_func);

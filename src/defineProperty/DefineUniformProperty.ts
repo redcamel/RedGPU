@@ -15,9 +15,9 @@ export {IBoolean, IDefineVec2, IDefineVec3, IDefineVec4, IPositiveNumberRange, I
  * [KO] 기존의 DefineForFragment, DefineForVertex를 대체하며, 셰이더 단계에 의존하지 않는 범용적인 속성 정의 기능을 제공합니다.
  * [EN] Replaces the existing DefineForFragment and DefineForVertex, providing general-purpose property definition features independent of shader stages.
  *
- * @namespace DefineProperty
+ * @namespace DefineUniformProperty
  */
-const DefineProperty = {
+const DefineUniformProperty = {
     defineBoolean,
     defineSampler,
     definePositiveNumber,
@@ -28,5 +28,5 @@ const DefineProperty = {
 }
 
 
-Object.freeze(DefineProperty)
-export default DefineProperty
+Object.freeze(DefineUniformProperty)
+export default DefineUniformProperty

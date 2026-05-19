@@ -72,11 +72,11 @@ function defineUintRange_func(
  * @example
  * ```typescript
  * // 단일 키 정의
- * DefineProperty.defineUint(MyMaterial, 'myUint');
+ * DefineUniformProperty.defineUint(MyMaterial, 'myUint');
  * // 초기값 및 범위와 함께 정의 (배열 방식)
- * DefineProperty.defineUint(MyMaterial, [['myUint', 1, 0, 10]]);
+ * DefineUniformProperty.defineUint(MyMaterial, [['myUint', 1, 0, 10]]);
  * // 설정 객체 방식 (IUintRange)
- * DefineProperty.defineUint(MyMaterial, [{ key: 'myUint', value: 1, min: 0, max: 10 }]);
+ * DefineUniformProperty.defineUint(MyMaterial, [{ key: 'myUint', value: 1, min: 0, max: 10 }]);
  * ```
  */
 const defineUint = (target: any, keys: string | (string | IUintRange | [string, number?, number?, number?])[]) => applyProperties(target, keys, defineUintRange_func);

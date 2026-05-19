@@ -6,7 +6,7 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
-import DefineProperty from "../../defineProperty/DefineProperty";
+import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
 
 const SHADER_INFO = parseWGSL('PHONG_MATERIAL', fragmentModuleSource)
 
@@ -231,7 +231,7 @@ class PhongMaterial extends AUVTransformBaseMaterial {
     }
 }
 
-DefineProperty.defineSampler(
+DefineUniformProperty.defineSampler(
     PhongMaterial,
     [
         'alphaTextureSampler',
@@ -242,7 +242,7 @@ DefineProperty.defineSampler(
         'normalTextureSampler',
         'specularTextureSampler'
     ])
-DefineProperty.definePositiveNumber(
+DefineUniformProperty.definePositiveNumber(
     PhongMaterial,
     [
         'aoStrength',
@@ -270,10 +270,10 @@ DefineForFragment.defineByPreset(PhongMaterial, [
     [DefineForFragment.PRESET_COLOR_RGB.SPECULAR_COLOR, '#ffffff'],
     //
 ])
-DefineProperty.defineBoolean(PhongMaterial, [
+DefineUniformProperty.defineBoolean(PhongMaterial, [
     ['useSSR', false]
 ])
-DefineProperty.definePositiveNumber(PhongMaterial, [
+DefineUniformProperty.definePositiveNumber(PhongMaterial, [
     ['metallic', 0, 0, 1],
     ['roughness', 0, 0, 1]
 ])

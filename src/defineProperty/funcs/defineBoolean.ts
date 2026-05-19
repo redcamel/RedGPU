@@ -63,11 +63,11 @@ function defineBoolean_func(
  * @example
  * ```typescript
  * // 단일 키 정의
- * DefineProperty.defineBoolean(MyMaterial, 'useAlphaTest');
+ * DefineUniformProperty.defineBoolean(MyMaterial, 'useAlphaTest');
  * // 초기값과 함께 정의 (배열 방식)
- * DefineProperty.defineBoolean(MyMaterial, [['useAlphaTest', true]]);
+ * DefineUniformProperty.defineBoolean(MyMaterial, [['useAlphaTest', true]]);
  * // 설정 객체 방식 (IBoolean)
- * DefineProperty.defineBoolean(MyMaterial, [{ key: 'useAlphaTest', value: true }]);
+ * DefineUniformProperty.defineBoolean(MyMaterial, [{ key: 'useAlphaTest', value: true }]);
  * ```
  */
 const defineBoolean = (target: any, keys: string | (string | IBoolean | [string, boolean?])[]) => applyProperties(target, keys, defineBoolean_func);
