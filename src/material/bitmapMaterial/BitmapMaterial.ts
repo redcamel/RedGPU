@@ -77,10 +77,6 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
         this.initGPURenderInfos()
     }
 }
-DefineProperty.defineVector2(BitmapMaterial,[
-    {key :'test', value : [0,0]},
-    ['test2',[0,0]]
-]);
 DefineProperty.defineSampler(BitmapMaterial, [
     'diffuseTextureSampler'
 ])
