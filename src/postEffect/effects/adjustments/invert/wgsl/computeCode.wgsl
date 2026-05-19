@@ -4,8 +4,10 @@ let dimW = f32(dimensions.x);
 let dimH = f32(dimensions.y);
 let uv = 	vec2<f32>(f32(index.x)/dimW,f32(index.y)/dimH);
 var color:vec4<f32> = textureLoad( sourceTexture, index, );
-color.r = 1.0 - color.r;
-color.g = 1.0 - color.g;
-color.b = 1.0 - color.b;
 
-textureStore(outputTexture, index, color );
+textureStore(
+    outputTexture,
+    index,
+    mix( color, vec4<f32>( 1.0 - color.r, 1.0 - color.g, 1.0 - color.b, color.a), uniforms.amount )
+);
+

@@ -2,6 +2,8 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 
 /**
  * [KO] 색상 반전(Invert) 후처리 이펙트입니다.
@@ -32,10 +34,12 @@ class Invert extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_INVERT',
-            createBasicPostEffectCode(this, computeCode)
+            createBasicPostEffectCode(this, computeCode,uniformStructCode)
         );
     }
 }
-
+DefineUniformProperty.definePositiveNumber(Invert, [
+    {key: 'amount', value: 1, min: 0, max: 1}
+])
 Object.freeze(Invert)
 export default Invert

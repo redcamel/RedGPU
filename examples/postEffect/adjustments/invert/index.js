@@ -28,7 +28,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
 
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        
+
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -77,23 +77,41 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        guiCallback: pane => {
+            const effect = targetView.postEffectManager.getEffectAt(0);
+            const TEST_STATE = {
+                Invert: true,
+                amount: effect.amount,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+            folder.addBinding(TEST_STATE, 'Invert').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.Invert(redGPUContext);
+                    newEffect.amount = TEST_STATE.amount;
+                    targetView.postEffectManager.addEffect(newEffect)
+                } else {
+                    targetView.postEffectManager.removeAllEffect()
+                }
+                amountControl.disabled = !v.value;
+            })
+
+            const amountControl = folder.addBinding(TEST_STATE, 'amount', {
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.amount = v.value
+            })
         }
     });
 
-    const pane = new Pane();
-    const TEST_STATE = {
-        Invert: true,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    folder.addBinding(TEST_STATE, 'Invert').on('change', (v) => {
-        if (v.value) targetView.postEffectManager.addEffect(new RedGPU.PostEffect.Invert(redGPUContext))
-        else targetView.postEffectManager.removeAllEffect()
-    })
+
 };
