@@ -565,7 +565,7 @@ DefineUniformProperty.definePositiveNumber(ABaseMaterial, [
 DefineUniformProperty.defineBoolean(ABaseMaterial, [
     ['useTint', false]
 ])
-DefineForFragment.defineColorRGBA(ABaseMaterial, [
+DefineUniformProperty.defineColorRGBA(ABaseMaterial, [
     'tint', '#ff0000'
 ])
 Object.freeze(ABaseMaterial)

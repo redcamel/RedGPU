@@ -1,4 +1,6 @@
 import defineBoolean, {IBoolean} from "./funcs/defineBoolean";
+import defineColorRGB, {IColorRGB} from "./funcs/defineColorRGB";
+import defineColorRGBA, {IColorRGBA} from "./funcs/defineColorRGBA";
 import definePositiveNumber, {IPositiveNumberRange} from "./funcs/definePositiveNumber";
 import defineSampler from "./funcs/defineSampler";
 import defineUint, {IUintRange} from "./funcs/defineUint";
@@ -6,7 +8,16 @@ import defineVector2, {IDefineVec2} from "./funcs/defineVector2";
 import defineVector3, {IDefineVec3} from "./funcs/defineVector3";
 import defineVector4, {IDefineVec4} from "./funcs/defineVector4";
 
-export {IBoolean, IDefineVec2, IDefineVec3, IDefineVec4, IPositiveNumberRange, IUintRange};
+export {
+    IBoolean,
+    IColorRGB,
+    IColorRGBA,
+    IDefineVec2,
+    IDefineVec3,
+    IDefineVec4,
+    IPositiveNumberRange,
+    IUintRange
+};
 
 /**
  * [KO] RedGPU의 통합 속성 정의 시스템입니다.
@@ -19,6 +30,8 @@ export {IBoolean, IDefineVec2, IDefineVec3, IDefineVec4, IPositiveNumberRange, I
  */
 const DefineUniformProperty = {
     defineBoolean,
+    defineColorRGB,
+    defineColorRGBA,
     defineSampler,
     definePositiveNumber,
     defineUint,

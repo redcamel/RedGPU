@@ -4,6 +4,7 @@ import DefineForFragment from "../../defineProperty/old/DefineForFragment";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABaseMaterial from "../core/ABaseMaterial";
 import fragmentModuleSource from './fragment.wgsl'
+import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
 
 const SHADER_INFO = parseWGSL('COLOR_MATERIAL', fragmentModuleSource)
 
@@ -52,9 +53,8 @@ class ColorMaterial extends ABaseMaterial {
         this.color.setColorByHEX(color)
     }
 }
-
-DefineForFragment.defineByPreset(ColorMaterial, [
-    DefineForFragment.PRESET_COLOR_RGB.COLOR,
+DefineUniformProperty.defineColorRGB(ColorMaterial, [
+    'color',
 ])
 Object.freeze(ColorMaterial)
 export default ColorMaterial

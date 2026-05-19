@@ -252,8 +252,12 @@ DefineUniformProperty.definePositiveNumber(
         'normalScale'
     ]
 )
+DefineUniformProperty.defineColorRGB(PhongMaterial, [
+    'color',
+    ['emissiveColor', '#000000'],
+    {key:'specularColor',value:'#ffffff'}
+])
 DefineForFragment.defineByPreset(PhongMaterial, [
-    DefineForFragment.PRESET_COLOR_RGB.COLOR,
     //
     DefineForFragment.PRESET_TEXTURE.ALPHA_TEXTURE,
     //
@@ -262,12 +266,10 @@ DefineForFragment.defineByPreset(PhongMaterial, [
     DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
     //
     DefineForFragment.PRESET_TEXTURE.EMISSIVE_TEXTURE,
-    [DefineForFragment.PRESET_COLOR_RGB.EMISSIVE_COLOR, '#000000'],
     //
     DefineForFragment.PRESET_TEXTURE.NORMAL_TEXTURE,
     //
     DefineForFragment.PRESET_TEXTURE.SPECULAR_TEXTURE,
-    [DefineForFragment.PRESET_COLOR_RGB.SPECULAR_COLOR, '#ffffff'],
     //
 ])
 DefineUniformProperty.defineBoolean(PhongMaterial, [
