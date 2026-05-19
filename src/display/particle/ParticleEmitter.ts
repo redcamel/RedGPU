@@ -1109,7 +1109,7 @@ class ParticleEmitter extends Mesh {
             })
         });
         if (prevBuffer) {
-            prevBuffer.forEach(v => commandEncoderManager.addDeferredDestroy( v));
+            prevBuffer.forEach(v => commandEncoderManager.addDeferredDestroy(v));
         }
         //
         let computeSource = computeModuleSource;
@@ -1217,8 +1217,8 @@ Object.defineProperty(ParticleEmitter.prototype, 'meshType', {
     value: MESH_TYPE.PARTICLE,
     writable: false
 });
-DefineUniformProperty.defineBoolean(ParticleEmitter,[
-    ['useBillboard',true],
+DefineUniformProperty.defineBoolean(ParticleEmitter, [
+    ['useBillboard', true],
 ])
 //
 Object.freeze(ParticleEmitter)

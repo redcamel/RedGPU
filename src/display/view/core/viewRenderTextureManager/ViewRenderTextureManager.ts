@@ -5,7 +5,6 @@ import calculateTextureByteSize from "../../../../utils/texture/calculateTexture
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import View3D from "../../View3D";
 import GBUFFER_TYPE from "../GBUFFER_TYPE";
-import {COMMAND_ENCODER_TYPE} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 
 const DEPTH0: GBUFFER_INNER_TYPE = 'depthTexture0'
 const DEPTH1: GBUFFER_INNER_TYPE = 'depthTexture1'
@@ -29,7 +28,12 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
     withResolve: boolean,
     useMipmap: boolean
 }> = {
-    [GBUFFER_TYPE.COLOR]: {format: 'rgba16float', usage: BASIC_USAGE | GPUTextureUsage.STORAGE_BINDING, withResolve: true, useMipmap: false},
+    [GBUFFER_TYPE.COLOR]: {
+        format: 'rgba16float',
+        usage: BASIC_USAGE | GPUTextureUsage.STORAGE_BINDING,
+        withResolve: true,
+        useMipmap: false
+    },
     [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rgba16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
     [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE, withResolve: true, useMipmap: false}, // navigator.gpu.getPreferredCanvasFormat() 사용
     [GBUFFER_TYPE.RENDER_PATH1_RESULT]: {
@@ -93,47 +97,6 @@ class ViewRenderTextureManager {
         validateRedGPUContext(view.redGPUContext)
         this.#redGPUContext = view.redGPUContext
         this.#view = view
-    }
-
-    /* ----------------------------------------
-     * Public getters (메모리/텍스처 접근)
-     * ---------------------------------------- */
-    /**
-     * [KO] 모든 렌더 텍스처들의 상태(크기, MSAA 등)를 일괄 확인하고 필요 시 재생성합니다.
-     * [EN] Batch check the status (size, MSAA, etc.) of all render textures and regenerate them if necessary.
-     * @private
-     */
-    #update() {
-        const {antialiasingManager} = this.#redGPUContext;
-        const {msaaID} = antialiasingManager;
-        const {pixelRectObject} = this.#view;
-        this.#targetTextureSize = {
-            width: Math.max(pixelRectObject.width, 1),
-            height: Math.max(pixelRectObject.height, 1),
-            depthOrArrayLayers: 1
-        }
-        this.#targetTextureSizeString = `${this.#targetTextureSize.width}x${this.#targetTextureSize.height}`
-        // 하나라도 변경되었는지 확인
-        const renderPath1ResultTexture = this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.texture
-        const changedSize = renderPath1ResultTexture?.width !== this.#targetTextureSize.width || renderPath1ResultTexture?.height !== this.#targetTextureSize.height;
-        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
-
-        if (changedSize || dirtyMSAA || !renderPath1ResultTexture) {
-            this.#lastUpdateMSAAID = msaaID;
-
-            // 1. 기존 리소스 일괄 정리 (선택 사항이나 명시적 관리를 위해 유지)
-            // 2. 새로운 리소스 일괄 생성
-            this.#createDepthTexture(DEPTH0);
-            this.#createDepthTexture(DEPTH1);
-
-            // G-Buffer 일괄 생성 (for...in 루프로 최적화)
-            for (const key in GBUFFER_TYPE) {
-                this.#createGBuffer(GBUFFER_TYPE[key]);
-            }
-
-            // 3. 비디오 메모리 계산 (마지막에 한 번만 수행)
-            this.#checkVideoMemorySize();
-        }
     }
 
     get gBuffers(): Map<string, GBufferInfo> {
@@ -239,6 +202,47 @@ class ViewRenderTextureManager {
     }
 
     /* ----------------------------------------
+     * Public getters (메모리/텍스처 접근)
+     * ---------------------------------------- */
+    /**
+     * [KO] 모든 렌더 텍스처들의 상태(크기, MSAA 등)를 일괄 확인하고 필요 시 재생성합니다.
+     * [EN] Batch check the status (size, MSAA, etc.) of all render textures and regenerate them if necessary.
+     * @private
+     */
+    #update() {
+        const {antialiasingManager} = this.#redGPUContext;
+        const {msaaID} = antialiasingManager;
+        const {pixelRectObject} = this.#view;
+        this.#targetTextureSize = {
+            width: Math.max(pixelRectObject.width, 1),
+            height: Math.max(pixelRectObject.height, 1),
+            depthOrArrayLayers: 1
+        }
+        this.#targetTextureSizeString = `${this.#targetTextureSize.width}x${this.#targetTextureSize.height}`
+        // 하나라도 변경되었는지 확인
+        const renderPath1ResultTexture = this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.texture
+        const changedSize = renderPath1ResultTexture?.width !== this.#targetTextureSize.width || renderPath1ResultTexture?.height !== this.#targetTextureSize.height;
+        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
+
+        if (changedSize || dirtyMSAA || !renderPath1ResultTexture) {
+            this.#lastUpdateMSAAID = msaaID;
+
+            // 1. 기존 리소스 일괄 정리 (선택 사항이나 명시적 관리를 위해 유지)
+            // 2. 새로운 리소스 일괄 생성
+            this.#createDepthTexture(DEPTH0);
+            this.#createDepthTexture(DEPTH1);
+
+            // G-Buffer 일괄 생성 (for...in 루프로 최적화)
+            for (const key in GBUFFER_TYPE) {
+                this.#createGBuffer(GBUFFER_TYPE[key]);
+            }
+
+            // 3. 비디오 메모리 계산 (마지막에 한 번만 수행)
+            this.#checkVideoMemorySize();
+        }
+    }
+
+    /* ----------------------------------------
      * Private helpers
      * ---------------------------------------- */
     /**
@@ -272,8 +276,8 @@ class ViewRenderTextureManager {
             this.#gBuffers.delete(type)
 
             const {commandEncoderManager} = this.#redGPUContext;
-            if (texture) commandEncoderManager.addDeferredDestroy( texture);
-            if (resolveTexture) commandEncoderManager.addDeferredDestroy( resolveTexture);
+            if (texture) commandEncoderManager.addDeferredDestroy(texture);
+            if (resolveTexture) commandEncoderManager.addDeferredDestroy(resolveTexture);
         }
     }
 

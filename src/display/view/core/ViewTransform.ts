@@ -322,7 +322,7 @@ class ViewTransform {
         const {antialiasingManager} = redGPUContext
         this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
         // TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
-        const needJitter = this.constructor.name === 'View3D' && (this.camera.constructor.name !=='IsometricController' ) && antialiasingManager.useTAA
+        const needJitter = this.constructor.name === 'View3D' && (this.camera.constructor.name !== 'IsometricController') && antialiasingManager.useTAA
 
         if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {

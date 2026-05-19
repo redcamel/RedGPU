@@ -1,7 +1,7 @@
 /**
  * G-Buffer 타입 상수 정의
  */
- const GBUFFER_TYPE = {
+const GBUFFER_TYPE = {
     COLOR: 'gBufferColor',
     NORMAL: 'gBufferNormal',
     MOTION_VECTOR: 'gBufferMotionVector',

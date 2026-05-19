@@ -9,7 +9,6 @@ import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANois
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
 import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
-import definePositiveNumber from "../../../../defineProperty/funcs/definePositiveNumber";
 
 const SHADER_INFO = parseWGSL('SKYBOX_MATERIAL', fragmentModuleSource)
 

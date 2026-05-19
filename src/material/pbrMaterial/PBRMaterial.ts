@@ -993,7 +993,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
         DefineUniformProperty.defineBoolean(PBRMaterial, [
             `use_${key}_KHR_texture_transform`,
         ])
-        DefineForFragment.defineVec2(PBRMaterial, [
+        DefineUniformProperty.defineVector2(PBRMaterial, [
             `${key}_KHR_texture_transform_offset`,
             [`${key}_KHR_texture_transform_scale`, [1, 1]],
         ])
@@ -1024,12 +1024,12 @@ const extensionDefine = (defineList) => {
             ])
         })
         vec3List?.forEach(v => {
-            DefineForFragment.defineVec3(PBRMaterial, [
+            DefineUniformProperty.defineVector3(PBRMaterial, [
                 v
             ])
         })
         vec4List?.forEach(v => {
-            DefineForFragment.defineVec4(PBRMaterial, [
+            DefineUniformProperty.defineVector4(PBRMaterial, [
                 v
             ])
         })

@@ -5,26 +5,10 @@ import defineColorRGBA from "./funcs/defineColorRGBA";
 import defineCubeTexture from "./funcs/defineCubeTexture";
 import defineTexture from "./funcs/defineTexture";
 import defineTexture3D from "./funcs/defineTexture3D";
-import defineVector from "./funcs/defineVector";
-
-function defineProperty_vec4(propertyKey: string, initValue: number[] = [0, 0, 0, 0]) {
-    return defineVector(propertyKey, initValue)
-}
-
-function defineProperty_vec3(propertyKey: string, initValue: number[] = [0, 0, 0]) {
-    return defineVector(propertyKey, initValue)
-}
-
-function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) {
-    return defineVector(propertyKey, initValue)
-}
 
 const PRESET_CUBE_TEXTURE = {
     ENVIRONMENT_TEXTURE: 'environmentTexture',
 };
-const PRESET_VEC2 = {};
-const PRESET_VEC3 = {};
-const PRESET_VEC4 = {};
 const PRESET_TEXTURE = {
     ALPHA_TEXTURE: 'alphaTexture',
     AO_TEXTURE: 'aoTexture',
@@ -55,9 +39,6 @@ const PRESET_COLOR_RGB = {
 const DefineForFragment = {
     ...createDefineByPreset(
         {
-            defineVec2: [defineProperty_vec2, PRESET_VEC2],
-            defineVec3: [defineProperty_vec3, PRESET_VEC3],
-            defineVec4: [defineProperty_vec4, PRESET_VEC4],
             defineColorRGB: [defineColorRGB, PRESET_COLOR_RGB],
             defineTexture: [defineTexture, PRESET_TEXTURE],
             defineTexture3D: [defineTexture3D, {}],
@@ -65,9 +46,6 @@ const DefineForFragment = {
         }
     ),
     //
-    defineVec2: defineProperties(defineProperty_vec2),
-    defineVec3: defineProperties(defineProperty_vec3),
-    defineVec4: defineProperties(defineProperty_vec4),
     defineColorRGB: defineProperties(defineColorRGB),
     defineColorRGBA: defineProperties(defineColorRGBA),
     defineTexture: defineProperties(defineTexture),
@@ -76,9 +54,6 @@ const DefineForFragment = {
     //
     PRESET_TEXTURE,
     PRESET_CUBE_TEXTURE,
-    PRESET_VEC2,
-    PRESET_VEC3,
-    PRESET_VEC4,
     PRESET_COLOR_RGB
 }
 Object.freeze(DefineForFragment)

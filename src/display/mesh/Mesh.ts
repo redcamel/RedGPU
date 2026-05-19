@@ -1962,8 +1962,8 @@ Object.defineProperty(Mesh.prototype, 'meshType', {
     value: MESH_TYPE.MESH,
     writable: false
 });
-DefineUniformProperty.defineBoolean(Mesh,[
-    ['receiveShadow',false],
+DefineUniformProperty.defineBoolean(Mesh, [
+    ['receiveShadow', false],
     ['useDisplacementTexture', false],
     ['disableJitter', false],
 ])
