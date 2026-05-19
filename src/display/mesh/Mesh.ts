@@ -2,7 +2,6 @@ import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import {OrthographicCamera} from "../../camera";
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForVertex from "../../defineProperty/old/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
 import {ABaseMaterial} from "../../material/core";
 import Primitive from "../../primitive/core/Primitive";
@@ -30,6 +29,7 @@ import createBasePipeline from "./core/pipeline/createBasePipeline";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
+import DefineProperty from "../../defineProperty/DefineProperty";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1962,10 +1962,8 @@ Object.defineProperty(Mesh.prototype, 'meshType', {
     value: MESH_TYPE.MESH,
     writable: false
 });
-DefineForVertex.defineByPreset(Mesh, [
-    DefineForVertex.PRESET_BOOLEAN.RECEIVE_SHADOW
-])
-DefineForVertex.defineBoolean(Mesh, [
+DefineProperty.defineBoolean(Mesh,[
+    ['receiveShadow',false],
     ['useDisplacementTexture', false],
     ['disableJitter', false],
 ])

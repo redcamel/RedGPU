@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import DefineForVertex from "../../../../defineProperty/old/DefineForVertex";
 import Geometry from "../../../../geometry/Geometry";
 import Primitive from "../../../../primitive/core/Primitive";
 import Plane from "../../../../primitive/Plane";
@@ -10,7 +9,6 @@ import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
-import {keepLog} from "../../../../utils";
 import DefineProperty from "../../../../defineProperty/DefineProperty";
 
 /** SpriteSheet3D 전용 버텍스 셰이더 모듈 이름 */
@@ -297,11 +295,8 @@ DefineProperty.definePositiveNumber(SpriteSheet3D, [
     ['_renderRatioX', 1],
     ['_renderRatioY', 1],
 ])
-/**
- * SpriteSheet3D 클래스에 빌보드 관련 속성들을 정의합니다.
- */
-DefineForVertex.defineByPreset(SpriteSheet3D, [
-    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
+DefineProperty.defineBoolean(SpriteSheet3D,[
+    ['useBillboard', true],
 ])
 /**
  * SpriteSheet3D 클래스를 동결하여 런타임에서의 수정을 방지합니다.

@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import DefineForVertex from "../../../defineProperty/old/DefineForVertex";
 import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
@@ -258,9 +257,8 @@ DefineProperty.definePositiveNumber(TextField3D, [
     ['_renderRatioX', 1],
     ['_renderRatioY', 1],
 ])
-// 버텍스 셰이더에서 사용할 프리셋 정의
-DefineForVertex.defineByPreset(TextField3D, [
-    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
-]);
+DefineProperty.defineBoolean(TextField3D,[
+    ['useBillboard', true],
+])
 Object.freeze(TextField3D);
 export default TextField3D;

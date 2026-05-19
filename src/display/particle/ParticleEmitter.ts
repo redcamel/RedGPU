@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForVertex from "../../defineProperty/old/DefineForVertex";
 import BitmapMaterial from "../../material/bitmapMaterial/BitmapMaterial";
 import Plane from "../../primitive/Plane";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
@@ -177,7 +176,6 @@ class ParticleEmitter extends Mesh {
         // this.material = new ColorMaterial(redGPUContext,)
         this.ignoreFrustumCulling = true
         // this.material.transparent = true
-        this.useBillboard = true
     }
 
     get vertexStateBuffers(): GPUVertexBufferLayout[] {
@@ -1219,9 +1217,9 @@ Object.defineProperty(ParticleEmitter.prototype, 'meshType', {
     value: MESH_TYPE.PARTICLE,
     writable: false
 });
-DefineForVertex.defineByPreset(ParticleEmitter, [
-    DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD,
-]);
+DefineProperty.defineBoolean(ParticleEmitter,[
+    ['useBillboard',true],
+])
 //
 Object.freeze(ParticleEmitter)
 export default ParticleEmitter

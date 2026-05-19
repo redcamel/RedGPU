@@ -7,7 +7,6 @@
  * @packageDocumentation
  */
 import DefineForFragment from "./old/DefineForFragment";
-import DefineForVertex from "./old/DefineForVertex";
 import DefineProperty from "./DefineProperty";
 
-export {DefineProperty,DefineForFragment, DefineForVertex};
+export {DefineProperty, DefineForFragment};

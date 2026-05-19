@@ -1,3 +1,4 @@
+import defineBoolean, {IBoolean} from "./funcs/defineBoolean";
 import definePositiveNumber, {IPositiveNumberRange} from "./funcs/definePositiveNumber";
 import defineSampler from "./funcs/defineSampler";
 import defineUint, {IUintRange} from "./funcs/defineUint";
@@ -5,7 +6,7 @@ import defineVector2, {IDefineVec2} from "./funcs/defineVector2";
 import defineVector3, {IDefineVec3} from "./funcs/defineVector3";
 import defineVector4, {IDefineVec4} from "./funcs/defineVector4";
 
-export {IDefineVec2, IDefineVec3, IDefineVec4, IPositiveNumberRange, IUintRange};
+export {IBoolean, IDefineVec2, IDefineVec3, IDefineVec4, IPositiveNumberRange, IUintRange};
 
 /**
  * [KO] RedGPU의 통합 속성 정의 시스템입니다.
@@ -17,6 +18,7 @@ export {IDefineVec2, IDefineVec3, IDefineVec4, IPositiveNumberRange, IUintRange}
  * @namespace DefineProperty
  */
 const DefineProperty = {
+    defineBoolean,
     defineSampler,
     definePositiveNumber,
     defineUint,
@@ -24,6 +26,7 @@ const DefineProperty = {
     defineVector3,
     defineVector4,
 }
+
 
 Object.freeze(DefineProperty)
 export default DefineProperty

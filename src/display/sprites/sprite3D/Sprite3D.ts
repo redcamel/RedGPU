@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import DefineForVertex from "../../../defineProperty/old/DefineForVertex";
 import Geometry from "../../../geometry/Geometry";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import BitmapMaterial from "../../../material/bitmapMaterial/BitmapMaterial";
@@ -241,11 +240,8 @@ DefineProperty.definePositiveNumber(Sprite3D, [
     ['_renderRatioX', 1],
     ['_renderRatioY', 1],
 ])
-/**
- * Sprite3D 클래스에 빌보드 관련 속성들을 정의합니다.
- */
-DefineForVertex.defineByPreset(Sprite3D, [
-    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
+DefineProperty.defineBoolean(Sprite3D,[
+    ['useBillboard', true],
 ])
 Object.freeze(Sprite3D)
 export default Sprite3D
