@@ -6,9 +6,9 @@ import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
  * [EN] Internal utility that extracts uniform information and buffer from target objects (Material, PostEffect, etc.).
  *
  * @param target - [KO] 유니폼 정보를 추출할 대상 인스턴스 [EN] Target instance to extract uniform information from
- * @returns { {targetUniformInfo: any, targetUniformBuffer: any} }
+
  */
-const getTargetInfos = (target: any) => {
+const updateTargetUniform = (target: any,propertyKey:string,newValue:any) => {
     let targetUniformInfo;
     let targetUniformBuffer;
     const {gpuRenderInfo} = target
@@ -22,6 +22,12 @@ const getTargetInfos = (target: any) => {
         targetUniformInfo = gpuRenderInfo.vertexUniformInfo
         targetUniformBuffer = gpuRenderInfo.vertexUniformBuffer
     }
-    return {targetUniformInfo, targetUniformBuffer}
+
+    if (targetUniformBuffer) {
+        targetUniformBuffer.writeOnlyBuffer(
+            targetUniformInfo.members[propertyKey],
+            newValue
+        );
+    }
 }
-export default getTargetInfos
+export default updateTargetUniform

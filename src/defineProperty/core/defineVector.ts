@@ -1,5 +1,5 @@
 import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
-import getTargetInfos from "./getTargetInfos";
+import updateTargetUniform from "./updateTargetUniform";
 
 /**
  * [KO] 유니폼 버퍼에 데이터를 쓰는 세터(Setter) 함수를 생성합니다.
@@ -11,10 +11,7 @@ import getTargetInfos from "./getTargetInfos";
 function createSetter(propertyKey: string, symbol: symbol) {
     return function (newValue: any) {
         this[symbol] = newValue;
-        const {targetUniformInfo, targetUniformBuffer} = getTargetInfos(this);
-        if (targetUniformBuffer) {
-            targetUniformBuffer.writeOnlyBuffer(targetUniformInfo.members[propertyKey], newValue)
-        }
+        updateTargetUniform(this,propertyKey,newValue);
     }
 }
 

@@ -1,6 +1,6 @@
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import applyProperties from "../core/applyProperties";
-import getTargetInfos from "../core/getTargetInfos";
+import updateTargetUniform from "../core/updateTargetUniform";
 import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
 
 export interface IPositiveNumberRange {
@@ -31,13 +31,7 @@ function createSetter(
 
         this[symbol] = newValue;
 
-        const {targetUniformInfo, targetUniformBuffer} = getTargetInfos(this);
-        if (targetUniformBuffer) {
-            targetUniformBuffer.writeOnlyBuffer(
-                targetUniformInfo.members[propertyKey],
-                newValue
-            );
-        }
+        updateTargetUniform(this,propertyKey,newValue)
     };
 }
 
