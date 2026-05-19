@@ -1,5 +1,5 @@
-import Sampler from "../../../resources/sampler/Sampler";
-import defineProperty_SETTING from "./defineProperty_SETTING";
+import Sampler from "../../resources/sampler/Sampler";
+import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
 
 function defineSampler(propertyKey: string) {
     const symbol = Symbol(propertyKey)

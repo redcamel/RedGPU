@@ -1,4 +1,4 @@
-import defineSampler from "./old/funcs/defineSampler";
+import defineSampler from "./funcs/defineSampler";
 
 /**
  * [KO] 클래스 프로토타입에 속성 정의 로직을 일괄 적용하는 내부 헬퍼 함수입니다.

@@ -4,7 +4,7 @@ import defineColorRGB from "./funcs/defineColorRGB";
 import defineColorRGBA from "./funcs/defineColorRGBA";
 import defineCubeTexture from "./funcs/defineCubeTexture";
 import definePositiveNumberRange from "./funcs/definePositiveNumberRange";
-import defineSampler from "./funcs/defineSampler";
+import defineSampler from "../funcs/defineSampler";
 import defineTexture from "./funcs/defineTexture";
 import defineTexture3D from "./funcs/defineTexture3D";
 import defineUintRange from "./funcs/defineUintRange";
