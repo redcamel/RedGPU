@@ -3,7 +3,7 @@ import ABaseMaterial from "../../material/core/ABaseMaterial";
 import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
 
 function createSetter(propertyKey: string, symbol: symbol) {
-    return function (newValue: number) {
+    return function (newValue: number[]) {
         this[symbol] = newValue;
         const {gpuRenderInfo} = this
         let targetUnformInfo;
