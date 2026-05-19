@@ -999,7 +999,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
             [`${key}_KHR_texture_transform_scale`, [1, 1]],
         ])
         //
-        DefineForFragment.defineUint(PBRMaterial, [
+        DefineProperty.defineUint(PBRMaterial, [
             `${key}_texCoord_index`,
         ])
         //
@@ -1042,7 +1042,7 @@ DefineProperty.definePositiveNumber(PBRMaterial, [
     ['KHR_materials_ior', 1.5],
     ['KHR_dispersion', 0],
 ]);
-DefineForFragment.defineUint(PBRMaterial, [
+DefineProperty.defineUint(PBRMaterial, [
     'alphaBlend',
 ])
 DefineForFragment.defineBoolean(PBRMaterial, [

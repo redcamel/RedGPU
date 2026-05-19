@@ -1,14 +1,9 @@
 import {createDefineByPreset, defineProperties} from "./core/createDefineByPreset";
 import defineBoolean from "./funcs/defineBoolean";
-import defineUintRange from "./funcs/defineUintRange";
 import defineVector from "./funcs/defineVector";
 
 function defineProperty_boolean(propertyKey: string, initValue: boolean = false) {
     return defineBoolean(propertyKey, initValue, false)
-}
-
-function defineProperty_uintRange(propertyKey: string, initValue: number = 0, min?: number, max?: number) {
-    return defineUintRange(propertyKey, initValue, false, min, max)
 }
 
 function defineProperty_vec4(propertyKey: string, initValue: number[] = [0, 0, 0, 0]) {
@@ -27,7 +22,6 @@ const PRESET_BOOLEAN = {
     USE_BILLBOARD: 'useBillboard',
     RECEIVE_SHADOW: 'receiveShadow',
 };
-const PRESET_UINT = {};
 const PRESET_SAMPLER = {};
 const PRESET_CUBE_TEXTURE = {};
 const PRESET_VEC2 = {};
@@ -53,18 +47,15 @@ const DefineForVertex = {
     ...createDefineByPreset(
         {
             defineBoolean: [defineProperty_boolean, PRESET_BOOLEAN],
-            defineUint: [defineProperty_uintRange, PRESET_UINT],
         }
     ),
     //
     defineBoolean: defineProperties(defineProperty_boolean),
-    defineUint: defineProperties(defineProperty_uintRange),
     defineVec4: defineProperties(defineProperty_vec4),
     defineVec3: defineProperties(defineProperty_vec3),
     defineVec2: defineProperties(defineProperty_vec2),
     //
     PRESET_BOOLEAN,
-    PRESET_UINT,
     PRESET_SAMPLER,
     PRESET_TEXTURE,
     PRESET_CUBE_TEXTURE,

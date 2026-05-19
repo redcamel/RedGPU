@@ -1,9 +1,9 @@
-import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import applyProperties from "../core/applyProperties";
 import getTargetInfos from "../core/getTargetInfos";
 import defineProperty_SETTING from "../old/funcs/defineProperty_SETTING";
 
-export interface IPositiveNumberRange {
+export interface IUintRange {
     key: string;
     value?: number;
     min?: number;
@@ -17,7 +17,7 @@ function createSetter(
     max?: number
 ) {
     return function (newValue: number) {
-        validatePositiveNumberRange(newValue);
+        validateUintRange(newValue);
         if (min !== undefined && newValue < min) {
             console.warn(`Value for ${propertyKey} is below the minimum (${min}). Adjusted to ${min}.`);
             newValue = min;
@@ -26,8 +26,6 @@ function createSetter(
             console.warn(`Value for ${propertyKey} exceeds the maximum (${max}). Adjusted to ${max}.`);
             newValue = max;
         }
-
-
 
         this[symbol] = newValue;
 
@@ -41,14 +39,14 @@ function createSetter(
     };
 }
 
-function definePositiveNumberRange_func(
-    propertyKey: string | IPositiveNumberRange,
-    initValue: number = 1,
+function defineUintRange_func(
+    propertyKey: string | IUintRange,
+    initValue: number = 0,
     min: number = 0,
     max?: number
 ) {
     if (typeof propertyKey === 'object') {
-        const {key, value = 1, min: minVal = 0, max: maxVal} = propertyKey;
+        const {key, value = 0, min: minVal = 0, max: maxVal} = propertyKey;
         const symbol = Symbol(key);
         return {
             get: function (): number {
@@ -71,8 +69,8 @@ function definePositiveNumberRange_func(
 }
 
 /**
- * [KO] 지정된 클래스에 양수 범위(Positive Number Range) 속성들을 정의합니다.
- * [EN] Defines positive number range properties on the specified class.
+ * [KO] 지정된 클래스에 Uint 범위(Uint Range) 속성들을 정의합니다.
+ * [EN] Defines Uint range properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
  * @param keys - [KO] 정의할 속성 키, 키 배열 또는 설정 배열 [EN] Property keys, array of keys, or configuration array
@@ -80,14 +78,14 @@ function definePositiveNumberRange_func(
  * @example
  * ```typescript
  * // 단일 키 정의
- * DefineProperty.definePositiveNumber(MyMaterial, 'opacity');
+ * DefineProperty.defineUint(MyMaterial, 'myUint');
  * // 초기값 및 범위와 함께 정의 (배열 방식)
- * DefineProperty.definePositiveNumber(MyMaterial, [['shininess', 30, 0, 100]]);
- * // 설정 객체 방식 (IPositiveNumberRange)
- * DefineProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
+ * DefineProperty.defineUint(MyMaterial, [['myUint', 1, 0, 10]]);
+ * // 설정 객체 방식 (IUintRange)
+ * DefineProperty.defineUint(MyMaterial, [{ key: 'myUint', value: 1, min: 0, max: 10 }]);
  * ```
  */
-const definePositiveNumber = (target: any, keys: string | (string | IPositiveNumberRange | [string, number?, number?, number?])[]) => applyProperties(target, keys, definePositiveNumberRange_func);
+const defineUint = (target: any, keys: string | (string | IUintRange | [string, number?, number?, number?])[]) => applyProperties(target, keys, defineUintRange_func);
 
-Object.freeze(definePositiveNumber);
-export default definePositiveNumber;
+Object.freeze(defineUint);
+export default defineUint;

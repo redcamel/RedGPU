@@ -5,7 +5,6 @@ import defineColorRGBA from "./funcs/defineColorRGBA";
 import defineCubeTexture from "./funcs/defineCubeTexture";
 import defineTexture from "./funcs/defineTexture";
 import defineTexture3D from "./funcs/defineTexture3D";
-import defineUintRange from "./funcs/defineUintRange";
 import defineVector from "./funcs/defineVector";
 
 function defineProperty_vec4(propertyKey: string, initValue: number[] = [0, 0, 0, 0]) {
@@ -22,7 +21,6 @@ function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) 
 
 const PRESET_BOOLEAN = {};
 
-const PRESET_UINT = {};
 const PRESET_CUBE_TEXTURE = {
     ENVIRONMENT_TEXTURE: 'environmentTexture',
 };
@@ -60,7 +58,6 @@ const DefineForFragment = {
     ...createDefineByPreset(
         {
             defineBoolean: [defineBoolean, PRESET_BOOLEAN],
-            defineUint: [defineUintRange, PRESET_UINT],
             defineVec2: [defineProperty_vec2, PRESET_VEC2],
             defineVec3: [defineProperty_vec3, PRESET_VEC3],
             defineVec4: [defineProperty_vec4, PRESET_VEC4],
@@ -72,7 +69,6 @@ const DefineForFragment = {
     ),
     //
     defineBoolean: defineProperties(defineBoolean),
-    defineUint: defineProperties(defineUintRange),
     defineVec2: defineProperties(defineProperty_vec2),
     defineVec3: defineProperties(defineProperty_vec3),
     defineVec4: defineProperties(defineProperty_vec4),
@@ -83,7 +79,6 @@ const DefineForFragment = {
     defineCubeTexture: defineProperties(defineCubeTexture),
     //
     PRESET_BOOLEAN,
-    PRESET_UINT,
     PRESET_TEXTURE,
     PRESET_CUBE_TEXTURE,
     PRESET_VEC2,
