@@ -1,34 +1,15 @@
 import {createDefineByPreset, defineProperties} from "./core/createDefineByPreset";
 import defineBoolean from "./funcs/defineBoolean";
-import defineVector from "./funcs/defineVector";
 
 function defineProperty_boolean(propertyKey: string, initValue: boolean = false) {
     return defineBoolean(propertyKey, initValue, false)
 }
 
-function defineProperty_vec4(propertyKey: string, initValue: number[] = [0, 0, 0, 0]) {
-    return defineVector(propertyKey, initValue, false)
-}
-
-function defineProperty_vec3(propertyKey: string, initValue: number[] = [0, 0, 0]) {
-    return defineVector(propertyKey, initValue, false)
-}
-
-function defineProperty_vec2(propertyKey: string, initValue: number[] = [0, 0]) {
-    return defineVector(propertyKey, initValue, false)
-}
 
 const PRESET_BOOLEAN = {
     USE_BILLBOARD: 'useBillboard',
     RECEIVE_SHADOW: 'receiveShadow',
 };
-const PRESET_SAMPLER = {};
-const PRESET_CUBE_TEXTURE = {};
-const PRESET_VEC2 = {};
-const PRESET_VEC3 = {};
-const PRESET_VEC4 = {};
-const PRESET_TEXTURE = {};
-const PRESET_COLOR_RGB = {};
 /**
  * [KO] 버텍스 쉐이더(Vertex Shader)에서 사용되는 속성들을 정의하는 네임스페이스입니다.
  * [EN] Namespace that defines properties used in Vertex Shaders.
@@ -51,18 +32,9 @@ const DefineForVertex = {
     ),
     //
     defineBoolean: defineProperties(defineProperty_boolean),
-    defineVec4: defineProperties(defineProperty_vec4),
-    defineVec3: defineProperties(defineProperty_vec3),
-    defineVec2: defineProperties(defineProperty_vec2),
+
     //
     PRESET_BOOLEAN,
-    PRESET_SAMPLER,
-    PRESET_TEXTURE,
-    PRESET_CUBE_TEXTURE,
-    PRESET_VEC2,
-    PRESET_VEC3,
-    PRESET_VEC4,
-    PRESET_COLOR_RGB
 }
 Object.freeze(DefineForVertex)
 export default DefineForVertex
