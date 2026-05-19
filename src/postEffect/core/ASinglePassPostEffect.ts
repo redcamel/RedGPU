@@ -5,6 +5,7 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {IPostEffectResult} from "./types";
+import {keepLog} from "../../utils";
 
 /**
  * [KO] 단일 패스 후처리 이펙트 추상 클래스입니다.
@@ -212,7 +213,19 @@ abstract class ASinglePassPostEffect {
             const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength);
             this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, `${this.constructor.name}_UniformBuffer`);
         }
+
+        {
+            keepLog(this.#uniformsInfo)
+            const {members} = this.#uniformsInfo || {}
+            if (members) {
+                for (const k in members) {
+                    this.uniformBuffer.writeOnlyBuffer(members[k], this[k]);
+                }
+            }
+        }
+
     }
+
 
     /**
      * [KO] 이펙트를 렌더링하고 결과를 반환합니다. 필요한 경우 바인드 그룹을 갱신합니다.
