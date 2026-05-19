@@ -3,6 +3,7 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty";
 
 /**
  * [KO] 필름 그레인 프리셋 정의 (업계 표준 수치 기반)
@@ -37,6 +38,13 @@ const VINTAGE = {
     grainSaturation: 0.8
 };
 
+interface FilmGrain{
+    filmGrainIntensity: number;
+    filmGrainResponse: number;
+    filmGrainScale: number;
+    coloredGrain: number;
+    grainSaturation: number;
+}
 /**
  * [KO] 현대적인 시네마틱 필름 그레인(Film Grain) 후처리 이펙트입니다.
  * [EN] Modern cinematic Film Grain post-processing effect.
@@ -49,13 +57,6 @@ class FilmGrain extends ASinglePassPostEffect {
     static HEAVY = HEAVY;
     static VINTAGE = VINTAGE;
 
-    // [KO] 초기값을 시각적으로 임팩트가 있는 VINTAGE 프리셋으로 설정 (데모 및 예제 최적화)
-    // [EN] Set initial values to VINTAGE preset for immediate visual impact (Optimized for demos and examples)
-    #filmGrainIntensity: number = VINTAGE.filmGrainIntensity;
-    #filmGrainResponse: number = VINTAGE.filmGrainResponse;
-    #filmGrainScale: number = VINTAGE.filmGrainScale;
-    #coloredGrain: number = VINTAGE.coloredGrain;
-    #grainSaturation: number = VINTAGE.grainSaturation;
     #devicePixelRatio: number = 1.0;
 
     constructor(redGPUContext: RedGPUContext) {
@@ -69,69 +70,31 @@ class FilmGrain extends ASinglePassPostEffect {
         this.#updateUniforms();
     }
 
-    get filmGrainIntensity(): number {
-        return this.#filmGrainIntensity;
-    }
-
-    set filmGrainIntensity(v: number) {
-        this.#filmGrainIntensity = v;
-        this.updateUniform('filmGrainIntensity', v);
-    }
-
-    get filmGrainResponse(): number {
-        return this.#filmGrainResponse;
-    }
-
-    set filmGrainResponse(v: number) {
-        this.#filmGrainResponse = v;
-        this.updateUniform('filmGrainResponse', v);
-    }
-
-    get filmGrainScale(): number {
-        return this.#filmGrainScale;
-    }
-
-    set filmGrainScale(v: number) {
-        this.#filmGrainScale = v;
-        this.updateUniform('filmGrainScale', v);
-    }
-
-    get coloredGrain(): number {
-        return this.#coloredGrain;
-    }
-
-    set coloredGrain(v: number) {
-        this.#coloredGrain = v;
-        this.updateUniform('coloredGrain', v);
-    }
-
-    get grainSaturation(): number {
-        return this.#grainSaturation;
-    }
-
-    set grainSaturation(v: number) {
-        this.#grainSaturation = v;
-        this.updateUniform('grainSaturation', v);
-    }
 
     applyPreset(preset: typeof SUBTLE): void {
-        this.#filmGrainIntensity = preset.filmGrainIntensity;
-        this.#filmGrainResponse = preset.filmGrainResponse;
-        this.#filmGrainScale = preset.filmGrainScale;
-        this.#coloredGrain = preset.coloredGrain;
-        this.#grainSaturation = preset.grainSaturation;
+        this.filmGrainIntensity = preset.filmGrainIntensity;
+        this.filmGrainResponse = preset.filmGrainResponse;
+        this.filmGrainScale = preset.filmGrainScale;
+        this.coloredGrain = preset.coloredGrain;
+        this.grainSaturation = preset.grainSaturation;
         this.#updateUniforms();
     }
 
     #updateUniforms(): void {
-        this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
-        this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
-        this.updateUniform('filmGrainScale', this.#filmGrainScale);
-        this.updateUniform('coloredGrain', this.#coloredGrain);
-        this.updateUniform('grainSaturation', this.#grainSaturation);
+        this.filmGrainIntensity = this.filmGrainIntensity;
+        this.filmGrainResponse = this.filmGrainResponse;
+        this.filmGrainScale = this.filmGrainScale;
+        this.coloredGrain = this.coloredGrain;
+        this.grainSaturation = this.grainSaturation;
         this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
     }
 }
-
+DefineUniformProperty.definePositiveNumber(FilmGrain,[
+    ['filmGrainIntensity',VINTAGE.filmGrainIntensity],
+    ['filmGrainResponse',VINTAGE.filmGrainResponse],
+    ['filmGrainScale',VINTAGE.filmGrainScale],
+    ['coloredGrain',VINTAGE.coloredGrain],
+    ['grainSaturation',VINTAGE.grainSaturation],
+])
 Object.freeze(FilmGrain);
 export default FilmGrain;

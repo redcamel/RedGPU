@@ -2,7 +2,8 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
-
+import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 /**
  * [KO] 그레이스케일(Grayscale) 후처리 이펙트입니다.
  * [EN] Grayscale post-processing effect.
@@ -10,7 +11,7 @@ import computeCode from "./wgsl/computeCode.wgsl"
  * [KO] 화면을 흑백으로 변환합니다.
  * [EN] Converts the screen to black and white.
  * * ### Example
- * ```typescript
+ * ``` TypeScript
  * const effect = new RedGPU.PostEffect.Grayscale(redGPUContext);
  * view.postEffectManager.addEffect(effect);
  * ```
@@ -24,18 +25,19 @@ class Grayscale extends ASinglePassPostEffect {
      * [EN] Creates a Grayscale instance.
      *
      * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.init(
             redGPUContext,
             'POST_EFFECT_GRAYSCALE',
-            createBasicPostEffectCode(this, computeCode)
+            createBasicPostEffectCode(this, computeCode,uniformStructCode)
         );
     }
 }
 
+DefineUniformProperty.definePositiveNumber(Grayscale, [
+    {key: 'amount', value: 1, min: 0, max: 1}
+])
 Object.freeze(Grayscale)
 export default Grayscale
