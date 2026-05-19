@@ -1,5 +1,5 @@
 import applyProperties from "../core/applyProperties";
-import defineVector from "./defineVector";
+import defineVector from "../core/defineVector";
 
 /**
  * [KO] Vector4 정의를 위한 설정 인터페이스.
