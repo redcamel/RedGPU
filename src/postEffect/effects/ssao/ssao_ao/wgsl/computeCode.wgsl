@@ -14,7 +14,7 @@
     let depth         = textureLoad(depthTexture, screenCoord, 0);
 
     // [KO] 블러 사용 여부에 따른 실패 시 기본 색상 설정 [EN] Set default fail color based on blur usage
-    var failColor = vec4<f32>(select(originalColor.rgb, vec3<f32>(1.0), uniforms.useBlur > 0.0), originalColor.a);
+    var failColor = vec4<f32>(select(originalColor.rgb, vec3<f32>(1.0), uniforms.useBlur == 1u), originalColor.a);
     if (depth < 0.001) {
         textureStore(outputTexture, screenCoord, failColor);
         return;
@@ -111,7 +111,7 @@
 
     // [KO] 8. 최종 색상 합성 및 결과 출력 [EN] 8. Final color synthesis and result output
     let finalColor = vec4<f32>(
-        select(originalColor.rgb * vec3<f32>(finalAO), vec3<f32>(finalAO), uniforms.useBlur > 0.0),
+        select(originalColor.rgb * vec3<f32>(finalAO), vec3<f32>(finalAO), uniforms.useBlur == 1u),
         originalColor.a
     );
 
