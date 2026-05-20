@@ -4,6 +4,9 @@ import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+interface Grayscale{
+    amount:number
+}
 /**
  * [KO] 그레이스케일(Grayscale) 후처리 이펙트입니다.
  * [EN] Grayscale post-processing effect.

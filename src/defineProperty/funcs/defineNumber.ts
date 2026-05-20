@@ -35,12 +35,12 @@ function createSetter(
 
 function defineNumber_func(
     propertyKey: string | INumberRange,
-    initValue: number = 0,
+    initValue: number = 1,
     min?: number,
     max?: number
 ) {
     if (typeof propertyKey === 'object') {
-        const {key, value = 0, min: minVal, max: maxVal} = propertyKey;
+        const {key, value = 1, min: minVal, max: maxVal} = propertyKey;
         const symbol = Symbol(key);
         return {
             get: function (): number {
