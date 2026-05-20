@@ -4,7 +4,7 @@ import defineColorRGBA, {IColorRGBA} from "./funcs/defineColorRGBA";
 import defineNumber, {IDefineNumber} from "./funcs/defineNumber";
 import definePositiveNumber, {IDefinePositiveNumber} from "./funcs/definePositiveNumber";
 import defineSampler from "./funcs/defineSampler";
-import defineUint, {IUintRange} from "./funcs/defineUint";
+import defineUint, {IDefineUint} from "./funcs/defineUint";
 import defineVector2, {IDefineVector2} from "./funcs/defineVector2";
 import defineVector3, {IDefineVector3} from "./funcs/defineVector3";
 import defineVector4, {IDefineVector4} from "./funcs/defineVector4";
@@ -18,7 +18,7 @@ export {
     IDefineVector4,
     IDefineNumber,
     IDefinePositiveNumber,
-    IUintRange
+    IDefineUint
 };
 
 /**

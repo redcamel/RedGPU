@@ -1009,7 +1009,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
         ])
         //
         DefineUniformProperty.defineUint(PBRMaterial, [
-            `${key}_texCoord_index`,
+            {key: `${key}_texCoord_index`,value:0},
         ])
         //
         DefineForFragment.defineTexture(PBRMaterial, [
@@ -1052,7 +1052,7 @@ DefineUniformProperty.definePositiveNumber(PBRMaterial, [
     {key: 'KHR_dispersion', value: 0},
 ]);
 DefineUniformProperty.defineUint(PBRMaterial, [
-    'alphaBlend',
+    {key: 'alphaBlend',value:0},
 ])
 DefineUniformProperty.defineBoolean(PBRMaterial, [
     'doubleSided',

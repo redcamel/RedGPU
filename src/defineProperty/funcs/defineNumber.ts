@@ -5,7 +5,7 @@ import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
 export interface IDefineNumber {
     key: string;
-    value: number;
+    value?: number;
     min?: number;
     max?: number;
 }
