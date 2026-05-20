@@ -1,11 +1,17 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-
+import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty";
+interface SSR {
+    maxSteps: number;
+    maxDistance: number;
+    stepSize: number;
+    reflectionIntensity: number;
+    fadeDistance: number;
+    edgeFade: number;
+}
 /**
  * [KO] SSR(Screen Space Reflection) 후처리 이펙트입니다.
  * [EN] SSR (Screen Space Reflection) post-processing effect.
@@ -28,42 +34,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category PostEffect
  */
 class SSR extends ASinglePassPostEffect {
-    /**
-     * [KO] 최대 스텝 수 (1 ~ 512)
-     * [EN] Max steps (1 ~ 512)
-     * @defaultValue 64
-     */
-    #maxSteps: number = 64;
-    /**
-     * [KO] 최대 반사 거리 (1.0 ~ 200.0)
-     * [EN] Max reflection distance (1.0 ~ 200.0)
-     * @defaultValue 15.0
-     */
-    #maxDistance: number = 15.0;
-    /**
-     * [KO] 스텝 크기 (0.001 ~ 5.0)
-     * [EN] Step size (0.001 ~ 5.0)
-     * @defaultValue 0.02
-     */
-    #stepSize: number = 0.02;
-    /**
-     * [KO] 반사 강도 (0.0 ~ 5.0)
-     * [EN] Reflection intensity (0.0 ~ 5.0)
-     * @defaultValue 1
-     */
-    #reflectionIntensity: number = 1;
-    /**
-     * [KO] 페이드 거리 (1.0 ~ 100.0)
-     * [EN] Fade distance (1.0 ~ 100.0)
-     * @defaultValue 12.0
-     */
-    #fadeDistance: number = 12.0;
-    /**
-     * [KO] 에지 페이드 (0.0 ~ 0.5)
-     * [EN] Edge fade (0.0 ~ 0.5)
-     * @defaultValue 0.15
-     */
-    #edgeFade: number = 0.15;
 
     /**
      * [KO] SSR 인스턴스를 생성합니다.
@@ -80,125 +50,16 @@ class SSR extends ASinglePassPostEffect {
             'POST_EFFECT_SSR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        // 초기값 설정
-        this.maxSteps = this.#maxSteps;
-        this.maxDistance = this.#maxDistance;
-        this.stepSize = this.#stepSize;
-        this.reflectionIntensity = this.#reflectionIntensity;
-        this.fadeDistance = this.#fadeDistance;
-        this.edgeFade = this.#edgeFade;
     }
-
-    /**
-     * [KO] 최대 스텝 수를 반환합니다.
-     * [EN] Returns the max steps.
-     */
-    get maxSteps(): number {
-        return this.#maxSteps;
-    }
-
-    /**
-     * [KO] 최대 스텝 수를 설정합니다. (1 ~ 512)
-     * [EN] Sets the max steps. (1 ~ 512)
-     */
-    set maxSteps(value: number) {
-        validateNumberRange(value, 1, 512);
-        this.#maxSteps = value;
-        this.updateUniform('maxSteps', value);
-    }
-
-    /**
-     * [KO] 최대 반사 거리를 반환합니다.
-     * [EN] Returns the max reflection distance.
-     */
-    get maxDistance(): number {
-        return this.#maxDistance;
-    }
-
-    /**
-     * [KO] 최대 반사 거리를 설정합니다. (1.0 ~ 200.0)
-     * [EN] Sets the max reflection distance. (1.0 ~ 200.0)
-     */
-    set maxDistance(value: number) {
-        validatePositiveNumberRange(value, 1.0, 200.0);
-        this.#maxDistance = value;
-        this.updateUniform('maxDistance', value);
-    }
-
-    /**
-     * [KO] 스텝 크기를 반환합니다.
-     * [EN] Returns the step size.
-     */
-    get stepSize(): number {
-        return this.#stepSize;
-    }
-
-    /**
-     * [KO] 스텝 크기를 설정합니다. (0.001 ~ 5.0)
-     * [EN] Sets the step size. (0.001 ~ 5.0)
-     */
-    set stepSize(value: number) {
-        validatePositiveNumberRange(value, 0.001, 5.0);
-        this.#stepSize = value;
-        this.updateUniform('stepSize', value);
-    }
-
-    /**
-     * [KO] 반사 강도를 반환합니다.
-     * [EN] Returns the reflection intensity.
-     */
-    get reflectionIntensity(): number {
-        return this.#reflectionIntensity;
-    }
-
-    /**
-     * [KO] 반사 강도를 설정합니다. (0.0 ~ 5.0)
-     * [EN] Sets the reflection intensity. (0.0 ~ 5.0)
-     */
-    set reflectionIntensity(value: number) {
-        validateNumberRange(value, 0.0, 5.0);
-        this.#reflectionIntensity = value;
-        this.updateUniform('reflectionIntensity', value);
-    }
-
-    /**
-     * [KO] 페이드 거리를 반환합니다.
-     * [EN] Returns the fade distance.
-     */
-    get fadeDistance(): number {
-        return this.#fadeDistance;
-    }
-
-    /**
-     * [KO] 페이드 거리를 설정합니다. (1.0 ~ 100.0)
-     * [EN] Sets the fade distance. (1.0 ~ 100.0)
-     */
-    set fadeDistance(value: number) {
-        validatePositiveNumberRange(value, 1.0, 100.0);
-        this.#fadeDistance = value;
-        this.updateUniform('fadeDistance', value);
-    }
-
-    /**
-     * [KO] 에지 페이드를 반환합니다.
-     * [EN] Returns the edge fade.
-     */
-    get edgeFade(): number {
-        return this.#edgeFade;
-    }
-
-    /**
-     * [KO] 에지 페이드를 설정합니다. (0.0 ~ 0.5)
-     * [EN] Sets the edge fade. (0.0 ~ 0.5)
-     */
-    set edgeFade(value: number) {
-        validateNumberRange(value, 0.0, 0.5);
-        this.#edgeFade = value;
-        this.updateUniform('edgeFade', value);
-    }
-
-
 }
 
+DefineUniformProperty.definePositiveNumber(SSR, [
+    {key: 'maxSteps', value: 64, min: 1, max: 512},
+    {key: 'maxDistance', value: 15.0, min: 1.0, max: 200.0},
+    {key: 'stepSize', value: 0.02, min: 0.001, max: 5.0},
+    {key: 'reflectionIntensity', value: 1, min: 0.0, max: 10},
+    {key: 'fadeDistance', value: 12.0, min: 1.0, max: 100.0},
+    {key: 'edgeFade', value: 0.15, min: 0.0, max: 0.5}
+])
 Object.freeze(SSR);
 export default SSR;

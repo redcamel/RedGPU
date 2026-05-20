@@ -103,7 +103,7 @@ function renderTestPane(redGPUContext) {
                 {key: 'maxSteps', min: 16, max: 128, step: 1},
                 {key: 'maxDistance', min: 1, max: 50, step: 0.1},
                 {key: 'stepSize', min: 0.001, max: 0.1, step: 0.001},
-                {key: 'reflectionIntensity', min: 0.0, max: 3.0, step: 0.01},
+                {key: 'reflectionIntensity', min: 0.0, max: 5.0, step: 0.01},
                 {key: 'fadeDistance', min: 1, max: 25, step: 0.1},
                 {key: 'edgeFade', min: 0.0, max: 0.5, step: 0.01}
             ];
