@@ -6,17 +6,20 @@ import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCod
 import {IPostEffectResult} from "../../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-
+import {DefineUniformProperty} from "../../../../../defineProperty";
+interface DOFUnified {
+    nearBlurSize: number;
+    farBlurSize: number;
+    nearStrength: number;
+    farStrength: number;
+}
 /**
  * [KO] DOF 통합 블러 및 합성 이펙트입니다.
  * [EN] DOF unified blur and compositing effect.
  * @category Lens
  */
 class DOFUnified extends ASinglePassPostEffect {
-    #nearBlurSize: number = 16;
-    #farBlurSize: number = 24;
-    #nearStrength: number = 1.0;
-    #farStrength: number = 1.0;
+
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -25,56 +28,19 @@ class DOFUnified extends ASinglePassPostEffect {
             'POST_EFFECT_DOF_UNIFIED',
             createBasicPostEffectCode(this, computeCode, uniformStructCode, ['sourceTexture', 'cocTexture'])
         );
-        this.nearBlurSize = this.#nearBlurSize;
-        this.farBlurSize = this.#farBlurSize;
-        this.nearStrength = this.#nearStrength;
-        this.farStrength = this.#farStrength;
     }
 
-    get nearBlurSize(): number {
-        return this.#nearBlurSize;
-    }
-
-    set nearBlurSize(value: number) {
-        validateNumberRange(value);
-        this.#nearBlurSize = value;
-        this.updateUniform('nearBlurSize', value)
-    }
-
-    get farBlurSize(): number {
-        return this.#farBlurSize;
-    }
-
-    set farBlurSize(value: number) {
-        validateNumberRange(value);
-        this.#farBlurSize = value;
-        this.updateUniform('farBlurSize', value)
-    }
-
-    get nearStrength(): number {
-        return this.#nearStrength;
-    }
-
-    set nearStrength(value: number) {
-        validateNumberRange(value);
-        this.#nearStrength = value;
-        this.updateUniform('nearStrength', value)
-    }
-
-    get farStrength(): number {
-        return this.#farStrength;
-    }
-
-    set farStrength(value: number) {
-        validateNumberRange(value);
-        this.#farStrength = value;
-        this.updateUniform('farStrength', value)
-    }
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult, cocTextureInfo: IPostEffectResult) {
         return super.render(view, width, height, sourceTextureInfo, cocTextureInfo);
     }
 }
 
+DefineUniformProperty.definePositiveNumber(DOFUnified, [
+    {key: 'nearBlurSize', value: 16},
+    {key: 'farBlurSize', value: 24},
+    {key: 'nearStrength', value: 1.0},
+    {key: 'farStrength', value: 1.0}
+])
 Object.freeze(DOFUnified);
 export default DOFUnified;
