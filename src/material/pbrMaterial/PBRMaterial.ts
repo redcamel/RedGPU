@@ -1004,8 +1004,8 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
             {key: `use_${key}_KHR_texture_transform`,value:false},
         ])
         DefineUniformProperty.defineVector2(PBRMaterial, [
-            `${key}_KHR_texture_transform_offset`,
-            [`${key}_KHR_texture_transform_scale`, [1, 1]],
+            {key: `${key}_KHR_texture_transform_offset`},
+            {key: `${key}_KHR_texture_transform_scale`, value: [1, 1]},
         ])
         //
         DefineUniformProperty.defineUint(PBRMaterial, [

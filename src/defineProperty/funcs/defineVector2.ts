@@ -2,15 +2,12 @@ import applyProperties from "../core/applyProperties";
 import defineVector from "../core/defineVector";
 
 export interface IDefineVector2 {
-    key: string,
-    value: [number, number]
+    key: string;
+    value?: [number, number];
 }
 
-function defineVector2_func(propertyKey: string | IDefineVector2, initValue: [number, number] = [0, 0]) {
-    if (typeof propertyKey === 'object') {
-        return defineVector(propertyKey.key, propertyKey.value);
-    }
-    return defineVector(propertyKey, initValue)
+function defineVector2_func(propertyKey: IDefineVector2) {
+    return defineVector(propertyKey.key, propertyKey.value ?? [0, 0]);
 }
 
 /**
@@ -18,21 +15,16 @@ function defineVector2_func(propertyKey: string | IDefineVector2, initValue: [nu
  * [EN] Defines Vector2 properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 키, 키 배열, 또는 IDefineVec2 배열 [EN] Property key, array of keys, or array of IDefineVec2
+ * @param keys - [KO] 정의할 속성 설정(IDefineVector2) 또는 설정 배열 [EN] Configuration (IDefineVector2) or array of configurations
  *
  * @example
  * ```typescript
- * // 단일 키 정의
- * DefineUniformProperty.defineVector2(MyMaterial, 'myVec2');
- * // 배열을 이용한 다중 키 정의
- * DefineUniformProperty.defineVector2(MyMaterial, ['vec0', 'vec1']);
- * // 초기값과 함께 정의
- * DefineUniformProperty.defineVector2(MyMaterial, [['vec0', [1, 0]], ['vec1', [0, 1]]]);
- * // IDefineVec2 인터페이스 사용
+ * // 설정 객체 방식 (IDefineVector2)
+ * DefineUniformProperty.defineVector2(MyMaterial, { key: 'vec0', value: [1, 0] });
  * DefineUniformProperty.defineVector2(MyMaterial, [{ key: 'vec0', value: [1, 0] }]);
  * ```
  */
-const defineVector2 = (target: any, keys: string | (string | IDefineVector2 | [string, [number, number]])[]) => applyProperties(target, keys, defineVector2_func);
+const defineVector2 = (target: any, keys: IDefineVector2 | IDefineVector2[]) => applyProperties(target, keys, defineVector2_func);
 
 Object.freeze(defineVector2)
 export default defineVector2;

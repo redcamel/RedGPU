@@ -2,15 +2,12 @@ import applyProperties from "../core/applyProperties";
 import defineVector from "../core/defineVector";
 
 export interface IDefineVector4 {
-    key: string,
-    value: [number, number, number, number]
+    key: string;
+    value?: [number, number, number, number];
 }
 
-function defineVector4_func(propertyKey: string | IDefineVector4, initValue: [number, number, number, number] = [0, 0, 0, 0]) {
-    if (typeof propertyKey === 'object') {
-        return defineVector(propertyKey.key, propertyKey.value);
-    }
-    return defineVector(propertyKey, initValue)
+function defineVector4_func(propertyKey: IDefineVector4) {
+    return defineVector(propertyKey.key, propertyKey.value ?? [0, 0, 0, 0]);
 }
 
 /**
@@ -18,19 +15,16 @@ function defineVector4_func(propertyKey: string | IDefineVector4, initValue: [nu
  * [EN] Defines Vector4 properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 키, 키 배열, 또는 IDefineVec4 배열 [EN] Property key, array of keys, or array of IDefineVec4
+ * @param keys - [KO] 정의할 속성 설정(IDefineVector4) 또는 설정 배열 [EN] Configuration (IDefineVector4) or array of configurations
  *
  * @example
  * ```typescript
- * // 단일 키 정의
- * DefineUniformProperty.defineVector4(MyMaterial, 'myVec4');
- * // 배열을 이용한 다중 키 정의
- * DefineUniformProperty.defineVector4(MyMaterial, [['vec0', [1, 0, 0, 1]], ['vec1', [0, 1, 0, 1]]]);
- * // IDefineVec4 인터페이스 사용
+ * // 설정 객체 방식 (IDefineVector4)
+ * DefineUniformProperty.defineVector4(MyMaterial, { key: 'vec0', value: [1, 0, 0, 1] });
  * DefineUniformProperty.defineVector4(MyMaterial, [{ key: 'vec0', value: [1, 0, 0, 1] }]);
  * ```
  */
-const defineVector4 = (target: any, keys: string | (string | IDefineVector4 | [string, [number, number, number, number]])[]) => applyProperties(target, keys, defineVector4_func);
+const defineVector4 = (target: any, keys: IDefineVector4 | IDefineVector4[]) => applyProperties(target, keys, defineVector4_func);
 
 Object.freeze(defineVector4)
 export default defineVector4;
