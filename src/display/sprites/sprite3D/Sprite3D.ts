@@ -241,7 +241,7 @@ DefineUniformProperty.definePositiveNumber(Sprite3D, [
     {key: '_renderRatioY', value: 1},
 ])
 DefineUniformProperty.defineBoolean(Sprite3D, [
-    ['useBillboard', true],
+    {key: 'useBillboard', value: true},
 ])
 Object.freeze(Sprite3D)
 export default Sprite3D

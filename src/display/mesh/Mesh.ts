@@ -1963,9 +1963,9 @@ Object.defineProperty(Mesh.prototype, 'meshType', {
     writable: false
 });
 DefineUniformProperty.defineBoolean(Mesh, [
-    ['receiveShadow', false],
-    ['useDisplacementTexture', false],
-    ['disableJitter', false],
+    {key: 'receiveShadow', value: false},
+    {key: 'useDisplacementTexture', value: false},
+    {key: 'disableJitter', value: false},
 ])
 Object.freeze(Mesh)
 export default Mesh

@@ -273,7 +273,7 @@ DefineForFragment.defineByPreset(PhongMaterial, [
     //
 ])
 DefineUniformProperty.defineBoolean(PhongMaterial, [
-    ['useSSR', false]
+    {key: 'useSSR', value: false}
 ])
 DefineUniformProperty.definePositiveNumber(PhongMaterial, [
     {key: 'metallic', value: 0, min: 0, max: 1},

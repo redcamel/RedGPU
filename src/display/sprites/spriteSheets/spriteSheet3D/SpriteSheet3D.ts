@@ -296,7 +296,7 @@ DefineUniformProperty.definePositiveNumber(SpriteSheet3D, [
     {key: '_renderRatioY', value: 1},
 ])
 DefineUniformProperty.defineBoolean(SpriteSheet3D, [
-    ['useBillboard', true],
+    {key: 'useBillboard', value: true},
 ])
 /**
  * SpriteSheet3D 클래스를 동결하여 런타임에서의 수정을 방지합니다.

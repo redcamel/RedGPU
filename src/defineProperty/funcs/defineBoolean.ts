@@ -4,7 +4,7 @@ import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
 export interface IDefineBoolean {
     key: string;
-    value?: boolean;
+    value: boolean;
 }
 
 function createSetter(
@@ -27,28 +27,16 @@ function createSetter(
 }
 
 function defineBoolean_func(
-    propertyKey: string | IDefineBoolean,
-    initValue: boolean = false
+    propertyKey: IDefineBoolean
 ) {
-    if (typeof propertyKey === 'object') {
-        const {key, value = false} = propertyKey;
-        const symbol = Symbol(key);
-        return {
-            get: function (): boolean {
-                if (this[symbol] === undefined) this[symbol] = value;
-                return this[symbol];
-            },
-            set: createSetter(key, symbol),
-            ...defineProperty_SETTING,
-        };
-    }
-    const symbol = Symbol(propertyKey);
+    const {key, value = false} = propertyKey;
+    const symbol = Symbol(key);
     return {
         get: function (): boolean {
-            if (this[symbol] === undefined) this[symbol] = initValue;
+            if (this[symbol] === undefined) this[symbol] = value;
             return this[symbol];
         },
-        set: createSetter(propertyKey, symbol),
+        set: createSetter(key, symbol),
         ...defineProperty_SETTING,
     };
 }
@@ -58,19 +46,16 @@ function defineBoolean_func(
  * [EN] Defines boolean properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 키, 키 배열 또는 설정 배열 [EN] Property keys, array of keys, or configuration array
+ * @param keys - [KO] 정의할 속성 설정(IDefineBoolean) 또는 설정 배열 [EN] Configuration (IDefineBoolean) or array of configurations
  *
  * @example
  * ```typescript
- * // 단일 키 정의
- * DefineUniformProperty.defineBoolean(MyMaterial, 'useAlphaTest');
- * // 초기값과 함께 정의 (배열 방식)
- * DefineUniformProperty.defineBoolean(MyMaterial, [['useAlphaTest', true]]);
- * // 설정 객체 방식 (IBoolean)
+ * // 설정 객체 방식 (IDefineBoolean)
+ * DefineUniformProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
  * DefineUniformProperty.defineBoolean(MyMaterial, [{ key: 'useAlphaTest', value: true }]);
  * ```
  */
-const defineBoolean = (target: any, keys: string | (string | IDefineBoolean | [string, boolean?])[]) => applyProperties(target, keys, defineBoolean_func);
+const defineBoolean = (target: any, keys: IDefineBoolean | IDefineBoolean[]) => applyProperties(target, keys, defineBoolean_func);
 
 Object.freeze(defineBoolean);
 export default defineBoolean;

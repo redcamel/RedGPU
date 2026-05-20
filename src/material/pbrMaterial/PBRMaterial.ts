@@ -995,13 +995,13 @@ DefineUniformProperty.definePositiveNumber(PBRMaterial,
 const defineTexture = (textureList: string[], useSampler: boolean) => {
     textureList?.forEach(key => {
         DefineUniformProperty.defineBoolean(PBRMaterial, [
-            `use${key.charAt(0).toUpperCase()}${key.substring(1)}`
+            {key: `use${key.charAt(0).toUpperCase()}${key.substring(1)}`,value:false}
         ])
         DefineUniformProperty.definePositiveNumber(PBRMaterial, [
             {key: `${key}_KHR_texture_transform_rotation`, value: 0},
         ]);
         DefineUniformProperty.defineBoolean(PBRMaterial, [
-            `use_${key}_KHR_texture_transform`,
+            {key: `use_${key}_KHR_texture_transform`,value:false},
         ])
         DefineUniformProperty.defineVector2(PBRMaterial, [
             `${key}_KHR_texture_transform_offset`,
@@ -1026,7 +1026,7 @@ const extensionDefine = (defineList) => {
     defineList.forEach(v => {
         const {extensionName, textureList, useSampler} = v;
         const {positiveNumberList, vec3List, vec4List} = v;
-        if (extensionName) DefineUniformProperty.defineBoolean(PBRMaterial, [`use${extensionName}`])
+        if (extensionName) DefineUniformProperty.defineBoolean(PBRMaterial, [{key: `use${extensionName}`,value:false}])
         defineTexture(textureList, !useSampler)
         positiveNumberList?.forEach(v => {
             DefineUniformProperty.definePositiveNumber(PBRMaterial, [
@@ -1055,14 +1055,14 @@ DefineUniformProperty.defineUint(PBRMaterial, [
     {key: 'alphaBlend',value:0},
 ])
 DefineUniformProperty.defineBoolean(PBRMaterial, [
-    'doubleSided',
-    'useCutOff',
-    'useVertexColor',
-    'useVertexTangent',
+    {key: 'doubleSided',value:false},
+    {key: 'useCutOff',value:false},
+    {key: 'useVertexColor',value:false},
+    {key: 'useVertexTangent',value:false},
     //
-    'useKHR_materials_unlit',
+    {key: 'useKHR_materials_unlit',value:false},
     //
-    ['useSSR', true]
+    {key: 'useSSR', value: true}
 ])
 Object.freeze(PBRMaterial)
 export default PBRMaterial

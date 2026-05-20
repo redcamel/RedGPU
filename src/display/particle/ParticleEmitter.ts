@@ -1218,7 +1218,7 @@ Object.defineProperty(ParticleEmitter.prototype, 'meshType', {
     writable: false
 });
 DefineUniformProperty.defineBoolean(ParticleEmitter, [
-    ['useBillboard', true],
+    {key: 'useBillboard', value: true},
 ])
 //
 Object.freeze(ParticleEmitter)

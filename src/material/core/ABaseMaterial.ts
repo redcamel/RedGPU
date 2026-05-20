@@ -563,7 +563,7 @@ DefineUniformProperty.definePositiveNumber(ABaseMaterial, [
     {key: 'opacity', value: 1, max: 1}
 ])
 DefineUniformProperty.defineBoolean(ABaseMaterial, [
-    ['useTint', false]
+    {key: 'useTint', value: false}
 ])
 DefineUniformProperty.defineColorRGBA(ABaseMaterial, [
     { key: 'tint', value: '#ff0000' }
