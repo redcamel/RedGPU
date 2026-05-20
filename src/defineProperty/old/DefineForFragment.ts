@@ -1,7 +1,6 @@
 import {createDefineByPreset, defineProperties} from "./core/createDefineByPreset";
 import defineCubeTexture from "./funcs/defineCubeTexture";
 import defineTexture from "./funcs/defineTexture";
-import defineTexture3D from "./funcs/defineTexture3D";
 
 const PRESET_CUBE_TEXTURE = {
     ENVIRONMENT_TEXTURE: 'environmentTexture',
@@ -32,13 +31,11 @@ const DefineForFragment = {
     ...createDefineByPreset(
         {
             defineTexture: [defineTexture, PRESET_TEXTURE],
-            defineTexture3D: [defineTexture3D, {}],
             defineCubeTexture: [defineCubeTexture, PRESET_CUBE_TEXTURE],
         }
     ),
     //
     defineTexture: defineProperties(defineTexture),
-    defineTexture3D: defineProperties(defineTexture3D),
     defineCubeTexture: defineProperties(defineCubeTexture),
     //
     PRESET_TEXTURE,
