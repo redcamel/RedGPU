@@ -1,10 +1,14 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import {DefineUniformProperty} from "../../../../defineProperty";
 
+interface Vignetting {
+    size: number;
+    smoothness: number;
+}
 /**
  * [KO] 비네팅(Vignetting) 후처리 이펙트입니다.
  * [EN] Vignetting post-processing effect.
@@ -26,18 +30,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Lens
  */
 class Vignetting extends ASinglePassPostEffect {
-    /**
-     * [KO] 비네팅 부드러움 (0 ~ 1)
-     * [EN] Vignetting smoothness (0 ~ 1)
-     * @defaultValue 0.2
-     */
-    #smoothness: number = 0.2
-    /**
-     * [KO] 비네팅 범위 (최소 0)
-     * [EN] Vignetting size (Minimum 0)
-     * @defaultValue 0.5
-     */
-    #size: number = 0.5
+
 
     /**
      * [KO] Vignetting 인스턴스를 생성합니다.
@@ -54,46 +47,14 @@ class Vignetting extends ASinglePassPostEffect {
             'POST_EFFECT_VIGNETTING',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         )
-        this.smoothness = this.#smoothness
-        this.size = this.#size
     }
 
-    /**
-     * [KO] 비네팅 범위를 반환합니다.
-     * [EN] Returns the vignetting size.
-     */
-    get size(): number {
-        return this.#size;
-    }
 
-    /**
-     * [KO] 비네팅 범위를 설정합니다. (최소 0)
-     * [EN] Sets the vignetting size. (Minimum 0)
-     */
-    set size(value: number) {
-        validateNumberRange(value, 0,)
-        this.#size = value;
-        this.updateUniform('size', value)
-    }
 
-    /**
-     * [KO] 비네팅 부드러움을 반환합니다.
-     * [EN] Returns the vignetting smoothness.
-     */
-    get smoothness(): number {
-        return this.#smoothness;
-    }
-
-    /**
-     * [KO] 비네팅 부드러움을 설정합니다. (0 ~ 1)
-     * [EN] Sets the vignetting smoothness. (0 ~ 1)
-     */
-    set smoothness(value: number) {
-        validateNumberRange(value, 0, 1)
-        this.#smoothness = value;
-        this.updateUniform('smoothness', value)
-    }
 }
-
+DefineUniformProperty.definePositiveNumber(Vignetting, [
+    {key: 'size', value: 0.5, max:1},
+    {key: 'smoothness', value: 0.2, max: 1},
+])
 Object.freeze(Vignetting)
 export default Vignetting

@@ -82,84 +82,85 @@ function setupDOFScene(redGPUContext, scene) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                DOF: true,
+                focusDistance: effect.focusDistance,
+                aperture: effect.aperture,
+                maxCoC: effect.maxCoC,
+                nearBlurSize: effect.nearBlurSize,
+                farBlurSize: effect.farBlurSize,
+                nearStrength: effect.nearStrength,
+                farStrength: effect.farStrength,
+            }
+
+            const folder = pane.addFolder({title: 'DOF Settings', expanded: true})
+            folder.addBinding(TEST_STATE, 'DOF').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.DOF(redGPUContext);
+                    Object.assign(newEffect, TEST_STATE);
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+            });
+
+            const controls = [
+                folder.addBinding(TEST_STATE, 'focusDistance', {min: 5, max: 50}),
+                folder.addBinding(TEST_STATE, 'aperture', {min: 1.0, max: 8.0}),
+                folder.addBinding(TEST_STATE, 'maxCoC', {min: 10, max: 100}),
+                folder.addBinding(TEST_STATE, 'nearBlurSize', {min: 5, max: 50}),
+                folder.addBinding(TEST_STATE, 'farBlurSize', {min: 5, max: 50}),
+                folder.addBinding(TEST_STATE, 'nearStrength', {min: 0, max: 3.0}),
+                folder.addBinding(TEST_STATE, 'farStrength', {min: 0, max: 3.0}),
+            ];
+
+            pane.on('change', () => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) {
+                    Object.assign(currentEffect, TEST_STATE);
+                }
+            });
+
+            const presetFolder = folder.addFolder({title: 'Presets', expanded: false});
+            presetFolder.addButton({title: 'Game Default'}).on('click', () => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) {
+                    currentEffect.setGameDefault();
+                    updateUI(currentEffect);
+                }
+            });
+            presetFolder.addButton({title: 'Cinematic'}).on('click', () => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) {
+                    currentEffect.setCinematic();
+                    updateUI(currentEffect);
+                }
+            });
+
+            function updateUI(effect) {
+                Object.assign(TEST_STATE, {
+                    focusDistance: effect.focusDistance,
+                    aperture: effect.aperture,
+                    maxCoC: effect.maxCoC,
+                    nearBlurSize: effect.nearBlurSize,
+                    farBlurSize: effect.farBlurSize,
+                    nearStrength: effect.nearStrength,
+                    farStrength: effect.farStrength,
+                });
+                pane.refresh();
+            }
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
 
-    const TEST_STATE = {
-        DOF: true,
-        focusDistance: effect.focusDistance,
-        aperture: effect.aperture,
-        maxCoC: effect.maxCoC,
-        nearBlurSize: effect.nearBlurSize,
-        farBlurSize: effect.farBlurSize,
-        nearStrength: effect.nearStrength,
-        farStrength: effect.farStrength,
-    }
-
-    const folder = pane.addFolder({title: 'DOF Settings', expanded: true})
-    folder.addBinding(TEST_STATE, 'DOF').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.DOF(redGPUContext);
-            Object.assign(newEffect, TEST_STATE);
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-    });
-
-    const controls = [
-        folder.addBinding(TEST_STATE, 'focusDistance', {min: 5, max: 50}),
-        folder.addBinding(TEST_STATE, 'aperture', {min: 1.0, max: 8.0}),
-        folder.addBinding(TEST_STATE, 'maxCoC', {min: 10, max: 100}),
-        folder.addBinding(TEST_STATE, 'nearBlurSize', {min: 5, max: 50}),
-        folder.addBinding(TEST_STATE, 'farBlurSize', {min: 5, max: 50}),
-        folder.addBinding(TEST_STATE, 'nearStrength', {min: 0, max: 3.0}),
-        folder.addBinding(TEST_STATE, 'farStrength', {min: 0, max: 3.0}),
-    ];
-
-    pane.on('change', () => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) {
-            Object.assign(currentEffect, TEST_STATE);
-        }
-    });
-
-    const presetFolder = folder.addFolder({title: 'Presets', expanded: false});
-    presetFolder.addButton({title: 'Game Default'}).on('click', () => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) {
-            currentEffect.setGameDefault();
-            updateUI(currentEffect);
-        }
-    });
-    presetFolder.addButton({title: 'Cinematic'}).on('click', () => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) {
-            currentEffect.setCinematic();
-            updateUI(currentEffect);
-        }
-    });
-
-    function updateUI(effect) {
-        Object.assign(TEST_STATE, {
-            focusDistance: effect.focusDistance,
-            aperture: effect.aperture,
-            maxCoC: effect.maxCoC,
-            nearBlurSize: effect.nearBlurSize,
-            farBlurSize: effect.farBlurSize,
-            nearStrength: effect.nearStrength,
-            farStrength: effect.farStrength,
-        });
-        pane.refresh();
-    }
 };

@@ -72,48 +72,49 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                Vignetting: true,
+                smoothness: effect.smoothness,
+                size: effect.size,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'Vignetting').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.Vignetting(redGPUContext);
+                    newEffect.smoothness = TEST_STATE.smoothness;
+                    newEffect.size = TEST_STATE.size;
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                controls.forEach(c => c.disabled = !v.value);
+            });
+
+            const controls = [
+                folder.addBinding(TEST_STATE, 'smoothness', {min: 0, max: 1}),
+                folder.addBinding(TEST_STATE, 'size', {min: 0, max: 1}),
+            ];
+
+            pane.on('change', () => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) {
+                    currentEffect.smoothness = TEST_STATE.smoothness;
+                    currentEffect.size = TEST_STATE.size;
+                }
+            });
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
 
-    const TEST_STATE = {
-        Vignetting: true,
-        smoothness: effect.smoothness,
-        size: effect.size,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'Vignetting').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.Vignetting(redGPUContext);
-            newEffect.smoothness = TEST_STATE.smoothness;
-            newEffect.size = TEST_STATE.size;
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        controls.forEach(c => c.disabled = !v.value);
-    });
-
-    const controls = [
-        folder.addBinding(TEST_STATE, 'smoothness', {min: 0, max: 1}),
-        folder.addBinding(TEST_STATE, 'size', {min: 0, max: 1}),
-    ];
-
-    pane.on('change', () => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) {
-            currentEffect.smoothness = TEST_STATE.smoothness;
-            currentEffect.size = TEST_STATE.size;
-        }
-    });
 };
