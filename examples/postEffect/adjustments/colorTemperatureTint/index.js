@@ -78,100 +78,116 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
-        }
-    });
+        },
+        guiCallback: (pane) => {
+            const effect = targetView.postEffectManager.getEffectAt(0);
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
-
-    const TEST_STATE = {
-        ColorTemperatureTint: true,
-        temperature: effect.temperature,
-        tint: effect.tint,
-        strength: effect.strength
-    }
-
-    const folder = pane.addFolder({title: 'Color Temperature & Tint', expanded: true})
-
-    folder.addBinding(TEST_STATE, 'ColorTemperatureTint').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext);
-            newEffect.temperature = TEST_STATE.temperature;
-            newEffect.tint = TEST_STATE.tint;
-            newEffect.strength = TEST_STATE.strength;
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        controls.forEach(c => c.disabled = !v.value);
-    });
-
-    const controls = [];
-    controls.push(folder.addBinding(TEST_STATE, 'temperature', {min: 1000, max: 20000, step: 100}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) {
-            currentEffect.temperature = v.value;
-            updateTemperatureInfo(v.value);
-        }
-    }));
-
-    controls.push(folder.addBinding(TEST_STATE, 'tint', {min: -100, max: 100}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.tint = v.value;
-    }));
-
-    controls.push(folder.addBinding(TEST_STATE, 'strength', {min: 0, max: 100}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.strength = v.value;
-    }));
-
-    const infoFolder = pane.addFolder({title: 'Information', expanded: false});
-    const temperatureInfo = {
-        kelvinValue: `${TEST_STATE.temperature}K`,
-        description: getTemperatureDescription(TEST_STATE.temperature)
-    };
-    const kelvinDisplay = infoFolder.addBinding(temperatureInfo, 'kelvinValue', {readonly: true});
-    const descDisplay = infoFolder.addBinding(temperatureInfo, 'description', {readonly: true});
-
-    function updateTemperatureInfo(temperature) {
-        temperatureInfo.kelvinValue = `${temperature}K`;
-        temperatureInfo.description = getTemperatureDescription(temperature);
-        kelvinDisplay.refresh();
-        descDisplay.refresh();
-    }
-
-    const actionFolder = pane.addFolder({title: 'Quick Actions & Presets', expanded: true});
-    const presets = [
-        {title: '🌅 Sunrise', temp: 3200, tint: -10},
-        {title: '☀️ Noon', temp: 6500, tint: 0},
-        {title: '🌆 Sunset', temp: 2800, tint: 5},
-        {title: '🌙 Moonlight', temp: 4000, tint: 15}
-    ];
-
-    presets.forEach(p => {
-        actionFolder.addButton({title: p.title}).on('click', () => {
-            const currentEffect = targetView.postEffectManager.getEffectAt(0);
-            if (currentEffect) {
-                currentEffect.temperature = p.temp;
-                currentEffect.tint = p.tint;
-                updateUI(currentEffect);
+            const TEST_STATE = {
+                active: true,
+                temperature: effect.temperature,
+                tint: effect.tint,
+                amount: effect.amount
             }
-        });
+
+            const folder = pane.addFolder({title: 'Color Temperature & Tint', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'active', {label: 'Active'}).on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext);
+                    newEffect.temperature = TEST_STATE.temperature;
+                    newEffect.tint = TEST_STATE.tint;
+                    newEffect.amount = TEST_STATE.amount;
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                controls.forEach(c => c.disabled = !v.value);
+            });
+
+            const controls = [];
+            controls.push(folder.addBinding(TEST_STATE, 'temperature', {
+                label: 'Temperature (K)',
+                min: 1000,
+                max: 20000,
+                step: 100
+            }).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) {
+                    currentEffect.temperature = v.value;
+                    updateTemperatureInfo(v.value);
+                }
+            }));
+
+            controls.push(folder.addBinding(TEST_STATE, 'tint', {
+                label: 'Tint',
+                min: -100,
+                max: 100,
+                step: 1
+            }).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.tint = v.value;
+            }));
+
+            controls.push(folder.addBinding(TEST_STATE, 'amount', {
+                label: 'Amount',
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.amount = v.value;
+            }));
+
+            const infoFolder = pane.addFolder({title: 'Information', expanded: false});
+            const temperatureInfo = {
+                kelvinValue: `${TEST_STATE.temperature}K`,
+                description: getTemperatureDescription(TEST_STATE.temperature)
+            };
+            const kelvinDisplay = infoFolder.addBinding(temperatureInfo, 'kelvinValue', {label: 'Kelvin', readonly: true});
+            const descDisplay = infoFolder.addBinding(temperatureInfo, 'description', {label: 'Description', readonly: true});
+
+            function updateTemperatureInfo(temperature) {
+                temperatureInfo.kelvinValue = `${temperature}K`;
+                temperatureInfo.description = getTemperatureDescription(temperature);
+                kelvinDisplay.refresh();
+                descDisplay.refresh();
+            }
+
+            const actionFolder = pane.addFolder({title: 'Presets', expanded: true});
+            const presets = [
+                {title: '🌅 Warm Tone', method: 'setWarmTone'},
+                {title: '❄️ Cool Tone', method: 'setCoolTone'},
+                {title: '☀️ Neutral', method: 'setNeutral'},
+                {title: '🕯️ Candle Light', method: 'setCandleLight'},
+                {title: '☁️ Cloudy Day', method: 'setCloudyDay'},
+                {title: '🧪 Neon Light', method: 'setNeonLight'}
+            ];
+
+            presets.forEach(p => {
+                actionFolder.addButton({title: p.title}).on('click', () => {
+                    const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                    if (currentEffect) {
+                        currentEffect[p.method]();
+                        updateUI(currentEffect);
+                    }
+                });
+            });
+
+            function updateUI(effect) {
+                TEST_STATE.temperature = effect.temperature;
+                TEST_STATE.tint = effect.tint;
+                pane.refresh();
+                updateTemperatureInfo(effect.temperature);
+            }
+        }
     });
 
-    function updateUI(effect) {
-        TEST_STATE.temperature = effect.temperature;
-        TEST_STATE.tint = effect.tint;
-        pane.refresh();
-        updateTemperatureInfo(effect.temperature);
-    }
 };
 
 function getTemperatureDescription(temperature) {

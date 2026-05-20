@@ -1,9 +1,15 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+
+interface ColorTemperatureTint {
+    amount: number;
+    temperature: number;
+    tint: number;
+}
 
 /**
  * [KO] 색온도/틴트(Color Temperature/Tint) 후처리 이펙트입니다.
@@ -19,7 +25,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * const effect = new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext);
  * effect.temperature = 3200; // 따뜻한 색감
  * effect.tint = -10;         // 마젠타 계열
- * effect.strength = 80;      // 효과 강도
+ * effect.amount = 0.8;       // 효과 강도 (0 ~ 1)
  * effect.setDaylight();      // 프리셋 사용
  * view.postEffectManager.addEffect(effect);
  * ```
@@ -28,24 +34,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Adjustments
  */
 class ColorTemperatureTint extends ASinglePassPostEffect {
-    /**
-     * [KO] 색온도(K) (1000 ~ 20000)
-     * [EN] Color Temperature (K) (1000 ~ 20000)
-     * @defaultValue 6500
-     */
-    #temperature: number = 6500
-    /**
-     * [KO] 틴트 (-100 ~ 100)
-     * [EN] Tint (-100 ~ 100)
-     * @defaultValue 0
-     */
-    #tint: number = 0
-    /**
-     * [KO] 효과 강도 (0 ~ 100)
-     * [EN] Effect Strength (0 ~ 100)
-     * @defaultValue 100
-     */
-    #strength: number = 100
+
 
     /**
      * [KO] ColorTemperatureTint 인스턴스를 생성합니다.
@@ -62,64 +51,13 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
             'POST_EFFECT_COLOR_TEMPERATURE_TINT',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.strength = this.#strength
-        this.tint = this.#tint
-        this.temperature = this.#temperature
+
+        // DefineUniformProperty로 정의된 초기값을 GPU 버퍼에 동기화
+        this.temperature = 6500;
+        this.amount = 1;
+        this.tint = 0;
     }
 
-    /**
-     * [KO] 색온도 값을 반환합니다.
-     * [EN] Returns the color temperature value.
-     */
-    get temperature(): number {
-        return this.#temperature;
-    }
-
-    /**
-     * [KO] 색온도 값을 설정합니다. (1000 ~ 20000)
-     * [EN] Sets the color temperature value. (1000 ~ 20000)
-     */
-    set temperature(value: number) {
-        validateNumberRange(value, 1000, 20000)
-        this.#temperature = value;
-        this.updateUniform('temperature', value)
-    }
-
-    /**
-     * [KO] 틴트 값을 반환합니다.
-     * [EN] Returns the tint value.
-     */
-    get tint(): number {
-        return this.#tint;
-    }
-
-    /**
-     * [KO] 틴트 값을 설정합니다. (-100 ~ 100)
-     * [EN] Sets the tint value. (-100 ~ 100)
-     */
-    set tint(value: number) {
-        validateNumberRange(value, -100, 100)
-        this.#tint = value;
-        this.updateUniform('tint', value)
-    }
-
-    /**
-     * [KO] 효과 강도를 반환합니다.
-     * [EN] Returns the effect strength.
-     */
-    get strength(): number {
-        return this.#strength;
-    }
-
-    /**
-     * [KO] 효과 강도를 설정합니다. (0 ~ 100)
-     * [EN] Sets the effect strength. (0 ~ 100)
-     */
-    set strength(value: number) {
-        validateNumberRange(value, 0, 100)
-        this.#strength = value;
-        this.updateUniform('strength', value)
-    }
 
     // 편의 메서드들
     /**
@@ -186,5 +124,27 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 }
 
+DefineUniformProperty.definePositiveNumber(ColorTemperatureTint, [
+    /**
+     * [KO] 색온도(K) (1000 ~ 20000)
+     * [EN] Color Temperature (K) (1000 ~ 20000)
+     * @defaultValue 6500
+     */
+    {key: 'temperature', value: 6500, min: 1000, max: 20000},
+    /**
+     * [KO] 효과 적용 강도 (0 ~ 1)
+     * [EN] Effect amount (0 ~ 1)
+     * @defaultValue 1
+     */
+    {key: 'amount', value: 1, min: 0, max: 1},
+])
+DefineUniformProperty.defineNumber(ColorTemperatureTint, [
+    /**
+     * [KO] 틴트 (-100 ~ 100)
+     * [EN] Tint (-100 ~ 100)
+     * @defaultValue 0
+     */
+    {key: 'tint', value: 0, min: -100, max: 100},
+])
 Object.freeze(ColorTemperatureTint)
 export default ColorTemperatureTint

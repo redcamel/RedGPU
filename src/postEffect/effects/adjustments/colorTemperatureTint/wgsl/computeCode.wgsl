@@ -53,8 +53,7 @@ if (tintValue >= 0.0) {
 
 let colorAdjust = tempAdjust * tintRGB;
 
-let strength = uniforms.strength * 0.01;
-let finalAdjust = mix(vec3<f32>(1.0, 1.0, 1.0), colorAdjust, strength);
+let finalAdjust = mix(vec3<f32>(1.0, 1.0, 1.0), colorAdjust, uniforms.amount);
 
 color = vec4<f32>(color.rgb * finalAdjust, color.a);
 
