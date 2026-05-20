@@ -67,7 +67,7 @@ class FilmGrain extends ASinglePassPostEffect {
             'POST_EFFECT_FILM_GRAIN',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.#updateUniforms();
+        this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
     }
 
 
@@ -77,17 +77,9 @@ class FilmGrain extends ASinglePassPostEffect {
         this.filmGrainScale = preset.filmGrainScale;
         this.coloredGrain = preset.coloredGrain;
         this.grainSaturation = preset.grainSaturation;
-        this.#updateUniforms();
     }
 
-    #updateUniforms(): void {
-        this.filmGrainIntensity = this.filmGrainIntensity;
-        this.filmGrainResponse = this.filmGrainResponse;
-        this.filmGrainScale = this.filmGrainScale;
-        this.coloredGrain = this.coloredGrain;
-        this.grainSaturation = this.grainSaturation;
-        this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
-    }
+
 }
 DefineUniformProperty.definePositiveNumber(FilmGrain,[
     ['filmGrainIntensity',VINTAGE.filmGrainIntensity],
