@@ -5,6 +5,12 @@ import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
+import {DefineUniformProperty} from "../../../../defineProperty";
+
+interface OldBloomBlend {
+    bloomStrength: number
+    exposure: number
+}
 
 /**
  * [KO] 올드 블룸 블렌딩 이펙트입니다. (내부용)
@@ -12,8 +18,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  * @category Visual Effects
  */
 class OldBloomBlend extends ASinglePassPostEffect {
-    #bloomStrength: number = 1;
-    #exposure: number = 1;
+
 
     /**
      * [KO] OldBloomBlend 인스턴스를 생성합니다.
@@ -26,28 +31,9 @@ class OldBloomBlend extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_OLD_BLOOM_BLEND',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicPostEffectCode(this, computeCode, uniformStructCode, ['sourceTexture0', 'sourceTexture1'])
         );
-        this.exposure = this.#exposure;
-        this.bloomStrength = this.#bloomStrength;
-    }
 
-    get bloomStrength(): number {
-        return this.#bloomStrength;
-    }
-
-    set bloomStrength(value: number) {
-        this.#bloomStrength = value;
-        this.updateUniform('bloomStrength', value);
-    }
-
-    get exposure(): number {
-        return this.#exposure;
-    }
-
-    set exposure(value: number) {
-        this.#exposure = value;
-        this.updateUniform('exposure', value);
     }
 
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult, sourceTextureInfo1: IPostEffectResult) {
@@ -55,5 +41,9 @@ class OldBloomBlend extends ASinglePassPostEffect {
     }
 }
 
+DefineUniformProperty.definePositiveNumber(OldBloomBlend, [
+    {key: 'bloomStrength', value: 1},
+    {key: 'exposure', value: 1},
+])
 Object.freeze(OldBloomBlend);
 export default OldBloomBlend;
