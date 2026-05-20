@@ -353,9 +353,14 @@ class PostEffectManager {
     render() {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
         const {antialiasingManager} = redGPUContext
-        const {useMSAA, useFXAA, useTAA} = antialiasingManager;
+        const {useMSAA, useFXAA, useTAA, msaaID} = antialiasingManager;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {width, height} = gBufferColorTexture;
+
+        // MSAA 상태가 바뀌면 텍스처 풀을 클리어 (리소스 규격이나 처리 흐름이 바뀔 수 있음)
+        if (this.#prevMSAAID_for_gbuffer !== msaaID) {
+            this.#texturePool.clear();
+        }
 
         // 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
         const initialSourceTexture = useMSAA

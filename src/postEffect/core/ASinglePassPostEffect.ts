@@ -32,6 +32,8 @@ abstract class ASinglePassPostEffect {
     #computeBindGroupEntries1: GPUBindGroupEntry[]
     #outputBindGroupEntries: GPUBindGroupEntry[]
     #computePipeline: GPUComputePipeline
+    #computePipelineMSAA: GPUComputePipeline
+    #computePipelineNonMSAA: GPUComputePipeline
 
     // 유니폼 및 셰이더 구조 정보
     #uniformBuffer: UniformBuffer
@@ -262,8 +264,13 @@ abstract class ASinglePassPostEffect {
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
         const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureInfo);
 
+        // 파이프라인 준비 (상태에 따라 최초 1회 생성 및 캐싱)
+        this.#checkAndCreatePipeline(view, useMSAA, gpuDevice);
+
+
         if (dimensionsChanged || msaaChanged || sourceTextureChanged || outputTextureChanged) {
-            this.#createBindGroups(view, sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
+            keepLog(this.constructor.name, dimensionsChanged, msaaChanged, sourceTextureChanged, outputTextureChanged)
+            this.#updateBindGroups(view, sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
         }
 
         // 컴퓨트 패스 실행
@@ -318,74 +325,16 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 바인드 그룹 및 파이프라인을 생성하거나 갱신합니다.
-     * [EN] Creates or updates bind groups and the pipeline.
+     * [KO] 파이프라인 및 레이아웃을 확인하고 필요한 경우 생성합니다.
+     * [EN] Checks for the pipeline and layout, creating them if necessary.
      */
-    #createBindGroups(view: View3D, sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
-        this.#computeBindGroupEntries0_swap0 = [];
-        this.#computeBindGroupEntries0_swap1 = [];
-        this.#computeBindGroupEntries1 = [];
-        this.#outputBindGroupEntries = [];
-
-        this.#updateBindGroupEntries(view, sourceTextureInfoList, targetOutputView);
-        this.#updateLayoutsAndPipeline(view, useMSAA, gpuDevice);
-
-        // 현재 소스 텍스처 참조 저장
-        this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
-    }
-
-    /**
-     * [KO] 바인드 그룹 엔트리 리스트를 구성합니다.
-     * [EN] Configures the list of bind group entries.
-     */
-    #updateBindGroupEntries(view: View3D, sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView) {
-        const {storage, textures, samplers} = this.shaderInfo;
-        const {postEffectManager} = view;
-
-        // Group 0: 소스 텍스처들 (Storage 리소스 중 outputTexture가 아닌 것들)
-        for (const k in storage) {
-            const {binding, name, group} = storage[k];
-            if (group === 0 && name !== 'outputTexture') {
-                const resource = sourceTextureInfoList[binding]?.textureView;
-                if (resource) {
-                    this.#computeBindGroupEntries0_swap0.push({binding, resource});
-                    this.#computeBindGroupEntries0_swap1.push({binding, resource});
-                }
-            }
+    #checkAndCreatePipeline(view: View3D, useMSAA: boolean, gpuDevice: GPUDevice) {
+        const cachedPipeline = useMSAA ? this.#computePipelineMSAA : this.#computePipelineNonMSAA;
+        if (cachedPipeline) {
+            this.#computePipeline = cachedPipeline;
+            return;
         }
 
-        // Group 0: 소스 텍스처들 (일반 Texture 리소스)
-        textures.forEach(({name, binding, group}) => {
-            if (group === 0) {
-                const resource = sourceTextureInfoList[binding]?.textureView;
-                if (resource) {
-                    this.#computeBindGroupEntries0_swap0.push({binding, resource});
-                    this.#computeBindGroupEntries0_swap1.push({binding, resource});
-                }
-            }
-        });
-
-        // Group 1: 이펙트 개별 유니폼 버퍼 (binding 0)
-        if (this.#uniformBuffer && this.uniformsInfo) {
-            this.#computeBindGroupEntries1.push({
-                binding: 0,
-                resource: {
-                    buffer: this.#uniformBuffer.gpuBuffer,
-                    offset: 0,
-                    size: this.#uniformBuffer.size
-                },
-            });
-        }
-
-        // Group 3: 출력 텍스처
-        this.#outputBindGroupEntries.push({binding: 0, resource: targetOutputView});
-    }
-
-    /**
-     * [KO] 바인드 그룹 레이아웃 및 컴퓨트 파이프라인을 생성합니다.
-     * [EN] Creates bind group layouts and the compute pipeline.
-     */
-    #updateLayoutsAndPipeline(view: View3D, useMSAA: boolean, gpuDevice: GPUDevice) {
         const {resourceManager} = this.#redGPUContext;
         const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
         const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
@@ -404,7 +353,76 @@ abstract class ASinglePassPostEffect {
         this.#outputBindGroupLayout = resourceManager.getGPUBindGroupLayout(layout3Name) ||
             resourceManager.createBindGroupLayout(layout3Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 3, useMSAA));
 
-        // 바인드 그룹 생성 (더블 버퍼링 지원)
+        // 파이프라인 생성
+        const pipeline = gpuDevice.createComputePipeline({
+            label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
+            layout: gpuDevice.createPipelineLayout({
+                bindGroupLayouts: [
+                    this.#computeBindGroupLayout0,
+                    this.#computeBindGroupLayout1,
+                    view.postEffectManager.gbufferBindGroupLayout,
+                    this.#outputBindGroupLayout
+                ]
+            }),
+            compute: {module: currentShader, entryPoint: 'main'}
+        });
+
+        // 캐싱
+        if (useMSAA) this.#computePipelineMSAA = pipeline;
+        else this.#computePipelineNonMSAA = pipeline;
+
+        this.#computePipeline = pipeline;
+    }
+
+    /**
+     * [KO] 바인드 그룹을 갱신합니다.
+     * [EN] Updates bind groups.
+     */
+    #updateBindGroups(view: View3D, sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
+        this.#computeBindGroupEntries0_swap0 = [];
+        this.#computeBindGroupEntries0_swap1 = [];
+        this.#computeBindGroupEntries1 = [];
+        this.#outputBindGroupEntries = [];
+
+        const {storage, textures} = this.shaderInfo;
+
+        // Group 0: 소스 텍스처들
+        for (const k in storage) {
+            const {binding, name, group} = storage[k];
+            if (group === 0 && name !== 'outputTexture') {
+                const resource = sourceTextureInfoList[binding]?.textureView;
+                if (resource) {
+                    this.#computeBindGroupEntries0_swap0.push({binding, resource});
+                    this.#computeBindGroupEntries0_swap1.push({binding, resource});
+                }
+            }
+        }
+        textures.forEach(({binding, group}) => {
+            if (group === 0) {
+                const resource = sourceTextureInfoList[binding]?.textureView;
+                if (resource) {
+                    this.#computeBindGroupEntries0_swap0.push({binding, resource});
+                    this.#computeBindGroupEntries0_swap1.push({binding, resource});
+                }
+            }
+        });
+
+        // Group 1: 이펙트 개별 유니폼 버퍼
+        if (this.#uniformBuffer && this.uniformsInfo) {
+            this.#computeBindGroupEntries1.push({
+                binding: 0,
+                resource: {
+                    buffer: this.#uniformBuffer.gpuBuffer,
+                    offset: 0,
+                    size: this.#uniformBuffer.size
+                },
+            });
+        }
+
+        // Group 3: 출력 텍스처
+        this.#outputBindGroupEntries.push({binding: 0, resource: targetOutputView});
+
+        // 바인드 그룹 실제 생성
         this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
             label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
             layout: this.#computeBindGroupLayout0,
@@ -429,19 +447,8 @@ abstract class ASinglePassPostEffect {
             entries: this.#outputBindGroupEntries
         });
 
-        // 파이프라인 생성
-        this.#computePipeline = gpuDevice.createComputePipeline({
-            label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
-            layout: gpuDevice.createPipelineLayout({
-                bindGroupLayouts: [
-                    this.#computeBindGroupLayout0,
-                    this.#computeBindGroupLayout1,
-                    view.postEffectManager.gbufferBindGroupLayout,
-                    this.#outputBindGroupLayout
-                ]
-            }),
-            compute: {module: currentShader, entryPoint: 'main'}
-        });
+        // 현재 소스 텍스처 참조 저장
+        this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
     }
 
     /**

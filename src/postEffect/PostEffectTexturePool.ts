@@ -1,5 +1,6 @@
 import RedGPUContext from "../context/RedGPUContext";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
+import {keepLog} from "../utils";
 
 /**
  * [KO] 후처리용 텍스처 풀링 클래스입니다.
@@ -49,7 +50,7 @@ class PostEffectTexturePool {
 
         let texture: GPUTexture;
         if (list.length > 0) {
-            texture = list.pop()!;
+            texture = list.shift()!;
         } else {
             // [KO] 신규 생성 시에만 메모리 사이즈를 가산합니다.
             // [EN] Add to memory size only when a new texture is created.
