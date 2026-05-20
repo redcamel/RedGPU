@@ -7,7 +7,6 @@ import updateTargetUniform from "../../core/updateTargetUniform";
 
 export interface IDefineTexture {
     key: string;
-    value?: BitmapTexture | ANoiseTexture | HDRTexture;
 }
 
 function createSetter(propertyKey: string, symbol: symbol) {
@@ -24,14 +23,11 @@ function createSetter(propertyKey: string, symbol: symbol) {
     };
 }
 
-function defineTexture_func(propertyKey: IDefineTexture) {
-    const {key, value} = propertyKey;
+function defineTexture_func(propertyInfo: IDefineTexture) {
+    const {key} = propertyInfo;
     const symbol = Symbol(key);
     return {
         get: function (): BitmapTexture | ANoiseTexture | HDRTexture {
-            if (this[symbol] === undefined && value !== undefined) {
-                this[symbol] = value;
-            }
             return this[symbol];
         },
         set: createSetter(key, symbol),

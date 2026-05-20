@@ -33,9 +33,9 @@ function createSetter(
 }
 
 function definePositiveNumberRange_func(
-    propertyKey: IDefinePositiveNumber
+    propertyInfo: IDefinePositiveNumber
 ) {
-    const {key, value = 0, min: minVal = 0, max: maxVal} = propertyKey;
+    const {key, value = 0, min: minVal = 0, max: maxVal} = propertyInfo;
     const symbol = Symbol(key);
     return {
         get: function (): number {

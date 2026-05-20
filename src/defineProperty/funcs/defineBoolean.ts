@@ -27,9 +27,9 @@ function createSetter(
 }
 
 function defineBoolean_func(
-    propertyKey: IDefineBoolean
+    propertyInfo: IDefineBoolean
 ) {
-    const {key, value = false} = propertyKey;
+    const {key, value = false} = propertyInfo;
     const symbol = Symbol(key);
     return {
         get: function (): boolean {

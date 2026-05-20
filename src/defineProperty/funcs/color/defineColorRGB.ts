@@ -24,10 +24,10 @@ function createColorRGB(instance: any, propertyKey: string, symbol: symbol, hexV
 }
 
 function defineColorRGB_func(
-    propertyKey: IColorRGB
+    propertyInfo: IColorRGB
 ) {
-    const key = propertyKey.key;
-    const value = propertyKey.value ?? '#fff';
+    const key = propertyInfo.key;
+    const value = propertyInfo.value ?? '#fff';
     const symbol = Symbol(key);
 
     return {

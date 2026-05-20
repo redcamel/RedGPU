@@ -6,8 +6,8 @@ export interface IDefineSampler {
     key: string;
 }
 
-function defineSampler_func(propertyKey: IDefineSampler) {
-    const {key} = propertyKey;
+function defineSampler_func(propertyInfo: IDefineSampler) {
+    const {key} = propertyInfo;
     const symbol = Symbol(key);
     return {
         get: function (): Sampler {

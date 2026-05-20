@@ -6,8 +6,8 @@ export interface IDefineVector3 {
     value?: [number, number, number];
 }
 
-function defineVector3_func(propertyKey: IDefineVector3) {
-    return defineVector(propertyKey.key, propertyKey.value ?? [0, 0, 0]);
+function defineVector3_func(propertyInfo: IDefineVector3) {
+    return defineVector(propertyInfo.key, propertyInfo.value ?? [0, 0, 0]);
 }
 
 /**

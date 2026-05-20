@@ -33,9 +33,9 @@ function createSetter(
 }
 
 function defineUintRange_func(
-    propertyKey: IDefineUint
+    propertyInfo: IDefineUint
 ) {
-    const {key, value = 0, min: minVal = 0, max: maxVal} = propertyKey;
+    const {key, value = 0, min: minVal = 0, max: maxVal} = propertyInfo;
     const symbol = Symbol(key);
     return {
         get: function (): number {

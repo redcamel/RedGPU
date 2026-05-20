@@ -33,9 +33,9 @@ function createSetter(
 }
 
 function defineNumber_func(
-    propertyKey: IDefineNumber
+    propertyInfo: IDefineNumber
 ) {
-    const {key, value = 0, min: minVal, max: maxVal} = propertyKey;
+    const {key, value = 0, min: minVal, max: maxVal} = propertyInfo;
     const symbol = Symbol(key);
     return {
         get: function (): number {

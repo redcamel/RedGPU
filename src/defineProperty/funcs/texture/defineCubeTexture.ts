@@ -6,7 +6,6 @@ import updateTargetUniform from "../../core/updateTargetUniform";
 
 export interface IDefineCubeTexture {
     key: string;
-    value?: CubeTexture | DirectCubeTexture;
 }
 
 function createSetter(propertyKey: string, symbol: symbol) {
@@ -24,14 +23,11 @@ function createSetter(propertyKey: string, symbol: symbol) {
     };
 }
 
-function defineCubeTexture_func(propertyKey: IDefineCubeTexture) {
-    const {key, value} = propertyKey;
+function defineCubeTexture_func(propertyInfo: IDefineCubeTexture) {
+    const {key} = propertyInfo;
     const symbol = Symbol(key);
     return {
         get: function (): CubeTexture | DirectCubeTexture {
-            if (this[symbol] === undefined && value !== undefined) {
-                this[symbol] = value;
-            }
             return this[symbol];
         },
         set: createSetter(key, symbol),
