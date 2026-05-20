@@ -136,7 +136,7 @@ function renderTestPane(redGPUContext, heightFog, autoRotateState) {
             });
 
             fogFolder.addBinding(PARAMS, 'density', {
-                min: 0, max: 4, step: 0.1
+                min: 0, max: 5, step: 0.1
             }).on('change', (ev) => {
                 heightFog.density = ev.value;
             });

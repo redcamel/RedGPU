@@ -5,8 +5,8 @@ struct Uniforms {
     fogType: u32,
     density: f32,
     baseHeight: f32,
+    thickness: f32,
     falloff: f32,
-    maxHeight: f32,
     fogColor: vec3<f32>,
     padding1: f32,
     padding2: f32,
@@ -44,7 +44,7 @@ fn calculateHeightFogFactor(screenCoord: vec2<f32>, depth: f32) -> f32 {
 
 fn getSkyboxHeightMaxPrecision(rayDirection: vec3<f32>) -> f32 {
     let u_baseHeight = uniforms.baseHeight;
-    let u_maxHeight = uniforms.maxHeight;
+    let u_maxHeight = u_baseHeight + uniforms.thickness;
 
     let rayY = clamp(rayDirection.y, -0.999, 0.999);
 
@@ -72,7 +72,7 @@ fn getSkyboxHeightMaxPrecision(rayDirection: vec3<f32>) -> f32 {
 
 fn calculateAbsoluteHeightFogMaxPrecision(worldHeight: f32) -> f32 {
     let u_baseHeight = uniforms.baseHeight;
-    let u_maxHeight = uniforms.maxHeight;
+    let u_maxHeight = u_baseHeight + uniforms.thickness;
     let u_density = uniforms.density;
     let u_falloff = uniforms.falloff;
     let u_fogType = uniforms.fogType;
