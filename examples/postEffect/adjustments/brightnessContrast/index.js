@@ -116,44 +116,45 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        guiCallback: (pane)=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+            const TEST_STATE = {
+                BrightnessContrast: true,
+                brightness: effect.brightness,
+                contrast: effect.contrast,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'BrightnessContrast').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.BrightnessContrast(redGPUContext);
+                    newEffect.brightness = TEST_STATE.brightness;
+                    newEffect.contrast = TEST_STATE.contrast;
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                brightnessControl.disabled = !v.value;
+                contrastControl.disabled = !v.value;
+            });
+
+            const brightnessControl = folder.addBinding(TEST_STATE, 'brightness', {min: -150, max: 150}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.brightness = v.value
+            })
+            const contrastControl = folder.addBinding(TEST_STATE, 'contrast', {min: -50, max: 100}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.contrast = v.value
+            })
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
-    const TEST_STATE = {
-        BrightnessContrast: true,
-        brightness: effect.brightness,
-        contrast: effect.contrast,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'BrightnessContrast').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.BrightnessContrast(redGPUContext);
-            newEffect.brightness = TEST_STATE.brightness;
-            newEffect.contrast = TEST_STATE.contrast;
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        brightnessControl.disabled = !v.value;
-        contrastControl.disabled = !v.value;
-    });
 
-    const brightnessControl = folder.addBinding(TEST_STATE, 'brightness', {min: -150, max: 150}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.brightness = v.value
-    })
-    const contrastControl = folder.addBinding(TEST_STATE, 'contrast', {min: -50, max: 100}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.contrast = v.value
-    })
 };
