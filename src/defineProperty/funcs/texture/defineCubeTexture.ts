@@ -1,8 +1,8 @@
-import applyProperties from "../core/applyProperties";
-import defineProperty_SETTING from "../core/defineProperty_SETTING";
-import CubeTexture from "../../resources/texture/CubeTexture";
-import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
-import updateTargetUniform from "../core/updateTargetUniform";
+import applyProperties from "../../core/applyProperties";
+import defineProperty_SETTING from "../../core/defineProperty_SETTING";
+import CubeTexture from "../../../resources/texture/CubeTexture";
+import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
+import updateTargetUniform from "../../core/updateTargetUniform";
 
 export interface IDefineCubeTexture {
     key: string;

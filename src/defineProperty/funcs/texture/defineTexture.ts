@@ -1,9 +1,9 @@
-import applyProperties from "../core/applyProperties";
-import defineProperty_SETTING from "../core/defineProperty_SETTING";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
-import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
-import HDRTexture from "../../resources/texture/hdr/HDRTexture";
-import updateTargetUniform from "../core/updateTargetUniform";
+import applyProperties from "../../core/applyProperties";
+import defineProperty_SETTING from "../../core/defineProperty_SETTING";
+import BitmapTexture from "../../../resources/texture/BitmapTexture";
+import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
+import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
+import updateTargetUniform from "../../core/updateTargetUniform";
 
 export interface IDefineTexture {
     key: string;

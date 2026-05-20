@@ -1,9 +1,9 @@
-import ColorRGB from "../../color/ColorRGB";
-import isHexColor from "../../runtimeChecker/isFunc/isHexColor";
-import convertHexToRgb from "../../color/convertHexToRgb";
-import applyProperties from "../core/applyProperties";
-import updateTargetUniform from "../core/updateTargetUniform";
-import defineProperty_SETTING from "../core/defineProperty_SETTING";
+import ColorRGB from "../../../color/ColorRGB";
+import isHexColor from "../../../runtimeChecker/isFunc/isHexColor";
+import convertHexToRgb from "../../../color/convertHexToRgb";
+import applyProperties from "../../core/applyProperties";
+import updateTargetUniform from "../../core/updateTargetUniform";
+import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 
 export interface IColorRGB {
     key: string;

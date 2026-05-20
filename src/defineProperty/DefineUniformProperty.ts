@@ -1,15 +1,15 @@
 import defineBoolean, {IDefineBoolean} from "./funcs/defineBoolean";
-import defineColorRGB, {IColorRGB} from "./funcs/defineColorRGB";
-import defineColorRGBA, {IColorRGBA} from "./funcs/defineColorRGBA";
-import defineCubeTexture, {IDefineCubeTexture} from "./funcs/defineCubeTexture";
-import defineNumber, {IDefineNumber} from "./funcs/defineNumber";
-import definePositiveNumber, {IDefinePositiveNumber} from "./funcs/definePositiveNumber";
-import defineSampler from "./funcs/defineSampler";
-import defineTexture, {IDefineTexture} from "./funcs/defineTexture";
-import defineUint, {IDefineUint} from "./funcs/defineUint";
-import defineVector2, {IDefineVector2} from "./funcs/defineVector2";
-import defineVector3, {IDefineVector3} from "./funcs/defineVector3";
-import defineVector4, {IDefineVector4} from "./funcs/defineVector4";
+import defineColorRGB, {IColorRGB} from "./funcs/color/defineColorRGB";
+import defineColorRGBA, {IColorRGBA} from "./funcs/color/defineColorRGBA";
+import defineCubeTexture, {IDefineCubeTexture} from "./funcs/texture/defineCubeTexture";
+import defineNumber, {IDefineNumber} from "./funcs/number/defineNumber";
+import definePositiveNumber, {IDefinePositiveNumber} from "./funcs/number/definePositiveNumber";
+import defineSampler from "./funcs/texture/defineSampler";
+import defineTexture, {IDefineTexture} from "./funcs/texture/defineTexture";
+import defineUint, {IDefineUint} from "./funcs/number/defineUint";
+import defineVector2, {IDefineVector2} from "./funcs/vector/defineVector2";
+import defineVector3, {IDefineVector3} from "./funcs/vector/defineVector3";
+import defineVector4, {IDefineVector4} from "./funcs/vector/defineVector4";
 
 export {
     IDefineBoolean,

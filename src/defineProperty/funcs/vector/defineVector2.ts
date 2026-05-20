@@ -1,5 +1,5 @@
-import applyProperties from "../core/applyProperties";
-import defineVector from "../core/defineVector";
+import applyProperties from "../../core/applyProperties";
+import defineVector from "../../core/defineVector";
 
 export interface IDefineVector2 {
     key: string;

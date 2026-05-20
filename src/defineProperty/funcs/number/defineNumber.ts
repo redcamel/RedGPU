@@ -1,7 +1,7 @@
-import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
-import applyProperties from "../core/applyProperties";
-import updateTargetUniform from "../core/updateTargetUniform";
-import defineProperty_SETTING from "../core/defineProperty_SETTING";
+import validateNumber from "../../../runtimeChecker/validateFunc/validateNumber";
+import applyProperties from "../../core/applyProperties";
+import updateTargetUniform from "../../core/updateTargetUniform";
+import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 
 export interface IDefineNumber {
     key: string;
