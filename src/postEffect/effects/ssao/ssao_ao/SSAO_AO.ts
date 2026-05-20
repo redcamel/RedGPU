@@ -1,18 +1,19 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
+import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {DefineUniformProperty} from "../../../../defineProperty";
-interface SSAO_AO{
-    useBlur:boolean
-    contrast:number
-    radius:number
-    intensity:number
-    bias:number
-    biasDistanceScale:number
-    fadeDistanceStart:number
-    fadeDistanceRange:number
+interface SSAO_AO {
+    contrast: number;
+    radius: number;
+    intensity: number;
+    bias: number;
+    biasDistanceScale: number;
+    fadeDistanceStart: number;
+    fadeDistanceRange: number;
 }
 /**
  * [KO] SSAO AO 계산 이펙트입니다. (내부용)
@@ -20,6 +21,7 @@ interface SSAO_AO{
  * @category PostEffect
  */
 class SSAO_AO extends ASinglePassPostEffect {
+
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -29,8 +31,8 @@ class SSAO_AO extends ASinglePassPostEffect {
             'POST_EFFECT_SSAO',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-    }
 
+    }
 
 }
 

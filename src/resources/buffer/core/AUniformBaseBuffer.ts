@@ -121,6 +121,7 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
      * [EN] Value to write
      */
     writeOnlyBuffer(target: any, value: any) {
+        if(typeof value === "boolean" ){ value = value ? 1 : 0}
         this.redGPUContext.gpuDevice.queue.writeBuffer(
             this.gpuBuffer,
             target.uniformOffset,
