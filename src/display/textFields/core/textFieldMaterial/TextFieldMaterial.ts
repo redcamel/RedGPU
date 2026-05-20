@@ -52,7 +52,7 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
 }
 
 DefineUniformProperty.defineSampler(TextFieldMaterial, [
-    'diffuseTextureSampler'
+    {key: 'diffuseTextureSampler'}
 ])
 /**
  * 프래그먼트 셰이더에서 사용할 텍스처 및 샘플러 속성을 정의합니다.

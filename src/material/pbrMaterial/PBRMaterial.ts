@@ -1016,7 +1016,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
         ])
         if (useSampler) {
             DefineUniformProperty.defineSampler(PBRMaterial, [
-                `${key}Sampler`,
+                {key: `${key}Sampler`},
             ])
         }
     })

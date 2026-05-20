@@ -233,13 +233,13 @@ class PhongMaterial extends AUVTransformBaseMaterial {
 DefineUniformProperty.defineSampler(
     PhongMaterial,
     [
-        'alphaTextureSampler',
-        'aoTextureSampler',
-        'diffuseTextureSampler',
-        'emissiveTextureSampler',
-        'environmentTextureSampler',
-        'normalTextureSampler',
-        'specularTextureSampler'
+        {key: 'alphaTextureSampler'},
+        {key: 'aoTextureSampler'},
+        {key: 'diffuseTextureSampler'},
+        {key: 'emissiveTextureSampler'},
+        {key: 'environmentTextureSampler'},
+        {key: 'normalTextureSampler'},
+        {key: 'specularTextureSampler'}
     ])
 DefineUniformProperty.definePositiveNumber(
     PhongMaterial,

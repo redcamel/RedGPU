@@ -68,7 +68,7 @@ DefineUniformProperty.defineCubeTexture(SkyBoxMaterial, [
 DefineUniformProperty.defineTexture(SkyBoxMaterial, [
     {key: 'transitionMask'}
 ])
-DefineUniformProperty.defineSampler(SkyBoxMaterial, ['sampler0'])
+DefineUniformProperty.defineSampler(SkyBoxMaterial, [{key: 'sampler0'}])
 
 Object.freeze(SkyBoxMaterial)
 export default SkyBoxMaterial

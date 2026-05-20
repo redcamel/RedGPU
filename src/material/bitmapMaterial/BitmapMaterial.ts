@@ -78,7 +78,7 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
 }
 
 DefineUniformProperty.defineSampler(BitmapMaterial, [
-    'diffuseTextureSampler'
+    {key: 'diffuseTextureSampler'}
 ])
 DefineUniformProperty.defineTexture(BitmapMaterial, [
     {key:'diffuseTexture'}
