@@ -110,6 +110,7 @@ class TAA extends ASinglePassPostEffect {
         };
         const result = super.render(view, width, height, sourceTextureInfo, historyInfo);
 
+        //TODO - 이거 스왑버퍼로해서 복사비용을 삭제해야겠다
         // 결과를 히스토리에 복사
         commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
             encoder.copyTextureToTexture(
