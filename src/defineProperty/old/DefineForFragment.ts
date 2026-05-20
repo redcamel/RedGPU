@@ -2,9 +2,6 @@ import {createDefineByPreset, defineProperties} from "./core/createDefineByPrese
 import defineCubeTexture from "./funcs/defineCubeTexture";
 import defineTexture from "./funcs/defineTexture";
 
-const PRESET_CUBE_TEXTURE = {
-    ENVIRONMENT_TEXTURE: 'environmentTexture',
-};
 const PRESET_TEXTURE = {
     ALPHA_TEXTURE: 'alphaTexture',
     AO_TEXTURE: 'aoTexture',
@@ -31,15 +28,12 @@ const DefineForFragment = {
     ...createDefineByPreset(
         {
             defineTexture: [defineTexture, PRESET_TEXTURE],
-            defineCubeTexture: [defineCubeTexture, PRESET_CUBE_TEXTURE],
         }
     ),
     //
     defineTexture: defineProperties(defineTexture),
-    defineCubeTexture: defineProperties(defineCubeTexture),
     //
     PRESET_TEXTURE,
-    PRESET_CUBE_TEXTURE,
 
 }
 Object.freeze(DefineForFragment)

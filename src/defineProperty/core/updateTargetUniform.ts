@@ -23,7 +23,7 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
         targetUniformBuffer = gpuRenderInfo.vertexUniformBuffer
     }
 
-    if (targetUniformBuffer) {
+    if (targetUniformBuffer && targetUniformInfo.members[propertyKey]) {
         targetUniformBuffer.writeOnlyBuffer(
             targetUniformInfo.members[propertyKey],
             newValue

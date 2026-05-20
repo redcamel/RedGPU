@@ -62,7 +62,10 @@ DefineUniformProperty.definePositiveNumber(SkyBoxMaterial, [
     {key: 'luminance', value: 10000},
     {key: 'transitionProgress', value: 0},
 ])
-DefineForFragment.defineCubeTexture(SkyBoxMaterial, ['texture0', 'transitionTexture'])
+DefineUniformProperty.defineCubeTexture(SkyBoxMaterial, [
+    {key: 'texture0'},
+    {key: 'transitionTexture'}
+])
 DefineForFragment.defineTexture(SkyBoxMaterial, ['transitionMask'])
 DefineUniformProperty.defineSampler(SkyBoxMaterial, ['sampler0'])
 

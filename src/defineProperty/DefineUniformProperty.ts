@@ -1,6 +1,7 @@
 import defineBoolean, {IDefineBoolean} from "./funcs/defineBoolean";
 import defineColorRGB, {IColorRGB} from "./funcs/defineColorRGB";
 import defineColorRGBA, {IColorRGBA} from "./funcs/defineColorRGBA";
+import defineCubeTexture, {IDefineCubeTexture} from "./funcs/defineCubeTexture";
 import defineNumber, {IDefineNumber} from "./funcs/defineNumber";
 import definePositiveNumber, {IDefinePositiveNumber} from "./funcs/definePositiveNumber";
 import defineSampler from "./funcs/defineSampler";
@@ -18,7 +19,8 @@ export {
     IDefineVector4,
     IDefineNumber,
     IDefinePositiveNumber,
-    IDefineUint
+    IDefineUint,
+    IDefineCubeTexture
 };
 
 /**
@@ -34,6 +36,7 @@ const DefineUniformProperty = {
     defineBoolean,
     defineColorRGB,
     defineColorRGBA,
+    defineCubeTexture,
     defineNumber,
     defineSampler,
     definePositiveNumber,
