@@ -2,11 +2,11 @@ let dimensions = textureDimensions(sourceTexture);
 let dimW = f32(dimensions.x);
 let dimH = f32(dimensions.y);
 
-let center = vec2<f32>(dimW * 0.5 + uniforms.centerX, dimH * 0.5 + uniforms.centerY);
+let uvCenter = vec2<f32>(uniforms.centerX, uniforms.centerY);
+let center = uvCenter * vec2<f32>(dimW, dimH);
 let global_id_vec = vec2<f32>(f32(global_id.x), f32(global_id.y));
 
 let uv = global_id_vec / vec2<f32>(dimW, dimH);
-let uvCenter = center / vec2<f32>(dimW, dimH);
 
 let offset = uv - uvCenter;
 let distance = length(offset);

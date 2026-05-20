@@ -103,8 +103,8 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
 
             const controls = [
                 folder.addBinding(TEST_STATE, 'distortion', {min: -2, max: 2}),
-                folder.addBinding(TEST_STATE, 'centerX', {min: -300, max: 300}),
-                folder.addBinding(TEST_STATE, 'centerY', {min: -300, max: 300}),
+                folder.addBinding(TEST_STATE, 'centerX', {min: 0, max: 1}),
+                folder.addBinding(TEST_STATE, 'centerY', {min: 0, max: 1}),
             ];
 
             pane.on('change', () => {

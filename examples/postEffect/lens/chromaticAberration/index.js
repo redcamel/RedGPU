@@ -78,54 +78,55 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                ChromaticAberration: true,
+                strength: effect.strength,
+                falloff: effect.falloff,
+                centerX: effect.centerX,
+                centerY: effect.centerY,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'ChromaticAberration').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.ChromaticAberration(redGPUContext);
+                    Object.assign(newEffect, TEST_STATE);
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                controls.forEach(c => c.disabled = !v.value);
+            });
+
+            const controls = [];
+            controls.push(folder.addBinding(TEST_STATE, 'strength', {min: 0, max: 0.05}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.strength = v.value
+            }));
+            controls.push(folder.addBinding(TEST_STATE, 'falloff', {min: 0, max: 2}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.falloff = v.value
+            }));
+            controls.push(folder.addBinding(TEST_STATE, 'centerX', {min: 0, max: 1}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.centerX = v.value
+            }));
+            controls.push(folder.addBinding(TEST_STATE, 'centerY', {min: 0, max: 1}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.centerY = v.value
+            }));
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
 
-    const TEST_STATE = {
-        ChromaticAberration: true,
-        strength: effect.strength,
-        falloff: effect.falloff,
-        centerX: effect.centerX,
-        centerY: effect.centerY,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'ChromaticAberration').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.ChromaticAberration(redGPUContext);
-            Object.assign(newEffect, TEST_STATE);
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        controls.forEach(c => c.disabled = !v.value);
-    });
-
-    const controls = [];
-    controls.push(folder.addBinding(TEST_STATE, 'strength', {min: 0, max: 0.05}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.strength = v.value
-    }));
-    controls.push(folder.addBinding(TEST_STATE, 'falloff', {min: 0, max: 2}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.falloff = v.value
-    }));
-    controls.push(folder.addBinding(TEST_STATE, 'centerX', {min: 0, max: 1}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.centerX = v.value
-    }));
-    controls.push(folder.addBinding(TEST_STATE, 'centerY', {min: 0, max: 1}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.centerY = v.value
-    }));
 };

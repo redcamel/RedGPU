@@ -50,8 +50,8 @@ class LensDistortion extends ASinglePassPostEffect {
 
 DefineUniformProperty.defineNumber(LensDistortion, [
     {key: 'distortion', value: 0.1,},
-    {key: 'centerX', value: 0},
-    {key: 'centerY', value: 0},
+    {key: 'centerX', value: 0.5, min: 0, max: 1},
+    {key: 'centerY', value: 0.5, min: 0, max: 1},
 ])
 Object.freeze(LensDistortion)
 export default LensDistortion
