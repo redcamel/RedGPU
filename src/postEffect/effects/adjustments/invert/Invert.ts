@@ -5,9 +5,10 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 
-interface Invert{
-    amount:number
+interface Invert {
+    amount: number
 }
+
 /**
  * [KO] 색상 반전(Invert) 후처리 이펙트입니다.
  * [EN] Invert post-processing effect.
@@ -37,10 +38,11 @@ class Invert extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_INVERT',
-            createBasicPostEffectCode(this, computeCode,uniformStructCode)
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
 }
+
 DefineUniformProperty.definePositiveNumber(Invert, [
     {key: 'amount', value: 1, min: 0, max: 1}
 ])

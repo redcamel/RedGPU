@@ -5,10 +5,11 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 
-interface BrightnessContrast{
-    brightness:number,
-    contrast:number
+interface BrightnessContrast {
+    brightness: number,
+    contrast: number
 }
+
 /**
  * [KO] 밝기/대비 조절 후처리 이펙트입니다.
  * [EN] Brightness/Contrast adjustment post-processing effect.

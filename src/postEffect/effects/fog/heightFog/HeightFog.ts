@@ -13,6 +13,7 @@ interface HeightFog {
     fogType: number;
     fogColor: string;
 }
+
 /**
  * [KO] 높이 기반 안개(Height Fog) 후처리 이펙트입니다.
  * [EN] Height Fog post-processing effect.

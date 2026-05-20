@@ -40,7 +40,7 @@ function defineCubeTexture_func(propertyInfo: IDefineCubeTexture) {
  * [EN] Defines CubeTexture properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefineCubeTexture) 또는 설정 배열 [EN] Configuration (IDefineCubeTexture) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefineCubeTexture) 또는 설정 배열 [EN] Configuration (IDefineCubeTexture) or array of configurations
  *
  * @example
  * ```typescript
@@ -49,7 +49,7 @@ function defineCubeTexture_func(propertyInfo: IDefineCubeTexture) {
  * DefineUniformProperty.defineCubeTexture(MyMaterial, [{ key: 'envTexture' }]);
  * ```
  */
-const defineCubeTexture = (target: any, keys: IDefineCubeTexture | IDefineCubeTexture[]) => applyProperties(target, keys, defineCubeTexture_func);
+const defineCubeTexture = (target: any, defineInfo: IDefineCubeTexture | IDefineCubeTexture[]) => applyProperties(target, defineInfo, defineCubeTexture_func);
 
 Object.freeze(defineCubeTexture);
 export default defineCubeTexture;

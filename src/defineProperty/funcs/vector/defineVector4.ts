@@ -15,7 +15,7 @@ function defineVector4_func(propertyInfo: IDefineVector4) {
  * [EN] Defines Vector4 properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefineVector4) 또는 설정 배열 [EN] Configuration (IDefineVector4) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefineVector4) 또는 설정 배열 [EN] Configuration (IDefineVector4) or array of configurations
  *
  * @example
  * ```typescript
@@ -24,7 +24,7 @@ function defineVector4_func(propertyInfo: IDefineVector4) {
  * DefineUniformProperty.defineVector4(MyMaterial, [{ key: 'vec0', value: [1, 0, 0, 1] }]);
  * ```
  */
-const defineVector4 = (target: any, keys: IDefineVector4 | IDefineVector4[]) => applyProperties(target, keys, defineVector4_func);
+const defineVector4 = (target: any, defineInfo: IDefineVector4 | IDefineVector4[]) => applyProperties(target, defineInfo, defineVector4_func);
 
 Object.freeze(defineVector4)
 export default defineVector4;

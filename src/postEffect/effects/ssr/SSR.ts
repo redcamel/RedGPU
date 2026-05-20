@@ -4,6 +4,7 @@ import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty";
+
 interface SSR {
     maxSteps: number;
     maxDistance: number;
@@ -12,6 +13,7 @@ interface SSR {
     fadeDistance: number;
     edgeFade: number;
 }
+
 /**
  * [KO] SSR(Screen Space Reflection) 후처리 이펙트입니다.
  * [EN] SSR (Screen Space Reflection) post-processing effect.

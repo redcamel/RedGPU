@@ -9,6 +9,7 @@ interface Vignetting {
     size: number;
     smoothness: number;
 }
+
 /**
  * [KO] 비네팅(Vignetting) 후처리 이펙트입니다.
  * [EN] Vignetting post-processing effect.
@@ -50,10 +51,10 @@ class Vignetting extends ASinglePassPostEffect {
     }
 
 
-
 }
+
 DefineUniformProperty.definePositiveNumber(Vignetting, [
-    {key: 'size', value: 0.5, max:1},
+    {key: 'size', value: 0.5, max: 1},
     {key: 'smoothness', value: 0.2, max: 1},
 ])
 Object.freeze(Vignetting)

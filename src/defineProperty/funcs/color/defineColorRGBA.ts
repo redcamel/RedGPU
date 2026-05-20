@@ -61,7 +61,7 @@ function defineColorRGBA_func(
  * [EN] Defines ColorRGBA properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IColorRGBA) 또는 설정 배열 [EN] Configuration (IColorRGBA) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IColorRGBA) 또는 설정 배열 [EN] Configuration (IColorRGBA) or array of configurations
  *
  * @example
  * ```typescript
@@ -70,7 +70,7 @@ function defineColorRGBA_func(
  * DefineUniformProperty.defineColorRGBA(MyMaterial, [{ key: 'color', value: '#00ff00' }]);
  * ```
  */
-const defineColorRGBA = (target: any, keys: IColorRGBA | IColorRGBA[]) => applyProperties(target, keys, defineColorRGBA_func);
+const defineColorRGBA = (target: any, defineInfo: IColorRGBA | IColorRGBA[]) => applyProperties(target, defineInfo, defineColorRGBA_func);
 
 Object.freeze(defineColorRGBA);
 export default defineColorRGBA;

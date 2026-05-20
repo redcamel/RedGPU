@@ -15,7 +15,7 @@ function defineVector2_func(propertyInfo: IDefineVector2) {
  * [EN] Defines Vector2 properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefineVector2) 또는 설정 배열 [EN] Configuration (IDefineVector2) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefineVector2) 또는 설정 배열 [EN] Configuration (IDefineVector2) or array of configurations
  *
  * @example
  * ```typescript
@@ -24,7 +24,7 @@ function defineVector2_func(propertyInfo: IDefineVector2) {
  * DefineUniformProperty.defineVector2(MyMaterial, [{ key: 'vec0', value: [1, 0] }]);
  * ```
  */
-const defineVector2 = (target: any, keys: IDefineVector2 | IDefineVector2[]) => applyProperties(target, keys, defineVector2_func);
+const defineVector2 = (target: any, defineInfo: IDefineVector2 | IDefineVector2[]) => applyProperties(target, defineInfo, defineVector2_func);
 
 Object.freeze(defineVector2)
 export default defineVector2;

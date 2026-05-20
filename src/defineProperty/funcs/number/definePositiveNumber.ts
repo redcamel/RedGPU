@@ -52,7 +52,7 @@ function definePositiveNumberRange_func(
  * [EN] Defines positive number range properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefinePositiveNumber) 또는 설정 배열 [EN] Configuration (IDefinePositiveNumber) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefinePositiveNumber) 또는 설정 배열 [EN] Configuration (IDefinePositiveNumber) or array of configurations
  *
  * @example
  * ```typescript
@@ -61,7 +61,7 @@ function definePositiveNumberRange_func(
  * DefineUniformProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
  * ```
  */
-const definePositiveNumber = (target: any, keys: IDefinePositiveNumber | IDefinePositiveNumber[]) => applyProperties(target, keys, definePositiveNumberRange_func);
+const definePositiveNumber = (target: any, defineInfo: IDefinePositiveNumber | IDefinePositiveNumber[]) => applyProperties(target, defineInfo, definePositiveNumberRange_func);
 
 Object.freeze(definePositiveNumber);
 export default definePositiveNumber;

@@ -1,6 +1,5 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import View3D from "../../../../../display/view/View3D";
-import validateNumberRange from "../../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../../core/types";

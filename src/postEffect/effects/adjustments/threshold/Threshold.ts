@@ -5,9 +5,10 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {DefineUniformProperty} from "../../../../defineProperty";
 
-interface Threshold{
-    threshold:number
+interface Threshold {
+    threshold: number
 }
+
 /**
  * [KO] 임계값(Threshold) 후처리 이펙트입니다.
  * [EN] Threshold post-processing effect.
@@ -44,6 +45,7 @@ class Threshold extends ASinglePassPostEffect {
     }
 
 }
+
 DefineUniformProperty.definePositiveNumber(Threshold, [
     {key: 'threshold', value: 128, min: 1, max: 255}
 ])

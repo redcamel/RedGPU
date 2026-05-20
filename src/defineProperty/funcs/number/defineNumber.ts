@@ -52,7 +52,7 @@ function defineNumber_func(
  * [EN] Defines number properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefineNumber) 또는 설정 배열 [EN] Configuration (IDefineNumber) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefineNumber) 또는 설정 배열 [EN] Configuration (IDefineNumber) or array of configurations
  *
  * @example
  * ```typescript
@@ -61,7 +61,7 @@ function defineNumber_func(
  * DefineUniformProperty.defineNumber(MyMaterial, [{ key: 'myValue', value: 0, min: -100, max: 100 }]);
  * ```
  */
-const defineNumber = (target: any, keys: IDefineNumber | IDefineNumber[]) => applyProperties(target, keys, defineNumber_func);
+const defineNumber = (target: any, defineInfo: IDefineNumber | IDefineNumber[]) => applyProperties(target, defineInfo, defineNumber_func);
 
 Object.freeze(defineNumber);
 export default defineNumber;

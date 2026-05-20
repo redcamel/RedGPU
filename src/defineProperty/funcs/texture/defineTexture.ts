@@ -40,7 +40,7 @@ function defineTexture_func(propertyInfo: IDefineTexture) {
  * [EN] Defines Texture properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefineTexture) 또는 설정 배열 [EN] Configuration (IDefineTexture) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefineTexture) 또는 설정 배열 [EN] Configuration (IDefineTexture) or array of configurations
  *
  * @example
  * ```typescript
@@ -49,7 +49,7 @@ function defineTexture_func(propertyInfo: IDefineTexture) {
  * DefineUniformProperty.defineTexture(MyMaterial, [{ key: 'diffuseTexture' }]);
  * ```
  */
-const defineTexture = (target: any, keys: IDefineTexture | IDefineTexture[]) => applyProperties(target, keys, defineTexture_func);
+const defineTexture = (target: any, defineInfo: IDefineTexture | IDefineTexture[]) => applyProperties(target, defineInfo, defineTexture_func);
 
 Object.freeze(defineTexture);
 export default defineTexture;

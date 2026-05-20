@@ -52,8 +52,9 @@ class ColorMaterial extends ABaseMaterial {
         this.color.setColorByHEX(color)
     }
 }
+
 DefineUniformProperty.defineColorRGB(ColorMaterial, [
-    { key: 'color' },
+    {key: 'color'},
 ])
 Object.freeze(ColorMaterial)
 export default ColorMaterial

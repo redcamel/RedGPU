@@ -1,11 +1,10 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
-import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {DefineUniformProperty} from "../../../../defineProperty";
+
 interface SSAO_AO {
     useBlur: boolean;
     contrast: number;
@@ -16,6 +15,7 @@ interface SSAO_AO {
     fadeDistanceStart: number;
     fadeDistanceRange: number;
 }
+
 /**
  * [KO] SSAO AO 계산 이펙트입니다. (내부용)
  * [EN] SSAO AO calculation effect. (Internal use)

@@ -38,13 +38,14 @@ const VINTAGE = {
     grainSaturation: 0.8
 };
 
-interface FilmGrain{
+interface FilmGrain {
     filmGrainIntensity: number;
     filmGrainResponse: number;
     filmGrainScale: number;
     coloredGrain: number;
     grainSaturation: number;
 }
+
 /**
  * [KO] 현대적인 시네마틱 필름 그레인(Film Grain) 후처리 이펙트입니다.
  * [EN] Modern cinematic Film Grain post-processing effect.
@@ -81,6 +82,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
 
 }
+
 DefineUniformProperty.definePositiveNumber(FilmGrain, [
     {key: 'filmGrainIntensity', value: VINTAGE.filmGrainIntensity},
     {key: 'filmGrainResponse', value: VINTAGE.filmGrainResponse},

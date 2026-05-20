@@ -11,6 +11,7 @@ interface ChromaticAberration {
     centerY: number
     falloff: number
 }
+
 /**
  * [KO] 색수차(Chromatic Aberration) 후처리 이펙트입니다.
  * [EN] Chromatic Aberration post-processing effect.

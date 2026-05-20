@@ -81,7 +81,7 @@ DefineUniformProperty.defineSampler(BitmapMaterial, [
     {key: 'diffuseTextureSampler'}
 ])
 DefineUniformProperty.defineTexture(BitmapMaterial, [
-    {key:'diffuseTexture'}
+    {key: 'diffuseTexture'}
 ])
 
 Object.freeze(BitmapMaterial)

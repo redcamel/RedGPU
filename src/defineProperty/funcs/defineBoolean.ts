@@ -46,7 +46,7 @@ function defineBoolean_func(
  * [EN] Defines boolean properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefineBoolean) 또는 설정 배열 [EN] Configuration (IDefineBoolean) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefineBoolean) 또는 설정 배열 [EN] Configuration (IDefineBoolean) or array of configurations
  *
  * @example
  * ```typescript
@@ -55,7 +55,7 @@ function defineBoolean_func(
  * DefineUniformProperty.defineBoolean(MyMaterial, [{ key: 'useAlphaTest', value: true }]);
  * ```
  */
-const defineBoolean = (target: any, keys: IDefineBoolean | IDefineBoolean[]) => applyProperties(target, keys, defineBoolean_func);
+const defineBoolean = (target: any, defineInfo: IDefineBoolean | IDefineBoolean[]) => applyProperties(target, defineInfo, defineBoolean_func);
 
 Object.freeze(defineBoolean);
 export default defineBoolean;

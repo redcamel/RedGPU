@@ -52,7 +52,7 @@ function defineUintRange_func(
  * [EN] Defines Uint range properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefineUint) 또는 설정 배열 [EN] Configuration (IDefineUint) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefineUint) 또는 설정 배열 [EN] Configuration (IDefineUint) or array of configurations
  *
  * @example
  * ```typescript
@@ -61,7 +61,7 @@ function defineUintRange_func(
  * DefineUniformProperty.defineUint(MyMaterial, [{ key: 'myUint', value: 1, min: 0, max: 10 }]);
  * ```
  */
-const defineUint = (target: any, keys: IDefineUint | IDefineUint[]) => applyProperties(target, keys, defineUintRange_func);
+const defineUint = (target: any, defineInfo: IDefineUint | IDefineUint[]) => applyProperties(target, defineInfo, defineUintRange_func);
 
 Object.freeze(defineUint);
 export default defineUint;

@@ -1,13 +1,14 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {DefineUniformProperty} from "../../../../defineProperty";
+
 interface BlurY {
     size: number
 }
+
 /**
  * [KO] Y축 방향 블러 후처리 효과를 제공하는 클래스입니다.
  * [EN] Class that provides Y-axis blur post-processing effect.

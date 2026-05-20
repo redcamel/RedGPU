@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"

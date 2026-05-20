@@ -27,7 +27,7 @@ function defineSampler_func(propertyInfo: IDefineSampler) {
  * [EN] Defines sampler properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 설정(IDefineSampler) 또는 설정 배열 [EN] Configuration (IDefineSampler) or array of configurations
+ * @param defineInfo - [KO] 정의할 속성 설정(IDefineSampler) 또는 설정 배열 [EN] Configuration (IDefineSampler) or array of configurations
  *
  * @example
  * ```typescript
@@ -36,7 +36,7 @@ function defineSampler_func(propertyInfo: IDefineSampler) {
  * DefineUniformProperty.defineSampler(MyMaterial, [{ key: 'diffuseSampler' }]);
  * ```
  */
-const defineSampler = (target: any, keys: IDefineSampler | IDefineSampler[]) => applyProperties(target, keys, defineSampler_func);
+const defineSampler = (target: any, defineInfo: IDefineSampler | IDefineSampler[]) => applyProperties(target, defineInfo, defineSampler_func);
 
 Object.freeze(defineSampler);
 export default defineSampler;

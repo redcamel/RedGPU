@@ -5,10 +5,11 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {DefineUniformProperty} from "../../../../defineProperty";
 
-interface Vibrance{
-    vibrance:number
-    saturation:number
+interface Vibrance {
+    vibrance: number
+    saturation: number
 }
+
 /**
  * [KO] 바이브런스/채도(Vibrance/Saturation) 후처리 이펙트입니다.
  * [EN] Vibrance/Saturation post-processing effect.
@@ -46,7 +47,8 @@ class Vibrance extends ASinglePassPostEffect {
     }
 
 }
-DefineUniformProperty.defineNumber(Vibrance,[
+
+DefineUniformProperty.defineNumber(Vibrance, [
     {key: 'vibrance', value: 0, min: -100, max: 100},
     {key: 'saturation', value: 0, min: -100, max: 100}
 ])

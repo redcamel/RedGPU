@@ -10,8 +10,8 @@ interface Fog {
     density: number;
     nearDistance: number;
     farDistance: number;
-    fogType:number;
-    fogColor:ColorRGB
+    fogType: number;
+    fogColor: ColorRGB
 }
 
 /**

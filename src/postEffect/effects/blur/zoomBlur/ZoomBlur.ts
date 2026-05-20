@@ -10,6 +10,7 @@ interface ZoomBlur {
     centerX: number
     centerY: number
 }
+
 /**
  * [KO] 줌 블러(Zoom Blur) 후처리 이펙트입니다.
  * [EN] Zoom Blur post-processing effect.
@@ -48,6 +49,7 @@ class ZoomBlur extends ASinglePassPostEffect {
     }
 
 }
+
 DefineUniformProperty.definePositiveNumber(ZoomBlur, [
     {key: 'amount', value: 50}
 ])

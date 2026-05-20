@@ -244,17 +244,17 @@ DefineUniformProperty.defineSampler(
 DefineUniformProperty.definePositiveNumber(
     PhongMaterial,
     [
-        {key: 'aoStrength',value:1},
-        {key: 'specularStrength',value:1},
-        {key: 'emissiveStrength',value:1},
-        {key: 'shininess',value:1},
-        {key: 'normalScale',value:1}
+        {key: 'aoStrength', value: 1},
+        {key: 'specularStrength', value: 1},
+        {key: 'emissiveStrength', value: 1},
+        {key: 'shininess', value: 1},
+        {key: 'normalScale', value: 1}
     ]
 )
 DefineUniformProperty.defineColorRGB(PhongMaterial, [
-    { key: 'color' },
-    { key: 'emissiveColor', value: '#000000' },
-    { key: 'specularColor', value: '#ffffff' }
+    {key: 'color'},
+    {key: 'emissiveColor', value: '#000000'},
+    {key: 'specularColor', value: '#ffffff'}
 ])
 DefineUniformProperty.defineTexture(PhongMaterial, [
     {key: 'alphaTexture'},

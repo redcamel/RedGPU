@@ -58,7 +58,7 @@ DefineUniformProperty.defineSampler(TextFieldMaterial, [
  * 프래그먼트 셰이더에서 사용할 텍스처 및 샘플러 속성을 정의합니다.
  */
 DefineUniformProperty.defineTexture(TextFieldMaterial, [
-    {key:'diffuseTexture'}
+    {key: 'diffuseTexture'}
 ])
 /**
  * `TextFieldMaterial` 클래스의 속성을 변경할 수 없도록 고정합니다.

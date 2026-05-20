@@ -4,11 +4,13 @@ import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffe
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
-interface FXAA{
+
+interface FXAA {
     subpix: number
     edgeThreshold: number
     edgeThresholdMin: number
 }
+
 /**
  * [KO] FXAA(Fast Approximate Anti-Aliasing) 후처리 이펙트입니다.
  * [EN] FXAA (Fast Approximate Anti-Aliasing) post-processing effect.
@@ -30,7 +32,7 @@ interface FXAA{
  * @category PostEffect
  */
 class FXAA extends ASinglePassPostEffect {
-     /**
+    /**
      * [KO] FXAA 인스턴스를 생성합니다.
      * [EN] Creates an FXAA instance.
      *

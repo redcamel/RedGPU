@@ -11,7 +11,7 @@ import DefineUniformProperty, {
     IDefineVector4
 } from "../../defineProperty/DefineUniformProperty";
 
-const EXTENSION_LIST:{
+const EXTENSION_LIST: {
     textureList?: string[],
     vec4List?: IDefineVector4[],
     vec3List?: IDefineVector3[],
@@ -23,7 +23,7 @@ const EXTENSION_LIST:{
             'baseColorTexture',
         ],
         vec4List: [
-            {key: 'baseColorFactor',value:[1,1,1,1]},
+            {key: 'baseColorFactor', value: [1, 1, 1, 1]},
         ]
     },
     {
@@ -36,8 +36,8 @@ const EXTENSION_LIST:{
             'metallicRoughnessTexture',
         ],
         positiveNumberList: [
-            {key:'metallicFactor',value:1},
-            {key:'roughnessFactor',value:1},
+            {key: 'metallicFactor', value: 1},
+            {key: 'roughnessFactor', value: 1},
         ]
     },
     {
@@ -45,7 +45,7 @@ const EXTENSION_LIST:{
             'emissiveTexture',
         ],
         vec3List: [
-            {key: 'emissiveFactor',value:[0,0,0]}
+            {key: 'emissiveFactor', value: [0, 0, 0]}
         ]
     },
     {
@@ -53,7 +53,7 @@ const EXTENSION_LIST:{
             'occlusionTexture',
         ],
         positiveNumberList: [
-            {key:'occlusionStrength',value:1},
+            {key: 'occlusionStrength', value: 1},
         ]
     },
     {
@@ -64,9 +64,9 @@ const EXTENSION_LIST:{
             'KHR_clearcoatRoughnessTexture',
         ],
         positiveNumberList: [
-            {key:'KHR_clearcoatFactor',value:0},
-            {key:'KHR_clearcoatRoughnessFactor',value:0},
-            {key:'KHR_clearcoatNormalScale',value:1},
+            {key: 'KHR_clearcoatFactor', value: 0},
+            {key: 'KHR_clearcoatRoughnessFactor', value: 0},
+            {key: 'KHR_clearcoatNormalScale', value: 1},
         ]
     },
     {
@@ -76,10 +76,10 @@ const EXTENSION_LIST:{
             'KHR_sheenRoughnessTexture',
         ],
         positiveNumberList: [
-            {key:'KHR_sheenRoughnessFactor',value:0},
+            {key: 'KHR_sheenRoughnessFactor', value: 0},
         ],
         vec3List: [
-            {key:'KHR_sheenColorFactor',value:[0,0,0]}
+            {key: 'KHR_sheenColorFactor', value: [0, 0, 0]}
         ]
     },
     {
@@ -89,10 +89,10 @@ const EXTENSION_LIST:{
             'KHR_specularColorTexture',
         ],
         positiveNumberList: [
-            {key:'KHR_specularFactor',value:1},
+            {key: 'KHR_specularFactor', value: 1},
         ],
         vec3List: [
-            {key:'KHR_specularColorFactor', value : [1, 1, 1]},
+            {key: 'KHR_specularColorFactor', value: [1, 1, 1]},
         ]
     },
     {
@@ -101,7 +101,7 @@ const EXTENSION_LIST:{
             'KHR_transmissionTexture',
         ],
         positiveNumberList: [
-            {key:'KHR_transmissionFactor',value:0},
+            {key: 'KHR_transmissionFactor', value: 0},
         ],
     },
     {
@@ -110,11 +110,11 @@ const EXTENSION_LIST:{
             'KHR_thicknessTexture',
         ],
         positiveNumberList: [
-            {key:'KHR_thicknessFactor',value:0},
-            {key:'KHR_attenuationDistance',value:1},
+            {key: 'KHR_thicknessFactor', value: 0},
+            {key: 'KHR_attenuationDistance', value: 1},
         ],
         vec3List: [
-            {key:'KHR_attenuationColor', value : [1, 1, 1]},
+            {key: 'KHR_attenuationColor', value: [1, 1, 1]},
         ]
     },
     {
@@ -124,10 +124,10 @@ const EXTENSION_LIST:{
             'KHR_diffuseTransmissionColorTexture',
         ],
         positiveNumberList: [
-            {key:'KHR_diffuseTransmissionFactor',value:0},
+            {key: 'KHR_diffuseTransmissionFactor', value: 0},
         ],
         vec3List: [
-            {key:'KHR_diffuseTransmissionColorFactor', value:[1, 1, 1]},
+            {key: 'KHR_diffuseTransmissionColorFactor', value: [1, 1, 1]},
         ]
     },
     {
@@ -136,8 +136,8 @@ const EXTENSION_LIST:{
             'KHR_anisotropyTexture',
         ],
         positiveNumberList: [
-            {key:'KHR_anisotropyStrength',value:0},
-            {key:'KHR_anisotropyRotation',value:0},
+            {key: 'KHR_anisotropyStrength', value: 0},
+            {key: 'KHR_anisotropyRotation', value: 0},
         ]
     },
     {
@@ -147,10 +147,10 @@ const EXTENSION_LIST:{
             'KHR_iridescenceThicknessTexture',
         ],
         positiveNumberList: [
-            {key:'KHR_iridescenceFactor',value:0.0},
-            {key:'KHR_iridescenceIor',value:1.3},
-            {key:'KHR_iridescenceThicknessMinimum',value:100},
-            {key:'KHR_iridescenceThicknessMaximum',value:400},
+            {key: 'KHR_iridescenceFactor', value: 0.0},
+            {key: 'KHR_iridescenceIor', value: 1.3},
+            {key: 'KHR_iridescenceThicknessMinimum', value: 100},
+            {key: 'KHR_iridescenceThicknessMaximum', value: 400},
         ]
     }
 ]
@@ -987,20 +987,20 @@ class PBRMaterial extends ABitmapBaseMaterial {
 
 DefineUniformProperty.definePositiveNumber(PBRMaterial,
     [
-        {key: 'emissiveStrength',value:1},
-        {key: 'normalScale',value:1}
+        {key: 'emissiveStrength', value: 1},
+        {key: 'normalScale', value: 1}
     ]
 )
 const defineTexture = (textureList: string[], useSampler: boolean) => {
     textureList?.forEach(key => {
         DefineUniformProperty.defineBoolean(PBRMaterial, [
-            {key: `use${key.charAt(0).toUpperCase()}${key.substring(1)}`,value:false}
+            {key: `use${key.charAt(0).toUpperCase()}${key.substring(1)}`, value: false}
         ])
         DefineUniformProperty.definePositiveNumber(PBRMaterial, [
             {key: `${key}_KHR_texture_transform_rotation`, value: 0},
         ]);
         DefineUniformProperty.defineBoolean(PBRMaterial, [
-            {key: `use_${key}_KHR_texture_transform`,value:false},
+            {key: `use_${key}_KHR_texture_transform`, value: false},
         ])
         DefineUniformProperty.defineVector2(PBRMaterial, [
             {key: `${key}_KHR_texture_transform_offset`},
@@ -1008,7 +1008,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
         ])
         //
         DefineUniformProperty.defineUint(PBRMaterial, [
-            {key: `${key}_texCoord_index`,value:0}
+            {key: `${key}_texCoord_index`, value: 0}
         ])
         //
         DefineUniformProperty.defineTexture(PBRMaterial, [
@@ -1025,7 +1025,10 @@ const extensionDefine = (defineList) => {
     defineList.forEach(v => {
         const {extensionName, textureList, useSampler} = v;
         const {positiveNumberList, vec3List, vec4List} = v;
-        if (extensionName) DefineUniformProperty.defineBoolean(PBRMaterial, [{key: `use${extensionName}`,value:false}])
+        if (extensionName) DefineUniformProperty.defineBoolean(PBRMaterial, [{
+            key: `use${extensionName}`,
+            value: false
+        }])
         defineTexture(textureList, !useSampler)
         positiveNumberList?.forEach(v => {
             DefineUniformProperty.definePositiveNumber(PBRMaterial, [
@@ -1051,15 +1054,15 @@ DefineUniformProperty.definePositiveNumber(PBRMaterial, [
     {key: 'KHR_dispersion', value: 0},
 ]);
 DefineUniformProperty.defineUint(PBRMaterial, [
-    {key: 'alphaBlend',value:0},
+    {key: 'alphaBlend', value: 0},
 ])
 DefineUniformProperty.defineBoolean(PBRMaterial, [
-    {key: 'doubleSided',value:false},
-    {key: 'useCutOff',value:false},
-    {key: 'useVertexColor',value:false},
-    {key: 'useVertexTangent',value:false},
+    {key: 'doubleSided', value: false},
+    {key: 'useCutOff', value: false},
+    {key: 'useVertexColor', value: false},
+    {key: 'useVertexTangent', value: false},
     //
-    {key: 'useKHR_materials_unlit',value:false},
+    {key: 'useKHR_materials_unlit', value: false},
     //
     {key: 'useSSR', value: true}
 ])

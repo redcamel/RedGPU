@@ -5,10 +5,11 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 
-interface HueSaturation{
+interface HueSaturation {
     hue: number
     saturation: number
 }
+
 /**
  * [KO] 색상/채도(Hue/Saturation) 후처리 이펙트입니다.
  * [EN] Hue/Saturation post-processing effect.
@@ -46,6 +47,7 @@ class HueSaturation extends ASinglePassPostEffect {
     }
 
 }
+
 DefineUniformProperty.defineNumber(HueSaturation, [
     {key: 'hue', value: 0, min: -180, max: 180},
     {key: 'saturation', value: 0, min: -100, max: 100}
