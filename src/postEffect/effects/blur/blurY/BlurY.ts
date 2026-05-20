@@ -4,7 +4,10 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-
+import {DefineUniformProperty} from "../../../../defineProperty";
+interface BlurY {
+    size: number
+}
 /**
  * [KO] Y축 방향 블러 후처리 효과를 제공하는 클래스입니다.
  * [EN] Class that provides Y-axis blur post-processing effect.
@@ -19,13 +22,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Blur
  */
 class BlurY extends ASinglePassPostEffect {
-    /**
-     * [KO] 블러 강도입니다.
-     * [EN] Blur strength.
-     * @defaultValue 32
-     * @private
-     */
-    #size: number = 32
 
     /**
      * [KO] BlurY 인스턴스를 생성합니다.
@@ -42,31 +38,13 @@ class BlurY extends ASinglePassPostEffect {
             'POST_EFFECT_BLUR_Y',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.size = this.#size
-    }
 
-    /**
-     * [KO] 블러 강도를 반환합니다.
-     * [EN] Returns the blur strength.
-     */
-    get size(): number {
-        return this.#size;
-    }
-
-    /**
-     * [KO] 블러 강도를 설정합니다. (최소 0)
-     * [EN] Sets the blur strength. (Minimum 0)
-     *
-     * @param value
-     * [KO] 블러 강도
-     * [EN] Blur strength
-     */
-    set size(value: number) {
-        validateNumberRange(value, 0)
-        this.#size = value;
-        this.updateUniform('size', value)
     }
 }
+
+DefineUniformProperty.definePositiveNumber(BlurY, [
+    {key: 'size', value: 32, min: 0, max: 512}
+])
 
 Object.freeze(BlurY)
 export default BlurY

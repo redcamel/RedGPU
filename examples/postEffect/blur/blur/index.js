@@ -28,7 +28,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
 
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        
+
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -78,38 +78,40 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui: pane => {
+
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                Blur: true,
+                size: effect.size,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'Blur').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.Blur(redGPUContext);
+                    newEffect.size = TEST_STATE.size;
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                sizeControl.disabled = !v.value;
+            });
+
+            const sizeControl = folder.addBinding(TEST_STATE, 'size', {min: 0, max: 100}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.size = v.value
+            })
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
 
-    const TEST_STATE = {
-        Blur: true,
-        size: effect.size,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'Blur').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.Blur(redGPUContext);
-            newEffect.size = TEST_STATE.size;
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        sizeControl.disabled = !v.value;
-    });
-
-    const sizeControl = folder.addBinding(TEST_STATE, 'size', {min: 0, max: 100}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.size = v.value
-    })
 };

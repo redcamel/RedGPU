@@ -78,54 +78,55 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                RadialBlur: true,
+                amount: effect.amount,
+                centerX: effect.centerX,
+                centerY: effect.centerY,
+                sampleCount: effect.sampleCount,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'RadialBlur').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.RadialBlur(redGPUContext);
+                    Object.assign(newEffect, TEST_STATE);
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                controls.forEach(c => c.disabled = !v.value);
+            });
+
+            const controls = [];
+            controls.push(folder.addBinding(TEST_STATE, 'amount', {min: 0, max: 300}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.amount = v.value
+            }));
+            controls.push(folder.addBinding(TEST_STATE, 'centerX', {min: -500, max: 500}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.centerX = v.value
+            }));
+            controls.push(folder.addBinding(TEST_STATE, 'centerY', {min: -500, max: 500}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.centerY = v.value
+            }));
+            controls.push(folder.addBinding(TEST_STATE, 'sampleCount', {min: 4, max: 32, step: 1}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.sampleCount = v.value
+            }));
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
 
-    const TEST_STATE = {
-        RadialBlur: true,
-        amount: effect.amount,
-        centerX: effect.centerX,
-        centerY: effect.centerY,
-        sampleCount: effect.sampleCount,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'RadialBlur').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.RadialBlur(redGPUContext);
-            Object.assign(newEffect, TEST_STATE);
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        controls.forEach(c => c.disabled = !v.value);
-    });
-
-    const controls = [];
-    controls.push(folder.addBinding(TEST_STATE, 'amount', {min: 0, max: 300}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.amount = v.value
-    }));
-    controls.push(folder.addBinding(TEST_STATE, 'centerX', {min: -500, max: 500}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.centerX = v.value
-    }));
-    controls.push(folder.addBinding(TEST_STATE, 'centerY', {min: -500, max: 500}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.centerY = v.value
-    }));
-    controls.push(folder.addBinding(TEST_STATE, 'sampleCount', {min: 4, max: 32, step: 1}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.sampleCount = v.value
-    }));
 };

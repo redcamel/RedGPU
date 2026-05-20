@@ -78,38 +78,38 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                BlurY: true,
+                size: effect.size,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'BlurY').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.BlurY(redGPUContext);
+                    newEffect.size = TEST_STATE.size;
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                sizeControl.disabled = !v.value;
+            });
+
+            const sizeControl = folder.addBinding(TEST_STATE, 'size', {min: 0, max: 100}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.size = v.value
+            })
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
-
-    const TEST_STATE = {
-        BlurY: true,
-        size: effect.size,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'BlurY').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.BlurY(redGPUContext);
-            newEffect.size = TEST_STATE.size;
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        sizeControl.disabled = !v.value;
-    });
-
-    const sizeControl = folder.addBinding(TEST_STATE, 'size', {min: 0, max: 100}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.size = v.value
-    })
 };
