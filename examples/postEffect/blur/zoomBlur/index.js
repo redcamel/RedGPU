@@ -78,51 +78,52 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                ZoomBlur: true,
+                amount: effect.amount,
+                centerX: effect.centerX,
+                centerY: effect.centerY,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'ZoomBlur').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.ZoomBlur(redGPUContext);
+                    newEffect.amount = TEST_STATE.amount;
+                    newEffect.centerX = TEST_STATE.centerX;
+                    newEffect.centerY = TEST_STATE.centerY;
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                controls.forEach(c => c.disabled = !v.value);
+            });
+
+            const controls = [];
+            controls.push(folder.addBinding(TEST_STATE, 'amount', {min: 0, max: 300}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.amount = v.value
+            }));
+            controls.push(folder.addBinding(TEST_STATE, 'centerX', {min: -500, max: 500}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.centerX = v.value
+            }));
+            controls.push(folder.addBinding(TEST_STATE, 'centerY', {min: -500, max: 500}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.centerY = v.value
+            }));
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
-
-    const TEST_STATE = {
-        ZoomBlur: true,
-        amount: effect.amount,
-        centerX: effect.centerX,
-        centerY: effect.centerY,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'ZoomBlur').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.ZoomBlur(redGPUContext);
-            newEffect.amount = TEST_STATE.amount;
-            newEffect.centerX = TEST_STATE.centerX;
-            newEffect.centerY = TEST_STATE.centerY;
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        controls.forEach(c => c.disabled = !v.value);
-    });
-
-    const controls = [];
-    controls.push(folder.addBinding(TEST_STATE, 'amount', {min: 0, max: 300}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.amount = v.value
-    }));
-    controls.push(folder.addBinding(TEST_STATE, 'centerX', {min: -500, max: 500}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.centerX = v.value
-    }));
-    controls.push(folder.addBinding(TEST_STATE, 'centerY', {min: -500, max: 500}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.centerY = v.value
-    }));
 };

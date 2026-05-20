@@ -72,23 +72,24 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const TEST_STATE = {
+                Sharpen: true,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+            folder.addBinding(TEST_STATE, 'Sharpen').on('change', (v) => {
+                if (v.value) targetView.postEffectManager.addEffect(new RedGPU.PostEffect.Sharpen(redGPUContext))
+                else targetView.postEffectManager.removeAllEffect()
+            });
         }
     });
 
-    const pane = new Pane();
-    const TEST_STATE = {
-        Sharpen: true,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    folder.addBinding(TEST_STATE, 'Sharpen').on('change', (v) => {
-        if (v.value) targetView.postEffectManager.addEffect(new RedGPU.PostEffect.Sharpen(redGPUContext))
-        else targetView.postEffectManager.removeAllEffect()
-    });
+
 };
