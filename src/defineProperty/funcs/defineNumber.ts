@@ -5,7 +5,7 @@ import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
 export interface IDefineNumber {
     key: string;
-    value?: number;
+    value: number;
     min?: number;
     max?: number;
 }
@@ -35,7 +35,7 @@ function createSetter(
 function defineNumber_func(
     propertyKey: IDefineNumber
 ) {
-    const {key, value = 1, min: minVal, max: maxVal} = propertyKey;
+    const {key, value = 0, min: minVal, max: maxVal} = propertyKey;
     const symbol = Symbol(key);
     return {
         get: function (): number {
