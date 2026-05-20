@@ -77,7 +77,7 @@ class Convolution extends ASinglePassPostEffect {
      * [EN] Currently applied kernel
      * @defaultValue BLUR
      */
-    #kernel: number[] = BLUR;
+    #kernel: number[] = EDGE;
 
     /**
      * [KO] Convolution 인스턴스를 생성합니다.
@@ -94,7 +94,6 @@ class Convolution extends ASinglePassPostEffect {
             'POST_EFFECT_CONVOLUTION',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.kernel = this.#kernel
     }
 
     /**
@@ -112,9 +111,8 @@ class Convolution extends ASinglePassPostEffect {
     set kernel(value: number[]) {
         this.#kernel = value;
         let kernelWeight = 0;
-        for (const k in this.#kernel) kernelWeight += this.#kernel[k];
-        console.log('kernelWeight', kernelWeight);
-        this.updateUniform('kernelWeight', kernelWeight)
+        this.#kernel.forEach(v => kernelWeight += v);
+        this.updateUniform('kernelWeight', kernelWeight || 1)
         this.updateUniform('kernel', value)
     }
 }

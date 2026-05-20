@@ -132,11 +132,12 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             targetContainer: container
         },
         gui: (pane) => {
+            const effect = targetView.postEffectManager.getEffectAt(0);
             const TEST_STATE = {
                 Convolution: true,
                 kernel: 'BLUR',
                 useCustomKernel: false,
-                customMatrix: [...targetView.postEffectManager.getEffectAt(0).kernel]
+                customMatrix: [...effect.kernel]
             };
 
             const convolutionMatrices = {
@@ -144,7 +145,7 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                 SHARPEN: RedGPU.PostEffect.Convolution.SHARPEN,
                 BLUR: RedGPU.PostEffect.Convolution.BLUR,
                 EDGE: RedGPU.PostEffect.Convolution.EDGE,
-                EMBOSE: RedGPU.PostEffect.Convolution.EMBOSE,
+                EMBOSS: RedGPU.PostEffect.Convolution.EMBOSS,
             };
 
             const updateEffectKernel = () => {
@@ -161,73 +162,60 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             folder.addBinding(TEST_STATE, 'Convolution').on('change', (v) => {
                 if (v.value) {
                     const effect = new RedGPU.PostEffect.Convolution(redGPUContext);
-                    effect.kernel = TEST_STATE.useCustomKernel
-                        ? TEST_STATE.customMatrix
-                        : convolutionMatrices[TEST_STATE.kernel];
                     targetView.postEffectManager.addEffect(effect);
+                    updateEffectKernel();
                 } else {
                     targetView.postEffectManager.removeAllEffect();
                 }
 
-                typeControl.disabled = !v.value && TEST_STATE.useCustomKernel;
-                customMatrixFolder.hidden = !v.value;
+                typeControl.disabled = !v.value || TEST_STATE.useCustomKernel;
+                useCustomBinding.disabled = !v.value;
+                customMatrixFolder.hidden = !v.value || !TEST_STATE.useCustomKernel;
             });
 
             // 필터 타입 선택
             const typeControl = folder.addBinding(TEST_STATE, 'kernel', {
+                label: 'Kernel Preset',
                 options: {
                     Normal: 'NORMAL',
                     Sharpen: 'SHARPEN',
                     Blur: 'BLUR',
                     Edge: 'EDGE',
-                    Embose: 'EMBOSE',
+                    Emboss: 'EMBOSS',
                 },
             }).on('change', (v) => {
-                const effect = targetView.postEffectManager.getEffectAt(0);
-                if (effect) {
-                    TEST_STATE.customMatrix.forEach(
-                        (_, index) => (TEST_STATE.customMatrix[index] = convolutionMatrices[v.value][index])
-                    );
-                    updateEffectKernel();
-                    pane.refresh();
+                const preset = convolutionMatrices[v.value];
+                for (let i = 0; i < 12; i++) {
+                    TEST_STATE.customMatrix[i] = preset[i];
                 }
+                updateEffectKernel();
+                pane.refresh();
             });
 
-            // Custom Kernel
-            const customMatrixFolder = pane.addFolder({title: 'Custom Kernel', expanded: true});
-            customMatrixFolder.addBinding(TEST_STATE, 'useCustomKernel').on('change', (v) => {
+            // Custom Kernel 활성화
+            const useCustomBinding = folder.addBinding(TEST_STATE, 'useCustomKernel', {label: 'Use Custom Kernel'}).on('change', (v) => {
                 typeControl.disabled = v.value;
-                customMatrixSliders.forEach((slider, index) => {
-                    slider.disabled = !v.value || index % 4 === 3; // useCustomKernel이 false이거나 마지막 컬럼인 경우 비활성화
-                });
-                if (v.value) {
-                    TEST_STATE.customMatrix.forEach(
-                        (_, index) => (TEST_STATE.customMatrix[index] = convolutionMatrices[TEST_STATE.kernel][index])
-                    );
-                    updateEffectKernel();
-                    pane.refresh();
-                } else {
-                    updateEffectKernel();
+                customMatrixFolder.hidden = !v.value;
+                updateEffectKernel();
+            });
+
+            // Custom Kernel Matrix 설정
+            const customMatrixFolder = folder.addFolder({title: 'Custom Kernel (3x3)', expanded: true, hidden: true});
+            for (let i = 0; i < 3; i++) {
+                const rowFolder = customMatrixFolder.addFolder({title: `Row ${i + 1}`, expanded: true});
+                for (let j = 0; j < 3; j++) {
+                    const idx = i * 4 + j;
+                    rowFolder.addBinding(TEST_STATE.customMatrix, idx, {
+                        label: `Col ${j + 1}`,
+                        min: -5,
+                        max: 5,
+                        step: 0.01,
+                    }).on('change', updateEffectKernel);
                 }
-            });
+            }
 
-            // Custom Matrix 입력 슬라이더 생성
-            const customMatrixSliders = [];
-            TEST_STATE.customMatrix.forEach((_, index) => {
-                const slider = customMatrixFolder.addBinding(TEST_STATE.customMatrix, index, {
-                    min: -2,
-                    max: 2,
-                    step: 0.001,
-                    label: `Row ${Math.floor(index / 4) + 1}, Col ${index % 4 + 1}`,
-                });
-                slider.disabled = true; // 마지막 컬럼 비활성화
-                customMatrixSliders.push(slider);
-            });
-
-            // 값 변경 시 반영
-            pane.on('change', updateEffectKernel);
+            // 초기 상태 동기화
+            updateEffectKernel();
         }
     });
-
-
 };
