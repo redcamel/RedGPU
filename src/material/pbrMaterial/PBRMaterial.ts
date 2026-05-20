@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../defineProperty/old/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
@@ -7,9 +6,9 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
 import DefineUniformProperty, {
+    IDefinePositiveNumber,
     IDefineVector3,
-    IDefineVector4,
-    IDefinePositiveNumber
+    IDefineVector4
 } from "../../defineProperty/DefineUniformProperty";
 
 const EXTENSION_LIST:{
@@ -607,12 +606,12 @@ interface PBRMaterial {
     emissiveTexture_texCoord_index: number
     /**
      * [KO] 발광 팩터
-     * [EN] Emissive factor
+     * [EN] emissive factor
      */
     emissiveFactor: number[]
     /**
      * [KO] 발광 강도
-     * [EN] Emissive strength
+     * [EN] emissive strength
      */
     emissiveStrength: number[]
     //
@@ -1009,11 +1008,11 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
         ])
         //
         DefineUniformProperty.defineUint(PBRMaterial, [
-            {key: `${key}_texCoord_index`,value:0},
+            {key: `${key}_texCoord_index`,value:0}
         ])
         //
-        DefineForFragment.defineTexture(PBRMaterial, [
-            key
+        DefineUniformProperty.defineTexture(PBRMaterial, [
+            {key: key}
         ])
         if (useSampler) {
             DefineUniformProperty.defineSampler(PBRMaterial, [

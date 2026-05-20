@@ -5,6 +5,7 @@ import defineCubeTexture, {IDefineCubeTexture} from "./funcs/defineCubeTexture";
 import defineNumber, {IDefineNumber} from "./funcs/defineNumber";
 import definePositiveNumber, {IDefinePositiveNumber} from "./funcs/definePositiveNumber";
 import defineSampler from "./funcs/defineSampler";
+import defineTexture, {IDefineTexture} from "./funcs/defineTexture";
 import defineUint, {IDefineUint} from "./funcs/defineUint";
 import defineVector2, {IDefineVector2} from "./funcs/defineVector2";
 import defineVector3, {IDefineVector3} from "./funcs/defineVector3";
@@ -20,7 +21,8 @@ export {
     IDefineNumber,
     IDefinePositiveNumber,
     IDefineUint,
-    IDefineCubeTexture
+    IDefineCubeTexture,
+    IDefineTexture
 };
 
 /**
@@ -40,6 +42,7 @@ const DefineUniformProperty = {
     defineNumber,
     defineSampler,
     definePositiveNumber,
+    defineTexture,
     defineUint,
     defineVector2,
     defineVector3,

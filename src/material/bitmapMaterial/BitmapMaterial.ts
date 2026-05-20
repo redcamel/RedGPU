@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../defineProperty/old/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
@@ -81,8 +80,8 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
 DefineUniformProperty.defineSampler(BitmapMaterial, [
     'diffuseTextureSampler'
 ])
-DefineForFragment.defineByPreset(BitmapMaterial, [
-    DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
+DefineUniformProperty.defineTexture(BitmapMaterial, [
+    {key:'diffuseTexture'}
 ])
 
 Object.freeze(BitmapMaterial)

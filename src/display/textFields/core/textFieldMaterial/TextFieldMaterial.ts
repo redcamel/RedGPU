@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import DefineForFragment from "../../../../defineProperty/old/DefineForFragment";
 import ABitmapBaseMaterial from "../../../../material/core/ABitmapBaseMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
@@ -58,8 +57,8 @@ DefineUniformProperty.defineSampler(TextFieldMaterial, [
 /**
  * 프래그먼트 셰이더에서 사용할 텍스처 및 샘플러 속성을 정의합니다.
  */
-DefineForFragment.defineByPreset(TextFieldMaterial, [
-    DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
+DefineUniformProperty.defineTexture(TextFieldMaterial, [
+    {key:'diffuseTexture'}
 ])
 /**
  * `TextFieldMaterial` 클래스의 속성을 변경할 수 없도록 고정합니다.

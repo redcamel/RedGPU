@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import DefineForFragment from "../../../../defineProperty/old/DefineForFragment";
 import ABitmapBaseMaterial from "../../../../material/core/ABitmapBaseMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
@@ -66,7 +65,9 @@ DefineUniformProperty.defineCubeTexture(SkyBoxMaterial, [
     {key: 'texture0'},
     {key: 'transitionTexture'}
 ])
-DefineForFragment.defineTexture(SkyBoxMaterial, ['transitionMask'])
+DefineUniformProperty.defineTexture(SkyBoxMaterial, [
+    {key: 'transitionMask'}
+])
 DefineUniformProperty.defineSampler(SkyBoxMaterial, ['sampler0'])
 
 Object.freeze(SkyBoxMaterial)

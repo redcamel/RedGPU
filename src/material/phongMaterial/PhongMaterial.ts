@@ -1,6 +1,5 @@
 import ColorRGB from "../../color/ColorRGB";
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../defineProperty/old/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
@@ -257,20 +256,14 @@ DefineUniformProperty.defineColorRGB(PhongMaterial, [
     { key: 'emissiveColor', value: '#000000' },
     { key: 'specularColor', value: '#ffffff' }
 ])
-DefineForFragment.defineByPreset(PhongMaterial, [
-    //
-    DefineForFragment.PRESET_TEXTURE.ALPHA_TEXTURE,
-    //
-    DefineForFragment.PRESET_TEXTURE.AO_TEXTURE,
-    //
-    DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
-    //
-    DefineForFragment.PRESET_TEXTURE.EMISSIVE_TEXTURE,
-    //
-    DefineForFragment.PRESET_TEXTURE.NORMAL_TEXTURE,
-    //
-    DefineForFragment.PRESET_TEXTURE.SPECULAR_TEXTURE,
-    //
+DefineUniformProperty.defineTexture(PhongMaterial, [
+    {key: 'alphaTexture'},
+    {key: 'aoTexture'},
+    {key: 'diffuseTexture'},
+    {key: 'emissiveTexture'},
+    {key: 'environmentTexture'},
+    {key: 'normalTexture'},
+    {key: 'specularTexture'},
 ])
 DefineUniformProperty.defineBoolean(PhongMaterial, [
     {key: 'useSSR', value: false}
