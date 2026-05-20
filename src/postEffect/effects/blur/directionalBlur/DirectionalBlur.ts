@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import {DefineUniformProperty} from "../../../../defineProperty";
 
 /**
  * [KO] 방향성 블러(Directional Blur) 후처리 이펙트입니다.
@@ -24,12 +24,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Blur
  */
 class DirectionalBlur extends ASinglePassPostEffect {
-    /**
-     * [KO] 블러 강도 (최소 0)
-     * [EN] Blur strength (Minimum 0)
-     * @defaultValue 15
-     */
-    #amount: number = 15
+
     /**
      * [KO] 블러 각도 (0 = 오른쪽)
      * [EN] Blur angle (0 = Right)
@@ -52,8 +47,6 @@ class DirectionalBlur extends ASinglePassPostEffect {
             'POST_EFFECT_DIRECTIONAL_BLUR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.amount = this.#amount
-        this.angle = this.#angle
     }
 
     /**
@@ -78,27 +71,6 @@ class DirectionalBlur extends ASinglePassPostEffect {
         this.#updateDirection();
     }
 
-    /**
-     * [KO] 블러 강도를 반환합니다.
-     * [EN] Returns the blur strength.
-     */
-    get amount(): number {
-        return this.#amount;
-    }
-
-    /**
-     * [KO] 블러 강도를 설정합니다. (최소 0)
-     * [EN] Sets the blur strength. (Minimum 0)
-     *
-     * @param value
-     * [KO] 강도
-     * [EN] Strength
-     */
-    set amount(value: number) {
-        validateNumberRange(value, 0)
-        this.#amount = value;
-        this.updateUniform('amount', value)
-    }
 
     // 내부 메서드: 각도를 방향 벡터로 변환
     #updateDirection() {
@@ -110,5 +82,8 @@ class DirectionalBlur extends ASinglePassPostEffect {
     }
 }
 
+DefineUniformProperty.definePositiveNumber(DirectionalBlur, [
+    {key: 'amount', value: 15}
+])
 Object.freeze(DirectionalBlur)
 export default DirectionalBlur
