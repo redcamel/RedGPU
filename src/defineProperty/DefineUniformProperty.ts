@@ -1,23 +1,23 @@
-import defineBoolean, {IBoolean} from "./funcs/defineBoolean";
+import defineBoolean, {IDefineBoolean} from "./funcs/defineBoolean";
 import defineColorRGB, {IColorRGB} from "./funcs/defineColorRGB";
 import defineColorRGBA, {IColorRGBA} from "./funcs/defineColorRGBA";
-import defineNumber, {INumberRange} from "./funcs/defineNumber";
-import definePositiveNumber, {IPositiveNumberRange} from "./funcs/definePositiveNumber";
+import defineNumber, {IDefineNumber} from "./funcs/defineNumber";
+import definePositiveNumber, {IDefinePositiveNumber} from "./funcs/definePositiveNumber";
 import defineSampler from "./funcs/defineSampler";
 import defineUint, {IUintRange} from "./funcs/defineUint";
-import defineVector2, {IDefineVec2} from "./funcs/defineVector2";
-import defineVector3, {IDefineVec3} from "./funcs/defineVector3";
-import defineVector4, {IDefineVec4} from "./funcs/defineVector4";
+import defineVector2, {IDefineVector2} from "./funcs/defineVector2";
+import defineVector3, {IDefineVector3} from "./funcs/defineVector3";
+import defineVector4, {IDefineVector4} from "./funcs/defineVector4";
 
 export {
-    IBoolean,
+    IDefineBoolean,
     IColorRGB,
     IColorRGBA,
-    IDefineVec2,
-    IDefineVec3,
-    IDefineVec4,
-    INumberRange,
-    IPositiveNumberRange,
+    IDefineVector2,
+    IDefineVector3,
+    IDefineVector4,
+    IDefineNumber,
+    IDefinePositiveNumber,
     IUintRange
 };
 

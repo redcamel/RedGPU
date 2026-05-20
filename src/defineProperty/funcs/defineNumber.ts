@@ -3,7 +3,7 @@ import applyProperties from "../core/applyProperties";
 import updateTargetUniform from "../core/updateTargetUniform";
 import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
-export interface INumberRange {
+export interface IDefineNumber {
     key: string;
     value?: number;
     min?: number;
@@ -34,7 +34,7 @@ function createSetter(
 }
 
 function defineNumber_func(
-    propertyKey: string | INumberRange,
+    propertyKey: string | IDefineNumber,
     initValue: number = 1,
     min?: number,
     max?: number
@@ -79,7 +79,7 @@ function defineNumber_func(
  * DefineUniformProperty.defineNumber(MyMaterial, [{ key: 'myValue', value: 0, min: -100, max: 100 }]);
  * ```
  */
-const defineNumber = (target: any, keys: string | (string | INumberRange | [string, number?, number?, number?])[]) => applyProperties(target, keys, defineNumber_func);
+const defineNumber = (target: any, keys: string | (string | IDefineNumber | [string, number?, number?, number?])[]) => applyProperties(target, keys, defineNumber_func);
 
 Object.freeze(defineNumber);
 export default defineNumber;

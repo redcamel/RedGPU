@@ -1,12 +1,12 @@
 import applyProperties from "../core/applyProperties";
 import defineVector from "../core/defineVector";
 
-export interface IDefineVec2 {
+export interface IDefineVector2 {
     key: string,
     value: [number, number]
 }
 
-function defineVector2_func(propertyKey: string | IDefineVec2, initValue: [number, number] = [0, 0]) {
+function defineVector2_func(propertyKey: string | IDefineVector2, initValue: [number, number] = [0, 0]) {
     if (typeof propertyKey === 'object') {
         return defineVector(propertyKey.key, propertyKey.value);
     }
@@ -32,7 +32,7 @@ function defineVector2_func(propertyKey: string | IDefineVec2, initValue: [numbe
  * DefineUniformProperty.defineVector2(MyMaterial, [{ key: 'vec0', value: [1, 0] }]);
  * ```
  */
-const defineVector2 = (target: any, keys: string | (string | IDefineVec2 | [string, [number, number]])[]) => applyProperties(target, keys, defineVector2_func);
+const defineVector2 = (target: any, keys: string | (string | IDefineVector2 | [string, [number, number]])[]) => applyProperties(target, keys, defineVector2_func);
 
 Object.freeze(defineVector2)
 export default defineVector2;

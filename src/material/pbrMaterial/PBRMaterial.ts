@@ -6,15 +6,25 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
-import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
+import DefineUniformProperty, {
+    IDefineVector3,
+    IDefineVector4,
+    IDefinePositiveNumber
+} from "../../defineProperty/DefineUniformProperty";
 
-const EXTENSION_LIST = [
+const EXTENSION_LIST:{
+    textureList?: string[],
+    vec4List?: IDefineVector4[],
+    vec3List?: IDefineVector3[],
+    positiveNumberList?: IDefinePositiveNumber[],
+    extensionName?: string,
+}[] = [
     {
         textureList: [
             'baseColorTexture',
         ],
         vec4List: [
-            ['baseColorFactor', [1, 1, 1, 1]]
+            {key: 'baseColorFactor',value:[1,1,1,1]},
         ]
     },
     {
@@ -27,8 +37,8 @@ const EXTENSION_LIST = [
             'metallicRoughnessTexture',
         ],
         positiveNumberList: [
-            'metallicFactor',
-            'roughnessFactor',
+            {key:'metallicFactor',value:1},
+            {key:'roughnessFactor',value:1},
         ]
     },
     {
@@ -36,7 +46,7 @@ const EXTENSION_LIST = [
             'emissiveTexture',
         ],
         vec3List: [
-            'emissiveFactor',
+            {key: 'emissiveFactor',value:[0,0,0]}
         ]
     },
     {
@@ -44,7 +54,7 @@ const EXTENSION_LIST = [
             'occlusionTexture',
         ],
         positiveNumberList: [
-            'occlusionStrength',
+            {key:'occlusionStrength',value:1},
         ]
     },
     {
@@ -55,9 +65,9 @@ const EXTENSION_LIST = [
             'KHR_clearcoatRoughnessTexture',
         ],
         positiveNumberList: [
-            ['KHR_clearcoatFactor', 0],
-            ['KHR_clearcoatRoughnessFactor', 0],
-            'KHR_clearcoatNormalScale',
+            {key:'KHR_clearcoatFactor',value:0},
+            {key:'KHR_clearcoatRoughnessFactor',value:0},
+            {key:'KHR_clearcoatNormalScale',value:1},
         ]
     },
     {
@@ -67,10 +77,10 @@ const EXTENSION_LIST = [
             'KHR_sheenRoughnessTexture',
         ],
         positiveNumberList: [
-            ['KHR_sheenRoughnessFactor', 0]
+            {key:'KHR_sheenRoughnessFactor',value:0},
         ],
         vec3List: [
-            ['KHR_sheenColorFactor', [0, 0, 0]]
+            {key:'KHR_sheenColorFactor',value:[0,0,0]}
         ]
     },
     {
@@ -80,10 +90,10 @@ const EXTENSION_LIST = [
             'KHR_specularColorTexture',
         ],
         positiveNumberList: [
-            'KHR_specularFactor',
+            {key:'KHR_specularFactor',value:1},
         ],
         vec3List: [
-            ['KHR_specularColorFactor', [1, 1, 1]],
+            {key:'KHR_specularColorFactor', value : [1, 1, 1]},
         ]
     },
     {
@@ -92,7 +102,7 @@ const EXTENSION_LIST = [
             'KHR_transmissionTexture',
         ],
         positiveNumberList: [
-            ['KHR_transmissionFactor', 0],
+            {key:'KHR_transmissionFactor',value:0},
         ],
     },
     {
@@ -101,11 +111,11 @@ const EXTENSION_LIST = [
             'KHR_thicknessTexture',
         ],
         positiveNumberList: [
-            ['KHR_thicknessFactor', 0],
-            ['KHR_attenuationDistance', 1],
+            {key:'KHR_thicknessFactor',value:0},
+            {key:'KHR_attenuationDistance',value:1},
         ],
         vec3List: [
-            ['KHR_attenuationColor', [1, 1, 1]],
+            {key:'KHR_attenuationColor', value : [1, 1, 1]},
         ]
     },
     {
@@ -115,10 +125,10 @@ const EXTENSION_LIST = [
             'KHR_diffuseTransmissionColorTexture',
         ],
         positiveNumberList: [
-            ['KHR_diffuseTransmissionFactor', 0],
+            {key:'KHR_diffuseTransmissionFactor',value:0},
         ],
         vec3List: [
-            ['KHR_diffuseTransmissionColorFactor', [1, 1, 1]],
+            {key:'KHR_diffuseTransmissionColorFactor', value:[1, 1, 1]},
         ]
     },
     {
@@ -127,8 +137,8 @@ const EXTENSION_LIST = [
             'KHR_anisotropyTexture',
         ],
         positiveNumberList: [
-            ['KHR_anisotropyStrength', 0],
-            ['KHR_anisotropyRotation', 0],
+            {key:'KHR_anisotropyStrength',value:0},
+            {key:'KHR_anisotropyRotation',value:0},
         ]
     },
     {
@@ -138,10 +148,10 @@ const EXTENSION_LIST = [
             'KHR_iridescenceThicknessTexture',
         ],
         positiveNumberList: [
-            ['KHR_iridescenceFactor', 0.0],
-            ['KHR_iridescenceIor', 1.3],
-            ['KHR_iridescenceThicknessMinimum', 100],
-            ['KHR_iridescenceThicknessMaximum', 400],
+            {key:'KHR_iridescenceFactor',value:0.0},
+            {key:'KHR_iridescenceIor',value:1.3},
+            {key:'KHR_iridescenceThicknessMinimum',value:100},
+            {key:'KHR_iridescenceThicknessMaximum',value:400},
         ]
     }
 ]

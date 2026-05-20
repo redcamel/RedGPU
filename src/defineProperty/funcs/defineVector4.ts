@@ -1,12 +1,12 @@
 import applyProperties from "../core/applyProperties";
 import defineVector from "../core/defineVector";
 
-export interface IDefineVec4 {
+export interface IDefineVector4 {
     key: string,
     value: [number, number, number, number]
 }
 
-function defineVector4_func(propertyKey: string | IDefineVec4, initValue: [number, number, number, number] = [0, 0, 0, 0]) {
+function defineVector4_func(propertyKey: string | IDefineVector4, initValue: [number, number, number, number] = [0, 0, 0, 0]) {
     if (typeof propertyKey === 'object') {
         return defineVector(propertyKey.key, propertyKey.value);
     }
@@ -30,7 +30,7 @@ function defineVector4_func(propertyKey: string | IDefineVec4, initValue: [numbe
  * DefineUniformProperty.defineVector4(MyMaterial, [{ key: 'vec0', value: [1, 0, 0, 1] }]);
  * ```
  */
-const defineVector4 = (target: any, keys: string | (string | IDefineVec4 | [string, [number, number, number, number]])[]) => applyProperties(target, keys, defineVector4_func);
+const defineVector4 = (target: any, keys: string | (string | IDefineVector4 | [string, [number, number, number, number]])[]) => applyProperties(target, keys, defineVector4_func);
 
 Object.freeze(defineVector4)
 export default defineVector4;

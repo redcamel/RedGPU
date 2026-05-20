@@ -3,7 +3,7 @@ import applyProperties from "../core/applyProperties";
 import updateTargetUniform from "../core/updateTargetUniform";
 import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
-export interface IPositiveNumberRange {
+export interface IDefinePositiveNumber {
     key: string;
     value?: number;
     min?: number;
@@ -35,7 +35,7 @@ function createSetter(
 }
 
 function definePositiveNumberRange_func(
-    propertyKey: string | IPositiveNumberRange,
+    propertyKey: string | IDefinePositiveNumber,
     initValue: number = 1,
     min: number = 0,
     max?: number
@@ -80,7 +80,7 @@ function definePositiveNumberRange_func(
  * DefineUniformProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
  * ```
  */
-const definePositiveNumber = (target: any, keys: string | (string | IPositiveNumberRange | [string, number?, number?, number?])[]) => applyProperties(target, keys, definePositiveNumberRange_func);
+const definePositiveNumber = (target: any, keys: string | (string | IDefinePositiveNumber | [string, number?, number?, number?])[]) => applyProperties(target, keys, definePositiveNumberRange_func);
 
 Object.freeze(definePositiveNumber);
 export default definePositiveNumber;

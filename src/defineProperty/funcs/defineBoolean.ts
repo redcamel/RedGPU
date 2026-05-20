@@ -2,7 +2,7 @@ import applyProperties from "../core/applyProperties";
 import updateTargetUniform from "../core/updateTargetUniform";
 import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
-export interface IBoolean {
+export interface IDefineBoolean {
     key: string;
     value?: boolean;
 }
@@ -27,7 +27,7 @@ function createSetter(
 }
 
 function defineBoolean_func(
-    propertyKey: string | IBoolean,
+    propertyKey: string | IDefineBoolean,
     initValue: boolean = false
 ) {
     if (typeof propertyKey === 'object') {
@@ -70,7 +70,7 @@ function defineBoolean_func(
  * DefineUniformProperty.defineBoolean(MyMaterial, [{ key: 'useAlphaTest', value: true }]);
  * ```
  */
-const defineBoolean = (target: any, keys: string | (string | IBoolean | [string, boolean?])[]) => applyProperties(target, keys, defineBoolean_func);
+const defineBoolean = (target: any, keys: string | (string | IDefineBoolean | [string, boolean?])[]) => applyProperties(target, keys, defineBoolean_func);
 
 Object.freeze(defineBoolean);
 export default defineBoolean;
