@@ -54,7 +54,7 @@ class ColorMaterial extends ABaseMaterial {
     }
 }
 DefineUniformProperty.defineColorRGB(ColorMaterial, [
-    'color',
+    { key: 'color' },
 ])
 Object.freeze(ColorMaterial)
 export default ColorMaterial

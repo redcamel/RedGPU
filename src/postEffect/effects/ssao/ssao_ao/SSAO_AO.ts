@@ -7,6 +7,7 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {DefineUniformProperty} from "../../../../defineProperty";
 interface SSAO_AO {
+    useBlur: boolean;
     contrast: number;
     radius: number;
     intensity: number;

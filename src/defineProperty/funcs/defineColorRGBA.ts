@@ -24,11 +24,10 @@ function createColorRGBA(instance: any, propertyKey: string, symbol: symbol, hex
 }
 
 function defineColorRGBA_func(
-    propertyKey: string | IColorRGBA,
-    initValue: string = '#fff'
+    propertyKey: IColorRGBA
 ) {
-    const key = typeof propertyKey === 'object' ? propertyKey.key : propertyKey;
-    const value = typeof propertyKey === 'object' ? (propertyKey.value ?? '#fff') : initValue;
+    const key = propertyKey.key;
+    const value = propertyKey.value ?? '#fff';
     const symbol = Symbol(key);
 
     return {
@@ -62,19 +61,16 @@ function defineColorRGBA_func(
  * [EN] Defines ColorRGBA properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 키, 키 배열 또는 설정 배열 [EN] Property keys, array of keys, or configuration array
+ * @param keys - [KO] 정의할 속성 설정(IColorRGBA) 또는 설정 배열 [EN] Configuration (IColorRGBA) or array of configurations
  *
  * @example
  * ```typescript
- * // 단일 키 정의
- * DefineUniformProperty.defineColorRGBA(MyMaterial, 'color');
- * // 초기값과 함께 정의 (배열 방식)
- * DefineUniformProperty.defineColorRGBA(MyMaterial, [['color', '#ff0000']]);
  * // 설정 객체 방식 (IColorRGBA)
+ * DefineUniformProperty.defineColorRGBA(MyMaterial, { key: 'color', value: '#00ff00' });
  * DefineUniformProperty.defineColorRGBA(MyMaterial, [{ key: 'color', value: '#00ff00' }]);
  * ```
  */
-const defineColorRGBA = (target: any, keys: string | (string | IColorRGBA | [string, string?])[]) => applyProperties(target, keys, defineColorRGBA_func);
+const defineColorRGBA = (target: any, keys: IColorRGBA | IColorRGBA[]) => applyProperties(target, keys, defineColorRGBA_func);
 
 Object.freeze(defineColorRGBA);
 export default defineColorRGBA;

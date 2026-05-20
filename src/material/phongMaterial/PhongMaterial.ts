@@ -253,9 +253,9 @@ DefineUniformProperty.definePositiveNumber(
     ]
 )
 DefineUniformProperty.defineColorRGB(PhongMaterial, [
-    'color',
-    ['emissiveColor', '#000000'],
-    {key:'specularColor',value:'#ffffff'}
+    { key: 'color' },
+    { key: 'emissiveColor', value: '#000000' },
+    { key: 'specularColor', value: '#ffffff' }
 ])
 DefineForFragment.defineByPreset(PhongMaterial, [
     //
