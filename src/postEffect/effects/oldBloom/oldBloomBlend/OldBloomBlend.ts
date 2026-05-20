@@ -31,7 +31,15 @@ class OldBloomBlend extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_OLD_BLOOM_BLEND',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode, ['sourceTexture0', 'sourceTexture1'])
+            createBasicPostEffectCode(
+                this,
+                computeCode,
+                uniformStructCode,
+                [
+                    {name: 'sourceTexture0'},
+                    {name: 'sourceTexture1'}
+                ]
+            )
         );
 
     }

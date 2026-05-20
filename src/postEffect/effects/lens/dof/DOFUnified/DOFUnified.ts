@@ -7,12 +7,14 @@ import {IPostEffectResult} from "../../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import {DefineUniformProperty} from "../../../../../defineProperty";
+
 interface DOFUnified {
     nearBlurSize: number;
     farBlurSize: number;
     nearStrength: number;
     farStrength: number;
 }
+
 /**
  * [KO] DOF 통합 블러 및 합성 이펙트입니다.
  * [EN] DOF unified blur and compositing effect.
@@ -26,7 +28,15 @@ class DOFUnified extends ASinglePassPostEffect {
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_UNIFIED',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode, ['sourceTexture', 'cocTexture'])
+            createBasicPostEffectCode(
+                this,
+                computeCode,
+                uniformStructCode,
+                [
+                    {name: 'sourceTexture'},
+                    {name: 'cocTexture'}
+                ]
+            )
         );
     }
 
