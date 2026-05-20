@@ -78,38 +78,38 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                Threshold: true,
+                threshold: effect.threshold,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'Threshold').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.Threshold(redGPUContext);
+                    newEffect.threshold = TEST_STATE.threshold;
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                thresholdControl.disabled = !v.value;
+            });
+
+            const thresholdControl = folder.addBinding(TEST_STATE, 'threshold', {min: 1, max: 255}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.threshold = v.value
+            })
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
-
-    const TEST_STATE = {
-        Threshold: true,
-        threshold: effect.threshold,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'Threshold').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.Threshold(redGPUContext);
-            newEffect.threshold = TEST_STATE.threshold;
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        thresholdControl.disabled = !v.value;
-    });
-
-    const thresholdControl = folder.addBinding(TEST_STATE, 'threshold', {min: 1, max: 255}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.threshold = v.value
-    })
 };

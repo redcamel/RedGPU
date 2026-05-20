@@ -1,10 +1,13 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import {DefineUniformProperty} from "../../../../defineProperty";
 
+interface Threshold{
+    threshold:number
+}
 /**
  * [KO] 임계값(Threshold) 후처리 이펙트입니다.
  * [EN] Threshold post-processing effect.
@@ -22,12 +25,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Adjustments
  */
 class Threshold extends ASinglePassPostEffect {
-    /**
-     * [KO] 임계값 (1 ~ 255)
-     * [EN] Threshold (1 ~ 255)
-     * @defaultValue 128
-     */
-    #threshold: number = 128
 
     /**
      * [KO] Threshold 인스턴스를 생성합니다.
@@ -44,27 +41,12 @@ class Threshold extends ASinglePassPostEffect {
             'POST_EFFECT_THRESHOLD',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.threshold = this.#threshold
     }
 
-    /**
-     * [KO] 임계값을 반환합니다.
-     * [EN] Returns the threshold value.
-     */
-    get threshold(): number {
-        return this.#threshold;
-    }
-
-    /**
-     * [KO] 임계값을 설정합니다. (1 ~ 255)
-     * [EN] Sets the threshold value. (1 ~ 255)
-     */
-    set threshold(value: number) {
-        validateNumberRange(value, 1, 255)
-        this.#threshold = value;
-        this.updateUniform('threshold', value)
-    }
 }
+DefineUniformProperty.definePositiveNumber(Threshold, [
+    {key: 'threshold', value: 128, min: 1, max: 255}
+])
 
 Object.freeze(Threshold)
 export default Threshold
