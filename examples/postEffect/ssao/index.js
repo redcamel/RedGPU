@@ -66,7 +66,7 @@ function renderTestPane(redGPUContext) {
         RedGPU,
         ibl: true,
         skybox: true,
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const ssaoFolder = pane.addFolder({title: 'SSAO Parameters', expanded: true});
             const ssao = view.postEffectManager.ssao;
 

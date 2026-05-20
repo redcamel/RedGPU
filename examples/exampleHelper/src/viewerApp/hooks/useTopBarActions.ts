@@ -84,7 +84,7 @@ export const useTopBarActions = () => {
                 guiConfig?.scene ||
                 guiConfig?.ibl ||
                 guiConfig?.skybox ||
-                guiConfig?.guiCallback
+                guiConfig?.gui
             );
 
             if (hasPanels) {

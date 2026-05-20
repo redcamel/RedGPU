@@ -117,7 +117,7 @@ RedGPU.init(
  */
 const renderTestPane = (redGPUContext, controller) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // FollowController 설정
             const followFolder = pane.addFolder({
                 title: 'Follow Controller',

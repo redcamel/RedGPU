@@ -118,7 +118,7 @@ const createChildSprite2D = (redGPUContext, parent) => {
  */
 const renderTestPane = (redGPUContext, rootGroup, parent, child) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const maxW = redGPUContext.screenRectObject.width;
             const maxH = redGPUContext.screenRectObject.height;
 

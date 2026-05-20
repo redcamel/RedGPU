@@ -165,7 +165,7 @@ RedGPU.init(
 
 const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
     new RedGPUExampleHelper(targetView.redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // 1. Sun Configuration
             const f_sun = pane.addFolder({title: 'Sun', expanded: true});
             f_sun.addBinding(sunLight, 'elevation', {min: -90, max: 90, step: 0.1, label: 'Elevation'});

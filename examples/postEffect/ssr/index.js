@@ -93,7 +93,7 @@ function renderTestPane(redGPUContext) {
         RedGPU,
         ibl: true,
         skybox: true,
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const ssrFolder = pane.addFolder({title: 'SSR 옵션 조절'});
             const ssr = view.postEffectManager.ssr;
 

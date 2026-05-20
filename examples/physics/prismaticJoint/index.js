@@ -218,7 +218,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, platformBody, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			const params = {
 				liftPower: 150
 			};

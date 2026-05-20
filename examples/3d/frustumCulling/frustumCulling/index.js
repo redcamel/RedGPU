@@ -97,7 +97,7 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
     };
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
 
             const cullingFolder = pane.addFolder({title: 'Frustum Culling', expanded: true});
             cullingFolder.addBinding(config, 'showBoundingBoxes').on('change', (evt) => {

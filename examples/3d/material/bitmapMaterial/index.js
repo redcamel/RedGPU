@@ -71,7 +71,7 @@ const createSampleMesh = (redGPUContext, scene) => {
  */
 const renderTestPane = async (redGPUContext, mesh) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             pane.addBinding(mesh.material, 'opacity', {min: 0, max: 1, step: 0.01})
                 .on('change', (e) => {
                     mesh.material.opacity = e.value;

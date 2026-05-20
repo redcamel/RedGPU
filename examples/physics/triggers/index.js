@@ -187,7 +187,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext, scene, triggerMesh, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			const params = {
 				showSensor: !!triggerMesh.parent
 			};

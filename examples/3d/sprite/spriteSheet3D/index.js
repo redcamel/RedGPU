@@ -86,7 +86,7 @@ RedGPU.init(canvas, (redGPUContext) => {
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const folder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
 
             const target = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);

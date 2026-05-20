@@ -228,7 +228,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext, createObject, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			pane.addBlade({
 				view: 'text',
 				label: 'Density Info',

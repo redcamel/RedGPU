@@ -214,7 +214,7 @@ RedGPU.init(
  */
 const renderTestPane = (redGPUContext, joint, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			const params = {
 				motorVelocity: 3.0
 			};

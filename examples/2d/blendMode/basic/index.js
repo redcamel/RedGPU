@@ -210,7 +210,7 @@ function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_
  */
 const renderTestPane = (redGPUContext, base, shape) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const tintSettings = {
                 blendMode: RedGPU.Material.BLEND_MODE[shape.blendMode],
             };

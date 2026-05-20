@@ -150,7 +150,7 @@ const createChildTextField2D = (redGPUContext, parent) => {
  */
 const renderTestPane = (redGPUContext, parent, children) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const parentConfig = {
                 x: parent.x,
                 y: parent.y,

@@ -132,7 +132,7 @@ function getRainbowColor(t) {
 /* 6. 디버그 UI 패널 */
 function renderTestPane(redGPUContext, groups, updateLinesCallback, getPointsPerLine, setPointsPerLine) {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const debugOptions = {
                 showDebugPoints: false,
                 pointsPerLine: getPointsPerLine(),

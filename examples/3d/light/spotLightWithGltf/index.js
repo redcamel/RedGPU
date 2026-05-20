@@ -95,7 +95,7 @@ const createSpotLight = (scene) => {
  */
 const renderTestPane = (redGPUContext, view, light) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // IBL 설정
             const iblConfig = {
                 showSkybox: true

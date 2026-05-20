@@ -169,7 +169,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			pane.addBlade({
 				view: 'text',
 				label: 'Guide',

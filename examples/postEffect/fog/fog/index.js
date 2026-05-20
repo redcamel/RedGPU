@@ -72,7 +72,7 @@ function renderTestPane(redGPUContext, fogEffect) {
         RedGPU,
         ibl: true,
         skybox: true,
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const fogFolder = pane.addFolder({title: '🌫️ Fog Test'});
             const PARAMS = {
                 enabled: true,

@@ -110,7 +110,7 @@ const createMaterialStudio = (redGPUContext, scene) => {
 
 const renderTestPaneWithLightControl = (redGPUContext, light, view) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // 1. Light Folder (UE5 Style)
             const lightConfig = {
                 lumen: light.lumen,

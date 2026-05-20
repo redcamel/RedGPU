@@ -1,10 +1,14 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
 
+interface HueSaturation{
+    hue: number
+    saturation: number
+}
 /**
  * [KO] 색상/채도(Hue/Saturation) 후처리 이펙트입니다.
  * [EN] Hue/Saturation post-processing effect.
@@ -23,18 +27,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Adjustments
  */
 class HueSaturation extends ASinglePassPostEffect {
-    /**
-     * [KO] 색상 (-180 ~ 180)
-     * [EN] Hue (-180 ~ 180)
-     * @defaultValue 0
-     */
-    #hue: number = 0
-    /**
-     * [KO] 채도 (-100 ~ 100)
-     * [EN] Saturation (-100 ~ 100)
-     * @defaultValue 0
-     */
-    #saturation: number = 0
 
     /**
      * [KO] HueSaturation 인스턴스를 생성합니다.
@@ -53,42 +45,10 @@ class HueSaturation extends ASinglePassPostEffect {
         );
     }
 
-    /**
-     * [KO] 색상 값을 반환합니다.
-     * [EN] Returns the hue value.
-     */
-    get hue(): number {
-        return this.#hue;
-    }
-
-    /**
-     * [KO] 색상 값을 설정합니다. (-180 ~ 180)
-     * [EN] Sets the hue value. (-180 ~ 180)
-     */
-    set hue(value: number) {
-        validateNumberRange(value, -180, 180)
-        this.#hue = value;
-        this.updateUniform('hue', value)
-    }
-
-    /**
-     * [KO] 채도 값을 반환합니다.
-     * [EN] Returns the saturation value.
-     */
-    get saturation(): number {
-        return this.#saturation;
-    }
-
-    /**
-     * [KO] 채도 값을 설정합니다. (-100 ~ 100)
-     * [EN] Sets the saturation value. (-100 ~ 100)
-     */
-    set saturation(value: number) {
-        validateNumberRange(value, -100, 100)
-        this.#saturation = value;
-        this.updateUniform('saturation', value)
-    }
 }
-
+DefineUniformProperty.defineNumber(HueSaturation, [
+    {key: 'hue', value: 0, min: -180, max: 180},
+    {key: 'saturation', value: 0, min: -100, max: 100}
+])
 Object.freeze(HueSaturation)
 export default HueSaturation

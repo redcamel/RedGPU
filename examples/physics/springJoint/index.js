@@ -206,7 +206,7 @@ RedGPU.init(
 		// [KO] 8. 테스트 UI 구성: 플랫폼 충격 주기 및 오브젝트 제거 기능
 		// [EN] 8. Set up test UI: Platform kick and object clearing functions
 		new RedGPUExampleHelper(redGPUContext, {
-			guiCallback: (pane) => {
+			gui: (pane) => {
 				const params = {
 					kick: () => {
 						platformBody.nativeBody.wakeUp();

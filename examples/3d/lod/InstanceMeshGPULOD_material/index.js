@@ -104,7 +104,7 @@ async function createTest(redGPUContext, scene, material) {
         initializeInstances();
 
         new RedGPUExampleHelper(redGPUContext, {
-            guiCallback: (pane) => {
+            gui: (pane) => {
                 pane.addBinding({baseMesh: "Base Mesh"}, "baseMesh", {
                     label: "Base Mesh",
                     readonly: true,

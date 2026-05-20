@@ -85,7 +85,7 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             normalTitle: 'Original',
             targetContainer: container
         },
-        guiCallback:pane=>{
+        gui:pane=>{
             const effect = targetView.postEffectManager.getEffectAt(0);
 
             const TEST_STATE = {

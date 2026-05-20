@@ -67,7 +67,7 @@ RedGPU.init(
         });
 
         new RedGPUExampleHelper(redGPUContext, {
-            guiCallback: (pane) => {
+            gui: (pane) => {
                 const targetNoiseTexture = material.displacementTexture;
 
                 pane.addBlade({view: 'separator'});

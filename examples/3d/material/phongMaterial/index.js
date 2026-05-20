@@ -89,7 +89,7 @@ const renderUI = async (redGPUContext, mesh) => {
     const textures = createTextures(redGPUContext);
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const params = {
                 color: {r: material.color.r, g: material.color.g, b: material.color.b},
                 aoStrength: material.aoStrength,

@@ -78,45 +78,47 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                HueSaturation: true,
+                hue: effect.hue,
+                saturation: effect.saturation,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'HueSaturation').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.HueSaturation(redGPUContext);
+                    newEffect.hue = TEST_STATE.hue;
+                    newEffect.saturation = TEST_STATE.saturation;
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                hueControl.disabled = !v.value;
+                saturationControl.disabled = !v.value;
+            });
+
+            const hueControl = folder.addBinding(TEST_STATE, 'hue', {min: -180, max: 180}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.hue = v.value
+            })
+            const saturationControl = folder.addBinding(TEST_STATE, 'saturation', {min: -100, max: 100}).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.saturation = v.value
+            })
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
 
-    const TEST_STATE = {
-        HueSaturation: true,
-        hue: effect.hue,
-        saturation: effect.saturation,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'HueSaturation').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.HueSaturation(redGPUContext);
-            newEffect.hue = TEST_STATE.hue;
-            newEffect.saturation = TEST_STATE.saturation;
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        hueControl.disabled = !v.value;
-        saturationControl.disabled = !v.value;
-    });
 
-    const hueControl = folder.addBinding(TEST_STATE, 'hue', {min: -180, max: 180}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.hue = v.value
-    })
-    const saturationControl = folder.addBinding(TEST_STATE, 'saturation', {min: -100, max: 100}).on('change', (v) => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) currentEffect.saturation = v.value
-    })
 };

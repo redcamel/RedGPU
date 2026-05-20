@@ -126,7 +126,7 @@ const createChildTextField3D = (redGPUContext, parent, x = 0, y = 0) => {
  */
 const renderTestPane = async (redGPUContext, parent, children) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const allObjects = [parent, ...children];
 
             allObjects.forEach((obj) => {

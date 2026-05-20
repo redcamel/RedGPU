@@ -99,7 +99,7 @@ const createMaterialStudio = (redGPUContext, scene) => {
 const renderTestPaneWithLightControl = (redGPUContext, light, view) => {
     new RedGPUExampleHelper(redGPUContext, {
         ibl: true,
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const autoExposure = view.postEffectManager.autoExposure;
 
             // 1. Light Folder

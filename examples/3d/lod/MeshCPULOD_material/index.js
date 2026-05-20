@@ -80,7 +80,7 @@ async function createTest(redGPUContext, scene) {
         }
 
         new RedGPUExampleHelper(redGPUContext, {
-            guiCallback: (pane) => {
+            gui: (pane) => {
                 const baseInfo = {baseMesh: "Base Mesh (Sphere 32x32)"};
                 pane.addBinding(baseInfo, "baseMesh", {
                     label: "Base Mesh",

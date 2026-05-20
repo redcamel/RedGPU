@@ -77,7 +77,7 @@ RedGPU.init(
  */
 const renderTestPane = (redGPUContext, sprite) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const folder = pane.addFolder({title: 'Material Tint Test'});
             const targetTint = sprite.material.tint;
             const tintSettings = {

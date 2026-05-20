@@ -103,7 +103,7 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
     };
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
 
 
             const cullingFolder = pane.addFolder({title: 'Distance Culling', expanded: true});

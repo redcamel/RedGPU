@@ -122,7 +122,7 @@ async function createTest(redGPUContext, scene, material) {
     initializeInstances();
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
                 .on('change', initializeInstances);
             pane.addBinding({maxInstanceCount: maxInstanceCount}, 'maxInstanceCount', {

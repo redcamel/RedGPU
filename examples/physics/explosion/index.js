@@ -97,7 +97,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, activeBoxes) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			pane.addBlade({ view: 'text', label: 'Interaction', value: 'Click to EXPLODE & SPAWN!', parse: (v) => v, readonly: true });
 			pane.addBinding(activeBoxes, 'length', { label: 'Box Count', readonly: true, interval: 100 });
 		}

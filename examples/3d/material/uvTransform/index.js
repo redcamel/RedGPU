@@ -136,7 +136,7 @@ async function renderTestPane(redGPUContext, testTarget) {
     const { materialTop, materialBottom, scrollInfo } = testTarget;
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const folderScroll = pane.addFolder({ title: 'Auto Scroll Control' });
             folderScroll.addBinding(scrollInfo, 'autoScroll', { label: 'Use Auto Scroll' });
             folderScroll.addBinding(scrollInfo, 'speedU', { min: -0.01, max: 0.01, step: 0.0001, label: 'Speed U' });

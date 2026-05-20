@@ -49,7 +49,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const maxAnisotropyValues = [1, 8, 16];
             const spacing = 105;
             const yOffset = 55;

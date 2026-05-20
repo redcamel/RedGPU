@@ -174,7 +174,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const folder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
 
             const child = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);

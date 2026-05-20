@@ -132,7 +132,7 @@ const getRandomHexValue = () => {
  */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const params = {
                 transparent: true,
             };

@@ -144,7 +144,7 @@ const renderTestPane = async (redGPUContext, targetView) => {
     };
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             pane.addBinding(TEST_DATA, 'volumeType', {
                 label: 'Mesh Volume Type',
                 options: {

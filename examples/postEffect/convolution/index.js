@@ -131,7 +131,7 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             normalTitle: 'Original',
             targetContainer: container
         },
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const TEST_STATE = {
                 Convolution: true,
                 kernel: 'BLUR',

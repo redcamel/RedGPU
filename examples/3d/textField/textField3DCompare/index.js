@@ -58,7 +58,7 @@ RedGPU.init(
 
 const renderTestPane = async (redGPUContext, textWorld, textPixel) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // World Size TextField Folder
             const fWorld = pane.addFolder({title: 'World Size TextField', expanded: true});
             fWorld.addBinding(textWorld, 'text');

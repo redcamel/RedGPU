@@ -100,7 +100,7 @@ const renderTestPane = (redGPUContext, targetView) => {
         RedGPU: RedGPU,
         ibl: true,
         skybox: true,
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const {skyAtmosphere} = targetView;
             if (skyAtmosphere) {
                 pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});

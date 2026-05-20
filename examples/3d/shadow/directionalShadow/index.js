@@ -48,7 +48,7 @@ RedGPU.init(
         });
 
         new RedGPUExampleHelper(redGPUContext, {
-            guiCallback: (pane) => {
+            gui: (pane) => {
                 const {shadowManager} = scene;
                 const {directionalShadowManager} = shadowManager;
 

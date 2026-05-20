@@ -98,7 +98,7 @@ async function createTest(redGPUContext, scene, material) {
     }
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // ---- 기본 메쉬 (LOD 0) 표시용 - 토글 불가 ----
             const baseInfo = {
                 baseMesh: "Base Mesh (Sphere 32x32)",

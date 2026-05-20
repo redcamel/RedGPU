@@ -96,7 +96,7 @@ function renderTestPane(redGPUContext, heightFog, autoRotateState) {
         RedGPU,
         ibl: true,
         skybox: true,
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const PARAMS = {
                 enabled: true,
                 autoRotate: autoRotateState.enabled,

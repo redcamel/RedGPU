@@ -107,7 +107,7 @@ const renderTestPane = async (redGPUContext, mesh) => {
     };
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             pane.addBinding(config, 'material', {
                 options: {
                     Color: 'Color',

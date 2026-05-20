@@ -73,7 +73,7 @@ const addSingleMesh = (redGPUContext, scene) => {
  */
 const renderTestPane = async (redGPUContext, mesh) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const samplerOptions = {
                 enableAnisotropy: '',
                 useMipmap: mesh.material.diffuseTexture.useMipmap,

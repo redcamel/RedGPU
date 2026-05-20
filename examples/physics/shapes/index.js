@@ -178,7 +178,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, resetScene, createPhysicalObject) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			const params = {
 				type: 'sphere',
 				color: '#ffffff',

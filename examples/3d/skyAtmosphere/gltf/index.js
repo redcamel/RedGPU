@@ -79,7 +79,7 @@ RedGPU.init(
 
 const renderTestPane = (targetView, skyAtmosphere, ibl, skybox) => {
     new RedGPUExampleHelper(targetView.redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
             f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
             f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});

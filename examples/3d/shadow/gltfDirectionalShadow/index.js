@@ -49,7 +49,7 @@ RedGPU.init(
             RedGPU: RedGPU,
             ibl: true,
             skybox: true,
-            guiCallback: (pane) => {
+            gui: (pane) => {
                 const {shadowManager} = scene;
                 const {directionalShadowManager} = shadowManager;
 

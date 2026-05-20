@@ -204,7 +204,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, getBigBallBody, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			pane.addButton({ title: 'Push Ball!' }).on('click', () => {
 				const body = getBigBallBody();
 				if (body) {

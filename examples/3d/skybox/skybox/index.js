@@ -70,7 +70,7 @@ const createSkybox = (redGPUContext) => {
  */
 const renderTestPane = async (redGPUContext, view) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const skybox = view.skybox;
             if (!skybox) return;
 

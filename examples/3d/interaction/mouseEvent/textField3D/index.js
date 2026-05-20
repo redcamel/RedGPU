@@ -167,7 +167,7 @@ function getRandomHexValue() {
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const child = scene.children.find(c => c instanceof RedGPU.Display.TextField3D);
             const controls = {
                 useBillboard: child.useBillboard,

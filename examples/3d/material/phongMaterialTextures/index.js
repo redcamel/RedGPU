@@ -72,7 +72,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // No specific controls for this example, helper will add standard debug buttons
         }
     });

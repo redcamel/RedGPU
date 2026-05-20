@@ -124,7 +124,7 @@ function rainbowHex(t) {
 
 const renderTestPane = (redGPUContext, view) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // 옵션 초기화
             const debugOptions = {
                 showDebugPoints: false // 디버그 포인트 표시 여부

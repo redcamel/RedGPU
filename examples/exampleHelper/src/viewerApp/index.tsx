@@ -103,18 +103,18 @@ class RedGPUExampleHelper {
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
 
-    constructor(redGPUContext: RedGPUContext, guiCallback?: GuiConfig | ((gui: any) => void)) {
+    constructor(redGPUContext: RedGPUContext, guiConfig?: GuiConfig | ((gui: any) => void)) {
         useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
-        if (guiCallback) {
-            if (typeof guiCallback === 'function') {
+        if (guiConfig) {
+            if (typeof guiConfig === 'function') {
                 useExampleHelperStore.getState().setGuiConfig({
-                    guiCallback: guiCallback
+                    gui: guiConfig
                 });
             } else {
-                if (guiCallback.RedGPU) {
-                    useExampleHelperStore.getState().setRedGPU(guiCallback.RedGPU);
+                if (guiConfig.RedGPU) {
+                    useExampleHelperStore.getState().setRedGPU(guiConfig.RedGPU);
                 }
-                useExampleHelperStore.getState().setGuiConfig(guiCallback);
+                useExampleHelperStore.getState().setGuiConfig(guiConfig);
             }
         }
 

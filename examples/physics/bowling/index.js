@@ -192,7 +192,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext, throwBall, resetGame) => {
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			const params = {
 				power: 180, // [KO] 늘어난 거리에 맞춰 기본 파워 상향 [EN] Increased default power for the longer distance
 				aim: 0.0

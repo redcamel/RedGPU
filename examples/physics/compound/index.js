@@ -173,7 +173,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, createDumbbell, resetScene, activeDumbbells) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			// [KO] 모든 아령 밀어내기
 			// [EN] Push all dumbbells
 			pane.addButton({ title: 'Push All Dumbbells' }).on('click', () => {

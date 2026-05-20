@@ -179,7 +179,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, intervalId, createBall, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			const params = {
 				spawnRate: 100,
 				pause: false

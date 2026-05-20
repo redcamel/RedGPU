@@ -109,7 +109,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
 
             const target = scene.children[0];

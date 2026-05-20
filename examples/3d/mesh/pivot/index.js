@@ -141,7 +141,7 @@ const createPivotMesh = (redGPUContext, targetMesh) => {
  */
 const renderTestPane = async (redGPUContext, parentMesh, childMesh, animationConfig) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const parentFolder = pane.addFolder({title: "Parent Mesh", expanded: true});
             parentFolder.addBinding(animationConfig, "parentAnimationOn", {label: "Parent Animation"});
             parentFolder.addBinding(parentMesh, "pivotX", {min: -2, max: 2, step: 0.1, label: "Pivot X"});

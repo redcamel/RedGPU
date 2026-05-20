@@ -65,7 +65,7 @@ function loadGLTF(view, url) {
 
 const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
     new RedGPUExampleHelper(targetView.redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // -------------------------------------------------------------------------
             // 1. Sun (Directional Light)
             // -------------------------------------------------------------------------

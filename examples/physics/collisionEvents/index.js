@@ -141,7 +141,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, createBall, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			pane.addButton({ title: 'Spawn Ball' }).on('click', () => createBall((Math.random() * 2) - 1, 10, (Math.random() * 2) - 1));
 			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 		}

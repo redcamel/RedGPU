@@ -169,7 +169,7 @@ const renderTestPane = (redGPUContext) => {
     };
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // [KO] 지오메트리 속성
             // [EN] Geometry properties
             const geoFolder = pane.addFolder({title: 'Geometry', expanded: true});

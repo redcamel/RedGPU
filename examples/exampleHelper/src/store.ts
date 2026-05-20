@@ -38,7 +38,7 @@ export interface GuiConfig {
     ibl?: boolean;
     skybox?: boolean;
     compareLabel?: CompareLabelConfig;
-    guiCallback?: (gui: any) => void;
+    gui?: (gui: any) => void;
 }
 
 /**
@@ -105,7 +105,7 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
             config?.scene ||
             config?.ibl ||
             config?.skybox ||
-            config?.guiCallback
+            config?.gui
         );
         set({guiConfig: config, showSettingsPanel: hasPanels});
     },

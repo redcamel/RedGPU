@@ -65,7 +65,7 @@ RedGPU.init(
  */
 const renderTestPane = (redGPUContext, sprite2D) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const config = {
                 material: 'Bitmap',
             };

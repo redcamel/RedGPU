@@ -142,7 +142,7 @@ const renderUI = async (redGPUContext, mesh) => {
     extractShaderVariantInfo(mesh);
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // Parameter object
             const params = {
                 shaderVariants: {
@@ -218,7 +218,7 @@ const renderUI = async (redGPUContext, mesh) => {
             }
             utilityFolder.addButton({title: "🎨 Apply All Textures"}).on('click', applyAllTextures);
 
-            // Core Functions inside guiCallback scope
+            // Core Functions inside gui scope
             function getCurrentVariant() {
                 try {
                     const shaderModuleLabel = material.gpuRenderInfo.fragmentShaderModule.label;

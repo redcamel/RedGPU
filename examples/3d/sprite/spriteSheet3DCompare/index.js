@@ -91,7 +91,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 const renderTestPane = async (redGPUContext, worldSprite, pixelSprite) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // World Mode Control
             const fWorld = pane.addFolder({title: 'World Size Mode (Left)', expanded: true});
             fWorld.addBinding(worldSprite, 'worldSize', {min: 0.1, max: 10, step: 0.1, label: 'Size (Units)'});

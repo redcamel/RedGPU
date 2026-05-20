@@ -85,7 +85,7 @@ RedGPU.init(
 const renderTestPane = async (redGPUContext, resetScene) => {
 	
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			pane.addBlade({ view: 'text', label: 'Guide', value: 'Click boxes to push them!', parse: (v) => v, readonly: true });
 			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
 		}

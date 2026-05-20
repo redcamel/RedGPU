@@ -62,7 +62,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             // [KO] 필요한 경우 여기에 추가 컨트롤을 구현할 수 있습니다.
             // [EN] Additional controls can be implemented here if needed.
         }

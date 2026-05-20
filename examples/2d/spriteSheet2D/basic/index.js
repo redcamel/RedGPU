@@ -71,7 +71,7 @@ RedGPU.init(canvas, (redGPUContext) => {
  */
 const renderTestPane = (scene, redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const controls = {
                 testSpriteSheetInfo: 0,
                 loop: true,

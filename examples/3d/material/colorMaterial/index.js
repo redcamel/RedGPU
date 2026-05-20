@@ -65,7 +65,7 @@ const createSampleMesh = (redGPUContext, scene) => {
  */
 const renderTestPane = async (redGPUContext, mesh) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const params = {
                 color: {r: 255, g: 0, b: 0},
             };

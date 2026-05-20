@@ -258,7 +258,7 @@ RedGPU.init(
  */
 const renderTestPane = (redGPUContext, clothMesh, spawnObject, windBlast, resetScene) => {
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			pane.addButton({ title: 'Drop Object' }).on('click', () => spawnObject());
 			pane.addButton({ title: 'Wind Blast!' }).on('click', () => windBlast());
 			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());

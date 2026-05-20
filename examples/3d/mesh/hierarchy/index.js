@@ -146,7 +146,7 @@ const renderTestPane = async (redGPUContext, parentMesh, childMesh) => {
     };
 
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
             createMeshControls(parentFolder, parentConfig, parentMesh);
 

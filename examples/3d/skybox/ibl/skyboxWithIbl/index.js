@@ -57,7 +57,7 @@ RedGPU.init(
 const renderTestPane = async (view) => {
     new RedGPUExampleHelper(view.redGPUContext, {
         RedGPU,
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const skybox = view.skybox;
             const ibl = view.ibl;
             if (!skybox || !ibl) return;

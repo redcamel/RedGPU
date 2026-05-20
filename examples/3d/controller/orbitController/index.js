@@ -72,7 +72,7 @@ RedGPU.init(
  */
 const renderTestPane = (redGPUContext, controller) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             {
                 // 두 번째 컨트롤러 및 뷰 설정
                 const controller2 = new RedGPU.Camera.OrbitController(redGPUContext);

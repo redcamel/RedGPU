@@ -81,7 +81,7 @@ const createInitialObjects = (redGPUContext, scene) => {
  */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             pane.addButton({title: 'Add Child'}).on('click', () => {
                 addChildObject(redGPUContext, scene);
             });

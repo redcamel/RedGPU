@@ -55,7 +55,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render)
         
         new RedGPUExampleHelper(redGPUContext, {
-            guiCallback: (pane) => {
+            gui: (pane) => {
                 {
                     const folder = pane.addFolder({
                         title: 'particle',

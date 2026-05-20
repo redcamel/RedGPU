@@ -141,7 +141,7 @@ RedGPU.init(
  */
 const renderTestPane = async (redGPUContext, physicsEngine, createBox, resetScene, updateGravityY) => {
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			const folder = pane.addFolder({ title: 'Physics Settings' });
 			const params = {
 				gravityY: -9.81,

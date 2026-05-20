@@ -110,7 +110,7 @@ const createChildMesh = (redGPUContext, parent) => {
  */
 const renderTestPane = (redGPUContext, rootGroup, parent, child) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             const rootConfig = {
                 x: rootGroup.x,
                 y: rootGroup.y,

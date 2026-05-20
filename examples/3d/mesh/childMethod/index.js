@@ -73,7 +73,7 @@ const createInitialMeshes = (redGPUContext, scene) => {
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
-        guiCallback: (pane) => {
+        gui: (pane) => {
             pane.addButton({title: 'Add Child'}).on('click', () => {
                 addChildMesh(redGPUContext, scene);
             });

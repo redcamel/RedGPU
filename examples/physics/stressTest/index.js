@@ -132,7 +132,7 @@ RedGPU.init(
  */
 const renderTestPane = (redGPUContext, createBall, resetScene, activeObjects) => {
 	new RedGPUExampleHelper(redGPUContext, {
-		guiCallback: (pane) => {
+		gui: (pane) => {
 			const params = {
 				spawnRate: 5,    // [KO] 초당 생성 주기 [EN] Spawn interval per second
 				autoSpawn: true, // [KO] 자동 생성 활성화 [EN] Enable auto-spawn
