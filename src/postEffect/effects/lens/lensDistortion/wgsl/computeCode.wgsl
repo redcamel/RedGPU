@@ -11,9 +11,7 @@ let uvCenter = center / vec2<f32>(dimW, dimH);
 let offset = uv - uvCenter;
 let distance = length(offset);
 
-let barrelFactor = 1.0 + uniforms.barrelStrength * distance * distance;
-let pincushionFactor = 1.0 - uniforms.pincushionStrength * distance * distance;
-let distortionFactor = barrelFactor * pincushionFactor;
+let distortionFactor = 1.0 + uniforms.distortion * distance * distance;
 
 let distortedUV = uvCenter + offset * distortionFactor;
 

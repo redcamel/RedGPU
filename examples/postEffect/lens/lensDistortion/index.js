@@ -72,50 +72,49 @@ function loadGLTF(redGPUContext, scene, url) {
 }
 
 const renderTestPane = async (redGPUContext, targetView, container) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1778922031603');
-    
+
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
+        },
+        gui:pane=>{
+            const effect = targetView.postEffectManager.getEffectAt(0);
+
+            const TEST_STATE = {
+                LensDistortion: true,
+                distortion: effect.distortion,
+                centerX: effect.centerX,
+                centerY: effect.centerY,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+
+            folder.addBinding(TEST_STATE, 'LensDistortion').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
+                    Object.assign(newEffect, TEST_STATE);
+                    targetView.postEffectManager.addEffect(newEffect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+                controls.forEach(c => c.disabled = !v.value);
+            });
+
+            const controls = [
+                folder.addBinding(TEST_STATE, 'distortion', {min: -2, max: 2}),
+                folder.addBinding(TEST_STATE, 'centerX', {min: -300, max: 300}),
+                folder.addBinding(TEST_STATE, 'centerY', {min: -300, max: 300}),
+            ];
+
+            pane.on('change', () => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) {
+                    Object.assign(currentEffect, TEST_STATE);
+                }
+            });
         }
     });
 
-    const pane = new Pane();
-    const effect = targetView.postEffectManager.getEffectAt(0);
 
-    const TEST_STATE = {
-        LensDistortion: true,
-        barrelStrength: effect.barrelStrength,
-        pincushionStrength: effect.pincushionStrength,
-        centerX: effect.centerX,
-        centerY: effect.centerY,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    
-    folder.addBinding(TEST_STATE, 'LensDistortion').on('change', (v) => {
-        if (v.value) {
-            const newEffect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
-            Object.assign(newEffect, TEST_STATE);
-            targetView.postEffectManager.addEffect(newEffect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-        controls.forEach(c => c.disabled = !v.value);
-    });
-
-    const controls = [
-        folder.addBinding(TEST_STATE, 'barrelStrength', {min: 0, max: 2}),
-        folder.addBinding(TEST_STATE, 'pincushionStrength', {min: 0, max: 2}),
-        folder.addBinding(TEST_STATE, 'centerX', {min: -300, max: 300}),
-        folder.addBinding(TEST_STATE, 'centerY', {min: -300, max: 300}),
-    ];
-
-    pane.on('change', () => {
-        const currentEffect = targetView.postEffectManager.getEffectAt(0);
-        if (currentEffect) {
-            Object.assign(currentEffect, TEST_STATE);
-        }
-    });
 };
