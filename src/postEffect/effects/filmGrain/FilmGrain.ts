@@ -81,12 +81,12 @@ class FilmGrain extends ASinglePassPostEffect {
 
 
 }
-DefineUniformProperty.definePositiveNumber(FilmGrain,[
-    ['filmGrainIntensity',VINTAGE.filmGrainIntensity],
-    ['filmGrainResponse',VINTAGE.filmGrainResponse],
-    ['filmGrainScale',VINTAGE.filmGrainScale],
-    ['coloredGrain',VINTAGE.coloredGrain],
-    ['grainSaturation',VINTAGE.grainSaturation],
+DefineUniformProperty.definePositiveNumber(FilmGrain, [
+    {key: 'filmGrainIntensity', value: VINTAGE.filmGrainIntensity},
+    {key: 'filmGrainResponse', value: VINTAGE.filmGrainResponse},
+    {key: 'filmGrainScale', value: VINTAGE.filmGrainScale},
+    {key: 'coloredGrain', value: VINTAGE.coloredGrain},
+    {key: 'grainSaturation', value: VINTAGE.grainSaturation},
 ])
 Object.freeze(FilmGrain);
 export default FilmGrain;

@@ -275,10 +275,10 @@ class ASpriteSheet extends Mesh {
  * ASpriteSheet 클래스에 스프라이트 시트 관련 속성들을 정의합니다.
  */
 DefineUniformProperty.definePositiveNumber(ASpriteSheet, [
-    ['segmentW', 5],
-    ['segmentH', 3],
-    ['totalFrame', 15],
-    ['currentIndex', 0]
+    {key: 'segmentW', value: 5},
+    {key: 'segmentH', value: 3},
+    {key: 'totalFrame', value: 15},
+    {key: 'currentIndex', value: 0}
 ])
 /**
  * ASpriteSheet 클래스를 동결하여 런타임에서의 수정을 방지합니다.

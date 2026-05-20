@@ -5,7 +5,7 @@ import defineProperty_SETTING from "../core/defineProperty_SETTING";
 
 export interface IDefinePositiveNumber {
     key: string;
-    value?: number;
+    value: number;
     min?: number;
     max?: number;
 }
@@ -27,38 +27,22 @@ function createSetter(
             newValue = max;
         }
 
-
         this[symbol] = newValue;
-
         updateTargetUniform(this, propertyKey, newValue)
     };
 }
 
 function definePositiveNumberRange_func(
-    propertyKey: string | IDefinePositiveNumber,
-    initValue: number = 1,
-    min: number = 0,
-    max?: number
+    propertyKey: IDefinePositiveNumber
 ) {
-    if (typeof propertyKey === 'object') {
-        const {key, value = 1, min: minVal = 0, max: maxVal} = propertyKey;
-        const symbol = Symbol(key);
-        return {
-            get: function (): number {
-                if (this[symbol] === undefined) this[symbol] = value;
-                return this[symbol];
-            },
-            set: createSetter(key, symbol, minVal, maxVal),
-            ...defineProperty_SETTING,
-        };
-    }
-    const symbol = Symbol(propertyKey);
+    const {key, value = 1, min: minVal = 0, max: maxVal} = propertyKey;
+    const symbol = Symbol(key);
     return {
         get: function (): number {
-            if (this[symbol] === undefined) this[symbol] = initValue;
+            if (this[symbol] === undefined) this[symbol] = value;
             return this[symbol];
         },
-        set: createSetter(propertyKey, symbol, min, max),
+        set: createSetter(key, symbol, minVal, maxVal),
         ...defineProperty_SETTING,
     };
 }
@@ -68,19 +52,16 @@ function definePositiveNumberRange_func(
  * [EN] Defines positive number range properties on the specified class.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param keys - [KO] 정의할 속성 키, 키 배열 또는 설정 배열 [EN] Property keys, array of keys, or configuration array
+ * @param keys - [KO] 정의할 속성 설정(IDefinePositiveNumber) 또는 설정 배열 [EN] Configuration (IDefinePositiveNumber) or array of configurations
  *
  * @example
  * ```typescript
- * // 단일 키 정의
- * DefineUniformProperty.definePositiveNumber(MyMaterial, 'opacity');
- * // 초기값 및 범위와 함께 정의 (배열 방식)
- * DefineUniformProperty.definePositiveNumber(MyMaterial, [['shininess', 30, 0, 100]]);
- * // 설정 객체 방식 (IPositiveNumberRange)
+ * // 설정 객체 방식 (IDefinePositiveNumber)
+ * DefineUniformProperty.definePositiveNumber(MyMaterial, { key: 'shininess', value: 30, min: 0, max: 100 });
  * DefineUniformProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
  * ```
  */
-const definePositiveNumber = (target: any, keys: string | (string | IDefinePositiveNumber | [string, number?, number?, number?])[]) => applyProperties(target, keys, definePositiveNumberRange_func);
+const definePositiveNumber = (target: any, keys: IDefinePositiveNumber | IDefinePositiveNumber[]) => applyProperties(target, keys, definePositiveNumberRange_func);
 
 Object.freeze(definePositiveNumber);
 export default definePositiveNumber;

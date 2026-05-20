@@ -57,10 +57,10 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
 }
 
 DefineUniformProperty.definePositiveNumber(SkyBoxMaterial, [
-    ['blur', 0],
-    ['intensityMultiplier', 1],
-    ['luminance', 10000],
-    ['transitionProgress', 0],
+    {key: 'blur', value: 0},
+    {key: 'intensityMultiplier', value: 1},
+    {key: 'luminance', value: 10000},
+    {key: 'transitionProgress', value: 0},
 ])
 DefineForFragment.defineCubeTexture(SkyBoxMaterial, ['texture0', 'transitionTexture'])
 DefineForFragment.defineTexture(SkyBoxMaterial, ['transitionMask'])

@@ -988,8 +988,8 @@ class PBRMaterial extends ABitmapBaseMaterial {
 
 DefineUniformProperty.definePositiveNumber(PBRMaterial,
     [
-        'emissiveStrength',
-        'normalScale'
+        {key: 'emissiveStrength',value:1},
+        {key: 'normalScale',value:1}
     ]
 )
 const defineTexture = (textureList: string[], useSampler: boolean) => {
@@ -998,7 +998,7 @@ const defineTexture = (textureList: string[], useSampler: boolean) => {
             `use${key.charAt(0).toUpperCase()}${key.substring(1)}`
         ])
         DefineUniformProperty.definePositiveNumber(PBRMaterial, [
-            [`${key}_KHR_texture_transform_rotation`, 0],
+            {key: `${key}_KHR_texture_transform_rotation`, value: 0},
         ]);
         DefineUniformProperty.defineBoolean(PBRMaterial, [
             `use_${key}_KHR_texture_transform`,
@@ -1047,9 +1047,9 @@ const extensionDefine = (defineList) => {
 }
 extensionDefine(EXTENSION_LIST)
 DefineUniformProperty.definePositiveNumber(PBRMaterial, [
-    ['cutOff', 0],
-    ['KHR_materials_ior', 1.5],
-    ['KHR_dispersion', 0],
+    {key: 'cutOff', value: 0},
+    {key: 'KHR_materials_ior', value: 1.5},
+    {key: 'KHR_dispersion', value: 0},
 ]);
 DefineUniformProperty.defineUint(PBRMaterial, [
     'alphaBlend',

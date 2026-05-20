@@ -254,8 +254,8 @@ class TextField3D extends ATextField {
  * TextField3D 클래스에 렌더링 비율 속성들을 정의합니다.
  */
 DefineUniformProperty.definePositiveNumber(TextField3D, [
-    ['_renderRatioX', 1],
-    ['_renderRatioY', 1],
+    {key: '_renderRatioX', value: 1},
+    {key: '_renderRatioY', value: 1},
 ])
 DefineUniformProperty.defineBoolean(TextField3D, [
     ['useBillboard', true],

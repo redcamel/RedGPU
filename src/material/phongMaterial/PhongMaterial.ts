@@ -245,11 +245,11 @@ DefineUniformProperty.defineSampler(
 DefineUniformProperty.definePositiveNumber(
     PhongMaterial,
     [
-        'aoStrength',
-        'specularStrength',
-        'emissiveStrength',
-        'shininess',
-        'normalScale'
+        {key: 'aoStrength',value:1},
+        {key: 'specularStrength',value:1},
+        {key: 'emissiveStrength',value:1},
+        {key: 'shininess',value:1},
+        {key: 'normalScale',value:1}
     ]
 )
 DefineUniformProperty.defineColorRGB(PhongMaterial, [
@@ -276,8 +276,8 @@ DefineUniformProperty.defineBoolean(PhongMaterial, [
     ['useSSR', false]
 ])
 DefineUniformProperty.definePositiveNumber(PhongMaterial, [
-    ['metallic', 0, 0, 1],
-    ['roughness', 0, 0, 1]
+    {key: 'metallic', value: 0, min: 0, max: 1},
+    {key: 'roughness', value: 0, min: 0, max: 1}
 ])
 Object.freeze(PhongMaterial)
 export default PhongMaterial
