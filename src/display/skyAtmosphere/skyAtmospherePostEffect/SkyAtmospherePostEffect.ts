@@ -5,7 +5,7 @@ import {IPostEffectResult} from "../../../postEffect/core/types";
 import SkyAtmosphere from "../SkyAtmosphere";
 import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect_compute.wgsl";
-
+//TODO - 바인딩 계속 생성되는 이유 찾아야함
 /**
  * [KO] SkyAtmospherePostEffect 클래스는 씬 내의 오브젝트들에 대해 대기 투과(Transmittance) 및 산란(Scattering)을 적용합니다.
  * [EN] The SkyAtmospherePostEffect class applies atmospheric transmittance and scattering to objects in the scene.
