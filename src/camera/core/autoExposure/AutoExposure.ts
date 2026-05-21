@@ -48,6 +48,15 @@ class AutoExposure {
     #targetLuminance: number = 0.18;
     #exposureCompensation: number = 0.0;
 
+    // 캐싱 관련 필드
+    #prevMSAAID: string;
+    #prevWidth: number;
+    #prevHeight: number;
+    #prevSourceTextureView: GPUTextureView;
+    #downsampleBindGroup0_swap0: GPUBindGroup;
+    #downsampleBindGroup0_swap1: GPUBindGroup;
+    #downsampleBindGroup1: GPUBindGroup;
+    #adaptationBindGroup0: GPUBindGroup;
 
     constructor(view: View3D) {
         this.#view = view;
@@ -195,10 +204,10 @@ class AutoExposure {
      */
     render(sourceTextureInfo: IPostEffectResult) {
         const {gpuDevice, antialiasingManager, commandEncoderManager} = this.#redGPUContext;
-        const {useMSAA} = antialiasingManager;
+        const {useMSAA, msaaID} = antialiasingManager;
         const {width, height} = this.#view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {rawCamera, renderViewStateData} = this.#view;
-        const {deltaTime} = renderViewStateData;
+        const {rawCamera, renderViewStateData, viewRenderTextureManager} = this.#view;
+        const {deltaTime, swapBufferIndex} = renderViewStateData;
 
         const ev100Range = this.#maxEV100 - this.#minEV100;
 
@@ -230,6 +239,59 @@ class AutoExposure {
             ])
         );
 
+        // 변경 감지 및 바인드 그룹 갱신
+        const msaaChanged = this.#prevMSAAID !== msaaID;
+        const sizeChanged = this.#prevWidth !== width || this.#prevHeight !== height;
+        const sourceViewChanged = this.#prevSourceTextureView !== sourceTextureInfo.textureView;
+
+        if (msaaChanged || sizeChanged || sourceViewChanged || !this.#downsampleBindGroup0_swap0) {
+            const depthView0 = viewRenderTextureManager.depthTextureView;
+            const depthView1 = viewRenderTextureManager.prevDepthTextureView;
+
+            // G-Buffer 스와핑을 고려한 2개의 바인드 그룹 생성
+            const layout0 = this.#getDownsampleBindGroupLayout0(useMSAA);
+            this.#downsampleBindGroup0_swap0 = gpuDevice.createBindGroup({
+                label: 'AutoExposure_Downsample_BG0_Swap0',
+                layout: layout0,
+                entries: [
+                    {binding: 0, resource: sourceTextureInfo.textureView},
+                    {binding: 1, resource: depthView0}
+                ]
+            });
+            this.#downsampleBindGroup0_swap1 = gpuDevice.createBindGroup({
+                label: 'AutoExposure_Downsample_BG0_Swap1',
+                layout: layout0,
+                entries: [
+                    {binding: 0, resource: sourceTextureInfo.textureView},
+                    {binding: 1, resource: depthView1}
+                ]
+            });
+
+            this.#downsampleBindGroup1 = gpuDevice.createBindGroup({
+                label: 'AutoExposure_Downsample_BG1',
+                layout: this.#downsampleBindGroupLayout1,
+                entries: [
+                    {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
+                    {binding: 1, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+                ]
+            });
+
+            this.#adaptationBindGroup0 = gpuDevice.createBindGroup({
+                label: 'AutoExposure_Adaptation_BG0',
+                layout: this.#adaptationBindGroupLayout0,
+                entries: [
+                    {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
+                    {binding: 1, resource: {buffer: this.#adaptedEV100Buffer.gpuBuffer}},
+                    {binding: 2, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+                ]
+            });
+
+            this.#prevMSAAID = msaaID;
+            this.#prevWidth = width;
+            this.#prevHeight = height;
+            this.#prevSourceTextureView = sourceTextureInfo.textureView;
+        }
+
         // [KO] 히스토그램 버퍼 명시적 초기화
         commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
             encoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
@@ -237,41 +299,17 @@ class AutoExposure {
 
         // Pass 1: Generate Histogram
         const pipeline = this.#getDownsamplePipeline(useMSAA);
-        const downsampleBindGroup0 = gpuDevice.createBindGroup({
-            layout: this.#getDownsampleBindGroupLayout0(useMSAA),
-            entries: [
-                {binding: 0, resource: sourceTextureInfo.textureView},
-                {binding: 1, resource: this.#view.viewRenderTextureManager.depthTextureView}
-            ]
-        });
-        const downsampleBindGroup1 = gpuDevice.createBindGroup({
-            layout: this.#downsampleBindGroupLayout1,
-            entries: [
-                {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
-                {binding: 1, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
-            ]
-        });
-
         commandEncoderManager.addPostProcessComputePass('AutoExposure_GenerateHistogram_Pass', (pass1) => {
             pass1.setPipeline(pipeline);
-            pass1.setBindGroup(0, downsampleBindGroup0);
-            pass1.setBindGroup(1, downsampleBindGroup1);
+            pass1.setBindGroup(0, swapBufferIndex ? this.#downsampleBindGroup0_swap1 : this.#downsampleBindGroup0_swap0);
+            pass1.setBindGroup(1, this.#downsampleBindGroup1);
             pass1.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16), 1);
         });
 
         // Pass 2: Average Histogram and Adapt
-        const adaptationBindGroup0 = gpuDevice.createBindGroup({
-            layout: this.#adaptationBindGroupLayout0,
-            entries: [
-                {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
-                {binding: 1, resource: {buffer: this.#adaptedEV100Buffer.gpuBuffer}},
-                {binding: 2, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
-            ]
-        });
-
         commandEncoderManager.addPostProcessComputePass('AutoExposure_Adaptation_Pass', (pass2) => {
             pass2.setPipeline(this.#adaptationPipeline);
-            pass2.setBindGroup(0, adaptationBindGroup0);
+            pass2.setBindGroup(0, this.#adaptationBindGroup0);
             pass2.dispatchWorkgroups(1, 1, 1);
         });
 

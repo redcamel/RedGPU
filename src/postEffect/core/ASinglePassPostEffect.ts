@@ -421,7 +421,10 @@ abstract class ASinglePassPostEffect {
 
         // Group 3: 출력 텍스처
         this.#outputBindGroupEntries.push({binding: 0, resource: targetOutputView});
-
+        this.#computeBindGroup0List_swap0 = null
+        this.#computeBindGroup0List_swap1 = null
+        this.#computeBindGroup1 = null
+        this.#outputBindGroup = null
         // 바인드 그룹 실제 생성
         this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
             label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,

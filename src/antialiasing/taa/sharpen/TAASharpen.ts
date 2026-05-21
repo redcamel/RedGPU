@@ -1,10 +1,13 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../postEffect/core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty";
 
+interface TAASharpen {
+    sharpness: number
+}
 /**
  * [KO] TAA 전용 샤프닝 후처리 이펙트입니다.
  * [EN] TAA-specific sharpening post-processing effect.
@@ -27,12 +30,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category PostEffect
  */
 class TAASharpen extends ASinglePassPostEffect {
-    /**
-     * [KO] 샤프닝 강도 (0 ~ 1)
-     * [EN] Sharpening strength (0 ~ 1)
-     * @defaultValue 0.5
-     */
-    #sharpness: number = 0.5
 
     /**
      * [KO] TAASharpen 인스턴스를 생성합니다.
@@ -49,36 +46,12 @@ class TAASharpen extends ASinglePassPostEffect {
             'POST_EFFECT_TAA_SHARPEN',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        // 기본값 적용
-        this.sharpness = 0.5;
     }
 
-    /**
-     * [KO] 샤프닝 강도를 반환합니다.
-     * [EN] Returns the sharpening strength.
-     *
-     * @returns
-     * [KO] 샤프닝 강도
-     * [EN] Sharpening strength
-     */
-    get sharpness(): number {
-        return this.#sharpness;
-    }
 
-    /**
-     * [KO] 샤프닝 강도를 설정합니다.
-     * [EN] Sets the sharpening strength.
-     *
-     * @param value -
-     * [KO] 샤프닝 강도 (0 ~ 1)
-     * [EN] Sharpening strength (0 ~ 1)
-     */
-    set sharpness(value: number) {
-        validateNumberRange(value, 0, 1)
-        this.#sharpness = value;
-        this.updateUniform('sharpness', value)
-    }
 }
-
+DefineUniformProperty.definePositiveNumber(TAASharpen, [
+    {key: 'sharpness', value: 0.5, min: 0, max: 1},
+])
 Object.freeze(TAASharpen)
 export default TAASharpen
