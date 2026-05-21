@@ -30,7 +30,7 @@ class PostEffectTexturePool {
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
-
+//TODO 현재는 할당이 한프레임에 누적으로 되어있는데 스마트하게 알아서 할당되는 구조를 가져야할듯
     /**
      * [KO] 적절한 텍스처를 풀에서 가져오거나 새로 생성합니다.
      * [EN] Gets a suitable texture from the pool or creates a new one.
