@@ -30,6 +30,7 @@ interface ABaseMaterial {
      * [EN] Whether to use tint color
      */
     useTint: boolean;
+    isInstanceofMaterial:boolean
 }
 
 /**
@@ -558,6 +559,10 @@ abstract class ABaseMaterial extends ResourceBase {
 }
 
 const pattern = /^use\w+Texture$/;
+Object.defineProperty(ABaseMaterial.prototype, 'isInstanceofMaterial', {
+    value: true,
+    writable: false
+});
 DefineUniformProperty.definePositiveNumber(ABaseMaterial, [
     {key: 'opacity', value: 1, max: 1}
 ])

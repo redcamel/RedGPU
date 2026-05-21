@@ -1,6 +1,3 @@
-import ABaseMaterial from "../../material/core/ABaseMaterial";
-import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
-
 /**
  * [KO] 타겟 객체(Material, PostEffect 등)로부터 유니폼 정보와 버퍼를 추출하는 내부 유틸리티입니다.
  * [EN] Internal utility that extracts uniform information and buffer from target objects (Material, PostEffect, etc.).
@@ -12,10 +9,10 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
     let targetUniformInfo;
     let targetUniformBuffer;
     const {gpuRenderInfo} = target
-    if (target instanceof ABaseMaterial) {
+    if (target.isInstanceofMaterial) {
         targetUniformInfo = gpuRenderInfo.fragmentUniformInfo
         targetUniformBuffer = gpuRenderInfo.fragmentUniformBuffer
-    } else if (target instanceof ASinglePassPostEffect) {
+    } else if (target.isInstanceofPostEffect) {
         targetUniformInfo = target.uniformsInfo
         targetUniformBuffer = target.uniformBuffer
     } else if (gpuRenderInfo?.vertexUniformInfo) {

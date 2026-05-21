@@ -44,6 +44,7 @@ interface Mesh {
     disableJitter: boolean
     meshType: string
     useDisplacementTexture: boolean
+    isInstanceofMesh: boolean
 }
 
 interface LODGPURenderInfo {
@@ -1957,7 +1958,10 @@ class Mesh extends MeshBase {
         return variantKey;
     }
 }
-
+Object.defineProperty(Mesh.prototype, 'isInstanceofMesh', {
+    value: true,
+    writable: false
+});
 Object.defineProperty(Mesh.prototype, 'meshType', {
     value: MESH_TYPE.MESH,
     writable: false

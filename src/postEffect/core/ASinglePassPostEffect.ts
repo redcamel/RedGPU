@@ -7,6 +7,9 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {IPostEffectResult} from "./types";
 import {keepLog} from "../../utils";
 
+interface ASinglePassPostEffect{
+    isInstanceofPostEffect:boolean
+}
 /**
  * [KO] 단일 패스 후처리 이펙트 추상 클래스입니다.
  * [EN] Abstract class for single-pass post-processing effects.
@@ -481,6 +484,9 @@ abstract class ASinglePassPostEffect {
         this.#previousSourceTextureReferences = [...sourceTextureInfoList];
     }
 }
-
+Object.defineProperty(ASinglePassPostEffect.prototype, 'isInstanceofPostEffect', {
+    value: true,
+    writable: false
+});
 Object.freeze(ASinglePassPostEffect)
 export default ASinglePassPostEffect
