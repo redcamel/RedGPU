@@ -10,7 +10,6 @@ import createBasePipeline from "../mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../mesh/core/pipeline/PIPELINE_TYPE";
 import VertexGPURenderInfo from "../mesh/core/VertexGPURenderInfo";
 import Mesh from "../mesh/Mesh";
-import MESH_TYPE from "../MESH_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 import cullingComputeSource from "./shader/instanceCullingCompute.wgsl";
@@ -735,8 +734,4 @@ class InstancingMesh extends Mesh {
     }
 }
 
-Object.defineProperty(InstancingMesh.prototype, "meshType", {
-    value: MESH_TYPE.INSTANCED_MESH,
-    writable: false,
-});
 export default InstancingMesh;

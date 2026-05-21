@@ -18,7 +18,6 @@ import mat4ToEuler from "../../math/mat4ToEuler";
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
-import MESH_TYPE from "../MESH_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import View3D from "../view/View3D";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
@@ -42,7 +41,6 @@ const up = new Float32Array([0, 1, 0]);
 interface Mesh {
     receiveShadow: boolean
     disableJitter: boolean
-    meshType: string
     useDisplacementTexture: boolean
     isInstanceofMesh: boolean
 }
@@ -1663,7 +1661,7 @@ class Mesh extends MeshBase {
                     }
                     if (currentMaterial.use2PathRender) {
                         bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
-                    } else if (this.meshType === MESH_TYPE.PARTICLE) {
+                    } else if (this['isInstanceofParticle']) {
                         bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle
                     } else if (currentMaterial.transparent) {
                         bundleListTransparentLayer[bundleListTransparentLayer.length] = renderBundle
@@ -1960,10 +1958,6 @@ class Mesh extends MeshBase {
 }
 Object.defineProperty(Mesh.prototype, 'isInstanceofMesh', {
     value: true,
-    writable: false
-});
-Object.defineProperty(Mesh.prototype, 'meshType', {
-    value: MESH_TYPE.MESH,
     writable: false
 });
 DefineUniformProperty.defineBoolean(Mesh, [

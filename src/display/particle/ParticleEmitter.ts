@@ -4,7 +4,6 @@ import Plane from "../../primitive/Plane";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";
-import MESH_TYPE from "../MESH_TYPE";
 import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import PARTICLE_EASE from "./PARTICLE_EASE";
@@ -18,6 +17,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 interface ParticleEmitter {
     useBillboard: boolean;
+    isInstanceofParticle:boolean
 }
 
 /**
@@ -1213,8 +1213,8 @@ class ParticleEmitter extends Mesh {
     }
 }
 
-Object.defineProperty(ParticleEmitter.prototype, 'meshType', {
-    value: MESH_TYPE.PARTICLE,
+Object.defineProperty(ParticleEmitter.prototype, 'isInstanceofParticle', {
+    value: true,
     writable: false
 });
 DefineUniformProperty.defineBoolean(ParticleEmitter, [

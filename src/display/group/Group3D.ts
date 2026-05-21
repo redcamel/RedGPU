@@ -1,5 +1,4 @@
 import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
-import MESH_TYPE from "../MESH_TYPE";
 import AGroupBase from "./core/AGroupBase";
 
 /**
@@ -65,13 +64,5 @@ class Group3D extends AGroupBase {
     }
 }
 
-/**
- * 이 객체가 3D Mesh 타입의 그룹임을 나타내는 플래그입니다.\
- * geometry/vertex 데이터 없이 transform과 자식만을 가지는 구조임을 구분하기 위해 사용됩니다.
- */
-Object.defineProperty(Group3D.prototype, 'meshType', {
-    value: MESH_TYPE.MESH,
-    writable: false
-});
 Object.freeze(Group3D)
 export default Group3D

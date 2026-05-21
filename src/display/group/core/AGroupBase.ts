@@ -1,7 +1,6 @@
 import {mat4} from "gl-matrix";
 import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
-import MESH_TYPE from "../../MESH_TYPE";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import updateObject3DMatrix from "../../../math/updateObject3DMatrix";
 
@@ -469,10 +468,5 @@ abstract class GroupBase extends Object3DContainer {
         }
     }
 }
-
-Object.defineProperty(GroupBase.prototype, 'meshType', {
-    value: MESH_TYPE.MESH,
-    writable: false
-});
 Object.freeze(GroupBase)
 export default GroupBase
