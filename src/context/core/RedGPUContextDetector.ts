@@ -31,9 +31,6 @@ class RedGPUContextDetector {
     /* [KO] Fallback Adapter 사용 여부 */
     /* [EN] Whether Fallback Adapter is used */
     #isFallbackAdapter: boolean;
-    /* [KO] 그룹화된 제한값 데이터 */
-    /* [EN] Grouped limit data */
-    #groupedLimits: any;
     /* [KO] 브라우저 User-Agent 문자열 */
     /* [EN] Browser User-Agent string */
     #userAgent: string;
@@ -74,13 +71,6 @@ class RedGPUContextDetector {
         return this.#isFallbackAdapter;
     }
 
-    /**
-     * [KO] 그룹화된 한계값 정보를 반환합니다.
-     * [EN] Returns grouped limit information.
-     */
-    get groupedLimits(): any {
-        return this.#groupedLimits;
-    }
 
     /**
      * [KO] 브라우저의 User-Agent 문자열을 반환합니다.
@@ -108,7 +98,6 @@ class RedGPUContextDetector {
     #init(gpuAdapter: GPUAdapter) {
         this.#userAgent = navigator.userAgent;
         this.#parseAdapter(gpuAdapter);
-        this.#parseLimits();
     }
 
     /**
@@ -125,78 +114,6 @@ class RedGPUContextDetector {
         }
     }
 
-    /**
-     * [KO] 제한값 정보를 그룹화하여 파싱합니다. (내부용)
-     * [EN] Parses limit information by grouping. (Internal use)
-     */
-    #parseLimits() {
-        const groupSettings = {
-            "TextureLimits": [
-                'maxTextureDimension1D',
-                'maxTextureDimension2D',
-                'maxTextureDimension3D',
-                'maxTextureArrayLayers',
-                'maxSampledTexturesPerShaderStage',
-                'maxSamplersPerShaderStage'
-            ],
-            "BufferLimits": [
-                'maxBindGroups',
-                'maxBindGroupsPlusVertexBuffers',
-                'maxBindingsPerBindGroup',
-                'maxDynamicUniformBuffersPerPipelineLayout',
-                'maxDynamicStorageBuffersPerPipelineLayout',
-                'maxStorageBuffersPerShaderStage',
-                'maxStorageTexturesPerShaderStage',
-                'maxUniformBuffersPerShaderStage',
-                'maxUniformBufferBindingSize',
-                'maxStorageBufferBindingSize',
-                'minUniformBufferOffsetAlignment',
-                'minStorageBufferOffsetAlignment',
-                'maxBufferSize'
-            ],
-            "PipelineAndShaderLimits": [
-                'maxVertexBuffers',
-                'maxVertexAttributes',
-                'maxVertexBufferArrayStride',
-                'maxInterStageShaderComponents',
-                'maxInterStageShaderVariables'
-            ],
-            "ComputeLimits": [
-                'maxComputeWorkgroupStorageSize',
-                'maxComputeInvocationsPerWorkgroup',
-                'maxComputeWorkgroupSizeX',
-                'maxComputeWorkgroupSizeY',
-                'maxComputeWorkgroupSizeZ',
-                'maxComputeWorkgroupsPerDimension'
-            ],
-            "ColorLimits": [
-                'maxColorAttachments',
-                'maxColorAttachmentBytesPerSample'
-            ]
-        };
-        const groupedLimits = {
-            "TextureLimits": {},
-            "BufferLimits": {},
-            "PipelineAndShaderLimits": {},
-            "ComputeLimits": {},
-            "ColorLimits": {},
-            "EtcLimit": {}
-        };
-        for (const limit in this.#limits) {
-            let found = false;
-            for (const group in groupSettings) {
-                if (groupSettings[group].includes(limit)) {
-                    groupedLimits[group][limit] = this.#limits[limit];
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                groupedLimits["EtcLimit"][limit] = this.#limits[limit];
-            }
-        }
-        this.#groupedLimits = groupedLimits;
-    }
 }
 
 export default RedGPUContextDetector;
