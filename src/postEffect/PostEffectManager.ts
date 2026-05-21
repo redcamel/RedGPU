@@ -86,8 +86,6 @@ class PostEffectManager {
     #gbufferBindGroup_swap0: GPUBindGroup;
     #gbufferBindGroup_swap1: GPUBindGroup;
     #prevMSAAID_for_gbuffer: string;
-    #prevDepthView0: GPUTextureView;
-    #prevDepthView1: GPUTextureView;
 
     /**
      * [KO] PostEffectManager 인스턴스를 생성합니다.
@@ -515,13 +513,16 @@ class PostEffectManager {
         const {gpuDevice, antialiasingManager, resourceManager} = redGPUContext;
         const {useMSAA, msaaID} = antialiasingManager;
 
-        const depthView0 = viewRenderTextureManager.depthTextureView;
-        const depthView1 = viewRenderTextureManager.prevDepthTextureView;
+        const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
+        const {width, height} = gBufferColorTexture;
 
         const msaaChanged = this.#prevMSAAID_for_gbuffer !== msaaID;
-        const depthChanged = this.#prevDepthView0 !== depthView0 || this.#prevDepthView1 !== depthView1;
+        const dimensionsChanged = this.#previousDimensions?.width !== width || this.#previousDimensions?.height !== height;
 
-        if (msaaChanged || depthChanged) {
+        if (msaaChanged || dimensionsChanged) {
+            const depthView0 = viewRenderTextureManager.depthTextureView;
+            const depthView1 = viewRenderTextureManager.prevDepthTextureView;
+            
             const normalView = useMSAA
                 ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
                 : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);
@@ -561,8 +562,6 @@ class PostEffectManager {
             });
 
             this.#prevMSAAID_for_gbuffer = msaaID;
-            this.#prevDepthView0 = depthView0;
-            this.#prevDepthView1 = depthView1;
         }
     }
 
