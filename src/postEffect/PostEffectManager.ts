@@ -522,7 +522,7 @@ class PostEffectManager {
         if (msaaChanged || dimensionsChanged) {
             const depthView0 = viewRenderTextureManager.depthTextureView;
             const depthView1 = viewRenderTextureManager.prevDepthTextureView;
-            
+
             const normalView = useMSAA
                 ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.NORMAL)
                 : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.NORMAL);

@@ -17,7 +17,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 interface ParticleEmitter {
     useBillboard: boolean;
-    isInstanceofParticle:boolean
+    isInstanceofParticle: boolean
 }
 
 /**

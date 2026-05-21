@@ -8,6 +8,7 @@ import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty
 interface TAASharpen {
     sharpness: number
 }
+
 /**
  * [KO] TAA 전용 샤프닝 후처리 이펙트입니다.
  * [EN] TAA-specific sharpening post-processing effect.
@@ -50,6 +51,7 @@ class TAASharpen extends ASinglePassPostEffect {
 
 
 }
+
 DefineUniformProperty.definePositiveNumber(TAASharpen, [
     {key: 'sharpness', value: 0.5, min: 0, max: 1},
 ])

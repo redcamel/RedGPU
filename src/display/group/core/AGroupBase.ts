@@ -468,5 +468,6 @@ abstract class GroupBase extends Object3DContainer {
         }
     }
 }
+
 Object.freeze(GroupBase)
 export default GroupBase

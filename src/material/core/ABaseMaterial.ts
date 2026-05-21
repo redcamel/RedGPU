@@ -30,7 +30,7 @@ interface ABaseMaterial {
      * [EN] Whether to use tint color
      */
     useTint: boolean;
-    isInstanceofMaterial:boolean
+    isInstanceofMaterial: boolean
 }
 
 /**

@@ -1728,15 +1728,6 @@ class Mesh extends MeshBase {
         return this.gpuRenderInfo.vertexShaderModule
     }
 
-    #normalizeRotationDelta(prevAngle: number, newAngle: number): number {
-        let delta = newAngle - prevAngle;
-
-        // delta가 180도보다 크면 반대 방향으로 회전
-        while (delta > 180) delta -= 360;
-        while (delta < -180) delta += 360;
-
-        return prevAngle + delta;
-    }
 
     #updateLODPipeline = () => {
 
@@ -1956,6 +1947,7 @@ class Mesh extends MeshBase {
         return variantKey;
     }
 }
+
 Object.defineProperty(Mesh.prototype, 'isInstanceofMesh', {
     value: true,
     writable: false

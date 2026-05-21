@@ -1,6 +1,5 @@
 import RedGPUContext from "../context/RedGPUContext";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
-import {keepLog} from "../utils";
 
 /**
  * [KO] 후처리용 텍스처 풀링 클래스입니다.
