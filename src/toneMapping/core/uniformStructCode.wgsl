@@ -68,8 +68,8 @@ fn acesFilmicHillToneMapping(color: vec3<f32>) -> vec3<f32> {
 
 
 fn getFinalSRGB(toneMappedColor:vec3<f32>, contrast: f32, brightness: f32) -> vec3<f32> {
-    let contrastRGB = applyContrast(toneMappedColor, uniforms.contrast);
-    let finalLinearRGB = applyBrightness(contrastRGB, uniforms.brightness);
+    let contrastRGB = applyContrast(toneMappedColor, contrast);
+    let finalLinearRGB = applyBrightness(contrastRGB, brightness);
     let finalSRGB = clamp(linearToSrgbVec3(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
     return finalSRGB;
 }

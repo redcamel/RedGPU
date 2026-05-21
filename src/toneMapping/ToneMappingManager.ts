@@ -7,8 +7,6 @@ import ToneKhronosPBRNeutral from "./khronosPbrNeutral/ToneKhronosPBRNeutral";
 import ToneACESFilmicNarkowicz from "./ACESFilmicNarkowicz/ToneACESFilmicNarkowicz";
 import ToneACESFilmicHill from "./ACESFilmicHill/ToneACESFilmicHill";
 import {IPostEffectResult} from "../postEffect/core/types";
-import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import validateNumberRange from "../runtimeChecker/validateFunc/validateNumberRange";
 
 /**
  * [KO] 톤 매핑, 대비, 밝기 및 노출 설정을 통합 관리하는 클래스입니다.
@@ -74,7 +72,6 @@ class ToneMappingManager {
 
     /** [KO] 명암 대비(Contrast)를 설정합니다. (0.0 ~ 2.0, 기본값: 1.0) [EN] Sets the contrast. (0.0 to 2.0, Default: 1.0) */
     set contrast(value: number) {
-        validatePositiveNumberRange(value, 0, 2)
         this.#contrast = value;
         if (this.#toneMapping) this.#toneMapping.contrast = value;
     }
@@ -86,7 +83,6 @@ class ToneMappingManager {
 
     /** [KO] 밝기(Brightness)를 설정합니다. (-1.0 ~ 1.0, 기본값: 0.0) [EN] Sets the brightness. (-1.0 to 1.0, Default: 0.0) */
     set brightness(value: number) {
-        validateNumberRange(value, -1, 1)
         this.#brightness = value;
         if (this.#toneMapping) this.#toneMapping.brightness = value;
     }

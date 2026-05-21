@@ -22,7 +22,6 @@ class ToneKhronosPBRNeutral extends AToneMappingEffect {
             'POST_EFFECT_TONE_MAPPING_KHRONOS_PBR_NEUTRAL',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.updateUniforms();
     }
 }
 
