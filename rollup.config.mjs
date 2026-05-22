@@ -48,7 +48,7 @@ export default [
 				}
 			),
 			terser(terserOptions),
-			removeSpacesAndTabs()
+			// removeSpacesAndTabs()
 		]
 	},
 	{
@@ -67,7 +67,7 @@ export default [
 				declarationDir: null
 			}),
 			terser(terserOptions),
-			removeSpacesAndTabs()
+			// removeSpacesAndTabs()
 		]
 	}
 ]
