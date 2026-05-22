@@ -277,9 +277,10 @@ abstract class ASinglePassPostEffect {
         const {gpuDevice, antialiasingManager, resourceManager} = this.#redGPUContext;
         const {useMSAA, msaaID} = antialiasingManager;
 
-        // 텍스처 풀에서 출력 텍스처 할당
-        this.#outputTexture = view.postEffectManager.texturePool.alloc(width, height, 'rgba16float');
-        this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
+        // 텍스처 풀에서 출력 텍스처 할당 (IPostEffectResult 형식으로 직접 획득)
+        const result = view.postEffectManager.texturePool.allocResult(width, height, 'rgba16float');
+        this.#outputTexture = result.texture;
+        this.#outputTextureView = result.textureView;
 
         // 변경 감지 (구조적 변경 확인)
         const dimensionsChanged = this.#prevInfo?.width !== width || this.#prevInfo?.height !== height;

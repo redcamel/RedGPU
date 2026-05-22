@@ -1,5 +1,6 @@
 import RedGPUContext from "../context/RedGPUContext";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
+import {IPostEffectResult} from "./core/types";
 
 /**
  * [KO] 후처리용 텍스처 풀링 클래스입니다.
@@ -12,6 +13,8 @@ class PostEffectTexturePool {
     #redGPUContext: RedGPUContext;
     #pool: Map<string, GPUTexture[]> = new Map();
     #activeTextures: Set<GPUTexture> = new Set();
+    #textureToKey: WeakMap<GPUTexture, string> = new WeakMap();
+    #textureToView: WeakMap<GPUTexture, GPUTextureView> = new WeakMap();
     #videoMemorySize: number = 0;
 
     // 통계 관련 필드
@@ -95,7 +98,7 @@ class PostEffectTexturePool {
     getDetails() {
         const details = [];
         this.#pool.forEach((list, key) => {
-            const activeCount = [...this.#activeTextures].filter(t => `${t.width}x${t.height}_${t.format}` === key).length;
+            const activeCount = [...this.#activeTextures].filter(t => this.#textureToKey.get(t) === key).length;
             details.push({
                 key,
                 total: list.length + activeCount,
@@ -107,6 +110,18 @@ class PostEffectTexturePool {
     }
 
     /**
+     * [KO] 적절한 텍스처를 풀에서 가져오거나 새로 생성하여 IPostEffectResult 형식으로 반환합니다.
+     * [EN] Gets a suitable texture from the pool or creates a new one, returning it as IPostEffectResult.
+     */
+    allocResult(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): IPostEffectResult {
+        const texture = this.#alloc(width, height, format);
+        return {
+            texture,
+            textureView: this.#textureToView.get(texture)!
+        };
+    }
+
+    /**
      * [KO] 적절한 텍스처를 풀에서 가져오거나 새로 생성합니다.
      * [EN] Gets a suitable texture from the pool or creates a new one.
      * @param width - 텍스처 너비
@@ -114,7 +129,7 @@ class PostEffectTexturePool {
      * @param format - 텍스처 포맷 (기본값: 'rgba16float')
      * @returns 할당된 GPUTexture
      */
-    alloc(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): GPUTexture {
+    #alloc(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): GPUTexture {
         this.#requestCount++;
         const key = `${width}x${height}_${format}`;
         let list = this.#pool.get(key);
@@ -137,6 +152,10 @@ class PostEffectTexturePool {
                 label: `PostEffectTexturePool_${key}`
             });
             this.#videoMemorySize += calculateTextureByteSize(texture);
+
+            // [KO] 메타데이터 및 뷰 생성/저장 [EN] Create/store metadata and view
+            this.#textureToKey.set(texture, key);
+            this.#textureToView.set(texture, this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(texture));
         }
         this.#activeTextures.add(texture);
 
@@ -156,13 +175,10 @@ class PostEffectTexturePool {
     release(texture: GPUTexture): void {
         if (this.#activeTextures.has(texture)) {
             this.#activeTextures.delete(texture);
-            const key = `${texture.width}x${texture.height}_${texture.format}`;
-            let list = this.#pool.get(key);
-            if (!list) {
-                list = [];
-                this.#pool.set(key, list);
+            const key = this.#textureToKey.get(texture);
+            if (key) {
+                this.#pool.get(key)!.push(texture);
             }
-            list.push(texture);
         }
     }
 
@@ -172,13 +188,10 @@ class PostEffectTexturePool {
      */
     releaseAll(): void {
         this.#activeTextures.forEach(texture => {
-            const key = `${texture.width}x${texture.height}_${texture.format}`;
-            let list = this.#pool.get(key);
-            if (!list) {
-                list = [];
-                this.#pool.set(key, list);
+            const key = this.#textureToKey.get(texture);
+            if (key) {
+                this.#pool.get(key)!.push(texture);
             }
-            list.push(texture);
         });
         this.#activeTextures.clear();
     }
