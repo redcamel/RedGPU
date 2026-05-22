@@ -412,6 +412,7 @@ abstract class ASinglePassPostEffect {
         const cachedBG0_swap0 = this.#bindGroupCache0.get(`${group0Key}_swap0`);
         const cachedBG0_swap1 = this.#bindGroupCache0.get(`${group0Key}_swap1`);
         // keepLog(this.constructor.name, view.postEffectManager.texturePool.activeTextureNum, group0Key, cachedBG0_swap0, cachedBG0_swap1)
+        // keepLog(this.constructor.name, `pool size : ${view.postEffectManager.texturePool.poolNum}`)
         if (cachedBG0_swap0 && cachedBG0_swap1) {
             this.#computeBindGroup0List_swap0 = cachedBG0_swap0;
             this.#computeBindGroup0List_swap1 = cachedBG0_swap1;
@@ -419,6 +420,7 @@ abstract class ASinglePassPostEffect {
         } else {
             this.#computeBindGroupEntries0_swap0 = [];
             this.#computeBindGroupEntries0_swap1 = [];
+
 
             // Group 0: 소스 텍스처들
             for (const k in storage) {

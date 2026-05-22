@@ -26,6 +26,9 @@ class PostEffectTexturePool {
     get activeTextureNum(): number {
         return this.#activeTextures.size;
     }
+    get poolNum(): number {
+        return this.#pool.size;
+    }
     /**
      * [KO] 풀 내의 전체 비디오 메모리 사용량(bytes)을 반환합니다.
      * [EN] Returns the total video memory usage (bytes) in the pool.
