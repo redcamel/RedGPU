@@ -13,6 +13,7 @@ import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformD
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./PostEffectTexturePool";
+import {IPostEffectResult} from "./core/types";
 
 
 /**
@@ -348,7 +349,7 @@ class PostEffectManager {
      * [KO] 렌더링 결과 텍스처 정보
      * [EN] Rendering result texture information
      */
-    render() {
+    render(): IPostEffectResult {
         const {viewRenderTextureManager, redGPUContext, taa, fxaa} = this.#view;
         const {antialiasingManager} = redGPUContext
         const {useMSAA, useFXAA, useTAA, msaaID} = antialiasingManager;
@@ -371,17 +372,9 @@ class PostEffectManager {
 
         let currentTextureView = this.#renderToStorageTexture(this.#view, initialSourceTexture);
 
-        const applyEffect = (renderFn: () => any) => {
-            const prevTextureView = currentTextureView;
-            currentTextureView = renderFn();
-            if (prevTextureView && prevTextureView.texture) {
-                this.#texturePool.release(prevTextureView.texture);
-            }
-        };
-
         // SkyAtmosphere 전용 처리 (톤 매핑 전 HDR 공간에서 실행)
         if (this.#view.skyAtmosphere) {
-            applyEffect(() => this.#view.skyAtmosphere.render(
+            currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.skyAtmosphere.render(
                 this.#view,
                 width,
                 height,
@@ -391,7 +384,7 @@ class PostEffectManager {
 
 
         this.#postEffects.forEach(effect => {
-            applyEffect(() => effect.render(
+            currentTextureView = this.#applyEffect(currentTextureView, () => effect.render(
                 this.#view,
                 width,
                 height,
@@ -400,7 +393,7 @@ class PostEffectManager {
         });
 
         if (this.#useSSAO) {
-            applyEffect(() => this.ssao.render(
+            currentTextureView = this.#applyEffect(currentTextureView, () => this.ssao.render(
                 this.#view,
                 width,
                 height,
@@ -408,7 +401,7 @@ class PostEffectManager {
             ));
         }
         if (this.#useSSR) {
-            applyEffect(() => this.ssr.render(
+            currentTextureView = this.#applyEffect(currentTextureView, () => this.ssr.render(
                 this.#view,
                 width,
                 height,
@@ -422,7 +415,7 @@ class PostEffectManager {
         }
 
         {
-            applyEffect(() => this.#view.toneMappingManager.render(
+            currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.toneMappingManager.render(
                 width,
                 height,
                 currentTextureView
@@ -431,7 +424,7 @@ class PostEffectManager {
 
 
         if (useFXAA) {
-            applyEffect(() => fxaa.render(
+            currentTextureView = this.#applyEffect(currentTextureView, () => fxaa.render(
                 this.#view,
                 width,
                 height,
@@ -441,7 +434,7 @@ class PostEffectManager {
 
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
-                applyEffect(() => taa.render(
+                currentTextureView = this.#applyEffect(currentTextureView, () => taa.render(
                     this.#view,
                     width,
                     height,
@@ -450,14 +443,14 @@ class PostEffectManager {
                 if (!this.#taaSharpenEffect) {
                     this.#taaSharpenEffect = new TAASharpen(redGPUContext)
                 }
-                applyEffect(() => this.#taaSharpenEffect.render(
+                currentTextureView = this.#applyEffect(currentTextureView, () => this.#taaSharpenEffect.render(
                     this.#view,
                     width,
                     height,
                     currentTextureView
                 ));
             } else {
-                applyEffect(() => fxaa.render(
+                currentTextureView = this.#applyEffect(currentTextureView, () => fxaa.render(
                     this.#view,
                     width,
                     height,
@@ -484,6 +477,14 @@ class PostEffectManager {
         if (this.#texturePool) {
             this.#texturePool.clear();
         }
+    }
+
+    #applyEffect(currentTextureView: IPostEffectResult, renderFn: () => IPostEffectResult): IPostEffectResult {
+        const nextTextureView = renderFn();
+        if (currentTextureView && currentTextureView.texture) {
+            this.#texturePool.release(currentTextureView.texture);
+        }
+        return nextTextureView;
     }
 
     #initGBufferLayouts() {
