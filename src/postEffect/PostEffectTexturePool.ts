@@ -23,12 +23,7 @@ class PostEffectTexturePool {
         this.#redGPUContext = redGPUContext;
     }
 
-    get activeTextureNum(): number {
-        return this.#activeTextures.size;
-    }
-    get poolNum(): number {
-        return this.#pool.size;
-    }
+
     /**
      * [KO] 풀 내의 전체 비디오 메모리 사용량(bytes)을 반환합니다.
      * [EN] Returns the total video memory usage (bytes) in the pool.
@@ -36,7 +31,33 @@ class PostEffectTexturePool {
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
-//TODO 현재는 할당이 한프레임에 누적으로 되어있는데 스마트하게 알아서 할당되는 구조를 가져야할듯
+
+    /**
+     * [KO] 풀 내의 전체 텍스처 개수(활성 + 유휴)를 반환합니다.
+     * [EN] Returns the total number of textures in the pool (active + idle).
+     */
+    get totalCount(): number {
+        return this.activeCount + this.idleCount;
+    }
+
+    /**
+     * [KO] 현재 사용 중인 활성 텍스처 개수를 반환합니다.
+     * [EN] Returns the number of currently active textures.
+     */
+    get activeCount(): number {
+        return this.#activeTextures.size;
+    }
+
+    /**
+     * [KO] 풀에서 대기 중인 유휴 텍스처 개수를 반환합니다.
+     * [EN] Returns the number of idle textures waiting in the pool.
+     */
+    get idleCount(): number {
+        let count = 0;
+        this.#pool.forEach(list => count += list.length);
+        return count;
+    }
+
     /**
      * [KO] 적절한 텍스처를 풀에서 가져오거나 새로 생성합니다.
      * [EN] Gets a suitable texture from the pool or creates a new one.
