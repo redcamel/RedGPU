@@ -23,8 +23,8 @@ const updateJitter = (view: View3D) => {
     const haltonY = haltonSequence(currentSample + 1, 3);
 
     // 1. 디바이스 픽셀 비율 가져오기
-    const dpr = window.devicePixelRatio || 1;
-    // const dpr =  1;
+    // const dpr = window.devicePixelRatio || 1;
+    const dpr =  1;
 
     // 2. 물리적 픽셀 기준의 오프셋 계산
     // (halton - 0.5)는 [-0.5, 0.5] 범위.
