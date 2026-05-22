@@ -52,9 +52,7 @@ class AutoExposure {
     #prevMSAAID: string;
     #prevWidth: number;
     #prevHeight: number;
-    #prevSourceTextureView: GPUTextureView;
-    #downsampleBindGroup0_swap0: GPUBindGroup;
-    #downsampleBindGroup0_swap1: GPUBindGroup;
+    #downsampleBindGroup0Cache: WeakMap<GPUTexture, { swap0: GPUBindGroup, swap1: GPUBindGroup }> = new WeakMap();
     #downsampleBindGroup1: GPUBindGroup;
     #adaptationBindGroup0: GPUBindGroup;
 
@@ -239,57 +237,41 @@ class AutoExposure {
             ])
         );
 
-        // 변경 감지 및 바인드 그룹 갱신
         const msaaChanged = this.#prevMSAAID !== msaaID;
         const sizeChanged = this.#prevWidth !== width || this.#prevHeight !== height;
-        const sourceViewChanged = this.#prevSourceTextureView !== sourceTextureInfo.textureView;
 
-        if (msaaChanged || sizeChanged || sourceViewChanged || !this.#downsampleBindGroup0_swap0) {
-            const depthView0 = viewRenderTextureManager.depthTextureView;
-            const depthView1 = viewRenderTextureManager.prevDepthTextureView;
-
-            // G-Buffer 스와핑을 고려한 2개의 바인드 그룹 생성
-            const layout0 = this.#getDownsampleBindGroupLayout0(useMSAA);
-            this.#downsampleBindGroup0_swap0 = gpuDevice.createBindGroup({
-                label: 'AutoExposure_Downsample_BG0_Swap0',
-                layout: layout0,
-                entries: [
-                    {binding: 0, resource: sourceTextureInfo.textureView},
-                    {binding: 1, resource: depthView0}
-                ]
-            });
-            this.#downsampleBindGroup0_swap1 = gpuDevice.createBindGroup({
-                label: 'AutoExposure_Downsample_BG0_Swap1',
-                layout: layout0,
-                entries: [
-                    {binding: 0, resource: sourceTextureInfo.textureView},
-                    {binding: 1, resource: depthView1}
-                ]
-            });
-
-            this.#downsampleBindGroup1 = gpuDevice.createBindGroup({
-                label: 'AutoExposure_Downsample_BG1',
-                layout: this.#downsampleBindGroupLayout1,
-                entries: [
-                    {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
-                    {binding: 1, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
-                ]
-            });
-
-            this.#adaptationBindGroup0 = gpuDevice.createBindGroup({
-                label: 'AutoExposure_Adaptation_BG0',
-                layout: this.#adaptationBindGroupLayout0,
-                entries: [
-                    {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
-                    {binding: 1, resource: {buffer: this.#adaptedEV100Buffer.gpuBuffer}},
-                    {binding: 2, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
-                ]
-            });
-
+        if (msaaChanged || sizeChanged) {
+            this.#downsampleBindGroup0Cache = new WeakMap();
             this.#prevMSAAID = msaaID;
             this.#prevWidth = width;
             this.#prevHeight = height;
-            this.#prevSourceTextureView = sourceTextureInfo.textureView;
+        }
+
+        let cachedBG0 = this.#downsampleBindGroup0Cache.get(sourceTextureInfo.texture);
+        if (!cachedBG0) {
+            const depthView0 = viewRenderTextureManager.depthTextureView;
+            const depthView1 = viewRenderTextureManager.prevDepthTextureView;
+            const layout0 = this.#getDownsampleBindGroupLayout0(useMSAA);
+
+            cachedBG0 = {
+                swap0: gpuDevice.createBindGroup({
+                    label: 'AutoExposure_Downsample_BG0_Swap0',
+                    layout: layout0,
+                    entries: [
+                        {binding: 0, resource: sourceTextureInfo.textureView},
+                        {binding: 1, resource: depthView0}
+                    ]
+                }),
+                swap1: gpuDevice.createBindGroup({
+                    label: 'AutoExposure_Downsample_BG0_Swap1',
+                    layout: layout0,
+                    entries: [
+                        {binding: 0, resource: sourceTextureInfo.textureView},
+                        {binding: 1, resource: depthView1}
+                    ]
+                })
+            };
+            this.#downsampleBindGroup0Cache.set(sourceTextureInfo.texture, cachedBG0);
         }
 
         // [KO] 히스토그램 버퍼 명시적 초기화
@@ -301,7 +283,7 @@ class AutoExposure {
         const pipeline = this.#getDownsamplePipeline(useMSAA);
         commandEncoderManager.addPostProcessComputePass('AutoExposure_GenerateHistogram_Pass', (pass1) => {
             pass1.setPipeline(pipeline);
-            pass1.setBindGroup(0, swapBufferIndex ? this.#downsampleBindGroup0_swap1 : this.#downsampleBindGroup0_swap0);
+            pass1.setBindGroup(0, swapBufferIndex ? cachedBG0.swap1 : cachedBG0.swap0);
             pass1.setBindGroup(1, this.#downsampleBindGroup1);
             pass1.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16), 1);
         });
@@ -402,6 +384,25 @@ class AutoExposure {
             label: 'AutoExposure_Adaptation_Pipeline',
             layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#adaptationBindGroupLayout0]}),
             compute: {module: adaptationModule, entryPoint: 'main'}
+        });
+
+        this.#downsampleBindGroup1 = gpuDevice.createBindGroup({
+            label: 'AutoExposure_Downsample_BG1',
+            layout: this.#downsampleBindGroupLayout1,
+            entries: [
+                {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
+                {binding: 1, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+            ]
+        });
+
+        this.#adaptationBindGroup0 = gpuDevice.createBindGroup({
+            label: 'AutoExposure_Adaptation_BG0',
+            layout: this.#adaptationBindGroupLayout0,
+            entries: [
+                {binding: 0, resource: {buffer: this.#histogramBuffer.gpuBuffer}},
+                {binding: 1, resource: {buffer: this.#adaptedEV100Buffer.gpuBuffer}},
+                {binding: 2, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
+            ]
         });
     }
 

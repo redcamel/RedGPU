@@ -37,12 +37,11 @@ class FinalRender {
     //
     #fragmentBindGroupLayout: GPUBindGroupLayout
     #fragmentShader: GPUShaderModule
-    #fragmentUniformBindGroups: GPUBindGroup[] = []
+    #fragmentBindGroupCache: WeakMap<GPUTextureView, GPUBindGroup>[] = []
     //
     #pipeline: GPURenderPipeline
     //
     #viewSizes: { width; height }[] = []
-    #viewGpuTextureViews: GPUTextureView[] = []
     #sampler: Sampler
     #fragmentBuffer: GPUBuffer[] = []
     #fragmentBufferData: Float32Array[] = []
@@ -70,7 +69,10 @@ class FinalRender {
             finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
             finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
             //
-            if (!this.#vertexBindGroupLayout || dirtyMSAA) this.#initGPUDetails(redGPUContext)
+            if (!this.#vertexBindGroupLayout || dirtyMSAA) {
+                this.#initGPUDetails(redGPUContext);
+                this.#fragmentBindGroupCache = [];
+            }
             this.#renderViewList(
                 redGPUContext,
                 finalRenderPassEnc,
@@ -148,21 +150,13 @@ class FinalRender {
                 projectionMatrix as Float32Array as BufferSource
             )
             //
-            const needNewBindGroup =
-                dirtyMSAA
-                || !this.#viewSizes[index]
-                || this.#viewSizes[index].width !== viewW
-                || this.#viewSizes[index].height !== viewH
-                || this.#viewGpuTextureViews[index] !== gpuTextureView
-            if (needNewBindGroup) {
-                if (!this.#fragmentBuffer[index]) {
-                    this.#fragmentBuffer[index] = redGPUContext.gpuDevice.createBuffer({
-                        label: `FINAL_RENDER_FRAGMENT_BUFFER_${index}`,
-                        size: 16,
-                        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-                    })
-                    this.#fragmentBufferData[index] = new Float32Array([1, 0, 0, 1])
-                }
+            if (!this.#fragmentBindGroupCache[index] || dirtyMSAA) {
+                this.#fragmentBindGroupCache[index] = null
+                this.#fragmentBindGroupCache[index] = new WeakMap();
+            }
+
+            let fragmentBindGroup = this.#fragmentBindGroupCache[index].get(gpuTextureView);
+            if (!fragmentBindGroup) {
                 const fragmentBindGroupDesc: GPUBindGroupDescriptor = {
                     layout: this.#fragmentBindGroupLayout,
                     label: FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,
@@ -178,14 +172,15 @@ class FinalRender {
                         }
                     ]
                 }
-                this.#fragmentUniformBindGroups[index] = gpuDevice.createBindGroup(fragmentBindGroupDesc)
+                fragmentBindGroup = gpuDevice.createBindGroup(fragmentBindGroupDesc)
+                this.#fragmentBindGroupCache[index].set(gpuTextureView, fragmentBindGroup);
                 this.#viewSizes[index] = {width: viewW || 1, height: viewH || 1}
-                this.#viewGpuTextureViews[index] = gpuTextureView
             }
+
             this.#updateFinalViewBackgroundColor(targetView, index)
             finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext, dirtyMSAA))
             finalRenderPassEnc.setBindGroup(0, vertexUniformBindGroup);
-            finalRenderPassEnc.setBindGroup(1, this.#fragmentUniformBindGroups[index])
+            finalRenderPassEnc.setBindGroup(1, fragmentBindGroup)
             finalRenderPassEnc.draw(6, 1, 0, 0);
         })
     }
@@ -239,6 +234,14 @@ class FinalRender {
                 }]
             }
             this.#vertexUniformBindGroups[index] = gpuDevice.createBindGroup(vertexBindGroupDesc)
+        }
+        if (!this.#fragmentBuffer[index]) {
+            this.#fragmentBuffer[index] = redGPUContext.gpuDevice.createBuffer({
+                label: `FINAL_RENDER_FRAGMENT_BUFFER_${index}`,
+                size: 16,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            })
+            this.#fragmentBufferData[index] = new Float32Array([1, 0, 0, 1])
         }
     }
 
