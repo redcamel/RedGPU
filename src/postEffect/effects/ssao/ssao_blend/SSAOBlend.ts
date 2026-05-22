@@ -1,8 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import View3D from "../../../../display/view/View3D";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
-import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 
 /**
@@ -28,9 +26,6 @@ class SSAOBlend extends ASinglePassPostEffect {
         )
     }
 
-    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult, sourceTextureInfo1: IPostEffectResult) {
-        return super.render(view, width, height, sourceTextureInfo, sourceTextureInfo1)
-    }
 }
 
 Object.freeze(SSAOBlend)
