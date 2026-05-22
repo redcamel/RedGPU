@@ -371,41 +371,49 @@ class PostEffectManager {
 
         let currentTextureView = this.#renderToStorageTexture(this.#view, initialSourceTexture);
 
+        const applyEffect = (renderFn: () => any) => {
+            const prevTextureView = currentTextureView;
+            currentTextureView = renderFn();
+            if (prevTextureView && prevTextureView.texture) {
+                this.#texturePool.release(prevTextureView.texture);
+            }
+        };
+
         // SkyAtmosphere 전용 처리 (톤 매핑 전 HDR 공간에서 실행)
         if (this.#view.skyAtmosphere) {
-            currentTextureView = this.#view.skyAtmosphere.render(
+            applyEffect(() => this.#view.skyAtmosphere.render(
                 this.#view,
                 width,
                 height,
                 currentTextureView
-            );
+            ));
         }
 
 
         this.#postEffects.forEach(effect => {
-            currentTextureView = effect.render(
+            applyEffect(() => effect.render(
                 this.#view,
                 width,
                 height,
                 currentTextureView,
-            );
+            ));
         });
 
         if (this.#useSSAO) {
-            currentTextureView = this.ssao.render(
+            applyEffect(() => this.ssao.render(
                 this.#view,
                 width,
                 height,
                 currentTextureView
-            );
+            ));
         }
         if (this.#useSSR) {
-            currentTextureView = this.ssr.render(
+            applyEffect(() => this.ssr.render(
                 this.#view,
                 width,
                 height,
                 currentTextureView
-            );
+            ));
         }
 
         // Auto Exposure 처리 (HDR 공간에서 수행)
@@ -414,47 +422,47 @@ class PostEffectManager {
         }
 
         {
-            currentTextureView = this.#view.toneMappingManager.render(
+            applyEffect(() => this.#view.toneMappingManager.render(
                 width,
                 height,
                 currentTextureView
-            );
+            ));
         }
 
 
         if (useFXAA) {
-            currentTextureView = fxaa.render(
+            applyEffect(() => fxaa.render(
                 this.#view,
                 width,
                 height,
                 currentTextureView
-            );
+            ));
         }
 
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
-                currentTextureView = taa.render(
+                applyEffect(() => taa.render(
                     this.#view,
                     width,
                     height,
                     currentTextureView
-                );
+                ));
                 if (!this.#taaSharpenEffect) {
                     this.#taaSharpenEffect = new TAASharpen(redGPUContext)
                 }
-                currentTextureView = this.#taaSharpenEffect.render(
+                applyEffect(() => this.#taaSharpenEffect.render(
                     this.#view,
                     width,
                     height,
                     currentTextureView
-                )
+                ));
             } else {
-                currentTextureView = fxaa.render(
+                applyEffect(() => fxaa.render(
                     this.#view,
                     width,
                     height,
                     currentTextureView
-                );
+                ));
             }
         }
 

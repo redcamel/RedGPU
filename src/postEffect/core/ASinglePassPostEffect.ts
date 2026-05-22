@@ -7,6 +7,9 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {IPostEffectResult} from "./types";
 import {keepLog} from "../../utils";
 
+const resourceIdMap = new WeakMap<GPUTexture, number>();
+let nextResourceId = 0;
+
 interface ASinglePassPostEffect {
     isInstanceofPostEffect: boolean
 }
@@ -61,6 +64,11 @@ abstract class ASinglePassPostEffect {
     #videoMemorySize: number = 0
     #prevMSAA: boolean
     #prevMSAAID: string
+
+    // 바인드 그룹 캐시
+    #bindGroupCache0 = new Map<string, GPUBindGroup>();
+    #bindGroupCache1: GPUBindGroup;
+    #bindGroupCache3 = new Map<number, GPUBindGroup>();
 
     /**
      * [KO] ASinglePassPostEffect 인스턴스를 생성합니다.
@@ -178,6 +186,18 @@ abstract class ASinglePassPostEffect {
     clear() {
         this.#outputTexture = null;
         this.#outputTextureView = null;
+        this.#bindGroupCache0.clear();
+        this.#bindGroupCache1 = null;
+        this.#bindGroupCache3.clear();
+    }
+
+    #getResourceId(resource: GPUTexture): number {
+        let id = resourceIdMap.get(resource);
+        if (id === undefined) {
+            id = nextResourceId++;
+            resourceIdMap.set(resource, id);
+        }
+        return id;
     }
 
     /**
@@ -221,7 +241,7 @@ abstract class ASinglePassPostEffect {
         }
 
         {
-            keepLog(this.#uniformsInfo)
+            // keepLog(this.#uniformsInfo)
             const {members} = this.#uniformsInfo || {}
             if (members) {
                 for (const k in members) {
@@ -258,24 +278,26 @@ abstract class ASinglePassPostEffect {
         const {useMSAA, msaaID} = antialiasingManager;
 
         // 텍스처 풀에서 출력 텍스처 할당
-        const prevOutputTexture = this.#outputTexture;
         this.#outputTexture = view.postEffectManager.texturePool.alloc(width, height, 'rgba16float');
         this.#outputTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#outputTexture);
 
-        // 변경 감지 (재바인딩 필요성 확인)
-        const outputTextureChanged = prevOutputTexture !== this.#outputTexture;
+        // 변경 감지 (구조적 변경 확인)
         const dimensionsChanged = this.#prevInfo?.width !== width || this.#prevInfo?.height !== height;
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
-        const sourceTextureChanged = this.#detectSourceTextureChange(sourceTextureInfo);
+
+        // MSAA나 해상도가 바뀌면 기존 바인드 그룹 캐시는 더 이상 유효하지 않으므로 클리어
+        if (dimensionsChanged || msaaChanged) {
+            this.#bindGroupCache0.clear();
+            this.#bindGroupCache1 = null;
+            this.#bindGroupCache3.clear();
+        }
 
         // 파이프라인 준비 (상태에 따라 최초 1회 생성 및 캐싱)
         this.#checkAndCreatePipeline(view, useMSAA, gpuDevice);
 
-
-        if (dimensionsChanged || msaaChanged || sourceTextureChanged || outputTextureChanged) {
-            keepLog(this.constructor.name, dimensionsChanged, msaaChanged, sourceTextureChanged, outputTextureChanged)
-            this.#updateBindGroups(view, sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
-        }
+        // 🌟 바인드 그룹 할당/갱신 (핑퐁 전략 시 매 프레임 텍스처가 바뀌므로 항상 호출)
+        // 내부적으로 캐시를 확인하여 생성을 최소화함
+        this.#updateBindGroups(view, sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
 
         // 컴퓨트 패스 실행
         this.#execute(view, gpuDevice, width, height, view.postEffectManager.gbufferBindGroup);
@@ -383,76 +405,91 @@ abstract class ASinglePassPostEffect {
      * [EN] Updates bind groups.
      */
     #updateBindGroups(view: View3D, sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
-        this.#computeBindGroupEntries0_swap0 = [];
-        this.#computeBindGroupEntries0_swap1 = [];
-        this.#computeBindGroupEntries1 = [];
-        this.#outputBindGroupEntries = [];
-
         const {storage, textures} = this.shaderInfo;
 
-        // Group 0: 소스 텍스처들
-        for (const k in storage) {
-            const {binding, name, group} = storage[k];
-            if (group === 0 && name !== 'outputTexture') {
-                const resource = sourceTextureInfoList[binding]?.textureView;
-                if (resource) {
-                    this.#computeBindGroupEntries0_swap0.push({binding, resource});
-                    this.#computeBindGroupEntries0_swap1.push({binding, resource});
-                }
-            }
-        }
-        textures.forEach(({binding, group}) => {
-            if (group === 0) {
-                const resource = sourceTextureInfoList[binding]?.textureView;
-                if (resource) {
-                    this.#computeBindGroupEntries0_swap0.push({binding, resource});
-                    this.#computeBindGroupEntries0_swap1.push({binding, resource});
-                }
-            }
-        });
+        // Group 0 캐시 키 생성 (소스 텍스처들의 조합)
+        const group0Key = sourceTextureInfoList.map(inf => this.#getResourceId(inf.texture)).join('_');
+        const cachedBG0_swap0 = this.#bindGroupCache0.get(`${group0Key}_swap0`);
+        const cachedBG0_swap1 = this.#bindGroupCache0.get(`${group0Key}_swap1`);
+        // keepLog(this.constructor.name, view.postEffectManager.texturePool.activeTextureNum, group0Key, cachedBG0_swap0, cachedBG0_swap1)
+        if (cachedBG0_swap0 && cachedBG0_swap1) {
+            this.#computeBindGroup0List_swap0 = cachedBG0_swap0;
+            this.#computeBindGroup0List_swap1 = cachedBG0_swap1;
 
-        // Group 1: 이펙트 개별 유니폼 버퍼
-        if (this.#uniformBuffer && this.uniformsInfo) {
-            this.#computeBindGroupEntries1.push({
+        } else {
+            this.#computeBindGroupEntries0_swap0 = [];
+            this.#computeBindGroupEntries0_swap1 = [];
+
+            // Group 0: 소스 텍스처들
+            for (const k in storage) {
+                const {binding, name, group} = storage[k];
+                if (group === 0 && name !== 'outputTexture') {
+                    const resource = sourceTextureInfoList[binding]?.textureView;
+                    if (resource) {
+                        this.#computeBindGroupEntries0_swap0.push({binding, resource});
+                        this.#computeBindGroupEntries0_swap1.push({binding, resource});
+                    }
+                }
+            }
+            textures.forEach(({binding, group}) => {
+                if (group === 0) {
+                    const resource = sourceTextureInfoList[binding]?.textureView;
+                    if (resource) {
+                        this.#computeBindGroupEntries0_swap0.push({binding, resource});
+                        this.#computeBindGroupEntries0_swap1.push({binding, resource});
+                    }
+                }
+            });
+
+            this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
+                label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
+                layout: this.#computeBindGroupLayout0,
+                entries: this.#computeBindGroupEntries0_swap0
+            });
+
+            this.#computeBindGroup0List_swap1 = gpuDevice.createBindGroup({
+                label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP1`,
+                layout: this.#computeBindGroupLayout0,
+                entries: this.#computeBindGroupEntries0_swap1
+            });
+
+            this.#bindGroupCache0.set(`${group0Key}_swap0`, this.#computeBindGroup0List_swap0);
+            this.#bindGroupCache0.set(`${group0Key}_swap1`, this.#computeBindGroup0List_swap1);
+        }
+
+        // Group 1: 이펙트 개별 유니폼 버퍼 (거의 변하지 않으므로 1회만 생성)
+        if (this.#bindGroupCache1) {
+            this.#computeBindGroup1 = this.#bindGroupCache1;
+        } else if (this.#uniformBuffer && this.uniformsInfo) {
+            this.#computeBindGroupEntries1 = [{
                 binding: 0,
                 resource: {
                     buffer: this.#uniformBuffer.gpuBuffer,
                     offset: 0,
                     size: this.#uniformBuffer.size
                 },
+            }];
+            this.#computeBindGroup1 = gpuDevice.createBindGroup({
+                label: `${this.#name}_BIND_GROUP_1_USE_MSAA_${useMSAA}`,
+                layout: this.#computeBindGroupLayout1,
+                entries: this.#computeBindGroupEntries1
             });
+            this.#bindGroupCache1 = this.#computeBindGroup1;
         }
 
         // Group 3: 출력 텍스처
-        this.#outputBindGroupEntries.push({binding: 0, resource: targetOutputView});
-        this.#computeBindGroup0List_swap0 = null
-        this.#computeBindGroup0List_swap1 = null
-        this.#computeBindGroup1 = null
-        this.#outputBindGroup = null
-        // 바인드 그룹 실제 생성
-        this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
-            label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,
-            layout: this.#computeBindGroupLayout0,
-            entries: this.#computeBindGroupEntries0_swap0
-        });
-
-        this.#computeBindGroup0List_swap1 = gpuDevice.createBindGroup({
-            label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP1`,
-            layout: this.#computeBindGroupLayout0,
-            entries: this.#computeBindGroupEntries0_swap1
-        });
-
-        this.#computeBindGroup1 = gpuDevice.createBindGroup({
-            label: `${this.#name}_BIND_GROUP_1_USE_MSAA_${useMSAA}`,
-            layout: this.#computeBindGroupLayout1,
-            entries: this.#computeBindGroupEntries1
-        });
-
-        this.#outputBindGroup = gpuDevice.createBindGroup({
-            label: `${this.#name}_BIND_GROUP_3_USE_MSAA_${useMSAA}`,
-            layout: this.#outputBindGroupLayout,
-            entries: this.#outputBindGroupEntries
-        });
+        const outputTextureId = this.#getResourceId(this.#outputTexture);
+        if (this.#bindGroupCache3.has(outputTextureId)) {
+            this.#outputBindGroup = this.#bindGroupCache3.get(outputTextureId);
+        } else {
+            this.#outputBindGroupEntries = [{binding: 0, resource: targetOutputView}];
+            this.#outputBindGroup = gpuDevice.createBindGroup({
+                label: `${this.#name}_BIND_GROUP_3_USE_MSAA_${useMSAA}`,
+                layout: this.#outputBindGroupLayout,
+                entries: this.#outputBindGroupEntries
+            });
+            this.#bindGroupCache3.set(outputTextureId, this.#outputBindGroup);
+        }
 
         // 현재 소스 텍스처 참조 저장
         this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
