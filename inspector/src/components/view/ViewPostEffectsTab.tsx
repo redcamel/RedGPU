@@ -34,6 +34,7 @@ const ViewPostEffectsTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTi
                 <Divider/>
                 <StatItem label="Pool Hit Rate" value={`${(texturePool.hitRate * 100).toFixed(1)}%`}/>
                 <StatItem label="Total Allocations" value={texturePool.allocationCount}/>
+                <StatItem label="Peak Concurrent" value={texturePool.peakActiveCount}/>
                 <Divider/>
                 <div style={{fontSize: '11px', color: '#888', marginBottom: '4px', paddingLeft: '4px'}}>Pool Breakdown</div>
                 {texturePool.getDetails().map((detail, index) => (

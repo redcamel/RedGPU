@@ -80,14 +80,6 @@ class PostEffectTexturePool {
     }
 
     /**
-     * [KO] 누적 텍스처 할당 요청 횟수를 반환합니다.
-     * [EN] Returns the cumulative number of texture allocation requests.
-     */
-    get requestCount(): number {
-        return this.#requestCount;
-    }
-
-    /**
      * [KO] 재사용 적중률(Hit Rate)을 반환합니다. (0~1)
      * [EN] Returns the reuse hit rate. (0~1)
      */
