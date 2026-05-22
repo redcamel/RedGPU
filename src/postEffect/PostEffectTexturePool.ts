@@ -14,6 +14,11 @@ class PostEffectTexturePool {
     #activeTextures: Set<GPUTexture> = new Set();
     #videoMemorySize: number = 0;
 
+    // 통계 관련 필드
+    #peakActiveCount: number = 0;
+    #allocationCount: number = 0;
+    #requestCount: number = 0;
+
     /**
      * [KO] PostEffectTexturePool 인스턴스를 생성합니다.
      * [EN] Creates a PostEffectTexturePool instance.
@@ -59,6 +64,57 @@ class PostEffectTexturePool {
     }
 
     /**
+     * [KO] 역대 최대 동시 활성 텍스처 수를 반환합니다.
+     * [EN] Returns the historical peak number of concurrently active textures.
+     */
+    get peakActiveCount(): number {
+        return this.#peakActiveCount;
+    }
+
+    /**
+     * [KO] 신규로 생성된 총 텍스처 횟수를 반환합니다.
+     * [EN] Returns the total number of newly created textures.
+     */
+    get allocationCount(): number {
+        return this.#allocationCount;
+    }
+
+    /**
+     * [KO] 누적 텍스처 할당 요청 횟수를 반환합니다.
+     * [EN] Returns the cumulative number of texture allocation requests.
+     */
+    get requestCount(): number {
+        return this.#requestCount;
+    }
+
+    /**
+     * [KO] 재사용 적중률(Hit Rate)을 반환합니다. (0~1)
+     * [EN] Returns the reuse hit rate. (0~1)
+     */
+    get hitRate(): number {
+        if (this.#requestCount === 0) return 0;
+        return (this.#requestCount - this.#allocationCount) / this.#requestCount;
+    }
+
+    /**
+     * [KO] 풀에 담긴 상세 내역을 반환합니다.
+     * [EN] Returns the detailed breakdown of the pool.
+     */
+    getDetails() {
+        const details = [];
+        this.#pool.forEach((list, key) => {
+            const activeCount = [...this.#activeTextures].filter(t => `${t.width}x${t.height}_${t.format}` === key).length;
+            details.push({
+                key,
+                total: list.length + activeCount,
+                active: activeCount,
+                idle: list.length
+            });
+        });
+        return details;
+    }
+
+    /**
      * [KO] 적절한 텍스처를 풀에서 가져오거나 새로 생성합니다.
      * [EN] Gets a suitable texture from the pool or creates a new one.
      * @param width - 텍스처 너비
@@ -67,6 +123,7 @@ class PostEffectTexturePool {
      * @returns 할당된 GPUTexture
      */
     alloc(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): GPUTexture {
+        this.#requestCount++;
         const key = `${width}x${height}_${format}`;
         let list = this.#pool.get(key);
         if (!list) {
@@ -80,6 +137,7 @@ class PostEffectTexturePool {
         } else {
             // [KO] 신규 생성 시에만 메모리 사이즈를 가산합니다.
             // [EN] Add to memory size only when a new texture is created.
+            this.#allocationCount++;
             texture = this.#redGPUContext.resourceManager.createManagedTexture({
                 size: {width, height},
                 format,
@@ -89,6 +147,12 @@ class PostEffectTexturePool {
             this.#videoMemorySize += calculateTextureByteSize(texture);
         }
         this.#activeTextures.add(texture);
+
+        // 최대 활성수 업데이트
+        if (this.#activeTextures.size > this.#peakActiveCount) {
+            this.#peakActiveCount = this.#activeTextures.size;
+        }
+
         return texture;
     }
 
@@ -138,6 +202,9 @@ class PostEffectTexturePool {
         });
         this.#pool.clear();
         this.#videoMemorySize = 0; // [KO] 모든 자원이 파기되었으므로 0으로 리셋 [EN] Reset to 0 as all resources are destroyed.
+        this.#peakActiveCount = 0;
+        this.#allocationCount = 0;
+        this.#requestCount = 0;
     }
 }
 

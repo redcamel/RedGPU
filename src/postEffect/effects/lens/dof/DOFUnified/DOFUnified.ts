@@ -40,9 +40,6 @@ class DOFUnified extends ASinglePassPostEffect {
     }
 
 
-    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult, cocTextureInfo: IPostEffectResult) {
-        return super.render(view, width, height, sourceTextureInfo, cocTextureInfo);
-    }
 }
 
 DefineUniformProperty.definePositiveNumber(DOFUnified, [

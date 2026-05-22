@@ -23,11 +23,36 @@ const ViewPostEffectsTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTi
     }
 
     const {antialiasingManager} = redGPUContext;
+    const {texturePool} = postEffectManager;
 
     return (
         <>
             <Section title="General">
-                <StatItem label="videoMemorySize" value={formatBytes(postEffectManager.videoMemorySize)}/>
+                <StatItem label="Video Memory Size" value={formatBytes(postEffectManager.videoMemorySize)}/>
+                <StatItem label="Texture Pool (Total)" value={texturePool.totalCount}/>
+                <StatItem label="Peak Concurrent" value={texturePool.peakActiveCount}/>
+                <Divider/>
+                <StatItem label="Pool Hit Rate" value={`${(texturePool.hitRate * 100).toFixed(1)}%`}/>
+                <StatItem label="Total Allocations" value={texturePool.allocationCount}/>
+                <Divider/>
+                <div style={{fontSize: '11px', color: '#888', marginBottom: '4px', paddingLeft: '4px'}}>Pool Breakdown</div>
+                {texturePool.getDetails().map((detail, index) => (
+                    <div key={index} style={{
+                        padding: '4px 8px',
+                        background: 'rgba(255,255,255,0.03)',
+                        borderRadius: '4px',
+                        marginBottom: '4px',
+                        fontSize: '11px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <div style={{color: '#ddd', fontWeight: 'bold'}}>{detail.key}</div>
+                        <div style={{color: '#aaa'}}>
+                            <span>Total: {detail.total}</span>
+                        </div>
+                    </div>
+                ))}
             </Section>
 
             <Section title="Built-in Effects">
