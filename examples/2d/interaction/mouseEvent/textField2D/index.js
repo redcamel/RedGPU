@@ -57,6 +57,7 @@ Event: ${eventName}
 Distance: ${e.distance !== undefined ? e.distance.toFixed(4) : 'N/A'}
 World Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]
 Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]
+Mouse Position: [${e.mouseX.toFixed(2)}, ${e.mouseY.toFixed(2)}]
 Face Index: ${e.faceIndex}
 UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
         };

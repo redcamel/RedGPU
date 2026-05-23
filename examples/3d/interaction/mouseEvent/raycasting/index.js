@@ -79,7 +79,7 @@ RedGPU.init(
             });
             mesh.addListener('move', (e) => {
                 marker.setPosition(e.point[0], e.point[1], e.point[2]);
-                infoBox.innerHTML = `[Hit Info]\nObject: ${e.target.name}\nDistance: ${e.distance.toFixed(4)}\nWorld Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]\nLocal Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]\nFace Index: ${e.faceIndex}\nUV: [${e.uv[0].toFixed(3)}, ${e.uv[1].toFixed(3)}]`;
+                infoBox.innerHTML = `[Hit Info]\nObject: ${e.target.name}\nDistance: ${e.distance.toFixed(4)}\nWorld Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]\nLocal Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]\nMouse Position: [${e.mouseX.toFixed(2)}, ${e.mouseY.toFixed(2)}]\nFace Index: ${e.faceIndex}\nUV: [${e.uv[0].toFixed(3)}, ${e.uv[1].toFixed(3)}]`;
             });
             mesh.addListener('out', (e) => {
                 e.target.material.color.setColorByHEX('#ffffff');
