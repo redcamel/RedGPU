@@ -463,12 +463,12 @@ class RedGPUContext extends RedGPUContextViewContainer {
                 this.viewList.forEach((view: View3D) => {
                     if (this.detector.isMobile && e instanceof TouchEvent && e.touches.length > 0) {
                         // Touch event
-                        view.pickingManager.mouseX = e.touches[0].clientX * devicePixelRatio - view.pixelRectObject.x;
-                        view.pickingManager.mouseY = e.touches[0].clientY * devicePixelRatio - view.pixelRectObject.y;
+                        view.pickingManager.mouseX = e.touches[0].clientX  - view.pixelRectObject.x;
+                        view.pickingManager.mouseY = e.touches[0].clientY  - view.pixelRectObject.y;
                     } else if (e instanceof MouseEvent) {
                         // Mouse event
-                        view.pickingManager.mouseX = e.offsetX * devicePixelRatio - view.pixelRectObject.x;
-                        view.pickingManager.mouseY = e.offsetY * devicePixelRatio - view.pixelRectObject.y;
+                        view.pickingManager.mouseX = e.offsetX  - view.pixelRectObject.x;
+                        view.pickingManager.mouseY = e.offsetY  - view.pixelRectObject.y;
                     }
                     if (eventTypeForDevice === PICKING_EVENT_TYPE.CLICK) {
                         view.pickingManager.lastMouseClickEvent = {...e, type: eventTypeForDevice}

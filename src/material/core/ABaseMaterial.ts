@@ -570,7 +570,7 @@ DefineUniformProperty.defineBoolean(ABaseMaterial, [
     {key: 'useTint', value: false}
 ])
 DefineUniformProperty.defineColorRGBA(ABaseMaterial, [
-    {key: 'tint', value: '#ff0000'}
+    {key: 'tint', value: '#ffffff'}
 ])
 Object.freeze(ABaseMaterial)
 export default ABaseMaterial

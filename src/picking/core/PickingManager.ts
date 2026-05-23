@@ -144,7 +144,23 @@ class PickingManager {
                 },
             };
             redGPUContext.commandEncoderManager.addMainRenderPass(this.pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
-                updateViewportAndScissor(view, viewPickingRenderPassEncoder)
+                const {pixelRectObject} = view;
+                const {width, height} = pixelRectObject
+                const dpr = window.devicePixelRatio;
+                const renderScale = view.redGPUContext.renderScale;
+                const combinedScale = dpr * renderScale;
+
+                // [KO] 로컬 논리 좌표(CSS)를 물리 픽셀 좌표로 변환하여 Scissor 적용
+                // [EN] Convert local logical coordinates (CSS) to physical pixel coordinates and apply Scissor
+                const physicalX = Math.floor(this.#mouseX * combinedScale);
+                const physicalY = Math.floor(this.#mouseY * combinedScale);
+
+                viewPickingRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
+                viewPickingRenderPassEncoder.setScissorRect(
+                    Math.max(0, Math.min(width - 1, physicalX)),
+                    Math.max(0, Math.min(height - 1, physicalY)),
+                    1, 1
+                );
                 renderPickingLayer(view, viewPickingRenderPassEncoder)
             });
         }
@@ -187,10 +203,19 @@ class PickingManager {
      */
     async checkEvents(view: any, time: number) {
         if (this.castingList.length && !this.#isReading) {
-            const {pixelRectArray} = view;
+            const {pixelRectArray, redGPUContext} = view;
+            const dpr = window.devicePixelRatio;
+            const renderScale = redGPUContext.renderScale;
+            const combinedScale = dpr * renderScale;
+
             const x = this.#mouseX;
             const y = this.#mouseY;
-            if (x > 0 && x < pixelRectArray[2] && y > 0 && y < pixelRectArray[3] && this.#readPixelBuffer) {
+
+            // [KO] 논리 좌표를 물리 좌표로 변환하여 범위 검사 [EN] Convert logical coordinates to physical coordinates for bounds checking
+            const physicalX = x * combinedScale;
+            const physicalY = y * combinedScale;
+
+            if (physicalX >= 0 && physicalX < pixelRectArray[2] && physicalY >= 0 && physicalY < pixelRectArray[3] && this.#readPixelBuffer) {
                 const pickingTable = this.#createPickingTable();
                 this.#isReading = true;
                 try {
@@ -244,10 +269,19 @@ class PickingManager {
         if (!this.castingList.length) return;
         if (this.#isReading) return; // [KO] 이미 읽기 작업 중이면 스킵 [EN] Skip if already reading
 
+        const dpr = window.devicePixelRatio;
+        const renderScale = view.redGPUContext.renderScale;
+        const combinedScale = dpr * renderScale;
+
         const x = this.#mouseX;
         const y = this.#mouseY;
         const {pixelRectArray} = view;
-        if (x <= 0 || x >= pixelRectArray[2] || y <= 0 || y >= pixelRectArray[3]) {
+
+        // [KO] 논리 좌표를 물리 좌표로 변환 [EN] Convert logical coordinates to physical coordinates
+        const physicalX = Math.floor(x * combinedScale);
+        const physicalY = Math.floor(y * combinedScale);
+
+        if (physicalX < 0 || physicalX >= pixelRectArray[2] || physicalY < 0 || physicalY >= pixelRectArray[3]) {
             return;
         }
 
@@ -260,7 +294,7 @@ class PickingManager {
         }
 
         this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, mainRenderEncoder => {
-            const textureView = {texture: this.#pickingGPUTexture, origin: {x: Math.floor(x), y: Math.floor(y), z: 0}};
+            const textureView = {texture: this.#pickingGPUTexture, origin: {x: physicalX, y: physicalY, z: 0}};
             const bufferView = {buffer: this.#readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
             const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
             mainRenderEncoder.copyTextureToBuffer(textureView, bufferView, textureExtent);
@@ -291,9 +325,10 @@ class PickingManager {
         }, {});
 
     #createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent) {
+        // [KO] mouseX, mouseY는 이미 논리 좌표(CSS)임 [EN] mouseX and mouseY are already in logical coordinates (CSS)
         const isView2D = this.#view.rawCamera.constructor.name === 'Camera2D';
         const raycaster = isView2D ? this.#raycaster2D : this.#raycaster3D;
-        raycaster.setFromCamera(this.#mouseX / devicePixelRatio, this.#mouseY / devicePixelRatio, this.#view as any);
+        raycaster.setFromCamera(this.#mouseX, this.#mouseY, this.#view as any);
         let hit;
         if (tMesh) {
             const intersects = raycaster.intersectObject(tMesh);

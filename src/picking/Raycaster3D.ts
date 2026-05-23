@@ -76,7 +76,7 @@ export default class Raycaster3D {
      * [EN] Target View3D instance
      */
     setFromCamera(screenX: number, screenY: number, view: View3D): void {
-        const {rawCamera} = view;
+        const {rawCamera, redGPUContext} = view;
         const origin = vec3.fromValues(rawCamera.x, rawCamera.y, rawCamera.z);
         const targetPoint = view.screenToWorld(screenX, screenY);
         const direction = vec3.create();
@@ -88,8 +88,16 @@ export default class Raycaster3D {
 
         this.#view = view;
         const {pixelRectObject} = view;
-        const ndcX = ((screenX * devicePixelRatio) / pixelRectObject.width) * 2 - 1;
-        const ndcY = -((screenY * devicePixelRatio) / pixelRectObject.height) * 2 + 1;
+        const dpr = window.devicePixelRatio;
+        const renderScale = redGPUContext.renderScale;
+
+        // [KO] 논리 좌표(CSS)를 물리 픽셀 좌표로 변환하여 NDC 계산
+        // [EN] Convert logical coordinates (CSS) to physical pixel coordinates and calculate NDC
+        const physicalX = screenX * dpr * renderScale;
+        const physicalY = screenY * dpr * renderScale;
+
+        const ndcX = (physicalX / pixelRectObject.width) * 2 - 1;
+        const ndcY = -(physicalY / pixelRectObject.height) * 2 + 1;
         vec2.set(this.#screenPoint, ndcX, ndcY);
 
         if ('nearClipping' in rawCamera) this.near = (rawCamera as any).nearClipping;
