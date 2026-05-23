@@ -123,7 +123,7 @@ class PickingManager {
     }
 
     render(view: View3D) {
-        if (this && this.castingList.length) {
+        if (this.castingList.length) {
             const {redGPUContext} = view
             this.#checkTexture(view)
             this.#pickingPassDescriptor = {
