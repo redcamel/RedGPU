@@ -192,6 +192,7 @@ abstract class ASinglePassPostEffect {
     }
 
     #getResourceId(resource: GPUTexture): number {
+        if (!resource) return 0;
         let id = resourceIdMap.get(resource);
         if (id === undefined) {
             id = nextResourceId++;

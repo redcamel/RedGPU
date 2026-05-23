@@ -79,11 +79,11 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
 
         return super.render(view, width, height,
             sourceTextureInfo, // 0
-            {texture: null, textureView: skyAtmosphere.transmittanceLUT.gpuTextureView}, // 1
-            {texture: null, textureView: skyAtmosphere.multiScatLUT.gpuTextureView}, // 2
-            {texture: null, textureView: skyAtmosphere.skyViewLUT.gpuTextureView}, // 3
-            {texture: null, textureView: skyAtmosphere.aerialPerspectiveLUT.gpuTexture.createView({dimension: '3d'})}, // 4
-            {texture: null, textureView: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTextureView} // 5
+            {texture: skyAtmosphere.transmittanceLUT.gpuTexture, textureView: skyAtmosphere.transmittanceLUT.gpuTextureView}, // 1
+            {texture: skyAtmosphere.multiScatLUT.gpuTexture, textureView: skyAtmosphere.multiScatLUT.gpuTextureView}, // 2
+            {texture: skyAtmosphere.skyViewLUT.gpuTexture, textureView: skyAtmosphere.skyViewLUT.gpuTextureView}, // 3
+            {texture: skyAtmosphere.aerialPerspectiveLUT.gpuTexture, textureView: skyAtmosphere.aerialPerspectiveLUT.gpuTextureView}, // 4
+            {texture: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTexture, textureView: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTextureView} // 5
         );
     }
 }

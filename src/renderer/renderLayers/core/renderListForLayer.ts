@@ -8,6 +8,7 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
     const {
         currentRenderPassEncoder,
     } = renderViewStateData
+    //TODO - 렌더번들기반으로 이것도 옮겨야함
     currentRenderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup)
     for (i; i < len; i++) {
         const target = list[i]
