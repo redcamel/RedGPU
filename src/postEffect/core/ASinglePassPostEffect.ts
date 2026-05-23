@@ -344,10 +344,16 @@ abstract class ASinglePassPostEffect {
 
         commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
             computePassEncoder.setPipeline(this.#computePipeline);
-            computePassEncoder.setBindGroup(0, renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0);
-            computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
-            computePassEncoder.setBindGroup(2, gbufferBindGroup);
-            computePassEncoder.setBindGroup(3, this.#outputBindGroup);
+
+            // [KO] 정의된 바인드 그룹만 설정 (정의되지 않은 그룹을 setBindGroup하면 에러 발생)
+            // [EN] Only set defined bind groups (Setting an undefined group causes an error)
+            const bg0 = renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0;
+            if (bg0) computePassEncoder.setBindGroup(0, bg0);
+
+            if (this.#computeBindGroup1) computePassEncoder.setBindGroup(1, this.#computeBindGroup1);
+            if (gbufferBindGroup) computePassEncoder.setBindGroup(2, gbufferBindGroup);
+            if (this.#outputBindGroup) computePassEncoder.setBindGroup(3, this.#outputBindGroup);
+
             computePassEncoder.dispatchWorkgroups(Math.ceil(width / this.WORK_SIZE_X), Math.ceil(height / this.WORK_SIZE_Y));
         });
     }
