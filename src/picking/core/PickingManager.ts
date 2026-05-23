@@ -144,23 +144,7 @@ class PickingManager {
                 },
             };
             redGPUContext.commandEncoderManager.addMainRenderPass(this.pickingPassDescriptor, (viewPickingRenderPassEncoder) => {
-                const {pixelRectObject} = view;
-                const {width, height} = pixelRectObject
-                const dpr = window.devicePixelRatio;
-                const renderScale = view.redGPUContext.renderScale;
-                const combinedScale = dpr * renderScale;
-
-                // [KO] 로컬 논리 좌표(CSS)를 물리 픽셀 좌표로 변환하여 Scissor 적용
-                // [EN] Convert local logical coordinates (CSS) to physical pixel coordinates and apply Scissor
-                const physicalX = Math.floor(this.#mouseX * combinedScale);
-                const physicalY = Math.floor(this.#mouseY * combinedScale);
-
-                viewPickingRenderPassEncoder.setViewport(0, 0, width, height, 0, 1);
-                viewPickingRenderPassEncoder.setScissorRect(
-                    Math.max(0, Math.min(width - 1, physicalX)),
-                    Math.max(0, Math.min(height - 1, physicalY)),
-                    1, 1
-                );
+                updateViewportAndScissor(view, viewPickingRenderPassEncoder, 'PICKING')
                 renderPickingLayer(view, viewPickingRenderPassEncoder)
             });
         }

@@ -36,7 +36,7 @@ class ShadowManager {
             },
         }
         redGPUContext.commandEncoderManager.addMainRenderPass(this.shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
-            updateViewportAndScissor(view, viewShadowRenderPassEncoder, true)
+            updateViewportAndScissor(view, viewShadowRenderPassEncoder, 'SHADOW')
             if (this.#directionalShadowManager.castingList.length) {
                 renderShadowLayer(view, viewShadowRenderPassEncoder)
             }

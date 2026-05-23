@@ -232,7 +232,7 @@ class Renderer {
             skyAtmosphere.update(view)
         }
         redGPUContext.commandEncoderManager.addMainRenderPass(renderPassDescriptor, (viewRenderPassEncoder) => {
-            updateViewportAndScissor(view, viewRenderPassEncoder)
+            updateViewportAndScissor(view, viewRenderPassEncoder, 'DEFAULT')
 
             renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
             if (skybox) skybox.render(renderViewStateData)
