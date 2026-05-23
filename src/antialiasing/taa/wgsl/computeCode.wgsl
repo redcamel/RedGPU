@@ -29,7 +29,7 @@
             }
         }
     }
-    let motionData = textureLoad(motionVectorTexture, closestCoord, 0);
+    let motionData = textureLoad(gBufferMotionVector, closestCoord, 0);
     let velocity = motionData.xy;
 
     let jitterDisabled = motionData.z > 0.5;
