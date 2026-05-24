@@ -6,7 +6,7 @@ import PassClusterLightBound from "./pass/bound/PassClusterLightBound";
 import PassClustersLight from "./pass/light/PassClustersLight";
 import PassClustersLightHelper from "./core/PassClustersLightHelper";
 
-class ClusterLightManager {
+class ClusterLightManager  {
     #redGPUContext: RedGPUContext
     #view: View3D
 
