@@ -5,6 +5,7 @@ import calculateTextureByteSize from "../../../../utils/texture/calculateTexture
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import View3D from "../../View3D";
 import GBUFFER_TYPE from "../GBUFFER_TYPE";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
 const DEPTH0: GBUFFER_INNER_TYPE = 'depthTexture0'
 const DEPTH1: GBUFFER_INNER_TYPE = 'depthTexture1'
@@ -55,19 +56,13 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
  *
  * @category Core
  */
-class ViewRenderTextureManager {
+class ViewRenderTextureManager extends RedGPUObject{
     /**
      * 관리 중인 텍스처들의 총 비디오 메모리 사용량(바이트)
      * @private
      * @type {number}
      */
     #videoMemorySize: number = 0
-    /**
-     * 연결된 RedGPUContext 인스턴스
-     * @private
-     * @type {RedGPUContext}
-     */
-    #redGPUContext: RedGPUContext
     /**
      * 소유 View3D 인스턴스
      * @private
@@ -94,8 +89,7 @@ class ViewRenderTextureManager {
      * @param {View3D} view - 이 매니저가 관리할 View3D 인스턴스
      */
     constructor(view: View3D) {
-        validateRedGPUContext(view.redGPUContext)
-        this.#redGPUContext = view.redGPUContext
+        super(view.redGPUContext)
         this.#view = view
     }
 
@@ -210,7 +204,7 @@ class ViewRenderTextureManager {
      * @private
      */
     #update() {
-        const {antialiasingManager} = this.#redGPUContext;
+        const {antialiasingManager} = this;
         const {msaaID} = antialiasingManager;
         const {pixelRectObject} = this.#view;
         this.#targetTextureSize = {
@@ -275,7 +269,7 @@ class ViewRenderTextureManager {
             //
             this.#gBuffers.delete(type)
 
-            const {commandEncoderManager} = this.#redGPUContext;
+            const {commandEncoderManager} = this;
             if (texture) commandEncoderManager.addDeferredDestroy(texture);
             if (resolveTexture) commandEncoderManager.addDeferredDestroy(resolveTexture);
         }
@@ -288,7 +282,7 @@ class ViewRenderTextureManager {
         withResolve: boolean = false,
         mipLevelCount: number = 1
     ): GBufferInfo {
-        const {antialiasingManager, resourceManager} = this.#redGPUContext
+        const {antialiasingManager, resourceManager} = this
         const {useMSAA} = antialiasingManager
         const newInfo: GBufferInfo = {
             texture: null as any,

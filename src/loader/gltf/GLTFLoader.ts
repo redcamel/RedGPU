@@ -1,6 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
-import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import getFileExtension from "../../utils/file/getFileExtension";
 import getFileName from "../../utils/file/getFileName";
@@ -9,6 +8,7 @@ import {GLTF} from "./GLTF";
 import {GLTFParsedSingleClip} from "./parsers/animation/parseAnimations";
 import parseFileGLB from "./parsers/loadFile/parseFileGLB";
 import parseFileGLTF from "./parsers/loadFile/parseFileGLTF";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] GLTF 파일 파싱 결과 정보를 담고 있는 타입입니다.
@@ -112,7 +112,7 @@ export type GLTFLoadingProgressInfo = {
  *
  * @category Loader
  */
-class GLTFLoader {
+class GLTFLoader extends RedGPUObject{
     /**
      * [KO] GLTF 파싱 결과 데이터
      * [EN] GLTF parsing result data
@@ -132,7 +132,6 @@ class GLTFLoader {
      * [EN] List of currently playing animation information
      */
     activeAnimations: any[] = []
-    readonly #redGPUContext: RedGPUContext
     readonly #filePath: string
     readonly #fileName: string
     readonly #url: string
@@ -167,8 +166,7 @@ class GLTFLoader {
      * [EN] Callback function called when an error occurs (optional)
      */
     constructor(redGPUContext: RedGPUContext, url: string, onLoad, onProgress, onError) {
-        validateRedGPUContext(redGPUContext)
-        this.#redGPUContext = redGPUContext
+        super(redGPUContext);
         this.#url = url
         this.#filePath = getFilePath(url);
         this.#fileName = getFileName(url)
@@ -187,7 +185,7 @@ class GLTFLoader {
             cameras: [],
             animations: []
         };
-        this.resultMesh = new Mesh(this.#redGPUContext);
+        this.resultMesh = new Mesh(redGPUContext);
         this.resultMesh.gltfLoaderInfo = this
         this.resultMesh.animationInfo.animationsList = this.parsingResult.animations
         this.#loadingProgressInfo.url = getFileName(url);
@@ -206,13 +204,7 @@ class GLTFLoader {
         return this.#loadingProgressInfo;
     }
 
-    /**
-     * [KO] RedGPUContext 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContext instance.
-     */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
+
 
     /**
      * [KO] 파일 경로를 반환합니다.
