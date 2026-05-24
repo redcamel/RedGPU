@@ -6,6 +6,7 @@ import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
 import DirectCubeTexture from "../../../DirectCubeTexture";
 import equirectangularToCubeShaderCode from "./equirectangularToCubeShaderCode.wgsl";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 
 /**
  * [KO] Equirectangular(2D) 텍스처를 CubeMap으로 변환하는 클래스입니다.
@@ -13,8 +14,8 @@ import equirectangularToCubeShaderCode from "./equirectangularToCubeShaderCode.w
  *
  * @category IBL
  */
-class EquirectangularToCubeGenerator {
-    readonly #redGPUContext: RedGPUContext;
+class EquirectangularToCubeGenerator extends RedGPUObject{
+
     #shaderModule: GPUShaderModule;
     #pipeline: GPUComputePipeline;
     #sampler: Sampler;
@@ -29,8 +30,8 @@ class EquirectangularToCubeGenerator {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
-        this.#sampler = new Sampler(this.#redGPUContext, {
+      super(redGPUContext);
+        this.#sampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
@@ -58,7 +59,7 @@ class EquirectangularToCubeGenerator {
      * [EN] Generated DirectCubeTexture
      */
     async generate(sourceTexture: GPUTexture, size: number = 512): Promise<DirectCubeTexture> {
-        const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager, commandEncoderManager,redGPUContext} = this;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
 
@@ -134,7 +135,7 @@ class EquirectangularToCubeGenerator {
         // 밉맵 생성 (컴퓨트 쉐이더로 첫 레벨 작성 후 밉맵 생성)
         resourceManager.mipmapGenerator.generateMipmap(cubeGPUTexture, textureDesc, true);
 
-        return new DirectCubeTexture(this.#redGPUContext, `CubeMap_From_Equirect_${createUUID()}`, cubeGPUTexture);
+        return new DirectCubeTexture(redGPUContext, `CubeMap_From_Equirect_${createUUID()}`, cubeGPUTexture);
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {

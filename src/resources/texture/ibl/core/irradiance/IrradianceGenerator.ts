@@ -7,6 +7,7 @@ import Sampler from "../../../../sampler/Sampler";
 import DirectCubeTexture from "../../../DirectCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 
 /**
  * [KO] Irradiance 맵을 생성하는 클래스입니다.
@@ -17,8 +18,7 @@ import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../../renderer/
  *
  * @category IBL
  */
-class IrradianceGenerator {
-    readonly #redGPUContext: RedGPUContext;
+class IrradianceGenerator extends RedGPUObject {
     #sampler: Sampler;
     #pipeline: GPUComputePipeline;
     #shaderModule: GPUShaderModule;
@@ -33,8 +33,8 @@ class IrradianceGenerator {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
-        this.#sampler = new Sampler(this.#redGPUContext, {
+       super(redGPUContext);
+        this.#sampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
             mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
@@ -71,7 +71,7 @@ class IrradianceGenerator {
         size: number = 32,
         phase: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): Promise<DirectCubeTexture> {
-        const {resourceManager} = this.#redGPUContext;
+        const {resourceManager,redGPUContext} = this;
         const format: GPUTextureFormat = 'rgba16float';
 
         // 1. 결과용 큐브 텍스처 생성
@@ -86,7 +86,7 @@ class IrradianceGenerator {
 
         await this.render(sourceCubeTexture, irradianceGPUTexture, phase);
 
-        return new DirectCubeTexture(this.#redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
+        return new DirectCubeTexture(redGPUContext, `Irradiance_Map_${createUUID()}`, irradianceGPUTexture);
     }
 
     /**
@@ -108,7 +108,7 @@ class IrradianceGenerator {
         targetTexture: GPUTexture,
         phase: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): Promise<void> {
-        const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager, commandEncoderManager} = this;
         const size = targetTexture.width;
 
         // 1. 파이프라인 생성 (지연 생성 및 캐싱)

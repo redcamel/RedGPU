@@ -7,6 +7,7 @@ import Sampler from "../../../../sampler/Sampler";
 import DirectCubeTexture from "../../../DirectCubeTexture";
 import prefilterShaderCode from "./prefilterShaderCode.wgsl";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 
 /**
  * [KO] Prefilter 맵을 생성하는 클래스입니다.
@@ -17,8 +18,7 @@ import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../../renderer/
  *
  * @category IBL
  */
-class PrefilterGenerator {
-    readonly #redGPUContext: RedGPUContext;
+class PrefilterGenerator extends RedGPUObject{
     #sampler: Sampler;
     #pipeline: GPUComputePipeline;
     #shaderModule: GPUShaderModule;
@@ -33,8 +33,8 @@ class PrefilterGenerator {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
-        this.#sampler = new Sampler(this.#redGPUContext, {
+      super(redGPUContext)
+        this.#sampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
@@ -74,7 +74,7 @@ class PrefilterGenerator {
         destinationTexture?: GPUTexture | DirectCubeTexture,
         phase: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): Promise<DirectCubeTexture> {
-        const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager, commandEncoderManager,redGPUContext} = this;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
 
@@ -183,7 +183,7 @@ class PrefilterGenerator {
             destinationTexture.notifyUpdate();
             return destinationTexture;
         }
-        return new DirectCubeTexture(this.#redGPUContext, `Prefilter_Map_${createUUID()}`, prefilterGPUTexture);
+        return new DirectCubeTexture(redGPUContext, `Prefilter_Map_${createUUID()}`, prefilterGPUTexture);
     }
 
     #getCubeMapFaceMatrices(): Float32Array[] {

@@ -2,6 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import CubeTexture from "../CubeTexture";
 import DirectCubeTexture from "../DirectCubeTexture";
 import HDRTexture from "../hdr/HDRTexture";
+import RedGPUObject from "../../../base/RedGPUObject";
 
 /**
  * [KO] Image-Based Lighting (IBL)을 관리하는 클래스입니다.
@@ -9,8 +10,8 @@ import HDRTexture from "../hdr/HDRTexture";
  *
  * @category IBL
  */
-class IBL {
-    #redGPUContext: RedGPUContext;
+class IBL extends RedGPUObject{
+
     #sourceCubeTexture: GPUTexture;
     #environmentTexture: DirectCubeTexture;
     #irradianceTexture: DirectCubeTexture;
@@ -42,11 +43,11 @@ class IBL {
         prefilterSize: number = 512,
         irradianceSize: number = 64
     ) {
+        super(redGPUContext);
         const cacheKeyPart = `${srcInfo}?key=${environmentSize}_${prefilterSize}_${irradianceSize}`;
         this.#prefilterSize = prefilterSize;
         this.#environmentSize = environmentSize;
         this.#irradianceSize = irradianceSize;
-        this.#redGPUContext = redGPUContext;
         this.#luminance = luminance;
 
         this.#environmentTexture = new DirectCubeTexture(redGPUContext, `IBL_ENV_${cacheKeyPart}`);
@@ -110,11 +111,12 @@ class IBL {
     #onSourceChanged = async (v?: HDRTexture | CubeTexture) => {
         v = v || this.#targetTexture;
         if (!v || !v.gpuTexture || this.#isInitializing) return;
+        const {resourceManager} = this;
 
         this.#isInitializing = true;
         try {
             if (v instanceof HDRTexture) {
-                const {equirectangularToCubeGenerator} = this.#redGPUContext.resourceManager;
+                const {equirectangularToCubeGenerator} = resourceManager;
                 const rawCube = await equirectangularToCubeGenerator.generate(v.gpuTexture, this.#environmentSize);
                 this.#sourceCubeTexture = rawCube.gpuTexture;
             } else {
@@ -127,7 +129,7 @@ class IBL {
     };
 
     async #initMaps() {
-        const {resourceManager} = this.#redGPUContext;
+        const {resourceManager} = this;
         const {prefilterGenerator, irradianceGenerator} = resourceManager;
 
         if (this.#sourceCubeTexture) {
