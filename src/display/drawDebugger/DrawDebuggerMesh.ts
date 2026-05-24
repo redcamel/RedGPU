@@ -80,9 +80,6 @@ class DrawDebuggerMesh {
                 this.#updateVertexDataFromOBB(targetOBB, this.#vertexBuffer);
                 this.#cacheOBB(targetOBB);
             }
-            this.#debugMesh.setPosition(0, 0, 0);
-            this.#debugMesh.setRotation(0, 0, 0);
-            this.#debugMesh.setScale(1, 1, 1);
         } else if (this.#debugMode === 'AABB' || this.#debugMode === 'COMBINED_AABB') {
             const targetAABB = this.#debugMode === 'COMBINED_AABB' ? this.#target.combinedBoundingAABB : this.#target.boundingAABB;
             // AABB가 변경된 경우에만 업데이트
@@ -90,9 +87,6 @@ class DrawDebuggerMesh {
                 this.#updateVertexDataFromAABB(targetAABB, this.#vertexBuffer);
                 this.#cacheAABB(targetAABB);
             }
-            this.#debugMesh.setPosition(0, 0, 0);
-            this.#debugMesh.setRotation(0, 0, 0);
-            this.#debugMesh.setScale(1, 1, 1);
         } else if (this.#debugMode === 'BOTH') {
             const targetOBB = this.#target.boundingOBB;
             const targetAABB = this.#target.boundingAABB;
@@ -101,17 +95,11 @@ class DrawDebuggerMesh {
                 this.#updateVertexDataFromOBB(targetOBB, this.#vertexBuffer);
                 this.#cacheOBB(targetOBB);
             }
-            this.#debugMesh.setPosition(0, 0, 0);
-            this.#debugMesh.setRotation(0, 0, 0);
-            this.#debugMesh.setScale(1, 1, 1);
             // AABB (초록색) - 변경된 경우에만 업데이트
             if (this.#hasAABBChanged(targetAABB)) {
                 this.#updateVertexDataFromAABB(targetAABB, this.#aabbDebugMesh.geometry.vertexBuffer);
                 this.#cacheAABB(targetAABB);
             }
-            this.#aabbDebugMesh.setPosition(0, 0, 0);
-            this.#aabbDebugMesh.setRotation(0, 0, 0);
-            this.#aabbDebugMesh.setScale(1, 1, 1);
         }
         let passFrustumAABBCulling = true
         let passFrustumOBBCulling = true

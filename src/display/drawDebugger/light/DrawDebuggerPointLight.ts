@@ -18,7 +18,7 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight {
         super(redGPUContext, [0, 255, 255], 51); // 청록색, 51개 라인 (16*3 + 3)
         this.#target = target;
         this.#label = new TextField3D(redGPUContext)
-        this.#label.useBillboard = true;
+        this.#label.usePixelSize = true
         this.#label.fontSize = 40
         this.#label.text = '💡'
         this.lightDebugMesh.addChild(this.#label)
@@ -28,9 +28,6 @@ class DrawDebuggerPointLight extends ADrawDebuggerLight {
         if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
         if (!this.#target.enableDebugger) return;
         this.#updateVertexDataFromPointLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
-        this.lightDebugMesh.setPosition(0, 0, 0);
-        this.lightDebugMesh.setRotation(0, 0, 0);
-        this.lightDebugMesh.setScale(1, 1, 1);
         this.lightDebugMesh.render(renderViewStateData);
         this.#label.setPosition(...this.#target.position)
     }

@@ -7,6 +7,7 @@ import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/Vert
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
+import convertRgbToHex from "../../../color/convertRgbToHex";
 
 /**
  * [KO] 조명 객체를 시각화하는 디버거의 추상 베이스 클래스입니다.
@@ -19,24 +20,20 @@ import RenderViewStateData from "../../view/core/RenderViewStateData";
  * @category Debugger
  */
 abstract class ADrawDebuggerLight {
-    #redGPUContext: RedGPUContext;
     #lightMaterial: ColorMaterial;
     #lightDebugMesh: Mesh;
 
     constructor(redGPUContext: RedGPUContext, color: [number, number, number], maxLines: number = 32) {
-        this.#redGPUContext = redGPUContext;
+
         const lightGeometry = this.createLightDebugGeometry(redGPUContext, maxLines);
-        this.#lightMaterial = new ColorMaterial(redGPUContext);
-        this.#lightMaterial.color.setColorByRGB(color[0], color[1], color[2]);
+        this.#lightMaterial = new ColorMaterial(redGPUContext,convertRgbToHex(color[0], color[1], color[2]));
         this.#lightDebugMesh = new Mesh(redGPUContext, lightGeometry, this.#lightMaterial);
-        this.#lightDebugMesh.primitiveState.cullMode = 'none';
-        this.#lightDebugMesh.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
+        const {primitiveState} =   this.#lightDebugMesh
+        primitiveState.cullMode = 'none';
+        primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
 
     }
 
-    get lightMaterial(): ColorMaterial {
-        return this.#lightMaterial;
-    }
 
     get lightDebugMesh(): Mesh {
         return this.#lightDebugMesh;

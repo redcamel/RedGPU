@@ -19,7 +19,7 @@ class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
         super(redGPUContext, [255, 255, 0], 8); // 노란색, 8개 라인
         this.#target = target;
         this.#label = new TextField3D(redGPUContext)
-        this.#label.useBillboard = true;
+        this.#label.usePixelSize = true
         this.#label.fontSize = 40
         this.#label.text = '☀️'
         this.lightDebugMesh.addChild(this.#label)
@@ -29,9 +29,6 @@ class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
         if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
         if (!this.#target.enableDebugger) return;
         this.#updateVertexDataFromDirectionalLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
-        this.lightDebugMesh.setPosition(0, 0, 0);
-        this.lightDebugMesh.setRotation(0, 0, 0);
-        this.lightDebugMesh.setScale(1, 1, 1);
         this.lightDebugMesh.render(renderViewStateData);
         // 빛이 오는 방향 (화살표 반대편)에 레이블 배치
         const direction = this.#target.direction;
