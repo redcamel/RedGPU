@@ -20,8 +20,8 @@ function defineVector2_func(propertyInfo: IDefineVector2) {
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineVector2)
- * DefineUniformProperty.defineVector2(MyMaterial, { key: 'vec0', value: [1, 0] });
- * DefineUniformProperty.defineVector2(MyMaterial, [{ key: 'vec0', value: [1, 0] }]);
+ * DefineGPUProperty.defineVector2(MyMaterial, { key: 'vec0', value: [1, 0] });
+ * DefineGPUProperty.defineVector2(MyMaterial, [{ key: 'vec0', value: [1, 0] }]);
  * ```
  */
 const defineVector2 = (target: any, defineInfo: IDefineVector2 | IDefineVector2[]) => applyProperties(target, defineInfo, defineVector2_func);

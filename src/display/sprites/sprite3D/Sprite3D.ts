@@ -8,7 +8,7 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/sprite3DVertex.wgsl";
-import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../defineProperty/DefineGPUProperty";
 
 /** Sprite3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_3D'
@@ -236,11 +236,11 @@ class Sprite3D extends Mesh {
 /**
  * Sprite3D 클래스에 렌더링 비율 속성들을 정의합니다.
  */
-DefineUniformProperty.definePositiveNumber(Sprite3D, [
+DefineGPUProperty.definePositiveNumber(Sprite3D, [
     {key: '_renderRatioX', value: 1},
     {key: '_renderRatioY', value: 1},
 ])
-DefineUniformProperty.defineBoolean(Sprite3D, [
+DefineGPUProperty.defineBoolean(Sprite3D, [
     {key: 'useBillboard', value: true},
 ])
 Object.freeze(Sprite3D)

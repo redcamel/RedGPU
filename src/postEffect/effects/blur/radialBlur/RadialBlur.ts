@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 
 interface RadialBlur {
     amount: number
@@ -53,14 +53,14 @@ class RadialBlur extends ASinglePassPostEffect {
 
 }
 
-DefineUniformProperty.definePositiveNumber(RadialBlur, [
+DefineGPUProperty.definePositiveNumber(RadialBlur, [
     {key: 'amount', value: 50}
 ])
-DefineUniformProperty.defineNumber(RadialBlur, [
+DefineGPUProperty.defineNumber(RadialBlur, [
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},
 ])
-DefineUniformProperty.defineUint(RadialBlur, [
+DefineGPUProperty.defineUint(RadialBlur, [
     {key: 'sampleCount', value: 16, min: 4},
 ])
 Object.freeze(RadialBlur)

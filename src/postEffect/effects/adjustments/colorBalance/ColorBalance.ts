@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 
 interface ColorBalance {
     highlightYellowBlue: number,
@@ -63,10 +63,10 @@ class ColorBalance extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.defineBoolean(ColorBalance, [
+DefineGPUProperty.defineBoolean(ColorBalance, [
     {key: 'preserveLuminosity', value: true}
 ])
-DefineUniformProperty.defineNumber(ColorBalance, [
+DefineGPUProperty.defineNumber(ColorBalance, [
     {key: 'highlightYellowBlue', value: 0, min: -100, max: 100},
     {key: 'highlightMagentaGreen', value: 0, min: -100, max: 100},
     {key: 'highlightCyanRed', value: 0, min: -100, max: 100},

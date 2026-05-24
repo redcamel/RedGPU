@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 
 interface ZoomBlur {
     amount: number
@@ -50,10 +50,10 @@ class ZoomBlur extends ASinglePassPostEffect {
 
 }
 
-DefineUniformProperty.definePositiveNumber(ZoomBlur, [
+DefineGPUProperty.definePositiveNumber(ZoomBlur, [
     {key: 'amount', value: 50}
 ])
-DefineUniformProperty.defineNumber(ZoomBlur, [
+DefineGPUProperty.defineNumber(ZoomBlur, [
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},
 ])

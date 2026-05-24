@@ -45,8 +45,8 @@ function defineTexture_func(propertyInfo: IDefineTexture) {
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineTexture)
- * DefineUniformProperty.defineTexture(MyMaterial, { key: 'diffuseTexture' });
- * DefineUniformProperty.defineTexture(MyMaterial, [{ key: 'diffuseTexture' }]);
+ * DefineGPUProperty.defineTexture(MyMaterial, { key: 'diffuseTexture' });
+ * DefineGPUProperty.defineTexture(MyMaterial, [{ key: 'diffuseTexture' }]);
  * ```
  */
 const defineTexture = (target: any, defineInfo: IDefineTexture | IDefineTexture[]) => applyProperties(target, defineInfo, defineTexture_func);

@@ -6,7 +6,7 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
-import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../defineProperty/DefineGPUProperty";
 
 interface TextField3D {
     useBillboard: boolean;
@@ -253,11 +253,11 @@ class TextField3D extends ATextField {
 /**
  * TextField3D 클래스에 렌더링 비율 속성들을 정의합니다.
  */
-DefineUniformProperty.definePositiveNumber(TextField3D, [
+DefineGPUProperty.definePositiveNumber(TextField3D, [
     {key: '_renderRatioX', value: 1},
     {key: '_renderRatioY', value: 1},
 ])
-DefineUniformProperty.defineBoolean(TextField3D, [
+DefineGPUProperty.defineBoolean(TextField3D, [
     {key: 'useBillboard', value: true},
 ])
 Object.freeze(TextField3D);

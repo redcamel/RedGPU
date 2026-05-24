@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineUniformProperty} from "../../../../defineProperty";
+import {DefineGPUProperty} from "../../../../defineProperty";
 
 interface LensDistortion {
     distortion: number
@@ -48,7 +48,7 @@ class LensDistortion extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.defineNumber(LensDistortion, [
+DefineGPUProperty.defineNumber(LensDistortion, [
     {key: 'distortion', value: 0.1,},
     {key: 'centerX', value: 0.5, min: 0, max: 1},
     {key: 'centerY', value: 0.5, min: 0, max: 1},

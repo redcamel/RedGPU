@@ -20,8 +20,8 @@ function defineVector4_func(propertyInfo: IDefineVector4) {
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineVector4)
- * DefineUniformProperty.defineVector4(MyMaterial, { key: 'vec0', value: [1, 0, 0, 1] });
- * DefineUniformProperty.defineVector4(MyMaterial, [{ key: 'vec0', value: [1, 0, 0, 1] }]);
+ * DefineGPUProperty.defineVector4(MyMaterial, { key: 'vec0', value: [1, 0, 0, 1] });
+ * DefineGPUProperty.defineVector4(MyMaterial, [{ key: 'vec0', value: [1, 0, 0, 1] }]);
  * ```
  */
 const defineVector4 = (target: any, defineInfo: IDefineVector4 | IDefineVector4[]) => applyProperties(target, defineInfo, defineVector4_func);

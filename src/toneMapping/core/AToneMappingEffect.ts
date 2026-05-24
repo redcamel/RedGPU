@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
-import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
 
 interface AToneMappingEffect {
     contrast: number;
@@ -25,7 +25,7 @@ class AToneMappingEffect extends ASinglePassPostEffect {
 
 }
 
-DefineUniformProperty.defineNumber(AToneMappingEffect, [
+DefineGPUProperty.defineNumber(AToneMappingEffect, [
     {key: 'contrast', value: 5.0, min: 0.5, max: 20.0},
     {key: 'brightness', value: 0.0, min: -1.0, max: 1.0}
 ])

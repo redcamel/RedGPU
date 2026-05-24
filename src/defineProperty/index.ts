@@ -6,6 +6,6 @@
  * [EN] Provides various types of uniform properties and preset configurations used in Vertex and Fragment stages.
  * @packageDocumentation
  */
-import DefineUniformProperty from "./DefineUniformProperty";
+import DefineGPUProperty from "./DefineGPUProperty";
 
-export {DefineUniformProperty};
+export {DefineGPUProperty};

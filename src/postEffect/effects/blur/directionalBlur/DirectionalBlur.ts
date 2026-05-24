@@ -4,7 +4,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineUniformProperty} from "../../../../defineProperty";
+import {DefineGPUProperty} from "../../../../defineProperty";
 
 /**
  * [KO] 방향성 블러(Directional Blur) 후처리 이펙트입니다.
@@ -82,7 +82,7 @@ class DirectionalBlur extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(DirectionalBlur, [
+DefineGPUProperty.definePositiveNumber(DirectionalBlur, [
     {key: 'amount', value: 15}
 ])
 Object.freeze(DirectionalBlur)

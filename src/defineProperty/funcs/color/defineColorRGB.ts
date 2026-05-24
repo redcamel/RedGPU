@@ -66,8 +66,8 @@ function defineColorRGB_func(
  * @example
  * ```typescript
  * // 설정 객체 방식 (IColorRGB)
- * DefineUniformProperty.defineColorRGB(MyMaterial, { key: 'color', value: '#00ff00' });
- * DefineUniformProperty.defineColorRGB(MyMaterial, [{ key: 'color', value: '#00ff00' }]);
+ * DefineGPUProperty.defineColorRGB(MyMaterial, { key: 'color', value: '#00ff00' });
+ * DefineGPUProperty.defineColorRGB(MyMaterial, [{ key: 'color', value: '#00ff00' }]);
  * ```
  */
 const defineColorRGB = (target: any, defineInfo: IColorRGB | IColorRGB[]) => applyProperties(target, defineInfo, defineColorRGB_func);

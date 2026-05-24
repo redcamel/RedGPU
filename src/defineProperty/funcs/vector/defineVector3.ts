@@ -20,8 +20,8 @@ function defineVector3_func(propertyInfo: IDefineVector3) {
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineVector3)
- * DefineUniformProperty.defineVector3(MyMaterial, { key: 'vec0', value: [1, 0, 0] });
- * DefineUniformProperty.defineVector3(MyMaterial, [{ key: 'vec0', value: [1, 0, 0] }]);
+ * DefineGPUProperty.defineVector3(MyMaterial, { key: 'vec0', value: [1, 0, 0] });
+ * DefineGPUProperty.defineVector3(MyMaterial, [{ key: 'vec0', value: [1, 0, 0] }]);
  * ```
  */
 const defineVector3 = (target: any, defineInfo: IDefineVector3 | IDefineVector3[]) => applyProperties(target, defineInfo, defineVector3_func);

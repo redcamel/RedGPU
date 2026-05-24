@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 
 interface BrightnessContrast {
     brightness: number,
@@ -43,7 +43,7 @@ class BrightnessContrast extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.defineNumber(BrightnessContrast,
+DefineGPUProperty.defineNumber(BrightnessContrast,
     [
         {key: 'brightness', value: 0, min: -150, max: 150},
         {key: 'contrast', value: 0, min: -50, max: 100}

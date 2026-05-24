@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineUniformProperty} from "../../../../defineProperty";
+import {DefineGPUProperty} from "../../../../defineProperty";
 
 interface HeightFog {
     density: number;
@@ -66,19 +66,19 @@ class HeightFog extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(HeightFog, [
+DefineGPUProperty.definePositiveNumber(HeightFog, [
     {key: 'density', value: 1.0, min: 0, max: 5},
     {key: 'falloff', value: 0.1, min: 0.001, max: 2},
     {key: 'thickness', value: 100.0, min: 0.1},
 ])
-DefineUniformProperty.defineNumber(HeightFog, [
+DefineGPUProperty.defineNumber(HeightFog, [
     {key: 'baseHeight', value: 0.0},
 
 ])
-DefineUniformProperty.defineUint(HeightFog, [
+DefineGPUProperty.defineUint(HeightFog, [
     {key: 'fogType', value: HeightFog.EXPONENTIAL, max: 1}
 ])
-DefineUniformProperty.defineColorRGB(HeightFog, [
+DefineGPUProperty.defineColorRGB(HeightFog, [
     {key: 'fogColor', value: '#1b2866'}
 ])
 Object.freeze(HeightFog);

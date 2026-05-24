@@ -5,7 +5,7 @@ import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCod
 import {IPostEffectResult} from "../../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-import {DefineUniformProperty} from "../../../../../defineProperty";
+import {DefineGPUProperty} from "../../../../../defineProperty";
 
 interface DOFUnified {
     nearBlurSize: number;
@@ -42,7 +42,7 @@ class DOFUnified extends ASinglePassPostEffect {
 
 }
 
-DefineUniformProperty.definePositiveNumber(DOFUnified, [
+DefineGPUProperty.definePositiveNumber(DOFUnified, [
     {key: 'nearBlurSize', value: 16},
     {key: 'farBlurSize', value: 24},
     {key: 'nearStrength', value: 1.0},

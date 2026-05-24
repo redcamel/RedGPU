@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineUniformProperty} from "../../../../defineProperty";
+import {DefineGPUProperty} from "../../../../defineProperty";
 
 interface BlurY {
     size: number
@@ -43,7 +43,7 @@ class BlurY extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(BlurY, [
+DefineGPUProperty.definePositiveNumber(BlurY, [
     {key: 'size', value: 32, min: 0, max: 512}
 ])
 

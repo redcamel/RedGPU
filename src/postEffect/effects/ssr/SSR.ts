@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../defineProperty/DefineGPUProperty";
 
 interface SSR {
     maxSteps: number;
@@ -55,7 +55,7 @@ class SSR extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(SSR, [
+DefineGPUProperty.definePositiveNumber(SSR, [
     {key: 'maxSteps', value: 64, min: 1, max: 512},
     {key: 'maxDistance', value: 15.0, min: 1.0, max: 200.0},
     {key: 'stepSize', value: 0.02, min: 0.001, max: 5.0},

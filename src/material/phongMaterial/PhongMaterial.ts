@@ -5,7 +5,7 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
-import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
 
 const SHADER_INFO = parseWGSL('PHONG_MATERIAL', fragmentModuleSource)
 
@@ -230,7 +230,7 @@ class PhongMaterial extends AUVTransformBaseMaterial {
     }
 }
 
-DefineUniformProperty.defineSampler(
+DefineGPUProperty.defineSampler(
     PhongMaterial,
     [
         {key: 'alphaTextureSampler'},
@@ -241,7 +241,7 @@ DefineUniformProperty.defineSampler(
         {key: 'normalTextureSampler'},
         {key: 'specularTextureSampler'}
     ])
-DefineUniformProperty.definePositiveNumber(
+DefineGPUProperty.definePositiveNumber(
     PhongMaterial,
     [
         {key: 'aoStrength', value: 1},
@@ -251,12 +251,12 @@ DefineUniformProperty.definePositiveNumber(
         {key: 'normalScale', value: 1}
     ]
 )
-DefineUniformProperty.defineColorRGB(PhongMaterial, [
+DefineGPUProperty.defineColorRGB(PhongMaterial, [
     {key: 'color'},
     {key: 'emissiveColor', value: '#000000'},
     {key: 'specularColor', value: '#ffffff'}
 ])
-DefineUniformProperty.defineTexture(PhongMaterial, [
+DefineGPUProperty.defineTexture(PhongMaterial, [
     {key: 'alphaTexture'},
     {key: 'aoTexture'},
     {key: 'diffuseTexture'},
@@ -265,10 +265,10 @@ DefineUniformProperty.defineTexture(PhongMaterial, [
     {key: 'normalTexture'},
     {key: 'specularTexture'},
 ])
-DefineUniformProperty.defineBoolean(PhongMaterial, [
+DefineGPUProperty.defineBoolean(PhongMaterial, [
     {key: 'useSSR', value: false}
 ])
-DefineUniformProperty.definePositiveNumber(PhongMaterial, [
+DefineGPUProperty.definePositiveNumber(PhongMaterial, [
     {key: 'metallic', value: 0, min: 0, max: 1},
     {key: 'roughness', value: 0, min: 0, max: 1}
 ])

@@ -57,8 +57,8 @@ function defineUintRange_func(
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineUint)
- * DefineUniformProperty.defineUint(MyMaterial, { key: 'myUint', value: 1, min: 0, max: 10 });
- * DefineUniformProperty.defineUint(MyMaterial, [{ key: 'myUint', value: 1, min: 0, max: 10 }]);
+ * DefineGPUProperty.defineUint(MyMaterial, { key: 'myUint', value: 1, min: 0, max: 10 });
+ * DefineGPUProperty.defineUint(MyMaterial, [{ key: 'myUint', value: 1, min: 0, max: 10 }]);
  * ```
  */
 const defineUint = (target: any, defineInfo: IDefineUint | IDefineUint[]) => applyProperties(target, defineInfo, defineUintRange_func);

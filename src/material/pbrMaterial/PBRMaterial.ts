@@ -5,11 +5,11 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
-import DefineUniformProperty, {
+import DefineGPUProperty, {
     IDefinePositiveNumber,
     IDefineVector3,
     IDefineVector4
-} from "../../defineProperty/DefineUniformProperty";
+} from "../../defineProperty/DefineGPUProperty";
 
 const EXTENSION_LIST: {
     textureList?: string[],
@@ -985,7 +985,7 @@ class PBRMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(PBRMaterial,
+DefineGPUProperty.definePositiveNumber(PBRMaterial,
     [
         {key: 'emissiveStrength', value: 1},
         {key: 'normalScale', value: 1}
@@ -993,29 +993,29 @@ DefineUniformProperty.definePositiveNumber(PBRMaterial,
 )
 const defineTexture = (textureList: string[], useSampler: boolean) => {
     textureList?.forEach(key => {
-        DefineUniformProperty.defineBoolean(PBRMaterial, [
+        DefineGPUProperty.defineBoolean(PBRMaterial, [
             {key: `use${key.charAt(0).toUpperCase()}${key.substring(1)}`, value: false}
         ])
-        DefineUniformProperty.definePositiveNumber(PBRMaterial, [
+        DefineGPUProperty.definePositiveNumber(PBRMaterial, [
             {key: `${key}_KHR_texture_transform_rotation`, value: 0},
         ]);
-        DefineUniformProperty.defineBoolean(PBRMaterial, [
+        DefineGPUProperty.defineBoolean(PBRMaterial, [
             {key: `use_${key}_KHR_texture_transform`, value: false},
         ])
-        DefineUniformProperty.defineVector2(PBRMaterial, [
+        DefineGPUProperty.defineVector2(PBRMaterial, [
             {key: `${key}_KHR_texture_transform_offset`},
             {key: `${key}_KHR_texture_transform_scale`, value: [1, 1]},
         ])
         //
-        DefineUniformProperty.defineUint(PBRMaterial, [
+        DefineGPUProperty.defineUint(PBRMaterial, [
             {key: `${key}_texCoord_index`, value: 0}
         ])
         //
-        DefineUniformProperty.defineTexture(PBRMaterial, [
+        DefineGPUProperty.defineTexture(PBRMaterial, [
             {key: key}
         ])
         if (useSampler) {
-            DefineUniformProperty.defineSampler(PBRMaterial, [
+            DefineGPUProperty.defineSampler(PBRMaterial, [
                 {key: `${key}Sampler`},
             ])
         }
@@ -1025,38 +1025,38 @@ const extensionDefine = (defineList) => {
     defineList.forEach(v => {
         const {extensionName, textureList, useSampler} = v;
         const {positiveNumberList, vec3List, vec4List} = v;
-        if (extensionName) DefineUniformProperty.defineBoolean(PBRMaterial, [{
+        if (extensionName) DefineGPUProperty.defineBoolean(PBRMaterial, [{
             key: `use${extensionName}`,
             value: false
         }])
         defineTexture(textureList, !useSampler)
         positiveNumberList?.forEach(v => {
-            DefineUniformProperty.definePositiveNumber(PBRMaterial, [
+            DefineGPUProperty.definePositiveNumber(PBRMaterial, [
                 v
             ])
         })
         vec3List?.forEach(v => {
-            DefineUniformProperty.defineVector3(PBRMaterial, [
+            DefineGPUProperty.defineVector3(PBRMaterial, [
                 v
             ])
         })
         vec4List?.forEach(v => {
-            DefineUniformProperty.defineVector4(PBRMaterial, [
+            DefineGPUProperty.defineVector4(PBRMaterial, [
                 v
             ])
         })
     })
 }
 extensionDefine(EXTENSION_LIST)
-DefineUniformProperty.definePositiveNumber(PBRMaterial, [
+DefineGPUProperty.definePositiveNumber(PBRMaterial, [
     {key: 'cutOff', value: 0},
     {key: 'KHR_materials_ior', value: 1.5},
     {key: 'KHR_dispersion', value: 0},
 ]);
-DefineUniformProperty.defineUint(PBRMaterial, [
+DefineGPUProperty.defineUint(PBRMaterial, [
     {key: 'alphaBlend', value: 0},
 ])
-DefineUniformProperty.defineBoolean(PBRMaterial, [
+DefineGPUProperty.defineBoolean(PBRMaterial, [
     {key: 'doubleSided', value: false},
     {key: 'useCutOff', value: false},
     {key: 'useVertexColor', value: false},

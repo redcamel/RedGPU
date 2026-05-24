@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 
 interface HueSaturation {
     hue: number
@@ -48,7 +48,7 @@ class HueSaturation extends ASinglePassPostEffect {
 
 }
 
-DefineUniformProperty.defineNumber(HueSaturation, [
+DefineGPUProperty.defineNumber(HueSaturation, [
     {key: 'hue', value: 0, min: -180, max: 180},
     {key: 'saturation', value: 0, min: -100, max: 100}
 ])

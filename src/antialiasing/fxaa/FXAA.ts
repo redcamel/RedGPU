@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
 
 interface FXAA {
     subpix: number
@@ -51,7 +51,7 @@ class FXAA extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(FXAA, [
+DefineGPUProperty.definePositiveNumber(FXAA, [
     {key: 'edgeThresholdMin', value: 0.0625, min: 0.00001, max: 0.1},
     {key: 'edgeThreshold', value: 0.125, min: 0.0001, max: 0.25},
     {key: 'subpix', value: 0.75, min: 0.0, max: 1},

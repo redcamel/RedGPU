@@ -51,8 +51,8 @@ function defineBoolean_func(
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineBoolean)
- * DefineUniformProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
- * DefineUniformProperty.defineBoolean(MyMaterial, [{ key: 'useAlphaTest', value: true }]);
+ * DefineGPUProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
+ * DefineGPUProperty.defineBoolean(MyMaterial, [{ key: 'useAlphaTest', value: true }]);
  * ```
  */
 const defineBoolean = (target: any, defineInfo: IDefineBoolean | IDefineBoolean[]) => applyProperties(target, defineInfo, defineBoolean_func);

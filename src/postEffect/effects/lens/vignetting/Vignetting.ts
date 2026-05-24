@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineUniformProperty} from "../../../../defineProperty";
+import {DefineGPUProperty} from "../../../../defineProperty";
 
 interface Vignetting {
     size: number;
@@ -53,7 +53,7 @@ class Vignetting extends ASinglePassPostEffect {
 
 }
 
-DefineUniformProperty.definePositiveNumber(Vignetting, [
+DefineGPUProperty.definePositiveNumber(Vignetting, [
     {key: 'size', value: 0.5, max: 1},
     {key: 'smoothness', value: 0.2, max: 1},
 ])

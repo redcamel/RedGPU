@@ -4,7 +4,7 @@ import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 
 const SHADER_INFO = parseWGSL('TEXTFIELD_MATERIAL', fragmentModuleSource)
 
@@ -51,13 +51,13 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineUniformProperty.defineSampler(TextFieldMaterial, [
+DefineGPUProperty.defineSampler(TextFieldMaterial, [
     {key: 'diffuseTextureSampler'}
 ])
 /**
  * 프래그먼트 셰이더에서 사용할 텍스처 및 샘플러 속성을 정의합니다.
  */
-DefineUniformProperty.defineTexture(TextFieldMaterial, [
+DefineGPUProperty.defineTexture(TextFieldMaterial, [
     {key: 'diffuseTexture'}
 ])
 /**

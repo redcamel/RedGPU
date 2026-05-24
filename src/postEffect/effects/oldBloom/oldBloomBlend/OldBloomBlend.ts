@@ -5,7 +5,7 @@ import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-import {DefineUniformProperty} from "../../../../defineProperty";
+import {DefineGPUProperty} from "../../../../defineProperty";
 
 interface OldBloomBlend {
     bloomStrength: number
@@ -49,7 +49,7 @@ class OldBloomBlend extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(OldBloomBlend, [
+DefineGPUProperty.definePositiveNumber(OldBloomBlend, [
     {key: 'bloomStrength', value: 1},
     {key: 'exposure', value: 1},
 ])

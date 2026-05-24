@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 import ColorRGB from "../../../../color/ColorRGB";
 
 interface Fog {
@@ -66,17 +66,17 @@ class Fog extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(Fog, [
+DefineGPUProperty.definePositiveNumber(Fog, [
     {key: 'density', value: 0.5, min: 0, max: 1},
 ])
-DefineUniformProperty.defineNumber(Fog, [
+DefineGPUProperty.defineNumber(Fog, [
     {key: 'nearDistance', value: 4.5, min: 0},
     {key: 'farDistance', value: 50, min: 0.1},
 ])
-DefineUniformProperty.defineUint(Fog, [
+DefineGPUProperty.defineUint(Fog, [
     {key: 'fogType', value: Fog.EXPONENTIAL, max: 1}
 ])
-DefineUniformProperty.defineColorRGB(Fog, [
+DefineGPUProperty.defineColorRGB(Fog, [
     {key: 'fogColor', value: '#1b2866'},
 ])
 Object.freeze(Fog);

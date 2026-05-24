@@ -12,7 +12,7 @@ import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
-import DefineUniformProperty from "../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
 
 interface ABaseMaterial {
     /**
@@ -563,13 +563,13 @@ Object.defineProperty(ABaseMaterial.prototype, 'isInstanceofMaterial', {
     value: true,
     writable: false
 });
-DefineUniformProperty.definePositiveNumber(ABaseMaterial, [
+DefineGPUProperty.definePositiveNumber(ABaseMaterial, [
     {key: 'opacity', value: 1, max: 1}
 ])
-DefineUniformProperty.defineBoolean(ABaseMaterial, [
+DefineGPUProperty.defineBoolean(ABaseMaterial, [
     {key: 'useTint', value: false}
 ])
-DefineUniformProperty.defineColorRGBA(ABaseMaterial, [
+DefineGPUProperty.defineColorRGBA(ABaseMaterial, [
     {key: 'tint', value: '#ffffff'}
 ])
 Object.freeze(ABaseMaterial)

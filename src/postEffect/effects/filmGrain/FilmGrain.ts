@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../defineProperty/DefineGPUProperty";
 
 /**
  * [KO] 필름 그레인 프리셋 정의 (업계 표준 수치 기반)
@@ -83,7 +83,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
 }
 
-DefineUniformProperty.definePositiveNumber(FilmGrain, [
+DefineGPUProperty.definePositiveNumber(FilmGrain, [
     {key: 'filmGrainIntensity', value: VINTAGE.filmGrainIntensity},
     {key: 'filmGrainResponse', value: VINTAGE.filmGrainResponse},
     {key: 'filmGrainScale', value: VINTAGE.filmGrainScale},

@@ -7,7 +7,7 @@ import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 
 const SHADER_INFO = parseWGSL('SKYBOX_MATERIAL', fragmentModuleSource)
 
@@ -55,20 +55,20 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(SkyBoxMaterial, [
+DefineGPUProperty.definePositiveNumber(SkyBoxMaterial, [
     {key: 'blur', value: 0},
     {key: 'intensityMultiplier', value: 1},
     {key: 'luminance', value: 10000},
     {key: 'transitionProgress', value: 0},
 ])
-DefineUniformProperty.defineCubeTexture(SkyBoxMaterial, [
+DefineGPUProperty.defineCubeTexture(SkyBoxMaterial, [
     {key: 'texture0'},
     {key: 'transitionTexture'}
 ])
-DefineUniformProperty.defineTexture(SkyBoxMaterial, [
+DefineGPUProperty.defineTexture(SkyBoxMaterial, [
     {key: 'transitionMask'}
 ])
-DefineUniformProperty.defineSampler(SkyBoxMaterial, [{key: 'sampler0'}])
+DefineGPUProperty.defineSampler(SkyBoxMaterial, [{key: 'sampler0'}])
 
 Object.freeze(SkyBoxMaterial)
 export default SkyBoxMaterial

@@ -32,9 +32,9 @@ export {
  * [KO] 기존의 DefineForFragment, DefineForVertex를 대체하며, 셰이더 단계에 의존하지 않는 범용적인 속성 정의 기능을 제공합니다.
  * [EN] Replaces the existing DefineForFragment and DefineForVertex, providing general-purpose property definition features independent of shader stages.
  *
- * @namespace DefineUniformProperty
+ * @namespace DefineGPUProperty
  */
-const DefineUniformProperty = {
+const DefineGPUProperty = {
     defineBoolean,
     defineColorRGB,
     defineColorRGBA,
@@ -50,5 +50,5 @@ const DefineUniformProperty = {
 }
 
 
-Object.freeze(DefineUniformProperty)
-export default DefineUniformProperty
+Object.freeze(DefineGPUProperty)
+export default DefineGPUProperty

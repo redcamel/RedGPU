@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineUniformProperty from "../../../../defineProperty/DefineUniformProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
 
 interface ColorTemperatureTint {
     amount: number;
@@ -52,7 +52,6 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
 
-        // DefineUniformProperty로 정의된 초기값을 GPU 버퍼에 동기화
         this.temperature = 6500;
         this.amount = 1;
         this.tint = 0;
@@ -124,7 +123,7 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 }
 
-DefineUniformProperty.definePositiveNumber(ColorTemperatureTint, [
+DefineGPUProperty.definePositiveNumber(ColorTemperatureTint, [
     /**
      * [KO] 색온도(K) (1000 ~ 20000)
      * [EN] Color Temperature (K) (1000 ~ 20000)
@@ -138,7 +137,7 @@ DefineUniformProperty.definePositiveNumber(ColorTemperatureTint, [
      */
     {key: 'amount', value: 1, min: 0, max: 1},
 ])
-DefineUniformProperty.defineNumber(ColorTemperatureTint, [
+DefineGPUProperty.defineNumber(ColorTemperatureTint, [
     /**
      * [KO] 틴트 (-100 ~ 100)
      * [EN] Tint (-100 ~ 100)

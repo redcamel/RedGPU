@@ -57,8 +57,8 @@ function definePositiveNumberRange_func(
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefinePositiveNumber)
- * DefineUniformProperty.definePositiveNumber(MyMaterial, { key: 'shininess', value: 30, min: 0, max: 100 });
- * DefineUniformProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
+ * DefineGPUProperty.definePositiveNumber(MyMaterial, { key: 'shininess', value: 30, min: 0, max: 100 });
+ * DefineGPUProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
  * ```
  */
 const definePositiveNumber = (target: any, defineInfo: IDefinePositiveNumber | IDefinePositiveNumber[]) => applyProperties(target, defineInfo, definePositiveNumberRange_func);
