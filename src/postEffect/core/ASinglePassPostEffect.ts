@@ -1,10 +1,10 @@
-import AntialiasingManager from "../../antialiasing/AntialiasingManager";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {IPostEffectResult} from "./types";
+import RedGPUObject from "../../base/RedGPUObject";
 
 const resourceIdMap = new WeakMap<GPUTexture, number>();
 let nextResourceId = 0;
@@ -22,7 +22,7 @@ interface ASinglePassPostEffect {
  *
  * @category Core
  */
-abstract class ASinglePassPostEffect {
+abstract class ASinglePassPostEffect extends RedGPUObject {
     // 컴퓨트 셰이더 및 파이프라인 관련 리소스
     #computeShaderMSAA: GPUShaderModule
     #computeShaderNonMSAA: GPUShaderModule
@@ -57,8 +57,6 @@ abstract class ASinglePassPostEffect {
     #WORK_SIZE_X: number = 16
     #WORK_SIZE_Y: number = 16
     #WORK_SIZE_Z: number = 1
-    #redGPUContext: RedGPUContext
-    #antialiasingManager: AntialiasingManager
     #videoMemorySize: number = 0
     #prevMSAA: boolean
     #prevMSAAID: string
@@ -80,8 +78,7 @@ abstract class ASinglePassPostEffect {
      * [EN] Workgroup size configuration (optional, default: {x: 16, y: 16, z: 1})
      */
     protected constructor(redGPUContext: RedGPUContext, workSize?: { x?: number, y?: number, z?: number }) {
-        this.#redGPUContext = redGPUContext;
-        this.#antialiasingManager = redGPUContext.antialiasingManager;
+        super(redGPUContext)
         if (workSize) {
             if (workSize.x !== undefined) this.#WORK_SIZE_X = workSize.x;
             if (workSize.y !== undefined) this.#WORK_SIZE_Y = workSize.y;
@@ -97,13 +94,6 @@ abstract class ASinglePassPostEffect {
         return this.#videoMemorySize
     }
 
-    /**
-     * [KO] RedGPU 컨텍스트를 반환합니다.
-     * [EN] Returns the RedGPU context.
-     */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
 
     /**
      * [KO] 셰이더의 스토리지 구조 정보를 반환합니다.
@@ -118,7 +108,7 @@ abstract class ASinglePassPostEffect {
      * [EN] Returns shader information based on the current MSAA state.
      */
     get shaderInfo() {
-        return this.#antialiasingManager.useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
+        return this.antialiasingManager.useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
     }
 
     /**
@@ -262,7 +252,7 @@ abstract class ASinglePassPostEffect {
      * [EN] Rendering result (texture and view)
      */
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: IPostEffectResult[]): IPostEffectResult {
-        const {gpuDevice, antialiasingManager} = this.#redGPUContext;
+        const {gpuDevice, antialiasingManager} = this;
         const {useMSAA, msaaID} = antialiasingManager;
 
         // 텍스처 풀에서 출력 텍스처 할당 (IPostEffectResult 형식으로 직접 획득)
@@ -286,7 +276,7 @@ abstract class ASinglePassPostEffect {
 
         // 🌟 바인드 그룹 할당/갱신 (핑퐁 전략 시 매 프레임 텍스처가 바뀌므로 항상 호출)
         // 내부적으로 캐시를 확인하여 생성을 최소화함
-        this.#updateBindGroups( sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
+        this.#updateBindGroups(sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
 
         // 컴퓨트 패스 실행
         this.#execute(view, width, height, view.postEffectManager.gbufferBindGroup);
@@ -336,7 +326,7 @@ abstract class ASinglePassPostEffect {
      * [EN] Adds the actual compute pass to the command encoder.
      */
     #execute(view: View3D, width: number, height: number, gbufferBindGroup: GPUBindGroup) {
-        const {commandEncoderManager} = this.#redGPUContext;
+        const {commandEncoderManager} = this;
         const {renderViewStateData} = view;
 
         commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
@@ -366,7 +356,7 @@ abstract class ASinglePassPostEffect {
             return;
         }
 
-        const {resourceManager} = this.#redGPUContext;
+        const {resourceManager} = this;
         const currentShaderInfo = useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
         const currentShader = useMSAA ? this.#computeShaderMSAA : this.#computeShaderNonMSAA;
 

@@ -25,9 +25,8 @@ import {IPostEffectResult} from "../postEffect/core/types";
  * ```
  * @category ToneMapping
  */
-class ToneMappingManager {
-    readonly #redGPUContext: RedGPUContext;
-    readonly #view: View3D;
+class ToneMappingManager extends AToneMappingEffect {
+
     #toneMapping?: AToneMappingEffect;
     #mode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL;
 
@@ -37,11 +36,10 @@ class ToneMappingManager {
     /**
      * [KO] ToneMappingManager 인스턴스를 생성합니다. (내부 시스템 전용)
      * [EN] Creates a ToneMappingManager instance. (Internal system only)
-     * @param view - [KO] View3D 인스턴스 [EN] View3D instance
+
      */
-    constructor(view: View3D) {
-        this.#redGPUContext = view.redGPUContext;
-        this.#view = view;
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
     }
 
     /** [KO] 현재 활성화된 톤 매핑 이펙트 인스턴스를 반환합니다. [EN] Returns the currently active tone mapping effect instance. */
@@ -95,9 +93,9 @@ class ToneMappingManager {
      * @param currentTextureView - [KO] 현재 텍스처 뷰 정보 [EN] Current texture view information
      * @returns [KO] 렌더링 결과 [EN] Rendering result
      */
-    render(width: number, height: number, currentTextureView: IPostEffectResult): IPostEffectResult {
+    render(view:View3D,width: number, height: number, currentTextureView: IPostEffectResult): IPostEffectResult {
         const effect = this.toneMapping;
-        return effect ? effect.render(this.#view, width, height, currentTextureView) : currentTextureView;
+        return effect ? effect.render(view, width, height, currentTextureView) : currentTextureView;
     }
 
     /**
@@ -106,22 +104,22 @@ class ToneMappingManager {
      */
     #createToneMapping(): void {
         if (this.#toneMapping) return;
-
+        const {redGPUContext} = this;
         switch (this.#mode) {
             case TONE_MAPPING_MODE.LINEAR:
-                this.#toneMapping = new ToneLinear(this.#redGPUContext);
+                this.#toneMapping = new ToneLinear(redGPUContext);
                 break;
             case TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL:
-                this.#toneMapping = new ToneKhronosPBRNeutral(this.#redGPUContext);
+                this.#toneMapping = new ToneKhronosPBRNeutral(redGPUContext);
                 break;
             case TONE_MAPPING_MODE.ACES_FILMIC_NARKOWICZ:
-                this.#toneMapping = new ToneACESFilmicNarkowicz(this.#redGPUContext);
+                this.#toneMapping = new ToneACESFilmicNarkowicz(redGPUContext);
                 break;
             case TONE_MAPPING_MODE.ACES_FILMIC_HILL:
-                this.#toneMapping = new ToneACESFilmicHill(this.#redGPUContext);
+                this.#toneMapping = new ToneACESFilmicHill(redGPUContext);
                 break;
             default:
-                this.#toneMapping = new ToneKhronosPBRNeutral(this.#redGPUContext);
+                this.#toneMapping = new ToneKhronosPBRNeutral(redGPUContext);
                 break;
         }
 

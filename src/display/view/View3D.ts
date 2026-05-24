@@ -66,7 +66,7 @@ class View3D extends AView {
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
         this.#renderViewStateData = new RenderViewStateData(this)
         this.#postEffectManager = new PostEffectManager(this)
-        this.#toneMappingManager = new ToneMappingManager(this)
+        this.#toneMappingManager = new ToneMappingManager(redGPUContext)
         this.#clusterLightManager = new ClusterLightManager(this)
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)

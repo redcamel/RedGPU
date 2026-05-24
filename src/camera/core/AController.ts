@@ -3,6 +3,7 @@ import View3D from "../../display/view/View3D";
 import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
 import BaseObject from "../../base/BaseObject";
+import RedGPUObject from "../../base/RedGPUObject";
 
 export type controllerInit = {
     HD_Move?: (deltaX: number, deltaY: number) => void
@@ -26,7 +27,7 @@ export type controllerInit = {
  *
  * @category Core
  */
-abstract class AController extends BaseObject {
+abstract class AController extends RedGPUObject {
     // ==================== Static - 전역 상태 ====================
     /**
      * [KO] 전역 키보드 활성 View - 모든 컨트롤러 인스턴스에서 공유
@@ -40,7 +41,7 @@ abstract class AController extends BaseObject {
     static #globalKeyboardActiveController: AController | null = null;
 
     // ==================== 인스턴스 정보 ====================
-    #redGPUContext: RedGPUContext;
+
     #camera: PerspectiveCamera | OrthographicCamera
     #initInfo: controllerInit;
 
@@ -74,11 +75,10 @@ abstract class AController extends BaseObject {
      * [EN] Controller initialization info
      */
     protected constructor(redGPUContext: RedGPUContext, initInfo: controllerInit) {
-        super();
-        this.#redGPUContext = redGPUContext
+        super(redGPUContext);
         this.#initInfo = initInfo || {}
         this.#camera = initInfo.camera || new PerspectiveCamera()
-        const isMobile = this.#redGPUContext.detector.isMobile;
+        const isMobile = this.redGPUContext.detector.isMobile;
         this.#eventTypeKeys = {
             moveKey: isMobile ? 'touchmove' : 'mousemove',
             upKey: isMobile ? 'touchend' : 'mouseup',
@@ -89,17 +89,6 @@ abstract class AController extends BaseObject {
 
     // ==================== Public Getters/Setters ====================
 
-    /**
-     * [KO] RedGPU 컨텍스트를 반환합니다.
-     * [EN] Returns the RedGPU context.
-     *
-     * @returns
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU context
-     */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
 
     /**
      * [KO] 이 컨트롤러가 제어하는 카메라를 반환합니다.
@@ -379,7 +368,7 @@ abstract class AController extends BaseObject {
      * @internal
      */
     findTargetViewByInputEvent = (e: MouseEvent | TouchEvent): View3D | null => {
-        const redGPUContext = this.#redGPUContext;
+        const {redGPUContext} = this
         const {renderScale, viewList} = redGPUContext;
         const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
         const scale = window.devicePixelRatio * renderScale
@@ -484,7 +473,7 @@ abstract class AController extends BaseObject {
         }
 
         this.#isMultiTouch = false;
-        const {x, y} = this.getCanvasEventPoint(e, this.#redGPUContext);
+        const {x, y} = this.getCanvasEventPoint(e, this.redGPUContext);
         const deltaX = x - this.#dragStartX;
         const deltaY = y - this.#dragStartY;
         this.#dragStartX = x;
@@ -510,7 +499,7 @@ abstract class AController extends BaseObject {
     }
 
     #HD_up = () => {
-        const {htmlCanvas} = this.#redGPUContext;
+        const {htmlCanvas} = this.redGPUContext;
         const {moveKey, upKey} = this.#eventTypeKeys;
 
         this.#isMultiTouch = false;

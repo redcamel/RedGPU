@@ -1,4 +1,3 @@
-import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import {IPostEffectResult} from "../../../postEffect/core/types";
 import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer";
@@ -10,14 +9,14 @@ import METERING_MODE from "../METERING_MODE";
 import {COMMAND_ENCODER_TYPE} from "../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 import copyGPUBuffer from "../../../utils/copyGPUBuffer";
 import GBUFFER_TYPE from "../../../display/view/core/GBUFFER_TYPE";
+import RedGPUObject from "../../../base/RedGPUObject";
 
 
 /**
  * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
  * [EN] Class that performs auto-exposure and eye adaptation.
  */
-class AutoExposure {
-    readonly #redGPUContext: RedGPUContext;
+class AutoExposure extends RedGPUObject{
     readonly #view: View3D;
     #adaptedEV100Buffer: StorageBuffer;
     #histogramBuffer: StorageBuffer;
@@ -57,8 +56,8 @@ class AutoExposure {
     #adaptationBindGroup0: GPUBindGroup;
 
     constructor(view: View3D) {
+        super(view.redGPUContext)
         this.#view = view;
-        this.#redGPUContext = view.redGPUContext;
         this.#initResources();
         this.#initPipelines();
     }
@@ -187,7 +186,7 @@ class AutoExposure {
     set currentAdaptedEV100(value: number) {
         this.#currentAdaptedEV100 = value;
         const initialData = new Float32Array([value]);
-        this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, initialData.buffer);
+        this.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, initialData.buffer);
     }
 
     get adaptedLuminanceBuffer(): StorageBuffer {
@@ -201,7 +200,7 @@ class AutoExposure {
      * @param sourceTextureInfo - [KO] 소스 텍스처 정보 [EN] Source texture information
      */
     render(sourceTextureInfo: IPostEffectResult) {
-        const {gpuDevice, antialiasingManager, commandEncoderManager} = this.#redGPUContext;
+        const {gpuDevice, antialiasingManager, commandEncoderManager} = this;
         const {useMSAA, msaaID} = antialiasingManager;
         const {width, height} = this.#view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {rawCamera, renderViewStateData, viewRenderTextureManager} = this.#view;
@@ -338,15 +337,15 @@ class AutoExposure {
     }
 
     #initResources() {
-        const {gpuDevice} = this.#redGPUContext;
+        const {gpuDevice,redGPUContext} = this;
 
         // [KO] 초기 EV100 값 설정 (기본적으로 1.0으로 시작하거나 이전 프레임의 적응 값을 유지합니다)
         // [EN] Set initial EV100 value (starts at 1.0 by default or maintains the adapted value from the previous frame)
         const initialData = new Float32Array([1.0]);
-        this.#adaptedEV100Buffer = new StorageBuffer(this.#redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
+        this.#adaptedEV100Buffer = new StorageBuffer(redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
 
         // [KO] 히스토그램 버퍼 (256 bins) [EN] Histogram buffer (256 bins)
-        this.#histogramBuffer = new StorageBuffer(this.#redGPUContext, new Uint32Array(256).buffer, 'AutoExposure_HistogramBuffer');
+        this.#histogramBuffer = new StorageBuffer(redGPUContext, new Uint32Array(256).buffer, 'AutoExposure_HistogramBuffer');
 
         // Readback buffer
         this.#readBuffer = gpuDevice.createBuffer({
@@ -357,11 +356,11 @@ class AutoExposure {
 
         // [KO] 통합 유니폼 데이터 구성 (총 18개 요소) [EN] Unified uniform data configuration (total 18 elements)
         const uniformData = new Float32Array(18);
-        this.#uniformBuffer = new UniformBuffer(this.#redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
+        this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }
 
     #initPipelines() {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager,} = this;
 
         const adaptationModule = resourceManager.createGPUShaderModule('AutoExposure_Adaptation', {code: adaptationCode});
 
@@ -409,7 +408,7 @@ class AutoExposure {
     #getDownsamplePipeline(useMSAA: boolean): GPUComputePipeline {
         if (this.#cachedDownsamplePipelines.has(useMSAA)) return this.#cachedDownsamplePipelines.get(useMSAA);
 
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager} = this;
         const shaderCode = useMSAA
             ? downsampleLogLuminanceCode.replace('texture_depth_2d', 'texture_depth_multisampled_2d')
             : downsampleLogLuminanceCode;
@@ -430,7 +429,7 @@ class AutoExposure {
     #getDownsampleBindGroupLayout0(useMSAA: boolean): GPUBindGroupLayout {
         if (this.#cachedDownsampleBindGroupLayouts.has(useMSAA)) return this.#cachedDownsampleBindGroupLayouts.get(useMSAA);
 
-        const {gpuDevice} = this.#redGPUContext;
+        const {gpuDevice} = this;
         const layout = gpuDevice.createBindGroupLayout({
             label: `AutoExposure_Downsample_BGL0_${useMSAA ? 'MSAA' : 'NonMSAA'}`,
             entries: [

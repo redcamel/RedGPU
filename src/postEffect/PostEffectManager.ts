@@ -416,6 +416,7 @@ class PostEffectManager {
 
         {
             currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.toneMappingManager.render(
+                this.#view,
                 width,
                 height,
                 currentTextureView

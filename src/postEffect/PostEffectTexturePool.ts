@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
 import {IPostEffectResult} from "./core/types";
+import RedGPUObject from "../base/RedGPUObject";
 
 /**
  * [KO] 후처리용 텍스처 풀링 클래스입니다.
@@ -9,8 +10,8 @@ import {IPostEffectResult} from "./core/types";
  * [KO] 후처리 과정에서 발생하는 임시 텍스처들을 재사용하여 비디오 메모리 점유율과 생성/파괴 오버헤드를 줄입니다.
  * [EN] Reduces video memory occupancy and creation/destruction overhead by reusing temporary textures generated during post-processing.
  */
-class PostEffectTexturePool {
-    #redGPUContext: RedGPUContext;
+class PostEffectTexturePool extends RedGPUObject{
+   
     #pool: Map<string, GPUTexture[]> = new Map();
     #activeTextures: Set<GPUTexture> = new Set();
     #textureToKey: WeakMap<GPUTexture, string> = new WeakMap();
@@ -28,7 +29,7 @@ class PostEffectTexturePool {
      * @param redGPUContext - RedGPU 컨텍스트
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
     }
 
 
@@ -175,6 +176,7 @@ class PostEffectTexturePool {
      * @returns 할당된 GPUTexture
      */
     #alloc(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): GPUTexture {
+        const {resourceManager} = this
         this.#requestCount++;
         const key = `${width}x${height}_${format}`;
         let list = this.#pool.get(key);
@@ -190,7 +192,7 @@ class PostEffectTexturePool {
             // [KO] 신규 생성 시에만 메모리 사이즈를 가산합니다.
             // [EN] Add to memory size only when a new texture is created.
             this.#allocationCount++;
-            texture = this.#redGPUContext.resourceManager.createManagedTexture({
+            texture = resourceManager.createManagedTexture({
                 size: {width, height},
                 format,
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
@@ -200,7 +202,7 @@ class PostEffectTexturePool {
 
             // [KO] 메타데이터 및 뷰 생성/저장 [EN] Create/store metadata and view
             this.#textureToKey.set(texture, key);
-            this.#textureToView.set(texture, this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(texture));
+            this.#textureToView.set(texture, resourceManager.getGPUResourceBitmapTextureView(texture));
         }
         this.#activeTextures.add(texture);
 
