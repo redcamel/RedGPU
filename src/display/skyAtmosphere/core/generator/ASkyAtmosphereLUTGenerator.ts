@@ -3,9 +3,9 @@ import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuf
 import Sampler from "../../../../resources/sampler/Sampler";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
-abstract class ASkyAtmosphereLUTGenerator {
-    #redGPUContext: RedGPUContext;
+abstract class ASkyAtmosphereLUTGenerator  extends RedGPUObject{
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
     #label: string;
@@ -20,7 +20,7 @@ abstract class ASkyAtmosphereLUTGenerator {
         label: string,
         width: number, height: number, depth: number = 1
     ) {
-        this.#redGPUContext = redGPUContext;
+      super(redGPUContext);
         this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#sampler = sampler;
         this.#label = label;
@@ -29,9 +29,6 @@ abstract class ASkyAtmosphereLUTGenerator {
         this.#depth = depth;
     }
 
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
 
     get sharedUniformBuffer(): UniformBuffer {
         return this.#sharedUniformBuffer;
@@ -64,7 +61,7 @@ abstract class ASkyAtmosphereLUTGenerator {
         bindGroup: GPUBindGroup,
         workgroupSize: [number, number, number] = [16, 16, 1]
     ): void {
-        const {commandEncoderManager} = this.#redGPUContext;
+        const {commandEncoderManager} = this;
         commandEncoderManager.addResourceComputePass(`SkyAtmosphere_${this.#label}_ComputePass`, (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, bindGroup);
@@ -78,7 +75,7 @@ abstract class ASkyAtmosphereLUTGenerator {
     }
 
     createLUTTexture(is3D: boolean = false, format: GPUTextureFormat = 'rgba16float'): GPUTexture {
-        const {resourceManager} = this.#redGPUContext;
+        const {resourceManager} = this;
         return resourceManager.createManagedTexture({
             label: `SkyAtmosphere_${this.#label}_Texture`,
             size: [this.#width, this.#height, this.#depth],
@@ -89,7 +86,7 @@ abstract class ASkyAtmosphereLUTGenerator {
     }
 
     protected createComputePipeline(label: string, shaderCode: string): GPUComputePipeline {
-        const {gpuDevice} = this.#redGPUContext;
+        const {gpuDevice} = this;
         return gpuDevice.createComputePipeline({
             label,
             layout: 'auto',
@@ -101,12 +98,12 @@ abstract class ASkyAtmosphereLUTGenerator {
     }
 
     protected createBindGroup(label: string, pipeline: GPUComputePipeline, entries: GPUBindGroupEntry[]): GPUBindGroup {
-        return this.#redGPUContext.gpuDevice.createBindGroup({
+        return this.gpuDevice.createBindGroup({
             label,
             layout: pipeline.getBindGroupLayout(0),
             entries
         });
     }
 }
-
+Object.freeze(ASkyAtmosphereLUTGenerator);
 export default ASkyAtmosphereLUTGenerator;
