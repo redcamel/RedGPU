@@ -204,7 +204,7 @@ class InstancingMesh extends Mesh {
             this.dirtyLOD = false;
             return;
         }
-        const {view, currentRenderPassEncoder,renderResults} = renderViewStateData;
+        const {view, currentRenderPassEncoder, renderResults} = renderViewStateData;
         const {scene} = view;
         const {shadowManager} = scene;
         const {directionalShadowManager} = shadowManager;
@@ -283,7 +283,7 @@ class InstancingMesh extends Mesh {
     ): void {
         const {gpuRenderInfo} = this;
         const {pipeline, shadowPipeline} = gpuRenderInfo;
-        const {view,renderResults} = renderViewStateData
+        const {view, renderResults} = renderViewStateData
         this.#updateDisplacementUniforms();
         this.#updateInstanceUniforms();
         const {fragmentUniformBindGroup} = this.material.gpuRenderInfo;
@@ -532,7 +532,7 @@ class InstancingMesh extends Mesh {
 
     #performGPUCulling(renderViewStateData: RenderViewStateData): void {
         const {gpuDevice, commandEncoderManager} = this.#redGPUContext;
-        const {indexBuffer,vertexBuffer} = this.geometry
+        const {indexBuffer, vertexBuffer} = this.geometry
         this.#updateCullingUniforms(renderViewStateData);
         const indexCount = indexBuffer
             ? indexBuffer.indexCount

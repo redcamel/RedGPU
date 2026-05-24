@@ -1,8 +1,6 @@
 import {vec3} from "gl-matrix";
 import ColorRGBA from "../../../color/ColorRGBA";
 import RedGPUContext from "../../../context/RedGPUContext";
-import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
-import GPU_BLEND_OPERATION from "../../../gpuConst/GPU_BLEND_OPERATION";
 import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import DrawBufferManager, {DrawCommandSlot} from "../../../renderer/core/DrawBufferManager";
@@ -165,7 +163,7 @@ class DrawDebuggerGrid {
     }
 
     render(renderViewStateData: RenderViewStateData) {
-        const {view, currentRenderPassEncoder,renderResults} = renderViewStateData
+        const {view, currentRenderPassEncoder, renderResults} = renderViewStateData
         const {redGPUContext} = view
         const {gpuDevice, antialiasingManager} = redGPUContext
         const {useMSAA, msaaID} = antialiasingManager
@@ -287,5 +285,6 @@ class DrawDebuggerGrid {
         this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormalLinear)
     }
 }
+
 Object.freeze(DrawDebuggerGrid)
 export default DrawDebuggerGrid

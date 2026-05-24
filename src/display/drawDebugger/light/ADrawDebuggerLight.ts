@@ -26,9 +26,9 @@ abstract class ADrawDebuggerLight {
     constructor(redGPUContext: RedGPUContext, color: [number, number, number], maxLines: number = 32) {
 
         const lightGeometry = this.createLightDebugGeometry(redGPUContext, maxLines);
-        this.#lightMaterial = new ColorMaterial(redGPUContext,convertRgbToHex(color[0], color[1], color[2]));
+        this.#lightMaterial = new ColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));
         this.#lightDebugMesh = new Mesh(redGPUContext, lightGeometry, this.#lightMaterial);
-        const {primitiveState} =   this.#lightDebugMesh
+        const {primitiveState} = this.#lightDebugMesh
         primitiveState.cullMode = 'none';
         primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
 
@@ -98,5 +98,6 @@ abstract class ADrawDebuggerLight {
         return new Geometry(redGPUContext, vertexBuffer);
     }
 }
+
 Object.freeze(ADrawDebuggerLight);
 export default ADrawDebuggerLight;

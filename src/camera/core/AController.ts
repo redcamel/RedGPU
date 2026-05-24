@@ -406,7 +406,7 @@ abstract class AController {
      */
     findTargetViewByInputEvent = (e: MouseEvent | TouchEvent): View3D | null => {
         const redGPUContext = this.#redGPUContext;
-        const {renderScale,viewList} = redGPUContext;
+        const {renderScale, viewList} = redGPUContext;
         const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
         const scale = window.devicePixelRatio * renderScale
         const tX = x * scale;

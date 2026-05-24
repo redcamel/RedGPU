@@ -5,7 +5,6 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {IPostEffectResult} from "./types";
-import {keepLog} from "../../utils";
 
 const resourceIdMap = new WeakMap<GPUTexture, number>();
 let nextResourceId = 0;
@@ -191,16 +190,6 @@ abstract class ASinglePassPostEffect {
         this.#bindGroupCache3.clear();
     }
 
-    #getResourceId(resource: GPUTexture): number {
-        if (!resource) return 0;
-        let id = resourceIdMap.get(resource);
-        if (id === undefined) {
-            id = nextResourceId++;
-            resourceIdMap.set(resource, id);
-        }
-        return id;
-    }
-
     /**
      * [KO] 이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
      * [EN] Initializes the effect. Creates compute shaders and uniform buffers.
@@ -252,7 +241,6 @@ abstract class ASinglePassPostEffect {
         }
 
     }
-
 
     /**
      * [KO] 이펙트를 렌더링하고 결과를 반환합니다. 필요한 경우 바인드 그룹을 갱신합니다.
@@ -332,6 +320,16 @@ abstract class ASinglePassPostEffect {
         if (memberInfo) {
             this.uniformBuffer.writeOnlyBuffer(memberInfo, value);
         }
+    }
+
+    #getResourceId(resource: GPUTexture): number {
+        if (!resource) return 0;
+        let id = resourceIdMap.get(resource);
+        if (id === undefined) {
+            id = nextResourceId++;
+            resourceIdMap.set(resource, id);
+        }
+        return id;
     }
 
     /**

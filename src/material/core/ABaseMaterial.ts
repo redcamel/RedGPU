@@ -1,12 +1,9 @@
 import ColorRGB from "../../color/ColorRGB";
 import ColorRGBA from "../../color/ColorRGBA";
 import RedGPUContext from "../../context/RedGPUContext";
-import GPU_BLEND_FACTOR from "../../gpuConst/GPU_BLEND_FACTOR";
-import GPU_BLEND_OPERATION from "../../gpuConst/GPU_BLEND_OPERATION";
 import BlendState from "../../renderState/BlendState";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceBase from "../../resources/core/ResourceBase";
-import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
@@ -491,7 +488,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Check shader variant (conditional branch) state and update shader module
      */
     #checkVariant() {
-        const { resourceManager} = this.redGPUContext;
+        const {resourceManager} = this.redGPUContext;
         // 현재 머티리얼 상태에 맞는 바리안트 키 찾기
         const currentVariantKey = this.#findMatchingVariantKey();
 

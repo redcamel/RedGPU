@@ -122,6 +122,51 @@ class PostEffectTexturePool {
     }
 
     /**
+     * [KO] 특정 텍스처를 풀로 반환합니다.
+     * [EN] Returns a specific texture to the pool.
+     * @param texture - 반환할 GPUTexture
+     */
+    release(texture: GPUTexture): void {
+        if (this.#activeTextures.has(texture)) {
+            this.#activeTextures.delete(texture);
+            const key = this.#textureToKey.get(texture);
+            if (key) {
+                this.#pool.get(key)!.push(texture);
+            }
+        }
+    }
+
+    /**
+     * [KO] 사용 중인 모든 텍스처를 풀로 반환합니다.
+     * [EN] Returns all active textures to the pool.
+     */
+    releaseAll(): void {
+        this.#activeTextures.forEach(texture => {
+            const key = this.#textureToKey.get(texture);
+            if (key) {
+                this.#pool.get(key)!.push(texture);
+            }
+        });
+        this.#activeTextures.clear();
+    }
+
+    /**
+     * [KO] 풀에 있는 모든 텍스처를 파기합니다.
+     * [EN] Destroys all textures in the pool.
+     */
+    clear(): void {
+        this.releaseAll();
+        this.#pool.forEach(list => {
+            list.forEach(texture => texture.destroy());
+        });
+        this.#pool.clear();
+        this.#videoMemorySize = 0; // [KO] 모든 자원이 파기되었으므로 0으로 리셋 [EN] Reset to 0 as all resources are destroyed.
+        this.#peakActiveCount = 0;
+        this.#allocationCount = 0;
+        this.#requestCount = 0;
+    }
+
+    /**
      * [KO] 적절한 텍스처를 풀에서 가져오거나 새로 생성합니다.
      * [EN] Gets a suitable texture from the pool or creates a new one.
      * @param width - 텍스처 너비
@@ -165,51 +210,6 @@ class PostEffectTexturePool {
         }
 
         return texture;
-    }
-
-    /**
-     * [KO] 특정 텍스처를 풀로 반환합니다.
-     * [EN] Returns a specific texture to the pool.
-     * @param texture - 반환할 GPUTexture
-     */
-    release(texture: GPUTexture): void {
-        if (this.#activeTextures.has(texture)) {
-            this.#activeTextures.delete(texture);
-            const key = this.#textureToKey.get(texture);
-            if (key) {
-                this.#pool.get(key)!.push(texture);
-            }
-        }
-    }
-
-    /**
-     * [KO] 사용 중인 모든 텍스처를 풀로 반환합니다.
-     * [EN] Returns all active textures to the pool.
-     */
-    releaseAll(): void {
-        this.#activeTextures.forEach(texture => {
-            const key = this.#textureToKey.get(texture);
-            if (key) {
-                this.#pool.get(key)!.push(texture);
-            }
-        });
-        this.#activeTextures.clear();
-    }
-
-    /**
-     * [KO] 풀에 있는 모든 텍스처를 파기합니다.
-     * [EN] Destroys all textures in the pool.
-     */
-    clear(): void {
-        this.releaseAll();
-        this.#pool.forEach(list => {
-            list.forEach(texture => texture.destroy());
-        });
-        this.#pool.clear();
-        this.#videoMemorySize = 0; // [KO] 모든 자원이 파기되었으므로 0으로 리셋 [EN] Reset to 0 as all resources are destroyed.
-        this.#peakActiveCount = 0;
-        this.#allocationCount = 0;
-        this.#requestCount = 0;
     }
 }
 
