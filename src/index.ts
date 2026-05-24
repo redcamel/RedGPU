@@ -16,7 +16,7 @@ export {
     ShaderLibrary,
     GLTFLoader
 }
-
+export * as BaseObject from "./base";
 export * as Camera from "./camera/";
 export * as Context from "./context";
 export * as Color from "./color";

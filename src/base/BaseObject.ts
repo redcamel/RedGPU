@@ -52,5 +52,5 @@ abstract class BaseObject {
         this.#name = value;
     }
 }
-
+Object.freeze(BaseObject);
 export default BaseObject;
