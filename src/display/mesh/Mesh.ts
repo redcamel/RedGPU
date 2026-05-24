@@ -1398,7 +1398,7 @@ class Mesh extends MeshBase {
         }
         // keepLog(this.gpuRenderInfo?.vertexStructInfo)
         if (currentGeometry) {
-            renderViewStateData.num3DObjects++
+            renderViewStateData.renderResults.num3DObjects++
             if (this.#lastUpdateMSAAID !== antialiasingManager.msaaID) {
                 currentDirtyPipeline = true
                 this.dirtyLOD = true
@@ -1450,7 +1450,7 @@ class Mesh extends MeshBase {
                 }
             }
         } else {
-            renderViewStateData.num3DGroups++
+            renderViewStateData.renderResults.num3DGroups++
         }
         if (currentGeometry && passFrustumCulling) {
             const {gpuRenderInfo} = this
@@ -1591,17 +1591,17 @@ class Mesh extends MeshBase {
                         this.#setRenderBundle(renderViewStateData)
                     }
 
-                    renderViewStateData.numDrawCalls++
+                    renderViewStateData.renderResults.numDrawCalls++
                     if (currentGeometry.indexBuffer) {
                         const {indexBuffer} = currentGeometry
                         const {indexCount, triangleCount} = indexBuffer
-                        renderViewStateData.numTriangles += triangleCount
-                        renderViewStateData.numPoints += indexCount
+                        renderViewStateData.renderResults.numTriangles += triangleCount
+                        renderViewStateData.renderResults.numPoints += indexCount
                     } else {
                         const {vertexBuffer} = currentGeometry
                         const {vertexCount, triangleCount} = vertexBuffer
-                        renderViewStateData.numTriangles += triangleCount;
-                        renderViewStateData.numPoints += vertexCount
+                        renderViewStateData.renderResults.numTriangles += triangleCount;
+                        renderViewStateData.renderResults.numPoints += vertexCount
                     }
                     let renderBundle = this.#renderBundle;
                     {

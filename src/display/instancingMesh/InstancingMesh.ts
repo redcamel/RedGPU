@@ -213,9 +213,9 @@ class InstancingMesh extends Mesh {
             this.#updateTransformMatrix();
         }
         if (this.geometry) {
-            renderViewStateData.num3DObjects++;
+            renderViewStateData.renderResults.num3DObjects++;
         } else {
-            renderViewStateData.num3DGroups++;
+            renderViewStateData.renderResults.num3DGroups++;
         }
         const redGPUContext = this.#redGPUContext;
         if (this.geometry) {
@@ -271,7 +271,7 @@ class InstancingMesh extends Mesh {
         this.#updatePipelines();
         this.material.dirtyPipeline = false;
         this.dirtyPipeline = false;
-        renderViewStateData.numDirtyPipelines++;
+        renderViewStateData.renderResults.numDirtyPipelines++;
     }
 
     // ========== 지오메트리 렌더링 ==========
@@ -317,8 +317,8 @@ class InstancingMesh extends Mesh {
             );
         });
 
-        renderViewStateData.numDrawCalls++;
-        renderViewStateData.numInstances++;
+        renderViewStateData.renderResults.numDrawCalls++;
+        renderViewStateData.renderResults.numInstances++;
     }
 
     #renderGeometryWithBuffer(

@@ -26,14 +26,18 @@ const ViewStateTab = ({view, lastUpdateTime}: { view: View3D, lastUpdateTime: nu
     const {
         usedVideoMemory,
         viewRenderCPURecordingTime,
+        viewportSize,
+        renderResults
+    } = renderViewStateData;
+
+    const {
         num3DGroups,
         num3DObjects,
         numInstances,
         numDrawCalls,
         numTriangles,
-        numPoints,
-        viewportSize
-    } = renderViewStateData;
+        numPoints
+    } = renderResults;
 
     const {x, y, width, height, pixelRectArray} = viewportSize;
 

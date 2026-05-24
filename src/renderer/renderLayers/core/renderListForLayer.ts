@@ -5,6 +5,7 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
     const len = list.length;
     const {
         currentRenderPassEncoder,
+        renderResults
     } = renderViewStateData
     //TODO - 렌더번들기반으로 이것도 옮겨야함
     currentRenderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup)
@@ -14,8 +15,8 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
             const currentGeometry = target._geometry
             const currentMaterial = target._material
             // render
-            if (currentGeometry) renderViewStateData.num3DObjects++
-            else renderViewStateData.num3DGroups++
+            if (currentGeometry) renderResults.num3DObjects++
+            else renderResults.num3DGroups++
             const {gpuRenderInfo} = target
             const {vertexUniformBindGroup} = gpuRenderInfo
 
@@ -27,21 +28,21 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
                 currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
                 currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
                 //
-                renderViewStateData.numDrawCalls++
+                renderResults.numDrawCalls++
                 //
                 if (currentGeometry.indexBuffer) {
                     const {indexBuffer} = currentGeometry
                     const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
                     currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
                     currentRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
-                    renderViewStateData.numTriangles += triangleCount
-                    renderViewStateData.numPoints += indexCount
+                    renderResults.numTriangles += triangleCount
+                    renderResults.numPoints += indexCount
                 } else {
                     const {vertexBuffer} = currentGeometry
                     const {vertexCount, triangleCount} = vertexBuffer
                     currentRenderPassEncoder.draw(vertexCount, 1, 0, 0);
-                    renderViewStateData.numTriangles += triangleCount;
-                    renderViewStateData.numPoints += vertexCount
+                    renderResults.numTriangles += triangleCount;
+                    renderResults.numPoints += vertexCount
                 }
             }
         }

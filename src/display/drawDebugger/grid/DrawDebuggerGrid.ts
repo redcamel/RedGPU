@@ -169,8 +169,8 @@ class DrawDebuggerGrid {
         const {useMSAA, msaaID} = antialiasingManager
         const position = vec3.create()
         vec3.set(position, view.rawCamera.x, view.rawCamera.y, view.rawCamera.z)
-        renderViewStateData.num3DObjects++
-        renderViewStateData.numDrawCalls++
+        renderViewStateData.renderResults.num3DObjects++
+        renderViewStateData.renderResults.numDrawCalls++
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
         const changedSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup !== this.#prevSystemUniform_Vertex_UniformBindGroup
         if (this.#pipeline) {
@@ -191,8 +191,8 @@ class DrawDebuggerGrid {
                 this.#bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
                 this.#renderBundle = this.#bundleEncoder.finish();
             }
-            renderViewStateData.numTriangles += 0; // 라인이므로 삼각형 수는 0
-            renderViewStateData.numPoints += indexCount
+            renderViewStateData.renderResults.numTriangles += 0; // 라인이므로 삼각형 수는 0
+            renderViewStateData.renderResults.numPoints += indexCount
             currentRenderPassEncoder.executeBundles([this.#renderBundle])
         }
         this.#prevSystemUniform_Vertex_UniformBindGroup = view.systemUniform_Vertex_UniformBindGroup

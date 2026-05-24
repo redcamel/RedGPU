@@ -123,7 +123,7 @@ const renderTestPane = async (redGPUContext, meshes, view) => {
             const drawCallsBinding = statsFolder.addBinding(config, 'drawCalls', {readonly: true});
 
             const updateStats = () => {
-                config.drawCalls = view.renderViewStateData.numDrawCalls;
+                config.drawCalls = view.renderViewStateData.renderResults.numDrawCalls;
                 drawCallsBinding.refresh();
                 requestAnimationFrame(updateStats);
             };

@@ -173,7 +173,7 @@ class SkyBox {
         if (this.#dirtyPipeline || this.#material.dirtyPipeline || this.#prevSystemUniform_Vertex_UniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
             this.gpuRenderInfo.pipeline = this.#updatePipeline()
             this.#dirtyPipeline = false
-            renderViewStateData.numDirtyPipelines++
+            renderViewStateData.renderResults.numDirtyPipelines++
             this.#prevSystemUniform_Vertex_UniformBindGroup = view.systemUniform_Vertex_UniformBindGroup
             {
                 this.#material.dirtyPipeline = false
@@ -195,10 +195,11 @@ class SkyBox {
         }
         currentRenderPassEncoder.executeBundles([this.#renderBundle])
 
-        renderViewStateData.num3DObjects++
-        renderViewStateData.numDrawCalls++
-        renderViewStateData.numTriangles += triangleCount
-        renderViewStateData.numPoints += indexCount
+        const {renderResults} = renderViewStateData;
+        renderResults.num3DObjects++
+        renderResults.numDrawCalls++
+        renderResults.numTriangles += triangleCount
+        renderResults.numPoints += indexCount
     }
 
     #updateMSAAStatus() {

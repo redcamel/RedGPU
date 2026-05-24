@@ -456,7 +456,7 @@ abstract class GroupBase extends Object3DContainer {
             dirtyTransformForChildren = true
             this.dirtyTransform = false
         }
-        renderViewStateData.num3DGroups++
+        renderViewStateData.renderResults.num3DGroups++
         // children render
         const {children} = this
         let i = 0

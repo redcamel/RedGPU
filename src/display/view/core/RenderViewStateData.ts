@@ -44,20 +44,16 @@ class RenderViewStateData {
     /** [KO] 객체를 컬링하기 위한 거리 임계값 [EN] Distance threshold for culling objects */
     distanceCulling: number;
 
-    /** [KO] 현재 프레임에서 렌더링된 3D 그룹의 수 [EN] Number of 3D groups rendered in the current frame */
-    num3DGroups: number;
-    /** [KO] 현재 프레임에서 렌더링된 3D 객체의 수 [EN] Number of 3D objects rendered in the current frame */
-    num3DObjects: number;
-    /** [KO] 현재 프레임에서 발행된 드로우 콜의 수 [EN] Number of draw calls issued in the current frame */
-    numDrawCalls: number;
-    /** [KO] 업데이트가 필요했던 더티 파이프라인의 수 [EN] Number of dirty pipelines that needed updating */
-    numDirtyPipelines: number;
-    /** [KO] 렌더링된 총 인스턴스 수 [EN] Total number of instances rendered */
-    numInstances: number;
-    /** [KO] 렌더링된 총 삼각형 수 [EN] Total number of triangles rendered */
-    numTriangles: number;
-    /** [KO] 렌더링된 총 포인트 수 [EN] Total number of points rendered */
-    numPoints: number;
+    /** [KO] 렌더링 통계 데이터 그룹 [EN] Group of rendering statistics data */
+    renderResults = {
+        num3DGroups: 0,
+        num3DObjects: 0,
+        numDrawCalls: 0,
+        numDirtyPipelines: 0,
+        numInstances: 0,
+        numTriangles: 0,
+        numPoints: 0
+    };
 
     // Time related
     /** [KO] 렌더링 시작을 표시하는 성능 타임스탬프 (ms) [EN] Performance timestamp marking the start of rendering (ms) */
@@ -169,13 +165,14 @@ class RenderViewStateData {
         this.useDistanceCulling = view.useDistanceCulling;
         this.distanceCulling = view.distanceCulling;
         this.cullingDistanceSquared = this.distanceCulling * this.distanceCulling;
-        this.num3DGroups = 0;
-        this.num3DObjects = 0;
-        this.numDrawCalls = 0;
-        this.numInstances = 0;
-        this.numDirtyPipelines = 0;
-        this.numTriangles = 0;
-        this.numPoints = 0;
+        const {renderResults} = this;
+        renderResults.num3DGroups = 0;
+        renderResults.num3DObjects = 0;
+        renderResults.numDrawCalls = 0;
+        renderResults.numInstances = 0;
+        renderResults.numDirtyPipelines = 0;
+        renderResults.numTriangles = 0;
+        renderResults.numPoints = 0;
         this.#calcTimeInfo();
         this.dirtyVertexUniformFromMaterial = {};
         //

@@ -43,12 +43,13 @@ export const collectStats = (redGPUContext: RedGPUContext, time: number): Partia
     for (let i = 0; i < viewListLen; i++) {
         const view = viewList[i];
         const state: RenderViewStateData = view.renderViewStateData;
-        totalNum3DGroups += state.num3DGroups;
-        totalNum3DObjects += state.num3DObjects;
-        totalNumInstances += state.numInstances;
-        totalNumDrawCalls += state.numDrawCalls;
-        totalNumTriangles += state.numTriangles;
-        totalNumPoints += state.numPoints;
+        const {renderResults} = state;
+        totalNum3DGroups += renderResults.num3DGroups;
+        totalNum3DObjects += renderResults.num3DObjects;
+        totalNumInstances += renderResults.numInstances;
+        totalNumDrawCalls += renderResults.numDrawCalls;
+        totalNumTriangles += renderResults.numTriangles;
+        totalNumPoints += renderResults.numPoints;
         totalUsedVideoMemory += state.usedVideoMemory;
 
         // 계층 구조 수집

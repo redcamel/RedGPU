@@ -39,6 +39,6 @@ const updateMeshDirtyPipeline = (
     }
     material.dirtyPipeline = false
     mesh.dirtyPipeline = false
-    if (renderViewStateData) renderViewStateData.numDirtyPipelines++
+    if (renderViewStateData) renderViewStateData.renderResults.numDirtyPipelines++
 }
 export default updateMeshDirtyPipeline
