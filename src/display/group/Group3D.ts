@@ -1,4 +1,3 @@
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import AGroupBase from "./core/AGroupBase";
 
 /**
@@ -20,16 +19,6 @@ import AGroupBase from "./core/AGroupBase";
  * @category Group
  */
 class Group3D extends AGroupBase {
-    /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number
-    /**
-     * [KO] 그룹 이름
-     * [EN] Group name
-     */
-    #name: string
 
     /**
      * [KO] Group3D 인스턴스를 생성합니다.
@@ -41,26 +30,6 @@ class Group3D extends AGroupBase {
     constructor(name?: string) {
         super()
         if (name) this.name = name
-    }
-
-    /**
-     * [KO] 그룹 이름을 반환합니다.
-     * [EN] Returns the group name.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 그룹 이름을 설정합니다.
-     * [EN] Sets the group name.
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 }
 

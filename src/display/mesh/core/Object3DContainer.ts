@@ -3,6 +3,7 @@ import validateUintRange from "../../../runtimeChecker/validateFunc/validateUint
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Mesh from "../Mesh";
 import MeshBase from "./MeshBase";
+import BaseObject from "../../../base/BaseObject";
 
 /**
  * [KO] Mesh 객체들을 담는 시각적 컨테이너 클래스입니다.
@@ -18,7 +19,7 @@ import MeshBase from "./MeshBase";
  *
  * @category Core
  */
-class Object3DContainer {
+class Object3DContainer extends BaseObject {
     /**
      * 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
      */
@@ -33,6 +34,7 @@ class Object3DContainer {
      * Object3DContainer 생성자입니다.
      */
     constructor() {
+        super();
     }
 
     /**

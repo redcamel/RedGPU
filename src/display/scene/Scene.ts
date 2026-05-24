@@ -3,7 +3,6 @@ import LightManager from "../../light/LightManager";
 import ShadowManager from "../../shadow/ShadowManager";
 import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../mesh/core/Object3DContainer";
 
 /**
@@ -23,16 +22,6 @@ import Object3DContainer from "../mesh/core/Object3DContainer";
  * @category Scene
  */
 class Scene extends Object3DContainer {
-    /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number
-    /**
-     * [KO] 씬 이름
-     * [EN] Scene name
-     */
-    #name: string
     /**
      * [KO] 배경색
      * [EN] Background color
@@ -72,8 +61,7 @@ class Scene extends Object3DContainer {
      */
     constructor(name?: string) {
         super()
-        this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        this.#name = name
+        if (name) this.name = name
     }
 
     /**
@@ -118,29 +106,6 @@ class Scene extends Object3DContainer {
      */
     set physicsEngine(value: IPhysicsEngine) {
         this.#physicsEngine = value;
-    }
-
-    /**
-     * [KO] 씬의 이름을 반환합니다.
-     * [EN] Returns the scene name.
-     * @returns
-     * [KO] 씬 이름
-     * [EN] Scene name
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 씬의 이름을 설정합니다.
-     * [EN] Sets the scene name.
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**

@@ -55,7 +55,6 @@ class MeshBase extends Object3DContainer {
     readonly #primitiveState: PrimitiveState
     readonly #depthStencilState: DepthStencilState
     #currentShaderModuleName: string
-    #uuid: string = createUUID()
 
     constructor(redGPUContext: RedGPUContext) {
         super()
@@ -64,15 +63,6 @@ class MeshBase extends Object3DContainer {
         this.#gpuDevice = redGPUContext.gpuDevice
         this.#primitiveState = new PrimitiveState(this)
         this.#depthStencilState = new DepthStencilState(this)
-    }
-
-    /**
-     * Retrieves the UUID of the object.
-     *
-     * @returns {string} The UUID of the object.
-     */
-    get uuid(): string {
-        return this.#uuid;
     }
 
     get currentShaderModuleName(): string {

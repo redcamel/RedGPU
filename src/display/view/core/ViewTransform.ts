@@ -8,6 +8,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
+import BaseObject from "../../../base/BaseObject";
 
 /**
  * [KO] View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
@@ -23,7 +24,7 @@ import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
  *
  * @category Core
  */
-class ViewTransform {
+class ViewTransform extends BaseObject {
     /**
      * 뷰 크기 변경 시 호출되는 콜백입니다.
      * @type {((event: RedResizeEvent<ViewTransform>) => void) | null}
@@ -103,6 +104,7 @@ class ViewTransform {
      * @param {RedGPUContext} redGPUContext - 유효한 RedGPUContext 인스턴스
      */
     constructor(redGPUContext: RedGPUContext) {
+        super();
         validateRedGPUContext(redGPUContext)
         this.#redGPUContext = redGPUContext
         this.setSize('100%', '100%')

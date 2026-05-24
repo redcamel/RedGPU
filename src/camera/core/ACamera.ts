@@ -1,12 +1,12 @@
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import type View3D from "../../display/view/View3D";
+import BaseObject from "../../base/BaseObject";
 
 /**
  * [KO] 모든 카메라의 기본이 되는 추상 클래스입니다. 물리적 카메라 속성과 공통 메타데이터를 관리합니다.
  * [EN] Abstract base class for all cameras. Manages physical camera properties and common metadata.
  */
-abstract class ACamera {
+abstract class ACamera extends BaseObject {
     /**
      * [KO] 교정 상수 (Calibration Constant, K)
      * [EN] Calibration constant (K)
@@ -15,16 +15,6 @@ abstract class ACamera {
      * [EN] Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
      */
     static readonly CALIBRATION_CONSTANT: number = 12.5;
-    /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number;
-    /**
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    #name: string;
     /**
      * [KO] 조리개 (f-stop)
      * [EN] Aperture (f-stop)
@@ -163,23 +153,6 @@ abstract class ACamera {
         if (this.#iso === value) return;
         this.#iso = value;
         this.#exposureDirty = true;
-    }
-
-    /**
-     * [KO] 카메라 이름을 반환합니다.
-     * [EN] Returns the camera name.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 카메라 이름을 설정합니다.
-     * [EN] Sets the camera name.
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**

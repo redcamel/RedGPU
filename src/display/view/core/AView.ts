@@ -28,20 +28,10 @@ import ViewTransform from "./ViewTransform";
  */
 abstract class AView extends ViewTransform {
     /**
-     * [KO] 뷰의 이름
-     * [EN] Name of the view
-     */
-    #name: string
-    /**
      * [KO] 연결된 Scene 객체
      * [EN] Connected Scene object
      */
     #scene: Scene
-    /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number
     /**
      * [KO] 객체 선택을 관리하는 PickingManager
      * [EN] PickingManager that manages object selection
@@ -104,26 +94,6 @@ abstract class AView extends ViewTransform {
         this.scene = scene
         this.camera = camera
         if (name) this.name = name
-    }
-
-    /**
-     * [KO] 뷰의 이름을 반환합니다.
-     * [EN] Returns the name of the view.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 뷰의 이름을 설정합니다.
-     * [EN] Sets the name of the view.
-     * @param value -
-     * [KO] 설정할 이름 문자열
-     * [EN] Name string to set
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**

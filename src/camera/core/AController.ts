@@ -1,8 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
+import BaseObject from "../../base/BaseObject";
 
 export type controllerInit = {
     HD_Move?: (deltaX: number, deltaY: number) => void
@@ -26,7 +26,7 @@ export type controllerInit = {
  *
  * @category Core
  */
-abstract class AController {
+abstract class AController extends BaseObject {
     // ==================== Static - 전역 상태 ====================
     /**
      * [KO] 전역 키보드 활성 View - 모든 컨트롤러 인스턴스에서 공유
@@ -40,8 +40,6 @@ abstract class AController {
     static #globalKeyboardActiveController: AController | null = null;
 
     // ==================== 인스턴스 정보 ====================
-    #instanceId: number;
-    #name: string;
     #redGPUContext: RedGPUContext;
     #camera: PerspectiveCamera | OrthographicCamera
     #initInfo: controllerInit;
@@ -76,6 +74,7 @@ abstract class AController {
      * [EN] Controller initialization info
      */
     protected constructor(redGPUContext: RedGPUContext, initInfo: controllerInit) {
+        super();
         this.#redGPUContext = redGPUContext
         this.#initInfo = initInfo || {}
         this.#camera = initInfo.camera || new PerspectiveCamera()
@@ -89,30 +88,6 @@ abstract class AController {
     }
 
     // ==================== Public Getters/Setters ====================
-    /**
-     * [KO] 컨트롤러의 이름을 반환합니다.
-     * [EN] Returns the name of the controller.
-     *
-     * @returns
-     * [KO] 컨트롤러 이름
-     * [EN] Controller name
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 컨트롤러의 이름을 설정합니다.
-     * [EN] Sets the name of the controller.
-     *
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string) {
-        this.#name = value;
-    }
 
     /**
      * [KO] RedGPU 컨텍스트를 반환합니다.

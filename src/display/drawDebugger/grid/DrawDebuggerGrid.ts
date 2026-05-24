@@ -13,9 +13,9 @@ import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexI
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
-import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import shaderSource from './shader.wgsl'
+import BaseObject from "../../../base/BaseObject";
 
 const SHADER_INFO = parseWGSL('DRAW_DEBUGGER_GRID', shaderSource);
 const FRAGMENT_UNIFORM_STRUCT = SHADER_INFO.uniforms.gridArgs;
@@ -29,7 +29,7 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_GRID'
  * [EN] Debugging grid class that visualizes the floor plane in 3D space.
  * @category Debugger
  */
-class DrawDebuggerGrid {
+class DrawDebuggerGrid extends BaseObject {
     #vertexBuffer: VertexBuffer
     #indexBuffer: IndexBuffer
     #uniformBuffer: UniformBuffer
@@ -40,8 +40,6 @@ class DrawDebuggerGrid {
     #blendAlphaState: BlendState
     readonly #lineColor: ColorRGBA
     #size: number = 100
-    #instanceId: number
-    #name: string
     #drawBufferManager: DrawBufferManager
     #drawCommandSlot: DrawCommandSlot
     #bundleEncoder: GPURenderBundleEncoder
@@ -50,9 +48,9 @@ class DrawDebuggerGrid {
     #lastUpdateMSAAID: string
 
     constructor(redGPUContext: RedGPUContext) {
+        super();
         validateRedGPUContext(redGPUContext)
         this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
-        this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
         const {resourceManager, gpuDevice} = redGPUContext
         const moduleDescriptor: GPUShaderModuleDescriptor = {code: shaderSource}
         // const moduleDescriptor: GPUShaderModuleDescriptor = {code: SHADER_INFO.defaultSource}
@@ -139,15 +137,6 @@ class DrawDebuggerGrid {
             this.#drawCommandSlot = drawBufferManager.allocateDrawCommand(this.name)
             drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, this.#indexBuffer.indexCount, 1, 0, 0, 0)
         }
-    }
-
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    set name(value: string) {
-        this.#name = value;
     }
 
     get size(): number {

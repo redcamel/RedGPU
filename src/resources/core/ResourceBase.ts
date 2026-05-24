@@ -1,8 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import createUUID from "../../utils/uuid/createUUID";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
+import BaseObject from "../../base/BaseObject";
 
 /**
  * [KO] RedGPU의 모든 리소스 클래스가 상속받는 최상위 기본 클래스입니다.
@@ -15,16 +14,9 @@ import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
  *
  * @category Resource
  */
-class ResourceBase {
-    /**
-     * [KO] 고유 식별자(UUID)를 생성합니다.
-     * [EN] Generates a Universally Unique Identifier (UUID).
-     */
-    #uuid: string = createUUID()
+class ResourceBase extends BaseObject {
     readonly #redGPUContext: RedGPUContext
     readonly #gpuDevice: GPUDevice
-    #name: string = ''
-    #instanceId: number
     #cacheKey: string
     /**
      * [KO] 더티 상태 리스너 배열입니다.
@@ -45,6 +37,7 @@ class ResourceBase {
      * [EN] Managed state key (optional)
      */
     protected constructor(redGPUContext: RedGPUContext, resourceManagerKey?: string) {
+        super()
         validateRedGPUContext(redGPUContext)
         this.#resourceManagerKey = resourceManagerKey
         this.#redGPUContext = redGPUContext
@@ -78,31 +71,6 @@ class ResourceBase {
      */
     get resourceManagerKey(): string {
         return this.#resourceManagerKey;
-    }
-
-    /**
-     * [KO] 인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
-     * [EN] Returns the name of the instance. If no name exists, it is generated using the class name and ID.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 인스턴스의 이름을 설정합니다.
-     * [EN] Sets the name of the instance.
-     */
-    set name(value: string) {
-        this.#name = value;
-    }
-
-    /**
-     * [KO] 고유 식별자(UUID)를 반환합니다.
-     * [EN] Returns the UUID.
-     */
-    get uuid(): string {
-        return this.#uuid;
     }
 
     /**

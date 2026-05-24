@@ -1,5 +1,4 @@
 import {mat4} from "gl-matrix";
-import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import updateObject3DMatrix from "../../../math/updateObject3DMatrix";
@@ -30,16 +29,6 @@ abstract class AGroupBase extends Object3DContainer {
      * [EN] Local transformation matrix
      */
     localMatrix = mat4.create()
-    /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number
-    /**
-     * [KO] 그룹 이름
-     * [EN] Group name
-     */
-    #name: string
     /**
      * [KO] 부모 객체
      * [EN] Parent object
@@ -150,21 +139,6 @@ abstract class AGroupBase extends Object3DContainer {
      */
     set dirtyTransform(value: boolean) {
         this.#dirtyTransform = value;
-    }
-
-    /**
-     * 그룹 이름 반환
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * 그룹 이름 설정
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**

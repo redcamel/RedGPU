@@ -108,16 +108,6 @@ class Mesh extends MeshBase {
     #lastUpdateMSAAID: string;
 
     /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number
-    /**
-     * [KO] 메시 이름
-     * [EN] Mesh name
-     */
-    #name: string
-    /**
      * [KO] 부모 객체
      * [EN] Parent object
      */
@@ -449,26 +439,6 @@ class Mesh extends MeshBase {
      */
     get events(): any {
         return this.#events;
-    }
-
-    /**
-     * [KO] 메시의 이름을 반환합니다.
-     * [EN] Returns the name of the mesh.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 메시의 이름을 설정합니다.
-     * [EN] Sets the name of the mesh.
-     * @param value -
-     * [KO] 메시 이름
-     * [EN] Mesh name
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**
