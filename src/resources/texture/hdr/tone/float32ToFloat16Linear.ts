@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import copyGPUBuffer from "../../../../utils/copyGPUBuffer";
 import computeShaderCode from "./float16Linear.wgsl";
 
 /**
@@ -195,7 +194,7 @@ async function executeCompute(
         throw new Error(`이미지 크기 초과: ${workgroupsX} × ${workgroupsY}`);
     }
 
-    redGPUContext.commandEncoderManager.immediateComputePass(
+    await redGPUContext.commandEncoderManager.immediateComputePass(
         'float16_conversion_command_encoder',
         (computePass: GPUComputePassEncoder) => {
             computePass.setPipeline(computePipeline);

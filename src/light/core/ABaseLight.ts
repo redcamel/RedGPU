@@ -46,7 +46,7 @@ abstract class ABaseLight {
      * [KO] 광원의 세기 배율 (기본값: 1)
      * [EN] Intensity multiplier of the light (default: 1)
      */
-    constructor(color: ColorRGB, intensityMultiplier: number = 1) {
+    protected constructor(color: ColorRGB, intensityMultiplier: number = 1) {
         this.#color = color;
         this.#intensityMultiplier = intensityMultiplier;
     }
