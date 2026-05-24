@@ -1,5 +1,7 @@
 import createUUID from "../utils/uuid/createUUID";
 import InstanceIdGenerator from "../utils/uuid/InstanceIdGenerator";
+import RedGPUObject from "./RedGPUObject";
+import RedGPUContext from "../context/RedGPUContext";
 
 /**
  * [KO] RedGPU의 모든 엔진 객체가 상속받는 최상위 추상 클래스입니다.
@@ -10,7 +12,7 @@ import InstanceIdGenerator from "../utils/uuid/InstanceIdGenerator";
  *
  * @category Core
  */
-abstract class BaseObject {
+abstract class BaseObject extends RedGPUObject{
     /**
      * [KO] 객체의 고유 식별자 (UUID)
      * [EN] Universally Unique Identifier (UUID) of the object
@@ -26,6 +28,10 @@ abstract class BaseObject {
      * [EN] Instance sequence ID per class
      */
     #instanceId: number;
+
+    protected constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
+    }
 
     /**
      * [KO] 객체의 UUID를 반환합니다.
