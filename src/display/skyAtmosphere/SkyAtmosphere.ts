@@ -21,6 +21,7 @@ import SkyLight from "./skyLight/SkyLight";
 import SkyAtmosphereBackground from "./skyAtmosphereBackground/SkyAtmosphereBackground";
 import SkyAtmospherePostEffect from "./skyAtmospherePostEffect/SkyAtmospherePostEffect";
 import {IPostEffectResult} from "../../postEffect/core/types";
+import RedGPUObject from "../../base/RedGPUObject";
 
 const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
@@ -29,8 +30,8 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
  * [KO] SkyAtmosphere 클래스는 대기 산란 물리 시뮬레이션의 핵심 시스템입니다.
  * [EN] The SkyAtmosphere class is the core system of atmospheric scattering physical simulation.
  */
-class SkyAtmosphere {
-    #redGPUContext: RedGPUContext;
+class SkyAtmosphere extends RedGPUObject{
+
     #transmittanceGenerator: TransmittanceGenerator;
     #multiScatteringGenerator: MultiScatteringGenerator;
     #skyViewGenerator: SkyViewGenerator;
@@ -77,7 +78,7 @@ class SkyAtmosphere {
     #prevCameraMatrix: mat4 = mat4.create();
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
 
         this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength), 'SkyAtmosphere_Shared_UniformBuffer');
 
@@ -99,10 +100,6 @@ class SkyAtmosphere {
         this.#postEffect = new SkyAtmospherePostEffect(redGPUContext, this);
     }
 
-    /** [KO] RedGPU 컨텍스트 반환 [EN] Returns RedGPU Context */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
 
     /** [KO] Post Effect 인스턴스 반환 [EN] Returns Post Effect instance */
     get postEffect(): SkyAtmospherePostEffect {

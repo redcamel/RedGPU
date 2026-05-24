@@ -5,9 +5,9 @@ import ResourceManager from "../../../resources/core/resourceManager/ResourceMan
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import Sampler from "../../../resources/sampler/Sampler";
 import DirectTexture from "../../../resources/texture/DirectTexture";
+import RedGPUObject from "../../../base/RedGPUObject";
 
-class SkyAtmosphereBackground {
-    readonly #redGPUContext: RedGPUContext;
+class SkyAtmosphereBackground extends RedGPUObject{
     readonly #backgroundBindGroupLayout2: GPUBindGroupLayout;
 
     #backgroundBindGroup2: GPUBindGroup;
@@ -19,10 +19,9 @@ class SkyAtmosphereBackground {
     #lastUpdateMSAAID: string;
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
-        const {gpuDevice} = redGPUContext;
+        super(redGPUContext,)
 
-        this.#backgroundBindGroupLayout2 = gpuDevice.createBindGroupLayout({
+        this.#backgroundBindGroupLayout2 = this.gpuDevice.createBindGroupLayout({
             label: 'SKY_ATMOSPHERE_BACKGROUND_BGL_2',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}}, // transmittance
@@ -41,7 +40,7 @@ class SkyAtmosphereBackground {
         sampler: Sampler
     ) {
         const {currentRenderPassEncoder, view} = renderViewStateData;
-        const {gpuDevice, antialiasingManager} = this.#redGPUContext;
+        const {gpuDevice, antialiasingManager} = this;
         const {useMSAA, msaaID} = antialiasingManager;
 
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
@@ -79,7 +78,7 @@ class SkyAtmosphereBackground {
     }
 
     #updateBackgroundPipeline(useMSAA: boolean) {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager} = this;
         const vertexModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Vertex_ShaderModule', {code: backgroundVertexShaderCode_wgsl});
         const fragmentModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Fragment_ShaderModule', {code: backgroundFragmentShaderCode_wgsl});
 

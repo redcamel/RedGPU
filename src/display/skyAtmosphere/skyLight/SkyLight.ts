@@ -6,18 +6,18 @@ import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
 import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../../resources/sampler/Sampler";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
+import RedGPUObject from "../../../base/RedGPUObject";
 
 /**
  * [KO] SkyLight 클래스는 SkyAtmosphere의 대기 산란 데이터를 기반으로 씬의 간접 조명(IBL)을 생성하고 관리합니다.
  * [EN] The SkyLight class generates and manages indirect lighting (IBL) for the scene based on SkyAtmosphere's atmospheric scattering data.
  */
-class SkyLight {
+class SkyLight extends RedGPUObject{
     /**
      * [KO] IBL 갱신 여부 (true일 경우 다음 프레임에 갱신 수행)
      * [EN] Whether IBL needs to be updated (if true, update is performed on the next frame)
      */
     dirty: boolean = true;
-    #redGPUContext: RedGPUContext;
     #reflectionGenerator: SkyLightReflectionGenerator;
     #irradianceGenerator: SkyLightIrradianceGenerator;
     #irradianceLUT: DirectCubeTexture;
@@ -31,12 +31,12 @@ class SkyLight {
      * @param sampler - [KO] 대기 산란용 샘플러 [EN] Sampler for atmospheric scattering
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#sampler = sampler;
 
         this.#irradianceLUT = new DirectCubeTexture(redGPUContext, `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`,
-            this.#redGPUContext.resourceManager.createManagedTexture({
+            this.resourceManager.createManagedTexture({
                 size: [32, 32, 6],
                 format: 'rgba16float',
                 usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
@@ -83,7 +83,7 @@ class SkyLight {
 
             // [KO] 최종 Irradiance LUT로 베이킹
             // [EN] Bake to final Irradiance LUT
-            this.#redGPUContext.resourceManager.irradianceGenerator.render(
+            this.resourceManager.irradianceGenerator.render(
                 this.#irradianceGenerator.sourceCubeTexture,
                 this.#irradianceLUT.gpuTexture
             );
