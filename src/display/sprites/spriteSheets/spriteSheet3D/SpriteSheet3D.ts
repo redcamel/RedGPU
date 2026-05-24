@@ -94,7 +94,6 @@ class SpriteSheet3D extends ASpriteSheet {
                         this.#nativeWidth = tW
                         this.#nativeHeight = tH
 
-                        const prevPixelSize = this.pixelSize;
                         // [KO] 원본 세그먼트 해상도를 pixelSize 기본값으로 설정
                         // [EN] Sync physical segment resolution to default pixelSize
                         this.pixelSize = this.#pixelSize ? this.#pixelSize : tH;

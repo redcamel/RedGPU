@@ -1029,8 +1029,8 @@ class ParticleEmitter extends Mesh {
             const startRX = Math.random() * (this.#maxStartRotationX - this.#minStartRotationX) + this.#minStartRotationX
             const startRY = Math.random() * (this.#maxStartRotationY - this.#minStartRotationY) + this.#minStartRotationY
             const startRZ = Math.random() * (this.#maxStartRotationZ - this.#minStartRotationZ) + this.#minStartRotationZ
-            const startScale = Math.random() * (this.#maxStartScale - this.#minStartScale) + this.#minStartScale
-            const startAlpha = Math.random() * (this.#maxStartAlpha - this.#minStartAlpha) + this.#minStartAlpha
+            // const startScale = Math.random() * (this.#maxStartScale - this.#minStartScale) + this.#minStartScale
+            // const startAlpha = Math.random() * (this.#maxStartAlpha - this.#minStartAlpha) + this.#minStartAlpha
             initialParticleData[12 * i] = currentTime - age; // start time
             initialParticleData[12 * i + 1] = life; // life
             // position

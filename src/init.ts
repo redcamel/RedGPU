@@ -136,8 +136,7 @@ const init = async (
                 const originalCreateShaderModule = device.createShaderModule.bind(device);
                 device.createShaderModule = function (descriptor) {
                     descriptor.code = ensureVertexIndexBuiltin(descriptor.code)
-                    const result = originalCreateShaderModule(descriptor);
-                    return result
+                    return originalCreateShaderModule(descriptor)
                 };
             }
             const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)

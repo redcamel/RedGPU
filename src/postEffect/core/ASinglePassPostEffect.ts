@@ -263,7 +263,7 @@ abstract class ASinglePassPostEffect {
      * [EN] Rendering result (texture and view)
      */
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: IPostEffectResult[]): IPostEffectResult {
-        const {gpuDevice, antialiasingManager, resourceManager} = this.#redGPUContext;
+        const {gpuDevice, antialiasingManager} = this.#redGPUContext;
         const {useMSAA, msaaID} = antialiasingManager;
 
         // 텍스처 풀에서 출력 텍스처 할당 (IPostEffectResult 형식으로 직접 획득)
@@ -287,10 +287,10 @@ abstract class ASinglePassPostEffect {
 
         // 🌟 바인드 그룹 할당/갱신 (핑퐁 전략 시 매 프레임 텍스처가 바뀌므로 항상 호출)
         // 내부적으로 캐시를 확인하여 생성을 최소화함
-        this.#updateBindGroups(view, sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
+        this.#updateBindGroups( sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
 
         // 컴퓨트 패스 실행
-        this.#execute(view, gpuDevice, width, height, view.postEffectManager.gbufferBindGroup);
+        this.#execute(view, width, height, view.postEffectManager.gbufferBindGroup);
 
         // 이전 상태 저장
         this.#prevMSAA = useMSAA;
@@ -336,7 +336,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 실제 컴퓨트 패스를 커맨드 인코더에 추가합니다.
      * [EN] Adds the actual compute pass to the command encoder.
      */
-    #execute(view: View3D, gpuDevice: GPUDevice, width: number, height: number, gbufferBindGroup: GPUBindGroup) {
+    #execute(view: View3D, width: number, height: number, gbufferBindGroup: GPUBindGroup) {
         const {commandEncoderManager} = this.#redGPUContext;
         const {renderViewStateData} = view;
 
@@ -410,7 +410,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 바인드 그룹을 갱신합니다.
      * [EN] Updates bind groups.
      */
-    #updateBindGroups(view: View3D, sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
+    #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
         const {storage, textures} = this.shaderInfo;
 
         // Group 0 캐시 키 생성 (소스 텍스처들의 조합)

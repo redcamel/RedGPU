@@ -190,8 +190,8 @@ class InstancingMesh extends Mesh {
         const headSize = (16 + 16 + 1 + 1 + 2) * 4; // mat4x2 + u32 + f32 + padding(vec2) = 144 bytes
         const perInstanceSize = (16 + 16 + 1) * 4; // mat4x2 + f32(opacity) = 132 bytes
         const maxStorageBufferBindingSize = Math.floor(Math.min(268435456, 134217728));
-        const limitNum = Math.floor((maxStorageBufferBindingSize - headSize) / perInstanceSize);
-        return limitNum;
+
+        return Math.floor((maxStorageBufferBindingSize - headSize) / perInstanceSize);
     }
 
     // ========== 메인 렌더링 ==========

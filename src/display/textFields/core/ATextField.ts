@@ -205,8 +205,7 @@ class ATextField extends Mesh {
         this.#textureImg.onload = _ => {
             let tW: number, tH: number;
             const {width, height} = this.#getRenderHtmlSize();
-            const dpr = window.devicePixelRatio === 1 ? 2 : window.devicePixelRatio;
-            const multiple = dpr;
+            const multiple = window.devicePixelRatio === 1 ? 2 : window.devicePixelRatio;
             tW = width * multiple;
             tH = height * multiple;
             this.#textureImg.width = width;
@@ -239,7 +238,7 @@ class ATextField extends Mesh {
                         URL.revokeObjectURL(prevSrc);
                     }
                 }
-                this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, v => {
+                this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, () => {
                     this.#renderWidth = width
                     this.#renderHeight = height
                 }, null, null, true);

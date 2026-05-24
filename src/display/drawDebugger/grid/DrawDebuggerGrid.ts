@@ -166,7 +166,7 @@ class DrawDebuggerGrid {
         const {view, currentRenderPassEncoder, renderResults} = renderViewStateData
         const {redGPUContext} = view
         const {gpuDevice, antialiasingManager} = redGPUContext
-        const {useMSAA, msaaID} = antialiasingManager
+        const {msaaID} = antialiasingManager
         const position = vec3.create()
         vec3.set(position, view.rawCamera.x, view.rawCamera.y, view.rawCamera.z)
         renderResults.num3DObjects++

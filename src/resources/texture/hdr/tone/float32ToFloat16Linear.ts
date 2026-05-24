@@ -118,7 +118,6 @@ export async function float32ToFloat16Linear(
             width,
             height,
             workgroupSize,
-            pixelCount,
         );
 
         cleanupBuffers(buffers);
@@ -287,7 +286,6 @@ async function executeCompute(
     width: number,
     height: number,
     workgroupSize: [number, number],
-    pixelCount: number,
 ): Promise<Uint16Array> {
     const workgroupsX = Math.ceil(width / workgroupSize[0]);
     const workgroupsY = Math.ceil(height / workgroupSize[1]);

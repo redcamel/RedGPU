@@ -368,6 +368,7 @@ class Mesh extends MeshBase {
         this.dirtyPipeline = true;
         // blendMode 키가 있는 경우 블렌드 모드 재적용
         if ("blendMode" in this) {
+            //TODO - 이거 이제 해결된것 같은데 확인해봐야함
             this.blendMode = this.blendMode;
         }
     }
@@ -914,8 +915,8 @@ class Mesh extends MeshBase {
      * [EN] Target Z coordinate (ignored if targetX is an array)
      */
     lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-        var tPosition = [];
-        var tRotation = [];
+        let tPosition = [];
+        let tRotation = [];
         tPosition[0] = targetX;
         tPosition[1] = targetY;
         tPosition[2] = targetZ;
@@ -1062,7 +1063,6 @@ class Mesh extends MeshBase {
             this.#needUpdateNormalMatrixUniform = true
             this.#needUpdateMatrixUniform = true
             {
-                const {pixelRectObject} = view
                 const parent = this.parent
                 const tLocalMatrix = this.localMatrix;
                 let aX, aY, aZ;
@@ -1731,7 +1731,7 @@ class Mesh extends MeshBase {
 
     #updateLODPipeline = () => {
 
-        const {gpuDevice, redGPUContext} = this
+        const {redGPUContext} = this
         const {resourceManager} = redGPUContext
         this.#lodGPURenderInfoList.length = 0;
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
@@ -1889,7 +1889,7 @@ class Mesh extends MeshBase {
     }
 
     #checkVariant(moduleName: String) {
-        const {gpuDevice, resourceManager} = this.redGPUContext
+        const {resourceManager} = this.redGPUContext
         // 현재 머티리얼 상태에 맞는 바리안트 키 찾기
         const currentVariantKey = this.#findMatchingVariantKey();
         // 바리안트별 셰이더 모듈 확인/생성

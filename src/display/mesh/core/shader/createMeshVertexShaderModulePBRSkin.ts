@@ -39,11 +39,11 @@ const createMeshVertexShaderModulePBRSkin = (
             gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(mesh));
         }
     }
-    const module = resourceManager.createGPUShaderModule(
+
+    mesh.gpuRenderInfo.vertexShaderModule = resourceManager.createGPUShaderModule(
         label,
         vModuleDescriptor
     )
-    mesh.gpuRenderInfo.vertexShaderModule = module
     return mesh.gpuRenderInfo.vertexShaderModule
 }
 export default createMeshVertexShaderModulePBRSkin

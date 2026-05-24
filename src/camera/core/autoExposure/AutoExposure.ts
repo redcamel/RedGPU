@@ -316,7 +316,7 @@ class AutoExposure {
                 this.#currentAdaptedEV100 = data[0];
                 this.#readBuffer.unmap();
                 this.#isReading = false;
-            }).catch(e => {
+            }).catch(() => {
                 this.#isReading = false;
             });
         }

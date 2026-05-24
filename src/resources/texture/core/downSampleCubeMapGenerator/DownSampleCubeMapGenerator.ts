@@ -13,8 +13,6 @@ class DownSampleCubeMapGenerator {
     #cubemapBindGroupLayouts: Map<GPUTextureFormat, GPUBindGroupLayout> = new Map();
     #cubemapShaderModule: GPUShaderModule | null = null;
     #cubemapSampler: GPUSampler | null = null;
-    readonly #COMPUTE_WORKGROUP_SIZE_X = 8;
-    readonly #COMPUTE_WORKGROUP_SIZE_Y = 8;
     #tempViewCache: Map<string, GPUTextureView> = new Map();
     #tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
     /** [KO] 밉 레벨별 독립적인 유니폼 버퍼 풀 [EN] Independent uniform buffer pool per mip level */

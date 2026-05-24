@@ -156,7 +156,7 @@ const EXTENSION_LIST: {
 ]
 const parseExtensionShaderCode = (source: string) => {
     const result = EXTENSION_LIST.map(v => {
-        const {textureList, positiveNumberList} = v
+        const {textureList} = v
         const textureDefine = textureList?.map(textureName => {
             return `
 				use${textureName.charAt(0).toUpperCase()}${textureName.substring(1)}: u32,

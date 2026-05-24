@@ -3,7 +3,7 @@ import {GlTfId, Node} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
 
 const parseJoint_GLTF = (gltfLoader: GLTFLoader, skinInfo: ParsedSkinInfo_GLTF, nodes: Node[], jointGlTfId: GlTfId) => {
-    const {redGPUContext} = gltfLoader
+    // const {redGPUContext} = gltfLoader
     const jointMesh = nodes[jointGlTfId]['Mesh'];
     if (jointMesh) {
         skinInfo.joints.push(jointMesh);

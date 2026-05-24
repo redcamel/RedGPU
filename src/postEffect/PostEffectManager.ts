@@ -370,7 +370,7 @@ class PostEffectManager {
         this.#updateGbufferBindGroup();
         const {useAutoExposure} = this.#view.rawCamera;
 
-        let currentTextureView = this.#renderToStorageTexture(this.#view, initialSourceTexture);
+        let currentTextureView = this.#renderToStorageTexture(this.#view);
 
         // SkyAtmosphere 전용 처리 (톤 매핑 전 HDR 공간에서 실행)
         if (this.#view.skyAtmosphere) {
@@ -666,7 +666,7 @@ class PostEffectManager {
         })
     }
 
-    #renderToStorageTexture(view: View3D, sourceTexture: GPUTexture) {
+    #renderToStorageTexture(view: View3D):IPostEffectResult {
         const {redGPUContext, viewRenderTextureManager} = view;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {antialiasingManager} = redGPUContext;

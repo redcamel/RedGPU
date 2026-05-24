@@ -58,7 +58,7 @@ class FinalRender {
      */
     render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]): void {
         const {sizeManager, antialiasingManager, commandEncoderManager} = redGPUContext
-        const {msaaID, useMSAA} = antialiasingManager
+        const {msaaID, } = antialiasingManager
         const {pixelRectObject: canvasPixelRectObject} = sizeManager
         const {width: canvasW, height: canvasH} = canvasPixelRectObject
         if (canvasW === 0 || canvasH === 0) return
@@ -80,7 +80,7 @@ class FinalRender {
                     const temp = v.colorAttachments[0]
                     return temp.postEffectView || temp.pickingView || temp.resolveTarget || temp.view
                 }), canvasW, canvasH,
-                useMSAA,
+
                 dirtyMSAA
             )
         })
@@ -126,7 +126,6 @@ class FinalRender {
         finalRenderPassEnc: GPURenderPassEncoder,
         resultTextureViews: GPUTextureView[],
         canvasW: number, canvasH: number,
-        useMSAA: boolean,
         dirtyMSAA: boolean
     ) {
         const {gpuDevice} = redGPUContext

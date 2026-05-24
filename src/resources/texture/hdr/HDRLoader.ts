@@ -186,8 +186,7 @@ class HDRLoader {
             const equalIndex = line.indexOf('=');
             if (equalIndex > 0) {
                 const key = line.substring(0, equalIndex).trim();
-                const value = line.substring(equalIndex + 1).trim();
-                header[key] = value;
+                header[key] = line.substring(equalIndex + 1).trim();
             }
         }
         // 해상도 파싱
@@ -326,13 +325,13 @@ class HDRLoader {
         keepLog(`예상 픽셀 수: ${hdrData.width * hdrData.height * 4}`);
         // 첫 몇 픽셀의 값 확인
         // keepLog('첫 4픽셀 값 (원본):');
-        for (let i = 0; i < Math.min(16, hdrData.data.length); i += 4) {
-            const r = hdrData.data[i];
-            const g = hdrData.data[i + 1];
-            const b = hdrData.data[i + 2];
-            const a = hdrData.data[i + 3];
-            // keepLog(`픽셀 ${i / 4}: R=${r.toFixed(3)}, G=${g.toFixed(3)}, B=${b.toFixed(3)}, A=${a.toFixed(3)}`);
-        }
+        // for (let i = 0; i < Math.min(16, hdrData.data.length); i += 4) {
+        //     const r = hdrData.data[i];
+        //     const g = hdrData.data[i + 1];
+        //     const b = hdrData.data[i + 2];
+        //     const a = hdrData.data[i + 3];
+        //     // keepLog(`픽셀 ${i / 4}: R=${r.toFixed(3)}, G=${g.toFixed(3)}, B=${b.toFixed(3)}, A=${a.toFixed(3)}`);
+        // }
     }
 
     /**

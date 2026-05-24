@@ -1,4 +1,3 @@
-import {mat4} from "gl-matrix";
 import RedGPUContext from "../context/RedGPUContext";
 import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
@@ -113,8 +112,7 @@ class Renderer {
                 const {commandEncoderManager} = redGPUContext;
                 // [KO] 뷰별 1~4단계 일괄 제출 (RESOURCE, PRE_PROCESS, MAIN, POST_PROCESS)
                 // [EN] Batch submission of phases 1-4 per view
-                const result = commandEncoderManager.submitAll();
-                targetView.renderViewStateData.commandBatchStats = result
+                targetView.renderViewStateData.commandBatchStats = commandEncoderManager.submitAll()
             }
         }
 
@@ -152,7 +150,6 @@ class Renderer {
             pickingManager,
             pixelRectObject,
             renderViewStateData,
-            scene
         } = view
         const {
             colorAttachment,
@@ -343,5 +340,4 @@ class Renderer {
 
 }
 
-let temp3 = mat4.create()
 export default Renderer

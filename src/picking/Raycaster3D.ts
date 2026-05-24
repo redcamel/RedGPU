@@ -44,7 +44,6 @@ export default class Raycaster3D {
     #tempMat4_2 = mat4.create();
     #tempMat4_3 = mat4.create();
     #tempVec3 = vec3.create();
-    #tempVec3_2 = vec3.create();
     #view: View3D;
     #screenPoint: vec2 = vec2.create();
 

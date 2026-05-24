@@ -279,7 +279,7 @@ class FreeController extends AController {
      */
     update(view: View3D, time: number): void {
         super.update(view, time, (deltaTime: number) => {
-            this.#updateAnimation(view, time, deltaTime);
+            this.#updateAnimation(view,  deltaTime);
         });
     }
 
@@ -287,7 +287,7 @@ class FreeController extends AController {
         this.#targetMesh = new Mesh(this.redGPUContext);
     }
 
-    #updateAnimation(view: View3D, time: number, deltaTime: number) {
+    #updateAnimation(view: View3D, deltaTime: number) {
         const targetMesh = this.#targetMesh;
         const tDelay = Math.pow(this.#moveDelayInterpolation, deltaTime);
         const tDelayRotation = Math.pow(this.#rotationInterpolation, deltaTime);

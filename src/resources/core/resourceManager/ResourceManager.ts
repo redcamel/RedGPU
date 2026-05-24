@@ -57,7 +57,7 @@ class ResourceManager {
     static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
     static PRESET_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_VERTEX_GPUBindGroupLayout_SKIN'
-    #gpuBufferVideoMemory: number = 0;
+
     #resources = new ImmutableKeyMap([
         [ResourceType.GPUShaderModule, new Map()],
         [ResourceType.GPUBindGroupLayout, new Map()],
@@ -812,8 +812,7 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
             const size = (value as any)[videoMemoryKey];
             if (typeof size === 'number') this.#videoMemory += size;
         }
-        const result = super.set(key, value);
-        return result;
+        return super.set(key, value);
     }
 
     delete(key: K): boolean {
@@ -827,8 +826,7 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
                 this.#videoMemory -= value[videoMemoryKey];
             }
         }
-        const result = super.delete(key);
-        return result;
+        return super.delete(key);
     }
 
     clear(): void {
