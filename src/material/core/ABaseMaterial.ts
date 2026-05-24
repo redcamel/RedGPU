@@ -187,8 +187,8 @@ abstract class ABaseMaterial extends ResourceBase {
         )
         // this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.ONE, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
         // this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.ONE, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
-        this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
-        this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
+        this.#blendColorState = new BlendState(this)
+        this.#blendAlphaState = new BlendState(this)
         this.#resourceManager = redGPUContext.resourceManager
         this.#basicGPUSampler = this.#resourceManager.basicSampler.gpuSampler
         this.#emptyBitmapGPUTextureView = this.#resourceManager.emptyBitmapTextureView

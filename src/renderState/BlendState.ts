@@ -49,7 +49,7 @@ class BlendState {
      * [KO] 블렌드 연산
      * [EN] Blend operation
      */
-    constructor(targetMaterial, srcFactor?: GPUBlendFactor, dstFactor?: GPUBlendFactor, operation?: GPUBlendOperation) {
+    constructor(targetMaterial, srcFactor: GPUBlendFactor = GPU_BLEND_FACTOR.SRC_ALPHA, dstFactor: GPUBlendFactor=GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, operation: GPUBlendOperation = GPU_BLEND_OPERATION.ADD) {
         this.#targetMaterial = targetMaterial;
         this.srcFactor = srcFactor;
         this.dstFactor = dstFactor;

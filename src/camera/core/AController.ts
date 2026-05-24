@@ -406,14 +406,14 @@ abstract class AController {
      */
     findTargetViewByInputEvent = (e: MouseEvent | TouchEvent): View3D | null => {
         const redGPUContext = this.#redGPUContext;
-        const isMobile = redGPUContext.detector.isMobile;
+        const {renderScale,viewList} = redGPUContext;
         const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
-        const scale = window.devicePixelRatio * redGPUContext.renderScale
+        const scale = window.devicePixelRatio * renderScale
         const tX = x * scale;
         const tY = y * scale;
 
         let targetView = null
-        for (const view of this.redGPUContext.viewList) {
+        for (const view of viewList) {
             const tViewRect = view.pixelRectObject;
             if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width &&
                 tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {

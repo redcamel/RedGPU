@@ -59,12 +59,14 @@ class DrawDebuggerGrid {
         const moduleDescriptor: GPUShaderModuleDescriptor = {code: shaderSource}
         // const moduleDescriptor: GPUShaderModuleDescriptor = {code: SHADER_INFO.defaultSource}
         const shaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(SHADER_MODULE_NAME, moduleDescriptor)
-        this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
-        this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
+        this.#blendColorState = new BlendState(this)
+        this.#blendAlphaState = new BlendState(this)
+
         this.#lineColor = new ColorRGBA(128, 128, 128, 0.25)
         const vertexBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System)
-        const fragmentBindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout('GRID_MATERIAL_BIND_GROUP_LAYOUT') || redGPUContext.resourceManager.createBindGroupLayout(
-            'GRID_MATERIAL_BIND_GROUP_LAYOUT',
+        const layoutName = 'GRID_MATERIAL_BIND_GROUP_LAYOUT'
+        const fragmentBindGroupLayout = resourceManager.getGPUBindGroupLayout(layoutName) || resourceManager.createBindGroupLayout(
+            layoutName,
             getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
         )
         this.#setBuffers(redGPUContext)
@@ -163,14 +165,14 @@ class DrawDebuggerGrid {
     }
 
     render(renderViewStateData: RenderViewStateData) {
-        const {view, currentRenderPassEncoder} = renderViewStateData
+        const {view, currentRenderPassEncoder,renderResults} = renderViewStateData
         const {redGPUContext} = view
         const {gpuDevice, antialiasingManager} = redGPUContext
         const {useMSAA, msaaID} = antialiasingManager
         const position = vec3.create()
         vec3.set(position, view.rawCamera.x, view.rawCamera.y, view.rawCamera.z)
-        renderViewStateData.renderResults.num3DObjects++
-        renderViewStateData.renderResults.numDrawCalls++
+        renderResults.num3DObjects++
+        renderResults.numDrawCalls++
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
         const changedSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup !== this.#prevSystemUniform_Vertex_UniformBindGroup
         if (this.#pipeline) {
@@ -191,8 +193,8 @@ class DrawDebuggerGrid {
                 this.#bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4)
                 this.#renderBundle = this.#bundleEncoder.finish();
             }
-            renderViewStateData.renderResults.numTriangles += 0; // 라인이므로 삼각형 수는 0
-            renderViewStateData.renderResults.numPoints += indexCount
+            renderResults.numTriangles += 0; // 라인이므로 삼각형 수는 0
+            renderResults.numPoints += indexCount
             currentRenderPassEncoder.executeBundles([this.#renderBundle])
         }
         this.#prevSystemUniform_Vertex_UniformBindGroup = view.systemUniform_Vertex_UniformBindGroup
