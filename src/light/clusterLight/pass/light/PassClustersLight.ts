@@ -6,6 +6,7 @@ import validateRedGPUContext from "../../../../runtimeChecker/validateFunc/valid
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersSource from "./PassClustersLight.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
 const emptyArray = new Uint32Array([0, 0, 0, 0]);
 
@@ -17,12 +18,11 @@ const emptyArray = new Uint32Array([0, 0, 0, 0]);
  * [EN] Performs intersection tests between point lights/spot lights and clusters (tiles) to record light indices included in each cluster.
  * @category Light
  */
-class PassClustersLight {
+class PassClustersLight extends RedGPUObject{
     #view: View3D
     #clusterLightBindGroup: GPUBindGroup
     #clusterLightPipeline: GPUComputePipeline
     #clusterLightsBuffer: GPUBuffer
-    readonly #redGPUContext: RedGPUContext
 
     /**
      * [KO] PassClustersLight 인스턴스를 생성합니다.
@@ -35,8 +35,7 @@ class PassClustersLight {
      * [EN] View3D instance
      */
     constructor(redGPUContext: RedGPUContext, view: View3D,) {
-        validateRedGPUContext(redGPUContext)
-        this.#redGPUContext = redGPUContext
+     super(redGPUContext)
         this.#view = view;
         this.#initPipeLine();
         console.log(this);
@@ -60,10 +59,10 @@ class PassClustersLight {
     render() {
         const systemUniformBindGroup: GPUBindGroup = this.#view.systemUniform_Vertex_UniformBindGroup;
         if (systemUniformBindGroup) {
-            const {commandEncoderManager} = this.#redGPUContext;
+            const {commandEncoderManager,gpuDevice} = this;
             commandEncoderManager.addPreProcessComputePass('PassClustersLight_ComputePass', (computePass) => {
                 const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
-                this.#redGPUContext.gpuDevice.queue.writeBuffer(this.clusterLightsBuffer, 0, emptyArray);
+                gpuDevice.queue.writeBuffer(this.clusterLightsBuffer, 0, emptyArray);
                 computePass.setPipeline(this.#clusterLightPipeline);
                 computePass.setBindGroup(0, systemUniformBindGroup);
                 computePass.setBindGroup(1, this.#clusterLightBindGroup);
@@ -73,7 +72,7 @@ class PassClustersLight {
     }
 
     #initPipeLine() {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager} = this;
         const source = parseWGSL('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
         this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_LIGHTS_BUFFER`, {
             size: PassClustersLightHelper.getClusterLightsBufferSize(),
