@@ -1,11 +1,12 @@
 import type RedGPUContext from "../RedGPUContext";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] RedGPUContext의 캔버스 환경 변화(부모 변경, 크기/위치 변화)를 감지하는 클래스입니다.
  * [EN] Class that detects changes in the RedGPUContext's canvas environment (parent changes, size/position changes).
  */
-export default class RedGPUContextObserver {
-    readonly #redGPUContext: RedGPUContext;
+export default class RedGPUContextObserver extends RedGPUObject{
+
     readonly #htmlCanvas: HTMLCanvasElement;
     readonly #updateCallback: () => void;
     #currentParent: HTMLElement | null = null;
@@ -20,7 +21,7 @@ export default class RedGPUContextObserver {
      * @param updateCallback - [KO] 레이아웃 변화 시 호출할 콜백 [EN] Callback to call when layout changes
      */
     constructor(redGPUContext: RedGPUContext, updateCallback: () => void) {
-        this.#redGPUContext = redGPUContext;
+super(redGPUContext);
         this.#htmlCanvas = redGPUContext.htmlCanvas;
         this.#updateCallback = updateCallback;
         this.#init();
@@ -107,6 +108,6 @@ export default class RedGPUContextObserver {
         // [KO] RedGPUContext의 boundingClientRect 업데이트 및 setSize 호출
         // [EN] Update RedGPUContext's boundingClientRect and call setSize
         this.#updateCallback();
-        this.#redGPUContext.sizeManager.setSize();
+        this.redGPUContext.sizeManager.setSize();
     }
 }

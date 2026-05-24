@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import BaseObject from "../../base/BaseObject";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] RedGPU의 모든 리소스 클래스가 상속받는 최상위 기본 클래스입니다.
@@ -14,8 +15,8 @@ import BaseObject from "../../base/BaseObject";
  *
  * @category Resource
  */
-class ResourceBase extends BaseObject {
-    readonly #redGPUContext: RedGPUContext
+class ResourceBase extends RedGPUObject {
+
     readonly #gpuDevice: GPUDevice
     #cacheKey: string
     /**
@@ -37,10 +38,8 @@ class ResourceBase extends BaseObject {
      * [EN] Managed state key (optional)
      */
     protected constructor(redGPUContext: RedGPUContext, resourceManagerKey?: string) {
-        super()
-        validateRedGPUContext(redGPUContext)
+        super(redGPUContext)
         this.#resourceManagerKey = resourceManagerKey
-        this.#redGPUContext = redGPUContext
         this.#gpuDevice = redGPUContext.gpuDevice
     }
 
@@ -81,13 +80,7 @@ class ResourceBase extends BaseObject {
         return this.#gpuDevice;
     }
 
-    /**
-     * [KO] RedGPUContext 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContext instance.
-     */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
+
 
     /**
      * [KO] 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
@@ -137,7 +130,7 @@ class ResourceBase extends BaseObject {
      * [EN] Whether adding a listener
      */
     #manageResourceState(isAddingListener: boolean) {
-        const {resourceManager} = this.#redGPUContext;
+        const {resourceManager} = this;
         if (this.constructor.name === 'Sampler') {
             return
         }
