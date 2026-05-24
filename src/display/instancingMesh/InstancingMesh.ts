@@ -204,7 +204,7 @@ class InstancingMesh extends Mesh {
             this.dirtyLOD = false;
             return;
         }
-        const {view, currentRenderPassEncoder} = renderViewStateData;
+        const {view, currentRenderPassEncoder,renderResults} = renderViewStateData;
         const {scene} = view;
         const {shadowManager} = scene;
         const {directionalShadowManager} = shadowManager;
@@ -213,9 +213,9 @@ class InstancingMesh extends Mesh {
             this.#updateTransformMatrix();
         }
         if (this.geometry) {
-            renderViewStateData.renderResults.num3DObjects++;
+            renderResults.num3DObjects++;
         } else {
-            renderViewStateData.renderResults.num3DGroups++;
+            renderResults.num3DGroups++;
         }
         const redGPUContext = this.#redGPUContext;
         if (this.geometry) {
@@ -283,11 +283,11 @@ class InstancingMesh extends Mesh {
     ): void {
         const {gpuRenderInfo} = this;
         const {pipeline, shadowPipeline} = gpuRenderInfo;
-
+        const {view,renderResults} = renderViewStateData
         this.#updateDisplacementUniforms();
         this.#updateInstanceUniforms();
         const {fragmentUniformBindGroup} = this.material.gpuRenderInfo;
-        renderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup);
+        renderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
         renderPassEncoder.setBindGroup(2, fragmentUniformBindGroup);
         renderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline);
 
@@ -317,8 +317,8 @@ class InstancingMesh extends Mesh {
             );
         });
 
-        renderViewStateData.renderResults.numDrawCalls++;
-        renderViewStateData.renderResults.numInstances++;
+        renderResults.numDrawCalls++;
+        renderResults.numInstances++;
     }
 
     #renderGeometryWithBuffer(
@@ -532,10 +532,11 @@ class InstancingMesh extends Mesh {
 
     #performGPUCulling(renderViewStateData: RenderViewStateData): void {
         const {gpuDevice, commandEncoderManager} = this.#redGPUContext;
+        const {indexBuffer,vertexBuffer} = this.geometry
         this.#updateCullingUniforms(renderViewStateData);
-        const indexCount = this.geometry.indexBuffer
-            ? this.geometry.indexBuffer.indexCount
-            : this.geometry.vertexBuffer.vertexCount;
+        const indexCount = indexBuffer
+            ? indexBuffer.indexCount
+            : vertexBuffer.vertexCount;
 
         // LOD 0 초기화
         const indirectDrawData = new Uint32Array([indexCount, 0, 0, 0, 0]);

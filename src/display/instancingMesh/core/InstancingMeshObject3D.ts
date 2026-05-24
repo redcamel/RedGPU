@@ -387,5 +387,5 @@ class InstancingMeshObject3D {
         }
     }
 }
-
+Object.freeze(InstancingMeshObject3D)
 export default InstancingMeshObject3D
