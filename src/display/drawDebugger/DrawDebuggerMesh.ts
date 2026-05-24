@@ -13,13 +13,22 @@ import {mat4} from "gl-matrix";
 
 type DebugMode = 'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB';
 
+const LOCAL_VERTICES = [
+    [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+    [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
+];
+const EDGES = [
+    [0, 1], [1, 2], [2, 3], [3, 0], // 뒷면
+    [4, 5], [5, 6], [6, 7], [7, 4], // 앞면
+    [0, 4], [1, 5], [2, 6], [3, 7]  // 연결선
+];
+
 /**
  * [KO] 메시의 바운딩 볼륨(AABB, OBB)을 시각화하는 디버깅용 클래스입니다.
  * [EN] Debugging class that visualizes the bounding volume (AABB, OBB) of a mesh.
  * @category Debugger
  */
 class DrawDebuggerMesh {
-    #redGPUContext: RedGPUContext;
     #target: Mesh;
     #vertexBuffer: VertexBuffer;
     #material: ColorMaterial;
@@ -33,7 +42,6 @@ class DrawDebuggerMesh {
     #cachedAABB: AABB | null = null;
 
     constructor(redGPUContext: RedGPUContext, target: Mesh) {
-        this.#redGPUContext = redGPUContext;
         this.#target = target;
         const geometry = this.#createWireframeBoxGeometry(redGPUContext);
         this.#vertexBuffer = geometry.vertexBuffer;
@@ -218,27 +226,21 @@ class DrawDebuggerMesh {
 
     #updateVertexDataFromOBB(targetOBB: OBB, vertexBuffer: VertexBuffer) {
         const {center, halfExtents, orientation} = targetOBB;
-        const localVertices = [
-            [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-            [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
-        ];
-        const transformedVertices = localVertices.map(vertex => {
-            const scaledVertex = [
-                vertex[0] * halfExtents[0],
-                vertex[1] * halfExtents[1],
-                vertex[2] * halfExtents[2]
-            ];
-            const rotatedVertex = [
-                orientation[0] * scaledVertex[0] + orientation[4] * scaledVertex[1] + orientation[8] * scaledVertex[2],
-                orientation[1] * scaledVertex[0] + orientation[5] * scaledVertex[1] + orientation[9] * scaledVertex[2],
-                orientation[2] * scaledVertex[0] + orientation[6] * scaledVertex[1] + orientation[10] * scaledVertex[2]
-            ];
-            return [
-                rotatedVertex[0] + center[0],
-                rotatedVertex[1] + center[1],
-                rotatedVertex[2] + center[2]
-            ];
-        });
+        const transformedVertices = [];
+        for (let i = 0; i < 8; i++) {
+            const vertex = LOCAL_VERTICES[i];
+            const scaledVertexX = vertex[0] * halfExtents[0];
+            const scaledVertexY = vertex[1] * halfExtents[1];
+            const scaledVertexZ = vertex[2] * halfExtents[2];
+            const rotatedVertexX = orientation[0] * scaledVertexX + orientation[4] * scaledVertexY + orientation[8] * scaledVertexZ;
+            const rotatedVertexY = orientation[1] * scaledVertexX + orientation[5] * scaledVertexY + orientation[9] * scaledVertexZ;
+            const rotatedVertexZ = orientation[2] * scaledVertexX + orientation[6] * scaledVertexY + orientation[10] * scaledVertexZ;
+            transformedVertices.push([
+                rotatedVertexX + center[0],
+                rotatedVertexY + center[1],
+                rotatedVertexZ + center[2]
+            ]);
+        }
         this.#updateVertexBuffer(transformedVertices, vertexBuffer);
     }
 
@@ -252,18 +254,19 @@ class DrawDebuggerMesh {
     }
 
     #updateVertexBuffer(transformedVertices: number[][], vertexBuffer: VertexBuffer) {
-        const edges = [
-            [0, 1], [1, 2], [2, 3], [3, 0], // 뒷면
-            [4, 5], [5, 6], [6, 7], [7, 4], // 앞면
-            [0, 4], [1, 5], [2, 6], [3, 7]  // 연결선
-        ];
         const vertexData = vertexBuffer.data;
         let offset = 0;
-        edges.forEach(([start, end]) => {
+        for (let i = 0; i < 12; i++) {
+            const edge = EDGES[i];
+            const startIdx = edge[0];
+            const endIdx = edge[1];
+            const start = transformedVertices[startIdx];
+            const end = transformedVertices[endIdx];
+
             // 시작점
-            vertexData[offset++] = transformedVertices[start][0];
-            vertexData[offset++] = transformedVertices[start][1];
-            vertexData[offset++] = transformedVertices[start][2];
+            vertexData[offset++] = start[0];
+            vertexData[offset++] = start[1];
+            vertexData[offset++] = start[2];
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;
             vertexData[offset++] = 1;
@@ -275,9 +278,9 @@ class DrawDebuggerMesh {
             vertexData[offset++] = 0;
             vertexData[offset++] = 1;
             // 끝점
-            vertexData[offset++] = transformedVertices[end][0];
-            vertexData[offset++] = transformedVertices[end][1];
-            vertexData[offset++] = transformedVertices[end][2];
+            vertexData[offset++] = end[0];
+            vertexData[offset++] = end[1];
+            vertexData[offset++] = end[2];
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;
             vertexData[offset++] = 1;
@@ -288,7 +291,7 @@ class DrawDebuggerMesh {
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;
             vertexData[offset++] = 1;
-        });
+        }
         vertexBuffer.updateAllData(vertexData);
     }
 }
