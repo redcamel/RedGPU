@@ -3,6 +3,7 @@ import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import RedGPUContext from "../RedGPUContext";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] 사각형 영역 정보를 나타내는 인터페이스입니다.
@@ -53,10 +54,9 @@ type ParentRect = {
  *
  * @category Context
  */
-class RedGPUContextSizeManager {
+class RedGPUContextSizeManager extends RedGPUObject{
     #width: number | string
     #height: number | string
-    #redGPUContext: RedGPUContext
     #pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
     readonly #htmlCanvas: HTMLCanvasElement
     #renderScale: number = 1
@@ -75,7 +75,7 @@ class RedGPUContextSizeManager {
      * [EN] Initial height (default: '100%')
      */
     constructor(redGPUContext: RedGPUContext, width: number | string = '100%', height: number | string = '100%') {
-        this.#redGPUContext = redGPUContext
+        super(redGPUContext);
         this.#htmlCanvas = redGPUContext.htmlCanvas
         this.#htmlCanvas.style.boxSizing = 'border-box'
         // this.#htmlCanvas.style.display = 'block'
@@ -344,14 +344,15 @@ class RedGPUContextSizeManager {
      * [EN] Updates the size of all registered View3Ds. (Internal use)
      */
     #updateViewsSize() {
-        if (this.#redGPUContext.onResize) {
-            this.#redGPUContext.onResize({
-                target: this.#redGPUContext,
+        const {redGPUContext} = this
+        if (redGPUContext.onResize) {
+            redGPUContext.onResize({
+                target: redGPUContext,
                 screenRectObject: this.screenRectObject,
                 pixelRectObject: this.pixelRectObject
             });
         }
-        this.#redGPUContext.viewList.forEach((view: View3D) => {
+        redGPUContext.viewList.forEach((view: View3D) => {
             view.setSize()
             view.setPosition()
         });
