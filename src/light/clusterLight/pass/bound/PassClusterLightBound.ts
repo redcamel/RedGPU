@@ -6,6 +6,7 @@ import validateRedGPUContext from "../../../../runtimeChecker/validateFunc/valid
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
 /**
  * [KO] 클러스터 조명의 경계를 계산하는 컴퓨트 패스 클래스입니다.
@@ -15,13 +16,13 @@ import PassClustersLightHelper from "../../core/PassClustersLightHelper";
  * [EN] Divides the screen into tiles and calculates the AABB (Axis-Aligned Bounding Box) in 3D space for each tile.
  * @category Light
  */
-class PassClusterLightBound {
+class PassClusterLightBound extends RedGPUObject{
     #view: View3D
     #clusterBoundBuffer: GPUBuffer
     #clusterBoundBindGroupLayout: GPUBindGroupLayout
     #clusterBoundBindGroup: GPUBindGroup
     #clusterBoundPipeline: GPUComputePipeline
-    readonly #redGPUContext: RedGPUContext
+
 
     /**
      * [KO] PassClusterLightBound 인스턴스를 생성합니다.
@@ -34,8 +35,7 @@ class PassClusterLightBound {
      * [EN] View3D instance
      */
     constructor(redGPUContext: RedGPUContext, view: View3D) {
-        validateRedGPUContext(redGPUContext)
-        this.#redGPUContext = redGPUContext
+        super(redGPUContext)
         this.#view = view;
         this.#initPipeLine();
     }
@@ -58,7 +58,7 @@ class PassClusterLightBound {
     render() {
         const sysUniformBindGroup = this.#view.systemUniform_Vertex_UniformBindGroup;
         if (sysUniformBindGroup) {
-            const {commandEncoderManager} = this.#redGPUContext;
+            const {commandEncoderManager} = this;
             commandEncoderManager.addPreProcessComputePass('PassClusterLightBound_ComputePass', (computePass) => {
                 const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
                 computePass.setPipeline(this.#clusterBoundPipeline);
@@ -70,7 +70,7 @@ class PassClusterLightBound {
     }
 
     #initPipeLine() {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager} = this;
         const source = parseWGSL('PASS_CLUSTER_LIGHT_BOUND', ClusterCellBoundsSource + PassLightClustersBoundSource).defaultSource;
         this.#clusterBoundBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_BOUND_BUFFER`, {
             size: PassClustersLightHelper.getTotalTileSize() * 32, // Cluster x, y, z size * 32 bytes per cluster. Why? It's to be verified.
