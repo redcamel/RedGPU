@@ -193,8 +193,7 @@ class HDRTexture extends ManagementResourceBase {
             hdrData.data,
             {
                 width: this.#width,
-                height: this.#height,
-                workgroupSize: [8, 8]
+                height: this.#height
             }
         );
 

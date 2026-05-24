@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import copyGPUBuffer from "../../../../utils/copyGPUBuffer";
+import computeShaderCode from "./float16Linear.wgsl";
 
 /**
  * [KO] Float16 변환 옵션 인터페이스입니다.
@@ -16,16 +17,6 @@ export interface Float16ConversionOptions {
      * [EN] Image height
      */
     height: number;
-    /**
-     * [KO] 컴퓨트 워크그룹 크기 (기본값: [8, 8])
-     * [EN] Compute workgroup size (default: [8, 8])
-     */
-    workgroupSize?: [number, number];
-    /**
-     * [KO] 최대 밝기 제한값 (기본값: 1000.0)
-     * [EN] Maximum brightness limit value (default: 1000.0)
-     */
-    maxValue?: number;
 }
 
 /**
@@ -86,13 +77,11 @@ export async function float32ToFloat16Linear(
 ): Promise<Float16ConversionResult> {
     const startTime = performance.now();
     const {gpuDevice} = redGPUContext;
-    const {width, height, workgroupSize = [8, 8], maxValue = 1000.0} = options;
+    const {width, height} = options;
     const pixelCount = float32Data.length / 4;
 
-    console.log(`Float32 → Float16 변환 시작 (최대값: ${maxValue})`);
+    console.log(`Float32 → Float16 변환 시작`);
     console.log(`총 픽셀 수: ${pixelCount.toLocaleString()}`);
-
-    const computeShaderCode = createFloat16ShaderCode(workgroupSize);
 
     try {
         const computeShader = gpuDevice.createShaderModule({
@@ -101,7 +90,7 @@ export async function float32ToFloat16Linear(
         });
 
         const buffers = createBuffers(gpuDevice, float32Data, pixelCount);
-        uploadConstants(gpuDevice, buffers.constantsBuffer, width, height, maxValue);
+        uploadConstants(gpuDevice, buffers.constantsBuffer, width, height);
 
         const {computePipeline, bindGroup} = createPipelineAndBindGroup(
             gpuDevice,
@@ -117,7 +106,6 @@ export async function float32ToFloat16Linear(
             buffers.readBuffer,
             width,
             height,
-            workgroupSize,
         );
 
         cleanupBuffers(buffers);
@@ -134,71 +122,6 @@ export async function float32ToFloat16Linear(
         console.error('Float16 변환 실패:', error);
         throw error;
     }
-}
-
-function createFloat16ShaderCode(workgroupSize: [number, number]): string {
-    return `
-    struct Constants {
-        width: u32,
-        height: u32,
-    }
-
-    @group(0) @binding(0) var<storage, read> inputData: array<f32>;
-    @group(0) @binding(1) var<storage, read_write> outputData: array<u32>;
-    @group(0) @binding(2) var<uniform> constants: Constants;
-
-    fn floatToHalf(value: f32) -> u32 {
-        let bits = bitcast<u32>(value);
-        let sign = (bits >> 16u) & 0x8000u;
-        var exp = (bits >> 23u) & 0xFFu;
-        var mantissa = bits & 0x7FFFFFu;
-
-        if (exp == 0u) {
-            return sign;
-        }
-
-        if (exp == 255u) {
-            return sign | 0x7C00u | select(0u, 1u, mantissa != 0u);
-        }
-
-        let newExp = i32(exp) - 127 + 15;
-        if (newExp <= 0) {
-            return sign;
-        }
-        if (newExp >= 31) {
-            return sign | 0x7C00u;
-        }
-
-        return sign | (u32(newExp) << 10u) | (mantissa >> 13u);
-    }
-
-    @compute @workgroup_size(${workgroupSize[0]}, ${workgroupSize[1]})
-    fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-        let x = global_id.x;
-        let y = global_id.y;
-
-        if (x >= constants.width || y >= constants.height) {
-            return;
-        }
-
-        let pixelIndex = y * constants.width + x;
-        let baseIndex = pixelIndex * 4u;
-
-        let r = inputData[baseIndex];
-        let g = inputData[baseIndex + 1u];
-        let b = inputData[baseIndex + 2u];
-        let a = inputData[baseIndex + 3u];
-
-        let r16 = floatToHalf(r);
-        let g16 = floatToHalf(g);
-        let b16 = floatToHalf(b);
-        let a16 = floatToHalf(a);
-
-        let outputIndex = pixelIndex * 2u;
-        outputData[outputIndex] = (g16 << 16u) | r16;
-        outputData[outputIndex + 1u] = (a16 << 16u) | b16;
-    }
-    `;
 }
 
 interface Float16ConversionBuffers {
@@ -242,14 +165,12 @@ function uploadConstants(
     gpuDevice: GPUDevice,
     constantsBuffer: GPUBuffer,
     width: number,
-    height: number,
-    maxValue: number
+    height: number
 ): void {
     const constantsData = new ArrayBuffer(16);
     const constantsView = new DataView(constantsData);
     constantsView.setUint32(0, width, true);
     constantsView.setUint32(4, height, true);
-    constantsView.setFloat32(8, maxValue, true);
     gpuDevice.queue.writeBuffer(constantsBuffer, 0, constantsData);
 }
 
@@ -285,10 +206,9 @@ async function executeCompute(
     readBuffer: GPUBuffer,
     width: number,
     height: number,
-    workgroupSize: [number, number],
 ): Promise<Uint16Array> {
-    const workgroupsX = Math.ceil(width / workgroupSize[0]);
-    const workgroupsY = Math.ceil(height / workgroupSize[1]);
+    const workgroupsX = Math.ceil(width / 8);
+    const workgroupsY = Math.ceil(height / 8);
     if (workgroupsX > 65535 || workgroupsY > 65535) {
         throw new Error(`이미지 크기 초과: ${workgroupsX} × ${workgroupsY}`);
     }
