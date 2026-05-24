@@ -188,20 +188,14 @@ class HDRTexture extends ManagementResourceBase {
         const newGPUTexture = gpuDevice.createTexture(textureDescriptor);
 
         // Float32 to Float16 conversion and upload
-        const float16Data = await float32ToFloat16Linear(
+        await float32ToFloat16Linear(
             this.redGPUContext,
             hdrData.data,
             {
                 width: this.#width,
-                height: this.#height
+                height: this.#height,
+                targetTexture: newGPUTexture
             }
-        );
-
-        gpuDevice.queue.writeTexture(
-            {texture: newGPUTexture},
-            float16Data.data.buffer,
-            {bytesPerRow: this.#width * 8, rowsPerImage: this.#height},
-            {width: this.#width, height: this.#height}
         );
 
         this.#setGpuTexture(newGPUTexture);

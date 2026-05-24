@@ -17,6 +17,11 @@ export interface Float16ConversionOptions {
      * [EN] Image height
      */
     height: number;
+    /**
+     * [KO] 결과가 복사될 대상 텍스처
+     * [EN] Target texture to copy the result to
+     */
+    targetTexture: GPUTexture;
 }
 
 /**
@@ -24,11 +29,6 @@ export interface Float16ConversionOptions {
  * [EN] Interface for Float16 conversion results.
  */
 export interface Float16ConversionResult {
-    /**
-     * [KO] 변환된 `Uint16Array` 데이터
-     * [EN] Converted `Uint16Array` data
-     */
-    data: Uint16Array;
     /**
      * [KO] 처리된 총 픽셀 수
      * [EN] Total number of processed pixels
@@ -42,17 +42,18 @@ export interface Float16ConversionResult {
 }
 
 /**
- * [KO] Float32 데이터를 Float16(Half-float)으로 변환합니다.
- * [EN] Converts Float32 data to Float16 (Half-float).
+ * [KO] Float32 데이터를 Float16(Half-float)으로 변환하여 대상 텍스처에 업로드합니다.
+ * [EN] Converts Float32 data to Float16 (Half-float) and uploads it to the target texture.
  *
- * [KO] GPU 컴퓨트 셰이더를 사용하여 선형 색공간을 유지하며 고속으로 변환을 수행합니다.
- * [EN] Performs high-speed conversion using GPU compute shaders while maintaining linear color space.
+ * [KO] GPU 컴퓨트 셰이더를 사용하여 선형 색공간을 유지하며 고속으로 변환을 수행하고, 결과를 직접 텍스처로 복사합니다.
+ * [EN] Performs high-speed conversion using GPU compute shaders while maintaining linear color space, and copies the result directly to the texture.
  *
  * ### Example
  * ```typescript
- * const result = await float32ToFloat16Linear(redGPUContext, rawFloat32Data, {
+ * await float32ToFloat16Linear(redGPUContext, rawFloat32Data, {
  *     width: 1024,
- *     height: 1024
+ *     height: 1024,
+ *     targetTexture: myTexture
  * });
  * ```
  *
@@ -66,8 +67,8 @@ export interface Float16ConversionResult {
  * [KO] 변환 옵션
  * [EN] Conversion options
  * @returns
- * [KO] 변환 결과 (Uint16Array 데이터 및 실행 정보 포함)
- * [EN] Conversion result (including Uint16Array data and execution info)
+ * [KO] 변환 결과 (실행 정보 포함)
+ * [EN] Conversion result (including execution info)
  * @category IBL
  */
 export async function float32ToFloat16Linear(
@@ -77,10 +78,10 @@ export async function float32ToFloat16Linear(
 ): Promise<Float16ConversionResult> {
     const startTime = performance.now();
     const {gpuDevice} = redGPUContext;
-    const {width, height} = options;
+    const {width, height, targetTexture} = options;
     const pixelCount = float32Data.length / 4;
 
-    console.log(`Float32 → Float16 변환 시작`);
+    console.log(`Float32 → Float16 변환 및 업로드 시작`);
     console.log(`총 픽셀 수: ${pixelCount.toLocaleString()}`);
 
     try {
@@ -90,7 +91,9 @@ export async function float32ToFloat16Linear(
         });
 
         const buffers = createBuffers(gpuDevice, float32Data, pixelCount);
-        uploadConstants(gpuDevice, buffers.constantsBuffer, width, height);
+
+        // 상수 업로드 단순화
+        gpuDevice.queue.writeBuffer(buffers.constantsBuffer, 0, new Uint32Array([width, height]));
 
         const {computePipeline, bindGroup} = createPipelineAndBindGroup(
             gpuDevice,
@@ -98,12 +101,12 @@ export async function float32ToFloat16Linear(
             buffers
         );
 
-        const result = await executeCompute(
+        await executeCompute(
             redGPUContext,
             computePipeline,
             bindGroup,
             buffers.outputBuffer,
-            buffers.readBuffer,
+            targetTexture,
             width,
             height,
         );
@@ -111,10 +114,9 @@ export async function float32ToFloat16Linear(
         cleanupBuffers(buffers);
 
         const executionTime = performance.now() - startTime;
-        console.log(`변환 완료: ${executionTime.toFixed(2)}ms`);
+        console.log(`변환 및 업로드 완료: ${executionTime.toFixed(2)}ms`);
 
         return {
-            data: result,
             processedPixels: pixelCount,
             executionTime
         };
@@ -128,7 +130,6 @@ interface Float16ConversionBuffers {
     inputBuffer: GPUBuffer;
     outputBuffer: GPUBuffer;
     constantsBuffer: GPUBuffer;
-    readBuffer: GPUBuffer;
 }
 
 function createBuffers(gpuDevice: GPUDevice, float32Data: Float32Array, pixelCount: number): Float16ConversionBuffers {
@@ -150,28 +151,9 @@ function createBuffers(gpuDevice: GPUDevice, float32Data: Float32Array, pixelCou
         label: 'float16_constants_buffer'
     });
 
-    const readBuffer = gpuDevice.createBuffer({
-        size: pixelCount * 8,
-        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-        label: 'float16_read_buffer'
-    });
-
     gpuDevice.queue.writeBuffer(inputBuffer, 0, float32Data as BufferSource);
 
-    return {inputBuffer, outputBuffer, constantsBuffer, readBuffer};
-}
-
-function uploadConstants(
-    gpuDevice: GPUDevice,
-    constantsBuffer: GPUBuffer,
-    width: number,
-    height: number
-): void {
-    const constantsData = new ArrayBuffer(16);
-    const constantsView = new DataView(constantsData);
-    constantsView.setUint32(0, width, true);
-    constantsView.setUint32(4, height, true);
-    gpuDevice.queue.writeBuffer(constantsBuffer, 0, constantsData);
+    return {inputBuffer, outputBuffer, constantsBuffer};
 }
 
 function createPipelineAndBindGroup(
@@ -203,10 +185,10 @@ async function executeCompute(
     computePipeline: GPUComputePipeline,
     bindGroup: GPUBindGroup,
     outputBuffer: GPUBuffer,
-    readBuffer: GPUBuffer,
+    targetTexture: GPUTexture,
     width: number,
     height: number,
-): Promise<Uint16Array> {
+): Promise<void> {
     const workgroupsX = Math.ceil(width / 8);
     const workgroupsY = Math.ceil(height / 8);
     if (workgroupsX > 65535 || workgroupsY > 65535) {
@@ -221,24 +203,31 @@ async function executeCompute(
             computePass.dispatchWorkgroups(workgroupsX, workgroupsY);
         },
         (commandEncoder: GPUCommandEncoder) => {
-            copyGPUBuffer(commandEncoder, outputBuffer, readBuffer);
+            // GPU 내에서 버퍼를 텍스처로 직접 복사
+            commandEncoder.copyBufferToTexture(
+                {
+                    buffer: outputBuffer,
+                    bytesPerRow: width * 8,
+                    rowsPerImage: height
+                },
+                {
+                    texture: targetTexture
+                },
+                {
+                    width,
+                    height,
+                    depthOrArrayLayers: 1
+                }
+            );
         }
     );
 
-
-    await readBuffer.mapAsync(GPUMapMode.READ);
-    const packedData = new Uint32Array(readBuffer.getMappedRange());
-    const uint16Data = new Uint16Array(
-        packedData.buffer.slice(packedData.byteOffset, packedData.byteOffset + packedData.byteLength)
-    );
-    readBuffer.unmap();
-
-    return uint16Data;
+    // GPU 작업 완료 대기
+    await redGPUContext.gpuDevice.queue.onSubmittedWorkDone();
 }
 
 function cleanupBuffers(buffers: Float16ConversionBuffers): void {
     buffers.inputBuffer.destroy();
     buffers.outputBuffer.destroy();
     buffers.constantsBuffer.destroy();
-    buffers.readBuffer.destroy();
 }
