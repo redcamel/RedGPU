@@ -99,7 +99,7 @@ abstract class AView extends ViewTransform {
      * [KO] 선택적 이름
      * [EN] Optional name
      */
-    constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
+    protected constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
         super(redGPUContext)
         this.scene = scene
         this.camera = camera

@@ -55,7 +55,6 @@ class MeshBase extends Object3DContainer {
     readonly #primitiveState: PrimitiveState
     readonly #depthStencilState: DepthStencilState
     #currentShaderModuleName: string
-    readonly #dirtyListeners: any[] = []; //TODO  이거이제 필요없는데 확인해야함
     #uuid: string = createUUID()
 
     constructor(redGPUContext: RedGPUContext) {
@@ -120,17 +119,6 @@ class MeshBase extends Object3DContainer {
 
     getScreenPoint(view: View3D): [number, number] {
         return getScreenPoint(view, this.modelMatrix)
-    }
-
-    /**
-     * Notifies registered listeners that the mesh has been updated.
-     *
-     * @param {boolean} [resetList=false] - Indicates whether to reset the dirty listeners list after firing.
-     */
-    notifyUpdate(resetList: boolean = false) {
-        // console.log('this.#dirtyListeners', this, this.#dirtyListeners)
-        for (const listener of this.#dirtyListeners) listener(this);
-        if (resetList) this.#dirtyListeners.length = 0
     }
 }
 

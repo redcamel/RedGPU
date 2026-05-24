@@ -13,7 +13,7 @@ abstract class ASkyAtmosphereLUTGenerator {
     #height: number;
     #depth: number;
 
-    constructor(
+    protected constructor(
         redGPUContext: RedGPUContext,
         sharedUniformBuffer: UniformBuffer,
         sampler: Sampler,

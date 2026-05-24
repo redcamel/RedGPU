@@ -133,7 +133,7 @@ abstract class AGroupBase extends Object3DContainer {
      * [KO] 그룹 이름(선택)
      * [EN] Group name (optional)
      */
-    constructor(name?: string) {
+    protected constructor(name?: string) {
         super()
         if (name) this.name = name
     }

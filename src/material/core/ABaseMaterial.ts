@@ -153,7 +153,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [KO] 바인드 그룹 인덱스
      * [EN] Bind group index
      */
-    constructor(
+    protected constructor(
         redGPUContext: RedGPUContext,
         moduleName: string,
         SHADER_INFO: any,

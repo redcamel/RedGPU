@@ -36,7 +36,7 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [KO] 순차적으로 적용할 단일 패스 이펙트 배열
      * [EN] Array of single-pass effects to be applied sequentially
      */
-    constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[]) {
+    protected constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[]) {
         super(redGPUContext);
         this.#passList.push(...passList);
     }

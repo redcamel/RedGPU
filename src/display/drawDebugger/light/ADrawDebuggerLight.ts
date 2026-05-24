@@ -23,7 +23,7 @@ abstract class ADrawDebuggerLight {
     #lightMaterial: ColorMaterial;
     #lightDebugMesh: Mesh;
 
-    constructor(redGPUContext: RedGPUContext, color: [number, number, number], maxLines: number = 32) {
+    protected constructor(redGPUContext: RedGPUContext, color: [number, number, number], maxLines: number = 32) {
 
         const lightGeometry = this.createLightDebugGeometry(redGPUContext, maxLines);
         this.#lightMaterial = new ColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));

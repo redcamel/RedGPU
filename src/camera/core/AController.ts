@@ -75,7 +75,7 @@ abstract class AController {
      * [KO] 컨트롤러 초기화 정보
      * [EN] Controller initialization info
      */
-    constructor(redGPUContext: RedGPUContext, initInfo: controllerInit) {
+    protected constructor(redGPUContext: RedGPUContext, initInfo: controllerInit) {
         this.#redGPUContext = redGPUContext
         this.#initInfo = initInfo || {}
         this.#camera = initInfo.camera || new PerspectiveCamera()

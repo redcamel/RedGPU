@@ -65,7 +65,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
      * @param height - [KO] 텍스처 높이 [EN] Texture height
      * @param define - [KO] 노이즈 정의 객체 [EN] Noise definition object
      */
-    constructor(
+    protected constructor(
         redGPUContext: RedGPUContext,
         width: number = 1024,
         height: number = 1024,

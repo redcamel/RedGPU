@@ -59,7 +59,6 @@ abstract class ASinglePassPostEffect {
     #WORK_SIZE_Z: number = 1
     #redGPUContext: RedGPUContext
     #antialiasingManager: AntialiasingManager
-    #previousSourceTextureReferences: IPostEffectResult[] = [];
     #videoMemorySize: number = 0
     #prevMSAA: boolean
     #prevMSAAID: string
@@ -80,7 +79,7 @@ abstract class ASinglePassPostEffect {
      * [KO] 워크그룹 사이즈 설정 (선택, 기본값: {x: 16, y: 16, z: 1})
      * [EN] Workgroup size configuration (optional, default: {x: 16, y: 16, z: 1})
      */
-    constructor(redGPUContext: RedGPUContext, workSize?: { x?: number, y?: number, z?: number }) {
+    protected constructor(redGPUContext: RedGPUContext, workSize?: { x?: number, y?: number, z?: number }) {
         this.#redGPUContext = redGPUContext;
         this.#antialiasingManager = redGPUContext.antialiasingManager;
         if (workSize) {
@@ -499,8 +498,6 @@ abstract class ASinglePassPostEffect {
             this.#bindGroupCache3.set(outputTextureId, this.#outputBindGroup);
         }
 
-        // 현재 소스 텍스처 참조 저장
-        this.#saveCurrentSourceTextureReferences(sourceTextureInfoList);
     }
 
     /**
@@ -511,13 +508,6 @@ abstract class ASinglePassPostEffect {
         this.#videoMemorySize = this.#uniformBuffer ? this.#uniformBuffer.size : 0;
     }
 
-    /**
-     * [KO] 현재 소스 텍스처들의 참조를 저장합니다.
-     * [EN] Saves the references of the current source textures.
-     */
-    #saveCurrentSourceTextureReferences(sourceTextureInfoList: IPostEffectResult[]) {
-        this.#previousSourceTextureReferences = [...sourceTextureInfoList];
-    }
 }
 
 Object.defineProperty(ASinglePassPostEffect.prototype, 'isInstanceofPostEffect', {
