@@ -287,5 +287,5 @@ class DrawDebuggerGrid {
         this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormalLinear)
     }
 }
-
+Object.freeze(DrawDebuggerGrid)
 export default DrawDebuggerGrid

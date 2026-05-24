@@ -73,5 +73,5 @@ class DrawDebuggerAxis extends Mesh {
         return coneTip;
     }
 }
-
+Object.freeze(DrawDebuggerAxis);
 export default DrawDebuggerAxis;

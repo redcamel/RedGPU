@@ -7,7 +7,6 @@ import updateObject3DMatrix from "../../../math/updateObject3DMatrix";
 interface AGroupBase {
 }
 
-const CONVERT_RADIAN = Math.PI / 180;
 
 /**
  * [KO] 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 추상 클래스입니다.
@@ -20,7 +19,7 @@ const CONVERT_RADIAN = Math.PI / 180;
  *
  * @category Core
  */
-abstract class GroupBase extends Object3DContainer {
+abstract class AGroupBase extends Object3DContainer {
     /**
      * [KO] 모델 변환 행렬
      * [EN] Model transformation matrix
@@ -128,8 +127,8 @@ abstract class GroupBase extends Object3DContainer {
     #dirtyTransform: boolean = true
 
     /**
-     * [KO] GroupBase 생성자
-     * [EN] GroupBase constructor
+     * [KO] AGroupBase 생성자
+     * [EN] AGroupBase constructor
      * @param name -
      * [KO] 그룹 이름(선택)
      * [EN] Group name (optional)
@@ -469,5 +468,5 @@ abstract class GroupBase extends Object3DContainer {
     }
 }
 
-Object.freeze(GroupBase)
-export default GroupBase
+Object.freeze(AGroupBase)
+export default AGroupBase

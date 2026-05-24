@@ -98,5 +98,5 @@ abstract class ADrawDebuggerLight {
         return new Geometry(redGPUContext, vertexBuffer);
     }
 }
-
+Object.freeze(ADrawDebuggerLight);
 export default ADrawDebuggerLight;
