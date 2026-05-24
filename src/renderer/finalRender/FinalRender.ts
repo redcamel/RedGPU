@@ -246,7 +246,7 @@ class FinalRender {
     }
 
     #getFinalRenderPassDesc(redGPUContext: RedGPUContext): GPURenderPassDescriptor {
-        const {backgroundColor, gpuContext} = redGPUContext
+        const {gpuContext} = redGPUContext
         const finalRenderTextureView = gpuContext.getCurrentTexture().createView({label: 'FINAL_RENDER'})
         const colorAttachment: GPURenderPassColorAttachment = {
             view: finalRenderTextureView,

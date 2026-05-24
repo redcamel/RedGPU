@@ -421,10 +421,11 @@ class LightManager {
         const distance = Math.max(vec3.distance(cameraPosition, vec3.create()), 1)
         const upVector = vec3.fromValues(0, 1, 0);
         const origin = vec3.fromValues(0, 0, 0);
-        const lightPosition = view.scene.lightManager.directionalLights.length ? vec3.fromValues(
-            -view.scene.lightManager.directionalLights[0].direction[0] * distance,
-            -view.scene.lightManager.directionalLights[0].direction[1] * distance,
-            -view.scene.lightManager.directionalLights[0].direction[2] * distance
+        const {directionalLights} = view.scene.lightManager
+        const lightPosition = directionalLights.length ? vec3.fromValues(
+            -directionalLights[0].direction[0] * distance,
+            -directionalLights[0].direction[1] * distance,
+            -directionalLights[0].direction[2] * distance
         ) : vec3.create();
         const lightViewMatrix = mat4.create()
         mat4.lookAt(lightViewMatrix, lightPosition, origin, upVector);

@@ -514,17 +514,6 @@ abstract class ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 입력 소스 텍스처들의 변경 여부를 감지합니다.
-     * [EN] Detects changes in the input source textures.
-     */
-    #detectSourceTextureChange(sourceTextureInfoList: IPostEffectResult[]): boolean {
-        if (!this.#previousSourceTextureReferences || this.#previousSourceTextureReferences.length !== sourceTextureInfoList.length) {
-            return true;
-        }
-        return sourceTextureInfoList.some((info, i) => info.textureView !== this.#previousSourceTextureReferences[i].textureView);
-    }
-
-    /**
      * [KO] 현재 소스 텍스처들의 참조를 저장합니다.
      * [EN] Saves the references of the current source textures.
      */

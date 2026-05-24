@@ -78,10 +78,6 @@ abstract class ABaseMaterial extends ResourceBase {
      */
     #writeMaskState: GPUFlagsConstant = GPUColorWrite.ALL
     /**
-     * 리소스 매니저 객체
-     */
-    #resourceManager: ResourceManager
-    /**
      * 기본 GPU 샘플러
      */
     readonly #basicGPUSampler: GPUSampler
@@ -167,6 +163,7 @@ abstract class ABaseMaterial extends ResourceBase {
         targetGroupIndex: number
     ) {
         super(redGPUContext)
+        const {resourceManager} = redGPUContext
         // console.log('SHADER_INFO', moduleName, SHADER_INFO)
         this.#MODULE_NAME = moduleName
         this.#FRAGMENT_SHADER_MODULE_NAME = `FRAGMENT_MODULE_${this.#MODULE_NAME}`
@@ -181,7 +178,7 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#TEXTURE_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionTextures();
         this.#SAMPLER_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionSamplers();
 
-        this.#bindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME) || redGPUContext.resourceManager.createBindGroupLayout(
+        this.#bindGroupLayout = resourceManager.getGPUBindGroupLayout(this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME) || resourceManager.createBindGroupLayout(
             this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME,
             getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex)
         )
@@ -189,10 +186,10 @@ abstract class ABaseMaterial extends ResourceBase {
         // this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.ONE, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
         this.#blendColorState = new BlendState(this)
         this.#blendAlphaState = new BlendState(this)
-        this.#resourceManager = redGPUContext.resourceManager
-        this.#basicGPUSampler = this.#resourceManager.basicSampler.gpuSampler
-        this.#emptyBitmapGPUTextureView = this.#resourceManager.emptyBitmapTextureView
-        this.#emptyCubeTextureView = this.#resourceManager.emptyCubeTextureView
+
+        this.#basicGPUSampler = resourceManager.basicSampler.gpuSampler
+        this.#emptyBitmapGPUTextureView = resourceManager.emptyBitmapTextureView
+        this.#emptyCubeTextureView = resourceManager.emptyCubeTextureView
     }
 
     /**
@@ -494,7 +491,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Check shader variant (conditional branch) state and update shader module
      */
     #checkVariant() {
-        const {gpuDevice, resourceManager} = this.redGPUContext;
+        const { resourceManager} = this.redGPUContext;
         // 현재 머티리얼 상태에 맞는 바리안트 키 찾기
         const currentVariantKey = this.#findMatchingVariantKey();
 
