@@ -1,6 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
 import {keepLog} from "../../utils";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] 단계별 통계 상세 정보 인터페이스
@@ -46,8 +47,8 @@ export type ComputePassDescriptorInput = string | GPUComputePassDescriptor;
  *
  * @category Renderer
  */
-class CommandEncoderManager {
-    readonly #redGPUContext: RedGPUContext;
+class CommandEncoderManager extends RedGPUObject{
+
     /** [KO] 타입별 활성화된 인코더 리스트 [EN] List of active encoders per type */
     readonly #encoderMap: Map<CommandEncoderType, GPUCommandEncoder[]> = new Map();
     /** [KO] 타입별 현재 패스 활성화 여부 [EN] Whether a pass is currently active per type */
@@ -62,7 +63,7 @@ class CommandEncoderManager {
     readonly #deferredDestroyList: { destroy(): void }[] = [];
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
     }
 
     /**
@@ -197,7 +198,7 @@ class CommandEncoderManager {
         }
         const buffers = this.#finish(type);
         if (buffers.length > 0) {
-            this.#redGPUContext.gpuDevice.queue.submit(buffers);
+            this.gpuDevice.queue.submit(buffers);
             const logData = this.#createPhaseStats(type, buffers.length);
             console.log(`🚀 [CommandEncoderManager] Submitted ${type} Phase`, logData);
             this.#resetStat(type);
@@ -236,7 +237,7 @@ class CommandEncoderManager {
         });
 
         if (allBuffers.length > 0) {
-            this.#redGPUContext.gpuDevice.queue.submit(allBuffers);
+            this.gpuDevice.queue.submit(allBuffers);
             const deferredDestroyCount = this.#processDeferredDestroys();
             const batchStats: CommandBatchStats = {phases, deferredDestroyCount};
             console.log(`🚀 [CommandEncoderManager] Batch Submitted ${allBuffers.length} Command Buffer(s)`, batchStats);
@@ -281,11 +282,12 @@ class CommandEncoderManager {
     }
 
     async #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): Promise<void> {
-        const encoder = this.#redGPUContext.gpuDevice.createCommandEncoder({label});
+        const  {gpuDevice} = this
+        const encoder = gpuDevice.createCommandEncoder({label});
         executor(encoder);
         const buffer = encoder.finish();
-        this.#redGPUContext.gpuDevice.queue.submit([buffer]);
-        await this.#redGPUContext.gpuDevice.queue.onSubmittedWorkDone();
+        gpuDevice.queue.submit([buffer]);
+        await gpuDevice.queue.onSubmittedWorkDone();
         console.log(`🚀 [CommandEncoderManager] ${logTag}`, {label});
     }
 
@@ -302,7 +304,7 @@ class CommandEncoderManager {
         // [KO] 리스트가 비어있거나, 마지막 인코더가 이미 패스를 기록 중이면 새 인코더 생성
         // [EN] Create a new encoder if the list is empty or the last encoder is already recording a pass
         if (list.length === 0 || this.#isPassActive[type]) {
-            const newEncoder = this.#redGPUContext.gpuDevice.createCommandEncoder({
+            const newEncoder = this.gpuDevice.createCommandEncoder({
                 label: `RedGPU_${type}_Encoder_${list.length}`
             });
             list.push(newEncoder);

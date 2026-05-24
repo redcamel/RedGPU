@@ -5,9 +5,10 @@ import DrawDebuggerSpotLight from "../../display/drawDebugger/light/DrawDebugger
 import PassClusterLightBound from "./pass/bound/PassClusterLightBound";
 import PassClustersLight from "./pass/light/PassClustersLight";
 import PassClustersLightHelper from "./core/PassClustersLightHelper";
+import RedGPUObject from "../../base/RedGPUObject";
 
-class ClusterLightManager  {
-    #redGPUContext: RedGPUContext
+class ClusterLightManager extends RedGPUObject{
+
     #view: View3D
 
     /**
@@ -42,17 +43,18 @@ class ClusterLightManager  {
     #clusterLightsBufferData: Float32Array
 
     constructor(view: View3D) {
+        super(view.redGPUContext)
+        const {resourceManager, gpuDevice} = this
         this.#view = view
-        this.#redGPUContext = view.redGPUContext
 
         this.#clusterLightsBufferData = new Float32Array((16 * PassClustersLightHelper.MAX_CLUSTER_LIGHTS) + 4)
-        this.#clusterLightsBuffer = this.#redGPUContext.resourceManager.createGPUBuffer(`VIEW_CLUSTER_LIGHTS_BUFFER`,
+        this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`VIEW_CLUSTER_LIGHTS_BUFFER`,
             {
                 size: this.#clusterLightsBufferData.byteLength,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
             }
         )
-        this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource)
+        gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource)
 
     }
 
@@ -86,6 +88,7 @@ class ClusterLightManager  {
         const {redGPUContext, scene, renderViewStateData, pixelRectArray} = this.#view
         const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== pixelRectArray[2] || this.#prevHeight !== pixelRectArray[3]
         // const dirtyPixelSize = true;
+        //TODO - 클러스터 체크가 망가졌네
         if (!this.#passClusterLightBound) {
             this.#passClusterLightBound = new PassClusterLightBound(redGPUContext, this.#view)
         }
@@ -147,7 +150,7 @@ class ClusterLightManager  {
                 [pointLightNum, spotLightNum, 0, 0],
                 0,
             )
-            this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource);
+            this.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource);
             this.#passClustersLight.render()
         }
     }
