@@ -1,6 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import InstancingMesh from "../../display/instancingMesh/InstancingMesh";
 import Mesh from "../../display/mesh/Mesh";
+import createBasePipeline from "../../display/mesh/core/pipeline/createBasePipeline";
+import PIPELINE_TYPE from "../../display/mesh/core/pipeline/PIPELINE_TYPE";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import PickingEvent from "./PickingEvent";
 import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
@@ -126,6 +128,12 @@ class PickingManager {
         if (this.castingList.length) {
             const {redGPUContext} = view
             this.#checkTexture(view)
+            this.#castingList.forEach(target => {
+                const {gpuRenderInfo} = target;
+                if (gpuRenderInfo && !gpuRenderInfo.pickingPipeline) {
+                    gpuRenderInfo.pickingPipeline = gpuRenderInfo.vertexStructInfo.vertexEntries.includes('entryPointPickingVertex') ? createBasePipeline(target as Mesh, gpuRenderInfo.vertexShaderModule, gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.PICKING) : null
+                }
+            })
             this.#pickingPassDescriptor = {
                 label: `${view.name} Picking Render Pass`,
                 colorAttachments: [

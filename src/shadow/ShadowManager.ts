@@ -1,6 +1,9 @@
 import RedGPUContext from "../context/RedGPUContext";
 import DirectionalShadowManager from "./DirectionalShadowManager";
 import View3D from "../display/view/View3D";
+import Mesh from "../display/mesh/Mesh";
+import createBasePipeline from "../display/mesh/core/pipeline/createBasePipeline";
+import PIPELINE_TYPE from "../display/mesh/core/pipeline/PIPELINE_TYPE";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import updateViewportAndScissor from "../renderer/helperFunc/updateViewportAndScissor";
@@ -24,6 +27,13 @@ class ShadowManager {
     render(view: View3D) {
         if (this.#directionalShadowManager.castingList.length === 0) return
         const {redGPUContext} = view
+
+        this.#directionalShadowManager.castingList.forEach(target => {
+            const {gpuRenderInfo} = target;
+            if (gpuRenderInfo && !gpuRenderInfo.shadowPipeline) {
+                gpuRenderInfo.shadowPipeline = gpuRenderInfo.vertexStructInfo.vertexEntries.includes('entryPointShadowVertex') ? createBasePipeline(target as Mesh, gpuRenderInfo.vertexShaderModule, gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.SHADOW) : null
+            }
+        })
 
         this.#shadowPassDescriptor = {
             label: `${view.name} Shadow Render Pass`,

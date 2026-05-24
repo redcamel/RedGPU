@@ -1,5 +1,3 @@
-import createBasePipeline from "../../../display/mesh/core/pipeline/createBasePipeline";
-import PIPELINE_TYPE from "../../../display/mesh/core/pipeline/PIPELINE_TYPE";
 import RenderViewStateData from "../../../display/view/core/RenderViewStateData";
 
 const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipelineKey: string = 'pipeline') => {
@@ -20,13 +18,7 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
             else renderViewStateData.num3DGroups++
             const {gpuRenderInfo} = target
             const {vertexUniformBindGroup} = gpuRenderInfo
-            if (!gpuRenderInfo[pipelineKey]) {
-                if (pipelineKey === 'shadowPipeline') {
-                    gpuRenderInfo.shadowPipeline = target.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('entryPointShadowVertex') ? createBasePipeline(target, target.gpuRenderInfo.vertexShaderModule, target.gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.SHADOW) : null
-                } else if (pipelineKey === 'pickingPipeline') {
-                    gpuRenderInfo.pickingPipeline = target.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('entryPointPickingVertex') ? createBasePipeline(target, target.gpuRenderInfo.vertexShaderModule, target.gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.PICKING) : null
-                }
-            }
+
             if (currentGeometry && gpuRenderInfo[pipelineKey]) {
                 currentRenderPassEncoder.setPipeline(gpuRenderInfo[pipelineKey])
                 const {gpuBuffer} = currentGeometry.vertexBuffer
