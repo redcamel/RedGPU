@@ -41,7 +41,6 @@ class FinalRender {
     //
     #pipeline: GPURenderPipeline
     //
-    #viewSizes: { width; height }[] = []
     #sampler: Sampler
     #fragmentBuffer: GPUBuffer[] = []
     #fragmentBufferData: Float32Array[] = []
@@ -173,7 +172,7 @@ class FinalRender {
                 }
                 fragmentBindGroup = gpuDevice.createBindGroup(fragmentBindGroupDesc)
                 this.#fragmentBindGroupCache[index].set(gpuTextureView, fragmentBindGroup);
-                this.#viewSizes[index] = {width: viewW || 1, height: viewH || 1}
+
             }
 
             this.#updateFinalViewBackgroundColor(targetView, index)

@@ -403,7 +403,7 @@ export class RapierPhysics implements IPhysicsEngine {
 
             for (let i = 0; i < numVertices; i++) {
                 const offset = i * stride;
-                positions[i * 3 + 0] = data[offset] * worldScale[0];
+                positions[i * 3 ] = data[offset] * worldScale[0];
                 positions[i * 3 + 1] = data[offset + 1] * worldScale[1];
                 positions[i * 3 + 2] = data[offset + 2] * worldScale[2];
             }

@@ -55,7 +55,7 @@ class MeshBase extends Object3DContainer {
     readonly #primitiveState: PrimitiveState
     readonly #depthStencilState: DepthStencilState
     #currentShaderModuleName: string
-    readonly #dirtyListeners: any[] = [];
+    readonly #dirtyListeners: any[] = []; //TODO  이거이제 필요없는데 확인해야함
     #uuid: string = createUUID()
 
     constructor(redGPUContext: RedGPUContext) {
