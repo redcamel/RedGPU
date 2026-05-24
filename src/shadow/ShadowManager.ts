@@ -28,12 +28,16 @@ class ShadowManager {
         if (this.#directionalShadowManager.castingList.length === 0) return
         const {redGPUContext} = view
 
-        this.#directionalShadowManager.castingList.forEach(target => {
+        const list = this.#directionalShadowManager.castingList;
+        let i = 0;
+        const len = list.length;
+        for (i; i < len; i++) {
+            const target = list[i];
             const {gpuRenderInfo} = target;
             if (gpuRenderInfo && !gpuRenderInfo.shadowPipeline) {
                 gpuRenderInfo.shadowPipeline = gpuRenderInfo.vertexStructInfo.vertexEntries.includes('entryPointShadowVertex') ? createBasePipeline(target as Mesh, gpuRenderInfo.vertexShaderModule, gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.SHADOW) : null
             }
-        })
+        }
 
         this.#shadowPassDescriptor = {
             label: `${view.name} Shadow Render Pass`,

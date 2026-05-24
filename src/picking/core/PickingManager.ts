@@ -128,12 +128,16 @@ class PickingManager {
         if (this.castingList.length) {
             const {redGPUContext} = view
             this.#checkTexture(view)
-            this.#castingList.forEach(target => {
+            const list = this.#castingList;
+            let i = 0;
+            const len = list.length;
+            for (i; i < len; i++) {
+                const target = list[i];
                 const {gpuRenderInfo} = target;
                 if (gpuRenderInfo && !gpuRenderInfo.pickingPipeline) {
                     gpuRenderInfo.pickingPipeline = gpuRenderInfo.vertexStructInfo.vertexEntries.includes('entryPointPickingVertex') ? createBasePipeline(target as Mesh, gpuRenderInfo.vertexShaderModule, gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.PICKING) : null
                 }
-            })
+            }
             this.#pickingPassDescriptor = {
                 label: `${view.name} Picking Render Pass`,
                 colorAttachments: [
