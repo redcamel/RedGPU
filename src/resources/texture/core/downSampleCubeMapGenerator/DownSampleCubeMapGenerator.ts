@@ -2,13 +2,14 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import Sampler from "../../../sampler/Sampler";
 import cubemapDownsampleCode from "./cubemapDownsample.wgsl";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
 /**
  * [KO] 큐브맵 다운샘플링 및 밉맵 생성을 담당하는 제너레이터 클래스입니다.
  * [EN] Generator class responsible for cubemap downsampling and mipmap generation.
  */
-class DownSampleCubeMapGenerator {
-    readonly #redGPUContext: RedGPUContext
+class DownSampleCubeMapGenerator extends RedGPUObject{
+
     #cubemapComputePipelines: Map<GPUTextureFormat, GPUComputePipeline> = new Map();
     #cubemapBindGroupLayouts: Map<GPUTextureFormat, GPUBindGroupLayout> = new Map();
     #cubemapShaderModule: GPUShaderModule | null = null;
@@ -19,7 +20,7 @@ class DownSampleCubeMapGenerator {
     #cubemapUniformBuffers: GPUBuffer[] = [];
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext
+        super(redGPUContext)
     }
 
     /** [KO] 소스 텍스처 뷰 생성 (캐싱) [EN] Create source texture view (cached) */
@@ -62,7 +63,7 @@ class DownSampleCubeMapGenerator {
     ): GPUBindGroup {
         const key = `DOWN_SAMPLE_CUBE_GENERATOR_BIND_GROUP_${sourceView.label}_${targetView.label}`;
         if (!this.#tempBindGroupCache.has(key)) {
-            const {gpuDevice} = this.#redGPUContext;
+            const {gpuDevice} = this;
             const bindGroup = gpuDevice.createBindGroup({
                 label: key,
                 layout: bindGroupLayout,
@@ -95,7 +96,7 @@ class DownSampleCubeMapGenerator {
         try {
             this.#clearTempCaches();
             this.#initCubemapDownsampler();
-            const {resourceManager} = this.#redGPUContext;
+            const {resourceManager} = this;
             if (!sourceCubemap) throw new Error('Invalid source cubemap texture');
             if (targetSize <= 0 || !Number.isInteger(targetSize)) throw new Error('Target size must be a positive integer');
 
@@ -152,7 +153,7 @@ class DownSampleCubeMapGenerator {
         targetSize: number,
         format: GPUTextureFormat
     ): void {
-        const {gpuDevice, commandEncoderManager} = this.#redGPUContext;
+        const {gpuDevice, commandEncoderManager} = this;
         const computePipeline = this.#getCubemapComputePipeline(format);
         const bindGroupLayout = this.#cubemapBindGroupLayouts.get(format)!;
 
@@ -183,13 +184,13 @@ class DownSampleCubeMapGenerator {
 
     #updateCubemapUniforms(uniformBuffer: GPUBuffer, sourceMipLevel: number, targetMipLevel: number, targetSize: number) {
         const uniformData = new Float32Array([targetSize, sourceMipLevel, targetMipLevel, 0]);
-        this.#redGPUContext.gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformData);
+        this.gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformData);
     }
 
     #initCubemapDownsampler() {
         if (this.#cubemapShaderModule) return;
-        const {resourceManager} = this.#redGPUContext;
-        this.#cubemapSampler = new Sampler(this.#redGPUContext, {
+        const {resourceManager,redGPUContext} = this;
+        this.#cubemapSampler = new Sampler(redGPUContext, {
             minFilter: 'linear', magFilter: 'linear', mipmapFilter: 'linear',
             addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge'
         }).gpuSampler;
@@ -198,7 +199,7 @@ class DownSampleCubeMapGenerator {
 
     #getCubemapComputePipeline(format: GPUTextureFormat): GPUComputePipeline {
         if (!this.#cubemapComputePipelines.has(format)) {
-            const {gpuDevice, resourceManager} = this.#redGPUContext;
+            const {gpuDevice, resourceManager} = this;
             const bindGroupLayout = resourceManager.createBindGroupLayout(`DOWN_SAMPLE_CUBE_GENERATOR_BGL_${format}`, {
                 entries: [
                     {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {viewDimension: 'cube'}},

@@ -4,9 +4,10 @@ import GPU_STORE_OP from "../../../../gpuConst/GPU_STORE_OP";
 import Sampler from "../../../sampler/Sampler";
 import shaderSource from "./shader.wgsl";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
-class MipmapGenerator {
-    readonly #redGPUContext: RedGPUContext
+class MipmapGenerator extends RedGPUObject{
+
     readonly #sampler: GPUSampler
     #pipelineLayout: GPUPipelineLayout
     readonly #pipelines: { [key: string]: GPURenderPipeline }
@@ -20,7 +21,7 @@ class MipmapGenerator {
     #persistentViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext
+       super(redGPUContext)
         this.#sampler = new Sampler(redGPUContext, {minFilter: 'linear'}).gpuSampler
         this.#pipelines = {};
     }
@@ -68,7 +69,7 @@ class MipmapGenerator {
     }
 
     createBindGroup(texture: GPUTexture, textureView: GPUTextureView, useCache: boolean = false): GPUBindGroup {
-        const {gpuDevice} = this.#redGPUContext;
+        const {gpuDevice} = this;
         if (useCache) {
             // GPUTexture를 키로 바인드 그룹 캐시 맵 가져오기
             let bindGroupMap = this.#persistentBindGroupCache.get(texture);
@@ -119,7 +120,7 @@ class MipmapGenerator {
     }
 
     getMipmapPipeline(format: GPUTextureFormat): GPURenderPipeline {
-        const {gpuDevice, resourceManager} = this.#redGPUContext
+        const {gpuDevice, resourceManager} = this;
         let pipeline = this.#pipelines[format];
         if (!pipeline) {
             if (!this.#mipmapShaderModule) {
@@ -174,7 +175,7 @@ class MipmapGenerator {
         if (!useCache) {
             this.#clearTempCaches();
         }
-        const {resourceManager, commandEncoderManager} = this.#redGPUContext
+        const {resourceManager, commandEncoderManager} = this;
         const pipeline: GPURenderPipeline = this.getMipmapPipeline(textureDescriptor.format);
         if (textureDescriptor.dimension == '3d' || textureDescriptor.dimension == '1d') {
             throw new Error('Generating mipmaps for non-2d textures is currently unsupported!');
@@ -268,7 +269,7 @@ class MipmapGenerator {
         }
 
         if (!renderToSource) {
-            this.#redGPUContext.commandEncoderManager.addDeferredDestroy(mipTexture);
+            commandEncoderManager.addDeferredDestroy(mipTexture);
         }
 
         // useCache가 false일 때만 temp 캐시 클리어

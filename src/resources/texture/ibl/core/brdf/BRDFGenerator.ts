@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import brdfShaderCode from "./brdfShaderCode.wgsl";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 
 /**
  * [KO] BRDF LUT(Look-Up Table)를 생성하는 클래스입니다.
@@ -10,8 +11,7 @@ import brdfShaderCode from "./brdfShaderCode.wgsl";
  *
  * @category IBL
  */
-class BRDFGenerator {
-    readonly #redGPUContext: RedGPUContext;
+class BRDFGenerator extends RedGPUObject{
     #brdfShaderModule: GPUShaderModule;
     #pipeline: GPURenderPipeline;
     #brdfLUTTexture: GPUTexture;
@@ -25,7 +25,7 @@ class BRDFGenerator {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+       super(redGPUContext);
     }
 
     /**
@@ -49,7 +49,7 @@ class BRDFGenerator {
      * [EN] Generates the BRDF LUT.
      */
     #generateBRDFLUT() {
-        const {gpuDevice, resourceManager, commandEncoderManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager, commandEncoderManager} = this;
         const size = 128;
         const format: GPUTextureFormat = 'rg16float';
 
