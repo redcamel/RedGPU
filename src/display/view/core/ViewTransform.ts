@@ -9,6 +9,7 @@ import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validate
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import BaseObject from "../../../base/BaseObject";
+import RedGPUObject from "../../../base/RedGPUObject";
 
 /**
  * [KO] View3D/View2D의 크기와 위치를 관리하는 클래스입니다.
@@ -24,19 +25,12 @@ import BaseObject from "../../../base/BaseObject";
  *
  * @category Core
  */
-class ViewTransform extends BaseObject {
+class ViewTransform extends RedGPUObject {
     /**
      * 뷰 크기 변경 시 호출되는 콜백입니다.
      * @type {((event: RedResizeEvent<ViewTransform>) => void) | null}
      */
     onResize: ((event: RedResizeEvent<ViewTransform>) => void) | null = null;
-    /**
-     * 연결된 RedGPUContext 인스턴스(읽기 전용).
-     * @private
-     * @readonly
-     * @type {RedGPUContext}
-     */
-    readonly #redGPUContext: RedGPUContext
     /**
      * 현재 적용된(지터 포함) 프로젝션 행렬 캐시입니다.
      * @private
@@ -104,18 +98,8 @@ class ViewTransform extends BaseObject {
      * @param {RedGPUContext} redGPUContext - 유효한 RedGPUContext 인스턴스
      */
     constructor(redGPUContext: RedGPUContext) {
-        super();
-        validateRedGPUContext(redGPUContext)
-        this.#redGPUContext = redGPUContext
+        super(redGPUContext);
         this.setSize('100%', '100%')
-    }
-
-    /**
-     * 연결된 RedGPUContext 반환 (읽기 전용).
-     * @returns {RedGPUContext}
-     */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
     }
 
     /**
@@ -381,7 +365,7 @@ class ViewTransform extends BaseObject {
      * @param {string | number} [y=this.#y] - Y 위치 (픽셀 또는 퍼센트)
      */
     setPosition(x: string | number = this.#x, y: string | number = this.#y) {
-        const {sizeManager} = this.#redGPUContext
+        const {sizeManager} = this.redGPUContext
         RedGPUContextSizeManager.validatePositionValue(x)
         RedGPUContextSizeManager.validatePositionValue(y)
         this.#x = x;
@@ -401,7 +385,7 @@ class ViewTransform extends BaseObject {
      * @param {string | number} [h=this.#height] - 높이 (픽셀 또는 퍼센트)
      */
     setSize(w: string | number = this.#width, h: string | number = this.#height) {
-        const {sizeManager} = this.#redGPUContext
+        const {sizeManager} = this.redGPUContext
         RedGPUContextSizeManager.validateSizeValue(w)
         RedGPUContextSizeManager.validateSizeValue(h)
         this.#width = w;
