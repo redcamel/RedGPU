@@ -9,6 +9,6 @@ const renderBasicLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEnco
     for (i; i < len; i++) {
         children[i].render(renderViewStateData);
     }
-    viewRenderPassEncoder.executeBundles(renderViewStateData.bundleListBasicList);
+    viewRenderPassEncoder.executeBundles(renderViewStateData.renderBundleResults.bundleListBasicList);
 }
 export default renderBasicLayer

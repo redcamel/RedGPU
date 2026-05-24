@@ -97,20 +97,19 @@ class RenderViewStateData {
     /** [KO] 머티리얼로부터 변경된 버텍스 유니폼의 맵 [EN] Map of vertex uniforms changed from materials */
     dirtyVertexUniformFromMaterial = {};
 
-    /** [KO] 알파 렌더링 레이어의 객체 배열 [EN] Array of objects in the alpha rendering layer */
-    bundleListAlphaLayer = [];
-    /** [KO] 투명 렌더링 레이어의 객체 배열 [EN] Array of objects in the transparent rendering layer */
-    bundleListTransparentLayer = [];
-    /** [KO] 파티클 렌더링 레이어의 객체 배열 [EN] Array of objects in the particle rendering layer */
-    bundleListParticleLayer = [];
-    /** [KO] 2D 패스 렌더링 레이어의 객체 배열 [EN] Array of objects in the 2D pass rendering layer */
-    bundleListRender2PathLayer = [];
+    /** [KO] 렌더링 레이어별 번들 리스트 그룹 [EN] Group of bundle lists for each rendering layer */
+    renderBundleResults = {
+        bundleListAlphaLayer: [] as GPURenderBundle[],
+        bundleListTransparentLayer: [] as GPURenderBundle[],
+        bundleListParticleLayer: [] as GPURenderBundle[],
+        bundleListRender2PathLayer: [] as GPURenderBundle[],
+        bundleListBasicList: [] as GPURenderBundle[]
+    };
+
     /** [KO] 처리할 스킨 메시 목록 [EN] List of skin meshes to process */
     skinList = [];
     /** [KO] 처리할 애니메이션 목록 [EN] List of animations to process */
     animationList = [];
-    /** [KO] 효율적인 렌더링을 위한 렌더 번들 목록 [EN] List of render bundles for efficient rendering */
-    bundleListBasicList = [];
 
     /** [KO] 씬이 2D 모드인지 여부 [EN] Whether the scene is in 2D mode */
     isScene2DMode: boolean = false;
@@ -180,11 +179,12 @@ class RenderViewStateData {
         this.#calcTimeInfo();
         this.dirtyVertexUniformFromMaterial = {};
         //
-        this.bundleListAlphaLayer.length = 0;
-        this.bundleListTransparentLayer.length = 0;
-        this.bundleListParticleLayer.length = 0;
-        this.bundleListRender2PathLayer.length = 0;
-        this.bundleListBasicList.length = 0;
+        const {renderBundleResults} = this;
+        renderBundleResults.bundleListAlphaLayer.length = 0;
+        renderBundleResults.bundleListTransparentLayer.length = 0;
+        renderBundleResults.bundleListParticleLayer.length = 0;
+        renderBundleResults.bundleListRender2PathLayer.length = 0;
+        renderBundleResults.bundleListBasicList.length = 0;
         //
         this.skinList.length = 0;
         this.animationList.length = 0;

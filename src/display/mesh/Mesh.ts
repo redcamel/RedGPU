@@ -1577,7 +1577,7 @@ class Mesh extends MeshBase {
                 bundleListTransparentLayer,
                 bundleListAlphaLayer,
                 bundleListBasicList
-            } = renderViewStateData
+            } = renderViewStateData.renderBundleResults
             {
                 {
                     const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo

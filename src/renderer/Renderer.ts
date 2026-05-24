@@ -249,7 +249,7 @@ class Renderer {
         const {antialiasingManager, commandEncoderManager} = redGPUContext
         const {useMSAA} = antialiasingManager
 
-        if (view.renderViewStateData.bundleListRender2PathLayer.length) {
+        if (view.renderViewStateData.renderBundleResults.bundleListRender2PathLayer.length) {
             const {mipmapGenerator} = redGPUContext.resourceManager
             let renderPath1ResultTexture = view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_RESULT);
 
@@ -287,7 +287,7 @@ class Renderer {
                 },
             }, (renderPassEncoder) => {
                 updateViewportAndScissor(view, renderPassEncoder)
-                renderPassEncoder.executeBundles(renderViewStateData.bundleListRender2PathLayer);
+                renderPassEncoder.executeBundles(renderViewStateData.renderBundleResults.bundleListRender2PathLayer);
             });
         }
     }
