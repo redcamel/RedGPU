@@ -31,15 +31,9 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
                 currentRenderPassEncoder.setPipeline(gpuRenderInfo[pipelineKey])
                 const {gpuBuffer} = currentGeometry.vertexBuffer
                 const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
-                if (renderViewStateData.prevVertexGpuBuffer !== gpuBuffer) {
-                    currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
-                    renderViewStateData.prevVertexGpuBuffer = gpuBuffer
-                }
+                currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
                 currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
-                if (renderViewStateData.prevFragmentUniformBindGroup !== fragmentUniformBindGroup) {
-                    currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
-                    renderViewStateData.prevFragmentUniformBindGroup = fragmentUniformBindGroup
-                }
+                currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
                 //
                 renderViewStateData.numDrawCalls++
                 //
@@ -60,8 +54,5 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
             }
         }
     }
-    renderViewStateData.prevVertexGpuBuffer = null
-    renderViewStateData.prevFragmentUniformBindGroup = null
-    renderViewStateData.prevVertexGpuBuffer = null
 }
 export default renderListForLayer

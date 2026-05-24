@@ -94,10 +94,6 @@ class RenderViewStateData {
 
     /** [KO] 컬링을 위한 프러스텀 평면 배열 [EN] Frustum planes array for culling */
     frustumPlanes: number[][];
-    /** [KO] 최적화를 위해 이전에 사용한 버텍스 GPU 버퍼 [EN] Previously used vertex GPU buffer for optimization */
-    prevVertexGpuBuffer: GPUBuffer;
-    /** [KO] 최적화를 위해 이전에 사용한 프래그먼트 유니폼 바인드 그룹 [EN] Previously used fragment uniform bind group for optimization */
-    prevFragmentUniformBindGroup: GPUBindGroup;
     /** [KO] 머티리얼로부터 변경된 버텍스 유니폼의 맵 [EN] Map of vertex uniforms changed from materials */
     dirtyVertexUniformFromMaterial = {};
 
@@ -182,8 +178,6 @@ class RenderViewStateData {
         this.numTriangles = 0;
         this.numPoints = 0;
         this.#calcTimeInfo();
-        this.prevVertexGpuBuffer = null;
-        this.prevFragmentUniformBindGroup = null;
         this.dirtyVertexUniformFromMaterial = {};
         //
         this.bundleListAlphaLayer.length = 0;
