@@ -19,6 +19,7 @@ import VertexGPURenderInfo from "../../mesh/core/VertexGPURenderInfo";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import SkyBoxMaterial from "./core/SkyBoxMaterial";
 import vertexModuleSource from './shader/vertex.wgsl';
+import RedGPUObject from "../../../base/RedGPUObject";
 
 /** 파싱된 WGSL 셰이더 정보 */
 const SHADER_INFO = parseWGSL('SKYBOX_VERTEX', vertexModuleSource)
@@ -37,7 +38,7 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  *
  * @category SkyBox
  */
-class SkyBox {
+class SkyBox extends RedGPUObject{
     /** [KO] 모델 변환 행렬 [EN] Model transformation matrix */
     modelMatrix = mat4.create()
     /** [KO] GPU 렌더링 정보 객체 [EN] GPU rendering information object */
@@ -47,7 +48,6 @@ class SkyBox {
     #renderBundle: GPURenderBundle
     #geometry: Primitive
     #material: SkyBoxMaterial
-    #redGPUContext: RedGPUContext
     #primitiveState: PrimitiveState
     #depthStencilState: DepthStencilState
     #texture: CubeTexture | DirectCubeTexture
@@ -68,8 +68,7 @@ class SkyBox {
      * @param luminance - [KO] 물리적 휘도 (Nit) [EN] Physical luminance (Nit)
      */
     constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture, luminance: number = 10000) {
-        validateRedGPUContext(redGPUContext)
-        this.#redGPUContext = redGPUContext
+      super(redGPUContext)
         this.#geometry = new Box(redGPUContext)
         this.#texture = texture
         this.#material = new SkyBoxMaterial(redGPUContext, this.#texture)
@@ -151,10 +150,10 @@ class SkyBox {
         const {currentRenderPassEncoder, viewRenderStartTime, view} = renderViewStateData
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
-        const {gpuDevice} = this.#redGPUContext
+        const {gpuDevice,redGPUContext} = this
 
         this.#updateMSAAStatus();
-        if (!this.gpuRenderInfo) this.#initGPURenderInfos(this.#redGPUContext)
+        if (!this.gpuRenderInfo) this.#initGPURenderInfos()
 
         if (this.#transitionStartTime) {
             this.#transitionElapsed = Math.max(viewRenderStartTime - this.#transitionStartTime, 0)
@@ -203,15 +202,15 @@ class SkyBox {
     }
 
     #updateMSAAStatus() {
-        const {msaaID} = this.#redGPUContext.antialiasingManager;
+        const {msaaID} = this.antialiasingManager;
         if (this.#lastUpdateMSAAID !== msaaID) {
             this.#dirtyPipeline = true;
             this.#lastUpdateMSAAID = msaaID;
         }
     }
 
-    #initGPURenderInfos(redGPUContext: RedGPUContext) {
-        const {resourceManager} = this.#redGPUContext
+    #initGPURenderInfos() {
+        const {resourceManager,redGPUContext} = this
         const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
             'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
             getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
@@ -237,7 +236,7 @@ class SkyBox {
     }
 
     #updatePipeline(): GPURenderPipeline {
-        const {resourceManager, gpuDevice, antialiasingManager} = this.#redGPUContext
+        const {resourceManager, gpuDevice, antialiasingManager} = this
         const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
             VERTEX_SHADER_MODULE_NAME, {code: vertexModuleSource}
         )
