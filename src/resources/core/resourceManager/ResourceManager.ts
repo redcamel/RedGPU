@@ -20,6 +20,7 @@ import ResourceStatusInfo from "./resourceState/ResourceStatusInfo";
 import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
+import RedGPUObject from "../../../base/RedGPUObject";
 
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
@@ -52,7 +53,7 @@ type ResourceState = ResourceStateVertexBuffer
  * ```
  * @category Resource
  */
-class ResourceManager {
+class ResourceManager extends RedGPUObject{
     static PRESET_GPUBindGroupLayout_System = 'PRESET_GPUBindGroupLayout_System'
     static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
@@ -85,8 +86,7 @@ class ResourceManager {
     #basicSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
-    readonly #redGPUContext: RedGPUContext
-    readonly #gpuDevice: GPUDevice
+
 
     /**
      * [KO] ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
@@ -96,8 +96,7 @@ class ResourceManager {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext
-        this.#gpuDevice = redGPUContext.gpuDevice
+       super(redGPUContext)
         this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
         this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
         this.#brdfGenerator = new BRDFGenerator(redGPUContext)
@@ -107,21 +106,6 @@ class ResourceManager {
         this.#initPresets()
     }
 
-    /**
-     * [KO] RedGPUContext 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContext instance.
-     */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext
-    }
-
-    /**
-     * [KO] GPU 디바이스를 반환합니다.
-     * [EN] Returns the GPU device.
-     */
-    get gpuDevice(): GPUDevice {
-        return this.#gpuDevice
-    }
 
     /**
      * [KO] 기본 샘플러를 반환합니다.
