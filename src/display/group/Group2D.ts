@@ -1,4 +1,4 @@
-import AGroupBase from "./core/AGroupBase";
+import Group3D from "./Group3D";
 
 /**
  * [KO] 2D 공간에서의 그룹(계층) 노드입니다.
@@ -18,7 +18,7 @@ import AGroupBase from "./core/AGroupBase";
  * <iframe src="/RedGPU/examples/2d/group2D/basic/" ></iframe>
  * @category Group
  */
-class Group2D extends AGroupBase {
+class Group2D extends Group3D {
     /**
      * [KO] 그룹의 회전 값 (라디안)
      * [EN] Rotation value of the group (radians)
