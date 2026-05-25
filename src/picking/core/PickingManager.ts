@@ -14,6 +14,8 @@ import GPU_STORE_OP from "../../gpuConst/GPU_STORE_OP";
 import View3D from "../../display/view/View3D";
 import updateViewportAndScissor from "../../renderer/helperFunc/updateViewportAndScissor";
 import renderPickingLayer from "../../renderer/renderLayers/renderPickingLayer";
+import RedGPUObject from "../../base/RedGPUObject";
+import AView from "../../display/view/core/AView";
 
 /**
  * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
@@ -34,15 +36,15 @@ import renderPickingLayer from "../../renderer/renderLayers/renderPickingLayer";
  * ```
  * @category Picking
  */
-class PickingManager {
+class PickingManager extends RedGPUObject{
     lastMouseEvent: MouseEvent
     lastMouseClickEvent: MouseEvent
     #pickingDepthGPUTexture: GPUTexture
     #pickingDepthGPUTextureView: GPUTextureView
     #pickingGPUTexture: GPUTexture
     #pickingGPUTextureView: GPUTextureView
-    #redGPUContext: RedGPUContext
-    #view: any
+
+    #view: AView
     #castingList: (Mesh | InstancingMesh)[] = []
     #mouseX: number = 0
     #mouseY: number = 0
@@ -56,6 +58,10 @@ class PickingManager {
     #isReading: boolean = false;
     #pickingPassDescriptor: GPURenderPassDescriptor
 
+    constructor(view:AView) {
+        super(view.redGPUContext);
+        this.#view = view
+    }
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
      * [EN] Returns the video memory usage.
@@ -243,8 +249,7 @@ class PickingManager {
     #checkTexture(view: any) {
         const {redGPUContext} = view
         const {resourceManager} = redGPUContext
-        this.#view = view
-        this.#redGPUContext = redGPUContext
+
         if (this.#pickingGPUTexture?.width !== this.#view.pixelRectObject.width || this.#pickingGPUTexture?.height !== this.#view.pixelRectObject.height) {
             this.destroy()
             this.#pickingGPUTexture = this.#createTexture('picking', navigator.gpu.getPreferredCanvasFormat())
@@ -265,8 +270,9 @@ class PickingManager {
         if (!this.castingList.length) return;
         if (this.#isReading) return; // [KO] 이미 읽기 작업 중이면 스킵 [EN] Skip if already reading
 
+        const {gpuDevice,commandEncoderManager,redGPUContext} = this
         const dpr = window.devicePixelRatio;
-        const renderScale = view.redGPUContext.renderScale;
+        const {renderScale} = redGPUContext
         const combinedScale = dpr * renderScale;
 
         const x = this.#mouseX;
@@ -282,14 +288,14 @@ class PickingManager {
         }
 
         if (!this.#readPixelBuffer) {
-            this.#readPixelBuffer = this.#redGPUContext.gpuDevice.createBuffer({
+            this.#readPixelBuffer = gpuDevice.createBuffer({
                 size: 4,
                 usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
                 label: 'PickingManager_ReadPixelBuffer'
             });
         }
 
-        this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, mainRenderEncoder => {
+        commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, mainRenderEncoder => {
             const textureView = {texture: this.#pickingGPUTexture, origin: {x: physicalX, y: physicalY, z: 0}};
             const bufferView = {buffer: this.#readPixelBuffer, bytesPerRow: 256, rowsPerImage: 1};
             const textureExtent = {width: 1, height: 1, depthOrArrayLayers: 1};
@@ -304,7 +310,7 @@ class PickingManager {
     }
 
     #createTexture(label: string, format: GPUTextureFormat): GPUTexture {
-        const {resourceManager} = this.#redGPUContext
+        const {resourceManager} = this
         return resourceManager.createManagedTexture({
             size: [this.#view.pixelRectObject.width, this.#view.pixelRectObject.height, 1],
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,

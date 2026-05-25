@@ -36,7 +36,7 @@ abstract class AView extends ViewTransform {
      * [KO] 객체 선택을 관리하는 PickingManager
      * [EN] PickingManager that manages object selection
      */
-    #pickingManager: PickingManager = new PickingManager()
+    #pickingManager: PickingManager
     /**
      * [KO] Frustum Culling 사용 여부
      * [EN] Whether to use frustum culling
@@ -93,6 +93,7 @@ abstract class AView extends ViewTransform {
         super(redGPUContext)
         this.scene = scene
         this.camera = camera
+        this.#pickingManager = new PickingManager(this)
         if (name) this.name = name
     }
 
