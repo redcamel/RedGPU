@@ -1,4 +1,3 @@
-import RedGPUContext from "../../context/RedGPUContext";
 import InstancingMesh from "../../display/instancingMesh/InstancingMesh";
 import Mesh from "../../display/mesh/Mesh";
 import createBasePipeline from "../../display/mesh/core/pipeline/createBasePipeline";
