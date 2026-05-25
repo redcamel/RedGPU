@@ -2,7 +2,6 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
-import validateRedGPUContext from "../../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
@@ -16,7 +15,7 @@ import RedGPUObject from "../../../../base/RedGPUObject";
  * [EN] Divides the screen into tiles and calculates the AABB (Axis-Aligned Bounding Box) in 3D space for each tile.
  * @category Light
  */
-class PassClusterLightBound extends RedGPUObject{
+class PassClusterLightBound extends RedGPUObject {
     #view: View3D
     #clusterBoundBuffer: GPUBuffer
     #clusterBoundBindGroupLayout: GPUBindGroupLayout

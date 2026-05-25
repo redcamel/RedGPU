@@ -10,8 +10,8 @@ import RedGPUObject from "../base/RedGPUObject";
  * [KO] 후처리 과정에서 발생하는 임시 텍스처들을 재사용하여 비디오 메모리 점유율과 생성/파괴 오버헤드를 줄입니다.
  * [EN] Reduces video memory occupancy and creation/destruction overhead by reusing temporary textures generated during post-processing.
  */
-class PostEffectTexturePool extends RedGPUObject{
-   
+class PostEffectTexturePool extends RedGPUObject {
+
     #pool: Map<string, GPUTexture[]> = new Map();
     #activeTextures: Set<GPUTexture> = new Set();
     #textureToKey: WeakMap<GPUTexture, string> = new WeakMap();

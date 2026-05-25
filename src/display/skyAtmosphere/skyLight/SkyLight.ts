@@ -12,7 +12,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
  * [KO] SkyLight 클래스는 SkyAtmosphere의 대기 산란 데이터를 기반으로 씬의 간접 조명(IBL)을 생성하고 관리합니다.
  * [EN] The SkyLight class generates and manages indirect lighting (IBL) for the scene based on SkyAtmosphere's atmospheric scattering data.
  */
-class SkyLight extends RedGPUObject{
+class SkyLight extends RedGPUObject {
     /**
      * [KO] IBL 갱신 여부 (true일 경우 다음 프레임에 갱신 수행)
      * [EN] Whether IBL needs to be updated (if true, update is performed on the next frame)

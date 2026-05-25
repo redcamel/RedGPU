@@ -6,7 +6,7 @@ import shaderSource from "./shader.wgsl";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
 import RedGPUObject from "../../../../base/RedGPUObject";
 
-class MipmapGenerator extends RedGPUObject{
+class MipmapGenerator extends RedGPUObject {
 
     readonly #sampler: GPUSampler
     #pipelineLayout: GPUPipelineLayout
@@ -21,7 +21,7 @@ class MipmapGenerator extends RedGPUObject{
     #persistentViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
 
     constructor(redGPUContext: RedGPUContext) {
-       super(redGPUContext)
+        super(redGPUContext)
         this.#sampler = new Sampler(redGPUContext, {minFilter: 'linear'}).gpuSampler
         this.#pipelines = {};
     }

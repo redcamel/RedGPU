@@ -5,10 +5,8 @@ import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import AController from "../../../camera/core/AController";
 import RedGPUContextSizeManager, {RedResizeEvent} from "../../../context/core/RedGPUContextSizeManager";
 import RedGPUContext from "../../../context/RedGPUContext";
-import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
-import BaseObject from "../../../base/BaseObject";
 import RedGPUObject from "../../../base/RedGPUObject";
 
 /**

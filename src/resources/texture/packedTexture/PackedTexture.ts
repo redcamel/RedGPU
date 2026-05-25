@@ -36,7 +36,7 @@ let mappingBuffer: GPUBuffer;
  * ```
  * @category Texture
  */
-class PackedTexture extends RedGPUObject{
+class PackedTexture extends RedGPUObject {
 
 
     /** [KO] 샘플러 객체 [EN] Sampler object */
@@ -166,7 +166,7 @@ class PackedTexture extends RedGPUObject{
     /** [KO] 바인드 그룹을 업데이트합니다. [EN] Updates the bind group. */
     #updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
         const textureKey = `${textures.r?.label || 'empty'}_${textures.g?.label || 'empty'}_${textures.b?.label || 'empty'}_${textures.a?.label || 'empty'}`;
-        const {resourceManager,gpuDevice} = this
+        const {resourceManager, gpuDevice} = this
         if (!this.#tempBindGroupCache.has(textureKey)) {
             const bindGroupEntries = [
                 {
@@ -239,7 +239,7 @@ class PackedTexture extends RedGPUObject{
         if (this.#gpuTexture) {
             this.#gpuTexture = null;
         }
-        const {resourceManager,gpuDevice,uuid} = this
+        const {resourceManager, gpuDevice, uuid} = this
         const packedTexture = resourceManager.createManagedTexture(textureDescriptor);
         const mappingData = new Uint32Array([
             ['r', 'g', 'b', 'a'].indexOf(mapping.r),
@@ -266,7 +266,7 @@ class PackedTexture extends RedGPUObject{
 
     /** [KO] 렌더 패스를 실행하여 패킹을 수행합니다. [EN] Executes the render pass to perform packing. */
     #executeRenderPass(packedTexture: GPUTexture, commandEncoder?: GPUCommandEncoder) {
-        const {resourceManager,gpuDevice} = this;
+        const {resourceManager, gpuDevice} = this;
         const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
             label: 'PackedTexture_CommandEncoder'
         });
@@ -295,7 +295,7 @@ class PackedTexture extends RedGPUObject{
     /** [KO] 패킹용 파이프라인을 생성합니다. [EN] Creates a pipeline for packing. */
     #createPipeline(): GPURenderPipeline {
         const shaderCode = computeShaderCode;
-        const {resourceManager,gpuDevice} = this;
+        const {resourceManager, gpuDevice} = this;
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'PACK_TEXTURE_PIPELINE_LAYOUT',
             bindGroupLayouts: [globalBindGroupLayout]

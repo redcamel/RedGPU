@@ -667,7 +667,7 @@ class PostEffectManager {
         })
     }
 
-    #renderToStorageTexture(view: View3D):IPostEffectResult {
+    #renderToStorageTexture(view: View3D): IPostEffectResult {
         const {redGPUContext, viewRenderTextureManager} = view;
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const {antialiasingManager} = redGPUContext;

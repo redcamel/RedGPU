@@ -30,7 +30,7 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
  * [KO] SkyAtmosphere 클래스는 대기 산란 물리 시뮬레이션의 핵심 시스템입니다.
  * [EN] The SkyAtmosphere class is the core system of atmospheric scattering physical simulation.
  */
-class SkyAtmosphere extends RedGPUObject{
+class SkyAtmosphere extends RedGPUObject {
 
     #transmittanceGenerator: TransmittanceGenerator;
     #multiScatteringGenerator: MultiScatteringGenerator;

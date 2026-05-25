@@ -57,7 +57,7 @@ class FinalRender {
      */
     render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]): void {
         const {sizeManager, antialiasingManager, commandEncoderManager} = redGPUContext
-        const {msaaID, } = antialiasingManager
+        const {msaaID,} = antialiasingManager
         const {pixelRectObject: canvasPixelRectObject} = sizeManager
         const {width: canvasW, height: canvasH} = canvasPixelRectObject
         if (canvasW === 0 || canvasH === 0) return

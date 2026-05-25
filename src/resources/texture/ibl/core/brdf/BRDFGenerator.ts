@@ -11,7 +11,7 @@ import RedGPUObject from "../../../../../base/RedGPUObject";
  *
  * @category IBL
  */
-class BRDFGenerator extends RedGPUObject{
+class BRDFGenerator extends RedGPUObject {
     #brdfShaderModule: GPUShaderModule;
     #pipeline: GPURenderPipeline;
     #brdfLUTTexture: GPUTexture;
@@ -25,7 +25,7 @@ class BRDFGenerator extends RedGPUObject{
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-       super(redGPUContext);
+        super(redGPUContext);
     }
 
     /**

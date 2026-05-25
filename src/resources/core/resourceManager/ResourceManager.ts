@@ -53,7 +53,7 @@ type ResourceState = ResourceStateVertexBuffer
  * ```
  * @category Resource
  */
-class ResourceManager extends RedGPUObject{
+class ResourceManager extends RedGPUObject {
     static PRESET_GPUBindGroupLayout_System = 'PRESET_GPUBindGroupLayout_System'
     static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
@@ -96,7 +96,7 @@ class ResourceManager extends RedGPUObject{
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-       super(redGPUContext)
+        super(redGPUContext)
         this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
         this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
         this.#brdfGenerator = new BRDFGenerator(redGPUContext)

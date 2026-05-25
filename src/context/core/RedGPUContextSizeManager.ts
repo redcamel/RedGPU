@@ -54,7 +54,7 @@ type ParentRect = {
  *
  * @category Context
  */
-class RedGPUContextSizeManager extends RedGPUObject{
+class RedGPUContextSizeManager extends RedGPUObject {
     #width: number | string
     #height: number | string
     #pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]

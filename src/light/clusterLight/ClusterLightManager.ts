@@ -1,4 +1,3 @@
-import {RedGPUContext} from "../../context";
 import View3D from "../../display/view/View3D";
 import DrawDebuggerPointLight from "../../display/drawDebugger/light/DrawDebuggerPointLight";
 import DrawDebuggerSpotLight from "../../display/drawDebugger/light/DrawDebuggerSpotLight";
@@ -7,7 +6,7 @@ import PassClustersLight from "./pass/light/PassClustersLight";
 import PassClustersLightHelper from "./core/PassClustersLightHelper";
 import RedGPUObject from "../../base/RedGPUObject";
 
-class ClusterLightManager extends RedGPUObject{
+class ClusterLightManager extends RedGPUObject {
 
     #view: View3D
 

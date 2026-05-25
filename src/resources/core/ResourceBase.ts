@@ -1,7 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import BaseObject from "../../base/BaseObject";
 import RedGPUObject from "../../base/RedGPUObject";
 
 /**
@@ -79,7 +77,6 @@ class ResourceBase extends RedGPUObject {
     get gpuDevice(): GPUDevice {
         return this.#gpuDevice;
     }
-
 
 
     /**

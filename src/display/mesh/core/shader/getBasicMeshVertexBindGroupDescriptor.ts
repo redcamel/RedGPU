@@ -5,7 +5,7 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
     const {redGPUContext, gpuRenderInfo, material} = mesh
     const {resourceManager} = redGPUContext
     const {vertexUniformBuffer, vertexBindGroupLayout} = gpuRenderInfo
-    const {basicSampler, emptyBitmapTextureView, } = resourceManager
+    const {basicSampler, emptyBitmapTextureView,} = resourceManager
     const {gpuSampler: basicGPUSampler} = basicSampler
 
     return {

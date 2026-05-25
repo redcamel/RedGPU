@@ -5,7 +5,7 @@ import DirectTexture from "../../../../resources/texture/DirectTexture";
 import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import RedGPUObject from "../../../../base/RedGPUObject";
 
-abstract class ASkyAtmosphereLUTGenerator  extends RedGPUObject{
+abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
     #label: string;
@@ -20,7 +20,7 @@ abstract class ASkyAtmosphereLUTGenerator  extends RedGPUObject{
         label: string,
         width: number, height: number, depth: number = 1
     ) {
-      super(redGPUContext);
+        super(redGPUContext);
         this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#sampler = sampler;
         this.#label = label;
@@ -105,5 +105,6 @@ abstract class ASkyAtmosphereLUTGenerator  extends RedGPUObject{
         });
     }
 }
+
 Object.freeze(ASkyAtmosphereLUTGenerator);
 export default ASkyAtmosphereLUTGenerator;

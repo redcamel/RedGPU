@@ -93,7 +93,7 @@ class ToneMappingManager extends AToneMappingEffect {
      * @param currentTextureView - [KO] 현재 텍스처 뷰 정보 [EN] Current texture view information
      * @returns [KO] 렌더링 결과 [EN] Rendering result
      */
-    render(view:View3D,width: number, height: number, currentTextureView: IPostEffectResult): IPostEffectResult {
+    render(view: View3D, width: number, height: number, currentTextureView: IPostEffectResult): IPostEffectResult {
         const effect = this.toneMapping;
         return effect ? effect.render(view, width, height, currentTextureView) : currentTextureView;
     }

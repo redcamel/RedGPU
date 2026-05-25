@@ -10,7 +10,7 @@ import InstanceIdGenerator from "../utils/uuid/InstanceIdGenerator";
  *
  * @category Core
  */
-abstract class BaseObject{
+abstract class BaseObject {
     /**
      * [KO] 객체의 고유 식별자 (UUID)
      * [EN] Universally Unique Identifier (UUID) of the object
@@ -56,5 +56,6 @@ abstract class BaseObject{
         this.#name = value;
     }
 }
+
 Object.freeze(BaseObject);
 export default BaseObject;

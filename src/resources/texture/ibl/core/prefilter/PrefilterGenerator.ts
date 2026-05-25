@@ -18,7 +18,7 @@ import RedGPUObject from "../../../../../base/RedGPUObject";
  *
  * @category IBL
  */
-class PrefilterGenerator extends RedGPUObject{
+class PrefilterGenerator extends RedGPUObject {
     #sampler: Sampler;
     #pipeline: GPUComputePipeline;
     #shaderModule: GPUShaderModule;
@@ -33,7 +33,7 @@ class PrefilterGenerator extends RedGPUObject{
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-      super(redGPUContext)
+        super(redGPUContext)
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
@@ -74,7 +74,7 @@ class PrefilterGenerator extends RedGPUObject{
         destinationTexture?: GPUTexture | DirectCubeTexture,
         phase: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): Promise<DirectCubeTexture> {
-        const {gpuDevice, resourceManager, commandEncoderManager,redGPUContext} = this;
+        const {gpuDevice, resourceManager, commandEncoderManager, redGPUContext} = this;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
 

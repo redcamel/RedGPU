@@ -12,7 +12,7 @@ import BaseObject from "./BaseObject";
  * [KO] RedGPUContext 및 관련 매니저들(ResourceManager, AntialiasingManager 등)에 대한 공통 접근 경로를 제공합니다.
  * [EN] Provides common access paths to RedGPUContext and related managers (ResourceManager, AntialiasingManager, etc.).
  */
-abstract class RedGPUObject extends BaseObject{
+abstract class RedGPUObject extends BaseObject {
     readonly #redGPUContext: RedGPUContext;
 
     protected constructor(redGPUContext: RedGPUContext) {

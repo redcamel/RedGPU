@@ -2,7 +2,6 @@ import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
-import BaseObject from "../../base/BaseObject";
 import RedGPUObject from "../../base/RedGPUObject";
 
 export type controllerInit = {

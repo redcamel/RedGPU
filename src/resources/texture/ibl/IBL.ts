@@ -10,7 +10,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
  *
  * @category IBL
  */
-class IBL extends RedGPUObject{
+class IBL extends RedGPUObject {
 
     #sourceCubeTexture: GPUTexture;
     #environmentTexture: DirectCubeTexture;

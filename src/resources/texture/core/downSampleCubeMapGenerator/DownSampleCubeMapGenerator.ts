@@ -8,7 +8,7 @@ import RedGPUObject from "../../../../base/RedGPUObject";
  * [KO] 큐브맵 다운샘플링 및 밉맵 생성을 담당하는 제너레이터 클래스입니다.
  * [EN] Generator class responsible for cubemap downsampling and mipmap generation.
  */
-class DownSampleCubeMapGenerator extends RedGPUObject{
+class DownSampleCubeMapGenerator extends RedGPUObject {
 
     #cubemapComputePipelines: Map<GPUTextureFormat, GPUComputePipeline> = new Map();
     #cubemapBindGroupLayouts: Map<GPUTextureFormat, GPUBindGroupLayout> = new Map();
@@ -189,7 +189,7 @@ class DownSampleCubeMapGenerator extends RedGPUObject{
 
     #initCubemapDownsampler() {
         if (this.#cubemapShaderModule) return;
-        const {resourceManager,redGPUContext} = this;
+        const {resourceManager, redGPUContext} = this;
         this.#cubemapSampler = new Sampler(redGPUContext, {
             minFilter: 'linear', magFilter: 'linear', mipmapFilter: 'linear',
             addressModeU: 'clamp-to-edge', addressModeV: 'clamp-to-edge', addressModeW: 'clamp-to-edge'

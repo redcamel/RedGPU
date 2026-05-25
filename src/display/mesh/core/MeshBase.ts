@@ -12,7 +12,6 @@ import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validate
 import getScreenPoint from "../../../math/coordinates/getScreenPoint";
 import localToWorld from "../../../math/coordinates/localToWorld";
 import worldToLocal from "../../../math/coordinates/worldToLocal";
-import createUUID from "../../../utils/uuid/createUUID";
 import View3D from "../../view/View3D";
 import Object3DContainer from "./Object3DContainer";
 import VertexGPURenderInfo from "./VertexGPURenderInfo";

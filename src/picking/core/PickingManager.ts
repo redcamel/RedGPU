@@ -35,7 +35,7 @@ import AView from "../../display/view/core/AView";
  * ```
  * @category Picking
  */
-class PickingManager extends RedGPUObject{
+class PickingManager extends RedGPUObject {
     lastMouseEvent: MouseEvent
     lastMouseClickEvent: MouseEvent
     #pickingDepthGPUTexture: GPUTexture
@@ -57,10 +57,11 @@ class PickingManager extends RedGPUObject{
     #isReading: boolean = false;
     #pickingPassDescriptor: GPURenderPassDescriptor
 
-    constructor(view:AView) {
+    constructor(view: AView) {
         super(view.redGPUContext);
         this.#view = view
     }
+
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
      * [EN] Returns the video memory usage.
@@ -269,7 +270,7 @@ class PickingManager extends RedGPUObject{
         if (!this.castingList.length) return;
         if (this.#isReading) return; // [KO] 이미 읽기 작업 중이면 스킵 [EN] Skip if already reading
 
-        const {gpuDevice,commandEncoderManager,redGPUContext} = this
+        const {gpuDevice, commandEncoderManager, redGPUContext} = this
         const dpr = window.devicePixelRatio;
         const {renderScale} = redGPUContext
         const combinedScale = dpr * renderScale;

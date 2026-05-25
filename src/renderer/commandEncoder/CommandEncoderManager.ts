@@ -47,7 +47,7 @@ export type ComputePassDescriptorInput = string | GPUComputePassDescriptor;
  *
  * @category Renderer
  */
-class CommandEncoderManager extends RedGPUObject{
+class CommandEncoderManager extends RedGPUObject {
 
     /** [KO] 타입별 활성화된 인코더 리스트 [EN] List of active encoders per type */
     readonly #encoderMap: Map<CommandEncoderType, GPUCommandEncoder[]> = new Map();
@@ -282,7 +282,7 @@ class CommandEncoderManager extends RedGPUObject{
     }
 
     async #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): Promise<void> {
-        const  {gpuDevice} = this
+        const {gpuDevice} = this
         const encoder = gpuDevice.createCommandEncoder({label});
         executor(encoder);
         const buffer = encoder.finish();

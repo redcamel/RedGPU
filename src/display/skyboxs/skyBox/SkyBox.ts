@@ -13,7 +13,6 @@ import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
-import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import VertexGPURenderInfo from "../../mesh/core/VertexGPURenderInfo";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
@@ -38,7 +37,7 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  *
  * @category SkyBox
  */
-class SkyBox extends RedGPUObject{
+class SkyBox extends RedGPUObject {
     /** [KO] 모델 변환 행렬 [EN] Model transformation matrix */
     modelMatrix = mat4.create()
     /** [KO] GPU 렌더링 정보 객체 [EN] GPU rendering information object */
@@ -68,7 +67,7 @@ class SkyBox extends RedGPUObject{
      * @param luminance - [KO] 물리적 휘도 (Nit) [EN] Physical luminance (Nit)
      */
     constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture, luminance: number = 10000) {
-      super(redGPUContext)
+        super(redGPUContext)
         this.#geometry = new Box(redGPUContext)
         this.#texture = texture
         this.#material = new SkyBoxMaterial(redGPUContext, this.#texture)
@@ -150,7 +149,7 @@ class SkyBox extends RedGPUObject{
         const {currentRenderPassEncoder, viewRenderStartTime, view} = renderViewStateData
         const {indexBuffer} = this.#geometry
         const {triangleCount, indexCount, format} = indexBuffer
-        const {gpuDevice,redGPUContext} = this
+        const {gpuDevice, redGPUContext} = this
 
         this.#updateMSAAStatus();
         if (!this.gpuRenderInfo) this.#initGPURenderInfos()
@@ -210,7 +209,7 @@ class SkyBox extends RedGPUObject{
     }
 
     #initGPURenderInfos() {
-        const {resourceManager,redGPUContext} = this
+        const {resourceManager, redGPUContext} = this
         const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
             'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
             getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)

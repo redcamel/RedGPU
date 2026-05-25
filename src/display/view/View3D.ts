@@ -149,7 +149,7 @@ class View3D extends AView {
 
     update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
         const {scene, redGPUContext, ibl, skyAtmosphere} = this
-        const {shadowManager, } = scene
+        const {shadowManager,} = scene
         shadowManager.update(redGPUContext)
         const {directionalShadowManager} = shadowManager
 

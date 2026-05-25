@@ -16,7 +16,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
  * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
  * [EN] Class that performs auto-exposure and eye adaptation.
  */
-class AutoExposure extends RedGPUObject{
+class AutoExposure extends RedGPUObject {
     readonly #view: View3D;
     #adaptedEV100Buffer: StorageBuffer;
     #histogramBuffer: StorageBuffer;
@@ -337,7 +337,7 @@ class AutoExposure extends RedGPUObject{
     }
 
     #initResources() {
-        const {gpuDevice,redGPUContext} = this;
+        const {gpuDevice, redGPUContext} = this;
 
         // [KO] 초기 EV100 값 설정 (기본적으로 1.0으로 시작하거나 이전 프레임의 적응 값을 유지합니다)
         // [EN] Set initial EV100 value (starts at 1.0 by default or maintains the adapted value from the previous frame)

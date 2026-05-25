@@ -33,7 +33,7 @@ class IrradianceGenerator extends RedGPUObject {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-       super(redGPUContext);
+        super(redGPUContext);
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
@@ -71,7 +71,7 @@ class IrradianceGenerator extends RedGPUObject {
         size: number = 32,
         phase: CommandEncoderType = COMMAND_ENCODER_TYPE.RESOURCE
     ): Promise<DirectCubeTexture> {
-        const {resourceManager,redGPUContext} = this;
+        const {resourceManager, redGPUContext} = this;
         const format: GPUTextureFormat = 'rgba16float';
 
         // 1. 결과용 큐브 텍스처 생성

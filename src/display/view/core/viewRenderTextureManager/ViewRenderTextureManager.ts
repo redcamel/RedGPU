@@ -1,5 +1,3 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import validateRedGPUContext from "../../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import {keepLog} from "../../../../utils";
 import calculateTextureByteSize from "../../../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
@@ -56,7 +54,7 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
  *
  * @category Core
  */
-class ViewRenderTextureManager extends RedGPUObject{
+class ViewRenderTextureManager extends RedGPUObject {
     /**
      * 관리 중인 텍스처들의 총 비디오 메모리 사용량(바이트)
      * @private

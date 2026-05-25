@@ -112,7 +112,7 @@ export type GLTFLoadingProgressInfo = {
  *
  * @category Loader
  */
-class GLTFLoader extends RedGPUObject{
+class GLTFLoader extends RedGPUObject {
     /**
      * [KO] GLTF 파싱 결과 데이터
      * [EN] GLTF parsing result data
@@ -203,7 +203,6 @@ class GLTFLoader extends RedGPUObject{
     get loadingProgressInfo(): GLTFLoadingProgressInfo {
         return this.#loadingProgressInfo;
     }
-
 
 
     /**

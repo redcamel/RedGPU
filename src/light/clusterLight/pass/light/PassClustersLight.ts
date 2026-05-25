@@ -2,7 +2,6 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
-import validateRedGPUContext from "../../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersSource from "./PassClustersLight.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
@@ -18,7 +17,7 @@ const emptyArray = new Uint32Array([0, 0, 0, 0]);
  * [EN] Performs intersection tests between point lights/spot lights and clusters (tiles) to record light indices included in each cluster.
  * @category Light
  */
-class PassClustersLight extends RedGPUObject{
+class PassClustersLight extends RedGPUObject {
     #view: View3D
     #clusterLightBindGroup: GPUBindGroup
     #clusterLightPipeline: GPUComputePipeline
@@ -35,7 +34,7 @@ class PassClustersLight extends RedGPUObject{
      * [EN] View3D instance
      */
     constructor(redGPUContext: RedGPUContext, view: View3D,) {
-     super(redGPUContext)
+        super(redGPUContext)
         this.#view = view;
         this.#initPipeLine();
         console.log(this);
@@ -59,7 +58,7 @@ class PassClustersLight extends RedGPUObject{
     render() {
         const systemUniformBindGroup: GPUBindGroup = this.#view.systemUniform_Vertex_UniformBindGroup;
         if (systemUniformBindGroup) {
-            const {commandEncoderManager,gpuDevice} = this;
+            const {commandEncoderManager, gpuDevice} = this;
             commandEncoderManager.addPreProcessComputePass('PassClustersLight_ComputePass', (computePass) => {
                 const DISPATCH_SIZE = PassClustersLightHelper.getDispatchSize();
                 gpuDevice.queue.writeBuffer(this.clusterLightsBuffer, 0, emptyArray);

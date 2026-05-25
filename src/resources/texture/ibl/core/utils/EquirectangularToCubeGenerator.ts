@@ -14,7 +14,7 @@ import RedGPUObject from "../../../../../base/RedGPUObject";
  *
  * @category IBL
  */
-class EquirectangularToCubeGenerator extends RedGPUObject{
+class EquirectangularToCubeGenerator extends RedGPUObject {
 
     #shaderModule: GPUShaderModule;
     #pipeline: GPUComputePipeline;
@@ -30,7 +30,7 @@ class EquirectangularToCubeGenerator extends RedGPUObject{
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-      super(redGPUContext);
+        super(redGPUContext);
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
@@ -59,7 +59,7 @@ class EquirectangularToCubeGenerator extends RedGPUObject{
      * [EN] Generated DirectCubeTexture
      */
     async generate(sourceTexture: GPUTexture, size: number = 512): Promise<DirectCubeTexture> {
-        const {gpuDevice, resourceManager, commandEncoderManager,redGPUContext} = this;
+        const {gpuDevice, resourceManager, commandEncoderManager, redGPUContext} = this;
         const format: GPUTextureFormat = 'rgba16float';
         const mipLevelCount = getMipLevelCount(size, size);
 

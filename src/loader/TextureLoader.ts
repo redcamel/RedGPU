@@ -21,7 +21,7 @@ export class TextureLoaderData {
     }
 }
 
-export default class TextureLoader extends RedGPUObject{
+export default class TextureLoader extends RedGPUObject {
     textures = [];
     #loaded = 0;
     readonly #srcInfoList;
@@ -29,7 +29,7 @@ export default class TextureLoader extends RedGPUObject{
     readonly #progressCallback;
 
     constructor(redGPUContext: RedGPUContext, srcInfoList = [], callback: Function, progressCallback?: Function) {
-       super(redGPUContext);
+        super(redGPUContext);
         this.#srcInfoList = srcInfoList;
         this.#callback = callback;
         this.#progressCallback = progressCallback;

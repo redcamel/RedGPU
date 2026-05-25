@@ -15,7 +15,6 @@ import calculateMeshCombinedAABB from "../../bound/math/calculateMeshCombinedAAB
 import calculateMeshOBB from "../../bound/math/calculateMeshOBB";
 import OBB from "../../bound/OBB";
 import mat4ToEuler from "../../math/mat4ToEuler";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
 import RenderViewStateData from "../view/core/RenderViewStateData";

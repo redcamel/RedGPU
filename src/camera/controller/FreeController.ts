@@ -279,7 +279,7 @@ class FreeController extends AController {
      */
     update(view: View3D, time: number): void {
         super.update(view, time, (deltaTime: number) => {
-            this.#updateAnimation(view,  deltaTime);
+            this.#updateAnimation(view, deltaTime);
         });
     }
 

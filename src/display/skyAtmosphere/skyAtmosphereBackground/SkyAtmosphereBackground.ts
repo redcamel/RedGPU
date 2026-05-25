@@ -7,7 +7,7 @@ import Sampler from "../../../resources/sampler/Sampler";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import RedGPUObject from "../../../base/RedGPUObject";
 
-class SkyAtmosphereBackground extends RedGPUObject{
+class SkyAtmosphereBackground extends RedGPUObject {
     readonly #backgroundBindGroupLayout2: GPUBindGroupLayout;
 
     #backgroundBindGroup2: GPUBindGroup;
