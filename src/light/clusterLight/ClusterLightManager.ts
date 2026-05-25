@@ -85,21 +85,20 @@ class ClusterLightManager extends RedGPUObject {
      */
     updateClusterLights() {
         const {redGPUContext, scene, renderViewStateData, pixelRectArray} = this.#view
-        const dirtyPixelSize = this.#prevWidth == undefined || this.#prevHeight == undefined || this.#prevWidth !== pixelRectArray[2] || this.#prevHeight !== pixelRectArray[3]
-        // const dirtyPixelSize = true;
-        //TODO - 클러스터 체크가 망가졌네
-        if (!this.#passClusterLightBound) {
-            this.#passClusterLightBound = new PassClusterLightBound(redGPUContext, this.#view)
-        }
-        if (this.#passClustersLight && dirtyPixelSize) {
-            // console.log('passClusterLightBound 재계산')
+        const width = pixelRectArray[2]
+        const height = pixelRectArray[3]
+
+        if (!this.#passClusterLightBound) this.#passClusterLightBound = new PassClusterLightBound(redGPUContext, this.#view)
+        if (!this.#passClustersLight) this.#passClustersLight = new PassClustersLight(redGPUContext, this.#view)
+        if (!this.#view.systemUniform_Vertex_UniformBindGroup || width === 0 || height === 0) return
+
+        const dirtyPixelSize = this.#prevWidth === undefined || this.#prevHeight === undefined || this.#prevWidth !== width || this.#prevHeight !== height
+        if (dirtyPixelSize) {
             this.#passClusterLightBound.render()
-            this.#prevWidth = pixelRectArray[2]
-            this.#prevHeight = pixelRectArray[3]
+            this.#prevWidth = width
+            this.#prevHeight = height
         }
-        if (!this.#passClustersLight) {
-            this.#passClustersLight = new PassClustersLight(redGPUContext, this.#view)
-        }
+
         if (scene) {
             const {pointLights, spotLights} = scene.lightManager
             const pointLightNum = pointLights.length
