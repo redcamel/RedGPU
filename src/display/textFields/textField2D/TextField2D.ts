@@ -98,14 +98,15 @@ class TextField2D extends BaseTextField2D {
      */
     set useSmoothing(value: boolean) {
         this.#useSmoothing = value;
+        const {diffuseTextureSampler} = this._material;
         if (this.useSmoothing) {
-            this._material.diffuseTextureSampler.minFilter = GPU_FILTER_MODE.LINEAR;
-            this._material.diffuseTextureSampler.magFilter = GPU_FILTER_MODE.LINEAR;
-            this._material.diffuseTextureSampler.mipmapFilter = GPU_MIPMAP_FILTER_MODE.LINEAR;
+            diffuseTextureSampler.minFilter = GPU_FILTER_MODE.LINEAR;
+            diffuseTextureSampler.magFilter = GPU_FILTER_MODE.LINEAR;
+            diffuseTextureSampler.mipmapFilter = GPU_MIPMAP_FILTER_MODE.LINEAR;
         } else {
-            this._material.diffuseTextureSampler.minFilter = GPU_FILTER_MODE.NEAREST;
-            this._material.diffuseTextureSampler.magFilter = GPU_FILTER_MODE.NEAREST;
-            this._material.diffuseTextureSampler.mipmapFilter = null;
+            diffuseTextureSampler.minFilter = GPU_FILTER_MODE.NEAREST;
+            diffuseTextureSampler.magFilter = GPU_FILTER_MODE.NEAREST;
+            diffuseTextureSampler.mipmapFilter = null;
         }
     }
 
