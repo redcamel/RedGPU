@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useExampleHelperStore } from '../../store';
+import '../styles/loading.css';
 
 /**
  * [KO] 바이트 단위를 읽기 좋은 형식으로 변환합니다.
